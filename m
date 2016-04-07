@@ -1,40 +1,47 @@
-From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Subject: Re: [PATCH] PCI: Add Broadcom 4331 reset quirk to prevent IRQ storm
-Date: Wed, 6 Apr 2016 23:19:43 +0100
-Message-ID: <20160406221943.GA10955@srcf.ucam.org>
-References: <811539524df8b5ed7e2817c1c3e3e08560c97964.1459275517.git.lukas@wunner.de>
- <20160405194015.GC15353@localhost>
- <20160406213029.GA12421@wunner.de>
+From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v10 06/17] Xen: ARM: Add support for mapping platform
+ device mmio
+Date: Thu, 7 Apr 2016 09:37:01 +0800
+Message-ID: <5705B9BD.1020403@huawei.com>
+References: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org> <1459525755-36968-7-git-send-email-shannon.zhao@linaro.org> <5704FE2C.5000902@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <b43-dev-bounces+gldbd-bcm43xx-dev=gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160406213029.GA12421-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/b43-dev>,
- <mailto:b43-dev-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/b43-dev/>
-List-Post: <mailto:b43-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:b43-dev-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/b43-dev>,
- <mailto:b43-dev-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "b43-dev" <b43-dev-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: b43-dev-bounces+gldbd-bcm43xx-dev=gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Bjorn Helgaas <helgaas-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, b43-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <5704FE2C.5000902-5wv7dgnIgG8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 06, 2016 at 11:30:29PM +0200, Lukas Wunner wrote:
 
-> Matthew's grub patch puts the wireless card into D3hot, which does not
-> stop the interrupts. I have tested this. (It may stop the DMA, I cannot
-> verify that as it doesn't occur on my machine for lack of an access point.)
 
-Ah, interesting. One thing to note (and which I've just noticed) is that 
-it looks like this fixup is only called when you boot with the "linux" 
-command and not with the "linuxefi" command. If you're using Ubuntu, 
-"linux" may fall back to "linuxefi" without executing this fixup. So we 
-need to add it to the kernel EFI stub anyway.
+On 2016/4/6 20:16, Julien Grall wrote:
+>> +            gpfns[j] = XEN_PFN_DOWN(r->start) + j;
+>> +            idxs[j] = XEN_PFN_DOWN(r->start) + j;
+>> +        }
+>> +
+>> +        xatp.domid = DOMID_SELF;
+>> +        xatp.size = nr;
+>> +        xatp.space = XENMAPSPACE_dev_mmio;
+>> +
+>> +        set_xen_guest_handle(xatp.gpfns, gpfns);
+>> +        set_xen_guest_handle(xatp.idxs, idxs);
+>> +        set_xen_guest_handle(xatp.errs, errs);
+>> +
+>> +        rc = HYPERVISOR_memory_op(XENMEM_add_to_physmap_range, &xatp);
+>> +        kfree(gpfns);
+>> +        kfree(idxs);
+>> +        kfree(errs);
+>> +        if (rc)
+>> +            return rc;
+> 
+> Shouldn't we redo the mapping if the hypercall fails?
+Hmm, why? If it fails again when we redo the mapping, what should we do
+then? Redo again?
+I think if it fails at the first time it will always fail no matter how
+many times we do.
 
+Thanks,
 -- 
-Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+Shannon
