@@ -1,10 +1,12 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v11 00/17] Add ACPI support for Xen Dom0 on ARM64
-Date: Thu, 7 Apr 2016 20:03:17 +0800
-Message-ID: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v11 04/17] arm/xen: Use xen_xlate_map_ballooned_pages to setup grant table
+Date: Thu, 7 Apr 2016 20:03:21 +0800
+Message-ID: <1460030614-16112-5-git-send-email-zhaoshenglong@huawei.com>
+References: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, sstabellini@kernel.org
 Cc: catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@arm.com, david.vrabel@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
@@ -12,148 +14,50 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao@linaro.org>
 
-This patch set adds ACPI support for Xen Dom0 on ARM64. The relevant Xen
-ACPI on ARM64 design document could be found from [1].
+Use xen_xlate_map_ballooned_pages to setup grant table. Then it doesn't
+rely on DT or ACPI to pass the start address and size of grant table.
 
-This patch set adds a new FDT node "uefi" under /hypervisor to pass UEFI
-information. Introduce a bus notifier of AMBA and Platform bus to map
-the new added device's MMIO space. Make Xen domain use
-xlated_setup_gnttab_pages to setup grant table and a new hypercall to
-get event-channel irq.
+Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+Acked-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+Reviewed-by: Julien Grall <julien.grall@arm.com>
+---
+ arch/arm/xen/enlighten.c | 13 ++++---------
+ 1 file changed, 4 insertions(+), 9 deletions(-)
 
-Regarding the initialization flow of Linux kernel, it needs to move
-xen_early_init() before efi_init(). Then xen_early_init() will check
-whether it runs on Xen through the /hypervisor node and efi_init() will
-call a new function fdt_find_xen_uefi_params(), to parse those
-xen,uefi-* parameters just like the existing efi_get_fdt_params().
-
-And in arm64_enable_runtime_services() it will check whether it runs on
-Xen and call another new function xen_efi_runtime_setup() to setup
-runtime service instead of efi_native_runtime_setup(). The
-xen_efi_runtime_setup() will assign the runtime function pointers with
-the functions of driver/xen/efi.c.
-
-And since we pass a /hypervisor node and a /chosen node to Dom0, it
-needs to check whether the DTS only contains a /hypervisor node and a
-/chosen node in acpi_boot_table_init().
-
-Patches are tested on FVP base model.
-
-Thanks,
-Shannon
-
-[1] http://lists.xen.org/archives/html/xen-devel/2015-11/msg00488.html
-
-Changes since v10:
-* address Rafael's comments on patch 1
-* undo the device mmio mappings if it fails in patch 6
-
-Changes since v9:
-* address Rafael's comments on patch 1
-* check the compatible string of hypervisor node in patch 12
-
-Changes since v8:
-* rebased on v4.6-rc1
-* print UART device address (PATCH 1)
-* use xen_for_each_gfn (PATCH 3)
-* reduce indentation by inverting the condition (PATCH 10)
-* move xen_early_init() before efi_init() as well for ARM (PATCH 11)
-* sync the document with Xen (PATCH 13)
-
-Changes since v7:
-* add __init prefix for acpi_get_spcr_uart_addr (PATCH 1)
-
-Changes since v6:
-* rebase on linux master
-* refactor codes as acpi_get_spcr_uart_addr (PATCH 1)
-* sync with Xen (patch 9)
-
-Changes since v5:
-* rebase on linux master
-* use acpi_dev_resource_memory to parse the device memory info(patch 1)
-* sync with Xen (patch 9)
-
-Changes since v4:
-* rebase on linux master
-* move the check acpi_device_should_be_hidden into
-  acpi_bus_type_and_status (patch 1)
-* use existing function fdt_subnode_offset (patch 16)
-
-Changes since v3:
-* rebase on linux master
-* print a warning when there is no SPCR table
-* rephase the commit message of PATCH 3
-* rephase the words of PATCH 13
-* use strcmp and factor the function in PATCH 16
-* Add several ACKs and RBs, thanks a lot
-
-
-Changes since v2:
-* Use 0 to check if it should ignore the UART
-* Fix the use of page_to_xen_pfn
-* Factor ACPI and DT parts in xen_guest_init
-* Check "uefi" node by full path
-* Fix the statement of Documentation/devicetree/bindings/arm/xen.txt
-
-Changes since v1:
-* Rebase on linux mainline and wallclock patch from Stefano
-* Refactor AMBA and platform device MMIO map to one file
-* Use EFI_PARAVIRT to check if it supports XEN EFI
-* Refactor Xen EFI codes
-* Address other comments
-
-Shannon Zhao (17):
-  Xen: ACPI: Hide UART used by Xen
-  xen/grant-table: Move xlated_setup_gnttab_pages to common place
-  Xen: xlate: Use page_to_xen_pfn instead of page_to_pfn
-  arm/xen: Use xen_xlate_map_ballooned_pages to setup grant table
-  xen: memory : Add new XENMAPSPACE type XENMAPSPACE_dev_mmio
-  Xen: ARM: Add support for mapping platform device mmio
-  Xen: ARM: Add support for mapping AMBA device mmio
-  Xen: public/hvm: sync changes of HVM_PARAM_CALLBACK_VIA ABI from Xen
-  xen/hvm/params: Add a new delivery type for event-channel in
-    HVM_PARAM_CALLBACK_IRQ
-  arm/xen: Get event-channel irq through HVM_PARAM when booting with
-    ACPI
-  ARM: XEN: Move xen_early_init() before efi_init()
-  ARM64: ACPI: Check if it runs on Xen to enable or disable ACPI
-  ARM: Xen: Document UEFI support on Xen ARM virtual platforms
-  XEN: EFI: Move x86 specific codes to architecture directory
-  ARM64: XEN: Add a function to initialize Xen specific UEFI runtime
-    services
-  FDT: Add a helper to get the subnode by given name
-  Xen: EFI: Parse DT parameters for Xen specific UEFI
-
- Documentation/devicetree/bindings/arm/xen.txt |  35 +++++
- arch/arm/include/asm/xen/xen-ops.h            |   6 +
- arch/arm/kernel/setup.c                       |   2 +-
- arch/arm/xen/Makefile                         |   1 +
- arch/arm/xen/efi.c                            |  40 ++++++
- arch/arm/xen/enlighten.c                      | 109 ++++++++++----
- arch/arm64/include/asm/xen/xen-ops.h          |   6 +
- arch/arm64/kernel/acpi.c                      |  14 +-
- arch/arm64/kernel/setup.c                     |   2 +-
- arch/arm64/xen/Makefile                       |   1 +
- arch/x86/xen/efi.c                            | 112 +++++++++++++++
- arch/x86/xen/grant-table.c                    |  57 +-------
- drivers/acpi/scan.c                           |  74 ++++++++++
- drivers/firmware/efi/arm-runtime.c            |  17 ++-
- drivers/firmware/efi/efi.c                    |  45 +++++-
- drivers/of/fdt.c                              |  13 ++
- drivers/xen/Kconfig                           |   2 +-
- drivers/xen/Makefile                          |   1 +
- drivers/xen/arm-device.c                      | 196 ++++++++++++++++++++++++++
- drivers/xen/efi.c                             | 174 +++++------------------
- drivers/xen/xlate_mmu.c                       |  77 ++++++++++
- include/linux/of_fdt.h                        |   2 +
- include/xen/interface/hvm/params.h            |  40 +++++-
- include/xen/interface/memory.h                |   1 +
- include/xen/xen-ops.h                         |  32 +++--
- 25 files changed, 811 insertions(+), 248 deletions(-)
- create mode 100644 arch/arm/include/asm/xen/xen-ops.h
- create mode 100644 arch/arm/xen/efi.c
- create mode 100644 arch/arm64/include/asm/xen/xen-ops.h
- create mode 100644 drivers/xen/arm-device.c
-
+diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
+index 75cd734..d94f726 100644
+--- a/arch/arm/xen/enlighten.c
++++ b/arch/arm/xen/enlighten.c
+@@ -282,18 +282,10 @@ static int __init xen_guest_init(void)
+ {
+ 	struct xen_add_to_physmap xatp;
+ 	struct shared_info *shared_info_page = NULL;
+-	struct resource res;
+-	phys_addr_t grant_frames;
+ 
+ 	if (!xen_domain())
+ 		return 0;
+ 
+-	if (of_address_to_resource(xen_node, GRANT_TABLE_PHYSADDR, &res)) {
+-		pr_err("Xen grant table base address not found\n");
+-		return -ENODEV;
+-	}
+-	grant_frames = res.start;
+-
+ 	xen_events_irq = irq_of_parse_and_map(xen_node, 0);
+ 	if (!xen_events_irq) {
+ 		pr_err("Xen event channel interrupt not found\n");
+@@ -328,7 +320,10 @@ static int __init xen_guest_init(void)
+ 	if (xen_vcpu_info == NULL)
+ 		return -ENOMEM;
+ 
+-	if (gnttab_setup_auto_xlat_frames(grant_frames)) {
++	xen_auto_xlat_grant_frames.count = gnttab_max_grant_frames();
++	if (xen_xlate_map_ballooned_pages(&xen_auto_xlat_grant_frames.pfn,
++					  &xen_auto_xlat_grant_frames.vaddr,
++					  xen_auto_xlat_grant_frames.count)) {
+ 		free_percpu(xen_vcpu_info);
+ 		return -ENOMEM;
+ 	}
 -- 
 2.0.4
