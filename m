@@ -1,120 +1,94 @@
-From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v11 02/17] xen/grant-table: Move
-	xlated_setup_gnttab_pages to common place
-Date: Thu, 7 Apr 2016 20:03:19 +0800
-Message-ID: <1460030614-16112-3-git-send-email-zhaoshenglong@huawei.com>
-References: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: Re: [PATCH v1 06/10] device property: switch to use UUID API
+Date: Thu, 07 Apr 2016 19:41:26 +0300
+Message-ID: <1460047286.6620.26.camel@linux.intel.com>
+References: <1455711448-124103-1-git-send-email-andriy.shevchenko@linux.intel.com>
+	 <1455711448-124103-7-git-send-email-andriy.shevchenko@linux.intel.com>
+	 <7544228.v4QPX4F7J7@vostro.rjw.lan>
+	 <1456495897.13244.144.camel@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
-In-Reply-To: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
-List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
-To: linux-arm-kernel@lists.infradead.org, sstabellini@kernel.org
-Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, julien.grall@arm.com, david.vrabel@citrix.com, peter.huangpeng@huawei.com, shannon.zhao@linaro.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1456495897.13244.144.camel@linux.intel.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Huang Ying <ying.huang@intel.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, Jani Nikula <jani.nikula@linux.intel.com>, David Airlie <airlied@linux.ie>, Benjamin Tissoires <benjamin.tissoires@redhat.com>, Bjorn Helgaas <bhelgaas@google.com>, Mathias Nyman <mathias.nyman@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Lv Zheng <lv.zheng@intel.com>, Mark Brown <broonie@kernel.org>, Zhang Rui <rui.zhang@intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, linux-acpi@vger.kernel.org, linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-efi@vger.kernel.org, linux-api@vger.kernel.org, linux-nvdimm@lists.01.org
 List-Id: linux-efi@vger.kernel.org
 
-RnJvbTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KCk1vdmUgeGxhdGVk
-X3NldHVwX2dudHRhYl9wYWdlcyB0byBjb21tb24gcGxhY2UsIHNvIGl0IGNhbiBiZSByZXVzZWQg
-YnkKQVJNIHRvIHNldHVwIGdyYW50IHRhYmxlLgoKUmVuYW1lIGl0IHRvIHhlbl94bGF0ZV9tYXBf
-YmFsbG9vbmVkX3BhZ2VzLgoKU2lnbmVkLW9mZi1ieTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpo
-YW9AbGluYXJvLm9yZz4KUmV2aWV3ZWQtYnk6IFN0ZWZhbm8gU3RhYmVsbGluaSA8c3RlZmFuby5z
-dGFiZWxsaW5pQGV1LmNpdHJpeC5jb20+ClJldmlld2VkLWJ5OiBKdWxpZW4gR3JhbGwgPGp1bGll
-bi5ncmFsbEBhcm0uY29tPgotLS0KIGFyY2gveDg2L3hlbi9ncmFudC10YWJsZS5jIHwgNTcgKysr
-KystLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogZHJpdmVycy94ZW4veGxh
-dGVfbW11LmMgICAgfCA2MSArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKysrCiBpbmNsdWRlL3hlbi94ZW4tb3BzLmggICAgICB8ICAyICsrCiAzIGZpbGVzIGNoYW5n
-ZWQsIDY5IGluc2VydGlvbnMoKyksIDUxIGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL2FyY2gv
-eDg2L3hlbi9ncmFudC10YWJsZS5jIGIvYXJjaC94ODYveGVuL2dyYW50LXRhYmxlLmMKaW5kZXgg
-ZTA3OTUwMC4uZGU0MTQ0YyAxMDA2NDQKLS0tIGEvYXJjaC94ODYveGVuL2dyYW50LXRhYmxlLmMK
-KysrIGIvYXJjaC94ODYveGVuL2dyYW50LXRhYmxlLmMKQEAgLTExMSw2MyArMTExLDE4IEBAIGlu
-dCBhcmNoX2dudHRhYl9pbml0KHVuc2lnbmVkIGxvbmcgbnJfc2hhcmVkKQogfQogCiAjaWZkZWYg
-Q09ORklHX1hFTl9QVkgKLSNpbmNsdWRlIDx4ZW4vYmFsbG9vbi5oPgogI2luY2x1ZGUgPHhlbi9l
-dmVudHMuaD4KLSNpbmNsdWRlIDxsaW51eC9zbGFiLmg+Ci1zdGF0aWMgaW50IF9faW5pdCB4bGF0
-ZWRfc2V0dXBfZ250dGFiX3BhZ2VzKHZvaWQpCi17Ci0Jc3RydWN0IHBhZ2UgKipwYWdlczsKLQl4
-ZW5fcGZuX3QgKnBmbnM7Ci0Jdm9pZCAqdmFkZHI7Ci0JaW50IHJjOwotCXVuc2lnbmVkIGludCBp
-OwotCXVuc2lnbmVkIGxvbmcgbnJfZ3JhbnRfZnJhbWVzID0gZ250dGFiX21heF9ncmFudF9mcmFt
-ZXMoKTsKLQotCUJVR19PTihucl9ncmFudF9mcmFtZXMgPT0gMCk7Ci0JcGFnZXMgPSBrY2FsbG9j
-KG5yX2dyYW50X2ZyYW1lcywgc2l6ZW9mKHBhZ2VzWzBdKSwgR0ZQX0tFUk5FTCk7Ci0JaWYgKCFw
-YWdlcykKLQkJcmV0dXJuIC1FTk9NRU07Ci0KLQlwZm5zID0ga2NhbGxvYyhucl9ncmFudF9mcmFt
-ZXMsIHNpemVvZihwZm5zWzBdKSwgR0ZQX0tFUk5FTCk7Ci0JaWYgKCFwZm5zKSB7Ci0JCWtmcmVl
-KHBhZ2VzKTsKLQkJcmV0dXJuIC1FTk9NRU07Ci0JfQotCXJjID0gYWxsb2NfeGVuYmFsbG9vbmVk
-X3BhZ2VzKG5yX2dyYW50X2ZyYW1lcywgcGFnZXMpOwotCWlmIChyYykgewotCQlwcl93YXJuKCIl
-cyBDb3VsZG4ndCBiYWxsb29uIGFsbG9jICVsZCBwZm5zIHJjOiVkXG4iLCBfX2Z1bmNfXywKLQkJ
-CW5yX2dyYW50X2ZyYW1lcywgcmMpOwotCQlrZnJlZShwYWdlcyk7Ci0JCWtmcmVlKHBmbnMpOwot
-CQlyZXR1cm4gcmM7Ci0JfQotCWZvciAoaSA9IDA7IGkgPCBucl9ncmFudF9mcmFtZXM7IGkrKykK
-LQkJcGZuc1tpXSA9IHBhZ2VfdG9fcGZuKHBhZ2VzW2ldKTsKLQotCXZhZGRyID0gdm1hcChwYWdl
-cywgbnJfZ3JhbnRfZnJhbWVzLCAwLCBQQUdFX0tFUk5FTCk7Ci0JaWYgKCF2YWRkcikgewotCQlw
-cl93YXJuKCIlcyBDb3VsZG4ndCBtYXAgJWxkIHBmbnMgcmM6JWRcbiIsIF9fZnVuY19fLAotCQkJ
-bnJfZ3JhbnRfZnJhbWVzLCByYyk7Ci0JCWZyZWVfeGVuYmFsbG9vbmVkX3BhZ2VzKG5yX2dyYW50
-X2ZyYW1lcywgcGFnZXMpOwotCQlrZnJlZShwYWdlcyk7Ci0JCWtmcmVlKHBmbnMpOwotCQlyZXR1
-cm4gLUVOT01FTTsKLQl9Ci0Ja2ZyZWUocGFnZXMpOwotCi0JeGVuX2F1dG9feGxhdF9ncmFudF9m
-cmFtZXMucGZuID0gcGZuczsKLQl4ZW5fYXV0b194bGF0X2dyYW50X2ZyYW1lcy5jb3VudCA9IG5y
-X2dyYW50X2ZyYW1lczsKLQl4ZW5fYXV0b194bGF0X2dyYW50X2ZyYW1lcy52YWRkciA9IHZhZGRy
-OwotCi0JcmV0dXJuIDA7Ci19Ci0KKyNpbmNsdWRlIDx4ZW4veGVuLW9wcy5oPgogc3RhdGljIGlu
-dCBfX2luaXQgeGVuX3B2aF9nbnR0YWJfc2V0dXAodm9pZCkKIHsKIAlpZiAoIXhlbl9wdmhfZG9t
-YWluKCkpCiAJCXJldHVybiAtRU5PREVWOwogCi0JcmV0dXJuIHhsYXRlZF9zZXR1cF9nbnR0YWJf
-cGFnZXMoKTsKKwl4ZW5fYXV0b194bGF0X2dyYW50X2ZyYW1lcy5jb3VudCA9IGdudHRhYl9tYXhf
-Z3JhbnRfZnJhbWVzKCk7CisKKwlyZXR1cm4geGVuX3hsYXRlX21hcF9iYWxsb29uZWRfcGFnZXMo
-Jnhlbl9hdXRvX3hsYXRfZ3JhbnRfZnJhbWVzLnBmbiwKKwkJCQkJICAgICAmeGVuX2F1dG9feGxh
-dF9ncmFudF9mcmFtZXMudmFkZHIsCisJCQkJCSAgICAgeGVuX2F1dG9feGxhdF9ncmFudF9mcmFt
-ZXMuY291bnQpOwogfQogLyogQ2FsbCBpdCBfYmVmb3JlXyBfX2dudHRhYl9pbml0IGFzIHdlIG5l
-ZWQgdG8gaW5pdGlhbGl6ZSB0aGUKICAqIHhlbl9hdXRvX3hsYXRfZ3JhbnRfZnJhbWVzIGZpcnN0
-LiAqLwpkaWZmIC0tZ2l0IGEvZHJpdmVycy94ZW4veGxhdGVfbW11LmMgYi9kcml2ZXJzL3hlbi94
-bGF0ZV9tbXUuYwppbmRleCA1MDYzYzVlLi45NjkyNjU2IDEwMDY0NAotLS0gYS9kcml2ZXJzL3hl
-bi94bGF0ZV9tbXUuYworKysgYi9kcml2ZXJzL3hlbi94bGF0ZV9tbXUuYwpAQCAtMjksNiArMjks
-OCBAQAogICovCiAjaW5jbHVkZSA8bGludXgva2VybmVsLmg+CiAjaW5jbHVkZSA8bGludXgvbW0u
-aD4KKyNpbmNsdWRlIDxsaW51eC9zbGFiLmg+CisjaW5jbHVkZSA8bGludXgvdm1hbGxvYy5oPgog
-CiAjaW5jbHVkZSA8YXNtL3hlbi9oeXBlcmNhbGwuaD4KICNpbmNsdWRlIDxhc20veGVuL2h5cGVy
-dmlzb3IuaD4KQEAgLTM3LDYgKzM5LDcgQEAKICNpbmNsdWRlIDx4ZW4vcGFnZS5oPgogI2luY2x1
-ZGUgPHhlbi9pbnRlcmZhY2UveGVuLmg+CiAjaW5jbHVkZSA8eGVuL2ludGVyZmFjZS9tZW1vcnku
-aD4KKyNpbmNsdWRlIDx4ZW4vYmFsbG9vbi5oPgogCiB0eXBlZGVmIHZvaWQgKCp4ZW5fZ2ZuX2Zu
-X3QpKHVuc2lnbmVkIGxvbmcgZ2ZuLCB2b2lkICpkYXRhKTsKIApAQCAtMTg1LDMgKzE4OCw2MSBA
-QCBpbnQgeGVuX3hsYXRlX3VubWFwX2dmbl9yYW5nZShzdHJ1Y3Qgdm1fYXJlYV9zdHJ1Y3QgKnZt
-YSwKIAlyZXR1cm4gMDsKIH0KIEVYUE9SVF9TWU1CT0xfR1BMKHhlbl94bGF0ZV91bm1hcF9nZm5f
-cmFuZ2UpOworCisvKioKKyAqIHhlbl94bGF0ZV9tYXBfYmFsbG9vbmVkX3BhZ2VzIC0gbWFwIGEg
-bmV3IHNldCBvZiBiYWxsb29uZWQgcGFnZXMKKyAqIEBnZm5zOiByZXR1cm5zIHRoZSBhcnJheSBv
-ZiBjb3JyZXNwb25kaW5nIEdGTnMKKyAqIEB2aXJ0OiByZXR1cm5zIHRoZSB2aXJ0dWFsIGFkZHJl
-c3Mgb2YgdGhlIG1hcHBlZCByZWdpb24KKyAqIEBucl9ncmFudF9mcmFtZXM6IG51bWJlciBvZiBH
-Rk5zCisgKiBAcmV0dXJuIDAgb24gc3VjY2VzcywgZXJyb3Igb3RoZXJ3aXNlCisgKgorICogVGhp
-cyBhbGxvY2F0ZXMgYSBzZXQgb2YgYmFsbG9vbmVkIHBhZ2VzIGFuZCBtYXBzIHRoZW0gaW50byB0
-aGUKKyAqIGtlcm5lbCdzIGFkZHJlc3Mgc3BhY2UuCisgKi8KK2ludCBfX2luaXQgeGVuX3hsYXRl
-X21hcF9iYWxsb29uZWRfcGFnZXMoeGVuX3Bmbl90ICoqZ2Zucywgdm9pZCAqKnZpcnQsCisJCQkJ
-CSB1bnNpZ25lZCBsb25nIG5yX2dyYW50X2ZyYW1lcykKK3sKKwlzdHJ1Y3QgcGFnZSAqKnBhZ2Vz
-OworCXhlbl9wZm5fdCAqcGZuczsKKwl2b2lkICp2YWRkcjsKKwlpbnQgcmM7CisJdW5zaWduZWQg
-aW50IGk7CisKKwlCVUdfT04obnJfZ3JhbnRfZnJhbWVzID09IDApOworCXBhZ2VzID0ga2NhbGxv
-Yyhucl9ncmFudF9mcmFtZXMsIHNpemVvZihwYWdlc1swXSksIEdGUF9LRVJORUwpOworCWlmICgh
-cGFnZXMpCisJCXJldHVybiAtRU5PTUVNOworCisJcGZucyA9IGtjYWxsb2MobnJfZ3JhbnRfZnJh
-bWVzLCBzaXplb2YocGZuc1swXSksIEdGUF9LRVJORUwpOworCWlmICghcGZucykgeworCQlrZnJl
-ZShwYWdlcyk7CisJCXJldHVybiAtRU5PTUVNOworCX0KKwlyYyA9IGFsbG9jX3hlbmJhbGxvb25l
-ZF9wYWdlcyhucl9ncmFudF9mcmFtZXMsIHBhZ2VzKTsKKwlpZiAocmMpIHsKKwkJcHJfd2Fybigi
-JXMgQ291bGRuJ3QgYmFsbG9vbiBhbGxvYyAlbGQgcGZucyByYzolZFxuIiwgX19mdW5jX18sCisJ
-CQlucl9ncmFudF9mcmFtZXMsIHJjKTsKKwkJa2ZyZWUocGFnZXMpOworCQlrZnJlZShwZm5zKTsK
-KwkJcmV0dXJuIHJjOworCX0KKwlmb3IgKGkgPSAwOyBpIDwgbnJfZ3JhbnRfZnJhbWVzOyBpKysp
-CisJCXBmbnNbaV0gPSBwYWdlX3RvX3BmbihwYWdlc1tpXSk7CisKKwl2YWRkciA9IHZtYXAocGFn
-ZXMsIG5yX2dyYW50X2ZyYW1lcywgMCwgUEFHRV9LRVJORUwpOworCWlmICghdmFkZHIpIHsKKwkJ
-cHJfd2FybigiJXMgQ291bGRuJ3QgbWFwICVsZCBwZm5zIHJjOiVkXG4iLCBfX2Z1bmNfXywKKwkJ
-CW5yX2dyYW50X2ZyYW1lcywgcmMpOworCQlmcmVlX3hlbmJhbGxvb25lZF9wYWdlcyhucl9ncmFu
-dF9mcmFtZXMsIHBhZ2VzKTsKKwkJa2ZyZWUocGFnZXMpOworCQlrZnJlZShwZm5zKTsKKwkJcmV0
-dXJuIC1FTk9NRU07CisJfQorCWtmcmVlKHBhZ2VzKTsKKworCSpnZm5zID0gcGZuczsKKwkqdmly
-dCA9IHZhZGRyOworCisJcmV0dXJuIDA7Cit9CitFWFBPUlRfU1lNQk9MX0dQTCh4ZW5feGxhdGVf
-bWFwX2JhbGxvb25lZF9wYWdlcyk7CmRpZmYgLS1naXQgYS9pbmNsdWRlL3hlbi94ZW4tb3BzLmgg
-Yi9pbmNsdWRlL3hlbi94ZW4tb3BzLmgKaW5kZXggODZhYmUwNy4uMDcyYmUxYyAxMDA2NDQKLS0t
-IGEvaW5jbHVkZS94ZW4veGVuLW9wcy5oCisrKyBiL2luY2x1ZGUveGVuL3hlbi1vcHMuaApAQCAt
-ODUsNiArODUsOCBAQCBpbnQgeGVuX3hsYXRlX3JlbWFwX2dmbl9hcnJheShzdHJ1Y3Qgdm1fYXJl
-YV9zdHJ1Y3QgKnZtYSwKIAkJCSAgICAgIHN0cnVjdCBwYWdlICoqcGFnZXMpOwogaW50IHhlbl94
-bGF0ZV91bm1hcF9nZm5fcmFuZ2Uoc3RydWN0IHZtX2FyZWFfc3RydWN0ICp2bWEsCiAJCQkgICAg
-ICBpbnQgbnIsIHN0cnVjdCBwYWdlICoqcGFnZXMpOworaW50IHhlbl94bGF0ZV9tYXBfYmFsbG9v
-bmVkX3BhZ2VzKHhlbl9wZm5fdCAqKnBmbnMsIHZvaWQgKip2YWRkciwKKwkJCQkgIHVuc2lnbmVk
-IGxvbmcgbnJfZ3JhbnRfZnJhbWVzKTsKIAogYm9vbCB4ZW5fcnVubmluZ19vbl92ZXJzaW9uX29y
-X2xhdGVyKHVuc2lnbmVkIGludCBtYWpvciwgdW5zaWduZWQgaW50IG1pbm9yKTsKIAotLSAKMi4w
-LjQKCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KWGVu
-LWRldmVsIG1haWxpbmcgbGlzdApYZW4tZGV2ZWxAbGlzdHMueGVuLm9yZwpodHRwOi8vbGlzdHMu
-eGVuLm9yZy94ZW4tZGV2ZWwK
+On Fri, 2016-02-26 at 16:11 +0200, Andy Shevchenko wrote:
+> On Thu, 2016-02-18 at 01:03 +0100, Rafael J. Wysocki wrote:
+> >=20
+> > On Wednesday, February 17, 2016 02:17:24 PM Andy Shevchenko wrote:
+> > >=20
+> > > Switch to use a generic UUID API instead of custom approach. It
+> > > allows to
+> > > define UUIDs, compare them, and validate.
+> []
+>=20
+
+Summon initial author of the UUID library.
+
+Summary: the API of comparison functions is rather strange. What the
+point to not take pointers directly? (Moreover I hope compiler too
+clever not to make a copy of constant arguments there)
+
+I could only imagine the case you are trying to avoid temporary
+variables for constants like NULL_UUID.
+
+Issue with this is the ugliness in the users of that, in particularly
+present in ACPI (drivers/acpi/apei/ghes.c).
+
+I would like to have more clear interface for that. Perhaps we may add
+something like
+
+cmp_p(pointer, non-pointer);
+cmp_pp(pointer, pointer);
+
+to not break existing API for now.
+
+It would be useful for many cases in the kernel.
+
+> >=20
+> > >=20
+> > > +static const uuid_le ads_uuid =3D
+> > > +	UUID_LE(0xdbb8e3e6, 0x5886, 0x4ba6,
+> > > +		0x87, 0x95, 0x13, 0x19, 0xf5, 0x2a, 0x96, 0x6b);
+> > > =C2=A0
+> > > =C2=A0static bool acpi_enumerate_nondev_subnodes(acpi_handle scop=
+e,
+> > > =C2=A0					=C2=A0=C2=A0=C2=A0const union
+> > > acpi_object
+> > > *desc,
+> > > @@ -138,7 +136,7 @@ static bool
+> > > acpi_enumerate_nondev_subnodes(acpi_handle scope,
+> > > =C2=A0		=C2=A0=C2=A0=C2=A0=C2=A0|| links->type !=3D ACPI_TYPE_PAC=
+KAGE)
+> > > =C2=A0			break;
+> > > =C2=A0
+> > > -		if (memcmp(uuid->buffer.pointer, ads_uuid,
+> > > sizeof(ads_uuid)))
+> > > +		if (uuid_le_cmp(*(uuid_le *)uuid->buffer.pointer,
+> > > ads_uuid))
+> > Maybe it's too late, but I don't quite understand the pointer
+> > manipulations here.
+> >=20
+> > I can see why you need a type conversion (although it looks ugly),
+> > but why do you
+> > need to dereference it too?
+> The function takes that kind of type on input. The other variants are
+> not compiled.
+> Perhaps we better change uuid_{lb}e_cmp() first to take normal
+> pointers, though I think the initial idea was to get type checking at
+> compile time.
+>=20
+
+--=20
+Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Intel Finland Oy
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-acpi" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
