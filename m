@@ -1,7 +1,7 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v11 11/17] ARM: XEN: Move xen_early_init() before efi_init()
-Date: Thu, 7 Apr 2016 20:03:28 +0800
-Message-ID: <1460030614-16112-12-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v11 13/17] ARM: Xen: Document UEFI support on Xen ARM virtual platforms
+Date: Thu, 7 Apr 2016 20:03:30 +0800
+Message-ID: <1460030614-16112-14-git-send-email-zhaoshenglong@huawei.com>
 References: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -9,167 +9,76 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, sstabellini@kernel.org
-Cc: catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@arm.com, david.vrabel@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, Russell King <linux@arm.linux.org.uk>
+Cc: catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@arm.com, david.vrabel@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, Rob Herring <robh@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao@linaro.org>
 
-Move xen_early_init() before efi_init(), then when calling efi_init()
-could initialize Xen specific UEFI.
+Add a "uefi" node under /hypervisor node in FDT, then Linux kernel could
+scan this to get the UEFI information.
 
-Check if it runs on Xen hypervisor through the flat dts.
-
-Cc: Russell King <linux@arm.linux.org.uk>
+CC: Rob Herring <robh@kernel.org>
 Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+Acked-by: Rob Herring <robh@kernel.org>
 Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
-Reviewed-by: Julien Grall <julien.grall@arm.com>
 ---
- arch/arm/kernel/setup.c   |  2 +-
- arch/arm/xen/enlighten.c  | 56 ++++++++++++++++++++++++++++++++++-------------
- arch/arm64/kernel/setup.c |  2 +-
- 3 files changed, 43 insertions(+), 17 deletions(-)
+ Documentation/devicetree/bindings/arm/xen.txt | 35 +++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
 
-diff --git a/arch/arm/kernel/setup.c b/arch/arm/kernel/setup.c
-index 139791e..5bc7516 100644
---- a/arch/arm/kernel/setup.c
-+++ b/arch/arm/kernel/setup.c
-@@ -1035,6 +1035,7 @@ void __init setup_arch(char **cmdline_p)
- 	early_paging_init(mdesc);
- #endif
- 	setup_dma_zone(mdesc);
-+	xen_early_init();
- 	efi_init();
- 	sanity_check_meminfo();
- 	arm_memblock_init(mdesc);
-@@ -1051,7 +1052,6 @@ void __init setup_arch(char **cmdline_p)
+diff --git a/Documentation/devicetree/bindings/arm/xen.txt b/Documentation/devicetree/bindings/arm/xen.txt
+index 0f7b9c2..c9b9321 100644
+--- a/Documentation/devicetree/bindings/arm/xen.txt
++++ b/Documentation/devicetree/bindings/arm/xen.txt
+@@ -11,10 +11,32 @@ the following properties:
+   memory where the grant table should be mapped to, using an
+   HYPERVISOR_memory_op hypercall. The memory region is large enough to map
+   the whole grant table (it is larger or equal to gnttab_max_grant_frames()).
++  This property is unnecessary when booting Dom0 using ACPI.
  
- 	arm_dt_init_cpu_maps();
- 	psci_dt_init();
--	xen_early_init();
- #ifdef CONFIG_SMP
- 	if (is_smp()) {
- 		if (!mdesc->smp_init || !mdesc->smp_init()) {
-diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-index 06bd61a..13e3e9f 100644
---- a/arch/arm/xen/enlighten.c
-+++ b/arch/arm/xen/enlighten.c
-@@ -20,6 +20,7 @@
- #include <linux/irqreturn.h>
- #include <linux/module.h>
- #include <linux/of.h>
-+#include <linux/of_fdt.h>
- #include <linux/of_irq.h>
- #include <linux/of_address.h>
- #include <linux/cpuidle.h>
-@@ -53,8 +54,6 @@ struct xen_memory_region xen_extra_mem[XEN_EXTRA_MEM_MAX_REGIONS] __initdata;
+ - interrupts: the interrupt used by Xen to inject event notifications.
+   A GIC node is also required.
++  This property is unnecessary when booting Dom0 using ACPI.
  
- static __read_mostly unsigned int xen_events_irq;
- 
--static __initdata struct device_node *xen_node;
--
- int xen_remap_domain_gfn_array(struct vm_area_struct *vma,
- 			       unsigned long addr,
- 			       xen_pfn_t *gfn, int nr,
-@@ -238,6 +237,33 @@ static irqreturn_t xen_arm_callback(int irq, void *arg)
- 	return IRQ_HANDLED;
- }
- 
-+static __initdata struct {
-+	const char *compat;
-+	const char *prefix;
-+	const char *version;
-+	bool found;
-+} hyper_node = {"xen,xen", "xen,xen-", NULL, false};
++To support UEFI on Xen ARM virtual platforms, Xen populates the FDT "uefi" node
++under /hypervisor with following parameters:
 +
-+static int __init fdt_find_hyper_node(unsigned long node, const char *uname,
-+				      int depth, void *data)
-+{
-+	const void *s = NULL;
-+	int len;
-+
-+	if (depth != 1 || strcmp(uname, "hypervisor") != 0)
-+		return 0;
-+
-+	if (of_flat_dt_is_compatible(node, hyper_node.compat))
-+		hyper_node.found = true;
-+
-+	s = of_get_flat_dt_prop(node, "compatible", &len);
-+	if (strlen(hyper_node.prefix) + 3  < len &&
-+	    !strncmp(hyper_node.prefix, s, strlen(hyper_node.prefix)))
-+		hyper_node.version = s + strlen(hyper_node.prefix);
-+
-+	return 0;
-+}
-+
- /*
-  * see Documentation/devicetree/bindings/arm/xen.txt for the
-  * documentation of the Xen Device Tree format.
-@@ -245,26 +271,18 @@ static irqreturn_t xen_arm_callback(int irq, void *arg)
- #define GRANT_TABLE_PHYSADDR 0
- void __init xen_early_init(void)
- {
--	int len;
--	const char *s = NULL;
--	const char *version = NULL;
--	const char *xen_prefix = "xen,xen-";
--
--	xen_node = of_find_compatible_node(NULL, NULL, "xen,xen");
--	if (!xen_node) {
-+	of_scan_flat_dt(fdt_find_hyper_node, NULL);
-+	if (!hyper_node.found) {
- 		pr_debug("No Xen support\n");
- 		return;
- 	}
--	s = of_get_property(xen_node, "compatible", &len);
--	if (strlen(xen_prefix) + 3  < len &&
--			!strncmp(xen_prefix, s, strlen(xen_prefix)))
--		version = s + strlen(xen_prefix);
--	if (version == NULL) {
-+
-+	if (hyper_node.version == NULL) {
- 		pr_debug("Xen version not found\n");
- 		return;
- 	}
++________________________________________________________________________________
++Name                      | Size   | Description
++================================================================================
++xen,uefi-system-table     | 64-bit | Guest physical address of the UEFI System
++			  |	   | Table.
++--------------------------------------------------------------------------------
++xen,uefi-mmap-start       | 64-bit | Guest physical address of the UEFI memory
++			  |	   | map.
++--------------------------------------------------------------------------------
++xen,uefi-mmap-size        | 32-bit | Size in bytes of the UEFI memory map
++                          |        | pointed to in previous entry.
++--------------------------------------------------------------------------------
++xen,uefi-mmap-desc-size   | 32-bit | Size in bytes of each entry in the UEFI
++                          |        | memory map.
++--------------------------------------------------------------------------------
++xen,uefi-mmap-desc-ver    | 32-bit | Version of the mmap descriptor format.
++--------------------------------------------------------------------------------
  
--	pr_info("Xen %s support found\n", version);
-+	pr_info("Xen %s support found\n", hyper_node.version);
+ Example (assuming #address-cells = <2> and #size-cells = <2>):
  
- 	xen_domain_type = XEN_HVM_DOMAIN;
- 
-@@ -305,6 +323,14 @@ static void __init xen_acpi_guest_init(void)
- 
- static void __init xen_dt_guest_init(void)
- {
-+	struct device_node *xen_node;
+@@ -22,4 +44,17 @@ hypervisor {
+ 	compatible = "xen,xen-4.3", "xen,xen";
+ 	reg = <0 0xb0000000 0 0x20000>;
+ 	interrupts = <1 15 0xf08>;
++	uefi {
++		xen,uefi-system-table = <0xXXXXXXXX>;
++		xen,uefi-mmap-start = <0xXXXXXXXX>;
++		xen,uefi-mmap-size = <0xXXXXXXXX>;
++		xen,uefi-mmap-desc-size = <0xXXXXXXXX>;
++		xen,uefi-mmap-desc-ver = <0xXXXXXXXX>;
++        };
+ };
 +
-+	xen_node = of_find_compatible_node(NULL, NULL, "xen,xen");
-+	if (!xen_node) {
-+		pr_err("Xen support was detected before, but it has disappeared\n");
-+		return;
-+	}
-+
- 	xen_events_irq = irq_of_parse_and_map(xen_node, 0);
- }
- 
-diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index 9dc6776..7cf992f 100644
---- a/arch/arm64/kernel/setup.c
-+++ b/arch/arm64/kernel/setup.c
-@@ -320,6 +320,7 @@ void __init setup_arch(char **cmdline_p)
- 	 */
- 	cpu_uninstall_idmap();
- 
-+	xen_early_init();
- 	efi_init();
- 	arm64_memblock_init();
- 
-@@ -341,7 +342,6 @@ void __init setup_arch(char **cmdline_p)
- 	} else {
- 		psci_acpi_init();
- 	}
--	xen_early_init();
- 
- 	cpu_read_bootcpu_ops();
- 	smp_init_cpus();
++The format and meaning of the "xen,uefi-*" parameters are similar to those in
++Documentation/arm/uefi.txt, which are provided by the regular UEFI stub. However
++they differ because they are provided by the Xen hypervisor, together with a set
++of UEFI runtime services implemented via hypercalls, see
++http://xenbits.xen.org/docs/unstable/hypercall/x86_64/include,public,platform.h.html.
 -- 
 2.0.4
