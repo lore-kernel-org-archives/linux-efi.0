@@ -1,115 +1,89 @@
-From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v11 06/17] Xen: ARM: Add support for mapping
-	platform device mmio
-Date: Thu, 7 Apr 2016 20:03:23 +0800
-Message-ID: <1460030614-16112-7-git-send-email-zhaoshenglong@huawei.com>
+From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v11 10/17] arm/xen: Get event-channel irq through HVM_PARAM when booting with ACPI
+Date: Thu, 7 Apr 2016 20:03:27 +0800
+Message-ID: <1460030614-16112-11-git-send-email-zhaoshenglong@huawei.com>
 References: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
-In-Reply-To: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
-List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
-To: linux-arm-kernel@lists.infradead.org, sstabellini@kernel.org
-Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, julien.grall@arm.com, david.vrabel@citrix.com, peter.huangpeng@huawei.com, shannon.zhao@linaro.org
+Content-Type: text/plain
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1460030614-16112-1-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-RnJvbTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KCkFkZCBhIGJ1c19u
-b3RpZmllciBmb3IgcGxhdGZvcm0gYnVzIGRldmljZSBpbiBvcmRlciB0byBtYXAgdGhlIGRldmlj
-ZQptbWlvIHJlZ2lvbnMgd2hlbiBET00wIGJvb3Rpbmcgd2l0aCBBQ1BJLgoKU2lnbmVkLW9mZi1i
-eTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KQWNrZWQtYnk6IFN0ZWZh
-bm8gU3RhYmVsbGluaSA8c3RlZmFuby5zdGFiZWxsaW5pQGV1LmNpdHJpeC5jb20+Ci0tLQogZHJp
-dmVycy94ZW4vTWFrZWZpbGUgICAgIHwgICAxICsKIGRyaXZlcnMveGVuL2FybS1kZXZpY2UuYyB8
-IDE1MyArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKwogMiBm
-aWxlcyBjaGFuZ2VkLCAxNTQgaW5zZXJ0aW9ucygrKQogY3JlYXRlIG1vZGUgMTAwNjQ0IGRyaXZl
-cnMveGVuL2FybS1kZXZpY2UuYwoKZGlmZiAtLWdpdCBhL2RyaXZlcnMveGVuL01ha2VmaWxlIGIv
-ZHJpdmVycy94ZW4vTWFrZWZpbGUKaW5kZXggOWI3YTM1Yy4uNDE1ZjI4NiAxMDA2NDQKLS0tIGEv
-ZHJpdmVycy94ZW4vTWFrZWZpbGUKKysrIGIvZHJpdmVycy94ZW4vTWFrZWZpbGUKQEAgLTksNiAr
-OSw3IEBAIENGTEFHU19mZWF0dXJlcy5vCQkJOj0gJChub3N0YWNrcCkKIAogQ0ZMQUdTX2VmaS5v
-CQkJCSs9IC1mc2hvcnQtd2NoYXIKIAorZG9tMC0kKENPTkZJR19BUk02NCkgKz0gYXJtLWRldmlj
-ZS5vCiBkb20wLSQoQ09ORklHX1BDSSkgKz0gcGNpLm8KIGRvbTAtJChDT05GSUdfVVNCX1NVUFBP
-UlQpICs9IGRiZ3AubwogZG9tMC0kKENPTkZJR19YRU5fQUNQSSkgKz0gYWNwaS5vICQoeGVuLXBh
-ZC15KQpkaWZmIC0tZ2l0IGEvZHJpdmVycy94ZW4vYXJtLWRldmljZS5jIGIvZHJpdmVycy94ZW4v
-YXJtLWRldmljZS5jCm5ldyBmaWxlIG1vZGUgMTAwNjQ0CmluZGV4IDAwMDAwMDAuLmI5MThlOGUK
-LS0tIC9kZXYvbnVsbAorKysgYi9kcml2ZXJzL3hlbi9hcm0tZGV2aWNlLmMKQEAgLTAsMCArMSwx
-NTMgQEAKKy8qCisgKiBDb3B5cmlnaHQgKGMpIDIwMTUsIExpbmFybyBMaW1pdGVkLCBTaGFubm9u
-IFpoYW8KKyAqCisgKiBUaGlzIHByb2dyYW0gaXMgZnJlZSBzb2Z0d2FyZTsgeW91IGNhbiByZWRp
-c3RyaWJ1dGUgaXQgYW5kL29yIG1vZGlmeSBpdAorICogdW5kZXIgdGhlIHRlcm1zIGFuZCBjb25k
-aXRpb25zIG9mIHRoZSBHTlUgR2VuZXJhbCBQdWJsaWMgTGljZW5zZSwKKyAqIHZlcnNpb24gMiwg
-YXMgcHVibGlzaGVkIGJ5IHRoZSBGcmVlIFNvZnR3YXJlIEZvdW5kYXRpb24uCisgKgorICogVGhp
-cyBwcm9ncmFtIGlzIGRpc3RyaWJ1dGVkIGluIHRoZSBob3BlIGl0IHdpbGwgYmUgdXNlZnVsLCBi
-dXQgV0lUSE9VVAorICogQU5ZIFdBUlJBTlRZOyB3aXRob3V0IGV2ZW4gdGhlIGltcGxpZWQgd2Fy
-cmFudHkgb2YgTUVSQ0hBTlRBQklMSVRZIG9yCisgKiBGSVRORVNTIEZPUiBBIFBBUlRJQ1VMQVIg
-UFVSUE9TRS4gIFNlZSB0aGUgR05VIEdlbmVyYWwgUHVibGljIExpY2Vuc2UgZm9yCisgKiBtb3Jl
-IGRldGFpbHMuCisgKgorICogWW91IHNob3VsZCBoYXZlIHJlY2VpdmVkIGEgY29weSBvZiB0aGUg
-R05VIEdlbmVyYWwgUHVibGljIExpY2Vuc2UKKyAqIGFsb25nIHdpdGggdGhpcyBwcm9ncmFtLiAg
-SWYgbm90LCBzZWUgPGh0dHA6Ly93d3cuZ251Lm9yZy9saWNlbnNlcy8+LgorICovCisKKyNpbmNs
-dWRlIDxsaW51eC9wbGF0Zm9ybV9kZXZpY2UuaD4KKyNpbmNsdWRlIDxsaW51eC9hY3BpLmg+Cisj
-aW5jbHVkZSA8eGVuL3hlbi5oPgorI2luY2x1ZGUgPHhlbi9wYWdlLmg+CisjaW5jbHVkZSA8eGVu
-L2ludGVyZmFjZS9tZW1vcnkuaD4KKyNpbmNsdWRlIDxhc20veGVuL2h5cGVydmlzb3IuaD4KKyNp
-bmNsdWRlIDxhc20veGVuL2h5cGVyY2FsbC5oPgorCitzdGF0aWMgaW50IHhlbl91bm1hcF9kZXZp
-Y2VfbW1pbyhjb25zdCBzdHJ1Y3QgcmVzb3VyY2UgKnJlc291cmNlcywKKwkJCQkgdW5zaWduZWQg
-aW50IGNvdW50KQoreworCXVuc2lnbmVkIGludCBpLCBqLCBucjsKKwlpbnQgcmMgPSAwOworCWNv
-bnN0IHN0cnVjdCByZXNvdXJjZSAqcjsKKwlzdHJ1Y3QgeGVuX3JlbW92ZV9mcm9tX3BoeXNtYXAg
-eHJwOworCisJZm9yIChpID0gMDsgaSA8IGNvdW50OyBpKyspIHsKKwkJciA9ICZyZXNvdXJjZXNb
-aV07CisJCW5yID0gRElWX1JPVU5EX1VQKHJlc291cmNlX3NpemUociksIFhFTl9QQUdFX1NJWkUp
-OworCQlpZiAoKHJlc291cmNlX3R5cGUocikgIT0gSU9SRVNPVVJDRV9NRU0pIHx8IChuciA9PSAw
-KSkKKwkJCWNvbnRpbnVlOworCisJCWZvciAoaiA9IDA7IGogPCBucjsgaisrKSB7CisJCQl4cnAu
-ZG9taWQgPSBET01JRF9TRUxGOworCQkJeHJwLmdwZm4gPSBYRU5fUEZOX0RPV04oci0+c3RhcnQp
-ICsgajsKKwkJCXJjID0gSFlQRVJWSVNPUl9tZW1vcnlfb3AoWEVOTUVNX3JlbW92ZV9mcm9tX3Bo
-eXNtYXAsCisJCQkJCQkgICZ4cnApOworCQkJaWYgKHJjKQorCQkJCXJldHVybiByYzsKKwkJfQor
-CX0KKworCXJldHVybiByYzsKK30KKworc3RhdGljIGludCB4ZW5fbWFwX2RldmljZV9tbWlvKGNv
-bnN0IHN0cnVjdCByZXNvdXJjZSAqcmVzb3VyY2VzLAorCQkJICAgICAgIHVuc2lnbmVkIGludCBj
-b3VudCkKK3sKKwl1bnNpZ25lZCBpbnQgaSwgaiwgbnI7CisJaW50IHJjID0gMDsKKwljb25zdCBz
-dHJ1Y3QgcmVzb3VyY2UgKnI7CisJeGVuX3Bmbl90ICpncGZuczsKKwl4ZW5fdWxvbmdfdCAqaWR4
-czsKKwlpbnQgKmVycnM7CisJc3RydWN0IHhlbl9hZGRfdG9fcGh5c21hcF9yYW5nZSB4YXRwOwor
-CisJZm9yIChpID0gMDsgaSA8IGNvdW50OyBpKyspIHsKKwkJciA9ICZyZXNvdXJjZXNbaV07CisJ
-CW5yID0gRElWX1JPVU5EX1VQKHJlc291cmNlX3NpemUociksIFhFTl9QQUdFX1NJWkUpOworCQlp
-ZiAoKHJlc291cmNlX3R5cGUocikgIT0gSU9SRVNPVVJDRV9NRU0pIHx8IChuciA9PSAwKSkKKwkJ
-CWNvbnRpbnVlOworCisJCWdwZm5zID0ga3phbGxvYyhzaXplb2YoeGVuX3Bmbl90KSAqIG5yLCBH
-RlBfS0VSTkVMKTsKKwkJaWR4cyA9IGt6YWxsb2Moc2l6ZW9mKHhlbl91bG9uZ190KSAqIG5yLCBH
-RlBfS0VSTkVMKTsKKwkJZXJycyA9IGt6YWxsb2Moc2l6ZW9mKGludCkgKiBuciwgR0ZQX0tFUk5F
-TCk7CisJCWlmICghZ3BmbnMgfHwgIWlkeHMgfHwgIWVycnMpIHsKKwkJCWtmcmVlKGdwZm5zKTsK
-KwkJCWtmcmVlKGlkeHMpOworCQkJa2ZyZWUoZXJycyk7CisJCQlyYyA9IC1FTk9NRU07CisJCQln
-b3RvIHVubWFwOworCQl9CisKKwkJZm9yIChqID0gMDsgaiA8IG5yOyBqKyspIHsKKwkJCS8qCisJ
-CQkgKiBUaGUgcmVnaW9ucyBhcmUgYWx3YXlzIG1hcHBlZCAxOjEgdG8gRE9NMCBhbmQgdGhpcyBp
-cworCQkJICogZmluZSBiZWNhdXNlIHRoZSBtZW1vcnkgbWFwIGZvciBET00wIGlzIHRoZSBzYW1l
-IGFzCisJCQkgKiB0aGUgaG9zdCAoZXhjZXB0IGZvciB0aGUgUkFNKS4KKwkJCSAqLworCQkJZ3Bm
-bnNbal0gPSBYRU5fUEZOX0RPV04oci0+c3RhcnQpICsgajsKKwkJCWlkeHNbal0gPSBYRU5fUEZO
-X0RPV04oci0+c3RhcnQpICsgajsKKwkJfQorCisJCXhhdHAuZG9taWQgPSBET01JRF9TRUxGOwor
-CQl4YXRwLnNpemUgPSBucjsKKwkJeGF0cC5zcGFjZSA9IFhFTk1BUFNQQUNFX2Rldl9tbWlvOwor
-CisJCXNldF94ZW5fZ3Vlc3RfaGFuZGxlKHhhdHAuZ3BmbnMsIGdwZm5zKTsKKwkJc2V0X3hlbl9n
-dWVzdF9oYW5kbGUoeGF0cC5pZHhzLCBpZHhzKTsKKwkJc2V0X3hlbl9ndWVzdF9oYW5kbGUoeGF0
-cC5lcnJzLCBlcnJzKTsKKworCQlyYyA9IEhZUEVSVklTT1JfbWVtb3J5X29wKFhFTk1FTV9hZGRf
-dG9fcGh5c21hcF9yYW5nZSwgJnhhdHApOworCQlrZnJlZShncGZucyk7CisJCWtmcmVlKGlkeHMp
-OworCQlrZnJlZShlcnJzKTsKKwkJaWYgKHJjKQorCQkJZ290byB1bm1hcDsKKwl9CisKKwlyZXR1
-cm4gcmM7CisKK3VubWFwOgorCXhlbl91bm1hcF9kZXZpY2VfbW1pbyhyZXNvdXJjZXMsIGkpOwor
-CXJldHVybiByYzsKK30KKworc3RhdGljIGludCB4ZW5fcGxhdGZvcm1fbm90aWZpZXIoc3RydWN0
-IG5vdGlmaWVyX2Jsb2NrICpuYiwKKwkJCQkgdW5zaWduZWQgbG9uZyBhY3Rpb24sIHZvaWQgKmRh
-dGEpCit7CisJc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldiA9IHRvX3BsYXRmb3JtX2Rldmlj
-ZShkYXRhKTsKKwlpbnQgciA9IDA7CisKKwlpZiAocGRldi0+bnVtX3Jlc291cmNlcyA9PSAwIHx8
-IHBkZXYtPnJlc291cmNlID09IE5VTEwpCisJCXJldHVybiBOT1RJRllfT0s7CisKKwlzd2l0Y2gg
-KGFjdGlvbikgeworCWNhc2UgQlVTX05PVElGWV9BRERfREVWSUNFOgorCQlyID0geGVuX21hcF9k
-ZXZpY2VfbW1pbyhwZGV2LT5yZXNvdXJjZSwgcGRldi0+bnVtX3Jlc291cmNlcyk7CisJCWJyZWFr
-OworCWNhc2UgQlVTX05PVElGWV9ERUxfREVWSUNFOgorCQlyID0geGVuX3VubWFwX2RldmljZV9t
-bWlvKHBkZXYtPnJlc291cmNlLCBwZGV2LT5udW1fcmVzb3VyY2VzKTsKKwkJYnJlYWs7CisJZGVm
-YXVsdDoKKwkJcmV0dXJuIE5PVElGWV9ET05FOworCX0KKwlpZiAocikKKwkJZGV2X2VycigmcGRl
-di0+ZGV2LCAiUGxhdGZvcm06IEZhaWxlZCB0byAlcyBkZXZpY2UgJXMgTU1JTyFcbiIsCisJCQlh
-Y3Rpb24gPT0gQlVTX05PVElGWV9BRERfREVWSUNFID8gIm1hcCIgOgorCQkJKGFjdGlvbiA9PSBC
-VVNfTk9USUZZX0RFTF9ERVZJQ0UgPyAidW5tYXAiIDogIj8iKSwKKwkJCXBkZXYtPm5hbWUpOwor
-CisJcmV0dXJuIE5PVElGWV9PSzsKK30KKworc3RhdGljIHN0cnVjdCBub3RpZmllcl9ibG9jayBw
-bGF0Zm9ybV9kZXZpY2VfbmIgPSB7CisJLm5vdGlmaWVyX2NhbGwgPSB4ZW5fcGxhdGZvcm1fbm90
-aWZpZXIsCit9OworCitzdGF0aWMgaW50IF9faW5pdCByZWdpc3Rlcl94ZW5fcGxhdGZvcm1fbm90
-aWZpZXIodm9pZCkKK3sKKwlpZiAoIXhlbl9pbml0aWFsX2RvbWFpbigpIHx8IGFjcGlfZGlzYWJs
-ZWQpCisJCXJldHVybiAwOworCisJcmV0dXJuIGJ1c19yZWdpc3Rlcl9ub3RpZmllcigmcGxhdGZv
-cm1fYnVzX3R5cGUsICZwbGF0Zm9ybV9kZXZpY2VfbmIpOworfQorCithcmNoX2luaXRjYWxsKHJl
-Z2lzdGVyX3hlbl9wbGF0Zm9ybV9ub3RpZmllcik7Ci0tIAoyLjAuNAoKCgpfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpYZW4tZGV2ZWwgbWFpbGluZyBsaXN0
-Clhlbi1kZXZlbEBsaXN0cy54ZW4ub3JnCmh0dHA6Ly9saXN0cy54ZW4ub3JnL3hlbi1kZXZlbAo=
+From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+
+The kernel will get the event-channel IRQ through
+HVM_PARAM_CALLBACK_IRQ.
+
+Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+Reviewed-by: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>
+---
+ arch/arm/xen/enlighten.c | 36 +++++++++++++++++++++++++++++++++++-
+ 1 file changed, 35 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
+index d94f726..06bd61a 100644
+--- a/arch/arm/xen/enlighten.c
++++ b/arch/arm/xen/enlighten.c
+@@ -30,6 +30,7 @@
+ #include <linux/time64.h>
+ #include <linux/timekeeping.h>
+ #include <linux/timekeeper_internal.h>
++#include <linux/acpi.h>
+ 
+ #include <linux/mm.h>
+ 
+@@ -278,6 +279,35 @@ void __init xen_early_init(void)
+ 		add_preferred_console("hvc", 0, NULL);
+ }
+ 
++static void __init xen_acpi_guest_init(void)
++{
++#ifdef CONFIG_ACPI
++	struct xen_hvm_param a;
++	int interrupt, trigger, polarity;
++
++	a.domid = DOMID_SELF;
++	a.index = HVM_PARAM_CALLBACK_IRQ;
++
++	if (HYPERVISOR_hvm_op(HVMOP_get_param, &a)
++	    || (a.value >> 56) != HVM_PARAM_CALLBACK_TYPE_PPI) {
++		xen_events_irq = 0;
++		return;
++	}
++
++	interrupt = a.value & 0xff;
++	trigger = ((a.value >> 8) & 0x1) ? ACPI_EDGE_SENSITIVE
++					 : ACPI_LEVEL_SENSITIVE;
++	polarity = ((a.value >> 8) & 0x2) ? ACPI_ACTIVE_LOW
++					  : ACPI_ACTIVE_HIGH;
++	xen_events_irq = acpi_register_gsi(NULL, interrupt, trigger, polarity);
++#endif
++}
++
++static void __init xen_dt_guest_init(void)
++{
++	xen_events_irq = irq_of_parse_and_map(xen_node, 0);
++}
++
+ static int __init xen_guest_init(void)
+ {
+ 	struct xen_add_to_physmap xatp;
+@@ -286,7 +316,11 @@ static int __init xen_guest_init(void)
+ 	if (!xen_domain())
+ 		return 0;
+ 
+-	xen_events_irq = irq_of_parse_and_map(xen_node, 0);
++	if (!acpi_disabled)
++		xen_acpi_guest_init();
++	else
++		xen_dt_guest_init();
++
+ 	if (!xen_events_irq) {
+ 		pr_err("Xen event channel interrupt not found\n");
+ 		return -ENODEV;
+-- 
+2.0.4
