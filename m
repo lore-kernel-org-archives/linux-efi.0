@@ -1,67 +1,79 @@
-From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v11 16/17] FDT: Add a helper to get the subnode by given name
-Date: Thu, 7 Apr 2016 20:03:33 +0800
-Message-ID: <1460030614-16112-17-git-send-email-zhaoshenglong@huawei.com>
+From: Shannon Zhao <zhaoshenglong@huawei.com>
+Subject: [PATCH v11 07/17] Xen: ARM: Add support for mapping AMBA device mmio
+Date: Thu, 7 Apr 2016 20:03:24 +0800
+Message-ID: <1460030614-16112-8-git-send-email-zhaoshenglong@huawei.com>
 References: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1460030614-16112-1-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, sstabellini@kernel.org
+Cc: catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@arm.com, david.vrabel@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Shannon Zhao <shannon.zhao@linaro.org>
 
-Sometimes it needs to check if there is a subnode of given node in FDT
-by given name. Introduce this helper to get the subnode if it exists.
+Add a bus_notifier for AMBA bus device in order to map the device
+mmio regions when DOM0 booting with ACPI.
 
-CC: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Acked-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+Reviewed-by: Julien Grall <julien.grall@arm.com>
 ---
- drivers/of/fdt.c       | 13 +++++++++++++
- include/linux/of_fdt.h |  2 ++
- 2 files changed, 15 insertions(+)
+ drivers/xen/arm-device.c | 43 +++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 43 insertions(+)
 
-diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
-index 3349d2a..5c8b2f2 100644
---- a/drivers/of/fdt.c
-+++ b/drivers/of/fdt.c
-@@ -645,6 +645,19 @@ int __init of_scan_flat_dt(int (*it)(unsigned long node,
+diff --git a/drivers/xen/arm-device.c b/drivers/xen/arm-device.c
+index b918e8e..778acf8 100644
+--- a/drivers/xen/arm-device.c
++++ b/drivers/xen/arm-device.c
+@@ -151,3 +151,46 @@ static int __init register_xen_platform_notifier(void)
  }
  
- /**
-+ * of_get_flat_dt_subnode_by_name - get the subnode by given name
-+ *
-+ * @node: the parent node
-+ * @uname: the name of subnode
-+ * @return offset of the subnode, or -FDT_ERR_NOTFOUND if there is none
-+ */
+ arch_initcall(register_xen_platform_notifier);
 +
-+int of_get_flat_dt_subnode_by_name(unsigned long node, const char *uname)
++#ifdef CONFIG_ARM_AMBA
++#include <linux/amba/bus.h>
++
++static int xen_amba_notifier(struct notifier_block *nb,
++			     unsigned long action, void *data)
 +{
-+	return fdt_subnode_offset(initial_boot_params, node, uname);
++	struct amba_device *adev = to_amba_device(data);
++	int r = 0;
++
++	switch (action) {
++	case BUS_NOTIFY_ADD_DEVICE:
++		r = xen_map_device_mmio(&adev->res, 1);
++		break;
++	case BUS_NOTIFY_DEL_DEVICE:
++		r = xen_unmap_device_mmio(&adev->res, 1);
++		break;
++	default:
++		return NOTIFY_DONE;
++	}
++	if (r)
++		dev_err(&adev->dev, "AMBA: Failed to %s device %s MMIO!\n",
++			action == BUS_NOTIFY_ADD_DEVICE ? "map" :
++			(action == BUS_NOTIFY_DEL_DEVICE ? "unmap" : "?"),
++			adev->dev.init_name);
++
++	return NOTIFY_OK;
 +}
 +
-+/**
-  * of_get_flat_dt_root - find the root node in the flat blob
-  */
- unsigned long __init of_get_flat_dt_root(void)
-diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
-index 2fbe868..2c3707e 100644
---- a/include/linux/of_fdt.h
-+++ b/include/linux/of_fdt.h
-@@ -52,6 +52,8 @@ extern char __dtb_end[];
- extern int of_scan_flat_dt(int (*it)(unsigned long node, const char *uname,
- 				     int depth, void *data),
- 			   void *data);
-+extern int of_get_flat_dt_subnode_by_name(unsigned long node,
-+					  const char *uname);
- extern const void *of_get_flat_dt_prop(unsigned long node, const char *name,
- 				       int *size);
- extern int of_flat_dt_is_compatible(unsigned long node, const char *name);
++static struct notifier_block amba_device_nb = {
++	.notifier_call = xen_amba_notifier,
++};
++
++static int __init register_xen_amba_notifier(void)
++{
++	if (!xen_initial_domain() || acpi_disabled)
++		return 0;
++
++	return bus_register_notifier(&amba_bustype, &amba_device_nb);
++}
++
++arch_initcall(register_xen_amba_notifier);
++#endif
 -- 
 2.0.4
