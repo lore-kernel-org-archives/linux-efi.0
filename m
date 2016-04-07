@@ -1,66 +1,70 @@
-From: Julien Grall <julien.grall@arm.com>
-Subject: Re: [PATCH v10 00/17] Add ACPI support for Xen Dom0 on ARM64
-Date: Thu, 7 Apr 2016 11:34:02 +0100
-Message-ID: <5706379A.2000503@arm.com>
-References: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org>
- <5704F3E1.7020508@arm.com> <5705BA61.7000205@huawei.com>
+From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v10 06/17] Xen: ARM: Add support for mapping platform
+ device mmio
+Date: Thu, 7 Apr 2016 19:25:40 +0800
+Message-ID: <570643B4.3070502@huawei.com>
+References: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org> <1459525755-36968-7-git-send-email-shannon.zhao@linaro.org> <5704FE2C.5000902@arm.com> <5705B9BD.1020403@huawei.com> <57063752.4020805@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5705BA61.7000205@huawei.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shannon Zhao <zhaoshenglong@huawei.com>, Shannon Zhao <shannon.zhao@linaro.org>, linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com
-Cc: david.vrabel@citrix.com, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <57063752.4020805-5wv7dgnIgG8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 07/04/16 02:39, Shannon Zhao wrote:
-> Hi Julien,
 
-Hi Shannon,
 
-> On 2016/4/6 19:32, Julien Grall wrote:
->> Hi Shannon,
+On 2016/4/7 18:32, Julien Grall wrote:
+> Hi Shannon,
+> 
+> On 07/04/16 02:37, Shannon Zhao wrote:
 >>
->> On 01/04/2016 16:48, Shannon Zhao wrote:
->>> This patch set adds ACPI support for Xen Dom0 on ARM64. The relevant Xen
->>> ACPI on ARM64 design document could be found from [1].
->>>
->>> This patch set adds a new FDT node "uefi" under /hypervisor to pass UEFI
->>> information. Introduce a bus notifier of AMBA and Platform bus to map
->>> the new added device's MMIO space. Make Xen domain use
->>> xlated_setup_gnttab_pages to setup grant table and a new hypercall to
->>> get event-channel irq.
->>>
->>> Regarding the initialization flow of Linux kernel, it needs to move
->>> xen_early_init() before efi_init(). Then xen_early_init() will check
->>> whether it runs on Xen through the /hypervisor node and efi_init() will
->>> call a new function fdt_find_xen_uefi_params(), to parse those
->>> xen,uefi-* parameters just like the existing efi_get_fdt_params().
->>>
->>> And in arm64_enable_runtime_services() it will check whether it runs on
->>> Xen and call another new function xen_efi_runtime_setup() to setup
->>> runtime service instead of efi_native_runtime_setup(). The
->>> xen_efi_runtime_setup() will assign the runtime function pointers with
->>> the functions of driver/xen/efi.c.
->>>
->>> And since we pass a /hypervisor node and a /chosen node to Dom0, it
->>> needs to check whether the DTS only contains a /hypervisor node and a
->>> /chosen node in acpi_boot_table_init().
->>>
->>> Patches are tested on FVP base model. They can be fetched from[2].
 >>
->> I have tested this series and Linux is booting up to the prompt:
->>
->> Tested-by: Julien Grall <julien.grall@arm.com>
-> Thanks a lot. There are several patches which you didn't give your
-> comments. So I assume you will review them. If so, I'll wait and update
-> this series later.
+>> On 2016/4/6 20:16, Julien Grall wrote:
+>>>> +            gpfns[j] = XEN_PFN_DOWN(r->start) + j;
+>>>> +            idxs[j] = XEN_PFN_DOWN(r->start) + j;
+>>>> +        }
+>>>> +
+>>>> +        xatp.domid = DOMID_SELF;
+>>>> +        xatp.size = nr;
+>>>> +        xatp.space = XENMAPSPACE_dev_mmio;
+>>>> +
+>>>> +        set_xen_guest_handle(xatp.gpfns, gpfns);
+>>>> +        set_xen_guest_handle(xatp.idxs, idxs);
+>>>> +        set_xen_guest_handle(xatp.errs, errs);
+>>>> +
+>>>> +        rc = HYPERVISOR_memory_op(XENMEM_add_to_physmap_range, &xatp);
+>>>> +        kfree(gpfns);
+>>>> +        kfree(idxs);
+>>>> +        kfree(errs);
+>>>> +        if (rc)
+>>>> +            return rc;
+>>>
+>>> Shouldn't we redo the mapping if the hypercall fails?
+>> Hmm, why? If it fails again when we redo the mapping, what should we do
+>> then? Redo again?
+> 
+> Because the device MMIO region is left half mapped in DOM0 address space.
+> 
+> After having another look to your patch, if an error occurs, the
+> notifier will still return NOTIFY_OK. This will lead to random data
+> abort when the driver is accessing the MMIO regions as the device will
+> be considered fully functional.
+> 
+> However, even if the notifier return NOTIFY_BAD, the function device_add
+> doesn't care about the return value of blocking_notifier_call_chain. I
+> think this need to be fixed.
+> 
+>> I think if it fails at the first time it will always fail no matter how
+>> many times we do.
+> 
+> I was speaking about the mappings that succeeded. They will unlikely
+> fail during removal. If they ever fail you can just ignore the error.
+Ok, I see. I thought you mean that it needs to map the regions again.
+But what you really mean is undoing the mappings.
 
-I don't have any comments on those patches. You can go ahead to update 
-the patch series.
-
-Regards,
-
+Thanks,
 -- 
-Julien Grall
+Shannon
