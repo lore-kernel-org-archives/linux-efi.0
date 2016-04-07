@@ -1,70 +1,74 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v11 08/17] Xen: public/hvm: sync changes of HVM_PARAM_CALLBACK_VIA ABI from Xen
-Date: Thu, 7 Apr 2016 20:03:25 +0800
-Message-ID: <1460030614-16112-9-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v11 03/17] Xen: xlate: Use page_to_xen_pfn
+	instead of page_to_pfn
+Date: Thu, 7 Apr 2016 20:03:20 +0800
+Message-ID: <1460030614-16112-4-git-send-email-zhaoshenglong@huawei.com>
 References: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
 In-Reply-To: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
 To: linux-arm-kernel@lists.infradead.org, sstabellini@kernel.org
-Cc: catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@arm.com, david.vrabel@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
+Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, julien.grall@arm.com, david.vrabel@citrix.com, peter.huangpeng@huawei.com, shannon.zhao@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Shannon Zhao <shannon.zhao@linaro.org>
-
-Sync the changes of HVM_PARAM_CALLBACK_VIA ABI introduced by
-Xen commit <ca5c54b6ff05> (public/hvm: export the HVM_PARAM_CALLBACK_VIA
-ABI in the API).
-
-Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-Acked-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
----
- include/xen/interface/hvm/params.h | 27 +++++++++++++++++++++------
- 1 file changed, 21 insertions(+), 6 deletions(-)
-
-diff --git a/include/xen/interface/hvm/params.h b/include/xen/interface/hvm/params.h
-index a6c7991..70ad208 100644
---- a/include/xen/interface/hvm/params.h
-+++ b/include/xen/interface/hvm/params.h
-@@ -27,16 +27,31 @@
-  * Parameter space for HVMOP_{set,get}_param.
-  */
- 
-+#define HVM_PARAM_CALLBACK_IRQ 0
- /*
-  * How should CPU0 event-channel notifications be delivered?
-- * val[63:56] == 0: val[55:0] is a delivery GSI (Global System Interrupt).
-- * val[63:56] == 1: val[55:0] is a delivery PCI INTx line, as follows:
-- *                  Domain = val[47:32], Bus  = val[31:16],
-- *                  DevFn  = val[15: 8], IntX = val[ 1: 0]
-- * val[63:56] == 2: val[7:0] is a vector number.
-+ *
-  * If val == 0 then CPU0 event-channel notifications are not delivered.
-+ * If val != 0, val[63:56] encodes the type, as follows:
-+ */
-+
-+#define HVM_PARAM_CALLBACK_TYPE_GSI      0
-+/*
-+ * val[55:0] is a delivery GSI.  GSI 0 cannot be used, as it aliases val == 0,
-+ * and disables all notifications.
-+ */
-+
-+#define HVM_PARAM_CALLBACK_TYPE_PCI_INTX 1
-+/*
-+ * val[55:0] is a delivery PCI INTx line:
-+ * Domain = val[47:32], Bus = val[31:16] DevFn = val[15:8], IntX = val[1:0]
-+ */
-+
-+#define HVM_PARAM_CALLBACK_TYPE_VECTOR   2
-+/*
-+ * val[7:0] is a vector number.  Check for XENFEAT_hvm_callback_vector to know
-+ * if this delivery method is available.
-  */
--#define HVM_PARAM_CALLBACK_IRQ 0
- 
- #define HVM_PARAM_STORE_PFN    1
- #define HVM_PARAM_STORE_EVTCHN 2
--- 
-2.0.4
+RnJvbTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KCk1ha2UgeGVuX3hs
+YXRlX21hcF9iYWxsb29uZWRfcGFnZXMgd29yayB3aXRoIDY0SyBwYWdlcy4gSW4gdGhhdCBjYXNl
+Cktlcm5lbCBwYWdlcyBhcmUgNjRLIGluIHNpemUgYnV0IFhlbiBwYWdlcyByZW1haW4gNEsgaW4g
+c2l6ZS4gWGVuIHBmbnMKcmVmZXIgdG8gNEsgcGFnZXMuCgpTaWduZWQtb2ZmLWJ5OiBTaGFubm9u
+IFpoYW8gPHNoYW5ub24uemhhb0BsaW5hcm8ub3JnPgpSZXZpZXdlZC1ieTogU3RlZmFubyBTdGFi
+ZWxsaW5pIDxzdGVmYW5vLnN0YWJlbGxpbmlAZXUuY2l0cml4LmNvbT4KUmV2aWV3ZWQtYnk6IEp1
+bGllbiBHcmFsbCA8anVsaWVuLmdyYWxsQGFybS5jb20+Ci0tLQogZHJpdmVycy94ZW4veGxhdGVf
+bW11LmMgfCAzOCArKysrKysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLQogMSBmaWxl
+IGNoYW5nZWQsIDI3IGluc2VydGlvbnMoKyksIDExIGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBh
+L2RyaXZlcnMveGVuL3hsYXRlX21tdS5jIGIvZHJpdmVycy94ZW4veGxhdGVfbW11LmMKaW5kZXgg
+OTY5MjY1Ni4uMjNmMTM4NyAxMDA2NDQKLS0tIGEvZHJpdmVycy94ZW4veGxhdGVfbW11LmMKKysr
+IGIvZHJpdmVycy94ZW4veGxhdGVfbW11LmMKQEAgLTE4OSw2ICsxODksMTggQEAgaW50IHhlbl94
+bGF0ZV91bm1hcF9nZm5fcmFuZ2Uoc3RydWN0IHZtX2FyZWFfc3RydWN0ICp2bWEsCiB9CiBFWFBP
+UlRfU1lNQk9MX0dQTCh4ZW5feGxhdGVfdW5tYXBfZ2ZuX3JhbmdlKTsKIAorc3RydWN0IG1hcF9i
+YWxsb29uX3BhZ2VzIHsKKwl4ZW5fcGZuX3QgKnBmbnM7CisJdW5zaWduZWQgaW50IGlkeDsKK307
+CisKK3N0YXRpYyB2b2lkIHNldHVwX2JhbGxvb25fZ2ZuKHVuc2lnbmVkIGxvbmcgZ2ZuLCB2b2lk
+ICpkYXRhKQoreworCXN0cnVjdCBtYXBfYmFsbG9vbl9wYWdlcyAqaW5mbyA9IGRhdGE7CisKKwlp
+bmZvLT5wZm5zW2luZm8tPmlkeCsrXSA9IGdmbjsKK30KKwogLyoqCiAgKiB4ZW5feGxhdGVfbWFw
+X2JhbGxvb25lZF9wYWdlcyAtIG1hcCBhIG5ldyBzZXQgb2YgYmFsbG9vbmVkIHBhZ2VzCiAgKiBA
+Z2ZuczogcmV0dXJucyB0aGUgYXJyYXkgb2YgY29ycmVzcG9uZGluZyBHRk5zCkBAIC0yMDUsMTEg
+KzIxNywxMyBAQCBpbnQgX19pbml0IHhlbl94bGF0ZV9tYXBfYmFsbG9vbmVkX3BhZ2VzKHhlbl9w
+Zm5fdCAqKmdmbnMsIHZvaWQgKip2aXJ0LAogCXN0cnVjdCBwYWdlICoqcGFnZXM7CiAJeGVuX3Bm
+bl90ICpwZm5zOwogCXZvaWQgKnZhZGRyOworCXN0cnVjdCBtYXBfYmFsbG9vbl9wYWdlcyBkYXRh
+OwogCWludCByYzsKLQl1bnNpZ25lZCBpbnQgaTsKKwl1bnNpZ25lZCBsb25nIG5yX3BhZ2VzOwog
+CiAJQlVHX09OKG5yX2dyYW50X2ZyYW1lcyA9PSAwKTsKLQlwYWdlcyA9IGtjYWxsb2MobnJfZ3Jh
+bnRfZnJhbWVzLCBzaXplb2YocGFnZXNbMF0pLCBHRlBfS0VSTkVMKTsKKwlucl9wYWdlcyA9IERJ
+Vl9ST1VORF9VUChucl9ncmFudF9mcmFtZXMsIFhFTl9QRk5fUEVSX1BBR0UpOworCXBhZ2VzID0g
+a2NhbGxvYyhucl9wYWdlcywgc2l6ZW9mKHBhZ2VzWzBdKSwgR0ZQX0tFUk5FTCk7CiAJaWYgKCFw
+YWdlcykKIAkJcmV0dXJuIC1FTk9NRU07CiAKQEAgLTIxOCwyMiArMjMyLDI0IEBAIGludCBfX2lu
+aXQgeGVuX3hsYXRlX21hcF9iYWxsb29uZWRfcGFnZXMoeGVuX3Bmbl90ICoqZ2Zucywgdm9pZCAq
+KnZpcnQsCiAJCWtmcmVlKHBhZ2VzKTsKIAkJcmV0dXJuIC1FTk9NRU07CiAJfQotCXJjID0gYWxs
+b2NfeGVuYmFsbG9vbmVkX3BhZ2VzKG5yX2dyYW50X2ZyYW1lcywgcGFnZXMpOworCXJjID0gYWxs
+b2NfeGVuYmFsbG9vbmVkX3BhZ2VzKG5yX3BhZ2VzLCBwYWdlcyk7CiAJaWYgKHJjKSB7Ci0JCXBy
+X3dhcm4oIiVzIENvdWxkbid0IGJhbGxvb24gYWxsb2MgJWxkIHBmbnMgcmM6JWRcbiIsIF9fZnVu
+Y19fLAotCQkJbnJfZ3JhbnRfZnJhbWVzLCByYyk7CisJCXByX3dhcm4oIiVzIENvdWxkbid0IGJh
+bGxvb24gYWxsb2MgJWxkIHBhZ2VzIHJjOiVkXG4iLCBfX2Z1bmNfXywKKwkJCW5yX3BhZ2VzLCBy
+Yyk7CiAJCWtmcmVlKHBhZ2VzKTsKIAkJa2ZyZWUocGZucyk7CiAJCXJldHVybiByYzsKIAl9Ci0J
+Zm9yIChpID0gMDsgaSA8IG5yX2dyYW50X2ZyYW1lczsgaSsrKQotCQlwZm5zW2ldID0gcGFnZV90
+b19wZm4ocGFnZXNbaV0pOwogCi0JdmFkZHIgPSB2bWFwKHBhZ2VzLCBucl9ncmFudF9mcmFtZXMs
+IDAsIFBBR0VfS0VSTkVMKTsKKwlkYXRhLnBmbnMgPSBwZm5zOworCWRhdGEuaWR4ID0gMDsKKwl4
+ZW5fZm9yX2VhY2hfZ2ZuKHBhZ2VzLCBucl9ncmFudF9mcmFtZXMsIHNldHVwX2JhbGxvb25fZ2Zu
+LCAmZGF0YSk7CisKKwl2YWRkciA9IHZtYXAocGFnZXMsIG5yX3BhZ2VzLCAwLCBQQUdFX0tFUk5F
+TCk7CiAJaWYgKCF2YWRkcikgewotCQlwcl93YXJuKCIlcyBDb3VsZG4ndCBtYXAgJWxkIHBmbnMg
+cmM6JWRcbiIsIF9fZnVuY19fLAotCQkJbnJfZ3JhbnRfZnJhbWVzLCByYyk7Ci0JCWZyZWVfeGVu
+YmFsbG9vbmVkX3BhZ2VzKG5yX2dyYW50X2ZyYW1lcywgcGFnZXMpOworCQlwcl93YXJuKCIlcyBD
+b3VsZG4ndCBtYXAgJWxkIHBhZ2VzIHJjOiVkXG4iLCBfX2Z1bmNfXywKKwkJCW5yX3BhZ2VzLCBy
+Yyk7CisJCWZyZWVfeGVuYmFsbG9vbmVkX3BhZ2VzKG5yX3BhZ2VzLCBwYWdlcyk7CiAJCWtmcmVl
+KHBhZ2VzKTsKIAkJa2ZyZWUocGZucyk7CiAJCXJldHVybiAtRU5PTUVNOwotLSAKMi4wLjQKCgoK
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KWGVuLWRldmVs
+IG1haWxpbmcgbGlzdApYZW4tZGV2ZWxAbGlzdHMueGVuLm9yZwpodHRwOi8vbGlzdHMueGVuLm9y
+Zy94ZW4tZGV2ZWwK
