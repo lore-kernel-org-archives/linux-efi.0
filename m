@@ -1,63 +1,98 @@
-From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v10 00/17] Add ACPI support for Xen Dom0 on ARM64
-Date: Thu, 7 Apr 2016 09:39:45 +0800
-Message-ID: <5705BA61.7000205@huawei.com>
-References: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org> <5704F3E1.7020508@arm.com>
+From: "Zheng, Lv" <lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [RFC PATCH 10/10] acpi: add support for loading SSDTs via
+ configfs
+Date: Thu, 7 Apr 2016 02:42:50 +0000
+Message-ID: <1AE640813FDE7649BE1B193DEA596E883BB66E60@SHSMSX101.ccr.corp.intel.com>
+References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
+	<1459417026-6697-11-git-send-email-octavian.purdila@intel.com>
+	<1AE640813FDE7649BE1B193DEA596E883BB66233@SHSMSX101.ccr.corp.intel.com>
+	<CAE1zotLgjfKvFr0W9CjFbbkxqM6erLGwv-aHzTt=qwdCPzGOhw@mail.gmail.com>
+	<1AE640813FDE7649BE1B193DEA596E883BB6677B@SHSMSX101.ccr.corp.intel.com>
+	<CAE1zotKDFLNP5JTnMiWOstE4DYBHVeyP902J9ixD+fJbFqSZ6Q@mail.gmail.com>
+	<1AE640813FDE7649BE1B193DEA596E883BB66B8C@SHSMSX101.ccr.corp.intel.com>
+ <CAE1zotKa+t5cxznWfPyQ599k9ZB=akOuEDZusWcJgzux8wqp5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <5704F3E1.7020508-5wv7dgnIgG8@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
-Cc: david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAE1zotKa+t5cxznWfPyQ599k9ZB=akOuEDZusWcJgzux8wqp5A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Purdila, Octavian" <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Tirdea, Irina" <irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Julien,
-
-On 2016/4/6 19:32, Julien Grall wrote:
-> Hi Shannon,
-> 
-> On 01/04/2016 16:48, Shannon Zhao wrote:
->> This patch set adds ACPI support for Xen Dom0 on ARM64. The relevant Xen
->> ACPI on ARM64 design document could be found from [1].
->>
->> This patch set adds a new FDT node "uefi" under /hypervisor to pass UEFI
->> information. Introduce a bus notifier of AMBA and Platform bus to map
->> the new added device's MMIO space. Make Xen domain use
->> xlated_setup_gnttab_pages to setup grant table and a new hypercall to
->> get event-channel irq.
->>
->> Regarding the initialization flow of Linux kernel, it needs to move
->> xen_early_init() before efi_init(). Then xen_early_init() will check
->> whether it runs on Xen through the /hypervisor node and efi_init() will
->> call a new function fdt_find_xen_uefi_params(), to parse those
->> xen,uefi-* parameters just like the existing efi_get_fdt_params().
->>
->> And in arm64_enable_runtime_services() it will check whether it runs on
->> Xen and call another new function xen_efi_runtime_setup() to setup
->> runtime service instead of efi_native_runtime_setup(). The
->> xen_efi_runtime_setup() will assign the runtime function pointers with
->> the functions of driver/xen/efi.c.
->>
->> And since we pass a /hypervisor node and a /chosen node to Dom0, it
->> needs to check whether the DTS only contains a /hypervisor node and a
->> /chosen node in acpi_boot_table_init().
->>
->> Patches are tested on FVP base model. They can be fetched from[2].
-> 
-> I have tested this series and Linux is booting up to the prompt:
-> 
-> Tested-by: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>
-Thanks a lot. There are several patches which you didn't give your
-comments. So I assume you will review them. If so, I'll wait and update
-this series later.
-
-Thanks,
--- 
-Shannon
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGksDQoNCj4gRnJvbTogbGludXgtYWNwaS1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzps
+aW51eC1hY3BpLQ0KPiBvd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBPY3Rhdmlh
+biBQdXJkaWxhDQo+IFN1YmplY3Q6IFJlOiBbUkZDIFBBVENIIDEwLzEwXSBhY3BpOiBhZGQgc3Vw
+cG9ydCBmb3IgbG9hZGluZyBTU0RUcyB2aWEgY29uZmlnZnMNCj4gDQo+IE9uIFdlZCwgQXByIDYs
+IDIwMTYgYXQgOTowNSBBTSwgWmhlbmcsIEx2IDxsdi56aGVuZ0BpbnRlbC5jb20+IHdyb3RlOg0K
+PiANCj4gPj4gSXQgaXMgaGFyZCB0byBjcmVhdGUgbmV3IGtlcm5lbCBvYmplY3RzIGZyb20gc3lz
+ZnMuIFlvdSBuZWVkIHRvIHJlc29ydA0KPiA+PiB0byBoYWNrcyBsaWtlIHVzaW5nIG5ld190YWJs
+ZSBzeXNmcyBlbnRyaWVzIHdoaWNoIGRvZXMgbm90IG1hcCB0byBhDQo+ID4+IGtlcm5lbCBvYmpl
+Y3QuIFdyaXRlcyBsYXJnZXIgdGhlbiBQQUdFX1NJWkUgYXJlIGltcG9zc2libGUgdG8gaGFuZGxl
+DQo+ID4+IHdpdGggbXVsdGlwbGUgb3BlbiBmaWxlcyBiZWNhdXNlIHlvdSBoYXZlIG5vIG9wZW4g
+Y2FsbGJhY2sgdG8gY3JlYXRlIGENCj4gPj4gZmlsZSBjb250ZXh0LiBJdCBpcyBhbHNvIG5vdCBw
+b3NzaWJsZSB0byBkbyBhbnkgY2xlYW4tdXAgYmVjYXVzZSB0aGVyZQ0KPiA+PiBpcyBubyBjbG9z
+ZSBjYWxsYmFjayBhbmQgaWYgc29tZXRoaW5nIGdvZXMgd3JvbmcgZm9yIGV4YW1wbGUgd2hlbg0K
+PiA+PiB0cnlpbmcgdG8gaW5zdGFsbCB0aGUgdGFibGUgeW91IHdpbGwgbGVhayB0aGUgYWxsb2Nh
+dGVkIG1lbW9yeS4NCj4gPj4NCj4gPj4gY29uZmlnZnMgd2FzIGRlc2lnbmVkIGZvciB0aGUgc3Bl
+Y2lmaWMgcHVycG9zZSBvZiBjcmVhdGluZyBrZXJuZWwNCj4gPj4gb2JqZWN0cyBmcm9tIHVzZXJz
+cGFjZSBhbmQgYWRkcmVzc2VzIGFsbCBvZiB0aGUgbGltaXRhdGlvbnMgYWJvdmUgKGFuZA0KPiA+
+PiBzb21lIG1vcmUpLg0KPiA+Pg0KPiA+PiBJbml0aWFsbHkgSSBzdGFydGVkIHRvIGltcGxlbWVu
+dCB0aGlzIGZ1bmN0aW9uYWxpdHkgdmlhIHN5c2ZzIGJ1dCBJDQo+ID4+IHJ1biBpbnRvIHRoZSBp
+c3N1ZXMgbWVudGlvbmVkIGFib3ZlIGFuZCBkZWNpZGVkIHRvIHVzZSBjb25maWdmcy4NCj4gPiBb
+THYgWmhlbmddDQo+ID4gSSBjYW4gc2Vuc2UgZGlmZmVyZW50IGRpZmZpY3VsdGllcyBmcm9tIHlv
+dXIgZGVzY3JpcHRpb25zLg0KPiA+IExldCBtZSBicmVhayBpdCBkb3duIGludG8gZGV0YWlscy4N
+Cj4gPg0KPiA+IFdlIGFscmVhZHkgaGF2ZSBhY3BpX3RhYmxlX2hhbmRsZXIgd29ya2luZyB0aGVy
+ZSBmb3IgY3JlYXRpbmcgbmV3IEFDUEkNCj4gdGFibGUgZW50cmllcyBmb3IgdXMuDQo+ID4gQmFz
+ZWQgb24gdGhpcyBmYWNpbGl0eSwgbGV0J3MgdGhpbmsgYWJvdXQgdGhlIGZvbGxvd2luZyBzb2x1
+dGlvbjoNCj4gPiAxLiBzeXNmcyBwcmVzZW50aW5nIGNoYW5nZQ0KPiA+IFdlIGNhbiBjaGFuZ2Ug
+dGhlIHRhYmxlIGZpbGUgdG8gYSB0YWJsZSBkaXJlY3Rvcnkgd2hvc2UgbmFtZSBpcyBpbiB0aGUN
+Cj4gZm9sbG93aW5nIGZvcm1hdDoNCj4gPiBUYWJsZVNpZ25hdHVyZS1PZW1JZC1PZW1UYWJsZUlk
+DQo+ID4gVGhlbiB3ZSBjYW4gZ2V0IHJpZCBvZiB0aGUgYW5ub3lpbmcgbnVtYmVyZWQgdGFibGUg
+bmFtZSBzdWZmaXggZmlyc3QuDQo+ID4gVGhlIG51bWJlcmVkIHRhYmxlIG5hbWUgc3VmZml4IGNh
+bm5vdCBiZSBrZXB0IGNvbnNpc3RlbnQgdG8gcmVmbGVjdCB0aGUgcmVhbA0KPiBpbmRleCBpZiB3
+ZSBhbGxvdyB0YWJsZXMgdG8gYmUgZHluYW1pY2FsbHkgbG9hZGVkL3VubG9hZGVkLg0KPiA+DQo+
+ID4gVGhpcyBpcyB0aGUgZmlyc3QgZGVzaWduIGRpZmZpY3VsdHkgd2UgbmVlZCB0byBzb2x2ZS4N
+Cj4gPg0KPiA+IDIuIGFjcGlfdGFibGVfaGFuZGxlciBjaGFuZ2UNCj4gPiBOb3cgd2UgY2FuIGFw
+cGVuZCAyIG5ldyBldmVudHMgdG8gYWNwaV90YWJsZV9oYW5kbGVyIC0NCj4gQUNQSV9UQUJMRV9J
+TlNUQUxML0FDUElfVEFCTEVfVU5JTlNUQUxMLg0KPiA+IFdpdGggd2hpY2gsIHRoZSBzeXNmcyBl
+bnRyaWVzIGNhbiBiZSBjcmVhdGVkL2RlbGV0ZWQgd2hlbiB0aGUgdGFibGUgaXMgYWRkZWQNCj4g
+dG8vcmVtb3ZlZCBmcm9tIHRoZSBnbG9iYWwgdGFibGUgbGlzdC4NCj4gPiBBbmQgdGhpcyBzaG91
+bGQgYmUgdGhlIHdvcmtpbmcgbWVjaGFuaXNtIGZvciB1cw0KPiA+IFNvIHdlIGFjdHVhbGx5IGRv
+bid0IGhhdmUgdGhlIHRyb3VibGUgdG8gZGVhbCB3aXRoIHRoZSBuZXcga2VybmVsIG9iamVjdA0K
+PiBjcmVhdGlvbi9kZWxldGlvbiBmcm9tIHN5c2ZzLg0KPiA+DQo+ID4gSSBhZ3JlZSB0aGUgZHlu
+YW1pYyBrZXJuZWwgb2JqZWN0IGNyZWF0aW9uL2RlbGV0aW9uIG5lZWQgc3BlY2lhbCBjYXJlLg0K
+PiA+IEJ1dCB0aGlzIGFjdHVhbGx5IGlzIHdoYXQgYSBrZXJuZWwgZW5naW5lZXIgc2hvdWxkIGRv
+IGJlY2F1c2UgdGhpcyBraW5kIG9mDQo+IHRoaW5ncyBoYXBwZW4gaGVyZSBhbmQgdGhlcmUgdGhy
+b3VnaG91dCB0aGUga2VybmVsLg0KPiA+IFdlIHNob3VsZCBoYXZlIGFscmVhZHkgYmVlbiB1c2Vk
+IHRvIHRoYXQuDQo+ID4NCj4gPiBUaGlzIGlzIHRoZSBzZWNvbmQgZW5naW5lZXJpbmcgZGlmZmlj
+dWx0eSB3ZSBuZWVkIHRvIGZhY2UuDQo+ID4NCj4gPiAzLiBsb2FkL3VubG9hZCBjb21tYW5kaW5n
+DQo+ID4gTm93IHdlIG5lZWQgYSBjaGFyYWN0ZXIgZGV2aWNlIGluIHN5c2ZzIHRvIGhhbmRsZSBs
+b2FkL3VubG9hZCBjb21tYW5kLg0KPiA+IFdlbGwsIHRoZXJlIGFyZSBtYW55IHN1Y2gga2luZCBv
+ZiBmaWxlcyBpbiBzeXNmcywgZm9yIGV4YW1wbGUsIGRldmljZSBub2Rlcy4NCj4gPiBTbyB0aGlz
+IGlzIG5vdCBhIG5vbi1hY2hpZXZhYmxlIHRhc2ssIGJ1dCBqdXN0IGEgZGlmZmljdWx0IGVuZ2lu
+ZWVyaW5nIHRhc2suDQo+ID4gVGhlIHN5c3RlbSBlbmdpbmVlcnMgbmVlZCB0byBiZSBza2lsbGZ1
+bCBlbm91Z2ggdG8gaW1wbGVtZW50IHRoaXMuDQo+ID4gTGlrZSB0aGUgZHluYW1pYyBrZXJuZWwg
+b2JqZWN0IGhhbmRsaW5nLCB3ZSBzaG91bGQgaGF2ZSBhbHJlYWR5IGJlZW4gdXNlZCB0bw0KPiB0
+aGlzLg0KPiA+DQo+ID4NCj4gPiBJZiB5b3Ugc3RpbGwgdGhpbmsgdGhpcyBpcyBkaWZmaWN1bHQs
+IHRoZSBhbHRlcm5hdGl2ZSBjaG9pY2UgaXMgdG8gdXNlIGFjcGlkYmcgY2hhcg0KPiBkZXZpY2Un
+cyBpb2N0bCBpbnRlcmZhY2UuDQo+ID4gVGhhdCBjb3VsZCBzaW1wbGlmaWVzIHRoaXMgdGFzay4N
+Cj4gPiBBbmQgc2luY2UgdGhlIGlvY3RsIGludGVyZmFjZSBpcyByZXF1aXJlZCBieSBBQ1BJQ0Eg
+ZGlzYXNzZW1ibGVyLCB0aGUgd29yayBvbg0KPiB0aGF0IHdpbGwgYmUgaW5oZXJpdGVkIGJ5IHRo
+ZSBkaXNhc3NlbWJsZXIgcG9ydGluZy4NCj4gPg0KPiANCj4gV2h5IGNhbid0IHRoZSBkaXNzZW1i
+bGVyIGFjY2VzcyB0aGUgdGFibGVzIHRocm91Z2ggdGhlIGV4aXN0aW5nIHN5c2ZzIGludGVyZmFj
+ZT8NCltMdiBaaGVuZ10gDQpUaGUgYWNwaWRiZyB1dGlsaXR5IHNob3VsZCBiZSBzZWxmLWNvbnRh
+aW5lZC4NCkl0IHdpbGwgYmUgYmFjayBwb3J0ZWQgdG8gQUNQSUNBLg0KU28gaXQgbWlnaHQgYmUg
+cG9ydGVkIHRvIG90aGVyIE9TUE1zLg0KRnJvbSB0aGlzIHBvaW50IG9mIHZpZXcsIGFjcGlkYmcg
+bmVlZCBzdWNoIGtpbmQgb2YgZGVzaWduIC0gZG9pbmcgZXZlcnl0aGluZyBpdCBuZWVkIGZyb20g
+YW4gT1NQTSBrZXJuZWwgdXNpbmcgYSBzaW5nbGUgY2hhciBkZXZpY2UuDQoNClRoYW5rcyBhbmQg
+YmVzdCByZWdhcmRzDQotTHYNCg0KPiANCj4gPiBUaGlzIGlzIHRoZSBsYXN0IGVuZ2luZWVyaW5n
+IGRpZmZpY3VsdHkgd2UgbmVlZCB0byBmYWNlLg0KPiA+DQo+ID4gU28gd2h5IGNhbid0IHRoZXNl
+IHNvbHV0aW9ucyB3b3JrIGZvciB1cz8NCj4gPg0KPiANCj4gSXQgY2FuIGJlIGRvbmUsIGJ1dCBp
+dCBpcyBub3QgdGhlIHJpZ2h0IHdheSB0byBkbyBpdCwgSU1PLg0KPiAtLQ0KPiBUbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtYWNw
+aSIgaW4NCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
+cmcNCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpv
+cmRvbW8taW5mby5odG1sDQo=
