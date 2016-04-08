@@ -1,292 +1,106 @@
-From: David Daney <ddaney.cavm@gmail.com>
-Subject: [PATCH v16 3/6] of, numa: Add NUMA of binding implementation.
-Date: Fri,  8 Apr 2016 15:50:25 -0700
-Message-ID: <1460155828-8690-4-git-send-email-ddaney.cavm@gmail.com>
+From: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH v16 4/6] arm64: Move unflatten_device_tree() call earlier.
+Date: Fri,  8 Apr 2016 15:50:26 -0700
+Message-ID: <1460155828-8690-5-git-send-email-ddaney.cavm@gmail.com>
 References: <1460155828-8690-1-git-send-email-ddaney.cavm@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1460155828-8690-1-git-send-email-ddaney.cavm@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Will Deacon <will.deacon@arm.com>, linux-arm-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Grant Likely <grant.likely@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>, Robert Richter <rrichter@cavium.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, David Daney <david.daney@cavium.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1460155828-8690-1-git-send-email-ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: David Daney <david.daney@cavium.com>
+From: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 
-Add device tree parsing for NUMA topology using device
-"numa-node-id" property in distance-map and cpu nodes.
+In order to extract NUMA information from the device tree, we need to
+have the tree in its unflattened form.
 
-This is a complete rewrite of a previous patch by:
-   Ganapatrao Kulkarni<gkulkarni@caviumnetworks.com>
+Move the call to bootmem_init() in the tail of paging_init() into
+setup_arch, and adjust header files so that its declaration is
+visible.
 
-Signed-off-by: David Daney <david.daney@cavium.com>
-Acked-by: Rob Herring <robh@kernel.org>
+Move the unflatten_device_tree() call between the calls to
+paging_init() and bootmem_init().  Follow on patches add NUMA handling
+to bootmem_init().
+
+Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 ---
- drivers/of/Kconfig   |   3 +
- drivers/of/Makefile  |   1 +
- drivers/of/of_numa.c | 211 +++++++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/of.h   |   9 +++
- 4 files changed, 224 insertions(+)
- create mode 100644 drivers/of/of_numa.c
+ arch/arm64/include/asm/mmu.h |  1 +
+ arch/arm64/kernel/setup.c    | 13 +++++++++----
+ arch/arm64/mm/mm.h           |  1 -
+ arch/arm64/mm/mmu.c          |  2 --
+ 4 files changed, 10 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/of/Kconfig b/drivers/of/Kconfig
-index e2a4841..b3bec3a 100644
---- a/drivers/of/Kconfig
-+++ b/drivers/of/Kconfig
-@@ -112,4 +112,7 @@ config OF_OVERLAY
- 	  While this option is selected automatically when needed, you can
- 	  enable it manually to improve device tree unit test coverage.
+diff --git a/arch/arm64/include/asm/mmu.h b/arch/arm64/include/asm/mmu.h
+index 990124a..97b1d8f 100644
+--- a/arch/arm64/include/asm/mmu.h
++++ b/arch/arm64/include/asm/mmu.h
+@@ -29,6 +29,7 @@ typedef struct {
+ #define ASID(mm)	((mm)->context.id.counter & 0xffff)
  
-+config OF_NUMA
-+	bool
-+
- endif # OF
-diff --git a/drivers/of/Makefile b/drivers/of/Makefile
-index 156c072..bee3fa9 100644
---- a/drivers/of/Makefile
-+++ b/drivers/of/Makefile
-@@ -14,5 +14,6 @@ obj-$(CONFIG_OF_MTD)	+= of_mtd.o
- obj-$(CONFIG_OF_RESERVED_MEM) += of_reserved_mem.o
- obj-$(CONFIG_OF_RESOLVE)  += resolver.o
- obj-$(CONFIG_OF_OVERLAY) += overlay.o
-+obj-$(CONFIG_OF_NUMA) += of_numa.o
+ extern void paging_init(void);
++extern void bootmem_init(void);
+ extern void __iomem *early_io_map(phys_addr_t phys, unsigned long virt);
+ extern void init_mem_pgprot(void);
+ extern void create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,
+diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+index 9dc6776..9bd237e 100644
+--- a/arch/arm64/kernel/setup.c
++++ b/arch/arm64/kernel/setup.c
+@@ -327,6 +327,12 @@ void __init setup_arch(char **cmdline_p)
+ 	acpi_boot_table_init();
  
- obj-$(CONFIG_OF_UNITTEST) += unittest-data/
-diff --git a/drivers/of/of_numa.c b/drivers/of/of_numa.c
-new file mode 100644
-index 0000000..0f2784b
---- /dev/null
-+++ b/drivers/of/of_numa.c
-@@ -0,0 +1,211 @@
-+/*
-+ * OF NUMA Parsing support.
-+ *
-+ * Copyright (C) 2015 - 2016 Cavium Inc.
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-+ */
+ 	paging_init();
 +
-+#include <linux/of.h>
-+#include <linux/of_address.h>
-+#include <linux/nodemask.h>
++	if (acpi_disabled)
++		unflatten_device_tree();
 +
-+#include <asm/numa.h>
++	bootmem_init();
 +
-+/* define default numa node to 0 */
-+#define DEFAULT_NODE 0
+ 	relocate_initrd();
+ 
+ 	kasan_init();
+@@ -335,12 +341,11 @@ void __init setup_arch(char **cmdline_p)
+ 
+ 	early_ioremap_reset();
+ 
+-	if (acpi_disabled) {
+-		unflatten_device_tree();
++	if (acpi_disabled)
+ 		psci_dt_init();
+-	} else {
++	else
+ 		psci_acpi_init();
+-	}
 +
-+/*
-+ * Even though we connect cpus to numa domains later in SMP
-+ * init, we need to know the node ids now for all cpus.
-+*/
-+static void __init of_numa_parse_cpu_nodes(void)
-+{
-+	u32 nid;
-+	int r;
-+	struct device_node *cpus;
-+	struct device_node *np = NULL;
-+
-+	cpus = of_find_node_by_path("/cpus");
-+	if (!cpus)
-+		return;
-+
-+	for_each_child_of_node(cpus, np) {
-+		/* Skip things that are not CPUs */
-+		if (of_node_cmp(np->type, "cpu") != 0)
-+			continue;
-+
-+		r = of_property_read_u32(np, "numa-node-id", &nid);
-+		if (r)
-+			continue;
-+
-+		pr_debug("NUMA: CPU on %u\n", nid);
-+		if (nid >= MAX_NUMNODES)
-+			pr_warn("NUMA: Node id %u exceeds maximum value\n",
-+				nid);
-+		else
-+			node_set(nid, numa_nodes_parsed);
-+	}
-+}
-+
-+static int __init of_numa_parse_memory_nodes(void)
-+{
-+	struct device_node *np = NULL;
-+	struct resource rsrc;
-+	u32 nid;
-+	int r = 0;
-+
-+	for (;;) {
-+		np = of_find_node_by_type(np, "memory");
-+		if (!np)
-+			break;
-+
-+		r = of_property_read_u32(np, "numa-node-id", &nid);
-+		if (r == -EINVAL)
-+			/*
-+			 * property doesn't exist if -EINVAL, continue
-+			 * looking for more memory nodes with
-+			 * "numa-node-id" property
-+			 */
-+			continue;
-+		else if (r)
-+			/* some other error */
-+			break;
-+
-+		r = of_address_to_resource(np, 0, &rsrc);
-+		if (r) {
-+			pr_err("NUMA: bad reg property in memory node\n");
-+			break;
-+		}
-+
-+		pr_debug("NUMA:  base = %llx len = %llx, node = %u\n",
-+			 rsrc.start, rsrc.end - rsrc.start + 1, nid);
-+
-+		r = numa_add_memblk(nid, rsrc.start,
-+				    rsrc.end - rsrc.start + 1);
-+		if (r)
-+			break;
-+	}
-+	of_node_put(np);
-+
-+	return r;
-+}
-+
-+static int __init of_numa_parse_distance_map_v1(struct device_node *map)
-+{
-+	const __be32 *matrix;
-+	int entry_count;
-+	int i;
-+
-+	pr_info("NUMA: parsing numa-distance-map-v1\n");
-+
-+	matrix = of_get_property(map, "distance-matrix", NULL);
-+	if (!matrix) {
-+		pr_err("NUMA: No distance-matrix property in distance-map\n");
-+		return -EINVAL;
-+	}
-+
-+	entry_count = of_property_count_u32_elems(map, "distance-matrix");
-+	if (entry_count <= 0) {
-+		pr_err("NUMA: Invalid distance-matrix\n");
-+		return -EINVAL;
-+	}
-+
-+	for (i = 0; i + 2 < entry_count; i += 3) {
-+		u32 nodea, nodeb, distance;
-+
-+		nodea = of_read_number(matrix, 1);
-+		matrix++;
-+		nodeb = of_read_number(matrix, 1);
-+		matrix++;
-+		distance = of_read_number(matrix, 1);
-+		matrix++;
-+
-+		numa_set_distance(nodea, nodeb, distance);
-+		pr_debug("NUMA:  distance[node%d -> node%d] = %d\n",
-+			 nodea, nodeb, distance);
-+
-+		/* Set default distance of node B->A same as A->B */
-+		if (nodeb > nodea)
-+			numa_set_distance(nodeb, nodea, distance);
-+	}
-+
-+	return 0;
-+}
-+
-+static int __init of_numa_parse_distance_map(void)
-+{
-+	int ret = 0;
-+	struct device_node *np;
-+
-+	np = of_find_compatible_node(NULL, NULL,
-+				     "numa-distance-map-v1");
-+	if (np)
-+		ret = of_numa_parse_distance_map_v1(np);
-+
-+	of_node_put(np);
-+	return ret;
-+}
-+
-+int of_node_to_nid(struct device_node *device)
-+{
-+	struct device_node *np;
-+	u32 nid;
-+	int r = -ENODATA;
-+
-+	np = of_node_get(device);
-+
-+	while (np) {
-+		struct device_node *parent;
-+
-+		r = of_property_read_u32(np, "numa-node-id", &nid);
-+		/*
-+		 * -EINVAL indicates the property was not found, and
-+		 *  we walk up the tree trying to find a parent with a
-+		 *  "numa-node-id".  Any other type of error indicates
-+		 *  a bad device tree and we give up.
-+		 */
-+		if (r != -EINVAL)
-+			break;
-+
-+		parent = of_get_parent(np);
-+		of_node_put(np);
-+		np = parent;
-+	}
-+	if (np && r)
-+		pr_warn("NUMA: Invalid \"numa-node-id\" property in node %s\n",
-+			np->name);
-+	of_node_put(np);
-+
-+	if (!r) {
-+		if (nid >= MAX_NUMNODES)
-+			pr_warn("NUMA: Node id %u exceeds maximum value\n",
-+				nid);
-+		else
-+			return nid;
-+	}
-+
-+	return NUMA_NO_NODE;
-+}
-+EXPORT_SYMBOL(of_node_to_nid);
-+
-+int __init of_numa_init(void)
-+{
-+	int r;
-+
-+	of_numa_parse_cpu_nodes();
-+	r = of_numa_parse_memory_nodes();
-+	if (r)
-+		return r;
-+	return of_numa_parse_distance_map();
-+}
-diff --git a/include/linux/of.h b/include/linux/of.h
-index 7fcb681..76f07c8 100644
---- a/include/linux/of.h
-+++ b/include/linux/of.h
-@@ -685,6 +685,15 @@ static inline int of_node_to_nid(struct device_node *device)
+ 	xen_early_init();
+ 
+ 	cpu_read_bootcpu_ops();
+diff --git a/arch/arm64/mm/mm.h b/arch/arm64/mm/mm.h
+index ef47d99..71fe989 100644
+--- a/arch/arm64/mm/mm.h
++++ b/arch/arm64/mm/mm.h
+@@ -1,3 +1,2 @@
+-extern void __init bootmem_init(void);
+ 
+ void fixup_init(void);
+diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
+index f3e5c74..267903b 100644
+--- a/arch/arm64/mm/mmu.c
++++ b/arch/arm64/mm/mmu.c
+@@ -564,8 +564,6 @@ void __init paging_init(void)
+ 	 */
+ 	memblock_free(__pa(swapper_pg_dir) + PAGE_SIZE,
+ 		      SWAPPER_DIR_SIZE - PAGE_SIZE);
+-
+-	bootmem_init();
  }
- #endif
  
-+#ifdef CONFIG_OF_NUMA
-+extern int of_numa_init(void);
-+#else
-+static inline int of_numa_init(void)
-+{
-+	return -ENOSYS;
-+}
-+#endif
-+
- static inline struct device_node *of_find_matching_node(
- 	struct device_node *from,
- 	const struct of_device_id *matches)
+ /*
 -- 
 1.8.3.1
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
