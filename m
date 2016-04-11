@@ -1,43 +1,36 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH] PCI: Add Broadcom 4331 reset quirk to prevent IRQ storm
-Date: Sat, 9 Apr 2016 13:00:55 +0100
-Message-ID: <20160409120055.GR2701@codeblueprint.co.uk>
-References: <811539524df8b5ed7e2817c1c3e3e08560c97964.1459275517.git.lukas@wunner.de>
- <20160405194015.GC15353@localhost>
- <20160406213029.GA12421@wunner.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-pci-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160406213029.GA12421@wunner.de>
-Sender: linux-pci-owner@vger.kernel.org
-To: Lukas Wunner <lukas@wunner.de>
-Cc: Bjorn Helgaas <helgaas@kernel.org>, linux-pci@vger.kernel.org, linux-wireless@vger.kernel.org, zajec5@gmail.com, b43-dev@lists.infradead.org, Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org
+From: Vaishali Thakkar <vaishali.thakkar-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] efi: Use GFP_ATOMIC instead of GFP_KERNEL
+Date: Mon, 11 Apr 2016 16:23:29 +0530
+Message-ID: <1460372009-10785-1-git-send-email-vaishali.thakkar@oracle.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vaishali Thakkar <vaishali.thakkar-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 06 Apr, at 11:30:29PM, Lukas Wunner wrote:
-> 
-> More specifically, arch/x86/platform/efi/quirks.c:efi_free_boot_services()
-> makes EFI boot services memory available to the page allocator and this
-> is called near the end of init/main.c:start_kernel(). *Afterwards*, the
-> initcalls are executed via rest_init() -> kernel_init() ->
-> kernel_init_freeable() -> do_basic_setup() -> do_initcalls(). In particular,
-> PCI header fixups are executed in the subsys_initcall acpi_init().
-> 
-> Some of the possible solutions are:
-> 
-> (1) Delay efi_free_boot_services() further, e.g. until late_initcall.
- 
-I'd prefer not to do this because boot services regions can account
-for a large amount of memory (multiple gigabytes).
+Function dup_variable_bug is called inside the spinlock.
+This may lead to issues when kzalloc sleeps, so it is
+better to use GFP_ATOMIC in this spinlocked context.
 
-> (2) Find out exactly which EFI boot services area is used for DMA and
->     amend arch/x86/platform/efi/quirks.c:efi_apply_memmap_quirks() to
->     assign that area a different type if dmi_match(DMI_SYS_VENDOR,
->     "Apple Inc."). That way it's not freed by efi_free_boot_services().
->     Add a late_initcall which calls free_bootmem() for that area.
+Problem found using Coccinelle.
+
+Signed-off-by: Vaishali Thakkar <vaishali.thakkar-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/firmware/efi/vars.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index 0ac594c..d5e2f28 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -411,7 +411,7 @@ static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_guid,
+ 	 */
+ 	efivar_wq_enabled = false;
  
-If it is possible to find out which boot services region is the
-problematic one, this would be the best solution. If there's any way
-to tie it into the PCI quirk, that would be even better so we don't
-need to maintain the blacklist in two places.
+-	str8 = kzalloc(len8, GFP_KERNEL);
++	str8 = kzalloc(len8, GFP_ATOMIC);
+ 	if (!str8)
+ 		return;
+ 
+-- 
+2.1.4
