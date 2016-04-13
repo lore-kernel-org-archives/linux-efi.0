@@ -1,48 +1,46 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: Remove global 'memmap'
-Date: Wed, 13 Apr 2016 10:12:56 +0200
-Message-ID: <CAKv+Gu_zjJ08HwwrtL5Mqd5AzHTVwDG2VxJv2DdX1+Jk8vyuow@mail.gmail.com>
-References: <1460379809-18490-1-git-send-email-matt@codeblueprint.co.uk>
-	<1460379809-18490-3-git-send-email-matt@codeblueprint.co.uk>
-	<CAKv+Gu-xUzbxzpTa_E_HjZcSXW+DdhasFDP1n-w-AzuDjvp6FA@mail.gmail.com>
-	<20160412200119.GH2829@codeblueprint.co.uk>
+Subject: Re: [PATCH v2 4/5] efi: implement generic support for the Memory
+ Attributes table
+Date: Wed, 13 Apr 2016 10:29:23 +0200
+Message-ID: <CAKv+Gu-bLN16YKei3togReQBNo+ScQVf7ek2NJEZAEyii2JEcw@mail.gmail.com>
+References: <1459355933-13529-1-git-send-email-ard.biesheuvel@linaro.org>
+	<1459355933-13529-5-git-send-email-ard.biesheuvel@linaro.org>
+	<20160408155608.GQ2701@codeblueprint.co.uk>
+	<CAKv+Gu-TMb0MTnzXXjczvxaWvZphu7M1-MMdjCrZ7A2CvCc2WQ@mail.gmail.com>
+	<20160412195727.GG2829@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160412200119.GH2829-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <20160412195727.GG2829-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Prakhya, Sai Praneeth" <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 12 April 2016 at 22:01, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Mon, 11 Apr, at 03:17:55PM, Ard Biesheuvel wrote:
->> > diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
->> > index 1cfbfaf57a2d..0416d5d33e74 100644
->> > --- a/drivers/firmware/efi/arm-runtime.c
->> > +++ b/drivers/firmware/efi/arm-runtime.c
->> > @@ -89,6 +89,7 @@ static bool __init efi_virtmap_init(void)
->> >   */
->> >  static int __init arm_enable_runtime_services(void)
->> >  {
->> > +       phys_addr_t phys_map;
+On 12 April 2016 at 21:57, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Mon, 11 Apr, at 04:09:11PM, Ard Biesheuvel wrote:
 >>
->> Is the sole purpose of this variable to prevent breaking the 80-column rule?
+>> The spec does not actually mandate that, and I do know that the
+>> Tianocore code deliberately uses a larger value for desc_size in
+>> GetMemoryMap() to catch inadvertent uses of sizeof(). I am not sure if
+>> the memory attribute table code does the same, and it seems dangerous
+>> to assume that to be the case in general.
 >
-> Indeed it is.
+> The spec may not mandate that, but this code will explode horribly if
+> efi_memory_desc_t does not accurately describe the entries in either
+> the EFI Memory Attributes table or the EFI memory map.
 >
->> If so, please be aware that I intend to propose a patch that replaces
->> the ioremap_cache() below with a call to memremap(), but this is
->> another change that is gated by Russell merging my memremap patches
->> for ARM
+> How do we ensure that doing,
 >
-> OK. Would you like me to drop this particular hunk and just go with,
+> static bool entry_is_valid(...)
+> {
+>         *out = *in;
+>         ...
 >
->         efi.memmap.map = (__force void *)ioremap_cache(efi.memmap.phys_map,
->                                                        mapsize);
->
-> if you're going to rewrite it soon anyway?
+> keeps working? Are we using the table version to guarantee that?
 
-Yes, please. Russell seems to be dragging his feet a bit, but I should
-still be able to get that patch out in time for v4.7 (and the memattr
-stuff for ARM relies on it anyway)
+I think it is implied by the spec that this table and the one returned
+by GetMemoryMap() use mutually compatible definitions of
+EFI_MEMORY_DESCRIPTOR. However, since our definition of the struct
+type is based on version 1, we should perhaps add a check for that
+separately
