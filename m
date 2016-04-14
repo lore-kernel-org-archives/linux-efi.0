@@ -1,58 +1,247 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi/arm*: use memremap() to create the persistent
- memmap mapping
-Date: Thu, 14 Apr 2016 10:43:45 +0200
-Message-ID: <CAKv+Gu9GNssCtBY85zMSpGh8bcwXD-3t3LCxmwmK7dO5qN0dzQ@mail.gmail.com>
-References: <1460561873-27756-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1460561873-27756-2-git-send-email-ard.biesheuvel@linaro.org>
+From: Suzuki K Poulose <Suzuki.Poulose-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH V2 2/9] ras: acpi/apei: cper: generic error data entry v3
+ per ACPI 6.1
+Date: Thu, 14 Apr 2016 11:22:46 +0100
+Message-ID: <570F6F76.3060804@arm.com>
+References: <1459955578-24602-1-git-send-email-tbaicar@codeaurora.org>
+ <1459955578-24602-3-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1460561873-27756-2-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1459955578-24602-3-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, harba-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, ahs3-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org
+Cc: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Naveen Kaje <nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 13 April 2016 at 17:37, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> Instead of using ioremap_cache(), which is slightly inappropriate for
-> mapping firmware tables, and is not even allowed on ARM for mapping
-> regions that are covered by a struct page, use memremap(), which was
-> invented for this purpose, and will also reuse the existing kernel
-> direct mapping if the requested region is covered by it.
+On 06/04/16 16:12, Tyler Baicar wrote:
+> Currently when a RAS error is reported it is not timestamped.
+> The ACPI 6.1 spec adds the timestamp field to the generic error
+> data entry v3 structure. The timestamp of when the firmware
+> generated the error is now being reported.
 >
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> Signed-off-by: Richard Ruigrok <rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> Signed-off-by: Naveen Kaje <nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 > ---
->  drivers/firmware/efi/arm-runtime.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
+>   drivers/acpi/apei/ghes.c    |  35 ++++++++++++--
+>   drivers/firmware/efi/cper.c | 111 +++++++++++++++++++++++++++++++++++++-------
+>   2 files changed, 126 insertions(+), 20 deletions(-)
 >
-> diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-> index 98fe93a9813b..17ccf0a8787a 100644
-> --- a/drivers/firmware/efi/arm-runtime.c
-> +++ b/drivers/firmware/efi/arm-runtime.c
-> @@ -111,8 +111,7 @@ static int __init arm_enable_runtime_services(void)
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index 9b0543e..a6848706 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -419,7 +419,15 @@ static void ghes_handle_memory_failure(struct acpi_hest_generic_data *gdata, int
+>   	int flags = -1;
+>   	int sec_sev = ghes_severity(gdata->error_severity);
+>   	struct cper_sec_mem_err *mem_err;
+> -	mem_err = (struct cper_sec_mem_err *)(gdata + 1);
+> +	struct acpi_hest_generic_data_v300 *gdata_v3 = NULL;
+> +
+> +	if ((gdata->revision >> 8) >= 0x03)
+
+Could we please make that a macro ? We seem to be using the check everywhere.
+
+> +		gdata_v3 = (struct acpi_hest_generic_data_v300 *)gdata;
+> +
+> +	if (gdata_v3)
+> +		mem_err = (struct cper_sec_mem_err *)(gdata_v3 + 1);
+> +	else
+> +		mem_err = (struct cper_sec_mem_err *)(gdata + 1);
 >
->         mapsize = efi.memmap.map_end - efi.memmap.map;
+>   	if (!(mem_err->validation_bits & CPER_MEM_VALID_PA))
+>   		return;
+> @@ -449,14 +457,27 @@ static void ghes_do_proc(struct ghes *ghes,
+>   {
+>   	int sev, sec_sev;
+>   	struct acpi_hest_generic_data *gdata;
+> +	struct acpi_hest_generic_data_v300 *gdata_v3 = NULL;
+> +	uuid_le sec_type;
 >
-> -       efi.memmap.map = (__force void *)ioremap_cache(efi.memmap.phys_map,
-> -                                                      mapsize);
-> +       efi.memmap.map = memremap(efi.memmap.phys_map, mapsize, MEMREMAP_WB);
->         if (!efi.memmap.map) {
->                 pr_err("Failed to remap EFI memory map\n");
->                 return -ENOMEM;
+>   	sev = ghes_severity(estatus->error_severity);
+>   	apei_estatus_for_each_section(estatus, gdata) {
+>   		sec_sev = ghes_severity(gdata->error_severity);
+> -		if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
+> +		sec_type = *(uuid_le *)gdata->section_type;
+> +
+> +		if ((gdata->revision >> 8) >= 0x03)
+> +			gdata_v3 = (struct acpi_hest_generic_data_v300 *)gdata;
+> +
+> +		if (!uuid_le_cmp(sec_type,
+>   				 CPER_SEC_PLATFORM_MEM)) {
+>   			struct cper_sec_mem_err *mem_err;
+> -			mem_err = (struct cper_sec_mem_err *)(gdata+1);
+> +
+> +			if (gdata_v3)
+> +				mem_err = (struct cper_sec_mem_err *)
+> +					  (gdata_v3 + 1);
+> +			else
+> +				mem_err = (struct cper_sec_mem_err *)
+> +					  (gdata + 1);
+>   			ghes_edac_report_mem_error(ghes, sev, mem_err);
+>
+>   			arch_apei_report_mem_error(sev, mem_err);
+> @@ -466,7 +487,13 @@ static void ghes_do_proc(struct ghes *ghes,
+>   		else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
+>   				      CPER_SEC_PCIE)) {
+>   			struct cper_sec_pcie *pcie_err;
+> -			pcie_err = (struct cper_sec_pcie *)(gdata+1);
+> +
+> +			if (gdata_v3)
+> +				pcie_err = (struct cper_sec_pcie *)
+> +					   (gdata_v3 + 1);
+> +			else
+> +				pcie_err = (struct cper_sec_pcie *)
+> +					   (gdata + 1);
+>   			if (sev == GHES_SEV_RECOVERABLE &&
+>   			    sec_sev == GHES_SEV_RECOVERABLE &&
+>   			    pcie_err->validation_bits & CPER_PCIE_VALID_DEVICE_ID &&
+> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+> index d425374..23f62962 100644
+> --- a/drivers/firmware/efi/cper.c
+> +++ b/drivers/firmware/efi/cper.c
+> @@ -32,6 +32,8 @@
+>   #include <linux/acpi.h>
+>   #include <linux/pci.h>
+>   #include <linux/aer.h>
+> +#include <linux/printk.h>
+> +#include <linux/bcd.h>
+>
+>   #define INDENT_SP	" "
+>
+> @@ -392,6 +394,10 @@ static void cper_estatus_print_section(
+>   	uuid_le *sec_type = (uuid_le *)gdata->section_type;
+>   	__u16 severity;
+>   	char newpfx[64];
+> +	struct acpi_hest_generic_data_v300 *gdata_v3 = NULL;
+> +
+> +	if ((gdata->revision >> 8) >= 0x03)
+> +		gdata_v3 = (struct acpi_hest_generic_data_v300 *)gdata;
+>
+>   	severity = gdata->error_severity;
+>   	printk("%s""Error %d, type: %s\n", pfx, sec_no,
+> @@ -403,14 +409,24 @@ static void cper_estatus_print_section(
+>
+>   	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
+>   	if (!uuid_le_cmp(*sec_type, CPER_SEC_PROC_GENERIC)) {
+> -		struct cper_sec_proc_generic *proc_err = (void *)(gdata + 1);
+> +		struct cper_sec_proc_generic *proc_err;
+> +
+> +		if (gdata_v3)
+> +			proc_err = (void *)(gdata_v3 + 1);
+> +		else
+> +			proc_err = (void *)(gdata + 1);
+>   		printk("%s""section_type: general processor error\n", newpfx);
+>   		if (gdata->error_data_length >= sizeof(*proc_err))
+>   			cper_print_proc_generic(newpfx, proc_err);
+>   		else
+>   			goto err_section_too_small;
+>   	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PLATFORM_MEM)) {
+> -		struct cper_sec_mem_err *mem_err = (void *)(gdata + 1);
+> +		struct cper_sec_mem_err *mem_err;
+> +
+> +		if (gdata_v3)
+> +			mem_err = (void *)(gdata_v3 + 1);
+> +		else
+> +			mem_err = (void *)(gdata + 1);
+>   		printk("%s""section_type: memory error\n", newpfx);
+>   		if (gdata->error_data_length >=
+>   		    sizeof(struct cper_sec_mem_err_old))
+> @@ -419,7 +435,12 @@ static void cper_estatus_print_section(
+>   		else
+>   			goto err_section_too_small;
+>   	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PCIE)) {
+> -		struct cper_sec_pcie *pcie = (void *)(gdata + 1);
+> +		struct cper_sec_pcie *pcie;
+> +
+> +		if (gdata_v3)
+> +			pcie = (void *)(gdata_v3 + 1);
+> +		else
+> +			pcie = (void *)(gdata + 1);
 
-Actually, this patch does not depend on the ARM memremap changes being
-merged: before those changes, memremap() unconditionally falls back to
-ioremap_cache() for 'System RAM' so this patch is essentially a nop in
-that case. This is guaranteed to work due to the fact that we [still]
-use MEMBLOCK_NOMAP for mapping the memory map on ARM.
 
-The memory attributes table and GOP changes do depend on it, however,
-since the configuration tables it accesses are likely to be covered by
-a struct page, in which case ARM disallows the ioremap_cache() (and
-thus the use of memremap() until it is updated to deal with this
-situation explicitly)
+The only use of the gdata_v3 above cases is to get the payload(or error_record).
+So instead of spilling these checks all over could we use something like :
 
-The other change that depends on it is dropping the MEMBLOCK_NOMAP for
-ARM as well (as we did in the arm64 patch that is currently queued up
-for v4.6-rc)
+#define acpi_hest_generic_data_version(gdata) \
+	(gdata->revision >> 8)
+
+static inline void *
+acpi_hest_generic_data_payload(struct acpi_hest_generic_data *gdata)
+{
+	return acpi_hest_generic_data_version(gdata) >= 3 ?
+		((struct acpi_hest_generic_data_v300 *)(gdata)) + 1 :
+		gdata + 1;
+}
+
+And then do :
+
+	void *payload = acpi_hest_generic_data_payload(gdata);
+
+
+>   		printk("%s""section_type: PCIe error\n", newpfx);
+>   		if (gdata->error_data_length >= sizeof(*pcie))
+>   			cper_print_pcie(newpfx, pcie, gdata);
+> @@ -434,10 +455,38 @@ err_section_too_small:
+>   	pr_err(FW_WARN "error section length is too small\n");
+>   }
+>
+> +static void cper_estatus_print_section_v300(const char *pfx,
+> +	const struct acpi_hest_generic_data_v300 *gdata, int sec_no)
+> +{
+> +	__u8 hour, min, sec, day, mon, year, century, *timestamp;
+> +
+> +	if (gdata->validation_bits & ACPI_HEST_GEN_VALID_TIMESTAMP) {
+> +		timestamp = (__u8 *)&(gdata->time_stamp);
+> +		memcpy(&sec, timestamp, 1);
+> +		memcpy(&min, timestamp + 1, 1);
+> +		memcpy(&hour, timestamp + 2, 1);
+> +		memcpy(&day, timestamp + 4, 1);
+> +		memcpy(&mon, timestamp + 5, 1);
+> +		memcpy(&year, timestamp + 6, 1);
+> +		memcpy(&century, timestamp + 7, 1);
+> +		printk("%stime: ", pfx);
+> +		printk("%7s", 0x01 & *(timestamp + 3) ? "precise" : "");
+> +		printk(" %02d:%02d:%02d %02d%02d-%02d-%02d\n",
+> +			bcd2bin(hour), bcd2bin(min), bcd2bin(sec),
+> +			bcd2bin(century), bcd2bin(year), bcd2bin(mon),
+> +			bcd2bin(day));
+> +	}
+> +
+> +	cper_estatus_print_section(pfx,
+> +				   (const struct acpi_hest_generic_data *)gdata,
+> +				   sec_no);
+> +}
+
+
+Wouldn't it be better do the v3 header check from cper_erstatus_print_section() and call out
+to cper_erstatus_print_section_v300() ? That way, we can leave the callers unaffected,
+even for future changes.
+
+
+> +	if (gdata_v3) {
+> +		while (data_len >= sizeof(*gdata_v3)) {
+> +			gedata_len = gdata_v3->error_data_length;
+> +			cper_estatus_print_section_v300(newpfx, gdata_v3,
+> +							sec_no);
+> +			data_len -= gedata_len + sizeof(*gdata_v3);
+> +			gdata_v3 = (void *)(gdata_v3 + 1) + gedata_len;
+> +			sec_no++;
+> +		}
+> +	} else {
+> +		while (data_len >= sizeof(*gdata)) {
+> +			gedata_len = gdata->error_data_length;
+> +			cper_estatus_print_section(newpfx, gdata, sec_no);
+> +			data_len -= gedata_len + sizeof(*gdata);
+> +			gdata = (void *)(gdata + 1) + gedata_len;
+> +			sec_no++;
+> +		}
+
+With the change mentioned above and storing the sizeof(), we could make this
+hunk a bit more cleaner.
+
+
+Suzuki
