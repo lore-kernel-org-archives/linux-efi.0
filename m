@@ -1,20 +1,32 @@
-From: Jason Taylor <jason.taylor-RrviKlmTjidOSnsfY10OVw@public.gmane.org>
+From: "Kinsella, Ray" <ray.kinsella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Subject: Re: efi_printk
-Date: Fri, 15 Apr 2016 10:24:46 -0400
-Message-ID: <666a26ae-8a78-a2d0-77c3-e2724be7d1d5@simplivity.com>
+Date: Fri, 15 Apr 2016 16:32:50 +0000
+Message-ID: <1460737968.3575.63.camel@intel.com>
 References: <005f85571fda40a483f7a5b7438a738d@WB-SVT-EXBE03.simplivity.com>
- <1460714923.3575.2.camel@intel.com>
+	 <1460714923.3575.2.camel@intel.com>
+	 <666a26ae-8a78-a2d0-77c3-e2724be7d1d5@simplivity.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1460714923.3575.2.camel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <666a26ae-8a78-a2d0-77c3-e2724be7d1d5-RrviKlmTjidOSnsfY10OVw@public.gmane.org>
+Content-Language: en-US
+Content-ID: <AFBD8369ADFCB2418556CBB298FB10F2-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jason.taylor-RrviKlmTjidOSnsfY10OVw@public.gmane.org" <jason.taylor-RrviKlmTjidOSnsfY10OVw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 4/15/2016 6:08 AM, Kinsella, Ray wrote:
->
-> Have you set CONFIG_EARLY_PRINTK_EFI ?
-
-Yes, I enabled that build option.
+DQpTaG91bGQgd29yayB0aGVuLCBvbmNlIHlvdSBzZXQgZWFybHlwcmludGs9ZWZpLiANCg0KQXMg
+SSByZW1lbWJlciBmcm9tIHJlYWRpbmcgdGhlIGVmaSBwcmludGsgY29kZSwgdGhlaXIgaXMgYW4g
+YXNzdW1wdGlvbg0KdGhhdCBVRUZJIHN1cHBvcnRzIGZyYW1lYnVmZmVyLiBJbiBteSBjYXNlIG15
+IGJvYXJkIHdhcyBoZWFkbGVzcywgc28NCmVhcmx5cHJpbnRrPWVmaSBkaWQgbm90IHdvcmsgZm9y
+IG1lLiAgDQoNCkdpdmVuIHlvdXIgdmlydHVhbGl6ZWQgZW52aXJvbm1lbnQsIGl0IGlzIG5vdCBv
+dXRzaWRlIHBvc3NpYmlsaXR5IHRoYXQNCnRoZWlyIGlzIG5vIGZyYW1lYnVmZmVyIHN1cHBvcnQg
+aW4gdGhlIFZNJ3MgVUVGST8gDQoNClRoYW5rcywNCg0KUmF5IEsgDQoNCk9uIEZyaSwgMjAxNi0w
+NC0xNSBhdCAxMDoyNCAtMDQwMCwgSmFzb24gVGF5bG9yIHdyb3RlOg0KPiBPbiA0LzE1LzIwMTYg
+NjowOCBBTSwgS2luc2VsbGEsIFJheSB3cm90ZToNCj4gPiANCj4gPiBIYXZlIHlvdSBzZXQgQ09O
+RklHX0VBUkxZX1BSSU5US19FRkkgPw0KPiANCj4gWWVzLCBJIGVuYWJsZWQgdGhhdCBidWlsZCBv
+cHRpb24uDQo+IA0KPiANCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
+bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LWVmaSINCj4gaW4NCj4gdGhlIGJvZHkgb2Yg
+YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4gTW9yZSBtYWpvcmRvbW8g
+aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1s
