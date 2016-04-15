@@ -1,32 +1,38 @@
-From: "Kinsella, Ray" <ray.kinsella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: efi_printk
-Date: Fri, 15 Apr 2016 16:32:50 +0000
-Message-ID: <1460737968.3575.63.camel@intel.com>
-References: <005f85571fda40a483f7a5b7438a738d@WB-SVT-EXBE03.simplivity.com>
-	 <1460714923.3575.2.camel@intel.com>
-	 <666a26ae-8a78-a2d0-77c3-e2724be7d1d5@simplivity.com>
+From: Steve Capper <steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efi/arm64: don't apply MEMBLOCK_NOMAP to UEFI memory map mapping
+Date: Fri, 15 Apr 2016 17:44:02 +0100
+Message-ID: <CAPvkgC0Dy1c78LOR53PgyTdDom=fWF9RurJHQ02RuMVj5Pch3g@mail.gmail.com>
+References: <1459323983-9120-1-git-send-email-ard.biesheuvel@linaro.org>
+	<20160331203520.GB2736@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <666a26ae-8a78-a2d0-77c3-e2724be7d1d5-RrviKlmTjidOSnsfY10OVw@public.gmane.org>
-Content-Language: en-US
-Content-ID: <AFBD8369ADFCB2418556CBB298FB10F2-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20160331203520.GB2736-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jason.taylor-RrviKlmTjidOSnsfY10OVw@public.gmane.org" <jason.taylor-RrviKlmTjidOSnsfY10OVw@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Mark Langsdorf <mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-DQpTaG91bGQgd29yayB0aGVuLCBvbmNlIHlvdSBzZXQgZWFybHlwcmludGs9ZWZpLiANCg0KQXMg
-SSByZW1lbWJlciBmcm9tIHJlYWRpbmcgdGhlIGVmaSBwcmludGsgY29kZSwgdGhlaXIgaXMgYW4g
-YXNzdW1wdGlvbg0KdGhhdCBVRUZJIHN1cHBvcnRzIGZyYW1lYnVmZmVyLiBJbiBteSBjYXNlIG15
-IGJvYXJkIHdhcyBoZWFkbGVzcywgc28NCmVhcmx5cHJpbnRrPWVmaSBkaWQgbm90IHdvcmsgZm9y
-IG1lLiAgDQoNCkdpdmVuIHlvdXIgdmlydHVhbGl6ZWQgZW52aXJvbm1lbnQsIGl0IGlzIG5vdCBv
-dXRzaWRlIHBvc3NpYmlsaXR5IHRoYXQNCnRoZWlyIGlzIG5vIGZyYW1lYnVmZmVyIHN1cHBvcnQg
-aW4gdGhlIFZNJ3MgVUVGST8gDQoNClRoYW5rcywNCg0KUmF5IEsgDQoNCk9uIEZyaSwgMjAxNi0w
-NC0xNSBhdCAxMDoyNCAtMDQwMCwgSmFzb24gVGF5bG9yIHdyb3RlOg0KPiBPbiA0LzE1LzIwMTYg
-NjowOCBBTSwgS2luc2VsbGEsIFJheSB3cm90ZToNCj4gPiANCj4gPiBIYXZlIHlvdSBzZXQgQ09O
-RklHX0VBUkxZX1BSSU5US19FRkkgPw0KPiANCj4gWWVzLCBJIGVuYWJsZWQgdGhhdCBidWlsZCBv
-cHRpb24uDQo+IA0KPiANCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
-bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LWVmaSINCj4gaW4NCj4gdGhlIGJvZHkgb2Yg
-YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4gTW9yZSBtYWpvcmRvbW8g
-aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1s
+On 31 March 2016 at 21:35, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Wed, 30 Mar, at 09:46:23AM, Ard Biesheuvel wrote:
+>> Hi Matt,
+>>
+>> Could we queue this as a fix for v4.6 with a cc:stable for v4.5, please?
+>> (assuming no objections from any of the cc'ees)
+>
+> Yep, I've picked this up. I'll go out to tip tomorrow.
+>
+
+Hello,
+Is this going to make it in for 4.6?
+I ran into this issue the other day, and can confirm that Ard's patch
+is helpful.
+
+Cheers,
+-- 
+Steve
+
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
