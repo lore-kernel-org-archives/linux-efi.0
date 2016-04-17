@@ -1,29 +1,33 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] efi/arm64: don't apply MEMBLOCK_NOMAP to UEFI memory map
- mapping
-Date: Sat, 16 Apr 2016 11:27:17 +0100
-Message-ID: <20160416102717.GX2829@codeblueprint.co.uk>
-References: <1459323983-9120-1-git-send-email-ard.biesheuvel@linaro.org>
- <20160331203520.GB2736@codeblueprint.co.uk>
- <CAPvkgC0Dy1c78LOR53PgyTdDom=fWF9RurJHQ02RuMVj5Pch3g@mail.gmail.com>
- <20160415221516.GU2829@codeblueprint.co.uk>
- <20160416090910.GA30739@gmail.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH] efi: Use GFP_ATOMIC instead of GFP_KERNEL
+Date: Sun, 17 Apr 2016 22:18:35 +0100
+Message-ID: <20160417211835.GY2829@codeblueprint.co.uk>
+References: <1460372009-10785-1-git-send-email-vaishali.thakkar@oracle.com>
+ <20160414214949.GS2829@codeblueprint.co.uk>
+ <alpine.DEB.2.02.1604150837040.2061@localhost6.localdomain6>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20160416090910.GA30739-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Steve Capper <steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Mark Langsdorf <mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.02.1604150837040.2061@localhost6.localdomain6>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Julia Lawall <julia.lawall@lip6.fr>
+Cc: Vaishali Thakkar <vaishali.thakkar@oracle.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Saurabh Sengar <saurabh.truth@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 16 Apr, at 11:09:10AM, Ingo Molnar wrote:
+On Fri, 15 Apr, at 08:38:37AM, Julia Lawall wrote:
 > 
-> I just sent it to Linus.
-> 
-> It got delayed a bit because it had an x86/urgent dependency that had to be sent 
-> upstream first. (In the future you can avoid such delays by basing EFI urgent 
-> fixes on an upstream -rc kernel, not x86/urgent.)
+> I looked at it a bit with Vaishali.  I wonder if it would be possible at 
+> least to have only one flag? Then one wouldn't have to maintain the 
+> subtle relationship between atomic and duplicates.  I'm not sure that it 
+> would help Coccinelle, but at least one could see more quickly that 
+> Coccinelle is giving a false positive.
 
-Noted. I'll do this in future, thanks Ingo.
+Yeah, that would be a good idea.
+
+How about we drop the @atomic parameter and simply use @duplicates to
+figure out whether to perform duplicate detection, which we should
+note in the comment of efivar_init() cannot be performed atomically.
+Bonus points if someone can clean up the code flow too.
+
+Otherwise, efivar_init() is done while holding a spinlock.
