@@ -1,25 +1,43 @@
-From: "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v11 01/17] Xen: ACPI: Hide UART used by Xen
-Date: Mon, 18 Apr 2016 01:59:00 +0200
-Message-ID: <CAJZ5v0jwxghXED6E20TDa-+PHQW7wZ=cLiesnizLZYF7R8FiVQ@mail.gmail.com>
-References: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
-	<1460030614-16112-2-git-send-email-zhaoshenglong@huawei.com>
-	<57108D99.5030800@huawei.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: [PATCH] efi: ARM: avoid warning about phys_addr_t cast
+Date: Mon, 18 Apr 2016 10:34:19 +0200
+Message-ID: <1460968481-169298-1-git-send-email-arnd@arndb.de>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <57108D99.5030800-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, julien.grall-5wv7dgnIgG8@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, ACPI <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Apr 15, 2016 at 8:43 AM, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org=
-> wrote:
-> Hi Rafael=EF=BC=8C
->
-> Could you please give your comments on this patch? Thanks in advanced=
-!
+memblock_remove() takes a phys_addr_t, which may be narrower than 64 bits,
+causing a harmless warning:
 
-I was traveling last week, sorry for the slow response.
+drivers/firmware/efi/arm-init.c: In function 'reserve_regions':
+include/linux/kernel.h:29:20: error: large integer implicitly truncated to unsigned type [-Werror=overflow]
+ #define ULLONG_MAX (~0ULL)
+                    ^
+drivers/firmware/efi/arm-init.c:152:21: note: in expansion of macro 'ULLONG_MAX'
+  memblock_remove(0, ULLONG_MAX);
+
+This adds an explicit typecast to avoid the warning
+
+Signed-off-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Fixes: 500899c2cc3e ("efi: ARM/arm64: ignore DT memory nodes instead of removing them")
+---
+ drivers/firmware/efi/arm-init.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index 434dd6065935..fac567c3b66a 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -149,7 +149,7 @@ static __init void reserve_regions(void)
+ 	 * uses its own memory map instead.
+ 	 */
+ 	memblock_dump_all();
+-	memblock_remove(0, ULLONG_MAX);
++	memblock_remove(0, (phys_addr_t)ULLONG_MAX);
+ 
+ 	for_each_efi_memory_desc(&memmap, md) {
+ 		paddr = md->phys_addr;
+-- 
+2.7.0
