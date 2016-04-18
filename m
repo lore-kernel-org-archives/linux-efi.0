@@ -1,22 +1,37 @@
-From: andreas122-Ko4HvKsVEdMwu+U/h7MTDQ@public.gmane.org
-Subject: Greetings!!!
-Date: Mon, 18 Apr 2016 21:12:04 +0100
-Message-ID: <777136.35773.qm__3874.23348515785$1461010776$gmane$org@smtp105.biz.mail.ne1.yahoo.com>
-Reply-To: J_ericdaniels111-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] efi: ARM: avoid warning about phys_addr_t cast
+Date: Mon, 18 Apr 2016 22:12:33 +0100
+Message-ID: <20160418211233.GZ2829@codeblueprint.co.uk>
+References: <1460968481-169298-1-git-send-email-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Description: Mail message body
+Content-Disposition: inline
+In-Reply-To: <1460968481-169298-1-git-send-email-arnd-r2nGTMty4D4@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Mr. Eric" <andreas122-Ko4HvKsVEdMwu+U/h7MTDQ@public.gmane.org>
+To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi, how are you? My name is J Eric Denials, External Financial Auditor =
-at Lloyds Banking Group plc., London. It is a pleasure to contact you a=
-t this time through this medium. I have a cool and legitimate deal to d=
-o with you as you're a foreigner, it will be mutually beneficial to bot=
-h. If you=E2=80=99re interested, urgently, get back to me for more expl=
-anation about the deal.
-Regards
-Eric
+On Mon, 18 Apr, at 10:34:19AM, Arnd Bergmann wrote:
+> memblock_remove() takes a phys_addr_t, which may be narrower than 64 bits,
+> causing a harmless warning:
+> 
+> drivers/firmware/efi/arm-init.c: In function 'reserve_regions':
+> include/linux/kernel.h:29:20: error: large integer implicitly truncated to unsigned type [-Werror=overflow]
+>  #define ULLONG_MAX (~0ULL)
+>                     ^
+> drivers/firmware/efi/arm-init.c:152:21: note: in expansion of macro 'ULLONG_MAX'
+>   memblock_remove(0, ULLONG_MAX);
+> 
+> This adds an explicit typecast to avoid the warning
+> 
+> Signed-off-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+> Fixes: 500899c2cc3e ("efi: ARM/arm64: ignore DT memory nodes instead of removing them")
+> ---
+>  drivers/firmware/efi/arm-init.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+
+Will, this one is for you.
+
+Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
