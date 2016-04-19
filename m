@@ -1,123 +1,126 @@
 From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: [RFC PATCH v2 10/10] HACK: acpi: configfs: add unload_hanlde_path attribute for tables
-Date: Wed, 20 Apr 2016 01:39:08 +0300
-Message-ID: <1461105548-20618-11-git-send-email-octavian.purdila@intel.com>
+Subject: [RFC PATCH v2 08/10] acpi: add support for configfs
+Date: Wed, 20 Apr 2016 01:39:06 +0300
+Message-ID: <1461105548-20618-9-git-send-email-octavian.purdila@intel.com>
 References: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-i2c-owner@vger.kernel.org>
 In-Reply-To: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-i2c-owner@vger.kernel.org
 To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
 Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, Octavian Purdila <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Because there is no way to get a references to a table that we can use
-to unload a table this patch adds an attribute allows the user to attach
-a path to an ACPI handle to be used when unloading the table. The ACPI
-handle must have been loaded with the table to which attribute is part
-of, otherwise the unload operation will not be correct.
-
-This patch should only be used to test table unloading and removal of
-associated ACPI devices and should not be merged. Once the new table
-loading/unloading APIs make it in ACPICA we can implement table
-unloading properly.
+Register the ACPI subsystem with configfs.
 
 Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
 ---
- drivers/acpi/configfs.c | 58 +++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 58 insertions(+)
+ Documentation/ABI/testing/configfs-acpi |  7 ++++++
+ MAINTAINERS                             |  1 +
+ drivers/acpi/Kconfig                    |  9 ++++++++
+ drivers/acpi/Makefile                   |  1 +
+ drivers/acpi/configfs.c                 | 39 +++++++++++++++++++++++++++++++++
+ 5 files changed, 57 insertions(+)
+ create mode 100644 Documentation/ABI/testing/configfs-acpi
+ create mode 100644 drivers/acpi/configfs.c
 
+diff --git a/Documentation/ABI/testing/configfs-acpi b/Documentation/ABI/testing/configfs-acpi
+new file mode 100644
+index 0000000..0c806aa
+--- /dev/null
++++ b/Documentation/ABI/testing/configfs-acpi
+@@ -0,0 +1,7 @@
++What:		/config/acpi
++Date:		April 2016
++KernelVersion:	4.6
++Contact:	linux-acpi@vger.kernel.org
++Description:
++		This represents the ACPI subsystem entry point directory. It
++		contains sub-groups corresponding to ACPI configurable options.
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 1c32f8a..6695648 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -289,6 +289,7 @@ F:	include/linux/acpi.h
+ F:	include/acpi/
+ F:	Documentation/acpi/
+ F:	Documentation/ABI/testing/sysfs-bus-acpi
++F:	Documentation/ABI/testing/configfs-acpi
+ F:	drivers/pci/*acpi*
+ F:	drivers/pci/*/*acpi*
+ F:	drivers/pci/*/*/*acpi*
+diff --git a/drivers/acpi/Kconfig b/drivers/acpi/Kconfig
+index 82b96ee..7d02816 100644
+--- a/drivers/acpi/Kconfig
++++ b/drivers/acpi/Kconfig
+@@ -521,4 +521,13 @@ config XPOWER_PMIC_OPREGION
+ 
+ endif
+ 
++config ACPI_CONFIGFS
++	tristate "ACPI configfs support"
++	select CONFIGFS_FS
++	default n
++	help
++	  Select this option to enable support for ACPI configuration from
++	  userspace. The configurable ACPI groups will be visible under
++	  /config/acpi, assuming configfs is mounted under /config.
++
+ endif	# ACPI
+diff --git a/drivers/acpi/Makefile b/drivers/acpi/Makefile
+index edeb2d1..319e63d 100644
+--- a/drivers/acpi/Makefile
++++ b/drivers/acpi/Makefile
+@@ -98,5 +98,6 @@ obj-$(CONFIG_ACPI_EXTLOG)	+= acpi_extlog.o
+ obj-$(CONFIG_PMIC_OPREGION)	+= pmic/intel_pmic.o
+ obj-$(CONFIG_CRC_PMIC_OPREGION) += pmic/intel_pmic_crc.o
+ obj-$(CONFIG_XPOWER_PMIC_OPREGION) += pmic/intel_pmic_xpower.o
++obj-$(CONFIG_ACPI_CONFIGFS)	+= configfs.o
+ 
+ video-objs			+= acpi_video.o video_detect.o
 diff --git a/drivers/acpi/configfs.c b/drivers/acpi/configfs.c
-index 5efa8ca..7bcdfbb 100644
---- a/drivers/acpi/configfs.c
+new file mode 100644
+index 0000000..96aa3d8
+--- /dev/null
 +++ b/drivers/acpi/configfs.c
-@@ -18,6 +18,7 @@ static struct config_group *acpi_table_group;
- struct acpi_user_table {
- 	struct config_item cfg;
- 	struct acpi_table_header *table;
-+	acpi_handle handle;
- };
- 
- static ssize_t acpi_table_data_write(struct config_item *cfg,
-@@ -65,14 +66,59 @@ static ssize_t acpi_table_data_write(struct config_item *cfg,
- 
- CONFIGFS_BIN_ATTR_WO(acpi_table_, data, NULL, MAX_ACPI_TABLE_SIZE);
- 
-+ssize_t acpi_table_unload_handle_path_show(struct config_item *item, char *page)
+@@ -0,0 +1,39 @@
++/*
++ * ACPI configfs support
++ *
++ * Copyright (c) 2015 Intel Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License version 2 as published by
++ * the Free Software Foundation.
++ */
++
++#include <linux/init.h>
++#include <linux/module.h>
++#include <linux/configfs.h>
++#include <linux/acpi.h>
++
++static int __init acpi_configfs_init(void)
 +{
-+	struct acpi_buffer path = {ACPI_ALLOCATE_BUFFER, NULL};
-+	struct acpi_user_table *table;
 +	int ret;
++	struct config_group *root = &acpi_configfs.su_group;
 +
-+	table = container_of(item, struct acpi_user_table, cfg);
++	config_group_init(root);
 +
-+	ret = acpi_get_name(table->handle, ACPI_FULL_PATHNAME, &path);
++	ret = configfs_register_subsystem(&acpi_configfs);
 +	if (ret)
 +		return ret;
 +
-+	ret = sprintf(page, "%s\n", (char *)path.pointer);
-+	kfree(path.pointer);
-+
-+	return ret;
++	return 0;
 +}
++module_init(acpi_configfs_init);
 +
-+ssize_t acpi_table_unload_handle_path_store(struct config_item *item,
-+					    const char *page, size_t count)
++static void __exit acpi_configfs_exit(void)
 +{
-+	struct acpi_user_table *table;
-+	char *str;
-+
-+	table = container_of(item, struct acpi_user_table, cfg);
-+
-+	str = kmalloc(count + 1, GFP_KERNEL);
-+	memcpy(str, page, count);
-+	str[count] = 0;
-+
-+	acpi_get_handle(NULL, strim(str), &table->handle);
-+
-+	kfree(str);
-+
-+	return count;
++	configfs_unregister_subsystem(&acpi_configfs);
 +}
++module_exit(acpi_configfs_exit);
 +
-+CONFIGFS_ATTR(acpi_table_, unload_handle_path);
-+
- struct configfs_bin_attribute *acpi_table_bin_attrs[] = {
- 	&acpi_table_attr_data,
- 	NULL,
- };
- 
-+struct configfs_attribute *acpi_table_attrs[] = {
-+	&acpi_table_attr_unload_handle_path,
-+	NULL,
-+};
-+
- static struct config_item_type acpi_table_type = {
- 	.ct_owner = THIS_MODULE,
- 	.ct_bin_attrs = acpi_table_bin_attrs,
-+	.ct_attrs = acpi_table_attrs,
- };
- 
- static struct config_item *acpi_table_make_item(struct config_group *group,
-@@ -88,8 +134,20 @@ static struct config_item *acpi_table_make_item(struct config_group *group,
- 	return &table->cfg;
- }
- 
-+static void acpi_table_drop_item(struct config_group *group,
-+				 struct config_item *item)
-+{
-+	struct acpi_user_table *table;
-+
-+	table = container_of(item, struct acpi_user_table, cfg);
-+
-+	if (table->handle)
-+		acpi_unload_parent_table(table->handle);
-+}
-+
- struct configfs_group_operations acpi_table_group_ops = {
- 	.make_item = acpi_table_make_item,
-+	.drop_item = acpi_table_drop_item,
- };
- 
- static struct config_item_type acpi_tables_type = {
++MODULE_AUTHOR("Octavian Purdila <octavian.purdila@intel.com>");
++MODULE_DESCRIPTION("ACPI configfs support");
++MODULE_LICENSE("GPL v2");
 -- 
 1.9.1
