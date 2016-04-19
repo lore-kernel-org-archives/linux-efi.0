@@ -1,7 +1,7 @@
 From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: [RFC PATCH v2 07/10] efi: load SSTDs from EFI variables
-Date: Wed, 20 Apr 2016 01:39:05 +0300
-Message-ID: <1461105548-20618-8-git-send-email-octavian.purdila@intel.com>
+Subject: [RFC PATCH v2 10/10] HACK: acpi: configfs: add unload_hanlde_path attribute for tables
+Date: Wed, 20 Apr 2016 01:39:08 +0300
+Message-ID: <1461105548-20618-11-git-send-email-octavian.purdila@intel.com>
 References: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
@@ -10,250 +10,114 @@ To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt F
 Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, Octavian Purdila <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-This patch allows SSDTs to be loaded from EFI variables. It works by
-specifying the EFI variable name containing the SSDT to be loaded. All
-variables with the same name (regardless of the vendor GUID) will be
-loaded.
+Because there is no way to get a references to a table that we can use
+to unload a table this patch adds an attribute allows the user to attach
+a path to an ACPI handle to be used when unloading the table. The ACPI
+handle must have been loaded with the table to which attribute is part
+of, otherwise the unload operation will not be correct.
 
-Note that we can't use acpi_install_table and we must rely on the
-dynamic ACPI table loading and bus re-scanning mechanisms. That is
-because I2C/SPI controllers are initialized earlier then the EFI
-subsystems and all I2C/SPI ACPI devices are enumerated when the
-I2C/SPI controllers are initialized.
+This patch should only be used to test table unloading and removal of
+associated ACPI devices and should not be merged. Once the new table
+loading/unloading APIs make it in ACPICA we can implement table
+unloading properly.
 
 Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
 ---
- Documentation/acpi/ssdt-overlays.txt |  67 +++++++++++++++++++++
- Documentation/kernel-parameters.txt  |   7 +++
- drivers/firmware/efi/efi.c           | 109 +++++++++++++++++++++++++++++++++++
- 3 files changed, 183 insertions(+)
+ drivers/acpi/configfs.c | 58 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 58 insertions(+)
 
-diff --git a/Documentation/acpi/ssdt-overlays.txt b/Documentation/acpi/ssdt-overlays.txt
-index c328f6a..27f8108 100644
---- a/Documentation/acpi/ssdt-overlays.txt
-+++ b/Documentation/acpi/ssdt-overlays.txt
-@@ -88,3 +88,70 @@ cp ssdt.aml kernel/firmware/acpi
- # on top:
- find kernel | cpio -H newc --create > /boot/instrumented_initrd
- cat /boot/initrd >>/boot/instrumented_initrd
-+
-+== Loading ACPI SSDTs from EFI variables ==
-+
-+This is the preferred method, when EFI is supported on the platform, because it
-+allows a persistent, OS independent way of storing the user defined SSDTs. There
-+is also work underway to implement EFI support for loading user defined SSDTs
-+and using this method will make it easier to convert to the EFI loading
-+mechanism when that will arrive.
-+
-+In order to load SSDTs from an EFI variable the efivar_ssdt kernel command line
-+parameter can be used. The argument for the option is the variable name to
-+use. If there are multiple variables with the same name but with different
-+vendor GUIDs, all of them will be loaded.
-+
-+In order to store the AML code in an EFI variable the efivarfs filesystem can be
-+used. It is enabled and mounted by default in /sys/firmware/efi/efivars in all
-+recent distribution.
-+
-+Creating a new file in /sys/firmware/efi/efivars will automatically create a new
-+EFI variable. Updating a file in /sys/firmware/efi/efivars will update the EFI
-+variable. Please note that the file name needs to be specially formatted as
-+"Name-GUID" and that the first 4 bytes in the file (little-endian format)
-+represent the attributes of the EFI variable (see EFI_VARIABLE_MASK in
-+include/linux/efi.h). Writing to the file must also be done with one write
-+operation.
-+
-+For example, you can use the following bash script to create/update an EFI
-+variable with the content from a given file:
-+
-+#!/bin/sh -e
-+
-+while ! [ -z "$1" ]; do
-+        case "$1" in
-+        "-f") filename="$2"; shift;;
-+        "-g") guid="$2"; shift;;
-+        *) name="$1";;
-+        esac
-+        shift
-+done
-+
-+usage()
+diff --git a/drivers/acpi/configfs.c b/drivers/acpi/configfs.c
+index 5efa8ca..7bcdfbb 100644
+--- a/drivers/acpi/configfs.c
++++ b/drivers/acpi/configfs.c
+@@ -18,6 +18,7 @@ static struct config_group *acpi_table_group;
+ struct acpi_user_table {
+ 	struct config_item cfg;
+ 	struct acpi_table_header *table;
++	acpi_handle handle;
+ };
+ 
+ static ssize_t acpi_table_data_write(struct config_item *cfg,
+@@ -65,14 +66,59 @@ static ssize_t acpi_table_data_write(struct config_item *cfg,
+ 
+ CONFIGFS_BIN_ATTR_WO(acpi_table_, data, NULL, MAX_ACPI_TABLE_SIZE);
+ 
++ssize_t acpi_table_unload_handle_path_show(struct config_item *item, char *page)
 +{
-+        echo "Syntax: ${0##*/} -f filename [ -g guid ] name"
-+        exit 1
++	struct acpi_buffer path = {ACPI_ALLOCATE_BUFFER, NULL};
++	struct acpi_user_table *table;
++	int ret;
++
++	table = container_of(item, struct acpi_user_table, cfg);
++
++	ret = acpi_get_name(table->handle, ACPI_FULL_PATHNAME, &path);
++	if (ret)
++		return ret;
++
++	ret = sprintf(page, "%s\n", (char *)path.pointer);
++	kfree(path.pointer);
++
++	return ret;
 +}
 +
-+[ -n "$name" -a -f "$filename" ] || usage
++ssize_t acpi_table_unload_handle_path_store(struct config_item *item,
++					    const char *page, size_t count)
++{
++	struct acpi_user_table *table;
++	char *str;
 +
-+EFIVARFS="/sys/firmware/efi/efivars"
++	table = container_of(item, struct acpi_user_table, cfg);
 +
-+[ -d "$EFIVARFS" ] || exit 2
++	str = kmalloc(count + 1, GFP_KERNEL);
++	memcpy(str, page, count);
++	str[count] = 0;
 +
-+if stat -tf $EFIVARFS | grep -q -v de5e81e4; then
-+        mount -t efivarfs none $EFIVARFS
-+fi
++	acpi_get_handle(NULL, strim(str), &table->handle);
 +
-+# try to pick up an existing GUID
-+[ -n "$guid" ] || guid=$(find "$EFIVARFS" -name "$name-*" | head -n1 | cut -f2- -d-)
++	kfree(str);
 +
-+# use a randomly generated GUID
-+[ -n "$guid" ] || guid="$(cat /proc/sys/kernel/random/uuid)"
++	return count;
++}
 +
-+# efivarfs expects all of the data in one write
-+tmp=$(mktemp)
-+/bin/echo -ne "\007\000\000\000" | cat - $filename > $tmp
-+dd if=$tmp of="$EFIVARFS/$name-$guid" bs=$(stat -c %s $tmp)
-+rm $tmp
-diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-index ecc74fa..f678ad9 100644
---- a/Documentation/kernel-parameters.txt
-+++ b/Documentation/kernel-parameters.txt
-@@ -1164,6 +1164,13 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
- 			Address Range Mirroring feature even if your box
- 			doesn't support it.
++CONFIGFS_ATTR(acpi_table_, unload_handle_path);
++
+ struct configfs_bin_attribute *acpi_table_bin_attrs[] = {
+ 	&acpi_table_attr_data,
+ 	NULL,
+ };
  
-+	efivar_ssdt=	[EFI; X86] Name of an EFI variable that contains an SSDT
-+			that is to be dynamically loaded by Linux. If there are
-+			multiple variables with the same name but with different
-+			vendor GUIDs, all of them will be loaded. See
-+			Documentation/acpi/ssdt-overlays.txt for details.
++struct configfs_attribute *acpi_table_attrs[] = {
++	&acpi_table_attr_unload_handle_path,
++	NULL,
++};
 +
-+
- 	eisa_irq_edge=	[PARISC,HW]
- 			See header of drivers/parisc/eisa.c.
+ static struct config_item_type acpi_table_type = {
+ 	.ct_owner = THIS_MODULE,
+ 	.ct_bin_attrs = acpi_table_bin_attrs,
++	.ct_attrs = acpi_table_attrs,
+ };
  
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 3a69ed5..78811f8 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -24,6 +24,8 @@
- #include <linux/of_fdt.h>
- #include <linux/io.h>
- #include <linux/platform_device.h>
-+#include <linux/slab.h>
-+#include <linux/acpi.h>
- 
- #include <asm/early_ioremap.h>
- 
-@@ -194,6 +196,110 @@ static void generic_ops_unregister(void)
- 	efivars_unregister(&generic_efivars);
+ static struct config_item *acpi_table_make_item(struct config_group *group,
+@@ -88,8 +134,20 @@ static struct config_item *acpi_table_make_item(struct config_group *group,
+ 	return &table->cfg;
  }
  
-+#if IS_ENABLED(CONFIG_ACPI)
-+#define EFIVAR_SSDT_NAME_MAX	16
-+static char efivar_ssdt[EFIVAR_SSDT_NAME_MAX];
-+static int __init efivar_ssdt_setup(char *str)
++static void acpi_table_drop_item(struct config_group *group,
++				 struct config_item *item)
 +{
-+	if (strlen(str) < sizeof(efivar_ssdt))
-+		memcpy(efivar_ssdt, str, strlen(str));
-+	else
-+		pr_warn("efivar_ssdt: name too long: %s\n", str);
-+	return 0;
-+}
-+__setup("efivar_ssdt=", efivar_ssdt_setup);
++	struct acpi_user_table *table;
 +
-+static LIST_HEAD(efivar_ssdts);
++	table = container_of(item, struct acpi_user_table, cfg);
 +
-+static inline void pr_efivar_name(efi_char16_t *name16)
-+{
-+	char name[EFIVAR_SSDT_NAME_MAX];
-+	int i;
-+
-+	for (i = 0; i < EFIVAR_SSDT_NAME_MAX - 1; i++)
-+		name[i] = name16[i] & 0xFF;
-+	name[i] = 0;
-+	pr_cont("%s", name);
++	if (table->handle)
++		acpi_unload_parent_table(table->handle);
 +}
 +
-+static __init int efivar_acpi_iter(efi_char16_t *name, efi_guid_t vendor,
-+				   unsigned long name_size, void *data)
-+{
-+	int i;
-+	int str_len = name_size / sizeof(efi_char16_t);
-+	struct efivar_entry *entry;
-+
-+	if (str_len != strlen(efivar_ssdt) + 1)
-+		return 0;
-+
-+	for (i = 0; i < str_len; i++)
-+		if ((name[i] & 0xFF) != efivar_ssdt[i])
-+			return 0;
-+
-+	entry = kzalloc(sizeof(*entry), GFP_KERNEL);
-+	if (!entry)
-+		return -ENOMEM;
-+
-+	memcpy(entry->var.VariableName, name, name_size);
-+	memcpy(&entry->var.VendorGuid, &vendor, sizeof(efi_guid_t));
-+
-+	efivar_entry_add(entry, &efivar_ssdts);
-+
-+	return 0;
-+}
-+
-+static __init int efivar_ssdt_load(void)
-+{
-+	struct efivar_entry *i;
-+	int err;
-+
-+	err = efivar_init(efivar_acpi_iter, NULL, false, false,
-+			  &efivar_ssdts);
-+	if (err) {
-+		pr_err("%s: efivar_init failed: %d\n", __func__, err);
-+		return err;
-+	}
-+
-+	list_for_each_entry(i, &efivar_ssdts, list) {
-+		void *data;
-+		unsigned long size;
-+
-+		pr_info("loading SSDT from EFI variable ");
-+		pr_efivar_name(i->var.VariableName); pr_cont("\n");
-+
-+		err = efivar_entry_size(i, &size);
-+		if (err) {
-+			pr_err("failed to get size\n");
-+			continue;
-+		}
-+
-+		data = kmalloc(size, GFP_KERNEL);
-+		if (!data)
-+			continue;
-+
-+		err = efivar_entry_get(i, NULL, &size, data);
-+		if (err) {
-+			pr_err("failed to get data\n");
-+			kfree(data);
-+			continue;
-+		}
-+
-+		err = acpi_load_table(data);
-+		if (err) {
-+			pr_err("failed to load table: %d\n", err);
-+			kfree(data);
-+			continue;
-+		}
-+
-+		add_taint(TAINT_OVERLAY_ACPI_TABLE, LOCKDEP_STILL_OK);
-+	}
-+
-+	return 0;
-+}
-+#else
-+static inline int efivar_ssdt_load(void) {}
-+#endif
-+
- /*
-  * We register the efi subsystem with the firmware subsystem and the
-  * efivars subsystem with the efi subsystem, if the system was booted with
-@@ -217,6 +323,9 @@ static int __init efisubsys_init(void)
- 	if (error)
- 		goto err_put;
+ struct configfs_group_operations acpi_table_group_ops = {
+ 	.make_item = acpi_table_make_item,
++	.drop_item = acpi_table_drop_item,
+ };
  
-+	if (efi_enabled(EFI_RUNTIME_SERVICES))
-+		efivar_ssdt_load();
-+
- 	error = sysfs_create_group(efi_kobj, &efi_subsys_attr_group);
- 	if (error) {
- 		pr_err("efi: Sysfs attribute export failed with error %d.\n",
+ static struct config_item_type acpi_tables_type = {
 -- 
 1.9.1
