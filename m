@@ -1,126 +1,161 @@
 From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: [RFC PATCH v2 08/10] acpi: add support for configfs
-Date: Wed, 20 Apr 2016 01:39:06 +0300
-Message-ID: <1461105548-20618-9-git-send-email-octavian.purdila@intel.com>
+Subject: [RFC PATCH v2 06/10] spi: add support for ACPI reconfigure notifications
+Date: Wed, 20 Apr 2016 01:39:04 +0300
+Message-ID: <1461105548-20618-7-git-send-email-octavian.purdila@intel.com>
 References: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
-Return-path: <linux-i2c-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
-Sender: linux-i2c-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
 Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, Octavian Purdila <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Register the ACPI subsystem with configfs.
+This patch adds supports for SPI device enumeration and removal via
+ACPI reconfiguration notifications that are send as a result of an
+ACPI table load or unload operation.
 
 Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
 ---
- Documentation/ABI/testing/configfs-acpi |  7 ++++++
- MAINTAINERS                             |  1 +
- drivers/acpi/Kconfig                    |  9 ++++++++
- drivers/acpi/Makefile                   |  1 +
- drivers/acpi/configfs.c                 | 39 +++++++++++++++++++++++++++++++++
- 5 files changed, 57 insertions(+)
- create mode 100644 Documentation/ABI/testing/configfs-acpi
- create mode 100644 drivers/acpi/configfs.c
+ drivers/spi/spi.c | 94 ++++++++++++++++++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 87 insertions(+), 7 deletions(-)
 
-diff --git a/Documentation/ABI/testing/configfs-acpi b/Documentation/ABI/testing/configfs-acpi
-new file mode 100644
-index 0000000..0c806aa
---- /dev/null
-+++ b/Documentation/ABI/testing/configfs-acpi
-@@ -0,0 +1,7 @@
-+What:		/config/acpi
-+Date:		April 2016
-+KernelVersion:	4.6
-+Contact:	linux-acpi@vger.kernel.org
-+Description:
-+		This represents the ACPI subsystem entry point directory. It
-+		contains sub-groups corresponding to ACPI configurable options.
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 1c32f8a..6695648 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -289,6 +289,7 @@ F:	include/linux/acpi.h
- F:	include/acpi/
- F:	Documentation/acpi/
- F:	Documentation/ABI/testing/sysfs-bus-acpi
-+F:	Documentation/ABI/testing/configfs-acpi
- F:	drivers/pci/*acpi*
- F:	drivers/pci/*/*acpi*
- F:	drivers/pci/*/*/*acpi*
-diff --git a/drivers/acpi/Kconfig b/drivers/acpi/Kconfig
-index 82b96ee..7d02816 100644
---- a/drivers/acpi/Kconfig
-+++ b/drivers/acpi/Kconfig
-@@ -521,4 +521,13 @@ config XPOWER_PMIC_OPREGION
+diff --git a/drivers/spi/spi.c b/drivers/spi/spi.c
+index de2f2f9..d6c5a9c 100644
+--- a/drivers/spi/spi.c
++++ b/drivers/spi/spi.c
+@@ -1644,18 +1644,15 @@ static int acpi_spi_add_resource(struct acpi_resource *ares, void *data)
+ 	return 1;
+ }
  
- endif
+-static acpi_status acpi_spi_add_device(acpi_handle handle, u32 level,
+-				       void *data, void **return_value)
++static acpi_status acpi_register_spi_device(struct spi_master *master,
++					    struct acpi_device *adev)
+ {
+-	struct spi_master *master = data;
+ 	struct list_head resource_list;
+-	struct acpi_device *adev;
+ 	struct spi_device *spi;
+ 	int ret;
  
-+config ACPI_CONFIGFS
-+	tristate "ACPI configfs support"
-+	select CONFIGFS_FS
-+	default n
-+	help
-+	  Select this option to enable support for ACPI configuration from
-+	  userspace. The configurable ACPI groups will be visible under
-+	  /config/acpi, assuming configfs is mounted under /config.
-+
- endif	# ACPI
-diff --git a/drivers/acpi/Makefile b/drivers/acpi/Makefile
-index edeb2d1..319e63d 100644
---- a/drivers/acpi/Makefile
-+++ b/drivers/acpi/Makefile
-@@ -98,5 +98,6 @@ obj-$(CONFIG_ACPI_EXTLOG)	+= acpi_extlog.o
- obj-$(CONFIG_PMIC_OPREGION)	+= pmic/intel_pmic.o
- obj-$(CONFIG_CRC_PMIC_OPREGION) += pmic/intel_pmic_crc.o
- obj-$(CONFIG_XPOWER_PMIC_OPREGION) += pmic/intel_pmic_xpower.o
-+obj-$(CONFIG_ACPI_CONFIGFS)	+= configfs.o
+-	if (acpi_bus_get_device(handle, &adev))
+-		return AE_OK;
+-	if (acpi_bus_get_status(adev) || !adev->status.present)
++	if (acpi_bus_get_status(adev) || !adev->status.present ||
++	    acpi_device_enumerated(adev))
+ 		return AE_OK;
  
- video-objs			+= acpi_video.o video_detect.o
-diff --git a/drivers/acpi/configfs.c b/drivers/acpi/configfs.c
-new file mode 100644
-index 0000000..96aa3d8
---- /dev/null
-+++ b/drivers/acpi/configfs.c
-@@ -0,0 +1,39 @@
-+/*
-+ * ACPI configfs support
-+ *
-+ * Copyright (c) 2015 Intel Corporation
-+ *
-+ * This program is free software; you can redistribute it and/or modify it
-+ * under the terms of the GNU General Public License version 2 as published by
-+ * the Free Software Foundation.
-+ */
+ 	spi = spi_alloc_device(master);
+@@ -1681,6 +1678,8 @@ static acpi_status acpi_spi_add_device(acpi_handle handle, u32 level,
+ 	if (spi->irq < 0)
+ 		spi->irq = acpi_dev_gpio_irq_get(adev, 0);
+ 
++	adev->flags.visited = true;
 +
-+#include <linux/init.h>
-+#include <linux/module.h>
-+#include <linux/configfs.h>
-+#include <linux/acpi.h>
-+
-+static int __init acpi_configfs_init(void)
+ 	adev->power.flags.ignore_parent = true;
+ 	strlcpy(spi->modalias, acpi_device_hid(adev), sizeof(spi->modalias));
+ 	if (spi_add_device(spi)) {
+@@ -1693,6 +1692,18 @@ static acpi_status acpi_spi_add_device(acpi_handle handle, u32 level,
+ 	return AE_OK;
+ }
+ 
++static acpi_status acpi_spi_add_device(acpi_handle handle, u32 level,
++				       void *data, void **return_value)
 +{
-+	int ret;
-+	struct config_group *root = &acpi_configfs.su_group;
++	struct spi_master *master = data;
++	struct acpi_device *adev;
 +
-+	config_group_init(root);
++	if (acpi_bus_get_device(handle, &adev))
++		return AE_OK;
 +
-+	ret = configfs_register_subsystem(&acpi_configfs);
-+	if (ret)
-+		return ret;
-+
-+	return 0;
++	return acpi_register_spi_device(master, adev);
 +}
-+module_init(acpi_configfs_init);
 +
-+static void __exit acpi_configfs_exit(void)
+ static void acpi_register_spi_devices(struct spi_master *master)
+ {
+ 	acpi_status status;
+@@ -3104,6 +3115,73 @@ static struct notifier_block spi_of_notifier = {
+ extern struct notifier_block spi_of_notifier;
+ #endif /* IS_ENABLED(CONFIG_OF_DYNAMIC) */
+ 
++#if IS_ENABLED(CONFIG_ACPI)
++static int spi_acpi_master_match(struct device *dev, const void *data)
 +{
-+	configfs_unregister_subsystem(&acpi_configfs);
++	return ACPI_COMPANION(dev->parent) == data;
 +}
-+module_exit(acpi_configfs_exit);
 +
-+MODULE_AUTHOR("Octavian Purdila <octavian.purdila@intel.com>");
-+MODULE_DESCRIPTION("ACPI configfs support");
-+MODULE_LICENSE("GPL v2");
++static int spi_acpi_device_match(struct device *dev, void *data)
++{
++	return ACPI_COMPANION(dev) == data;
++}
++
++static struct spi_master *acpi_spi_find_master_by_adev(struct acpi_device *adev)
++{
++	struct device *dev;
++
++	dev = class_find_device(&spi_master_class, NULL, adev,
++				spi_acpi_master_match);
++	if (!dev)
++		return NULL;
++
++	return container_of(dev, struct spi_master, dev);
++}
++
++static struct spi_device *acpi_spi_find_device_by_adev(struct acpi_device *adev)
++{
++	struct device *dev;
++
++	dev = bus_find_device(&spi_bus_type, NULL, adev, spi_acpi_device_match);
++
++	return dev ? to_spi_device(dev) : NULL;
++}
++
++static int acpi_spi_notify(struct notifier_block *nb, unsigned long value,
++			   void *arg)
++{
++	struct acpi_device *adev = arg;
++	struct spi_master *master;
++	struct spi_device *spi;
++
++	switch (value) {
++	case ACPI_RECONFIG_DEVICE_ADD:
++		master = acpi_spi_find_master_by_adev(adev->parent);
++		if (!master)
++			break;
++
++		acpi_register_spi_device(master, adev);
++		put_device(&master->dev);
++		break;
++	case ACPI_RECONFIG_DEVICE_REMOVE:
++		spi = acpi_spi_find_device_by_adev(adev);
++		if (!spi)
++			break;
++
++		spi_unregister_device(spi);
++		put_device(&spi->dev);
++	}
++
++	return NOTIFY_OK;
++}
++
++static struct notifier_block spi_acpi_notifier = {
++	.notifier_call = acpi_spi_notify,
++};
++#else
++extern struct notifier_block spi_acpi_notifier;
++#endif
++
+ static int __init spi_init(void)
+ {
+ 	int	status;
+@@ -3124,6 +3202,8 @@ static int __init spi_init(void)
+ 
+ 	if (IS_ENABLED(CONFIG_OF_DYNAMIC))
+ 		WARN_ON(of_reconfig_notifier_register(&spi_of_notifier));
++	if (IS_ENABLED(CONFIG_ACPI))
++		WARN_ON(acpi_reconfig_notifier_register(&spi_acpi_notifier));
+ 
+ 	return 0;
+ 
 -- 
 1.9.1
