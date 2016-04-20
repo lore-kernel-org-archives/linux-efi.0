@@ -1,24 +1,23 @@
-From: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] lib: Always NUL terminate ucs2_as_utf8
-Date: Wed, 20 Apr 2016 15:25:32 +0200
-Message-ID: <5717834C.6070802@redhat.com>
+From: Jani Nikula <jani.nikula-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: Re: [Intel-gfx] [PATCH] lib: Always NUL terminate ucs2_as_utf8
+Date: Wed, 20 Apr 2016 17:03:28 +0300
+Message-ID: <871t60nzrj.fsf@intel.com>
 References: <1461141427-16361-1-git-send-email-chris@chris-wilson.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1461141427-16361-1-git-send-email-chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: intel-gfx-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Jason Andryuk <jandryuk-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jason Andryuk <jandryuk-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, intel-gfx-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 04/20/16 10:37, Chris Wilson wrote:
+On Wed, 20 Apr 2016, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org> wrote:
 > If the caller, in this case efivarfs_callback(), only provides sufficent
 > room for the expanded utf8 and not enough to include the terminating NUL
 > byte, that NUL byte is skipped. When the caller then interprets it as a
 > string, it may then read from past its allocated memory:
-> 
+>
 > [  170.605647] WARNING: kmemcheck: Caught 8-bit read from uninitialized memory (ffff8804079ae786)
 > [  170.605677] 436f6e4f757400004c44322d35363062663538612d316530642d346437652d39
 > [  170.606037]  i i i i i i u u u u u u u u u u u u u u u u u u u u u u u u u u
@@ -44,120 +43,18 @@ On 04/20/16 10:37, Chris Wilson wrote:
 > [  170.606519]  [<ffffffff8114fa9f>] SyS_mount+0x8f/0xd0
 > [  170.606530]  [<ffffffff81451d1f>] entry_SYSCALL_64_fastpath+0x17/0x93
 > [  170.606542]  [<ffffffffffffffff>] 0xffffffffffffffff
-> 
-> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> Cc: Jason Andryuk <jandryuk-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Cc: Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>
-> Cc: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> ---
->  drivers/firmware/efi/vars.c |  2 +-
->  lib/ucs2_string.c           | 15 ++++++++++-----
->  2 files changed, 11 insertions(+), 6 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-> index 0ac594c0a234..8dd503bac35d 100644
-> --- a/drivers/firmware/efi/vars.c
-> +++ b/drivers/firmware/efi/vars.c
-> @@ -166,7 +166,7 @@ validate_ascii_string(efi_char16_t *var_name, int match, u8 *buffer,
->  
->  struct variable_validate {
->  	efi_guid_t vendor;
-> -	char *name;
-> +	const char *name;
->  	bool (*validate)(efi_char16_t *var_name, int match, u8 *data,
->  			 unsigned long len);
->  };
-> diff --git a/lib/ucs2_string.c b/lib/ucs2_string.c
-> index f0b323abb4c6..fb8d03966656 100644
-> --- a/lib/ucs2_string.c
-> +++ b/lib/ucs2_string.c
-> @@ -85,29 +85,34 @@ ucs2_as_utf8(u8 *dest, const ucs2_char_t *src, unsigned long maxlength)
->  	unsigned long j = 0;
->  	unsigned long limit = ucs2_strnlen(src, maxlength);
->  
-> -	for (i = 0; maxlength && i < limit; i++) {
-> +	if (maxlength == 0)
-> +		return 0;
-> +
-> +	for (i = 0; i < limit; i++) {
->  		u16 c = src[i];
->  
->  		if (c >= 0x800) {
-> -			if (maxlength < 3)
-> +			if (maxlength <= 3)
->  				break;
->  			maxlength -= 3;
->  			dest[j++] = 0xe0 | (c & 0xf000) >> 12;
->  			dest[j++] = 0x80 | (c & 0x0fc0) >> 6;
->  			dest[j++] = 0x80 | (c & 0x003f);
->  		} else if (c >= 0x80) {
-> -			if (maxlength < 2)
-> +			if (maxlength <= 2)
->  				break;
->  			maxlength -= 2;
->  			dest[j++] = 0xc0 | (c & 0x7c0) >> 6;
->  			dest[j++] = 0x80 | (c & 0x03f);
->  		} else {
-> +			if (maxlength <= 1)
-> +				break;
->  			maxlength -= 1;
->  			dest[j++] = c & 0x7f;
->  		}
->  	}
-> -	if (maxlength)
-> -		dest[j] = '\0';
-> +	dest[j] = '\0';
-> +
->  	return j;
->  }
->  EXPORT_SYMBOL(ucs2_as_utf8);
-> 
 
-I apologize for following up in "waves". I'd like us to consider how
-this patch works together with the rest of the code.
+So I eyeballed the code a bit, and came across efivar_validate(), which
+calls variable_matches(), which definitely can access off by one beyond
+the passed in var_name on that call path.
 
-IIUC, ucs2_utf8size() returns the number of non-NUL bytes that are
-required to store the transcoded string. And, in "fs/efivarfs/super.c",
-function efivarfs_callback(), we have:
+However I can't match that up with your backtrace, so may be another
+bug.
 
-	len = ucs2_utf8size(entry->var.VariableName);
 
-	/* name, plus '-', plus GUID, plus NUL*/
-	name = kmalloc(len + 1 + EFI_VARIABLE_GUID_LEN + 1, GFP_KERNEL);
-	if (!name)
-		goto fail;
+BR,
+Jani.
 
-	ucs2_as_utf8(name, entry->var.VariableName, len);
 
-So, "len" does not include the room for the terminating NUL-byte here.
-When "len" is passed to ucs2_as_utf8(), with the proposed patch applied,
-a NUL byte will be produced in "name", but it will be at the price of a
-genuine character from the input variable name.
-
-Because, "len" has been computed for the exact storage need, and now the
-equality in one of the permissive inequalities (introduced by this
-patch) will terminate the transcoding early.
-
-Assume that VariableName is (u16[]){ 'a', 'b', '\0' }. For this input,
-ucs2_strlen() returns 2, and ucs2_utf8size() also returns 2. Right?
-
-If so, then:
-- len = 2
-- "maxlen" at entry to ucs2_as_utf8() is also 2
-- "limit" in ucs2_as_utf8() will be initialized to 2 as well
-
-So we run the loop body twice. The first iteration will lower
-"maxlength" to 1 (last branch). In the second iteration, (maxlength<=1)
-will match, and instead of transferring the character 'b', we'll set
-dest[1] to '\0'. In other words, we get the NUL-terminated string "a" as
-output.
-
-I think this breaks the subsequent comparisons against known variable names.
-
-Am I wrong?
-
-Thanks
-Laszlo
+-- 
+Jani Nikula, Intel Open Source Technology Center
