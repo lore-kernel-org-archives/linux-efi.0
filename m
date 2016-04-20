@@ -1,74 +1,93 @@
-From: Laszlo Ersek <lersek@redhat.com>
-Subject: Re: [PATCH] lib: Always NUL terminate ucs2_as_utf8
-Date: Wed, 20 Apr 2016 14:45:04 +0200
-Message-ID: <571779D0.1040508@redhat.com>
-References: <1461141427-16361-1-git-send-email-chris@chris-wilson.co.uk>
- <57174DA5.6030602@redhat.com>
- <20160420094133.GF14602@nuc-i3427.alporthouse.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 0/9] EFI framebuffer support for ARM and arm64
+Date: Wed, 20 Apr 2016 14:51:09 +0200
+Message-ID: <CAKv+Gu_WPCbGgG1TjnY5tQ4YPgR_LDdaeR1fm-S=C894OsXiGQ@mail.gmail.com>
+References: <1459526735-24936-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <intel-gfx-bounces@lists.freedesktop.org>
-In-Reply-To: <20160420094133.GF14602@nuc-i3427.alporthouse.com>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
-List-Post: <mailto:intel-gfx@lists.freedesktop.org>
-List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: intel-gfx-bounces@lists.freedesktop.org
-Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
-To: Chris Wilson <chris@chris-wilson.co.uk>, Peter Jones <pjones@redhat.com>, intel-gfx@lists.freedesktop.org, Matt Fleming <matt@codeblueprint.co.uk>, Jason Andryuk <jandryuk@gmail.com>, Matthew Garrett <mjg59@coreos.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1459526735-24936-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, David Herrmann <dh.herrmann-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gMDQvMjAvMTYgMTE6NDEsIENocmlzIFdpbHNvbiB3cm90ZToKPiBPbiBXZWQsIEFwciAyMCwg
-MjAxNiBhdCAxMTozNjozN0FNICswMjAwLCBMYXN6bG8gRXJzZWsgd3JvdGU6Cj4+IE9uIDA0LzIw
-LzE2IDEwOjM3LCBDaHJpcyBXaWxzb24gd3JvdGU6Cj4+PiBJZiB0aGUgY2FsbGVyLCBpbiB0aGlz
-IGNhc2UgZWZpdmFyZnNfY2FsbGJhY2soKSwgb25seSBwcm92aWRlcyBzdWZmaWNlbnQKPj4+IHJv
-b20gZm9yIHRoZSBleHBhbmRlZCB1dGY4IGFuZCBub3QgZW5vdWdoIHRvIGluY2x1ZGUgdGhlIHRl
-cm1pbmF0aW5nIE5VTAo+Pj4gYnl0ZSwgdGhhdCBOVUwgYnl0ZSBpcyBza2lwcGVkLgo+Pgo+PiBI
-b3cgZG9lcyB0aGF0IG9jY3VyPyBJbiBlZml2YXJmc19jYWxsYmFjaygpIFtmcy9lZml2YXJmcy9z
-dXBlci5jXSwgd2UgaGF2ZQo+Pgo+PiAJbGVuID0gdWNzMl91dGY4c2l6ZShlbnRyeS0+dmFyLlZh
-cmlhYmxlTmFtZSk7Cj4+Cj4+IAkvKiBuYW1lLCBwbHVzICctJywgcGx1cyBHVUlELCBwbHVzIE5V
-TCovCj4+IAluYW1lID0ga21hbGxvYyhsZW4gKyAxICsgRUZJX1ZBUklBQkxFX0dVSURfTEVOICsg
-MSwgR0ZQX0tFUk5FTCk7Cj4+IAlpZiAoIW5hbWUpCj4+IAkJZ290byBmYWlsOwo+Pgo+PiAJdWNz
-Ml9hc191dGY4KG5hbWUsIGVudHJ5LT52YXIuVmFyaWFibGVOYW1lLCBsZW4pOwo+Pgo+PiBJbnN0
-ZWFkLCBJIHRoaW5rIHRoZSBmb2xsb3dpbmcgbWlnaHQgYmUgaGFwcGVuaW5nIChub3RlIHRoYXQg
-UklQIHBvaW50cwo+PiBpbnRvIGVmaXZhcl92YXJpYWJsZV9pc19yZW1vdmFibGUoKSwgYW5kIEkg
-Z3Vlc3MgdmFyaWFibGVfbWF0Y2hlcygpCj4+ICh3aGljaCBpcyBzdGF0aWMpIGlzIGlubGluZWQp
-Ogo+Pgo+PiBlZml2YXJmc19jYWxsYmFjaygpICAgICAgICAgICAgICBbZnMvZWZpdmFyZnMvc3Vw
-ZXIuY10KPj4gICBlZml2YXJfdmFyaWFibGVfaXNfcmVtb3ZhYmxlKCkgW2RyaXZlcnMvZmlybXdh
-cmUvZWZpL3ZhcnMuY10KPj4gICAgIHZhcmlhYmxlX21hdGNoZXMoKSAgICAgICAgICAgW2RyaXZl
-cnMvZmlybXdhcmUvZWZpL3ZhcnMuY10KPj4KPj4gVGhlIGJ1ZyBzZWVtcyB0byBiZSBpbiB2YXJp
-YWJsZV9tYXRjaGVzKCksIHdoaWNoIGRvZXNuJ3QgY29uc2lkZXIgdGhlCj4+ICJsZW4iIHBhcmFt
-ZXRlciBlYXJseSBlbm91Z2guIE5hbWVseSwgY29uc2lkZXIgdGhhdCB3ZSBoYXZlIHRoZQo+PiBm
-b2xsb3dpbmcgaW5wdXQ6Cj4+Cj4+IC0gdmFyX25hbWU6ICJhIgo+PiAtIGxlbjogMQo+PiAtIG1h
-dGNoX25hbWUgImFiIgo+Pgo+PiBJbiB0aGUgZmlyc3QgaXRlcmF0aW9uIG9mIHRoZSBsb29wIChp
-LmUuLCAqbWF0Y2ggPT0gMCk6Cj4+IC0gYyA9ICdhJwo+PiAtIHUgPSAnYScKPj4gLSAqbWF0Y2gg
-Z2V0cyBpbmNyZW1lbnRlZCB0byAxLgo+Pgo+PiBJbiB0aGUgc2Vjb25kIGl0ZXJhdGlvbiBvZiB0
-aGUgbG9vcCAoaS5lLiwgKm1hdGNoID09IDEpOgo+PiAtIGMgPSAnYicKPj4gLSB1ID0gPGluZGV0
-ZXJtaW5hdGUgdmFsdWU+ICh0aGF0IGlzLCB1bmRlZmluZWQgYmVoYXZpb3IpLAo+PiAgIGJlY2F1
-c2UgKCptYXRjaCA9PSBsZW4pLgo+Pgo+PiBUaGlzIHNlZW1zIHRvIGJlIGNvbnNpc3RlbnQgd2l0
-aCB0aGUgZXJyb3IgbWVzc2FnZSAiQ2F1Z2h0IDgtYml0IHJlYWQKPj4gZnJvbSB1bmluaXRpYWxp
-emVkIG1lbW9yeSI6IG5hbWVseSwgdGhlIGFycmF5IGFsbG9jYXRlZCBmb3IgIm5hbWUiIGluCj4+
-IGVmaXZhcmZzX2NhbGxiYWNrKCkgaXMgaW5kZWVkIG5vdCBwcmUtemVyb2VkLCBhbmQgdGhlIHVj
-czJfYXNfdXRmOCgpCj4+IGZ1bmN0aW9uIGRvZXMgbm90IHBvcHVsYXRlIG5hbWVbbGVuXSAtLSBj
-b3JyZWN0bHksIEkgd291bGQgc2F5Lgo+IAo+IHVjczJfYXNfdXRmOCByZXBvcnRzIHRoYXQgaXQg
-cmV0dXJucyBhIE5VTCB0ZXJtaW5hdGVkIHN0cmluZy4KCkkgZG9uJ3QgdGhpbmsgaXQgZG9lcy4g
-SGVyZSdzIHRoZSBjb21tZW50OgoKLyoKICogY29weSBhdCBtb3N0IG1heGxlbmd0aCBieXRlcyBv
-ZiB3aG9sZSB1dGY4IGNoYXJhY3RlcnMgdG8gZGVzdCBmcm9tIHRoZQogKiB1Y3MyIHN0cmluZyBz
-cmMuCiAqCiAqIFRoZSByZXR1cm4gdmFsdWUgaXMgdGhlIG51bWJlciBvZiBjaGFyYWN0ZXJzIGNv
-cGllZCwgbm90IGluY2x1ZGluZyB0aGUKICogZmluYWwgTlVMIGNoYXJhY3Rlci4KICovCgpJdCBk
-b2Vzbid0IHNlZW0gdG8gcHJvbWlzZSB0aGF0IHRoZSBvdXRwdXQgd2lsbCBhbHdheXMgYmUgTlVM
-LXRlcm1pbmF0ZWQuIEFuZCwgdGhlIGNvZGUgZXhwbGljaXRseSBjb25zaWRlcnMgdGhlIGNhc2Ug
-d2hlbiB0aGVyZSBpcyBubyByb29tIGZvciB0aGUgZmluYWwgTlVMLgoKQSBzdHJpY3RseSBOVUwt
-dGVybWluYXRlZCBvdXRwdXQgbWlnaHQgbWFrZSBmb3IgYSBiZXR0ZXIgaW50ZXJmYWNlLCBidXQg
-dGhlbiB0aGUgY29tbWVudCBzaG91bGQgYmUgdXBkYXRlZCBhcyB3ZWxsLiBQbHVzLCBJJ20gdW5z
-dXJlIGlmIGl0IHdvdWxkIGJlIGFsaWduZWQgd2l0aCBQZXRlcidzIG9yaWdpbmFsIGdvYWwgKGFu
-ZCB0aGUgY3VycmVudCBjYWxsIHNpdGVzKS4gSSdtIG5vdCBhZ2FpbnN0IGNoYW5naW5nIHRoZSBp
-bnRlcmZhY2UgY29udHJhY3Q7IEknbGwgbGV0IFBldGVyIHNwZWFrIHVwLgoKPiBJdCBkaWRuJ3QK
-PiBpbiB0aGlzIGNhc2UuCj4gLUNocmlzCj4gCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fXwpJbnRlbC1nZnggbWFpbGluZyBsaXN0CkludGVsLWdmeEBsaXN0
-cy5mcmVlZGVza3RvcC5vcmcKaHR0cHM6Ly9saXN0cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1hbi9s
-aXN0aW5mby9pbnRlbC1nZngK
+On 1 April 2016 at 18:05, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> This series adds support to ARM and arm64 for using the kernel's EFI
+> framebuffer driver to drive EFI Graphics Output Protocol (GOP) based
+> framebuffers.
+>
+
+Matt: FYI the memremap() patches for ARM that this series (and the
+memory attributes one as well, for that matter) depends on have been
+pulled by Russell and should turn up in -next shortly. That means
+these patches are good to go, as far as I am concerned (unless there
+are remaining concerns?)
+
+Thanks,
+Ard.
+
+
+> This involves refactoring some of the existing x86 code so it can be reused
+> by ARM and arm64, and wiring it up both in the UEFI stub and in the core
+> kernel into the existing UEFI infrastructure for ARM and arm64.
+>
+> Changes since v2:
+> - added acks from Peter and David (patches #3 and #4)
+> - move introduction of typedef of efi_graphics_output_protocol_query_mode to
+>   patch #1 (and move it along in a subsequent patch) to fix a transient build
+>   issue spotted by the kbuild robot
+> - register screen_info as platform driver data explicitly, as x86 does (David)
+> - assign dummy values to screen_info.orig_video_cols/orig_video_lines, this is
+>   required by dummycon on ARM
+>
+> Changes since v1:
+> - don't use const efi_guid_t and subsequently cast away constness
+> - update first, then move the x86 GOP code rather than creating a copy
+>   and update at the same time, and delete the x86 code later: this should
+>   make it easier to spot changes to the code that affect its correct operation
+>   on x86
+> - refactor the ARM changes so that the config table creation and consumption
+>   is introduced in the same patch (including the prototype changes for the
+>   install_configuration_table() boot service function pointer)
+> - use true/false rather than 1/0
+> - split stub changes into 32-bit arm/64-bit arm/common arm
+> - split platform device changes from platform driver changes (latter is
+>   basically only a Kconfig change)
+>
+> Ard Biesheuvel (9):
+>   efi/x86: prepare GOP handling code for reuse as generic code
+>   efi: libstub: move Graphics Output Protocol handling to generic code
+>   efi/x86: efifb: move DMI based quirks handling out of generic code
+>   efi: efifb: use builtin_platform_driver and drop unused includes
+>   efi/arm64: libstub: make screen_info accessible to the UEFI stub
+>   efi/arm: libstub: make screen_info accessible to the UEFI stub
+>   efi/arm*: libstub: wire up GOP protocol to struct screen_info
+>   efi/arm*: wire up struct screen_info to efi-framebuffer platform
+>     device
+>   efifb: enable the efi-framebuffer platform driver for ARM and arm64
+>
+>  arch/arm/include/asm/efi.h                |  11 +-
+>  arch/arm/kernel/setup.c                   |   3 +-
+>  arch/arm64/include/asm/efi.h              |  11 +-
+>  arch/arm64/kernel/efi.c                   |   3 +
+>  arch/arm64/kernel/image.h                 |   1 +
+>  arch/x86/boot/compressed/eboot.c          | 308 +----------------
+>  arch/x86/boot/compressed/eboot.h          |  74 ----
+>  arch/x86/include/asm/efi.h                |   7 +
+>  arch/x86/kernel/sysfb_efi.c               |  15 +
+>  drivers/firmware/efi/arm-init.c           |  52 ++-
+>  drivers/firmware/efi/efi.c                |   5 +-
+>  drivers/firmware/efi/libstub/Makefile     |   2 +-
+>  drivers/firmware/efi/libstub/arm-stub.c   |  23 ++
+>  drivers/firmware/efi/libstub/arm32-stub.c |  37 ++
+>  drivers/firmware/efi/libstub/gop.c        | 354 ++++++++++++++++++++
+>  drivers/video/fbdev/Kconfig               |   2 +-
+>  drivers/video/fbdev/efifb.c               |  21 +-
+>  include/linux/efi.h                       |  97 +++++-
+>  18 files changed, 619 insertions(+), 407 deletions(-)
+>  create mode 100644 drivers/firmware/efi/libstub/gop.c
+>
+> --
+> 2.5.0
+>
