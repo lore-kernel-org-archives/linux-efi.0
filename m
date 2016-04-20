@@ -1,94 +1,78 @@
-From: Chris Wilson <chris@chris-wilson.co.uk>
-Subject: [PATCH] lib: Always NUL terminate ucs2_as_utf8
-Date: Wed, 20 Apr 2016 09:37:07 +0100
-Message-ID: <1461141427-16361-1-git-send-email-chris@chris-wilson.co.uk>
+From: Stefano Stabellini <sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v11 12/17] ARM64: ACPI: Check if it runs on Xen to enable
+ or disable ACPI
+Date: Wed, 20 Apr 2016 10:34:41 +0100 (BST)
+Message-ID: <alpine.DEB.2.10.1604201033140.25611@sstabellini-ThinkPad-X260>
+References: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com> <1460030614-16112-13-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <intel-gfx-bounces@lists.freedesktop.org>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
-List-Post: <mailto:intel-gfx@lists.freedesktop.org>
-List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: intel-gfx-bounces@lists.freedesktop.org
-Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
-To: Peter Jones <pjones@redhat.com>
-Cc: linux-efi@vger.kernel.org, Jason Andryuk <jandryuk@gmail.com>, Matt Fleming <matt@codeblueprint.co.uk>, intel-gfx@lists.freedesktop.org, linux-kernel@vger.kernel.org, Matthew Garrett <mjg59@coreos.com>, Laszlo Ersek <lersek@redhat.com>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1460030614-16112-13-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: mark.rutland-5wv7dgnIgG8@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-SWYgdGhlIGNhbGxlciwgaW4gdGhpcyBjYXNlIGVmaXZhcmZzX2NhbGxiYWNrKCksIG9ubHkgcHJv
-dmlkZXMgc3VmZmljZW50CnJvb20gZm9yIHRoZSBleHBhbmRlZCB1dGY4IGFuZCBub3QgZW5vdWdo
-IHRvIGluY2x1ZGUgdGhlIHRlcm1pbmF0aW5nIE5VTApieXRlLCB0aGF0IE5VTCBieXRlIGlzIHNr
-aXBwZWQuIFdoZW4gdGhlIGNhbGxlciB0aGVuIGludGVycHJldHMgaXQgYXMgYQpzdHJpbmcsIGl0
-IG1heSB0aGVuIHJlYWQgZnJvbSBwYXN0IGl0cyBhbGxvY2F0ZWQgbWVtb3J5OgoKWyAgMTcwLjYw
-NTY0N10gV0FSTklORzoga21lbWNoZWNrOiBDYXVnaHQgOC1iaXQgcmVhZCBmcm9tIHVuaW5pdGlh
-bGl6ZWQgbWVtb3J5IChmZmZmODgwNDA3OWFlNzg2KQpbICAxNzAuNjA1Njc3XSA0MzZmNmU0Zjc1
-NzQwMDAwNGM0NDMyMmQzNTM2MzA2MjY2MzUzODYxMmQzMTY1MzA2NDJkMzQ2NDM3NjUyZDM5Clsg
-IDE3MC42MDYwMzddICBpIGkgaSBpIGkgaSB1IHUgdSB1IHUgdSB1IHUgdSB1IHUgdSB1IHUgdSB1
-IHUgdSB1IHUgdSB1IHUgdSB1IHUKWyAgMTcwLjYwNjIzNl0gICAgICAgICAgICAgIF4KWyAgMTcw
-LjYwNjI0M10gUklQOiAwMDEwOls8ZmZmZmZmZmY4MTNhMjUxZj5dICBbPGZmZmZmZmZmODEzYTI1
-MWY+XSBlZml2YXJfdmFyaWFibGVfaXNfcmVtb3ZhYmxlKzB4YWYvMHhmMApbICAxNzAuNjA2MzQ2
-XSBSU1A6IDAwMTg6ZmZmZjg4MDQwOGU3M2MyMCAgRUZMQUdTOiAwMDAxMDIwNgpbICAxNzAuNjA2
-MzUyXSBSQVg6IDAwMDAwMDAwMDAwMDAwMDAgUkJYOiAwMDAwMDAwMDAwMDAwMDA2IFJDWDogMDAw
-MDAwMDAwMDAwMDAwNgpbICAxNzAuNjA2MzU5XSBSRFg6IDAwMDAwMDAwMDAwMDAwMDAgUlNJOiAw
-MDAwMDAwMDAwMDAwMDc0IFJESTogZmZmZjg4MDQwOGU3M2MzMApbICAxNzAuNjA2MzY1XSBSQlA6
-IGZmZmY4ODA0MDhlNzNjODAgUjA4OiAwMDAwMDAwMDAwMDAwMDA2IFIwOTogMDAwMDAwMDAwMDAw
-MDA4YwpbICAxNzAuNjA2MzcxXSBSMTA6IDAwMDAwMDAwMDAwMDAwMDYgUjExOiAwMDAwMDAwMDAw
-MDAwMDAwIFIxMjogZmZmZmZmZmY4MTY2ZWQyMApbICAxNzAuNjA2Mzc4XSBSMTM6IDExZDI5M2Nh
-OGJlNGRmNjEgUjE0OiBmZmZmZmZmZjgxNzczODM0IFIxNTogZmZmZjg4MDQwNzlhZTc4MApbICAx
-NzAuNjA2Mzg1XSBGUzogIDAwMDAwMDAwMDAwMDAwMDAoMDAwMCkgR1M6ZmZmZjg4MDQxY2EwMDAw
-MCgwMDAwKSBrbmxHUzowMDAwMDAwMDAwMDAwMDAwClsgIDE3MC42MDYzOTJdIENTOiAgMDAxMCBE
-UzogMDAwMCBFUzogMDAwMCBDUjA6IDAwMDAwMDAwODAwNTAwMzMKWyAgMTcwLjYwNjM5OV0gQ1Iy
-OiBmZmZmODgwNDA5Y2JlNGMwIENSMzogMDAwMDAwMDQwODVmZDAwMCBDUjQ6IDAwMDAwMDAwMDAx
-NDA2ZjAKWyAgMTcwLjYwNjQwNV0gIFs8ZmZmZmZmZmY4MTFlYjkzOD5dIGVmaXZhcmZzX2NhbGxi
-YWNrKzB4ZjgvMHgyNzUKWyAgMTcwLjYwNjQxOF0gIFs8ZmZmZmZmZmY4MTNhMzM2OD5dIGVmaXZh
-cl9pbml0KzB4MjQ4LzB4MmUwClsgIDE3MC42MDY0NDBdICBbPGZmZmZmZmZmODExZWI2YjQ+XSBl
-Zml2YXJmc19maWxsX3N1cGVyKzB4YjQvMHhmMApbICAxNzAuNjA2NDUyXSAgWzxmZmZmZmZmZjgx
-MTMzM2U3Pl0gbW91bnRfc2luZ2xlKzB4ODcvMHhiMApbICAxNzAuNjA2NDYzXSAgWzxmZmZmZmZm
-ZjgxMWViNWYzPl0gZWZpdmFyZnNfbW91bnQrMHgxMy8weDIwClsgIDE3MC42MDY0NzVdICBbPGZm
-ZmZmZmZmODExMzM0ODA+XSBtb3VudF9mcysweDEwLzB4OTAKWyAgMTcwLjYwNjQ5N10gIFs8ZmZm
-ZmZmZmY4MTE0YzczMj5dIHZmc19rZXJuX21vdW50KzB4NjIvMHgxMDAKWyAgMTcwLjYwNjUwOF0g
-IFs8ZmZmZmZmZmY4MTE0ZWNiMD5dIGRvX21vdW50KzB4MWUwLzB4Y2QwClsgIDE3MC42MDY1MTld
-ICBbPGZmZmZmZmZmODExNGZhOWY+XSBTeVNfbW91bnQrMHg4Zi8weGQwClsgIDE3MC42MDY1MzBd
-ICBbPGZmZmZmZmZmODE0NTFkMWY+XSBlbnRyeV9TWVNDQUxMXzY0X2Zhc3RwYXRoKzB4MTcvMHg5
-MwpbICAxNzAuNjA2NTQyXSAgWzxmZmZmZmZmZmZmZmZmZmZmPl0gMHhmZmZmZmZmZmZmZmZmZmZm
-CgpDYzogTWF0dCBGbGVtaW5nIDxtYXR0QGNvZGVibHVlcHJpbnQuY28udWs+CkNjOiBKYXNvbiBB
-bmRyeXVrIDxqYW5kcnl1a0BnbWFpbC5jb20+CkNjOiBNYXR0aGV3IEdhcnJldHQgPG1qZzU5QGNv
-cmVvcy5jb20+CkNjOiBMYXN6bG8gRXJzZWsgPGxlcnNla0ByZWRoYXQuY29tPgpDYzogUGV0ZXIg
-Sm9uZXMgPHBqb25lc0ByZWRoYXQuY29tPgpDYzogbGludXgtZWZpQHZnZXIua2VybmVsLm9yZwpD
-YzogbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZwotLS0KIGRyaXZlcnMvZmlybXdhcmUvZWZp
-L3ZhcnMuYyB8ICAyICstCiBsaWIvdWNzMl9zdHJpbmcuYyAgICAgICAgICAgfCAxNSArKysrKysr
-KysrLS0tLS0KIDIgZmlsZXMgY2hhbmdlZCwgMTEgaW5zZXJ0aW9ucygrKSwgNiBkZWxldGlvbnMo
-LSkKCmRpZmYgLS1naXQgYS9kcml2ZXJzL2Zpcm13YXJlL2VmaS92YXJzLmMgYi9kcml2ZXJzL2Zp
-cm13YXJlL2VmaS92YXJzLmMKaW5kZXggMGFjNTk0YzBhMjM0Li44ZGQ1MDNiYWMzNWQgMTAwNjQ0
-Ci0tLSBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL3ZhcnMuYworKysgYi9kcml2ZXJzL2Zpcm13YXJl
-L2VmaS92YXJzLmMKQEAgLTE2Niw3ICsxNjYsNyBAQCB2YWxpZGF0ZV9hc2NpaV9zdHJpbmcoZWZp
-X2NoYXIxNl90ICp2YXJfbmFtZSwgaW50IG1hdGNoLCB1OCAqYnVmZmVyLAogCiBzdHJ1Y3QgdmFy
-aWFibGVfdmFsaWRhdGUgewogCWVmaV9ndWlkX3QgdmVuZG9yOwotCWNoYXIgKm5hbWU7CisJY29u
-c3QgY2hhciAqbmFtZTsKIAlib29sICgqdmFsaWRhdGUpKGVmaV9jaGFyMTZfdCAqdmFyX25hbWUs
-IGludCBtYXRjaCwgdTggKmRhdGEsCiAJCQkgdW5zaWduZWQgbG9uZyBsZW4pOwogfTsKZGlmZiAt
-LWdpdCBhL2xpYi91Y3MyX3N0cmluZy5jIGIvbGliL3VjczJfc3RyaW5nLmMKaW5kZXggZjBiMzIz
-YWJiNGM2Li5mYjhkMDM5NjY2NTYgMTAwNjQ0Ci0tLSBhL2xpYi91Y3MyX3N0cmluZy5jCisrKyBi
-L2xpYi91Y3MyX3N0cmluZy5jCkBAIC04NSwyOSArODUsMzQgQEAgdWNzMl9hc191dGY4KHU4ICpk
-ZXN0LCBjb25zdCB1Y3MyX2NoYXJfdCAqc3JjLCB1bnNpZ25lZCBsb25nIG1heGxlbmd0aCkKIAl1
-bnNpZ25lZCBsb25nIGogPSAwOwogCXVuc2lnbmVkIGxvbmcgbGltaXQgPSB1Y3MyX3N0cm5sZW4o
-c3JjLCBtYXhsZW5ndGgpOwogCi0JZm9yIChpID0gMDsgbWF4bGVuZ3RoICYmIGkgPCBsaW1pdDsg
-aSsrKSB7CisJaWYgKG1heGxlbmd0aCA9PSAwKQorCQlyZXR1cm4gMDsKKworCWZvciAoaSA9IDA7
-IGkgPCBsaW1pdDsgaSsrKSB7CiAJCXUxNiBjID0gc3JjW2ldOwogCiAJCWlmIChjID49IDB4ODAw
-KSB7Ci0JCQlpZiAobWF4bGVuZ3RoIDwgMykKKwkJCWlmIChtYXhsZW5ndGggPD0gMykKIAkJCQli
-cmVhazsKIAkJCW1heGxlbmd0aCAtPSAzOwogCQkJZGVzdFtqKytdID0gMHhlMCB8IChjICYgMHhm
-MDAwKSA+PiAxMjsKIAkJCWRlc3RbaisrXSA9IDB4ODAgfCAoYyAmIDB4MGZjMCkgPj4gNjsKIAkJ
-CWRlc3RbaisrXSA9IDB4ODAgfCAoYyAmIDB4MDAzZik7CiAJCX0gZWxzZSBpZiAoYyA+PSAweDgw
-KSB7Ci0JCQlpZiAobWF4bGVuZ3RoIDwgMikKKwkJCWlmIChtYXhsZW5ndGggPD0gMikKIAkJCQli
-cmVhazsKIAkJCW1heGxlbmd0aCAtPSAyOwogCQkJZGVzdFtqKytdID0gMHhjMCB8IChjICYgMHg3
-YzApID4+IDY7CiAJCQlkZXN0W2orK10gPSAweDgwIHwgKGMgJiAweDAzZik7CiAJCX0gZWxzZSB7
-CisJCQlpZiAobWF4bGVuZ3RoIDw9IDEpCisJCQkJYnJlYWs7CiAJCQltYXhsZW5ndGggLT0gMTsK
-IAkJCWRlc3RbaisrXSA9IGMgJiAweDdmOwogCQl9CiAJfQotCWlmIChtYXhsZW5ndGgpCi0JCWRl
-c3Rbal0gPSAnXDAnOworCWRlc3Rbal0gPSAnXDAnOworCiAJcmV0dXJuIGo7CiB9CiBFWFBPUlRf
-U1lNQk9MKHVjczJfYXNfdXRmOCk7Ci0tIAoyLjguMQoKX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX18KSW50ZWwtZ2Z4IG1haWxpbmcgbGlzdApJbnRlbC1nZnhA
-bGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBzOi8vbGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxt
-YW4vbGlzdGluZm8vaW50ZWwtZ2Z4Cg==
+Hello Mark,
+
+do you think that this patch addresses your previous comments
+(http://marc.info/?l=devicetree&m=145926913008544&w=2) appropriately?
+
+Thanks,
+
+Stefano
+
+On Thu, 7 Apr 2016, Shannon Zhao wrote:
+> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> 
+> When it's a Xen domain0 booting with ACPI, it will supply a /chosen and
+> a /hypervisor node in DT. So check if it needs to enable ACPI.
+> 
+> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+> Acked-by: Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm64/kernel/acpi.c | 14 ++++++++++----
+>  1 file changed, 10 insertions(+), 4 deletions(-)
+> 
+> diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
+> index d1ce8e2..57ee317 100644
+> --- a/arch/arm64/kernel/acpi.c
+> +++ b/arch/arm64/kernel/acpi.c
+> @@ -67,10 +67,15 @@ static int __init dt_scan_depth1_nodes(unsigned long node,
+>  {
+>  	/*
+>  	 * Return 1 as soon as we encounter a node at depth 1 that is
+> -	 * not the /chosen node.
+> +	 * not the /chosen node, or /hypervisor node with compatible
+> +	 * string "xen,xen".
+>  	 */
+> -	if (depth == 1 && (strcmp(uname, "chosen") != 0))
+> -		return 1;
+> +	if (depth == 1 && (strcmp(uname, "chosen") != 0)) {
+> +		if (strcmp(uname, "hypervisor") != 0 ||
+> +		    !of_flat_dt_is_compatible(node, "xen,xen"))
+> +			return 1;
+> +	}
+> +
+>  	return 0;
+>  }
+>  
+> @@ -184,7 +189,8 @@ void __init acpi_boot_table_init(void)
+>  	/*
+>  	 * Enable ACPI instead of device tree unless
+>  	 * - ACPI has been disabled explicitly (acpi=off), or
+> -	 * - the device tree is not empty (it has more than just a /chosen node)
+> +	 * - the device tree is not empty (it has more than just a /chosen node,
+> +	 *   and a /hypervisor node when running on Xen)
+>  	 *   and ACPI has not been force enabled (acpi=force)
+>  	 */
+>  	if (param_acpi_off ||
+> -- 
+> 2.0.4
+> 
+> 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
