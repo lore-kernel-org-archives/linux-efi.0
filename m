@@ -1,170 +1,162 @@
-From: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] lib: Always NUL terminate ucs2_as_utf8
-Date: Wed, 20 Apr 2016 11:36:37 +0200
-Message-ID: <57174DA5.6030602@redhat.com>
-References: <1461141427-16361-1-git-send-email-chris@chris-wilson.co.uk>
+From: Stefano Stabellini <sstabellini@kernel.org>
+Subject: Re: [PATCH v11 01/17] Xen: ACPI: Hide UART used by Xen
+Date: Wed, 20 Apr 2016 10:39:47 +0100 (BST)
+Message-ID: <alpine.DEB.2.10.1604201038490.25611@sstabellini-ThinkPad-X260>
+References: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com> <1460030614-16112-2-git-send-email-zhaoshenglong@huawei.com> <CAJZ5v0gN9S0AKX8SZbbVFOn6ydwCa_7GyxzzJHod8s0xyCXgvA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1461141427-16361-1-git-send-email-chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: intel-gfx-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Jason Andryuk <jandryuk-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAJZ5v0gN9S0AKX8SZbbVFOn6ydwCa_7GyxzzJHod8s0xyCXgvA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rafael@kernel.org>
+Cc: Shannon Zhao <zhaoshenglong@huawei.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, sstabellini@kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, julien.grall@arm.com, david.vrabel@citrix.com, xen-devel@lists.xen.org, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Shannon Zhao <shannon.zhao@linaro.org>, peter.huangpeng@huawei.com, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, "open list:ACPI" <linux-acpi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 04/20/16 10:37, Chris Wilson wrote:
-> If the caller, in this case efivarfs_callback(), only provides sufficent
-> room for the expanded utf8 and not enough to include the terminating NUL
-> byte, that NUL byte is skipped.
-
-How does that occur? In efivarfs_callback() [fs/efivarfs/super.c], we have
-
-	len = ucs2_utf8size(entry->var.VariableName);
-
-	/* name, plus '-', plus GUID, plus NUL*/
-	name = kmalloc(len + 1 + EFI_VARIABLE_GUID_LEN + 1, GFP_KERNEL);
-	if (!name)
-		goto fail;
-
-	ucs2_as_utf8(name, entry->var.VariableName, len);
-
-Instead, I think the following might be happening (note that RIP points
-into efivar_variable_is_removable(), and I guess variable_matches()
-(which is static) is inlined):
-
-efivarfs_callback()              [fs/efivarfs/super.c]
-  efivar_variable_is_removable() [drivers/firmware/efi/vars.c]
-    variable_matches()           [drivers/firmware/efi/vars.c]
-
-The bug seems to be in variable_matches(), which doesn't consider the
-"len" parameter early enough. Namely, consider that we have the
-following input:
-
-- var_name: "a"
-- len: 1
-- match_name "ab"
-
-In the first iteration of the loop (i.e., *match == 0):
-- c = 'a'
-- u = 'a'
-- *match gets incremented to 1.
-
-In the second iteration of the loop (i.e., *match == 1):
-- c = 'b'
-- u = <indeterminate value> (that is, undefined behavior),
-  because (*match == len).
-
-This seems to be consistent with the error message "Caught 8-bit read
-from uninitialized memory": namely, the array allocated for "name" in
-efivarfs_callback() is indeed not pre-zeroed, and the ucs2_as_utf8()
-function does not populate name[len] -- correctly, I would say.
-
-So, I think the function that needs a fix is variable_matches().
-
-(I don't disagree though that it could be useful to audit all
-ucs2_as_utf8() calls.)
-
-Thanks
-Laszlo
-
-
-> When the caller then interprets it as a
-> string, it may then read from past its allocated memory:
+On Mon, 18 Apr 2016, Rafael J. Wysocki wrote:
+> On Thu, Apr 7, 2016 at 2:03 PM, Shannon Zhao <zhaoshenglong@huawei.com> wrote:
+> > From: Shannon Zhao <shannon.zhao@linaro.org>
+> >
+> > ACPI 6.0 introduces a new table STAO to list the devices which are used
+> > by Xen and can't be used by Dom0. On Xen virtual platforms, the physical
+> > UART is used by Xen. So here it hides UART from Dom0.
+> >
+> > CC: "Rafael J. Wysocki" <rjw@rjwysocki.net> (supporter:ACPI)
+> > CC: Len Brown <lenb@kernel.org> (supporter:ACPI)
+> > CC: linux-acpi@vger.kernel.org (open list:ACPI)
+> > Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
 > 
-> [  170.605647] WARNING: kmemcheck: Caught 8-bit read from uninitialized memory (ffff8804079ae786)
-> [  170.605677] 436f6e4f757400004c44322d35363062663538612d316530642d346437652d39
-> [  170.606037]  i i i i i i u u u u u u u u u u u u u u u u u u u u u u u u u u
-> [  170.606236]              ^
-> [  170.606243] RIP: 0010:[<ffffffff813a251f>]  [<ffffffff813a251f>] efivar_variable_is_removable+0xaf/0xf0
-> [  170.606346] RSP: 0018:ffff880408e73c20  EFLAGS: 00010206
-> [  170.606352] RAX: 0000000000000000 RBX: 0000000000000006 RCX: 0000000000000006
-> [  170.606359] RDX: 0000000000000000 RSI: 0000000000000074 RDI: ffff880408e73c30
-> [  170.606365] RBP: ffff880408e73c80 R08: 0000000000000006 R09: 000000000000008c
-> [  170.606371] R10: 0000000000000006 R11: 0000000000000000 R12: ffffffff8166ed20
-> [  170.606378] R13: 11d293ca8be4df61 R14: ffffffff81773834 R15: ffff8804079ae780
-> [  170.606385] FS:  0000000000000000(0000) GS:ffff88041ca00000(0000) knlGS:0000000000000000
-> [  170.606392] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [  170.606399] CR2: ffff880409cbe4c0 CR3: 00000004085fd000 CR4: 00000000001406f0
-> [  170.606405]  [<ffffffff811eb938>] efivarfs_callback+0xf8/0x275
-> [  170.606418]  [<ffffffff813a3368>] efivar_init+0x248/0x2e0
-> [  170.606440]  [<ffffffff811eb6b4>] efivarfs_fill_super+0xb4/0xf0
-> [  170.606452]  [<ffffffff811333e7>] mount_single+0x87/0xb0
-> [  170.606463]  [<ffffffff811eb5f3>] efivarfs_mount+0x13/0x20
-> [  170.606475]  [<ffffffff81133480>] mount_fs+0x10/0x90
-> [  170.606497]  [<ffffffff8114c732>] vfs_kern_mount+0x62/0x100
-> [  170.606508]  [<ffffffff8114ecb0>] do_mount+0x1e0/0xcd0
-> [  170.606519]  [<ffffffff8114fa9f>] SyS_mount+0x8f/0xd0
-> [  170.606530]  [<ffffffff81451d1f>] entry_SYSCALL_64_fastpath+0x17/0x93
-> [  170.606542]  [<ffffffffffffffff>] 0xffffffffffffffff
-> 
-> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> Cc: Jason Andryuk <jandryuk-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Cc: Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>
-> Cc: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> ---
->  drivers/firmware/efi/vars.c |  2 +-
->  lib/ucs2_string.c           | 15 ++++++++++-----
->  2 files changed, 11 insertions(+), 6 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-> index 0ac594c0a234..8dd503bac35d 100644
-> --- a/drivers/firmware/efi/vars.c
-> +++ b/drivers/firmware/efi/vars.c
-> @@ -166,7 +166,7 @@ validate_ascii_string(efi_char16_t *var_name, int match, u8 *buffer,
->  
->  struct variable_validate {
->  	efi_guid_t vendor;
-> -	char *name;
-> +	const char *name;
->  	bool (*validate)(efi_char16_t *var_name, int match, u8 *data,
->  			 unsigned long len);
->  };
-> diff --git a/lib/ucs2_string.c b/lib/ucs2_string.c
-> index f0b323abb4c6..fb8d03966656 100644
-> --- a/lib/ucs2_string.c
-> +++ b/lib/ucs2_string.c
-> @@ -85,29 +85,34 @@ ucs2_as_utf8(u8 *dest, const ucs2_char_t *src, unsigned long maxlength)
->  	unsigned long j = 0;
->  	unsigned long limit = ucs2_strnlen(src, maxlength);
->  
-> -	for (i = 0; maxlength && i < limit; i++) {
-> +	if (maxlength == 0)
-> +		return 0;
-> +
-> +	for (i = 0; i < limit; i++) {
->  		u16 c = src[i];
->  
->  		if (c >= 0x800) {
-> -			if (maxlength < 3)
-> +			if (maxlength <= 3)
->  				break;
->  			maxlength -= 3;
->  			dest[j++] = 0xe0 | (c & 0xf000) >> 12;
->  			dest[j++] = 0x80 | (c & 0x0fc0) >> 6;
->  			dest[j++] = 0x80 | (c & 0x003f);
->  		} else if (c >= 0x80) {
-> -			if (maxlength < 2)
-> +			if (maxlength <= 2)
->  				break;
->  			maxlength -= 2;
->  			dest[j++] = 0xc0 | (c & 0x7c0) >> 6;
->  			dest[j++] = 0x80 | (c & 0x03f);
->  		} else {
-> +			if (maxlength <= 1)
-> +				break;
->  			maxlength -= 1;
->  			dest[j++] = c & 0x7f;
->  		}
->  	}
-> -	if (maxlength)
-> -		dest[j] = '\0';
-> +	dest[j] = '\0';
-> +
->  	return j;
->  }
->  EXPORT_SYMBOL(ucs2_as_utf8);
+> Acked-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+
+I am going to commit it to the xentip tree, if you prefer to take it in
+your tree please let me know.
+
+
+> > ---
+> >  drivers/acpi/scan.c | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  1 file changed, 74 insertions(+)
+> >
+> > diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
+> > index 5f28cf7..cfc73fe 100644
+> > --- a/drivers/acpi/scan.c
+> > +++ b/drivers/acpi/scan.c
+> > @@ -46,6 +46,13 @@ DEFINE_MUTEX(acpi_device_lock);
+> >  LIST_HEAD(acpi_wakeup_device_list);
+> >  static DEFINE_MUTEX(acpi_hp_context_lock);
+> >
+> > +/*
+> > + * The UART device described by the SPCR table is the only object which needs
+> > + * special-casing. Everything else is covered by ACPI namespace paths in STAO
+> > + * table.
+> > + */
+> > +static u64 spcr_uart_addr;
+> > +
+> >  struct acpi_dep_data {
+> >         struct list_head node;
+> >         acpi_handle master;
+> > @@ -1453,6 +1460,41 @@ static int acpi_add_single_object(struct acpi_device **child,
+> >         return 0;
+> >  }
+> >
+> > +static acpi_status acpi_get_resource_memory(struct acpi_resource *ares,
+> > +                                           void *context)
+> > +{
+> > +       struct resource *res = context;
+> > +
+> > +       if (acpi_dev_resource_memory(ares, res))
+> > +               return AE_CTRL_TERMINATE;
+> > +
+> > +       return AE_OK;
+> > +}
+> > +
+> > +static bool acpi_device_should_be_hidden(acpi_handle handle)
+> > +{
+> > +       acpi_status status;
+> > +       struct resource res;
+> > +
+> > +       /* Check if it should ignore the UART device */
+> > +       if (!(spcr_uart_addr && acpi_has_method(handle, METHOD_NAME__CRS)))
+> > +               return false;
+> > +
+> > +       /*
+> > +        * The UART device described in SPCR table is assumed to have only one
+> > +        * memory resource present. So we only look for the first one here.
+> > +        */
+> > +       status = acpi_walk_resources(handle, METHOD_NAME__CRS,
+> > +                                    acpi_get_resource_memory, &res);
+> > +       if (ACPI_FAILURE(status) || res.start != spcr_uart_addr)
+> > +               return false;
+> > +
+> > +       acpi_handle_info(handle, "The UART device @%pa in SPCR table will be hidden\n",
+> > +                        &res.start);
+> > +
+> > +       return true;
+> > +}
+> > +
+> >  static int acpi_bus_type_and_status(acpi_handle handle, int *type,
+> >                                     unsigned long long *sta)
+> >  {
+> > @@ -1466,6 +1508,9 @@ static int acpi_bus_type_and_status(acpi_handle handle, int *type,
+> >         switch (acpi_type) {
+> >         case ACPI_TYPE_ANY:             /* for ACPI_ROOT_OBJECT */
+> >         case ACPI_TYPE_DEVICE:
+> > +               if (acpi_device_should_be_hidden(handle))
+> > +                       return -ENODEV;
+> > +
+> >                 *type = ACPI_BUS_TYPE_DEVICE;
+> >                 status = acpi_bus_get_status_handle(handle, sta);
+> >                 if (ACPI_FAILURE(status))
+> > @@ -1916,9 +1961,24 @@ static int acpi_bus_scan_fixed(void)
+> >         return result < 0 ? result : 0;
+> >  }
+> >
+> > +static void __init acpi_get_spcr_uart_addr(void)
+> > +{
+> > +       acpi_status status;
+> > +       struct acpi_table_spcr *spcr_ptr;
+> > +
+> > +       status = acpi_get_table(ACPI_SIG_SPCR, 0,
+> > +                               (struct acpi_table_header **)&spcr_ptr);
+> > +       if (ACPI_SUCCESS(status))
+> > +               spcr_uart_addr = spcr_ptr->serial_port.address;
+> > +       else
+> > +               printk(KERN_WARNING PREFIX "STAO table present, but SPCR is missing\n");
+> > +}
+> > +
+> >  int __init acpi_scan_init(void)
+> >  {
+> >         int result;
+> > +       acpi_status status;
+> > +       struct acpi_table_stao *stao_ptr;
+> >
+> >         acpi_pci_root_init();
+> >         acpi_pci_link_init();
+> > @@ -1934,6 +1994,20 @@ int __init acpi_scan_init(void)
+> >
+> >         acpi_scan_add_handler(&generic_device_handler);
+> >
+> > +       /*
+> > +        * If there is STAO table, check whether it needs to ignore the UART
+> > +        * device in SPCR table.
+> > +        */
+> > +       status = acpi_get_table(ACPI_SIG_STAO, 0,
+> > +                               (struct acpi_table_header **)&stao_ptr);
+> > +       if (ACPI_SUCCESS(status)) {
+> > +               if (stao_ptr->header.length > sizeof(struct acpi_table_stao))
+> > +                       printk(KERN_INFO PREFIX "STAO Name List not yet supported.");
+> > +
+> > +               if (stao_ptr->ignore_uart)
+> > +                       acpi_get_spcr_uart_addr();
+> > +       }
+> > +
+> >         mutex_lock(&acpi_scan_lock);
+> >         /*
+> >          * Enumerate devices in the ACPI namespace.
+> > --
+> > 2.0.4
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-acpi" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
