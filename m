@@ -1,269 +1,94 @@
-From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: [RFC PATCH v2 02/10] acpi: decouple initrd table install from CONFIG_ACPI_INITRD_TABLE_OVERRIDE
-Date: Wed, 20 Apr 2016 01:39:00 +0300
-Message-ID: <1461105548-20618-3-git-send-email-octavian.purdila@intel.com>
-References: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
-Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, Octavian Purdila <octavian.purdila@intel.com>
+From: Chris Wilson <chris@chris-wilson.co.uk>
+Subject: [PATCH] lib: Always NUL terminate ucs2_as_utf8
+Date: Wed, 20 Apr 2016 09:37:07 +0100
+Message-ID: <1461141427-16361-1-git-send-email-chris@chris-wilson.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <intel-gfx-bounces@lists.freedesktop.org>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
+List-Post: <mailto:intel-gfx@lists.freedesktop.org>
+List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: intel-gfx-bounces@lists.freedesktop.org
+Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
+To: Peter Jones <pjones@redhat.com>
+Cc: linux-efi@vger.kernel.org, Jason Andryuk <jandryuk@gmail.com>, Matt Fleming <matt@codeblueprint.co.uk>, intel-gfx@lists.freedesktop.org, linux-kernel@vger.kernel.org, Matthew Garrett <mjg59@coreos.com>, Laszlo Ersek <lersek@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-The ACPI override and overlay functionality is different, with the
-latter being more then a debug option. Allow loading of ACPI tables from
-initrd even if CONFIG_ACPI_INITRD_TABLE_OVERRIDE is not selected.
-
-The patch also switches to using TAINT_OVERLAY_ACPI_TABLE and adds
-documentation about how to load SSDT tables from initrd.
-
-Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
----
- Documentation/acpi/ssdt-overlays.txt | 26 ++++++++++++
- arch/x86/kernel/setup.c              |  2 +-
- drivers/acpi/osl.c                   | 80 +++++++++++++++++++-----------------
- include/linux/acpi.h                 |  8 +---
- 4 files changed, 71 insertions(+), 45 deletions(-)
-
-diff --git a/Documentation/acpi/ssdt-overlays.txt b/Documentation/acpi/ssdt-overlays.txt
-index 54ee74a..c328f6a 100644
---- a/Documentation/acpi/ssdt-overlays.txt
-+++ b/Documentation/acpi/ssdt-overlays.txt
-@@ -62,3 +62,29 @@ AML Output:    minnowmax.aml - 165 bytes, 6 named objects, 1 executable opcodes
- 
- The resulting AML code can then be loaded by the kernel using one of the methods
- below.
-+
-+== Loading ACPI SSDTs from initrd ==
-+
-+This option allows loading of user defined SSDTs from initrd and it is useful
-+when the system does not support EFI or when there is not enough EFI storage.
-+
-+It works in a similar way with initrd based ACPI tables overrides: SSDT aml code
-+must be placed in the first, uncompressed, initrd under the
-+"kernel/firmware/acpi" path. Multiple files can be used and this will translate
-+in loading multiple tables. Only SSDT and OEM tables are allowed.
-+
-+Here is an example:
-+
-+# Add the raw ACPI tables to an uncompressed cpio archive.
-+# They must be put into a /kernel/firmware/acpi directory inside the
-+# cpio archive.
-+# The uncompressed cpio archive must be the first.
-+# Other, typically compressed cpio archives, must be
-+# concatenated on top of the uncompressed one.
-+mkdir -p kernel/firmware/acpi
-+cp ssdt.aml kernel/firmware/acpi
-+
-+# Create the uncompressed cpio archive and concatenate the original initrd
-+# on top:
-+find kernel | cpio -H newc --create > /boot/instrumented_initrd
-+cat /boot/initrd >>/boot/instrumented_initrd
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 2367ae0..1908668 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -1139,7 +1139,7 @@ void __init setup_arch(char **cmdline_p)
- 	reserve_initrd();
- 
- #if defined(CONFIG_ACPI) && defined(CONFIG_BLK_DEV_INITRD)
--	acpi_initrd_override((void *)initrd_start, initrd_end - initrd_start);
-+	acpi_table_initrd_init((void *)initrd_start, initrd_end - initrd_start);
- #endif
- 
- 	vsmp_init();
-diff --git a/drivers/acpi/osl.c b/drivers/acpi/osl.c
-index 814d5f8..dcc99b4 100644
---- a/drivers/acpi/osl.c
-+++ b/drivers/acpi/osl.c
-@@ -602,15 +602,24 @@ acpi_os_predefined_override(const struct acpi_predefined_names *init_val,
- 	return AE_OK;
- }
- 
--static void acpi_table_taint(struct acpi_table_header *table)
-+static void acpi_table_taint(struct acpi_table_header *table, bool override)
- {
--	pr_warn(PREFIX
--		"Override [%4.4s-%8.8s], this is unsafe: tainting kernel\n",
--		table->signature, table->oem_table_id);
--	add_taint(TAINT_OVERRIDDEN_ACPI_TABLE, LOCKDEP_NOW_UNRELIABLE);
-+	enum lockdep_ok lockdep_ok;
-+	unsigned int taint;
-+
-+	if (override) {
-+		pr_warn(PREFIX "Override [%4.4s-%8.8s], this is unsafe: tainting kernel\n",
-+			table->signature, table->oem_table_id);
-+		lockdep_ok = false;
-+		taint = TAINT_OVERRIDDEN_ACPI_TABLE;
-+	} else {
-+		lockdep_ok = true;
-+		taint = TAINT_OVERLAY_ACPI_TABLE;
-+	}
-+
-+	add_taint(taint, lockdep_ok);
- }
- 
--#ifdef CONFIG_ACPI_INITRD_TABLE_OVERRIDE
- #include <linux/earlycpio.h>
- #include <linux/memblock.h>
- 
-@@ -642,13 +651,13 @@ static const char * const table_sigs[] = {
- 
- #define ACPI_HEADER_SIZE sizeof(struct acpi_table_header)
- 
--#define ACPI_OVERRIDE_TABLES 64
--static struct cpio_data __initdata acpi_initrd_files[ACPI_OVERRIDE_TABLES];
--static DECLARE_BITMAP(acpi_initrd_installed, ACPI_OVERRIDE_TABLES);
-+#define ACPI_INITRD_TABLES 64
-+static struct cpio_data acpi_initrd_files[ACPI_INITRD_TABLES] __initdata;
-+static DECLARE_BITMAP(acpi_initrd_installed, ACPI_INITRD_TABLES);
- 
- #define MAP_CHUNK_SIZE   (NR_FIX_BTMAPS << PAGE_SHIFT)
- 
--void __init acpi_initrd_override(void *data, size_t size)
-+void __init acpi_table_initrd_init(void *data, size_t size)
- {
- 	int sig, no, table_nr = 0, total_offset = 0;
- 	long offset = 0;
-@@ -659,7 +668,7 @@ void __init acpi_initrd_override(void *data, size_t size)
- 	if (data == NULL || size == 0)
- 		return;
- 
--	for (no = 0; no < ACPI_OVERRIDE_TABLES; no++) {
-+	for (no = 0; no < ACPI_INITRD_TABLES; no++) {
- 		file = find_cpio_data(cpio_path, data, size, &offset);
- 		if (!file.data)
- 			break;
-@@ -668,8 +677,8 @@ void __init acpi_initrd_override(void *data, size_t size)
- 		size -= offset;
- 
- 		if (file.size < sizeof(struct acpi_table_header)) {
--			pr_err("ACPI OVERRIDE: Table smaller than ACPI header [%s%s]\n",
--				cpio_path, file.name);
-+			pr_err(PREFIX "initrd: Table smaller than ACPI header [%s%s]\n",
-+			       cpio_path, file.name);
- 			continue;
- 		}
- 
-@@ -680,18 +689,18 @@ void __init acpi_initrd_override(void *data, size_t size)
- 				break;
- 
- 		if (!table_sigs[sig]) {
--			pr_err("ACPI OVERRIDE: Unknown signature [%s%s]\n",
--				cpio_path, file.name);
-+			pr_err(PREFIX "initrd: Unknown signature [%s%s]\n",
-+			       cpio_path, file.name);
- 			continue;
- 		}
- 		if (file.size != table->length) {
--			pr_err("ACPI OVERRIDE: File length does not match table length [%s%s]\n",
--				cpio_path, file.name);
-+			pr_err(PREFIX "initrd: File length does not match table length [%s%s]\n",
-+			       cpio_path, file.name);
- 			continue;
- 		}
- 		if (acpi_table_checksum(file.data, table->length)) {
--			pr_err("ACPI OVERRIDE: Bad table checksum [%s%s]\n",
--				cpio_path, file.name);
-+			pr_err(PREFIX "initrd: Bad table checksum [%s%s]\n",
-+			       cpio_path, file.name);
- 			continue;
- 		}
- 
-@@ -756,6 +765,7 @@ void __init acpi_initrd_override(void *data, size_t size)
- 	}
- }
- 
-+#ifdef CONFIG_ACPI_INITRD_TABLE_OVERRIDE
- acpi_status
- acpi_os_physical_table_override(struct acpi_table_header *existing_table,
- 				acpi_physical_address *address, u32 *length)
-@@ -792,7 +802,7 @@ acpi_os_physical_table_override(struct acpi_table_header *existing_table,
- 
- 		*length = table_length;
- 		*address = acpi_tables_addr + table_offset;
--		acpi_table_taint(existing_table);
-+		acpi_table_taint(existing_table, true);
- 		acpi_os_unmap_memory(table, ACPI_HEADER_SIZE);
- 		set_bit(table_index, acpi_initrd_installed);
- 		break;
-@@ -803,6 +813,17 @@ next_table:
- 	}
- 	return AE_OK;
- }
-+#else
-+acpi_status
-+acpi_os_physical_table_override(struct acpi_table_header *existing_table,
-+				acpi_physical_address *address,
-+				u32 *table_length)
-+{
-+	*table_length = 0;
-+	*address = 0;
-+	return AE_OK;
-+}
-+#endif /* CONFIG_ACPI_INITRD_TABLE_OVERRIDE */
- 
- void __init acpi_initrd_initialize_tables(void)
- {
-@@ -833,7 +854,7 @@ void __init acpi_initrd_initialize_tables(void)
- 			goto next_table;
- 		}
- 
--		acpi_table_taint(table);
-+		acpi_table_taint(table, false);
- 		acpi_os_unmap_memory(table, ACPI_HEADER_SIZE);
- 		acpi_install_table(acpi_tables_addr + table_offset, TRUE);
- 		set_bit(table_index, acpi_initrd_installed);
-@@ -842,21 +863,6 @@ next_table:
- 		table_index++;
- 	}
- }
--#else
--acpi_status
--acpi_os_physical_table_override(struct acpi_table_header *existing_table,
--				acpi_physical_address *address,
--				u32 *table_length)
--{
--	*table_length = 0;
--	*address = 0;
--	return AE_OK;
--}
--
--void __init acpi_initrd_initialize_tables(void)
--{
--}
--#endif /* CONFIG_ACPI_INITRD_TABLE_OVERRIDE */
- 
- acpi_status
- acpi_os_table_override(struct acpi_table_header *existing_table,
-@@ -872,7 +878,7 @@ acpi_os_table_override(struct acpi_table_header *existing_table,
- 		*new_table = (struct acpi_table_header *)AmlCode;
- #endif
- 	if (*new_table != NULL)
--		acpi_table_taint(existing_table);
-+		acpi_table_taint(existing_table, true);
- 	return AE_OK;
- }
- 
-diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-index 06ed7e5..d4a3cb2 100644
---- a/include/linux/acpi.h
-+++ b/include/linux/acpi.h
-@@ -190,13 +190,7 @@ static inline int acpi_debugger_notify_command_complete(void)
- }
- #endif
- 
--#ifdef CONFIG_ACPI_INITRD_TABLE_OVERRIDE
--void acpi_initrd_override(void *data, size_t size);
--#else
--static inline void acpi_initrd_override(void *data, size_t size)
--{
--}
--#endif
-+void acpi_table_initrd_init(void *data, size_t size);
- 
- #define BAD_MADT_ENTRY(entry, end) (					    \
- 		(!entry) || (unsigned long)entry + sizeof(*entry) > end ||  \
--- 
-1.9.1
-
+SWYgdGhlIGNhbGxlciwgaW4gdGhpcyBjYXNlIGVmaXZhcmZzX2NhbGxiYWNrKCksIG9ubHkgcHJv
+dmlkZXMgc3VmZmljZW50CnJvb20gZm9yIHRoZSBleHBhbmRlZCB1dGY4IGFuZCBub3QgZW5vdWdo
+IHRvIGluY2x1ZGUgdGhlIHRlcm1pbmF0aW5nIE5VTApieXRlLCB0aGF0IE5VTCBieXRlIGlzIHNr
+aXBwZWQuIFdoZW4gdGhlIGNhbGxlciB0aGVuIGludGVycHJldHMgaXQgYXMgYQpzdHJpbmcsIGl0
+IG1heSB0aGVuIHJlYWQgZnJvbSBwYXN0IGl0cyBhbGxvY2F0ZWQgbWVtb3J5OgoKWyAgMTcwLjYw
+NTY0N10gV0FSTklORzoga21lbWNoZWNrOiBDYXVnaHQgOC1iaXQgcmVhZCBmcm9tIHVuaW5pdGlh
+bGl6ZWQgbWVtb3J5IChmZmZmODgwNDA3OWFlNzg2KQpbICAxNzAuNjA1Njc3XSA0MzZmNmU0Zjc1
+NzQwMDAwNGM0NDMyMmQzNTM2MzA2MjY2MzUzODYxMmQzMTY1MzA2NDJkMzQ2NDM3NjUyZDM5Clsg
+IDE3MC42MDYwMzddICBpIGkgaSBpIGkgaSB1IHUgdSB1IHUgdSB1IHUgdSB1IHUgdSB1IHUgdSB1
+IHUgdSB1IHUgdSB1IHUgdSB1IHUKWyAgMTcwLjYwNjIzNl0gICAgICAgICAgICAgIF4KWyAgMTcw
+LjYwNjI0M10gUklQOiAwMDEwOls8ZmZmZmZmZmY4MTNhMjUxZj5dICBbPGZmZmZmZmZmODEzYTI1
+MWY+XSBlZml2YXJfdmFyaWFibGVfaXNfcmVtb3ZhYmxlKzB4YWYvMHhmMApbICAxNzAuNjA2MzQ2
+XSBSU1A6IDAwMTg6ZmZmZjg4MDQwOGU3M2MyMCAgRUZMQUdTOiAwMDAxMDIwNgpbICAxNzAuNjA2
+MzUyXSBSQVg6IDAwMDAwMDAwMDAwMDAwMDAgUkJYOiAwMDAwMDAwMDAwMDAwMDA2IFJDWDogMDAw
+MDAwMDAwMDAwMDAwNgpbICAxNzAuNjA2MzU5XSBSRFg6IDAwMDAwMDAwMDAwMDAwMDAgUlNJOiAw
+MDAwMDAwMDAwMDAwMDc0IFJESTogZmZmZjg4MDQwOGU3M2MzMApbICAxNzAuNjA2MzY1XSBSQlA6
+IGZmZmY4ODA0MDhlNzNjODAgUjA4OiAwMDAwMDAwMDAwMDAwMDA2IFIwOTogMDAwMDAwMDAwMDAw
+MDA4YwpbICAxNzAuNjA2MzcxXSBSMTA6IDAwMDAwMDAwMDAwMDAwMDYgUjExOiAwMDAwMDAwMDAw
+MDAwMDAwIFIxMjogZmZmZmZmZmY4MTY2ZWQyMApbICAxNzAuNjA2Mzc4XSBSMTM6IDExZDI5M2Nh
+OGJlNGRmNjEgUjE0OiBmZmZmZmZmZjgxNzczODM0IFIxNTogZmZmZjg4MDQwNzlhZTc4MApbICAx
+NzAuNjA2Mzg1XSBGUzogIDAwMDAwMDAwMDAwMDAwMDAoMDAwMCkgR1M6ZmZmZjg4MDQxY2EwMDAw
+MCgwMDAwKSBrbmxHUzowMDAwMDAwMDAwMDAwMDAwClsgIDE3MC42MDYzOTJdIENTOiAgMDAxMCBE
+UzogMDAwMCBFUzogMDAwMCBDUjA6IDAwMDAwMDAwODAwNTAwMzMKWyAgMTcwLjYwNjM5OV0gQ1Iy
+OiBmZmZmODgwNDA5Y2JlNGMwIENSMzogMDAwMDAwMDQwODVmZDAwMCBDUjQ6IDAwMDAwMDAwMDAx
+NDA2ZjAKWyAgMTcwLjYwNjQwNV0gIFs8ZmZmZmZmZmY4MTFlYjkzOD5dIGVmaXZhcmZzX2NhbGxi
+YWNrKzB4ZjgvMHgyNzUKWyAgMTcwLjYwNjQxOF0gIFs8ZmZmZmZmZmY4MTNhMzM2OD5dIGVmaXZh
+cl9pbml0KzB4MjQ4LzB4MmUwClsgIDE3MC42MDY0NDBdICBbPGZmZmZmZmZmODExZWI2YjQ+XSBl
+Zml2YXJmc19maWxsX3N1cGVyKzB4YjQvMHhmMApbICAxNzAuNjA2NDUyXSAgWzxmZmZmZmZmZjgx
+MTMzM2U3Pl0gbW91bnRfc2luZ2xlKzB4ODcvMHhiMApbICAxNzAuNjA2NDYzXSAgWzxmZmZmZmZm
+ZjgxMWViNWYzPl0gZWZpdmFyZnNfbW91bnQrMHgxMy8weDIwClsgIDE3MC42MDY0NzVdICBbPGZm
+ZmZmZmZmODExMzM0ODA+XSBtb3VudF9mcysweDEwLzB4OTAKWyAgMTcwLjYwNjQ5N10gIFs8ZmZm
+ZmZmZmY4MTE0YzczMj5dIHZmc19rZXJuX21vdW50KzB4NjIvMHgxMDAKWyAgMTcwLjYwNjUwOF0g
+IFs8ZmZmZmZmZmY4MTE0ZWNiMD5dIGRvX21vdW50KzB4MWUwLzB4Y2QwClsgIDE3MC42MDY1MTld
+ICBbPGZmZmZmZmZmODExNGZhOWY+XSBTeVNfbW91bnQrMHg4Zi8weGQwClsgIDE3MC42MDY1MzBd
+ICBbPGZmZmZmZmZmODE0NTFkMWY+XSBlbnRyeV9TWVNDQUxMXzY0X2Zhc3RwYXRoKzB4MTcvMHg5
+MwpbICAxNzAuNjA2NTQyXSAgWzxmZmZmZmZmZmZmZmZmZmZmPl0gMHhmZmZmZmZmZmZmZmZmZmZm
+CgpDYzogTWF0dCBGbGVtaW5nIDxtYXR0QGNvZGVibHVlcHJpbnQuY28udWs+CkNjOiBKYXNvbiBB
+bmRyeXVrIDxqYW5kcnl1a0BnbWFpbC5jb20+CkNjOiBNYXR0aGV3IEdhcnJldHQgPG1qZzU5QGNv
+cmVvcy5jb20+CkNjOiBMYXN6bG8gRXJzZWsgPGxlcnNla0ByZWRoYXQuY29tPgpDYzogUGV0ZXIg
+Sm9uZXMgPHBqb25lc0ByZWRoYXQuY29tPgpDYzogbGludXgtZWZpQHZnZXIua2VybmVsLm9yZwpD
+YzogbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZwotLS0KIGRyaXZlcnMvZmlybXdhcmUvZWZp
+L3ZhcnMuYyB8ICAyICstCiBsaWIvdWNzMl9zdHJpbmcuYyAgICAgICAgICAgfCAxNSArKysrKysr
+KysrLS0tLS0KIDIgZmlsZXMgY2hhbmdlZCwgMTEgaW5zZXJ0aW9ucygrKSwgNiBkZWxldGlvbnMo
+LSkKCmRpZmYgLS1naXQgYS9kcml2ZXJzL2Zpcm13YXJlL2VmaS92YXJzLmMgYi9kcml2ZXJzL2Zp
+cm13YXJlL2VmaS92YXJzLmMKaW5kZXggMGFjNTk0YzBhMjM0Li44ZGQ1MDNiYWMzNWQgMTAwNjQ0
+Ci0tLSBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL3ZhcnMuYworKysgYi9kcml2ZXJzL2Zpcm13YXJl
+L2VmaS92YXJzLmMKQEAgLTE2Niw3ICsxNjYsNyBAQCB2YWxpZGF0ZV9hc2NpaV9zdHJpbmcoZWZp
+X2NoYXIxNl90ICp2YXJfbmFtZSwgaW50IG1hdGNoLCB1OCAqYnVmZmVyLAogCiBzdHJ1Y3QgdmFy
+aWFibGVfdmFsaWRhdGUgewogCWVmaV9ndWlkX3QgdmVuZG9yOwotCWNoYXIgKm5hbWU7CisJY29u
+c3QgY2hhciAqbmFtZTsKIAlib29sICgqdmFsaWRhdGUpKGVmaV9jaGFyMTZfdCAqdmFyX25hbWUs
+IGludCBtYXRjaCwgdTggKmRhdGEsCiAJCQkgdW5zaWduZWQgbG9uZyBsZW4pOwogfTsKZGlmZiAt
+LWdpdCBhL2xpYi91Y3MyX3N0cmluZy5jIGIvbGliL3VjczJfc3RyaW5nLmMKaW5kZXggZjBiMzIz
+YWJiNGM2Li5mYjhkMDM5NjY2NTYgMTAwNjQ0Ci0tLSBhL2xpYi91Y3MyX3N0cmluZy5jCisrKyBi
+L2xpYi91Y3MyX3N0cmluZy5jCkBAIC04NSwyOSArODUsMzQgQEAgdWNzMl9hc191dGY4KHU4ICpk
+ZXN0LCBjb25zdCB1Y3MyX2NoYXJfdCAqc3JjLCB1bnNpZ25lZCBsb25nIG1heGxlbmd0aCkKIAl1
+bnNpZ25lZCBsb25nIGogPSAwOwogCXVuc2lnbmVkIGxvbmcgbGltaXQgPSB1Y3MyX3N0cm5sZW4o
+c3JjLCBtYXhsZW5ndGgpOwogCi0JZm9yIChpID0gMDsgbWF4bGVuZ3RoICYmIGkgPCBsaW1pdDsg
+aSsrKSB7CisJaWYgKG1heGxlbmd0aCA9PSAwKQorCQlyZXR1cm4gMDsKKworCWZvciAoaSA9IDA7
+IGkgPCBsaW1pdDsgaSsrKSB7CiAJCXUxNiBjID0gc3JjW2ldOwogCiAJCWlmIChjID49IDB4ODAw
+KSB7Ci0JCQlpZiAobWF4bGVuZ3RoIDwgMykKKwkJCWlmIChtYXhsZW5ndGggPD0gMykKIAkJCQli
+cmVhazsKIAkJCW1heGxlbmd0aCAtPSAzOwogCQkJZGVzdFtqKytdID0gMHhlMCB8IChjICYgMHhm
+MDAwKSA+PiAxMjsKIAkJCWRlc3RbaisrXSA9IDB4ODAgfCAoYyAmIDB4MGZjMCkgPj4gNjsKIAkJ
+CWRlc3RbaisrXSA9IDB4ODAgfCAoYyAmIDB4MDAzZik7CiAJCX0gZWxzZSBpZiAoYyA+PSAweDgw
+KSB7Ci0JCQlpZiAobWF4bGVuZ3RoIDwgMikKKwkJCWlmIChtYXhsZW5ndGggPD0gMikKIAkJCQli
+cmVhazsKIAkJCW1heGxlbmd0aCAtPSAyOwogCQkJZGVzdFtqKytdID0gMHhjMCB8IChjICYgMHg3
+YzApID4+IDY7CiAJCQlkZXN0W2orK10gPSAweDgwIHwgKGMgJiAweDAzZik7CiAJCX0gZWxzZSB7
+CisJCQlpZiAobWF4bGVuZ3RoIDw9IDEpCisJCQkJYnJlYWs7CiAJCQltYXhsZW5ndGggLT0gMTsK
+IAkJCWRlc3RbaisrXSA9IGMgJiAweDdmOwogCQl9CiAJfQotCWlmIChtYXhsZW5ndGgpCi0JCWRl
+c3Rbal0gPSAnXDAnOworCWRlc3Rbal0gPSAnXDAnOworCiAJcmV0dXJuIGo7CiB9CiBFWFBPUlRf
+U1lNQk9MKHVjczJfYXNfdXRmOCk7Ci0tIAoyLjguMQoKX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX18KSW50ZWwtZ2Z4IG1haWxpbmcgbGlzdApJbnRlbC1nZnhA
+bGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBzOi8vbGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxt
+YW4vbGlzdGluZm8vaW50ZWwtZ2Z4Cg==
