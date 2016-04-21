@@ -1,59 +1,58 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCHv2 5/5] efi/runtime-wrappers: detect FW irq flag corruption
-Date: Thu, 21 Apr 2016 18:18:14 +0100
-Message-ID: <20160421171814.GB3078@leverpostej>
-References: <1461238529-12810-1-git-send-email-mark.rutland@arm.com>
- <1461238529-12810-6-git-send-email-mark.rutland@arm.com>
- <CAKv+Gu-Sou_-UgBwrj939JQr8M5=ScZZ4M9Y-hRUa8WrkwBK7Q@mail.gmail.com>
+From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [RFC PATCH v2 05/10] i2c: add support for ACPI reconfigure notifications
+Date: Fri, 22 Apr 2016 00:27:14 +0300
+Message-ID: <CAHp75VdCX65bftG+5D2r1N0nwYV0tSDf6+ZgJYPgxu9AV54eKA@mail.gmail.com>
+References: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
+	<1461105548-20618-6-git-send-email-octavian.purdila@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-Sou_-UgBwrj939JQr8M5=ScZZ4M9Y-hRUa8WrkwBK7Q@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, "hpa@zytor.com" <hpa@zytor.com>, Leif Lindholm <leif.lindholm@linaro.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Matt Fleming <matt@codeblueprint.co.uk>, "mingo@redhat.com" <mingo@redhat.com>, "tglx@linutronix.de" <tglx@linutronix.de>, Will Deacon <will.deacon@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1461105548-20618-6-git-send-email-octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Apr 21, 2016 at 07:05:32PM +0200, Ard Biesheuvel wrote:
-> On 21 April 2016 at 13:35, Mark Rutland <mark.rutland@arm.com> wrote:
-> > @@ -25,8 +27,11 @@
-> >  #define efi_call_virt(f, args...)                                      \
-> >  ({                                                                     \
-> >         efi_status_t __s;                                               \
-> > +       unsigned long flags;                                            \
-> >         arch_efi_call_virt_setup();                                     \
-> > +       local_save_flags(flags);                                        \
-> >         __s = arch_efi_call_virt(f, args);                              \
-> > +       efi_call_virt_check_flags(flags, __stringify(f));               \
-> >         arch_efi_call_virt_teardown();                                  \
-> >         __s;                                                            \
-> >  })
-> > @@ -35,12 +40,29 @@
-> >  #ifndef __efi_call_virt
-> >  #define __efi_call_virt(f, args...)                                    \
-> >  ({                                                                     \
-> > +       unsigned long flags;                                            \
-> >         arch_efi_call_virt_setup();                                     \
-> > +       local_irq_save(flags);                                          \
-> 
-> We shouldn't disable interrupts here. I assume this is a typo, and you
-> intended to use local_save_flags() as above?
+On Wed, Apr 20, 2016 at 1:39 AM, Octavian Purdila
+<octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> This patch adds supports for I2C device enumeration and removal via
+> ACPI reconfiguration notifications that are send as a result of an
+> ACPI table load or unload operation.
 
-Oh, yes. That's an impressive mistake on my behalf; thanks for spotting
-that!
+>
+>         acpi_dev_free_resource_list(&resource_list);
+>
+> +       strlcpy(info->type, dev_name(&adev->dev), sizeof(info->type));
 
-I've been seeing issues with GetVariable and GetNextVariable, which
-happen to only exercise the correct macro above.
+strscpy() ?
 
-> Other than that, this series looks fine to me.
-> 
-> With the above fixed:
-> 
-> For the series (except the x86 patch)
-> 
-> Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> +static int acpi_i2c_match_adapter(struct device *dev, void *data)
+> +{
+> +       struct i2c_adapter *adapter = i2c_verify_adapter(dev);
+> +
+> +       if (!adapter)
+> +               return 0;
+> +
 
-Cheers!
+> +       return ACPI_HANDLE(dev) == (acpi_handle)data;
 
-Mark.
+What is suppose to return? Hidden bool to integer conversion is not
+best option I suppose.
+
+> +}
+> +
+> +static int acpi_i2c_match_device(struct device *dev, void *data)
+> +{
+> +       return ACPI_COMPANION(dev) == data;
+
+Ditto.
+
+> +}
+
+-- 
+With Best Regards,
+Andy Shevchenko
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
