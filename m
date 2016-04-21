@@ -1,84 +1,51 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCHv2 1/5] efi/runtime-wrappers: add {__,}efi_call_virt
- templates
-Date: Thu, 21 Apr 2016 15:19:53 +0100
-Message-ID: <20160421141952.GQ6879@leverpostej>
-References: <1461238529-12810-1-git-send-email-mark.rutland@arm.com>
- <1461238529-12810-2-git-send-email-mark.rutland@arm.com>
- <20160421114256.GP2904@bivouac.eciton.net>
- <20160421125507.GM6879@leverpostej>
+From: Peter Jones <pjones@redhat.com>
+Subject: Re: [PATCH] lib: Always NUL terminate ucs2_as_utf8
+Date: Thu, 21 Apr 2016 11:13:44 -0400
+Message-ID: <20160421151343.GA3763@redhat.com>
+References: <1461141427-16361-1-git-send-email-chris@chris-wilson.co.uk>
+ <5717834C.6070802@redhat.com>
+ <20160421121827.GE2829@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <intel-gfx-bounces@lists.freedesktop.org>
 Content-Disposition: inline
-In-Reply-To: <20160421125507.GM6879@leverpostej>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <20160421121827.GE2829@codeblueprint.co.uk>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
+List-Post: <mailto:intel-gfx@lists.freedesktop.org>
+List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: intel-gfx-bounces@lists.freedesktop.org
+Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: linux-efi@vger.kernel.org, Jason Andryuk <jandryuk@gmail.com>, intel-gfx@lists.freedesktop.org, linux-kernel@vger.kernel.org, Matthew Garrett <mjg59@coreos.com>, Laszlo Ersek <lersek@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Apr 21, 2016 at 01:55:07PM +0100, Mark Rutland wrote:
-> On Thu, Apr 21, 2016 at 12:42:56PM +0100, Leif Lindholm wrote:
-> > On Thu, Apr 21, 2016 at 12:35:25PM +0100, Mark Rutland wrote:
-> > > Currently each architecture must implement two macros, efi_call_virt and
-> > > __efi_call_virt, which only differ by the presence or absence of a
-> > > return type. Otherwise, the logic surrounding the call is identical.
-> > > 
-> > > As each architecture must define the entire body of each, we can't place
-> > > any generic manipulation (e.g. irq flag validation) in the middle.
-> > > 
-> > > This patch adds template implementations of these macros. With these,
-> > > arch code can implement three template macros, avoiding reptition for
-> > > the void/non-void return cases:
-> > > 
-> > > * arch_efi_call_virt_setup
-> > > 
-> > >   Sets up the environment for the call (e.g. switching page tables,
-> > >   allowing kernel-mode use of floating point, if required).
-> > > 
-> > > * arch_efi_call_virt
-> > > 
-> > >   Performs the call. The last expression in the macro must be the call
-> > >   itself, allowing the logic to be shared by the void and non-void
-> > >   cases.
-> > > 
-> > > * arch_efi_call_virt_teardown
-> > > 
-> > >   Restores the usual kernel environment once the call has returned.
-> > > 
-> > > While the savings from repition are minimal, we additionally gain the
-> > > ability to add common code around the call with the call enviroment set
-> > > up. This can be used to detect common firmware issues (e.g. bad irq mask
-> > > management).
-> > > 
-> > > Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> > > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> > > Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > > Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > > ---
-> > >  drivers/firmware/efi/runtime-wrappers.c | 21 +++++++++++++++++++++
-> > >  1 file changed, 21 insertions(+)
-> > > 
-> > > diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-> > > index de69530..1b9fa54 100644
-> > > --- a/drivers/firmware/efi/runtime-wrappers.c
-> > > +++ b/drivers/firmware/efi/runtime-wrappers.c
-> > > @@ -20,6 +20,27 @@
-> > >  #include <linux/spinlock.h>
-> > >  #include <asm/efi.h>
-> > >  
-> > > +
-> > > +#ifndef efi_call_virt
-> > 
-> > So ... not a strong complaint, but I would prefer if these weren't
-> > ifdefd. I presume this is because ia64?
-> 
-> Yup, and to allow the gradual migration of arm/arm64/x86 without a new
-> CONFIG_WANT_GENERIC_EFI_CALL_VIRT or something to that effect.
-
-Actually, ia64 never uses this code, so I can add a final patch to
-remove the ifdefs after the existing arch code is moved over.
-
-I'll do that...
-
-Mark.
+T24gVGh1LCBBcHIgMjEsIDIwMTYgYXQgMDE6MTg6MjdQTSArMDEwMCwgTWF0dCBGbGVtaW5nIHdy
+b3RlOgo+ICggR29vZCBMb3JkLCBJIGhhdGUgZG9pbmcgc3RyaW5nIG1hbmlwdWxhdGlvbiBpbiBD
+ICkKCih5ZXApCgo+IAo+IE9uIFdlZCwgMjAgQXByLCBhdCAwMzoyNTozMlBNLCBMYXN6bG8gRXJz
+ZWsgd3JvdGU6Cj4gPiAKPiA+IFNvLCAibGVuIiBkb2VzIG5vdCBpbmNsdWRlIHRoZSByb29tIGZv
+ciB0aGUgdGVybWluYXRpbmcgTlVMLWJ5dGUgaGVyZS4KPiA+IFdoZW4gImxlbiIgaXMgcGFzc2Vk
+IHRvIHVjczJfYXNfdXRmOCgpLCB3aXRoIHRoZSBwcm9wb3NlZCBwYXRjaCBhcHBsaWVkLAo+ID4g
+YSBOVUwgYnl0ZSB3aWxsIGJlIHByb2R1Y2VkIGluICJuYW1lIiwgYnV0IGl0IHdpbGwgYmUgYXQg
+dGhlIHByaWNlIG9mIGEKPiA+IGdlbnVpbmUgY2hhcmFjdGVyIGZyb20gdGhlIGlucHV0IHZhcmlh
+YmxlIG5hbWUuCj4gCj4gUmlnaHQsIGFuZCB0aGlzIGlzIGEgcHJvYmxlbSBiZWNhdXNlIHdlJ3Jl
+IHRyeWluZyB0byBrZWVwIHRoZSBuYW1lcwo+IGNvbnNpc3RlbnQgYmV0d2VlbiBlZml2YXJmcyBh
+bmQgdGhlIEVGSSB2YXJpYWJsZSBkYXRhLiBGb3JjZQo+IE5VTC10ZXJtaW5hdGluZyB0aGUgc3Ry
+aW5nIGlzIHdyb25nLCBiZWNhdXNlIGlmIHlvdSBoYXZlIG5vIHJvb20gZm9yCj4gdGhlIE5VTCB0
+aGUgY2FsbGVyIHNob3VsZCBjaGVjayBmb3IgdGhhdC4gU2FkbHkgbm9uZSBkby4KPiAKPiBPbiB0
+aGUgZmxpcC1zaWRlLCBwYXNzaW5nIGFyb3VuZCBub24tTlVMIHRlcm1pbmF0ZWQgc3RyaW5ncyBp
+cyBqdXN0Cj4gYmVnZ2luZyBmb3IgdGhlc2Uga2luZHMgb2YgaXNzdWVzIHRvIGNvbWUgdXAuCj4g
+Cj4gVGhlIGZhY3QgaXMgdGhhdCB0aGUgY2FsbGVycyBvZiB1Y3MyX2FzX3V0ZjgoKSBhcmUgcGFz
+c2luZyBpdCB0aGUKPiB3cm9uZyAnbGVuJyBhcmd1bWVudC4gV2Ugd2FudCBhIE5VTC10ZXJtaW5h
+dGVkIHV0Zjggc3RyaW5nIGFuZCB3ZSdyZQo+IHBhc3NpbmcgYSBOVUwtdGVybWluYXRlZCB1Y3My
+IHN0cmluZy4gV2Ugc2hvdWxkIHRlbGwgdWNzMl9hc191dGY4KCkgaXQKPiBoYXMgZW5vdWdoIHJv
+b20gdG8gY29weSB0aGUgTlVMLgo+IAo+IFdvdWxkbid0IHRoaXMgd29yayAobWludXMgdGhlIHJl
+dHVybiB2YWx1ZSBjaGVja2luZyk/CgpJIGFncmVlIHdpdGggeW91ciBhbmFseXNpcywgYW5kIHlv
+dXIgcGF0Y2ggbG9va3MgcGxhdXNpYmxlLgoKLS0gCiAgUGV0ZXIKX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KSW50ZWwtZ2Z4IG1haWxpbmcgbGlzdApJbnRl
+bC1nZnhAbGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBzOi8vbGlzdHMuZnJlZWRlc2t0b3Aub3Jn
+L21haWxtYW4vbGlzdGluZm8vaW50ZWwtZ2Z4Cg==
