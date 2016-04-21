@@ -1,155 +1,75 @@
-From: Laszlo Ersek <lersek@redhat.com>
-Subject: Re: [PATCH] lib: Always NUL terminate ucs2_as_utf8
-Date: Thu, 21 Apr 2016 18:21:11 +0200
-Message-ID: <5718FDF7.4030309@redhat.com>
-References: <1461141427-16361-1-git-send-email-chris@chris-wilson.co.uk>
- <5717834C.6070802@redhat.com> <20160421121827.GE2829@codeblueprint.co.uk>
+From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCHv2 2/5] arm64/efi: move to generic {__,}efi_call_virt
+Date: Thu, 21 Apr 2016 17:48:40 +0100
+Message-ID: <20160421164840.GO929@arm.com>
+References: <1461238529-12810-1-git-send-email-mark.rutland@arm.com>
+ <1461238529-12810-3-git-send-email-mark.rutland@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <intel-gfx-bounces@lists.freedesktop.org>
-In-Reply-To: <20160421121827.GE2829@codeblueprint.co.uk>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
-List-Post: <mailto:intel-gfx@lists.freedesktop.org>
-List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: intel-gfx-bounces@lists.freedesktop.org
-Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: linux-efi@vger.kernel.org, Jason Andryuk <jandryuk@gmail.com>, intel-gfx@lists.freedesktop.org, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>, Matthew Garrett <mjg59@coreos.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1461238529-12810-3-git-send-email-mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-T24gMDQvMjEvMTYgMTQ6MTgsIE1hdHQgRmxlbWluZyB3cm90ZToKPiAoIEdvb2QgTG9yZCwgSSBo
-YXRlIGRvaW5nIHN0cmluZyBtYW5pcHVsYXRpb24gaW4gQyApCj4gCj4gT24gV2VkLCAyMCBBcHIs
-IGF0IDAzOjI1OjMyUE0sIExhc3psbyBFcnNlayB3cm90ZToKPj4KPj4gU28sICJsZW4iIGRvZXMg
-bm90IGluY2x1ZGUgdGhlIHJvb20gZm9yIHRoZSB0ZXJtaW5hdGluZyBOVUwtYnl0ZSBoZXJlLgo+
-PiBXaGVuICJsZW4iIGlzIHBhc3NlZCB0byB1Y3MyX2FzX3V0ZjgoKSwgd2l0aCB0aGUgcHJvcG9z
-ZWQgcGF0Y2ggYXBwbGllZCwKPj4gYSBOVUwgYnl0ZSB3aWxsIGJlIHByb2R1Y2VkIGluICJuYW1l
-IiwgYnV0IGl0IHdpbGwgYmUgYXQgdGhlIHByaWNlIG9mIGEKPj4gZ2VudWluZSBjaGFyYWN0ZXIg
-ZnJvbSB0aGUgaW5wdXQgdmFyaWFibGUgbmFtZS4KPiAKPiBSaWdodCwgYW5kIHRoaXMgaXMgYSBw
-cm9ibGVtIGJlY2F1c2Ugd2UncmUgdHJ5aW5nIHRvIGtlZXAgdGhlIG5hbWVzCj4gY29uc2lzdGVu
-dCBiZXR3ZWVuIGVmaXZhcmZzIGFuZCB0aGUgRUZJIHZhcmlhYmxlIGRhdGEuIEZvcmNlCj4gTlVM
-LXRlcm1pbmF0aW5nIHRoZSBzdHJpbmcgaXMgd3JvbmcsIGJlY2F1c2UgaWYgeW91IGhhdmUgbm8g
-cm9vbSBmb3IKPiB0aGUgTlVMIHRoZSBjYWxsZXIgc2hvdWxkIGNoZWNrIGZvciB0aGF0LiBTYWRs
-eSBub25lIGRvLgoKSSBkb24ndCB0aGluayBpdCBpcyBuZWNlc3NhcnkgdG8gY2hlY2sgZm9yIHRo
-ZSByZXR1cm4gdmFsdWUgaWYgb24gaW5wdXQgdGhlIGNhbGxlciBjYW4gZ3VhcmFudGVlIChmcm9t
-IHVjczJfdXRmOHNpemUoKSkgdGhhdCB0aGUgb3V0cHV0IGJ1ZmZlciB3aWxsIGJlIGxhcmdlIGVu
-b3VnaC4KCj4gT24gdGhlIGZsaXAtc2lkZSwgcGFzc2luZyBhcm91bmQgbm9uLU5VTCB0ZXJtaW5h
-dGVkIHN0cmluZ3MgaXMganVzdAo+IGJlZ2dpbmcgZm9yIHRoZXNlIGtpbmRzIG9mIGlzc3VlcyB0
-byBjb21lIHVwLgoKIkRlcGVuZHMiLCBJIGd1ZXNzIDopIE5VTC10ZXJtaW5hdGlvbiBhbmQgKHB0
-ciwgbGVuZ3RoKSBib3RoIHdvcmssIGJ1dCB3aGF0ZXZlciBpcyBjaG9zZW4gc2hvdWxkIGJlIHVz
-ZWQgY29uc2lzdGVudGx5LgoKSW4gbXkgb3BpbmlvbiwgdGhlIHBhdHRlcm4gdGhlIGNvZGUgdHJp
-ZXMgdG8gZm9sbG93IGlzIChwdHIsIGxlbmd0aCksIGFuZCB0aGUgZGlyZWN0IGlzc3VlIGlzIG9u
-bHkgdGhhdCB2YXJpYWJsZV9tYXRjaGVzKCkgcGVyZm9ybXMgYW4gb3V0LW9mLWJvdW5kcyBhY2Nl
-c3MuCgpXZSBjYW4gY2hhbmdlIHRoZSBwYXR0ZXJuIHRvIE5VTC10ZXJtaW5hdGlvbiwgYnV0IHRo
-ZW4gaXQgc2hvdWxkIGJlIGNvbnNpc3RlbnRseSB1c2VkLCBhbmQgSSB0aGluayB2YXJpYWJsZV9t
-YXRjaGVzKCkgc2hvdWxkIGJlIGFkYXB0ZWQganVzdCB0aGUgc2FtZS4gV2h5IHBhc3MgaW4gdGhl
-IGxlbmd0aCB0byBleGFtaW5lIGlmIHRoZSBzdHJpbmcgaXMgTlVMLXRlcm1pbmF0ZWQsIGd1YXJh
-bnRlZWQ/Cgo+IFRoZSBmYWN0IGlzIHRoYXQgdGhlIGNhbGxlcnMgb2YgdWNzMl9hc191dGY4KCkg
-YXJlIHBhc3NpbmcgaXQgdGhlCj4gd3JvbmcgJ2xlbicgYXJndW1lbnQuIFdlIHdhbnQgYSBOVUwt
-dGVybWluYXRlZCB1dGY4IHN0cmluZwoKTm90IG5lY2Vzc2FyaWx5LiBGb3IgZXhhbXBsZSwgZWZp
-dmFyZnNfY2FsbGJhY2soKSBpcyBjb25zdHJ1Y3RpbmcgIm5hbWUiIGluIHNldmVyYWwgc3RlcHMs
-IGFuZCB1Y3MyX2FzX3V0ZjgoKSBpcyBqdXN0IHRoZSBmaXJzdCBzdGVwLiBJZiBpdCBwcm9kdWNl
-ZCBhICdcMCcgYXQgbmFtZVtsZW5dLCBpdCB3b3VsZCBiZSBvdmVyd3JpdHRlbiBzb29uIGFmdGVy
-ICh3aXRoIGEgaHlwaGVuIGNoYXJhY3RlcikuCgpBbHNvLCB0aGUgZWZpdmFyX3ZhcmlhYmxlX2lz
-X3JlbW92YWJsZSgpIGZ1bmN0aW9uIHRha2VzICJsZW4iLiBJIHRoaW5rIHRoZSBpbnRlcmZhY2Vz
-IGFyZSBjb25zaXN0ZW50LCBpdCdzIGp1c3QgdGhlIHZhcmlhYmxlX21hdGNoZXMoKSBmdW5jdGlv
-biB0aGF0IGlzIGJ1Z2d5LgoKQWdhaW4sIEkgZG9uJ3Qgb3Bwb3NlIHN3aXRjaGluZyB0aGUgcGF0
-dGVybiB0byBOVUwtdGVybWluYXRpb24gZ2VuZXJhbGx5LCBidXQgdmFyaWFibGVfbWF0Y2hlcygp
-IHdpbGwgaGF2ZSB0byBiZSB1cGRhdGVkIGFueXdheS4gSSB0aGluayB0aGF0J3MgdGhlIGZpcnN0
-IHN0ZXAsIGFuZCB0aGUgaW50ZXJmYWNlcyBjYW4gYmUgc3dpdGNoZWQgb3ZlciBvbmx5IGFmdGVy
-LgoKPiBhbmQgd2UncmUKPiBwYXNzaW5nIGEgTlVMLXRlcm1pbmF0ZWQgdWNzMiBzdHJpbmcuIFdl
-IHNob3VsZCB0ZWxsIHVjczJfYXNfdXRmOCgpIGl0Cj4gaGFzIGVub3VnaCByb29tIHRvIGNvcHkg
-dGhlIE5VTC4KPiAKPiBXb3VsZG4ndCB0aGlzIHdvcmsgKG1pbnVzIHRoZSByZXR1cm4gdmFsdWUg
-Y2hlY2tpbmcpPwo+IAo+IC0tLQo+IAo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL2Zpcm13YXJlL2Vm
-aS92YXJzLmMgYi9kcml2ZXJzL2Zpcm13YXJlL2VmaS92YXJzLmMKPiBpbmRleCAwYWM1OTRjMGEy
-MzQuLjEzYTgzN2M3MGU5MCAxMDA2NDQKPiAtLS0gYS9kcml2ZXJzL2Zpcm13YXJlL2VmaS92YXJz
-LmMKPiArKysgYi9kcml2ZXJzL2Zpcm13YXJlL2VmaS92YXJzLmMKPiBAQCAtMjM1LDEzICsyMzUs
-MTIgQEAgZWZpdmFyX3ZhbGlkYXRlKGVmaV9ndWlkX3QgdmVuZG9yLCBlZmlfY2hhcjE2X3QgKnZh
-cl9uYW1lLCB1OCAqZGF0YSwKPiAgCXVuc2lnbmVkIGxvbmcgdXRmOF9zaXplOwo+ICAJdTggKnV0
-ZjhfbmFtZTsKPiAgCj4gLQl1dGY4X3NpemUgPSB1Y3MyX3V0ZjhzaXplKHZhcl9uYW1lKTsKPiAt
-CXV0ZjhfbmFtZSA9IGttYWxsb2ModXRmOF9zaXplICsgMSwgR0ZQX0tFUk5FTCk7Cj4gKwl1dGY4
-X3NpemUgPSB1Y3MyX3V0ZjhzaXplKHZhcl9uYW1lKSArIDE7Cj4gKwl1dGY4X25hbWUgPSBrbWFs
-bG9jKHV0Zjhfc2l6ZSwgR0ZQX0tFUk5FTCk7Cj4gIAlpZiAoIXV0ZjhfbmFtZSkKPiAgCQlyZXR1
-cm4gZmFsc2U7Cj4gIAo+ICAJdWNzMl9hc191dGY4KHV0ZjhfbmFtZSwgdmFyX25hbWUsIHV0Zjhf
-c2l6ZSk7Cj4gLQl1dGY4X25hbWVbdXRmOF9zaXplXSA9ICdcMCc7Cj4gIAo+ICAJZm9yIChpID0g
-MDsgdmFyaWFibGVfdmFsaWRhdGVbaV0ubmFtZVswXSAhPSAnXDAnOyBpKyspIHsKPiAgCQljb25z
-dCBjaGFyICpuYW1lID0gdmFyaWFibGVfdmFsaWRhdGVbaV0ubmFtZTsKPiBAQCAtMjUwLDcgKzI0
-OSw3IEBAIGVmaXZhcl92YWxpZGF0ZShlZmlfZ3VpZF90IHZlbmRvciwgZWZpX2NoYXIxNl90ICp2
-YXJfbmFtZSwgdTggKmRhdGEsCj4gIAkJaWYgKGVmaV9ndWlkY21wKHZlbmRvciwgdmFyaWFibGVf
-dmFsaWRhdGVbaV0udmVuZG9yKSkKPiAgCQkJY29udGludWU7Cj4gIAo+IC0JCWlmICh2YXJpYWJs
-ZV9tYXRjaGVzKHV0ZjhfbmFtZSwgdXRmOF9zaXplKzEsIG5hbWUsICZtYXRjaCkpIHsKPiArCQlp
-ZiAodmFyaWFibGVfbWF0Y2hlcyh1dGY4X25hbWUsIHV0Zjhfc2l6ZSwgbmFtZSwgJm1hdGNoKSkg
-ewo+ICAJCQlpZiAodmFyaWFibGVfdmFsaWRhdGVbaV0udmFsaWRhdGUgPT0gTlVMTCkKPiAgCQkJ
-CWJyZWFrOwo+ICAJCQlrZnJlZSh1dGY4X25hbWUpOwoKQXMgSSBzYWlkLCB0aGUgdGhpbmcgSSBk
-aXNsaWtlIGFib3V0IHRoaXMgaXM6IHdoeSBwYXNzICJ1dGY4X3NpemUiIHRvIHZhcmlhYmxlX21h
-dGNoZXMoKSBhdCBhbGwsIGlmICJ1dGY4X25hbWUiIGlzIGd1YXJhbnRlZWQgdG8gYmUgTlVMLXRl
-cm1pbmF0ZWQ/CgpPdGhlcndpc2UsIEkgdGhpbmsgdGhpcyBwYXRjaCBkb2VzIGdldCB0aGUgam9i
-IGRvbmUsIHllcy4gKEkgYWxzbyBjaGVja2VkIHRoZSB1Y3MyX2FzX3V0ZjgoKSBjYWxsIGluIGVm
-aXZhcl9jcmVhdGVfc3lzZnNfZW50cnkoKSwgImRyaXZlcnMvZmlybXdhcmUvZWZpL2VmaXZhcnMu
-YyIsIGJ1dCB0aGVyZSB0aGUgYnVmZmVyIGFscmVhZHkgaGFzIGVub3VnaCByb29tIGZvciAnXDAn
-LikKCi4uLiBIb3cgYWJvdXQgdGhpcyBpbnN0ZWFkPwoKPiBGcm9tIDE2ODRmNDM5OGI4NDk4YWYx
-MzVmYjNlMDdmODM2MTRlZjA0MjMyNjUgTW9uIFNlcCAxNyAwMDowMDowMCAyMDAxCj4gRnJvbTog
-TGFzemxvIEVyc2VrIDxsZXJzZWtAcmVkaGF0LmNvbT4KPiBEYXRlOiBUaHUsIDIxIEFwciAyMDE2
-IDE4OjA4OjMxICswMjAwCj4gU3ViamVjdDogW1BBVENIXSBlZmk6IGZpeCBvdXQtb2YtYm91bmRz
-IHJlYWQgaW4gdmFyaWFibGVfbWF0Y2hlcygpCj4KPiBUaGUgdmFyaWFibGVfbWF0Y2hlcygpIGZ1
-bmN0aW9uIGNhbiBjdXJyZW50bHkgcmVhZCAidmFyX25hbWVbbGVuXSIsIGZvcgo+IGV4YW1wbGUg
-d2hlbjoKPiAtIHZhcl9uYW1lWzBdID09ICdhJywKPiAtIGxlbiA9PSAxCj4gLSBtYXRjaF9uYW1l
-IHBvaW50cyB0byB0aGUgTlVMLXRlcm1pbmF0ZWQgc3RyaW5nICJhYiIuCj4KPiBUaGlzIGZ1bmN0
-aW9uIGlzIHN1cHBvc2VkIHRvIGFjY2VwdCAidmFyX25hbWUiIGlucHV0cyB0aGF0IGFyZSBub3QK
-PiBOVUwtdGVybWluYXRlZCAoaGVuY2UgdGhlICJsZW4iIHBhcmFtZXRlciIpLiBEb2N1bWVudCB0
-aGUgZnVuY3Rpb24sIGFuZAo+IGFjY2VzcyAidmFyX25hbWVbKm1hdGNoXSIgb25seSBpZiAiKm1h
-dGNoIiBpcyBzbWFsbGVyIHRoYW4gImxlbiIuCj4KPiBSZWY6IGh0dHA6Ly90aHJlYWQuZ21hbmUu
-b3JnL2dtYW5lLmNvbXAuZnJlZWRlc2t0b3AueG9yZy5kcml2ZXJzLmludGVsLzg2OTA2Cj4gUmVw
-b3J0ZWQtYnk6IENocmlzIFdpbHNvbiA8Y2hyaXNAY2hyaXMtd2lsc29uLmNvLnVrPgo+IFNpZ25l
-ZC1vZmYtYnk6IExhc3psbyBFcnNlayA8bGVyc2VrQHJlZGhhdC5jb20+Cj4gLS0tCj4gIGRyaXZl
-cnMvZmlybXdhcmUvZWZpL3ZhcnMuYyB8IDM3ICsrKysrKysrKysrKysrKysrKysrKysrKysrLS0t
-LS0tLS0tLS0KPiAgMSBmaWxlIGNoYW5nZWQsIDI2IGluc2VydGlvbnMoKyksIDExIGRlbGV0aW9u
-cygtKQo+Cj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL3ZhcnMuYyBiL2RyaXZl
-cnMvZmlybXdhcmUvZWZpL3ZhcnMuYwo+IGluZGV4IDBhYzU5NGMwYTIzNC4uMzRiNzQxOTQwNDk0
-IDEwMDY0NAo+IC0tLSBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL3ZhcnMuYwo+ICsrKyBiL2RyaXZl
-cnMvZmlybXdhcmUvZWZpL3ZhcnMuYwo+IEBAIC0yMDIsMjkgKzIwMiw0NCBAQCBzdGF0aWMgY29u
-c3Qgc3RydWN0IHZhcmlhYmxlX3ZhbGlkYXRlIHZhcmlhYmxlX3ZhbGlkYXRlW10gPSB7Cj4gIAl7
-IE5VTExfR1VJRCwgIiIsIE5VTEwgfSwKPiAgfTsKPgo+ICsvKgo+ICsgKiBDaGVjayBpZiBAdmFy
-X25hbWUgbWF0Y2hlcyB0aGUgcGF0dGVybiBnaXZlbiBpbiBAbWF0Y2hfbmFtZS4KPiArICoKPiAr
-ICogQHZhcl9uYW1lOiBhbiBhcnJheSBvZiBAbGVuIG5vbi1OVUwgY2hhcmFjdGVycy4KPiArICog
-QG1hdGNoX25hbWU6IGEgTlVMLXRlcm1pbmF0ZWQgcGF0dGVybiBzdHJpbmcsIG9wdGlvbmFsbHkg
-ZW5kaW5nIGluICIqIi4gQQo+ICsgKiAgICAgICAgICAgICAgZmluYWwgIioiIGNoYXJhY3RlciBt
-YXRjaGVzIGFueSB0cmFpbGluZyBjaGFyYWN0ZXJzIEB2YXJfbmFtZSwKPiArICogICAgICAgICAg
-ICAgIGluY2x1ZGluZyB0aGUgY2FzZSB3aGVuIHRoZXJlIGFyZSBub25lIGxlZnQgaW4gQHZhcl9u
-YW1lLgo+ICsgKiBAbWF0Y2g6IG9uIG91dHB1dCwgdGhlIG51bWJlciBvZiBub24td2lsZGNhcmQg
-Y2hhcmFjdGVycyBpbiBAbWF0Y2hfbmFtZQo+ICsgKiAgICAgICAgIHRoYXQgQHZhcl9uYW1lIG1h
-dGNoZXMsIHJlZ2FyZGxlc3Mgb2YgdGhlIHJldHVybiB2YWx1ZS4KPiArICogQHJldHVybjogd2hl
-dGhlciBAdmFyX25hbWUgZnVsbHkgbWF0Y2hlcyBAbWF0Y2hfbmFtZS4KPiArICovCj4gIHN0YXRp
-YyBib29sCj4gIHZhcmlhYmxlX21hdGNoZXMoY29uc3QgY2hhciAqdmFyX25hbWUsIHNpemVfdCBs
-ZW4sIGNvbnN0IGNoYXIgKm1hdGNoX25hbWUsCj4gIAkJIGludCAqbWF0Y2gpCj4gIHsKPiAgCWZv
-ciAoKm1hdGNoID0gMDsgOyAoKm1hdGNoKSsrKSB7Cj4gIAkJY2hhciBjID0gbWF0Y2hfbmFtZVsq
-bWF0Y2hdOwo+IC0JCWNoYXIgdSA9IHZhcl9uYW1lWyptYXRjaF07Cj4KPiAtCQkvKiBXaWxkY2Fy
-ZCBpbiB0aGUgbWF0Y2hpbmcgbmFtZSBtZWFucyB3ZSd2ZSBtYXRjaGVkICovCj4gLQkJaWYgKGMg
-PT0gJyonKQo+ICsJCXN3aXRjaCAoYykgewo+ICsJCWNhc2UgJyonOgo+ICsJCQkvKiBXaWxkY2Fy
-ZCBpbiBAbWF0Y2hfbmFtZSBtZWFucyB3ZSd2ZSBtYXRjaGVkLiAqLwo+ICAJCQlyZXR1cm4gdHJ1
-ZTsKPgo+IC0JCS8qIENhc2Ugc2Vuc2l0aXZlIG1hdGNoICovCj4gLQkJaWYgKCFjICYmICptYXRj
-aCA9PSBsZW4pCj4gLQkJCXJldHVybiB0cnVlOwo+ICsJCWNhc2UgJ1wwJzoKPiArCQkJLyogQG1h
-dGNoX25hbWUgaGFzIGVuZGVkLiBIYXMgQHZhcl9uYW1lIHRvbz8gKi8KPiArCQkJcmV0dXJuICgq
-bWF0Y2ggPT0gbGVuKTsKPgo+IC0JCWlmIChjICE9IHUpCj4gKwkJZGVmYXVsdDoKPiArCQkJLyoK
-PiArCQkJICogV2UndmUgcmVhY2hlZCBhIG5vbi13aWxkY2FyZCBjaGFyIGluIEBtYXRjaF9uYW1l
-Lgo+ICsJCQkgKiBDb250aW51ZSBvbmx5IGlmIHRoZXJlJ3MgYW4gaWRlbnRpY2FsIGNoYXJhY3Rl
-ciBpbgo+ICsJCQkgKiBAdmFyX25hbWUuCj4gKwkJCSAqLwo+ICsJCQlpZiAoKm1hdGNoIDwgbGVu
-ICYmIGMgPT0gdmFyX25hbWVbKm1hdGNoXSkKPiArCQkJCWNvbnRpbnVlOwo+ICAJCQlyZXR1cm4g
-ZmFsc2U7Cj4gLQo+IC0JCWlmICghYykKPiAtCQkJcmV0dXJuIHRydWU7Cj4gKwkJfQo+ICAJfQo+
-IC0JcmV0dXJuIHRydWU7Cj4gIH0KPgo+ICBib29sCj4gLS0KPiAxLjguMy4xCj4KClRoYW5rcwpM
-YXN6bG8KCj4gZGlmZiAtLWdpdCBhL2ZzL2VmaXZhcmZzL3N1cGVyLmMgYi9mcy9lZml2YXJmcy9z
-dXBlci5jCj4gaW5kZXggZGQwMjlkMTNlYTYxLi5iZTVhMDI3MjFiNDEgMTAwNjQ0Cj4gLS0tIGEv
-ZnMvZWZpdmFyZnMvc3VwZXIuYwo+ICsrKyBiL2ZzL2VmaXZhcmZzL3N1cGVyLmMKPiBAQCAtMTM2
-LDcgKzEzNiw3IEBAIHN0YXRpYyBpbnQgZWZpdmFyZnNfY2FsbGJhY2soZWZpX2NoYXIxNl90ICpu
-YW1lMTYsIGVmaV9ndWlkX3QgdmVuZG9yLAo+ICAJaWYgKCFuYW1lKQo+ICAJCWdvdG8gZmFpbDsK
-PiAgCj4gLQl1Y3MyX2FzX3V0ZjgobmFtZSwgZW50cnktPnZhci5WYXJpYWJsZU5hbWUsIGxlbik7
-Cj4gKwl1Y3MyX2FzX3V0ZjgobmFtZSwgZW50cnktPnZhci5WYXJpYWJsZU5hbWUsIGxlbiArIDEp
-Owo+ICAKPiAgCWlmIChlZml2YXJfdmFyaWFibGVfaXNfcmVtb3ZhYmxlKGVudHJ5LT52YXIuVmVu
-ZG9yR3VpZCwgbmFtZSwgbGVuKSkKPiAgCQlpc19yZW1vdmFibGUgPSB0cnVlOwo+IAoKX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KSW50ZWwtZ2Z4IG1haWxp
-bmcgbGlzdApJbnRlbC1nZnhAbGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBzOi8vbGlzdHMuZnJl
-ZWRlc2t0b3Aub3JnL21haWxtYW4vbGlzdGluZm8vaW50ZWwtZ2Z4Cg==
+On Thu, Apr 21, 2016 at 12:35:26PM +0100, Mark Rutland wrote:
+> Now there's a common template for {__,}efi_call_virt, remove the
+> duplicate logic from the arm64 efi code.
+> 
+> Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+> Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+> Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> ---
+>  arch/arm64/include/asm/efi.h | 21 +++++++--------------
+>  1 file changed, 7 insertions(+), 14 deletions(-)
+> 
+> diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+> index 8e88a69..f4f71224 100644
+> --- a/arch/arm64/include/asm/efi.h
+> +++ b/arch/arm64/include/asm/efi.h
+> @@ -14,28 +14,21 @@ extern void efi_init(void);
+>  
+>  int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
+>  
+> -#define efi_call_virt(f, ...)						\
+> +#define arch_efi_call_virt_setup()					\
+>  ({									\
+> -	efi_##f##_t *__f;						\
+> -	efi_status_t __s;						\
+> -									\
+>  	kernel_neon_begin();						\
+>  	efi_virtmap_load();						\
+> -	__f = efi.systab->runtime->f;					\
+> -	__s = __f(__VA_ARGS__);						\
+> -	efi_virtmap_unload();						\
+> -	kernel_neon_end();						\
+> -	__s;								\
+>  })
+>  
+> -#define __efi_call_virt(f, ...)						\
+> +#define arch_efi_call_virt(f, args...)					\
+>  ({									\
+>  	efi_##f##_t *__f;						\
+> -									\
+> -	kernel_neon_begin();						\
+> -	efi_virtmap_load();						\
+>  	__f = efi.systab->runtime->f;					\
+> -	__f(__VA_ARGS__);						\
+> +	__f(args);							\
+
+Any reason to change this to a named argument? This patch is hard enough
+to review as it is, given the way the diff has been generated!
+
+Either way:
+
+Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+
+Will
