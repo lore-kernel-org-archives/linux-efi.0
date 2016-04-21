@@ -1,116 +1,133 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCHv2 1/5] efi/runtime-wrappers: add {__,}efi_call_virt
- templates
-Date: Thu, 21 Apr 2016 13:55:07 +0100
-Message-ID: <20160421125507.GM6879@leverpostej>
-References: <1461238529-12810-1-git-send-email-mark.rutland@arm.com>
- <1461238529-12810-2-git-send-email-mark.rutland@arm.com>
- <20160421114256.GP2904@bivouac.eciton.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Julia Lawall <Julia.Lawall-L2FTfq7BK8M@public.gmane.org>
+Subject: [PATCH] efivarfs: merge boolean flag arguments
+Date: Thu, 21 Apr 2016 15:24:29 +0200
+Message-ID: <1461245069-10221-1-git-send-email-Julia.Lawall@lip6.fr>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160421114256.GP2904-t77nlHhSwNqAroYi2ySoxKxOck334EZe@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, vaishali.thakkar-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, saurabh.truth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Apr 21, 2016 at 12:42:56PM +0100, Leif Lindholm wrote:
-> On Thu, Apr 21, 2016 at 12:35:25PM +0100, Mark Rutland wrote:
-> > Currently each architecture must implement two macros, efi_call_virt and
-> > __efi_call_virt, which only differ by the presence or absence of a
-> > return type. Otherwise, the logic surrounding the call is identical.
-> > 
-> > As each architecture must define the entire body of each, we can't place
-> > any generic manipulation (e.g. irq flag validation) in the middle.
-> > 
-> > This patch adds template implementations of these macros. With these,
-> > arch code can implement three template macros, avoiding reptition for
-> > the void/non-void return cases:
-> > 
-> > * arch_efi_call_virt_setup
-> > 
-> >   Sets up the environment for the call (e.g. switching page tables,
-> >   allowing kernel-mode use of floating point, if required).
-> > 
-> > * arch_efi_call_virt
-> > 
-> >   Performs the call. The last expression in the macro must be the call
-> >   itself, allowing the logic to be shared by the void and non-void
-> >   cases.
-> > 
-> > * arch_efi_call_virt_teardown
-> > 
-> >   Restores the usual kernel environment once the call has returned.
-> > 
-> > While the savings from repition are minimal, we additionally gain the
-> > ability to add common code around the call with the call enviroment set
-> > up. This can be used to detect common firmware issues (e.g. bad irq mask
-> > management).
-> > 
-> > Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> > Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > ---
-> >  drivers/firmware/efi/runtime-wrappers.c | 21 +++++++++++++++++++++
-> >  1 file changed, 21 insertions(+)
-> > 
-> > diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-> > index de69530..1b9fa54 100644
-> > --- a/drivers/firmware/efi/runtime-wrappers.c
-> > +++ b/drivers/firmware/efi/runtime-wrappers.c
-> > @@ -20,6 +20,27 @@
-> >  #include <linux/spinlock.h>
-> >  #include <asm/efi.h>
-> >  
-> > +
-> > +#ifndef efi_call_virt
-> 
-> So ... not a strong complaint, but I would prefer if these weren't
-> ifdefd. I presume this is because ia64?
+The parameters atomic and duplicates of efivar_init always have opposite
+values.  Drop the parameter atomic, replace the uses of !atomic with
+duplicates, and update the call sites accordingly.
 
-Yup, and to allow the gradual migration of arm/arm64/x86 without a new
-CONFIG_WANT_GENERIC_EFI_CALL_VIRT or something to that effect.
+The code using duplicates is slightly reorganized with an else, to avoid
+duplicating the lock code.
 
-> Could that be given a dummy pass-through version instead?
+Signed-off-by: Julia Lawall <Julia.Lawall-L2FTfq7BK8M@public.gmane.org>
 
-I'm not exactly sure what you mean by that. Could you elaborate?
+---
+Not tested.  I have assumed that the calls to both variable_is_present and
+dup_variable_bug need to be out of the lock.
 
-> If not, could a comment be added that this is to retain compatibility
-> with ia64 (so that if that architecture was to mysteriously disappear
-> from the tree, someone might remember to deconditionalise it)?
+ drivers/firmware/efi/efivars.c |    5 ++---
+ drivers/firmware/efi/vars.c    |   23 ++++++++++-------------
+ fs/efivarfs/super.c            |    3 +--
+ include/linux/efi.h            |    3 +--
+ 4 files changed, 14 insertions(+), 20 deletions(-)
 
-Sure. I can also add a note to the commit message regarding the
-temporary need while arm/arm64/x86 are moved over.
-
-Thanks,
-Mark.
-
-> > +#define efi_call_virt(f, args...)					\
-> > +({									\
-> > +	efi_status_t __s;						\
-> > +	arch_efi_call_virt_setup();					\
-> > +	__s = arch_efi_call_virt(f, args);				\
-> > +	arch_efi_call_virt_teardown();					\
-> > +	__s;								\
-> > +})
-> > +#endif
-> > +
-> > +#ifndef __efi_call_virt
-> > +#define __efi_call_virt(f, args...)					\
-> > +({									\
-> > +	arch_efi_call_virt_setup();					\
-> > +	arch_efi_call_virt(f, args);					\
-> > +	arch_efi_call_virt_teardown();					\
-> > +})
-> > +#endif
-> > +
-> >  /*
-> >   * According to section 7.1 of the UEFI spec, Runtime Services are not fully
-> >   * reentrant, and there are particular combinations of calls that need to be
-> > -- 
-> > 1.9.1
-> > 
-> 
+diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
+index 096adcb..116b244 100644
+--- a/drivers/firmware/efi/efivars.c
++++ b/drivers/firmware/efi/efivars.c
+@@ -661,7 +661,7 @@ static void efivar_update_sysfs_entries(struct work_struct *work)
+ 			return;
+ 
+ 		err = efivar_init(efivar_update_sysfs_entry, entry,
+-				  true, false, &efivar_sysfs_list);
++				  false, &efivar_sysfs_list);
+ 		if (!err)
+ 			break;
+ 
+@@ -730,8 +730,7 @@ int efivars_sysfs_init(void)
+ 		return -ENOMEM;
+ 	}
+ 
+-	efivar_init(efivars_sysfs_callback, NULL, false,
+-		    true, &efivar_sysfs_list);
++	efivar_init(efivars_sysfs_callback, NULL, true, &efivar_sysfs_list);
+ 
+ 	error = create_efivars_bin_attributes();
+ 	if (error) {
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index 0ac594c..758c73c 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -437,8 +437,7 @@ static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_guid,
+  * Returns 0 on success, or a kernel error code on failure.
+  */
+ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+-		void *data, bool atomic, bool duplicates,
+-		struct list_head *head)
++		void *data, bool duplicates, struct list_head *head)
+ {
+ 	const struct efivar_operations *ops = __efivars->ops;
+ 	unsigned long variable_name_size = 1024;
+@@ -468,7 +467,7 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+ 						&vendor_guid);
+ 		switch (status) {
+ 		case EFI_SUCCESS:
+-			if (!atomic)
++			if (duplicates)
+ 				spin_unlock_irq(&__efivars->lock);
+ 
+ 			variable_name_size = var_name_strnsize(variable_name,
+@@ -483,21 +482,19 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+ 			 * and may end up looping here forever.
+ 			 */
+ 			if (duplicates &&
+-			    variable_is_present(variable_name, &vendor_guid, head)) {
++			    variable_is_present(variable_name, &vendor_guid,
++						head)) {
+ 				dup_variable_bug(variable_name, &vendor_guid,
+ 						 variable_name_size);
+-				if (!atomic)
+-					spin_lock_irq(&__efivars->lock);
+-
+ 				status = EFI_NOT_FOUND;
+-				break;
++			} else {
++				err = func(variable_name, vendor_guid,
++					   variable_name_size, data);
++				if (err)
++					status = EFI_NOT_FOUND;
+ 			}
+ 
+-			err = func(variable_name, vendor_guid, variable_name_size, data);
+-			if (err)
+-				status = EFI_NOT_FOUND;
+-
+-			if (!atomic)
++			if (duplicates)
+ 				spin_lock_irq(&__efivars->lock);
+ 
+ 			break;
+diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+index 553c5d2..9cb54a3 100644
+--- a/fs/efivarfs/super.c
++++ b/fs/efivarfs/super.c
+@@ -216,8 +216,7 @@ static int efivarfs_fill_super(struct super_block *sb, void *data, int silent)
+ 
+ 	INIT_LIST_HEAD(&efivarfs_list);
+ 
+-	err = efivar_init(efivarfs_callback, (void *)sb, false,
+-			  true, &efivarfs_list);
++	err = efivar_init(efivarfs_callback, (void *)sb, true, &efivarfs_list);
+ 	if (err)
+ 		__efivar_entry_iter(efivarfs_destroy, &efivarfs_list, NULL, NULL);
+ 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 5b1d5c5..7b8b2c5 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1189,8 +1189,7 @@ int efivars_unregister(struct efivars *efivars);
+ struct kobject *efivars_kobject(void);
+ 
+ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+-		void *data, bool atomic, bool duplicates,
+-		struct list_head *head);
++		void *data, bool duplicates, struct list_head *head);
+ 
+ void efivar_entry_add(struct efivar_entry *entry, struct list_head *head);
+ void efivar_entry_remove(struct efivar_entry *entry);
