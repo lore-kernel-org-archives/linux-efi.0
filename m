@@ -1,50 +1,116 @@
 From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCHv2 0/5] efi: detect erroneous firmware IRQ manipulation
-Date: Thu, 21 Apr 2016 13:52:37 +0100
-Message-ID: <20160421125236.GL6879@leverpostej>
+Subject: Re: [PATCHv2 1/5] efi/runtime-wrappers: add {__,}efi_call_virt
+ templates
+Date: Thu, 21 Apr 2016 13:55:07 +0100
+Message-ID: <20160421125507.GM6879@leverpostej>
 References: <1461238529-12810-1-git-send-email-mark.rutland@arm.com>
- <20160421114737.GQ2904@bivouac.eciton.net>
+ <1461238529-12810-2-git-send-email-mark.rutland@arm.com>
+ <20160421114256.GP2904@bivouac.eciton.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160421114737.GQ2904-t77nlHhSwNqAroYi2ySoxKxOck334EZe@public.gmane.org>
+In-Reply-To: <20160421114256.GP2904-t77nlHhSwNqAroYi2ySoxKxOck334EZe@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Apr 21, 2016 at 12:47:37PM +0100, Leif Lindholm wrote:
-> On Thu, Apr 21, 2016 at 12:35:24PM +0100, Mark Rutland wrote:
-> > Some firmware erroneously unmask IRQs (and potentially other architecture
-> > specific exceptions) during runtime services functions, in violation of both
-> > common sense and the UEFI specification. This can result in a number of issues
-> > if said exceptions are taken when they are expected to be masked, and
-> > additionally can confuse IRQ tracing if the original mask state is not
-> > restored prior to returning from firmware.
+On Thu, Apr 21, 2016 at 12:42:56PM +0100, Leif Lindholm wrote:
+> On Thu, Apr 21, 2016 at 12:35:25PM +0100, Mark Rutland wrote:
+> > Currently each architecture must implement two macros, efi_call_virt and
+> > __efi_call_virt, which only differ by the presence or absence of a
+> > return type. Otherwise, the logic surrounding the call is identical.
 > > 
-> > In practice it's difficult to check that firmware never unmasks exceptions, but
-> > we can at least check that the IRQ flags are at least consistent upon entry to
-> > and return from a runtime services function call. This series implements said
-> > check in the shared EFI runtime wrappers code, after an initial round of
-> > refactoring such that this can be generic.
+> > As each architecture must define the entire body of each, we can't place
+> > any generic manipulation (e.g. irq flag validation) in the middle.
+> > 
+> > This patch adds template implementations of these macros. With these,
+> > arch code can implement three template macros, avoiding reptition for
+> > the void/non-void return cases:
+> > 
+> > * arch_efi_call_virt_setup
+> > 
+> >   Sets up the environment for the call (e.g. switching page tables,
+> >   allowing kernel-mode use of floating point, if required).
+> > 
+> > * arch_efi_call_virt
+> > 
+> >   Performs the call. The last expression in the macro must be the call
+> >   itself, allowing the logic to be shared by the void and non-void
+> >   cases.
+> > 
+> > * arch_efi_call_virt_teardown
+> > 
+> >   Restores the usual kernel environment once the call has returned.
+> > 
+> > While the savings from repition are minimal, we additionally gain the
+> > ability to add common code around the call with the call enviroment set
+> > up. This can be used to detect common firmware issues (e.g. bad irq mask
+> > management).
+> > 
+> > Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> > Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> > Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> > ---
+> >  drivers/firmware/efi/runtime-wrappers.c | 21 +++++++++++++++++++++
+> >  1 file changed, 21 insertions(+)
+> > 
+> > diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+> > index de69530..1b9fa54 100644
+> > --- a/drivers/firmware/efi/runtime-wrappers.c
+> > +++ b/drivers/firmware/efi/runtime-wrappers.c
+> > @@ -20,6 +20,27 @@
+> >  #include <linux/spinlock.h>
+> >  #include <asm/efi.h>
+> >  
+> > +
+> > +#ifndef efi_call_virt
+> 
+> So ... not a strong complaint, but I would prefer if these weren't
+> ifdefd. I presume this is because ia64?
 
-[...]
+Yup, and to allow the gradual migration of arm/arm64/x86 without a new
+CONFIG_WANT_GENERIC_EFI_CALL_VIRT or something to that effect.
 
-> So, I think this is a good thing, but the diffs end up being quite
-> hard to deciphre. Is there any non-insane shuffling around of things
-> that can make the changeset more clear?
+> Could that be given a dummy pass-through version instead?
 
-This is the clearest/simplest way I had found to organise them.
+I'm not exactly sure what you mean by that. Could you elaborate?
 
-I think the arm and arm64 diffs are fairly clear, so I assume you're
-mainly asking w.r.t. the x86 patch, which is less so due to the volume
-of lines that fall out of the diff context. The 32-bit side of that is
-simple, so I could split that into two patches, leaving the diff pain
-only with the 64-bit patch.
+> If not, could a comment be added that this is to retain compatibility
+> with ia64 (so that if that architecture was to mysteriously disappear
+> from the tree, someone might remember to deconditionalise it)?
 
-Otherwise, short of moving things into a different file I think this is
-a losing battle against git's diff engine.
+Sure. I can also add a note to the commit message regarding the
+temporary need while arm/arm64/x86 are moved over.
 
 Thanks,
 Mark.
+
+> > +#define efi_call_virt(f, args...)					\
+> > +({									\
+> > +	efi_status_t __s;						\
+> > +	arch_efi_call_virt_setup();					\
+> > +	__s = arch_efi_call_virt(f, args);				\
+> > +	arch_efi_call_virt_teardown();					\
+> > +	__s;								\
+> > +})
+> > +#endif
+> > +
+> > +#ifndef __efi_call_virt
+> > +#define __efi_call_virt(f, args...)					\
+> > +({									\
+> > +	arch_efi_call_virt_setup();					\
+> > +	arch_efi_call_virt(f, args);					\
+> > +	arch_efi_call_virt_teardown();					\
+> > +})
+> > +#endif
+> > +
+> >  /*
+> >   * According to section 7.1 of the UEFI spec, Runtime Services are not fully
+> >   * reentrant, and there are particular combinations of calls that need to be
+> > -- 
+> > 1.9.1
+> > 
+> 
