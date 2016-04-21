@@ -1,33 +1,52 @@
-From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Subject: Re: [PATCH][v6] ACPI / PM: Introduce efi poweroff for HW-full platforms without _S5
-Date: Thu, 21 Apr 2016 02:17:27 +0200
-Message-ID: <1562468.HF88ABVP4x@vostro.rjw.lan>
-References: <1458607870-22522-1-git-send-email-yu.c.chen@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7Bit
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH] x86/efi: Remove the always true EFI_DEBUG symbol
+Date: Thu, 21 Apr 2016 12:09:30 +0100
+Message-ID: <1461236970-19275-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1458607870-22522-1-git-send-email-yu.c.chen@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chen Yu <yu.c.chen@intel.com>
-Cc: linux-acpi@vger.kernel.org, "Rafael J. Wysocki" <rafael@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Len Brown <lenb@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-pm@vger.kernel.org
+To: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@alien8.de>, Robert Elliott <elliott@hpe.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Tuesday, March 22, 2016 08:51:10 AM Chen Yu wrote:
-> The problem is Linux registers pm_power_off = efi_power_off only if
-> we are in hardware reduced mode. Actually, what we also want is to do
-> this when ACPI S5 is simply not supported on non-legacy platforms.
-> Since some future Intel platforms are HW-full mode where the DSDT
-> fails to supply an _S5 object(without SLP_TYP), we should let such
-> kind of platform to leverage efi runtime service to poweroff.
-> 
-> This patch uses efi power off as first choice when S5 is unavailable,
-> even if there is a customized poweroff(driver provided, eg).
-> Meanwhile, the legacy platforms will not be affected because there is
-> no path for them to overwrite the pm_power_off to efi power off.
-> 
-> Suggested-by: Len Brown <len.brown@intel.com>
-> Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
-> Signed-off-by: Chen Yu <yu.c.chen@intel.com>
+This symbol is always set which makes it useless. Additionally we have
+a kernel command-line switch, efi=debug, which actually controls the
+printing of the memory map.
 
-Applied, thanks!
+Reported-by: Robert Elliott <elliott@hpe.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+---
+ arch/x86/platform/efi/efi.c | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index dde46cd78b8f..f93545e7dc54 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -54,8 +54,6 @@
+ #include <asm/rtc.h>
+ #include <asm/uv/uv.h>
+ 
+-#define EFI_DEBUG
+-
+ static struct efi efi_phys __initdata;
+ static efi_system_table_t efi_systab __initdata;
+ 
+@@ -222,7 +220,6 @@ int __init efi_memblock_x86_reserve_range(void)
+ 
+ void __init efi_print_memmap(void)
+ {
+-#ifdef EFI_DEBUG
+ 	efi_memory_desc_t *md;
+ 	int i = 0;
+ 
+@@ -235,7 +232,6 @@ void __init efi_print_memmap(void)
+ 			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1,
+ 			(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
+ 	}
+-#endif  /*  EFI_DEBUG  */
+ }
+ 
+ void __init efi_unmap_memmap(void)
+-- 
+2.7.3
