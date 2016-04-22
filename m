@@ -1,61 +1,44 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCHv2 0/6] efi: detect erroneous firmware IRQ manipulation
-Date: Fri, 22 Apr 2016 16:12:59 +0200
-Message-ID: <CAKv+Gu8FGpZK4yDito2jKTbjuyE2jojj5tZhCa2qUwKdWL9+ng@mail.gmail.com>
-References: <1461333083-15529-1-git-send-email-mark.rutland@arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH v2 0/6] arm64/ARM pt dumper changes
+Date: Fri, 22 Apr 2016 18:48:02 +0200
+Message-ID: <1461343688-8552-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1461333083-15529-1-git-send-email-mark.rutland-5wv7dgnIgG8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org" <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
+Cc: will.deacon-5wv7dgnIgG8@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 22 April 2016 at 15:51, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> Some firmware erroneously unmask IRQs (and potentially other architecture
-> specific exceptions) during runtime services functions, in violation of both
-> common sense and the UEFI specification. This can result in a number of issues
-> if said exceptions are taken when they are expected to be masked, and
-> additionally can confuse IRQ tracing if the original mask state is not
-> restored prior to returning from firmware.
->
-> In practice it's difficult to check that firmware never unmasks exceptions, but
-> we can at least check that the IRQ flags are at least consistent upon entry to
-> and return from a runtime services function call. This series implements said
-> check in the shared EFI runtime wrappers code, after an initial round of
-> refactoring such that this can be generic.
->
-> I have left ia64 as-is, without this check, as ia64 doesn't currently use the
-> generic runtime wrappers, has many special cases for the runtime calls which
-> don't fit well with the generic code, and I don't expect a new, buggy ia64
-> firmware to appear soon.
->
-> The first time corruption of the IRQ flags is detected, we dump a stack trace,
-> and set TAINT_FIRMWARE_WORKAROUND. Additionally, and in all subsequent cases,
-> we log (with ratelimiting) the specific corruption of the flags, and restore
-> the expected flags to avoid redundant warnings elsewhere.
->
-> Since v1 [1]:
-> * Fix thinko: s/local_irq_save/local_save_flags/
-> * Remove ifdefs after conversion
-> * Remove reundant semicolon from x86 patch
-> * Move efi_call_virt_check_flags before first use
-> * Add Acked-bys and Reviewed-bys
->
-> Ard, I assume that your Reviewed-by still stands for the final patch, even
-> though efi_call_virt_check_flags moved. Please shout if that's not the case!
->
+This series updates the kernel page table dumper to:
+- not initialize the vmemmap region markers dynamically
+- show region boundaries for the kasan shadow region
+- include the UEFI runtime services mappings
 
-No, that's fine. Thanks for respinning so quickly.
+Changes since v1:
+- incorporated Mark Rutland's patches to split into separate sysfs files
+- give ARM the same treatment so that we can export the UEFI page tables in
+  code that is shared between ARM and arm64
+- added file to use char arrays rather than char pointer in the marker and
+  prot_bits arrays (arm64)
 
-> Hopefully you're also happy to extend that to the new patch removing the
-> ifdefs once they become superfluous.
->
+Ard Biesheuvel (4):
+  arm64: ptdump: use static initializers for vmemmap region boundaries
+  arm64: ptdump: add region marker for kasan shadow region
+  arm64: ptdump: fold string literals into address_markers[] and
+    pte_bits[]
+  arm: mm: dump: make page table dumping reusable
 
-Matt: in case your review bandwidth is limited atm, I'd much prefer
-this series making v4.7 than the GOP stuff or the other stuff i have
-been posting over the past weeks.
+Mark Rutland (2):
+  arm64: mm: dump: make page table dumping reusable
+  efi/arm*: add support to dump the EFI page tables
 
-Thanks,
-Ard.
+ arch/arm/include/asm/ptdump.h      | 44 +++++++++
+ arch/arm/mm/dump.c                 | 60 ++++++++-----
+ arch/arm64/include/asm/ptdump.h    | 44 +++++++++
+ arch/arm64/mm/dump.c               | 94 +++++++++-----------
+ drivers/firmware/efi/arm-runtime.c | 21 +++++
+ 5 files changed, 188 insertions(+), 75 deletions(-)
+ create mode 100644 arch/arm/include/asm/ptdump.h
+ create mode 100644 arch/arm64/include/asm/ptdump.h
+
+-- 
+2.7.4
