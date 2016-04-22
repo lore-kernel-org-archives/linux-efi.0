@@ -1,7 +1,7 @@
 From: Mark Rutland <mark.rutland@arm.com>
-Subject: [PATCHv2 4/6] x86/efi: move to generic {__,}efi_call_virt
-Date: Fri, 22 Apr 2016 14:51:21 +0100
-Message-ID: <1461333083-15529-5-git-send-email-mark.rutland@arm.com>
+Subject: [PATCHv2 1/6] efi/runtime-wrappers: add {__,}efi_call_virt templates
+Date: Fri, 22 Apr 2016 14:51:18 +0100
+Message-ID: <1461333083-15529-2-git-send-email-mark.rutland@arm.com>
 References: <1461333083-15529-1-git-send-email-mark.rutland@arm.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1461333083-15529-1-git-send-email-mark.rutland@arm.com>
@@ -10,101 +10,77 @@ To: linux-efi@vger.kernel.org
 Cc: ard.biesheuvel@linaro.org, catalin.marinas@arm.com, hpa@zytor.com, leif.lindholm@linaro.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, linux-kernel@vger.kernel.org, mark.rutland@arm.com, matt@codeblueprint.co.uk, mingo@redhat.com, tglx@linutronix.de, will.deacon@arm.com
 List-Id: linux-efi@vger.kernel.org
 
-Now there's a common template for {__,}efi_call_virt, remove the
-duplicate logic from the x86 efi code.
+Currently each architecture must implement two macros, efi_call_virt and
+__efi_call_virt, which only differ by the presence or absence of a
+return type. Otherwise, the logic surrounding the call is identical.
+
+As each architecture must define the entire body of each, we can't place
+any generic manipulation (e.g. irq flag validation) in the middle.
+
+This patch adds template implementations of these macros. With these,
+arch code can implement three template macros, avoiding reptition for
+the void/non-void return cases:
+
+* arch_efi_call_virt_setup
+
+  Sets up the environment for the call (e.g. switching page tables,
+  allowing kernel-mode use of floating point, if required).
+
+* arch_efi_call_virt
+
+  Performs the call. The last expression in the macro must be the call
+  itself, allowing the logic to be shared by the void and non-void
+  cases.
+
+* arch_efi_call_virt_teardown
+
+  Restores the usual kernel environment once the call has returned.
+
+While the savings from repition are minimal, we additionally gain the
+ability to add common code around the call with the call environment set
+up. This can be used to detect common firmware issues (e.g. bad irq mask
+management).
 
 Signed-off-by: Mark Rutland <mark.rutland@arm.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Ingo Molnar <mingo@redhat.com>
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org
 ---
- arch/x86/include/asm/efi.h | 41 ++++++++++++-----------------------------
- 1 file changed, 12 insertions(+), 29 deletions(-)
+ drivers/firmware/efi/runtime-wrappers.c | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 53748c4..34bd38b 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -33,28 +33,16 @@
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index de69530..1b9fa54 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -20,6 +20,27 @@
+ #include <linux/spinlock.h>
+ #include <asm/efi.h>
  
- extern unsigned long asmlinkage efi_call_phys(void *, ...);
- 
-+#define arch_efi_call_virt_setup()	kernel_fpu_begin()
-+#define arch_efi_call_virt_teardown()	kernel_fpu_end()
++
++#ifndef efi_call_virt
++#define efi_call_virt(f, args...)					\
++({									\
++	efi_status_t __s;						\
++	arch_efi_call_virt_setup();					\
++	__s = arch_efi_call_virt(f, args);				\
++	arch_efi_call_virt_teardown();					\
++	__s;								\
++})
++#endif
++
++#ifndef __efi_call_virt
++#define __efi_call_virt(f, args...)					\
++({									\
++	arch_efi_call_virt_setup();					\
++	arch_efi_call_virt(f, args);					\
++	arch_efi_call_virt_teardown();					\
++})
++#endif
 +
  /*
-  * Wrap all the virtual calls in a way that forces the parameters on the stack.
-  */
--
--/* Use this macro if your virtual returns a non-void value */
--#define efi_call_virt(f, args...) \
--({									\
--	efi_status_t __s;						\
--	kernel_fpu_begin();						\
--	__s = ((efi_##f##_t __attribute__((regparm(0)))*)		\
--		efi.systab->runtime->f)(args);				\
--	kernel_fpu_end();						\
--	__s;								\
--})
--
--/* Use this macro if your virtual call does not return any value */
--#define __efi_call_virt(f, args...) \
-+#define arch_efi_call_virt(f, args...)					\
- ({									\
--	kernel_fpu_begin();						\
- 	((efi_##f##_t __attribute__((regparm(0)))*)			\
- 		efi.systab->runtime->f)(args);				\
--	kernel_fpu_end();						\
- })
- 
- #define efi_ioremap(addr, size, type, attr)	ioremap_cache(addr, size)
-@@ -78,10 +66,8 @@ struct efi_scratch {
- 	u64	phys_stack;
- } __packed;
- 
--#define efi_call_virt(f, ...)						\
-+#define arch_efi_call_virt_setup()					\
- ({									\
--	efi_status_t __s;						\
--									\
- 	efi_sync_low_kernel_mappings();					\
- 	preempt_disable();						\
- 	__kernel_fpu_begin();						\
-@@ -91,9 +77,13 @@ struct efi_scratch {
- 		write_cr3((unsigned long)efi_scratch.efi_pgt);		\
- 		__flush_tlb_all();					\
- 	}								\
--									\
--	__s = efi_call((void *)efi.systab->runtime->f, __VA_ARGS__);	\
--									\
-+})
-+
-+#define arch_efi_call_virt(f, args...)					\
-+	efi_call((void *)efi.systab->runtime->f, args)			\
-+
-+#define arch_efi_call_virt_teardown()					\
-+({									\
- 	if (efi_scratch.use_pgd) {					\
- 		write_cr3(efi_scratch.prev_cr3);			\
- 		__flush_tlb_all();					\
-@@ -101,15 +91,8 @@ struct efi_scratch {
- 									\
- 	__kernel_fpu_end();						\
- 	preempt_enable();						\
--	__s;								\
- })
- 
--/*
-- * All X86_64 virt calls return non-void values. Thus, use non-void call for
-- * virt calls that would be void on X86_32.
-- */
--#define __efi_call_virt(f, args...) efi_call_virt(f, args)
--
- extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
- 					u32 type, u64 attribute);
- 
+  * According to section 7.1 of the UEFI spec, Runtime Services are not fully
+  * reentrant, and there are particular combinations of calls that need to be
 -- 
 1.9.1
