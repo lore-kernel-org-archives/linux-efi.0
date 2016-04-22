@@ -1,67 +1,110 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: [PATCHv2 0/6] efi: detect erroneous firmware IRQ manipulation
-Date: Fri, 22 Apr 2016 14:51:17 +0100
-Message-ID: <1461333083-15529-1-git-send-email-mark.rutland@arm.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: [PATCHv2 4/6] x86/efi: move to generic {__,}efi_call_virt
+Date: Fri, 22 Apr 2016 14:51:21 +0100
+Message-ID: <1461333083-15529-5-git-send-email-mark.rutland@arm.com>
+References: <1461333083-15529-1-git-send-email-mark.rutland@arm.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1461333083-15529-1-git-send-email-mark.rutland@arm.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org
+Cc: ard.biesheuvel@linaro.org, catalin.marinas@arm.com, hpa@zytor.com, leif.lindholm@linaro.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, linux-kernel@vger.kernel.org, mark.rutland@arm.com, matt@codeblueprint.co.uk, mingo@redhat.com, tglx@linutronix.de, will.deacon@arm.com
 List-Id: linux-efi@vger.kernel.org
 
-Some firmware erroneously unmask IRQs (and potentially other architecture
-specific exceptions) during runtime services functions, in violation of both
-common sense and the UEFI specification. This can result in a number of issues
-if said exceptions are taken when they are expected to be masked, and
-additionally can confuse IRQ tracing if the original mask state is not
-restored prior to returning from firmware.
+Now there's a common template for {__,}efi_call_virt, remove the
+duplicate logic from the x86 efi code.
 
-In practice it's difficult to check that firmware never unmasks exceptions, but
-we can at least check that the IRQ flags are at least consistent upon entry to
-and return from a runtime services function call. This series implements said
-check in the shared EFI runtime wrappers code, after an initial round of
-refactoring such that this can be generic.
+Signed-off-by: Mark Rutland <mark.rutland@arm.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+---
+ arch/x86/include/asm/efi.h | 41 ++++++++++++-----------------------------
+ 1 file changed, 12 insertions(+), 29 deletions(-)
 
-I have left ia64 as-is, without this check, as ia64 doesn't currently use the
-generic runtime wrappers, has many special cases for the runtime calls which
-don't fit well with the generic code, and I don't expect a new, buggy ia64
-firmware to appear soon.
-
-The first time corruption of the IRQ flags is detected, we dump a stack trace,
-and set TAINT_FIRMWARE_WORKAROUND. Additionally, and in all subsequent cases,
-we log (with ratelimiting) the specific corruption of the flags, and restore
-the expected flags to avoid redundant warnings elsewhere.
-
-Since v1 [1]:
-* Fix thinko: s/local_irq_save/local_save_flags/
-* Remove ifdefs after conversion
-* Remove reundant semicolon from x86 patch
-* Move efi_call_virt_check_flags before first use
-* Add Acked-bys and Reviewed-bys
-
-Ard, I assume that your Reviewed-by still stands for the final patch, even
-though efi_call_virt_check_flags moved. Please shout if that's not the case!
-
-Hopefully you're also happy to extend that to the new patch removing the
-ifdefs once they become superfluous.
-
-Thanks,
-Mark.
-
-[1] https://lkml.org/lkml/2016/4/21/260
-
-Mark Rutland (6):
-  efi/runtime-wrappers: add {__,}efi_call_virt templates
-  arm64/efi: move to generic {__,}efi_call_virt
-  arm/efi: move to generic {__,}efi_call_virt
-  x86/efi: move to generic {__,}efi_call_virt
-  efi/runtime-wrappers: remove redundant ifdefs
-  efi/runtime-wrappers: detect FW irq flag corruption
-
- arch/arm/include/asm/efi.h              | 20 ++++------------
- arch/arm64/include/asm/efi.h            | 21 ++++++-----------
- arch/x86/include/asm/efi.h              | 41 ++++++++++-----------------------
- drivers/firmware/efi/runtime-wrappers.c | 38 ++++++++++++++++++++++++++++++
- 4 files changed, 61 insertions(+), 59 deletions(-)
-
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 53748c4..34bd38b 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -33,28 +33,16 @@
+ 
+ extern unsigned long asmlinkage efi_call_phys(void *, ...);
+ 
++#define arch_efi_call_virt_setup()	kernel_fpu_begin()
++#define arch_efi_call_virt_teardown()	kernel_fpu_end()
++
+ /*
+  * Wrap all the virtual calls in a way that forces the parameters on the stack.
+  */
+-
+-/* Use this macro if your virtual returns a non-void value */
+-#define efi_call_virt(f, args...) \
+-({									\
+-	efi_status_t __s;						\
+-	kernel_fpu_begin();						\
+-	__s = ((efi_##f##_t __attribute__((regparm(0)))*)		\
+-		efi.systab->runtime->f)(args);				\
+-	kernel_fpu_end();						\
+-	__s;								\
+-})
+-
+-/* Use this macro if your virtual call does not return any value */
+-#define __efi_call_virt(f, args...) \
++#define arch_efi_call_virt(f, args...)					\
+ ({									\
+-	kernel_fpu_begin();						\
+ 	((efi_##f##_t __attribute__((regparm(0)))*)			\
+ 		efi.systab->runtime->f)(args);				\
+-	kernel_fpu_end();						\
+ })
+ 
+ #define efi_ioremap(addr, size, type, attr)	ioremap_cache(addr, size)
+@@ -78,10 +66,8 @@ struct efi_scratch {
+ 	u64	phys_stack;
+ } __packed;
+ 
+-#define efi_call_virt(f, ...)						\
++#define arch_efi_call_virt_setup()					\
+ ({									\
+-	efi_status_t __s;						\
+-									\
+ 	efi_sync_low_kernel_mappings();					\
+ 	preempt_disable();						\
+ 	__kernel_fpu_begin();						\
+@@ -91,9 +77,13 @@ struct efi_scratch {
+ 		write_cr3((unsigned long)efi_scratch.efi_pgt);		\
+ 		__flush_tlb_all();					\
+ 	}								\
+-									\
+-	__s = efi_call((void *)efi.systab->runtime->f, __VA_ARGS__);	\
+-									\
++})
++
++#define arch_efi_call_virt(f, args...)					\
++	efi_call((void *)efi.systab->runtime->f, args)			\
++
++#define arch_efi_call_virt_teardown()					\
++({									\
+ 	if (efi_scratch.use_pgd) {					\
+ 		write_cr3(efi_scratch.prev_cr3);			\
+ 		__flush_tlb_all();					\
+@@ -101,15 +91,8 @@ struct efi_scratch {
+ 									\
+ 	__kernel_fpu_end();						\
+ 	preempt_enable();						\
+-	__s;								\
+ })
+ 
+-/*
+- * All X86_64 virt calls return non-void values. Thus, use non-void call for
+- * virt calls that would be void on X86_32.
+- */
+-#define __efi_call_virt(f, args...) efi_call_virt(f, args)
+-
+ extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
+ 					u32 type, u64 attribute);
+ 
 -- 
 1.9.1
