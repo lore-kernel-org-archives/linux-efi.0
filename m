@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 5/6] arm: mm: dump: make page table dumping reusable
-Date: Fri, 22 Apr 2016 18:48:07 +0200
-Message-ID: <1461343688-8552-6-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 4/6] arm64: mm: dump: make page table dumping reusable
+Date: Fri, 22 Apr 2016 18:48:06 +0200
+Message-ID: <1461343688-8552-5-git-send-email-ard.biesheuvel@linaro.org>
 References: <1461343688-8552-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1461343688-8552-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,24 +10,25 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ef
 Cc: will.deacon-5wv7dgnIgG8@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+
 For debugging purposes, it would be nice if we could export page tables
 other than the swapper_pg_dir to userspace. To enable this, this patch
-refactors the ARM page table dumping code such that multiple tables
+refactors the arm64 page table dumping code such that multiple tables
 may be registered with the framework, and exported under debugfs.
 
-(this is a port of Mark Rutland's arm64 patch that does the same)
-
+Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm/include/asm/ptdump.h | 44 ++++++++++++++
- arch/arm/mm/dump.c            | 60 ++++++++++++--------
- 2 files changed, 81 insertions(+), 23 deletions(-)
+ arch/arm64/include/asm/ptdump.h | 44 ++++++++++++++++++++
+ arch/arm64/mm/dump.c            | 32 ++++++++------
+ 2 files changed, 64 insertions(+), 12 deletions(-)
 
-diff --git a/arch/arm/include/asm/ptdump.h b/arch/arm/include/asm/ptdump.h
+diff --git a/arch/arm64/include/asm/ptdump.h b/arch/arm64/include/asm/ptdump.h
 new file mode 100644
-index 000000000000..2df5737b2cc7
+index 000000000000..fe82d693638a
 --- /dev/null
-+++ b/arch/arm/include/asm/ptdump.h
++++ b/arch/arm64/include/asm/ptdump.h
 @@ -0,0 +1,44 @@
 +/*
 + * Copyright (C) 2014 ARM Ltd.
@@ -47,13 +48,13 @@ index 000000000000..2df5737b2cc7
 +#ifndef __ASM_PTDUMP_H
 +#define __ASM_PTDUMP_H
 +
-+#ifdef CONFIG_ARM_PTDUMP
++#ifdef CONFIG_ARM64_PTDUMP
 +
 +#include <linux/mm_types.h>
 +
 +struct addr_marker {
 +	unsigned long start_address;
-+	char *name;
++	char name[32];
 +};
 +
 +struct ptdump_info {
@@ -70,112 +71,53 @@ index 000000000000..2df5737b2cc7
 +{
 +	return 0;
 +}
-+#endif /* CONFIG_ARM_PTDUMP */
++#endif /* CONFIG_ARM64_PTDUMP */
 +
 +#endif /* __ASM_PTDUMP_H */
-diff --git a/arch/arm/mm/dump.c b/arch/arm/mm/dump.c
-index 9fe8e241335c..0c1ff61440aa 100644
---- a/arch/arm/mm/dump.c
-+++ b/arch/arm/mm/dump.c
-@@ -19,11 +19,7 @@
- 
- #include <asm/fixmap.h>
+diff --git a/arch/arm64/mm/dump.c b/arch/arm64/mm/dump.c
+index 024f803e2fb4..73d7227d1403 100644
+--- a/arch/arm64/mm/dump.c
++++ b/arch/arm64/mm/dump.c
+@@ -27,11 +27,7 @@
+ #include <asm/memory.h>
  #include <asm/pgtable.h>
+ #include <asm/pgtable-hwdef.h>
 -
 -struct addr_marker {
 -	unsigned long start_address;
--	const char *name;
+-	char name[32];
 -};
 +#include <asm/ptdump.h>
  
- static struct addr_marker address_markers[] = {
- 	{ MODULES_VADDR,	"Modules" },
-@@ -266,7 +262,8 @@ static void walk_pte(struct pg_state *st, pmd_t *pmd, unsigned long start)
+ static const struct addr_marker address_markers[] = {
+ #ifdef CONFIG_KASAN
+@@ -284,7 +280,8 @@ static void walk_pud(struct pg_state *st, pgd_t *pgd, unsigned long start)
  	}
  }
  
--static void walk_pmd(struct pg_state *st, pud_t *pud, unsigned long start)
-+static void walk_pmd(struct pg_state *st, pud_t *pud, unsigned long start,
-+		     unsigned long max)
+-static void walk_pgd(struct pg_state *st, struct mm_struct *mm, unsigned long start)
++static void walk_pgd(struct pg_state *st, struct mm_struct *mm,
++		     unsigned long start)
  {
- 	pmd_t *pmd = pmd_offset(pud, 0);
- 	unsigned long addr;
-@@ -274,6 +271,8 @@ static void walk_pmd(struct pg_state *st, pud_t *pud, unsigned long start)
- 
- 	for (i = 0; i < PTRS_PER_PMD; i++, pmd++) {
- 		addr = start + i * PMD_SIZE;
-+		if (addr > max)
-+			break;
- 		if (pmd_none(*pmd) || pmd_large(*pmd) || !pmd_present(*pmd))
- 			note_page(st, addr, 3, pmd_val(*pmd));
- 		else
-@@ -284,7 +283,8 @@ static void walk_pmd(struct pg_state *st, pud_t *pud, unsigned long start)
- 	}
- }
- 
--static void walk_pud(struct pg_state *st, pgd_t *pgd, unsigned long start)
-+static void walk_pud(struct pg_state *st, pgd_t *pgd, unsigned long start,
-+		     unsigned long max)
- {
- 	pud_t *pud = pud_offset(pgd, 0);
- 	unsigned long addr;
-@@ -292,46 +292,51 @@ static void walk_pud(struct pg_state *st, pgd_t *pgd, unsigned long start)
- 
- 	for (i = 0; i < PTRS_PER_PUD; i++, pud++) {
- 		addr = start + i * PUD_SIZE;
-+		if (addr > max)
-+			break;
- 		if (!pud_none(*pud)) {
--			walk_pmd(st, pud, addr);
-+			walk_pmd(st, pud, addr, max);
- 		} else {
- 			note_page(st, addr, 2, pud_val(*pud));
- 		}
- 	}
- }
- 
--static void walk_pgd(struct seq_file *m)
-+static void walk_pgd(struct pg_state *st, struct mm_struct *mm, unsigned long max)
- {
--	pgd_t *pgd = swapper_pg_dir;
--	struct pg_state st;
-+	pgd_t *pgd = pgd_offset(mm, 0UL);
- 	unsigned long addr;
+ 	pgd_t *pgd = pgd_offset(mm, 0UL);
  	unsigned i;
- 
--	memset(&st, 0, sizeof(st));
--	st.seq = m;
--	st.marker = address_markers;
--
- 	for (i = 0; i < PTRS_PER_PGD; i++, pgd++) {
- 		addr = i * PGDIR_SIZE;
-+		if (addr > max)
-+			break;
- 		if (!pgd_none(*pgd)) {
--			walk_pud(&st, pgd, addr);
-+			walk_pud(st, pgd, addr, max);
- 		} else {
--			note_page(&st, addr, 1, pgd_val(*pgd));
-+			note_page(st, addr, 1, pgd_val(*pgd));
- 		}
- 	}
- 
--	note_page(&st, 0, 0, 0);
-+	note_page(st, 0, 0, 0);
- }
+@@ -303,12 +300,13 @@ static void walk_pgd(struct pg_state *st, struct mm_struct *mm, unsigned long st
  
  static int ptdump_show(struct seq_file *m, void *v)
  {
--	walk_pgd(m);
 +	struct ptdump_info *info = m->private;
-+	struct pg_state st = {
-+		.seq = m,
+ 	struct pg_state st = {
+ 		.seq = m,
+-		.marker = address_markers,
 +		.marker = info->markers,
-+	};
-+
-+	walk_pgd(&st, info->mm, info->max_addr);
+ 	};
+ 
+-	walk_pgd(&st, &init_mm, VA_START);
++	walk_pgd(&st, info->mm, info->base_addr);
+ 
+ 	note_page(&st, 0, 0, 0);
  	return 0;
- }
+@@ -316,7 +314,7 @@ static int ptdump_show(struct seq_file *m, void *v)
  
  static int ptdump_open(struct inode *inode, struct file *file)
  {
@@ -184,7 +126,7 @@ index 9fe8e241335c..0c1ff61440aa 100644
  }
  
  static const struct file_operations ptdump_fops = {
-@@ -341,7 +346,7 @@ static const struct file_operations ptdump_fops = {
+@@ -326,7 +324,7 @@ static const struct file_operations ptdump_fops = {
  	.release	= single_release,
  };
  
@@ -193,9 +135,9 @@ index 9fe8e241335c..0c1ff61440aa 100644
  {
  	struct dentry *pe;
  	unsigned i, j;
-@@ -353,8 +358,17 @@ static int ptdump_init(void)
- 
- 	address_markers[2].start_address = VMALLOC_START;
+@@ -336,8 +334,18 @@ static int ptdump_init(void)
+ 			for (j = 0; j < pg_level[i].num; j++)
+ 				pg_level[i].mask |= pg_level[i].bits[j].mask;
  
 -	pe = debugfs_create_file("kernel_page_tables", 0400, NULL, NULL,
 -				 &ptdump_fops);
@@ -206,12 +148,13 @@ index 9fe8e241335c..0c1ff61440aa 100644
 +static struct ptdump_info kernel_ptdump_info = {
 +	.mm		= &init_mm,
 +	.markers	= address_markers,
++	.base_addr	= VA_START,
 +};
 +
 +static int ptdump_init(void)
 +{
 +	return ptdump_register(&kernel_ptdump_info, "kernel_page_tables");
 +}
- __initcall(ptdump_init);
+ device_initcall(ptdump_init);
 -- 
 2.7.4
