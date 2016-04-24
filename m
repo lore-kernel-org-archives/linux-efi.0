@@ -1,61 +1,53 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCHv2 1/6] efi/runtime-wrappers: add {__,}efi_call_virt
- templates
-Date: Sun, 24 Apr 2016 22:12:12 +0100
-Message-ID: <20160424211212.GM2829@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCHv2 6/6] efi/runtime-wrappers: detect FW irq flag corruption
+Date: Sun, 24 Apr 2016 22:17:49 +0100
+Message-ID: <20160424211749.GN2829@codeblueprint.co.uk>
 References: <1461333083-15529-1-git-send-email-mark.rutland@arm.com>
- <1461333083-15529-2-git-send-email-mark.rutland@arm.com>
+ <1461333083-15529-7-git-send-email-mark.rutland@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1461333083-15529-2-git-send-email-mark.rutland@arm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org, catalin.marinas@arm.com, hpa@zytor.com, leif.lindholm@linaro.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, linux-kernel@vger.kernel.org, mingo@redhat.com, tglx@linutronix.de, will.deacon@arm.com
+In-Reply-To: <1461333083-15529-7-git-send-email-mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 22 Apr, at 02:51:18PM, Mark Rutland wrote:
-> Currently each architecture must implement two macros, efi_call_virt and
-> __efi_call_virt, which only differ by the presence or absence of a
-> return type. Otherwise, the logic surrounding the call is identical.
+On Fri, 22 Apr, at 02:51:23PM, Mark Rutland wrote:
+> The UEFI spec allows runtime services to be called with interrupts
+> masked or unmasked, and if a runtime service function needs to mask
+> interrupts, it must restore the mask to its original state before
+> returning (i.e. from the PoV of the OS, this does not change across a
+> call). Firmware should never unmask exceptions, as these may then be
+> taken by the OS unexpectedly.
 > 
-> As each architecture must define the entire body of each, we can't place
-> any generic manipulation (e.g. irq flag validation) in the middle.
+> Unfortunately, some firmware has been seen to unmask IRQs (and
+> potentially other maskable exceptions) across runtime services calls,
+> leaving irq flags corrupted after returning from a runtime services
+> function call. This may be detected by the IRQ tracing code, but often
+> goes unnoticed, leaving a potentially disastrous bug hidden.
 > 
-> This patch adds template implementations of these macros. With these,
-> arch code can implement three template macros, avoiding reptition for
-> the void/non-void return cases:
+> This patch detects when the irq flags are corrupted by an EFI runtime
+> services call, logging the call and specific corruption to the console.
+> While restoring the expected value of the flags is insufficient to avoid
+> problems, we do so to avoid redundant warnings from elsewhere (e.g. IRQ
+> tracing).
 > 
-> * arch_efi_call_virt_setup
-> 
->   Sets up the environment for the call (e.g. switching page tables,
->   allowing kernel-mode use of floating point, if required).
-> 
-> * arch_efi_call_virt
-> 
->   Performs the call. The last expression in the macro must be the call
->   itself, allowing the logic to be shared by the void and non-void
->   cases.
-> 
-> * arch_efi_call_virt_teardown
-> 
->   Restores the usual kernel environment once the call has returned.
-> 
-> While the savings from repition are minimal, we additionally gain the
-> ability to add common code around the call with the call environment set
-> up. This can be used to detect common firmware issues (e.g. bad irq mask
-> management).
-> 
-> Signed-off-by: Mark Rutland <mark.rutland@arm.com>
-> Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> Cc: Matt Fleming <matt@codeblueprint.co.uk>
-> Cc: linux-efi@vger.kernel.org
-> Cc: linux-kernel@vger.kernel.org
+> Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> Reviewed-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 > ---
->  drivers/firmware/efi/runtime-wrappers.c | 21 +++++++++++++++++++++
->  1 file changed, 21 insertions(+)
+>  drivers/firmware/efi/runtime-wrappers.c | 22 ++++++++++++++++++++++
+>  1 file changed, 22 insertions(+)
+> 
+> I'm not sure about the LOCKDEP_NOW_UNRELIABLE here. If FW unmasks IRQs there's
+> the potential for deadlock, but arguably by the time we've detected the flag
+> corruption the danger has passed. I'm erring on the side of caution here
+> setting it, but perhaps that's not the best idea?
 
-Applied. I incorporated the explanation of the 3 template macros next
-to the code because it is too useful to only have it exist in the git
-commit history.
+I think it makes sense to leave it as-is, not least to guard against
+future changes we make to the kernel side that might have lockdep side
+effects when this bug is triggered.
