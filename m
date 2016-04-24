@@ -1,54 +1,60 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] efibc: EFI Bootloader Control
-Date: Fri, 22 Apr 2016 23:44:12 +0100
-Message-ID: <20160422224412.GJ2829@codeblueprint.co.uk>
-References: <87bn5tlbkw.fsf@jcompost-MOBL1.tl.intel.com>
- <20160414160006.GR2829@codeblueprint.co.uk>
- <87r3e383v7.fsf@jcompost-MOBL1.tl.intel.com>
- <87mvor83tl.fsf@jcompost-MOBL1.tl.intel.com>
+From: Lukas Wunner <lukas@wunner.de>
+Subject: Re: [PATCH] PCI: Add Broadcom 4331 reset quirk to prevent IRQ storm
+Date: Sun, 24 Apr 2016 18:58:58 +0200
+Message-ID: <20160424165858.GA17019@wunner.de>
+References: <811539524df8b5ed7e2817c1c3e3e08560c97964.1459275517.git.lukas@wunner.de>
+ <20160405194015.GC15353@localhost>
+ <20160406213029.GA12421@wunner.de>
+ <20160409120055.GR2701@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-pci-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <87mvor83tl.fsf-e2kLcBBGnpIIbNWpFUBdLQzuBQEzu/OPQQ4Iyu8u01E@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Compostella, Jeremy" <jeremy.compostella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Stanacar, Stefan" <stefan.stanacar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20160409120055.GR2701@codeblueprint.co.uk>
+Sender: linux-pci-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Bjorn Helgaas <helgaas@kernel.org>, linux-pci@vger.kernel.org, linux-wireless@vger.kernel.org, zajec5@gmail.com, b43-dev@lists.infradead.org, Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org, Andrew Worsley <amworsley@gmail.com>, Chris Bainbridge <chris.bainbridge@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 18 Apr, at 03:05:42PM, Jeremy Compostella wrote:
-> This module installs a reboot hook, such that if reboot() is invoked
-> with a string argument NNN, "NNN" is copied to the
-> "LoaderEntryOneShot" EFI variable, to be read by the bootloader. If
-> the string matches one of the boot labels defined in its
-> configuration, the bootloader will boot once to that label.  The
-> "LoaderEntryRebootReason" EFI variable is set with the reboot reason:
-> "reboot", "shutdown".  The bootloader reads this reboot reason and
-> takes particular action according to its policy.
-> 
-> There are reboot implementations that do "reboot <reason>", such as
-> Android's reboot command and Upstart's reboot replacement, which pass
-> the reason as an argument to the reboot syscall.  There is no
-> platform-agnostic way how those could be modified to pass the reason
-> to the bootloader, regardless of platform or bootloader.
-> 
-> Signed-off-by: Jeremy Compostella <jeremy.compostella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->  drivers/firmware/efi/Kconfig  |  15 +++++++
->  drivers/firmware/efi/Makefile |   1 +
->  drivers/firmware/efi/efibc.c  | 101 ++++++++++++++++++++++++++++++++++++++++++
->  include/linux/efi.h           |   4 ++
->  4 files changed, 121 insertions(+)
->  create mode 100644 drivers/firmware/efi/efibc.c
- 
-It's difficult to have any concerns with a driver that's so small, so
-I've applied this. Please note a couple of things I fixed up,
+Hi,
 
- - Add 'const' qualifier to char *reason
- - Change EFI_LOADER_GUID to LINUX_EFI_LOADER_ENTRY_GUID
+On Sat, Apr 09, 2016 at 01:00:55PM +0100, Matt Fleming wrote:
+> On Wed, 06 Apr, at 11:30:29PM, Lukas Wunner wrote:
+> > (2) Find out exactly which EFI boot services area is used for DMA and
+> >     amend arch/x86/platform/efi/quirks.c:efi_apply_memmap_quirks() to
+> >     assign that area a different type if dmi_match(DMI_SYS_VENDOR,
+> >     "Apple Inc."). That way it's not freed by efi_free_boot_services().
+> >     Add a late_initcall which calls free_bootmem() for that area.
+>  
+> If it is possible to find out which boot services region is the
+> problematic one, this would be the best solution. If there's any way
+> to tie it into the PCI quirk, that would be even better so we don't
+> need to maintain the blacklist in two places.
 
-Shout if you've issues with the change of name for the guid. It is
-important to make it clear that this guid is not found in the UEFI
-spec, which we've done in the past by prefixing guid names with LINUX_
-(though presumably the Loader Entry GUID isn't necessarily Linux
-specific).
+I've since cooked up an experimental patch which resets the Broadcom 4331
+wireless card from arch/x86/kernel/early-quirks.c, and another which does
+the same from arch/x86/boot/compressed/eboot.c. Both approaches stopped
+the spurious interrupts for me and should also stop the DMA'ing.
+
+In the latter case, the machine locked up immediately after resetting the
+card. Suspecting that the EFI driver doesn't digest the reset well,
+I tried kicking it off the card with DisconnectController() first.
+This worked, although it returns EFI_NOT_FOUND, which is strange as that
+error isn't defined for DisconnectController() per the spec.
+
+I then tested if DisconnectController() alone is already sufficient
+(i.e. without resetting the card by writing to its mmio).
+Guess what, it is. So the EFI driver seems to leave the card in a
+sane state if it's unloaded.
+
+I then realized that the Simple Network protocol is supported for both
+the wireless card as well as the Ethernet card built into my MacBook Pro.
+What I'll try next is to iterate over all handles that support that
+protocol and just Stop() the interface if it's been brought up by EFI.
+
+Perhaps OS X supports some kind of connection handover from EFI.
+That would explain why they leave the card enabled.
+
+Best regards,
+
+Lukas
