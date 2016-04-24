@@ -1,46 +1,61 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] efi/arm-init: reserve rather than unmap the memory map
- for ARM as well
-Date: Sun, 24 Apr 2016 20:57:44 +0100
-Message-ID: <20160424195744.GL2829@codeblueprint.co.uk>
-References: <1461165635-8041-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCHv2 1/6] efi/runtime-wrappers: add {__,}efi_call_virt
+ templates
+Date: Sun, 24 Apr 2016 22:12:12 +0100
+Message-ID: <20160424211212.GM2829@codeblueprint.co.uk>
+References: <1461333083-15529-1-git-send-email-mark.rutland@arm.com>
+ <1461333083-15529-2-git-send-email-mark.rutland@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1461165635-8041-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+In-Reply-To: <1461333083-15529-2-git-send-email-mark.rutland@arm.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org, catalin.marinas@arm.com, hpa@zytor.com, leif.lindholm@linaro.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, linux-kernel@vger.kernel.org, mingo@redhat.com, tglx@linutronix.de, will.deacon@arm.com
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 20 Apr, at 05:20:35PM, Ard Biesheuvel wrote:
-> Now that ARM has a fully functional memremap() implementation, there is
-> no longer a need to remove the UEFI memory map from the linear mapping
-> in order to be able to create a permanent mapping for it using generic
-> code.
+On Fri, 22 Apr, at 02:51:18PM, Mark Rutland wrote:
+> Currently each architecture must implement two macros, efi_call_virt and
+> __efi_call_virt, which only differ by the presence or absence of a
+> return type. Otherwise, the logic surrounding the call is identical.
 > 
-> So remove the 'IS_ENABLED(CONFIG_ARM)' conditional we added in commit
-> 7cc8cbcf82d1 ("efi/arm64: Don't apply MEMBLOCK_NOMAP to UEFI memory map
-> mapping"), and revert to using memblock_reserve() for both ARM and arm64
+> As each architecture must define the entire body of each, we can't place
+> any generic manipulation (e.g. irq flag validation) in the middle.
 > 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> This patch adds template implementations of these macros. With these,
+> arch code can implement three template macros, avoiding reptition for
+> the void/non-void return cases:
+> 
+> * arch_efi_call_virt_setup
+> 
+>   Sets up the environment for the call (e.g. switching page tables,
+>   allowing kernel-mode use of floating point, if required).
+> 
+> * arch_efi_call_virt
+> 
+>   Performs the call. The last expression in the macro must be the call
+>   itself, allowing the logic to be shared by the void and non-void
+>   cases.
+> 
+> * arch_efi_call_virt_teardown
+> 
+>   Restores the usual kernel environment once the call has returned.
+> 
+> While the savings from repition are minimal, we additionally gain the
+> ability to add common code around the call with the call environment set
+> up. This can be used to detect common firmware issues (e.g. bad irq mask
+> management).
+> 
+> Signed-off-by: Mark Rutland <mark.rutland@arm.com>
+> Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+> Cc: linux-efi@vger.kernel.org
+> Cc: linux-kernel@vger.kernel.org
 > ---
-> 
-> This is the permanent fix I alluded to in the commit log for the patch
-> mentioned above. Russell has pulled the memremap() patches so this is
-> good to go for v4.7
-> 
-> Note that current efi-next already has a conflict with v4.6-rc4 (where
-> that patch landed) which will get even worse with this on top, so it may
-> make sense to rebase efi-next onto v4.6-rc4 before pulling this
-> (but note that this patch depends on 'efi/arm*: Use memremap() to create
-> the persistent memmap mapping', so please don't reorder them to maintain
-> bisectability)
+>  drivers/firmware/efi/runtime-wrappers.c | 21 +++++++++++++++++++++
+>  1 file changed, 21 insertions(+)
 
-Good notes, thanks Ard.
-
-I applied this for v4.7 but please check the result since there was a
-conflict with the GOP framebuffer patches,
-
-  https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=next&id=b2757153ee7cfce23f760036b0c85bd0ec99cf50
+Applied. I incorporated the explanation of the 3 template macros next
+to the code because it is too useful to only have it exist in the git
+commit history.
