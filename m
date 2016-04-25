@@ -1,87 +1,50 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 05/40] efi/arm64: Check SetupMode when determining Secure Boot status
-Date: Mon, 25 Apr 2016 21:06:37 +0100
-Message-ID: <1461614832-17633-6-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 03/40] x86/mm/pat: Document the (currently) EFI-only code path
+Date: Mon, 25 Apr 2016 21:06:35 +0100
+Message-ID: <1461614832-17633-4-git-send-email-matt@codeblueprint.co.uk>
 References: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Linn Crosetto <linn@hpe.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Mark Rutland <mark.rutland@arm.com>, Roy Franz <roy.franz@linaro.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Andy Lutomirski <luto@amacapital.net>, Borislav Petkov <bp@alien8.de>, Linus Torvalds <torvalds@linux-foundation.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Linn Crosetto <linn@hpe.com>
+It's not at all obvious that populate_pgd() and friends are only
+executed when mapping EFI virtual memory regions or that no other
+pageattr callers pass a ->pgd value.
 
-According to the UEFI specification (version 2.5 Errata A, page 87):
-
-    The platform firmware is operating in secure boot mode if the value of
-    the SetupMode variable is 0 and the SecureBoot variable is set to 1. A
-    platform cannot operate in secure boot mode if the SetupMode variable
-    is set to 1.
-
-Check the value of the SetupMode variable when determining the state of
-Secure Boot. Minor cleanup, change sizeof to match kernel style guidelines.
-
-Signed-off-by: Linn Crosetto <linn@hpe.com>
-Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Acked-by: Mark Rutland <mark.rutland@arm.com>
-Cc: Roy Franz <roy.franz@linaro.org>
+Reported-by: Andy Lutomirski <luto@amacapital.net>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- drivers/firmware/efi/libstub/arm-stub.c | 32 +++++++++++++++++++++++++-------
- 1 file changed, 25 insertions(+), 7 deletions(-)
+ arch/x86/mm/pageattr.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 07f967c4c567..128632508fc6 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -22,21 +22,39 @@ bool __nokaslr;
- 
- static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index 01be9ec3bf79..a1f0e1d0ddc2 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -1125,8 +1125,14 @@ static int populate_pgd(struct cpa_data *cpa, unsigned long addr)
+ static int __cpa_process_fault(struct cpa_data *cpa, unsigned long vaddr,
+ 			       int primary)
  {
--	static efi_guid_t const var_guid = EFI_GLOBAL_VARIABLE_GUID;
--	static efi_char16_t const var_name[] = {
-+	static efi_char16_t const sb_var_name[] = {
- 		'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0 };
-+	static efi_char16_t const sm_var_name[] = {
-+		'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0 };
+-	if (cpa->pgd)
++	if (cpa->pgd) {
++		/*
++		 * Right now, we only execute this code path when mapping
++		 * the EFI virtual memory map regions, no other users
++		 * provide a ->pgd value. This may change in the future.
++		 */
+ 		return populate_pgd(cpa, vaddr);
++	}
  
-+	efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
- 	efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
--	unsigned long size = sizeof(u8);
--	efi_status_t status;
- 	u8 val;
-+	unsigned long size = sizeof(val);
-+	efi_status_t status;
- 
--	status = f_getvar((efi_char16_t *)var_name, (efi_guid_t *)&var_guid,
-+	status = f_getvar((efi_char16_t *)sb_var_name, (efi_guid_t *)&var_guid,
- 			  NULL, &size, &val);
- 
-+	if (status != EFI_SUCCESS)
-+		goto out_efi_err;
-+
-+	if (val == 0)
-+		return 0;
-+
-+	status = f_getvar((efi_char16_t *)sm_var_name, (efi_guid_t *)&var_guid,
-+			  NULL, &size, &val);
-+
-+	if (status != EFI_SUCCESS)
-+		goto out_efi_err;
-+
-+	if (val == 1)
-+		return 0;
-+
-+	return 1;
-+
-+out_efi_err:
- 	switch (status) {
--	case EFI_SUCCESS:
--		return val;
- 	case EFI_NOT_FOUND:
- 		return 0;
- 	case EFI_DEVICE_ERROR:
+ 	/*
+ 	 * Ignore all non primary paths.
 -- 
 2.7.3
