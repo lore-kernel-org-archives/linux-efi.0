@@ -1,965 +1,168 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 17/40] efi/libstub: Move Graphics Output Protocol handling to generic code
-Date: Mon, 25 Apr 2016 21:06:49 +0100
-Message-ID: <1461614832-17633-18-git-send-email-matt@codeblueprint.co.uk>
-References: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Subject: [GIT PULL 00/40] EFI changes for v4.7
+Date: Mon, 25 Apr 2016 21:06:32 +0100
+Message-ID: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, David Herrmann <dh.herrmann@gmail.com>, Mark Rutland <mark.rutland@arm.com>, Peter Jones <pjones@redhat.com>, Will Deacon <will.deacon@arm.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, Raphael Hertzog <hertzog@debian.org>, linux-efi@vger.kernel.org, Jeremy Compostella <jeremy.compostella@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Peter Jones <pjones@redhat.com>, David Herrmann <dh.herrmann@gmail.com>, Christoph Hellwig <hch@lst.de>, Kweh Hock Leong <hock.leong.kweh@intel.com>, Russell King <linux@arm.linux.org.uk>, Peter Zijlstra <peterz@infradead.org>, Mark Salter <msalter@redhat.com>, Darren Hart <dvhart@infradead.org>, Stefan Stanacar <stefan.stanacar@intel.com>, Borislav Petkov <bp@suse.de>, Ben Hutchings <ben@decadent.org.uk>, Robert Elliott <elliott@hpe.com>, Ricardo Neri <ricardo.neri-calderon@linux.intel.com>, Robin Murphy <robin.murphy@arm.com>, Leif Lindholm <leif.>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Folks, here's the queue of EFI material for v4.7. This is probably the
+biggest EFI pull ever sent, and there quite a few different topics
+covered.
 
-The Graphics Output Protocol code executes in the stub, so create a generic
-version based on the x86 version in libstub so that we can move other archs
-to it in subsequent patches. The new source file gop.c is added to the
-libstub build for all architectures, but only wired up for x86.
+On the plus side the majority of new features (EFI Memory Attribute
+tables, EFI capsules, GOP framebuffer) are basically architecture
+independent, and some of the existing architecture-specific code has
+been generalised and moved to drivers/firmware/efi.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Will Deacon <will.deacon@arm.com>
-Cc: David Herrmann <dh.herrmann@gmail.com>
-Cc: Peter Jones <pjones@redhat.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
----
- arch/arm/include/asm/efi.h            |   4 +-
- arch/arm64/include/asm/efi.h          |   4 +-
- arch/x86/boot/compressed/eboot.c      | 318 ------------------------------
- arch/x86/boot/compressed/eboot.h      |  78 --------
- drivers/firmware/efi/libstub/Makefile |   2 +-
- drivers/firmware/efi/libstub/gop.c    | 354 ++++++++++++++++++++++++++++++++++
- include/linux/efi.h                   |  81 +++++++-
- 7 files changed, 441 insertions(+), 400 deletions(-)
+The following changes since commit c3b46c73264b03000d1e18b22f5caf63332547c9:
+
+  Linux 4.6-rc4 (2016-04-17 19:13:32 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+
+for you to fetch changes up to 4716a27d61ca3e3201d3201a6ee073da24902613:
+
+  efi/runtime-wrappers: Remove ARCH_EFI_IRQ_FLAGS_MASK ifdef (2016-04-25 16:53:59 +0100)
+
+----------------------------------------------------------------
+ * Drop the unused EFI_SYSTEM_TABLES efi.flags bit and ensure the
+   ARM/arm64 EFI System Table mapping is read-only - Ard Biesheuvel
+
+ * Add a comment to explain that one of the code paths in the x86/pat
+   code is only executed for EFI boot - Matt Fleming
+
+ * Improve Secure Boot status checks on arm64 and handle unexpected
+   errors - Linn Crosetto
+
+ * Remove the global EFI memory map variable 'memmap' as the same
+   information is already available in efi::memmap - Matt Fleming
+
+ * EFI Memory Attribute table support for ARM/arm64 - Ard Biesheuvel
+
+ * EFI GOP framebuffer support for ARM/arm64 - Ard Biesheuvel
+
+ * EFI Bootloader Control driver for storing reboot(2) data in EFI
+   variables for consumption by bootloaders  - Jeremy Compostella
+
+ * Core EFI capsule support - Matt Fleming
+
+ * EFI capsule char driver - Kweh, Hock Leong
+
+ * EFI memory map code unification for ARM and arm64 - Ard Biesheuvel
+
+ * Add generic EFI support for detecting when firmware corrupts cpu
+   status register bits (like IRQ flags) when performing EFI runtime
+   service calls - Mark Rutland
+
+----------------------------------------------------------------
+Ard Biesheuvel (19):
+      efi: Get rid of EFI_SYSTEM_TABLES status bit
+      efi/arm*: Drop writable mapping of the UEFI System table
+      efi: Check EFI_MEMORY_DESCRIPTOR version explicitly
+      efi/arm*: Use memremap() to create the persistent memmap mapping
+      ARM: efi: Apply strict permissons for UEFI Runtime Services regions
+      arm64: efi: Apply strict permissons for UEFI Runtime Services regions
+      efi: Add support for the EFI_MEMORY_ATTRIBUTES_TABLE config table
+      efi: Implement generic support for the Memory Attributes table
+      efi/arm*: Take the Memory Attributes table into account
+      x86/efi: Prepare GOP handling code for reuse as generic code
+      efi/libstub: Move Graphics Output Protocol handling to generic code
+      x86/efi: efifb: Move DMI based quirks handling out of generic code
+      efifb: Use builtin_platform_driver and drop unused includes
+      arm64/efi: libstub: Make screen_info accessible to the UEFI stub
+      efi/arm: libstub: Make screen_info accessible to the UEFI stub
+      efi/arm*: libstub: Wire up GOP protocol to struct screen_info
+      efi/arm*: Wire up struct screen_info to efi-framebuffer platform device
+      efifb: Enable the efi-framebuffer platform driver for ARM and arm64
+      efi/arm-init: Reserve rather than unmap the memory map for ARM as well
+
+Compostella, Jeremy (1):
+      efibc: EFI Bootloader Control
+
+Kweh, Hock Leong (1):
+      efi: A misc char interface to update EFI firmware
+
+Linn Crosetto (2):
+      efi/arm64: Report unexpected errors when determining Secure Boot status
+      efi/arm64: Check SetupMode when determining Secure Boot status
+
+Mark Rutland (10):
+      efi/runtime-wrappers: Add {__,}efi_call_virt templates
+      arm64/efi: Move to generic {__,}efi_call_virt
+      arm/efi: Move to generic {__,}efi_call_virt
+      x86/efi: Move to generic {__,}efi_call_virt
+      efi/runtime-wrappers: Remove redundant ifdefs
+      efi/runtime-wrappers: Detect firmware irq flag corruption
+      arm64/efi: Enable runtime call flag checking
+      arm/efi: Enable runtime call flag checking
+      x86/efi: Enable runtime call flag checking
+      efi/runtime-wrappers: Remove ARCH_EFI_IRQ_FLAGS_MASK ifdef
+
+Matt Fleming (7):
+      x86/mm/pat: Document the (currently) EFI-only code path
+      efi: Iterate over efi.memmap in for_each_efi_memory_desc
+      efi: Remove global 'memmap'
+      x86/efi: Remove the always true EFI_DEBUG symbol
+      efi: Move efi_status_to_err() to drivers/firmware/efi/
+      efi: Capsule update support
+      x86/efi: Force EFI reboot to process pending capsules
+
+ arch/arm/include/asm/efi.h                     |  37 +--
+ arch/arm/kernel/efi.c                          |  41 +++
+ arch/arm/kernel/setup.c                        |   3 +-
+ arch/arm64/include/asm/efi.h                   |  37 +--
+ arch/arm64/kernel/efi.c                        |  57 +++-
+ arch/arm64/kernel/image.h                      |   1 +
+ arch/ia64/kernel/efi.c                         |   2 -
+ arch/x86/boot/compressed/eboot.c               | 308 +--------------------
+ arch/x86/boot/compressed/eboot.h               |  74 ------
+ arch/x86/include/asm/efi.h                     |  52 ++--
+ arch/x86/kernel/reboot.c                       |   9 +
+ arch/x86/kernel/sysfb_efi.c                    |  15 ++
+ arch/x86/mm/pageattr.c                         |   8 +-
+ arch/x86/platform/efi/efi.c                    | 133 +++++-----
+ arch/x86/platform/efi/efi_64.c                 |  10 +-
+ arch/x86/platform/efi/quirks.c                 |  10 +-
+ drivers/firmware/efi/Kconfig                   |  25 ++
+ drivers/firmware/efi/Makefile                  |   5 +-
+ drivers/firmware/efi/arm-init.c                |  96 +++++--
+ drivers/firmware/efi/arm-runtime.c             |  45 ++--
+ drivers/firmware/efi/capsule-loader.c          | 343 ++++++++++++++++++++++++
+ drivers/firmware/efi/capsule.c                 | 300 +++++++++++++++++++++
+ drivers/firmware/efi/efi.c                     |  48 +++-
+ drivers/firmware/efi/efibc.c                   | 101 +++++++
+ drivers/firmware/efi/fake_mem.c                |  43 ++-
+ drivers/firmware/efi/libstub/Makefile          |   2 +-
+ drivers/firmware/efi/libstub/arm-stub.c        |  77 +++++-
+ drivers/firmware/efi/libstub/arm32-stub.c      |  37 +++
+ drivers/firmware/efi/libstub/efi-stub-helper.c |   6 +-
+ drivers/firmware/efi/libstub/gop.c             | 354 +++++++++++++++++++++++++
+ drivers/firmware/efi/memattr.c                 | 182 +++++++++++++
+ drivers/firmware/efi/reboot.c                  |  12 +-
+ drivers/firmware/efi/runtime-wrappers.c        |  60 +++++
+ drivers/firmware/efi/vars.c                    |  33 ---
+ drivers/video/fbdev/Kconfig                    |   2 +-
+ drivers/video/fbdev/efifb.c                    |  21 +-
+ include/linux/efi.h                            | 164 +++++++++++-
+ 37 files changed, 2062 insertions(+), 691 deletions(-)
+ create mode 100644 drivers/firmware/efi/capsule-loader.c
+ create mode 100644 drivers/firmware/efi/capsule.c
+ create mode 100644 drivers/firmware/efi/efibc.c
  create mode 100644 drivers/firmware/efi/libstub/gop.c
-
-diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-index b0c341d7ceee..dc30d89a1ed3 100644
---- a/arch/arm/include/asm/efi.h
-+++ b/arch/arm/include/asm/efi.h
-@@ -60,7 +60,9 @@ void efi_virtmap_unload(void);
- 
- /* arch specific definitions used by the stub code */
- 
--#define efi_call_early(f, ...) sys_table_arg->boottime->f(__VA_ARGS__)
-+#define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
-+#define __efi_call_early(f, ...)	f(__VA_ARGS__)
-+#define efi_is_64bit()			(false)
- 
- /*
-  * A reasonable upper bound for the uncompressed kernel size is 32 MBytes,
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index 4dafc89f373a..af40baa5d53f 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -52,7 +52,9 @@ int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
- #define EFI_FDT_ALIGN	SZ_2M   /* used by allocate_new_fdt_and_exit_boot() */
- #define MAX_FDT_OFFSET	SZ_512M
- 
--#define efi_call_early(f, ...) sys_table_arg->boottime->f(__VA_ARGS__)
-+#define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
-+#define __efi_call_early(f, ...)	f(__VA_ARGS__)
-+#define efi_is_64bit()			(true)
- 
- #define EFI_ALLOC_ALIGN		SZ_64K
- 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 10516e22fdcb..52fef606bc54 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -571,324 +571,6 @@ free_handle:
- 	efi_call_early(free_pool, pci_handle);
- }
- 
--static void
--setup_pixel_info(struct screen_info *si, u32 pixels_per_scan_line,
--		 struct efi_pixel_bitmask pixel_info, int pixel_format)
--{
--	if (pixel_format == PIXEL_RGB_RESERVED_8BIT_PER_COLOR) {
--		si->lfb_depth = 32;
--		si->lfb_linelength = pixels_per_scan_line * 4;
--		si->red_size = 8;
--		si->red_pos = 0;
--		si->green_size = 8;
--		si->green_pos = 8;
--		si->blue_size = 8;
--		si->blue_pos = 16;
--		si->rsvd_size = 8;
--		si->rsvd_pos = 24;
--	} else if (pixel_format == PIXEL_BGR_RESERVED_8BIT_PER_COLOR) {
--		si->lfb_depth = 32;
--		si->lfb_linelength = pixels_per_scan_line * 4;
--		si->red_size = 8;
--		si->red_pos = 16;
--		si->green_size = 8;
--		si->green_pos = 8;
--		si->blue_size = 8;
--		si->blue_pos = 0;
--		si->rsvd_size = 8;
--		si->rsvd_pos = 24;
--	} else if (pixel_format == PIXEL_BIT_MASK) {
--		find_bits(pixel_info.red_mask, &si->red_pos, &si->red_size);
--		find_bits(pixel_info.green_mask, &si->green_pos,
--			  &si->green_size);
--		find_bits(pixel_info.blue_mask, &si->blue_pos, &si->blue_size);
--		find_bits(pixel_info.reserved_mask, &si->rsvd_pos,
--			  &si->rsvd_size);
--		si->lfb_depth = si->red_size + si->green_size +
--			si->blue_size + si->rsvd_size;
--		si->lfb_linelength = (pixels_per_scan_line * si->lfb_depth) / 8;
--	} else {
--		si->lfb_depth = 4;
--		si->lfb_linelength = si->lfb_width / 2;
--		si->red_size = 0;
--		si->red_pos = 0;
--		si->green_size = 0;
--		si->green_pos = 0;
--		si->blue_size = 0;
--		si->blue_pos = 0;
--		si->rsvd_size = 0;
--		si->rsvd_pos = 0;
--	}
--}
--
--static efi_status_t
--__gop_query32(efi_system_table_t *sys_table_arg,
--	      struct efi_graphics_output_protocol_32 *gop32,
--	      struct efi_graphics_output_mode_info **info,
--	      unsigned long *size, u64 *fb_base)
--{
--	struct efi_graphics_output_protocol_mode_32 *mode;
--	efi_graphics_output_protocol_query_mode query_mode;
--	efi_status_t status;
--	unsigned long m;
--
--	m = gop32->mode;
--	mode = (struct efi_graphics_output_protocol_mode_32 *)m;
--	query_mode = (void *)(unsigned long)gop32->query_mode;
--
--	status = __efi_call_early(query_mode, (void *)gop32, mode->mode, size,
--				  info);
--	if (status != EFI_SUCCESS)
--		return status;
--
--	*fb_base = mode->frame_buffer_base;
--	return status;
--}
--
--static efi_status_t
--setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
--            efi_guid_t *proto, unsigned long size, void **gop_handle)
--{
--	struct efi_graphics_output_protocol_32 *gop32, *first_gop;
--	unsigned long nr_gops;
--	u16 width, height;
--	u32 pixels_per_scan_line;
--	u32 ext_lfb_base;
--	u64 fb_base;
--	struct efi_pixel_bitmask pixel_info;
--	int pixel_format;
--	efi_status_t status = EFI_NOT_FOUND;
--	u32 *handles = (u32 *)(unsigned long)gop_handle;
--	int i;
--
--	first_gop = NULL;
--	gop32 = NULL;
--
--	nr_gops = size / sizeof(u32);
--	for (i = 0; i < nr_gops; i++) {
--		struct efi_graphics_output_mode_info *info = NULL;
--		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
--		bool conout_found = false;
--		void *dummy = NULL;
--		efi_handle_t h = (efi_handle_t)(unsigned long)handles[i];
--		u64 current_fb_base;
--
--		status = efi_call_early(handle_protocol, h,
--					proto, (void **)&gop32);
--		if (status != EFI_SUCCESS)
--			continue;
--
--		status = efi_call_early(handle_protocol, h,
--					&conout_proto, &dummy);
--		if (status == EFI_SUCCESS)
--			conout_found = true;
--
--		status = __gop_query32(sys_table_arg, gop32, &info, &size,
--				       &current_fb_base);
--		if (status == EFI_SUCCESS && (!first_gop || conout_found)) {
--			/*
--			 * Systems that use the UEFI Console Splitter may
--			 * provide multiple GOP devices, not all of which are
--			 * backed by real hardware. The workaround is to search
--			 * for a GOP implementing the ConOut protocol, and if
--			 * one isn't found, to just fall back to the first GOP.
--			 */
--			width = info->horizontal_resolution;
--			height = info->vertical_resolution;
--			pixel_format = info->pixel_format;
--			pixel_info = info->pixel_information;
--			pixels_per_scan_line = info->pixels_per_scan_line;
--			fb_base = current_fb_base;
--
--			/*
--			 * Once we've found a GOP supporting ConOut,
--			 * don't bother looking any further.
--			 */
--			first_gop = gop32;
--			if (conout_found)
--				break;
--		}
--	}
--
--	/* Did we find any GOPs? */
--	if (!first_gop)
--		goto out;
--
--	/* EFI framebuffer */
--	si->orig_video_isVGA = VIDEO_TYPE_EFI;
--
--	si->lfb_width = width;
--	si->lfb_height = height;
--	si->lfb_base = fb_base;
--
--	ext_lfb_base = (u64)(unsigned long)fb_base >> 32;
--	if (ext_lfb_base) {
--		si->capabilities |= VIDEO_CAPABILITY_64BIT_BASE;
--		si->ext_lfb_base = ext_lfb_base;
--	}
--
--	si->pages = 1;
--
--	setup_pixel_info(si, pixels_per_scan_line, pixel_info, pixel_format);
--
--	si->lfb_size = si->lfb_linelength * si->lfb_height;
--
--	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
--out:
--	return status;
--}
--
--static efi_status_t
--__gop_query64(efi_system_table_t *sys_table_arg,
--	      struct efi_graphics_output_protocol_64 *gop64,
--	      struct efi_graphics_output_mode_info **info,
--	      unsigned long *size, u64 *fb_base)
--{
--	struct efi_graphics_output_protocol_mode_64 *mode;
--	efi_graphics_output_protocol_query_mode query_mode;
--	efi_status_t status;
--	unsigned long m;
--
--	m = gop64->mode;
--	mode = (struct efi_graphics_output_protocol_mode_64 *)m;
--	query_mode = (void *)(unsigned long)gop64->query_mode;
--
--	status = __efi_call_early(query_mode, (void *)gop64, mode->mode, size,
--				  info);
--	if (status != EFI_SUCCESS)
--		return status;
--
--	*fb_base = mode->frame_buffer_base;
--	return status;
--}
--
--static efi_status_t
--setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
--	    efi_guid_t *proto, unsigned long size, void **gop_handle)
--{
--	struct efi_graphics_output_protocol_64 *gop64, *first_gop;
--	unsigned long nr_gops;
--	u16 width, height;
--	u32 pixels_per_scan_line;
--	u32 ext_lfb_base;
--	u64 fb_base;
--	struct efi_pixel_bitmask pixel_info;
--	int pixel_format;
--	efi_status_t status = EFI_NOT_FOUND;
--	u64 *handles = (u64 *)(unsigned long)gop_handle;
--	int i;
--
--	first_gop = NULL;
--	gop64 = NULL;
--
--	nr_gops = size / sizeof(u64);
--	for (i = 0; i < nr_gops; i++) {
--		struct efi_graphics_output_mode_info *info = NULL;
--		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
--		bool conout_found = false;
--		void *dummy = NULL;
--		efi_handle_t h = (efi_handle_t)(unsigned long)handles[i];
--		u64 current_fb_base;
--
--		status = efi_call_early(handle_protocol, h,
--					proto, (void **)&gop64);
--		if (status != EFI_SUCCESS)
--			continue;
--
--		status = efi_call_early(handle_protocol, h,
--					&conout_proto, &dummy);
--		if (status == EFI_SUCCESS)
--			conout_found = true;
--
--		status = __gop_query64(sys_table_arg, gop64, &info, &size,
--				       &current_fb_base);
--		if (status == EFI_SUCCESS && (!first_gop || conout_found)) {
--			/*
--			 * Systems that use the UEFI Console Splitter may
--			 * provide multiple GOP devices, not all of which are
--			 * backed by real hardware. The workaround is to search
--			 * for a GOP implementing the ConOut protocol, and if
--			 * one isn't found, to just fall back to the first GOP.
--			 */
--			width = info->horizontal_resolution;
--			height = info->vertical_resolution;
--			pixel_format = info->pixel_format;
--			pixel_info = info->pixel_information;
--			pixels_per_scan_line = info->pixels_per_scan_line;
--			fb_base = current_fb_base;
--
--			/*
--			 * Once we've found a GOP supporting ConOut,
--			 * don't bother looking any further.
--			 */
--			first_gop = gop64;
--			if (conout_found)
--				break;
--		}
--	}
--
--	/* Did we find any GOPs? */
--	if (!first_gop)
--		goto out;
--
--	/* EFI framebuffer */
--	si->orig_video_isVGA = VIDEO_TYPE_EFI;
--
--	si->lfb_width = width;
--	si->lfb_height = height;
--	si->lfb_base = fb_base;
--
--	ext_lfb_base = (u64)(unsigned long)fb_base >> 32;
--	if (ext_lfb_base) {
--		si->capabilities |= VIDEO_CAPABILITY_64BIT_BASE;
--		si->ext_lfb_base = ext_lfb_base;
--	}
--
--	si->pages = 1;
--
--	setup_pixel_info(si, pixels_per_scan_line, pixel_info, pixel_format);
--
--	si->lfb_size = si->lfb_linelength * si->lfb_height;
--
--	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
--out:
--	return status;
--}
--
--/*
-- * See if we have Graphics Output Protocol
-- */
--efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
--			   struct screen_info *si, efi_guid_t *proto,
--			   unsigned long size)
--{
--	efi_status_t status;
--	void **gop_handle = NULL;
--
--	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
--				size, (void **)&gop_handle);
--	if (status != EFI_SUCCESS)
--		return status;
--
--	status = efi_call_early(locate_handle,
--				EFI_LOCATE_BY_PROTOCOL,
--				proto, NULL, &size, gop_handle);
--	if (status != EFI_SUCCESS)
--		goto free_handle;
--
--	if (efi_is_64bit()) {
--		status = setup_gop64(sys_table_arg, si, proto, size,
--				     gop_handle);
--	} else {
--		status = setup_gop32(sys_table_arg, si, proto, size,
--				     gop_handle);
--	}
--
--free_handle:
--	efi_call_early(free_pool, gop_handle);
--	return status;
--}
--
- static efi_status_t
- setup_uga32(void **uga_handle, unsigned long size, u32 *width, u32 *height)
- {
-diff --git a/arch/x86/boot/compressed/eboot.h b/arch/x86/boot/compressed/eboot.h
-index 4ee5318d7f28..c0223f1a89d7 100644
---- a/arch/x86/boot/compressed/eboot.h
-+++ b/arch/x86/boot/compressed/eboot.h
-@@ -11,84 +11,6 @@
- 
- #define DESC_TYPE_CODE_DATA	(1 << 0)
- 
--#define EFI_CONSOLE_OUT_DEVICE_GUID    \
--	EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4, 0x9a, 0x46, 0x0, 0x90, 0x27, \
--		  0x3f, 0xc1, 0x4d)
--
--#define PIXEL_RGB_RESERVED_8BIT_PER_COLOR		0
--#define PIXEL_BGR_RESERVED_8BIT_PER_COLOR		1
--#define PIXEL_BIT_MASK					2
--#define PIXEL_BLT_ONLY					3
--#define PIXEL_FORMAT_MAX				4
--
--struct efi_pixel_bitmask {
--	u32 red_mask;
--	u32 green_mask;
--	u32 blue_mask;
--	u32 reserved_mask;
--};
--
--struct efi_graphics_output_mode_info {
--	u32 version;
--	u32 horizontal_resolution;
--	u32 vertical_resolution;
--	int pixel_format;
--	struct efi_pixel_bitmask pixel_information;
--	u32 pixels_per_scan_line;
--} __packed;
--
--struct efi_graphics_output_protocol_mode_32 {
--	u32 max_mode;
--	u32 mode;
--	u32 info;
--	u32 size_of_info;
--	u64 frame_buffer_base;
--	u32 frame_buffer_size;
--} __packed;
--
--struct efi_graphics_output_protocol_mode_64 {
--	u32 max_mode;
--	u32 mode;
--	u64 info;
--	u64 size_of_info;
--	u64 frame_buffer_base;
--	u64 frame_buffer_size;
--} __packed;
--
--struct efi_graphics_output_protocol_mode {
--	u32 max_mode;
--	u32 mode;
--	unsigned long info;
--	unsigned long size_of_info;
--	u64 frame_buffer_base;
--	unsigned long frame_buffer_size;
--} __packed;
--
--struct efi_graphics_output_protocol_32 {
--	u32 query_mode;
--	u32 set_mode;
--	u32 blt;
--	u32 mode;
--};
--
--struct efi_graphics_output_protocol_64 {
--	u64 query_mode;
--	u64 set_mode;
--	u64 blt;
--	u64 mode;
--};
--
--struct efi_graphics_output_protocol {
--	void *query_mode;
--	unsigned long set_mode;
--	unsigned long blt;
--	struct efi_graphics_output_protocol_mode *mode;
--};
--
--typedef efi_status_t (*efi_graphics_output_protocol_query_mode)(
--	struct efi_graphics_output_protocol *, u32, unsigned long *,
--	struct efi_graphics_output_mode_info **);
--
- struct efi_uga_draw_protocol_32 {
- 	u32 get_mode;
- 	u32 set_mode;
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index da99bbb74aeb..c06945160a41 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -28,7 +28,7 @@ OBJECT_FILES_NON_STANDARD	:= y
- # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
- KCOV_INSTRUMENT			:= n
- 
--lib-y				:= efi-stub-helper.o
-+lib-y				:= efi-stub-helper.o gop.o
- 
- # include the stub's generic dependencies from lib/ when building for ARM/arm64
- arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
-diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-new file mode 100644
-index 000000000000..932742e4cf23
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/gop.c
-@@ -0,0 +1,354 @@
-+/* -----------------------------------------------------------------------
-+ *
-+ *   Copyright 2011 Intel Corporation; author Matt Fleming
-+ *
-+ *   This file is part of the Linux kernel, and is made available under
-+ *   the terms of the GNU General Public License version 2.
-+ *
-+ * ----------------------------------------------------------------------- */
-+
-+#include <linux/efi.h>
-+#include <linux/screen_info.h>
-+#include <asm/efi.h>
-+#include <asm/setup.h>
-+
-+static void find_bits(unsigned long mask, u8 *pos, u8 *size)
-+{
-+	u8 first, len;
-+
-+	first = 0;
-+	len = 0;
-+
-+	if (mask) {
-+		while (!(mask & 0x1)) {
-+			mask = mask >> 1;
-+			first++;
-+		}
-+
-+		while (mask & 0x1) {
-+			mask = mask >> 1;
-+			len++;
-+		}
-+	}
-+
-+	*pos = first;
-+	*size = len;
-+}
-+
-+static void
-+setup_pixel_info(struct screen_info *si, u32 pixels_per_scan_line,
-+		 struct efi_pixel_bitmask pixel_info, int pixel_format)
-+{
-+	if (pixel_format == PIXEL_RGB_RESERVED_8BIT_PER_COLOR) {
-+		si->lfb_depth = 32;
-+		si->lfb_linelength = pixels_per_scan_line * 4;
-+		si->red_size = 8;
-+		si->red_pos = 0;
-+		si->green_size = 8;
-+		si->green_pos = 8;
-+		si->blue_size = 8;
-+		si->blue_pos = 16;
-+		si->rsvd_size = 8;
-+		si->rsvd_pos = 24;
-+	} else if (pixel_format == PIXEL_BGR_RESERVED_8BIT_PER_COLOR) {
-+		si->lfb_depth = 32;
-+		si->lfb_linelength = pixels_per_scan_line * 4;
-+		si->red_size = 8;
-+		si->red_pos = 16;
-+		si->green_size = 8;
-+		si->green_pos = 8;
-+		si->blue_size = 8;
-+		si->blue_pos = 0;
-+		si->rsvd_size = 8;
-+		si->rsvd_pos = 24;
-+	} else if (pixel_format == PIXEL_BIT_MASK) {
-+		find_bits(pixel_info.red_mask, &si->red_pos, &si->red_size);
-+		find_bits(pixel_info.green_mask, &si->green_pos,
-+			  &si->green_size);
-+		find_bits(pixel_info.blue_mask, &si->blue_pos, &si->blue_size);
-+		find_bits(pixel_info.reserved_mask, &si->rsvd_pos,
-+			  &si->rsvd_size);
-+		si->lfb_depth = si->red_size + si->green_size +
-+			si->blue_size + si->rsvd_size;
-+		si->lfb_linelength = (pixels_per_scan_line * si->lfb_depth) / 8;
-+	} else {
-+		si->lfb_depth = 4;
-+		si->lfb_linelength = si->lfb_width / 2;
-+		si->red_size = 0;
-+		si->red_pos = 0;
-+		si->green_size = 0;
-+		si->green_pos = 0;
-+		si->blue_size = 0;
-+		si->blue_pos = 0;
-+		si->rsvd_size = 0;
-+		si->rsvd_pos = 0;
-+	}
-+}
-+
-+static efi_status_t
-+__gop_query32(efi_system_table_t *sys_table_arg,
-+	      struct efi_graphics_output_protocol_32 *gop32,
-+	      struct efi_graphics_output_mode_info **info,
-+	      unsigned long *size, u64 *fb_base)
-+{
-+	struct efi_graphics_output_protocol_mode_32 *mode;
-+	efi_graphics_output_protocol_query_mode query_mode;
-+	efi_status_t status;
-+	unsigned long m;
-+
-+	m = gop32->mode;
-+	mode = (struct efi_graphics_output_protocol_mode_32 *)m;
-+	query_mode = (void *)(unsigned long)gop32->query_mode;
-+
-+	status = __efi_call_early(query_mode, (void *)gop32, mode->mode, size,
-+				  info);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	*fb_base = mode->frame_buffer_base;
-+	return status;
-+}
-+
-+static efi_status_t
-+setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
-+            efi_guid_t *proto, unsigned long size, void **gop_handle)
-+{
-+	struct efi_graphics_output_protocol_32 *gop32, *first_gop;
-+	unsigned long nr_gops;
-+	u16 width, height;
-+	u32 pixels_per_scan_line;
-+	u32 ext_lfb_base;
-+	u64 fb_base;
-+	struct efi_pixel_bitmask pixel_info;
-+	int pixel_format;
-+	efi_status_t status = EFI_NOT_FOUND;
-+	u32 *handles = (u32 *)(unsigned long)gop_handle;
-+	int i;
-+
-+	first_gop = NULL;
-+	gop32 = NULL;
-+
-+	nr_gops = size / sizeof(u32);
-+	for (i = 0; i < nr_gops; i++) {
-+		struct efi_graphics_output_mode_info *info = NULL;
-+		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
-+		bool conout_found = false;
-+		void *dummy = NULL;
-+		efi_handle_t h = (efi_handle_t)(unsigned long)handles[i];
-+		u64 current_fb_base;
-+
-+		status = efi_call_early(handle_protocol, h,
-+					proto, (void **)&gop32);
-+		if (status != EFI_SUCCESS)
-+			continue;
-+
-+		status = efi_call_early(handle_protocol, h,
-+					&conout_proto, &dummy);
-+		if (status == EFI_SUCCESS)
-+			conout_found = true;
-+
-+		status = __gop_query32(sys_table_arg, gop32, &info, &size,
-+				       &current_fb_base);
-+		if (status == EFI_SUCCESS && (!first_gop || conout_found)) {
-+			/*
-+			 * Systems that use the UEFI Console Splitter may
-+			 * provide multiple GOP devices, not all of which are
-+			 * backed by real hardware. The workaround is to search
-+			 * for a GOP implementing the ConOut protocol, and if
-+			 * one isn't found, to just fall back to the first GOP.
-+			 */
-+			width = info->horizontal_resolution;
-+			height = info->vertical_resolution;
-+			pixel_format = info->pixel_format;
-+			pixel_info = info->pixel_information;
-+			pixels_per_scan_line = info->pixels_per_scan_line;
-+			fb_base = current_fb_base;
-+
-+			/*
-+			 * Once we've found a GOP supporting ConOut,
-+			 * don't bother looking any further.
-+			 */
-+			first_gop = gop32;
-+			if (conout_found)
-+				break;
-+		}
-+	}
-+
-+	/* Did we find any GOPs? */
-+	if (!first_gop)
-+		goto out;
-+
-+	/* EFI framebuffer */
-+	si->orig_video_isVGA = VIDEO_TYPE_EFI;
-+
-+	si->lfb_width = width;
-+	si->lfb_height = height;
-+	si->lfb_base = fb_base;
-+
-+	ext_lfb_base = (u64)(unsigned long)fb_base >> 32;
-+	if (ext_lfb_base) {
-+		si->capabilities |= VIDEO_CAPABILITY_64BIT_BASE;
-+		si->ext_lfb_base = ext_lfb_base;
-+	}
-+
-+	si->pages = 1;
-+
-+	setup_pixel_info(si, pixels_per_scan_line, pixel_info, pixel_format);
-+
-+	si->lfb_size = si->lfb_linelength * si->lfb_height;
-+
-+	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
-+out:
-+	return status;
-+}
-+
-+static efi_status_t
-+__gop_query64(efi_system_table_t *sys_table_arg,
-+	      struct efi_graphics_output_protocol_64 *gop64,
-+	      struct efi_graphics_output_mode_info **info,
-+	      unsigned long *size, u64 *fb_base)
-+{
-+	struct efi_graphics_output_protocol_mode_64 *mode;
-+	efi_graphics_output_protocol_query_mode query_mode;
-+	efi_status_t status;
-+	unsigned long m;
-+
-+	m = gop64->mode;
-+	mode = (struct efi_graphics_output_protocol_mode_64 *)m;
-+	query_mode = (void *)(unsigned long)gop64->query_mode;
-+
-+	status = __efi_call_early(query_mode, (void *)gop64, mode->mode, size,
-+				  info);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	*fb_base = mode->frame_buffer_base;
-+	return status;
-+}
-+
-+static efi_status_t
-+setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
-+	    efi_guid_t *proto, unsigned long size, void **gop_handle)
-+{
-+	struct efi_graphics_output_protocol_64 *gop64, *first_gop;
-+	unsigned long nr_gops;
-+	u16 width, height;
-+	u32 pixels_per_scan_line;
-+	u32 ext_lfb_base;
-+	u64 fb_base;
-+	struct efi_pixel_bitmask pixel_info;
-+	int pixel_format;
-+	efi_status_t status = EFI_NOT_FOUND;
-+	u64 *handles = (u64 *)(unsigned long)gop_handle;
-+	int i;
-+
-+	first_gop = NULL;
-+	gop64 = NULL;
-+
-+	nr_gops = size / sizeof(u64);
-+	for (i = 0; i < nr_gops; i++) {
-+		struct efi_graphics_output_mode_info *info = NULL;
-+		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
-+		bool conout_found = false;
-+		void *dummy = NULL;
-+		efi_handle_t h = (efi_handle_t)(unsigned long)handles[i];
-+		u64 current_fb_base;
-+
-+		status = efi_call_early(handle_protocol, h,
-+					proto, (void **)&gop64);
-+		if (status != EFI_SUCCESS)
-+			continue;
-+
-+		status = efi_call_early(handle_protocol, h,
-+					&conout_proto, &dummy);
-+		if (status == EFI_SUCCESS)
-+			conout_found = true;
-+
-+		status = __gop_query64(sys_table_arg, gop64, &info, &size,
-+				       &current_fb_base);
-+		if (status == EFI_SUCCESS && (!first_gop || conout_found)) {
-+			/*
-+			 * Systems that use the UEFI Console Splitter may
-+			 * provide multiple GOP devices, not all of which are
-+			 * backed by real hardware. The workaround is to search
-+			 * for a GOP implementing the ConOut protocol, and if
-+			 * one isn't found, to just fall back to the first GOP.
-+			 */
-+			width = info->horizontal_resolution;
-+			height = info->vertical_resolution;
-+			pixel_format = info->pixel_format;
-+			pixel_info = info->pixel_information;
-+			pixels_per_scan_line = info->pixels_per_scan_line;
-+			fb_base = current_fb_base;
-+
-+			/*
-+			 * Once we've found a GOP supporting ConOut,
-+			 * don't bother looking any further.
-+			 */
-+			first_gop = gop64;
-+			if (conout_found)
-+				break;
-+		}
-+	}
-+
-+	/* Did we find any GOPs? */
-+	if (!first_gop)
-+		goto out;
-+
-+	/* EFI framebuffer */
-+	si->orig_video_isVGA = VIDEO_TYPE_EFI;
-+
-+	si->lfb_width = width;
-+	si->lfb_height = height;
-+	si->lfb_base = fb_base;
-+
-+	ext_lfb_base = (u64)(unsigned long)fb_base >> 32;
-+	if (ext_lfb_base) {
-+		si->capabilities |= VIDEO_CAPABILITY_64BIT_BASE;
-+		si->ext_lfb_base = ext_lfb_base;
-+	}
-+
-+	si->pages = 1;
-+
-+	setup_pixel_info(si, pixels_per_scan_line, pixel_info, pixel_format);
-+
-+	si->lfb_size = si->lfb_linelength * si->lfb_height;
-+
-+	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
-+out:
-+	return status;
-+}
-+
-+/*
-+ * See if we have Graphics Output Protocol
-+ */
-+efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
-+			   struct screen_info *si, efi_guid_t *proto,
-+			   unsigned long size)
-+{
-+	efi_status_t status;
-+	void **gop_handle = NULL;
-+
-+	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-+				size, (void **)&gop_handle);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	status = efi_call_early(locate_handle,
-+				EFI_LOCATE_BY_PROTOCOL,
-+				proto, NULL, &size, gop_handle);
-+	if (status != EFI_SUCCESS)
-+		goto free_handle;
-+
-+	if (efi_is_64bit()) {
-+		status = setup_gop64(sys_table_arg, si, proto, size,
-+				     gop_handle);
-+	} else {
-+		status = setup_gop32(sys_table_arg, si, proto, size,
-+				     gop_handle);
-+	}
-+
-+free_handle:
-+	efi_call_early(free_pool, gop_handle);
-+	return status;
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index c2949909339b..9203bbb28887 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -283,7 +283,8 @@ typedef struct {
- 	efi_status_t (*handle_protocol)(efi_handle_t, efi_guid_t *, void **);
- 	void *__reserved;
- 	void *register_protocol_notify;
--	void *locate_handle;
-+	efi_status_t (*locate_handle)(int, efi_guid_t *, void *,
-+				      unsigned long *, efi_handle_t *);
- 	void *locate_device_path;
- 	void *install_configuration_table;
- 	void *load_image;
-@@ -628,6 +629,10 @@ void efi_native_runtime_setup(void);
- 	EFI_GUID(0xdcfa911d, 0x26eb, 0x469f, \
- 		 0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
- 
-+#define EFI_CONSOLE_OUT_DEVICE_GUID \
-+	EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4, \
-+		 0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
-+
- typedef struct {
- 	efi_guid_t guid;
- 	u64 table;
-@@ -1214,6 +1219,80 @@ struct efi_simple_text_output_protocol {
- 	void *test_string;
- };
- 
-+#define PIXEL_RGB_RESERVED_8BIT_PER_COLOR		0
-+#define PIXEL_BGR_RESERVED_8BIT_PER_COLOR		1
-+#define PIXEL_BIT_MASK					2
-+#define PIXEL_BLT_ONLY					3
-+#define PIXEL_FORMAT_MAX				4
-+
-+struct efi_pixel_bitmask {
-+	u32 red_mask;
-+	u32 green_mask;
-+	u32 blue_mask;
-+	u32 reserved_mask;
-+};
-+
-+struct efi_graphics_output_mode_info {
-+	u32 version;
-+	u32 horizontal_resolution;
-+	u32 vertical_resolution;
-+	int pixel_format;
-+	struct efi_pixel_bitmask pixel_information;
-+	u32 pixels_per_scan_line;
-+} __packed;
-+
-+struct efi_graphics_output_protocol_mode_32 {
-+	u32 max_mode;
-+	u32 mode;
-+	u32 info;
-+	u32 size_of_info;
-+	u64 frame_buffer_base;
-+	u32 frame_buffer_size;
-+} __packed;
-+
-+struct efi_graphics_output_protocol_mode_64 {
-+	u32 max_mode;
-+	u32 mode;
-+	u64 info;
-+	u64 size_of_info;
-+	u64 frame_buffer_base;
-+	u64 frame_buffer_size;
-+} __packed;
-+
-+struct efi_graphics_output_protocol_mode {
-+	u32 max_mode;
-+	u32 mode;
-+	unsigned long info;
-+	unsigned long size_of_info;
-+	u64 frame_buffer_base;
-+	unsigned long frame_buffer_size;
-+} __packed;
-+
-+struct efi_graphics_output_protocol_32 {
-+	u32 query_mode;
-+	u32 set_mode;
-+	u32 blt;
-+	u32 mode;
-+};
-+
-+struct efi_graphics_output_protocol_64 {
-+	u64 query_mode;
-+	u64 set_mode;
-+	u64 blt;
-+	u64 mode;
-+};
-+
-+struct efi_graphics_output_protocol {
-+	unsigned long query_mode;
-+	unsigned long set_mode;
-+	unsigned long blt;
-+	struct efi_graphics_output_protocol_mode *mode;
-+};
-+
-+typedef efi_status_t (*efi_graphics_output_protocol_query_mode)(
-+	struct efi_graphics_output_protocol *, u32, unsigned long *,
-+	struct efi_graphics_output_mode_info **);
-+
- extern struct list_head efivar_sysfs_list;
- 
- static inline void
--- 
-2.7.3
+ create mode 100644 drivers/firmware/efi/memattr.c
