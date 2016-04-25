@@ -1,57 +1,54 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 19/40] efifb: Use builtin_platform_driver and drop unused includes
-Date: Mon, 25 Apr 2016 21:06:51 +0100
-Message-ID: <1461614832-17633-20-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH 15/40] x86/efi: Remove the always true EFI_DEBUG symbol
+Date: Mon, 25 Apr 2016 21:06:47 +0100
+Message-ID: <1461614832-17633-16-git-send-email-matt@codeblueprint.co.uk>
 References: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, David Herrmann <dh.herrmann@gmail.com>, Mark Rutland <mark.rutland@arm.com>, Peter Jones <pjones@redhat.com>, Will Deacon <will.deacon@arm.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1461614832-17633-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+This symbol is always set which makes it useless. Additionally we have
+a kernel command-line switch, efi=debug, which actually controls the
+printing of the memory map.
 
-Since efifb can only be built directly into the kernel, drop the module
-specific includes and definitions. Drop some other includes we don't need
-as well.
-
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Acked-by: Peter Jones <pjones@redhat.com>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Will Deacon <will.deacon@arm.com>
-Cc: David Herrmann <dh.herrmann@gmail.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Reported-by: Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>
+Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- drivers/video/fbdev/efifb.c | 6 +-----
- 1 file changed, 1 insertion(+), 5 deletions(-)
+ arch/x86/platform/efi/efi.c | 4 ----
+ 1 file changed, 4 deletions(-)
 
-diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
-index dd594369b8a6..f4c045c0051c 100644
---- a/drivers/video/fbdev/efifb.c
-+++ b/drivers/video/fbdev/efifb.c
-@@ -6,15 +6,12 @@
-  *
-  */
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index dde46cd78b8f..f93545e7dc54 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -54,8 +54,6 @@
+ #include <asm/rtc.h>
+ #include <asm/uv/uv.h>
  
--#include <linux/module.h>
- #include <linux/kernel.h>
- #include <linux/efi.h>
- #include <linux/errno.h>
- #include <linux/fb.h>
- #include <linux/platform_device.h>
- #include <linux/screen_info.h>
--#include <linux/dmi.h>
--#include <linux/pci.h>
- #include <video/vga.h>
- #include <asm/efi.h>
+-#define EFI_DEBUG
+-
+ static struct efi efi_phys __initdata;
+ static efi_system_table_t efi_systab __initdata;
  
-@@ -331,5 +328,4 @@ static struct platform_driver efifb_driver = {
- 	.remove = efifb_remove,
- };
+@@ -222,7 +220,6 @@ int __init efi_memblock_x86_reserve_range(void)
  
--module_platform_driver(efifb_driver);
--MODULE_LICENSE("GPL");
-+builtin_platform_driver(efifb_driver);
+ void __init efi_print_memmap(void)
+ {
+-#ifdef EFI_DEBUG
+ 	efi_memory_desc_t *md;
+ 	int i = 0;
+ 
+@@ -235,7 +232,6 @@ void __init efi_print_memmap(void)
+ 			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1,
+ 			(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
+ 	}
+-#endif  /*  EFI_DEBUG  */
+ }
+ 
+ void __init efi_unmap_memmap(void)
 -- 
 2.7.3
