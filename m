@@ -1,38 +1,75 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] efibc: EFI Bootloader Control
-Date: Mon, 25 Apr 2016 13:17:53 +0100
-Message-ID: <20160425121753.GT2829@codeblueprint.co.uk>
-References: <87bn5tlbkw.fsf@jcompost-MOBL1.tl.intel.com>
- <20160414160006.GR2829@codeblueprint.co.uk>
- <87r3e383v7.fsf@jcompost-MOBL1.tl.intel.com>
- <87mvor83tl.fsf@jcompost-MOBL1.tl.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: [PATCHv3 0/5] efi: detect erroneous firmware IRQ manipulation
+Date: Mon, 25 Apr 2016 14:46:29 +0100
+Message-ID: <1461591994-14918-1-git-send-email-mark.rutland@arm.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <87mvor83tl.fsf-e2kLcBBGnpIIbNWpFUBdLQzuBQEzu/OPQQ4Iyu8u01E@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Compostella, Jeremy" <jeremy.compostella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Stanacar, Stefan" <stefan.stanacar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 18 Apr, at 03:05:42PM, Jeremy Compostella wrote:
-> +static void efibc_set_variable(const char *name, const char *value)
-> +{
-> +	int ret;
-> +	efi_guid_t guid =3D EFI_LOADER_GUID;
-> +	struct efivar_entry entry;
-> +	size_t size =3D (strlen(value) + 1) * sizeof(efi_char16_t);
+Note: this is largely a rework of the final patch from v2 [2], which now has a
+per-arch component (and hence additional patches). The rest of v2 has already
+been picked up, and hence dropped from this posting.
 
-Putting 'entry' on the stack leads to the following build warning,
+Some firmware erroneously unmask IRQs (and potentially other architecture
+specific exceptions) during runtime services functions, in violation of both
+common sense and the UEFI specification. This can result in a number of issues
+if said exceptions are taken when they are expected to be masked, and
+additionally can confuse IRQ tracing if the original mask state is not
+restored prior to returning from firmware.
 
- drivers/firmware/efi/efibc.c: In function =E2=80=98efibc_set_variable=E2=
-=80=99:
- drivers/firmware/efi/efibc.c:53:1: warning: the frame size of 2192 byt=
-es is larger than 2048 bytes [-Wframe-larger-than=3D]
+In practice it's difficult to check that firmware never unmasks exceptions, but
+we can at least check that the IRQ flags are at least consistent upon entry to
+and return from a runtime services function call. This series implements said
+check in the shared EFI runtime wrappers code, after an initial round of
+refactoring (patches 1-5 of [2]).
 
-That's a big object.
+I have left ia64 as-is, without this check, as ia64 doesn't currently use the
+generic runtime wrappers, has many special cases for the runtime calls which
+don't fit well with the generic code, and I don't expect a new, buggy ia64
+firmware to appear soon.
 
-Given that efibc_reboot_notifier_call() can only be invoked once,
-could we just statically allocate 'entry' instead?
+The first time corruption of the IRQ flags is detected, we dump a stack trace,
+and set TAINT_FIRMWARE_WORKAROUND. Additionally, and in all subsequent cases,
+we log (with ratelimiting) the specific corruption of the flags, and restore
+the expected flags to avoid redundant warnings elsewhere.
+
+Since v1 [1]:
+* Fix thinko: s/local_irq_save/local_save_flags/
+* Remove ifdefs after conversion
+* Remove reundant semicolon from x86 patch
+* Move efi_call_virt_check_flags before first use
+* Add Acked-bys and Reviewed-bys
+
+Since v2 [2]:
+* Drop the refactoring patches (1-5), which Matt has queued
+* Add per-arch ARCH_EFI_IRQ_FLAGS_MASK, as discussed for v2 [3,4]
+
+As with v2, this has been build-tested for each target, but other than arm64 I
+don't have a good platform for testing. Hopefully this causes fewer explosions
+than v2.
+
+Thanks,
+Mark.
+
+[1] https://lkml.org/lkml/2016/4/21/260
+[2] https://lkml.org/lkml/2016/4/22/542
+[3] https://lkml.org/lkml/2016/4/25/230
+[4] https://lkml.org/lkml/2016/4/25/243
+
+Mark Rutland (5):
+  efi/runtime-wrappers: detect FW irq flag corruption
+  arm64/efi: enable runtime call flag checking
+  arm/efi: enable runtime call flag checking
+  x86/efi: enable runtime call flag checking
+  efi/runtime-wrappers: remove ARCH_EFI_IRQ_FLAGS_MASK ifdef
+
+ arch/arm/include/asm/efi.h              |  5 +++++
+ arch/arm64/include/asm/efi.h            |  3 +++
+ arch/x86/include/asm/efi.h              |  4 +++-
+ drivers/firmware/efi/runtime-wrappers.c | 25 +++++++++++++++++++++++++
+ 4 files changed, 36 insertions(+), 1 deletion(-)
+
+-- 
+1.9.1
