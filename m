@@ -1,60 +1,66 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 40/40] efi/runtime-wrappers: Remove ARCH_EFI_IRQ_FLAGS_MASK ifdef
-Date: Mon, 25 Apr 2016 21:07:12 +0100
-Message-ID: <1461614832-17633-41-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH 35/40] efi/runtime-wrappers: Remove redundant ifdefs
+Date: Mon, 25 Apr 2016 21:07:07 +0100
+Message-ID: <1461614832-17633-36-git-send-email-matt@codeblueprint.co.uk>
 References: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, Leif Lindholm <leif.lindholm@linaro.org>, Russell King <linux@arm.linux.org.uk>, Will Deacon <will.deacon@arm.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1461614832-17633-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Mark Rutland <mark.rutland@arm.com>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 
-Now that arm, arm64, and x86 all provide ARCH_EFI_IRQ_FLAGS_MASK, we can
-get rid of the trivial and now unused implementation of
-efi_call_virt_check_flags.
+Now that all users of the EFI runtime wrappers (arm,arm64,x86) have been
+migrated to the new setup/teardown macros, we don't need to support
+overridden {__,}efi_call_virt implementations.
 
-Signed-off-by: Mark Rutland <mark.rutland@arm.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
-Cc: Catalin Marinas <catalin.marinas@arm.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Will Deacon <will.deacon@arm.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+This patch removes the unnecessary ifdefs.
+
+Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- drivers/firmware/efi/runtime-wrappers.c | 7 -------
- 1 file changed, 7 deletions(-)
+ drivers/firmware/efi/runtime-wrappers.c | 4 ----
+ 1 file changed, 4 deletions(-)
 
 diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index 89dcdb3a16a2..23bef6bb73ee 100644
+index 0677577bdaa1..b9ece374d4d3 100644
 --- a/drivers/firmware/efi/runtime-wrappers.c
 +++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -22,10 +22,6 @@
- #include <linux/stringify.h>
- #include <asm/efi.h>
+@@ -40,7 +40,6 @@
+  *    Restores the usual kernel environment once the call has returned.
+  */
  
--/*
-- * Temporary scaffolding until all users provide ARCH_EFI_IRQ_FLAGS_MASK.
-- */
--#ifdef ARCH_EFI_IRQ_FLAGS_MASK
- static void efi_call_virt_check_flags(unsigned long flags, const char *call)
- {
- 	unsigned long cur_flags, mismatch;
-@@ -41,9 +37,6 @@ static void efi_call_virt_check_flags(unsigned long flags, const char *call)
- 			   flags, cur_flags, call);
- 	local_irq_restore(flags);
- }
--#else /* ARCH_EFI_IRQ_FLAGS_MASK */
--static inline void efi_call_virt_check_flags(unsigned long flags, const char *call) {}
--#endif /* ARCH_EFI_IRQ_FLAGS_MASK */
+-#ifndef efi_call_virt
+ #define efi_call_virt(f, args...)					\
+ ({									\
+ 	efi_status_t __s;						\
+@@ -49,16 +48,13 @@
+ 	arch_efi_call_virt_teardown();					\
+ 	__s;								\
+ })
+-#endif
+ 
+-#ifndef __efi_call_virt
+ #define __efi_call_virt(f, args...)					\
+ ({									\
+ 	arch_efi_call_virt_setup();					\
+ 	arch_efi_call_virt(f, args);					\
+ 	arch_efi_call_virt_teardown();					\
+ })
+-#endif
  
  /*
-  * Arch code can implement the following three template macros, avoiding
+  * According to section 7.1 of the UEFI spec, Runtime Services are not fully
 -- 
 2.7.3
