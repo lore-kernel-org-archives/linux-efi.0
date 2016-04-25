@@ -1,61 +1,48 @@
-From: Robin Murphy <robin.murphy@arm.com>
-Subject: Re: [PATCHv3 1/5] efi/runtime-wrappers: detect FW irq flag corruption
-Date: Mon, 25 Apr 2016 15:33:02 +0100
-Message-ID: <571E2A9E.3010407@arm.com>
-References: <1461591994-14918-1-git-send-email-mark.rutland@arm.com>
- <1461591994-14918-2-git-send-email-mark.rutland@arm.com>
- <571E25B1.8070305@arm.com> <20160425141557.GA2829@codeblueprint.co.uk>
- <CAKv+Gu8yH4u0-DNezUTk5b1DQJdEaH4RxR7YMQcwmkuRmEaNEw@mail.gmail.com>
- <20160425142435.GB2829@codeblueprint.co.uk>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [GIT PULL] EFI urgent fix
+Date: Mon, 25 Apr 2016 17:29:38 +0200
+Message-ID: <20160425152938.GA12231@gmail.com>
+References: <1461583602-31599-1-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=WINDOWS-1252; format=flowed
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160425142435.GB2829@codeblueprint.co.uk>
+Content-Disposition: inline
+In-Reply-To: <1461583602-31599-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, "mingo@redhat.com" <mingo@redhat.com>, "hpa@zytor.com" <hpa@zytor.com>, "tglx@linutronix.de" <tglx@linutronix.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Chris Wilson <chris@chris-wilson.co.uk>, Jani Nikula <jani.nikula@linux.intel.com>, Jason Andryuk <jandryuk@gmail.com>, Laszlo Ersek <lersek@redhat.com>, Matthew Garrett <mjg59@coreos.com>, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 25/04/16 15:24, Matt Fleming wrote:
-> On Mon, 25 Apr, at 04:18:41PM, Ard Biesheuvel wrote:
->> On 25 April 2016 at 16:15, Matt Fleming <matt@codeblueprint.co.uk> wrote:
->>> On Mon, 25 Apr, at 03:12:01PM, Robin Murphy wrote:
->>>>> +static void efi_call_virt_check_flags(unsigned long flags, const char *call)
->>>>> +{
->>>>> +    unsigned long cur_flags;
->>>>> +    bool mismatch;
->>>>> +
->>>>> +    local_save_flags(cur_flags);
->>>>> +
->>>>> +    mismatch = !!((cur_flags ^ flags) & ARCH_EFI_IRQ_FLAGS_MASK);
->>>>
->>>> nit: the assignment itself is already a conversion to bool, so the
->>>> excitement is redundant here.
->>>
->>> This was intentional. I asked Mark to make this change so that it's
->>> explicit for the developer that we're performing the type conversion.
->>
->> But replacing an implicit boolean cast with an explicit one makes
->> little sense, no? Don't we simply want '!= 0' here if you need a
->> boolean expression?
->
-> Aha but '!!' is fewer characters to type!!
->
-> I'm not that bothered as long as we don't stuff an int into a bool
-> without giving the programmer some idea we're doing that. It's not
-> about the compiler getting it wrong, more about a developer
-> introducing a bug when they change the code in the future.
->
-> Unless anyone objects, I'll fix this up to use '!= 0' when I apply it.
 
-Agreed - the belt and braces approach isn't necessarily bad if the cost
-of cocking it up is significant, and !=0 is as explicit as you can get.
-After all, if Joe Random Hacker can't infer the behaviour from looking 4
-lines up to see the variable definition, then I wouldn't count on him
-understanding !! either ;)
+* Matt Fleming <matt@codeblueprint.co.uk> wrote:
 
-Thanks,
-Robin.
+> Folks, please pull the following fix from Laszlo that ensures we don't
+> perform an out-of-bounds access when matching EFI variable names
+> against the variable protection whitelist.
+> 
+> The following changes since commit c3b46c73264b03000d1e18b22f5caf63332547c9:
+> 
+>   Linux 4.6-rc4 (2016-04-17 19:13:32 -0700)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+> 
+> for you to fetch changes up to 630ba0cc7a6dbafbdee43795617c872b35cde1b4:
+> 
+>   efi: Fix out-of-bounds read in variable_matches() (2016-04-22 19:41:41 +0100)
+> 
+> ----------------------------------------------------------------
+>  * Avoid out-of-bounds access in the efivars code when performing
+>    string matching on converted EFI variable names - Laszlo Ersek
+> 
+> ----------------------------------------------------------------
+> Laszlo Ersek (1):
+>       efi: Fix out-of-bounds read in variable_matches()
+> 
+>  drivers/firmware/efi/vars.c | 37 ++++++++++++++++++++++++++-----------
+>  1 file changed, 26 insertions(+), 11 deletions(-)
 
-IMPORTANT NOTICE: The contents of this email and any attachments are confidential and may also be privileged. If you are not the intended recipient, please notify the sender immediately and do not disclose the contents to any other person, use it for any purpose, or store or copy the information in any medium. Thank you.
+Pulled into tip:efi/urgent, thanks Matt!
+
+	Ingo
