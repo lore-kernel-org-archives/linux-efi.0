@@ -1,75 +1,57 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: [PATCHv3 0/5] efi: detect erroneous firmware IRQ manipulation
-Date: Mon, 25 Apr 2016 14:46:29 +0100
-Message-ID: <1461591994-14918-1-git-send-email-mark.rutland@arm.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: [PATCHv3 3/5] arm/efi: enable runtime call flag checking
+Date: Mon, 25 Apr 2016 14:46:32 +0100
+Message-ID: <1461591994-14918-4-git-send-email-mark.rutland@arm.com>
+References: <1461591994-14918-1-git-send-email-mark.rutland@arm.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1461591994-14918-1-git-send-email-mark.rutland@arm.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org
+Cc: ard.biesheuvel@linaro.org, catalin.marinas@arm.com, hpa@zytor.com, leif.lindholm@linaro.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, linux-kernel@vger.kernel.org, mark.rutland@arm.com, matt@codeblueprint.co.uk, mingo@redhat.com, tglx@linutronix.de, will.deacon@arm.com
 List-Id: linux-efi@vger.kernel.org
 
-Note: this is largely a rework of the final patch from v2 [2], which now has a
-per-arch component (and hence additional patches). The rest of v2 has already
-been picked up, and hence dropped from this posting.
+Define ARCH_EFI_IRQ_FLAGS_MASK for arm, which will enable the generic
+runtime wrapper code to detect when firmware erroneously modifies flags
+over a runtime services function call.
 
-Some firmware erroneously unmask IRQs (and potentially other architecture
-specific exceptions) during runtime services functions, in violation of both
-common sense and the UEFI specification. This can result in a number of issues
-if said exceptions are taken when they are expected to be masked, and
-additionally can confuse IRQ tracing if the original mask state is not
-restored prior to returning from firmware.
+We check all allocated flags, barring those which firmware has
+legitimate reason to modify (condition flags and IT state). While in
+practice corruption of some flags (e.g. J) would already be fatal, we
+include these for consistency and documentation purposes.
 
-In practice it's difficult to check that firmware never unmasks exceptions, but
-we can at least check that the IRQ flags are at least consistent upon entry to
-and return from a runtime services function call. This series implements said
-check in the shared EFI runtime wrappers code, after an initial round of
-refactoring (patches 1-5 of [2]).
+Signed-off-by: Mark Rutland <mark.rutland@arm.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Russell King <linux@arm.linux.org.uk>
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-efi@vger.kernel.org
+---
+ arch/arm/include/asm/efi.h | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-I have left ia64 as-is, without this check, as ia64 doesn't currently use the
-generic runtime wrappers, has many special cases for the runtime calls which
-don't fit well with the generic code, and I don't expect a new, buggy ia64
-firmware to appear soon.
-
-The first time corruption of the IRQ flags is detected, we dump a stack trace,
-and set TAINT_FIRMWARE_WORKAROUND. Additionally, and in all subsequent cases,
-we log (with ratelimiting) the specific corruption of the flags, and restore
-the expected flags to avoid redundant warnings elsewhere.
-
-Since v1 [1]:
-* Fix thinko: s/local_irq_save/local_save_flags/
-* Remove ifdefs after conversion
-* Remove reundant semicolon from x86 patch
-* Move efi_call_virt_check_flags before first use
-* Add Acked-bys and Reviewed-bys
-
-Since v2 [2]:
-* Drop the refactoring patches (1-5), which Matt has queued
-* Add per-arch ARCH_EFI_IRQ_FLAGS_MASK, as discussed for v2 [3,4]
-
-As with v2, this has been build-tested for each target, but other than arm64 I
-don't have a good platform for testing. Hopefully this causes fewer explosions
-than v2.
-
-Thanks,
-Mark.
-
-[1] https://lkml.org/lkml/2016/4/21/260
-[2] https://lkml.org/lkml/2016/4/22/542
-[3] https://lkml.org/lkml/2016/4/25/230
-[4] https://lkml.org/lkml/2016/4/25/243
-
-Mark Rutland (5):
-  efi/runtime-wrappers: detect FW irq flag corruption
-  arm64/efi: enable runtime call flag checking
-  arm/efi: enable runtime call flag checking
-  x86/efi: enable runtime call flag checking
-  efi/runtime-wrappers: remove ARCH_EFI_IRQ_FLAGS_MASK ifdef
-
- arch/arm/include/asm/efi.h              |  5 +++++
- arch/arm64/include/asm/efi.h            |  3 +++
- arch/x86/include/asm/efi.h              |  4 +++-
- drivers/firmware/efi/runtime-wrappers.c | 25 +++++++++++++++++++++++++
- 4 files changed, 36 insertions(+), 1 deletion(-)
-
+diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
+index e1461fc..b05ff68 100644
+--- a/arch/arm/include/asm/efi.h
++++ b/arch/arm/include/asm/efi.h
+@@ -17,6 +17,7 @@
+ #include <asm/mach/map.h>
+ #include <asm/mmu_context.h>
+ #include <asm/pgtable.h>
++#include <asm/ptrace.h>
+ 
+ #ifdef CONFIG_EFI
+ void efi_init(void);
+@@ -33,6 +34,10 @@ int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
+ 	__f(args);							\
+ })
+ 
++#define ARCH_EFI_IRQ_FLAGS_MASK \
++	(PSR_J_BIT | PSR_E_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT | \
++	 PSR_T_BIT | MODE_MASK)
++
+ static inline void efi_set_pgd(struct mm_struct *mm)
+ {
+ 	check_and_switch_context(mm, NULL);
 -- 
 1.9.1
