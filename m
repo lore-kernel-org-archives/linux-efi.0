@@ -1,49 +1,54 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi/arm-init: reserve rather than unmap the memory map
- for ARM as well
-Date: Mon, 25 Apr 2016 10:08:15 +0200
-Message-ID: <CAKv+Gu99AHbV2F9RPj_QS7yvx0P5u9tq_zkpAoTdjf88+gXkVg@mail.gmail.com>
-References: <1461165635-8041-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20160424195744.GL2829@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCHv2 0/6] efi: detect erroneous firmware IRQ manipulation
+Date: Mon, 25 Apr 2016 11:15:27 +0100
+Message-ID: <20160425101527.GP2829@codeblueprint.co.uk>
+References: <1461333083-15529-1-git-send-email-mark.rutland@arm.com>
+ <CAKv+Gu8FGpZK4yDito2jKTbjuyE2jojj5tZhCa2qUwKdWL9+ng@mail.gmail.com>
+ <20160424212241.GO2829@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160424195744.GL2829-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160424212241.GO2829-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org" <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 24 April 2016 at 21:57, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Wed, 20 Apr, at 05:20:35PM, Ard Biesheuvel wrote:
->> Now that ARM has a fully functional memremap() implementation, there is
->> no longer a need to remove the UEFI memory map from the linear mapping
->> in order to be able to create a permanent mapping for it using generic
->> code.
->>
->> So remove the 'IS_ENABLED(CONFIG_ARM)' conditional we added in commit
->> 7cc8cbcf82d1 ("efi/arm64: Don't apply MEMBLOCK_NOMAP to UEFI memory map
->> mapping"), and revert to using memblock_reserve() for both ARM and arm64
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>
->> This is the permanent fix I alluded to in the commit log for the patch
->> mentioned above. Russell has pulled the memremap() patches so this is
->> good to go for v4.7
->>
->> Note that current efi-next already has a conflict with v4.6-rc4 (where
->> that patch landed) which will get even worse with this on top, so it may
->> make sense to rebase efi-next onto v4.6-rc4 before pulling this
->> (but note that this patch depends on 'efi/arm*: Use memremap() to create
->> the persistent memmap mapping', so please don't reorder them to maintain
->> bisectability)
->
-> Good notes, thanks Ard.
->
-> I applied this for v4.7 but please check the result since there was a
-> conflict with the GOP framebuffer patches,
->
->   https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=next&id=b2757153ee7cfce23f760036b0c85bd0ec99cf50
+On Sun, 24 Apr, at 10:22:41PM, Matt Fleming wrote:
+> 
+> I like this series a lot (well, ignoring the fact that the firmware is
+> trying to eat itself). The runtime call code is much cleaner now, and
+> this is a great precedent for any future multi-architecture quirks we
+> may need.
+> 
+> Queued for v4.7, thanks everyone!
 
-Looks fine, thanks
+Hmm... Booting this series with Qemu and OVMF results in lots of
+warnings,
+
+[    0.102173] ------------[ cut here ]------------
+[    0.103000] WARNING: CPU: 0 PID: 0 at /dev/shm/mfleming/git/efi/drivers/firmware/efi/runtime-wrappers.c:30 efi_call_virt_check_flags+0x69/0x90
+[    0.103505] Modules linked in:
+[    0.104519] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.6.0-rc4+ #1
+[    0.105000]  0000000000000000 ffffffff81e03e30 ffffffff8132206f 0000000000000000
+[    0.105000]  0000000000000000 ffffffff81e03e70 ffffffff8105a47c 0000001e0000000a
+[    0.105000]  0000000000000246 0000000000000286 ffffffff81bed975 ffffffff81e03f10
+[    0.105000] Call Trace:
+[    0.105000]  [<ffffffff8132206f>] dump_stack+0x4d/0x6e
+[    0.105000]  [<ffffffff8105a47c>] __warn+0xcc/0xf0
+[    0.105000]  [<ffffffff8105a558>] warn_slowpath_null+0x18/0x20
+[    0.105000]  [<ffffffff8164e5a9>] efi_call_virt_check_flags+0x69/0x90
+[    0.105000]  [<ffffffff8164f9d2>] virt_efi_set_variable+0x82/0x190
+[    0.105000]  [<ffffffff81054555>] efi_delete_dummy_variable+0x75/0x80
+[    0.105000]  [<ffffffff81f599f6>] efi_enter_virtual_mode+0x463/0x472
+[    0.105000]  [<ffffffff81f41f82>] start_kernel+0x38f/0x415
+[    0.105000]  [<ffffffff81f419e1>] ? set_init_arg+0x55/0x55
+[    0.105000]  [<ffffffff81f415ee>] x86_64_start_reservations+0x2a/0x2c
+[    0.105000]  [<ffffffff81f416da>] x86_64_start_kernel+0xea/0xed
+[    0.107181] ---[ end trace 0081cc453369d969 ]---
+[    0.107499] Disabling lock debugging due to kernel taint
+[    0.108226] [Firmware Bug]: IRQ flags corrupted (0x00000246=>0x00000286) by EFI set_variable
+
+Has anyone tested this series on x86 to ensure that this is a rare
+case? I'll go and test some physical x86 machines now.
