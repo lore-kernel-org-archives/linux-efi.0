@@ -1,58 +1,42 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 08/40] efi: Check EFI_MEMORY_DESCRIPTOR version explicitly
-Date: Mon, 25 Apr 2016 21:06:40 +0100
-Message-ID: <1461614832-17633-9-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH 09/40] efi/arm*: Use memremap() to create the persistent memmap mapping
+Date: Mon, 25 Apr 2016 21:06:41 +0100
+Message-ID: <1461614832-17633-10-git-send-email-matt@codeblueprint.co.uk>
 References: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1461614832-17633-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Our efi_memory_desc_t type is based on EFI_MEMORY_DESCRIPTOR version 1 in
-the UEFI spec. No version updates are expected, but since we are about to
-introduce support for new firmware tables that use the same descriptor
-type, it makes sense to at least warn if we encounter other versions.
+Instead of using ioremap_cache(), which is slightly inappropriate for
+mapping firmware tables, and is not even allowed on ARM for mapping
+regions that are covered by a struct page, use memremap(), which was
+invented for this purpose, and will also reuse the existing kernel
+direct mapping if the requested region is covered by it.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- arch/x86/platform/efi/efi.c     | 4 ++++
- drivers/firmware/efi/arm-init.c | 4 ++++
- 2 files changed, 8 insertions(+)
+ drivers/firmware/efi/arm-runtime.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 88d2fb2cb3ef..dde46cd78b8f 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -211,6 +211,10 @@ int __init efi_memblock_x86_reserve_range(void)
- 	efi.memmap.desc_size	= e->efi_memdesc_size;
- 	efi.memmap.desc_version	= e->efi_memdesc_version;
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 55a9ea041068..19283deac375 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -105,8 +105,7 @@ static int __init arm_enable_runtime_services(void)
  
-+	WARN(efi.memmap.desc_version != 1,
-+	     "Unexpected EFI_MEMORY_DESCRIPTOR version %ld",
-+	     efi.memmap.desc_version);
-+
- 	memblock_reserve(pmap, efi.memmap.nr_map * efi.memmap.desc_size);
+ 	mapsize = efi.memmap.map_end - efi.memmap.map;
  
- 	return 0;
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 90a9b473e45c..a84dddb54c14 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -198,6 +198,10 @@ void __init efi_init(void)
- 	efi.memmap.desc_size = params.desc_size;
- 	efi.memmap.desc_version = params.desc_ver;
- 
-+	WARN(efi.memmap.desc_version != 1,
-+	     "Unexpected EFI_MEMORY_DESCRIPTOR version %ld",
-+	      efi.memmap.desc_version);
-+
- 	if (uefi_init() < 0)
- 		return;
- 
+-	efi.memmap.map = (__force void *)ioremap_cache(efi.memmap.phys_map,
+-						       mapsize);
++	efi.memmap.map = memremap(efi.memmap.phys_map, mapsize, MEMREMAP_WB);
+ 	if (!efi.memmap.map) {
+ 		pr_err("Failed to remap EFI memory map\n");
+ 		return -ENOMEM;
 -- 
 2.7.3
