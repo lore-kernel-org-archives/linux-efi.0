@@ -1,72 +1,69 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 33/40] arm/efi: Move to generic {__,}efi_call_virt
-Date: Mon, 25 Apr 2016 21:07:05 +0100
-Message-ID: <1461614832-17633-34-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 28/40] x86/efi: Force EFI reboot to process pending capsules
+Date: Mon, 25 Apr 2016 21:07:00 +0100
+Message-ID: <1461614832-17633-29-git-send-email-matt@codeblueprint.co.uk>
 References: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, Colin Ian King <colin.king@canonical.com>, Leif Lindholm <leif.lindholm@linaro.org>, Russell King <linux@arm.linux.org.uk>, Will Deacon <will.deacon@arm.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, joeyli <jlee@suse.com>, Kweh Hock Leong <hock.leong.kweh@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Mark Rutland <mark.rutland@arm.com>
+If an EFI capsule has been sent to the firmware we must match the type
+of EFI reset against that required by the capsule to ensure it is
+processed correctly.
 
-Now there's a common template for {__,}efi_call_virt, remove the
-duplicate logic from the arm efi code.
+Force an EFI reboot if a capsule is pending for the next reset.
 
-Signed-off-by: Mark Rutland <mark.rutland@arm.com>
-Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Russell King <linux@arm.linux.org.uk>
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
-Cc: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Kweh Hock Leong <hock.leong.kweh@intel.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Ingo Molnar <mingo@kernel.org>
 Cc: "H. Peter Anvin" <hpa@zytor.com>
 Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Will Deacon <will.deacon@arm.com>
-Cc: Colin Ian King <colin.king@canonical.com>
+Cc: joeyli <jlee@suse.com>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/arm/include/asm/efi.h | 20 ++++----------------
- 1 file changed, 4 insertions(+), 16 deletions(-)
+ arch/x86/kernel/reboot.c | 9 +++++++++
+ include/linux/efi.h      | 6 ++++++
+ 2 files changed, 15 insertions(+)
 
-diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-index b45fe39bf35b..5f273b43d704 100644
---- a/arch/arm/include/asm/efi.h
-+++ b/arch/arm/include/asm/efi.h
-@@ -24,26 +24,14 @@ void efi_init(void);
- int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
- int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
+diff --git a/arch/x86/kernel/reboot.c b/arch/x86/kernel/reboot.c
+index ab0adc0fa5db..a9b31eb815f2 100644
+--- a/arch/x86/kernel/reboot.c
++++ b/arch/x86/kernel/reboot.c
+@@ -535,6 +535,15 @@ static void native_machine_emergency_restart(void)
+ 	mode = reboot_mode == REBOOT_WARM ? 0x1234 : 0;
+ 	*((unsigned short *)__va(0x472)) = mode;
  
--#define efi_call_virt(f, ...)						\
--({									\
--	efi_##f##_t *__f;						\
--	efi_status_t __s;						\
--									\
--	efi_virtmap_load();						\
--	__f = efi.systab->runtime->f;					\
--	__s = __f(__VA_ARGS__);						\
--	efi_virtmap_unload();						\
--	__s;								\
--})
-+#define arch_efi_call_virt_setup()	efi_virtmap_load()
-+#define arch_efi_call_virt_teardown()	efi_virtmap_unload()
++	/*
++	 * If an EFI capsule has been registered with the firmware then
++	 * override the reboot= parameter.
++	 */
++	if (efi_capsule_pending(NULL)) {
++		pr_info("EFI capsule is pending, forcing EFI reboot.\n");
++		reboot_type = BOOT_EFI;
++	}
++
+ 	for (;;) {
+ 		/* Could also try the reset bit in the Hammer NB */
+ 		switch (reboot_type) {
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index a3b4c1ec38c0..aa36fb8bea4b 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1085,6 +1085,12 @@ static inline bool efi_enabled(int feature)
+ }
+ static inline void
+ efi_reboot(enum reboot_mode reboot_mode, const char *__unused) {}
++
++static inline bool
++efi_capsule_pending(int *reset_type)
++{
++	return false;
++}
+ #endif
  
--#define __efi_call_virt(f, ...)						\
-+#define arch_efi_call_virt(f, args...)					\
- ({									\
- 	efi_##f##_t *__f;						\
--									\
--	efi_virtmap_load();						\
- 	__f = efi.systab->runtime->f;					\
--	__f(__VA_ARGS__);						\
--	efi_virtmap_unload();						\
-+	__f(args);							\
- })
- 
- static inline void efi_set_pgd(struct mm_struct *mm)
+ extern int efi_status_to_err(efi_status_t status);
 -- 
 2.7.3
