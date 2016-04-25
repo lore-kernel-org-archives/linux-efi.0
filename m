@@ -1,36 +1,100 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [GIT PULL] EFI urgent fix
-Date: Mon, 25 Apr 2016 12:26:41 +0100
-Message-ID: <1461583602-31599-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, Jani Nikula <jani.nikula-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Jason Andryuk <jandryuk-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH] efi: Fix out-of-bounds read in variable_matches()
+Date: Mon, 25 Apr 2016 12:29:04 +0100
+Message-ID: <1461583744-32034-1-git-send-email-matt@codeblueprint.co.uk>
+References: <1461583602-31599-1-git-send-email-matt@codeblueprint.co.uk>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1461583602-31599-1-git-send-email-matt@codeblueprint.co.uk>
+Sender: stable-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Laszlo Ersek <lersek@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Chris Wilson <chris@chris-wilson.co.uk>, Jani Nikula <jani.nikula@linux.intel.com>, Jason Andryuk <jandryuk@gmail.com>, Matthew Garrett <mjg59@coreos.com>, Peter Jones <pjones@redhat.com>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Folks, please pull the following fix from Laszlo that ensures we don't
-perform an out-of-bounds access when matching EFI variable names
-against the variable protection whitelist.
+From: Laszlo Ersek <lersek@redhat.com>
 
-The following changes since commit c3b46c73264b03000d1e18b22f5caf63332547c9:
+The variable_matches() function can currently read "var_name[len]", for
+example when:
 
-  Linux 4.6-rc4 (2016-04-17 19:13:32 -0700)
+ - var_name[0] == 'a',
+ - len == 1
+ - match_name points to the NUL-terminated string "ab".
 
-are available in the git repository at:
+This function is supposed to accept "var_name" inputs that are not
+NUL-terminated (hence the "len" parameter"). Document the function, and
+access "var_name[*match]" only if "*match" is smaller than "len".
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-
-for you to fetch changes up to 630ba0cc7a6dbafbdee43795617c872b35cde1b4:
-
-  efi: Fix out-of-bounds read in variable_matches() (2016-04-22 19:41:41 +0100)
-
-----------------------------------------------------------------
- * Avoid out-of-bounds access in the efivars code when performing
-   string matching on converted EFI variable names - Laszlo Ersek
-
-----------------------------------------------------------------
-Laszlo Ersek (1):
-      efi: Fix out-of-bounds read in variable_matches()
-
+Reported-by: Chris Wilson <chris@chris-wilson.co.uk>
+Signed-off-by: Laszlo Ersek <lersek@redhat.com>
+Cc: Peter Jones <pjones@redhat.com>
+Cc: Matthew Garrett <mjg59@coreos.com>
+Cc: Jason Andryuk <jandryuk@gmail.com>
+Cc: Jani Nikula <jani.nikula@linux.intel.com>
+Cc: <stable@vger.kernel.org> # v3.10+
+Link: http://thread.gmane.org/gmane.comp.freedesktop.xorg.drivers.intel/86906
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+---
  drivers/firmware/efi/vars.c | 37 ++++++++++++++++++++++++++-----------
  1 file changed, 26 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index 0ac594c0a234..34b741940494 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -202,29 +202,44 @@ static const struct variable_validate variable_validate[] = {
+ 	{ NULL_GUID, "", NULL },
+ };
+ 
++/*
++ * Check if @var_name matches the pattern given in @match_name.
++ *
++ * @var_name: an array of @len non-NUL characters.
++ * @match_name: a NUL-terminated pattern string, optionally ending in "*". A
++ *              final "*" character matches any trailing characters @var_name,
++ *              including the case when there are none left in @var_name.
++ * @match: on output, the number of non-wildcard characters in @match_name
++ *         that @var_name matches, regardless of the return value.
++ * @return: whether @var_name fully matches @match_name.
++ */
+ static bool
+ variable_matches(const char *var_name, size_t len, const char *match_name,
+ 		 int *match)
+ {
+ 	for (*match = 0; ; (*match)++) {
+ 		char c = match_name[*match];
+-		char u = var_name[*match];
+ 
+-		/* Wildcard in the matching name means we've matched */
+-		if (c == '*')
++		switch (c) {
++		case '*':
++			/* Wildcard in @match_name means we've matched. */
+ 			return true;
+ 
+-		/* Case sensitive match */
+-		if (!c && *match == len)
+-			return true;
++		case '\0':
++			/* @match_name has ended. Has @var_name too? */
++			return (*match == len);
+ 
+-		if (c != u)
++		default:
++			/*
++			 * We've reached a non-wildcard char in @match_name.
++			 * Continue only if there's an identical character in
++			 * @var_name.
++			 */
++			if (*match < len && c == var_name[*match])
++				continue;
+ 			return false;
+-
+-		if (!c)
+-			return true;
++		}
+ 	}
+-	return true;
+ }
+ 
+ bool
+-- 
+2.7.3
