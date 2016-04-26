@@ -1,86 +1,115 @@
-From: Julius Werner <jwerner-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH] block: partitions: efi: Always check for alternative GPT
- at end of drive
-Date: Tue, 26 Apr 2016 13:13:04 -0700
-Message-ID: <CAODwPW9YOS=xVmiHUSKMJi3CBPeQp-afEGRbuRLCg7RHVmS_tQ@mail.gmail.com>
+From: "Elliott, Robert (Persistent Memory)" <elliott@hpe.com>
+Subject: RE: [PATCH] block: partitions: efi: Always check for alternative
+ GPT at end of drive
+Date: Tue, 26 Apr 2016 20:34:14 +0000
+Message-ID: <94D0CD8314A33A4D9D801C0FE68B402963904365@G4W3296.americas.hpqcorp.net>
 References: <1461632806-5946-1-git-send-email-jwerner@chromium.org>
-	<20160426102014.o7k77uzi32h73y3b@ws.net.home>
-	<20160426183353.GB16601@linux-uzut.site>
+ <20160426102014.o7k77uzi32h73y3b@ws.net.home>
+ <20160426183353.GB16601@linux-uzut.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160426183353.GB16601-95RKjC4jbl+7r5TWoziOLQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Davidlohr Bueso <dave-h16yJtLeMjHk1uMJSBkQmQ@public.gmane.org>
-Cc: Karel Zak <kzak-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Julius Werner <jwerner-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Gwendal Grignou <gwendal-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160426183353.GB16601@linux-uzut.site>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Davidlohr Bueso <dave@stgolabs.net>, Karel Zak <kzak@redhat.com>
+Cc: Julius Werner <jwerner@chromium.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, Gwendal Grignou <gwendal@chromium.org>, Doug Anderson <dianders@chromium.org>
 List-Id: linux-efi@vger.kernel.org
 
->> I guess "force_gpt" (and "gpt" on kernel command line) exists to force
->> users to think and care about a reason why the device has unreadable
->> (broken) primary GPT header.
->
->
+
+
+> -----Original Message-----
+> From: linux-kernel-owner@vger.kernel.org [mailto:linux-kernel-
+> owner@vger.kernel.org] On Behalf Of Davidlohr Bueso
+> Sent: Tuesday, April 26, 2016 1:34 PM
+> To: Karel Zak <kzak@redhat.com>
+> Cc: Julius Werner <jwerner@chromium.org>; linux-efi@vger.kernel.org;
+> linux-kernel@vger.kernel.org; linux-block@vger.kernel.org; Gwendal
+> Grignou <gwendal@chromium.org>; Doug Anderson <dianders@chromium.org>
+> Subject: Re: [PATCH] block: partitions: efi: Always check for
+> alternative GPT at end of drive
+> 
+> On Tue, 26 Apr 2016, Karel Zak wrote:
+> 
+> >On Mon, Apr 25, 2016 at 06:06:46PM -0700, Julius Werner wrote:
+> >> The GUID Partiton Table layout maintains two synonymous partition
+> >> tables on a block device, one starting in sector 1 and one in the
+> >> very last sectors of the block device. This is useful if one of
+> >> the tables gets
+> >> accidentally corrupted (e.g. through a partial write because of an
+> >> unexpected power loss).
+> >>
+> >> Linux normally only boots if the primary GPT is valid. It will not
+> >> even try to find the alternative GPT to an invalid primary one
+> >> unless the "gpt" command line option forces more aggressive
+> >> detection. This doesn't
+> >> really make any sense... if the "gpt" option is not set, the code
+> >> validates the protective or hybrid MBR in sector 0 anyway before
+> >> it even starts looking for the actual GPTs. If we get to the point
+> >> where a valid proctective or hybrid MBR was found but the primary
+> >> GPT was not found (valid), checking the alternative GPT is our 
+> >> best bet: we know that this
+> 
+> 'best bet' in a kernel is not enough :) Which is why userland tools
+> can fix and/or do any sort of crazy stuff with the backup and recover
+> the primary etc etc.
+
+Drive blocks go bad; the redundant GPTs are there to let the
+system keep booting and running if that happens.
+
+Rewriting the bad GPTs is what should require user intervention.
+
+> 
+> >> block device is meant to use GPT (because any other partitioning
+> system
+> >> would've presumably overwritten sector 0), and we know that if the
+> >> alternative GPT is valid it should contain more accurate
+> information
+> >> than parsing the protective/hybrid MBR with msdos_partition()
+> would
+> >> yield (which would otherwise be what happens next).
+> 
+> >I guess "force_gpt" (and "gpt" on kernel command line) exists to
+> >force users to think and care about a reason why the device has
+> >unreadable (broken) primary GPT header.
+> 
 > Yes, from find_valid_gpt():
->
-> * If the Primary GPT header is not valid, the Alternate GPT header
-> * is not checked unless the 'gpt' kernel command line option is passed.
-> * This protects against devices which misreport their size, and forces
-> * the user to decide to use the Alternate GPT.
->
+> 
+>  * If the Primary GPT header is not valid, the Alternate GPT header
+>  * is not checked unless the 'gpt' kernel command line option is
+> passed.
+>  * This protects against devices which misreport their size, and
+> forces
+>  * the user to decide to use the Alternate GPT.
+> 
 > ... so users are at least forced in some way to think about this.
-
-Are you sure that not recognizing the device at all (rather than
-spitting a warning and using the still valid information we have, as
-it would do with my patch) is better for the user? This does not just
-apply to the root device, after all... GPTs on any (possibly external)
-medium will not be recognized if the primary table is broken. If a
-novice user just wants to read a slightly corrupted USB stick on his
-Ubuntu desktop, he has to dig through dmesg to find the reason it
-doesn't auto-mount, then figure out somehow that he has to add "gpt"
-to his command line (which the error messages don't allude to in any
-way), and reboot the whole system to make it apply.
-
-I agree that broken GPTs should be fixed, of course. But unless you
-want the kernel to fix them itself, the only option is to spew a
-warning and let some userspace tool look for that. With this patch,
-any distro would be free to add a simple 'if dmesg | grep "Primary GPT
-is invalid"; then parted --whatever-you-need-to-pass-to-fix-it; fi'
-init script. But without it, you're going to throw the user to a grub
-prompt or worse (e.g. what if it's a phone or something?), possibly
-cutting off his only source of internet access and expecting him to
-figure out the magic option he needs to make it work again on his own.
-
-Another argument is that GPTs mostly break on update... disks
-(usually) don't just corrupt themselves randomly. If your primary GPT
-is broken but the secondary is valid, you're probably fine until you
-try to repartition the device again, at which point any good
-partitioning tool will detect and fix the problem before it let's you
-make any more changes anyway.
-
->> It seems like bad (and dangerous) idea to silently ignore corrupted
->> primary GTP header and boot from such device.
->
->
+> 
+> >It seems like bad (and dangerous) idea to silently ignore corrupted
+> >primary GTP header and boot from such device.
+> 
 > Yeah, there's no way in hell I trust a backup gpt in kernel space.
 > We simply have no way of distinguishing between good and bad devices.
-
-I'm not sure what you're getting at here. The alternative GPT is just
-as trustworthy and as protected by checksums as the primary. If it's
-there, and it's valid, and you had a valid PMBR, I don't see how
-there's any realistic chance that this is not a GPT device.
-
->> And note that alternative GPT header and the end of the device is a
->> just guess. The proper location of the alternative header is specified
->> with-in primary header (pgpt->alternate_lba). The header at the end of
->> the device (as used for "force_gpt") is a fallback solution only.
 >
+> >And note that alternative GPT header and the end of the device is a
+> >just guess. The proper location of the alternative header is
+> >specified with-in primary header (pgpt->alternate_lba). The header
+> >at the end of
+> >the device (as used for "force_gpt") is a fallback solution only.
+> 
 > And this only illustrates the ambiguity of the backup.
 
-The GPT specification mandates the alternative GPT header to be in the
-last sector on disk. That is the only proper and valid location...
-pgpt->alternative_lba is just a redundant aid to double-check it. If
-it's not there (maybe because you dd'ed a disk onto a
-differently-sized disk), that is just plain incorrect. Sure, it
-happens, but that's fine... in that case this code just won't find a
-valid GPT at the end and fail. But if it does find a GPT, and it is
-valid, I really don't see why we shouldn't just use it.
+The UEFI specification is not ambiguous - you should always look
+for the backup GPT Header at the last LBA:
+
+"Two GPT Header structures are stored on the device: the primary
+and the backup. The primary GPT Header must be located in LBA 1
+(i.e., the second logical block), and the backup GPT Header must
+be located in the last LBA of the device."
+
+If the primary GPT Header is corrupted (e.g., CRC is bad), you
+cannot trust any fields in it, including the Alternate LBA field.
+The Alternate LBA field is there to help you tolerate failures 
+while growing or shrinking the block device size (not important
+for individual physical drives, but an issue for logical drives
+presented by RAID controllers).
