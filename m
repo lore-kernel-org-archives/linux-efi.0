@@ -1,123 +1,50 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 02/40] efi/arm*: Drop writable mapping of the UEFI System table
-Date: Mon, 25 Apr 2016 21:06:34 +0100
-Message-ID: <1461614832-17633-3-git-send-email-matt@codeblueprint.co.uk>
-References: <1461614832-17633-1-git-send-email-matt@codeblueprint.co.uk>
+From: Julius Werner <jwerner-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: [PATCH] block: partitions: efi: Always check for alternative GPT at end of drive
+Date: Mon, 25 Apr 2016 18:06:46 -0700
+Message-ID: <1461632806-5946-1-git-send-email-jwerner@chromium.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1461614832-17633-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+To: Davidlohr Bueso <dave-h16yJtLeMjHk1uMJSBkQmQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Gwendal Grignou <gwendal-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Julius Werner <jwerner-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+The GUID Partiton Table layout maintains two synonymous partition tables
+on a block device, one starting in sector 1 and one in the very last
+sectors of the block device. This is useful if one of the tables gets
+accidentally corrupted (e.g. through a partial write because of an
+unexpected power loss).
 
-Commit 2eec5dedf770 ("efi/arm-init: Use read-only early mappings")
-updated the early ARM UEFI init code to create the temporary, early
-mapping of the UEFI System table using read-only attributes, as a
-hardening measure against inadvertent modification.
+Linux normally only boots if the primary GPT is valid. It will not even
+try to find the alternative GPT to an invalid primary one unless the
+"gpt" command line option forces more aggressive detection. This doesn't
+really make any sense... if the "gpt" option is not set, the code
+validates the protective or hybrid MBR in sector 0 anyway before it even
+starts looking for the actual GPTs. If we get to the point where a valid
+proctective or hybrid MBR was found but the primary GPT was not found
+(valid), checking the alternative GPT is our best bet: we know that this
+block device is meant to use GPT (because any other partitioning system
+would've presumably overwritten sector 0), and we know that if the
+alternative GPT is valid it should contain more accurate information
+than parsing the protective/hybrid MBR with msdos_partition() would
+yield (which would otherwise be what happens next).
 
-However, this still leaves the permanent, writable mapping of the UEFI
-System table, which is only ever referenced during invocations of UEFI
-Runtime Services, at which time the UEFI virtual mapping is available,
-which also covers the system table. (This is guaranteed by the fact that
-SetVirtualAddressMap(), which is a runtime service itself, converts
-various entries in the table to their virtual equivalents, which implies
-that the table must be covered by a RuntimeServicesData region that has
-the EFI_MEMORY_RUNTIME attribute.)
-
-So instead of creating this permanent mapping, record the virtual address
-of the system table inside the UEFI virtual mapping, and dereference that
-when accessing the table. This protects the contents of the system table
-from inadvertent (or deliberate) modification when no UEFI Runtime
-Services calls are in progress.
-
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Julius Werner <jwerner-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 ---
- drivers/firmware/efi/arm-init.c    |  2 ++
- drivers/firmware/efi/arm-runtime.c | 27 ++++++++++++++++-----------
- 2 files changed, 18 insertions(+), 11 deletions(-)
+ block/partitions/efi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 8714f8c271ba..008ed1993b72 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -85,6 +85,8 @@ static int __init uefi_init(void)
- 			efi.systab->hdr.revision >> 16,
- 			efi.systab->hdr.revision & 0xffff);
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index 26cb624..0d4ca8e 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -625,7 +625,7 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+ 		good_agpt = is_gpt_valid(state,
+ 					 le64_to_cpu(pgpt->alternate_lba),
+ 					 &agpt, &aptes);
+-        if (!good_agpt && force_gpt)
++        if (!good_agpt)
+                 good_agpt = is_gpt_valid(state, lastlba, &agpt, &aptes);
  
-+	efi.runtime_version = efi.systab->hdr.revision;
-+
- 	/* Show what we know for posterity */
- 	c16 = early_memremap_ro(efi_to_phys(efi.systab->fw_vendor),
- 				sizeof(vendor) * sizeof(efi_char16_t));
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 16c7d2a71156..771750df6b7d 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -42,10 +42,12 @@ static struct mm_struct efi_mm = {
- static bool __init efi_virtmap_init(void)
- {
- 	efi_memory_desc_t *md;
-+	bool systab_found;
- 
- 	efi_mm.pgd = pgd_alloc(&efi_mm);
- 	init_new_context(NULL, &efi_mm);
- 
-+	systab_found = false;
- 	for_each_efi_memory_desc(&memmap, md) {
- 		phys_addr_t phys = md->phys_addr;
- 		int ret;
-@@ -64,8 +66,20 @@ static bool __init efi_virtmap_init(void)
- 				&phys, ret);
- 			return false;
- 		}
-+		/*
-+		 * If this entry covers the address of the UEFI system table,
-+		 * calculate and record its virtual address.
-+		 */
-+		if (efi_system_table >= phys &&
-+		    efi_system_table < phys + (md->num_pages * EFI_PAGE_SIZE)) {
-+			efi.systab = (void *)(unsigned long)(efi_system_table -
-+							     phys + md->virt_addr);
-+			systab_found = true;
-+		}
- 	}
--	return true;
-+	if (!systab_found)
-+		pr_err("No virtual mapping found for the UEFI System Table\n");
-+	return systab_found;
- }
- 
- /*
-@@ -99,15 +113,8 @@ static int __init arm_enable_runtime_services(void)
- 	memmap.map_end = memmap.map + mapsize;
- 	efi.memmap = &memmap;
- 
--	efi.systab = (__force void *)ioremap_cache(efi_system_table,
--						   sizeof(efi_system_table_t));
--	if (!efi.systab) {
--		pr_err("Failed to remap EFI System Table\n");
--		return -ENOMEM;
--	}
--
- 	if (!efi_virtmap_init()) {
--		pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
-+		pr_err("UEFI virtual mapping missing or invalid -- runtime services will not be available\n");
- 		return -ENOMEM;
- 	}
- 
-@@ -115,8 +122,6 @@ static int __init arm_enable_runtime_services(void)
- 	efi_native_runtime_setup();
- 	set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
- 
--	efi.runtime_version = efi.systab->hdr.revision;
--
- 	return 0;
- }
- early_initcall(arm_enable_runtime_services);
+         /* The obviously unsuccessful case */
 -- 
-2.7.3
+2.1.2
