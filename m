@@ -1,8 +1,8 @@
 From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: [RFC PATCH v1 04/18] x86: Add the Secure Memory Encryption cpu
- feature
-Date: Tue, 26 Apr 2016 17:56:35 -0500
-Message-ID: <20160426225635.13567.39381.stgit@tlendack-t1.amdoffice.net>
+Subject: [RFC PATCH v1 05/18] x86: Handle reduction in physical address size
+ with SME
+Date: Tue, 26 Apr 2016 17:56:47 -0500
+Message-ID: <20160426225647.13567.16101.stgit@tlendack-t1.amdoffice.net>
 References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -18,63 +18,35 @@ Cc: Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arn
  Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-Update the cpu features to include identifying and reporting on the
-Secure Memory Encryption feature.
+When System Memory Encryption (SME) is enabled, the physical address
+space is reduced. Adjust the x86_phys_bits value to reflect this
+reduction.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/include/asm/cpufeature.h  |    1 +
- arch/x86/include/asm/cpufeatures.h |    5 ++++-
- arch/x86/kernel/cpu/scattered.c    |    1 +
- 3 files changed, 6 insertions(+), 1 deletion(-)
+ arch/x86/kernel/cpu/common.c |    2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/arch/x86/include/asm/cpufeature.h b/arch/x86/include/asm/cpufeature.h
-index 07c942d..e27e352 100644
---- a/arch/x86/include/asm/cpufeature.h
-+++ b/arch/x86/include/asm/cpufeature.h
-@@ -27,6 +27,7 @@ enum cpuid_leafs
- 	CPUID_6_EAX,
- 	CPUID_8000_000A_EDX,
- 	CPUID_7_ECX,
-+	CPUID_8000_001F_EAX,
- };
+diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
+index 6bfa36d..b49e7fc 100644
+--- a/arch/x86/kernel/cpu/common.c
++++ b/arch/x86/kernel/cpu/common.c
+@@ -43,6 +43,7 @@
+ #include <asm/pat.h>
+ #include <asm/microcode.h>
+ #include <asm/microcode_intel.h>
++#include <asm/mem_encrypt.h>
  
- #ifdef CONFIG_X86_FEATURE_NAMES
-diff --git a/arch/x86/include/asm/cpufeatures.h b/arch/x86/include/asm/cpufeatures.h
-index 47b5056..4aea205 100644
---- a/arch/x86/include/asm/cpufeatures.h
-+++ b/arch/x86/include/asm/cpufeatures.h
-@@ -12,7 +12,7 @@
- /*
-  * Defines x86 CPU feature bits
-  */
--#define NCAPINTS	17	/* N 32-bit words worth of info */
-+#define NCAPINTS	18	/* N 32-bit words worth of info */
- #define NBUGINTS	1	/* N 32-bit bug flags */
+ #ifdef CONFIG_X86_LOCAL_APIC
+ #include <asm/uv/uv.h>
+@@ -722,6 +723,7 @@ void get_cpu_cap(struct cpuinfo_x86 *c)
  
- /*
-@@ -282,6 +282,9 @@
- #define X86_FEATURE_PKU		(16*32+ 3) /* Protection Keys for Userspace */
- #define X86_FEATURE_OSPKE	(16*32+ 4) /* OS Protection Keys Enable */
- 
-+/* AMD SME Feature Identification, CPUID level 0x8000001f (eax), word 17 */
-+#define X86_FEATURE_SME		(17*32+ 0) /* Secure Memory Encryption support */
-+
- /*
-  * BUG word(s)
-  */
-diff --git a/arch/x86/kernel/cpu/scattered.c b/arch/x86/kernel/cpu/scattered.c
-index 8cb57df..d86d9a5 100644
---- a/arch/x86/kernel/cpu/scattered.c
-+++ b/arch/x86/kernel/cpu/scattered.c
-@@ -37,6 +37,7 @@ void init_scattered_cpuid_features(struct cpuinfo_x86 *c)
- 		{ X86_FEATURE_HW_PSTATE,	CR_EDX, 7, 0x80000007, 0 },
- 		{ X86_FEATURE_CPB,		CR_EDX, 9, 0x80000007, 0 },
- 		{ X86_FEATURE_PROC_FEEDBACK,	CR_EDX,11, 0x80000007, 0 },
-+		{ X86_FEATURE_SME,		CR_EAX, 0, 0x8000001f, 0 },
- 		{ 0, 0, 0, 0, 0 }
- 	};
- 
+ 		c->x86_virt_bits = (eax >> 8) & 0xff;
+ 		c->x86_phys_bits = eax & 0xff;
++		c->x86_phys_bits -= sme_get_me_loss();
+ 		c->x86_capability[CPUID_8000_0008_EBX] = ebx;
+ 	}
+ #ifdef CONFIG_X86_32
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
