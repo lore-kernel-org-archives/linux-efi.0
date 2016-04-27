@@ -1,37 +1,189 @@
-From: Andy Lutomirski <luto@amacapital.net>
-Subject: Re: [RFC PATCH v1 01/18] x86: Set the write-protect cache mode for
- AMD processors
-Date: Wed, 27 Apr 2016 07:47:44 -0700
-Message-ID: <CALCETrV+JzPZjrrqkhWSVfvKQt62Aq8NSW=ZvfdiAi8XKoLi8A@mail.gmail.com>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <20160426225604.13567.55443.stgit@tlendack-t1.amdoffice.net>
- <CALCETrU9ozp1mBKG-P88cKRJRY5bifn2Ab__AZcn5b33n3j2cg@mail.gmail.com> <5720D066.7080409@amd.com>
+From: =?UTF-8?Q?M=c3=b4she_van_der_Sterre?= <me@moshe.nl>
+Subject: Re: [PATCH] x86/efi-bgrt: Switch all pr_err() to pr_debug() for
+ invalid BGRT
+Date: Wed, 27 Apr 2016 16:57:41 +0200
+Message-ID: <5720D365.5080601@moshe.nl>
+References: <1461761412-16046-1-git-send-email-jwboyer@fedoraproject.org>
+ <5720BE0B.8080605@moshe.nl>
+ <CA+5PVA71vCaf+a=6cEqQxe4iUQeAK5NN-s09bMDa6_NbXZfMNw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arch-owner@vger.kernel.org>
-In-Reply-To: <5720D066.7080409@amd.com>
-Sender: linux-arch-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch <linux-arch@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, kvm list <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, X86 ML <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kasan-dev <kasan-dev@googlegroups.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@li>
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CA+5PVA71vCaf+a=6cEqQxe4iUQeAK5NN-s09bMDa6_NbXZfMNw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Josh Boyer <jwboyer@fedoraproject.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "Linux-Kernel@Vger. Kernel. Org" <linux-kernel@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 27, 2016 at 7:44 AM, Tom Lendacky <thomas.lendacky@amd.com> wrote:
-> On 04/27/2016 09:33 AM, Andy Lutomirski wrote:
->> On Tue, Apr 26, 2016 at 3:56 PM, Tom Lendacky <thomas.lendacky@amd.com> wrote:
->>> For AMD processors that support PAT, set the write-protect cache mode
->>> (_PAGE_CACHE_MODE_WP) entry to the actual write-protect value (x05).
+
+On 04/27/2016 03:56 PM, Josh Boyer wrote:
+> On Wed, Apr 27, 2016 at 9:26 AM, M=C3=B4she van der Sterre <me@moshe.=
+nl> wrote:
+>> (additionally CC-ing Josh Triplett)
+> Thanks for doing so.  I completely forgot.
+>
+>> On 04/27/2016 02:50 PM, Josh Boyer wrote:
+>>> The promise of pretty boot splashes from firmware via BGRT was at
+>>> best only that; a promise.  The kernel diligently checks to make
+>>> sure the BGRT data firmware gives it is valid, and dutifully warns
+>>> the user when it isn't.  However, it does so via the pr_err log
+>>> level which seems unnecessary.  The user cannot do anything about
+>>> this and there really isn't an error on the part of Linux to
+>>> correct.
+>>>
+>>> This lowers the log level by using pr_debug instead.  Users will
+>>> no longer have their boot process uglified by the kernel reminding
+>>> us that firmware can and often is broken.  Ironic, considering
+>>> BGRT is supposed to make boot pretty to begin with.
+>> Hi Josh Boyer,
 >>
->> What's the purpose of using the WP memory type?
+>> Are you seeing these errors somewhere? I recently fixed the error "I=
+gnoring
+> We have a user that reports seeing:
 >
-> The WP memory type is used for encrypting or decrypting data "in place".
-> The use of the WP on the source data will prevent any of the source
-> data from being cached.  Refer to section 7.10.8 "Encrypt-in-Place" in
-> the AMD64 APM link provided in the cover letter.
+> "Ignoring BGRT: Invalid version 0 (expected 1)"
 >
-> This memory type will be used in subsequent patches for this purpose.
+> on a Lenovo T430 machine.  We've had a few other scattered reports on
+> various machine types since BGRT went into the kernel as well.
+Ok. With this information, I think pr_debug is indeed better.
+>> BGRT: invalid status 0 (expected 1)" because Linux apparently interp=
+reted
+>> that part of the specification differently than others.
+>> If that's the error you are seeing, perhaps your problem is already =
+solved
+>> in recent kernels? (fixed in commit 66dbe99)
+>>
+>> Personally I agree that BGRT messages should not annoy actual users =
+of
+>> production firmwares.
+>> However I also agree with the previous consensus that these checks (=
+for
+>> actual spec violations) should remain pr_err unless some production =
+firmware
+>> is triggering them. What do you think?
+> Production firmware is literally the only firmware end users will eve=
+r
+> see.  I don't see much point in leaving scary error messages in the
+> kernel to complain about things the user has no chance of fixing or i=
+n
+> almost all cases even reporting to people who could fix it.
+In principle I can understand the wish to show big scary error messages=
+=20
+to firmware developers doing it wrong.
 
-OK.
+With that said:
+The patch looks good to me, but Josh Triplett and Matt Fleming their=20
+opinions might be better informed than mine.
 
-Why AMD-only?  I thought Intel supported WP, too.
-
---Andy
+> josh
+>
+>>> Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
+>>> ---
+>>>    arch/x86/platform/efi/efi-bgrt.c | 18 +++++++++---------
+>>>    1 file changed, 9 insertions(+), 9 deletions(-)
+>>>
+>>> diff --git a/arch/x86/platform/efi/efi-bgrt.c
+>>> b/arch/x86/platform/efi/efi-bgrt.c
+>>> index a2433817c987..6f70d2ac8029 100644
+>>> --- a/arch/x86/platform/efi/efi-bgrt.c
+>>> +++ b/arch/x86/platform/efi/efi-bgrt.c
+>>> @@ -43,40 +43,40 @@ void __init efi_bgrt_init(void)
+>>>                  return;
+>>>          if (bgrt_tab->header.length < sizeof(*bgrt_tab)) {
+>>> -               pr_err("Ignoring BGRT: invalid length %u (expected
+>>> %zu)\n",
+>>> +               pr_debug("Ignoring BGRT: invalid length %u (expecte=
+d
+>>> %zu)\n",
+>>>                         bgrt_tab->header.length, sizeof(*bgrt_tab))=
+;
+>>>                  return;
+>>>          }
+>>>          if (bgrt_tab->version !=3D 1) {
+>>> -               pr_err("Ignoring BGRT: invalid version %u (expected=
+ 1)\n",
+>>> +               pr_debug("Ignoring BGRT: invalid version %u (expect=
+ed
+>>> 1)\n",
+>>>                         bgrt_tab->version);
+>>>                  return;
+>>>          }
+>>>          if (bgrt_tab->status & 0xfe) {
+>>> -               pr_err("Ignoring BGRT: reserved status bits are non=
+-zero
+>>> %u\n",
+>>> +               pr_debug("Ignoring BGRT: reserved status bits are n=
+on-zero
+>>> %u\n",
+>>>                         bgrt_tab->status);
+>>>                  return;
+>>>          }
+>>>          if (bgrt_tab->image_type !=3D 0) {
+>>> -               pr_err("Ignoring BGRT: invalid image type %u (expec=
+ted
+>>> 0)\n",
+>>> +               pr_debug("Ignoring BGRT: invalid image type %u (exp=
+ected
+>>> 0)\n",
+>>>                         bgrt_tab->image_type);
+>>>                  return;
+>>>          }
+>>>          if (!bgrt_tab->image_address) {
+>>> -               pr_err("Ignoring BGRT: null image address\n");
+>>> +               pr_debug("Ignoring BGRT: null image address\n");
+>>>                  return;
+>>>          }
+>>>          image =3D memremap(bgrt_tab->image_address, sizeof(bmp_hea=
+der),
+>>> MEMREMAP_WB);
+>>>          if (!image) {
+>>> -               pr_err("Ignoring BGRT: failed to map image header
+>>> memory\n");
+>>> +               pr_debug("Ignoring BGRT: failed to map image header
+>>> memory\n");
+>>>                  return;
+>>>          }
+>>>          memcpy(&bmp_header, image, sizeof(bmp_header));
+>>>          memunmap(image);
+>>>          if (bmp_header.id !=3D 0x4d42) {
+>>> -               pr_err("Ignoring BGRT: Incorrect BMP magic number 0=
+x%x
+>>> (expected 0x4d42)\n",
+>>> +               pr_debug("Ignoring BGRT: Incorrect BMP magic number=
+ 0x%x
+>>> (expected 0x4d42)\n",
+>>>                          bmp_header.id);
+>>>                  return;
+>>>          }
+>>> @@ -84,14 +84,14 @@ void __init efi_bgrt_init(void)
+>>>          bgrt_image =3D kmalloc(bgrt_image_size, GFP_KERNEL | __GFP=
+_NOWARN);
+>>>          if (!bgrt_image) {
+>>> -               pr_err("Ignoring BGRT: failed to allocate memory fo=
+r image
+>>> (wanted %zu bytes)\n",
+>>> +               pr_debug("Ignoring BGRT: failed to allocate memory =
+for
+>>> image (wanted %zu bytes)\n",
+>>>                         bgrt_image_size);
+>>>                  return;
+>>>          }
+>>>          image =3D memremap(bgrt_tab->image_address, bmp_header.siz=
+e,
+>>> MEMREMAP_WB);
+>>>          if (!image) {
+>>> -               pr_err("Ignoring BGRT: failed to map image memory\n=
+");
+>>> +               pr_debug("Ignoring BGRT: failed to map image memory=
+\n");
+>>>                  kfree(bgrt_image);
+>>>                  bgrt_image =3D NULL;
+>>>                  return;
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
