@@ -1,55 +1,40 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [RFC PATCH v1 02/18] x86: Secure Memory Encryption (SME) build
- enablement
-Date: Wed, 27 Apr 2016 17:30:10 +0200
-Message-ID: <20160427153010.GA7861@amd>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [RFC PATCH v1 01/18] x86: Set the write-protect cache mode for
+ AMD processors
+Date: Wed, 27 Apr 2016 17:31:58 +0200
+Message-ID: <20160427153158.GJ21011@pd.tnic>
 References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <20160426225614.13567.47487.stgit@tlendack-t1.amdoffice.net>
- <20160322130150.GB16528@xo-6d-61-c0.localdomain>
- <5720D810.9060602@amd.com>
+ <20160426225604.13567.55443.stgit@tlendack-t1.amdoffice.net>
+ <CALCETrU9ozp1mBKG-P88cKRJRY5bifn2Ab__AZcn5b33n3j2cg@mail.gmail.com>
+ <5720D066.7080409@amd.com>
+ <CALCETrV+JzPZjrrqkhWSVfvKQt62Aq8NSW=ZvfdiAi8XKoLi8A@mail.gmail.com>
+ <5720D546.6050105@amd.com>
+ <CALCETrVcS-H9BtCevT4=Luo2sK0A3cbBs7Rs=RaBr2yzOzxp4w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <5720D810.9060602@amd.com>
+In-Reply-To: <CALCETrVcS-H9BtCevT4=Luo2sK0A3cbBs7Rs=RaBr2yzOzxp4w@mail.gmail.com>
 Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+To: Andy Lutomirski <luto@amacapital.net>
+Cc: Tom Lendacky <thomas.lendacky@amd.com>, linux-arch <linux-arch@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, kvm list <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, X86 ML <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kasan-dev <kasan-dev@googlegroups.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tg>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed 2016-04-27 10:17:36, Tom Lendacky wrote:
-> On 03/22/2016 08:01 AM, Pavel Machek wrote:
-> > On Tue 2016-04-26 17:56:14, Tom Lendacky wrote:
-> >> Provide the Kconfig support to build the SME support in the kernel.
-> > 
-> > 
-> > Probably should go last in the series?
-> 
-> Yeah, I've seen arguments both ways for this. Doing it early
-> allows compiling and testing with it enabled and doing it late
-> doesn't enable anything until it's all there. I just chose the
-> former.
+On Wed, Apr 27, 2016 at 08:12:56AM -0700, Andy Lutomirski wrote:
+> I think there are some errata
 
-Doing it early will break bisect, right?
-							Pavel
+Isn't that addressed by the first branch of the if-test in pat_init():
 
-> >> +config AMD_MEM_ENCRYPT
-> >> +	bool "Secure Memory Encryption support for AMD"
-> >> +	depends on X86_64 && CPU_SUP_AMD
-> >> +	---help---
-> >> +	  Say yes to enable the encryption of system memory. This requires
-> >> +	  an AMD processor that supports Secure Memory Encryption (SME).
-> >> +	  The encryption of system memory is disabled by default but can be
-> >> +	  enabled with the mem_encrypt=on command line option.
-> >> +
-> >>  # Common NUMA Features
-> >>  config NUMA
-> >>  	bool "Numa Memory Allocation and Scheduler Support"
-> > 
+        if ((c->x86_vendor == X86_VENDOR_INTEL) &&
+            (((c->x86 == 0x6) && (c->x86_model <= 0xd)) ||
+             ((c->x86 == 0xf) && (c->x86_model <= 0x6)))) {
+
 
 -- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
