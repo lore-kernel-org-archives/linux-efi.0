@@ -1,64 +1,99 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [RFC PATCH v1 03/18] x86: Secure Memory Encryption (SME) support
-Date: Tue, 22 Mar 2016 14:03:54 +0100
-Message-ID: <20160322130354.GC16528@xo-6d-61-c0.localdomain>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <20160426225626.13567.72425.stgit@tlendack-t1.amdoffice.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160426225626.13567.72425.stgit@tlendack-t1.amdoffice.net>
-Sender: linux-doc-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+From: Josh Boyer <jwboyer@fedoraproject.org>
+Subject: [PATCH] x86/efi-bgrt: Switch all pr_err() to pr_debug() for invalid BGRT
+Date: Wed, 27 Apr 2016 08:50:12 -0400
+Message-ID: <1461761412-16046-1-git-send-email-jwboyer@fedoraproject.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue 2016-04-26 17:56:26, Tom Lendacky wrote:
-> Provide support for Secure Memory Encryption (SME). This initial support
-> defines the memory encryption mask as a variable for quick access and an
-> accessor for retrieving the number of physical addressing bits lost if
-> SME is enabled.
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/include/asm/mem_encrypt.h |   37 ++++++++++++++++++++++++++++++++++++
->  arch/x86/kernel/Makefile           |    2 ++
->  arch/x86/kernel/mem_encrypt.S      |   29 ++++++++++++++++++++++++++++
->  arch/x86/kernel/x8664_ksyms_64.c   |    6 ++++++
->  4 files changed, 74 insertions(+)
->  create mode 100644 arch/x86/include/asm/mem_encrypt.h
->  create mode 100644 arch/x86/kernel/mem_encrypt.S
-> 
-> index 0000000..ef7f325
-> --- /dev/null
-> +++ b/arch/x86/kernel/mem_encrypt.S
-> @@ -0,0 +1,29 @@
-> +/*
-> + * AMD Memory Encryption Support
-> + *
-> + * Copyright (C) 2016 Advanced Micro Devices, Inc.
-> + *
-> + * Author: Tom Lendacky <thomas.lendacky@amd.com>
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License version 2 as
-> + * published by the Free Software Foundation.
-> + */
-> +
-> +#include <linux/linkage.h>
-> +
-> +	.text
-> +	.code64
-> +ENTRY(sme_get_me_loss)
-> +	xor	%rax, %rax
-> +	mov	sme_me_loss(%rip), %al
-> +	ret
-> +ENDPROC(sme_get_me_loss)
+The promise of pretty boot splashes from firmware via BGRT was at
+best only that; a promise.  The kernel diligently checks to make
+sure the BGRT data firmware gives it is valid, and dutifully warns
+the user when it isn't.  However, it does so via the pr_err log
+level which seems unnecessary.  The user cannot do anything about
+this and there really isn't an error on the part of Linux to
+correct.
 
-Does this really need to be implemented in assembly?
+This lowers the log level by using pr_debug instead.  Users will
+no longer have their boot process uglified by the kernel reminding
+us that firmware can and often is broken.  Ironic, considering
+BGRT is supposed to make boot pretty to begin with.
 
+Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
+---
+ arch/x86/platform/efi/efi-bgrt.c | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
 
+diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
+index a2433817c987..6f70d2ac8029 100644
+--- a/arch/x86/platform/efi/efi-bgrt.c
++++ b/arch/x86/platform/efi/efi-bgrt.c
+@@ -43,40 +43,40 @@ void __init efi_bgrt_init(void)
+ 		return;
+ 
+ 	if (bgrt_tab->header.length < sizeof(*bgrt_tab)) {
+-		pr_err("Ignoring BGRT: invalid length %u (expected %zu)\n",
++		pr_debug("Ignoring BGRT: invalid length %u (expected %zu)\n",
+ 		       bgrt_tab->header.length, sizeof(*bgrt_tab));
+ 		return;
+ 	}
+ 	if (bgrt_tab->version != 1) {
+-		pr_err("Ignoring BGRT: invalid version %u (expected 1)\n",
++		pr_debug("Ignoring BGRT: invalid version %u (expected 1)\n",
+ 		       bgrt_tab->version);
+ 		return;
+ 	}
+ 	if (bgrt_tab->status & 0xfe) {
+-		pr_err("Ignoring BGRT: reserved status bits are non-zero %u\n",
++		pr_debug("Ignoring BGRT: reserved status bits are non-zero %u\n",
+ 		       bgrt_tab->status);
+ 		return;
+ 	}
+ 	if (bgrt_tab->image_type != 0) {
+-		pr_err("Ignoring BGRT: invalid image type %u (expected 0)\n",
++		pr_debug("Ignoring BGRT: invalid image type %u (expected 0)\n",
+ 		       bgrt_tab->image_type);
+ 		return;
+ 	}
+ 	if (!bgrt_tab->image_address) {
+-		pr_err("Ignoring BGRT: null image address\n");
++		pr_debug("Ignoring BGRT: null image address\n");
+ 		return;
+ 	}
+ 
+ 	image = memremap(bgrt_tab->image_address, sizeof(bmp_header), MEMREMAP_WB);
+ 	if (!image) {
+-		pr_err("Ignoring BGRT: failed to map image header memory\n");
++		pr_debug("Ignoring BGRT: failed to map image header memory\n");
+ 		return;
+ 	}
+ 
+ 	memcpy(&bmp_header, image, sizeof(bmp_header));
+ 	memunmap(image);
+ 	if (bmp_header.id != 0x4d42) {
+-		pr_err("Ignoring BGRT: Incorrect BMP magic number 0x%x (expected 0x4d42)\n",
++		pr_debug("Ignoring BGRT: Incorrect BMP magic number 0x%x (expected 0x4d42)\n",
+ 			bmp_header.id);
+ 		return;
+ 	}
+@@ -84,14 +84,14 @@ void __init efi_bgrt_init(void)
+ 
+ 	bgrt_image = kmalloc(bgrt_image_size, GFP_KERNEL | __GFP_NOWARN);
+ 	if (!bgrt_image) {
+-		pr_err("Ignoring BGRT: failed to allocate memory for image (wanted %zu bytes)\n",
++		pr_debug("Ignoring BGRT: failed to allocate memory for image (wanted %zu bytes)\n",
+ 		       bgrt_image_size);
+ 		return;
+ 	}
+ 
+ 	image = memremap(bgrt_tab->image_address, bmp_header.size, MEMREMAP_WB);
+ 	if (!image) {
+-		pr_err("Ignoring BGRT: failed to map image memory\n");
++		pr_debug("Ignoring BGRT: failed to map image memory\n");
+ 		kfree(bgrt_image);
+ 		bgrt_image = NULL;
+ 		return;
 -- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+2.5.5
