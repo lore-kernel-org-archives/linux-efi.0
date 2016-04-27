@@ -1,43 +1,41 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [RFC PATCH v1 00/18] x86: Secure Memory Encryption (AMD)
-Date: Wed, 27 Apr 2016 16:39:51 +0200
-Message-ID: <20160427143951.GH21011@pd.tnic>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v1 01/18] x86: Set the write-protect cache mode for
+ AMD processors
+Date: Wed, 27 Apr 2016 09:44:54 -0500
+Message-ID: <5720D066.7080409@amd.com>
 References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <20160322130058.GA16528@xo-6d-61-c0.localdomain>
- <20160427140520.GG21011@pd.tnic>
- <20160427143045.GA4718@amd>
+ <20160426225604.13567.55443.stgit@tlendack-t1.amdoffice.net>
+ <CALCETrU9ozp1mBKG-P88cKRJRY5bifn2Ab__AZcn5b33n3j2cg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20160427143045.GA4718@amd>
+In-Reply-To: <CALCETrU9ozp1mBKG-P88cKRJRY5bifn2Ab__AZcn5b33n3j2cg@mail.gmail.com>
 Sender: owner-linux-mm@kvack.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Tom Lendacky <thomas.lendacky@amd.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+To: Andy Lutomirski <luto@amacapital.net>
+Cc: linux-arch <linux-arch@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, kvm list <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, X86 ML <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kasan-dev <kasan-dev@googlegroups.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutro>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 27, 2016 at 04:30:45PM +0200, Pavel Machek wrote:
-> That does not answer the question. "Why would I want SME on my
-> system?".
+On 04/27/2016 09:33 AM, Andy Lutomirski wrote:
+> On Tue, Apr 26, 2016 at 3:56 PM, Tom Lendacky <thomas.lendacky@amd.com> wrote:
+>> For AMD processors that support PAT, set the write-protect cache mode
+>> (_PAGE_CACHE_MODE_WP) entry to the actual write-protect value (x05).
+> 
+> What's the purpose of using the WP memory type?
 
-Because your question wasn't formulated properly. Here's some text from
-the 0th mail which you could've found on your own:
+The WP memory type is used for encrypting or decrypting data "in place".
+The use of the WP on the source data will prevent any of the source
+data from being cached.  Refer to section 7.10.8 "Encrypt-in-Place" in
+the AMD64 APM link provided in the cover letter.
 
-"The following links provide additional detail:
+This memory type will be used in subsequent patches for this purpose.
 
-AMD Memory Encryption whitepaper:
-   http://amd-dev.wpengine.netdna-cdn.com/wordpress/media/2013/12/AMD_Memory_Encryption_Whitepaper_v7-Public.pdf
-"
+Thanks,
+Tom
 
-> And that answer should go to Documentation/.
-
-It will.
-
--- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
+> 
+> --Andy
+> 
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
