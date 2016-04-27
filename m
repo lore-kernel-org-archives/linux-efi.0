@@ -1,70 +1,62 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] block: partitions: efi: Always check for alternative GPT
- at end of drive
-Date: Wed, 27 Apr 2016 08:45:41 -0700
-Message-ID: <CAD=FV=WCZh-RuUghzwTkDKvVFjpLNR7RW6H_hNbS15ZqWeBjTg@mail.gmail.com>
-References: <1461632806-5946-1-git-send-email-jwerner@chromium.org>
-	<20160426102014.o7k77uzi32h73y3b@ws.net.home>
-	<20160426183353.GB16601@linux-uzut.site>
-	<94D0CD8314A33A4D9D801C0FE68B402963904365@G4W3296.americas.hpqcorp.net>
-	<20160426211547.GC16601@linux-uzut.site>
-	<CAMHSBOW7MBtpVPZdt8yGggUhxk_ca3U+w9Wc-vg5fX7G-jB6mQ@mail.gmail.com>
-	<20160427150913.m2vvhtriq27u65tk@ws.net.home>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [RFC PATCH v1 00/18] x86: Secure Memory Encryption (AMD)
+Date: Wed, 27 Apr 2016 17:47:57 +0200
+Message-ID: <20160427154757.GB8501@amd>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+ <20160322130058.GA16528@xo-6d-61-c0.localdomain>
+ <20160427140520.GG21011@pd.tnic>
+ <20160427143045.GA4718@amd>
+ <20160427143951.GH21011@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160427150913.m2vvhtriq27u65tk@ws.net.home>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Karel Zak <kzak@redhat.com>
-Cc: Gwendal Grignou <gwendal@chromium.org>, Davidlohr Bueso <dave@stgolabs.net>, "Elliott, Robert (Persistent Memory)" <elliott@hpe.com>, Julius Werner <jwerner@chromium.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20160427143951.GH21011@pd.tnic>
+Sender: owner-linux-mm@kvack.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Tom Lendacky <thomas.lendacky@amd.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
-
-On Wed, Apr 27, 2016 at 8:09 AM, Karel Zak <kzak@redhat.com> wrote:
-> On Tue, Apr 26, 2016 at 02:51:01PM -0700, Gwendal Grignou wrote:
->> Julius and I were looking at the code when we spotted the issue.
->>
->> As Julius said, "just pass a boot param", is not easy on certain
->> machines, like phone. It is not user friendly either.
->> The system won't boot at all, a typical user will have to do a full
->> reinstall to fix the error.
->
-> And how typical user will fix the problem with corrupted primary
-> header after successful boot? I mean, use alternative header (without
-> force_gpt) is a good idea if we know that user will not ignore the
-> problem. The current solution is to force user to do anything.
->
-> It would be nice to have support for this issue in userspace
-> and switch for example to single user mode, or so...
->
-> I'm also have doubts that printk() is the best way how to report
-> this issue to userspace if we want to trigger any action :-)
-
-Presumably:
-
-* We ended up in this situation because something (auto update,
-partition resizer, etc) was making changes to the GPT and got
-interrupted (power cycle, crash, etc).
-
-* The something that was making changes will run again after the
-system boots up.
-
-* The something that was making changes will presumably be smart
-enough to figure out how to fix things up.
-
-* If we can't even boot up, that something has no chance...
+On Wed 2016-04-27 16:39:51, Borislav Petkov wrote:
+> On Wed, Apr 27, 2016 at 04:30:45PM +0200, Pavel Machek wrote:
+> > That does not answer the question. "Why would I want SME on my
+> > system?".
+> 
+> Because your question wasn't formulated properly. Here's some text from
+> the 0th mail which you could've found on your own:
+> 
+> "The following links provide additional detail:
+> 
+> AMD Memory Encryption whitepaper:
+>    http://amd-dev.wpengine.netdna-cdn.com/wordpress/media/2013/12/AMD_Memory_Encryption_Whitepaper_v7-Public.pdf
+> "
 
 
-...or, if we ended up in this situation because a cosmic ray hit our
-storage device and corrupted the primary GPT then I'd say that we
-should keep using the alternate and not care that userspace won't do
-anything to fix it.  Hopefully cosmic rays are super rare and the
-changes of a second one hitting and killing the secondary GPT are slim
-to none.  If you're using this disk in outer space and cosmic rays are
-common, presumably you've got some massive ECC going on and maybe you
-even have userspace that expects periodic sector failures and knows
-how to handle it.
+Unfortunately that document is marketing junk.
 
+AFAICT:
 
--Doug
+SME can protect against cold boot attack and snooping at DRAM
+level. That's pretty much it.
+
+Does the AES encryption take the address as a parameter?
+
+SEV may protect against passive attack on the VM. For active attack,
+they claim it will "probably" crash the VM, but we already know that
+is untrue, see the work on gaining root using rowhammer. In this case,
+attacker can choose which address to damage and has precise control of
+timing.
+
+Best regards,
+                                                                Pavel
+								
+
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
