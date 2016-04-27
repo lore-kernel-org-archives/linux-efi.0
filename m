@@ -1,140 +1,133 @@
-From: "Austin S. Hemmelgarn" <ahferroin7-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] block: partitions: efi: Always check for alternative GPT
- at end of drive
-Date: Wed, 27 Apr 2016 08:59:54 -0400
-Message-ID: <5720B7CA.1050002@gmail.com>
-References: <1461632806-5946-1-git-send-email-jwerner@chromium.org>
- <20160426102014.o7k77uzi32h73y3b@ws.net.home>
- <20160426183353.GB16601@linux-uzut.site>
- <94D0CD8314A33A4D9D801C0FE68B402963904365@G4W3296.americas.hpqcorp.net>
- <CAKv+Gu9UnTnWQt7Q6p3CWbmn8sufcxgYcVo=KD68Wg1=1rrzdw@mail.gmail.com>
+From: =?UTF-8?Q?M=c3=b4she_van_der_Sterre?= <me-A/3C56C7qwM@public.gmane.org>
+Subject: Re: [PATCH] x86/efi-bgrt: Switch all pr_err() to pr_debug() for
+ invalid BGRT
+Date: Wed, 27 Apr 2016 15:26:35 +0200
+Message-ID: <5720BE0B.8080605@moshe.nl>
+References: <1461761412-16046-1-git-send-email-jwboyer@fedoraproject.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu9UnTnWQt7Q6p3CWbmn8sufcxgYcVo=KD68Wg1=1rrzdw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1461761412-16046-1-git-send-email-jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Elliott, Robert (Persistent Memory)" <elliott-ZPxbGqLxI0U@public.gmane.org>
-Cc: Davidlohr Bueso <dave-h16yJtLeMjHk1uMJSBkQmQ@public.gmane.org>, Karel Zak <kzak-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Julius Werner <jwerner-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Gwendal Grignou <gwendal-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+To: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 2016-04-27 02:00, Ard Biesheuvel wrote:
-> On 26 April 2016 at 22:34, Elliott, Robert (Persistent Memory)
-> <elliott-ZPxbGqLxI0U@public.gmane.org> wrote:
->>
->>
->>> -----Original Message-----
->>> From: linux-kernel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:linux-kernel-
->>> owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Davidlohr Bueso
->>> Sent: Tuesday, April 26, 2016 1:34 PM
->>> To: Karel Zak <kzak-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->>> Cc: Julius Werner <jwerner-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>; linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
->>> linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Gwendal
->>> Grignou <gwendal-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>; Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
->>> Subject: Re: [PATCH] block: partitions: efi: Always check for
->>> alternative GPT at end of drive
->>>
->>> On Tue, 26 Apr 2016, Karel Zak wrote:
->>>
->>>> On Mon, Apr 25, 2016 at 06:06:46PM -0700, Julius Werner wrote:
->>>>> The GUID Partiton Table layout maintains two synonymous partition
->>>>> tables on a block device, one starting in sector 1 and one in the
->>>>> very last sectors of the block device. This is useful if one of
->>>>> the tables gets
->>>>> accidentally corrupted (e.g. through a partial write because of an
->>>>> unexpected power loss).
->>>>>
->>>>> Linux normally only boots if the primary GPT is valid. It will not
->>>>> even try to find the alternative GPT to an invalid primary one
->>>>> unless the "gpt" command line option forces more aggressive
->>>>> detection. This doesn't
->>>>> really make any sense... if the "gpt" option is not set, the code
->>>>> validates the protective or hybrid MBR in sector 0 anyway before
->>>>> it even starts looking for the actual GPTs. If we get to the point
->>>>> where a valid proctective or hybrid MBR was found but the primary
->>>>> GPT was not found (valid), checking the alternative GPT is our
->>>>> best bet: we know that this
->>>
->>> 'best bet' in a kernel is not enough :) Which is why userland tools
->>> can fix and/or do any sort of crazy stuff with the backup and recover
->>> the primary etc etc.
->>
->> Drive blocks go bad; the redundant GPTs are there to let the
->> system keep booting and running if that happens.
->>
->> Rewriting the bad GPTs is what should require user intervention.
->>
->>>
->>>>> block device is meant to use GPT (because any other partitioning
->>> system
->>>>> would've presumably overwritten sector 0), and we know that if the
->>>>> alternative GPT is valid it should contain more accurate
->>> information
->>>>> than parsing the protective/hybrid MBR with msdos_partition()
->>> would
->>>>> yield (which would otherwise be what happens next).
->>>
->>>> I guess "force_gpt" (and "gpt" on kernel command line) exists to
->>>> force users to think and care about a reason why the device has
->>>> unreadable (broken) primary GPT header.
->>>
->>> Yes, from find_valid_gpt():
->>>
->>>   * If the Primary GPT header is not valid, the Alternate GPT header
->>>   * is not checked unless the 'gpt' kernel command line option is
->>> passed.
->>>   * This protects against devices which misreport their size, and
->>> forces
->>>   * the user to decide to use the Alternate GPT.
->>>
->>> ... so users are at least forced in some way to think about this.
->>>
->>>> It seems like bad (and dangerous) idea to silently ignore corrupted
->>>> primary GTP header and boot from such device.
->>>
->>> Yeah, there's no way in hell I trust a backup gpt in kernel space.
->>> We simply have no way of distinguishing between good and bad devices.
->>>
->>>> And note that alternative GPT header and the end of the device is a
->>>> just guess. The proper location of the alternative header is
->>>> specified with-in primary header (pgpt->alternate_lba). The header
->>>> at the end of
->>>> the device (as used for "force_gpt") is a fallback solution only.
->>>
->>> And this only illustrates the ambiguity of the backup.
->>
->> The UEFI specification is not ambiguous - you should always look
->> for the backup GPT Header at the last LBA:
->>
->> "Two GPT Header structures are stored on the device: the primary
->> and the backup. The primary GPT Header must be located in LBA 1
->> (i.e., the second logical block), and the backup GPT Header must
->> be located in the last LBA of the device."
->>
->> If the primary GPT Header is corrupted (e.g., CRC is bad), you
->> cannot trust any fields in it, including the Alternate LBA field.
->> The Alternate LBA field is there to help you tolerate failures
->> while growing or shrinking the block device size (not important
->> for individual physical drives, but an issue for logical drives
->> presented by RAID controllers).
->>
->
-> What the UEFI spec stipulates is not really relevant for the kernel.
-> So the firmware must use the backup GPT if the CRC of the primary one
-> indicates that it is corrupted, fine. Once we are in the kernel, the
-> policy is currently different, which makes sense since we are not only
-> mounting the boot device, but other block devices as well.
->
-No, it is relevant considering that it's the authoritative standard for 
-the GPT format.  Sure, we have to deal with other block devices.  The 
-fact is though, we currently refuse to do anything with a disk that has 
-a corrupted primary GPT, but a valid secondary.  I agree that the user 
-needs to be notified somehow that something is wrong, but refusing to 
-work is not a user friendly behavior, and doesn't really give much 
-specific information about what's wrong (keep in mind, most typical 
-desktop users won't look at kernel logs, and a lot of people using 
-embedded devices can't).
+(additionally CC-ing Josh Triplett)
 
-For what it's worth, Windows 7 and newer will properly read partitions 
-on a disk with a corrupt primary GPT and a valid secondary, and I'd be 
-willing to bet that OS X does so as well.
+On 04/27/2016 02:50 PM, Josh Boyer wrote:
+> The promise of pretty boot splashes from firmware via BGRT was at
+> best only that; a promise.  The kernel diligently checks to make
+> sure the BGRT data firmware gives it is valid, and dutifully warns
+> the user when it isn't.  However, it does so via the pr_err log
+> level which seems unnecessary.  The user cannot do anything about
+> this and there really isn't an error on the part of Linux to
+> correct.
+>
+> This lowers the log level by using pr_debug instead.  Users will
+> no longer have their boot process uglified by the kernel reminding
+> us that firmware can and often is broken.  Ironic, considering
+> BGRT is supposed to make boot pretty to begin with.
+Hi Josh Boyer,
+
+Are you seeing these errors somewhere? I recently fixed the error=20
+"Ignoring BGRT: invalid status 0 (expected 1)" because Linux apparently=
+=20
+interpreted that part of the specification differently than others.
+If that's the error you are seeing, perhaps your problem is already=20
+solved in recent kernels? (fixed in commit 66dbe99)
+
+Personally I agree that BGRT messages should not annoy actual users of=20
+production firmwares.
+However I also agree with the previous consensus that these checks (for=
+=20
+actual spec violations) should remain pr_err unless some production=20
+firmware is triggering them. What do you think?
+
+Greetings,
+M=F4she van der Sterre
+
+> Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+> ---
+>   arch/x86/platform/efi/efi-bgrt.c | 18 +++++++++---------
+>   1 file changed, 9 insertions(+), 9 deletions(-)
+>
+> diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi=
+/efi-bgrt.c
+> index a2433817c987..6f70d2ac8029 100644
+> --- a/arch/x86/platform/efi/efi-bgrt.c
+> +++ b/arch/x86/platform/efi/efi-bgrt.c
+> @@ -43,40 +43,40 @@ void __init efi_bgrt_init(void)
+>   		return;
+>  =20
+>   	if (bgrt_tab->header.length < sizeof(*bgrt_tab)) {
+> -		pr_err("Ignoring BGRT: invalid length %u (expected %zu)\n",
+> +		pr_debug("Ignoring BGRT: invalid length %u (expected %zu)\n",
+>   		       bgrt_tab->header.length, sizeof(*bgrt_tab));
+>   		return;
+>   	}
+>   	if (bgrt_tab->version !=3D 1) {
+> -		pr_err("Ignoring BGRT: invalid version %u (expected 1)\n",
+> +		pr_debug("Ignoring BGRT: invalid version %u (expected 1)\n",
+>   		       bgrt_tab->version);
+>   		return;
+>   	}
+>   	if (bgrt_tab->status & 0xfe) {
+> -		pr_err("Ignoring BGRT: reserved status bits are non-zero %u\n",
+> +		pr_debug("Ignoring BGRT: reserved status bits are non-zero %u\n",
+>   		       bgrt_tab->status);
+>   		return;
+>   	}
+>   	if (bgrt_tab->image_type !=3D 0) {
+> -		pr_err("Ignoring BGRT: invalid image type %u (expected 0)\n",
+> +		pr_debug("Ignoring BGRT: invalid image type %u (expected 0)\n",
+>   		       bgrt_tab->image_type);
+>   		return;
+>   	}
+>   	if (!bgrt_tab->image_address) {
+> -		pr_err("Ignoring BGRT: null image address\n");
+> +		pr_debug("Ignoring BGRT: null image address\n");
+>   		return;
+>   	}
+>  =20
+>   	image =3D memremap(bgrt_tab->image_address, sizeof(bmp_header), ME=
+MREMAP_WB);
+>   	if (!image) {
+> -		pr_err("Ignoring BGRT: failed to map image header memory\n");
+> +		pr_debug("Ignoring BGRT: failed to map image header memory\n");
+>   		return;
+>   	}
+>  =20
+>   	memcpy(&bmp_header, image, sizeof(bmp_header));
+>   	memunmap(image);
+>   	if (bmp_header.id !=3D 0x4d42) {
+> -		pr_err("Ignoring BGRT: Incorrect BMP magic number 0x%x (expected 0=
+x4d42)\n",
+> +		pr_debug("Ignoring BGRT: Incorrect BMP magic number 0x%x (expected=
+ 0x4d42)\n",
+>   			bmp_header.id);
+>   		return;
+>   	}
+> @@ -84,14 +84,14 @@ void __init efi_bgrt_init(void)
+>  =20
+>   	bgrt_image =3D kmalloc(bgrt_image_size, GFP_KERNEL | __GFP_NOWARN)=
+;
+>   	if (!bgrt_image) {
+> -		pr_err("Ignoring BGRT: failed to allocate memory for image (wanted=
+ %zu bytes)\n",
+> +		pr_debug("Ignoring BGRT: failed to allocate memory for image (want=
+ed %zu bytes)\n",
+>   		       bgrt_image_size);
+>   		return;
+>   	}
+>  =20
+>   	image =3D memremap(bgrt_tab->image_address, bmp_header.size, MEMRE=
+MAP_WB);
+>   	if (!image) {
+> -		pr_err("Ignoring BGRT: failed to map image memory\n");
+> +		pr_debug("Ignoring BGRT: failed to map image memory\n");
+>   		kfree(bgrt_image);
+>   		bgrt_image =3D NULL;
+>   		return;
