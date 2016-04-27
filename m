@@ -1,101 +1,140 @@
-From: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>
-Subject: Re: [RFC PATCH v1 18/18] x86: Add support to turn on Secure Memory
-	Encryption
-Date: Tue, 22 Mar 2016 14:13:09 +0100
-Message-ID: <20160322131309.GD16528@xo-6d-61-c0.localdomain>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
-	<20160426225904.13567.538.stgit@tlendack-t1.amdoffice.net>
+From: "Austin S. Hemmelgarn" <ahferroin7-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] block: partitions: efi: Always check for alternative GPT
+ at end of drive
+Date: Wed, 27 Apr 2016 08:59:54 -0400
+Message-ID: <5720B7CA.1050002@gmail.com>
+References: <1461632806-5946-1-git-send-email-jwerner@chromium.org>
+ <20160426102014.o7k77uzi32h73y3b@ws.net.home>
+ <20160426183353.GB16601@linux-uzut.site>
+ <94D0CD8314A33A4D9D801C0FE68B402963904365@G4W3296.americas.hpqcorp.net>
+ <CAKv+Gu9UnTnWQt7Q6p3CWbmn8sufcxgYcVo=KD68Wg1=1rrzdw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160426225904.13567.538.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKv+Gu9UnTnWQt7Q6p3CWbmn8sufcxgYcVo=KD68Wg1=1rrzdw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Elliott, Robert (Persistent Memory)" <elliott-ZPxbGqLxI0U@public.gmane.org>
+Cc: Davidlohr Bueso <dave-h16yJtLeMjHk1uMJSBkQmQ@public.gmane.org>, Karel Zak <kzak-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Julius Werner <jwerner-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Gwendal Grignou <gwendal-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi!
+On 2016-04-27 02:00, Ard Biesheuvel wrote:
+> On 26 April 2016 at 22:34, Elliott, Robert (Persistent Memory)
+> <elliott-ZPxbGqLxI0U@public.gmane.org> wrote:
+>>
+>>
+>>> -----Original Message-----
+>>> From: linux-kernel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:linux-kernel-
+>>> owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Davidlohr Bueso
+>>> Sent: Tuesday, April 26, 2016 1:34 PM
+>>> To: Karel Zak <kzak-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>>> Cc: Julius Werner <jwerner-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>; linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
+>>> linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Gwendal
+>>> Grignou <gwendal-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>; Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+>>> Subject: Re: [PATCH] block: partitions: efi: Always check for
+>>> alternative GPT at end of drive
+>>>
+>>> On Tue, 26 Apr 2016, Karel Zak wrote:
+>>>
+>>>> On Mon, Apr 25, 2016 at 06:06:46PM -0700, Julius Werner wrote:
+>>>>> The GUID Partiton Table layout maintains two synonymous partition
+>>>>> tables on a block device, one starting in sector 1 and one in the
+>>>>> very last sectors of the block device. This is useful if one of
+>>>>> the tables gets
+>>>>> accidentally corrupted (e.g. through a partial write because of an
+>>>>> unexpected power loss).
+>>>>>
+>>>>> Linux normally only boots if the primary GPT is valid. It will not
+>>>>> even try to find the alternative GPT to an invalid primary one
+>>>>> unless the "gpt" command line option forces more aggressive
+>>>>> detection. This doesn't
+>>>>> really make any sense... if the "gpt" option is not set, the code
+>>>>> validates the protective or hybrid MBR in sector 0 anyway before
+>>>>> it even starts looking for the actual GPTs. If we get to the point
+>>>>> where a valid proctective or hybrid MBR was found but the primary
+>>>>> GPT was not found (valid), checking the alternative GPT is our
+>>>>> best bet: we know that this
+>>>
+>>> 'best bet' in a kernel is not enough :) Which is why userland tools
+>>> can fix and/or do any sort of crazy stuff with the backup and recover
+>>> the primary etc etc.
+>>
+>> Drive blocks go bad; the redundant GPTs are there to let the
+>> system keep booting and running if that happens.
+>>
+>> Rewriting the bad GPTs is what should require user intervention.
+>>
+>>>
+>>>>> block device is meant to use GPT (because any other partitioning
+>>> system
+>>>>> would've presumably overwritten sector 0), and we know that if the
+>>>>> alternative GPT is valid it should contain more accurate
+>>> information
+>>>>> than parsing the protective/hybrid MBR with msdos_partition()
+>>> would
+>>>>> yield (which would otherwise be what happens next).
+>>>
+>>>> I guess "force_gpt" (and "gpt" on kernel command line) exists to
+>>>> force users to think and care about a reason why the device has
+>>>> unreadable (broken) primary GPT header.
+>>>
+>>> Yes, from find_valid_gpt():
+>>>
+>>>   * If the Primary GPT header is not valid, the Alternate GPT header
+>>>   * is not checked unless the 'gpt' kernel command line option is
+>>> passed.
+>>>   * This protects against devices which misreport their size, and
+>>> forces
+>>>   * the user to decide to use the Alternate GPT.
+>>>
+>>> ... so users are at least forced in some way to think about this.
+>>>
+>>>> It seems like bad (and dangerous) idea to silently ignore corrupted
+>>>> primary GTP header and boot from such device.
+>>>
+>>> Yeah, there's no way in hell I trust a backup gpt in kernel space.
+>>> We simply have no way of distinguishing between good and bad devices.
+>>>
+>>>> And note that alternative GPT header and the end of the device is a
+>>>> just guess. The proper location of the alternative header is
+>>>> specified with-in primary header (pgpt->alternate_lba). The header
+>>>> at the end of
+>>>> the device (as used for "force_gpt") is a fallback solution only.
+>>>
+>>> And this only illustrates the ambiguity of the backup.
+>>
+>> The UEFI specification is not ambiguous - you should always look
+>> for the backup GPT Header at the last LBA:
+>>
+>> "Two GPT Header structures are stored on the device: the primary
+>> and the backup. The primary GPT Header must be located in LBA 1
+>> (i.e., the second logical block), and the backup GPT Header must
+>> be located in the last LBA of the device."
+>>
+>> If the primary GPT Header is corrupted (e.g., CRC is bad), you
+>> cannot trust any fields in it, including the Alternate LBA field.
+>> The Alternate LBA field is there to help you tolerate failures
+>> while growing or shrinking the block device size (not important
+>> for individual physical drives, but an issue for logical drives
+>> presented by RAID controllers).
+>>
+>
+> What the UEFI spec stipulates is not really relevant for the kernel.
+> So the firmware must use the backup GPT if the CRC of the primary one
+> indicates that it is corrupted, fine. Once we are in the kernel, the
+> policy is currently different, which makes sense since we are not only
+> mounting the boot device, but other block devices as well.
+>
+No, it is relevant considering that it's the authoritative standard for 
+the GPT format.  Sure, we have to deal with other block devices.  The 
+fact is though, we currently refuse to do anything with a disk that has 
+a corrupted primary GPT, but a valid secondary.  I agree that the user 
+needs to be notified somehow that something is wrong, but refusing to 
+work is not a user friendly behavior, and doesn't really give much 
+specific information about what's wrong (keep in mind, most typical 
+desktop users won't look at kernel logs, and a lot of people using 
+embedded devices can't).
 
-> This patch adds the support to check for and enable SME when available
-> on the processor and when the mem_encrypt=on command line option is set.
-> This consists of setting the encryption mask, calculating the number of
-> physical bits of addressing lost and encrypting the kernel "in place."
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-> ---
->  Documentation/kernel-parameters.txt |    3 
->  arch/x86/kernel/asm-offsets.c       |    2 
->  arch/x86/kernel/mem_encrypt.S       |  306 +++++++++++++++++++++++++++++++++++
->  3 files changed, 311 insertions(+)
-> 
-> diff --git a/arch/x86/kernel/mem_encrypt.S b/arch/x86/kernel/mem_encrypt.S
-> index f2e0536..4d3326d 100644
-> --- a/arch/x86/kernel/mem_encrypt.S
-> +++ b/arch/x86/kernel/mem_encrypt.S
-> @@ -12,13 +12,236 @@
->  
->  #include <linux/linkage.h>
->  
-> +#include <asm/processor-flags.h>
-> +#include <asm/pgtable.h>
-> +#include <asm/page.h>
-> +#include <asm/msr.h>
-> +#include <asm/asm-offsets.h>
-> +
->  	.text
->  	.code64
->  ENTRY(sme_enable)
-> +#ifdef CONFIG_AMD_MEM_ENCRYPT
-> +	/* Check for AMD processor */
-> +	xorl	%eax, %eax
-> +	cpuid
-> +	cmpl    $0x68747541, %ebx	# AuthenticAMD
-> +	jne     .Lno_mem_encrypt
-> +	cmpl    $0x69746e65, %edx
-> +	jne     .Lno_mem_encrypt
-> +	cmpl    $0x444d4163, %ecx
-> +	jne     .Lno_mem_encrypt
-> +
-> +	/* Check for memory encryption leaf */
-> +	movl	$0x80000000, %eax
-> +	cpuid
-> +	cmpl	$0x8000001f, %eax
-> +	jb	.Lno_mem_encrypt
-> +
-> +	/*
-> +	 * Check for memory encryption feature:
-> +	 *   CPUID Fn8000_001F[EAX] - Bit 0
-> +	 */
-> +	movl	$0x8000001f, %eax
-> +	cpuid
-> +	bt	$0, %eax
-> +	jnc	.Lno_mem_encrypt
-> +
-> +	/* Check for the mem_encrypt=on command line option */
-> +	push	%rsi			/* Save RSI (real_mode_data) */
-> +	movl	BP_ext_cmd_line_ptr(%rsi), %ecx
-> +	shlq	$32, %rcx
-> +	movl	BP_cmd_line_ptr(%rsi), %edi
-> +	addq	%rcx, %rdi
-> +	leaq	mem_encrypt_enable_option(%rip), %rsi
-> +	call	cmdline_find_option_bool
-> +	pop	%rsi			/* Restore RSI (real_mode_data) */
-> +	testl	%eax, %eax
-> +	jz	.Lno_mem_encrypt
-
-Can you move parts to C here, so that it is more readable?
-
-								Pavel
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+For what it's worth, Windows 7 and newer will properly read partitions 
+on a disk with a corrupt primary GPT and a valid secondary, and I'd be 
+willing to bet that OS X does so as well.
