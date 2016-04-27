@@ -1,99 +1,58 @@
-From: Josh Boyer <jwboyer@fedoraproject.org>
-Subject: Re: [PATCH] x86/efi-bgrt: Switch all pr_err() to pr_debug() for
- invalid BGRT
-Date: Wed, 27 Apr 2016 11:20:26 -0400
-Message-ID: <CA+5PVA51UZL3zkYgLAimnXcYQwNJ4h+zCqEt0XRp2UEHaV302g@mail.gmail.com>
-References: <1461761412-16046-1-git-send-email-jwboyer@fedoraproject.org>
-	<5720BE0B.8080605@moshe.nl>
-	<CA+5PVA71vCaf+a=6cEqQxe4iUQeAK5NN-s09bMDa6_NbXZfMNw@mail.gmail.com>
-	<5720D365.5080601@moshe.nl>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [RFC PATCH v1 02/18] x86: Secure Memory Encryption (SME) build
+ enablement
+Date: Wed, 27 Apr 2016 17:30:10 +0200
+Message-ID: <20160427153010.GA7861@amd>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+ <20160426225614.13567.47487.stgit@tlendack-t1.amdoffice.net>
+ <20160322130150.GB16528@xo-6d-61-c0.localdomain>
+ <5720D810.9060602@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5720D365.5080601@moshe.nl>
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?Q?M=C3=B4she_van_der_Sterre?= <me@moshe.nl>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "Linux-Kernel@Vger. Kernel. Org" <linux-kernel@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <5720D810.9060602@amd.com>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 27, 2016 at 10:57 AM, M=C3=B4she van der Sterre <me@moshe.n=
-l> wrote:
->
-> On 04/27/2016 03:56 PM, Josh Boyer wrote:
->>
->> On Wed, Apr 27, 2016 at 9:26 AM, M=C3=B4she van der Sterre <me@moshe=
-=2Enl> wrote:
->>>
->>> (additionally CC-ing Josh Triplett)
->>
->> Thanks for doing so.  I completely forgot.
->>
->>> On 04/27/2016 02:50 PM, Josh Boyer wrote:
->>>>
->>>> The promise of pretty boot splashes from firmware via BGRT was at
->>>> best only that; a promise.  The kernel diligently checks to make
->>>> sure the BGRT data firmware gives it is valid, and dutifully warns
->>>> the user when it isn't.  However, it does so via the pr_err log
->>>> level which seems unnecessary.  The user cannot do anything about
->>>> this and there really isn't an error on the part of Linux to
->>>> correct.
->>>>
->>>> This lowers the log level by using pr_debug instead.  Users will
->>>> no longer have their boot process uglified by the kernel reminding
->>>> us that firmware can and often is broken.  Ironic, considering
->>>> BGRT is supposed to make boot pretty to begin with.
->>>
->>> Hi Josh Boyer,
->>>
->>> Are you seeing these errors somewhere? I recently fixed the error
->>> "Ignoring
->>
->> We have a user that reports seeing:
->>
->> "Ignoring BGRT: Invalid version 0 (expected 1)"
->>
->> on a Lenovo T430 machine.  We've had a few other scattered reports o=
-n
->> various machine types since BGRT went into the kernel as well.
->
-> Ok. With this information, I think pr_debug is indeed better.
->>>
->>> BGRT: invalid status 0 (expected 1)" because Linux apparently inter=
-preted
->>> that part of the specification differently than others.
->>> If that's the error you are seeing, perhaps your problem is already
->>> solved
->>> in recent kernels? (fixed in commit 66dbe99)
->>>
->>> Personally I agree that BGRT messages should not annoy actual users=
- of
->>> production firmwares.
->>> However I also agree with the previous consensus that these checks =
-(for
->>> actual spec violations) should remain pr_err unless some production
->>> firmware
->>> is triggering them. What do you think?
->>
->> Production firmware is literally the only firmware end users will ev=
-er
->> see.  I don't see much point in leaving scary error messages in the
->> kernel to complain about things the user has no chance of fixing or =
-in
->> almost all cases even reporting to people who could fix it.
->
-> In principle I can understand the wish to show big scary error messag=
-es to
-> firmware developers doing it wrong.
+On Wed 2016-04-27 10:17:36, Tom Lendacky wrote:
+> On 03/22/2016 08:01 AM, Pavel Machek wrote:
+> > On Tue 2016-04-26 17:56:14, Tom Lendacky wrote:
+> >> Provide the Kconfig support to build the SME support in the kernel.
+> > 
+> > 
+> > Probably should go last in the series?
+> 
+> Yeah, I've seen arguments both ways for this. Doing it early
+> allows compiling and testing with it enabled and doing it late
+> doesn't enable anything until it's all there. I just chose the
+> former.
 
-Yes, that is theoretically possible.  However, my best guess is that
-firmware developers aren't typically testing with Linux distributions
-during firmware development.  They test with Windows, which is why we
-see warnings in Linux that Windows doesn't show.  By then the firmware
-is in production and it is too late.
+Doing it early will break bisect, right?
+							Pavel
 
-We see this in lots of areas, which is why we have weird quirks for
-devices all over the kernel, but I don't think there's value in doing
-quirk mechanisms around BGRT.
+> >> +config AMD_MEM_ENCRYPT
+> >> +	bool "Secure Memory Encryption support for AMD"
+> >> +	depends on X86_64 && CPU_SUP_AMD
+> >> +	---help---
+> >> +	  Say yes to enable the encryption of system memory. This requires
+> >> +	  an AMD processor that supports Secure Memory Encryption (SME).
+> >> +	  The encryption of system memory is disabled by default but can be
+> >> +	  enabled with the mem_encrypt=on command line option.
+> >> +
+> >>  # Common NUMA Features
+> >>  config NUMA
+> >>  	bool "Numa Memory Allocation and Scheduler Support"
+> > 
 
-josh
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
