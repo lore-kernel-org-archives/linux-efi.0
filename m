@@ -1,128 +1,57 @@
-From: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
-Subject: Re: [RFC PATCH v1 13/18] x86: DMA support for memory encryption
-Date: Fri, 29 Apr 2016 12:27:58 -0400
-Message-ID: <20160429162757.GA1191@char.us.oracle.com>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <20160426225812.13567.91220.stgit@tlendack-t1.amdoffice.net>
- <20160429071743.GC11592@char.us.oracle.com>
- <572379ED.9050404@amd.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <572379ED.9050404@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] efibc: avoid stack overflow warning
+Date: Fri, 29 Apr 2016 19:48:31 +0200
+Message-ID: <1461952128-2135409-1-git-send-email-arnd@arndb.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Arnd Bergmann <arnd@arndb.de>, "Compostella, Jeremy" <jeremy.compostella@intel.com>, Ingo Molnar <mingo@kernel.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Apr 29, 2016 at 10:12:45AM -0500, Tom Lendacky wrote:
-> On 04/29/2016 02:17 AM, Konrad Rzeszutek Wilk wrote:
-> > On Tue, Apr 26, 2016 at 05:58:12PM -0500, Tom Lendacky wrote:
-> >> Since DMA addresses will effectively look like 48-bit addresses when the
-> >> memory encryption mask is set, SWIOTLB is needed if the DMA mask of the
-> >> device performing the DMA does not support 48-bits. SWIOTLB will be
-> >> initialized to create un-encrypted bounce buffers for use by these devices.
-> >>
-> > 
-> > 
-> > I presume the sme_me_mask does not use the lower 48 bits?
-> 
-> The sme_me_mask will actually be bit 47. So, when applied, the address
-> will become a 48-bit address.
-> 
-> > 
-> > 
-> > ..snip..
-> >> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-> >> index 7d56d1b..594dc65 100644
-> >> --- a/arch/x86/mm/mem_encrypt.c
-> >> +++ b/arch/x86/mm/mem_encrypt.c
-> >> @@ -12,6 +12,8 @@
-> >>  
-> >>  #include <linux/init.h>
-> >>  #include <linux/mm.h>
-> >> +#include <linux/dma-mapping.h>
-> >> +#include <linux/swiotlb.h>
-> >>  
-> >>  #include <asm/mem_encrypt.h>
-> >>  #include <asm/cacheflush.h>
-> >> @@ -168,6 +170,25 @@ void __init sme_early_init(void)
-> >>  }
-> >>  
-> >>  /* Architecture __weak replacement functions */
-> >> +void __init mem_encrypt_init(void)
-> >> +{
-> >> +	if (!sme_me_mask)
-> >> +		return;
-> >> +
-> >> +	/* Make SWIOTLB use an unencrypted DMA area */
-> >> +	swiotlb_clear_encryption();
-> >> +}
-> >> +
-> >> +unsigned long swiotlb_get_me_mask(void)
-> >> +{
-> >> +	return sme_me_mask;
-> >> +}
-> >> +
-> >> +void swiotlb_set_mem_dec(void *vaddr, unsigned long size)
-> >> +{
-> >> +	sme_set_mem_dec(vaddr, size);
-> >> +}
-> >> +
-> >>  void __init *efi_me_early_memremap(resource_size_t paddr,
-> >>  				   unsigned long size)
-> >>  {
-> >> diff --git a/include/linux/swiotlb.h b/include/linux/swiotlb.h
-> >> index 017fced..121b9de 100644
-> >> --- a/include/linux/swiotlb.h
-> >> +++ b/include/linux/swiotlb.h
-> >> @@ -30,6 +30,7 @@ int swiotlb_init_with_tbl(char *tlb, unsigned long nslabs, int verbose);
-> >>  extern unsigned long swiotlb_nr_tbl(void);
-> >>  unsigned long swiotlb_size_or_default(void);
-> >>  extern int swiotlb_late_init_with_tbl(char *tlb, unsigned long nslabs);
-> >> +extern void __init swiotlb_clear_encryption(void);
-> >>  
-> >>  /*
-> >>   * Enumeration for sync targets
-> >> diff --git a/init/main.c b/init/main.c
-> >> index b3c6e36..1013d1c 100644
-> >> --- a/init/main.c
-> >> +++ b/init/main.c
-> >> @@ -458,6 +458,10 @@ void __init __weak thread_info_cache_init(void)
-> >>  }
-> >>  #endif
-> >>  
-> >> +void __init __weak mem_encrypt_init(void)
-> >> +{
-> >> +}
-> >> +
-> >>  /*
-> >>   * Set up kernel memory allocators
-> >>   */
-> >> @@ -597,6 +601,8 @@ asmlinkage __visible void __init start_kernel(void)
-> >>  	 */
-> >>  	locking_selftest();
-> >>  
-> >> +	mem_encrypt_init();
-> >> +
-> >>  #ifdef CONFIG_BLK_DEV_INITRD
-> >>  	if (initrd_start && !initrd_below_start_ok &&
-> >>  	    page_to_pfn(virt_to_page((void *)initrd_start)) < min_low_pfn) {
-> > 
-> > What happens if devices use the bounce buffer before mem_encrypt_init()?
-> 
-> The call to mem_encrypt_init is early in the boot process, I may have
-> overlooked something, but what devices would be performing DMA before
-> this?
+gcc complains about a newly added file for the EFI Bootloader Control:
 
-I am not saying that you overlooked. Merely wondering if somebody re-orders these
-calls what would happen. It maybe also good to have a comment right before
-mem_encrpyt_init stating what will happen if the device does DMA before the function
-is called.
+drivers/firmware/efi/efibc.c: In function 'efibc_set_variable':
+drivers/firmware/efi/efibc.c:53:1: error: the frame size of 2272 bytes is larger than 1024 bytes [-Werror=frame-larger-than=]
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+The problem is the declaration of a local variable of type
+struct efivar_entry, which is by itself larger than the warning
+limit of 1024 bytes.
+
+We know that the reboot notifiers are not called from a deep stack,
+so this is not an actual bug, but we should still try to rework
+the code to avoid the warning. We also know that reboot notifiers
+are never run concurrently on multiple CPUs, so there is no problem
+in just making the variable 'static'.
+
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Fixes: 06f7d4a1618d ("efibc: Add EFI Bootloader Control module")
+---
+ drivers/firmware/efi/efibc.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
+index 2e0c7ccd9d9e..83ac90efa03f 100644
+--- a/drivers/firmware/efi/efibc.c
++++ b/drivers/firmware/efi/efibc.c
+@@ -31,8 +31,9 @@ static void efibc_str_to_str16(const char *str, efi_char16_t *str16)
+ static void efibc_set_variable(const char *name, const char *value)
+ {
+ 	int ret;
+-	efi_guid_t guid = LINUX_EFI_LOADER_ENTRY_GUID;
+-	struct efivar_entry entry;
++	static struct efivar_entry entry = {
++		.var.VendorGuid = LINUX_EFI_LOADER_ENTRY_GUID,
++	};
+ 	size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
+ 
+ 	if (size > sizeof(entry.var.Data))
+@@ -40,7 +41,6 @@ static void efibc_set_variable(const char *name, const char *value)
+ 
+ 	efibc_str_to_str16(name, entry.var.VariableName);
+ 	efibc_str_to_str16(value, (efi_char16_t *)entry.var.Data);
+-	memcpy(&entry.var.VendorGuid, &guid, sizeof(guid));
+ 
+ 	ret = efivar_entry_set(&entry,
+ 			       EFI_VARIABLE_NON_VOLATILE
+-- 
+2.7.0
