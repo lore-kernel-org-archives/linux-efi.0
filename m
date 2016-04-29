@@ -1,41 +1,113 @@
-From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: Re: [RFC PATCH v2 06/10] spi: add support for ACPI reconfigure notifications
-Date: Thu, 28 Apr 2016 22:37:57 +0300
-Message-ID: <CAE1zot+LuQJGrDrEDM2iVv-omz3Sg6k3bavX+5gde8jzrK0pog@mail.gmail.com>
-References: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
-	<1461105548-20618-7-git-send-email-octavian.purdila@intel.com>
-	<20160428174215.GS3217@sirena.org.uk>
+From: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+Subject: Re: [RFC PATCH v1 13/18] x86: DMA support for memory encryption
+Date: Fri, 29 Apr 2016 03:17:43 -0400
+Message-ID: <20160429071743.GC11592@char.us.oracle.com>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+ <20160426225812.13567.91220.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-i2c-owner@vger.kernel.org>
-In-Reply-To: <20160428174215.GS3217@sirena.org.uk>
-Sender: linux-i2c-owner@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, linux-efi@vger.kernel.org, linux-i2c <linux-i2c@vger.kernel.org>, linux-spi <linux-spi@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, Irina Tirdea <irina.tirdea@intel.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20160426225812.13567.91220.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Apr 28, 2016 at 8:42 PM, Mark Brown <broonie@kernel.org> wrote:
-> On Wed, Apr 20, 2016 at 01:39:04AM +0300, Octavian Purdila wrote:
->
->> +     switch (value) {
->> +     case ACPI_RECONFIG_DEVICE_ADD:
->> +             master = acpi_spi_find_master_by_adev(adev->parent);
->> +             if (!master)
->> +                     break;
->> +
->> +             acpi_register_spi_device(master, adev);
->> +             put_device(&master->dev);
->> +             break;
->> +     case ACPI_RECONFIG_DEVICE_REMOVE:
->> +             spi = acpi_spi_find_device_by_adev(adev);
->> +             if (!spi)
->> +                     break;
->
-> There's more code here now than I remember but this all looks *really*
-> close to the DT code except for the OF_POPULATED flag that we set when
-> things are instantiated in DT.  The duplication seems bad but the fact
-> that we're missing the flag worries me...  do we have guarantees that
-> ACPI won't double register?
+On Tue, Apr 26, 2016 at 05:58:12PM -0500, Tom Lendacky wrote:
+> Since DMA addresses will effectively look like 48-bit addresses when the
+> memory encryption mask is set, SWIOTLB is needed if the DMA mask of the
+> device performing the DMA does not support 48-bits. SWIOTLB will be
+> initialized to create un-encrypted bounce buffers for use by these devices.
+> 
 
-We use the adev->flags.visited to check when a device has been already
-enumerated, and we skip registering a new SPI slave in that case.
+
+I presume the sme_me_mask does not use the lower 48 bits?
+
+
+..snip..
+> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+> index 7d56d1b..594dc65 100644
+> --- a/arch/x86/mm/mem_encrypt.c
+> +++ b/arch/x86/mm/mem_encrypt.c
+> @@ -12,6 +12,8 @@
+>  
+>  #include <linux/init.h>
+>  #include <linux/mm.h>
+> +#include <linux/dma-mapping.h>
+> +#include <linux/swiotlb.h>
+>  
+>  #include <asm/mem_encrypt.h>
+>  #include <asm/cacheflush.h>
+> @@ -168,6 +170,25 @@ void __init sme_early_init(void)
+>  }
+>  
+>  /* Architecture __weak replacement functions */
+> +void __init mem_encrypt_init(void)
+> +{
+> +	if (!sme_me_mask)
+> +		return;
+> +
+> +	/* Make SWIOTLB use an unencrypted DMA area */
+> +	swiotlb_clear_encryption();
+> +}
+> +
+> +unsigned long swiotlb_get_me_mask(void)
+> +{
+> +	return sme_me_mask;
+> +}
+> +
+> +void swiotlb_set_mem_dec(void *vaddr, unsigned long size)
+> +{
+> +	sme_set_mem_dec(vaddr, size);
+> +}
+> +
+>  void __init *efi_me_early_memremap(resource_size_t paddr,
+>  				   unsigned long size)
+>  {
+> diff --git a/include/linux/swiotlb.h b/include/linux/swiotlb.h
+> index 017fced..121b9de 100644
+> --- a/include/linux/swiotlb.h
+> +++ b/include/linux/swiotlb.h
+> @@ -30,6 +30,7 @@ int swiotlb_init_with_tbl(char *tlb, unsigned long nslabs, int verbose);
+>  extern unsigned long swiotlb_nr_tbl(void);
+>  unsigned long swiotlb_size_or_default(void);
+>  extern int swiotlb_late_init_with_tbl(char *tlb, unsigned long nslabs);
+> +extern void __init swiotlb_clear_encryption(void);
+>  
+>  /*
+>   * Enumeration for sync targets
+> diff --git a/init/main.c b/init/main.c
+> index b3c6e36..1013d1c 100644
+> --- a/init/main.c
+> +++ b/init/main.c
+> @@ -458,6 +458,10 @@ void __init __weak thread_info_cache_init(void)
+>  }
+>  #endif
+>  
+> +void __init __weak mem_encrypt_init(void)
+> +{
+> +}
+> +
+>  /*
+>   * Set up kernel memory allocators
+>   */
+> @@ -597,6 +601,8 @@ asmlinkage __visible void __init start_kernel(void)
+>  	 */
+>  	locking_selftest();
+>  
+> +	mem_encrypt_init();
+> +
+>  #ifdef CONFIG_BLK_DEV_INITRD
+>  	if (initrd_start && !initrd_below_start_ok &&
+>  	    page_to_pfn(virt_to_page((void *)initrd_start)) < min_low_pfn) {
+
+What happens if devices use the bounce buffer before mem_encrypt_init()?
+
+..snip..
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
