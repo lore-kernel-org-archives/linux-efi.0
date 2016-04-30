@@ -1,146 +1,485 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [RFC PATCH v1 13/18] x86: DMA support for memory encryption
-Date: Fri, 29 Apr 2016 18:49:56 -0500
-Message-ID: <5723F324.9040909@amd.com>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
-	<20160426225812.13567.91220.stgit@tlendack-t1.amdoffice.net>
-	<20160429071743.GC11592@char.us.oracle.com> <572379ED.9050404@amd.com>
-	<20160429162757.GA1191@char.us.oracle.com>
+From: Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>
+Subject: Re: [PATCH v2] pstore: add lzo/lz4 compression support
+Date: Sat, 30 Apr 2016 10:26:38 +0800
+Message-ID: <20160430022637.GA8702@localhost.localdomain>
+References: <CAGXu5jJJ+VN7g6w8G-Sgi-5a9ATnARZrbbwheKLc4chZzBFaJQ@mail.gmail.com>
+ <ebfd596d5cb01997420a49ed20571bc254c14ac0.1455803858.git.geliangtang@163.com>
+ <CAGXu5jKSf5Jw5sNjniQz9aSres4kG3X3Ypj_e8V5MThLz7+nJQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20160429162757.GA1191-he5eyhs8q0BAdwtm4QZOy9BPR1lH4CV8@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAGXu5jKSf5Jw5sNjniQz9aSres4kG3X3Ypj_e8V5MThLz7+nJQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 04/29/2016 11:27 AM, Konrad Rzeszutek Wilk wrote:
-> On Fri, Apr 29, 2016 at 10:12:45AM -0500, Tom Lendacky wrote:
->> On 04/29/2016 02:17 AM, Konrad Rzeszutek Wilk wrote:
->>> On Tue, Apr 26, 2016 at 05:58:12PM -0500, Tom Lendacky wrote:
->>>> Since DMA addresses will effectively look like 48-bit addresses when the
->>>> memory encryption mask is set, SWIOTLB is needed if the DMA mask of the
->>>> device performing the DMA does not support 48-bits. SWIOTLB will be
->>>> initialized to create un-encrypted bounce buffers for use by these devices.
->>>>
->>>
->>>
->>> I presume the sme_me_mask does not use the lower 48 bits?
->>
->> The sme_me_mask will actually be bit 47. So, when applied, the address
->> will become a 48-bit address.
->>
->>>
->>>
->>> ..snip..
->>>> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
->>>> index 7d56d1b..594dc65 100644
->>>> --- a/arch/x86/mm/mem_encrypt.c
->>>> +++ b/arch/x86/mm/mem_encrypt.c
->>>> @@ -12,6 +12,8 @@
->>>>  
->>>>  #include <linux/init.h>
->>>>  #include <linux/mm.h>
->>>> +#include <linux/dma-mapping.h>
->>>> +#include <linux/swiotlb.h>
->>>>  
->>>>  #include <asm/mem_encrypt.h>
->>>>  #include <asm/cacheflush.h>
->>>> @@ -168,6 +170,25 @@ void __init sme_early_init(void)
->>>>  }
->>>>  
->>>>  /* Architecture __weak replacement functions */
->>>> +void __init mem_encrypt_init(void)
->>>> +{
->>>> +	if (!sme_me_mask)
->>>> +		return;
->>>> +
->>>> +	/* Make SWIOTLB use an unencrypted DMA area */
->>>> +	swiotlb_clear_encryption();
->>>> +}
->>>> +
->>>> +unsigned long swiotlb_get_me_mask(void)
->>>> +{
->>>> +	return sme_me_mask;
->>>> +}
->>>> +
->>>> +void swiotlb_set_mem_dec(void *vaddr, unsigned long size)
->>>> +{
->>>> +	sme_set_mem_dec(vaddr, size);
->>>> +}
->>>> +
->>>>  void __init *efi_me_early_memremap(resource_size_t paddr,
->>>>  				   unsigned long size)
->>>>  {
->>>> diff --git a/include/linux/swiotlb.h b/include/linux/swiotlb.h
->>>> index 017fced..121b9de 100644
->>>> --- a/include/linux/swiotlb.h
->>>> +++ b/include/linux/swiotlb.h
->>>> @@ -30,6 +30,7 @@ int swiotlb_init_with_tbl(char *tlb, unsigned long nslabs, int verbose);
->>>>  extern unsigned long swiotlb_nr_tbl(void);
->>>>  unsigned long swiotlb_size_or_default(void);
->>>>  extern int swiotlb_late_init_with_tbl(char *tlb, unsigned long nslabs);
->>>> +extern void __init swiotlb_clear_encryption(void);
->>>>  
->>>>  /*
->>>>   * Enumeration for sync targets
->>>> diff --git a/init/main.c b/init/main.c
->>>> index b3c6e36..1013d1c 100644
->>>> --- a/init/main.c
->>>> +++ b/init/main.c
->>>> @@ -458,6 +458,10 @@ void __init __weak thread_info_cache_init(void)
->>>>  }
->>>>  #endif
->>>>  
->>>> +void __init __weak mem_encrypt_init(void)
->>>> +{
->>>> +}
->>>> +
->>>>  /*
->>>>   * Set up kernel memory allocators
->>>>   */
->>>> @@ -597,6 +601,8 @@ asmlinkage __visible void __init start_kernel(void)
->>>>  	 */
->>>>  	locking_selftest();
->>>>  
->>>> +	mem_encrypt_init();
->>>> +
->>>>  #ifdef CONFIG_BLK_DEV_INITRD
->>>>  	if (initrd_start && !initrd_below_start_ok &&
->>>>  	    page_to_pfn(virt_to_page((void *)initrd_start)) < min_low_pfn) {
->>>
->>> What happens if devices use the bounce buffer before mem_encrypt_init()?
->>
->> The call to mem_encrypt_init is early in the boot process, I may have
->> overlooked something, but what devices would be performing DMA before
->> this?
+On Thu, Feb 18, 2016 at 09:37:26AM -0800, Kees Cook wrote:
+> On Thu, Feb 18, 2016 at 6:04 AM, Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org> wrote:
+> > Like zlib compression in pstore, this patch added lzo and lz4
+> > compression support so that users can have more options and better
+> > compression ratio.
+> >
+> > The original code treats the compressed data together with the
+> > uncompressed ECC correction notice by using zlib decompress. The
+> > ECC correction notice is missing in the decompression process. The
+> > treatment also makes lzo and lz4 not working. So I treat them
+> > separately by using pstore_decompress() to treat the compressed
+> > data, and memcpy() to treat the uncompressed ECC correction notice.
+> >
+> > Signed-off-by: Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>
 > 
-> I am not saying that you overlooked. Merely wondering if somebody re-orders these
-> calls what would happen. It maybe also good to have a comment right before
-> mem_encrpyt_init stating what will happen if the device does DMA before the function
-> is called.
+> Thanks for the updates!
 > 
+> Reviewed-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> 
+> -Kees
 
-Ah, ok. Before mem_encrypt_init is called the bounce buffers will be
-marked as encrypted in the page tables. The use of the bounce buffers
-will not have the memory encryption bit as part of the DMA address so a
-device will DMA into memory in the clear. When the bounce buffer is
-copied to the original buffer it will be accessed by a virtual address
-that has the memory encryption bit set in the page tables. So the
-plaintext data that was DMA'd in will be decrypted resulting in invalid
-data in the destination buffer.
+Hi there,
 
-I'll be sure to add a comment before the call.
+It's been three months since this patch has been reviewed. But it hasn't
+been replied yet by far. Can I please know if there's anything wrong with
+it?
 
-Thanks,
-Tom
+-Geliang Tang
+
+> > ---
+> > Changes in v2:
+> >  revise the patch as Kees suggested:
+> >  - drop 'depends on PSTORE' in config choice PSTORE_ZLIB/LZO/LZ4_COMPRESS;
+> >  - set big_oops_buf_sz to 0 in free_zlib/lzo/lz4;
+> >  - change zbackend[] to zbackend.
+> > ---
+> >  drivers/firmware/efi/efi-pstore.c |   1 +
+> >  fs/pstore/Kconfig                 |  31 +++++-
+> >  fs/pstore/platform.c              | 218 ++++++++++++++++++++++++++++++++++++--
+> >  fs/pstore/ram.c                   |  10 +-
+> >  include/linux/pstore.h            |   3 +-
+> >  5 files changed, 248 insertions(+), 15 deletions(-)
+> >
+> > diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+> > index eac76a7..cd8c35f 100644
+> > --- a/drivers/firmware/efi/efi-pstore.c
+> > +++ b/drivers/firmware/efi/efi-pstore.c
+> > @@ -210,6 +210,7 @@ static int efi_pstore_sysfs_entry_iter(void *data, struct efivar_entry **pos)
+> >  static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
+> >                                int *count, struct timespec *timespec,
+> >                                char **buf, bool *compressed,
+> > +                              ssize_t *ecc_notice_size,
+> >                                struct pstore_info *psi)
+> >  {
+> >         struct pstore_read_data data;
+> > diff --git a/fs/pstore/Kconfig b/fs/pstore/Kconfig
+> > index 360ae43..be40813 100644
+> > --- a/fs/pstore/Kconfig
+> > +++ b/fs/pstore/Kconfig
+> > @@ -1,8 +1,6 @@
+> >  config PSTORE
+> >         tristate "Persistent store support"
+> >         default n
+> > -       select ZLIB_DEFLATE
+> > -       select ZLIB_INFLATE
+> >         help
+> >            This option enables generic access to platform level
+> >            persistent storage via "pstore" filesystem that can
+> > @@ -14,6 +12,35 @@ config PSTORE
+> >            If you don't have a platform persistent store driver,
+> >            say N.
+> >
+> > +choice
+> > +        prompt "Choose compression algorithm"
+> > +        depends on PSTORE
+> > +        default PSTORE_ZLIB_COMPRESS
+> > +        help
+> > +          This option chooses compression algorithm.
+> > +
+> > +config PSTORE_ZLIB_COMPRESS
+> > +        bool "ZLIB"
+> > +        select ZLIB_DEFLATE
+> > +        select ZLIB_INFLATE
+> > +        help
+> > +          This option enables ZLIB compression algorithm support.
+> > +
+> > +config PSTORE_LZO_COMPRESS
+> > +        bool "LZO"
+> > +        select LZO_COMPRESS
+> > +        select LZO_DECOMPRESS
+> > +        help
+> > +          This option enables LZO compression algorithm support.
+> > +
+> > +config PSTORE_LZ4_COMPRESS
+> > +        bool "LZ4"
+> > +        select LZ4_COMPRESS
+> > +        select LZ4_DECOMPRESS
+> > +        help
+> > +          This option enables LZ4 compression algorithm support.
+> > +endchoice
+> > +
+> >  config PSTORE_CONSOLE
+> >         bool "Log kernel console messages"
+> >         depends on PSTORE
+> > diff --git a/fs/pstore/platform.c b/fs/pstore/platform.c
+> > index 588461b..7246d50 100644
+> > --- a/fs/pstore/platform.c
+> > +++ b/fs/pstore/platform.c
+> > @@ -28,7 +28,15 @@
+> >  #include <linux/console.h>
+> >  #include <linux/module.h>
+> >  #include <linux/pstore.h>
+> > +#ifdef CONFIG_PSTORE_ZLIB_COMPRESS
+> >  #include <linux/zlib.h>
+> > +#endif
+> > +#ifdef CONFIG_PSTORE_LZO_COMPRESS
+> > +#include <linux/lzo.h>
+> > +#endif
+> > +#ifdef CONFIG_PSTORE_LZ4_COMPRESS
+> > +#include <linux/lz4.h>
+> > +#endif
+> >  #include <linux/string.h>
+> >  #include <linux/timer.h>
+> >  #include <linux/slab.h>
+> > @@ -69,10 +77,23 @@ struct pstore_info *psinfo;
+> >  static char *backend;
+> >
+> >  /* Compression parameters */
+> > +#ifdef CONFIG_PSTORE_ZLIB_COMPRESS
+> >  #define COMPR_LEVEL 6
+> >  #define WINDOW_BITS 12
+> >  #define MEM_LEVEL 4
+> >  static struct z_stream_s stream;
+> > +#else
+> > +static unsigned char *workspace;
+> > +#endif
+> > +
+> > +struct pstore_zbackend {
+> > +       int (*compress)(const void *in, void *out, size_t inlen, size_t outlen);
+> > +       int (*decompress)(void *in, void *out, size_t inlen, size_t outlen);
+> > +       void (*allocate)(void);
+> > +       void (*free)(void);
+> > +
+> > +       const char *name;
+> > +};
+> >
+> >  static char *big_oops_buf;
+> >  static size_t big_oops_buf_sz;
+> > @@ -129,9 +150,9 @@ bool pstore_cannot_block_path(enum kmsg_dump_reason reason)
+> >  }
+> >  EXPORT_SYMBOL_GPL(pstore_cannot_block_path);
+> >
+> > +#ifdef CONFIG_PSTORE_ZLIB_COMPRESS
+> >  /* Derived from logfs_compress() */
+> > -static int pstore_compress(const void *in, void *out, size_t inlen,
+> > -                                                       size_t outlen)
+> > +static int compress_zlib(const void *in, void *out, size_t inlen, size_t outlen)
+> >  {
+> >         int err, ret;
+> >
+> > @@ -165,7 +186,7 @@ error:
+> >  }
+> >
+> >  /* Derived from logfs_uncompress */
+> > -static int pstore_decompress(void *in, void *out, size_t inlen, size_t outlen)
+> > +static int decompress_zlib(void *in, void *out, size_t inlen, size_t outlen)
+> >  {
+> >         int err, ret;
+> >
+> > @@ -194,7 +215,7 @@ error:
+> >         return ret;
+> >  }
+> >
+> > -static void allocate_buf_for_compression(void)
+> > +static void allocate_zlib(void)
+> >  {
+> >         size_t size;
+> >         size_t cmpr;
+> > @@ -237,12 +258,190 @@ static void allocate_buf_for_compression(void)
+> >
+> >  }
+> >
+> > -static void free_buf_for_compression(void)
+> > +static void free_zlib(void)
+> >  {
+> >         kfree(stream.workspace);
+> >         stream.workspace = NULL;
+> >         kfree(big_oops_buf);
+> >         big_oops_buf = NULL;
+> > +       big_oops_buf_sz = 0;
+> > +}
+> > +
+> > +static struct pstore_zbackend backend_zlib = {
+> > +       .compress       = compress_zlib,
+> > +       .decompress     = decompress_zlib,
+> > +       .allocate       = allocate_zlib,
+> > +       .free           = free_zlib,
+> > +       .name           = "zlib",
+> > +};
+> > +#endif
+> > +
+> > +#ifdef CONFIG_PSTORE_LZO_COMPRESS
+> > +static int compress_lzo(const void *in, void *out, size_t inlen, size_t outlen)
+> > +{
+> > +       int ret;
+> > +
+> > +       ret = lzo1x_1_compress(in, inlen, out, &outlen, workspace);
+> > +       if (ret != LZO_E_OK) {
+> > +               pr_err("lzo_compress error, ret = %d!\n", ret);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       return outlen;
+> > +}
+> > +
+> > +static int decompress_lzo(void *in, void *out, size_t inlen, size_t outlen)
+> > +{
+> > +       int ret;
+> > +
+> > +       ret = lzo1x_decompress_safe(in, inlen, out, &outlen);
+> > +       if (ret != LZO_E_OK) {
+> > +               pr_err("lzo_decompress error, ret = %d!\n", ret);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       return outlen;
+> > +}
+> > +
+> > +static void allocate_lzo(void)
+> > +{
+> > +       big_oops_buf_sz = lzo1x_worst_compress(psinfo->bufsize);
+> > +       big_oops_buf = kmalloc(big_oops_buf_sz, GFP_KERNEL);
+> > +       if (big_oops_buf) {
+> > +               workspace = kmalloc(LZO1X_MEM_COMPRESS, GFP_KERNEL);
+> > +               if (!workspace) {
+> > +                       pr_err("No memory for compression workspace; skipping compression\n");
+> > +                       kfree(big_oops_buf);
+> > +                       big_oops_buf = NULL;
+> > +               }
+> > +       } else {
+> > +               pr_err("No memory for uncompressed data; skipping compression\n");
+> > +               workspace = NULL;
+> > +       }
+> > +}
+> > +
+> > +static void free_lzo(void)
+> > +{
+> > +       kfree(workspace);
+> > +       kfree(big_oops_buf);
+> > +       big_oops_buf = NULL;
+> > +       big_oops_buf_sz = 0;
+> > +}
+> > +
+> > +static struct pstore_zbackend backend_lzo = {
+> > +       .compress       = compress_lzo,
+> > +       .decompress     = decompress_lzo,
+> > +       .allocate       = allocate_lzo,
+> > +       .free           = free_lzo,
+> > +       .name           = "lzo",
+> > +};
+> > +#endif
+> > +
+> > +#ifdef CONFIG_PSTORE_LZ4_COMPRESS
+> > +static int compress_lz4(const void *in, void *out, size_t inlen, size_t outlen)
+> > +{
+> > +       int ret;
+> > +
+> > +       ret = lz4_compress(in, inlen, out, &outlen, workspace);
+> > +       if (ret) {
+> > +               pr_err("lz4_compress error, ret = %d!\n", ret);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       return outlen;
+> > +}
+> > +
+> > +static int decompress_lz4(void *in, void *out, size_t inlen, size_t outlen)
+> > +{
+> > +       int ret;
+> > +
+> > +       ret = lz4_decompress_unknownoutputsize(in, inlen, out, &outlen);
+> > +       if (ret) {
+> > +               pr_err("lz4_decompress error, ret = %d!\n", ret);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       return outlen;
+> > +}
+> > +
+> > +static void allocate_lz4(void)
+> > +{
+> > +       big_oops_buf_sz = lz4_compressbound(psinfo->bufsize);
+> > +       big_oops_buf = kmalloc(big_oops_buf_sz, GFP_KERNEL);
+> > +       if (big_oops_buf) {
+> > +               workspace = kmalloc(LZ4_MEM_COMPRESS, GFP_KERNEL);
+> > +               if (!workspace) {
+> > +                       pr_err("No memory for compression workspace; skipping compression\n");
+> > +                       kfree(big_oops_buf);
+> > +                       big_oops_buf = NULL;
+> > +               }
+> > +       } else {
+> > +               pr_err("No memory for uncompressed data; skipping compression\n");
+> > +               workspace = NULL;
+> > +       }
+> > +}
+> > +
+> > +static void free_lz4(void)
+> > +{
+> > +       kfree(workspace);
+> > +       kfree(big_oops_buf);
+> > +       big_oops_buf = NULL;
+> > +       big_oops_buf_sz = 0;
+> > +}
+> > +
+> > +static struct pstore_zbackend backend_lz4 = {
+> > +       .compress       = compress_lz4,
+> > +       .decompress     = decompress_lz4,
+> > +       .allocate       = allocate_lz4,
+> > +       .free           = free_lz4,
+> > +       .name           = "lz4",
+> > +};
+> > +#endif
+> > +
+> > +static struct pstore_zbackend *zbackend =
+> > +#if defined(CONFIG_PSTORE_ZLIB_COMPRESS)
+> > +       &backend_zlib;
+> > +#elif defined(CONFIG_PSTORE_LZO_COMPRESS)
+> > +       &backend_lzo;
+> > +#elif defined(CONFIG_PSTORE_LZ4_COMPRESS)
+> > +       &backend_lz4;
+> > +#else
+> > +       NULL;
+> > +#endif
+> > +
+> > +static int pstore_compress(const void *in, void *out,
+> > +                          size_t inlen, size_t outlen)
+> > +{
+> > +       if (zbackend)
+> > +               return zbackend->compress(in, out, inlen, outlen);
+> > +       else
+> > +               return -EIO;
+> > +}
+> > +
+> > +static int pstore_decompress(void *in, void *out, size_t inlen, size_t outlen)
+> > +{
+> > +       if (zbackend)
+> > +               return zbackend->decompress(in, out, inlen, outlen);
+> > +       else
+> > +               return -EIO;
+> > +}
+> > +
+> > +static void allocate_buf_for_compression(void)
+> > +{
+> > +       if (zbackend) {
+> > +               pr_info("using %s compression\n", zbackend->name);
+> > +               zbackend->allocate();
+> > +       } else {
+> > +               pr_err("allocate compression buffer error!\n");
+> > +       }
+> > +}
+> > +
+> > +static void free_buf_for_compression(void)
+> > +{
+> > +       if (zbackend)
+> > +               zbackend->free();
+> > +       else
+> > +               pr_err("free compression buffer error!\n");
+> >  }
+> >
+> >  /*
+> > @@ -527,6 +726,7 @@ void pstore_get_records(int quiet)
+> >         int                     failed = 0, rc;
+> >         bool                    compressed;
+> >         int                     unzipped_len = -1;
+> > +       ssize_t                 ecc_notice_size = 0;
+> >
+> >         if (!psi)
+> >                 return;
+> > @@ -536,7 +736,7 @@ void pstore_get_records(int quiet)
+> >                 goto out;
+> >
+> >         while ((size = psi->read(&id, &type, &count, &time, &buf, &compressed,
+> > -                               psi)) > 0) {
+> > +                                &ecc_notice_size, psi)) > 0) {
+> >                 if (compressed && (type == PSTORE_TYPE_DMESG)) {
+> >                         if (big_oops_buf)
+> >                                 unzipped_len = pstore_decompress(buf,
+> > @@ -544,6 +744,9 @@ void pstore_get_records(int quiet)
+> >                                                         big_oops_buf_sz);
+> >
+> >                         if (unzipped_len > 0) {
+> > +                               if (ecc_notice_size)
+> > +                                       memcpy(big_oops_buf + unzipped_len,
+> > +                                              buf + size, ecc_notice_size);
+> >                                 kfree(buf);
+> >                                 buf = big_oops_buf;
+> >                                 size = unzipped_len;
+> > @@ -555,7 +758,8 @@ void pstore_get_records(int quiet)
+> >                         }
+> >                 }
+> >                 rc = pstore_mkfile(type, psi->name, id, count, buf,
+> > -                                 compressed, (size_t)size, time, psi);
+> > +                                  compressed, size + ecc_notice_size,
+> > +                                  time, psi);
+> >                 if (unzipped_len < 0) {
+> >                         /* Free buffer other than big oops */
+> >                         kfree(buf);
+> > diff --git a/fs/pstore/ram.c b/fs/pstore/ram.c
+> > index 319c3a6..11ec024 100644
+> > --- a/fs/pstore/ram.c
+> > +++ b/fs/pstore/ram.c
+> > @@ -181,10 +181,10 @@ static bool prz_ok(struct persistent_ram_zone *prz)
+> >  static ssize_t ramoops_pstore_read(u64 *id, enum pstore_type_id *type,
+> >                                    int *count, struct timespec *time,
+> >                                    char **buf, bool *compressed,
+> > +                                  ssize_t *ecc_notice_size,
+> >                                    struct pstore_info *psi)
+> >  {
+> >         ssize_t size;
+> > -       ssize_t ecc_notice_size;
+> >         struct ramoops_context *cxt = psi->data;
+> >         struct persistent_ram_zone *prz = NULL;
+> >         int header_length = 0;
+> > @@ -229,16 +229,16 @@ static ssize_t ramoops_pstore_read(u64 *id, enum pstore_type_id *type,
+> >         size = persistent_ram_old_size(prz) - header_length;
+> >
+> >         /* ECC correction notice */
+> > -       ecc_notice_size = persistent_ram_ecc_string(prz, NULL, 0);
+> > +       *ecc_notice_size = persistent_ram_ecc_string(prz, NULL, 0);
+> >
+> > -       *buf = kmalloc(size + ecc_notice_size + 1, GFP_KERNEL);
+> > +       *buf = kmalloc(size + *ecc_notice_size + 1, GFP_KERNEL);
+> >         if (*buf == NULL)
+> >                 return -ENOMEM;
+> >
+> >         memcpy(*buf, (char *)persistent_ram_old(prz) + header_length, size);
+> > -       persistent_ram_ecc_string(prz, *buf + size, ecc_notice_size + 1);
+> > +       persistent_ram_ecc_string(prz, *buf + size, *ecc_notice_size + 1);
+> >
+> > -       return size + ecc_notice_size;
+> > +       return size;
+> >  }
+> >
+> >  static size_t ramoops_write_kmsg_hdr(struct persistent_ram_zone *prz,
+> > diff --git a/include/linux/pstore.h b/include/linux/pstore.h
+> > index 831479f..899e95e 100644
+> > --- a/include/linux/pstore.h
+> > +++ b/include/linux/pstore.h
+> > @@ -58,7 +58,8 @@ struct pstore_info {
+> >         int             (*close)(struct pstore_info *psi);
+> >         ssize_t         (*read)(u64 *id, enum pstore_type_id *type,
+> >                         int *count, struct timespec *time, char **buf,
+> > -                       bool *compressed, struct pstore_info *psi);
+> > +                       bool *compressed, ssize_t *ecc_notice_size,
+> > +                       struct pstore_info *psi);
+> >         int             (*write)(enum pstore_type_id type,
+> >                         enum kmsg_dump_reason reason, u64 *id,
+> >                         unsigned int part, int count, bool compressed,
+> > --
+> > 2.5.0
+> >
+> >
+> 
+> 
+> 
+> -- 
+> Kees Cook
+> Chrome OS & Brillo Security
