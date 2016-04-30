@@ -1,59 +1,122 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [BUG] x86/efi: MMRs no longer properly mapped after switch to
- isolated page table
-Date: Sat, 30 Apr 2016 23:12:09 +0100
-Message-ID: <20160430221209.GO2839@codeblueprint.co.uk>
-References: <20160427154132.GB113599@stormcage.americas.sgi.com>
- <20160427225122.GG21282@pd.tnic>
- <20160428014128.GF113599@stormcage.americas.sgi.com>
- <20160428125711.GB9164@pd.tnic>
- <20160429154119.GI113599@stormcage.americas.sgi.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH] efi/capsule: Make efi_capsule_pending() lockless
+Date: Sat, 30 Apr 2016 23:13:27 +0100
+Message-ID: <1462054407-9735-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160429154119.GI113599-7ppMa7wkY9tKToyKb8PD+Zs2JHu2awxn0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, mike travis <travis-sJ/iWh9BUns@public.gmane.org>, Nathan Zimmer <nzimmer-sJ/iWh9BUns@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 29 Apr, at 10:41:19AM, Alex Thorlton wrote:
-> 
-> You can see here that we've made it past the MMR read in uv_system_init,
-> but we die inside of our first EFI callback.  In this example, it looks
-> like we're using the kernel page table at the time of the failure, and I
-> believe that the failing address is somewhere in our EFI runtime code:
-> 
-> [    0.803396] efi: ATHORLTON EFI md dump:
-> [    0.803396]         type: 5
-> [    0.803396]         pad: 0
-> [    0.803396]         phys_addr: 6a0a6000
-> [    0.803396]         virt_addr: 0
-> [    0.803396]         num_pages: 184
-> [    0.803396]         attribute: 800000000000000f
-> 
-> So it looks like we're trying to read from EFI runtime space while using
-> the kernel page table, which fails, presumably because the space is also
-> not mapped into the kernel page table.  While I understand *why* it
-> fails, and why the address isn't mapped, I don't fully know how we
-> should handle fixing it.
+Taking a mutex in the reboot path is bogus because we cannot sleep
+with interrupts disabled, such as when rebooting due to panic(),
 
-How come you're not using the new EFI page tables while making EFI
-runtime calls?
+ [   18.069005] BUG: sleeping function called from invalid context at kernel/locking/mutex.c:97
+ [   18.071639] in_atomic(): 0, irqs_disabled(): 1, pid: 7, name: rcu_sched
+ [   18.085940] Call Trace:
+ [   18.086911]  [<ffffffff8142e53a>] dump_stack+0x63/0x89
+ [   18.088260]  [<ffffffff810a1048>] ___might_sleep+0xd8/0x120
+ [   18.089860]  [<ffffffff810a10d9>] __might_sleep+0x49/0x80
+ [   18.091272]  [<ffffffff818f5110>] mutex_lock+0x20/0x50
+ [   18.092636]  [<ffffffff81771edd>] efi_capsule_pending+0x1d/0x60
+ [   18.094272]  [<ffffffff8104e749>] native_machine_emergency_restart+0x59/0x280
+ [   18.095975]  [<ffffffff8104e5d9>] machine_emergency_restart+0x19/0x20
+ [   18.097685]  [<ffffffff8109d4b8>] emergency_restart+0x18/0x20
+ [   18.099303]  [<ffffffff81172d6d>] panic+0x1ba/0x217
 
-Who owns the MMR space and what is it used for? Do both the kernel and
-the firmware need access to it? My SGI UV knowledge is zero, so I'm
-happy to be educated! I can't think of any analogous memory regions on
-x86 where the EFI services require the kernel to map them, other than
-the EFI regions themselves.
+In this case all other CPUs will have been stopped by the time we
+execute the platform reboot code, so 'capsule_pending' cannot change
+under our feet. We wouldn't care even if it could since we cannot wait
+for it complete.
 
-Runtime EFI regions should be opaque, isolated and self-contained.
-This is why there are two phases of execution for firmware; before and
-after ExitBootServices(). Once the kernel takes control after
-ExitBootServices() firmware can no longer provide timer services, for
-example, and doesn't care where the kernel maps the LAPIC because it
-never tries to access it.
+Also, instead of relying on the external 'system_state' variable just
+use a reboot notifier, so we can set 'stop_capsules' while holding
+'capsule_mutex', thereby avoiding a race where system_state is updated
+while we're in the middle of efi_capsule_update_locked() (since CPUs
+won't have been stopped at that point).
 
-The fact that the UV firmware does care where the MMR space is mapped
-makes me suspect that there's a lack of isolation.
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+Cc: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+---
+ drivers/firmware/efi/capsule.c | 36 ++++++++++++++++++++++++++----------
+ 1 file changed, 26 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
+index 0de55944ac0b..4703dc9b8fbd 100644
+--- a/drivers/firmware/efi/capsule.c
++++ b/drivers/firmware/efi/capsule.c
+@@ -22,11 +22,12 @@ typedef struct {
+ } efi_capsule_block_desc_t;
+ 
+ static bool capsule_pending;
++static bool stop_capsules;
+ static int efi_reset_type = -1;
+ 
+ /*
+  * capsule_mutex serialises access to both capsule_pending and
+- * efi_reset_type.
++ * efi_reset_type and stop_capsules.
+  */
+ static DEFINE_MUTEX(capsule_mutex);
+ 
+@@ -50,18 +51,13 @@ static DEFINE_MUTEX(capsule_mutex);
+  */
+ bool efi_capsule_pending(int *reset_type)
+ {
+-	bool rv = false;
+-
+-	mutex_lock(&capsule_mutex);
+ 	if (!capsule_pending)
+-		goto out;
++		return false;
+ 
+ 	if (reset_type)
+ 		*reset_type = efi_reset_type;
+-	rv = true;
+-out:
+-	mutex_unlock(&capsule_mutex);
+-	return rv;
++
++	return true;
+ }
+ 
+ /*
+@@ -176,7 +172,7 @@ efi_capsule_update_locked(efi_capsule_header_t *capsule,
+ 	 * whether to force an EFI reboot), and we're racing against
+ 	 * that call. Abort in that case.
+ 	 */
+-	if (unlikely(system_state == SYSTEM_RESTART)) {
++	if (unlikely(stop_capsules)) {
+ 		pr_warn("Capsule update raced with reboot, aborting.\n");
+ 		return -EINVAL;
+ 	}
+@@ -298,3 +294,23 @@ out:
+ 	return rv;
+ }
+ EXPORT_SYMBOL_GPL(efi_capsule_update);
++
++static int capsule_reboot_notify(struct notifier_block *nb,
++				 unsigned long event, void *cmd)
++{
++	mutex_lock(&capsule_mutex);
++	stop_capsules = true;
++	mutex_unlock(&capsule_mutex);
++
++	return NOTIFY_DONE;
++}
++
++static struct notifier_block capsule_reboot_nb = {
++	.notifier_call = capsule_reboot_notify,
++};
++
++static int __init capsule_reboot_register(void)
++{
++	return register_reboot_notifier(&capsule_reboot_nb);
++}
++core_initcall(capsule_reboot_register);
+-- 
+2.7.3
