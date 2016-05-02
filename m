@@ -1,145 +1,154 @@
-From: "Huang, Kai" <kai.huang@linux.intel.com>
-Subject: Re: [RFC PATCH v1 15/18] x86: Enable memory encryption on the APs
-Date: Mon, 2 May 2016 10:10:24 +1200
-Message-ID: <f37dd7de-23ad-f70f-c32d-a32f116215ce@linux.intel.com>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <20160426225833.13567.55695.stgit@tlendack-t1.amdoffice.net>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [BUG] x86/efi: MMRs no longer properly mapped after switch to
+ isolated page table
+Date: Mon, 2 May 2016 12:02:22 +0200
+Message-ID: <20160502100222.GB25669@pd.tnic>
+References: <20160427154132.GB113599@stormcage.americas.sgi.com>
+ <20160427225122.GG21282@pd.tnic>
+ <20160428014128.GF113599@stormcage.americas.sgi.com>
+ <20160428125711.GB9164@pd.tnic>
+ <20160429154119.GI113599@stormcage.americas.sgi.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arch-owner@vger.kernel.org>
-In-Reply-To: <20160426225833.13567.55695.stgit@tlendack-t1.amdoffice.net>
-Sender: linux-arch-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
-Cc: =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160429154119.GI113599-7ppMa7wkY9tKToyKb8PD+Zs2JHu2awxn0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, mike travis <travis-sJ/iWh9BUns@public.gmane.org>, Nathan Zimmer <nzimmer-sJ/iWh9BUns@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On Fri, Apr 29, 2016 at 10:41:19AM -0500, Alex Thorlton wrote:
+> I think this is partially correct, but in doing that, we find that we=
+'re
+> still missing something.  Watch what happens when I make this small
+> tweak to my kernel:
+>=20
+> 8<---
+> diff --git a/arch/x86/kernel/apic/x2apic_uv_x.c
+> b/arch/x86/kernel/apic/x2apic_uv_x.c
+> index 624db005..91ac029 100644
+> --- a/arch/x86/kernel/apic/x2apic_uv_x.c
+> +++ b/arch/x86/kernel/apic/x2apic_uv_x.c
+> @@ -891,7 +891,7 @@ void __init uv_system_init(void)
+>         pr_info("UV: Found %s hub\n", hub);
+> =20
+>         /* We now only need to map the MMRs on UV1 */
+> -       if (is_uv1_hub())
+> +       //if (is_uv1_hub())
+>                 map_low_mmrs();
+> =20
+>         m_n_config.v =3D uv_read_local_mmr(UVH_RH_GAM_CONFIG_MMR );
+> --->8
+>=20
+> Here's the result:
+>=20
+> 8<---
+> [    5.353656] BUG: unable to handle kernel paging request at ffff880=
+06a1ab938
+> [    5.361448] IP: [<ffff88006a1ab938>] 0xffff88006a1ab938
+> [    5.367290] PGD 1f81067 PUD 87ffff067 PMD 87fff8067 PTE 0
+> [    5.373356] Oops: 0010 [#1] SMP=20
+> [    5.376977] Modules linked in:
+> [    5.380395] CPU: 0 PID: 1 Comm: swapper/0 Not tainted 4.5.0-rc2-uv=
+4-comm-debug-fix+ #538
+> [    5.389428] Hardware name: SGI UV3000/UV3000, BIOS SGI UV 3000 ser=
+ies BIOS 01/15/2015
+> [    5.398169] task: ffff880867ec4040 ti: ffff880867ec8000 task.ti: f=
+fff880867ec8000
+> [    5.406522] RIP: 0010:[<ffff88006a1ab938>]  [<ffff88006a1ab938>] 0=
+xffff88006a1ab938
+> [    5.415080] RSP: 0000:ffff880867ecbc88  EFLAGS: 00010086
+> [    5.421006] RAX: 0000000000000000 RBX: 0000000000000282 RCX: 00000=
+00000000001
+> [    5.428971] RDX: 0000000000000000 RSI: 0000000000000001 RDI: ffff8=
+8006a1ab938
+> [    5.436935] RBP: ffff880867ecbd58 R08: ffff880867ecbd68 R09: ffff8=
+80867ecbd70
+> [    5.444900] R10: ffffffffffffffda R11: 000000006a1ab938 R12: 00000=
+00000000000
+> [    5.452864] R13: ffffffff81dcf0b8 R14: ffffffff81dcf0c0 R15: fffff=
+fff81dcf0a0
+> [    5.460829] FS:  0000000000000000(0000) GS:ffff880878c00000(0000) =
+knlGS:0000000000000000
+> [    5.469861] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [    5.476274] CR2: ffff88006a1ab938 CR3: 0000000001a0a000 CR4: 00000=
+000001406f0
+> [    5.484240] Stack:
+> [    5.486483]  ffffffff8105d7f8 0000000000000000 0000000000000006 00=
+00000000000006
+> [    5.494777]  000000000000001e 0000000000000000 0000000000000000 ff=
+ff880867ecbd38
+> [    5.503074]  0000000080050033 0000000000000000 0000000000000000 00=
+00000000000000
+> [    5.511368] Call Trace:
+> [    5.514098]  [<ffffffff8105d7f8>] ? efi_call+0x58/0x90
+> [    5.519834]  [<ffffffff8106033d>] ? uv_bios_call_irqsave+0x5d/0x80
+> [    5.526733]  [<ffffffff810603a0>] uv_bios_get_sn_info+0x40/0xb0
+> [    5.533344]  [<ffffffff81b6f824>] uv_system_init+0x772/0x104d
+> [    5.539751]  [<ffffffff810bd479>] ? vprintk_default+0x29/0x40
+> [    5.546159]  [<ffffffff81161cf8>] ? printk+0x4d/0x4f
+> [    5.551692]  [<ffffffff81b6ac75>] native_smp_prepare_cpus+0x299/0x=
+2e4
+> [    5.558884]  [<ffffffff81b5c18e>] kernel_init_freeable+0xc3/0x21b
+> [    5.565680]  [<ffffffff815acd00>] ? rest_init+0x80/0x80
+> [    5.571502]  [<ffffffff815acd0e>] kernel_init+0xe/0xf0
+> [    5.577238]  [<ffffffff815b87cf>] ret_from_fork+0x3f/0x70
+> [    5.583264]  [<ffffffff815acd00>] ? rest_init+0x80/0x80
+> [    5.589093] Code:  Bad RIP value.
+> [    5.592812] RIP  [<ffff88006a1ab938>] 0xffff88006a1ab938
+> [    5.598748]  RSP <ffff880867ecbc88>
+> [    5.602638] CR2: ffff88006a1ab938
+> [    5.606339] ---[ end trace 3abaacb020c74a50 ]---
+> [    5.611487] Kernel panic - not syncing: Attempted to kill init! ex=
+itcode=3D0x00000009
+> --->8
+>=20
+> You can see here that we've made it past the MMR read in uv_system_in=
+it,
+> but we die inside of our first EFI callback.  In this example, it loo=
+ks
+> like we're using the kernel page table at the time of the failure, an=
+d I
+> believe that the failing address is somewhere in our EFI runtime code=
+:
 
+I think I see what's going on:
 
-On 4/27/2016 10:58 AM, Tom Lendacky wrote:
-> Add support to set the memory encryption enable flag on the APs during
-> realmode initialization. When an AP is started it checks this flag, and
-> if set, enables memory encryption on its core.
->
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/include/asm/msr-index.h     |    2 ++
->  arch/x86/include/asm/realmode.h      |   12 ++++++++++++
->  arch/x86/realmode/init.c             |    4 ++++
->  arch/x86/realmode/rm/trampoline_64.S |   14 ++++++++++++++
->  4 files changed, 32 insertions(+)
->
-> diff --git a/arch/x86/include/asm/msr-index.h b/arch/x86/include/asm/msr-index.h
-> index 94555b4..b73182b 100644
-> --- a/arch/x86/include/asm/msr-index.h
-> +++ b/arch/x86/include/asm/msr-index.h
-> @@ -349,6 +349,8 @@
->  #define MSR_K8_TOP_MEM1			0xc001001a
->  #define MSR_K8_TOP_MEM2			0xc001001d
->  #define MSR_K8_SYSCFG			0xc0010010
-> +#define MSR_K8_SYSCFG_MEM_ENCRYPT_BIT	23
-> +#define MSR_K8_SYSCFG_MEM_ENCRYPT	(1ULL << MSR_K8_SYSCFG_MEM_ENCRYPT_BIT)
->  #define MSR_K8_INT_PENDING_MSG		0xc0010055
->  /* C1E active bits in int pending message */
->  #define K8_INTP_C1E_ACTIVE_MASK		0x18000000
-> diff --git a/arch/x86/include/asm/realmode.h b/arch/x86/include/asm/realmode.h
-> index 9c6b890..e24d2ec 100644
-> --- a/arch/x86/include/asm/realmode.h
-> +++ b/arch/x86/include/asm/realmode.h
-> @@ -1,6 +1,15 @@
->  #ifndef _ARCH_X86_REALMODE_H
->  #define _ARCH_X86_REALMODE_H
->
-> +/*
-> + * Flag bit definitions for use with the flags field of the trampoline header
-> + * when configured for X86_64
-> + */
-> +#define TH_FLAGS_MEM_ENCRYPT_BIT	0
-> +#define TH_FLAGS_MEM_ENCRYPT		(1ULL << TH_FLAGS_MEM_ENCRYPT_BIT)
+[    5.367290] PGD 1f81067 PUD 87ffff067 PMD 87fff8067 PTE 0
 
-Would mind change it to a more vendor specific name, such as 
-AMD_MEM_ENCRYPT, or SME_MEM_ENCRYPT?
+PTE 0 because, most probably, you need to sync
+efi_sync_low_kernel_mappings(). Why?
 
-> +
-> +#ifndef __ASSEMBLY__
-> +
->  #include <linux/types.h>
->  #include <asm/io.h>
->
-> @@ -38,6 +47,7 @@ struct trampoline_header {
->  	u64 start;
->  	u64 efer;
->  	u32 cr4;
-> +	u32 flags;
->  #endif
->  };
->
-> @@ -61,4 +71,6 @@ extern unsigned char secondary_startup_64[];
->  void reserve_real_mode(void);
->  void setup_real_mode(void);
->
-> +#endif /* __ASSEMBLY__ */
-> +
->  #endif /* _ARCH_X86_REALMODE_H */
-> diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
-> index 85b145c..657532b 100644
-> --- a/arch/x86/realmode/init.c
-> +++ b/arch/x86/realmode/init.c
-> @@ -84,6 +84,10 @@ void __init setup_real_mode(void)
->  	trampoline_cr4_features = &trampoline_header->cr4;
->  	*trampoline_cr4_features = __read_cr4();
->
-> +	trampoline_header->flags = 0;
-> +	if (sme_me_mask)
-> +		trampoline_header->flags |= TH_FLAGS_MEM_ENCRYPT;
-> +
->  	trampoline_pgd = (u64 *) __va(real_mode_header->trampoline_pgd);
->  	trampoline_pgd[0] = init_level4_pgt[pgd_index(__PAGE_OFFSET)].pgd;
->  	trampoline_pgd[511] = init_level4_pgt[511].pgd;
-> diff --git a/arch/x86/realmode/rm/trampoline_64.S b/arch/x86/realmode/rm/trampoline_64.S
-> index dac7b20..8d84167 100644
-> --- a/arch/x86/realmode/rm/trampoline_64.S
-> +++ b/arch/x86/realmode/rm/trampoline_64.S
-> @@ -30,6 +30,7 @@
->  #include <asm/msr.h>
->  #include <asm/segment.h>
->  #include <asm/processor-flags.h>
-> +#include <asm/realmode.h>
->  #include "realmode.h"
->
->  	.text
-> @@ -109,6 +110,18 @@ ENTRY(startup_32)
->  	movl	$(X86_CR0_PG | X86_CR0_WP | X86_CR0_PE), %eax
->  	movl	%eax, %cr0
->
-> +	# Check for and enable memory encryption support
-> +	movl	pa_tr_flags, %eax
-> +	bt	$TH_FLAGS_MEM_ENCRYPT_BIT, pa_tr_flags
+So the point of time this call is done, is, IINM, after we have
+enabled virtual mode. I.e., it is being done in start_kernel() and
+your callstack points at rest_init() which happens later in that same
+function.
 
-pa_tr_flags -> %eax ? Otherwise looks the previous line is useless.
+So IMO what you should be doing, instead, is doing efi_call_virt() in
+uv_bios_call() which should take care of everything.
 
-Thanks,
--Kai
+I think this naked efi_call() in uv_bios_call() should not be there
+but UV should be calling the _phys or _virt helpers from the EFI core.
 
-> +	jnc	.Ldone
-> +	movl	$MSR_K8_SYSCFG, %ecx
-> +	rdmsr
-> +	bt	$MSR_K8_SYSCFG_MEM_ENCRYPT_BIT, %eax
-> +	jc	.Ldone
-> +	bts	$MSR_K8_SYSCFG_MEM_ENCRYPT_BIT, %eax
-> +	wrmsr
-> +.Ldone:
-> +
->  	/*
->  	 * At this point we're in long mode but in 32bit compatibility mode
->  	 * with EFER.LME = 1, CS.L = 0, CS.D = 1 (and in turn
-> @@ -147,6 +160,7 @@ GLOBAL(trampoline_header)
->  	tr_start:		.space	8
->  	GLOBAL(tr_efer)		.space	8
->  	GLOBAL(tr_cr4)		.space	4
-> +	GLOBAL(tr_flags)	.space	4
->  END(trampoline_header)
->
->  #include "trampoline_common.S"
->
->
+Preferrably someone should go and audit all those EFI calls in UV and
+figure out which one to use, _phys or _virt depending on the point in
+time this call is being done.
+
+=46or example, uv_system_init() should all be _virt calls, obviously.
+And from a quick scan, most of the EFI calls are coming from there so
+everything should be _virt.
+
+Btw, uv_bios_call_reentrant() looks unused, might want to remove it
+while at it.
+
+Hmmm.
+
+--=20
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Nort=
+on, HRB 21284 (AG N=C3=BCrnberg)
+--=20
