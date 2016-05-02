@@ -1,59 +1,109 @@
-From: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Subject: re: efi: Add 'capsule' update support
-Date: Mon, 2 May 2016 21:25:00 +0300
-Message-ID: <20160502182500.GA3461@mwanda>
+From: Andy Lutomirski <luto@amacapital.net>
+Subject: Re: [RFC PATCH v1 00/18] x86: Secure Memory Encryption (AMD)
+Date: Mon, 2 May 2016 11:31:23 -0700
+Message-ID: <CALCETrWAP5hxQeVSwNx-XkO53-X3bX0LasjOuHxeRWCTob7JAA@mail.gmail.com>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+ <CALCETrUdrMAmE6Vgj6_PALdmRZVVKa3QDwJtO=YDTOQdox=rhQ@mail.gmail.com> <57211CAB.9040902@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <57211CAB.9040902@amd.com>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch <linux-arch@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, kvm list <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, X86 ML <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kasan-dev <kasan-dev@googlegroups.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@li>
 List-Id: linux-efi@vger.kernel.org
 
-Hello Matt Fleming,
+On Wed, Apr 27, 2016 at 1:10 PM, Tom Lendacky <thomas.lendacky@amd.com> wrote:
+> On 04/27/2016 09:39 AM, Andy Lutomirski wrote:
+>> On Tue, Apr 26, 2016 at 3:55 PM, Tom Lendacky <thomas.lendacky@amd.com> wrote:
+>>> This RFC patch series provides support for AMD's new Secure Memory
+>>> Encryption (SME) feature.
+>>>
+>>> SME can be used to mark individual pages of memory as encrypted through the
+>>> page tables. A page of memory that is marked encrypted will be automatically
+>>> decrypted when read from DRAM and will be automatically encrypted when
+>>> written to DRAM. Details on SME can found in the links below.
+>>
+>> Having read through the docs briefly, some questions:
+>>
+>> 1. How does the crypto work?  Is it straight AES-ECB?  Is it a
+>> tweakable mode?  If so, what does into the tweak?  For example, if I
+>> swap the ciphertext of two pages, does the plaintext of the pages get
+>> swapped?  If not, why not?
+>
+> The AES crypto uses a tweak such that two identical plaintexts at
+> different locations will have different ciphertext. So swapping the
+> ciphertext of two pages will not result in the plaintext being swapped.
 
-The patch f0133f3c5b8b: "efi: Add 'capsule' update support" from Apr
-25, 2016, leads to the following static checker warning:
+OK, makes sense.
 
-	drivers/firmware/efi/capsule.c:109 efi_capsule_supported()
-	warn: did you mean to pass the address of 'capsule'
+>
+>>
+>> 2. In SEV mode, how does the hypervisor relocate a physical backing
+>> page?  Does it simple move it and update the 2nd-level page tables?
+>> If so, is the result of decryption guaranteed to be garbage if it
+>> relocates a page and re-inserts it at the wrong guest physical
+>> address?
+>
+> For SEV mode, relocating a physical backing page takes extra steps.
+> There are APIs that are used to have the AMD Secure Processor create a
+> transportable encrypted page that can then be moved to a new location
+> in memory. After moving it to the new location the APIs are used to
+> haves the AMD Secure Processor re-encrypt the page for use with the
+> guests SEV key. Based on #1 above, just moving a page without invoking
+> the necessary APIs will result in the decryption returning garbage.
+>
+>>
+>> 3. In SEV mode, does anything prevent the hypervisor from resuming a
+>> guest with the wrong ASID, or is this all relying on the resulting
+>> corruption of the guest code and data to cause a crash?
+>
+> There is nothing that prevents resuming a guest with the wrong ASID.
+> This relies on the resulting corruption of the guest code/data to
+> cause a crash.
 
-drivers/firmware/efi/capsule.c
-    91  int efi_capsule_supported(efi_guid_t guid, u32 flags, size_t size, int *reset)
-    92  {
-    93          efi_capsule_header_t *capsule;
-    94          efi_status_t status;
-    95          u64 max_size;
-    96          int rv = 0;
-    97  
-    98          if (flags & ~EFI_CAPSULE_SUPPORTED_FLAG_MASK)
-    99                  return -EINVAL;
-   100  
-   101          capsule = kmalloc(sizeof(*capsule), GFP_KERNEL);
-   102          if (!capsule)
-   103                  return -ENOMEM;
-   104  
-   105          capsule->headersize = capsule->imagesize = sizeof(*capsule);
-   106          memcpy(&capsule->guid, &guid, sizeof(efi_guid_t));
-   107          capsule->flags = flags;
-   108  
-   109          status = efi.query_capsule_caps(&capsule, 1, &max_size, reset);
-                                                ^^^^^^^^
-If we modify capsule inside this function call then at the end of the
-function we aren't freeing the original pointer that we allocated.
+This all seems somewhat useful, but I almost guarantee that if there
+is ever anything economically important (or important for national
+security reasons, or simply something that sounds fun for an
+enterprising kid to break) that it *will* be broken in many creative
+ways.
 
-   110          if (status != EFI_SUCCESS) {
-   111                  rv = efi_status_to_err(status);
-   112                  goto out;
-   113          }
-   114  
-   115          if (size > max_size)
-   116                  rv = -ENOSPC;
-   117  out:
-   118          kfree(capsule);
-   119          return rv;
-   120  }
+Someone will break it by replaying old data through the VM, either to
+confuse control flow or to use some part of the VM code as an oracle
+with which to attack another part.
 
-regards,
-dan carpenter
+Someone else will break it by installing a #UD / #PF handler and using
+the resulting exceptions as an oracle.
+
+A third clever person will break it by carefully constructing a
+scenario in which randomizing 16 bytes of data has a high probability
+of letting then pwn your system.  (For example, what if the secured VM
+creates an RSA key and you can carefully interrupt it right after
+generating p and q.  Replace 16 bytes from the middle of both p and q
+(32 bytes total) with random garbage.  With reasonably high
+probability, the resulting p and q will no longer be prime.)
+
+Depending on how strong your ASID protection is, a fourth clever
+person will break it by replacing a bunch of the VM out from under the
+target while leaving the sensitive data in place and then will use
+some existing exploit or design issue to gain code execution in the
+modified VM.
+
+Also, I really hope that your tweakable cipher mode is at least CCA2
+secure, because attackers can absolutely hit it with adaptive chosen
+ciphertext attacks.  (Actually, attackers can alternate between
+adaptive chosen ciphertext and adaptive chosen plaintext.)
+
+And did the SEV implementation remember to encrypt the guest register
+state?  Because, if not, everything of importance will leak out
+through the VMCB and/or GPRs.
+
+But I guess it's better than nothing.
+
+--Andy
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
