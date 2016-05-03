@@ -1,66 +1,25 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: efi: Add 'capsule' update support
-Date: Tue, 3 May 2016 15:50:50 +0100
-Message-ID: <20160503145050.GY2839@codeblueprint.co.uk>
-References: <20160502182500.GA3461@mwanda>
+Subject: Re: [PATCH] efivarfs: make efivarfs_file_ioctl static.
+Date: Tue, 3 May 2016 15:56:00 +0100
+Message-ID: <20160503145600.GZ2839@codeblueprint.co.uk>
+References: <1462213506-1860-1-git-send-email-pjones@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160502182500.GA3461@mwanda>
+In-Reply-To: <1462213506-1860-1-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 02 May, at 09:25:00PM, Dan Carpenter wrote:
-> Hello Matt Fleming,
+On Mon, 02 May, at 02:25:06PM, Peter Jones wrote:
+> There are no callers except through the file_operations struct below
+> this, so it should be static like everything else here.
 > 
-> The patch f0133f3c5b8b: "efi: Add 'capsule' update support" from Apr
-> 25, 2016, leads to the following static checker warning:
-> 
-> 	drivers/firmware/efi/capsule.c:109 efi_capsule_supported()
-> 	warn: did you mean to pass the address of 'capsule'
-> 
-> drivers/firmware/efi/capsule.c
->     91  int efi_capsule_supported(efi_guid_t guid, u32 flags, size_t size, int *reset)
->     92  {
->     93          efi_capsule_header_t *capsule;
->     94          efi_status_t status;
->     95          u64 max_size;
->     96          int rv = 0;
->     97  
->     98          if (flags & ~EFI_CAPSULE_SUPPORTED_FLAG_MASK)
->     99                  return -EINVAL;
->    100  
->    101          capsule = kmalloc(sizeof(*capsule), GFP_KERNEL);
->    102          if (!capsule)
->    103                  return -ENOMEM;
->    104  
->    105          capsule->headersize = capsule->imagesize = sizeof(*capsule);
->    106          memcpy(&capsule->guid, &guid, sizeof(efi_guid_t));
->    107          capsule->flags = flags;
->    108  
->    109          status = efi.query_capsule_caps(&capsule, 1, &max_size, reset);
->                                                 ^^^^^^^^
-> If we modify capsule inside this function call then at the end of the
-> function we aren't freeing the original pointer that we allocated.
-> 
->    110          if (status != EFI_SUCCESS) {
->    111                  rv = efi_status_to_err(status);
->    112                  goto out;
->    113          }
->    114  
->    115          if (size > max_size)
->    116                  rv = -ENOSPC;
->    117  out:
->    118          kfree(capsule);
->    119          return rv;
->    120  }
+> Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  fs/efivarfs/file.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 
-We should be fine here, the firmware should not modify the argument
-that we pass since we're simply querying whether or not the capsule is
-supported.
-
-Is there a cleanup that you'd suggest making to silence the static
-checker warning?
+Thanks Peter, applied.
