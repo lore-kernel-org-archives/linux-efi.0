@@ -1,117 +1,79 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 3/3] x86/efi-bgrt: Switch all pr_err() to pr_notice() for invalid BGRT
-Date: Tue,  3 May 2016 20:29:41 +0100
-Message-ID: <1462303781-8686-4-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 2/3] x86/sysfb_efi: Fix valid BAR address range check
+Date: Tue,  3 May 2016 20:29:40 +0100
+Message-ID: <1462303781-8686-3-git-send-email-matt@codeblueprint.co.uk>
 References: <1462303781-8686-1-git-send-email-matt@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <stable-owner@vger.kernel.org>
 In-Reply-To: <1462303781-8686-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: stable-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Josh Boyer <jwboyer@fedoraproject.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Josh Triplett <josh@joshtriplett.org>, =?UTF-8?q?M=C3=B4she=20van=20der=20Sterre?= <me@moshe.nl>
+Cc: Wang YanQing <udknight@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, David Herrmann <dh.herrmann@gmail.com>, Peter Jones <pjones@redhat.com>, stable@vger.kernel.org, Tomi Valkeinen <tomi.valkeinen@ti.com>
 List-Id: linux-efi@vger.kernel.org
 
-=46rom: Josh Boyer <jwboyer@fedoraproject.org>
+From: Wang YanQing <udknight@gmail.com>
 
-The promise of pretty boot splashes from firmware via BGRT was at
-best only that; a promise.  The kernel diligently checks to make
-sure the BGRT data firmware gives it is valid, and dutifully warns
-the user when it isn't.  However, it does so via the pr_err log
-level which seems unnecessary.  The user cannot do anything about
-this and there really isn't an error on the part of Linux to
-correct.
+We can't just break out when meet start is equal to zero,
+this will cause us to miss valid address ranges in later BARs.
 
-This lowers the log level by using pr_notice instead.  Users will
-no longer have their boot process uglified by the kernel reminding
-us that firmware can and often is broken when the 'quiet' kernel
-parameter is specified.  Ironic, considering BGRT is supposed to
-make boot pretty to begin with.
+On the other hand, it isn't enough to test start only
+for below situation:
 
-Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
-Cc: M=C3=B4she van der Sterre <me@moshe.nl>
+  0(start) <= lfb_base < end
+
+Due to the BUG this patch fix, I can't use video=efifb:
+boot parameter to get efifb on my new ThinkPad E550 for
+my old linux system hard disk with 3.10 kernel. In 3.10,
+efifb is the only choice due to DRM/I915 in it doesn't
+support the GPU.
+
+This patch also add a trivial optimization, break out
+after we find the address range is valid without test
+later BARs.
+
+Signed-off-by: Wang YanQing <udknight@gmail.com>
+Reviewed-by: Peter Jones <pjones@redhat.com>
+Cc: David Herrmann <dh.herrmann@gmail.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
+Cc: <stable@vger.kernel.org>
+[ Updated changelog ]
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/platform/efi/efi-bgrt.c | 18 +++++++++---------
- 1 file changed, 9 insertions(+), 9 deletions(-)
+ arch/x86/kernel/sysfb_efi.c | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/e=
-fi-bgrt.c
-index a2433817c987..6a2f5691b1ab 100644
---- a/arch/x86/platform/efi/efi-bgrt.c
-+++ b/arch/x86/platform/efi/efi-bgrt.c
-@@ -43,40 +43,40 @@ void __init efi_bgrt_init(void)
- 		return;
-=20
- 	if (bgrt_tab->header.length < sizeof(*bgrt_tab)) {
--		pr_err("Ignoring BGRT: invalid length %u (expected %zu)\n",
-+		pr_notice("Ignoring BGRT: invalid length %u (expected %zu)\n",
- 		       bgrt_tab->header.length, sizeof(*bgrt_tab));
- 		return;
- 	}
- 	if (bgrt_tab->version !=3D 1) {
--		pr_err("Ignoring BGRT: invalid version %u (expected 1)\n",
-+		pr_notice("Ignoring BGRT: invalid version %u (expected 1)\n",
- 		       bgrt_tab->version);
- 		return;
- 	}
- 	if (bgrt_tab->status & 0xfe) {
--		pr_err("Ignoring BGRT: reserved status bits are non-zero %u\n",
-+		pr_notice("Ignoring BGRT: reserved status bits are non-zero %u\n",
- 		       bgrt_tab->status);
- 		return;
- 	}
- 	if (bgrt_tab->image_type !=3D 0) {
--		pr_err("Ignoring BGRT: invalid image type %u (expected 0)\n",
-+		pr_notice("Ignoring BGRT: invalid image type %u (expected 0)\n",
- 		       bgrt_tab->image_type);
- 		return;
- 	}
- 	if (!bgrt_tab->image_address) {
--		pr_err("Ignoring BGRT: null image address\n");
-+		pr_notice("Ignoring BGRT: null image address\n");
- 		return;
- 	}
-=20
- 	image =3D memremap(bgrt_tab->image_address, sizeof(bmp_header), MEMRE=
-MAP_WB);
- 	if (!image) {
--		pr_err("Ignoring BGRT: failed to map image header memory\n");
-+		pr_notice("Ignoring BGRT: failed to map image header memory\n");
- 		return;
- 	}
-=20
- 	memcpy(&bmp_header, image, sizeof(bmp_header));
- 	memunmap(image);
- 	if (bmp_header.id !=3D 0x4d42) {
--		pr_err("Ignoring BGRT: Incorrect BMP magic number 0x%x (expected 0x4=
-d42)\n",
-+		pr_notice("Ignoring BGRT: Incorrect BMP magic number 0x%x (expected =
-0x4d42)\n",
- 			bmp_header.id);
- 		return;
- 	}
-@@ -84,14 +84,14 @@ void __init efi_bgrt_init(void)
-=20
- 	bgrt_image =3D kmalloc(bgrt_image_size, GFP_KERNEL | __GFP_NOWARN);
- 	if (!bgrt_image) {
--		pr_err("Ignoring BGRT: failed to allocate memory for image (wanted %=
-zu bytes)\n",
-+		pr_notice("Ignoring BGRT: failed to allocate memory for image (wante=
-d %zu bytes)\n",
- 		       bgrt_image_size);
- 		return;
- 	}
-=20
- 	image =3D memremap(bgrt_tab->image_address, bmp_header.size, MEMREMAP=
-_WB);
- 	if (!image) {
--		pr_err("Ignoring BGRT: failed to map image memory\n");
-+		pr_notice("Ignoring BGRT: failed to map image memory\n");
- 		kfree(bgrt_image);
- 		bgrt_image =3D NULL;
- 		return;
---=20
+diff --git a/arch/x86/kernel/sysfb_efi.c b/arch/x86/kernel/sysfb_efi.c
+index b285d4e8c68e..5da924bbf0a0 100644
+--- a/arch/x86/kernel/sysfb_efi.c
++++ b/arch/x86/kernel/sysfb_efi.c
+@@ -106,14 +106,24 @@ static int __init efifb_set_system(const struct dmi_system_id *id)
+ 					continue;
+ 				for (i = 0; i < DEVICE_COUNT_RESOURCE; i++) {
+ 					resource_size_t start, end;
++					unsigned long flags;
++
++					flags = pci_resource_flags(dev, i);
++					if (!(flags & IORESOURCE_MEM))
++						continue;
++
++					if (flags & IORESOURCE_UNSET)
++						continue;
++
++					if (pci_resource_len(dev, i) == 0)
++						continue;
+ 
+ 					start = pci_resource_start(dev, i);
+-					if (start == 0)
+-						break;
+ 					end = pci_resource_end(dev, i);
+ 					if (screen_info.lfb_base >= start &&
+ 					    screen_info.lfb_base < end) {
+ 						found_bar = 1;
++						break;
+ 					}
+ 				}
+ 			}
+-- 
 2.7.3
