@@ -1,145 +1,226 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH] efi/capsule: Make efi_capsule_pending() lockless
-Date: Tue, 3 May 2016 11:02:29 +0200
-Message-ID: <20160503090229.GC27540@pd.tnic>
-References: <1462054407-9735-1-git-send-email-matt@codeblueprint.co.uk>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [BUG] x86/efi: MMRs no longer properly mapped after switch to
+ isolated page table
+Date: Tue, 3 May 2016 11:48:20 +0200
+Message-ID: <20160503094820.GA27503@pd.tnic>
+References: <20160427154132.GB113599@stormcage.americas.sgi.com>
+ <20160427225122.GG21282@pd.tnic>
+ <20160428014128.GF113599@stormcage.americas.sgi.com>
+ <20160428125711.GB9164@pd.tnic>
+ <20160429154119.GI113599@stormcage.americas.sgi.com>
+ <20160502100222.GB25669@pd.tnic>
+ <20160502222719.GW113599@stormcage.americas.sgi.com>
+ <20160503001036.GX113599@stormcage.americas.sgi.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1462054407-9735-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Kweh Hock Leong <hock.leong.kweh@intel.com>, Bryan O'Donoghue <pure.logic@nexus-software.ie>, joeyli <jlee@suse.com>
+In-Reply-To: <20160503001036.GX113599-7ppMa7wkY9tKToyKb8PD+Zs2JHu2awxn0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, mike travis <travis-sJ/iWh9BUns@public.gmane.org>, Nathan Zimmer <nzimmer-sJ/iWh9BUns@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Apr 30, 2016 at 11:13:27PM +0100, Matt Fleming wrote:
-> Taking a mutex in the reboot path is bogus because we cannot sleep
-> with interrupts disabled, such as when rebooting due to panic(),
-> 
->  [   18.069005] BUG: sleeping function called from invalid context at kernel/locking/mutex.c:97
->  [   18.071639] in_atomic(): 0, irqs_disabled(): 1, pid: 7, name: rcu_sched
->  [   18.085940] Call Trace:
->  [   18.086911]  [<ffffffff8142e53a>] dump_stack+0x63/0x89
->  [   18.088260]  [<ffffffff810a1048>] ___might_sleep+0xd8/0x120
->  [   18.089860]  [<ffffffff810a10d9>] __might_sleep+0x49/0x80
->  [   18.091272]  [<ffffffff818f5110>] mutex_lock+0x20/0x50
->  [   18.092636]  [<ffffffff81771edd>] efi_capsule_pending+0x1d/0x60
->  [   18.094272]  [<ffffffff8104e749>] native_machine_emergency_restart+0x59/0x280
->  [   18.095975]  [<ffffffff8104e5d9>] machine_emergency_restart+0x19/0x20
->  [   18.097685]  [<ffffffff8109d4b8>] emergency_restart+0x18/0x20
->  [   18.099303]  [<ffffffff81172d6d>] panic+0x1ba/0x217
+On Mon, May 02, 2016 at 07:10:36PM -0500, Alex Thorlton wrote:
+> +#define uv_call_virt(f, args...) \
+> +({                                                                  =
+   \
+> +       efi_status_t __s;                                            =
+   \
+> +       kernel_fpu_begin();                                          =
+   \
+> +       __s =3D ((efi_##f##_t __attribute__((regparm(0)))*)          =
+     \
+> +               f)(args);                                            =
+   \
+> +       kernel_fpu_end();                                            =
+   \
+> +       __s;                                                         =
+   \
+> +})
 
-Please remove all stuff in [] and the offsets and leave only the call
-trace with the function names. The numbers are useless and only get in
-the way.
+Right, can you use the EFI-ones in
+drivers/firmware/efi/runtime-wrappers.c directly?
 
-> In this case all other CPUs will have been stopped by the time we
-> execute the platform reboot code, so 'capsule_pending' cannot change
-> under our feet. We wouldn't care even if it could since we cannot wait
-> for it complete.
-> 
-> Also, instead of relying on the external 'system_state' variable just
-> use a reboot notifier, so we can set 'stop_capsules' while holding
-> 'capsule_mutex', thereby avoiding a race where system_state is updated
-> while we're in the middle of efi_capsule_update_locked() (since CPUs
-> won't have been stopped at that point).
+ (So they're going to land there, I'm staring at latest -tip and those =
+calls
+  have become all fancy now:
 
-So I'm wondering: why can't we push all that logic higher up the API
-chain, say in efi_capsule_open() or efi_capsule_write() or so?
+#define efi_call_virt(f, args...)                                      =
+ \
+({                                                                     =
+ \
+        efi_status_t __s;                                              =
+ \
+        unsigned long flags;                                           =
+ \
+        arch_efi_call_virt_setup();                                    =
+ \
+        local_save_flags(flags);                                       =
+ \
+        __s =3D arch_efi_call_virt(f, args);                           =
+   \
+        efi_call_virt_check_flags(flags, __stringify(f));              =
+ \
+        arch_efi_call_virt_teardown();                                 =
+ \
+        __s;                                                           =
+ \
+})
 
-I mean, userspace can either reboot *or* update capsules but both? Both
-would be kinda nasty, like, 2 admins doing that stuff in parallel...
+with efi_call_virt_check_flags() checking for IRQ flags corruption... A=
+nd so
+on, but that's beside the point... )
 
-> 
-> Cc: Borislav Petkov <bp@alien8.de>
-> Cc: Kweh Hock Leong <hock.leong.kweh@intel.com>
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> Cc: Bryan O'Donoghue <pure.logic@nexus-software.ie>
-> Cc: joeyli <jlee@suse.com>
-> Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-> ---
->  drivers/firmware/efi/capsule.c | 36 ++++++++++++++++++++++++++----------
->  1 file changed, 26 insertions(+), 10 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
-> index 0de55944ac0b..4703dc9b8fbd 100644
-> --- a/drivers/firmware/efi/capsule.c
-> +++ b/drivers/firmware/efi/capsule.c
-> @@ -22,11 +22,12 @@ typedef struct {
->  } efi_capsule_block_desc_t;
->  
->  static bool capsule_pending;
-> +static bool stop_capsules;
->  static int efi_reset_type = -1;
->  
->  /*
->   * capsule_mutex serialises access to both capsule_pending and
-> - * efi_reset_type.
-> + * efi_reset_type and stop_capsules.
->   */
->  static DEFINE_MUTEX(capsule_mutex);
->  
-> @@ -50,18 +51,13 @@ static DEFINE_MUTEX(capsule_mutex);
->   */
->  bool efi_capsule_pending(int *reset_type)
->  {
-> -	bool rv = false;
-> -
-> -	mutex_lock(&capsule_mutex);
->  	if (!capsule_pending)
-> -		goto out;
-> +		return false;
->  
->  	if (reset_type)
->  		*reset_type = efi_reset_type;
-> -	rv = true;
-> -out:
-> -	mutex_unlock(&capsule_mutex);
-> -	return rv;
 > +
-> +	return true;
->  }
->  
+>  /* Use this macro if your virtual call does not return any value */
+>  #define __efi_call_virt(f, args...) \
+>  ({                                                                  =
+   \
+> @@ -104,6 +114,32 @@ struct efi_scratch {
+>         __s;                                                         =
+   \
+>  })
+> =20
+> +#define uv_call_virt(f, ...)                                        =
+   \
+> +({                                                                  =
+   \
+> +       efi_status_t __s;                                            =
+   \
+> +                                                                    =
+   \
+> +       efi_sync_low_kernel_mappings();                              =
+   \
+> +       preempt_disable();                                           =
+   \
+> +       __kernel_fpu_begin();                                        =
+   \
+> +                                                                    =
+   \
+> +       if (efi_scratch.use_pgd) {                                   =
+   \
+> +               efi_scratch.prev_cr3 =3D read_cr3();                 =
+     \
+> +               write_cr3((unsigned long)efi_scratch.efi_pgt);       =
+   \
+> +               __flush_tlb_all();                                   =
+   \
+> +       }                                                            =
+   \
+> +                                                                    =
+   \
+> +       __s =3D efi_call((void *)f, __VA_ARGS__); \
+> +                                                                    =
+   \
+> +       if (efi_scratch.use_pgd) {                                   =
+   \
+> +               write_cr3(efi_scratch.prev_cr3);                     =
+   \
+> +               __flush_tlb_all();                                   =
+   \
+> +       }                                                            =
+   \
+> +                                                                    =
+   \
+> +       __kernel_fpu_end();                                          =
+   \
+> +       preempt_enable();                                            =
+   \
+> +       __s;                                                         =
+   \
+> +})
+> +
 >  /*
-> @@ -176,7 +172,7 @@ efi_capsule_update_locked(efi_capsule_header_t *capsule,
->  	 * whether to force an EFI reboot), and we're racing against
->  	 * that call. Abort in that case.
->  	 */
-> -	if (unlikely(system_state == SYSTEM_RESTART)) {
-> +	if (unlikely(stop_capsules)) {
->  		pr_warn("Capsule update raced with reboot, aborting.\n");
->  		return -EINVAL;
->  	}
+>   * All X86_64 virt calls return non-void values. Thus, use non-void =
+call for
+>   * virt calls that would be void on X86_32.
+>=20
+> diff --git a/arch/x86/platform/uv/bios_uv.c b/arch/x86/platform/uv/bi=
+os_uv.c
+> index 1584cbe..6e99f81 100644
+> --- a/arch/x86/platform/uv/bios_uv.c
+> +++ b/arch/x86/platform/uv/bios_uv.c
+> @@ -39,8 +39,8 @@ s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u6=
+4 a2, u64 a3, u64 a4, u64 a5)
+>                  */
+>                 return BIOS_STATUS_UNIMPLEMENTED;
+> =20
+> -       ret =3D efi_call((void *)__va(tab->function), (u64)which,
+> -                       a1, a2, a3, a4, a5);
+> +       ret =3D uv_call_virt(tab->function, (u64)which, a1, a2, a3, a=
+4, a5);
+> +
 
-... also, what happens if stop_capsules gets set here
+That could be simply
 
-<---
+		efi_call_virt(tab->function, ...)
 
-after the check? We will continue trying to update but the box is
-already rebooting too. I think to solve this here properly, you'd need
-to be able to hold off reboot temporarily until you either update the
-capsule successfully or fail.
+methinks.
 
-But that sounds nasty.
+>         return ret;
+>  }
+>  EXPORT_SYMBOL_GPL(uv_bios_call);
+> --->8
+>=20
+> Note that the only change I made to efi_call_virt was to change
+> efi.systab->runtime->f to simply f in the efi_call line.  This works =
+up
+> until we try to do callbacks from a loaded module.  When we try that =
+we
+> hit this:
+>=20
+> [   56.232086] BUG: unable to handle kernel paging request at fffffff=
+f8106148f
+> [   56.239880] IP: [<fffffffedbb408ce>] 0xfffffffedbb408ce
+> [   56.245721] PGD 8698e0067 PUD 1a08063 PMD 10001e1=20
 
-So the first case where the capsule update is started after reboot is
-easy: the reboot notifier disables capsules update, done.
+PMD looks ok to me.
 
-The second one where a reboot comes *after* the capsule update has
-started is a bit tricky. My current thinking is to maybe disable
-virt_efi_update_capsule() with the reboot notifier. But we'd still need
-some sort of a synchronization with reboot there too, if we want to be
-absolutely clean.
+Have you tried CONFIG_EFI_PGT_DUMP ? It will dump to dmesg so you might
+be able to spot stuff.
 
-Something like make both the reboot notifier and
-virt_efi_update_capsule() grab efi_runtime_lock or so which
-virt_efi_update_capsule() already does...
+Also, you could dump them from debugfs *right* before loading the modul=
+e
+and then look at stuff.
 
-I could very well be missing something though...
+Also 2, booting with efi=3Ddebug should give you how the EFI regions ge=
+t
+mapped.
 
--- 
+=2E..
+
+> The bad paging request here appears to be on the:
+>=20
+> if (efi_scratch.use_pgd)
+>=20
+> Line of uv_call_virt.  It looks like it's having trouble accessing th=
+e
+> efi_scratch struct using the EFI page table.  I'm not sure why this
+> is an issue with callbacks from modules and not with the ones in
+> uv_system_init and friends.
+
+Just this one module or all modules doing EFI calls?
+
+> I'll keep investigating the module issue.  Looks like we're getting
+> closer to sorting this out!
+>=20
+> Let me know if you have thoughts about the way I'm getting stuff
+> working.  I'm thinking there's probably a better way to do this than =
+by
+> copying the whole efi_call_virt macro - this was a quick and dirty
+> solution.
+
+Yeah, try using the generic facilities. We should be able to accomodate
+all users...
+
+HTH.
+
+--=20
 Regards/Gruss,
     Boris.
 
-ECO tip #101: Trim your mails when you reply.
+SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Nort=
+on, HRB 21284 (AG N=C3=BCrnberg)
+--=20
