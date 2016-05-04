@@ -1,44 +1,93 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 2/3] x86/sysfb_efi: Fix valid BAR address range check
-Date: Wed, 4 May 2016 11:29:05 +0100
-Message-ID: <20160504102905.GF2839@codeblueprint.co.uk>
-References: <1462303781-8686-1-git-send-email-matt@codeblueprint.co.uk>
- <1462303781-8686-3-git-send-email-matt@codeblueprint.co.uk>
- <20160504063524.GB12846@gmail.com>
- <20160504092510.GD2839@codeblueprint.co.uk>
- <20160504102340.GA4470@gmail.com>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [BUG] x86/efi: MMRs no longer properly mapped after switch to
+ isolated page table
+Date: Wed, 4 May 2016 12:36:36 +0200
+Message-ID: <20160504103636.GA21554@pd.tnic>
+References: <20160427154132.GB113599@stormcage.americas.sgi.com>
+ <20160427225122.GG21282@pd.tnic>
+ <20160428014128.GF113599@stormcage.americas.sgi.com>
+ <20160428125711.GB9164@pd.tnic>
+ <20160429154119.GI113599@stormcage.americas.sgi.com>
+ <20160502100222.GB25669@pd.tnic>
+ <20160502222719.GW113599@stormcage.americas.sgi.com>
+ <20160503001036.GX113599@stormcage.americas.sgi.com>
+ <20160503094820.GA27503@pd.tnic>
+ <20160503184751.GE113599@stormcage.americas.sgi.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160504102340.GA4470-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20160503184751.GE113599-7ppMa7wkY9tKToyKb8PD+Zs2JHu2awxn0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Wang YanQing <udknight-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Herrmann <dh.herrmann-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tomi Valkeinen <tomi.valkeinen-l0cyMroinI0@public.gmane.org>
+To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, mike travis <travis-sJ/iWh9BUns@public.gmane.org>, Nathan Zimmer <nzimmer-sJ/iWh9BUns@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 04 May, at 12:23:40PM, Ingo Molnar wrote:
-> 
-> * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> 
-> > On Wed, 04 May, at 08:35:24AM, Ingo Molnar wrote:
-> > > 
-> > > * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> > > 
-> > > > From: Wang YanQing <udknight-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> > > > 
-> > > > We can't just break out when meet start is equal to zero,
-> > > 
-> > > Hm, wot?
-> > 
-> > The existing code treats address 0x0 as invalid for a PCI BAR range
-> > start address, but 0x0 is actually possible and legitimate, so we
-> > shouldn't be breaking out of the loop.
-> 
-> Yeah, so I just don't understand the 'when meet start is equal to zero' part - 
-> what does it mean?
+On Tue, May 03, 2016 at 01:47:51PM -0500, Alex Thorlton wrote:
+> I think this will work for us, for the most part.  Only issue is that
+> the efi_call_virt macro is only accessible from inside
+> runtime-wrappers.c.  If we could pull that macro (and whatever else i=
+t
+> needs) up to the header file, I think that might work for us.  Not su=
+re
+> if that's the appropriate solution, but it's a start.
 
-I suspect it means "when start is equal to zero" or "when we encounter
-the scenario where start is equal to zero".
+Should be doable. You could give it a try and see how ugly it can get.
 
-Wang?
+> Yes, I do have CONFIG_EFI_PGT_DUMP=3Dy.  I don't *think* I see anythi=
+ng
+> strange in there, but I could be missing something.  I will send you =
+a
+> full dump of my log buffer wit MLs et. al. off of Cc.
+
+Sure.
+
+> Take note that the Oops bits here indicate that it was a *write* from
+> kernel space that triggered this most recent Oops, whereas the ones w=
+e
+> were hitting before were all just missing pages in the mappings.
+>=20
+> This means my suggestiong about the "if(efi_scratch..." bit was wrong=
+=2E
+> This issue is still rolling around in my head.  I'll address it below=
+=2E
+
+One thing I don't see in your uv_call_virt() is you're not grabbing
+efi_runtime_lock like the rest of the EFI callers do. And there's
+__wake_up_common() somewhere there in the callstack, not on the current
+frame but there's also another uv_bios_call() in there and this all
+looks like some locking issue...
+
+So please convert it to the generic one first, do the calls as runtime
+services in drivers/firmware/efi/runtime-wrappers.c do and we can
+continue debugging.
+
+> This is probably the answer for the future, when we can expect the
+> changes to these macros be merged with the mainline kernel, but I don=
+'t
+> know exactly how long it will be before that happens.
+
+What's the hurry exactly here? You want stuff fixed in 4.6 when it
+releases in less than two weeks?
+
+Lemme try to understand the fallout range: that's only UV1 or UV3 too?
+Because the latest oops comes from UV3...
+
+If it is UV1 only, I'd say we don't care since you guys wanted to even
+kill that support :-)
+
+Btw, does "efi=3Dold_memmap" fix things and could it be used as an inte=
+rim
+workaround until we've fixed everything properly and stuff has trickled
+into -stable.?
+
+Thanks.
+
+--=20
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Nort=
+on, HRB 21284 (AG N=C3=BCrnberg)
+--=20
