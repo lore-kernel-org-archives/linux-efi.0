@@ -1,25 +1,35 @@
-From: poma <pomidorabelisima-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Support for generating and verifying the signature of memory snapshot
- image
-Date: Thu, 5 May 2016 07:50:20 +0200
-Message-ID: <572ADF1C.20001@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [GIT PULL v2] EFI urgent fix
+Date: Thu,  5 May 2016 14:14:20 +0100
+Message-ID: <1462454061-21561-1-git-send-email-matt@codeblueprint.co.uk>
+Return-path: <stable-owner@vger.kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, David Herrmann <dh.herrmann@gmail.com>, Peter Jones <pjones@redhat.com>, stable@vger.kernel.org, Tomi Valkeinen <tomi.valkeinen@ti.com>, Wang YanQing <udknight@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
+Folks, please pull the following with from Wang which includes a
+rewritten changelog as compared with the previous pull request.
 
-i.e.
-"Signature verification of hibernate snapshot"
+The following changes since commit 04974df8049fc4240d22759a91e035082ccd18b4:
 
-Hello guys,
-is there any chance that the 'UEFI-S4-VERIFIED' patchset finally "enter the dragon", i.e. mainline?
+  Linux 4.6-rc6 (2016-05-01 15:52:31 -0700)
 
+are available in the git repository at:
 
-Ref.
-https://lkml.org/lkml/2015/8/11/47
-https://bugzilla.redhat.com/show_bug.cgi?id=1330335
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+
+for you to fetch changes up to 8491332837eed61cd5d47613b33cba90b809f36a:
+
+  x86/sysfb_efi: Fix valid BAR address range check (2016-05-05 13:14:04 +0100)
+
+----------------------------------------------------------------
+ * Fix sysfb_efi to detect BARs starting at 0x0, which otherwise makes
+   video=efifb not work on some the ThinkPad E550 - Wang YanQing
+
+----------------------------------------------------------------
+Wang YanQing (1):
+      x86/sysfb_efi: Fix valid BAR address range check
+
+ arch/x86/kernel/sysfb_efi.c | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
