@@ -1,69 +1,116 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [GIT PULL 0/5] EFI changes for v4.7
-Date: Fri,  6 May 2016 22:39:26 +0100
-Message-ID: <1462570771-13324-1-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 2/5] efibc: Fix excessive stack footprint warning
+Date: Fri,  6 May 2016 22:39:28 +0100
+Message-ID: <1462570771-13324-3-git-send-email-matt@codeblueprint.co.uk>
+References: <1462570771-13324-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1462570771-13324-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Borislav Petkov <bp@alien8.de>, Bryan O'Donoghue <pure.logic@nexus-software.ie>, Dan Carpenter <dan.carpenter@oracle.com>, Jeremy Compostella <jeremy.compostella@intel.com>, Jeremy Kerr <jk@ozlabs.org>, joeyli <jlee@suse.com>, Julia Lawall <Julia.Lawall@lip6.fr>, Kweh Hock Leong <hock.leong.kweh@intel.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Peter Jones <pjones@redhat.com>, Saurabh Sengar <saurabh.truth@gmail.com>, Vaishali Thakkar <vaishali.thakkar@oracle.com>
+Cc: Jeremy Compostella <jeremy.compostella@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Arnd Bergmann <arnd@arndb.de>
 List-Id: linux-efi@vger.kernel.org
 
-Folks, this is the second pull request containing v4.7 material. The
-commits are listed in priority order, with the first patch fixing an
-oops in the EFI capsule code sitting in tip/efi/core, and the rest
-being a compiler warning fix, static checker fix, and a couple of
-cleanups.
+From: Jeremy Compostella <jeremy.compostella@intel.com>
 
-The following changes since commit 0ec7ae928a9c19c2b7b8054507d5694a2597065e:
+gcc complains about a newly added file for the EFI Bootloader Control:
 
-  efi: Remove unnecessary (and buggy) .memmap initialization from the Xen EFI driver (2016-04-29 11:06:15 +0200)
+drivers/firmware/efi/efibc.c: In function 'efibc_set_variable':
+drivers/firmware/efi/efibc.c:53:1: error: the frame size of 2272 bytes is larger than 1024 bytes [-Werror=frame-larger-than=]
 
-are available in the git repository at:
+The problem is the declaration of a local variable of type struct
+efivar_entry, which is by itself larger than the warning limit of 1024
+bytes.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+Use dynamic memory allocation instead of stack memory for the entry
+object.
 
-for you to fetch changes up to 20948c1d9fdefa7acfaa84046f59adce9ef00f2e:
+This patch also fixes a potential buffer overflow.
 
-  efivarfs: Make efivarfs_file_ioctl static (2016-05-05 16:52:19 +0100)
+Reported-by: Ingo Molnar <mingo@kernel.org>
+Reported-by: Arnd Bergmann <arnd@arndb.de>
+Signed-off-by: Jeremy Compostella <jeremy.compostella@intel.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+[ Updated changelog to include gcc error ]
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+---
+ drivers/firmware/efi/efibc.c | 34 +++++++++++++++++++++++-----------
+ 1 file changed, 23 insertions(+), 11 deletions(-)
 
-----------------------------------------------------------------
- * Fix an oops in the EFI capsule code reported by the 0day bot
-   because efi_capsule_pending() was grabbing a mutex in the emergency
-   reboot path - Matt Fleming
-
- * Fix a compiler warning about excessive stack usage in the new efibc
-   driver by kmalloc'ing the efivar_entry object - Jeremy Compostella
-
- * Dan Carpenter reported that it's potentially unsafe to pass the
-   address of a pointer to the firmware in efi_capsule_supported().
-   Instead we can skip the dynamic allocation entirely and put the
-   capsule object on the stack - Matt Fleming
-
- * Simplify the locking in the efivars code by merging two of
-   efivar_init()'s parameters into one - Julia Lawall
-
- * Cleanup efivarfs_file_ioctl by marking it as static since it has no
-   external users - Peter Jones
-
-----------------------------------------------------------------
-Jeremy Compostella (1):
-      efibc: Fix excessive stack footprint warning
-
-Julia Lawall (1):
-      efi: Merge boolean flag arguments
-
-Matt Fleming (2):
-      efi/capsule: Make efi_capsule_pending() lockless
-      efi/capsule: Move 'capsule' to the stack in efi_capsule_supported()
-
-Peter Jones (1):
-      efivarfs: Make efivarfs_file_ioctl static
-
- drivers/firmware/efi/capsule.c | 65 ++++++++++++++++++++++++------------------
- drivers/firmware/efi/efibc.c   | 34 +++++++++++++++-------
- drivers/firmware/efi/efivars.c |  5 ++--
- drivers/firmware/efi/vars.c    | 23 +++++++--------
- fs/efivarfs/file.c             |  2 +-
- fs/efivarfs/super.c            |  3 +-
- include/linux/efi.h            |  3 +-
- 7 files changed, 75 insertions(+), 60 deletions(-)
+diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
+index 2e0c7ccd9d9e..8dd0c7085e59 100644
+--- a/drivers/firmware/efi/efibc.c
++++ b/drivers/firmware/efi/efibc.c
+@@ -17,6 +17,7 @@
+ #include <linux/efi.h>
+ #include <linux/module.h>
+ #include <linux/reboot.h>
++#include <linux/slab.h>
+ 
+ static void efibc_str_to_str16(const char *str, efi_char16_t *str16)
+ {
+@@ -28,41 +29,52 @@ static void efibc_str_to_str16(const char *str, efi_char16_t *str16)
+ 	str16[i] = '\0';
+ }
+ 
+-static void efibc_set_variable(const char *name, const char *value)
++static int efibc_set_variable(const char *name, const char *value)
+ {
+ 	int ret;
+ 	efi_guid_t guid = LINUX_EFI_LOADER_ENTRY_GUID;
+-	struct efivar_entry entry;
++	struct efivar_entry *entry;
+ 	size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
+ 
+-	if (size > sizeof(entry.var.Data))
++	if (size > sizeof(entry->var.Data)) {
+ 		pr_err("value is too large");
++		return -EINVAL;
++	}
+ 
+-	efibc_str_to_str16(name, entry.var.VariableName);
+-	efibc_str_to_str16(value, (efi_char16_t *)entry.var.Data);
+-	memcpy(&entry.var.VendorGuid, &guid, sizeof(guid));
++	entry = kmalloc(sizeof(*entry), GFP_KERNEL);
++	if (!entry) {
++		pr_err("failed to allocate efivar entry");
++		return -ENOMEM;
++	}
+ 
+-	ret = efivar_entry_set(&entry,
++	efibc_str_to_str16(name, entry->var.VariableName);
++	efibc_str_to_str16(value, (efi_char16_t *)entry->var.Data);
++	memcpy(&entry->var.VendorGuid, &guid, sizeof(guid));
++
++	ret = efivar_entry_set(entry,
+ 			       EFI_VARIABLE_NON_VOLATILE
+ 			       | EFI_VARIABLE_BOOTSERVICE_ACCESS
+ 			       | EFI_VARIABLE_RUNTIME_ACCESS,
+-			       size, entry.var.Data, NULL);
++			       size, entry->var.Data, NULL);
+ 	if (ret)
+ 		pr_err("failed to set %s EFI variable: 0x%x\n",
+ 		       name, ret);
++
++	kfree(entry);
++	return ret;
+ }
+ 
+ static int efibc_reboot_notifier_call(struct notifier_block *notifier,
+ 				      unsigned long event, void *data)
+ {
+ 	const char *reason = "shutdown";
++	int ret;
+ 
+ 	if (event == SYS_RESTART)
+ 		reason = "reboot";
+ 
+-	efibc_set_variable("LoaderEntryRebootReason", reason);
+-
+-	if (!data)
++	ret = efibc_set_variable("LoaderEntryRebootReason", reason);
++	if (ret || !data)
+ 		return NOTIFY_DONE;
+ 
+ 	efibc_set_variable("LoaderEntryOneShot", (char *)data);
+-- 
+2.7.3
