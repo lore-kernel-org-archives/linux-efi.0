@@ -1,93 +1,141 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 3/5] efi/capsule: Move 'capsule' to the stack in efi_capsule_supported()
-Date: Fri,  6 May 2016 22:39:29 +0100
-Message-ID: <1462570771-13324-4-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 4/5] efi: Merge boolean flag arguments
+Date: Fri,  6 May 2016 22:39:30 +0100
+Message-ID: <1462570771-13324-5-git-send-email-matt@codeblueprint.co.uk>
 References: <1462570771-13324-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1462570771-13324-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Bryan O'Donoghue <pure.logic@nexus-software.ie>, Dan Carpenter <dan.carpenter@oracle.com>, joeyli <jlee@suse.com>, Kweh Hock Leong <hock.leong.kweh@intel.com>
+Cc: Julia Lawall <Julia.Lawall@lip6.fr>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Jeremy Kerr <jk@ozlabs.org>, Matthew Garrett <mjg59@srcf.ucam.org>, Saurabh Sengar <saurabh.truth@gmail.com>, Vaishali Thakkar <vaishali.thakkar@oracle.com>
 List-Id: linux-efi@vger.kernel.org
 
-Dan reports that passing the address of the pointer to the kmalloc()'d
-memory for 'capsule' is dangerous,
+From: Julia Lawall <Julia.Lawall@lip6.fr>
 
- "drivers/firmware/efi/capsule.c:109 efi_capsule_supported()
-  warn: did you mean to pass the address of 'capsule'
+The parameters atomic and duplicates of efivar_init always have opposite
+values.  Drop the parameter atomic, replace the uses of !atomic with
+duplicates, and update the call sites accordingly.
 
-   108
-   109          status = efi.query_capsule_caps(&capsule, 1, &max_size, reset);
-                                                ^^^^^^^^
-  If we modify capsule inside this function call then at the end of the
-  function we aren't freeing the original pointer that we allocated."
+The code using duplicates is slightly reorganized with an else, to avoid
+duplicating the lock code.
 
-Ard noted that we don't even need to call kmalloc() since the object
-we allocate isn't very big and doesn't need to persist after the
-function returns.
-
-Place 'capsule' on the stack instead.
-
-Suggested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Kweh Hock Leong <hock.leong.kweh@intel.com>
-Cc: Bryan O'Donoghue <pure.logic@nexus-software.ie>
-Cc: joeyli <jlee@suse.com>
+Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: Jeremy Kerr <jk@ozlabs.org>
+Cc: Vaishali Thakkar <vaishali.thakkar@oracle.com>
+Cc: Saurabh Sengar <saurabh.truth@gmail.com>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- drivers/firmware/efi/capsule.c | 29 +++++++++++------------------
- 1 file changed, 11 insertions(+), 18 deletions(-)
+ drivers/firmware/efi/efivars.c |  5 ++---
+ drivers/firmware/efi/vars.c    | 23 ++++++++++-------------
+ fs/efivarfs/super.c            |  3 +--
+ include/linux/efi.h            |  3 +--
+ 4 files changed, 14 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
-index 4703dc9b8fbd..7593108f5402 100644
---- a/drivers/firmware/efi/capsule.c
-+++ b/drivers/firmware/efi/capsule.c
-@@ -86,33 +86,26 @@ bool efi_capsule_pending(int *reset_type)
+diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
+index 096adcbcb5a9..116b244dee68 100644
+--- a/drivers/firmware/efi/efivars.c
++++ b/drivers/firmware/efi/efivars.c
+@@ -661,7 +661,7 @@ static void efivar_update_sysfs_entries(struct work_struct *work)
+ 			return;
+ 
+ 		err = efivar_init(efivar_update_sysfs_entry, entry,
+-				  true, false, &efivar_sysfs_list);
++				  false, &efivar_sysfs_list);
+ 		if (!err)
+ 			break;
+ 
+@@ -730,8 +730,7 @@ int efivars_sysfs_init(void)
+ 		return -ENOMEM;
+ 	}
+ 
+-	efivar_init(efivars_sysfs_callback, NULL, false,
+-		    true, &efivar_sysfs_list);
++	efivar_init(efivars_sysfs_callback, NULL, true, &efivar_sysfs_list);
+ 
+ 	error = create_efivars_bin_attributes();
+ 	if (error) {
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index 0012331d5a3d..d3b751383286 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -419,8 +419,7 @@ static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_guid,
+  * Returns 0 on success, or a kernel error code on failure.
   */
- int efi_capsule_supported(efi_guid_t guid, u32 flags, size_t size, int *reset)
+ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+-		void *data, bool atomic, bool duplicates,
+-		struct list_head *head)
++		void *data, bool duplicates, struct list_head *head)
  {
--	efi_capsule_header_t *capsule;
-+	efi_capsule_header_t capsule;
-+	efi_capsule_header_t *cap_list[] = { &capsule };
- 	efi_status_t status;
- 	u64 max_size;
--	int rv = 0;
+ 	const struct efivar_operations *ops = __efivars->ops;
+ 	unsigned long variable_name_size = 1024;
+@@ -450,7 +449,7 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+ 						&vendor_guid);
+ 		switch (status) {
+ 		case EFI_SUCCESS:
+-			if (!atomic)
++			if (duplicates)
+ 				spin_unlock_irq(&__efivars->lock);
  
- 	if (flags & ~EFI_CAPSULE_SUPPORTED_FLAG_MASK)
- 		return -EINVAL;
- 
--	capsule = kmalloc(sizeof(*capsule), GFP_KERNEL);
--	if (!capsule)
--		return -ENOMEM;
+ 			variable_name_size = var_name_strnsize(variable_name,
+@@ -465,21 +464,19 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+ 			 * and may end up looping here forever.
+ 			 */
+ 			if (duplicates &&
+-			    variable_is_present(variable_name, &vendor_guid, head)) {
++			    variable_is_present(variable_name, &vendor_guid,
++						head)) {
+ 				dup_variable_bug(variable_name, &vendor_guid,
+ 						 variable_name_size);
+-				if (!atomic)
+-					spin_lock_irq(&__efivars->lock);
 -
--	capsule->headersize = capsule->imagesize = sizeof(*capsule);
--	memcpy(&capsule->guid, &guid, sizeof(efi_guid_t));
--	capsule->flags = flags;
-+	capsule.headersize = capsule.imagesize = sizeof(capsule);
-+	memcpy(&capsule.guid, &guid, sizeof(efi_guid_t));
-+	capsule.flags = flags;
+ 				status = EFI_NOT_FOUND;
+-				break;
++			} else {
++				err = func(variable_name, vendor_guid,
++					   variable_name_size, data);
++				if (err)
++					status = EFI_NOT_FOUND;
+ 			}
  
--	status = efi.query_capsule_caps(&capsule, 1, &max_size, reset);
--	if (status != EFI_SUCCESS) {
--		rv = efi_status_to_err(status);
--		goto out;
--	}
-+	status = efi.query_capsule_caps(cap_list, 1, &max_size, reset);
-+	if (status != EFI_SUCCESS)
-+		return efi_status_to_err(status);
+-			err = func(variable_name, vendor_guid, variable_name_size, data);
+-			if (err)
+-				status = EFI_NOT_FOUND;
+-
+-			if (!atomic)
++			if (duplicates)
+ 				spin_lock_irq(&__efivars->lock);
  
- 	if (size > max_size)
--		rv = -ENOSPC;
--out:
--	kfree(capsule);
--	return rv;
-+		return -ENOSPC;
-+
-+	return 0;
- }
- EXPORT_SYMBOL_GPL(efi_capsule_supported);
+ 			break;
+diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+index 553c5d2db4a4..9cb54a38832d 100644
+--- a/fs/efivarfs/super.c
++++ b/fs/efivarfs/super.c
+@@ -216,8 +216,7 @@ static int efivarfs_fill_super(struct super_block *sb, void *data, int silent)
  
+ 	INIT_LIST_HEAD(&efivarfs_list);
+ 
+-	err = efivar_init(efivarfs_callback, (void *)sb, false,
+-			  true, &efivarfs_list);
++	err = efivar_init(efivarfs_callback, (void *)sb, true, &efivarfs_list);
+ 	if (err)
+ 		__efivar_entry_iter(efivarfs_destroy, &efivarfs_list, NULL, NULL);
+ 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index aa36fb8bea4b..df7acb51f3cc 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1336,8 +1336,7 @@ int efivars_unregister(struct efivars *efivars);
+ struct kobject *efivars_kobject(void);
+ 
+ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+-		void *data, bool atomic, bool duplicates,
+-		struct list_head *head);
++		void *data, bool duplicates, struct list_head *head);
+ 
+ void efivar_entry_add(struct efivar_entry *entry, struct list_head *head);
+ void efivar_entry_remove(struct efivar_entry *entry);
 -- 
 2.7.3
