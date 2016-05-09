@@ -1,141 +1,47 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 4/5] efi: Merge boolean flag arguments
-Date: Fri,  6 May 2016 22:39:30 +0100
-Message-ID: <1462570771-13324-5-git-send-email-matt@codeblueprint.co.uk>
-References: <1462570771-13324-1-git-send-email-matt@codeblueprint.co.uk>
+From: Jon Masters <jcm@redhat.com>
+Subject: Re: [RFC PATCH v2 07/10] efi: load SSTDs from EFI variables
+Date: Mon, 9 May 2016 00:13:22 -0400
+Message-ID: <da0e65ef-7c04-e274-2f15-a50daa8c4c8c@redhat.com>
+References: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
+ <1461105548-20618-8-git-send-email-octavian.purdila@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1462570771-13324-1-git-send-email-matt@codeblueprint.co.uk>
+In-Reply-To: <1461105548-20618-8-git-send-email-octavian.purdila@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Julia Lawall <Julia.Lawall@lip6.fr>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Jeremy Kerr <jk@ozlabs.org>, Matthew Garrett <mjg59@srcf.ucam.org>, Saurabh Sengar <saurabh.truth@gmail.com>, Vaishali Thakkar <vaishali.thakkar@oracle.com>
+To: Octavian Purdila <octavian.purdila@intel.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
+Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Julia Lawall <Julia.Lawall@lip6.fr>
+Hi Octavian,
 
-The parameters atomic and duplicates of efivar_init always have opposite
-values.  Drop the parameter atomic, replace the uses of !atomic with
-duplicates, and update the call sites accordingly.
+Apologies for missing this earlier, just catching up on this thread...
 
-The code using duplicates is slightly reorganized with an else, to avoid
-duplicating the lock code.
+On 04/19/2016 06:39 PM, Octavian Purdila wrote:
 
-Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>
-Cc: Jeremy Kerr <jk@ozlabs.org>
-Cc: Vaishali Thakkar <vaishali.thakkar@oracle.com>
-Cc: Saurabh Sengar <saurabh.truth@gmail.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
----
- drivers/firmware/efi/efivars.c |  5 ++---
- drivers/firmware/efi/vars.c    | 23 ++++++++++-------------
- fs/efivarfs/super.c            |  3 +--
- include/linux/efi.h            |  3 +--
- 4 files changed, 14 insertions(+), 20 deletions(-)
+> This patch allows SSDTs to be loaded from EFI variables. It works by
+> specifying the EFI variable name containing the SSDT to be loaded. All
+> variables with the same name (regardless of the vendor GUID) will be
+> loaded.
 
-diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
-index 096adcbcb5a9..116b244dee68 100644
---- a/drivers/firmware/efi/efivars.c
-+++ b/drivers/firmware/efi/efivars.c
-@@ -661,7 +661,7 @@ static void efivar_update_sysfs_entries(struct work_struct *work)
- 			return;
- 
- 		err = efivar_init(efivar_update_sysfs_entry, entry,
--				  true, false, &efivar_sysfs_list);
-+				  false, &efivar_sysfs_list);
- 		if (!err)
- 			break;
- 
-@@ -730,8 +730,7 @@ int efivars_sysfs_init(void)
- 		return -ENOMEM;
- 	}
- 
--	efivar_init(efivars_sysfs_callback, NULL, false,
--		    true, &efivar_sysfs_list);
-+	efivar_init(efivars_sysfs_callback, NULL, true, &efivar_sysfs_list);
- 
- 	error = create_efivars_bin_attributes();
- 	if (error) {
-diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-index 0012331d5a3d..d3b751383286 100644
---- a/drivers/firmware/efi/vars.c
-+++ b/drivers/firmware/efi/vars.c
-@@ -419,8 +419,7 @@ static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_guid,
-  * Returns 0 on success, or a kernel error code on failure.
-  */
- int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
--		void *data, bool atomic, bool duplicates,
--		struct list_head *head)
-+		void *data, bool duplicates, struct list_head *head)
- {
- 	const struct efivar_operations *ops = __efivars->ops;
- 	unsigned long variable_name_size = 1024;
-@@ -450,7 +449,7 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
- 						&vendor_guid);
- 		switch (status) {
- 		case EFI_SUCCESS:
--			if (!atomic)
-+			if (duplicates)
- 				spin_unlock_irq(&__efivars->lock);
- 
- 			variable_name_size = var_name_strnsize(variable_name,
-@@ -465,21 +464,19 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
- 			 * and may end up looping here forever.
- 			 */
- 			if (duplicates &&
--			    variable_is_present(variable_name, &vendor_guid, head)) {
-+			    variable_is_present(variable_name, &vendor_guid,
-+						head)) {
- 				dup_variable_bug(variable_name, &vendor_guid,
- 						 variable_name_size);
--				if (!atomic)
--					spin_lock_irq(&__efivars->lock);
--
- 				status = EFI_NOT_FOUND;
--				break;
-+			} else {
-+				err = func(variable_name, vendor_guid,
-+					   variable_name_size, data);
-+				if (err)
-+					status = EFI_NOT_FOUND;
- 			}
- 
--			err = func(variable_name, vendor_guid, variable_name_size, data);
--			if (err)
--				status = EFI_NOT_FOUND;
--
--			if (!atomic)
-+			if (duplicates)
- 				spin_lock_irq(&__efivars->lock);
- 
- 			break;
-diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
-index 553c5d2db4a4..9cb54a38832d 100644
---- a/fs/efivarfs/super.c
-+++ b/fs/efivarfs/super.c
-@@ -216,8 +216,7 @@ static int efivarfs_fill_super(struct super_block *sb, void *data, int silent)
- 
- 	INIT_LIST_HEAD(&efivarfs_list);
- 
--	err = efivar_init(efivarfs_callback, (void *)sb, false,
--			  true, &efivarfs_list);
-+	err = efivar_init(efivarfs_callback, (void *)sb, true, &efivarfs_list);
- 	if (err)
- 		__efivar_entry_iter(efivarfs_destroy, &efivarfs_list, NULL, NULL);
- 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index aa36fb8bea4b..df7acb51f3cc 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1336,8 +1336,7 @@ int efivars_unregister(struct efivars *efivars);
- struct kobject *efivars_kobject(void);
- 
- int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
--		void *data, bool atomic, bool duplicates,
--		struct list_head *head);
-+		void *data, bool duplicates, struct list_head *head);
- 
- void efivar_entry_add(struct efivar_entry *entry, struct list_head *head);
- void efivar_entry_remove(struct efivar_entry *entry);
+This sounds very useful during development. However, and using EFI
+variables isn't so terrible, but I am concerned that this should be
+standardized through ASWG and at least involve certain other OS vendors
+so that the variable (GUID) can be captured somewhere. If not in the
+spec itself, then it should be captured as an external ACPI resource on
+the UEFI website with a clear pointer to the exact IDs to be used.
+
+Can you confirm that's the intention? i.e. that you're allowing a
+command line option for specifying the ID now because you intend to go
+ensure that there is a standard one that everyone will use later?
+
+I should check (but maybe you know) if the kernel is automatically
+tainted by this codepath as well?
+
+Thanks,
+
+Jon.
+
 -- 
-2.7.3
+Computer Architect | Sent from my Fedora powered laptop
