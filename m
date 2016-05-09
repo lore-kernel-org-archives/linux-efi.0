@@ -1,40 +1,80 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [BUG] x86/efi: MMRs no longer properly mapped after switch to
- isolated page table
-Date: Mon, 9 May 2016 22:55:24 +0100
-Message-ID: <20160509215524.GQ2839@codeblueprint.co.uk>
-References: <20160427154132.GB113599@stormcage.americas.sgi.com>
- <20160427225122.GG21282@pd.tnic>
- <20160428014128.GF113599@stormcage.americas.sgi.com>
- <20160428125711.GB9164@pd.tnic>
- <20160429154119.GI113599@stormcage.americas.sgi.com>
- <20160430221209.GO2839@codeblueprint.co.uk>
- <20160502213931.GT113599@stormcage.americas.sgi.com>
+From: "Elliott, Robert (Persistent Memory)" <elliott@hpe.com>
+Subject: RE: [PATCH 2/5] efibc: Fix excessive stack footprint warning
+Date: Mon, 9 May 2016 23:41:01 +0000
+Message-ID: <94D0CD8314A33A4D9D801C0FE68B4029639618A2@G4W3202.americas.hpqcorp.net>
+References: <1462570771-13324-1-git-send-email-matt@codeblueprint.co.uk>
+ <1462570771-13324-3-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160502213931.GT113599-7ppMa7wkY9tKToyKb8PD+Zs2JHu2awxn0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, mike travis <travis-sJ/iWh9BUns@public.gmane.org>, Nathan Zimmer <nzimmer-sJ/iWh9BUns@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1462570771-13324-3-git-send-email-matt@codeblueprint.co.uk>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Jeremy Compostella <jeremy.compostella@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 02 May, at 04:39:31PM, Alex Thorlton wrote:
+> -----Original Message-----
+> From: linux-kernel-owner@vger.kernel.org [mailto:linux-kernel-
+> owner@vger.kernel.org] On Behalf Of Matt Fleming
+> Sent: Friday, May 06, 2016 4:39 PM
+...
+> Subject: [PATCH 2/5] efibc: Fix excessive stack footprint warning
 > 
-> If you think we're violating EFI rules by accessing these registers from
-> both sides of the fence, please let me know.  I'd like to make sure that
-> we get everything behaving the way it should be!
+> From: Jeremy Compostella <jeremy.compostella@intel.com>
+> 
+...
+> 
+> -static void efibc_set_variable(const char *name, const char *value)
+> +static int efibc_set_variable(const char *name, const char *value)
+>  {
+>  	int ret;
+>  	efi_guid_t guid = LINUX_EFI_LOADER_ENTRY_GUID;
+> -	struct efivar_entry entry;
+> +	struct efivar_entry *entry;
+>  	size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
+> 
+> -	if (size > sizeof(entry.var.Data))
+> +	if (size > sizeof(entry->var.Data)) {
+>  		pr_err("value is too large");
 
-Oh no, I don't think this is violating the UEFI spec at all, but I do
-think it goes against the spirit of the way other implementations are
-designed; with maximum separation between firmware and kernel.
+That pr_err is introduced by patch 25/40 of the first series.
 
-In a perfect world, I'd suggest mapping the MMR range in both the
-kernel and firmware, at different virtual address ranges, but have
-the firmware's version opaque to the kernel and only described by an
-EfiMemoryMappedIO region, or something. That is ignoring any region
-type conflicts that may arise.
+How about including the name of the variable for which this is failing, 
+like the final pr_err?
 
-Of course, we don't operate in a perfect world, so a good solution may
-be to just insert the kernels' mapping into the EFI page tables.
+> +		return -EINVAL;
+> +	}
+> 
+> -	efibc_str_to_str16(name, entry.var.VariableName);
+> -	efibc_str_to_str16(value, (efi_char16_t *)entry.var.Data);
+> -	memcpy(&entry.var.VendorGuid, &guid, sizeof(guid));
+> +	entry = kmalloc(sizeof(*entry), GFP_KERNEL);
+> +	if (!entry) {
+> +		pr_err("failed to allocate efivar entry");
+
+How about including the name of the variable for which this
+is failing, like the final pr_err?
+
+> +		return -ENOMEM;
+> +	}
+> 
+> -	ret = efivar_entry_set(&entry,
+> +	efibc_str_to_str16(name, entry->var.VariableName);
+> +	efibc_str_to_str16(value, (efi_char16_t *)entry->var.Data);
+> +	memcpy(&entry->var.VendorGuid, &guid, sizeof(guid));
+> +
+> +	ret = efivar_entry_set(entry,
+>  			       EFI_VARIABLE_NON_VOLATILE
+>  			       | EFI_VARIABLE_BOOTSERVICE_ACCESS
+>  			       | EFI_VARIABLE_RUNTIME_ACCESS,
+> -			       size, entry.var.Data, NULL);
+> +			       size, entry->var.Data, NULL);
+>  	if (ret)
+>  		pr_err("failed to set %s EFI variable: 0x%x\n",
+>  		       name, ret);
+> +
+> +	kfree(entry);
+> +	return ret;
+>  }
