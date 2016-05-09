@@ -1,18 +1,18 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.4 47/67] x86/sysfb_efi: Fix valid BAR address range check
-Date: Mon,  9 May 2016 09:18:52 +0200
-Message-ID: <20160509071839.605389021@linuxfoundation.org>
-References: <20160509071837.238078895@linuxfoundation.org>
+Subject: [PATCH 4.5 65/88] x86/sysfb_efi: Fix valid BAR address range check
+Date: Mon,  9 May 2016 09:21:54 +0200
+Message-ID: <20160509071955.373943811@linuxfoundation.org>
+References: <20160509071952.129092535@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-15
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160509071837.238078895@linuxfoundation.org>
+In-Reply-To: <20160509071952.129092535@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Wang YanQing <udknight@gmail.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Herrmann <dh.herrmann@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, Tomi Valkeinen <tomi.valkeinen@ti.com>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.4-stable review patch.  If anyone has any objections, please let me know.
+4.5-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
