@@ -1,84 +1,55 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.5 65/88] x86/sysfb_efi: Fix valid BAR address range check
-Date: Mon,  9 May 2016 09:21:54 +0200
-Message-ID: <20160509071955.373943811@linuxfoundation.org>
+From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: [PATCH 4.5 59/88] MAINTAINERS: Remove asterisk from EFI directory names
+Date: Mon,  9 May 2016 09:21:48 +0200
+Message-ID: <20160509071955.050627436@linuxfoundation.org>
 References: <20160509071952.129092535@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-15
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160509071952.129092535@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Wang YanQing <udknight@gmail.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Herrmann <dh.herrmann@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, Tomi Valkeinen <tomi.valkeinen@ti.com>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160509071952.129092535-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
 4.5-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
-From: Wang YanQing <udknight@gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 
-commit c10fcb14c7afd6688c7b197a814358fecf244222 upstream.
+commit e8dfe6d8f6762d515fcd4f30577f7bfcf7659887 upstream.
 
-The code for checking whether a BAR address range is valid will break
-out of the loop when a start address of 0x0 is encountered.
+Mark reported that having asterisks on the end of directory names
+confuses get_maintainer.pl when it encounters subdirectories, and that
+my name does not appear when run on drivers/firmware/efi/libstub.
 
-This behaviour is wrong since by breaking out of the loop we may miss
-the BAR that describes the EFI frame buffer in a later iteration.
-
-Because of this bug I can't use video=efifb: boot parameter to get
-efifb on my new ThinkPad E550 for my old linux system hard disk with
-3.10 kernel. In 3.10, efifb is the only choice due to DRM/I915 not
-supporting the GPU.
-
-This patch also add a trivial optimization to break out after we find
-the frame buffer address range without testing later BARs.
-
-Signed-off-by: Wang YanQing <udknight@gmail.com>
-[ Rewrote changelog. ]
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-Reviewed-by: Peter Jones <pjones@redhat.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: David Herrmann <dh.herrmann@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
-Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/1462454061-21561-2-git-send-email-matt@codeblueprint.co.uk
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Reported-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Link: http://lkml.kernel.org/r/1462303781-8686-2-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
 
 ---
- arch/x86/kernel/sysfb_efi.c |   14 ++++++++++++--
- 1 file changed, 12 insertions(+), 2 deletions(-)
+ MAINTAINERS |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
---- a/arch/x86/kernel/sysfb_efi.c
-+++ b/arch/x86/kernel/sysfb_efi.c
-@@ -106,14 +106,24 @@ static int __init efifb_set_system(const
- 					continue;
- 				for (i = 0; i < DEVICE_COUNT_RESOURCE; i++) {
- 					resource_size_t start, end;
-+					unsigned long flags;
-+
-+					flags = pci_resource_flags(dev, i);
-+					if (!(flags & IORESOURCE_MEM))
-+						continue;
-+
-+					if (flags & IORESOURCE_UNSET)
-+						continue;
-+
-+					if (pci_resource_len(dev, i) == 0)
-+						continue;
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -4163,8 +4163,8 @@ F:	Documentation/efi-stub.txt
+ F:	arch/ia64/kernel/efi.c
+ F:	arch/x86/boot/compressed/eboot.[ch]
+ F:	arch/x86/include/asm/efi.h
+-F:	arch/x86/platform/efi/*
+-F:	drivers/firmware/efi/*
++F:	arch/x86/platform/efi/
++F:	drivers/firmware/efi/
+ F:	include/linux/efi*.h
  
- 					start = pci_resource_start(dev, i);
--					if (start == 0)
--						break;
- 					end = pci_resource_end(dev, i);
- 					if (screen_info.lfb_base >= start &&
- 					    screen_info.lfb_base < end) {
- 						found_bar = 1;
-+						break;
- 					}
- 				}
- 			}
+ EFI VARIABLE FILESYSTEM
