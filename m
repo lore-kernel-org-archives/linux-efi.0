@@ -1,140 +1,40 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v1 00/18] x86: Secure Memory Encryption (AMD)
-Date: Mon, 9 May 2016 16:08:03 -0500
-Message-ID: <5730FC33.2060804@amd.com>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <CALCETrUdrMAmE6Vgj6_PALdmRZVVKa3QDwJtO=YDTOQdox=rhQ@mail.gmail.com>
- <57211CAB.9040902@amd.com>
- <CALCETrWAP5hxQeVSwNx-XkO53-X3bX0LasjOuHxeRWCTob7JAA@mail.gmail.com>
- <5730A91E.6040601@redhat.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [BUG] x86/efi: MMRs no longer properly mapped after switch to
+ isolated page table
+Date: Mon, 9 May 2016 22:55:24 +0100
+Message-ID: <20160509215524.GQ2839@codeblueprint.co.uk>
+References: <20160427154132.GB113599@stormcage.americas.sgi.com>
+ <20160427225122.GG21282@pd.tnic>
+ <20160428014128.GF113599@stormcage.americas.sgi.com>
+ <20160428125711.GB9164@pd.tnic>
+ <20160429154119.GI113599@stormcage.americas.sgi.com>
+ <20160430221209.GO2839@codeblueprint.co.uk>
+ <20160502213931.GT113599@stormcage.americas.sgi.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <5730A91E.6040601@redhat.com>
-Sender: owner-linux-mm@kvack.org
-To: Paolo Bonzini <pbonzini@redhat.com>, Andy Lutomirski <luto@amacapital.net>
-Cc: linux-arch <linux-arch@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, kvm list <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, X86 ML <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kasan-dev <kasan-dev@googlegroups.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Ingo
- Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
- Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry
- Vyukov <dvyukov>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160502213931.GT113599-7ppMa7wkY9tKToyKb8PD+Zs2JHu2awxn0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, mike travis <travis-sJ/iWh9BUns@public.gmane.org>, Nathan Zimmer <nzimmer-sJ/iWh9BUns@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 05/09/2016 10:13 AM, Paolo Bonzini wrote:
->=20
->=20
-> On 02/05/2016 20:31, Andy Lutomirski wrote:
->> And did the SEV implementation remember to encrypt the guest register
->> state?  Because, if not, everything of importance will leak out
->> through the VMCB and/or GPRs.
->=20
-> No, it doesn't.  And SEV is very limited unless you paravirtualize
-> everything.
->=20
-> For example, the hypervisor needs to read some instruction bytes from
-> memory, and instruction bytes are always encrypted (15.34.5 in the APM)=
-.
->  So you're pretty much restricted to IN/OUT operations (not even
-> INS/OUTS) on emulated (non-assigned) devices, paravirtualized MSRs, and
-> hypercalls.  These are the only operations that connect the guest and
-> the hypervisor, where the vmexit doesn't have the need to e.g. walk
-> guest page tables (also always encrypted).  It possibly can be made to
-> work once the guest boots, and a modern UEFI firmware probably can cope
-> with it too just like a kernel can, but you need to ensure that your
-> hardware has no memory BARs for example.  And I/O port space is not ver=
-y
-> abundant.
+On Mon, 02 May, at 04:39:31PM, Alex Thorlton wrote:
+> 
+> If you think we're violating EFI rules by accessing these registers from
+> both sides of the fence, please let me know.  I'd like to make sure that
+> we get everything behaving the way it should be!
 
-The instruction bytes stored in the VMCB at offset 0xd0 for a data
-side #NPF are stored un-encrypted (which is not clearly documented in
-the APM). This allows for the hypervisor to perform MMIO on emulated
-devices. Because the hardware provides enough information on VMEXIT
-events, such as exit codes, decode assist, etc., the hypervisor has
-the information it needs to perform the operation without having to
-read the guest pagetables and/or the guest instruction stream from
-guest memory. There are a few minor corner cases (e.g. rep ins) and
-there will be more info on those when the SEV patches are submitted.
+Oh no, I don't think this is violating the UEFI spec at all, but I do
+think it goes against the spirit of the way other implementations are
+designed; with maximum separation between firmware and kernel.
 
->=20
-> Even in order to emulate I/O ports or RDMSR/WRMSR or process hypercalls=
-,
-> the hypervisor needs to read the GPRs.  The VMCB doesn't store guest
-> GPRs, not even on SEV-enabled processors.  Accordingly, the hypervisor
-> has access to the guest GPRs on every exit.
+In a perfect world, I'd suggest mapping the MMR range in both the
+kernel and firmware, at different virtual address ranges, but have
+the firmware's version opaque to the kernel and only described by an
+EfiMemoryMappedIO region, or something. That is ignoring any region
+type conflicts that may arise.
 
-In this initial version of SEV support the hardware does not encrypt
-the guest save state and the hypervisor does have access to the GPRs.
-
->=20
-> In general, SEV provides mitigation only.  Even if the hypervisor canno=
-t
-> write known plaintext directly to memory, an accomplice virtual machine
-> can e.g. use the network to spray the attacked VM's memory.  At least
-
-Can you elaborate further on this? The accomplice VM will not have
-access to the encryption key of the target VM and cannot accomplish
-any spraying that the hypervisor itself cannot do.
-
-> it's not as easy as "disable NX under the guest's feet and redirect RIP=
-"
-> (pte.nx is reserved if efer.nxe=3D0, all you get is a #PF).  But the
-> hypervisor can still disable SMEP and SMAP, it can use hardware
-> breakpoints to leak information through the registers, and it can do al=
-l
-> the other attacks you mentioned.  If AMD had rdrand/rdseed, it could
-> replace the output with not so random values, and so on.
-
-AMD added support for the rdrand in some of the later fam16h models.
-
->=20
-> It's surely better than nothing, but "encryption that really is nothing
-> more than mitigation" is pretty weird.  I'm waiting for cloud vendors t=
-o
-> sell this as the best thing since sliced bread, when in reality it's
-> just mitigation.  I wonder how wise it is to merge SEV in its current
-> state---and since security is not my specialty I am definitely looking
-> for advice on this.
->=20
-
-In this first generation of SEV, we are targeting a threat model very
-similar to the one used by SMEP and SMAP. Specifically, SEV protects a
-guest from a benign but vulnerable hypervisor, where a malicious guest
-or unprivileged process exploits a system/hypervisor interface in an
-attempt to read or modify the guest's memory.  But, like SMEP and SMAP,
-if an attacker has the ability to arbitrarily execute code in the
-kernel, he would be able to circumvent the control. AMD has a vision
-for this generation of SEV to be foundational to future generations
-that defend against stronger attacks.
-
-Thanks,
-Tom
-
-> Paolo
->=20
-> ps: I'm now reminded of this patch:
->=20
->     commit dab429a798a8ab3377136e09dda55ea75a41648d
->     Author: David Kaplan <David.Kaplan@amd.com>
->     Date:   Mon Mar 2 13:43:37 2015 -0600
->=20
->     kvm: svm: make wbinvd faster
->=20
->     No need to re-decode WBINVD since we know what it is from the
->     intercept.
->=20
->     Signed-off-by: David Kaplan <David.Kaplan@amd.com>
->     [extracted from larger unlrelated patch, forward ported,
->      tested,style cleanup]
->     Signed-off-by: Joel Schopp <joel.schopp@amd.com>
->     Reviewed-by: Radim Kr=C4=8Dm=C3=A1=C5=99 <rkrcmar@redhat.com>
->     Signed-off-by: Marcelo Tosatti <mtosatti@redhat.com>
->=20
-> and I wonder if the larger unlrelated patch had anything to do with SEV=
-!
->=20
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=3Dmailto:"dont@kvack.org"> email@kvack.org </a>
+Of course, we don't operate in a perfect world, so a good solution may
+be to just insert the kernels' mapping into the EFI page tables.
