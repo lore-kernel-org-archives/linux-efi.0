@@ -1,66 +1,91 @@
-From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [RFC PATCH v2 07/10] efi: load SSTDs from EFI variables
-Date: Mon, 9 May 2016 12:59:09 +0300
-Message-ID: <CAE1zotKgmr30rsTZCQTXuSsUTZybt41m0TJqQqJgTaZ0auSrPw@mail.gmail.com>
-References: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
-	<1461105548-20618-8-git-send-email-octavian.purdila@intel.com>
-	<da0e65ef-7c04-e274-2f15-a50daa8c4c8c@redhat.com>
+From: Paolo Bonzini <pbonzini@redhat.com>
+Subject: Re: [RFC PATCH v1 00/18] x86: Secure Memory Encryption (AMD)
+Date: Mon, 9 May 2016 17:13:34 +0200
+Message-ID: <5730A91E.6040601@redhat.com>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+ <CALCETrUdrMAmE6Vgj6_PALdmRZVVKa3QDwJtO=YDTOQdox=rhQ@mail.gmail.com>
+ <57211CAB.9040902@amd.com>
+ <CALCETrWAP5hxQeVSwNx-XkO53-X3bX0LasjOuHxeRWCTob7JAA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <da0e65ef-7c04-e274-2f15-a50daa8c4c8c-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jon Masters <jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-spi <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Irina Tirdea <irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Vincent Zimmer <vincent.zimmer-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arch-owner@vger.kernel.org>
+In-Reply-To: <CALCETrWAP5hxQeVSwNx-XkO53-X3bX0LasjOuHxeRWCTob7JAA@mail.gmail.com>
+Sender: linux-arch-owner@vger.kernel.org
+To: Andy Lutomirski <luto@amacapital.net>, Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch <linux-arch@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, kvm list <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, X86 ML <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kasan-dev <kasan-dev@googlegroups.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, May 9, 2016 at 7:13 AM, Jon Masters <jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> Hi Octavian,
->
-> Apologies for missing this earlier, just catching up on this thread...
 
-Hi Jon,
 
->
-> On 04/19/2016 06:39 PM, Octavian Purdila wrote:
->
->> This patch allows SSDTs to be loaded from EFI variables. It works by
->> specifying the EFI variable name containing the SSDT to be loaded. All
->> variables with the same name (regardless of the vendor GUID) will be
->> loaded.
->
-> This sounds very useful during development. However, and using EFI
-> variables isn't so terrible, but I am concerned that this should be
-> standardized through ASWG and at least involve certain other OS vendors
-> so that the variable (GUID) can be captured somewhere. If not in the
-> spec itself, then it should be captured as an external ACPI resource on
-> the UEFI website with a clear pointer to the exact IDs to be used.
->
-> Can you confirm that's the intention? i.e. that you're allowing a
-> command line option for specifying the ID now because you intend to go
-> ensure that there is a standard one that everyone will use later?
->
+On 02/05/2016 20:31, Andy Lutomirski wrote:
+> And did the SEV implementation remember to encrypt the guest register
+> state?  Because, if not, everything of importance will leak out
+> through the VMCB and/or GPRs.
 
-Yes, that is the intention. As I mentioned in the commit the long term
-plan is to do the loading at the FW level (before the OS boots) using
-the same mechanisms. But since this is going to take some time, I
-think its worth having the option to do the loading from software for
-two reason:
+No, it doesn't.  And SEV is very limited unless you paravirtualize
+everything.
 
-a) to provide a way for using this mechanism on older boards that will
-not have the option to do a firmware update to get this functionality
+=46or example, the hypervisor needs to read some instruction bytes from
+memory, and instruction bytes are always encrypted (15.34.5 in the APM)=
+=2E
+ So you're pretty much restricted to IN/OUT operations (not even
+INS/OUTS) on emulated (non-assigned) devices, paravirtualized MSRs, and
+hypercalls.  These are the only operations that connect the guest and
+the hypervisor, where the vmexit doesn't have the need to e.g. walk
+guest page tables (also always encrypted).  It possibly can be made to
+work once the guest boots, and a modern UEFI firmware probably can cope
+with it too just like a kernel can, but you need to ensure that your
+hardware has no memory BARs for example.  And I/O port space is not ver=
+y
+abundant.
 
-b) to implement the software support needed in advance and have a way to test it
+Even in order to emulate I/O ports or RDMSR/WRMSR or process hypercalls=
+,
+the hypervisor needs to read the GPRs.  The VMCB doesn't store guest
+GPRs, not even on SEV-enabled processors.  Accordingly, the hypervisor
+has access to the guest GPRs on every exit.
 
-> I should check (but maybe you know) if the kernel is automatically
-> tainted by this codepath as well?
+In general, SEV provides mitigation only.  Even if the hypervisor canno=
+t
+write known plaintext directly to memory, an accomplice virtual machine
+can e.g. use the network to spray the attacked VM's memory.  At least
+it's not as easy as "disable NX under the guest's feet and redirect RIP=
+"
+(pte.nx is reserved if efer.nxe=3D0, all you get is a #PF).  But the
+hypervisor can still disable SMEP and SMAP, it can use hardware
+breakpoints to leak information through the registers, and it can do al=
+l
+the other attacks you mentioned.  If AMD had rdrand/rdseed, it could
+replace the output with not so random values, and so on.
 
-In this version of the patch the kernel is tainted. However, note that
-in future versions I intend to remove it because it was already
-removed part of the initrd ACPI table upgrade patch [1].
+It's surely better than nothing, but "encryption that really is nothing
+more than mitigation" is pretty weird.  I'm waiting for cloud vendors t=
+o
+sell this as the best thing since sliced bread, when in reality it's
+just mitigation.  I wonder how wise it is to merge SEV in its current
+state---and since security is not my specialty I am definitely looking
+for advice on this.
 
-[1] http://lkml.iu.edu/hypermail/linux/kernel/1604.1/01488.html
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Paolo
+
+ps: I'm now reminded of this patch:
+
+    commit dab429a798a8ab3377136e09dda55ea75a41648d
+    Author: David Kaplan <David.Kaplan@amd.com>
+    Date:   Mon Mar 2 13:43:37 2015 -0600
+
+    kvm: svm: make wbinvd faster
+
+    No need to re-decode WBINVD since we know what it is from the
+    intercept.
+
+    Signed-off-by: David Kaplan <David.Kaplan@amd.com>
+    [extracted from larger unlrelated patch, forward ported,
+     tested,style cleanup]
+    Signed-off-by: Joel Schopp <joel.schopp@amd.com>
+    Reviewed-by: Radim Kr=C4=8Dm=C3=A1=C5=99 <rkrcmar@redhat.com>
+    Signed-off-by: Marcelo Tosatti <mtosatti@redhat.com>
+
+and I wonder if the larger unlrelated patch had anything to do with SEV=
+!
