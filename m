@@ -1,85 +1,56 @@
 From: Kamal Mostafa <kamal@canonical.com>
-Subject: [PATCH 4.2.y-ckt 42/59] x86/sysfb_efi: Fix valid BAR address range check
-Date: Mon,  9 May 2016 12:56:00 -0700
-Message-ID: <1462823777-8384-43-git-send-email-kamal@canonical.com>
+Subject: [PATCH 4.2.y-ckt 39/59] MAINTAINERS: Remove asterisk from EFI directory names
+Date: Mon,  9 May 2016 12:55:57 -0700
+Message-ID: <1462823777-8384-40-git-send-email-kamal@canonical.com>
 References: <1462823777-8384-1-git-send-email-kamal@canonical.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <stable-owner@vger.kernel.org>
 In-Reply-To: <1462823777-8384-1-git-send-email-kamal@canonical.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org, kernel-team@lists.ubuntu.com
-Cc: Wang YanQing <udknight@gmail.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Herrmann <dh.herrmann@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, Tomi Valkeinen <tomi.valkeinen@ti.com>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Kamal Mostafa <kamal@canonical.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Kamal Mostafa <kamal@canonical.com>
 List-Id: linux-efi@vger.kernel.org
 
 4.2.8-ckt10 -stable review patch.  If anyone has any objections, please let me know.
 
 ---8<------------------------------------------------------------
 
-From: Wang YanQing <udknight@gmail.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
 
-commit c10fcb14c7afd6688c7b197a814358fecf244222 upstream.
+commit e8dfe6d8f6762d515fcd4f30577f7bfcf7659887 upstream.
 
-The code for checking whether a BAR address range is valid will break
-out of the loop when a start address of 0x0 is encountered.
+Mark reported that having asterisks on the end of directory names
+confuses get_maintainer.pl when it encounters subdirectories, and that
+my name does not appear when run on drivers/firmware/efi/libstub.
 
-This behaviour is wrong since by breaking out of the loop we may miss
-the BAR that describes the EFI frame buffer in a later iteration.
-
-Because of this bug I can't use video=efifb: boot parameter to get
-efifb on my new ThinkPad E550 for my old linux system hard disk with
-3.10 kernel. In 3.10, efifb is the only choice due to DRM/I915 not
-supporting the GPU.
-
-This patch also add a trivial optimization to break out after we find
-the frame buffer address range without testing later BARs.
-
-Signed-off-by: Wang YanQing <udknight@gmail.com>
-[ Rewrote changelog. ]
+Reported-by: Mark Rutland <mark.rutland@arm.com>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-Reviewed-by: Peter Jones <pjones@redhat.com>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: David Herrmann <dh.herrmann@gmail.com>
+Cc: Catalin Marinas <catalin.marinas@arm.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
 Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/1462454061-21561-2-git-send-email-matt@codeblueprint.co.uk
+Link: http://lkml.kernel.org/r/1462303781-8686-2-git-send-email-matt@codeblueprint.co.uk
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Kamal Mostafa <kamal@canonical.com>
 ---
- arch/x86/kernel/sysfb_efi.c | 14 ++++++++++++--
- 1 file changed, 12 insertions(+), 2 deletions(-)
+ MAINTAINERS | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/kernel/sysfb_efi.c b/arch/x86/kernel/sysfb_efi.c
-index b285d4e..5da924b 100644
---- a/arch/x86/kernel/sysfb_efi.c
-+++ b/arch/x86/kernel/sysfb_efi.c
-@@ -106,14 +106,24 @@ static int __init efifb_set_system(const struct dmi_system_id *id)
- 					continue;
- 				for (i = 0; i < DEVICE_COUNT_RESOURCE; i++) {
- 					resource_size_t start, end;
-+					unsigned long flags;
-+
-+					flags = pci_resource_flags(dev, i);
-+					if (!(flags & IORESOURCE_MEM))
-+						continue;
-+
-+					if (flags & IORESOURCE_UNSET)
-+						continue;
-+
-+					if (pci_resource_len(dev, i) == 0)
-+						continue;
+diff --git a/MAINTAINERS b/MAINTAINERS
+index ab4384f..fb1c3fa 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -3941,8 +3941,8 @@ F:	Documentation/efi-stub.txt
+ F:	arch/ia64/kernel/efi.c
+ F:	arch/x86/boot/compressed/eboot.[ch]
+ F:	arch/x86/include/asm/efi.h
+-F:	arch/x86/platform/efi/*
+-F:	drivers/firmware/efi/*
++F:	arch/x86/platform/efi/
++F:	drivers/firmware/efi/
+ F:	include/linux/efi*.h
  
- 					start = pci_resource_start(dev, i);
--					if (start == 0)
--						break;
- 					end = pci_resource_end(dev, i);
- 					if (screen_info.lfb_base >= start &&
- 					    screen_info.lfb_base < end) {
- 						found_bar = 1;
-+						break;
- 					}
- 				}
- 			}
+ EFI VARIABLE FILESYSTEM
 -- 
 2.7.4
