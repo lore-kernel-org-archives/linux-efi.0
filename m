@@ -1,39 +1,20 @@
-From: Kamal Mostafa <kamal-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: [4.2.y-ckt stable] Patch "x86/sysfb_efi: Fix valid BAR address range check" has been added to the 4.2.y-ckt tree
-Date: Mon,  9 May 2016 12:44:07 -0700
-Message-ID: <1462823047-6834-1-git-send-email-kamal@canonical.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Wang YanQing <udknight-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, David Herrmann <dh.herrmann-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Tomi Valkeinen <tomi.valkeinen-l0cyMroinI0@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Kamal Mostafa <kamal-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, kernel-team-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
+From: Kamal Mostafa <kamal@canonical.com>
+Subject: [PATCH 4.2.y-ckt 42/59] x86/sysfb_efi: Fix valid BAR address range check
+Date: Mon,  9 May 2016 12:56:00 -0700
+Message-ID: <1462823777-8384-43-git-send-email-kamal@canonical.com>
+References: <1462823777-8384-1-git-send-email-kamal@canonical.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1462823777-8384-1-git-send-email-kamal@canonical.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org, kernel-team@lists.ubuntu.com
+Cc: Wang YanQing <udknight@gmail.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Herrmann <dh.herrmann@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, Tomi Valkeinen <tomi.valkeinen@ti.com>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Kamal Mostafa <kamal@canonical.com>
 List-Id: linux-efi@vger.kernel.org
 
-This is a note to let you know that I have just added a patch titled
-
-    x86/sysfb_efi: Fix valid BAR address range check
-
-to the linux-4.2.y-queue branch of the 4.2.y-ckt extended stable tree 
-which can be found at:
-
-    https://git.launchpad.net/~canonical-kernel/linux/+git/linux-stable-ckt/log/?h=linux-4.2.y-queue
-
-This patch is scheduled to be released in version 4.2.8-ckt10.
-
-If you, or anyone else, feels it should not be added to this tree, please 
-reply to this email.
-
-For more information about the 4.2.y-ckt tree, see
-https://wiki.ubuntu.com/Kernel/Dev/ExtendedStable
-
-Thanks.
--Kamal
+4.2.8-ckt10 -stable review patch.  If anyone has any objections, please let me know.
 
 ---8<------------------------------------------------------------
 
->From d33f4cccaada83da96b5a33784cd8fce6829c3e1 Mon Sep 17 00:00:00 2001
-From: Wang YanQing <udknight-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Date: Thu, 5 May 2016 14:14:21 +0100
-Subject: x86/sysfb_efi: Fix valid BAR address range check
+From: Wang YanQing <udknight@gmail.com>
 
 commit c10fcb14c7afd6688c7b197a814358fecf244222 upstream.
 
@@ -51,20 +32,20 @@ supporting the GPU.
 This patch also add a trivial optimization to break out after we find
 the frame buffer address range without testing later BARs.
 
-Signed-off-by: Wang YanQing <udknight-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Wang YanQing <udknight@gmail.com>
 [ Rewrote changelog. ]
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Reviewed-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: David Herrmann <dh.herrmann-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: Tomi Valkeinen <tomi.valkeinen-l0cyMroinI0@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Link: http://lkml.kernel.org/r/1462454061-21561-2-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Signed-off-by: Kamal Mostafa <kamal-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Reviewed-by: Peter Jones <pjones@redhat.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: David Herrmann <dh.herrmann@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/1462454061-21561-2-git-send-email-matt@codeblueprint.co.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Kamal Mostafa <kamal@canonical.com>
 ---
  arch/x86/kernel/sysfb_efi.c | 14 ++++++++++++--
  1 file changed, 12 insertions(+), 2 deletions(-)
@@ -88,7 +69,7 @@ index b285d4e..5da924b 100644
 +
 +					if (pci_resource_len(dev, i) == 0)
 +						continue;
-
+ 
  					start = pci_resource_start(dev, i);
 -					if (start == 0)
 -						break;
@@ -100,5 +81,5 @@ index b285d4e..5da924b 100644
  					}
  				}
  			}
---
+-- 
 2.7.4
