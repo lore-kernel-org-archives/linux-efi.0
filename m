@@ -1,47 +1,55 @@
-From: Jon Masters <jcm@redhat.com>
-Subject: Re: [RFC PATCH v2 07/10] efi: load SSTDs from EFI variables
-Date: Mon, 9 May 2016 00:13:22 -0400
-Message-ID: <da0e65ef-7c04-e274-2f15-a50daa8c4c8c@redhat.com>
-References: <1461105548-20618-1-git-send-email-octavian.purdila@intel.com>
- <1461105548-20618-8-git-send-email-octavian.purdila@intel.com>
+From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: [PATCH 4.4 41/67] MAINTAINERS: Remove asterisk from EFI directory names
+Date: Mon,  9 May 2016 09:18:46 +0200
+Message-ID: <20160509071839.287522959@linuxfoundation.org>
+References: <20160509071837.238078895@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1461105548-20618-8-git-send-email-octavian.purdila@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Octavian Purdila <octavian.purdila@intel.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
-Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com
+Content-Type: text/plain; charset=ISO-8859-15
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160509071837.238078895-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Octavian,
+4.4-stable review patch.  If anyone has any objections, please let me know.
 
-Apologies for missing this earlier, just catching up on this thread...
+------------------
 
-On 04/19/2016 06:39 PM, Octavian Purdila wrote:
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 
-> This patch allows SSDTs to be loaded from EFI variables. It works by
-> specifying the EFI variable name containing the SSDT to be loaded. All
-> variables with the same name (regardless of the vendor GUID) will be
-> loaded.
+commit e8dfe6d8f6762d515fcd4f30577f7bfcf7659887 upstream.
 
-This sounds very useful during development. However, and using EFI
-variables isn't so terrible, but I am concerned that this should be
-standardized through ASWG and at least involve certain other OS vendors
-so that the variable (GUID) can be captured somewhere. If not in the
-spec itself, then it should be captured as an external ACPI resource on
-the UEFI website with a clear pointer to the exact IDs to be used.
+Mark reported that having asterisks on the end of directory names
+confuses get_maintainer.pl when it encounters subdirectories, and that
+my name does not appear when run on drivers/firmware/efi/libstub.
 
-Can you confirm that's the intention? i.e. that you're allowing a
-command line option for specifying the ID now because you intend to go
-ensure that there is a standard one that everyone will use later?
+Reported-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Link: http://lkml.kernel.org/r/1462303781-8686-2-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
 
-I should check (but maybe you know) if the kernel is automatically
-tainted by this codepath as well?
+---
+ MAINTAINERS |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Thanks,
-
-Jon.
-
--- 
-Computer Architect | Sent from my Fedora powered laptop
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -4097,8 +4097,8 @@ F:	Documentation/efi-stub.txt
+ F:	arch/ia64/kernel/efi.c
+ F:	arch/x86/boot/compressed/eboot.[ch]
+ F:	arch/x86/include/asm/efi.h
+-F:	arch/x86/platform/efi/*
+-F:	drivers/firmware/efi/*
++F:	arch/x86/platform/efi/
++F:	drivers/firmware/efi/
+ F:	include/linux/efi*.h
+ 
+ EFI VARIABLE FILESYSTEM
