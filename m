@@ -1,91 +1,75 @@
-From: Paolo Bonzini <pbonzini@redhat.com>
-Subject: Re: [RFC PATCH v1 00/18] x86: Secure Memory Encryption (AMD)
-Date: Mon, 9 May 2016 17:13:34 +0200
-Message-ID: <5730A91E.6040601@redhat.com>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <CALCETrUdrMAmE6Vgj6_PALdmRZVVKa3QDwJtO=YDTOQdox=rhQ@mail.gmail.com>
- <57211CAB.9040902@amd.com>
- <CALCETrWAP5hxQeVSwNx-XkO53-X3bX0LasjOuHxeRWCTob7JAA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-arch-owner@vger.kernel.org>
-In-Reply-To: <CALCETrWAP5hxQeVSwNx-XkO53-X3bX0LasjOuHxeRWCTob7JAA@mail.gmail.com>
-Sender: linux-arch-owner@vger.kernel.org
-To: Andy Lutomirski <luto@amacapital.net>, Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch <linux-arch@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, kvm list <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, X86 ML <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kasan-dev <kasan-dev@googlegroups.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@>
+From: Kamal Mostafa <kamal-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Subject: [4.2.y-ckt stable] Patch "MAINTAINERS: Remove asterisk from EFI directory names" has been added to the 4.2.y-ckt tree
+Date: Mon,  9 May 2016 12:44:03 -0700
+Message-ID: <1462823043-6696-1-git-send-email-kamal@canonical.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Kamal Mostafa <kamal-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, kernel-team-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+This is a note to let you know that I have just added a patch titled
 
+    MAINTAINERS: Remove asterisk from EFI directory names
 
-On 02/05/2016 20:31, Andy Lutomirski wrote:
-> And did the SEV implementation remember to encrypt the guest register
-> state?  Because, if not, everything of importance will leak out
-> through the VMCB and/or GPRs.
+to the linux-4.2.y-queue branch of the 4.2.y-ckt extended stable tree 
+which can be found at:
 
-No, it doesn't.  And SEV is very limited unless you paravirtualize
-everything.
+    https://git.launchpad.net/~canonical-kernel/linux/+git/linux-stable-ckt/log/?h=linux-4.2.y-queue
 
-=46or example, the hypervisor needs to read some instruction bytes from
-memory, and instruction bytes are always encrypted (15.34.5 in the APM)=
-=2E
- So you're pretty much restricted to IN/OUT operations (not even
-INS/OUTS) on emulated (non-assigned) devices, paravirtualized MSRs, and
-hypercalls.  These are the only operations that connect the guest and
-the hypervisor, where the vmexit doesn't have the need to e.g. walk
-guest page tables (also always encrypted).  It possibly can be made to
-work once the guest boots, and a modern UEFI firmware probably can cope
-with it too just like a kernel can, but you need to ensure that your
-hardware has no memory BARs for example.  And I/O port space is not ver=
-y
-abundant.
+This patch is scheduled to be released in version 4.2.8-ckt10.
 
-Even in order to emulate I/O ports or RDMSR/WRMSR or process hypercalls=
-,
-the hypervisor needs to read the GPRs.  The VMCB doesn't store guest
-GPRs, not even on SEV-enabled processors.  Accordingly, the hypervisor
-has access to the guest GPRs on every exit.
+If you, or anyone else, feels it should not be added to this tree, please 
+reply to this email.
 
-In general, SEV provides mitigation only.  Even if the hypervisor canno=
-t
-write known plaintext directly to memory, an accomplice virtual machine
-can e.g. use the network to spray the attacked VM's memory.  At least
-it's not as easy as "disable NX under the guest's feet and redirect RIP=
-"
-(pte.nx is reserved if efer.nxe=3D0, all you get is a #PF).  But the
-hypervisor can still disable SMEP and SMAP, it can use hardware
-breakpoints to leak information through the registers, and it can do al=
-l
-the other attacks you mentioned.  If AMD had rdrand/rdseed, it could
-replace the output with not so random values, and so on.
+For more information about the 4.2.y-ckt tree, see
+https://wiki.ubuntu.com/Kernel/Dev/ExtendedStable
 
-It's surely better than nothing, but "encryption that really is nothing
-more than mitigation" is pretty weird.  I'm waiting for cloud vendors t=
-o
-sell this as the best thing since sliced bread, when in reality it's
-just mitigation.  I wonder how wise it is to merge SEV in its current
-state---and since security is not my specialty I am definitely looking
-for advice on this.
+Thanks.
+-Kamal
 
-Paolo
+---8<------------------------------------------------------------
 
-ps: I'm now reminded of this patch:
+>From 9b6a54c9e51a5d4535540a82023b9aff160ea6d3 Mon Sep 17 00:00:00 2001
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Date: Tue, 3 May 2016 20:29:39 +0100
+Subject: MAINTAINERS: Remove asterisk from EFI directory names
 
-    commit dab429a798a8ab3377136e09dda55ea75a41648d
-    Author: David Kaplan <David.Kaplan@amd.com>
-    Date:   Mon Mar 2 13:43:37 2015 -0600
+commit e8dfe6d8f6762d515fcd4f30577f7bfcf7659887 upstream.
 
-    kvm: svm: make wbinvd faster
+Mark reported that having asterisks on the end of directory names
+confuses get_maintainer.pl when it encounters subdirectories, and that
+my name does not appear when run on drivers/firmware/efi/libstub.
 
-    No need to re-decode WBINVD since we know what it is from the
-    intercept.
+Reported-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Link: http://lkml.kernel.org/r/1462303781-8686-2-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Kamal Mostafa <kamal-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+---
+ MAINTAINERS | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-    Signed-off-by: David Kaplan <David.Kaplan@amd.com>
-    [extracted from larger unlrelated patch, forward ported,
-     tested,style cleanup]
-    Signed-off-by: Joel Schopp <joel.schopp@amd.com>
-    Reviewed-by: Radim Kr=C4=8Dm=C3=A1=C5=99 <rkrcmar@redhat.com>
-    Signed-off-by: Marcelo Tosatti <mtosatti@redhat.com>
+diff --git a/MAINTAINERS b/MAINTAINERS
+index ab4384f..fb1c3fa 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -3941,8 +3941,8 @@ F:	Documentation/efi-stub.txt
+ F:	arch/ia64/kernel/efi.c
+ F:	arch/x86/boot/compressed/eboot.[ch]
+ F:	arch/x86/include/asm/efi.h
+-F:	arch/x86/platform/efi/*
+-F:	drivers/firmware/efi/*
++F:	arch/x86/platform/efi/
++F:	drivers/firmware/efi/
+ F:	include/linux/efi*.h
 
-and I wonder if the larger unlrelated patch had anything to do with SEV=
-!
+ EFI VARIABLE FILESYSTEM
+--
+2.7.4
