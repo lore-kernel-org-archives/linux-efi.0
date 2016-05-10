@@ -1,79 +1,50 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [RFC PATCH v1 00/18] x86: Secure Memory Encryption (AMD)
-Date: Tue, 10 May 2016 14:04:34 +0200
-Message-ID: <20160510120434.GC16752@pd.tnic>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
+ clear
+Date: Tue, 10 May 2016 14:43:58 +0100
+Message-ID: <20160510134358.GR2839@codeblueprint.co.uk>
 References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <CALCETrUdrMAmE6Vgj6_PALdmRZVVKa3QDwJtO=YDTOQdox=rhQ@mail.gmail.com>
- <57211CAB.9040902@amd.com>
- <CALCETrWAP5hxQeVSwNx-XkO53-X3bX0LasjOuHxeRWCTob7JAA@mail.gmail.com>
- <5730A91E.6040601@redhat.com>
- <5730FC33.2060804@amd.com>
- <5731C4B7.9000209@redhat.com>
+ <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-arch-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <5731C4B7.9000209@redhat.com>
-Sender: linux-arch-owner@vger.kernel.org
-To: Paolo Bonzini <pbonzini@redhat.com>
-Cc: Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@amacapital.net>, linux-arch <linux-arch@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, kvm list <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, X86 ML <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kasan-dev <kasan-dev@googlegroups.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas
+In-Reply-To: <20160426225740.13567.85438.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, May 10, 2016 at 01:23:35PM +0200, Paolo Bonzini wrote:
-> It can send plaintext packets that will be stored encrypted in memory.
-> (Of course the hypervisor can do that too if it has access to the guest
-> network).
+On Tue, 26 Apr, at 05:57:40PM, Tom Lendacky wrote:
+> The EFI tables are not encrypted and need to be accessed as such. Be sure
+> to memmap them without the encryption attribute set. For EFI support that
+> lives outside of the arch/x86 tree, create a routine that uses the __weak
+> attribute so that it can be overridden by an architecture specific routine.
+> 
+> When freeing boot services related memory, since it has been mapped as
+> un-encrypted, be sure to change the mapping to encrypted for future use.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+> ---
+>  arch/x86/include/asm/cacheflush.h  |    3 +
+>  arch/x86/include/asm/mem_encrypt.h |   22 +++++++++++
+>  arch/x86/kernel/setup.c            |    6 +--
+>  arch/x86/mm/mem_encrypt.c          |   56 +++++++++++++++++++++++++++
+>  arch/x86/mm/pageattr.c             |   75 ++++++++++++++++++++++++++++++++++++
+>  arch/x86/platform/efi/efi.c        |   26 +++++++-----
+>  arch/x86/platform/efi/efi_64.c     |    9 +++-
+>  arch/x86/platform/efi/quirks.c     |   12 +++++-
+>  drivers/firmware/efi/efi.c         |   18 +++++++--
+>  drivers/firmware/efi/esrt.c        |   12 +++---
+>  include/linux/efi.h                |    3 +
+>  11 files changed, 212 insertions(+), 30 deletions(-)
 
-And then what?
+The size of this change is completely unexpected. Why is there so much
+churn to workaround this new feature?
 
-You need to find out where exactly (which pages) got the packets. If at
-all. I don't think you can do that from another VM, you probably are
-more lucky if you're the hypervisor. But I'm no security guy so I'm
-genuinely asking...
+Is it not possible to maintain some kind of kernel virtual address
+mapping so memremap*() and friends can figure out when to twiddle the
+mapping attributes and map with/without encryption?
 
-In any case, it sounds hard to do.
-
-> And that's great!  However, it is very different from "virtual machines
-> need not fully trust the hypervisor and administrator of their host
-> system" as said in the whitepaper.
-
-You know, those documents can be corrected ... :)
-
-> SEV protects pretty well from sibling VMs, but by design
-> this generation of SEV leaks a lot of information to an evil
-> host---probably more than enough to mount a ROP attack or to do evil
-> stuff that Andy outlined.
->
-> My problem is that people will read AMD's whitepaper, not your message
-> on LKML, and may put more trust in SEV than (for now) they should.
-
-So if people rely on only one security feature, then they get what they
-deserve. And even non-security people like me know that proper security
-is layering of multiple features/mechanisms which should take care of
-aspects only, not of everything. And not a single magic wand which makes
-sh*t secure. :)
-
-So let's please get real: the feature is pretty elegant IMO and gives
-you a lot more security than before.
-
-Can it be made better/cover more aspects?
-
-Absolutely and it is a safe bet that it will be. You don't just
-implement stuff like that in hw to not improve on it in future
-iterations. It is like with all hardware features, they get improved
-with time and CPU revisions.
-
-Now, can people please look at the actual code and complain about stuff
-that bothers them codewise? We've tried to make it as unobtrusive as
-possible to the rest of the kernel but improvement suggestions are
-always welcome!
-
-:-)
-
-Thanks.
-
--- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
+These API changes place an undue burden on developers that don't even
+care about SME.
