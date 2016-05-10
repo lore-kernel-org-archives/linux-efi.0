@@ -1,147 +1,95 @@
-From: jeremy.compostella@intel.com (Compostella, Jeremy)
-Subject: Re: [PATCH 2/5] efibc: Fix excessive stack footprint warning
-Date: Tue, 10 May 2016 10:40:22 +0200
-Message-ID: <87r3dauwzt.fsf@intel.com>
-References: <1462570771-13324-1-git-send-email-matt@codeblueprint.co.uk>
-	<1462570771-13324-3-git-send-email-matt@codeblueprint.co.uk>
-	<94D0CD8314A33A4D9D801C0FE68B4029639618A2@G4W3202.americas.hpqcorp.net>
+From: Paolo Bonzini <pbonzini@redhat.com>
+Subject: Re: [RFC PATCH v1 00/18] x86: Secure Memory Encryption (AMD)
+Date: Tue, 10 May 2016 13:23:35 +0200
+Message-ID: <5731C4B7.9000209@redhat.com>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+ <CALCETrUdrMAmE6Vgj6_PALdmRZVVKa3QDwJtO=YDTOQdox=rhQ@mail.gmail.com>
+ <57211CAB.9040902@amd.com>
+ <CALCETrWAP5hxQeVSwNx-XkO53-X3bX0LasjOuHxeRWCTob7JAA@mail.gmail.com>
+ <5730A91E.6040601@redhat.com> <5730FC33.2060804@amd.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="=-=-="
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <94D0CD8314A33A4D9D801C0FE68B4029639618A2@G4W3202.americas.hpqcorp.net>
-	(Robert Elliott's message of "Tue, 10 May 2016 01:41:01 +0200")
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Elliott, Robert (Persistent Memory)" <elliott@hpe.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
-List-Id: linux-efi@vger.kernel.org
-
---=-=-=
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <5730FC33.2060804@amd.com>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@amacapital.net>
+Cc: linux-arch <linux-arch@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, kvm list <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, X86 ML <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kasan-dev <kasan-dev@googlegroups.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@googl>
+List-Id: linux-efi@vger.kernel.org
 
-Why not.  See patch as attachment.
+
+
+On 09/05/2016 23:08, Tom Lendacky wrote:
+> On 05/09/2016 10:13 AM, Paolo Bonzini wrote:
+>>
+>>
+>> On 02/05/2016 20:31, Andy Lutomirski wrote:
+>>> And did the SEV implementation remember to encrypt the guest register
+>>> state?  Because, if not, everything of importance will leak out
+>>> through the VMCB and/or GPRs.
+>>
+>> No, it doesn't.  And SEV is very limited unless you paravirtualize
+>> everything.
+>>
+>> For example, the hypervisor needs to read some instruction bytes from
+>> memory, and instruction bytes are always encrypted (15.34.5 in the APM=
+).
+>>  So you're pretty much restricted to IN/OUT operations (not even
+>> INS/OUTS) on emulated (non-assigned) devices, paravirtualized MSRs, an=
+d
+>> hypercalls.  These are the only operations that connect the guest and
+>> the hypervisor, where the vmexit doesn't have the need to e.g. walk
+>> guest page tables (also always encrypted).  It possibly can be made to
+>> work once the guest boots, and a modern UEFI firmware probably can cop=
+e
+>> with it too just like a kernel can, but you need to ensure that your
+>> hardware has no memory BARs for example.  And I/O port space is not ve=
+ry
+>> abundant.
+>=20
+> The instruction bytes stored in the VMCB at offset 0xd0 for a data
+> side #NPF are stored un-encrypted (which is not clearly documented in
+> the APM). This allows for the hypervisor to perform MMIO on emulated
+> devices. Because the hardware provides enough information on VMEXIT
+> events, such as exit codes, decode assist, etc., the hypervisor has
+> the information it needs to perform the operation
+
+Ok, that helps.
+
+>> In general, SEV provides mitigation only.  Even if the hypervisor cann=
+ot
+>> write known plaintext directly to memory, an accomplice virtual machin=
+e
+>> can e.g. use the network to spray the attacked VM's memory.  At least
+>=20
+> Can you elaborate further on this? The accomplice VM will not have
+> access to the encryption key of the target VM and cannot accomplish
+> any spraying that the hypervisor itself cannot do.
+
+It can send plaintext packets that will be stored encrypted in memory.
+(Of course the hypervisor can do that too if it has access to the guest
+network).  This was my first thought on attacking SEV, but luckily NX is
+designed well.
+
+> In this first generation of SEV, we are targeting a threat model very
+> similar to the one used by SMEP and SMAP.
+
+And that's great!  However, it is very different from "virtual machines
+need not fully trust the hypervisor and administrator of their host
+system" as said in the whitepaper.  SEV protects pretty well from
+sibling VMs, but by design this generation of SEV leaks a lot of
+information to an evil host---probably more than enough to mount a ROP
+attack or to do evil stuff that Andy outlined.
+
+My problem is that people will read AMD's whitepaper, not your message
+on LKML, and may put more trust in SEV than (for now) they should.
 
 Thanks,
 
-J=C3=A9r=C3=A9my
+Paolo
 
-
---=-=-=
-Content-Type: text/x-diff
-Content-Disposition: attachment;
- filename=0001-efibc-report-the-EFI-variable-name-in-the-error-mess.patch
-
->From 8a9b07e2d7242fa8a36157f1025202a96c3c7c9a Mon Sep 17 00:00:00 2001
-From: Jeremy Compostella <jeremy.compostella@intel.com>
-Date: Tue, 10 May 2016 10:34:21 +0200
-Subject: [PATCH] efibc: report the EFI variable name in the error messages
-
-Report the name of the EFI variable if the value is incorrect or if
-efibc_set_variable() fails to allocate the struct efivar_entry object.
-
-Signed-off-by: Jeremy Compostella <jeremy.compostella@intel.com>
----
- drivers/firmware/efi/efibc.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
-index cb4f573..93d34a1 100644
---- a/drivers/firmware/efi/efibc.c
-+++ b/drivers/firmware/efi/efibc.c
-@@ -37,13 +37,14 @@ static int efibc_set_variable(const char *name, const char *value)
- 	size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
- 
- 	if (size > sizeof(entry->var.Data)) {
--		pr_err("value is too large");
-+		pr_err("value is too large for %s EFI variable", name);
- 		return -EINVAL;
- 	}
- 
- 	entry = kmalloc(sizeof(*entry), GFP_KERNEL);
- 	if (!entry) {
--		pr_err("failed to allocate efivar entry");
-+		pr_err("failed to allocate efivar entry for %s EFI variable",
-+		       name);
- 		return -ENOMEM;
- 	}
- 
--- 
-1.9.1
-
-
---=-=-=
-Content-Type: text/plain
-
-
-
-"Elliott, Robert (Persistent Memory)" <elliott@hpe.com> writes:
-
->> -----Original Message-----
->> From: linux-kernel-owner@vger.kernel.org [mailto:linux-kernel-
->> owner@vger.kernel.org] On Behalf Of Matt Fleming
->> Sent: Friday, May 06, 2016 4:39 PM
-> ...
->> Subject: [PATCH 2/5] efibc: Fix excessive stack footprint warning
->>
->> From: Jeremy Compostella <jeremy.compostella@intel.com>
->>
-> ...
->>
->> -static void efibc_set_variable(const char *name, const char *value)
->> +static int efibc_set_variable(const char *name, const char *value)
->>  {
->>       int ret;
->>       efi_guid_t guid = LINUX_EFI_LOADER_ENTRY_GUID;
->> -     struct efivar_entry entry;
->> +     struct efivar_entry *entry;
->>       size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
->>
->> -     if (size > sizeof(entry.var.Data))
->> +     if (size > sizeof(entry->var.Data)) {
->>               pr_err("value is too large");
->
-> That pr_err is introduced by patch 25/40 of the first series.
->
-> How about including the name of the variable for which this is failing,
-> like the final pr_err?
->
->> +             return -EINVAL;
->> +     }
->>
->> -     efibc_str_to_str16(name, entry.var.VariableName);
->> -     efibc_str_to_str16(value, (efi_char16_t *)entry.var.Data);
->> -     memcpy(&entry.var.VendorGuid, &guid, sizeof(guid));
->> +     entry = kmalloc(sizeof(*entry), GFP_KERNEL);
->> +     if (!entry) {
->> +             pr_err("failed to allocate efivar entry");
->
-> How about including the name of the variable for which this
-> is failing, like the final pr_err?
->
->> +             return -ENOMEM;
->> +     }
->>
->> -     ret = efivar_entry_set(&entry,
->> +     efibc_str_to_str16(name, entry->var.VariableName);
->> +     efibc_str_to_str16(value, (efi_char16_t *)entry->var.Data);
->> +     memcpy(&entry->var.VendorGuid, &guid, sizeof(guid));
->> +
->> +     ret = efivar_entry_set(entry,
->>                              EFI_VARIABLE_NON_VOLATILE
->>                              | EFI_VARIABLE_BOOTSERVICE_ACCESS
->>                              | EFI_VARIABLE_RUNTIME_ACCESS,
->> -                            size, entry.var.Data, NULL);
->> +                            size, entry->var.Data, NULL);
->>       if (ret)
->>               pr_err("failed to set %s EFI variable: 0x%x\n",
->>                      name, ret);
->> +
->> +     kfree(entry);
->> +     return ret;
->>  }
->
-
--- 
-One Emacs to rule them all
-
---=-=-=--
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=3Dmailto:"dont@kvack.org"> email@kvack.org </a>
