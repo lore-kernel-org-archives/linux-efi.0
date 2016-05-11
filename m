@@ -1,57 +1,55 @@
-From: Alex Thorlton <athorlton@sgi.com>
-Subject: [RFC PATCH 0/2] Fix EFI runtime calls on SGI UV
-Date: Wed, 11 May 2016 14:55:43 -0500
-Message-ID: <1462996545-98387-1-git-send-email-athorlton@sgi.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH] Xen: EFI: Parse DT parameters for Xen specific UEFI
+Date: Thu, 12 May 2016 00:24:44 +0100
+Message-ID: <20160511232444.GY2839@codeblueprint.co.uk>
+References: <1462523526-3172-1-git-send-email-zhaoshenglong@huawei.com>
+ <20160511122730.GU2839@codeblueprint.co.uk>
+ <57333533.2030206@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <57333533.2030206@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Alex Thorlton <athorlton@sgi.com>, Dimitri Sivanich <sivanich@sgi.com>, Russ Anderson <rja@sgi.com>, Mike Travis <travis@sgi.com>, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org
+To: Shannon Zhao <shannon.zhao@linaro.org>
+Cc: Shannon Zhao <zhaoshenglong@huawei.com>, linux-arm-kernel@lists.infradead.org, catalin.marinas@arm.com, will.deacon@arm.com, sstabellini@kernel.org, stefano@aporeto.com, julien.grall@arm.com, ard.biesheuvel@linaro.org, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, peter.huangpeng@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-These patches make the necessary changes to get SGI UVs working with the
-latest EFI memory mapping code.  The motivation behind the changes is
-fairly simple:
+On Wed, 11 May, at 09:35:47PM, Shannon Zhao wrote:
+> > 
+> > Also, why do you need to setup efi.runtime_version here? Isn't that
+> > done inside uefi_init()?
+> > 
+> I don't see any codes which setup efi.runtime_version in uefi_init().
+ 
+Look in the EFI tree,
 
-Patch 1: The current efi_call_virt macro will not work with function
-	 pointers that don't live in efi.systab->runtime
-Patch 2: The efi_call assembly code incorrectly puts the return address
-	 from the current stack frame into the space reserved for the
-	 arguments in the stack frame that we're setting up for our EFI
-	 runtime call, instead of the 7th argument to efi_call.
+  https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/tree/drivers/firmware/efi/arm-init.c?h=next#n120
 
-I'm pretty sure that the second patch should be fine in its current
-state, but there will likely need to be some discussion about how to
-properly handle the stuff I'm doing in the first patch.  I know we need
-to do something kind of like what I did, but I know my copied/pasted
-UV-specific macros are not how we'll want to implement this in the end.
+> > Here is how I would have expected this patch to look:
+> > 
+> >   - Add FDT code to find hypervisor EFI params
+> > 
+> >   - Force enable EFI_RUNTIME_SERVICES for Xen and call
+> >     xen_efi_runtime_setup() inside xen_guest_init()
+> > 
+> >   - Change arm_enable_runtime_services() to handle the case where
+> >     EFI_RUNTIME_SERVICES is already set
+> > 
+> > Am I misunderstanding some ordering issues?
+> 
+> Since xen_guest_init() and arm_enable_runtime_services() are both
+> early_initcall and the calling order is random I think.
 
-Please note that, as requested, these patches apply to the current
-tip/master branch, but they will not apply out-of-the-box to
-linus/master.
+Urgh, right, I missed that.
 
-Let me know what everybody thinks!
+> And when we call xen_efi_runtime_setup() and setup
+> efi.runtime_version in xen_guest_init(), the efi.systab might be
+> NULL. So it needs to map the systanle explicitly before we use
+> efi.systab.
 
-Cc: Dimitri Sivanich <sivanich@sgi.com>
-Cc: Russ Anderson <rja@sgi.com>
-Cc: Mike Travis <travis@sgi.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Borislav Petkov <bp@suse.de>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: x86@kernel.org
-Cc: linux-efi@vger.kernel.org
+Could you explain why you need to copy efi.runtime_version instead of
+letting the existing code in uefi_init() set it up?
 
-Alex Thorlton (2):
-  Create UV efi_call macros
-  Fix efi_call
-
- arch/x86/include/asm/efi.h              |  3 ++
- arch/x86/platform/efi/efi_stub_64.S     |  2 +-
- arch/x86/platform/uv/bios_uv.c          |  3 +-
- drivers/firmware/efi/runtime-wrappers.c | 44 +-------------------------
- include/linux/efi.h                     | 55 +++++++++++++++++++++++++++++++++
- 5 files changed, 61 insertions(+), 46 deletions(-)
-
--- 
-1.8.5.6
+Also, efi.systab isn't used by xen_efi_runtime_setup() as far I can
+see, not sure why you need that either?
