@@ -1,135 +1,63 @@
-From: jeremy.compostella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org (Compostella, Jeremy)
-Subject: Re: [PATCH 2/5] efibc: Fix excessive stack footprint warning
-Date: Wed, 11 May 2016 17:16:24 +0200
-Message-ID: <8737povd4n.fsf@intel.com>
-References: <1462570771-13324-1-git-send-email-matt@codeblueprint.co.uk>
-	<1462570771-13324-3-git-send-email-matt@codeblueprint.co.uk>
-	<94D0CD8314A33A4D9D801C0FE68B4029639618A2@G4W3202.americas.hpqcorp.net>
-	<87r3dauwzt.fsf@intel.com> <20160511124338.GW2839@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="=-=-="
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160511124338.GW2839-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> (Matt Fleming's
-	message of "Wed, 11 May 2016 13:43:38 +0100")
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "Elliott, Robert (Persistent Memory)" <elliott-ZPxbGqLxI0U@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-kernel@vger.kernel.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi@vger.kernel.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+From: Alex Thorlton <athorlton@sgi.com>
+Subject: [PATCH 2/2] Fix efi_call
+Date: Wed, 11 May 2016 14:55:45 -0500
+Message-ID: <1462996545-98387-3-git-send-email-athorlton@sgi.com>
+References: <1462996545-98387-1-git-send-email-athorlton@sgi.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1462996545-98387-1-git-send-email-athorlton@sgi.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Alex Thorlton <athorlton@sgi.com>, Dimitri Sivanich <sivanich@sgi.com>, Russ Anderson <rja@sgi.com>, Mike Travis <travis@sgi.com>, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
---=-=-=
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+The efi_call assembly code has a slight error that prevents us from
+using arguments 7 and higher, which will be passed in on the stack.
 
-You're right.  Here is the new patch.
+        mov (%rsp), %rax
+        mov 8(%rax), %rax
+	...
+        mov %rax, 40(%rsp)
 
-Thanks,
+This code goes and grabs the return address for the current stack frame,
+and puts it on the stack, next the 5th argument for the EFI runtime
+call.  Considering the fact that having the return address in that
+position on the stack makes no sense, I'm guessing that the intent of
+this code was actually to grab an argument off the stack frame for this
+call and place it into the frame for the next one.
 
-J=C3=A9r=C3=A9my
+The small change to that offset (i.e. 8(%rax) to 16(%rax)) ensures that
+we grab the 7th argument off the stack, and pass it as the 6th argument
+to the EFI runtime function that we're about to call.  This change gets
+our EFI runtime calls that need to pass more than 6 arguments working
+again.
 
-
---=-=-=
-Content-Type: text/x-diff
-Content-Disposition: attachment;
- filename=0001-efibc-report-more-information-in-the-error-messages.patch
-
->From 3a54e6872e220e1ac4db0eae126a20b5383dae3e Mon Sep 17 00:00:00 2001
-From: Jeremy Compostella <jeremy.compostella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Date: Tue, 10 May 2016 10:34:21 +0200
-Subject: [PATCH] efibc: report more information in the error messages
-
-Report the name of the EFI variable if the value size is too large or
-if efibc_set_variable() fails to allocate the struct efivar_entry
-object.  If efibc_set_variable() fails because the value size is too
-large, it also reports the value size in the error message.
-
-Signed-off-by: Jeremy Compostella <jeremy.compostella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Alex Thorlton <athorlton@sgi.com>
+Cc: Dimitri Sivanich <sivanich@sgi.com>
+Cc: Russ Anderson <rja@sgi.com>
+Cc: Mike Travis <travis@sgi.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Borislav Petkov <bp@suse.de>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: x86@kernel.org
+Cc: linux-efi@vger.kernel.org
 ---
- drivers/firmware/efi/efibc.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ arch/x86/platform/efi/efi_stub_64.S | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
-index cb4f573..369edb5 100644
---- a/drivers/firmware/efi/efibc.c
-+++ b/drivers/firmware/efi/efibc.c
-@@ -37,13 +37,15 @@ static int efibc_set_variable(const char *name, const char *value)
- 	size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
- 
- 	if (size > sizeof(entry->var.Data)) {
--		pr_err("value is too large");
-+		pr_err("value is too large (%zu bytes) for %s EFI variable\n",
-+		       size, name);
- 		return -EINVAL;
- 	}
- 
- 	entry = kmalloc(sizeof(*entry), GFP_KERNEL);
- 	if (!entry) {
--		pr_err("failed to allocate efivar entry");
-+		pr_err("failed to allocate efivar entry for %s EFI variable\n",
-+		       name);
- 		return -ENOMEM;
- 	}
- 
+diff --git a/arch/x86/platform/efi/efi_stub_64.S b/arch/x86/platform/efi/efi_stub_64.S
+index 92723ae..62938ff 100644
+--- a/arch/x86/platform/efi/efi_stub_64.S
++++ b/arch/x86/platform/efi/efi_stub_64.S
+@@ -43,7 +43,7 @@ ENTRY(efi_call)
+ 	FRAME_BEGIN
+ 	SAVE_XMM
+ 	mov (%rsp), %rax
+-	mov 8(%rax), %rax
++	mov 16(%rax), %rax
+ 	subq $48, %rsp
+ 	mov %r9, 32(%rsp)
+ 	mov %rax, 40(%rsp)
 -- 
-1.9.1
-
-
---=-=-=
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-
-Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> writes:
-
-> On Tue, 10 May, at 10:40:22AM, Jeremy Compostella wrote:
->> Why not.  See patch as attachment.
->>=20
->> Thanks,
->>=20
->> J=C3=A9r=C3=A9my
->>=20
->
->> From 8a9b07e2d7242fa8a36157f1025202a96c3c7c9a Mon Sep 17 00:00:00 2001
->> From: Jeremy Compostella <jeremy.compostella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->> Date: Tue, 10 May 2016 10:34:21 +0200
->> Subject: [PATCH] efibc: report the EFI variable name in the error messag=
-es
->>=20
->> Report the name of the EFI variable if the value is incorrect or if
->> efibc_set_variable() fails to allocate the struct efivar_entry object.
->>=20
->> Signed-off-by: Jeremy Compostella <jeremy.compostella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->> ---
->>  drivers/firmware/efi/efibc.c | 5 +++--
->>  1 file changed, 3 insertions(+), 2 deletions(-)
->>=20
->> diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
->> index cb4f573..93d34a1 100644
->> --- a/drivers/firmware/efi/efibc.c
->> +++ b/drivers/firmware/efi/efibc.c
->> @@ -37,13 +37,14 @@ static int efibc_set_variable(const char *name, cons=
-t char *value)
->>  	size_t size =3D (strlen(value) + 1) * sizeof(efi_char16_t);
->>=20=20
->>  	if (size > sizeof(entry->var.Data)) {
->> -		pr_err("value is too large");
->> +		pr_err("value is too large for %s EFI variable", name);
->>  		return -EINVAL;
->>  	}
->
-> It'd be a good idea to print 'size' too.
->
->>=20=20
->>  	entry =3D kmalloc(sizeof(*entry), GFP_KERNEL);
->>  	if (!entry) {
->> -		pr_err("failed to allocate efivar entry");
->> +		pr_err("failed to allocate efivar entry for %s EFI variable",
->> +		       name);
->>  		return -ENOMEM;
->>  	}
->
-> Aren't these pr_err() calls missing newline characters?
-
---=20
-One Emacs to rule them all
-
---=-=-=--
+1.8.5.6
