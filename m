@@ -1,46 +1,223 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 2/2] Fix efi_call
-Date: Thu, 12 May 2016 12:43:46 +0100
-Message-ID: <20160512114346.GE2728@codeblueprint.co.uk>
+Subject: Re: [PATCH 1/2] Create UV efi_call macros
+Date: Thu, 12 May 2016 13:06:00 +0100
+Message-ID: <20160512120600.GF2728@codeblueprint.co.uk>
 References: <1462996545-98387-1-git-send-email-athorlton@sgi.com>
- <1462996545-98387-3-git-send-email-athorlton@sgi.com>
- <20160512064835.GB30717@gmail.com>
+ <1462996545-98387-2-git-send-email-athorlton@sgi.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20160512064835.GB30717@gmail.com>
+In-Reply-To: <1462996545-98387-2-git-send-email-athorlton@sgi.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Alex Thorlton <athorlton@sgi.com>, linux-kernel@vger.kernel.org, Dimitri Sivanich <sivanich@sgi.com>, Russ Anderson <rja@sgi.com>, Mike Travis <travis@sgi.com>, Borislav Petkov <bp@suse.de>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org
+To: Alex Thorlton <athorlton@sgi.com>
+Cc: linux-kernel@vger.kernel.org, Dimitri Sivanich <sivanich@sgi.com>, Russ Anderson <rja@sgi.com>, Mike Travis <travis@sgi.com>, Borislav Petkov <bp@suse.de>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 12 May, at 08:48:35AM, Ingo Molnar wrote:
-> 
-> * Alex Thorlton <athorlton@sgi.com> wrote:
-> 
-> > The efi_call assembly code has a slight error that prevents us from
-> > using arguments 7 and higher, which will be passed in on the stack.
-> > 
-> >         mov (%rsp), %rax
-> >         mov 8(%rax), %rax
-> > 	...
-> >         mov %rax, 40(%rsp)
-> > 
-> > This code goes and grabs the return address for the current stack frame,
-> > and puts it on the stack, next the 5th argument for the EFI runtime
-> > call.  Considering the fact that having the return address in that
-> > position on the stack makes no sense, I'm guessing that the intent of
-> > this code was actually to grab an argument off the stack frame for this
-> > call and place it into the frame for the next one.
-> > 
-> > The small change to that offset (i.e. 8(%rax) to 16(%rax)) ensures that
-> > we grab the 7th argument off the stack, and pass it as the 6th argument
-> > to the EFI runtime function that we're about to call.  This change gets
-> > our EFI runtime calls that need to pass more than 6 arguments working
-> > again.
-> 
-> I suppose the SGI/UV code is the only one using 7 arguments or more? Might make 
-> sense to point that out in the changelog.
+(Adding author of arch_efi_call code)
+
+On Wed, 11 May, at 02:55:44PM, Alex Thorlton wrote:
+> We need a slightly different macro than the standard efi_call_virt,
+> since those macros all assume that the function pointer, f, that gets
+> passed in will live somewhere in efi.systab->runtime.  Our EFI function
+> pointer lives in efi.uv_systab, so we can't use the standard macros out
+> of the box.
  
-Yeah, I included that info when I applied this patch.
+Is that true of all EFI services pointers? From reading the SGI/UV
+code I got the impression that it's possible to call the standard
+services via efi.systab->runtime but you also need the ability to call
+these UV bios functions, which are not accessible via efi.systab.
+
+Do you actually want the same environment setup and teardown to happen
+when calling efi.uv_systab ? Or are you simply trying to reuse the
+efi_call() implementation?
+
+> This commit creates some new uv_* macros that are functionally
+> equivalent to the standard ones, with the exception of allowing us to
+> use a different function pointer.  I figure that we won't want to call
+> these uv_* in the end (we'll probably want something more generic), but
+> I thought I would get everyone's thoughts on how we might best reach
+> that goal instead of just trying to come up with a new implementation on
+> my own.
+> 
+> By itself, this commit does get our machines booting, but it needs the
+> small fix to the efi_call assembly code for our modules to work.
+ 
+Could you provide some more details in the changelog on why your
+machine doesn't boot without this change?
+
+> Signed-off-by: Alex Thorlton <athorlton@sgi.com>
+> Cc: Dimitri Sivanich <sivanich@sgi.com>
+> Cc: Russ Anderson <rja@sgi.com>
+> Cc: Mike Travis <travis@sgi.com>
+> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+> Cc: Borislav Petkov <bp@suse.de>
+> Cc: Thomas Gleixner <tglx@linutronix.de>
+> Cc: Ingo Molnar <mingo@redhat.com>
+> Cc: "H. Peter Anvin" <hpa@zytor.com>
+> Cc: x86@kernel.org
+> Cc: linux-efi@vger.kernel.org
+> ---
+>  arch/x86/include/asm/efi.h              |  3 ++
+>  arch/x86/platform/uv/bios_uv.c          |  3 +-
+>  drivers/firmware/efi/runtime-wrappers.c | 44 +-------------------------
+>  include/linux/efi.h                     | 55 +++++++++++++++++++++++++++++++++
+>  4 files changed, 60 insertions(+), 45 deletions(-)
+> 
+> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+> index 78d1e74..f384047 100644
+> --- a/arch/x86/include/asm/efi.h
+> +++ b/arch/x86/include/asm/efi.h
+> @@ -84,6 +84,9 @@ struct efi_scratch {
+>  #define arch_efi_call_virt(f, args...)					\
+>  	efi_call((void *)efi.systab->runtime->f, args)			\
+>  
+> +#define uv_efi_call_virt(f, args...)					\
+> +	efi_call((void *)f, args)			\
+> +
+>  #define arch_efi_call_virt_teardown()					\
+>  ({									\
+>  	if (efi_scratch.use_pgd) {					\
+> diff --git a/arch/x86/platform/uv/bios_uv.c b/arch/x86/platform/uv/bios_uv.c
+> index 815fec6..62a46cb 100644
+> --- a/arch/x86/platform/uv/bios_uv.c
+> +++ b/arch/x86/platform/uv/bios_uv.c
+> @@ -40,8 +40,7 @@ s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
+>  		 */
+>  		return BIOS_STATUS_UNIMPLEMENTED;
+>  
+> -	ret = efi_call((void *)__va(tab->function), (u64)which,
+> -			a1, a2, a3, a4, a5);
+> +	ret = uv_call_virt(tab->function, (u64)which, a1, a2, a3, a4, a5);
+>  	return ret;
+>  }
+>  EXPORT_SYMBOL_GPL(uv_bios_call);
+> diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+> index 23bef6b..008a1a3 100644
+> --- a/drivers/firmware/efi/runtime-wrappers.c
+> +++ b/drivers/firmware/efi/runtime-wrappers.c
+> @@ -22,7 +22,7 @@
+>  #include <linux/stringify.h>
+>  #include <asm/efi.h>
+>  
+> -static void efi_call_virt_check_flags(unsigned long flags, const char *call)
+> +void efi_call_virt_check_flags(unsigned long flags, const char *call)
+>  {
+>  	unsigned long cur_flags, mismatch;
+>  
+> @@ -39,48 +39,6 @@ static void efi_call_virt_check_flags(unsigned long flags, const char *call)
+>  }
+>  
+>  /*
+> - * Arch code can implement the following three template macros, avoiding
+> - * reptition for the void/non-void return cases of {__,}efi_call_virt:
+> - *
+> - *  * arch_efi_call_virt_setup
+> - *
+> - *    Sets up the environment for the call (e.g. switching page tables,
+> - *    allowing kernel-mode use of floating point, if required).
+> - *
+> - *  * arch_efi_call_virt
+> - *
+> - *    Performs the call. The last expression in the macro must be the call
+> - *    itself, allowing the logic to be shared by the void and non-void
+> - *    cases.
+> - *
+> - *  * arch_efi_call_virt_teardown
+> - *
+> - *    Restores the usual kernel environment once the call has returned.
+> - */
+> -
+> -#define efi_call_virt(f, args...)					\
+> -({									\
+> -	efi_status_t __s;						\
+> -	unsigned long flags;						\
+> -	arch_efi_call_virt_setup();					\
+> -	local_save_flags(flags);					\
+> -	__s = arch_efi_call_virt(f, args);				\
+> -	efi_call_virt_check_flags(flags, __stringify(f));		\
+> -	arch_efi_call_virt_teardown();					\
+> -	__s;								\
+> -})
+> -
+> -#define __efi_call_virt(f, args...)					\
+> -({									\
+> -	unsigned long flags;						\
+> -	arch_efi_call_virt_setup();					\
+> -	local_save_flags(flags);					\
+> -	arch_efi_call_virt(f, args);					\
+> -	efi_call_virt_check_flags(flags, __stringify(f));		\
+> -	arch_efi_call_virt_teardown();					\
+> -})
+> -
+> -/*
+>   * According to section 7.1 of the UEFI spec, Runtime Services are not fully
+>   * reentrant, and there are particular combinations of calls that need to be
+>   * serialized. (source: UEFI Specification v2.4A)
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index df7acb5..f429269 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -1471,4 +1471,59 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
+>  			   unsigned long size);
+>  
+>  bool efi_runtime_disabled(void);
+> +extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
+> +
+> +/*
+> + * Arch code can implement the following three template macros, avoiding
+> + * reptition for the void/non-void return cases of {__,}efi_call_virt:
+> + *
+> + *  * arch_efi_call_virt_setup
+> + *
+> + *    Sets up the environment for the call (e.g. switching page tables,
+> + *    allowing kernel-mode use of floating point, if required).
+> + *
+> + *  * arch_efi_call_virt
+> + *
+> + *    Performs the call. The last expression in the macro must be the call
+> + *    itself, allowing the logic to be shared by the void and non-void
+> + *    cases.
+> + *
+> + *  * arch_efi_call_virt_teardown
+> + *
+> + *    Restores the usual kernel environment once the call has returned.
+> + */
+> +
+> +#define efi_call_virt(f, args...)					\
+> +({									\
+> +	efi_status_t __s;						\
+> +	unsigned long flags;						\
+> +	arch_efi_call_virt_setup();					\
+> +	local_save_flags(flags);					\
+> +	__s = arch_efi_call_virt(f, args);				\
+> +	efi_call_virt_check_flags(flags, __stringify(f));		\
+> +	arch_efi_call_virt_teardown();					\
+> +	__s;								\
+> +})
+> +
+> +#define __efi_call_virt(f, args...)					\
+> +({									\
+> +	unsigned long flags;						\
+> +	arch_efi_call_virt_setup();					\
+> +	local_save_flags(flags);					\
+> +	arch_efi_call_virt(f, args);					\
+> +	efi_call_virt_check_flags(flags, __stringify(f));		\
+> +	arch_efi_call_virt_teardown();					\
+> +})
+> +
+> +#define uv_call_virt(f, args...)					\
+> +({									\
+> +	efi_status_t __s;						\
+> +	unsigned long flags;						\
+> +	arch_efi_call_virt_setup();					\
+> +	local_save_flags(flags);					\
+> +	__s = uv_efi_call_virt(f, args);				\
+> +	efi_call_virt_check_flags(flags, __stringify(f));		\
+> +	arch_efi_call_virt_teardown();					\
+> +	__s;								\
+> +})
+>  #endif /* _LINUX_EFI_H */
+> -- 
+> 1.8.5.6
+> 
