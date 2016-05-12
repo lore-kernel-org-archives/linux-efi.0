@@ -1,237 +1,43 @@
-From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v2] Xen: EFI: Parse DT parameters for Xen specific UEFI
-Date: Thu, 12 May 2016 20:19:54 +0800
-Message-ID: <1463055594-14980-1-git-send-email-zhaoshenglong@huawei.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
+ clear
+Date: Thu, 12 May 2016 13:20:45 -0500
+Message-ID: <5734C97D.8060803@amd.com>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+ <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
+ <20160510134358.GR2839@codeblueprint.co.uk> <20160510135758.GA16783@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Cc: sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20160510135758.GA16783@pd.tnic>
+Sender: owner-linux-mm@kvack.org
+To: Borislav Petkov <bp@alien8.de>, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter
+ Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On 05/10/2016 08:57 AM, Borislav Petkov wrote:
+> On Tue, May 10, 2016 at 02:43:58PM +0100, Matt Fleming wrote:
+>> Is it not possible to maintain some kind of kernel virtual address
+>> mapping so memremap*() and friends can figure out when to twiddle the
+>> mapping attributes and map with/without encryption?
+> 
+> I guess we can move the sme_* specific stuff one indirection layer
+> below, i.e., in the *memremap() routines so that callers don't have to
+> care... That should keep the churn down...
+> 
 
-The EFI DT parameters for bare metal are located under /chosen node,
-while for Xen Dom0 they are located under /hyperviosr/uefi node. These
-parameters under /chosen and /hyperviosr/uefi are not expected to appear
-at the same time.
-Parse these EFI parameters and initialize EFI like the way for bare
-metal except the runtime services because the runtime services for Xen
-Dom0 are available through hypercalls and they are always enabled. So it
-sets the EFI_RUNTIME_SERVICES flag if it finds /hyperviosr/uefi node and
-bails out in arm_enable_runtime_services() when EFI_RUNTIME_SERVICES
-flag is set already.
+We could do that, but we'll have to generate that list of addresses so
+that it can be checked against the range being mapped.  Since this is
+part of early memmap support searching that list every time might not be
+too bad. I'll have to look into that and see what that looks like.
 
-CC: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
-v2: rebase it on top of EFI and Xen next branch, add some comments to
-explain the codes. 
----
- arch/arm/xen/enlighten.c           | 22 +++++++++++
- drivers/firmware/efi/arm-runtime.c |  5 +++
- drivers/firmware/efi/efi.c         | 81 ++++++++++++++++++++++++++++++--------
- 3 files changed, 92 insertions(+), 16 deletions(-)
+Thanks,
+Tom
 
-diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-index 13e3e9f..d4f36eb 100644
---- a/arch/arm/xen/enlighten.c
-+++ b/arch/arm/xen/enlighten.c
-@@ -15,7 +15,9 @@
- #include <asm/paravirt.h>
- #include <asm/xen/hypervisor.h>
- #include <asm/xen/hypercall.h>
-+#include <asm/xen/xen-ops.h>
- #include <asm/system_misc.h>
-+#include <asm/efi.h>
- #include <linux/interrupt.h>
- #include <linux/irqreturn.h>
- #include <linux/module.h>
-@@ -261,6 +263,19 @@ static int __init fdt_find_hyper_node(unsigned long node, const char *uname,
- 	    !strncmp(hyper_node.prefix, s, strlen(hyper_node.prefix)))
- 		hyper_node.version = s + strlen(hyper_node.prefix);
- 
-+	/*
-+	 * Check if Xen supports EFI by checking whether there is the
-+	 * "/hypervisor/uefi" node in DT. If so, runtime services are available
-+	 * through proxy functions (e.g. in case of Xen dom0 EFI implementation
-+	 * they call special hypercall which executes relevant EFI functions)
-+	 * and that is why they are always enabled.
-+	 */
-+	if (IS_ENABLED(CONFIG_XEN_EFI)) {
-+		if ((of_get_flat_dt_subnode_by_name(node, "uefi") > 0) &&
-+		    !efi_runtime_disabled())
-+			set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
-+	}
-+
- 	return 0;
- }
- 
-@@ -352,6 +367,13 @@ static int __init xen_guest_init(void)
- 		return -ENODEV;
- 	}
- 
-+	/*
-+	 * The fdt parsing codes have set EFI_RUNTIME_SERVICES if Xen EFI
-+	 * parameters are found. Force enable runtime services.
-+	 */
-+	if (efi_enabled(EFI_RUNTIME_SERVICES))
-+		xen_efi_runtime_setup();
-+
- 	shared_info_page = (struct shared_info *)get_zeroed_page(GFP_KERNEL);
- 
- 	if (!shared_info_page) {
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 17ccf0a..c394b81 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -107,6 +107,11 @@ static int __init arm_enable_runtime_services(void)
- 		return 0;
- 	}
- 
-+	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
-+		pr_info("EFI runtime services access via paravirt.\n");
-+		return 0;
-+	}
-+
- 	pr_info("Remapping and enabling EFI services.\n");
- 
- 	mapsize = efi.memmap.map_end - efi.memmap.map;
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 05509f3..1c6f9dd 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -472,12 +472,14 @@ device_initcall(efi_load_efivars);
- 		FIELD_SIZEOF(struct efi_fdt_params, field) \
- 	}
- 
--static __initdata struct {
-+struct params {
- 	const char name[32];
- 	const char propname[32];
- 	int offset;
- 	int size;
--} dt_params[] = {
-+};
-+
-+static __initdata struct params fdt_params[] = {
- 	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
- 	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
- 	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
-@@ -485,44 +487,91 @@ static __initdata struct {
- 	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
- };
- 
-+static __initdata struct params xen_fdt_params[] = {
-+	UEFI_PARAM("System Table", "xen,uefi-system-table", system_table),
-+	UEFI_PARAM("MemMap Address", "xen,uefi-mmap-start", mmap),
-+	UEFI_PARAM("MemMap Size", "xen,uefi-mmap-size", mmap_size),
-+	UEFI_PARAM("MemMap Desc. Size", "xen,uefi-mmap-desc-size", desc_size),
-+	UEFI_PARAM("MemMap Desc. Version", "xen,uefi-mmap-desc-ver", desc_ver)
-+};
-+
-+#define EFI_FDT_PARAMS_SIZE	ARRAY_SIZE(fdt_params)
-+
-+static __initdata struct {
-+	const char *uname;
-+	const char *subnode;
-+	struct params *params;
-+} dt_params[] = {
-+	{ "hypervisor", "uefi", xen_fdt_params },
-+	{ "chosen", NULL, fdt_params },
-+};
-+
- struct param_info {
- 	int found;
- 	void *params;
-+	const char *missing;
- };
- 
--static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
--				       int depth, void *data)
-+static int __init __find_uefi_params(unsigned long node,
-+				     struct param_info *info,
-+				     struct params *params)
- {
--	struct param_info *info = data;
- 	const void *prop;
- 	void *dest;
- 	u64 val;
- 	int i, len;
- 
--	if (depth != 1 || strcmp(uname, "chosen") != 0)
--		return 0;
--
--	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
--		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
--		if (!prop)
-+	for (i = 0; i < EFI_FDT_PARAMS_SIZE; i++) {
-+		prop = of_get_flat_dt_prop(node, params[i].propname, &len);
-+		if (!prop) {
-+			info->missing = params[i].name;
- 			return 0;
--		dest = info->params + dt_params[i].offset;
-+		}
-+
-+		dest = info->params + params[i].offset;
- 		info->found++;
- 
- 		val = of_read_number(prop, len / sizeof(u32));
- 
--		if (dt_params[i].size == sizeof(u32))
-+		if (params[i].size == sizeof(u32))
- 			*(u32 *)dest = val;
- 		else
- 			*(u64 *)dest = val;
- 
- 		if (efi_enabled(EFI_DBG))
--			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
--				dt_params[i].size * 2, val);
-+			pr_info("  %s: 0x%0*llx\n", params[i].name,
-+				params[i].size * 2, val);
- 	}
-+
- 	return 1;
- }
- 
-+static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
-+				       int depth, void *data)
-+{
-+	struct param_info *info = data;
-+	int i;
-+
-+	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
-+		const char *subnode = dt_params[i].subnode;
-+
-+		if (depth != 1 || strcmp(uname, dt_params[i].uname) != 0) {
-+			info->missing = dt_params[i].params[0].name;
-+			continue;
-+		}
-+
-+		if (subnode) {
-+			node = of_get_flat_dt_subnode_by_name(node, subnode);
-+			if (node < 0)
-+				return 0;
-+		}
-+
-+		return __find_uefi_params(node, info, dt_params[i].params);
-+	}
-+
-+	return 0;
-+}
-+
- int __init efi_get_fdt_params(struct efi_fdt_params *params)
- {
- 	struct param_info info;
-@@ -538,7 +587,7 @@ int __init efi_get_fdt_params(struct efi_fdt_params *params)
- 		pr_info("UEFI not found.\n");
- 	else if (!ret)
- 		pr_err("Can't find '%s' in device tree!\n",
--		       dt_params[info.found].name);
-+		       info.missing);
- 
- 	return ret;
- }
--- 
-2.0.4
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
