@@ -1,57 +1,32 @@
-From: Jiri Slaby <jslaby@suse.cz>
-Subject: [patch added to 3.12-stable] MAINTAINERS: Remove asterisk from EFI directory names
-Date: Fri, 13 May 2016 15:09:57 +0200
-Message-ID: <1463145007-20409-12-git-send-email-jslaby@suse.cz>
-References: <1463145007-20409-1-git-send-email-jslaby@suse.cz>
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1463145007-20409-1-git-send-email-jslaby@suse.cz>
-Sender: stable-owner@vger.kernel.org
-To: stable@vger.kernel.org
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Jiri Slaby <jslaby@suse.cz>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [GIT PULL] EFI urgent fix
+Date: Fri, 13 May 2016 21:34:41 +0100
+Message-ID: <1463171682-13881-1-git-send-email-matt@codeblueprint.co.uk>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt@codeblueprint.co.uk>
+The following changes since commit c10fcb14c7afd6688c7b197a814358fecf244222:
 
-This patch has been added to the 3.12 stable tree. If you have any
-objections, please let us know.
+  x86/sysfb_efi: Fix valid BAR address range check (2016-05-05 16:01:00 +0200)
 
-===============
+are available in the git repository at:
 
-commit e8dfe6d8f6762d515fcd4f30577f7bfcf7659887 upstream.
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
 
-Mark reported that having asterisks on the end of directory names
-confuses get_maintainer.pl when it encounters subdirectories, and that
-my name does not appear when run on drivers/firmware/efi/libstub.
+for you to fetch changes up to 6f4c184576aeb5594b8d21f9e7206b7b62e3d96e:
 
-Reported-by: Mark Rutland <mark.rutland@arm.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Catalin Marinas <catalin.marinas@arm.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/1462303781-8686-2-git-send-email-matt@codeblueprint.co.uk
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Jiri Slaby <jslaby@suse.cz>
----
- MAINTAINERS | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+  x86/efi: Fix 7th argument to efi_call (2016-05-13 21:12:13 +0100)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 44881abcfb06..b3233331dc0d 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -3165,8 +3165,8 @@ F:	Documentation/x86/efi-stub.txt
- F:	arch/ia64/kernel/efi.c
- F:	arch/x86/boot/compressed/eboot.[ch]
- F:	arch/x86/include/asm/efi.h
--F:	arch/x86/platform/efi/*
--F:	drivers/firmware/efi/*
-+F:	arch/x86/platform/efi/
-+F:	drivers/firmware/efi/
- F:	include/linux/efi*.h
- 
- EFI VARIABLE FILESYSTEM
--- 
-2.8.2
+----------------------------------------------------------------
+ * Fix passing of 7 parameters or more to efi_call. This issue is only
+   triggered on SGI/UV systems - Alex Thorlton
+
+----------------------------------------------------------------
+Alex Thorlton (1):
+      x86/efi: Fix 7th argument to efi_call
+
+ arch/x86/platform/efi/efi_stub_64.S | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
