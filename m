@@ -1,54 +1,51 @@
-From: David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [Xen-devel] [GIT PULL] EFI ARM Xen support
-Date: Tue, 17 May 2016 11:40:14 +0100
-Message-ID: <573AF50E.9090206@citrix.com>
-References: <20160514190410.GA2283@codeblueprint.co.uk>
- <alpine.DEB.2.10.1605171109170.2494@sstabellini-ThinkPad-X260>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 1/2] Create UV efi_call macros
+Date: Tue, 17 May 2016 13:11:22 +0100
+Message-ID: <20160517121122.GC21993@codeblueprint.co.uk>
+References: <1462996545-98387-1-git-send-email-athorlton@sgi.com>
+ <1462996545-98387-2-git-send-email-athorlton@sgi.com>
+ <20160512120600.GF2728@codeblueprint.co.uk>
+ <20160516225840.GL98477@stormcage.americas.sgi.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.10.1605171109170.2494@sstabellini-ThinkPad-X260>
+Content-Disposition: inline
+In-Reply-To: <20160516225840.GL98477-7ppMa7wkY9tKToyKb8PD+Zs2JHu2awxn0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stefano Stabellini <sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 17/05/16 11:12, Stefano Stabellini wrote:
-> On Sat, 14 May 2016, Matt Fleming wrote:
->> Folks,
->>
->> Please pull the following branch which contains support for Xen on ARM
->> EFI platforms.
->>
->> This merge includes a merge of Stefano's xen/linux-next branch to pull
->> in the prerequisites required for Shannon's commit:
->>
->>   11ee5491e5ff ("Xen: EFI: Parse DT parameters for Xen specific UEFI")
->>
->> as it needs both the latest changes in the EFI 'next' branch (now
->> tip/efi/core) and xen/linux-next.
->>
->> I have intentionally not included the individual patches as I would
->> normally do in a pull request, so that commit history created by my
->> merging of Stefano's branch is preserved, and so that there's no way
->> to accidentally apply the patches individually.
->>
->> The following changes since commit 6c5450ef66816216e574885cf8d3ddb31ef77428:
->>
->>   efivarfs: Make efivarfs_file_ioctl() static (2016-05-07 07:06:13 +0200)
->>
->> are available in the git repository at:
->>
->>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git efi/arm-xen
->>
->> for you to fetch changes up to 11ee5491e5ff519e0d3a7018eb21351cb6955a98:
->>
->>   Xen: EFI: Parse DT parameters for Xen specific UEFI (2016-05-14 19:31:01 +0100)
+On Mon, 16 May, at 05:58:40PM, Alex Thorlton wrote:
 > 
-> Is this arrangement working for everybody, in particular the tip
-> maintainers?
+> I was simply re-using the efi_call implementation.  Boris suggested that
+> I re-write this using the efi_call_virt macro, so I just went with that.
+> It all seems to work just fine, so I don't see much reason to stray away
+> from that implementation.  That being said, I'm obviously not a huge fun
+> of the code duplication across the macros.  I think there's probably a
+> way to minimize this, though I haven't quite worked out the best method
+> yet (ideas are welcome :)
 
-Yes.
+The reason I'm pressing for details is that we have a related issue
+with the EFI thunking code (CONFIG_EFI_MIXED), where the function
+pointer we want to call isn't accessible via the EFI System Table, see
+efi_thunk().
 
-David
+Well, technically it *is* accessible, you just can't dereference the
+services at runtime because the pointers in the tables are not 64-bit.
+
+But the same constraints exist for EFI thunk and UV code; given a
+function pointer to execute that isn't in efi.systab, setup the EFI
+runtime environment and call a custom ABI function.
+
+I haven't tested this (or thought through all the implications), but
+could you look at providing a table (or something) for mapping a
+function name to a ptr,func pair, e.g.
+
+	thunk_get_time:	runtime_services32(get_time), efi64_thunk
+	thunk_set_time:	runtime_services32(set_time), efi64_thunk
+	...
+	uv_call_func: efi.uv_systab->function, uv_efi_call_virt
+
+which we could use in arch_efi_call_virt()? That should give us much
+less code duplication and hide all this inside arch/x86.
