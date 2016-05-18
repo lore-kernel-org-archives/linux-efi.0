@@ -1,7 +1,7 @@
 From: Alex Thorlton <athorlton@sgi.com>
-Subject: [PATCH 1/3] Convert efi_call_virt to efi_call_virt_generic
-Date: Wed, 18 May 2016 14:11:39 -0500
-Message-ID: <1463598701-178201-2-git-send-email-athorlton@sgi.com>
+Subject: [PATCH 3/3] Update efi_thunk to use efi_call_virt_generic
+Date: Wed, 18 May 2016 14:11:41 -0500
+Message-ID: <1463598701-178201-4-git-send-email-athorlton@sgi.com>
 References: <1463598701-178201-1-git-send-email-athorlton@sgi.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1463598701-178201-1-git-send-email-athorlton@sgi.com>
@@ -10,26 +10,27 @@ To: linux-kernel@vger.kernel.org
 Cc: Alex Thorlton <athorlton@sgi.com>, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Mike Travis <travis@sgi.com>, Russ Anderson <rja@sgi.com>, Dimitri Sivanich <sivanich@sgi.com>, x86@kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-This commit makes a few slight modifications to the efi_call_virt macro
-to get it to work with function pointers that are stored in locations
-other than efi.systab->runtime, and renames the macro to
-efi_call_virt_generic.  The majority of the changes here are to pull
-these macros up into header files so that they can be accessed from
-outside of drivers/firmware/efi/runtime-wrappers.c.
+Now that we have efi_call_virt_generic, we no longer need to have an
+entirely separate efi_thunk macro to handle the CONFIG_EFI_MIXED
+scenario, where the function pointers cannot be read directly out of
+efi.systab->runtime.
 
-The most significant change not directly related to the code move is to
-add an extra "p" argument into the appropriate efi_call macros, and use
-that new argument in place of the, formerly hard-coded,
-efi.systab->runtime pointer.
+This commit creates a new set of arch_efi_call_virt* macros to mimic the
+behavior of the old efi_thunk macro.  In the end, the code should be the
+same, functionally, but we'll have eliminated a good chunk of code
+duplication by splitting the efi_thunk macro up into the appropriate
+arch_efi_call_virt bits and then just calling efi_call_virt_generic,
+instead of efi_thunk.  I do go ahead and create a new efi_thunk macro in
+arch/x86/platform/efi/efi_64.c, but this is mainly to keep the existing
+code clean.
 
-The last piece of the puzzle was to add an efi_call_virt macro back into
-drivers/firmware/efi/runtime-wrappers.c to wrap around the new
-efi_call_virt_generic macro - this was mainly to keep the code from
-looking too cluttered by adding a bunch of extra references to
-efi.systab->runtime everywhere.
-
-Note that I also broke up the code in the efi_call_virt_generic macro a
-bit in the process of moving it.
+One thing to note here, is that this is not and absolutely *perfect* use
+of the efi_call_virt_generic macro, in that it still has the
+efi.systab->runtime pointer hard-coded into runtime_service32.  For now,
+I think this should be fine, as the only users of the function already
+assumed that this was where their function pointer would come from.  If
+another CONFIG_EFI_MIXED user comes along and needs to use
+efi_call_virt_generic, then we will need to re-think things a bit.
 
 Signed-off-by: Alex Thorlton <athorlton@sgi.com>
 Cc: Matt Fleming <matt@codeblueprint.co.uk>
@@ -43,156 +44,138 @@ Cc: Dimitri Sivanich <sivanich@sgi.com>
 Cc: x86@kernel.org
 Cc: linux-efi@vger.kernel.org
 ---
- arch/x86/include/asm/efi.h              |  4 +--
- drivers/firmware/efi/runtime-wrappers.c | 53 +++++++--------------------------
- include/linux/efi.h                     | 51 +++++++++++++++++++++++++++++++
- 3 files changed, 63 insertions(+), 45 deletions(-)
+ arch/x86/include/asm/efi.h     | 47 ++++++++++++++++++++++++++++++++++++++++
+ arch/x86/platform/efi/efi_64.c | 49 ++++++++++--------------------------------
+ 2 files changed, 58 insertions(+), 38 deletions(-)
 
 diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 78d1e74..f310f0b 100644
+index f310f0b..6643f9b 100644
 --- a/arch/x86/include/asm/efi.h
 +++ b/arch/x86/include/asm/efi.h
-@@ -81,8 +81,8 @@ struct efi_scratch {
- 	}								\
- })
+@@ -68,6 +68,52 @@ struct efi_scratch {
+ 	u64	phys_stack;
+ } __packed;
  
--#define arch_efi_call_virt(f, args...)					\
--	efi_call((void *)efi.systab->runtime->f, args)			\
-+#define arch_efi_call_virt(p, f, args...)					\
-+	efi_call((void *)p->f, args)			\
- 
- #define arch_efi_call_virt_teardown()					\
- ({									\
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index 23bef6b..e8bc493 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -22,7 +22,16 @@
- #include <linux/stringify.h>
- #include <asm/efi.h>
- 
--static void efi_call_virt_check_flags(unsigned long flags, const char *call)
-+/*
-+ * Wrap around the new efi_call_virt_generic macros so that the
-+ * code doesn't get too cluttered
-+ */
-+#define efi_call_virt(f, args...)   \
-+	efi_call_virt_generic(efi.systab->runtime, f, args)
-+#define __efi_call_virt(f, args...) \
-+	__efi_call_virt_generic(efi.systab->runtime, f, args)
++#ifdef CONFIG_EFI_MIXED
++extern efi_status_t efi64_thunk(u32, ...);
 +
-+void efi_call_virt_check_flags(unsigned long flags, const char *call)
- {
- 	unsigned long cur_flags, mismatch;
++#define runtime_service32(func)						 \
++({									 \
++	u32 table = (u32)(unsigned long)efi.systab;			 \
++	u32 *rt, *___f;							 \
++									 \
++	rt = (u32 *)(table + offsetof(efi_system_table_32_t, runtime));	 \
++	___f = (u32 *)(*rt + offsetof(efi_runtime_services_32_t, func)); \
++	*___f;								 \
++})
++
++/*
++ * Switch to the EFI page tables early so that we can access the 1:1
++ * runtime services mappings which are not mapped in any other page
++ * tables. This function must be called before runtime_service32().
++ *
++ * Also, disable interrupts because the IDT points to 64-bit handlers,
++ * which aren't going to function correctly when we switch to 32-bit.
++ */
++#define arch_efi_call_virt_setup()					\
++({									\
++	efi_sync_low_kernel_mappings();					\
++	local_irq_save(flags);						\
++									\
++	efi_scratch.prev_cr3 = read_cr3();				\
++	write_cr3((unsigned long)efi_scratch.efi_pgt);			\
++	__flush_tlb_all();						\
++})
++
++#define arch_efi_call_virt(p, f, ...)					\
++({									\
++	u32 func = runtime_service32(f);				\
++	efi64_thunk(func, __VA_ARGS__);					\
++})
++
++#define arch_efi_call_virt_teardown()					\
++({									\
++	write_cr3(efi_scratch.prev_cr3);				\
++	__flush_tlb_all();						\
++	local_irq_restore(flags);					\
++})
++
++#else /* !CONFIG_EFI_MIXED */
++
+ #define arch_efi_call_virt_setup()					\
+ ({									\
+ 	efi_sync_low_kernel_mappings();					\
+@@ -94,6 +140,7 @@ struct efi_scratch {
+ 	__kernel_fpu_end();						\
+ 	preempt_enable();						\
+ })
++#endif
  
-@@ -39,48 +48,6 @@ static void efi_call_virt_check_flags(unsigned long flags, const char *call)
+ extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
+ 					u32 type, u64 attribute);
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 6e7242b..747bbc3 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -443,48 +443,21 @@ void __init efi_dump_pagetable(void)
  }
  
- /*
-- * Arch code can implement the following three template macros, avoiding
-- * reptition for the void/non-void return cases of {__,}efi_call_virt:
-- *
-- *  * arch_efi_call_virt_setup
-- *
-- *    Sets up the environment for the call (e.g. switching page tables,
-- *    allowing kernel-mode use of floating point, if required).
-- *
-- *  * arch_efi_call_virt
-- *
-- *    Performs the call. The last expression in the macro must be the call
-- *    itself, allowing the logic to be shared by the void and non-void
-- *    cases.
-- *
-- *  * arch_efi_call_virt_teardown
-- *
-- *    Restores the usual kernel environment once the call has returned.
-- */
+ #ifdef CONFIG_EFI_MIXED
+-extern efi_status_t efi64_thunk(u32, ...);
 -
--#define efi_call_virt(f, args...)					\
+-#define runtime_service32(func)						 \
+-({									 \
+-	u32 table = (u32)(unsigned long)efi.systab;			 \
+-	u32 *rt, *___f;							 \
+-									 \
+-	rt = (u32 *)(table + offsetof(efi_system_table_32_t, runtime));	 \
+-	___f = (u32 *)(*rt + offsetof(efi_runtime_services_32_t, func)); \
+-	*___f;								 \
+-})
+ 
+ /*
+- * Switch to the EFI page tables early so that we can access the 1:1
+- * runtime services mappings which are not mapped in any other page
+- * tables. This function must be called before runtime_service32().
++ * Note that we pass in NULL here instead of the systab/function name combo
++ * that usually gets us what we need.  This is because the EFI_MIXED code
++ * still assumes that all EFI callback function pointers will be in
++ * efi.systab->runtime.  Currently there are no users in the EFI_MIXED code
++ * that require efi_thunk to behave otherwise.
+  *
+- * Also, disable interrupts because the IDT points to 64-bit handlers,
+- * which aren't going to function correctly when we switch to 32-bit.
++ * If EFI_MIXED users want to call runtime functions that *don't* live in
++ * efi.systab->runtime, runtime_service32 and some of the related macros
++ * will need to be updated to handle this.  Not a major headache, but
++ * something to keep in mind.
+  */
+-#define efi_thunk(f, ...)						\
 -({									\
 -	efi_status_t __s;						\
 -	unsigned long flags;						\
--	arch_efi_call_virt_setup();					\
--	local_save_flags(flags);					\
--	__s = arch_efi_call_virt(f, args);				\
--	efi_call_virt_check_flags(flags, __stringify(f));		\
--	arch_efi_call_virt_teardown();					\
+-	u32 func;							\
+-									\
+-	efi_sync_low_kernel_mappings();					\
+-	local_irq_save(flags);						\
+-									\
+-	efi_scratch.prev_cr3 = read_cr3();				\
+-	write_cr3((unsigned long)efi_scratch.efi_pgt);			\
+-	__flush_tlb_all();						\
+-									\
+-	func = runtime_service32(f);					\
+-	__s = efi64_thunk(func, __VA_ARGS__);			\
+-									\
+-	write_cr3(efi_scratch.prev_cr3);				\
+-	__flush_tlb_all();						\
+-	local_irq_restore(flags);					\
+-									\
 -	__s;								\
 -})
--
--#define __efi_call_virt(f, args...)					\
--({									\
--	unsigned long flags;						\
--	arch_efi_call_virt_setup();					\
--	local_save_flags(flags);					\
--	arch_efi_call_virt(f, args);					\
--	efi_call_virt_check_flags(flags, __stringify(f));		\
--	arch_efi_call_virt_teardown();					\
--})
--
--/*
-  * According to section 7.1 of the UEFI spec, Runtime Services are not fully
-  * reentrant, and there are particular combinations of calls that need to be
-  * serialized. (source: UEFI Specification v2.4A)
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index df7acb5..8d1117ae 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1471,4 +1471,55 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
- 			   unsigned long size);
++#define efi_thunk(f, args...)   \
++	efi_call_virt_generic(NULL, f, args)
  
- bool efi_runtime_disabled(void);
-+extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
-+
-+/*
-+ * Arch code can implement the following three template macros, avoiding
-+ * reptition for the void/non-void return cases of {__,}efi_call_virt:
-+ *
-+ *  * arch_efi_call_virt_setup
-+ *
-+ *    Sets up the environment for the call (e.g. switching page tables,
-+ *    allowing kernel-mode use of floating point, if required).
-+ *
-+ *  * arch_efi_call_virt
-+ *
-+ *    Performs the call. The last expression in the macro must be the call
-+ *    itself, allowing the logic to be shared by the void and non-void
-+ *    cases.
-+ *
-+ *  * arch_efi_call_virt_teardown
-+ *
-+ *    Restores the usual kernel environment once the call has returned.
-+ */
-+
-+#define efi_call_virt_generic(p, f, args...)					\
-+({									\
-+	efi_status_t __s;						\
-+	unsigned long flags;						\
-+									\
-+	arch_efi_call_virt_setup();					\
-+									\
-+	local_save_flags(flags);					\
-+	__s = arch_efi_call_virt(p, f, args);				\
-+	efi_call_virt_check_flags(flags, __stringify(f));		\
-+									\
-+	arch_efi_call_virt_teardown();					\
-+									\
-+	__s;								\
-+})
-+
-+#define __efi_call_virt_generic(p, f, args...)					\
-+({									\
-+	unsigned long flags;						\
-+									\
-+	arch_efi_call_virt_setup();					\
-+									\
-+	local_save_flags(flags);					\
-+	arch_efi_call_virt(p, f, args);					\
-+	efi_call_virt_check_flags(flags, __stringify(f));		\
-+									\
-+	arch_efi_call_virt_teardown();					\
-+})
-+
- #endif /* _LINUX_EFI_H */
+ efi_status_t efi_thunk_set_virtual_address_map(
+ 	void *phys_set_virtual_address_map,
 -- 
 1.8.5.6
