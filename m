@@ -1,30 +1,188 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [Xen-devel] [GIT PULL] EFI ARM Xen support
-Date: Wed, 18 May 2016 11:49:00 +0100
-Message-ID: <20160518104900.GH21993@codeblueprint.co.uk>
-References: <20160514190410.GA2283@codeblueprint.co.uk>
- <alpine.DEB.2.10.1605171109170.2494@sstabellini-ThinkPad-X260>
- <573AF50E.9090206@citrix.com>
- <alpine.DEB.2.10.1605171153070.2494@sstabellini-ThinkPad-X260>
- <20160518104638.GA19191@gmail.com>
+From: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH v2 2/5] arm64: efi: apply strict permissons for UEFI
+ Runtime Services regions
+Date: Wed, 18 May 2016 08:06:34 -0500
+Message-ID: <573C68DA.8080009@codeaurora.org>
+References: <1459355933-13529-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1459355933-13529-3-git-send-email-ard.biesheuvel@linaro.org>
+ <573BB9FE.7050008@codeaurora.org>
+ <CAKv+Gu-Tam+QiXc_f0e+x8hNc4rxP_-59NdaCHkF9h=4Rd+XeA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160518104638.GA19191-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <CAKv+Gu-Tam+QiXc_f0e+x8hNc4rxP_-59NdaCHkF9h=4Rd+XeA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Stefano Stabellini <sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Prakhya, Sai Praneeth" <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 18 May, at 12:46:38PM, Ingo Molnar wrote:
-> 
-> I have no particular objections, since this seems to be Xen-next merged to the EFI 
-> tree that is already upstream, plus this single commit on top of t:
-> 
->   11ee5491e5ff Xen: EFI: Parse DT parameters for Xen specific UEFI
-> 
-> Which, if Matt is fine with it, you could send to Linus too as part of this 
-> cycle's Xen pull request.
+Hi Ard,
 
-Sure, I'm fine with that.
+We are not using the permission attribute table and all the Runtime
+Data/Code regions are marked with 'XP' bit. Do you think something
+wrong in our UEFI implementation or Linux has to map RuntimeCode
+regions with executable permission always irrespective of an attribute
+flag EFI_MEMORY_XP?
+
+[    0.000000] efi: Processing EFI memory map:
+[    0.000000] efi:   0x000000100000-0x00000010ffff [Memory Mapped I/O  |RUN|  |  |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x00003b830000-0x00003b83ffff [Memory Mapped I/O  |RUN|  |  |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x00003c000000-0x00003fffffff [Memory Mapped I/O  |RUN|  |  |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x000000100000-0x00000010ffff [Memory Mapped I/O  |RUN|  |  |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x00003b830000-0x00003b83ffff [Memory Mapped I/O  |RUN|  |  |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x00003c000000-0x00003fffffff [Memory Mapped I/O  |RUN|  |  |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x004000820000-0x00400085ffff [Runtime Data       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x004003080000-0x00400308ffff [Runtime Data       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047f9960000-0x0047f997ffff [Runtime Data       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047fa9c0000-0x0047fa9cffff [Runtime Code       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047faa30000-0x0047faa3ffff [Runtime Code       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047fab90000-0x0047fab9ffff [Runtime Code       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047faba0000-0x0047fabaffff [Runtime Data       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047fab90000-0x0047fab9ffff [Runtime Code       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047faba0000-0x0047fabaffff [Runtime Data       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047fabb0000-0x0047fabbffff [Runtime Code       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047fabc0000-0x0047fad9ffff [Runtime Data       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047fada0000-0x0047fae2ffff [Runtime Code       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047faf50000-0x0047faf7ffff [Runtime Code       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047fafa0000-0x0047fafbffff [Runtime Code       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047faf50000-0x0047faf7ffff [Runtime Code       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047fafa0000-0x0047fafbffff [Runtime Code       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047fff90000-0x0047fff9ffff [Runtime Code       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0047fffb0000-0x0047fffdffff [Runtime Data       |RUN|  |  |XP|  |  |  |   |WB|WT|WC|UC]*
+
+
+On 05/18/2016 01:18 AM, Ard Biesheuvel wrote:
+> On 18 May 2016 at 02:40, Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
+>> Hi Ard,
+>>
+>> This patch causing the kernel boot fail using the UEFI firmware on
+>> Qualcomm Technologies QDF2XXX server platforms.
+>>
+>> +       /* RW- */
+>> +       if (attr & EFI_MEMORY_XP || type != EFI_RUNTIME_SERVICES_CODE)
+>> +               return pgprot_val(PAGE_KERNEL);
+>> +
+>>
+>> Changing above condition from 'or' to 'and' fixed the problem.Are we
+>> missing something here or intentionally implemented this logic?
+> The logic is sound, I think. If you need execute permissions on a
+> non-code region with the XP bit set, there is something wrong in the
+> firmware, unless you are hitting this case for an MMIO region perhaps?
+> Could you share the kernel log with efi=debug enabled?
+>
+>> At least
+>> we need some pr_warn here if UEFI firmware passes EFI_RUNTIME_SEVRICE_CODE
+>> region that has an attribute EFI_MEMORY_XP.
+>>
+> No. DXE_RUNTIME_DRIVER modules are implemented as PE/COFF binaries,
+> which are covered completely by EfiRuntimeServicesCode regions.
+> However, a PE/COFF image consists of .text and .data sections, which
+> require different permissions, so PE/COFF binaries are represented by
+> several memory map entries in the memory attributes table, all of
+> which have a code type, but differ in the permission bits.
+>
+>>
+>> On 03/30/2016 11:38 AM, Ard Biesheuvel wrote:
+>>> Recent UEFI versions expose permission attributes for runtime services
+>>> memory regions, either in the UEFI memory map or in the separate memory
+>>> attributes table. This allows the kernel to map these regions with
+>>> stricter permissions, rather than the RWX permissions that are used by
+>>> default. So wire this up in our mapping routine.
+>>>
+>>> Note that in the absence of permission attributes, we still only map
+>>> regions of type EFI_RUNTIME_SERVICE_CODE with the executable bit set.
+>>> Also, we base the mapping attributes of EFI_MEMORY_MAPPED_IO on the
+>>> type directly rather than on the absence of the EFI_MEMORY_WB attribute.
+>>> This is more correct, but is also required for compatibility with the
+>>> upcoming support for the Memory Attributes Table, which only carries
+>>> permission attributes, not memory type attributes.
+>>>
+>>> Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+>>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>> ---
+>>>  arch/arm64/kernel/efi.c | 54 +++++++++++++++-----
+>>>  1 file changed, 40 insertions(+), 14 deletions(-)
+>>>
+>>> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+>>> index b6abc852f2a1..33a6da160a50 100644
+>>> --- a/arch/arm64/kernel/efi.c
+>>> +++ b/arch/arm64/kernel/efi.c
+>>> @@ -17,22 +17,48 @@
+>>>
+>>>  #include <asm/efi.h>
+>>>
+>>> -int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t
+>>> *md)
+>>> +/*
+>>> + * Only regions of type EFI_RUNTIME_SERVICES_CODE need to be
+>>> + * executable, everything else can be mapped with the XN bits
+>>> + * set. Also take the new (optional) RO/XP bits into account.
+>>> + */
+>>> +static __init pteval_t create_mapping_protection(efi_memory_desc_t *md)
+>>>  {
+>>> -     pteval_t prot_val;
+>>> +     u64 attr = md->attribute;
+>>> +     u32 type = md->type;
+>>>
+>>> -     /*
+>>> -      * Only regions of type EFI_RUNTIME_SERVICES_CODE need to be
+>>> -      * executable, everything else can be mapped with the XN bits
+>>> -      * set.
+>>> -      */
+>>> -     if ((md->attribute & EFI_MEMORY_WB) == 0)
+>>> -             prot_val = PROT_DEVICE_nGnRE;
+>>> -     else if (md->type == EFI_RUNTIME_SERVICES_CODE ||
+>>> -              !PAGE_ALIGNED(md->phys_addr))
+>>> -             prot_val = pgprot_val(PAGE_KERNEL_EXEC);
+>>> -     else
+>>> -             prot_val = pgprot_val(PAGE_KERNEL);
+>>> +     if (type == EFI_MEMORY_MAPPED_IO)
+>>> +             return PROT_DEVICE_nGnRE;
+>>> +
+>>> +     if (WARN_ONCE(!PAGE_ALIGNED(md->phys_addr),
+>>> +                   "UEFI Runtime regions are not aligned to 64 KB --
+>>> buggy firmware?"))
+>>> +             /*
+>>> +              * If the region is not aligned to the page size of the
+>>> OS, we
+>>> +              * can not use strict permissions, since that would also
+>>> affect
+>>> +              * the mapping attributes of the adjacent regions.
+>>> +              */
+>>> +             return pgprot_val(PAGE_KERNEL_EXEC);
+>>> +
+>>> +     /* R-- */
+>>> +     if ((attr & (EFI_MEMORY_XP | EFI_MEMORY_RO)) ==
+>>> +         (EFI_MEMORY_XP | EFI_MEMORY_RO))
+>>> +             return pgprot_val(PAGE_KERNEL_RO);
+>>> +
+>>> +     /* R-X */
+>>> +     if (attr & EFI_MEMORY_RO)
+>>> +             return pgprot_val(PAGE_KERNEL_ROX);
+>>> +
+>>> +     /* RW- */
+>>> +     if (attr & EFI_MEMORY_XP || type != EFI_RUNTIME_SERVICES_CODE)
+>>> +             return pgprot_val(PAGE_KERNEL);
+>>> +
+>>> +     /* RWX */
+>>> +     return pgprot_val(PAGE_KERNEL_EXEC);
+>>> +}
+>>> +
+>>> +int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t
+>>> *md)
+>>> +{
+>>> +     pteval_t prot_val = create_mapping_protection(md);
+>>>
+>>>       create_pgd_mapping(mm, md->phys_addr, md->virt_addr,
+>>>                          md->num_pages << EFI_PAGE_SHIFT,
+>> --
+>> Shanker Donthineni
+>> Qualcomm Technologies, Inc. on behalf of Qualcomm Innovation Center, Inc.
+>> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
+>>
+
+-- 
+Shanker Donthineni
+Qualcomm Technologies, Inc. on behalf of Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
