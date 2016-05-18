@@ -1,39 +1,72 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v2 1/2] efi: esrt: use memremap not ioremap to access
- ESRT table in memory
-Date: Wed, 18 May 2016 09:53:48 +0100
-Message-ID: <20160518085348.GG21993@codeblueprint.co.uk>
-References: <20160218132824.GE2651@codeblueprint.co.uk>
- <CAKv+Gu-s1pzYBzuDG-Z7s3gyo8dPOfeidZQ+rim-uAWZCBcKQQ@mail.gmail.com>
- <20160218134324.GG2651@codeblueprint.co.uk>
- <CAKv+Gu875r9RkDC723kNsG4XC0eSE9RPPmSFZrD0sx0QxS+V4g@mail.gmail.com>
- <20160218141544.GH2651@codeblueprint.co.uk>
- <20160218191624.GA1515@redhat.com>
- <20160226144114.GA7475@codeblueprint.co.uk>
- <20160301233040.GA31476@codeblueprint.co.uk>
- <20160304062524.GA19010@dhcp-128-65.nay.redhat.com>
- <CAKv+Gu_ekP+44FJjR7BY_MFqx2jQgc6Tk9W4SBL__ttdvQ55VQ@mail.gmail.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [Xen-devel] [GIT PULL] EFI ARM Xen support
+Date: Wed, 18 May 2016 12:46:38 +0200
+Message-ID: <20160518104638.GA19191@gmail.com>
+References: <20160514190410.GA2283@codeblueprint.co.uk>
+ <alpine.DEB.2.10.1605171109170.2494@sstabellini-ThinkPad-X260>
+ <573AF50E.9090206@citrix.com>
+ <alpine.DEB.2.10.1605171153070.2494@sstabellini-ThinkPad-X260>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_ekP+44FJjR7BY_MFqx2jQgc6Tk9W4SBL__ttdvQ55VQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.10.1605171153070.2494@sstabellini-ThinkPad-X260>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Stefano Stabellini <sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 18 May, at 10:36:33AM, Ard Biesheuvel wrote:
+
+* Stefano Stabellini <sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+
+> On Tue, 17 May 2016, David Vrabel wrote:
+> > On 17/05/16 11:12, Stefano Stabellini wrote:
+> > > On Sat, 14 May 2016, Matt Fleming wrote:
+> > >> Folks,
+> > >>
+> > >> Please pull the following branch which contains support for Xen on ARM
+> > >> EFI platforms.
+> > >>
+> > >> This merge includes a merge of Stefano's xen/linux-next branch to pull
+> > >> in the prerequisites required for Shannon's commit:
+> > >>
+> > >>   11ee5491e5ff ("Xen: EFI: Parse DT parameters for Xen specific UEFI")
+> > >>
+> > >> as it needs both the latest changes in the EFI 'next' branch (now
+> > >> tip/efi/core) and xen/linux-next.
+> > >>
+> > >> I have intentionally not included the individual patches as I would
+> > >> normally do in a pull request, so that commit history created by my
+> > >> merging of Stefano's branch is preserved, and so that there's no way
+> > >> to accidentally apply the patches individually.
+> > >>
+> > >> The following changes since commit 6c5450ef66816216e574885cf8d3ddb31ef77428:
+> > >>
+> > >>   efivarfs: Make efivarfs_file_ioctl() static (2016-05-07 07:06:13 +0200)
+> > >>
+> > >> are available in the git repository at:
+> > >>
+> > >>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git efi/arm-xen
+> > >>
+> > >> for you to fetch changes up to 11ee5491e5ff519e0d3a7018eb21351cb6955a98:
+> > >>
+> > >>   Xen: EFI: Parse DT parameters for Xen specific UEFI (2016-05-14 19:31:01 +0100)
+> > > 
+> > > Is this arrangement working for everybody, in particular the tip
+> > > maintainers?
+> > 
+> > Yes.
 > 
-> So what is the status here? I know Sai is working on x86 support for
-> the memory attributes table, so it would make sense settle this matter
-> as well.
+> I meant the x86 tip maintainers (Thomas, Peter and Ingo).
 
-This got stuck behind some other work, sorry about that.
+I have no particular objections, since this seems to be Xen-next merged to the EFI 
+tree that is already upstream, plus this single commit on top of t:
 
-Some of this was just merged by Linus (getting rid of the global
-memmap and switching everyone over to efi.memmap), a large chunk
-remains however.
+  11ee5491e5ff Xen: EFI: Parse DT parameters for Xen specific UEFI
 
-I should be able to get those patches mailed out once the merge window
-closes.
+Which, if Matt is fine with it, you could send to Linus too as part of this 
+cycle's Xen pull request.
+
+Thanks,
+
+	Ingo
