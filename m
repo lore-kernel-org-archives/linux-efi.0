@@ -1,67 +1,56 @@
 From: Alex Thorlton <athorlton@sgi.com>
-Subject: [RFC PATCH 0/3] x86/UV, x86/efi: Re-factor efi_call_virt for general use
-Date: Wed, 18 May 2016 14:11:38 -0500
-Message-ID: <1463598701-178201-1-git-send-email-athorlton@sgi.com>
+Subject: [PATCH 2/3] Update uv_bios_call to use efi_call_virt_generic
+Date: Wed, 18 May 2016 14:11:40 -0500
+Message-ID: <1463598701-178201-3-git-send-email-athorlton@sgi.com>
+References: <1463598701-178201-1-git-send-email-athorlton@sgi.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1463598701-178201-1-git-send-email-athorlton@sgi.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Alex Thorlton <athorlton@sgi.com>, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Mike Travis <travis@sgi.com>, Russ Anderson <rja@sgi.com>, Dimitri Sivanich <sivanich@sgi.com>, x86@kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Hey guys,
+Now that the efi_call_virt macro has been generalized to be able to
+use EFI system tables besides efi.systab, we are able to convert our
+uv_bios_call wrapper to use this standard EFI callback mechanism.
 
-This patchset creates a general purpose version of the efi_call_virt
-macro that does not assume that the function pointer being passed in is
-inside of efi.systab->runtime.  It also fixes up a few potentional users
-of that new functionality, namely the SGI UV, and the CONFIG_EFI_MIXED
-code paths.
+This simple change is part of a much larger effort to recover from some
+issues with the way we were mapping in some of our MMRs, and the way
+that we were doing our BIOS callbacks, which were uncovered by commit
+67a9108ed431 ("x86/efi: Build our own page table structures").
 
-Quick breakdown of the patches:
+The first issue that this uncovered was that we were relying on the EFI
+memory mapping mechanism to map in our MMR space for us, which, while
+reliable, was technically a bug, as it relied on "undefined" behavior in
+the mapping code.
 
-Patch 1) Move necessary macros to locations where we can access them.
-	 Remove hard-coded efi.systab reference from efi_call_virt.
-	 Rename/create new macros as needed.
-Patch 2) Simple change to allow UV code to utilize the new
-	 functionality.  Included a detailed explanation of how we got
-	 here.
-Patch 3) This is the one I'm most looking for input on.  I merge the
-	 efi_thunk code in with the new efi_call_virt scheme (giving it
-	 it's own arch_efi_call_* macros, conditionally defined for
-	 EFI_MIXED) and then use efi_thunk as a wrapper for
-	 efi_call_virt_generic.
+The reason we were able to piggyback on the EFI memory mapping code to
+map in our MMRs was because, previously, EFI code used the
+trampoline_pgd, which shares a few entries with the main kernel pgd.  It
+just so happened, that the memory range containing our MMRs was inside
+one of those shared regions, which kept our code working without issue
+for quite a while.
 
-The first two have been tested on simulators and hardware, but the third
-has only been compile-tested.  I don't have any hardware to test that
-on.  I'm sure I could set up a VM with OVMF, but I haven't taken the
-time yet :)
+Anyways, once we discovered this problem, we brought back our original
+code to map in the MMRs with commit 08914f436bdd ("x86/platform/UV:
+Bring back the call to map_low_mmrs in uv_system_init").  This got our
+systems a little further along, but we were still running into trouble
+with our EFI callbacks, which prevented us from booting all the way up.
 
-A few notes/concerns that I had about the patches:
+Our first step towards fixing the BIOS callbacks was to get our
+uv_bios_call wrapper updated to use efi_call_virt instead of the plain
+efi_call.  The previous patch took care of the effort needed to make
+that possible.  Along the way, we hit a major issue with some confusion
+about how to properly pull arguments higher than number 6 off the stack
+in the efi_call code, which resulted in Linus's commit 683ad8092cd2
+("x86/efi: Fix 7-parameter efi_call()s").
 
-1) I could have created more specific names for the individual uses of
-   efi_call_virt instead of using the originals as wrappers for
-   efi_call_virt_generic.
-   * Would be easy enough to do, but would need to update all the
-     original callers of the function.  Not difficult, just different.
-2) I'm not sure if each macro really needs to have the same args
-   implemented.  Could be simplified a bit if we didn't use "p" on the
-   EFI_MIXED side.
-   * I did this for consistency, but I suppose it's not explicitly
-     necessary.
-3) It wouldn't be too hard to add an efi_thunk_generic function that
-   would just expect a 32-bit pointer, and then have an
-   efi_thunk_runtime to wrap that and handle the call to
-   runtime_service32 for us, so that the efi.systab pointer doesn't have
-   to be hard-coded into the EFI_MIXED version of efi_call_virt_generic.
-   * This would only be to cover a hypothetical situation where there
-     was code that needed to use a function pointer outside of
-     efi.systab->runtime, running with CONFIG_EFI_MIXED enabled.
+Now that all of those issues are out of the way, we're able to make this
+simple change to use the new efi_call_virt_generic in uv_bios_call which
+gets our machines booting, running properly, and able to execute our
+callbacks with 6+ arguments.
 
-I'm still playing around with some of this to see how it could be
-cleaned up, but wanted to get something out there so people could see
-how I'm thinking about handling this.
-
-Let me know what everybody thinks!
-
+Signed-off-by: Alex Thorlton <athorlton@sgi.com>
 Cc: Matt Fleming <matt@codeblueprint.co.uk>
 Cc: Borislav Petkov <bp@suse.de>
 Cc: Thomas Gleixner <tglx@linutronix.de>
@@ -72,18 +61,23 @@ Cc: Russ Anderson <rja@sgi.com>
 Cc: Dimitri Sivanich <sivanich@sgi.com>
 Cc: x86@kernel.org
 Cc: linux-efi@vger.kernel.org
+---
+ arch/x86/platform/uv/bios_uv.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-Alex Thorlton (3):
-  Convert efi_call_virt to efi_call_virt_generic
-  Update uv_bios_call to use efi_call_virt_generic
-  Update efi_thunk to use efi_call_virt_generic
-
- arch/x86/include/asm/efi.h              | 51 +++++++++++++++++++++++++++++--
- arch/x86/platform/efi/efi_64.c          | 49 +++++++-----------------------
- arch/x86/platform/uv/bios_uv.c          |  3 +-
- drivers/firmware/efi/runtime-wrappers.c | 53 +++++++--------------------------
- include/linux/efi.h                     | 51 +++++++++++++++++++++++++++++++
- 5 files changed, 122 insertions(+), 85 deletions(-)
-
+diff --git a/arch/x86/platform/uv/bios_uv.c b/arch/x86/platform/uv/bios_uv.c
+index 815fec6..0ae0826 100644
+--- a/arch/x86/platform/uv/bios_uv.c
++++ b/arch/x86/platform/uv/bios_uv.c
+@@ -40,8 +40,7 @@ s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
+ 		 */
+ 		return BIOS_STATUS_UNIMPLEMENTED;
+ 
+-	ret = efi_call((void *)__va(tab->function), (u64)which,
+-			a1, a2, a3, a4, a5);
++	ret = efi_call_virt_generic(tab, function, (u64)which, a1, a2, a3, a4, a5);
+ 	return ret;
+ }
+ EXPORT_SYMBOL_GPL(uv_bios_call);
 -- 
 1.8.5.6
