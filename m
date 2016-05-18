@@ -1,83 +1,24 @@
-From: Alex Thorlton <athorlton@sgi.com>
-Subject: [PATCH 2/3] Update uv_bios_call to use efi_call_virt_generic
-Date: Wed, 18 May 2016 14:11:40 -0500
-Message-ID: <1463598701-178201-3-git-send-email-athorlton@sgi.com>
+From: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Subject: Re: [RFC PATCH 0/3] x86/UV, x86/efi: Re-factor efi_call_virt for
+ general use
+Date: Wed, 18 May 2016 14:13:32 -0500
+Message-ID: <20160518191332.GE242721@stormcage.americas.sgi.com>
 References: <1463598701-178201-1-git-send-email-athorlton@sgi.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1463598701-178201-1-git-send-email-athorlton@sgi.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Alex Thorlton <athorlton@sgi.com>, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Mike Travis <travis@sgi.com>, Russ Anderson <rja@sgi.com>, Dimitri Sivanich <sivanich@sgi.com>, x86@kernel.org, linux-efi@vger.kernel.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1463598701-178201-1-git-send-email-athorlton-sJ/iWh9BUns@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Now that the efi_call_virt macro has been generalized to be able to
-use EFI system tables besides efi.systab, we are able to convert our
-uv_bios_call wrapper to use this standard EFI callback mechanism.
+On Wed, May 18, 2016 at 02:11:38PM -0500, Alex Thorlton wrote:
+> Let me know what everybody thinks!
 
-This simple change is part of a much larger effort to recover from some
-issues with the way we were mapping in some of our MMRs, and the way
-that we were doing our BIOS callbacks, which were uncovered by commit
-67a9108ed431 ("x86/efi: Build our own page table structures").
+I realized right as I sent these that I should've included prefixes on
+the individual patches.  I have a feeling we'll need a v2 anyways, so
+I'll clean that up then.
 
-The first issue that this uncovered was that we were relying on the EFI
-memory mapping mechanism to map in our MMR space for us, which, while
-reliable, was technically a bug, as it relied on "undefined" behavior in
-the mapping code.
-
-The reason we were able to piggyback on the EFI memory mapping code to
-map in our MMRs was because, previously, EFI code used the
-trampoline_pgd, which shares a few entries with the main kernel pgd.  It
-just so happened, that the memory range containing our MMRs was inside
-one of those shared regions, which kept our code working without issue
-for quite a while.
-
-Anyways, once we discovered this problem, we brought back our original
-code to map in the MMRs with commit 08914f436bdd ("x86/platform/UV:
-Bring back the call to map_low_mmrs in uv_system_init").  This got our
-systems a little further along, but we were still running into trouble
-with our EFI callbacks, which prevented us from booting all the way up.
-
-Our first step towards fixing the BIOS callbacks was to get our
-uv_bios_call wrapper updated to use efi_call_virt instead of the plain
-efi_call.  The previous patch took care of the effort needed to make
-that possible.  Along the way, we hit a major issue with some confusion
-about how to properly pull arguments higher than number 6 off the stack
-in the efi_call code, which resulted in Linus's commit 683ad8092cd2
-("x86/efi: Fix 7-parameter efi_call()s").
-
-Now that all of those issues are out of the way, we're able to make this
-simple change to use the new efi_call_virt_generic in uv_bios_call which
-gets our machines booting, running properly, and able to execute our
-callbacks with 6+ arguments.
-
-Signed-off-by: Alex Thorlton <athorlton@sgi.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Borislav Petkov <bp@suse.de>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Mike Travis <travis@sgi.com>
-Cc: Russ Anderson <rja@sgi.com>
-Cc: Dimitri Sivanich <sivanich@sgi.com>
-Cc: x86@kernel.org
-Cc: linux-efi@vger.kernel.org
----
- arch/x86/platform/uv/bios_uv.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
-
-diff --git a/arch/x86/platform/uv/bios_uv.c b/arch/x86/platform/uv/bios_uv.c
-index 815fec6..0ae0826 100644
---- a/arch/x86/platform/uv/bios_uv.c
-+++ b/arch/x86/platform/uv/bios_uv.c
-@@ -40,8 +40,7 @@ s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
- 		 */
- 		return BIOS_STATUS_UNIMPLEMENTED;
- 
--	ret = efi_call((void *)__va(tab->function), (u64)which,
--			a1, a2, a3, a4, a5);
-+	ret = efi_call_virt_generic(tab, function, (u64)which, a1, a2, a3, a4, a5);
- 	return ret;
- }
- EXPORT_SYMBOL_GPL(uv_bios_call);
--- 
-1.8.5.6
+- Alex
