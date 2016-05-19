@@ -1,24 +1,88 @@
-From: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-Subject: Re: [RFC PATCH 0/3] x86/UV, x86/efi: Re-factor efi_call_virt for
- general use
-Date: Wed, 18 May 2016 14:13:32 -0500
-Message-ID: <20160518191332.GE242721@stormcage.americas.sgi.com>
-References: <1463598701-178201-1-git-send-email-athorlton@sgi.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1463598701-178201-1-git-send-email-athorlton-sJ/iWh9BUns@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Sasha Levin <sasha.levin@oracle.com>
+Subject: [added to the 3.18 stable tree] x86/sysfb_efi: Fix valid BAR address range check
+Date: Thu, 19 May 2016 00:15:26 -0400
+Message-ID: <1463631350-32182-37-git-send-email-sasha.levin@oracle.com>
+References: <1463631350-32182-1-git-send-email-sasha.levin@oracle.com>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1463631350-32182-1-git-send-email-sasha.levin@oracle.com>
+Sender: stable-owner@vger.kernel.org
+To: stable@vger.kernel.org, stable-commits@vger.kernel.org
+Cc: Wang YanQing <udknight@gmail.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Herrmann <dh.herrmann@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, Tomi Valkeinen <tomi.valkeinen@ti.com>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sasha.levin@oracle.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, May 18, 2016 at 02:11:38PM -0500, Alex Thorlton wrote:
-> Let me know what everybody thinks!
+From: Wang YanQing <udknight@gmail.com>
 
-I realized right as I sent these that I should've included prefixes on
-the individual patches.  I have a feeling we'll need a v2 anyways, so
-I'll clean that up then.
+This patch has been added to the 3.18 stable tree. If you have any
+objections, please let us know.
 
-- Alex
+===============
+
+[ Upstream commit c10fcb14c7afd6688c7b197a814358fecf244222 ]
+
+The code for checking whether a BAR address range is valid will break
+out of the loop when a start address of 0x0 is encountered.
+
+This behaviour is wrong since by breaking out of the loop we may miss
+the BAR that describes the EFI frame buffer in a later iteration.
+
+Because of this bug I can't use video=efifb: boot parameter to get
+efifb on my new ThinkPad E550 for my old linux system hard disk with
+3.10 kernel. In 3.10, efifb is the only choice due to DRM/I915 not
+supporting the GPU.
+
+This patch also add a trivial optimization to break out after we find
+the frame buffer address range without testing later BARs.
+
+Signed-off-by: Wang YanQing <udknight@gmail.com>
+[ Rewrote changelog. ]
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Reviewed-by: Peter Jones <pjones@redhat.com>
+Cc: <stable@vger.kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: David Herrmann <dh.herrmann@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/1462454061-21561-2-git-send-email-matt@codeblueprint.co.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+---
+ arch/x86/kernel/sysfb_efi.c | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/kernel/sysfb_efi.c b/arch/x86/kernel/sysfb_efi.c
+index b285d4e..5da924b 100644
+--- a/arch/x86/kernel/sysfb_efi.c
++++ b/arch/x86/kernel/sysfb_efi.c
+@@ -106,14 +106,24 @@ static int __init efifb_set_system(const struct dmi_system_id *id)
+ 					continue;
+ 				for (i = 0; i < DEVICE_COUNT_RESOURCE; i++) {
+ 					resource_size_t start, end;
++					unsigned long flags;
++
++					flags = pci_resource_flags(dev, i);
++					if (!(flags & IORESOURCE_MEM))
++						continue;
++
++					if (flags & IORESOURCE_UNSET)
++						continue;
++
++					if (pci_resource_len(dev, i) == 0)
++						continue;
+ 
+ 					start = pci_resource_start(dev, i);
+-					if (start == 0)
+-						break;
+ 					end = pci_resource_end(dev, i);
+ 					if (screen_info.lfb_base >= start &&
+ 					    screen_info.lfb_base < end) {
+ 						found_bar = 1;
++						break;
+ 					}
+ 				}
+ 			}
+-- 
+2.5.0
