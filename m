@@ -1,87 +1,59 @@
-From: Jiri Slaby <jslaby@suse.cz>
-Subject: [PATCH 3.12 43/76] x86/sysfb_efi: Fix valid BAR address range check
-Date: Thu, 19 May 2016 11:08:05 +0200
-Message-ID: <edfad738252de419a11a332131f8b31c776c9326.1463648873.git.jslaby@suse.cz>
-References: <c4ec97c341630e22e546c1a628a3664f17f7ffc8.1463648873.git.jslaby@suse.cz>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
+ clear
+Date: Tue, 24 May 2016 09:54:31 -0500
+Message-ID: <57446B27.20406@amd.com>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+ <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
+ <20160510134358.GR2839@codeblueprint.co.uk> <20160510135758.GA16783@pd.tnic>
+ <5734C97D.8060803@amd.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <c4ec97c341630e22e546c1a628a3664f17f7ffc8.1463648873.git.jslaby@suse.cz>
-In-Reply-To: <cover.1463648873.git.jslaby@suse.cz>
-References: <cover.1463648873.git.jslaby@suse.cz>
+In-Reply-To: <5734C97D.8060803@amd.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: stable@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Wang YanQing <udknight@gmail.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Herrmann <dh.herrmann@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, Tomi Valkeinen <tomi.valkeinen@ti.com>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Jiri Slaby <jslaby@suse.cz>
+To: Borislav Petkov <bp@alien8.de>, Matt Fleming <matt@codeblueprint.co.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, Daniel Kiper <daniel.kiper@oracle.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Wang YanQing <udknight@gmail.com>
+On 05/12/2016 01:20 PM, Tom Lendacky wrote:
+> On 05/10/2016 08:57 AM, Borislav Petkov wrote:
+>> On Tue, May 10, 2016 at 02:43:58PM +0100, Matt Fleming wrote:
+>>> Is it not possible to maintain some kind of kernel virtual address
+>>> mapping so memremap*() and friends can figure out when to twiddle the
+>>> mapping attributes and map with/without encryption?
+>>
+>> I guess we can move the sme_* specific stuff one indirection layer
+>> below, i.e., in the *memremap() routines so that callers don't have to
+>> care... That should keep the churn down...
+>>
+> 
+> We could do that, but we'll have to generate that list of addresses so
+> that it can be checked against the range being mapped.  Since this is
+> part of early memmap support searching that list every time might not be
+> too bad. I'll have to look into that and see what that looks like.
 
-3.12-stable review patch.  If anyone has any objections, please let me know.
+I looked into this and this would be a large change also to parse tables
+and build lists.  It occurred to me that this could all be taken care of
+if the early_memremap calls were changed to early_ioremap calls. Looking
+in the git log I see that they were originally early_ioremap calls but
+were changed to early_memremap calls with this commit:
 
-===============
+commit abc93f8eb6e4 ("efi: Use early_mem*() instead of early_io*()")
 
-commit c10fcb14c7afd6688c7b197a814358fecf244222 upstream.
+Looking at the early_memremap code and the early_ioremap code they both
+call __early_ioremap so I don't see how this change makes any
+difference (especially since FIXMAP_PAGE_NORMAL and FIXMAP_PAGE_IO are
+identical in this case).
 
-The code for checking whether a BAR address range is valid will break
-out of the loop when a start address of 0x0 is encountered.
+Is it safe to change these back to early_ioremap calls (at least on
+x86)?
 
-This behaviour is wrong since by breaking out of the loop we may miss
-the BAR that describes the EFI frame buffer in a later iteration.
+Thanks,
+Tom
 
-Because of this bug I can't use video=efifb: boot parameter to get
-efifb on my new ThinkPad E550 for my old linux system hard disk with
-3.10 kernel. In 3.10, efifb is the only choice due to DRM/I915 not
-supporting the GPU.
-
-This patch also add a trivial optimization to break out after we find
-the frame buffer address range without testing later BARs.
-
-Signed-off-by: Wang YanQing <udknight@gmail.com>
-[ Rewrote changelog. ]
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-Reviewed-by: Peter Jones <pjones@redhat.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: David Herrmann <dh.herrmann@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
-Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/1462454061-21561-2-git-send-email-matt@codeblueprint.co.uk
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Jiri Slaby <jslaby@suse.cz>
----
- arch/x86/kernel/sysfb_efi.c | 14 ++++++++++++--
- 1 file changed, 12 insertions(+), 2 deletions(-)
-
-diff --git a/arch/x86/kernel/sysfb_efi.c b/arch/x86/kernel/sysfb_efi.c
-index b285d4e8c68e..5da924bbf0a0 100644
---- a/arch/x86/kernel/sysfb_efi.c
-+++ b/arch/x86/kernel/sysfb_efi.c
-@@ -106,14 +106,24 @@ static int __init efifb_set_system(const struct dmi_system_id *id)
- 					continue;
- 				for (i = 0; i < DEVICE_COUNT_RESOURCE; i++) {
- 					resource_size_t start, end;
-+					unsigned long flags;
-+
-+					flags = pci_resource_flags(dev, i);
-+					if (!(flags & IORESOURCE_MEM))
-+						continue;
-+
-+					if (flags & IORESOURCE_UNSET)
-+						continue;
-+
-+					if (pci_resource_len(dev, i) == 0)
-+						continue;
- 
- 					start = pci_resource_start(dev, i);
--					if (start == 0)
--						break;
- 					end = pci_resource_end(dev, i);
- 					if (screen_info.lfb_base >= start &&
- 					    screen_info.lfb_base < end) {
- 						found_bar = 1;
-+						break;
- 					}
- 				}
- 			}
--- 
-2.8.2
+> 
+> Thanks,
+> Tom
+> 
