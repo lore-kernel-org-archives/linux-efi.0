@@ -1,111 +1,67 @@
-From: Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH] arm64/efi: remove spurious WARN_ON for !4K kernels
-Date: Wed, 25 May 2016 10:38:19 -0500
-Message-ID: <5745C6EB.8090004@arm.com>
-References: <1464189116-30898-1-git-send-email-mark.rutland@arm.com>
+From: Daniel Kiper <daniel.kiper@oracle.com>
+Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
+ clear
+Date: Wed, 25 May 2016 18:09:30 +0200
+Message-ID: <20160525160930.GJ5490@olila.local.net-space.pl>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+ <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
+ <20160510134358.GR2839@codeblueprint.co.uk>
+ <20160510135758.GA16783@pd.tnic>
+ <5734C97D.8060803@amd.com>
+ <57446B27.20406@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1464189116-30898-1-git-send-email-mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <57446B27.20406@amd.com>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: Borislav Petkov <bp@alien8.de>, Matt Fleming <matt@codeblueprint.co.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas
 List-Id: linux-efi@vger.kernel.org
 
-On 05/25/2016 10:11 AM, Mark Rutland wrote:
-> Since commit 1fd55a9a09b0293a ("arm64/efi: Apply strict permissions t=
-o
-> UEFI Runtime Services regions"), booting a !4K page kernel results in=
- a
-> boot-time splat on some systems, due to to a WARN_ONCE added in that
-> commit which fires if the base address of an EFI memory descriptor is
-> not aligned to the kernel page size (which might be 4K, 16K, or 64K).
+On Tue, May 24, 2016 at 09:54:31AM -0500, Tom Lendacky wrote:
+> On 05/12/2016 01:20 PM, Tom Lendacky wrote:
+> > On 05/10/2016 08:57 AM, Borislav Petkov wrote:
+> >> On Tue, May 10, 2016 at 02:43:58PM +0100, Matt Fleming wrote:
+> >>> Is it not possible to maintain some kind of kernel virtual address
+> >>> mapping so memremap*() and friends can figure out when to twiddle the
+> >>> mapping attributes and map with/without encryption?
+> >>
+> >> I guess we can move the sme_* specific stuff one indirection layer
+> >> below, i.e., in the *memremap() routines so that callers don't have to
+> >> care... That should keep the churn down...
+> >>
+> >
+> > We could do that, but we'll have to generate that list of addresses so
+> > that it can be checked against the range being mapped.  Since this is
+> > part of early memmap support searching that list every time might not be
+> > too bad. I'll have to look into that and see what that looks like.
 >
-> On page 38 of the UEFI 2.6 specification it is stated:
+> I looked into this and this would be a large change also to parse tables
+> and build lists.  It occurred to me that this could all be taken care of
+> if the early_memremap calls were changed to early_ioremap calls. Looking
+> in the git log I see that they were originally early_ioremap calls but
+> were changed to early_memremap calls with this commit:
 >
-> 	If a 64KiB physical page contains any 4KiB page with any of the
-> 	following types listed below, then all 4KiB pages in the 64KiB
-> 	page must use identical ARM Memory Page Attributes (as described
-> 	in Table 8):
-> 	=E2=80=94 EfiRuntimeServicesCode
-> 	=E2=80=94 EfiRuntimeServicesData
-> 	=E2=80=94 EfiReserved
-> 	=E2=80=94 EfiACPIMemoryNVS
-> 	Mixed attribute mappings within a larger page are not allowed.
+> commit abc93f8eb6e4 ("efi: Use early_mem*() instead of early_io*()")
 >
-> On page 158 of the UEFI 2.6 specification, in the description of a
-> memory descriptor, the PhysicalStart and VirtualStart fields are
-> mandated as being 4K aligned, with NumberOfPages describing the numbe=
-r
-> of 4K pages in the region.
+> Looking at the early_memremap code and the early_ioremap code they both
+> call __early_ioremap so I don't see how this change makes any
+> difference (especially since FIXMAP_PAGE_NORMAL and FIXMAP_PAGE_IO are
+> identical in this case).
 >
-> No further restriction on alignment is provided in the UEFI
-> specification, neither generically nor in a rule specific to AArch64.
->
-> So while attributes within a naturally-aligned 64K region must be
-> consistent across memory descriptors, the regions described by those
-> descriptors are not mandated to be 64K aligned.
->
-> Not being able to apply strict permissions is sub-optimal, and worthy=
- of
-> some notice, but it is not helpful to erroneously suggest that firmwa=
-re
-> is buggy, nor is it beneficial to have a noisy backtrace at boot time=
-=2E
+> Is it safe to change these back to early_ioremap calls (at least on
+> x86)?
 
+Commit f955371ca9d3986bca100666041fcfa9b6d21962 (x86: remove the Xen-specific
+_PAGE_IOMAP PTE flag) made commit abc93f8eb6e4 unnecessary. Though, IMO, it
+is still valid code cleanup. So, if it is not very strongly needed I would
+not revert this change.
 
+Daniel
 
->
-> This patch downgrades the WARN_ONCE to a pr_warn_once, and re-words t=
-he
-> message to also describe the implication of the insufficient alignmen=
-t.
-
-I've been seeing this a lot, and this should help to lower the noise le=
-vel.
-
-Reviewed-by: Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>
-
-Thanks,
-
->
-> Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-> Cc: Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>
-> Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> ---
->   arch/arm64/kernel/efi.c | 5 +++--
->   1 file changed, 3 insertions(+), 2 deletions(-)
->
-> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> index 78f5248..95e748e 100644
-> --- a/arch/arm64/kernel/efi.c
-> +++ b/arch/arm64/kernel/efi.c
-> @@ -30,14 +30,15 @@ static __init pteval_t create_mapping_protection(=
-efi_memory_desc_t *md)
->   	if (type =3D=3D EFI_MEMORY_MAPPED_IO)
->   		return PROT_DEVICE_nGnRE;
->
-> -	if (WARN_ONCE(!PAGE_ALIGNED(md->phys_addr),
-> -		      "UEFI Runtime regions are not aligned to 64 KB -- buggy firm=
-ware?"))
-> +	if (!PAGE_ALIGNED(md->phys_addr)) {
-> +		pr_warn_once("UEFI Runtime regions insufficiently aligned for stri=
-ct permissions\n");
->   		/*
->   		 * If the region is not aligned to the page size of the OS, we
->   		 * can not use strict permissions, since that would also affect
->   		 * the mapping attributes of the adjacent regions.
->   		 */
->   		return pgprot_val(PAGE_KERNEL_EXEC);
-> +	}
->
->   	/* R-- */
->   	if ((attr & (EFI_MEMORY_XP | EFI_MEMORY_RO)) =3D=3D
->
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
