@@ -1,67 +1,199 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
- clear
-Date: Wed, 25 May 2016 18:09:30 +0200
-Message-ID: <20160525160930.GJ5490@olila.local.net-space.pl>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
- <20160510134358.GR2839@codeblueprint.co.uk>
- <20160510135758.GA16783@pd.tnic>
- <5734C97D.8060803@amd.com>
- <57446B27.20406@amd.com>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH] arm64/efi: remove spurious WARN_ON for !4K kernels
+Date: Wed, 25 May 2016 17:12:07 +0100
+Message-ID: <20160525161207.GD30956@leverpostej>
+References: <1464189116-30898-1-git-send-email-mark.rutland@arm.com>
+ <BA565A9C-8CC0-42E4-9821-7941852F835A@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <57446B27.20406@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: Borislav Petkov <bp@alien8.de>, Matt Fleming <matt@codeblueprint.co.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas
+In-Reply-To: <BA565A9C-8CC0-42E4-9821-7941852F835A-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, May 24, 2016 at 09:54:31AM -0500, Tom Lendacky wrote:
-> On 05/12/2016 01:20 PM, Tom Lendacky wrote:
-> > On 05/10/2016 08:57 AM, Borislav Petkov wrote:
-> >> On Tue, May 10, 2016 at 02:43:58PM +0100, Matt Fleming wrote:
-> >>> Is it not possible to maintain some kind of kernel virtual address
-> >>> mapping so memremap*() and friends can figure out when to twiddle the
-> >>> mapping attributes and map with/without encryption?
-> >>
-> >> I guess we can move the sme_* specific stuff one indirection layer
-> >> below, i.e., in the *memremap() routines so that callers don't have to
-> >> care... That should keep the churn down...
-> >>
-> >
-> > We could do that, but we'll have to generate that list of addresses so
-> > that it can be checked against the range being mapped.  Since this is
-> > part of early memmap support searching that list every time might not be
-> > too bad. I'll have to look into that and see what that looks like.
->
-> I looked into this and this would be a large change also to parse tables
-> and build lists.  It occurred to me that this could all be taken care of
-> if the early_memremap calls were changed to early_ioremap calls. Looking
-> in the git log I see that they were originally early_ioremap calls but
-> were changed to early_memremap calls with this commit:
->
-> commit abc93f8eb6e4 ("efi: Use early_mem*() instead of early_io*()")
->
-> Looking at the early_memremap code and the early_ioremap code they both
-> call __early_ioremap so I don't see how this change makes any
-> difference (especially since FIXMAP_PAGE_NORMAL and FIXMAP_PAGE_IO are
-> identical in this case).
->
-> Is it safe to change these back to early_ioremap calls (at least on
-> x86)?
+On Wed, May 25, 2016 at 05:23:01PM +0200, Ard Biesheuvel wrote:
+>=20
+>=20
+> > On 25 mei 2016, at 17:11, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote=
+:
+> >=20
+> > Since commit 1fd55a9a09b0293a ("arm64/efi: Apply strict permissions=
+ to
+> > UEFI Runtime Services regions"), booting a !4K page kernel results =
+in a
+> > boot-time splat on some systems, due to to a WARN_ONCE added in tha=
+t
+> > commit which fires if the base address of an EFI memory descriptor =
+is
+> > not aligned to the kernel page size (which might be 4K, 16K, or 64K=
+).
+> >=20
+> > On page 38 of the UEFI 2.6 specification it is stated:
+> >=20
+> >    If a 64KiB physical page contains any 4KiB page with any of the
+> >    following types listed below, then all 4KiB pages in the 64KiB
+> >    page must use identical ARM Memory Page Attributes (as described
+> >    in Table 8):
+> >    =E2=80=94 EfiRuntimeServicesCode
+> >    =E2=80=94 EfiRuntimeServicesData
+> >    =E2=80=94 EfiReserved
+> >    =E2=80=94 EfiACPIMemoryNVS
+> >    Mixed attribute mappings within a larger page are not allowed.
+> >=20
+>=20
+> The same section mentions that the ro/xp etc attributes are unused on
+> arm, so if we go by the letter here, we need to remove those memory
+> protection features entirely. So a spec update is clearly in order
+> here.
 
-Commit f955371ca9d3986bca100666041fcfa9b6d21962 (x86: remove the Xen-specific
-_PAGE_IOMAP PTE flag) made commit abc93f8eb6e4 unnecessary. Though, IMO, it
-is still valid code cleanup. So, if it is not very strongly needed I would
-not revert this change.
+Yes; that definitely needs fixing.
 
-Daniel
+=46WIW, I don't think that matters in this case (assuming the usual EFI
+memory desc dump stuff prints those).
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+My memory map (and the remap triggering the WARN_ONCE) look like:
+
+[    0.000000] efi: Getting EFI parameters from FDT:
+[    0.000000] efi:   System Table: 0x00000083ff34bf18
+[    0.000000] efi:   MemMap Address: 0x00000083fcefd618
+[    0.000000] efi:   MemMap Size: 0x00000540
+[    0.000000] efi:   MemMap Desc. Size: 0x00000030
+[    0.000000] efi:   MemMap Desc. Version: 0x00000001
+[    0.000000] efi: EFI v2.40 by American Megatrends
+[    0.000000] efi:  ACPI 2.0=3D0x83ff1c3000  SMBIOS 3.0=3D0x83ff347798=
+=20
+[    0.000000] efi: Processing EFI memory map:
+[    0.000000] efi:   0x0000e1050000-0x0000e105ffff [Memory Mapped I/O =
+ |RUN|  |  |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x0000e1300000-0x0000e1300fff [Memory Mapped I/O =
+ |RUN|  |  |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x0000e8200000-0x0000e827ffff [Memory Mapped I/O =
+ |RUN|  |  |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x008000000000-0x008001e7ffff [Runtime Data      =
+ |RUN|  |  |  |  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x008001e80000-0x008001ffffff [Conventional Memor=
+y|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x008002000000-0x008002ddffff [Loader Data       =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x008002de0000-0x00801fdfffff [Conventional Memor=
+y|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x00801fe00000-0x00801fe0ffff [Loader Data       =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x00801fe10000-0x00801fffbfff [Conventional Memor=
+y|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x00801fffc000-0x00801fffffff [Boot Data         =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x008020000000-0x0083f0ffffff [Conventional Memor=
+y|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083f1000000-0x0083f101ffff [Boot Data         =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083f1020000-0x0083fb542fff [Conventional Memor=
+y|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fb543000-0x0083fc2a2fff [Loader Code       =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fc2a3000-0x0083fcefcfff [Conventional Memor=
+y|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fcefd000-0x0083fcefefff [Loader Data       =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fceff000-0x0083fd01afff [Loader Code       =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fd01b000-0x0083fea67fff [Boot Data         =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fea68000-0x0083febd3fff [Conventional Memor=
+y|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083febd4000-0x0083ff186fff [Boot Code         =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff187000-0x0083ff1b6fff [Reserved          =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0083ff1b7000-0x0083ff1c4fff [ACPI Reclaim Memor=
+y|   |  |  |  |  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0083ff1c5000-0x0083ff20ffff [Conventional Memor=
+y|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff210000-0x0083ff224fff [Loader Data       =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff225000-0x0083ff226fff [ACPI Memory NVS   =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0083ff227000-0x0083ff34bfff [Runtime Data      =
+ |RUN|  |  |  |  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0083ff34c000-0x0083ffe42fff [Runtime Code      =
+ |RUN|  |  |  |  |  |  |   |WB|WT|WC|UC]*
+[    0.000000] efi:   0x0083ffe43000-0x0083ffffffff [Boot Data         =
+ |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
+=2E..
+[    0.079000] Remapping and enabling EFI services.
+[    0.083677]   EFI remap 0x00000000e1050000 =3D> 0000000020000000
+[    0.089551]   EFI remap 0x00000000e1300000 =3D> 0000000020010000
+[    0.095421]   EFI remap 0x00000000e8200000 =3D> 0000000020020000
+[    0.101324]   EFI remap 0x0000008000000000 =3D> 0000000020200000
+[    0.107192] UEFI Runtime regions are not aligned to 64 KB -- buggy f=
+irmware?
+[    0.114116] ------------[ cut here ]------------
+[    0.118941] WARNING: CPU: 0 PID: 1 at arch/arm64/kernel/efi.c:34 efi=
+_create_mapping+0x50/0xdc
+[    0.127524] Modules linked in:
+[    0.130592]=20
+[    0.132083] CPU: 0 PID: 1 Comm: swapper/0 Not tainted 4.6.0-next-201=
+60525 #6
+[    0.139180] Hardware name: AMD Seattle (Rev.B0) Development Board (O=
+verdrive) (DT)
+[    0.146805] task: ffff8003c01e0000 ti: ffff8003c0200000 task.ti: fff=
+f8003c0200000
+[    0.154338] PC is at efi_create_mapping+0x50/0xdc
+[    0.159071] LR is at efi_create_mapping+0x50/0xdc
+[    0.163800] pc : [<ffff000008b23f34>] lr : [<ffff000008b23f34>] psta=
+te: 60000245
+[    0.171248] sp : ffff8003c0203d60
+[    0.174579] x29: ffff8003c0203d60 x28: 0000000000000000=20
+[    0.179925] x27: 0000000000000000 x26: 0000000000000000=20
+[    0.185269] x25: 0000000000000000 x24: ffff000008ca7be0=20
+[    0.190616] x23: ffff000008d5b000 x22: ffff000008a76ff8=20
+[    0.195959] x21: ffff000008c45000 x20: ffff000008ca7be0=20
+[    0.201303] x19: ffff8003fcefdac8 x18: 0000000000000006=20
+[    0.206649] x17: 0000000000000007 x16: 0000000000000001=20
+[    0.211992] x15: ffff000008d15c95 x14: 3f657261776d7269=20
+[    0.217337] x13: 6620796767756220 x12: 0000000005f5e0ff=20
+[    0.222683] x11: 206f742064656e67 x10: 000000000001a2b8=20
+[    0.228026] x9 : ffff8003c0203b60 x8 : 000000000000006c=20
+[    0.233368] x7 : 2d2d20424b203436 x6 : ffff000008d15cd7=20
+[    0.238711] x5 : 0000000000000041 x4 : 0000000000000000=20
+[    0.244055] x3 : 0000000000000000 x2 : 00000000000002e6=20
+[    0.249439] x1 : ffff8003c0200000 x0 : 0000000000000040=20
+[    0.254784]=20
+[    0.256279] ---[ end trace e9947b6ce71b94cd ]---
+[    0.260922] Call trace:
+[    0.263376] Exception stack(0xffff8003c0203ba0 to 0xffff8003c0203cc0=
+)
+[    0.269860] 3ba0: ffff8003fcefdac8 ffff000008ca7be0 ffff8003c0203d60=
+ ffff000008b23f34
+[    0.277741] 3bc0: ffff8003c0203be0 ffff000008a08ac0 0000000000000040=
+ 0000000000000001
+[    0.285624] 3be0: ffff8003c0203c80 ffff0000080f42a8 ffff8003fcefdac8=
+ ffff000008ca7be0
+[    0.293508] 3c00: ffff000008c45000 ffff000008a76ff8 ffff000008d5b000=
+ ffff000008ca7be0
+[    0.301391] 3c20: 0000000000000000 0000000000000000 0000000000000000=
+ 0000000000000000
+[    0.309271] 3c40: 0000000000000040 ffff8003c0200000 00000000000002e6=
+ 0000000000000000
+[    0.317154] 3c60: 0000000000000000 0000000000000041 ffff000008d15cd7=
+ 2d2d20424b203436
+[    0.325037] 3c80: 000000000000006c ffff8003c0203b60 000000000001a2b8=
+ 206f742064656e67
+[    0.332922] 3ca0: 0000000005f5e0ff 6620796767756220 3f657261776d7269=
+ ffff000008d15c95
+[    0.340805] [<ffff000008b23f34>] efi_create_mapping+0x50/0xdc
+[    0.346651] [<ffff000008b530e8>] arm_enable_runtime_services+0x130/0=
+x214
+[    0.353400] [<ffff000008081990>] do_one_initcall+0x38/0x128
+[    0.359009] [<ffff000008b20be4>] kernel_init_freeable+0x84/0x1f0
+[    0.365054] [<ffff0000087a9b58>] kernel_init+0x10/0x100
+[    0.370311] [<ffff000008084ac0>] ret_from_fork+0x10/0x50
+[    0.375661]   EFI remap 0x00000083ff227000 =3D> 0000000022087000
+[    0.381544]   EFI remap 0x00000083ff34c000 =3D> 00000000221ac000
+
+Thanks,
+Mark.
