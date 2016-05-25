@@ -1,57 +1,76 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
- clear
-Date: Wed, 25 May 2016 20:30:11 +0100
-Message-ID: <20160525193011.GC2984@codeblueprint.co.uk>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
- <20160510134358.GR2839@codeblueprint.co.uk>
- <20160510135758.GA16783@pd.tnic>
- <5734C97D.8060803@amd.com>
- <57446B27.20406@amd.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] efi: fix for_each_efi_memory_desc_in_map() for empty
+ memmaps
+Date: Wed, 25 May 2016 21:48:05 +0100
+Message-ID: <20160525204805.GE2984@codeblueprint.co.uk>
+References: <1464187015-5640-1-git-send-email-vkuznets@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <57446B27.20406@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: Borislav Petkov <bp@alien8.de>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, Daniel Kiper <daniel.kiper@oracle.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.or>
+In-Reply-To: <1464187015-5640-1-git-send-email-vkuznets-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Vitaly Kuznetsov <vkuznets-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "K. Y. Srinivasan" <kys-0li6OtcxBFHby3iVrkZq2A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 24 May, at 09:54:31AM, Tom Lendacky wrote:
-> 
-> I looked into this and this would be a large change also to parse tables
-> and build lists.  It occurred to me that this could all be taken care of
-> if the early_memremap calls were changed to early_ioremap calls. Looking
-> in the git log I see that they were originally early_ioremap calls but
-> were changed to early_memremap calls with this commit:
-> 
-> commit abc93f8eb6e4 ("efi: Use early_mem*() instead of early_io*()")
-> 
-> Looking at the early_memremap code and the early_ioremap code they both
-> call __early_ioremap so I don't see how this change makes any
-> difference (especially since FIXMAP_PAGE_NORMAL and FIXMAP_PAGE_IO are
-> identical in this case).
-> 
-> Is it safe to change these back to early_ioremap calls (at least on
-> x86)?
+(Cc'ing Mark, the original author)
 
-I really don't want to begin mixing early_ioremap() calls and
-early_memremap() calls for any of the EFI code if it can be avoided.
+On Wed, 25 May, at 04:36:55PM, Vitaly Kuznetsov wrote:
+> Commit 78ce248faa3c ("efi: Iterate over efi.memmap in
+> for_each_efi_memory_desc()") introduced a regression for systems booted
+> with 'noefi' kernel option. In particular, I observe early kernel hang in
+> efi_find_mirror() on for_each_efi_memory_desc() call. As we don't have
+> efi memmap we enter this iterator with the following parameters:
+> 
+> efi.memmap.map = 0, efi.memmap.map_end = 0, efi.memmap.desc_size = 28
+> 
+> for_each_efi_memory_desc_in_map() does the following comparison:
+> 
+> (md) <= (efi_memory_desc_t *)((m)->map_end - (m)->desc_size);
+> 
+> where md = 0, (m)->map_end = 0 and (m)->desc_size = 28 but when we subtract
+> something from a NULL pointer wrap around happens and we end up returning
+> invalid pointer.
+> 
+> Fixes: 78ce248faa3c ("efi: Iterate over efi.memmap in for_each_efi_memory_desc()")
+> Signed-off-by: Vitaly Kuznetsov <vkuznets-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  include/linux/efi.h | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index c2db3ca..229ccb5 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -1005,7 +1005,8 @@ extern int efi_memattr_apply_permissions(struct mm_struct *mm,
+>  /* Iterate through an efi_memory_map */
+>  #define for_each_efi_memory_desc_in_map(m, md)				   \
+>  	for ((md) = (m)->map;						   \
+> -	     (md) <= (efi_memory_desc_t *)((m)->map_end - (m)->desc_size); \
+> +	     (efi_memory_desc_t *)((md) + (m)->desc_size) <=		   \
+> +		     (efi_memory_desc_t *)(m)->map_end;			   \
+>  	     (md) = (void *)(md) + (m)->desc_size)
 
-There is slow but steady progress to move more and more of the
-architecture specific EFI code out into generic code. Swapping
-early_memremap() for early_ioremap() would be a step backwards,
-because FIXMAP_PAGE_NORMAL and FIXMAP_PAGE_IO are not identical on
-ARM/arm64.
+Curse C type casting!
 
-Could you point me at the patch that in this series that fixes up
-early_ioremap() to work with mem encrypt/decrypt? I took another
-(quick) look through but couldn't find it.
+You're adding m->desc_size to a (efi_memory_desc_t *) which is 40
+bytes. You need the below to avoid breaking regular EFI boot.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+But yeah, this looks like a fine fix. Mark, any concerns?
+
+---
+
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index d8ab480b1089..3a3f8d8bd9be 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1026,7 +1026,7 @@ extern int efi_memattr_apply_permissions(struct mm_struct *mm,
+ /* Iterate through an efi_memory_map */
+ #define for_each_efi_memory_desc_in_map(m, md)				   \
+ 	for ((md) = (m)->map;						   \
+-	     (md) <= (efi_memory_desc_t *)((m)->map_end - (m)->desc_size); \
++	     ((void *)(md) + (m)->desc_size) <=	(m)->map_end;		   \
+ 	     (md) = (void *)(md) + (m)->desc_size)
+ 
+ /**
