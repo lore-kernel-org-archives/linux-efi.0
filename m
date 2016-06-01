@@ -1,61 +1,60 @@
-From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Subject: [PATCH 2/3] arm64: efi: Ensure efi_create_mapping() does not map overlapping regions
-Date: Tue, 31 May 2016 16:14:31 +0100
-Message-ID: <1464707672-21882-3-git-send-email-catalin.marinas@arm.com>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 1/3] efi: Introduce *_continue efi_memory_desc iterators
+Date: Wed, 1 Jun 2016 11:34:47 +0100
+Message-ID: <20160601103446.GC9280@leverpostej>
 References: <1464707672-21882-1-git-send-email-catalin.marinas@arm.com>
+ <1464707672-21882-2-git-send-email-catalin.marinas@arm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1464707672-21882-1-git-send-email-catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1464707672-21882-2-git-send-email-catalin.marinas-5wv7dgnIgG8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Since the EFI page size is 4KB, it is possible for a !4KB page kernel to
-align an EFI runtime map boundaries in a way that they can overlap
-within the same page. This requires the current create_pgd_mapping()
-code to be able to split existing larger mappings when an overlapping
-region needs to be mapped.
+Hi Catalin,
 
-With this patch, efi_create_mapping() scans the EFI memory map for
-overlapping regions and trims the length of the current map to avoid a
-large block mapping and subsequent split.
+On Tue, May 31, 2016 at 04:14:30PM +0100, Catalin Marinas wrote:
+> The for_each_efi_memory_desc_continue() macro and corresponding
+> "_in_map" allow iterating over an efi_memory_map from a given position.
+> For code reuse between the existing iterator and the _continue variant,
+> this patch also introduces efi_memory_desc_next_entry_map().
+> 
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Signed-off-by: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+> ---
+>  include/linux/efi.h | 19 +++++++++++++++++--
+>  1 file changed, 17 insertions(+), 2 deletions(-)
+> 
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index c2db3ca22217..4b0d880f1cd7 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -1002,11 +1002,16 @@ extern int efi_memattr_init(void);
+>  extern int efi_memattr_apply_permissions(struct mm_struct *mm,
+>  					 efi_memattr_perm_setter fn);
+>  
+> +/* Find next entry in an efi_memory_map or NULL if md is last */
+> +#define efi_memory_desc_next_entry_map(m, md)				   \
+> +	((md) == (efi_memory_desc_t *)((m)->map_end - (m)->desc_size)	   \
+> +	 ? NULL : (void *)(md) + (m)->desc_size)
+> +
+>  /* Iterate through an efi_memory_map */
+>  #define for_each_efi_memory_desc_in_map(m, md)				   \
+>  	for ((md) = (m)->map;						   \
+> -	     (md) <= (efi_memory_desc_t *)((m)->map_end - (m)->desc_size); \
+> -	     (md) = (void *)(md) + (m)->desc_size)
+> +	     (md);							   \
+> +	     (md) = efi_memory_desc_next_entry_map(m, md))
 
-Signed-off-by: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
----
- arch/arm64/kernel/efi.c | 22 +++++++++++++++++++---
- 1 file changed, 19 insertions(+), 3 deletions(-)
+As a heads-up, this will conflict with the efi/urgent branch [1], due to
+commit ee92562e33c516dd ("efi: Fix for_each_efi_memory_desc_in_map() for
+empty memmaps"). A pull went out for that yesterday [2].
 
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index 78f52488f9ff..0d5753c31c7f 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -62,10 +62,26 @@ struct screen_info screen_info __section(.data);
- int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
- {
- 	pteval_t prot_val = create_mapping_protection(md);
-+	phys_addr_t length = md->num_pages << EFI_PAGE_SHIFT;
-+	efi_memory_desc_t *next = md;
- 
--	create_pgd_mapping(mm, md->phys_addr, md->virt_addr,
--			   md->num_pages << EFI_PAGE_SHIFT,
--			   __pgprot(prot_val | PTE_NG));
-+	/*
-+	 * Search for the next EFI runtime map and check for any overlap with
-+	 * the current map when aligned to PAGE_SIZE. In such case, defer
-+	 * mapping the end of the current range until the next
-+	 * efi_create_mapping() call.
-+	 */
-+	for_each_efi_memory_desc_continue(next) {
-+		if (!(next->attribute & EFI_MEMORY_RUNTIME))
-+			continue;
-+		if (next->phys_addr < PAGE_ALIGN(md->phys_addr + length))
-+			length -= (md->phys_addr + length) & ~PAGE_MASK;
-+		break;
-+	}
-+
-+	if (length)
-+		create_pgd_mapping(mm, md->phys_addr, md->virt_addr, length,
-+				   __pgprot(prot_val | PTE_NG));
- 	return 0;
- }
- 
+Thanks,
+Mark.
+
+[1] git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git urgent
+[2] http://lkml.kernel.org/r/1464690224-4503-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
