@@ -1,61 +1,35 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: BGRT warns again on my system
-Date: Thu, 2 Jun 2016 10:24:38 +0100
-Message-ID: <20160602092438.GD2658@codeblueprint.co.uk>
-References: <CALCETrUJ2QoUSYY82Q1BN3niasiunktnrmdE9Lmi2PZnCJRdag@mail.gmail.com>
- <20160528222531.GA10687@x>
- <574A6B5D.60200@moshe.nl>
+Subject: Re: [PATCH 1/3] efi: Introduce *_continue efi_memory_desc iterators
+Date: Thu, 2 Jun 2016 15:36:50 +0100
+Message-ID: <20160602143650.GG2658@codeblueprint.co.uk>
+References: <1464707672-21882-1-git-send-email-catalin.marinas@arm.com>
+ <1464707672-21882-2-git-send-email-catalin.marinas@arm.com>
+ <20160601103446.GC9280@leverpostej>
+ <20160601104326.GA24749@e104818-lin.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <574A6B5D.60200-A/3C56C7qwM@public.gmane.org>
+In-Reply-To: <20160601104326.GA24749-M2fw3Uu6cmfZROr8t4l/smS4ubULX0JqMm0uRHvK7Nw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: =?iso-8859-1?Q?M=F4she?= van der Sterre <me-A/3C56C7qwM@public.gmane.org>
-Cc: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 29 May, at 06:09:01AM, M=F4she van der Sterre wrote:
-> ---
->  arch/x86/platform/efi/efi-bgrt.c | 7 +++++++
->  1 file changed, 7 insertions(+)
->=20
-> diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi=
-/efi-bgrt.c
-> index 6a2f569..a7fdb61 100644
-> --- a/arch/x86/platform/efi/efi-bgrt.c
-> +++ b/arch/x86/platform/efi/efi-bgrt.c
-> @@ -19,6 +19,8 @@
->  #include <linux/efi.h>
->  #include <linux/efi-bgrt.h>
-> =20
-> +#include "../../mm/physaddr.h"
-> +
->  struct acpi_table_bgrt *bgrt_tab;
->  void *__initdata bgrt_image;
->  size_t __initdata bgrt_image_size;
-> @@ -67,6 +69,11 @@ void __init efi_bgrt_init(void)
->  		return;
->  	}
-> =20
-> +	if (!phys_addr_valid(bgrt_tab->image_address)) {
-> +		pr_notice("Ignoring BGRT: image address is bogus\n");
-> +		return;
-> +	}
-> +
->  	image =3D memremap(bgrt_tab->image_address, sizeof(bmp_header), MEM=
-REMAP_WB);
->  	if (!image) {
->  		pr_notice("Ignoring BGRT: failed to map image header memory\n");
-> --=20
-> 2.4.3
->=20
+On Wed, 01 Jun, at 11:43:26AM, Catalin Marinas wrote:
+> 
+> Thanks for the heads up. I'll rebase the patches after -rc2 but anyway I
+> plan to merge them in 4.8 via the arm64 tree, including the patch above
+> if Matt acks it. So there is enough time to fix the conflicts.
 
-If this does indeed fix Andy's immediate issue (and it looks like
-it would) I'm happy to apply this as an interim solution.
+I'd really prefer it if you didn't take this series through the arm64
+tree, unless there are existing dependencies, of course.
 
-Once we have a persistent EFI memmap available at runtime on x86 we
-should attempt to see whether the physical address in ->image_address
-is covered by some region in that table. The persistent EFI memmap
-patches should be posted in the coming weeks.
+There were a number of conflicts in 3 different maintainer trees in
+linux-next before the most recent merge window opened, and extra work
+was required to sort that out. I want to avoid that in the future, so
+expect me to be more insistent about keeping EFI patches in the EFI
+tree than I have been in the past. 
+
+Do arm64 prerequisites exist for this series? Or are you planning on
+adding dependencies on top?
