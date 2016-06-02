@@ -1,49 +1,61 @@
-From: Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>,
-	Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v2 2/3] efi-pstore: implement efivars_pstore_exit()
-Date: Thu, 2 Jun 2016 15:26:39 +0800
-Message-ID: <20160602072639.GA8456@OptiPlex>
-References: <cover.1446869434.git.geliangtang@163.com>
- <337377a3fbcf855d6a5217e06fcd8c8a979f2853.1446869434.git.geliangtang@163.com>
- <c203e0cfee351d6f97c6a1a42c3e25b4be339f93.1446869434.git.geliangtang@163.com>
- <20151111165947.GD4889@codeblueprint.co.uk>
- <CAGXu5j+DADxC6LrHMSAnw5N2GRFbby6-iPTgkKC=BZotBqt-NQ@mail.gmail.com>
- <3908561D78D1C84285E8C5FCA982C28F32B86A52@ORSMSX114.amr.corp.intel.com>
- <CAGXu5j+PZwpcRTNFpTYzw-Fs6OJLdvaNDGq=vsW7iEhWunc+8g@mail.gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: BGRT warns again on my system
+Date: Thu, 2 Jun 2016 10:24:38 +0100
+Message-ID: <20160602092438.GD2658@codeblueprint.co.uk>
+References: <CALCETrUJ2QoUSYY82Q1BN3niasiunktnrmdE9Lmi2PZnCJRdag@mail.gmail.com>
+ <20160528222531.GA10687@x>
+ <574A6B5D.60200@moshe.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAGXu5j+PZwpcRTNFpTYzw-Fs6OJLdvaNDGq=vsW7iEhWunc+8g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <574A6B5D.60200-A/3C56C7qwM@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>
+To: =?iso-8859-1?Q?M=F4she?= van der Sterre <me-A/3C56C7qwM@public.gmane.org>
+Cc: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Nov 11, 2015 at 03:24:33PM -0800, Kees Cook wrote:
-> On Wed, Nov 11, 2015 at 3:23 PM, Luck, Tony <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> >>>>  module_init(efivars_pstore_init);
-> >>>
-> >>> Looks OK to me. Kees, are you picking this up?
-> >>
-> >> I can, though usually it goes through Tony.
-> >
-> > Can I count that as "Acked-by" from both of you?
-> 
-> Yup, sorry. I thought I'd acked them already. :) My bad!
-> 
-> Acked-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-> 
+On Sun, 29 May, at 06:09:01AM, M=F4she van der Sterre wrote:
+> ---
+>  arch/x86/platform/efi/efi-bgrt.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
+>=20
+> diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi=
+/efi-bgrt.c
+> index 6a2f569..a7fdb61 100644
+> --- a/arch/x86/platform/efi/efi-bgrt.c
+> +++ b/arch/x86/platform/efi/efi-bgrt.c
+> @@ -19,6 +19,8 @@
+>  #include <linux/efi.h>
+>  #include <linux/efi-bgrt.h>
+> =20
+> +#include "../../mm/physaddr.h"
+> +
+>  struct acpi_table_bgrt *bgrt_tab;
+>  void *__initdata bgrt_image;
+>  size_t __initdata bgrt_image_size;
+> @@ -67,6 +69,11 @@ void __init efi_bgrt_init(void)
+>  		return;
+>  	}
+> =20
+> +	if (!phys_addr_valid(bgrt_tab->image_address)) {
+> +		pr_notice("Ignoring BGRT: image address is bogus\n");
+> +		return;
+> +	}
+> +
+>  	image =3D memremap(bgrt_tab->image_address, sizeof(bmp_header), MEM=
+REMAP_WB);
+>  	if (!image) {
+>  		pr_notice("Ignoring BGRT: failed to map image header memory\n");
+> --=20
+> 2.4.3
+>=20
 
-Hi Kees,
+If this does indeed fix Andy's immediate issue (and it looks like
+it would) I'm happy to apply this as an interim solution.
 
-Could you please apply these three pending patches for me?
-I think they are still valid. Thank you very much.
-
--Geliang
-
-> -Kees
-> 
-> -- 
-> Kees Cook
-> Chrome OS Security
+Once we have a persistent EFI memmap available at runtime on x86 we
+should attempt to see whether the physical address in ->image_address
+is covered by some region in that table. The persistent EFI memmap
+patches should be posted in the coming weeks.
