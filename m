@@ -1,95 +1,62 @@
-From: Kees Cook <keescook@chromium.org>
-Subject: Re: [PATCH] pstore: set ecc_notice_size to zero
-Date: Thu, 2 Jun 2016 09:03:02 -0700
-Message-ID: <CAGXu5jJeLbe5D-wLPDR6z9y=DTz57gr56G6M2vZz9MXqRRerdQ@mail.gmail.com>
-References: <ca5ede6ead67d9f805748394c37f06e174543bd3.1464844327.git.geliangtang@gmail.com>
+From: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Subject: Re: [PATCH 1/3] Convert efi_call_virt to efi_call_virt_generic
+Date: Thu, 2 Jun 2016 11:23:35 -0500
+Message-ID: <20160602162335.GV242721@stormcage.americas.sgi.com>
+References: <1463598701-178201-1-git-send-email-athorlton@sgi.com>
+ <1463598701-178201-2-git-send-email-athorlton@sgi.com>
+ <20160602154114.GI2658@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <ca5ede6ead67d9f805748394c37f06e174543bd3.1464844327.git.geliangtang@gmail.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Geliang Tang <geliangtang@gmail.com>
-Cc: Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, linux-acpi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160602154114.GI2658-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jun 1, 2016 at 10:17 PM, Geliang Tang <geliangtang@gmail.com> wrote:
-> Since a @ecc_notice_size parameter has been added in pstore_info.read(),
-> this patch sets this parameter to zero in efi_pstore_read() and
-> erst_reader().
->
-> Signed-off-by: Geliang Tang <geliangtang@gmail.com>
+On Thu, Jun 02, 2016 at 04:41:14PM +0100, Matt Fleming wrote:
+> Oops, you're missing updates to the 32-bit version and ARM/arm64,
+> which results in this,
+>=20
+> drivers/firmware/efi/runtime-wrappers.c: In function =E2=80=98virt_ef=
+i_get_time=E2=80=99:
+> arch/x86/include/asm/efi.h:46:4: error: =E2=80=98efi_efi=E2=80=99 und=
+eclared (first use in this function)
+>   ((efi_##f##_t __attribute__((regparm(0)))*)   \
+>     ^
+>=20
+> but that's easily fixed up.
 
-Thanks! I'll get this added.
+Oops!  Sorry about that.  I had done a pretty recent pull before I did
+my last build, but it was probably before these updates came in.  I'll
+rebase my patches onto the latest tip kernel and fix this.
 
--Kees
+> > +/*
+> > + * Wrap around the new efi_call_virt_generic macros so that the
+> > + * code doesn't get too cluttered
+> > + */
+> > +#define efi_call_virt(f, args...)   \
+> > +	efi_call_virt_generic(efi.systab->runtime, f, args)
+> > +#define __efi_call_virt(f, args...) \
+> > +	__efi_call_virt_generic(efi.systab->runtime, f, args)
+> > +
+> > +void efi_call_virt_check_flags(unsigned long flags, const char *ca=
+ll)
+> >  {
+> >  	unsigned long cur_flags, mismatch;
+> > =20
+>=20
+> I'm not crazy about using "generic" in the name. How about
+> efi_call_virt_function() or efi_call_virt_pointer()?
 
-> ---
->  drivers/acpi/apei/erst.c          | 1 +
->  drivers/firmware/efi/efi-pstore.c | 5 +++++
->  2 files changed, 6 insertions(+)
->
-> diff --git a/drivers/acpi/apei/erst.c b/drivers/acpi/apei/erst.c
-> index 3024edf..f096ab3 100644
-> --- a/drivers/acpi/apei/erst.c
-> +++ b/drivers/acpi/apei/erst.c
-> @@ -1035,6 +1035,7 @@ skip:
->         memcpy(*buf, rcd->data, len - sizeof(*rcd));
->         *id = record_id;
->         *compressed = false;
-> +       *ecc_notice_size = 0;
->         if (uuid_le_cmp(rcd->sec_hdr.section_type,
->                         CPER_SECTION_TYPE_DMESG_Z) == 0) {
->                 *type = PSTORE_TYPE_DMESG;
-> diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-> index cd8c35f..d5903ea 100644
-> --- a/drivers/firmware/efi/efi-pstore.c
-> +++ b/drivers/firmware/efi/efi-pstore.c
-> @@ -34,6 +34,7 @@ struct pstore_read_data {
->         int *count;
->         struct timespec *timespec;
->         bool *compressed;
-> +       ssize_t *ecc_notice_size;
->         char **buf;
->  };
->
-> @@ -69,6 +70,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
->                         *cb_data->compressed = true;
->                 else
->                         *cb_data->compressed = false;
-> +               *cb_data->ecc_notice_size = 0;
->         } else if (sscanf(name, "dump-type%u-%u-%d-%lu",
->                    cb_data->type, &part, &cnt, &time) == 4) {
->                 *cb_data->id = generic_id(time, part, cnt);
-> @@ -76,6 +78,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
->                 cb_data->timespec->tv_sec = time;
->                 cb_data->timespec->tv_nsec = 0;
->                 *cb_data->compressed = false;
-> +               *cb_data->ecc_notice_size = 0;
->         } else if (sscanf(name, "dump-type%u-%u-%lu",
->                           cb_data->type, &part, &time) == 3) {
->                 /*
-> @@ -88,6 +91,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
->                 cb_data->timespec->tv_sec = time;
->                 cb_data->timespec->tv_nsec = 0;
->                 *cb_data->compressed = false;
-> +               *cb_data->ecc_notice_size = 0;
->         } else
->                 return 0;
->
-> @@ -221,6 +225,7 @@ static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
->         data.count = count;
->         data.timespec = timespec;
->         data.compressed = compressed;
-> +       data.ecc_notice_size = ecc_notice_size;
->         data.buf = buf;
->
->         *data.buf = kzalloc(EFIVARS_DATA_SIZE_MAX, GFP_KERNEL);
-> --
-> 1.9.1
->
+I'm not married to "generic."  I'll change it to efi_call_virt_pointer.
+I think efi_call_virt_function is a little confusing/redundant, since a
+call is always to a function, right?
 
+I will fix this stuff up and send a v2.
 
+Thanks for looking this over, Matt!
 
--- 
-Kees Cook
-Chrome OS & Brillo Security
+- Alex
