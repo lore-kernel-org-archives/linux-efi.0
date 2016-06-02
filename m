@@ -1,78 +1,46 @@
-From: Jeremy Linton <Jeremy.Linton-5wv7dgnIgG8@public.gmane.org>
-Subject: RE: [PATCH 1/3] efi: Introduce *_continue efi_memory_desc iterators
-Date: Thu, 2 Jun 2016 17:15:06 +0000
-Message-ID: <AM3PR08MB0008C1E125C039E33284C20CF7580@AM3PR08MB0008.eurprd08.prod.outlook.com>
-References: <1464707672-21882-1-git-send-email-catalin.marinas@arm.com>
- <1464707672-21882-2-git-send-email-catalin.marinas@arm.com>
- <20160601103446.GC9280@leverpostej>
- <20160601104326.GA24749@e104818-lin.cambridge.arm.com>
- <20160602143650.GG2658@codeblueprint.co.uk>
- <20160602162925.GC24938@e104818-lin.cambridge.arm.com>
- <57505F52.3040108@arm.com>
- <20160602171152.GE24938@e104818-lin.cambridge.arm.com>
+From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH v2 2/3] efi-pstore: implement efivars_pstore_exit()
+Date: Thu, 2 Jun 2016 11:26:15 -0700
+Message-ID: <CAGXu5jJgnPw7o_EbeyJhOgqCLxde-09tDoGiYHfiODOfZQ8b3A@mail.gmail.com>
+References: <cover.1446869434.git.geliangtang@163.com> <337377a3fbcf855d6a5217e06fcd8c8a979f2853.1446869434.git.geliangtang@163.com>
+ <c203e0cfee351d6f97c6a1a42c3e25b4be339f93.1446869434.git.geliangtang@163.com>
+ <20151111165947.GD4889@codeblueprint.co.uk> <CAGXu5j+DADxC6LrHMSAnw5N2GRFbby6-iPTgkKC=BZotBqt-NQ@mail.gmail.com>
+ <3908561D78D1C84285E8C5FCA982C28F32B86A52@ORSMSX114.amr.corp.intel.com>
+ <CAGXu5j+PZwpcRTNFpTYzw-Fs6OJLdvaNDGq=vsW7iEhWunc+8g@mail.gmail.com> <20160602072639.GA8456@OptiPlex>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160602171152.GE24938-M2fw3Uu6cmfZROr8t4l/smS4ubULX0JqMm0uRHvK7Nw@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <20160602072639.GA8456@OptiPlex>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+To: Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On Thu, Jun 2, 2016 at 12:26 AM, Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org> wrote:
+> On Wed, Nov 11, 2015 at 03:24:33PM -0800, Kees Cook wrote:
+>> On Wed, Nov 11, 2015 at 3:23 PM, Luck, Tony <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+>> >>>>  module_init(efivars_pstore_init);
+>> >>>
+>> >>> Looks OK to me. Kees, are you picking this up?
+>> >>
+>> >> I can, though usually it goes through Tony.
+>> >
+>> > Can I count that as "Acked-by" from both of you?
+>>
+>> Yup, sorry. I thought I'd acked them already. :) My bad!
+>>
+>> Acked-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+>>
+>
+> Hi Kees,
+>
+> Could you please apply these three pending patches for me?
+> I think they are still valid. Thank you very much.
 
+Yes, added to my for-next tree now. Thanks!
 
-|-----Original Message-----
-|From: Catalin Marinas [mailto:catalin.marinas-5wv7dgnIgG8@public.gmane.org]
-|Sent: Thursday, June 02, 2016 12:12 PM
-|To: Jeremy Linton
-|Cc: Matt Fleming; Mark Rutland; linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Will Deacon;
-|linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-|Subject: Re: [PATCH 1/3] efi: Introduce *_continue efi_memory_desc
-|iterators
-|
-|On Thu, Jun 02, 2016 at 11:31:14AM -0500, Jeremy Linton wrote:
-|> On 06/02/2016 11:29 AM, Catalin Marinas wrote:
-|> >On Thu, Jun 02, 2016 at 03:36:50PM +0100, Matt Fleming wrote:
-|> >>On Wed, 01 Jun, at 11:43:26AM, Catalin Marinas wrote:
-|> >>>
-|> >>>Thanks for the heads up. I'll rebase the patches after -rc2 but
-|> >>>anyway I plan to merge them in 4.8 via the arm64 tree, including
-|> >>>the patch above if Matt acks it. So there is enough time to fix the
-|conflicts.
-|> >>
-|> >>I'd really prefer it if you didn't take this series through the
-|> >>arm64 tree, unless there are existing dependencies, of course.
-|> >>
-|> >>There were a number of conflicts in 3 different maintainer trees in
-|> >>linux-next before the most recent merge window opened, and extra
-|> >>work was required to sort that out. I want to avoid that in the
-|> >>future, so expect me to be more insistent about keeping EFI patches
-|> >>in the EFI tree than I have been in the past.
-|> >>
-|> >>Do arm64 prerequisites exist for this series? Or are you planning on
-|> >>adding dependencies on top?
-|> >
-|> >I don't know when Jeremy plans to submit his contiguous PTE patches
-|> >(we rejected them on the grounds of unnecessary huge page splitting,
-|> >hence this series). If he's not targeting 4.8, I'm happy for the
-|> >patches to go in via the EFI tree.
-|>
-|> I can re-post them again for 4.8. They seem to get simpler every time!
-|
-|I think you should post them fairly soon so that we get a chance to review
-|them and ideally push into next around -rc4.
-|
-|Regarding these efi/arm64 patches, I can push them to a branch (once the
-|conflicting efi/urgent patches hit upstream, I guess around -rc2) that Matt can
-|pull into the EFI tree and I can also pull in the arm64 tree
-|*if* we are to merge the Jeremy's patches.
-|
-|Jeremy, you can base your patches on such branch (I'll follow up with the
-|details if that's ok with Matt).
+-Kees
 
-Sure. Most of the delay on posting them generally comes down to how many machines I try to boot them on with a given kernel, which is related to how many ACPI issues I happen to have.
-
-
-IMPORTANT NOTICE: The contents of this email and any attachments are confidential and may also be privileged. If you are not the intended recipient, please notify the sender immediately and do not disclose the contents to any other person, use it for any purpose, or store or copy the information in any medium. Thank you.
+-- 
+Kees Cook
+Chrome OS & Brillo Security
