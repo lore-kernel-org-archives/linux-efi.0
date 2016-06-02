@@ -1,61 +1,79 @@
-From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 1/3] efi: Introduce *_continue efi_memory_desc iterators
-Date: Wed, 1 Jun 2016 11:43:26 +0100
-Message-ID: <20160601104326.GA24749@e104818-lin.cambridge.arm.com>
-References: <1464707672-21882-1-git-send-email-catalin.marinas@arm.com>
- <1464707672-21882-2-git-send-email-catalin.marinas@arm.com>
- <20160601103446.GC9280@leverpostej>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160601103446.GC9280@leverpostej>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+From: Geliang Tang <geliangtang@gmail.com>
+Subject: [PATCH] pstore: set ecc_notice_size to zero
+Date: Thu,  2 Jun 2016 13:17:03 +0800
+Message-ID: <ca5ede6ead67d9f805748394c37f06e174543bd3.1464844327.git.geliangtang@gmail.com>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Kees Cook <keescook@chromium.org>, Tony Luck <tony.luck@intel.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Geliang Tang <geliangtang@gmail.com>, linux-acpi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jun 01, 2016 at 11:34:47AM +0100, Mark Rutland wrote:
-> On Tue, May 31, 2016 at 04:14:30PM +0100, Catalin Marinas wrote:
-> > The for_each_efi_memory_desc_continue() macro and corresponding
-> > "_in_map" allow iterating over an efi_memory_map from a given position.
-> > For code reuse between the existing iterator and the _continue variant,
-> > this patch also introduces efi_memory_desc_next_entry_map().
-> > 
-> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> > Signed-off-by: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-> > ---
-> >  include/linux/efi.h | 19 +++++++++++++++++--
-> >  1 file changed, 17 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/include/linux/efi.h b/include/linux/efi.h
-> > index c2db3ca22217..4b0d880f1cd7 100644
-> > --- a/include/linux/efi.h
-> > +++ b/include/linux/efi.h
-> > @@ -1002,11 +1002,16 @@ extern int efi_memattr_init(void);
-> >  extern int efi_memattr_apply_permissions(struct mm_struct *mm,
-> >  					 efi_memattr_perm_setter fn);
-> >  
-> > +/* Find next entry in an efi_memory_map or NULL if md is last */
-> > +#define efi_memory_desc_next_entry_map(m, md)				   \
-> > +	((md) == (efi_memory_desc_t *)((m)->map_end - (m)->desc_size)	   \
-> > +	 ? NULL : (void *)(md) + (m)->desc_size)
-> > +
-> >  /* Iterate through an efi_memory_map */
-> >  #define for_each_efi_memory_desc_in_map(m, md)				   \
-> >  	for ((md) = (m)->map;						   \
-> > -	     (md) <= (efi_memory_desc_t *)((m)->map_end - (m)->desc_size); \
-> > -	     (md) = (void *)(md) + (m)->desc_size)
-> > +	     (md);							   \
-> > +	     (md) = efi_memory_desc_next_entry_map(m, md))
-> 
-> As a heads-up, this will conflict with the efi/urgent branch [1], due to
-> commit ee92562e33c516dd ("efi: Fix for_each_efi_memory_desc_in_map() for
-> empty memmaps"). A pull went out for that yesterday [2].
+Since a @ecc_notice_size parameter has been added in pstore_info.read(),
+this patch sets this parameter to zero in efi_pstore_read() and
+erst_reader().
 
-Thanks for the heads up. I'll rebase the patches after -rc2 but anyway I
-plan to merge them in 4.8 via the arm64 tree, including the patch above
-if Matt acks it. So there is enough time to fix the conflicts.
+Signed-off-by: Geliang Tang <geliangtang@gmail.com>
+---
+ drivers/acpi/apei/erst.c          | 1 +
+ drivers/firmware/efi/efi-pstore.c | 5 +++++
+ 2 files changed, 6 insertions(+)
 
+diff --git a/drivers/acpi/apei/erst.c b/drivers/acpi/apei/erst.c
+index 3024edf..f096ab3 100644
+--- a/drivers/acpi/apei/erst.c
++++ b/drivers/acpi/apei/erst.c
+@@ -1035,6 +1035,7 @@ skip:
+ 	memcpy(*buf, rcd->data, len - sizeof(*rcd));
+ 	*id = record_id;
+ 	*compressed = false;
++	*ecc_notice_size = 0;
+ 	if (uuid_le_cmp(rcd->sec_hdr.section_type,
+ 			CPER_SECTION_TYPE_DMESG_Z) == 0) {
+ 		*type = PSTORE_TYPE_DMESG;
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+index cd8c35f..d5903ea 100644
+--- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -34,6 +34,7 @@ struct pstore_read_data {
+ 	int *count;
+ 	struct timespec *timespec;
+ 	bool *compressed;
++	ssize_t *ecc_notice_size;
+ 	char **buf;
+ };
+ 
+@@ -69,6 +70,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
+ 			*cb_data->compressed = true;
+ 		else
+ 			*cb_data->compressed = false;
++		*cb_data->ecc_notice_size = 0;
+ 	} else if (sscanf(name, "dump-type%u-%u-%d-%lu",
+ 		   cb_data->type, &part, &cnt, &time) == 4) {
+ 		*cb_data->id = generic_id(time, part, cnt);
+@@ -76,6 +78,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
+ 		cb_data->timespec->tv_sec = time;
+ 		cb_data->timespec->tv_nsec = 0;
+ 		*cb_data->compressed = false;
++		*cb_data->ecc_notice_size = 0;
+ 	} else if (sscanf(name, "dump-type%u-%u-%lu",
+ 			  cb_data->type, &part, &time) == 3) {
+ 		/*
+@@ -88,6 +91,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
+ 		cb_data->timespec->tv_sec = time;
+ 		cb_data->timespec->tv_nsec = 0;
+ 		*cb_data->compressed = false;
++		*cb_data->ecc_notice_size = 0;
+ 	} else
+ 		return 0;
+ 
+@@ -221,6 +225,7 @@ static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
+ 	data.count = count;
+ 	data.timespec = timespec;
+ 	data.compressed = compressed;
++	data.ecc_notice_size = ecc_notice_size;
+ 	data.buf = buf;
+ 
+ 	*data.buf = kzalloc(EFIVARS_DATA_SIZE_MAX, GFP_KERNEL);
 -- 
-Catalin
+1.9.1
+
