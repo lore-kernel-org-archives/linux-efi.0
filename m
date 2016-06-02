@@ -1,46 +1,92 @@
-From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v2 2/3] efi-pstore: implement efivars_pstore_exit()
-Date: Thu, 2 Jun 2016 11:26:15 -0700
-Message-ID: <CAGXu5jJgnPw7o_EbeyJhOgqCLxde-09tDoGiYHfiODOfZQ8b3A@mail.gmail.com>
-References: <cover.1446869434.git.geliangtang@163.com> <337377a3fbcf855d6a5217e06fcd8c8a979f2853.1446869434.git.geliangtang@163.com>
- <c203e0cfee351d6f97c6a1a42c3e25b4be339f93.1446869434.git.geliangtang@163.com>
- <20151111165947.GD4889@codeblueprint.co.uk> <CAGXu5j+DADxC6LrHMSAnw5N2GRFbby6-iPTgkKC=BZotBqt-NQ@mail.gmail.com>
- <3908561D78D1C84285E8C5FCA982C28F32B86A52@ORSMSX114.amr.corp.intel.com>
- <CAGXu5j+PZwpcRTNFpTYzw-Fs6OJLdvaNDGq=vsW7iEhWunc+8g@mail.gmail.com> <20160602072639.GA8456@OptiPlex>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 2/3] Update uv_bios_call to use efi_call_virt_generic
+Date: Thu, 2 Jun 2016 20:45:47 +0100
+Message-ID: <20160602194547.GK2658@codeblueprint.co.uk>
+References: <1463598701-178201-1-git-send-email-athorlton@sgi.com>
+ <1463598701-178201-3-git-send-email-athorlton@sgi.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160602072639.GA8456@OptiPlex>
+Content-Disposition: inline
+In-Reply-To: <1463598701-178201-3-git-send-email-athorlton-sJ/iWh9BUns@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jun 2, 2016 at 12:26 AM, Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org> wrote:
-> On Wed, Nov 11, 2015 at 03:24:33PM -0800, Kees Cook wrote:
->> On Wed, Nov 11, 2015 at 3:23 PM, Luck, Tony <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
->> >>>>  module_init(efivars_pstore_init);
->> >>>
->> >>> Looks OK to me. Kees, are you picking this up?
->> >>
->> >> I can, though usually it goes through Tony.
->> >
->> > Can I count that as "Acked-by" from both of you?
->>
->> Yup, sorry. I thought I'd acked them already. :) My bad!
->>
->> Acked-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
->>
->
-> Hi Kees,
->
-> Could you please apply these three pending patches for me?
-> I think they are still valid. Thank you very much.
+On Wed, 18 May, at 02:11:40PM, Alex Thorlton wrote:
+> Now that the efi_call_virt macro has been generalized to be able to
+> use EFI system tables besides efi.systab, we are able to convert our
+> uv_bios_call wrapper to use this standard EFI callback mechanism.
+> 
+> This simple change is part of a much larger effort to recover from some
+> issues with the way we were mapping in some of our MMRs, and the way
+> that we were doing our BIOS callbacks, which were uncovered by commit
+> 67a9108ed431 ("x86/efi: Build our own page table structures").
+> 
+> The first issue that this uncovered was that we were relying on the EFI
+> memory mapping mechanism to map in our MMR space for us, which, while
+> reliable, was technically a bug, as it relied on "undefined" behavior in
+> the mapping code.
+> 
+> The reason we were able to piggyback on the EFI memory mapping code to
+> map in our MMRs was because, previously, EFI code used the
+> trampoline_pgd, which shares a few entries with the main kernel pgd.  It
+> just so happened, that the memory range containing our MMRs was inside
+> one of those shared regions, which kept our code working without issue
+> for quite a while.
+> 
+> Anyways, once we discovered this problem, we brought back our original
+> code to map in the MMRs with commit 08914f436bdd ("x86/platform/UV:
+> Bring back the call to map_low_mmrs in uv_system_init").  This got our
+> systems a little further along, but we were still running into trouble
+> with our EFI callbacks, which prevented us from booting all the way up.
+> 
+> Our first step towards fixing the BIOS callbacks was to get our
+> uv_bios_call wrapper updated to use efi_call_virt instead of the plain
+> efi_call.  The previous patch took care of the effort needed to make
+> that possible.  Along the way, we hit a major issue with some confusion
+> about how to properly pull arguments higher than number 6 off the stack
+> in the efi_call code, which resulted in Linus's commit 683ad8092cd2
+> ("x86/efi: Fix 7-parameter efi_call()s").
+> 
+> Now that all of those issues are out of the way, we're able to make this
+> simple change to use the new efi_call_virt_generic in uv_bios_call which
+> gets our machines booting, running properly, and able to execute our
+> callbacks with 6+ arguments.
+> 
+> Signed-off-by: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+> Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+> Cc: Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>
+> Cc: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+> Cc: Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>
+> Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> ---
+>  arch/x86/platform/uv/bios_uv.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+> 
+> diff --git a/arch/x86/platform/uv/bios_uv.c b/arch/x86/platform/uv/bios_uv.c
+> index 815fec6..0ae0826 100644
+> --- a/arch/x86/platform/uv/bios_uv.c
+> +++ b/arch/x86/platform/uv/bios_uv.c
+> @@ -40,8 +40,7 @@ s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
+>  		 */
+>  		return BIOS_STATUS_UNIMPLEMENTED;
+>  
+> -	ret = efi_call((void *)__va(tab->function), (u64)which,
+> -			a1, a2, a3, a4, a5);
+> +	ret = efi_call_virt_generic(tab, function, (u64)which, a1, a2, a3, a4, a5);
+>  	return ret;
+>  }
+>  EXPORT_SYMBOL_GPL(uv_bios_call);
 
-Yes, added to my for-next tree now. Thanks!
+Unless I've missed it, I didn't see an explanation in the changelog of
+why it's OK to switch from using __va(tab->function) to tab->function
+directly, which presumably is a physical address.
 
--Kees
-
--- 
-Kees Cook
-Chrome OS & Brillo Security
+Was that intended?
