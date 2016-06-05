@@ -1,33 +1,53 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 2/3] arm64: efi: Ensure efi_create_mapping() does not map
- overlapping regions
-Date: Fri, 3 Jun 2016 21:56:39 +0100
-Message-ID: <20160603205639.GO2658@codeblueprint.co.uk>
-References: <1464707672-21882-1-git-send-email-catalin.marinas@arm.com>
- <1464707672-21882-3-git-send-email-catalin.marinas@arm.com>
- <20160602145246.GH2658@codeblueprint.co.uk>
- <20160602165621.GD24938@e104818-lin.cambridge.arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Willy Tarreau <w@1wt.eu>
+Subject: [PATCH 3.10 111/143] MAINTAINERS: Remove asterisk from EFI directory names
+Date: Sun,  5 Jun 2016 12:20:14 +0200
+Message-ID: <1465122046-9645-112-git-send-email-w@1wt.eu>
+References: <1465122046-9645-1-git-send-email-w@1wt.eu>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160602165621.GD24938-M2fw3Uu6cmfZROr8t4l/smS4ubULX0JqMm0uRHvK7Nw@public.gmane.org>
+In-Reply-To: <1465122046-9645-1-git-send-email-w-K+wRfnb2/UA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Willy Tarreau <w@1wt.eu>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 02 Jun, at 05:56:21PM, Catalin Marinas wrote:
-> 
-> Ard to confirm but I think the reason is the relative offset between
-> code and data regions that must be preserved. For example, on Juno I
-> get:
-> 
-> [    0.000000] efi:   0x0009fff6e000-0x0009fffaefff [Runtime Code       |RUN|  |  |  |  |  |  |   |WB|WT|WC|UC]*
-> [    0.000000] efi:   0x0009fffaf000-0x0009ffffefff [Runtime Data       |RUN|  |  |  |  |  |  |   |WB|WT|WC|UC]*
-> 
-> Since the code may assume relative loads from the data section, we need
-> to preserve this offset (which doesn't seem 64KB aligned).
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 
-Yeah, figures. Could you mention this in the changelog or in a code
-comment?
+commit e8dfe6d8f6762d515fcd4f30577f7bfcf7659887 upstream.
+
+Mark reported that having asterisks on the end of directory names
+confuses get_maintainer.pl when it encounters subdirectories, and that
+my name does not appear when run on drivers/firmware/efi/libstub.
+
+Reported-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Link: http://lkml.kernel.org/r/1462303781-8686-2-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Willy Tarreau <w@1wt.eu>
+---
+ MAINTAINERS | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 48c7480..29d7d74 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -3032,8 +3032,8 @@ F:	Documentation/x86/efi-stub.txt
+ F:	arch/ia64/kernel/efi.c
+ F:	arch/x86/boot/compressed/eboot.[ch]
+ F:	arch/x86/include/asm/efi.h
+-F:	arch/x86/platform/efi/*
+-F:	drivers/firmware/efi/*
++F:	arch/x86/platform/efi/
++F:	drivers/firmware/efi/
+ F:	include/linux/efi*.h
+ 
+ EFI VARIABLE FILESYSTEM
+-- 
+2.8.0.rc2.1.gbe9624a
