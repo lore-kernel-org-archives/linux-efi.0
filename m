@@ -1,51 +1,45 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [GIT PULL 0/2] EFI urgent fixes
-Date: Mon, 6 Jun 2016 11:02:53 +0100
-Message-ID: <20160606100253.GQ2658@codeblueprint.co.uk>
-References: <1464690224-4503-1-git-send-email-matt@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Colin King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Subject: [PATCH] x86/efi: remove unused variable efi
+Date: Mon,  6 Jun 2016 15:32:11 +0100
+Message-ID: <1465223531-15661-1-git-send-email-colin.king@canonical.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1464690224-4503-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org>, "K. Y. Srinivasan" <kys-0li6OtcxBFHby3iVrkZq2A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>, Steve McIntyre <steve-nt0JYOx6u4DQT0dZR+AlfA@public.gmane.org>, Steven Rostedt <rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org>, Vitaly Kuznetsov <vkuznets-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "H . Peter Anvi" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 31 May, at 11:23:42AM, Matt Fleming wrote:
-> Folks, please pull the following urgent patches which fix a boot crash
-> when using the "noefi" parameter and the debug output on arm.
-> 
-> The following changes since commit 1a695a905c18548062509178b98bc91e67510864:
-> 
->   Linux 4.7-rc1 (2016-05-29 09:29:24 -0700)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-> 
-> for you to fetch changes up to 1f0cf3892caeab20a99c19f5523499be77b533cd:
-> 
->   efi/arm: Fix the format of debug message from efi (2016-05-30 22:51:53 +0100)
-> 
-> ----------------------------------------------------------------
->  * Fix crash when booting with the "noefi" kernel parameter, caused by
->    recent changes to for_each_efi_memory_desc_in_map() - Vitaly Kuznetsov
-> 
->  * Unscramble the debug output on arm when efi=debug and memblock=debug
->    is passed on the kernel cmdline - Dennis Chen
-> 
-> ----------------------------------------------------------------
-> Dennis Chen (1):
->       efi/arm: Fix the format of debug message from efi
-> 
-> Vitaly Kuznetsov (1):
->       efi: Fix for_each_efi_memory_desc_in_map() for empty memmaps
-> 
->  drivers/firmware/efi/arm-init.c | 14 ++++++--------
->  include/linux/efi.h             |  2 +-
->  2 files changed, 7 insertions(+), 9 deletions(-)
+From: Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 
-Ping? I see these patches queued up in tip/efi/urgent but they don't
-appear to be in Linus' tree yet.
+Remove unused variable efi, it is never used. Fixes clang build
+warning:
+
+arch/x86/boot/compressed/eboot.c:803:2: warning: Value stored to
+  'efi' is never read
+
+Signed-off-by: Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+---
+ arch/x86/boot/compressed/eboot.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 52fef60..ff574da 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -757,7 +757,6 @@ struct boot_params *make_boot_params(struct efi_config *c)
+ 	struct boot_params *boot_params;
+ 	struct apm_bios_info *bi;
+ 	struct setup_header *hdr;
+-	struct efi_info *efi;
+ 	efi_loaded_image_t *image;
+ 	void *options, *handle;
+ 	efi_guid_t proto = LOADED_IMAGE_PROTOCOL_GUID;
+@@ -800,7 +799,6 @@ struct boot_params *make_boot_params(struct efi_config *c)
+ 	memset(boot_params, 0x0, 0x4000);
+ 
+ 	hdr = &boot_params->hdr;
+-	efi = &boot_params->efi_info;
+ 	bi = &boot_params->apm_bios_info;
+ 
+ 	/* Copy the second sector to boot_params */
+-- 
+2.8.1
