@@ -1,61 +1,53 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL 0/2] EFI urgent fixes
-Date: Wed, 8 Jun 2016 09:24:36 +0200
-Message-ID: <20160608072436.GA9706@gmail.com>
-References: <1464690224-4503-1-git-send-email-matt@codeblueprint.co.uk>
- <20160606100253.GQ2658@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
+ clear
+Date: Wed, 8 Jun 2016 11:07:13 +0100
+Message-ID: <20160608100713.GU2658@codeblueprint.co.uk>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+ <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
+ <20160510134358.GR2839@codeblueprint.co.uk>
+ <20160510135758.GA16783@pd.tnic>
+ <5734C97D.8060803@amd.com>
+ <57446B27.20406@amd.com>
+ <20160525193011.GC2984@codeblueprint.co.uk>
+ <5746FE16.9070408@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20160606100253.GQ2658@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Dan Williams <dan.j.williams@intel.com>, Dennis Chen <dennis.chen@arm.com>, "K. Y. Srinivasan" <kys@microsoft.com>, Mark Rutland <mark.rutland@arm.com>, Mark Salter <msalter@redhat.com>, Steve Capper <steve.capper@arm.com>, Steve McIntyre <steve@einval.com>, Steven Rostedt <rostedt@goodmis.org>, Vitaly Kuznetsov <vkuznets@redhat.com>, Will Deacon <will.deacon@arm.com>
+In-Reply-To: <5746FE16.9070408@amd.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: Borislav Petkov <bp@alien8.de>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, Daniel Kiper <daniel.kiper@oracle.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.>
 List-Id: linux-efi@vger.kernel.org
 
+(Sorry for the delay)
 
-* Matt Fleming <matt@codeblueprint.co.uk> wrote:
-
-> On Tue, 31 May, at 11:23:42AM, Matt Fleming wrote:
-> > Folks, please pull the following urgent patches which fix a boot crash
-> > when using the "noefi" parameter and the debug output on arm.
-> > 
-> > The following changes since commit 1a695a905c18548062509178b98bc91e67510864:
-> > 
-> >   Linux 4.7-rc1 (2016-05-29 09:29:24 -0700)
-> > 
-> > are available in the git repository at:
-> > 
-> >   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-> > 
-> > for you to fetch changes up to 1f0cf3892caeab20a99c19f5523499be77b533cd:
-> > 
-> >   efi/arm: Fix the format of debug message from efi (2016-05-30 22:51:53 +0100)
-> > 
-> > ----------------------------------------------------------------
-> >  * Fix crash when booting with the "noefi" kernel parameter, caused by
-> >    recent changes to for_each_efi_memory_desc_in_map() - Vitaly Kuznetsov
-> > 
-> >  * Unscramble the debug output on arm when efi=debug and memblock=debug
-> >    is passed on the kernel cmdline - Dennis Chen
-> > 
-> > ----------------------------------------------------------------
-> > Dennis Chen (1):
-> >       efi/arm: Fix the format of debug message from efi
-> > 
-> > Vitaly Kuznetsov (1):
-> >       efi: Fix for_each_efi_memory_desc_in_map() for empty memmaps
-> > 
-> >  drivers/firmware/efi/arm-init.c | 14 ++++++--------
-> >  include/linux/efi.h             |  2 +-
-> >  2 files changed, 7 insertions(+), 9 deletions(-)
+On Thu, 26 May, at 08:45:58AM, Tom Lendacky wrote:
 > 
-> Ping? I see these patches queued up in tip/efi/urgent but they don't
-> appear to be in Linus' tree yet.
+> The patch in question is patch 6/18 where PAGE_KERNEL is changed to
+> include the _PAGE_ENC attribute (the encryption mask). This now
+> makes FIXMAP_PAGE_NORMAL contain the encryption mask while
+> FIXMAP_PAGE_IO does not. In this way, anything mapped using the
+> early_ioremap call won't be mapped encrypted.
 
-Yeah, will get them to Linus later today.
+There are semantics attached to early_ioremap() that do not apply in
+this case; that you're mapping an MMIO region but for EFI we just care
+about noting where the firmware (not the kernel) populated the region
+with data. Similar problems exist for other early boot code such as
+the devicetree stuff.
 
-Thanks,
+early_ioremap() is not the answer.
 
-	Ingo
+What you really want is just some way to distinguish kernel-owned
+regions from those owned by "somebody else".
+
+I have no problem updating early_memremap() to take a @flags argument
+to make that distinction, provided that the naming is generic and not
+tied to AMD's SME technology via an "sme" prefix/suffix.
+
+And making it generic should allow it to be easily sprinkled into the
+shared architecture code in drivers/firmware/efi/ without issue.
+
+I'm going to follow up with some additional comments/questions on
+PATCH 10.
