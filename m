@@ -1,76 +1,103 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
- clear
-Date: Thu, 9 Jun 2016 11:16:40 -0500
-Message-ID: <57599668.20000@amd.com>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
- <20160510134358.GR2839@codeblueprint.co.uk> <20160510135758.GA16783@pd.tnic>
- <5734C97D.8060803@amd.com> <57446B27.20406@amd.com>
- <20160525193011.GC2984@codeblueprint.co.uk> <5746FE16.9070408@amd.com>
- <20160608100713.GU2658@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20160608100713.GU2658@codeblueprint.co.uk>
-Sender: owner-linux-mm@kvack.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Borislav Petkov <bp@alien8.de>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, Daniel Kiper <daniel.kiper@oracle.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter
- Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>, Ard Biesheuvel <ard.bieshe>
+From: Yigal Korman <yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org>
+Subject: [PATCH] efi: kernel param for legacy NVDIMM support
+Date: Thu,  9 Jun 2016 20:42:22 +0300
+Message-ID: <1465494142-1456010-1-git-send-email-yigal@plexistor.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, elliott-ZPxbGqLxI0U@public.gmane.org, jmoyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, toshi.kani-ZPxbGqLxI0U@public.gmane.org, Yigal Korman <yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 06/08/2016 05:07 AM, Matt Fleming wrote:
-> (Sorry for the delay)
+The 'efi_legacy_pmem' parameter will convert EFI persistent memory range
+(type 14) into E820 legacy NVDIMM (type 12) memory range.
 
-No worries, thanks for all the feedback.
+Background:
 
-> 
-> On Thu, 26 May, at 08:45:58AM, Tom Lendacky wrote:
->>
->> The patch in question is patch 6/18 where PAGE_KERNEL is changed to
->> include the _PAGE_ENC attribute (the encryption mask). This now
->> makes FIXMAP_PAGE_NORMAL contain the encryption mask while
->> FIXMAP_PAGE_IO does not. In this way, anything mapped using the
->> early_ioremap call won't be mapped encrypted.
-> 
-> There are semantics attached to early_ioremap() that do not apply in
-> this case; that you're mapping an MMIO region but for EFI we just care
-> about noting where the firmware (not the kernel) populated the region
-> with data. Similar problems exist for other early boot code such as
-> the devicetree stuff.
-> 
-> early_ioremap() is not the answer.
-> 
-> What you really want is just some way to distinguish kernel-owned
-> regions from those owned by "somebody else".
-> 
-> I have no problem updating early_memremap() to take a @flags argument
-> to make that distinction, provided that the naming is generic and not
-> tied to AMD's SME technology via an "sme" prefix/suffix.
+In contrast with the NVDIMM E820 types where we can clearly distinguish
+between old NVDIMMs (type-12) and ACPI 6.0 NVDIMMs (type-7), the EFI
+memory types for NVDIMMs are the same before ACPI 6.0 and after
+(type-14).
+This means that old NVDIMMs under EFI aren't supported even though
+they work fine if booted with BIOS (E820).
 
-So maybe something along the lines of an enum that would have entries
-(initially) like KERNEL_DATA (equal to zero) and EFI_DATA. Others could
-be added later as needed.
+So allow the user to explicitly request the kernel to identify NVDIMMs
+as legacy under EFI.
 
-Would you then want to allow the protection attributes to be updated
-by architecture specific code through something like a __weak function?
-In the x86 case I can add this function as a non-SME specific function
-that would initially just have the SME-related mask modification in it.
+Signed-off-by: Yigal Korman <yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org>
+---
+ Documentation/kernel-parameters.txt |  3 +++
+ arch/x86/platform/efi/efi.c         | 31 +++++++++++++++++++++++++++++++
+ 2 files changed, 34 insertions(+)
 
-Thanks,
-Tom
-
-> 
-> And making it generic should allow it to be easily sprinkled into the
-> shared architecture code in drivers/firmware/efi/ without issue.
-> 
-> I'm going to follow up with some additional comments/questions on
-> PATCH 10.
-> 
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+index 9a53c92..58f2a9b 100644
+--- a/Documentation/kernel-parameters.txt
++++ b/Documentation/kernel-parameters.txt
+@@ -394,6 +394,9 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+ 	add_efi_memmap	[EFI; X86] Include EFI memory map in
+ 			kernel's map of available physical RAM.
+ 
++	efi_legacy_pmem	[EFI; X86] Convert EFI_PERSISTENT_MEMORY to E820_PRAM
++			and add it to E820 memmap for legacy NVDIMM support.
++
+ 	agp=		[AGP]
+ 			{ off | try_unsupported }
+ 			off: disable AGP support
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index ad28540..5e82532 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -78,6 +78,14 @@ static int __init setup_add_efi_memmap(char *arg)
+ }
+ early_param("add_efi_memmap", setup_add_efi_memmap);
+ 
++static int add_legacy_pmem __initdata;
++static int __init setup_add_legacy_pmem(char *arg)
++{
++	add_legacy_pmem = 1;
++	return 0;
++}
++early_param("efi_legacy_pmem", setup_add_legacy_pmem);
++
+ static efi_status_t __init phys_efi_set_virtual_address_map(
+ 	unsigned long memory_map_size,
+ 	unsigned long descriptor_size,
+@@ -191,6 +199,26 @@ static void __init do_add_efi_memmap(void)
+ 	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
+ }
+ 
++static void __init do_add_legacy_pmem(void)
++{
++	void *p;
++
++	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
++		efi_memory_desc_t *md = p;
++
++		if (md->type == EFI_PERSISTENT_MEMORY) {
++			pr_info("Registering %lluMB as PRAM in E820\n",
++				(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
++
++			e820_add_region(md->phys_addr,
++					md->num_pages << EFI_PAGE_SHIFT,
++					E820_PRAM);
++		}
++
++	}
++	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
++}
++
+ int __init efi_memblock_x86_reserve_range(void)
+ {
+ 	struct efi_info *e = &boot_params.efi_info;
+@@ -455,6 +483,9 @@ static int __init efi_memmap_init(void)
+ 	if (add_efi_memmap)
+ 		do_add_efi_memmap();
+ 
++	if (add_legacy_pmem)
++		do_add_legacy_pmem();
++
+ 	set_bit(EFI_MEMMAP, &efi.flags);
+ 
+ 	return 0;
+-- 
+1.9.3
