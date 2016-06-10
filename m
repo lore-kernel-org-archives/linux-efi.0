@@ -1,48 +1,62 @@
-From: "Elliott, Robert (Persistent Memory)" <elliott-ZPxbGqLxI0U@public.gmane.org>
-Subject: RE: [PATCH] efi: kernel param for legacy NVDIMM support
-Date: Fri, 10 Jun 2016 14:46:26 +0000
-Message-ID: <DF4PR84MB016965ECBD5DF92D9091E816AB500@DF4PR84MB0169.NAMPRD84.PROD.OUTLOOK.COM>
-References: <CAA9_cmeQUaxShZfnARt=j4iResPTwjxrK_toA6CJgtRAnzEgYQ@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 04/21] fs: Replace CURRENT_TIME with
+	current_fs_time() for inode timestamps
+Date: Sat, 11 Jun 2016 00:23:39 +0200
+Message-ID: <3828814.bejVmX1kJo@wuerfel>
+References: <1465448705-25055-1-git-send-email-deepa.kernel@gmail.com>
+	<1465448705-25055-5-git-send-email-deepa.kernel@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAA9_cmeQUaxShZfnARt=j4iResPTwjxrK_toA6CJgtRAnzEgYQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Yigal Korman <yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org" <linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+Content-Transfer-Encoding: 7Bit
+Return-path: <cluster-devel-bounces@redhat.com>
+In-Reply-To: <1465448705-25055-5-git-send-email-deepa.kernel@gmail.com>
+List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
+	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
+List-Archive: <https://www.redhat.com/archives/cluster-devel>
+List-Post: <mailto:cluster-devel@redhat.com>
+List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
+List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
+	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
+Sender: cluster-devel-bounces@redhat.com
+Errors-To: cluster-devel-bounces@redhat.com
+To: Deepa Dinamani <deepa.kernel@gmail.com>, Mike Marshall <hubcap@omnibond.com>, Nadia Yvette Chambers <nyc@holomorphy.com>, Chao Yu <chao2.yu@samsung.com>, linux-nilfs@vger.kernel.org
+Cc: Latchesar Ionkov <lucho@ionkov.net>, Dave Kleikamp <shaggy@kernel.org>, jfs-discussion@lists.sourceforge.net, Michal Hocko <mhocko@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, Firo Yang <firogm@gmail.com>, Trond Myklebust <trond.myklebust@primarydata.com>, Alexei Starovoitov <ast@kernel.org>, David Howells <dhowells@redhat.com>, linux-efi@vger.kernel.org, selinux@tycho.nsa.gov, Eric Paris <eparis@parisplace.org>, Matthew Garrett <matthew.garrett@nebula.com>, Jeff Layton <jlayton@poochiereds.net>, linux-f2fs-devel@lists.sourceforge.net, Sean Hefty <sean.hefty@intel.com>, Ian Kent <raven@themaw.net>, linux-cifs@vger.kernel.org, Paul Moore <paul@paul-moore.com>, "David S. Miller" <davem@davemloft.net>, y2038@lists.linaro.org, Anton Vorontsov <anton@enomsg.org>, Hugh Dickins <hu>
 List-Id: linux-efi@vger.kernel.org
 
-
-
-> -----Original Message-----
-> From: Linux-nvdimm [mailto:linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org] On
-> Behalf Of Dan Williams
-> Sent: Friday, June 10, 2016 9:28 AM
-> To: Yigal Korman <yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org>
-> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>; linux-
-> efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
-> Subject: Re: [PATCH] efi: kernel param for legacy NVDIMM support
+On Wednesday, June 8, 2016 10:04:48 PM CEST Deepa Dinamani wrote:
 > 
-> On Fri, Jun 10, 2016 at 1:48 AM, Yigal Korman <yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org>
-> wrote:
-> > On Thu, Jun 9, 2016 at 11:27 PM, Dan Williams
-...
-> We should always look for an NFIT in the type-14 case.  Injecting a
-> crafted NFIT for this legacy case removes confusion as there is only
-> one action the kernel takes and no possibility for collisions.  I
-> also
-> do not want to make it easier for firmware developers to skip the
-> necessary due diligence to decide whether attributes like numa
-> topology, posted write queue flush mechanisms, and media health,
-> etc...  need description.
+> Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
+> Cc: Steve French <sfrench@samba.org>
+> Cc: linux-cifs@vger.kernel.org
+> Cc: samba-technical@lists.samba.org
+> Cc: Joern Engel <joern@logfs.org>
+> Cc: Prasad Joshi <prasadjoshi.linux@gmail.com>
+> Cc: logfs@logfs.org
+> Cc: Andrew Morton <akpm@linux-foundation.org>
+> Cc: Julia Lawall <Julia.Lawall@lip6.fr>
+> Cc: David Howells <dhowells@redhat.com>
+> Cc: Firo Yang <firogm@gmail.com>
+> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+> Cc: Changman Lee <cm224.lee@samsung.com>
+> ...
 
-I'll also reiterate that NVDIMM ranges may also be reported using
-the UEFI and E820 reserved types.  The simple E820 and UEFI memory
-map persistent memory type values do not contain enough information
-to properly talk to an NVDIMM; the information in ACPI NFIT is
-crucial.
 
----
-Robert Elliott, HPE Persistent Memory
+Hi Deepa,
+
+
+Just FYI, the vger.kernel.org list server and some others
+intentionally reject mails with more than 1024 characters in the
+Cc header, to stop people from cross-posting to too many folks.
+
+I realize that you merged the patch after Linus' comment about
+doing things in fewer steps for the simple conversion, which is
+fine, but then the patch should be obvious enough that you
+don't need to Cc every single maintainer and mailing list.
+
+I've had some cases like this, and I usually remove the people
+that are less likely to reply, leaving one per subsystem.
+Leaving out the cleartext names is another trick you can use
+if you think that you really need to Cc more people than
+allowed ;-)
+
+	Arnd
