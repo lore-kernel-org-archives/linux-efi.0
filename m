@@ -1,77 +1,85 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
- clear
-Date: Mon, 13 Jun 2016 10:16:12 -0500
-Message-ID: <575ECE3C.5030600@amd.com>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
- <20160510134358.GR2839@codeblueprint.co.uk> <20160510135758.GA16783@pd.tnic>
- <5734C97D.8060803@amd.com> <57446B27.20406@amd.com>
- <20160525193011.GC2984@codeblueprint.co.uk> <5746FE16.9070408@amd.com>
- <20160608100713.GU2658@codeblueprint.co.uk> <57599668.20000@amd.com>
- <20160613120322.GA2658@codeblueprint.co.uk>
+From: Ben Hutchings <ben@decadent.org.uk>
+Subject: [PATCH 3.16 074/114] x86/sysfb_efi: Fix valid BAR address range check
+Date: Mon, 13 Jun 2016 19:36:37 +0100
+Message-ID: <lsq.1465842997.56340922@decadent.org.uk>
+References: <lsq.1465842997.838358341@decadent.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <20160613120322.GA2658@codeblueprint.co.uk>
-Sender: kvm-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Borislav Petkov <bp@alien8.de>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, Daniel Kiper <daniel.kiper@oracle.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>Ard Biesheuvel <a>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <lsq.1465842997.838358341@decadent.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: akpm@linux-foundation.org, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, David Herrmann <dh.herrmann@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Wang YanQing <udknight@gmail.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Tomi Valkeinen <tomi.valkeinen@ti.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 06/13/2016 07:03 AM, Matt Fleming wrote:
-> On Thu, 09 Jun, at 11:16:40AM, Tom Lendacky wrote:
->>
->> So maybe something along the lines of an enum that would have entries
->> (initially) like KERNEL_DATA (equal to zero) and EFI_DATA. Others could
->> be added later as needed.
->  
-> Sure, that works for me, though maybe BOOT_DATA would be more
-> applicable considering the devicetree case too.
-> 
->> Would you then want to allow the protection attributes to be updated
->> by architecture specific code through something like a __weak function?
->> In the x86 case I can add this function as a non-SME specific function
->> that would initially just have the SME-related mask modification in it.
-> 
-> Would we need a new function? Couldn't we just have a new
-> FIXMAP_PAGE_* constant? e.g. would something like this work?
+3.16.36-rc1 review patch.  If anyone has any objections, please let me know.
 
-Looking forward to the virtualization support (SEV), the VM will be
-completely encrypted from the time it is started. In this case all of
-the UEFI data will be encrypted and I would need to insure that the
-mapping reflects that. When I do the SEV patches, I can change the
-FIXMAP #define to add some logic to return a value, so I think the
-FIXMAP_PAGE_ idea can work.
+------------------
 
-Thanks,
-Tom
+From: Wang YanQing <udknight@gmail.com>
 
-> 
-> ---
-> 
-> enum memremap_owner {
-> 	KERNEL_DATA = 0,
-> 	BOOT_DATA,
-> };
-> 
-> void __init *
-> early_memremap(resource_size_t phys_addr, unsigned long size,
-> 	       enum memremap_owner owner)
-> {
-> 	pgprot_t prot;
-> 
-> 	switch (owner) {
-> 	case BOOT_DATA:
-> 		prot = FIXMAP_PAGE_BOOT;
-> 		break;
-> 	case KERNEL_DATA:	/* FALLTHROUGH */
-> 	default:
-> 		prot = FIXMAP_PAGE_NORMAL;
-> 		
-> 	}
-> 
-> 	return (__force void *)__early_ioremap(phys_addr, size, prot);
-> }
-> 
+commit c10fcb14c7afd6688c7b197a814358fecf244222 upstream.
+
+The code for checking whether a BAR address range is valid will break
+out of the loop when a start address of 0x0 is encountered.
+
+This behaviour is wrong since by breaking out of the loop we may miss
+the BAR that describes the EFI frame buffer in a later iteration.
+
+Because of this bug I can't use video=efifb: boot parameter to get
+efifb on my new ThinkPad E550 for my old linux system hard disk with
+3.10 kernel. In 3.10, efifb is the only choice due to DRM/I915 not
+supporting the GPU.
+
+This patch also add a trivial optimization to break out after we find
+the frame buffer address range without testing later BARs.
+
+Signed-off-by: Wang YanQing <udknight@gmail.com>
+[ Rewrote changelog. ]
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Reviewed-by: Peter Jones <pjones@redhat.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: David Herrmann <dh.herrmann@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/1462454061-21561-2-git-send-email-matt@codeblueprint.co.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
+---
+ arch/x86/kernel/sysfb_efi.c | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+--- a/arch/x86/kernel/sysfb_efi.c
++++ b/arch/x86/kernel/sysfb_efi.c
+@@ -106,14 +106,24 @@ static int __init efifb_set_system(const
+ 					continue;
+ 				for (i = 0; i < DEVICE_COUNT_RESOURCE; i++) {
+ 					resource_size_t start, end;
++					unsigned long flags;
++
++					flags = pci_resource_flags(dev, i);
++					if (!(flags & IORESOURCE_MEM))
++						continue;
++
++					if (flags & IORESOURCE_UNSET)
++						continue;
++
++					if (pci_resource_len(dev, i) == 0)
++						continue;
+ 
+ 					start = pci_resource_start(dev, i);
+-					if (start == 0)
+-						break;
+ 					end = pci_resource_end(dev, i);
+ 					if (screen_info.lfb_base >= start &&
+ 					    screen_info.lfb_base < end) {
+ 						found_bar = 1;
++						break;
+ 					}
+ 				}
+ 			}
