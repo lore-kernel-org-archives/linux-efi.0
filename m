@@ -1,62 +1,73 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 04/21] fs: Replace CURRENT_TIME with
-	current_fs_time() for inode timestamps
-Date: Sat, 11 Jun 2016 00:23:39 +0200
-Message-ID: <3828814.bejVmX1kJo@wuerfel>
-References: <1465448705-25055-1-git-send-email-deepa.kernel@gmail.com>
-	<1465448705-25055-5-git-send-email-deepa.kernel@gmail.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
+ clear
+Date: Mon, 13 Jun 2016 13:03:22 +0100
+Message-ID: <20160613120322.GA2658@codeblueprint.co.uk>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+ <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
+ <20160510134358.GR2839@codeblueprint.co.uk>
+ <20160510135758.GA16783@pd.tnic>
+ <5734C97D.8060803@amd.com>
+ <57446B27.20406@amd.com>
+ <20160525193011.GC2984@codeblueprint.co.uk>
+ <5746FE16.9070408@amd.com>
+ <20160608100713.GU2658@codeblueprint.co.uk>
+ <57599668.20000@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <cluster-devel-bounces@redhat.com>
-In-Reply-To: <1465448705-25055-5-git-send-email-deepa.kernel@gmail.com>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/cluster-devel>
-List-Post: <mailto:cluster-devel@redhat.com>
-List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
-Sender: cluster-devel-bounces@redhat.com
-Errors-To: cluster-devel-bounces@redhat.com
-To: Deepa Dinamani <deepa.kernel@gmail.com>, Mike Marshall <hubcap@omnibond.com>, Nadia Yvette Chambers <nyc@holomorphy.com>, Chao Yu <chao2.yu@samsung.com>, linux-nilfs@vger.kernel.org
-Cc: Latchesar Ionkov <lucho@ionkov.net>, Dave Kleikamp <shaggy@kernel.org>, jfs-discussion@lists.sourceforge.net, Michal Hocko <mhocko@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, Firo Yang <firogm@gmail.com>, Trond Myklebust <trond.myklebust@primarydata.com>, Alexei Starovoitov <ast@kernel.org>, David Howells <dhowells@redhat.com>, linux-efi@vger.kernel.org, selinux@tycho.nsa.gov, Eric Paris <eparis@parisplace.org>, Matthew Garrett <matthew.garrett@nebula.com>, Jeff Layton <jlayton@poochiereds.net>, linux-f2fs-devel@lists.sourceforge.net, Sean Hefty <sean.hefty@intel.com>, Ian Kent <raven@themaw.net>, linux-cifs@vger.kernel.org, Paul Moore <paul@paul-moore.com>, "David S. Miller" <davem@davemloft.net>, y2038@lists.linaro.org, Anton Vorontsov <anton@enomsg.org>, Hugh Dickins <hu>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <57599668.20000@amd.com>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: Borislav Petkov <bp@alien8.de>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, Daniel Kiper <daniel.kiper@oracle.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.or>
 List-Id: linux-efi@vger.kernel.org
 
-On Wednesday, June 8, 2016 10:04:48 PM CEST Deepa Dinamani wrote:
+On Thu, 09 Jun, at 11:16:40AM, Tom Lendacky wrote:
 > 
-> Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
-> Cc: Steve French <sfrench@samba.org>
-> Cc: linux-cifs@vger.kernel.org
-> Cc: samba-technical@lists.samba.org
-> Cc: Joern Engel <joern@logfs.org>
-> Cc: Prasad Joshi <prasadjoshi.linux@gmail.com>
-> Cc: logfs@logfs.org
-> Cc: Andrew Morton <akpm@linux-foundation.org>
-> Cc: Julia Lawall <Julia.Lawall@lip6.fr>
-> Cc: David Howells <dhowells@redhat.com>
-> Cc: Firo Yang <firogm@gmail.com>
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Cc: Changman Lee <cm224.lee@samsung.com>
-> ...
+> So maybe something along the lines of an enum that would have entries
+> (initially) like KERNEL_DATA (equal to zero) and EFI_DATA. Others could
+> be added later as needed.
+ 
+Sure, that works for me, though maybe BOOT_DATA would be more
+applicable considering the devicetree case too.
 
+> Would you then want to allow the protection attributes to be updated
+> by architecture specific code through something like a __weak function?
+> In the x86 case I can add this function as a non-SME specific function
+> that would initially just have the SME-related mask modification in it.
 
-Hi Deepa,
+Would we need a new function? Couldn't we just have a new
+FIXMAP_PAGE_* constant? e.g. would something like this work?
 
+---
 
-Just FYI, the vger.kernel.org list server and some others
-intentionally reject mails with more than 1024 characters in the
-Cc header, to stop people from cross-posting to too many folks.
+enum memremap_owner {
+	KERNEL_DATA = 0,
+	BOOT_DATA,
+};
 
-I realize that you merged the patch after Linus' comment about
-doing things in fewer steps for the simple conversion, which is
-fine, but then the patch should be obvious enough that you
-don't need to Cc every single maintainer and mailing list.
+void __init *
+early_memremap(resource_size_t phys_addr, unsigned long size,
+	       enum memremap_owner owner)
+{
+	pgprot_t prot;
 
-I've had some cases like this, and I usually remove the people
-that are less likely to reply, leaving one per subsystem.
-Leaving out the cleartext names is another trick you can use
-if you think that you really need to Cc more people than
-allowed ;-)
+	switch (owner) {
+	case BOOT_DATA:
+		prot = FIXMAP_PAGE_BOOT;
+		break;
+	case KERNEL_DATA:	/* FALLTHROUGH */
+	default:
+		prot = FIXMAP_PAGE_NORMAL;
+		
+	}
 
-	Arnd
+	return (__force void *)__early_ioremap(phys_addr, size, prot);
+}
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
