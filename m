@@ -1,81 +1,77 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
+From: Tom Lendacky <thomas.lendacky@amd.com>
 Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
  clear
-Date: Mon, 13 Jun 2016 14:51:10 +0100
-Message-ID: <20160613135110.GC2658@codeblueprint.co.uk>
+Date: Mon, 13 Jun 2016 10:16:12 -0500
+Message-ID: <575ECE3C.5030600@amd.com>
 References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
  <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
- <20160608111844.GV2658@codeblueprint.co.uk>
- <5759B67A.4000800@amd.com>
+ <20160510134358.GR2839@codeblueprint.co.uk> <20160510135758.GA16783@pd.tnic>
+ <5734C97D.8060803@amd.com> <57446B27.20406@amd.com>
+ <20160525193011.GC2984@codeblueprint.co.uk> <5746FE16.9070408@amd.com>
+ <20160608100713.GU2658@codeblueprint.co.uk> <57599668.20000@amd.com>
+ <20160613120322.GA2658@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <5759B67A.4000800@amd.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvm-owner@vger.kernel.org>
+In-Reply-To: <20160613120322.GA2658@codeblueprint.co.uk>
+Sender: kvm-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Borislav Petkov <bp@alien8.de>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, Daniel Kiper <daniel.kiper@oracle.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>Ard Biesheuvel <a>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 09 Jun, at 01:33:30PM, Tom Lendacky wrote:
+On 06/13/2016 07:03 AM, Matt Fleming wrote:
+> On Thu, 09 Jun, at 11:16:40AM, Tom Lendacky wrote:
+>>
+>> So maybe something along the lines of an enum that would have entries
+>> (initially) like KERNEL_DATA (equal to zero) and EFI_DATA. Others could
+>> be added later as needed.
+>  
+> Sure, that works for me, though maybe BOOT_DATA would be more
+> applicable considering the devicetree case too.
 > 
-> I was trying to play it safe here, but as you say, the firmware should
-> be using our page tables so we can get rid of this call. The problem
-> will actually be if we transition to a 32-bit efi. The encryption bit
-> will be lost in cr3 and so the pgd table will have to be un-encrypted.
-> The entries in the pgd can have the encryption bit set so I would only
-> need to worry about the pgd itself. I'll have to update the
-> efi_alloc_page_tables routine.
- 
-Interesting, I hadn't expected 32-bit EFI to be an option for
-platforms with the SME technology. I'd assumed we could just ignore
-that.
+>> Would you then want to allow the protection attributes to be updated
+>> by architecture specific code through something like a __weak function?
+>> In the x86 case I can add this function as a non-SME specific function
+>> that would initially just have the SME-related mask modification in it.
+> 
+> Would we need a new function? Couldn't we just have a new
+> FIXMAP_PAGE_* constant? e.g. would something like this work?
 
-Are you saying that the encryption bit isn't supported in 32-bit
-compatibility mode? We don't do a "full" switch to 32-bit protected
-mode when in mixed mode, just load a 32-bit code segment descriptor.
-The page tables are not modified at all.
+Looking forward to the virtualization support (SEV), the VM will be
+completely encrypted from the time it is started. In this case all of
+the UEFI data will be encrypted and I would need to insure that the
+mapping reflects that. When I do the SEV patches, I can change the
+FIXMAP #define to add some logic to return a value, so I think the
+FIXMAP_PAGE_ idea can work.
 
-> The encryption bit in the cr3 register will indicate if the pgd table
-> is encrypted or not. Based on my comment above about the pgd having
-> to be un-encrypted in case we have to transition to 32-bit efi, this
-> can be removed.
- 
-I'm not (yet) sure that the pgd needs to be unencrypted for 32-bit EFI
-when running a 64-bit kernel. In the AMD Programmer's Manual, Section
-7.10.3 Operating Modes seems to indicate that running encrypted should
-work fine.
+Thanks,
+Tom
 
-> I'll look into this a bit more. From looking at it I don't want the
-> _PAGE_ENC bit set for the memmap unless it gets re-allocated (which
-> I missed in these patches). Let me see what I can do with this.
- 
-I don't understand your comment about re-allocating the memmap.
-
-The kernel builds its own EFI memory map at runtime, initially based
-on the memory map provided by the firmware. We always allocate a new
-memory map.
-
-In efi_setup_page_tables() we're building our own page tables, which
-should be encrypted, and mapping EFI regions described by the memmap
-into those page tables.
-
-So unless we're mapping an MMIO region (in which case _PAGE_PCD is set
-in @flags for kernel_map_pages_in_pgd()) I would expect _PAGE_ENC to
-be set.
-
-> I'll look further into this, but I saw that this area of virtual memory
-> was mapped un-encrypted and after freeing the boot services the
-> mappings were somehow reused as un-encrypted for DMA which assumes
-> (unless using swiotlb) encrypted. This resulted in DMA data being
-> transferred in as encrypted and then accessed un-encrypted.
-
-That the mappings were re-used isn't a surprise.
-
-efi_free_boot_services() lifts the reservation that was put in place
-during efi_reserve_boot_services() and releases the pages to the
-kernel's memory allocators.
-
-What is surprising is that they were marked unencrypted at all.
-There's nothing special about these pages as far as the __va() region
-is concerned.
+> 
+> ---
+> 
+> enum memremap_owner {
+> 	KERNEL_DATA = 0,
+> 	BOOT_DATA,
+> };
+> 
+> void __init *
+> early_memremap(resource_size_t phys_addr, unsigned long size,
+> 	       enum memremap_owner owner)
+> {
+> 	pgprot_t prot;
+> 
+> 	switch (owner) {
+> 	case BOOT_DATA:
+> 		prot = FIXMAP_PAGE_BOOT;
+> 		break;
+> 	case KERNEL_DATA:	/* FALLTHROUGH */
+> 	default:
+> 		prot = FIXMAP_PAGE_NORMAL;
+> 		
+> 	}
+> 
+> 	return (__force void *)__early_ioremap(phys_addr, size, prot);
+> }
+> 
