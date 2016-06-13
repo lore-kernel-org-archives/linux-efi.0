@@ -1,10 +1,9 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
 Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
  clear
-Date: Mon, 13 Jun 2016 13:03:22 +0100
-Message-ID: <20160613120322.GA2658@codeblueprint.co.uk>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
+Date: Mon, 13 Jun 2016 13:34:52 +0100
+Message-ID: <20160613123452.GB2658@codeblueprint.co.uk>
+References: <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
  <20160510134358.GR2839@codeblueprint.co.uk>
  <20160510135758.GA16783@pd.tnic>
  <5734C97D.8060803@amd.com>
@@ -13,58 +12,52 @@ References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
  <5746FE16.9070408@amd.com>
  <20160608100713.GU2658@codeblueprint.co.uk>
  <57599668.20000@amd.com>
+ <20160613120322.GA2658@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <57599668.20000@amd.com>
+In-Reply-To: <20160613120322.GA2658@codeblueprint.co.uk>
 Sender: owner-linux-mm@kvack.org
 To: Tom Lendacky <thomas.lendacky@amd.com>
 Cc: Borislav Petkov <bp@alien8.de>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, Daniel Kiper <daniel.kiper@oracle.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.or>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 09 Jun, at 11:16:40AM, Tom Lendacky wrote:
+On Mon, 13 Jun, at 01:03:22PM, Matt Fleming wrote:
 > 
-> So maybe something along the lines of an enum that would have entries
-> (initially) like KERNEL_DATA (equal to zero) and EFI_DATA. Others could
-> be added later as needed.
- 
-Sure, that works for me, though maybe BOOT_DATA would be more
-applicable considering the devicetree case too.
+> Would we need a new function? Couldn't we just have a new
+> FIXMAP_PAGE_* constant? e.g. would something like this work?
+> 
+> ---
+> 
+> enum memremap_owner {
+> 	KERNEL_DATA = 0,
+> 	BOOT_DATA,
+> };
+> 
+> void __init *
+> early_memremap(resource_size_t phys_addr, unsigned long size,
+> 	       enum memremap_owner owner)
+> {
+> 	pgprot_t prot;
+> 
+> 	switch (owner) {
+> 	case BOOT_DATA:
+> 		prot = FIXMAP_PAGE_BOOT;
+> 		break;
+> 	case KERNEL_DATA:	/* FALLTHROUGH */
+> 	default:
+> 		prot = FIXMAP_PAGE_NORMAL;
+> 		
+> 	}
+> 
+> 	return (__force void *)__early_ioremap(phys_addr, size, prot);
+> }
 
-> Would you then want to allow the protection attributes to be updated
-> by architecture specific code through something like a __weak function?
-> In the x86 case I can add this function as a non-SME specific function
-> that would initially just have the SME-related mask modification in it.
-
-Would we need a new function? Couldn't we just have a new
-FIXMAP_PAGE_* constant? e.g. would something like this work?
-
----
-
-enum memremap_owner {
-	KERNEL_DATA = 0,
-	BOOT_DATA,
-};
-
-void __init *
-early_memremap(resource_size_t phys_addr, unsigned long size,
-	       enum memremap_owner owner)
-{
-	pgprot_t prot;
-
-	switch (owner) {
-	case BOOT_DATA:
-		prot = FIXMAP_PAGE_BOOT;
-		break;
-	case KERNEL_DATA:	/* FALLTHROUGH */
-	default:
-		prot = FIXMAP_PAGE_NORMAL;
-		
-	}
-
-	return (__force void *)__early_ioremap(phys_addr, size, prot);
-}
+Although it occurs to me that if there's a trivial 1:1 mapping between
+memremap_owner and FIXMAP_PAGE_* we might as well just add a new
+early_memremap_boot() that uses the correct FIXMAP_PAGE_* constant,
+akin to early_memremap_ro().
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
