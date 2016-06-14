@@ -1,83 +1,118 @@
 From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v3 2/8] acpi: fix enumeration (visited) flags for bus rescans
-Date: Tue, 14 Jun 2016 18:17:20 +0300
-Message-ID: <1465917446-14043-3-git-send-email-octavian.purdila@intel.com>
-References: <1465917446-14043-1-git-send-email-octavian.purdila@intel.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1465917446-14043-1-git-send-email-octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Subject: [PATCH v3 0/8] ACPI overlays
+Date: Tue, 14 Jun 2016 18:17:18 +0300
+Message-ID: <1465917446-14043-1-git-send-email-octavian.purdila@intel.com>
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: "Rafael J . Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
 Cc: Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-If the ACPI tables changes as a result of a dinamically loaded table and
-a bus rescan is required the enumeration/visited flag are not
-consistent.
+This patch set enables custom ACPI board configuration by adding
+mechanisms in the Linux kernel for loading user defined SSDTs.
 
-I2C/SPI are not directly enumerated in acpi_bus_attach(), however the
-visited flag is set. This makes it impossible to check if an ACPI device
-has already been enumerated by the I2C and SPI subsystems. To fix this
-issue we only set the visited flags if the device is not I2C or SPI.
+In order to support ACPI open-ended hardware configurations we need a
+way to augment the ACPI configuration provided by the firmware
+image. A common example is connecting sensors on I2C / SPI buses on
+development boards.
 
-With this change we also need to remove setting visited to false from
-acpi_bus_attach(), otherwise if we rescan already enumerated I2C/SPI
-devices we try to re-enumerate them.
+Although this can be accomplished by creating a kernel platform driver
+or recompiling the firmware image with updated ACPI tables, neither is
+practical: the former proliferates board specific kernel code while
+the latter requires access to firmware tools which are often not
+publicly available.
 
-Signed-off-by: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
- drivers/acpi/scan.c | 11 +++++++----
- 1 file changed, 7 insertions(+), 4 deletions(-)
+Because ACPI supports external references in AML code a more practical
+way to augment firmware ACPI configuration is by dynamically loading
+user defined SSDT tables that contain the board specific information.
 
-diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 5f28cf7..7656ea4 100644
---- a/drivers/acpi/scan.c
-+++ b/drivers/acpi/scan.c
-@@ -1670,7 +1670,7 @@ static int acpi_check_spi_i2c_slave(struct acpi_resource *ares, void *data)
- 	return -1;
- }
- 
--static void acpi_default_enumeration(struct acpi_device *device)
-+static bool acpi_default_enumeration(struct acpi_device *device)
- {
- 	struct list_head resource_list;
- 	bool is_spi_i2c_slave = false;
-@@ -1685,6 +1685,7 @@ static void acpi_default_enumeration(struct acpi_device *device)
- 	acpi_dev_free_resource_list(&resource_list);
- 	if (!is_spi_i2c_slave)
- 		acpi_create_platform_device(device);
-+	return !is_spi_i2c_slave;
- }
- 
- static const struct acpi_device_id generic_device_ids[] = {
-@@ -1744,6 +1745,7 @@ static void acpi_bus_attach(struct acpi_device *device)
- 	struct acpi_device *child;
- 	acpi_handle ejd;
- 	int ret;
-+	bool enumerated = true;
- 
- 	if (ACPI_SUCCESS(acpi_bus_get_ejd(device->handle, &ejd)))
- 		register_dock_dependent_device(device, ejd);
-@@ -1766,7 +1768,7 @@ static void acpi_bus_attach(struct acpi_device *device)
- 
- 		device->flags.initialized = true;
- 	}
--	device->flags.visited = false;
-+
- 	ret = acpi_scan_attach_handler(device);
- 	if (ret < 0)
- 		return;
-@@ -1778,9 +1780,10 @@ static void acpi_bus_attach(struct acpi_device *device)
- 			return;
- 
- 		if (!ret && device->pnp.type.platform_id)
--			acpi_default_enumeration(device);
-+			enumerated = acpi_default_enumeration(device);
- 	}
--	device->flags.visited = true;
-+	if (enumerated)
-+		device->flags.visited = true;
- 
-  ok:
- 	list_for_each_entry(child, &device->children, node)
+Currently it is possible to load SSDT overlays using the upgrade
+initrd mechanism introduced in 4.7. This patch series adds support for
+two more methods:
+
+* From an EFI variable
+
+ This is the preferred method, when EFI is supported on the platform,
+ because it allows a persistent, OS independent way of storing and
+ updating the user defined SSDTs. There is also work underway to
+ implement EFI support for loading user defined SSDTs and using this
+ method will make it easier to convert to the EFI loading mechanism
+ when that will arrive.
+
+* From userspace via configfs
+
+ This is useful when we want to defer the operation to userspace for
+ platform detection, loading the SSDTs from a custom partition, etc.
+
+Changes from v2:
+
+* fix a few issues caught by the kbuild test robot
+
+* add more configfs table attributes
+
+* removed the initrd based loading functionality from this patch set
+  as this can already be accomplished in 4.7 using the ACPI table
+  upgrade mechanism
+
+* rebased to 4.7-rc3
+
+Changes from v1:
+
+* rebased on top of the ACPI install from initrd table functionality;
+  there is significant overlap between the 1st patch in this series
+  and these patch [1] from Lv - I kept it in this series until the
+  discussions around the taint and config option are resolved
+
+* make sure EFI_RUNTIME_SERVICES are available before trying to use
+  EFI variables to load tables
+
+* rework the ACPI reconfiguration notifications to work on device
+  granularity (device added or removed) instead of table granularity
+  (table loaded or unloaded)
+
+* add support for table unloading / device removal
+
+* note that the last patch is just a hack to be able to test the table
+  unload / device remove functionality, if someone wants to try out
+  this patch set
+
+[1] https://patchwork.kernel.org/patch/8795931/
+
+
+Octavian Purdila (8):
+  Documentation: acpi: add SSDT overlays documentation
+  acpi: fix enumeration (visited) flags for bus rescans
+  acpi: add support for ACPI reconfiguration notifiers
+  i2c: add support for ACPI reconfigure notifications
+  spi: add support for ACPI reconfigure notifications
+  efi: load SSTDs from EFI variables
+  acpi: add support for configfs
+  acpi: add support for loading SSDTs via configfs
+
+ Documentation/ABI/testing/configfs-acpi |  36 +++++
+ Documentation/acpi/ssdt-overlays.txt    | 172 ++++++++++++++++++++
+ Documentation/kernel-parameters.txt     |   7 +
+ MAINTAINERS                             |   1 +
+ drivers/acpi/Kconfig                    |   9 ++
+ drivers/acpi/Makefile                   |   1 +
+ drivers/acpi/bus.c                      |   9 ++
+ drivers/acpi/configfs.c                 | 267 ++++++++++++++++++++++++++++++++
+ drivers/acpi/internal.h                 |   3 +
+ drivers/acpi/scan.c                     |  79 +++++++++-
+ drivers/acpi/sysfs.c                    |   6 +-
+ drivers/firmware/efi/efi.c              | 106 +++++++++++++
+ drivers/i2c/i2c-core.c                  | 170 +++++++++++++++-----
+ drivers/spi/spi.c                       |  94 ++++++++++-
+ include/linux/acpi.h                    |  18 +++
+ 15 files changed, 924 insertions(+), 54 deletions(-)
+ create mode 100644 Documentation/ABI/testing/configfs-acpi
+ create mode 100644 Documentation/acpi/ssdt-overlays.txt
+ create mode 100644 drivers/acpi/configfs.c
+
 -- 
 2.7.4
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
