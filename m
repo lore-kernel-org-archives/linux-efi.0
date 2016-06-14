@@ -1,57 +1,83 @@
-From: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
-Subject: [PATCH 3.16 071/114] MAINTAINERS: Remove asterisk from EFI
- directory names
-Date: Mon, 13 Jun 2016 19:36:37 +0100
-Message-ID: <lsq.1465842997.588855998@decadent.org.uk>
-References: <lsq.1465842997.838358341@decadent.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH v3 2/8] acpi: fix enumeration (visited) flags for bus rescans
+Date: Tue, 14 Jun 2016 18:17:20 +0300
+Message-ID: <1465917446-14043-3-git-send-email-octavian.purdila@intel.com>
+References: <1465917446-14043-1-git-send-email-octavian.purdila@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <lsq.1465842997.838358341-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
+In-Reply-To: <1465917446-14043-1-git-send-email-octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: "Rafael J . Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Cc: Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-3.16.36-rc1 review patch.  If anyone has any objections, please let me know.
+If the ACPI tables changes as a result of a dinamically loaded table and
+a bus rescan is required the enumeration/visited flag are not
+consistent.
 
-------------------
+I2C/SPI are not directly enumerated in acpi_bus_attach(), however the
+visited flag is set. This makes it impossible to check if an ACPI device
+has already been enumerated by the I2C and SPI subsystems. To fix this
+issue we only set the visited flags if the device is not I2C or SPI.
 
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+With this change we also need to remove setting visited to false from
+acpi_bus_attach(), otherwise if we rescan already enumerated I2C/SPI
+devices we try to re-enumerate them.
 
-commit e8dfe6d8f6762d515fcd4f30577f7bfcf7659887 upstream.
-
-Mark reported that having asterisks on the end of directory names
-confuses get_maintainer.pl when it encounters subdirectories, and that
-my name does not appear when run on drivers/firmware/efi/libstub.
-
-Reported-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Link: http://lkml.kernel.org/r/1462303781-8686-2-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Signed-off-by: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
+Signed-off-by: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- MAINTAINERS | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/acpi/scan.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
 
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -3394,8 +3394,8 @@ F:	Documentation/x86/efi-stub.txt
- F:	arch/ia64/kernel/efi.c
- F:	arch/x86/boot/compressed/eboot.[ch]
- F:	arch/x86/include/asm/efi.h
--F:	arch/x86/platform/efi/*
--F:	drivers/firmware/efi/*
-+F:	arch/x86/platform/efi/
-+F:	drivers/firmware/efi/
- F:	include/linux/efi*.h
+diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
+index 5f28cf7..7656ea4 100644
+--- a/drivers/acpi/scan.c
++++ b/drivers/acpi/scan.c
+@@ -1670,7 +1670,7 @@ static int acpi_check_spi_i2c_slave(struct acpi_resource *ares, void *data)
+ 	return -1;
+ }
  
- EFI VARIABLE FILESYSTEM
+-static void acpi_default_enumeration(struct acpi_device *device)
++static bool acpi_default_enumeration(struct acpi_device *device)
+ {
+ 	struct list_head resource_list;
+ 	bool is_spi_i2c_slave = false;
+@@ -1685,6 +1685,7 @@ static void acpi_default_enumeration(struct acpi_device *device)
+ 	acpi_dev_free_resource_list(&resource_list);
+ 	if (!is_spi_i2c_slave)
+ 		acpi_create_platform_device(device);
++	return !is_spi_i2c_slave;
+ }
+ 
+ static const struct acpi_device_id generic_device_ids[] = {
+@@ -1744,6 +1745,7 @@ static void acpi_bus_attach(struct acpi_device *device)
+ 	struct acpi_device *child;
+ 	acpi_handle ejd;
+ 	int ret;
++	bool enumerated = true;
+ 
+ 	if (ACPI_SUCCESS(acpi_bus_get_ejd(device->handle, &ejd)))
+ 		register_dock_dependent_device(device, ejd);
+@@ -1766,7 +1768,7 @@ static void acpi_bus_attach(struct acpi_device *device)
+ 
+ 		device->flags.initialized = true;
+ 	}
+-	device->flags.visited = false;
++
+ 	ret = acpi_scan_attach_handler(device);
+ 	if (ret < 0)
+ 		return;
+@@ -1778,9 +1780,10 @@ static void acpi_bus_attach(struct acpi_device *device)
+ 			return;
+ 
+ 		if (!ret && device->pnp.type.platform_id)
+-			acpi_default_enumeration(device);
++			enumerated = acpi_default_enumeration(device);
+ 	}
+-	device->flags.visited = true;
++	if (enumerated)
++		device->flags.visited = true;
+ 
+  ok:
+ 	list_for_each_entry(child, &device->children, node)
+-- 
+2.7.4
