@@ -1,7 +1,7 @@
 From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: [PATCH v3 4/8] i2c: add support for ACPI reconfigure notifications
-Date: Tue, 14 Jun 2016 18:17:22 +0300
-Message-ID: <1465917446-14043-5-git-send-email-octavian.purdila@intel.com>
+Subject: [PATCH v3 6/8] efi: load SSTDs from EFI variables
+Date: Tue, 14 Jun 2016 18:17:24 +0300
+Message-ID: <1465917446-14043-7-git-send-email-octavian.purdila@intel.com>
 References: <1465917446-14043-1-git-send-email-octavian.purdila@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1465917446-14043-1-git-send-email-octavian.purdila@intel.com>
@@ -10,267 +10,247 @@ To: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt 
 Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, Octavian Purdila <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-This patch adds supports for I2C device enumeration and removal via
-ACPI reconfiguration notifications that are send as a result of an
-ACPI table load or unload operation.
+This patch allows SSDTs to be loaded from EFI variables. It works by
+specifying the EFI variable name containing the SSDT to be loaded. All
+variables with the same name (regardless of the vendor GUID) will be
+loaded.
+
+Note that we can't use acpi_install_table and we must rely on the
+dynamic ACPI table loading and bus re-scanning mechanisms. That is
+because I2C/SPI controllers are initialized earlier then the EFI
+subsystems and all I2C/SPI ACPI devices are enumerated when the
+I2C/SPI controllers are initialized.
 
 Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
 ---
- drivers/i2c/i2c-core.c | 170 ++++++++++++++++++++++++++++++++++++++-----------
- 1 file changed, 132 insertions(+), 38 deletions(-)
+ Documentation/acpi/ssdt-overlays.txt |  67 ++++++++++++++++++++++
+ Documentation/kernel-parameters.txt  |   7 +++
+ drivers/firmware/efi/efi.c           | 106 +++++++++++++++++++++++++++++++++++
+ 3 files changed, 180 insertions(+)
 
-diff --git a/drivers/i2c/i2c-core.c b/drivers/i2c/i2c-core.c
-index af11b65..18f7b19 100644
---- a/drivers/i2c/i2c-core.c
-+++ b/drivers/i2c/i2c-core.c
-@@ -107,12 +107,11 @@ struct acpi_i2c_lookup {
- 	acpi_handle device_handle;
- };
- 
--static int acpi_i2c_find_address(struct acpi_resource *ares, void *data)
-+static int acpi_i2c_fill_info(struct acpi_resource *ares, void *data)
- {
- 	struct acpi_i2c_lookup *lookup = data;
- 	struct i2c_board_info *info = lookup->info;
- 	struct acpi_resource_i2c_serialbus *sb;
--	acpi_handle adapter_handle;
- 	acpi_status status;
- 
- 	if (info->addr || ares->type != ACPI_RESOURCE_TYPE_SERIAL_BUS)
-@@ -122,80 +121,102 @@ static int acpi_i2c_find_address(struct acpi_resource *ares, void *data)
- 	if (sb->type != ACPI_RESOURCE_SERIAL_TYPE_I2C)
- 		return 1;
- 
--	/*
--	 * Extract the ResourceSource and make sure that the handle matches
--	 * with the I2C adapter handle.
--	 */
- 	status = acpi_get_handle(lookup->device_handle,
- 				 sb->resource_source.string_ptr,
--				 &adapter_handle);
--	if (ACPI_SUCCESS(status) && adapter_handle == lookup->adapter_handle) {
--		info->addr = sb->slave_address;
--		if (sb->access_mode == ACPI_I2C_10BIT_MODE)
--			info->flags |= I2C_CLIENT_TEN;
--	}
-+				 &lookup->adapter_handle);
-+	if (!ACPI_SUCCESS(status))
-+		return 1;
+diff --git a/Documentation/acpi/ssdt-overlays.txt b/Documentation/acpi/ssdt-overlays.txt
+index 8050259..c4b57ba 100644
+--- a/Documentation/acpi/ssdt-overlays.txt
++++ b/Documentation/acpi/ssdt-overlays.txt
+@@ -89,3 +89,70 @@ cp ssdt.aml kernel/firmware/acpi
+ # on top:
+ find kernel | cpio -H newc --create > /boot/instrumented_initrd
+ cat /boot/initrd >>/boot/instrumented_initrd
 +
-+	info->addr = sb->slave_address;
-+	if (sb->access_mode == ACPI_I2C_10BIT_MODE)
-+		info->flags |= I2C_CLIENT_TEN;
++== Loading ACPI SSDTs from EFI variables ==
++
++This is the preferred method, when EFI is supported on the platform, because it
++allows a persistent, OS independent way of storing the user defined SSDTs. There
++is also work underway to implement EFI support for loading user defined SSDTs
++and using this method will make it easier to convert to the EFI loading
++mechanism when that will arrive.
++
++In order to load SSDTs from an EFI variable the efivar_ssdt kernel command line
++parameter can be used. The argument for the option is the variable name to
++use. If there are multiple variables with the same name but with different
++vendor GUIDs, all of them will be loaded.
++
++In order to store the AML code in an EFI variable the efivarfs filesystem can be
++used. It is enabled and mounted by default in /sys/firmware/efi/efivars in all
++recent distribution.
++
++Creating a new file in /sys/firmware/efi/efivars will automatically create a new
++EFI variable. Updating a file in /sys/firmware/efi/efivars will update the EFI
++variable. Please note that the file name needs to be specially formatted as
++"Name-GUID" and that the first 4 bytes in the file (little-endian format)
++represent the attributes of the EFI variable (see EFI_VARIABLE_MASK in
++include/linux/efi.h). Writing to the file must also be done with one write
++operation.
++
++For example, you can use the following bash script to create/update an EFI
++variable with the content from a given file:
++
++#!/bin/sh -e
++
++while ! [ -z "$1" ]; do
++        case "$1" in
++        "-f") filename="$2"; shift;;
++        "-g") guid="$2"; shift;;
++        *) name="$1";;
++        esac
++        shift
++done
++
++usage()
++{
++        echo "Syntax: ${0##*/} -f filename [ -g guid ] name"
++        exit 1
++}
++
++[ -n "$name" -a -f "$filename" ] || usage
++
++EFIVARFS="/sys/firmware/efi/efivars"
++
++[ -d "$EFIVARFS" ] || exit 2
++
++if stat -tf $EFIVARFS | grep -q -v de5e81e4; then
++        mount -t efivarfs none $EFIVARFS
++fi
++
++# try to pick up an existing GUID
++[ -n "$guid" ] || guid=$(find "$EFIVARFS" -name "$name-*" | head -n1 | cut -f2- -d-)
++
++# use a randomly generated GUID
++[ -n "$guid" ] || guid="$(cat /proc/sys/kernel/random/uuid)"
++
++# efivarfs expects all of the data in one write
++tmp=$(mktemp)
++/bin/echo -ne "\007\000\000\000" | cat - $filename > $tmp
++dd if=$tmp of="$EFIVARFS/$name-$guid" bs=$(stat -c %s $tmp)
++rm $tmp
+diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+index 82b42c9..bbfb56f 100644
+--- a/Documentation/kernel-parameters.txt
++++ b/Documentation/kernel-parameters.txt
+@@ -1185,6 +1185,13 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+ 			Address Range Mirroring feature even if your box
+ 			doesn't support it.
  
- 	return 1;
++	efivar_ssdt=	[EFI; X86] Name of an EFI variable that contains an SSDT
++			that is to be dynamically loaded by Linux. If there are
++			multiple variables with the same name but with different
++			vendor GUIDs, all of them will be loaded. See
++			Documentation/acpi/ssdt-overlays.txt for details.
++
++
+ 	eisa_irq_edge=	[PARISC,HW]
+ 			See header of drivers/parisc/eisa.c.
+ 
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 05509f3..b68cb8d 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -24,6 +24,8 @@
+ #include <linux/of_fdt.h>
+ #include <linux/io.h>
+ #include <linux/platform_device.h>
++#include <linux/slab.h>
++#include <linux/acpi.h>
+ 
+ #include <asm/early_ioremap.h>
+ 
+@@ -195,6 +197,107 @@ static void generic_ops_unregister(void)
+ 	efivars_unregister(&generic_efivars);
  }
  
--static acpi_status acpi_i2c_add_device(acpi_handle handle, u32 level,
--				       void *data, void **return_value)
-+static int acpi_i2c_get_info(struct acpi_device *adev,
-+			     struct i2c_board_info *info,
-+			     acpi_handle *adapter_handle)
- {
--	struct i2c_adapter *adapter = data;
- 	struct list_head resource_list;
--	struct acpi_i2c_lookup lookup;
- 	struct resource_entry *entry;
--	struct i2c_board_info info;
--	struct acpi_device *adev;
-+	struct acpi_i2c_lookup lookup;
- 	int ret;
- 
--	if (acpi_bus_get_device(handle, &adev))
--		return AE_OK;
--	if (acpi_bus_get_status(adev) || !adev->status.present)
--		return AE_OK;
-+	if (acpi_bus_get_status(adev) || !adev->status.present ||
-+	    acpi_device_enumerated(adev))
-+		return -EINVAL;
- 
--	memset(&info, 0, sizeof(info));
--	info.fwnode = acpi_fwnode_handle(adev);
-+	memset(info, 0, sizeof(*info));
-+	info->fwnode = acpi_fwnode_handle(adev);
- 
- 	memset(&lookup, 0, sizeof(lookup));
--	lookup.adapter_handle = ACPI_HANDLE(&adapter->dev);
--	lookup.device_handle = handle;
--	lookup.info = &info;
-+	lookup.device_handle = acpi_device_handle(adev);
-+	lookup.info = info;
- 
--	/*
--	 * Look up for I2cSerialBus resource with ResourceSource that
--	 * matches with this adapter.
--	 */
-+	/* Look up for I2cSerialBus resource */
- 	INIT_LIST_HEAD(&resource_list);
- 	ret = acpi_dev_get_resources(adev, &resource_list,
--				     acpi_i2c_find_address, &lookup);
-+				     acpi_i2c_fill_info, &lookup);
- 	acpi_dev_free_resource_list(&resource_list);
- 
--	if (ret < 0 || !info.addr)
--		return AE_OK;
-+	if (ret < 0 || !info->addr)
-+		return -EINVAL;
++#if IS_ENABLED(CONFIG_ACPI)
++#define EFIVAR_SSDT_NAME_MAX	16
++static char efivar_ssdt[EFIVAR_SSDT_NAME_MAX];
++static int __init efivar_ssdt_setup(char *str)
++{
++	if (strlen(str) < sizeof(efivar_ssdt))
++		memcpy(efivar_ssdt, str, strlen(str));
++	else
++		pr_warn("efivar_ssdt: name too long: %s\n", str);
++	return 0;
++}
++__setup("efivar_ssdt=", efivar_ssdt_setup);
 +
-+	*adapter_handle = lookup.adapter_handle;
- 
- 	/* Then fill IRQ number if any */
- 	ret = acpi_dev_get_resources(adev, &resource_list, NULL, NULL);
- 	if (ret < 0)
--		return AE_OK;
-+		return -EINVAL;
- 
- 	resource_list_for_each_entry(entry, &resource_list) {
- 		if (resource_type(entry->res) == IORESOURCE_IRQ) {
--			info.irq = entry->res->start;
-+			info->irq = entry->res->start;
- 			break;
- 		}
- 	}
- 
- 	acpi_dev_free_resource_list(&resource_list);
- 
-+	strlcpy(info->type, dev_name(&adev->dev), sizeof(info->type));
++static LIST_HEAD(efivar_ssdts);
++
++static inline void pr_efivar_name(efi_char16_t *name16)
++{
++	char name[EFIVAR_SSDT_NAME_MAX];
++	int i;
++
++	for (i = 0; i < EFIVAR_SSDT_NAME_MAX - 1; i++)
++		name[i] = name16[i] & 0xFF;
++	name[i] = 0;
++	pr_cont("%s", name);
++}
++
++static __init int efivar_acpi_iter(efi_char16_t *name, efi_guid_t vendor,
++				   unsigned long name_size, void *data)
++{
++	int i;
++	int str_len = name_size / sizeof(efi_char16_t);
++	struct efivar_entry *entry;
++
++	if (str_len != strlen(efivar_ssdt) + 1)
++		return 0;
++
++	for (i = 0; i < str_len; i++)
++		if ((name[i] & 0xFF) != efivar_ssdt[i])
++			return 0;
++
++	entry = kzalloc(sizeof(*entry), GFP_KERNEL);
++	if (!entry)
++		return -ENOMEM;
++
++	memcpy(entry->var.VariableName, name, name_size);
++	memcpy(&entry->var.VendorGuid, &vendor, sizeof(efi_guid_t));
++
++	efivar_entry_add(entry, &efivar_ssdts);
 +
 +	return 0;
 +}
 +
-+static void acpi_i2c_register_device(struct i2c_adapter *adapter,
-+				     struct acpi_device *adev,
-+				     struct i2c_board_info *info)
++static __init int efivar_ssdt_load(void)
 +{
- 	adev->power.flags.ignore_parent = true;
--	strlcpy(info.type, dev_name(&adev->dev), sizeof(info.type));
--	if (!i2c_new_device(adapter, &info)) {
-+	adev->flags.visited = true;
++	struct efivar_entry *i;
++	int err;
 +
-+	if (!i2c_new_device(adapter, info)) {
- 		adev->power.flags.ignore_parent = false;
- 		dev_err(&adapter->dev,
- 			"failed to add I2C device %s from ACPI\n",
- 			dev_name(&adev->dev));
- 	}
-+}
-+
-+static acpi_status acpi_i2c_add_device(acpi_handle handle, u32 level,
-+				       void *data, void **return_value)
-+{
-+	struct i2c_adapter *adapter = data;
-+	struct acpi_device *adev;
-+	acpi_handle adapter_handle;
-+	struct i2c_board_info info;
-+
-+	if (acpi_bus_get_device(handle, &adev))
-+		return AE_OK;
-+
-+	if (acpi_i2c_get_info(adev, &info, &adapter_handle))
-+		return AE_OK;
-+
-+	if (adapter_handle != ACPI_HANDLE(&adapter->dev))
-+		return AE_OK;
-+
-+	acpi_i2c_register_device(adapter, adev, &info);
- 
- 	return AE_OK;
- }
-@@ -225,8 +246,77 @@ static void acpi_i2c_register_devices(struct i2c_adapter *adap)
- 		dev_warn(&adap->dev, "failed to enumerate I2C slaves\n");
- }
- 
-+static int acpi_i2c_match_adapter(struct device *dev, void *data)
-+{
-+	struct i2c_adapter *adapter = i2c_verify_adapter(dev);
-+
-+	if (!adapter)
-+		return 0;
-+
-+	return ACPI_HANDLE(dev) == (acpi_handle)data;
-+}
-+
-+static int acpi_i2c_match_device(struct device *dev, void *data)
-+{
-+	return ACPI_COMPANION(dev) == data;
-+}
-+
-+static struct i2c_adapter *acpi_i2c_find_adapter_by_handle(acpi_handle handle)
-+{
-+	struct device *dev;
-+
-+	dev = bus_find_device(&i2c_bus_type, NULL, handle,
-+			      acpi_i2c_match_adapter);
-+	return dev ? i2c_verify_adapter(dev) : NULL;
-+}
-+
-+static struct i2c_client *acpi_i2c_find_client_by_adev(struct acpi_device *adev)
-+{
-+	struct device *dev;
-+
-+	dev = bus_find_device(&i2c_bus_type, NULL, adev, acpi_i2c_match_device);
-+	return dev ? i2c_verify_client(dev) : NULL;
-+}
-+
-+static int acpi_i2c_notify(struct notifier_block *nb, unsigned long value,
-+			   void *arg)
-+{
-+	struct acpi_device *adev = arg;
-+	struct i2c_board_info info;
-+	acpi_handle adapter_handle;
-+	struct i2c_adapter *adapter;
-+	struct i2c_client *client;
-+
-+	switch (value) {
-+	case ACPI_RECONFIG_DEVICE_ADD:
-+		if (acpi_i2c_get_info(adev, &info, &adapter_handle))
-+			break;
-+
-+		adapter = acpi_i2c_find_adapter_by_handle(adapter_handle);
-+		if (!adapter)
-+			break;
-+
-+		acpi_i2c_register_device(adapter, adev, &info);
-+		break;
-+	case ACPI_RECONFIG_DEVICE_REMOVE:
-+		client = acpi_i2c_find_client_by_adev(adev);
-+		if (!client)
-+			break;
-+
-+		i2c_unregister_device(client);
-+		put_device(&client->dev);
-+		break;
++	err = efivar_init(efivar_acpi_iter, NULL, true, &efivar_ssdts);
++	if (err) {
++		pr_err("%s: efivar_init failed: %d\n", __func__, err);
++		return err;
 +	}
 +
-+	return NOTIFY_OK;
-+}
++	list_for_each_entry(i, &efivar_ssdts, list) {
++		void *data;
++		unsigned long size;
 +
-+static struct notifier_block i2c_acpi_notifier = {
-+	.notifier_call = acpi_i2c_notify,
-+};
- #else /* CONFIG_ACPI */
- static inline void acpi_i2c_register_devices(struct i2c_adapter *adap) { }
-+extern struct notifier_block i2c_acpi_notifier;
- #endif /* CONFIG_ACPI */
++		pr_info("loading SSDT from EFI variable ");
++		pr_efivar_name(i->var.VariableName); pr_cont("\n");
++
++		err = efivar_entry_size(i, &size);
++		if (err) {
++			pr_err("failed to get size\n");
++			continue;
++		}
++
++		data = kmalloc(size, GFP_KERNEL);
++		if (!data)
++			continue;
++
++		err = efivar_entry_get(i, NULL, &size, data);
++		if (err) {
++			pr_err("failed to get data\n");
++			kfree(data);
++			continue;
++		}
++
++		err = acpi_load_table(data);
++		if (err) {
++			pr_err("failed to load table: %d\n", err);
++			kfree(data);
++			continue;
++		}
++	}
++
++	return 0;
++}
++#else
++static inline int efivar_ssdt_load(void) { return 0; }
++#endif
++
+ /*
+  * We register the efi subsystem with the firmware subsystem and the
+  * efivars subsystem with the efi subsystem, if the system was booted with
+@@ -218,6 +321,9 @@ static int __init efisubsys_init(void)
+ 	if (error)
+ 		goto err_put;
  
- #ifdef CONFIG_ACPI_I2C_OPREGION
-@@ -2117,6 +2207,8 @@ static int __init i2c_init(void)
- 
- 	if (IS_ENABLED(CONFIG_OF_DYNAMIC))
- 		WARN_ON(of_reconfig_notifier_register(&i2c_of_notifier));
-+	if (IS_ENABLED(CONFIG_ACPI))
-+		WARN_ON(acpi_reconfig_notifier_register(&i2c_acpi_notifier));
- 
- 	return 0;
- 
-@@ -2132,6 +2224,8 @@ bus_err:
- 
- static void __exit i2c_exit(void)
- {
-+	if (IS_ENABLED(CONFIG_ACPI))
-+		WARN_ON(acpi_reconfig_notifier_unregister(&i2c_acpi_notifier));
- 	if (IS_ENABLED(CONFIG_OF_DYNAMIC))
- 		WARN_ON(of_reconfig_notifier_unregister(&i2c_of_notifier));
- 	i2c_del_driver(&dummy_driver);
++	if (efi_enabled(EFI_RUNTIME_SERVICES))
++		efivar_ssdt_load();
++
+ 	error = sysfs_create_group(efi_kobj, &efi_subsys_attr_group);
+ 	if (error) {
+ 		pr_err("efi: Sysfs attribute export failed with error %d.\n",
 -- 
 2.7.4
