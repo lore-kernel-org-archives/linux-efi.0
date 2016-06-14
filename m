@@ -1,118 +1,255 @@
-From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v3 0/8] ACPI overlays
-Date: Tue, 14 Jun 2016 18:17:18 +0300
-Message-ID: <1465917446-14043-1-git-send-email-octavian.purdila@intel.com>
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Rafael J . Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
-Cc: Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Octavian Purdila <octavian.purdila@intel.com>
+Subject: [PATCH v3 3/8] acpi: add support for ACPI reconfiguration notifiers
+Date: Tue, 14 Jun 2016 18:17:21 +0300
+Message-ID: <1465917446-14043-4-git-send-email-octavian.purdila@intel.com>
+References: <1465917446-14043-1-git-send-email-octavian.purdila@intel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1465917446-14043-1-git-send-email-octavian.purdila@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
+Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, Octavian Purdila <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-This patch set enables custom ACPI board configuration by adding
-mechanisms in the Linux kernel for loading user defined SSDTs.
+Add support for ACPI reconfiguration notifiers to allow subsystems to
+react to changes in the ACPI tables that happen after the initial
+enumeration. This is similar with the way dynamic device tree
+notifications work.
 
-In order to support ACPI open-ended hardware configurations we need a
-way to augment the ACPI configuration provided by the firmware
-image. A common example is connecting sensors on I2C / SPI buses on
-development boards.
+The reconfigure notifications supported for now are device add and
+device remove.
 
-Although this can be accomplished by creating a kernel platform driver
-or recompiling the firmware image with updated ACPI tables, neither is
-practical: the former proliferates board specific kernel code while
-the latter requires access to firmware tools which are often not
-publicly available.
+Since ACPICA allows only one table notification handler, this patch
+makes the table notifier function generic and moves it out of the
+sysfs specific code.
 
-Because ACPI supports external references in AML code a more practical
-way to augment firmware ACPI configuration is by dynamically loading
-user defined SSDT tables that contain the board specific information.
+Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
+---
+ drivers/acpi/bus.c      |  9 +++++++
+ drivers/acpi/internal.h |  3 +++
+ drivers/acpi/scan.c     | 68 ++++++++++++++++++++++++++++++++++++++++++++++++-
+ drivers/acpi/sysfs.c    |  6 ++---
+ include/linux/acpi.h    | 18 +++++++++++++
+ 5 files changed, 99 insertions(+), 5 deletions(-)
 
-Currently it is possible to load SSDT overlays using the upgrade
-initrd mechanism introduced in 4.7. This patch series adds support for
-two more methods:
-
-* From an EFI variable
-
- This is the preferred method, when EFI is supported on the platform,
- because it allows a persistent, OS independent way of storing and
- updating the user defined SSDTs. There is also work underway to
- implement EFI support for loading user defined SSDTs and using this
- method will make it easier to convert to the EFI loading mechanism
- when that will arrive.
-
-* From userspace via configfs
-
- This is useful when we want to defer the operation to userspace for
- platform detection, loading the SSDTs from a custom partition, etc.
-
-Changes from v2:
-
-* fix a few issues caught by the kbuild test robot
-
-* add more configfs table attributes
-
-* removed the initrd based loading functionality from this patch set
-  as this can already be accomplished in 4.7 using the ACPI table
-  upgrade mechanism
-
-* rebased to 4.7-rc3
-
-Changes from v1:
-
-* rebased on top of the ACPI install from initrd table functionality;
-  there is significant overlap between the 1st patch in this series
-  and these patch [1] from Lv - I kept it in this series until the
-  discussions around the taint and config option are resolved
-
-* make sure EFI_RUNTIME_SERVICES are available before trying to use
-  EFI variables to load tables
-
-* rework the ACPI reconfiguration notifications to work on device
-  granularity (device added or removed) instead of table granularity
-  (table loaded or unloaded)
-
-* add support for table unloading / device removal
-
-* note that the last patch is just a hack to be able to test the table
-  unload / device remove functionality, if someone wants to try out
-  this patch set
-
-[1] https://patchwork.kernel.org/patch/8795931/
-
-
-Octavian Purdila (8):
-  Documentation: acpi: add SSDT overlays documentation
-  acpi: fix enumeration (visited) flags for bus rescans
-  acpi: add support for ACPI reconfiguration notifiers
-  i2c: add support for ACPI reconfigure notifications
-  spi: add support for ACPI reconfigure notifications
-  efi: load SSTDs from EFI variables
-  acpi: add support for configfs
-  acpi: add support for loading SSDTs via configfs
-
- Documentation/ABI/testing/configfs-acpi |  36 +++++
- Documentation/acpi/ssdt-overlays.txt    | 172 ++++++++++++++++++++
- Documentation/kernel-parameters.txt     |   7 +
- MAINTAINERS                             |   1 +
- drivers/acpi/Kconfig                    |   9 ++
- drivers/acpi/Makefile                   |   1 +
- drivers/acpi/bus.c                      |   9 ++
- drivers/acpi/configfs.c                 | 267 ++++++++++++++++++++++++++++++++
- drivers/acpi/internal.h                 |   3 +
- drivers/acpi/scan.c                     |  79 +++++++++-
- drivers/acpi/sysfs.c                    |   6 +-
- drivers/firmware/efi/efi.c              | 106 +++++++++++++
- drivers/i2c/i2c-core.c                  | 170 +++++++++++++++-----
- drivers/spi/spi.c                       |  94 ++++++++++-
- include/linux/acpi.h                    |  18 +++
- 15 files changed, 924 insertions(+), 54 deletions(-)
- create mode 100644 Documentation/ABI/testing/configfs-acpi
- create mode 100644 Documentation/acpi/ssdt-overlays.txt
- create mode 100644 drivers/acpi/configfs.c
-
+diff --git a/drivers/acpi/bus.c b/drivers/acpi/bus.c
+index 262ca31..97e270e 100644
+--- a/drivers/acpi/bus.c
++++ b/drivers/acpi/bus.c
+@@ -990,6 +990,13 @@ void __init acpi_subsystem_init(void)
+ 	}
+ }
+ 
++static acpi_status acpi_bus_table_handler(u32 event, void *table, void *context)
++{
++	acpi_scan_table_handler(event, table, context);
++
++	return acpi_sysfs_table_handler(event, table, context);
++}
++
+ static int __init acpi_bus_init(void)
+ {
+ 	int result;
+@@ -1043,6 +1050,8 @@ static int __init acpi_bus_init(void)
+ 	 * _PDC control method may load dynamic SSDT tables,
+ 	 * and we need to install the table handler before that.
+ 	 */
++	status = acpi_install_table_handler(acpi_bus_table_handler, NULL);
++
+ 	acpi_sysfs_init();
+ 
+ 	acpi_early_processor_set_pdc();
+diff --git a/drivers/acpi/internal.h b/drivers/acpi/internal.h
+index 27cc7fe..940218f 100644
+--- a/drivers/acpi/internal.h
++++ b/drivers/acpi/internal.h
+@@ -87,6 +87,9 @@ bool acpi_queue_hotplug_work(struct work_struct *work);
+ void acpi_device_hotplug(struct acpi_device *adev, u32 src);
+ bool acpi_scan_is_offline(struct acpi_device *adev, bool uevent);
+ 
++acpi_status acpi_sysfs_table_handler(u32 event, void *table, void *context);
++void acpi_scan_table_handler(u32 event, void *table, void *context);
++
+ /* --------------------------------------------------------------------------
+                      Device Node Initialization / Removal
+    -------------------------------------------------------------------------- */
+diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
+index 7656ea4..343c105 100644
+--- a/drivers/acpi/scan.c
++++ b/drivers/acpi/scan.c
+@@ -494,6 +494,8 @@ static void acpi_device_del(struct acpi_device *device)
+ 	device_del(&device->dev);
+ }
+ 
++static BLOCKING_NOTIFIER_HEAD(acpi_reconfig_chain);
++
+ static LIST_HEAD(acpi_device_del_list);
+ static DEFINE_MUTEX(acpi_device_del_lock);
+ 
+@@ -514,6 +516,9 @@ static void acpi_device_del_work_fn(struct work_struct *work_not_used)
+ 
+ 		mutex_unlock(&acpi_device_del_lock);
+ 
++		blocking_notifier_call_chain(&acpi_reconfig_chain,
++					     ACPI_RECONFIG_DEVICE_REMOVE, adev);
++
+ 		acpi_device_del(adev);
+ 		/*
+ 		 * Drop references to all power resources that might have been
+@@ -1676,7 +1681,7 @@ static bool acpi_default_enumeration(struct acpi_device *device)
+ 	bool is_spi_i2c_slave = false;
+ 
+ 	/*
+-	 * Do not enemerate SPI/I2C slaves as they will be enuerated by their
++	 * Do not enemerate SPI/I2C slaves as they will be enumerated by their
+ 	 * respective parents.
+ 	 */
+ 	INIT_LIST_HEAD(&resource_list);
+@@ -1685,6 +1690,9 @@ static bool acpi_default_enumeration(struct acpi_device *device)
+ 	acpi_dev_free_resource_list(&resource_list);
+ 	if (!is_spi_i2c_slave)
+ 		acpi_create_platform_device(device);
++	else
++		blocking_notifier_call_chain(&acpi_reconfig_chain,
++					     ACPI_RECONFIG_DEVICE_ADD, device);
+ 	return !is_spi_i2c_slave;
+ }
+ 
+@@ -1919,6 +1927,8 @@ static int acpi_bus_scan_fixed(void)
+ 	return result < 0 ? result : 0;
+ }
+ 
++static bool acpi_scan_initialized;
++
+ int __init acpi_scan_init(void)
+ {
+ 	int result;
+@@ -1963,6 +1973,8 @@ int __init acpi_scan_init(void)
+ 
+ 	acpi_update_all_gpes();
+ 
++	acpi_scan_initialized = true;
++
+  out:
+ 	mutex_unlock(&acpi_scan_lock);
+ 	return result;
+@@ -2006,3 +2018,57 @@ int __init __acpi_probe_device_table(struct acpi_probe_entry *ap_head, int nr)
+ 
+ 	return count;
+ }
++
++struct acpi_table_events_work {
++	struct work_struct work;
++	void *table;
++	u32 event;
++};
++
++void acpi_table_events_fn(struct work_struct *work)
++{
++	struct acpi_table_events_work *tew;
++
++	tew = container_of(work, struct acpi_table_events_work, work);
++
++	if (tew->event == ACPI_TABLE_EVENT_LOAD) {
++		acpi_scan_lock_acquire();
++		acpi_bus_scan(ACPI_ROOT_OBJECT);
++		acpi_scan_lock_release();
++	}
++
++	kfree(tew);
++}
++
++void acpi_scan_table_handler(u32 event, void *table, void *context)
++{
++	struct acpi_table_events_work *tew;
++
++	if (!acpi_scan_initialized)
++		return;
++
++	if (event != ACPI_TABLE_EVENT_LOAD)
++		return;
++
++	tew = kmalloc(sizeof(*tew), GFP_KERNEL);
++	if (!tew)
++		return;
++
++	INIT_WORK(&tew->work, acpi_table_events_fn);
++	tew->table = table;
++	tew->event = event;
++
++	schedule_work(&tew->work);
++}
++
++int acpi_reconfig_notifier_register(struct notifier_block *nb)
++{
++	return blocking_notifier_chain_register(&acpi_reconfig_chain, nb);
++}
++EXPORT_SYMBOL(acpi_reconfig_notifier_register);
++
++int acpi_reconfig_notifier_unregister(struct notifier_block *nb)
++{
++	return blocking_notifier_chain_unregister(&acpi_reconfig_chain, nb);
++}
++EXPORT_SYMBOL(acpi_reconfig_notifier_unregister);
+diff --git a/drivers/acpi/sysfs.c b/drivers/acpi/sysfs.c
+index 4b3a9e2..358165e 100644
+--- a/drivers/acpi/sysfs.c
++++ b/drivers/acpi/sysfs.c
+@@ -378,8 +378,7 @@ static void acpi_table_attr_init(struct acpi_table_attr *table_attr,
+ 	return;
+ }
+ 
+-static acpi_status
+-acpi_sysfs_table_handler(u32 event, void *table, void *context)
++acpi_status acpi_sysfs_table_handler(u32 event, void *table, void *context)
+ {
+ 	struct acpi_table_attr *table_attr;
+ 
+@@ -452,9 +451,8 @@ static int acpi_tables_sysfs_init(void)
+ 
+ 	kobject_uevent(tables_kobj, KOBJ_ADD);
+ 	kobject_uevent(dynamic_tables_kobj, KOBJ_ADD);
+-	status = acpi_install_table_handler(acpi_sysfs_table_handler, NULL);
+ 
+-	return ACPI_FAILURE(status) ? -EINVAL : 0;
++	return 0;
+ err_dynamic_tables:
+ 	kobject_put(tables_kobj);
+ err:
+diff --git a/include/linux/acpi.h b/include/linux/acpi.h
+index 288fac5..d2ad476 100644
+--- a/include/linux/acpi.h
++++ b/include/linux/acpi.h
+@@ -532,6 +532,14 @@ void acpi_walk_dep_device_list(acpi_handle handle);
+ struct platform_device *acpi_create_platform_device(struct acpi_device *);
+ #define ACPI_PTR(_ptr)	(_ptr)
+ 
++enum acpi_reconfig_event  {
++	ACPI_RECONFIG_DEVICE_ADD = 0,
++	ACPI_RECONFIG_DEVICE_REMOVE,
++};
++
++int acpi_reconfig_notifier_register(struct notifier_block *nb);
++int acpi_reconfig_notifier_unregister(struct notifier_block *nb);
++
+ #else	/* !CONFIG_ACPI */
+ 
+ #define acpi_disabled 1
+@@ -678,6 +686,16 @@ static inline enum dev_dma_attr acpi_get_dma_attr(struct acpi_device *adev)
+ 
+ #define ACPI_PTR(_ptr)	(NULL)
+ 
++static inline int acpi_reconfig_notifier_register(struct notifier_block *nb)
++{
++	return -EINVAL;
++}
++
++static inline int acpi_reconfig_notifier_unregister(struct notifier_block *nb)
++{
++	return -EINVAL;
++}
++
+ #endif	/* !CONFIG_ACPI */
+ 
+ #ifdef CONFIG_ACPI
 -- 
 2.7.4
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
