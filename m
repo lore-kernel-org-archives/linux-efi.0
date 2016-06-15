@@ -1,73 +1,77 @@
-From: Alex Thorlton <athorlton@sgi.com>
-Subject: [PATCHv2 0/3] x86/UV, x86/efi: Re-factor efi_call_virt for general use
-Date: Wed, 15 Jun 2016 14:04:12 -0500
-Message-ID: <1466017455-236934-1-git-send-email-athorlton@sgi.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Alex Thorlton <athorlton@sgi.com>, Matt Fleming <matt@codeblueprint.co.uk>, Russ Anderson <rja@sgi.com>, Dimitri Sivanich <sivanich@sgi.com>, Russell King <linux@armlinux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Roy Franz <roy.franz@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, x86@kernel.org
+From: "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 7/8] acpi: add support for configfs
+Date: Wed, 15 Jun 2016 23:02:20 +0200
+Message-ID: <CAJZ5v0ip=GuF041dR3m4mMSOqxMU7BDMYC2YTpKtCsjL6pXM+w@mail.gmail.com>
+References: <201606150617.OKhb5WCs%fengguang.wu@intel.com> <3209646.novQQXrKbd@vostro.rjw.lan>
+ <CAE1zotJFg6xWexm0WbxOwU0JFsQ5NJUvo-Tw=hFmqXpNMuwYbA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAE1zotJFg6xWexm0WbxOwU0JFsQ5NJUvo-Tw=hFmqXpNMuwYbA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, kbuild-all-JC7UmRfGjtg@public.gmane.org, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-spi <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Irina Tirdea <irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hey guys,
+On Wed, Jun 15, 2016 at 12:20 PM, Octavian Purdila
+<octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> On Wed, Jun 15, 2016 at 1:59 AM, Rafael J. Wysocki <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org> wrote:
+>> Hi Octavian,
+>>
+>> On Wednesday, June 15, 2016 06:43:21 AM kbuild test robot wrote:
+>>> Hi,
+>>>
+>>> [auto build test ERROR on pm/linux-next]
+>>> [also build test ERROR on v4.7-rc3]
+>>> [cannot apply to next-20160614]
+>>> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
+>>>
+>>> url:    https://github.com/0day-ci/linux/commits/Octavian-Purdila/ACPI-overlays/20160614-202312
+>>> base:   https://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm.git linux-next
+>>> config: x86_64-allyesconfig (attached as .config)
+>>> compiler: gcc-6 (Debian 6.1.1-1) 6.1.1 20160430
+>>> reproduce:
+>>>         # save the attached .config to linux build tree
+>>>         make ARCH=x86_64
+>>>
+>>> Note: the linux-review/Octavian-Purdila/ACPI-overlays/20160614-202312 HEAD 042f716a165ffa274684c787377acddfc1f34e3f builds fine.
+>>>       It only hurts bisectibility.
+>>>
+>>> All errors (new ones prefixed by >>):
+>>>
+>>>    drivers/acpi/configfs.c: In function 'acpi_configfs_init':
+>>> >> drivers/acpi/configfs.c:19:31: error: 'acpi_configfs' undeclared (first use in this function)
+>>>      struct config_group *root = &acpi_configfs.su_group;
+>>>                                   ^~~~~~~~~~~~~
+>>>    drivers/acpi/configfs.c:19:31: note: each undeclared identifier is reported only once for each function it appears in
+>>>    drivers/acpi/configfs.c: In function 'acpi_configfs_exit':
+>>>    drivers/acpi/configfs.c:33:33: error: 'acpi_configfs' undeclared (first use in this function)
+>>>      configfs_unregister_subsystem(&acpi_configfs);
+>>>                                     ^~~~~~~~~~~~~
+>>>
+>>> vim +/acpi_configfs +19 drivers/acpi/configfs.c
+>>>
+>>>     13        #include <linux/configfs.h>
+>>>     14        #include <linux/acpi.h>
+>>>     15
+>>>     16        static int __init acpi_configfs_init(void)
+>>>     17        {
+>>>     18                int ret;
+>>>   > 19                struct config_group *root = &acpi_configfs.su_group;
+>>>     20
+>>>     21                config_group_init(root);
+>>>     22
+>>>
+>>> ---
+>>
+>> Any chance to send an updated patch with this fixed?
+>>
+>> No need to resend the whole series, just this single patch, please.
+>>
+>
+> Oops, sorry about that. I will have to resend at least the last two
+> patches to fix this issue, but since I have missed to add the
+> Reviewed-by from Mika for another two patches, its probably best to
+> resend the whole series?
 
-This patchset creates a general purpose version of the efi_call_virt
-macro that does not assume that the function pointer being passed in is
-inside of efi.systab->runtime.  It also fixes up uv_bios_call to use the
-new functionality, and does a bit of cleanup in the efi_thunk macro.
-
-Quick breakdown of the patches:
-
-Patch 1) Move necessary macros to locations where we can access them.
-	 Remove hard-coded efi.systab reference from efi_call_virt.
-	 Rename/create new macros as needed.
-Patch 2) Simple change to allow UV code to utilize the new
-	 functionality.  Included a detailed explanation of how we got
-	 here.
-Patch 3) Replace a few bits of the efi_thunk macro with the
-	 arch_efi_call_setup/teardown macros.
-
-The first two have been tested on simulators and hardware, but the third
-has only been compile-tested.  I don't have any hardware to test that
-on.
-
-Updates for v2:
-
-- Fix up arm and arm64 versions of arch_efi_call_virt.  I missed these
-  on my first pass 
-- Add some more detail to the commit message for the uv_bios_call fix.
-- Change the third patch to use the arch_efi_call_setup/teardown macros
-  inside of the efi_thunk macro, instead of replacing efi_thunk entirely
-  for the CONFIG_EFI_MIXED case.
-
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Russ Anderson <rja@sgi.com>
-Cc: Dimitri Sivanich <sivanich@sgi.com>
-Cc: Russell King <linux@armlinux.org.uk>
-Cc: Catalin Marinas <catalin.marinas@arm.com>
-Cc: Will Deacon <will.deacon@arm.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Roy Franz <roy.franz@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: linux-efi@vger.kernel.org
-Cc: x86@kernel.org
-
-Alex Thorlton (3):
-  Convert efi_call_virt to efi_call_virt_pointer
-  Update uv_bios_call to use efi_call_virt_pointer
-  Update efi_thunk to use the the arch_efi_call_virt* macros
-
- arch/arm/include/asm/efi.h              |  4 +--
- arch/arm64/include/asm/efi.h            |  4 +--
- arch/x86/include/asm/efi.h              |  9 +++---
- arch/x86/platform/efi/efi_64.c          | 11 ++-----
- arch/x86/platform/uv/bios_uv.c          |  3 +-
- drivers/firmware/efi/runtime-wrappers.c | 53 +++++++--------------------------
- include/linux/efi.h                     | 51 +++++++++++++++++++++++++++++++
- 7 files changed, 73 insertions(+), 62 deletions(-)
-
--- 
-1.8.5.6
+Yes, please.
