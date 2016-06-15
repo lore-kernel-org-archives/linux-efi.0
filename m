@@ -1,56 +1,73 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 4/8] i2c: add support for ACPI reconfigure
- notifications
-Date: Wed, 15 Jun 2016 08:27:24 +0200
-Message-ID: <20160615062724.GB1344@tetsubishi>
-References: <1465917446-14043-1-git-send-email-octavian.purdila@intel.com>
- <1465917446-14043-5-git-send-email-octavian.purdila@intel.com>
+From: Octavian Purdila <octavian.purdila@intel.com>
+Subject: Re: [PATCH v3 7/8] acpi: add support for configfs
+Date: Wed, 15 Jun 2016 13:20:51 +0300
+Message-ID: <CAE1zotJFg6xWexm0WbxOwU0JFsQ5NJUvo-Tw=hFmqXpNMuwYbA@mail.gmail.com>
+References: <201606150617.OKhb5WCs%fengguang.wu@intel.com>
+	<3209646.novQQXrKbd@vostro.rjw.lan>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="1LKvkjL3sHcu1TtY"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1465917446-14043-5-git-send-email-octavian.purdila@intel.com>
+In-Reply-To: <3209646.novQQXrKbd@vostro.rjw.lan>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Octavian Purdila <octavian.purdila@intel.com>
-Cc: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: kbuild test robot <lkp@intel.com>, kbuild-all@01.org, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, linux-efi@vger.kernel.org, linux-i2c <linux-i2c@vger.kernel.org>, linux-spi <linux-spi@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, Irina Tirdea <irina.tirdea@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
+On Wed, Jun 15, 2016 at 1:59 AM, Rafael J. Wysocki <rjw@rjwysocki.net> wrote:
+> Hi Octavian,
+>
+> On Wednesday, June 15, 2016 06:43:21 AM kbuild test robot wrote:
+>> Hi,
+>>
+>> [auto build test ERROR on pm/linux-next]
+>> [also build test ERROR on v4.7-rc3]
+>> [cannot apply to next-20160614]
+>> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
+>>
+>> url:    https://github.com/0day-ci/linux/commits/Octavian-Purdila/ACPI-overlays/20160614-202312
+>> base:   https://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm.git linux-next
+>> config: x86_64-allyesconfig (attached as .config)
+>> compiler: gcc-6 (Debian 6.1.1-1) 6.1.1 20160430
+>> reproduce:
+>>         # save the attached .config to linux build tree
+>>         make ARCH=x86_64
+>>
+>> Note: the linux-review/Octavian-Purdila/ACPI-overlays/20160614-202312 HEAD 042f716a165ffa274684c787377acddfc1f34e3f builds fine.
+>>       It only hurts bisectibility.
+>>
+>> All errors (new ones prefixed by >>):
+>>
+>>    drivers/acpi/configfs.c: In function 'acpi_configfs_init':
+>> >> drivers/acpi/configfs.c:19:31: error: 'acpi_configfs' undeclared (first use in this function)
+>>      struct config_group *root = &acpi_configfs.su_group;
+>>                                   ^~~~~~~~~~~~~
+>>    drivers/acpi/configfs.c:19:31: note: each undeclared identifier is reported only once for each function it appears in
+>>    drivers/acpi/configfs.c: In function 'acpi_configfs_exit':
+>>    drivers/acpi/configfs.c:33:33: error: 'acpi_configfs' undeclared (first use in this function)
+>>      configfs_unregister_subsystem(&acpi_configfs);
+>>                                     ^~~~~~~~~~~~~
+>>
+>> vim +/acpi_configfs +19 drivers/acpi/configfs.c
+>>
+>>     13        #include <linux/configfs.h>
+>>     14        #include <linux/acpi.h>
+>>     15
+>>     16        static int __init acpi_configfs_init(void)
+>>     17        {
+>>     18                int ret;
+>>   > 19                struct config_group *root = &acpi_configfs.su_group;
+>>     20
+>>     21                config_group_init(root);
+>>     22
+>>
+>> ---
+>
+> Any chance to send an updated patch with this fixed?
+>
+> No need to resend the whole series, just this single patch, please.
+>
 
---1LKvkjL3sHcu1TtY
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, Jun 14, 2016 at 06:17:22PM +0300, Octavian Purdila wrote:
-> This patch adds supports for I2C device enumeration and removal via
-> ACPI reconfiguration notifications that are send as a result of an
-> ACPI table load or unload operation.
->=20
-> Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
-
-What happened to Mika's reviewed-by?
-
-
---1LKvkjL3sHcu1TtY
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJXYPVLAAoJEBQN5MwUoCm2H+YP/icKyBrRnXDb3VCEr7M94uUe
-1YoXPA6NWoXZnngjrtz2n6+KzvBk/nRDxpChWfpXMYyiHm0jGc9kiS+9DkPlLilO
-M48h5bBMf0bE2vyc0eysUZJt++brFQHy6ADvvVTyItSDw2cg0Cuyza2IqgENFu5q
-KMkMRXYF5r2ZodeUQrRJ/IUPnmkYyCThYyMq+rEFkTBm8M9PFqdInwSGpyJiBq2m
-ZZADJtwxy/6OVYVoJsPuNwGS8FIuKz1t8PyFmg4LCDGA+UOO8o6uFP6oAzMGi1ll
-q6CjafFfAwE0oHbCopGEzj3mt+d258SEfQ1SZdUNo4tOFx5bkT1bTONZOyxxXt6b
-27BI86nWz8sTjqmwM8KR5ExXd+Fr7sQS5L7X4vLNcJn6aLinp3lyt6g2eKmcmqfX
-38YNhmfF+tFCrc5lB21NDn6JU/IfhKg8XginM1LTYzf9TEg0mYrVdPmisnaPKD7y
-Hg0L4HWAE7Ox1/c5AOkg6w2w4q7jiZn9Ijizv/s5QjKvj/BQUxxu/4g3nxcvIDsi
-gJFi7BQsPCaiLFjJuLrWAqNznugNuoMbcotx5Eoj1K03Od9/XRaoNX64MhZCFY5j
-TY2hZS4dkUVwhFaIjoRfLXLSilxEtsUd2ZVLWMJ9wEJOZ6OkI1ApMcklceEUHOi+
-NBfzjjHv9Ag5RhaIfv0+
-=1jmD
------END PGP SIGNATURE-----
-
---1LKvkjL3sHcu1TtY--
+Oops, sorry about that. I will have to resend at least the last two
+patches to fix this issue, but since I have missed to add the
+Reviewed-by from Mika for another two patches, its probably best to
+resend the whole series?
