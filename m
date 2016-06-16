@@ -1,39 +1,72 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 1/2] efi: esrt: use memremap not ioremap to access ESRT
- table in memory
-Date: Thu, 16 Jun 2016 15:47:30 +0200
-Message-ID: <CAKv+Gu-7FQ-34Ruhxc+RcKK9ycp9LW4_HdsD8Gb-+Y4XE7vNoQ@mail.gmail.com>
-References: <20160218132824.GE2651@codeblueprint.co.uk> <CAKv+Gu-s1pzYBzuDG-Z7s3gyo8dPOfeidZQ+rim-uAWZCBcKQQ@mail.gmail.com>
- <20160218134324.GG2651@codeblueprint.co.uk> <CAKv+Gu875r9RkDC723kNsG4XC0eSE9RPPmSFZrD0sx0QxS+V4g@mail.gmail.com>
- <20160218141544.GH2651@codeblueprint.co.uk> <20160218191624.GA1515@redhat.com>
- <20160226144114.GA7475@codeblueprint.co.uk> <20160301233040.GA31476@codeblueprint.co.uk>
- <20160304062524.GA19010@dhcp-128-65.nay.redhat.com> <CAKv+Gu_ekP+44FJjR7BY_MFqx2jQgc6Tk9W4SBL__ttdvQ55VQ@mail.gmail.com>
- <20160518085348.GG21993@codeblueprint.co.uk>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
+	clear
+Date: Thu, 16 Jun 2016 09:38:31 -0500
+Message-ID: <5762B9E7.80903@amd.com>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+	<20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
+	<20160608111844.GV2658@codeblueprint.co.uk> <5759B67A.4000800@amd.com>
+	<20160613135110.GC2658@codeblueprint.co.uk> <57615561.4090502@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160518085348.GG21993-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <57615561.4090502-5C7GfCeVMHo@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 18 May 2016 at 10:53, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Wed, 18 May, at 10:36:33AM, Ard Biesheuvel wrote:
+On 06/15/2016 08:17 AM, Tom Lendacky wrote:
+> On 06/13/2016 08:51 AM, Matt Fleming wrote:
+>> On Thu, 09 Jun, at 01:33:30PM, Tom Lendacky wrote:
+>>>
+
+[...]
+
 >>
->> So what is the status here? I know Sai is working on x86 support for
->> the memory attributes table, so it would make sense settle this matter
->> as well.
->
-> This got stuck behind some other work, sorry about that.
->
-> Some of this was just merged by Linus (getting rid of the global
-> memmap and switching everyone over to efi.memmap), a large chunk
-> remains however.
->
-> I should be able to get those patches mailed out once the merge window
-> closes.
+>>> I'll look further into this, but I saw that this area of virtual memory
+>>> was mapped un-encrypted and after freeing the boot services the
+>>> mappings were somehow reused as un-encrypted for DMA which assumes
+>>> (unless using swiotlb) encrypted. This resulted in DMA data being
+>>> transferred in as encrypted and then accessed un-encrypted.
+>>
+>> That the mappings were re-used isn't a surprise.
+>>
+>> efi_free_boot_services() lifts the reservation that was put in place
+>> during efi_reserve_boot_services() and releases the pages to the
+>> kernel's memory allocators.
+>>
+>> What is surprising is that they were marked unencrypted at all.
+>> There's nothing special about these pages as far as the __va() region
+>> is concerned.
+> 
+> Right, let me keep looking into this to see if I can pin down what
+> was (or is) happening.
 
-Hi Matt,
+Ok, I think this was happening before the commit to build our own
+EFI page table structures:
 
-Any progress here?
+commit 67a9108ed ("x86/efi: Build our own page table structures")
+
+Before this commit the boot services ended up mapped into the kernel
+page table entries as un-encrypted during efi_map_regions() and I needed
+to change those entries back to encrypted. With your change above,
+this appears to no longer be needed.
+
+Thanks,
+Tom
+
+> 
+> Thanks,
+> Tom
+> 
+>>
