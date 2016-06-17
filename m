@@ -1,65 +1,64 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH] ia64: efi: use timespec64 for persistent clock
-Date: Fri, 17 Jun 2016 16:48:17 +0200
-Message-ID: <20160617144920.3511152-1-arnd@arndb.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <y2038-bounces@lists.linaro.org>
-List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/y2038/>
-List-Post: <mailto:y2038@lists.linaro.org>
-List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
-List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=subscribe>
-Errors-To: y2038-bounces@lists.linaro.org
-Sender: "Y2038" <y2038-bounces@lists.linaro.org>
-To: Tony Luck <tony.luck@intel.com>, Fenghua Yu <fenghua.yu@intel.com>
-Cc: linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Toshi Kani <toshi.kani@hpe.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, y2038@lists.linaro.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Ingo Molnar <mingo@kernel.org>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: [PATCH] x86: fix unused efi_get_time function
+Date: Fri, 17 Jun 2016 16:51:29 +0200
+Message-ID: <20160617145152.3569706-1-arnd@arndb.de>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: y2038-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-V2UgaGF2ZSBhIGdlbmVyaWMgcmVhZF9wZXJzaXN0ZW50X2Nsb2NrNjQgaW50ZXJmYWNlIG5vdywg
-YW5kIGNhbgpjaGFuZ2UgdGhlIGlhNjQgaW1wbGVtZW50YXRpb24gdG8gcHJvdmlkZSB0aGF0IGlu
-c3RlYWQgb2YKcmVhZF9wZXJzaXN0ZW50X2Nsb2NrLgoKVGhlIG1haW4gcG9pbnQgb2YgdGhpcyBp
-cyB0byBhdm9pZCB0aGUgdXNlIG9mIHN0cnVjdCB0aW1lc3BlYwppbiB0aGUgZ2xvYmFsIGVmaS5o
-LCB3aGljaCB3b3VsZCBjYXVzZSBidWlsZCBlcnJvcnMgYXMgc29vbgphcyB3ZSB3YW50IHRvIGJ1
-aWxkIGEga2VybmVsIHdpdGhvdXQgJ3N0cnVjdCB0aW1lc3BlYycgZGVmaW5lZApvbiAzMi1iaXQg
-YXJjaGl0ZWN0dXJlcy4KCkFzaWRlIGZyb20gdGhpcywgd2UgZ2V0IGEgbGl0dGxlIGNsb3NlciB0
-byByZW1vdmluZyB0aGUKX193ZWFrIHJlYWRfcGVyc2lzdGVudF9jbG9jaygpIGRlZmluaXRpb24s
-IHdoaWNoIHJlbGllcyBvbgpjb252ZXJ0aW5nIGFsbCBhcmNoaXRlY3R1cmVzIHRvIHByb3ZpZGUg
-cmVhZF9wZXJzaXN0ZW50X2Nsb2NrNjQKaW5zdGVhZC4KClNpZ25lZC1vZmYtYnk6IEFybmQgQmVy
-Z21hbm4gPGFybmRAYXJuZGIuZGU+Ci0tLQogYXJjaC9pYTY0L2tlcm5lbC9lZmkuYyAgfCA0ICsr
-LS0KIGFyY2gvaWE2NC9rZXJuZWwvdGltZS5jIHwgMiArLQogaW5jbHVkZS9saW51eC9lZmkuaCAg
-ICAgfCAyICstCiAzIGZpbGVzIGNoYW5nZWQsIDQgaW5zZXJ0aW9ucygrKSwgNCBkZWxldGlvbnMo
-LSkKCmRpZmYgLS1naXQgYS9hcmNoL2lhNjQva2VybmVsL2VmaS5jIGIvYXJjaC9pYTY0L2tlcm5l
-bC9lZmkuYwppbmRleCAzYjdhNjBlNDBlOGEuLjEyMTI5NTYzN2QwZCAxMDA2NDQKLS0tIGEvYXJj
-aC9pYTY0L2tlcm5lbC9lZmkuYworKysgYi9hcmNoL2lhNjQva2VybmVsL2VmaS5jCkBAIC0yMzYs
-NyArMjM2LDcgQEAgU1RVQl9HRVRfTkVYVF9ISUdIX01PTk9fQ09VTlQodmlydCwgaWQpCiBTVFVC
-X1JFU0VUX1NZU1RFTSh2aXJ0LCBpZCkKIAogdm9pZAotZWZpX2dldHRpbWVvZmRheSAoc3RydWN0
-IHRpbWVzcGVjICp0cykKK2VmaV9nZXR0aW1lb2ZkYXkgKHN0cnVjdCB0aW1lc3BlYzY0ICp0cykK
-IHsKIAllZmlfdGltZV90IHRtOwogCkBAIC0yNDUsNyArMjQ1LDcgQEAgZWZpX2dldHRpbWVvZmRh
-eSAoc3RydWN0IHRpbWVzcGVjICp0cykKIAkJcmV0dXJuOwogCX0KIAotCXRzLT50dl9zZWMgPSBt
-a3RpbWUodG0ueWVhciwgdG0ubW9udGgsIHRtLmRheSwKKwl0cy0+dHZfc2VjID0gbWt0aW1lNjQo
-dG0ueWVhciwgdG0ubW9udGgsIHRtLmRheSwKIAkJCSAgICB0bS5ob3VyLCB0bS5taW51dGUsIHRt
-LnNlY29uZCk7CiAJdHMtPnR2X25zZWMgPSB0bS5uYW5vc2Vjb25kOwogfQpkaWZmIC0tZ2l0IGEv
-YXJjaC9pYTY0L2tlcm5lbC90aW1lLmMgYi9hcmNoL2lhNjQva2VybmVsL3RpbWUuYwppbmRleCBj
-OGRiZTJhY2Q3MzUuLjZmODkyYjk0ZTkwNiAxMDA2NDQKLS0tIGEvYXJjaC9pYTY0L2tlcm5lbC90
-aW1lLmMKKysrIGIvYXJjaC9pYTY0L2tlcm5lbC90aW1lLmMKQEAgLTM1NSw3ICszNTUsNyBAQCBz
-dGF0aWMgc3RydWN0IGlycWFjdGlvbiB0aW1lcl9pcnFhY3Rpb24gPSB7CiAJLm5hbWUgPQkJInRp
-bWVyIgogfTsKIAotdm9pZCByZWFkX3BlcnNpc3RlbnRfY2xvY2soc3RydWN0IHRpbWVzcGVjICp0
-cykKK3ZvaWQgcmVhZF9wZXJzaXN0ZW50X2Nsb2NrNjQoc3RydWN0IHRpbWVzcGVjNjQgKnRzKQog
-ewogCWVmaV9nZXR0aW1lb2ZkYXkodHMpOwogfQpkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9l
-ZmkuaCBiL2luY2x1ZGUvbGludXgvZWZpLmgKaW5kZXggOWE1M2E1NTdhY2ZmLi5kY2E4ODEwZDZi
-NDkgMTAwNjQ0Ci0tLSBhL2luY2x1ZGUvbGludXgvZWZpLmgKKysrIGIvaW5jbHVkZS9saW51eC9l
-ZmkuaApAQCAtOTM3LDcgKzkzNyw3IEBAIGV4dGVybiB2b2lkIGVmaV9pbml0ICh2b2lkKTsKIGV4
-dGVybiB2b2lkICplZmlfZ2V0X3BhbF9hZGRyICh2b2lkKTsKIGV4dGVybiB2b2lkIGVmaV9tYXBf
-cGFsX2NvZGUgKHZvaWQpOwogZXh0ZXJuIHZvaWQgZWZpX21lbW1hcF93YWxrIChlZmlfZnJlZW1l
-bV9jYWxsYmFja190IGNhbGxiYWNrLCB2b2lkICphcmcpOwotZXh0ZXJuIHZvaWQgZWZpX2dldHRp
-bWVvZmRheSAoc3RydWN0IHRpbWVzcGVjICp0cyk7CitleHRlcm4gdm9pZCBlZmlfZ2V0dGltZW9m
-ZGF5IChzdHJ1Y3QgdGltZXNwZWM2NCAqdHMpOwogZXh0ZXJuIHZvaWQgZWZpX2VudGVyX3ZpcnR1
-YWxfbW9kZSAodm9pZCk7CS8qIHN3aXRjaCBFRkkgdG8gdmlydHVhbCBtb2RlLCBpZiBwb3NzaWJs
-ZSAqLwogI2lmZGVmIENPTkZJR19YODYKIGV4dGVybiB2b2lkIGVmaV9sYXRlX2luaXQodm9pZCk7
-Ci0tIAoyLjkuMAoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X18KWTIwMzggbWFpbGluZyBsaXN0ClkyMDM4QGxpc3RzLmxpbmFyby5vcmcKaHR0cHM6Ly9saXN0
-cy5saW5hcm8ub3JnL21haWxtYW4vbGlzdGluZm8veTIwMzgK
+Nothing calls the efi_get_time function on x86, but it does suffer
+from the 32-bit time_t overflow in 2038.
+
+To avoid that if anyone starts calling it, this changes the function
+to use timespec64 and mktime64 instead.
+
+Signed-off-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+---
+The obvious alternative would be to remove the function, I'll send
+that patch as well, so you can pick one or the other.
+
+ arch/x86/platform/efi/efi.c | 6 +++---
+ include/linux/efi.h         | 2 +-
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 56400d03409f..d72d5de02f61 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -97,7 +97,7 @@ static efi_status_t __init phys_efi_set_virtual_address_map(
+ 	return status;
+ }
+ 
+-void efi_get_time(struct timespec *now)
++void efi_get_time(struct timespec64 *now)
+ {
+ 	efi_status_t status;
+ 	efi_time_t eft;
+@@ -107,8 +107,8 @@ void efi_get_time(struct timespec *now)
+ 	if (status != EFI_SUCCESS)
+ 		pr_err("Oops: efitime: can't read time!\n");
+ 
+-	now->tv_sec = mktime(eft.year, eft.month, eft.day, eft.hour,
+-			     eft.minute, eft.second);
++	now->tv_sec = mktime64(eft.year, eft.month, eft.day, eft.hour,
++			       eft.minute, eft.second);
+ 	now->tv_nsec = 0;
+ }
+ 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index acb6adace01e..dca8810d6b49 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -975,7 +975,7 @@ extern u64 efi_mem_desc_end(efi_memory_desc_t *md);
+ extern int efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md);
+ extern void efi_initialize_iomem_resources(struct resource *code_resource,
+ 		struct resource *data_resource, struct resource *bss_resource);
+-extern void efi_get_time(struct timespec *now);
++extern void efi_get_time(struct timespec64 *now);
+ extern void efi_reserve_boot_services(void);
+ extern int efi_get_fdt_params(struct efi_fdt_params *params);
+ extern struct kobject *efi_kobj;
+-- 
+2.9.0
