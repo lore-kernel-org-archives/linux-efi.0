@@ -1,134 +1,65 @@
-From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: [PATCH v4 2/8] acpi: fix enumeration (visited) flags for bus rescans
-Date: Fri, 17 Jun 2016 14:52:10 +0300
-Message-ID: <1466164336-9508-3-git-send-email-octavian.purdila@intel.com>
-References: <1466164336-9508-1-git-send-email-octavian.purdila@intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1466164336-9508-1-git-send-email-octavian.purdila@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
-Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, leonard.crestez@intel.com, Octavian Purdila <octavian.purdila@intel.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] ia64: efi: use timespec64 for persistent clock
+Date: Fri, 17 Jun 2016 16:48:17 +0200
+Message-ID: <20160617144920.3511152-1-arnd@arndb.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <y2038-bounces@lists.linaro.org>
+List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/y2038/>
+List-Post: <mailto:y2038@lists.linaro.org>
+List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
+List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=subscribe>
+Errors-To: y2038-bounces@lists.linaro.org
+Sender: "Y2038" <y2038-bounces@lists.linaro.org>
+To: Tony Luck <tony.luck@intel.com>, Fenghua Yu <fenghua.yu@intel.com>
+Cc: linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Toshi Kani <toshi.kani@hpe.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, y2038@lists.linaro.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-If the ACPI tables changes as a result of a dinamically loaded table and
-a bus rescan is required the enumeration/visited flag are not
-consistent.
-
-I2C/SPI are not directly enumerated in acpi_bus_attach(), however the
-visited flag is set. This makes it impossible to check if an ACPI device
-has already been enumerated by the I2C and SPI subsystems. To fix this
-issue we only set the visited flags if the device is not I2C or SPI.
-
-With this change we also need to remove setting visited to false from
-acpi_bus_attach(), otherwise if we rescan already enumerated I2C/SPI
-devices we try to re-enumerate them.
-
-Note that I2C/SPI devices can be enumerated either via a scan handler
-(when using PRP0001) or via regular device_attach(). In either case
-the flow goes through acpi_default_enumeration() which makes it the
-ideal place to mark the ACPI device as enumerated.
-
-Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
----
- drivers/acpi/scan.c  | 13 +++++++------
- include/linux/acpi.h | 18 ++++++++++++++++++
- 2 files changed, 25 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 5f28cf7..f80f8a7 100644
---- a/drivers/acpi/scan.c
-+++ b/drivers/acpi/scan.c
-@@ -1406,7 +1406,7 @@ void acpi_init_device_object(struct acpi_device *device, acpi_handle handle,
- 	acpi_bus_get_flags(device);
- 	device->flags.match_driver = false;
- 	device->flags.initialized = true;
--	device->flags.visited = false;
-+	acpi_device_clear_enumerated(device);
- 	device_initialize(&device->dev);
- 	dev_set_uevent_suppress(&device->dev, true);
- 	acpi_init_coherency(device);
-@@ -1683,8 +1683,10 @@ static void acpi_default_enumeration(struct acpi_device *device)
- 	acpi_dev_get_resources(device, &resource_list, acpi_check_spi_i2c_slave,
- 			       &is_spi_i2c_slave);
- 	acpi_dev_free_resource_list(&resource_list);
--	if (!is_spi_i2c_slave)
-+	if (!is_spi_i2c_slave) {
- 		acpi_create_platform_device(device);
-+		acpi_device_set_enumerated(device);
-+	}
- }
- 
- static const struct acpi_device_id generic_device_ids[] = {
-@@ -1751,7 +1753,7 @@ static void acpi_bus_attach(struct acpi_device *device)
- 	acpi_bus_get_status(device);
- 	/* Skip devices that are not present. */
- 	if (!acpi_device_is_present(device)) {
--		device->flags.visited = false;
-+		acpi_device_clear_enumerated(device);
- 		device->flags.power_manageable = 0;
- 		return;
- 	}
-@@ -1766,7 +1768,7 @@ static void acpi_bus_attach(struct acpi_device *device)
- 
- 		device->flags.initialized = true;
- 	}
--	device->flags.visited = false;
-+
- 	ret = acpi_scan_attach_handler(device);
- 	if (ret < 0)
- 		return;
-@@ -1780,7 +1782,6 @@ static void acpi_bus_attach(struct acpi_device *device)
- 		if (!ret && device->pnp.type.platform_id)
- 			acpi_default_enumeration(device);
- 	}
--	device->flags.visited = true;
- 
-  ok:
- 	list_for_each_entry(child, &device->children, node)
-@@ -1872,7 +1873,7 @@ void acpi_bus_trim(struct acpi_device *adev)
- 	 */
- 	acpi_device_set_power(adev, ACPI_STATE_D3_COLD);
- 	adev->flags.initialized = false;
--	adev->flags.visited = false;
-+	acpi_device_clear_enumerated(adev);
- }
- EXPORT_SYMBOL_GPL(acpi_bus_trim);
- 
-diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-index 288fac5..7089e99 100644
---- a/include/linux/acpi.h
-+++ b/include/linux/acpi.h
-@@ -532,6 +532,16 @@ void acpi_walk_dep_device_list(acpi_handle handle);
- struct platform_device *acpi_create_platform_device(struct acpi_device *);
- #define ACPI_PTR(_ptr)	(_ptr)
- 
-+static inline void acpi_device_set_enumerated(struct acpi_device *adev)
-+{
-+	adev->flags.visited = true;
-+}
-+
-+static inline void acpi_device_clear_enumerated(struct acpi_device *adev)
-+{
-+	adev->flags.visited = false;
-+}
-+
- #else	/* !CONFIG_ACPI */
- 
- #define acpi_disabled 1
-@@ -678,6 +688,14 @@ static inline enum dev_dma_attr acpi_get_dma_attr(struct acpi_device *adev)
- 
- #define ACPI_PTR(_ptr)	(NULL)
- 
-+static inline void acpi_device_set_enumerated(struct acpi_device *adev)
-+{
-+}
-+
-+static inline void acpi_device_clear_enumerated(struct acpi_device *adev)
-+{
-+}
-+
- #endif	/* !CONFIG_ACPI */
- 
- #ifdef CONFIG_ACPI
--- 
-2.7.4
+V2UgaGF2ZSBhIGdlbmVyaWMgcmVhZF9wZXJzaXN0ZW50X2Nsb2NrNjQgaW50ZXJmYWNlIG5vdywg
+YW5kIGNhbgpjaGFuZ2UgdGhlIGlhNjQgaW1wbGVtZW50YXRpb24gdG8gcHJvdmlkZSB0aGF0IGlu
+c3RlYWQgb2YKcmVhZF9wZXJzaXN0ZW50X2Nsb2NrLgoKVGhlIG1haW4gcG9pbnQgb2YgdGhpcyBp
+cyB0byBhdm9pZCB0aGUgdXNlIG9mIHN0cnVjdCB0aW1lc3BlYwppbiB0aGUgZ2xvYmFsIGVmaS5o
+LCB3aGljaCB3b3VsZCBjYXVzZSBidWlsZCBlcnJvcnMgYXMgc29vbgphcyB3ZSB3YW50IHRvIGJ1
+aWxkIGEga2VybmVsIHdpdGhvdXQgJ3N0cnVjdCB0aW1lc3BlYycgZGVmaW5lZApvbiAzMi1iaXQg
+YXJjaGl0ZWN0dXJlcy4KCkFzaWRlIGZyb20gdGhpcywgd2UgZ2V0IGEgbGl0dGxlIGNsb3NlciB0
+byByZW1vdmluZyB0aGUKX193ZWFrIHJlYWRfcGVyc2lzdGVudF9jbG9jaygpIGRlZmluaXRpb24s
+IHdoaWNoIHJlbGllcyBvbgpjb252ZXJ0aW5nIGFsbCBhcmNoaXRlY3R1cmVzIHRvIHByb3ZpZGUg
+cmVhZF9wZXJzaXN0ZW50X2Nsb2NrNjQKaW5zdGVhZC4KClNpZ25lZC1vZmYtYnk6IEFybmQgQmVy
+Z21hbm4gPGFybmRAYXJuZGIuZGU+Ci0tLQogYXJjaC9pYTY0L2tlcm5lbC9lZmkuYyAgfCA0ICsr
+LS0KIGFyY2gvaWE2NC9rZXJuZWwvdGltZS5jIHwgMiArLQogaW5jbHVkZS9saW51eC9lZmkuaCAg
+ICAgfCAyICstCiAzIGZpbGVzIGNoYW5nZWQsIDQgaW5zZXJ0aW9ucygrKSwgNCBkZWxldGlvbnMo
+LSkKCmRpZmYgLS1naXQgYS9hcmNoL2lhNjQva2VybmVsL2VmaS5jIGIvYXJjaC9pYTY0L2tlcm5l
+bC9lZmkuYwppbmRleCAzYjdhNjBlNDBlOGEuLjEyMTI5NTYzN2QwZCAxMDA2NDQKLS0tIGEvYXJj
+aC9pYTY0L2tlcm5lbC9lZmkuYworKysgYi9hcmNoL2lhNjQva2VybmVsL2VmaS5jCkBAIC0yMzYs
+NyArMjM2LDcgQEAgU1RVQl9HRVRfTkVYVF9ISUdIX01PTk9fQ09VTlQodmlydCwgaWQpCiBTVFVC
+X1JFU0VUX1NZU1RFTSh2aXJ0LCBpZCkKIAogdm9pZAotZWZpX2dldHRpbWVvZmRheSAoc3RydWN0
+IHRpbWVzcGVjICp0cykKK2VmaV9nZXR0aW1lb2ZkYXkgKHN0cnVjdCB0aW1lc3BlYzY0ICp0cykK
+IHsKIAllZmlfdGltZV90IHRtOwogCkBAIC0yNDUsNyArMjQ1LDcgQEAgZWZpX2dldHRpbWVvZmRh
+eSAoc3RydWN0IHRpbWVzcGVjICp0cykKIAkJcmV0dXJuOwogCX0KIAotCXRzLT50dl9zZWMgPSBt
+a3RpbWUodG0ueWVhciwgdG0ubW9udGgsIHRtLmRheSwKKwl0cy0+dHZfc2VjID0gbWt0aW1lNjQo
+dG0ueWVhciwgdG0ubW9udGgsIHRtLmRheSwKIAkJCSAgICB0bS5ob3VyLCB0bS5taW51dGUsIHRt
+LnNlY29uZCk7CiAJdHMtPnR2X25zZWMgPSB0bS5uYW5vc2Vjb25kOwogfQpkaWZmIC0tZ2l0IGEv
+YXJjaC9pYTY0L2tlcm5lbC90aW1lLmMgYi9hcmNoL2lhNjQva2VybmVsL3RpbWUuYwppbmRleCBj
+OGRiZTJhY2Q3MzUuLjZmODkyYjk0ZTkwNiAxMDA2NDQKLS0tIGEvYXJjaC9pYTY0L2tlcm5lbC90
+aW1lLmMKKysrIGIvYXJjaC9pYTY0L2tlcm5lbC90aW1lLmMKQEAgLTM1NSw3ICszNTUsNyBAQCBz
+dGF0aWMgc3RydWN0IGlycWFjdGlvbiB0aW1lcl9pcnFhY3Rpb24gPSB7CiAJLm5hbWUgPQkJInRp
+bWVyIgogfTsKIAotdm9pZCByZWFkX3BlcnNpc3RlbnRfY2xvY2soc3RydWN0IHRpbWVzcGVjICp0
+cykKK3ZvaWQgcmVhZF9wZXJzaXN0ZW50X2Nsb2NrNjQoc3RydWN0IHRpbWVzcGVjNjQgKnRzKQog
+ewogCWVmaV9nZXR0aW1lb2ZkYXkodHMpOwogfQpkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9l
+ZmkuaCBiL2luY2x1ZGUvbGludXgvZWZpLmgKaW5kZXggOWE1M2E1NTdhY2ZmLi5kY2E4ODEwZDZi
+NDkgMTAwNjQ0Ci0tLSBhL2luY2x1ZGUvbGludXgvZWZpLmgKKysrIGIvaW5jbHVkZS9saW51eC9l
+ZmkuaApAQCAtOTM3LDcgKzkzNyw3IEBAIGV4dGVybiB2b2lkIGVmaV9pbml0ICh2b2lkKTsKIGV4
+dGVybiB2b2lkICplZmlfZ2V0X3BhbF9hZGRyICh2b2lkKTsKIGV4dGVybiB2b2lkIGVmaV9tYXBf
+cGFsX2NvZGUgKHZvaWQpOwogZXh0ZXJuIHZvaWQgZWZpX21lbW1hcF93YWxrIChlZmlfZnJlZW1l
+bV9jYWxsYmFja190IGNhbGxiYWNrLCB2b2lkICphcmcpOwotZXh0ZXJuIHZvaWQgZWZpX2dldHRp
+bWVvZmRheSAoc3RydWN0IHRpbWVzcGVjICp0cyk7CitleHRlcm4gdm9pZCBlZmlfZ2V0dGltZW9m
+ZGF5IChzdHJ1Y3QgdGltZXNwZWM2NCAqdHMpOwogZXh0ZXJuIHZvaWQgZWZpX2VudGVyX3ZpcnR1
+YWxfbW9kZSAodm9pZCk7CS8qIHN3aXRjaCBFRkkgdG8gdmlydHVhbCBtb2RlLCBpZiBwb3NzaWJs
+ZSAqLwogI2lmZGVmIENPTkZJR19YODYKIGV4dGVybiB2b2lkIGVmaV9sYXRlX2luaXQodm9pZCk7
+Ci0tIAoyLjkuMAoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18KWTIwMzggbWFpbGluZyBsaXN0ClkyMDM4QGxpc3RzLmxpbmFyby5vcmcKaHR0cHM6Ly9saXN0
+cy5saW5hcm8ub3JnL21haWxtYW4vbGlzdGluZm8veTIwMzgK
