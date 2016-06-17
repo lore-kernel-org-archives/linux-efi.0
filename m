@@ -1,35 +1,42 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
- clear
-Date: Fri, 17 Jun 2016 16:51:45 +0100
-Message-ID: <20160617155145.GJ2658@codeblueprint.co.uk>
-References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
- <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
- <20160608111844.GV2658@codeblueprint.co.uk>
- <5759B67A.4000800@amd.com>
- <20160613135110.GC2658@codeblueprint.co.uk>
- <57615561.4090502@amd.com>
- <5762B9E7.80903@amd.com>
+From: Joseph Thelen <jthelen-sJ/iWh9BUns@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: Auto enable EFI memmap on SGI UV systems
+Date: Fri, 17 Jun 2016 15:57:19 -0500
+Message-ID: <20160617205719.GB285943@stormcage.americas.sgi.com>
+References: <1464900635-11957-1-git-send-email-jthelen@sgi.com>
+ <1464900635-11957-2-git-send-email-jthelen@sgi.com>
+ <20160608123623.GW2658@codeblueprint.co.uk>
+ <20160614223448.GC172952@stormcage.americas.sgi.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <5762B9E7.80903@amd.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+In-Reply-To: <20160614223448.GC172952-7ppMa7wkY9tKToyKb8PD+Zs2JHu2awxn0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linn Crosetto <linn-ZPxbGqLxI0U@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Joseph Thelen <jthelen-sJ/iWh9BUns@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 16 Jun, at 09:38:31AM, Tom Lendacky wrote:
+On Tue, Jun 14, 2016 at 05:34:49PM -0500, Joseph Thelen wrote:
+> We're still reasonably confident we'll need something like this. Although,
+> after looking into the stuff you mention, it seems that it should perhaps
+> be a bit more sophisticated than just checking if we're on a UV system.
 > 
-> Ok, I think this was happening before the commit to build our own
-> EFI page table structures:
+> We'll get back to you after digging into this a bit more and coming
+> up with some more specific reasons for the change.
 > 
-> commit 67a9108ed ("x86/efi: Build our own page table structures")
+> Thanks,
 > 
-> Before this commit the boot services ended up mapped into the kernel
-> page table entries as un-encrypted during efi_map_regions() and I needed
-> to change those entries back to encrypted. With your change above,
-> this appears to no longer be needed.
+> Joseph Thelen
+>
 
-Great news! Things are as they should be ;)
+After investigating a bit more, it seems that this is really only
+an issue where people are using older bootloaders/managers and kernels, some
+of which are still supported / used by big distros like redhat.
+
+Given that this is, as you've pointed out, either a non-issue or easily
+remedied without kernel changes now and in the future, we'll try
+talking about it directly with any distro where it's still an issue.
+
+Thanks,
+
+Joseph Thelen
