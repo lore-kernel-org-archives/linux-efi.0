@@ -1,145 +1,134 @@
-From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v4 7/8] acpi: add support for configfs
-Date: Fri, 17 Jun 2016 14:52:15 +0300
-Message-ID: <1466164336-9508-8-git-send-email-octavian.purdila@intel.com>
+From: Octavian Purdila <octavian.purdila@intel.com>
+Subject: [PATCH v4 2/8] acpi: fix enumeration (visited) flags for bus rescans
+Date: Fri, 17 Jun 2016 14:52:10 +0300
+Message-ID: <1466164336-9508-3-git-send-email-octavian.purdila@intel.com>
 References: <1466164336-9508-1-git-send-email-octavian.purdila@intel.com>
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1466164336-9508-1-git-send-email-octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Rafael J . Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
-Cc: Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leonard.crestez-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1466164336-9508-1-git-send-email-octavian.purdila@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
+Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, leonard.crestez@intel.com, Octavian Purdila <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Register the ACPI subsystem with configfs.
+If the ACPI tables changes as a result of a dinamically loaded table and
+a bus rescan is required the enumeration/visited flag are not
+consistent.
 
-Signed-off-by: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+I2C/SPI are not directly enumerated in acpi_bus_attach(), however the
+visited flag is set. This makes it impossible to check if an ACPI device
+has already been enumerated by the I2C and SPI subsystems. To fix this
+issue we only set the visited flags if the device is not I2C or SPI.
+
+With this change we also need to remove setting visited to false from
+acpi_bus_attach(), otherwise if we rescan already enumerated I2C/SPI
+devices we try to re-enumerate them.
+
+Note that I2C/SPI devices can be enumerated either via a scan handler
+(when using PRP0001) or via regular device_attach(). In either case
+the flow goes through acpi_default_enumeration() which makes it the
+ideal place to mark the ACPI device as enumerated.
+
+Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
 ---
- Documentation/ABI/testing/configfs-acpi |  7 +++++
- MAINTAINERS                             |  1 +
- drivers/acpi/Kconfig                    |  9 ++++++
- drivers/acpi/Makefile                   |  1 +
- drivers/acpi/configfs.c                 | 53 +++++++++++++++++++++++++++++++++
- 5 files changed, 71 insertions(+)
- create mode 100644 Documentation/ABI/testing/configfs-acpi
- create mode 100644 drivers/acpi/configfs.c
+ drivers/acpi/scan.c  | 13 +++++++------
+ include/linux/acpi.h | 18 ++++++++++++++++++
+ 2 files changed, 25 insertions(+), 6 deletions(-)
 
-diff --git a/Documentation/ABI/testing/configfs-acpi b/Documentation/ABI/testing/configfs-acpi
-new file mode 100644
-index 0000000..17b19dc
---- /dev/null
-+++ b/Documentation/ABI/testing/configfs-acpi
-@@ -0,0 +1,7 @@
-+What:		/config/acpi
-+Date:		July 2016
-+KernelVersion:	4.8
-+Contact:	linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-+Description:
-+		This represents the ACPI subsystem entry point directory. It
-+		contains sub-groups corresponding to ACPI configurable options.
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 16700e4..9c5365f 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -288,6 +288,7 @@ F:	include/linux/acpi.h
- F:	include/acpi/
- F:	Documentation/acpi/
- F:	Documentation/ABI/testing/sysfs-bus-acpi
-+F:	Documentation/ABI/testing/configfs-acpi
- F:	drivers/pci/*acpi*
- F:	drivers/pci/*/*acpi*
- F:	drivers/pci/*/*/*acpi*
-diff --git a/drivers/acpi/Kconfig b/drivers/acpi/Kconfig
-index b7e2e77..a039433 100644
---- a/drivers/acpi/Kconfig
-+++ b/drivers/acpi/Kconfig
-@@ -521,4 +521,13 @@ config XPOWER_PMIC_OPREGION
+diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
+index 5f28cf7..f80f8a7 100644
+--- a/drivers/acpi/scan.c
++++ b/drivers/acpi/scan.c
+@@ -1406,7 +1406,7 @@ void acpi_init_device_object(struct acpi_device *device, acpi_handle handle,
+ 	acpi_bus_get_flags(device);
+ 	device->flags.match_driver = false;
+ 	device->flags.initialized = true;
+-	device->flags.visited = false;
++	acpi_device_clear_enumerated(device);
+ 	device_initialize(&device->dev);
+ 	dev_set_uevent_suppress(&device->dev, true);
+ 	acpi_init_coherency(device);
+@@ -1683,8 +1683,10 @@ static void acpi_default_enumeration(struct acpi_device *device)
+ 	acpi_dev_get_resources(device, &resource_list, acpi_check_spi_i2c_slave,
+ 			       &is_spi_i2c_slave);
+ 	acpi_dev_free_resource_list(&resource_list);
+-	if (!is_spi_i2c_slave)
++	if (!is_spi_i2c_slave) {
+ 		acpi_create_platform_device(device);
++		acpi_device_set_enumerated(device);
++	}
+ }
  
- endif
+ static const struct acpi_device_id generic_device_ids[] = {
+@@ -1751,7 +1753,7 @@ static void acpi_bus_attach(struct acpi_device *device)
+ 	acpi_bus_get_status(device);
+ 	/* Skip devices that are not present. */
+ 	if (!acpi_device_is_present(device)) {
+-		device->flags.visited = false;
++		acpi_device_clear_enumerated(device);
+ 		device->flags.power_manageable = 0;
+ 		return;
+ 	}
+@@ -1766,7 +1768,7 @@ static void acpi_bus_attach(struct acpi_device *device)
  
-+config ACPI_CONFIGFS
-+	tristate "ACPI configfs support"
-+	select CONFIGFS_FS
-+	default n
-+	help
-+	  Select this option to enable support for ACPI configuration from
-+	  userspace. The configurable ACPI groups will be visible under
-+	  /config/acpi, assuming configfs is mounted under /config.
+ 		device->flags.initialized = true;
+ 	}
+-	device->flags.visited = false;
 +
- endif	# ACPI
-diff --git a/drivers/acpi/Makefile b/drivers/acpi/Makefile
-index 251ce85..1dc2173 100644
---- a/drivers/acpi/Makefile
-+++ b/drivers/acpi/Makefile
-@@ -99,5 +99,6 @@ obj-$(CONFIG_ACPI_EXTLOG)	+= acpi_extlog.o
- obj-$(CONFIG_PMIC_OPREGION)	+= pmic/intel_pmic.o
- obj-$(CONFIG_CRC_PMIC_OPREGION) += pmic/intel_pmic_crc.o
- obj-$(CONFIG_XPOWER_PMIC_OPREGION) += pmic/intel_pmic_xpower.o
-+obj-$(CONFIG_ACPI_CONFIGFS)	+= configfs.o
+ 	ret = acpi_scan_attach_handler(device);
+ 	if (ret < 0)
+ 		return;
+@@ -1780,7 +1782,6 @@ static void acpi_bus_attach(struct acpi_device *device)
+ 		if (!ret && device->pnp.type.platform_id)
+ 			acpi_default_enumeration(device);
+ 	}
+-	device->flags.visited = true;
  
- video-objs			+= acpi_video.o video_detect.o
-diff --git a/drivers/acpi/configfs.c b/drivers/acpi/configfs.c
-new file mode 100644
-index 0000000..44a72ff
---- /dev/null
-+++ b/drivers/acpi/configfs.c
-@@ -0,0 +1,53 @@
-+/*
-+ * ACPI configfs support
-+ *
-+ * Copyright (c) 2015 Intel Corporation
-+ *
-+ * This program is free software; you can redistribute it and/or modify it
-+ * under the terms of the GNU General Public License version 2 as published by
-+ * the Free Software Foundation.
-+ */
-+
-+#include <linux/init.h>
-+#include <linux/module.h>
-+#include <linux/configfs.h>
-+#include <linux/acpi.h>
-+
-+static struct config_item_type acpi_root_group_type = {
-+	.ct_owner = THIS_MODULE,
-+};
-+
-+static struct configfs_subsystem acpi_configfs = {
-+	.su_group = {
-+		.cg_item = {
-+			.ci_namebuf = "acpi",
-+			.ci_type = &acpi_root_group_type,
-+		},
-+	},
-+	.su_mutex = __MUTEX_INITIALIZER(acpi_configfs.su_mutex),
-+};
-+
-+static int __init acpi_configfs_init(void)
+  ok:
+ 	list_for_each_entry(child, &device->children, node)
+@@ -1872,7 +1873,7 @@ void acpi_bus_trim(struct acpi_device *adev)
+ 	 */
+ 	acpi_device_set_power(adev, ACPI_STATE_D3_COLD);
+ 	adev->flags.initialized = false;
+-	adev->flags.visited = false;
++	acpi_device_clear_enumerated(adev);
+ }
+ EXPORT_SYMBOL_GPL(acpi_bus_trim);
+ 
+diff --git a/include/linux/acpi.h b/include/linux/acpi.h
+index 288fac5..7089e99 100644
+--- a/include/linux/acpi.h
++++ b/include/linux/acpi.h
+@@ -532,6 +532,16 @@ void acpi_walk_dep_device_list(acpi_handle handle);
+ struct platform_device *acpi_create_platform_device(struct acpi_device *);
+ #define ACPI_PTR(_ptr)	(_ptr)
+ 
++static inline void acpi_device_set_enumerated(struct acpi_device *adev)
 +{
-+	int ret;
-+	struct config_group *root = &acpi_configfs.su_group;
-+
-+	config_group_init(root);
-+
-+	ret = configfs_register_subsystem(&acpi_configfs);
-+	if (ret)
-+		return ret;
-+
-+	return 0;
++	adev->flags.visited = true;
 +}
-+module_init(acpi_configfs_init);
 +
-+static void __exit acpi_configfs_exit(void)
++static inline void acpi_device_clear_enumerated(struct acpi_device *adev)
 +{
-+	configfs_unregister_subsystem(&acpi_configfs);
++	adev->flags.visited = false;
 +}
-+module_exit(acpi_configfs_exit);
 +
-+MODULE_AUTHOR("Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>");
-+MODULE_DESCRIPTION("ACPI configfs support");
-+MODULE_LICENSE("GPL v2");
+ #else	/* !CONFIG_ACPI */
+ 
+ #define acpi_disabled 1
+@@ -678,6 +688,14 @@ static inline enum dev_dma_attr acpi_get_dma_attr(struct acpi_device *adev)
+ 
+ #define ACPI_PTR(_ptr)	(NULL)
+ 
++static inline void acpi_device_set_enumerated(struct acpi_device *adev)
++{
++}
++
++static inline void acpi_device_clear_enumerated(struct acpi_device *adev)
++{
++}
++
+ #endif	/* !CONFIG_ACPI */
+ 
+ #ifdef CONFIG_ACPI
 -- 
 2.7.4
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
