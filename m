@@ -1,71 +1,35 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] x86: remove unused efi_get_time function
-Date: Fri, 17 Jun 2016 16:59:41 +0200
-Message-ID: <CAKv+Gu_Hk+yPXjKFm=osm=r13KCqjNO0HmHb20dMzqLW47MN5A@mail.gmail.com>
-References: <20160617145713.3737965-1-arnd@arndb.de>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [RFC PATCH v1 10/18] x86/efi: Access EFI related tables in the
+ clear
+Date: Fri, 17 Jun 2016 16:51:45 +0100
+Message-ID: <20160617155145.GJ2658@codeblueprint.co.uk>
+References: <20160426225553.13567.19459.stgit@tlendack-t1.amdoffice.net>
+ <20160426225740.13567.85438.stgit@tlendack-t1.amdoffice.net>
+ <20160608111844.GV2658@codeblueprint.co.uk>
+ <5759B67A.4000800@amd.com>
+ <20160613135110.GC2658@codeblueprint.co.uk>
+ <57615561.4090502@amd.com>
+ <5762B9E7.80903@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160617145713.3737965-1-arnd@arndb.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, y2038@lists.linaro.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <5762B9E7.80903@amd.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 17 June 2016 at 16:56, Arnd Bergmann <arnd@arndb.de> wrote:
-> Nothing calls the efi_get_time function on x86, but it does suffer
-> from the 32-bit time_t overflow in 2038.
->
-> This removes the function, we can always put it back in case we need
-> it later.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+On Thu, 16 Jun, at 09:38:31AM, Tom Lendacky wrote:
+> 
+> Ok, I think this was happening before the commit to build our own
+> EFI page table structures:
+> 
+> commit 67a9108ed ("x86/efi: Build our own page table structures")
+> 
+> Before this commit the boot services ended up mapped into the kernel
+> page table entries as un-encrypted during efi_map_regions() and I needed
+> to change those entries back to encrypted. With your change above,
+> this appears to no longer be needed.
 
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-
-> ---
->  arch/x86/platform/efi/efi.c | 15 ---------------
->  include/linux/efi.h         |  1 -
->  2 files changed, 16 deletions(-)
->
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 56400d03409f..105e34747116 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -97,21 +97,6 @@ static efi_status_t __init phys_efi_set_virtual_address_map(
->         return status;
->  }
->
-> -void efi_get_time(struct timespec *now)
-> -{
-> -       efi_status_t status;
-> -       efi_time_t eft;
-> -       efi_time_cap_t cap;
-> -
-> -       status = efi.get_time(&eft, &cap);
-> -       if (status != EFI_SUCCESS)
-> -               pr_err("Oops: efitime: can't read time!\n");
-> -
-> -       now->tv_sec = mktime(eft.year, eft.month, eft.day, eft.hour,
-> -                            eft.minute, eft.second);
-> -       now->tv_nsec = 0;
-> -}
-> -
->  void __init efi_find_mirror(void)
->  {
->         efi_memory_desc_t *md;
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index acb6adace01e..a402a527592f 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -975,7 +975,6 @@ extern u64 efi_mem_desc_end(efi_memory_desc_t *md);
->  extern int efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md);
->  extern void efi_initialize_iomem_resources(struct resource *code_resource,
->                 struct resource *data_resource, struct resource *bss_resource);
-> -extern void efi_get_time(struct timespec *now);
->  extern void efi_reserve_boot_services(void);
->  extern int efi_get_fdt_params(struct efi_fdt_params *params);
->  extern struct kobject *efi_kobj;
-> --
-> 2.9.0
->
+Great news! Things are as they should be ;)
