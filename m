@@ -1,117 +1,171 @@
 From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: [PATCH v4 1/8] Documentation: acpi: add SSDT overlays documentation
-Date: Fri, 17 Jun 2016 14:52:09 +0300
-Message-ID: <1466164336-9508-2-git-send-email-octavian.purdila@intel.com>
+Subject: [PATCH v4 5/8] spi: add support for ACPI reconfigure notifications
+Date: Fri, 17 Jun 2016 14:52:13 +0300
+Message-ID: <1466164336-9508-6-git-send-email-octavian.purdila@intel.com>
 References: <1466164336-9508-1-git-send-email-octavian.purdila@intel.com>
-Return-path: <linux-i2c-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1466164336-9508-1-git-send-email-octavian.purdila@intel.com>
-Sender: linux-i2c-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
 Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, leonard.crestez@intel.com, Octavian Purdila <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
----
- Documentation/acpi/ssdt-overlays.txt | 91 ++++++++++++++++++++++++++++++++++++
- 1 file changed, 91 insertions(+)
- create mode 100644 Documentation/acpi/ssdt-overlays.txt
+This patch adds supports for SPI device enumeration and removal via
+ACPI reconfiguration notifications that are send as a result of an
+ACPI table load or unload operation.
 
-diff --git a/Documentation/acpi/ssdt-overlays.txt b/Documentation/acpi/ssdt-overlays.txt
-new file mode 100644
-index 0000000..8050259
---- /dev/null
-+++ b/Documentation/acpi/ssdt-overlays.txt
-@@ -0,0 +1,91 @@
+Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
+Reviewed-by: Mika Westerberg <mika.westerberg@linux.intel.com>
+---
+ drivers/spi/spi.c | 96 +++++++++++++++++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 89 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/spi/spi.c b/drivers/spi/spi.c
+index 77e6e45..37cda92 100644
+--- a/drivers/spi/spi.c
++++ b/drivers/spi/spi.c
+@@ -622,6 +622,8 @@ void spi_unregister_device(struct spi_device *spi)
+ 
+ 	if (spi->dev.of_node)
+ 		of_node_clear_flag(spi->dev.of_node, OF_POPULATED);
++	if (ACPI_COMPANION(&spi->dev))
++		acpi_device_clear_enumerated(ACPI_COMPANION(&spi->dev));
+ 	device_unregister(&spi->dev);
+ }
+ EXPORT_SYMBOL_GPL(spi_unregister_device);
+@@ -1646,18 +1648,15 @@ static int acpi_spi_add_resource(struct acpi_resource *ares, void *data)
+ 	return 1;
+ }
+ 
+-static acpi_status acpi_spi_add_device(acpi_handle handle, u32 level,
+-				       void *data, void **return_value)
++static acpi_status acpi_register_spi_device(struct spi_master *master,
++					    struct acpi_device *adev)
+ {
+-	struct spi_master *master = data;
+ 	struct list_head resource_list;
+-	struct acpi_device *adev;
+ 	struct spi_device *spi;
+ 	int ret;
+ 
+-	if (acpi_bus_get_device(handle, &adev))
+-		return AE_OK;
+-	if (acpi_bus_get_status(adev) || !adev->status.present)
++	if (acpi_bus_get_status(adev) || !adev->status.present ||
++	    acpi_device_enumerated(adev))
+ 		return AE_OK;
+ 
+ 	spi = spi_alloc_device(master);
+@@ -1683,6 +1682,8 @@ static acpi_status acpi_spi_add_device(acpi_handle handle, u32 level,
+ 	if (spi->irq < 0)
+ 		spi->irq = acpi_dev_gpio_irq_get(adev, 0);
+ 
++	acpi_device_set_enumerated(adev);
 +
-+In order to support ACPI open-ended hardware configurations (e.g. development
-+boards) we need a way to augment the ACPI configuration provided by the firmware
-+image. A common example is connecting sensors on I2C / SPI buses on development
-+boards.
-+
-+Although this can be accomplished by creating a kernel platform driver or
-+recompiling the firmware image with updated ACPI tables, neither is practical:
-+the former proliferates board specific kernel code while the latter requires
-+access to firmware tools which are often not publicly available.
-+
-+Because ACPI supports external references in AML code a more practical
-+way to augment firmware ACPI configuration is by dynamically loading
-+user defined SSDT tables that contain the board specific information.
-+
-+For example, to enumerate a Bosch BMA222E accelerometer on the I2C bus of the
-+Minnowboard MAX development board exposed via the LSE connector [1], the
-+following ASL code can be used:
-+
-+DefinitionBlock ("minnowmax.aml", "SSDT", 1, "Vendor", "Accel", 0x00000003)
+ 	adev->power.flags.ignore_parent = true;
+ 	strlcpy(spi->modalias, acpi_device_hid(adev), sizeof(spi->modalias));
+ 	if (spi_add_device(spi)) {
+@@ -1695,6 +1696,18 @@ static acpi_status acpi_spi_add_device(acpi_handle handle, u32 level,
+ 	return AE_OK;
+ }
+ 
++static acpi_status acpi_spi_add_device(acpi_handle handle, u32 level,
++				       void *data, void **return_value)
 +{
-+    External (\_SB.I2C6, DeviceObj)
++	struct spi_master *master = data;
++	struct acpi_device *adev;
 +
-+    Scope (\_SB.I2C6)
-+    {
-+        Device (STAC)
-+        {
-+            Name (_ADR, Zero)
-+            Name (_HID, "BMA222E")
++	if (acpi_bus_get_device(handle, &adev))
++		return AE_OK;
 +
-+            Method (_CRS, 0, Serialized)
-+            {
-+                Name (RBUF, ResourceTemplate ()
-+                {
-+                    I2cSerialBus (0x0018, ControllerInitiated, 0x00061A80,
-+                                  AddressingMode7Bit, "\\_SB.I2C6", 0x00,
-+                                  ResourceConsumer, ,)
-+                    GpioInt (Edge, ActiveHigh, Exclusive, PullDown, 0x0000,
-+                             "\\_SB.GPO2", 0x00, ResourceConsumer, , )
-+                    { // Pin list
-+                        0
-+                    }
-+                })
-+                Return (RBUF)
-+            }
-+        }
-+    }
++	return acpi_register_spi_device(master, adev);
 +}
 +
-+which can then be compiled to AML binary format:
+ static void acpi_register_spi_devices(struct spi_master *master)
+ {
+ 	acpi_status status;
+@@ -3107,6 +3120,73 @@ static struct notifier_block spi_of_notifier = {
+ extern struct notifier_block spi_of_notifier;
+ #endif /* IS_ENABLED(CONFIG_OF_DYNAMIC) */
+ 
++#if IS_ENABLED(CONFIG_ACPI)
++static int spi_acpi_master_match(struct device *dev, const void *data)
++{
++	return ACPI_COMPANION(dev->parent) == data;
++}
 +
-+$ iasl minnowmax.asl
++static int spi_acpi_device_match(struct device *dev, void *data)
++{
++	return ACPI_COMPANION(dev) == data;
++}
 +
-+Intel ACPI Component Architecture
-+ASL Optimizing Compiler version 20140214-64 [Mar 29 2014]
-+Copyright (c) 2000 - 2014 Intel Corporation
++static struct spi_master *acpi_spi_find_master_by_adev(struct acpi_device *adev)
++{
++	struct device *dev;
 +
-+ASL Input:     minnomax.asl - 30 lines, 614 bytes, 7 keywords
-+AML Output:    minnowmax.aml - 165 bytes, 6 named objects, 1 executable opcodes
++	dev = class_find_device(&spi_master_class, NULL, adev,
++				spi_acpi_master_match);
++	if (!dev)
++		return NULL;
 +
-+[1] http://wiki.minnowboard.org/MinnowBoard_MAX#Low_Speed_Expansion_Connector_.28Top.29
++	return container_of(dev, struct spi_master, dev);
++}
 +
-+The resulting AML code can then be loaded by the kernel using one of the methods
-+below.
++static struct spi_device *acpi_spi_find_device_by_adev(struct acpi_device *adev)
++{
++	struct device *dev;
 +
-+== Loading ACPI SSDTs from initrd ==
++	dev = bus_find_device(&spi_bus_type, NULL, adev, spi_acpi_device_match);
 +
-+This option allows loading of user defined SSDTs from initrd and it is useful
-+when the system does not support EFI or when there is not enough EFI storage.
++	return dev ? to_spi_device(dev) : NULL;
++}
 +
-+It works in a similar way with initrd based ACPI tables override/upgrade: SSDT
-+aml code must be placed in the first, uncompressed, initrd under the
-+"kernel/firmware/acpi" path. Multiple files can be used and this will translate
-+in loading multiple tables. Only SSDT and OEM tables are allowed. See
-+initrd_table_override.txt for more details.
++static int acpi_spi_notify(struct notifier_block *nb, unsigned long value,
++			   void *arg)
++{
++	struct acpi_device *adev = arg;
++	struct spi_master *master;
++	struct spi_device *spi;
 +
-+Here is an example:
++	switch (value) {
++	case ACPI_RECONFIG_DEVICE_ADD:
++		master = acpi_spi_find_master_by_adev(adev->parent);
++		if (!master)
++			break;
 +
-+# Add the raw ACPI tables to an uncompressed cpio archive.
-+# They must be put into a /kernel/firmware/acpi directory inside the
-+# cpio archive.
-+# The uncompressed cpio archive must be the first.
-+# Other, typically compressed cpio archives, must be
-+# concatenated on top of the uncompressed one.
-+mkdir -p kernel/firmware/acpi
-+cp ssdt.aml kernel/firmware/acpi
++		acpi_register_spi_device(master, adev);
++		put_device(&master->dev);
++		break;
++	case ACPI_RECONFIG_DEVICE_REMOVE:
++		spi = acpi_spi_find_device_by_adev(adev);
++		if (!spi)
++			break;
 +
-+# Create the uncompressed cpio archive and concatenate the original initrd
-+# on top:
-+find kernel | cpio -H newc --create > /boot/instrumented_initrd
-+cat /boot/initrd >>/boot/instrumented_initrd
++		spi_unregister_device(spi);
++		put_device(&spi->dev);
++	}
++
++	return NOTIFY_OK;
++}
++
++static struct notifier_block spi_acpi_notifier = {
++	.notifier_call = acpi_spi_notify,
++};
++#else
++extern struct notifier_block spi_acpi_notifier;
++#endif
++
+ static int __init spi_init(void)
+ {
+ 	int	status;
+@@ -3127,6 +3207,8 @@ static int __init spi_init(void)
+ 
+ 	if (IS_ENABLED(CONFIG_OF_DYNAMIC))
+ 		WARN_ON(of_reconfig_notifier_register(&spi_of_notifier));
++	if (IS_ENABLED(CONFIG_ACPI))
++		WARN_ON(acpi_reconfig_notifier_register(&spi_acpi_notifier));
+ 
+ 	return 0;
+ 
 -- 
 2.7.4
