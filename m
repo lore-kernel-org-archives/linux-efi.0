@@ -1,26 +1,53 @@
-From: "Luck, Tony" <tony.luck@intel.com>
-Subject: RE: [PATCH] ia64: efi: use timespec64 for persistent clock
-Date: Fri, 17 Jun 2016 21:39:00 +0000
-Message-ID: <3908561D78D1C84285E8C5FCA982C28F3A13F30B@ORSMSX114.amr.corp.intel.com>
-References: <20160617144920.3511152-1-arnd@arndb.de>
+From: Andy Lutomirski <luto@amacapital.net>
+Subject: Re: [PATCH v2 03/13] x86/cpa: Warn if kernel_unmap_pages_in_pgd is
+ used inappropriately
+Date: Sat, 18 Jun 2016 03:29:01 -0700
+Message-ID: <CALCETrW-i8p=w5PTW817kAmfybHUntYkcAjc6sUsFJGcDGdnMA@mail.gmail.com>
+References: <cover.1466192946.git.luto@kernel.org> <3336bb02792d56c49d18e2f7a435fd194a4a22e4.1466192946.git.luto@kernel.org>
+ <20160617203045.GB3842@pd.tnic>
+Reply-To: kernel-hardening@lists.openwall.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-ia64-owner@vger.kernel.org>
-In-Reply-To: <20160617144920.3511152-1-arnd@arndb.de>
-Content-Language: en-US
-Sender: linux-ia64-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, "Yu, Fenghua" <fenghua.yu@intel.com>
-Cc: "y2038@lists.linaro.org" <y2038@lists.linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ingo Molnar <mingo@kernel.org>, Toshi Kani <toshi.kani@hpe.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-ia64@vger.kernel.org" <linux-ia64@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <kernel-hardening-return-3513-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+In-Reply-To: <20160617203045.GB3842@pd.tnic>
+To: Borislav Petkov <bp@alien8.de>
+Cc: Andy Lutomirski <luto@kernel.org>, X86 ML <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arch <linux-arch@vger.kernel.org>, Nadav Amit <nadav.amit@gmail.com>, Kees Cook <keescook@chromium.org>, Brian Gerst <brgerst@gmail.com>, "kernel-hardening@lists.openwall.com" <kernel-hardening@lists.openwall.com>, Linus Torvalds <torvalds@linux-foundation.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Jann Horn <jann@thejh.net>, Heiko Carstens <heiko.carstens@de.ibm.com>, Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-> Aside from this, we get a little closer to removing the
-> __weak read_persistent_clock() definition, which relies on
-> converting all architectures to provide read_persistent_clock64
-> instead.
+On Fri, Jun 17, 2016 at 1:30 PM, Borislav Petkov <bp@alien8.de> wrote:
+> On Fri, Jun 17, 2016 at 01:00:39PM -0700, Andy Lutomirski wrote:
+>> It's currently only used in the EFI code, which is safe AFAICT.
 >
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> "It is basically useful for a pagetable hierarchy which is not init_mm."
+>
+>> Warn if anyone tries to use it on the normal kernel pgd.
+>>
+>> Signed-off-by: Andy Lutomirski <luto@kernel.org>
+>> ---
+>>  arch/x86/mm/pageattr.c | 3 +++
+>>  1 file changed, 3 insertions(+)
+>>
+>> diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+>> index 6a8026918bf6..e9b9c5cedbb8 100644
+>> --- a/arch/x86/mm/pageattr.c
+>> +++ b/arch/x86/mm/pageattr.c
+>> @@ -1996,6 +1996,9 @@ out:
+>>  void kernel_unmap_pages_in_pgd(pgd_t *root, unsigned long address,
+>>                              unsigned numpages)
+>>  {
+>> +     /* Unmapping kernel entries from init_mm's pgd is not allowed. */
+>> +     WARN_ON(root == init_mm.pgd);
+>
+> We can also return and not do the unmapping:
+>
+>         if (WARN_ON(root == init_mm.pgd))
+>                 return;
 
-Applied. Thanks
+I'll do one better: the only function that calls this function is
+unused.  I'll just delete it.
 
--Tony
+--Andy
