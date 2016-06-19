@@ -1,40 +1,33 @@
-From: =?UTF-8?Q?M=c3=b4she_van_der_Sterre?= <me-A/3C56C7qwM@public.gmane.org>
-Subject: Re: BGRT warns again on my system
-Date: Sun, 19 Jun 2016 16:57:17 +0200
-Message-ID: <5766B2CD.6010401@moshe.nl>
-References: <CALCETrUJ2QoUSYY82Q1BN3niasiunktnrmdE9Lmi2PZnCJRdag@mail.gmail.com>
- <20160528222531.GA10687@x> <574A6B5D.60200@moshe.nl>
- <20160602092438.GD2658@codeblueprint.co.uk> <57669AC0.7010905@moshe.nl>
- <20160619143840.GA18605@x>
+From: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [RFC] x86/mm: only allow memmap=XX!YY over existing RAM
+Date: Sun, 19 Jun 2016 09:40:23 -0700
+Message-ID: <CAPcyv4hiOwx5LM+80Hz7jWnidMrKVjY9V5B3zS7y_g7C1KLoYQ@mail.gmail.com>
+References: <1466340570-2471502-1-git-send-email-yigal@plexistor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160619143840.GA18605@x>
+In-Reply-To: <1466340570-2471502-1-git-send-email-yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Yigal Korman <yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org" <linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>, "Elliott, Robert (Persistent Memory)" <elliott-ZPxbGqLxI0U@public.gmane.org>, jmoyer <jmoyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Toshi Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 06/19/2016 04:38 PM, Josh Triplett wrote:
-> On Sun, Jun 19, 2016 at 03:14:40PM +0200, M=F4she van der Sterre wrot=
-e:
->> On 06/02/2016 11:24 AM, Matt Fleming wrote:
->>
->>> If this does indeed fix Andy's immediate issue (and it looks like
->>> it would) I'm happy to apply this as an interim solution.
->> I have tested that this does indeed fix the warning for Andy's value=
- of
->> ->image_address, but off course I can't test this with the actual ha=
-rdware
->> that Andy has. Do you want me to resend this with a commit message s=
-o it can
->> be applied?
-> With a commit message and a clearer pr_notice than "is bogus", yes. H=
-ow
-> about "image address not a valid physical memory address"?
+On Sun, Jun 19, 2016 at 5:49 AM, Yigal Korman <yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org> wrote:
+> Before this patch, passing a range that is beyond the physical memory
+> range will succeed, the user will see a /dev/pmem0 and will be able to
+> access it. Reads will always return 0 and writes will be silently
+> ignored.
+>
+> I've gotten more than one bug report about mkfs.{xfs,ext4} or nvml
+> failing that were eventually tracked down to be wrong values passed to
+> memmap.
+>
+> This patch prevents the above issue by instead of adding a new memory
+> range, only update a RAM memory range with the PRAM type. This way,
+> passing the wrong memmap will either not give you a pmem at all or give
+> you a smaller one that actually has RAM behind it.
+>
+> And if someone still needs to fake a pmem that doesn't have RAM behind
+> it, they can simply do memmap=XX@YY,XX!YY.
 
-The sub-par notice text crossed my mind when I originally mailed it, bu=
-t=20
-I forgot about it today. I like your suggestion so I'll use that one.
+Thanks!  I've debugged a report like this as well.
