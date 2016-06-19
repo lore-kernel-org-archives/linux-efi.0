@@ -1,39 +1,58 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v2 03/13] x86/cpa: Warn if kernel_unmap_pages_in_pgd is
- used inappropriately
-Date: Sat, 18 Jun 2016 12:37:08 +0200
-Message-ID: <20160618103708.GB3841@pd.tnic>
-References: <cover.1466192946.git.luto@kernel.org>
- <3336bb02792d56c49d18e2f7a435fd194a4a22e4.1466192946.git.luto@kernel.org>
- <20160617203045.GB3842@pd.tnic>
- <CALCETrW-i8p=w5PTW817kAmfybHUntYkcAjc6sUsFJGcDGdnMA@mail.gmail.com>
-Reply-To: kernel-hardening@lists.openwall.com
+From: Yigal Korman <yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org>
+Subject: [RFC] x86/mm: only allow memmap=XX!YY over existing RAM
+Date: Sun, 19 Jun 2016 15:49:30 +0300
+Message-ID: <1466340570-2471502-1-git-send-email-yigal@plexistor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <kernel-hardening-return-3514-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-Content-Disposition: inline
-In-Reply-To: <CALCETrW-i8p=w5PTW817kAmfybHUntYkcAjc6sUsFJGcDGdnMA@mail.gmail.com>
-To: Andy Lutomirski <luto@amacapital.net>
-Cc: Andy Lutomirski <luto@kernel.org>, X86 ML <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arch <linux-arch@vger.kernel.org>, Nadav Amit <nadav.amit@gmail.com>, Kees Cook <keescook@chromium.org>, Brian Gerst <brgerst@gmail.com>, "kernel-hardening@lists.openwall.com" <kernel-hardening@lists.openwall.com>, Linus Torvalds <torvalds@linux-foundation.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Jann Horn <jann@thejh.net>, Heiko Carstens <heiko.carstens@de.ibm.com>, Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
+List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
+Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Jun 18, 2016 at 03:29:01AM -0700, Andy Lutomirski wrote:
-> I'll do one better: the only function that calls this function is
-> unused.  I'll just delete it.
+Before this patch, passing a range that is beyond the physical memory
+range will succeed, the user will see a /dev/pmem0 and will be able to
+access it. Reads will always return 0 and writes will be silently
+ignored.
 
-Fair enough - Matt is on CC.
+I've gotten more than one bug report about mkfs.{xfs,ext4} or nvml
+failing that were eventually tracked down to be wrong values passed to
+memmap.
 
-Btw, normally I'm almost never talking to you at that time of the day,
-what's up? Can't sleep?
+This patch prevents the above issue by instead of adding a new memory
+range, only update a RAM memory range with the PRAM type. This way,
+passing the wrong memmap will either not give you a pmem at all or give
+you a smaller one that actually has RAM behind it.
 
-:-))
+And if someone still needs to fake a pmem that doesn't have RAM behind
+it, they can simply do memmap=XX@YY,XX!YY.
 
+Signed-off-by: Yigal Korman <yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org>
+---
+ arch/x86/kernel/e820.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/x86/kernel/e820.c b/arch/x86/kernel/e820.c
+index 569c1e4..bcd2ebb1 100644
+--- a/arch/x86/kernel/e820.c
++++ b/arch/x86/kernel/e820.c
+@@ -877,7 +877,7 @@ static int __init parse_memmap_one(char *p)
+ 		e820_add_region(start_at, mem_size, E820_RESERVED);
+ 	} else if (*p == '!') {
+ 		start_at = memparse(p+1, &p);
+-		e820_add_region(start_at, mem_size, E820_PRAM);
++		e820_update_range(start_at, mem_size, E820_RAM, E820_PRAM);
+ 	} else
+ 		e820_remove_range(mem_size, ULLONG_MAX - mem_size, E820_RAM, 1);
+ 
 -- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
+1.9.3
