@@ -1,58 +1,65 @@
-From: Yigal Korman <yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org>
-Subject: [RFC] x86/mm: only allow memmap=XX!YY over existing RAM
-Date: Sun, 19 Jun 2016 15:49:30 +0300
-Message-ID: <1466340570-2471502-1-git-send-email-yigal@plexistor.com>
+From: =?UTF-8?Q?M=c3=b4she_van_der_Sterre?= <me-A/3C56C7qwM@public.gmane.org>
+Subject: Re: BGRT warns again on my system
+Date: Sun, 19 Jun 2016 15:14:40 +0200
+Message-ID: <57669AC0.7010905@moshe.nl>
+References: <CALCETrUJ2QoUSYY82Q1BN3niasiunktnrmdE9Lmi2PZnCJRdag@mail.gmail.com>
+ <20160528222531.GA10687@x> <574A6B5D.60200@moshe.nl>
+ <20160602092438.GD2658@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
-List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
-Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
-Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160602092438.GD2658-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Before this patch, passing a range that is beyond the physical memory
-range will succeed, the user will see a /dev/pmem0 and will be able to
-access it. Reads will always return 0 and writes will be silently
-ignored.
-
-I've gotten more than one bug report about mkfs.{xfs,ext4} or nvml
-failing that were eventually tracked down to be wrong values passed to
-memmap.
-
-This patch prevents the above issue by instead of adding a new memory
-range, only update a RAM memory range with the PRAM type. This way,
-passing the wrong memmap will either not give you a pmem at all or give
-you a smaller one that actually has RAM behind it.
-
-And if someone still needs to fake a pmem that doesn't have RAM behind
-it, they can simply do memmap=XX@YY,XX!YY.
-
-Signed-off-by: Yigal Korman <yigal-/8YdC2HfS5554TAoqtyWWQ@public.gmane.org>
----
- arch/x86/kernel/e820.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/arch/x86/kernel/e820.c b/arch/x86/kernel/e820.c
-index 569c1e4..bcd2ebb1 100644
---- a/arch/x86/kernel/e820.c
-+++ b/arch/x86/kernel/e820.c
-@@ -877,7 +877,7 @@ static int __init parse_memmap_one(char *p)
- 		e820_add_region(start_at, mem_size, E820_RESERVED);
- 	} else if (*p == '!') {
- 		start_at = memparse(p+1, &p);
--		e820_add_region(start_at, mem_size, E820_PRAM);
-+		e820_update_range(start_at, mem_size, E820_RAM, E820_PRAM);
- 	} else
- 		e820_remove_range(mem_size, ULLONG_MAX - mem_size, E820_RAM, 1);
- 
--- 
-1.9.3
+On 06/02/2016 11:24 AM, Matt Fleming wrote:
+> On Sun, 29 May, at 06:09:01AM, M=F4she van der Sterre wrote:
+>> ---
+>>   arch/x86/platform/efi/efi-bgrt.c | 7 +++++++
+>>   1 file changed, 7 insertions(+)
+>>
+>> diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/ef=
+i/efi-bgrt.c
+>> index 6a2f569..a7fdb61 100644
+>> --- a/arch/x86/platform/efi/efi-bgrt.c
+>> +++ b/arch/x86/platform/efi/efi-bgrt.c
+>> @@ -19,6 +19,8 @@
+>>   #include <linux/efi.h>
+>>   #include <linux/efi-bgrt.h>
+>>  =20
+>> +#include "../../mm/physaddr.h"
+>> +
+>>   struct acpi_table_bgrt *bgrt_tab;
+>>   void *__initdata bgrt_image;
+>>   size_t __initdata bgrt_image_size;
+>> @@ -67,6 +69,11 @@ void __init efi_bgrt_init(void)
+>>   		return;
+>>   	}
+>>  =20
+>> +	if (!phys_addr_valid(bgrt_tab->image_address)) {
+>> +		pr_notice("Ignoring BGRT: image address is bogus\n");
+>> +		return;
+>> +	}
+>> +
+>>   	image =3D memremap(bgrt_tab->image_address, sizeof(bmp_header), M=
+EMREMAP_WB);
+>>   	if (!image) {
+>>   		pr_notice("Ignoring BGRT: failed to map image header memory\n");
+>> --=20
+>> 2.4.3
+>>
+> If this does indeed fix Andy's immediate issue (and it looks like
+> it would) I'm happy to apply this as an interim solution.
+I have tested that this does indeed fix the warning for Andy's value of=
+=20
+->image_address, but off course I can't test this with the actual=20
+hardware that Andy has. Do you want me to resend this with a commit=20
+message so it can be applied?
+> Once we have a persistent EFI memmap available at runtime on x86 we
+> should attempt to see whether the physical address in ->image_address
+> is covered by some region in that table. The persistent EFI memmap
+> patches should be posted in the coming weeks.
