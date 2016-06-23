@@ -1,44 +1,20 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH 02/11] x86/efi: Consolidate region mapping logic
-Date: Thu, 23 Jun 2016 16:00:28 +0200
-Message-ID: <20160623140028.GD20951@nazgul.tnic>
-References: <1466681690-5850-1-git-send-email-matt@codeblueprint.co.uk>
- <1466681690-5850-3-git-send-email-matt@codeblueprint.co.uk>
+From: Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Subject: Re: [PATCH v2 1/3] block: provide helpers for reading block count
+Date: Thu, 23 Jun 2016 07:22:56 -0700
+Message-ID: <20160623142256.GA27641@infradead.org>
+References: <20160623133016.3781907-1-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1466681690-5850-3-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
+In-Reply-To: <20160623133016.3781907-1-arnd-r2nGTMty4D4@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: Jens Axboe <axboe-b10kYP2dOMg@public.gmane.org>, "Nicholas A . Bellinger" <nab-IzHhD5pYlfBP7FQvKIMDCQ@public.gmane.org>, Mike Christie <mchristi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Grover <agrover-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Hannes Reinecke <hare-IBi9RG/b67k@public.gmane.org>, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Davidlohr Bueso <dave-h16yJtLeMjHk1uMJSBkQmQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jun 23, 2016 at 12:34:41PM +0100, Matt Fleming wrote:
-> EFI regions are currently mapped in two separate places. The bulk of
-> the work is done in efi_map_regions() but when CONFIG_EFI_MIXED is
-> enabled the additional regions that are required when operating in
-> mixed mode are mapping in efi_setup_page_tables().
-> 
-> Pull everything into efi_map_regions() and refactor the test for
-> which regions should be mapped into a should_map_region() function.
-> Generously sprinkle comments to clarify the different cases.
-> 
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> Cc: Borislav Petkov <bp@alien8.de>
-> Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-> ---
->  arch/x86/platform/efi/efi.c    | 50 ++++++++++++++++++++++++++++++++++++------
->  arch/x86/platform/efi/efi_64.c | 20 -----------------
->  2 files changed, 43 insertions(+), 27 deletions(-)
+Thanks Arnd,
 
-Looks good.
+the series looks fine to me:
 
-Acked-by: Borislav Petkov <bp@suse.de>
-
--- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
---
+Reviewed-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
