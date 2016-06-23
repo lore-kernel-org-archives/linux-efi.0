@@ -1,78 +1,137 @@
-From: Dennis Chen <dennis.chen@arm.com>
-Subject: [PATCH 2/2] arm64:acpi Fix the acpi alignment exeception when 'mem=' specified
-Date: Thu, 23 Jun 2016 19:30:15 +0800
-Message-ID: <1466681415-8058-2-git-send-email-dennis.chen@arm.com>
-References: <1466681415-8058-1-git-send-email-dennis.chen@arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: quoted-printable
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1466681415-8058-1-git-send-email-dennis.chen@arm.com>
-Sender: owner-linux-mm@kvack.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: nd@arm.com, Dennis Chen <dennis.chen@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Steve Capper <steve.capper@arm.com>, Ard
- Biesheuvel <ard.biesheuvel@linaro.org>, Will Deacon <will.deacon@arm.com>, Mark Rutland <mark.rutland@arm.com>, "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, linux-mm@kvack.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH 02/11] x86/efi: Consolidate region mapping logic
+Date: Thu, 23 Jun 2016 12:34:41 +0100
+Message-ID: <1466681690-5850-3-git-send-email-matt@codeblueprint.co.uk>
+References: <1466681690-5850-1-git-send-email-matt@codeblueprint.co.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1466681690-5850-1-git-send-email-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dave Young <dyoung@redhat.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>
 List-Id: linux-efi@vger.kernel.org
 
-This is a rework patch based on [1]. According to the proposal from
-Mark Rutland, when applying the system memory limit through 'mem=3Dx'
-kernel command line, don't remove the rest memory regions above the
-limit from the memblock, instead marking them as MEMBLOCK_NOMAP region,
-which will preserve the ability to identify regions as normal memory
-while not using them for allocation and the linear map.
+EFI regions are currently mapped in two separate places. The bulk of
+the work is done in efi_map_regions() but when CONFIG_EFI_MIXED is
+enabled the additional regions that are required when operating in
+mixed mode are mapping in efi_setup_page_tables().
 
-Without this patch, the ACPI core will map those acpi data regions(if
-they are above the limit) as device type memory, which will result in
-the alignment exception when ACPI core parses the AML data stream=20
-since the parsing will produce some non-alignment accesses.
+Pull everything into efi_map_regions() and refactor the test for
+which regions should be mapped into a should_map_region() function.
+Generously sprinkle comments to clarify the different cases.
 
-[1]:http://lists.infradead.org/pipermail/linux-arm-kernel/2016-June/438443.=
-html
-
-Signed-off-by: Dennis Chen <dennis.chen@arm.com>
-Cc: Catalin Marinas <catalin.marinas@arm.com>
-Cc: Steve Capper <steve.capper@arm.com>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Will Deacon <will.deacon@arm.com>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: linux-mm@kvack.org
-Cc: linux-acpi@vger.kernel.org
-Cc: linux-efi@vger.kernel.org
+Cc: Borislav Petkov <bp@alien8.de>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/arm64/mm/init.c | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+ arch/x86/platform/efi/efi.c    | 50 ++++++++++++++++++++++++++++++++++++------
+ arch/x86/platform/efi/efi_64.c | 20 -----------------
+ 2 files changed, 43 insertions(+), 27 deletions(-)
 
-diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
-index d45f862..e509e24 100644
---- a/arch/arm64/mm/init.c
-+++ b/arch/arm64/mm/init.c
-@@ -222,12 +222,14 @@ void __init arm64_memblock_init(void)
-=20
- =09/*
- =09 * Apply the memory limit if it was set. Since the kernel may be loaded
--=09 * high up in memory, add back the kernel region that must be accessibl=
-e
--=09 * via the linear mapping.
-+=09 * in the memory regions above the limit, so we need to clear the
-+=09 * MEMBLOCK_NOMAP flag of this region to make it can be accessible via
-+=09 * the linear mapping.
- =09 */
- =09if (memory_limit !=3D (phys_addr_t)ULLONG_MAX) {
--=09=09memblock_enforce_memory_limit(memory_limit);
--=09=09memblock_add(__pa(_text), (u64)(_end - _text));
-+=09=09memblock_mem_limit_mark_nomap(memory_limit);
-+=09=09if (!memblock_is_map_memory(__pa(_text)))
-+=09=09=09memblock_clear_nomap(__pa(_text), (u64)(_end - _text));
- =09}
-=20
- =09if (IS_ENABLED(CONFIG_BLK_DEV_INITRD) && initrd_start) {
---=20
-1.8.3.1
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index f93545e7dc54..7c3d9092c668 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -761,6 +761,46 @@ static void *efi_map_next_entry(void *entry)
+ 	return entry;
+ }
+ 
++static bool should_map_region(efi_memory_desc_t *md)
++{
++	/*
++	 * Runtime regions always require runtime mappings (obviously).
++	 */
++	if (md->attribute & EFI_MEMORY_RUNTIME)
++		return true;
++
++	/*
++	 * 32-bit EFI doesn't suffer from the bug that requires us to
++	 * reserve boot services regions, and mixed mode support
++	 * doesn't exist for 32-bit kernels.
++	 */
++	if (IS_ENABLED(CONFIG_X86_32))
++		return false;
++
++	/*
++	 * Map all of RAM so that we can access arguments in the 1:1
++	 * mapping when making EFI runtime calls.
++	 */
++	if (IS_ENABLED(CONFIG_EFI_MIXED) && !efi_is_native()) {
++		if (md->type == EFI_CONVENTIONAL_MEMORY ||
++		    md->type == EFI_LOADER_DATA ||
++		    md->type == EFI_LOADER_CODE)
++			return true;
++	}
++
++	/*
++	 * Map boot services regions as a workaround for buggy
++	 * firmware that accesses them even when they shouldn't.
++	 *
++	 * See efi_{reserve,free}_boot_services().
++	 */
++	if (md->type == EFI_BOOT_SERVICES_CODE ||
++	    md->type == EFI_BOOT_SERVICES_DATA)
++		return true;
++
++	return false;
++}
++
+ /*
+  * Map the efi memory ranges of the runtime services and update new_mmap with
+  * virtual addresses.
+@@ -777,13 +817,9 @@ static void * __init efi_map_regions(int *count, int *pg_shift)
+ 	p = NULL;
+ 	while ((p = efi_map_next_entry(p))) {
+ 		md = p;
+-		if (!(md->attribute & EFI_MEMORY_RUNTIME)) {
+-#ifdef CONFIG_X86_64
+-			if (md->type != EFI_BOOT_SERVICES_CODE &&
+-			    md->type != EFI_BOOT_SERVICES_DATA)
+-#endif
+-				continue;
+-		}
++
++		if (!should_map_region(md))
++			continue;
+ 
+ 		efi_map_region(md);
+ 		get_systab_virt_addr(md);
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 6e7242be1c87..3fcdfc93991e 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -213,7 +213,6 @@ void efi_sync_low_kernel_mappings(void)
+ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ {
+ 	unsigned long pfn, text;
+-	efi_memory_desc_t *md;
+ 	struct page *page;
+ 	unsigned npages;
+ 	pgd_t *pgd;
+@@ -247,25 +246,6 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	if (!IS_ENABLED(CONFIG_EFI_MIXED))
+ 		return 0;
+ 
+-	/*
+-	 * Map all of RAM so that we can access arguments in the 1:1
+-	 * mapping when making EFI runtime calls.
+-	 */
+-	for_each_efi_memory_desc(md) {
+-		if (md->type != EFI_CONVENTIONAL_MEMORY &&
+-		    md->type != EFI_LOADER_DATA &&
+-		    md->type != EFI_LOADER_CODE)
+-			continue;
+-
+-		pfn = md->phys_addr >> PAGE_SHIFT;
+-		npages = md->num_pages;
+-
+-		if (kernel_map_pages_in_pgd(pgd, pfn, md->phys_addr, npages, _PAGE_RW)) {
+-			pr_err("Failed to map 1:1 memory\n");
+-			return 1;
+-		}
+-	}
+-
+ 	page = alloc_page(GFP_KERNEL|__GFP_DMA32);
+ 	if (!page)
+ 		panic("Unable to allocate EFI runtime stack < 4GB\n");
+-- 
+2.7.3
