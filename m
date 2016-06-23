@@ -1,137 +1,56 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 02/11] x86/efi: Consolidate region mapping logic
-Date: Thu, 23 Jun 2016 12:34:41 +0100
-Message-ID: <1466681690-5850-3-git-send-email-matt@codeblueprint.co.uk>
-References: <1466681690-5850-1-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 00/11] efi: Permanent runtime EFI memmap support
+Date: Thu, 23 Jun 2016 12:34:39 +0100
+Message-ID: <1466681690-5850-1-git-send-email-matt@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1466681690-5850-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dave Young <dyoung@redhat.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Andy Lutomirski <luto@amacapital.net>, Borislav Petkov <bp@alien8.de>, Josh Boyer <jwboyer@fedoraproject.org>, Josh Triplett <josh@joshtriplett.org>, Kamezawa Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Rutland <mark.rutland@arm.com>, =?UTF-8?q?M=C3=B4she=20van=20der=20Sterre?= <me@moshe.nl>, Peter Jones <pjones@redhat.com>, Taku Izumi <izumi.taku@jp.fujitsu.com>, Tony Luck <tony.luck@intel.com>, Xishi Qiu <qiuxishi@huawei.com>
 List-Id: linux-efi@vger.kernel.org
 
-EFI regions are currently mapped in two separate places. The bulk of
-the work is done in efi_map_regions() but when CONFIG_EFI_MIXED is
-enabled the additional regions that are required when operating in
-mixed mode are mapping in efi_setup_page_tables().
+This series adds support for keeping the EFI memory map around at
+runtime for x86 (ARM and arm64 already have this support).
 
-Pull everything into efi_map_regions() and refactor the test for
-which regions should be mapped into a should_map_region() function.
-Generously sprinkle comments to clarify the different cases.
+Additionally, drivers can now reserve EFI boot services regions such
+that they are not released back to the kernel during
+efi_free_boot_services().
 
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Borislav Petkov <bp@alien8.de>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
----
- arch/x86/platform/efi/efi.c    | 50 ++++++++++++++++++++++++++++++++++++------
- arch/x86/platform/efi/efi_64.c | 20 -----------------
- 2 files changed, 43 insertions(+), 27 deletions(-)
+With these two features it becomes possible to pass things like the
+EFI System Resource Table data structures across kexec reboot.
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index f93545e7dc54..7c3d9092c668 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -761,6 +761,46 @@ static void *efi_map_next_entry(void *entry)
- 	return entry;
- }
- 
-+static bool should_map_region(efi_memory_desc_t *md)
-+{
-+	/*
-+	 * Runtime regions always require runtime mappings (obviously).
-+	 */
-+	if (md->attribute & EFI_MEMORY_RUNTIME)
-+		return true;
-+
-+	/*
-+	 * 32-bit EFI doesn't suffer from the bug that requires us to
-+	 * reserve boot services regions, and mixed mode support
-+	 * doesn't exist for 32-bit kernels.
-+	 */
-+	if (IS_ENABLED(CONFIG_X86_32))
-+		return false;
-+
-+	/*
-+	 * Map all of RAM so that we can access arguments in the 1:1
-+	 * mapping when making EFI runtime calls.
-+	 */
-+	if (IS_ENABLED(CONFIG_EFI_MIXED) && !efi_is_native()) {
-+		if (md->type == EFI_CONVENTIONAL_MEMORY ||
-+		    md->type == EFI_LOADER_DATA ||
-+		    md->type == EFI_LOADER_CODE)
-+			return true;
-+	}
-+
-+	/*
-+	 * Map boot services regions as a workaround for buggy
-+	 * firmware that accesses them even when they shouldn't.
-+	 *
-+	 * See efi_{reserve,free}_boot_services().
-+	 */
-+	if (md->type == EFI_BOOT_SERVICES_CODE ||
-+	    md->type == EFI_BOOT_SERVICES_DATA)
-+		return true;
-+
-+	return false;
-+}
-+
- /*
-  * Map the efi memory ranges of the runtime services and update new_mmap with
-  * virtual addresses.
-@@ -777,13 +817,9 @@ static void * __init efi_map_regions(int *count, int *pg_shift)
- 	p = NULL;
- 	while ((p = efi_map_next_entry(p))) {
- 		md = p;
--		if (!(md->attribute & EFI_MEMORY_RUNTIME)) {
--#ifdef CONFIG_X86_64
--			if (md->type != EFI_BOOT_SERVICES_CODE &&
--			    md->type != EFI_BOOT_SERVICES_DATA)
--#endif
--				continue;
--		}
-+
-+		if (!should_map_region(md))
-+			continue;
- 
- 		efi_map_region(md);
- 		get_systab_virt_addr(md);
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 6e7242be1c87..3fcdfc93991e 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -213,7 +213,6 @@ void efi_sync_low_kernel_mappings(void)
- int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- {
- 	unsigned long pfn, text;
--	efi_memory_desc_t *md;
- 	struct page *page;
- 	unsigned npages;
- 	pgd_t *pgd;
-@@ -247,25 +246,6 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	if (!IS_ENABLED(CONFIG_EFI_MIXED))
- 		return 0;
- 
--	/*
--	 * Map all of RAM so that we can access arguments in the 1:1
--	 * mapping when making EFI runtime calls.
--	 */
--	for_each_efi_memory_desc(md) {
--		if (md->type != EFI_CONVENTIONAL_MEMORY &&
--		    md->type != EFI_LOADER_DATA &&
--		    md->type != EFI_LOADER_CODE)
--			continue;
--
--		pfn = md->phys_addr >> PAGE_SHIFT;
--		npages = md->num_pages;
--
--		if (kernel_map_pages_in_pgd(pgd, pfn, md->phys_addr, npages, _PAGE_RW)) {
--			pr_err("Failed to map 1:1 memory\n");
--			return 1;
--		}
--	}
--
- 	page = alloc_page(GFP_KERNEL|__GFP_DMA32);
- 	if (!page)
- 		panic("Unable to allocate EFI runtime stack < 4GB\n");
--- 
-2.7.3
+This series also includes a whole bunch of refactoring and cleanups to
+move code out of arch or driver-specific files into generic places.
+
+I've given these patches some light testing, but it would be good if
+others could provide more given that this series touches so many
+different code paths.
+
+ARM/arm64 folks, you're going to want to pay particular attention to
+PATCH 3 where I drop the read-only mapping of the EFI memory map since
+it causes problems for x86.
+
+I am aware that we leak memory maps when new ones get installed, e.g.
+during __efi_enter_virtual_mode(), but that's an existing bug that
+requires everyone to allocate memory maps the same way before it can
+be fixed.
+
+ arch/x86/include/asm/efi.h         |   1 -
+ arch/x86/kernel/setup.c            |  13 +-
+ arch/x86/platform/efi/efi-bgrt.c   |  13 +-
+ arch/x86/platform/efi/efi.c        | 198 ++++++++++++-------------
+ arch/x86/platform/efi/efi_64.c     |  20 ---
+ arch/x86/platform/efi/quirks.c     | 123 ++++++++++++++--
+ drivers/firmware/efi/Makefile      |   2 +-
+ drivers/firmware/efi/arm-init.c    |  17 +--
+ drivers/firmware/efi/arm-runtime.c |   4 +-
+ drivers/firmware/efi/efi.c         |  64 ++++----
+ drivers/firmware/efi/esrt.c        |  20 +--
+ drivers/firmware/efi/fake_mem.c    | 125 ++--------------
+ drivers/firmware/efi/memmap.c      | 292 +++++++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/runtime-map.c |  35 ++---
+ include/linux/efi.h                |  34 ++++-
+ 15 files changed, 605 insertions(+), 356 deletions(-)
+ create mode 100644 drivers/firmware/efi/memmap.c
