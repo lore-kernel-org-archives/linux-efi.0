@@ -1,293 +1,219 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 05/11] efi/fake_mem: Refactor main two code chunks into functions
-Date: Thu, 23 Jun 2016 12:34:44 +0100
-Message-ID: <1466681690-5850-6-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH 09/11] efi/runtime-map: Use efi.memmap directly instead of a copy
+Date: Thu, 23 Jun 2016 12:34:48 +0100
+Message-ID: <1466681690-5850-10-git-send-email-matt@codeblueprint.co.uk>
 References: <1466681690-5850-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1466681690-5850-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dave Young <dyoung@redhat.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Leif Lindholm <leif.lindholm@linaro.org>, Peter Jones <pjones@redhat.com>, Borislav Petkov <bp@alien8.de>, Mark Rutland <mark.rutland@arm.com>, Taku Izumi <izumi.taku@jp.fujitsu.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1466681690-5850-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-There is a whole load of generic EFI memory map code inside of the
-fake_mem driver which is better suited to being grouped with the rest
-of the generic EFI code for manipulating EFI memory maps.
+Now that efi.memmap is available all of the time there's no need to
+allocate and build a separate copy of the EFI memory map.
 
-In preparation for that, this patch refactors the core code, so that
-it's possible to move entire functions later.
+Furthermore, efi.memmap contains boot services regions but only those
+regions that have been reserved via efi_mem_reserve(). Using
+efi.memmap allows us to pass boot services across kexec reboot so that
+the ESRT and BGRT drivers will now work.
 
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Dave Young <dyoung@redhat.com>
-Cc: Taku Izumi <izumi.taku@jp.fujitsu.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- drivers/firmware/efi/fake_mem.c | 229 +++++++++++++++++++++++-----------------
- 1 file changed, 134 insertions(+), 95 deletions(-)
+ arch/x86/platform/efi/efi.c        | 40 --------------------------------------
+ drivers/firmware/efi/runtime-map.c | 35 +++++++++++++--------------------
+ include/linux/efi.h                |  4 ----
+ 3 files changed, 13 insertions(+), 66 deletions(-)
 
-diff --git a/drivers/firmware/efi/fake_mem.c b/drivers/firmware/efi/fake_mem.c
-index 939eec47139f..446c669431c0 100644
---- a/drivers/firmware/efi/fake_mem.c
-+++ b/drivers/firmware/efi/fake_mem.c
-@@ -54,43 +54,151 @@ static int __init cmp_fake_mem(const void *x1, const void *x2)
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 33bc6c12702c..8ac32128ca94 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -608,42 +608,6 @@ static void __init get_systab_virt_addr(efi_memory_desc_t *md)
+ 	}
+ }
+ 
+-static void __init save_runtime_map(void)
+-{
+-#ifdef CONFIG_KEXEC_CORE
+-	unsigned long desc_size;
+-	efi_memory_desc_t *md;
+-	void *tmp, *q = NULL;
+-	int count = 0;
+-
+-	if (efi_enabled(EFI_OLD_MEMMAP))
+-		return;
+-
+-	desc_size = efi.memmap.desc_size;
+-
+-	for_each_efi_memory_desc(md) {
+-		if (!(md->attribute & EFI_MEMORY_RUNTIME) ||
+-		    (md->type == EFI_BOOT_SERVICES_CODE) ||
+-		    (md->type == EFI_BOOT_SERVICES_DATA))
+-			continue;
+-		tmp = krealloc(q, (count + 1) * desc_size, GFP_KERNEL);
+-		if (!tmp)
+-			goto out;
+-		q = tmp;
+-
+-		memcpy(q + count * desc_size, md, desc_size);
+-		count++;
+-	}
+-
+-	efi_runtime_map_setup(q, count, desc_size);
+-	return;
+-
+-out:
+-	kfree(q);
+-	pr_err("Error saving runtime map, efi runtime on kexec non-functional!!\n");
+-#endif
+-}
+-
+ static void *realloc_pages(void *old_memmap, int old_shift)
+ {
+ 	void *ret;
+@@ -856,8 +820,6 @@ static void __init kexec_enter_virtual_mode(void)
+ 		return;
+ 	}
+ 
+-	save_runtime_map();
+-
+ 	BUG_ON(!efi.systab);
+ 
+ 	num_pages = ALIGN(efi.memmap.nr_map * efi.memmap.desc_size, PAGE_SIZE);
+@@ -950,8 +912,6 @@ static void __init __efi_enter_virtual_mode(void)
+ 		return;
+ 	}
+ 
+-	save_runtime_map();
+-
+ 	BUG_ON(!efi.systab);
+ 
+ 	if (efi_setup_page_tables(pa, 1 << pg_shift)) {
+diff --git a/drivers/firmware/efi/runtime-map.c b/drivers/firmware/efi/runtime-map.c
+index 5c55227a34c8..8e64b77aeac9 100644
+--- a/drivers/firmware/efi/runtime-map.c
++++ b/drivers/firmware/efi/runtime-map.c
+@@ -14,10 +14,6 @@
+ 
+ #include <asm/setup.h>
+ 
+-static void *efi_runtime_map;
+-static int nr_efi_runtime_map;
+-static u32 efi_memdesc_size;
+-
+ struct efi_runtime_map_entry {
+ 	efi_memory_desc_t md;
+ 	struct kobject kobj;   /* kobject for each entry */
+@@ -106,7 +102,8 @@ static struct kobj_type __refdata map_ktype = {
+ static struct kset *map_kset;
+ 
+ static struct efi_runtime_map_entry *
+-add_sysfs_runtime_map_entry(struct kobject *kobj, int nr)
++add_sysfs_runtime_map_entry(struct kobject *kobj, int nr,
++			    efi_memory_desc_t *md)
+ {
+ 	int ret;
+ 	struct efi_runtime_map_entry *entry;
+@@ -124,8 +121,7 @@ add_sysfs_runtime_map_entry(struct kobject *kobj, int nr)
+ 		return ERR_PTR(-ENOMEM);
+ 	}
+ 
+-	memcpy(&entry->md, efi_runtime_map + nr * efi_memdesc_size,
+-	       sizeof(efi_memory_desc_t));
++	memcpy(&entry->md, md, sizeof(efi_memory_desc_t));
+ 
+ 	kobject_init(&entry->kobj, &map_ktype);
+ 	entry->kobj.kset = map_kset;
+@@ -142,12 +138,12 @@ add_sysfs_runtime_map_entry(struct kobject *kobj, int nr)
+ 
+ int efi_get_runtime_map_size(void)
+ {
+-	return nr_efi_runtime_map * efi_memdesc_size;
++	return efi.memmap.nr_map * efi.memmap.desc_size;
+ }
+ 
+ int efi_get_runtime_map_desc_size(void)
+ {
+-	return efi_memdesc_size;
++	return efi.memmap.desc_size;
+ }
+ 
+ int efi_runtime_map_copy(void *buf, size_t bufsz)
+@@ -157,38 +153,33 @@ int efi_runtime_map_copy(void *buf, size_t bufsz)
+ 	if (sz > bufsz)
+ 		sz = bufsz;
+ 
+-	memcpy(buf, efi_runtime_map, sz);
++	memcpy(buf, efi.memmap.map, sz);
  	return 0;
  }
  
-+/**
-+ * efi_fake_memmap_split_count - Count number of additional EFI memmap entries
-+ * @md: EFI memory descriptor to split
-+ * @range: Address range (start, end) to split around
-+ *
-+ * Returns the number of additional EFI memmap entries required to
-+ * accomodate @range.
-+ */
-+static int efi_fake_memmap_split_count(efi_memory_desc_t *md, struct range *range)
-+{
-+	u64 m_start, m_end;
-+	u64 start, end;
-+	int count = 0;
-+
-+	start = md->phys_addr;
-+	end = start + (md->num_pages << EFI_PAGE_SHIFT) - 1;
-+
-+	/* modifying range */
-+	m_start = range->start;
-+	m_end = range->end;
-+
-+	if (m_start <= start) {
-+		/* split into 2 parts */
-+		if (start < m_end && m_end < end)
-+			count++;
-+	}
-+
-+	if (start < m_start && m_start < end) {
-+		/* split into 3 parts */
-+		if (m_end < end)
-+			count += 2;
-+		/* split into 2 parts */
-+		if (end <= m_end)
-+			count++;
-+	}
-+
-+	return count;
-+}
-+
-+/**
-+ * efi_fake_memmap_insert - Insert a fake memory region in an EFI memmap
-+ * @old_memmap: The existing EFI memory map structure
-+ * @buf: Address of buffer to store new map
-+ * @mem: Fake memory map entry to insert
-+ *
-+ * It is suggested that you call efi_fake_memmap_split_count() first
-+ * to see how large @buf needs to be.
-+ */
-+static void efi_fake_memmap_insert(struct efi_memory_map *old_memmap,
-+				   void *buf, struct fake_mem *mem)
-+{
-+	u64 m_start, m_end, m_attr;
-+	efi_memory_desc_t *md;
-+	u64 start, end;
-+	void *old, *new;
-+
-+	/* modifying range */
-+	m_start = mem->range.start;
-+	m_end = mem->range.end;
-+	m_attr = mem->attribute;
-+
-+	for (old = old_memmap->map, new = buf;
-+	     old < old_memmap->map_end;
-+	     old += old_memmap->desc_size, new += old_memmap->desc_size) {
-+
-+		/* copy original EFI memory descriptor */
-+		memcpy(new, old, old_memmap->desc_size);
-+		md = new;
-+		start = md->phys_addr;
-+		end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1;
-+
-+		if (m_start <= start && end <= m_end)
-+			md->attribute |= m_attr;
-+
-+		if (m_start <= start &&
-+		    (start < m_end && m_end < end)) {
-+			/* first part */
-+			md->attribute |= m_attr;
-+			md->num_pages = (m_end - md->phys_addr + 1) >>
-+				EFI_PAGE_SHIFT;
-+			/* latter part */
-+			new += old_memmap->desc_size;
-+			memcpy(new, old, old_memmap->desc_size);
-+			md = new;
-+			md->phys_addr = m_end + 1;
-+			md->num_pages = (end - md->phys_addr + 1) >>
-+				EFI_PAGE_SHIFT;
-+		}
-+
-+		if ((start < m_start && m_start < end) && m_end < end) {
-+			/* first part */
-+			md->num_pages = (m_start - md->phys_addr) >>
-+				EFI_PAGE_SHIFT;
-+			/* middle part */
-+			new += old_memmap->desc_size;
-+			memcpy(new, old, old_memmap->desc_size);
-+			md = new;
-+			md->attribute |= m_attr;
-+			md->phys_addr = m_start;
-+			md->num_pages = (m_end - m_start + 1) >>
-+				EFI_PAGE_SHIFT;
-+			/* last part */
-+			new += old_memmap->desc_size;
-+			memcpy(new, old, old_memmap->desc_size);
-+			md = new;
-+			md->phys_addr = m_end + 1;
-+			md->num_pages = (end - m_end) >>
-+				EFI_PAGE_SHIFT;
-+		}
-+
-+		if ((start < m_start && m_start < end) &&
-+		    (end <= m_end)) {
-+			/* first part */
-+			md->num_pages = (m_start - md->phys_addr) >>
-+				EFI_PAGE_SHIFT;
-+			/* latter part */
-+			new += old_memmap->desc_size;
-+			memcpy(new, old, old_memmap->desc_size);
-+			md = new;
-+			md->phys_addr = m_start;
-+			md->num_pages = (end - md->phys_addr + 1) >>
-+				EFI_PAGE_SHIFT;
-+			md->attribute |= m_attr;
-+		}
-+	}
-+}
-+
- void __init efi_fake_memmap(void)
+-void efi_runtime_map_setup(void *map, int nr_entries, u32 desc_size)
+-{
+-	efi_runtime_map = map;
+-	nr_efi_runtime_map = nr_entries;
+-	efi_memdesc_size = desc_size;
+-}
+-
+ int __init efi_runtime_map_init(struct kobject *efi_kobj)
  {
--	u64 start, end, m_start, m_end, m_attr;
- 	struct efi_memory_map_data data;
- 	int new_nr_map = efi.memmap.nr_map;
- 	efi_memory_desc_t *md;
- 	phys_addr_t new_memmap_phy;
- 	void *new_memmap;
--	void *old, *new;
- 	int i;
+ 	int i, j, ret = 0;
+ 	struct efi_runtime_map_entry *entry;
++	efi_memory_desc_t *md;
  
- 	if (!nr_fake_mem)
- 		return;
+-	if (!efi_runtime_map)
++	if (!efi_enabled(EFI_MEMMAP))
+ 		return 0;
  
- 	/* count up the number of EFI memory descriptor */
--	for_each_efi_memory_desc(md) {
--		start = md->phys_addr;
--		end = start + (md->num_pages << EFI_PAGE_SHIFT) - 1;
--
--		for (i = 0; i < nr_fake_mem; i++) {
--			/* modifying range */
--			m_start = fake_mems[i].range.start;
--			m_end = fake_mems[i].range.end;
--
--			if (m_start <= start) {
--				/* split into 2 parts */
--				if (start < m_end && m_end < end)
--					new_nr_map++;
--			}
--			if (start < m_start && m_start < end) {
--				/* split into 3 parts */
--				if (m_end < end)
--					new_nr_map += 2;
--				/* split into 2 parts */
--				if (end <= m_end)
--					new_nr_map++;
--			}
-+	for (i = 0; i < nr_fake_mem; i++) {
-+		for_each_efi_memory_desc(md) {
-+			struct range *r = &fake_mems[i].range;
-+
-+			new_nr_map += efi_fake_memmap_split_count(md, r);
+-	map_entries = kzalloc(nr_efi_runtime_map * sizeof(entry), GFP_KERNEL);
++	map_entries = kzalloc(efi.memmap.nr_map * sizeof(entry), GFP_KERNEL);
+ 	if (!map_entries) {
+ 		ret = -ENOMEM;
+ 		goto out;
+ 	}
+ 
+-	for (i = 0; i < nr_efi_runtime_map; i++) {
+-		entry = add_sysfs_runtime_map_entry(efi_kobj, i);
++	i = 0;
++	for_each_efi_memory_desc(md) {
++		entry = add_sysfs_runtime_map_entry(efi_kobj, i, md);
+ 		if (IS_ERR(entry)) {
+ 			ret = PTR_ERR(entry);
+ 			goto out_add_entry;
  		}
+-		*(map_entries + i) = entry;
++		*(map_entries + i++) = entry;
  	}
  
-@@ -108,77 +216,8 @@ void __init efi_fake_memmap(void)
- 		return;
- 	}
+ 	return 0;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 9f955dab9f77..729ce6f1af13 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1431,7 +1431,6 @@ extern int efi_capsule_update(efi_capsule_header_t *capsule,
  
--	for (old = efi.memmap.map, new = new_memmap;
--	     old < efi.memmap.map_end;
--	     old += efi.memmap.desc_size, new += efi.memmap.desc_size) {
--
--		/* copy original EFI memory descriptor */
--		memcpy(new, old, efi.memmap.desc_size);
--		md = new;
--		start = md->phys_addr;
--		end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1;
--
--		for (i = 0; i < nr_fake_mem; i++) {
--			/* modifying range */
--			m_start = fake_mems[i].range.start;
--			m_end = fake_mems[i].range.end;
--			m_attr = fake_mems[i].attribute;
--
--			if (m_start <= start && end <= m_end)
--				md->attribute |= m_attr;
--
--			if (m_start <= start &&
--			    (start < m_end && m_end < end)) {
--				/* first part */
--				md->attribute |= m_attr;
--				md->num_pages = (m_end - md->phys_addr + 1) >>
--					EFI_PAGE_SHIFT;
--				/* latter part */
--				new += efi.memmap.desc_size;
--				memcpy(new, old, efi.memmap.desc_size);
--				md = new;
--				md->phys_addr = m_end + 1;
--				md->num_pages = (end - md->phys_addr + 1) >>
--					EFI_PAGE_SHIFT;
--			}
--
--			if ((start < m_start && m_start < end) && m_end < end) {
--				/* first part */
--				md->num_pages = (m_start - md->phys_addr) >>
--					EFI_PAGE_SHIFT;
--				/* middle part */
--				new += efi.memmap.desc_size;
--				memcpy(new, old, efi.memmap.desc_size);
--				md = new;
--				md->attribute |= m_attr;
--				md->phys_addr = m_start;
--				md->num_pages = (m_end - m_start + 1) >>
--					EFI_PAGE_SHIFT;
--				/* last part */
--				new += efi.memmap.desc_size;
--				memcpy(new, old, efi.memmap.desc_size);
--				md = new;
--				md->phys_addr = m_end + 1;
--				md->num_pages = (end - m_end) >>
--					EFI_PAGE_SHIFT;
--			}
--
--			if ((start < m_start && m_start < end) &&
--			    (end <= m_end)) {
--				/* first part */
--				md->num_pages = (m_start - md->phys_addr) >>
--					EFI_PAGE_SHIFT;
--				/* latter part */
--				new += efi.memmap.desc_size;
--				memcpy(new, old, efi.memmap.desc_size);
--				md = new;
--				md->phys_addr = m_start;
--				md->num_pages = (end - md->phys_addr + 1) >>
--					EFI_PAGE_SHIFT;
--				md->attribute |= m_attr;
--			}
--		}
--	}
-+	for (i = 0; i < nr_fake_mem; i++)
-+		efi_fake_memmap_insert(&efi.memmap, new_memmap, &fake_mems[i]);
+ #ifdef CONFIG_EFI_RUNTIME_MAP
+ int efi_runtime_map_init(struct kobject *);
+-void efi_runtime_map_setup(void *, int, u32);
+ int efi_get_runtime_map_size(void);
+ int efi_get_runtime_map_desc_size(void);
+ int efi_runtime_map_copy(void *buf, size_t bufsz);
+@@ -1441,9 +1440,6 @@ static inline int efi_runtime_map_init(struct kobject *kobj)
+ 	return 0;
+ }
  
- 	/* swap into new EFI memmap */
- 	early_memunmap(new_memmap, efi.memmap.desc_size * new_nr_map);
+-static inline void
+-efi_runtime_map_setup(void *map, int nr_entries, u32 desc_size) {}
+-
+ static inline int efi_get_runtime_map_size(void)
+ {
+ 	return 0;
 -- 
 2.7.3
