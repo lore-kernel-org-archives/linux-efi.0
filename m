@@ -1,54 +1,51 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 1/7] efibc: Report more information in the error messages
-Date: Sat, 25 Jun 2016 08:20:24 +0100
-Message-ID: <1466839230-12781-2-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH 3/7] x86/efi: Remove unused variable efi
+Date: Sat, 25 Jun 2016 08:20:26 +0100
+Message-ID: <1466839230-12781-4-git-send-email-matt@codeblueprint.co.uk>
 References: <1466839230-12781-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1466839230-12781-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: "Compostella, Jeremy" <jeremy.compostella@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Arnd Bergmann <arnd@arndb.de>, Robert Elliott <elliott@hpe.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1466839230-12781-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: "Compostella, Jeremy" <jeremy.compostella@intel.com>
+From: Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 
-Report the name of the EFI variable if the value size is too large or
-if efibc_set_variable() fails to allocate the struct efivar_entry
-object.  If efibc_set_variable() fails because the value size is too
-large, it also reports the value size in the error message.
+Remove unused variable efi, it is never used. Fixes clang build
+warning:
 
-Signed-off-by: Jeremy Compostella <jeremy.compostella@intel.com>
-Reported-by: Robert Elliott <elliott@hpe.com>
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+arch/x86/boot/compressed/eboot.c:803:2: warning: Value stored to
+  'efi' is never read
+
+Signed-off-by: Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- drivers/firmware/efi/efibc.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ arch/x86/boot/compressed/eboot.c | 2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
-index 8dd0c7085e59..568335d4239a 100644
---- a/drivers/firmware/efi/efibc.c
-+++ b/drivers/firmware/efi/efibc.c
-@@ -37,13 +37,15 @@ static int efibc_set_variable(const char *name, const char *value)
- 	size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 52fef606bc54..ff574dad95cc 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -757,7 +757,6 @@ struct boot_params *make_boot_params(struct efi_config *c)
+ 	struct boot_params *boot_params;
+ 	struct apm_bios_info *bi;
+ 	struct setup_header *hdr;
+-	struct efi_info *efi;
+ 	efi_loaded_image_t *image;
+ 	void *options, *handle;
+ 	efi_guid_t proto = LOADED_IMAGE_PROTOCOL_GUID;
+@@ -800,7 +799,6 @@ struct boot_params *make_boot_params(struct efi_config *c)
+ 	memset(boot_params, 0x0, 0x4000);
  
- 	if (size > sizeof(entry->var.Data)) {
--		pr_err("value is too large");
-+		pr_err("value is too large (%zu bytes) for %s EFI variable\n",
-+		       size, name);
- 		return -EINVAL;
- 	}
+ 	hdr = &boot_params->hdr;
+-	efi = &boot_params->efi_info;
+ 	bi = &boot_params->apm_bios_info;
  
- 	entry = kmalloc(sizeof(*entry), GFP_KERNEL);
- 	if (!entry) {
--		pr_err("failed to allocate efivar entry");
-+		pr_err("failed to allocate efivar entry for %s EFI variable\n",
-+		       name);
- 		return -ENOMEM;
- 	}
- 
+ 	/* Copy the second sector to boot_params */
 -- 
 2.7.3
