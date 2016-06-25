@@ -1,71 +1,54 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 7/7] x86/efi: Remove unused efi_get_time function
-Date: Sat, 25 Jun 2016 08:20:30 +0100
-Message-ID: <1466839230-12781-8-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH 1/7] efibc: Report more information in the error messages
+Date: Sat, 25 Jun 2016 08:20:24 +0100
+Message-ID: <1466839230-12781-2-git-send-email-matt@codeblueprint.co.uk>
 References: <1466839230-12781-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1466839230-12781-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1466839230-12781-1-git-send-email-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: "Compostella, Jeremy" <jeremy.compostella@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Arnd Bergmann <arnd@arndb.de>, Robert Elliott <elliott@hpe.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+From: "Compostella, Jeremy" <jeremy.compostella@intel.com>
 
-Nothing calls the efi_get_time function on x86, but it does suffer
-from the 32-bit time_t overflow in 2038.
+Report the name of the EFI variable if the value size is too large or
+if efibc_set_variable() fails to allocate the struct efivar_entry
+object.  If efibc_set_variable() fails because the value size is too
+large, it also reports the value size in the error message.
 
-This removes the function, we can always put it back in case we need
-it later.
-
-Signed-off-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Jeremy Compostella <jeremy.compostella@intel.com>
+Reported-by: Robert Elliott <elliott@hpe.com>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/platform/efi/efi.c | 15 ---------------
- include/linux/efi.h         |  1 -
- 2 files changed, 16 deletions(-)
+ drivers/firmware/efi/efibc.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index f93545e7dc54..d898b334ff46 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -98,21 +98,6 @@ static efi_status_t __init phys_efi_set_virtual_address_map(
- 	return status;
- }
+diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
+index 8dd0c7085e59..568335d4239a 100644
+--- a/drivers/firmware/efi/efibc.c
++++ b/drivers/firmware/efi/efibc.c
+@@ -37,13 +37,15 @@ static int efibc_set_variable(const char *name, const char *value)
+ 	size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
  
--void efi_get_time(struct timespec *now)
--{
--	efi_status_t status;
--	efi_time_t eft;
--	efi_time_cap_t cap;
--
--	status = efi.get_time(&eft, &cap);
--	if (status != EFI_SUCCESS)
--		pr_err("Oops: efitime: can't read time!\n");
--
--	now->tv_sec = mktime(eft.year, eft.month, eft.day, eft.hour,
--			     eft.minute, eft.second);
--	now->tv_nsec = 0;
--}
--
- void __init efi_find_mirror(void)
- {
- 	efi_memory_desc_t *md;
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index a5f6f75936eb..d4687122383e 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -990,7 +990,6 @@ extern u64 efi_mem_desc_end(efi_memory_desc_t *md);
- extern int efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md);
- extern void efi_initialize_iomem_resources(struct resource *code_resource,
- 		struct resource *data_resource, struct resource *bss_resource);
--extern void efi_get_time(struct timespec *now);
- extern void efi_reserve_boot_services(void);
- extern int efi_get_fdt_params(struct efi_fdt_params *params);
- extern struct kobject *efi_kobj;
+ 	if (size > sizeof(entry->var.Data)) {
+-		pr_err("value is too large");
++		pr_err("value is too large (%zu bytes) for %s EFI variable\n",
++		       size, name);
+ 		return -EINVAL;
+ 	}
+ 
+ 	entry = kmalloc(sizeof(*entry), GFP_KERNEL);
+ 	if (!entry) {
+-		pr_err("failed to allocate efivar entry");
++		pr_err("failed to allocate efivar entry for %s EFI variable\n",
++		       name);
+ 		return -ENOMEM;
+ 	}
+ 
 -- 
 2.7.3
