@@ -1,254 +1,158 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 4/7] efi: Convert efi_call_virt to efi_call_virt_pointer
-Date: Sat, 25 Jun 2016 08:20:27 +0100
-Message-ID: <1466839230-12781-5-git-send-email-matt@codeblueprint.co.uk>
-References: <1466839230-12781-1-git-send-email-matt@codeblueprint.co.uk>
+From: Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v4 05/29] x86/mm: Remove kernel_unmap_pages_in_pgd() and efi_cleanup_page_tables()
+Date: Sun, 26 Jun 2016 14:55:27 -0700
+Message-ID: <f49fbe4a40e1630981614b910fbfbcaa387e6c8f.1466974736.git.luto@kernel.org>
+References: <cover.1466974736.git.luto@kernel.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1466839230-12781-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <cover.1466974736.git.luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+In-Reply-To: <cover.1466974736.git.luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+References: <cover.1466974736.git.luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+To: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Nadav Amit <nadav.amit-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "kernel-hardening-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org" <kernel-hardening-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jann Horn <jann-XZ1E9jl8jIdeoWH0uzbU5w@public.gmane.org>, Heiko Carstens <heiko.carstens-tA70FqPdS9bQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+kernel_unmap_pages_in_pgd() is dangerous: if a pgd entry in
+init_mm.pgd were to be cleared, callers would need to ensure that
+the pgd entry hadn't been propagated to any other pgd.
 
-This commit makes a few slight modifications to the efi_call_virt macro
-to get it to work with function pointers that are stored in locations
-other than efi.systab->runtime, and renames the macro to
-efi_call_virt_pointer.  The majority of the changes here are to pull
-these macros up into header files so that they can be accessed from
-outside of drivers/firmware/efi/runtime-wrappers.c.
+Its only caller was efi_cleanup_page_tables(), and that, in turn,
+was unused, so just delete both functions.  This leaves a couple of
+other helpers unused, so delete them, too.
 
-The most significant change not directly related to the code move is to
-add an extra "p" argument into the appropriate efi_call macros, and use
-that new argument in place of the, formerly hard-coded,
-efi.systab->runtime pointer.
-
-The last piece of the puzzle was to add an efi_call_virt macro back into
-drivers/firmware/efi/runtime-wrappers.c to wrap around the new
-efi_call_virt_pointer macro - this was mainly to keep the code from
-looking too cluttered by adding a bunch of extra references to
-efi.systab->runtime everywhere.
-
-Note that I also broke up the code in the efi_call_virt_pointer macro a
-bit in the process of moving it.
-
-Signed-off-by: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-Cc: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
-Cc: Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>
-Cc: Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>
-Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 ---
- arch/arm/include/asm/efi.h              |  4 +--
- arch/arm64/include/asm/efi.h            |  4 +--
- arch/x86/include/asm/efi.h              |  9 +++---
- drivers/firmware/efi/runtime-wrappers.c | 53 +++++++--------------------------
- include/linux/efi.h                     | 51 +++++++++++++++++++++++++++++++
- 5 files changed, 69 insertions(+), 52 deletions(-)
+ arch/x86/include/asm/efi.h           |  1 -
+ arch/x86/include/asm/pgtable_types.h |  2 --
+ arch/x86/mm/pageattr.c               | 28 ----------------------------
+ arch/x86/platform/efi/efi.c          |  2 --
+ arch/x86/platform/efi/efi_32.c       |  3 ---
+ arch/x86/platform/efi/efi_64.c       |  5 -----
+ 6 files changed, 41 deletions(-)
 
-diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-index a708fa1f0905..766bf9b78160 100644
---- a/arch/arm/include/asm/efi.h
-+++ b/arch/arm/include/asm/efi.h
-@@ -28,10 +28,10 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
- #define arch_efi_call_virt_setup()	efi_virtmap_load()
- #define arch_efi_call_virt_teardown()	efi_virtmap_unload()
- 
--#define arch_efi_call_virt(f, args...)					\
-+#define arch_efi_call_virt(p, f, args...)				\
- ({									\
- 	efi_##f##_t *__f;						\
--	__f = efi.systab->runtime->f;					\
-+	__f = p->f;							\
- 	__f(args);							\
- })
- 
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index 622db3c6474e..bd887663689b 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -23,10 +23,10 @@ int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
- 	efi_virtmap_load();						\
- })
- 
--#define arch_efi_call_virt(f, args...)					\
-+#define arch_efi_call_virt(p, f, args...)				\
- ({									\
- 	efi_##f##_t *__f;						\
--	__f = efi.systab->runtime->f;					\
-+	__f = p->f;							\
- 	__f(args);							\
- })
- 
 diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 78d1e7467eae..55b4596ef688 100644
+index 78d1e7467eae..45ea38df86d4 100644
 --- a/arch/x86/include/asm/efi.h
 +++ b/arch/x86/include/asm/efi.h
-@@ -41,10 +41,9 @@ extern unsigned long asmlinkage efi_call_phys(void *, ...);
- /*
-  * Wrap all the virtual calls in a way that forces the parameters on the stack.
-  */
--#define arch_efi_call_virt(f, args...)					\
-+#define arch_efi_call_virt(p, f, args...)				\
- ({									\
--	((efi_##f##_t __attribute__((regparm(0)))*)			\
--		efi.systab->runtime->f)(args);				\
-+	((efi_##f##_t __attribute__((regparm(0)))*) p->f)(args);	\
- })
+@@ -125,7 +125,6 @@ extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
+ extern void efi_sync_low_kernel_mappings(void);
+ extern int __init efi_alloc_page_tables(void);
+ extern int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages);
+-extern void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages);
+ extern void __init old_map_region(efi_memory_desc_t *md);
+ extern void __init runtime_code_page_mkexec(void);
+ extern void __init efi_runtime_update_mappings(void);
+diff --git a/arch/x86/include/asm/pgtable_types.h b/arch/x86/include/asm/pgtable_types.h
+index 7b5efe264eff..0b9f58ad10c8 100644
+--- a/arch/x86/include/asm/pgtable_types.h
++++ b/arch/x86/include/asm/pgtable_types.h
+@@ -475,8 +475,6 @@ extern pmd_t *lookup_pmd_address(unsigned long address);
+ extern phys_addr_t slow_virt_to_phys(void *__address);
+ extern int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+ 				   unsigned numpages, unsigned long page_flags);
+-void kernel_unmap_pages_in_pgd(pgd_t *root, unsigned long address,
+-			       unsigned numpages);
+ #endif	/* !__ASSEMBLY__ */
  
- #define efi_ioremap(addr, size, type, attr)	ioremap_cache(addr, size)
-@@ -81,8 +80,8 @@ struct efi_scratch {
- 	}								\
- })
- 
--#define arch_efi_call_virt(f, args...)					\
--	efi_call((void *)efi.systab->runtime->f, args)			\
-+#define arch_efi_call_virt(p, f, args...)				\
-+	efi_call((void *)p->f, args)					\
- 
- #define arch_efi_call_virt_teardown()					\
- ({									\
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index 23bef6bb73ee..6a364f525a4f 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -22,7 +22,16 @@
- #include <linux/stringify.h>
- #include <asm/efi.h>
- 
--static void efi_call_virt_check_flags(unsigned long flags, const char *call)
-+/*
-+ * Wrap around the new efi_call_virt_generic macros so that the
-+ * code doesn't get too cluttered
-+ */
-+#define efi_call_virt(f, args...)   \
-+	efi_call_virt_pointer(efi.systab->runtime, f, args)
-+#define __efi_call_virt(f, args...) \
-+	__efi_call_virt_pointer(efi.systab->runtime, f, args)
-+
-+void efi_call_virt_check_flags(unsigned long flags, const char *call)
- {
- 	unsigned long cur_flags, mismatch;
- 
-@@ -39,48 +48,6 @@ static void efi_call_virt_check_flags(unsigned long flags, const char *call)
+ #endif /* _ASM_X86_PGTABLE_DEFS_H */
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index 6a8026918bf6..762162af3662 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -746,18 +746,6 @@ static bool try_to_free_pmd_page(pmd_t *pmd)
+ 	return true;
  }
  
- /*
-- * Arch code can implement the following three template macros, avoiding
-- * reptition for the void/non-void return cases of {__,}efi_call_virt:
-- *
-- *  * arch_efi_call_virt_setup
-- *
-- *    Sets up the environment for the call (e.g. switching page tables,
-- *    allowing kernel-mode use of floating point, if required).
-- *
-- *  * arch_efi_call_virt
-- *
-- *    Performs the call. The last expression in the macro must be the call
-- *    itself, allowing the logic to be shared by the void and non-void
-- *    cases.
-- *
-- *  * arch_efi_call_virt_teardown
-- *
-- *    Restores the usual kernel environment once the call has returned.
-- */
+-static bool try_to_free_pud_page(pud_t *pud)
+-{
+-	int i;
 -
--#define efi_call_virt(f, args...)					\
--({									\
--	efi_status_t __s;						\
--	unsigned long flags;						\
--	arch_efi_call_virt_setup();					\
--	local_save_flags(flags);					\
--	__s = arch_efi_call_virt(f, args);				\
--	efi_call_virt_check_flags(flags, __stringify(f));		\
--	arch_efi_call_virt_teardown();					\
--	__s;								\
--})
+-	for (i = 0; i < PTRS_PER_PUD; i++)
+-		if (!pud_none(pud[i]))
+-			return false;
 -
--#define __efi_call_virt(f, args...)					\
--({									\
--	unsigned long flags;						\
--	arch_efi_call_virt_setup();					\
--	local_save_flags(flags);					\
--	arch_efi_call_virt(f, args);					\
--	efi_call_virt_check_flags(flags, __stringify(f));		\
--	arch_efi_call_virt_teardown();					\
--})
+-	free_page((unsigned long)pud);
+-	return true;
+-}
 -
--/*
-  * According to section 7.1 of the UEFI spec, Runtime Services are not fully
-  * reentrant, and there are particular combinations of calls that need to be
-  * serialized. (source: UEFI Specification v2.4A)
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 03009695760d..a5f6f75936eb 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1480,4 +1480,55 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
- 			   unsigned long size);
+ static bool unmap_pte_range(pmd_t *pmd, unsigned long start, unsigned long end)
+ {
+ 	pte_t *pte = pte_offset_kernel(pmd, start);
+@@ -871,16 +859,6 @@ static void unmap_pud_range(pgd_t *pgd, unsigned long start, unsigned long end)
+ 	 */
+ }
  
- bool efi_runtime_disabled(void);
-+extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
-+
-+/*
-+ * Arch code can implement the following three template macros, avoiding
-+ * reptition for the void/non-void return cases of {__,}efi_call_virt:
-+ *
-+ *  * arch_efi_call_virt_setup
-+ *
-+ *    Sets up the environment for the call (e.g. switching page tables,
-+ *    allowing kernel-mode use of floating point, if required).
-+ *
-+ *  * arch_efi_call_virt
-+ *
-+ *    Performs the call. The last expression in the macro must be the call
-+ *    itself, allowing the logic to be shared by the void and non-void
-+ *    cases.
-+ *
-+ *  * arch_efi_call_virt_teardown
-+ *
-+ *    Restores the usual kernel environment once the call has returned.
-+ */
-+
-+#define efi_call_virt_pointer(p, f, args...)				\
-+({									\
-+	efi_status_t __s;						\
-+	unsigned long flags;						\
-+									\
-+	arch_efi_call_virt_setup();					\
-+									\
-+	local_save_flags(flags);					\
-+	__s = arch_efi_call_virt(p, f, args);				\
-+	efi_call_virt_check_flags(flags, __stringify(f));		\
-+									\
-+	arch_efi_call_virt_teardown();					\
-+									\
-+	__s;								\
-+})
-+
-+#define __efi_call_virt_pointer(p, f, args...)				\
-+({									\
-+	unsigned long flags;						\
-+									\
-+	arch_efi_call_virt_setup();					\
-+									\
-+	local_save_flags(flags);					\
-+	arch_efi_call_virt(p, f, args);					\
-+	efi_call_virt_check_flags(flags, __stringify(f));		\
-+									\
-+	arch_efi_call_virt_teardown();					\
-+})
-+
- #endif /* _LINUX_EFI_H */
+-static void unmap_pgd_range(pgd_t *root, unsigned long addr, unsigned long end)
+-{
+-	pgd_t *pgd_entry = root + pgd_index(addr);
+-
+-	unmap_pud_range(pgd_entry, addr, end);
+-
+-	if (try_to_free_pud_page((pud_t *)pgd_page_vaddr(*pgd_entry)))
+-		pgd_clear(pgd_entry);
+-}
+-
+ static int alloc_pte_page(pmd_t *pmd)
+ {
+ 	pte_t *pte = (pte_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
+@@ -1993,12 +1971,6 @@ out:
+ 	return retval;
+ }
+ 
+-void kernel_unmap_pages_in_pgd(pgd_t *root, unsigned long address,
+-			       unsigned numpages)
+-{
+-	unmap_pgd_range(root, address, address + (numpages << PAGE_SHIFT));
+-}
+-
+ /*
+  * The testcases use internal knowledge of the implementation that shouldn't
+  * be exposed to the rest of the kernel. Include these directly here.
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index f93545e7dc54..62986e5fbdba 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -978,8 +978,6 @@ static void __init __efi_enter_virtual_mode(void)
+ 	 * EFI mixed mode we need all of memory to be accessible when
+ 	 * we pass parameters to the EFI runtime services in the
+ 	 * thunking code.
+-	 *
+-	 * efi_cleanup_page_tables(__pa(new_memmap), 1 << pg_shift);
+ 	 */
+ 	free_pages((unsigned long)new_memmap, pg_shift);
+ 
+diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
+index 338402b91d2e..cef39b097649 100644
+--- a/arch/x86/platform/efi/efi_32.c
++++ b/arch/x86/platform/efi/efi_32.c
+@@ -49,9 +49,6 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ {
+ 	return 0;
+ }
+-void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+-{
+-}
+ 
+ void __init efi_map_region(efi_memory_desc_t *md)
+ {
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index b226b3f497f1..d288dcea1ffe 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -285,11 +285,6 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	return 0;
+ }
+ 
+-void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+-{
+-	kernel_unmap_pages_in_pgd(efi_pgd, pa_memmap, num_pages);
+-}
+-
+ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+ {
+ 	unsigned long flags = _PAGE_RW;
 -- 
-2.7.3
+2.7.4
