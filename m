@@ -1,61 +1,53 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 4/7] efi: Convert efi_call_virt to efi_call_virt_pointer
-Date: Mon, 27 Jun 2016 12:22:56 +0100
-Message-ID: <20160627112255.GD1113@leverpostej>
-References: <1466839230-12781-1-git-send-email-matt@codeblueprint.co.uk>
- <1466839230-12781-5-git-send-email-matt@codeblueprint.co.uk>
- <20160627110050.GB9099@gmail.com>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH v4 5/8] spi: add support for ACPI reconfigure
+ notifications
+Date: Mon, 27 Jun 2016 15:17:13 +0100
+Message-ID: <20160627141713.GW28202@sirena.org.uk>
+References: <1466164336-9508-1-git-send-email-octavian.purdila@intel.com>
+ <1466164336-9508-6-git-send-email-octavian.purdila@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="XGH+X5Sk6wksXc5a"
+Return-path: <linux-acpi-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20160627110050.GB9099-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+In-Reply-To: <1466164336-9508-6-git-send-email-octavian.purdila@intel.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Octavian Purdila <octavian.purdila@intel.com>
+Cc: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, leonard.crestez@intel.com
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jun 27, 2016 at 01:00:50PM +0200, Ingo Molnar wrote:
-> 
-> * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> 
-> > +#define efi_call_virt_pointer(p, f, args...)				\
-> > +({									\
-> > +	efi_status_t __s;						\
-> > +	unsigned long flags;						\
-> > +									\
-> > +	arch_efi_call_virt_setup();					\
-> > +									\
-> > +	local_save_flags(flags);					\
-> > +	__s = arch_efi_call_virt(p, f, args);				\
-> > +	efi_call_virt_check_flags(flags, __stringify(f));		\
-> > +									\
-> > +	arch_efi_call_virt_teardown();					\
-> > +									\
-> > +	__s;								\
-> > +})
-> > +
-> > +#define __efi_call_virt_pointer(p, f, args...)				\
-> > +({									\
-> > +	unsigned long flags;						\
-> > +									\
-> > +	arch_efi_call_virt_setup();					\
-> > +									\
-> > +	local_save_flags(flags);					\
-> > +	arch_efi_call_virt(p, f, args);					\
-> > +	efi_call_virt_check_flags(flags, __stringify(f));		\
-> > +									\
-> > +	arch_efi_call_virt_teardown();					\
-> > +})
-> 
-> Note that while at it I renamed 'flags' to '__flags' because 'flags' is
-> a commonly used variable name and the 'efi_status_t __s' variable was
-> macro-prefixed already.
-> 
-> Any objections?
 
-FWIW, none from me. I probably should have done that when I wrote the
-original {__,}efi_call_virt macros.
+--XGH+X5Sk6wksXc5a
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Thanks,
-Mark.
+On Fri, Jun 17, 2016 at 02:52:13PM +0300, Octavian Purdila wrote:
+
+> This patch adds supports for SPI device enumeration and removal via
+> ACPI reconfiguration notifications that are send as a result of an
+> ACPI table load or unload operation.
+
+I still have the same concern I've had all the way through here: this is
+very similar to the equivalent DT code but not quite, especially in
+regard to the OF_POPULATED flag which has no ACPI equivalent.  This
+gives us ACPI code which just looks like it's missing something.  I'd
+like to see the comparison at least covered in the changelog so people
+have something to refer to in future when trying to understand why
+things are done this way.
+
+--XGH+X5Sk6wksXc5a
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJXcTVoAAoJECTWi3JdVIfQ1NkIAICLFrq20hSWhgkKNPVK2Fxu
+ZlIUEeByk4Ko38eN/9XzEXP3JrQC5iIOe7or4AneoEpS2urUPg91Ozx0ylZUBzwV
+8SLbS3mvDTJ/skvMbC/zbBsLgMiJ8MjFGQbYvE622sgFup+bQ+v070l9fmCmB/MX
+NqeJO+LKISe68MA6fugIl6cgj2TR9ngvBbrc/tUFl2FXwzyd0yp14MM3uEHpMBSX
+A097r6EHZTzYQXe3C7V646BHlW2tm8EIi/j1xa5i6ssI+g1SB3Q0TbwOELN7jJ1W
+49rA7hTrS5HsUhlYTqE2xyXXg9sMuP94Nf77qNFsFrYdJBkBw/sffitdCvOY28Q=
+=ikos
+-----END PGP SIGNATURE-----
+
+--XGH+X5Sk6wksXc5a--
