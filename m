@@ -1,158 +1,182 @@
-From: Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v4 05/29] x86/mm: Remove kernel_unmap_pages_in_pgd() and efi_cleanup_page_tables()
-Date: Sun, 26 Jun 2016 14:55:27 -0700
-Message-ID: <f49fbe4a40e1630981614b910fbfbcaa387e6c8f.1466974736.git.luto@kernel.org>
-References: <cover.1466974736.git.luto@kernel.org>
+From: Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v2 2/2] arm64:acpi Fix the acpi alignment exeception when
+ 'mem=' specified
+Date: Mon, 27 Jun 2016 09:20:53 +0800
+Message-ID: <20160627012051.GA5311@arm.com>
+References: <1466738027-15066-1-git-send-email-dennis.chen@arm.com>
+ <1466738027-15066-2-git-send-email-dennis.chen@arm.com>
+ <CAKv+Gu8ZyWG-OZ8=2u9jrdS-0j+qL1sstPQ0uX=j7wyj+ETo-w@mail.gmail.com>
+ <20160624120058.GA19972@arm.com>
+ <CAKv+Gu9XHYVEoL846WBx6PZqSnbBCjwup0CPkZ1JexJVkvds9A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=WINDOWS-1252
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.1466974736.git.luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-In-Reply-To: <cover.1466974736.git.luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-References: <cover.1466974736.git.luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+In-Reply-To: <CAKv+Gu9XHYVEoL846WBx6PZqSnbBCjwup0CPkZ1JexJVkvds9A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Nadav Amit <nadav.amit-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "kernel-hardening-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org" <kernel-hardening-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jann Horn <jann-XZ1E9jl8jIdeoWH0uzbU5w@public.gmane.org>, Heiko Carstens <heiko.carstens-tA70FqPdS9bQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, nd-5wv7dgnIgG8@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "Rafael J . Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org" <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-kernel_unmap_pages_in_pgd() is dangerous: if a pgd entry in
-init_mm.pgd were to be cleared, callers would need to ensure that
-the pgd entry hadn't been propagated to any other pgd.
+On Fri, Jun 24, 2016 at 04:12:02PM +0200, Ard Biesheuvel wrote:
+> On 24 June 2016 at 14:01, Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org> wrote:
+> > On Fri, Jun 24, 2016 at 12:43:52PM +0200, Ard Biesheuvel wrote:
+> >> On 24 June 2016 at 05:13, Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org> wrote:
+> >> > When booting an ACPI enabled kernel with 'mem=', probably the ACPI data
+> >> > regions loaded by firmware will beyond the limit of the memory, in this
+> >> > case we need to nomap the region above the limit while not removing
+> >> > it from memblock, because once region removed from memblock, the ACPI
+> >> > will think that region is not a normal memory and map it as device type
+> >> > memory accordingly. Since the ACPI core will produce non-alignment access
+> >> > when paring AML data stream, hence result in alignment fault upon the io
+> >> > mapped memory space.
+> >> >
+> >> > For example, below is an alignment exception observed on softIron board
+> >> > when booting the kernel with 'acpi=force mem=8G':
+> >> > ...
+> >> > [ 0.542475] Unable to handle kernel paging request at virtual address ffff0000080521e7
+> >> > [ 0.550457] pgd = ffff000008aa0000
+> >> > [ 0.553880] [ffff0000080521e7] *pgd=000000801fffe003, *pud=000000801fffd003, *pmd=000000801fffc003, *pte=00e80083ff1c1707
+> >> > [    0.564939] Internal error: Oops: 96000021 [#1] PREEMPT SMP
+> >> > [    0.570553] Modules linked in:
+> >> > [    0.573626] CPU: 1 PID: 1 Comm: swapper/0 Not tainted 4.7.0-rc3-next-20160616+ #172
+> >> > [    0.581344] Hardware name: AMD Overdrive/Supercharger/Default string, BIOS ROD1001A 02/09/2016
+> >> > [    0.590025] task: ffff800001ef0000 ti: ffff800001ef8000 task.ti: ffff800001ef8000
+> >> > [    0.597571] PC is at acpi_ns_lookup+0x520/0x734
+> >> > [    0.602134] LR is at acpi_ns_lookup+0x4a4/0x734
+> >> > [    0.606693] pc : [<ffff0000083b8b10>] lr : [<ffff0000083b8a94>] pstate: 60000045
+> >> > [    0.614145] sp : ffff800001efb8b0
+> >> > [    0.617478] x29: ffff800001efb8c0 x28: 000000000000001b
+> >> > [    0.622829] x27: 0000000000000001 x26: 0000000000000000
+> >> > [    0.628181] x25: ffff800001efb9e8 x24: ffff000008a10000
+> >> > [    0.633531] x23: 0000000000000001 x22: 0000000000000001
+> >> > [    0.638881] x21: ffff000008724000 x20: 000000000000001b
+> >> > [    0.644230] x19: ffff0000080521e7 x18: 000000000000000d
+> >> > [    0.649580] x17: 00000000000038ff x16: 0000000000000002
+> >> > [    0.654929] x15: 0000000000000007 x14: 0000000000007fff
+> >> > [    0.660278] x13: ffffff0000000000 x12: 0000000000000018
+> >> > [    0.665627] x11: 000000001fffd200 x10: 00000000ffffff76
+> >> > [    0.670978] x9 : 000000000000005f x8 : ffff000008725fa8
+> >> > [    0.676328] x7 : ffff000008a8df70 x6 : ffff000008a8df70
+> >> > [    0.681679] x5 : ffff000008a8d000 x4 : 0000000000000010
+> >> > [    0.687027] x3 : 0000000000000010 x2 : 000000000000000c
+> >> > [    0.692378] x1 : 0000000000000006 x0 : 0000000000000000
+> >> > ...
+> >> > [    1.262235] [<ffff0000083b8b10>] acpi_ns_lookup+0x520/0x734
+> >> > [    1.267845] [<ffff0000083a7160>] acpi_ds_load1_begin_op+0x174/0x4fc
+> >> > [    1.274156] [<ffff0000083c1f4c>] acpi_ps_build_named_op+0xf8/0x220
+> >> > [    1.280380] [<ffff0000083c227c>] acpi_ps_create_op+0x208/0x33c
+> >> > [    1.286254] [<ffff0000083c1820>] acpi_ps_parse_loop+0x204/0x838
+> >> > [    1.292215] [<ffff0000083c2fd4>] acpi_ps_parse_aml+0x1bc/0x42c
+> >> > [    1.298090] [<ffff0000083bc6e8>] acpi_ns_one_complete_parse+0x1e8/0x22c
+> >> > [    1.304753] [<ffff0000083bc7b8>] acpi_ns_parse_table+0x8c/0x128
+> >> > [    1.310716] [<ffff0000083bb8fc>] acpi_ns_load_table+0xc0/0x1e8
+> >> > [    1.316591] [<ffff0000083c9068>] acpi_tb_load_namespace+0xf8/0x2e8
+> >> > [    1.322818] [<ffff000008984128>] acpi_load_tables+0x7c/0x110
+> >> > [    1.328516] [<ffff000008982ea4>] acpi_init+0x90/0x2c0
+> >> > [    1.333603] [<ffff0000080819fc>] do_one_initcall+0x38/0x12c
+> >> > [    1.339215] [<ffff000008960cd4>] kernel_init_freeable+0x148/0x1ec
+> >> > [    1.345353] [<ffff0000086b7d30>] kernel_init+0x10/0xec
+> >> > [    1.350529] [<ffff000008084e10>] ret_from_fork+0x10/0x40
+> >> > [    1.355878] Code: b9009fbc 2a00037b 36380057 3219037b (b9400260)
+> >> > [    1.362035] ---[ end trace 03381e5eb0a24de4 ]---
+> >> > [    1.366691] Kernel panic - not syncing: Attempted to kill init! exitcode=0x0000000b
+> >> >
+> >> > With 'efi=debug', we can see those ACPI regions loaded by firmware on
+> >> > that board as:
+> >> > [    0.000000] efi:   0x0083ff1b5000-0x0083ff1c2fff [ACPI Reclaim Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]*
+> >> > [    0.000000] efi:   0x0083ff223000-0x0083ff224fff [ACPI Memory NVS    |   |  |  |  |  |  |  |   |WB|WT|WC|UC]*
+> >> >
+> >> > This patch is trying to address the above issues by nomaping the region
+> >> > instead of removing it.
+> >> >
+> >> > Signed-off-by: Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org>
+> >> > Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+> >> > Cc: Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>
+> >> > Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >> > Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+> >> > Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> >> > Cc: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> >> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> >> > Cc: linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org
+> >> > Cc: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> >> > Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> >> > ---
+> >> > Changes in v2:
+> >> > Update the commit message and remove the memblock_is_map_memory() check
+> >> > according to the suggestion from Mark Rutland.
+> >> >
+> >> >  arch/arm64/mm/init.c | 9 +++++----
+> >> >  1 file changed, 5 insertions(+), 4 deletions(-)
+> >> >
+> >> > diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
+> >> > index d45f862..6af2456 100644
+> >> > --- a/arch/arm64/mm/init.c
+> >> > +++ b/arch/arm64/mm/init.c
+> >> > @@ -222,12 +222,13 @@ void __init arm64_memblock_init(void)
+> >> >
+> >> >         /*
+> >> >          * Apply the memory limit if it was set. Since the kernel may be loaded
+> >> > -        * high up in memory, add back the kernel region that must be accessible
+> >> > -        * via the linear mapping.
+> >> > +        * in the memory regions above the limit, so we need to clear the
+> >> > +        * MEMBLOCK_NOMAP flag of this region to make it can be accessible via
+> >> > +        * the linear mapping.
+> >> >          */
+> >> >         if (memory_limit != (phys_addr_t)ULLONG_MAX) {
+> >> > -               memblock_enforce_memory_limit(memory_limit);
+> >> > -               memblock_add(__pa(_text), (u64)(_end - _text));
+> >> > +               memblock_mem_limit_mark_nomap(memory_limit);
+> >> > +               memblock_clear_nomap(__pa(_text), (u64)(_end - _text));
+> >>
+> >> Up until now, we have ignored the effect of having NOMAP memblocks on
+> >> the return values of functions like memblock_phys_mem_size() and
+> >> memblock_mem_size(), since they could reasonably be expected to cover
+> >> only a small slice of all available memory. However, after applying
+> >> this patch, it may well be the case that most of memory is marked
+> >> NOMAP, and these functions will cease to work as expected.
+> >>
+> > Hi Ard, I noticed these inconsistences as you mentioned, but seems the
+> > available memory is limited correctly. For this case('mem='), will it bring
+> > some substantive side effects except that some log messages maybe confusing?
+> 
+> That is exactly the question that needs answering before we can merge
+> these patches. I know we consider mem= a development hack, but the
+> intent is to make it appear to the kernel as if only a smaller amount
+> of memory is available to the kernel, and this is signficantly
+> different from having memblock_mem_size() et al return much larger
+> values than what is actually available. Perhaps this doesn't matter at
+> all, but it is something we must discuss before proceeding with these
+> changes.
+>
+Indeed. So let's go back to the method below... 
+>
+> >>
+> >> This means NOMAP is really only suited to punch some holes into the
+> >> kernel direct mapping, and so implementing the memory limit by marking
+> >> everything NOMAP is not the way to go. Instead, we should probably
+> >> reorder the init sequence so that the regions that are reserved in the
+> >> UEFI memory map are declared and marked NOMAP [again] after applying
+> >> the memory limit in the old way.
+> >>
+> > Before this patch, I have another one addressing the same issue [1], with
+> > that patch we'll not have these inconsistences, but it looks like a little
+> > bit complicated, so it becomes current one. Any comments about that?
+> >
+> > [1]http://lists.infradead.org/pipermail/linux-arm-kernel/2016-June/438443.html
+> >
+> 
+> The problem caused by mem= is that it removes regions that are marked
+> NOMAP. So instead of marking everything above the limit NOMAP, I would
+> much rather see an alternative implementation of
+> memblock_enforce_memory_limit() that enforces the mem= limit by only
+> removing memblocks that have to NOMAP flag cleared, and leaving the
+> NOMAP ones where they are.
+>
+At least for me, this approach will mitigate the inconsistence in some degree while
+keeping the similar logic as it was, so I will post an updated version patch soon.
 
-Its only caller was efi_cleanup_page_tables(), and that, in turn,
-was unused, so just delete both functions.  This leaves a couple of
-other helpers unused, so delete them, too.
-
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
----
- arch/x86/include/asm/efi.h           |  1 -
- arch/x86/include/asm/pgtable_types.h |  2 --
- arch/x86/mm/pageattr.c               | 28 ----------------------------
- arch/x86/platform/efi/efi.c          |  2 --
- arch/x86/platform/efi/efi_32.c       |  3 ---
- arch/x86/platform/efi/efi_64.c       |  5 -----
- 6 files changed, 41 deletions(-)
-
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 78d1e7467eae..45ea38df86d4 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -125,7 +125,6 @@ extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
- extern void efi_sync_low_kernel_mappings(void);
- extern int __init efi_alloc_page_tables(void);
- extern int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages);
--extern void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages);
- extern void __init old_map_region(efi_memory_desc_t *md);
- extern void __init runtime_code_page_mkexec(void);
- extern void __init efi_runtime_update_mappings(void);
-diff --git a/arch/x86/include/asm/pgtable_types.h b/arch/x86/include/asm/pgtable_types.h
-index 7b5efe264eff..0b9f58ad10c8 100644
---- a/arch/x86/include/asm/pgtable_types.h
-+++ b/arch/x86/include/asm/pgtable_types.h
-@@ -475,8 +475,6 @@ extern pmd_t *lookup_pmd_address(unsigned long address);
- extern phys_addr_t slow_virt_to_phys(void *__address);
- extern int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
- 				   unsigned numpages, unsigned long page_flags);
--void kernel_unmap_pages_in_pgd(pgd_t *root, unsigned long address,
--			       unsigned numpages);
- #endif	/* !__ASSEMBLY__ */
- 
- #endif /* _ASM_X86_PGTABLE_DEFS_H */
-diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index 6a8026918bf6..762162af3662 100644
---- a/arch/x86/mm/pageattr.c
-+++ b/arch/x86/mm/pageattr.c
-@@ -746,18 +746,6 @@ static bool try_to_free_pmd_page(pmd_t *pmd)
- 	return true;
- }
- 
--static bool try_to_free_pud_page(pud_t *pud)
--{
--	int i;
--
--	for (i = 0; i < PTRS_PER_PUD; i++)
--		if (!pud_none(pud[i]))
--			return false;
--
--	free_page((unsigned long)pud);
--	return true;
--}
--
- static bool unmap_pte_range(pmd_t *pmd, unsigned long start, unsigned long end)
- {
- 	pte_t *pte = pte_offset_kernel(pmd, start);
-@@ -871,16 +859,6 @@ static void unmap_pud_range(pgd_t *pgd, unsigned long start, unsigned long end)
- 	 */
- }
- 
--static void unmap_pgd_range(pgd_t *root, unsigned long addr, unsigned long end)
--{
--	pgd_t *pgd_entry = root + pgd_index(addr);
--
--	unmap_pud_range(pgd_entry, addr, end);
--
--	if (try_to_free_pud_page((pud_t *)pgd_page_vaddr(*pgd_entry)))
--		pgd_clear(pgd_entry);
--}
--
- static int alloc_pte_page(pmd_t *pmd)
- {
- 	pte_t *pte = (pte_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
-@@ -1993,12 +1971,6 @@ out:
- 	return retval;
- }
- 
--void kernel_unmap_pages_in_pgd(pgd_t *root, unsigned long address,
--			       unsigned numpages)
--{
--	unmap_pgd_range(root, address, address + (numpages << PAGE_SHIFT));
--}
--
- /*
-  * The testcases use internal knowledge of the implementation that shouldn't
-  * be exposed to the rest of the kernel. Include these directly here.
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index f93545e7dc54..62986e5fbdba 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -978,8 +978,6 @@ static void __init __efi_enter_virtual_mode(void)
- 	 * EFI mixed mode we need all of memory to be accessible when
- 	 * we pass parameters to the EFI runtime services in the
- 	 * thunking code.
--	 *
--	 * efi_cleanup_page_tables(__pa(new_memmap), 1 << pg_shift);
- 	 */
- 	free_pages((unsigned long)new_memmap, pg_shift);
- 
-diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
-index 338402b91d2e..cef39b097649 100644
---- a/arch/x86/platform/efi/efi_32.c
-+++ b/arch/x86/platform/efi/efi_32.c
-@@ -49,9 +49,6 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- {
- 	return 0;
- }
--void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
--{
--}
- 
- void __init efi_map_region(efi_memory_desc_t *md)
- {
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index b226b3f497f1..d288dcea1ffe 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -285,11 +285,6 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	return 0;
- }
- 
--void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
--{
--	kernel_unmap_pages_in_pgd(efi_pgd, pa_memmap, num_pages);
--}
--
- static void __init __map_region(efi_memory_desc_t *md, u64 va)
- {
- 	unsigned long flags = _PAGE_RW;
--- 
-2.7.4
+Thanks,
+Dennis
+> 
