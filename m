@@ -1,97 +1,290 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v2 2/2] arm64:acpi Fix the acpi alignment exeception when
- 'mem=' specified
-Date: Mon, 27 Jun 2016 10:53:18 +0100
-Message-ID: <20160627095318.GA1113@leverpostej>
-References: <1466738027-15066-1-git-send-email-dennis.chen@arm.com>
- <1466738027-15066-2-git-send-email-dennis.chen@arm.com>
- <CAKv+Gu8ZyWG-OZ8=2u9jrdS-0j+qL1sstPQ0uX=j7wyj+ETo-w@mail.gmail.com>
- <20160624120058.GA19972@arm.com>
- <CAKv+Gu9XHYVEoL846WBx6PZqSnbBCjwup0CPkZ1JexJVkvds9A@mail.gmail.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 2/7] efi: Document #define FOO_PROTOCOL_GUID layout
+Date: Mon, 27 Jun 2016 12:49:20 +0200
+Message-ID: <20160627104920.GA9099@gmail.com>
+References: <1466839230-12781-1-git-send-email-matt@codeblueprint.co.uk>
+ <1466839230-12781-3-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu9XHYVEoL846WBx6PZqSnbBCjwup0CPkZ1JexJVkvds9A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1466839230-12781-3-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, nd-5wv7dgnIgG8@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "Rafael J . Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org" <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Joe Perches <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jun 24, 2016 at 04:12:02PM +0200, Ard Biesheuvel wrote:
-> On 24 June 2016 at 14:01, Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org> wrote:
-> > On Fri, Jun 24, 2016 at 12:43:52PM +0200, Ard Biesheuvel wrote:
-> >> On 24 June 2016 at 05:13, Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org> wrote:
-> >> >         /*
-> >> >          * Apply the memory limit if it was set. Since the kernel may be loaded
-> >> > -        * high up in memory, add back the kernel region that must be accessible
-> >> > -        * via the linear mapping.
-> >> > +        * in the memory regions above the limit, so we need to clear the
-> >> > +        * MEMBLOCK_NOMAP flag of this region to make it can be accessible via
-> >> > +        * the linear mapping.
-> >> >          */
-> >> >         if (memory_limit != (phys_addr_t)ULLONG_MAX) {
-> >> > -               memblock_enforce_memory_limit(memory_limit);
-> >> > -               memblock_add(__pa(_text), (u64)(_end - _text));
-> >> > +               memblock_mem_limit_mark_nomap(memory_limit);
-> >> > +               memblock_clear_nomap(__pa(_text), (u64)(_end - _text));
-> >>
-> >> Up until now, we have ignored the effect of having NOMAP memblocks on
-> >> the return values of functions like memblock_phys_mem_size() and
-> >> memblock_mem_size(), since they could reasonably be expected to cover
-> >> only a small slice of all available memory. However, after applying
-> >> this patch, it may well be the case that most of memory is marked
-> >> NOMAP, and these functions will cease to work as expected.
-> >>
-> > Hi Ard, I noticed these inconsistences as you mentioned, but seems the
-> > available memory is limited correctly. For this case('mem='), will it bring
-> > some substantive side effects except that some log messages maybe confusing?
+
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+
+> From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 > 
-> That is exactly the question that needs answering before we can merge
-> these patches. I know we consider mem= a development hack, but the
-> intent is to make it appear to the kernel as if only a smaller amount
-> of memory is available to the kernel, and this is signficantly
-> different from having memblock_mem_size() et al return much larger
-> values than what is actually available. Perhaps this doesn't matter at
-> all, but it is something we must discuss before proceeding with these
-> changes.
-
-Yeah, I think we need to figure out precisely what the expected
-semantics are.
-
->From taking a look, memblock_mem_size() is only used by arch/x86. In
-reserve_initrd, it's used to determine the amount of *free* memory, but
-it counts reserved (and nomap) regions, so that doesn't feel right
-regardless. For reserve_crashkernel_low it's not immediately clear to me
-what it should do, as I've not gone digging.
-
-There are many memblock_end_of_DRAM() users, mostly in arch code. We
-(arm64) use it to determine the size of the linear map, and effectively
-need it to be the limit for what should be mapped, which could/should
-exclude nomap. I've not yet dug into the rest, so I don't know whether
-that holds.
-
-> >> This means NOMAP is really only suited to punch some holes into the
-> >> kernel direct mapping, and so implementing the memory limit by marking
-> >> everything NOMAP is not the way to go. Instead, we should probably
-> >> reorder the init sequence so that the regions that are reserved in the
-> >> UEFI memory map are declared and marked NOMAP [again] after applying
-> >> the memory limit in the old way.
-> >>
-> > Before this patch, I have another one addressing the same issue [1], with
-> > that patch we'll not have these inconsistences, but it looks like a little
-> > bit complicated, so it becomes current one. Any comments about that?
-> >
-> > [1]http://lists.infradead.org/pipermail/linux-arm-kernel/2016-June/438443.html
+> Add a comment documenting why EFI GUIDs are laid out like they are.
+> Ideally I'd like to change all the ", " to "," too, but right now the
+> format is such that checkpatch won't complain with new ones, and staring
+> at checkpatch didn't get me anywhere towards making that work.
 > 
-> The problem caused by mem= is that it removes regions that are marked
-> NOMAP. So instead of marking everything above the limit NOMAP, I would
-> much rather see an alternative implementation of
-> memblock_enforce_memory_limit() that enforces the mem= limit by only
-> removing memblocks that have to NOMAP flag cleared, and leaving the
-> NOMAP ones where they are.
+> Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: Joe Perches <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> ---
+>  include/linux/efi.h | 17 ++++++++++++++++-
+>  1 file changed, 16 insertions(+), 1 deletion(-)
+> 
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index f196dd0b0f2f..03009695760d 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -536,7 +536,22 @@ typedef efi_status_t efi_query_variable_store_t(u32 attributes,
+>  void efi_native_runtime_setup(void);
+>  
+>  /*
+> - *  EFI Configuration Table and GUID definitions
+> + * EFI Configuration Table and GUID definitions
+> + *
+> + * These should be formatted roughly like the ones in the UEFI SPEC has
+> + * them.  It makes them easier to grep for, and they look the same when
+> + * you're staring at them.  Here's the guide:
+> + *
+> + * GUID: 12345678-1234-1234-1234-123456789012
+> + * Spec:
+> + *      #define EFI_SOME_PROTOCOL_GUID \
+> + *        {0x12345678,0x1234,0x1234,\
+> + *          {0x12,0x34,0x12,0x34,0x56,0x78,0x90,0x12}}
+> + * Here:
+> + *	#define SOME_PROTOCOL_GUID \
+> + *		EFI_GUID(0x12345678, 0x1234,  0x1234, \
+> + *			 0x12, 0x34, 0x12, 0x34, 0x56, 0x78, 0x90, 0x12)
+> + *      ^ tab   ^tab    ^ space
+>   */
+>  #define NULL_GUID \
+>  	EFI_GUID(0x00000000, 0x0000, 0x0000, \
 
-That would work for me.
+Btw., another possible way to organize the GUIDs would be to ignore checkpatch (we 
+should ignore checkpatch when it's wrong) and go for a nice table format:
+
+#define NULL_GUID				EFI_GUID(0x00000000, 0x0000, 0x0000,  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+#define MPS_TABLE_GUID				EFI_GUID(0xeb9d2d2f, 0x2d88, 0x11d3,  0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+#define ACPI_TABLE_GUID				EFI_GUID(0xeb9d2d30, 0x2d88, 0x11d3,  0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+#define ACPI_20_TABLE_GUID			EFI_GUID(0x8868e871, 0xe4f1, 0x11d3,  0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81)
+#define SMBIOS_TABLE_GUID			EFI_GUID(0xeb9d2d31, 0x2d88, 0x11d3,  0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+#define SMBIOS3_TABLE_GUID			EFI_GUID(0xf2fd1544, 0x9794, 0x4a2c,  0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94)
+#define SAL_SYSTEM_TABLE_GUID			EFI_GUID(0xeb9d2d32, 0x2d88, 0x11d3,  0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+#define HCDP_TABLE_GUID				EFI_GUID(0xf951938d, 0x620b, 0x42ef,  0x82, 0x79, 0xa8, 0x4b, 0x79, 0x61, 0x78, 0x98)
+#define UGA_IO_PROTOCOL_GUID			EFI_GUID(0x61a4d49e, 0x6f68, 0x4f1b,  0xb9, 0x22, 0xa8, 0x6e, 0xed, 0x0b, 0x07, 0xa2)
+#define EFI_GLOBAL_VARIABLE_GUID		EFI_GUID(0x8be4df61, 0x93ca, 0x11d2,  0xaa, 0x0d, 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c)
+#define UV_SYSTEM_TABLE_GUID			EFI_GUID(0x3b13a7d4, 0x633e, 0x11dd,  0x93, 0xec, 0xda, 0x25, 0x56, 0xd8, 0x95, 0x93)
+#define LINUX_EFI_CRASH_GUID			EFI_GUID(0xcfc8fc79, 0xbe2e, 0x4ddc,  0x97, 0xf0, 0x9f, 0x98, 0xbf, 0xe2, 0x98, 0xa0)
+#define LOADED_IMAGE_PROTOCOL_GUID		EFI_GUID(0x5b1b31a1, 0x9562, 0x11d2,  0x8e, 0x3f, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
+#define EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID	EFI_GUID(0x9042a9de, 0x23dc, 0x4a38,  0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a)
+#define EFI_UGA_PROTOCOL_GUID			EFI_GUID(0x982c298b, 0xf4fa, 0x41cb,  0xb8, 0x38, 0x77, 0xaa, 0x68, 0x8f, 0xb8, 0x39)
+#define EFI_PCI_IO_PROTOCOL_GUID		EFI_GUID(0x4cf5b200, 0x68b8, 0x4ca5,  0x9e, 0xec, 0xb2, 0x3e, 0x3f, 0x50, 0x02, 0x9a)
+#define EFI_FILE_INFO_ID			EFI_GUID(0x9576e92, 0x6d3f, 0x11d2,  0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
+#define EFI_SYSTEM_RESOURCE_TABLE_GUID		EFI_GUID(0xb122a263, 0x3661, 0x4f68,  0x99, 0x29, 0x78, 0xf8, 0xb0, 0xd6, 0x21, 0x80)
+#define EFI_FILE_SYSTEM_GUID			EFI_GUID(0x964e5b22, 0x6459, 0x11d2,  0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
+#define DEVICE_TREE_GUID			EFI_GUID(0xb1b621d5, 0xf19c, 0x41a5,  0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0)
+#define EFI_PROPERTIES_TABLE_GUID		EFI_GUID(0x880aaca3, 0x4adc, 0x4a04,  0x90, 0x79, 0xb7, 0x47, 0x34, 0x08, 0x25, 0xe5)
+#define EFI_RNG_PROTOCOL_GUID			EFI_GUID(0x3152bca5, 0xeade, 0x433d,  0x86, 0x2e, 0xc0, 0x1c, 0xdc, 0x29, 0x1f, 0x44)
+#define EFI_MEMORY_ATTRIBUTES_TABLE_GUID	EFI_GUID(0xdcfa911d, 0x26eb, 0x469f,  0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
+#define EFI_CONSOLE_OUT_DEVICE_GUID		EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+
+/*
+ * This GUID is used to pass to the kernel proper the struct screen_info
+ * structure that was populated by the stub based on the GOP protocol instance
+ * associated with ConOut
+ */
+#define LINUX_EFI_ARM_SCREEN_INFO_TABLE_GUID	EFI_GUID(0xe03fc20a, 0x85dc, 0x406e,  0xb9, 0x0e, 0x4a, 0xb5, 0x02, 0x37, 0x1d, 0x95)
+#define LINUX_EFI_LOADER_ENTRY_GUID		EFI_GUID(0x4a67b082, 0x0a4c, 0x41cf,  0xb6, 0xc7, 0x44, 0x0b, 0x29, 0xbb, 0x8c, 0x4f)
+
+This should look pretty nice if you have a large enough terminal window.
+
+The advantage of such a table organization is that two weirdnesses immediately 
+showed up:
+
+#define EFI_PCI_IO_PROTOCOL_GUID		EFI_GUID(0x4cf5b200, 0x68b8, 0x4ca5,  0x9e, 0xec, 0xb2, 0x3e, 0x3f, 0x50, 0x02, 0x9a)
+#define EFI_FILE_INFO_ID			EFI_GUID(0x9576e92, 0x6d3f, 0x11d2,  0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
+#define EFI_SYSTEM_RESOURCE_TABLE_GUID		EFI_GUID(0xb122a263, 0x3661, 0x4f68,  0x99, 0x29, 0x78, 0xf8, 0xb0, 0xd6, 0x21, 0x80)
+
+EFI_FILE_INFO_ID should probably be written as 0x09576e92. (I believe the GUID is 
+correct.) So we can write that as:
+
+#define EFI_PCI_IO_PROTOCOL_GUID		EFI_GUID(0x4cf5b200, 0x68b8, 0x4ca5,  0x9e, 0xec, 0xb2, 0x3e, 0x3f, 0x50, 0x02, 0x9a)
+#define EFI_FILE_INFO_ID			EFI_GUID(0x09576e92, 0x6d3f, 0x11d2,  0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
+#define EFI_SYSTEM_RESOURCE_TABLE_GUID		EFI_GUID(0xb122a263, 0x3661, 0x4f68,  0x99, 0x29, 0x78, 0xf8, 0xb0, 0xd6, 0x21, 0x80)
+
+The other weirdness is the misalignment of the '0xe' portion here:
+
+#define LINUX_EFI_ARM_SCREEN_INFO_TABLE_GUID	EFI_GUID(0xe03fc20a, 0x85dc, 0x406e,  0xb9, 0xe, 0x4a, 0xb5, 0x02, 0x37, 0x1d, 0x95)
+#define LINUX_EFI_LOADER_ENTRY_GUID		EFI_GUID(0x4a67b082, 0x0a4c, 0x41cf,  0xb6, 0xc7, 0x44, 0x0b, 0x29, 0xbb, 0x8c, 0x4f)
+
+Am I correct that LINUX_EFI_ARM_SCREEN_INFO_TABLE_GUID is purely Linux kernel 
+internal, and that we can write 0xe as 0x0e?
+
+The patch below implements this organization of the GUIDs on top of your patch.
+
+Also note that it should still be easy to line up these lines with the spec, as I 
+left an extra space before the 'byte' portion of the table, so the table is 
+separated into two areas visually.
 
 Thanks,
-Mark.
+
+	Ingo
+
+---
+Subject: fix
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Date: Mon Jun 27 12:37:05 CEST 2016
+
+Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+---
+ include/linux/efi.h |  128 ++++++++++------------------------------------------
+ 1 file changed, 26 insertions(+), 102 deletions(-)
+
+Index: tip/include/linux/efi.h
+===================================================================
+--- tip.orig/include/linux/efi.h
++++ tip/include/linux/efi.h
+@@ -553,114 +553,38 @@ void efi_native_runtime_setup(void);
+  *			 0x12, 0x34, 0x12, 0x34, 0x56, 0x78, 0x90, 0x12)
+  *      ^ tab   ^tab    ^ space
+  */
+-#define NULL_GUID \
+-	EFI_GUID(0x00000000, 0x0000, 0x0000, \
+-		 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+-
+-#define MPS_TABLE_GUID    \
+-	EFI_GUID(0xeb9d2d2f, 0x2d88, 0x11d3, \
+-		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+-
+-#define ACPI_TABLE_GUID    \
+-	EFI_GUID(0xeb9d2d30, 0x2d88, 0x11d3, \
+-		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+-
+-#define ACPI_20_TABLE_GUID    \
+-	EFI_GUID(0x8868e871, 0xe4f1, 0x11d3, \
+-		 0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81)
+-
+-#define SMBIOS_TABLE_GUID    \
+-	EFI_GUID(0xeb9d2d31, 0x2d88, 0x11d3, \
+-		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+-
+-#define SMBIOS3_TABLE_GUID    \
+-	EFI_GUID(0xf2fd1544, 0x9794, 0x4a2c, \
+-		 0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94)
+-
+-#define SAL_SYSTEM_TABLE_GUID    \
+-	EFI_GUID(0xeb9d2d32, 0x2d88, 0x11d3, \
+-		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+-
+-#define HCDP_TABLE_GUID	\
+-	EFI_GUID(0xf951938d, 0x620b, 0x42ef, \
+-		 0x82, 0x79, 0xa8, 0x4b, 0x79, 0x61, 0x78, 0x98)
+-
+-#define UGA_IO_PROTOCOL_GUID \
+-	EFI_GUID(0x61a4d49e, 0x6f68, 0x4f1b, \
+-		 0xb9, 0x22, 0xa8, 0x6e, 0xed, 0x0b, 0x07, 0xa2)
+-
+-#define EFI_GLOBAL_VARIABLE_GUID \
+-	EFI_GUID(0x8be4df61, 0x93ca, 0x11d2, \
+-		 0xaa, 0x0d, 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c)
+-
+-#define UV_SYSTEM_TABLE_GUID \
+-	EFI_GUID(0x3b13a7d4, 0x633e, 0x11dd, \
+-		 0x93, 0xec, 0xda, 0x25, 0x56, 0xd8, 0x95, 0x93)
+-
+-#define LINUX_EFI_CRASH_GUID \
+-	EFI_GUID(0xcfc8fc79, 0xbe2e, 0x4ddc, \
+-		 0x97, 0xf0, 0x9f, 0x98, 0xbf, 0xe2, 0x98, 0xa0)
+-
+-#define LOADED_IMAGE_PROTOCOL_GUID \
+-	EFI_GUID(0x5b1b31a1, 0x9562, 0x11d2, \
+-		 0x8e, 0x3f, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
+-
+-#define EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID \
+-	EFI_GUID(0x9042a9de, 0x23dc, 0x4a38, \
+-		 0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a)
+-
+-#define EFI_UGA_PROTOCOL_GUID \
+-	EFI_GUID(0x982c298b, 0xf4fa, 0x41cb, \
+-		 0xb8, 0x38, 0x77, 0xaa, 0x68, 0x8f, 0xb8, 0x39)
+-
+-#define EFI_PCI_IO_PROTOCOL_GUID \
+-	EFI_GUID(0x4cf5b200, 0x68b8, 0x4ca5, \
+-		 0x9e, 0xec, 0xb2, 0x3e, 0x3f, 0x50, 0x02, 0x9a)
+-
+-#define EFI_FILE_INFO_ID \
+-	EFI_GUID(0x9576e92, 0x6d3f, 0x11d2, \
+-		 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
+-
+-#define EFI_SYSTEM_RESOURCE_TABLE_GUID \
+-	EFI_GUID(0xb122a263, 0x3661, 0x4f68, \
+-		 0x99, 0x29, 0x78, 0xf8, 0xb0, 0xd6, 0x21, 0x80)
+-
+-#define EFI_FILE_SYSTEM_GUID \
+-	EFI_GUID(0x964e5b22, 0x6459, 0x11d2, \
+-		 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
+-
+-#define DEVICE_TREE_GUID \
+-	EFI_GUID(0xb1b621d5, 0xf19c, 0x41a5, \
+-		 0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0)
+-
+-#define EFI_PROPERTIES_TABLE_GUID \
+-	EFI_GUID(0x880aaca3, 0x4adc, 0x4a04, \
+-		 0x90, 0x79, 0xb7, 0x47, 0x34, 0x08, 0x25, 0xe5)
+-
+-#define EFI_RNG_PROTOCOL_GUID \
+-	EFI_GUID(0x3152bca5, 0xeade, 0x433d, \
+-		 0x86, 0x2e, 0xc0, 0x1c, 0xdc, 0x29, 0x1f, 0x44)
+-
+-#define EFI_MEMORY_ATTRIBUTES_TABLE_GUID \
+-	EFI_GUID(0xdcfa911d, 0x26eb, 0x469f, \
+-		 0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
+-
+-#define EFI_CONSOLE_OUT_DEVICE_GUID \
+-	EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4, \
+-		 0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
++#define NULL_GUID				EFI_GUID(0x00000000, 0x0000, 0x0000,  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
++#define MPS_TABLE_GUID				EFI_GUID(0xeb9d2d2f, 0x2d88, 0x11d3,  0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
++#define ACPI_TABLE_GUID				EFI_GUID(0xeb9d2d30, 0x2d88, 0x11d3,  0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
++#define ACPI_20_TABLE_GUID			EFI_GUID(0x8868e871, 0xe4f1, 0x11d3,  0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81)
++#define SMBIOS_TABLE_GUID			EFI_GUID(0xeb9d2d31, 0x2d88, 0x11d3,  0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
++#define SMBIOS3_TABLE_GUID			EFI_GUID(0xf2fd1544, 0x9794, 0x4a2c,  0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94)
++#define SAL_SYSTEM_TABLE_GUID			EFI_GUID(0xeb9d2d32, 0x2d88, 0x11d3,  0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
++#define HCDP_TABLE_GUID				EFI_GUID(0xf951938d, 0x620b, 0x42ef,  0x82, 0x79, 0xa8, 0x4b, 0x79, 0x61, 0x78, 0x98)
++#define UGA_IO_PROTOCOL_GUID			EFI_GUID(0x61a4d49e, 0x6f68, 0x4f1b,  0xb9, 0x22, 0xa8, 0x6e, 0xed, 0x0b, 0x07, 0xa2)
++#define EFI_GLOBAL_VARIABLE_GUID		EFI_GUID(0x8be4df61, 0x93ca, 0x11d2,  0xaa, 0x0d, 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c)
++#define UV_SYSTEM_TABLE_GUID			EFI_GUID(0x3b13a7d4, 0x633e, 0x11dd,  0x93, 0xec, 0xda, 0x25, 0x56, 0xd8, 0x95, 0x93)
++#define LINUX_EFI_CRASH_GUID			EFI_GUID(0xcfc8fc79, 0xbe2e, 0x4ddc,  0x97, 0xf0, 0x9f, 0x98, 0xbf, 0xe2, 0x98, 0xa0)
++#define LOADED_IMAGE_PROTOCOL_GUID		EFI_GUID(0x5b1b31a1, 0x9562, 0x11d2,  0x8e, 0x3f, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
++#define EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID	EFI_GUID(0x9042a9de, 0x23dc, 0x4a38,  0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a)
++#define EFI_UGA_PROTOCOL_GUID			EFI_GUID(0x982c298b, 0xf4fa, 0x41cb,  0xb8, 0x38, 0x77, 0xaa, 0x68, 0x8f, 0xb8, 0x39)
++#define EFI_PCI_IO_PROTOCOL_GUID		EFI_GUID(0x4cf5b200, 0x68b8, 0x4ca5,  0x9e, 0xec, 0xb2, 0x3e, 0x3f, 0x50, 0x02, 0x9a)
++#define EFI_FILE_INFO_ID			EFI_GUID(0x09576e92, 0x6d3f, 0x11d2,  0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
++#define EFI_SYSTEM_RESOURCE_TABLE_GUID		EFI_GUID(0xb122a263, 0x3661, 0x4f68,  0x99, 0x29, 0x78, 0xf8, 0xb0, 0xd6, 0x21, 0x80)
++#define EFI_FILE_SYSTEM_GUID			EFI_GUID(0x964e5b22, 0x6459, 0x11d2,  0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
++#define DEVICE_TREE_GUID			EFI_GUID(0xb1b621d5, 0xf19c, 0x41a5,  0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0)
++#define EFI_PROPERTIES_TABLE_GUID		EFI_GUID(0x880aaca3, 0x4adc, 0x4a04,  0x90, 0x79, 0xb7, 0x47, 0x34, 0x08, 0x25, 0xe5)
++#define EFI_RNG_PROTOCOL_GUID			EFI_GUID(0x3152bca5, 0xeade, 0x433d,  0x86, 0x2e, 0xc0, 0x1c, 0xdc, 0x29, 0x1f, 0x44)
++#define EFI_MEMORY_ATTRIBUTES_TABLE_GUID	EFI_GUID(0xdcfa911d, 0x26eb, 0x469f,  0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
++#define EFI_CONSOLE_OUT_DEVICE_GUID		EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+ 
+ /*
+  * This GUID is used to pass to the kernel proper the struct screen_info
+  * structure that was populated by the stub based on the GOP protocol instance
+  * associated with ConOut
+  */
+-#define LINUX_EFI_ARM_SCREEN_INFO_TABLE_GUID \
+-	EFI_GUID(0xe03fc20a, 0x85dc, 0x406e, \
+-		 0xb9, 0xe, 0x4a, 0xb5, 0x02, 0x37, 0x1d, 0x95)
+-
+-#define LINUX_EFI_LOADER_ENTRY_GUID \
+-	EFI_GUID(0x4a67b082, 0x0a4c, 0x41cf, \
+-		 0xb6, 0xc7, 0x44, 0x0b, 0x29, 0xbb, 0x8c, 0x4f)
++#define LINUX_EFI_ARM_SCREEN_INFO_TABLE_GUID	EFI_GUID(0xe03fc20a, 0x85dc, 0x406e,  0xb9, 0x0e, 0x4a, 0xb5, 0x02, 0x37, 0x1d, 0x95)
++#define LINUX_EFI_LOADER_ENTRY_GUID		EFI_GUID(0x4a67b082, 0x0a4c, 0x41cf,  0xb6, 0xc7, 0x44, 0x0b, 0x29, 0xbb, 0x8c, 0x4f)
+ 
+ typedef struct {
+ 	efi_guid_t guid;
