@@ -1,33 +1,117 @@
-From: "Rafael J. Wysocki" <rafael@kernel.org>
-Subject: Re: [PATCH v4 5/8] spi: add support for ACPI reconfigure notifications
-Date: Mon, 27 Jun 2016 23:13:56 +0200
-Message-ID: <CAJZ5v0gzw4oWicOE8yKPZCKR8r9MxpnaBUBgZXOTzkz8hc_BQw@mail.gmail.com>
-References: <1466164336-9508-1-git-send-email-octavian.purdila@intel.com>
- <1466164336-9508-6-git-send-email-octavian.purdila@intel.com> <20160627141713.GW28202@sirena.org.uk>
+From: Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v2 2/2] arm64:acpi Fix the acpi alignment exeception when
+ 'mem=' specified
+Date: Tue, 28 Jun 2016 10:20:12 +0800
+Message-ID: <20160628022010.GA9594@arm.com>
+References: <1466738027-15066-1-git-send-email-dennis.chen@arm.com>
+ <1466738027-15066-2-git-send-email-dennis.chen@arm.com>
+ <CAKv+Gu8ZyWG-OZ8=2u9jrdS-0j+qL1sstPQ0uX=j7wyj+ETo-w@mail.gmail.com>
+ <20160624120058.GA19972@arm.com>
+ <CAKv+Gu9XHYVEoL846WBx6PZqSnbBCjwup0CPkZ1JexJVkvds9A@mail.gmail.com>
+ <20160627095318.GA1113@leverpostej>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <20160627141713.GW28202@sirena.org.uk>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>, Octavian Purdila <octavian.purdila@intel.com>
-Cc: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, linux-efi@vger.kernel.org, linux-i2c <linux-i2c@vger.kernel.org>, linux-spi <linux-spi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Tirdea, Irina" <irina.tirdea@intel.com>, leonard.crestez@intel.com
+Content-Type: text/plain; charset=WINDOWS-1252
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160627095318.GA1113@leverpostej>
+Content-Disposition: inline
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, nd-5wv7dgnIgG8@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "Rafael J . Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org" <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jun 27, 2016 at 4:17 PM, Mark Brown <broonie@kernel.org> wrote:
-> On Fri, Jun 17, 2016 at 02:52:13PM +0300, Octavian Purdila wrote:
+On Mon, Jun 27, 2016 at 10:53:18AM +0100, Mark Rutland wrote:
+> On Fri, Jun 24, 2016 at 04:12:02PM +0200, Ard Biesheuvel wrote:
+> > On 24 June 2016 at 14:01, Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org> wrote:
+> > > On Fri, Jun 24, 2016 at 12:43:52PM +0200, Ard Biesheuvel wrote:
+> > >> On 24 June 2016 at 05:13, Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org> wrote:
+> > >> >         /*
+> > >> >          * Apply the memory limit if it was set. Since the kernel may be loaded
+> > >> > -        * high up in memory, add back the kernel region that must be accessible
+> > >> > -        * via the linear mapping.
+> > >> > +        * in the memory regions above the limit, so we need to clear the
+> > >> > +        * MEMBLOCK_NOMAP flag of this region to make it can be accessible via
+> > >> > +        * the linear mapping.
+> > >> >          */
+> > >> >         if (memory_limit != (phys_addr_t)ULLONG_MAX) {
+> > >> > -               memblock_enforce_memory_limit(memory_limit);
+> > >> > -               memblock_add(__pa(_text), (u64)(_end - _text));
+> > >> > +               memblock_mem_limit_mark_nomap(memory_limit);
+> > >> > +               memblock_clear_nomap(__pa(_text), (u64)(_end - _text));
+> > >>
+> > >> Up until now, we have ignored the effect of having NOMAP memblocks on
+> > >> the return values of functions like memblock_phys_mem_size() and
+> > >> memblock_mem_size(), since they could reasonably be expected to cover
+> > >> only a small slice of all available memory. However, after applying
+> > >> this patch, it may well be the case that most of memory is marked
+> > >> NOMAP, and these functions will cease to work as expected.
+> > >>
+> > > Hi Ard, I noticed these inconsistences as you mentioned, but seems the
+> > > available memory is limited correctly. For this case('mem='), will it bring
+> > > some substantive side effects except that some log messages maybe confusing?
+> > 
+> > That is exactly the question that needs answering before we can merge
+> > these patches. I know we consider mem= a development hack, but the
+> > intent is to make it appear to the kernel as if only a smaller amount
+> > of memory is available to the kernel, and this is signficantly
+> > different from having memblock_mem_size() et al return much larger
+> > values than what is actually available. Perhaps this doesn't matter at
+> > all, but it is something we must discuss before proceeding with these
+> > changes.
+> 
+> Yeah, I think we need to figure out precisely what the expected
+> semantics are.
+> 
+> From taking a look, memblock_mem_size() is only used by arch/x86. In
+> reserve_initrd, it's used to determine the amount of *free* memory, but
+> it counts reserved (and nomap) regions, so that doesn't feel right
+> regardless. For reserve_crashkernel_low it's not immediately clear to me
+> what it should do, as I've not gone digging.
 >
->> This patch adds supports for SPI device enumeration and removal via
->> ACPI reconfiguration notifications that are send as a result of an
->> ACPI table load or unload operation.
+After rough digging go, memblock_mem_size() used by arch/x86 to calculate
+the size of a segment of direct mapping physical memory, it only counts on 
+memory memblock region regardless of the flag of that region, so from this
+point, if we have a segment of memory marked as NOMAP, memblock_mem_size()
+will still take its size into the total size and have it a direct mapped.
+IMO memblock_mem_size() is not used to determine the amount of *free*, it
+just to determine the amount of mem that can be mapped directly, so it's
+reasonable to count reserved regions.
+    
+> 
+> There are many memblock_end_of_DRAM() users, mostly in arch code. We
+> (arm64) use it to determine the size of the linear map, and effectively
+> need it to be the limit for what should be mapped, which could/should
+> exclude nomap. I've not yet dug into the rest, so I don't know whether
+> that holds.
 >
-> I still have the same concern I've had all the way through here: this is
-> very similar to the equivalent DT code but not quite, especially in
-> regard to the OF_POPULATED flag which has no ACPI equivalent.  This
-> gives us ACPI code which just looks like it's missing something.  I'd
-> like to see the comparison at least covered in the changelog so people
-> have something to refer to in future when trying to understand why
-> things are done this way.
-
-I agree here.
-
-Tavi, please extend the changelog as requested by Mark.
+we will use memblock_end_of_DRAM() to get the top boundary of the linear mapping,
+given some memblock region is NOMAP, so some holes will be punched into the
+linear mapping zone just as you mentioned those NOMAP should be excluded.
+As my understanding, NOMAP regions only have possible potential side effect to count
+the mem size such as memblock_mem_size 
+> 
+> > >> This means NOMAP is really only suited to punch some holes into the
+> > >> kernel direct mapping, and so implementing the memory limit by marking
+> > >> everything NOMAP is not the way to go. Instead, we should probably
+> > >> reorder the init sequence so that the regions that are reserved in the
+> > >> UEFI memory map are declared and marked NOMAP [again] after applying
+> > >> the memory limit in the old way.
+> > >>
+> > > Before this patch, I have another one addressing the same issue [1], with
+> > > that patch we'll not have these inconsistences, but it looks like a little
+> > > bit complicated, so it becomes current one. Any comments about that?
+> > >
+> > > [1]http://lists.infradead.org/pipermail/linux-arm-kernel/2016-June/438443.html
+> > 
+> > The problem caused by mem= is that it removes regions that are marked
+> > NOMAP. So instead of marking everything above the limit NOMAP, I would
+> > much rather see an alternative implementation of
+> > memblock_enforce_memory_limit() that enforces the mem= limit by only
+> > removing memblocks that have to NOMAP flag cleared, and leaving the
+> > NOMAP ones where they are.
+> 
+> That would work for me.
+> 
+> Thanks,
+> Mark.
+> 
