@@ -1,240 +1,81 @@
 From: Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v3 1/2] mm: memblock Add some new functions to address
- the mem limit issue
-Date: Tue, 28 Jun 2016 10:55:41 +0800
-Message-ID: <20160628025539.GB9594@arm.com>
-References: <1466994431-6214-1-git-send-email-dennis.chen@arm.com>
- <20160627142818.GI1113@leverpostej>
+Subject: [PATCH v4 1/3] mm: memblock enhence the memblock debugfs output
+Date: Tue, 28 Jun 2016 17:45:35 +0800
+Message-ID: <1467107137-29631-1-git-send-email-dennis.chen@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=WINDOWS-1252
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160627142818.GI1113@leverpostej>
-Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, nd-5wv7dgnIgG8@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "Rafael J . Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: nd-5wv7dgnIgG8@public.gmane.org, Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "Rafael J . Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jun 27, 2016 at 03:28:19PM +0100, Mark Rutland wrote:
-> On Mon, Jun 27, 2016 at 10:27:10AM +0800, Dennis Chen wrote:
-> > In some cases, memblock is queried to determine whether a physical
-> > address corresponds to memory present in a system even if unused by
-> > the OS for the linear mapping, highmem, etc. For example, the ACPI
-> > core needs this information to determine which attributes to use when
-> > mapping ACPI regions. Use of incorrect memory types can result in
-> > faults, data corruption, or other issues.
-> > 
-> > Removing memory with memblock_enforce_memory_limit throws away this
-> > information, and so a kernel booted with 'mem=' may suffers from the
-> > issues described above. To avoid this, we need to keep those NOMAP
-> > regions instead of removing all above limit, which preserves the
-> > information we need while preventing other use of the regions.
-> > 
-> > This patch adds new insfrastructure to retain all NOMAP memblock regions
-> > while removing others, to cater for this.
-> > 
-> > At last, we add 'size' and 'flag' debug output in the memblock debugfs
-> > for ease of the memblock debug.
-> > The '/sys/kernel/debug/memblock/memory' output looks like before:
-> >    0: 0x0000008000000000..0x0000008001e7ffff
-> >    1: 0x0000008001e80000..0x00000083ff184fff
-> >    2: 0x00000083ff185000..0x00000083ff1c2fff
-> >    3: 0x00000083ff1c3000..0x00000083ff222fff
-> >    4: 0x00000083ff223000..0x00000083ffe42fff
-> >    5: 0x00000083ffe43000..0x00000083ffffffff
-> > 
-> > After applied:
-> >    0: 0x0000008000000000..0x0000008001e7ffff  0x0000000001e80000  0x4
-> >    1: 0x0000008001e80000..0x00000083ff184fff  0x00000003fd305000  0x0
-> >    2: 0x00000083ff185000..0x00000083ff1c2fff  0x000000000003e000  0x4
-> >    3: 0x00000083ff1c3000..0x00000083ff222fff  0x0000000000060000  0x0
-> >    4: 0x00000083ff223000..0x00000083ffe42fff  0x0000000000c20000  0x4
-> >    5: 0x00000083ffe43000..0x00000083ffffffff  0x00000000001bd000  0x0
-> 
-> The debugfs changes should be a separate patch. Even if they're useful
-> for debugging this patch, they're logically independent.
->
-Indeed. Will isolate it as an individual patch for this set.
-> 
-> > Signed-off-by: Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org>
-> > Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-> > Cc: Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>
-> > Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-> > Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> > Cc: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> > Cc: linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org
-> > Cc: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > ---
-> >  include/linux/memblock.h |  1 +
-> >  mm/memblock.c            | 55 +++++++++++++++++++++++++++++++++++++++++-------
-> >  2 files changed, 48 insertions(+), 8 deletions(-)
-> > 
-> > diff --git a/include/linux/memblock.h b/include/linux/memblock.h
-> > index 6c14b61..2925da2 100644
-> > --- a/include/linux/memblock.h
-> > +++ b/include/linux/memblock.h
-> > @@ -332,6 +332,7 @@ phys_addr_t memblock_mem_size(unsigned long limit_pfn);
-> >  phys_addr_t memblock_start_of_DRAM(void);
-> >  phys_addr_t memblock_end_of_DRAM(void);
-> >  void memblock_enforce_memory_limit(phys_addr_t memory_limit);
-> > +void memblock_mem_limit_remove_map(phys_addr_t limit);
-> >  bool memblock_is_memory(phys_addr_t addr);
-> >  int memblock_is_map_memory(phys_addr_t addr);
-> >  int memblock_is_region_memory(phys_addr_t base, phys_addr_t size);
-> > diff --git a/mm/memblock.c b/mm/memblock.c
-> > index ca09915..8099f1a 100644
-> > --- a/mm/memblock.c
-> > +++ b/mm/memblock.c
-> > @@ -1465,14 +1465,11 @@ phys_addr_t __init_memblock memblock_end_of_DRAM(void)
-> >  	return (memblock.memory.regions[idx].base + memblock.memory.regions[idx].size);
-> >  }
-> >  
-> > -void __init memblock_enforce_memory_limit(phys_addr_t limit)
-> > +static phys_addr_t __init_memblock __find_max_addr(phys_addr_t limit)
-> >  {
-> >  	phys_addr_t max_addr = (phys_addr_t)ULLONG_MAX;
-> >  	struct memblock_region *r;
-> >  
-> > -	if (!limit)
-> > -		return;
-> > -
-> >  	/* find out max address */
-> >  	for_each_memblock(memory, r) {
-> >  		if (limit <= r->size) {
-> > @@ -1482,6 +1479,20 @@ void __init memblock_enforce_memory_limit(phys_addr_t limit)
-> >  		limit -= r->size;
-> >  	}
-> >  
-> > +	return max_addr;
-> > +}
-> > +
-> > +void __init memblock_enforce_memory_limit(phys_addr_t limit)
-> > +{
-> > +	phys_addr_t max_addr;
-> > +
-> > +	if (!limit)
-> > +		return;
-> > +
-> > +	max_addr = __find_max_addr(limit);
-> > +	if (max_addr == (phys_addr_t)ULLONG_MAX)
-> > +		return;
-> 
-> We didn't previously return early, so do we actually need this check?
->
-If we assign a mem limit count exceeds the actual physical RAM size in the system,
-then we will fall into this case, return directly here will avoid a function call
-followed though it will step out quickly. 
-> 
-> > +
-> >  	/* truncate both memory and reserved regions */
-> >  	memblock_remove_range(&memblock.memory, max_addr,
-> >  			      (phys_addr_t)ULLONG_MAX);
-> > @@ -1489,6 +1500,32 @@ void __init memblock_enforce_memory_limit(phys_addr_t limit)
-> >  			      (phys_addr_t)ULLONG_MAX);
-> >  }
-> >  
-> > +void __init memblock_mem_limit_remove_map(phys_addr_t limit)
-> > +{
-> > +	struct memblock_type *type = &memblock.memory;
-> > +	phys_addr_t max_addr;
-> > +	int i, ret, start_rgn, end_rgn;
-> > +
-> > +	if (!limit)
-> > +		return;
-> > +
-> > +	max_addr = __find_max_addr(limit);
-> > +	if (max_addr == (phys_addr_t)ULLONG_MAX)
-> > +		return;
-> 
-> Likewise?
->
-ditto
-> 
-> > +
-> > +	ret = memblock_isolate_range(type, max_addr, (phys_addr_t)ULLONG_MAX,
-> > +					&start_rgn, &end_rgn);
-> > +	if (ret) {
-> > +		WARN_ONCE(1, "Mem limit failed, will not be applied!\n");
-> > +		return;
-> > +	}
-> 
-> We don't have a similar warning in memblock_enforce_memory_limit, where
-> memblock_remove_range() might return an error code from an internal call
-> to memblock_isolate_range.
->
-Somehow cosmetic here for the warning, given it's extremely rare case to return
-an error value, it doesn't hurt significantly to ignore the return value. But
-WARN_ONCE at least makes me comfortable though :)
-> 
-> The two should be consistent, either both with a message or both
-> without.
-> 
-> > +
-> > +	for (i = end_rgn - 1; i >= start_rgn; i--) {
-> > +		if (!memblock_is_nomap(&type->regions[i]))
-> > +			memblock_remove_region(type, i);
-> > +	}
-> > +}
-> 
-> This will preserve nomap regions, but it does mean that we may preserve
-> less memory that the user asked for, since __find_max_addr counted nomap
-> (and reserved) regions. Given we've always counted the latter, maybe
-> that's ok.
->
-As far as the user here, I think we have two: the firmware and the kernel.
-All the memory reserved by firmware will be NOMAP marked, so it doesn't matter here.
-For kernel user, we need to avoid allocate memory(e.g, memblock_alloc) before
-the limit is applied, otherwise probably we may discard the user's allocated
-memory once limit is applied. Fortunately, I don't find that kind of use before
-using the limit. Technically, as a hack method to fake the less memory available
-to the kernel than it actually is, mem limit should be applied as early as possible. 
-But given some limitation there, for instance, the early parameter parsing and the
-possible effort, maybe a little bit fussy to do that.
+Current memblock debugfs output doesn't make the debug convenient
+enough, for example, lack of the 'flag' of the corresponding memblock
+region result in it's difficult to known whether the region has been
+mapped to the kernel linear map zone or not. This patch is trying to
+ease the dubug effort by adding 'size' and 'flag' output.
 
-> 
-> We should clarify what __find_max_addr is intended to determine, with a
-> comment, so as to avoid future ambiguity there.
->
-__find_max_addr is used to translate the limit(size) into the final limited address
-within one of the memblocks, for example, in our juno board, we have two separate
-physical memory block: 2G- (0x8000_0000, ...) and 6G- (0x8_8000_0000, ...), mem=4G
-will hit the limited memory address as 0x8_8000_0000 + 2G in the 2nd block. 
-I will add some comments to clarify. 
-> 
-> > +
-> >  static int __init_memblock memblock_search(struct memblock_type *type, phys_addr_t addr)
-> >  {
-> >  	unsigned int left = 0, right = type->cnt;
-> > @@ -1677,13 +1714,15 @@ static int memblock_debug_show(struct seq_file *m, void *private)
-> >  		reg = &type->regions[i];
-> >  		seq_printf(m, "%4d: ", i);
-> >  		if (sizeof(phys_addr_t) == 4)
-> > -			seq_printf(m, "0x%08lx..0x%08lx\n",
-> > +			seq_printf(m, "0x%08lx..0x%08lx  0x%08lx  0x%lx\n",
-> >  				   (unsigned long)reg->base,
-> > -				   (unsigned long)(reg->base + reg->size - 1));
-> > +				   (unsigned long)(reg->base + reg->size - 1),
-> > +				   (unsigned long)reg->size, reg->flags);
-> >  		else
-> > -			seq_printf(m, "0x%016llx..0x%016llx\n",
-> > +			seq_printf(m, "0x%016llx..0x%016llx  0x%016llx  0x%lx\n",
-> >  				   (unsigned long long)reg->base,
-> > -				   (unsigned long long)(reg->base + reg->size - 1));
-> > +				   (unsigned long long)(reg->base + reg->size - 1),
-> > +				   (unsigned long long)reg->size, reg->flags);
-> 
-> As mentioned above, this should be a separate patch. I have no strong
-> feelings either way about the logic itself.
->
-Hi Mark, thanks for the review!I plan to post updated version later on...
+The '/sys/kernel/debug/memblock/memory' output looks like before:
+   0: 0x0000008000000000..0x0000008001e7ffff
+   1: 0x0000008001e80000..0x00000083ff184fff
+   2: 0x00000083ff185000..0x00000083ff1c2fff
+   3: 0x00000083ff1c3000..0x00000083ff222fff
+   4: 0x00000083ff223000..0x00000083ffe42fff
+   5: 0x00000083ffe43000..0x00000083ffffffff
 
-Thanks,
-Dennis
-> 
-> Thanks,
-> Mark.
-> 
+After applied:
+   0: 0x0000008000000000..0x0000008001e7ffff  0x0000000001e80000  0x4
+   1: 0x0000008001e80000..0x00000083ff184fff  0x00000003fd305000  0x0
+   2: 0x00000083ff185000..0x00000083ff1c2fff  0x000000000003e000  0x4
+   3: 0x00000083ff1c3000..0x00000083ff222fff  0x0000000000060000  0x0
+   4: 0x00000083ff223000..0x00000083ffe42fff  0x0000000000c20000  0x4
+   5: 0x00000083ffe43000..0x00000083ffffffff  0x00000000001bd000  0x0
+
+Signed-off-by: Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org>
+Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org
+Cc: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+---
+Change history:
+v3->v4: 
+According to suggestion from Mark Rutland, make the memblock debugfs
+part as an individual patch since logically it's independent from others
+
+ mm/memblock.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/mm/memblock.c b/mm/memblock.c
+index ca09915..0fc0fa1 100644
+--- a/mm/memblock.c
++++ b/mm/memblock.c
+@@ -1677,13 +1677,15 @@ static int memblock_debug_show(struct seq_file *m, void *private)
+ 		reg = &type->regions[i];
+ 		seq_printf(m, "%4d: ", i);
+ 		if (sizeof(phys_addr_t) == 4)
+-			seq_printf(m, "0x%08lx..0x%08lx\n",
++			seq_printf(m, "0x%08lx..0x%08lx  0x%08lx  0x%lx\n",
+ 				   (unsigned long)reg->base,
+-				   (unsigned long)(reg->base + reg->size - 1));
++				   (unsigned long)(reg->base + reg->size - 1),
++				   (unsigned long)reg->size, reg->flags);
+ 		else
+-			seq_printf(m, "0x%016llx..0x%016llx\n",
++			seq_printf(m, "0x%016llx..0x%016llx  0x%016llx  0x%lx\n",
+ 				   (unsigned long long)reg->base,
+-				   (unsigned long long)(reg->base + reg->size - 1));
++				   (unsigned long long)(reg->base + reg->size - 1),
++				   (unsigned long long)reg->size, reg->flags);
+ 
+ 	}
+ 	return 0;
+-- 
+2.7.4
