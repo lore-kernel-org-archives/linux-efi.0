@@ -1,116 +1,239 @@
 From: Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v2 2/2] arm64:acpi Fix the acpi alignment exeception when
- 'mem=' specified
-Date: Tue, 28 Jun 2016 10:20:12 +0800
-Message-ID: <20160628022010.GA9594@arm.com>
-References: <1466738027-15066-1-git-send-email-dennis.chen@arm.com>
- <1466738027-15066-2-git-send-email-dennis.chen@arm.com>
- <CAKv+Gu8ZyWG-OZ8=2u9jrdS-0j+qL1sstPQ0uX=j7wyj+ETo-w@mail.gmail.com>
- <20160624120058.GA19972@arm.com>
- <CAKv+Gu9XHYVEoL846WBx6PZqSnbBCjwup0CPkZ1JexJVkvds9A@mail.gmail.com>
- <20160627095318.GA1113@leverpostej>
+Subject: Re: [PATCH v3 1/2] mm: memblock Add some new functions to address
+ the mem limit issue
+Date: Tue, 28 Jun 2016 10:55:41 +0800
+Message-ID: <20160628025539.GB9594@arm.com>
+References: <1466994431-6214-1-git-send-email-dennis.chen@arm.com>
+ <20160627142818.GI1113@leverpostej>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=WINDOWS-1252
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160627095318.GA1113@leverpostej>
+In-Reply-To: <20160627142818.GI1113@leverpostej>
 Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, nd-5wv7dgnIgG8@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "Rafael J . Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org" <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, nd-5wv7dgnIgG8@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "Rafael J . Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jun 27, 2016 at 10:53:18AM +0100, Mark Rutland wrote:
-> On Fri, Jun 24, 2016 at 04:12:02PM +0200, Ard Biesheuvel wrote:
-> > On 24 June 2016 at 14:01, Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org> wrote:
-> > > On Fri, Jun 24, 2016 at 12:43:52PM +0200, Ard Biesheuvel wrote:
-> > >> On 24 June 2016 at 05:13, Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org> wrote:
-> > >> >         /*
-> > >> >          * Apply the memory limit if it was set. Since the kernel may be loaded
-> > >> > -        * high up in memory, add back the kernel region that must be accessible
-> > >> > -        * via the linear mapping.
-> > >> > +        * in the memory regions above the limit, so we need to clear the
-> > >> > +        * MEMBLOCK_NOMAP flag of this region to make it can be accessible via
-> > >> > +        * the linear mapping.
-> > >> >          */
-> > >> >         if (memory_limit != (phys_addr_t)ULLONG_MAX) {
-> > >> > -               memblock_enforce_memory_limit(memory_limit);
-> > >> > -               memblock_add(__pa(_text), (u64)(_end - _text));
-> > >> > +               memblock_mem_limit_mark_nomap(memory_limit);
-> > >> > +               memblock_clear_nomap(__pa(_text), (u64)(_end - _text));
-> > >>
-> > >> Up until now, we have ignored the effect of having NOMAP memblocks on
-> > >> the return values of functions like memblock_phys_mem_size() and
-> > >> memblock_mem_size(), since they could reasonably be expected to cover
-> > >> only a small slice of all available memory. However, after applying
-> > >> this patch, it may well be the case that most of memory is marked
-> > >> NOMAP, and these functions will cease to work as expected.
-> > >>
-> > > Hi Ard, I noticed these inconsistences as you mentioned, but seems the
-> > > available memory is limited correctly. For this case('mem='), will it bring
-> > > some substantive side effects except that some log messages maybe confusing?
+On Mon, Jun 27, 2016 at 03:28:19PM +0100, Mark Rutland wrote:
+> On Mon, Jun 27, 2016 at 10:27:10AM +0800, Dennis Chen wrote:
+> > In some cases, memblock is queried to determine whether a physical
+> > address corresponds to memory present in a system even if unused by
+> > the OS for the linear mapping, highmem, etc. For example, the ACPI
+> > core needs this information to determine which attributes to use when
+> > mapping ACPI regions. Use of incorrect memory types can result in
+> > faults, data corruption, or other issues.
 > > 
-> > That is exactly the question that needs answering before we can merge
-> > these patches. I know we consider mem= a development hack, but the
-> > intent is to make it appear to the kernel as if only a smaller amount
-> > of memory is available to the kernel, and this is signficantly
-> > different from having memblock_mem_size() et al return much larger
-> > values than what is actually available. Perhaps this doesn't matter at
-> > all, but it is something we must discuss before proceeding with these
-> > changes.
-> 
-> Yeah, I think we need to figure out precisely what the expected
-> semantics are.
-> 
-> From taking a look, memblock_mem_size() is only used by arch/x86. In
-> reserve_initrd, it's used to determine the amount of *free* memory, but
-> it counts reserved (and nomap) regions, so that doesn't feel right
-> regardless. For reserve_crashkernel_low it's not immediately clear to me
-> what it should do, as I've not gone digging.
->
-After rough digging go, memblock_mem_size() used by arch/x86 to calculate
-the size of a segment of direct mapping physical memory, it only counts on 
-memory memblock region regardless of the flag of that region, so from this
-point, if we have a segment of memory marked as NOMAP, memblock_mem_size()
-will still take its size into the total size and have it a direct mapped.
-IMO memblock_mem_size() is not used to determine the amount of *free*, it
-just to determine the amount of mem that can be mapped directly, so it's
-reasonable to count reserved regions.
-    
-> 
-> There are many memblock_end_of_DRAM() users, mostly in arch code. We
-> (arm64) use it to determine the size of the linear map, and effectively
-> need it to be the limit for what should be mapped, which could/should
-> exclude nomap. I've not yet dug into the rest, so I don't know whether
-> that holds.
->
-we will use memblock_end_of_DRAM() to get the top boundary of the linear mapping,
-given some memblock region is NOMAP, so some holes will be punched into the
-linear mapping zone just as you mentioned those NOMAP should be excluded.
-As my understanding, NOMAP regions only have possible potential side effect to count
-the mem size such as memblock_mem_size 
-> 
-> > >> This means NOMAP is really only suited to punch some holes into the
-> > >> kernel direct mapping, and so implementing the memory limit by marking
-> > >> everything NOMAP is not the way to go. Instead, we should probably
-> > >> reorder the init sequence so that the regions that are reserved in the
-> > >> UEFI memory map are declared and marked NOMAP [again] after applying
-> > >> the memory limit in the old way.
-> > >>
-> > > Before this patch, I have another one addressing the same issue [1], with
-> > > that patch we'll not have these inconsistences, but it looks like a little
-> > > bit complicated, so it becomes current one. Any comments about that?
-> > >
-> > > [1]http://lists.infradead.org/pipermail/linux-arm-kernel/2016-June/438443.html
+> > Removing memory with memblock_enforce_memory_limit throws away this
+> > information, and so a kernel booted with 'mem=' may suffers from the
+> > issues described above. To avoid this, we need to keep those NOMAP
+> > regions instead of removing all above limit, which preserves the
+> > information we need while preventing other use of the regions.
 > > 
-> > The problem caused by mem= is that it removes regions that are marked
-> > NOMAP. So instead of marking everything above the limit NOMAP, I would
-> > much rather see an alternative implementation of
-> > memblock_enforce_memory_limit() that enforces the mem= limit by only
-> > removing memblocks that have to NOMAP flag cleared, and leaving the
-> > NOMAP ones where they are.
+> > This patch adds new insfrastructure to retain all NOMAP memblock regions
+> > while removing others, to cater for this.
+> > 
+> > At last, we add 'size' and 'flag' debug output in the memblock debugfs
+> > for ease of the memblock debug.
+> > The '/sys/kernel/debug/memblock/memory' output looks like before:
+> >    0: 0x0000008000000000..0x0000008001e7ffff
+> >    1: 0x0000008001e80000..0x00000083ff184fff
+> >    2: 0x00000083ff185000..0x00000083ff1c2fff
+> >    3: 0x00000083ff1c3000..0x00000083ff222fff
+> >    4: 0x00000083ff223000..0x00000083ffe42fff
+> >    5: 0x00000083ffe43000..0x00000083ffffffff
+> > 
+> > After applied:
+> >    0: 0x0000008000000000..0x0000008001e7ffff  0x0000000001e80000  0x4
+> >    1: 0x0000008001e80000..0x00000083ff184fff  0x00000003fd305000  0x0
+> >    2: 0x00000083ff185000..0x00000083ff1c2fff  0x000000000003e000  0x4
+> >    3: 0x00000083ff1c3000..0x00000083ff222fff  0x0000000000060000  0x0
+> >    4: 0x00000083ff223000..0x00000083ffe42fff  0x0000000000c20000  0x4
+> >    5: 0x00000083ffe43000..0x00000083ffffffff  0x00000000001bd000  0x0
 > 
-> That would work for me.
+> The debugfs changes should be a separate patch. Even if they're useful
+> for debugging this patch, they're logically independent.
+>
+Indeed. Will isolate it as an individual patch for this set.
+> 
+> > Signed-off-by: Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org>
+> > Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+> > Cc: Steve Capper <steve.capper-5wv7dgnIgG8@public.gmane.org>
+> > Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+> > Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> > Cc: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> > Cc: linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org
+> > Cc: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> > Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> > ---
+> >  include/linux/memblock.h |  1 +
+> >  mm/memblock.c            | 55 +++++++++++++++++++++++++++++++++++++++++-------
+> >  2 files changed, 48 insertions(+), 8 deletions(-)
+> > 
+> > diff --git a/include/linux/memblock.h b/include/linux/memblock.h
+> > index 6c14b61..2925da2 100644
+> > --- a/include/linux/memblock.h
+> > +++ b/include/linux/memblock.h
+> > @@ -332,6 +332,7 @@ phys_addr_t memblock_mem_size(unsigned long limit_pfn);
+> >  phys_addr_t memblock_start_of_DRAM(void);
+> >  phys_addr_t memblock_end_of_DRAM(void);
+> >  void memblock_enforce_memory_limit(phys_addr_t memory_limit);
+> > +void memblock_mem_limit_remove_map(phys_addr_t limit);
+> >  bool memblock_is_memory(phys_addr_t addr);
+> >  int memblock_is_map_memory(phys_addr_t addr);
+> >  int memblock_is_region_memory(phys_addr_t base, phys_addr_t size);
+> > diff --git a/mm/memblock.c b/mm/memblock.c
+> > index ca09915..8099f1a 100644
+> > --- a/mm/memblock.c
+> > +++ b/mm/memblock.c
+> > @@ -1465,14 +1465,11 @@ phys_addr_t __init_memblock memblock_end_of_DRAM(void)
+> >  	return (memblock.memory.regions[idx].base + memblock.memory.regions[idx].size);
+> >  }
+> >  
+> > -void __init memblock_enforce_memory_limit(phys_addr_t limit)
+> > +static phys_addr_t __init_memblock __find_max_addr(phys_addr_t limit)
+> >  {
+> >  	phys_addr_t max_addr = (phys_addr_t)ULLONG_MAX;
+> >  	struct memblock_region *r;
+> >  
+> > -	if (!limit)
+> > -		return;
+> > -
+> >  	/* find out max address */
+> >  	for_each_memblock(memory, r) {
+> >  		if (limit <= r->size) {
+> > @@ -1482,6 +1479,20 @@ void __init memblock_enforce_memory_limit(phys_addr_t limit)
+> >  		limit -= r->size;
+> >  	}
+> >  
+> > +	return max_addr;
+> > +}
+> > +
+> > +void __init memblock_enforce_memory_limit(phys_addr_t limit)
+> > +{
+> > +	phys_addr_t max_addr;
+> > +
+> > +	if (!limit)
+> > +		return;
+> > +
+> > +	max_addr = __find_max_addr(limit);
+> > +	if (max_addr == (phys_addr_t)ULLONG_MAX)
+> > +		return;
+> 
+> We didn't previously return early, so do we actually need this check?
+>
+If we assign a mem limit count exceeds the actual physical RAM size in the system,
+then we will fall into this case, return directly here will avoid a function call
+followed though it will step out quickly. 
+> 
+> > +
+> >  	/* truncate both memory and reserved regions */
+> >  	memblock_remove_range(&memblock.memory, max_addr,
+> >  			      (phys_addr_t)ULLONG_MAX);
+> > @@ -1489,6 +1500,32 @@ void __init memblock_enforce_memory_limit(phys_addr_t limit)
+> >  			      (phys_addr_t)ULLONG_MAX);
+> >  }
+> >  
+> > +void __init memblock_mem_limit_remove_map(phys_addr_t limit)
+> > +{
+> > +	struct memblock_type *type = &memblock.memory;
+> > +	phys_addr_t max_addr;
+> > +	int i, ret, start_rgn, end_rgn;
+> > +
+> > +	if (!limit)
+> > +		return;
+> > +
+> > +	max_addr = __find_max_addr(limit);
+> > +	if (max_addr == (phys_addr_t)ULLONG_MAX)
+> > +		return;
+> 
+> Likewise?
+>
+ditto
+> 
+> > +
+> > +	ret = memblock_isolate_range(type, max_addr, (phys_addr_t)ULLONG_MAX,
+> > +					&start_rgn, &end_rgn);
+> > +	if (ret) {
+> > +		WARN_ONCE(1, "Mem limit failed, will not be applied!\n");
+> > +		return;
+> > +	}
+> 
+> We don't have a similar warning in memblock_enforce_memory_limit, where
+> memblock_remove_range() might return an error code from an internal call
+> to memblock_isolate_range.
+>
+Somehow cosmetic here for the warning, given it's extremely rare case to return
+an error value, it doesn't hurt significantly to ignore the return value. But
+WARN_ONCE at least makes me comfortable though :)
+> 
+> The two should be consistent, either both with a message or both
+> without.
+> 
+> > +
+> > +	for (i = end_rgn - 1; i >= start_rgn; i--) {
+> > +		if (!memblock_is_nomap(&type->regions[i]))
+> > +			memblock_remove_region(type, i);
+> > +	}
+> > +}
+> 
+> This will preserve nomap regions, but it does mean that we may preserve
+> less memory that the user asked for, since __find_max_addr counted nomap
+> (and reserved) regions. Given we've always counted the latter, maybe
+> that's ok.
+>
+As far as the user here, I think we have two: the firmware and the kernel.
+All the memory reserved by firmware will be NOMAP marked, so it doesn't matter here.
+For kernel user, we need to avoid allocate memory(e.g, memblock_alloc) before
+the limit is applied, otherwise probably we may discard the user's allocated
+memory once limit is applied. Fortunately, I don't find that kind of use before
+using the limit. Technically, as a hack method to fake the less memory available
+to the kernel than it actually is, mem limit should be applied as early as possible. 
+But given some limitation there, for instance, the early parameter parsing and the
+possible effort, maybe a little bit fussy to do that.
+
+> 
+> We should clarify what __find_max_addr is intended to determine, with a
+> comment, so as to avoid future ambiguity there.
+>
+__find_max_addr is used to translate the limit(size) into the final limited address
+within one of the memblocks, for example, in our juno board, we have two separate
+physical memory block: 2G- (0x8000_0000, ...) and 6G- (0x8_8000_0000, ...), mem=4G
+will hit the limited memory address as 0x8_8000_0000 + 2G in the 2nd block. 
+I will add some comments to clarify. 
+> 
+> > +
+> >  static int __init_memblock memblock_search(struct memblock_type *type, phys_addr_t addr)
+> >  {
+> >  	unsigned int left = 0, right = type->cnt;
+> > @@ -1677,13 +1714,15 @@ static int memblock_debug_show(struct seq_file *m, void *private)
+> >  		reg = &type->regions[i];
+> >  		seq_printf(m, "%4d: ", i);
+> >  		if (sizeof(phys_addr_t) == 4)
+> > -			seq_printf(m, "0x%08lx..0x%08lx\n",
+> > +			seq_printf(m, "0x%08lx..0x%08lx  0x%08lx  0x%lx\n",
+> >  				   (unsigned long)reg->base,
+> > -				   (unsigned long)(reg->base + reg->size - 1));
+> > +				   (unsigned long)(reg->base + reg->size - 1),
+> > +				   (unsigned long)reg->size, reg->flags);
+> >  		else
+> > -			seq_printf(m, "0x%016llx..0x%016llx\n",
+> > +			seq_printf(m, "0x%016llx..0x%016llx  0x%016llx  0x%lx\n",
+> >  				   (unsigned long long)reg->base,
+> > -				   (unsigned long long)(reg->base + reg->size - 1));
+> > +				   (unsigned long long)(reg->base + reg->size - 1),
+> > +				   (unsigned long long)reg->size, reg->flags);
+> 
+> As mentioned above, this should be a separate patch. I have no strong
+> feelings either way about the logic itself.
+>
+Hi Mark, thanks for the review!I plan to post updated version later on...
+
+Thanks,
+Dennis
 > 
 > Thanks,
 > Mark.
