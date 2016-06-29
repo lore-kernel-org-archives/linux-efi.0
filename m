@@ -1,67 +1,39 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 5/5] arm64: mm: fold init_pgd() into __create_pgd_mapping()
-Date: Wed, 29 Jun 2016 14:51:30 +0200
-Message-ID: <1467204690-10790-6-git-send-email-ard.biesheuvel@linaro.org>
+From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 3/5] arm64: efi: avoid block mappings for unaligned UEFI
+ memory regions
+Date: Wed, 29 Jun 2016 17:45:25 +0100
+Message-ID: <20160629164525.GE2522@e104818-lin.cambridge.arm.com>
 References: <1467204690-10790-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1467204690-10790-4-git-send-email-ard.biesheuvel@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1467204690-10790-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1467204690-10790-4-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-The routine __create_pgd_mapping() does nothing except calling init_pgd(),
-which has no other callers. So fold the latter into the former. Also, drop
-a comment that has gone stale.
+On Wed, Jun 29, 2016 at 02:51:28PM +0200, Ard Biesheuvel wrote:
+> +	if (!PAGE_ALIGNED(md->phys_addr) ||
+> +	    !PAGE_ALIGNED(md->num_pages << EFI_PAGE_SHIFT)) {
+> +		/*
+> +		 * If the end address of this region is not aligned to page
+> +		 * size, the mapping is rounded up, and may end up sharing a
+> +		 * page frame with the next UEFI memory region. If we create
+> +		 * a block entry now, we may need to split it again when mapping
+> +		 * the next region, and support for that is going to be removed
+> +		 * from the MMU routines. So avoid block mappings altogether in
+> +		 * that case.
+> +		 */
+> +		allow_block_mappings = false;
+> +	}
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm64/mm/mmu.c | 24 +++++---------------
- 1 file changed, 6 insertions(+), 18 deletions(-)
+How common is it for large areas to have unaligned start/end? I wonder
+whether it's worth implementing my approach to look ahead and explicitly
+check the overlap with the next section instead of disabling block
+mappings altogether for this region.
 
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index f233c885042d..8cf4da36909a 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -240,16 +240,14 @@ static void alloc_init_pud(pgd_t *pgd, unsigned long addr, unsigned long end,
- 	pud_clear_fixmap();
- }
- 
--/*
-- * Create the page directory entries and any necessary page tables for the
-- * mapping specified by 'md'.
-- */
--static void init_pgd(pgd_t *pgd, phys_addr_t phys, unsigned long virt,
--				    phys_addr_t size, pgprot_t prot,
--				    phys_addr_t (*pgtable_alloc)(void),
--				    bool allow_block_mappings)
-+static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
-+				 unsigned long virt, phys_addr_t size,
-+				 pgprot_t prot,
-+				 phys_addr_t (*pgtable_alloc)(void),
-+				 bool allow_block_mappings)
- {
- 	unsigned long addr, length, end, next;
-+	pgd_t *pgd = pgd_offset_raw(pgdir, virt);
- 
- 	/*
- 	 * If the virtual and physical address don't have the same offset
-@@ -281,16 +279,6 @@ static phys_addr_t late_pgtable_alloc(void)
- 	return __pa(ptr);
- }
- 
--static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
--				 unsigned long virt, phys_addr_t size,
--				 pgprot_t prot,
--				 phys_addr_t (*alloc)(void),
--				 bool allow_block_mappings)
--{
--	init_pgd(pgd_offset_raw(pgdir, virt), phys, virt, size, prot, alloc,
--		 allow_block_mappings);
--}
--
- /*
-  * This function can only be used to modify existing table entries,
-  * without allocating new levels of table. Note that this permits the
 -- 
-2.7.4
+Catalin
