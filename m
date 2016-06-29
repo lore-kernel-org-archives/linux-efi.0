@@ -1,100 +1,92 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Leif Lindholm <leif.lindholm@linaro.org>
 Subject: Re: [PATCH 3/5] arm64: efi: avoid block mappings for unaligned UEFI
  memory regions
-Date: Wed, 29 Jun 2016 19:40:10 +0200
-Message-ID: <CAKv+Gu9f3H5QER+YeTSCoCvDkEvRu6AH6XUkKmkOwTP8mMkDqw@mail.gmail.com>
+Date: Wed, 29 Jun 2016 18:54:54 +0100
+Message-ID: <20160629175454.GZ22984@bivouac.eciton.net>
 References: <1467204690-10790-1-git-send-email-ard.biesheuvel@linaro.org>
  <1467204690-10790-4-git-send-email-ard.biesheuvel@linaro.org>
- <20160629164525.GE2522@e104818-lin.cambridge.arm.com> <CAKv+Gu_OUw+WJSNmC8mdAgAK8Nm=UGqtwgt8TBCwhTiBY9+2tg@mail.gmail.com>
+ <20160629164525.GE2522@e104818-lin.cambridge.arm.com>
+ <CAKv+Gu_OUw+WJSNmC8mdAgAK8Nm=UGqtwgt8TBCwhTiBY9+2tg@mail.gmail.com>
  <CAKv+Gu9CxorhWGzx=CaVWnEWZ-AhBt3dh0XU+Vw1gNe=HxkySQ@mail.gmail.com>
- <20160629170053.GY22984@bivouac.eciton.net> <CAKv+Gu9CM79pE+dGoJ+Q=j5tUrKaCkaaGH+Yud8AOfxHv2fnvw@mail.gmail.com>
+ <20160629170053.GY22984@bivouac.eciton.net>
+ <CAKv+Gu9CM79pE+dGoJ+Q=j5tUrKaCkaaGH+Yud8AOfxHv2fnvw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu9CM79pE+dGoJ+Q=j5tUrKaCkaaGH+Yud8AOfxHv2fnvw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu9CM79pE+dGoJ+Q=j5tUrKaCkaaGH+Yud8AOfxHv2fnvw@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 29 June 2016 at 19:04, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 29 June 2016 at 19:00, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> On Wed, Jun 29, 2016 at 06:53:18PM +0200, Ard Biesheuvel wrote:
->>> On 29 June 2016 at 18:50, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>> > On 29 June 2016 at 18:45, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org> wrote:
->>> >> On Wed, Jun 29, 2016 at 02:51:28PM +0200, Ard Biesheuvel wrote:
->>> >>> +     if (!PAGE_ALIGNED(md->phys_addr) ||
->>> >>> +         !PAGE_ALIGNED(md->num_pages << EFI_PAGE_SHIFT)) {
->>> >>> +             /*
->>> >>> +              * If the end address of this region is not aligned to page
->>> >>> +              * size, the mapping is rounded up, and may end up sharing a
->>> >>> +              * page frame with the next UEFI memory region. If we create
->>> >>> +              * a block entry now, we may need to split it again when mapping
->>> >>> +              * the next region, and support for that is going to be removed
->>> >>> +              * from the MMU routines. So avoid block mappings altogether in
->>> >>> +              * that case.
->>> >>> +              */
->>> >>> +             allow_block_mappings = false;
->>> >>> +     }
->>> >>
->>> >> How common is it for large areas to have unaligned start/end? I wonder
->>> >> whether it's worth implementing my approach to look ahead and explicitly
->>> >> check the overlap with the next section instead of disabling block
->>> >> mappings altogether for this region.
->>> >>
->>> >
->>> > Very uncommon. Typically, only MMIO regions that represent NOR flash
->>> > are larger than a couple of pages. Taken from QEMU:
->>>
->>>   RT_Code   :            640 Pages (2,621,440 Bytes)
->>>   RT_Data   :            880 Pages (3,604,480 Bytes)
->>>
->>> so all RT_Code regions *combined* are 2.5 MB in total, and all RT_Data
->>> regions 3.5 MB. Ideally, they are grouped together, but in reality,
->>> there are always a couple of regions of each type, so there is little
->>> to gain here from using block mappings
->>
->> Is this representative for real platforms?
->>
->
+On Wed, Jun 29, 2016 at 07:04:57PM +0200, Ard Biesheuvel wrote:
+> On 29 June 2016 at 19:00, Leif Lindholm <leif.lindholm@linaro.org> wrote:
+> > On Wed, Jun 29, 2016 at 06:53:18PM +0200, Ard Biesheuvel wrote:
+> >> On 29 June 2016 at 18:50, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+> >> > On 29 June 2016 at 18:45, Catalin Marinas <catalin.marinas@arm.com> wrote:
+> >> >> On Wed, Jun 29, 2016 at 02:51:28PM +0200, Ard Biesheuvel wrote:
+> >> >>> +     if (!PAGE_ALIGNED(md->phys_addr) ||
+> >> >>> +         !PAGE_ALIGNED(md->num_pages << EFI_PAGE_SHIFT)) {
+> >> >>> +             /*
+> >> >>> +              * If the end address of this region is not aligned to page
+> >> >>> +              * size, the mapping is rounded up, and may end up sharing a
+> >> >>> +              * page frame with the next UEFI memory region. If we create
+> >> >>> +              * a block entry now, we may need to split it again when mapping
+> >> >>> +              * the next region, and support for that is going to be removed
+> >> >>> +              * from the MMU routines. So avoid block mappings altogether in
+> >> >>> +              * that case.
+> >> >>> +              */
+> >> >>> +             allow_block_mappings = false;
+> >> >>> +     }
+> >> >>
+> >> >> How common is it for large areas to have unaligned start/end? I wonder
+> >> >> whether it's worth implementing my approach to look ahead and explicitly
+> >> >> check the overlap with the next section instead of disabling block
+> >> >> mappings altogether for this region.
+> >> >>
+> >> >
+> >> > Very uncommon. Typically, only MMIO regions that represent NOR flash
+> >> > are larger than a couple of pages. Taken from QEMU:
+> >>
+> >>   RT_Code   :            640 Pages (2,621,440 Bytes)
+> >>   RT_Data   :            880 Pages (3,604,480 Bytes)
+> >>
+> >> so all RT_Code regions *combined* are 2.5 MB in total, and all RT_Data
+> >> regions 3.5 MB. Ideally, they are grouped together, but in reality,
+> >> there are always a couple of regions of each type, so there is little
+> >> to gain here from using block mappings
+> >
+> > Is this representative for real platforms?
+> 
 > I think it is a reasonable ballpark figure
->
->> What about efifb and reserved regions?
->>
->
+> 
+> > What about efifb and reserved regions?
+> 
 > Those are not tagged as EFI_MEMORY_RUNTIME so they are not covered by
 > the UEFI runtime mappings, and not relevant to this discussion.
->
->> My (x86) Lenovo workstation has one 64MB and one 16MB Runtime/Uncached
->> MMIO region. As well as a 3MB and a 4MB RT_Data one.
->>
->
+
+OK.
+
+> > My (x86) Lenovo workstation has one 64MB and one 16MB Runtime/Uncached
+> > MMIO region. As well as a 3MB and a 4MB RT_Data one.
+> 
 > Are those MMIO regions naturally aligned? And how about the RT_Data ones?
 
-Just to be clear: we are talking about regions that
-a) are larger than 2 MB
-b) whose naturally aligned 2 MB subregions are relatively aligned with
-their physical mapping
-c) share a 16 KB or 64 KB page frame at either end with an adjacent region
+So, I've now gone home and don't have access to the Lenovo, however I
+have a machine at home also with an AMI UEFI implementation, and
+identical MMIO regions. And they do look naturally aligned.
 
-So first of all, the virtual mapping code in the stub does take the 2
-MB alignment into account, but only if the physical base of the region
-is aligned to 2 MB and the size of the region is at least 2 MB. This
-is intended for things like the NOR flash mapping (or the MMIO regions
-that Leif refers to). But a region that happens to exceed 2 MB is not
-mapped with the relative physical alignment in mind, and usually does
-not end up aligned correctly for block mappings to be usable.
+The RT_Data ones are not naturally aligned.
 
-On top of that, the v2.6 Memory Attributes table feature (which I
-think should be recommended in all cases, but is optional in the spec)
-breaks RT_Code regions into read-only and non-exec slices, so even if
-a RT_Code region existed whose size and alignment would happen to
-allow a block mapping to be used, it will subsequently be split
-anyway.
-
-The bottom line is that I don't think it makes a huge amount of sense
-to go out of our way to deal with large regions with unaligned
-boundaries until we encounter any in real life.
-
--- 
-Ard.
+/
+    Leif
