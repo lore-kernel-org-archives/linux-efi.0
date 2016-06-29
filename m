@@ -1,84 +1,84 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/3] arm64: efi: Ensure efi_create_mapping() does not map
- overlapping regions
-Date: Tue, 28 Jun 2016 18:12:22 +0200
-Message-ID: <CAKv+Gu8RxZ2xpDC0pudewHu9Z5YTL8XbcjSPvGasRUQbhqm5qQ@mail.gmail.com>
-References: <1464707672-21882-1-git-send-email-catalin.marinas@arm.com>
- <1464707672-21882-3-git-send-email-catalin.marinas@arm.com>
- <CAKv+Gu-Kiq30-BtQ_aYamLyTB6d8WWmnBM6bOM-+c+WciUnUwA@mail.gmail.com>
- <20160606170950.GD29910@e104818-lin.cambridge.arm.com> <20160606174207.GH29910@e104818-lin.cambridge.arm.com>
- <CAKv+Gu_3uKgFtvMryROwTMeGs=uXYU-OPrUC6LaNQiAKP=PZ3Q@mail.gmail.com> <20160628160528.GG4585@e104818-lin.cambridge.arm.com>
+From: Dennis Chen <dennis.chen@arm.com>
+Subject: [PATCH v5 1/3] mm: memblock enhence the memblock debugfs output
+Date: Wed, 29 Jun 2016 08:57:33 +0800
+Message-ID: <1467161855-10010-1-git-send-email-dennis.chen@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160628160528.GG4585-M2fw3Uu6cmfZROr8t4l/smS4ubULX0JqMm0uRHvK7Nw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=WINDOWS-1252
+Content-Transfer-Encoding: quoted-printable
+Return-path: <owner-linux-mm@kvack.org>
+Sender: owner-linux-mm@kvack.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: nd@arm.com, Dennis Chen <dennis.chen@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Steve Capper <steve.capper@arm.com>, Ard
+ Biesheuvel <ard.biesheuvel@linaro.org>, Will Deacon <will.deacon@arm.com>, Mark Rutland <mark.rutland@arm.com>, "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, linux-mm@kvack.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 28 June 2016 at 18:05, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org> wrote:
-> (Restarting the thread before I forget the entire discussion)
->
-> On Mon, Jun 06, 2016 at 11:18:14PM +0200, Ard Biesheuvel wrote:
->> >> > On 31 May 2016 at 17:14, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org> wrote:
->> >> > > diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
->> >> > > index 78f52488f9ff..0d5753c31c7f 100644
->> >> > > --- a/arch/arm64/kernel/efi.c
->> >> > > +++ b/arch/arm64/kernel/efi.c
->> >> > > @@ -62,10 +62,26 @@ struct screen_info screen_info __section(.data);
->> >> > >  int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
->> >> > >  {
->> >> > >         pteval_t prot_val = create_mapping_protection(md);
->> >> > > +       phys_addr_t length = md->num_pages << EFI_PAGE_SHIFT;
->> >> > > +       efi_memory_desc_t *next = md;
->> >> > >
->> >> > > -       create_pgd_mapping(mm, md->phys_addr, md->virt_addr,
->> >> > > -                          md->num_pages << EFI_PAGE_SHIFT,
->> >> > > -                          __pgprot(prot_val | PTE_NG));
->> >> > > +       /*
->> >> > > +        * Search for the next EFI runtime map and check for any overlap with
->> >> > > +        * the current map when aligned to PAGE_SIZE. In such case, defer
->> >> > > +        * mapping the end of the current range until the next
->> >> > > +        * efi_create_mapping() call.
->> >> > > +        */
->> >> > > +       for_each_efi_memory_desc_continue(next) {
->> >> > > +               if (!(next->attribute & EFI_MEMORY_RUNTIME))
->> >> > > +                       continue;
->> >> > > +               if (next->phys_addr < PAGE_ALIGN(md->phys_addr + length))
->> >> > > +                       length -= (md->phys_addr + length) & ~PAGE_MASK;
-> [...]
->> Another thing I failed to mention is that the new Memory Attributes
->> table support may map all of the RuntimeServicesCode regions a second
->> time, but with a higher granularity, using RO for .text and .rodata
->> and NX for .data and .bss (and the PE/COFF header).
->
-> Can this not be done in a single go without multiple passes? That's what
-> we did for the core arm64 code, the only one left being EFI run-time
-> mappings.
->
+Current memblock debugfs output doesn't make the debug convenient
+enough, for example, lack of the 'flag' of the corresponding memblock
+region result in it's difficult to known whether the region has been
+mapped to the kernel linear map zone or not. This patch is trying to
+ease the dubug effort by adding 'size' and 'flag' output.
 
-Well, we probably could, but it is far from trivial.
+The '/sys/kernel/debug/memblock/memory' output looks like before:
+   0: 0x0000008000000000..0x0000008001e7ffff
+   1: 0x0000008001e80000..0x00000083ff184fff
+   2: 0x00000083ff185000..0x00000083ff1c2fff
+   3: 0x00000083ff1c3000..0x00000083ff222fff
+   4: 0x00000083ff223000..0x00000083ffe42fff
+   5: 0x00000083ffe43000..0x00000083ffffffff
 
->> Due to the higher
->> granularity, regions that were mapped using the contiguous bit the
->> first time around may be split into smaller regions. Your current code
->> does not address that case.
->
-> If the above doesn't work, the only solution would be to permanently map
-> these ranges as individual pages, no large blocks.
->
+After applied:
+   0: 0x0000008000000000..0x0000008001e7ffff  0x0000000001e80000  0x4=20
+   1: 0x0000008001e80000..0x00000083ff184fff  0x00000003fd305000  0x0=20
+   2: 0x00000083ff185000..0x00000083ff1c2fff  0x000000000003e000  0x4=20
+   3: 0x00000083ff1c3000..0x00000083ff222fff  0x0000000000060000  0x0=20
+   4: 0x00000083ff223000..0x00000083ffe42fff  0x0000000000c20000  0x4=20
+   5: 0x00000083ffe43000..0x00000083ffffffff  0x00000000001bd000  0x0=20
 
-That is not unreasonable, since regions >2MB are unusual.
+Signed-off-by: Dennis Chen <dennis.chen@arm.com>
+Cc: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Steve Capper <steve.capper@arm.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Will Deacon <will.deacon@arm.com>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: linux-mm@kvack.org
+Cc: linux-acpi@vger.kernel.org
+Cc: linux-efi@vger.kernel.org
+---
+ mm/memblock.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
->> I wonder how the PT debug code deals with this, and whether there is
->> anything we can reuse to inhibit cont and block mappings
->
-> Do you mean DEBUG_PAGEALLOC? When enabled, it defaults to single page
-> mappings for the kernel, no sections.
->
+diff --git a/mm/memblock.c b/mm/memblock.c
+index ca09915..0fc0fa1 100644
+--- a/mm/memblock.c
++++ b/mm/memblock.c
+@@ -1677,13 +1677,15 @@ static int memblock_debug_show(struct seq_file *m, =
+void *private)
+ =09=09reg =3D &type->regions[i];
+ =09=09seq_printf(m, "%4d: ", i);
+ =09=09if (sizeof(phys_addr_t) =3D=3D 4)
+-=09=09=09seq_printf(m, "0x%08lx..0x%08lx\n",
++=09=09=09seq_printf(m, "0x%08lx..0x%08lx  0x%08lx  0x%lx\n",
+ =09=09=09=09   (unsigned long)reg->base,
+-=09=09=09=09   (unsigned long)(reg->base + reg->size - 1));
++=09=09=09=09   (unsigned long)(reg->base + reg->size - 1),
++=09=09=09=09   (unsigned long)reg->size, reg->flags);
+ =09=09else
+-=09=09=09seq_printf(m, "0x%016llx..0x%016llx\n",
++=09=09=09seq_printf(m, "0x%016llx..0x%016llx  0x%016llx  0x%lx\n",
+ =09=09=09=09   (unsigned long long)reg->base,
+-=09=09=09=09   (unsigned long long)(reg->base + reg->size - 1));
++=09=09=09=09   (unsigned long long)(reg->base + reg->size - 1),
++=09=09=09=09   (unsigned long long)reg->size, reg->flags);
+=20
+ =09}
+ =09return 0;
+--=20
+2.7.4
 
-Indeed. So we could reuse the logic that imposes that to prevent
-creating regions that are subject to splitting later on. That way,
-there is no need to worry about the code running twice in case the
-Memory Attributes table is exposed by the firmware.
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
