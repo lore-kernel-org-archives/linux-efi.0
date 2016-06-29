@@ -1,49 +1,98 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 0/5] arm64: avoid block entries that we need to split later
-Date: Wed, 29 Jun 2016 14:51:25 +0200
-Message-ID: <1467204690-10790-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/5] arm64: efi: always map runtime services code and data regions down to pages
+Date: Wed, 29 Jun 2016 14:51:27 +0200
+Message-ID: <1467204690-10790-3-git-send-email-ard.biesheuvel@linaro.org>
+References: <1467204690-10790-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1467204690-10790-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
 Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This is a followup to Catalin's series 'arm64: Avoid overlapping EFI regions'
-whose aim was to get rid of the split_pmd() and split_pud() routines in
-mm/mmu.c, which may violate the architecture when used in the wrong way.
+To avoid triggering diagnostics in the MMU code that are finicky about
+splitting block mappings into more granular mappings, ensure that regions
+that are likely to appear in the Memory Attributes table as well as the
+UEFI memory map are always mapped down to pages. This way, we can use
+apply_to_page_range() instead of create_pgd_mapping() for the second pass,
+which cannot split or merge block entries, and operates strictly on PTEs.
 
-This series updates the MMU mapping routines invoked by the code that sets
-up the UEFI runtime services environment so that regions that may be subject
-to splitting are always mapped down to pages. On the one hand, these are
-regions that are covered by the Memory Attributes table as well as the UEFI
-memory map, in which case we need to map down to pages in the first pass to
-ensure that the more granular permission attributes do not require splitting
-block entries. On the other hand, any region that is not aligned to the OS's
-page size is mapped down to pages as well, so that the page such a region may
-share with the next region is always mapped using pages, and no splitting is
-required for mapping the second region.
+Note that this aligns the arm64 Memory Attributes table handling code with
+the ARM code, which already uses apply_to_page_range() to set the strict
+permissions.
 
-Finally, remove the split_pmd() and split_pud() routines. Patch #5 is a cleanup
-patch,
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/arm64/include/asm/efi.h |  3 +-
+ arch/arm64/kernel/efi.c      | 36 +++++++++++++++++++-
+ 2 files changed, 36 insertions(+), 3 deletions(-)
 
-[0] http://thread.gmane.org/gmane.linux.kernel.efi/8649
-
-Ard Biesheuvel (4):
-  arm64: mm: add param to force create_pgd_mapping() to use page
-    mappings
-  arm64: efi: always map runtime services code and data regions down to
-    pages
-  arm64: efi: avoid block mappings for unaligned UEFI memory regions
-  arm64: mm: fold init_pgd() into __create_pgd_mapping()
-
-Catalin Marinas (1):
-  arm64: mm: Remove split_p*d() functions
-
- arch/arm64/include/asm/efi.h |   3 +-
- arch/arm64/include/asm/mmu.h |   2 +-
- arch/arm64/kernel/efi.c      |  50 +++++++-
- arch/arm64/mm/mmu.c          | 126 +++++---------------
- 4 files changed, 82 insertions(+), 99 deletions(-)
-
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index 622db3c6474e..8b13476cdf96 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -14,8 +14,7 @@ extern void efi_init(void);
+ #endif
+ 
+ int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
+-
+-#define efi_set_mapping_permissions	efi_create_mapping
++int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
+ 
+ #define arch_efi_call_virt_setup()					\
+ ({									\
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 981604948521..4aef89f37049 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -62,13 +62,47 @@ struct screen_info screen_info __section(.data);
+ int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
+ {
+ 	pteval_t prot_val = create_mapping_protection(md);
++	bool allow_block_mappings = (md->type != EFI_RUNTIME_SERVICES_CODE &&
++				     md->type != EFI_RUNTIME_SERVICES_DATA);
+ 
+ 	create_pgd_mapping(mm, md->phys_addr, md->virt_addr,
+ 			   md->num_pages << EFI_PAGE_SHIFT,
+-			   __pgprot(prot_val | PTE_NG), true);
++			   __pgprot(prot_val | PTE_NG), allow_block_mappings);
+ 	return 0;
+ }
+ 
++static int __init set_permissions(pte_t *ptep, pgtable_t token,
++				  unsigned long addr, void *data)
++{
++	efi_memory_desc_t *md = data;
++	pte_t pte = *ptep;
++
++	if (md->attribute & EFI_MEMORY_RO)
++		pte = set_pte_bit(pte, __pgprot(PTE_RDONLY));
++	if (md->attribute & EFI_MEMORY_XP)
++		pte = set_pte_bit(pte, __pgprot(PTE_PXN));
++	set_pte(ptep, pte);
++	return 0;
++}
++
++int __init efi_set_mapping_permissions(struct mm_struct *mm,
++				       efi_memory_desc_t *md)
++{
++	BUG_ON(md->type != EFI_RUNTIME_SERVICES_CODE &&
++	       md->type != EFI_RUNTIME_SERVICES_DATA);
++
++	/*
++	 * Calling apply_to_page_range() is only safe on regions that are
++	 * guaranteed to be mapped down to pages. Since we are only called
++	 * for regions that have been mapped using efi_create_mapping() above
++	 * (and this is checked by the generic Memory Attributes table parsing
++	 * routines), there is no need to check that again here.
++	 */
++	return apply_to_page_range(mm, md->virt_addr,
++				   md->num_pages << EFI_PAGE_SHIFT,
++				   set_permissions, md);
++}
++
+ static int __init arm64_dmi_init(void)
+ {
+ 	/*
 -- 
 2.7.4
