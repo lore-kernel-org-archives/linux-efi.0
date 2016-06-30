@@ -1,44 +1,80 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 00/11] efi: Permanent runtime EFI memmap support
-Date: Thu, 30 Jun 2016 10:34:31 -0400
-Message-ID: <20160630143431.GA2818@dhcp-128-65.nay.redhat.com>
+From: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+Subject: Re: [PATCH 11/11] x86/efi-bgrt: Use efi_mem_reserve() to avoid
+ copying image data
+Date: Thu, 30 Jun 2016 07:41:43 -0700
+Message-ID: <20160630144143.GA13005@cloud>
 References: <1466681690-5850-1-git-send-email-matt@codeblueprint.co.uk>
+ <1466681690-5850-12-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1466681690-5850-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <1466681690-5850-12-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Kamezawa Hiroyuki <kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, =?iso-8859-1?Q?M=F4she?= van der Sterre <me-A/3C56C7qwM@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, =?iso-8859-1?Q?M=F4she?= van der Sterre <me-A/3C56C7qwM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi, Matt
+On Thu, Jun 23, 2016 at 12:34:50PM +0100, Matt Fleming wrote:
+> efi_mem_reserve() allows us to permanently mark EFI boot services
+> regions as reserved, which means we no longer need to copy the image
+> data out and into a separate buffer.
+>=20
+> Leaving the data in the original boot services region has the added
+> benefit that BGRT images can now be passed across kexec reboot.
+>=20
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+> Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+> Cc: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+> Cc: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+> Cc: M=F4she van der Sterre <me-A/3C56C7qwM@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 
-On 06/23/16 at 12:34pm, Matt Fleming wrote:
-> This series adds support for keeping the EFI memory map around at
-> runtime for x86 (ARM and arm64 already have this support).
-> 
-> Additionally, drivers can now reserve EFI boot services regions such
-> that they are not released back to the kernel during
-> efi_free_boot_services().
-> 
-> With these two features it becomes possible to pass things like the
-> EFI System Resource Table data structures across kexec reboot.
-> 
-> This series also includes a whole bunch of refactoring and cleanups to
-> move code out of arch or driver-specific files into generic places.
-> 
-> I've given these patches some light testing, but it would be good if
-> others could provide more given that this series touches so many
-> different code paths.
+Reviewed-by: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
 
-Tested kexec/kdump and the bgrt reservation with kexec and kexec_file
-system call. But due to a crypto issue I can not test signature
-verification of kexec_file, but I think that is a separate problem.
+This definitely seems like an improvement.
 
-For these parts:
-Tested-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-
-Thanks
-Dave
+>  arch/x86/platform/efi/efi-bgrt.c | 13 ++-----------
+>  1 file changed, 2 insertions(+), 11 deletions(-)
+>=20
+> diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi=
+/efi-bgrt.c
+> index 6a2f5691b1ab..6aad870e8962 100644
+> --- a/arch/x86/platform/efi/efi-bgrt.c
+> +++ b/arch/x86/platform/efi/efi-bgrt.c
+> @@ -82,21 +82,12 @@ void __init efi_bgrt_init(void)
+>  	}
+>  	bgrt_image_size =3D bmp_header.size;
+> =20
+> -	bgrt_image =3D kmalloc(bgrt_image_size, GFP_KERNEL | __GFP_NOWARN);
+> +	bgrt_image =3D memremap(bgrt_tab->image_address, bmp_header.size, M=
+EMREMAP_WB);
+>  	if (!bgrt_image) {
+> -		pr_notice("Ignoring BGRT: failed to allocate memory for image (wan=
+ted %zu bytes)\n",
+> -		       bgrt_image_size);
+> -		return;
+> -	}
+> -
+> -	image =3D memremap(bgrt_tab->image_address, bmp_header.size, MEMREM=
+AP_WB);
+> -	if (!image) {
+>  		pr_notice("Ignoring BGRT: failed to map image memory\n");
+> -		kfree(bgrt_image);
+>  		bgrt_image =3D NULL;
+>  		return;
+>  	}
+> =20
+> -	memcpy(bgrt_image, image, bgrt_image_size);
+> -	memunmap(image);
+> +	efi_mem_reserve(bgrt_tab->image_address, bgrt_image_size);
+>  }
+> --=20
+> 2.7.3
+>=20
