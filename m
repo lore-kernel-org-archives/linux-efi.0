@@ -1,169 +1,79 @@
-From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v4 6/8] efi: load SSTDs from EFI variables
-Date: Thu, 30 Jun 2016 14:56:35 +0300
-Message-ID: <CAE1zotLvUCtokAWT_8qogUcXuASdjD2K=4LDiE4czrCSeXop=Q@mail.gmail.com>
-References: <1466164336-9508-1-git-send-email-octavian.purdila@intel.com>
- <1466164336-9508-7-git-send-email-octavian.purdila@intel.com> <20160623132237.GG8415@codeblueprint.co.uk>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH] efi: arm64: add debugfs node to dump UEFI runtime page
+ tables
+Date: Thu, 30 Jun 2016 15:09:31 +0100
+Message-ID: <20160630140930.GD20363@leverpostej>
+References: <1467280906-31158-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160623132237.GG8415-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "Rafael J . Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-spi <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Irina Tirdea <irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leonard Crestez <leonard.crestez-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1467280906-31158-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jun 23, 2016 at 4:22 PM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+On Thu, Jun 30, 2016 at 12:01:46PM +0200, Ard Biesheuvel wrote:
+> Register the debugfs node 'efi_page_tables' to allow the UEFI runtime
+> page tables to be inspected. Note that ARM does not have 'asm/ptdump.h'
+> [yet] so for now, this is arm64 only.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+> 
+> This patch could be helpful in assessing the series 'arm64: avoid block
+> entries that we need to split later' that I sent out yesterday.
 
-> On Fri, 17 Jun, at 02:52:14PM, Octavian Purdila wrote:
->> This patch allows SSDTs to be loaded from EFI variables. It works by
->> specifying the EFI variable name containing the SSDT to be loaded. All
->> variables with the same name (regardless of the vendor GUID) will be
->> loaded.
->>
->> Note that we can't use acpi_install_table and we must rely on the
->> dynamic ACPI table loading and bus re-scanning mechanisms. That is
->> because I2C/SPI controllers are initialized earlier then the EFI
->> subsystems and all I2C/SPI ACPI devices are enumerated when the
->> I2C/SPI controllers are initialized.
->>
->> Signed-off-by: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->> ---
->>  Documentation/acpi/ssdt-overlays.txt |  67 ++++++++++++++++++++++
->>  Documentation/kernel-parameters.txt  |   7 +++
->>  drivers/firmware/efi/efi.c           | 106 +++++++++++++++++++++++++++++++++++
->>  3 files changed, 180 insertions(+)
->
-> [...]
->
->> @@ -195,6 +197,107 @@ static void generic_ops_unregister(void)
->>       efivars_unregister(&generic_efivars);
->>  }
->>
->> +#if IS_ENABLED(CONFIG_ACPI)
->> +#define EFIVAR_SSDT_NAME_MAX 16
->> +static char efivar_ssdt[EFIVAR_SSDT_NAME_MAX];
->> +static int __init efivar_ssdt_setup(char *str)
->> +{
->> +     if (strlen(str) < sizeof(efivar_ssdt))
->> +             memcpy(efivar_ssdt, str, strlen(str));
->> +     else
->> +             pr_warn("efivar_ssdt: name too long: %s\n", str);
->> +     return 0;
->> +}
->> +__setup("efivar_ssdt=", efivar_ssdt_setup);
->> +
->> +static LIST_HEAD(efivar_ssdts);
->> +
->> +static inline void pr_efivar_name(efi_char16_t *name16)
->> +{
->> +     char name[EFIVAR_SSDT_NAME_MAX];
->> +     int i;
->> +
->> +     for (i = 0; i < EFIVAR_SSDT_NAME_MAX - 1; i++)
->> +             name[i] = name16[i] & 0xFF;
->> +     name[i] = 0;
->> +     pr_cont("%s", name);
->> +}
->
-> Please use the various ucs2_* functions we already have in lib/.
->
+It's probably worth noting that this is based on the arm64 for-next/core
+branch. I don't know if/how we can orgnise branches for merging this.
 
-Okay, after reading the archives regarding UTF8, ucs2, etc. it looks
-like the best thing to do in kernel is to avoid interpreting them. So
-I'll just print the kernel command line parameter and use ucs2_as_utf8
-and memcmp to check if the variable name matches the kernel command
-line.
+>  drivers/firmware/efi/arm-runtime.c | 20 ++++++++++++++++++++
+>  1 file changed, 20 insertions(+)
+> 
+> diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+> index 17ccf0a8787a..4197a1da013d 100644
+> --- a/drivers/firmware/efi/arm-runtime.c
+> +++ b/drivers/firmware/efi/arm-runtime.c
+> @@ -39,6 +39,26 @@ static struct mm_struct efi_mm = {
+>  	.mmlist			= LIST_HEAD_INIT(efi_mm.mmlist),
+>  };
+>  
+> +#ifdef CONFIG_ARM64
 
->> +static __init int efivar_acpi_iter(efi_char16_t *name, efi_guid_t vendor,
->> +                                unsigned long name_size, void *data)
->> +{
->> +     int i;
->> +     int str_len = name_size / sizeof(efi_char16_t);
->> +     struct efivar_entry *entry;
->> +
->> +     if (str_len != strlen(efivar_ssdt) + 1)
->> +             return 0;
->> +
->> +     for (i = 0; i < str_len; i++)
->> +             if ((name[i] & 0xFF) != efivar_ssdt[i])
->> +                     return 0;
->> +
->> +     entry = kzalloc(sizeof(*entry), GFP_KERNEL);
->> +     if (!entry)
->> +             return -ENOMEM;
->> +
->> +     memcpy(entry->var.VariableName, name, name_size);
->> +     memcpy(&entry->var.VendorGuid, &vendor, sizeof(efi_guid_t));
->> +
->> +     efivar_entry_add(entry, &efivar_ssdts);
->> +
->> +     return 0;
->> +}
->> +
->> +static __init int efivar_ssdt_load(void)
->> +{
->> +     struct efivar_entry *i;
->> +     int err;
->> +
->> +     err = efivar_init(efivar_acpi_iter, NULL, true, &efivar_ssdts);
->> +     if (err) {
->> +             pr_err("%s: efivar_init failed: %d\n", __func__, err);
->> +             return err;
->> +     }
->> +
->> +     list_for_each_entry(i, &efivar_ssdts, list) {
->> +             void *data;
->> +             unsigned long size;
->> +
->> +             pr_info("loading SSDT from EFI variable ");
->> +             pr_efivar_name(i->var.VariableName); pr_cont("\n");
->> +
->> +             err = efivar_entry_size(i, &size);
->> +             if (err) {
->> +                     pr_err("failed to get size\n");
->> +                     continue;
->> +             }
->> +
->> +             data = kmalloc(size, GFP_KERNEL);
->> +             if (!data)
->> +                     continue;
->> +
->> +             err = efivar_entry_get(i, NULL, &size, data);
->> +             if (err) {
->> +                     pr_err("failed to get data\n");
->> +                     kfree(data);
->> +                     continue;
->> +             }
->> +
->> +             err = acpi_load_table(data);
->> +             if (err) {
->> +                     pr_err("failed to load table: %d\n", err);
->> +                     kfree(data);
->> +                     continue;
->> +             }
->> +     }
->> +
->
-> Since 'efivar_ssdts' isn't exported to userspace and is never
-> traversed again after its built in efivar_acpi_iter(), can't you just
-> fold the code from the above list_for_each_entry() loop into
-> efivar_acpi_iter()?
->
-> You should be able to call efivar_entry_get() without 'entry' actually
-> being on any list since the list is only used for duplicate variable
-> detection in this case.
+If you use CONFIG_ARM64_PTDUMP for the moment, then we won't have some
+unused structs lying around when the feature is unused.
 
-Since commit 1cfd63166 (efi: Merge boolean flag arguments) it is a bit
-hairy to do this. We need to call efivar_init() with duplicates set to
-false to allow passing a  NULL list but in that case the __efivars
-lock is not release when calling the iterator function which means
-that calls like efivar_entry_get from within the iterator function
-will deadlock.
+Otherwise, I agree that this is a useful debuging feature. FWIW, either
+way:
 
-What seems to work is to call efivar_init() with duplicates set and
-pass a temporary empty list. How does that sound?
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Acked-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+
+Thanks,
+Mark.
+
+> +#include <asm/ptdump.h>
+> +
+> +static struct ptdump_info efi_ptdump_info = {
+> +	.mm		= &efi_mm,
+> +	.markers	= (struct addr_marker[]){
+> +		{ 0,		"UEFI runtime start" },
+> +		{ TASK_SIZE_64,	"UEFI runtime end" }
+> +	},
+> +	.base_addr	= 0,
+> +};
+> +
+> +static int __init ptdump_init(void)
+> +{
+> +	return ptdump_register(&efi_ptdump_info, "efi_page_tables");
+> +}
+> +device_initcall(ptdump_init);
+> +
+> +#endif
+> +
+>  static bool __init efi_virtmap_init(void)
+>  {
+>  	efi_memory_desc_t *md;
+> -- 
+> 2.7.4
+> 
