@@ -1,140 +1,255 @@
 From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: [PATCH v5 7/8] acpi: add support for configfs
-Date: Fri,  1 Jul 2016 23:19:11 +0300
-Message-ID: <1467404352-27101-8-git-send-email-octavian.purdila@intel.com>
+Subject: [PATCH v5 3/8] acpi: add support for ACPI reconfiguration notifiers
+Date: Fri,  1 Jul 2016 23:19:07 +0300
+Message-ID: <1467404352-27101-4-git-send-email-octavian.purdila@intel.com>
 References: <1467404352-27101-1-git-send-email-octavian.purdila@intel.com>
-Return-path: <linux-i2c-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1467404352-27101-1-git-send-email-octavian.purdila@intel.com>
-Sender: linux-i2c-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
 Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, leonard.crestez@intel.com, Octavian Purdila <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Register the ACPI subsystem with configfs.
+Add support for ACPI reconfiguration notifiers to allow subsystems to
+react to changes in the ACPI tables that happen after the initial
+enumeration. This is similar with the way dynamic device tree
+notifications work.
+
+The reconfigure notifications supported for now are device add and
+device remove.
+
+Since ACPICA allows only one table notification handler, this patch
+makes the table notifier function generic and moves it out of the
+sysfs specific code.
 
 Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
 ---
- Documentation/ABI/testing/configfs-acpi |  7 +++++
- MAINTAINERS                             |  1 +
- drivers/acpi/Kconfig                    |  9 ++++++
- drivers/acpi/Makefile                   |  1 +
- drivers/acpi/configfs.c                 | 53 +++++++++++++++++++++++++++++++++
- 5 files changed, 71 insertions(+)
- create mode 100644 Documentation/ABI/testing/configfs-acpi
- create mode 100644 drivers/acpi/configfs.c
+ drivers/acpi/bus.c      |  9 +++++++
+ drivers/acpi/internal.h |  3 +++
+ drivers/acpi/scan.c     | 68 ++++++++++++++++++++++++++++++++++++++++++++++++-
+ drivers/acpi/sysfs.c    |  6 ++---
+ include/linux/acpi.h    | 18 +++++++++++++
+ 5 files changed, 99 insertions(+), 5 deletions(-)
 
-diff --git a/Documentation/ABI/testing/configfs-acpi b/Documentation/ABI/testing/configfs-acpi
-new file mode 100644
-index 0000000..17b19dc
---- /dev/null
-+++ b/Documentation/ABI/testing/configfs-acpi
-@@ -0,0 +1,7 @@
-+What:		/config/acpi
-+Date:		July 2016
-+KernelVersion:	4.8
-+Contact:	linux-acpi@vger.kernel.org
-+Description:
-+		This represents the ACPI subsystem entry point directory. It
-+		contains sub-groups corresponding to ACPI configurable options.
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 16700e4..9c5365f 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -288,6 +288,7 @@ F:	include/linux/acpi.h
- F:	include/acpi/
- F:	Documentation/acpi/
- F:	Documentation/ABI/testing/sysfs-bus-acpi
-+F:	Documentation/ABI/testing/configfs-acpi
- F:	drivers/pci/*acpi*
- F:	drivers/pci/*/*acpi*
- F:	drivers/pci/*/*/*acpi*
-diff --git a/drivers/acpi/Kconfig b/drivers/acpi/Kconfig
-index b7e2e77..a039433 100644
---- a/drivers/acpi/Kconfig
-+++ b/drivers/acpi/Kconfig
-@@ -521,4 +521,13 @@ config XPOWER_PMIC_OPREGION
+diff --git a/drivers/acpi/bus.c b/drivers/acpi/bus.c
+index 262ca31..97e270e 100644
+--- a/drivers/acpi/bus.c
++++ b/drivers/acpi/bus.c
+@@ -990,6 +990,13 @@ void __init acpi_subsystem_init(void)
+ 	}
+ }
  
- endif
- 
-+config ACPI_CONFIGFS
-+	tristate "ACPI configfs support"
-+	select CONFIGFS_FS
-+	default n
-+	help
-+	  Select this option to enable support for ACPI configuration from
-+	  userspace. The configurable ACPI groups will be visible under
-+	  /config/acpi, assuming configfs is mounted under /config.
-+
- endif	# ACPI
-diff --git a/drivers/acpi/Makefile b/drivers/acpi/Makefile
-index 251ce85..1dc2173 100644
---- a/drivers/acpi/Makefile
-+++ b/drivers/acpi/Makefile
-@@ -99,5 +99,6 @@ obj-$(CONFIG_ACPI_EXTLOG)	+= acpi_extlog.o
- obj-$(CONFIG_PMIC_OPREGION)	+= pmic/intel_pmic.o
- obj-$(CONFIG_CRC_PMIC_OPREGION) += pmic/intel_pmic_crc.o
- obj-$(CONFIG_XPOWER_PMIC_OPREGION) += pmic/intel_pmic_xpower.o
-+obj-$(CONFIG_ACPI_CONFIGFS)	+= configfs.o
- 
- video-objs			+= acpi_video.o video_detect.o
-diff --git a/drivers/acpi/configfs.c b/drivers/acpi/configfs.c
-new file mode 100644
-index 0000000..44a72ff
---- /dev/null
-+++ b/drivers/acpi/configfs.c
-@@ -0,0 +1,53 @@
-+/*
-+ * ACPI configfs support
-+ *
-+ * Copyright (c) 2015 Intel Corporation
-+ *
-+ * This program is free software; you can redistribute it and/or modify it
-+ * under the terms of the GNU General Public License version 2 as published by
-+ * the Free Software Foundation.
-+ */
-+
-+#include <linux/init.h>
-+#include <linux/module.h>
-+#include <linux/configfs.h>
-+#include <linux/acpi.h>
-+
-+static struct config_item_type acpi_root_group_type = {
-+	.ct_owner = THIS_MODULE,
-+};
-+
-+static struct configfs_subsystem acpi_configfs = {
-+	.su_group = {
-+		.cg_item = {
-+			.ci_namebuf = "acpi",
-+			.ci_type = &acpi_root_group_type,
-+		},
-+	},
-+	.su_mutex = __MUTEX_INITIALIZER(acpi_configfs.su_mutex),
-+};
-+
-+static int __init acpi_configfs_init(void)
++static acpi_status acpi_bus_table_handler(u32 event, void *table, void *context)
 +{
-+	int ret;
-+	struct config_group *root = &acpi_configfs.su_group;
++	acpi_scan_table_handler(event, table, context);
 +
-+	config_group_init(root);
++	return acpi_sysfs_table_handler(event, table, context);
++}
 +
-+	ret = configfs_register_subsystem(&acpi_configfs);
-+	if (ret)
-+		return ret;
+ static int __init acpi_bus_init(void)
+ {
+ 	int result;
+@@ -1043,6 +1050,8 @@ static int __init acpi_bus_init(void)
+ 	 * _PDC control method may load dynamic SSDT tables,
+ 	 * and we need to install the table handler before that.
+ 	 */
++	status = acpi_install_table_handler(acpi_bus_table_handler, NULL);
 +
+ 	acpi_sysfs_init();
+ 
+ 	acpi_early_processor_set_pdc();
+diff --git a/drivers/acpi/internal.h b/drivers/acpi/internal.h
+index 27cc7fe..940218f 100644
+--- a/drivers/acpi/internal.h
++++ b/drivers/acpi/internal.h
+@@ -87,6 +87,9 @@ bool acpi_queue_hotplug_work(struct work_struct *work);
+ void acpi_device_hotplug(struct acpi_device *adev, u32 src);
+ bool acpi_scan_is_offline(struct acpi_device *adev, bool uevent);
+ 
++acpi_status acpi_sysfs_table_handler(u32 event, void *table, void *context);
++void acpi_scan_table_handler(u32 event, void *table, void *context);
++
+ /* --------------------------------------------------------------------------
+                      Device Node Initialization / Removal
+    -------------------------------------------------------------------------- */
+diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
+index f80f8a7..6a9b5cb 100644
+--- a/drivers/acpi/scan.c
++++ b/drivers/acpi/scan.c
+@@ -494,6 +494,8 @@ static void acpi_device_del(struct acpi_device *device)
+ 	device_del(&device->dev);
+ }
+ 
++static BLOCKING_NOTIFIER_HEAD(acpi_reconfig_chain);
++
+ static LIST_HEAD(acpi_device_del_list);
+ static DEFINE_MUTEX(acpi_device_del_lock);
+ 
+@@ -514,6 +516,9 @@ static void acpi_device_del_work_fn(struct work_struct *work_not_used)
+ 
+ 		mutex_unlock(&acpi_device_del_lock);
+ 
++		blocking_notifier_call_chain(&acpi_reconfig_chain,
++					     ACPI_RECONFIG_DEVICE_REMOVE, adev);
++
+ 		acpi_device_del(adev);
+ 		/*
+ 		 * Drop references to all power resources that might have been
+@@ -1676,7 +1681,7 @@ static void acpi_default_enumeration(struct acpi_device *device)
+ 	bool is_spi_i2c_slave = false;
+ 
+ 	/*
+-	 * Do not enemerate SPI/I2C slaves as they will be enuerated by their
++	 * Do not enemerate SPI/I2C slaves as they will be enumerated by their
+ 	 * respective parents.
+ 	 */
+ 	INIT_LIST_HEAD(&resource_list);
+@@ -1686,6 +1691,9 @@ static void acpi_default_enumeration(struct acpi_device *device)
+ 	if (!is_spi_i2c_slave) {
+ 		acpi_create_platform_device(device);
+ 		acpi_device_set_enumerated(device);
++	} else {
++		blocking_notifier_call_chain(&acpi_reconfig_chain,
++					     ACPI_RECONFIG_DEVICE_ADD, device);
+ 	}
+ }
+ 
+@@ -1917,6 +1925,8 @@ static int acpi_bus_scan_fixed(void)
+ 	return result < 0 ? result : 0;
+ }
+ 
++static bool acpi_scan_initialized;
++
+ int __init acpi_scan_init(void)
+ {
+ 	int result;
+@@ -1961,6 +1971,8 @@ int __init acpi_scan_init(void)
+ 
+ 	acpi_update_all_gpes();
+ 
++	acpi_scan_initialized = true;
++
+  out:
+ 	mutex_unlock(&acpi_scan_lock);
+ 	return result;
+@@ -2004,3 +2016,57 @@ int __init __acpi_probe_device_table(struct acpi_probe_entry *ap_head, int nr)
+ 
+ 	return count;
+ }
++
++struct acpi_table_events_work {
++	struct work_struct work;
++	void *table;
++	u32 event;
++};
++
++void acpi_table_events_fn(struct work_struct *work)
++{
++	struct acpi_table_events_work *tew;
++
++	tew = container_of(work, struct acpi_table_events_work, work);
++
++	if (tew->event == ACPI_TABLE_EVENT_LOAD) {
++		acpi_scan_lock_acquire();
++		acpi_bus_scan(ACPI_ROOT_OBJECT);
++		acpi_scan_lock_release();
++	}
++
++	kfree(tew);
++}
++
++void acpi_scan_table_handler(u32 event, void *table, void *context)
++{
++	struct acpi_table_events_work *tew;
++
++	if (!acpi_scan_initialized)
++		return;
++
++	if (event != ACPI_TABLE_EVENT_LOAD)
++		return;
++
++	tew = kmalloc(sizeof(*tew), GFP_KERNEL);
++	if (!tew)
++		return;
++
++	INIT_WORK(&tew->work, acpi_table_events_fn);
++	tew->table = table;
++	tew->event = event;
++
++	schedule_work(&tew->work);
++}
++
++int acpi_reconfig_notifier_register(struct notifier_block *nb)
++{
++	return blocking_notifier_chain_register(&acpi_reconfig_chain, nb);
++}
++EXPORT_SYMBOL(acpi_reconfig_notifier_register);
++
++int acpi_reconfig_notifier_unregister(struct notifier_block *nb)
++{
++	return blocking_notifier_chain_unregister(&acpi_reconfig_chain, nb);
++}
++EXPORT_SYMBOL(acpi_reconfig_notifier_unregister);
+diff --git a/drivers/acpi/sysfs.c b/drivers/acpi/sysfs.c
+index 4b3a9e2..358165e 100644
+--- a/drivers/acpi/sysfs.c
++++ b/drivers/acpi/sysfs.c
+@@ -378,8 +378,7 @@ static void acpi_table_attr_init(struct acpi_table_attr *table_attr,
+ 	return;
+ }
+ 
+-static acpi_status
+-acpi_sysfs_table_handler(u32 event, void *table, void *context)
++acpi_status acpi_sysfs_table_handler(u32 event, void *table, void *context)
+ {
+ 	struct acpi_table_attr *table_attr;
+ 
+@@ -452,9 +451,8 @@ static int acpi_tables_sysfs_init(void)
+ 
+ 	kobject_uevent(tables_kobj, KOBJ_ADD);
+ 	kobject_uevent(dynamic_tables_kobj, KOBJ_ADD);
+-	status = acpi_install_table_handler(acpi_sysfs_table_handler, NULL);
+ 
+-	return ACPI_FAILURE(status) ? -EINVAL : 0;
 +	return 0;
-+}
-+module_init(acpi_configfs_init);
+ err_dynamic_tables:
+ 	kobject_put(tables_kobj);
+ err:
+diff --git a/include/linux/acpi.h b/include/linux/acpi.h
+index 7089e99..ac93253 100644
+--- a/include/linux/acpi.h
++++ b/include/linux/acpi.h
+@@ -542,6 +542,14 @@ static inline void acpi_device_clear_enumerated(struct acpi_device *adev)
+ 	adev->flags.visited = false;
+ }
+ 
++enum acpi_reconfig_event  {
++	ACPI_RECONFIG_DEVICE_ADD = 0,
++	ACPI_RECONFIG_DEVICE_REMOVE,
++};
 +
-+static void __exit acpi_configfs_exit(void)
++int acpi_reconfig_notifier_register(struct notifier_block *nb);
++int acpi_reconfig_notifier_unregister(struct notifier_block *nb);
++
+ #else	/* !CONFIG_ACPI */
+ 
+ #define acpi_disabled 1
+@@ -696,6 +704,16 @@ static inline void acpi_device_clear_enumerated(struct acpi_device *adev)
+ {
+ }
+ 
++static inline int acpi_reconfig_notifier_register(struct notifier_block *nb)
 +{
-+	configfs_unregister_subsystem(&acpi_configfs);
++	return -EINVAL;
 +}
-+module_exit(acpi_configfs_exit);
 +
-+MODULE_AUTHOR("Octavian Purdila <octavian.purdila@intel.com>");
-+MODULE_DESCRIPTION("ACPI configfs support");
-+MODULE_LICENSE("GPL v2");
++static inline int acpi_reconfig_notifier_unregister(struct notifier_block *nb)
++{
++	return -EINVAL;
++}
++
+ #endif	/* !CONFIG_ACPI */
+ 
+ #ifdef CONFIG_ACPI
 -- 
 2.7.4
