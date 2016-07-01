@@ -1,49 +1,59 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] arm64: document that pending SErrors are not allowed
- at kernel entry
-Date: Fri, 1 Jul 2016 17:34:46 +0200
-Message-ID: <CAKv+Gu_mJzY9YQtibOcvyqMLRNjfxQH5M4eJ=gDU1Uv7hqeGeg@mail.gmail.com>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 1/2] efi: arm64: abort boot on pending SError
+Date: Fri, 1 Jul 2016 16:46:12 +0100
+Message-ID: <20160701154612.GC17071@leverpostej>
 References: <1467385291-9880-1-git-send-email-ard.biesheuvel@linaro.org>
- <1467385291-9880-2-git-send-email-ard.biesheuvel@linaro.org> <20160701152515.GB17071@leverpostej>
+ <20160701152252.GA17071@leverpostej>
+ <CAKv+Gu9Pk6xbUUMisAMhd4rpoYHA+wjzrZGkyEUXPdx_TaniVQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160701152515.GB17071@leverpostej>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu9Pk6xbUUMisAMhd4rpoYHA+wjzrZGkyEUXPdx_TaniVQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 1 July 2016 at 17:25, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Fri, Jul 01, 2016 at 05:01:31PM +0200, Ard Biesheuvel wrote:
->> Our current strategy to deal with pending SErrors at boot is to panic.
->> So let's mention in our boot protocol documentation that no SErrors
->> should be pending when handing over to the kernel.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  Documentation/arm64/booting.txt | 5 +++--
->>  1 file changed, 3 insertions(+), 2 deletions(-)
->>
->> diff --git a/Documentation/arm64/booting.txt b/Documentation/arm64/booting.txt
->> index 8d0df62c3fe0..75dcfead1a0c 100644
->> --- a/Documentation/arm64/booting.txt
->> +++ b/Documentation/arm64/booting.txt
->> @@ -154,8 +154,9 @@ Before jumping into the kernel, the following conditions must be met:
->>    x3 = 0 (reserved for future use)
->>
->>  - CPU mode
->> -  All forms of interrupts must be masked in PSTATE.DAIF (Debug, SError,
->> -  IRQ and FIQ).
->> +  All forms of exceptions must be masked in PSTATE.DAIF (Debug, SError,
->> +  IRQ and FIQ), and any pending SError exceptions must be taken by the
->> +  boot loader or firmware before handing over to the kernel.
->
-> That can be read to mean that a loader should silently swallow SError,
-> which isn't quite what we want (that no SError ever occurs). I don't
-> have a better wording to suggest, unfortunately. :/
->
+On Fri, Jul 01, 2016 at 05:31:33PM +0200, Ard Biesheuvel wrote:
+> On 1 July 2016 at 17:22, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
+> > On Fri, Jul 01, 2016 at 05:01:30PM +0200, Ard Biesheuvel wrote:
+> >> It is the firmware's job to clear any pending SErrors before entering
+> >> the kernel. On UEFI, we can fail gracefully rather than panic during
+> >> early boot, so check for this condition in the stub.
+> >>
+> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >
+> > An SError could be triggered either asynchronously by FW, or as a result
+> > of our actions at any point after this, e.g. due to the filesystem
+> > accesses made to load an initrd.
+> >
+> > So in practice, is checking here useful? Have we seen FW with masked but
+> > pending SError at the point we enter the stub rather than that SError
+> > being triggered later,?
+> 
+> Yes. EDK2 keeps SError masked throughout its execution by default, and
+> so any condition that triggered an SError up till this point is likely
+> to still be pending, and blow up the kernel as soon as it unmasks it.
 
-I don't think it is up to us to mandate how the firmware should be
-dealing with early SErrors, as long as none are pending when we enter
-the kernel.
+Ok.
+
+> > I'm also not sure what this means for CPER, which may use SError to
+> > signal to the OS. It's possible that the UEFI implementation polls
+> > ISR_EL1 itself, and handles SError appropriately internally, or that the
+> > OS can later deal with the SError based on CPER and friends.
+> 
+> Currently, the kernel panics on an SError, and so what the kernel
+> should do once we start dealing with them in a more sophisticated way
+> is hypothetical at the moment. Once that code arrives, it may revert
+> this change, but for now, being dropped back into the UEFI shell does
+> sound more appealing than panic early imo.
+
+Logging something while the UART is available is certainly appealing.
+
+As you say, we can change this later if/when we have more advanced
+SError handling. So modulo my prior comments, I guess this is fine for
+now.
+
+Thanks,
+Mark.
