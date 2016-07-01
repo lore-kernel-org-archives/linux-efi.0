@@ -1,58 +1,39 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi: arm64: add debugfs node to dump UEFI runtime page tables
-Date: Fri, 1 Jul 2016 15:18:37 +0200
-Message-ID: <CAKv+Gu8T5=OKQVXzOToCro-XoLvavHGB6B5kAqPtUE+sepwC1A@mail.gmail.com>
-References: <1467280906-31158-1-git-send-email-ard.biesheuvel@linaro.org> <20160630140930.GD20363@leverpostej>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH 2/2] arm64: document that pending SErrors are not allowed at kernel entry
+Date: Fri,  1 Jul 2016 17:01:31 +0200
+Message-ID: <1467385291-9880-2-git-send-email-ard.biesheuvel@linaro.org>
+References: <1467385291-9880-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160630140930.GD20363@leverpostej>
+In-Reply-To: <1467385291-9880-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 30 June 2016 at 16:09, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Thu, Jun 30, 2016 at 12:01:46PM +0200, Ard Biesheuvel wrote:
->> Register the debugfs node 'efi_page_tables' to allow the UEFI runtime
->> page tables to be inspected. Note that ARM does not have 'asm/ptdump.h'
->> [yet] so for now, this is arm64 only.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>
->> This patch could be helpful in assessing the series 'arm64: avoid block
->> entries that we need to split later' that I sent out yesterday.
->
-> It's probably worth noting that this is based on the arm64 for-next/core
-> branch. I don't know if/how we can orgnise branches for merging this.
->
+Our current strategy to deal with pending SErrors at boot is to panic.
+So let's mention in our boot protocol documentation that no SErrors
+should be pending when handing over to the kernel.
 
-There's no rush, so Matt can take it for v4.9 I suppose?
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ Documentation/arm64/booting.txt | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
->>  drivers/firmware/efi/arm-runtime.c | 20 ++++++++++++++++++++
->>  1 file changed, 20 insertions(+)
->>
->> diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
->> index 17ccf0a8787a..4197a1da013d 100644
->> --- a/drivers/firmware/efi/arm-runtime.c
->> +++ b/drivers/firmware/efi/arm-runtime.c
->> @@ -39,6 +39,26 @@ static struct mm_struct efi_mm = {
->>       .mmlist                 = LIST_HEAD_INIT(efi_mm.mmlist),
->>  };
->>
->> +#ifdef CONFIG_ARM64
->
-> If you use CONFIG_ARM64_PTDUMP for the moment, then we won't have some
-> unused structs lying around when the feature is unused.
->
-
-I can change that
-
-> Otherwise, I agree that this is a useful debuging feature. FWIW, either
-> way:
->
-> Acked-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
->
-
-Thanks.
+diff --git a/Documentation/arm64/booting.txt b/Documentation/arm64/booting.txt
+index 8d0df62c3fe0..75dcfead1a0c 100644
+--- a/Documentation/arm64/booting.txt
++++ b/Documentation/arm64/booting.txt
+@@ -154,8 +154,9 @@ Before jumping into the kernel, the following conditions must be met:
+   x3 = 0 (reserved for future use)
+ 
+ - CPU mode
+-  All forms of interrupts must be masked in PSTATE.DAIF (Debug, SError,
+-  IRQ and FIQ).
++  All forms of exceptions must be masked in PSTATE.DAIF (Debug, SError,
++  IRQ and FIQ), and any pending SError exceptions must be taken by the
++  boot loader or firmware before handing over to the kernel.
+   The CPU must be in either EL2 (RECOMMENDED in order to have access to
+   the virtualisation extensions) or non-secure EL1.
+ 
+-- 
+2.7.4
