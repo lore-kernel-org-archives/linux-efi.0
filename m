@@ -1,7 +1,7 @@
 From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: [PATCH v5 3/8] acpi: add support for ACPI reconfiguration notifiers
-Date: Fri,  1 Jul 2016 23:19:07 +0300
-Message-ID: <1467404352-27101-4-git-send-email-octavian.purdila@intel.com>
+Subject: [PATCH v5 8/8] acpi: add support for loading SSDTs via configfs
+Date: Fri,  1 Jul 2016 23:19:12 +0300
+Message-ID: <1467404352-27101-9-git-send-email-octavian.purdila@intel.com>
 References: <1467404352-27101-1-git-send-email-octavian.purdila@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1467404352-27101-1-git-send-email-octavian.purdila@intel.com>
@@ -10,246 +10,323 @@ To: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt 
 Cc: Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, leonard.crestez@intel.com, Octavian Purdila <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Add support for ACPI reconfiguration notifiers to allow subsystems to
-react to changes in the ACPI tables that happen after the initial
-enumeration. This is similar with the way dynamic device tree
-notifications work.
+New tables can be loaded by creating directories under /config/table/
+and writing the AML code into the aml table attribute. Various table
+attributes will be readable once the table is successfully loaded.
 
-The reconfigure notifications supported for now are device add and
-device remove.
-
-Since ACPICA allows only one table notification handler, this patch
-makes the table notifier function generic and moves it out of the
-sysfs specific code.
+Unloading tables is not supported at the moment, but it can be easily
+implemented once ACPI loading functions provide a table handle to be
+used for unloading.
 
 Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
 ---
- drivers/acpi/bus.c      |  9 +++++++
- drivers/acpi/internal.h |  3 +++
- drivers/acpi/scan.c     | 68 ++++++++++++++++++++++++++++++++++++++++++++++++-
- drivers/acpi/sysfs.c    |  6 ++---
- include/linux/acpi.h    | 18 +++++++++++++
- 5 files changed, 99 insertions(+), 5 deletions(-)
+ Documentation/ABI/testing/configfs-acpi |  29 +++++
+ Documentation/acpi/ssdt-overlays.txt    |  14 +++
+ drivers/acpi/configfs.c                 | 216 +++++++++++++++++++++++++++++++-
+ 3 files changed, 258 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/acpi/bus.c b/drivers/acpi/bus.c
-index 262ca31..97e270e 100644
---- a/drivers/acpi/bus.c
-+++ b/drivers/acpi/bus.c
-@@ -990,6 +990,13 @@ void __init acpi_subsystem_init(void)
- 	}
- }
- 
-+static acpi_status acpi_bus_table_handler(u32 event, void *table, void *context)
-+{
-+	acpi_scan_table_handler(event, table, context);
+diff --git a/Documentation/ABI/testing/configfs-acpi b/Documentation/ABI/testing/configfs-acpi
+index 17b19dc..4ab4e99 100644
+--- a/Documentation/ABI/testing/configfs-acpi
++++ b/Documentation/ABI/testing/configfs-acpi
+@@ -5,3 +5,32 @@ Contact:	linux-acpi@vger.kernel.org
+ Description:
+ 		This represents the ACPI subsystem entry point directory. It
+ 		contains sub-groups corresponding to ACPI configurable options.
 +
-+	return acpi_sysfs_table_handler(event, table, context);
-+}
++What:		/config/acpi/table
++Date:		July 2016
++KernelVersion:	4.8
++Description:
 +
- static int __init acpi_bus_init(void)
- {
- 	int result;
-@@ -1043,6 +1050,8 @@ static int __init acpi_bus_init(void)
- 	 * _PDC control method may load dynamic SSDT tables,
- 	 * and we need to install the table handler before that.
- 	 */
-+	status = acpi_install_table_handler(acpi_bus_table_handler, NULL);
++		This group contains the configuration for user defined ACPI
++		tables. The attributes of a user define table are:
 +
- 	acpi_sysfs_init();
- 
- 	acpi_early_processor_set_pdc();
-diff --git a/drivers/acpi/internal.h b/drivers/acpi/internal.h
-index 27cc7fe..940218f 100644
---- a/drivers/acpi/internal.h
-+++ b/drivers/acpi/internal.h
-@@ -87,6 +87,9 @@ bool acpi_queue_hotplug_work(struct work_struct *work);
- void acpi_device_hotplug(struct acpi_device *adev, u32 src);
- bool acpi_scan_is_offline(struct acpi_device *adev, bool uevent);
- 
-+acpi_status acpi_sysfs_table_handler(u32 event, void *table, void *context);
-+void acpi_scan_table_handler(u32 event, void *table, void *context);
++		aml 		- a binary attribute that the user can use to
++				fill in the ACPI aml definitions. Once the aml
++				data is written to this file and the file is
++				closed the table will be loaded and ACPI devices
++				will be enumerated. To check if the operation is
++				successful the user must check the error code
++				for close(). If the operation is successful,
++				subsequent writes to this attribute will fail.
 +
- /* --------------------------------------------------------------------------
-                      Device Node Initialization / Removal
-    -------------------------------------------------------------------------- */
-diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index f80f8a7..6a9b5cb 100644
---- a/drivers/acpi/scan.c
-+++ b/drivers/acpi/scan.c
-@@ -494,6 +494,8 @@ static void acpi_device_del(struct acpi_device *device)
- 	device_del(&device->dev);
- }
- 
-+static BLOCKING_NOTIFIER_HEAD(acpi_reconfig_chain);
++		The rest of the attributes are read-only and are valid only
++		after the table has been loaded by filling the aml entry:
 +
- static LIST_HEAD(acpi_device_del_list);
- static DEFINE_MUTEX(acpi_device_del_lock);
- 
-@@ -514,6 +516,9 @@ static void acpi_device_del_work_fn(struct work_struct *work_not_used)
- 
- 		mutex_unlock(&acpi_device_del_lock);
- 
-+		blocking_notifier_call_chain(&acpi_reconfig_chain,
-+					     ACPI_RECONFIG_DEVICE_REMOVE, adev);
++		signature 	- ASCII table signature
++		length 		- length of table in bytes, including the header
++		revision 	- ACPI Specification minor version number
++		oem_id 		- ASCII OEM identification
++		oem_table_id 	- ASCII OEM table identification
++		oem_revision 	- OEM revision number
++		asl_compiler_id - ASCII ASL compiler vendor ID
++		asl_compiler_revision - ASL compiler version
+diff --git a/Documentation/acpi/ssdt-overlays.txt b/Documentation/acpi/ssdt-overlays.txt
+index c4b57ba..5ae13f1 100644
+--- a/Documentation/acpi/ssdt-overlays.txt
++++ b/Documentation/acpi/ssdt-overlays.txt
+@@ -156,3 +156,17 @@ tmp=$(mktemp)
+ /bin/echo -ne "\007\000\000\000" | cat - $filename > $tmp
+ dd if=$tmp of="$EFIVARFS/$name-$guid" bs=$(stat -c %s $tmp)
+ rm $tmp
 +
- 		acpi_device_del(adev);
- 		/*
- 		 * Drop references to all power resources that might have been
-@@ -1676,7 +1681,7 @@ static void acpi_default_enumeration(struct acpi_device *device)
- 	bool is_spi_i2c_slave = false;
- 
- 	/*
--	 * Do not enemerate SPI/I2C slaves as they will be enuerated by their
-+	 * Do not enemerate SPI/I2C slaves as they will be enumerated by their
- 	 * respective parents.
- 	 */
- 	INIT_LIST_HEAD(&resource_list);
-@@ -1686,6 +1691,9 @@ static void acpi_default_enumeration(struct acpi_device *device)
- 	if (!is_spi_i2c_slave) {
- 		acpi_create_platform_device(device);
- 		acpi_device_set_enumerated(device);
-+	} else {
-+		blocking_notifier_call_chain(&acpi_reconfig_chain,
-+					     ACPI_RECONFIG_DEVICE_ADD, device);
- 	}
- }
- 
-@@ -1917,6 +1925,8 @@ static int acpi_bus_scan_fixed(void)
- 	return result < 0 ? result : 0;
- }
- 
-+static bool acpi_scan_initialized;
++== Loading ACPI SSDTs from configfs ==
 +
- int __init acpi_scan_init(void)
- {
- 	int result;
-@@ -1961,6 +1971,8 @@ int __init acpi_scan_init(void)
- 
- 	acpi_update_all_gpes();
- 
-+	acpi_scan_initialized = true;
++This option allows loading of user defined SSDTs from userspace via the configfs
++interface. The CONFIG_ACPI_CONFIGFS option must be select and configfs must be
++mounted. In the following examples, we assume that configfs has been mounted in
++/config.
 +
-  out:
- 	mutex_unlock(&acpi_scan_lock);
- 	return result;
-@@ -2004,3 +2016,57 @@ int __init __acpi_probe_device_table(struct acpi_probe_entry *ap_head, int nr)
- 
- 	return count;
- }
++New tables can be loading by creating new directories in /config/acpi/table/ and
++writing the SSDT aml code in the aml attribute:
 +
-+struct acpi_table_events_work {
-+	struct work_struct work;
-+	void *table;
-+	u32 event;
++cd /config/acpi/table
++mkdir my_ssdt
++cat ~/ssdt.aml > my_ssdt/aml
+diff --git a/drivers/acpi/configfs.c b/drivers/acpi/configfs.c
+index 44a72ff..135cc0e 100644
+--- a/drivers/acpi/configfs.c
++++ b/drivers/acpi/configfs.c
+@@ -8,11 +8,222 @@
+  * the Free Software Foundation.
+  */
+ 
++#define pr_fmt(fmt) "ACPI configfs: " fmt
++
+ #include <linux/init.h>
+ #include <linux/module.h>
+ #include <linux/configfs.h>
+ #include <linux/acpi.h>
+ 
++static struct config_group *acpi_table_group;
++
++struct acpi_table {
++	struct config_item cfg;
++	struct acpi_table_header *header;
 +};
 +
-+void acpi_table_events_fn(struct work_struct *work)
++static ssize_t acpi_table_aml_write(struct config_item *cfg,
++				    const void *data, size_t size)
 +{
-+	struct acpi_table_events_work *tew;
++	const struct acpi_table_header *header = data;
++	struct acpi_table *table;
++	int ret;
 +
-+	tew = container_of(work, struct acpi_table_events_work, work);
++	table = container_of(cfg, struct acpi_table, cfg);
 +
-+	if (tew->event == ACPI_TABLE_EVENT_LOAD) {
-+		acpi_scan_lock_acquire();
-+		acpi_bus_scan(ACPI_ROOT_OBJECT);
-+		acpi_scan_lock_release();
++	if (table->header) {
++		pr_err("table already loaded\n");
++		return -EBUSY;
 +	}
 +
-+	kfree(tew);
++	if (header->length != size) {
++		pr_err("invalid table length\n");
++		return -EINVAL;
++	}
++
++	if (memcmp(header->signature, ACPI_SIG_SSDT, 4)) {
++		pr_err("invalid table signature\n");
++		return -EINVAL;
++	}
++
++	table = container_of(cfg, struct acpi_table, cfg);
++
++	table->header = kmemdup(header, header->length, GFP_KERNEL);
++	if (!table->header)
++		return -ENOMEM;
++
++	ret = acpi_load_table(table->header);
++	if (ret) {
++		kfree(table->header);
++		table->header = NULL;
++	}
++
++	return ret;
 +}
 +
-+void acpi_scan_table_handler(u32 event, void *table, void *context)
++static inline struct acpi_table_header *get_header(struct config_item *cfg)
 +{
-+	struct acpi_table_events_work *tew;
++	struct acpi_table *table = container_of(cfg, struct acpi_table, cfg);
 +
-+	if (!acpi_scan_initialized)
-+		return;
++	if (!table->header)
++		pr_err("table not loaded\n");
 +
-+	if (event != ACPI_TABLE_EVENT_LOAD)
-+		return;
-+
-+	tew = kmalloc(sizeof(*tew), GFP_KERNEL);
-+	if (!tew)
-+		return;
-+
-+	INIT_WORK(&tew->work, acpi_table_events_fn);
-+	tew->table = table;
-+	tew->event = event;
-+
-+	schedule_work(&tew->work);
++	return table->header;
 +}
 +
-+int acpi_reconfig_notifier_register(struct notifier_block *nb)
++static ssize_t acpi_table_aml_read(struct config_item *cfg,
++				   void *data, size_t size)
 +{
-+	return blocking_notifier_chain_register(&acpi_reconfig_chain, nb);
-+}
-+EXPORT_SYMBOL(acpi_reconfig_notifier_register);
++	struct acpi_table_header *h = get_header(cfg);
 +
-+int acpi_reconfig_notifier_unregister(struct notifier_block *nb)
-+{
-+	return blocking_notifier_chain_unregister(&acpi_reconfig_chain, nb);
++	if (!h)
++		return -EINVAL;
++
++	if (data)
++		memcpy(data, h, h->length);
++
++	return h->length;
 +}
-+EXPORT_SYMBOL(acpi_reconfig_notifier_unregister);
-diff --git a/drivers/acpi/sysfs.c b/drivers/acpi/sysfs.c
-index 4b3a9e2..358165e 100644
---- a/drivers/acpi/sysfs.c
-+++ b/drivers/acpi/sysfs.c
-@@ -378,8 +378,7 @@ static void acpi_table_attr_init(struct acpi_table_attr *table_attr,
- 	return;
- }
- 
--static acpi_status
--acpi_sysfs_table_handler(u32 event, void *table, void *context)
-+acpi_status acpi_sysfs_table_handler(u32 event, void *table, void *context)
- {
- 	struct acpi_table_attr *table_attr;
- 
-@@ -452,9 +451,8 @@ static int acpi_tables_sysfs_init(void)
- 
- 	kobject_uevent(tables_kobj, KOBJ_ADD);
- 	kobject_uevent(dynamic_tables_kobj, KOBJ_ADD);
--	status = acpi_install_table_handler(acpi_sysfs_table_handler, NULL);
- 
--	return ACPI_FAILURE(status) ? -EINVAL : 0;
-+	return 0;
- err_dynamic_tables:
- 	kobject_put(tables_kobj);
- err:
-diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-index 7089e99..ac93253 100644
---- a/include/linux/acpi.h
-+++ b/include/linux/acpi.h
-@@ -542,6 +542,14 @@ static inline void acpi_device_clear_enumerated(struct acpi_device *adev)
- 	adev->flags.visited = false;
- }
- 
-+enum acpi_reconfig_event  {
-+	ACPI_RECONFIG_DEVICE_ADD = 0,
-+	ACPI_RECONFIG_DEVICE_REMOVE,
++
++#define MAX_ACPI_TABLE_SIZE (128 * 1024)
++
++CONFIGFS_BIN_ATTR(acpi_table_, aml, NULL, MAX_ACPI_TABLE_SIZE);
++
++struct configfs_bin_attribute *acpi_table_bin_attrs[] = {
++	&acpi_table_attr_aml,
++	NULL,
 +};
 +
-+int acpi_reconfig_notifier_register(struct notifier_block *nb);
-+int acpi_reconfig_notifier_unregister(struct notifier_block *nb);
++ssize_t acpi_table_signature_show(struct config_item *cfg, char *str)
++{
++	struct acpi_table_header *h = get_header(cfg);
 +
- #else	/* !CONFIG_ACPI */
++	if (!h)
++		return -EINVAL;
++
++	return sprintf(str, "%.*s\n", ACPI_NAME_SIZE, h->signature);
++}
++
++ssize_t acpi_table_length_show(struct config_item *cfg, char *str)
++{
++	struct acpi_table_header *h = get_header(cfg);
++
++	if (!h)
++		return -EINVAL;
++
++	return sprintf(str, "%d\n", h->length);
++}
++
++ssize_t acpi_table_revision_show(struct config_item *cfg, char *str)
++{
++	struct acpi_table_header *h = get_header(cfg);
++
++	if (!h)
++		return -EINVAL;
++
++	return sprintf(str, "%d\n", h->revision);
++}
++
++ssize_t acpi_table_oem_id_show(struct config_item *cfg, char *str)
++{
++	struct acpi_table_header *h = get_header(cfg);
++
++	if (!h)
++		return -EINVAL;
++
++	return sprintf(str, "%.*s\n", ACPI_OEM_ID_SIZE, h->oem_id);
++}
++
++ssize_t acpi_table_oem_table_id_show(struct config_item *cfg, char *str)
++{
++	struct acpi_table_header *h = get_header(cfg);
++
++	if (!h)
++		return -EINVAL;
++
++	return sprintf(str, "%.*s\n", ACPI_OEM_TABLE_ID_SIZE, h->oem_table_id);
++}
++
++ssize_t acpi_table_oem_revision_show(struct config_item *cfg, char *str)
++{
++	struct acpi_table_header *h = get_header(cfg);
++
++	if (!h)
++		return -EINVAL;
++
++	return sprintf(str, "%d\n", h->oem_revision);
++}
++
++ssize_t acpi_table_asl_compiler_id_show(struct config_item *cfg, char *str)
++{
++	struct acpi_table_header *h = get_header(cfg);
++
++	if (!h)
++		return -EINVAL;
++
++	return sprintf(str, "%.*s\n", ACPI_NAME_SIZE, h->asl_compiler_id);
++}
++
++ssize_t acpi_table_asl_compiler_revision_show(struct config_item *cfg,
++					      char *str)
++{
++	struct acpi_table_header *h = get_header(cfg);
++
++	if (!h)
++		return -EINVAL;
++
++	return sprintf(str, "%d\n", h->asl_compiler_revision);
++}
++
++CONFIGFS_ATTR_RO(acpi_table_, signature);
++CONFIGFS_ATTR_RO(acpi_table_, length);
++CONFIGFS_ATTR_RO(acpi_table_, revision);
++CONFIGFS_ATTR_RO(acpi_table_, oem_id);
++CONFIGFS_ATTR_RO(acpi_table_, oem_table_id);
++CONFIGFS_ATTR_RO(acpi_table_, oem_revision);
++CONFIGFS_ATTR_RO(acpi_table_, asl_compiler_id);
++CONFIGFS_ATTR_RO(acpi_table_, asl_compiler_revision);
++
++struct configfs_attribute *acpi_table_attrs[] = {
++	&acpi_table_attr_signature,
++	&acpi_table_attr_length,
++	&acpi_table_attr_revision,
++	&acpi_table_attr_oem_id,
++	&acpi_table_attr_oem_table_id,
++	&acpi_table_attr_oem_revision,
++	&acpi_table_attr_asl_compiler_id,
++	&acpi_table_attr_asl_compiler_revision,
++	NULL,
++};
++
++static struct config_item_type acpi_table_type = {
++	.ct_owner = THIS_MODULE,
++	.ct_bin_attrs = acpi_table_bin_attrs,
++	.ct_attrs = acpi_table_attrs,
++};
++
++static struct config_item *acpi_table_make_item(struct config_group *group,
++						const char *name)
++{
++	struct acpi_table *table;
++
++	table = kzalloc(sizeof(*table), GFP_KERNEL);
++	if (!table)
++		return ERR_PTR(-ENOMEM);
++
++	config_item_init_type_name(&table->cfg, name, &acpi_table_type);
++	return &table->cfg;
++}
++
++struct configfs_group_operations acpi_table_group_ops = {
++	.make_item = acpi_table_make_item,
++};
++
++static struct config_item_type acpi_tables_type = {
++	.ct_owner = THIS_MODULE,
++	.ct_group_ops = &acpi_table_group_ops,
++};
++
+ static struct config_item_type acpi_root_group_type = {
+ 	.ct_owner = THIS_MODULE,
+ };
+@@ -38,12 +249,15 @@ static int __init acpi_configfs_init(void)
+ 	if (ret)
+ 		return ret;
  
- #define acpi_disabled 1
-@@ -696,6 +704,16 @@ static inline void acpi_device_clear_enumerated(struct acpi_device *adev)
- {
+-	return 0;
++	acpi_table_group = configfs_register_default_group(root, "table",
++							   &acpi_tables_type);
++	return PTR_ERR_OR_ZERO(acpi_table_group);
  }
+ module_init(acpi_configfs_init);
  
-+static inline int acpi_reconfig_notifier_register(struct notifier_block *nb)
-+{
-+	return -EINVAL;
-+}
-+
-+static inline int acpi_reconfig_notifier_unregister(struct notifier_block *nb)
-+{
-+	return -EINVAL;
-+}
-+
- #endif	/* !CONFIG_ACPI */
- 
- #ifdef CONFIG_ACPI
+ static void __exit acpi_configfs_exit(void)
+ {
++	configfs_unregister_default_group(acpi_table_group);
+ 	configfs_unregister_subsystem(&acpi_configfs);
+ }
+ module_exit(acpi_configfs_exit);
 -- 
 2.7.4
