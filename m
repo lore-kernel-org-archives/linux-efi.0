@@ -1,72 +1,46 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 1/2] efi: arm64: abort boot on pending SError
-Date: Sat, 2 Jul 2016 12:14:42 +0200
-Message-ID: <CAKv+Gu-sAc-PRDqVdi2v9G_crx0dXHpxPhswJHgDRVe6caLjRw@mail.gmail.com>
-References: <1467385291-9880-1-git-send-email-ard.biesheuvel@linaro.org>
- <20160701152252.GA17071@leverpostej>
- <CAKv+Gu9Pk6xbUUMisAMhd4rpoYHA+wjzrZGkyEUXPdx_TaniVQ@mail.gmail.com>
- <20160701154612.GC17071@leverpostej>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH v5 5/8] spi: add support for ACPI reconfigure
+ notifications
+Date: Sun, 3 Jul 2016 14:10:49 +0200
+Message-ID: <20160703121049.GM6247@sirena.org.uk>
+References: <1467404352-27101-1-git-send-email-octavian.purdila@intel.com>
+ <1467404352-27101-6-git-send-email-octavian.purdila@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20160701154612.GC17071@leverpostej>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="N/EvDld9rH7KvG42"
+Return-path: <linux-i2c-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1467404352-27101-6-git-send-email-octavian.purdila@intel.com>
+Sender: linux-i2c-owner@vger.kernel.org
+To: Octavian Purdila <octavian.purdila@intel.com>
+Cc: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, leonard.crestez@intel.com
 List-Id: linux-efi@vger.kernel.org
 
-On 1 July 2016 at 17:46, Mark Rutland <mark.rutland@arm.com> wrote:
-> On Fri, Jul 01, 2016 at 05:31:33PM +0200, Ard Biesheuvel wrote:
->> On 1 July 2016 at 17:22, Mark Rutland <mark.rutland@arm.com> wrote:
->> > On Fri, Jul 01, 2016 at 05:01:30PM +0200, Ard Biesheuvel wrote:
->> >> It is the firmware's job to clear any pending SErrors before entering
->> >> the kernel. On UEFI, we can fail gracefully rather than panic during
->> >> early boot, so check for this condition in the stub.
->> >>
->> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->> >
->> > An SError could be triggered either asynchronously by FW, or as a result
->> > of our actions at any point after this, e.g. due to the filesystem
->> > accesses made to load an initrd.
->> >
->> > So in practice, is checking here useful? Have we seen FW with masked but
->> > pending SError at the point we enter the stub rather than that SError
->> > being triggered later,?
->>
->> Yes. EDK2 keeps SError masked throughout its execution by default, and
->> so any condition that triggered an SError up till this point is likely
->> to still be pending, and blow up the kernel as soon as it unmasks it.
->
-> Ok.
->
->> > I'm also not sure what this means for CPER, which may use SError to
->> > signal to the OS. It's possible that the UEFI implementation polls
->> > ISR_EL1 itself, and handles SError appropriately internally, or that the
->> > OS can later deal with the SError based on CPER and friends.
->>
->> Currently, the kernel panics on an SError, and so what the kernel
->> should do once we start dealing with them in a more sophisticated way
->> is hypothetical at the moment. Once that code arrives, it may revert
->> this change, but for now, being dropped back into the UEFI shell does
->> sound more appealing than panic early imo.
->
-> Logging something while the UART is available is certainly appealing.
->
 
-Not just the UART, the graphical console as well, if the system has one.
+--N/EvDld9rH7KvG42
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> As you say, we can change this later if/when we have more advanced
-> SError handling. So modulo my prior comments, I guess this is fine for
-> now.
->
+On Fri, Jul 01, 2016 at 11:19:09PM +0300, Octavian Purdila wrote:
+> This patch adds supports for SPI device enumeration and removal via
+> ACPI reconfiguration notifications that are send as a result of an
+> ACPI table load or unload operation.
 
-OK, thanks.
+Acked-by: Mark Brown <broonie@kernel.org>
+
+--N/EvDld9rH7KvG42
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJXeQDCAAoJECTWi3JdVIfQCogH/iI53CIKhH7n1rZmVFEhPqXL
+1I1PeKA1D9kcDMCgQKE3TJ1xw2+PxwQAtrb1HrBual7vkKFcq+idl5dh3T+mZnFT
+qPFdiPiZYBwaVQ+7mBD5pG/DcutRs2bFA89bvqBRtSjrTgQfZO/GI4LpVLFsAukg
+KSLdl4OnS9RbZHiaaoeAe/pSmTKz8V3vv+SrQbsXz9ZPMusLkQ/RhqS6+CBJYdlt
+TvQPTXjjzqhgVMxcJxAbO9Vj4jjLkEeF3/ShtNdl6nWJm5+bmOfafIIBxm99WAC1
+V/UVA3Ul2lHrR0rQjrxCaTq+6cTxpOzjtJI42IDD6GM+CZ5AcN9AZ1GgHChEwYY=
+=mWKT
+-----END PGP SIGNATURE-----
+
+--N/EvDld9rH7KvG42--
