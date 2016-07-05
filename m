@@ -1,63 +1,259 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Subject: Re: MemoryOverwriteRequestControl
-Date: Mon, 04 Jul 2016 21:24:36 -0700
-Message-ID: <1467692676.2288.63.camel@HansenPartnership.com>
-References: <CACxGe6s7rgTBUf7jtN6J3i3w-HvAm2rFnjjwCtWRS6oHx3ZB5A@mail.gmail.com>
-	 <1467667917.2288.23.camel@HansenPartnership.com>
-	 <20160704222609.GB5160@srcf.ucam.org>
-	 <1467680635.2288.36.camel@HansenPartnership.com>
-	 <20160705010622.GA7974@srcf.ucam.org>
-	 <1467686108.2288.43.camel@HansenPartnership.com>
-	 <20160705024022.GA9292@srcf.ucam.org>
-	 <1467687531.2288.51.camel@HansenPartnership.com>
-	 <20160705030314.GA9597@srcf.ucam.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH v6 6/8] efi: load SSTDs from EFI variables
+Date: Tue,  5 Jul 2016 13:09:52 +0300
+Message-ID: <1467713392-24825-1-git-send-email-octavian.purdila@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160705030314.GA9597-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jon Masters <jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: "Rafael J . Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Cc: Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leonard.crestez-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org, Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2016-07-05 at 04:03 +0100, Matthew Garrett wrote:
-> On Mon, Jul 04, 2016 at 07:58:51PM -0700, James Bottomley wrote:
-> > On Tue, 2016-07-05 at 03:40 +0100, Matthew Garrett wrote:
-> > > dm-crypt secrets are typically unrelated to the TPM, so I really 
-> > > don't think the TSS is the right layer to be solving this.
-> > 
-> > Not in theory: the MOR protocol is supposed to protect arbitrary
-> > unprotected secrets in memory.  I accept that in practice, it was
-> > designed to protect a single secret: the bitlocker encryption key.
-> 
-> I think we may be miscommunicating slightly. If MOR is intended to 
-> protect arbitrary secrets then it needs to protect secrets that are 
-> unrelated to the TPM - that means that TSS integration isn't
-> sufficient. 
+This patch allows SSDTs to be loaded from EFI variables. It works by
+specifying the EFI variable name containing the SSDT to be loaded. All
+variables with the same name (regardless of the vendor GUID) will be
+loaded.
 
-I agree: necessary but not sufficient.
+Note that we can't use acpi_install_table and we must rely on the
+dynamic ACPI table loading and bus re-scanning mechanisms. That is
+because I2C/SPI controllers are initialized earlier then the EFI
+subsystems and all I2C/SPI ACPI devices are enumerated when the
+I2C/SPI controllers are initialized.
 
-> Unless we can guarantee that every piece of userspace is behaving 
-> correctly, that probably means setting MOR in kernel init and letting
-> userspace turn it off if it's been audited to handle things 
-> appropriately (and having the kernel ignore that request if it has 
-> its own secrets it needs to protect)
+Signed-off-by: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
 
-Well, no, I was thinking, as I said before, of a kernel secrets
-counter.  MOR Control doesn't need to be set in init; merely when the
-first secret is exposed.  It can be reset when the last one is
-shredded.  We need a user space per process interface to this so that
-processes can also declare secret exposure and shredding.  For dmcrypt,
-first exposure is the dm device setup and shredding the teardown, so
-it's fairly long lived.
+As the rest of the series remains unchanged and it got Acks from most
+of the other patches, I've resend only this patch. Rafael, please let
+me know if you prefer to resend the whole series.
 
-However, there's still the problem of secrets and suspend/resume.  The
-best I can come up with there is to have memory regions declared as
-protected (in the kernel and per process) and encrypt them all on
-suspend.  The problem, on resume, is getting enough up that we can ask
-for the password, but not so much that it requires an encrypted
-resource.  This is the problem windows couldn't solve, but I think
-we're a bit better placed.
+Changes from v5:
 
-James
+* enable duplicate detection to avoid firmware bugs that returns the
+same variable over and over again; this requires pushing the entry
+allocation back into efivar_ssdt_iter() and creating a temporary list
+that is iterated over in efivar_ssdt_load()
+
+* marked efivar_ssdt with __initdata
+
+
+ Documentation/acpi/ssdt-overlays.txt | 67 +++++++++++++++++++++++++
+ Documentation/kernel-parameters.txt  |  7 +++
+ drivers/firmware/efi/efi.c           | 96 ++++++++++++++++++++++++++++++++++++
+ 3 files changed, 170 insertions(+)
+
+diff --git a/Documentation/acpi/ssdt-overlays.txt b/Documentation/acpi/ssdt-overlays.txt
+index 8050259..c4b57ba 100644
+--- a/Documentation/acpi/ssdt-overlays.txt
++++ b/Documentation/acpi/ssdt-overlays.txt
+@@ -89,3 +89,70 @@ cp ssdt.aml kernel/firmware/acpi
+ # on top:
+ find kernel | cpio -H newc --create > /boot/instrumented_initrd
+ cat /boot/initrd >>/boot/instrumented_initrd
++
++== Loading ACPI SSDTs from EFI variables ==
++
++This is the preferred method, when EFI is supported on the platform, because it
++allows a persistent, OS independent way of storing the user defined SSDTs. There
++is also work underway to implement EFI support for loading user defined SSDTs
++and using this method will make it easier to convert to the EFI loading
++mechanism when that will arrive.
++
++In order to load SSDTs from an EFI variable the efivar_ssdt kernel command line
++parameter can be used. The argument for the option is the variable name to
++use. If there are multiple variables with the same name but with different
++vendor GUIDs, all of them will be loaded.
++
++In order to store the AML code in an EFI variable the efivarfs filesystem can be
++used. It is enabled and mounted by default in /sys/firmware/efi/efivars in all
++recent distribution.
++
++Creating a new file in /sys/firmware/efi/efivars will automatically create a new
++EFI variable. Updating a file in /sys/firmware/efi/efivars will update the EFI
++variable. Please note that the file name needs to be specially formatted as
++"Name-GUID" and that the first 4 bytes in the file (little-endian format)
++represent the attributes of the EFI variable (see EFI_VARIABLE_MASK in
++include/linux/efi.h). Writing to the file must also be done with one write
++operation.
++
++For example, you can use the following bash script to create/update an EFI
++variable with the content from a given file:
++
++#!/bin/sh -e
++
++while ! [ -z "$1" ]; do
++        case "$1" in
++        "-f") filename="$2"; shift;;
++        "-g") guid="$2"; shift;;
++        *) name="$1";;
++        esac
++        shift
++done
++
++usage()
++{
++        echo "Syntax: ${0##*/} -f filename [ -g guid ] name"
++        exit 1
++}
++
++[ -n "$name" -a -f "$filename" ] || usage
++
++EFIVARFS="/sys/firmware/efi/efivars"
++
++[ -d "$EFIVARFS" ] || exit 2
++
++if stat -tf $EFIVARFS | grep -q -v de5e81e4; then
++        mount -t efivarfs none $EFIVARFS
++fi
++
++# try to pick up an existing GUID
++[ -n "$guid" ] || guid=$(find "$EFIVARFS" -name "$name-*" | head -n1 | cut -f2- -d-)
++
++# use a randomly generated GUID
++[ -n "$guid" ] || guid="$(cat /proc/sys/kernel/random/uuid)"
++
++# efivarfs expects all of the data in one write
++tmp=$(mktemp)
++/bin/echo -ne "\007\000\000\000" | cat - $filename > $tmp
++dd if=$tmp of="$EFIVARFS/$name-$guid" bs=$(stat -c %s $tmp)
++rm $tmp
+diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+index 82b42c9..bbfb56f 100644
+--- a/Documentation/kernel-parameters.txt
++++ b/Documentation/kernel-parameters.txt
+@@ -1185,6 +1185,13 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+ 			Address Range Mirroring feature even if your box
+ 			doesn't support it.
+ 
++	efivar_ssdt=	[EFI; X86] Name of an EFI variable that contains an SSDT
++			that is to be dynamically loaded by Linux. If there are
++			multiple variables with the same name but with different
++			vendor GUIDs, all of them will be loaded. See
++			Documentation/acpi/ssdt-overlays.txt for details.
++
++
+ 	eisa_irq_edge=	[PARISC,HW]
+ 			See header of drivers/parisc/eisa.c.
+ 
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 05509f3..8730fd4 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -24,6 +24,9 @@
+ #include <linux/of_fdt.h>
+ #include <linux/io.h>
+ #include <linux/platform_device.h>
++#include <linux/slab.h>
++#include <linux/acpi.h>
++#include <linux/ucs2_string.h>
+ 
+ #include <asm/early_ioremap.h>
+ 
+@@ -195,6 +198,96 @@ static void generic_ops_unregister(void)
+ 	efivars_unregister(&generic_efivars);
+ }
+ 
++#if IS_ENABLED(CONFIG_ACPI)
++#define EFIVAR_SSDT_NAME_MAX	16
++static char efivar_ssdt[EFIVAR_SSDT_NAME_MAX] __initdata;
++static int __init efivar_ssdt_setup(char *str)
++{
++	if (strlen(str) < sizeof(efivar_ssdt))
++		memcpy(efivar_ssdt, str, strlen(str));
++	else
++		pr_warn("efivar_ssdt: name too long: %s\n", str);
++	return 0;
++}
++__setup("efivar_ssdt=", efivar_ssdt_setup);
++
++static __init int efivar_ssdt_iter(efi_char16_t *name, efi_guid_t vendor,
++				   unsigned long name_size, void *data)
++{
++	struct efivar_entry *entry;
++	struct list_head *list = data;
++	char utf8_name[EFIVAR_SSDT_NAME_MAX];
++	int limit = min_t(unsigned long, EFIVAR_SSDT_NAME_MAX, name_size);
++
++	ucs2_as_utf8(utf8_name, name, limit - 1);
++	if (strncmp(utf8_name, efivar_ssdt, limit) != 0)
++		return 0;
++
++	entry = kmalloc(sizeof(*entry), GFP_KERNEL);
++	if (!entry)
++		return 0;
++
++	memcpy(entry->var.VariableName, name, name_size);
++	memcpy(&entry->var.VendorGuid, &vendor, sizeof(efi_guid_t));
++
++	efivar_entry_add(entry, list);
++
++	return 0;
++}
++
++static __init int efivar_ssdt_load(void)
++{
++	LIST_HEAD(entries);
++	struct efivar_entry *entry, *aux;
++	unsigned long size;
++	void *data;
++	int ret;
++
++	ret = efivar_init(efivar_ssdt_iter, &entries, true, &entries);
++
++	list_for_each_entry_safe(entry, aux, &entries, list) {
++		pr_info("loading SSDT from variable %s-%pUl\n", efivar_ssdt,
++			&entry->var.VendorGuid);
++
++		list_del(&entry->list);
++
++		ret = efivar_entry_size(entry, &size);
++		if (ret) {
++			pr_err("failed to get var size\n");
++			goto free_entry;
++		}
++
++		data = kmalloc(size, GFP_KERNEL);
++		if (!data)
++			goto free_entry;
++
++		ret = efivar_entry_get(entry, NULL, &size, data);
++		if (ret) {
++			pr_err("failed to get var data\n");
++			goto free_data;
++		}
++
++		ret = acpi_load_table(data);
++		if (ret) {
++			pr_err("failed to load table: %d\n", ret);
++			goto free_data;
++		}
++
++		goto free_entry;
++
++free_data:
++		kfree(data);
++
++free_entry:
++		kfree(entry);
++	}
++
++	return ret;
++}
++#else
++static inline int efivar_ssdt_load(void) { return 0; }
++#endif
++
+ /*
+  * We register the efi subsystem with the firmware subsystem and the
+  * efivars subsystem with the efi subsystem, if the system was booted with
+@@ -218,6 +311,9 @@ static int __init efisubsys_init(void)
+ 	if (error)
+ 		goto err_put;
+ 
++	if (efi_enabled(EFI_RUNTIME_SERVICES))
++		efivar_ssdt_load();
++
+ 	error = sysfs_create_group(efi_kobj, &efi_subsys_attr_group);
+ 	if (error) {
+ 		pr_err("efi: Sysfs attribute export failed with error %d.\n",
+-- 
+2.7.4
