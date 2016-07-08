@@ -1,261 +1,313 @@
-From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v7 3/8] acpi: add support for ACPI reconfiguration notifiers
-Date: Fri,  8 Jul 2016 19:13:09 +0300
-Message-ID: <1467994394-23983-4-git-send-email-octavian.purdila@intel.com>
+From: Octavian Purdila <octavian.purdila@intel.com>
+Subject: [PATCH v7 4/8] i2c: add support for ACPI reconfigure notifications
+Date: Fri,  8 Jul 2016 19:13:10 +0300
+Message-ID: <1467994394-23983-5-git-send-email-octavian.purdila@intel.com>
 References: <1467994394-23983-1-git-send-email-octavian.purdila@intel.com>
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1467994394-23983-1-git-send-email-octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Rafael J . Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
-Cc: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leonard.crestez-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1467994394-23983-1-git-send-email-octavian.purdila@intel.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "Rafael J . Wysocki" <rjw@rjwysocki.net>
+Cc: linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, leonard.crestez@intel.com, Octavian Purdila <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Add support for ACPI reconfiguration notifiers to allow subsystems to
-react to changes in the ACPI tables that happen after the initial
-enumeration. This is similar with the way dynamic device tree
-notifications work.
+This patch adds supports for I2C device enumeration and removal via
+ACPI reconfiguration notifications that are send as a result of an
+ACPI table load or unload operation.
 
-The reconfigure notifications supported for now are device add and
-device remove.
+The code is very similar with the device tree reconfiguration code
+with only small differences in the way we test and set the enumerated
+state of the device:
 
-Since ACPICA allows only one table notification handler, this patch
-makes the table notifier function generic and moves it out of the
-sysfs specific code.
+ * the equivalent of device tree's OF_POPULATED flag is the
+   flags.visited field in the ACPI device and the following
+   wrappers are used to manipulate it: acpi_device_enumerated(),
+   acpi_device_set_enumerated() and acpi_device_clear_enumerated()
 
-Signed-off-by: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Reviewed-by: Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+ * the device tree code checks of status of the OF_POPULATED flag to
+   avoid trying to create duplicate Linux devices in two places: once
+   when the controller is probed, and once when the reconfigure event
+   is received; in the ACPI code the check is performed only once when
+   the ACPI namespace is searched because this code path is invoked in
+   both of the two mentioned cases
+
+The rest of the enumeration handling is similar with device tree: when
+the Linux device is unregistered the ACPI device is marked as not
+enumerated; also, when a device remove notification is received we
+check that the device is in the enumerated state before continuing
+with the removal of the Linux device.
+
+Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
+Reviewed-by: Mika Westerberg <mika.westerberg@linux.intel.com>
+Acked-by: Wolfram Sang <wsa@the-dreams.de>
 ---
- drivers/acpi/bus.c      |  9 +++++++
- drivers/acpi/internal.h |  3 +++
- drivers/acpi/scan.c     | 68 ++++++++++++++++++++++++++++++++++++++++++++++++-
- drivers/acpi/sysfs.c    |  6 ++---
- include/linux/acpi.h    | 18 +++++++++++++
- 5 files changed, 99 insertions(+), 5 deletions(-)
+ drivers/i2c/i2c-core.c | 175 ++++++++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 137 insertions(+), 38 deletions(-)
 
-diff --git a/drivers/acpi/bus.c b/drivers/acpi/bus.c
-index 262ca31..97e270e 100644
---- a/drivers/acpi/bus.c
-+++ b/drivers/acpi/bus.c
-@@ -990,6 +990,13 @@ void __init acpi_subsystem_init(void)
- 	}
+diff --git a/drivers/i2c/i2c-core.c b/drivers/i2c/i2c-core.c
+index af11b65..74e5aea 100644
+--- a/drivers/i2c/i2c-core.c
++++ b/drivers/i2c/i2c-core.c
+@@ -107,12 +107,11 @@ struct acpi_i2c_lookup {
+ 	acpi_handle device_handle;
+ };
+ 
+-static int acpi_i2c_find_address(struct acpi_resource *ares, void *data)
++static int acpi_i2c_fill_info(struct acpi_resource *ares, void *data)
+ {
+ 	struct acpi_i2c_lookup *lookup = data;
+ 	struct i2c_board_info *info = lookup->info;
+ 	struct acpi_resource_i2c_serialbus *sb;
+-	acpi_handle adapter_handle;
+ 	acpi_status status;
+ 
+ 	if (info->addr || ares->type != ACPI_RESOURCE_TYPE_SERIAL_BUS)
+@@ -122,80 +121,102 @@ static int acpi_i2c_find_address(struct acpi_resource *ares, void *data)
+ 	if (sb->type != ACPI_RESOURCE_SERIAL_TYPE_I2C)
+ 		return 1;
+ 
+-	/*
+-	 * Extract the ResourceSource and make sure that the handle matches
+-	 * with the I2C adapter handle.
+-	 */
+ 	status = acpi_get_handle(lookup->device_handle,
+ 				 sb->resource_source.string_ptr,
+-				 &adapter_handle);
+-	if (ACPI_SUCCESS(status) && adapter_handle == lookup->adapter_handle) {
+-		info->addr = sb->slave_address;
+-		if (sb->access_mode == ACPI_I2C_10BIT_MODE)
+-			info->flags |= I2C_CLIENT_TEN;
+-	}
++				 &lookup->adapter_handle);
++	if (!ACPI_SUCCESS(status))
++		return 1;
++
++	info->addr = sb->slave_address;
++	if (sb->access_mode == ACPI_I2C_10BIT_MODE)
++		info->flags |= I2C_CLIENT_TEN;
+ 
+ 	return 1;
  }
  
-+static acpi_status acpi_bus_table_handler(u32 event, void *table, void *context)
-+{
-+	acpi_scan_table_handler(event, table, context);
+-static acpi_status acpi_i2c_add_device(acpi_handle handle, u32 level,
+-				       void *data, void **return_value)
++static int acpi_i2c_get_info(struct acpi_device *adev,
++			     struct i2c_board_info *info,
++			     acpi_handle *adapter_handle)
+ {
+-	struct i2c_adapter *adapter = data;
+ 	struct list_head resource_list;
+-	struct acpi_i2c_lookup lookup;
+ 	struct resource_entry *entry;
+-	struct i2c_board_info info;
+-	struct acpi_device *adev;
++	struct acpi_i2c_lookup lookup;
+ 	int ret;
+ 
+-	if (acpi_bus_get_device(handle, &adev))
+-		return AE_OK;
+-	if (acpi_bus_get_status(adev) || !adev->status.present)
+-		return AE_OK;
++	if (acpi_bus_get_status(adev) || !adev->status.present ||
++	    acpi_device_enumerated(adev))
++		return -EINVAL;
+ 
+-	memset(&info, 0, sizeof(info));
+-	info.fwnode = acpi_fwnode_handle(adev);
++	memset(info, 0, sizeof(*info));
++	info->fwnode = acpi_fwnode_handle(adev);
+ 
+ 	memset(&lookup, 0, sizeof(lookup));
+-	lookup.adapter_handle = ACPI_HANDLE(&adapter->dev);
+-	lookup.device_handle = handle;
+-	lookup.info = &info;
++	lookup.device_handle = acpi_device_handle(adev);
++	lookup.info = info;
+ 
+-	/*
+-	 * Look up for I2cSerialBus resource with ResourceSource that
+-	 * matches with this adapter.
+-	 */
++	/* Look up for I2cSerialBus resource */
+ 	INIT_LIST_HEAD(&resource_list);
+ 	ret = acpi_dev_get_resources(adev, &resource_list,
+-				     acpi_i2c_find_address, &lookup);
++				     acpi_i2c_fill_info, &lookup);
+ 	acpi_dev_free_resource_list(&resource_list);
+ 
+-	if (ret < 0 || !info.addr)
+-		return AE_OK;
++	if (ret < 0 || !info->addr)
++		return -EINVAL;
 +
-+	return acpi_sysfs_table_handler(event, table, context);
++	*adapter_handle = lookup.adapter_handle;
+ 
+ 	/* Then fill IRQ number if any */
+ 	ret = acpi_dev_get_resources(adev, &resource_list, NULL, NULL);
+ 	if (ret < 0)
+-		return AE_OK;
++		return -EINVAL;
+ 
+ 	resource_list_for_each_entry(entry, &resource_list) {
+ 		if (resource_type(entry->res) == IORESOURCE_IRQ) {
+-			info.irq = entry->res->start;
++			info->irq = entry->res->start;
+ 			break;
+ 		}
+ 	}
+ 
+ 	acpi_dev_free_resource_list(&resource_list);
+ 
++	strlcpy(info->type, dev_name(&adev->dev), sizeof(info->type));
++
++	return 0;
 +}
 +
- static int __init acpi_bus_init(void)
- {
- 	int result;
-@@ -1043,6 +1050,8 @@ static int __init acpi_bus_init(void)
- 	 * _PDC control method may load dynamic SSDT tables,
- 	 * and we need to install the table handler before that.
- 	 */
-+	status = acpi_install_table_handler(acpi_bus_table_handler, NULL);
-+
- 	acpi_sysfs_init();
- 
- 	acpi_early_processor_set_pdc();
-diff --git a/drivers/acpi/internal.h b/drivers/acpi/internal.h
-index 27cc7fe..940218f 100644
---- a/drivers/acpi/internal.h
-+++ b/drivers/acpi/internal.h
-@@ -87,6 +87,9 @@ bool acpi_queue_hotplug_work(struct work_struct *work);
- void acpi_device_hotplug(struct acpi_device *adev, u32 src);
- bool acpi_scan_is_offline(struct acpi_device *adev, bool uevent);
- 
-+acpi_status acpi_sysfs_table_handler(u32 event, void *table, void *context);
-+void acpi_scan_table_handler(u32 event, void *table, void *context);
-+
- /* --------------------------------------------------------------------------
-                      Device Node Initialization / Removal
-    -------------------------------------------------------------------------- */
-diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index f80f8a7..405056b 100644
---- a/drivers/acpi/scan.c
-+++ b/drivers/acpi/scan.c
-@@ -494,6 +494,8 @@ static void acpi_device_del(struct acpi_device *device)
- 	device_del(&device->dev);
- }
- 
-+static BLOCKING_NOTIFIER_HEAD(acpi_reconfig_chain);
-+
- static LIST_HEAD(acpi_device_del_list);
- static DEFINE_MUTEX(acpi_device_del_lock);
- 
-@@ -514,6 +516,9 @@ static void acpi_device_del_work_fn(struct work_struct *work_not_used)
- 
- 		mutex_unlock(&acpi_device_del_lock);
- 
-+		blocking_notifier_call_chain(&acpi_reconfig_chain,
-+					     ACPI_RECONFIG_DEVICE_REMOVE, adev);
-+
- 		acpi_device_del(adev);
- 		/*
- 		 * Drop references to all power resources that might have been
-@@ -1676,7 +1681,7 @@ static void acpi_default_enumeration(struct acpi_device *device)
- 	bool is_spi_i2c_slave = false;
- 
- 	/*
--	 * Do not enemerate SPI/I2C slaves as they will be enuerated by their
-+	 * Do not enumerate SPI/I2C slaves as they will be enumerated by their
- 	 * respective parents.
- 	 */
- 	INIT_LIST_HEAD(&resource_list);
-@@ -1686,6 +1691,9 @@ static void acpi_default_enumeration(struct acpi_device *device)
- 	if (!is_spi_i2c_slave) {
- 		acpi_create_platform_device(device);
- 		acpi_device_set_enumerated(device);
-+	} else {
-+		blocking_notifier_call_chain(&acpi_reconfig_chain,
-+					     ACPI_RECONFIG_DEVICE_ADD, device);
- 	}
- }
- 
-@@ -1917,6 +1925,8 @@ static int acpi_bus_scan_fixed(void)
- 	return result < 0 ? result : 0;
- }
- 
-+static bool acpi_scan_initialized;
-+
- int __init acpi_scan_init(void)
- {
- 	int result;
-@@ -1961,6 +1971,8 @@ int __init acpi_scan_init(void)
- 
- 	acpi_update_all_gpes();
- 
-+	acpi_scan_initialized = true;
-+
-  out:
- 	mutex_unlock(&acpi_scan_lock);
- 	return result;
-@@ -2004,3 +2016,57 @@ int __init __acpi_probe_device_table(struct acpi_probe_entry *ap_head, int nr)
- 
- 	return count;
- }
-+
-+struct acpi_table_events_work {
-+	struct work_struct work;
-+	void *table;
-+	u32 event;
-+};
-+
-+static void acpi_table_events_fn(struct work_struct *work)
++static void acpi_i2c_register_device(struct i2c_adapter *adapter,
++				     struct acpi_device *adev,
++				     struct i2c_board_info *info)
 +{
-+	struct acpi_table_events_work *tew;
+ 	adev->power.flags.ignore_parent = true;
+-	strlcpy(info.type, dev_name(&adev->dev), sizeof(info.type));
+-	if (!i2c_new_device(adapter, &info)) {
++	acpi_device_set_enumerated(adev);
 +
-+	tew = container_of(work, struct acpi_table_events_work, work);
++	if (!i2c_new_device(adapter, info)) {
+ 		adev->power.flags.ignore_parent = false;
+ 		dev_err(&adapter->dev,
+ 			"failed to add I2C device %s from ACPI\n",
+ 			dev_name(&adev->dev));
+ 	}
++}
 +
-+	if (tew->event == ACPI_TABLE_EVENT_LOAD) {
-+		acpi_scan_lock_acquire();
-+		acpi_bus_scan(ACPI_ROOT_OBJECT);
-+		acpi_scan_lock_release();
++static acpi_status acpi_i2c_add_device(acpi_handle handle, u32 level,
++				       void *data, void **return_value)
++{
++	struct i2c_adapter *adapter = data;
++	struct acpi_device *adev;
++	acpi_handle adapter_handle;
++	struct i2c_board_info info;
++
++	if (acpi_bus_get_device(handle, &adev))
++		return AE_OK;
++
++	if (acpi_i2c_get_info(adev, &info, &adapter_handle))
++		return AE_OK;
++
++	if (adapter_handle != ACPI_HANDLE(&adapter->dev))
++		return AE_OK;
++
++	acpi_i2c_register_device(adapter, adev, &info);
+ 
+ 	return AE_OK;
+ }
+@@ -225,8 +246,80 @@ static void acpi_i2c_register_devices(struct i2c_adapter *adap)
+ 		dev_warn(&adap->dev, "failed to enumerate I2C slaves\n");
+ }
+ 
++static int acpi_i2c_match_adapter(struct device *dev, void *data)
++{
++	struct i2c_adapter *adapter = i2c_verify_adapter(dev);
++
++	if (!adapter)
++		return 0;
++
++	return ACPI_HANDLE(dev) == (acpi_handle)data;
++}
++
++static int acpi_i2c_match_device(struct device *dev, void *data)
++{
++	return ACPI_COMPANION(dev) == data;
++}
++
++static struct i2c_adapter *acpi_i2c_find_adapter_by_handle(acpi_handle handle)
++{
++	struct device *dev;
++
++	dev = bus_find_device(&i2c_bus_type, NULL, handle,
++			      acpi_i2c_match_adapter);
++	return dev ? i2c_verify_adapter(dev) : NULL;
++}
++
++static struct i2c_client *acpi_i2c_find_client_by_adev(struct acpi_device *adev)
++{
++	struct device *dev;
++
++	dev = bus_find_device(&i2c_bus_type, NULL, adev, acpi_i2c_match_device);
++	return dev ? i2c_verify_client(dev) : NULL;
++}
++
++static int acpi_i2c_notify(struct notifier_block *nb, unsigned long value,
++			   void *arg)
++{
++	struct acpi_device *adev = arg;
++	struct i2c_board_info info;
++	acpi_handle adapter_handle;
++	struct i2c_adapter *adapter;
++	struct i2c_client *client;
++
++	switch (value) {
++	case ACPI_RECONFIG_DEVICE_ADD:
++		if (acpi_i2c_get_info(adev, &info, &adapter_handle))
++			break;
++
++		adapter = acpi_i2c_find_adapter_by_handle(adapter_handle);
++		if (!adapter)
++			break;
++
++		acpi_i2c_register_device(adapter, adev, &info);
++		break;
++	case ACPI_RECONFIG_DEVICE_REMOVE:
++		if (!acpi_device_enumerated(adev))
++			break;
++
++		client = acpi_i2c_find_client_by_adev(adev);
++		if (!client)
++			break;
++
++		i2c_unregister_device(client);
++		put_device(&client->dev);
++		break;
 +	}
 +
-+	kfree(tew);
++	return NOTIFY_OK;
 +}
 +
-+void acpi_scan_table_handler(u32 event, void *table, void *context)
-+{
-+	struct acpi_table_events_work *tew;
-+
-+	if (!acpi_scan_initialized)
-+		return;
-+
-+	if (event != ACPI_TABLE_EVENT_LOAD)
-+		return;
-+
-+	tew = kmalloc(sizeof(*tew), GFP_KERNEL);
-+	if (!tew)
-+		return;
-+
-+	INIT_WORK(&tew->work, acpi_table_events_fn);
-+	tew->table = table;
-+	tew->event = event;
-+
-+	schedule_work(&tew->work);
-+}
-+
-+int acpi_reconfig_notifier_register(struct notifier_block *nb)
-+{
-+	return blocking_notifier_chain_register(&acpi_reconfig_chain, nb);
-+}
-+EXPORT_SYMBOL(acpi_reconfig_notifier_register);
-+
-+int acpi_reconfig_notifier_unregister(struct notifier_block *nb)
-+{
-+	return blocking_notifier_chain_unregister(&acpi_reconfig_chain, nb);
-+}
-+EXPORT_SYMBOL(acpi_reconfig_notifier_unregister);
-diff --git a/drivers/acpi/sysfs.c b/drivers/acpi/sysfs.c
-index 4b3a9e2..358165e 100644
---- a/drivers/acpi/sysfs.c
-+++ b/drivers/acpi/sysfs.c
-@@ -378,8 +378,7 @@ static void acpi_table_attr_init(struct acpi_table_attr *table_attr,
- 	return;
- }
- 
--static acpi_status
--acpi_sysfs_table_handler(u32 event, void *table, void *context)
-+acpi_status acpi_sysfs_table_handler(u32 event, void *table, void *context)
- {
- 	struct acpi_table_attr *table_attr;
- 
-@@ -452,9 +451,8 @@ static int acpi_tables_sysfs_init(void)
- 
- 	kobject_uevent(tables_kobj, KOBJ_ADD);
- 	kobject_uevent(dynamic_tables_kobj, KOBJ_ADD);
--	status = acpi_install_table_handler(acpi_sysfs_table_handler, NULL);
- 
--	return ACPI_FAILURE(status) ? -EINVAL : 0;
-+	return 0;
- err_dynamic_tables:
- 	kobject_put(tables_kobj);
- err:
-diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-index 7089e99..ac93253 100644
---- a/include/linux/acpi.h
-+++ b/include/linux/acpi.h
-@@ -542,6 +542,14 @@ static inline void acpi_device_clear_enumerated(struct acpi_device *adev)
- 	adev->flags.visited = false;
- }
- 
-+enum acpi_reconfig_event  {
-+	ACPI_RECONFIG_DEVICE_ADD = 0,
-+	ACPI_RECONFIG_DEVICE_REMOVE,
++static struct notifier_block i2c_acpi_notifier = {
++	.notifier_call = acpi_i2c_notify,
 +};
-+
-+int acpi_reconfig_notifier_register(struct notifier_block *nb);
-+int acpi_reconfig_notifier_unregister(struct notifier_block *nb);
-+
- #else	/* !CONFIG_ACPI */
+ #else /* CONFIG_ACPI */
+ static inline void acpi_i2c_register_devices(struct i2c_adapter *adap) { }
++extern struct notifier_block i2c_acpi_notifier;
+ #endif /* CONFIG_ACPI */
  
- #define acpi_disabled 1
-@@ -696,6 +704,16 @@ static inline void acpi_device_clear_enumerated(struct acpi_device *adev)
+ #ifdef CONFIG_ACPI_I2C_OPREGION
+@@ -1089,6 +1182,8 @@ void i2c_unregister_device(struct i2c_client *client)
  {
+ 	if (client->dev.of_node)
+ 		of_node_clear_flag(client->dev.of_node, OF_POPULATED);
++	if (ACPI_COMPANION(&client->dev))
++		acpi_device_clear_enumerated(ACPI_COMPANION(&client->dev));
+ 	device_unregister(&client->dev);
  }
+ EXPORT_SYMBOL_GPL(i2c_unregister_device);
+@@ -2117,6 +2212,8 @@ static int __init i2c_init(void)
  
-+static inline int acpi_reconfig_notifier_register(struct notifier_block *nb)
-+{
-+	return -EINVAL;
-+}
-+
-+static inline int acpi_reconfig_notifier_unregister(struct notifier_block *nb)
-+{
-+	return -EINVAL;
-+}
-+
- #endif	/* !CONFIG_ACPI */
+ 	if (IS_ENABLED(CONFIG_OF_DYNAMIC))
+ 		WARN_ON(of_reconfig_notifier_register(&i2c_of_notifier));
++	if (IS_ENABLED(CONFIG_ACPI))
++		WARN_ON(acpi_reconfig_notifier_register(&i2c_acpi_notifier));
  
- #ifdef CONFIG_ACPI
+ 	return 0;
+ 
+@@ -2132,6 +2229,8 @@ bus_err:
+ 
+ static void __exit i2c_exit(void)
+ {
++	if (IS_ENABLED(CONFIG_ACPI))
++		WARN_ON(acpi_reconfig_notifier_unregister(&i2c_acpi_notifier));
+ 	if (IS_ENABLED(CONFIG_OF_DYNAMIC))
+ 		WARN_ON(of_reconfig_notifier_unregister(&i2c_of_notifier));
+ 	i2c_del_driver(&dummy_driver);
 -- 
 2.7.4
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
