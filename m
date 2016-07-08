@@ -1,247 +1,140 @@
-From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: [PATCH v7 6/8] efi: load SSTDs from EFI variables
-Date: Fri,  8 Jul 2016 19:13:12 +0300
-Message-ID: <1467994394-23983-7-git-send-email-octavian.purdila@intel.com>
+From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH v7 7/8] acpi: add support for configfs
+Date: Fri,  8 Jul 2016 19:13:13 +0300
+Message-ID: <1467994394-23983-8-git-send-email-octavian.purdila@intel.com>
 References: <1467994394-23983-1-git-send-email-octavian.purdila@intel.com>
-Return-path: <linux-i2c-owner@vger.kernel.org>
-In-Reply-To: <1467994394-23983-1-git-send-email-octavian.purdila@intel.com>
-Sender: linux-i2c-owner@vger.kernel.org
-To: "Rafael J . Wysocki" <rjw@rjwysocki.net>
-Cc: linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, leonard.crestez@intel.com, Octavian Purdila <octavian.purdila@intel.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1467994394-23983-1-git-send-email-octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Rafael J . Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
+Cc: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leonard.crestez-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This patch allows SSDTs to be loaded from EFI variables. It works by
-specifying the EFI variable name containing the SSDT to be loaded. All
-variables with the same name (regardless of the vendor GUID) will be
-loaded.
+Register the ACPI subsystem with configfs.
 
-Note that we can't use acpi_install_table and we must rely on the
-dynamic ACPI table loading and bus re-scanning mechanisms. That is
-because I2C/SPI controllers are initialized earlier then the EFI
-subsystems and all I2C/SPI ACPI devices are enumerated when the
-I2C/SPI controllers are initialized.
-
-Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
-Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Reviewed-by: Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 ---
- Documentation/acpi/ssdt-overlays.txt | 67 +++++++++++++++++++++++++
- Documentation/kernel-parameters.txt  |  7 +++
- drivers/firmware/efi/efi.c           | 96 ++++++++++++++++++++++++++++++++++++
- 3 files changed, 170 insertions(+)
+ Documentation/ABI/testing/configfs-acpi |  7 +++++
+ MAINTAINERS                             |  1 +
+ drivers/acpi/Kconfig                    |  8 +++++
+ drivers/acpi/Makefile                   |  1 +
+ drivers/acpi/configfs.c                 | 53 +++++++++++++++++++++++++++++++++
+ 5 files changed, 70 insertions(+)
+ create mode 100644 Documentation/ABI/testing/configfs-acpi
+ create mode 100644 drivers/acpi/configfs.c
 
-diff --git a/Documentation/acpi/ssdt-overlays.txt b/Documentation/acpi/ssdt-overlays.txt
-index 8050259..c4b57ba 100644
---- a/Documentation/acpi/ssdt-overlays.txt
-+++ b/Documentation/acpi/ssdt-overlays.txt
-@@ -89,3 +89,70 @@ cp ssdt.aml kernel/firmware/acpi
- # on top:
- find kernel | cpio -H newc --create > /boot/instrumented_initrd
- cat /boot/initrd >>/boot/instrumented_initrd
-+
-+== Loading ACPI SSDTs from EFI variables ==
-+
-+This is the preferred method, when EFI is supported on the platform, because it
-+allows a persistent, OS independent way of storing the user defined SSDTs. There
-+is also work underway to implement EFI support for loading user defined SSDTs
-+and using this method will make it easier to convert to the EFI loading
-+mechanism when that will arrive.
-+
-+In order to load SSDTs from an EFI variable the efivar_ssdt kernel command line
-+parameter can be used. The argument for the option is the variable name to
-+use. If there are multiple variables with the same name but with different
-+vendor GUIDs, all of them will be loaded.
-+
-+In order to store the AML code in an EFI variable the efivarfs filesystem can be
-+used. It is enabled and mounted by default in /sys/firmware/efi/efivars in all
-+recent distribution.
-+
-+Creating a new file in /sys/firmware/efi/efivars will automatically create a new
-+EFI variable. Updating a file in /sys/firmware/efi/efivars will update the EFI
-+variable. Please note that the file name needs to be specially formatted as
-+"Name-GUID" and that the first 4 bytes in the file (little-endian format)
-+represent the attributes of the EFI variable (see EFI_VARIABLE_MASK in
-+include/linux/efi.h). Writing to the file must also be done with one write
-+operation.
-+
-+For example, you can use the following bash script to create/update an EFI
-+variable with the content from a given file:
-+
-+#!/bin/sh -e
-+
-+while ! [ -z "$1" ]; do
-+        case "$1" in
-+        "-f") filename="$2"; shift;;
-+        "-g") guid="$2"; shift;;
-+        *) name="$1";;
-+        esac
-+        shift
-+done
-+
-+usage()
-+{
-+        echo "Syntax: ${0##*/} -f filename [ -g guid ] name"
-+        exit 1
-+}
-+
-+[ -n "$name" -a -f "$filename" ] || usage
-+
-+EFIVARFS="/sys/firmware/efi/efivars"
-+
-+[ -d "$EFIVARFS" ] || exit 2
-+
-+if stat -tf $EFIVARFS | grep -q -v de5e81e4; then
-+        mount -t efivarfs none $EFIVARFS
-+fi
-+
-+# try to pick up an existing GUID
-+[ -n "$guid" ] || guid=$(find "$EFIVARFS" -name "$name-*" | head -n1 | cut -f2- -d-)
-+
-+# use a randomly generated GUID
-+[ -n "$guid" ] || guid="$(cat /proc/sys/kernel/random/uuid)"
-+
-+# efivarfs expects all of the data in one write
-+tmp=$(mktemp)
-+/bin/echo -ne "\007\000\000\000" | cat - $filename > $tmp
-+dd if=$tmp of="$EFIVARFS/$name-$guid" bs=$(stat -c %s $tmp)
-+rm $tmp
-diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-index 82b42c9..bbfb56f 100644
---- a/Documentation/kernel-parameters.txt
-+++ b/Documentation/kernel-parameters.txt
-@@ -1185,6 +1185,13 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
- 			Address Range Mirroring feature even if your box
- 			doesn't support it.
+diff --git a/Documentation/ABI/testing/configfs-acpi b/Documentation/ABI/testing/configfs-acpi
+new file mode 100644
+index 0000000..17b19dc
+--- /dev/null
++++ b/Documentation/ABI/testing/configfs-acpi
+@@ -0,0 +1,7 @@
++What:		/config/acpi
++Date:		July 2016
++KernelVersion:	4.8
++Contact:	linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
++Description:
++		This represents the ACPI subsystem entry point directory. It
++		contains sub-groups corresponding to ACPI configurable options.
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 16700e4..9c5365f 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -288,6 +288,7 @@ F:	include/linux/acpi.h
+ F:	include/acpi/
+ F:	Documentation/acpi/
+ F:	Documentation/ABI/testing/sysfs-bus-acpi
++F:	Documentation/ABI/testing/configfs-acpi
+ F:	drivers/pci/*acpi*
+ F:	drivers/pci/*/*acpi*
+ F:	drivers/pci/*/*/*acpi*
+diff --git a/drivers/acpi/Kconfig b/drivers/acpi/Kconfig
+index b7e2e77..ec716bf 100644
+--- a/drivers/acpi/Kconfig
++++ b/drivers/acpi/Kconfig
+@@ -521,4 +521,12 @@ config XPOWER_PMIC_OPREGION
  
-+	efivar_ssdt=	[EFI; X86] Name of an EFI variable that contains an SSDT
-+			that is to be dynamically loaded by Linux. If there are
-+			multiple variables with the same name but with different
-+			vendor GUIDs, all of them will be loaded. See
-+			Documentation/acpi/ssdt-overlays.txt for details.
-+
-+
- 	eisa_irq_edge=	[PARISC,HW]
- 			See header of drivers/parisc/eisa.c.
+ endif
  
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 05509f3..8730fd4 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -24,6 +24,9 @@
- #include <linux/of_fdt.h>
- #include <linux/io.h>
- #include <linux/platform_device.h>
-+#include <linux/slab.h>
++config ACPI_CONFIGFS
++	tristate "ACPI configfs support"
++	select CONFIGFS_FS
++	help
++	  Select this option to enable support for ACPI configuration from
++	  userspace. The configurable ACPI groups will be visible under
++	  /config/acpi, assuming configfs is mounted under /config.
++
+ endif	# ACPI
+diff --git a/drivers/acpi/Makefile b/drivers/acpi/Makefile
+index 251ce85..1dc2173 100644
+--- a/drivers/acpi/Makefile
++++ b/drivers/acpi/Makefile
+@@ -99,5 +99,6 @@ obj-$(CONFIG_ACPI_EXTLOG)	+= acpi_extlog.o
+ obj-$(CONFIG_PMIC_OPREGION)	+= pmic/intel_pmic.o
+ obj-$(CONFIG_CRC_PMIC_OPREGION) += pmic/intel_pmic_crc.o
+ obj-$(CONFIG_XPOWER_PMIC_OPREGION) += pmic/intel_pmic_xpower.o
++obj-$(CONFIG_ACPI_CONFIGFS)	+= configfs.o
+ 
+ video-objs			+= acpi_video.o video_detect.o
+diff --git a/drivers/acpi/configfs.c b/drivers/acpi/configfs.c
+new file mode 100644
+index 0000000..44b463f
+--- /dev/null
++++ b/drivers/acpi/configfs.c
+@@ -0,0 +1,53 @@
++/*
++ * ACPI configfs support
++ *
++ * Copyright (c) 2016 Intel Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License version 2 as published by
++ * the Free Software Foundation.
++ */
++
++#include <linux/init.h>
++#include <linux/module.h>
++#include <linux/configfs.h>
 +#include <linux/acpi.h>
-+#include <linux/ucs2_string.h>
- 
- #include <asm/early_ioremap.h>
- 
-@@ -195,6 +198,96 @@ static void generic_ops_unregister(void)
- 	efivars_unregister(&generic_efivars);
- }
- 
-+#if IS_ENABLED(CONFIG_ACPI)
-+#define EFIVAR_SSDT_NAME_MAX	16
-+static char efivar_ssdt[EFIVAR_SSDT_NAME_MAX] __initdata;
-+static int __init efivar_ssdt_setup(char *str)
++
++static struct config_item_type acpi_root_group_type = {
++	.ct_owner = THIS_MODULE,
++};
++
++static struct configfs_subsystem acpi_configfs = {
++	.su_group = {
++		.cg_item = {
++			.ci_namebuf = "acpi",
++			.ci_type = &acpi_root_group_type,
++		},
++	},
++	.su_mutex = __MUTEX_INITIALIZER(acpi_configfs.su_mutex),
++};
++
++static int __init acpi_configfs_init(void)
 +{
-+	if (strlen(str) < sizeof(efivar_ssdt))
-+		memcpy(efivar_ssdt, str, strlen(str));
-+	else
-+		pr_warn("efivar_ssdt: name too long: %s\n", str);
-+	return 0;
-+}
-+__setup("efivar_ssdt=", efivar_ssdt_setup);
-+
-+static __init int efivar_ssdt_iter(efi_char16_t *name, efi_guid_t vendor,
-+				   unsigned long name_size, void *data)
-+{
-+	struct efivar_entry *entry;
-+	struct list_head *list = data;
-+	char utf8_name[EFIVAR_SSDT_NAME_MAX];
-+	int limit = min_t(unsigned long, EFIVAR_SSDT_NAME_MAX, name_size);
-+
-+	ucs2_as_utf8(utf8_name, name, limit - 1);
-+	if (strncmp(utf8_name, efivar_ssdt, limit) != 0)
-+		return 0;
-+
-+	entry = kmalloc(sizeof(*entry), GFP_KERNEL);
-+	if (!entry)
-+		return 0;
-+
-+	memcpy(entry->var.VariableName, name, name_size);
-+	memcpy(&entry->var.VendorGuid, &vendor, sizeof(efi_guid_t));
-+
-+	efivar_entry_add(entry, list);
-+
-+	return 0;
-+}
-+
-+static __init int efivar_ssdt_load(void)
-+{
-+	LIST_HEAD(entries);
-+	struct efivar_entry *entry, *aux;
-+	unsigned long size;
-+	void *data;
 +	int ret;
++	struct config_group *root = &acpi_configfs.su_group;
 +
-+	ret = efivar_init(efivar_ssdt_iter, &entries, true, &entries);
++	config_group_init(root);
 +
-+	list_for_each_entry_safe(entry, aux, &entries, list) {
-+		pr_info("loading SSDT from variable %s-%pUl\n", efivar_ssdt,
-+			&entry->var.VendorGuid);
++	ret = configfs_register_subsystem(&acpi_configfs);
++	if (ret)
++		return ret;
 +
-+		list_del(&entry->list);
-+
-+		ret = efivar_entry_size(entry, &size);
-+		if (ret) {
-+			pr_err("failed to get var size\n");
-+			goto free_entry;
-+		}
-+
-+		data = kmalloc(size, GFP_KERNEL);
-+		if (!data)
-+			goto free_entry;
-+
-+		ret = efivar_entry_get(entry, NULL, &size, data);
-+		if (ret) {
-+			pr_err("failed to get var data\n");
-+			goto free_data;
-+		}
-+
-+		ret = acpi_load_table(data);
-+		if (ret) {
-+			pr_err("failed to load table: %d\n", ret);
-+			goto free_data;
-+		}
-+
-+		goto free_entry;
-+
-+free_data:
-+		kfree(data);
-+
-+free_entry:
-+		kfree(entry);
-+	}
-+
-+	return ret;
++	return 0;
 +}
-+#else
-+static inline int efivar_ssdt_load(void) { return 0; }
-+#endif
++module_init(acpi_configfs_init);
 +
- /*
-  * We register the efi subsystem with the firmware subsystem and the
-  * efivars subsystem with the efi subsystem, if the system was booted with
-@@ -218,6 +311,9 @@ static int __init efisubsys_init(void)
- 	if (error)
- 		goto err_put;
- 
-+	if (efi_enabled(EFI_RUNTIME_SERVICES))
-+		efivar_ssdt_load();
++static void __exit acpi_configfs_exit(void)
++{
++	configfs_unregister_subsystem(&acpi_configfs);
++}
++module_exit(acpi_configfs_exit);
 +
- 	error = sysfs_create_group(efi_kobj, &efi_subsys_attr_group);
- 	if (error) {
- 		pr_err("efi: Sysfs attribute export failed with error %d.\n",
++MODULE_AUTHOR("Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>");
++MODULE_DESCRIPTION("ACPI configfs support");
++MODULE_LICENSE("GPL v2");
 -- 
 2.7.4
