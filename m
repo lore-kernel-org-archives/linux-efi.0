@@ -1,140 +1,118 @@
-From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v7 2/8] acpi: fix enumeration (visited) flags for bus rescans
-Date: Fri,  8 Jul 2016 19:13:08 +0300
-Message-ID: <1467994394-23983-3-git-send-email-octavian.purdila@intel.com>
+From: Octavian Purdila <octavian.purdila@intel.com>
+Subject: [PATCH v7 1/8] Documentation: acpi: add SSDT overlays documentation
+Date: Fri,  8 Jul 2016 19:13:07 +0300
+Message-ID: <1467994394-23983-2-git-send-email-octavian.purdila@intel.com>
 References: <1467994394-23983-1-git-send-email-octavian.purdila@intel.com>
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1467994394-23983-1-git-send-email-octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Rafael J . Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
-Cc: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leonard.crestez-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1467994394-23983-1-git-send-email-octavian.purdila@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Rafael J . Wysocki" <rjw@rjwysocki.net>
+Cc: linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, leonard.crestez@intel.com, Octavian Purdila <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-If the ACPI tables changes as a result of a dinamically loaded table and
-a bus rescan is required the enumeration/visited flag are not
-consistent.
-
-I2C/SPI are not directly enumerated in acpi_bus_attach(), however the
-visited flag is set. This makes it impossible to check if an ACPI device
-has already been enumerated by the I2C and SPI subsystems. To fix this
-issue we only set the visited flags if the device is not I2C or SPI.
-
-With this change we also need to remove setting visited to false from
-acpi_bus_attach(), otherwise if we rescan already enumerated I2C/SPI
-devices we try to re-enumerate them.
-
-Note that I2C/SPI devices can be enumerated either via a scan handler
-(when using PRP0001) or via regular device_attach(). In either case
-the flow goes through acpi_default_enumeration() which makes it the
-ideal place to mark the ACPI device as enumerated.
-
-Signed-off-by: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Reviewed-by: Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
+Reviewed-by: Mika Westerberg <mika.westerberg@linux.intel.com>
 ---
- drivers/acpi/scan.c  | 13 +++++++------
- include/linux/acpi.h | 18 ++++++++++++++++++
- 2 files changed, 25 insertions(+), 6 deletions(-)
+ Documentation/acpi/ssdt-overlays.txt | 91 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 91 insertions(+)
+ create mode 100644 Documentation/acpi/ssdt-overlays.txt
 
-diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 5f28cf7..f80f8a7 100644
---- a/drivers/acpi/scan.c
-+++ b/drivers/acpi/scan.c
-@@ -1406,7 +1406,7 @@ void acpi_init_device_object(struct acpi_device *device, acpi_handle handle,
- 	acpi_bus_get_flags(device);
- 	device->flags.match_driver = false;
- 	device->flags.initialized = true;
--	device->flags.visited = false;
-+	acpi_device_clear_enumerated(device);
- 	device_initialize(&device->dev);
- 	dev_set_uevent_suppress(&device->dev, true);
- 	acpi_init_coherency(device);
-@@ -1683,8 +1683,10 @@ static void acpi_default_enumeration(struct acpi_device *device)
- 	acpi_dev_get_resources(device, &resource_list, acpi_check_spi_i2c_slave,
- 			       &is_spi_i2c_slave);
- 	acpi_dev_free_resource_list(&resource_list);
--	if (!is_spi_i2c_slave)
-+	if (!is_spi_i2c_slave) {
- 		acpi_create_platform_device(device);
-+		acpi_device_set_enumerated(device);
-+	}
- }
- 
- static const struct acpi_device_id generic_device_ids[] = {
-@@ -1751,7 +1753,7 @@ static void acpi_bus_attach(struct acpi_device *device)
- 	acpi_bus_get_status(device);
- 	/* Skip devices that are not present. */
- 	if (!acpi_device_is_present(device)) {
--		device->flags.visited = false;
-+		acpi_device_clear_enumerated(device);
- 		device->flags.power_manageable = 0;
- 		return;
- 	}
-@@ -1766,7 +1768,7 @@ static void acpi_bus_attach(struct acpi_device *device)
- 
- 		device->flags.initialized = true;
- 	}
--	device->flags.visited = false;
+diff --git a/Documentation/acpi/ssdt-overlays.txt b/Documentation/acpi/ssdt-overlays.txt
+new file mode 100644
+index 0000000..8050259
+--- /dev/null
++++ b/Documentation/acpi/ssdt-overlays.txt
+@@ -0,0 +1,91 @@
 +
- 	ret = acpi_scan_attach_handler(device);
- 	if (ret < 0)
- 		return;
-@@ -1780,7 +1782,6 @@ static void acpi_bus_attach(struct acpi_device *device)
- 		if (!ret && device->pnp.type.platform_id)
- 			acpi_default_enumeration(device);
- 	}
--	device->flags.visited = true;
- 
-  ok:
- 	list_for_each_entry(child, &device->children, node)
-@@ -1872,7 +1873,7 @@ void acpi_bus_trim(struct acpi_device *adev)
- 	 */
- 	acpi_device_set_power(adev, ACPI_STATE_D3_COLD);
- 	adev->flags.initialized = false;
--	adev->flags.visited = false;
-+	acpi_device_clear_enumerated(adev);
- }
- EXPORT_SYMBOL_GPL(acpi_bus_trim);
- 
-diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-index 288fac5..7089e99 100644
---- a/include/linux/acpi.h
-+++ b/include/linux/acpi.h
-@@ -532,6 +532,16 @@ void acpi_walk_dep_device_list(acpi_handle handle);
- struct platform_device *acpi_create_platform_device(struct acpi_device *);
- #define ACPI_PTR(_ptr)	(_ptr)
- 
-+static inline void acpi_device_set_enumerated(struct acpi_device *adev)
++In order to support ACPI open-ended hardware configurations (e.g. development
++boards) we need a way to augment the ACPI configuration provided by the firmware
++image. A common example is connecting sensors on I2C / SPI buses on development
++boards.
++
++Although this can be accomplished by creating a kernel platform driver or
++recompiling the firmware image with updated ACPI tables, neither is practical:
++the former proliferates board specific kernel code while the latter requires
++access to firmware tools which are often not publicly available.
++
++Because ACPI supports external references in AML code a more practical
++way to augment firmware ACPI configuration is by dynamically loading
++user defined SSDT tables that contain the board specific information.
++
++For example, to enumerate a Bosch BMA222E accelerometer on the I2C bus of the
++Minnowboard MAX development board exposed via the LSE connector [1], the
++following ASL code can be used:
++
++DefinitionBlock ("minnowmax.aml", "SSDT", 1, "Vendor", "Accel", 0x00000003)
 +{
-+	adev->flags.visited = true;
++    External (\_SB.I2C6, DeviceObj)
++
++    Scope (\_SB.I2C6)
++    {
++        Device (STAC)
++        {
++            Name (_ADR, Zero)
++            Name (_HID, "BMA222E")
++
++            Method (_CRS, 0, Serialized)
++            {
++                Name (RBUF, ResourceTemplate ()
++                {
++                    I2cSerialBus (0x0018, ControllerInitiated, 0x00061A80,
++                                  AddressingMode7Bit, "\\_SB.I2C6", 0x00,
++                                  ResourceConsumer, ,)
++                    GpioInt (Edge, ActiveHigh, Exclusive, PullDown, 0x0000,
++                             "\\_SB.GPO2", 0x00, ResourceConsumer, , )
++                    { // Pin list
++                        0
++                    }
++                })
++                Return (RBUF)
++            }
++        }
++    }
 +}
 +
-+static inline void acpi_device_clear_enumerated(struct acpi_device *adev)
-+{
-+	adev->flags.visited = false;
-+}
++which can then be compiled to AML binary format:
 +
- #else	/* !CONFIG_ACPI */
- 
- #define acpi_disabled 1
-@@ -678,6 +688,14 @@ static inline enum dev_dma_attr acpi_get_dma_attr(struct acpi_device *adev)
- 
- #define ACPI_PTR(_ptr)	(NULL)
- 
-+static inline void acpi_device_set_enumerated(struct acpi_device *adev)
-+{
-+}
++$ iasl minnowmax.asl
 +
-+static inline void acpi_device_clear_enumerated(struct acpi_device *adev)
-+{
-+}
++Intel ACPI Component Architecture
++ASL Optimizing Compiler version 20140214-64 [Mar 29 2014]
++Copyright (c) 2000 - 2014 Intel Corporation
 +
- #endif	/* !CONFIG_ACPI */
- 
- #ifdef CONFIG_ACPI
++ASL Input:     minnomax.asl - 30 lines, 614 bytes, 7 keywords
++AML Output:    minnowmax.aml - 165 bytes, 6 named objects, 1 executable opcodes
++
++[1] http://wiki.minnowboard.org/MinnowBoard_MAX#Low_Speed_Expansion_Connector_.28Top.29
++
++The resulting AML code can then be loaded by the kernel using one of the methods
++below.
++
++== Loading ACPI SSDTs from initrd ==
++
++This option allows loading of user defined SSDTs from initrd and it is useful
++when the system does not support EFI or when there is not enough EFI storage.
++
++It works in a similar way with initrd based ACPI tables override/upgrade: SSDT
++aml code must be placed in the first, uncompressed, initrd under the
++"kernel/firmware/acpi" path. Multiple files can be used and this will translate
++in loading multiple tables. Only SSDT and OEM tables are allowed. See
++initrd_table_override.txt for more details.
++
++Here is an example:
++
++# Add the raw ACPI tables to an uncompressed cpio archive.
++# They must be put into a /kernel/firmware/acpi directory inside the
++# cpio archive.
++# The uncompressed cpio archive must be the first.
++# Other, typically compressed cpio archives, must be
++# concatenated on top of the uncompressed one.
++mkdir -p kernel/firmware/acpi
++cp ssdt.aml kernel/firmware/acpi
++
++# Create the uncompressed cpio archive and concatenate the original initrd
++# on top:
++find kernel | cpio -H newc --create > /boot/instrumented_initrd
++cat /boot/initrd >>/boot/instrumented_initrd
 -- 
 2.7.4
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
