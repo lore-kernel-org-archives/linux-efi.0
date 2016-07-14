@@ -1,81 +1,51 @@
-From: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: ESRT failures ... was Re: [PATCH 04/11] efi: Add efi_memmap_init_late()
- for permanent EFI memmap
-Date: Wed, 13 Jul 2016 13:49:38 -0400
-Message-ID: <57867F32.8040001@redhat.com>
+From: Dennis Chen <dennis.chen-5wv7dgnIgG8@public.gmane.org>
+Subject: [PATCH v6 0/2] Fix acpi alignment fault with 'mem='
+Date: Thu, 14 Jul 2016 13:43:54 +0800
+Message-ID: <1468475036-5852-1-git-send-email-dennis.chen@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=WINDOWS-1252
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Lenny Szubowicz <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: nd-5wv7dgnIgG8@public.gmane.org, steve.capper-5wv7dgnIgG8@public.gmane.org, dennis.chen-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, penberg-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mgorman-3eNAlZScCAx27rWaFMvyedHuzzzSOjJt@public.gmane.org, tangchen-BthXqXjhjHXQFUHtdCDX3A@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, kaly.xin-5wv7dgnIgG8@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-[I am not subscribed to linux-efi.  Sorry for the bad threading.  Please include
-me on the cc on any replies.]
+An ACPI alignment access fault has been observed on ARM platforms if one 
+boots an ACPI enabled kernel with 'mem=' specificed. This was due to
+memblock_enforce_memory_limit(.) throwing away NOMAP regions thus causing
+acpi_os_ioremap(.) to map them as device memory (rather than normal memory).
 
-Matt, I grabbed your patches which are similar to a change that I wanted to make
-to the kernel.  There is one issue though that I want to bring up.
+This patch series fixes this issue by: 
+ 1) Introducing memblock_mem_limit_remove_map(.), which retains the NOMAP
+    regions.
+ 2) Calling this function in arm64.
 
-With or without your changeset, I see the following issue on Dell system with a
-valid ESRT table.
+ChangeLog:
+v5->v6: 
+	- Truncate the reserved regions above the limit as suggested by
+	  Steve Capper.
+        - Drop the memblock debug fs related patch from this series since
+	  it's independent logically. 
+	- CC more relevant persons.
+v4->v5:
+        Fix a build warning.
+v3->v4:
+        Address some review comments from Mark Rutland.
+v2->v3:
+        Only keep the NOMAP regions above the limit while removing all other
+        memblocks as suggested by Ard Biesheuvel.
+v1->v2:
+        Flag all regions above the limit as NOMAP as suggested by Mark Rutland.
 
+Dennis Chen (2):
+  mm:memblock Add new infrastructure to address the mem limit issue
+  arm64:acpi Fix the acpi alignment exeception when 'mem=' specified
 
-[    0.000000] efi:  SMBIOS=0x8ce95000  ACPI=0x8d2fe000  ACPI 2.0=0x8d2fe014
-ESRT=0x8d0f5000  MPS=0x8d0dd000
-[    0.000000] efi: requested map not found.
-[    0.000000] esrt: ESRT header is not in the memory map.
-[    0.000000] SMBIOS 2.8 present.
+ arch/arm64/mm/init.c     |  2 +-
+ include/linux/memblock.h |  1 +
+ mm/memblock.c            | 57 +++++++++++++++++++++++++++++++++++++++++++-----
+ 3 files changed, 54 insertions(+), 6 deletions(-)
 
-This occurs AFAICT (with or without your changes) because of this check in
-efi_mem_desc_lookup():
-
-                if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
-                    md->type != EFI_BOOT_SERVICES_DATA &&
-                    md->type != EFI_RUNTIME_SERVICES_DATA) {
-                        continue;
-                }
-
-which then results in skipping the appropriate region.  IIUC (and that's part of
-my question ;)) the above check means that the region has already been
-permanently mapped.  That is,
-
-rc = efi_mem_desc_lookup(efi.esrt, &md);
-        if (rc < 0) {
-                pr_err("ESRT header is not in the memory map.\n");
-                return;
-        }
-...
-        va = early_memremap(efi.esrt, size);
-        if (!va) {
-
-and rc is -ENOENT because a matching region couldn't be found.  As can be seen
-the existing ESRT code will attempt to remap the region if not mapped.
-
-I think that perhaps the function should be changed to do
-
-        for_each_efi_memory_desc(md) {
-                u64 size;
-                u64 end;
-
-                size = md->num_pages << EFI_PAGE_SHIFT;
-                end = md->phys_addr + size;
-                if (phys_addr >= md->phys_addr && phys_addr < end) {
-                        memcpy(out_md, md, sizeof(*out_md));
-
-                        if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
-                            md->type != EFI_BOOT_SERVICES_DATA &&
-                            md->type != EFI_RUNTIME_SERVICES_DATA) {
-                                return UNMAPPED;
-                        }
-
-                        return MAPPED;
-                }
-        }
-
-so that individual callers (like the ESRT code) can then make a decision on
-whether or not the area needs to be mapped.
-
-Thoughts/concerns?
-
-P.
+-- 
+2.7.4
