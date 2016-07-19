@@ -1,76 +1,77 @@
-From: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH 1/4] efi/libstub: Allocate headspace in
- efi_get_memory_map()
-Date: Mon, 18 Jul 2016 11:53:57 -0600
-Message-ID: <53b43dc6-929e-68cd-b308-a28f94563754@codeaurora.org>
-References: <1468788362-3962-1-git-send-email-jhugo@codeaurora.org>
- <1468788362-3962-2-git-send-email-jhugo@codeaurora.org>
- <20160718110001.GC10069@leverpostej>
- <8d1fd10a-97d0-df6e-0d52-dcc29671521d@codeaurora.org>
- <20160718151147.GH10069@leverpostej>
- <CAKv+Gu9fy0KRr9u3Euva8Jc1U-uGhCuSB5Fyt6C-o-7tD0+Phw@mail.gmail.com>
+From: Tobias Klauser <tklauser-93Khv+1bN0NyDzI6CaY1VQ@public.gmane.org>
+Subject: Re: [PATCH] efivarfs: Eliminate dead code in efivarfs_create()
+Date: Tue, 19 Jul 2016 13:06:14 +0200
+Message-ID: <20160719110614.GA23998@distanz.ch>
+References: <1456243630-24834-1-git-send-email-tklauser@distanz.ch>
+ <20160224164734.GC2603@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu9fy0KRr9u3Euva8Jc1U-uGhCuSB5Fyt6C-o-7tD0+Phw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160224164734.GC2603-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Timur Tabi <timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 7/18/2016 9:14 AM, Ard Biesheuvel wrote:
-> On 18 July 2016 at 17:11, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
->> On Mon, Jul 18, 2016 at 09:03:31AM -0600, Jeffrey Hugo wrote:
->>> On 7/18/2016 5:00 AM, Mark Rutland wrote:
->>>> Hi,
->>>>
->>>> On Sun, Jul 17, 2016 at 02:45:59PM -0600, Jeffrey Hugo wrote:
->>>>> +   if (status == EFI_BUFFER_TOO_SMALL ||
->>>>> +                           (*buff_size - *map_size) / sizeof(*m) < 8) {
->>>>>            efi_call_early(free_pool, m);
->>>>> +           /*
->>>>> +            * Make sure there is 8 entries worth of headroom so that the
->>>>> +            * buffer can be reused for a new map after allocations are
->>>>> +            * no longer permitted.  Its unlikely that the map will grow to
->>>>> +            * exceed this headroom once we are ready to trigger
->>>>> +            * ExitBootServices()
->>>>> +            */
->>>>> +           *map_size += sizeof(*m) * 8;
->>
->>>> As a general note, it's a shame that we don't know desc_size first time
->>>> through. If descs grow, 8 * sizeof(*m) might be too small. That's an
->>>> existing problem though, so I guess it makes sense to be consistent and
->>>> use sizeof(*m) here.
->>>
->>> Yep.  Unless I've missed something, it seems like the two options
->>> are either make a decent attempt to guess at desc_size the first
->>> time (current approach), or intentionally fail the first time just
->>> to get the size.  The current approach doesn't seem perfect, but it
->>> does have a chance at passing with just one attempt.  I couldn't see
->>> a better solution, but if someone else has an idea, I'd like to hear
->>> it.
->>
->> Sure, that was more of an observation than a critique. In the absence of
->> any suggestions better, sticking with sizeof(*m) makes sense.
->>
->> If it does become a problem, we're likely to have to fix up other sites
->> regardless.
->>
->
-> It is worth noting that the EDK2 implementation deliberately uses a
-> desc_size that exceeds the size of the type. So '8 * sizeof(*m)' is
-> almost never going to be 8 slots' worth of headroom.
->
+On 2016-02-24 at 17:47:34 +0100, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Tue, 23 Feb, at 05:07:10PM, Tobias Klauser wrote:
+> > After commit ed8b0de5a33d ("efi: Make efivarfs entries immutable by
+> > default"), inode will always be NULL in the error check before iput(),
+> > thus remove the check and the call to iput() alltogether. Also directly
+> > fold the error handling code into the only place it is needed, which
+> > makes the code a bit smaller.
+> > 
+> > Found by the Coverity scanner (CID 1353443).
+> > 
+> > Signed-off-by: Tobias Klauser <tklauser-93Khv+1bN0NyDzI6CaY1VQ@public.gmane.org>
+> > ---
+> >  fs/efivarfs/inode.c | 15 +++++----------
+> >  1 file changed, 5 insertions(+), 10 deletions(-)
+> > 
+> > diff --git a/fs/efivarfs/inode.c b/fs/efivarfs/inode.c
+> > index e2ab6d0497f2..43321c9cd71b 100644
+> > --- a/fs/efivarfs/inode.c
+> > +++ b/fs/efivarfs/inode.c
+> > @@ -106,7 +106,7 @@ static int efivarfs_create(struct inode *dir, struct dentry *dentry,
+> >  {
+> >  	struct inode *inode = NULL;
+> >  	struct efivar_entry *var;
+> > -	int namelen, i = 0, err = 0;
+> > +	int namelen, i = 0;
+> >  	bool is_removable = false;
+> >  
+> >  	if (!efivarfs_valid_name(dentry->d_name.name, dentry->d_name.len))
+> > @@ -128,8 +128,8 @@ static int efivarfs_create(struct inode *dir, struct dentry *dentry,
+> >  
+> >  	inode = efivarfs_get_inode(dir->i_sb, dir, mode, 0, is_removable);
+> >  	if (!inode) {
+> > -		err = -ENOMEM;
+> > -		goto out;
+> > +		kfree(var);
+> > +		return -ENOMEM;
+> >  	}
+> >  
+> >  	for (i = 0; i < namelen; i++)
+> > @@ -142,13 +142,8 @@ static int efivarfs_create(struct inode *dir, struct dentry *dentry,
+> >  	efivar_entry_add(var, &efivarfs_list);
+> >  	d_instantiate(dentry, inode);
+> >  	dget(dentry);
+> > -out:
+> > -	if (err) {
+> > -		kfree(var);
+> > -		if (inode)
+> > -			iput(inode);
+> > -	}
+> > -	return err;
+> > +
+> > +	return 0;
+> >  }
+> >  
+> >  static int efivarfs_unlink(struct inode *dir, struct dentry *dentry)
+> 
+> Looks good to me. Thanks, applied!
 
-Good point, desc_size does exceed sizeof(*m) when I test an EDK2 
-implementation.  I think I can rework things to use desc_size instead, 
-so that we do get the expected 8 slots of headroom.  I'll incorporate 
-that in V2.
-
--- 
-Jeffrey Hugo
-Qualcomm Datacenter Technologies as an affiliate of Qualcomm 
-Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the
-Code Aurora Forum, a Linux Foundation Collaborative Project.
+Ping, this doesn't seem to have made it into Linus' tree, linux-next or
+your publicly accessible tree yet. It seems the patch still applies, or
+should I resubmit it?
