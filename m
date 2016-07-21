@@ -1,7 +1,7 @@
 From: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: [PATCH V2 1/4] efi/libstub: Allocate headspace in efi_get_memory_map()
-Date: Thu, 21 Jul 2016 14:28:11 -0600
-Message-ID: <1469132894-17103-2-git-send-email-jhugo@codeaurora.org>
+Subject: [PATCH V2 3/4] efi/libstub: Use efi_exit_boot_services() in FDT
+Date: Thu, 21 Jul 2016 14:28:13 -0600
+Message-ID: <1469132894-17103-4-git-send-email-jhugo@codeaurora.org>
 References: <1469132894-17103-1-git-send-email-jhugo@codeaurora.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1469132894-17103-1-git-send-email-jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
@@ -10,224 +10,85 @@ To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29T
 Cc: timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-efi_get_memory_map() allocates a buffer to store the memory map that it
-retrieves.  This buffer may need to be reused by the client after
-ExitBootServices() is called, at which point allocations are not longer
-permitted.  To support this usecase, provide the allocated buffer size back
-to the client, and allocate some additional headroom to account for any
-reasonable growth in the map that is likely to happen between the call to
-efi_get_memory_map() and the client reusing the buffer.
+The FDT code directly calls ExitBootServices.  This is inadvisable, and the
+FDT code does not handle EFI_INVALID_PARAMETER as required by the spec.
+The efi_exit_boot_services() helper handles the EFI_INVALID_PARAMETER
+scenario.
 
-Change-Id: Ib0686811581c59eee2eb60b4b62e1628e649d6f0
 Signed-off-by: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 ---
- arch/x86/boot/compressed/eboot.c               |  4 +--
- drivers/firmware/efi/libstub/efi-stub-helper.c | 36 +++++++++++++++++++-------
- drivers/firmware/efi/libstub/fdt.c             |  8 +++---
- drivers/firmware/efi/libstub/random.c          |  3 ++-
- include/linux/efi.h                            |  3 ++-
- 5 files changed, 37 insertions(+), 17 deletions(-)
+ drivers/firmware/efi/libstub/fdt.c | 44 +++++++++++++++++++++++++++++---------
+ 1 file changed, 34 insertions(+), 10 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 52fef60..9036ec9 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -1010,7 +1010,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params,
- 			      void *handle, bool is64)
- {
- 	struct efi_info *efi = &boot_params->efi_info;
--	unsigned long map_sz, key, desc_size;
-+	unsigned long map_sz, key, desc_size, buff_size;
- 	efi_memory_desc_t *mem_map;
- 	struct setup_data *e820ext;
- 	const char *signature;
-@@ -1028,7 +1028,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params,
- 
- get_map:
- 	status = efi_get_memory_map(sys_table, &mem_map, &map_sz, &desc_size,
--				    &desc_version, &key);
-+				    &desc_version, &key, &buff_size);
- 
- 	if (status != EFI_SUCCESS)
- 		return status;
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 3bd127f9..3071269 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -41,6 +41,8 @@ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
- #define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
- #endif
- 
-+#define EFI_MMAP_NR_SLACK_SLOTS	8
-+
- struct file_info {
- 	efi_file_handle_t *handle;
- 	u64 size;
-@@ -68,20 +70,24 @@ efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
- 				unsigned long *map_size,
- 				unsigned long *desc_size,
- 				u32 *desc_ver,
--				unsigned long *key_ptr)
-+				unsigned long *key_ptr,
-+				unsigned long *buff_size)
- {
- 	efi_memory_desc_t *m = NULL;
- 	efi_status_t status;
- 	unsigned long key;
- 	u32 desc_version;
- 
--	*map_size = sizeof(*m) * 32;
-+	*desc_size = sizeof(*m);
-+	*map_size = *desc_size * 32;
-+	*buff_size = *map_size;
- again:
- 	/*
- 	 * Add an additional efi_memory_desc_t because we're doing an
- 	 * allocation which may be in a new descriptor region.
- 	 */
--	*map_size += sizeof(*m);
-+	*map_size += *desc_size;
-+	*buff_size = *map_size;
- 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
- 				*map_size, (void **)&m);
- 	if (status != EFI_SUCCESS)
-@@ -91,8 +97,17 @@ again:
- 	key = 0;
- 	status = efi_call_early(get_memory_map, map_size, m,
- 				&key, desc_size, &desc_version);
--	if (status == EFI_BUFFER_TOO_SMALL) {
-+	if (status == EFI_BUFFER_TOO_SMALL ||
-+				(*buff_size - *map_size) / *desc_size < 8) {
- 		efi_call_early(free_pool, m);
-+		/*
-+		 * Make sure there is some entries of headroom so that the
-+		 * buffer can be reused for a new map after allocations are
-+		 * no longer permitted.  Its unlikely that the map will grow to
-+		 * exceed this headroom once we are ready to trigger
-+		 * ExitBootServices()
-+		 */
-+		*map_size += *desc_size * EFI_MMAP_NR_SLACK_SLOTS;
- 		goto again;
- 	}
- 
-@@ -113,13 +128,14 @@ fail:
- unsigned long get_dram_base(efi_system_table_t *sys_table_arg)
- {
- 	efi_status_t status;
--	unsigned long map_size;
-+	unsigned long map_size, buff_size;
- 	unsigned long membase  = EFI_ERROR;
- 	struct efi_memory_map map;
- 	efi_memory_desc_t *md;
- 
- 	status = efi_get_memory_map(sys_table_arg, (efi_memory_desc_t **)&map.map,
--				    &map_size, &map.desc_size, NULL, NULL);
-+				    &map_size, &map.desc_size, NULL, NULL,
-+				    &buff_size);
- 	if (status != EFI_SUCCESS)
- 		return membase;
- 
-@@ -144,7 +160,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
- 			    unsigned long size, unsigned long align,
- 			    unsigned long *addr, unsigned long max)
- {
--	unsigned long map_size, desc_size;
-+	unsigned long map_size, desc_size, buff_size;
- 	efi_memory_desc_t *map;
- 	efi_status_t status;
- 	unsigned long nr_pages;
-@@ -152,7 +168,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
- 	int i;
- 
- 	status = efi_get_memory_map(sys_table_arg, &map, &map_size, &desc_size,
--				    NULL, NULL);
-+				    NULL, NULL, &buff_size);
- 	if (status != EFI_SUCCESS)
- 		goto fail;
- 
-@@ -230,14 +246,14 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
- 			   unsigned long size, unsigned long align,
- 			   unsigned long *addr)
- {
--	unsigned long map_size, desc_size;
-+	unsigned long map_size, desc_size, buff_size;
- 	efi_memory_desc_t *map;
- 	efi_status_t status;
- 	unsigned long nr_pages;
- 	int i;
- 
- 	status = efi_get_memory_map(sys_table_arg, &map, &map_size, &desc_size,
--				    NULL, NULL);
-+				    NULL, NULL, &buff_size);
- 	if (status != EFI_SUCCESS)
- 		goto fail;
- 
 diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index e58abfa..878e661 100644
+index 878e661..fdda4e6 100644
 --- a/drivers/firmware/efi/libstub/fdt.c
 +++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -175,7 +175,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
- 					    unsigned long fdt_addr,
- 					    unsigned long fdt_size)
- {
--	unsigned long map_size, desc_size;
-+	unsigned long map_size, desc_size, buff_size;
- 	u32 desc_ver;
- 	unsigned long mmap_key;
- 	efi_memory_desc_t *memory_map, *runtime_map;
-@@ -190,7 +190,8 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
- 	 * the number of EFI_MEMORY_RUNTIME regions.
- 	 */
- 	status = efi_get_memory_map(sys_table, &runtime_map, &map_size,
--				    &desc_size, &desc_ver, &mmap_key);
-+				    &desc_size, &desc_ver, &mmap_key,
-+				    &buff_size);
- 	if (status != EFI_SUCCESS) {
- 		pr_efi_err(sys_table, "Unable to retrieve UEFI memory map.\n");
- 		return status;
-@@ -219,7 +220,8 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
- 		 * exit_boot_services().
- 		 */
- 		status = efi_get_memory_map(sys_table, &memory_map, &map_size,
--					    &desc_size, &desc_ver, &mmap_key);
-+					    &desc_size, &desc_ver, &mmap_key,
-+					    &buff_size);
- 		if (status != EFI_SUCCESS)
- 			goto fail_free_new_fdt;
+@@ -152,6 +152,33 @@ fdt_set_fail:
+ #define EFI_FDT_ALIGN EFI_PAGE_SIZE
+ #endif
  
-diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index 53f6d3f..9dd8534 100644
---- a/drivers/firmware/efi/libstub/random.c
-+++ b/drivers/firmware/efi/libstub/random.c
-@@ -73,12 +73,13 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
- 			      unsigned long random_seed)
- {
- 	unsigned long map_size, desc_size, total_slots = 0, target_slot;
-+	unsigned long buff_size;
++struct exit_boot_struct {
++	efi_memory_desc_t *runtime_map;
++	int *runtime_entry_count;
++};
++
++static efi_status_t exit_boot_func(efi_system_table_t *sys_table,
++				   void *handle,
++				   efi_memory_desc_t *memory_map,
++				   unsigned long *map_size,
++				   unsigned long *desc_size,
++				   u32 *desc_ver,
++				   unsigned long *mmap_key,
++				   unsigned long buff_size,
++				   void *priv)
++{
++	struct exit_boot_struct *p = priv;
++	/*
++	 * Update the memory map with virtual addresses. The function will also
++	 * populate @runtime_map with copies of just the EFI_MEMORY_RUNTIME
++	 * entries so that we can pass it straight into SetVirtualAddressMap()
++	 */
++	efi_get_virtmap(memory_map, *map_size, *desc_size, p->runtime_map,
++			p->runtime_entry_count);
++
++	return EFI_SUCCESS;
++}
++
+ /*
+  * Allocate memory for a new FDT, then add EFI, commandline, and
+  * initrd related fields to the FDT.  This routine increases the
+@@ -182,6 +209,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 	unsigned long new_fdt_size;
  	efi_status_t status;
- 	efi_memory_desc_t *memory_map;
- 	int map_offset;
+ 	int runtime_entry_count = 0;
++	struct exit_boot_struct priv;
  
- 	status = efi_get_memory_map(sys_table_arg, &memory_map, &map_size,
--				    &desc_size, NULL, NULL);
-+				    &desc_size, NULL, NULL, &buff_size);
- 	if (status != EFI_SUCCESS)
- 		return status;
+ 	/*
+ 	 * Get a copy of the current memory map that we will use to prepare
+@@ -252,16 +280,12 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 		}
+ 	}
  
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index f196dd0..c47fc5f 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1434,7 +1434,8 @@ efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
- 				unsigned long *map_size,
- 				unsigned long *desc_size,
- 				u32 *desc_ver,
--				unsigned long *key_ptr);
-+				unsigned long *key_ptr,
-+				unsigned long *buff_size);
+-	/*
+-	 * Update the memory map with virtual addresses. The function will also
+-	 * populate @runtime_map with copies of just the EFI_MEMORY_RUNTIME
+-	 * entries so that we can pass it straight into SetVirtualAddressMap()
+-	 */
+-	efi_get_virtmap(memory_map, map_size, desc_size, runtime_map,
+-			&runtime_entry_count);
+-
+-	/* Now we are ready to exit_boot_services.*/
+-	status = sys_table->boottime->exit_boot_services(handle, mmap_key);
++	sys_table->boottime->free_pool(memory_map);
++	priv.runtime_map = runtime_map;
++	priv.runtime_entry_count = &runtime_entry_count;
++	status = efi_exit_boot_services(sys_table, handle, &memory_map,
++					&map_size, &desc_size, &desc_ver,
++					&mmap_key, &priv, exit_boot_func);
  
- efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
- 			   unsigned long size, unsigned long align,
+ 	if (status == EFI_SUCCESS) {
+ 		efi_set_virtual_address_map_t *svam;
 -- 
 Qualcomm Datacenter Technologies as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the
