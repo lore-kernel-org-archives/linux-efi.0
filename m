@@ -1,64 +1,37 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH] efi: capsule: allocate whole capsule into virtual memory
-Date: Thu, 21 Jul 2016 14:12:30 +0100
-Message-ID: <20160721131230.GH26504@codeblueprint.co.uk>
-References: <1468600891-15794-1-git-send-email-austinwc@codeaurora.org>
+From: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: ESRT failures ... was Re: [PATCH 04/11] efi: Add efi_memmap_init_late()
+ for permanent EFI memmap
+Date: Thu, 21 Jul 2016 10:44:32 -0400
+Message-ID: <5790DFD0.4020806@redhat.com>
+References: <57867F32.8040001@redhat.com> <20160721121136.GF26504@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1468600891-15794-1-git-send-email-austinwc@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Austin Christ <austinwc@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jbrasen@codeaurora.org, Kweh Hock Leong <hock.leong.kweh@intel.com>, Bryan O'Donoghue <pure.logic@nexus-software.ie>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160721121136.GF26504-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Lenny Szubowicz <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 15 Jul, at 10:41:31AM, Christ, Austin wrote:
-> According to UEFI 2.6 section 7.5.3, the capsule should be in contiguous
-> virtual memory and firmware may consume the capsule immediately. To
-> correctly implement this functionality, the kernel driver needs to vmap
-> the entire capsule at the time it is made available to firmware.
-> 
-> The virtual allocation of the capsule update has been changed from kmap,
-> which was only allocating the first page of the update, to vmap and
-> allocates the entire data payload.
-> 
-> Signed-off-by: Austin Christ <austinwc@codeaurora.org>
-> ---
->  drivers/firmware/efi/capsule-loader.c | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-> index c99c24b..c4f3c20 100644
-> --- a/drivers/firmware/efi/capsule-loader.c
-> +++ b/drivers/firmware/efi/capsule-loader.c
-> @@ -16,6 +16,7 @@
->  #include <linux/slab.h>
->  #include <linux/mutex.h>
->  #include <linux/efi.h>
-> +#include <linux/vmalloc.h>
->  
->  #define NO_FURTHER_WRITE_ACTION -1
->  
-> @@ -108,14 +109,15 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
->  	int ret;
->  	void *cap_hdr_temp;
->  
-> -	cap_hdr_temp = kmap(cap_info->pages[0]);
-> +	cap_hdr_temp = vmap(cap_info->pages, cap_info->index,
-> +			VM_MAP, PAGE_KERNEL);
->  	if (!cap_hdr_temp) {
->  		pr_debug("%s: kmap() failed\n", __func__);
->  		return -EFAULT;
->  	}
->  
->  	ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
-> -	kunmap(cap_info->pages[0]);
-> +	vunmap(cap_hdr_temp);
->  	if (ret) {
->  		pr_err("%s: efi_capsule_update() failed\n", __func__);
->  		return ret;
 
-Looks OK to me but could you also update the comments above
-efi_capsule_update() that mention the virtual mapping only being
-required for the first page?
+
+On 07/21/2016 08:11 AM, Matt Fleming wrote:
+> 
+> efi_mem_desc_lookup() should just return the correct EFI memory
+> descriptor now that we have efi_mem_reserve() coming in v4.9.
+> 
+> What does the EFI memmap (as printed with efi=debug) look like on your
+> machine?
+> 
+
+[    0.000000] efi: EFI v2.40 by Dell Inc.
+[    0.000000] efi:  ESRT=0x8eb1c000  ACPI=0x8efe7000  ACPI 2.0=0x8efe7014
+SMBIOS=0x8ef69000
+
+and
+
+[    0.000000] efi: mem249: [Reserved           |   |  |  |  |  |  |  |
+|WB|WT|WC|UC] range=[0x000000008d6df000-0x000000008ef69fff] (24MB)
+
+P.
