@@ -1,62 +1,70 @@
-From: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: ESRT failures ... was Re: [PATCH 04/11] efi: Add efi_memmap_init_late()
- for permanent EFI memmap
-Date: Mon, 25 Jul 2016 11:38:49 -0400
-Message-ID: <57963289.2090805@redhat.com>
-References: <57867F32.8040001@redhat.com> <20160721121136.GF26504@codeblueprint.co.uk> <5790DFD0.4020806@redhat.com> <20160722131101.GJ26504@codeblueprint.co.uk> <57922028.7070103@redhat.com> <20160725144431.GA31759@codeblueprint.co.uk> <57962C23.5090705@redhat.com> <20160725151344.GB31759@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v3 2/3] efi: don't use spinlocks for efi vars
+Date: Mon, 25 Jul 2016 16:43:54 +0100
+Message-ID: <20160725154354.GC31759@codeblueprint.co.uk>
+References: <1468611391-4039-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1468611391-4039-3-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160725151344.GB31759-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1468611391-4039-3-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Lenny Szubowicz <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tobias Klauser <tklauser-93Khv+1bN0NyDzI6CaY1VQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-
-
-On 07/25/2016 11:13 AM, Matt Fleming wrote:
-> On Mon, 25 Jul, at 11:11:31AM, Prarit Bhargava wrote:
->>
->>
->> On 07/25/2016 10:44 AM, Matt Fleming wrote:
->>> On Fri, 22 Jul, at 09:31:20AM, Prarit Bhargava wrote:
->>>>
->>>> Hmm ... maybe just a Dell specific quirk?
->>>
->>> Quirks are best avoided at all costs, platform-specific quirks doubly
->>> so because there are just so many in the EFI arena that maintaining
->>> them all would be a nightmare.
->>>
->>> Where possible we adopt a "most buggy implementation" approach to
->>> compatibility, as a least common denominator.
->>>
->>> Could you try this patch out? It's not a final version, but I'd just
->>> like to see if anything else explodes when we start returning reserved
->>> regions.
->>>
->>> ---
->>>
->>> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
->>> index 05509f3aaee8..9857796c4cd4 100644
->>> --- a/drivers/firmware/efi/efi.c
->>> +++ b/drivers/firmware/efi/efi.c
->>> @@ -299,7 +299,8 @@ int __init efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md)
->>>  
->>>  		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
->>>  		    md->type != EFI_BOOT_SERVICES_DATA &&
->>> -		    md->type != EFI_RUNTIME_SERVICES_DATA) {
->>> +		    md->type != EFI_RUNTIME_SERVICES_DATA &&
->>> +		    md->type != EFI_RESERVED_TYPE) {
->>
->> I had tried this fix earlier FWIW and it causes the boot to hang.
+On Fri, 15 Jul, at 09:36:30PM, Ard Biesheuvel wrote:
+> From: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > 
-> Do you know where it hangs? earlyprintk=efi might shed some light on
-> that if you don't have a serial console setup.
+> All efivars operations are protected by a spinlock which prevents
+> interruptions and preemption. This is too restricted, we just need a
+> lock preventing concurrency.
+> The idea is to use a semaphore of count 1 and to have two ways of
+> locking, depending on the context:
+> - In interrupt context, we call down_trylock(), if it fails we return
+>   an error
+> - In normal context, we call down_interruptible()
 > 
+> We don't use a mutex here because the mutex_trylock() function must not
+> be called from interrupt context, whereas the down_trylock() can.
+> 
+> Signed-off-by: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> [ardb: rebased onto v4.7-rc3, remove lockdep_assert_xxx() calls]
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+> v3: remove lockdep_assert() calls: they are no longer appropriate now that we
+>     have switched to a semaphore
+> v2: rebased onto v4.7-rc3
+> 
+>  drivers/firmware/efi/efi-pstore.c |  36 +++--
+>  drivers/firmware/efi/efivars.c    |  22 +++-
+>  drivers/firmware/efi/vars.c       | 137 ++++++++++++--------
+>  fs/efivarfs/inode.c               |   5 +-
+>  fs/efivarfs/super.c               |   9 +-
+>  include/linux/efi.h               |   6 +-
+>  6 files changed, 139 insertions(+), 76 deletions(-)
+ 
+[...]
 
-Nope, nothing else is displayed with "earlyprintk=efi" as a kernel parameter (I
-already had that as a kernel parameter).
+> diff --git a/fs/efivarfs/inode.c b/fs/efivarfs/inode.c
+> index 1d73fc6dba13..cbb50cadcffc 100644
+> --- a/fs/efivarfs/inode.c
+> +++ b/fs/efivarfs/inode.c
+> @@ -105,7 +105,10 @@ static int efivarfs_create(struct inode *dir, struct dentry *dentry,
+>  
+>  	inode->i_private = var;
+>  
+> -	efivar_entry_add(var, &efivarfs_list);
+> +	err = efivar_entry_add(var, &efivarfs_list);
+> +	if (err)
+> +		goto out;
+> +
+>  	d_instantiate(dentry, inode);
+>  	dget(dentry);
+>  out:
 
-P.
+Tobias, this patch requires the exact error path that was removed in
+patch ("efivarfs: Eliminate dead code in efivarfs_create()").
+
+Which unfortunately means I'm going to drop your patch from the queue.
