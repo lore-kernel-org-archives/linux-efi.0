@@ -1,7 +1,7 @@
 From: Namhyung Kim <namhyung@kernel.org>
-Subject: [PATCH 1/7] pstore: Split pstore fragile flags
-Date: Thu, 28 Jul 2016 00:08:25 +0900
-Message-ID: <1469632111-23260-2-git-send-email-namhyung@kernel.org>
+Subject: [PATCH 3/7] pstore: Manage buffer position for async write
+Date: Thu, 28 Jul 2016 00:08:27 +0900
+Message-ID: <1469632111-23260-4-git-send-email-namhyung@kernel.org>
 References: <1469632111-23260-1-git-send-email-namhyung@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -18,131 +18,204 @@ List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualizati
 Sender: virtualization-bounces@lists.linux-foundation.org
 Errors-To: virtualization-bounces@lists.linux-foundation.org
 To: kvm@vger.kernel.org, qemu-devel@nongnu.org, virtualization@lists.linux-foundation.org
-Cc: Tony Luck <tony.luck@intel.com>, Kees Cook <keescook@chromium.org>, Matt Fleming <matt@codeblueprint.co.uk>, Anton Vorontsov <anton@enomsg.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, LKML <linux-kernel@vger.kernel.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, Colin Cross <ccross@android.com>, Len Brown <lenb@kernel.org>
+Cc: Tony Luck <tony.luck@intel.com>, Kees Cook <keescook@chromium.org>, Matt Fleming <matt@codeblueprint.co.uk>, Anton Vorontsov <anton@enomsg.org>, LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Colin Cross <ccross@android.com>
 List-Id: linux-efi@vger.kernel.org
 
-This patch adds new PSTORE_FLAGS for each pstore type so that they can
-be enabled separately.  This is a preparation for ongoing virtio-pstore
-work to support those types flexibly.
+Some pstore backend only supports async mode, so it's possible to do
+some IO at the same time.  In this case we need to manage the single
+psinfo->buf not to broken by concurrent IO.
 
-The PSTORE_FLAGS_FRAGILE is changed to PSTORE_FLAGS_DMESG to preserve the
-original behavior.
+For example PSTORE_TYPE_CONSOLE IO is serialized by psinfo->buf_lock but
+later IO can be issued before finishing previous request.  In this case
+it overwrites psinfo->buf so the previous result might be broken.
+
+This patch adds psinfo->bufpos field to keep track of current position
+in order to use psinfo->buf as a ring buffer.  However it's just a
+simple, best-effort way of doing that, and provides no 100% guarantee.
+It's only effective for small concurrent IO like PSTORE_TYPE_CONSOLE
+IMHO.
+
+The new PSTORE_FLAGS_ASYNC flag enables management of buffer position.
+The pstore_prepare_buf() is called before accessing the psinfo->buf and
+the pstore_update_buf() is called after accessing the buf.
+
+The pstore_get_buf() is provided for psinfo->write callback to determine
+the current position of available buffer.
 
 Cc: Anton Vorontsov <anton@enomsg.org>
 Cc: Colin Cross <ccross@android.com>
 Cc: Kees Cook <keescook@chromium.org>
 Cc: Tony Luck <tony.luck@intel.com>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Cc: Len Brown <lenb@kernel.org>
 Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: linux-acpi@vger.kernel.org
 Cc: linux-efi@vger.kernel.org
 Signed-off-by: Namhyung Kim <namhyung@kernel.org>
 ---
- drivers/acpi/apei/erst.c          |  2 +-
  drivers/firmware/efi/efi-pstore.c |  2 +-
- fs/pstore/platform.c              | 17 ++++++++++-------
- fs/pstore/ram.c                   |  2 ++
- include/linux/pstore.h            |  7 ++++++-
- 5 files changed, 20 insertions(+), 10 deletions(-)
+ fs/pstore/platform.c              | 48 +++++++++++++++++++++++++++++++--------
+ include/linux/pstore.h            |  4 ++++
+ 3 files changed, 44 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/acpi/apei/erst.c b/drivers/acpi/apei/erst.c
-index f096ab3cb54d..ec4f507b524f 100644
---- a/drivers/acpi/apei/erst.c
-+++ b/drivers/acpi/apei/erst.c
-@@ -938,7 +938,7 @@ static int erst_clearer(enum pstore_type_id type, u64 id, int count,
- static struct pstore_info erst_info = {
- 	.owner		= THIS_MODULE,
- 	.name		= "erst",
--	.flags		= PSTORE_FLAGS_FRAGILE,
-+	.flags		= PSTORE_FLAGS_DMESG,
- 	.open		= erst_open_pstore,
- 	.close		= erst_close_pstore,
- 	.read		= erst_reader,
 diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-index 30a24d09ea6c..4daa5acd9117 100644
+index 4daa5acd9117..ae0ffe259e07 100644
 --- a/drivers/firmware/efi/efi-pstore.c
 +++ b/drivers/firmware/efi/efi-pstore.c
-@@ -362,7 +362,7 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
- static struct pstore_info efi_pstore_info = {
- 	.owner		= THIS_MODULE,
- 	.name		= "efi",
--	.flags		= PSTORE_FLAGS_FRAGILE,
-+	.flags		= PSTORE_FLAGS_DMESG,
- 	.open		= efi_pstore_open,
- 	.close		= efi_pstore_close,
- 	.read		= efi_pstore_read,
+@@ -259,7 +259,7 @@ static int efi_pstore_write(enum pstore_type_id type,
+ 
+ 	efivar_entry_set_safe(efi_name, vendor, PSTORE_EFI_ATTRIBUTES,
+ 			      !pstore_cannot_block_path(reason),
+-			      size, psi->buf);
++			      size, pstore_get_buf(psi));
+ 
+ 	if (reason == KMSG_DUMP_OOPS)
+ 		efivar_run_worker();
 diff --git a/fs/pstore/platform.c b/fs/pstore/platform.c
-index 16ecca5b72d8..76dd604a0f2c 100644
+index 76dd604a0f2c..26e2808cf554 100644
 --- a/fs/pstore/platform.c
 +++ b/fs/pstore/platform.c
-@@ -659,13 +659,14 @@ int pstore_register(struct pstore_info *psi)
- 	if (pstore_is_mounted())
- 		pstore_get_records(0);
+@@ -150,6 +150,27 @@ bool pstore_cannot_block_path(enum kmsg_dump_reason reason)
+ }
+ EXPORT_SYMBOL_GPL(pstore_cannot_block_path);
  
--	pstore_register_kmsg();
--
--	if ((psi->flags & PSTORE_FLAGS_FRAGILE) == 0) {
-+	if (psi->flags & PSTORE_FLAGS_DMESG)
-+		pstore_register_kmsg();
-+	if (psi->flags & PSTORE_FLAGS_CONSOLE)
- 		pstore_register_console();
-+	if (psi->flags & PSTORE_FLAGS_FTRACE)
- 		pstore_register_ftrace();
-+	if (psi->flags & PSTORE_FLAGS_PMSG)
- 		pstore_register_pmsg();
--	}
- 
- 	if (pstore_update_ms >= 0) {
- 		pstore_timer.expires = jiffies +
-@@ -689,12 +690,14 @@ EXPORT_SYMBOL_GPL(pstore_register);
- 
- void pstore_unregister(struct pstore_info *psi)
- {
--	if ((psi->flags & PSTORE_FLAGS_FRAGILE) == 0) {
-+	if (psi->flags & PSTORE_FLAGS_PMSG)
- 		pstore_unregister_pmsg();
-+	if (psi->flags & PSTORE_FLAGS_FTRACE)
- 		pstore_unregister_ftrace();
-+	if (psi->flags & PSTORE_FLAGS_CONSOLE)
- 		pstore_unregister_console();
--	}
--	pstore_unregister_kmsg();
-+	if (psi->flags & PSTORE_FLAGS_DMESG)
-+		pstore_unregister_kmsg();
- 
- 	free_buf_for_compression();
- 
-diff --git a/fs/pstore/ram.c b/fs/pstore/ram.c
-index 47516a794011..ba19a74e95bc 100644
---- a/fs/pstore/ram.c
-+++ b/fs/pstore/ram.c
-@@ -624,6 +624,8 @@ static int ramoops_probe(struct platform_device *pdev)
- 		goto fail_clear;
- 	}
- 
-+	cxt->pstore.flags = PSTORE_FLAGS_ALL;
++static void *pstore_prepare_buf(struct pstore_info *psi, size_t len)
++{
++	if (psi->bufpos + len > psi->bufsize ||
++	    (psi->flags & PSTORE_FLAGS_ASYNC) == 0)
++		psi->bufpos = 0;
 +
- 	err = pstore_register(&cxt->pstore);
- 	if (err) {
- 		pr_err("registering with pstore failed\n");
++	return psi->buf + psi->bufpos;
++}
++
++static void pstore_update_buf(struct pstore_info *psi, size_t len)
++{
++	if (psi->flags & PSTORE_FLAGS_ASYNC)
++		psi->bufpos += len;
++}
++
++void *pstore_get_buf(struct pstore_info *psi)
++{
++	return psi->buf + psi->bufpos;
++}
++EXPORT_SYMBOL_GPL(pstore_get_buf);
++
+ #ifdef CONFIG_PSTORE_ZLIB_COMPRESS
+ /* Derived from logfs_compress() */
+ static int compress_zlib(const void *in, void *out, size_t inlen, size_t outlen)
+@@ -455,18 +476,21 @@ static size_t copy_kmsg_to_buffer(int hsize, size_t len)
+ {
+ 	size_t total_len;
+ 	size_t diff;
++	void *dst;
+ 
+ 	total_len = hsize + len;
++	dst = pstore_prepare_buf(psinfo, total_len);
+ 
+ 	if (total_len > psinfo->bufsize) {
+ 		diff = total_len - psinfo->bufsize + hsize;
+-		memcpy(psinfo->buf, big_oops_buf, hsize);
+-		memcpy(psinfo->buf + hsize, big_oops_buf + diff,
++		memcpy(dst, big_oops_buf, hsize);
++		memcpy(dst + hsize, big_oops_buf + diff,
+ 					psinfo->bufsize - hsize);
+ 		total_len = psinfo->bufsize;
+ 	} else
+-		memcpy(psinfo->buf, big_oops_buf, total_len);
++		memcpy(dst, big_oops_buf, total_len);
+ 
++	pstore_update_buf(psinfo, total_len);
+ 	return total_len;
+ }
+ 
+@@ -500,7 +524,7 @@ static void pstore_dump(struct kmsg_dumper *dumper,
+ 	}
+ 	oopscount++;
+ 	while (total < kmsg_bytes) {
+-		char *dst;
++		char *dst, *buf;
+ 		unsigned long size;
+ 		int hsize;
+ 		int zipped_len = -1;
+@@ -514,6 +538,7 @@ static void pstore_dump(struct kmsg_dumper *dumper,
+ 		} else {
+ 			dst = psinfo->buf;
+ 			size = psinfo->bufsize;
++			psinfo->bufpos = 0;
+ 		}
+ 
+ 		hsize = sprintf(dst, "%s#%d Part%u\n", why, oopscount, part);
+@@ -524,8 +549,9 @@ static void pstore_dump(struct kmsg_dumper *dumper,
+ 			break;
+ 
+ 		if (big_oops_buf && is_locked) {
+-			zipped_len = pstore_compress(dst, psinfo->buf,
+-						hsize + len, psinfo->bufsize);
++			buf = pstore_prepare_buf(psinfo, hsize + len);
++			zipped_len = pstore_compress(dst, buf, hsize + len,
++						psinfo->bufsize - psinfo->bufpos);
+ 
+ 			if (zipped_len > 0) {
+ 				compressed = true;
+@@ -543,6 +569,7 @@ static void pstore_dump(struct kmsg_dumper *dumper,
+ 			pstore_new_entry = 1;
+ 
+ 		total += total_len;
++		pstore_update_buf(psinfo, total_len);
+ 		part++;
+ 	}
+ 	if (is_locked)
+@@ -573,6 +600,7 @@ static void pstore_console_write(struct console *con, const char *s, unsigned c)
+ 
+ 	while (s < e) {
+ 		unsigned long flags;
++		void *dst;
+ 		u64 id;
+ 
+ 		if (c > psinfo->bufsize)
+@@ -584,8 +612,10 @@ static void pstore_console_write(struct console *con, const char *s, unsigned c)
+ 		} else {
+ 			spin_lock_irqsave(&psinfo->buf_lock, flags);
+ 		}
+-		memcpy(psinfo->buf, s, c);
++		dst = pstore_prepare_buf(psinfo, c);
++		memcpy(dst, s, c);
+ 		psinfo->write(PSTORE_TYPE_CONSOLE, 0, &id, 0, 0, 0, c, psinfo);
++		pstore_update_buf(psinfo, c);
+ 		spin_unlock_irqrestore(&psinfo->buf_lock, flags);
+ 		s += c;
+ 		c = e - s;
+@@ -619,8 +649,8 @@ static int pstore_write_compat(enum pstore_type_id type,
+ 			       bool compressed, size_t size,
+ 			       struct pstore_info *psi)
+ {
+-	return psi->write_buf(type, reason, id, part, psinfo->buf, compressed,
+-			     size, psi);
++	return psi->write_buf(type, reason, id, part, pstore_get_buf(psinfo),
++			      compressed, size, psi);
+ }
+ 
+ /*
 diff --git a/include/linux/pstore.h b/include/linux/pstore.h
-index 899e95e84400..069b96faf478 100644
+index 9790904de6d2..14f524177b1f 100644
 --- a/include/linux/pstore.h
 +++ b/include/linux/pstore.h
-@@ -74,7 +74,12 @@ struct pstore_info {
- 	void		*data;
- };
+@@ -52,6 +52,7 @@ struct pstore_info {
+ 	spinlock_t	buf_lock;	/* serialize access to 'buf' */
+ 	char		*buf;
+ 	size_t		bufsize;
++	size_t		bufpos;
+ 	struct mutex	read_mutex;	/* serialize open/read/close */
+ 	int		flags;
+ 	int		(*open)(struct pstore_info *psi);
+@@ -79,8 +80,11 @@ struct pstore_info {
+ #define PSTORE_FLAGS_FTRACE	(1 << 2)
+ #define PSTORE_FLAGS_PMSG	(1 << 3)
  
--#define	PSTORE_FLAGS_FRAGILE	1
-+#define PSTORE_FLAGS_DMESG	(1 << 0)
-+#define PSTORE_FLAGS_CONSOLE	(1 << 1)
-+#define PSTORE_FLAGS_FTRACE	(1 << 2)
-+#define PSTORE_FLAGS_PMSG	(1 << 3)
++#define PSTORE_FLAGS_ASYNC      (1 << 30)
 +
-+#define PSTORE_FLAGS_ALL	((1 << 4) - 1)
- 
  extern int pstore_register(struct pstore_info *);
  extern void pstore_unregister(struct pstore_info *);
+ extern bool pstore_cannot_block_path(enum kmsg_dump_reason reason);
++extern void *pstore_get_buf(struct pstore_info *);
+ 
+ #endif /*_LINUX_PSTORE_H*/
 -- 
 2.8.0
