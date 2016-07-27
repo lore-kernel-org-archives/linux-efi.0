@@ -1,110 +1,148 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH V2 1/4] efi/libstub: Allocate headspace in
- efi_get_memory_map()
-Date: Wed, 27 Jul 2016 15:57:50 +0100
-Message-ID: <20160727145750.GH31759@codeblueprint.co.uk>
-References: <1469132894-17103-1-git-send-email-jhugo@codeaurora.org>
- <1469132894-17103-2-git-send-email-jhugo@codeaurora.org>
+From: Namhyung Kim <namhyung@kernel.org>
+Subject: [PATCH 1/7] pstore: Split pstore fragile flags
+Date: Thu, 28 Jul 2016 00:08:25 +0900
+Message-ID: <1469632111-23260-2-git-send-email-namhyung@kernel.org>
+References: <1469632111-23260-1-git-send-email-namhyung@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1469132894-17103-2-git-send-email-jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+In-Reply-To: <1469632111-23260-1-git-send-email-namhyung@kernel.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: kvm@vger.kernel.org, qemu-devel@nongnu.org, virtualization@lists.linux-foundation.org
+Cc: Tony Luck <tony.luck@intel.com>, Kees Cook <keescook@chromium.org>, Matt Fleming <matt@codeblueprint.co.uk>, Anton Vorontsov <anton@enomsg.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, LKML <linux-kernel@vger.kernel.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, Colin Cross <ccross@android.com>, Len Brown <lenb@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 21 Jul, at 02:28:11PM, Jeffrey Hugo wrote:
-> efi_get_memory_map() allocates a buffer to store the memory map that it
-> retrieves.  This buffer may need to be reused by the client after
-> ExitBootServices() is called, at which point allocations are not longer
-> permitted.  To support this usecase, provide the allocated buffer size back
-> to the client, and allocate some additional headroom to account for any
-> reasonable growth in the map that is likely to happen between the call to
-> efi_get_memory_map() and the client reusing the buffer.
-> 
-> Change-Id: Ib0686811581c59eee2eb60b4b62e1628e649d6f0
+This patch adds new PSTORE_FLAGS for each pstore type so that they can
+be enabled separately.  This is a preparation for ongoing virtio-pstore
+work to support those types flexibly.
 
-Please don't include these tags in your patch submission - they don't
-mean anything in the upstream kernel and there's always the chance
-I'll forget to strip it before applying your patch.
+The PSTORE_FLAGS_FRAGILE is changed to PSTORE_FLAGS_DMESG to preserve the
+original behavior.
 
-> Signed-off-by: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> ---
->  arch/x86/boot/compressed/eboot.c               |  4 +--
->  drivers/firmware/efi/libstub/efi-stub-helper.c | 36 +++++++++++++++++++-------
->  drivers/firmware/efi/libstub/fdt.c             |  8 +++---
->  drivers/firmware/efi/libstub/random.c          |  3 ++-
->  include/linux/efi.h                            |  3 ++-
->  5 files changed, 37 insertions(+), 17 deletions(-)
+Cc: Anton Vorontsov <anton@enomsg.org>
+Cc: Colin Cross <ccross@android.com>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Tony Luck <tony.luck@intel.com>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: Len Brown <lenb@kernel.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: linux-acpi@vger.kernel.org
+Cc: linux-efi@vger.kernel.org
+Signed-off-by: Namhyung Kim <namhyung@kernel.org>
+---
+ drivers/acpi/apei/erst.c          |  2 +-
+ drivers/firmware/efi/efi-pstore.c |  2 +-
+ fs/pstore/platform.c              | 17 ++++++++++-------
+ fs/pstore/ram.c                   |  2 ++
+ include/linux/pstore.h            |  7 ++++++-
+ 5 files changed, 20 insertions(+), 10 deletions(-)
 
-[...]
-
-> index 3bd127f9..3071269 100644
-> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-> @@ -41,6 +41,8 @@ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
->  #define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
->  #endif
->  
-> +#define EFI_MMAP_NR_SLACK_SLOTS	8
-> +
->  struct file_info {
->  	efi_file_handle_t *handle;
->  	u64 size;
-> @@ -68,20 +70,24 @@ efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
->  				unsigned long *map_size,
->  				unsigned long *desc_size,
->  				u32 *desc_ver,
-> -				unsigned long *key_ptr)
-> +				unsigned long *key_ptr,
-> +				unsigned long *buff_size)
->  {
->  	efi_memory_desc_t *m = NULL;
->  	efi_status_t status;
->  	unsigned long key;
->  	u32 desc_version;
->  
-> -	*map_size = sizeof(*m) * 32;
-> +	*desc_size = sizeof(*m);
-> +	*map_size = *desc_size * 32;
-> +	*buff_size = *map_size;
->  again:
->  	/*
->  	 * Add an additional efi_memory_desc_t because we're doing an
->  	 * allocation which may be in a new descriptor region.
->  	 */
-> -	*map_size += sizeof(*m);
-> +	*map_size += *desc_size;
-> +	*buff_size = *map_size;
->  	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
->  				*map_size, (void **)&m);
->  	if (status != EFI_SUCCESS)
-
-Isn't this chunk of code unnecessary now? If we think 8 entries is
-enough headroom for all scenarios then there's no need to allocate 9.
-
-> @@ -91,8 +97,17 @@ again:
->  	key = 0;
->  	status = efi_call_early(get_memory_map, map_size, m,
->  				&key, desc_size, &desc_version);
-> -	if (status == EFI_BUFFER_TOO_SMALL) {
-> +	if (status == EFI_BUFFER_TOO_SMALL ||
-> +				(*buff_size - *map_size) / *desc_size < 8) {
-
-Please pull this expression into a static inline wrapper, e.g.
-
-static inline bool mmap_has_headroom(unsigned long buff_size,
-				     unsigned long map_size,
-				     unsigned long desc_size)
-{
-	unsigned long slack = buff_size - map_size;
-
-    	return slack / desc_size >= EFI_MMAP_NR_SLACK_SLOTS;
-}
-
-...
-
-	if (status == EFI_BUFFER_TOO_SMALL ||
-	    !mmap_has_headroom(*buff_size, *map_size, *desc_size)) {
+diff --git a/drivers/acpi/apei/erst.c b/drivers/acpi/apei/erst.c
+index f096ab3cb54d..ec4f507b524f 100644
+--- a/drivers/acpi/apei/erst.c
++++ b/drivers/acpi/apei/erst.c
+@@ -938,7 +938,7 @@ static int erst_clearer(enum pstore_type_id type, u64 id, int count,
+ static struct pstore_info erst_info = {
+ 	.owner		= THIS_MODULE,
+ 	.name		= "erst",
+-	.flags		= PSTORE_FLAGS_FRAGILE,
++	.flags		= PSTORE_FLAGS_DMESG,
+ 	.open		= erst_open_pstore,
+ 	.close		= erst_close_pstore,
+ 	.read		= erst_reader,
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+index 30a24d09ea6c..4daa5acd9117 100644
+--- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -362,7 +362,7 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
+ static struct pstore_info efi_pstore_info = {
+ 	.owner		= THIS_MODULE,
+ 	.name		= "efi",
+-	.flags		= PSTORE_FLAGS_FRAGILE,
++	.flags		= PSTORE_FLAGS_DMESG,
+ 	.open		= efi_pstore_open,
+ 	.close		= efi_pstore_close,
+ 	.read		= efi_pstore_read,
+diff --git a/fs/pstore/platform.c b/fs/pstore/platform.c
+index 16ecca5b72d8..76dd604a0f2c 100644
+--- a/fs/pstore/platform.c
++++ b/fs/pstore/platform.c
+@@ -659,13 +659,14 @@ int pstore_register(struct pstore_info *psi)
+ 	if (pstore_is_mounted())
+ 		pstore_get_records(0);
+ 
+-	pstore_register_kmsg();
+-
+-	if ((psi->flags & PSTORE_FLAGS_FRAGILE) == 0) {
++	if (psi->flags & PSTORE_FLAGS_DMESG)
++		pstore_register_kmsg();
++	if (psi->flags & PSTORE_FLAGS_CONSOLE)
+ 		pstore_register_console();
++	if (psi->flags & PSTORE_FLAGS_FTRACE)
+ 		pstore_register_ftrace();
++	if (psi->flags & PSTORE_FLAGS_PMSG)
+ 		pstore_register_pmsg();
+-	}
+ 
+ 	if (pstore_update_ms >= 0) {
+ 		pstore_timer.expires = jiffies +
+@@ -689,12 +690,14 @@ EXPORT_SYMBOL_GPL(pstore_register);
+ 
+ void pstore_unregister(struct pstore_info *psi)
+ {
+-	if ((psi->flags & PSTORE_FLAGS_FRAGILE) == 0) {
++	if (psi->flags & PSTORE_FLAGS_PMSG)
+ 		pstore_unregister_pmsg();
++	if (psi->flags & PSTORE_FLAGS_FTRACE)
+ 		pstore_unregister_ftrace();
++	if (psi->flags & PSTORE_FLAGS_CONSOLE)
+ 		pstore_unregister_console();
+-	}
+-	pstore_unregister_kmsg();
++	if (psi->flags & PSTORE_FLAGS_DMESG)
++		pstore_unregister_kmsg();
+ 
+ 	free_buf_for_compression();
+ 
+diff --git a/fs/pstore/ram.c b/fs/pstore/ram.c
+index 47516a794011..ba19a74e95bc 100644
+--- a/fs/pstore/ram.c
++++ b/fs/pstore/ram.c
+@@ -624,6 +624,8 @@ static int ramoops_probe(struct platform_device *pdev)
+ 		goto fail_clear;
+ 	}
+ 
++	cxt->pstore.flags = PSTORE_FLAGS_ALL;
++
+ 	err = pstore_register(&cxt->pstore);
+ 	if (err) {
+ 		pr_err("registering with pstore failed\n");
+diff --git a/include/linux/pstore.h b/include/linux/pstore.h
+index 899e95e84400..069b96faf478 100644
+--- a/include/linux/pstore.h
++++ b/include/linux/pstore.h
+@@ -74,7 +74,12 @@ struct pstore_info {
+ 	void		*data;
+ };
+ 
+-#define	PSTORE_FLAGS_FRAGILE	1
++#define PSTORE_FLAGS_DMESG	(1 << 0)
++#define PSTORE_FLAGS_CONSOLE	(1 << 1)
++#define PSTORE_FLAGS_FTRACE	(1 << 2)
++#define PSTORE_FLAGS_PMSG	(1 << 3)
++
++#define PSTORE_FLAGS_ALL	((1 << 4) - 1)
+ 
+ extern int pstore_register(struct pstore_info *);
+ extern void pstore_unregister(struct pstore_info *);
+-- 
+2.8.0
