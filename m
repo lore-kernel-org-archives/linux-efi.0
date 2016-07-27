@@ -1,221 +1,131 @@
-From: Namhyung Kim <namhyung@kernel.org>
-Subject: [PATCH 3/7] pstore: Manage buffer position for async write
-Date: Thu, 28 Jul 2016 00:08:27 +0900
-Message-ID: <1469632111-23260-4-git-send-email-namhyung@kernel.org>
-References: <1469632111-23260-1-git-send-email-namhyung@kernel.org>
+From: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH V2 1/4] efi/libstub: Allocate headspace in
+ efi_get_memory_map()
+Date: Wed, 27 Jul 2016 10:22:17 -0600
+Message-ID: <e9d8f0b1-4894-7473-00d1-a28331a17e91@codeaurora.org>
+References: <1469132894-17103-1-git-send-email-jhugo@codeaurora.org>
+ <1469132894-17103-2-git-send-email-jhugo@codeaurora.org>
+ <20160727145750.GH31759@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <virtualization-bounces@lists.linux-foundation.org>
-In-Reply-To: <1469632111-23260-1-git-send-email-namhyung@kernel.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
-List-Post: <mailto:virtualization@lists.linux-foundation.org>
-List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
-Sender: virtualization-bounces@lists.linux-foundation.org
-Errors-To: virtualization-bounces@lists.linux-foundation.org
-To: kvm@vger.kernel.org, qemu-devel@nongnu.org, virtualization@lists.linux-foundation.org
-Cc: Tony Luck <tony.luck@intel.com>, Kees Cook <keescook@chromium.org>, Matt Fleming <matt@codeblueprint.co.uk>, Anton Vorontsov <anton@enomsg.org>, LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Colin Cross <ccross@android.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160727145750.GH31759-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Some pstore backend only supports async mode, so it's possible to do
-some IO at the same time.  In this case we need to manage the single
-psinfo->buf not to broken by concurrent IO.
+On 7/27/2016 8:57 AM, Matt Fleming wrote:
+> On Thu, 21 Jul, at 02:28:11PM, Jeffrey Hugo wrote:
+>> efi_get_memory_map() allocates a buffer to store the memory map that it
+>> retrieves.  This buffer may need to be reused by the client after
+>> ExitBootServices() is called, at which point allocations are not longer
+>> permitted.  To support this usecase, provide the allocated buffer size back
+>> to the client, and allocate some additional headroom to account for any
+>> reasonable growth in the map that is likely to happen between the call to
+>> efi_get_memory_map() and the client reusing the buffer.
+>>
+>> Change-Id: Ib0686811581c59eee2eb60b4b62e1628e649d6f0
+>
+> Please don't include these tags in your patch submission - they don't
+> mean anything in the upstream kernel and there's always the chance
+> I'll forget to strip it before applying your patch.
 
-For example PSTORE_TYPE_CONSOLE IO is serialized by psinfo->buf_lock but
-later IO can be issued before finishing previous request.  In this case
-it overwrites psinfo->buf so the previous result might be broken.
+Doh, sorry about that.  I apparently was not as vigilant as I should 
+have been.  I'll make sure to strip it.
 
-This patch adds psinfo->bufpos field to keep track of current position
-in order to use psinfo->buf as a ring buffer.  However it's just a
-simple, best-effort way of doing that, and provides no 100% guarantee.
-It's only effective for small concurrent IO like PSTORE_TYPE_CONSOLE
-IMHO.
+>
+>> Signed-off-by: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>> ---
+>>  arch/x86/boot/compressed/eboot.c               |  4 +--
+>>  drivers/firmware/efi/libstub/efi-stub-helper.c | 36 +++++++++++++++++++-------
+>>  drivers/firmware/efi/libstub/fdt.c             |  8 +++---
+>>  drivers/firmware/efi/libstub/random.c          |  3 ++-
+>>  include/linux/efi.h                            |  3 ++-
+>>  5 files changed, 37 insertions(+), 17 deletions(-)
+>
+> [...]
+>
+>> index 3bd127f9..3071269 100644
+>> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
+>> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+>> @@ -41,6 +41,8 @@ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
+>>  #define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
+>>  #endif
+>>
+>> +#define EFI_MMAP_NR_SLACK_SLOTS	8
+>> +
+>>  struct file_info {
+>>  	efi_file_handle_t *handle;
+>>  	u64 size;
+>> @@ -68,20 +70,24 @@ efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
+>>  				unsigned long *map_size,
+>>  				unsigned long *desc_size,
+>>  				u32 *desc_ver,
+>> -				unsigned long *key_ptr)
+>> +				unsigned long *key_ptr,
+>> +				unsigned long *buff_size)
+>>  {
+>>  	efi_memory_desc_t *m = NULL;
+>>  	efi_status_t status;
+>>  	unsigned long key;
+>>  	u32 desc_version;
+>>
+>> -	*map_size = sizeof(*m) * 32;
+>> +	*desc_size = sizeof(*m);
+>> +	*map_size = *desc_size * 32;
+>> +	*buff_size = *map_size;
+>>  again:
+>>  	/*
+>>  	 * Add an additional efi_memory_desc_t because we're doing an
+>>  	 * allocation which may be in a new descriptor region.
+>>  	 */
+>> -	*map_size += sizeof(*m);
+>> +	*map_size += *desc_size;
+>> +	*buff_size = *map_size;
+>>  	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+>>  				*map_size, (void **)&m);
+>>  	if (status != EFI_SUCCESS)
+>
+> Isn't this chunk of code unnecessary now? If we think 8 entries is
+> enough headroom for all scenarios then there's no need to allocate 9.
 
-The new PSTORE_FLAGS_ASYNC flag enables management of buffer position.
-The pstore_prepare_buf() is called before accessing the psinfo->buf and
-the pstore_update_buf() is called after accessing the buf.
+I guess the original logic still made a bit of sense to me at the time, 
+but I'm not attached to it.  Will change.
 
-The pstore_get_buf() is provided for psinfo->write callback to determine
-the current position of available buffer.
+>
+>> @@ -91,8 +97,17 @@ again:
+>>  	key = 0;
+>>  	status = efi_call_early(get_memory_map, map_size, m,
+>>  				&key, desc_size, &desc_version);
+>> -	if (status == EFI_BUFFER_TOO_SMALL) {
+>> +	if (status == EFI_BUFFER_TOO_SMALL ||
+>> +				(*buff_size - *map_size) / *desc_size < 8) {
+>
+> Please pull this expression into a static inline wrapper, e.g.
+>
+> static inline bool mmap_has_headroom(unsigned long buff_size,
+> 				     unsigned long map_size,
+> 				     unsigned long desc_size)
+> {
+> 	unsigned long slack = buff_size - map_size;
+>
+>     	return slack / desc_size >= EFI_MMAP_NR_SLACK_SLOTS;
+> }
+>
+> ...
+>
+> 	if (status == EFI_BUFFER_TOO_SMALL ||
+> 	    !mmap_has_headroom(*buff_size, *map_size, *desc_size)) {
+>
 
-Cc: Anton Vorontsov <anton@enomsg.org>
-Cc: Colin Cross <ccross@android.com>
-Cc: Kees Cook <keescook@chromium.org>
-Cc: Tony Luck <tony.luck@intel.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: linux-efi@vger.kernel.org
-Signed-off-by: Namhyung Kim <namhyung@kernel.org>
----
- drivers/firmware/efi/efi-pstore.c |  2 +-
- fs/pstore/platform.c              | 48 +++++++++++++++++++++++++++++++--------
- include/linux/pstore.h            |  4 ++++
- 3 files changed, 44 insertions(+), 10 deletions(-)
+Sure.
 
-diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-index 4daa5acd9117..ae0ffe259e07 100644
---- a/drivers/firmware/efi/efi-pstore.c
-+++ b/drivers/firmware/efi/efi-pstore.c
-@@ -259,7 +259,7 @@ static int efi_pstore_write(enum pstore_type_id type,
- 
- 	efivar_entry_set_safe(efi_name, vendor, PSTORE_EFI_ATTRIBUTES,
- 			      !pstore_cannot_block_path(reason),
--			      size, psi->buf);
-+			      size, pstore_get_buf(psi));
- 
- 	if (reason == KMSG_DUMP_OOPS)
- 		efivar_run_worker();
-diff --git a/fs/pstore/platform.c b/fs/pstore/platform.c
-index 76dd604a0f2c..26e2808cf554 100644
---- a/fs/pstore/platform.c
-+++ b/fs/pstore/platform.c
-@@ -150,6 +150,27 @@ bool pstore_cannot_block_path(enum kmsg_dump_reason reason)
- }
- EXPORT_SYMBOL_GPL(pstore_cannot_block_path);
- 
-+static void *pstore_prepare_buf(struct pstore_info *psi, size_t len)
-+{
-+	if (psi->bufpos + len > psi->bufsize ||
-+	    (psi->flags & PSTORE_FLAGS_ASYNC) == 0)
-+		psi->bufpos = 0;
-+
-+	return psi->buf + psi->bufpos;
-+}
-+
-+static void pstore_update_buf(struct pstore_info *psi, size_t len)
-+{
-+	if (psi->flags & PSTORE_FLAGS_ASYNC)
-+		psi->bufpos += len;
-+}
-+
-+void *pstore_get_buf(struct pstore_info *psi)
-+{
-+	return psi->buf + psi->bufpos;
-+}
-+EXPORT_SYMBOL_GPL(pstore_get_buf);
-+
- #ifdef CONFIG_PSTORE_ZLIB_COMPRESS
- /* Derived from logfs_compress() */
- static int compress_zlib(const void *in, void *out, size_t inlen, size_t outlen)
-@@ -455,18 +476,21 @@ static size_t copy_kmsg_to_buffer(int hsize, size_t len)
- {
- 	size_t total_len;
- 	size_t diff;
-+	void *dst;
- 
- 	total_len = hsize + len;
-+	dst = pstore_prepare_buf(psinfo, total_len);
- 
- 	if (total_len > psinfo->bufsize) {
- 		diff = total_len - psinfo->bufsize + hsize;
--		memcpy(psinfo->buf, big_oops_buf, hsize);
--		memcpy(psinfo->buf + hsize, big_oops_buf + diff,
-+		memcpy(dst, big_oops_buf, hsize);
-+		memcpy(dst + hsize, big_oops_buf + diff,
- 					psinfo->bufsize - hsize);
- 		total_len = psinfo->bufsize;
- 	} else
--		memcpy(psinfo->buf, big_oops_buf, total_len);
-+		memcpy(dst, big_oops_buf, total_len);
- 
-+	pstore_update_buf(psinfo, total_len);
- 	return total_len;
- }
- 
-@@ -500,7 +524,7 @@ static void pstore_dump(struct kmsg_dumper *dumper,
- 	}
- 	oopscount++;
- 	while (total < kmsg_bytes) {
--		char *dst;
-+		char *dst, *buf;
- 		unsigned long size;
- 		int hsize;
- 		int zipped_len = -1;
-@@ -514,6 +538,7 @@ static void pstore_dump(struct kmsg_dumper *dumper,
- 		} else {
- 			dst = psinfo->buf;
- 			size = psinfo->bufsize;
-+			psinfo->bufpos = 0;
- 		}
- 
- 		hsize = sprintf(dst, "%s#%d Part%u\n", why, oopscount, part);
-@@ -524,8 +549,9 @@ static void pstore_dump(struct kmsg_dumper *dumper,
- 			break;
- 
- 		if (big_oops_buf && is_locked) {
--			zipped_len = pstore_compress(dst, psinfo->buf,
--						hsize + len, psinfo->bufsize);
-+			buf = pstore_prepare_buf(psinfo, hsize + len);
-+			zipped_len = pstore_compress(dst, buf, hsize + len,
-+						psinfo->bufsize - psinfo->bufpos);
- 
- 			if (zipped_len > 0) {
- 				compressed = true;
-@@ -543,6 +569,7 @@ static void pstore_dump(struct kmsg_dumper *dumper,
- 			pstore_new_entry = 1;
- 
- 		total += total_len;
-+		pstore_update_buf(psinfo, total_len);
- 		part++;
- 	}
- 	if (is_locked)
-@@ -573,6 +600,7 @@ static void pstore_console_write(struct console *con, const char *s, unsigned c)
- 
- 	while (s < e) {
- 		unsigned long flags;
-+		void *dst;
- 		u64 id;
- 
- 		if (c > psinfo->bufsize)
-@@ -584,8 +612,10 @@ static void pstore_console_write(struct console *con, const char *s, unsigned c)
- 		} else {
- 			spin_lock_irqsave(&psinfo->buf_lock, flags);
- 		}
--		memcpy(psinfo->buf, s, c);
-+		dst = pstore_prepare_buf(psinfo, c);
-+		memcpy(dst, s, c);
- 		psinfo->write(PSTORE_TYPE_CONSOLE, 0, &id, 0, 0, 0, c, psinfo);
-+		pstore_update_buf(psinfo, c);
- 		spin_unlock_irqrestore(&psinfo->buf_lock, flags);
- 		s += c;
- 		c = e - s;
-@@ -619,8 +649,8 @@ static int pstore_write_compat(enum pstore_type_id type,
- 			       bool compressed, size_t size,
- 			       struct pstore_info *psi)
- {
--	return psi->write_buf(type, reason, id, part, psinfo->buf, compressed,
--			     size, psi);
-+	return psi->write_buf(type, reason, id, part, pstore_get_buf(psinfo),
-+			      compressed, size, psi);
- }
- 
- /*
-diff --git a/include/linux/pstore.h b/include/linux/pstore.h
-index 9790904de6d2..14f524177b1f 100644
---- a/include/linux/pstore.h
-+++ b/include/linux/pstore.h
-@@ -52,6 +52,7 @@ struct pstore_info {
- 	spinlock_t	buf_lock;	/* serialize access to 'buf' */
- 	char		*buf;
- 	size_t		bufsize;
-+	size_t		bufpos;
- 	struct mutex	read_mutex;	/* serialize open/read/close */
- 	int		flags;
- 	int		(*open)(struct pstore_info *psi);
-@@ -79,8 +80,11 @@ struct pstore_info {
- #define PSTORE_FLAGS_FTRACE	(1 << 2)
- #define PSTORE_FLAGS_PMSG	(1 << 3)
- 
-+#define PSTORE_FLAGS_ASYNC      (1 << 30)
-+
- extern int pstore_register(struct pstore_info *);
- extern void pstore_unregister(struct pstore_info *);
- extern bool pstore_cannot_block_path(enum kmsg_dump_reason reason);
-+extern void *pstore_get_buf(struct pstore_info *);
- 
- #endif /*_LINUX_PSTORE_H*/
+
 -- 
-2.8.0
+Jeffrey Hugo
+Qualcomm Datacenter Technologies as an affiliate of Qualcomm 
+Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the
+Code Aurora Forum, a Linux Foundation Collaborative Project.
