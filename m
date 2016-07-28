@@ -1,82 +1,83 @@
-From: "Christ, Austin" <austinwc@codeaurora.org>
-Subject: Re: [PATCH] efi: capsule: allocate whole capsule into virtual memory
-Date: Thu, 28 Jul 2016 15:28:17 -0600
-Message-ID: <7721d488-7c0f-4cbb-62ba-8b3e1bd823a5@codeaurora.org>
-References: <1468600891-15794-1-git-send-email-austinwc@codeaurora.org>
- <20160728060704.GE21549@linux-rxt1.site>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160728060704.GE21549@linux-rxt1.site>
-Sender: linux-kernel-owner@vger.kernel.org
-To: joeyli <jlee@suse.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, matt@codeblueprint.co.uk, linux-arm-kernel@lists.infradead.org, jbrasen@codeaurora.org
+From: Austin Christ <austinwc-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: [PATCH v2] efi: capsule: allocate whole capsule into virtual memory
+Date: Thu, 28 Jul 2016 15:30:29 -0600
+Message-ID: <1469741429-17606-1-git-send-email-austinwc@codeaurora.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, jbrasen-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Austin Christ <austinwc-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hello,
+According to UEFI 2.6 section 7.5.3, the capsule should be in contiguous
+virtual memory and firmware may consume the capsule immediately. To
+correctly implement this functionality, the kernel driver needs to vmap
+the entire capsule at the time it is made available to firmware.
 
+The virtual allocation of the capsule update has been changed from kmap,
+which was only allocating the first page of the update, to vmap, and
+allocates the entire data payload.
 
-On 7/28/2016 12:07 AM, joeyli wrote:
-> Hi Austin,
->
-> On Fri, Jul 15, 2016 at 10:41:31AM -0600, Austin Christ wrote:
->> According to UEFI 2.6 section 7.5.3, the capsule should be in contiguous
->> virtual memory and firmware may consume the capsule immediately. To
->> correctly implement this functionality, the kernel driver needs to vmap
->> the entire capsule at the time it is made available to firmware.
->>
->> The virtual allocation of the capsule update has been changed from kmap,
->> which was only allocating the first page of the update, to vmap and
->> allocates the entire data payload.
->>
->> Signed-off-by: Austin Christ <austinwc@codeaurora.org>
->> ---
->>   drivers/firmware/efi/capsule-loader.c | 6 ++++--
->>   1 file changed, 4 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
->> index c99c24b..c4f3c20 100644
->> --- a/drivers/firmware/efi/capsule-loader.c
->> +++ b/drivers/firmware/efi/capsule-loader.c
->> @@ -16,6 +16,7 @@
->>   #include <linux/slab.h>
->>   #include <linux/mutex.h>
->>   #include <linux/efi.h>
->> +#include <linux/vmalloc.h>
->>   
->>   #define NO_FURTHER_WRITE_ACTION -1
->>   
->> @@ -108,14 +109,15 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
->>   	int ret;
->>   	void *cap_hdr_temp;
->>   
->> -	cap_hdr_temp = kmap(cap_info->pages[0]);
->> +	cap_hdr_temp = vmap(cap_info->pages, cap_info->index,
->> +			VM_MAP, PAGE_KERNEL);
->>   	if (!cap_hdr_temp) {
->>   		pr_debug("%s: kmap() failed\n", __func__);
->                               ^^^^^^^^ use vmap()?
->
-> I have only a minor suggestion as above.
->
-> Reviewed-by: Lee, Chun-Yi <jlee@suse.com>
+Signed-off-by: Austin Christ <austinwc-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Reviewed-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+---
+ drivers/firmware/efi/capsule-loader.c | 8 +++++---
+ drivers/firmware/efi/capsule.c        | 6 +++---
+ 2 files changed, 8 insertions(+), 6 deletions(-)
 
-Thanks, this will be fixed in v2.
->
->>   		return -EFAULT;
->>   	}
->>   
->>   	ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
->> -	kunmap(cap_info->pages[0]);
->> +	vunmap(cap_hdr_temp);
->>   	if (ret) {
->>   		pr_err("%s: efi_capsule_update() failed\n", __func__);
->>   		return ret;
->> --
-> Thanks a lot!
-> Joey Lee
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Changes:
+- v2:
+ - update comment and fix log output
+
+diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+index c99c24b..9ae6c11 100644
+--- a/drivers/firmware/efi/capsule-loader.c
++++ b/drivers/firmware/efi/capsule-loader.c
+@@ -16,6 +16,7 @@
+ #include <linux/slab.h>
+ #include <linux/mutex.h>
+ #include <linux/efi.h>
++#include <linux/vmalloc.h>
+ 
+ #define NO_FURTHER_WRITE_ACTION -1
+ 
+@@ -108,14 +109,15 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
+ 	int ret;
+ 	void *cap_hdr_temp;
+ 
+-	cap_hdr_temp = kmap(cap_info->pages[0]);
++	cap_hdr_temp = vmap(cap_info->pages, cap_info->index,
++			VM_MAP, PAGE_KERNEL);
+ 	if (!cap_hdr_temp) {
+-		pr_debug("%s: kmap() failed\n", __func__);
++		pr_debug("%s: vmap() failed\n", __func__);
+ 		return -EFAULT;
+ 	}
+ 
+ 	ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
+-	kunmap(cap_info->pages[0]);
++	vunmap(cap_hdr_temp);
+ 	if (ret) {
+ 		pr_err("%s: efi_capsule_update() failed\n", __func__);
+ 		return ret;
+diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
+index 53b9fd2..6eedff4 100644
+--- a/drivers/firmware/efi/capsule.c
++++ b/drivers/firmware/efi/capsule.c
+@@ -190,9 +190,9 @@ efi_capsule_update_locked(efi_capsule_header_t *capsule,
+  * map the capsule described by @capsule with its data in @pages and
+  * send it to the firmware via the UpdateCapsule() runtime service.
+  *
+- * @capsule must be a virtual mapping of the first page in @pages
+- * (@pages[0]) in the kernel address space. That is, a
+- * capsule_header_t that describes the entire contents of the capsule
++ * @capsule must be a virtual mapping of the complete capsule update in the
++ * kernel address space, as the capsule can be consumed immediately.
++ * A capsule_header_t that describes the entire contents of the capsule
+  * must be at the start of the first data page.
+  *
+  * Even though this function will validate that the firmware supports
+-- 
+Qualcomm Datacenter Technologies as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the
+Code Aurora Forum, a Linux Foundation Collaborative Project.
