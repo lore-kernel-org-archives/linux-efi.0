@@ -1,83 +1,166 @@
-From: Austin Christ <austinwc-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: [PATCH v2] efi: capsule: allocate whole capsule into virtual memory
-Date: Thu, 28 Jul 2016 15:30:29 -0600
-Message-ID: <1469741429-17606-1-git-send-email-austinwc@codeaurora.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, jbrasen-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Austin Christ <austinwc-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+From: Andrei Borzenkov <arvidjaar@gmail.com>
+Subject: Re: [PATCH 1/6] efi: Retrieve Apple device properties
+Date: Sat, 30 Jul 2016 22:16:55 +0300
+Message-ID: <339ee03d-c8bb-d3c3-cf64-cc1c157ba406@gmail.com>
+References: <cover.1469616641.git.lukas@wunner.de>
+	<833d193b8a18b0afe168c515e9e56a857ece4bd1.1469616641.git.lukas@wunner.de>
+Reply-To: The development of GNU GRUB <grub-devel@gnu.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <grub-devel-bounces+gcbgd-grub-devel=m.gmane.org@gnu.org>
+In-Reply-To: <833d193b8a18b0afe168c515e9e56a857ece4bd1.1469616641.git.lukas@wunner.de>
+List-Unsubscribe: <https://lists.gnu.org/mailman/options/grub-devel>,
+	<mailto:grub-devel-request@gnu.org?subject=unsubscribe>
+List-Archive: <http://lists.gnu.org/archive/html/grub-devel/>
+List-Post: <mailto:grub-devel@gnu.org>
+List-Help: <mailto:grub-devel-request@gnu.org?subject=help>
+List-Subscribe: <https://lists.gnu.org/mailman/listinfo/grub-devel>,
+	<mailto:grub-devel-request@gnu.org?subject=subscribe>
+Errors-To: grub-devel-bounces+gcbgd-grub-devel=m.gmane.org@gnu.org
+Sender: "Grub-devel" <grub-devel-bounces+gcbgd-grub-devel=m.gmane.org@gnu.org>
+To: The development of GNU GRUB <grub-devel@gnu.org>, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, pjones@redhat.com
+Cc: Andreas Noever <andreas.noever@gmail.com>, Pierre Moreau <pierre.morrow@free.fr>, x86@kernel.org, reverser@put.as
 List-Id: linux-efi@vger.kernel.org
 
-According to UEFI 2.6 section 7.5.3, the capsule should be in contiguous
-virtual memory and firmware may consume the capsule immediately. To
-correctly implement this functionality, the kernel driver needs to vmap
-the entire capsule at the time it is made available to firmware.
-
-The virtual allocation of the capsule update has been changed from kmap,
-which was only allocating the first page of the update, to vmap, and
-allocates the entire data payload.
-
-Signed-off-by: Austin Christ <austinwc-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Reviewed-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
----
- drivers/firmware/efi/capsule-loader.c | 8 +++++---
- drivers/firmware/efi/capsule.c        | 6 +++---
- 2 files changed, 8 insertions(+), 6 deletions(-)
-
-Changes:
-- v2:
- - update comment and fix log output
-
-diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-index c99c24b..9ae6c11 100644
---- a/drivers/firmware/efi/capsule-loader.c
-+++ b/drivers/firmware/efi/capsule-loader.c
-@@ -16,6 +16,7 @@
- #include <linux/slab.h>
- #include <linux/mutex.h>
- #include <linux/efi.h>
-+#include <linux/vmalloc.h>
- 
- #define NO_FURTHER_WRITE_ACTION -1
- 
-@@ -108,14 +109,15 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
- 	int ret;
- 	void *cap_hdr_temp;
- 
--	cap_hdr_temp = kmap(cap_info->pages[0]);
-+	cap_hdr_temp = vmap(cap_info->pages, cap_info->index,
-+			VM_MAP, PAGE_KERNEL);
- 	if (!cap_hdr_temp) {
--		pr_debug("%s: kmap() failed\n", __func__);
-+		pr_debug("%s: vmap() failed\n", __func__);
- 		return -EFAULT;
- 	}
- 
- 	ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
--	kunmap(cap_info->pages[0]);
-+	vunmap(cap_hdr_temp);
- 	if (ret) {
- 		pr_err("%s: efi_capsule_update() failed\n", __func__);
- 		return ret;
-diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
-index 53b9fd2..6eedff4 100644
---- a/drivers/firmware/efi/capsule.c
-+++ b/drivers/firmware/efi/capsule.c
-@@ -190,9 +190,9 @@ efi_capsule_update_locked(efi_capsule_header_t *capsule,
-  * map the capsule described by @capsule with its data in @pages and
-  * send it to the firmware via the UpdateCapsule() runtime service.
-  *
-- * @capsule must be a virtual mapping of the first page in @pages
-- * (@pages[0]) in the kernel address space. That is, a
-- * capsule_header_t that describes the entire contents of the capsule
-+ * @capsule must be a virtual mapping of the complete capsule update in the
-+ * kernel address space, as the capsule can be consumed immediately.
-+ * A capsule_header_t that describes the entire contents of the capsule
-  * must be at the start of the first data page.
-  *
-  * Even though this function will validate that the firmware supports
--- 
-Qualcomm Datacenter Technologies as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the
-Code Aurora Forum, a Linux Foundation Collaborative Project.
+MjcuMDcuMjAxNiAxNDoyMCwgTHVrYXMgV3VubmVyINC/0LjRiNC10YI6Cj4gUmV0cmlldmUgZGV2
+aWNlIHByb3BlcnRpZXMgZnJvbSBFRkkgdXNpbmcgQXBwbGUncyBwcm9wcmlldGFyeSBwcm90b2Nv
+bAo+IHdpdGggR1VJRCA5MUJEMTJGRS1GNkMzLTQ0RkItQTVCNy01MTIyQUIzMDNBRTAsIHdoaWNo
+IGxvb2tzIGxpa2UgdGhpczoKPiAKPiB0eXBlZGVmIHN0cnVjdCB7Cj4gCXVuc2lnbmVkIGxvbmcg
+c2lnbmF0dXJlOyAvKiAweDEwMDAwICovCj4gCWVmaV9zdGF0dXNfdCAoKmdldCkgKAo+IAkJSU4g
+c3RydWN0IGFwcGxlX3Byb3BlcnRpZXNfcHJvdG9jb2wgKnRoaXMsCj4gCQlJTiBzdHJ1Y3QgZWZp
+X2dlbmVyaWNfZGV2X3BhdGggKmRldmljZSwKPiAJCUlOIGVmaV9jaGFyMTZfdCAqcHJvcGVydHlf
+bmFtZSwKPiAJCU9VVCB2b2lkICpidWZmZXIsCj4gCQlJTiBPVVQgdTMyICpidWZmZXJfc2l6ZSk7
+Cj4gCQkvKiBFRklfU1VDQ0VTUywgRUZJX05PVF9GT1VORCwgRUZJX0JVRkZFUl9UT09fU01BTEwg
+Ki8KPiAJZWZpX3N0YXR1c190ICgqc2V0KSAoCj4gCQlJTiBzdHJ1Y3QgYXBwbGVfcHJvcGVydGll
+c19wcm90b2NvbCAqdGhpcywKPiAJCUlOIHN0cnVjdCBlZmlfZ2VuZXJpY19kZXZfcGF0aCAqZGV2
+aWNlLAo+IAkJSU4gZWZpX2NoYXIxNl90ICpwcm9wZXJ0eV9uYW1lLAo+IAkJSU4gdm9pZCAqcHJv
+cGVydHlfdmFsdWUsCj4gCQlJTiB1MzIgcHJvcGVydHlfdmFsdWVfbGVuKTsKPiAJCS8qIGFsbG9j
+YXRlcyBjb3BpZXMgb2YgcHJvcGVydHkgbmFtZSBhbmQgdmFsdWUgKi8KPiAJCS8qIEVGSV9TVUND
+RVNTLCBFRklfT1VUX09GX1JFU09VUkNFUyAqLwo+IAllZmlfc3RhdHVzX3QgKCpkZWwpICgKPiAJ
+CUlOIHN0cnVjdCBhcHBsZV9wcm9wZXJ0aWVzX3Byb3RvY29sICp0aGlzLAo+IAkJSU4gc3RydWN0
+IGVmaV9nZW5lcmljX2Rldl9wYXRoICpkZXZpY2UsCj4gCQlJTiBlZmlfY2hhcjE2X3QgKnByb3Bl
+cnR5X25hbWUpOwo+IAkJLyogRUZJX1NVQ0NFU1MsIEVGSV9OT1RfRk9VTkQgKi8KPiAJZWZpX3N0
+YXR1c190ICgqZ2V0X2FsbCkgKAo+IAkJSU4gc3RydWN0IGFwcGxlX3Byb3BlcnRpZXNfcHJvdG9j
+b2wgKnRoaXMsCj4gCQlPVVQgdm9pZCAqYnVmZmVyLAo+IAkJSU4gT1VUIHUzMiAqYnVmZmVyX3Np
+emUpOwo+IAkJLyogRUZJX1NVQ0NFU1MsIEVGSV9CVUZGRVJfVE9PX1NNQUxMICovCj4gfSBhcHBs
+ZV9wcm9wZXJ0aWVzX3Byb3RvY29sOwo+IAo+IEFwcGxlJ3MgRUZJIGRyaXZlciBpbXBsZW1lbnRp
+bmcgdGhpcyBwcm90b2NvbCwgIkFBUEwsUGF0aFByb3BlcnRpZXMiLAo+IGlzIGEgcGVyLWRldmlj
+ZSBrZXkvdmFsdWUgc3RvcmUgd2hpY2ggaXMgcG9wdWxhdGVkIGJ5IG90aGVyIEVGSSBkcml2ZXJz
+Lgo+IE9uIG1hY09TLCB0aGVzZSBkZXZpY2UgcHJvcGVydGllcyBhcmUgcmV0cmlldmVkIGJ5IHRo
+ZSBib290bG9hZGVyCj4gL3Vzci9zdGFuZGFsb25lL2kzODYvYm9vdC5lZmkuIFRoZSBleHRlbnNp
+b24gQXBwbGVBQ1BJUGxhdGZvcm0ua2V4dAo+IHN1YnNlcXVlbnRseSBtZXJnZXMgdGhlbSBpbnRv
+IHRoZSBJL08gS2l0IHJlZ2lzdHJ5IChzZWUgaW9yZWcoOCkpIHdoZXJlCj4gdGhleSBjYW4gYmUg
+cXVlcmllZCBieSBvdGhlciBrZXJuZWwgZXh0ZW5zaW9ucyBhbmQgdXNlciBzcGFjZS4KPiAKPiBU
+aGVzZSBkZXZpY2UgcHJvcGVydGllcyBjb250YWluIHZpdGFsIGluZm9ybWF0aW9uIHdoaWNoIGNh
+bm5vdCBiZQo+IG9idGFpbmVkIGFueSBvdGhlciB3YXkgKGUuZy4gVGh1bmRlcmJvbHQgRGV2aWNl
+IFJPTSkuIEVGSSBkcml2ZXJzIGFsc28KPiB1c2UgdGhlbSB0byBjb21tdW5pY2F0ZSB0aGUgY3Vy
+cmVudCBkZXZpY2Ugc3RhdGUgc28gdGhhdCBPUyBkcml2ZXJzIGNhbgo+IHBpY2sgdXAgd2hlcmUg
+RUZJIGRyaXZlcnMgbGVmdCAoZS5nLiBHUFUgbW9kZSBzZXR0aW5nKS4KPiAKPiBUaGUgZ2V0X2Fs
+bCgpIGZ1bmN0aW9uIGNvbnZlbmllbnRseSBmaWxscyBhIGJ1ZmZlciB3aXRoIGFsbCBwcm9wZXJ0
+aWVzCj4gaW4gbWFyc2hhbGxlZCBmb3JtIHdoaWNoIGNhbiBiZSBwYXNzZWQgdG8gdGhlIGtlcm5l
+bCBhcyBhIHNldHVwX2RhdGEKPiBwYXlsb2FkLiBOb3RlIHRoYXQgdGhlIGRldmljZSBwcm9wZXJ0
+aWVzIHdpbGwgb25seSBiZSBhdmFpbGFibGUgaWYgdGhlCj4ga2VybmVsIGlzIGJvb3RlZCB3aXRo
+IHRoZSBlZmlzdHViLiBEaXN0cm9zIHNob3VsZCBhZGp1c3QgdGhlaXIKPiBpbnN0YWxsZXJzIHRv
+IGFsd2F5cyB1c2UgdGhlIGVmaXN0dWIgb24gTWFjcy4gZ3J1YiB3aXRoIHRoZSAibGludXgiCj4g
+ZGlyZWN0aXZlIHdpbGwgbm90IHdvcmsgdW5sZXNzIHRoZSBmdW5jdGlvbmFsaXR5IG9mIHRoaXMg
+Y29tbWl0IGlzCj4gZHVwbGljYXRlZCBpbiBncnViLiAoVGhlICJsaW51eGVmaSIgZGlyZWN0aXZl
+IHNob3VsZCB3b3JrIGJ1dCBpcyBub3QKPiBpbmNsdWRlZCB1cHN0cmVhbSBhcyBvZiB0aGlzIHdy
+aXRpbmcuKQo+IAoKSW50ZW50aW9uIHdhcyB0byBwYXJ0aWFsbHkgbWVyZ2UgbGludXhlZmkgZnVu
+Y3Rpb25hbGl0eSBpbnRvICJsaW51eCIgYnkKYXV0b2RldGVjdGluZyBhbmQgcHJlZmVycmluZyBF
+Rkkgc3R1YiBzdXBwb3J0LiBQZXRlciwgYW55IHByb2dyZXNzIG9uIHRoaXM/Cgo+IFRoYW5rcyB0
+byBvc3hyZXZlcnNlciBmb3IgdGhpcyBibG9nIHBvc3Rpbmcgd2hpY2ggd2FzIGhlbHBmdWwgaW4g
+cmV2ZXJzZQo+IGVuZ2luZWVyaW5nIEFwcGxlJ3MgRUZJIGRyaXZlcnMgYW5kIGJvb3Rsb2FkZXI6
+Cj4gaHR0cHM6Ly9yZXZlcnNlLnB1dC5hcy8yMDE2LzA2LzI1L2FwcGxlLWVmaS1maXJtd2FyZS1w
+YXNzd29yZHMtYW5kLXRoZS1zY2JvLW15dGgvCj4gCj4gSWYgc29tZW9uZSBhdCBBcHBsZSBpcyBy
+ZWFkaW5nIHRoaXMsIHBsZWFzZSBub3RlIHRoZXJlJ3MgYSBtZW1vcnkgbGVhawo+IGluIHlvdXIg
+aW1wbGVtZW50YXRpb24gb2YgdGhlIGRlbCgpIGZ1bmN0aW9uIGFzIHRoZSBwcm9wZXJ0eSBzdHJ1
+Y3QgaXMKPiBmcmVlZCBidXQgdGhlIG5hbWUgYW5kIHZhbHVlIGFsbG9jYXRpb25zIGFyZSBub3Qu
+Cj4gCj4gQ2M6IHJldmVyc2VyQHB1dC5hcwo+IENjOiBncnViLWRldmVsQGdudS5vcmcKPiBDYzog
+TWF0dCBGbGVtaW5nIDxtYXR0QGNvZGVibHVlcHJpbnQuY28udWs+Cj4gQ2M6IEFuZHJlYXMgTm9l
+dmVyIDxhbmRyZWFzLm5vZXZlckBnbWFpbC5jb20+Cj4gVGVzdGVkLWJ5OiBMdWthcyBXdW5uZXIg
+PGx1a2FzQHd1bm5lci5kZT4gW01hY0Jvb2tQcm85LDFdCj4gVGVzdGVkLWJ5OiBQaWVycmUgTW9y
+ZWF1IDxwaWVycmUubW9ycm93QGZyZWUuZnI+IFtNYWNCb29rUHJvMTEsM10KPiBTaWduZWQtb2Zm
+LWJ5OiBMdWthcyBXdW5uZXIgPGx1a2FzQHd1bm5lci5kZT4KPiAtLS0KPiAgYXJjaC94ODYvYm9v
+dC9jb21wcmVzc2VkL2Vib290LmMgICAgICB8IDU1ICsrKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrKysrCj4gIGFyY2gveDg2L2luY2x1ZGUvdWFwaS9hc20vYm9vdHBhcmFtLmggfCAgMSAr
+Cj4gIGluY2x1ZGUvbGludXgvZWZpLmggICAgICAgICAgICAgICAgICAgfCAxNyArKysrKysrKysr
+Kwo+ICAzIGZpbGVzIGNoYW5nZWQsIDczIGluc2VydGlvbnMoKykKPiAKPiBkaWZmIC0tZ2l0IGEv
+YXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL2Vib290LmMgYi9hcmNoL3g4Ni9ib290L2NvbXByZXNz
+ZWQvZWJvb3QuYwo+IGluZGV4IGZmNTc0ZGEuLjcyNjJlZTQgMTAwNjQ0Cj4gLS0tIGEvYXJjaC94
+ODYvYm9vdC9jb21wcmVzc2VkL2Vib290LmMKPiArKysgYi9hcmNoL3g4Ni9ib290L2NvbXByZXNz
+ZWQvZWJvb3QuYwo+IEBAIC01NzEsNiArNTcxLDU1IEBAIGZyZWVfaGFuZGxlOgo+ICAJZWZpX2Nh
+bGxfZWFybHkoZnJlZV9wb29sLCBwY2lfaGFuZGxlKTsKPiAgfQo+ICAKPiArc3RhdGljIHZvaWQg
+cmV0cmlldmVfYXBwbGVfZGV2aWNlX3Byb3BlcnRpZXMoc3RydWN0IGJvb3RfcGFyYW1zICpwYXJh
+bXMpCj4gK3sKPiArCWVmaV9ndWlkX3QgZ3VpZCA9IEFQUExFX1BST1BFUlRJRVNfUFJPVE9DT0xf
+R1VJRDsKPiArCXN0cnVjdCBzZXR1cF9kYXRhICpkYXRhLCAqbmV3Owo+ICsJZWZpX3N0YXR1c190
+IHN0YXR1czsKPiArCXZvaWQgKnByb3BlcnRpZXM7Cj4gKwl1MzIgc2l6ZSA9IDA7Cj4gKwo+ICsJ
+c3RhdHVzID0gZWZpX2Vhcmx5LT5jYWxsKAo+ICsJCQkodW5zaWduZWQgbG9uZylzeXNfdGFibGUt
+PmJvb3R0aW1lLT5sb2NhdGVfcHJvdG9jb2wsCj4gKwkJCSZndWlkLCBOVUxMLCAmcHJvcGVydGll
+cyk7Cj4gKwlpZiAoc3RhdHVzICE9IEVGSV9TVUNDRVNTKQo+ICsJCXJldHVybjsKPiArCj4gKwlk
+byB7Cj4gKwkJc3RhdHVzID0gZWZpX2NhbGxfZWFybHkoYWxsb2NhdGVfcG9vbCwgRUZJX0xPQURF
+Ul9EQVRBLAo+ICsJCQlzaXplICsgc2l6ZW9mKHN0cnVjdCBzZXR1cF9kYXRhKSwgJm5ldyk7Cj4g
+KwkJaWYgKHN0YXR1cyAhPSBFRklfU1VDQ0VTUykgewo+ICsJCQllZmlfcHJpbnRrKHN5c190YWJs
+ZSwKPiArCQkJCSAgICJGYWlsZWQgdG8gYWxsb2MgbWVtIGZvciBwcm9wZXJ0aWVzXG4iKTsKPiAr
+CQkJcmV0dXJuOwo+ICsJCX0KPiArCQlzdGF0dXMgPSBlZmlfZWFybHktPmNhbGwoZWZpX2Vhcmx5
+LT5pczY0ID8KPiArCQkJKChhcHBsZV9wcm9wZXJ0aWVzX3Byb3RvY29sXzY0ICopcHJvcGVydGll
+cyktPmdldF9hbGwgOgo+ICsJCQkoKGFwcGxlX3Byb3BlcnRpZXNfcHJvdG9jb2xfMzIgKilwcm9w
+ZXJ0aWVzKS0+Z2V0X2FsbCwKPiArCQkJcHJvcGVydGllcywgbmV3LT5kYXRhLCAmc2l6ZSk7Cj4g
+KwkJaWYgKHN0YXR1cyA9PSBFRklfQlVGRkVSX1RPT19TTUFMTCkKPiArCQkJZWZpX2NhbGxfZWFy
+bHkoZnJlZV9wb29sLCBuZXcpOwo+ICsJfSB3aGlsZSAoc3RhdHVzID09IEVGSV9CVUZGRVJfVE9P
+X1NNQUxMKTsKPiArCj4gKwlpZiAoIXNpemUpIHsKPiArCQllZmlfY2FsbF9lYXJseShmcmVlX3Bv
+b2wsIG5ldyk7Cj4gKwkJcmV0dXJuOwo+ICsJfQo+ICsKPiArCW5ldy0+dHlwZSA9IFNFVFVQX0FQ
+UExFX1BST1BFUlRJRVM7Cj4gKwluZXctPmxlbiAgPSBzaXplOwo+ICsJbmV3LT5uZXh0ID0gMDsK
+PiArCj4gKwlkYXRhID0gKHN0cnVjdCBzZXR1cF9kYXRhICopKHVuc2lnbmVkIGxvbmcpcGFyYW1z
+LT5oZHIuc2V0dXBfZGF0YTsKPiArCWlmICghZGF0YSkKPiArCQlwYXJhbXMtPmhkci5zZXR1cF9k
+YXRhID0gKHVuc2lnbmVkIGxvbmcpbmV3Owo+ICsJZWxzZSB7Cj4gKwkJd2hpbGUgKGRhdGEtPm5l
+eHQpCj4gKwkJCWRhdGEgPSAoc3RydWN0IHNldHVwX2RhdGEgKikodW5zaWduZWQgbG9uZylkYXRh
+LT5uZXh0Owo+ICsJCWRhdGEtPm5leHQgPSAodW5zaWduZWQgbG9uZyluZXc7Cj4gKwl9Cj4gK30K
+PiArCj4gIHN0YXRpYyBlZmlfc3RhdHVzX3QKPiAgc2V0dXBfdWdhMzIodm9pZCAqKnVnYV9oYW5k
+bGUsIHVuc2lnbmVkIGxvbmcgc2l6ZSwgdTMyICp3aWR0aCwgdTMyICpoZWlnaHQpCj4gIHsKPiBA
+QCAtMTA5OCw2ICsxMTQ3LDcgQEAgZnJlZV9tZW1fbWFwOgo+ICBzdHJ1Y3QgYm9vdF9wYXJhbXMg
+KmVmaV9tYWluKHN0cnVjdCBlZmlfY29uZmlnICpjLAo+ICAJCQkgICAgIHN0cnVjdCBib290X3Bh
+cmFtcyAqYm9vdF9wYXJhbXMpCj4gIHsKPiArCWVmaV9jaGFyMTZfdCBjb25zdCBhcHBsZVtdID0g
+eyAnQScsICdwJywgJ3AnLCAnbCcsICdlJywgMCB9Owo+ICAJc3RydWN0IGRlc2NfcHRyICpnZHQg
+PSBOVUxMOwo+ICAJZWZpX2xvYWRlZF9pbWFnZV90ICppbWFnZTsKPiAgCXN0cnVjdCBzZXR1cF9o
+ZWFkZXIgKmhkciA9ICZib290X3BhcmFtcy0+aGRyOwo+IEBAIC0xMTI4LDYgKzExNzgsMTEgQEAg
+c3RydWN0IGJvb3RfcGFyYW1zICplZmlfbWFpbihzdHJ1Y3QgZWZpX2NvbmZpZyAqYywKPiAgCj4g
+IAlzZXR1cF9lZmlfcGNpKGJvb3RfcGFyYW1zKTsKPiAgCj4gKwlpZiAoIW1lbWNtcCgodm9pZCAq
+KXN5c190YWJsZS0+ZndfdmVuZG9yLCBhcHBsZSwgc2l6ZW9mKGFwcGxlKSkpIHsKPiArCQlpZiAo
+SVNfRU5BQkxFRChDT05GSUdfQVBQTEVfUFJPUEVSVElFUykpCj4gKwkJCXJldHJpZXZlX2FwcGxl
+X2RldmljZV9wcm9wZXJ0aWVzKGJvb3RfcGFyYW1zKTsKPiArCX0KPiArCj4gIAlzdGF0dXMgPSBl
+ZmlfY2FsbF9lYXJseShhbGxvY2F0ZV9wb29sLCBFRklfTE9BREVSX0RBVEEsCj4gIAkJCQlzaXpl
+b2YoKmdkdCksICh2b2lkICoqKSZnZHQpOwo+ICAJaWYgKHN0YXR1cyAhPSBFRklfU1VDQ0VTUykg
+ewo+IGRpZmYgLS1naXQgYS9hcmNoL3g4Ni9pbmNsdWRlL3VhcGkvYXNtL2Jvb3RwYXJhbS5oIGIv
+YXJjaC94ODYvaW5jbHVkZS91YXBpL2FzbS9ib290cGFyYW0uaAo+IGluZGV4IGMxOGNlNjcuLmIx
+MGJmMzEgMTAwNjQ0Cj4gLS0tIGEvYXJjaC94ODYvaW5jbHVkZS91YXBpL2FzbS9ib290cGFyYW0u
+aAo+ICsrKyBiL2FyY2gveDg2L2luY2x1ZGUvdWFwaS9hc20vYm9vdHBhcmFtLmgKPiBAQCAtNyw2
+ICs3LDcgQEAKPiAgI2RlZmluZSBTRVRVUF9EVEIJCQkyCj4gICNkZWZpbmUgU0VUVVBfUENJCQkJ
+Mwo+ICAjZGVmaW5lIFNFVFVQX0VGSQkJCTQKPiArI2RlZmluZSBTRVRVUF9BUFBMRV9QUk9QRVJU
+SUVTCQk1Cj4gIAo+ICAvKiByYW1fc2l6ZSBmbGFncyAqLwo+ICAjZGVmaW5lIFJBTURJU0tfSU1B
+R0VfU1RBUlRfTUFTSwkweDA3RkYKPiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9lZmkuaCBi
+L2luY2x1ZGUvbGludXgvZWZpLmgKPiBpbmRleCA3ZjgwYTc1Li5lNTNiNGIyIDEwMDY0NAo+IC0t
+LSBhL2luY2x1ZGUvbGludXgvZWZpLmgKPiArKysgYi9pbmNsdWRlL2xpbnV4L2VmaS5oCj4gQEAg
+LTQzMiw2ICs0MzIsMjIgQEAgdHlwZWRlZiBzdHJ1Y3Qgewo+ICAjZGVmaW5lIEVGSV9QQ0lfSU9f
+QVRUUklCVVRFX1ZHQV9QQUxFVFRFX0lPXzE2IDB4MjAwMDAKPiAgI2RlZmluZSBFRklfUENJX0lP
+X0FUVFJJQlVURV9WR0FfSU9fMTYgMHg0MDAwMAo+ICAKPiArdHlwZWRlZiBzdHJ1Y3Qgewo+ICsJ
+dTMyIHNpZ25hdHVyZTsKPiArCXUzMiBnZXQ7Cj4gKwl1MzIgc2V0Owo+ICsJdTMyIGRlbDsKPiAr
+CXUzMiBnZXRfYWxsOwo+ICt9IGFwcGxlX3Byb3BlcnRpZXNfcHJvdG9jb2xfMzI7Cj4gKwo+ICt0
+eXBlZGVmIHN0cnVjdCB7Cj4gKwl1NjQgc2lnbmF0dXJlOwo+ICsJdTY0IGdldDsKPiArCXU2NCBz
+ZXQ7Cj4gKwl1NjQgZGVsOwo+ICsJdTY0IGdldF9hbGw7Cj4gK30gYXBwbGVfcHJvcGVydGllc19w
+cm90b2NvbF82NDsKPiArCj4gIC8qCj4gICAqIFR5cGVzIGFuZCBkZWZpbmVzIGZvciBFRkkgUmVz
+ZXRTeXN0ZW0KPiAgICovCj4gQEAgLTU4MCw2ICs1OTYsNyBAQCB2b2lkIGVmaV9uYXRpdmVfcnVu
+dGltZV9zZXR1cCh2b2lkKTsKPiAgI2RlZmluZSBFRklfUk5HX1BST1RPQ09MX0dVSUQJCQlFRklf
+R1VJRCgweDMxNTJiY2E1LCAweGVhZGUsIDB4NDMzZCwgIDB4ODYsIDB4MmUsIDB4YzAsIDB4MWMs
+IDB4ZGMsIDB4MjksIDB4MWYsIDB4NDQpCj4gICNkZWZpbmUgRUZJX01FTU9SWV9BVFRSSUJVVEVT
+X1RBQkxFX0dVSUQJRUZJX0dVSUQoMHhkY2ZhOTExZCwgMHgyNmViLCAweDQ2OWYsICAweGEyLCAw
+eDIwLCAweDM4LCAweGI3LCAweGRjLCAweDQ2LCAweDEyLCAweDIwKQo+ICAjZGVmaW5lIEVGSV9D
+T05TT0xFX09VVF9ERVZJQ0VfR1VJRAkJRUZJX0dVSUQoMHhkM2IzNmYyYywgMHhkNTUxLCAweDEx
+ZDQsICAweDlhLCAweDQ2LCAweDAwLCAweDkwLCAweDI3LCAweDNmLCAweGMxLCAweDRkKQo+ICsj
+ZGVmaW5lIEFQUExFX1BST1BFUlRJRVNfUFJPVE9DT0xfR1VJRAkJRUZJX0dVSUQoMHg5MWJkMTJm
+ZSwgMHhmNmMzLCAweDQ0ZmIsICAweGE1LCAweGI3LCAweDUxLCAweDIyLCAweGFiLCAweDMwLCAw
+eDNhLCAweGUwKQo+ICAKPiAgLyoKPiAgICogVGhpcyBHVUlEIGlzIHVzZWQgdG8gcGFzcyB0byB0
+aGUga2VybmVsIHByb3BlciB0aGUgc3RydWN0IHNjcmVlbl9pbmZvCj4gCgoKX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KR3J1Yi1kZXZlbCBtYWlsaW5nIGxp
+c3QKR3J1Yi1kZXZlbEBnbnUub3JnCmh0dHBzOi8vbGlzdHMuZ251Lm9yZy9tYWlsbWFuL2xpc3Rp
+bmZvL2dydWItZGV2ZWwK
