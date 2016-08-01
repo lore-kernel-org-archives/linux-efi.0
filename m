@@ -1,166 +1,948 @@
-From: Andrei Borzenkov <arvidjaar@gmail.com>
-Subject: Re: [PATCH 1/6] efi: Retrieve Apple device properties
-Date: Sat, 30 Jul 2016 22:16:55 +0300
-Message-ID: <339ee03d-c8bb-d3c3-cf64-cc1c157ba406@gmail.com>
-References: <cover.1469616641.git.lukas@wunner.de>
-	<833d193b8a18b0afe168c515e9e56a857ece4bd1.1469616641.git.lukas@wunner.de>
-Reply-To: The development of GNU GRUB <grub-devel@gnu.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <grub-devel-bounces+gcbgd-grub-devel=m.gmane.org@gnu.org>
-In-Reply-To: <833d193b8a18b0afe168c515e9e56a857ece4bd1.1469616641.git.lukas@wunner.de>
-List-Unsubscribe: <https://lists.gnu.org/mailman/options/grub-devel>,
-	<mailto:grub-devel-request@gnu.org?subject=unsubscribe>
-List-Archive: <http://lists.gnu.org/archive/html/grub-devel/>
-List-Post: <mailto:grub-devel@gnu.org>
-List-Help: <mailto:grub-devel-request@gnu.org?subject=help>
-List-Subscribe: <https://lists.gnu.org/mailman/listinfo/grub-devel>,
-	<mailto:grub-devel-request@gnu.org?subject=subscribe>
-Errors-To: grub-devel-bounces+gcbgd-grub-devel=m.gmane.org@gnu.org
-Sender: "Grub-devel" <grub-devel-bounces+gcbgd-grub-devel=m.gmane.org@gnu.org>
-To: The development of GNU GRUB <grub-devel@gnu.org>, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, pjones@redhat.com
-Cc: Andreas Noever <andreas.noever@gmail.com>, Pierre Moreau <pierre.morrow@free.fr>, x86@kernel.org, reverser@put.as
+From: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Subject: [PATCH V2] efi: add efi_test driver for exporting UEFI runtime service interfaces
+Date: Mon,  1 Aug 2016 09:48:16 +0800
+Message-ID: <1470016096-5063-1-git-send-email-ivan.hu@canonical.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-MjcuMDcuMjAxNiAxNDoyMCwgTHVrYXMgV3VubmVyINC/0LjRiNC10YI6Cj4gUmV0cmlldmUgZGV2
-aWNlIHByb3BlcnRpZXMgZnJvbSBFRkkgdXNpbmcgQXBwbGUncyBwcm9wcmlldGFyeSBwcm90b2Nv
-bAo+IHdpdGggR1VJRCA5MUJEMTJGRS1GNkMzLTQ0RkItQTVCNy01MTIyQUIzMDNBRTAsIHdoaWNo
-IGxvb2tzIGxpa2UgdGhpczoKPiAKPiB0eXBlZGVmIHN0cnVjdCB7Cj4gCXVuc2lnbmVkIGxvbmcg
-c2lnbmF0dXJlOyAvKiAweDEwMDAwICovCj4gCWVmaV9zdGF0dXNfdCAoKmdldCkgKAo+IAkJSU4g
-c3RydWN0IGFwcGxlX3Byb3BlcnRpZXNfcHJvdG9jb2wgKnRoaXMsCj4gCQlJTiBzdHJ1Y3QgZWZp
-X2dlbmVyaWNfZGV2X3BhdGggKmRldmljZSwKPiAJCUlOIGVmaV9jaGFyMTZfdCAqcHJvcGVydHlf
-bmFtZSwKPiAJCU9VVCB2b2lkICpidWZmZXIsCj4gCQlJTiBPVVQgdTMyICpidWZmZXJfc2l6ZSk7
-Cj4gCQkvKiBFRklfU1VDQ0VTUywgRUZJX05PVF9GT1VORCwgRUZJX0JVRkZFUl9UT09fU01BTEwg
-Ki8KPiAJZWZpX3N0YXR1c190ICgqc2V0KSAoCj4gCQlJTiBzdHJ1Y3QgYXBwbGVfcHJvcGVydGll
-c19wcm90b2NvbCAqdGhpcywKPiAJCUlOIHN0cnVjdCBlZmlfZ2VuZXJpY19kZXZfcGF0aCAqZGV2
-aWNlLAo+IAkJSU4gZWZpX2NoYXIxNl90ICpwcm9wZXJ0eV9uYW1lLAo+IAkJSU4gdm9pZCAqcHJv
-cGVydHlfdmFsdWUsCj4gCQlJTiB1MzIgcHJvcGVydHlfdmFsdWVfbGVuKTsKPiAJCS8qIGFsbG9j
-YXRlcyBjb3BpZXMgb2YgcHJvcGVydHkgbmFtZSBhbmQgdmFsdWUgKi8KPiAJCS8qIEVGSV9TVUND
-RVNTLCBFRklfT1VUX09GX1JFU09VUkNFUyAqLwo+IAllZmlfc3RhdHVzX3QgKCpkZWwpICgKPiAJ
-CUlOIHN0cnVjdCBhcHBsZV9wcm9wZXJ0aWVzX3Byb3RvY29sICp0aGlzLAo+IAkJSU4gc3RydWN0
-IGVmaV9nZW5lcmljX2Rldl9wYXRoICpkZXZpY2UsCj4gCQlJTiBlZmlfY2hhcjE2X3QgKnByb3Bl
-cnR5X25hbWUpOwo+IAkJLyogRUZJX1NVQ0NFU1MsIEVGSV9OT1RfRk9VTkQgKi8KPiAJZWZpX3N0
-YXR1c190ICgqZ2V0X2FsbCkgKAo+IAkJSU4gc3RydWN0IGFwcGxlX3Byb3BlcnRpZXNfcHJvdG9j
-b2wgKnRoaXMsCj4gCQlPVVQgdm9pZCAqYnVmZmVyLAo+IAkJSU4gT1VUIHUzMiAqYnVmZmVyX3Np
-emUpOwo+IAkJLyogRUZJX1NVQ0NFU1MsIEVGSV9CVUZGRVJfVE9PX1NNQUxMICovCj4gfSBhcHBs
-ZV9wcm9wZXJ0aWVzX3Byb3RvY29sOwo+IAo+IEFwcGxlJ3MgRUZJIGRyaXZlciBpbXBsZW1lbnRp
-bmcgdGhpcyBwcm90b2NvbCwgIkFBUEwsUGF0aFByb3BlcnRpZXMiLAo+IGlzIGEgcGVyLWRldmlj
-ZSBrZXkvdmFsdWUgc3RvcmUgd2hpY2ggaXMgcG9wdWxhdGVkIGJ5IG90aGVyIEVGSSBkcml2ZXJz
-Lgo+IE9uIG1hY09TLCB0aGVzZSBkZXZpY2UgcHJvcGVydGllcyBhcmUgcmV0cmlldmVkIGJ5IHRo
-ZSBib290bG9hZGVyCj4gL3Vzci9zdGFuZGFsb25lL2kzODYvYm9vdC5lZmkuIFRoZSBleHRlbnNp
-b24gQXBwbGVBQ1BJUGxhdGZvcm0ua2V4dAo+IHN1YnNlcXVlbnRseSBtZXJnZXMgdGhlbSBpbnRv
-IHRoZSBJL08gS2l0IHJlZ2lzdHJ5IChzZWUgaW9yZWcoOCkpIHdoZXJlCj4gdGhleSBjYW4gYmUg
-cXVlcmllZCBieSBvdGhlciBrZXJuZWwgZXh0ZW5zaW9ucyBhbmQgdXNlciBzcGFjZS4KPiAKPiBU
-aGVzZSBkZXZpY2UgcHJvcGVydGllcyBjb250YWluIHZpdGFsIGluZm9ybWF0aW9uIHdoaWNoIGNh
-bm5vdCBiZQo+IG9idGFpbmVkIGFueSBvdGhlciB3YXkgKGUuZy4gVGh1bmRlcmJvbHQgRGV2aWNl
-IFJPTSkuIEVGSSBkcml2ZXJzIGFsc28KPiB1c2UgdGhlbSB0byBjb21tdW5pY2F0ZSB0aGUgY3Vy
-cmVudCBkZXZpY2Ugc3RhdGUgc28gdGhhdCBPUyBkcml2ZXJzIGNhbgo+IHBpY2sgdXAgd2hlcmUg
-RUZJIGRyaXZlcnMgbGVmdCAoZS5nLiBHUFUgbW9kZSBzZXR0aW5nKS4KPiAKPiBUaGUgZ2V0X2Fs
-bCgpIGZ1bmN0aW9uIGNvbnZlbmllbnRseSBmaWxscyBhIGJ1ZmZlciB3aXRoIGFsbCBwcm9wZXJ0
-aWVzCj4gaW4gbWFyc2hhbGxlZCBmb3JtIHdoaWNoIGNhbiBiZSBwYXNzZWQgdG8gdGhlIGtlcm5l
-bCBhcyBhIHNldHVwX2RhdGEKPiBwYXlsb2FkLiBOb3RlIHRoYXQgdGhlIGRldmljZSBwcm9wZXJ0
-aWVzIHdpbGwgb25seSBiZSBhdmFpbGFibGUgaWYgdGhlCj4ga2VybmVsIGlzIGJvb3RlZCB3aXRo
-IHRoZSBlZmlzdHViLiBEaXN0cm9zIHNob3VsZCBhZGp1c3QgdGhlaXIKPiBpbnN0YWxsZXJzIHRv
-IGFsd2F5cyB1c2UgdGhlIGVmaXN0dWIgb24gTWFjcy4gZ3J1YiB3aXRoIHRoZSAibGludXgiCj4g
-ZGlyZWN0aXZlIHdpbGwgbm90IHdvcmsgdW5sZXNzIHRoZSBmdW5jdGlvbmFsaXR5IG9mIHRoaXMg
-Y29tbWl0IGlzCj4gZHVwbGljYXRlZCBpbiBncnViLiAoVGhlICJsaW51eGVmaSIgZGlyZWN0aXZl
-IHNob3VsZCB3b3JrIGJ1dCBpcyBub3QKPiBpbmNsdWRlZCB1cHN0cmVhbSBhcyBvZiB0aGlzIHdy
-aXRpbmcuKQo+IAoKSW50ZW50aW9uIHdhcyB0byBwYXJ0aWFsbHkgbWVyZ2UgbGludXhlZmkgZnVu
-Y3Rpb25hbGl0eSBpbnRvICJsaW51eCIgYnkKYXV0b2RldGVjdGluZyBhbmQgcHJlZmVycmluZyBF
-Rkkgc3R1YiBzdXBwb3J0LiBQZXRlciwgYW55IHByb2dyZXNzIG9uIHRoaXM/Cgo+IFRoYW5rcyB0
-byBvc3hyZXZlcnNlciBmb3IgdGhpcyBibG9nIHBvc3Rpbmcgd2hpY2ggd2FzIGhlbHBmdWwgaW4g
-cmV2ZXJzZQo+IGVuZ2luZWVyaW5nIEFwcGxlJ3MgRUZJIGRyaXZlcnMgYW5kIGJvb3Rsb2FkZXI6
-Cj4gaHR0cHM6Ly9yZXZlcnNlLnB1dC5hcy8yMDE2LzA2LzI1L2FwcGxlLWVmaS1maXJtd2FyZS1w
-YXNzd29yZHMtYW5kLXRoZS1zY2JvLW15dGgvCj4gCj4gSWYgc29tZW9uZSBhdCBBcHBsZSBpcyBy
-ZWFkaW5nIHRoaXMsIHBsZWFzZSBub3RlIHRoZXJlJ3MgYSBtZW1vcnkgbGVhawo+IGluIHlvdXIg
-aW1wbGVtZW50YXRpb24gb2YgdGhlIGRlbCgpIGZ1bmN0aW9uIGFzIHRoZSBwcm9wZXJ0eSBzdHJ1
-Y3QgaXMKPiBmcmVlZCBidXQgdGhlIG5hbWUgYW5kIHZhbHVlIGFsbG9jYXRpb25zIGFyZSBub3Qu
-Cj4gCj4gQ2M6IHJldmVyc2VyQHB1dC5hcwo+IENjOiBncnViLWRldmVsQGdudS5vcmcKPiBDYzog
-TWF0dCBGbGVtaW5nIDxtYXR0QGNvZGVibHVlcHJpbnQuY28udWs+Cj4gQ2M6IEFuZHJlYXMgTm9l
-dmVyIDxhbmRyZWFzLm5vZXZlckBnbWFpbC5jb20+Cj4gVGVzdGVkLWJ5OiBMdWthcyBXdW5uZXIg
-PGx1a2FzQHd1bm5lci5kZT4gW01hY0Jvb2tQcm85LDFdCj4gVGVzdGVkLWJ5OiBQaWVycmUgTW9y
-ZWF1IDxwaWVycmUubW9ycm93QGZyZWUuZnI+IFtNYWNCb29rUHJvMTEsM10KPiBTaWduZWQtb2Zm
-LWJ5OiBMdWthcyBXdW5uZXIgPGx1a2FzQHd1bm5lci5kZT4KPiAtLS0KPiAgYXJjaC94ODYvYm9v
-dC9jb21wcmVzc2VkL2Vib290LmMgICAgICB8IDU1ICsrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKysrCj4gIGFyY2gveDg2L2luY2x1ZGUvdWFwaS9hc20vYm9vdHBhcmFtLmggfCAgMSAr
-Cj4gIGluY2x1ZGUvbGludXgvZWZpLmggICAgICAgICAgICAgICAgICAgfCAxNyArKysrKysrKysr
-Kwo+ICAzIGZpbGVzIGNoYW5nZWQsIDczIGluc2VydGlvbnMoKykKPiAKPiBkaWZmIC0tZ2l0IGEv
-YXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL2Vib290LmMgYi9hcmNoL3g4Ni9ib290L2NvbXByZXNz
-ZWQvZWJvb3QuYwo+IGluZGV4IGZmNTc0ZGEuLjcyNjJlZTQgMTAwNjQ0Cj4gLS0tIGEvYXJjaC94
-ODYvYm9vdC9jb21wcmVzc2VkL2Vib290LmMKPiArKysgYi9hcmNoL3g4Ni9ib290L2NvbXByZXNz
-ZWQvZWJvb3QuYwo+IEBAIC01NzEsNiArNTcxLDU1IEBAIGZyZWVfaGFuZGxlOgo+ICAJZWZpX2Nh
-bGxfZWFybHkoZnJlZV9wb29sLCBwY2lfaGFuZGxlKTsKPiAgfQo+ICAKPiArc3RhdGljIHZvaWQg
-cmV0cmlldmVfYXBwbGVfZGV2aWNlX3Byb3BlcnRpZXMoc3RydWN0IGJvb3RfcGFyYW1zICpwYXJh
-bXMpCj4gK3sKPiArCWVmaV9ndWlkX3QgZ3VpZCA9IEFQUExFX1BST1BFUlRJRVNfUFJPVE9DT0xf
-R1VJRDsKPiArCXN0cnVjdCBzZXR1cF9kYXRhICpkYXRhLCAqbmV3Owo+ICsJZWZpX3N0YXR1c190
-IHN0YXR1czsKPiArCXZvaWQgKnByb3BlcnRpZXM7Cj4gKwl1MzIgc2l6ZSA9IDA7Cj4gKwo+ICsJ
-c3RhdHVzID0gZWZpX2Vhcmx5LT5jYWxsKAo+ICsJCQkodW5zaWduZWQgbG9uZylzeXNfdGFibGUt
-PmJvb3R0aW1lLT5sb2NhdGVfcHJvdG9jb2wsCj4gKwkJCSZndWlkLCBOVUxMLCAmcHJvcGVydGll
-cyk7Cj4gKwlpZiAoc3RhdHVzICE9IEVGSV9TVUNDRVNTKQo+ICsJCXJldHVybjsKPiArCj4gKwlk
-byB7Cj4gKwkJc3RhdHVzID0gZWZpX2NhbGxfZWFybHkoYWxsb2NhdGVfcG9vbCwgRUZJX0xPQURF
-Ul9EQVRBLAo+ICsJCQlzaXplICsgc2l6ZW9mKHN0cnVjdCBzZXR1cF9kYXRhKSwgJm5ldyk7Cj4g
-KwkJaWYgKHN0YXR1cyAhPSBFRklfU1VDQ0VTUykgewo+ICsJCQllZmlfcHJpbnRrKHN5c190YWJs
-ZSwKPiArCQkJCSAgICJGYWlsZWQgdG8gYWxsb2MgbWVtIGZvciBwcm9wZXJ0aWVzXG4iKTsKPiAr
-CQkJcmV0dXJuOwo+ICsJCX0KPiArCQlzdGF0dXMgPSBlZmlfZWFybHktPmNhbGwoZWZpX2Vhcmx5
-LT5pczY0ID8KPiArCQkJKChhcHBsZV9wcm9wZXJ0aWVzX3Byb3RvY29sXzY0ICopcHJvcGVydGll
-cyktPmdldF9hbGwgOgo+ICsJCQkoKGFwcGxlX3Byb3BlcnRpZXNfcHJvdG9jb2xfMzIgKilwcm9w
-ZXJ0aWVzKS0+Z2V0X2FsbCwKPiArCQkJcHJvcGVydGllcywgbmV3LT5kYXRhLCAmc2l6ZSk7Cj4g
-KwkJaWYgKHN0YXR1cyA9PSBFRklfQlVGRkVSX1RPT19TTUFMTCkKPiArCQkJZWZpX2NhbGxfZWFy
-bHkoZnJlZV9wb29sLCBuZXcpOwo+ICsJfSB3aGlsZSAoc3RhdHVzID09IEVGSV9CVUZGRVJfVE9P
-X1NNQUxMKTsKPiArCj4gKwlpZiAoIXNpemUpIHsKPiArCQllZmlfY2FsbF9lYXJseShmcmVlX3Bv
-b2wsIG5ldyk7Cj4gKwkJcmV0dXJuOwo+ICsJfQo+ICsKPiArCW5ldy0+dHlwZSA9IFNFVFVQX0FQ
-UExFX1BST1BFUlRJRVM7Cj4gKwluZXctPmxlbiAgPSBzaXplOwo+ICsJbmV3LT5uZXh0ID0gMDsK
-PiArCj4gKwlkYXRhID0gKHN0cnVjdCBzZXR1cF9kYXRhICopKHVuc2lnbmVkIGxvbmcpcGFyYW1z
-LT5oZHIuc2V0dXBfZGF0YTsKPiArCWlmICghZGF0YSkKPiArCQlwYXJhbXMtPmhkci5zZXR1cF9k
-YXRhID0gKHVuc2lnbmVkIGxvbmcpbmV3Owo+ICsJZWxzZSB7Cj4gKwkJd2hpbGUgKGRhdGEtPm5l
-eHQpCj4gKwkJCWRhdGEgPSAoc3RydWN0IHNldHVwX2RhdGEgKikodW5zaWduZWQgbG9uZylkYXRh
-LT5uZXh0Owo+ICsJCWRhdGEtPm5leHQgPSAodW5zaWduZWQgbG9uZyluZXc7Cj4gKwl9Cj4gK30K
-PiArCj4gIHN0YXRpYyBlZmlfc3RhdHVzX3QKPiAgc2V0dXBfdWdhMzIodm9pZCAqKnVnYV9oYW5k
-bGUsIHVuc2lnbmVkIGxvbmcgc2l6ZSwgdTMyICp3aWR0aCwgdTMyICpoZWlnaHQpCj4gIHsKPiBA
-QCAtMTA5OCw2ICsxMTQ3LDcgQEAgZnJlZV9tZW1fbWFwOgo+ICBzdHJ1Y3QgYm9vdF9wYXJhbXMg
-KmVmaV9tYWluKHN0cnVjdCBlZmlfY29uZmlnICpjLAo+ICAJCQkgICAgIHN0cnVjdCBib290X3Bh
-cmFtcyAqYm9vdF9wYXJhbXMpCj4gIHsKPiArCWVmaV9jaGFyMTZfdCBjb25zdCBhcHBsZVtdID0g
-eyAnQScsICdwJywgJ3AnLCAnbCcsICdlJywgMCB9Owo+ICAJc3RydWN0IGRlc2NfcHRyICpnZHQg
-PSBOVUxMOwo+ICAJZWZpX2xvYWRlZF9pbWFnZV90ICppbWFnZTsKPiAgCXN0cnVjdCBzZXR1cF9o
-ZWFkZXIgKmhkciA9ICZib290X3BhcmFtcy0+aGRyOwo+IEBAIC0xMTI4LDYgKzExNzgsMTEgQEAg
-c3RydWN0IGJvb3RfcGFyYW1zICplZmlfbWFpbihzdHJ1Y3QgZWZpX2NvbmZpZyAqYywKPiAgCj4g
-IAlzZXR1cF9lZmlfcGNpKGJvb3RfcGFyYW1zKTsKPiAgCj4gKwlpZiAoIW1lbWNtcCgodm9pZCAq
-KXN5c190YWJsZS0+ZndfdmVuZG9yLCBhcHBsZSwgc2l6ZW9mKGFwcGxlKSkpIHsKPiArCQlpZiAo
-SVNfRU5BQkxFRChDT05GSUdfQVBQTEVfUFJPUEVSVElFUykpCj4gKwkJCXJldHJpZXZlX2FwcGxl
-X2RldmljZV9wcm9wZXJ0aWVzKGJvb3RfcGFyYW1zKTsKPiArCX0KPiArCj4gIAlzdGF0dXMgPSBl
-ZmlfY2FsbF9lYXJseShhbGxvY2F0ZV9wb29sLCBFRklfTE9BREVSX0RBVEEsCj4gIAkJCQlzaXpl
-b2YoKmdkdCksICh2b2lkICoqKSZnZHQpOwo+ICAJaWYgKHN0YXR1cyAhPSBFRklfU1VDQ0VTUykg
-ewo+IGRpZmYgLS1naXQgYS9hcmNoL3g4Ni9pbmNsdWRlL3VhcGkvYXNtL2Jvb3RwYXJhbS5oIGIv
-YXJjaC94ODYvaW5jbHVkZS91YXBpL2FzbS9ib290cGFyYW0uaAo+IGluZGV4IGMxOGNlNjcuLmIx
-MGJmMzEgMTAwNjQ0Cj4gLS0tIGEvYXJjaC94ODYvaW5jbHVkZS91YXBpL2FzbS9ib290cGFyYW0u
-aAo+ICsrKyBiL2FyY2gveDg2L2luY2x1ZGUvdWFwaS9hc20vYm9vdHBhcmFtLmgKPiBAQCAtNyw2
-ICs3LDcgQEAKPiAgI2RlZmluZSBTRVRVUF9EVEIJCQkyCj4gICNkZWZpbmUgU0VUVVBfUENJCQkJ
-Mwo+ICAjZGVmaW5lIFNFVFVQX0VGSQkJCTQKPiArI2RlZmluZSBTRVRVUF9BUFBMRV9QUk9QRVJU
-SUVTCQk1Cj4gIAo+ICAvKiByYW1fc2l6ZSBmbGFncyAqLwo+ICAjZGVmaW5lIFJBTURJU0tfSU1B
-R0VfU1RBUlRfTUFTSwkweDA3RkYKPiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9lZmkuaCBi
-L2luY2x1ZGUvbGludXgvZWZpLmgKPiBpbmRleCA3ZjgwYTc1Li5lNTNiNGIyIDEwMDY0NAo+IC0t
-LSBhL2luY2x1ZGUvbGludXgvZWZpLmgKPiArKysgYi9pbmNsdWRlL2xpbnV4L2VmaS5oCj4gQEAg
-LTQzMiw2ICs0MzIsMjIgQEAgdHlwZWRlZiBzdHJ1Y3Qgewo+ICAjZGVmaW5lIEVGSV9QQ0lfSU9f
-QVRUUklCVVRFX1ZHQV9QQUxFVFRFX0lPXzE2IDB4MjAwMDAKPiAgI2RlZmluZSBFRklfUENJX0lP
-X0FUVFJJQlVURV9WR0FfSU9fMTYgMHg0MDAwMAo+ICAKPiArdHlwZWRlZiBzdHJ1Y3Qgewo+ICsJ
-dTMyIHNpZ25hdHVyZTsKPiArCXUzMiBnZXQ7Cj4gKwl1MzIgc2V0Owo+ICsJdTMyIGRlbDsKPiAr
-CXUzMiBnZXRfYWxsOwo+ICt9IGFwcGxlX3Byb3BlcnRpZXNfcHJvdG9jb2xfMzI7Cj4gKwo+ICt0
-eXBlZGVmIHN0cnVjdCB7Cj4gKwl1NjQgc2lnbmF0dXJlOwo+ICsJdTY0IGdldDsKPiArCXU2NCBz
-ZXQ7Cj4gKwl1NjQgZGVsOwo+ICsJdTY0IGdldF9hbGw7Cj4gK30gYXBwbGVfcHJvcGVydGllc19w
-cm90b2NvbF82NDsKPiArCj4gIC8qCj4gICAqIFR5cGVzIGFuZCBkZWZpbmVzIGZvciBFRkkgUmVz
-ZXRTeXN0ZW0KPiAgICovCj4gQEAgLTU4MCw2ICs1OTYsNyBAQCB2b2lkIGVmaV9uYXRpdmVfcnVu
-dGltZV9zZXR1cCh2b2lkKTsKPiAgI2RlZmluZSBFRklfUk5HX1BST1RPQ09MX0dVSUQJCQlFRklf
-R1VJRCgweDMxNTJiY2E1LCAweGVhZGUsIDB4NDMzZCwgIDB4ODYsIDB4MmUsIDB4YzAsIDB4MWMs
-IDB4ZGMsIDB4MjksIDB4MWYsIDB4NDQpCj4gICNkZWZpbmUgRUZJX01FTU9SWV9BVFRSSUJVVEVT
-X1RBQkxFX0dVSUQJRUZJX0dVSUQoMHhkY2ZhOTExZCwgMHgyNmViLCAweDQ2OWYsICAweGEyLCAw
-eDIwLCAweDM4LCAweGI3LCAweGRjLCAweDQ2LCAweDEyLCAweDIwKQo+ICAjZGVmaW5lIEVGSV9D
-T05TT0xFX09VVF9ERVZJQ0VfR1VJRAkJRUZJX0dVSUQoMHhkM2IzNmYyYywgMHhkNTUxLCAweDEx
-ZDQsICAweDlhLCAweDQ2LCAweDAwLCAweDkwLCAweDI3LCAweDNmLCAweGMxLCAweDRkKQo+ICsj
-ZGVmaW5lIEFQUExFX1BST1BFUlRJRVNfUFJPVE9DT0xfR1VJRAkJRUZJX0dVSUQoMHg5MWJkMTJm
-ZSwgMHhmNmMzLCAweDQ0ZmIsICAweGE1LCAweGI3LCAweDUxLCAweDIyLCAweGFiLCAweDMwLCAw
-eDNhLCAweGUwKQo+ICAKPiAgLyoKPiAgICogVGhpcyBHVUlEIGlzIHVzZWQgdG8gcGFzcyB0byB0
-aGUga2VybmVsIHByb3BlciB0aGUgc3RydWN0IHNjcmVlbl9pbmZvCj4gCgoKX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KR3J1Yi1kZXZlbCBtYWlsaW5nIGxp
-c3QKR3J1Yi1kZXZlbEBnbnUub3JnCmh0dHBzOi8vbGlzdHMuZ251Lm9yZy9tYWlsbWFuL2xpc3Rp
-bmZvL2dydWItZGV2ZWwK
+This driver is used by the Firmware Test Suite (FWTS) for testing the UEFI
+runtime interfaces readiness of the firmware.
+
+This driver exports UEFI runtime service interfaces into userspace,
+which allows to use and test UEFI runtime services provided by the
+firmware.
+
+This driver uses the efi.<service> function pointers directly instead of
+going through the efivar API to allow for direct testing of the UEFI
+runtime service interfaces provided by the firmware.
+
+Details for FWTS are available from,
+<https://wiki.ubuntu.com/FirmwareTestSuite>
+
+Signed-off-by: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+---
+ MAINTAINERS                              |   6 +
+ drivers/firmware/efi/Kconfig             |  15 +
+ drivers/firmware/efi/Makefile            |   1 +
+ drivers/firmware/efi/efi_test/Makefile   |   1 +
+ drivers/firmware/efi/efi_test/efi_test.c | 726 +++++++++++++++++++++++++++++++
+ drivers/firmware/efi/efi_test/efi_test.h | 110 +++++
+ 6 files changed, 859 insertions(+)
+ create mode 100644 drivers/firmware/efi/efi_test/Makefile
+ create mode 100644 drivers/firmware/efi/efi_test/efi_test.c
+ create mode 100644 drivers/firmware/efi/efi_test/efi_test.h
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 1209323..1f888cc 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -4471,6 +4471,12 @@ M:	Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+ S:	Maintained
+ F:	drivers/video/fbdev/efifb.c
+ 
++EFI TEST DRIVER
++L:	linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
++M:      Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
++S:      Maintained
++F:      drivers/firmware/efi/efi_test/
++
+ EFS FILESYSTEM
+ W:	http://aeschi.ch.eu.org/efs/
+ S:	Orphan
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 6394152..7677d99 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -112,6 +112,21 @@ config EFI_CAPSULE_LOADER
+ 
+ 	  Most users should say N.
+ 
++config EFI_TEST
++	tristate "EFI Runtime Service Tests Support"
++	depends on EFI
++	default n
++	help
++	  Say Y here to enable the runtime services support via /dev/efi_test.
++	  This driver uses the efi.<service> function pointers directly instead
++	  of going through the efivar API, because it is not trying to test the
++	  kernel subsystem, just for testing the UEFI runtime service
++	  interfaces which are provided by the firmware. This driver is used
++	  by the Firmware Test Suite (FWTS) for testing the UEFI runtime
++	  interfaces readiness of the firmware.
++	  Details for FWTS are available from:
++	  <https://wiki.ubuntu.com/FirmwareTestSuite>
++
+ endmenu
+ 
+ config UEFI_CPER
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index a219640..569d1a1 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -20,6 +20,7 @@ obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
+ obj-$(CONFIG_EFI_STUB)			+= libstub/
+ obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
+ obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
++obj-$(CONFIG_EFI_TEST)			+= efi_test/
+ 
+ arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
+ obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+diff --git a/drivers/firmware/efi/efi_test/Makefile b/drivers/firmware/efi/efi_test/Makefile
+new file mode 100644
+index 0000000..bcd4577
+--- /dev/null
++++ b/drivers/firmware/efi/efi_test/Makefile
+@@ -0,0 +1 @@
++obj-$(CONFIG_EFI_TEST)			+= efi_test.o
+diff --git a/drivers/firmware/efi/efi_test/efi_test.c b/drivers/firmware/efi/efi_test/efi_test.c
+new file mode 100644
+index 0000000..18931ba
+--- /dev/null
++++ b/drivers/firmware/efi/efi_test/efi_test.c
+@@ -0,0 +1,726 @@
++/*
++ * EFI Test Driver for Runtime Services
++ *
++ * Copyright(C) 2012-2016 Canonical Ltd.
++ *
++ * This driver exports EFI runtime services interfaces into userspace, which
++ * allow to use and test UEFI runtime services provided by firmware.
++ *
++ */
++
++#include <linux/version.h>
++#include <linux/miscdevice.h>
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/proc_fs.h>
++#include <linux/efi.h>
++#include <linux/slab.h>
++#include <linux/uaccess.h>
++
++#include "efi_test.h"
++
++MODULE_AUTHOR("Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>");
++MODULE_DESCRIPTION("EFI Test Driver");
++MODULE_LICENSE("GPL");
++
++/* commit 83e681897 turned efi_enabled into a function, so abstract it */
++#ifdef EFI_RUNTIME_SERVICES
++#define EFI_RUNTIME_ENABLED	efi_enabled(EFI_RUNTIME_SERVICES)
++#else
++#define EFI_RUNTIME_ENABLED	efi_enabled
++#endif
++
++/*
++ * Count the bytes in 'str', including the terminating NULL.
++ *
++ * Note this function returns the number of *bytes*, not the number of
++ * ucs2 characters.
++ */
++static inline size_t __ucs2_strsize(uint16_t  __user *str)
++{
++	uint16_t *s = str, c;
++	size_t len;
++
++	if (!str)
++		return 0;
++
++	/* Include terminating NULL */
++	len = sizeof(uint16_t);
++
++	if (get_user(c, s++)) {
++		WARN(1, "efi_test: Can't read userspace memory for size");
++		return 0;
++	}
++
++	while (c != 0) {
++		if (get_user(c, s++)) {
++			WARN(1, "efi_test: Can't read userspace memory for size");
++			return 0;
++		}
++		len += sizeof(uint16_t);
++	}
++	return len;
++}
++
++/*
++ * Allocate a buffer and copy a ucs2 string from user space into it.
++ */
++static inline int
++copy_ucs2_from_user_len(uint16_t **dst, uint16_t __user *src, size_t len)
++{
++	uint16_t *buf;
++
++	if (!src) {
++		*dst = NULL;
++		return 0;
++	}
++
++	if (!access_ok(VERIFY_READ, src, 1))
++		return -EFAULT;
++
++	buf = kmalloc(len, GFP_KERNEL);
++	if (!buf) {
++		*dst = NULL;
++		return -ENOMEM;
++	}
++	*dst = buf;
++
++	if (copy_from_user(*dst, src, len)) {
++		kfree(buf);
++		return -EFAULT;
++	}
++
++	return 0;
++}
++
++/*
++ * Count the bytes in 'str', including the terminating NULL.
++ *
++ * Just a wrap for __ucs2_strsize
++ */
++static inline int get_ucs2_strsize_from_user(uint16_t __user *src, size_t *len)
++{
++	if (!access_ok(VERIFY_READ, src, 1))
++		return -EFAULT;
++
++	*len = __ucs2_strsize(src);
++	if (*len == 0)
++		return -EFAULT;
++
++	return 0;
++}
++
++/*
++ * Calculate the required buffer allocation size and copy a ucs2 string
++ * from user space into it.
++ *
++ * This function differs from copy_ucs2_from_user_len() because it
++ * calculates the size of the buffer to allocate by taking the length of
++ * the string 'src'.
++ *
++ * If a non-zero value is returned, the caller MUST NOT access 'dst'.
++ *
++ * It is the caller's responsibility to free 'dst'.
++ */
++static inline int copy_ucs2_from_user(uint16_t **dst, uint16_t __user *src)
++{
++	size_t len;
++
++	if (!access_ok(VERIFY_READ, src, 1))
++		return -EFAULT;
++
++	len = __ucs2_strsize(src);
++	return copy_ucs2_from_user_len(dst, src, len);
++}
++
++/*
++ * Copy a ucs2 string to a user buffer.
++ *
++ * This function is a simple wrapper around copy_to_user() that does
++ * nothing if 'src' is NULL, which is useful for reducing the amount of
++ * NULL checking the caller has to do.
++ *
++ * 'len' specifies the number of bytes to copy.
++ */
++static inline int
++copy_ucs2_to_user_len(uint16_t __user *dst, uint16_t *src, size_t len)
++{
++	if (!src)
++		return 0;
++
++	if (!access_ok(VERIFY_WRITE, dst, 1))
++		return -EFAULT;
++
++	return copy_to_user(dst, src, len);
++}
++
++static long efi_runtime_get_variable(unsigned long arg)
++{
++	struct efi_getvariable __user *getvariable;
++	struct efi_getvariable getvariable_local;
++	unsigned long datasize, prev_datasize, *dz;
++	efi_guid_t vendor_guid, *vd = NULL;
++	efi_status_t status;
++	uint16_t *name = NULL;
++	uint32_t attr, *at;
++	void *data = NULL;
++	int rv = 0;
++
++	getvariable = (struct efi_getvariable __user *)arg;
++
++	if (copy_from_user(&getvariable_local, getvariable,
++			   sizeof(getvariable_local)))
++		return -EFAULT;
++	if (getvariable_local.data_size &&
++	    get_user(datasize, getvariable_local.data_size))
++		return -EFAULT;
++	if (getvariable_local.vendor_guid) {
++		if (copy_from_user(&vendor_guid, getvariable_local.vendor_guid,
++			   sizeof(vendor_guid)))
++			return -EFAULT;
++		vd = &vendor_guid;
++	}
++
++	if (getvariable_local.variable_name) {
++		rv = copy_ucs2_from_user(&name,
++				getvariable_local.variable_name);
++		if (rv)
++			return rv;
++	}
++
++	at = getvariable_local.attributes ? &attr : NULL;
++	dz = getvariable_local.data_size ? &datasize : NULL;
++
++	if (getvariable_local.data_size && getvariable_local.data) {
++		data = kmalloc(datasize, GFP_KERNEL);
++		if (!data) {
++			kfree(name);
++			return -ENOMEM;
++		}
++	}
++
++	prev_datasize = datasize;
++	status = efi.get_variable(name, vd, at, dz, data);
++	kfree(name);
++
++	if (data) {
++		if (status == EFI_SUCCESS && prev_datasize >= datasize)
++			rv = copy_to_user(getvariable_local.data, data,
++				datasize);
++		kfree(data);
++	}
++
++	if (rv)
++		return rv;
++
++	if (put_user(status, getvariable_local.status))
++		return -EFAULT;
++	if (status == EFI_SUCCESS && prev_datasize >= datasize) {
++		if (at && put_user(attr, getvariable_local.attributes))
++			return -EFAULT;
++		if (dz && put_user(datasize, getvariable_local.data_size))
++			return -EFAULT;
++		return 0;
++	} else if (status == EFI_BUFFER_TOO_SMALL) {
++		if (dz && put_user(datasize, getvariable_local.data_size))
++			return -EFAULT;
++		return -EINVAL;
++	} else {
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static long efi_runtime_set_variable(unsigned long arg)
++{
++	struct efi_setvariable __user *setvariable;
++	struct efi_setvariable setvariable_local;
++	efi_guid_t vendor_guid;
++	efi_status_t status;
++	uint16_t *name;
++	void *data;
++	int rv;
++
++	setvariable = (struct efi_setvariable __user *)arg;
++
++	if (copy_from_user(&setvariable_local, setvariable,
++			   sizeof(setvariable_local)))
++		return -EFAULT;
++	if (copy_from_user(&vendor_guid, setvariable_local.vendor_guid,
++			   sizeof(vendor_guid)))
++		return -EFAULT;
++
++	rv = copy_ucs2_from_user(&name, setvariable_local.variable_name);
++	if (rv)
++		return rv;
++
++	data = kmalloc(setvariable_local.data_size, GFP_KERNEL);
++	if (!data) {
++		kfree(name);
++		return -ENOMEM;
++	}
++	if (copy_from_user(data, setvariable_local.data,
++			   setvariable_local.data_size)) {
++		kfree(data);
++		kfree(name);
++		return -EFAULT;
++	}
++
++	status = efi.set_variable(name, &vendor_guid,
++				setvariable_local.attributes,
++				setvariable_local.data_size, data);
++
++	kfree(data);
++	kfree(name);
++
++	if (put_user(status, setvariable_local.status))
++		return -EFAULT;
++	return status == EFI_SUCCESS ? 0 : -EINVAL;
++}
++
++static long efi_runtime_get_time(unsigned long arg)
++{
++	struct efi_gettime __user *gettime;
++	struct efi_gettime  gettime_local;
++	efi_status_t status;
++	efi_time_cap_t cap;
++	efi_time_t efi_time;
++
++	gettime = (struct efi_gettime __user *)arg;
++	if (copy_from_user(&gettime_local, gettime, sizeof(gettime_local)))
++		return -EFAULT;
++
++	status = efi.get_time(gettime_local.time ? &efi_time : NULL,
++			      gettime_local.capabilities ? &cap : NULL);
++
++	if (put_user(status, gettime_local.status))
++		return -EFAULT;
++	if (status != EFI_SUCCESS) {
++		pr_err("efi_test: can't read time\n");
++		return -EINVAL;
++	}
++	if (gettime_local.capabilities) {
++		efi_time_cap_t __user *cap_local;
++
++		cap_local = (efi_time_cap_t *)gettime_local.capabilities;
++		if (put_user(cap.resolution,
++			&(cap_local->resolution)) ||
++			put_user(cap.accuracy, &(cap_local->accuracy)) ||
++			put_user(cap.sets_to_zero, &(cap_local->sets_to_zero)))
++			return -EFAULT;
++	}
++	if (gettime_local.time)
++		return copy_to_user(gettime_local.time, &efi_time,
++			sizeof(efi_time_t)) ? -EFAULT : 0;
++	return 0;
++}
++
++static long efi_runtime_set_time(unsigned long arg)
++{
++	struct efi_settime __user *settime;
++	struct efi_settime settime_local;
++	efi_status_t status;
++	efi_time_t efi_time;
++
++	settime = (struct efi_settime __user *)arg;
++	if (copy_from_user(&settime_local, settime, sizeof(settime_local)))
++		return -EFAULT;
++	if (copy_from_user(&efi_time, settime_local.time,
++					sizeof(efi_time_t)))
++		return -EFAULT;
++	status = efi.set_time(&efi_time);
++
++	if (put_user(status, settime_local.status))
++		return -EFAULT;
++
++	return status == EFI_SUCCESS ? 0 : -EINVAL;
++}
++
++static long efi_runtime_get_waketime(unsigned long arg)
++{
++	struct efi_getwakeuptime __user *getwakeuptime;
++	struct efi_getwakeuptime getwakeuptime_local;
++	unsigned char enabled, pending;
++	efi_status_t status;
++	efi_time_t efi_time;
++
++	getwakeuptime = (struct efi_getwakeuptime __user *)arg;
++	if (copy_from_user(&getwakeuptime_local, getwakeuptime,
++				sizeof(getwakeuptime_local)))
++		return -EFAULT;
++
++	status = efi.get_wakeup_time(
++		getwakeuptime_local.enabled ? (efi_bool_t *)&enabled : NULL,
++		getwakeuptime_local.pending ? (efi_bool_t *)&pending : NULL,
++		getwakeuptime_local.time ? &efi_time : NULL);
++
++	if (put_user(status, getwakeuptime_local.status))
++		return -EFAULT;
++	if (status != EFI_SUCCESS)
++		return -EINVAL;
++	if (getwakeuptime_local.enabled && put_user(enabled,
++						getwakeuptime_local.enabled))
++		return -EFAULT;
++
++	if (getwakeuptime_local.time)
++		return copy_to_user(getwakeuptime_local.time, &efi_time,
++			sizeof(efi_time_t)) ? -EFAULT : 0;
++	return 0;
++}
++
++static long efi_runtime_set_waketime(unsigned long arg)
++{
++	struct efi_setwakeuptime __user *setwakeuptime;
++	struct efi_setwakeuptime setwakeuptime_local;
++	unsigned char enabled;
++	efi_status_t status;
++	efi_time_t efi_time;
++
++	setwakeuptime = (struct efi_setwakeuptime __user *)arg;
++
++	if (copy_from_user(&setwakeuptime_local, setwakeuptime,
++				sizeof(setwakeuptime_local)))
++		return -EFAULT;
++
++	enabled = setwakeuptime_local.enabled;
++	if (setwakeuptime_local.time) {
++		if (copy_from_user(&efi_time, setwakeuptime_local.time,
++					sizeof(efi_time_t)))
++			return -EFAULT;
++
++		status = efi.set_wakeup_time(enabled, &efi_time);
++	} else {
++		status = efi.set_wakeup_time(enabled, NULL);
++	}
++
++	if (put_user(status, setwakeuptime_local.status))
++		return -EFAULT;
++
++	return status == EFI_SUCCESS ? 0 : -EINVAL;
++}
++
++static long efi_runtime_get_nextvariablename(unsigned long arg)
++{
++	struct efi_getnextvariablename __user *getnextvariablename;
++	struct efi_getnextvariablename getnextvariablename_local;
++	unsigned long name_size, prev_name_size = 0, *ns = NULL;
++	efi_status_t status;
++	efi_guid_t *vd = NULL;
++	efi_guid_t vendor_guid;
++	uint16_t *name = NULL;
++	int rv;
++
++	getnextvariablename = (struct efi_getnextvariablename
++							__user *)arg;
++
++	if (copy_from_user(&getnextvariablename_local, getnextvariablename,
++			   sizeof(getnextvariablename_local)))
++		return -EFAULT;
++
++	if (getnextvariablename_local.variable_name_size) {
++		if (get_user(name_size,
++				getnextvariablename_local.variable_name_size))
++			return -EFAULT;
++		ns = &name_size;
++		prev_name_size = name_size;
++	}
++
++	if (getnextvariablename_local.vendor_guid) {
++		if (copy_from_user(&vendor_guid,
++				getnextvariablename_local.vendor_guid,
++				sizeof(vendor_guid)))
++			return -EFAULT;
++		vd = &vendor_guid;
++	}
++
++	if (getnextvariablename_local.variable_name) {
++		size_t name_string_size = 0;
++
++		rv = get_ucs2_strsize_from_user(
++				getnextvariablename_local.variable_name,
++				&name_string_size);
++		if (rv)
++			return rv;
++		/*
++		 * The name_size may be smaller than the real buffer size where
++		 * variable name located in some use cases. The most typical
++		 * case is passing a 0 to get the required buffer size for the
++		 * 1st time call. So we need to copy the content from user
++		 * space for at least the string size of variable name, or else
++		 * the name passed to UEFI may not be terminated as we expected.
++		 */
++		rv = copy_ucs2_from_user_len(&name,
++				getnextvariablename_local.variable_name,
++				prev_name_size > name_string_size ?
++				prev_name_size : name_string_size);
++		if (rv)
++			return rv;
++	}
++
++	status = efi.get_next_variable(ns, name, vd);
++
++	if (name) {
++		rv = copy_ucs2_to_user_len(
++				getnextvariablename_local.variable_name,
++				name, prev_name_size);
++		kfree(name);
++		if (rv)
++			return -EFAULT;
++	}
++
++	if (put_user(status, getnextvariablename_local.status))
++		return -EFAULT;
++
++	if (ns) {
++		if (put_user(*ns,
++			getnextvariablename_local.variable_name_size))
++			return -EFAULT;
++	}
++
++	if (vd) {
++		if (copy_to_user(getnextvariablename_local.vendor_guid,
++				 vd, sizeof(efi_guid_t)))
++			return -EFAULT;
++	}
++
++	if (status != EFI_SUCCESS)
++		return -EINVAL;
++	return 0;
++}
++
++static long efi_runtime_get_nexthighmonocount(unsigned long arg)
++{
++	struct efi_getnexthighmonotoniccount __user *getnexthighmonotoniccount;
++	struct efi_getnexthighmonotoniccount getnexthighmonotoniccount_local;
++	efi_status_t status;
++	uint32_t count;
++
++	getnexthighmonotoniccount = (struct
++			efi_getnexthighmonotoniccount __user *)arg;
++
++	if (copy_from_user(&getnexthighmonotoniccount_local,
++			   getnexthighmonotoniccount,
++			   sizeof(getnexthighmonotoniccount_local)))
++		return -EFAULT;
++
++	status = efi.get_next_high_mono_count(
++		getnexthighmonotoniccount_local.high_count ? &count : NULL);
++
++	if (put_user(status, getnexthighmonotoniccount_local.status))
++		return -EFAULT;
++
++	if (getnexthighmonotoniccount_local.high_count &&
++	    put_user(count, getnexthighmonotoniccount_local.high_count))
++		return -EFAULT;
++
++	if (status != EFI_SUCCESS)
++		return -EINVAL;
++
++	return 0;
++}
++
++static long efi_runtime_query_variableinfo(unsigned long arg)
++{
++	struct efi_queryvariableinfo __user *queryvariableinfo;
++	struct efi_queryvariableinfo queryvariableinfo_local;
++	efi_status_t status;
++	uint64_t max_storage, remaining, max_size;
++
++	queryvariableinfo = (struct efi_queryvariableinfo __user *)arg;
++
++	if (copy_from_user(&queryvariableinfo_local, queryvariableinfo,
++			   sizeof(queryvariableinfo_local)))
++		return -EFAULT;
++
++	status = efi.query_variable_info(queryvariableinfo_local.attributes,
++					 &max_storage, &remaining, &max_size);
++
++	if (put_user(max_storage,
++		     queryvariableinfo_local.maximum_variable_storage_size))
++		return -EFAULT;
++
++	if (put_user(remaining,
++		     queryvariableinfo_local.remaining_variable_storage_size))
++		return -EFAULT;
++
++	if (put_user(max_size, queryvariableinfo_local.maximum_variable_size))
++		return -EFAULT;
++
++	if (put_user(status, queryvariableinfo_local.status))
++		return -EFAULT;
++	if (status != EFI_SUCCESS)
++		return -EINVAL;
++
++	return 0;
++}
++
++static long efi_runtime_query_capsulecaps(unsigned long arg)
++{
++	struct efi_querycapsulecapabilities __user *u_caps;
++	struct efi_querycapsulecapabilities caps;
++	efi_capsule_header_t *capsules;
++	efi_status_t status;
++	uint64_t max_size;
++	int i, reset_type;
++	int rv;
++
++	u_caps = (struct efi_querycapsulecapabilities __user *)arg;
++
++	if (copy_from_user(&caps, u_caps, sizeof(caps)))
++		return -EFAULT;
++
++	capsules = kcalloc(caps.capsule_count + 1,
++			   sizeof(efi_capsule_header_t), GFP_KERNEL);
++	if (!capsules)
++		return -ENOMEM;
++
++	for (i = 0; i < caps.capsule_count; i++) {
++		efi_capsule_header_t *c;
++		/*
++		 * We cannot dereference caps.capsule_header_array directly to
++		 * obtain the address of the capsule as it resides in the
++		 * user space
++		 */
++		if (get_user(c, caps.capsule_header_array + i)) {
++			rv = -EFAULT;
++			goto err_exit;
++		}
++		if (copy_from_user(&capsules[i], c,
++				sizeof(efi_capsule_header_t))) {
++			rv = -EFAULT;
++			goto err_exit;
++		}
++	}
++
++	caps.capsule_header_array = &capsules;
++
++	status = efi.query_capsule_caps((efi_capsule_header_t **)
++					caps.capsule_header_array,
++					caps.capsule_count,
++					&max_size, &reset_type);
++
++	if (put_user(status, caps.status)) {
++		rv = -EFAULT;
++		goto err_exit;
++	}
++
++	if (put_user(max_size, caps.maximum_capsule_size)) {
++		rv = -EFAULT;
++		goto err_exit;
++	}
++
++	if (put_user(reset_type, caps.reset_type)) {
++		rv = -EFAULT;
++		goto err_exit;
++	}
++
++	if (status != EFI_SUCCESS) {
++		rv = -EINVAL;
++		goto err_exit;
++	}
++
++	kfree(capsules);
++	return 0;
++
++err_exit:
++	kfree(capsules);
++	return rv;
++}
++
++static long efi_test_ioctl(struct file *file, unsigned int cmd,
++							unsigned long arg)
++{
++	switch (cmd) {
++	case EFI_RUNTIME_GET_VARIABLE:
++		return efi_runtime_get_variable(arg);
++
++	case EFI_RUNTIME_SET_VARIABLE:
++		return efi_runtime_set_variable(arg);
++
++	case EFI_RUNTIME_GET_TIME:
++		return efi_runtime_get_time(arg);
++
++	case EFI_RUNTIME_SET_TIME:
++		return efi_runtime_set_time(arg);
++
++	case EFI_RUNTIME_GET_WAKETIME:
++		return efi_runtime_get_waketime(arg);
++
++	case EFI_RUNTIME_SET_WAKETIME:
++		return efi_runtime_set_waketime(arg);
++
++	case EFI_RUNTIME_GET_NEXTVARIABLENAME:
++		return efi_runtime_get_nextvariablename(arg);
++
++	case EFI_RUNTIME_GET_NEXTHIGHMONOTONICCOUNT:
++		return efi_runtime_get_nexthighmonocount(arg);
++
++	case EFI_RUNTIME_QUERY_VARIABLEINFO:
++		return efi_runtime_query_variableinfo(arg);
++
++	case EFI_RUNTIME_QUERY_CAPSULECAPABILITIES:
++		return efi_runtime_query_capsulecaps(arg);
++	}
++
++	return -ENOTTY;
++}
++
++static int efi_test_open(struct inode *inode, struct file *file)
++{
++	/*
++	 * nothing special to do here
++	 * We do accept multiple open files at the same time as we
++	 * synchronize on the per call operation.
++	 */
++	return 0;
++}
++
++static int efi_test_close(struct inode *inode, struct file *file)
++{
++	return 0;
++}
++
++/*
++ *	The various file operations we support.
++ */
++static const struct file_operations efi_test_fops = {
++	.owner		= THIS_MODULE,
++	.unlocked_ioctl	= efi_test_ioctl,
++	.open		= efi_test_open,
++	.release	= efi_test_close,
++	.llseek		= no_llseek,
++};
++
++static struct miscdevice efi_test_dev = {
++	MISC_DYNAMIC_MINOR,
++	"efi_test",
++	&efi_test_fops
++};
++
++static int __init efi_test_init(void)
++{
++	int ret;
++
++	if (!EFI_RUNTIME_ENABLED) {
++		pr_err("efi_test: EFI runtime services not enabled.\n");
++		return -ENODEV;
++	}
++
++	ret = misc_register(&efi_test_dev);
++	if (ret) {
++		pr_err("efi_test: can't misc_register on minor=%d\n",
++			MISC_DYNAMIC_MINOR);
++		return ret;
++	}
++
++	return 0;
++}
++
++static void __exit efi_test_exit(void)
++{
++	misc_deregister(&efi_test_dev);
++}
++
++module_init(efi_test_init);
++module_exit(efi_test_exit);
+diff --git a/drivers/firmware/efi/efi_test/efi_test.h b/drivers/firmware/efi/efi_test/efi_test.h
+new file mode 100644
+index 0000000..648030f
+--- /dev/null
++++ b/drivers/firmware/efi/efi_test/efi_test.h
+@@ -0,0 +1,110 @@
++/*
++ * EFI Test driver Header
++ *
++ * Copyright(C) 2012-2016 Canonical Ltd.
++ *
++ */
++
++#ifndef _DRIVERS_FIRMWARE_EFI_TEST_H_
++#define _DRIVERS_FIRMWARE_EFI_TEST_H_
++
++#include <linux/efi.h>
++
++struct efi_getvariable {
++	uint16_t	*variable_name;
++	efi_guid_t	*vendor_guid;
++	uint32_t	*attributes;
++	uint64_t	*data_size;
++	void		*data;
++	uint64_t	*status;
++} __packed;
++
++struct efi_setvariable {
++	uint16_t	*variable_name;
++	efi_guid_t	*vendor_guid;
++	uint32_t	attributes;
++	uint64_t	data_size;
++	void		*data;
++	uint64_t	*status;
++} __packed;
++
++struct efi_getnextvariablename {
++	uint64_t	*variable_name_size;
++	uint16_t	*variable_name;
++	efi_guid_t	*vendor_guid;
++	uint64_t	*status;
++} __packed;
++
++struct efi_queryvariableinfo {
++	uint32_t	attributes;
++	uint64_t	*maximum_variable_storage_size;
++	uint64_t	*remaining_variable_storage_size;
++	uint64_t	*maximum_variable_size;
++	uint64_t	*status;
++} __packed;
++
++struct efi_gettime {
++	efi_time_t		*time;
++	efi_time_cap_t		*capabilities;
++	uint64_t		*status;
++} __packed;
++
++struct efi_settime {
++	efi_time_t		*time;
++	uint64_t		*status;
++} __packed;
++
++struct efi_getwakeuptime {
++	uint8_t		*enabled;
++	uint8_t		*pending;
++	efi_time_t	*time;
++	uint64_t	*status;
++} __packed;
++
++struct efi_setwakeuptime {
++	uint8_t		enabled;
++	efi_time_t	*time;
++	uint64_t	*status;
++} __packed;
++
++struct efi_getnexthighmonotoniccount {
++	uint32_t	*high_count;
++	uint64_t	*status;
++} __packed;
++
++struct efi_querycapsulecapabilities {
++	efi_capsule_header_t	**capsule_header_array;
++	uint64_t		capsule_count;
++	uint64_t		*maximum_capsule_size;
++	int			*reset_type;
++	uint64_t		*status;
++} __packed;
++
++#define EFI_RUNTIME_GET_VARIABLE \
++	_IOWR('p', 0x01, struct efi_getvariable)
++#define EFI_RUNTIME_SET_VARIABLE \
++	_IOW('p', 0x02, struct efi_setvariable)
++
++#define EFI_RUNTIME_GET_TIME \
++	_IOR('p', 0x03, struct efi_gettime)
++#define EFI_RUNTIME_SET_TIME \
++	_IOW('p', 0x04, struct efi_settime)
++
++#define EFI_RUNTIME_GET_WAKETIME \
++	_IOR('p', 0x05, struct efi_getwakeuptime)
++#define EFI_RUNTIME_SET_WAKETIME \
++	_IOW('p', 0x06, struct efi_setwakeuptime)
++
++#define EFI_RUNTIME_GET_NEXTVARIABLENAME \
++	_IOWR('p', 0x07, struct efi_getnextvariablename)
++
++#define EFI_RUNTIME_QUERY_VARIABLEINFO \
++	_IOR('p', 0x08, struct efi_queryvariableinfo)
++
++#define EFI_RUNTIME_GET_NEXTHIGHMONOTONICCOUNT \
++	_IOR('p', 0x09, struct efi_getnexthighmonotoniccount)
++
++#define EFI_RUNTIME_QUERY_CAPSULECAPABILITIES \
++	_IOR('p', 0x0A, struct efi_querycapsulecapabilities)
++
++#endif /* _DRIVERS_FIRMWARE_EFI_TEST_H_ */
+-- 
+1.9.1
