@@ -1,39 +1,45 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH V2 2/4] efi/libstub: Introduce ExitBootServices helper
-Date: Mon, 1 Aug 2016 13:03:12 +0100
-Message-ID: <20160801120312.GE3636@codeblueprint.co.uk>
-References: <1469132894-17103-1-git-send-email-jhugo@codeaurora.org>
- <1469132894-17103-3-git-send-email-jhugo@codeaurora.org>
- <20160727180318.GI31759@codeblueprint.co.uk>
- <32feffc6-a789-fcce-0e53-cc473247bb76@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Baole Ni <baolex.ni-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH 0171/1285] Replace numeric parameter like 0444 with macro
+Date: Tue,  2 Aug 2016 18:46:25 +0800
+Message-ID: <20160802104625.25138-1-baolex.ni@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <32feffc6-a789-fcce-0e53-cc473247bb76-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, m.chehab-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, lho-qTEPVZfXA3Y@public.gmane.org, dougthompson-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, chuansheng.liu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, baolex.ni-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 27 Jul, at 01:21:17PM, Jeffrey Hugo wrote:
-> On 7/27/2016 12:03 PM, Matt Fleming wrote:
-> >
-> >Why not move the priv_func call until after we know ExitBootServices()
-> >returned successfully? That way we don't have to make two calls and
-> >the callee doesn't need to handle that.
-> >
-> 
-> It keeps the code flow for FDT (patch 3 in the series) and x86 (patch 4) the
-> same as before, and x86 seems to require that its function occurs before
-> ExitBootServices().
-> 
-> exit_boot() calls alloc_e820ext() based on the contents of the current
-> memory map, which invokes allocate_pool().  Per my understanding of the
-> spec, allocate_pool() should not be called after ExitBootServices(), and per
-> my understanding of the x86 code, alloc_e820ext() needs to be called between
-> getting the current memory map, and ExitBootServices().  Am I incorrect, and
-> there is an option to restructure the x86 code so that this ordering is not
-> required?
+I find that the developers often just specified the numeric value
+when calling a macro which is defined with a parameter for access permission.
+As we know, these numeric value for access permission have had the corresponding macro,
+and that using macro can improve the robustness and readability of the code,
+thus, I suggest replacing the numeric parameter with the macro.
 
-On second thoughts, it's fine as-is.
+Signed-off-by: Chuansheng Liu <chuansheng.liu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Baole Ni <baolex.ni-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ drivers/firmware/efi/efivars.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
+index 116b244..0510433 100644
+--- a/drivers/firmware/efi/efivars.c
++++ b/drivers/firmware/efi/efivars.c
+@@ -390,11 +390,11 @@ static void efivar_release(struct kobject *kobj)
+ 	kfree(var);
+ }
+ 
+-static EFIVAR_ATTR(guid, 0400, efivar_guid_read, NULL);
+-static EFIVAR_ATTR(attributes, 0400, efivar_attr_read, NULL);
+-static EFIVAR_ATTR(size, 0400, efivar_size_read, NULL);
+-static EFIVAR_ATTR(data, 0400, efivar_data_read, NULL);
+-static EFIVAR_ATTR(raw_var, 0600, efivar_show_raw, efivar_store_raw);
++static EFIVAR_ATTR(guid, S_IRUSR, efivar_guid_read, NULL);
++static EFIVAR_ATTR(attributes, S_IRUSR, efivar_attr_read, NULL);
++static EFIVAR_ATTR(size, S_IRUSR, efivar_size_read, NULL);
++static EFIVAR_ATTR(data, S_IRUSR, efivar_data_read, NULL);
++static EFIVAR_ATTR(raw_var, S_IRUSR | S_IWUSR, efivar_show_raw, efivar_store_raw);
+ 
+ static struct attribute *def_attrs[] = {
+ 	&efivar_attr_guid.attr,
+-- 
+2.9.2
