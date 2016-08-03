@@ -1,37 +1,33 @@
-From: Baole Ni <baolex.ni-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH 0170/1285] Replace numeric parameter like 0444 with macro
-Date: Tue,  2 Aug 2016 18:46:20 +0800
-Message-ID: <20160802104620.25072-1-baolex.ni@intel.com>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Subject: [PATCH] lib/ucs2_string: Speed up ucs2_utf8size()
+Date: Wed, 3 Aug 2016 10:16:02 +0200
+Message-ID: <c45b75bbb1bd486429ab993d66167f22f14cf415.1470211796.git.lukas@wunner.de>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org, ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, m.chehab-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, lho-qTEPVZfXA3Y@public.gmane.org, dougthompson-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, chuansheng.liu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, baolex.ni-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-I find that the developers often just specified the numeric value
-when calling a macro which is defined with a parameter for access permission.
-As we know, these numeric value for access permission have had the corresponding macro,
-and that using macro can improve the robustness and readability of the code,
-thus, I suggest replacing the numeric parameter with the macro.
+No need to calculate the string length on every loop iteration.
 
-Signed-off-by: Chuansheng Liu <chuansheng.liu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Signed-off-by: Baole Ni <baolex.ni-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 ---
- drivers/firmware/efi/efi-pstore.c | 2 +-
+ lib/ucs2_string.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-index eac76a7..5d29a4b 100644
---- a/drivers/firmware/efi/efi-pstore.c
-+++ b/drivers/firmware/efi/efi-pstore.c
-@@ -9,7 +9,7 @@
- static bool efivars_pstore_disable =
- 	IS_ENABLED(CONFIG_EFI_VARS_PSTORE_DEFAULT_DISABLE);
+diff --git a/lib/ucs2_string.c b/lib/ucs2_string.c
+index f0b323a..ae8d249 100644
+--- a/lib/ucs2_string.c
++++ b/lib/ucs2_string.c
+@@ -56,7 +56,7 @@ ucs2_utf8size(const ucs2_char_t *src)
+ 	unsigned long i;
+ 	unsigned long j = 0;
  
--module_param_named(pstore_disable, efivars_pstore_disable, bool, 0644);
-+module_param_named(pstore_disable, efivars_pstore_disable, bool, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+-	for (i = 0; i < ucs2_strlen(src); i++) {
++	for (i = 0; src[i]; i++) {
+ 		u16 c = src[i];
  
- #define PSTORE_EFI_ATTRIBUTES \
- 	(EFI_VARIABLE_NON_VOLATILE | \
+ 		if (c >= 0x800)
 -- 
-2.9.2
+2.8.1
