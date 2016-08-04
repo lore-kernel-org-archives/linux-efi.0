@@ -1,54 +1,69 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 0/6] Apple device properties
-Date: Thu, 4 Aug 2016 15:57:10 +0100
-Message-ID: <20160804145710.GL3636@codeblueprint.co.uk>
+Subject: Re: [PATCH 1/6] efi: Retrieve Apple device properties
+Date: Thu, 4 Aug 2016 16:13:45 +0100
+Message-ID: <20160804151345.GM3636@codeblueprint.co.uk>
 References: <cover.1469616641.git.lukas@wunner.de>
+	<833d193b8a18b0afe168c515e9e56a857ece4bd1.1469616641.git.lukas@wunner.de>
+Reply-To: The development of GNU GRUB <grub-devel@gnu.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <grub-devel-bounces+gcbgd-grub-devel=m.gmane.org@gnu.org>
 Content-Disposition: inline
-In-Reply-To: <cover.1469616641.git.lukas@wunner.de>
-Sender: linux-kernel-owner@vger.kernel.org
+In-Reply-To: <833d193b8a18b0afe168c515e9e56a857ece4bd1.1469616641.git.lukas@wunner.de>
+List-Unsubscribe: <https://lists.gnu.org/mailman/options/grub-devel>,
+	<mailto:grub-devel-request@gnu.org?subject=unsubscribe>
+List-Archive: <http://lists.gnu.org/archive/html/grub-devel/>
+List-Post: <mailto:grub-devel@gnu.org>
+List-Help: <mailto:grub-devel-request@gnu.org?subject=help>
+List-Subscribe: <https://lists.gnu.org/mailman/listinfo/grub-devel>,
+	<mailto:grub-devel-request@gnu.org?subject=subscribe>
+Errors-To: grub-devel-bounces+gcbgd-grub-devel=m.gmane.org@gnu.org
+Sender: "Grub-devel" <grub-devel-bounces+gcbgd-grub-devel=m.gmane.org@gnu.org>
 To: Lukas Wunner <lukas@wunner.de>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, Pierre Moreau <pierre.morrow@free.fr>, reverser@put.as, grub-devel@gnu.org, x86@kernel.org, Aleksey Makarov <aleksey.makarov@linaro.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-acpi@vger.kernel.org
+Cc: Pierre Moreau <pierre.morrow@free.fr>, grub-devel@gnu.org, linux-efi@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, reverser@put.as, Andreas Noever <andreas.noever@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
 On Thu, 28 Jul, at 02:25:41AM, Lukas Wunner wrote:
-> Apple EFI drivers supply device properties which are needed to support
-> Macs optimally.
 > 
-> This series extends the efistub to retrieve the device properties before
-> ExitBootServices is called (patch [1/6]). They are assigned to devices
-> in an fs_initcall (patch [5/6]). As a first use case, the Thunderbolt
-> driver is amended to take advantage of the Device ROM supplied by EFI
-> (patch [6/6]).
-> 
-> A by-product is a parser for EFI Device Paths which finds the struct
-> device corresponding to a given path. This is needed to assign
-> properties to their devices (patch [3/6]).
-> 
-> 
-> I've pushed these patches to GitHub where they can be reviewed more
-> comfortably with green/red highlighting:
-> https://github.com/l1k/linux/commits/apple_properties_v1
-> 
-> 
-> It would be good if one of the resident EFI experts could look over
-> patch [1/6] to see if I've made any mistakes that might prevent this
-> from working on 32 bit. It was only tested on 64 bit, I don't know
-> anyone with an older Mac who could test this.
-> 
-> Specifically, is the following okay:
-> efi_early->call((unsigned long)sys_table->boottime->locate_protocol, ...)
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> index ff574da..7262ee4 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -571,6 +571,55 @@ free_handle:
+>  	efi_call_early(free_pool, pci_handle);
+>  }
+>  
+> +static void retrieve_apple_device_properties(struct boot_params *params)
+> +{
+> +	efi_guid_t guid = APPLE_PROPERTIES_PROTOCOL_GUID;
+> +	struct setup_data *data, *new;
+> +	efi_status_t status;
+> +	void *properties;
+> +	u32 size = 0;
+> +
+> +	status = efi_early->call(
+> +			(unsigned long)sys_table->boottime->locate_protocol,
+> +			&guid, NULL, &properties);
+> +	if (status != EFI_SUCCESS)
+> +		return;
+> +
+> +	do {
+> +		status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+> +			size + sizeof(struct setup_data), &new);
+> +		if (status != EFI_SUCCESS) {
+> +			efi_printk(sys_table,
+> +				   "Failed to alloc mem for properties\n");
+> +			return;
+> +		}
+> +		status = efi_early->call(efi_early->is64 ?
+> +			((apple_properties_protocol_64 *)properties)->get_all :
+> +			((apple_properties_protocol_32 *)properties)->get_all,
+> +			properties, new->data, &size);
+> +		if (status == EFI_BUFFER_TOO_SMALL)
+> +			efi_call_early(free_pool, new);
+> +	} while (status == EFI_BUFFER_TOO_SMALL);
 
-This probably isn't going to work with EFI mixed mode because you
-can't jump through pointers at runtime - that's the whole point of the
-setup_boot_services*bits() code.
-
-> It would be convenient to have LocateProtocol or LocateHandleBuffer in
-> struct efi_config so that they can be called with efi_call_early().
-> Would a patch to add those be entertained? Right now we only offer
-> LocateHandle and HandleProtocol, which is somewhat cumbersome and
-> needs more code as the setup_pci() functions show.
-
-Yes, go for it. Doing this would make it work with EFI mixed mode too.
+Is this looping really required? Do we not know ahead of time what we
+expect the size to be? Writing this as a potentially infinite loop (if
+broken firmware always returns EFI_BUFFER_TOO_SMALL) is a bad idea.
