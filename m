@@ -1,355 +1,82 @@
-From: ivanhu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: Re: [PATCH V2] efi: add efi_test driver for exporting UEFI runtime
- service interfaces
-Date: Mon, 8 Aug 2016 13:44:21 +0800
-Message-ID: <9981aae0-cd44-2d5c-9493-c8a8ea0fd90d@canonical.com>
-References: <1470016096-5063-1-git-send-email-ivan.hu@canonical.com>
- <20160804110821.GM16090@linux-rxt1.site>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+From: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: [PATCH] x86/efi: delay efi_esrt_init to efi_late_init
+Date: Mon,  8 Aug 2016 15:08:24 -0700
+Message-ID: <1470694104-9278-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160804110821.GM16090-empE8CJ7fzk2xCFIczX1Fw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Joey,
+Commit 7b02d53e7852 introduced a new efi_mem_reserve to reserve the boot
+services memory regions forever. This reservation involves allocating a new
+EFI memory range descriptor. However, allocation can only succeed if there
+is memory available for the allocation. Otherwise, error such as the
+following may occur:
 
-Thanks for your comments.
-"MODULE_LICENSE("GPL")" had already added below the MODULE_DESCRIPTION.
-And I will check the others and send out the fix.
+esrt: Reserving ESRT space from 0x000000003dd6a000 to 0x000000003dd6a010.
+Kernel panic - not syncing: ERROR: Failed to allocate 0x9f0 bytes below 0x0.
+CPU: 0 PID: 0 Comm: swapper Not tainted 4.7.0-rc5+ #503
+ 0000000000000000 ffffffff81e03ce0 ffffffff8131dae8 ffffffff81bb6c50
+ ffffffff81e03d70 ffffffff81e03d60 ffffffff8111f4df 0000000000000018
+ ffffffff81e03d70 ffffffff81e03d08 00000000000009f0 00000000000009f0
+Call Trace:
+ [<ffffffff8131dae8>] dump_stack+0x4d/0x65
+ [<ffffffff8111f4df>] panic+0xc5/0x206
+ [<ffffffff81f7c6d3>] memblock_alloc_base+0x29/0x2e
+ [<ffffffff81f7c6e3>] memblock_alloc+0xb/0xd
+ [<ffffffff81f6c86d>] efi_arch_mem_reserve+0xbc/0x134
+ [<ffffffff81fa3280>] efi_mem_reserve+0x2c/0x31
+ [<ffffffff81fa3280>] ? efi_mem_reserve+0x2c/0x31
+ [<ffffffff81fa40d3>] efi_esrt_init+0x19e/0x1b4
+ [<ffffffff81f6d2dd>] efi_init+0x398/0x44a
+ [<ffffffff81f5c782>] setup_arch+0x415/0xc30
+ [<ffffffff81f55af1>] start_kernel+0x5b/0x3ef
+ [<ffffffff81f55434>] x86_64_start_reservations+0x2f/0x31
+ [<ffffffff81f55520>] x86_64_start_kernel+0xea/0xed
+---[ end Kernel panic - not syncing: ERROR: Failed to allocate 0x9f0
+     bytes below 0x0.
 
-Cheers,
-Ivan
+An inspection of the memblock configuration reveals that there is no memory
+available for the allocation:
 
-On 2016年08月04日 19:08, joeyli wrote:
-> Hi Ivan,
->
-> On Mon, Aug 01, 2016 at 09:48:16AM +0800, Ivan Hu wrote:
->> This driver is used by the Firmware Test Suite (FWTS) for testing the UEFI
->> runtime interfaces readiness of the firmware.
->>
->> This driver exports UEFI runtime service interfaces into userspace,
->> which allows to use and test UEFI runtime services provided by the
->> firmware.
->>
->> This driver uses the efi.<service> function pointers directly instead of
->> going through the efivar API to allow for direct testing of the UEFI
->> runtime service interfaces provided by the firmware.
->>
->> Details for FWTS are available from,
->> <https://wiki.ubuntu.com/FirmwareTestSuite>
->>
->> Signed-off-by: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
->> ---
->>  MAINTAINERS                              |   6 +
->>  drivers/firmware/efi/Kconfig             |  15 +
->>  drivers/firmware/efi/Makefile            |   1 +
->>  drivers/firmware/efi/efi_test/Makefile   |   1 +
->>  drivers/firmware/efi/efi_test/efi_test.c | 726 +++++++++++++++++++++++++++++++
->>  drivers/firmware/efi/efi_test/efi_test.h | 110 +++++
->>  6 files changed, 859 insertions(+)
->>  create mode 100644 drivers/firmware/efi/efi_test/Makefile
->>  create mode 100644 drivers/firmware/efi/efi_test/efi_test.c
->>  create mode 100644 drivers/firmware/efi/efi_test/efi_test.h
->>
->
-> [...snip]
->
->> index 0000000..18931ba
->> --- /dev/null
->> +++ b/drivers/firmware/efi/efi_test/efi_test.c
->> @@ -0,0 +1,726 @@
->> +/*
->> + * EFI Test Driver for Runtime Services
->> + *
->> + * Copyright(C) 2012-2016 Canonical Ltd.
->> + *
->> + * This driver exports EFI runtime services interfaces into userspace, which
->> + * allow to use and test UEFI runtime services provided by firmware.
->> + *
->
-> I have a suggestion to declare the GPL license in file description.
->
-> I am not sure that the GPL in file description is a must have, because
-> the efi-pstore.c also doesn't declare GPL in file description. Maybe
-> 'MODULE_LICENSE("GPL")' is enough?
->
-> You can consider to add it.
->
->> + */
->> +
->> +#include <linux/version.h>
->> +#include <linux/miscdevice.h>
->> +#include <linux/module.h>
->> +#include <linux/init.h>
->> +#include <linux/proc_fs.h>
->> +#include <linux/efi.h>
->> +#include <linux/slab.h>
->> +#include <linux/uaccess.h>
->> +
->> +#include "efi_test.h"
->> +
->> +MODULE_AUTHOR("Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>");
->> +MODULE_DESCRIPTION("EFI Test Driver");
->> +MODULE_LICENSE("GPL");
->> +
->> +/* commit 83e681897 turned efi_enabled into a function, so abstract it */
->> +#ifdef EFI_RUNTIME_SERVICES
->> +#define EFI_RUNTIME_ENABLED	efi_enabled(EFI_RUNTIME_SERVICES)
->> +#else
->> +#define EFI_RUNTIME_ENABLED	efi_enabled
->> +#endif
->> +
->> +/*
->> + * Count the bytes in 'str', including the terminating NULL.
->> + *
->> + * Note this function returns the number of *bytes*, not the number of
->> + * ucs2 characters.
->> + */
->> +static inline size_t __ucs2_strsize(uint16_t  __user *str)
->> +{
->> +	uint16_t *s = str, c;
->> +	size_t len;
->> +
->> +	if (!str)
->> +		return 0;
->> +
->> +	/* Include terminating NULL */
->> +	len = sizeof(uint16_t);
->> +
->> +	if (get_user(c, s++)) {
->> +		WARN(1, "efi_test: Can't read userspace memory for size");
->> +		return 0;
->> +	}
->> +
->> +	while (c != 0) {
->> +		if (get_user(c, s++)) {
->> +			WARN(1, "efi_test: Can't read userspace memory for size");
->> +			return 0;
->> +		}
->> +		len += sizeof(uint16_t);
->> +	}
->> +	return len;
->> +}
->> +
->
-> Looks __ucs2_strsize will return zero size when str is zero or when it can not
-> read userspace memory.
->
-> Then please see below...
->
->> +/*
->> + * Allocate a buffer and copy a ucs2 string from user space into it.
->> + */
->> +static inline int
->> +copy_ucs2_from_user_len(uint16_t **dst, uint16_t __user *src, size_t len)
->> +{
->> +	uint16_t *buf;
->> +
->> +	if (!src) {
->> +		*dst = NULL;
->> +		return 0;
->> +	}
->> +
->> +	if (!access_ok(VERIFY_READ, src, 1))
->> +		return -EFAULT;
->> +
->> +	buf = kmalloc(len, GFP_KERNEL);
->> +	if (!buf) {
->> +		*dst = NULL;
->> +		return -ENOMEM;
->> +	}
->> +	*dst = buf;
->> +
->> +	if (copy_from_user(*dst, src, len)) {
->> +		kfree(buf);
->> +		return -EFAULT;
->> +	}
->> +
->> +	return 0;
->> +}
->
-> If the input len is zero, then kmalloc returns ZERO_SIZE_PTR, it causes
-> ZERO_SIZE_PTR dereference in later copy_from_user().
->
->> +
->> +/*
->> + * Count the bytes in 'str', including the terminating NULL.
->> + *
->> + * Just a wrap for __ucs2_strsize
->> + */
->> +static inline int get_ucs2_strsize_from_user(uint16_t __user *src, size_t *len)
->> +{
->> +	if (!access_ok(VERIFY_READ, src, 1))
->> +		return -EFAULT;
->> +
->> +	*len = __ucs2_strsize(src);
->> +	if (*len == 0)
->> +		return -EFAULT;
->> +
->> +	return 0;
->> +}
->> +
->> +/*
->> + * Calculate the required buffer allocation size and copy a ucs2 string
->> + * from user space into it.
->> + *
->> + * This function differs from copy_ucs2_from_user_len() because it
->> + * calculates the size of the buffer to allocate by taking the length of
->> + * the string 'src'.
->> + *
->> + * If a non-zero value is returned, the caller MUST NOT access 'dst'.
->> + *
->> + * It is the caller's responsibility to free 'dst'.
->> + */
->> +static inline int copy_ucs2_from_user(uint16_t **dst, uint16_t __user *src)
->> +{
->> +	size_t len;
->> +
->> +	if (!access_ok(VERIFY_READ, src, 1))
->> +		return -EFAULT;
->
-> The above code prevents src is zero.
->
->> +
->> +	len = __ucs2_strsize(src);
->> +	return copy_ucs2_from_user_len(dst, src, len);
->> +}
->> +
->
-> The __ucs2_strsize may returns zero when it can not read userspace
-> memory, why not check that len should not be zero like
-> get_ucs2_strsize_from_user() does?
->
->> +/*
->> + * Copy a ucs2 string to a user buffer.
->> + *
->> + * This function is a simple wrapper around copy_to_user() that does
->> + * nothing if 'src' is NULL, which is useful for reducing the amount of
->> + * NULL checking the caller has to do.
->> + *
->> + * 'len' specifies the number of bytes to copy.
->> + */
->> +static inline int
->> +copy_ucs2_to_user_len(uint16_t __user *dst, uint16_t *src, size_t len)
->> +{
->> +	if (!src)
->> +		return 0;
->> +
->> +	if (!access_ok(VERIFY_WRITE, dst, 1))
->> +		return -EFAULT;
->> +
->> +	return copy_to_user(dst, src, len);
->> +}
->> +
->> +static long efi_runtime_get_variable(unsigned long arg)
->> +{
->> +	struct efi_getvariable __user *getvariable;
->> +	struct efi_getvariable getvariable_local;
->> +	unsigned long datasize, prev_datasize, *dz;
->> +	efi_guid_t vendor_guid, *vd = NULL;
->> +	efi_status_t status;
->> +	uint16_t *name = NULL;
->> +	uint32_t attr, *at;
->> +	void *data = NULL;
->> +	int rv = 0;
->> +
->> +	getvariable = (struct efi_getvariable __user *)arg;
->> +
->> +	if (copy_from_user(&getvariable_local, getvariable,
->> +			   sizeof(getvariable_local)))
->> +		return -EFAULT;
->> +	if (getvariable_local.data_size &&
->> +	    get_user(datasize, getvariable_local.data_size))
->> +		return -EFAULT;
->> +	if (getvariable_local.vendor_guid) {
->> +		if (copy_from_user(&vendor_guid, getvariable_local.vendor_guid,
->> +			   sizeof(vendor_guid)))
->> +			return -EFAULT;
->> +		vd = &vendor_guid;
->> +	}
->> +
->> +	if (getvariable_local.variable_name) {
->> +		rv = copy_ucs2_from_user(&name,
->> +				getvariable_local.variable_name);
->> +		if (rv)
->> +			return rv;
->> +	}
->> +
->> +	at = getvariable_local.attributes ? &attr : NULL;
->> +	dz = getvariable_local.data_size ? &datasize : NULL;
->> +
->> +	if (getvariable_local.data_size && getvariable_local.data) {
->> +		data = kmalloc(datasize, GFP_KERNEL);
->> +		if (!data) {
->> +			kfree(name);
->> +			return -ENOMEM;
->> +		}
->> +	}
->> +
->> +	prev_datasize = datasize;
->> +	status = efi.get_variable(name, vd, at, dz, data);
->> +	kfree(name);
->> +
->> +	if (data) {
->> +		if (status == EFI_SUCCESS && prev_datasize >= datasize)
->> +			rv = copy_to_user(getvariable_local.data, data,
->> +				datasize);
->> +		kfree(data);
->> +	}
->> +
->> +	if (rv)
->> +		return rv;
->> +
->> +	if (put_user(status, getvariable_local.status))
->> +		return -EFAULT;
->> +	if (status == EFI_SUCCESS && prev_datasize >= datasize) {
->> +		if (at && put_user(attr, getvariable_local.attributes))
->> +			return -EFAULT;
->> +		if (dz && put_user(datasize, getvariable_local.data_size))
->> +			return -EFAULT;
->> +		return 0;
->> +	} else if (status == EFI_BUFFER_TOO_SMALL) {
->> +		if (dz && put_user(datasize, getvariable_local.data_size))
->> +			return -EFAULT;
->> +		return -EINVAL;
->> +	} else {
->> +		return -EINVAL;
->> +	}
->> +
->> +	return 0;
->> +}
->> +
->> +static long efi_runtime_set_variable(unsigned long arg)
->> +{
->> +	struct efi_setvariable __user *setvariable;
->> +	struct efi_setvariable setvariable_local;
->> +	efi_guid_t vendor_guid;
->> +	efi_status_t status;
->> +	uint16_t *name;
->> +	void *data;
->> +	int rv;
->> +
->> +	setvariable = (struct efi_setvariable __user *)arg;
->> +
->> +	if (copy_from_user(&setvariable_local, setvariable,
->> +			   sizeof(setvariable_local)))
->> +		return -EFAULT;
->> +	if (copy_from_user(&vendor_guid, setvariable_local.vendor_guid,
->> +			   sizeof(vendor_guid)))
->> +		return -EFAULT;
->> +
->> +	rv = copy_ucs2_from_user(&name, setvariable_local.variable_name);
->> +	if (rv)
->> +		return rv;
->
-> In efi_runtime_get_variable(), it checks variable_name input. Why doesn't
-> check here?
->
->
-> Thanks a lot!
-> Joey Lee
->
+MEMBLOCK configuration:
+ memory size = 0x0 reserved size = 0x4f339c0
+ memory.cnt  = 0x1
+ memory[0x0]	[0x00000000000000-0xffffffffffffffff], 0x0 bytes on node 0 flags: 0x0
+ reserved.cnt  = 0x4
+ reserved[0x0]	[0x0000000008c000-0x0000000008c9bf], 0x9c0 bytes flags: 0x0
+ reserved[0x1]	[0x0000000009f000-0x000000000fffff], 0x61000 bytes flags: 0x0
+ reserved[0x2]	[0x00000002800000-0x0000000394bfff], 0x114c000 bytes flags: 0x0
+ reserved[0x3]	[0x000000304e4000-0x00000034269fff], 0x3d86000 bytes flags: 0x0
+
+efi_esrt_init is called from efi_init, which in x86 happens before
+memblock_x86_fill is called. Since ESRT is not critical to boot but to
+runtime, its initialization can be safely delayed to efi_late_init.
+
+Signed-off-by: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/platform/efi/efi.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index ef9b6ab..d92c174 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -475,12 +475,11 @@ void __init efi_init(void)
+ 
+ 	if (efi_enabled(EFI_DBG))
+ 		efi_print_memmap();
+-
+-	efi_esrt_init();
+ }
+ 
+ void __init efi_late_init(void)
+ {
++	efi_esrt_init();
+ 	efi_bgrt_init();
+ }
+ 
+-- 
+2.9.2
