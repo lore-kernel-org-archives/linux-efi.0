@@ -1,82 +1,40 @@
-From: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: [PATCH] x86/efi: delay efi_esrt_init to efi_late_init
-Date: Mon,  8 Aug 2016 15:08:24 -0700
-Message-ID: <1470694104-9278-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
+From: "Jan Beulich" <JBeulich-IBi9RG/b67k@public.gmane.org>
+Subject: [PATCH] EFI: make for_each_efi_memory_desc_in_map() cope with
+ running on Xen
+Date: Tue, 09 Aug 2016 04:16:38 -0600
+Message-ID: <57A9C9A60200007800104268@prv-mh.provo.novell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Cc: Vitaly Kuznetsov <vkuznets-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Commit 7b02d53e7852 introduced a new efi_mem_reserve to reserve the boot
-services memory regions forever. This reservation involves allocating a new
-EFI memory range descriptor. However, allocation can only succeed if there
-is memory available for the allocation. Otherwise, error such as the
-following may occur:
+While commit 55f1ea15216 ("efi: Fix for_each_efi_memory_desc_in_map()
+for empty memmaps") made an attempt to deal with empty memory maps, it
+didn't address the case where the desc_size field never gets set, as is
+apparently the case when running under Xen.
 
-esrt: Reserving ESRT space from 0x000000003dd6a000 to 0x000000003dd6a010.
-Kernel panic - not syncing: ERROR: Failed to allocate 0x9f0 bytes below 0x0.
-CPU: 0 PID: 0 Comm: swapper Not tainted 4.7.0-rc5+ #503
- 0000000000000000 ffffffff81e03ce0 ffffffff8131dae8 ffffffff81bb6c50
- ffffffff81e03d70 ffffffff81e03d60 ffffffff8111f4df 0000000000000018
- ffffffff81e03d70 ffffffff81e03d08 00000000000009f0 00000000000009f0
-Call Trace:
- [<ffffffff8131dae8>] dump_stack+0x4d/0x65
- [<ffffffff8111f4df>] panic+0xc5/0x206
- [<ffffffff81f7c6d3>] memblock_alloc_base+0x29/0x2e
- [<ffffffff81f7c6e3>] memblock_alloc+0xb/0xd
- [<ffffffff81f6c86d>] efi_arch_mem_reserve+0xbc/0x134
- [<ffffffff81fa3280>] efi_mem_reserve+0x2c/0x31
- [<ffffffff81fa3280>] ? efi_mem_reserve+0x2c/0x31
- [<ffffffff81fa40d3>] efi_esrt_init+0x19e/0x1b4
- [<ffffffff81f6d2dd>] efi_init+0x398/0x44a
- [<ffffffff81f5c782>] setup_arch+0x415/0xc30
- [<ffffffff81f55af1>] start_kernel+0x5b/0x3ef
- [<ffffffff81f55434>] x86_64_start_reservations+0x2f/0x31
- [<ffffffff81f55520>] x86_64_start_kernel+0xea/0xed
----[ end Kernel panic - not syncing: ERROR: Failed to allocate 0x9f0
-     bytes below 0x0.
-
-An inspection of the memblock configuration reveals that there is no memory
-available for the allocation:
-
-MEMBLOCK configuration:
- memory size = 0x0 reserved size = 0x4f339c0
- memory.cnt  = 0x1
- memory[0x0]	[0x00000000000000-0xffffffffffffffff], 0x0 bytes on node 0 flags: 0x0
- reserved.cnt  = 0x4
- reserved[0x0]	[0x0000000008c000-0x0000000008c9bf], 0x9c0 bytes flags: 0x0
- reserved[0x1]	[0x0000000009f000-0x000000000fffff], 0x61000 bytes flags: 0x0
- reserved[0x2]	[0x00000002800000-0x0000000394bfff], 0x114c000 bytes flags: 0x0
- reserved[0x3]	[0x000000304e4000-0x00000034269fff], 0x3d86000 bytes flags: 0x0
-
-efi_esrt_init is called from efi_init, which in x86 happens before
-memblock_x86_fill is called. Since ESRT is not critical to boot but to
-runtime, its initialization can be safely delayed to efi_late_init.
-
-Signed-off-by: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Reported-by: <lists-Ilq5uHa1fWNWk0Htik3J/w@public.gmane.org>
+Cc: Vitaly Kuznetsov <vkuznets-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>
+Signed-off-by: Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>
+Tested-by: <lists-Ilq5uHa1fWNWk0Htik3J/w@public.gmane.org>
 ---
- arch/x86/platform/efi/efi.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ include/linux/efi.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index ef9b6ab..d92c174 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -475,12 +475,11 @@ void __init efi_init(void)
+--- 4.8-rc1/include/linux/efi.h
++++ 4.8-rc1-EFI-memdesc-iterator-Xen/include/linux/efi.h
+@@ -946,7 +946,7 @@ extern int efi_memattr_apply_permissions
+ /* Iterate through an efi_memory_map */
+ #define for_each_efi_memory_desc_in_map(m, md)				   \
+ 	for ((md) = (m)->map;						   \
+-	     ((void *)(md) + (m)->desc_size) <= (m)->map_end;		   \
++	     ((void *)(md) + (m)->desc_size - 1) < (m)->map_end;	   \
+ 	     (md) = (void *)(md) + (m)->desc_size)
  
- 	if (efi_enabled(EFI_DBG))
- 		efi_print_memmap();
--
--	efi_esrt_init();
- }
- 
- void __init efi_late_init(void)
- {
-+	efi_esrt_init();
- 	efi_bgrt_init();
- }
- 
--- 
-2.9.2
+ /**
