@@ -1,31 +1,37 @@
-From: Alex Thorlton <athorlton@sgi.com>
-Subject: Re: [PATCH] Map in physical addresses in efi_map_region_fixed
-Date: Wed, 10 Aug 2016 12:19:51 -0500
-Message-ID: <20160810171951.GA214806@stormcage.americas.sgi.com>
-References: <1470441575-96065-1-git-send-email-athorlton@sgi.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] x86/efi-bgrt: remove the check of the version field
+Date: Wed, 10 Aug 2016 14:52:01 +0200
+Message-ID: <20160810125201.GA9028@gmail.com>
+References: <20160809052546.31462-1-icenowy@aosc.xyz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1470441575-96065-1-git-send-email-athorlton@sgi.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Alex Thorlton <athorlton@sgi.com>
-Cc: linux-kernel@vger.kernel.org, Russ Anderson <rja@sgi.com>, Dimitri Sivanich <sivanich@sgi.com>, Mike Travis <travis@sgi.com>, Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org
+In-Reply-To: <20160809052546.31462-1-icenowy-ymACFijhrKM@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Aug 05, 2016 at 06:59:35PM -0500, Alex Thorlton wrote:
-> This is a simple change to add in the physical mappings as well as the
-> virtual mappings in efi_map_region_fixed.  The motivation here is to
-> get access to EFI runtime code that is only available via the 1:1
-> mappings on a kexec'd kernel.
+
+* Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org> wrote:
+
+> Some broken firmwares have a wrongly filled version field in BGRT table.
+> (See http://wiki.osdev.org/Broken_UEFI_implementations )
 > 
-> The added call is essentially the kexec analog of the first __map_region
-> that Boris put in efi_map_region in commit d2f7cbe7b26a ("x86/efi:
-> Runtime services virtual mapping").
+> As we know, these firmwares can also provide correct BGRT image, although
+> the table is wrong.
+> 
+> After removing the check of the version field, the kernel can now extract
+> the image correctly, and the information is also correct.
+> 
+> Tested on a Thinkpad E531 (68854UC).
 
-Just wanted to ping and see if anybody has had a chance to look at this?
-Also, linux-kernel looks broken today (latest e-mails on lkml look to be
-from last night?) so I wanted to send something to see if it goes
-through :)
+What's the practical effects of the bug - what problems does a missing 
+/sys/firmware/acpi/bgrt/ cause?
 
-- Alex
+I.e. how does the user notice?
+
+Thanks,
+
+	Ingo
