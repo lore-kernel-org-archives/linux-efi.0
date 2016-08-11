@@ -1,80 +1,45 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: delay efi_esrt_init to efi_late_init
-Date: Thu, 11 Aug 2016 11:29:55 +0100
-Message-ID: <20160811102955.GB30909@codeblueprint.co.uk>
-References: <1470694104-9278-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [GIT PULL 0/2] EFI urgent fixes
+Date: Thu, 11 Aug 2016 11:41:58 +0100
+Message-ID: <1470912120-22831-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1470694104-9278-1-git-send-email-ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Austin Christ <austinwc-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 08 Aug, at 03:08:24PM, Ricardo Neri wrote:
-> Commit 7b02d53e7852 introduced a new efi_mem_reserve to reserve the boot
-> services memory regions forever. This reservation involves allocating a new
-> EFI memory range descriptor. However, allocation can only succeed if there
-> is memory available for the allocation. Otherwise, error such as the
-> following may occur:
-> 
-> esrt: Reserving ESRT space from 0x000000003dd6a000 to 0x000000003dd6a010.
-> Kernel panic - not syncing: ERROR: Failed to allocate 0x9f0 bytes below 0x0.
-> CPU: 0 PID: 0 Comm: swapper Not tainted 4.7.0-rc5+ #503
->  0000000000000000 ffffffff81e03ce0 ffffffff8131dae8 ffffffff81bb6c50
->  ffffffff81e03d70 ffffffff81e03d60 ffffffff8111f4df 0000000000000018
->  ffffffff81e03d70 ffffffff81e03d08 00000000000009f0 00000000000009f0
-> Call Trace:
->  [<ffffffff8131dae8>] dump_stack+0x4d/0x65
->  [<ffffffff8111f4df>] panic+0xc5/0x206
->  [<ffffffff81f7c6d3>] memblock_alloc_base+0x29/0x2e
->  [<ffffffff81f7c6e3>] memblock_alloc+0xb/0xd
->  [<ffffffff81f6c86d>] efi_arch_mem_reserve+0xbc/0x134
->  [<ffffffff81fa3280>] efi_mem_reserve+0x2c/0x31
->  [<ffffffff81fa3280>] ? efi_mem_reserve+0x2c/0x31
->  [<ffffffff81fa40d3>] efi_esrt_init+0x19e/0x1b4
->  [<ffffffff81f6d2dd>] efi_init+0x398/0x44a
->  [<ffffffff81f5c782>] setup_arch+0x415/0xc30
->  [<ffffffff81f55af1>] start_kernel+0x5b/0x3ef
->  [<ffffffff81f55434>] x86_64_start_reservations+0x2f/0x31
->  [<ffffffff81f55520>] x86_64_start_kernel+0xea/0xed
-> ---[ end Kernel panic - not syncing: ERROR: Failed to allocate 0x9f0
->      bytes below 0x0.
-> 
-> An inspection of the memblock configuration reveals that there is no memory
-> available for the allocation:
-> 
-> MEMBLOCK configuration:
->  memory size = 0x0 reserved size = 0x4f339c0
->  memory.cnt  = 0x1
->  memory[0x0]	[0x00000000000000-0xffffffffffffffff], 0x0 bytes on node 0 flags: 0x0
->  reserved.cnt  = 0x4
->  reserved[0x0]	[0x0000000008c000-0x0000000008c9bf], 0x9c0 bytes flags: 0x0
->  reserved[0x1]	[0x0000000009f000-0x000000000fffff], 0x61000 bytes flags: 0x0
->  reserved[0x2]	[0x00000002800000-0x0000000394bfff], 0x114c000 bytes flags: 0x0
->  reserved[0x3]	[0x000000304e4000-0x00000034269fff], 0x3d86000 bytes flags: 0x0
-> 
-> efi_esrt_init is called from efi_init, which in x86 happens before
-> memblock_x86_fill is called. Since ESRT is not critical to boot but to
-> runtime, its initialization can be safely delayed to efi_late_init.
+Please pull the following two patches that fix EFI issues in v4.7.
+They're both tagged for stable.
 
-Ouch. This looks like the right thing to do now that we no longer need
-to reserve the ESRT data before efi_reserve_boot_services() runs.
+The following changes since commit 29b4817d4018df78086157ea3a55c1d9424a7cfc:
 
-Ard, could you confirm that this isn't does not exist for ARM/arm64?
-It looks like reserve_regions() takes care of adding all RAM from the
-EFI memmap, so efi_esrt_init() is free to make allocations.
+  Linux 4.8-rc1 (2016-08-07 18:18:00 -0700)
 
-Actually Ricardo, there's a slight hiccup with this patch in that
-efi_esrt_init() is now being called at very different points during
-boot.
+are available in the git repository at:
 
-ARM/arm64 call it at efi_init() time and the early_memremap()
-calls in the ESRT driver make sense, but those calls don't make sense
-when invoked from efi_late_init() on x86. Look how the ACPI BGRT
-driver makes use of the standard memremap() API.
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
 
-Instead, could you fold this call into the same location as
-efi_find_mirror() and co. in x86's setup_arch()?
+for you to fetch changes up to be6743b7f66c7d8bf7f8a48de9d86a66a177c3a2:
+
+  efi/capsule: Allocate whole capsule into virtual memory (2016-08-09 11:32:55 +0100)
+
+----------------------------------------------------------------
+ * Fix a boot crash on SGI/UV when kexec'ing a kernel with the "noefi"
+   kernel parameter - Alex Thorlton
+
+ * Wholly map EFI capsules with vmap() instead of just the first page
+   with kmap(), so that the capsule driver works on Qualcomm QDF2432,
+   and because the UEFI specification requires the capsule to be fully
+   mapped into the kernel's virtual address space - Austin Christ
+
+----------------------------------------------------------------
+Alex Thorlton (1):
+      x86/platform/uv: Skip UV runtime services mapping in the efi_runtime_disabled case
+
+Austin Christ (1):
+      efi/capsule: Allocate whole capsule into virtual memory
+
+ arch/x86/platform/uv/bios_uv.c        | 3 ++-
+ drivers/firmware/efi/capsule-loader.c | 8 +++++---
+ drivers/firmware/efi/capsule.c        | 6 +++---
+ 3 files changed, 10 insertions(+), 7 deletions(-)
