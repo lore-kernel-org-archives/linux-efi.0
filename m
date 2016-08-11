@@ -1,53 +1,80 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] x86/efi-bgrt: remove the check of the version field
-Date: Thu, 11 Aug 2016 10:48:44 +0200
-Message-ID: <20160811084844.GA4343@gmail.com>
-References: <20160809052546.31462-1-icenowy@aosc.xyz>
- <20160810125201.GA9028@gmail.com>
- <120791470839405@web16h.yandex.ru>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: delay efi_esrt_init to efi_late_init
+Date: Thu, 11 Aug 2016 11:29:55 +0100
+Message-ID: <20160811102955.GB30909@codeblueprint.co.uk>
+References: <1470694104-9278-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <120791470839405-TUpq1W2QCG9xpj1cXAZ9Bg@public.gmane.org>
+In-Reply-To: <1470694104-9278-1-git-send-email-ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-
-* Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org> wrote:
-
+On Mon, 08 Aug, at 03:08:24PM, Ricardo Neri wrote:
+> Commit 7b02d53e7852 introduced a new efi_mem_reserve to reserve the boot
+> services memory regions forever. This reservation involves allocating a new
+> EFI memory range descriptor. However, allocation can only succeed if there
+> is memory available for the allocation. Otherwise, error such as the
+> following may occur:
 > 
+> esrt: Reserving ESRT space from 0x000000003dd6a000 to 0x000000003dd6a010.
+> Kernel panic - not syncing: ERROR: Failed to allocate 0x9f0 bytes below 0x0.
+> CPU: 0 PID: 0 Comm: swapper Not tainted 4.7.0-rc5+ #503
+>  0000000000000000 ffffffff81e03ce0 ffffffff8131dae8 ffffffff81bb6c50
+>  ffffffff81e03d70 ffffffff81e03d60 ffffffff8111f4df 0000000000000018
+>  ffffffff81e03d70 ffffffff81e03d08 00000000000009f0 00000000000009f0
+> Call Trace:
+>  [<ffffffff8131dae8>] dump_stack+0x4d/0x65
+>  [<ffffffff8111f4df>] panic+0xc5/0x206
+>  [<ffffffff81f7c6d3>] memblock_alloc_base+0x29/0x2e
+>  [<ffffffff81f7c6e3>] memblock_alloc+0xb/0xd
+>  [<ffffffff81f6c86d>] efi_arch_mem_reserve+0xbc/0x134
+>  [<ffffffff81fa3280>] efi_mem_reserve+0x2c/0x31
+>  [<ffffffff81fa3280>] ? efi_mem_reserve+0x2c/0x31
+>  [<ffffffff81fa40d3>] efi_esrt_init+0x19e/0x1b4
+>  [<ffffffff81f6d2dd>] efi_init+0x398/0x44a
+>  [<ffffffff81f5c782>] setup_arch+0x415/0xc30
+>  [<ffffffff81f55af1>] start_kernel+0x5b/0x3ef
+>  [<ffffffff81f55434>] x86_64_start_reservations+0x2f/0x31
+>  [<ffffffff81f55520>] x86_64_start_kernel+0xea/0xed
+> ---[ end Kernel panic - not syncing: ERROR: Failed to allocate 0x9f0
+>      bytes below 0x0.
 > 
-> 10.08.2016, 20:52, "Ingo Molnar" <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>:
-> > * Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org> wrote:
-> >
-> >>  Some broken firmwares have a wrongly filled version field in BGRT table.
-> >>  (See http://wiki.osdev.org/Broken_UEFI_implementations )
-> >>
-> >>  As we know, these firmwares can also provide correct BGRT image, although
-> >>  the table is wrong.
-> >>
-> >>  After removing the check of the version field, the kernel can now extract
-> >>  the image correctly, and the information is also correct.
-> >>
-> >>  Tested on a Thinkpad E531 (68854UC).
-> >
-> > What's the practical effects of the bug - what problems does a missing
-> > /sys/firmware/acpi/bgrt/ cause?
+> An inspection of the memblock configuration reveals that there is no memory
+> available for the allocation:
 > 
-> Currently nothing uses this featues. However, one of my friend is trying to
-> develop a splash screen which uses ACPI BGRT, like the splash screen
-> of Windows 8 and above.
-> Without the directory, there won't be any way to retrieve the vendor splash
-> logo.
+> MEMBLOCK configuration:
+>  memory size = 0x0 reserved size = 0x4f339c0
+>  memory.cnt  = 0x1
+>  memory[0x0]	[0x00000000000000-0xffffffffffffffff], 0x0 bytes on node 0 flags: 0x0
+>  reserved.cnt  = 0x4
+>  reserved[0x0]	[0x0000000008c000-0x0000000008c9bf], 0x9c0 bytes flags: 0x0
+>  reserved[0x1]	[0x0000000009f000-0x000000000fffff], 0x61000 bytes flags: 0x0
+>  reserved[0x2]	[0x00000002800000-0x0000000394bfff], 0x114c000 bytes flags: 0x0
+>  reserved[0x3]	[0x000000304e4000-0x00000034269fff], 0x3d86000 bytes flags: 0x0
+> 
+> efi_esrt_init is called from efi_init, which in x86 happens before
+> memblock_x86_fill is called. Since ESRT is not critical to boot but to
+> runtime, its initialization can be safely delayed to efi_late_init.
 
-Ok - please add this information to the changelog.
+Ouch. This looks like the right thing to do now that we no longer need
+to reserve the ESRT data before efi_reserve_boot_services() runs.
 
-Acked-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Ard, could you confirm that this isn't does not exist for ARM/arm64?
+It looks like reserve_regions() takes care of adding all RAM from the
+EFI memmap, so efi_esrt_init() is free to make allocations.
 
-Thanks,
+Actually Ricardo, there's a slight hiccup with this patch in that
+efi_esrt_init() is now being called at very different points during
+boot.
 
-	Ingo
+ARM/arm64 call it at efi_init() time and the early_memremap()
+calls in the ESRT driver make sense, but those calls don't make sense
+when invoked from efi_late_init() on x86. Look how the ACPI BGRT
+driver makes use of the standard memremap() API.
+
+Instead, could you fold this call into the same location as
+efi_find_mirror() and co. in x86's setup_arch()?
