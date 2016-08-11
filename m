@@ -1,65 +1,85 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 1/2] x86/platform/uv: Skip UV runtime services mapping in the efi_runtime_disabled case
-Date: Thu, 11 Aug 2016 11:41:59 +0100
-Message-ID: <1470912120-22831-2-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 2/2] efi/capsule: Allocate whole capsule into virtual memory
+Date: Thu, 11 Aug 2016 11:42:00 +0100
+Message-ID: <1470912120-22831-3-git-send-email-matt@codeblueprint.co.uk>
 References: <1470912120-22831-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1470912120-22831-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Alex Thorlton <athorlton@sgi.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Ingo Molnar <mingo@redhat.com>, Mike Travis <travis@sgi.com>, Russ Anderson <rja@sgi.com>, stable@vger.kernel.org
+Cc: Austin Christ <austinwc@codeaurora.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Bryan O'Donoghue <pure.logic@nexus-software.ie>, Kweh Hock Leong <hock.leong.kweh@intel.com>, "Lee, Chun-Yi" <jlee@suse.com>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Alex Thorlton <athorlton@sgi.com>
+From: Austin Christ <austinwc@codeaurora.org>
 
-This problem has actually been in the UV code for a while, but we didn't
-catch it until recently, because we had been relying on EFI_OLD_MEMMAP
-to allow our systems to boot for a period of time.  We noticed the issue
-when trying to kexec a recent community kernel, where we hit this NULL
-pointer dereference in efi_sync_low_kernel_mappings:
+According to UEFI 2.6 section 7.5.3, the capsule should be in contiguous
+virtual memory and firmware may consume the capsule immediately. To
+correctly implement this functionality, the kernel driver needs to vmap
+the entire capsule at the time it is made available to firmware.
 
-[    0.337515] BUG: unable to handle kernel NULL pointer dereference at 0000000000000880
-[    0.346276] IP: [<ffffffff8105df8d>] efi_sync_low_kernel_mappings+0x5d/0x1b0
+The virtual allocation of the capsule update has been changed from kmap,
+which was only allocating the first page of the update, to vmap, and
+allocates the entire data payload.
 
-The problem doesn't show up with EFI_OLD_MEMMAP because we skip the
-chunk of setup_efi_state that sets the efi_loader_signature for the
-kexec'd kernel.  When the kexec'd kernel boots, it won't set EFI_BOOT in
-setup_arch, so we completely avoid the bug.
-
-We always kexec with noefi on the command line, so this shouldn't be an
-issue, but since we're not actually checking for efi_runtime_disabled in
-uv_bios_init, we end up trying to do EFI runtime callbacks when we
-shouldn't be. This patch just adds a check for efi_runtime_disabled in
-uv_bios_init so that we don't map in uv_systab when runtime_disabled ==
-true.
-
-Signed-off-by: Alex Thorlton <athorlton@sgi.com>
-Cc: Russ Anderson <rja@sgi.com>
-Cc: Mike Travis <travis@sgi.com>
-Cc: Borislav Petkov <bp@suse.de>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: x86@kernel.org
+Signed-off-by: Austin Christ <austinwc@codeaurora.org>
+Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+Reviewed-by: Lee, Chun-Yi <jlee@suse.com>
+Cc: Bryan O'Donoghue <pure.logic@nexus-software.ie>
+Cc: Kweh Hock Leong <hock.leong.kweh@intel.com>
 Cc: <stable@vger.kernel.org> # v4.7
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/platform/uv/bios_uv.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/capsule-loader.c | 8 +++++---
+ drivers/firmware/efi/capsule.c        | 6 +++---
+ 2 files changed, 8 insertions(+), 6 deletions(-)
 
-diff --git a/arch/x86/platform/uv/bios_uv.c b/arch/x86/platform/uv/bios_uv.c
-index 66b2166ea4a1..0df8a0370d32 100644
---- a/arch/x86/platform/uv/bios_uv.c
-+++ b/arch/x86/platform/uv/bios_uv.c
-@@ -187,7 +187,8 @@ EXPORT_SYMBOL_GPL(uv_bios_set_legacy_vga_target);
- void uv_bios_init(void)
- {
- 	uv_systab = NULL;
--	if ((efi.uv_systab == EFI_INVALID_TABLE_ADDR) || !efi.uv_systab) {
-+	if ((efi.uv_systab == EFI_INVALID_TABLE_ADDR) ||
-+	    !efi.uv_systab || efi_runtime_disabled()) {
- 		pr_crit("UV: UVsystab: missing\n");
- 		return;
+diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+index c99c24bc79b0..9ae6c116c474 100644
+--- a/drivers/firmware/efi/capsule-loader.c
++++ b/drivers/firmware/efi/capsule-loader.c
+@@ -16,6 +16,7 @@
+ #include <linux/slab.h>
+ #include <linux/mutex.h>
+ #include <linux/efi.h>
++#include <linux/vmalloc.h>
+ 
+ #define NO_FURTHER_WRITE_ACTION -1
+ 
+@@ -108,14 +109,15 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
+ 	int ret;
+ 	void *cap_hdr_temp;
+ 
+-	cap_hdr_temp = kmap(cap_info->pages[0]);
++	cap_hdr_temp = vmap(cap_info->pages, cap_info->index,
++			VM_MAP, PAGE_KERNEL);
+ 	if (!cap_hdr_temp) {
+-		pr_debug("%s: kmap() failed\n", __func__);
++		pr_debug("%s: vmap() failed\n", __func__);
+ 		return -EFAULT;
  	}
+ 
+ 	ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
+-	kunmap(cap_info->pages[0]);
++	vunmap(cap_hdr_temp);
+ 	if (ret) {
+ 		pr_err("%s: efi_capsule_update() failed\n", __func__);
+ 		return ret;
+diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
+index 53b9fd2293ee..6eedff45e6d7 100644
+--- a/drivers/firmware/efi/capsule.c
++++ b/drivers/firmware/efi/capsule.c
+@@ -190,9 +190,9 @@ efi_capsule_update_locked(efi_capsule_header_t *capsule,
+  * map the capsule described by @capsule with its data in @pages and
+  * send it to the firmware via the UpdateCapsule() runtime service.
+  *
+- * @capsule must be a virtual mapping of the first page in @pages
+- * (@pages[0]) in the kernel address space. That is, a
+- * capsule_header_t that describes the entire contents of the capsule
++ * @capsule must be a virtual mapping of the complete capsule update in the
++ * kernel address space, as the capsule can be consumed immediately.
++ * A capsule_header_t that describes the entire contents of the capsule
+  * must be at the start of the first data page.
+  *
+  * Even though this function will validate that the firmware supports
 -- 
 2.7.3
