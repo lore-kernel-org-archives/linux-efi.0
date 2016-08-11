@@ -1,45 +1,65 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [GIT PULL 0/2] EFI urgent fixes
-Date: Thu, 11 Aug 2016 11:41:58 +0100
-Message-ID: <1470912120-22831-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Austin Christ <austinwc-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH 1/2] x86/platform/uv: Skip UV runtime services mapping in the efi_runtime_disabled case
+Date: Thu, 11 Aug 2016 11:41:59 +0100
+Message-ID: <1470912120-22831-2-git-send-email-matt@codeblueprint.co.uk>
+References: <1470912120-22831-1-git-send-email-matt@codeblueprint.co.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1470912120-22831-1-git-send-email-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Alex Thorlton <athorlton@sgi.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Ingo Molnar <mingo@redhat.com>, Mike Travis <travis@sgi.com>, Russ Anderson <rja@sgi.com>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Please pull the following two patches that fix EFI issues in v4.7.
-They're both tagged for stable.
+From: Alex Thorlton <athorlton@sgi.com>
 
-The following changes since commit 29b4817d4018df78086157ea3a55c1d9424a7cfc:
+This problem has actually been in the UV code for a while, but we didn't
+catch it until recently, because we had been relying on EFI_OLD_MEMMAP
+to allow our systems to boot for a period of time.  We noticed the issue
+when trying to kexec a recent community kernel, where we hit this NULL
+pointer dereference in efi_sync_low_kernel_mappings:
 
-  Linux 4.8-rc1 (2016-08-07 18:18:00 -0700)
+[    0.337515] BUG: unable to handle kernel NULL pointer dereference at 0000000000000880
+[    0.346276] IP: [<ffffffff8105df8d>] efi_sync_low_kernel_mappings+0x5d/0x1b0
 
-are available in the git repository at:
+The problem doesn't show up with EFI_OLD_MEMMAP because we skip the
+chunk of setup_efi_state that sets the efi_loader_signature for the
+kexec'd kernel.  When the kexec'd kernel boots, it won't set EFI_BOOT in
+setup_arch, so we completely avoid the bug.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+We always kexec with noefi on the command line, so this shouldn't be an
+issue, but since we're not actually checking for efi_runtime_disabled in
+uv_bios_init, we end up trying to do EFI runtime callbacks when we
+shouldn't be. This patch just adds a check for efi_runtime_disabled in
+uv_bios_init so that we don't map in uv_systab when runtime_disabled ==
+true.
 
-for you to fetch changes up to be6743b7f66c7d8bf7f8a48de9d86a66a177c3a2:
+Signed-off-by: Alex Thorlton <athorlton@sgi.com>
+Cc: Russ Anderson <rja@sgi.com>
+Cc: Mike Travis <travis@sgi.com>
+Cc: Borislav Petkov <bp@suse.de>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: x86@kernel.org
+Cc: <stable@vger.kernel.org> # v4.7
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+---
+ arch/x86/platform/uv/bios_uv.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-  efi/capsule: Allocate whole capsule into virtual memory (2016-08-09 11:32:55 +0100)
-
-----------------------------------------------------------------
- * Fix a boot crash on SGI/UV when kexec'ing a kernel with the "noefi"
-   kernel parameter - Alex Thorlton
-
- * Wholly map EFI capsules with vmap() instead of just the first page
-   with kmap(), so that the capsule driver works on Qualcomm QDF2432,
-   and because the UEFI specification requires the capsule to be fully
-   mapped into the kernel's virtual address space - Austin Christ
-
-----------------------------------------------------------------
-Alex Thorlton (1):
-      x86/platform/uv: Skip UV runtime services mapping in the efi_runtime_disabled case
-
-Austin Christ (1):
-      efi/capsule: Allocate whole capsule into virtual memory
-
- arch/x86/platform/uv/bios_uv.c        | 3 ++-
- drivers/firmware/efi/capsule-loader.c | 8 +++++---
- drivers/firmware/efi/capsule.c        | 6 +++---
- 3 files changed, 10 insertions(+), 7 deletions(-)
+diff --git a/arch/x86/platform/uv/bios_uv.c b/arch/x86/platform/uv/bios_uv.c
+index 66b2166ea4a1..0df8a0370d32 100644
+--- a/arch/x86/platform/uv/bios_uv.c
++++ b/arch/x86/platform/uv/bios_uv.c
+@@ -187,7 +187,8 @@ EXPORT_SYMBOL_GPL(uv_bios_set_legacy_vga_target);
+ void uv_bios_init(void)
+ {
+ 	uv_systab = NULL;
+-	if ((efi.uv_systab == EFI_INVALID_TABLE_ADDR) || !efi.uv_systab) {
++	if ((efi.uv_systab == EFI_INVALID_TABLE_ADDR) ||
++	    !efi.uv_systab || efi_runtime_disabled()) {
+ 		pr_crit("UV: UVsystab: missing\n");
+ 		return;
+ 	}
+-- 
+2.7.3
