@@ -1,61 +1,63 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH] Map in physical addresses in efi_map_region_fixed
-Date: Mon, 15 Aug 2016 17:07:09 +0200
-Message-ID: <20160815150709.GA6085@nazgul.tnic>
-References: <1470441575-96065-1-git-send-email-athorlton@sgi.com>
- <20160815124258.GF30909@codeblueprint.co.uk>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [PATCH] x86/efi-bgrt: remove the check of the version field
+Date: Mon, 15 Aug 2016 09:09:49 -0700
+Message-ID: <20160815160949.b6sccopomrn54c76@x>
+References: <20160809052546.31462-1-icenowy@aosc.xyz>
+ <20160815125643.GG30909@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20160815124258.GF30909-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20160815125643.GG30909@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Icenowy Zheng <icenowy@aosc.xyz>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Dave Young <dyoung@redhat.com>, Josh Boyer <jwboyer@redhat.com>, Andy Lutomirski <luto@amacapital.net>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 15, 2016 at 01:42:58PM +0100, Matt Fleming wrote:
-> (Cc'ing Boris and Dave)
+On Mon, Aug 15, 2016 at 01:56:43PM +0100, Matt Fleming wrote:
+> On Tue, 09 Aug, at 01:25:46PM, Icenowy Zheng wrote:
+> > Some broken firmwares have a wrongly filled version field in BGRT table.
+> > (See http://wiki.osdev.org/Broken_UEFI_implementations )
+> > 
+> > As we know, these firmwares can also provide correct BGRT image, although
+> > the table is wrong.
+> > 
+> > After removing the check of the version field, the kernel can now extract
+> > the image correctly, and the information is also correct.
+> > 
+> > Tested on a Thinkpad E531 (68854UC).
+> > 
+> > Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
+> > ---
+> >  arch/x86/platform/efi/efi-bgrt.c | 5 -----
+> >  1 file changed, 5 deletions(-)
+> > 
+> > diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
+> > index 6a2f569..f492ea0 100644
+> > --- a/arch/x86/platform/efi/efi-bgrt.c
+> > +++ b/arch/x86/platform/efi/efi-bgrt.c
+> > @@ -47,11 +47,6 @@ void __init efi_bgrt_init(void)
+> >  		       bgrt_tab->header.length, sizeof(*bgrt_tab));
+> >  		return;
+> >  	}
+> > -	if (bgrt_tab->version != 1) {
+> > -		pr_notice("Ignoring BGRT: invalid version %u (expected 1)\n",
+> > -		       bgrt_tab->version);
+> > -		return;
+> > -	}
+> >  	if (bgrt_tab->status & 0xfe) {
+> >  		pr_notice("Ignoring BGRT: reserved status bits are non-zero %u\n",
+> >  		       bgrt_tab->status);
 > 
-> On Fri, 05 Aug, at 06:59:35PM, Alex Thorlton wrote:
-> > This is a simple change to add in the physical mappings as well as the
-> > virtual mappings in efi_map_region_fixed.  The motivation here is to
-> > get access to EFI runtime code that is only available via the 1:1
-> > mappings on a kexec'd kernel.
+> This would be less scary if we checked for known broken and known good
+> version values instead of removing the check altogether, i.e. 0 and 1.
+> 
+> The whole point of the version field is that it tells us about the
+> layout of the BGRT table, so it's not exactly a useless check.
 
-So I don't understand: the whole jumping through hoops so that we have
-stable virtual mappings just so that the kexec-ed kernel can call EFI
-runtime, is now useless?!
+Agreed.  It seems likely that BIOSes would have incorrectly left the
+version at 0.  It seems less likely that they'd set it to some other
+random value.
 
-What if the physical address is occupied by the kexec kernel?
-
-Why do you guys need the physical mapping all of a sudden?
-
-Your patch is basically rendering all the effort moot and we could've
-saved ourselves all that trouble of doing all that virtual address
-mapping and done the 1:1 thing.
-
-Which really is probably simpler since we have an EFI-specific page
-table and running EFI in the kexec-ed kernel would mean basically
-recreating it.
-
-What am I missing?
-
-commit d2f7cbe7b26a74dbbbf8f325b2a6fd01bc34032c
-Author: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Date:   Thu Oct 31 17:25:08 2013 +0100
-
-    x86/efi: Runtime services virtual mapping
-    
-    We map the EFI regions needed for runtime services non-contiguously,
-    with preserved alignment on virtual addresses starting from -4G down
-    for a total max space of 64G. This way, we provide for stable runtime
-    services addresses across kernels so that a kexec'd kernel can still use
-    them.
-
--- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
---
+So, I'd suggest changing the check to pr_debug and continue for 0,
+continue for 1, and pr_notice and abort for anything else.
