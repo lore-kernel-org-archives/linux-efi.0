@@ -1,36 +1,56 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 0/6] Apple device properties
-Date: Mon, 15 Aug 2016 12:54:14 +0100
-Message-ID: <20160815115414.GE30909@codeblueprint.co.uk>
-References: <cover.1469616641.git.lukas@wunner.de>
- <20160804145710.GL3636@codeblueprint.co.uk>
- <20160809133816.GA6571@wunner.de>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] Map in physical addresses in efi_map_region_fixed
+Date: Mon, 15 Aug 2016 13:42:58 +0100
+Message-ID: <20160815124258.GF30909@codeblueprint.co.uk>
+References: <1470441575-96065-1-git-send-email-athorlton@sgi.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160809133816.GA6571@wunner.de>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Lukas Wunner <lukas@wunner.de>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, x86@kernel.org, linux-acpi@vger.kernel.org
+In-Reply-To: <1470441575-96065-1-git-send-email-athorlton-sJ/iWh9BUns@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 09 Aug, at 03:38:16PM, Lukas Wunner wrote:
-> @@ -208,7 +201,10 @@ struct efi_config {
->  __pure const struct efi_config *__efi_early(void);
->  
->  #define efi_call_early(f, ...)						\
-> -	__efi_early()->call(__efi_early()->f, __VA_ARGS__);
-> +	__efi_early()->call(__efi_early()->is64 ?			\
-> +	((efi_boot_services_64_t *)__efi_early()->boot_services)->f :	\
-> +	((efi_boot_services_32_t *)__efi_early()->boot_services)->f,	\
-> +						       __VA_ARGS__);
+(Cc'ing Boris and Dave)
+
+On Fri, 05 Aug, at 06:59:35PM, Alex Thorlton wrote:
+> This is a simple change to add in the physical mappings as well as the
+> virtual mappings in efi_map_region_fixed.  The motivation here is to
+> get access to EFI runtime code that is only available via the 1:1
+> mappings on a kexec'd kernel.
+> 
+> The added call is essentially the kexec analog of the first __map_region
+> that Boris put in efi_map_region in commit d2f7cbe7b26a ("x86/efi:
+> Runtime services virtual mapping").
+> 
+> Signed-off-by: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+> Cc: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+> Cc: Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>
+> Cc: Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+> Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+> Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> ---
+>  arch/x86/platform/efi/efi_64.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+> index 459bcbb..b206126 100644
+> --- a/arch/x86/platform/efi/efi_64.c
+> +++ b/arch/x86/platform/efi/efi_64.c
+> @@ -363,6 +363,7 @@ void __init efi_map_region(efi_memory_desc_t *md)
+>   */
+>  void __init efi_map_region_fixed(efi_memory_desc_t *md)
+>  {
+> +	__map_region(md, md->phys_addr);
+>  	__map_region(md, md->virt_addr);
+>  }
 >  
 
-You cannot use pointers from the firmware directly in mixed mode
-because the kernel is compiled for 64-bits but the firmware is using
-32-bit addresses, so dereferencing a pointer causes a 64-bit load.
-
-That's the reason we deconstruct the tables and copy the addresses
-from the last level - so we don't have to jump through multiple
-pointers.
+This looks fine to me. I'm going to run it through my tests and unless
+anyone complains, apply it for v4.9.
