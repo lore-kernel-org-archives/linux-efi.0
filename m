@@ -1,54 +1,125 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH] x86/efi-bgrt: remove the check of the version field
-Date: Mon, 15 Aug 2016 13:56:43 +0100
-Message-ID: <20160815125643.GG30909@codeblueprint.co.uk>
-References: <20160809052546.31462-1-icenowy@aosc.xyz>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [efi:next 15/19] fs/efivarfs/super.c:180:7-11: ERROR: reference
+ preceded by free on line 162
+Date: Mon, 15 Aug 2016 15:54:12 +0100
+Message-ID: <20160815145412.GH30909@codeblueprint.co.uk>
+References: <alpine.DEB.2.10.1608091401570.2911@hadrien>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160809052546.31462-1-icenowy@aosc.xyz>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Icenowy Zheng <icenowy@aosc.xyz>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>, Dave Young <dyoung@redhat.com>, Josh Boyer <jwboyer@redhat.com>, Andy Lutomirski <luto@amacapital.net>
+In-Reply-To: <alpine.DEB.2.10.1608091401570.2911@hadrien>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kbuild-all-JC7UmRfGjtg@public.gmane.org, Sylvain Chouleur <sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 09 Aug, at 01:25:46PM, Icenowy Zheng wrote:
-> Some broken firmwares have a wrongly filled version field in BGRT table.
-> (See http://wiki.osdev.org/Broken_UEFI_implementations )
+On Tue, 09 Aug, at 02:02:39PM, Julia Lawall wrote:
+> Possibility of a double free.
 > 
-> As we know, these firmwares can also provide correct BGRT image, although
-> the table is wrong.
+> julia
 > 
-> After removing the check of the version field, the kernel can now extract
-> the image correctly, and the information is also correct.
+> ---------- Forwarded message ----------
+> Date: Tue, 9 Aug 2016 19:58:20 +0800
+> From: kbuild test robot <fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> To: kbuild-JC7UmRfGjtg@public.gmane.org
+> Cc: Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>
+> Subject: [efi:next 15/19] fs/efivarfs/super.c:180:7-11: ERROR: reference
+>     preceded by free on line 162
 > 
-> Tested on a Thinkpad E531 (68854UC).
+> CC: kbuild-all-JC7UmRfGjtg@public.gmane.org
+> CC: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> TO: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> CC: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> CC: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > 
-> Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
-> ---
->  arch/x86/platform/efi/efi-bgrt.c | 5 -----
->  1 file changed, 5 deletions(-)
+> tree:   https://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git next
+> head:   302c675f2c1f6a2426709695d6dfe8683cfc7bab
+> commit: 0d22f33bc37ce1c9f10dd304bd335d6feb7796d1 [15/19] efi: Don't use spinlocks for efi vars
+> :::::: branch date: 4 days ago
+> :::::: commit date: 2 weeks ago
 > 
-> diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
-> index 6a2f569..f492ea0 100644
-> --- a/arch/x86/platform/efi/efi-bgrt.c
-> +++ b/arch/x86/platform/efi/efi-bgrt.c
-> @@ -47,11 +47,6 @@ void __init efi_bgrt_init(void)
->  		       bgrt_tab->header.length, sizeof(*bgrt_tab));
->  		return;
->  	}
-> -	if (bgrt_tab->version != 1) {
-> -		pr_notice("Ignoring BGRT: invalid version %u (expected 1)\n",
-> -		       bgrt_tab->version);
-> -		return;
-> -	}
->  	if (bgrt_tab->status & 0xfe) {
->  		pr_notice("Ignoring BGRT: reserved status bits are non-zero %u\n",
->  		       bgrt_tab->status);
+> >> fs/efivarfs/super.c:180:7-11: ERROR: reference preceded by free on line 162
+> 
+> git remote add efi https://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
+> git remote update efi
+> git checkout 0d22f33bc37ce1c9f10dd304bd335d6feb7796d1
+> vim +180 fs/efivarfs/super.c
+> 
+> d68772b7 Matt Fleming     2013-02-08  156  	if (IS_ERR(dentry)) {
+> d68772b7 Matt Fleming     2013-02-08  157  		err = PTR_ERR(dentry);
+> d68772b7 Matt Fleming     2013-02-08  158  		goto fail_inode;
+> d68772b7 Matt Fleming     2013-02-08  159  	}
+> d68772b7 Matt Fleming     2013-02-08  160
+> d68772b7 Matt Fleming     2013-02-08  161  	/* copied by the above to local storage in the dentry. */
+> d68772b7 Matt Fleming     2013-02-08 @162  	kfree(name);
+> d68772b7 Matt Fleming     2013-02-08  163
+> d68772b7 Matt Fleming     2013-02-08  164  	efivar_entry_size(entry, &size);
+> 0d22f33b Sylvain Chouleur 2016-07-15  165  	err = efivar_entry_add(entry, &efivarfs_list);
+> 0d22f33b Sylvain Chouleur 2016-07-15  166  	if (err)
+> 0d22f33b Sylvain Chouleur 2016-07-15  167  		goto fail_inode;
+> d68772b7 Matt Fleming     2013-02-08  168
+> 5955102c Al Viro          2016-01-22  169  	inode_lock(inode);
+> d68772b7 Matt Fleming     2013-02-08  170  	inode->i_private = entry;
+> d68772b7 Matt Fleming     2013-02-08  171  	i_size_write(inode, size + sizeof(entry->var.Attributes));
+> 5955102c Al Viro          2016-01-22  172  	inode_unlock(inode);
+> d68772b7 Matt Fleming     2013-02-08  173  	d_add(dentry, inode);
+> d68772b7 Matt Fleming     2013-02-08  174
+> d68772b7 Matt Fleming     2013-02-08  175  	return 0;
+> d68772b7 Matt Fleming     2013-02-08  176
+> d68772b7 Matt Fleming     2013-02-08  177  fail_inode:
+> d68772b7 Matt Fleming     2013-02-08  178  	iput(inode);
+> d68772b7 Matt Fleming     2013-02-08  179  fail_name:
+> d68772b7 Matt Fleming     2013-02-08 @180  	kfree(name);
+> d68772b7 Matt Fleming     2013-02-08  181  fail:
+> d68772b7 Matt Fleming     2013-02-08  182  	kfree(entry);
+> d68772b7 Matt Fleming     2013-02-08  183  	return err;
+ 
+Indeed. How about this?
 
-This would be less scary if we checked for known broken and known good
-version values instead of removing the check altogether, i.e. 0 and 1.
+---
 
-The whole point of the version field is that it tells us about the
-layout of the BGRT table, so it's not exactly a useless check.
+>From 403180deeb68ce6b78ac0e22c50dc6aa2003dab5 Mon Sep 17 00:00:00 2001
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Date: Mon, 15 Aug 2016 15:29:20 +0100
+Subject: [PATCH] fs/efivarfs: Fix double kfree() in error path
+
+Julia reported that we may double free 'name' in efivarfs_callback(),
+and that this bug was introduced by commit 0d22f33bc37c ("efi: Don't
+use spinlocks for efi vars").
+
+Move one of the kfree()s until after the point at which we know we are
+definitely on the success path.
+
+Reported-by: Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Sylvain Chouleur <sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+---
+ fs/efivarfs/super.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+index e48feb022d82..a0837453dc2c 100644
+--- a/fs/efivarfs/super.c
++++ b/fs/efivarfs/super.c
+@@ -158,14 +158,14 @@ static int efivarfs_callback(efi_char16_t *name16, efi_guid_t vendor,
+ 		goto fail_inode;
+ 	}
+ 
+-	/* copied by the above to local storage in the dentry. */
+-	kfree(name);
+-
+ 	efivar_entry_size(entry, &size);
+ 	err = efivar_entry_add(entry, &efivarfs_list);
+ 	if (err)
+ 		goto fail_inode;
+ 
++	/* copied by the above to local storage in the dentry. */
++	kfree(name);
++
+ 	inode_lock(inode);
+ 	inode->i_private = entry;
+ 	i_size_write(inode, size + sizeof(entry->var.Attributes));
+-- 
+2.7.3
