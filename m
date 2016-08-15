@@ -1,55 +1,36 @@
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH] x86/efi: Remove unused find_bits() function
-Date: Mon, 15 Aug 2016 13:52:34 +0200
-Message-ID: <494a2f40906bb220168d835b37e609232fe0ffdf.1471261734.git.lukas@wunner.de>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH 0/6] Apple device properties
+Date: Mon, 15 Aug 2016 12:54:14 +0100
+Message-ID: <20160815115414.GE30909@codeblueprint.co.uk>
+References: <cover.1469616641.git.lukas@wunner.de>
+ <20160804145710.GL3636@codeblueprint.co.uk>
+ <20160809133816.GA6571@wunner.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160809133816.GA6571@wunner.de>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Lukas Wunner <lukas@wunner.de>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, x86@kernel.org, linux-acpi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Left behind by commit fc37206427ce ("efi/libstub: Move Graphics Output
-Protocol handling to generic code").
+On Tue, 09 Aug, at 03:38:16PM, Lukas Wunner wrote:
+> @@ -208,7 +201,10 @@ struct efi_config {
+>  __pure const struct efi_config *__efi_early(void);
+>  
+>  #define efi_call_early(f, ...)						\
+> -	__efi_early()->call(__efi_early()->f, __VA_ARGS__);
+> +	__efi_early()->call(__efi_early()->is64 ?			\
+> +	((efi_boot_services_64_t *)__efi_early()->boot_services)->f :	\
+> +	((efi_boot_services_32_t *)__efi_early()->boot_services)->f,	\
+> +						       __VA_ARGS__);
+>  
 
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
----
- arch/x86/boot/compressed/eboot.c | 23 -----------------------
- 1 file changed, 23 deletions(-)
+You cannot use pointers from the firmware directly in mixed mode
+because the kernel is compiled for 64-bits but the firmware is using
+32-bit addresses, so dereferencing a pointer causes a 64-bit load.
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index ec6d2ef..f7fc85b 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -286,29 +286,6 @@ void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
- 	}
- }
- 
--static void find_bits(unsigned long mask, u8 *pos, u8 *size)
--{
--	u8 first, len;
--
--	first = 0;
--	len = 0;
--
--	if (mask) {
--		while (!(mask & 0x1)) {
--			mask = mask >> 1;
--			first++;
--		}
--
--		while (mask & 0x1) {
--			mask = mask >> 1;
--			len++;
--		}
--	}
--
--	*pos = first;
--	*size = len;
--}
--
- static efi_status_t
- __setup_efi_pci32(efi_pci_io_protocol_32 *pci, struct pci_setup_rom **__rom)
- {
--- 
-2.8.1
+That's the reason we deconstruct the tables and copy the addresses
+from the last level - so we don't have to jump through multiple
+pointers.
