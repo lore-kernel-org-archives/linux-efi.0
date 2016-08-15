@@ -1,85 +1,110 @@
-From: Lukas Wunner <lukas@wunner.de>
-Subject: Re: [PATCH 0/6] Apple device properties
-Date: Mon, 15 Aug 2016 18:13:58 +0200
-Message-ID: <20160815161358.GA9603@wunner.de>
-References: <cover.1469616641.git.lukas@wunner.de>
- <20160804145710.GL3636@codeblueprint.co.uk>
- <20160809133816.GA6571@wunner.de>
- <20160815115414.GE30909@codeblueprint.co.uk>
+From: Alex Thorlton <athorlton@sgi.com>
+Subject: Re: [PATCH] Map in physical addresses in efi_map_region_fixed
+Date: Mon, 15 Aug 2016 13:47:31 -0500
+Message-ID: <20160815184731.GS214806@stormcage.americas.sgi.com>
+References: <1470441575-96065-1-git-send-email-athorlton@sgi.com>
+ <20160815124258.GF30909@codeblueprint.co.uk>
+ <20160815150709.GA6085@nazgul.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20160815115414.GE30909@codeblueprint.co.uk>
+In-Reply-To: <20160815150709.GA6085@nazgul.tnic>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, x86@kernel.org, linux-acpi@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Alex Thorlton <athorlton@sgi.com>, linux-kernel@vger.kernel.org, Russ Anderson <rja@sgi.com>, Dimitri Sivanich <sivanich@sgi.com>, Mike Travis <travis@sgi.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, Dave Young <dyoung@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 15, 2016 at 12:54:14PM +0100, Matt Fleming wrote:
-> On Tue, 09 Aug, at 03:38:16PM, Lukas Wunner wrote:
-> > @@ -208,7 +201,10 @@ struct efi_config {
-> >  __pure const struct efi_config *__efi_early(void);
-> >  
-> >  #define efi_call_early(f, ...)					\
-> > -	__efi_early()->call(__efi_early()->f, __VA_ARGS__);
-> > +	__efi_early()->call(__efi_early()->is64 ?			\
-> > +	((efi_boot_services_64_t *)__efi_early()->boot_services)->f :	\
-> > +	((efi_boot_services_32_t *)__efi_early()->boot_services)->f,	\
-> > +						       __VA_ARGS__);
-> >  
+On Mon, Aug 15, 2016 at 05:07:09PM +0200, Borislav Petkov wrote:
+> On Mon, Aug 15, 2016 at 01:42:58PM +0100, Matt Fleming wrote:
+> > (Cc'ing Boris and Dave)
+> > 
+> > On Fri, 05 Aug, at 06:59:35PM, Alex Thorlton wrote:
+> > > This is a simple change to add in the physical mappings as well as the
+> > > virtual mappings in efi_map_region_fixed.  The motivation here is to
+> > > get access to EFI runtime code that is only available via the 1:1
+> > > mappings on a kexec'd kernel.
 > 
-> You cannot use pointers from the firmware directly in mixed mode
-> because the kernel is compiled for 64-bits but the firmware is using
-> 32-bit addresses, so dereferencing a pointer causes a 64-bit load.
+> So I don't understand: the whole jumping through hoops so that we have
+> stable virtual mappings just so that the kexec-ed kernel can call EFI
+> runtime, is now useless?!
 
-Please behold the resulting binary code, which uses a 32-bit load,
-not a 64-bit load (note the "mov edi, dword [ds:rax+0x2c]").
+Well, anyone who is using the mappings in -4G down range still needs
+your code to map their stuff into the appropriate spot in the kexec'd
+kernel, so anybody who is doing things in the most up-to-date manner
+still makes use of your new code, right?
 
-This is a call to AllocatePool *with* my patch:
+AFAIK, we pass up the efi_runtime_map to the kexec'd kernel, and then
+process the memory descriptors one by one, mapping in their virtual
+addresses during kexec_enter_virtual_mode.  All of this relies on your
+efforts to pass up the virtual mappings.  The only thing we're adding
+here is the physical mappings, to match what is availble in the primary
+kernel.
 
-0x22c1         mov        rax, qword [ds:efi_early]
-0x22c8         add        rdx, 0x10                  ; buffer size argument
-0x22cc         cmp        byte [ds:rax+0x28], 0x0    ; !efi_early->is64 ?
-0x22d0         mov        r8, qword [ds:rax+0x20]    ; efi_early->call()
-0x22d4         mov        rax, qword [ds:rax+0x10]   ; efi_early->boot_services
-0x22d8         je         0x2410
-0x22de         mov        rdi, qword [ds:rax+0x40]   ; allocate_pool (64 bit)
-0x22e2         xor        eax, eax
-0x22e4         mov        rcx, r13                   ; buffer argument
-0x22e7         mov        esi, 0x2                   ; EfiLoaderData argument
-0x22ec         call       r8
-...
-0x2410         mov        edi, dword [ds:rax+0x2c]   ; allocate_pool (32 bit)
-0x2413         jmp        0x22e2
+> What if the physical address is occupied by the kexec kernel?
 
-The same *without* my patch:
+Ah, that's a good question.  I usually don't force the placement of my
+crashkernel, so I can't exactly comment intelligently on what will
+happen in that situation.  I will look into this, but in our case, I
+believe that the primary kernel would either fail to boot, or fail to
+load the kexec kernel if we placed it over the range where are EFI code
+gets mapped in, which I think is an issue even without this patch.
 
-0x1d41         mov        r8, qword [ds:efi_early]
-0x1d48         add        r15, 0x40
-0x1d4c         mov        rcx, qword [ss:rsp-0x10+arg_20] ; buffer argument
-0x1d51         mov        rdx, r15                   ; buffer size argument
-0x1d54         mov        esi, 0x2                   ; EfiLoaderData argument
-0x1d59         mov        rdi, qword [ds:r8+0x10]    ; allocate_pool
-0x1d5d         call       qword [ds:r8+0x58]         ; efi_early->call
+IIRC, the crashkernel memory gets reserved really early, so I'd imagine
+we'd hit the former problem, since we will try to remap into that same
+space in uv_bios_init.
 
-So it looks to me like my patch should work just fine on 32-bit,
-even though I cannot verify it through testing.
+This is sort of a hand-wavey answer - I will investigate the his further to
+make sure that I'm not making any stupid assumptions (there's a good
+chance that I am :)
 
-The ARM folks afford invocation of arbitrary boot services, it just
-seemed natural to me to allow the same for x86. The portion of the
-stub code which is shared between arches cannot use more than the
-8 boot services supported by x86 even though ARM would be capable
-of using all of them.
+> Why do you guys need the physical mapping all of a sudden?
 
-Of course the binary code with my patch is longer, less readable,
-and needs to follow multiple indirections and I can understand if
-you would rather stay with the current approach for these reasons.
+It's not that we need it all of the sudden, necessarily, it's just that
+we've had to make other changes to make things work with the new,
+(almost) completely isolated, EFI page tables.  We ended up choosing the
+lesser of two evils, and have decided to temporarily rely on the
+physical address of our runtime code, instead of continuing to rely on
+EFI_OLD_MEMMAP.
 
-But I would like to understand the "cannot jump through pointers at
-runtime" argument because the binary code looks to me like it should
-work on 32 bit. I guess I must be missing something obvious?
+I guess what I'm saying is, if we hadn't been relying on some
+semi-undefined behavior in the EFI memory mapping scheme, we would've
+been relying on the physical address for quite a while, since nobody
+would have been mapping in the virtual address for us.
 
-Thanks,
+It's important to note that we've been dancing back and forth between
+workarounds for some slightly inorrect assumptions, and some actual bug
+fixes.  We're working to get everything 100% compatible with the new
+memory mapping schemes, but there're a few pieces of the puzzle we
+haven't gotten around to yet.
 
-Lukas
+> Your patch is basically rendering all the effort moot and we could've
+> saved ourselves all that trouble of doing all that virtual address
+> mapping and done the 1:1 thing.
+> 
+> Which really is probably simpler since we have an EFI-specific page
+> table and running EFI in the kexec-ed kernel would mean basically
+> recreating it.
+> 
+> What am I missing?
+
+I don't think it renders all of your effort worthless.  It just allows
+those who haven't had a chance to completely update their code to work
+with the new mapping schemes a way to utilize EFI runtime callbacks, in
+a kexec'd kernel.
+
+I do understand that, in a perfect world, we would be able to just hop
+right in and use your memory mapping scheme.  At the same time, I don't
+see how this is that much different from what we already do in the
+primary, non-kexec'd kernel.
+
+If there are strong objections to this change, I won't pursue it
+further.  We will be able to achieve the same effect once we've had a
+chance to update our code to register a callback with
+SetVirtualAddressMap to fix up our function pointer.  This is on my
+upcoming to-do list, but it'll be a little bit before I have a chance to
+get it finished.
+
+Thanks for the input, Boris!
+
+- Alex
