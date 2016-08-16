@@ -1,26 +1,50 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Remove unused find_bits() function
-Date: Tue, 16 Aug 2016 12:34:18 +0100
-Message-ID: <20160816113418.GL30909@codeblueprint.co.uk>
-References: <494a2f40906bb220168d835b37e609232fe0ffdf.1471261734.git.lukas@wunner.de>
+Subject: Re: [PATCH v2] EFI: make for_each_efi_memory_desc_in_map() cope with
+ running on Xen
+Date: Tue, 16 Aug 2016 12:49:17 +0100
+Message-ID: <20160816114917.GM30909@codeblueprint.co.uk>
+References: <57B1F6690200007800106095@prv-mh.provo.novell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <494a2f40906bb220168d835b37e609232fe0ffdf.1471261734.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+In-Reply-To: <57B1F6690200007800106095-rw/UEucdPrvD8XXLLHKrIiOjQekVJEpY@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>
+Cc: Vitaly Kuznetsov <vkuznets-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 15 Aug, at 01:52:34PM, Lukas Wunner wrote:
-> Left behind by commit fc37206427ce ("efi/libstub: Move Graphics Output
-> Protocol handling to generic code").
+On Mon, 15 Aug, at 09:05:45AM, Jan Beulich wrote:
+> While commit 55f1ea15216 ("efi: Fix for_each_efi_memory_desc_in_map()
+> for empty memmaps") made an attempt to deal with empty memory maps, it
+> didn't address the case where the desc_size field never gets set, as is
+> apparently the case when running under Xen.
 > 
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+> Reported-by: <lists-Ilq5uHa1fWNWk0Htik3J/w@public.gmane.org>
+> Cc: Vitaly Kuznetsov <vkuznets-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>
+> Signed-off-by: Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>
+> Tested-by: <lists-Ilq5uHa1fWNWk0Htik3J/w@public.gmane.org>
 > ---
->  arch/x86/boot/compressed/eboot.c | 23 -----------------------
->  1 file changed, 23 deletions(-)
+> v2: Add comment.
+> ---
+>  include/linux/efi.h |    6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+> 
+> --- 4.8-rc2/include/linux/efi.h
+> +++ 4.8-rc2-EFI-memdesc-iterator-Xen/include/linux/efi.h
+> @@ -946,7 +946,11 @@ extern int efi_memattr_apply_permissions
+>  /* Iterate through an efi_memory_map */
+>  #define for_each_efi_memory_desc_in_map(m, md)				   \
+>  	for ((md) = (m)->map;						   \
+> -	     ((void *)(md) + (m)->desc_size) <= (m)->map_end;		   \
+> +	     /*								   \
+> +	      * Leverage wrapping of the calculation to avoid an infinite  \
+> +	      * loop when all three values are zero.			   \
+> +	      */							   \
+> +	     ((void *)(md) + (m)->desc_size - 1) < (m)->map_end;	   \
+>  	     (md) = (void *)(md) + (m)->desc_size)
+>  
 
-Thanks Lukas, applied.
+Thanks Jan, applied to the 'urgent' EFI queue and tagged for stable.
+I'll send it out this week.
