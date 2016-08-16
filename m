@@ -1,68 +1,78 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v2] efi: arm64: add debugfs node to dump UEFI runtime page
- tables
-Date: Tue, 16 Aug 2016 14:13:21 +0200
-Message-ID: <1471349601-31257-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH] Map in physical addresses in efi_map_region_fixed
+Date: Tue, 16 Aug 2016 13:30:28 +0100
+Message-ID: <20160816123028.GN30909@codeblueprint.co.uk>
+References: <1470441575-96065-1-git-send-email-athorlton@sgi.com>
+ <20160815124258.GF30909@codeblueprint.co.uk>
+ <20160815150709.GA6085@nazgul.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt@codeblueprint.co.uk, mark.rutland@arm.com
-Cc: leif.lindholm@linaro.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160815150709.GA6085@nazgul.tnic>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Alex Thorlton <athorlton@sgi.com>, linux-kernel@vger.kernel.org, Russ Anderson <rja@sgi.com>, Dimitri Sivanich <sivanich@sgi.com>, Mike Travis <travis@sgi.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, Dave Young <dyoung@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-Register the debugfs node 'efi_page_tables' to allow the UEFI runtime
-page tables to be inspected. Note that ARM does not have 'asm/ptdump.h'
-[yet] so for now, this is arm64 only.
-
-Acked-by: Mark Rutland <mark.rutland@arm.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
-v2: test for CONFIG_ARM64_PTDUMP rather than CONFIG_ARM64
-    add Mark's ack
-
- drivers/firmware/efi/arm-runtime.c | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
-
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index c394b81fe452..7ff61749acef 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -39,6 +39,26 @@ static struct mm_struct efi_mm = {
- 	.mmlist			= LIST_HEAD_INIT(efi_mm.mmlist),
- };
+On Mon, 15 Aug, at 05:07:09PM, Borislav Petkov wrote:
+> On Mon, Aug 15, 2016 at 01:42:58PM +0100, Matt Fleming wrote:
+> > (Cc'ing Boris and Dave)
+> > 
+> > On Fri, 05 Aug, at 06:59:35PM, Alex Thorlton wrote:
+> > > This is a simple change to add in the physical mappings as well as the
+> > > virtual mappings in efi_map_region_fixed.  The motivation here is to
+> > > get access to EFI runtime code that is only available via the 1:1
+> > > mappings on a kexec'd kernel.
+> 
+> So I don't understand: the whole jumping through hoops so that we have
+> stable virtual mappings just so that the kexec-ed kernel can call EFI
+> runtime, is now useless?!
+> 
+> What if the physical address is occupied by the kexec kernel?
  
-+#ifdef CONFIG_ARM64_PTDUMP
-+#include <asm/ptdump.h>
-+
-+static struct ptdump_info efi_ptdump_info = {
-+	.mm		= &efi_mm,
-+	.markers	= (struct addr_marker[]){
-+		{ 0,		"UEFI runtime start" },
-+		{ TASK_SIZE_64,	"UEFI runtime end" }
-+	},
-+	.base_addr	= 0,
-+};
-+
-+static int __init ptdump_init(void)
-+{
-+	return ptdump_register(&efi_ptdump_info, "efi_page_tables");
-+}
-+device_initcall(ptdump_init);
-+
-+#endif
-+
- static bool __init efi_virtmap_init(void)
- {
- 	efi_memory_desc_t *md;
--- 
-2.7.4
+That's impossible, because that would mean we loaded the kexec kernel
+over the top of physical pages of EFI services. We still need to be
+able to invoke EFI services from kexec - we just can't change their
+virtual mappings.
+
+Unless I've misunderstood your question.
+
+> Why do you guys need the physical mapping all of a sudden?
+ 
+This is because of the way that the SGI firmware works and that the
+"new" virtual address mappings are usable on SGI+kexec now.
+
+> Your patch is basically rendering all the effort moot and we could've
+> saved ourselves all that trouble of doing all that virtual address
+> mapping and done the 1:1 thing.
+ 
+No, some Apple platforms will not boot if SetVirtualAddressMap()
+passes 1:1 mappings, and we only enter the firmware via the 1:1
+mappings for EFI mixed mode calls. We're still using the virtual
+runtime mappings in the commit you reference below most of the time.
+ 
+> Which really is probably simpler since we have an EFI-specific page
+> table and running EFI in the kexec-ed kernel would mean basically
+> recreating it.
+> 
+> What am I missing?
+> 
+> commit d2f7cbe7b26a74dbbbf8f325b2a6fd01bc34032c
+> Author: Borislav Petkov <bp@suse.de>
+> Date:   Thu Oct 31 17:25:08 2013 +0100
+> 
+>     x86/efi: Runtime services virtual mapping
+>     
+>     We map the EFI regions needed for runtime services non-contiguously,
+>     with preserved alignment on virtual addresses starting from -4G down
+>     for a total max space of 64G. This way, we provide for stable runtime
+>     services addresses across kernels so that a kexec'd kernel can still use
+>     them.
+> 
+> -- 
+> Regards/Gruss,
+>     Boris.
+> 
+> ECO tip #101: Trim your mails when you reply.
+> --
