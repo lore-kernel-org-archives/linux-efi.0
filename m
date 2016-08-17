@@ -1,52 +1,42 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] Map in physical addresses in efi_map_region_fixed
-Date: Wed, 17 Aug 2016 15:01:51 +0800
-Message-ID: <20160817070151.GC5498@dhcp-128-65.nay.redhat.com>
-References: <1470441575-96065-1-git-send-email-athorlton@sgi.com>
- <20160815124258.GF30909@codeblueprint.co.uk>
- <20160815150709.GA6085@nazgul.tnic>
- <20160815184731.GS214806@stormcage.americas.sgi.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160815184731.GS214806-7ppMa7wkY9tKToyKb8PD+Zs2JHu2awxn0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Andrzej Hajda <a.hajda@samsung.com>
+Subject: [PATCH] efi: fix handling error value in fdt_find_uefi_params
+Date: Wed, 17 Aug 2016 12:00:40 +0200
+Message-ID: <1471428040-23463-1-git-send-email-a.hajda@samsung.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>, "open list:EXTENSIBLE FIRMWARE INTERFACE
+	EFI" <linux-efi@vger.kernel.org>
+Cc: Andrzej Hajda <a.hajda@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-> > Why do you guys need the physical mapping all of a sudden?
-> 
-> It's not that we need it all of the sudden, necessarily, it's just that
-> we've had to make other changes to make things work with the new,
-> (almost) completely isolated, EFI page tables.  We ended up choosing the
-> lesser of two evils, and have decided to temporarily rely on the
-> physical address of our runtime code, instead of continuing to rely on
-> EFI_OLD_MEMMAP.
+of_get_flat_dt_subnode_by_name can return negative value in case of error.
 
-In efi_map_region, there is already mapped md->phys_addr for broken
-firmware. SGI still need EFI_OLD_MEMMAP? I means in 1st kernel instead
-of kexec kernel.
+The problem has been detected using semantic patch
+scripts/coccinelle/tests/unsigned_lesser_than_zero.cocci
 
-void __init efi_map_region(efi_memory_desc_t *md)
-{
-        unsigned long size = md->num_pages << PAGE_SHIFT;
-        u64 pa = md->phys_addr;
+Signed-off-by: Andrzej Hajda <a.hajda@samsung.com>
+---
+ drivers/firmware/efi/efi.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-        if (efi_enabled(EFI_OLD_MEMMAP))
-                return old_map_region(md);
-
-        /*
-         * Make sure the 1:1 mappings are present as a catch-all for
-         * b0rked
-         * firmware which doesn't update all internal pointers after
-         * switching
-         * to virtual mode and would otherwise crap on us.
-         */
-        __map_region(md, md->phys_addr);
-
-[snip]
-
-Thanks
-Dave
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 5a2631a..7dd2e2d 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -657,9 +657,12 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+ 		}
+ 
+ 		if (subnode) {
+-			node = of_get_flat_dt_subnode_by_name(node, subnode);
+-			if (node < 0)
++			int err = of_get_flat_dt_subnode_by_name(node, subnode);
++
++			if (err < 0)
+ 				return 0;
++
++			node = err;
+ 		}
+ 
+ 		return __find_uefi_params(node, info, dt_params[i].params);
+-- 
+1.9.1
