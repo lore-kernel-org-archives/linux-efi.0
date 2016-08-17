@@ -1,42 +1,35 @@
 From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Subject: Re: [PATCH 2/6] ACPI / bus: Make acpi_get_first_physical_node() public
-Date: Wed, 17 Aug 2016 02:38:15 +0200
-Message-ID: <1821462.QyPXGhZaWJ@vostro.rjw.lan>
-References: <cover.1469616641.git.lukas@wunner.de> <a0bb3346635e3bd8caf6cf735ceba684e3fde2fa.1469616641.git.lukas@wunner.de>
+Subject: Re: [PATCH 4/6] driver core: Don't leak secondary fwnode on device removal
+Date: Wed, 17 Aug 2016 02:38:50 +0200
+Message-ID: <6868582.iUcUV1Tb36@vostro.rjw.lan>
+References: <cover.1469616641.git.lukas@wunner.de> <ef34b0d31d1fb9bc6a48a07d265fd103527b3f30.1469616641.git.lukas@wunner.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7Bit
 Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <a0bb3346635e3bd8caf6cf735ceba684e3fde2fa.1469616641.git.lukas@wunner.de>
+In-Reply-To: <ef34b0d31d1fb9bc6a48a07d265fd103527b3f30.1469616641.git.lukas@wunner.de>
 Sender: linux-acpi-owner@vger.kernel.org
 To: Lukas Wunner <lukas@wunner.de>
-Cc: linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, Pierre Moreau <pierre.morrow@free.fr>, Aleksey Makarov <aleksey.makarov@linaro.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, linux-acpi@vger.kernel.org
+Cc: linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, Pierre Moreau <pierre.morrow@free.fr>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-acpi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
 On Thursday, July 28, 2016 02:25:41 AM Lukas Wunner wrote:
-> Following the fwnode of a device is currently a one-way road: We provide
-> ACPI_COMPANION() to obtain the fwnode but there's no (public) method to
-> do the reverse. Granted, there may be multiple physical_nodes, but often
-> the first one in the list is sufficient.
+> If device_add_property_set() is called for a device, a secondary fwnode
+> is allocated and assigned to the device but currently not freed once the
+> device is removed.
 > 
-> A handy function to obtain it was introduced with commit 3b95bd160547
-> ("ACPI: introduce a function to find the first physical device"), but
-> currently it's only available internally.
+> This can be triggered on Apple Macs if a Thunderbolt device is plugged
+> in on boot since Apple's NHI EFI driver sets a number of properties for
+> that device which are leaked on unplug.
 > 
-> We're about to add an EFI Device Path parser which needs this function.
-> Consider the following device path: ACPI(PNP0A03,0)/PCI(28,2)/PCI(0,0)
-> The PCI root is encoded as an ACPI device in the path, so the parser
-> has to find the corresponding ACPI device, then find its physical node,
-> find the PCI bridge in slot 1c (decimal 28), function 2 below it and
-> finally find the PCI device in slot 0, function 0.
-> 
-> To this end, make acpi_get_first_physical_node() public.
-> 
-> Cc: Aleksey Makarov <aleksey.makarov@linaro.org>
+> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 > Cc: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+> Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
+> Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> Cc: Andreas Noever <andreas.noever@gmail.com>
 > Signed-off-by: Lukas Wunner <lukas@wunner.de>
 
-ACK
+ACK, or I can apply it directly if you want me to do that.
 
 Thanks,
 Rafael
