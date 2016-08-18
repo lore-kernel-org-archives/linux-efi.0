@@ -1,59 +1,53 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] Map in physical addresses in efi_map_region_fixed
-Date: Thu, 18 Aug 2016 14:11:13 +0800
-Message-ID: <20160818061113.GA26001@dhcp-128-65.nay.redhat.com>
-References: <1470441575-96065-1-git-send-email-athorlton@sgi.com>
- <20160815124258.GF30909@codeblueprint.co.uk>
- <20160815150709.GA6085@nazgul.tnic>
- <20160815184731.GS214806@stormcage.americas.sgi.com>
- <20160817070151.GC5498@dhcp-128-65.nay.redhat.com>
- <20160817160031.GV214806@stormcage.americas.sgi.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH 0/6] Apple device properties
+Date: Thu, 18 Aug 2016 21:34:33 +0100
+Message-ID: <20160818203433.GP30909@codeblueprint.co.uk>
+References: <cover.1469616641.git.lukas@wunner.de>
+ <20160804145710.GL3636@codeblueprint.co.uk>
+ <20160809133816.GA6571@wunner.de>
+ <20160815115414.GE30909@codeblueprint.co.uk>
+ <20160815161358.GA9603@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20160817160031.GV214806-7ppMa7wkY9tKToyKb8PD+Zs2JHu2awxn0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <20160815161358.GA9603@wunner.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Lukas Wunner <lukas@wunner.de>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, x86@kernel.org, linux-acpi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 08/17/16 at 11:00am, Alex Thorlton wrote:
-> On Wed, Aug 17, 2016 at 03:01:51PM +0800, Dave Young wrote:
-> > > > Why do you guys need the physical mapping all of a sudden?
-> > > 
-> > > It's not that we need it all of the sudden, necessarily, it's just that
-> > > we've had to make other changes to make things work with the new,
-> > > (almost) completely isolated, EFI page tables.  We ended up choosing the
-> > > lesser of two evils, and have decided to temporarily rely on the
-> > > physical address of our runtime code, instead of continuing to rely on
-> > > EFI_OLD_MEMMAP.
-> > 
-> > In efi_map_region, there is already mapped md->phys_addr for broken
-> > firmware. SGI still need EFI_OLD_MEMMAP? I means in 1st kernel instead
-> > of kexec kernel.
+On Mon, 15 Aug, at 06:13:58PM, Lukas Wunner wrote:
 > 
-> We're actually in the middle of trying to move *away* from
-> EFI_OLD_MEMMAP, which is why we're just starting to uncover some of
-> these things.  efi_map_region covers us on the primary kernel, because
-> it maps in the physical address of each md (as you note here), but that
-> little piece is missing in the kexec'd kernel.  So, our primary kernel
-> works without efi=old_map, but the second kernel won't, without this
-> change (supplying "noefi" on the kexec command line also works, but then
-> we don't have any of our runtime stuff available).
-> 
-> As noted in a previous message, we're aware that our code needs a little
-> more work to be "perfect," but this small change buys us most of (all
-> of?) the stuff we'd get by implementing the other changes that we're
-> aware we need to make, i.e. update our runtime function pointer to its
-> efi_va during SetVirtualAddressMap, at least from a kexec perspective.
+> But I would like to understand the "cannot jump through pointers at
+> runtime" argument because the binary code looks to me like it should
+> work on 32 bit. I guess I must be missing something obvious?
 
-Thanks for explanation, I still do not get why the original ioremap way
-works if SetVirtualAddressMapdo does not update runtime function
-pointer.
+Ah no, I forgot that efi_boot_services_{32,64}_t doesn't contain
+pointers - it contains u32/u64 objects. So yeah, your patch looks
+fine.
 
-But if it fixes the problem in primary kernel, it should be fine to do
-same in kexec kernel. 
+It does trigger the following warnings when building for i386 though,
 
-Thanks
-Dave
+In file included from /dev/shm/mfleming/git/efi/drivers/firmware/efi/libstub/efi-stub-helper.c:14:0:
+/dev/shm/mfleming/git/efi/drivers/firmware/efi/libstub/efi-stub-helper.c: In function ‘efi_get_memory_map’:
+/dev/shm/mfleming/git/efi/arch/x86/include/asm/efi.h:205:3: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  ((efi_boot_services_64_t *)__efi_early()->boot_services)->f : \
+   ^
+/dev/shm/mfleming/git/efi/drivers/firmware/efi/libstub/efi-stub-helper.c:85:11: note: in expansion of macro ‘efi_call_early’
+  status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+           ^
+/dev/shm/mfleming/git/efi/arch/x86/include/asm/efi.h:206:3: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  ((efi_boot_services_32_t *)__efi_early()->boot_services)->f, \
+   ^
+/dev/shm/mfleming/git/efi/drivers/firmware/efi/libstub/efi-stub-helper.c:85:11: note: in expansion of macro ‘efi_call_early’
+  status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+           ^
+/dev/shm/mfleming/git/efi/arch/x86/include/asm/efi.h:205:3: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  ((efi_boot_services_64_t *)__efi_early()->boot_services)->f : \
+   ^
+/dev/shm/mfleming/git/efi/drivers/firmware/efi/libstub/efi-stub-helper.c:92:11: note: in expansion of macro ‘efi_call_early’
+  status = efi_call_early(get_memory_map, map_size, m,
+           ^
+etc.
