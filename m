@@ -1,53 +1,29 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 0/6] Apple device properties
-Date: Thu, 18 Aug 2016 21:34:33 +0100
-Message-ID: <20160818203433.GP30909@codeblueprint.co.uk>
-References: <cover.1469616641.git.lukas@wunner.de>
- <20160804145710.GL3636@codeblueprint.co.uk>
- <20160809133816.GA6571@wunner.de>
- <20160815115414.GE30909@codeblueprint.co.uk>
- <20160815161358.GA9603@wunner.de>
+Subject: Re: [PATCH] x86/efi-bgrt: remove the check of the version field
+Date: Thu, 18 Aug 2016 21:41:30 +0100
+Message-ID: <20160818204130.GQ30909@codeblueprint.co.uk>
+References: <20160809052546.31462-1-icenowy@aosc.xyz>
+ <20160815125643.GG30909@codeblueprint.co.uk>
+ <20160817054413.GB5498@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20160815161358.GA9603@wunner.de>
+In-Reply-To: <20160817054413.GB5498@dhcp-128-65.nay.redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Lukas Wunner <lukas@wunner.de>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, x86@kernel.org, linux-acpi@vger.kernel.org
+To: Dave Young <dyoung@redhat.com>
+Cc: Icenowy Zheng <icenowy@aosc.xyz>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>, Josh Boyer <jwboyer@redhat.com>, Andy Lutomirski <luto@amacapital.net>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 15 Aug, at 06:13:58PM, Lukas Wunner wrote:
+On Wed, 17 Aug, at 01:44:13PM, Dave Young wrote:
 > 
-> But I would like to understand the "cannot jump through pointers at
-> runtime" argument because the binary code looks to me like it should
-> work on 32 bit. I guess I must be missing something obvious?
+> Could we add some quirk for these broken hardware instead of changing
+> the normal code?
 
-Ah no, I forgot that efi_boot_services_{32,64}_t doesn't contain
-pointers - it contains u32/u64 objects. So yeah, your patch looks
-fine.
+I'd prefer not to do that if possible. Due to the way that the BIOS
+ecosystem works, this kind of broken firmware spreads across the
+industry, appearing in newer versions of products from the same vendor
+and even products from different vendors.
 
-It does trigger the following warnings when building for i386 though,
-
-In file included from /dev/shm/mfleming/git/efi/drivers/firmware/efi/libstub/efi-stub-helper.c:14:0:
-/dev/shm/mfleming/git/efi/drivers/firmware/efi/libstub/efi-stub-helper.c: In function ‘efi_get_memory_map’:
-/dev/shm/mfleming/git/efi/arch/x86/include/asm/efi.h:205:3: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
-  ((efi_boot_services_64_t *)__efi_early()->boot_services)->f : \
-   ^
-/dev/shm/mfleming/git/efi/drivers/firmware/efi/libstub/efi-stub-helper.c:85:11: note: in expansion of macro ‘efi_call_early’
-  status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-           ^
-/dev/shm/mfleming/git/efi/arch/x86/include/asm/efi.h:206:3: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
-  ((efi_boot_services_32_t *)__efi_early()->boot_services)->f, \
-   ^
-/dev/shm/mfleming/git/efi/drivers/firmware/efi/libstub/efi-stub-helper.c:85:11: note: in expansion of macro ‘efi_call_early’
-  status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-           ^
-/dev/shm/mfleming/git/efi/arch/x86/include/asm/efi.h:205:3: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
-  ((efi_boot_services_64_t *)__efi_early()->boot_services)->f : \
-   ^
-/dev/shm/mfleming/git/efi/drivers/firmware/efi/libstub/efi-stub-helper.c:92:11: note: in expansion of macro ‘efi_call_early’
-  status = efi_call_early(get_memory_map, map_size, m,
-           ^
-etc.
+Continuously updating a quirks table as additional broken platforms
+are discovered simply does not scale.
