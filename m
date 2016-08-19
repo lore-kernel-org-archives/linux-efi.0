@@ -1,49 +1,57 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] efi: fix handling error value in fdt_find_uefi_params
-Date: Fri, 19 Aug 2016 13:30:26 +0100
-Message-ID: <20160819123026.GV30909@codeblueprint.co.uk>
-References: <1471428040-23463-1-git-send-email-a.hajda@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1471428040-23463-1-git-send-email-a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andrzej Hajda <a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: "open list:EXTENSIBLE FIRMWARE INTERFACE (EFI)" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Marek Szyprowski <m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, open list <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [GIT PULL 0/6] EFI urgent fixes
+Date: Fri, 19 Aug 2016 21:34:58 +0100
+Message-ID: <1471638904-3494-1-git-send-email-matt@codeblueprint.co.uk>
+Return-path: <stable-owner@vger.kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Andrzej Hajda <a.hajda@samsung.com>, Jan Beulich <jbeulich@suse.com>, Jeffrey Hugo <jhugo@codeaurora.org>, Jiri Slaby <jslaby@suse.cz>, Leif Lindholm <leif.lindholm@linaro.org>, lists@ssl-mail.com, Mark Rutland <mark.rutland@arm.com>, Mark Salter <msalter@redhat.com>, Shannon Zhao <shannon.zhao@linaro.org>, stable@vger.kernel.org, Vitaly Kuznetsov <vkuznets@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 17 Aug, at 12:00:40PM, Andrzej Hajda wrote:
-> of_get_flat_dt_subnode_by_name can return negative value in case of error.
-> 
-> The problem has been detected using semantic patch
-> scripts/coccinelle/tests/unsigned_lesser_than_zero.cocci
-> 
-> Signed-off-by: Andrzej Hajda <a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-> ---
->  drivers/firmware/efi/efi.c | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 5a2631a..7dd2e2d 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -657,9 +657,12 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
->  		}
->  
->  		if (subnode) {
-> -			node = of_get_flat_dt_subnode_by_name(node, subnode);
-> -			if (node < 0)
-> +			int err = of_get_flat_dt_subnode_by_name(node, subnode);
-> +
-> +			if (err < 0)
->  				return 0;
-> +
-> +			node = err;
->  		}
->  
->  		return __find_uefi_params(node, info, dt_params[i].params);
-> -- 
-> 1.9.1
- 
-Looks good to me. Thanks, applied.
+Folks, please pull the following urgent fixes, which prevent an
+infinite loop on Xen, a boot failure on Qualcomm platforms and a data
+type bug in the fdt code.
+
+The following changes since commit 694d0d0bb2030d2e36df73e2d23d5770511dbc8d:
+
+  Linux 4.8-rc2 (2016-08-14 19:11:36 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+
+for you to fetch changes up to b7453c7a235c597b44c365887e57e7c300e72bf0:
+
+  efi/fdt: Fix handling error value in fdt_find_uefi_params (2016-08-19 21:18:34 +0100)
+
+----------------------------------------------------------------
+ * Make for_each_efi_memory_desc_in_map() safe on Xen and prevent an
+   infinte loop - Jan Beulich
+
+ * Fix boot error on arm64 Qualcomm platforms by refactoring and
+   improving the ExitBootServices() hack we already for x86 and moving
+   it to the libstub - Jeffrey Hugo
+
+ * Use correct return data type for of_get_flat_dt_subnode_by_name()
+   so that we correctly handle errors - Andrzej Hajda
+
+----------------------------------------------------------------
+Andrzej Hajda (1):
+      efi/fdt: Fix handling error value in fdt_find_uefi_params
+
+Jan Beulich (1):
+      efi: Make for_each_efi_memory_desc_in_map() cope with running on Xen
+
+Jeffrey Hugo (4):
+      efi/libstub: Allocate headspace in efi_get_memory_map()
+      efi/libstub: Introduce ExitBootServices helper
+      efi/libstub: Use efi_exit_boot_services() in FDT
+      x86/efi: Use efi_exit_boot_services()
+
+ arch/x86/boot/compressed/eboot.c               | 134 ++++++++++----------
+ drivers/firmware/efi/efi.c                     |   7 +-
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 168 ++++++++++++++++++++-----
+ drivers/firmware/efi/libstub/fdt.c             |  54 +++++---
+ drivers/firmware/efi/libstub/random.c          |  12 +-
+ include/linux/efi.h                            |  28 ++++-
+ 6 files changed, 283 insertions(+), 120 deletions(-)
