@@ -1,29 +1,49 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v2] x86/efi: defer efi_esrt_init until after
- memblock_x86_fill
-Date: Fri, 19 Aug 2016 13:17:05 +0100
-Message-ID: <20160819121705.GU30909@codeblueprint.co.uk>
-References: <1471393951-28804-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
+Subject: Re: [PATCH] efi: fix handling error value in fdt_find_uefi_params
+Date: Fri, 19 Aug 2016 13:30:26 +0100
+Message-ID: <20160819123026.GV30909@codeblueprint.co.uk>
+References: <1471428040-23463-1-git-send-email-a.hajda@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1471393951-28804-1-git-send-email-ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+In-Reply-To: <1471428040-23463-1-git-send-email-a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Scott Lawson <scott.lawson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Andrzej Hajda <a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Cc: "open list:EXTENSIBLE FIRMWARE INTERFACE (EFI)" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Marek Szyprowski <m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, open list <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 16 Aug, at 05:32:31PM, Ricardo Neri wrote:
-> Commit 7b02d53e7852 ("efi: Allow drivers to reserve boot services forever")
-> introduced a new efi_mem_reserve to reserve the boot services memory
-> regions forever. This reservation involves allocating a new EFI memory
-> range descriptor. However, allocation can only succeed if there is memory
-> available for the allocation. Otherwise, error such as the following may
-> occur:
+On Wed, 17 Aug, at 12:00:40PM, Andrzej Hajda wrote:
+> of_get_flat_dt_subnode_by_name can return negative value in case of error.
 > 
-> esrt: Reserving ESRT space from 0x000000003dd6a000 to 0x000000003dd6a010.
-> Kernel panic - not syncing: ERROR: Failed to allocate 0x9f0 bytes below \
->  0x0.
+> The problem has been detected using semantic patch
+> scripts/coccinelle/tests/unsigned_lesser_than_zero.cocci
+> 
+> Signed-off-by: Andrzej Hajda <a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+> ---
+>  drivers/firmware/efi/efi.c | 7 +++++--
+>  1 file changed, 5 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 5a2631a..7dd2e2d 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -657,9 +657,12 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+>  		}
+>  
+>  		if (subnode) {
+> -			node = of_get_flat_dt_subnode_by_name(node, subnode);
+> -			if (node < 0)
+> +			int err = of_get_flat_dt_subnode_by_name(node, subnode);
+> +
+> +			if (err < 0)
+>  				return 0;
+> +
+> +			node = err;
+>  		}
+>  
+>  		return __find_uefi_params(node, info, dt_params[i].params);
+> -- 
+> 1.9.1
  
-Thanks Ricardo. Applied to 'next'.
+Looks good to me. Thanks, applied.
