@@ -1,63 +1,29 @@
-From: "Jan Beulich" <JBeulich-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH v2] EFI: make for_each_efi_memory_desc_in_map()
- cope with running on Xen
-Date: Fri, 19 Aug 2016 06:07:34 -0600
-Message-ID: <57B712A60200007800107639@prv-mh.provo.novell.com>
-References: <57B1F6690200007800106095@prv-mh.provo.novell.com>
- <20160816114917.GM30909@codeblueprint.co.uk>
- <20160819104715.GR30909@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v2] x86/efi: defer efi_esrt_init until after
+ memblock_x86_fill
+Date: Fri, 19 Aug 2016 13:17:05 +0100
+Message-ID: <20160819121705.GU30909@codeblueprint.co.uk>
+References: <1471393951-28804-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160819104715.GR30909-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Content-Disposition: inline
+In-Reply-To: <1471393951-28804-1-git-send-email-ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Vitaly Kuznetsov <vkuznets-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Scott Lawson <scott.lawson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
->>> On 19.08.16 at 12:47, <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Tue, 16 Aug, at 12:49:17PM, Matt Fleming wrote:
->> On Mon, 15 Aug, at 09:05:45AM, Jan Beulich wrote:
->> > --- 4.8-rc2/include/linux/efi.h
->> > +++ 4.8-rc2-EFI-memdesc-iterator-Xen/include/linux/efi.h
->> > @@ -946,7 +946,11 @@ extern int efi_memattr_apply_permissions
->> >  /* Iterate through an efi_memory_map */
->> >  #define for_each_efi_memory_desc_in_map(m, md)				   \
->> >  	for ((md) = (m)->map;						   \
->> > -	     ((void *)(md) + (m)->desc_size) <= (m)->map_end;		   \
->> > +	     /*								   \
->> > +	      * Leverage wrapping of the calculation to avoid an infinite  \
->> > +	      * loop when all three values are zero.			   \
->> > +	      */							   \
->> > +	     ((void *)(md) + (m)->desc_size - 1) < (m)->map_end;	   \
->> >  	     (md) = (void *)(md) + (m)->desc_size)
->> >  
->> 
->> Thanks Jan, applied to the 'urgent' EFI queue and tagged for stable.
->> I'll send it out this week.
+On Tue, 16 Aug, at 05:32:31PM, Ricardo Neri wrote:
+> Commit 7b02d53e7852 ("efi: Allow drivers to reserve boot services forever")
+> introduced a new efi_mem_reserve to reserve the boot services memory
+> regions forever. This reservation involves allocating a new EFI memory
+> range descriptor. However, allocation can only succeed if there is memory
+> available for the allocation. Otherwise, error such as the following may
+> occur:
 > 
-> Jiri caught me on IRC and repeated his concern that this patch relies
-> on undefined behaviour per the C language standard.
-> 
-> I really don't want to get into a discussion of compiler
-> implementations, so instead can we check whether the 'md' is NULL and
-> skip the loop if so? e.g. would something like this work?
-
-I think so, yes, but I've not seen the issue myself, so I can't verify
-that's the case.
-
-Jan
-
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -946,7 +946,7 @@ extern int efi_memattr_apply_permissions(struct mm_struct *mm,
->  /* Iterate through an efi_memory_map */
->  #define for_each_efi_memory_desc_in_map(m, md)				   \
->  	for ((md) = (m)->map;						   \
-> -	     ((void *)(md) + (m)->desc_size) <= (m)->map_end;		   \
-> +	     (md) && ((void *)(md) + (m)->desc_size) <= (m)->map_end;	   \
->  	     (md) = (void *)(md) + (m)->desc_size)
->  
->  /**
+> esrt: Reserving ESRT space from 0x000000003dd6a000 to 0x000000003dd6a010.
+> Kernel panic - not syncing: ERROR: Failed to allocate 0x9f0 bytes below \
+>  0x0.
+ 
+Thanks Ricardo. Applied to 'next'.
