@@ -1,8 +1,7 @@
 From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [RFC PATCH v1 11/28] x86: Don't decrypt trampoline area if SEV is
- active
-Date: Mon, 22 Aug 2016 19:25:51 -0400
-Message-ID: <147190835102.9523.9786544054464015663.stgit@brijesh-build-machine>
+Subject: [RFC PATCH v1 12/28] x86: DMA support for SEV memory encryption
+Date: Mon, 22 Aug 2016 19:26:02 -0400
+Message-ID: <147190836254.9523.17071309814378405604.stgit@brijesh-build-machine>
 References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -15,36 +14,84 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Tom Lendacky <thomas.lendacky@amd.com>
 
-When Secure Encrypted Virtualization is active instruction fetches are
-always interpreted as being from encrypted memory so the trampoline area
-must remain encrypted when SEV is active.
+DMA access to memory mapped as encrypted while SEV is active can not be
+encrypted during device write or decrypted during device read. In order
+for DMA to properly work when SEV is active, the swiotlb bounce buffers
+must be used.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/realmode/init.c |    9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
+ arch/x86/mm/mem_encrypt.c |   48 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 48 insertions(+)
 
-diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
-index c3edb49..f3207e5 100644
---- a/arch/x86/realmode/init.c
-+++ b/arch/x86/realmode/init.c
-@@ -138,10 +138,13 @@ static void __init set_real_mode_permissions(void)
- 	/*
- 	 * If memory encryption is active, the trampoline area will need to
- 	 * be in non-encrypted memory in order to bring up other processors
--	 * successfully.
-+	 * successfully. This only applies to SME, SEV requires the trampoline
-+	 * to be encrypted.
- 	 */
--	sme_early_mem_dec(__pa(base), size);
--	sme_set_mem_dec(base, size);
-+	if (!sev_active) {
-+		sme_early_mem_dec(__pa(base), size);
-+		sme_set_mem_dec(base, size);
-+	}
+diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+index 1154353..ce6e3ea 100644
+--- a/arch/x86/mm/mem_encrypt.c
++++ b/arch/x86/mm/mem_encrypt.c
+@@ -173,8 +173,52 @@ void __init sme_early_init(void)
+ 	/* Update the protection map with memory encryption mask */
+ 	for (i = 0; i < ARRAY_SIZE(protection_map); i++)
+ 		protection_map[i] = __pgprot(pgprot_val(protection_map[i]) | sme_me_mask);
++
++	if (sev_active)
++		swiotlb_force = 1;
+ }
  
- 	set_memory_nx((unsigned long) base, size >> PAGE_SHIFT);
- 	set_memory_ro((unsigned long) base, ro_size >> PAGE_SHIFT);
++static void *sme_alloc(struct device *dev, size_t size, dma_addr_t *dma_handle,
++		       gfp_t gfp, unsigned long attrs)
++{
++	void *vaddr;
++
++	vaddr = x86_swiotlb_alloc_coherent(dev, size, dma_handle, gfp, attrs);
++	if (!vaddr)
++		return NULL;
++
++	/* Clear the SME encryption bit for DMA use */
++	sme_set_mem_dec(vaddr, size);
++
++	/* Remove the encryption bit from the DMA address */
++	*dma_handle &= ~sme_me_mask;
++
++	return vaddr;
++}
++
++static void sme_free(struct device *dev, size_t size, void *vaddr,
++		     dma_addr_t dma_handle, unsigned long attrs)
++{
++	/* Set the SME encryption bit for re-use as encrypted */
++	sme_set_mem_enc(vaddr, size);
++
++	x86_swiotlb_free_coherent(dev, size, vaddr, dma_handle, attrs);
++}
++
++static struct dma_map_ops sme_dma_ops = {
++	.alloc                  = sme_alloc,
++	.free                   = sme_free,
++	.map_page               = swiotlb_map_page,
++	.unmap_page             = swiotlb_unmap_page,
++	.map_sg                 = swiotlb_map_sg_attrs,
++	.unmap_sg               = swiotlb_unmap_sg_attrs,
++	.sync_single_for_cpu    = swiotlb_sync_single_for_cpu,
++	.sync_single_for_device = swiotlb_sync_single_for_device,
++	.sync_sg_for_cpu        = swiotlb_sync_sg_for_cpu,
++	.sync_sg_for_device     = swiotlb_sync_sg_for_device,
++	.mapping_error          = swiotlb_dma_mapping_error,
++};
++
+ /* Architecture __weak replacement functions */
+ void __init mem_encrypt_init(void)
+ {
+@@ -184,6 +228,10 @@ void __init mem_encrypt_init(void)
+ 	/* Make SWIOTLB use an unencrypted DMA area */
+ 	swiotlb_clear_encryption();
+ 
++	/* Use SEV DMA operations if SEV is active */
++	if (sev_active)
++		dma_ops = &sme_dma_ops;
++
+ 	pr_info("memory encryption active\n");
+ }
+ 
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
