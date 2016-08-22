@@ -1,58 +1,218 @@
 From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [RFC PATCH v1 19/28] KVM: SVM: prepare to reserve asid for SEV guest
-Date: Mon, 22 Aug 2016 19:27:45 -0400
-Message-ID: <147190846546.9523.8365293594479732082.stgit@brijesh-build-machine>
+Subject: [RFC PATCH v1 21/28] KVM: introduce KVM_SEV_ISSUE_CMD ioctl
+Date: Mon, 22 Aug 2016 19:28:17 -0400
+Message-ID: <147190849706.9523.17127624683768628621.stgit@brijesh-build-machine>
 References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
-Sender: owner-linux-mm@kvack.org
-To: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, brijesh.singh@amd.com, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, devel@linuxdriverproject.org, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedoraproject.org, tony.luck@intel.com, alexandre.bounin
+Sender: linux-kernel-owner@vger.kernel.org
+To: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, brijesh.singh@amd.com, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, devel@linuxdriverproject.org, tglx@linutronix.de, mchehab@kernel.or
 List-Id: linux-efi@vger.kernel.org
 
-In current implementation, asid allocation starts from 1, this patch
-adds a min_asid variable in svm_vcpu structure to allow starting asid
-from something other than 1.
+The ioctl will be used by qemu to issue the Secure Encrypted
+Virtualization (SEV) guest commands to transition a guest into
+into SEV-enabled mode.
+
+a typical usage:
+
+struct kvm_sev_launch_start start;
+struct kvm_sev_issue_cmd data;
+
+data.cmd = KVM_SEV_LAUNCH_START;
+data.opaque = &start;
+
+ret = ioctl(fd, KVM_SEV_ISSUE_CMD, &data);
+
+On SEV command failure, data.ret_code will contain the firmware error code.
 
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/kvm/svm.c |    4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ arch/x86/include/asm/kvm_host.h |    3 +
+ arch/x86/kvm/x86.c              |   13 ++++
+ include/uapi/linux/kvm.h        |  125 +++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 141 insertions(+)
 
-diff --git a/arch/x86/kvm/svm.c b/arch/x86/kvm/svm.c
-index 211be94..f010b23 100644
---- a/arch/x86/kvm/svm.c
-+++ b/arch/x86/kvm/svm.c
-@@ -470,6 +470,7 @@ struct svm_cpu_data {
- 	u64 asid_generation;
- 	u32 max_asid;
- 	u32 next_asid;
-+	u32 min_asid;
- 	struct kvm_ldttss_desc *tss_desc;
+diff --git a/arch/x86/include/asm/kvm_host.h b/arch/x86/include/asm/kvm_host.h
+index 9b885fc..a94e37d 100644
+--- a/arch/x86/include/asm/kvm_host.h
++++ b/arch/x86/include/asm/kvm_host.h
+@@ -1040,6 +1040,9 @@ struct kvm_x86_ops {
+ 	void (*cancel_hv_timer)(struct kvm_vcpu *vcpu);
  
- 	struct page *save_area;
-@@ -726,6 +727,7 @@ static int svm_hardware_enable(void)
- 	sd->asid_generation = 1;
- 	sd->max_asid = cpuid_ebx(SVM_CPUID_FUNC) - 1;
- 	sd->next_asid = sd->max_asid + 1;
-+	sd->min_asid = 1;
+ 	void (*setup_mce)(struct kvm_vcpu *vcpu);
++
++	int (*sev_issue_cmd)(struct kvm *kvm,
++			     struct kvm_sev_issue_cmd __user *argp);
+ };
  
- 	native_store_gdt(&gdt_descr);
- 	gdt = (struct desc_struct *)gdt_descr.address;
-@@ -1887,7 +1889,7 @@ static void new_asid(struct vcpu_svm *svm, struct svm_cpu_data *sd)
+ struct kvm_arch_async_pf {
+diff --git a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
+index d6f2f4b..0c0adad 100644
+--- a/arch/x86/kvm/x86.c
++++ b/arch/x86/kvm/x86.c
+@@ -3820,6 +3820,15 @@ split_irqchip_unlock:
+ 	return r;
+ }
+ 
++static int kvm_vm_ioctl_sev_issue_cmd(struct kvm *kvm,
++				      struct kvm_sev_issue_cmd __user *argp)
++{
++	if (kvm_x86_ops->sev_issue_cmd)
++		return kvm_x86_ops->sev_issue_cmd(kvm, argp);
++
++	return -ENOTTY;
++}
++
+ long kvm_arch_vm_ioctl(struct file *filp,
+ 		       unsigned int ioctl, unsigned long arg)
  {
- 	if (sd->next_asid > sd->max_asid) {
- 		++sd->asid_generation;
--		sd->next_asid = 1;
-+		sd->next_asid = sd->min_asid;
- 		svm->vmcb->control.tlb_ctl = TLB_CONTROL_FLUSH_ALL_ASID;
+@@ -4085,6 +4094,10 @@ long kvm_arch_vm_ioctl(struct file *filp,
+ 		r = kvm_vm_ioctl_enable_cap(kvm, &cap);
+ 		break;
  	}
++	case KVM_SEV_ISSUE_CMD: {
++		r = kvm_vm_ioctl_sev_issue_cmd(kvm, argp);
++		break;
++	}
+ 	default:
+ 		r = kvm_vm_ioctl_assigned_device(kvm, ioctl, arg);
+ 	}
+diff --git a/include/uapi/linux/kvm.h b/include/uapi/linux/kvm.h
+index 300ef25..72c18c3 100644
+--- a/include/uapi/linux/kvm.h
++++ b/include/uapi/linux/kvm.h
+@@ -1274,6 +1274,131 @@ struct kvm_s390_ucas_mapping {
+ /* Available with KVM_CAP_X86_SMM */
+ #define KVM_SMI                   _IO(KVMIO,   0xb7)
  
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
++/* Secure Encrypted Virtualization mode */
++enum sev_cmd {
++	KVM_SEV_LAUNCH_START = 0,
++	KVM_SEV_LAUNCH_UPDATE,
++	KVM_SEV_LAUNCH_FINISH,
++	KVM_SEV_GUEST_STATUS,
++	KVM_SEV_DBG_DECRYPT,
++	KVM_SEV_DBG_ENCRYPT,
++	KVM_SEV_RECEIVE_START,
++	KVM_SEV_RECEIVE_UPDATE,
++	KVM_SEV_RECEIVE_FINISH,
++	KVM_SEV_SEND_START,
++	KVM_SEV_SEND_UPDATE,
++	KVM_SEV_SEND_FINISH,
++	KVM_SEV_API_VERSION,
++	KVM_SEV_NR_MAX,
++};
++
++struct kvm_sev_issue_cmd {
++	__u32 cmd;
++	__u64 opaque;
++	__u32 ret_code;
++};
++
++struct kvm_sev_launch_start {
++	__u32 handle;
++	__u32 flags;
++	__u32 policy;
++	__u8 nonce[16];
++	__u8 dh_pub_qx[32];
++	__u8 dh_pub_qy[32];
++};
++
++struct kvm_sev_launch_update {
++	__u64	address;
++	__u32	length;
++};
++
++struct kvm_sev_launch_finish {
++	__u32 vcpu_count;
++	__u32 vcpu_length;
++	__u64 vcpu_mask_addr;
++	__u32 vcpu_mask_length;
++	__u8  measurement[32];
++};
++
++struct kvm_sev_guest_status {
++	__u32 policy;
++	__u32 state;
++};
++
++struct kvm_sev_dbg_decrypt {
++	__u64 src_addr;
++	__u64 dst_addr;
++	__u32 length;
++};
++
++struct kvm_sev_dbg_encrypt {
++	__u64 src_addr;
++	__u64 dst_addr;
++	__u32 length;
++};
++
++struct kvm_sev_receive_start {
++	__u32 handle;
++	__u32 flags;
++	__u32 policy;
++	__u8 policy_meas[32];
++	__u8 wrapped_tek[24];
++	__u8 wrapped_tik[24];
++	__u8 ten[16];
++	__u8 dh_pub_qx[32];
++	__u8 dh_pub_qy[32];
++	__u8 nonce[16];
++};
++
++struct kvm_sev_receive_update {
++	__u8 iv[16];
++	__u64 address;
++	__u32 length;
++};
++
++struct kvm_sev_receive_finish {
++	__u8 measurement[32];
++};
++
++struct kvm_sev_send_start {
++	__u8 nonce[16];
++	__u32 policy;
++	__u8 policy_meas[32];
++	__u8 wrapped_tek[24];
++	__u8 wrapped_tik[24];
++	__u8 ten[16];
++	__u8 iv[16];
++	__u32 flags;
++	__u8 api_major;
++	__u8 api_minor;
++	__u32 serial;
++	__u8 dh_pub_qx[32];
++	__u8 dh_pub_qy[32];
++	__u8 pek_sig_r[32];
++	__u8 pek_sig_s[32];
++	__u8 cek_sig_r[32];
++	__u8 cek_sig_s[32];
++	__u8 cek_pub_qx[32];
++	__u8 cek_pub_qy[32];
++	__u8 ask_sig_r[32];
++	__u8 ask_sig_s[32];
++	__u32 ncerts;
++	__u32 cert_length;
++	__u64 certs_addr;
++};
++
++struct kvm_sev_send_update {
++	__u32 length;
++	__u64 src_addr;
++	__u64 dst_addr;
++};
++
++struct kvm_sev_send_finish {
++	__u8 measurement[32];
++};
++
++#define KVM_SEV_ISSUE_CMD	_IOWR(KVMIO, 0xb8, struct kvm_sev_issue_cmd)
++
+ #define KVM_DEV_ASSIGN_ENABLE_IOMMU	(1 << 0)
+ #define KVM_DEV_ASSIGN_PCI_2_3		(1 << 1)
+ #define KVM_DEV_ASSIGN_MASK_INTX	(1 << 2)
