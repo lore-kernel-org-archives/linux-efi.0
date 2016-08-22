@@ -1,47 +1,39 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 1/6] efi: Make for_each_efi_memory_desc_in_map() cope with running on Xen
-Date: Fri, 19 Aug 2016 21:34:59 +0100
-Message-ID: <1471638904-3494-2-git-send-email-matt@codeblueprint.co.uk>
-References: <1471638904-3494-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1471638904-3494-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: stable-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Jan Beulich <JBeulich@suse.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Jan Beulich <jbeulich@suse.com>, Jiri Slaby <jslaby@suse.cz>, lists@ssl-mail.com, Mark Rutland <mark.rutland@arm.com>, stable@vger.kernel.org, Vitaly Kuznetsov <vkuznets@redhat.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] x86/efi-bgrt: remove the check of the version field
+Date: Mon, 22 Aug 2016 15:28:41 +0800
+Message-ID: <20160822072841.GB32673@dhcp-128-65.nay.redhat.com>
+References: <20160809052546.31462-1-icenowy@aosc.xyz>
+ <20160815125643.GG30909@codeblueprint.co.uk>
+ <20160817054413.GB5498@dhcp-128-65.nay.redhat.com>
+ <20160818204130.GQ30909@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160818204130.GQ30909-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Jan Beulich <JBeulich@suse.com>
+On 08/18/16 at 09:41pm, Matt Fleming wrote:
+> On Wed, 17 Aug, at 01:44:13PM, Dave Young wrote:
+> > 
+> > Could we add some quirk for these broken hardware instead of changing
+> > the normal code?
+> 
+> I'd prefer not to do that if possible. Due to the way that the BIOS
+> ecosystem works, this kind of broken firmware spreads across the
+> industry, appearing in newer versions of products from the same vendor
+> and even products from different vendors.
+> 
+> Continuously updating a quirks table as additional broken platforms
+> are discovered simply does not scale.
 
-While commit 55f1ea15216 ("efi: Fix for_each_efi_memory_desc_in_map()
-for empty memmaps") made an attempt to deal with empty memory maps, it
-didn't address the case where the map field never gets set, as is
-apparently the case when running under Xen.
+Ok, I assumed that they are limited like one point in the web url
+http://wiki.osdev.org/Broken_UEFI_implementations 
 
-Reported-by: <lists@ssl-mail.com>
-Tested-by: <lists@ssl-mail.com>
-Cc: Vitaly Kuznetsov <vkuznets@redhat.com>
-Cc: Jiri Slaby <jslaby@suse.cz>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: <stable@vger.kernel.org> # v4.7+
-Signed-off-by: Jan Beulich <jbeulich@suse.com>
-[ Guard the loop with a NULL check instead of pointer underflow ]
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
----
- include/linux/efi.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+But I arm probably wrong like you said. Please ignore the comment then.
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 7f5a58225385..23cd3ced8c1a 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -946,7 +946,7 @@ extern int efi_memattr_apply_permissions(struct mm_struct *mm,
- /* Iterate through an efi_memory_map */
- #define for_each_efi_memory_desc_in_map(m, md)				   \
- 	for ((md) = (m)->map;						   \
--	     ((void *)(md) + (m)->desc_size) <= (m)->map_end;		   \
-+	     (md) && ((void *)(md) + (m)->desc_size) <= (m)->map_end;	   \
- 	     (md) = (void *)(md) + (m)->desc_size)
- 
- /**
--- 
-2.7.3
+Thanks
+Dave
