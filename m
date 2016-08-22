@@ -1,7 +1,8 @@
 From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [RFC PATCH v1 13/28] iommu/amd: AMD IOMMU support for SEV
-Date: Mon, 22 Aug 2016 19:26:13 -0400
-Message-ID: <147190837333.9523.16962214308407411754.stgit@brijesh-build-machine>
+Subject: [RFC PATCH v1 14/28] x86: Don't set the SME MSR bit when SEV is
+ active
+Date: Mon, 22 Aug 2016 19:26:28 -0400
+Message-ID: <147190838870.9523.7536164067495140361.stgit@brijesh-build-machine>
 References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -14,28 +15,27 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Tom Lendacky <thomas.lendacky@amd.com>
 
-DMA must be performed to memory that is not mapped encrypted when running
-with SEV active. So if SEV is active, do not return the encryption mask
-to the IOMMU.
+When SEV is active the virtual machine cannot set the MSR for SME, so
+don't set the trampoline flag for SME.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/mm/mem_encrypt.c |    2 +-
+ arch/x86/realmode/init.c |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-index ce6e3ea..d6e9f96 100644
---- a/arch/x86/mm/mem_encrypt.c
-+++ b/arch/x86/mm/mem_encrypt.c
-@@ -237,7 +237,7 @@ void __init mem_encrypt_init(void)
+diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
+index f3207e5..391d8ba 100644
+--- a/arch/x86/realmode/init.c
++++ b/arch/x86/realmode/init.c
+@@ -102,7 +102,7 @@ static void __init setup_real_mode(void)
+ 	*trampoline_cr4_features = mmu_cr4_features;
  
- unsigned long amd_iommu_get_me_mask(void)
- {
--	return sme_me_mask;
-+	return sev_active ? 0 : sme_me_mask;
- }
+ 	trampoline_header->flags = 0;
+-	if (sme_me_mask)
++	if (sme_me_mask && !sev_active)
+ 		trampoline_header->flags |= TH_FLAGS_SME_ENABLE;
  
- unsigned long swiotlb_get_me_mask(void)
+ 	trampoline_pgd = (u64 *) __va(real_mode_header->trampoline_pgd);
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
