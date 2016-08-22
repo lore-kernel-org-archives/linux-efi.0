@@ -1,8 +1,7 @@
 From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [RFC PATCH v1 14/28] x86: Don't set the SME MSR bit when SEV is
- active
-Date: Mon, 22 Aug 2016 19:26:28 -0400
-Message-ID: <147190838870.9523.7536164067495140361.stgit@brijesh-build-machine>
+Subject: [RFC PATCH v1 15/28] x86: Unroll string I/O when SEV is active
+Date: Mon, 22 Aug 2016 19:26:40 -0400
+Message-ID: <147190840032.9523.7491479364800390492.stgit@brijesh-build-machine>
 References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -15,27 +14,56 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Tom Lendacky <thomas.lendacky@amd.com>
 
-When SEV is active the virtual machine cannot set the MSR for SME, so
-don't set the trampoline flag for SME.
+Secure Encrypted Virtualization (SEV) does not support string I/O, so
+unroll the string I/O operation into a loop operating on one element at
+a time.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/realmode/init.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/x86/include/asm/io.h |   26 ++++++++++++++++++++++----
+ 1 file changed, 22 insertions(+), 4 deletions(-)
 
-diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
-index f3207e5..391d8ba 100644
---- a/arch/x86/realmode/init.c
-+++ b/arch/x86/realmode/init.c
-@@ -102,7 +102,7 @@ static void __init setup_real_mode(void)
- 	*trampoline_cr4_features = mmu_cr4_features;
+diff --git a/arch/x86/include/asm/io.h b/arch/x86/include/asm/io.h
+index de25aad..130b3e2 100644
+--- a/arch/x86/include/asm/io.h
++++ b/arch/x86/include/asm/io.h
+@@ -303,14 +303,32 @@ static inline unsigned type in##bwl##_p(int port)			\
+ 									\
+ static inline void outs##bwl(int port, const void *addr, unsigned long count) \
+ {									\
+-	asm volatile("rep; outs" #bwl					\
+-		     : "+S"(addr), "+c"(count) : "d"(port));		\
++	if (sev_active) {						\
++		unsigned type *value = (unsigned type *)addr;		\
++		while (count) {						\
++			out##bwl(*value, port);				\
++			value++;					\
++			count--;					\
++		}							\
++	} else {							\
++		asm volatile("rep; outs" #bwl				\
++			     : "+S"(addr), "+c"(count) : "d"(port));	\
++	}								\
+ }									\
+ 									\
+ static inline void ins##bwl(int port, void *addr, unsigned long count)	\
+ {									\
+-	asm volatile("rep; ins" #bwl					\
+-		     : "+D"(addr), "+c"(count) : "d"(port));		\
++	if (sev_active) {						\
++		unsigned type *value = (unsigned type *)addr;		\
++		while (count) {						\
++			*value = in##bwl(port);				\
++			value++;					\
++			count--;					\
++		}							\
++	} else {							\
++		asm volatile("rep; ins" #bwl				\
++			     : "+D"(addr), "+c"(count) : "d"(port));	\
++	}								\
+ }
  
- 	trampoline_header->flags = 0;
--	if (sme_me_mask)
-+	if (sme_me_mask && !sev_active)
- 		trampoline_header->flags |= TH_FLAGS_SME_ENABLE;
- 
- 	trampoline_pgd = (u64 *) __va(real_mode_header->trampoline_pgd);
+ BUILDIO(b, b, char)
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
