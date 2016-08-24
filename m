@@ -1,70 +1,42 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi: arm64: treat regions with WT/WC set but WB cleared
- as memory
-Date: Wed, 24 Aug 2016 17:25:35 +0200
-Message-ID: <CAKv+Gu_+oAZ9-a12h=HhE=MreK3KEg_2aO2vQTzHjPSndm2ONA@mail.gmail.com>
-References: <1472052256-26365-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH 0/6] Apple device properties
+Date: Wed, 24 Aug 2016 20:49:05 +0100
+Message-ID: <20160824194905.GA4551@codeblueprint.co.uk>
+References: <cover.1469616641.git.lukas@wunner.de>
+ <20160804145710.GL3636@codeblueprint.co.uk>
+ <20160809133816.GA6571@wunner.de>
+ <20160815115414.GE30909@codeblueprint.co.uk>
+ <20160815161358.GA9603@wunner.de>
+ <20160818203433.GP30909@codeblueprint.co.uk>
+ <20160822095850.GA22131@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1472052256-26365-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lorenzo Pieralisi <lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org>, Takahiro Akashi <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160822095850.GA22131@wunner.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Lukas Wunner <lukas@wunner.de>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, x86@kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 24 August 2016 at 17:24, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> Currently, memory regions are only recorded in the memblock memory table
-> if they have the EFI_MEMORY_WB memory type attribute set. In case the
-> region is of a reserved type, it is also marked as MEMBLOCK_NOMAP, which
-> will leave it out of the linear mapping.
->
-> However, memory regions may legally have the EFI_MEMORY_WT or EFI_MEMORY_WC
-> attributes set, and the EFI_MEMORY_WB cleared, in which case the region in
-> question is obviously backed by normal memory, but is not recorded in the
-> memblock memory table at all. Since it would be useful to be able to
-> identify any UEFI reported memory region using memblock_is_memory(), it
-> makes sense to add all memory to the memblock memory table, and simply mark
-> it as MEMBLOCK_NOMAP if it lacks the EFI_MEMORY_WB attribute.
->
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->
-> Note that this will also result in regions with EFI_MEMORY_WB cleared to
-> be listed in /proc/iomem as 'System RAM', which may be incorrect. However,
-> we already display this incorrect behavior for runtime services code/data
-> regions, so this should be fixed in a separate patch, of which an example
-> has been proposed here:
-> https://www.spinics.net/lists/arm-kernel/msg525369.html
->
->  drivers/firmware/efi/arm-init.c | 10 ++++++++--
->  1 file changed, 8 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-> index c49d50e68aee..678672d332f8 100644
-> --- a/drivers/firmware/efi/arm-init.c
-> +++ b/drivers/firmware/efi/arm-init.c
-> @@ -28,7 +28,7 @@ u64 efi_system_table;
->
->  static int __init is_normal_ram(efi_memory_desc_t *md)
->  {
-> -       if (md->attribute & EFI_MEMORY_WB)
-> +       if (md->attribute & (EFI_MEMORY_WB|EFI_MEMORY_WT|EFI_MEMORY_WC))
->                 return 1;
->         return 0;
->  }
-> @@ -163,7 +163,13 @@ static __init int is_reserve_region(efi_memory_desc_t *md)
->         case EFI_BOOT_SERVICES_DATA:
->         case EFI_CONVENTIONAL_MEMORY:
->         case EFI_PERSISTENT_MEMORY:
-> -               return 0;
-> +               /*
-> +                * According to the spec, these regions are no longer reserved
-> +                * after calling ExitBootServices(). However, we can only use
-> +                * them as System RAM if they can be mapped writeback cacheable.
-> +                * Otherwise, treat them as reserved.
-> +                */
-> +               return (md->type & EFI_MEMORY_WB) == 0;
+On Mon, 22 Aug, at 11:58:50AM, Lukas Wunner wrote:
+> By the way, arch/x86/Kconfig says that "it is not possible to boot a
+> mixed-mode enabled kernel via the EFI boot stub - a bootloader that
+> supports the EFI handover protocol must be used".
+> 
+> Is this still correct? With all the mixed-mode support in head_64.S
+> and eboot.c, I'm wondering what's missing?
 
-Oops, failed to commit --amend the above line: this should be
-md->attribute not md->type
+Yes, that's still correct.
+
+The EFI boot stub technically refers to the feature of having the
+firmware load the kernel directly, without the use of a boot loader.
+
+In that scenario you need the kernel and firmware to agree on a CPU
+mode since the kernel has no way to figure out if it needs to switch
+or not. Nor does it have a direct way to figure out what bitness the
+firmware is.
+
+[ Yes, technically we could add code to the EFI stub to detect the
+  current mode and perform the switch, we just don't have anything
+  like that right now ]
