@@ -1,25 +1,54 @@
-From: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Subject: =?windows-1251?B?S8vIxUjS0UvIxSDBwMfcSSDMwMnLOkFsdC5Y?=
-        =?windows-1251?B?dS0wM3BhbnIyQG1lZ2EuWmlrLmRqICDRS8DJ?=
-        =?windows-1251?B?zzogcHJvZGF3ZXozODkgxOv/IDb78fLw7ukg?=
-        =?windows-1251?B?7MDx8e7i7ukg7/DuZ8DmdSBCwPh1eCDy7uLA?=
-        =?windows-1251?B?8O7iIHUg8/Hr8+MhIM/uZ/DuNu3u8fJ1IPPn?=
-        =?windows-1251?B?7cDp8uUg8eXp98DxIQ==?=
-Date: Fri, 19 Aug 2016 07:39:18 +0700
-Message-ID: <6A9018695581AF1CC0C58C3024F14DC7@vger.kernel.org>
-Reply-To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <Alt.Xu-03panr2-e5wAKt8HHWUzFesvfQVZXw@public.gmane.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1251";
-Content-Transfer-Encoding: base64
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH] efi: fix the wrong check for the offset of subnode
+Date: Wed, 24 Aug 2016 10:18:10 +0800
+Message-ID: <1472005090-5871-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-0e42ZfDl7CBn6/8gwuDxIG5vIOjtbWVw7WXyIOFh5/MgceDt7fv1IO9vbWXt9ujg6/zt+/Uga+vo
-Ze3yb+Ig5Ov/IMLg+OXjbyDBdeftZfHgISDCIDZh52Ug4fPkeW0g4mNlIGvu7fJha23t+2UgZ2Ht
-7fvlIO3l7jb17nHo7PvlIGfr/yDsYWNj7uJv6SBucG9x4OboIMLg+Oj1IPLu4mFwb+IgdSDz8evz
-4y4gz28gQuD45ex5IOfgbnBv8fMgbvB1+Ovl7CDv8HXs5fAgdSDvb3Hw7uHt8/4g6O307nDs4Pbo
-/i4gxWPrdSB17W1lcOXx7e4g52Hv8O5j6PJlIG5vcfBv4e3u8W3oIGPl6ffgYyDMwMnLOiBBbHQu
-WHUtMDNwYW5yMkBtZWdhLlppay5kaiDRykHJzzogcHJvZGF3ZXozODkgweth42/kYfB17CDn4CA2
-+/HycPvpIO5t4uVtDQoNCg==
+of_get_flat_dt_subnode_by_name return the offset of
+the subnode, and we should check if it's valid. But
+the original code use the unsigned type to check it,
+which makes the we always get subnode successfully
+even if returning -FDT_ERR_BADPATH etc. Let's fix it
+by adding offset variable.
+
+Suggested-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+---
+
+ drivers/firmware/efi/efi.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 5a2631a..7a5964e 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -647,6 +647,7 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+ {
+ 	struct param_info *info = data;
+ 	int i;
++	int offset = node;
+ 
+ 	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
+ 		const char *subnode = dt_params[i].subnode;
+@@ -657,12 +658,12 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+ 		}
+ 
+ 		if (subnode) {
+-			node = of_get_flat_dt_subnode_by_name(node, subnode);
+-			if (node < 0)
++			offset = of_get_flat_dt_subnode_by_name(node, subnode);
++			if (offset < 0)
+ 				return 0;
+ 		}
+ 
+-		return __find_uefi_params(node, info, dt_params[i].params);
++		return __find_uefi_params(offset, info, dt_params[i].params);
+ 	}
+ 
+ 	return 0;
+-- 
+2.3.7
