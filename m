@@ -1,76 +1,66 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] efi: fix the wrong check for the offset of subnode
-Date: Wed, 24 Aug 2016 15:28:18 +0100
-Message-ID: <20160824142818.GX30909@codeblueprint.co.uk>
-References: <1472005090-5871-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] efi: arm64: treat regions with WT/WC set but WB cleared as memory
+Date: Wed, 24 Aug 2016 17:24:16 +0200
+Message-ID: <1472052256-26365-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1472005090-5871-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Andrzej Hajda <a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org, takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-(Cc'ing Mark and other folks)
+Currently, memory regions are only recorded in the memblock memory table
+if they have the EFI_MEMORY_WB memory type attribute set. In case the
+region is of a reserved type, it is also marked as MEMBLOCK_NOMAP, which
+will leave it out of the linear mapping.
 
-On Wed, 24 Aug, at 10:18:10AM, Shawn Lin wrote:
-> of_get_flat_dt_subnode_by_name return the offset of
-> the subnode, and we should check if it's valid. But
-> the original code use the unsigned type to check it,
-> which makes the we always get subnode successfully
-> even if returning -FDT_ERR_BADPATH etc. Let's fix it
-> by adding offset variable.
-> 
-> Suggested-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-> ---
-> 
->  drivers/firmware/efi/efi.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
+However, memory regions may legally have the EFI_MEMORY_WT or EFI_MEMORY_WC
+attributes set, and the EFI_MEMORY_WB cleared, in which case the region in
+question is obviously backed by normal memory, but is not recorded in the
+memblock memory table at all. Since it would be useful to be able to
+identify any UEFI reported memory region using memblock_is_memory(), it
+makes sense to add all memory to the memblock memory table, and simply mark
+it as MEMBLOCK_NOMAP if it lacks the EFI_MEMORY_WB attribute.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+
+Note that this will also result in regions with EFI_MEMORY_WB cleared to
+be listed in /proc/iomem as 'System RAM', which may be incorrect. However,
+we already display this incorrect behavior for runtime services code/data
+regions, so this should be fixed in a separate patch, of which an example
+has been proposed here:
+https://www.spinics.net/lists/arm-kernel/msg525369.html
+
+ drivers/firmware/efi/arm-init.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index c49d50e68aee..678672d332f8 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -28,7 +28,7 @@ u64 efi_system_table;
  
-There's already a patch queued up in the 'urgent' branch for this
-issue,
-
-  https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=urgent&id=b7453c7a235c597b44c365887e57e7c300e72bf0
-
-If your patch is superior in some way please mention that in the patch
-description.
-
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 5a2631a..7a5964e 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -647,6 +647,7 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
->  {
->  	struct param_info *info = data;
->  	int i;
-> +	int offset = node;
->  
->  	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
->  		const char *subnode = dt_params[i].subnode;
-> @@ -657,12 +658,12 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
->  		}
->  
->  		if (subnode) {
-> -			node = of_get_flat_dt_subnode_by_name(node, subnode);
-> -			if (node < 0)
-> +			offset = of_get_flat_dt_subnode_by_name(node, subnode);
-> +			if (offset < 0)
->  				return 0;
->  		}
->  
-> -		return __find_uefi_params(node, info, dt_params[i].params);
-> +		return __find_uefi_params(offset, info, dt_params[i].params);
->  	}
->  
->  	return 0;
-> -- 
-> 2.3.7
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ static int __init is_normal_ram(efi_memory_desc_t *md)
+ {
+-	if (md->attribute & EFI_MEMORY_WB)
++	if (md->attribute & (EFI_MEMORY_WB|EFI_MEMORY_WT|EFI_MEMORY_WC))
+ 		return 1;
+ 	return 0;
+ }
+@@ -163,7 +163,13 @@ static __init int is_reserve_region(efi_memory_desc_t *md)
+ 	case EFI_BOOT_SERVICES_DATA:
+ 	case EFI_CONVENTIONAL_MEMORY:
+ 	case EFI_PERSISTENT_MEMORY:
+-		return 0;
++		/*
++		 * According to the spec, these regions are no longer reserved
++		 * after calling ExitBootServices(). However, we can only use
++		 * them as System RAM if they can be mapped writeback cacheable.
++		 * Otherwise, treat them as reserved.
++		 */
++		return (md->type & EFI_MEMORY_WB) == 0;
+ 	default:
+ 		break;
+ 	}
+-- 
+2.7.4
