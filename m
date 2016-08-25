@@ -1,52 +1,83 @@
-From: Paolo Bonzini <pbonzini@redhat.com>
-Subject: Re: [PATCH] x86/efi: Use kmalloc_array() in efi_call_phys_prolog()
-Date: Thu, 25 Aug 2016 13:32:51 +0200
-Message-ID: <d8006c17-d675-decb-6204-3dcf8652da7e@redhat.com>
-References: <f6dc4cd4-eb71-50e5-8f10-c38c8ec6f6c0@users.sourceforge.net>
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efi: arm64: treat regions with WT/WC set but WB cleared
+ as memory
+Date: Thu, 25 Aug 2016 12:53:25 +0100
+Message-ID: <20160825115325.GG31760@bivouac.eciton.net>
+References: <1472052256-26365-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <f6dc4cd4-eb71-50e5-8f10-c38c8ec6f6c0@users.sourceforge.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: SF Markus Elfring <elfring@users.sourceforge.net>, linux-efi@vger.kernel.org, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>
-Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1472052256-26365-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org, takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-
-
-On 25/08/2016 11:40, SF Markus Elfring wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Thu, 25 Aug 2016 11:34:03 +0200
+On Wed, Aug 24, 2016 at 05:24:16PM +0200, Ard Biesheuvel wrote:
+> Currently, memory regions are only recorded in the memblock memory table
+> if they have the EFI_MEMORY_WB memory type attribute set. In case the
+> region is of a reserved type, it is also marked as MEMBLOCK_NOMAP, which
+> will leave it out of the linear mapping.
 > 
-> * A multiplication for the size determination of a memory allocation
->   indicated that an array data structure should be processed.
->   Thus reuse the corresponding function "kmalloc_array".
+> However, memory regions may legally have the EFI_MEMORY_WT or EFI_MEMORY_WC
+> attributes set, and the EFI_MEMORY_WB cleared, in which case the region in
+> question is obviously backed by normal memory, but is not recorded in the
+> memblock memory table at all. Since it would be useful to be able to
+> identify any UEFI reported memory region using memblock_is_memory(), it
+> makes sense to add all memory to the memblock memory table, and simply mark
+> it as MEMBLOCK_NOMAP if it lacks the EFI_MEMORY_WB attribute.
 > 
->   This issue was detected by using the Coccinelle software.
-> 
-> * Replace the specification of a data type by a pointer dereference
->   to make the corresponding size determination a bit safer according to
->   the Linux coding style convention.
-> 
-> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
->  arch/x86/platform/efi/efi_64.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-> index 677e29e..311022a 100644
-> --- a/arch/x86/platform/efi/efi_64.c
-> +++ b/arch/x86/platform/efi/efi_64.c
-> @@ -85,7 +85,7 @@ pgd_t * __init efi_call_phys_prolog(void)
->  	early_code_mapping_set_exec(1);
->  
->  	n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
-> -	save_pgd = kmalloc(n_pgds * sizeof(pgd_t), GFP_KERNEL);
-> +	save_pgd = kmalloc_array(n_pgds, sizeof(*save_pgd), GFP_KERNEL);
->  
->  	for (pgd = 0; pgd < n_pgds; pgd++) {
->  		save_pgd[pgd] = *pgd_offset_k(pgd * PGDIR_SIZE);
+> Note that this will also result in regions with EFI_MEMORY_WB cleared to
+> be listed in /proc/iomem as 'System RAM', which may be incorrect. However,
+> we already display this incorrect behavior for runtime services code/data
+> regions, so this should be fixed in a separate patch, of which an example
+> has been proposed here:
+> https://www.spinics.net/lists/arm-kernel/msg525369.html
 > 
+>  drivers/firmware/efi/arm-init.c | 10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+> index c49d50e68aee..678672d332f8 100644
+> --- a/drivers/firmware/efi/arm-init.c
+> +++ b/drivers/firmware/efi/arm-init.c
+> @@ -28,7 +28,7 @@ u64 efi_system_table;
+>  
+>  static int __init is_normal_ram(efi_memory_desc_t *md)
+>  {
+> -	if (md->attribute & EFI_MEMORY_WB)
+> +	if (md->attribute & (EFI_MEMORY_WB|EFI_MEMORY_WT|EFI_MEMORY_WC))
 
-Reviewed-by: Paolo Bonzini <pbonzini@redhat.com>
+The code change makes a lot of sense, but this makes the call sites a
+bit confusing. It would make sense to rename this function.
+
+Would supports_unaligned() be too silly? That's basically what the
+above makes it mean.
+
+/
+    Leif
+
+>  		return 1;
+>  	return 0;
+>  }
+> @@ -163,7 +163,13 @@ static __init int is_reserve_region(efi_memory_desc_t *md)
+>  	case EFI_BOOT_SERVICES_DATA:
+>  	case EFI_CONVENTIONAL_MEMORY:
+>  	case EFI_PERSISTENT_MEMORY:
+> -		return 0;
+> +		/*
+> +		 * According to the spec, these regions are no longer reserved
+> +		 * after calling ExitBootServices(). However, we can only use
+> +		 * them as System RAM if they can be mapped writeback cacheable.
+> +		 * Otherwise, treat them as reserved.
+> +		 */
+> +		return (md->type & EFI_MEMORY_WB) == 0;
+>  	default:
+>  		break;
+>  	}
+> -- 
+> 2.7.4
