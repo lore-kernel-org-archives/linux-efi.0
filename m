@@ -1,92 +1,74 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] efi: arm64: treat regions with WT/WC set but WB
- cleared as memory
-Date: Fri, 26 Aug 2016 12:08:08 +0200
-Message-ID: <CAKv+Gu8-u7bqEj3Y9N0W0xogRM7t6rzxcY=Of2HHHzhKjo59Dg@mail.gmail.com>
-References: <1472141829-12026-1-git-send-email-ard.biesheuvel@linaro.org> <57C00FA7.8010908@arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: [PATCH V5 0/4] Handle EFI_INVALID_PARAMETER from ExitBootServices
+Date: Mon, 29 Aug 2016 14:38:50 -0600
+Message-ID: <1472503134-23057-1-git-send-email-jhugo@codeaurora.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <57C00FA7.8010908-5wv7dgnIgG8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lorenzo Pieralisi <lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org>, Takahiro Akashi <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Cc: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 26 August 2016 at 11:45, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org> wrote:
-> Hi Ard,
->
-> On 25/08/16 17:17, Ard Biesheuvel wrote:
->> Currently, memory regions are only recorded in the memblock memory table
->> if they have the EFI_MEMORY_WB memory type attribute set. In case the
->> region is of a reserved type, it is also marked as MEMBLOCK_NOMAP, which
->> will leave it out of the linear mapping.
->>
->> However, memory regions may legally have the EFI_MEMORY_WT or EFI_MEMORY_WC
->> attributes set, and the EFI_MEMORY_WB cleared, in which case the region in
->> question is obviously backed by normal memory, but is not recorded in the
->> memblock memory table at all.
->
-> I've been hitting this when applying weird (but permissible) attributes to the
-> ACPI regions. Currently without WB we map these as device memory, then let
-> acpica make unaligned accesses to it.
->
-> This patch fixes all that, and from the conversation on irc, the 'UC only' case
-> for ACPI tables is x86-legacy, and should never happen.
->
+According to the UEFI spec, the UEFI OS Loader (aka the stub) should
+transition from UEFI to the OS by getting the current memory map from UEFI,
+then calling ExitBootServices.  The spec states that ExitBootServices may
+return EFI_INVALID_PARAMETER if the memory map reference provided by the stub
+is not current, ie UEFI handled some event prior to ExitBootServices which
+modified the map.  The spec states that to handle this scenario, the stub shall
+get the updated map, and invoke ExitBootServices again.  The spec also states
+that once ExitBootServices is invoked, even if it returns error, the only
+APIs the stub is allowed to invoke is GetMemoryMap and ExitBootServices.
 
-Indeed, deliberately exposing a region containing ACPI tables as
-something that *requires* strongly ordered access does not make sense.
+The EFI_INVALID_PARAMETER scenario has been seen in the wild previously in
+x86 but the fix - d3768d885c6c ("x86, efi: retry ExitBootServices() on failure")
+still violates the spec.  The FDT code does not handle this scenario, but
+instances of it are now observed.
 
-The problem here is that the UEFI memory map describes both occupied
-and available regions, and in the 'available' case, it is obvious that
-these bits describe the nature of the physical backing of the region,
-i.e., whether the bus fabric, memory, etc allow writeback/writethrough
-caching, write buffering etc. This explains why most regions have all
-the bits set.
+This patch series aims to provide a spec complaint solution that can be reused
+in all stubs, thus preventing each arch or variant from reinventing the wheel
+and likely getting it wrong.
 
-In the occupied case, this can be misinterpreted as describing the
-nature of the content, like an ACPI table containing fields that are
-not naturally aligned. I.e, I don't think clearing the UC bit here
-should be interpreted to mean that the payload *requires* WB/WT/WC. It
-is up to the kernel to complain if it interprets a region, and notices
-that the only supported mapping type conflicts with the nature of the
-accesses we intend to perform.
+[V5]
+-Vertically align struct definition and initializations per Ingo Molnar
+-Remove struct typedef per Ingo Molnar
+-Clarify commit texts per Ingo Molnar
+-Clean up comment placement and format per Ingo Molnar 
+-Misc spelling/phrasing cleanups per Ingo Molnar
+-Add inline refernce to relevant UEFI spec section per Timur Tabi
 
->
->> diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
->> index c49d50e68aee..c2ac5975fd5d 100644
->> --- a/drivers/firmware/efi/arm-init.c
->> +++ b/drivers/firmware/efi/arm-init.c
->> @@ -163,18 +163,22 @@ static __init int is_reserve_region(efi_memory_desc_t *md)
->>       case EFI_BOOT_SERVICES_DATA:
->>       case EFI_CONVENTIONAL_MEMORY:
->>       case EFI_PERSISTENT_MEMORY:
->> -             return 0;
->> +             /*
->> +              * According to the spec, these regions are no longer reserved
->> +              * after calling ExitBootServices(). However, we can only use
->> +              * them as System RAM if they can be mapped writeback cacheable.
->> +              */
->> +             return (md->attribute & EFI_MEMORY_WB);
->>       default:
->>               break;
->
-> Micro-nit: break here in order to immediately return false looks a bit odd...
->
+[V4]
+-Fix x86 boot error reported by Matt Fleming
+-Update change logs to indicate real world occurances per Matt Fleming
+-Make the callback function non-optional per Matt Fleming
+-Reduce parameter list of efi_get_memory_map() per Matt Fleming
+-Reduce parameter list of efi_exit_boot_services per Matt Fleming
+-Define callback function signature with a typedef per Matt Fleming
 
-Yes, I could not decide what to do with it so I left it.
+[V3]
+-Remove old extra headroom allocation per Matt Fleming
+-Create and use headroom check wrapper per Matt Fleming
 
->
->>       }
->> -     return is_normal_ram(md);
->> +     return false;
->>  }
->
->
-> Tested-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
-> Reviewed-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
->
+[V2]
+-Define EFI_MMAP_NR_SLACK_SLOTS per Mark Rutland
+-Use desc_size as firmware may exceed the defined struct size per Ard Biesheuvel
 
-Thanks,
-Ard.
+[V1]
+-Allocate headspace on the memory map buffer for reuse per Ard Biesheuvel
+-Create a shared helper address the issue universally per Matt Fleming
+
+Jeffrey Hugo (4):
+  efi/libstub: Allocate headspace in efi_get_memory_map()
+  efi/libstub: Introduce ExitBootServices helper
+  efi/libstub: Use efi_exit_boot_services() in FDT
+  x86/efi: Use efi_exit_boot_services()
+
+ arch/x86/boot/compressed/eboot.c               | 132 +++++++++++++------------
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 129 ++++++++++++++++++++++--
+ drivers/firmware/efi/libstub/fdt.c             |  52 +++++++---
+ drivers/firmware/efi/libstub/random.c          |   3 +-
+ include/linux/efi.h                            |  22 ++++-
+ 5 files changed, 249 insertions(+), 89 deletions(-)
+
+-- 
+Qualcomm Datacenter Technologies as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the
+Code Aurora Forum, a Linux Foundation Collaborative Project.
