@@ -1,7 +1,7 @@
 From: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: [PATCH V5 2/4] efi/libstub: Introduce ExitBootServices helper
-Date: Mon, 29 Aug 2016 14:38:52 -0600
-Message-ID: <1472503134-23057-3-git-send-email-jhugo@codeaurora.org>
+Subject: [PATCH V5 3/4] efi/libstub: Use efi_exit_boot_services() in FDT
+Date: Mon, 29 Aug 2016 14:38:53 -0600
+Message-ID: <1472503134-23057-4-git-send-email-jhugo@codeaurora.org>
 References: <1472503134-23057-1-git-send-email-jhugo@codeaurora.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1472503134-23057-1-git-send-email-jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
@@ -10,130 +10,81 @@ To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJtt
 Cc: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The spec allows ExitBootServices to fail with EFI_INVALID_PARAMETER if a
-race condition has occurred where the EFI has updated the memory map after
-the stub grabbed a reference to the map.  The spec defines a retry
-proceedure with specific requirements to handle this scenario.
-
-This scenario was previously observed on x86 - commit d3768d885c6c ("x86,
-efi: retry ExitBootServices() on failure") but the current fix is not spec
-compliant and the scenario is now observed on the Qualcomm Technologies
-QDF2432 via the FDT stub which does not handle the error and thus causes
-boot failures.  The user will notice the boot failure as the kernel is not
-executed and the system may drop back to a UEFI shell, but will be
-unresponsive to input and the system will require a power cycle to recover.
-
-Add a helper to the stub library that correctly adheres to the spec in the
-case of EFI_INVALID_PARAMETER from ExitBootServices and can be universally
-used across all stub implementations.
+The FDT code directly calls ExitBootServices.  This is inadvisable as the
+UEFI spec details a complex set of errors, race conditions, and API
+interactions that the caller of ExitBootServices must get correct.  The
+FDT code does not handle EFI_INVALID_PARAMETER as required by the spec,
+which causes intermittent boot failures on the Qualcomm Technologies
+QDF2432.  Call the efi_exit_boot_services() helper intead, which handles
+the EFI_INVALID_PARAMETER scenario properly.
 
 Signed-off-by: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 ---
- drivers/firmware/efi/libstub/efi-stub-helper.c | 73 ++++++++++++++++++++++++++
- include/linux/efi.h                            | 11 ++++
- 2 files changed, 84 insertions(+)
+ drivers/firmware/efi/libstub/fdt.c | 37 +++++++++++++++++++++++++++----------
+ 1 file changed, 27 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 29368ac..aded106 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -740,3 +740,76 @@ char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
- 	*cmd_line_len = options_bytes;
- 	return (char *)cmdline_addr;
- }
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index bec0fa8..a6a9311 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -152,6 +152,27 @@ fdt_set_fail:
+ #define EFI_FDT_ALIGN EFI_PAGE_SIZE
+ #endif
+ 
++struct exit_boot_struct {
++	efi_memory_desc_t *runtime_map;
++	int *runtime_entry_count;
++};
 +
-+/*
-+ * Handle calling ExitBootServices according to the requirements set out by the
-+ * spec.  Obtains the current memory map, and returns that info after calling
-+ * ExitBootServices.  The client must specify a function to perform any
-+ * processing of the memory map data prior to ExitBootServices.  A client
-+ * specific structure may be passed to the function via priv.  The client
-+ * function may be called multiple times.
-+ */
-+efi_status_t efi_exit_boot_services(efi_system_table_t *sys_table_arg,
-+				    void *handle,
-+				    struct efi_boot_memmap *map,
-+				    void *priv,
-+				    efi_exit_boot_map_processing priv_func)
++static efi_status_t exit_boot_func(efi_system_table_t *sys_table_arg,
++				   struct efi_boot_memmap *map,
++				   void *priv)
 +{
-+	efi_status_t status;
-+
-+	status = efi_get_memory_map(sys_table_arg, map);
-+
-+	if (status != EFI_SUCCESS)
-+		goto fail;
-+
-+	status = priv_func(sys_table_arg, map, priv);
-+	if (status != EFI_SUCCESS)
-+		goto free_map;
-+
-+	status = efi_call_early(exit_boot_services, handle, *map->key_ptr);
-+
-+	if (status == EFI_INVALID_PARAMETER) {
-+		/*
-+		 * The memory map changed between efi_get_memory_map() and
-+		 * exit_boot_services().  Per the UEFI Spec v2.6, Section 6.4:
-+		 * EFI_BOOT_SERVICES.ExitBootServices we need to get the
-+		 * updated map, and try again.  The spec implies one retry
-+		 * should be sufficent, which is confirmed against the EDK2
-+		 * implementation.  Per the spec, we can only invoke
-+		 * get_memory_map() and exit_boot_services() - we cannot alloc
-+		 * so efi_get_memory_map() cannot be used, and we must reuse
-+		 * the buffer.  For all practical purposes, the headroom in the
-+		 * buffer should account for any changes in the map so the call
-+		 * to get_memory_map() is expected to succeed here.
-+		 */
-+		*map->map_size = *map->buff_size;
-+		status = efi_call_early(get_memory_map,
-+					map->map_size,
-+					*map->map,
-+					map->key_ptr,
-+					map->desc_size,
-+					map->desc_ver);
-+
-+		/* exit_boot_services() was called, thus cannot free */
-+		if (status != EFI_SUCCESS)
-+			goto fail;
-+
-+		status = priv_func(sys_table_arg, map, priv);
-+		/* exit_boot_services() was called, thus cannot free */
-+		if (status != EFI_SUCCESS)
-+			goto fail;
-+
-+		status = efi_call_early(exit_boot_services, handle, *map->key_ptr);
-+	}
-+
-+	/* exit_boot_services() was called, thus cannot free */
-+	if (status != EFI_SUCCESS)
-+		goto fail;
++	struct exit_boot_struct *p = priv;
++	/*
++	 * Update the memory map with virtual addresses. The function will also
++	 * populate @runtime_map with copies of just the EFI_MEMORY_RUNTIME
++	 * entries so that we can pass it straight to SetVirtualAddressMap()
++	 */
++	efi_get_virtmap(*map->map, *map->map_size, *map->desc_size,
++			p->runtime_map, p->runtime_entry_count);
 +
 +	return EFI_SUCCESS;
-+
-+free_map:
-+	efi_call_early(free_pool, *map->map);
-+fail:
-+	return status;
 +}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index dc9a40e..7f5c0d8 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1470,4 +1470,15 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
- 			   unsigned long size);
++
+ /*
+  * Allocate memory for a new FDT, then add EFI, commandline, and
+  * initrd related fields to the FDT.  This routine increases the
+@@ -183,6 +204,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 	efi_status_t status;
+ 	int runtime_entry_count = 0;
+ 	struct efi_boot_memmap map;
++	struct exit_boot_struct priv;
  
- bool efi_runtime_disabled(void);
-+
-+typedef efi_status_t (*efi_exit_boot_map_processing)(
-+	efi_system_table_t *sys_table_arg,
-+	struct efi_boot_memmap *map,
-+	void *priv);
-+
-+efi_status_t efi_exit_boot_services(efi_system_table_t *sys_table,
-+				    void *handle,
-+				    struct efi_boot_memmap *map,
-+				    void *priv,
-+				    efi_exit_boot_map_processing priv_func);
- #endif /* _LINUX_EFI_H */
+ 	map.map =	&runtime_map;
+ 	map.map_size =	&map_size;
+@@ -257,16 +279,11 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 		}
+ 	}
+ 
+-	/*
+-	 * Update the memory map with virtual addresses. The function will also
+-	 * populate @runtime_map with copies of just the EFI_MEMORY_RUNTIME
+-	 * entries so that we can pass it straight into SetVirtualAddressMap()
+-	 */
+-	efi_get_virtmap(memory_map, map_size, desc_size, runtime_map,
+-			&runtime_entry_count);
+-
+-	/* Now we are ready to exit_boot_services.*/
+-	status = sys_table->boottime->exit_boot_services(handle, mmap_key);
++	sys_table->boottime->free_pool(memory_map);
++	priv.runtime_map = runtime_map;
++	priv.runtime_entry_count = &runtime_entry_count;
++	status = efi_exit_boot_services(sys_table, handle, &map, &priv,
++					exit_boot_func);
+ 
+ 	if (status == EFI_SUCCESS) {
+ 		efi_set_virtual_address_map_t *svam;
 -- 
 Qualcomm Datacenter Technologies as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the
