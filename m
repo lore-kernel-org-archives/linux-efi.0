@@ -1,26 +1,42 @@
-From: biekongdan <survey5-fkChtrg5iFP1o8fLvoAFJgC/G2K4zDHf@public.gmane.org>
-Subject: =?UTF-8?B?5bCP5LyZ5Ly05Lus77yB5LiA6LW35p2l5oiY5paX5ZCn77yB6LaF6auY56aP?=  =?UTF-8?B?5Yip5ZOm77yBKEFEKQ==?=
-Date: Mon, 29 Aug 2016 06:57:34 +0200
-Message-ID: <201608290457.u7T4vY1m014742@hautenormandie.fr>
+From: Lukas Wunner <lukas@wunner.de>
+Subject: Re: [PATCH 4/6] driver core: Don't leak secondary fwnode on device
+ removal
+Date: Tue, 30 Aug 2016 11:03:25 +0200
+Message-ID: <20160830090325.GA25024@wunner.de>
+References: <cover.1469616641.git.lukas@wunner.de>
+ <ef34b0d31d1fb9bc6a48a07d265fd103527b3f30.1469616641.git.lukas@wunner.de>
+ <6868582.iUcUV1Tb36@vostro.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-acpi-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <6868582.iUcUV1Tb36@vostro.rjw.lan>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, Pierre Moreau <pierre.morrow@free.fr>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-acpi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
+On Wed, Aug 17, 2016 at 02:38:50AM +0200, Rafael J. Wysocki wrote:
+> On Thursday, July 28, 2016 02:25:41 AM Lukas Wunner wrote:
+> > If device_add_property_set() is called for a device, a secondary fwnode
+> > is allocated and assigned to the device but currently not freed once the
+> > device is removed.
+> > 
+> > This can be triggered on Apple Macs if a Thunderbolt device is plugged
+> > in on boot since Apple's NHI EFI driver sets a number of properties for
+> > that device which are leaked on unplug.
+> > 
+> > Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> > Cc: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+> > Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
+> > Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> > Cc: Andreas Noever <andreas.noever@gmail.com>
+> > Signed-off-by: Lukas Wunner <lukas@wunner.de>
+> 
+> ACK, or I can apply it directly if you want me to do that.
 
-Ce message vous a été envoyé parce que "biekongdan <survey5-fkChtrg5iFP1o8fLvoAFJgC/G2K4zDHf@public.gmane.org>" pense que vous trouverez la page "Appel à projets Energies : la Haute-Normandie, une région, des énergies" www.ape.hautenormandie.fr intéressante.
+Yes, if you could apply it directly I'd be grateful.
 
-Lien vers la page:
-http://www.ape.hautenormandie.fr/
+Thanks!
 
-Commentaire par "biekongdan <survey5-fkChtrg5iFP1o8fLvoAFJgC/G2K4zDHf@public.gmane.org>":
-【澳门金沙集团】电子游戏不计输赢，天天1.2%返水无上限！
-拥有MG电子、BB电子等最火平台，1元即可游戏（支持支付宝、微信、财付通、游戏点卡充值）
-最新捕鱼游戏上线，独具一格，玩法精彩，惊喜连不停，运气高到爆！
-丰富的各类电子游戏，邀您体验，赶快加入吧！：http://www.834516.com/?linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-------------------------------------------
-                    在乎才会乱想，不在乎连想都不会想。
+Lukas
