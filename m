@@ -1,42 +1,29 @@
-From: Lukas Wunner <lukas@wunner.de>
-Subject: Re: [PATCH 4/6] driver core: Don't leak secondary fwnode on device
- removal
-Date: Tue, 30 Aug 2016 11:03:25 +0200
-Message-ID: <20160830090325.GA25024@wunner.de>
-References: <cover.1469616641.git.lukas@wunner.de>
- <ef34b0d31d1fb9bc6a48a07d265fd103527b3f30.1469616641.git.lukas@wunner.de>
- <6868582.iUcUV1Tb36@vostro.rjw.lan>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 6/6] efi/fdt: Fix handling error value in
+ fdt_find_uefi_params
+Date: Tue, 30 Aug 2016 11:07:42 +0100
+Message-ID: <20160830100742.GA32579@codeblueprint.co.uk>
+References: <1471638904-3494-1-git-send-email-matt@codeblueprint.co.uk>
+ <1471638904-3494-7-git-send-email-matt@codeblueprint.co.uk>
+ <20160822164508.GD11327@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <6868582.iUcUV1Tb36@vostro.rjw.lan>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Cc: linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, Pierre Moreau <pierre.morrow@free.fr>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-acpi@vger.kernel.org
+In-Reply-To: <20160822164508.GD11327-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andrzej Hajda <a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 17, 2016 at 02:38:50AM +0200, Rafael J. Wysocki wrote:
-> On Thursday, July 28, 2016 02:25:41 AM Lukas Wunner wrote:
-> > If device_add_property_set() is called for a device, a secondary fwnode
-> > is allocated and assigned to the device but currently not freed once the
-> > device is removed.
-> > 
-> > This can be triggered on Apple Macs if a Thunderbolt device is plugged
-> > in on boot since Apple's NHI EFI driver sets a number of properties for
-> > that device which are leaked on unplug.
-> > 
-> > Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> > Cc: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
-> > Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
-> > Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> > Cc: Andreas Noever <andreas.noever@gmail.com>
-> > Signed-off-by: Lukas Wunner <lukas@wunner.de>
+On Mon, 22 Aug, at 06:45:08PM, Ingo Molnar wrote:
 > 
-> ACK, or I can apply it directly if you want me to do that.
+> * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> 
+> > From: Andrzej Hajda <a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+> > 
+> > of_get_flat_dt_subnode_by_name can return negative value in case of error.
+> 
+> ... which is a problem because <X>, and we solve it by doing <Y>?
 
-Yes, if you could apply it directly I'd be grateful.
-
-Thanks!
-
-Lukas
+Andrzej, could you please provide an answer to Ingo's question?
