@@ -1,26 +1,99 @@
-From: rongshenxie <tuisong-6E0zOJYHXTs5cWOQI2gDXVaTQe2KTcn/@public.gmane.org>
-Subject: =?UTF-8?B?5Lia55WM5pyA6LGq5Y2O55S15a2Q5ri45oiP5aWX6aSQ77yM5YWo572R55S1?=  =?UTF-8?B?5a2Q5ri46Im65pyA5L2z5oqV5rOo5bmz5Y+w77yB?=
-Date: Thu, 01 Sep 2016 13:36:55 +0200
-Message-ID: <20160901113655.2B10D64FDF@srv02.yokohama.domainplatzhalter.de>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2] efi: arm64: treat regions with WT/WC set but WB
+ cleared as memory
+Date: Thu, 1 Sep 2016 15:33:42 +0100
+Message-ID: <CAKv+Gu9QVUg2a=+efO+j+nVUNszpRYuzH9mRHTHLNNBBJX+b9w@mail.gmail.com>
+References: <1472141829-12026-1-git-send-email-ard.biesheuvel@linaro.org>
+ <57C00FA7.8010908@arm.com> <CAKv+Gu8-u7bqEj3Y9N0W0xogRM7t6rzxcY=Of2HHHzhKjo59Dg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
+In-Reply-To: <CAKv+Gu8-u7bqEj3Y9N0W0xogRM7t6rzxcY=Of2HHHzhKjo59Dg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lorenzo Pieralisi <lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org>, Takahiro Akashi <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On 26 August 2016 at 11:08, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On 26 August 2016 at 11:45, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org> wrote:
+>> Hi Ard,
+>>
+>> On 25/08/16 17:17, Ard Biesheuvel wrote:
+>>> Currently, memory regions are only recorded in the memblock memory table
+>>> if they have the EFI_MEMORY_WB memory type attribute set. In case the
+>>> region is of a reserved type, it is also marked as MEMBLOCK_NOMAP, which
+>>> will leave it out of the linear mapping.
+>>>
+>>> However, memory regions may legally have the EFI_MEMORY_WT or EFI_MEMORY_WC
+>>> attributes set, and the EFI_MEMORY_WB cleared, in which case the region in
+>>> question is obviously backed by normal memory, but is not recorded in the
+>>> memblock memory table at all.
+>>
+>> I've been hitting this when applying weird (but permissible) attributes to the
+>> ACPI regions. Currently without WB we map these as device memory, then let
+>> acpica make unaligned accesses to it.
+>>
+>> This patch fixes all that, and from the conversation on irc, the 'UC only' case
+>> for ACPI tables is x86-legacy, and should never happen.
+>>
+>
+> Indeed, deliberately exposing a region containing ACPI tables as
+> something that *requires* strongly ordered access does not make sense.
+>
+> The problem here is that the UEFI memory map describes both occupied
+> and available regions, and in the 'available' case, it is obvious that
+> these bits describe the nature of the physical backing of the region,
+> i.e., whether the bus fabric, memory, etc allow writeback/writethrough
+> caching, write buffering etc. This explains why most regions have all
+> the bits set.
+>
+> In the occupied case, this can be misinterpreted as describing the
+> nature of the content, like an ACPI table containing fields that are
+> not naturally aligned. I.e, I don't think clearing the UC bit here
+> should be interpreted to mean that the payload *requires* WB/WT/WC. It
+> is up to the kernel to complain if it interprets a region, and notices
+> that the only supported mapping type conflicts with the nature of the
+> accesses we intend to perform.
+>
+>>
+>>> diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+>>> index c49d50e68aee..c2ac5975fd5d 100644
+>>> --- a/drivers/firmware/efi/arm-init.c
+>>> +++ b/drivers/firmware/efi/arm-init.c
+>>> @@ -163,18 +163,22 @@ static __init int is_reserve_region(efi_memory_desc_t *md)
+>>>       case EFI_BOOT_SERVICES_DATA:
+>>>       case EFI_CONVENTIONAL_MEMORY:
+>>>       case EFI_PERSISTENT_MEMORY:
+>>> -             return 0;
+>>> +             /*
+>>> +              * According to the spec, these regions are no longer reserved
+>>> +              * after calling ExitBootServices(). However, we can only use
+>>> +              * them as System RAM if they can be mapped writeback cacheable.
+>>> +              */
+>>> +             return (md->attribute & EFI_MEMORY_WB);
+>>>       default:
+>>>               break;
+>>
+>> Micro-nit: break here in order to immediately return false looks a bit odd...
+>>
+>
+> Yes, I could not decide what to do with it so I left it.
+>
+>>
+>>>       }
+>>> -     return is_normal_ram(md);
+>>> +     return false;
+>>>  }
+>>
+>>
+>> Tested-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+>> Reviewed-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+>>
+>
 
+Matt,
 
-This message was sent to you because "rongshenxie <tuisong-6E0zOJYHXTs5cWOQI2gDXVaTQe2KTcn/@public.gmane.org>" thought you might find the page "Tyre Labelling Tab" at www.yokohama-online.com interesting.
+Could we get this queued for v4.9 please?
 
-This is the link to the page:
-http://www.yokohama-online.com/Tyrepedia/Tyre-Labelling/Tyre-Labelling-Tab
-
-Comment by "rongshenxie <tuisong-6E0zOJYHXTs5cWOQI2gDXVaTQe2KTcn/@public.gmane.org>":
-10年亚洲顶级品牌信誉，持有正规牌照，负责任的博彩公司！
-主营电子游戏（老虎机）、真人百家乐、皇冠体育、各类时时彩票，1元即可游戏，50元就能出款！
-您有多久，没有随心所欲的娱乐了呢？来，【澳门金沙集团】欢迎您，天天返水1.2%：http://www.834516.com/?linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-------------------------------------------
-                    成功的领导人不是温度计，而是恒温器。
+Thanks,
+Ard.
