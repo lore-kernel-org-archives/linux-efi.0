@@ -1,238 +1,226 @@
 From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: add firmware version information to sysfs
-Date: Fri, 2 Sep 2016 14:57:58 -0400
-Message-ID: <20160902185758.GB9082@redhat.com>
-References: <1471968832-19847-1-git-send-email-pjones@redhat.com>
- <1471968832-19847-2-git-send-email-pjones@redhat.com>
- <20160824103021.GA22888@wunner.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Subject: [PATCH 1/3] efi: don't call the system table version the runtime services version
+Date: Fri,  2 Sep 2016 16:57:51 -0400
+Message-ID: <1472849873-32041-1-git-send-email-pjones@redhat.com>
+References: <20160902185758.GB9082@redhat.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160824103021.GA22888-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+In-Reply-To: <20160902185758.GB9082-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 24, 2016 at 12:30:21PM +0200, Lukas Wunner wrote:
+The system table's hdr.revision is not the runtime services revision,
+it's the EFI Spec revision.  The runtime services revision is the one on
+systab->runtime->hdr.revision.
 
-(sorry for the delay, it turned into a busy pair of weeks)
+So we shouldn't call it runtime_version throughout the code, as that's
+misleading if you're *actually* looking for the runtime services
+revision.
 
-> On Tue, Aug 23, 2016 at 12:13:52PM -0400, Peter Jones wrote:
-> > This adds the EFI Spec version from the system table to sysfs as
-> > /sys/firmware/efi/spec_version .
-> > 
-> > Userland tools need this information in order to work around
-> > specification deficiencies in 2.4 and earlier firmwares.
-> 
-> Some details or examples on the nature of those specification
-> deficiencies would help an uninitiated reader understand the
-> necessity of this patch.
-> 
-> > 
-> > Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > ---
-> >  Documentation/ABI/testing/sysfs-firmware-efi |  6 +++
-> >  arch/ia64/kernel/efi.c                       |  3 ++
-> >  drivers/firmware/efi/arm-init.c              |  2 +
-> >  drivers/firmware/efi/efi.c                   | 71 ++++++++++++++++++++++++++++
-> >  4 files changed, 82 insertions(+)
-> > 
-> > diff --git a/Documentation/ABI/testing/sysfs-firmware-efi b/Documentation/ABI/testing/sysfs-firmware-efi
-> > index e794eac..4eec7c2 100644
-> > --- a/Documentation/ABI/testing/sysfs-firmware-efi
-> > +++ b/Documentation/ABI/testing/sysfs-firmware-efi
-> > @@ -28,3 +28,9 @@ Description:	Displays the physical addresses of all EFI Configuration
-> >  		versions are always printed first, i.e. ACPI20 comes
-> >  		before ACPI.
-> >  Users:		dmidecode
-> > +
-> > +What:		/sys/firmware/efi/spec_version
-> > +Date:		August 2016
-> > +Contact:	linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > +Description:	Displays the UEFI Specification revision the firmware claims to
-> > +		be based upon.
-> > diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
-> > index 1212956..a48377f 100644
-> > --- a/arch/ia64/kernel/efi.c
-> > +++ b/arch/ia64/kernel/efi.c
-> > @@ -475,6 +475,7 @@ efi_init (void)
-> >  	u64 efi_desc_size;
-> >  	char *cp, vendor[100] = "unknown";
-> >  	int i;
-> > +	efi_table_hdr_t *hdr;
-> 
-> Unused new variable?
+We also move some of the assignments around just a bit, in support of
+making a future patch more readable.
 
-A remnant I apparently have failed to remove from an old version of the
-patch.
+This also fixes a minor bug where the version field was not set in the
+efi structure on ia64.
 
-> 
-> >  
-> >  	set_bit(EFI_BOOT, &efi.flags);
-> >  	set_bit(EFI_64BIT, &efi.flags);
-> > @@ -531,6 +532,8 @@ efi_init (void)
-> >  	       efi.systab->hdr.revision >> 16,
-> >  	       efi.systab->hdr.revision & 0xffff, vendor);
-> >  
-> > +	efi.spec_version = efi.systab->hdr.version;
-> > +
-> 
-> I think this deserves a mention in the commit message that the
-> spec_version struct field was previously not filled for ia64 arch
-> and that you're fixing that while you're at it. Alternatively,
-> move this to a separate commit.
+Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/ia64/kernel/efi.c                  | 3 +++
+ arch/x86/platform/efi/efi.c             | 7 ++++---
+ arch/x86/platform/efi/efi_64.c          | 2 +-
+ arch/x86/xen/efi.c                      | 4 ++--
+ drivers/firmware/efi/arm-init.c         | 5 +++--
+ drivers/firmware/efi/runtime-wrappers.c | 8 ++++----
+ drivers/xen/efi.c                       | 6 +++---
+ include/linux/efi.h                     | 2 +-
+ 8 files changed, 21 insertions(+), 16 deletions(-)
 
-Sure.
-
-> 
-> >  	palo_phys      = EFI_INVALID_TABLE_ADDR;
-> >  
-> >  	if (efi_config_init(arch_tables) != 0)
-> > diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-> > index b89fc23..8e8cb8c 100644
-> > --- a/drivers/firmware/efi/arm-init.c
-> > +++ b/drivers/firmware/efi/arm-init.c
-> > @@ -133,6 +133,8 @@ static int __init uefi_init(void)
-> >  
-> >  	efi.spec_version = (u32)efi.systab->hdr.revision;
-> >  
-> > +	early_memunmap(tmp, sizeof(efi_table_hdr_t));
-> > +
-> 
-> What is the connection of this change to exposing the spec_version
-> in sysfs? Seems like a fix that should be moved to a separate commit.
-
-This is another remnant from that same previous version; I'll fix it
-before resending as well.
-
-> 
-> >  	table_size = sizeof(efi_config_table_64_t) * efi.systab->nr_tables;
-> >  	config_tables = early_memremap_ro(efi_to_phys(efi.systab->tables),
-> >  					  table_size);
-> > diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> > index 5a2631a..5947d19 100644
-> > --- a/drivers/firmware/efi/efi.c
-> > +++ b/drivers/firmware/efi/efi.c
-> > @@ -27,6 +27,7 @@
-> >  #include <linux/slab.h>
-> >  #include <linux/acpi.h>
-> >  #include <linux/ucs2_string.h>
-> > +#include <linux/bcd.h>
-> >  
-> >  #include <asm/early_ioremap.h>
-> >  
-> > @@ -124,6 +125,74 @@ static struct kobj_attribute efi_attr_systab =
-> >  
-> >  #define EFI_FIELD(var) efi.var
-> >  
-> > +static ssize_t efi_version_show(struct kobject *kobj,
-> > +				struct kobj_attribute *attr,
-> > +				char *buf,
-> > +				u32 revision)
-> > +{
-> > +	char *str = buf;
-> > +	u16 major;
-> > +	u8 minor, tiny;
-> > +
-> > +	if (!kobj || !buf)
-> > +		return -EINVAL;
-> > +
-> > +	/* The spec says:
-> > +	 *  The revision of the EFI Specification to which this table
-> > +	 *  conforms. The upper 16 bits of this field contain the major
-> > +	 *  revision value, and the lower 16 bits contain the minor revision
-> > +	 *  value. The minor revision values are binary coded decimals and are
-> > +	 *  limited to the range of 00..99.
-> > +	 *
-> > +	 *  When printed or displayed UEFI spec revision is referred as (Major
-> > +	 *  revision).(Minor revision upper decimal).(Minor revision lower
-> > +	 *  decimal) or (Major revision).(Minor revision upper decimal) in
-> > +	 *  case Minor revision lower decimal is set to 0. For example:
-> > +	 *
-> > +	 *  A specification with the revision value ((2<<16) | (30)) would be
-> > +	 *  referred as 2.3;
-> > +	 *  A specification with the revision value ((2<<16) | (31)) would be
-> > +	 *  referred as 2.3.1
-> > +	 *
-> > +	 * Then later it says:
-> > +	 *  Related Definitions
-> > +	 *   #define EFI_SYSTEM_TABLE_SIGNATURE 0x5453595320494249
-> > +	 *   #define EFI_2_40_SYSTEM_TABLE_REVISION ((2<<16) | (40))
-> > +	 *   #define EFI_2_31_SYSTEM_TABLE_REVISION ((2<<16) | (31))
-> > +	 *   #define EFI_2_30_SYSTEM_TABLE_REVISION ((2<<16) | (30))
-> > +	 *   #define EFI_2_20_SYSTEM_TABLE_REVISION ((2<<16) | (20))
-> > +	 *   #define EFI_2_10_SYSTEM_TABLE_REVISION ((2<<16) | (10))
-> > +	 *   #define EFI_2_00_SYSTEM_TABLE_REVISION ((2<<16) | (00))
-> > +	 *   #define EFI_1_10_SYSTEM_TABLE_REVISION ((1<<16) | (10))
-> > +	 *   #define EFI_1_02_SYSTEM_TABLE_REVISION ((1<<16) | (02))
-> > +	 *   #define EFI_SPECIFICATION_VERSION EFI_SYSTEM_TABLE_REVISION
-> > +	 *   #define EFI_SYSTEM_TABLE_REVISION EFI_2_40_SYSTEM_TABLE_REVISION
-> > +	 *
-> > +	 * (Apparently this bit of the spec failed to get updated for 2.5
-> > +	 * and 2.6; UefiSpec.h in Tiano has been updated, though.)
-> > +	 */
-> 
-> I'd only include a 2-3 line summary of the spec and move this documentation
-> to the commit message in order to keep the code concise.
-
-This is the first time I think I've ever been told by anybody to comment
-less :)  But I think this comment explains why it's formatting it this
-way pretty well, without really breaking up the code meaningfully at
-all.  I'd rather leave it.
-
-> 
-> > +
-> > +	major = (revision & 0xffff0000) >> 16;
-> > +	minor = bcd2bin((revision & 0x0000ff00) >> 8);
-> > +	tiny = bcd2bin(revision & 0x000000ff);
-> 
-> You can improve readability by inserting a few blanks like this:
-> 
-> 	major =         (revision & 0xffff0000) >> 16;
-> 	minor = bcd2bin((revision & 0x0000ff00) >> 8);
-> 	tiny  = bcd2bin( revision & 0x000000ff);
-> 
-> I'd also use minor_u and minor_l or somesuch instead of "tiny"
-> but that's just my preferred bikeshed color.
-
-I've never understood why people think that makes things more readable,
-but I can read it fine either way, so sure, I'll take these suggestions
-for the next version of the patch.
-
-> > +
-> > +	if (tiny == 0)
-> > +		str += sprintf(str, "%d.%d\n", major, minor);
-> > +	else
-> > +		str += sprintf(str, "%d.%d.%d\n", major, minor, tiny);
-> > +
-> > +	return str - buf;
-> 
-> Hm, why not return the result of sprintf directly (cast to ssize_t),
-> or if you want to handle negative return values properly, store the
-> result in an int?
-
-Fair enough.
-
-> > +}
-> > +
-> > +#define EFI_VERSION_ATTR_SHOW(name) \
-> > +static ssize_t name##_show(struct kobject *kobj, \
-> > +				struct kobj_attribute *attr, char *buf) \
-> > +{ \
-> > +	return efi_version_show(kobj, attr, buf, EFI_FIELD(name)); \
-> > +}
-> > +
-> > +EFI_VERSION_ATTR_SHOW(spec_version);
-> > +
-> 
-> Unless you plan to expose other versions like this, you can save on
-> code by not using a macro here.
-
-Yep; originally I'd had 3, but it turned out not to be worthwhile.
-
-I'll send an updated version.
-
+diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
+index 1212956..2af99a8 100644
+--- a/arch/ia64/kernel/efi.c
++++ b/arch/ia64/kernel/efi.c
+@@ -513,6 +513,9 @@ efi_init (void)
+ 		panic("Whoa! Can't find EFI system table.\n");
+ 	if (efi.systab->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+ 		panic("Whoa! EFI system table signature incorrect\n");
++
++	efi.spec_version = efi.systab->hdr.version;
++
+ 	if ((efi.systab->hdr.revision >> 16) == 0)
+ 		printk(KERN_WARNING "Warning: EFI system table version "
+ 		       "%d.%02d, expected 1.00 or greater\n",
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 1fbb408..51c091e 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -325,6 +325,9 @@ static int __init efi_systab_init(void *phys)
+ 		pr_err("System table signature incorrect!\n");
+ 		return -EINVAL;
+ 	}
++
++	efi.spec_version = efi.systab->hdr.revision;
++
+ 	if ((efi.systab->hdr.revision >> 16) == 0)
+ 		pr_err("Warning: System table version %d.%02d, expected 1.00 or greater!\n",
+ 		       efi.systab->hdr.revision >> 16,
+@@ -843,7 +846,7 @@ static void __init kexec_enter_virtual_mode(void)
+ 	 *
+ 	 * Call EFI services through wrapper functions.
+ 	 */
+-	efi.runtime_version = efi_systab.hdr.revision;
++	efi.spec_version = efi_systab.hdr.revision;
+ 
+ 	efi_native_runtime_setup();
+ 
+@@ -939,8 +942,6 @@ static void __init __efi_enter_virtual_mode(void)
+ 	 *
+ 	 * Call EFI services through wrapper functions.
+ 	 */
+-	efi.runtime_version = efi_systab.hdr.revision;
+-
+ 	if (efi_is_native())
+ 		efi_native_runtime_setup();
+ 	else
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 677e29e..2366cf2 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -677,7 +677,7 @@ efi_thunk_query_variable_info(u32 attr, u64 *storage_space,
+ 	efi_status_t status;
+ 	u32 phys_storage, phys_remaining, phys_max;
+ 
+-	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
++	if (efi.spec_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+ 	phys_storage = virt_to_phys(storage_space);
+diff --git a/arch/x86/xen/efi.c b/arch/x86/xen/efi.c
+index 3be0121..e7c8357 100644
+--- a/arch/x86/xen/efi.c
++++ b/arch/x86/xen/efi.c
+@@ -56,7 +56,7 @@ static efi_system_table_t efi_systab_xen __initdata = {
+ 
+ static const struct efi efi_xen __initconst = {
+ 	.systab                   = NULL, /* Initialized later. */
+-	.runtime_version	  = 0,    /* Initialized later. */
++	.spec_version		  = 0,    /* Initialized_later. */
+ 	.mps                      = EFI_INVALID_TABLE_ADDR,
+ 	.acpi                     = EFI_INVALID_TABLE_ADDR,
+ 	.acpi20                   = EFI_INVALID_TABLE_ADDR,
+@@ -131,7 +131,7 @@ static efi_system_table_t __init *xen_efi_probe(void)
+ 	op.u.firmware_info.index = XEN_FW_EFI_RT_VERSION;
+ 
+ 	if (HYPERVISOR_platform_op(&op) == 0)
+-		efi.runtime_version = info->version;
++		efi.spec_version = info->version;
+ 
+ 	return &efi_systab_xen;
+ }
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index c49d50e..8f4aeba 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -112,13 +112,14 @@ static int __init uefi_init(void)
+ 		retval = -EINVAL;
+ 		goto out;
+ 	}
++
++	efi.spec_version = efi.systab->hdr.revision;
++
+ 	if ((efi.systab->hdr.revision >> 16) < 2)
+ 		pr_warn("Warning: EFI system table version %d.%02d, expected 2.00 or greater\n",
+ 			efi.systab->hdr.revision >> 16,
+ 			efi.systab->hdr.revision & 0xffff);
+ 
+-	efi.runtime_version = efi.systab->hdr.revision;
+-
+ 	/* Show what we know for posterity */
+ 	c16 = early_memremap_ro(efi_to_phys(efi.systab->fw_vendor),
+ 				sizeof(vendor) * sizeof(efi_char16_t));
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index 4195877..753df73 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -196,7 +196,7 @@ static efi_status_t virt_efi_query_variable_info(u32 attr,
+ {
+ 	efi_status_t status;
+ 
+-	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
++	if (efi.spec_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+ 	spin_lock(&efi_runtime_lock);
+@@ -214,7 +214,7 @@ virt_efi_query_variable_info_nonblocking(u32 attr,
+ {
+ 	efi_status_t status;
+ 
+-	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
++	if (efi.spec_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+ 	if (!spin_trylock(&efi_runtime_lock))
+@@ -252,7 +252,7 @@ static efi_status_t virt_efi_update_capsule(efi_capsule_header_t **capsules,
+ {
+ 	efi_status_t status;
+ 
+-	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
++	if (efi.spec_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+ 	spin_lock(&efi_runtime_lock);
+@@ -268,7 +268,7 @@ static efi_status_t virt_efi_query_capsule_caps(efi_capsule_header_t **capsules,
+ {
+ 	efi_status_t status;
+ 
+-	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
++	if (efi.spec_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+ 	spin_lock(&efi_runtime_lock);
+diff --git a/drivers/xen/efi.c b/drivers/xen/efi.c
+index 22f71ff..44294b6 100644
+--- a/drivers/xen/efi.c
++++ b/drivers/xen/efi.c
+@@ -192,7 +192,7 @@ efi_status_t xen_efi_query_variable_info(u32 attr, u64 *storage_space,
+ {
+ 	struct xen_platform_op op = INIT_EFI_OP(query_variable_info);
+ 
+-	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
++	if (efi.spec_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+ 	efi_data(op).u.query_variable_info.attr = attr;
+@@ -226,7 +226,7 @@ efi_status_t xen_efi_update_capsule(efi_capsule_header_t **capsules,
+ {
+ 	struct xen_platform_op op = INIT_EFI_OP(update_capsule);
+ 
+-	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
++	if (efi.spec_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+ 	set_xen_guest_handle(efi_data(op).u.update_capsule.capsule_header_array,
+@@ -247,7 +247,7 @@ efi_status_t xen_efi_query_capsule_caps(efi_capsule_header_t **capsules,
+ {
+ 	struct xen_platform_op op = INIT_EFI_OP(query_capsule_capabilities);
+ 
+-	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
++	if (efi.spec_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+ 	set_xen_guest_handle(efi_data(op).u.query_capsule_capabilities.capsule_header_array,
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 7f5a582..c6a3126 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -826,7 +826,7 @@ typedef struct {
+  */
+ extern struct efi {
+ 	efi_system_table_t *systab;	/* EFI system table */
+-	unsigned int runtime_version;	/* Runtime services version */
++	u32 spec_version;		/* EFI Spec revision of our firmware */
+ 	unsigned long mps;		/* MPS table */
+ 	unsigned long acpi;		/* ACPI table  (IA64 ext 0.71) */
+ 	unsigned long acpi20;		/* ACPI table  (ACPI 2.0) */
 -- 
-        Peter
+2.7.4
