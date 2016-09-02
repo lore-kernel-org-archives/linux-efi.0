@@ -1,99 +1,95 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] efi: arm64: treat regions with WT/WC set but WB
- cleared as memory
-Date: Thu, 1 Sep 2016 15:33:42 +0100
-Message-ID: <CAKv+Gu9QVUg2a=+efO+j+nVUNszpRYuzH9mRHTHLNNBBJX+b9w@mail.gmail.com>
-References: <1472141829-12026-1-git-send-email-ard.biesheuvel@linaro.org>
- <57C00FA7.8010908@arm.com> <CAKv+Gu8-u7bqEj3Y9N0W0xogRM7t6rzxcY=Of2HHHzhKjo59Dg@mail.gmail.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [RFC PATCH v2 01/20] x86: Documentation for AMD Secure Memory
+	Encryption (SME)
+Date: Fri, 2 Sep 2016 10:50:45 +0200
+Message-ID: <20160902085045.GG17338@nazgul.tnic>
+References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
+	<20160822223539.29880.96739.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu8-u7bqEj3Y9N0W0xogRM7t6rzxcY=Of2HHHzhKjo59Dg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lorenzo Pieralisi <lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org>, Takahiro Akashi <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160822223539.29880.96739.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 26 August 2016 at 11:08, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 26 August 2016 at 11:45, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org> wrote:
->> Hi Ard,
->>
->> On 25/08/16 17:17, Ard Biesheuvel wrote:
->>> Currently, memory regions are only recorded in the memblock memory table
->>> if they have the EFI_MEMORY_WB memory type attribute set. In case the
->>> region is of a reserved type, it is also marked as MEMBLOCK_NOMAP, which
->>> will leave it out of the linear mapping.
->>>
->>> However, memory regions may legally have the EFI_MEMORY_WT or EFI_MEMORY_WC
->>> attributes set, and the EFI_MEMORY_WB cleared, in which case the region in
->>> question is obviously backed by normal memory, but is not recorded in the
->>> memblock memory table at all.
->>
->> I've been hitting this when applying weird (but permissible) attributes to the
->> ACPI regions. Currently without WB we map these as device memory, then let
->> acpica make unaligned accesses to it.
->>
->> This patch fixes all that, and from the conversation on irc, the 'UC only' case
->> for ACPI tables is x86-legacy, and should never happen.
->>
->
-> Indeed, deliberately exposing a region containing ACPI tables as
-> something that *requires* strongly ordered access does not make sense.
->
-> The problem here is that the UEFI memory map describes both occupied
-> and available regions, and in the 'available' case, it is obvious that
-> these bits describe the nature of the physical backing of the region,
-> i.e., whether the bus fabric, memory, etc allow writeback/writethrough
-> caching, write buffering etc. This explains why most regions have all
-> the bits set.
->
-> In the occupied case, this can be misinterpreted as describing the
-> nature of the content, like an ACPI table containing fields that are
-> not naturally aligned. I.e, I don't think clearing the UC bit here
-> should be interpreted to mean that the payload *requires* WB/WT/WC. It
-> is up to the kernel to complain if it interprets a region, and notices
-> that the only supported mapping type conflicts with the nature of the
-> accesses we intend to perform.
->
->>
->>> diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
->>> index c49d50e68aee..c2ac5975fd5d 100644
->>> --- a/drivers/firmware/efi/arm-init.c
->>> +++ b/drivers/firmware/efi/arm-init.c
->>> @@ -163,18 +163,22 @@ static __init int is_reserve_region(efi_memory_desc_t *md)
->>>       case EFI_BOOT_SERVICES_DATA:
->>>       case EFI_CONVENTIONAL_MEMORY:
->>>       case EFI_PERSISTENT_MEMORY:
->>> -             return 0;
->>> +             /*
->>> +              * According to the spec, these regions are no longer reserved
->>> +              * after calling ExitBootServices(). However, we can only use
->>> +              * them as System RAM if they can be mapped writeback cacheable.
->>> +              */
->>> +             return (md->attribute & EFI_MEMORY_WB);
->>>       default:
->>>               break;
->>
->> Micro-nit: break here in order to immediately return false looks a bit odd...
->>
->
-> Yes, I could not decide what to do with it so I left it.
->
->>
->>>       }
->>> -     return is_normal_ram(md);
->>> +     return false;
->>>  }
->>
->>
->> Tested-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
->> Reviewed-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
->>
->
+On Mon, Aug 22, 2016 at 05:35:39PM -0500, Tom Lendacky wrote:
+> This patch adds a Documenation entry to decribe the AMD Secure Memory
+> Encryption (SME) feature.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+> ---
+>  Documentation/x86/amd-memory-encryption.txt |   35 +++++++++++++++++++++++++++
+>  1 file changed, 35 insertions(+)
+>  create mode 100644 Documentation/x86/amd-memory-encryption.txt
+> 
+> diff --git a/Documentation/x86/amd-memory-encryption.txt b/Documentation/x86/amd-memory-encryption.txt
+> new file mode 100644
+> index 0000000..f19c555
+> --- /dev/null
+> +++ b/Documentation/x86/amd-memory-encryption.txt
+> @@ -0,0 +1,35 @@
+> +Secure Memory Encryption (SME) is a feature found on AMD processors.
+> +
+> +SME provides the ability to mark individual pages of memory as encrypted using
+> +the standard x86 page tables.  A page that is marked encrpyted will be
 
-Matt,
+s/encrpyted/encrypted/
 
-Could we get this queued for v4.9 please?
+> +automatically decrypted when read from DRAM and encrypted when written to
+> +DRAM.  SME can therefore be used to protect the contents of DRAM from physical
+> +attacks on the system.
+> +
+> +Support for SME can be determined through the CPUID instruction. The CPUID
+> +function 0x8000001f reports information related to SME:
+> +
+> +	0x8000001f[eax]:
+> +		Bit[0] indicates support for SME
+> +	0x8000001f[ebx]:
+> +		Bit[5:0]  pagetable bit number used to enable memory encryption
+> +		Bit[11:6] reduction in physical address space, in bits, when
+> +			  memory encryption is enabled (this only affects system
+> +			  physical addresses, not guest physical addresses)
+> +
+> +If support for SME is present, MSR 0xc00100010 (SYS_CFG) can be used to
+> +determine if SME is enabled and/or to enable memory encryption:
+> +
+> +	0xc0010010:
+> +		Bit[23]   0 = memory encryption features are disabled
+> +			  1 = memory encryption features are enabled
+> +
+> +Linux relies on BIOS to set this bit if BIOS has determined that the reduction
+> +in the physical address space as a result of enabling memory encryption (see
+> +CPUID information above) will not conflict with the address space resource
+> +requirements for the system.  If this bit is not set upon Linux startup then
+> +Linux itself will not set it and memory encryption will not be possible.
+> +
+> +SME support is configurable in the kernel through the AMD_MEM_ENCRYPT config
+> +option.
 
-Thanks,
-Ard.
+" ... is configurable through CONFIG_AMD_MEM_ENCRYPT."
+
+> Additionally, the mem_encrypt=on command line parameter is required
+> +to activate memory encryption.
+
+I think you want to rewrite the logic here to say that people should use
+the BIOS option and if none is present for whatever reason, resort to
+the alternative "mem_encrypt=on" kernel command line option, no?
+
+-- 
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
+--
