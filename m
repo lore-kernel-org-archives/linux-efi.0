@@ -1,81 +1,51 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [RFC PATCH v2 07/20] x86: Provide general kernel support for
- memory encryption
-Date: Mon, 5 Sep 2016 10:48:17 +0200
-Message-ID: <20160905084817.GB18856@pd.tnic>
-References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
- <20160822223646.29880.28794.stgit@tlendack-t1.amdoffice.net>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v2] efi: fix handling error value in fdt_find_uefi_params
+Date: Mon, 5 Sep 2016 11:27:23 +0100
+Message-ID: <20160905102723.GB32579@codeblueprint.co.uk>
+References: <20160830100742.GA32579@codeblueprint.co.uk>
+ <1472553697-27984-1-git-send-email-a.hajda@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160822223646.29880.28794.stgit@tlendack-t1.amdoffice.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Paolo Bonzini <pbonzini@redhat.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.>
+In-Reply-To: <1472553697-27984-1-git-send-email-a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andrzej Hajda <a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Cc: "open list:EXTENSIBLE FIRMWARE INTERFACE (EFI)" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Marek Szyprowski <m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, open list <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 22, 2016 at 05:36:46PM -0500, Tom Lendacky wrote:
-> Adding general kernel support for memory encryption includes:
-> - Modify and create some page table macros to include the Secure Memory
->   Encryption (SME) memory encryption mask
-> - Update kernel boot support to call an SME routine that checks for and
->   sets the SME capability (the SME routine will grow later and for now
->   is just a stub routine)
-> - Update kernel boot support to call an SME routine that encrypts the
->   kernel (the SME routine will grow later and for now is just a stub
->   routine)
-> - Provide an SME initialization routine to update the protection map with
->   the memory encryption mask so that it is used by default
+On Tue, 30 Aug, at 12:41:37PM, Andrzej Hajda wrote:
+> of_get_flat_dt_subnode_by_name can return negative value in case of error.
+> Assigning the result to unsigned variable and checking if the variable
+> is lesser than zero is incorrect and always false.
+> The patch fixes it by using signed variable to check the result.
 > 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> The problem has been detected using semantic patch
+> scripts/coccinelle/tests/unsigned_lesser_than_zero.cocci
+> 
+> Signed-off-by: Andrzej Hajda <a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 > ---
-
-...
-
-> diff --git a/arch/x86/include/asm/pgtable_types.h b/arch/x86/include/asm/pgtable_types.h
-> index f1218f5..a01f0e1 100644
-> --- a/arch/x86/include/asm/pgtable_types.h
-> +++ b/arch/x86/include/asm/pgtable_types.h
-> @@ -3,6 +3,7 @@
+>  drivers/firmware/efi/efi.c | 7 +++++--
+>  1 file changed, 5 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 5a2631a..7dd2e2d 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -657,9 +657,12 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+>  		}
 >  
->  #include <linux/const.h>
->  #include <asm/page_types.h>
-> +#include <asm/mem_encrypt.h>
+>  		if (subnode) {
+> -			node = of_get_flat_dt_subnode_by_name(node, subnode);
+> -			if (node < 0)
+> +			int err = of_get_flat_dt_subnode_by_name(node, subnode);
+> +
+> +			if (err < 0)
+>  				return 0;
+> +
+> +			node = err;
+>  		}
 >  
->  #define FIRST_USER_ADDRESS	0UL
->  
-> @@ -121,9 +122,9 @@
->  
->  #define _PAGE_PROTNONE	(_AT(pteval_t, 1) << _PAGE_BIT_PROTNONE)
->  
-> -#define _PAGE_TABLE	(_PAGE_PRESENT | _PAGE_RW | _PAGE_USER |	\
-> +#define __PAGE_TABLE	(_PAGE_PRESENT | _PAGE_RW | _PAGE_USER |	\
->  			 _PAGE_ACCESSED | _PAGE_DIRTY)
+>  		return __find_uefi_params(node, info, dt_params[i].params);
 
-Hmm, so this naming looks confusing and error-prone: the only difference
-is a single "_".
-
-How about this instead:
-
-#define _PAGE_TABLE_NO_ENC	(_PAGE_PRESENT | _PAGE_RW | _PAGE_USER |	\
-	  			 _PAGE_ACCESSED | _PAGE_DIRTY)
-
-#define _PAGE_TABLE (_PAGE_TABLE_NO_ENC | _PAGE_ENC)
-
-Or call it _PAGE_TABLE_BASE or whatever.
-
-Ditto for __KERNPG_TABLE.
-
-This way you can differentiate between the two and use the _NO_ENC one
-to define _PAGE_TABLE. And it will be absolutely clear when you use the
-_NO_ENC one, what you mean and that you don't want to have the enc mask
-in the PTE.
-
-Should be less confusing IMO too.
-
--- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
+Thanks Andrzej, applied.
