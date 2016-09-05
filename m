@@ -1,67 +1,82 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 1/2] x86/efi: Optimize away setup_gop32/64 if unused
-Date: Mon, 5 Sep 2016 13:37:25 +0100
-Message-ID: <20160905123725.GF32579@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH 2/2] x86/efi: Allow invocation of arbitrary boot services
+Date: Mon, 5 Sep 2016 14:02:47 +0100
+Message-ID: <20160905130247.GG32579@codeblueprint.co.uk>
 References: <188ea850c957034d482576dfdcf8c8a2536460cf.1471823100.git.lukas@wunner.de>
+ <19e0ac48c448dabbed8ed87bf872a39d1e7ea3b2.1471823100.git.lukas@wunner.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <188ea850c957034d482576dfdcf8c8a2536460cf.1471823100.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+In-Reply-To: <19e0ac48c448dabbed8ed87bf872a39d1e7ea3b2.1471823100.git.lukas@wunner.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Lukas Wunner <lukas@wunner.de>
+Cc: linux-efi@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, linux-kernel@vger.kernel.org, x86@kernel.org
 List-Id: linux-efi@vger.kernel.org
 
 On Mon, 22 Aug, at 12:01:21PM, Lukas Wunner wrote:
-> Eliminate the 64 bit code path when compiling for x86_32, and vice-versa
-> the 32 bit code path when compiling for x86_64 with mixed mode disabled.
+> We currently allow invocation of 8 boot services with efi_call_early().
+> Not included are LocateHandleBuffer and LocateProtocol in particular.
+> For graphics output or to retrieve PCI ROMs and Apple device properties,
+> we're thus forced to use the LocateHandle + AllocatePool + LocateHandle
+> combo, which is cumbersome and needs more code.
 > 
-> Size of gop.o text section:
-> CONFIG_X86_32:                         1758 before, 1299 after
-> CONFIG_X86_64 && !CONFIG_EFI_MIXED:    2201 before, 1406 after
-> CONFIG_X86_64 &&  CONFIG_EFI_MIXED:    2201 before and after
+> The ARM folks allow invocation of the full set of boot services but are
+> restricted to our 8 boot services in functions shared across arches.
 > 
-> Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Thus, rather than adding just LocateHandleBuffer and LocateProtocol to
+> struct efi_config, let's rework efi_call_early() to allow invocation of
+> arbitrary boot services by selecting the 64 bit vs 32 bit code path in
+> the macro itself.
+> 
+> When compiling for 32 bit or for 64 bit without mixed mode, the unused
+> code path is optimized away and the binary code is the same as before.
+> But on 64 bit with mixed mode enabled, this commit adds one compare
+> instruction to each invocation of a boot service and, depending on the
+> code path selected, two jump instructions. (Most of the time gcc
+> arranges the jumps in the 32 bit code path.) The result is a minuscule
+> performance penalty and the binary code becomes slightly larger and more
+> difficult to read when disassembled. This isn't a hot path, so these
+> drawbacks are arguably outweighed by the attainable simplification of
+> the C code. We have some overhead anyway for thunking or conversion
+> between calling conventions.
+> 
+> The 8 boot services can consequently be removed from struct efi_config.
+> 
+> No functional change intended (for now).
+> 
+> Example -- invocation of free_pool before (64 bit code path):
+> 0x2d4      movq  %ds:efi_early, %rdx          ; efi_early
+> 0x2db      movq  %ss:arg_0-0x20(%rsp), %rsi
+> 0x2e0      xorl  %eax, %eax
+> 0x2e2      movq  %ds:0x28(%rdx), %rdi         ; efi_early->free_pool
+> 0x2e6      callq *%ds:0x58(%rdx)              ; efi_early->call()
+> 
+> Example -- invocation of free_pool after (64 / 32 bit mixed code path):
+> 0x0dc      movq  %ds:efi_early, %rax          ; efi_early
+> 0x0e3      cmpb  $0, %ds:0x28(%rax)           ; !efi_early->is64 ?
+> 0x0e7      movq  %ds:0x20(%rax), %rdx         ; efi_early->call()
+> 0x0eb      movq  %ds:0x10(%rax), %rax         ; efi_early->boot_services
+> 0x0ef      je    $0x150
+> 0x0f1      movq  %ds:0x48(%rax), %rdi         ; free_pool (64 bit)
+> 0x0f5      xorl  %eax, %eax
+> 0x0f7      callq *%rdx
+> ...
+> 0x150      movl  %ds:0x30(%rax), %edi         ; free_pool (32 bit)
+> 0x153      jmp   $0x0f5
+> 
+> Size of eboot.o text section:
+> CONFIG_X86_32:                         6464 before, 6318 after
+> CONFIG_X86_64 && !CONFIG_EFI_MIXED:    7670 before, 7573 after
+> CONFIG_X86_64 &&  CONFIG_EFI_MIXED:    7670 before, 8319 after
+> 
+> Signed-off-by: Lukas Wunner <lukas@wunner.de>
+> Cc: Matt Fleming <matt@codeblueprint.co.uk>
 > ---
->  arch/x86/include/asm/efi.h | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
-> 
-> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-> index 6b06939..1bda245 100644
-> --- a/arch/x86/include/asm/efi.h
-> +++ b/arch/x86/include/asm/efi.h
-> @@ -207,14 +207,16 @@ struct efi_config {
->  
->  __pure const struct efi_config *__efi_early(void);
->  
-> +#define efi_is_64bit()							\
-> +	(IS_ENABLED(CONFIG_X86_64) && (!IS_ENABLED(CONFIG_EFI_MIXED)	\
-> +				       || __efi_early()->is64))
-> +
->  #define efi_call_early(f, ...)						\
->  	__efi_early()->call(__efi_early()->f, __VA_ARGS__);
->  
->  #define __efi_call_early(f, ...)					\
->  	__efi_early()->call((unsigned long)f, __VA_ARGS__);
->  
-> -#define efi_is_64bit()		__efi_early()->is64
-> -
->  extern bool efi_reboot_required(void);
->  
->  #else
+>  arch/x86/boot/compressed/eboot.c   | 13 +------------
+>  arch/x86/boot/compressed/head_32.S |  6 +++---
+>  arch/x86/boot/compressed/head_64.S |  8 ++++----
+>  arch/x86/include/asm/efi.h         | 15 ++++++---------
+>  4 files changed, 14 insertions(+), 28 deletions(-)
 
-Could you make this into a more readable static inline? e.g. something
-like this,
-
-static inline bool efi_is_64bit(void)
-{
-	if (!IS_ENABLED(CONFIG_X86_64))
-		return false;
-
-	if (!IS_ENABLED(CONFIG_EFI_MIXED) || __efi_early()->is64)
-		return true;
-
-	return false;
-}
+Nice, I like this. Applied pending the update to the first patch.
