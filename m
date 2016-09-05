@@ -1,76 +1,79 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [RFC PATCH v2 07/20] x86: Provide general kernel support for
-	memory encryption
-Date: Mon, 5 Sep 2016 17:22:12 +0200
-Message-ID: <20160905152211.GD18856@pd.tnic>
-References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
-	<20160822223646.29880.28794.stgit@tlendack-t1.amdoffice.net>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.7 003/143] x86/platform/uv: Skip UV runtime services mapping in the efi_runtime_disabled case
+Date: Mon,  5 Sep 2016 18:42:59 +0200
+Message-ID: <20160905164430.753320812@linuxfoundation.org>
+References: <20160905164430.593075551@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160822223646.29880.28794.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160905164430.593075551@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Alex Thorlton <athorlton@sgi.com>, Matt Fleming <matt@codeblueprint.co.uk>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Mike Travis <travis@sgi.com>, Peter Zijlstra <peterz@infradead.org>, Russ Anderson <rja@sgi.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 22, 2016 at 05:36:46PM -0500, Tom Lendacky wrote:
-> Adding general kernel support for memory encryption includes:
-> - Modify and create some page table macros to include the Secure Memory
->   Encryption (SME) memory encryption mask
-> - Update kernel boot support to call an SME routine that checks for and
->   sets the SME capability (the SME routine will grow later and for now
->   is just a stub routine)
-> - Update kernel boot support to call an SME routine that encrypts the
->   kernel (the SME routine will grow later and for now is just a stub
->   routine)
-> - Provide an SME initialization routine to update the protection map with
->   the memory encryption mask so that it is used by default
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+4.7-stable review patch.  If anyone has any objections, please let me know.
 
-...
+------------------
 
-> diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
-> index c98a559..30f7715 100644
-> --- a/arch/x86/kernel/head_64.S
-> +++ b/arch/x86/kernel/head_64.S
-> @@ -95,6 +95,13 @@ startup_64:
->  	jnz	bad_address
->  
->  	/*
-> +	 * Enable memory encryption (if available). Add the memory encryption
-> +	 * mask to %rbp to include it in the the page table fixup.
-> +	 */
-> +	call	sme_enable
-> +	addq	sme_me_mask(%rip), %rbp
-> +
-> +	/*
->  	 * Fixup the physical addresses in the page table
->  	 */
->  	addq	%rbp, early_level4_pgt + (L4_START_KERNEL*8)(%rip)
-> @@ -116,7 +123,8 @@ startup_64:
->  	movq	%rdi, %rax
->  	shrq	$PGDIR_SHIFT, %rax
->  
-> -	leaq	(4096 + _KERNPG_TABLE)(%rbx), %rdx
-> +	leaq	(4096 + __KERNPG_TABLE)(%rbx), %rdx
-> +	addq	sme_me_mask(%rip), %rdx		/* Apply mem encryption mask */
+From: Alex Thorlton <athorlton@sgi.com>
 
-Please add comments over the line and not at the side...
+commit f72075c9eda8a43aeea2f9dbb8d187afd4a76f0b upstream.
 
--- 
-Regards/Gruss,
-    Boris.
+This problem has actually been in the UV code for a while, but we didn't
+catch it until recently, because we had been relying on EFI_OLD_MEMMAP
+to allow our systems to boot for a period of time.  We noticed the issue
+when trying to kexec a recent community kernel, where we hit this NULL
+pointer dereference in efi_sync_low_kernel_mappings():
 
-ECO tip #101: Trim your mails when you reply.
+ [    0.337515] BUG: unable to handle kernel NULL pointer dereference at 0000000000000880
+ [    0.346276] IP: [<ffffffff8105df8d>] efi_sync_low_kernel_mappings+0x5d/0x1b0
+
+The problem doesn't show up with EFI_OLD_MEMMAP because we skip the
+chunk of setup_efi_state() that sets the efi_loader_signature for the
+kexec'd kernel.  When the kexec'd kernel boots, it won't set EFI_BOOT in
+setup_arch, so we completely avoid the bug.
+
+We always kexec with noefi on the command line, so this shouldn't be an
+issue, but since we're not actually checking for efi_runtime_disabled in
+uv_bios_init(), we end up trying to do EFI runtime callbacks when we
+shouldn't be. This patch just adds a check for efi_runtime_disabled in
+uv_bios_init() so that we don't map in uv_systab when runtime_disabled ==
+true.
+
+Signed-off-by: Alex Thorlton <athorlton@sgi.com>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Borislav Petkov <bp@suse.de>
+Cc: Brian Gerst <brgerst@gmail.com>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Josh Poimboeuf <jpoimboe@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Mike Travis <travis@sgi.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Russ Anderson <rja@sgi.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/1470912120-22831-2-git-send-email-matt@codeblueprint.co.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ arch/x86/platform/uv/bios_uv.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+--- a/arch/x86/platform/uv/bios_uv.c
++++ b/arch/x86/platform/uv/bios_uv.c
+@@ -188,7 +188,8 @@ EXPORT_SYMBOL_GPL(uv_bios_set_legacy_vga
+ void uv_bios_init(void)
+ {
+ 	uv_systab = NULL;
+-	if ((efi.uv_systab == EFI_INVALID_TABLE_ADDR) || !efi.uv_systab) {
++	if ((efi.uv_systab == EFI_INVALID_TABLE_ADDR) ||
++	    !efi.uv_systab || efi_runtime_disabled()) {
+ 		pr_crit("UV: UVsystab: missing\n");
+ 		return;
+ 	}
