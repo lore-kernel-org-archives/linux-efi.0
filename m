@@ -1,366 +1,76 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 3/6] efi/libstub: Allocate headspace in efi_get_memory_map()
-Date: Mon,  5 Sep 2016 15:42:34 +0100
-Message-ID: <20160905144237.2361-4-matt@codeblueprint.co.uk>
-References: <20160905144237.2361-1-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160905144237.2361-1-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Jeffrey Hugo <jhugo@codeaurora.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Rutland <mark.rutland@arm.com>, stable@vger.kernel.org
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [RFC PATCH v2 07/20] x86: Provide general kernel support for
+	memory encryption
+Date: Mon, 5 Sep 2016 17:22:12 +0200
+Message-ID: <20160905152211.GD18856@pd.tnic>
+References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
+	<20160822223646.29880.28794.stgit@tlendack-t1.amdoffice.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160822223646.29880.28794.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Jeffrey Hugo <jhugo@codeaurora.org>
+On Mon, Aug 22, 2016 at 05:36:46PM -0500, Tom Lendacky wrote:
+> Adding general kernel support for memory encryption includes:
+> - Modify and create some page table macros to include the Secure Memory
+>   Encryption (SME) memory encryption mask
+> - Update kernel boot support to call an SME routine that checks for and
+>   sets the SME capability (the SME routine will grow later and for now
+>   is just a stub routine)
+> - Update kernel boot support to call an SME routine that encrypts the
+>   kernel (the SME routine will grow later and for now is just a stub
+>   routine)
+> - Provide an SME initialization routine to update the protection map with
+>   the memory encryption mask so that it is used by default
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 
-efi_get_memory_map() allocates a buffer to store the memory map that it
-retrieves.  This buffer may need to be reused by the client after
-ExitBootServices() is called, at which point allocations are not longer
-permitted.  To support this usecase, provide the allocated buffer size back
-to the client, and allocate some additional headroom to account for any
-reasonable growth in the map that is likely to happen between the call to
-efi_get_memory_map() and the client reusing the buffer.
+...
 
-Signed-off-by: Jeffrey Hugo <jhugo@codeaurora.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: <stable@vger.kernel.org>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
----
- arch/x86/boot/compressed/eboot.c               | 20 ++++--
- drivers/firmware/efi/libstub/efi-stub-helper.c | 96 ++++++++++++++++++--------
- drivers/firmware/efi/libstub/fdt.c             | 17 +++--
- drivers/firmware/efi/libstub/random.c          | 12 +++-
- include/linux/efi.h                            | 15 ++--
- 5 files changed, 111 insertions(+), 49 deletions(-)
+> diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
+> index c98a559..30f7715 100644
+> --- a/arch/x86/kernel/head_64.S
+> +++ b/arch/x86/kernel/head_64.S
+> @@ -95,6 +95,13 @@ startup_64:
+>  	jnz	bad_address
+>  
+>  	/*
+> +	 * Enable memory encryption (if available). Add the memory encryption
+> +	 * mask to %rbp to include it in the the page table fixup.
+> +	 */
+> +	call	sme_enable
+> +	addq	sme_me_mask(%rip), %rbp
+> +
+> +	/*
+>  	 * Fixup the physical addresses in the page table
+>  	 */
+>  	addq	%rbp, early_level4_pgt + (L4_START_KERNEL*8)(%rip)
+> @@ -116,7 +123,8 @@ startup_64:
+>  	movq	%rdi, %rax
+>  	shrq	$PGDIR_SHIFT, %rax
+>  
+> -	leaq	(4096 + _KERNPG_TABLE)(%rbx), %rdx
+> +	leaq	(4096 + __KERNPG_TABLE)(%rbx), %rdx
+> +	addq	sme_me_mask(%rip), %rdx		/* Apply mem encryption mask */
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index ff574dad95cc..c5b7c7b4f0d7 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -1008,7 +1008,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params,
- 			      void *handle, bool is64)
- {
- 	struct efi_info *efi = &boot_params->efi_info;
--	unsigned long map_sz, key, desc_size;
-+	unsigned long map_sz, key, desc_size, buff_size;
- 	efi_memory_desc_t *mem_map;
- 	struct setup_data *e820ext;
- 	const char *signature;
-@@ -1019,14 +1019,20 @@ static efi_status_t exit_boot(struct boot_params *boot_params,
- 	bool called_exit = false;
- 	u8 nr_entries;
- 	int i;
--
--	nr_desc = 0;
--	e820ext = NULL;
--	e820ext_size = 0;
-+	struct efi_boot_memmap map;
-+
-+	nr_desc =	0;
-+	e820ext =	NULL;
-+	e820ext_size =	0;
-+	map.map =	&mem_map;
-+	map.map_size =	&map_sz;
-+	map.desc_size =	&desc_size;
-+	map.desc_ver =	&desc_version;
-+	map.key_ptr =	&key;
-+	map.buff_size =	&buff_size;
- 
- get_map:
--	status = efi_get_memory_map(sys_table, &mem_map, &map_sz, &desc_size,
--				    &desc_version, &key);
-+	status = efi_get_memory_map(sys_table, &map);
- 
- 	if (status != EFI_SUCCESS)
- 		return status;
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 3bd127f95315..29368ac69221 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -41,6 +41,8 @@ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
- #define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
- #endif
- 
-+#define EFI_MMAP_NR_SLACK_SLOTS	8
-+
- struct file_info {
- 	efi_file_handle_t *handle;
- 	u64 size;
-@@ -63,49 +65,62 @@ void efi_printk(efi_system_table_t *sys_table_arg, char *str)
- 	}
- }
- 
-+static inline bool mmap_has_headroom(unsigned long buff_size,
-+				     unsigned long map_size,
-+				     unsigned long desc_size)
-+{
-+	unsigned long slack = buff_size - map_size;
-+
-+	return slack / desc_size >= EFI_MMAP_NR_SLACK_SLOTS;
-+}
-+
- efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
--				efi_memory_desc_t **map,
--				unsigned long *map_size,
--				unsigned long *desc_size,
--				u32 *desc_ver,
--				unsigned long *key_ptr)
-+				struct efi_boot_memmap *map)
- {
- 	efi_memory_desc_t *m = NULL;
- 	efi_status_t status;
- 	unsigned long key;
- 	u32 desc_version;
- 
--	*map_size = sizeof(*m) * 32;
-+	*map->desc_size =	sizeof(*m);
-+	*map->map_size =	*map->desc_size * 32;
-+	*map->buff_size =	*map->map_size;
- again:
--	/*
--	 * Add an additional efi_memory_desc_t because we're doing an
--	 * allocation which may be in a new descriptor region.
--	 */
--	*map_size += sizeof(*m);
- 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
--				*map_size, (void **)&m);
-+				*map->map_size, (void **)&m);
- 	if (status != EFI_SUCCESS)
- 		goto fail;
- 
--	*desc_size = 0;
-+	*map->desc_size = 0;
- 	key = 0;
--	status = efi_call_early(get_memory_map, map_size, m,
--				&key, desc_size, &desc_version);
--	if (status == EFI_BUFFER_TOO_SMALL) {
-+	status = efi_call_early(get_memory_map, map->map_size, m,
-+				&key, map->desc_size, &desc_version);
-+	if (status == EFI_BUFFER_TOO_SMALL ||
-+	    !mmap_has_headroom(*map->buff_size, *map->map_size,
-+			       *map->desc_size)) {
- 		efi_call_early(free_pool, m);
-+		/*
-+		 * Make sure there is some entries of headroom so that the
-+		 * buffer can be reused for a new map after allocations are
-+		 * no longer permitted.  Its unlikely that the map will grow to
-+		 * exceed this headroom once we are ready to trigger
-+		 * ExitBootServices()
-+		 */
-+		*map->map_size += *map->desc_size * EFI_MMAP_NR_SLACK_SLOTS;
-+		*map->buff_size = *map->map_size;
- 		goto again;
- 	}
- 
- 	if (status != EFI_SUCCESS)
- 		efi_call_early(free_pool, m);
- 
--	if (key_ptr && status == EFI_SUCCESS)
--		*key_ptr = key;
--	if (desc_ver && status == EFI_SUCCESS)
--		*desc_ver = desc_version;
-+	if (map->key_ptr && status == EFI_SUCCESS)
-+		*map->key_ptr = key;
-+	if (map->desc_ver && status == EFI_SUCCESS)
-+		*map->desc_ver = desc_version;
- 
- fail:
--	*map = m;
-+	*map->map = m;
- 	return status;
- }
- 
-@@ -113,13 +128,20 @@ fail:
- unsigned long get_dram_base(efi_system_table_t *sys_table_arg)
- {
- 	efi_status_t status;
--	unsigned long map_size;
-+	unsigned long map_size, buff_size;
- 	unsigned long membase  = EFI_ERROR;
- 	struct efi_memory_map map;
- 	efi_memory_desc_t *md;
-+	struct efi_boot_memmap boot_map;
- 
--	status = efi_get_memory_map(sys_table_arg, (efi_memory_desc_t **)&map.map,
--				    &map_size, &map.desc_size, NULL, NULL);
-+	boot_map.map =		(efi_memory_desc_t **)&map.map;
-+	boot_map.map_size =	&map_size;
-+	boot_map.desc_size =	&map.desc_size;
-+	boot_map.desc_ver =	NULL;
-+	boot_map.key_ptr =	NULL;
-+	boot_map.buff_size =	&buff_size;
-+
-+	status = efi_get_memory_map(sys_table_arg, &boot_map);
- 	if (status != EFI_SUCCESS)
- 		return membase;
- 
-@@ -144,15 +166,22 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
- 			    unsigned long size, unsigned long align,
- 			    unsigned long *addr, unsigned long max)
- {
--	unsigned long map_size, desc_size;
-+	unsigned long map_size, desc_size, buff_size;
- 	efi_memory_desc_t *map;
- 	efi_status_t status;
- 	unsigned long nr_pages;
- 	u64 max_addr = 0;
- 	int i;
-+	struct efi_boot_memmap boot_map;
-+
-+	boot_map.map =		&map;
-+	boot_map.map_size =	&map_size;
-+	boot_map.desc_size =	&desc_size;
-+	boot_map.desc_ver =	NULL;
-+	boot_map.key_ptr =	NULL;
-+	boot_map.buff_size =	&buff_size;
- 
--	status = efi_get_memory_map(sys_table_arg, &map, &map_size, &desc_size,
--				    NULL, NULL);
-+	status = efi_get_memory_map(sys_table_arg, &boot_map);
- 	if (status != EFI_SUCCESS)
- 		goto fail;
- 
-@@ -230,14 +259,21 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
- 			   unsigned long size, unsigned long align,
- 			   unsigned long *addr)
- {
--	unsigned long map_size, desc_size;
-+	unsigned long map_size, desc_size, buff_size;
- 	efi_memory_desc_t *map;
- 	efi_status_t status;
- 	unsigned long nr_pages;
- 	int i;
-+	struct efi_boot_memmap boot_map;
-+
-+	boot_map.map =		&map;
-+	boot_map.map_size =	&map_size;
-+	boot_map.desc_size =	&desc_size;
-+	boot_map.desc_ver =	NULL;
-+	boot_map.key_ptr =	NULL;
-+	boot_map.buff_size =	&buff_size;
- 
--	status = efi_get_memory_map(sys_table_arg, &map, &map_size, &desc_size,
--				    NULL, NULL);
-+	status = efi_get_memory_map(sys_table_arg, &boot_map);
- 	if (status != EFI_SUCCESS)
- 		goto fail;
- 
-diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index e58abfa953cc..bec0fa8d8746 100644
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -175,13 +175,21 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
- 					    unsigned long fdt_addr,
- 					    unsigned long fdt_size)
- {
--	unsigned long map_size, desc_size;
-+	unsigned long map_size, desc_size, buff_size;
- 	u32 desc_ver;
- 	unsigned long mmap_key;
- 	efi_memory_desc_t *memory_map, *runtime_map;
- 	unsigned long new_fdt_size;
- 	efi_status_t status;
- 	int runtime_entry_count = 0;
-+	struct efi_boot_memmap map;
-+
-+	map.map =	&runtime_map;
-+	map.map_size =	&map_size;
-+	map.desc_size =	&desc_size;
-+	map.desc_ver =	&desc_ver;
-+	map.key_ptr =	&mmap_key;
-+	map.buff_size =	&buff_size;
- 
- 	/*
- 	 * Get a copy of the current memory map that we will use to prepare
-@@ -189,8 +197,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
- 	 * subsequent allocations adding entries, since they could not affect
- 	 * the number of EFI_MEMORY_RUNTIME regions.
- 	 */
--	status = efi_get_memory_map(sys_table, &runtime_map, &map_size,
--				    &desc_size, &desc_ver, &mmap_key);
-+	status = efi_get_memory_map(sys_table, &map);
- 	if (status != EFI_SUCCESS) {
- 		pr_efi_err(sys_table, "Unable to retrieve UEFI memory map.\n");
- 		return status;
-@@ -199,6 +206,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
- 	pr_efi(sys_table,
- 	       "Exiting boot services and installing virtual address map...\n");
- 
-+	map.map = &memory_map;
- 	/*
- 	 * Estimate size of new FDT, and allocate memory for it. We
- 	 * will allocate a bigger buffer if this ends up being too
-@@ -218,8 +226,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
- 		 * we can get the memory map key  needed for
- 		 * exit_boot_services().
- 		 */
--		status = efi_get_memory_map(sys_table, &memory_map, &map_size,
--					    &desc_size, &desc_ver, &mmap_key);
-+		status = efi_get_memory_map(sys_table, &map);
- 		if (status != EFI_SUCCESS)
- 			goto fail_free_new_fdt;
- 
-diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index 53f6d3fe6d86..0c9f58c5ba50 100644
---- a/drivers/firmware/efi/libstub/random.c
-+++ b/drivers/firmware/efi/libstub/random.c
-@@ -73,12 +73,20 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
- 			      unsigned long random_seed)
- {
- 	unsigned long map_size, desc_size, total_slots = 0, target_slot;
-+	unsigned long buff_size;
- 	efi_status_t status;
- 	efi_memory_desc_t *memory_map;
- 	int map_offset;
-+	struct efi_boot_memmap map;
- 
--	status = efi_get_memory_map(sys_table_arg, &memory_map, &map_size,
--				    &desc_size, NULL, NULL);
-+	map.map =	&memory_map;
-+	map.map_size =	&map_size;
-+	map.desc_size =	&desc_size;
-+	map.desc_ver =	NULL;
-+	map.key_ptr =	NULL;
-+	map.buff_size =	&buff_size;
-+
-+	status = efi_get_memory_map(sys_table_arg, &map);
- 	if (status != EFI_SUCCESS)
- 		return status;
- 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 23cd3ced8c1a..943fee524176 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -118,6 +118,15 @@ typedef struct {
- 	u32 imagesize;
- } efi_capsule_header_t;
- 
-+struct efi_boot_memmap {
-+	efi_memory_desc_t	**map;
-+	unsigned long		*map_size;
-+	unsigned long		*desc_size;
-+	u32			*desc_ver;
-+	unsigned long		*key_ptr;
-+	unsigned long		*buff_size;
-+};
-+
- /*
-  * EFI capsule flags
-  */
-@@ -1371,11 +1380,7 @@ char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
- 			  efi_loaded_image_t *image, int *cmd_line_len);
- 
- efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
--				efi_memory_desc_t **map,
--				unsigned long *map_size,
--				unsigned long *desc_size,
--				u32 *desc_ver,
--				unsigned long *key_ptr);
-+				struct efi_boot_memmap *map);
- 
- efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
- 			   unsigned long size, unsigned long align,
+Please add comments over the line and not at the side...
+
 -- 
-2.9.3
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
