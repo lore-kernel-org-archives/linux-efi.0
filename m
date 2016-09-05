@@ -1,57 +1,97 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 2/6] efi: Fix handling error value in fdt_find_uefi_params
-Date: Mon,  5 Sep 2016 15:42:33 +0100
-Message-ID: <20160905144237.2361-3-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH 5/6] efi/libstub: Use efi_exit_boot_services() in FDT
+Date: Mon,  5 Sep 2016 15:42:36 +0100
+Message-ID: <20160905144237.2361-6-matt@codeblueprint.co.uk>
 References: <20160905144237.2361-1-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160905144237.2361-1-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Andrzej Hajda <a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Marek Szyprowski <m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20160905144237.2361-1-matt@codeblueprint.co.uk>
+Sender: stable-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Jeffrey Hugo <jhugo@codeaurora.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Rutland <mark.rutland@arm.com>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Andrzej Hajda <a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+From: Jeffrey Hugo <jhugo@codeaurora.org>
 
-of_get_flat_dt_subnode_by_name can return negative value in case of error.
-Assigning the result to unsigned variable and checking if the variable
-is lesser than zero is incorrect and always false.
-The patch fixes it by using signed variable to check the result.
+The FDT code directly calls ExitBootServices.  This is inadvisable as the
+UEFI spec details a complex set of errors, race conditions, and API
+interactions that the caller of ExitBootServices must get correct.  The
+FDT code does not handle EFI_INVALID_PARAMETER as required by the spec,
+which causes intermittent boot failures on the Qualcomm Technologies
+QDF2432.  Call the efi_exit_boot_services() helper intead, which handles
+the EFI_INVALID_PARAMETER scenario properly.
 
-The problem has been detected using semantic patch
-scripts/coccinelle/tests/unsigned_lesser_than_zero.cocci
-
-Signed-off-by: Andrzej Hajda <a.hajda-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: Marek Szyprowski <m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Jeffrey Hugo <jhugo@codeaurora.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: <stable@vger.kernel.org>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- drivers/firmware/efi/efi.c | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/libstub/fdt.c | 37 +++++++++++++++++++++++++++----------
+ 1 file changed, 27 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 5a2631af7410..7dd2e2d37231 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -657,9 +657,12 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
- 		}
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index bec0fa8d8746..a6a93116a8f0 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -152,6 +152,27 @@ fdt_set_fail:
+ #define EFI_FDT_ALIGN EFI_PAGE_SIZE
+ #endif
  
- 		if (subnode) {
--			node = of_get_flat_dt_subnode_by_name(node, subnode);
--			if (node < 0)
-+			int err = of_get_flat_dt_subnode_by_name(node, subnode);
++struct exit_boot_struct {
++	efi_memory_desc_t *runtime_map;
++	int *runtime_entry_count;
++};
 +
-+			if (err < 0)
- 				return 0;
++static efi_status_t exit_boot_func(efi_system_table_t *sys_table_arg,
++				   struct efi_boot_memmap *map,
++				   void *priv)
++{
++	struct exit_boot_struct *p = priv;
++	/*
++	 * Update the memory map with virtual addresses. The function will also
++	 * populate @runtime_map with copies of just the EFI_MEMORY_RUNTIME
++	 * entries so that we can pass it straight to SetVirtualAddressMap()
++	 */
++	efi_get_virtmap(*map->map, *map->map_size, *map->desc_size,
++			p->runtime_map, p->runtime_entry_count);
 +
-+			node = err;
- 		}
++	return EFI_SUCCESS;
++}
++
+ /*
+  * Allocate memory for a new FDT, then add EFI, commandline, and
+  * initrd related fields to the FDT.  This routine increases the
+@@ -183,6 +204,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 	efi_status_t status;
+ 	int runtime_entry_count = 0;
+ 	struct efi_boot_memmap map;
++	struct exit_boot_struct priv;
  
- 		return __find_uefi_params(node, info, dt_params[i].params);
+ 	map.map =	&runtime_map;
+ 	map.map_size =	&map_size;
+@@ -257,16 +279,11 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 		}
+ 	}
+ 
+-	/*
+-	 * Update the memory map with virtual addresses. The function will also
+-	 * populate @runtime_map with copies of just the EFI_MEMORY_RUNTIME
+-	 * entries so that we can pass it straight into SetVirtualAddressMap()
+-	 */
+-	efi_get_virtmap(memory_map, map_size, desc_size, runtime_map,
+-			&runtime_entry_count);
+-
+-	/* Now we are ready to exit_boot_services.*/
+-	status = sys_table->boottime->exit_boot_services(handle, mmap_key);
++	sys_table->boottime->free_pool(memory_map);
++	priv.runtime_map = runtime_map;
++	priv.runtime_entry_count = &runtime_entry_count;
++	status = efi_exit_boot_services(sys_table, handle, &map, &priv,
++					exit_boot_func);
+ 
+ 	if (status == EFI_SUCCESS) {
+ 		efi_set_virtual_address_map_t *svam;
 -- 
 2.9.3
