@@ -1,38 +1,88 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v2] x86/efi: Optimize away setup_gop32/64 if unused
-Date: Tue, 6 Sep 2016 12:08:15 +0100
-Message-ID: <20160906110815.GN32579@codeblueprint.co.uk>
-References: <188ea850c957034d482576dfdcf8c8a2536460cf.1471823100.git.lukas@wunner.de>
- <f80213780594fdb86b3c1f7256b459856ee953be.1473140971.git.lukas@wunner.de>
+From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 2/3] efi: add firmware version information to sysfs
+Date: Tue, 6 Sep 2016 11:35:17 -0400
+Message-ID: <20160906153516.GA23610@redhat.com>
+References: <20160902185758.GB9082@redhat.com>
+ <1472849873-32041-1-git-send-email-pjones@redhat.com>
+ <1472849873-32041-2-git-send-email-pjones@redhat.com>
+ <20160905120006.GA27048@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <f80213780594fdb86b3c1f7256b459856ee953be.1473140971.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+In-Reply-To: <20160905120006.GA27048-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 06 Sep, at 08:05:32AM, Lukas Wunner wrote:
-> Commit 2c23b73c2d02 ("x86/efi: Prepare GOP handling code for reuse
-> as generic code") introduced an efi_is_64bit() macro to x86 which
-> previously only existed for arm arches.  The macro is used to
-> choose between the 64 bit or 32 bit code path in gop.c at runtime.
+On Mon, Sep 05, 2016 at 02:00:06PM +0200, Lukas Wunner wrote:
+> On Fri, Sep 02, 2016 at 04:57:52PM -0400, Peter Jones wrote:
+> > This adds the EFI Spec version from the system table to sysfs as
+> > /sys/firmware/efi/spec_version .
+> > 
+> > Userland tools need this information in order to work around
+> > specification deficiencies in 2.4 and earlier firmwares.  Specifically,
+> > UEFI 2.4 and 2.5+ treat management of BootOrder very differently (See
+> > UEFI 2.4 section 3.1.1 vs UEFI 2.5 section 3.1), which means on older
+> > firmware we'll want to work around BDS's boot order management by adding
+> > fwupdate entries to BootOrder.  We'd prefer not to do this on newer
+> > firmware, as it is both non-sensical in terms of what it expresses, and
+> > it results in more relatively failure prone flash writes.
+> > 
+> > Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > ---
+> >  Documentation/ABI/testing/sysfs-firmware-efi |  6 +++
+> >  drivers/firmware/efi/efi.c                   | 55 ++++++++++++++++++++++++++++
+> >  2 files changed, 61 insertions(+)
+> > 
+> > diff --git a/Documentation/ABI/testing/sysfs-firmware-efi b/Documentation/ABI/testing/sysfs-firmware-efi
+> > index e794eac..4eec7c2 100644
+> > --- a/Documentation/ABI/testing/sysfs-firmware-efi
+> > +++ b/Documentation/ABI/testing/sysfs-firmware-efi
+> > @@ -28,3 +28,9 @@ Description:	Displays the physical addresses of all EFI Configuration
+> >  		versions are always printed first, i.e. ACPI20 comes
+> >  		before ACPI.
+> >  Users:		dmidecode
+> > +
+> > +What:		/sys/firmware/efi/spec_version
+> > +Date:		August 2016
+> > +Contact:	linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> > +Description:	Displays the UEFI Specification revision the firmware claims to
+> > +		be based upon.
+> > diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> > index 5a2631a..3ef3a2a 100644
+> > --- a/drivers/firmware/efi/efi.c
+> > +++ b/drivers/firmware/efi/efi.c
+> > @@ -141,11 +141,65 @@ static ssize_t fw_platform_size_show(struct kobject *kobj,
+> >  	return sprintf(buf, "%d\n", efi_enabled(EFI_64BIT) ? 64 : 32);
+> >  }
+> >  
+> > +static ssize_t spec_version_show(struct kobject *kobj,
+> > +				 struct kobj_attribute *attr,
+> > +				 char *buf)
 > 
-> However the code path that's going to be taken is known at compile
-> time when compiling for x86_32 or for x86_64 with mixed mode disabled.
-> Amend the macro to eliminate the unused code path in those cases.
-> 
-> Size of gop.o text section:
-> CONFIG_X86_32:                         1758 before, 1299 after
-> CONFIG_X86_64 && !CONFIG_EFI_MIXED:    2201 before, 1406 after
-> CONFIG_X86_64 &&  CONFIG_EFI_MIXED:    2201 before and after
-> 
-> Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/x86/include/asm/efi.h | 13 +++++++++++--
->  1 file changed, 11 insertions(+), 2 deletions(-)
+> The function is renamed efi_spec_version_format() in the next patch.
+> Why not call it that right away in this patch?
 
-Thanks Lukas. Both patches applied.
+Well, I'd rather leave the _show bit there so we can use the same macro
+as everything else for the real declaration.  It's less code, and more
+readable.
+
+> I'd change the return type to void and make this function copy
+> "(unknown)" to buf on error. That way you don't have to repeat
+> that over and over again in the next patch.
+
+I've done... almost that.  I'm not sure one way is really better or
+worse, to be honest.
+
+> > +	if (!buf)
+> > +		return -EINVAL;
+> 
+> Move that check to the top of the function so that you avoid calculating
+> major and minor in vain if buf is NULL.
+
+Sure.  Updated set to follow.
+
+-- 
+  Peter
