@@ -1,77 +1,77 @@
 From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH v2 0/4] Apple device properties
+Subject: [PATCH v2 1/4] ACPI / bus: Make acpi_get_first_physical_node() public
 Date: Wed, 7 Sep 2016 12:49:18 +0200
-Message-ID: <cover.1473242067.git.lukas@wunner.de>
+Message-ID: <2ccf03905d16368aabed0619835292b6d7f2c99e.1473242067.git.lukas@wunner.de>
+References: <cover.1473242067.git.lukas@wunner.de>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <cover.1473242067.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, grub-devel-mXXj517/zsQ@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Retrieve device properties from EFI on Macs before ExitBootServices is
-called and assign them to devices (patch [3/4]). The devices that
-properties pertain to are encoded as EFI Device Paths, so add a parser
-for these (patch [2/4]). As a first use case, amend the Thunderbolt driver
-to take advantage of the Device ROM supplied by EFI (patch [4/4]).
+Following the fwnode of a device is currently a one-way road: We provide
+ACPI_COMPANION() to obtain the fwnode but there's no (public) method to
+do the reverse. Granted, there may be multiple physical_nodes, but often
+the first one in the list is sufficient.
 
-Patch [1/4] is already queued in Rafael J. Wysocki's tree for 4.9 and is
-included here only because patch [2/4] wouldn't compile without it.
+A handy function to obtain it was introduced with commit 3b95bd160547
+("ACPI: introduce a function to find the first physical device"), but
+currently it's only available internally.
 
-The series also depends on these two patches which are already queued
-in Matt's tree for 4.9:
+We're about to add an EFI Device Path parser which needs this function.
+Consider the following device path: ACPI(PNP0A03,0)/PCI(28,2)/PCI(0,0)
+The PCI root is encoded as an ACPI device in the path, so the parser
+has to find the corresponding ACPI device, then find its physical node,
+find the PCI bridge in slot 1c (decimal 28), function 2 below it and
+finally find the PCI device in slot 0, function 0.
 
-- x86/efi: Optimize away setup_gop32/64 if unused
-  https://patchwork.kernel.org/patch/9315763/
+To this end, make acpi_get_first_physical_node() public.
 
-- x86/efi: Allow invocation of arbitrary boot services
-  https://patchwork.kernel.org/patch/9293371/
+Cc: Aleksey Makarov <aleksey.makarov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Acked-by: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ drivers/acpi/internal.h | 1 -
+ include/linux/acpi.h    | 7 +++++++
+ 2 files changed, 7 insertions(+), 1 deletion(-)
 
-
-Changes since v1:
-
-- Previously there were two separate patches for retrieving properties
-  and assigning them to devices. These are now squashed together in
-  patch [3/4]. (Requested by Matt Fleming.)
-
-- The version of the EFI properties protocol as well as the properties
-  payload is now checked.
-
-- Applied a bit of polish all over.
-
-
-Link to v1:
-https://lkml.org/lkml/2016/7/27/218
-
-Browseable on GitHub:
-https://github.com/l1k/linux/commits/apple_properties_v2
-
-Thanks,
-
-Lukas
-
-
-Lukas Wunner (4):
-  ACPI / bus: Make acpi_get_first_physical_node() public
-  efi: Add device path parser
-  x86/efi: Retrieve and assign Apple device properties
-  thunderbolt: Use Device ROM retrieved from EFI
-
- Documentation/kernel-parameters.txt     |   5 +
- arch/x86/boot/compressed/eboot.c        |  63 +++++++++
- arch/x86/include/uapi/asm/bootparam.h   |   1 +
- drivers/acpi/internal.h                 |   1 -
- drivers/firmware/efi/Kconfig            |  18 +++
- drivers/firmware/efi/Makefile           |   2 +
- drivers/firmware/efi/apple-properties.c | 230 ++++++++++++++++++++++++++++++++
- drivers/firmware/efi/dev-path-parser.c  | 186 ++++++++++++++++++++++++++
- drivers/thunderbolt/Kconfig             |   1 +
- drivers/thunderbolt/eeprom.c            |  42 ++++++
- drivers/thunderbolt/switch.c            |   2 +-
- include/linux/acpi.h                    |   7 +
- include/linux/efi.h                     |  38 ++++++
- 13 files changed, 594 insertions(+), 2 deletions(-)
- create mode 100644 drivers/firmware/efi/apple-properties.c
- create mode 100644 drivers/firmware/efi/dev-path-parser.c
-
+diff --git a/drivers/acpi/internal.h b/drivers/acpi/internal.h
+index 27cc7fe..48e718e 100644
+--- a/drivers/acpi/internal.h
++++ b/drivers/acpi/internal.h
+@@ -113,7 +113,6 @@ bool acpi_device_is_present(struct acpi_device *adev);
+ bool acpi_device_is_battery(struct acpi_device *adev);
+ bool acpi_device_is_first_physical_node(struct acpi_device *adev,
+ 					const struct device *dev);
+-struct device *acpi_get_first_physical_node(struct acpi_device *adev);
+ 
+ /* --------------------------------------------------------------------------
+                      Device Matching and Notification
+diff --git a/include/linux/acpi.h b/include/linux/acpi.h
+index 288fac5..8ab6a95 100644
+--- a/include/linux/acpi.h
++++ b/include/linux/acpi.h
+@@ -85,6 +85,8 @@ static inline const char *acpi_dev_name(struct acpi_device *adev)
+ 	return dev_name(&adev->dev);
+ }
+ 
++struct device *acpi_get_first_physical_node(struct acpi_device *adev);
++
+ enum acpi_irq_model_id {
+ 	ACPI_IRQ_MODEL_PIC = 0,
+ 	ACPI_IRQ_MODEL_IOAPIC,
+@@ -588,6 +590,11 @@ static inline const char *acpi_dev_name(struct acpi_device *adev)
+ 	return NULL;
+ }
+ 
++static inline struct device *acpi_get_first_physical_node(struct acpi_device *adev)
++{
++	return NULL;
++}
++
+ static inline void early_acpi_table_init(void *data, size_t size) { }
+ static inline void acpi_early_init(void) { }
+ static inline void acpi_subsystem_init(void) { }
 -- 
 2.9.3
