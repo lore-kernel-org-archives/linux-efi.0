@@ -1,77 +1,295 @@
 From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH v2 1/4] ACPI / bus: Make acpi_get_first_physical_node() public
+Subject: [PATCH v2 2/4] efi: Add device path parser
 Date: Wed, 7 Sep 2016 12:49:18 +0200
-Message-ID: <2ccf03905d16368aabed0619835292b6d7f2c99e.1473242067.git.lukas@wunner.de>
+Message-ID: <23d2289b6fd74077d1ed208fcf43e672164a2916.1473242067.git.lukas@wunner.de>
 References: <cover.1473242067.git.lukas@wunner.de>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <cover.1473242067.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Following the fwnode of a device is currently a one-way road: We provide
-ACPI_COMPANION() to obtain the fwnode but there's no (public) method to
-do the reverse. Granted, there may be multiple physical_nodes, but often
-the first one in the list is sufficient.
+We're about to extended the efistub to retrieve device properties from
+EFI on Apple Macs. The properties use EFI Device Paths to indicate the
+device they belong to. This commit adds a parser which, given an EFI
+Device Path, locates the corresponding struct device and returns a
+reference to it.
 
-A handy function to obtain it was introduced with commit 3b95bd160547
-("ACPI: introduce a function to find the first physical device"), but
-currently it's only available internally.
+Initially only ACPI and PCI Device Path nodes are supported, these are
+the only types needed for Apple device properties (the corresponding
+macOS function AppleACPIPlatformExpert::matchEFIDevicePath() does not
+support any others). Further node types can be added with moderate
+effort.
 
-We're about to add an EFI Device Path parser which needs this function.
-Consider the following device path: ACPI(PNP0A03,0)/PCI(28,2)/PCI(0,0)
-The PCI root is encoded as an ACPI device in the path, so the parser
-has to find the corresponding ACPI device, then find its physical node,
-find the PCI bridge in slot 1c (decimal 28), function 2 below it and
-finally find the PCI device in slot 0, function 0.
+Apple device properties is currently the only use case of this parser,
+but since this may be useful to others, make it a separate component
+which can be selected with config option EFI_DEV_PATH_PARSER. It can
+in principle be compiled as a module if acpi_get_first_physical_node()
+and acpi_bus_type are exported (and get_device_by_efi_path() itself is
+exported).
 
-To this end, make acpi_get_first_physical_node() public.
+The dependency on CONFIG_ACPI is needed for acpi_match_device_ids().
+It can be removed if an empty inline stub is added for that function.
 
-Cc: Aleksey Makarov <aleksey.makarov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Acked-by: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- drivers/acpi/internal.h | 1 -
- include/linux/acpi.h    | 7 +++++++
- 2 files changed, 7 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/Kconfig           |   5 +
+ drivers/firmware/efi/Makefile          |   1 +
+ drivers/firmware/efi/dev-path-parser.c | 186 +++++++++++++++++++++++++++++++++
+ include/linux/efi.h                    |  21 ++++
+ 4 files changed, 213 insertions(+)
+ create mode 100644 drivers/firmware/efi/dev-path-parser.c
 
-diff --git a/drivers/acpi/internal.h b/drivers/acpi/internal.h
-index 27cc7fe..48e718e 100644
---- a/drivers/acpi/internal.h
-+++ b/drivers/acpi/internal.h
-@@ -113,7 +113,6 @@ bool acpi_device_is_present(struct acpi_device *adev);
- bool acpi_device_is_battery(struct acpi_device *adev);
- bool acpi_device_is_first_physical_node(struct acpi_device *adev,
- 					const struct device *dev);
--struct device *acpi_get_first_physical_node(struct acpi_device *adev);
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index c981be1..893fda4 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -133,3 +133,8 @@ endmenu
  
- /* --------------------------------------------------------------------------
-                      Device Matching and Notification
-diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-index 288fac5..8ab6a95 100644
---- a/include/linux/acpi.h
-+++ b/include/linux/acpi.h
-@@ -85,6 +85,8 @@ static inline const char *acpi_dev_name(struct acpi_device *adev)
- 	return dev_name(&adev->dev);
- }
- 
-+struct device *acpi_get_first_physical_node(struct acpi_device *adev);
+ config UEFI_CPER
+ 	bool
 +
- enum acpi_irq_model_id {
- 	ACPI_IRQ_MODEL_PIC = 0,
- 	ACPI_IRQ_MODEL_IOAPIC,
-@@ -588,6 +590,11 @@ static inline const char *acpi_dev_name(struct acpi_device *adev)
- 	return NULL;
- }
++config EFI_DEV_PATH_PARSER
++	bool
++	depends on ACPI
++	default n
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index c8a439f..3e91ae3 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -21,6 +21,7 @@ obj-$(CONFIG_EFI_STUB)			+= libstub/
+ obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
+ obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
+ obj-$(CONFIG_EFI_TEST)			+= test/
++obj-$(CONFIG_EFI_DEV_PATH_PARSER)	+= dev-path-parser.o
  
-+static inline struct device *acpi_get_first_physical_node(struct acpi_device *adev)
+ arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
+ obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+diff --git a/drivers/firmware/efi/dev-path-parser.c b/drivers/firmware/efi/dev-path-parser.c
+new file mode 100644
+index 0000000..549f80b
+--- /dev/null
++++ b/drivers/firmware/efi/dev-path-parser.c
+@@ -0,0 +1,186 @@
++/*
++ * dev-path-parser.c - EFI Device Path parser
++ * Copyright (C) 2016 Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License (version 2) as
++ * published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <linux/acpi.h>
++#include <linux/efi.h>
++#include <linux/pci.h>
++
++struct acpi_hid_uid {
++	struct acpi_device_id hid[2];
++	char uid[11]; /* UINT_MAX + null byte */
++};
++
++static int __init acpi_match(struct device *dev, void *data)
 +{
-+	return NULL;
++	struct acpi_hid_uid hid_uid = *(struct acpi_hid_uid *)data;
++	struct acpi_device *adev = to_acpi_device(dev);
++
++	if (acpi_match_device_ids(adev, hid_uid.hid))
++		return 0;
++
++	if (adev->pnp.unique_id)
++		return !strcmp(adev->pnp.unique_id, hid_uid.uid);
++	else
++		return !strcmp("0", hid_uid.uid);
 +}
 +
- static inline void early_acpi_table_init(void *data, size_t size) { }
- static inline void acpi_early_init(void) { }
- static inline void acpi_subsystem_init(void) { }
++static int __init get_device_by_acpi_path(struct efi_dev_path *node,
++					  struct device *parent,
++					  struct device **child)
++{
++	struct acpi_hid_uid hid_uid = {};
++	struct device *phys_dev;
++
++	if (node->length != 12)
++		return -EINVAL;
++
++	sprintf(hid_uid.hid[0].id, "%c%c%c%04X",
++		'A' + ((node->acpi.hid >> 10) & 0x1f) - 1,
++		'A' + ((node->acpi.hid >>  5) & 0x1f) - 1,
++		'A' + ((node->acpi.hid >>  0) & 0x1f) - 1,
++			node->acpi.hid >> 16);
++	sprintf(hid_uid.uid, "%u", node->acpi.uid);
++
++	*child = bus_find_device(&acpi_bus_type, NULL, &hid_uid, acpi_match);
++	if (!*child)
++		return -ENODEV;
++
++	phys_dev = acpi_get_first_physical_node(to_acpi_device(*child));
++	if (phys_dev) {
++		get_device(phys_dev);
++		put_device(*child);
++		*child = phys_dev;
++	}
++
++	return 0;
++}
++
++static int __init pci_match(struct device *dev, void *data)
++{
++	unsigned int devfn = *(unsigned int *)data;
++
++	return dev_is_pci(dev) && to_pci_dev(dev)->devfn == devfn;
++}
++
++static int __init get_device_by_pci_path(struct efi_dev_path *node,
++					 struct device *parent,
++					 struct device **child)
++{
++	unsigned int devfn;
++
++	if (node->length != 6)
++		return -EINVAL;
++	if (!parent)
++		return -EINVAL;
++
++	devfn = PCI_DEVFN(node->pci.dev, node->pci.fn);
++
++	*child = device_find_child(parent, &devfn, pci_match);
++	if (!*child)
++		return -ENODEV;
++
++	return 0;
++}
++
++/*
++ * Insert parsers for further node types here.
++ *
++ * Each parser takes a pointer to the @node and to the @parent (will be NULL
++ * for the first device path node). If a device corresponding to @node was
++ * found below @parent, its reference count should be incremented and the
++ * device returned in @child.
++ *
++ * The return value should be 0 on success or a negative int on failure.
++ * The special return value 1 signals the end of the device path, only
++ * get_device_by_end_path() is supposed to return this.
++ *
++ * Be sure to validate the node length and contents before commencing the
++ * search for a device.
++ */
++
++static int __init get_device_by_end_path(struct efi_dev_path *node,
++					 struct device *parent,
++					 struct device **child)
++{
++	if (node->length != 4)
++		return -EINVAL;
++	if (!parent)
++		return -ENODEV;
++
++	*child = get_device(parent);
++	return 1;
++}
++
++/**
++ * get_device_by_efi_path - find device by EFI Device Path
++ * @node: EFI Device Path
++ * @len: maximum length of EFI Device Path in bytes
++ * @dev: device found
++ *
++ * Parse a series of EFI Device Path nodes at @node and find the corresponding
++ * device. If the device was found, its reference count is incremented and a
++ * pointer to it is returned in @dev. The caller needs to drop the reference
++ * with put_device() after use. The @node pointer is updated to point to the
++ * location immediately after the "End Entire Device Path" node.
++ *
++ * If a Device Path node is malformed or its corresponding device is not found,
++ * @node is updated to point to this offending node and @dev will be %NULL.
++ *
++ * Most buses instantiate devices in "subsys" initcall level, hence the
++ * earliest initcall level in which this function should be called is "fs".
++ *
++ * Returns 0 on success,
++ *	   %-ENODEV if no device was found,
++ *	   %-EINVAL if a node is malformed or exceeds @len,
++ *	   %-ENOTSUPP if support for a node type is not yet implemented.
++ */
++int __init get_device_by_efi_path(struct efi_dev_path **node, size_t len,
++				  struct device **dev)
++{
++	struct device *parent = NULL, *child;
++	int ret = 0;
++
++	*dev = NULL;
++
++	while (ret != 1) {
++		if (len < 4 || len < (*node)->length)
++			ret = -EINVAL;
++		else if ((*node)->type     == EFI_DEV_ACPI &&
++			 (*node)->sub_type == EFI_DEV_BASIC_ACPI)
++			ret = get_device_by_acpi_path(*node, parent, &child);
++		else if ((*node)->type     == EFI_DEV_HW &&
++			 (*node)->sub_type == EFI_DEV_PCI)
++			ret = get_device_by_pci_path(*node, parent, &child);
++		else if (((*node)->type    == EFI_DEV_END_PATH ||
++			  (*node)->type    == EFI_DEV_END_PATH2) &&
++			 (*node)->sub_type == EFI_DEV_END_ENTIRE)
++			ret = get_device_by_end_path(*node, parent, &child);
++		else
++			ret = -ENOTSUPP;
++
++		put_device(parent);
++		if (ret < 0)
++			return ret;
++
++		parent = child;
++		*node  = (void *)*node + (*node)->length;
++		len   -= (*node)->length;
++	}
++
++	*dev = child;
++	return 0;
++}
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 4ae1a1a..29ba93c 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1136,6 +1136,27 @@ struct efi_generic_dev_path {
+ 	u16 length;
+ } __attribute ((packed));
+ 
++struct efi_dev_path {
++	u8 type;	/* can be replaced with unnamed */
++	u8 sub_type;	/* struct efi_generic_dev_path; */
++	u16 length;	/* once we've moved to -std=c11 */
++	union {
++		struct {
++			u32 hid;
++			u32 uid;
++		} acpi;
++		struct {
++			u8 fn;
++			u8 dev;
++		} pci;
++	};
++} __attribute ((packed));
++
++#if IS_ENABLED(CONFIG_EFI_DEV_PATH_PARSER)
++int get_device_by_efi_path(struct efi_dev_path **node, size_t len,
++			   struct device **dev);
++#endif
++
+ static inline void memrange_efi_to_native(u64 *addr, u64 *npages)
+ {
+ 	*npages = PFN_UP(*addr + (*npages<<EFI_PAGE_SHIFT)) - PFN_DOWN(*addr);
 -- 
 2.9.3
