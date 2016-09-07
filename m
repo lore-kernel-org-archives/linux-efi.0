@@ -1,159 +1,56 @@
-From: Lukas Wunner <lukas@wunner.de>
-Subject: [PATCH v2 4/4] thunderbolt: Use Device ROM retrieved from EFI
-Date: Wed, 7 Sep 2016 12:49:18 +0200
-Message-ID: <c7da04f16d1d4ed6a3767dfb1897532d20fd7b2f.1473242067.git.lukas@wunner.de>
-References: <cover.1473242067.git.lukas@wunner.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1473242067.git.lukas@wunner.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org
-Cc: Andreas Noever <andreas.noever@gmail.com>
+From: Yisheng Xie <xieyisheng1-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] arm64/efi: efi_init error handling fix
+Date: Wed, 7 Sep 2016 19:15:48 +0800
+Message-ID: <c57dfbbe-a2a7-e8af-7d94-20f86126053c@huawei.com>
+References: <1472811519-4897-1-git-send-email-xieyisheng1@huawei.com>
+ <20160902102618.GC17482@arm.com> <20160905135723.GK32579@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160905135723.GK32579-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Cc: mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, guohanjun-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Macs with Thunderbolt 1 do not have a unit-specific DROM: The DROM is
-empty with uid 0x1000000000000. (Apple started factory-burning a unit-
-specific DROM with Thunderbolt 2.)
 
-Instead, the NHI EFI driver supplies a DROM in a device property. Use
-it if available. It's only available when booting with the efistub.
-If it's not available, silently fall back to our hardcoded DROM.
 
-The size of the DROM is always 256 bytes. The number is hardcoded into
-the NHI EFI driver. This commit can deal with an arbitrary size however,
-just in case they ever change that.
+On 2016/9/5 21:57, Matt Fleming wrote:
+> On Fri, 02 Sep, at 11:26:18AM, Will Deacon wrote:
+>> On Fri, Sep 02, 2016 at 06:18:39PM +0800, Xie Yisheng wrote:
+>>> From: Yisheng Xie <xieyisheng1-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+>>>
+>>> diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+>>> index c49d50e..5080e40 100644
+>>> --- a/drivers/firmware/efi/arm-init.c
+>>> +++ b/drivers/firmware/efi/arm-init.c
+>>> @@ -243,8 +243,10 @@ void __init efi_init(void)
+>>>  	     "Unexpected EFI_MEMORY_DESCRIPTOR version %ld",
+>>>  	      efi.memmap.desc_version);
+>>>  
+>>> -	if (uefi_init() < 0)
+>>> +	if (uefi_init() < 0) {
+>>> +		early_memunmap(efi.memmap.map, params.mmap_size);
+>>>  		return;
+>>> +	}
+> 
+> This should be a call to efi_memmap_unmap() because the EFI_MEMMAP
+> flag also needs clearing.
+> 
+Hi Matt,
+Thanks for your reply.
+You mean call the function efi_unmap_memmap() like x86?
 
-A modification is needed in the resume code where we currently read the
-uid of all switches in the hierarchy to detect plug events that occurred
-during sleep. On Thunderbolt 1 root switches this will now lead to a
-mismatch between the uid of the empty DROM and the EFI DROM. Exempt the
-root switch from this check: It's built in, so the uid should never
-change. However we continue to *read* the uid of the root switch, this
-seems like a good way to test its reachability after resume.
+however, it seems no need to clear EFI_MEMMAP here. For arm*, the flag
+EFI_MEMMAP is set in function reserve_regions(), which is called
+only when uefi_init() return 0:
 
-Background information: The EFI firmware volume contains ROM files for
-the NHI, GMUX and several other chips as well as key material. This
-strategy allows Apple to deploy ROM or key updates by simply publishing
-an EFI firmware update on their website. Drivers do not access those
-files directly but rather through a file server via EFI protocol
-AC5E4829-A8FD-440B-AF33-9FFE013B12D8. Files are identified by GUID, the
-NHI DROM has 339370BD-CFC6-4454-8EF7-704653120818.
+efi_init()
+   -> reserve_regions()
+       -> set_bit(EFI_MEMMAP, &efi.flags);
+Thanks
+Xie Yisheng.
 
-The NHI EFI driver amends that file with a unit-specific uid. The uid
-has 64 bit but its entropy is much lower: 24 bit represent the model,
-24 bit are taken from a serial number, 16 bit are fixed. The NHI EFI
-driver obtains the serial number via the DataHub protocol, copies it
-into the DROM, calculates the CRC and submits the result as a device
-property.
-
-Cc: reverser@put.as
-Cc: Andreas Noever <andreas.noever@gmail.com>
-Tested-by: Lukas Wunner <lukas@wunner.de> [MacBookPro9,1]
-Tested-by: Pierre Moreau <pierre.morrow@free.fr> [MacBookPro11,3]
-Signed-off-by: Lukas Wunner <lukas@wunner.de>
----
- drivers/thunderbolt/Kconfig  |  1 +
- drivers/thunderbolt/eeprom.c | 42 ++++++++++++++++++++++++++++++++++++++++++
- drivers/thunderbolt/switch.c |  2 +-
- 3 files changed, 44 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/thunderbolt/Kconfig b/drivers/thunderbolt/Kconfig
-index c121acc..0056df7 100644
---- a/drivers/thunderbolt/Kconfig
-+++ b/drivers/thunderbolt/Kconfig
-@@ -1,6 +1,7 @@
- menuconfig THUNDERBOLT
- 	tristate "Thunderbolt support for Apple devices"
- 	depends on PCI
-+	select APPLE_PROPERTIES
- 	select CRC32
- 	help
- 	  Cactus Ridge Thunderbolt Controller driver
-diff --git a/drivers/thunderbolt/eeprom.c b/drivers/thunderbolt/eeprom.c
-index 2b9602c..785a171 100644
---- a/drivers/thunderbolt/eeprom.c
-+++ b/drivers/thunderbolt/eeprom.c
-@@ -5,6 +5,7 @@
-  */
- 
- #include <linux/crc32.h>
-+#include <linux/property.h>
- #include <linux/slab.h>
- #include "tb.h"
- 
-@@ -360,6 +361,39 @@ static int tb_drom_parse_entries(struct tb_switch *sw)
- }
- 
- /**
-+ * tb_drom_copy_efi - copy drom supplied by EFI to sw->drom if present
-+ */
-+static int tb_drom_copy_efi(struct tb_switch *sw, u16 *size)
-+{
-+	struct device *dev = &sw->tb->nhi->pdev->dev;
-+	int len, res;
-+
-+	len = device_property_read_u8_array(dev, "ThunderboltDROM", NULL, 0);
-+	if (len < 0 || len < sizeof(struct tb_drom_header))
-+		return -EINVAL;
-+
-+	sw->drom = kmalloc(len, GFP_KERNEL);
-+	if (!sw->drom)
-+		return -ENOMEM;
-+
-+	res = device_property_read_u8_array(dev, "ThunderboltDROM", sw->drom,
-+									len);
-+	if (res)
-+		goto err;
-+
-+	*size = ((struct tb_drom_header *)sw->drom)->data_len +
-+							  TB_DROM_DATA_START;
-+	if (*size > len)
-+		goto err;
-+
-+	return 0;
-+
-+err:
-+	kfree(sw->drom);
-+	return -EINVAL;
-+}
-+
-+/**
-  * tb_drom_read - copy drom to sw->drom and parse it
-  */
- int tb_drom_read(struct tb_switch *sw)
-@@ -374,6 +408,13 @@ int tb_drom_read(struct tb_switch *sw)
- 
- 	if (tb_route(sw) == 0) {
- 		/*
-+		 * Apple's NHI EFI driver supplies a DROM for the root switch
-+		 * in a device property. Use it if available.
-+		 */
-+		if (tb_drom_copy_efi(sw, &size) == 0)
-+			goto parse;
-+
-+		/*
- 		 * The root switch contains only a dummy drom (header only,
- 		 * no entries). Hardcode the configuration here.
- 		 */
-@@ -418,6 +459,7 @@ int tb_drom_read(struct tb_switch *sw)
- 	if (res)
- 		goto err;
- 
-+parse:
- 	header = (void *) sw->drom;
- 
- 	if (header->data_len + TB_DROM_DATA_START != size) {
-diff --git a/drivers/thunderbolt/switch.c b/drivers/thunderbolt/switch.c
-index 1e116f5..d8a6cf1 100644
---- a/drivers/thunderbolt/switch.c
-+++ b/drivers/thunderbolt/switch.c
-@@ -458,7 +458,7 @@ int tb_switch_resume(struct tb_switch *sw)
- 		tb_sw_warn(sw, "uid read failed\n");
- 		return err;
- 	}
--	if (sw->uid != uid) {
-+	if (tb_route(sw) && sw->uid != uid) {
- 		tb_sw_info(sw,
- 			"changed while suspended (uid %#llx -> %#llx)\n",
- 			sw->uid, uid);
--- 
-2.9.3
+> .
+> 
