@@ -1,123 +1,77 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [RFC PATCH v2 09/20] x86: Add support for early
-	encryption/decryption of memory
-Date: Tue, 6 Sep 2016 18:12:49 +0200
-Message-ID: <20160906161249.3ckotvocwuukhjws@pd.tnic>
-References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
-	<20160822223710.29880.23936.stgit@tlendack-t1.amdoffice.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160822223710.29880.23936.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Subject: [PATCH v2 0/4] Apple device properties
+Date: Wed, 7 Sep 2016 12:49:18 +0200
+Message-ID: <cover.1473242067.git.lukas@wunner.de>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, grub-devel-mXXj517/zsQ@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 22, 2016 at 05:37:10PM -0500, Tom Lendacky wrote:
-> This adds support to be able to either encrypt or decrypt data during
-> the early stages of booting the kernel. This does not change the memory
-> encryption attribute - it is used for ensuring that data present in
-> either an encrypted or un-encrypted memory area is in the proper state
-> (for example the initrd will have been loaded by the boot loader and
-> will not be encrypted, but the memory that it resides in is marked as
-> encrypted).
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-> ---
+Retrieve device properties from EFI on Macs before ExitBootServices is
+called and assign them to devices (patch [3/4]). The devices that
+properties pertain to are encoded as EFI Device Paths, so add a parser
+for these (patch [2/4]). As a first use case, amend the Thunderbolt driver
+to take advantage of the Device ROM supplied by EFI (patch [4/4]).
 
-...
+Patch [1/4] is already queued in Rafael J. Wysocki's tree for 4.9 and is
+included here only because patch [2/4] wouldn't compile without it.
 
-> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-> index 00eb705..f35a646 100644
-> --- a/arch/x86/mm/mem_encrypt.c
-> +++ b/arch/x86/mm/mem_encrypt.c
-> @@ -14,6 +14,107 @@
->  #include <linux/mm.h>
->  
->  #include <asm/mem_encrypt.h>
-> +#include <asm/tlbflush.h>
-> +#include <asm/fixmap.h>
-> +
-> +/* Buffer used for early in-place encryption by BSP, no locking needed */
-> +static char me_early_buffer[PAGE_SIZE] __aligned(PAGE_SIZE);
-> +
-> +/*
-> + * This routine does not change the underlying encryption setting of the
-> + * page(s) that map this memory. It assumes that eventually the memory is
-> + * meant to be accessed as encrypted but the contents are currently not
-> + * encyrpted.
+The series also depends on these two patches which are already queued
+in Matt's tree for 4.9:
 
-s/encyrpted/encrypted/
+- x86/efi: Optimize away setup_gop32/64 if unused
+  https://patchwork.kernel.org/patch/9315763/
 
-Ditto below.
+- x86/efi: Allow invocation of arbitrary boot services
+  https://patchwork.kernel.org/patch/9293371/
 
-> + */
-> +void __init sme_early_mem_enc(resource_size_t paddr, unsigned long size)
-> +{
-> +	void *src, *dst;
-> +	size_t len;
-> +
-> +	if (!sme_me_mask)
-> +		return;
-> +
-> +	local_flush_tlb();
-> +	wbinvd();
-> +
-> +	/*
-> +	 * There are limited number of early mapping slots, so map (at most)
-> +	 * one page at time.
-> +	 */
-> +	while (size) {
-> +		len = min_t(size_t, sizeof(me_early_buffer), size);
-> +
-> +		/* Create a mapping for non-encrypted write-protected memory */
-> +		src = early_memremap_dec_wp(paddr, len);
-> +
-> +		/* Create a mapping for encrypted memory */
-> +		dst = early_memremap_enc(paddr, len);
-> +
-> +		/*
-> +		 * If a mapping can't be obtained to perform the encryption,
-> +		 * then encrypted access to that area will end up causing
-> +		 * a crash.
-> +		 */
-> +		BUG_ON(!src || !dst);
-> +
-> +		memcpy(me_early_buffer, src, len);
-> +		memcpy(dst, me_early_buffer, len);
-> +
-> +		early_memunmap(dst, len);
-> +		early_memunmap(src, len);
-> +
-> +		paddr += len;
-> +		size -= len;
-> +	}
-> +}
-> +
-> +/*
-> + * This routine does not change the underlying encryption setting of the
-> + * page(s) that map this memory. It assumes that eventually the memory is
-> + * meant to be accessed as not encrypted but the contents are currently
-> + * encyrpted.
-> + */
-> +void __init sme_early_mem_dec(resource_size_t paddr, unsigned long size)
-> +{
 
-...
+Changes since v1:
+
+- Previously there were two separate patches for retrieving properties
+  and assigning them to devices. These are now squashed together in
+  patch [3/4]. (Requested by Matt Fleming.)
+
+- The version of the EFI properties protocol as well as the properties
+  payload is now checked.
+
+- Applied a bit of polish all over.
+
+
+Link to v1:
+https://lkml.org/lkml/2016/7/27/218
+
+Browseable on GitHub:
+https://github.com/l1k/linux/commits/apple_properties_v2
+
+Thanks,
+
+Lukas
+
+
+Lukas Wunner (4):
+  ACPI / bus: Make acpi_get_first_physical_node() public
+  efi: Add device path parser
+  x86/efi: Retrieve and assign Apple device properties
+  thunderbolt: Use Device ROM retrieved from EFI
+
+ Documentation/kernel-parameters.txt     |   5 +
+ arch/x86/boot/compressed/eboot.c        |  63 +++++++++
+ arch/x86/include/uapi/asm/bootparam.h   |   1 +
+ drivers/acpi/internal.h                 |   1 -
+ drivers/firmware/efi/Kconfig            |  18 +++
+ drivers/firmware/efi/Makefile           |   2 +
+ drivers/firmware/efi/apple-properties.c | 230 ++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/dev-path-parser.c  | 186 ++++++++++++++++++++++++++
+ drivers/thunderbolt/Kconfig             |   1 +
+ drivers/thunderbolt/eeprom.c            |  42 ++++++
+ drivers/thunderbolt/switch.c            |   2 +-
+ include/linux/acpi.h                    |   7 +
+ include/linux/efi.h                     |  38 ++++++
+ 13 files changed, 594 insertions(+), 2 deletions(-)
+ create mode 100644 drivers/firmware/efi/apple-properties.c
+ create mode 100644 drivers/firmware/efi/dev-path-parser.c
 
 -- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
+2.9.3
