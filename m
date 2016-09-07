@@ -1,102 +1,136 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [RFC PATCH v2 07/20] x86: Provide general kernel support for
-	memory encryption
-Date: Wed, 7 Sep 2016 09:30:54 -0500
-Message-ID: <f4125cae-63af-f8c7-086f-e297ce480a07@amd.com>
-References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
-	<20160822223646.29880.28794.stgit@tlendack-t1.amdoffice.net>
-	<20160906093113.GA18319@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20160906093113.GA18319-fF5Pk5pvG8Y@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter
-	Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 2/3] efi: add firmware version information to sysfs
+Date: Wed,  7 Sep 2016 10:56:25 -0400
+Message-ID: <1473260186-4500-2-git-send-email-pjones@redhat.com>
+References: <20160907122339.GB28333@wunner.de>
+ <1473260186-4500-1-git-send-email-pjones@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1473260186-4500-1-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 09/06/2016 04:31 AM, Borislav Petkov wrote:
-> On Mon, Aug 22, 2016 at 05:36:46PM -0500, Tom Lendacky wrote:
->> Adding general kernel support for memory encryption includes:
->> - Modify and create some page table macros to include the Secure Memory
->>   Encryption (SME) memory encryption mask
->> - Update kernel boot support to call an SME routine that checks for and
->>   sets the SME capability (the SME routine will grow later and for now
->>   is just a stub routine)
->> - Update kernel boot support to call an SME routine that encrypts the
->>   kernel (the SME routine will grow later and for now is just a stub
->>   routine)
->> - Provide an SME initialization routine to update the protection map with
->>   the memory encryption mask so that it is used by default
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-> 
-> ...
-> 
->> diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
->> index 54a2372..88c7bae 100644
->> --- a/arch/x86/kernel/head64.c
->> +++ b/arch/x86/kernel/head64.c
->> @@ -28,6 +28,7 @@
->>  #include <asm/bootparam_utils.h>
->>  #include <asm/microcode.h>
->>  #include <asm/kasan.h>
->> +#include <asm/mem_encrypt.h>
->>  
->>  /*
->>   * Manage page tables very early on.
->> @@ -42,7 +43,7 @@ static void __init reset_early_page_tables(void)
->>  {
->>  	memset(early_level4_pgt, 0, sizeof(pgd_t)*(PTRS_PER_PGD-1));
->>  	next_early_pgt = 0;
->> -	write_cr3(__pa_nodebug(early_level4_pgt));
->> +	write_cr3(__sme_pa_nodebug(early_level4_pgt));
->>  }
->>  
->>  /* Create a new PMD entry */
->> @@ -54,7 +55,7 @@ int __init early_make_pgtable(unsigned long address)
->>  	pmdval_t pmd, *pmd_p;
->>  
->>  	/* Invalid address or early pgt is done ?  */
->> -	if (physaddr >= MAXMEM || read_cr3() != __pa_nodebug(early_level4_pgt))
->> +	if (physaddr >= MAXMEM || read_cr3() != __sme_pa_nodebug(early_level4_pgt))
->>  		return -1;
->>  
->>  again:
->> @@ -157,6 +158,11 @@ asmlinkage __visible void __init x86_64_start_kernel(char * real_mode_data)
->>  
->>  	clear_page(init_level4_pgt);
->>  
->> +	/* Update the early_pmd_flags with the memory encryption mask */
->> +	early_pmd_flags |= _PAGE_ENC;
->> +
->> +	sme_early_init();
->> +
-> 
-> So maybe this comes later but you're setting _PAGE_ENC unconditionally
-> *before* sme_early_init().
-> 
-> I think you should set it in sme_early_init() and iff SME is enabled.
+This adds the EFI Spec version from the system table to sysfs as
+/sys/firmware/efi/spec_version .
 
-_PAGE_ENC is #defined as sme_me_mask and sme_me_mask has already been
-set (or not set) at this point - so it will be the mask if SME is
-active or 0 if SME is not active.  sme_early_init() is merely
-propagating the mask to other structures.  Since early_pmd_flags is
-mainly used in this file (one line in head_64.S is the other place) I
-felt it best to modify it here.  But it can always be moved if you feel
-that is best.
+Userland tools need this information in order to work around
+specification deficiencies in 2.4 and earlier firmwares.  Specifically,
+UEFI 2.4 and 2.5+ treat management of BootOrder very differently (See
+UEFI 2.4 section 3.1.1 vs UEFI 2.5 section 3.1), which means on older
+firmware we'll want to work around BDS's boot order management by adding
+fwupdate entries to BootOrder.  We'd prefer not to do this on newer
+firmware, as it is both non-sensical in terms of what it expresses, and
+it results in more relatively failure prone flash writes.
 
-Thanks,
-Tom
+Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Reviewed-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+---
+ Documentation/ABI/testing/sysfs-firmware-efi |  6 +++
+ drivers/firmware/efi/efi.c                   | 65 ++++++++++++++++++++++++++++
+ 2 files changed, 71 insertions(+)
 
-> 
+diff --git a/Documentation/ABI/testing/sysfs-firmware-efi b/Documentation/ABI/testing/sysfs-firmware-efi
+index e794eac..4eec7c2 100644
+--- a/Documentation/ABI/testing/sysfs-firmware-efi
++++ b/Documentation/ABI/testing/sysfs-firmware-efi
+@@ -28,3 +28,9 @@ Description:	Displays the physical addresses of all EFI Configuration
+ 		versions are always printed first, i.e. ACPI20 comes
+ 		before ACPI.
+ Users:		dmidecode
++
++What:		/sys/firmware/efi/spec_version
++Date:		August 2016
++Contact:	linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
++Description:	Displays the UEFI Specification revision the firmware claims to
++		be based upon.
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 5a2631a..4e06e54 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -141,11 +141,75 @@ static ssize_t fw_platform_size_show(struct kobject *kobj,
+ 	return sprintf(buf, "%d\n", efi_enabled(EFI_64BIT) ? 64 : 32);
+ }
+ 
++static ssize_t spec_version_show(struct kobject *kobj,
++				 struct kobj_attribute *attr,
++				 char *buf)
++{
++	u16 major, minor;
++	ssize_t rc;
++
++	if (!buf)
++		return -EINVAL;
++
++	/* The spec says:
++	 *  The revision of the EFI Specification to which this table
++	 *  conforms. The upper 16 bits of this field contain the major
++	 *  revision value, and the lower 16 bits contain the minor revision
++	 *  value. The minor revision values are binary coded decimals and are
++	 *  limited to the range of 00..99.
++	 *
++	 *  When printed or displayed UEFI spec revision is referred as (Major
++	 *  revision).(Minor revision upper decimal).(Minor revision lower
++	 *  decimal) or (Major revision).(Minor revision upper decimal) in
++	 *  case Minor revision lower decimal is set to 0. For example:
++	 *
++	 *  A specification with the revision value ((2<<16) | (30)) would be
++	 *  referred as 2.3;
++	 *  A specification with the revision value ((2<<16) | (31)) would be
++	 *  referred as 2.3.1
++	 *
++	 * Then later it says:
++	 *  Related Definitions
++	 *   #define EFI_SYSTEM_TABLE_SIGNATURE 0x5453595320494249
++	 *   #define EFI_2_40_SYSTEM_TABLE_REVISION ((2<<16) | (40))
++	 *   #define EFI_2_31_SYSTEM_TABLE_REVISION ((2<<16) | (31))
++	 *   #define EFI_2_30_SYSTEM_TABLE_REVISION ((2<<16) | (30))
++	 *   #define EFI_2_20_SYSTEM_TABLE_REVISION ((2<<16) | (20))
++	 *   #define EFI_2_10_SYSTEM_TABLE_REVISION ((2<<16) | (10))
++	 *   #define EFI_2_00_SYSTEM_TABLE_REVISION ((2<<16) | (00))
++	 *   #define EFI_1_10_SYSTEM_TABLE_REVISION ((1<<16) | (10))
++	 *   #define EFI_1_02_SYSTEM_TABLE_REVISION ((1<<16) | (02))
++	 *   #define EFI_SPECIFICATION_VERSION EFI_SYSTEM_TABLE_REVISION
++	 *   #define EFI_SYSTEM_TABLE_REVISION EFI_2_40_SYSTEM_TABLE_REVISION
++	 *
++	 * (Apparently this bit of the spec failed to get updated for 2.5
++	 * and 2.6; UefiSpec.h in Tiano has been updated, though.)
++	 *
++	 * This of course does not match the description above at all, but it
++	 * does match the code in Tiano.  So we decode it Tiano's way.
++	 */
++	major = (efi.spec_version & 0xffff0000) >> 16;
++	minor = (efi.spec_version & 0x0000ffff);
++
++	if ((minor % 10) == 0)
++		rc = sprintf(buf, "%u.%u", major, minor / 10);
++	else
++		rc = sprintf(buf, "%u.%u.%u", major, minor / 10, minor % 10);
++
++	if (rc < 0) {
++		strcpy(buf, "(unknown)");
++		return strlen(buf);
++	}
++
++	return rc;
++}
++
+ static struct kobj_attribute efi_attr_fw_vendor = __ATTR_RO(fw_vendor);
+ static struct kobj_attribute efi_attr_runtime = __ATTR_RO(runtime);
+ static struct kobj_attribute efi_attr_config_table = __ATTR_RO(config_table);
+ static struct kobj_attribute efi_attr_fw_platform_size =
+ 	__ATTR_RO(fw_platform_size);
++static struct kobj_attribute efi_attr_spec_version = __ATTR_RO(spec_version);
+ 
+ static struct attribute *efi_subsys_attrs[] = {
+ 	&efi_attr_systab.attr,
+@@ -153,6 +217,7 @@ static struct attribute *efi_subsys_attrs[] = {
+ 	&efi_attr_runtime.attr,
+ 	&efi_attr_config_table.attr,
+ 	&efi_attr_fw_platform_size.attr,
++	&efi_attr_spec_version.attr,
+ 	NULL,
+ };
+ 
+-- 
+2.7.4
