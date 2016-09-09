@@ -1,81 +1,142 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 01/29] x86/efi: Test for EFI_MEMMAP functionality when iterating EFI memmap
-Date: Fri,  9 Sep 2016 16:18:23 +0100
-Message-ID: <20160909151851.27577-2-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH 26/29] efi/arm64: Treat regions with WT/WC set but WB cleared as memory
+Date: Fri,  9 Sep 2016 16:18:48 +0100
+Message-ID: <20160909151851.27577-27-matt@codeblueprint.co.uk>
 References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160909151851.27577-1-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Dave Young <dyoung@redhat.com>, Kamezawa Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, Taku Izumi <izumi.taku@jp.fujitsu.com>, Tony Luck <tony.luck@intel.com>, Xishi Qiu <qiuxishi@huawei.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160909151851.27577-1-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Both efi_find_mirror() and efi_fake_memmap() really want to know
-whether the EFI memory map is available, not just whether the machine
-was booted using EFI. efi_fake_memmap() even has a check for
-EFI_MEMMAP at the start of the function.
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Since we've already got other code that has this dependency, merge
-everything under one if() conditional, and remove the now superfluous
-check from efi_fake_memmap().
+Currently, memory regions are only recorded in the memblock memory table
+if they have the EFI_MEMORY_WB memory type attribute set. In case the
+region is of a reserved type, it is also marked as MEMBLOCK_NOMAP, which
+will leave it out of the linear mapping.
 
-Tested-by: Dave Young <dyoung@redhat.com> [kexec/kdump]
-Tested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org> [arm]
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Taku Izumi <izumi.taku@jp.fujitsu.com>
-Cc: Tony Luck <tony.luck@intel.com>
-Cc: Xishi Qiu <qiuxishi@huawei.com>
-Cc: Kamezawa Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+However, memory regions may legally have the EFI_MEMORY_WT or EFI_MEMORY_WC
+attributes set, and the EFI_MEMORY_WB cleared, in which case the region in
+question is obviously backed by normal memory, but is not recorded in the
+memblock memory table at all. Since it would be useful to be able to
+identify any UEFI reported memory region using memblock_is_memory(), it
+makes sense to add all memory to the memblock memory table, and simply mark
+it as MEMBLOCK_NOMAP if it lacks the EFI_MEMORY_WB attribute.
+
+While implementing this, let's refactor the code slightly to make it easier
+to understand: replace is_normal_ram() with is_memory(), and make it return
+true for each region that has any of the WB|WT|WC bits set. (This follows
+the AArch64 bindings in the UEFI spec, which state that those are the
+attributes that map to normal memory)
+
+Also, replace is_reserve_region() with is_usable_memory(), and only invoke
+it if the region in question was identified as memory by is_memory() in the
+first place. The net result is the same (only reserved regions that are
+backed by memory end up in the memblock memory table with the MEMBLOCK_NOMAP
+flag set) but carried out in a more straightforward way.
+
+Finally, we remove the trailing asterisk in the EFI debug output. Keeping it
+clutters the code, and it serves no real purpose now that we no longer
+temporarily reserve BootServices code and data regions like we did in the
+early days of EFI support on arm64 Linux (which it inherited from the x86
+implementation)
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Reviewed-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Tested-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+Reviewed-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- arch/x86/kernel/setup.c         | 17 ++++++++---------
- drivers/firmware/efi/fake_mem.c |  2 +-
- 2 files changed, 9 insertions(+), 10 deletions(-)
+ drivers/firmware/efi/arm-init.c | 32 +++++++++++++++++---------------
+ 1 file changed, 17 insertions(+), 15 deletions(-)
 
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 0fa60f5f5a16..4fd69e532c15 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -1096,19 +1096,18 @@ void __init setup_arch(char **cmdline_p)
- 	memblock_set_current_limit(ISA_END_ADDRESS);
- 	memblock_x86_fill();
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index e0a511d4074f..8efe13075c92 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -26,9 +26,9 @@
  
--	if (efi_enabled(EFI_BOOT)) {
-+	reserve_bios_regions();
-+
-+	if (efi_enabled(EFI_MEMMAP)) {
- 		efi_fake_memmap();
- 		efi_find_mirror();
--	}
--
--	reserve_bios_regions();
+ u64 efi_system_table;
  
--	/*
--	 * The EFI specification says that boot service code won't be called
--	 * after ExitBootServices(). This is, in fact, a lie.
--	 */
--	if (efi_enabled(EFI_MEMMAP))
+-static int __init is_normal_ram(efi_memory_desc_t *md)
++static int __init is_memory(efi_memory_desc_t *md)
+ {
+-	if (md->attribute & EFI_MEMORY_WB)
++	if (md->attribute & (EFI_MEMORY_WB|EFI_MEMORY_WT|EFI_MEMORY_WC))
+ 		return 1;
+ 	return 0;
+ }
+@@ -152,9 +152,9 @@ out:
+ }
+ 
+ /*
+- * Return true for RAM regions we want to permanently reserve.
++ * Return true for regions that can be used as System RAM.
+  */
+-static __init int is_reserve_region(efi_memory_desc_t *md)
++static __init int is_usable_memory(efi_memory_desc_t *md)
+ {
+ 	switch (md->type) {
+ 	case EFI_LOADER_CODE:
+@@ -163,18 +163,22 @@ static __init int is_reserve_region(efi_memory_desc_t *md)
+ 	case EFI_BOOT_SERVICES_DATA:
+ 	case EFI_CONVENTIONAL_MEMORY:
+ 	case EFI_PERSISTENT_MEMORY:
+-		return 0;
 +		/*
-+		 * The EFI specification says that boot service code won't be
-+		 * called after ExitBootServices(). This is, in fact, a lie.
++		 * According to the spec, these regions are no longer reserved
++		 * after calling ExitBootServices(). However, we can only use
++		 * them as System RAM if they can be mapped writeback cacheable.
 +		 */
- 		efi_reserve_boot_services();
-+	}
++		return (md->attribute & EFI_MEMORY_WB);
+ 	default:
+ 		break;
+ 	}
+-	return is_normal_ram(md);
++	return false;
+ }
  
- 	/* preallocate 4k for mptable mpc */
- 	early_reserve_e820_mpc_new();
-diff --git a/drivers/firmware/efi/fake_mem.c b/drivers/firmware/efi/fake_mem.c
-index 48430aba13c1..c437388a7b85 100644
---- a/drivers/firmware/efi/fake_mem.c
-+++ b/drivers/firmware/efi/fake_mem.c
-@@ -64,7 +64,7 @@ void __init efi_fake_memmap(void)
- 	void *old, *new;
- 	int i;
+ static __init void reserve_regions(void)
+ {
+ 	efi_memory_desc_t *md;
+ 	u64 paddr, npages, size;
+-	int resv;
  
--	if (!nr_fake_mem || !efi_enabled(EFI_MEMMAP))
-+	if (!nr_fake_mem)
- 		return;
+ 	if (efi_enabled(EFI_DBG))
+ 		pr_info("Processing EFI memory map:\n");
+@@ -191,25 +195,23 @@ static __init void reserve_regions(void)
+ 		paddr = md->phys_addr;
+ 		npages = md->num_pages;
  
- 	/* count up the number of EFI memory descriptor */
+-		resv = is_reserve_region(md);
+ 		if (efi_enabled(EFI_DBG)) {
+ 			char buf[64];
+ 
+-			pr_info("  0x%012llx-0x%012llx %s%s\n",
++			pr_info("  0x%012llx-0x%012llx %s\n",
+ 				paddr, paddr + (npages << EFI_PAGE_SHIFT) - 1,
+-				efi_md_typeattr_format(buf, sizeof(buf), md),
+-				resv ? "*" : "");
++				efi_md_typeattr_format(buf, sizeof(buf), md));
+ 		}
+ 
+ 		memrange_efi_to_native(&paddr, &npages);
+ 		size = npages << PAGE_SHIFT;
+ 
+-		if (is_normal_ram(md))
++		if (is_memory(md)) {
+ 			early_init_dt_add_memory_arch(paddr, size);
+ 
+-		if (resv)
+-			memblock_mark_nomap(paddr, size);
+-
++			if (!is_usable_memory(md))
++				memblock_mark_nomap(paddr, size);
++		}
+ 	}
+ }
+ 
 -- 
 2.9.3
