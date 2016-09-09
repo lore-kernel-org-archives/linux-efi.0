@@ -1,7 +1,7 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 13/29] efi/arm*: esrt: Add missing call to efi_esrt_init()
-Date: Fri,  9 Sep 2016 16:18:35 +0100
-Message-ID: <20160909151851.27577-14-matt@codeblueprint.co.uk>
+Subject: [PATCH 12/29] efi/esrt: Use memremap not ioremap to access ESRT table in memory
+Date: Fri,  9 Sep 2016 16:18:34 +0100
+Message-ID: <20160909151851.27577-13-matt@codeblueprint.co.uk>
 References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20160909151851.27577-1-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
@@ -12,30 +12,48 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-ESRT support is built by default for all architectures that define
-CONFIG_EFI. However, this support was not wired up yet for ARM/arm64,
-since efi_esrt_init() was never called. So add the missing call.
+On ARM and arm64, ioremap() and memremap() are not interchangeable like
+on x86, and the use of ioremap() on ordinary RAM is typically flagged
+as an error if the memory region being mapped is also covered by the
+linear mapping, since that would lead to aliases with conflicting
+cacheability attributes.
 
+Since what we are dealing with is not an I/O region with side effects,
+using ioremap() here is arguably incorrect anyway, so let's replace
+it with memremap() instead.
+
+Acked-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- drivers/firmware/efi/arm-init.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/firmware/efi/esrt.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 5a2df3fefccc..e0a511d4074f 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -247,6 +247,7 @@ void __init efi_init(void)
+diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+index b93cd11f9bcc..14914074f716 100644
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -16,6 +16,7 @@
+ #include <linux/device.h>
+ #include <linux/efi.h>
+ #include <linux/init.h>
++#include <linux/io.h>
+ #include <linux/kernel.h>
+ #include <linux/kobject.h>
+ #include <linux/list.h>
+@@ -387,9 +388,9 @@ static int __init esrt_sysfs_init(void)
+ 	if (!esrt_data || !esrt_data_size)
+ 		return -ENOSYS;
  
- 	reserve_regions();
- 	efi_memattr_init();
-+	efi_esrt_init();
- 	efi_memmap_unmap();
- 
- 	memblock_reserve(params.mmap & PAGE_MASK,
+-	esrt = ioremap(esrt_data, esrt_data_size);
++	esrt = memremap(esrt_data, esrt_data_size, MEMREMAP_WB);
+ 	if (!esrt) {
+-		pr_err("ioremap(%pa, %zu) failed.\n", &esrt_data,
++		pr_err("memremap(%pa, %zu) failed.\n", &esrt_data,
+ 		       esrt_data_size);
+ 		return -ENOMEM;
+ 	}
 -- 
 2.9.3
