@@ -1,67 +1,150 @@
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH] efi: Use LocateHandleBuffer instead of LocateHandle
-Date: Fri, 9 Sep 2016 13:59:51 +0200
-Message-ID: <20160909115951.GA29385@wunner.de>
-References: <1d7915dc0dd328ca04088f6b8b3fcfad5cec55a0.1473275006.git.lukas@wunner.de>
- <CAKv+Gu_kfnHfiBH__Wnvh39KMPj_-s39YyY=pT3roNv7iPPzrA@mail.gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [GIT PULL 00/29] EFI changes for v4.9
+Date: Fri,  9 Sep 2016 16:18:22 +0100
+Message-ID: <20160909151851.27577-1-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_kfnHfiBH__Wnvh39KMPj_-s39YyY=pT3roNv7iPPzrA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>, Kamezawa Hiroyuki <kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Sep 09, 2016 at 11:52:32AM +0100, Ard Biesheuvel wrote:
-> On 8 September 2016 at 01:02, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
-> > Use LocateHandleBuffer instead of the LocateHandle + AllocatePool +
-> > LocateHandle combo to save a bit on code.
-> >
-> > Usage of LocateHandle for UGA and GOP has been present in the efistub
-> > since its introduction with commit 291f36325f9f ("x86, efi: EFI boot
-> > stub support"). It was subsequently inherited by the PCI ROM retrieval
-> > with commit dd5fc854de5f ("EFI: Stash ROMs if they're not in the PCI
-> > BAR").
-> >
-> > One valid reason to not use LocateHandleBuffer would be if a specific
-> > memory type is required for the buffer, and particularly if the buffer
-> > needs to persist across ExitBootServices. The spec does not mandate
-> > which type is used, edk2 seems to default to EfiBootServicesData.
-> > In the three use cases modified by this commit (UGA, GOP, PCI), the
-> > buffer is freed before ExitBootServices is called. Hence the memory
-> > type is irrelevant.
-> >
-> > No functional change intended.
-> >
-> > Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-> > ---
-> >
-> 
-> What is the oldest UEFI version we claim to support? For ARM, this is
-> not an issue, but it appears that LocateHandleBuffer () was introduced
-> in v1.10
+Folks, please queue up the following patches for v4.9. There's more
+work on refactoring EFI code to be architecture independent and the
+largest number of patches is spent cleaning up the EFI memory map code
+and allowing drivers on x86 to reserve EFI boot services for all of
+runtime.
 
-That's a fair point. I couldn't find any older specs than 1.10, only found
-some sources saying the 1.02 spec was pulled for legal reasons.
+The architecture independent quest is going pretty well and it was
+only a couple of lines to get the esrt driver working on arm64.
 
-I did notice the 1.10 spec says "The LocateHandleBuffer() is a new version
-of LocateHandle() that allocates the required buffer for the caller."
+Other than that there's some cleanups and fixes, and a merge of the
+out of tree EFI runtime driver from the FWTS project.
 
-Note the word "new".
+The following changes since commit c6935931c1894ff857616ff8549b61236a19148f:
 
-According to Wikipedia, "Intel's first Itanium workstations and servers,
-released in 2000, implemented EFI 1.02. Hewlett-Packard's first Itanium 2
-systems, released in 2002, implemented EFI 1.10".
+  Linux 4.8-rc5 (2016-09-04 14:31:46 -0700)
 
-Since this code is only used by x86 and arm (not ia64), were x86_32
-systems with EFI < 1.10 actually shipped?
+are available in the git repository at:
 
-I vaguely recall that Apple was among the first vendors adopting EFI
-for x86 in 2005, but I could be wrong.
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
 
-Thanks,
+for you to fetch changes up to 0a637ee61247bd4bed9b2a07568ef7a1cfc76187:
 
-Lukas
+  x86/efi: Allow invocation of arbitrary boot services (2016-09-09 16:08:57 +0100)
+
+----------------------------------------------------------------
+ * Refactor the EFI memory map code into architecture neutral files
+   and allow drivers to permanently reserve EFI boot services regions
+   on x86, as well as ARM/arm64 - Matt Fleming
+
+ * Add ARM support for the EFI esrt driver - Ard Biesheuvel
+
+ * Make the EFI runtime services and efivar API interruptible by
+   swapping spinlocks for semaphores - Sylvain Chouleur
+
+ * Provide the EFI identity mapping for kexec which allows kexec to
+   work on SGI/UV platforms with requiring the "noefi" kernel command
+   line parameter - Alex Thorlton
+
+ * Add debugfs node to dump EFI page tables on arm64 - Ard Biesheuvel
+
+ * Merge the EFI test driver being carried out of tree until now in
+   the FWTS project - Ivan Hu
+
+ * Expand the list of flags for classifying EFI regions as "RAM" on
+   arm64 so we align with the UEFI spec - Ard Biesheuvel
+
+ * Optimise out the EFI mixed mode if it's unsupported (CONFIG_X86_32)
+   or disabled (CONFIG_EFI_MIXED=n) and switch the early EFI boot
+   services function table for direct calls, alleviating us from
+   having to maintain the custom function table - Lukas Wunner
+
+ * Miscellaneous cleanups and fixes
+
+----------------------------------------------------------------
+Alex Thorlton (1):
+      x86/efi: Map in physical addresses in efi_map_region_fixed
+
+Ard Biesheuvel (5):
+      efi/esrt: Use memremap not ioremap to access ESRT table in memory
+      efi/arm*: esrt: Add missing call to efi_esrt_init()
+      efi: Replace runtime services spinlock with semaphore
+      efi/arm64: Add debugfs node to dump UEFI runtime page tables
+      efi/arm64: Treat regions with WT/WC set but WB cleared as memory
+
+Colin Ian King (1):
+      x86/efi: Initialize status to ensure garbage is not returned on small size
+
+Ivan Hu (1):
+      efi: Add efi_test driver for exporting UEFI runtime service interfaces
+
+Lukas Wunner (4):
+      lib/ucs2_string: Speed up ucs2_utf8size()
+      x86/efi: Remove unused find_bits() function
+      x86/efi: Optimize away setup_gop32/64 if unused
+      x86/efi: Allow invocation of arbitrary boot services
+
+Markus Elfring (2):
+      firmware-gsmi: Delete an unnecessary check before the function call "dma_pool_destroy"
+      x86/efi: Use kmalloc_array() in efi_call_phys_prolog()
+
+Matt Fleming (12):
+      x86/efi: Test for EFI_MEMMAP functionality when iterating EFI memmap
+      x86/efi: Consolidate region mapping logic
+      efi: Refactor efi_memmap_init_early() into arch-neutral code
+      efi: Add efi_memmap_init_late() for permanent EFI memmap
+      efi/fake_mem: Refactor main two code chunks into functions
+      efi: Split out EFI memory map functions into new file
+      efi: Add efi_memmap_install() for installing new EFI memory maps
+      efi: Allow drivers to reserve boot services forever
+      efi/runtime-map: Use efi.memmap directly instead of a copy
+      efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()
+      x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data
+      fs/efivarfs: Fix double kfree() in error path
+
+Ricardo Neri (1):
+      x86/efi: Defer efi_esrt_init until after memblock_x86_fill
+
+Sylvain Chouleur (2):
+      efi: Use a file local lock for efivars
+      efi: Don't use spinlocks for efi vars
+
+ MAINTAINERS                             |   7 +
+ arch/x86/boot/compressed/eboot.c        |  40 +-
+ arch/x86/boot/compressed/head_32.S      |   6 +-
+ arch/x86/boot/compressed/head_64.S      |   8 +-
+ arch/x86/include/asm/efi.h              |  29 +-
+ arch/x86/kernel/setup.c                 |  18 +-
+ arch/x86/platform/efi/efi-bgrt.c        |  13 +-
+ arch/x86/platform/efi/efi.c             | 198 ++++-----
+ arch/x86/platform/efi/efi_64.c          |  23 +-
+ arch/x86/platform/efi/quirks.c          | 123 +++++-
+ drivers/firmware/efi/Kconfig            |  17 +
+ drivers/firmware/efi/Makefile           |   3 +-
+ drivers/firmware/efi/arm-init.c         |  50 ++-
+ drivers/firmware/efi/arm-runtime.c      |  26 +-
+ drivers/firmware/efi/efi-pstore.c       |  36 +-
+ drivers/firmware/efi/efi.c              |  67 +--
+ drivers/firmware/efi/efivars.c          |  22 +-
+ drivers/firmware/efi/esrt.c             |  23 +-
+ drivers/firmware/efi/fake_mem.c         | 125 +-----
+ drivers/firmware/efi/memmap.c           | 292 +++++++++++++
+ drivers/firmware/efi/runtime-map.c      |  35 +-
+ drivers/firmware/efi/runtime-wrappers.c |  81 ++--
+ drivers/firmware/efi/test/Makefile      |   1 +
+ drivers/firmware/efi/test/efi_test.c    | 749 ++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/test/efi_test.h    | 110 +++++
+ drivers/firmware/efi/vars.c             | 142 +++---
+ drivers/firmware/google/gsmi.c          |   3 +-
+ fs/efivarfs/inode.c                     |   5 +-
+ fs/efivarfs/super.c                     |  13 +-
+ include/linux/efi.h                     |  47 +-
+ lib/ucs2_string.c                       |   2 +-
+ 31 files changed, 1767 insertions(+), 547 deletions(-)
+ create mode 100644 drivers/firmware/efi/memmap.c
+ create mode 100644 drivers/firmware/efi/test/Makefile
+ create mode 100644 drivers/firmware/efi/test/efi_test.c
+ create mode 100644 drivers/firmware/efi/test/efi_test.h
