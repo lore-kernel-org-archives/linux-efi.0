@@ -1,60 +1,45 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 22/29] x86/efi: Remove unused find_bits() function
-Date: Fri,  9 Sep 2016 16:18:44 +0100
-Message-ID: <20160909151851.27577-23-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH 18/29] firmware-gsmi: Delete an unnecessary check before the function call "dma_pool_destroy"
+Date: Fri,  9 Sep 2016 16:18:40 +0100
+Message-ID: <20160909151851.27577-19-matt@codeblueprint.co.uk>
 References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160909151851.27577-1-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Lukas Wunner <lukas@wunner.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160909151851.27577-1-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Markus Elfring <elfring-Rn4VEauK+AKRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>, Michel Lespinasse <walken-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Lukas Wunner <lukas@wunner.de>
+From: Markus Elfring <elfring-Rn4VEauK+AKRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
 
-Left behind by commit fc37206427ce ("efi/libstub: Move Graphics Output
-Protocol handling to generic code").
+The dma_pool_destroy() function tests whether its argument is NULL
+and then returns immediately. Thus the test around the call is not needed.
 
-Signed-off-by: Lukas Wunner <lukas@wunner.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+This issue was detected by using the Coccinelle software.
+
+Signed-off-by: Markus Elfring <elfring-Rn4VEauK+AKRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+Cc: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>
+Cc: Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Cc: Michel Lespinasse <walken-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- arch/x86/boot/compressed/eboot.c | 23 -----------------------
- 1 file changed, 23 deletions(-)
+ drivers/firmware/google/gsmi.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index ec6d2ef12baf..f7fc85bf8221 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -286,29 +286,6 @@ void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
- 	}
- }
- 
--static void find_bits(unsigned long mask, u8 *pos, u8 *size)
--{
--	u8 first, len;
--
--	first = 0;
--	len = 0;
--
--	if (mask) {
--		while (!(mask & 0x1)) {
--			mask = mask >> 1;
--			first++;
--		}
--
--		while (mask & 0x1) {
--			mask = mask >> 1;
--			len++;
--		}
--	}
--
--	*pos = first;
--	*size = len;
--}
--
- static efi_status_t
- __setup_efi_pci32(efi_pci_io_protocol_32 *pci, struct pci_setup_rom **__rom)
- {
+diff --git a/drivers/firmware/google/gsmi.c b/drivers/firmware/google/gsmi.c
+index f1ab05ea56bb..c46387160976 100644
+--- a/drivers/firmware/google/gsmi.c
++++ b/drivers/firmware/google/gsmi.c
+@@ -910,8 +910,7 @@ out_err:
+ 	gsmi_buf_free(gsmi_dev.param_buf);
+ 	gsmi_buf_free(gsmi_dev.data_buf);
+ 	gsmi_buf_free(gsmi_dev.name_buf);
+-	if (gsmi_dev.dma_pool)
+-		dma_pool_destroy(gsmi_dev.dma_pool);
++	dma_pool_destroy(gsmi_dev.dma_pool);
+ 	platform_device_unregister(gsmi_dev.pdev);
+ 	pr_info("gsmi: failed to load: %d\n", ret);
+ 	return ret;
 -- 
 2.9.3
