@@ -1,38 +1,21 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 08/29] efi: Allow drivers to reserve boot services forever
-Date: Fri,  9 Sep 2016 16:18:30 +0100
-Message-ID: <20160909151851.27577-9-matt@codeblueprint.co.uk>
+Subject: [PATCH 05/29] efi/fake_mem: Refactor main two code chunks into functions
+Date: Fri,  9 Sep 2016 16:18:27 +0100
+Message-ID: <20160909151851.27577-6-matt@codeblueprint.co.uk>
 References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20160909151851.27577-1-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Peter Jones <pjones@redhat.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Peter Jones <pjones@redhat.com>, Taku Izumi <izumi.taku@jp.fujitsu.com>
 List-Id: linux-efi@vger.kernel.org
 
-Today, it is not possible for drivers to reserve EFI boot services for
-access after efi_free_boot_services() has been called on x86. For
-ARM/arm64 it can be done simply by calling memblock_reserve().
+There is a whole load of generic EFI memory map code inside of the
+fake_mem driver which is better suited to being grouped with the rest
+of the generic EFI code for manipulating EFI memory maps.
 
-Having this ability for all three architectures is desirable for a
-couple of reasons,
-
-  1) It saves drivers copying data out of those regions
-  2) kexec reboot can now make use of things like ESRT
-
-Instead of using the standard memblock_reserve() which is insufficient
-to reserve the region on x86 (see efi_reserve_boot_services()), a new
-API is introduced in this patch; efi_mem_reserve().
-
-efi.memmap now always represents which EFI memory regions are
-available. On x86 the EFI boot services regions that have not been
-reserved via efi_mem_reserve() will be removed from efi.memmap during
-efi_free_boot_services().
-
-This has implications for kexec, since it is not possible for a newly
-kexec'd kernel to access the same boot services regions that the
-initial boot kernel had access to unless they are reserved by every
-kexec kernel in the chain.
+In preparation for that, this patch refactors the core code, so that
+it's possible to move entire functions later.
 
 Tested-by: Dave Young <dyoung@redhat.com> [kexec/kdump]
 Tested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org> [arm]
@@ -41,237 +24,271 @@ Cc: Leif Lindholm <leif.lindholm@linaro.org>
 Cc: Peter Jones <pjones@redhat.com>
 Cc: Borislav Petkov <bp@alien8.de>
 Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Taku Izumi <izumi.taku@jp.fujitsu.com>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/platform/efi/quirks.c | 121 +++++++++++++++++++++++++++++++++++++----
- drivers/firmware/efi/efi.c     |  30 ++++++++++
- include/linux/efi.h            |   1 +
- 3 files changed, 141 insertions(+), 11 deletions(-)
+ drivers/firmware/efi/fake_mem.c | 229 +++++++++++++++++++++++-----------------
+ 1 file changed, 134 insertions(+), 95 deletions(-)
 
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 9faf18874692..f14b7a9da24b 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -164,6 +164,71 @@ efi_status_t efi_query_variable_store(u32 attributes, unsigned long size,
- EXPORT_SYMBOL_GPL(efi_query_variable_store);
+diff --git a/drivers/firmware/efi/fake_mem.c b/drivers/firmware/efi/fake_mem.c
+index 939eec47139f..446c669431c0 100644
+--- a/drivers/firmware/efi/fake_mem.c
++++ b/drivers/firmware/efi/fake_mem.c
+@@ -54,43 +54,151 @@ static int __init cmp_fake_mem(const void *x1, const void *x2)
+ 	return 0;
+ }
  
- /*
-+ * The UEFI specification makes it clear that the operating system is
-+ * free to do whatever it wants with boot services code after
-+ * ExitBootServices() has been called. Ignoring this recommendation a
-+ * significant bunch of EFI implementations continue calling into boot
-+ * services code (SetVirtualAddressMap). In order to work around such
-+ * buggy implementations we reserve boot services region during EFI
-+ * init and make sure it stays executable. Then, after
-+ * SetVirtualAddressMap(), it is discarded.
++/**
++ * efi_fake_memmap_split_count - Count number of additional EFI memmap entries
++ * @md: EFI memory descriptor to split
++ * @range: Address range (start, end) to split around
 + *
-+ * However, some boot services regions contain data that is required
-+ * by drivers, so we need to track which memory ranges can never be
-+ * freed. This is done by tagging those regions with the
-+ * EFI_MEMORY_RUNTIME attribute.
-+ *
-+ * Any driver that wants to mark a region as reserved must use
-+ * efi_mem_reserve() which will insert a new EFI memory descriptor
-+ * into efi.memmap (splitting existing regions if necessary) and tag
-+ * it with EFI_MEMORY_RUNTIME.
++ * Returns the number of additional EFI memmap entries required to
++ * accomodate @range.
 + */
-+void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
++static int efi_fake_memmap_split_count(efi_memory_desc_t *md, struct range *range)
 +{
-+	phys_addr_t new_phys, new_size;
-+	struct efi_mem_range mr;
-+	efi_memory_desc_t md;
-+	int num_entries;
-+	void *new;
++	u64 m_start, m_end;
++	u64 start, end;
++	int count = 0;
 +
-+	if (efi_mem_desc_lookup(addr, &md)) {
-+		pr_err("Failed to lookup EFI memory descriptor for %pa\n", &addr);
-+		return;
++	start = md->phys_addr;
++	end = start + (md->num_pages << EFI_PAGE_SHIFT) - 1;
++
++	/* modifying range */
++	m_start = range->start;
++	m_end = range->end;
++
++	if (m_start <= start) {
++		/* split into 2 parts */
++		if (start < m_end && m_end < end)
++			count++;
 +	}
 +
-+	if (addr + size > md.phys_addr + (md.num_pages << EFI_PAGE_SHIFT)) {
-+		pr_err("Region spans EFI memory descriptors, %pa\n", &addr);
-+		return;
++	if (start < m_start && m_start < end) {
++		/* split into 3 parts */
++		if (m_end < end)
++			count += 2;
++		/* split into 2 parts */
++		if (end <= m_end)
++			count++;
 +	}
 +
-+	mr.range.start = addr;
-+	mr.range.end = addr + size;
-+	mr.attribute = md.attribute | EFI_MEMORY_RUNTIME;
-+
-+	num_entries = efi_memmap_split_count(&md, &mr.range);
-+	num_entries += efi.memmap.nr_map;
-+
-+	new_size = efi.memmap.desc_size * num_entries;
-+
-+	new_phys = memblock_alloc(new_size, 0);
-+	if (!new_phys) {
-+		pr_err("Could not allocate boot services memmap\n");
-+		return;
-+	}
-+
-+	new = early_memremap(new_phys, new_size);
-+	if (!new) {
-+		pr_err("Failed to map new boot services memmap\n");
-+		return;
-+	}
-+
-+	efi_memmap_insert(&efi.memmap, new, &mr);
-+	early_memunmap(new, new_size);
-+
-+	efi_memmap_install(new_phys, num_entries);
++	return count;
 +}
-+
-+/*
-  * Helper function for efi_reserve_boot_services() to figure out if we
-  * can free regions in efi_free_boot_services().
-  *
-@@ -184,15 +249,6 @@ static bool can_free_region(u64 start, u64 size)
- 	return true;
- }
- 
--/*
-- * The UEFI specification makes it clear that the operating system is free to do
-- * whatever it wants with boot services code after ExitBootServices() has been
-- * called. Ignoring this recommendation a significant bunch of EFI implementations 
-- * continue calling into boot services code (SetVirtualAddressMap). In order to 
-- * work around such buggy implementations we reserve boot services region during 
-- * EFI init and make sure it stays executable. Then, after SetVirtualAddressMap(), it
--* is discarded.
--*/
- void __init efi_reserve_boot_services(void)
- {
- 	efi_memory_desc_t *md;
-@@ -249,7 +305,10 @@ void __init efi_reserve_boot_services(void)
- 
- void __init efi_free_boot_services(void)
- {
-+	phys_addr_t new_phys, new_size;
- 	efi_memory_desc_t *md;
-+	int num_entries = 0;
-+	void *new, *new_md;
- 
- 	for_each_efi_memory_desc(md) {
- 		unsigned long long start = md->phys_addr;
-@@ -257,12 +316,16 @@ void __init efi_free_boot_services(void)
- 		size_t rm_size;
- 
- 		if (md->type != EFI_BOOT_SERVICES_CODE &&
--		    md->type != EFI_BOOT_SERVICES_DATA)
-+		    md->type != EFI_BOOT_SERVICES_DATA) {
-+			num_entries++;
- 			continue;
-+		}
- 
- 		/* Do not free, someone else owns it: */
--		if (md->attribute & EFI_MEMORY_RUNTIME)
-+		if (md->attribute & EFI_MEMORY_RUNTIME) {
-+			num_entries++;
- 			continue;
-+		}
- 
- 		/*
- 		 * Nasty quirk: if all sub-1MB memory is used for boot
-@@ -286,6 +349,42 @@ void __init efi_free_boot_services(void)
- 
- 		free_bootmem_late(start, size);
- 	}
-+
-+	new_size = efi.memmap.desc_size * num_entries;
-+	new_phys = memblock_alloc(new_size, 0);
-+	if (!new_phys) {
-+		pr_err("Failed to allocate new EFI memmap\n");
-+		return;
-+	}
-+
-+	new = memremap(new_phys, new_size, MEMREMAP_WB);
-+	if (!new) {
-+		pr_err("Failed to map new EFI memmap\n");
-+		return;
-+	}
-+
-+	/*
-+	 * Build a new EFI memmap that excludes any boot services
-+	 * regions that are not tagged EFI_MEMORY_RUNTIME, since those
-+	 * regions have now been freed.
-+	 */
-+	new_md = new;
-+	for_each_efi_memory_desc(md) {
-+		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
-+		    (md->type == EFI_BOOT_SERVICES_CODE ||
-+		     md->type == EFI_BOOT_SERVICES_DATA))
-+			continue;
-+
-+		memcpy(new_md, md, efi.memmap.desc_size);
-+		new_md += efi.memmap.desc_size;
-+	}
-+
-+	memunmap(new);
-+
-+	if (efi_memmap_install(new_phys, num_entries)) {
-+		pr_err("Could not install new EFI memmap\n");
-+		return;
-+	}
- }
- 
- /*
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index d4886fd50c16..dfe07316cae5 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -27,6 +27,7 @@
- #include <linux/slab.h>
- #include <linux/acpi.h>
- #include <linux/ucs2_string.h>
-+#include <linux/memblock.h>
- 
- #include <asm/early_ioremap.h>
- 
-@@ -396,6 +397,35 @@ u64 __init efi_mem_desc_end(efi_memory_desc_t *md)
- 	return end;
- }
- 
-+void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size) {}
 +
 +/**
-+ * efi_mem_reserve - Reserve an EFI memory region
-+ * @addr: Physical address to reserve
-+ * @size: Size of reservation
++ * efi_fake_memmap_insert - Insert a fake memory region in an EFI memmap
++ * @old_memmap: The existing EFI memory map structure
++ * @buf: Address of buffer to store new map
++ * @mem: Fake memory map entry to insert
 + *
-+ * Mark a region as reserved from general kernel allocation and
-+ * prevent it being released by efi_free_boot_services().
-+ *
-+ * This function should be called drivers once they've parsed EFI
-+ * configuration tables to figure out where their data lives, e.g.
-+ * efi_esrt_init().
++ * It is suggested that you call efi_fake_memmap_split_count() first
++ * to see how large @buf needs to be.
 + */
-+void __init efi_mem_reserve(phys_addr_t addr, u64 size)
++static void efi_fake_memmap_insert(struct efi_memory_map *old_memmap,
++				   void *buf, struct fake_mem *mem)
 +{
-+	if (!memblock_is_region_reserved(addr, size))
-+		memblock_reserve(addr, size);
++	u64 m_start, m_end, m_attr;
++	efi_memory_desc_t *md;
++	u64 start, end;
++	void *old, *new;
 +
-+	/*
-+	 * Some architectures (x86) reserve all boot services ranges
-+	 * until efi_free_boot_services() because of buggy firmware
-+	 * implementations. This means the above memblock_reserve() is
-+	 * superfluous on x86 and instead what it needs to do is
-+	 * ensure the @start, @size is not freed.
-+	 */
-+	efi_arch_mem_reserve(addr, size);
++	/* modifying range */
++	m_start = mem->range.start;
++	m_end = mem->range.end;
++	m_attr = mem->attribute;
++
++	for (old = old_memmap->map, new = buf;
++	     old < old_memmap->map_end;
++	     old += old_memmap->desc_size, new += old_memmap->desc_size) {
++
++		/* copy original EFI memory descriptor */
++		memcpy(new, old, old_memmap->desc_size);
++		md = new;
++		start = md->phys_addr;
++		end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1;
++
++		if (m_start <= start && end <= m_end)
++			md->attribute |= m_attr;
++
++		if (m_start <= start &&
++		    (start < m_end && m_end < end)) {
++			/* first part */
++			md->attribute |= m_attr;
++			md->num_pages = (m_end - md->phys_addr + 1) >>
++				EFI_PAGE_SHIFT;
++			/* latter part */
++			new += old_memmap->desc_size;
++			memcpy(new, old, old_memmap->desc_size);
++			md = new;
++			md->phys_addr = m_end + 1;
++			md->num_pages = (end - md->phys_addr + 1) >>
++				EFI_PAGE_SHIFT;
++		}
++
++		if ((start < m_start && m_start < end) && m_end < end) {
++			/* first part */
++			md->num_pages = (m_start - md->phys_addr) >>
++				EFI_PAGE_SHIFT;
++			/* middle part */
++			new += old_memmap->desc_size;
++			memcpy(new, old, old_memmap->desc_size);
++			md = new;
++			md->attribute |= m_attr;
++			md->phys_addr = m_start;
++			md->num_pages = (m_end - m_start + 1) >>
++				EFI_PAGE_SHIFT;
++			/* last part */
++			new += old_memmap->desc_size;
++			memcpy(new, old, old_memmap->desc_size);
++			md = new;
++			md->phys_addr = m_end + 1;
++			md->num_pages = (end - m_end) >>
++				EFI_PAGE_SHIFT;
++		}
++
++		if ((start < m_start && m_start < end) &&
++		    (end <= m_end)) {
++			/* first part */
++			md->num_pages = (m_start - md->phys_addr) >>
++				EFI_PAGE_SHIFT;
++			/* latter part */
++			new += old_memmap->desc_size;
++			memcpy(new, old, old_memmap->desc_size);
++			md = new;
++			md->phys_addr = m_start;
++			md->num_pages = (end - md->phys_addr + 1) >>
++				EFI_PAGE_SHIFT;
++			md->attribute |= m_attr;
++		}
++	}
 +}
 +
- static __initdata efi_config_table_type_t common_tables[] = {
- 	{ACPI_20_TABLE_GUID, "ACPI 2.0", &efi.acpi20},
- 	{ACPI_TABLE_GUID, "ACPI", &efi.acpi},
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 987c18f6fcae..3fe4f3c47834 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -944,6 +944,7 @@ extern u64 efi_mem_attribute (unsigned long phys_addr, unsigned long size);
- extern int __init efi_uart_console_only (void);
- extern u64 efi_mem_desc_end(efi_memory_desc_t *md);
- extern int efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md);
-+extern void efi_mem_reserve(phys_addr_t addr, u64 size);
- extern void efi_initialize_iomem_resources(struct resource *code_resource,
- 		struct resource *data_resource, struct resource *bss_resource);
- extern void efi_reserve_boot_services(void);
+ void __init efi_fake_memmap(void)
+ {
+-	u64 start, end, m_start, m_end, m_attr;
+ 	struct efi_memory_map_data data;
+ 	int new_nr_map = efi.memmap.nr_map;
+ 	efi_memory_desc_t *md;
+ 	phys_addr_t new_memmap_phy;
+ 	void *new_memmap;
+-	void *old, *new;
+ 	int i;
+ 
+ 	if (!nr_fake_mem)
+ 		return;
+ 
+ 	/* count up the number of EFI memory descriptor */
+-	for_each_efi_memory_desc(md) {
+-		start = md->phys_addr;
+-		end = start + (md->num_pages << EFI_PAGE_SHIFT) - 1;
+-
+-		for (i = 0; i < nr_fake_mem; i++) {
+-			/* modifying range */
+-			m_start = fake_mems[i].range.start;
+-			m_end = fake_mems[i].range.end;
+-
+-			if (m_start <= start) {
+-				/* split into 2 parts */
+-				if (start < m_end && m_end < end)
+-					new_nr_map++;
+-			}
+-			if (start < m_start && m_start < end) {
+-				/* split into 3 parts */
+-				if (m_end < end)
+-					new_nr_map += 2;
+-				/* split into 2 parts */
+-				if (end <= m_end)
+-					new_nr_map++;
+-			}
++	for (i = 0; i < nr_fake_mem; i++) {
++		for_each_efi_memory_desc(md) {
++			struct range *r = &fake_mems[i].range;
++
++			new_nr_map += efi_fake_memmap_split_count(md, r);
+ 		}
+ 	}
+ 
+@@ -108,77 +216,8 @@ void __init efi_fake_memmap(void)
+ 		return;
+ 	}
+ 
+-	for (old = efi.memmap.map, new = new_memmap;
+-	     old < efi.memmap.map_end;
+-	     old += efi.memmap.desc_size, new += efi.memmap.desc_size) {
+-
+-		/* copy original EFI memory descriptor */
+-		memcpy(new, old, efi.memmap.desc_size);
+-		md = new;
+-		start = md->phys_addr;
+-		end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1;
+-
+-		for (i = 0; i < nr_fake_mem; i++) {
+-			/* modifying range */
+-			m_start = fake_mems[i].range.start;
+-			m_end = fake_mems[i].range.end;
+-			m_attr = fake_mems[i].attribute;
+-
+-			if (m_start <= start && end <= m_end)
+-				md->attribute |= m_attr;
+-
+-			if (m_start <= start &&
+-			    (start < m_end && m_end < end)) {
+-				/* first part */
+-				md->attribute |= m_attr;
+-				md->num_pages = (m_end - md->phys_addr + 1) >>
+-					EFI_PAGE_SHIFT;
+-				/* latter part */
+-				new += efi.memmap.desc_size;
+-				memcpy(new, old, efi.memmap.desc_size);
+-				md = new;
+-				md->phys_addr = m_end + 1;
+-				md->num_pages = (end - md->phys_addr + 1) >>
+-					EFI_PAGE_SHIFT;
+-			}
+-
+-			if ((start < m_start && m_start < end) && m_end < end) {
+-				/* first part */
+-				md->num_pages = (m_start - md->phys_addr) >>
+-					EFI_PAGE_SHIFT;
+-				/* middle part */
+-				new += efi.memmap.desc_size;
+-				memcpy(new, old, efi.memmap.desc_size);
+-				md = new;
+-				md->attribute |= m_attr;
+-				md->phys_addr = m_start;
+-				md->num_pages = (m_end - m_start + 1) >>
+-					EFI_PAGE_SHIFT;
+-				/* last part */
+-				new += efi.memmap.desc_size;
+-				memcpy(new, old, efi.memmap.desc_size);
+-				md = new;
+-				md->phys_addr = m_end + 1;
+-				md->num_pages = (end - m_end) >>
+-					EFI_PAGE_SHIFT;
+-			}
+-
+-			if ((start < m_start && m_start < end) &&
+-			    (end <= m_end)) {
+-				/* first part */
+-				md->num_pages = (m_start - md->phys_addr) >>
+-					EFI_PAGE_SHIFT;
+-				/* latter part */
+-				new += efi.memmap.desc_size;
+-				memcpy(new, old, efi.memmap.desc_size);
+-				md = new;
+-				md->phys_addr = m_start;
+-				md->num_pages = (end - md->phys_addr + 1) >>
+-					EFI_PAGE_SHIFT;
+-				md->attribute |= m_attr;
+-			}
+-		}
+-	}
++	for (i = 0; i < nr_fake_mem; i++)
++		efi_fake_memmap_insert(&efi.memmap, new_memmap, &fake_mems[i]);
+ 
+ 	/* swap into new EFI memmap */
+ 	early_memunmap(new_memmap, efi.memmap.desc_size * new_nr_map);
 -- 
 2.9.3
