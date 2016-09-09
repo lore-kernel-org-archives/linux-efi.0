@@ -1,52 +1,288 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 17/29] x86/efi: Initialize status to ensure garbage is not returned on small size
-Date: Fri,  9 Sep 2016 16:18:39 +0100
-Message-ID: <20160909151851.27577-18-matt@codeblueprint.co.uk>
+Subject: [PATCH 16/29] efi: Replace runtime services spinlock with semaphore
+Date: Fri,  9 Sep 2016 16:18:38 +0100
+Message-ID: <20160909151851.27577-17-matt@codeblueprint.co.uk>
 References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20160909151851.27577-1-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Colin Ian King <colin.king@canonical.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Sylvain Chouleur <sylvain.chouleur@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Colin Ian King <colin.king@canonical.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Although very unlikey, if size is too small or zero, then we end up with
-status not being set and returning garbage. Instead, initializing status to
-EFI_INVALID_PARAMETER to indicate that size is invalid in the calls to
-setup_uga32 and setup_uga64.
+The purpose of the efi_runtime_lock is to prevent concurrent calls into
+the firmware. There is no need to use spinlocks here, as long as we ensure
+that runtime service invocations from an atomic context (i.e., EFI pstore)
+cannot block.
 
-Signed-off-by: Colin Ian King <colin.king@canonical.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@kernel.org>
+So use a semaphore instead, and use down_trylock() in the nonblocking case.
+We don't use a mutex here because the mutex_trylock() function must not
+be called from interrupt context, whereas the down_trylock() can.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Sylvain Chouleur <sylvain.chouleur@gmail.com>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/boot/compressed/eboot.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/efi.c              |  3 ++
+ drivers/firmware/efi/runtime-wrappers.c | 81 ++++++++++++++++++++-------------
+ include/linux/efi.h                     |  1 +
+ 3 files changed, 53 insertions(+), 32 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index ff574dad95cc..ec6d2ef12baf 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -578,7 +578,7 @@ setup_uga32(void **uga_handle, unsigned long size, u32 *width, u32 *height)
- 	efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
- 	unsigned long nr_ugas;
- 	u32 *handles = (u32 *)uga_handle;;
--	efi_status_t status;
-+	efi_status_t status = EFI_INVALID_PARAMETER;
- 	int i;
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index dfe07316cae5..97d98e82f0f4 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -810,6 +810,9 @@ int efi_status_to_err(efi_status_t status)
+ 	case EFI_NOT_FOUND:
+ 		err = -ENOENT;
+ 		break;
++	case EFI_ABORTED:
++		err = -EINTR;
++		break;
+ 	default:
+ 		err = -EINVAL;
+ 	}
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index 41958774cde3..ae54870b2788 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -14,11 +14,13 @@
+  * This file is released under the GPLv2.
+  */
  
- 	first_uga = NULL;
-@@ -623,7 +623,7 @@ setup_uga64(void **uga_handle, unsigned long size, u32 *width, u32 *height)
- 	efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
- 	unsigned long nr_ugas;
- 	u64 *handles = (u64 *)uga_handle;;
--	efi_status_t status;
-+	efi_status_t status = EFI_INVALID_PARAMETER;
- 	int i;
++#define pr_fmt(fmt)	"efi: " fmt
++
+ #include <linux/bug.h>
+ #include <linux/efi.h>
+ #include <linux/irqflags.h>
+ #include <linux/mutex.h>
+-#include <linux/spinlock.h>
++#include <linux/semaphore.h>
+ #include <linux/stringify.h>
+ #include <asm/efi.h>
  
- 	first_uga = NULL;
+@@ -81,20 +83,21 @@ void efi_call_virt_check_flags(unsigned long flags, const char *call)
+  * +------------------------------------+-------------------------------+
+  *
+  * Due to the fact that the EFI pstore may write to the variable store in
+- * interrupt context, we need to use a spinlock for at least the groups that
++ * interrupt context, we need to use a lock for at least the groups that
+  * contain SetVariable() and QueryVariableInfo(). That leaves little else, as
+  * none of the remaining functions are actually ever called at runtime.
+- * So let's just use a single spinlock to serialize all Runtime Services calls.
++ * So let's just use a single lock to serialize all Runtime Services calls.
+  */
+-static DEFINE_SPINLOCK(efi_runtime_lock);
++static DEFINE_SEMAPHORE(efi_runtime_lock);
+ 
+ static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
+ {
+ 	efi_status_t status;
+ 
+-	spin_lock(&efi_runtime_lock);
++	if (down_interruptible(&efi_runtime_lock))
++		return EFI_ABORTED;
+ 	status = efi_call_virt(get_time, tm, tc);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+@@ -102,9 +105,10 @@ static efi_status_t virt_efi_set_time(efi_time_t *tm)
+ {
+ 	efi_status_t status;
+ 
+-	spin_lock(&efi_runtime_lock);
++	if (down_interruptible(&efi_runtime_lock))
++		return EFI_ABORTED;
+ 	status = efi_call_virt(set_time, tm);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+@@ -114,9 +118,10 @@ static efi_status_t virt_efi_get_wakeup_time(efi_bool_t *enabled,
+ {
+ 	efi_status_t status;
+ 
+-	spin_lock(&efi_runtime_lock);
++	if (down_interruptible(&efi_runtime_lock))
++		return EFI_ABORTED;
+ 	status = efi_call_virt(get_wakeup_time, enabled, pending, tm);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+@@ -124,9 +129,10 @@ static efi_status_t virt_efi_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
+ {
+ 	efi_status_t status;
+ 
+-	spin_lock(&efi_runtime_lock);
++	if (down_interruptible(&efi_runtime_lock))
++		return EFI_ABORTED;
+ 	status = efi_call_virt(set_wakeup_time, enabled, tm);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+@@ -138,10 +144,11 @@ static efi_status_t virt_efi_get_variable(efi_char16_t *name,
+ {
+ 	efi_status_t status;
+ 
+-	spin_lock(&efi_runtime_lock);
++	if (down_interruptible(&efi_runtime_lock))
++		return EFI_ABORTED;
+ 	status = efi_call_virt(get_variable, name, vendor, attr, data_size,
+ 			       data);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+@@ -151,9 +158,10 @@ static efi_status_t virt_efi_get_next_variable(unsigned long *name_size,
+ {
+ 	efi_status_t status;
+ 
+-	spin_lock(&efi_runtime_lock);
++	if (down_interruptible(&efi_runtime_lock))
++		return EFI_ABORTED;
+ 	status = efi_call_virt(get_next_variable, name_size, name, vendor);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+@@ -165,10 +173,11 @@ static efi_status_t virt_efi_set_variable(efi_char16_t *name,
+ {
+ 	efi_status_t status;
+ 
+-	spin_lock(&efi_runtime_lock);
++	if (down_interruptible(&efi_runtime_lock))
++		return EFI_ABORTED;
+ 	status = efi_call_virt(set_variable, name, vendor, attr, data_size,
+ 			       data);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+@@ -179,12 +188,12 @@ virt_efi_set_variable_nonblocking(efi_char16_t *name, efi_guid_t *vendor,
+ {
+ 	efi_status_t status;
+ 
+-	if (!spin_trylock(&efi_runtime_lock))
++	if (down_trylock(&efi_runtime_lock))
+ 		return EFI_NOT_READY;
+ 
+ 	status = efi_call_virt(set_variable, name, vendor, attr, data_size,
+ 			       data);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+@@ -199,10 +208,11 @@ static efi_status_t virt_efi_query_variable_info(u32 attr,
+ 	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+-	spin_lock(&efi_runtime_lock);
++	if (down_interruptible(&efi_runtime_lock))
++		return EFI_ABORTED;
+ 	status = efi_call_virt(query_variable_info, attr, storage_space,
+ 			       remaining_space, max_variable_size);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+@@ -217,12 +227,12 @@ virt_efi_query_variable_info_nonblocking(u32 attr,
+ 	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+-	if (!spin_trylock(&efi_runtime_lock))
++	if (down_trylock(&efi_runtime_lock))
+ 		return EFI_NOT_READY;
+ 
+ 	status = efi_call_virt(query_variable_info, attr, storage_space,
+ 			       remaining_space, max_variable_size);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+@@ -230,9 +240,10 @@ static efi_status_t virt_efi_get_next_high_mono_count(u32 *count)
+ {
+ 	efi_status_t status;
+ 
+-	spin_lock(&efi_runtime_lock);
++	if (down_interruptible(&efi_runtime_lock))
++		return EFI_ABORTED;
+ 	status = efi_call_virt(get_next_high_mono_count, count);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+@@ -241,9 +252,13 @@ static void virt_efi_reset_system(int reset_type,
+ 				  unsigned long data_size,
+ 				  efi_char16_t *data)
+ {
+-	spin_lock(&efi_runtime_lock);
++	if (down_interruptible(&efi_runtime_lock)) {
++		pr_warn("failed to invoke the reset_system() runtime service:\n"
++			"could not get exclusive access to the firmware\n");
++		return;
++	}
+ 	__efi_call_virt(reset_system, reset_type, status, data_size, data);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ }
+ 
+ static efi_status_t virt_efi_update_capsule(efi_capsule_header_t **capsules,
+@@ -255,9 +270,10 @@ static efi_status_t virt_efi_update_capsule(efi_capsule_header_t **capsules,
+ 	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+-	spin_lock(&efi_runtime_lock);
++	if (down_interruptible(&efi_runtime_lock))
++		return EFI_ABORTED;
+ 	status = efi_call_virt(update_capsule, capsules, count, sg_list);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+@@ -271,10 +287,11 @@ static efi_status_t virt_efi_query_capsule_caps(efi_capsule_header_t **capsules,
+ 	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+-	spin_lock(&efi_runtime_lock);
++	if (down_interruptible(&efi_runtime_lock))
++		return EFI_ABORTED;
+ 	status = efi_call_virt(query_capsule_caps, capsules, count, max_size,
+ 			       reset_type);
+-	spin_unlock(&efi_runtime_lock);
++	up(&efi_runtime_lock);
+ 	return status;
+ }
+ 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 4d6da7b66c19..4c92c0630c45 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -38,6 +38,7 @@
+ #define EFI_WRITE_PROTECTED	( 8 | (1UL << (BITS_PER_LONG-1)))
+ #define EFI_OUT_OF_RESOURCES	( 9 | (1UL << (BITS_PER_LONG-1)))
+ #define EFI_NOT_FOUND		(14 | (1UL << (BITS_PER_LONG-1)))
++#define EFI_ABORTED		(21 | (1UL << (BITS_PER_LONG-1)))
+ #define EFI_SECURITY_VIOLATION	(26 | (1UL << (BITS_PER_LONG-1)))
+ 
+ typedef unsigned long efi_status_t;
 -- 
 2.9.3
