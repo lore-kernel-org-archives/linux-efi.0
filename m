@@ -1,211 +1,983 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 29/29] x86/efi: Allow invocation of arbitrary boot services
-Date: Fri,  9 Sep 2016 16:18:51 +0100
-Message-ID: <20160909151851.27577-30-matt@codeblueprint.co.uk>
+Subject: [PATCH 25/29] efi: Add efi_test driver for exporting UEFI runtime service interfaces
+Date: Fri,  9 Sep 2016 16:18:47 +0100
+Message-ID: <20160909151851.27577-26-matt@codeblueprint.co.uk>
 References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20160909151851.27577-1-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Lukas Wunner <lukas@wunner.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ivan Hu <ivan.hu@canonical.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, "@@ -4583,6 +4583,13 @@ M: Peter Jones" <pjones@redhat.com>, joeyli <jlee@suse.com>, Ricardo Neri <ricardo.neri-calderon@linux.intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Lukas Wunner <lukas@wunner.de>
+From: Ivan Hu <ivan.hu@canonical.com>
 
-We currently allow invocation of 8 boot services with efi_call_early().
-Not included are LocateHandleBuffer and LocateProtocol in particular.
-For graphics output or to retrieve PCI ROMs and Apple device properties,
-we're thus forced to use the LocateHandle + AllocatePool + LocateHandle
-combo, which is cumbersome and needs more code.
+This driver is used by the Firmware Test Suite (FWTS) for testing the UEFI
+runtime interfaces readiness of the firmware.
 
-The ARM folks allow invocation of the full set of boot services but are
-restricted to our 8 boot services in functions shared across arches.
+This driver exports UEFI runtime service interfaces into userspace,
+which allows to use and test UEFI runtime services provided by the
+firmware.
 
-Thus, rather than adding just LocateHandleBuffer and LocateProtocol to
-struct efi_config, let's rework efi_call_early() to allow invocation of
-arbitrary boot services by selecting the 64 bit vs 32 bit code path in
-the macro itself.
+This driver uses the efi.<service> function pointers directly instead of
+going through the efivar API to allow for direct testing of the UEFI
+runtime service interfaces provided by the firmware.
 
-When compiling for 32 bit or for 64 bit without mixed mode, the unused
-code path is optimized away and the binary code is the same as before.
-But on 64 bit with mixed mode enabled, this commit adds one compare
-instruction to each invocation of a boot service and, depending on the
-code path selected, two jump instructions. (Most of the time gcc
-arranges the jumps in the 32 bit code path.) The result is a minuscule
-performance penalty and the binary code becomes slightly larger and more
-difficult to read when disassembled. This isn't a hot path, so these
-drawbacks are arguably outweighed by the attainable simplification of
-the C code. We have some overhead anyway for thunking or conversion
-between calling conventions.
+Details for FWTS are available from,
+<https://wiki.ubuntu.com/FirmwareTestSuite>
 
-The 8 boot services can consequently be removed from struct efi_config.
-
-No functional change intended (for now).
-
-Example -- invocation of free_pool before (64 bit code path):
-0x2d4      movq  %ds:efi_early, %rdx          ; efi_early
-0x2db      movq  %ss:arg_0-0x20(%rsp), %rsi
-0x2e0      xorl  %eax, %eax
-0x2e2      movq  %ds:0x28(%rdx), %rdi         ; efi_early->free_pool
-0x2e6      callq *%ds:0x58(%rdx)              ; efi_early->call()
-
-Example -- invocation of free_pool after (64 / 32 bit mixed code path):
-0x0dc      movq  %ds:efi_early, %rax          ; efi_early
-0x0e3      cmpb  $0, %ds:0x28(%rax)           ; !efi_early->is64 ?
-0x0e7      movq  %ds:0x20(%rax), %rdx         ; efi_early->call()
-0x0eb      movq  %ds:0x10(%rax), %rax         ; efi_early->boot_services
-0x0ef      je    $0x150
-0x0f1      movq  %ds:0x48(%rax), %rdi         ; free_pool (64 bit)
-0x0f5      xorl  %eax, %eax
-0x0f7      callq *%rdx
-...
-0x150      movl  %ds:0x30(%rax), %edi         ; free_pool (32 bit)
-0x153      jmp   $0x0f5
-
-Size of eboot.o text section:
-CONFIG_X86_32:                         6464 before, 6318 after
-CONFIG_X86_64 && !CONFIG_EFI_MIXED:    7670 before, 7573 after
-CONFIG_X86_64 &&  CONFIG_EFI_MIXED:    7670 before, 8319 after
-
-Signed-off-by: Lukas Wunner <lukas@wunner.de>
+Signed-off-by: Ivan Hu <ivan.hu@canonical.com>
+Cc: joeyli <jlee@suse.com>
+Cc: Ricardo Neri <ricardo.neri-calderon@linux.intel.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/boot/compressed/eboot.c   | 13 +------------
- arch/x86/boot/compressed/head_32.S |  6 +++---
- arch/x86/boot/compressed/head_64.S |  8 ++++----
- arch/x86/include/asm/efi.h         | 15 ++++++---------
- 4 files changed, 14 insertions(+), 28 deletions(-)
+ MAINTAINERS                          |   7 +
+ drivers/firmware/efi/Kconfig         |  17 +
+ drivers/firmware/efi/Makefile        |   1 +
+ drivers/firmware/efi/test/Makefile   |   1 +
+ drivers/firmware/efi/test/efi_test.c | 749 +++++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/test/efi_test.h | 110 +++++
+ 6 files changed, 885 insertions(+)
+ create mode 100644 drivers/firmware/efi/test/Makefile
+ create mode 100644 drivers/firmware/efi/test/efi_test.c
+ create mode 100644 drivers/firmware/efi/test/efi_test.h
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index f7fc85bf8221..447a6a2df5ae 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -29,22 +29,11 @@ __pure const struct efi_config *__efi_early(void)
- static void setup_boot_services##bits(struct efi_config *c)		\
- {									\
- 	efi_system_table_##bits##_t *table;				\
--	efi_boot_services_##bits##_t *bt;				\
- 									\
- 	table = (typeof(table))sys_table;				\
- 									\
-+	c->boot_services = table->boottime;				\
- 	c->text_output = table->con_out;				\
--									\
--	bt = (typeof(bt))(unsigned long)(table->boottime);		\
--									\
--	c->allocate_pool = bt->allocate_pool;				\
--	c->allocate_pages = bt->allocate_pages;				\
--	c->get_memory_map = bt->get_memory_map;				\
--	c->free_pool = bt->free_pool;					\
--	c->free_pages = bt->free_pages;					\
--	c->locate_handle = bt->locate_handle;				\
--	c->handle_protocol = bt->handle_protocol;			\
--	c->exit_boot_services = bt->exit_boot_services;			\
- }
- BOOT_SERVICES(32);
- BOOT_SERVICES(64);
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index 1038524270e7..fd0b6a272dd5 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -82,7 +82,7 @@ ENTRY(efi_pe_entry)
+diff --git a/MAINTAINERS b/MAINTAINERS
+index db814a89599c..007d05acbb5f 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -4583,6 +4583,13 @@ M:	Peter Jones <pjones@redhat.com>
+ S:	Maintained
+ F:	drivers/video/fbdev/efifb.c
  
- 	/* Relocate efi_config->call() */
- 	leal	efi32_config(%esi), %eax
--	add	%esi, 88(%eax)
-+	add	%esi, 32(%eax)
- 	pushl	%eax
++EFI TEST DRIVER
++L:	linux-efi@vger.kernel.org
++M:	Ivan Hu <ivan.hu@canonical.com>
++M:	Matt Fleming <matt@codeblueprint.co.uk>
++S:	Maintained
++F:	drivers/firmware/efi/test/
++
+ EFS FILESYSTEM
+ W:	http://aeschi.ch.eu.org/efs/
+ S:	Orphan
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 6394152f648f..c981be17d3c0 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -112,6 +112,23 @@ config EFI_CAPSULE_LOADER
  
- 	call	make_boot_params
-@@ -108,7 +108,7 @@ ENTRY(efi32_stub_entry)
+ 	  Most users should say N.
  
- 	/* Relocate efi_config->call() */
- 	leal	efi32_config(%esi), %eax
--	add	%esi, 88(%eax)
-+	add	%esi, 32(%eax)
- 	pushl	%eax
- 2:
- 	call	efi_main
-@@ -264,7 +264,7 @@ relocated:
- #ifdef CONFIG_EFI_STUB
- 	.data
- efi32_config:
--	.fill 11,8,0
-+	.fill 4,8,0
- 	.long efi_call_phys
- 	.long 0
- 	.byte 0
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 0d80a7ad65cd..efdfba21a5b2 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -265,7 +265,7 @@ ENTRY(efi_pe_entry)
- 	/*
- 	 * Relocate efi_config->call().
- 	 */
--	addq	%rbp, efi64_config+88(%rip)
-+	addq	%rbp, efi64_config+32(%rip)
++config EFI_TEST
++	tristate "EFI Runtime Service Tests Support"
++	depends on EFI
++	default n
++	help
++	  This driver uses the efi.<service> function pointers directly instead
++	  of going through the efivar API, because it is not trying to test the
++	  kernel subsystem, just for testing the UEFI runtime service
++	  interfaces which are provided by the firmware. This driver is used
++	  by the Firmware Test Suite (FWTS) for testing the UEFI runtime
++	  interfaces readiness of the firmware.
++	  Details for FWTS are available from:
++	  <https://wiki.ubuntu.com/FirmwareTestSuite>
++
++	  Say Y here to enable the runtime services support via /dev/efi_test.
++	  If unsure, say N.
++
+ endmenu
  
- 	movq	%rax, %rdi
- 	call	make_boot_params
-@@ -285,7 +285,7 @@ handover_entry:
- 	 * Relocate efi_config->call().
- 	 */
- 	movq	efi_config(%rip), %rax
--	addq	%rbp, 88(%rax)
-+	addq	%rbp, 32(%rax)
- 2:
- 	movq	efi_config(%rip), %rdi
- 	call	efi_main
-@@ -457,14 +457,14 @@ efi_config:
- #ifdef CONFIG_EFI_MIXED
- 	.global efi32_config
- efi32_config:
--	.fill	11,8,0
-+	.fill	4,8,0
- 	.quad	efi64_thunk
- 	.byte	0
- #endif
+ config UEFI_CPER
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index b3f5e2adc49f..c8a439f6d715 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -20,6 +20,7 @@ obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
+ obj-$(CONFIG_EFI_STUB)			+= libstub/
+ obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
+ obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
++obj-$(CONFIG_EFI_TEST)			+= test/
  
- 	.global efi64_config
- efi64_config:
--	.fill	11,8,0
-+	.fill	4,8,0
- 	.quad	efi_call
- 	.byte	1
- #endif /* CONFIG_EFI_STUB */
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index f14655e7726a..389d700b961e 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -191,14 +191,7 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
- struct efi_config {
- 	u64 image_handle;
- 	u64 table;
--	u64 allocate_pool;
--	u64 allocate_pages;
--	u64 get_memory_map;
--	u64 free_pool;
--	u64 free_pages;
--	u64 locate_handle;
--	u64 handle_protocol;
--	u64 exit_boot_services;
-+	u64 boot_services;
- 	u64 text_output;
- 	efi_status_t (*call)(unsigned long, ...);
- 	bool is64;
-@@ -218,7 +211,11 @@ static inline bool efi_is_64bit(void)
- }
- 
- #define efi_call_early(f, ...)						\
--	__efi_early()->call(__efi_early()->f, __VA_ARGS__);
-+	__efi_early()->call(efi_is_64bit() ?				\
-+		((efi_boot_services_64_t *)(unsigned long)		\
-+			__efi_early()->boot_services)->f :		\
-+		((efi_boot_services_32_t *)(unsigned long)		\
-+			__efi_early()->boot_services)->f, __VA_ARGS__)
- 
- #define __efi_call_early(f, ...)					\
- 	__efi_early()->call((unsigned long)f, __VA_ARGS__);
+ arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
+ obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+diff --git a/drivers/firmware/efi/test/Makefile b/drivers/firmware/efi/test/Makefile
+new file mode 100644
+index 000000000000..bcd4577d40e6
+--- /dev/null
++++ b/drivers/firmware/efi/test/Makefile
+@@ -0,0 +1 @@
++obj-$(CONFIG_EFI_TEST)			+= efi_test.o
+diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
+new file mode 100644
+index 000000000000..f61bb52be318
+--- /dev/null
++++ b/drivers/firmware/efi/test/efi_test.c
+@@ -0,0 +1,749 @@
++/*
++ * EFI Test Driver for Runtime Services
++ *
++ * Copyright(C) 2012-2016 Canonical Ltd.
++ *
++ * This driver exports EFI runtime services interfaces into userspace, which
++ * allow to use and test UEFI runtime services provided by firmware.
++ *
++ */
++
++#include <linux/version.h>
++#include <linux/miscdevice.h>
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/proc_fs.h>
++#include <linux/efi.h>
++#include <linux/slab.h>
++#include <linux/uaccess.h>
++
++#include "efi_test.h"
++
++MODULE_AUTHOR("Ivan Hu <ivan.hu@canonical.com>");
++MODULE_DESCRIPTION("EFI Test Driver");
++MODULE_LICENSE("GPL");
++
++/*
++ * Count the bytes in 'str', including the terminating NULL.
++ *
++ * Note this function returns the number of *bytes*, not the number of
++ * ucs2 characters.
++ */
++static inline size_t user_ucs2_strsize(efi_char16_t  __user *str)
++{
++	efi_char16_t *s = str, c;
++	size_t len;
++
++	if (!str)
++		return 0;
++
++	/* Include terminating NULL */
++	len = sizeof(efi_char16_t);
++
++	if (get_user(c, s++)) {
++		/* Can't read userspace memory for size */
++		return 0;
++	}
++
++	while (c != 0) {
++		if (get_user(c, s++)) {
++			/* Can't read userspace memory for size */
++			return 0;
++		}
++		len += sizeof(efi_char16_t);
++	}
++	return len;
++}
++
++/*
++ * Allocate a buffer and copy a ucs2 string from user space into it.
++ */
++static inline int
++copy_ucs2_from_user_len(efi_char16_t **dst, efi_char16_t __user *src,
++			size_t len)
++{
++	efi_char16_t *buf;
++
++	if (!src) {
++		*dst = NULL;
++		return 0;
++	}
++
++	if (!access_ok(VERIFY_READ, src, 1))
++		return -EFAULT;
++
++	buf = kmalloc(len, GFP_KERNEL);
++	if (!buf) {
++		*dst = NULL;
++		return -ENOMEM;
++	}
++	*dst = buf;
++
++	if (copy_from_user(*dst, src, len)) {
++		kfree(buf);
++		return -EFAULT;
++	}
++
++	return 0;
++}
++
++/*
++ * Count the bytes in 'str', including the terminating NULL.
++ *
++ * Just a wrap for user_ucs2_strsize
++ */
++static inline int
++get_ucs2_strsize_from_user(efi_char16_t __user *src, size_t *len)
++{
++	if (!access_ok(VERIFY_READ, src, 1))
++		return -EFAULT;
++
++	*len = user_ucs2_strsize(src);
++	if (*len == 0)
++		return -EFAULT;
++
++	return 0;
++}
++
++/*
++ * Calculate the required buffer allocation size and copy a ucs2 string
++ * from user space into it.
++ *
++ * This function differs from copy_ucs2_from_user_len() because it
++ * calculates the size of the buffer to allocate by taking the length of
++ * the string 'src'.
++ *
++ * If a non-zero value is returned, the caller MUST NOT access 'dst'.
++ *
++ * It is the caller's responsibility to free 'dst'.
++ */
++static inline int
++copy_ucs2_from_user(efi_char16_t **dst, efi_char16_t __user *src)
++{
++	size_t len;
++
++	if (!access_ok(VERIFY_READ, src, 1))
++		return -EFAULT;
++
++	len = user_ucs2_strsize(src);
++	if (len == 0)
++		return -EFAULT;
++	return copy_ucs2_from_user_len(dst, src, len);
++}
++
++/*
++ * Copy a ucs2 string to a user buffer.
++ *
++ * This function is a simple wrapper around copy_to_user() that does
++ * nothing if 'src' is NULL, which is useful for reducing the amount of
++ * NULL checking the caller has to do.
++ *
++ * 'len' specifies the number of bytes to copy.
++ */
++static inline int
++copy_ucs2_to_user_len(efi_char16_t __user *dst, efi_char16_t *src, size_t len)
++{
++	if (!src)
++		return 0;
++
++	if (!access_ok(VERIFY_WRITE, dst, 1))
++		return -EFAULT;
++
++	return copy_to_user(dst, src, len);
++}
++
++static long efi_runtime_get_variable(unsigned long arg)
++{
++	struct efi_getvariable __user *getvariable_user;
++	struct efi_getvariable getvariable;
++	unsigned long datasize, prev_datasize, *dz;
++	efi_guid_t vendor_guid, *vd = NULL;
++	efi_status_t status;
++	efi_char16_t *name = NULL;
++	u32 attr, *at;
++	void *data = NULL;
++	int rv = 0;
++
++	getvariable_user = (struct efi_getvariable __user *)arg;
++
++	if (copy_from_user(&getvariable, getvariable_user,
++			   sizeof(getvariable)))
++		return -EFAULT;
++	if (getvariable.data_size &&
++	    get_user(datasize, getvariable.data_size))
++		return -EFAULT;
++	if (getvariable.vendor_guid) {
++		if (copy_from_user(&vendor_guid, getvariable.vendor_guid,
++					sizeof(vendor_guid)))
++			return -EFAULT;
++		vd = &vendor_guid;
++	}
++
++	if (getvariable.variable_name) {
++		rv = copy_ucs2_from_user(&name, getvariable.variable_name);
++		if (rv)
++			return rv;
++	}
++
++	at = getvariable.attributes ? &attr : NULL;
++	dz = getvariable.data_size ? &datasize : NULL;
++
++	if (getvariable.data_size && getvariable.data) {
++		data = kmalloc(datasize, GFP_KERNEL);
++		if (!data) {
++			kfree(name);
++			return -ENOMEM;
++		}
++	}
++
++	prev_datasize = datasize;
++	status = efi.get_variable(name, vd, at, dz, data);
++	kfree(name);
++
++	if (put_user(status, getvariable.status)) {
++		rv = -EFAULT;
++		goto out;
++	}
++
++	if (status != EFI_SUCCESS) {
++		if (status == EFI_BUFFER_TOO_SMALL) {
++			if (dz && put_user(datasize, getvariable.data_size)) {
++				rv = -EFAULT;
++				goto out;
++			}
++		}
++		rv = -EINVAL;
++		goto out;
++	}
++
++	if (prev_datasize < datasize) {
++		rv = -EINVAL;
++		goto out;
++	}
++
++	if (data) {
++		if (copy_to_user(getvariable.data, data, datasize)) {
++			rv = -EFAULT;
++			goto out;
++		}
++	}
++
++	if (at && put_user(attr, getvariable.attributes)) {
++		rv = -EFAULT;
++		goto out;
++	}
++
++	if (dz && put_user(datasize, getvariable.data_size))
++		rv = -EFAULT;
++
++out:
++	kfree(data);
++	return rv;
++
++}
++
++static long efi_runtime_set_variable(unsigned long arg)
++{
++	struct efi_setvariable __user *setvariable_user;
++	struct efi_setvariable setvariable;
++	efi_guid_t vendor_guid;
++	efi_status_t status;
++	efi_char16_t *name = NULL;
++	void *data;
++	int rv = 0;
++
++	setvariable_user = (struct efi_setvariable __user *)arg;
++
++	if (copy_from_user(&setvariable, setvariable_user, sizeof(setvariable)))
++		return -EFAULT;
++	if (copy_from_user(&vendor_guid, setvariable.vendor_guid,
++				sizeof(vendor_guid)))
++		return -EFAULT;
++
++	if (setvariable.variable_name) {
++		rv = copy_ucs2_from_user(&name, setvariable.variable_name);
++		if (rv)
++			return rv;
++	}
++
++	data = kmalloc(setvariable.data_size, GFP_KERNEL);
++	if (!data) {
++		kfree(name);
++		return -ENOMEM;
++	}
++	if (copy_from_user(data, setvariable.data, setvariable.data_size)) {
++		rv = -EFAULT;
++		goto out;
++	}
++
++	status = efi.set_variable(name, &vendor_guid,
++				setvariable.attributes,
++				setvariable.data_size, data);
++
++	if (put_user(status, setvariable.status)) {
++		rv = -EFAULT;
++		goto out;
++	}
++
++	rv = status == EFI_SUCCESS ? 0 : -EINVAL;
++
++out:
++	kfree(data);
++	kfree(name);
++
++	return rv;
++}
++
++static long efi_runtime_get_time(unsigned long arg)
++{
++	struct efi_gettime __user *gettime_user;
++	struct efi_gettime  gettime;
++	efi_status_t status;
++	efi_time_cap_t cap;
++	efi_time_t efi_time;
++
++	gettime_user = (struct efi_gettime __user *)arg;
++	if (copy_from_user(&gettime, gettime_user, sizeof(gettime)))
++		return -EFAULT;
++
++	status = efi.get_time(gettime.time ? &efi_time : NULL,
++			      gettime.capabilities ? &cap : NULL);
++
++	if (put_user(status, gettime.status))
++		return -EFAULT;
++
++	if (status != EFI_SUCCESS)
++		return -EINVAL;
++
++	if (gettime.capabilities) {
++		efi_time_cap_t __user *cap_local;
++
++		cap_local = (efi_time_cap_t *)gettime.capabilities;
++		if (put_user(cap.resolution, &(cap_local->resolution)) ||
++			put_user(cap.accuracy, &(cap_local->accuracy)) ||
++			put_user(cap.sets_to_zero, &(cap_local->sets_to_zero)))
++			return -EFAULT;
++	}
++	if (gettime.time) {
++		if (copy_to_user(gettime.time, &efi_time, sizeof(efi_time_t)))
++			return -EFAULT;
++	}
++
++	return 0;
++}
++
++static long efi_runtime_set_time(unsigned long arg)
++{
++	struct efi_settime __user *settime_user;
++	struct efi_settime settime;
++	efi_status_t status;
++	efi_time_t efi_time;
++
++	settime_user = (struct efi_settime __user *)arg;
++	if (copy_from_user(&settime, settime_user, sizeof(settime)))
++		return -EFAULT;
++	if (copy_from_user(&efi_time, settime.time,
++					sizeof(efi_time_t)))
++		return -EFAULT;
++	status = efi.set_time(&efi_time);
++
++	if (put_user(status, settime.status))
++		return -EFAULT;
++
++	return status == EFI_SUCCESS ? 0 : -EINVAL;
++}
++
++static long efi_runtime_get_waketime(unsigned long arg)
++{
++	struct efi_getwakeuptime __user *getwakeuptime_user;
++	struct efi_getwakeuptime getwakeuptime;
++	efi_bool_t enabled, pending;
++	efi_status_t status;
++	efi_time_t efi_time;
++
++	getwakeuptime_user = (struct efi_getwakeuptime __user *)arg;
++	if (copy_from_user(&getwakeuptime, getwakeuptime_user,
++				sizeof(getwakeuptime)))
++		return -EFAULT;
++
++	status = efi.get_wakeup_time(
++		getwakeuptime.enabled ? (efi_bool_t *)&enabled : NULL,
++		getwakeuptime.pending ? (efi_bool_t *)&pending : NULL,
++		getwakeuptime.time ? &efi_time : NULL);
++
++	if (put_user(status, getwakeuptime.status))
++		return -EFAULT;
++
++	if (status != EFI_SUCCESS)
++		return -EINVAL;
++
++	if (getwakeuptime.enabled && put_user(enabled,
++						getwakeuptime.enabled))
++		return -EFAULT;
++
++	if (getwakeuptime.time) {
++		if (copy_to_user(getwakeuptime.time, &efi_time,
++				sizeof(efi_time_t)))
++			return -EFAULT;
++	}
++
++	return 0;
++}
++
++static long efi_runtime_set_waketime(unsigned long arg)
++{
++	struct efi_setwakeuptime __user *setwakeuptime_user;
++	struct efi_setwakeuptime setwakeuptime;
++	efi_bool_t enabled;
++	efi_status_t status;
++	efi_time_t efi_time;
++
++	setwakeuptime_user = (struct efi_setwakeuptime __user *)arg;
++
++	if (copy_from_user(&setwakeuptime, setwakeuptime_user,
++				sizeof(setwakeuptime)))
++		return -EFAULT;
++
++	enabled = setwakeuptime.enabled;
++	if (setwakeuptime.time) {
++		if (copy_from_user(&efi_time, setwakeuptime.time,
++					sizeof(efi_time_t)))
++			return -EFAULT;
++
++		status = efi.set_wakeup_time(enabled, &efi_time);
++	} else
++		status = efi.set_wakeup_time(enabled, NULL);
++
++	if (put_user(status, setwakeuptime.status))
++		return -EFAULT;
++
++	return status == EFI_SUCCESS ? 0 : -EINVAL;
++}
++
++static long efi_runtime_get_nextvariablename(unsigned long arg)
++{
++	struct efi_getnextvariablename __user *getnextvariablename_user;
++	struct efi_getnextvariablename getnextvariablename;
++	unsigned long name_size, prev_name_size = 0, *ns = NULL;
++	efi_status_t status;
++	efi_guid_t *vd = NULL;
++	efi_guid_t vendor_guid;
++	efi_char16_t *name = NULL;
++	int rv;
++
++	getnextvariablename_user = (struct efi_getnextvariablename __user *)arg;
++
++	if (copy_from_user(&getnextvariablename, getnextvariablename_user,
++			   sizeof(getnextvariablename)))
++		return -EFAULT;
++
++	if (getnextvariablename.variable_name_size) {
++		if (get_user(name_size, getnextvariablename.variable_name_size))
++			return -EFAULT;
++		ns = &name_size;
++		prev_name_size = name_size;
++	}
++
++	if (getnextvariablename.vendor_guid) {
++		if (copy_from_user(&vendor_guid,
++				getnextvariablename.vendor_guid,
++				sizeof(vendor_guid)))
++			return -EFAULT;
++		vd = &vendor_guid;
++	}
++
++	if (getnextvariablename.variable_name) {
++		size_t name_string_size = 0;
++
++		rv = get_ucs2_strsize_from_user(
++				getnextvariablename.variable_name,
++				&name_string_size);
++		if (rv)
++			return rv;
++		/*
++		 * The name_size may be smaller than the real buffer size where
++		 * variable name located in some use cases. The most typical
++		 * case is passing a 0 to get the required buffer size for the
++		 * 1st time call. So we need to copy the content from user
++		 * space for at least the string size of variable name, or else
++		 * the name passed to UEFI may not be terminated as we expected.
++		 */
++		rv = copy_ucs2_from_user_len(&name,
++				getnextvariablename.variable_name,
++				prev_name_size > name_string_size ?
++				prev_name_size : name_string_size);
++		if (rv)
++			return rv;
++	}
++
++	status = efi.get_next_variable(ns, name, vd);
++
++	if (put_user(status, getnextvariablename.status)) {
++		rv = -EFAULT;
++		goto out;
++	}
++
++	if (status != EFI_SUCCESS) {
++		if (status == EFI_BUFFER_TOO_SMALL) {
++			if (ns && put_user(*ns,
++				getnextvariablename.variable_name_size)) {
++				rv = -EFAULT;
++				goto out;
++			}
++		}
++		rv = -EINVAL;
++		goto out;
++	}
++
++	if (name) {
++		if (copy_ucs2_to_user_len(getnextvariablename.variable_name,
++						name, prev_name_size)) {
++			rv = -EFAULT;
++			goto out;
++		}
++	}
++
++	if (ns) {
++		if (put_user(*ns, getnextvariablename.variable_name_size)) {
++			rv = -EFAULT;
++			goto out;
++		}
++	}
++
++	if (vd) {
++		if (copy_to_user(getnextvariablename.vendor_guid, vd,
++							sizeof(efi_guid_t)))
++			rv = -EFAULT;
++	}
++
++out:
++	kfree(name);
++	return rv;
++}
++
++static long efi_runtime_get_nexthighmonocount(unsigned long arg)
++{
++	struct efi_getnexthighmonotoniccount __user *getnexthighmonocount_user;
++	struct efi_getnexthighmonotoniccount getnexthighmonocount;
++	efi_status_t status;
++	u32 count;
++
++	getnexthighmonocount_user = (struct
++			efi_getnexthighmonotoniccount __user *)arg;
++
++	if (copy_from_user(&getnexthighmonocount,
++			   getnexthighmonocount_user,
++			   sizeof(getnexthighmonocount)))
++		return -EFAULT;
++
++	status = efi.get_next_high_mono_count(
++		getnexthighmonocount.high_count ? &count : NULL);
++
++	if (put_user(status, getnexthighmonocount.status))
++		return -EFAULT;
++
++	if (status != EFI_SUCCESS)
++		return -EINVAL;
++
++	if (getnexthighmonocount.high_count &&
++	    put_user(count, getnexthighmonocount.high_count))
++		return -EFAULT;
++
++	return 0;
++}
++
++static long efi_runtime_query_variableinfo(unsigned long arg)
++{
++	struct efi_queryvariableinfo __user *queryvariableinfo_user;
++	struct efi_queryvariableinfo queryvariableinfo;
++	efi_status_t status;
++	u64 max_storage, remaining, max_size;
++
++	queryvariableinfo_user = (struct efi_queryvariableinfo __user *)arg;
++
++	if (copy_from_user(&queryvariableinfo, queryvariableinfo_user,
++			   sizeof(queryvariableinfo)))
++		return -EFAULT;
++
++	status = efi.query_variable_info(queryvariableinfo.attributes,
++					 &max_storage, &remaining, &max_size);
++
++	if (put_user(status, queryvariableinfo.status))
++		return -EFAULT;
++
++	if (status != EFI_SUCCESS)
++		return -EINVAL;
++
++	if (put_user(max_storage,
++		     queryvariableinfo.maximum_variable_storage_size))
++		return -EFAULT;
++
++	if (put_user(remaining,
++		     queryvariableinfo.remaining_variable_storage_size))
++		return -EFAULT;
++
++	if (put_user(max_size, queryvariableinfo.maximum_variable_size))
++		return -EFAULT;
++
++	return 0;
++}
++
++static long efi_runtime_query_capsulecaps(unsigned long arg)
++{
++	struct efi_querycapsulecapabilities __user *qcaps_user;
++	struct efi_querycapsulecapabilities qcaps;
++	efi_capsule_header_t *capsules;
++	efi_status_t status;
++	u64 max_size;
++	int i, reset_type;
++	int rv = 0;
++
++	qcaps_user = (struct efi_querycapsulecapabilities __user *)arg;
++
++	if (copy_from_user(&qcaps, qcaps_user, sizeof(qcaps)))
++		return -EFAULT;
++
++	capsules = kcalloc(qcaps.capsule_count + 1,
++			   sizeof(efi_capsule_header_t), GFP_KERNEL);
++	if (!capsules)
++		return -ENOMEM;
++
++	for (i = 0; i < qcaps.capsule_count; i++) {
++		efi_capsule_header_t *c;
++		/*
++		 * We cannot dereference qcaps.capsule_header_array directly to
++		 * obtain the address of the capsule as it resides in the
++		 * user space
++		 */
++		if (get_user(c, qcaps.capsule_header_array + i)) {
++			rv = -EFAULT;
++			goto out;
++		}
++		if (copy_from_user(&capsules[i], c,
++				sizeof(efi_capsule_header_t))) {
++			rv = -EFAULT;
++			goto out;
++		}
++	}
++
++	qcaps.capsule_header_array = &capsules;
++
++	status = efi.query_capsule_caps((efi_capsule_header_t **)
++					qcaps.capsule_header_array,
++					qcaps.capsule_count,
++					&max_size, &reset_type);
++
++	if (put_user(status, qcaps.status)) {
++		rv = -EFAULT;
++		goto out;
++	}
++
++	if (status != EFI_SUCCESS) {
++		rv = -EINVAL;
++		goto out;
++	}
++
++	if (put_user(max_size, qcaps.maximum_capsule_size)) {
++		rv = -EFAULT;
++		goto out;
++	}
++
++	if (put_user(reset_type, qcaps.reset_type))
++		rv = -EFAULT;
++
++out:
++	kfree(capsules);
++	return rv;
++}
++
++static long efi_test_ioctl(struct file *file, unsigned int cmd,
++							unsigned long arg)
++{
++	switch (cmd) {
++	case EFI_RUNTIME_GET_VARIABLE:
++		return efi_runtime_get_variable(arg);
++
++	case EFI_RUNTIME_SET_VARIABLE:
++		return efi_runtime_set_variable(arg);
++
++	case EFI_RUNTIME_GET_TIME:
++		return efi_runtime_get_time(arg);
++
++	case EFI_RUNTIME_SET_TIME:
++		return efi_runtime_set_time(arg);
++
++	case EFI_RUNTIME_GET_WAKETIME:
++		return efi_runtime_get_waketime(arg);
++
++	case EFI_RUNTIME_SET_WAKETIME:
++		return efi_runtime_set_waketime(arg);
++
++	case EFI_RUNTIME_GET_NEXTVARIABLENAME:
++		return efi_runtime_get_nextvariablename(arg);
++
++	case EFI_RUNTIME_GET_NEXTHIGHMONOTONICCOUNT:
++		return efi_runtime_get_nexthighmonocount(arg);
++
++	case EFI_RUNTIME_QUERY_VARIABLEINFO:
++		return efi_runtime_query_variableinfo(arg);
++
++	case EFI_RUNTIME_QUERY_CAPSULECAPABILITIES:
++		return efi_runtime_query_capsulecaps(arg);
++	}
++
++	return -ENOTTY;
++}
++
++static int efi_test_open(struct inode *inode, struct file *file)
++{
++	/*
++	 * nothing special to do here
++	 * We do accept multiple open files at the same time as we
++	 * synchronize on the per call operation.
++	 */
++	return 0;
++}
++
++static int efi_test_close(struct inode *inode, struct file *file)
++{
++	return 0;
++}
++
++/*
++ *	The various file operations we support.
++ */
++static const struct file_operations efi_test_fops = {
++	.owner		= THIS_MODULE,
++	.unlocked_ioctl	= efi_test_ioctl,
++	.open		= efi_test_open,
++	.release	= efi_test_close,
++	.llseek		= no_llseek,
++};
++
++static struct miscdevice efi_test_dev = {
++	MISC_DYNAMIC_MINOR,
++	"efi_test",
++	&efi_test_fops
++};
++
++static int __init efi_test_init(void)
++{
++	int ret;
++
++	ret = misc_register(&efi_test_dev);
++	if (ret) {
++		pr_err("efi_test: can't misc_register on minor=%d\n",
++			MISC_DYNAMIC_MINOR);
++		return ret;
++	}
++
++	return 0;
++}
++
++static void __exit efi_test_exit(void)
++{
++	misc_deregister(&efi_test_dev);
++}
++
++module_init(efi_test_init);
++module_exit(efi_test_exit);
+diff --git a/drivers/firmware/efi/test/efi_test.h b/drivers/firmware/efi/test/efi_test.h
+new file mode 100644
+index 000000000000..a33a6c633852
+--- /dev/null
++++ b/drivers/firmware/efi/test/efi_test.h
+@@ -0,0 +1,110 @@
++/*
++ * EFI Test driver Header
++ *
++ * Copyright(C) 2012-2016 Canonical Ltd.
++ *
++ */
++
++#ifndef _DRIVERS_FIRMWARE_EFI_TEST_H_
++#define _DRIVERS_FIRMWARE_EFI_TEST_H_
++
++#include <linux/efi.h>
++
++struct efi_getvariable {
++	efi_char16_t	*variable_name;
++	efi_guid_t	*vendor_guid;
++	u32		*attributes;
++	unsigned long	*data_size;
++	void		*data;
++	efi_status_t	*status;
++} __packed;
++
++struct efi_setvariable {
++	efi_char16_t	*variable_name;
++	efi_guid_t	*vendor_guid;
++	u32		attributes;
++	unsigned long	data_size;
++	void		*data;
++	efi_status_t	*status;
++} __packed;
++
++struct efi_getnextvariablename {
++	unsigned long	*variable_name_size;
++	efi_char16_t	*variable_name;
++	efi_guid_t	*vendor_guid;
++	efi_status_t	*status;
++} __packed;
++
++struct efi_queryvariableinfo {
++	u32		attributes;
++	u64		*maximum_variable_storage_size;
++	u64		*remaining_variable_storage_size;
++	u64		*maximum_variable_size;
++	efi_status_t	*status;
++} __packed;
++
++struct efi_gettime {
++	efi_time_t	*time;
++	efi_time_cap_t	*capabilities;
++	efi_status_t	*status;
++} __packed;
++
++struct efi_settime {
++	efi_time_t	*time;
++	efi_status_t	*status;
++} __packed;
++
++struct efi_getwakeuptime {
++	efi_bool_t	*enabled;
++	efi_bool_t	*pending;
++	efi_time_t	*time;
++	efi_status_t	*status;
++} __packed;
++
++struct efi_setwakeuptime {
++	efi_bool_t	enabled;
++	efi_time_t	*time;
++	efi_status_t	*status;
++} __packed;
++
++struct efi_getnexthighmonotoniccount {
++	u32		*high_count;
++	efi_status_t	*status;
++} __packed;
++
++struct efi_querycapsulecapabilities {
++	efi_capsule_header_t	**capsule_header_array;
++	unsigned long		capsule_count;
++	u64			*maximum_capsule_size;
++	int			*reset_type;
++	efi_status_t		*status;
++} __packed;
++
++#define EFI_RUNTIME_GET_VARIABLE \
++	_IOWR('p', 0x01, struct efi_getvariable)
++#define EFI_RUNTIME_SET_VARIABLE \
++	_IOW('p', 0x02, struct efi_setvariable)
++
++#define EFI_RUNTIME_GET_TIME \
++	_IOR('p', 0x03, struct efi_gettime)
++#define EFI_RUNTIME_SET_TIME \
++	_IOW('p', 0x04, struct efi_settime)
++
++#define EFI_RUNTIME_GET_WAKETIME \
++	_IOR('p', 0x05, struct efi_getwakeuptime)
++#define EFI_RUNTIME_SET_WAKETIME \
++	_IOW('p', 0x06, struct efi_setwakeuptime)
++
++#define EFI_RUNTIME_GET_NEXTVARIABLENAME \
++	_IOWR('p', 0x07, struct efi_getnextvariablename)
++
++#define EFI_RUNTIME_QUERY_VARIABLEINFO \
++	_IOR('p', 0x08, struct efi_queryvariableinfo)
++
++#define EFI_RUNTIME_GET_NEXTHIGHMONOTONICCOUNT \
++	_IOR('p', 0x09, struct efi_getnexthighmonotoniccount)
++
++#define EFI_RUNTIME_QUERY_CAPSULECAPABILITIES \
++	_IOR('p', 0x0A, struct efi_querycapsulecapabilities)
++
++#endif /* _DRIVERS_FIRMWARE_EFI_TEST_H_ */
 -- 
 2.9.3
