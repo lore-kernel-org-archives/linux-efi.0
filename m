@@ -1,150 +1,220 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [GIT PULL 00/29] EFI changes for v4.9
-Date: Fri,  9 Sep 2016 16:18:22 +0100
-Message-ID: <20160909151851.27577-1-matt@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>, Kamezawa Hiroyuki <kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH 09/29] efi/runtime-map: Use efi.memmap directly instead of a copy
+Date: Fri,  9 Sep 2016 16:18:31 +0100
+Message-ID: <20160909151851.27577-10-matt@codeblueprint.co.uk>
+References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160909151851.27577-1-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-Folks, please queue up the following patches for v4.9. There's more
-work on refactoring EFI code to be architecture independent and the
-largest number of patches is spent cleaning up the EFI memory map code
-and allowing drivers on x86 to reserve EFI boot services for all of
-runtime.
+Now that efi.memmap is available all of the time there's no need to
+allocate and build a separate copy of the EFI memory map.
 
-The architecture independent quest is going pretty well and it was
-only a couple of lines to get the esrt driver working on arm64.
+Furthermore, efi.memmap contains boot services regions but only those
+regions that have been reserved via efi_mem_reserve(). Using
+efi.memmap allows us to pass boot services across kexec reboot so that
+the ESRT and BGRT drivers will now work.
 
-Other than that there's some cleanups and fixes, and a merge of the
-out of tree EFI runtime driver from the FWTS project.
+Tested-by: Dave Young <dyoung@redhat.com> [kexec/kdump]
+Tested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org> [arm]
+Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>
+Cc: Peter Jones <pjones@redhat.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+---
+ arch/x86/platform/efi/efi.c        | 40 --------------------------------------
+ drivers/firmware/efi/runtime-map.c | 35 +++++++++++++--------------------
+ include/linux/efi.h                |  4 ----
+ 3 files changed, 13 insertions(+), 66 deletions(-)
 
-The following changes since commit c6935931c1894ff857616ff8549b61236a19148f:
-
-  Linux 4.8-rc5 (2016-09-04 14:31:46 -0700)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-
-for you to fetch changes up to 0a637ee61247bd4bed9b2a07568ef7a1cfc76187:
-
-  x86/efi: Allow invocation of arbitrary boot services (2016-09-09 16:08:57 +0100)
-
-----------------------------------------------------------------
- * Refactor the EFI memory map code into architecture neutral files
-   and allow drivers to permanently reserve EFI boot services regions
-   on x86, as well as ARM/arm64 - Matt Fleming
-
- * Add ARM support for the EFI esrt driver - Ard Biesheuvel
-
- * Make the EFI runtime services and efivar API interruptible by
-   swapping spinlocks for semaphores - Sylvain Chouleur
-
- * Provide the EFI identity mapping for kexec which allows kexec to
-   work on SGI/UV platforms with requiring the "noefi" kernel command
-   line parameter - Alex Thorlton
-
- * Add debugfs node to dump EFI page tables on arm64 - Ard Biesheuvel
-
- * Merge the EFI test driver being carried out of tree until now in
-   the FWTS project - Ivan Hu
-
- * Expand the list of flags for classifying EFI regions as "RAM" on
-   arm64 so we align with the UEFI spec - Ard Biesheuvel
-
- * Optimise out the EFI mixed mode if it's unsupported (CONFIG_X86_32)
-   or disabled (CONFIG_EFI_MIXED=n) and switch the early EFI boot
-   services function table for direct calls, alleviating us from
-   having to maintain the custom function table - Lukas Wunner
-
- * Miscellaneous cleanups and fixes
-
-----------------------------------------------------------------
-Alex Thorlton (1):
-      x86/efi: Map in physical addresses in efi_map_region_fixed
-
-Ard Biesheuvel (5):
-      efi/esrt: Use memremap not ioremap to access ESRT table in memory
-      efi/arm*: esrt: Add missing call to efi_esrt_init()
-      efi: Replace runtime services spinlock with semaphore
-      efi/arm64: Add debugfs node to dump UEFI runtime page tables
-      efi/arm64: Treat regions with WT/WC set but WB cleared as memory
-
-Colin Ian King (1):
-      x86/efi: Initialize status to ensure garbage is not returned on small size
-
-Ivan Hu (1):
-      efi: Add efi_test driver for exporting UEFI runtime service interfaces
-
-Lukas Wunner (4):
-      lib/ucs2_string: Speed up ucs2_utf8size()
-      x86/efi: Remove unused find_bits() function
-      x86/efi: Optimize away setup_gop32/64 if unused
-      x86/efi: Allow invocation of arbitrary boot services
-
-Markus Elfring (2):
-      firmware-gsmi: Delete an unnecessary check before the function call "dma_pool_destroy"
-      x86/efi: Use kmalloc_array() in efi_call_phys_prolog()
-
-Matt Fleming (12):
-      x86/efi: Test for EFI_MEMMAP functionality when iterating EFI memmap
-      x86/efi: Consolidate region mapping logic
-      efi: Refactor efi_memmap_init_early() into arch-neutral code
-      efi: Add efi_memmap_init_late() for permanent EFI memmap
-      efi/fake_mem: Refactor main two code chunks into functions
-      efi: Split out EFI memory map functions into new file
-      efi: Add efi_memmap_install() for installing new EFI memory maps
-      efi: Allow drivers to reserve boot services forever
-      efi/runtime-map: Use efi.memmap directly instead of a copy
-      efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()
-      x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data
-      fs/efivarfs: Fix double kfree() in error path
-
-Ricardo Neri (1):
-      x86/efi: Defer efi_esrt_init until after memblock_x86_fill
-
-Sylvain Chouleur (2):
-      efi: Use a file local lock for efivars
-      efi: Don't use spinlocks for efi vars
-
- MAINTAINERS                             |   7 +
- arch/x86/boot/compressed/eboot.c        |  40 +-
- arch/x86/boot/compressed/head_32.S      |   6 +-
- arch/x86/boot/compressed/head_64.S      |   8 +-
- arch/x86/include/asm/efi.h              |  29 +-
- arch/x86/kernel/setup.c                 |  18 +-
- arch/x86/platform/efi/efi-bgrt.c        |  13 +-
- arch/x86/platform/efi/efi.c             | 198 ++++-----
- arch/x86/platform/efi/efi_64.c          |  23 +-
- arch/x86/platform/efi/quirks.c          | 123 +++++-
- drivers/firmware/efi/Kconfig            |  17 +
- drivers/firmware/efi/Makefile           |   3 +-
- drivers/firmware/efi/arm-init.c         |  50 ++-
- drivers/firmware/efi/arm-runtime.c      |  26 +-
- drivers/firmware/efi/efi-pstore.c       |  36 +-
- drivers/firmware/efi/efi.c              |  67 +--
- drivers/firmware/efi/efivars.c          |  22 +-
- drivers/firmware/efi/esrt.c             |  23 +-
- drivers/firmware/efi/fake_mem.c         | 125 +-----
- drivers/firmware/efi/memmap.c           | 292 +++++++++++++
- drivers/firmware/efi/runtime-map.c      |  35 +-
- drivers/firmware/efi/runtime-wrappers.c |  81 ++--
- drivers/firmware/efi/test/Makefile      |   1 +
- drivers/firmware/efi/test/efi_test.c    | 749 ++++++++++++++++++++++++++++++++
- drivers/firmware/efi/test/efi_test.h    | 110 +++++
- drivers/firmware/efi/vars.c             | 142 +++---
- drivers/firmware/google/gsmi.c          |   3 +-
- fs/efivarfs/inode.c                     |   5 +-
- fs/efivarfs/super.c                     |  13 +-
- include/linux/efi.h                     |  47 +-
- lib/ucs2_string.c                       |   2 +-
- 31 files changed, 1767 insertions(+), 547 deletions(-)
- create mode 100644 drivers/firmware/efi/memmap.c
- create mode 100644 drivers/firmware/efi/test/Makefile
- create mode 100644 drivers/firmware/efi/test/efi_test.c
- create mode 100644 drivers/firmware/efi/test/efi_test.h
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 33996987ac70..342cebd1e17c 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -592,42 +592,6 @@ static void __init get_systab_virt_addr(efi_memory_desc_t *md)
+ 	}
+ }
+ 
+-static void __init save_runtime_map(void)
+-{
+-#ifdef CONFIG_KEXEC_CORE
+-	unsigned long desc_size;
+-	efi_memory_desc_t *md;
+-	void *tmp, *q = NULL;
+-	int count = 0;
+-
+-	if (efi_enabled(EFI_OLD_MEMMAP))
+-		return;
+-
+-	desc_size = efi.memmap.desc_size;
+-
+-	for_each_efi_memory_desc(md) {
+-		if (!(md->attribute & EFI_MEMORY_RUNTIME) ||
+-		    (md->type == EFI_BOOT_SERVICES_CODE) ||
+-		    (md->type == EFI_BOOT_SERVICES_DATA))
+-			continue;
+-		tmp = krealloc(q, (count + 1) * desc_size, GFP_KERNEL);
+-		if (!tmp)
+-			goto out;
+-		q = tmp;
+-
+-		memcpy(q + count * desc_size, md, desc_size);
+-		count++;
+-	}
+-
+-	efi_runtime_map_setup(q, count, desc_size);
+-	return;
+-
+-out:
+-	kfree(q);
+-	pr_err("Error saving runtime map, efi runtime on kexec non-functional!!\n");
+-#endif
+-}
+-
+ static void *realloc_pages(void *old_memmap, int old_shift)
+ {
+ 	void *ret;
+@@ -840,8 +804,6 @@ static void __init kexec_enter_virtual_mode(void)
+ 		return;
+ 	}
+ 
+-	save_runtime_map();
+-
+ 	BUG_ON(!efi.systab);
+ 
+ 	num_pages = ALIGN(efi.memmap.nr_map * efi.memmap.desc_size, PAGE_SIZE);
+@@ -934,8 +896,6 @@ static void __init __efi_enter_virtual_mode(void)
+ 		return;
+ 	}
+ 
+-	save_runtime_map();
+-
+ 	BUG_ON(!efi.systab);
+ 
+ 	if (efi_setup_page_tables(pa, 1 << pg_shift)) {
+diff --git a/drivers/firmware/efi/runtime-map.c b/drivers/firmware/efi/runtime-map.c
+index 5c55227a34c8..8e64b77aeac9 100644
+--- a/drivers/firmware/efi/runtime-map.c
++++ b/drivers/firmware/efi/runtime-map.c
+@@ -14,10 +14,6 @@
+ 
+ #include <asm/setup.h>
+ 
+-static void *efi_runtime_map;
+-static int nr_efi_runtime_map;
+-static u32 efi_memdesc_size;
+-
+ struct efi_runtime_map_entry {
+ 	efi_memory_desc_t md;
+ 	struct kobject kobj;   /* kobject for each entry */
+@@ -106,7 +102,8 @@ static struct kobj_type __refdata map_ktype = {
+ static struct kset *map_kset;
+ 
+ static struct efi_runtime_map_entry *
+-add_sysfs_runtime_map_entry(struct kobject *kobj, int nr)
++add_sysfs_runtime_map_entry(struct kobject *kobj, int nr,
++			    efi_memory_desc_t *md)
+ {
+ 	int ret;
+ 	struct efi_runtime_map_entry *entry;
+@@ -124,8 +121,7 @@ add_sysfs_runtime_map_entry(struct kobject *kobj, int nr)
+ 		return ERR_PTR(-ENOMEM);
+ 	}
+ 
+-	memcpy(&entry->md, efi_runtime_map + nr * efi_memdesc_size,
+-	       sizeof(efi_memory_desc_t));
++	memcpy(&entry->md, md, sizeof(efi_memory_desc_t));
+ 
+ 	kobject_init(&entry->kobj, &map_ktype);
+ 	entry->kobj.kset = map_kset;
+@@ -142,12 +138,12 @@ add_sysfs_runtime_map_entry(struct kobject *kobj, int nr)
+ 
+ int efi_get_runtime_map_size(void)
+ {
+-	return nr_efi_runtime_map * efi_memdesc_size;
++	return efi.memmap.nr_map * efi.memmap.desc_size;
+ }
+ 
+ int efi_get_runtime_map_desc_size(void)
+ {
+-	return efi_memdesc_size;
++	return efi.memmap.desc_size;
+ }
+ 
+ int efi_runtime_map_copy(void *buf, size_t bufsz)
+@@ -157,38 +153,33 @@ int efi_runtime_map_copy(void *buf, size_t bufsz)
+ 	if (sz > bufsz)
+ 		sz = bufsz;
+ 
+-	memcpy(buf, efi_runtime_map, sz);
++	memcpy(buf, efi.memmap.map, sz);
+ 	return 0;
+ }
+ 
+-void efi_runtime_map_setup(void *map, int nr_entries, u32 desc_size)
+-{
+-	efi_runtime_map = map;
+-	nr_efi_runtime_map = nr_entries;
+-	efi_memdesc_size = desc_size;
+-}
+-
+ int __init efi_runtime_map_init(struct kobject *efi_kobj)
+ {
+ 	int i, j, ret = 0;
+ 	struct efi_runtime_map_entry *entry;
++	efi_memory_desc_t *md;
+ 
+-	if (!efi_runtime_map)
++	if (!efi_enabled(EFI_MEMMAP))
+ 		return 0;
+ 
+-	map_entries = kzalloc(nr_efi_runtime_map * sizeof(entry), GFP_KERNEL);
++	map_entries = kzalloc(efi.memmap.nr_map * sizeof(entry), GFP_KERNEL);
+ 	if (!map_entries) {
+ 		ret = -ENOMEM;
+ 		goto out;
+ 	}
+ 
+-	for (i = 0; i < nr_efi_runtime_map; i++) {
+-		entry = add_sysfs_runtime_map_entry(efi_kobj, i);
++	i = 0;
++	for_each_efi_memory_desc(md) {
++		entry = add_sysfs_runtime_map_entry(efi_kobj, i, md);
+ 		if (IS_ERR(entry)) {
+ 			ret = PTR_ERR(entry);
+ 			goto out_add_entry;
+ 		}
+-		*(map_entries + i) = entry;
++		*(map_entries + i++) = entry;
+ 	}
+ 
+ 	return 0;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 3fe4f3c47834..d8b555db81c7 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1357,7 +1357,6 @@ extern int efi_capsule_update(efi_capsule_header_t *capsule,
+ 
+ #ifdef CONFIG_EFI_RUNTIME_MAP
+ int efi_runtime_map_init(struct kobject *);
+-void efi_runtime_map_setup(void *, int, u32);
+ int efi_get_runtime_map_size(void);
+ int efi_get_runtime_map_desc_size(void);
+ int efi_runtime_map_copy(void *buf, size_t bufsz);
+@@ -1367,9 +1366,6 @@ static inline int efi_runtime_map_init(struct kobject *kobj)
+ 	return 0;
+ }
+ 
+-static inline void
+-efi_runtime_map_setup(void *map, int nr_entries, u32 desc_size) {}
+-
+ static inline int efi_get_runtime_map_size(void)
+ {
+ 	return 0;
+-- 
+2.9.3
