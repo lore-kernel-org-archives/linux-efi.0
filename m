@@ -1,51 +1,52 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 20/29] x86/efi: Map in physical addresses in efi_map_region_fixed
-Date: Fri,  9 Sep 2016 16:18:42 +0100
-Message-ID: <20160909151851.27577-21-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH 21/29] fs/efivarfs: Fix double kfree() in error path
+Date: Fri,  9 Sep 2016 16:18:43 +0100
+Message-ID: <20160909151851.27577-22-matt@codeblueprint.co.uk>
 References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160909151851.27577-1-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160909151851.27577-1-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>, Sylvain Chouleur <sylvain.chouleur@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Julia reported that we may double free 'name' in efivarfs_callback(),
+and that this bug was introduced by commit 0d22f33bc37c ("efi: Don't
+use spinlocks for efi vars").
 
-This is a simple change to add in the physical mappings as well as the
-virtual mappings in efi_map_region_fixed.  The motivation here is to
-get access to EFI runtime code that is only available via the 1:1
-mappings on a kexec'd kernel.
+Move one of the kfree()s until after the point at which we know we are
+definitely on the success path.
 
-The added call is essentially the kexec analog of the first __map_region
-that Boris put in efi_map_region in commit d2f7cbe7b26a ("x86/efi:
-Runtime services virtual mapping").
-
-Signed-off-by: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-Cc: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
-Cc: Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>
-Cc: Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Reported-by: Julia Lawall <julia.lawall@lip6.fr>
+Acked-by: Julia Lawall <julia.lawall@lip6.fr>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Sylvain Chouleur <sylvain.chouleur@gmail.com>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/platform/efi/efi_64.c | 1 +
- 1 file changed, 1 insertion(+)
+ fs/efivarfs/super.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 45434ea345e9..e1ca71259468 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -339,6 +339,7 @@ void __init efi_map_region(efi_memory_desc_t *md)
-  */
- void __init efi_map_region_fixed(efi_memory_desc_t *md)
- {
-+	__map_region(md, md->phys_addr);
- 	__map_region(md, md->virt_addr);
- }
+diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+index 01e3d6e53944..d7a7c53803c1 100644
+--- a/fs/efivarfs/super.c
++++ b/fs/efivarfs/super.c
+@@ -157,14 +157,14 @@ static int efivarfs_callback(efi_char16_t *name16, efi_guid_t vendor,
+ 		goto fail_inode;
+ 	}
  
+-	/* copied by the above to local storage in the dentry. */
+-	kfree(name);
+-
+ 	efivar_entry_size(entry, &size);
+ 	err = efivar_entry_add(entry, &efivarfs_list);
+ 	if (err)
+ 		goto fail_inode;
+ 
++	/* copied by the above to local storage in the dentry. */
++	kfree(name);
++
+ 	inode_lock(inode);
+ 	inode->i_private = entry;
+ 	i_size_write(inode, size + sizeof(entry->var.Attributes));
 -- 
 2.9.3
