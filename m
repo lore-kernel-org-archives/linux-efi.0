@@ -1,294 +1,413 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 05/29] efi/fake_mem: Refactor main two code chunks into functions
-Date: Fri,  9 Sep 2016 16:18:27 +0100
-Message-ID: <20160909151851.27577-6-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH 04/29] efi: Add efi_memmap_init_late() for permanent EFI memmap
+Date: Fri,  9 Sep 2016 16:18:26 +0100
+Message-ID: <20160909151851.27577-5-matt@codeblueprint.co.uk>
 References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160909151851.27577-1-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Peter Jones <pjones@redhat.com>, Taku Izumi <izumi.taku@jp.fujitsu.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160909151851.27577-1-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-There is a whole load of generic EFI memory map code inside of the
-fake_mem driver which is better suited to being grouped with the rest
-of the generic EFI code for manipulating EFI memory maps.
+Drivers need a way to access the EFI memory map at runtime. ARM and
+arm64 currently provide this by remapping the EFI memory map into the
+vmalloc space before setting up the EFI virtual mappings.
 
-In preparation for that, this patch refactors the core code, so that
-it's possible to move entire functions later.
+x86 does not provide this functionality which has resulted in the code
+in efi_mem_desc_lookup() where it will manually map individual EFI
+memmap entries if the memmap has already been torn down on x86,
 
-Tested-by: Dave Young <dyoung@redhat.com> [kexec/kdump]
-Tested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org> [arm]
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Taku Izumi <izumi.taku@jp.fujitsu.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+  /*
+   * If a driver calls this after efi_free_boot_services,
+   * ->map will be NULL, and the target may also not be mapped.
+   * So just always get our own virtual map on the CPU.
+   *
+   */
+  md = early_memremap(p, sizeof (*md));
+
+There isn't a good reason for not providing a permanent EFI memory map
+for runtime queries, especially since the EFI regions are not mapped
+into the standard kernel page tables.
+
+Tested-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> [kexec/kdump]
+Tested-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> [arm]
+Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- drivers/firmware/efi/fake_mem.c | 229 +++++++++++++++++++++++-----------------
- 1 file changed, 134 insertions(+), 95 deletions(-)
+ arch/x86/platform/efi/efi.c        |  44 ++++++++----
+ arch/x86/platform/efi/quirks.c     |   2 -
+ drivers/firmware/efi/arm-runtime.c |   4 +-
+ drivers/firmware/efi/efi.c         | 135 ++++++++++++++++++++++++++-----------
+ include/linux/efi.h                |   2 +
+ 5 files changed, 130 insertions(+), 57 deletions(-)
 
-diff --git a/drivers/firmware/efi/fake_mem.c b/drivers/firmware/efi/fake_mem.c
-index 939eec47139f..446c669431c0 100644
---- a/drivers/firmware/efi/fake_mem.c
-+++ b/drivers/firmware/efi/fake_mem.c
-@@ -54,43 +54,151 @@ static int __init cmp_fake_mem(const void *x1, const void *x2)
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 5ccde8b6cdd1..33996987ac70 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -827,6 +827,19 @@ static void __init kexec_enter_virtual_mode(void)
+ 		get_systab_virt_addr(md);
+ 	}
+ 
++	/*
++	 * Unregister the early EFI memmap from efi_init() and install
++	 * the new EFI memory map.
++	 */
++	efi_memmap_unmap();
++
++	if (efi_memmap_init_late(efi.memmap.phys_map,
++				 efi.memmap.desc_size * efi.memmap.nr_map)) {
++		pr_err("Failed to remap late EFI memory map\n");
++		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
++		return;
++	}
++
+ 	save_runtime_map();
+ 
+ 	BUG_ON(!efi.systab);
+@@ -888,6 +901,7 @@ static void __init __efi_enter_virtual_mode(void)
+ 	int count = 0, pg_shift = 0;
+ 	void *new_memmap = NULL;
+ 	efi_status_t status;
++	phys_addr_t pa;
+ 
+ 	efi.systab = NULL;
+ 
+@@ -905,11 +919,26 @@ static void __init __efi_enter_virtual_mode(void)
+ 		return;
+ 	}
+ 
++	pa = __pa(new_memmap);
++
++	/*
++	 * Unregister the early EFI memmap from efi_init() and install
++	 * the new EFI memory map that we are about to pass to the
++	 * firmware via SetVirtualAddressMap().
++	 */
++	efi_memmap_unmap();
++
++	if (efi_memmap_init_late(pa, efi.memmap.desc_size * count)) {
++		pr_err("Failed to remap late EFI memory map\n");
++		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
++		return;
++	}
++
+ 	save_runtime_map();
+ 
+ 	BUG_ON(!efi.systab);
+ 
+-	if (efi_setup_page_tables(__pa(new_memmap), 1 << pg_shift)) {
++	if (efi_setup_page_tables(pa, 1 << pg_shift)) {
+ 		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 		return;
+ 	}
+@@ -921,14 +950,14 @@ static void __init __efi_enter_virtual_mode(void)
+ 				efi.memmap.desc_size * count,
+ 				efi.memmap.desc_size,
+ 				efi.memmap.desc_version,
+-				(efi_memory_desc_t *)__pa(new_memmap));
++				(efi_memory_desc_t *)pa);
+ 	} else {
+ 		status = efi_thunk_set_virtual_address_map(
+ 				efi_phys.set_virtual_address_map,
+ 				efi.memmap.desc_size * count,
+ 				efi.memmap.desc_size,
+ 				efi.memmap.desc_version,
+-				(efi_memory_desc_t *)__pa(new_memmap));
++				(efi_memory_desc_t *)pa);
+ 	}
+ 
+ 	if (status != EFI_SUCCESS) {
+@@ -960,15 +989,6 @@ static void __init __efi_enter_virtual_mode(void)
+ 	efi_runtime_update_mappings();
+ 	efi_dump_pagetable();
+ 
+-	/*
+-	 * We mapped the descriptor array into the EFI pagetable above
+-	 * but we're not unmapping it here because if we're running in
+-	 * EFI mixed mode we need all of memory to be accessible when
+-	 * we pass parameters to the EFI runtime services in the
+-	 * thunking code.
+-	 */
+-	free_pages((unsigned long)new_memmap, pg_shift);
+-
+ 	/* clean DUMMY object */
+ 	efi_delete_dummy_variable();
+ }
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 47b99108ff8e..9faf18874692 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -286,8 +286,6 @@ void __init efi_free_boot_services(void)
+ 
+ 		free_bootmem_late(start, size);
+ 	}
+-
+-	efi_memmap_unmap();
+ }
+ 
+ /*
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index eedb30351a68..ae001450545f 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -116,12 +116,10 @@ static int __init arm_enable_runtime_services(void)
+ 
+ 	mapsize = efi.memmap.desc_size * efi.memmap.nr_map;
+ 
+-	efi.memmap.map = memremap(efi.memmap.phys_map, mapsize, MEMREMAP_WB);
+-	if (!efi.memmap.map) {
++	if (efi_memmap_init_late(efi.memmap.phys_map, mapsize)) {
+ 		pr_err("Failed to remap EFI memory map\n");
+ 		return -ENOMEM;
+ 	}
+-	efi.memmap.map_end = efi.memmap.map + mapsize;
+ 
+ 	if (!efi_virtmap_init()) {
+ 		pr_err("UEFI virtual mapping missing or invalid -- runtime services will not be available\n");
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index c1879999abe7..8a5e0db72b8f 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -347,56 +347,31 @@ subsys_initcall(efisubsys_init);
+ 
+ /*
+  * Find the efi memory descriptor for a given physical address.  Given a
+- * physicall address, determine if it exists within an EFI Memory Map entry,
++ * physical address, determine if it exists within an EFI Memory Map entry,
+  * and if so, populate the supplied memory descriptor with the appropriate
+  * data.
+  */
+ int __init efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md)
+ {
+-	struct efi_memory_map *map = &efi.memmap;
+-	phys_addr_t p, e;
++	efi_memory_desc_t *md;
+ 
+ 	if (!efi_enabled(EFI_MEMMAP)) {
+ 		pr_err_once("EFI_MEMMAP is not enabled.\n");
+ 		return -EINVAL;
+ 	}
+ 
+-	if (!map) {
+-		pr_err_once("efi.memmap is not set.\n");
+-		return -EINVAL;
+-	}
+ 	if (!out_md) {
+ 		pr_err_once("out_md is null.\n");
+ 		return -EINVAL;
+         }
+-	if (WARN_ON_ONCE(!map->phys_map))
+-		return -EINVAL;
+-	if (WARN_ON_ONCE(map->nr_map == 0) || WARN_ON_ONCE(map->desc_size == 0))
+-		return -EINVAL;
+ 
+-	e = map->phys_map + map->nr_map * map->desc_size;
+-	for (p = map->phys_map; p < e; p += map->desc_size) {
+-		efi_memory_desc_t *md;
++	for_each_efi_memory_desc(md) {
+ 		u64 size;
+ 		u64 end;
+ 
+-		/*
+-		 * If a driver calls this after efi_free_boot_services,
+-		 * ->map will be NULL, and the target may also not be mapped.
+-		 * So just always get our own virtual map on the CPU.
+-		 *
+-		 */
+-		md = early_memremap(p, sizeof (*md));
+-		if (!md) {
+-			pr_err_once("early_memremap(%pa, %zu) failed.\n",
+-				    &p, sizeof (*md));
+-			return -ENOMEM;
+-		}
+-
+ 		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
+ 		    md->type != EFI_BOOT_SERVICES_DATA &&
+ 		    md->type != EFI_RUNTIME_SERVICES_DATA) {
+-			early_memunmap(md, sizeof (*md));
+ 			continue;
+ 		}
+ 
+@@ -404,11 +379,8 @@ int __init efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md)
+ 		end = md->phys_addr + size;
+ 		if (phys_addr >= md->phys_addr && phys_addr < end) {
+ 			memcpy(out_md, md, sizeof(*out_md));
+-			early_memunmap(md, sizeof (*md));
+ 			return 0;
+ 		}
+-
+-		early_memunmap(md, sizeof (*md));
+ 	}
+ 	pr_err_once("requested map not found.\n");
+ 	return -ENOENT;
+@@ -545,32 +517,49 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
+ }
+ 
+ /**
+- * efi_memmap_init_early - Map the EFI memory map data structure
++ * __efi_memmap_init - Common code for mapping the EFI memory map
+  * @data: EFI memory map data
++ * @late: Use early or late mapping function?
+  *
+- * Use early_memremap() to map the passed in EFI memory map and assign
+- * it to efi.memmap.
++ * This function takes care of figuring out which function to use to
++ * map the EFI memory map in efi.memmap based on how far into the boot
++ * we are.
++ *
++ * During bootup @late should be %false since we only have access to
++ * the early_memremap*() functions as the vmalloc space isn't setup.
++ * Once the kernel is fully booted we can fallback to the more robust
++ * memremap*() API.
++ *
++ * Returns zero on success, a negative error code on failure.
+  */
+-int __init efi_memmap_init_early(struct efi_memory_map_data *data)
++static int __init
++__efi_memmap_init(struct efi_memory_map_data *data, bool late)
+ {
+ 	struct efi_memory_map map;
++	phys_addr_t phys_map;
+ 
+ 	if (efi_enabled(EFI_PARAVIRT))
+ 		return 0;
+ 
+-	map.phys_map = data->phys_map;
++	phys_map = data->phys_map;
++
++	if (late)
++		map.map = memremap(phys_map, data->size, MEMREMAP_WB);
++	else
++		map.map = early_memremap(phys_map, data->size);
+ 
+-	map.map = early_memremap(data->phys_map, data->size);
+ 	if (!map.map) {
+ 		pr_err("Could not map the memory map!\n");
+ 		return -ENOMEM;
+ 	}
+ 
++	map.phys_map = data->phys_map;
+ 	map.nr_map = data->size / data->desc_size;
+ 	map.map_end = map.map + data->size;
+ 
+ 	map.desc_version = data->desc_version;
+ 	map.desc_size = data->desc_size;
++	map.late = late;
+ 
+ 	set_bit(EFI_MEMMAP, &efi.flags);
+ 
+@@ -579,17 +568,83 @@ int __init efi_memmap_init_early(struct efi_memory_map_data *data)
  	return 0;
  }
  
 +/**
-+ * efi_fake_memmap_split_count - Count number of additional EFI memmap entries
-+ * @md: EFI memory descriptor to split
-+ * @range: Address range (start, end) to split around
++ * efi_memmap_init_early - Map the EFI memory map data structure
++ * @data: EFI memory map data
 + *
-+ * Returns the number of additional EFI memmap entries required to
-+ * accomodate @range.
++ * Use early_memremap() to map the passed in EFI memory map and assign
++ * it to efi.memmap.
 + */
-+static int efi_fake_memmap_split_count(efi_memory_desc_t *md, struct range *range)
++int __init efi_memmap_init_early(struct efi_memory_map_data *data)
 +{
-+	u64 m_start, m_end;
-+	u64 start, end;
-+	int count = 0;
++	/* Cannot go backwards */
++	WARN_ON(efi.memmap.late);
 +
-+	start = md->phys_addr;
-+	end = start + (md->num_pages << EFI_PAGE_SHIFT) - 1;
-+
-+	/* modifying range */
-+	m_start = range->start;
-+	m_end = range->end;
-+
-+	if (m_start <= start) {
-+		/* split into 2 parts */
-+		if (start < m_end && m_end < end)
-+			count++;
-+	}
-+
-+	if (start < m_start && m_start < end) {
-+		/* split into 3 parts */
-+		if (m_end < end)
-+			count += 2;
-+		/* split into 2 parts */
-+		if (end <= m_end)
-+			count++;
-+	}
-+
-+	return count;
++	return __efi_memmap_init(data, false);
 +}
 +
-+/**
-+ * efi_fake_memmap_insert - Insert a fake memory region in an EFI memmap
-+ * @old_memmap: The existing EFI memory map structure
-+ * @buf: Address of buffer to store new map
-+ * @mem: Fake memory map entry to insert
-+ *
-+ * It is suggested that you call efi_fake_memmap_split_count() first
-+ * to see how large @buf needs to be.
-+ */
-+static void efi_fake_memmap_insert(struct efi_memory_map *old_memmap,
-+				   void *buf, struct fake_mem *mem)
-+{
-+	u64 m_start, m_end, m_attr;
-+	efi_memory_desc_t *md;
-+	u64 start, end;
-+	void *old, *new;
-+
-+	/* modifying range */
-+	m_start = mem->range.start;
-+	m_end = mem->range.end;
-+	m_attr = mem->attribute;
-+
-+	for (old = old_memmap->map, new = buf;
-+	     old < old_memmap->map_end;
-+	     old += old_memmap->desc_size, new += old_memmap->desc_size) {
-+
-+		/* copy original EFI memory descriptor */
-+		memcpy(new, old, old_memmap->desc_size);
-+		md = new;
-+		start = md->phys_addr;
-+		end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1;
-+
-+		if (m_start <= start && end <= m_end)
-+			md->attribute |= m_attr;
-+
-+		if (m_start <= start &&
-+		    (start < m_end && m_end < end)) {
-+			/* first part */
-+			md->attribute |= m_attr;
-+			md->num_pages = (m_end - md->phys_addr + 1) >>
-+				EFI_PAGE_SHIFT;
-+			/* latter part */
-+			new += old_memmap->desc_size;
-+			memcpy(new, old, old_memmap->desc_size);
-+			md = new;
-+			md->phys_addr = m_end + 1;
-+			md->num_pages = (end - md->phys_addr + 1) >>
-+				EFI_PAGE_SHIFT;
-+		}
-+
-+		if ((start < m_start && m_start < end) && m_end < end) {
-+			/* first part */
-+			md->num_pages = (m_start - md->phys_addr) >>
-+				EFI_PAGE_SHIFT;
-+			/* middle part */
-+			new += old_memmap->desc_size;
-+			memcpy(new, old, old_memmap->desc_size);
-+			md = new;
-+			md->attribute |= m_attr;
-+			md->phys_addr = m_start;
-+			md->num_pages = (m_end - m_start + 1) >>
-+				EFI_PAGE_SHIFT;
-+			/* last part */
-+			new += old_memmap->desc_size;
-+			memcpy(new, old, old_memmap->desc_size);
-+			md = new;
-+			md->phys_addr = m_end + 1;
-+			md->num_pages = (end - m_end) >>
-+				EFI_PAGE_SHIFT;
-+		}
-+
-+		if ((start < m_start && m_start < end) &&
-+		    (end <= m_end)) {
-+			/* first part */
-+			md->num_pages = (m_start - md->phys_addr) >>
-+				EFI_PAGE_SHIFT;
-+			/* latter part */
-+			new += old_memmap->desc_size;
-+			memcpy(new, old, old_memmap->desc_size);
-+			md = new;
-+			md->phys_addr = m_start;
-+			md->num_pages = (end - md->phys_addr + 1) >>
-+				EFI_PAGE_SHIFT;
-+			md->attribute |= m_attr;
-+		}
-+	}
-+}
-+
- void __init efi_fake_memmap(void)
+ void __init efi_memmap_unmap(void)
  {
--	u64 start, end, m_start, m_end, m_attr;
- 	struct efi_memory_map_data data;
- 	int new_nr_map = efi.memmap.nr_map;
- 	efi_memory_desc_t *md;
- 	phys_addr_t new_memmap_phy;
- 	void *new_memmap;
--	void *old, *new;
- 	int i;
+-	unsigned long size;
++	if (!efi.memmap.late) {
++		unsigned long size;
  
- 	if (!nr_fake_mem)
- 		return;
+-	size = efi.memmap.desc_size * efi.memmap.nr_map;
++		size = efi.memmap.desc_size * efi.memmap.nr_map;
++		early_memunmap(efi.memmap.map, size);
++	} else {
++		memunmap(efi.memmap.map);
++	}
  
- 	/* count up the number of EFI memory descriptor */
--	for_each_efi_memory_desc(md) {
--		start = md->phys_addr;
--		end = start + (md->num_pages << EFI_PAGE_SHIFT) - 1;
--
--		for (i = 0; i < nr_fake_mem; i++) {
--			/* modifying range */
--			m_start = fake_mems[i].range.start;
--			m_end = fake_mems[i].range.end;
--
--			if (m_start <= start) {
--				/* split into 2 parts */
--				if (start < m_end && m_end < end)
--					new_nr_map++;
--			}
--			if (start < m_start && m_start < end) {
--				/* split into 3 parts */
--				if (m_end < end)
--					new_nr_map += 2;
--				/* split into 2 parts */
--				if (end <= m_end)
--					new_nr_map++;
--			}
-+	for (i = 0; i < nr_fake_mem; i++) {
-+		for_each_efi_memory_desc(md) {
-+			struct range *r = &fake_mems[i].range;
+-	early_memunmap(efi.memmap.map, size);
+ 	efi.memmap.map = NULL;
+ 	clear_bit(EFI_MEMMAP, &efi.flags);
+ }
+ 
++/**
++ * efi_memmap_init_late - Map efi.memmap with memremap()
++ * @phys_addr: Physical address of the new EFI memory map
++ * @size: Size in bytes of the new EFI memory map
++ *
++ * Setup a mapping of the EFI memory map using ioremap_cache(). This
++ * function should only be called once the vmalloc space has been
++ * setup and is therefore not suitable for calling during early EFI
++ * initialise, e.g. in efi_init(). Additionally, it expects
++ * efi_memmap_init_early() to have already been called.
++ *
++ * The reason there are two EFI memmap initialisation
++ * (efi_memmap_init_early() and this late version) is because the
++ * early EFI memmap should be explicitly unmapped once EFI
++ * initialisation is complete as the fixmap space used to map the EFI
++ * memmap (via early_memremap()) is a scarce resource.
++ *
++ * This late mapping is intended to persist for the duration of
++ * runtime so that things like efi_mem_desc_lookup() and
++ * efi_mem_attributes() always work.
++ *
++ * Returns zero on success, a negative error code on failure.
++ */
++int __init efi_memmap_init_late(phys_addr_t addr, unsigned long size)
++{
++	struct efi_memory_map_data data = {
++		.phys_map = addr,
++		.size = size,
++	};
 +
-+			new_nr_map += efi_fake_memmap_split_count(md, r);
- 		}
- 	}
++	/* Did we forget to unmap the early EFI memmap? */
++	WARN_ON(efi.memmap.map);
++
++	/* Were we already called? */
++	WARN_ON(efi.memmap.late);
++
++	/*
++	 * It makes no sense to allow callers to register different
++	 * values for the following fields. Copy them out of the
++	 * existing early EFI memmap.
++	 */
++	data.desc_version = efi.memmap.desc_version;
++	data.desc_size = efi.memmap.desc_size;
++
++	return __efi_memmap_init(&data, true);
++}
++
+ #ifdef CONFIG_EFI_VARS_MODULE
+ static int __init efi_load_efivars(void)
+ {
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index d862d4998580..f149676b2fcd 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -688,6 +688,7 @@ struct efi_memory_map {
+ 	int nr_map;
+ 	unsigned long desc_version;
+ 	unsigned long desc_size;
++	bool late;
+ };
  
-@@ -108,77 +216,8 @@ void __init efi_fake_memmap(void)
- 		return;
- 	}
+ struct efi_fdt_params {
+@@ -914,6 +915,7 @@ static inline efi_status_t efi_query_variable_store(u32 attributes,
+ extern void __iomem *efi_lookup_mapped_addr(u64 phys_addr);
  
--	for (old = efi.memmap.map, new = new_memmap;
--	     old < efi.memmap.map_end;
--	     old += efi.memmap.desc_size, new += efi.memmap.desc_size) {
--
--		/* copy original EFI memory descriptor */
--		memcpy(new, old, efi.memmap.desc_size);
--		md = new;
--		start = md->phys_addr;
--		end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1;
--
--		for (i = 0; i < nr_fake_mem; i++) {
--			/* modifying range */
--			m_start = fake_mems[i].range.start;
--			m_end = fake_mems[i].range.end;
--			m_attr = fake_mems[i].attribute;
--
--			if (m_start <= start && end <= m_end)
--				md->attribute |= m_attr;
--
--			if (m_start <= start &&
--			    (start < m_end && m_end < end)) {
--				/* first part */
--				md->attribute |= m_attr;
--				md->num_pages = (m_end - md->phys_addr + 1) >>
--					EFI_PAGE_SHIFT;
--				/* latter part */
--				new += efi.memmap.desc_size;
--				memcpy(new, old, efi.memmap.desc_size);
--				md = new;
--				md->phys_addr = m_end + 1;
--				md->num_pages = (end - md->phys_addr + 1) >>
--					EFI_PAGE_SHIFT;
--			}
--
--			if ((start < m_start && m_start < end) && m_end < end) {
--				/* first part */
--				md->num_pages = (m_start - md->phys_addr) >>
--					EFI_PAGE_SHIFT;
--				/* middle part */
--				new += efi.memmap.desc_size;
--				memcpy(new, old, efi.memmap.desc_size);
--				md = new;
--				md->attribute |= m_attr;
--				md->phys_addr = m_start;
--				md->num_pages = (m_end - m_start + 1) >>
--					EFI_PAGE_SHIFT;
--				/* last part */
--				new += efi.memmap.desc_size;
--				memcpy(new, old, efi.memmap.desc_size);
--				md = new;
--				md->phys_addr = m_end + 1;
--				md->num_pages = (end - m_end) >>
--					EFI_PAGE_SHIFT;
--			}
--
--			if ((start < m_start && m_start < end) &&
--			    (end <= m_end)) {
--				/* first part */
--				md->num_pages = (m_start - md->phys_addr) >>
--					EFI_PAGE_SHIFT;
--				/* latter part */
--				new += efi.memmap.desc_size;
--				memcpy(new, old, efi.memmap.desc_size);
--				md = new;
--				md->phys_addr = m_start;
--				md->num_pages = (end - md->phys_addr + 1) >>
--					EFI_PAGE_SHIFT;
--				md->attribute |= m_attr;
--			}
--		}
--	}
-+	for (i = 0; i < nr_fake_mem; i++)
-+		efi_fake_memmap_insert(&efi.memmap, new_memmap, &fake_mems[i]);
+ extern int __init efi_memmap_init_early(struct efi_memory_map_data *data);
++extern int __init efi_memmap_init_late(phys_addr_t addr, unsigned long size);
+ extern void __init efi_memmap_unmap(void);
  
- 	/* swap into new EFI memmap */
- 	early_memunmap(new_memmap, efi.memmap.desc_size * new_nr_map);
+ extern int efi_config_init(efi_config_table_type_t *arch_tables);
 -- 
 2.9.3
