@@ -1,73 +1,43 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v2 13/20] x86: Decrypt trampoline area if memory
- encryption is active
-Date: Mon, 12 Sep 2016 10:43:32 -0500
-Message-ID: <15219992-dfca-aaa4-4a98-593ed85e1e8f@amd.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [RFC PATCH v2 10/20] x86: Insure that memory areas are encrypted
+ when possible
+Date: Mon, 12 Sep 2016 18:33:49 +0200
+Message-ID: <20160912163349.exnuvr7svsq7fmui@pd.tnic>
 References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
- <20160822223757.29880.24107.stgit@tlendack-t1.amdoffice.net>
- <20160909173442.wypsprnzb5ax6xqb@pd.tnic>
+ <20160822223722.29880.94331.stgit@tlendack-t1.amdoffice.net>
+ <20160909155305.bmm2fvw7ndjjhqvo@pd.tnic>
+ <23855fb4-05b0-4c12-d34f-4d5f45f3b015@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20160909173442.wypsprnzb5ax6xqb@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>, Paolo Bonzini <pbonzini@redhat.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-arch-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <23855fb4-05b0-4c12-d34f-4d5f45f3b015@amd.com>
+Sender: linux-arch-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Paolo Bonzini <pbonzini@redhat.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.>
 List-Id: linux-efi@vger.kernel.org
 
-On 09/09/2016 12:34 PM, Borislav Petkov wrote:
-> On Mon, Aug 22, 2016 at 05:37:57PM -0500, Tom Lendacky wrote:
->> When Secure Memory Encryption is enabled, the trampoline area must not
->> be encrypted. A cpu running in real mode will not be able to decrypt
-> 
-> s/cpu/CPU/... always :-)
+On Mon, Sep 12, 2016 at 10:05:36AM -0500, Tom Lendacky wrote:
+> I can look into that.  The reason I put this here is this is all the
+> early page fault support that is very specific to this file. I modified
+> an existing static function to take advantage of the mapping support.
 
-Ok.
+Yeah, but all this code is SME-specific and doesn't belong there.
+AFAICT, it uses global/public symbols so there shouldn't be a problem to
+have it in mem_encrypt.c.
 
-> 
->> memory that has been encrypted because it will not be able to use addresses
->> with the memory encryption mask.
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->>  arch/x86/realmode/init.c |    9 +++++++++
->>  1 file changed, 9 insertions(+)
->>
->> diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
->> index 5db706f1..f74925f 100644
->> --- a/arch/x86/realmode/init.c
->> +++ b/arch/x86/realmode/init.c
->> @@ -6,6 +6,7 @@
->>  #include <asm/pgtable.h>
->>  #include <asm/realmode.h>
->>  #include <asm/tlbflush.h>
->> +#include <asm/mem_encrypt.h>
->>  
->>  struct real_mode_header *real_mode_header;
->>  u32 *trampoline_cr4_features;
->> @@ -130,6 +131,14 @@ static void __init set_real_mode_permissions(void)
->>  	unsigned long text_start =
->>  		(unsigned long) __va(real_mode_header->text_start);
->>  
->> +	/*
->> +	 * If memory encryption is active, the trampoline area will need to
->> +	 * be in non-encrypted memory in order to bring up other processors
-> 
-> Let's stick with either "unencrypted" - I'd prefer that one - or
-> "non-encrypted" nomenclature so that there's no distraction. I see both
-> versions in the patchset.
+> Hmmm, maybe... With the change to the early_memremap() the initrd is now
+> identified as BOOT_DATA in relocate_initrd() and so it will be mapped
+> and copied as non-encyrpted data. But since it was encrypted before the
+> call to relocate_initrd() it will copy encrypted bytes which will later
+> be accessed encrypted. That isn't clear though, so I'll rework
+> reserve_initrd() to perform the sme_early_mem_enc() once at the end
+> whether the initrd is re-located or not.
 
-Yup, I'll audit the code and make everything consistent.
+Makes sense.
 
-Thanks,
-Tom
+-- 
+Regards/Gruss,
+    Boris.
 
-> 
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+ECO tip #101: Trim your mails when you reply.
