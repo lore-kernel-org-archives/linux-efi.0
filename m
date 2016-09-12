@@ -1,37 +1,115 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [RFC PATCH v2 16/20] x86: Check for memory encryption on the APs
-Date: Mon, 12 Sep 2016 18:43:03 +0200
-Message-ID: <20160912164303.kaqx2ayqjtbkcc2z@pd.tnic>
-References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
-	<20160822223829.29880.10341.stgit@tlendack-t1.amdoffice.net>
+From: Andy Lutomirski <luto@amacapital.net>
+Subject: Re: [RFC PATCH v2 11/20] mm: Access BOOT related data in the clear
+Date: Mon, 12 Sep 2016 09:55:09 -0700
+Message-ID: <CALCETrUk2kRSzKfwhio6KV3iuYaSV2uxybd-e95kK3vY=yTSfg@mail.gmail.com>
+References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net> <20160822223738.29880.6909.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160822223829.29880.10341.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20160822223738.29880.6909.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>, Matt Fleming <mfleming@suse.de>
+Cc: kasan-dev <kasan-dev@googlegroups.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-arch <linux-arch@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Paolo Bonzini <pbonzini@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, iommu@lists.linux-foundation.org, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, Jonathan Corbet <corbet@lwn.net>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Dmitry Vyukov <dvyukov@google.com>, Arnd Bergmann <arnd@arndb.de>, Joerg Roedel <joro@8bytes.org>, Andrey Ryabinin <aryabinin@virtuozzo.com>, "H. Peter Anvin" <hpa@zytor.com>, X86
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 22, 2016 at 05:38:29PM -0500, Tom Lendacky wrote:
-> Add support to check if memory encryption is active in the kernel and that
-> it has been enabled on the AP. If memory encryption is active in the kernel
+On Aug 22, 2016 6:53 PM, "Tom Lendacky" <thomas.lendacky@amd.com> wrote:
+>
+> BOOT data (such as EFI related data) is not encyrpted when the system is
+> booted and needs to be accessed as non-encrypted.  Add support to the
+> early_memremap API to identify the type of data being accessed so that
+> the proper encryption attribute can be applied.  Currently, two types
+> of data are defined, KERNEL_DATA and BOOT_DATA.
 
-A small nit: let's write out "AP" the first time at least: "... on the
-Application Processors (AP)." for more clarity.
+What happens when you memremap boot services data outside of early
+boot?  Matt just added code that does this.
 
--- 
-Regards/Gruss,
-    Boris.
+IMO this API is not so great.  It scatters a specialized consideration
+all over the place.  Could early_memremap not look up the PA to figure
+out what to do?
 
-ECO tip #101: Trim your mails when you reply.
+--Andy
+
+[leaving the rest here for Matt's benefit]
+
+>                      unsigned long size,
+> +                                                   enum memremap_owner owner,
+> +                                                   pgprot_t prot)
+> +{
+> +       return prot;
+> +}
+> +
+>  void __init early_ioremap_reset(void)
+>  {
+>         early_ioremap_shutdown();
+> @@ -213,16 +221,23 @@ early_ioremap(resource_size_t phys_addr, unsigned long size)
+>
+>  /* Remap memory */
+>  void __init *
+> -early_memremap(resource_size_t phys_addr, unsigned long size)
+> +early_memremap(resource_size_t phys_addr, unsigned long size,
+> +              enum memremap_owner owner)
+>  {
+> -       return (__force void *)__early_ioremap(phys_addr, size,
+> -                                              FIXMAP_PAGE_NORMAL);
+> +       pgprot_t prot = early_memremap_pgprot_adjust(phys_addr, size, owner,
+> +                                                    FIXMAP_PAGE_NORMAL);
+> +
+> +       return (__force void *)__early_ioremap(phys_addr, size, prot);
+>  }
+>  #ifdef FIXMAP_PAGE_RO
+>  void __init *
+> -early_memremap_ro(resource_size_t phys_addr, unsigned long size)
+> +early_memremap_ro(resource_size_t phys_addr, unsigned long size,
+> +                 enum memremap_owner owner)
+>  {
+> -       return (__force void *)__early_ioremap(phys_addr, size, FIXMAP_PAGE_RO);
+> +       pgprot_t prot = early_memremap_pgprot_adjust(phys_addr, size, owner,
+> +                                                    FIXMAP_PAGE_RO);
+> +
+> +       return (__force void *)__early_ioremap(phys_addr, size, prot);
+>  }
+>  #endif
+>
+> @@ -236,7 +251,8 @@ early_memremap_prot(resource_size_t phys_addr, unsigned long size,
+>
+>  #define MAX_MAP_CHUNK  (NR_FIX_BTMAPS << PAGE_SHIFT)
+>
+> -void __init copy_from_early_mem(void *dest, phys_addr_t src, unsigned long size)
+> +void __init copy_from_early_mem(void *dest, phys_addr_t src, unsigned long size,
+> +                               enum memremap_owner owner)
+>  {
+>         unsigned long slop, clen;
+>         char *p;
+> @@ -246,7 +262,7 @@ void __init copy_from_early_mem(void *dest, phys_addr_t src, unsigned long size)
+>                 clen = size;
+>                 if (clen > MAX_MAP_CHUNK - slop)
+>                         clen = MAX_MAP_CHUNK - slop;
+> -               p = early_memremap(src & PAGE_MASK, clen + slop);
+> +               p = early_memremap(src & PAGE_MASK, clen + slop, owner);
+>                 memcpy(dest, p + slop, clen);
+>                 early_memunmap(p, clen + slop);
+>                 dest += clen;
+> @@ -265,12 +281,14 @@ early_ioremap(resource_size_t phys_addr, unsigned long size)
+>
+>  /* Remap memory */
+>  void __init *
+> -early_memremap(resource_size_t phys_addr, unsigned long size)
+> +early_memremap(resource_size_t phys_addr, unsigned long size,
+> +              enum memremap_owner owner)
+>  {
+>         return (void *)phys_addr;
+>  }
+>  void __init *
+> -early_memremap_ro(resource_size_t phys_addr, unsigned long size)
+> +early_memremap_ro(resource_size_t phys_addr, unsigned long size,
+> +                 enum memremap_owner owner)
+>  {
+>         return (void *)phys_addr;
+>  }
+>
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
