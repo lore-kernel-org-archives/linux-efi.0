@@ -1,87 +1,69 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [RFC PATCH v2 16/20] x86: Check for memory encryption on the APs
-Date: Mon, 12 Sep 2016 14:17:40 +0200
-Message-ID: <20160912121739.rwuumwpwo5megmd7@pd.tnic>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v2 07/20] x86: Provide general kernel support for
+ memory encryption
+Date: Mon, 12 Sep 2016 08:43:14 -0500
+Message-ID: <e92f1f20-a847-acb3-51ef-ced0329ccbd1@amd.com>
 References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
-	<20160822223829.29880.10341.stgit@tlendack-t1.amdoffice.net>
+ <20160822223646.29880.28794.stgit@tlendack-t1.amdoffice.net>
+ <20160906093113.GA18319@pd.tnic>
+ <f4125cae-63af-f8c7-086f-e297ce480a07@amd.com>
+ <20160907155535.i7wh46uxxa2bj3ik@pd.tnic>
+ <bc8f22db-b6f9-951f-145c-fed919098cbe@amd.com>
+ <20160908135551.3gtbwezbb7xpyud2@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160822223829.29880.10341.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20160908135551.3gtbwezbb7xpyud2@pd.tnic>
+Sender: owner-linux-mm@kvack.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
+ Anvin" <hpa@zytor.com>, Paolo Bonzini <pbonzini@redhat.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 22, 2016 at 05:38:29PM -0500, Tom Lendacky wrote:
-> Add support to check if memory encryption is active in the kernel and that
-> it has been enabled on the AP. If memory encryption is active in the kernel
-> but has not been enabled on the AP then do not allow the AP to continue
-> start up.
+On 09/08/2016 08:55 AM, Borislav Petkov wrote:
+> On Thu, Sep 08, 2016 at 08:26:27AM -0500, Tom Lendacky wrote:
+>> When does this value get initialized?  Since _PAGE_ENC is #defined to
+>> sme_me_mask, which is not set until the boot process begins, I'm afraid
+>> we'd end up using the initial value of sme_me_mask, which is zero.  Do
+>> I have that right?
 > 
-> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-> ---
->  arch/x86/include/asm/msr-index.h     |    2 ++
->  arch/x86/include/asm/realmode.h      |   12 ++++++++++++
->  arch/x86/realmode/init.c             |    4 ++++
->  arch/x86/realmode/rm/trampoline_64.S |   19 +++++++++++++++++++
->  4 files changed, 37 insertions(+)
+> Hmm, but then that would hold true for all the other defines where you
+> OR-in _PAGE_ENC, no?
 
-...
+As long as the #define is not a global variable like this one it's ok.
 
-> diff --git a/arch/x86/realmode/rm/trampoline_64.S b/arch/x86/realmode/rm/trampoline_64.S
-> index dac7b20..94e29f4 100644
-> --- a/arch/x86/realmode/rm/trampoline_64.S
-> +++ b/arch/x86/realmode/rm/trampoline_64.S
-> @@ -30,6 +30,7 @@
->  #include <asm/msr.h>
->  #include <asm/segment.h>
->  #include <asm/processor-flags.h>
-> +#include <asm/realmode.h>
->  #include "realmode.h"
->  
->  	.text
-> @@ -92,6 +93,23 @@ ENTRY(startup_32)
->  	movl	%edx, %fs
->  	movl	%edx, %gs
->  
-> +	/* Check for memory encryption support */
-> +	bt	$TH_FLAGS_SME_ENABLE_BIT, pa_tr_flags
-> +	jnc	.Ldone
-> +	movl	$MSR_K8_SYSCFG, %ecx
-> +	rdmsr
-> +	bt	$MSR_K8_SYSCFG_MEM_ENCRYPT_BIT, %eax
-> +	jc	.Ldone
-> +
-> +	/*
-> +	 * Memory encryption is enabled but the MSR has not been set on this
-> +	 * CPU so we can't continue
+> 
+> In any case, the preprocessed source looks like this:
+> 
+> pmdval_t early_pmd_flags = (((((((pteval_t)(1)) << 0) | (((pteval_t)(1)) << 1) | (((pteval_t)(1)) << 6) | (((pteval_t)(1)) << 5) | (((pteval_t)(1)) << 8)) | (((pteval_t)(1)) << 63)) | (((pteval_t)(1)) << 7)) | sme_me_mask) & ~((((pteval_t)(1)) << 8) | (((pteval_t)(1)) << 63));
+> 
+> but the problem is later, when building:
+> 
+> arch/x86/kernel/head64.c:39:28: error: initializer element is not constant
+>  pmdval_t early_pmd_flags = (__PAGE_KERNEL_LARGE | _PAGE_ENC) & ~(_PAGE_GLOBAL | _PAGE_NX);
+>                             ^
+> scripts/Makefile.build:153: recipe for target 'arch/x86/kernel/head64.s' failed
+> 
+> so I guess not. :-\
+> 
+> Ok, then at least please put the early_pmd_flags init after
+> sme_early_init() along with a small comment explaning what happens.
 
-Hmm, let me try to parse this correctly: BSP has SME enabled but the
-BIOS might not've set this on the AP? Really? Is that even possible?
+Let me verify that we won't possibly take any kind of page fault during
+sme_early_init() and cause a page to be not be marked encrypted. Or... I
+can add a comment indicating I need to set this as early as possible to
+cover any page faults that might occur.
 
-Because if SME is enabled, that means that MSR_K8_SYSCFG[23] on the BSP
-is set, right?
+Thanks,
+Tom
 
-Also, I want to rule out here simple BIOS idiocy: if the only problem
-with the bit not being set in the AP is because some BIOS monkey forgot
-to do so, then we should try to set it ourselves and not die for no real
-reason.
+> 
+> Thanks.
+> 
 
-Or is there another issue?
-
--- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
