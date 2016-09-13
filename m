@@ -1,42 +1,71 @@
-From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Subject: Re: [PATCH 4/6] driver core: Don't leak secondary fwnode on device removal
-Date: Tue, 13 Sep 2016 00:03:38 +0200
-Message-ID: <2138721.OSYGqcTspe@vostro.rjw.lan>
-References: <cover.1469616641.git.lukas@wunner.de> <6868582.iUcUV1Tb36@vostro.rjw.lan> <20160830090325.GA25024@wunner.de>
+From: Chao Gao <chao.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH] x86/efi: Add necessary checks before iterating over
+ efi.memmap
+Date: Tue, 13 Sep 2016 11:28:15 +0800
+Message-ID: <20160913032813.GA11652@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <20160830090325.GA25024@wunner.de>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Lukas Wunner <lukas@wunner.de>
-Cc: linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, Andreas Noever <andreas.noever@gmail.com>, Pierre Moreau <pierre.morrow@free.fr>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-acpi@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tuesday, August 30, 2016 11:03:25 AM Lukas Wunner wrote:
-> On Wed, Aug 17, 2016 at 02:38:50AM +0200, Rafael J. Wysocki wrote:
-> > On Thursday, July 28, 2016 02:25:41 AM Lukas Wunner wrote:
-> > > If device_add_property_set() is called for a device, a secondary fwnode
-> > > is allocated and assigned to the device but currently not freed once the
-> > > device is removed.
-> > > 
-> > > This can be triggered on Apple Macs if a Thunderbolt device is plugged
-> > > in on boot since Apple's NHI EFI driver sets a number of properties for
-> > > that device which are leaked on unplug.
-> > > 
-> > > Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> > > Cc: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
-> > > Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
-> > > Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> > > Cc: Andreas Noever <andreas.noever@gmail.com>
-> > > Signed-off-by: Lukas Wunner <lukas@wunner.de>
-> > 
-> > ACK, or I can apply it directly if you want me to do that.
-> 
-> Yes, if you could apply it directly I'd be grateful.
+Commit 78ce248f (efi: Iterate over efi.memmap in for_each_efi_memory_desc())
+replaces the old loop by for_each_efi_memory_desc() which will encounter #PF
+when efi.memap are not initialized.
 
-Applied.
+In boot process, xen set EFI_PARAVIRT in xen_efi_init() before setup_arch()
+is called. This leads efi_memmap_init() will not initialize structures
+related to efi.memmap. However, the following functions e.g.
+efi_find_mirror(), efi_print_memmap() and efi_free_boot_services() access
+efi.memmap without necessary checks. kernel and xen crash in this case.
+After adding these checks, xen and kernel boot up normally.
 
-Thanks,
-Rafael
+Signed-off-by: Chao Gao <chao.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ arch/x86/platform/efi/efi.c    | 6 ++++++
+ arch/x86/platform/efi/quirks.c | 3 +++
+ 2 files changed, 9 insertions(+)
 
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 1fbb408..68966dc 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -102,6 +102,9 @@ void __init efi_find_mirror(void)
+ 	efi_memory_desc_t *md;
+ 	u64 mirror_size = 0, total_size = 0;
+ 
++	if (efi_enabled(EFI_PARAVIRT))
++		return;
++
+ 	for_each_efi_memory_desc(md) {
+ 		unsigned long long start = md->phys_addr;
+ 		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
+@@ -207,6 +210,9 @@ void __init efi_print_memmap(void)
+ 	efi_memory_desc_t *md;
+ 	int i = 0;
+ 
++	if (efi_enabled(EFI_PARAVIRT))
++		return;
++
+ 	for_each_efi_memory_desc(md) {
+ 		char buf[64];
+ 
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 89d1146..4fa1e4d 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -251,6 +251,9 @@ void __init efi_free_boot_services(void)
+ {
+ 	efi_memory_desc_t *md;
+ 
++	if (efi_enabled(EFI_PARAVIRT))
++		return;
++
+ 	for_each_efi_memory_desc(md) {
+ 		unsigned long long start = md->phys_addr;
+ 		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
+-- 
+1.8.3.1
