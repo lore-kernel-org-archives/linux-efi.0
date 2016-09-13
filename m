@@ -1,40 +1,61 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v2 0/4] Apple device properties
-Date: Tue, 13 Sep 2016 12:29:21 +0100
-Message-ID: <20160913112921.GH3872@codeblueprint.co.uk>
-References: <cover.1473242067.git.lukas@wunner.de>
+Subject: Re: [PATCH 1/3] efi: don't call the system table version the runtime
+ services version
+Date: Tue, 13 Sep 2016 13:32:49 +0100
+Message-ID: <20160913123249.GI3872@codeblueprint.co.uk>
+References: <20160907122339.GB28333@wunner.de>
+ <1473260186-4500-1-git-send-email-pjones@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <cover.1473242067.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+In-Reply-To: <1473260186-4500-1-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, grub-devel-mXXj517/zsQ@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 07 Sep, at 12:49:18PM, Lukas Wunner wrote:
-> Retrieve device properties from EFI on Macs before ExitBootServices is
-> called and assign them to devices (patch [3/4]). The devices that
-> properties pertain to are encoded as EFI Device Paths, so add a parser
-> for these (patch [2/4]). As a first use case, amend the Thunderbolt driver
-> to take advantage of the Device ROM supplied by EFI (patch [4/4]).
+On Wed, 07 Sep, at 10:56:24AM, Peter Jones wrote:
+> The system table's hdr.revision is not the runtime services revision,
+> it's the EFI Spec revision.  The runtime services revision is the one on
+> systab->runtime->hdr.revision.
 > 
-> Patch [1/4] is already queued in Rafael J. Wysocki's tree for 4.9 and is
-> included here only because patch [2/4] wouldn't compile without it.
+> So we shouldn't call it runtime_version throughout the code, as that's
+> misleading if you're *actually* looking for the runtime services
+> revision.
 > 
-> The series also depends on these two patches which are already queued
-> in Matt's tree for 4.9:
+> We also move some of the assignments around just a bit, in support of
+> making a future patch more readable.
 > 
-> - x86/efi: Optimize away setup_gop32/64 if unused
->   https://patchwork.kernel.org/patch/9315763/
+> This also fixes a minor bug where the version field was not set in the
+> efi structure on ia64.
 > 
-> - x86/efi: Allow invocation of arbitrary boot services
->   https://patchwork.kernel.org/patch/9293371/
+> Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Reviewed-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+> ---
+>  arch/ia64/kernel/efi.c                  | 3 +++
+>  arch/x86/platform/efi/efi.c             | 7 ++++---
+>  arch/x86/platform/efi/efi_64.c          | 2 +-
+>  arch/x86/xen/efi.c                      | 4 ++--
+>  drivers/firmware/efi/arm-init.c         | 5 +++--
+>  drivers/firmware/efi/runtime-wrappers.c | 8 ++++----
+>  drivers/xen/efi.c                       | 6 +++---
+>  include/linux/efi.h                     | 2 +-
+>  8 files changed, 21 insertions(+), 16 deletions(-)
+> 
+> diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
+> index 1212956..2af99a8 100644
+> --- a/arch/ia64/kernel/efi.c
+> +++ b/arch/ia64/kernel/efi.c
+> @@ -513,6 +513,9 @@ efi_init (void)
+>  		panic("Whoa! Can't find EFI system table.\n");
+>  	if (efi.systab->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+>  		panic("Whoa! EFI system table signature incorrect\n");
+> +
+> +	efi.spec_version = efi.systab->hdr.version;
+> +
+>  	if ((efi.systab->hdr.revision >> 16) == 0)
+>  		printk(KERN_WARNING "Warning: EFI system table version "
+>  		       "%d.%02d, expected 1.00 or greater\n",
 
-I had a quick look over these series and nothing looks too crazy, but
-I still need to do an in-depth review.
-
-Given the patch dependencies you outlined above, could you resubmit
-this after the v4.9 merge window closes? That way it won't be
-forgotten about.
+I applied this and fixed up the above typo s/hdr.version/hdr.revision/
