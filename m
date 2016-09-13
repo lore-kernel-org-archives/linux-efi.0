@@ -1,94 +1,40 @@
-From: Chao Gao <chao.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Add necessary checks before iterating over
- efi.memmap
-Date: Tue, 13 Sep 2016 19:26:22 +0800
-Message-ID: <20160913112622.GA25947@localhost.localdomain>
-References: <20160913032813.GA11652@localhost.localdomain>
- <CAKv+Gu_NrMGSu-9DxyZdurLWNbkHx2D480WS3gupazzC8U67EQ@mail.gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v2 0/4] Apple device properties
+Date: Tue, 13 Sep 2016 12:29:21 +0100
+Message-ID: <20160913112921.GH3872@codeblueprint.co.uk>
+References: <cover.1473242067.git.lukas@wunner.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_NrMGSu-9DxyZdurLWNbkHx2D480WS3gupazzC8U67EQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <cover.1473242067.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, grub-devel-mXXj517/zsQ@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Sep 13, 2016 at 09:51:39AM +0100, Ard Biesheuvel wrote:
->On 13 September 2016 at 04:28, Chao Gao <chao.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
->> Commit 78ce248f (efi: Iterate over efi.memmap in for_each_efi_memory_desc())
->> replaces the old loop by for_each_efi_memory_desc() which will encounter #PF
->> when efi.memap are not initialized.
->>
->> In boot process, xen set EFI_PARAVIRT in xen_efi_init() before setup_arch()
->> is called. This leads efi_memmap_init() will not initialize structures
->> related to efi.memmap. However, the following functions e.g.
->> efi_find_mirror(), efi_print_memmap() and efi_free_boot_services() access
->> efi.memmap without necessary checks. kernel and xen crash in this case.
->> After adding these checks, xen and kernel boot up normally.
->>
->
->OK, so looking at the hunks below, it looks to me like we should
->initialize the efi.memmap to sane values in the EFI_PARAVIRT case,
->rather than open coding this test each time for_each_efi_memory_desc()
->is invoked.
->
+On Wed, 07 Sep, at 12:49:18PM, Lukas Wunner wrote:
+> Retrieve device properties from EFI on Macs before ExitBootServices is
+> called and assign them to devices (patch [3/4]). The devices that
+> properties pertain to are encoded as EFI Device Paths, so add a parser
+> for these (patch [2/4]). As a first use case, amend the Thunderbolt driver
+> to take advantage of the Device ROM supplied by EFI (patch [4/4]).
+> 
+> Patch [1/4] is already queued in Rafael J. Wysocki's tree for 4.9 and is
+> included here only because patch [2/4] wouldn't compile without it.
+> 
+> The series also depends on these two patches which are already queued
+> in Matt's tree for 4.9:
+> 
+> - x86/efi: Optimize away setup_gop32/64 if unused
+>   https://patchwork.kernel.org/patch/9315763/
+> 
+> - x86/efi: Allow invocation of arbitrary boot services
+>   https://patchwork.kernel.org/patch/9293371/
 
-Ard, thanks for you reply.
-Yes, I think what you say is also a solution. This patch just uses the same method
-using by some existed functions such as efi_memblock_x86_reserve_range() and 
-efi_runtime_init(). we can handle cases with existed flags correctly and the checks
-seems not too much. Maybe we can try what you say when it's really needed.
+I had a quick look over these series and nothing looks too crazy, but
+I still need to do an in-depth review.
 
->> Signed-off-by: Chao Gao <chao.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->> ---
->>  arch/x86/platform/efi/efi.c    | 6 ++++++
->>  arch/x86/platform/efi/quirks.c | 3 +++
->>  2 files changed, 9 insertions(+)
->>
->> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
->> index 1fbb408..68966dc 100644
->> --- a/arch/x86/platform/efi/efi.c
->> +++ b/arch/x86/platform/efi/efi.c
->> @@ -102,6 +102,9 @@ void __init efi_find_mirror(void)
->>         efi_memory_desc_t *md;
->>         u64 mirror_size = 0, total_size = 0;
->>
->> +       if (efi_enabled(EFI_PARAVIRT))
->> +               return;
->> +
->>         for_each_efi_memory_desc(md) {
->>                 unsigned long long start = md->phys_addr;
->>                 unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
->> @@ -207,6 +210,9 @@ void __init efi_print_memmap(void)
->>         efi_memory_desc_t *md;
->>         int i = 0;
->>
->> +       if (efi_enabled(EFI_PARAVIRT))
->> +               return;
->> +
->>         for_each_efi_memory_desc(md) {
->>                 char buf[64];
->>
->> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
->> index 89d1146..4fa1e4d 100644
->> --- a/arch/x86/platform/efi/quirks.c
->> +++ b/arch/x86/platform/efi/quirks.c
->> @@ -251,6 +251,9 @@ void __init efi_free_boot_services(void)
->>  {
->>         efi_memory_desc_t *md;
->>
->> +       if (efi_enabled(EFI_PARAVIRT))
->> +               return;
->> +
->>         for_each_efi_memory_desc(md) {
->>                 unsigned long long start = md->phys_addr;
->>                 unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
->> --
->> 1.8.3.1
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
->> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Given the patch dependencies you outlined above, could you resubmit
+this after the v4.9 merge window closes? That way it won't be
+forgotten about.
