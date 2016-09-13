@@ -1,83 +1,66 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Add necessary checks before iterating over efi.memmap
-Date: Tue, 13 Sep 2016 09:51:39 +0100
-Message-ID: <CAKv+Gu_NrMGSu-9DxyZdurLWNbkHx2D480WS3gupazzC8U67EQ@mail.gmail.com>
-References: <20160913032813.GA11652@localhost.localdomain>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [RFC PATCH v1 01/28] kvm: svm: Add support for additional SVM
+ NPF error codes
+Date: Tue, 13 Sep 2016 11:56:04 +0200
+Message-ID: <20160913095604.GB19076@nazgul.tnic>
+References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
+ <147190822443.9523.7814744422402462127.stgit@brijesh-build-machine>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160913032813.GA11652-bi+AKbBUZKY6gyzm1THtWbp2dZbC/Bob@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chao Gao <chao.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <147190822443.9523.7814744422402462127.stgit@brijesh-build-machine>
+Sender: owner-linux-mm@kvack.org
+To: Brijesh Singh <brijesh.singh@amd.com>
+Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, devel@linuxdriverproject.org, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedoraproject.org, tony.luck@intel.com, alexandre.bounine@idt.com, kuleshovmail@gmail.com, linux-kernel@vger.kernel.org, mcgrof@kernel.org, linux-crypto@vger.k
 List-Id: linux-efi@vger.kernel.org
 
-On 13 September 2016 at 04:28, Chao Gao <chao.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> Commit 78ce248f (efi: Iterate over efi.memmap in for_each_efi_memory_desc())
-> replaces the old loop by for_each_efi_memory_desc() which will encounter #PF
-> when efi.memap are not initialized.
->
-> In boot process, xen set EFI_PARAVIRT in xen_efi_init() before setup_arch()
-> is called. This leads efi_memmap_init() will not initialize structures
-> related to efi.memmap. However, the following functions e.g.
-> efi_find_mirror(), efi_print_memmap() and efi_free_boot_services() access
-> efi.memmap without necessary checks. kernel and xen crash in this case.
-> After adding these checks, xen and kernel boot up normally.
->
-
-OK, so looking at the hunks below, it looks to me like we should
-initialize the efi.memmap to sane values in the EFI_PARAVIRT case,
-rather than open coding this test each time for_each_efi_memory_desc()
-is invoked.
-
-> Signed-off-by: Chao Gao <chao.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+On Mon, Aug 22, 2016 at 07:23:44PM -0400, Brijesh Singh wrote:
+> From: Tom Lendacky <thomas.lendacky@amd.com>
+> 
+> AMD hardware adds two additional bits to aid in nested page fault handling.
+> 
+> Bit 32 - NPF occurred while translating the guest's final physical address
+> Bit 33 - NPF occurred while translating the guest page tables
+> 
+> The guest page tables fault indicator can be used as an aid for nested
+> virtualization. Using V0 for the host, V1 for the first level guest and
+> V2 for the second level guest, when both V1 and V2 are using nested paging
+> there are currently a number of unnecessary instruction emulations. When
+> V2 is launched shadow paging is used in V1 for the nested tables of V2. As
+> a result, KVM marks these pages as RO in the host nested page tables. When
+> V2 exits and we resume V1, these pages are still marked RO.
+> 
+> Every nested walk for a guest page table is treated as a user-level write
+> access and this causes a lot of NPFs because the V1 page tables are marked
+> RO in the V0 nested tables. While executing V1, when these NPFs occur KVM
+> sees a write to a read-only page, emulates the V1 instruction and unprotects
+> the page (marking it RW). This patch looks for cases where we get a NPF due
+> to a guest page table walk where the page was marked RO. It immediately
+> unprotects the page and resumes the guest, leading to far fewer instruction
+> emulations when nested virtualization is used.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 > ---
->  arch/x86/platform/efi/efi.c    | 6 ++++++
->  arch/x86/platform/efi/quirks.c | 3 +++
->  2 files changed, 9 insertions(+)
->
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 1fbb408..68966dc 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -102,6 +102,9 @@ void __init efi_find_mirror(void)
->         efi_memory_desc_t *md;
->         u64 mirror_size = 0, total_size = 0;
->
-> +       if (efi_enabled(EFI_PARAVIRT))
-> +               return;
-> +
->         for_each_efi_memory_desc(md) {
->                 unsigned long long start = md->phys_addr;
->                 unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
-> @@ -207,6 +210,9 @@ void __init efi_print_memmap(void)
->         efi_memory_desc_t *md;
->         int i = 0;
->
-> +       if (efi_enabled(EFI_PARAVIRT))
-> +               return;
-> +
->         for_each_efi_memory_desc(md) {
->                 char buf[64];
->
-> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-> index 89d1146..4fa1e4d 100644
-> --- a/arch/x86/platform/efi/quirks.c
-> +++ b/arch/x86/platform/efi/quirks.c
-> @@ -251,6 +251,9 @@ void __init efi_free_boot_services(void)
->  {
->         efi_memory_desc_t *md;
->
-> +       if (efi_enabled(EFI_PARAVIRT))
-> +               return;
-> +
->         for_each_efi_memory_desc(md) {
->                 unsigned long long start = md->phys_addr;
->                 unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
-> --
-> 1.8.3.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  arch/x86/include/asm/kvm_host.h |   11 ++++++++++-
+>  arch/x86/kvm/mmu.c              |   20 ++++++++++++++++++--
+>  arch/x86/kvm/svm.c              |    2 +-
+>  3 files changed, 29 insertions(+), 4 deletions(-)
+
+FWIW: Reviewed-by: Borislav Petkov <bp@suse.de>
+
+-- 
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+--
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
