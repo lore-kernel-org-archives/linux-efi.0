@@ -1,159 +1,201 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL 00/29] EFI changes for v4.9
-Date: Tue, 13 Sep 2016 20:32:09 +0200
-Message-ID: <20160913183209.GA28714@gmail.com>
-References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v2 14/20] x86: DMA support for memory encryption
+Date: Wed, 14 Sep 2016 08:36:30 -0500
+Message-ID: <cb3e6b91-44f7-ee01-6da1-82eb32243b85@amd.com>
+References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
+ <20160822223807.29880.69294.stgit@tlendack-t1.amdoffice.net>
+ <20160912105815.3z5bvzbcfjcj4ku7@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160909151851.27577-1-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Alex Thorlton <athorlton@sgi.com>, Andy Lutomirski <luto@amacapital.net>, Borislav Petkov <bp@alien8.de>, Borislav Petkov <bp@suse.de>, Colin Ian King <colin.king@canonical.com>, Dave Young <dyoung@redhat.com>, Dimitri Sivanich <sivanich@sgi.com>, Greg KH <gregkh@linuxfoundation.org>, Ivan Hu <ivan.hu@canonical.com>, James Morse <james.morse@arm.com>, joeyli <jlee@suse.com>, Josh Boyer <jwboyer@fedoraproject.org>, Josh Triplett <josh@joshtriplett.org>, Julia Lawall <julia.lawall@lip6.fr>, Kamezawa Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, Leif Lindholm <leif.lindholm@linaro.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <20160912105815.3z5bvzbcfjcj4ku7@pd.tnic>
+Sender: linux-doc-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Paolo Bonzini <pbonzini@redhat.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dm
 List-Id: linux-efi@vger.kernel.org
 
+On 09/12/2016 05:58 AM, Borislav Petkov wrote:
+> On Mon, Aug 22, 2016 at 05:38:07PM -0500, Tom Lendacky wrote:
+>> Since DMA addresses will effectively look like 48-bit addresses when the
+>> memory encryption mask is set, SWIOTLB is needed if the DMA mask of the
+>> device performing the DMA does not support 48-bits. SWIOTLB will be
+>> initialized to create un-encrypted bounce buffers for use by these devices.
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>> ---
+>>  arch/x86/include/asm/dma-mapping.h |    5 ++-
+>>  arch/x86/include/asm/mem_encrypt.h |    6 +++
+>>  arch/x86/kernel/pci-dma.c          |   11 ++++--
+>>  arch/x86/kernel/pci-nommu.c        |    2 +
+>>  arch/x86/kernel/pci-swiotlb.c      |    8 +++--
+>>  arch/x86/mm/mem_encrypt.c          |   22 ++++++++++++
+>>  include/linux/swiotlb.h            |    1 +
+>>  init/main.c                        |   13 +++++++
+>>  lib/swiotlb.c                      |   64 ++++++++++++++++++++++++++++++++----
+>>  9 files changed, 115 insertions(+), 17 deletions(-)
+> 
+> ...
+> 
+>> @@ -172,3 +174,23 @@ void __init sme_early_init(void)
+>>  	for (i = 0; i < ARRAY_SIZE(protection_map); i++)
+>>  		protection_map[i] = __pgprot(pgprot_val(protection_map[i]) | sme_me_mask);
+>>  }
+>> +
+>> +/* Architecture __weak replacement functions */
+>> +void __init mem_encrypt_init(void)
+>> +{
+>> +	if (!sme_me_mask)
+>> +		return;
+>> +
+>> +	/* Make SWIOTLB use an unencrypted DMA area */
+>> +	swiotlb_clear_encryption();
+>> +}
+>> +
+>> +unsigned long swiotlb_get_me_mask(void)
+> 
+> This could just as well be named to something more generic:
+> 
+> swiotlb_get_clear_dma_mask() or so which basically means the mask of
+> bits which get cleared before returning DMA addresses...
 
-* Matt Fleming <matt@codeblueprint.co.uk> wrote:
+Ok.
 
-> Folks, please queue up the following patches for v4.9. There's more
-> work on refactoring EFI code to be architecture independent and the
-> largest number of patches is spent cleaning up the EFI memory map code
-> and allowing drivers on x86 to reserve EFI boot services for all of
-> runtime.
 > 
-> The architecture independent quest is going pretty well and it was
-> only a couple of lines to get the esrt driver working on arm64.
+>> +{
+>> +	return sme_me_mask;
+>> +}
+>> +
+>> +void swiotlb_set_mem_dec(void *vaddr, unsigned long size)
+>> +{
+>> +	sme_set_mem_dec(vaddr, size);
+>> +}
+>> diff --git a/include/linux/swiotlb.h b/include/linux/swiotlb.h
+>> index 5f81f8a..5c909fc 100644
+>> --- a/include/linux/swiotlb.h
+>> +++ b/include/linux/swiotlb.h
+>> @@ -29,6 +29,7 @@ int swiotlb_init_with_tbl(char *tlb, unsigned long nslabs, int verbose);
+>>  extern unsigned long swiotlb_nr_tbl(void);
+>>  unsigned long swiotlb_size_or_default(void);
+>>  extern int swiotlb_late_init_with_tbl(char *tlb, unsigned long nslabs);
+>> +extern void __init swiotlb_clear_encryption(void);
+>>  
+>>  /*
+>>   * Enumeration for sync targets
+>> diff --git a/init/main.c b/init/main.c
+>> index a8a58e2..82c7cd9 100644
+>> --- a/init/main.c
+>> +++ b/init/main.c
+>> @@ -458,6 +458,10 @@ void __init __weak thread_stack_cache_init(void)
+>>  }
+>>  #endif
+>>  
+>> +void __init __weak mem_encrypt_init(void)
+>> +{
+>> +}
+>> +
+>>  /*
+>>   * Set up kernel memory allocators
+>>   */
+>> @@ -598,6 +602,15 @@ asmlinkage __visible void __init start_kernel(void)
+>>  	 */
+>>  	locking_selftest();
+>>  
+>> +	/*
+>> +	 * This needs to be called before any devices perform DMA
+>> +	 * operations that might use the swiotlb bounce buffers.
+>> +	 * This call will mark the bounce buffers as un-encrypted so
+>> +	 * that the usage of them will not cause "plain-text" data
 > 
-> Other than that there's some cleanups and fixes, and a merge of the
-> out of tree EFI runtime driver from the FWTS project.
-> 
-> The following changes since commit c6935931c1894ff857616ff8549b61236a19148f:
-> 
->   Linux 4.8-rc5 (2016-09-04 14:31:46 -0700)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-> 
-> for you to fetch changes up to 0a637ee61247bd4bed9b2a07568ef7a1cfc76187:
-> 
->   x86/efi: Allow invocation of arbitrary boot services (2016-09-09 16:08:57 +0100)
-> 
-> ----------------------------------------------------------------
->  * Refactor the EFI memory map code into architecture neutral files
->    and allow drivers to permanently reserve EFI boot services regions
->    on x86, as well as ARM/arm64 - Matt Fleming
-> 
->  * Add ARM support for the EFI esrt driver - Ard Biesheuvel
-> 
->  * Make the EFI runtime services and efivar API interruptible by
->    swapping spinlocks for semaphores - Sylvain Chouleur
-> 
->  * Provide the EFI identity mapping for kexec which allows kexec to
->    work on SGI/UV platforms with requiring the "noefi" kernel command
->    line parameter - Alex Thorlton
-> 
->  * Add debugfs node to dump EFI page tables on arm64 - Ard Biesheuvel
-> 
->  * Merge the EFI test driver being carried out of tree until now in
->    the FWTS project - Ivan Hu
-> 
->  * Expand the list of flags for classifying EFI regions as "RAM" on
->    arm64 so we align with the UEFI spec - Ard Biesheuvel
-> 
->  * Optimise out the EFI mixed mode if it's unsupported (CONFIG_X86_32)
->    or disabled (CONFIG_EFI_MIXED=n) and switch the early EFI boot
->    services function table for direct calls, alleviating us from
->    having to maintain the custom function table - Lukas Wunner
-> 
->  * Miscellaneous cleanups and fixes
-> 
-> ----------------------------------------------------------------
-> Alex Thorlton (1):
->       x86/efi: Map in physical addresses in efi_map_region_fixed
-> 
-> Ard Biesheuvel (5):
->       efi/esrt: Use memremap not ioremap to access ESRT table in memory
->       efi/arm*: esrt: Add missing call to efi_esrt_init()
->       efi: Replace runtime services spinlock with semaphore
->       efi/arm64: Add debugfs node to dump UEFI runtime page tables
->       efi/arm64: Treat regions with WT/WC set but WB cleared as memory
-> 
-> Colin Ian King (1):
->       x86/efi: Initialize status to ensure garbage is not returned on small size
-> 
-> Ivan Hu (1):
->       efi: Add efi_test driver for exporting UEFI runtime service interfaces
-> 
-> Lukas Wunner (4):
->       lib/ucs2_string: Speed up ucs2_utf8size()
->       x86/efi: Remove unused find_bits() function
->       x86/efi: Optimize away setup_gop32/64 if unused
->       x86/efi: Allow invocation of arbitrary boot services
-> 
-> Markus Elfring (2):
->       firmware-gsmi: Delete an unnecessary check before the function call "dma_pool_destroy"
->       x86/efi: Use kmalloc_array() in efi_call_phys_prolog()
-> 
-> Matt Fleming (12):
->       x86/efi: Test for EFI_MEMMAP functionality when iterating EFI memmap
->       x86/efi: Consolidate region mapping logic
->       efi: Refactor efi_memmap_init_early() into arch-neutral code
->       efi: Add efi_memmap_init_late() for permanent EFI memmap
->       efi/fake_mem: Refactor main two code chunks into functions
->       efi: Split out EFI memory map functions into new file
->       efi: Add efi_memmap_install() for installing new EFI memory maps
->       efi: Allow drivers to reserve boot services forever
->       efi/runtime-map: Use efi.memmap directly instead of a copy
->       efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()
->       x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data
->       fs/efivarfs: Fix double kfree() in error path
-> 
-> Ricardo Neri (1):
->       x86/efi: Defer efi_esrt_init until after memblock_x86_fill
-> 
-> Sylvain Chouleur (2):
->       efi: Use a file local lock for efivars
->       efi: Don't use spinlocks for efi vars
-> 
->  MAINTAINERS                             |   7 +
->  arch/x86/boot/compressed/eboot.c        |  40 +-
->  arch/x86/boot/compressed/head_32.S      |   6 +-
->  arch/x86/boot/compressed/head_64.S      |   8 +-
->  arch/x86/include/asm/efi.h              |  29 +-
->  arch/x86/kernel/setup.c                 |  18 +-
->  arch/x86/platform/efi/efi-bgrt.c        |  13 +-
->  arch/x86/platform/efi/efi.c             | 198 ++++-----
->  arch/x86/platform/efi/efi_64.c          |  23 +-
->  arch/x86/platform/efi/quirks.c          | 123 +++++-
->  drivers/firmware/efi/Kconfig            |  17 +
->  drivers/firmware/efi/Makefile           |   3 +-
->  drivers/firmware/efi/arm-init.c         |  50 ++-
->  drivers/firmware/efi/arm-runtime.c      |  26 +-
->  drivers/firmware/efi/efi-pstore.c       |  36 +-
->  drivers/firmware/efi/efi.c              |  67 +--
->  drivers/firmware/efi/efivars.c          |  22 +-
->  drivers/firmware/efi/esrt.c             |  23 +-
->  drivers/firmware/efi/fake_mem.c         | 125 +-----
->  drivers/firmware/efi/memmap.c           | 292 +++++++++++++
->  drivers/firmware/efi/runtime-map.c      |  35 +-
->  drivers/firmware/efi/runtime-wrappers.c |  81 ++--
->  drivers/firmware/efi/test/Makefile      |   1 +
->  drivers/firmware/efi/test/efi_test.c    | 749 ++++++++++++++++++++++++++++++++
->  drivers/firmware/efi/test/efi_test.h    | 110 +++++
->  drivers/firmware/efi/vars.c             | 142 +++---
->  drivers/firmware/google/gsmi.c          |   3 +-
->  fs/efivarfs/inode.c                     |   5 +-
->  fs/efivarfs/super.c                     |  13 +-
->  include/linux/efi.h                     |  47 +-
->  lib/ucs2_string.c                       |   2 +-
->  31 files changed, 1767 insertions(+), 547 deletions(-)
->  create mode 100644 drivers/firmware/efi/memmap.c
->  create mode 100644 drivers/firmware/efi/test/Makefile
->  create mode 100644 drivers/firmware/efi/test/efi_test.c
->  create mode 100644 drivers/firmware/efi/test/efi_test.h
+> 	...that their usage will not cause ...
 
-Pulled into tip:efi/core, thanks a lot Matt!
+Ok.
 
-	Ingo
+> 
+>> +	 * to be decrypted when accessed.
+>> +	 */
+>> +	mem_encrypt_init();
+>> +
+>>  #ifdef CONFIG_BLK_DEV_INITRD
+>>  	if (initrd_start && !initrd_below_start_ok &&
+>>  	    page_to_pfn(virt_to_page((void *)initrd_start)) < min_low_pfn) {
+>> diff --git a/lib/swiotlb.c b/lib/swiotlb.c
+>> index 22e13a0..15d5741 100644
+>> --- a/lib/swiotlb.c
+>> +++ b/lib/swiotlb.c
+>> @@ -131,6 +131,26 @@ unsigned long swiotlb_size_or_default(void)
+>>  	return size ? size : (IO_TLB_DEFAULT_SIZE);
+>>  }
+>>  
+>> +/*
+>> + * Support for memory encryption. If memory encryption is supported, then an
+>> + * override to these functions will be provided.
+>> + */
+> 
+> No need for that comment.
+
+Ok.
+
+> 
+>> +unsigned long __weak swiotlb_get_me_mask(void)
+>> +{
+>> +	return 0;
+>> +}
+>> +
+>> +void __weak swiotlb_set_mem_dec(void *vaddr, unsigned long size)
+>> +{
+>> +}
+>> +
+>> +/* For swiotlb, clear memory encryption mask from dma addresses */
+>> +static dma_addr_t swiotlb_phys_to_dma(struct device *hwdev,
+>> +				      phys_addr_t address)
+>> +{
+>> +	return phys_to_dma(hwdev, address) & ~swiotlb_get_me_mask();
+>> +}
+>> +
+>>  /* Note that this doesn't work with highmem page */
+>>  static dma_addr_t swiotlb_virt_to_bus(struct device *hwdev,
+>>  				      volatile void *address)
+>> @@ -159,6 +179,30 @@ void swiotlb_print_info(void)
+>>  	       bytes >> 20, vstart, vend - 1);
+>>  }
+>>  
+>> +/*
+>> + * If memory encryption is active, the DMA address for an encrypted page may
+>> + * be beyond the range of the device. If bounce buffers are required be sure
+>> + * that they are not on an encrypted page. This should be called before the
+>> + * iotlb area is used.
+>> + */
+>> +void __init swiotlb_clear_encryption(void)
+>> +{
+>> +	void *vaddr;
+>> +	unsigned long bytes;
+>> +
+>> +	if (no_iotlb_memory || !io_tlb_start || late_alloc)
+>> +		return;
+>> +
+>> +	vaddr = phys_to_virt(io_tlb_start);
+>> +	bytes = PAGE_ALIGN(io_tlb_nslabs << IO_TLB_SHIFT);
+>> +	swiotlb_set_mem_dec(vaddr, bytes);
+>> +	memset(vaddr, 0, bytes);
+> 
+> io_tlb_start is cleared...
+> 
+>> +
+>> +	vaddr = phys_to_virt(io_tlb_overflow_buffer);
+>> +	bytes = PAGE_ALIGN(io_tlb_overflow);
+>> +	swiotlb_set_mem_dec(vaddr, bytes);
+> 
+> ... but io_tlb_overflow_buffer isn't? I don't see the difference here.
+
+Yup, I missed that one.  Will memset this as well.
+
+Thanks,
+Tom
+
+> 
+>> +}
+>> +
+>>  int __init swiotlb_init_with_tbl(char *tlb, unsigned long nslabs, int verbose)
+>>  {
+>>  	void *v_overflow_buffer;
