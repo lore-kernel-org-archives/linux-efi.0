@@ -1,56 +1,194 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [RFC PATCH v2 19/20] x86: Access the setup data through debugfs
- un-encrypted
-Date: Wed, 14 Sep 2016 09:29:41 -0500
-Message-ID: <4a357b9b-7d53-5bd6-81db-9d8cc63a6c72@amd.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v2 20/20] x86: Add support to make use of Secure
+ Memory Encryption
+Date: Wed, 14 Sep 2016 09:31:42 -0500
+Message-ID: <11306db6-fec1-db98-5e1b-400f7d828f7e@amd.com>
 References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
- <20160822223859.29880.60652.stgit@tlendack-t1.amdoffice.net>
- <20160912165944.rpqbwxz2biathnt3@pd.tnic>
+ <20160822223908.29880.50365.stgit@tlendack-t1.amdoffice.net>
+ <20160912170856.2uklaoc4vxmkgnkq@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160912165944.rpqbwxz2biathnt3-fF5Pk5pvG8Y@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dm
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20160912170856.2uklaoc4vxmkgnkq@pd.tnic>
+Sender: owner-linux-mm@kvack.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
+ Anvin" <hpa@zytor.com>, Paolo Bonzini <pbonzini@redhat.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 09/12/2016 11:59 AM, Borislav Petkov wrote:
-> On Mon, Aug 22, 2016 at 05:38:59PM -0500, Tom Lendacky wrote:
->> Since the setup data is in memory in the clear, it must be accessed as
->> un-encrypted.  Always use ioremap (similar to sysfs setup data support)
->> to map the data.
+On 09/12/2016 12:08 PM, Borislav Petkov wrote:
+> On Mon, Aug 22, 2016 at 05:39:08PM -0500, Tom Lendacky wrote:
+>> This patch adds the support to check if SME has been enabled and if the
+>> mem_encrypt=on command line option is set. If both of these conditions
+>> are true, then the encryption mask is set and the kernel is encrypted
+>> "in place."
 >>
->> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 >> ---
->>  arch/x86/kernel/kdebugfs.c |   30 +++++++++++-------------------
->>  1 file changed, 11 insertions(+), 19 deletions(-)
+>>  Documentation/kernel-parameters.txt |    3 
+>>  arch/x86/kernel/asm-offsets.c       |    2 
+>>  arch/x86/kernel/mem_encrypt.S       |  302 +++++++++++++++++++++++++++++++++++
+>>  arch/x86/mm/mem_encrypt.c           |    2 
+>>  4 files changed, 309 insertions(+)
 >>
->> diff --git a/arch/x86/kernel/kdebugfs.c b/arch/x86/kernel/kdebugfs.c
->> index bdb83e4..a58a82e 100644
->> --- a/arch/x86/kernel/kdebugfs.c
->> +++ b/arch/x86/kernel/kdebugfs.c
->> @@ -48,17 +48,13 @@ static ssize_t setup_data_read(struct file *file, char __user *user_buf,
+>> diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+>> index 46c030a..a1986c8 100644
+>> --- a/Documentation/kernel-parameters.txt
+>> +++ b/Documentation/kernel-parameters.txt
+>> @@ -2268,6 +2268,9 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+>>  			memory contents and reserves bad memory
+>>  			regions that are detected.
 >>  
->>  	pa = node->paddr + sizeof(struct setup_data) + pos;
->>  	pg = pfn_to_page((pa + count - 1) >> PAGE_SHIFT);
->> -	if (PageHighMem(pg)) {
+>> +	mem_encrypt=on	[X86_64] Enable memory encryption on processors
+>> +			that support this feature.
+>> +
+>>  	meye.*=		[HW] Set MotionEye Camera parameters
+>>  			See Documentation/video4linux/meye.txt.
+>>  
+>> diff --git a/arch/x86/kernel/asm-offsets.c b/arch/x86/kernel/asm-offsets.c
+>> index 2bd5c6f..e485ada 100644
+>> --- a/arch/x86/kernel/asm-offsets.c
+>> +++ b/arch/x86/kernel/asm-offsets.c
+>> @@ -85,6 +85,8 @@ void common(void) {
+>>  	OFFSET(BP_init_size, boot_params, hdr.init_size);
+>>  	OFFSET(BP_pref_address, boot_params, hdr.pref_address);
+>>  	OFFSET(BP_code32_start, boot_params, hdr.code32_start);
+>> +	OFFSET(BP_cmd_line_ptr, boot_params, hdr.cmd_line_ptr);
+>> +	OFFSET(BP_ext_cmd_line_ptr, boot_params, ext_cmd_line_ptr);
+>>  
+>>  	BLANK();
+>>  	DEFINE(PTREGS_SIZE, sizeof(struct pt_regs));
+>> diff --git a/arch/x86/kernel/mem_encrypt.S b/arch/x86/kernel/mem_encrypt.S
+>> index f2e0536..bf9f6a9 100644
+>> --- a/arch/x86/kernel/mem_encrypt.S
+>> +++ b/arch/x86/kernel/mem_encrypt.S
+>> @@ -12,13 +12,230 @@
+>>  
+>>  #include <linux/linkage.h>
+>>  
+>> +#include <asm/processor-flags.h>
+>> +#include <asm/pgtable.h>
+>> +#include <asm/page.h>
+>> +#include <asm/msr.h>
+>> +#include <asm/asm-offsets.h>
+>> +
+>>  	.text
+>>  	.code64
+>>  ENTRY(sme_enable)
+>> +#ifdef CONFIG_AMD_MEM_ENCRYPT
+>> +	/* Check for AMD processor */
+>> +	xorl	%eax, %eax
+>> +	cpuid
+>> +	cmpl    $0x68747541, %ebx	# AuthenticAMD
+>> +	jne     .Lmem_encrypt_exit
+>> +	cmpl    $0x69746e65, %edx
+>> +	jne     .Lmem_encrypt_exit
+>> +	cmpl    $0x444d4163, %ecx
+>> +	jne     .Lmem_encrypt_exit
+>> +
+>> +	/* Check for memory encryption leaf */
+>> +	movl	$0x80000000, %eax
+>> +	cpuid
+>> +	cmpl	$0x8000001f, %eax
+>> +	jb	.Lmem_encrypt_exit
+>> +
+>> +	/*
+>> +	 * Check for memory encryption feature:
+>> +	 *   CPUID Fn8000_001F[EAX] - Bit 0
+>> +	 *     Secure Memory Encryption support
+>> +	 *   CPUID Fn8000_001F[EBX] - Bits 5:0
+>> +	 *     Pagetable bit position used to indicate encryption
+>> +	 *   CPUID Fn8000_001F[EBX] - Bits 11:6
+>> +	 *     Reduction in physical address space (in bits) when enabled
+>> +	 */
+>> +	movl	$0x8000001f, %eax
+>> +	cpuid
+>> +	bt	$0, %eax
+>> +	jnc	.Lmem_encrypt_exit
+>> +
+>> +	/* Check if BIOS/UEFI has allowed memory encryption */
+>> +	movl	$MSR_K8_SYSCFG, %ecx
+>> +	rdmsr
+>> +	bt	$MSR_K8_SYSCFG_MEM_ENCRYPT_BIT, %eax
+>> +	jnc	.Lmem_encrypt_exit
 > 
-> Why is it ok to get rid of the PageHighMem() check?
+> Like other people suggested, it would be great if this were in C. Should be
+> actually readable :)
 
-Since the change is to perform the ioremap call no matter what the check
-for PageHighMem() wasn't needed anymore.
+Yup, working on that.  I'll try and make it all completely C.
 
 > 
-> Btw, we did talk earlier in the thread about making __va() clear the SME
-> mask and then you won't really need to change stuff here. Or?
+>> +
+>> +	/* Check for the mem_encrypt=on command line option */
+>> +	push	%rsi			/* Save RSI (real_mode_data) */
+>> +	push	%rbx			/* Save CPUID information */
+>> +	movl	BP_ext_cmd_line_ptr(%rsi), %ecx
+>> +	shlq	$32, %rcx
+>> +	movl	BP_cmd_line_ptr(%rsi), %edi
+>> +	addq	%rcx, %rdi
+>> +	leaq	mem_encrypt_enable_option(%rip), %rsi
+>> +	call	cmdline_find_option_bool
+>> +	pop	%rbx			/* Restore CPUID information */
+>> +	pop	%rsi			/* Restore RSI (real_mode_data) */
+>> +	testl	%eax, %eax
+>> +	jz	.Lno_mem_encrypt
+> 
+> This too.
+> 
+>> +
+>> +	/* Set memory encryption mask */
+>> +	movl	%ebx, %ecx
+>> +	andl	$0x3f, %ecx
+>> +	bts	%ecx, sme_me_mask(%rip)
+>> +
+>> +.Lno_mem_encrypt:
+>> +	/*
+>> +	 * BIOS/UEFI has allowed memory encryption so we need to set
+>> +	 * the amount of physical address space reduction even if
+>> +	 * the user decides not to use memory encryption.
+>> +	 */
+>> +	movl	%ebx, %ecx
+>> +	shrl	$6, %ecx
+>> +	andl	$0x3f, %ecx
+>> +	movb	%cl, sme_me_loss(%rip)
+>> +
+>> +.Lmem_encrypt_exit:
+>> +#endif	/* CONFIG_AMD_MEM_ENCRYPT */
+>> +
+>>  	ret
+>>  ENDPROC(sme_enable)
+>>  
+>>  ENTRY(sme_encrypt_kernel)
+> 
+> This should be doable too but I guess you'll have to try it to see.
+> 
+> ...
+> 
+>> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+>> index 2f28d87..1154353 100644
+>> --- a/arch/x86/mm/mem_encrypt.c
+>> +++ b/arch/x86/mm/mem_encrypt.c
+>> @@ -183,6 +183,8 @@ void __init mem_encrypt_init(void)
+>>  
+>>  	/* Make SWIOTLB use an unencrypted DMA area */
+>>  	swiotlb_clear_encryption();
+>> +
+>> +	pr_info("memory encryption active\n");
+> 
+> Let's make it more official with nice caps and so on...
+> 
+> 	pr_info("AMD Secure Memory Encryption active.\n");
 
-This is still required because just using the __va() would still cause
-the mapping created to have the encryption bit set. The ioremap call
-will result in the mapping not having the encryption bit set.
+Will do.
 
 Thanks,
 Tom
 
 > 
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
