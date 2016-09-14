@@ -1,114 +1,96 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [RFC PATCH v2 15/20] iommu/amd: AMD IOMMU support for memory
-	encryption
-Date: Wed, 14 Sep 2016 08:45:44 -0500
-Message-ID: <27bc5c87-3a74-a1ee-55b1-7f19ec9cd6cc@amd.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v2 16/20] x86: Check for memory encryption on the APs
+Date: Wed, 14 Sep 2016 08:50:25 -0500
+Message-ID: <06a97eaa-d54f-9f7e-d207-4ff3e576169f@amd.com>
 References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
-	<20160822223820.29880.17752.stgit@tlendack-t1.amdoffice.net>
-	<20160912114550.nwhtpmncwp22l7vy@pd.tnic>
+ <20160822223829.29880.10341.stgit@tlendack-t1.amdoffice.net>
+ <20160912121739.rwuumwpwo5megmd7@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20160912114550.nwhtpmncwp22l7vy-fF5Pk5pvG8Y@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter
-	Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20160912121739.rwuumwpwo5megmd7@pd.tnic>
+Sender: owner-linux-mm@kvack.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
+ Anvin" <hpa@zytor.com>, Paolo Bonzini <pbonzini@redhat.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 09/12/2016 06:45 AM, Borislav Petkov wrote:
-> On Mon, Aug 22, 2016 at 05:38:20PM -0500, Tom Lendacky wrote:
->> Add support to the AMD IOMMU driver to set the memory encryption mask if
->> memory encryption is enabled.
+On 09/12/2016 07:17 AM, Borislav Petkov wrote:
+> On Mon, Aug 22, 2016 at 05:38:29PM -0500, Tom Lendacky wrote:
+>> Add support to check if memory encryption is active in the kernel and that
+>> it has been enabled on the AP. If memory encryption is active in the kernel
+>> but has not been enabled on the AP then do not allow the AP to continue
+>> start up.
 >>
->> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 >> ---
->>  arch/x86/include/asm/mem_encrypt.h |    2 ++
->>  arch/x86/mm/mem_encrypt.c          |    5 +++++
->>  drivers/iommu/amd_iommu.c          |   10 ++++++++++
->>  3 files changed, 17 insertions(+)
->>
->> diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
->> index 384fdfb..e395729 100644
->> --- a/arch/x86/include/asm/mem_encrypt.h
->> +++ b/arch/x86/include/asm/mem_encrypt.h
->> @@ -36,6 +36,8 @@ void __init sme_early_init(void);
->>  /* Architecture __weak replacement functions */
->>  void __init mem_encrypt_init(void);
+>>  arch/x86/include/asm/msr-index.h     |    2 ++
+>>  arch/x86/include/asm/realmode.h      |   12 ++++++++++++
+>>  arch/x86/realmode/init.c             |    4 ++++
+>>  arch/x86/realmode/rm/trampoline_64.S |   19 +++++++++++++++++++
+>>  4 files changed, 37 insertions(+)
+> 
+> ...
+> 
+>> diff --git a/arch/x86/realmode/rm/trampoline_64.S b/arch/x86/realmode/rm/trampoline_64.S
+>> index dac7b20..94e29f4 100644
+>> --- a/arch/x86/realmode/rm/trampoline_64.S
+>> +++ b/arch/x86/realmode/rm/trampoline_64.S
+>> @@ -30,6 +30,7 @@
+>>  #include <asm/msr.h>
+>>  #include <asm/segment.h>
+>>  #include <asm/processor-flags.h>
+>> +#include <asm/realmode.h>
+>>  #include "realmode.h"
 >>  
->> +unsigned long amd_iommu_get_me_mask(void);
+>>  	.text
+>> @@ -92,6 +93,23 @@ ENTRY(startup_32)
+>>  	movl	%edx, %fs
+>>  	movl	%edx, %gs
+>>  
+>> +	/* Check for memory encryption support */
+>> +	bt	$TH_FLAGS_SME_ENABLE_BIT, pa_tr_flags
+>> +	jnc	.Ldone
+>> +	movl	$MSR_K8_SYSCFG, %ecx
+>> +	rdmsr
+>> +	bt	$MSR_K8_SYSCFG_MEM_ENCRYPT_BIT, %eax
+>> +	jc	.Ldone
 >> +
->>  unsigned long swiotlb_get_me_mask(void);
->>  void swiotlb_set_mem_dec(void *vaddr, unsigned long size);
->>  
->> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
->> index 6b2e8bf..2f28d87 100644
->> --- a/arch/x86/mm/mem_encrypt.c
->> +++ b/arch/x86/mm/mem_encrypt.c
->> @@ -185,6 +185,11 @@ void __init mem_encrypt_init(void)
->>  	swiotlb_clear_encryption();
->>  }
->>  
->> +unsigned long amd_iommu_get_me_mask(void)
->> +{
->> +	return sme_me_mask;
->> +}
->> +
->>  unsigned long swiotlb_get_me_mask(void)
->>  {
->>  	return sme_me_mask;
->> diff --git a/drivers/iommu/amd_iommu.c b/drivers/iommu/amd_iommu.c
->> index 96de97a..63995e3 100644
->> --- a/drivers/iommu/amd_iommu.c
->> +++ b/drivers/iommu/amd_iommu.c
->> @@ -166,6 +166,15 @@ struct dma_ops_domain {
->>  static struct iova_domain reserved_iova_ranges;
->>  static struct lock_class_key reserved_rbtree_key;
->>  
->> +/*
->> + * Support for memory encryption. If memory encryption is supported, then an
->> + * override to this function will be provided.
->> + */
->> +unsigned long __weak amd_iommu_get_me_mask(void)
->> +{
->> +	return 0;
->> +}
+>> +	/*
+>> +	 * Memory encryption is enabled but the MSR has not been set on this
+>> +	 * CPU so we can't continue
 > 
-> So instead of adding a function each time which returns sme_me_mask
-> for each user it has, why don't you add a single function which
-> returns sme_me_mask in mem_encrypt.c and add an inline in the header
-> mem_encrypt.h which returns 0 for the !CONFIG_AMD_MEM_ENCRYPT case.
+> Hmm, let me try to parse this correctly: BSP has SME enabled but the
+> BIOS might not've set this on the AP? Really? Is that even possible?
 
-Currently, mem_encrypt.h only lives in the arch/x86 directory so it
-wouldn't be able to be included here without breaking other archs.
+Anything is possible, although it's highly unlikely.
 
 > 
-> This all is still funny because we access sme_me_mask directly for the
-> different KERNEL_* masks but then you're adding an accessor function.
+> Because if SME is enabled, that means that MSR_K8_SYSCFG[23] on the BSP
+> is set, right?
 
-Because this lives outside of the arch/x86 I need to use the weak
-function.
+Correct.
 
 > 
-> So what you should do instead, IMHO, is either hide sme_me_mask
-> altogether and use the accessor functions only (not sure if that would
-> work in all cases) or expose sme_me_mask unconditionally and have it be
-> 0 if CONFIG_AMD_MEM_ENCRYPT is not enabled so that it just works.
-> 
-> Or is there a third, more graceful variant?
+> Also, I want to rule out here simple BIOS idiocy: if the only problem
+> with the bit not being set in the AP is because some BIOS monkey forgot
+> to do so, then we should try to set it ourselves and not die for no real
+> reason.
 
-Is there a better way to do this given the support is only in x86?
+Yes, we can do that.  I was debating on which way to go with this. Most
+likely this would never happen, but if it did...  I can change this to
+set the MSR bit and continue.
 
 Thanks,
 Tom
 
 > 
+> Or is there another issue?
+> 
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
