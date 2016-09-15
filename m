@@ -1,40 +1,51 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [RFC PATCH v2 19/20] x86: Access the setup data through debugfs
- un-encrypted
-Date: Wed, 14 Sep 2016 16:51:01 +0200
-Message-ID: <20160914145101.GB9295@nazgul.tnic>
-References: <20160822223529.29880.50884.stgit@tlendack-t1.amdoffice.net>
- <20160822223859.29880.60652.stgit@tlendack-t1.amdoffice.net>
- <20160912165944.rpqbwxz2biathnt3@pd.tnic>
- <4a357b9b-7d53-5bd6-81db-9d8cc63a6c72@amd.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 3/3] efi: Format EFI version prints the way the standard
+ says.
+Date: Thu, 15 Sep 2016 10:18:22 +0100
+Message-ID: <20160915091822.GA16797@codeblueprint.co.uk>
+References: <20160907122339.GB28333@wunner.de>
+ <1473260186-4500-1-git-send-email-pjones@redhat.com>
+ <1473260186-4500-3-git-send-email-pjones@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <4a357b9b-7d53-5bd6-81db-9d8cc63a6c72@amd.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Paolo Bonzini <pbonzini@redhat.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.>
+In-Reply-To: <1473260186-4500-3-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Sep 14, 2016 at 09:29:41AM -0500, Tom Lendacky wrote:
-> This is still required because just using the __va() would still cause
-> the mapping created to have the encryption bit set. The ioremap call
-> will result in the mapping not having the encryption bit set.
+On Wed, 07 Sep, at 10:56:26AM, Peter Jones wrote:
+> We print "EFI v2.xx.yy vendor blahblah" at several places.  Make them
+> conform to the standard format.
+> 
+> This leaves 2 checkpatch warnings in arch/ia64/kernel/efi.c intact; the
+> old code would have produced them, and they match the nearby code in the
+> functions.
+> 
+> Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Reviewed-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+> ---
+>  arch/ia64/kernel/efi.c          | 14 ++++++--------
+>  arch/x86/platform/efi/efi.c     | 20 ++++++++++++--------
+>  drivers/firmware/efi/arm-init.c | 13 ++++++-------
+>  drivers/firmware/efi/efi.c      | 16 +++++++++++++---
+>  include/linux/efi.h             |  2 ++
+>  5 files changed, 39 insertions(+), 26 deletions(-)
 
-I meant this: https://lkml.kernel.org/r/20160902181447.GA25328@nazgul.tnic
+I'm not sure about this one. Booting with this patch on my test VMs I
+see the old,
 
-Wouldn't simply clearing the SME mask work?
+  efi: EFI v2.40 by EDK II
 
-#define __va(x)			((void *)(((unsigned long)(x)+PAGE_OFFSET) & ~sme_me_mask))
+now reading,
 
-Or are you saying, one needs the whole noodling through ioremap_cache()
-because the data is already encrypted and accessing it with sme_me_mask
-cleared would simply give you the encrypted garbage?
+  efi: EFI v2.4 by EDK II
 
--- 
-Regards/Gruss,
-    Boris.
+Yes, the new string is obviously more correct but gratuitous changes
+to the strings we print on boot have caused trouble in the past. If
+people have scripts or tests that check the EFI version that gets
+printed they'll break.
 
-ECO tip #101: Trim your mails when you reply.
---
+Are there any additional supporting reasons for this patch?
