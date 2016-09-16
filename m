@@ -1,46 +1,34 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [tip regression]  efi: Allow drivers to reserve boot services
- forever == toxic
-Date: Fri, 16 Sep 2016 10:31:49 +0100
-Message-ID: <20160916093149.GC16797@codeblueprint.co.uk>
-References: <1474005912.3930.10.camel@gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 3/3] efi: Format EFI version prints the way the standard
+ says.
+Date: Fri, 16 Sep 2016 10:40:06 +0100
+Message-ID: <20160916094006.GD16797@codeblueprint.co.uk>
+References: <20160907122339.GB28333@wunner.de>
+ <1473260186-4500-1-git-send-email-pjones@redhat.com>
+ <1473260186-4500-3-git-send-email-pjones@redhat.com>
+ <20160915091822.GA16797@codeblueprint.co.uk>
+ <20160915131305.5mhdpc6vql5nv2gw@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1474005912.3930.10.camel@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mike Galbraith <umgwanakikbuti@gmail.com>
-Cc: Ingo Molnar <mingo@elte.hu>, LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Peter Jones <pjones@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+In-Reply-To: <20160915131305.5mhdpc6vql5nv2gw-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 16 Sep, at 08:05:12AM, Mike Galbraith wrote:
-> Hi Matt,
+On Thu, 15 Sep, at 09:13:05AM, Peter Jones wrote:
 > 
-> My workstation started instant rebooting with tip.  I bisected it to..
-> 
->    efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()
-> 
-> ..but seems it's really $subject, as box works fine with the below.
-> 
-> ---
->  drivers/firmware/efi/efi.c |    1 +
->  1 file changed, 1 insertion(+)
-> 
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -415,6 +415,7 @@ void __init efi_mem_reserve(phys_addr_t
->  {
->  	if (!memblock_is_region_reserved(addr, size))
->  		memblock_reserve(addr, size);
-> +	else
->  
->  	/*
->  	 * Some architectures (x86) reserve all boot services ranges
-> 
-> 
-> No idea what's going boom down in efi_arch_mem_reserve().
+> Really I just prefer to have them say the same thing the spec does - but
+> your point is certainly valid.  Would you be happier with it if I put a
+> check in that only prints the new way for, say, revisions newer than
+> 2.6, and prints them the older way otherwise?
 
-Urgh, that's bad. Which machine is this? Can you paste the dmesg after
-booting with the efi=debug kernel parameter, either with your above
-patch or with the commit reverted?
+Because /sys/firmware/efi/spec_version is a new file, I'm totally
+happy with printing a correct version string there. There's really no
+need to maintain the version idiosyncrasy in new places.
+
+And given the extra code required to maintain backwards compatibility
+for versions <= 2.6 but only in the boot paths, I think the simplest
+solution is to drop this patch.
