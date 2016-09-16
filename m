@@ -1,41 +1,55 @@
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 3/3] efi: Format EFI version prints the way the standard
- says.
-Date: Fri, 16 Sep 2016 10:42:57 -0400
-Message-ID: <20160916144256.rnjc3pc2oj7zbp4k@redhat.com>
-References: <20160907122339.GB28333@wunner.de>
- <1473260186-4500-1-git-send-email-pjones@redhat.com>
- <1473260186-4500-3-git-send-email-pjones@redhat.com>
- <20160915091822.GA16797@codeblueprint.co.uk>
- <20160915131305.5mhdpc6vql5nv2gw@redhat.com>
- <20160916094006.GD16797@codeblueprint.co.uk>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [tip regression]  efi: Allow drivers to reserve boot services
+ forever == toxic
+Date: Fri, 16 Sep 2016 15:45:20 +0100
+Message-ID: <20160916144519.GA3179@leverpostej>
+References: <1474005912.3930.10.camel@gmail.com>
+ <20160916093149.GC16797@codeblueprint.co.uk>
+ <1474020059.3881.3.camel@gmail.com>
+ <20160916143007.GF16797@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160916094006.GD16797-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <20160916143007.GF16797-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: Mike Galbraith <umgwanakikbuti-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Sep 16, 2016 at 10:40:06AM +0100, Matt Fleming wrote:
-> On Thu, 15 Sep, at 09:13:05AM, Peter Jones wrote:
+On Fri, Sep 16, 2016 at 03:30:07PM +0100, Matt Fleming wrote:
+> On Fri, 16 Sep, at 12:00:59PM, Mike Galbraith wrote:
 > > 
-> > Really I just prefer to have them say the same thing the spec does - but
-> > your point is certainly valid.  Would you be happier with it if I put a
-> > check in that only prints the new way for, say, revisions newer than
-> > 2.6, and prints them the older way otherwise?
+> > Ok, here's the whole thing just in case.  Hope it's not too big.
+>  
+> [...]
 > 
-> Because /sys/firmware/efi/spec_version is a new file, I'm totally
-> happy with printing a correct version string there. There's really no
-> need to maintain the version idiosyncrasy in new places.
+> > [    0.000000] esrt: Reserving ESRT space from 0x00000000def87998 to 0x00000000def879d0.
 > 
-> And given the extra code required to maintain backwards compatibility
-> for versions <= 2.6 but only in the boot paths, I think the simplest
-> solution is to drop this patch.
+> OK, that's 56 bytes and yet I realise that at no point in the
+> efi_mem_reserve() call path do we round up to the nearest page size
+> even though the EFI memory map only deals with EFI_PAGE_SIZE regions.
 
-Okay, that's fine by me since we now have the other interface.
+I note that the base is also not aligned to EFI_PAGE_SIZE. Shouldn't we
+round that down, too?
 
--- 
-        Peter
+[...]
+
+> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+> index f14b7a9da24b..e881b4b2ffd6 100644
+> --- a/arch/x86/platform/efi/quirks.c
+> +++ b/arch/x86/platform/efi/quirks.c
+> @@ -201,8 +201,10 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
+>  		return;
+>  	}
+>  
+> +	size = round_up(size, EFI_PAGE_SIZE);
+
+i.e. have:
+
+	size += addr % EFI_PAGE_SIZE;
+	size = round_up(size, EFI_PAGE_SIZE);
+	addr = round_down(base, EFI_PAGE_SIZE);
+
+Thanks,
+Mark.
