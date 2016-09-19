@@ -1,51 +1,38 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: Cannot load linux after recent efi-related changes
-Date: Mon, 19 Sep 2016 12:14:24 +0100
-Message-ID: <20160919111424.GB2892@codeblueprint.co.uk>
-References: <20160917162357.GA4122@gmail.com>
- <20160918011443.GA4475@gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [tip regression]  efi: Allow drivers to reserve boot services
+ forever == toxic
+Date: Mon, 19 Sep 2016 12:15:31 +0100
+Message-ID: <20160919111531.GC2892@codeblueprint.co.uk>
+References: <1474005912.3930.10.camel@gmail.com>
+ <20160916093149.GC16797@codeblueprint.co.uk>
+ <1474020059.3881.3.camel@gmail.com>
+ <20160916143007.GF16797@codeblueprint.co.uk>
+ <1474043695.3854.3.camel@gmail.com>
+ <20160917195853.GG16797@codeblueprint.co.uk>
+ <1474178972.3817.2.camel@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160918011443.GA4475@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mike Krinkin <krinkin.m.u@gmail.com>
-Cc: mingo@kernel.org, tglx@linutronix.de, hpa@zytor.com, ricardo.neri-calderon@linux.intel.com, ard.biesheuvel@linaro.org, pjones@redhat.com, scott.lawson@intel.com, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Mike Galbraith <umgwanakikbuti@gmail.com>
+In-Reply-To: <1474178972.3817.2.camel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mike Galbraith <umgwanakikbuti-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 18 Sep, at 04:14:45AM, Mike Krinkin wrote:
+On Sun, 18 Sep, at 08:09:32AM, Mike Galbraith wrote:
 > 
-> diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
-> index cd96086..34322d1 100644
-> --- a/drivers/firmware/efi/memmap.c
-> +++ b/drivers/firmware/efi/memmap.c
-> @@ -221,8 +221,8 @@ void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
->  	void *old, *new;
->  
->  	/* modifying range */
-> -	m_start = mem->range.start;
-> -	m_end = mem->range.end;
-> +	m_start = mem->range.start & ~(u64)EFI_PAGE_SIZE;
-> +	m_end = ALIGN(mem->range.end, EFI_PAGE_SIZE) - 1;
->  	m_attr = mem->attribute;
->  
->  	for (old = old_memmap->map, new = buf;
+> +MATT changes + XXX changes (boots/works without #if 0)
+> [    0.000000] MIKE md.phys_addr:0xded81000  md.virt_addr:0x0  md.num_pages:520
+> [    0.000000] MIKE mr.range.start:0xdef87000  mr.range.end:0xdef87fff
+> [    0.000000] MIKE efi_memmap_install(0x9d640, 51);
 
-Thanks for the analysis and patch Mike, but this needs fixing further
-up the call stack so that we don't map things the caller didn't
-expect.
+Brilliant. This is what I've got queued up. Thanks everyone.
 
-This bug was also reported in this thread,
-
-  https://lkml.kernel.org/r/1474005912.3930.10.camel@gmail.com
-
-Could you try this patch?
-
----->8----
+----8<----
 
 >From 7e750e3289a44fe3ad693bde45aea1ad8577dd2a Mon Sep 17 00:00:00 2001
-From: Matt Fleming <matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Date: Fri, 16 Sep 2016 15:12:47 +0100
 Subject: [PATCH] x86/efi: Round EFI memmap reservations to EFI_PAGE_SIZE
 
@@ -69,13 +56,13 @@ EFI_PAGE_SIZE boundary.
 Additionally, efi_memmap_insert() expects the mem::range::end value to
 be one less than the end address for the region.
 
-Reported-by: Mike Galbraith <umgwanakikbuti@gmail.com>
-Reported-by: Mike Krinkin <krinkin.m.u@gmail.com>
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Taku Izumi <izumi.taku@jp.fujitsu.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Reported-by: Mike Galbraith <umgwanakikbuti-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Reported-by: Mike Krinkin <krinkin.m.u-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
  arch/x86/platform/efi/quirks.c |  6 +++++-
  drivers/firmware/efi/memmap.c  | 11 +++++++++++
