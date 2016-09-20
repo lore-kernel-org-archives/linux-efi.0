@@ -1,37 +1,38 @@
-From: Yisheng Xie <xieyisheng1-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH -next v2] arm*/efi: efi_init error handling fix
-Date: Tue, 20 Sep 2016 19:39:53 +0800
-Message-ID: <1474371593-10250-1-git-send-email-xieyisheng1@huawei.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Cc: will.deacon-5wv7dgnIgG8@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, guohanjun-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [GIT PULL] EFI fix for v4.9 queue
+Date: Tue, 20 Sep 2016 15:46:49 +0100
+Message-ID: <20160920144650.30615-1-matt@codeblueprint.co.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, Mike Galbraith <umgwanakikbuti@gmail.com>, Mike Krinkin <krinkin.m.u@gmail.com>, Peter Jones <pjones@redhat.com>, Taku Izumi <izumi.taku@jp.fujitsu.com>
 List-Id: linux-efi@vger.kernel.org
 
-There's an early memmap leak in efi_init error path, fix it.
+Folks, please pull the following fix for the v4.9 EFI queue sat in
+tip/efi/core.
 
-Signed-off-by: Yisheng Xie <xieyisheng1-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
----
- drivers/firmware/efi/arm-init.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+The following changes since commit 5465fe0fc3316f7cdda66732a7986f4ebe76d949:
 
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 9f8d996..7c2fe57 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -245,8 +245,10 @@ void __init efi_init(void)
- 	     "Unexpected EFI_MEMORY_DESCRIPTOR version %ld",
- 	      efi.memmap.desc_version);
- 
--	if (uefi_init() < 0)
-+	if (uefi_init() < 0) {
-+		efi_memmap_unmap();
- 		return;
-+	}
- 
- 	reserve_regions();
- 	efi_memattr_init();
--- 
-1.7.12.4
+  Merge tag 'efi-next' of git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi into efi/core (2016-09-13 20:21:55 +0200)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+
+for you to fetch changes up to 92dc33501bfba74655dbf3ec63ea82d040fd6d58:
+
+  x86/efi: Round EFI memmap reservations to EFI_PAGE_SIZE (2016-09-20 15:43:31 +0100)
+
+----------------------------------------------------------------
+ * Fix a boot crash reported by Mike Galbraith and Mike Krinkin. The
+   new EFI memory map reservation code didn't align reservations to
+   EFI_PAGE_SIZE boundaries causing bogus regions to be inserted into
+   the global EFI memory map - Matt Fleming
+
+----------------------------------------------------------------
+Matt Fleming (1):
+      x86/efi: Round EFI memmap reservations to EFI_PAGE_SIZE
+
+ arch/x86/platform/efi/quirks.c |  6 +++++-
+ drivers/firmware/efi/memmap.c  | 11 +++++++++++
+ 2 files changed, 16 insertions(+), 1 deletion(-)
