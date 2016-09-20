@@ -1,27 +1,37 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH] x86/efi: Add necessary checks before iterating over
- efi.memmap
-Date: Tue, 20 Sep 2016 10:56:18 +0100
-Message-ID: <20160920095618.GH2892@codeblueprint.co.uk>
-References: <20160913032813.GA11652@localhost.localdomain>
- <20160920052514.GA41801@g.c>
+From: Yisheng Xie <xieyisheng1-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH -next v2] arm*/efi: efi_init error handling fix
+Date: Tue, 20 Sep 2016 19:39:53 +0800
+Message-ID: <1474371593-10250-1-git-send-email-xieyisheng1@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160920052514.GA41801@g.c>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chao Gao <chao.gao@intel.com>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, linux-kernel@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Cc: will.deacon-5wv7dgnIgG8@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, guohanjun-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 20 Sep, at 01:25:14PM, Chao Gao wrote:
-> Sorry for bothering you. There is a regression since commit 78ce248f that if
-> booting xen in UEFI mode, dom0 will crash and xen reboot constantly.
-> This patch tries to fix it. Please take a look at it.
+There's an early memmap leak in efi_init error path, fix it.
 
-Can you try commit d4c4fed08f31 ("efi: Make
-for_each_efi_memory_desc_in_map() cope with running on Xen") and see
-if that fixes things for you?
+Signed-off-by: Yisheng Xie <xieyisheng1-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+---
+ drivers/firmware/efi/arm-init.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-That patch is already in Linus' tree and is included in v4.8-rc7.
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index 9f8d996..7c2fe57 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -245,8 +245,10 @@ void __init efi_init(void)
+ 	     "Unexpected EFI_MEMORY_DESCRIPTOR version %ld",
+ 	      efi.memmap.desc_version);
+ 
+-	if (uefi_init() < 0)
++	if (uefi_init() < 0) {
++		efi_memmap_unmap();
+ 		return;
++	}
+ 
+ 	reserve_regions();
+ 	efi_memattr_init();
+-- 
+1.7.12.4
