@@ -1,50 +1,51 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL] EFI fix for v4.9 queue
-Date: Tue, 20 Sep 2016 16:59:55 +0200
-Message-ID: <20160920145955.GB22836@gmail.com>
-References: <20160920144650.30615-1-matt@codeblueprint.co.uk>
+From: Waiman Long <waiman.long@hpe.com>
+Subject: Re: [GIT PULL 0/2] EFI urgent fixes
+Date: Tue, 20 Sep 2016 11:20:17 -0400
+Message-ID: <57E153B1.3040907@hpe.com>
+References: <20160920144829.30873-1-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160920144650.30615-1-matt@codeblueprint.co.uk>
+In-Reply-To: <20160920144829.30873-1-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, Mike Galbraith <umgwanakikbuti@gmail.com>, Mike Krinkin <krinkin.m.u@gmail.com>, Peter Jones <pjones@redhat.com>, Taku Izumi <izumi.taku@jp.fujitsu.com>
+Cc: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Borislav Petkov <bp@alien8.de>, Douglas Hatch <doug.hatch@hpe.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Torvalds <torvalds@linux-foundation.org>, Scott J Norton <scott.norton@hpe.com>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-
-* Matt Fleming <matt@codeblueprint.co.uk> wrote:
-
-> Folks, please pull the following fix for the v4.9 EFI queue sat in
-> tip/efi/core.
-> 
-> The following changes since commit 5465fe0fc3316f7cdda66732a7986f4ebe76d949:
-> 
->   Merge tag 'efi-next' of git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi into efi/core (2016-09-13 20:21:55 +0200)
-> 
+On 09/20/2016 10:48 AM, Matt Fleming wrote:
+> Folks, please pull the following two fixes that address the boot hang
+> issue Waiman reported here,
+>
+>    https://lkml.kernel.org/r/57DF56D4.50304@hpe.com
+>
+> The following changes since commit 3be7988674ab33565700a37b210f502563d932e6:
+>
+>    Linux 4.8-rc7 (2016-09-18 17:27:41 -0700)
+>
 > are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-> 
-> for you to fetch changes up to 92dc33501bfba74655dbf3ec63ea82d040fd6d58:
-> 
->   x86/efi: Round EFI memmap reservations to EFI_PAGE_SIZE (2016-09-20 15:43:31 +0100)
-> 
+>
+>    git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+>
+> for you to fetch changes up to 1297667083d5442aafe3e337b9413bf02b114edb:
+>
+>    x86/efi: Only map RAM into EFI page tables if in mixed-mode (2016-09-20 14:53:04 +0100)
+>
 > ----------------------------------------------------------------
->  * Fix a boot crash reported by Mike Galbraith and Mike Krinkin. The
->    new EFI memory map reservation code didn't align reservations to
->    EFI_PAGE_SIZE boundaries causing bogus regions to be inserted into
->    the global EFI memory map - Matt Fleming
-> 
+>   * Fix a boot hang on large memory machines (multiple terabyte) caused
+>     by type conversion errors in the x86 pat code - Matt Fleming
+>
 > ----------------------------------------------------------------
-> Matt Fleming (1):
->       x86/efi: Round EFI memmap reservations to EFI_PAGE_SIZE
-> 
->  arch/x86/platform/efi/quirks.c |  6 +++++-
->  drivers/firmware/efi/memmap.c  | 11 +++++++++++
->  2 files changed, 16 insertions(+), 1 deletion(-)
+> Matt Fleming (2):
+>        x86/mm/pat: Prevent hang during boot when mapping pages
+>        x86/efi: Only map RAM into EFI page tables if in mixed-mode
+>
+>   arch/x86/mm/pageattr.c         | 21 +++++++++++----------
+>   arch/x86/platform/efi/efi_64.c |  2 +-
+>   2 files changed, 12 insertions(+), 11 deletions(-)
 
-Pulled into tip:efi/core, thanks a lot Matt!
+Are you also going to send these fixes to the 4.6 and 4.7 stable trees 
+as well?
 
-	Ingo
+Cheers,
+Longman
