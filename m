@@ -1,55 +1,51 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [RFC PATCH v1 03/28] kvm: svm: Use the hardware provided GPA
- instead of page walk
-Date: Wed, 21 Sep 2016 19:16:59 +0200
-Message-ID: <20160921171659.cvtkp5nf3r3afawi@pd.tnic>
-References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
- <147190824754.9523.13923968456167130181.stgit@brijesh-build-machine>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Subject: Re: EFI co-maintainer
+Date: Wed, 21 Sep 2016 19:59:51 +0200
+Message-ID: <20160921175951.GA3387@wunner.de>
+References: <20160921150912.GM2892@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <owner-linux-mm@kvack.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <147190824754.9523.13923968456167130181.stgit@brijesh-build-machine>
-Sender: owner-linux-mm@kvack.org
-To: Brijesh Singh <brijesh.singh@amd.com>
-Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, devel@linuxdriverproject.org, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedoraproject.org, tony.luck@intel.com, alexandre.bounine@idt.com, kuleshovmail@gmail.com, linux-kernel@vger.kernel.org, mcgrof@kernel.org, linux-crypto@vger.k
+In-Reply-To: <20160921150912.GM2892-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 22, 2016 at 07:24:07PM -0400, Brijesh Singh wrote:
-> From: Tom Lendacky <thomas.lendacky@amd.com>
+Hi Matt, Hi Ard,
+
+On Wed, Sep 21, 2016 at 04:09:12PM +0100, Matt Fleming wrote:
+> I've asked, and Ard has agreed to step up and help me co-maintain the
+> EFI subsystem.
 > 
-> When a guest causes a NPF which requires emulation, KVM sometimes walks
-> the guest page tables to translate the GVA to a GPA. This is unnecessary
-> most of the time on AMD hardware since the hardware provides the GPA in
-> EXITINFO2.
+> Given that there are now two maintainers, we're moving to a shared git
+> repository on kernel.org, hosted at,
 > 
-> The only exception cases involve string operations involving rep or
-> operations that use two memory locations. With rep, the GPA will only be
-> the value of the initial NPF and with dual memory locations we won't know
-> which memory address was translated into EXITINFO2.
+>   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
 > 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/include/asm/kvm_emulate.h |    3 +++
->  arch/x86/include/asm/kvm_host.h    |    3 +++
->  arch/x86/kvm/svm.c                 |    2 ++
->  arch/x86/kvm/x86.c                 |   17 ++++++++++++++++-
->  4 files changed, 24 insertions(+), 1 deletion(-)
+> Expect a MAINTAINERS patch soon.
+> 
+> I do plan on keeping the existing tree in sync for the time being, so
+> it won't actually matter which repository people base their patches
+> on. Hopefully the disruption to patch submitters will be minimal.
+> 
+> Thanks again Ard!
 
-FWIW, LGTM. (Gotta love replying in acronyms :-))
+That is great to hear, thanks a lot from me as well.
 
-Reviewed-by: Borislav Petkov <bp@suse.de>
+Just curious, are there any plans to integrate the new repo into
+linux-next?  It would be great to have testing as early as possible.
 
--- 
-Regards/Gruss,
-    Boris.
+Also, if this isn't too much trouble, would it be possible to merge
+urgent into next when patches are added in the future?  When I tested
+my patches during this release cycle, I tried to pull in everything
+from efi/urgent + efi/next into my development branch but hit some
+non-trivial merge conflicts in portions of the EFI code I wasn't
+familiar with.  And ISTR that efi/next was based on 4.7, not 4.8-rc.
+In the end I just rebased my patches on efi/next, but felt a bit uneasy
+as I wasn't testing what the code would eventually look like.
 
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+Thanks again,
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Lukas
