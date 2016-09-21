@@ -1,56 +1,55 @@
-From: Will Deacon <will.deacon@arm.com>
-Subject: Re: [PATCH 2/2] MAINTAINERS: add ARM and arm64 EFI specific files to
- EFI subsystem
-Date: Wed, 21 Sep 2016 16:44:00 +0100
-Message-ID: <20160921154400.GJ29042@arm.com>
-References: <1474472114-12973-1-git-send-email-ard.biesheuvel@linaro.org>
- <1474472114-12973-2-git-send-email-ard.biesheuvel@linaro.org>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [RFC PATCH v1 03/28] kvm: svm: Use the hardware provided GPA
+ instead of page walk
+Date: Wed, 21 Sep 2016 19:16:59 +0200
+Message-ID: <20160921171659.cvtkp5nf3r3afawi@pd.tnic>
+References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
+ <147190824754.9523.13923968456167130181.stgit@brijesh-build-machine>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <1474472114-12973-2-git-send-email-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, linux@arm.linux.org.uk, Russell King <rmk+kernel@armlinux.org.uk>
+In-Reply-To: <147190824754.9523.13923968456167130181.stgit@brijesh-build-machine>
+Sender: owner-linux-mm@kvack.org
+To: Brijesh Singh <brijesh.singh@amd.com>
+Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, devel@linuxdriverproject.org, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedoraproject.org, tony.luck@intel.com, alexandre.bounine@idt.com, kuleshovmail@gmail.com, linux-kernel@vger.kernel.org, mcgrof@kernel.org, linux-crypto@vger.k
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Sep 21, 2016 at 04:35:14PM +0100, Ard Biesheuvel wrote:
-> Since I will be co-maintaining the EFI subsystem, it makes sense to
-> mention the ARM and arm64 EFI bits in the EFI section in MAINTAINERS
-> so that Matt, the list and I get cc'ed on proposed changes.
+On Mon, Aug 22, 2016 at 07:24:07PM -0400, Brijesh Singh wrote:
+> From: Tom Lendacky <thomas.lendacky@amd.com>
 > 
-> Cc: Catalin Marinas <catalin.marinas@arm.com>
-> Cc: Will Deacon <will.deacon@arm.com>
-> Cc: Russell King <rmk+kernel@armlinux.org.uk>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> When a guest causes a NPF which requires emulation, KVM sometimes walks
+> the guest page tables to translate the GVA to a GPA. This is unnecessary
+> most of the time on AMD hardware since the hardware provides the GPA in
+> EXITINFO2.
+> 
+> The only exception cases involve string operations involving rep or
+> operations that use two memory locations. With rep, the GPA will only be
+> the value of the initial NPF and with dual memory locations we won't know
+> which memory address was translated into EXITINFO2.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 > ---
->  MAINTAINERS | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
-> 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 224518556a84..cc8b36699f94 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -4562,12 +4562,14 @@ L:	linux-efi@vger.kernel.org
->  T:	git git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
->  S:	Maintained
->  F:	Documentation/efi-stub.txt
-> -F:	arch/ia64/kernel/efi.c
-> +F:	arch/*/kernel/efi.c
->  F:	arch/x86/boot/compressed/eboot.[ch]
-> -F:	arch/x86/include/asm/efi.h
-> +F:	arch/*/include/asm/efi.h
->  F:	arch/x86/platform/efi/
->  F:	drivers/firmware/efi/
->  F:	include/linux/efi*.h
-> +F:	arch/arm/boot/compressed/efi-header.S
-> +F:	arch/arm64/kernel/efi-entry.S
+>  arch/x86/include/asm/kvm_emulate.h |    3 +++
+>  arch/x86/include/asm/kvm_host.h    |    3 +++
+>  arch/x86/kvm/svm.c                 |    2 ++
+>  arch/x86/kvm/x86.c                 |   17 ++++++++++++++++-
+>  4 files changed, 24 insertions(+), 1 deletion(-)
 
-For the arm64 bit,
+FWIW, LGTM. (Gotta love replying in acronyms :-))
 
-Acked-by: Will Deacon <will.deacon@arm.com>
+Reviewed-by: Borislav Petkov <bp@suse.de>
 
-Thanks,
+-- 
+Regards/Gruss,
+    Boris.
 
-Will
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
