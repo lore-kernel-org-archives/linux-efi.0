@@ -1,36 +1,47 @@
-From: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
-Subject: Re: EFI co-maintainer
-Date: Wed, 21 Sep 2016 16:12:19 +0100
-Message-ID: <CACxGe6vNt_Ssa1mvZHn_aFTx0Vs5C-e_0+yEQ88hsG1vuJL_2w@mail.gmail.com>
-References: <20160921150912.GM2892@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160921150912.GM2892-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/2] MAINTAINERS: add ARM and arm64 EFI specific files to EFI subsystem
+Date: Wed, 21 Sep 2016 16:35:14 +0100
+Message-ID: <1474472114-12973-2-git-send-email-ard.biesheuvel@linaro.org>
+References: <1474472114-12973-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1474472114-12973-1-git-send-email-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux@arm.linux.org.uk, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Russell King <rmk+kernel@armlinux.org.uk>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Sep 21, 2016 at 4:09 PM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> Folks,
->
-> I've asked, and Ard has agreed to step up and help me co-maintain the
-> EFI subsystem.
->
-> Given that there are now two maintainers, we're moving to a shared git
-> repository on kernel.org, hosted at,
->
->   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
->
-> Expect a MAINTAINERS patch soon.
->
-> I do plan on keeping the existing tree in sync for the time being, so
-> it won't actually matter which repository people base their patches
-> on. Hopefully the disruption to patch submitters will be minimal.
->
-> Thanks again Ard!
+Since I will be co-maintaining the EFI subsystem, it makes sense to
+mention the ARM and arm64 EFI bits in the EFI section in MAINTAINERS
+so that Matt, the list and I get cc'ed on proposed changes.
 
-Brilliant! That is excellent news.
+Cc: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Will Deacon <will.deacon@arm.com>
+Cc: Russell King <rmk+kernel@armlinux.org.uk>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ MAINTAINERS | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-g.
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 224518556a84..cc8b36699f94 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -4562,12 +4562,14 @@ L:	linux-efi@vger.kernel.org
+ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
+ S:	Maintained
+ F:	Documentation/efi-stub.txt
+-F:	arch/ia64/kernel/efi.c
++F:	arch/*/kernel/efi.c
+ F:	arch/x86/boot/compressed/eboot.[ch]
+-F:	arch/x86/include/asm/efi.h
++F:	arch/*/include/asm/efi.h
+ F:	arch/x86/platform/efi/
+ F:	drivers/firmware/efi/
+ F:	include/linux/efi*.h
++F:	arch/arm/boot/compressed/efi-header.S
++F:	arch/arm64/kernel/efi-entry.S
+ 
+ EFI VARIABLE FILESYSTEM
+ M:	Matthew Garrett <matthew.garrett@nebula.com>
+-- 
+2.7.4
