@@ -1,59 +1,43 @@
-From: Paolo Bonzini <pbonzini@redhat.com>
+From: Borislav Petkov <bp@suse.de>
 Subject: Re: [RFC PATCH v1 09/28] x86/efi: Access EFI data as encrypted when
  SEV is active
-Date: Thu, 22 Sep 2016 17:05:54 +0200
-Message-ID: <938ee0cf-85e6-eefa-7df9-9d5e09ed7a9d@redhat.com>
+Date: Thu, 22 Sep 2016 19:07:18 +0200
+Message-ID: <20160922170718.34d4ppockeurrg25@pd.tnic>
 References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
  <147190832511.9523.10850626471583956499.stgit@brijesh-build-machine>
  <20160922143545.3kl7khff6vqk7b2t@pd.tnic>
  <464461b7-1efb-0af1-dd3e-eb919a2578e9@redhat.com>
  <20160922145947.52v42l7p7dl7u3r4@pd.tnic>
+ <938ee0cf-85e6-eefa-7df9-9d5e09ed7a9d@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20160922145947.52v42l7p7dl7u3r4@pd.tnic>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Borislav Petkov <bp@suse.de>
-Cc: linux-efi@vger.kernel.org, Brijesh Singh <brijesh.singh@amd.com>, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, paul.gortmaker@windriver.com, hpa@zytor.com, tglx@linutronix.de, aarcange@redhat.com, sfr@canb.auug.org.au, mchehab@kernel.org, simon.guinot@sequanux.org, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, labbott@fedoraproject.org, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, dan.j.williams@intel.com, andriy.shevchenko@linux.intel.com, akpm@linux-foundation.org, herbert@gondor.apana.org.au, tony.luck@intel.com, linux-mm@kvack.org, kuleshovmail@gmail.com, linux-kernel@vger.kernel.org, mcgrof@kernel.org, linux-crypto@vger.kernel.org, devel@li
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <938ee0cf-85e6-eefa-7df9-9d5e09ed7a9d@redhat.com>
+Sender: owner-linux-mm@kvack.org
+To: Paolo Bonzini <pbonzini@redhat.com>
+Cc: Brijesh Singh <brijesh.singh@amd.com>, thomas.lendacky@amd.com, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, devel@linuxdriverproject.org, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedoraproject.org, tony.luck@intel.com, alexandre.bounine@idt.com, kuleshovmail@gmail.com, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
+On Thu, Sep 22, 2016 at 05:05:54PM +0200, Paolo Bonzini wrote:
+> Which paragraph?
 
+"Linux relies on BIOS to set this bit if BIOS has determined that the
+reduction in the physical address space as a result of enabling memory
+encryption..."
 
-On 22/09/2016 16:59, Borislav Petkov wrote:
-> On Thu, Sep 22, 2016 at 04:45:51PM +0200, Paolo Bonzini wrote:
->> The main difference between the SME and SEV encryption, from the point
->> of view of the kernel, is that real-mode always writes unencrypted in
->> SME and always writes encrypted in SEV.  But UEFI can run in 64-bit mode
->> and learn about the C bit, so EFI boot data should be unprotected in SEV
->> guests.
-> 
-> Actually, it is different: you can start fully encrypted in SME, see:
-> 
-> https://lkml.kernel.org/r/20160822223539.29880.96739.stgit@tlendack-t1.amdoffice.net
-> 
-> The last paragraph alludes to a certain transparent mode where you're
-> already encrypted and only certain pieces like EFI is not encrypted.
+Basically, you can enable SME in the BIOS and you're all set.
 
-Which paragraph?
+-- 
+Regards/Gruss,
+    Boris.
 
->> Because the firmware volume is written to high memory in encrypted
->> form, and because the PEI phase runs in 32-bit mode, the firmware
->> code will be encrypted; on the other hand, data that is placed in low
->> memory for the kernel can be unencrypted, thus limiting differences
->> between SME and SEV.
-> 
-> When you run fully encrypted, you still need to access EFI tables in the
-> clear. That's why I'm confused about this patch here.
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
 
-I might be wrong, but I don't think this patch was tested with OVMF or Duet.
-
-Paolo
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
