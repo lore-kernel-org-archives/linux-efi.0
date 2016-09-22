@@ -1,73 +1,88 @@
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: Re: EFI co-maintainer
-Date: Thu, 22 Sep 2016 10:57:48 +0200
-Message-ID: <20160922085748.GA3546@wunner.de>
-References: <20160921150912.GM2892@codeblueprint.co.uk>
- <20160921175951.GA3387@wunner.de>
- <20160922083402.GA16071@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [RFC PATCH 0/3] efi: MMC proxy support for the UEFI varstore
+Date: Thu, 22 Sep 2016 12:30:03 +0100
+Message-ID: <1474543806-19210-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160922083402.GA16071-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, glikely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org, haojian.zhuang-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Sep 22, 2016 at 09:34:02AM +0100, Matt Fleming wrote:
-> On Wed, 21 Sep, at 07:59:51PM, Lukas Wunner wrote:
-> > Just curious, are there any plans to integrate the new repo into
-> > linux-next?  It would be great to have testing as early as possible.
->  
-> Yes, the existing one is also part of linux-next once it gets merged
-> into tip. The issue has been that I didn't send pull requests to tip
-> frequently enough for that to happen on a regular basis.
-> 
-> Ard has already mentioned that he'd like to see that change.
+================================================================================
+NOTE: this is a work in progress, and not fully functional yet. In particular,
+the actual MMC host protocol methods are stubbed out at the moment, and need to
+be wired up to the Linux device drivers.
+================================================================================
 
-Excellent, thank you.
+On mobile and embedded systems, there is usually only a single MMC device for
+non-volatile storage, which sits behind a controller that is owned by the OS at
+runtime. This makes it difficult to host the UEFI variable store on MMC as well,
+since the UEFI runtime services routines expect ownership of the underlying
+device as well.
 
-> > Also, if this isn't too much trouble, would it be possible to merge
-> > urgent into next when patches are added in the future?  When I tested
-> > my patches during this release cycle, I tried to pull in everything
-> > from efi/urgent + efi/next into my development branch but hit some
-> > non-trivial merge conflicts in portions of the EFI code I wasn't
-> > familiar with.  And ISTR that efi/next was based on 4.7, not 4.8-rc.
-> > In the end I just rebased my patches on efi/next, but felt a bit uneasy
-> > as I wasn't testing what the code would eventually look like.
-> 
-> This is a fair request. The only reason this hasn't happened in the
-> past is that no one has ever asked for it to happen regularly.
-> 
-> 'next' and 'urgent' are intended to be topic branches, and they're
-> based on tags that align with their purpose - 'next' is new features
-> and needs a stable base and lots of testing time, whereas 'urgent' is
-> critical bug fixes and so needs to be based on the latest -rc.
-> 
-> While I don't think it makes sense to merge those branches together,
-> using the 'master' branch as the place with all the changes plus the
-> merge resolutions sounds fine to me. This is similar to how the tip
-> repository is structured. 
-> 
-> Would that work?
+This series proposes an approach to work around this. It implements the UEFI
+MMC host protocol in the kernel, in a way that makes it possible to expose it
+to the firmware. At the same time, the firmware needs be set up for this, i.e.,
+it needs to expose its MMC host protocol pointer via a UEFI configuration table,
+so that the kernel can override it if it decides to expose this functionality
+to the firmware.
 
-Yes, sure thing.  And if efi/master is part of linux-next, you'll
-automatically get testing for 'urgent' patches as well and thus a
-bit of extra confidence before the merge into tip a few days later.
+Note that these patches are based on patches in the EFI tree that are queued
+for v4.9, which replace the runtime wrappers spinlock with a semaphore. This
+allows us to sleep in the firmware callbacks.
 
-Just to provide an additional data point, the i915 folks have a
-drm-intel-next branch and a drm-intel-fixes branch, the latter mostly
-just cherry-picks from the former.  Plus there's drm-intel-nightly
-which merges everything together (drm-intel + drm-misc branches,
-Dave Airlie's drm-next, sound etc) and which my own development
-branch is also based on.  Some people run drm-intel-nightly all
-the time, plus the linux-next coverage this adds up to a considerable
-safety net.
+Prerequisites for using these patches:
 
-So the 'master' branch you've mentioned would sort of be the equivalent
-to drm-intel-nightly. Yeah, that would definitely work.
+* qemu-system-aarch64 built from this branch:
+  https://git.linaro.org/people/ard.biesheuvel/qemu.git/shortlog/refs/heads/mach-virt-pl181
+  which adds a PL181 SD/MMC controller to the mach-virt model, and exposes it
+  via the device tree. It also sets the 'linux,uefi-varstore' property on this
+  node.
 
-Best regards,
+* UEFI firmware built from this branch:
+  https://git.linaro.org/people/ard.biesheuvel/uefi-next.git/shortlog/refs/heads/mmc-proxy
+  
+  Build using the following command
+  build -a AARCH64 -t GCC5 -p ArmVirtPkg/ArmVirtQemuMmcVars.dsc
 
-Lukas
+  Run using 
+  qemu-system-aarch64 \
+    -M virt -cpu cortex-a57 -m 2048 \
+    -device virtio-blk-device,drive=boot \
+    -drive if=none,id=boot,file=fat:<path-of-Image>,format=raw \
+    -kernel <edk2-dir>/Build/ArmVirtQemuMmcVars-AARCH64/DEBUG_GCC5/FV/QEMU_EFI.fd \
+    -sd <edk2-dir>/build/edk2/Build/ArmVirtQemuMmcVars-AARCH64/DEBUG_GCC5/FV/QEMU_VARS.fd \
+    -nographic $@
+
+  This will give you an UEFI environment which keeps its UEFI variables in the
+  emulated MMC volume, and exposes its MMC host protocol in a way that allows
+  these patches to hook into it.
+
+Patches #1 and #2 implement the arch specific hooks to preserve/restore the NEON
+registers that the firmware may expect to be preserved across function calls.
+
+Patch #3 implements the plumbing to call back into the kernel from the firmware.
+
+Please comment on whether this approach seems feasible, and in particular, how
+on earth I should wire this up to the actual MMC code.
+
+Thanks,
+Ard.
+
+Ard Biesheuvel (3):
+  efi/arm64: add SIMD stash/unstash operations
+  efi/arm: add SIMD stash/unstash operations
+  efi: implement MMC proxy support for the UEFI variable store
+
+ arch/arm/include/asm/efi.h       |  11 +
+ arch/arm64/include/asm/efi.h     |  33 +++
+ drivers/firmware/efi/Kconfig     |   9 +
+ drivers/firmware/efi/Makefile    |   1 +
+ drivers/firmware/efi/arm-init.c  |   2 +
+ drivers/firmware/efi/mmc-proxy.c | 222 ++++++++++++++++++++
+ include/linux/efi.h              |   1 +
+ 7 files changed, 279 insertions(+)
+ create mode 100644 drivers/firmware/efi/mmc-proxy.c
+
+-- 
+2.7.4
