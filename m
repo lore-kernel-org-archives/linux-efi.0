@@ -1,80 +1,43 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] efi/arm: fix absolute relocation detection for older toolchains
-Date: Fri, 30 Sep 2016 16:01:55 -0700
-Message-ID: <1475276515-21801-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Credit Suisse Bank England <werberthfurtado-opADqmyLwHrdnys6gewWnQ@public.gmane.org>
+Subject: Credit Suisse Bank England
+Date: Mon, 3 Oct 2016 03:21:07 -0300 (BRT)
+Message-ID: <225830506.151248.1475475667071.JavaMail.root__18809.3994664543$1475479870$gmane$org@detran.ma.gov.br>
+Reply-To: Chris Williams <chriswilliams-creditsuisse-O5WfVfzUwx8@public.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org
-Cc: linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, khilman-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-When building the ARM kernel with CONFIG_EFI=y, the following build
-error may occur when using a less recent version of binutils (2.23 or
-older):
+Guten Tag, wie geht es Ihnen heute? Ich habe Ihre E-Mail-Kontakt aus Ihrem Land Business Directory und beschlossen, mit Ihnen in Verbindung zu diesem Business-Vorschlag. Ich bin Herr Chris Williams der Investment Banking Abteilung der Credit Suisse Bank One Cabot Square, London E14 4QJ, Großbritannien. Ich bin Kontaktaufnahme mit Ihnen in Bezug auf ein Geschäft Vorschlag, die von einer immensen Vorteil für uns beide sein wird.
 
-   STUBCPY drivers/firmware/efi/libstub/lib-sort.stub.o
- 00000000 R_ARM_ABS32       sort
- 00000004 R_ARM_ABS32       __ksymtab_strings
- drivers/firmware/efi/libstub/lib-sort.stub.o: absolute symbol references
- not allowed in the EFI stub
+In meiner Abteilung, entdeckte ich eine verlassene Summe von £ 17,5 Mio. GBP (Siebzehn Millionen fünfhunderttausend britische Pfund Sterling) in einem Konto, das zu einem unserer ausländischen Kunden verstorbenen Herrn Brodskij Nikolai, ein russischer Geschäftsmann, der ein Opfer war, gehört der Malaysia Airlines Flight 370 (MH370 / MAS370), die im Süden der indische Ozean auf 8. März 2014 auf dem Weg von Kuala Lumpur international Airport abgestürzt zu Beijing Capital International Airport zu töten alle an Bord.
 
-(and when building with debug symbols, the list above is much longer, and
-contains all the internal references between the .debug sections and the
-actual code)
+Informieren Sie sich über den untenstehenden Link für die Passagierliste:
 
-This issue is caused by the fact that objcopy v2.23 or earlier does not
-support wildcards in its -R and -j options, which means the following
-line from the Makefile:
 
-  STUBCOPY_FLAGS-y		:= -R .debug* -R *ksymtab* -R *kcrctab*
+http://online.wsj.com/news/articles/SB10001424052702303369904579427230127866184
 
-fails to take effect, leaving harmless absolute relocations in the binary
-that are indistinguishable from relocations that may cause crashes at
-runtime due to the fact that these relocations are resolved at link time
-using the virtual address of the kernel, which is always different from
-the address at which the EFI firmware loads and invokes the stub.
+MR Brodskij Nikolai Nummer 7 auf der Liste, Seit seinem Tod unserer Bank hat für die nächsten Angehörigen zu kommen für die Behauptung seiner Gelder und Güter schätzten die Summe von £ 17,5 Mio. GBP, aber niemand hat so, ich persönlich getan gewartet , waren nicht erfolgreich bei der Suche nach einer seiner Verwandten. Ich suche Ihre Zustimmung an Sie an die Bank, wie die nächsten Angehörigen des Verstorbenen zu präsentieren, so dass die Erlöse aus diesem Konto bei £ 17,5 Mio. GBP an Sie gezahlt werden bewertet.
 
-So, as a workaround, disable debug symbols explicitly when building the
-stub for ARM, and strip the ksymtab and kcrctab symbols for the only
-exported symbol we currently reuse in the stub, which is 'sort'.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
+Der Deal wird in diesem Verhältnis aufgeteilt: 55% für mich und 45% zu Ihnen. Ich habe in meinem Besitz alle notwendigen und wichtigen Dokumente, die in diesem Geschäft verwendet werden kann. Ich brauche Ihre ehrliche Zusammenarbeit, Verschwiegenheit und Vertrauen, damit wir sehen diese Verhandlung durch. Ich garantiere Ihnen 100% Erfolg in diesem Geschäft, wenden Sie sich bitte sicher sein, dass Sie das Angebot unter einer legitimen Anordnung, die Sie aus der Verletzung des Gesetzes sowohl hier als auch in Großbritannien und in Ihrem Land zu schützen wird ausgeführt.
 
-This is a workaround for now. We can revisit this when a need arises to copy
-more kernel code into the stub, by which time we could put in a more elaborate
-fix, or decide to no longer care about 'older' versions of objcopy.
+Wenn Sie in der Lage, dem Umgang mit diesem Angebot sind, bitte zurück zu mir mit folgenden Angaben, damit wir fortfahren:
 
-Since this fixes an ARM specific issue and only affects ARM specific Makefile
-variables, I am happy for this to go on top of the arm-soc patch that enables
-CONFIG_EFI for ARM's multi_v7_defconfig (queued for v4.9), given that we have
-no other changes queued in linux-efi that should conflict with this patch.
+1. Ihr vollständiger Name:
+2. Telefonnummer:
+3. Kontakt-Adresse:
+4. Alter:
+5. Geschlecht:
+6. Beruf:
+7. Ihre Nationalität:
 
-Matt, any concerns?
 
- drivers/firmware/efi/libstub/Makefile | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+Nachdem durch eine methodische Suche gegangen, entschied ich mich, Sie zu kontaktieren hoffen, dass Sie diesen Vorschlag interessant, Bitte auf Ihrer Bestätigung dieser Nachricht und geben Sie Ihr Interesse, ich will dich mit mehr Informationen liefern zu finden.
 
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index c06945160a41..5e23e2d305e7 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -11,7 +11,7 @@ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ $(LINUX_INCLUDE) -O2 \
- 				   -mno-mmx -mno-sse
- 
- cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS))
--cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) \
-+cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) -g0 \
- 				   -fno-builtin -fpic -mno-single-pic-base
- 
- cflags-$(CONFIG_EFI_ARMSTUB)	+= -I$(srctree)/scripts/dtc/libfdt
-@@ -79,5 +79,6 @@ quiet_cmd_stubcopy = STUBCPY $@
- # decompressor. So move our .data to .data.efistub, which is preserved
- # explicitly by the decompressor linker script.
- #
--STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub
-+STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub \
-+				   -R ___ksymtab+sort -R ___kcrctab+sort
- STUBCOPY_RELOC-$(CONFIG_ARM)	:= R_ARM_ABS
--- 
-2.7.4
+Ihre Zustimmung zu dieser E-Mail und Business-Vorschlag wird sehr geschätzt werden.
+
+Freundliche Grüße,
+Chris Williams
