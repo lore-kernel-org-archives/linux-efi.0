@@ -1,44 +1,32 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 3/3] efi/efi_test: fix the uninitialized value rv
-Date: Mon, 3 Oct 2016 21:25:53 +0100
-Message-ID: <20161003202553.GN16071@codeblueprint.co.uk>
-References: <1474859691-8574-1-git-send-email-ivan.hu@canonical.com>
- <1474859691-8574-4-git-send-email-ivan.hu@canonical.com>
+Subject: Re: [PATCH] efi/arm: fix absolute relocation detection for older
+ toolchains
+Date: Mon, 3 Oct 2016 21:52:33 +0100
+Message-ID: <20161003205233.GO16071@codeblueprint.co.uk>
+References: <1475276515-21801-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1474859691-8574-4-git-send-email-ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+In-Reply-To: <1475276515-21801-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, khilman-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 26 Sep, at 11:14:51AM, Ivan Hu wrote:
-> Fix the minor issue found by CoverityScan
-> 520        kfree(name);
-> CID 1358932 (#1 of 1): Uninitialized scalar variable (UNINIT)17.
-> uninit_use: Using uninitialized value rv.
-> 521        return rv;
-> 522}
+On Fri, 30 Sep, at 04:01:55PM, Ard Biesheuvel wrote:
 > 
-> Signed-off-by: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-> ---
->  drivers/firmware/efi/test/efi_test.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> This is a workaround for now. We can revisit this when a need arises to copy
+> more kernel code into the stub, by which time we could put in a more elaborate
+> fix, or decide to no longer care about 'older' versions of objcopy.
 > 
-> diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
-> index 87394f0..39302e6 100644
-> --- a/drivers/firmware/efi/test/efi_test.c
-> +++ b/drivers/firmware/efi/test/efi_test.c
-> @@ -425,7 +425,7 @@ static long efi_runtime_get_nextvariablename(unsigned long arg)
->  	efi_guid_t *vd = NULL;
->  	efi_guid_t vendor_guid;
->  	efi_char16_t *name = NULL;
-> -	int rv;
-> +	int rv = 0;
->  
->  	getnextvariablename_user = (struct efi_getnextvariablename __user *)arg;
->  
+> Since this fixes an ARM specific issue and only affects ARM specific Makefile
+> variables, I am happy for this to go on top of the arm-soc patch that enables
+> CONFIG_EFI for ARM's multi_v7_defconfig (queued for v4.9), given that we have
+> no other changes queued in linux-efi that should conflict with this patch.
+> 
+> Matt, any concerns?
 
-Thanks, applied to 'next'.
+Not with the patch, but could we clarify the user-visible effects of
+not applying it? Are the absolute relocations harmless, or will they
+lead to crashes? 
