@@ -1,25 +1,41 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] efi: Use LocateHandleBuffer instead of LocateHandle
-Date: Tue, 4 Oct 2016 22:33:31 +0100
-Message-ID: <20161004213331.GU16071@codeblueprint.co.uk>
-References: <1d7915dc0dd328ca04088f6b8b3fcfad5cec55a0.1473275006.git.lukas@wunner.de>
- <CAKv+Gu_kfnHfiBH__Wnvh39KMPj_-s39YyY=pT3roNv7iPPzrA@mail.gmail.com>
- <20160909115951.GA29385@wunner.de>
- <20161003193220.GI16071@codeblueprint.co.uk>
- <CAKv+Gu-UKr0bPjy_0tO0ThB6F4E1q-uKtktg+z5CRP=gX-oewg@mail.gmail.com>
+Subject: Re: [PATCH 1/3] efi/efi_test: use memdup_user() as a cleanup
+Date: Tue, 4 Oct 2016 22:37:43 +0100
+Message-ID: <20161004213743.GV16071@codeblueprint.co.uk>
+References: <1474859691-8574-1-git-send-email-ivan.hu@canonical.com>
+ <1474859691-8574-2-git-send-email-ivan.hu@canonical.com>
+ <20161003201718.GL16071@codeblueprint.co.uk>
+ <3fb6d9fa-b554-509b-fc59-d75340017589@canonical.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-UKr0bPjy_0tO0ThB6F4E1q-uKtktg+z5CRP=gX-oewg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <3fb6d9fa-b554-509b-fc59-d75340017589-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: ivanhu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 04 Oct, at 01:56:42PM, Ard Biesheuvel wrote:
+On Tue, 04 Oct, at 11:04:56AM, ivanhu wrote:
+> Hi Matt,
 > 
-> I am leaning towards not taking the patch, although we could revisit
-> this in the future.
+> The warning message is from Kbuild test robot,
+> 
+> https://chromium.googlesource.com/linux-fpga-chameleon/+/fpga-chameleon-4.2/scripts/coccinelle/api/memdup_user.cocci,
+> 
+> 
+> and  I believe it tries to persuade us to use memdup_user instead of kmalloc
+> and copy_form_user,
+> 
+> With this new function, we don't have to write 'len' twice, which can lead
+> to typos/mistakes.
+> It also produces smaller code and kernel text.
+> 
+> http://lkml.iu.edu/hypermail/linux/kernel/0903.0/02349.html
 
-Let's do this. It's only a cleanup after all.
+Right, I understand all that. My question was specifically about the
+following sentence from your patch,
+
+> This is a little bit restricted to reduce false positives
+
+What restriction that reduces false positives are you referring to?
