@@ -1,194 +1,98 @@
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] efifb: show framebuffer layout as device attributes
-Date: Tue, 4 Oct 2016 09:35:21 -0400
-Message-ID: <20161004133520.ecyfshyalxjl5eap@redhat.com>
-References: <20161003170923.15025-1-pjones@redhat.com>
- <CAKv+Gu-tW51s7ajiAZWWYyN3b_H3qXbXDpGV4Oowf5AiFzmSSA@mail.gmail.com>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH] efi: Use LocateHandleBuffer instead of LocateHandle
+Date: Tue, 4 Oct 2016 18:53:49 +0200
+Message-ID: <20161004165349.GA5019@wunner.de>
+References: <1d7915dc0dd328ca04088f6b8b3fcfad5cec55a0.1473275006.git.lukas@wunner.de>
+ <CAKv+Gu_kfnHfiBH__Wnvh39KMPj_-s39YyY=pT3roNv7iPPzrA@mail.gmail.com>
+ <20160909115951.GA29385@wunner.de>
+ <20161003193220.GI16071@codeblueprint.co.uk>
+ <CAKv+Gu-UKr0bPjy_0tO0ThB6F4E1q-uKtktg+z5CRP=gX-oewg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-tW51s7ajiAZWWYyN3b_H3qXbXDpGV4Oowf5AiFzmSSA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <CAKv+Gu-UKr0bPjy_0tO0ThB6F4E1q-uKtktg+z5CRP=gX-oewg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jean-Christophe Plagniol-Villard <plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org>, Tomi Valkeinen <tomi.valkeinen-l0cyMroinI0@public.gmane.org>, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Oct 04, 2016 at 02:31:55PM +0100, Ard Biesheuvel wrote:
-> Hi Peter,
-> 
-> On 3 October 2016 at 10:09, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> > Userland sometimes needs to know what the framebuffer configuration was
-> > when the firmware was running.  This enables us to render localized
-> > status strings during firmware updates using the data from the ACPI BGRT
-> > table and the protocol described at the url below:
+On Tue, Oct 04, 2016 at 01:56:42PM +0100, Ard Biesheuvel wrote:
+> On 3 October 2016 at 12:32, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> > On Fri, 09 Sep, at 01:59:51PM, Lukas Wunner wrote:
+> >>
+> >> I vaguely recall that Apple was among the first vendors adopting EFI
+> >> for x86 in 2005, but I could be wrong.
 > >
-> > https://msdn.microsoft.com/en-us/windows/hardware/drivers/bringup/boot-screen-components
-> >
-> > This patch also fixes up efifb's printk() usage to use pr_warn() /
-> > pr_info() / pr_err() instead.
-> >
-> > Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > I'm fairly sure my old Macbook 2.1 is EFI 1.10, yeah.
 > 
-> I've given this a spin on arm64 (QEMU), and it works as expected.
-> 
-> Tested-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Reviewed-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> 
-> Since you're the maintainer of efifb, how do you expect this to be taken in?
+> Indeed. But the Macs are a little weird in this respect, it does not
+> necessarily mean they don't implement LocateHandleBuffer(). Since
+> Lukas uses a Mac himself (IIRC), I'd assume it works on his system and
+> so their UEFI does implement this boot service. That does not
+> necessarily tell us anything about other Macs, though.
 
-Usually I just funnel anything EFI related through mfleming, since he's
-already doing regular pushes upstream and it's part of his workflow.
-Matt, does that work for you in this case?
+I have a 2012 MacBook Pro, but there's a simple trick to find out if
+even the earliest Intel Macs of 2006 supported LocateHandleBuffer:
+By disassembling the bootloader that shipped with OS X 10.6 (2009).
+This release still officially supported the very first Intel Macs.
+If it unconditionally calls LocateHandleBuffer, then it must have
+been supported from the very beginning.
 
-> 
-> -- 
-> Ard.
-> 
-> 
-> > ---
-> >  drivers/video/fbdev/efifb.c | 59 +++++++++++++++++++++++++++++++++++----------
-> >  1 file changed, 46 insertions(+), 13 deletions(-)
-> >
-> > diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
-> > index 924bad4..099b76b 100644
-> > --- a/drivers/video/fbdev/efifb.c
-> > +++ b/drivers/video/fbdev/efifb.c
-> > @@ -118,6 +118,31 @@ static inline bool fb_base_is_valid(void)
-> >         return false;
-> >  }
-> >
-> > +#define efifb_attr_decl(name, fmt)                                     \
-> > +static ssize_t name##_show(struct device *dev,                         \
-> > +                          struct device_attribute *attr,               \
-> > +                          char *buf)                                   \
-> > +{                                                                      \
-> > +       return sprintf(buf, fmt "\n", (screen_info.lfb_##name));        \
-> > +}                                                                      \
-> > +static DEVICE_ATTR_RO(name)
-> > +
-> > +efifb_attr_decl(base, "0x%x");
-> > +efifb_attr_decl(linelength, "%u");
-> > +efifb_attr_decl(height, "%u");
-> > +efifb_attr_decl(width, "%u");
-> > +efifb_attr_decl(depth, "%u");
-> > +
-> > +static struct attribute *efifb_attrs[] = {
-> > +       &dev_attr_base.attr,
-> > +       &dev_attr_linelength.attr,
-> > +       &dev_attr_width.attr,
-> > +       &dev_attr_height.attr,
-> > +       &dev_attr_depth.attr,
-> > +       NULL
-> > +};
-> > +ATTRIBUTE_GROUPS(efifb);
-> > +
-> >  static int efifb_probe(struct platform_device *dev)
-> >  {
-> >         struct fb_info *info;
-> > @@ -205,14 +230,13 @@ static int efifb_probe(struct platform_device *dev)
-> >         } else {
-> >                 /* We cannot make this fatal. Sometimes this comes from magic
-> >                    spaces our resource handlers simply don't know about */
-> > -               printk(KERN_WARNING
-> > -                      "efifb: cannot reserve video memory at 0x%lx\n",
-> > +               pr_warn("efifb: cannot reserve video memory at 0x%lx\n",
-> >                         efifb_fix.smem_start);
-> >         }
-> >
-> >         info = framebuffer_alloc(sizeof(u32) * 16, &dev->dev);
-> >         if (!info) {
-> > -               printk(KERN_ERR "efifb: cannot allocate framebuffer\n");
-> > +               pr_err("efifb: cannot allocate framebuffer\n");
-> >                 err = -ENOMEM;
-> >                 goto err_release_mem;
-> >         }
-> > @@ -230,16 +254,15 @@ static int efifb_probe(struct platform_device *dev)
-> >
-> >         info->screen_base = ioremap_wc(efifb_fix.smem_start, efifb_fix.smem_len);
-> >         if (!info->screen_base) {
-> > -               printk(KERN_ERR "efifb: abort, cannot ioremap video memory "
-> > -                               "0x%x @ 0x%lx\n",
-> > +               pr_err("efifb: abort, cannot ioremap video memory 0x%x @ 0x%lx\n",
-> >                         efifb_fix.smem_len, efifb_fix.smem_start);
-> >                 err = -EIO;
-> >                 goto err_release_fb;
-> >         }
-> >
-> > -       printk(KERN_INFO "efifb: framebuffer at 0x%lx, using %dk, total %dk\n",
-> > +       pr_info("efifb: framebuffer at 0x%lx, using %dk, total %dk\n",
-> >                efifb_fix.smem_start, size_remap/1024, size_total/1024);
-> > -       printk(KERN_INFO "efifb: mode is %dx%dx%d, linelength=%d, pages=%d\n",
-> > +       pr_info("efifb: mode is %dx%dx%d, linelength=%d, pages=%d\n",
-> >                efifb_defined.xres, efifb_defined.yres,
-> >                efifb_defined.bits_per_pixel, efifb_fix.line_length,
-> >                screen_info.pages);
-> > @@ -247,7 +270,7 @@ static int efifb_probe(struct platform_device *dev)
-> >         efifb_defined.xres_virtual = efifb_defined.xres;
-> >         efifb_defined.yres_virtual = efifb_fix.smem_len /
-> >                                         efifb_fix.line_length;
-> > -       printk(KERN_INFO "efifb: scrolling: redraw\n");
-> > +       pr_info("efifb: scrolling: redraw\n");
-> >         efifb_defined.yres_virtual = efifb_defined.yres;
-> >
-> >         /* some dummy values for timing to make fbset happy */
-> > @@ -265,7 +288,7 @@ static int efifb_probe(struct platform_device *dev)
-> >         efifb_defined.transp.offset = screen_info.rsvd_pos;
-> >         efifb_defined.transp.length = screen_info.rsvd_size;
-> >
-> > -       printk(KERN_INFO "efifb: %s: "
-> > +       pr_info("efifb: %s: "
-> >                "size=%d:%d:%d:%d, shift=%d:%d:%d:%d\n",
-> >                "Truecolor",
-> >                screen_info.rsvd_size,
-> > @@ -285,12 +308,19 @@ static int efifb_probe(struct platform_device *dev)
-> >         info->fix = efifb_fix;
-> >         info->flags = FBINFO_FLAG_DEFAULT | FBINFO_MISC_FIRMWARE;
-> >
-> > -       if ((err = fb_alloc_cmap(&info->cmap, 256, 0)) < 0) {
-> > -               printk(KERN_ERR "efifb: cannot allocate colormap\n");
-> > +       err = sysfs_create_groups(&dev->dev.kobj, efifb_groups);
-> > +       if (err) {
-> > +               pr_err("efifb: cannot add sysfs attrs\n");
-> >                 goto err_unmap;
-> >         }
-> > -       if ((err = register_framebuffer(info)) < 0) {
-> > -               printk(KERN_ERR "efifb: cannot register framebuffer\n");
-> > +       err = fb_alloc_cmap(&info->cmap, 256, 0);
-> > +       if (err < 0) {
-> > +               pr_err("efifb: cannot allocate colormap\n");
-> > +               goto err_groups;
-> > +       }
-> > +       err = register_framebuffer(info);
-> > +       if (err < 0) {
-> > +               pr_err("efifb: cannot register framebuffer\n");
-> >                 goto err_fb_dealoc;
-> >         }
-> >         fb_info(info, "%s frame buffer device\n", info->fix.id);
-> > @@ -298,6 +328,8 @@ static int efifb_probe(struct platform_device *dev)
-> >
-> >  err_fb_dealoc:
-> >         fb_dealloc_cmap(&info->cmap);
-> > +err_groups:
-> > +       sysfs_remove_groups(&dev->dev.kobj, efifb_groups);
-> >  err_unmap:
-> >         iounmap(info->screen_base);
-> >  err_release_fb:
-> > @@ -313,6 +345,7 @@ static int efifb_remove(struct platform_device *pdev)
-> >         struct fb_info *info = platform_get_drvdata(pdev);
-> >
-> >         unregister_framebuffer(info);
-> > +       sysfs_remove_groups(&pdev->dev.kobj, efifb_groups);
-> >         framebuffer_release(info);
-> >
-> >         return 0;
-> > --
-> > 2.10.0
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Did a quick search for instruction FF 90 38 01 00 00, which means
+"call qword [ds:rax+0x138]", where 138 is the LocateHandleBuffer
+offset in the 64-bit boot services table.  And sure enough:
 
--- 
-  Peter
+5147         lea        rdi, qword [ds:0x278d0]         ; boot services table
+514e         lea        rdx, qword [ss:rbp+0xffffffffffffffa8]
+5152         xor        r8d, r8d                        ; SearchKey
+5155         lea        r9, qword [ss:rbp+0xffffffffffffff98] ; NoHandles
+5159         mov        ecx, 0x2                        ; ByProtocol
+515e         mov        rax, qword [ds:rdi]
+5161         mov        qword [ss:rsp-0x8+arg_10], rdx  ; Buffer
+5166         lea        rdx, qword [ds:0x27a00]         ; GUID
+516d         call       qword [ds:rax+0x138]            ; LocateHandleBuffer
+
+The 32-bit version looks the same except for the offset (rax+0xa8) and
+calling convention.
+
+So I'm pretty confident this patch works on all Macs, the question is
+were there any non-Mac x86 machines which might lack LocateHandleBuffer?
+
+The EFI 1.10 spec merely says "The LocateHandleBuffer() is a new version
+of LocateHandle() that allocates the required buffer for the caller."
+
+But new since when?  Was this added with 1.10 or did it already exist
+in earlier versions?  The 1.10 spec dates back to 2002 and according
+to Wikipedia, only Itaniums used EFI back then.
+
+If LocateHandleBuffer was indeed missing in earlier specs, was the
+layout of the boot services table the same as in 1.10 and the function
+pointer was just marked reserved, or was the layout completely different?
+If the latter, then we don't support earlier versions anyway.
+
+The Graphics Output Protocol was added post 1.10, so it should be safe
+to use LocateHandleBuffer at least for GOP.  The two other protocols,
+UGA and EFI_PCI_IO_PROTOCOL, were already present in 1.10.
+
+I tried to find the 1.02 spec using the Wayback Machine:
+https://web.archive.org/web/20021218163928/http://developer.intel.com/technology/efi/download.htm
+
+The download required entering an e-mail address and the user was then
+redirected to an URL which is missing in the Wayback Machine:
+https://web.archive.org/web/http://developer.intel.com/technology/efi/EFISpec_v102.htm
+
+I couldn't find older specs than 1.10 with Google either, so it looks
+like it's gone from today's web.  Thus, on September 12 I reached out
+by e-mail to Vincent Zimmer who had been working on EFI since its early
+days (see his blog at http://vzimmer.blogspot.com).  Unfortunately I
+never got a reply.
+
+My guess is that pre-1.10 versions were only ever shipped with Itanium
+and that using LocateHandleBuffer is therefore safe on x86.  But to know
+for sure it would be necessary to find someone who still is in possession
+of earlier specs and knows what shipped when.
+
+Thanks,
+
+Lukas
