@@ -1,161 +1,106 @@
-From: Robert Richter <robert.richter@cavium.com>
-Subject: arm64: kernel BUG at mm/page_alloc.c:1844!
-Date: Wed, 5 Oct 2016 16:13:13 +0200
-Message-ID: <20161005141313.GF22012@rric.localdomain>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efi: Use LocateHandleBuffer instead of LocateHandle
+Date: Wed, 5 Oct 2016 17:25:44 +0100
+Message-ID: <CAKv+Gu-6yB_ZVC38S8yFZtB7vPfDZe1wp47bT+WxwpSSUN4OgA@mail.gmail.com>
+References: <1d7915dc0dd328ca04088f6b8b3fcfad5cec55a0.1473275006.git.lukas@wunner.de>
+ <CAKv+Gu_kfnHfiBH__Wnvh39KMPj_-s39YyY=pT3roNv7iPPzrA@mail.gmail.com>
+ <20160909115951.GA29385@wunner.de> <20161003193220.GI16071@codeblueprint.co.uk>
+ <CAKv+Gu-UKr0bPjy_0tO0ThB6F4E1q-uKtktg+z5CRP=gX-oewg@mail.gmail.com> <20161004165349.GA5019@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-Sender: owner-linux-mm@kvack.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Will Deacon <will.deacon@arm.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mm@kvack.org, linux@arm.linux.org.uk, linux-efi@vger.kernel.org, David Daney <david.daney@cavium.com>, Mark Salter <msalter@redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20161004165349.GA5019-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi all,
+On 4 October 2016 at 17:53, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
+> On Tue, Oct 04, 2016 at 01:56:42PM +0100, Ard Biesheuvel wrote:
+>> On 3 October 2016 at 12:32, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+>> > On Fri, 09 Sep, at 01:59:51PM, Lukas Wunner wrote:
+>> >>
+>> >> I vaguely recall that Apple was among the first vendors adopting EFI
+>> >> for x86 in 2005, but I could be wrong.
+>> >
+>> > I'm fairly sure my old Macbook 2.1 is EFI 1.10, yeah.
+>>
+>> Indeed. But the Macs are a little weird in this respect, it does not
+>> necessarily mean they don't implement LocateHandleBuffer(). Since
+>> Lukas uses a Mac himself (IIRC), I'd assume it works on his system and
+>> so their UEFI does implement this boot service. That does not
+>> necessarily tell us anything about other Macs, though.
+>
+> I have a 2012 MacBook Pro, but there's a simple trick to find out if
+> even the earliest Intel Macs of 2006 supported LocateHandleBuffer:
+> By disassembling the bootloader that shipped with OS X 10.6 (2009).
+> This release still officially supported the very first Intel Macs.
+> If it unconditionally calls LocateHandleBuffer, then it must have
+> been supported from the very beginning.
+>
+> Did a quick search for instruction FF 90 38 01 00 00, which means
+> "call qword [ds:rax+0x138]", where 138 is the LocateHandleBuffer
+> offset in the 64-bit boot services table.  And sure enough:
+>
+> 5147         lea        rdi, qword [ds:0x278d0]         ; boot services table
+> 514e         lea        rdx, qword [ss:rbp+0xffffffffffffffa8]
+> 5152         xor        r8d, r8d                        ; SearchKey
+> 5155         lea        r9, qword [ss:rbp+0xffffffffffffff98] ; NoHandles
+> 5159         mov        ecx, 0x2                        ; ByProtocol
+> 515e         mov        rax, qword [ds:rdi]
+> 5161         mov        qword [ss:rsp-0x8+arg_10], rdx  ; Buffer
+> 5166         lea        rdx, qword [ds:0x27a00]         ; GUID
+> 516d         call       qword [ds:rax+0x138]            ; LocateHandleBuffer
+>
+> The 32-bit version looks the same except for the offset (rax+0xa8) and
+> calling convention.
+>
+> So I'm pretty confident this patch works on all Macs, the question is
+> were there any non-Mac x86 machines which might lack LocateHandleBuffer?
+>
+> The EFI 1.10 spec merely says "The LocateHandleBuffer() is a new version
+> of LocateHandle() that allocates the required buffer for the caller."
+>
+> But new since when?  Was this added with 1.10 or did it already exist
+> in earlier versions?  The 1.10 spec dates back to 2002 and according
+> to Wikipedia, only Itaniums used EFI back then.
+>
+> If LocateHandleBuffer was indeed missing in earlier specs, was the
+> layout of the boot services table the same as in 1.10 and the function
+> pointer was just marked reserved, or was the layout completely different?
+> If the latter, then we don't support earlier versions anyway.
+>
+> The Graphics Output Protocol was added post 1.10, so it should be safe
+> to use LocateHandleBuffer at least for GOP.  The two other protocols,
+> UGA and EFI_PCI_IO_PROTOCOL, were already present in 1.10.
+>
+> I tried to find the 1.02 spec using the Wayback Machine:
+> https://web.archive.org/web/20021218163928/http://developer.intel.com/technology/efi/download.htm
+>
+> The download required entering an e-mail address and the user was then
+> redirected to an URL which is missing in the Wayback Machine:
+> https://web.archive.org/web/http://developer.intel.com/technology/efi/EFISpec_v102.htm
+>
+> I couldn't find older specs than 1.10 with Google either, so it looks
+> like it's gone from today's web.  Thus, on September 12 I reached out
+> by e-mail to Vincent Zimmer who had been working on EFI since its early
+> days (see his blog at http://vzimmer.blogspot.com).  Unfortunately I
+> never got a reply.
+>
 
-I am looking into a memory setup problem on ThunderX systems under
-certain memory configurations. The symptom is
+Thanks for the archeological background :-) Matt and I deal with
+Vincent on a regular basis in the USST and other UEFI forum calls, so
+we could simply ask him. However, we've had our share of breakage with
+the stub code, which is difficult to debug on anything except
+development hardware, and so I think we should not take this change
+(and Matt appears to agree). I do like the cleanup, but since there is
+no functional change, I'd rather stick with the existing code.
 
- kernel BUG at mm/page_alloc.c:1848!
+> My guess is that pre-1.10 versions were only ever shipped with Itanium
+> and that using LocateHandleBuffer is therefore safe on x86.  But to know
+> for sure it would be necessary to find someone who still is in possession
+> of earlier specs and knows what shipped when.
+>
 
-It happens for some configs with 64k page size enabled (at least since
-4.5). The bug triggers for page zones with some pages in the zone not
-assigned to this particular zone. In my case some pages that are
-marked as nomap were not reassigned to the new zone of node 1, so
-those are still assigned to node 0. Mark also reported something
-similar for non-numa configs. I think this is a related problem where
-not all pages of a zone have been reassigned to the new zone during
-setup.
-
-Now, the reason for the mis-configuration is a change in pfn_valid()
-which reports pages marked nomap as invalid. In memmap_init_zone()
-nomap-pages are not reassigned to that node (__init_single_pfn()).
-
-I tried various changes to fix that, but without success so far:
-
-a) I modified reserve_regions() to use memblock_reserve() instead of
-memblock_mark_nomap(). This marked efi regions as reserved instead of
-unmap. pfn_valid() now worked as before the nomap change. I could boot
-the system but noticed the following malloc assertion which looks like
-there is some mem corruption:
-
-  emacs: malloc.c:2395: sysmalloc: Assertion `(old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)' failed.
-
-Other than that the system looked ok so far.
-
-I checked pfn used by the process with kmem:mm_page_alloc_zone_locked,
-it looked correct with all pfn allocated from free memory, mem ranges
-reported by efi as reserved were not used.
-
-b) I found a quote that for sparsemem the entire memmap (all pages have a
-struct *page) for single section (include/linux/mmzone.h):
-
- "In SPARSEMEM, it is assumed that a valid section has a memmap for
- the entire section."
-
-So I implemented a arm64 private __early_pfn_valid() function that
-uses memblock_is_memory() to setup all pages of a zone. I got the same
-result as for a).
-
-c) I modified (almost) all arch arm64 users of pfn_valid() to use
-memblock_mark_nomap() instead of pfn_valid() and changed pfn_valid()
-to use memblock_is_memory(). Same problem as a).
-
-d) Enabling HOLES_IN_ZONE config option does not looks correct for
-sparsemem, trying it anyway causes VM_BUG_ON_PAGE() in in line 1849
-since (uninitialized) struct *page is accessed. This did not work
-either.
-
-I also noticed the efi ranges to be only 4k page aligned, I checked
-reserved mem regions, its transformation to 64k alignment looked ok
-too. See below for efi and memblock address ranges.
-
-Is there anything else I could do here? Am I missing something? Could
-the malloc assertion be another bug which was uncovered after fixing
-the first? Any help is appreciated.
-
-Thanks,
-
--Robert
-
-
-
-
-[    0.000000] efi: Getting EFI parameters from FDT:
-[    0.000000] efi:   System Table: 0x0000010fffffef18
-[    0.000000] efi:   MemMap Address: 0x0000010ff788e018
-[    0.000000] efi:   MemMap Size: 0x000006c0
-[    0.000000] efi:   MemMap Desc. Size: 0x00000030
-[    0.000000] efi:   MemMap Desc. Version: 0x00000001
-[    0.000000] efi: EFI v2.40 by Cavium Thunder cn88xx EFI ThunderX-Firmware-Release-1.22.10-0-g4e85766 Aug 24 2016 15:59:03
-[    0.000000] efi:  ACPI=0xfffff000  ACPI 2.0=0xfffff014  SMBIOS 3.0=0x10ffafcf000 
-[    0.000000] efi: Processing EFI memory map:
-[    0.000000] efi:   0x000001400000-0x00000147ffff [Conventional Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x000001480000-0x0000024affff [Loader Data        |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x0000024b0000-0x0000211fffff [Conventional Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x000021200000-0x00002121ffff [Loader Data        |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x000021220000-0x0000fffecfff [Conventional Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x0000fffed000-0x0000ffff4fff [ACPI Reclaim Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]*
-[    0.000000] efi:   0x0000ffff5000-0x0000ffff5fff [ACPI Memory NVS    |   |  |  |  |  |  |  |   |WB|WT|WC|UC]*
-[    0.000000] efi:   0x0000ffff6000-0x0000ffffffff [ACPI Reclaim Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]*
-[    0.000000] efi:   0x000100000000-0x000ff7ffffff [Conventional Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x000ff8000000-0x000ff801ffff [Boot Data          |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x000ff8020000-0x000fffa9cfff [Conventional Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x000fffa9d000-0x000fffffffff [Boot Data          |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010000400000-0x010f8465ffff [Conventional Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010f84660000-0x010f8568ffff [Loader Code        |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010f85690000-0x010ff788afff [Loader Data        |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010ff788b000-0x010ff788dfff [Conventional Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010ff788e000-0x010ff7890fff [Loader Data        |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010ff7891000-0x010ff78adfff [Loader Code        |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010ff78ae000-0x010ff9e97fff [Boot Data          |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010ff9e98000-0x010ff9f20fff [Runtime Data       |RUN|  |  |  |  |  |  |   |WB|WT|WC|UC]*
-[    0.000000] efi:   0x010ff9f21000-0x010ffaeb5fff [Boot Data          |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010ffaeb6000-0x010ffafc8fff [Runtime Data       |RUN|  |  |  |  |  |  |   |WB|WT|WC|UC]*
-[    0.000000] efi:   0x010ffafc9000-0x010ffafccfff [Runtime Code       |RUN|  |  |  |  |  |  |   |WB|WT|WC|UC]*
-[    0.000000] efi:   0x010ffafcd000-0x010ffaff4fff [Runtime Data       |RUN|  |  |  |  |  |  |   |WB|WT|WC|UC]*
-[    0.000000] efi:   0x010ffaff5000-0x010ffb008fff [Conventional Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010ffb009000-0x010ffeb6cfff [Boot Data          |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010ffeb6d000-0x010ffec94fff [Conventional Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010ffec95000-0x010fffe28fff [Boot Data          |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010fffe29000-0x010fffe3ffff [Conventional Memory|   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010fffe40000-0x010fffe53fff [Loader Data        |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010fffe54000-0x010ffffb8fff [Boot Code          |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x010ffffb9000-0x010ffffccfff [Runtime Code       |RUN|  |  |  |  |  |  |   |WB|WT|WC|UC]*
-[    0.000000] efi:   0x010ffffcd000-0x010fffffefff [Runtime Data       |RUN|  |  |  |  |  |  |   |WB|WT|WC|UC]*
-[    0.000000] efi:   0x010ffffff000-0x010fffffffff [Boot Data          |   |  |  |  |  |  |  |   |WB|WT|WC|UC]
-[    0.000000] efi:   0x804000001000-0x804000001fff [Memory Mapped I/O  |RUN|  |  |  |  |  |  |   |  |  |  |UC]
-[    0.000000] efi:   0x87e0d0001000-0x87e0d0001fff [Memory Mapped I/O  |RUN|  |  |  |  |  |  |   |  |  |  |UC]
-
-[    0.000000] MEMBLOCK configuration:
-[    0.000000]  memory size = 0x1ffe800000 reserved size = 0x36506a21
-[    0.000000]  memory.cnt  = 0x9
-[    0.000000]  memory[0x0]     [0x00000001400000-0x000000fffdffff], 0xfebe0000 bytes on node 0 flags: 0x0
-[    0.000000]  memory[0x1]     [0x000000fffe0000-0x000000ffffffff], 0x20000 bytes on node 0 flags: 0x4
-[    0.000000]  memory[0x2]     [0x00000100000000-0x00000fffffffff], 0xf00000000 bytes on node 0 flags: 0x0
-[    0.000000]  memory[0x3]     [0x00010000400000-0x00010ff9e8ffff], 0xff9a90000 bytes on node 1 flags: 0x0
-[    0.000000]  memory[0x4]     [0x00010ff9e90000-0x00010ff9f2ffff], 0xa0000 bytes on node 1 flags: 0x4
-[    0.000000]  memory[0x5]     [0x00010ff9f30000-0x00010ffaeaffff], 0xf80000 bytes on node 1 flags: 0x0
-[    0.000000]  memory[0x6]     [0x00010ffaeb0000-0x00010ffaffffff], 0x150000 bytes on node 1 flags: 0x4
-[    0.000000]  memory[0x7]     [0x00010ffb000000-0x00010ffffaffff], 0x4fb0000 bytes on node 1 flags: 0x0
-[    0.000000]  memory[0x8]     [0x00010ffffb0000-0x00010fffffffff], 0x50000 bytes on node 1 flags: 0x4
-[    0.000000]  reserved.cnt  = 0xd
-[    0.000000]  reserved[0x0]   [0x00000001480000-0x0000000248ffff], 0x1010000 bytes flags: 0x0
-[    0.000000]  reserved[0x1]   [0x00000021200000-0x00000021210536], 0x10537 bytes flags: 0x0
-[    0.000000]  reserved[0x2]   [0x000000c0000000-0x000000dfffffff], 0x20000000 bytes flags: 0x0
-[    0.000000]  reserved[0x3]   [0x00000ffbfb8000-0x00000ffffdffff], 0x4028000 bytes flags: 0x0
-[    0.000000]  reserved[0x4]   [0x00000ffffecb00-0x00000fffffffff], 0x13500 bytes flags: 0x0
-[    0.000000]  reserved[0x5]   [0x00010f856a0000-0x00010f92a6ffff], 0xd3d0000 bytes flags: 0x0
-[    0.000000]  reserved[0x6]   [0x00010ff7880000-0x00010ff788ffff], 0x10000 bytes flags: 0x0
-[    0.000000]  reserved[0x7]   [0x00010ffbce0000-0x00010fffceffff], 0x4010000 bytes flags: 0x0
-[    0.000000]  reserved[0x8]   [0x00010fffee6d80-0x00010ffff2fffb], 0x4927c bytes flags: 0x0
-[    0.000000]  reserved[0x9]   [0x00010ffff30000-0x00010ffffa000f], 0x70010 bytes flags: 0x0
-[    0.000000]  reserved[0xa]   [0x00010ffffae280-0x00010ffffaff7f], 0x1d00 bytes flags: 0x0
-[    0.000000]  reserved[0xb]   [0x00010ffffaffa0-0x00010ffffaffce], 0x2f bytes flags: 0x0
-[    0.000000]  reserved[0xc]   [0x00010ffffaffd0-0x00010ffffafffe], 0x2f bytes flags: 0x0
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Regards,
+Ard.
