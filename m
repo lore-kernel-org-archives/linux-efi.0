@@ -1,57 +1,45 @@
-From: ivanhu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: Re: [PATCH 1/3] efi/efi_test: use memdup_user() as a cleanup
-Date: Wed, 5 Oct 2016 09:31:01 +0800
-Message-ID: <fc934b37-d7c2-3ec2-76d0-6c0b4e501765@canonical.com>
-References: <1474859691-8574-1-git-send-email-ivan.hu@canonical.com>
- <1474859691-8574-2-git-send-email-ivan.hu@canonical.com>
- <20161003201718.GL16071@codeblueprint.co.uk>
- <3fb6d9fa-b554-509b-fc59-d75340017589@canonical.com>
- <20161004213743.GV16071@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+From: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Subject: [PATCH 1/3 V2] efi/efi_test: use memdup_user() as a cleanup
+Date: Wed,  5 Oct 2016 10:07:34 +0800
+Message-ID: <1475633254-6815-1-git-send-email-ivan.hu@canonical.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161004213743.GV16071-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+Fix coccicheck warning which recommends to use memdup_user()
 
+This patch fixes below coccicheck warnings:
+drivers/firmware/efi/test/efi_test.c:269:8-15: WARNING opportunity for
+memdup_user
 
-On 2016年10月05日 05:37, Matt Fleming wrote:
-> On Tue, 04 Oct, at 11:04:56AM, ivanhu wrote:
->> Hi Matt,
->>
->> The warning message is from Kbuild test robot,
->>
->> https://chromium.googlesource.com/linux-fpga-chameleon/+/fpga-chameleon-4.2/scripts/coccinelle/api/memdup_user.cocci,
->>
->>
->> and  I believe it tries to persuade us to use memdup_user instead of kmalloc
->> and copy_form_user,
->>
->> With this new function, we don't have to write 'len' twice, which can lead
->> to typos/mistakes.
->> It also produces smaller code and kernel text.
->>
->> http://lkml.iu.edu/hypermail/linux/kernel/0903.0/02349.html
->
-> Right, I understand all that. My question was specifically about the
-> following sentence from your patch,
->
->> This is a little bit restricted to reduce false positives
->
-> What restriction that reduces false positives are you referring to?
+Signed-off-by: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+---
+ drivers/firmware/efi/test/efi_test.c | 10 +++-------
+ 1 file changed, 3 insertions(+), 7 deletions(-)
 
-I believe that author means that, with this new function, we don't have 
-to write 'len' twice, which can lead to typos/mistakes ....
-
-Let me remove the ambiguous comments and send out the patch again.
-
-Ivan
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
+index f61bb52..5602c46 100644
+--- a/drivers/firmware/efi/test/efi_test.c
++++ b/drivers/firmware/efi/test/efi_test.c
+@@ -266,14 +266,10 @@ static long efi_runtime_set_variable(unsigned long arg)
+ 			return rv;
+ 	}
+ 
+-	data = kmalloc(setvariable.data_size, GFP_KERNEL);
+-	if (!data) {
++	data = memdup_user(setvariable.data, setvariable.data_size);
++	if (IS_ERR(data)) {
+ 		kfree(name);
+-		return -ENOMEM;
+-	}
+-	if (copy_from_user(data, setvariable.data, setvariable.data_size)) {
+-		rv = -EFAULT;
+-		goto out;
++		return PTR_ERR(data);
+ 	}
+ 
+ 	status = efi.set_variable(name, &vendor_guid,
+-- 
+1.9.1
