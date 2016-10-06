@@ -1,67 +1,50 @@
-From: Robert Richter <robert.richter@cavium.com>
-Subject: Re: arm64: kernel BUG at mm/page_alloc.c:1844!
-Date: Thu, 6 Oct 2016 11:16:18 +0200
-Message-ID: <20161006091618.GG22012@rric.localdomain>
-References: <20161005141313.GF22012@rric.localdomain>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH] efi: Use LocateHandleBuffer instead of LocateHandle
+Date: Thu, 6 Oct 2016 11:32:00 +0200
+Message-ID: <20161006093200.GA6925@wunner.de>
+References: <1d7915dc0dd328ca04088f6b8b3fcfad5cec55a0.1473275006.git.lukas@wunner.de>
+ <CAKv+Gu_kfnHfiBH__Wnvh39KMPj_-s39YyY=pT3roNv7iPPzrA@mail.gmail.com>
+ <20160909115951.GA29385@wunner.de>
+ <20161003193220.GI16071@codeblueprint.co.uk>
+ <CAKv+Gu-UKr0bPjy_0tO0ThB6F4E1q-uKtktg+z5CRP=gX-oewg@mail.gmail.com>
+ <20161004165349.GA5019@wunner.de>
+ <CAKv+Gu-6yB_ZVC38S8yFZtB7vPfDZe1wp47bT+WxwpSSUN4OgA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <owner-linux-mm@kvack.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20161005141313.GF22012@rric.localdomain>
-Sender: owner-linux-mm@kvack.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Will Deacon <will.deacon@arm.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mm@kvack.org, linux@arm.linux.org.uk, linux-efi@vger.kernel.org, David Daney <david.daney@cavium.com>, Mark Salter <msalter@redhat.com>, Hanjun Guo <hanjun.guo@linaro.org>
+In-Reply-To: <CAKv+Gu-6yB_ZVC38S8yFZtB7vPfDZe1wp47bT+WxwpSSUN4OgA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 05.10.16 16:13:13, Robert Richter wrote:
-> I tried various changes to fix that, but without success so far:
-> 
-> a) I modified reserve_regions() to use memblock_reserve() instead of
-> memblock_mark_nomap(). This marked efi regions as reserved instead of
-> unmap. pfn_valid() now worked as before the nomap change. I could boot
-> the system but noticed the following malloc assertion which looks like
-> there is some mem corruption:
-> 
->   emacs: malloc.c:2395: sysmalloc: Assertion `(old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)' failed.
-> 
-> Other than that the system looked ok so far.
-> 
-> I checked pfn used by the process with kmem:mm_page_alloc_zone_locked,
-> it looked correct with all pfn allocated from free memory, mem ranges
-> reported by efi as reserved were not used.
+On Fri, Sep 09, 2016 at 11:52:32AM +0100, Ard Biesheuvel wrote:
+> What is the oldest UEFI version we claim to support? For ARM, this is
+> not an issue, but it appears that LocateHandleBuffer () was introduced
+> in v1.10
 
-I have updated the packages in my system and the problem went
-away. Also I have run memtest for memory ranges close to efi
-boundaries without any issues. So I assume this problem was userland
-specific and unrelated to the original bug.
+UGA was apparently introduced with v1.10, GOP was introduced later
+than v1.10, it follows that availability of LocateHandleBuffer()
+can be assumed at least when searching for these two protocols.
 
-> 
-> b) I found a quote that for sparsemem the entire memmap (all pages have a
-> struct *page) for single section (include/linux/mmzone.h):
-> 
->  "In SPARSEMEM, it is assumed that a valid section has a memmap for
->  the entire section."
-> 
-> So I implemented a arm64 private __early_pfn_valid() function that
-> uses memblock_is_memory() to setup all pages of a zone. I got the same
-> result as for a).
-> 
-> c) I modified (almost) all arch arm64 users of pfn_valid() to use
-> memblock_mark_nomap() instead of pfn_valid() and changed pfn_valid()
-> to use memblock_is_memory(). Same problem as a).
+Would a patch be entertained which uses LocateHandleBuffer for these
+two but leaves the PCI ROM retrieval unchanged?
 
-I am going to prepare a patch that implements c).
 
--Robert
+On Wed, Oct 05, 2016 at 05:25:44PM +0100, Ard Biesheuvel wrote:
+> However, we've had our share of breakage with
+> the stub code, which is difficult to debug on anything except
+> development hardware, and so I think we should not take this change
+> (and Matt appears to agree).
 
-> 
-> d) Enabling HOLES_IN_ZONE config option does not looks correct for
-> sparsemem, trying it anyway causes VM_BUG_ON_PAGE() in in line 1849
-> since (uninitialized) struct *page is accessed. This did not work
-> either.
+Thanks for the clarification, however I don't quite follow:
+Is the rejection of the patch based on the intent to maintain
+support for EFI v1.0+ (which isn't an argument for UGA + GOP
+as lined out above) or is it based on a gut feeling that the
+patch might cause breakage for whatever reason.
+(Perhaps firmware bugs?  Not sure what is meant here.)
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Thanks,
+
+Lukas
