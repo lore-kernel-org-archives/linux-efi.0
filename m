@@ -1,119 +1,114 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 2/2] efi/arm*: libstub: invoke EFI_RNG_PROTOCOL to seed the UEFI RNG table
-Date: Thu,  6 Oct 2016 11:27:26 +0100
-Message-ID: <1475749646-10844-3-git-send-email-ard.biesheuvel@linaro.org>
-References: <1475749646-10844-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] arm64: mm: Fix memmap to be initialized for the entire
+ section
+Date: Thu, 6 Oct 2016 18:11:14 +0200
+Message-ID: <20161006161114.GH22012@rric.localdomain>
+References: <1475747527-32387-1-git-send-email-rrichter@cavium.com>
+ <CAKv+Gu-oYzSn_eeqaX3QVFeQjBGkaX-Wh7+oPcQFcXv7J6GOFQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1475749646-10844-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu-oYzSn_eeqaX3QVFeQjBGkaX-Wh7+oPcQFcXv7J6GOFQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Invoke the EFI_RNG_PROTOCOL protocol in the context of the stub and
-install the Linux-specific RNG seed UEFI config table. This will be
-picked up by the EFI routines in the core kernel to seed the kernel
-entropy pool.
+Ard,
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/libstub/arm-stub.c |  2 +
- drivers/firmware/efi/libstub/efistub.h  |  2 +
- drivers/firmware/efi/libstub/random.c   | 48 ++++++++++++++++++++
- include/linux/efi.h                     |  1 +
- 4 files changed, 53 insertions(+)
+thank you for your answer and you explanation.
 
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 993aa56755f6..b4f7d78f9e8b 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -340,6 +340,8 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 	if (status != EFI_SUCCESS)
- 		pr_efi_err(sys_table, "Failed initrd from command line!\n");
- 
-+	efi_random_get_seed(sys_table);
-+
- 	new_fdt_addr = fdt_addr;
- 	status = allocate_new_fdt_and_exit_boot(sys_table, handle,
- 				&new_fdt_addr, dram_base + MAX_FDT_OFFSET,
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index ee49cd23ee63..1c57715286a7 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -62,4 +62,6 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
- 
- efi_status_t check_platform_features(efi_system_table_t *sys_table_arg);
- 
-+efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg);
-+
- #endif
-diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index 0c9f58c5ba50..0109bc3a1f3f 100644
---- a/drivers/firmware/efi/libstub/random.c
-+++ b/drivers/firmware/efi/libstub/random.c
-@@ -141,3 +141,51 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
- 
- 	return status;
- }
-+
-+#define RANDOM_SEED_SIZE	32
-+
-+efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg)
-+{
-+	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
-+	efi_guid_t rng_algo_raw = EFI_RNG_ALGORITHM_RAW;
-+	efi_guid_t rng_table_guid = LINUX_EFI_RANDOM_SEED_TABLE_GUID;
-+	struct efi_rng_protocol *rng;
-+	struct linux_efi_random_seed *seed;
-+	efi_status_t status;
-+
-+	status = efi_call_early(locate_protocol, &rng_proto, NULL,
-+				(void **)&rng);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-+				sizeof(*seed) + RANDOM_SEED_SIZE,
-+				(void **)&seed);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	status = rng->get_rng(rng, &rng_algo_raw, RANDOM_SEED_SIZE,
-+			      seed->bits);
-+	if (status == EFI_UNSUPPORTED)
-+		/*
-+		 * Use whatever algorithm we have available if the raw algorithm
-+		 * is not implemented.
-+		 */
-+		status = rng->get_rng(rng, NULL, RANDOM_SEED_SIZE,
-+				      seed->bits);
-+
-+	if (status != EFI_SUCCESS)
-+		goto err_freepool;
-+
-+	seed->size = RANDOM_SEED_SIZE;
-+	status = efi_call_early(install_configuration_table, &rng_table_guid,
-+				seed);
-+	if (status != EFI_SUCCESS)
-+		goto err_freepool;
-+
-+	return EFI_SUCCESS;
-+
-+err_freepool:
-+	efi_call_early(free_pool, seed);
-+	return status;
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 85e28b138cdd..f5a821d9b90c 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -589,6 +589,7 @@ void efi_native_runtime_setup(void);
- #define DEVICE_TREE_GUID			EFI_GUID(0xb1b621d5, 0xf19c, 0x41a5,  0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0)
- #define EFI_PROPERTIES_TABLE_GUID		EFI_GUID(0x880aaca3, 0x4adc, 0x4a04,  0x90, 0x79, 0xb7, 0x47, 0x34, 0x08, 0x25, 0xe5)
- #define EFI_RNG_PROTOCOL_GUID			EFI_GUID(0x3152bca5, 0xeade, 0x433d,  0x86, 0x2e, 0xc0, 0x1c, 0xdc, 0x29, 0x1f, 0x44)
-+#define EFI_RNG_ALGORITHM_RAW			EFI_GUID(0xe43176d7, 0xb6e8, 0x4827,  0xb7, 0x84, 0x7f, 0xfd, 0xc4, 0xb6, 0x85, 0x61)
- #define EFI_MEMORY_ATTRIBUTES_TABLE_GUID	EFI_GUID(0xdcfa911d, 0x26eb, 0x469f,  0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
- #define EFI_CONSOLE_OUT_DEVICE_GUID		EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
- 
--- 
-2.7.4
+On 06.10.16 11:00:33, Ard Biesheuvel wrote:
+> On 6 October 2016 at 10:52, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org> wrote:
+> > There is a memory setup problem on ThunderX systems with certain
+> > memory configurations. The symptom is
+> >
+> >  kernel BUG at mm/page_alloc.c:1848!
+> >
+> > This happens for some configs with 64k page size enabled. The bug
+> > triggers for page zones with some pages in the zone not assigned to
+> > this particular zone. In my case some pages that are marked as nomap
+> > were not reassigned to the new zone of node 1, so those are still
+> > assigned to node 0.
+> >
+> > The reason for the mis-configuration is a change in pfn_valid() which
+> > reports pages marked nomap as invalid:
+> >
+> >  68709f45385a arm64: only consider memblocks with NOMAP cleared for linear mapping
+> >
+> 
+> These pages are owned by the firmware, which may map it with
+> attributes that conflict with the attributes we use for the linear
+> mapping. This means they should not be covered by the linear mapping.
+> 
+> > This causes pages marked as nomap being no long reassigned to the new
+> > zone in memmap_init_zone() by calling __init_single_pfn().
+> >
+> 
+> This sounds like the root cause of your issue. Could we not fix that instead?
+
+Yes, this is proposal b) from my last mail that would work too: I
+implemented an arm64 private early_pfn_valid() function that uses
+memblock_is_memory() to setup all pages of a zone. Though, I think
+this is the wrong way and thus I prefer this patch instead. I see
+serveral reasons for this:
+
+Inconsistent use of struct *page, it is initialized but never used
+again.
+
+Other archs only do a basic range check in pfn_valid(), the default
+implementation just returns if the whole section is valid. As I
+understand the code, if the mem range is not aligned to the section,
+then there will be pfn's in the section that don't have physical mem
+attached. The page is then just initialized, it's not marked reserved
+nor the refcount is non-zero. It is then simply not used. This is how
+no-map pages should be handled too.
+
+I think pfn_valid() is just a quick check if the pfn's struct *page
+can be used. There is a good description for this in include/linux/
+mmzone.h. So there can be memory holes that have a valid pfn.
+
+If the no-map memory needs special handling, then additional checks
+need to be added to the particular code (as in ioremap.c). It's imo
+wrong to (mis-)use pfn_valid for that.
+
+Variant b) involves generic mm code to fix it for arm64, this patch is
+an arm64 change only. This makes it harder to get a fix for it.
+(Though maybe only a problem of patch logistics.)
+
+> 
+> > Fixing this by restoring the old behavior of pfn_valid() to use
+> > memblock_is_memory().
+> 
+> This is incorrect imo. In general, pfn_valid() means ordinary memory
+> covered by the linear mapping and the struct page array. Returning
+> reserved ranges that the kernel should not even touch only to please
+> the NUMA code seems like an inappropriate way to deal with this issue.
+
+As said above, it is not marked as reserved, it is treated like
+non-existing memory.
+
+This has been observed for non-numa kernels too and can happen for
+each zone that is only partly initialized.
+
+I think the patch addresses your concerns. I can't see there the
+kernel uses memory marked as nomap in a wrong way.
+
+Thanks,
+
+-Robert
+
+> 
+> > Also changing users of pfn_valid() in arm64 code
+> > to use memblock_is_map_memory() where necessary. This only affects
+> > code in ioremap.c. The code in mmu.c still can use the new version of
+> > pfn_valid().
+> >
+> > Should be marked stable v4.5..
+> >
+> > Signed-off-by: Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+> > ---
+> >  arch/arm64/mm/init.c    | 2 +-
+> >  arch/arm64/mm/ioremap.c | 5 +++--
+> >  2 files changed, 4 insertions(+), 3 deletions(-)
