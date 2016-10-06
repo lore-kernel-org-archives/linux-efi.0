@@ -1,50 +1,99 @@
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH] efi: Use LocateHandleBuffer instead of LocateHandle
-Date: Thu, 6 Oct 2016 11:32:00 +0200
-Message-ID: <20161006093200.GA6925@wunner.de>
-References: <1d7915dc0dd328ca04088f6b8b3fcfad5cec55a0.1473275006.git.lukas@wunner.de>
- <CAKv+Gu_kfnHfiBH__Wnvh39KMPj_-s39YyY=pT3roNv7iPPzrA@mail.gmail.com>
- <20160909115951.GA29385@wunner.de>
- <20161003193220.GI16071@codeblueprint.co.uk>
- <CAKv+Gu-UKr0bPjy_0tO0ThB6F4E1q-uKtktg+z5CRP=gX-oewg@mail.gmail.com>
- <20161004165349.GA5019@wunner.de>
- <CAKv+Gu-6yB_ZVC38S8yFZtB7vPfDZe1wp47bT+WxwpSSUN4OgA@mail.gmail.com>
+From: Robert Richter <rrichter@cavium.com>
+Subject: [PATCH] arm64: mm: Fix memmap to be initialized for the entire section
+Date: Thu, 6 Oct 2016 11:52:07 +0200
+Message-ID: <1475747527-32387-1-git-send-email-rrichter@cavium.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-6yB_ZVC38S8yFZtB7vPfDZe1wp47bT+WxwpSSUN4OgA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, linux-efi@vger.kernel.org, David Daney <david.daney@cavium.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Robert Richter <rrichter@cavium.com>, Hanjun Guo <hanjun.guo@linaro.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Sep 09, 2016 at 11:52:32AM +0100, Ard Biesheuvel wrote:
-> What is the oldest UEFI version we claim to support? For ARM, this is
-> not an issue, but it appears that LocateHandleBuffer () was introduced
-> in v1.10
+There is a memory setup problem on ThunderX systems with certain
+memory configurations. The symptom is
 
-UGA was apparently introduced with v1.10, GOP was introduced later
-than v1.10, it follows that availability of LocateHandleBuffer()
-can be assumed at least when searching for these two protocols.
+ kernel BUG at mm/page_alloc.c:1848!
 
-Would a patch be entertained which uses LocateHandleBuffer for these
-two but leaves the PCI ROM retrieval unchanged?
+This happens for some configs with 64k page size enabled. The bug
+triggers for page zones with some pages in the zone not assigned to
+this particular zone. In my case some pages that are marked as nomap
+were not reassigned to the new zone of node 1, so those are still
+assigned to node 0.
 
+The reason for the mis-configuration is a change in pfn_valid() which
+reports pages marked nomap as invalid:
 
-On Wed, Oct 05, 2016 at 05:25:44PM +0100, Ard Biesheuvel wrote:
-> However, we've had our share of breakage with
-> the stub code, which is difficult to debug on anything except
-> development hardware, and so I think we should not take this change
-> (and Matt appears to agree).
+ 68709f45385a arm64: only consider memblocks with NOMAP cleared for linear mapping
 
-Thanks for the clarification, however I don't quite follow:
-Is the rejection of the patch based on the intent to maintain
-support for EFI v1.0+ (which isn't an argument for UGA + GOP
-as lined out above) or is it based on a gut feeling that the
-patch might cause breakage for whatever reason.
-(Perhaps firmware bugs?  Not sure what is meant here.)
+This causes pages marked as nomap being no long reassigned to the new
+zone in memmap_init_zone() by calling __init_single_pfn().
 
-Thanks,
+Fixing this by restoring the old behavior of pfn_valid() to use
+memblock_is_memory(). Also changing users of pfn_valid() in arm64 code
+to use memblock_is_map_memory() where necessary. This only affects
+code in ioremap.c. The code in mmu.c still can use the new version of
+pfn_valid().
 
-Lukas
+Should be marked stable v4.5..
+
+Signed-off-by: Robert Richter <rrichter@cavium.com>
+---
+ arch/arm64/mm/init.c    | 2 +-
+ arch/arm64/mm/ioremap.c | 5 +++--
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
+index bbb7ee76e319..25b8659c2a9f 100644
+--- a/arch/arm64/mm/init.c
++++ b/arch/arm64/mm/init.c
+@@ -147,7 +147,7 @@ static void __init zone_sizes_init(unsigned long min, unsigned long max)
+ #ifdef CONFIG_HAVE_ARCH_PFN_VALID
+ int pfn_valid(unsigned long pfn)
+ {
+-	return memblock_is_map_memory(pfn << PAGE_SHIFT);
++	return memblock_is_memory(pfn << PAGE_SHIFT);
+ }
+ EXPORT_SYMBOL(pfn_valid);
+ #endif
+diff --git a/arch/arm64/mm/ioremap.c b/arch/arm64/mm/ioremap.c
+index 01e88c8bcab0..c17c220b0c48 100644
+--- a/arch/arm64/mm/ioremap.c
++++ b/arch/arm64/mm/ioremap.c
+@@ -21,6 +21,7 @@
+  */
+ 
+ #include <linux/export.h>
++#include <linux/memblock.h>
+ #include <linux/mm.h>
+ #include <linux/vmalloc.h>
+ #include <linux/io.h>
+@@ -55,7 +56,7 @@ static void __iomem *__ioremap_caller(phys_addr_t phys_addr, size_t size,
+ 	/*
+ 	 * Don't allow RAM to be mapped.
+ 	 */
+-	if (WARN_ON(pfn_valid(__phys_to_pfn(phys_addr))))
++	if (WARN_ON(memblock_is_map_memory(phys_addr)))
+ 		return NULL;
+ 
+ 	area = get_vm_area_caller(size, VM_IOREMAP, caller);
+@@ -96,7 +97,7 @@ EXPORT_SYMBOL(__iounmap);
+ void __iomem *ioremap_cache(phys_addr_t phys_addr, size_t size)
+ {
+ 	/* For normal memory we already have a cacheable mapping. */
+-	if (pfn_valid(__phys_to_pfn(phys_addr)))
++	if (memblock_is_map_memory(phys_addr))
+ 		return (void __iomem *)__phys_to_virt(phys_addr);
+ 
+ 	return __ioremap_caller(phys_addr, size, __pgprot(PROT_NORMAL),
+-- 
+2.7.0.rc3
