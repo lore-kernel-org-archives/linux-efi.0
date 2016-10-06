@@ -1,28 +1,67 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efifb: show framebuffer layout as device attributes
-Date: Wed, 5 Oct 2016 19:05:21 +0100
-Message-ID: <CAKv+Gu8SmytPAS2WpUQkHCMPpB7yWx+jpk6Do+KiBChXAg=2_w@mail.gmail.com>
-References: <20161003170923.15025-1-pjones@redhat.com> <CAKv+Gu-tW51s7ajiAZWWYyN3b_H3qXbXDpGV4Oowf5AiFzmSSA@mail.gmail.com>
- <20161004133520.ecyfshyalxjl5eap@redhat.com> <20161004212721.GS16071@codeblueprint.co.uk>
+From: Robert Richter <robert.richter@cavium.com>
+Subject: Re: arm64: kernel BUG at mm/page_alloc.c:1844!
+Date: Thu, 6 Oct 2016 11:16:18 +0200
+Message-ID: <20161006091618.GG22012@rric.localdomain>
+References: <20161005141313.GF22012@rric.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161004212721.GS16071-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jean-Christophe Plagniol-Villard <plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org>, Tomi Valkeinen <tomi.valkeinen-l0cyMroinI0@public.gmane.org>, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20161005141313.GF22012@rric.localdomain>
+Sender: owner-linux-mm@kvack.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Will Deacon <will.deacon@arm.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mm@kvack.org, linux@arm.linux.org.uk, linux-efi@vger.kernel.org, David Daney <david.daney@cavium.com>, Mark Salter <msalter@redhat.com>, Hanjun Guo <hanjun.guo@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 4 October 2016 at 22:27, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Tue, 04 Oct, at 09:35:21AM, Peter Jones wrote:
->>
->> Usually I just funnel anything EFI related through mfleming, since he's
->> already doing regular pushes upstream and it's part of his workflow.
->> Matt, does that work for you in this case?
->
-> I'm happy for this to go through the EFI tree, sure.
+On 05.10.16 16:13:13, Robert Richter wrote:
+> I tried various changes to fix that, but without success so far:
+> 
+> a) I modified reserve_regions() to use memblock_reserve() instead of
+> memblock_mark_nomap(). This marked efi regions as reserved instead of
+> unmap. pfn_valid() now worked as before the nomap change. I could boot
+> the system but noticed the following malloc assertion which looks like
+> there is some mem corruption:
+> 
+>   emacs: malloc.c:2395: sysmalloc: Assertion `(old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)' failed.
+> 
+> Other than that the system looked ok so far.
+> 
+> I checked pfn used by the process with kmem:mm_page_alloc_zone_locked,
+> it looked correct with all pfn allocated from free memory, mem ranges
+> reported by efi as reserved were not used.
 
-OK. Applied to next.
+I have updated the packages in my system and the problem went
+away. Also I have run memtest for memory ranges close to efi
+boundaries without any issues. So I assume this problem was userland
+specific and unrelated to the original bug.
 
-Thanks,
-Ard.
+> 
+> b) I found a quote that for sparsemem the entire memmap (all pages have a
+> struct *page) for single section (include/linux/mmzone.h):
+> 
+>  "In SPARSEMEM, it is assumed that a valid section has a memmap for
+>  the entire section."
+> 
+> So I implemented a arm64 private __early_pfn_valid() function that
+> uses memblock_is_memory() to setup all pages of a zone. I got the same
+> result as for a).
+> 
+> c) I modified (almost) all arch arm64 users of pfn_valid() to use
+> memblock_mark_nomap() instead of pfn_valid() and changed pfn_valid()
+> to use memblock_is_memory(). Same problem as a).
+
+I am going to prepare a patch that implements c).
+
+-Robert
+
+> 
+> d) Enabling HOLES_IN_ZONE config option does not looks correct for
+> sparsemem, trying it anyway causes VM_BUG_ON_PAGE() in in line 1849
+> since (uninitialized) struct *page is accessed. This did not work
+> either.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
