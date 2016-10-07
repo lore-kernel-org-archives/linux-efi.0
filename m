@@ -1,7 +1,7 @@
 From: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: [PATCH V3 03/10] efi: parse ARMv8 processor error
-Date: Fri,  7 Oct 2016 15:31:15 -0600
-Message-ID: <1475875882-2604-4-git-send-email-tbaicar@codeaurora.org>
+Subject: [PATCH V3 05/10] acpi: apei: handle SEA notification type for ARMv8
+Date: Fri,  7 Oct 2016 15:31:17 -0600
+Message-ID: <1475875882-2604-6-git-send-email-tbaicar@codeaurora.org>
 References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1475875882-2604-1-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
@@ -10,289 +10,188 @@ To: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7d
 Cc: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Naveen Kaje <nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Add support for ARMv8 Common Platform Error Record (CPER).
-UEFI 2.6 specification adds support for ARMv8 specific
-processor error information to be reported as part of the
-CPER records. This provides more detail on for processor error logs.
+ARM APEI extension proposal added SEA (Synchrounous External
+Abort) notification type for ARMv8.
+Add a new GHES error source handling function for SEA. If an error
+source's notification type is SEA, then this function can be registered
+into the SEA exception handler. That way GHES will parse and report
+SEA exceptions when they occur.
 
 Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Signed-off-by: Naveen Kaje <nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 ---
- drivers/firmware/efi/cper.c | 135 ++++++++++++++++++++++++++++++++++++++++++++
- include/linux/cper.h        |  72 +++++++++++++++++++++++
- 2 files changed, 207 insertions(+)
+ arch/arm64/Kconfig        |  1 +
+ drivers/acpi/apei/Kconfig | 15 +++++++++
+ drivers/acpi/apei/ghes.c  | 83 +++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 99 insertions(+)
 
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index 9fa1317..2594245 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -112,12 +112,15 @@ void cper_print_bits(const char *pfx, unsigned int bits,
- static const char * const proc_type_strs[] = {
- 	"IA32/X64",
- 	"IA64",
-+	"ARMv8",
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index b380c87..ae34349 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -53,6 +53,7 @@ config ARM64
+ 	select HANDLE_DOMAIN_IRQ
+ 	select HARDIRQS_SW_RESEND
+ 	select HAVE_ACPI_APEI if (ACPI && EFI)
++	select HAVE_ACPI_APEI_SEA if (ACPI && EFI)
+ 	select HAVE_ALIGNED_STRUCT_PAGE if SLUB
+ 	select HAVE_ARCH_AUDITSYSCALL
+ 	select HAVE_ARCH_BITREVERSE
+diff --git a/drivers/acpi/apei/Kconfig b/drivers/acpi/apei/Kconfig
+index b0140c8..fb99c1c 100644
+--- a/drivers/acpi/apei/Kconfig
++++ b/drivers/acpi/apei/Kconfig
+@@ -4,6 +4,21 @@ config HAVE_ACPI_APEI
+ config HAVE_ACPI_APEI_NMI
+ 	bool
+ 
++config HAVE_ACPI_APEI_SEA
++	bool "APEI Synchronous External Abort logging/recovering support"
++	depends on ARM64
++	help
++	  This option should be enabled if the system supports
++	  firmware first handling of SEA (Synchronous External Abort).
++	  SEA happens with certain faults of data abort or instruction
++	  abort synchronous exceptions on ARMv8 systems. If a system
++	  supports firmware first handling of SEA, the platform analyzes
++	  and handles hardware error notifications with SEA, and it may then
++	  form a HW error record for the OS to parse and handle. This
++	  option allows the OS to look for such HW error record, and
++	  take appropriate action.
++
+ config ACPI_APEI
+ 	bool "ACPI Platform Error Interface (APEI)"
+ 	select MISC_FILESYSTEMS
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index c8488f1..28d5a09 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -50,6 +50,10 @@
+ #include <acpi/apei.h>
+ #include <asm/tlbflush.h>
+ 
++#ifdef CONFIG_HAVE_ACPI_APEI_SEA
++#include <asm/system_misc.h>
++#endif
++
+ #include "apei-internal.h"
+ 
+ #define GHES_PFX	"GHES: "
+@@ -779,6 +783,62 @@ static struct notifier_block ghes_notifier_sci = {
+ 	.notifier_call = ghes_notify_sci,
  };
  
- static const char * const proc_isa_strs[] = {
- 	"IA32",
- 	"IA64",
- 	"X64",
-+	"ARM A32/T32",
-+	"ARM A64",
- };
- 
- static const char * const proc_error_type_strs[] = {
-@@ -186,6 +189,129 @@ static void cper_print_proc_generic(const char *pfx,
- 		printk("%s""IP: 0x%016llx\n", pfx, proc->ip);
- }
- 
-+static void cper_print_proc_armv8(const char *pfx,
-+				  const struct cper_sec_proc_armv8 *proc)
++#ifdef CONFIG_HAVE_ACPI_APEI_SEA
++static LIST_HEAD(ghes_sea);
++
++static int ghes_notify_sea(struct notifier_block *this,
++				  unsigned long event, void *data)
 +{
-+	int i, len;
-+	struct cper_armv8_err_info *err_info;
-+	__u64 *qword = NULL;
-+	char newpfx[64];
++	struct ghes *ghes;
++	int ret = NOTIFY_DONE;
 +
-+	printk("%ssection length: %d\n", pfx, proc->section_length);
-+	printk("%sMIDR: 0x%016llx\n", pfx, proc->midr);
-+
-+	len = proc->section_length - (sizeof(*proc) +
-+		proc->err_info_num * (sizeof(*err_info)));
-+	if (len < 0) {
-+		printk("%ssection length is too small.\n", pfx);
-+		printk("%sERR_INFO_NUM is %d.\n", pfx, proc->err_info_num);
-+		return;
++	rcu_read_lock();
++	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
++		if (!ghes_proc(ghes))
++			ret = NOTIFY_OK;
 +	}
++	rcu_read_unlock();
 +
-+	if (proc->validation_bits & CPER_ARMV8_VALID_MPIDR)
-+		printk("%sMPIDR: 0x%016llx\n", pfx, proc->mpidr);
-+	if (proc->validation_bits & CPER_ARMV8_VALID_AFFINITY_LEVEL)
-+		printk("%serror affinity level: %d\n", pfx,
-+			proc->affinity_level);
-+	if (proc->validation_bits & CPER_ARMV8_VALID_RUNNING_STATE) {
-+		printk("%srunning state: %d\n", pfx, proc->running_state);
-+		printk("%sPSCI state: %d\n", pfx, proc->psci_state);
-+	}
-+
-+	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
-+
-+	err_info = (struct cper_armv8_err_info *)(proc + 1);
-+	for (i = 0; i < proc->err_info_num; i++) {
-+		printk("%sError info structure %d:\n", pfx, i);
-+		printk("%sversion:%d\n", newpfx, err_info->version);
-+		printk("%slength:%d\n", newpfx, err_info->length);
-+		if (err_info->validation_bits &
-+		    CPER_ARMV8_INFO_VALID_MULTI_ERR) {
-+			if (err_info->multiple_error == 0)
-+				printk("%ssingle error.\n", newpfx);
-+			else if (err_info->multiple_error == 1)
-+				printk("%smultiple errors.\n", newpfx);
-+			else
-+				printk("%smultiple errors count:%d.\n",
-+				newpfx, err_info->multiple_error);
-+		}
-+		if (err_info->validation_bits & CPER_ARMV8_INFO_VALID_FLAGS) {
-+			if (err_info->flags & CPER_ARMV8_INFO_FLAGS_FIRST)
-+				printk("%sfirst error captured.\n", newpfx);
-+			if (err_info->flags & CPER_ARMV8_INFO_FLAGS_LAST)
-+				printk("%slast error captured.\n", newpfx);
-+			if (err_info->flags & CPER_ARMV8_INFO_FLAGS_PROPAGATED)
-+				printk("%spropagated error captured.\n",
-+				       newpfx);
-+		}
-+		printk("%serror_type: %d, %s\n", newpfx, err_info->type,
-+			err_info->type < ARRAY_SIZE(proc_error_type_strs) ?
-+			proc_error_type_strs[err_info->type] : "unknown");
-+		printk("%serror_info: 0x%016llx\n", newpfx,
-+		       err_info->error_info);
-+		if (err_info->validation_bits & CPER_ARMV8_INFO_VALID_VIRT_ADDR)
-+			printk("%svirtual fault address: 0x%016llx\n",
-+				newpfx, err_info->virt_fault_addr);
-+		if (err_info->validation_bits &
-+		    CPER_ARMV8_INFO_VALID_PHYSICAL_ADDR)
-+			printk("%sphysical fault address: 0x%016llx\n",
-+				newpfx, err_info->physical_fault_addr);
-+		err_info += 1;
-+	}
-+
-+	if (len < sizeof(*qword) && proc->context_info_num > 0) {
-+		printk("%ssection length is too small.\n", pfx);
-+		printk("%sCTX_INFO_NUM is %d.\n", pfx, proc->context_info_num);
-+		return;
-+	}
-+	for (i = 0; i < proc->context_info_num; i++) {
-+		qword = (__u64 *)err_info;
-+		printk("%sProcessor context info structure %d:\n", pfx, i);
-+		printk("%sException level %d.\n", newpfx,
-+		       (int)((*qword & CPER_ARMV8_CTX_EL_MASK)
-+				>> CPER_ARMV8_CTX_EL_SHIFT));
-+		printk("%sSecure bit: %d.\n", newpfx,
-+		       (int)((*qword & CPER_ARMV8_CTX_NS_MASK)
-+				>> CPER_ARMV8_CTX_NS_SHIFT));
-+		if ((*qword & CPER_ARMV8_CTX_TYPE_MASK) == 0) {
-+			if (len < CPER_AARCH32_CTX_LEN) {
-+				printk("%ssection length is too small.\n", pfx);
-+				printk("%sremaining length is %d.\n", pfx, len);
-+				return;
-+			}
-+			printk("%sAArch32 execution context.\n", newpfx);
-+			qword++;
-+			print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4,
-+				qword, CPER_AARCH32_CTX_LEN - sizeof(*qword),
-+				0);
-+			len -= CPER_AARCH32_CTX_LEN;
-+		} else if ((*qword & CPER_ARMV8_CTX_TYPE_MASK) == 1) {
-+			if (len < CPER_AARCH64_CTX_LEN) {
-+				printk("%ssection length is too small.\n", pfx);
-+				printk("%sremaining length is %d.\n", pfx, len);
-+				return;
-+			}
-+			printk("%sAArch64 execution context.\n", newpfx);
-+			qword++;
-+			print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4,
-+				qword, CPER_AARCH64_CTX_LEN - sizeof(*qword),
-+				0);
-+			len -= CPER_AARCH64_CTX_LEN;
-+		} else {
-+			printk("%scontext type is incorrect 0x%016llx.\n",
-+			pfx, *qword);
-+			return;
-+		}
-+	}
-+
-+	if (len > 0) {
-+		printk("%sVendor specific error info has %d bytes.\n", pfx,
-+		       len);
-+		print_hex_dump(pfx, "", DUMP_PREFIX_OFFSET, 16, 4, qword, len,
-+			0);
-+	}
++	return ret;
 +}
 +
- static const char * const mem_err_type_strs[] = {
- 	"unknown",
- 	"no error",
-@@ -470,6 +596,15 @@ static void cper_estatus_print_section(
- 			cper_print_pcie(newpfx, pcie, gdata);
- 		else
- 			goto err_section_too_small;
-+	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PROC_ARMV8)) {
-+		struct cper_sec_proc_armv8 *armv8_err;
++static struct notifier_block ghes_notifier_sea = {
++	.notifier_call = ghes_notify_sea,
++};
 +
-+		armv8_err = acpi_hest_generic_data_payload(gdata);
-+		printk("%ssection_type: ARMv8 processor error\n", newpfx);
-+		if (gdata->error_data_length >= sizeof(*armv8_err))
-+			cper_print_proc_armv8(newpfx, armv8_err);
-+		else
-+			goto err_section_too_small;
- 	} else
- 		printk("%s""section type: unknown, %pUl\n", newpfx, sec_type);
- 
-diff --git a/include/linux/cper.h b/include/linux/cper.h
-index dcacb1a..d1efbef 100644
---- a/include/linux/cper.h
-+++ b/include/linux/cper.h
-@@ -162,6 +162,11 @@ enum {
-  * corrective action before the data is consumed
-  */
- #define CPER_SEC_LATENT_ERROR			0x0020
-+/*
-+ * If set, the section contains an error that is propagated. The error
-+ * did not originate from the hardware associated with this section.
-+ */
-+#define CPER_SEC_PROPAGATED			0x0040
- 
++static int ghes_sea_add(struct ghes *ghes)
++{
++	mutex_lock(&ghes_list_mutex);
++	if (list_empty(&ghes_sea))
++		sea_register_handler_chain(&ghes_notifier_sea);
++	list_add_rcu(&ghes->list, &ghes_sea);
++	mutex_unlock(&ghes_list_mutex);
++	return 0;
++}
++
++static void ghes_sea_remove(struct ghes *ghes)
++{
++	mutex_lock(&ghes_list_mutex);
++	list_del_rcu(&ghes->list);
++	if (list_empty(&ghes_sea))
++		sea_unregister_handler_chain(&ghes_notifier_sea);
++	mutex_unlock(&ghes_list_mutex);
++}
++#else /* CONFIG_HAVE_ACPI_APEI_SEA */
++static inline int ghes_sea_add(struct ghes *ghes)
++{
++	pr_err(GHES_PFX "ID: %d, trying to add SEA notification which is not supported\n",
++	       ghes->generic->header.source_id);
++	return -ENOTSUPP;
++}
++
++static inline void ghes_sea_remove(struct ghes *ghes)
++{
++	pr_err(GHES_PFX "ID: %d, trying to remove SEA notification which is not supported\n",
++	       ghes->generic->header.source_id);
++}
++#endif /* CONFIG_HAVE_ACPI_APEI_SEA */
++
+ #ifdef CONFIG_HAVE_ACPI_APEI_NMI
  /*
-  * Section type definitions, used in section_type field in struct
-@@ -180,6 +185,10 @@ enum {
- #define CPER_SEC_PROC_IPF						\
- 	UUID_LE(0xE429FAF1, 0x3CB7, 0x11D4, 0x0B, 0xCA, 0x07, 0x00,	\
- 		0x80, 0xC7, 0x3C, 0x88, 0x81)
-+/* Processor Specific: ARMv8 */
-+#define CPER_SEC_PROC_ARMV8						\
-+	UUID_LE(0xE19E3D16, 0xBC11, 0x11E4, 0x9C, 0xAA, 0xC2, 0x05,	\
-+		0x1D, 0x5D, 0x46, 0xB0)
- /* Platform Memory */
- #define CPER_SEC_PLATFORM_MEM						\
- 	UUID_LE(0xA5BC1114, 0x6F64, 0x4EDE, 0xB8, 0x63, 0x3E, 0x83,	\
-@@ -255,6 +264,34 @@ enum {
- 
- #define CPER_PCIE_SLOT_SHIFT			3
- 
-+#define CPER_ARMV8_ERR_INFO_NUM_MASK		0x00000000000000FF
-+#define CPER_ARMV8_CTX_INFO_NUM_MASK		0x0000000000FFFF00
-+#define CPER_ARMV8_CTX_INFO_NUM_SHIFT		8
-+
-+#define CPER_ARMV8_VALID_MPIDR			0x00000001
-+#define CPER_ARMV8_VALID_AFFINITY_LEVEL		0x00000002
-+#define CPER_ARMV8_VALID_RUNNING_STATE		0x00000004
-+#define CPER_ARMV8_VALID_VENDOR_INFO		0x00000008
-+
-+#define CPER_ARMV8_INFO_VALID_MULTI_ERR		0x0001
-+#define CPER_ARMV8_INFO_VALID_FLAGS		0x0002
-+#define CPER_ARMV8_INFO_VALID_ERR_INFO		0x0004
-+#define CPER_ARMV8_INFO_VALID_VIRT_ADDR		0x0008
-+#define CPER_ARMV8_INFO_VALID_PHYSICAL_ADDR	0x0010
-+
-+#define CPER_ARMV8_INFO_FLAGS_FIRST		0x0001
-+#define CPER_ARMV8_INFO_FLAGS_LAST		0x0002
-+#define CPER_ARMV8_INFO_FLAGS_PROPAGATED	0x0004
-+
-+#define CPER_AARCH64_CTX_LEN			368
-+#define CPER_AARCH32_CTX_LEN			256
-+
-+#define CPER_ARMV8_CTX_TYPE_MASK		0x000000000000000F
-+#define CPER_ARMV8_CTX_EL_MASK			0x0000000000000070
-+#define CPER_ARMV8_CTX_NS_MASK			0x0000000000000080
-+#define CPER_ARMV8_CTX_EL_SHIFT			4
-+#define CPER_ARMV8_CTX_NS_SHIFT			7
-+
- /*
-  * All tables and structs must be byte-packed to match CPER
-  * specification, since the tables are provided by the system BIOS
-@@ -340,6 +377,41 @@ struct cper_ia_proc_ctx {
- 	__u64	mm_reg_addr;
- };
- 
-+/* ARMv8 Processor Error Section */
-+struct cper_sec_proc_armv8 {
-+	__u32	validation_bits;
-+	__u16	err_info_num; /* Number of Processor Error Info */
-+	__u16	context_info_num; /* Number of Processor Context Info Records*/
-+	__u32	section_length;
-+	__u8	affinity_level;
-+	__u8	reserved[3];	/* must be zero */
-+	__u64	mpidr;
-+	__u64	midr;
-+	__u32	running_state; /* Bit 0 set - Processor running. PSCI = 0 */
-+	__u32	psci_state;
-+};
-+
-+/* ARMv8 Processor Error Information Structure */
-+struct cper_armv8_err_info {
-+	__u8	version;
-+	__u8	length;
-+	__u16	validation_bits;
-+	__u8	type;
-+	__u16	multiple_error;
-+	__u8	flags;
-+	__u64	error_info;
-+	__u64	virt_fault_addr;
-+	__u64	physical_fault_addr;
-+};
-+
-+/* ARMv8 AARCH64 Processor Context Information Structure */
-+struct cper_armv8_aarch64_ctx {
-+	__u8	type_el_ns;
-+	__u8	reserved[7];	/* must be zero */
-+	__u8	gpr[288];
-+	__u8	spr[68];
-+};
-+
- /* Old Memory Error Section UEFI 2.1, 2.2 */
- struct cper_sec_mem_err_old {
- 	__u64	validation_bits;
+  * printk is not safe in NMI context.  So in NMI handler, we allocate
+@@ -1023,6 +1083,14 @@ static int ghes_probe(struct platform_device *ghes_dev)
+ 	case ACPI_HEST_NOTIFY_EXTERNAL:
+ 	case ACPI_HEST_NOTIFY_SCI:
+ 		break;
++	case ACPI_HEST_NOTIFY_SEA:
++		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_SEA)) {
++			pr_warn(GHES_PFX "Generic hardware error source: %d notified via SEA is not supported\n",
++				generic->header.source_id);
++			rc = -ENOTSUPP;
++			goto err;
++		}
++		break;
+ 	case ACPI_HEST_NOTIFY_NMI:
+ 		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_NMI)) {
+ 			pr_warn(GHES_PFX "Generic hardware error source: %d notified via NMI interrupt is not supported!\n",
+@@ -1034,6 +1102,13 @@ static int ghes_probe(struct platform_device *ghes_dev)
+ 		pr_warning(GHES_PFX "Generic hardware error source: %d notified via local interrupt is not supported!\n",
+ 			   generic->header.source_id);
+ 		goto err;
++	case ACPI_HEST_NOTIFY_GPIO:
++	case ACPI_HEST_NOTIFY_SEI:
++	case ACPI_HEST_NOTIFY_GSIV:
++		pr_warn(GHES_PFX "Generic hardware error source: %d notified via notification type %u is not supported\n",
++			generic->header.source_id, generic->header.source_id);
++		rc = -ENOTSUPP;
++		goto err;
+ 	default:
+ 		pr_warning(FW_WARN GHES_PFX "Unknown notification type: %u for generic hardware error source: %d\n",
+ 			   generic->notify.type, generic->header.source_id);
+@@ -1088,6 +1163,11 @@ static int ghes_probe(struct platform_device *ghes_dev)
+ 		list_add_rcu(&ghes->list, &ghes_sci);
+ 		mutex_unlock(&ghes_list_mutex);
+ 		break;
++	case ACPI_HEST_NOTIFY_SEA:
++		rc = ghes_sea_add(ghes);
++		if (rc)
++			goto err_edac_unreg;
++		break;
+ 	case ACPI_HEST_NOTIFY_NMI:
+ 		ghes_nmi_add(ghes);
+ 		break;
+@@ -1130,6 +1210,9 @@ static int ghes_remove(struct platform_device *ghes_dev)
+ 			unregister_acpi_hed_notifier(&ghes_notifier_sci);
+ 		mutex_unlock(&ghes_list_mutex);
+ 		break;
++	case ACPI_HEST_NOTIFY_SEA:
++		ghes_sea_remove(ghes);
++		break;
+ 	case ACPI_HEST_NOTIFY_NMI:
+ 		ghes_nmi_remove(ghes);
+ 		break;
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
