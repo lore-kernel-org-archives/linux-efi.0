@@ -1,114 +1,140 @@
-From: Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] arm64: mm: Fix memmap to be initialized for the entire
- section
-Date: Thu, 6 Oct 2016 18:11:14 +0200
-Message-ID: <20161006161114.GH22012@rric.localdomain>
-References: <1475747527-32387-1-git-send-email-rrichter@cavium.com>
- <CAKv+Gu-oYzSn_eeqaX3QVFeQjBGkaX-Wh7+oPcQFcXv7J6GOFQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: [PATCH V3 00/10] Add UEFI 2.6 and ACPI 6.1 updates for RAS on ARM64
+Date: Fri,  7 Oct 2016 15:31:12 -0600
+Message-ID: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-oYzSn_eeqaX3QVFeQjBGkaX-Wh7+oPcQFcXv7J6GOFQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tomasz.nowicki-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, Dkvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org
+Cc: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Ard,
+When a memory error, CPU error, PCIe error, or other type of hardware error
+that's covered by RAS occurs, firmware should populate the shared GHES memory
+location with the proper GHES structures to notify the OS of the error.
+For example, platforms that implement firmware first handling may implement
+separate GHES sources for corrected errors and uncorrected errors. If the
+error is an uncorrectable error, then the firmware will notify the OS
+immediately since the error needs to be handled ASAP. The OS will then be able
+to take the appropriate action needed such as offlining a page. If the error
+is a corrected error, then the firmware will not interrupt the OS immediately.
+Instead, the OS will see and report the error the next time it's GHES timer
+expires. The kernel will first parse the GHES structures and report the errors
+through the kernel logs and then notify the user space through RAS trace
+events. This allows user space applications such as RAS Daemon to see the
+errors and report them however the user desires. This patchset extends the
+kernel functionality for RAS errors based on updates in the UEFI 2.6 and
+ACPI 6.1 specifications.
 
-thank you for your answer and you explanation.
+An example flow from firmware to user space could be:
 
-On 06.10.16 11:00:33, Ard Biesheuvel wrote:
-> On 6 October 2016 at 10:52, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org> wrote:
-> > There is a memory setup problem on ThunderX systems with certain
-> > memory configurations. The symptom is
-> >
-> >  kernel BUG at mm/page_alloc.c:1848!
-> >
-> > This happens for some configs with 64k page size enabled. The bug
-> > triggers for page zones with some pages in the zone not assigned to
-> > this particular zone. In my case some pages that are marked as nomap
-> > were not reassigned to the new zone of node 1, so those are still
-> > assigned to node 0.
-> >
-> > The reason for the mis-configuration is a change in pfn_valid() which
-> > reports pages marked nomap as invalid:
-> >
-> >  68709f45385a arm64: only consider memblocks with NOMAP cleared for linear mapping
-> >
-> 
-> These pages are owned by the firmware, which may map it with
-> attributes that conflict with the attributes we use for the linear
-> mapping. This means they should not be covered by the linear mapping.
-> 
-> > This causes pages marked as nomap being no long reassigned to the new
-> > zone in memmap_init_zone() by calling __init_single_pfn().
-> >
-> 
-> This sounds like the root cause of your issue. Could we not fix that instead?
+                 +---------------+
+       +-------->|               |
+       |         |  GHES polling |--+
++-------------+  |    source     |  |   +---------------+   +------------+
+|             |  +---------------+  |   |  Kernel GHES  |   |            |
+|  Firmware   |                     +-->|  CPER AER and |-->|  RAS trace |
+|             |  +---------------+  |   |  EDAC drivers |   |   event    |
++-------------+  |               |  |   +---------------+   +------------+
+       |         |  GHES sci     |--+
+       +-------->|   source      |
+                 +---------------+
 
-Yes, this is proposal b) from my last mail that would work too: I
-implemented an arm64 private early_pfn_valid() function that uses
-memblock_is_memory() to setup all pages of a zone. Though, I think
-this is the wrong way and thus I prefer this patch instead. I see
-serveral reasons for this:
+Add support for Generic Hardware Error Source (GHES) v2, which introduces the
+capability for the OS to acknowledge the consumption of the error record
+generated by the Reliability, Availability and Serviceability (RAS) controller.
+This eliminates potential race conditions between the OS and the RAS controller.
 
-Inconsistent use of struct *page, it is initialized but never used
-again.
+Add support for the timestamp field added to the Generic Error Data Entry v3,
+allowing the OS to log the time that the error is generated by the firmware,
+rather than the time the error is consumed. This improves the correctness of
+event sequences when analyzing error logs. The timestamp is added in
+ACPI 6.1, reference Table 18-343 Generic Error Data Entry.
 
-Other archs only do a basic range check in pfn_valid(), the default
-implementation just returns if the whole section is valid. As I
-understand the code, if the mem range is not aligned to the section,
-then there will be pfn's in the section that don't have physical mem
-attached. The page is then just initialized, it's not marked reserved
-nor the refcount is non-zero. It is then simply not used. This is how
-no-map pages should be handled too.
+Add support for ARMv8 Common Platform Error Record (CPER) per UEFI 2.6
+specification. ARMv8 specific processor error information is reported as part of
+the CPER records.  This provides more detail on for processor error logs. This
+can help describe ARMv8 cache, tlb, and bus errors.
 
-I think pfn_valid() is just a quick check if the pfn's struct *page
-can be used. There is a good description for this in include/linux/
-mmzone.h. So there can be memory holes that have a valid pfn.
+Synchronous External Abort (SEA) represents a specific processor error condition
+in ARM systems. A handler is added to recognize SEA errors, and a notifier is
+added to parse and report the errors before the process is killed. Refer to
+section N.2.1.1 in the Common Platform Error Record appendix of the UEFI 2.6
+specification.
 
-If the no-map memory needs special handling, then additional checks
-need to be added to the particular code (as in ioremap.c). It's imo
-wrong to (mis-)use pfn_valid for that.
+Currently the kernel ignores CPER records that are unrecognized.
+On the other hand, UEFI spec allows for non-standard (eg. vendor
+proprietary) error section type in CPER (Common Platform Error Record),
+as defined in section N2.3 of UEFI version 2.5. Therefore, user
+is not able to see hardware error data of non-standard section.
 
-Variant b) involves generic mm code to fix it for arm64, this patch is
-an arm64 change only. This makes it harder to get a fix for it.
-(Though maybe only a problem of patch logistics.)
+If section Type field of Generic Error Data Entry is unrecognized,
+prints out the raw data in dmesg buffer, and also adds a tracepoint
+for reporting such hardware errors.
 
-> 
-> > Fixing this by restoring the old behavior of pfn_valid() to use
-> > memblock_is_memory().
-> 
-> This is incorrect imo. In general, pfn_valid() means ordinary memory
-> covered by the linear mapping and the struct page array. Returning
-> reserved ranges that the kernel should not even touch only to please
-> the NUMA code seems like an inappropriate way to deal with this issue.
+Currently even if an error status block's severity is fatal, the kernel
+does not honor the severity level and panic. With the firmware first
+model, the platform could inform the OS about a fatal hardware error
+through the non-NMI GHES notification type. The OS should panic when a
+hardware error record is received with this severity.
 
-As said above, it is not marked as reserved, it is treated like
-non-existing memory.
+Add support to handle SEAs that occur while a KVM guest kernel is
+running. Currently these are unsupported by the guest abort handling.
 
-This has been observed for non-numa kernels too and can happen for
-each zone that is only partly initialized.
+Depends on: [PATCH v14] acpi, apei, arm64: APEI initial support for aarch64.
+            https://lkml.org/lkml/2016/8/10/231
 
-I think the patch addresses your concerns. I can't see there the
-kernel uses memory marked as nomap in a wrong way.
+V3: Fix unmapped address to the read_ack_register in ghes.c
+    Add helper function to get the proper payload based on generic data entry
+     version
+    Move timestamp print to avoid changing function calls in cper.c
+    Remove patch "arm64: exception: handle instruction abort at current EL"
+     since the el1_ia handler is already added in 4.8
+    Add EFI and ARM64 dependencies for HAVE_ACPI_APEI_SEA
+    Add a new trace event for ARM type errors
+    Add support to handle KVM guest SEAs
 
-Thanks,
+V2: Add PSCI state print for the ARMv8 error type.
+    Separate timestamp year into year and century using BCD format.
+    Rebase on top of ACPICA 20160318 release and remove header file changes
+     in include/acpi/actbl1.h.
+    Add panic OS with fatal error status block patch.
+    Add processing of unrecognized CPER error section patches with updates
+     from previous comments. Original patches: https://lkml.org/lkml/2015/9/8/646
 
--Robert
+V1: https://lkml.org/lkml/2016/2/5/544
 
-> 
-> > Also changing users of pfn_valid() in arm64 code
-> > to use memblock_is_map_memory() where necessary. This only affects
-> > code in ioremap.c. The code in mmu.c still can use the new version of
-> > pfn_valid().
-> >
-> > Should be marked stable v4.5..
-> >
-> > Signed-off-by: Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-> > ---
-> >  arch/arm64/mm/init.c    | 2 +-
-> >  arch/arm64/mm/ioremap.c | 5 +++--
-> >  2 files changed, 4 insertions(+), 3 deletions(-)
+Jonathan (Zhixiong) Zhang (1):
+  acpi: apei: panic OS with fatal error status block
+
+Tyler Baicar (9):
+  acpi: apei: read ack upon ghes record consumption
+  ras: acpi/apei: cper: generic error data entry v3 per ACPI 6.1
+  efi: parse ARMv8 processor error
+  arm64: exception: handle Synchronous External Abort
+  acpi: apei: handle SEA notification type for ARMv8
+  efi: print unrecognized CPER section
+  ras: acpi / apei: generate trace event for unrecognized CPER section
+  trace, ras: add ARM processor error trace event
+  arm64: KVM: add guest SEA support
+
+ arch/arm/include/asm/kvm_arm.h       |   1 +
+ arch/arm/include/asm/system_misc.h   |   5 +
+ arch/arm/kvm/mmu.c                   |  15 ++-
+ arch/arm64/Kconfig                   |   1 +
+ arch/arm64/include/asm/kvm_arm.h     |   1 +
+ arch/arm64/include/asm/system_misc.h |  15 +++
+ arch/arm64/mm/fault.c                |  71 ++++++++--
+ drivers/acpi/apei/Kconfig            |  15 +++
+ drivers/acpi/apei/ghes.c             | 177 +++++++++++++++++++++++-
+ drivers/acpi/apei/hest.c             |   7 +-
+ drivers/firmware/efi/cper.c          | 252 ++++++++++++++++++++++++++++++++---
+ drivers/ras/ras.c                    |   2 +
+ include/acpi/ghes.h                  |   1 +
+ include/linux/cper.h                 |  72 ++++++++++
+ include/ras/ras_event.h              | 112 ++++++++++++++++
+ 15 files changed, 711 insertions(+), 36 deletions(-)
+
+-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
