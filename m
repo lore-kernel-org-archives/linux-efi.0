@@ -1,145 +1,299 @@
-From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V3 04/10] arm64: exception: handle Synchronous External Abort
-Date: Fri,  7 Oct 2016 15:31:16 -0600
-Message-ID: <1475875882-2604-5-git-send-email-tbaicar@codeaurora.org>
+From: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: [PATCH V3 03/10] efi: parse ARMv8 processor error
+Date: Fri,  7 Oct 2016 15:31:15 -0600
+Message-ID: <1475875882-2604-4-git-send-email-tbaicar@codeaurora.org>
 References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, Dkvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org
-Cc: Tyler Baicar <tbaicar@codeaurora.org>, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, Naveen Kaje <nkaje@codeaurora.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1475875882-2604-1-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tomasz.nowicki-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, Dkvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org
+Cc: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Naveen Kaje <nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-SEA exceptions are often caused by an uncorrected hardware
-error, and are handled when data abort and instruction abort
-exception classes have specific values for their Fault Status
-Code.
-When SEA occurs, before killing the process, go through
-the handlers registered in the notification list.
-Update fault_info[] with specific SEA faults so that the
-new SEA handler is used.
+Add support for ARMv8 Common Platform Error Record (CPER).
+UEFI 2.6 specification adds support for ARMv8 specific
+processor error information to be reported as part of the
+CPER records. This provides more detail on for processor error logs.
 
-Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Signed-off-by: Naveen Kaje <nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 ---
- arch/arm64/include/asm/system_misc.h | 13 ++++++++
- arch/arm64/mm/fault.c                | 58 +++++++++++++++++++++++++++++-------
- 2 files changed, 61 insertions(+), 10 deletions(-)
+ drivers/firmware/efi/cper.c | 135 ++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/cper.h        |  72 +++++++++++++++++++++++
+ 2 files changed, 207 insertions(+)
 
-diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
-index 57f110b..90daf4a 100644
---- a/arch/arm64/include/asm/system_misc.h
-+++ b/arch/arm64/include/asm/system_misc.h
-@@ -64,4 +64,17 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index 9fa1317..2594245 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -112,12 +112,15 @@ void cper_print_bits(const char *pfx, unsigned int bits,
+ static const char * const proc_type_strs[] = {
+ 	"IA32/X64",
+ 	"IA64",
++	"ARMv8",
+ };
  
- #endif	/* __ASSEMBLY__ */
+ static const char * const proc_isa_strs[] = {
+ 	"IA32",
+ 	"IA64",
+ 	"X64",
++	"ARM A32/T32",
++	"ARM A64",
+ };
  
-+/*
-+ * The functions below are used to register and unregister callbacks
-+ * that are to be invoked when a Synchronous External Abort (SEA)
-+ * occurs. An SEA is raised by certain fault status codes that have
-+ * either data or instruction abort as the exception class, and
-+ * callbacks may be registered to parse or handle such hardware errors.
-+ *
-+ * Registered callbacks are run in an interrupt/atomic context. They
-+ * are not allowed to block or sleep.
-+ */
-+int sea_register_handler_chain(struct notifier_block *nb);
-+void sea_unregister_handler_chain(struct notifier_block *nb);
-+
- #endif	/* __ASM_SYSTEM_MISC_H */
-diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-index 05d2bd7..81cb7ad 100644
---- a/arch/arm64/mm/fault.c
-+++ b/arch/arm64/mm/fault.c
-@@ -39,6 +39,22 @@
- #include <asm/pgtable.h>
- #include <asm/tlbflush.h>
- 
-+/*
-+ * GHES SEA handler code may register a notifier call here to
-+ * handle HW error record passed from platform.
-+ */
-+static ATOMIC_NOTIFIER_HEAD(sea_handler_chain);
-+
-+int sea_register_handler_chain(struct notifier_block *nb)
-+{
-+	return atomic_notifier_chain_register(&sea_handler_chain, nb);
-+}
-+
-+void sea_unregister_handler_chain(struct notifier_block *nb)
-+{
-+	atomic_notifier_chain_unregister(&sea_handler_chain, nb);
-+}
-+
- static const char *fault_name(unsigned int esr);
- 
- #ifdef CONFIG_KPROBES
-@@ -480,6 +496,28 @@ static int do_bad(unsigned long addr, unsigned int esr, struct pt_regs *regs)
- 	return 1;
+ static const char * const proc_error_type_strs[] = {
+@@ -186,6 +189,129 @@ static void cper_print_proc_generic(const char *pfx,
+ 		printk("%s""IP: 0x%016llx\n", pfx, proc->ip);
  }
  
-+/*
-+ * This abort handler deals with Synchronous External Abort.
-+ * It calls notifiers, and then returns "fault".
-+ */
-+static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
++static void cper_print_proc_armv8(const char *pfx,
++				  const struct cper_sec_proc_armv8 *proc)
 +{
-+	struct siginfo info;
++	int i, len;
++	struct cper_armv8_err_info *err_info;
++	__u64 *qword = NULL;
++	char newpfx[64];
 +
-+	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
++	printk("%ssection length: %d\n", pfx, proc->section_length);
++	printk("%sMIDR: 0x%016llx\n", pfx, proc->midr);
 +
-+	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
-+		 fault_name(esr), esr, addr);
++	len = proc->section_length - (sizeof(*proc) +
++		proc->err_info_num * (sizeof(*err_info)));
++	if (len < 0) {
++		printk("%ssection length is too small.\n", pfx);
++		printk("%sERR_INFO_NUM is %d.\n", pfx, proc->err_info_num);
++		return;
++	}
 +
-+	info.si_signo = SIGBUS;
-+	info.si_errno = 0;
-+	info.si_code  = 0;
-+	info.si_addr  = (void __user *)addr;
-+	arm64_notify_die("", regs, &info, esr);
++	if (proc->validation_bits & CPER_ARMV8_VALID_MPIDR)
++		printk("%sMPIDR: 0x%016llx\n", pfx, proc->mpidr);
++	if (proc->validation_bits & CPER_ARMV8_VALID_AFFINITY_LEVEL)
++		printk("%serror affinity level: %d\n", pfx,
++			proc->affinity_level);
++	if (proc->validation_bits & CPER_ARMV8_VALID_RUNNING_STATE) {
++		printk("%srunning state: %d\n", pfx, proc->running_state);
++		printk("%sPSCI state: %d\n", pfx, proc->psci_state);
++	}
 +
-+	return 0;
++	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
++
++	err_info = (struct cper_armv8_err_info *)(proc + 1);
++	for (i = 0; i < proc->err_info_num; i++) {
++		printk("%sError info structure %d:\n", pfx, i);
++		printk("%sversion:%d\n", newpfx, err_info->version);
++		printk("%slength:%d\n", newpfx, err_info->length);
++		if (err_info->validation_bits &
++		    CPER_ARMV8_INFO_VALID_MULTI_ERR) {
++			if (err_info->multiple_error == 0)
++				printk("%ssingle error.\n", newpfx);
++			else if (err_info->multiple_error == 1)
++				printk("%smultiple errors.\n", newpfx);
++			else
++				printk("%smultiple errors count:%d.\n",
++				newpfx, err_info->multiple_error);
++		}
++		if (err_info->validation_bits & CPER_ARMV8_INFO_VALID_FLAGS) {
++			if (err_info->flags & CPER_ARMV8_INFO_FLAGS_FIRST)
++				printk("%sfirst error captured.\n", newpfx);
++			if (err_info->flags & CPER_ARMV8_INFO_FLAGS_LAST)
++				printk("%slast error captured.\n", newpfx);
++			if (err_info->flags & CPER_ARMV8_INFO_FLAGS_PROPAGATED)
++				printk("%spropagated error captured.\n",
++				       newpfx);
++		}
++		printk("%serror_type: %d, %s\n", newpfx, err_info->type,
++			err_info->type < ARRAY_SIZE(proc_error_type_strs) ?
++			proc_error_type_strs[err_info->type] : "unknown");
++		printk("%serror_info: 0x%016llx\n", newpfx,
++		       err_info->error_info);
++		if (err_info->validation_bits & CPER_ARMV8_INFO_VALID_VIRT_ADDR)
++			printk("%svirtual fault address: 0x%016llx\n",
++				newpfx, err_info->virt_fault_addr);
++		if (err_info->validation_bits &
++		    CPER_ARMV8_INFO_VALID_PHYSICAL_ADDR)
++			printk("%sphysical fault address: 0x%016llx\n",
++				newpfx, err_info->physical_fault_addr);
++		err_info += 1;
++	}
++
++	if (len < sizeof(*qword) && proc->context_info_num > 0) {
++		printk("%ssection length is too small.\n", pfx);
++		printk("%sCTX_INFO_NUM is %d.\n", pfx, proc->context_info_num);
++		return;
++	}
++	for (i = 0; i < proc->context_info_num; i++) {
++		qword = (__u64 *)err_info;
++		printk("%sProcessor context info structure %d:\n", pfx, i);
++		printk("%sException level %d.\n", newpfx,
++		       (int)((*qword & CPER_ARMV8_CTX_EL_MASK)
++				>> CPER_ARMV8_CTX_EL_SHIFT));
++		printk("%sSecure bit: %d.\n", newpfx,
++		       (int)((*qword & CPER_ARMV8_CTX_NS_MASK)
++				>> CPER_ARMV8_CTX_NS_SHIFT));
++		if ((*qword & CPER_ARMV8_CTX_TYPE_MASK) == 0) {
++			if (len < CPER_AARCH32_CTX_LEN) {
++				printk("%ssection length is too small.\n", pfx);
++				printk("%sremaining length is %d.\n", pfx, len);
++				return;
++			}
++			printk("%sAArch32 execution context.\n", newpfx);
++			qword++;
++			print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4,
++				qword, CPER_AARCH32_CTX_LEN - sizeof(*qword),
++				0);
++			len -= CPER_AARCH32_CTX_LEN;
++		} else if ((*qword & CPER_ARMV8_CTX_TYPE_MASK) == 1) {
++			if (len < CPER_AARCH64_CTX_LEN) {
++				printk("%ssection length is too small.\n", pfx);
++				printk("%sremaining length is %d.\n", pfx, len);
++				return;
++			}
++			printk("%sAArch64 execution context.\n", newpfx);
++			qword++;
++			print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4,
++				qword, CPER_AARCH64_CTX_LEN - sizeof(*qword),
++				0);
++			len -= CPER_AARCH64_CTX_LEN;
++		} else {
++			printk("%scontext type is incorrect 0x%016llx.\n",
++			pfx, *qword);
++			return;
++		}
++	}
++
++	if (len > 0) {
++		printk("%sVendor specific error info has %d bytes.\n", pfx,
++		       len);
++		print_hex_dump(pfx, "", DUMP_PREFIX_OFFSET, 16, 4, qword, len,
++			0);
++	}
 +}
 +
- static const struct fault_info {
- 	int	(*fn)(unsigned long addr, unsigned int esr, struct pt_regs *regs);
- 	int	sig;
-@@ -502,22 +540,22 @@ static const struct fault_info {
- 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 1 permission fault"	},
- 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
- 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 permission fault"	},
--	{ do_bad,		SIGBUS,  0,		"synchronous external abort"	},
-+	{ do_sea,		SIGBUS,  0,		"synchronous external abort"	},
- 	{ do_bad,		SIGBUS,  0,		"unknown 17"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 18"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 19"			},
--	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error"	},
-+	{ do_sea,		SIGBUS,  0,		"level 0 SEA (trans tbl walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 1 SEA (trans tbl walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 2 SEA (trans tbl walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 3 SEA (trans tbl walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"synchronous parity or ECC err" },
- 	{ do_bad,		SIGBUS,  0,		"unknown 25"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 26"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 27"			},
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
-+	{ do_sea,		SIGBUS,  0,		"level 0 synch parity error"	},
-+	{ do_sea,		SIGBUS,  0,		"level 1 synch parity error"	},
-+	{ do_sea,		SIGBUS,  0,		"level 2 synch parity error"	},
-+	{ do_sea,		SIGBUS,  0,		"level 3 synch parity error"	},
- 	{ do_bad,		SIGBUS,  0,		"unknown 32"			},
- 	{ do_alignment_fault,	SIGBUS,  BUS_ADRALN,	"alignment fault"		},
- 	{ do_bad,		SIGBUS,  0,		"unknown 34"			},
+ static const char * const mem_err_type_strs[] = {
+ 	"unknown",
+ 	"no error",
+@@ -470,6 +596,15 @@ static void cper_estatus_print_section(
+ 			cper_print_pcie(newpfx, pcie, gdata);
+ 		else
+ 			goto err_section_too_small;
++	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PROC_ARMV8)) {
++		struct cper_sec_proc_armv8 *armv8_err;
++
++		armv8_err = acpi_hest_generic_data_payload(gdata);
++		printk("%ssection_type: ARMv8 processor error\n", newpfx);
++		if (gdata->error_data_length >= sizeof(*armv8_err))
++			cper_print_proc_armv8(newpfx, armv8_err);
++		else
++			goto err_section_too_small;
+ 	} else
+ 		printk("%s""section type: unknown, %pUl\n", newpfx, sec_type);
+ 
+diff --git a/include/linux/cper.h b/include/linux/cper.h
+index dcacb1a..d1efbef 100644
+--- a/include/linux/cper.h
++++ b/include/linux/cper.h
+@@ -162,6 +162,11 @@ enum {
+  * corrective action before the data is consumed
+  */
+ #define CPER_SEC_LATENT_ERROR			0x0020
++/*
++ * If set, the section contains an error that is propagated. The error
++ * did not originate from the hardware associated with this section.
++ */
++#define CPER_SEC_PROPAGATED			0x0040
+ 
+ /*
+  * Section type definitions, used in section_type field in struct
+@@ -180,6 +185,10 @@ enum {
+ #define CPER_SEC_PROC_IPF						\
+ 	UUID_LE(0xE429FAF1, 0x3CB7, 0x11D4, 0x0B, 0xCA, 0x07, 0x00,	\
+ 		0x80, 0xC7, 0x3C, 0x88, 0x81)
++/* Processor Specific: ARMv8 */
++#define CPER_SEC_PROC_ARMV8						\
++	UUID_LE(0xE19E3D16, 0xBC11, 0x11E4, 0x9C, 0xAA, 0xC2, 0x05,	\
++		0x1D, 0x5D, 0x46, 0xB0)
+ /* Platform Memory */
+ #define CPER_SEC_PLATFORM_MEM						\
+ 	UUID_LE(0xA5BC1114, 0x6F64, 0x4EDE, 0xB8, 0x63, 0x3E, 0x83,	\
+@@ -255,6 +264,34 @@ enum {
+ 
+ #define CPER_PCIE_SLOT_SHIFT			3
+ 
++#define CPER_ARMV8_ERR_INFO_NUM_MASK		0x00000000000000FF
++#define CPER_ARMV8_CTX_INFO_NUM_MASK		0x0000000000FFFF00
++#define CPER_ARMV8_CTX_INFO_NUM_SHIFT		8
++
++#define CPER_ARMV8_VALID_MPIDR			0x00000001
++#define CPER_ARMV8_VALID_AFFINITY_LEVEL		0x00000002
++#define CPER_ARMV8_VALID_RUNNING_STATE		0x00000004
++#define CPER_ARMV8_VALID_VENDOR_INFO		0x00000008
++
++#define CPER_ARMV8_INFO_VALID_MULTI_ERR		0x0001
++#define CPER_ARMV8_INFO_VALID_FLAGS		0x0002
++#define CPER_ARMV8_INFO_VALID_ERR_INFO		0x0004
++#define CPER_ARMV8_INFO_VALID_VIRT_ADDR		0x0008
++#define CPER_ARMV8_INFO_VALID_PHYSICAL_ADDR	0x0010
++
++#define CPER_ARMV8_INFO_FLAGS_FIRST		0x0001
++#define CPER_ARMV8_INFO_FLAGS_LAST		0x0002
++#define CPER_ARMV8_INFO_FLAGS_PROPAGATED	0x0004
++
++#define CPER_AARCH64_CTX_LEN			368
++#define CPER_AARCH32_CTX_LEN			256
++
++#define CPER_ARMV8_CTX_TYPE_MASK		0x000000000000000F
++#define CPER_ARMV8_CTX_EL_MASK			0x0000000000000070
++#define CPER_ARMV8_CTX_NS_MASK			0x0000000000000080
++#define CPER_ARMV8_CTX_EL_SHIFT			4
++#define CPER_ARMV8_CTX_NS_SHIFT			7
++
+ /*
+  * All tables and structs must be byte-packed to match CPER
+  * specification, since the tables are provided by the system BIOS
+@@ -340,6 +377,41 @@ struct cper_ia_proc_ctx {
+ 	__u64	mm_reg_addr;
+ };
+ 
++/* ARMv8 Processor Error Section */
++struct cper_sec_proc_armv8 {
++	__u32	validation_bits;
++	__u16	err_info_num; /* Number of Processor Error Info */
++	__u16	context_info_num; /* Number of Processor Context Info Records*/
++	__u32	section_length;
++	__u8	affinity_level;
++	__u8	reserved[3];	/* must be zero */
++	__u64	mpidr;
++	__u64	midr;
++	__u32	running_state; /* Bit 0 set - Processor running. PSCI = 0 */
++	__u32	psci_state;
++};
++
++/* ARMv8 Processor Error Information Structure */
++struct cper_armv8_err_info {
++	__u8	version;
++	__u8	length;
++	__u16	validation_bits;
++	__u8	type;
++	__u16	multiple_error;
++	__u8	flags;
++	__u64	error_info;
++	__u64	virt_fault_addr;
++	__u64	physical_fault_addr;
++};
++
++/* ARMv8 AARCH64 Processor Context Information Structure */
++struct cper_armv8_aarch64_ctx {
++	__u8	type_el_ns;
++	__u8	reserved[7];	/* must be zero */
++	__u8	gpr[288];
++	__u8	spr[68];
++};
++
+ /* Old Memory Error Section UEFI 2.1, 2.2 */
+ struct cper_sec_mem_err_old {
+ 	__u64	validation_bits;
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project.
-
