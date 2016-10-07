@@ -1,144 +1,158 @@
-From: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: [PATCH V3 09/10] trace, ras: add ARM processor error trace event
-Date: Fri,  7 Oct 2016 15:31:21 -0600
-Message-ID: <1475875882-2604-10-git-send-email-tbaicar@codeaurora.org>
+From: Tyler Baicar <tbaicar@codeaurora.org>
+Subject: [PATCH V3 08/10] ras: acpi / apei: generate trace event for unrecognized CPER section
+Date: Fri,  7 Oct 2016 15:31:20 -0600
+Message-ID: <1475875882-2604-9-git-send-email-tbaicar@codeaurora.org>
 References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1475875882-2604-1-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tomasz.nowicki-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, Dkvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org
-Cc: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, Dkvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org
+Cc: Tyler Baicar <tbaicar@codeaurora.org>, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-Currently there are trace events for the various RAS
-errors with the exception of ARM processor type errors.
-Add a new trace event for such errors so that the user
-will know when they occur. These trace events are
-consistent with the ARM processor error section type
-defined in UEFI 2.6 spec section N.2.4.4.
+UEFI spec allows for non-standard section in Common Platform Error
+Record. This is defined in section N.2.3 of UEFI version 2.5.
 
-Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Currently if the CPER section's type (UUID) does not match with
+any section type that the kernel knows how to parse, trace event
+is not generated for such section. And thus user is not able to know
+happening of such hardware error, including error record of
+non-standard section.
+
+This commit generates a trace event which contains raw error data
+for unrecognized CPER section.
+
+Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
 ---
- drivers/firmware/efi/cper.c |  9 ++++++
- drivers/ras/ras.c           |  1 +
- include/ras/ras_event.h     | 67 +++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 77 insertions(+)
+ drivers/acpi/apei/ghes.c | 18 +++++++++++++++++-
+ drivers/ras/ras.c        |  1 +
+ include/ras/ras_event.h  | 45 +++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 63 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index f9ffba6..21b8a6f 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -34,6 +34,7 @@
- #include <linux/aer.h>
- #include <linux/printk.h>
- #include <linux/bcd.h>
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index 36894c8..cb4c7f4 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -49,6 +49,7 @@
+ #include <acpi/ghes.h>
+ #include <acpi/apei.h>
+ #include <asm/tlbflush.h>
 +#include <ras/ras_event.h>
  
- #define INDENT_SP	" "
+ #ifdef CONFIG_HAVE_ACPI_APEI_SEA
+ #include <asm/system_misc.h>
+@@ -468,12 +469,21 @@ static void ghes_do_proc(struct ghes *ghes,
+ 	int sev, sec_sev;
+ 	struct acpi_hest_generic_data *gdata;
+ 	uuid_le sec_type;
++	uuid_le *fru_id;
++	char *fru_text = "";
  
-@@ -256,6 +257,14 @@ static void cper_print_proc_armv8(const char *pfx,
- 		    CPER_ARMV8_INFO_VALID_PHYSICAL_ADDR)
- 			printk("%sphysical fault address: 0x%016llx\n",
- 				newpfx, err_info->physical_fault_addr);
-+		trace_arm_event(proc->affinity_level, proc->mpidr, proc->midr,
-+				proc->running_state, proc->psci_state,
-+				err_info->version, err_info->type,
-+				err_info->multiple_error,
-+				err_info->validation_bits,
-+				err_info->error_info,
-+				err_info->virt_fault_addr,
-+				err_info->physical_fault_addr);
- 		err_info += 1;
+ 	sev = ghes_severity(estatus->error_severity);
+ 	apei_estatus_for_each_section(estatus, gdata) {
+ 		sec_sev = ghes_severity(gdata->error_severity);
+ 		sec_type = *(uuid_le *)gdata->section_type;
+ 
++		if (gdata->validation_bits & CPER_SEC_VALID_FRU_ID)
++			fru_id = (uuid_le *)gdata->fru_id;
++		else
++			fru_id = &NULL_UUID_LE;
++		if (gdata->validation_bits & CPER_SEC_VALID_FRU_TEXT)
++			fru_text = gdata->fru_text;
++
+ 		if (!uuid_le_cmp(sec_type,
+ 				 CPER_SEC_PLATFORM_MEM)) {
+ 			struct cper_sec_mem_err *mem_err;
+@@ -485,7 +495,7 @@ static void ghes_do_proc(struct ghes *ghes,
+ 			ghes_handle_memory_failure(gdata, sev);
+ 		}
+ #ifdef CONFIG_ACPI_APEI_PCIEAER
+-		else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
++		else if (!uuid_le_cmp(sec_type,
+ 				      CPER_SEC_PCIE)) {
+ 			struct cper_sec_pcie *pcie_err;
+ 
+@@ -518,6 +528,12 @@ static void ghes_do_proc(struct ghes *ghes,
+ 
+ 		}
+ #endif
++		else {
++			void *unknown_err = acpi_hest_generic_data_payload(gdata);
++			trace_unknown_sec_event(&sec_type,
++					fru_id, fru_text, sec_sev,
++					unknown_err, gdata->error_data_length);
++		}
  	}
+ }
  
 diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
-index fb2500b..8ba5a94 100644
+index b67dd36..fb2500b 100644
 --- a/drivers/ras/ras.c
 +++ b/drivers/ras/ras.c
-@@ -28,3 +28,4 @@ EXPORT_TRACEPOINT_SYMBOL_GPL(extlog_mem_event);
+@@ -27,3 +27,4 @@ subsys_initcall(ras_init);
+ EXPORT_TRACEPOINT_SYMBOL_GPL(extlog_mem_event);
  #endif
  EXPORT_TRACEPOINT_SYMBOL_GPL(mc_event);
- EXPORT_TRACEPOINT_SYMBOL_GPL(unknown_sec_event);
-+EXPORT_TRACEPOINT_SYMBOL_GPL(arm_event);
++EXPORT_TRACEPOINT_SYMBOL_GPL(unknown_sec_event);
 diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
-index 5861b6f..eb2719a 100644
+index 1791a12..5861b6f 100644
 --- a/include/ras/ras_event.h
 +++ b/include/ras/ras_event.h
-@@ -162,6 +162,73 @@ TRACE_EVENT(mc_event,
+@@ -162,6 +162,51 @@ TRACE_EVENT(mc_event,
  );
  
  /*
-+ * ARM Processor Events Report
++ * Unknown Section Report
 + *
-+ * This event is generated when hardware detects an ARM processor error
-+ * has occurred. UEFI 2.6 spec section N.2.4.4.
++ * This event is generated when hardware detected a hardware
++ * error event, which may be of non-standard section as defined
++ * in UEFI spec appendix "Common Platform Error Record", or may
++ * be of sections for which TRACE_EVENT is not defined.
++ *
 + */
-+TRACE_EVENT(arm_event,
++TRACE_EVENT(unknown_sec_event,
 +
-+	TP_PROTO(const u8 affinity,
-+		 const u64 mpidr,
-+		 const u64 midr,
-+		 const u32 running_state,
-+		 const u32 psci_state,
-+		 const u8 version,
-+		 const u8 type,
-+		 const u16 err_count,
-+		 const u8 flags,
-+		 const u64 info,
-+		 const u64 virt_fault_addr,
-+		 const u64 phys_fault_addr),
++	TP_PROTO(const uuid_le *sec_type,
++		 const uuid_le *fru_id,
++		 const char *fru_text,
++		 const u8 sev,
++		 const u8 *err,
++		 const u32 len),
 +
-+	TP_ARGS(affinity, mpidr, midr, running_state, psci_state,
-+		version, type, err_count, flags, info, virt_fault_addr,
-+		phys_fault_addr),
++	TP_ARGS(sec_type, fru_id, fru_text, sev, err, len),
 +
 +	TP_STRUCT__entry(
-+		__field(u8, affinity)
-+		__field(u64, mpidr)
-+		__field(u64, midr)
-+		__field(u32, running_state)
-+		__field(u32, psci_state)
-+		__field(u8, version)
-+		__field(u8, type)
-+		__field(u16, err_count)
-+		__field(u8, flags)
-+		__field(u64, info)
-+		__field(u64, virt_fault_addr)
-+		__field(u64, phys_fault_addr)
++		__array(char, sec_type, 16)
++		__array(char, fru_id, 16)
++		__string(fru_text, fru_text)
++		__field(u8, sev)
++		__field(u32, len)
++		__dynamic_array(u8, buf, len)
 +	),
 +
 +	TP_fast_assign(
-+		__entry->affinity = affinity;
-+		__entry->mpidr = mpidr;
-+		__entry->midr = midr;
-+		__entry->running_state = running_state;
-+		__entry->psci_state = psci_state;
-+		__entry->version = version;
-+		__entry->type = type;
-+		__entry->err_count = err_count;
-+		__entry->flags = flags;
-+		__entry->info = info;
-+		__entry->virt_fault_addr = virt_fault_addr;
-+		__entry->phys_fault_addr = phys_fault_addr;
++		memcpy(__entry->sec_type, sec_type, sizeof(uuid_le));
++		memcpy(__entry->fru_id, fru_id, sizeof(uuid_le));
++		__assign_str(fru_text, fru_text);
++		__entry->sev = sev;
++		__entry->len = len;
++		memcpy(__get_dynamic_array(buf), err, len);
 +	),
 +
-+	TP_printk("affinity level: %d; MPIDR: %016llx; MIDR: %016llx; "
-+		  "running state: %d; PSCI state: %d; version: %d; type: %d; "
-+		  "error count: 0x%04x; flags: 0x%02x; info: %016llx; "
-+		  "virtual fault address: %016llx; "
-+		  "physical fault address: %016llx",
-+		  __entry->affinity, __entry->mpidr, __entry->midr,
-+		  __entry->running_state, __entry->psci_state, __entry->version,
-+		  __entry->type, __entry->err_count, __entry->flags,
-+		  __entry->info, __entry->virt_fault_addr,
-+		  __entry->phys_fault_addr)
++	TP_printk("severity: %d; sec type:%pU; FRU: %pU %s; data len:%d; raw data:%s",
++		  __entry->sev, __entry->sec_type,
++		  __entry->fru_id, __get_str(fru_text),
++		  __entry->len,
++		  __print_hex(__get_dynamic_array(buf), __entry->len))
 +);
 +
 +/*
-  * Unknown Section Report
+  * PCIe AER Trace event
   *
-  * This event is generated when hardware detected a hardware
+  * These events are generated when hardware detects a corrected or
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project.
+
