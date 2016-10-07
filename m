@@ -1,137 +1,144 @@
-From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V3 10/10] arm64: KVM: add guest SEA support
-Date: Fri,  7 Oct 2016 15:31:22 -0600
-Message-ID: <1475875882-2604-11-git-send-email-tbaicar@codeaurora.org>
+From: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: [PATCH V3 09/10] trace, ras: add ARM processor error trace event
+Date: Fri,  7 Oct 2016 15:31:21 -0600
+Message-ID: <1475875882-2604-10-git-send-email-tbaicar@codeaurora.org>
 References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, Dkvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org
-Cc: Tyler Baicar <tbaicar@codeaurora.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1475875882-2604-1-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tomasz.nowicki-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, Dkvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org
+Cc: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Currently external aborts are unsupported by the guest abort
-handling. Add handling for SEAs so that the host kernel reports
-SEAs which occur in the guest kernel.
+Currently there are trace events for the various RAS
+errors with the exception of ARM processor type errors.
+Add a new trace event for such errors so that the user
+will know when they occur. These trace events are
+consistent with the ARM processor error section type
+defined in UEFI 2.6 spec section N.2.4.4.
 
-Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 ---
- arch/arm/include/asm/kvm_arm.h       |  1 +
- arch/arm/include/asm/system_misc.h   |  5 +++++
- arch/arm/kvm/mmu.c                   | 15 +++++++++++++--
- arch/arm64/include/asm/kvm_arm.h     |  1 +
- arch/arm64/include/asm/system_misc.h |  2 ++
- arch/arm64/mm/fault.c                | 13 +++++++++++++
- 6 files changed, 35 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/cper.c |  9 ++++++
+ drivers/ras/ras.c           |  1 +
+ include/ras/ras_event.h     | 67 +++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 77 insertions(+)
 
-diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
-index e22089f..33a77509 100644
---- a/arch/arm/include/asm/kvm_arm.h
-+++ b/arch/arm/include/asm/kvm_arm.h
-@@ -187,6 +187,7 @@
- #define FSC_FAULT	(0x04)
- #define FSC_ACCESS	(0x08)
- #define FSC_PERM	(0x0c)
-+#define FSC_EXTABT	(0x10)
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index f9ffba6..21b8a6f 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -34,6 +34,7 @@
+ #include <linux/aer.h>
+ #include <linux/printk.h>
+ #include <linux/bcd.h>
++#include <ras/ras_event.h>
  
- /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
- #define HPFAR_MASK	(~0xf)
-diff --git a/arch/arm/include/asm/system_misc.h b/arch/arm/include/asm/system_misc.h
-index a3d61ad..86e1faa 100644
---- a/arch/arm/include/asm/system_misc.h
-+++ b/arch/arm/include/asm/system_misc.h
-@@ -24,4 +24,9 @@ extern unsigned int user_debug;
+ #define INDENT_SP	" "
  
- #endif /* !__ASSEMBLY__ */
+@@ -256,6 +257,14 @@ static void cper_print_proc_armv8(const char *pfx,
+ 		    CPER_ARMV8_INFO_VALID_PHYSICAL_ADDR)
+ 			printk("%sphysical fault address: 0x%016llx\n",
+ 				newpfx, err_info->physical_fault_addr);
++		trace_arm_event(proc->affinity_level, proc->mpidr, proc->midr,
++				proc->running_state, proc->psci_state,
++				err_info->version, err_info->type,
++				err_info->multiple_error,
++				err_info->validation_bits,
++				err_info->error_info,
++				err_info->virt_fault_addr,
++				err_info->physical_fault_addr);
+ 		err_info += 1;
+ 	}
  
-+inline int handle_guest_sea(unsigned long addr, unsigned int esr)
-+{
-+	return -1;
-+}
-+
- #endif /* __ASM_ARM_SYSTEM_MISC_H */
-diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
-index e9a5c0e..24cde84 100644
---- a/arch/arm/kvm/mmu.c
-+++ b/arch/arm/kvm/mmu.c
-@@ -29,6 +29,7 @@
- #include <asm/kvm_asm.h>
- #include <asm/kvm_emulate.h>
- #include <asm/virt.h>
-+#include <asm/system_misc.h>
- 
- #include "trace.h"
- 
-@@ -1441,8 +1442,18 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
- 
- 	/* Check the stage-2 fault is trans. fault or write fault */
- 	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
--	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
--	    fault_status != FSC_ACCESS) {
-+
-+	if (fault_status == FSC_EXTABT) {
-+		if(handle_guest_sea((unsigned long)fault_ipa,
-+				    kvm_vcpu_get_hsr(vcpu))) {
-+			kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
-+				kvm_vcpu_trap_get_class(vcpu),
-+				(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
-+				(unsigned long)kvm_vcpu_get_hsr(vcpu));
-+			return -EFAULT;
-+		}
-+	} else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
-+		   fault_status != FSC_ACCESS) {
- 		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
- 			kvm_vcpu_trap_get_class(vcpu),
- 			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
-diff --git a/arch/arm64/include/asm/kvm_arm.h b/arch/arm64/include/asm/kvm_arm.h
-index 4b5c977..be0efb6 100644
---- a/arch/arm64/include/asm/kvm_arm.h
-+++ b/arch/arm64/include/asm/kvm_arm.h
-@@ -201,6 +201,7 @@
- #define FSC_FAULT	ESR_ELx_FSC_FAULT
- #define FSC_ACCESS	ESR_ELx_FSC_ACCESS
- #define FSC_PERM	ESR_ELx_FSC_PERM
-+#define FSC_EXTABT	ESR_ELx_FSC_EXTABT
- 
- /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
- #define HPFAR_MASK	(~UL(0xf))
-diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
-index 90daf4a..8522fff 100644
---- a/arch/arm64/include/asm/system_misc.h
-+++ b/arch/arm64/include/asm/system_misc.h
-@@ -77,4 +77,6 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
- int sea_register_handler_chain(struct notifier_block *nb);
- void sea_unregister_handler_chain(struct notifier_block *nb);
- 
-+int handle_guest_sea(unsigned long addr, unsigned int esr);
-+
- #endif	/* __ASM_SYSTEM_MISC_H */
-diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-index 81cb7ad..d714432 100644
---- a/arch/arm64/mm/fault.c
-+++ b/arch/arm64/mm/fault.c
-@@ -597,6 +597,19 @@ static const char *fault_name(unsigned int esr)
- }
+diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
+index fb2500b..8ba5a94 100644
+--- a/drivers/ras/ras.c
++++ b/drivers/ras/ras.c
+@@ -28,3 +28,4 @@ EXPORT_TRACEPOINT_SYMBOL_GPL(extlog_mem_event);
+ #endif
+ EXPORT_TRACEPOINT_SYMBOL_GPL(mc_event);
+ EXPORT_TRACEPOINT_SYMBOL_GPL(unknown_sec_event);
++EXPORT_TRACEPOINT_SYMBOL_GPL(arm_event);
+diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
+index 5861b6f..eb2719a 100644
+--- a/include/ras/ras_event.h
++++ b/include/ras/ras_event.h
+@@ -162,6 +162,73 @@ TRACE_EVENT(mc_event,
+ );
  
  /*
-+ * Handle Synchronous External Aborts that occur in a guest kernel.
++ * ARM Processor Events Report
++ *
++ * This event is generated when hardware detects an ARM processor error
++ * has occurred. UEFI 2.6 spec section N.2.4.4.
 + */
-+int handle_guest_sea(unsigned long addr, unsigned int esr)
-+{
-+	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
++TRACE_EVENT(arm_event,
 +
-+	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
-+		fault_name(esr), esr, addr);
++	TP_PROTO(const u8 affinity,
++		 const u64 mpidr,
++		 const u64 midr,
++		 const u32 running_state,
++		 const u32 psci_state,
++		 const u8 version,
++		 const u8 type,
++		 const u16 err_count,
++		 const u8 flags,
++		 const u64 info,
++		 const u64 virt_fault_addr,
++		 const u64 phys_fault_addr),
 +
-+	return 0;
-+}
++	TP_ARGS(affinity, mpidr, midr, running_state, psci_state,
++		version, type, err_count, flags, info, virt_fault_addr,
++		phys_fault_addr),
++
++	TP_STRUCT__entry(
++		__field(u8, affinity)
++		__field(u64, mpidr)
++		__field(u64, midr)
++		__field(u32, running_state)
++		__field(u32, psci_state)
++		__field(u8, version)
++		__field(u8, type)
++		__field(u16, err_count)
++		__field(u8, flags)
++		__field(u64, info)
++		__field(u64, virt_fault_addr)
++		__field(u64, phys_fault_addr)
++	),
++
++	TP_fast_assign(
++		__entry->affinity = affinity;
++		__entry->mpidr = mpidr;
++		__entry->midr = midr;
++		__entry->running_state = running_state;
++		__entry->psci_state = psci_state;
++		__entry->version = version;
++		__entry->type = type;
++		__entry->err_count = err_count;
++		__entry->flags = flags;
++		__entry->info = info;
++		__entry->virt_fault_addr = virt_fault_addr;
++		__entry->phys_fault_addr = phys_fault_addr;
++	),
++
++	TP_printk("affinity level: %d; MPIDR: %016llx; MIDR: %016llx; "
++		  "running state: %d; PSCI state: %d; version: %d; type: %d; "
++		  "error count: 0x%04x; flags: 0x%02x; info: %016llx; "
++		  "virtual fault address: %016llx; "
++		  "physical fault address: %016llx",
++		  __entry->affinity, __entry->mpidr, __entry->midr,
++		  __entry->running_state, __entry->psci_state, __entry->version,
++		  __entry->type, __entry->err_count, __entry->flags,
++		  __entry->info, __entry->virt_fault_addr,
++		  __entry->phys_fault_addr)
++);
 +
 +/*
-  * Dispatch a data abort to the relevant handler.
-  */
- asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
+  * Unknown Section Report
+  *
+  * This event is generated when hardware detected a hardware
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project.
-
