@@ -1,139 +1,173 @@
-From: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: [PATCH V3 00/10] Add UEFI 2.6 and ACPI 6.1 updates for RAS on ARM64
-Date: Fri,  7 Oct 2016 15:31:12 -0600
-Message-ID: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tomasz.nowicki-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, Dkvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org
-Cc: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+From: Tyler Baicar <tbaicar@codeaurora.org>
+Subject: [PATCH V3 01/10] acpi: apei: read ack upon ghes record consumption
+Date: Fri,  7 Oct 2016 15:31:13 -0600
+Message-ID: <1475875882-2604-2-git-send-email-tbaicar@codeaurora.org>
+References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, Dkvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org
+Cc: Tyler Baicar <tbaicar@codeaurora.org>, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, Richard Ruigrok <rruigrok@codeaurora.org>, Naveen Kaje <nkaje@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-When a memory error, CPU error, PCIe error, or other type of hardware error
-that's covered by RAS occurs, firmware should populate the shared GHES memory
-location with the proper GHES structures to notify the OS of the error.
-For example, platforms that implement firmware first handling may implement
-separate GHES sources for corrected errors and uncorrected errors. If the
-error is an uncorrectable error, then the firmware will notify the OS
-immediately since the error needs to be handled ASAP. The OS will then be able
-to take the appropriate action needed such as offlining a page. If the error
-is a corrected error, then the firmware will not interrupt the OS immediately.
-Instead, the OS will see and report the error the next time it's GHES timer
-expires. The kernel will first parse the GHES structures and report the errors
-through the kernel logs and then notify the user space through RAS trace
-events. This allows user space applications such as RAS Daemon to see the
-errors and report them however the user desires. This patchset extends the
-kernel functionality for RAS errors based on updates in the UEFI 2.6 and
-ACPI 6.1 specifications.
+A RAS (Reliability, Availability, Serviceability) controller
+may be a separate processor running in parallel with OS
+execution, and may generate error records for consumption by
+the OS. If the RAS controller produces multiple error records,
+then they may be overwritten before the OS has consumed them.
 
-An example flow from firmware to user space could be:
+The Generic Hardware Error Source (GHES) v2 structure
+introduces the capability for the OS to acknowledge the
+consumption of the error record generated by the RAS
+controller. A RAS controller supporting GHESv2 shall wait for
+the acknowledgment before writing a new error record, thus
+eliminating the race condition.
 
-                 +---------------+
-       +-------->|               |
-       |         |  GHES polling |--+
-+-------------+  |    source     |  |   +---------------+   +------------+
-|             |  +---------------+  |   |  Kernel GHES  |   |            |
-|  Firmware   |                     +-->|  CPER AER and |-->|  RAS trace |
-|             |  +---------------+  |   |  EDAC drivers |   |   event    |
-+-------------+  |               |  |   +---------------+   +------------+
-       |         |  GHES sci     |--+
-       +-------->|   source      |
-                 +---------------+
+Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+Signed-off-by: Richard Ruigrok <rruigrok@codeaurora.org>
+Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+---
+ drivers/acpi/apei/ghes.c | 41 +++++++++++++++++++++++++++++++++++++++++
+ drivers/acpi/apei/hest.c |  7 +++++--
+ include/acpi/ghes.h      |  1 +
+ 3 files changed, 47 insertions(+), 2 deletions(-)
 
-Add support for Generic Hardware Error Source (GHES) v2, which introduces the
-capability for the OS to acknowledge the consumption of the error record
-generated by the Reliability, Availability and Serviceability (RAS) controller.
-This eliminates potential race conditions between the OS and the RAS controller.
-
-Add support for the timestamp field added to the Generic Error Data Entry v3,
-allowing the OS to log the time that the error is generated by the firmware,
-rather than the time the error is consumed. This improves the correctness of
-event sequences when analyzing error logs. The timestamp is added in
-ACPI 6.1, reference Table 18-343 Generic Error Data Entry.
-
-Add support for ARMv8 Common Platform Error Record (CPER) per UEFI 2.6
-specification. ARMv8 specific processor error information is reported as part of
-the CPER records.  This provides more detail on for processor error logs. This
-can help describe ARMv8 cache, tlb, and bus errors.
-
-Synchronous External Abort (SEA) represents a specific processor error condition
-in ARM systems. A handler is added to recognize SEA errors, and a notifier is
-added to parse and report the errors before the process is killed. Refer to
-section N.2.1.1 in the Common Platform Error Record appendix of the UEFI 2.6
-specification.
-
-Currently the kernel ignores CPER records that are unrecognized.
-On the other hand, UEFI spec allows for non-standard (eg. vendor
-proprietary) error section type in CPER (Common Platform Error Record),
-as defined in section N2.3 of UEFI version 2.5. Therefore, user
-is not able to see hardware error data of non-standard section.
-
-If section Type field of Generic Error Data Entry is unrecognized,
-prints out the raw data in dmesg buffer, and also adds a tracepoint
-for reporting such hardware errors.
-
-Currently even if an error status block's severity is fatal, the kernel
-does not honor the severity level and panic. With the firmware first
-model, the platform could inform the OS about a fatal hardware error
-through the non-NMI GHES notification type. The OS should panic when a
-hardware error record is received with this severity.
-
-Add support to handle SEAs that occur while a KVM guest kernel is
-running. Currently these are unsupported by the guest abort handling.
-
-Depends on: [PATCH v14] acpi, apei, arm64: APEI initial support for aarch64.
-            https://lkml.org/lkml/2016/8/10/231
-
-V3: Fix unmapped address to the read_ack_register in ghes.c
-    Add helper function to get the proper payload based on generic data entry
-     version
-    Move timestamp print to avoid changing function calls in cper.c
-    Remove patch "arm64: exception: handle instruction abort at current EL"
-     since the el1_ia handler is already added in 4.8
-    Add EFI and ARM64 dependencies for HAVE_ACPI_APEI_SEA
-    Add a new trace event for ARM type errors
-    Add support to handle KVM guest SEAs
-
-V2: Add PSCI state print for the ARMv8 error type.
-    Separate timestamp year into year and century using BCD format.
-    Rebase on top of ACPICA 20160318 release and remove header file changes
-     in include/acpi/actbl1.h.
-    Add panic OS with fatal error status block patch.
-    Add processing of unrecognized CPER error section patches with updates
-     from previous comments. Original patches: https://lkml.org/lkml/2015/9/8/646
-
-V1: https://lkml.org/lkml/2016/2/5/544
-
-Jonathan (Zhixiong) Zhang (1):
-  acpi: apei: panic OS with fatal error status block
-
-Tyler Baicar (9):
-  acpi: apei: read ack upon ghes record consumption
-  ras: acpi/apei: cper: generic error data entry v3 per ACPI 6.1
-  efi: parse ARMv8 processor error
-  arm64: exception: handle Synchronous External Abort
-  acpi: apei: handle SEA notification type for ARMv8
-  efi: print unrecognized CPER section
-  ras: acpi / apei: generate trace event for unrecognized CPER section
-  trace, ras: add ARM processor error trace event
-  arm64: KVM: add guest SEA support
-
- arch/arm/include/asm/kvm_arm.h       |   1 +
- arch/arm/include/asm/system_misc.h   |   5 +
- arch/arm/kvm/mmu.c                   |  15 ++-
- arch/arm64/Kconfig                   |   1 +
- arch/arm64/include/asm/kvm_arm.h     |   1 +
- arch/arm64/include/asm/system_misc.h |  15 +++
- arch/arm64/mm/fault.c                |  71 ++++++++--
- drivers/acpi/apei/Kconfig            |  15 +++
- drivers/acpi/apei/ghes.c             | 177 +++++++++++++++++++++++-
- drivers/acpi/apei/hest.c             |   7 +-
- drivers/firmware/efi/cper.c          | 252 ++++++++++++++++++++++++++++++++---
- drivers/ras/ras.c                    |   2 +
- include/acpi/ghes.h                  |   1 +
- include/linux/cper.h                 |  72 ++++++++++
- include/ras/ras_event.h              | 112 ++++++++++++++++
- 15 files changed, 711 insertions(+), 36 deletions(-)
-
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index 60746ef..3021f0e 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -45,6 +45,7 @@
+ #include <linux/aer.h>
+ #include <linux/nmi.h>
+ 
++#include <acpi/actbl1.h>
+ #include <acpi/ghes.h>
+ #include <acpi/apei.h>
+ #include <asm/tlbflush.h>
+@@ -244,10 +245,22 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+ 	struct ghes *ghes;
+ 	unsigned int error_block_length;
+ 	int rc;
++	struct acpi_hest_header *hest_hdr;
+ 
+ 	ghes = kzalloc(sizeof(*ghes), GFP_KERNEL);
+ 	if (!ghes)
+ 		return ERR_PTR(-ENOMEM);
++
++	hest_hdr = (struct acpi_hest_header *)generic;
++	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR_V2) {
++		ghes->generic_v2 = (struct acpi_hest_generic_v2 *)generic;
++		rc = apei_map_generic_address(
++			&ghes->generic_v2->read_ack_register);
++		if (rc)
++			goto err_unmap;
++	} else
++		ghes->generic_v2 = NULL;
++
+ 	ghes->generic = generic;
+ 	rc = apei_map_generic_address(&generic->error_status_address);
+ 	if (rc)
+@@ -270,6 +283,9 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+ 
+ err_unmap:
+ 	apei_unmap_generic_address(&generic->error_status_address);
++	if (ghes->generic_v2)
++		apei_unmap_generic_address(
++			&ghes->generic_v2->read_ack_register);
+ err_free:
+ 	kfree(ghes);
+ 	return ERR_PTR(rc);
+@@ -279,6 +295,9 @@ static void ghes_fini(struct ghes *ghes)
+ {
+ 	kfree(ghes->estatus);
+ 	apei_unmap_generic_address(&ghes->generic->error_status_address);
++	if (ghes->generic_v2)
++		apei_unmap_generic_address(
++			&ghes->generic_v2->read_ack_register);
+ }
+ 
+ static inline int ghes_severity(int severity)
+@@ -648,6 +667,22 @@ static void ghes_estatus_cache_add(
+ 	rcu_read_unlock();
+ }
+ 
++static int ghes_do_read_ack(struct acpi_hest_generic_v2 *generic_v2)
++{
++	int rc;
++	u64 val = 0;
++
++	rc = apei_read(&val, &generic_v2->read_ack_register);
++	if (rc)
++		return rc;
++	val &= generic_v2->read_ack_preserve <<
++		generic_v2->read_ack_register.bit_offset;
++	val |= generic_v2->read_ack_write;
++	rc = apei_write(val, &generic_v2->read_ack_register);
++
++	return rc;
++}
++
+ static int ghes_proc(struct ghes *ghes)
+ {
+ 	int rc;
+@@ -660,6 +695,12 @@ static int ghes_proc(struct ghes *ghes)
+ 			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+ 	}
+ 	ghes_do_proc(ghes, ghes->estatus);
++
++	if (ghes->generic_v2) {
++		rc = ghes_do_read_ack(ghes->generic_v2);
++		if (rc)
++			return rc;
++	}
+ out:
+ 	ghes_clear_estatus(ghes);
+ 	return 0;
+diff --git a/drivers/acpi/apei/hest.c b/drivers/acpi/apei/hest.c
+index 792a0d9..ef725a9 100644
+--- a/drivers/acpi/apei/hest.c
++++ b/drivers/acpi/apei/hest.c
+@@ -52,6 +52,7 @@ static const int hest_esrc_len_tab[ACPI_HEST_TYPE_RESERVED] = {
+ 	[ACPI_HEST_TYPE_AER_ENDPOINT] = sizeof(struct acpi_hest_aer),
+ 	[ACPI_HEST_TYPE_AER_BRIDGE] = sizeof(struct acpi_hest_aer_bridge),
+ 	[ACPI_HEST_TYPE_GENERIC_ERROR] = sizeof(struct acpi_hest_generic),
++	[ACPI_HEST_TYPE_GENERIC_ERROR_V2] = sizeof(struct acpi_hest_generic_v2),
+ };
+ 
+ static int hest_esrc_len(struct acpi_hest_header *hest_hdr)
+@@ -146,7 +147,8 @@ static int __init hest_parse_ghes_count(struct acpi_hest_header *hest_hdr, void
+ {
+ 	int *count = data;
+ 
+-	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR)
++	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR ||
++	    hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+ 		(*count)++;
+ 	return 0;
+ }
+@@ -157,7 +159,8 @@ static int __init hest_parse_ghes(struct acpi_hest_header *hest_hdr, void *data)
+ 	struct ghes_arr *ghes_arr = data;
+ 	int rc, i;
+ 
+-	if (hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR)
++	if (hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR &&
++	    hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+ 		return 0;
+ 
+ 	if (!((struct acpi_hest_generic *)hest_hdr)->enabled)
+diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+index 720446c..d0108b6 100644
+--- a/include/acpi/ghes.h
++++ b/include/acpi/ghes.h
+@@ -14,6 +14,7 @@
+ 
+ struct ghes {
+ 	struct acpi_hest_generic *generic;
++	struct acpi_hest_generic_v2 *generic_v2;
+ 	struct acpi_hest_generic_status *estatus;
+ 	u64 buffer_paddr;
+ 	unsigned long flags;
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
