@@ -1,54 +1,39 @@
-From: David Daney <ddaney.cavm@gmail.com>
-Subject: Re: [PATCH] arm64: mm: Fix memmap to be initialized for the entire
- section
-Date: Mon, 10 Oct 2016 08:33:50 -0700
-Message-ID: <57FBB4DE.2090502@gmail.com>
-References: <1475747527-32387-1-git-send-email-rrichter@cavium.com>
+From: natalikuz06-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Subject: =?UTF-8?B?0KXQvtGH0YMg0L/RgNC10LTQu9C+0LbQuNGC0Ywg0YPRgdC70YPQs9C4INC/0L4g0L/Qvg==?=
+        =?UTF-8?B?0LTQs9C+0YLQvtCy0LrQtSDRgdGC0LDRgtC10Lk=?=
+Date: Tue, 11 Oct 2016 06:00:08 +0000
+Message-ID: <94eb2c0833e6bdec3b053e9096df@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1475747527-32387-1-git-send-email-rrichter@cavium.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Robert Richter <rrichter@cavium.com>
-Cc: Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Mark Rutland <mark.rutland@arm.com>, linux-efi@vger.kernel.org, David Daney <david.daney@cavium.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Hanjun Guo <hanjun.guo@linaro.org>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8; format=flowed; delsp=yes
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 10/06/2016 02:52 AM, Robert Richter wrote:
-> There is a memory setup problem on ThunderX systems with certain
-> memory configurations. The symptom is
->
->   kernel BUG at mm/page_alloc.c:1848!
->
-> This happens for some configs with 64k page size enabled. The bug
-> triggers for page zones with some pages in the zone not assigned to
-> this particular zone. In my case some pages that are marked as nomap
-> were not reassigned to the new zone of node 1, so those are still
-> assigned to node 0.
->
-> The reason for the mis-configuration is a change in pfn_valid() which
-> reports pages marked nomap as invalid:
->
->   68709f45385a arm64: only consider memblocks with NOMAP cleared for linear mapping
->
-> This causes pages marked as nomap being no long reassigned to the new
-> zone in memmap_init_zone() by calling __init_single_pfn().
->
-> Fixing this by restoring the old behavior of pfn_valid() to use
-> memblock_is_memory(). Also changing users of pfn_valid() in arm64 code
-> to use memblock_is_map_memory() where necessary. This only affects
-> code in ioremap.c. The code in mmu.c still can use the new version of
-> pfn_valid().
->
-> Should be marked stable v4.5..
-
-In that case you should add:
-
-Cc: <stable@vger.kernel.org> # 4.5.x-
-
-here.
-
-
->
-> Signed-off-by: Robert Richter <rrichter@cavium.com>
-[...]
+0JfQtNGA0LDQstGB0YLQstGD0LnRgtC1IQ0KDQrQn9GA0LjRj9GC0L3QviDQv9C+0LfQvdCw0LrQ
+vtC80LjRgtGM0YHRjywg0Y8gLSDQndCw0YLQsNC70YzRjy4g0K8g0L/RgNC+0YTQtdGB0YHQuNC+
+0L3QsNC70YzQvdC+INC30LDQvdC40LzQsNGO0YHRjCDQutC+0L/QuNGA0LDQudGC0L7QvCAgDQrQ
+uCDRgNC10YDQsNC50YLQvtC8LiDQkiDQtNCw0L3QvdC+0Lwg0L3QsNC/0YDQsNCy0LvQtdC90LjQ
+uCDQv9GA0LjQvNC10YDQvdC+IDYg0LvQtdGCLiDQn9GA0LXQtNC70LDQs9Cw0Y4g0JLQsNC8ICAN
+CtGB0L7RgtGA0YPQtNC90LjRh9C10YHRgtCy0L4g0L/QviDQv9GA0L7QtNCy0LjQttC10L3QuNGO
+INC/0L7RgNGC0LDQu9CwLCDQv9GA0LjQvdCw0LTQu9C10LbQsNGJ0LXQs9C+INCS0LDQvC4g0J/R
+gNC+0LTQstC40LbQtdC90LjQtSAgDQrQv9GA0L7QuNC30LLQvtC00LjRgtGB0Y8g0YEg0LjRgdC/
+0L7Qu9GM0LfQvtCy0LDQvdC40LXQvCBTRU8t0YLQtdC60YHRgtC+0LIuINCh0LXQudGH0LDRgSDQ
+vdC10LzQvdC+0LPQviDRgNCw0YHRgdC60LDQttGDINC+INGC0L7QvCwgIA0K0YfQtdC8INC30LDQ
+vdC40LzQsNGO0YHRjC4g0K8g0YHQvtGB0YLQsNCy0LvRj9GOIFNFTy3RgtC10LrRgdGC0YssINGA
+0LXRgNCw0LnRgiwg0LrQvtC/0LjRgNCw0LnRgiwg0LrQvtC90YLQtdC90YIg0L/RgNC+0YfQtdCz
+0L4gIA0K0LLQuNC00LAuINCU0LvRjyDRgNCw0LHQvtGCINCy0L/QuNGB0YvQstCw0Y4g0LrQu9GO
+0YfQtdCy0LjQutC4LiDQn9C+0LzQuNC80L4g0LLRgdC10LPQviDQv9GA0L7Rh9C10LPQviwg0LzQ
+vtCz0YMg0LjRgdC/0L7Qu9GM0LfQvtCy0LDRgtGMICANCtGB0LXQvNCw0L3RgtC40LrRgywg0L/R
+gNC10LTQvtGB0YLQsNCy0LvQtdC90L3Rg9GOINCS0LDQvNC4LCDQu9C40LHQviDQt9Cw0L3QuNC8
+0LDRgtGM0YHRjyDQv9C+0LTQsdC+0YDQvtC8INC60LvRjtGH0LXQstC40LrQvtCyICANCtGB0LDQ
+vNC+0YHRgtC+0Y/RgtC10LvRjNC90L4uDQoNCtCc0L7Qs9GDLCDRgSDQktCw0YjQtdCz0L4g0L/Q
+vtC30LLQvtC70LXQvdC40Y8sINC/0YDQvtC40L3RhNC+0YDQvNC40YDQvtCy0LDRgtGMINC+INGC
+0L7QvCwg0YfQtdC8INC30LDQvdC40LzQsNGO0YHRjCwg0L/QvtC00YDQvtCx0L3QtdC5ICANCtCy
+INGB0LvQtdC00YPRjtGJ0LXQvCDQv9C40YHRjNC80LUg0Lgg0L/QvtC60LDQt9Cw0YLRjCDQv9GA
+0LjQvNC10YDRiyDRg9C20LUg0L3QsNC/0LjRgdCw0L3QvdGL0YUg0YLQtdC60YHRgtC+0LIgINC4
+INGB0YLQvtC40LzQvtGB0YLRjC4gIA0K0KLRgNC10LHRg9C10YLRgdGPINC70Lgg0JLQsNC8INGD
+0LLQtdC70LjRh9C10L3QuNC1INC/0L7RgdC10YnQsNC10LzQvtGB0YLQuCDRgdCw0LnRgtCwPw0K
+DQrQoSDRg9Cy0LDQttC10L3QuNC10LwsDQrQmtGD0LfQvdC10YbQvtCy0LAg0J3QsNGC0LDRiNCw
+DQo=
