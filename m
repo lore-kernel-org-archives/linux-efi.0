@@ -1,104 +1,54 @@
-From: Russell King - ARM Linux <linux@armlinux.org.uk>
-Subject: Re: [PATCH V3 02/10] ras: acpi/apei: cper: generic error data entry
- v3 per ACPI 6.1
-Date: Tue, 11 Oct 2016 19:52:36 +0100
-Message-ID: <20161011185236.GC1041@n2100.armlinux.org.uk>
-References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
- <1475875882-2604-3-git-send-email-tbaicar@codeaurora.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efi: Use LocateHandleBuffer instead of LocateHandle
+Date: Wed, 12 Oct 2016 13:35:34 +0100
+Message-ID: <CAKv+Gu9bQY-uoY8ra_BFgPUnLaoCDjA-Nu+1O75Mx8QRA2VqrA@mail.gmail.com>
+References: <1d7915dc0dd328ca04088f6b8b3fcfad5cec55a0.1473275006.git.lukas@wunner.de>
+ <CAKv+Gu_kfnHfiBH__Wnvh39KMPj_-s39YyY=pT3roNv7iPPzrA@mail.gmail.com>
+ <20160909115951.GA29385@wunner.de> <20161003193220.GI16071@codeblueprint.co.uk>
+ <CAKv+Gu-UKr0bPjy_0tO0ThB6F4E1q-uKtktg+z5CRP=gX-oewg@mail.gmail.com>
+ <20161004165349.GA5019@wunner.de> <CAKv+Gu-6yB_ZVC38S8yFZtB7vPfDZe1wp47bT+WxwpSSUN4OgA@mail.gmail.com>
+ <20161006093200.GA6925@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1475875882-2604-3-git-send-email-tbaicar@codeaurora.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, Richard Ruigrok <rruigrok@codeaurora.org>, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, robert.moore@intel.com, linux-acpi@vger.kernel.org, shijie.huang@arm.com, lenb@kernel.org, marc.zyngier@arm.com, tomasz.nowicki@linaro.org, Naveen Kaje <nkaje@codeaurora.org>, rostedt@goodmis.org, sandeepa.s.prabhu@gmail.com, Dkvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, linux-kernel@vger.kernel.org, james.morse@arm.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, christoffer.dall@linaro.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20161006093200.GA6925-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Oct 07, 2016 at 03:31:14PM -0600, Tyler Baicar wrote:
-> +static void cper_estatus_print_section_v300(const char *pfx,
-> +	const struct acpi_hest_generic_data_v300 *gdata)
-> +{
-> +	__u8 hour, min, sec, day, mon, year, century, *timestamp;
-> +
-> +	if (gdata->validation_bits & ACPI_HEST_GEN_VALID_TIMESTAMP) {
-> +		timestamp = (__u8 *)&(gdata->time_stamp);
-> +		memcpy(&sec, timestamp, 1);
-> +		memcpy(&min, timestamp + 1, 1);
-> +		memcpy(&hour, timestamp + 2, 1);
-> +		memcpy(&day, timestamp + 4, 1);
-> +		memcpy(&mon, timestamp + 5, 1);
-> +		memcpy(&year, timestamp + 6, 1);
-> +		memcpy(&century, timestamp + 7, 1);
+On 6 October 2016 at 10:32, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
+> On Fri, Sep 09, 2016 at 11:52:32AM +0100, Ard Biesheuvel wrote:
+>> What is the oldest UEFI version we claim to support? For ARM, this is
+>> not an issue, but it appears that LocateHandleBuffer () was introduced
+>> in v1.10
+>
+> UGA was apparently introduced with v1.10, GOP was introduced later
+> than v1.10, it follows that availability of LocateHandleBuffer()
+> can be assumed at least when searching for these two protocols.
+>
+> Would a patch be entertained which uses LocateHandleBuffer for these
+> two but leaves the PCI ROM retrieval unchanged?
+>
 
-This is utterly silly.  Why are you using memcpy() to access individual
-bytes of a u8 pointer?  What's wrong with:
+Thanks, but no thanks.
 
-		sec = timestamp[0];
-		min = timestamp[1];
-		hour = timestamp[2];
-		day = timestamp[4];
-		mon = timestamp[5];
-		year = timestamp[6];
-		century = timestamp[7];
+> On Wed, Oct 05, 2016 at 05:25:44PM +0100, Ard Biesheuvel wrote:
+>> However, we've had our share of breakage with
+>> the stub code, which is difficult to debug on anything except
+>> development hardware, and so I think we should not take this change
+>> (and Matt appears to agree).
+>
+> Thanks for the clarification, however I don't quite follow:
+> Is the rejection of the patch based on the intent to maintain
+> support for EFI v1.0+ (which isn't an argument for UGA + GOP
+> as lined out above) or is it based on a gut feeling that the
+> patch might cause breakage for whatever reason.
+> (Perhaps firmware bugs?  Not sure what is meant here.)
+>
 
-or even do the conversion here:
-
-		sec = bcd2bin(timestamp[0]);
-... etc ...
-
-> +		printk("%stime: ", pfx);
-> +		printk("%7s", 0x01 & *(timestamp + 3) ? "precise" : "");
-> +		printk(" %02d:%02d:%02d %02d%02d-%02d-%02d\n",
-> +			bcd2bin(hour), bcd2bin(min), bcd2bin(sec),
-> +			bcd2bin(century), bcd2bin(year), bcd2bin(mon),
-> +			bcd2bin(day));
-> +	}
-
-It's also a good idea to (as much as possible) keep to single printk()
-statements - which makes the emission of the string more atomic wrt
-other CPUs and contexts.  So, this should probably become (with the
-conversion being done at the assignment of sec etc):
-
-		printk("%stime: %7s %02d:%02d:%02d %02d%02d-%02d-%02d\n",
-			pfx, 0x01 & timestamp[3] ? "precise" : "",
-			hour, min, sec, century, year, mon, day);
-
-which, IMHO, looks a lot nicer and doesn't risk some other printk()
-getting between each individual part of the line.
-
-> +}
-> +
->  static void cper_estatus_print_section(
-> -	const char *pfx, const struct acpi_hest_generic_data *gdata, int sec_no)
-> +	const char *pfx, struct acpi_hest_generic_data *gdata, int sec_no)
->  {
->  	uuid_le *sec_type = (uuid_le *)gdata->section_type;
->  	__u16 severity;
->  	char newpfx[64];
->  
-> +	if ((gdata->revision >> 8) >= 0x03)
-> +		cper_estatus_print_section_v300(pfx,
-> +			(const struct acpi_hest_generic_data_v300 *)gdata);
-> +
->  	severity = gdata->error_severity;
->  	printk("%s""Error %d, type: %s\n", pfx, sec_no,
->  	       cper_severity_str(severity));
-
-Not sure why you have the "" here - %sError works just as well and the
-"" is just obfuscation - the compiler will eliminate the double-double
-quote and merge the strings anyway.
-
--- 
-RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
+The fact that LocateHandleBuffer() should be implemented by fairly old
+versions of UEFI does not guarantee that all UEFI systems that we
+currently support implement it correctly. So in that sense, we face a
+non-zero risk of regressions, which is not justifiable for a simple
+code cleanup.
