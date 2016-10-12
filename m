@@ -1,54 +1,206 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi: Use LocateHandleBuffer instead of LocateHandle
-Date: Wed, 12 Oct 2016 13:35:34 +0100
-Message-ID: <CAKv+Gu9bQY-uoY8ra_BFgPUnLaoCDjA-Nu+1O75Mx8QRA2VqrA@mail.gmail.com>
-References: <1d7915dc0dd328ca04088f6b8b3fcfad5cec55a0.1473275006.git.lukas@wunner.de>
- <CAKv+Gu_kfnHfiBH__Wnvh39KMPj_-s39YyY=pT3roNv7iPPzrA@mail.gmail.com>
- <20160909115951.GA29385@wunner.de> <20161003193220.GI16071@codeblueprint.co.uk>
- <CAKv+Gu-UKr0bPjy_0tO0ThB6F4E1q-uKtktg+z5CRP=gX-oewg@mail.gmail.com>
- <20161004165349.GA5019@wunner.de> <CAKv+Gu-6yB_ZVC38S8yFZtB7vPfDZe1wp47bT+WxwpSSUN4OgA@mail.gmail.com>
- <20161006093200.GA6925@wunner.de>
+From: Punit Agrawal <punit.agrawal@arm.com>
+Subject: Re: [PATCH V3 01/10] acpi: apei: read ack upon ghes record consumption
+Date: Wed, 12 Oct 2016 16:39:25 +0100
+Message-ID: <8760oxtw42.fsf@e105922-lin.cambridge.arm.com>
+References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
+ <1475875882-2604-2-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161006093200.GA6925-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <1475875882-2604-2-git-send-email-tbaicar@codeaurora.org> (Tyler
+ Baicar's message of "Fri, 7 Oct 2016 15:31:13 -0600")
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: linux-efi@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, shijie.huang@arm.com, lenb@kernel.org, marc.zyngier@arm.com, tomasz.nowicki@linaro.org, Naveen Kaje <nkaje@codeaurora.org>, rostedt@goodmis.org, sandeepa.s.prabhu@gmail.com, Dkvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, linux-kernel@vger.kernel.org, Richard Ruigrok <rruigrok@codeaurora.org>, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On 6 October 2016 at 10:32, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
-> On Fri, Sep 09, 2016 at 11:52:32AM +0100, Ard Biesheuvel wrote:
->> What is the oldest UEFI version we claim to support? For ARM, this is
->> not an issue, but it appears that LocateHandleBuffer () was introduced
->> in v1.10
->
-> UGA was apparently introduced with v1.10, GOP was introduced later
-> than v1.10, it follows that availability of LocateHandleBuffer()
-> can be assumed at least when searching for these two protocols.
->
-> Would a patch be entertained which uses LocateHandleBuffer for these
-> two but leaves the PCI ROM retrieval unchanged?
->
+Hi Tyler,
 
-Thanks, but no thanks.
+A few comments below.
 
-> On Wed, Oct 05, 2016 at 05:25:44PM +0100, Ard Biesheuvel wrote:
->> However, we've had our share of breakage with
->> the stub code, which is difficult to debug on anything except
->> development hardware, and so I think we should not take this change
->> (and Matt appears to agree).
->
-> Thanks for the clarification, however I don't quite follow:
-> Is the rejection of the patch based on the intent to maintain
-> support for EFI v1.0+ (which isn't an argument for UGA + GOP
-> as lined out above) or is it based on a gut feeling that the
-> patch might cause breakage for whatever reason.
-> (Perhaps firmware bugs?  Not sure what is meant here.)
->
+Tyler Baicar <tbaicar@codeaurora.org> writes:
 
-The fact that LocateHandleBuffer() should be implemented by fairly old
-versions of UEFI does not guarantee that all UEFI systems that we
-currently support implement it correctly. So in that sense, we face a
-non-zero risk of regressions, which is not justifiable for a simple
-code cleanup.
+> A RAS (Reliability, Availability, Serviceability) controller
+> may be a separate processor running in parallel with OS
+> execution, and may generate error records for consumption by
+> the OS. If the RAS controller produces multiple error records,
+> then they may be overwritten before the OS has consumed them.
+>
+> The Generic Hardware Error Source (GHES) v2 structure
+> introduces the capability for the OS to acknowledge the
+> consumption of the error record generated by the RAS
+> controller. A RAS controller supporting GHESv2 shall wait for
+> the acknowledgment before writing a new error record, thus
+> eliminating the race condition.
+>
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+> Signed-off-by: Richard Ruigrok <rruigrok@codeaurora.org>
+> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+> ---
+>  drivers/acpi/apei/ghes.c | 41 +++++++++++++++++++++++++++++++++++++++++
+>  drivers/acpi/apei/hest.c |  7 +++++--
+>  include/acpi/ghes.h      |  1 +
+>  3 files changed, 47 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index 60746ef..3021f0e 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -45,6 +45,7 @@
+>  #include <linux/aer.h>
+>  #include <linux/nmi.h>
+>  
+> +#include <acpi/actbl1.h>
+>  #include <acpi/ghes.h>
+>  #include <acpi/apei.h>
+>  #include <asm/tlbflush.h>
+> @@ -244,10 +245,22 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+>  	struct ghes *ghes;
+>  	unsigned int error_block_length;
+>  	int rc;
+> +	struct acpi_hest_header *hest_hdr;
+>  
+>  	ghes = kzalloc(sizeof(*ghes), GFP_KERNEL);
+>  	if (!ghes)
+>  		return ERR_PTR(-ENOMEM);
+> +
+> +	hest_hdr = (struct acpi_hest_header *)generic;
+> +	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR_V2) {
+> +		ghes->generic_v2 = (struct acpi_hest_generic_v2 *)generic;
+> +		rc = apei_map_generic_address(
+> +			&ghes->generic_v2->read_ack_register);
+> +		if (rc)
+> +			goto err_unmap;
+> +	} else
+> +		ghes->generic_v2 = NULL;
+
+Since you kzalloc ghes, shouldn't ghes->generic_v2 be NULL already?
+
+> +
+>  	ghes->generic = generic;
+>  	rc = apei_map_generic_address(&generic->error_status_address);
+>  	if (rc)
+> @@ -270,6 +283,9 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+>  
+>  err_unmap:
+>  	apei_unmap_generic_address(&generic->error_status_address);
+> +	if (ghes->generic_v2)
+> +		apei_unmap_generic_address(
+> +			&ghes->generic_v2->read_ack_register);
+>  err_free:
+>  	kfree(ghes);
+>  	return ERR_PTR(rc);
+> @@ -279,6 +295,9 @@ static void ghes_fini(struct ghes *ghes)
+>  {
+>  	kfree(ghes->estatus);
+>  	apei_unmap_generic_address(&ghes->generic->error_status_address);
+> +	if (ghes->generic_v2)
+> +		apei_unmap_generic_address(
+> +			&ghes->generic_v2->read_ack_register);
+>  }
+>  
+>  static inline int ghes_severity(int severity)
+> @@ -648,6 +667,22 @@ static void ghes_estatus_cache_add(
+>  	rcu_read_unlock();
+>  }
+>  
+> +static int ghes_do_read_ack(struct acpi_hest_generic_v2 *generic_v2)
+> +{
+> +	int rc;
+> +	u64 val = 0;
+> +
+> +	rc = apei_read(&val, &generic_v2->read_ack_register);
+> +	if (rc)
+> +		return rc;
+> +	val &= generic_v2->read_ack_preserve <<
+> +		generic_v2->read_ack_register.bit_offset;
+> +	val |= generic_v2->read_ack_write;
+
+Reading the spec, it is not clear whether you need the left shift
+above.
+
+Having said that, if you do it for read_ack_preserve, do you also need
+to left shift read_ack_write by read_ack_register.bit_offset?
+
+> +	rc = apei_write(val, &generic_v2->read_ack_register);
+> +
+> +	return rc;
+> +}
+> +
+>  static int ghes_proc(struct ghes *ghes)
+>  {
+>  	int rc;
+> @@ -660,6 +695,12 @@ static int ghes_proc(struct ghes *ghes)
+>  			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+>  	}
+>  	ghes_do_proc(ghes, ghes->estatus);
+> +
+> +	if (ghes->generic_v2) {
+> +		rc = ghes_do_read_ack(ghes->generic_v2);
+> +		if (rc)
+> +			return rc;
+> +	}
+>  out:
+>  	ghes_clear_estatus(ghes);
+>  	return 0;
+> diff --git a/drivers/acpi/apei/hest.c b/drivers/acpi/apei/hest.c
+> index 792a0d9..ef725a9 100644
+> --- a/drivers/acpi/apei/hest.c
+> +++ b/drivers/acpi/apei/hest.c
+> @@ -52,6 +52,7 @@ static const int hest_esrc_len_tab[ACPI_HEST_TYPE_RESERVED] = {
+>  	[ACPI_HEST_TYPE_AER_ENDPOINT] = sizeof(struct acpi_hest_aer),
+>  	[ACPI_HEST_TYPE_AER_BRIDGE] = sizeof(struct acpi_hest_aer_bridge),
+>  	[ACPI_HEST_TYPE_GENERIC_ERROR] = sizeof(struct acpi_hest_generic),
+> +	[ACPI_HEST_TYPE_GENERIC_ERROR_V2] = sizeof(struct acpi_hest_generic_v2),
+>  };
+>  
+>  static int hest_esrc_len(struct acpi_hest_header *hest_hdr)
+> @@ -146,7 +147,8 @@ static int __init hest_parse_ghes_count(struct acpi_hest_header *hest_hdr, void
+>  {
+>  	int *count = data;
+>  
+> -	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR)
+> +	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR ||
+> +	    hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+>  		(*count)++;
+>  	return 0;
+>  }
+> @@ -157,7 +159,8 @@ static int __init hest_parse_ghes(struct acpi_hest_header *hest_hdr, void *data)
+>  	struct ghes_arr *ghes_arr = data;
+>  	int rc, i;
+>  
+> -	if (hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR)
+> +	if (hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR &&
+> +	    hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+>  		return 0;
+>  
+>  	if (!((struct acpi_hest_generic *)hest_hdr)->enabled)
+> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+> index 720446c..d0108b6 100644
+> --- a/include/acpi/ghes.h
+> +++ b/include/acpi/ghes.h
+> @@ -14,6 +14,7 @@
+>  
+>  struct ghes {
+>  	struct acpi_hest_generic *generic;
+> +	struct acpi_hest_generic_v2 *generic_v2;
+
+You either have a GHES or a GHESv2 structure. Instead of duplication,
+could this be represented as a union?
+
+Thanks,
+Punit
+
+>  	struct acpi_hest_generic_status *estatus;
+>  	u64 buffer_paddr;
+>  	unsigned long flags;
