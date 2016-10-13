@@ -1,32 +1,123 @@
 From: Paolo Bonzini <pbonzini@redhat.com>
-Subject: Re: [RFC PATCH v1 24/28] KVM: SVM: add SEV_LAUNCH_FINISH command
-Date: Thu, 13 Oct 2016 13:16:33 +0200
-Message-ID: <b7c63f07-7056-30db-0cd0-d103d51c4ff2@redhat.com>
+Subject: Re: [RFC PATCH v1 00/28] x86: Secure Encrypted Virtualization (AMD)
+Date: Thu, 13 Oct 2016 13:19:47 +0200
+Message-ID: <d8f5b59e-5450-6bf6-c01e-084e612a4fed@redhat.com>
 References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
- <147190853894.9523.16890031242057232592.stgit@brijesh-build-machine>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <147190853894.9523.16890031242057232592.stgit@brijesh-build-machine>
+In-Reply-To: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
 Sender: owner-linux-mm@kvack.org
 To: Brijesh Singh <brijesh.singh@amd.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, devel@linuxdriverproject.org, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedoraproject.org, tony.luck@intel.com
 List-Id: linux-efi@vger.kernel.org
 
 
 
-On 23/08/2016 01:28, Brijesh Singh wrote:
-> +
-> +	/* Iterate through each vcpus and set SEV KVM_SEV_FEATURE bit in
-> +	 * KVM_CPUID_FEATURE to indicate that SEV is enabled on this vcpu
-> +	 */
-> +	kvm_for_each_vcpu(i, vcpu, kvm)
-> +		svm_cpuid_update(vcpu);
-> +
+On 23/08/2016 01:23, Brijesh Singh wrote:
+> TODO:
+> - send qemu/seabios RFC's on respective mailing list
+> - integrate the psp driver with CCP driver (they share the PCI id's)
+> - add SEV guest migration command support
+> - add SEV snapshotting command support
+> - determine how to do ioremap of physical memory with mem encryption enabled
+>   (e.g acpi tables)
 
-Do you need another call to sev_init_vmcb here?
+The would be encrypted, right?  Similar to the EFI data in patch 9.
+
+> - determine how to share the guest memory with hypervisor for to support
+>   pvclock driver
+
+Is it enough if the guest makes that page unencrypted?
+
+I reviewed the KVM host-side patches and they are pretty
+straightforward, so the comments on each patch suffice.
+
+Thanks,
 
 Paolo
+
+> Brijesh Singh (11):
+>       crypto: add AMD Platform Security Processor driver
+>       KVM: SVM: prepare to reserve asid for SEV guest
+>       KVM: SVM: prepare for SEV guest management API support
+>       KVM: introduce KVM_SEV_ISSUE_CMD ioctl
+>       KVM: SVM: add SEV launch start command
+>       KVM: SVM: add SEV launch update command
+>       KVM: SVM: add SEV_LAUNCH_FINISH command
+>       KVM: SVM: add KVM_SEV_GUEST_STATUS command
+>       KVM: SVM: add KVM_SEV_DEBUG_DECRYPT command
+>       KVM: SVM: add KVM_SEV_DEBUG_ENCRYPT command
+>       KVM: SVM: add command to query SEV API version
+> 
+> Tom Lendacky (17):
+>       kvm: svm: Add support for additional SVM NPF error codes
+>       kvm: svm: Add kvm_fast_pio_in support
+>       kvm: svm: Use the hardware provided GPA instead of page walk
+>       x86: Secure Encrypted Virtualization (SEV) support
+>       KVM: SVM: prepare for new bit definition in nested_ctl
+>       KVM: SVM: Add SEV feature definitions to KVM
+>       x86: Do not encrypt memory areas if SEV is enabled
+>       Access BOOT related data encrypted with SEV active
+>       x86/efi: Access EFI data as encrypted when SEV is active
+>       x86: Change early_ioremap to early_memremap for BOOT data
+>       x86: Don't decrypt trampoline area if SEV is active
+>       x86: DMA support for SEV memory encryption
+>       iommu/amd: AMD IOMMU support for SEV
+>       x86: Don't set the SME MSR bit when SEV is active
+>       x86: Unroll string I/O when SEV is active
+>       x86: Add support to determine if running with SEV enabled
+>       KVM: SVM: Enable SEV by setting the SEV_ENABLE cpu feature
+> 
+> 
+>  arch/x86/boot/compressed/Makefile      |    2 
+>  arch/x86/boot/compressed/head_64.S     |   19 +
+>  arch/x86/boot/compressed/mem_encrypt.S |  123 ++++
+>  arch/x86/include/asm/io.h              |   26 +
+>  arch/x86/include/asm/kvm_emulate.h     |    3 
+>  arch/x86/include/asm/kvm_host.h        |   27 +
+>  arch/x86/include/asm/mem_encrypt.h     |    3 
+>  arch/x86/include/asm/svm.h             |    3 
+>  arch/x86/include/uapi/asm/hyperv.h     |    4 
+>  arch/x86/include/uapi/asm/kvm_para.h   |    4 
+>  arch/x86/kernel/acpi/boot.c            |    4 
+>  arch/x86/kernel/head64.c               |    4 
+>  arch/x86/kernel/mem_encrypt.S          |   44 ++
+>  arch/x86/kernel/mpparse.c              |   10 
+>  arch/x86/kernel/setup.c                |    7 
+>  arch/x86/kernel/x8664_ksyms_64.c       |    1 
+>  arch/x86/kvm/cpuid.c                   |    4 
+>  arch/x86/kvm/mmu.c                     |   20 +
+>  arch/x86/kvm/svm.c                     |  906 ++++++++++++++++++++++++++++++++
+>  arch/x86/kvm/x86.c                     |   73 +++
+>  arch/x86/mm/ioremap.c                  |    7 
+>  arch/x86/mm/mem_encrypt.c              |   50 ++
+>  arch/x86/platform/efi/efi_64.c         |   14 
+>  arch/x86/realmode/init.c               |   11 
+>  drivers/crypto/Kconfig                 |   11 
+>  drivers/crypto/Makefile                |    1 
+>  drivers/crypto/psp/Kconfig             |    8 
+>  drivers/crypto/psp/Makefile            |    3 
+>  drivers/crypto/psp/psp-dev.c           |  220 ++++++++
+>  drivers/crypto/psp/psp-dev.h           |   95 +++
+>  drivers/crypto/psp/psp-ops.c           |  454 ++++++++++++++++
+>  drivers/crypto/psp/psp-pci.c           |  376 +++++++++++++
+>  drivers/sfi/sfi_core.c                 |    6 
+>  include/linux/ccp-psp.h                |  833 +++++++++++++++++++++++++++++
+>  include/uapi/linux/Kbuild              |    1 
+>  include/uapi/linux/ccp-psp.h           |  182 ++++++
+>  include/uapi/linux/kvm.h               |  125 ++++
+>  37 files changed, 3643 insertions(+), 41 deletions(-)
+>  create mode 100644 arch/x86/boot/compressed/mem_encrypt.S
+>  create mode 100644 drivers/crypto/psp/Kconfig
+>  create mode 100644 drivers/crypto/psp/Makefile
+>  create mode 100644 drivers/crypto/psp/psp-dev.c
+>  create mode 100644 drivers/crypto/psp/psp-dev.h
+>  create mode 100644 drivers/crypto/psp/psp-ops.c
+>  create mode 100644 drivers/crypto/psp/psp-pci.c
+>  create mode 100644 include/linux/ccp-psp.h
+>  create mode 100644 include/uapi/linux/ccp-psp.h
+> 
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
