@@ -1,126 +1,68 @@
-From: Paolo Bonzini <pbonzini@redhat.com>
-Subject: Re: [RFC PATCH v1 00/28] x86: Secure Encrypted Virtualization (AMD)
-Date: Thu, 13 Oct 2016 13:19:47 +0200
-Message-ID: <d8f5b59e-5450-6bf6-c01e-084e612a4fed@redhat.com>
-References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
+From: Suzuki K Poulose <Suzuki.Poulose@arm.com>
+Subject: Re: [PATCH V3 06/10] acpi: apei: panic OS with fatal error status
+ block
+Date: Thu, 13 Oct 2016 14:00:30 +0100
+Message-ID: <bf911628-71be-0dca-f1c7-c12e681bd37f@arm.com>
+References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
+ <1475875882-2604-7-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
-Sender: owner-linux-mm@kvack.org
-To: Brijesh Singh <brijesh.singh@amd.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, devel@linuxdriverproject.org, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedoraproject.org, tony.luck@intel.com
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1475875882-2604-7-git-send-email-tbaicar@codeaurora.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Tyler Baicar <tbaicar@codeaurora.org>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, Dkvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org
+Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
+On 07/10/16 22:31, Tyler Baicar wrote:
+> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+>
+> Even if an error status block's severity is fatal, the kernel does not
+> honor the severity level and panic.
+>
+> With the firmware first model, the platform could inform the OS about a
+> fatal hardware error through the non-NMI GHES notification type. The OS
+> should panic when a hardware error record is received with this
+> severity.
+>
+> Call panic() after CPER data in error status block is printed if
+> severity is fatal, before each error section is handled.
+>
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+> ---
+>  drivers/acpi/apei/ghes.c | 10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index 28d5a09..36894c8 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -141,6 +141,8 @@ static unsigned long ghes_estatus_pool_size_request;
+>  static struct ghes_estatus_cache *ghes_estatus_caches[GHES_ESTATUS_CACHES_SIZE];
+>  static atomic_t ghes_estatus_cache_alloced;
+>
+> +static int ghes_panic_timeout __read_mostly = 30;
+> +
+>  static int ghes_ioremap_init(void)
+>  {
+>  	ghes_ioremap_area = __get_vm_area(PAGE_SIZE * GHES_IOREMAP_PAGES,
+> @@ -715,6 +717,12 @@ static int ghes_proc(struct ghes *ghes)
+>  		if (ghes_print_estatus(NULL, ghes->generic, ghes->estatus))
+>  			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+>  	}
+> +	if (ghes_severity(ghes->estatus->error_severity) >= GHES_SEV_PANIC) {
+> +		if (panic_timeout == 0)
+> +			panic_timeout = ghes_panic_timeout;
+> +		panic("Fatal hardware error!");
 
+I think there is a chance that we might miss the o/p of ghes_print_estatus() as we use
+no pfx, and it could default to the normal loglevel and would never get printed
+if panic() is encountered before it. On the other hand, there is already a
+__ghes_panic() which does similar stuff. Is there a way we could reuse
+(may be even parts of) it ? Or at least use KERN_EMERG for the ghes_print_estatus(),
+if the severity could result in panic() ?
 
-On 23/08/2016 01:23, Brijesh Singh wrote:
-> TODO:
-> - send qemu/seabios RFC's on respective mailing list
-> - integrate the psp driver with CCP driver (they share the PCI id's)
-> - add SEV guest migration command support
-> - add SEV snapshotting command support
-> - determine how to do ioremap of physical memory with mem encryption enabled
->   (e.g acpi tables)
+Cheers
+Suzuki
 
-The would be encrypted, right?  Similar to the EFI data in patch 9.
-
-> - determine how to share the guest memory with hypervisor for to support
->   pvclock driver
-
-Is it enough if the guest makes that page unencrypted?
-
-I reviewed the KVM host-side patches and they are pretty
-straightforward, so the comments on each patch suffice.
-
-Thanks,
-
-Paolo
-
-> Brijesh Singh (11):
->       crypto: add AMD Platform Security Processor driver
->       KVM: SVM: prepare to reserve asid for SEV guest
->       KVM: SVM: prepare for SEV guest management API support
->       KVM: introduce KVM_SEV_ISSUE_CMD ioctl
->       KVM: SVM: add SEV launch start command
->       KVM: SVM: add SEV launch update command
->       KVM: SVM: add SEV_LAUNCH_FINISH command
->       KVM: SVM: add KVM_SEV_GUEST_STATUS command
->       KVM: SVM: add KVM_SEV_DEBUG_DECRYPT command
->       KVM: SVM: add KVM_SEV_DEBUG_ENCRYPT command
->       KVM: SVM: add command to query SEV API version
-> 
-> Tom Lendacky (17):
->       kvm: svm: Add support for additional SVM NPF error codes
->       kvm: svm: Add kvm_fast_pio_in support
->       kvm: svm: Use the hardware provided GPA instead of page walk
->       x86: Secure Encrypted Virtualization (SEV) support
->       KVM: SVM: prepare for new bit definition in nested_ctl
->       KVM: SVM: Add SEV feature definitions to KVM
->       x86: Do not encrypt memory areas if SEV is enabled
->       Access BOOT related data encrypted with SEV active
->       x86/efi: Access EFI data as encrypted when SEV is active
->       x86: Change early_ioremap to early_memremap for BOOT data
->       x86: Don't decrypt trampoline area if SEV is active
->       x86: DMA support for SEV memory encryption
->       iommu/amd: AMD IOMMU support for SEV
->       x86: Don't set the SME MSR bit when SEV is active
->       x86: Unroll string I/O when SEV is active
->       x86: Add support to determine if running with SEV enabled
->       KVM: SVM: Enable SEV by setting the SEV_ENABLE cpu feature
-> 
-> 
->  arch/x86/boot/compressed/Makefile      |    2 
->  arch/x86/boot/compressed/head_64.S     |   19 +
->  arch/x86/boot/compressed/mem_encrypt.S |  123 ++++
->  arch/x86/include/asm/io.h              |   26 +
->  arch/x86/include/asm/kvm_emulate.h     |    3 
->  arch/x86/include/asm/kvm_host.h        |   27 +
->  arch/x86/include/asm/mem_encrypt.h     |    3 
->  arch/x86/include/asm/svm.h             |    3 
->  arch/x86/include/uapi/asm/hyperv.h     |    4 
->  arch/x86/include/uapi/asm/kvm_para.h   |    4 
->  arch/x86/kernel/acpi/boot.c            |    4 
->  arch/x86/kernel/head64.c               |    4 
->  arch/x86/kernel/mem_encrypt.S          |   44 ++
->  arch/x86/kernel/mpparse.c              |   10 
->  arch/x86/kernel/setup.c                |    7 
->  arch/x86/kernel/x8664_ksyms_64.c       |    1 
->  arch/x86/kvm/cpuid.c                   |    4 
->  arch/x86/kvm/mmu.c                     |   20 +
->  arch/x86/kvm/svm.c                     |  906 ++++++++++++++++++++++++++++++++
->  arch/x86/kvm/x86.c                     |   73 +++
->  arch/x86/mm/ioremap.c                  |    7 
->  arch/x86/mm/mem_encrypt.c              |   50 ++
->  arch/x86/platform/efi/efi_64.c         |   14 
->  arch/x86/realmode/init.c               |   11 
->  drivers/crypto/Kconfig                 |   11 
->  drivers/crypto/Makefile                |    1 
->  drivers/crypto/psp/Kconfig             |    8 
->  drivers/crypto/psp/Makefile            |    3 
->  drivers/crypto/psp/psp-dev.c           |  220 ++++++++
->  drivers/crypto/psp/psp-dev.h           |   95 +++
->  drivers/crypto/psp/psp-ops.c           |  454 ++++++++++++++++
->  drivers/crypto/psp/psp-pci.c           |  376 +++++++++++++
->  drivers/sfi/sfi_core.c                 |    6 
->  include/linux/ccp-psp.h                |  833 +++++++++++++++++++++++++++++
->  include/uapi/linux/Kbuild              |    1 
->  include/uapi/linux/ccp-psp.h           |  182 ++++++
->  include/uapi/linux/kvm.h               |  125 ++++
->  37 files changed, 3643 insertions(+), 41 deletions(-)
->  create mode 100644 arch/x86/boot/compressed/mem_encrypt.S
->  create mode 100644 drivers/crypto/psp/Kconfig
->  create mode 100644 drivers/crypto/psp/Makefile
->  create mode 100644 drivers/crypto/psp/psp-dev.c
->  create mode 100644 drivers/crypto/psp/psp-dev.h
->  create mode 100644 drivers/crypto/psp/psp-ops.c
->  create mode 100644 drivers/crypto/psp/psp-pci.c
->  create mode 100644 include/linux/ccp-psp.h
->  create mode 100644 include/uapi/linux/ccp-psp.h
-> 
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
