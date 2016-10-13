@@ -1,95 +1,42 @@
-From: Punit Agrawal <punit.agrawal@arm.com>
-Subject: Re: [PATCH V3 08/10] ras: acpi / apei: generate trace event for
- unrecognized CPER section
-Date: Thu, 13 Oct 2016 11:54:11 +0100
-Message-ID: <87mvi8seng.fsf@e105922-lin.cambridge.arm.com>
-References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
- <1475875882-2604-9-git-send-email-tbaicar@codeaurora.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [patch] efi: fix an error code
+Date: Thu, 13 Oct 2016 11:59:11 +0100
+Message-ID: <CAKv+Gu9Bi36rAn1wFjitiQ4yrxDOvH3JmapBX63VFMUvmXEe5g@mail.gmail.com>
+References: <20161013085137.GD16198@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <1475875882-2604-9-git-send-email-tbaicar@codeaurora.org> (Tyler
- Baicar's message of "Fri, 7 Oct 2016 15:31:20 -0600")
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, shijie.huang@arm.com, lenb@kernel.org, marc.zyngier@arm.com, tomasz.nowicki@linaro.org, rostedt@goodmis.org, sandeepa.s.prabhu@gmail.com, Dkvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, linux-kernel@vger.kernel.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+In-Reply-To: <20161013085137.GD16198@mwanda>
+Sender: kernel-janitors-owner@vger.kernel.org
+To: Dan Carpenter <dan.carpenter@oracle.com>, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Octavian Purdila <octavian.purdila@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Tyler,
-
-One last comment...
-
-Tyler Baicar <tbaicar@codeaurora.org> writes:
-
-> UEFI spec allows for non-standard section in Common Platform Error
-> Record. This is defined in section N.2.3 of UEFI version 2.5.
+On 13 October 2016 at 09:51, Dan Carpenter <dan.carpenter@oracle.com> wrote:
+> We should return -ENOMEM here, instead of success.
 >
-> Currently if the CPER section's type (UUID) does not match with
-> any section type that the kernel knows how to parse, trace event
-> is not generated for such section. And thus user is not able to know
-> happening of such hardware error, including error record of
-> non-standard section.
+> Fixes: 475fb4e8b2f4 ('efi / ACPI: load SSTDs from EFI variables')
+> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 >
-> This commit generates a trace event which contains raw error data
-> for unrecognized CPER section.
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 1ac199c..a4944e2 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -259,8 +259,10 @@ static __init int efivar_ssdt_load(void)
+>                 }
 >
-> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> ---
->  drivers/acpi/apei/ghes.c | 18 +++++++++++++++++-
->  drivers/ras/ras.c        |  1 +
->  include/ras/ras_event.h  | 45 +++++++++++++++++++++++++++++++++++++++++++++
->  3 files changed, 63 insertions(+), 1 deletion(-)
+>                 data = kmalloc(size, GFP_KERNEL);
+> -               if (!data)
+> +               if (!data) {
+> +                       ret = -ENOMEM;
+>                         goto free_entry;
+> +               }
 >
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index 36894c8..cb4c7f4 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -49,6 +49,7 @@
->  #include <acpi/ghes.h>
->  #include <acpi/apei.h>
->  #include <asm/tlbflush.h>
-> +#include <ras/ras_event.h>
->  
->  #ifdef CONFIG_HAVE_ACPI_APEI_SEA
->  #include <asm/system_misc.h>
-> @@ -468,12 +469,21 @@ static void ghes_do_proc(struct ghes *ghes,
->  	int sev, sec_sev;
->  	struct acpi_hest_generic_data *gdata;
->  	uuid_le sec_type;
-> +	uuid_le *fru_id;
-> +	char *fru_text = "";
->  
->  	sev = ghes_severity(estatus->error_severity);
->  	apei_estatus_for_each_section(estatus, gdata) {
->  		sec_sev = ghes_severity(gdata->error_severity);
->  		sec_type = *(uuid_le *)gdata->section_type;
->  
-> +		if (gdata->validation_bits & CPER_SEC_VALID_FRU_ID)
-> +			fru_id = (uuid_le *)gdata->fru_id;
-> +		else
-> +			fru_id = &NULL_UUID_LE;
+>                 ret = efivar_entry_get(entry, NULL, &size, data);
+>                 if (ret) {
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-fru_id can be initialised at declaration and drop the else here. The
-same is already being done for fru_text.
-
-Thanks,
-Punit
-
-> +		if (gdata->validation_bits & CPER_SEC_VALID_FRU_TEXT)
-> +			fru_text = gdata->fru_text;
-> +
->  		if (!uuid_le_cmp(sec_type,
->  				 CPER_SEC_PLATFORM_MEM)) {
->  			struct cper_sec_mem_err *mem_err;
-
-[...]
+Applied, thanks.
