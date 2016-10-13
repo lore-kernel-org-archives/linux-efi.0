@@ -1,153 +1,169 @@
-From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V3 02/10] ras: acpi/apei: cper: generic error data entry
- v3 per ACPI 6.1
-Date: Thu, 13 Oct 2016 13:37:33 -0600
-Message-ID: <912acc88-fbaf-2576-8048-1fcc67439600@codeaurora.org>
+From: "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH V3 10/10] arm64: KVM: add guest SEA support
+Date: Thu, 13 Oct 2016 14:14:27 -0600
+Message-ID: <afa9a3c6-7516-cf5c-2366-f826f914d582@codeaurora.org>
 References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
- <1475875882-2604-3-git-send-email-tbaicar@codeaurora.org>
- <3f17d0a8-6b63-5792-903a-341effaae432@arm.com>
- <c17a0c03-5037-d88d-f096-4cc72dbfcb99@codeaurora.org>
- <064dca7d-0625-c0d0-09ae-72ef7abdc63f@arm.com>
+ <1475875882-2604-11-git-send-email-tbaicar@codeaurora.org>
+ <87h98gs853.fsf@e105922-lin.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; Format="flowed"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <064dca7d-0625-c0d0-09ae-72ef7abdc63f@arm.com>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Suzuki K Poulose <Suzuki.Poulose@arm.com>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, Dkvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org
-Cc: Naveen Kaje <nkaje@codeaurora.org>, Richard Ruigrok <rruigrok@codeaurora.org>, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <87h98gs853.fsf-Z9gB6HwUD+TZROr8t4l/smS4ubULX0JqMm0uRHvK7Nw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Punit Agrawal <punit.agrawal-5wv7dgnIgG8@public.gmane.org>
+Cc: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tomasz.nowicki-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, Dkvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hello Suzuki,
+Hello Punit,
 
-On 10/13/2016 2:50 AM, Suzuki K Poulose wrote:
-> On 12/10/16 23:10, Baicar, Tyler wrote:
->> Hello Suzuki,
+On 10/13/2016 7:14 AM, Punit Agrawal wrote:
+> Hi Tyler,
+>
+> I know I've had my last comment already ;), but I thought I'd rather
+> raise the question than stay confused...
+>
+> Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> writes:
+>
+>> Currently external aborts are unsupported by the guest abort
+>> handling. Add handling for SEAs so that the host kernel reports
+>> SEAs which occur in the guest kernel.
 >>
->> Thank you for the feedback! Responses below.
+>> Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>> ---
+>>   arch/arm/include/asm/kvm_arm.h       |  1 +
+>>   arch/arm/include/asm/system_misc.h   |  5 +++++
+>>   arch/arm/kvm/mmu.c                   | 15 +++++++++++++--
+>>   arch/arm64/include/asm/kvm_arm.h     |  1 +
+>>   arch/arm64/include/asm/system_misc.h |  2 ++
+>>   arch/arm64/mm/fault.c                | 13 +++++++++++++
+>>   6 files changed, 35 insertions(+), 2 deletions(-)
 >>
->> On 10/11/2016 11:28 AM, Suzuki K Poulose wrote:
->>> On 07/10/16 22:31, Tyler Baicar wrote:
->>>> Currently when a RAS error is reported it is not timestamped.
->>>> The ACPI 6.1 spec adds the timestamp field to the generic error
->>>> data entry v3 structure. The timestamp of when the firmware
->>>> generated the error is now being reported.
->>>>
->>>> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
->>>> Signed-off-by: Richard Ruigrok <rruigrok@codeaurora.org>
->>>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
->>>> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
->>>
->>> Please could you keep the people who reviewed/commented on your =
-
->>> series in the past,
->>> whenever you post a new version ?
->> Do you mean to just send the new version to their e-mail directly in =
-
->> addition to the lists? If so, I will do that next time.
->
-> If you send a new version of a series to the list, it is a good idea =
-
-> to keep
-> the people who commented (significantly) on your previous version in =
-
-> Cc, especially
-> when you have addressed their feedback. That will help them to keep =
-
-> track of the
-> series. People can always see the new version in the list, but then it =
-
-> is so easy
-> to miss something in the 100s of emails you get each day. I am sure =
-
-> people have
-> special filters for the emails based on if they are in Cc/To etc.
->
-Okay, understood. I'll make sure to add those who have commented in the =
-
-cc/to list to avoid the e-mail filters.
->>
->> I know you provided good feedback on the previous patchset, but I did =
-
->> not have anyone specifically respond to add "reviewed-by:...". I =
-
->> don't think I should add reviewed-by for someone unless they =
-
->> specifically add it in a response :)
->
-> No, I haven't yet "Reviewed-by" your patches. I had some comments on =
-
-> it, which means
-> I expected it to be addressed as you committed in your response.
->
->>>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
->>>> index 3021f0e..c8488f1 100644
->>>> --- a/drivers/acpi/apei/ghes.c
->>>> +++ b/drivers/acpi/apei/ghes.c
->>>> @@ -80,6 +80,10 @@
->
->> I think that should work to avoid duplication. I will move them to a =
-
->> header file in the next patchset.
->>>> +
->>>> +static void cper_estatus_print_section_v300(const char *pfx,
->>>> +    const struct acpi_hest_generic_data_v300 *gdata)
->>>> +{
->>>> +    __u8 hour, min, sec, day, mon, year, century, *timestamp;
->>>> +
->>>> +    if (gdata->validation_bits & ACPI_HEST_GEN_VALID_TIMESTAMP) {
->>>> +        timestamp =3D (__u8 *)&(gdata->time_stamp);
->>>> +        memcpy(&sec, timestamp, 1);
->>>> +        memcpy(&min, timestamp + 1, 1);
->>>> +        memcpy(&hour, timestamp + 2, 1);
->>>> +        memcpy(&day, timestamp + 4, 1);
->>>> +        memcpy(&mon, timestamp + 5, 1);
->>>> +        memcpy(&year, timestamp + 6, 1);
->>>> +        memcpy(&century, timestamp + 7, 1);
->>>> +        printk("%stime: ", pfx);
->>>> +        printk("%7s", 0x01 & *(timestamp + 3) ? "precise" : "");
->>>
->>> What format is the (timestamp + 3) stored in ? Does it need =
-
->>> conversion ?
->> The third byte of the timestamp is currently only used to determine =
-
->> if the time is precise or not. Bit 0 is used to specify that and the =
-
->> other bits in this byte are marked as reserved. This is shown in =
-
->> table 247 of the UEFI spec 2.6:
->>
->> Byte 3:
->>   Bit 0 =96 Timestamp is precise if this bit is set and correlates to =
-
->> the time of the error event.
->>   Bit 7:1 =96 Reserved
->
-> Is it always the same endianness as that of the CPU ?
-It is a fair assumption that the firmware populating this record will =
-
-use a CPU of the same endianness. There is no mechanism in the spec to =
-
-indicate otherwise.
+>> diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
+>> index e22089f..33a77509 100644
+>> --- a/arch/arm/include/asm/kvm_arm.h
+>> +++ b/arch/arm/include/asm/kvm_arm.h
+>> @@ -187,6 +187,7 @@
+>>   #define FSC_FAULT	(0x04)
+>>   #define FSC_ACCESS	(0x08)
+>>   #define FSC_PERM	(0x0c)
+>> +#define FSC_EXTABT	(0x10)
+>>   
+>>   /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
+>>   #define HPFAR_MASK	(~0xf)
+>> diff --git a/arch/arm/include/asm/system_misc.h b/arch/arm/include/asm/system_misc.h
+>> index a3d61ad..86e1faa 100644
+>> --- a/arch/arm/include/asm/system_misc.h
+>> +++ b/arch/arm/include/asm/system_misc.h
+>> @@ -24,4 +24,9 @@ extern unsigned int user_debug;
+>>   
+>>   #endif /* !__ASSEMBLY__ */
+>>   
+>> +inline int handle_guest_sea(unsigned long addr, unsigned int esr)
+>> +{
+>> +	return -1;
+>> +}
+>> +
+>>   #endif /* __ASM_ARM_SYSTEM_MISC_H */
+>> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
+>> index e9a5c0e..24cde84 100644
+>> --- a/arch/arm/kvm/mmu.c
+>> +++ b/arch/arm/kvm/mmu.c
+>> @@ -29,6 +29,7 @@
+>>   #include <asm/kvm_asm.h>
+>>   #include <asm/kvm_emulate.h>
+>>   #include <asm/virt.h>
+>> +#include <asm/system_misc.h>
+>>   
+>>   #include "trace.h"
+>>   
+>> @@ -1441,8 +1442,18 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
+>>   
+>>   	/* Check the stage-2 fault is trans. fault or write fault */
+>>   	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
+>> -	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>> -	    fault_status != FSC_ACCESS) {
+>> +
+>> +	if (fault_status == FSC_EXTABT) {
+>> +		if(handle_guest_sea((unsigned long)fault_ipa,
+>> +				    kvm_vcpu_get_hsr(vcpu))) {
+>> +			kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
+>> +				kvm_vcpu_trap_get_class(vcpu),
+>> +				(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+>> +				(unsigned long)kvm_vcpu_get_hsr(vcpu));
+>> +			return -EFAULT;
+>> +		}
+>> +	} else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>> +		   fault_status != FSC_ACCESS) {
+>>   		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
+>>   			kvm_vcpu_trap_get_class(vcpu),
+>>   			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+>> diff --git a/arch/arm64/include/asm/kvm_arm.h b/arch/arm64/include/asm/kvm_arm.h
+>> index 4b5c977..be0efb6 100644
+>> --- a/arch/arm64/include/asm/kvm_arm.h
+>> +++ b/arch/arm64/include/asm/kvm_arm.h
+>> @@ -201,6 +201,7 @@
+>>   #define FSC_FAULT	ESR_ELx_FSC_FAULT
+>>   #define FSC_ACCESS	ESR_ELx_FSC_ACCESS
+>>   #define FSC_PERM	ESR_ELx_FSC_PERM
+>> +#define FSC_EXTABT	ESR_ELx_FSC_EXTABT
+>>   
+>>   /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
+>>   #define HPFAR_MASK	(~UL(0xf))
+>> diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
+>> index 90daf4a..8522fff 100644
+>> --- a/arch/arm64/include/asm/system_misc.h
+>> +++ b/arch/arm64/include/asm/system_misc.h
+>> @@ -77,4 +77,6 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
+>>   int sea_register_handler_chain(struct notifier_block *nb);
+>>   void sea_unregister_handler_chain(struct notifier_block *nb);
+>>   
+>> +int handle_guest_sea(unsigned long addr, unsigned int esr);
+>> +
+>>   #endif	/* __ASM_SYSTEM_MISC_H */
+>> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+>> index 81cb7ad..d714432 100644
+>> --- a/arch/arm64/mm/fault.c
+>> +++ b/arch/arm64/mm/fault.c
+>> @@ -597,6 +597,19 @@ static const char *fault_name(unsigned int esr)
+>>   }
+>>   
+>>   /*
+>> + * Handle Synchronous External Aborts that occur in a guest kernel.
+>> + */
+>> +int handle_guest_sea(unsigned long addr, unsigned int esr)
+>> +{
+>> +	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
+>> +
+>> +	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
+>> +		fault_name(esr), esr, addr);
+>> +
+>> +	return 0;
+>> +}
+> Don't we need to pass the abort to the guest?
+This requires some infrastructure to implement virtual "ACPI platform 
+error interface" to expose the details of the abort to the guest. This 
+patchset does not cover that and focuses on feature parity with other 
+architectures that support APEI. There are discussions among Linaro 
+partners about how this can be achieved in the long term, but that work 
+is outside the scope of this patchset. This patch will ensure that if a 
+guest encounters one of these errors then it will be reported before 
+getting killed. Before this patch we would just get an unsupported FSC 
+print out and then the guest would be killed.
 
 Thanks,
 Tyler
 >
-> Cheers
-> Suzuki
+> Thanks,
+> Punit
 >
--- =
+>> +
+>> +/*
+>>    * Dispatch a data abort to the relevant handler.
+>>    */
+>>   asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technolo=
-gies, Inc.
+-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project.
