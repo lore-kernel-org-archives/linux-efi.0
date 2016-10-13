@@ -1,237 +1,95 @@
-From: Paolo Bonzini <pbonzini@redhat.com>
-Subject: Re: [RFC PATCH v1 21/28] KVM: introduce KVM_SEV_ISSUE_CMD ioctl
-Date: Thu, 13 Oct 2016 12:45:42 +0200
-Message-ID: <6a6e6a1a-eec8-c547-553d-7746d65fc182@redhat.com>
-References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
- <147190849706.9523.17127624683768628621.stgit@brijesh-build-machine>
+From: Punit Agrawal <punit.agrawal@arm.com>
+Subject: Re: [PATCH V3 08/10] ras: acpi / apei: generate trace event for
+ unrecognized CPER section
+Date: Thu, 13 Oct 2016 11:54:11 +0100
+Message-ID: <87mvi8seng.fsf@e105922-lin.cambridge.arm.com>
+References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
+ <1475875882-2604-9-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <147190849706.9523.17127624683768628621.stgit@brijesh-build-machine>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Brijesh Singh <brijesh.singh@amd.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, devel@linuxdriverproject.org, tglx@linutronix.de, mchehab@kernel.or
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <1475875882-2604-9-git-send-email-tbaicar@codeaurora.org> (Tyler
+ Baicar's message of "Fri, 7 Oct 2016 15:31:20 -0600")
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: linux-efi@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, shijie.huang@arm.com, lenb@kernel.org, marc.zyngier@arm.com, tomasz.nowicki@linaro.org, rostedt@goodmis.org, sandeepa.s.prabhu@gmail.com, Dkvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, linux-kernel@vger.kernel.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
+Hi Tyler,
 
+One last comment...
 
-On 23/08/2016 01:28, Brijesh Singh wrote:
-> The ioctl will be used by qemu to issue the Secure Encrypted
-> Virtualization (SEV) guest commands to transition a guest into
-> into SEV-enabled mode.
-> 
-> a typical usage:
-> 
-> struct kvm_sev_launch_start start;
-> struct kvm_sev_issue_cmd data;
-> 
-> data.cmd = KVM_SEV_LAUNCH_START;
-> data.opaque = &start;
-> 
-> ret = ioctl(fd, KVM_SEV_ISSUE_CMD, &data);
-> 
-> On SEV command failure, data.ret_code will contain the firmware error code.
+Tyler Baicar <tbaicar@codeaurora.org> writes:
 
-Please modify the ioctl to require the file descriptor for the PSP.  A
-program without access to /dev/psp should not be able to use SEV.
-
-> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+> UEFI spec allows for non-standard section in Common Platform Error
+> Record. This is defined in section N.2.3 of UEFI version 2.5.
+>
+> Currently if the CPER section's type (UUID) does not match with
+> any section type that the kernel knows how to parse, trace event
+> is not generated for such section. And thus user is not able to know
+> happening of such hardware error, including error record of
+> non-standard section.
+>
+> This commit generates a trace event which contains raw error data
+> for unrecognized CPER section.
+>
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
 > ---
->  arch/x86/include/asm/kvm_host.h |    3 +
->  arch/x86/kvm/x86.c              |   13 ++++
->  include/uapi/linux/kvm.h        |  125 +++++++++++++++++++++++++++++++++++++++
->  3 files changed, 141 insertions(+)
-> 
-> diff --git a/arch/x86/include/asm/kvm_host.h b/arch/x86/include/asm/kvm_host.h
-> index 9b885fc..a94e37d 100644
-> --- a/arch/x86/include/asm/kvm_host.h
-> +++ b/arch/x86/include/asm/kvm_host.h
-> @@ -1040,6 +1040,9 @@ struct kvm_x86_ops {
->  	void (*cancel_hv_timer)(struct kvm_vcpu *vcpu);
+>  drivers/acpi/apei/ghes.c | 18 +++++++++++++++++-
+>  drivers/ras/ras.c        |  1 +
+>  include/ras/ras_event.h  | 45 +++++++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 63 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index 36894c8..cb4c7f4 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -49,6 +49,7 @@
+>  #include <acpi/ghes.h>
+>  #include <acpi/apei.h>
+>  #include <asm/tlbflush.h>
+> +#include <ras/ras_event.h>
 >  
->  	void (*setup_mce)(struct kvm_vcpu *vcpu);
-> +
-> +	int (*sev_issue_cmd)(struct kvm *kvm,
-> +			     struct kvm_sev_issue_cmd __user *argp);
->  };
+>  #ifdef CONFIG_HAVE_ACPI_APEI_SEA
+>  #include <asm/system_misc.h>
+> @@ -468,12 +469,21 @@ static void ghes_do_proc(struct ghes *ghes,
+>  	int sev, sec_sev;
+>  	struct acpi_hest_generic_data *gdata;
+>  	uuid_le sec_type;
+> +	uuid_le *fru_id;
+> +	char *fru_text = "";
 >  
->  struct kvm_arch_async_pf {
-> diff --git a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
-> index d6f2f4b..0c0adad 100644
-> --- a/arch/x86/kvm/x86.c
-> +++ b/arch/x86/kvm/x86.c
-> @@ -3820,6 +3820,15 @@ split_irqchip_unlock:
->  	return r;
->  }
+>  	sev = ghes_severity(estatus->error_severity);
+>  	apei_estatus_for_each_section(estatus, gdata) {
+>  		sec_sev = ghes_severity(gdata->error_severity);
+>  		sec_type = *(uuid_le *)gdata->section_type;
 >  
-> +static int kvm_vm_ioctl_sev_issue_cmd(struct kvm *kvm,
-> +				      struct kvm_sev_issue_cmd __user *argp)
-> +{
-> +	if (kvm_x86_ops->sev_issue_cmd)
-> +		return kvm_x86_ops->sev_issue_cmd(kvm, argp);
-> +
-> +	return -ENOTTY;
-> +}
+> +		if (gdata->validation_bits & CPER_SEC_VALID_FRU_ID)
+> +			fru_id = (uuid_le *)gdata->fru_id;
+> +		else
+> +			fru_id = &NULL_UUID_LE;
 
-Please make a more generic vm_ioctl callback.
+fru_id can be initialised at declaration and drop the else here. The
+same is already being done for fru_text.
 
->  long kvm_arch_vm_ioctl(struct file *filp,
->  		       unsigned int ioctl, unsigned long arg)
->  {
-> @@ -4085,6 +4094,10 @@ long kvm_arch_vm_ioctl(struct file *filp,
->  		r = kvm_vm_ioctl_enable_cap(kvm, &cap);
->  		break;
->  	}
-> +	case KVM_SEV_ISSUE_CMD: {
-> +		r = kvm_vm_ioctl_sev_issue_cmd(kvm, argp);
-> +		break;
-> +	}
->  	default:
->  		r = kvm_vm_ioctl_assigned_device(kvm, ioctl, arg);
->  	}
-> diff --git a/include/uapi/linux/kvm.h b/include/uapi/linux/kvm.h
-> index 300ef25..72c18c3 100644
-> --- a/include/uapi/linux/kvm.h
-> +++ b/include/uapi/linux/kvm.h
-> @@ -1274,6 +1274,131 @@ struct kvm_s390_ucas_mapping {
->  /* Available with KVM_CAP_X86_SMM */
->  #define KVM_SMI                   _IO(KVMIO,   0xb7)
->  
-> +/* Secure Encrypted Virtualization mode */
-> +enum sev_cmd {
-> +	KVM_SEV_LAUNCH_START = 0,
-> +	KVM_SEV_LAUNCH_UPDATE,
-> +	KVM_SEV_LAUNCH_FINISH,
-> +	KVM_SEV_GUEST_STATUS,
-> +	KVM_SEV_DBG_DECRYPT,
-> +	KVM_SEV_DBG_ENCRYPT,
-> +	KVM_SEV_RECEIVE_START,
-> +	KVM_SEV_RECEIVE_UPDATE,
-> +	KVM_SEV_RECEIVE_FINISH,
-> +	KVM_SEV_SEND_START,
-> +	KVM_SEV_SEND_UPDATE,
-> +	KVM_SEV_SEND_FINISH,
-> +	KVM_SEV_API_VERSION,
-> +	KVM_SEV_NR_MAX,
-> +};
+Thanks,
+Punit
+
+> +		if (gdata->validation_bits & CPER_SEC_VALID_FRU_TEXT)
+> +			fru_text = gdata->fru_text;
 > +
-> +struct kvm_sev_issue_cmd {
-> +	__u32 cmd;
-> +	__u64 opaque;
-> +	__u32 ret_code;
-> +};
-> +
-> +struct kvm_sev_launch_start {
-> +	__u32 handle;
-> +	__u32 flags;
-> +	__u32 policy;
-> +	__u8 nonce[16];
-> +	__u8 dh_pub_qx[32];
-> +	__u8 dh_pub_qy[32];
-> +};
-> +
-> +struct kvm_sev_launch_update {
-> +	__u64	address;
-> +	__u32	length;
-> +};
-> +
-> +struct kvm_sev_launch_finish {
-> +	__u32 vcpu_count;
-> +	__u32 vcpu_length;
-> +	__u64 vcpu_mask_addr;
-> +	__u32 vcpu_mask_length;
-> +	__u8  measurement[32];
-> +};
-> +
-> +struct kvm_sev_guest_status {
-> +	__u32 policy;
-> +	__u32 state;
-> +};
-> +
-> +struct kvm_sev_dbg_decrypt {
-> +	__u64 src_addr;
-> +	__u64 dst_addr;
-> +	__u32 length;
-> +};
-> +
-> +struct kvm_sev_dbg_encrypt {
-> +	__u64 src_addr;
-> +	__u64 dst_addr;
-> +	__u32 length;
-> +};
-> +
-> +struct kvm_sev_receive_start {
-> +	__u32 handle;
-> +	__u32 flags;
-> +	__u32 policy;
-> +	__u8 policy_meas[32];
-> +	__u8 wrapped_tek[24];
-> +	__u8 wrapped_tik[24];
-> +	__u8 ten[16];
-> +	__u8 dh_pub_qx[32];
-> +	__u8 dh_pub_qy[32];
-> +	__u8 nonce[16];
-> +};
-> +
-> +struct kvm_sev_receive_update {
-> +	__u8 iv[16];
-> +	__u64 address;
-> +	__u32 length;
-> +};
-> +
-> +struct kvm_sev_receive_finish {
-> +	__u8 measurement[32];
-> +};
-> +
-> +struct kvm_sev_send_start {
-> +	__u8 nonce[16];
-> +	__u32 policy;
-> +	__u8 policy_meas[32];
-> +	__u8 wrapped_tek[24];
-> +	__u8 wrapped_tik[24];
-> +	__u8 ten[16];
-> +	__u8 iv[16];
-> +	__u32 flags;
-> +	__u8 api_major;
-> +	__u8 api_minor;
-> +	__u32 serial;
-> +	__u8 dh_pub_qx[32];
-> +	__u8 dh_pub_qy[32];
-> +	__u8 pek_sig_r[32];
-> +	__u8 pek_sig_s[32];
-> +	__u8 cek_sig_r[32];
-> +	__u8 cek_sig_s[32];
-> +	__u8 cek_pub_qx[32];
-> +	__u8 cek_pub_qy[32];
-> +	__u8 ask_sig_r[32];
-> +	__u8 ask_sig_s[32];
-> +	__u32 ncerts;
-> +	__u32 cert_length;
-> +	__u64 certs_addr;
-> +};
-> +
-> +struct kvm_sev_send_update {
-> +	__u32 length;
-> +	__u64 src_addr;
-> +	__u64 dst_addr;
-> +};
-> +
-> +struct kvm_sev_send_finish {
-> +	__u8 measurement[32];
-> +};
-> +
-> +#define KVM_SEV_ISSUE_CMD	_IOWR(KVMIO, 0xb8, struct kvm_sev_issue_cmd)
-> +
->  #define KVM_DEV_ASSIGN_ENABLE_IOMMU	(1 << 0)
->  #define KVM_DEV_ASSIGN_PCI_2_3		(1 << 1)
->  #define KVM_DEV_ASSIGN_MASK_INTX	(1 << 2)
-> 
-> 
+>  		if (!uuid_le_cmp(sec_type,
+>  				 CPER_SEC_PLATFORM_MEM)) {
+>  			struct cper_sec_mem_err *mem_err;
+
+[...]
