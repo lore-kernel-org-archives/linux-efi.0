@@ -1,167 +1,103 @@
-From: "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH V3 10/10] arm64: KVM: add guest SEA support
-Date: Thu, 13 Oct 2016 14:14:27 -0600
-Message-ID: <afa9a3c6-7516-cf5c-2366-f826f914d582@codeaurora.org>
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V3 08/10] ras: acpi / apei: generate trace event for
+ unrecognized CPER section
+Date: Thu, 13 Oct 2016 14:15:48 -0600
+Message-ID: <6d0637b2-3ed5-1392-601d-3cbffd26026a@codeaurora.org>
 References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
- <1475875882-2604-11-git-send-email-tbaicar@codeaurora.org>
- <87h98gs853.fsf@e105922-lin.cambridge.arm.com>
+ <1475875882-2604-9-git-send-email-tbaicar@codeaurora.org>
+ <87mvi8seng.fsf@e105922-lin.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <87h98gs853.fsf-Z9gB6HwUD+TZROr8t4l/smS4ubULX0JqMm0uRHvK7Nw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Punit Agrawal <punit.agrawal-5wv7dgnIgG8@public.gmane.org>
-Cc: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tomasz.nowicki-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, Dkvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <87mvi8seng.fsf@e105922-lin.cambridge.arm.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Punit Agrawal <punit.agrawal@arm.com>
+Cc: linux-efi@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, shijie.huang@arm.com, lenb@kernel.org, marc.zyngier@arm.com, tomasz.nowicki@linaro.org, rostedt@goodmis.org, sandeepa.s.prabhu@gmail.com, Dkvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, linux-kernel@vger.kernel.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
 Hello Punit,
 
-On 10/13/2016 7:14 AM, Punit Agrawal wrote:
+On 10/13/2016 4:54 AM, Punit Agrawal wrote:
 > Hi Tyler,
 >
-> I know I've had my last comment already ;), but I thought I'd rather
-> raise the question than stay confused...
+> One last comment...
 >
-> Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> writes:
+> Tyler Baicar <tbaicar@codeaurora.org> writes:
 >
->> Currently external aborts are unsupported by the guest abort
->> handling. Add handling for SEAs so that the host kernel reports
->> SEAs which occur in the guest kernel.
+>> UEFI spec allows for non-standard section in Common Platform Error
+>> Record. This is defined in section N.2.3 of UEFI version 2.5.
 >>
->> Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>> Currently if the CPER section's type (UUID) does not match with
+>> any section type that the kernel knows how to parse, trace event
+>> is not generated for such section. And thus user is not able to know
+>> happening of such hardware error, including error record of
+>> non-standard section.
+>>
+>> This commit generates a trace event which contains raw error data
+>> for unrecognized CPER section.
+>>
+>> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
 >> ---
->>   arch/arm/include/asm/kvm_arm.h       |  1 +
->>   arch/arm/include/asm/system_misc.h   |  5 +++++
->>   arch/arm/kvm/mmu.c                   | 15 +++++++++++++--
->>   arch/arm64/include/asm/kvm_arm.h     |  1 +
->>   arch/arm64/include/asm/system_misc.h |  2 ++
->>   arch/arm64/mm/fault.c                | 13 +++++++++++++
->>   6 files changed, 35 insertions(+), 2 deletions(-)
+>>   drivers/acpi/apei/ghes.c | 18 +++++++++++++++++-
+>>   drivers/ras/ras.c        |  1 +
+>>   include/ras/ras_event.h  | 45 +++++++++++++++++++++++++++++++++++++++++++++
+>>   3 files changed, 63 insertions(+), 1 deletion(-)
 >>
->> diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
->> index e22089f..33a77509 100644
->> --- a/arch/arm/include/asm/kvm_arm.h
->> +++ b/arch/arm/include/asm/kvm_arm.h
->> @@ -187,6 +187,7 @@
->>   #define FSC_FAULT	(0x04)
->>   #define FSC_ACCESS	(0x08)
->>   #define FSC_PERM	(0x0c)
->> +#define FSC_EXTABT	(0x10)
+>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+>> index 36894c8..cb4c7f4 100644
+>> --- a/drivers/acpi/apei/ghes.c
+>> +++ b/drivers/acpi/apei/ghes.c
+>> @@ -49,6 +49,7 @@
+>>   #include <acpi/ghes.h>
+>>   #include <acpi/apei.h>
+>>   #include <asm/tlbflush.h>
+>> +#include <ras/ras_event.h>
 >>   
->>   /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
->>   #define HPFAR_MASK	(~0xf)
->> diff --git a/arch/arm/include/asm/system_misc.h b/arch/arm/include/asm/system_misc.h
->> index a3d61ad..86e1faa 100644
->> --- a/arch/arm/include/asm/system_misc.h
->> +++ b/arch/arm/include/asm/system_misc.h
->> @@ -24,4 +24,9 @@ extern unsigned int user_debug;
+>>   #ifdef CONFIG_HAVE_ACPI_APEI_SEA
+>>   #include <asm/system_misc.h>
+>> @@ -468,12 +469,21 @@ static void ghes_do_proc(struct ghes *ghes,
+>>   	int sev, sec_sev;
+>>   	struct acpi_hest_generic_data *gdata;
+>>   	uuid_le sec_type;
+>> +	uuid_le *fru_id;
+>> +	char *fru_text = "";
 >>   
->>   #endif /* !__ASSEMBLY__ */
+>>   	sev = ghes_severity(estatus->error_severity);
+>>   	apei_estatus_for_each_section(estatus, gdata) {
+>>   		sec_sev = ghes_severity(gdata->error_severity);
+>>   		sec_type = *(uuid_le *)gdata->section_type;
 >>   
->> +inline int handle_guest_sea(unsigned long addr, unsigned int esr)
->> +{
->> +	return -1;
->> +}
->> +
->>   #endif /* __ASM_ARM_SYSTEM_MISC_H */
->> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
->> index e9a5c0e..24cde84 100644
->> --- a/arch/arm/kvm/mmu.c
->> +++ b/arch/arm/kvm/mmu.c
->> @@ -29,6 +29,7 @@
->>   #include <asm/kvm_asm.h>
->>   #include <asm/kvm_emulate.h>
->>   #include <asm/virt.h>
->> +#include <asm/system_misc.h>
->>   
->>   #include "trace.h"
->>   
->> @@ -1441,8 +1442,18 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
->>   
->>   	/* Check the stage-2 fault is trans. fault or write fault */
->>   	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
->> -	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
->> -	    fault_status != FSC_ACCESS) {
->> +
->> +	if (fault_status == FSC_EXTABT) {
->> +		if(handle_guest_sea((unsigned long)fault_ipa,
->> +				    kvm_vcpu_get_hsr(vcpu))) {
->> +			kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
->> +				kvm_vcpu_trap_get_class(vcpu),
->> +				(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
->> +				(unsigned long)kvm_vcpu_get_hsr(vcpu));
->> +			return -EFAULT;
->> +		}
->> +	} else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
->> +		   fault_status != FSC_ACCESS) {
->>   		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
->>   			kvm_vcpu_trap_get_class(vcpu),
->>   			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
->> diff --git a/arch/arm64/include/asm/kvm_arm.h b/arch/arm64/include/asm/kvm_arm.h
->> index 4b5c977..be0efb6 100644
->> --- a/arch/arm64/include/asm/kvm_arm.h
->> +++ b/arch/arm64/include/asm/kvm_arm.h
->> @@ -201,6 +201,7 @@
->>   #define FSC_FAULT	ESR_ELx_FSC_FAULT
->>   #define FSC_ACCESS	ESR_ELx_FSC_ACCESS
->>   #define FSC_PERM	ESR_ELx_FSC_PERM
->> +#define FSC_EXTABT	ESR_ELx_FSC_EXTABT
->>   
->>   /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
->>   #define HPFAR_MASK	(~UL(0xf))
->> diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
->> index 90daf4a..8522fff 100644
->> --- a/arch/arm64/include/asm/system_misc.h
->> +++ b/arch/arm64/include/asm/system_misc.h
->> @@ -77,4 +77,6 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
->>   int sea_register_handler_chain(struct notifier_block *nb);
->>   void sea_unregister_handler_chain(struct notifier_block *nb);
->>   
->> +int handle_guest_sea(unsigned long addr, unsigned int esr);
->> +
->>   #endif	/* __ASM_SYSTEM_MISC_H */
->> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
->> index 81cb7ad..d714432 100644
->> --- a/arch/arm64/mm/fault.c
->> +++ b/arch/arm64/mm/fault.c
->> @@ -597,6 +597,19 @@ static const char *fault_name(unsigned int esr)
->>   }
->>   
->>   /*
->> + * Handle Synchronous External Aborts that occur in a guest kernel.
->> + */
->> +int handle_guest_sea(unsigned long addr, unsigned int esr)
->> +{
->> +	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
->> +
->> +	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
->> +		fault_name(esr), esr, addr);
->> +
->> +	return 0;
->> +}
-> Don't we need to pass the abort to the guest?
-This requires some infrastructure to implement virtual "ACPI platform 
-error interface" to expose the details of the abort to the guest. This 
-patchset does not cover that and focuses on feature parity with other 
-architectures that support APEI. There are discussions among Linaro 
-partners about how this can be achieved in the long term, but that work 
-is outside the scope of this patchset. This patch will ensure that if a 
-guest encounters one of these errors then it will be reported before 
-getting killed. Before this patch we would just get an unsupported FSC 
-print out and then the guest would be killed.
+>> +		if (gdata->validation_bits & CPER_SEC_VALID_FRU_ID)
+>> +			fru_id = (uuid_le *)gdata->fru_id;
+>> +		else
+>> +			fru_id = &NULL_UUID_LE;
+> fru_id can be initialised at declaration and drop the else here. The
+> same is already being done for fru_text.
+Yes, I will make this change in the next version.
 
 Thanks,
 Tyler
->
 > Thanks,
 > Punit
 >
+>> +		if (gdata->validation_bits & CPER_SEC_VALID_FRU_TEXT)
+>> +			fru_text = gdata->fru_text;
 >> +
->> +/*
->>    * Dispatch a data abort to the relevant handler.
->>    */
->>   asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
+>>   		if (!uuid_le_cmp(sec_type,
+>>   				 CPER_SEC_PLATFORM_MEM)) {
+>>   			struct cper_sec_mem_err *mem_err;
+> [...]
+>
 
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
