@@ -1,15 +1,15 @@
-From: Punit Agrawal <punit.agrawal@arm.com>
-Subject: Re: [PATCH V3 10/10] arm64: KVM: add guest SEA support
-Date: Thu, 13 Oct 2016 14:14:48 +0100
-Message-ID: <87h98gs853.fsf@e105922-lin.cambridge.arm.com>
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V3 01/10] acpi: apei: read ack upon ghes record consumption
+Date: Thu, 13 Oct 2016 07:49:00 -0600
+Message-ID: <4ffb4e6c-8b39-b423-f137-666d27897af3@codeaurora.org>
 References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
- <1475875882-2604-11-git-send-email-tbaicar@codeaurora.org>
+ <1475875882-2604-2-git-send-email-tbaicar@codeaurora.org>
+ <8760oxtw42.fsf@e105922-lin.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
 Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <1475875882-2604-11-git-send-email-tbaicar@codeaurora.org> (Tyler
- Baicar's message of "Fri, 7 Oct 2016 15:31:22 -0600")
+In-Reply-To: <8760oxtw42.fsf@e105922-lin.cambridge.arm.com>
 List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
 List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
@@ -19,140 +19,200 @@ List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
 Errors-To: kvmarm-bounces@lists.cs.columbia.edu
 Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, shijie.huang@arm.com, lenb@kernel.org, marc.zyngier@arm.com, tomasz.nowicki@linaro.org, rostedt@goodmis.org, sandeepa.s.prabhu@gmail.com, Dkvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, linux-kernel@vger.kernel.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
+To: Punit Agrawal <punit.agrawal@arm.com>
+Cc: linux-efi@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, shijie.huang@arm.com, lenb@kernel.org, marc.zyngier@arm.com, tomasz.nowicki@linaro.org, Naveen Kaje <nkaje@codeaurora.org>, rostedt@goodmis.org, sandeepa.s.prabhu@gmail.com, Dkvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, linux-kernel@vger.kernel.org, Richard Ruigrok <rruigrok@codeaurora.org>, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-Hi Tyler,
+Hello Punit,
 
-I know I've had my last comment already ;), but I thought I'd rather
-raise the question than stay confused...
+Thank you for the feedback! Responses below
 
-Tyler Baicar <tbaicar@codeaurora.org> writes:
-
-> Currently external aborts are unsupported by the guest abort
-> handling. Add handling for SEAs so that the host kernel reports
-> SEAs which occur in the guest kernel.
+On 10/12/2016 9:39 AM, Punit Agrawal wrote:
+> Hi Tyler,
 >
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> ---
->  arch/arm/include/asm/kvm_arm.h       |  1 +
->  arch/arm/include/asm/system_misc.h   |  5 +++++
->  arch/arm/kvm/mmu.c                   | 15 +++++++++++++--
->  arch/arm64/include/asm/kvm_arm.h     |  1 +
->  arch/arm64/include/asm/system_misc.h |  2 ++
->  arch/arm64/mm/fault.c                | 13 +++++++++++++
->  6 files changed, 35 insertions(+), 2 deletions(-)
+> A few comments below.
 >
-> diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
-> index e22089f..33a77509 100644
-> --- a/arch/arm/include/asm/kvm_arm.h
-> +++ b/arch/arm/include/asm/kvm_arm.h
-> @@ -187,6 +187,7 @@
->  #define FSC_FAULT	(0x04)
->  #define FSC_ACCESS	(0x08)
->  #define FSC_PERM	(0x0c)
-> +#define FSC_EXTABT	(0x10)
->  
->  /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
->  #define HPFAR_MASK	(~0xf)
-> diff --git a/arch/arm/include/asm/system_misc.h b/arch/arm/include/asm/system_misc.h
-> index a3d61ad..86e1faa 100644
-> --- a/arch/arm/include/asm/system_misc.h
-> +++ b/arch/arm/include/asm/system_misc.h
-> @@ -24,4 +24,9 @@ extern unsigned int user_debug;
->  
->  #endif /* !__ASSEMBLY__ */
->  
-> +inline int handle_guest_sea(unsigned long addr, unsigned int esr)
-> +{
-> +	return -1;
-> +}
-> +
->  #endif /* __ASM_ARM_SYSTEM_MISC_H */
-> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
-> index e9a5c0e..24cde84 100644
-> --- a/arch/arm/kvm/mmu.c
-> +++ b/arch/arm/kvm/mmu.c
-> @@ -29,6 +29,7 @@
->  #include <asm/kvm_asm.h>
->  #include <asm/kvm_emulate.h>
->  #include <asm/virt.h>
-> +#include <asm/system_misc.h>
->  
->  #include "trace.h"
->  
-> @@ -1441,8 +1442,18 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
->  
->  	/* Check the stage-2 fault is trans. fault or write fault */
->  	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
-> -	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
-> -	    fault_status != FSC_ACCESS) {
-> +
-> +	if (fault_status == FSC_EXTABT) {
-> +		if(handle_guest_sea((unsigned long)fault_ipa,
-> +				    kvm_vcpu_get_hsr(vcpu))) {
-> +			kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
-> +				kvm_vcpu_trap_get_class(vcpu),
-> +				(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
-> +				(unsigned long)kvm_vcpu_get_hsr(vcpu));
-> +			return -EFAULT;
-> +		}
-> +	} else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
-> +		   fault_status != FSC_ACCESS) {
->  		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
->  			kvm_vcpu_trap_get_class(vcpu),
->  			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
-> diff --git a/arch/arm64/include/asm/kvm_arm.h b/arch/arm64/include/asm/kvm_arm.h
-> index 4b5c977..be0efb6 100644
-> --- a/arch/arm64/include/asm/kvm_arm.h
-> +++ b/arch/arm64/include/asm/kvm_arm.h
-> @@ -201,6 +201,7 @@
->  #define FSC_FAULT	ESR_ELx_FSC_FAULT
->  #define FSC_ACCESS	ESR_ELx_FSC_ACCESS
->  #define FSC_PERM	ESR_ELx_FSC_PERM
-> +#define FSC_EXTABT	ESR_ELx_FSC_EXTABT
->  
->  /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
->  #define HPFAR_MASK	(~UL(0xf))
-> diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
-> index 90daf4a..8522fff 100644
-> --- a/arch/arm64/include/asm/system_misc.h
-> +++ b/arch/arm64/include/asm/system_misc.h
-> @@ -77,4 +77,6 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
->  int sea_register_handler_chain(struct notifier_block *nb);
->  void sea_unregister_handler_chain(struct notifier_block *nb);
->  
-> +int handle_guest_sea(unsigned long addr, unsigned int esr);
-> +
->  #endif	/* __ASM_SYSTEM_MISC_H */
-> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-> index 81cb7ad..d714432 100644
-> --- a/arch/arm64/mm/fault.c
-> +++ b/arch/arm64/mm/fault.c
-> @@ -597,6 +597,19 @@ static const char *fault_name(unsigned int esr)
->  }
->  
->  /*
-> + * Handle Synchronous External Aborts that occur in a guest kernel.
-> + */
-> +int handle_guest_sea(unsigned long addr, unsigned int esr)
-> +{
-> +	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
-> +
-> +	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
-> +		fault_name(esr), esr, addr);
-> +
-> +	return 0;
-> +}
-
-Don't we need to pass the abort to the guest?
+> Tyler Baicar <tbaicar@codeaurora.org> writes:
+>
+>> A RAS (Reliability, Availability, Serviceability) controller
+>> may be a separate processor running in parallel with OS
+>> execution, and may generate error records for consumption by
+>> the OS. If the RAS controller produces multiple error records,
+>> then they may be overwritten before the OS has consumed them.
+>>
+>> The Generic Hardware Error Source (GHES) v2 structure
+>> introduces the capability for the OS to acknowledge the
+>> consumption of the error record generated by the RAS
+>> controller. A RAS controller supporting GHESv2 shall wait for
+>> the acknowledgment before writing a new error record, thus
+>> eliminating the race condition.
+>>
+>> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+>> Signed-off-by: Richard Ruigrok <rruigrok@codeaurora.org>
+>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+>> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+>> ---
+>>   drivers/acpi/apei/ghes.c | 41 +++++++++++++++++++++++++++++++++++++++++
+>>   drivers/acpi/apei/hest.c |  7 +++++--
+>>   include/acpi/ghes.h      |  1 +
+>>   3 files changed, 47 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+>> index 60746ef..3021f0e 100644
+>> --- a/drivers/acpi/apei/ghes.c
+>> +++ b/drivers/acpi/apei/ghes.c
+>> @@ -45,6 +45,7 @@
+>>   #include <linux/aer.h>
+>>   #include <linux/nmi.h>
+>>   
+>> +#include <acpi/actbl1.h>
+>>   #include <acpi/ghes.h>
+>>   #include <acpi/apei.h>
+>>   #include <asm/tlbflush.h>
+>> @@ -244,10 +245,22 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+>>   	struct ghes *ghes;
+>>   	unsigned int error_block_length;
+>>   	int rc;
+>> +	struct acpi_hest_header *hest_hdr;
+>>   
+>>   	ghes = kzalloc(sizeof(*ghes), GFP_KERNEL);
+>>   	if (!ghes)
+>>   		return ERR_PTR(-ENOMEM);
+>> +
+>> +	hest_hdr = (struct acpi_hest_header *)generic;
+>> +	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR_V2) {
+>> +		ghes->generic_v2 = (struct acpi_hest_generic_v2 *)generic;
+>> +		rc = apei_map_generic_address(
+>> +			&ghes->generic_v2->read_ack_register);
+>> +		if (rc)
+>> +			goto err_unmap;
+>> +	} else
+>> +		ghes->generic_v2 = NULL;
+> Since you kzalloc ghes, shouldn't ghes->generic_v2 be NULL already?
+Yes, the documentation says kzalloc returns memory set to zero, so I 
+will remove this else statement.
+>> +
+>>   	ghes->generic = generic;
+>>   	rc = apei_map_generic_address(&generic->error_status_address);
+>>   	if (rc)
+>> @@ -270,6 +283,9 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+>>   
+>>   err_unmap:
+>>   	apei_unmap_generic_address(&generic->error_status_address);
+>> +	if (ghes->generic_v2)
+>> +		apei_unmap_generic_address(
+>> +			&ghes->generic_v2->read_ack_register);
+>>   err_free:
+>>   	kfree(ghes);
+>>   	return ERR_PTR(rc);
+>> @@ -279,6 +295,9 @@ static void ghes_fini(struct ghes *ghes)
+>>   {
+>>   	kfree(ghes->estatus);
+>>   	apei_unmap_generic_address(&ghes->generic->error_status_address);
+>> +	if (ghes->generic_v2)
+>> +		apei_unmap_generic_address(
+>> +			&ghes->generic_v2->read_ack_register);
+>>   }
+>>   
+>>   static inline int ghes_severity(int severity)
+>> @@ -648,6 +667,22 @@ static void ghes_estatus_cache_add(
+>>   	rcu_read_unlock();
+>>   }
+>>   
+>> +static int ghes_do_read_ack(struct acpi_hest_generic_v2 *generic_v2)
+>> +{
+>> +	int rc;
+>> +	u64 val = 0;
+>> +
+>> +	rc = apei_read(&val, &generic_v2->read_ack_register);
+>> +	if (rc)
+>> +		return rc;
+>> +	val &= generic_v2->read_ack_preserve <<
+>> +		generic_v2->read_ack_register.bit_offset;
+>> +	val |= generic_v2->read_ack_write;
+> Reading the spec, it is not clear whether you need the left shift
+> above.
+>
+> Having said that, if you do it for read_ack_preserve, do you also need
+> to left shift read_ack_write by read_ack_register.bit_offset?
+Good catch, it looks like the read_ack_write should also get this shift. 
+I'm using a shift of 0 so I didn't catch this in testing :)
+>> +	rc = apei_write(val, &generic_v2->read_ack_register);
+>> +
+>> +	return rc;
+>> +}
+>> +
+>>   static int ghes_proc(struct ghes *ghes)
+>>   {
+>>   	int rc;
+>> @@ -660,6 +695,12 @@ static int ghes_proc(struct ghes *ghes)
+>>   			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+>>   	}
+>>   	ghes_do_proc(ghes, ghes->estatus);
+>> +
+>> +	if (ghes->generic_v2) {
+>> +		rc = ghes_do_read_ack(ghes->generic_v2);
+>> +		if (rc)
+>> +			return rc;
+>> +	}
+>>   out:
+>>   	ghes_clear_estatus(ghes);
+>>   	return 0;
+>> diff --git a/drivers/acpi/apei/hest.c b/drivers/acpi/apei/hest.c
+>> index 792a0d9..ef725a9 100644
+>> --- a/drivers/acpi/apei/hest.c
+>> +++ b/drivers/acpi/apei/hest.c
+>> @@ -52,6 +52,7 @@ static const int hest_esrc_len_tab[ACPI_HEST_TYPE_RESERVED] = {
+>>   	[ACPI_HEST_TYPE_AER_ENDPOINT] = sizeof(struct acpi_hest_aer),
+>>   	[ACPI_HEST_TYPE_AER_BRIDGE] = sizeof(struct acpi_hest_aer_bridge),
+>>   	[ACPI_HEST_TYPE_GENERIC_ERROR] = sizeof(struct acpi_hest_generic),
+>> +	[ACPI_HEST_TYPE_GENERIC_ERROR_V2] = sizeof(struct acpi_hest_generic_v2),
+>>   };
+>>   
+>>   static int hest_esrc_len(struct acpi_hest_header *hest_hdr)
+>> @@ -146,7 +147,8 @@ static int __init hest_parse_ghes_count(struct acpi_hest_header *hest_hdr, void
+>>   {
+>>   	int *count = data;
+>>   
+>> -	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR)
+>> +	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR ||
+>> +	    hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+>>   		(*count)++;
+>>   	return 0;
+>>   }
+>> @@ -157,7 +159,8 @@ static int __init hest_parse_ghes(struct acpi_hest_header *hest_hdr, void *data)
+>>   	struct ghes_arr *ghes_arr = data;
+>>   	int rc, i;
+>>   
+>> -	if (hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR)
+>> +	if (hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR &&
+>> +	    hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+>>   		return 0;
+>>   
+>>   	if (!((struct acpi_hest_generic *)hest_hdr)->enabled)
+>> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+>> index 720446c..d0108b6 100644
+>> --- a/include/acpi/ghes.h
+>> +++ b/include/acpi/ghes.h
+>> @@ -14,6 +14,7 @@
+>>   
+>>   struct ghes {
+>>   	struct acpi_hest_generic *generic;
+>> +	struct acpi_hest_generic_v2 *generic_v2;
+> You either have a GHES or a GHESv2 structure. Instead of duplication,
+> could this be represented as a union?
+>
+> Thanks,
+> Punit
+I think that should be doable. I'll make these changes in the next version.
 
 Thanks,
-Punit
+Tyler
+>>   	struct acpi_hest_generic_status *estatus;
+>>   	u64 buffer_paddr;
+>>   	unsigned long flags;
 
-> +
-> +/*
->   * Dispatch a data abort to the relevant handler.
->   */
->  asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
+-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
