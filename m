@@ -1,16 +1,17 @@
-From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V3 06/10] acpi: apei: panic OS with fatal error status
- block
-Date: Thu, 13 Oct 2016 17:34:08 -0600
-Message-ID: <18205aac-02ae-bd45-2d2d-aa01cf845ae7@codeaurora.org>
+From: Punit Agrawal <punit.agrawal@arm.com>
+Subject: Re: [PATCH V3 10/10] arm64: KVM: add guest SEA support
+Date: Fri, 14 Oct 2016 10:38:16 +0100
+Message-ID: <878ttrs22f.fsf@e105922-lin.cambridge.arm.com>
 References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
- <1475875882-2604-7-git-send-email-tbaicar@codeaurora.org>
- <bf911628-71be-0dca-f1c7-c12e681bd37f@arm.com>
+ <1475875882-2604-11-git-send-email-tbaicar@codeaurora.org>
+ <87h98gs853.fsf@e105922-lin.cambridge.arm.com>
+ <afa9a3c6-7516-cf5c-2366-f826f914d582@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <bf911628-71be-0dca-f1c7-c12e681bd37f@arm.com>
+In-Reply-To: <afa9a3c6-7516-cf5c-2366-f826f914d582@codeaurora.org> (Tyler
+ Baicar's message of "Thu, 13 Oct 2016 14:14:27 -0600")
 List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
 List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
@@ -20,102 +21,162 @@ List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
 Errors-To: kvmarm-bounces@lists.cs.columbia.edu
 Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Suzuki K Poulose <Suzuki.Poulose@arm.com>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, Dkvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+To: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Cc: linux-efi@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux@armlinux.org.uk, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, robert.moore@intel.com, linux-acpi@vger.kernel.org, shijie.huang@arm.com, lenb@kernel.org, marc.zyngier@arm.com, tomasz.nowicki@linaro.org, rostedt@goodmis.org, sandeepa.s.prabhu@gmail.com, Dkvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, linux-kernel@vger.kernel.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-Hello Suzuki,
+"Baicar, Tyler" <tbaicar@codeaurora.org> writes:
 
-On 10/13/2016 7:00 AM, Suzuki K Poulose wrote:
-> On 07/10/16 22:31, Tyler Baicar wrote:
->> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
->>
->> Even if an error status block's severity is fatal, the kernel does not
->> honor the severity level and panic.
->>
->> With the firmware first model, the platform could inform the OS about a
->> fatal hardware error through the non-NMI GHES notification type. The OS
->> should panic when a hardware error record is received with this
->> severity.
->>
->> Call panic() after CPER data in error status block is printed if
->> severity is fatal, before each error section is handled.
->>
->> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
->> ---
->>  drivers/acpi/apei/ghes.c | 10 ++++++++--
->>  1 file changed, 8 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
->> index 28d5a09..36894c8 100644
->> --- a/drivers/acpi/apei/ghes.c
->> +++ b/drivers/acpi/apei/ghes.c
->> @@ -141,6 +141,8 @@ static unsigned long ghes_estatus_pool_size_request;
->>  static struct ghes_estatus_cache 
->> *ghes_estatus_caches[GHES_ESTATUS_CACHES_SIZE];
->>  static atomic_t ghes_estatus_cache_alloced;
->>
->> +static int ghes_panic_timeout __read_mostly = 30;
->> +
->>  static int ghes_ioremap_init(void)
->>  {
->>      ghes_ioremap_area = __get_vm_area(PAGE_SIZE * GHES_IOREMAP_PAGES,
->> @@ -715,6 +717,12 @@ static int ghes_proc(struct ghes *ghes)
->>          if (ghes_print_estatus(NULL, ghes->generic, ghes->estatus))
->>              ghes_estatus_cache_add(ghes->generic, ghes->estatus);
->>      }
->> +    if (ghes_severity(ghes->estatus->error_severity) >= 
->> GHES_SEV_PANIC) {
->> +        if (panic_timeout == 0)
->> +            panic_timeout = ghes_panic_timeout;
->> +        panic("Fatal hardware error!");
+> Hello Punit,
 >
-> I think there is a chance that we might miss the o/p of 
-> ghes_print_estatus() as we use
-> no pfx, and it could default to the normal loglevel and would never 
-> get printed
-> if panic() is encountered before it. On the other hand, there is 
-> already a
-> __ghes_panic() which does similar stuff. Is there a way we could reuse
-> (may be even parts of) it ? Or at least use KERN_EMERG for the 
-> ghes_print_estatus(),
-> if the severity could result in panic() ?
-__ghes_panic() does additional handling which we do not want to do here. 
-I could make the following a helper function so it is not duplicated though:
+> On 10/13/2016 7:14 AM, Punit Agrawal wrote:
+>> Hi Tyler,
+>>
+>> I know I've had my last comment already ;), but I thought I'd rather
+>> raise the question than stay confused...
+>>
+>> Tyler Baicar <tbaicar@codeaurora.org> writes:
+>>
+>>> Currently external aborts are unsupported by the guest abort
+>>> handling. Add handling for SEAs so that the host kernel reports
+>>> SEAs which occur in the guest kernel.
+>>>
+>>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+>>> ---
+>>>   arch/arm/include/asm/kvm_arm.h       |  1 +
+>>>   arch/arm/include/asm/system_misc.h   |  5 +++++
+>>>   arch/arm/kvm/mmu.c                   | 15 +++++++++++++--
+>>>   arch/arm64/include/asm/kvm_arm.h     |  1 +
+>>>   arch/arm64/include/asm/system_misc.h |  2 ++
+>>>   arch/arm64/mm/fault.c                | 13 +++++++++++++
+>>>   6 files changed, 35 insertions(+), 2 deletions(-)
+>>>
+>>> diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
+>>> index e22089f..33a77509 100644
+>>> --- a/arch/arm/include/asm/kvm_arm.h
+>>> +++ b/arch/arm/include/asm/kvm_arm.h
+>>> @@ -187,6 +187,7 @@
+>>>   #define FSC_FAULT	(0x04)
+>>>   #define FSC_ACCESS	(0x08)
+>>>   #define FSC_PERM	(0x0c)
+>>> +#define FSC_EXTABT	(0x10)
+>>>     /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
+>>>   #define HPFAR_MASK	(~0xf)
+>>> diff --git a/arch/arm/include/asm/system_misc.h b/arch/arm/include/asm/system_misc.h
+>>> index a3d61ad..86e1faa 100644
+>>> --- a/arch/arm/include/asm/system_misc.h
+>>> +++ b/arch/arm/include/asm/system_misc.h
+>>> @@ -24,4 +24,9 @@ extern unsigned int user_debug;
+>>>     #endif /* !__ASSEMBLY__ */
+>>>   +inline int handle_guest_sea(unsigned long addr, unsigned int
+>>> esr)
+>>> +{
+>>> +	return -1;
+>>> +}
+>>> +
+>>>   #endif /* __ASM_ARM_SYSTEM_MISC_H */
+>>> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
+>>> index e9a5c0e..24cde84 100644
+>>> --- a/arch/arm/kvm/mmu.c
+>>> +++ b/arch/arm/kvm/mmu.c
+>>> @@ -29,6 +29,7 @@
+>>>   #include <asm/kvm_asm.h>
+>>>   #include <asm/kvm_emulate.h>
+>>>   #include <asm/virt.h>
+>>> +#include <asm/system_misc.h>
+>>>     #include "trace.h"
+>>>   @@ -1441,8 +1442,18 @@ int kvm_handle_guest_abort(struct kvm_vcpu
+>>> *vcpu, struct kvm_run *run)
+>>>     	/* Check the stage-2 fault is trans. fault or write fault */
+>>>   	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
+>>> -	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>>> -	    fault_status != FSC_ACCESS) {
+>>> +
+>>> +	if (fault_status == FSC_EXTABT) {
+>>> +		if(handle_guest_sea((unsigned long)fault_ipa,
+>>> +				    kvm_vcpu_get_hsr(vcpu))) {
+>>> +			kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
+>>> +				kvm_vcpu_trap_get_class(vcpu),
+>>> +				(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+>>> +				(unsigned long)kvm_vcpu_get_hsr(vcpu));
+>>> +			return -EFAULT;
+>>> +		}
+>>> +	} else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>>> +		   fault_status != FSC_ACCESS) {
+>>>   		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
+>>>   			kvm_vcpu_trap_get_class(vcpu),
+>>>   			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+>>> diff --git a/arch/arm64/include/asm/kvm_arm.h b/arch/arm64/include/asm/kvm_arm.h
+>>> index 4b5c977..be0efb6 100644
+>>> --- a/arch/arm64/include/asm/kvm_arm.h
+>>> +++ b/arch/arm64/include/asm/kvm_arm.h
+>>> @@ -201,6 +201,7 @@
+>>>   #define FSC_FAULT	ESR_ELx_FSC_FAULT
+>>>   #define FSC_ACCESS	ESR_ELx_FSC_ACCESS
+>>>   #define FSC_PERM	ESR_ELx_FSC_PERM
+>>> +#define FSC_EXTABT	ESR_ELx_FSC_EXTABT
+>>>     /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
+>>>   #define HPFAR_MASK	(~UL(0xf))
+>>> diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
+>>> index 90daf4a..8522fff 100644
+>>> --- a/arch/arm64/include/asm/system_misc.h
+>>> +++ b/arch/arm64/include/asm/system_misc.h
+>>> @@ -77,4 +77,6 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
+>>>   int sea_register_handler_chain(struct notifier_block *nb);
+>>>   void sea_unregister_handler_chain(struct notifier_block *nb);
+>>>   +int handle_guest_sea(unsigned long addr, unsigned int esr);
+>>> +
+>>>   #endif	/* __ASM_SYSTEM_MISC_H */
+>>> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+>>> index 81cb7ad..d714432 100644
+>>> --- a/arch/arm64/mm/fault.c
+>>> +++ b/arch/arm64/mm/fault.c
+>>> @@ -597,6 +597,19 @@ static const char *fault_name(unsigned int esr)
+>>>   }
+>>>     /*
+>>> + * Handle Synchronous External Aborts that occur in a guest kernel.
+>>> + */
+>>> +int handle_guest_sea(unsigned long addr, unsigned int esr)
+>>> +{
+>>> +	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
+>>> +
+>>> +	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
+>>> +		fault_name(esr), esr, addr);
+>>> +
+>>> +	return 0;
+>>> +}
+>> Don't we need to pass the abort to the guest?
+> This requires some infrastructure to implement virtual "ACPI platform
+> error interface" to expose the details of the abort to the guest. This
+> patchset does not cover that and focuses on feature parity with other
+> architectures that support APEI. There are discussions among Linaro
+> partners about how this can be achieved in the long term, but that
+> work is outside the scope of this patchset. This patch will ensure
+> that if a guest encounters one of these errors then it will be
+> reported before getting killed. Before this patch we would just get an
+> unsupported FSC print out and then the guest would be killed.
 
-if (panic_timeout == 0)
-     panic_timeout = ghes_panic_timeout;
-panic("Fatal hardware error!");
+OK.
 
-The pfx is actually being calculated already in __ghes_print_estatus():
+I think we might be talking about different things though.
 
-         if (pfx == NULL) {
-                 if (ghes_severity(estatus->error_severity) <=
-                     GHES_SEV_CORRECTED)
-                         pfx = KERN_WARNING;
-                 else
-                         pfx = KERN_ERR;
-         }
+I am referring to the injection of the synchronous external abort into
+the guest - similar to what's been done for prefetch abort in the
+kvm_guest_handle_abort.
 
- From ghes.h:
+Maybe there is no benefit in passing the abort to the guest. In that
+case, can you please add a comment where you handle external abort
+(FSC_EXTABT) in kvm_guest_handle_abort.
 
-enum {
-         GHES_SEV_NO = 0x0,
-         GHES_SEV_CORRECTED = 0x1,
-         GHES_SEV_RECOVERABLE = 0x2,
-         GHES_SEV_PANIC = 0x3,
-};
-
-This will make the pfx KERN_ERR for the case of a panic.
-
-Thanks,
-Tyler
 >
-> Cheers
-> Suzuki
->
-
--- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+> Thanks,
+> Tyler
+>>
+>> Thanks,
+>> Punit
+>>
+>>> +
+>>> +/*
+>>>    * Dispatch a data abort to the relevant handler.
+>>>    */
+>>>   asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
