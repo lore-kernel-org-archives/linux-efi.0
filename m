@@ -1,17 +1,18 @@
 From: Punit Agrawal <punit.agrawal@arm.com>
-Subject: Re: [PATCH V3 10/10] arm64: KVM: add guest SEA support
-Date: Fri, 14 Oct 2016 10:38:16 +0100
-Message-ID: <878ttrs22f.fsf@e105922-lin.cambridge.arm.com>
+Subject: Re: [PATCH V3 05/10] acpi: apei: handle SEA notification type for
+ ARMv8
+Date: Fri, 14 Oct 2016 10:39:50 +0100
+Message-ID: <874m4fs1zt.fsf@e105922-lin.cambridge.arm.com>
 References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
- <1475875882-2604-11-git-send-email-tbaicar@codeaurora.org>
- <87h98gs853.fsf@e105922-lin.cambridge.arm.com>
- <afa9a3c6-7516-cf5c-2366-f826f914d582@codeaurora.org>
+ <1475875882-2604-6-git-send-email-tbaicar@codeaurora.org>
+ <87shs1sb1b.fsf@e105922-lin.cambridge.arm.com>
+ <90d13241-d6b9-0b81-9f92-71df99b91b67@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <afa9a3c6-7516-cf5c-2366-f826f914d582@codeaurora.org> (Tyler
- Baicar's message of "Thu, 13 Oct 2016 14:14:27 -0600")
+In-Reply-To: <90d13241-d6b9-0b81-9f92-71df99b91b67@codeaurora.org> (Tyler
+ Baicar's message of "Thu, 13 Oct 2016 08:03:55 -0600")
 List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
 List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
@@ -22,161 +23,94 @@ List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
 Errors-To: kvmarm-bounces@lists.cs.columbia.edu
 Sender: kvmarm-bounces@lists.cs.columbia.edu
 To: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux@armlinux.org.uk, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, robert.moore@intel.com, linux-acpi@vger.kernel.org, shijie.huang@arm.com, lenb@kernel.org, marc.zyngier@arm.com, tomasz.nowicki@linaro.org, rostedt@goodmis.org, sandeepa.s.prabhu@gmail.com, Dkvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, linux-kernel@vger.kernel.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
+Cc: linux-efi@vger.kernel.org, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux@armlinux.org.uk, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, robert.moore@intel.com, linux-acpi@vger.kernel.org, shijie.huang@arm.com, lenb@kernel.org, marc.zyngier@arm.com, tomasz.nowicki@linaro.org, Naveen Kaje <nkaje@codeaurora.org>, rostedt@goodmis.org, sandeepa.s.prabhu@gmail.com, Dkvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, linux-kernel@vger.kernel.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
 "Baicar, Tyler" <tbaicar@codeaurora.org> writes:
 
 > Hello Punit,
 >
-> On 10/13/2016 7:14 AM, Punit Agrawal wrote:
->> Hi Tyler,
->>
->> I know I've had my last comment already ;), but I thought I'd rather
->> raise the question than stay confused...
->>
+>
+> On 10/12/2016 12:00 PM, Punit Agrawal wrote:
 >> Tyler Baicar <tbaicar@codeaurora.org> writes:
 >>
->>> Currently external aborts are unsupported by the guest abort
->>> handling. Add handling for SEAs so that the host kernel reports
->>> SEAs which occur in the guest kernel.
+>>> ARM APEI extension proposal added SEA (Synchrounous External
+>>> Abort) notification type for ARMv8.
+>>> Add a new GHES error source handling function for SEA. If an error
+>>> source's notification type is SEA, then this function can be registered
+>>> into the SEA exception handler. That way GHES will parse and report
+>>> SEA exceptions when they occur.
 >>>
+>>> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
 >>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
->>> ---
->>>   arch/arm/include/asm/kvm_arm.h       |  1 +
->>>   arch/arm/include/asm/system_misc.h   |  5 +++++
->>>   arch/arm/kvm/mmu.c                   | 15 +++++++++++++--
->>>   arch/arm64/include/asm/kvm_arm.h     |  1 +
->>>   arch/arm64/include/asm/system_misc.h |  2 ++
->>>   arch/arm64/mm/fault.c                | 13 +++++++++++++
->>>   6 files changed, 35 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
->>> index e22089f..33a77509 100644
->>> --- a/arch/arm/include/asm/kvm_arm.h
->>> +++ b/arch/arm/include/asm/kvm_arm.h
->>> @@ -187,6 +187,7 @@
->>>   #define FSC_FAULT	(0x04)
->>>   #define FSC_ACCESS	(0x08)
->>>   #define FSC_PERM	(0x0c)
->>> +#define FSC_EXTABT	(0x10)
->>>     /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
->>>   #define HPFAR_MASK	(~0xf)
->>> diff --git a/arch/arm/include/asm/system_misc.h b/arch/arm/include/asm/system_misc.h
->>> index a3d61ad..86e1faa 100644
->>> --- a/arch/arm/include/asm/system_misc.h
->>> +++ b/arch/arm/include/asm/system_misc.h
->>> @@ -24,4 +24,9 @@ extern unsigned int user_debug;
->>>     #endif /* !__ASSEMBLY__ */
->>>   +inline int handle_guest_sea(unsigned long addr, unsigned int
->>> esr)
->>> +{
->>> +	return -1;
->>> +}
->>> +
->>>   #endif /* __ASM_ARM_SYSTEM_MISC_H */
->>> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
->>> index e9a5c0e..24cde84 100644
->>> --- a/arch/arm/kvm/mmu.c
->>> +++ b/arch/arm/kvm/mmu.c
->>> @@ -29,6 +29,7 @@
->>>   #include <asm/kvm_asm.h>
->>>   #include <asm/kvm_emulate.h>
->>>   #include <asm/virt.h>
+>>> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+>> This patch fails to apply for me on v4.8. Is there a different tree this
+>> is based on?
+> This patch was giving me some grief as well. I'm not sure why that is
+> because this patchset was based on the 4.8 kernel with the dependent
+> patch for initial APEI support.
+
+That explains it!. I've missed out the dependency called out in the
+cover letter.
+
+
+>> One comment below.
+>>
+>> [...]
+>>
+>>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+>>> index c8488f1..28d5a09 100644
+>>> --- a/drivers/acpi/apei/ghes.c
+>>> +++ b/drivers/acpi/apei/ghes.c
+>>> @@ -50,6 +50,10 @@
+>>>   #include <acpi/apei.h>
+>>>   #include <asm/tlbflush.h>
+>>>   +#ifdef CONFIG_HAVE_ACPI_APEI_SEA
 >>> +#include <asm/system_misc.h>
->>>     #include "trace.h"
->>>   @@ -1441,8 +1442,18 @@ int kvm_handle_guest_abort(struct kvm_vcpu
->>> *vcpu, struct kvm_run *run)
->>>     	/* Check the stage-2 fault is trans. fault or write fault */
->>>   	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
->>> -	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
->>> -	    fault_status != FSC_ACCESS) {
+>>> +#endif
 >>> +
->>> +	if (fault_status == FSC_EXTABT) {
->>> +		if(handle_guest_sea((unsigned long)fault_ipa,
->>> +				    kvm_vcpu_get_hsr(vcpu))) {
->>> +			kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
->>> +				kvm_vcpu_trap_get_class(vcpu),
->>> +				(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
->>> +				(unsigned long)kvm_vcpu_get_hsr(vcpu));
->>> +			return -EFAULT;
->>> +		}
->>> +	} else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
->>> +		   fault_status != FSC_ACCESS) {
->>>   		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
->>>   			kvm_vcpu_trap_get_class(vcpu),
->>>   			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
->>> diff --git a/arch/arm64/include/asm/kvm_arm.h b/arch/arm64/include/asm/kvm_arm.h
->>> index 4b5c977..be0efb6 100644
->>> --- a/arch/arm64/include/asm/kvm_arm.h
->>> +++ b/arch/arm64/include/asm/kvm_arm.h
->>> @@ -201,6 +201,7 @@
->>>   #define FSC_FAULT	ESR_ELx_FSC_FAULT
->>>   #define FSC_ACCESS	ESR_ELx_FSC_ACCESS
->>>   #define FSC_PERM	ESR_ELx_FSC_PERM
->>> +#define FSC_EXTABT	ESR_ELx_FSC_EXTABT
->>>     /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
->>>   #define HPFAR_MASK	(~UL(0xf))
->>> diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
->>> index 90daf4a..8522fff 100644
->>> --- a/arch/arm64/include/asm/system_misc.h
->>> +++ b/arch/arm64/include/asm/system_misc.h
->>> @@ -77,4 +77,6 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
->>>   int sea_register_handler_chain(struct notifier_block *nb);
->>>   void sea_unregister_handler_chain(struct notifier_block *nb);
->>>   +int handle_guest_sea(unsigned long addr, unsigned int esr);
+>>>   #include "apei-internal.h"
+>>>     #define GHES_PFX	"GHES: "
+>>> @@ -779,6 +783,62 @@ static struct notifier_block ghes_notifier_sci = {
+>>>   	.notifier_call = ghes_notify_sci,
+>>>   };
+>>>   +#ifdef CONFIG_HAVE_ACPI_APEI_SEA
+>>> +static LIST_HEAD(ghes_sea);
 >>> +
->>>   #endif	/* __ASM_SYSTEM_MISC_H */
->>> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
->>> index 81cb7ad..d714432 100644
->>> --- a/arch/arm64/mm/fault.c
->>> +++ b/arch/arm64/mm/fault.c
->>> @@ -597,6 +597,19 @@ static const char *fault_name(unsigned int esr)
->>>   }
->>>     /*
->>> + * Handle Synchronous External Aborts that occur in a guest kernel.
->>> + */
->>> +int handle_guest_sea(unsigned long addr, unsigned int esr)
+>>> +static int ghes_notify_sea(struct notifier_block *this,
+>>> +				  unsigned long event, void *data)
 >>> +{
->>> +	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
+>>> +	struct ghes *ghes;
+>>> +	int ret = NOTIFY_DONE;
 >>> +
->>> +	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
->>> +		fault_name(esr), esr, addr);
->>> +
->>> +	return 0;
->>> +}
->> Don't we need to pass the abort to the guest?
-> This requires some infrastructure to implement virtual "ACPI platform
-> error interface" to expose the details of the abort to the guest. This
-> patchset does not cover that and focuses on feature parity with other
-> architectures that support APEI. There are discussions among Linaro
-> partners about how this can be achieved in the long term, but that
-> work is outside the scope of this patchset. This patch will ensure
-> that if a guest encounters one of these errors then it will be
-> reported before getting killed. Before this patch we would just get an
-> unsupported FSC print out and then the guest would be killed.
-
-OK.
-
-I think we might be talking about different things though.
-
-I am referring to the injection of the synchronous external abort into
-the guest - similar to what's been done for prefetch abort in the
-kvm_guest_handle_abort.
-
-Maybe there is no benefit in passing the abort to the guest. In that
-case, can you please add a comment where you handle external abort
-(FSC_EXTABT) in kvm_guest_handle_abort.
-
+>>> +	rcu_read_lock();
+>>> +	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
+>>> +		if (!ghes_proc(ghes))
+>>> +			ret = NOTIFY_OK;
+>> Not something you've introduced but it looks like ghes_proc erroneously
+>> never returns anything other than 0. I plan to post the below fix to
+>> address it.
+>>
+>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+>> index 60746ef..caea575 100644
+>> --- a/drivers/acpi/apei/ghes.c
+>> +++ b/drivers/acpi/apei/ghes.c
+>> @@ -662,7 +662,7 @@ static int ghes_proc(struct ghes *ghes)
+>>          ghes_do_proc(ghes, ghes->estatus);
+>>   out:
+>>          ghes_clear_estatus(ghes);
+>> -   return 0;
+>> + return rc;
+>>   }
+> Yes, this definitely should be fixed :)
 >
 > Thanks,
 > Tyler
->>
->> Thanks,
->> Punit
->>
+>>> +	}
+>>> +	rcu_read_unlock();
 >>> +
->>> +/*
->>>    * Dispatch a data abort to the relevant handler.
->>>    */
->>>   asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
+>>> +	return ret;
+>>> +}
+>>> +
+>> [...]
+>>
