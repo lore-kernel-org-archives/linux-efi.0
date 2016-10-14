@@ -1,48 +1,95 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH V3 02/10] ras: acpi/apei: cper: generic error data entry
- v3 per ACPI 6.1
-Date: Fri, 14 Oct 2016 17:39:29 +0100
-Message-ID: <20161014163928.GA25194@leverpostej>
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V3 10/10] arm64: KVM: add guest SEA support
+Date: Fri, 14 Oct 2016 14:58:18 -0700
+Message-ID: <4f99e989-cb7b-2bf3-a947-6f6713e55b6f@codeaurora.org>
 References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
- <1475875882-2604-3-git-send-email-tbaicar@codeaurora.org>
- <3f17d0a8-6b63-5792-903a-341effaae432@arm.com>
- <c17a0c03-5037-d88d-f096-4cc72dbfcb99@codeaurora.org>
- <064dca7d-0625-c0d0-09ae-72ef7abdc63f@arm.com>
- <912acc88-fbaf-2576-8048-1fcc67439600@codeaurora.org>
- <38c7c9ac-e8ad-6fb5-3ee9-3ba85e4b8299@arm.com>
+ <1475875882-2604-11-git-send-email-tbaicar@codeaurora.org>
+ <87h98gs853.fsf@e105922-lin.cambridge.arm.com>
+ <afa9a3c6-7516-cf5c-2366-f826f914d582@codeaurora.org>
+ <878ttrs22f.fsf@e105922-lin.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <38c7c9ac-e8ad-6fb5-3ee9-3ba85e4b8299@arm.com>
+In-Reply-To: <878ttrs22f.fsf@e105922-lin.cambridge.arm.com>
 Sender: linux-acpi-owner@vger.kernel.org
-To: Suzuki K Poulose <Suzuki.Poulose@arm.com>
-Cc: "Baicar, Tyler" <tbaicar@codeaurora.org>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, james.morse@arm.com, akpm@linux-foundation.org, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, Dkvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, Richard
+To: Punit Agrawal <punit.agrawal@arm.com>
+Cc: linux-efi@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, shijie.huang@arm.com, lenb@kernel.org, marc.zyngier@arm.com, tomasz.nowicki@linaro.org, rostedt@goodmis.org, sandeepa.s.prabhu@gmail.com, Dkvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, linux-kernel@vger.kernel.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Oct 14, 2016 at 05:28:58PM +0100, Suzuki K Poulose wrote:
-> On 13/10/16 20:37, Baicar, Tyler wrote:
-> >On 10/13/2016 2:50 AM, Suzuki K Poulose wrote:
-> >>Is it always the same endianness as that of the CPU ?
-> >
-> >It is a fair assumption that the firmware populating this record will
-> >use a CPU of the same endianness. There is no mechanism in the spec
-> >to indicate otherwise.
-> 
-> Yep, you are right. The EFI expects the EL2/EL1 to be of the same endianness
-
-To be clear, it is specifically required in the ACPI spec that elements
-are in little-endian. Per the ACPI 6.1 spec, page 109:
-
-	All numeric values in ACPI-defined tables, blocks, and
-	structures are always encoded in little endian
-	format.
-
-Given that CPER, HEST, etc are defined within the ACPI specification,
-they are covered by this requirement.
-
-Elements outside of the ACPI spec are not necessarily covered by this
-requirement, but their specifications should state their endianness.
+On 10/14/2016 2:38 AM, Punit Agrawal wrote:
+> "Baicar, Tyler" <tbaicar@codeaurora.org> writes:
+>
+>> Hello Punit,
+>>
+>> On 10/13/2016 7:14 AM, Punit Agrawal wrote:
+>>> Hi Tyler,
+>>>
+>>> I know I've had my last comment already ;), but I thought I'd rather
+>>> raise the question than stay confused...
+>>>
+>>> Tyler Baicar <tbaicar@codeaurora.org> writes:
+>>>
+>>>> Currently external aborts are unsupported by the guest abort
+>>>> handling. Add handling for SEAs so that the host kernel reports
+>>>> SEAs which occur in the guest kernel.
+>>>>
+>>>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+>>>> ---
+>>>>    arch/arm/include/asm/kvm_arm.h       |  1 +
+>>>>    arch/arm/include/asm/system_misc.h   |  5 +++++
+>>>>    arch/arm/kvm/mmu.c                   | 15 +++++++++++++--
+>>>>    arch/arm64/include/asm/kvm_arm.h     |  1 +
+>>>>    arch/arm64/include/asm/system_misc.h |  2 ++
+>>>>    arch/arm64/mm/fault.c                | 13 +++++++++++++
+>>>>    6 files changed, 35 insertions(+), 2 deletions(-)
+[...]
+>>>> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+>>>> index 81cb7ad..d714432 100644
+>>>> --- a/arch/arm64/mm/fault.c
+>>>> +++ b/arch/arm64/mm/fault.c
+>>>> @@ -597,6 +597,19 @@ static const char *fault_name(unsigned int esr)
+>>>>    }
+>>>>      /*
+>>>> + * Handle Synchronous External Aborts that occur in a guest kernel.
+>>>> + */
+>>>> +int handle_guest_sea(unsigned long addr, unsigned int esr)
+>>>> +{
+>>>> +	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
+>>>> +
+>>>> +	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
+>>>> +		fault_name(esr), esr, addr);
+>>>> +
+>>>> +	return 0;
+>>>> +}
+>>> Don't we need to pass the abort to the guest?
+>> This requires some infrastructure to implement virtual "ACPI platform
+>> error interface" to expose the details of the abort to the guest. This
+>> patchset does not cover that and focuses on feature parity with other
+>> architectures that support APEI. There are discussions among Linaro
+>> partners about how this can be achieved in the long term, but that
+>> work is outside the scope of this patchset. This patch will ensure
+>> that if a guest encounters one of these errors then it will be
+>> reported before getting killed. Before this patch we would just get an
+>> unsupported FSC print out and then the guest would be killed.
+> OK.
+>
+> I think we might be talking about different things though.
+>
+> I am referring to the injection of the synchronous external abort into
+> the guest - similar to what's been done for prefetch abort in the
+> kvm_guest_handle_abort.
+>
+> Maybe there is no benefit in passing the abort to the guest. In that
+> case, can you please add a comment where you handle external abort
+> (FSC_EXTABT) in kvm_guest_handle_abort.
+Yes, I will add a comment there in the next version.
 
 Thanks,
-Mark.
+Tyler
+
+-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
+
