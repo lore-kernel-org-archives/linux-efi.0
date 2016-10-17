@@ -1,146 +1,110 @@
 From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: Re: [RFC PATCH v1 00/28] x86: Secure Encrypted Virtualization (AMD)
-Date: Mon, 17 Oct 2016 08:51:33 -0500
-Message-ID: <7c1c7a4a-02cd-fa9b-5f4e-065db2042e15@amd.com>
+Subject: Re: [RFC PATCH v1 21/28] KVM: introduce KVM_SEV_ISSUE_CMD ioctl
+Date: Mon, 17 Oct 2016 12:57:00 -0500
+Message-ID: <59369ed7-9d35-baad-e0a9-ce4a62bc30bb@amd.com>
 References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
- <d8f5b59e-5450-6bf6-c01e-084e612a4fed@redhat.com>
+ <147190849706.9523.17127624683768628621.stgit@brijesh-build-machine>
+ <6a6e6a1a-eec8-c547-553d-7746d65fc182@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <d8f5b59e-5450-6bf6-c01e-084e612a4fed@redhat.com>
-Sender: owner-linux-mm@kvack.org
-To: Paolo Bonzini <pbonzini@redhat.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, devel@linuxdriverproject.org, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedoraproject.org, tony.luck@intel.com
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <6a6e6a1a-eec8-c547-553d-7746d65fc182@redhat.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Paolo Bonzini <pbonzini@redhat.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, devel@linuxdriverproject.org, tglx@linutronix.de, mchehab@kernel.or
 Cc: brijesh.singh@amd.com
 List-Id: linux-efi@vger.kernel.org
 
 Hi Paolo,
 
-Thanks for reviews. I will incorporate your feedbacks in v2.
 
-On 10/13/2016 06:19 AM, Paolo Bonzini wrote:
+On 10/13/2016 05:45 AM, Paolo Bonzini wrote:
 >
 >
-> On 23/08/2016 01:23, Brijesh Singh wrote:
->> TODO:
->> - send qemu/seabios RFC's on respective mailing list
->> - integrate the psp driver with CCP driver (they share the PCI id's)
->> - add SEV guest migration command support
->> - add SEV snapshotting command support
->> - determine how to do ioremap of physical memory with mem encryption enabled
->>   (e.g acpi tables)
->
-> The would be encrypted, right?  Similar to the EFI data in patch 9.
-
-Yes.
-
->
->> - determine how to share the guest memory with hypervisor for to support
->>   pvclock driver
->
-> Is it enough if the guest makes that page unencrypted?
->
-
-Yes that should be enough. If guest can mark a page as unencrypted then 
-hypervisor should be able to read and write to that particular page.
-
-Tom's patches have introduced API (set_memory_dec) to mark memory as 
-unencrypted but pvclock drv runs very early during boot (when irq was 
-disabled). Because of this we are not able to use set_memory_dec() to 
-mark the page as unencrypted. Will need to come up with method for 
-handling these cases.
-
-> I reviewed the KVM host-side patches and they are pretty
-> straightforward, so the comments on each patch suffice.
->
-> Thanks,
->
-> Paolo
->
->> Brijesh Singh (11):
->>       crypto: add AMD Platform Security Processor driver
->>       KVM: SVM: prepare to reserve asid for SEV guest
->>       KVM: SVM: prepare for SEV guest management API support
->>       KVM: introduce KVM_SEV_ISSUE_CMD ioctl
->>       KVM: SVM: add SEV launch start command
->>       KVM: SVM: add SEV launch update command
->>       KVM: SVM: add SEV_LAUNCH_FINISH command
->>       KVM: SVM: add KVM_SEV_GUEST_STATUS command
->>       KVM: SVM: add KVM_SEV_DEBUG_DECRYPT command
->>       KVM: SVM: add KVM_SEV_DEBUG_ENCRYPT command
->>       KVM: SVM: add command to query SEV API version
+> On 23/08/2016 01:28, Brijesh Singh wrote:
+>> The ioctl will be used by qemu to issue the Secure Encrypted
+>> Virtualization (SEV) guest commands to transition a guest into
+>> into SEV-enabled mode.
 >>
->> Tom Lendacky (17):
->>       kvm: svm: Add support for additional SVM NPF error codes
->>       kvm: svm: Add kvm_fast_pio_in support
->>       kvm: svm: Use the hardware provided GPA instead of page walk
->>       x86: Secure Encrypted Virtualization (SEV) support
->>       KVM: SVM: prepare for new bit definition in nested_ctl
->>       KVM: SVM: Add SEV feature definitions to KVM
->>       x86: Do not encrypt memory areas if SEV is enabled
->>       Access BOOT related data encrypted with SEV active
->>       x86/efi: Access EFI data as encrypted when SEV is active
->>       x86: Change early_ioremap to early_memremap for BOOT data
->>       x86: Don't decrypt trampoline area if SEV is active
->>       x86: DMA support for SEV memory encryption
->>       iommu/amd: AMD IOMMU support for SEV
->>       x86: Don't set the SME MSR bit when SEV is active
->>       x86: Unroll string I/O when SEV is active
->>       x86: Add support to determine if running with SEV enabled
->>       KVM: SVM: Enable SEV by setting the SEV_ENABLE cpu feature
+>> a typical usage:
 >>
+>> struct kvm_sev_launch_start start;
+>> struct kvm_sev_issue_cmd data;
 >>
->>  arch/x86/boot/compressed/Makefile      |    2
->>  arch/x86/boot/compressed/head_64.S     |   19 +
->>  arch/x86/boot/compressed/mem_encrypt.S |  123 ++++
->>  arch/x86/include/asm/io.h              |   26 +
->>  arch/x86/include/asm/kvm_emulate.h     |    3
->>  arch/x86/include/asm/kvm_host.h        |   27 +
->>  arch/x86/include/asm/mem_encrypt.h     |    3
->>  arch/x86/include/asm/svm.h             |    3
->>  arch/x86/include/uapi/asm/hyperv.h     |    4
->>  arch/x86/include/uapi/asm/kvm_para.h   |    4
->>  arch/x86/kernel/acpi/boot.c            |    4
->>  arch/x86/kernel/head64.c               |    4
->>  arch/x86/kernel/mem_encrypt.S          |   44 ++
->>  arch/x86/kernel/mpparse.c              |   10
->>  arch/x86/kernel/setup.c                |    7
->>  arch/x86/kernel/x8664_ksyms_64.c       |    1
->>  arch/x86/kvm/cpuid.c                   |    4
->>  arch/x86/kvm/mmu.c                     |   20 +
->>  arch/x86/kvm/svm.c                     |  906 ++++++++++++++++++++++++++++++++
->>  arch/x86/kvm/x86.c                     |   73 +++
->>  arch/x86/mm/ioremap.c                  |    7
->>  arch/x86/mm/mem_encrypt.c              |   50 ++
->>  arch/x86/platform/efi/efi_64.c         |   14
->>  arch/x86/realmode/init.c               |   11
->>  drivers/crypto/Kconfig                 |   11
->>  drivers/crypto/Makefile                |    1
->>  drivers/crypto/psp/Kconfig             |    8
->>  drivers/crypto/psp/Makefile            |    3
->>  drivers/crypto/psp/psp-dev.c           |  220 ++++++++
->>  drivers/crypto/psp/psp-dev.h           |   95 +++
->>  drivers/crypto/psp/psp-ops.c           |  454 ++++++++++++++++
->>  drivers/crypto/psp/psp-pci.c           |  376 +++++++++++++
->>  drivers/sfi/sfi_core.c                 |    6
->>  include/linux/ccp-psp.h                |  833 +++++++++++++++++++++++++++++
->>  include/uapi/linux/Kbuild              |    1
->>  include/uapi/linux/ccp-psp.h           |  182 ++++++
->>  include/uapi/linux/kvm.h               |  125 ++++
->>  37 files changed, 3643 insertions(+), 41 deletions(-)
->>  create mode 100644 arch/x86/boot/compressed/mem_encrypt.S
->>  create mode 100644 drivers/crypto/psp/Kconfig
->>  create mode 100644 drivers/crypto/psp/Makefile
->>  create mode 100644 drivers/crypto/psp/psp-dev.c
->>  create mode 100644 drivers/crypto/psp/psp-dev.h
->>  create mode 100644 drivers/crypto/psp/psp-ops.c
->>  create mode 100644 drivers/crypto/psp/psp-pci.c
->>  create mode 100644 include/linux/ccp-psp.h
->>  create mode 100644 include/uapi/linux/ccp-psp.h
+>> data.cmd = KVM_SEV_LAUNCH_START;
+>> data.opaque = &start;
 >>
+>> ret = ioctl(fd, KVM_SEV_ISSUE_CMD, &data);
+>>
+>> On SEV command failure, data.ret_code will contain the firmware error code.
+>
+> Please modify the ioctl to require the file descriptor for the PSP.  A
+> program without access to /dev/psp should not be able to use SEV.
+>
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+I am not sure if I fully understand this feedback. Let me summaries what 
+we have right now.
+
+At highest level SEV key management commands are divided into two sections:
+
+- platform  management : commands used during platform provisioning. PSP 
+drv provides ioctl's for these commands. Qemu will not use these 
+ioctl's, i believe these ioctl will be used by other tools.
+
+- guest management: command used during guest life cycle. PSP drv 
+exports various function and KVM drv calls these function when it 
+receives the SEV_ISSUE_CMD ioctl from qemu.
+
+If I understanding correctly then you are recommending that instead of 
+exporting various functions from PSP drv we should expose one function 
+for the all the guest command handling (something like this).
+
+int psp_issue_cmd_external_user(struct file *filep,
+			    	int cmd, unsigned long addr,
+			    	int *psp_ret)
+{
+	/* here we check to ensure that file->f_ops is a valid
+	 * psp instance.
+          */
+	if (filep->f_ops != &psp_fops)
+		return -EINVAL;
+
+	/* handle the command */
+	return psp_issue_cmd (cmd, addr, timeout, psp_ret);
+}
+
+In KVM driver use something like this to invoke the PSP command handler.
+
+int kvm_sev_psp_cmd (struct kvm_sev_issue_cmd *input,
+		     unsigned long data)
+{
+	int ret;
+	struct fd f;
+
+	f = fdget(input->psp_fd);
+	if (!f.file)
+		return -EBADF;
+	....
+
+	psp_issue_cmd_external_user(f.file, input->cmd,
+				    data, &input->psp_ret);
+	....
+}
+
+Please let me know if I understood this correctly.
+
+>> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+>> ---
+>>  arch/x86/include/asm/kvm_host.h |    3 +
+>>  arch/x86/kvm/x86.c              |   13 ++++
+>>  include/uapi/linux/kvm.h        |  125 +++++++++++++++++++++++++++++++++++++++
+>>  3 files changed, 141 insertions(+)
+>>
