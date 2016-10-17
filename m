@@ -1,159 +1,146 @@
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH v2 3/3] thunderbolt: Use Device ROM retrieved from EFI
-Date: Mon, 17 Oct 2016 12:57:23 +0200
-Message-ID: <654345b812dfaf686d4711dc833efd5f40e45c8a.1476698603.git.lukas@wunner.de>
-References: <cover.1476698603.git.lukas@wunner.de>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.1476698603.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Brijesh Singh <brijesh.singh@amd.com>
+Subject: Re: [RFC PATCH v1 00/28] x86: Secure Encrypted Virtualization (AMD)
+Date: Mon, 17 Oct 2016 08:51:33 -0500
+Message-ID: <7c1c7a4a-02cd-fa9b-5f4e-065db2042e15@amd.com>
+References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
+ <d8f5b59e-5450-6bf6-c01e-084e612a4fed@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <d8f5b59e-5450-6bf6-c01e-084e612a4fed@redhat.com>
+Sender: owner-linux-mm@kvack.org
+To: Paolo Bonzini <pbonzini@redhat.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus.walleij@linaro.org, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, devel@linuxdriverproject.org, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedoraproject.org, tony.luck@intel.com
+Cc: brijesh.singh@amd.com
 List-Id: linux-efi@vger.kernel.org
 
-Macs with Thunderbolt 1 do not have a unit-specific DROM: The DROM is
-empty with uid 0x1000000000000. (Apple started factory-burning a unit-
-specific DROM with Thunderbolt 2.)
+Hi Paolo,
 
-Instead, the NHI EFI driver supplies a DROM in a device property. Use
-it if available. It's only available when booting with the efistub.
-If it's not available, silently fall back to our hardcoded DROM.
+Thanks for reviews. I will incorporate your feedbacks in v2.
 
-The size of the DROM is always 256 bytes. The number is hardcoded into
-the NHI EFI driver. This commit can deal with an arbitrary size however,
-just in case they ever change that.
+On 10/13/2016 06:19 AM, Paolo Bonzini wrote:
+>
+>
+> On 23/08/2016 01:23, Brijesh Singh wrote:
+>> TODO:
+>> - send qemu/seabios RFC's on respective mailing list
+>> - integrate the psp driver with CCP driver (they share the PCI id's)
+>> - add SEV guest migration command support
+>> - add SEV snapshotting command support
+>> - determine how to do ioremap of physical memory with mem encryption enabled
+>>   (e.g acpi tables)
+>
+> The would be encrypted, right?  Similar to the EFI data in patch 9.
 
-Background information: The EFI firmware volume contains ROM files for
-the NHI, GMUX and several other chips as well as key material. This
-strategy allows Apple to deploy ROM or key updates by simply publishing
-an EFI firmware update on their website. Drivers do not access those
-files directly but rather through a file server via EFI protocol
-AC5E4829-A8FD-440B-AF33-9FFE013B12D8. Files are identified by GUID, the
-NHI DROM has 339370BD-CFC6-4454-8EF7-704653120818.
+Yes.
 
-The NHI EFI driver amends that file with a unit-specific uid. The uid
-has 64 bit but its entropy is much lower: 24 bit represent the model,
-24 bit are taken from a serial number, 16 bit are fixed. The NHI EFI
-driver obtains the serial number via the DataHub protocol, copies it
-into the DROM, calculates the CRC and submits the result as a device
-property.
+>
+>> - determine how to share the guest memory with hypervisor for to support
+>>   pvclock driver
+>
+> Is it enough if the guest makes that page unencrypted?
+>
 
-A modification is needed in the resume code where we currently read the
-uid of all switches in the hierarchy to detect plug events that occurred
-during sleep. On Thunderbolt 1 root switches this will now lead to a
-mismatch between the uid of the empty DROM and the EFI DROM. Exempt the
-root switch from this check: It's built in, so the uid should never
-change. However we continue to *read* the uid of the root switch, this
-seems like a good way to test its reachability after resume.
+Yes that should be enough. If guest can mark a page as unencrypted then 
+hypervisor should be able to read and write to that particular page.
 
-Cc: reverser-P1ImLx+pFc0@public.gmane.org
-Cc: Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Tested-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> [MacBookPro9,1]
-Tested-by: Pierre Moreau <pierre.morrow-GANU6spQydw@public.gmane.org> [MacBookPro11,3]
-Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
----
- drivers/thunderbolt/Kconfig  |  1 +
- drivers/thunderbolt/eeprom.c | 42 ++++++++++++++++++++++++++++++++++++++++++
- drivers/thunderbolt/switch.c |  2 +-
- 3 files changed, 44 insertions(+), 1 deletion(-)
+Tom's patches have introduced API (set_memory_dec) to mark memory as 
+unencrypted but pvclock drv runs very early during boot (when irq was 
+disabled). Because of this we are not able to use set_memory_dec() to 
+mark the page as unencrypted. Will need to come up with method for 
+handling these cases.
 
-diff --git a/drivers/thunderbolt/Kconfig b/drivers/thunderbolt/Kconfig
-index c121acc..0056df7 100644
---- a/drivers/thunderbolt/Kconfig
-+++ b/drivers/thunderbolt/Kconfig
-@@ -1,6 +1,7 @@
- menuconfig THUNDERBOLT
- 	tristate "Thunderbolt support for Apple devices"
- 	depends on PCI
-+	select APPLE_PROPERTIES
- 	select CRC32
- 	help
- 	  Cactus Ridge Thunderbolt Controller driver
-diff --git a/drivers/thunderbolt/eeprom.c b/drivers/thunderbolt/eeprom.c
-index 2b9602c..785a171 100644
---- a/drivers/thunderbolt/eeprom.c
-+++ b/drivers/thunderbolt/eeprom.c
-@@ -5,6 +5,7 @@
-  */
- 
- #include <linux/crc32.h>
-+#include <linux/property.h>
- #include <linux/slab.h>
- #include "tb.h"
- 
-@@ -360,6 +361,39 @@ static int tb_drom_parse_entries(struct tb_switch *sw)
- }
- 
- /**
-+ * tb_drom_copy_efi - copy drom supplied by EFI to sw->drom if present
-+ */
-+static int tb_drom_copy_efi(struct tb_switch *sw, u16 *size)
-+{
-+	struct device *dev = &sw->tb->nhi->pdev->dev;
-+	int len, res;
-+
-+	len = device_property_read_u8_array(dev, "ThunderboltDROM", NULL, 0);
-+	if (len < 0 || len < sizeof(struct tb_drom_header))
-+		return -EINVAL;
-+
-+	sw->drom = kmalloc(len, GFP_KERNEL);
-+	if (!sw->drom)
-+		return -ENOMEM;
-+
-+	res = device_property_read_u8_array(dev, "ThunderboltDROM", sw->drom,
-+									len);
-+	if (res)
-+		goto err;
-+
-+	*size = ((struct tb_drom_header *)sw->drom)->data_len +
-+							  TB_DROM_DATA_START;
-+	if (*size > len)
-+		goto err;
-+
-+	return 0;
-+
-+err:
-+	kfree(sw->drom);
-+	return -EINVAL;
-+}
-+
-+/**
-  * tb_drom_read - copy drom to sw->drom and parse it
-  */
- int tb_drom_read(struct tb_switch *sw)
-@@ -374,6 +408,13 @@ int tb_drom_read(struct tb_switch *sw)
- 
- 	if (tb_route(sw) == 0) {
- 		/*
-+		 * Apple's NHI EFI driver supplies a DROM for the root switch
-+		 * in a device property. Use it if available.
-+		 */
-+		if (tb_drom_copy_efi(sw, &size) == 0)
-+			goto parse;
-+
-+		/*
- 		 * The root switch contains only a dummy drom (header only,
- 		 * no entries). Hardcode the configuration here.
- 		 */
-@@ -418,6 +459,7 @@ int tb_drom_read(struct tb_switch *sw)
- 	if (res)
- 		goto err;
- 
-+parse:
- 	header = (void *) sw->drom;
- 
- 	if (header->data_len + TB_DROM_DATA_START != size) {
-diff --git a/drivers/thunderbolt/switch.c b/drivers/thunderbolt/switch.c
-index 9840fde..d11d00c 100644
---- a/drivers/thunderbolt/switch.c
-+++ b/drivers/thunderbolt/switch.c
-@@ -460,7 +460,7 @@ int tb_switch_resume(struct tb_switch *sw)
- 		tb_sw_warn(sw, "uid read failed\n");
- 		return err;
- 	}
--	if (sw->uid != uid) {
-+	if (tb_route(sw) && sw->uid != uid) {
- 		tb_sw_info(sw,
- 			"changed while suspended (uid %#llx -> %#llx)\n",
- 			sw->uid, uid);
--- 
-2.9.3
+> I reviewed the KVM host-side patches and they are pretty
+> straightforward, so the comments on each patch suffice.
+>
+> Thanks,
+>
+> Paolo
+>
+>> Brijesh Singh (11):
+>>       crypto: add AMD Platform Security Processor driver
+>>       KVM: SVM: prepare to reserve asid for SEV guest
+>>       KVM: SVM: prepare for SEV guest management API support
+>>       KVM: introduce KVM_SEV_ISSUE_CMD ioctl
+>>       KVM: SVM: add SEV launch start command
+>>       KVM: SVM: add SEV launch update command
+>>       KVM: SVM: add SEV_LAUNCH_FINISH command
+>>       KVM: SVM: add KVM_SEV_GUEST_STATUS command
+>>       KVM: SVM: add KVM_SEV_DEBUG_DECRYPT command
+>>       KVM: SVM: add KVM_SEV_DEBUG_ENCRYPT command
+>>       KVM: SVM: add command to query SEV API version
+>>
+>> Tom Lendacky (17):
+>>       kvm: svm: Add support for additional SVM NPF error codes
+>>       kvm: svm: Add kvm_fast_pio_in support
+>>       kvm: svm: Use the hardware provided GPA instead of page walk
+>>       x86: Secure Encrypted Virtualization (SEV) support
+>>       KVM: SVM: prepare for new bit definition in nested_ctl
+>>       KVM: SVM: Add SEV feature definitions to KVM
+>>       x86: Do not encrypt memory areas if SEV is enabled
+>>       Access BOOT related data encrypted with SEV active
+>>       x86/efi: Access EFI data as encrypted when SEV is active
+>>       x86: Change early_ioremap to early_memremap for BOOT data
+>>       x86: Don't decrypt trampoline area if SEV is active
+>>       x86: DMA support for SEV memory encryption
+>>       iommu/amd: AMD IOMMU support for SEV
+>>       x86: Don't set the SME MSR bit when SEV is active
+>>       x86: Unroll string I/O when SEV is active
+>>       x86: Add support to determine if running with SEV enabled
+>>       KVM: SVM: Enable SEV by setting the SEV_ENABLE cpu feature
+>>
+>>
+>>  arch/x86/boot/compressed/Makefile      |    2
+>>  arch/x86/boot/compressed/head_64.S     |   19 +
+>>  arch/x86/boot/compressed/mem_encrypt.S |  123 ++++
+>>  arch/x86/include/asm/io.h              |   26 +
+>>  arch/x86/include/asm/kvm_emulate.h     |    3
+>>  arch/x86/include/asm/kvm_host.h        |   27 +
+>>  arch/x86/include/asm/mem_encrypt.h     |    3
+>>  arch/x86/include/asm/svm.h             |    3
+>>  arch/x86/include/uapi/asm/hyperv.h     |    4
+>>  arch/x86/include/uapi/asm/kvm_para.h   |    4
+>>  arch/x86/kernel/acpi/boot.c            |    4
+>>  arch/x86/kernel/head64.c               |    4
+>>  arch/x86/kernel/mem_encrypt.S          |   44 ++
+>>  arch/x86/kernel/mpparse.c              |   10
+>>  arch/x86/kernel/setup.c                |    7
+>>  arch/x86/kernel/x8664_ksyms_64.c       |    1
+>>  arch/x86/kvm/cpuid.c                   |    4
+>>  arch/x86/kvm/mmu.c                     |   20 +
+>>  arch/x86/kvm/svm.c                     |  906 ++++++++++++++++++++++++++++++++
+>>  arch/x86/kvm/x86.c                     |   73 +++
+>>  arch/x86/mm/ioremap.c                  |    7
+>>  arch/x86/mm/mem_encrypt.c              |   50 ++
+>>  arch/x86/platform/efi/efi_64.c         |   14
+>>  arch/x86/realmode/init.c               |   11
+>>  drivers/crypto/Kconfig                 |   11
+>>  drivers/crypto/Makefile                |    1
+>>  drivers/crypto/psp/Kconfig             |    8
+>>  drivers/crypto/psp/Makefile            |    3
+>>  drivers/crypto/psp/psp-dev.c           |  220 ++++++++
+>>  drivers/crypto/psp/psp-dev.h           |   95 +++
+>>  drivers/crypto/psp/psp-ops.c           |  454 ++++++++++++++++
+>>  drivers/crypto/psp/psp-pci.c           |  376 +++++++++++++
+>>  drivers/sfi/sfi_core.c                 |    6
+>>  include/linux/ccp-psp.h                |  833 +++++++++++++++++++++++++++++
+>>  include/uapi/linux/Kbuild              |    1
+>>  include/uapi/linux/ccp-psp.h           |  182 ++++++
+>>  include/uapi/linux/kvm.h               |  125 ++++
+>>  37 files changed, 3643 insertions(+), 41 deletions(-)
+>>  create mode 100644 arch/x86/boot/compressed/mem_encrypt.S
+>>  create mode 100644 drivers/crypto/psp/Kconfig
+>>  create mode 100644 drivers/crypto/psp/Makefile
+>>  create mode 100644 drivers/crypto/psp/psp-dev.c
+>>  create mode 100644 drivers/crypto/psp/psp-dev.h
+>>  create mode 100644 drivers/crypto/psp/psp-ops.c
+>>  create mode 100644 drivers/crypto/psp/psp-pci.c
+>>  create mode 100644 include/linux/ccp-psp.h
+>>  create mode 100644 include/uapi/linux/ccp-psp.h
+>>
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
