@@ -1,95 +1,51 @@
-From: Paolo Bonzini <pbonzini@redhat.com>
-Subject: Re: [RFC PATCH v1 21/28] KVM: introduce KVM_SEV_ISSUE_CMD ioctl
-Date: Mon, 17 Oct 2016 16:14:56 -0400 (EDT)
-Message-ID: <28535418.4145222.1476735296810.JavaMail.zimbra@redhat.com>
-References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine> <147190849706.9523.17127624683768628621.stgit@brijesh-build-machine> <6a6e6a1a-eec8-c547-553d-7746d65fc182@redhat.com> <59369ed7-9d35-baad-e0a9-ce4a62bc30bb@amd.com>
+From: Karel Zak <kzak-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] partitions/efi: Ignore errors when alternate GPT is not
+ at the end of disk
+Date: Tue, 18 Oct 2016 11:56:37 +0200
+Message-ID: <20161018095637.tgdjehscttskqz5q@ws.net.home>
+References: <1476699630-127009-1-git-send-email-hare@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <59369ed7-9d35-baad-e0a9-ce4a62bc30bb@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Brijesh Singh <brijesh.singh@amd.com>
-Cc: simon guinot <simon.guinot@sequanux.org>, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus walleij <linus.walleij@linaro.org>, linux-mm@kvack.org, paul gortmaker <paul.gortmaker@windriver.com>, hpa@zytor.com, dan j williams <dan.j.williams@intel.com>, aarcange@redhat.com, sfr@canb.auug.org.au, andriy shevchenko <andriy.shevchenko@linux.intel.com>, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross zwisler <ross.zwisler@linux.intel.com>, bp@suse.de, dyoung@redhat.com, thomas lendacky <thomas.lendacky@amd.com>, jroedel@suse.de, keescook@chromium.org, toshi kani <toshi.kani@hpe.com>, mathieu desnoyers <mathieu.desnoyers@efficios.com>de
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1476699630-127009-1-git-send-email-hare-l3A5Bk7waGM@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Hannes Reinecke <hare-l3A5Bk7waGM@public.gmane.org>
+Cc: Davidlohr Bueso <dbueso-IBi9RG/b67k@public.gmane.org>, Jens-l3A5Bk7waGM@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Hannes Reinecke <hare-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> I am not sure if I fully understand this feedback. Let me summaries what
-> we have right now.
-> 
-> At highest level SEV key management commands are divided into two sections:
-> 
-> - platform  management : commands used during platform provisioning. PSP
-> drv provides ioctl's for these commands. Qemu will not use these
-> ioctl's, i believe these ioctl will be used by other tools.
-> 
-> - guest management: command used during guest life cycle. PSP drv
-> exports various function and KVM drv calls these function when it
-> receives the SEV_ISSUE_CMD ioctl from qemu.
-> 
-> If I understanding correctly then you are recommending that instead of
-> exporting various functions from PSP drv we should expose one function
-> for the all the guest command handling (something like this).
+On Mon, Oct 17, 2016 at 12:20:30PM +0200, Hannes Reinecke wrote:
+> The GPT specification requires that the alternate GPT is at the
+> end of the disk. However, if a Software RAID1 is enabled the RAID
+> metadata typically placed at the end of the disk, and the actual
+> size of the disk is decreased by the size of the metadata.
 
-My understanding is that a user could exhaust the ASIDs for encrypted
-VMs if it was allowed to start an arbitrary number of KVM guests.  So
-we would need some kind of control.  Is this correct?
+This is not about GPT, but about kernel. It does not support this
+use-case and it parses PT on wrong device. If I good remember udev
+should be smart enough to remove (by partx) such partitions and 
+re-create on /dev/mdX. 
 
-If so, does /dev/psp provide any functionality that you believe is
-dangerous for the KVM userspace (which runs in a very confined
-environment)?  Is this functionality blocked through capability
-checks?
+The real solution is to use RAID1 signatures on the begin of the disk.
+This problem is generic, not specific to GPT.
 
-Thanks,
+> Plus it's perfectly legit to have a partition table which is
+> _smaller_ than the device
 
-Paolo
+Well, this is reason why GPT differentiate between headers position
+and usable area (addressed by {First,Last}UsableLba within the header.
 
+> eg we don't check for the device
+> size in the msdos partition, neither.
 
-> int psp_issue_cmd_external_user(struct file *filep,
-> 			    	int cmd, unsigned long addr,
-> 			    	int *psp_ret)
-> {
-> 	/* here we check to ensure that file->f_ops is a valid
-> 	 * psp instance.
->           */
-> 	if (filep->f_ops != &psp_fops)
-> 		return -EINVAL;
-> 
-> 	/* handle the command */
-> 	return psp_issue_cmd (cmd, addr, timeout, psp_ret);
-> }
-> 
-> In KVM driver use something like this to invoke the PSP command handler.
-> 
-> int kvm_sev_psp_cmd (struct kvm_sev_issue_cmd *input,
-> 		     unsigned long data)
-> {
-> 	int ret;
-> 	struct fd f;
-> 
-> 	f = fdget(input->psp_fd);
-> 	if (!f.file)
-> 		return -EBADF;
-> 	....
-> 
-> 	psp_issue_cmd_external_user(f.file, input->cmd,
-> 				    data, &input->psp_ret);
-> 	....
-> }
-> 
-> Please let me know if I understood this correctly.
-> 
-> >> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
-> >> ---
-> >>  arch/x86/include/asm/kvm_host.h |    3 +
-> >>  arch/x86/kvm/x86.c              |   13 ++++
-> >>  include/uapi/linux/kvm.h        |  125
-> >>  +++++++++++++++++++++++++++++++++++++++
-> >>  3 files changed, 141 insertions(+)
-> >>
-> 
+All the "backup" GPT stuff is based on well known place for the backup
+header. How do you want to reliably support GPT recovery from the
+backup header if there is no explicit place for the header? 
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Let's imagine your primary header is broken and alternate_lba is
+unreliable (or zero, etc.), where is the backup header?
+
+    Karel
+
+-- 
+ Karel Zak  <kzak-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+ http://karelzak.blogspot.com
