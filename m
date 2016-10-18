@@ -1,26 +1,37 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [GIT PULL 0/8] EFI changes for v4.10
-Date: Tue, 18 Oct 2016 16:40:13 +0100
-Message-ID: <20161018154013.GL16071@codeblueprint.co.uk>
-References: <20161018143318.15673-1-matt@codeblueprint.co.uk>
- <20161018153436.GA2593@wunner.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [GIT PULL] urgent EFI fix for v4.9
+Date: Tue, 18 Oct 2016 16:53:10 +0100
+Message-ID: <1476805991-7160-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20161018153436.GA2593-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Ivan Khoronzhuk <ivan.khoronzhuk-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Wei Yongjun <weiyongjun1-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Yisheng Xie <xieyisheng1-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+To: mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 18 Oct, at 05:34:36PM, Lukas Wunner wrote:
-> On Tue, Oct 18, 2016 at 03:33:10PM +0100, Matt Fleming wrote:
-> > Folks, please queue up the following small changes for v4.10.
-> 
-> These are all fixes.  Did you mean 4.9?  Ingo only queued up
-> the MAINTAINERS patch for 4.9 now, the rest for 4.10.
+Please merge the single fix below: it addresses a build issue on ARM with
+less recent toolchain versions, which surfaced now that EFI has been added
+to multi_v7_defconfig, the de facto generic defconfig for the most recent
+cores.
 
-No, I meant v4.10. They are not all fixes, some are new features (like
-the framebuffer changes from Peter) and none of them are critical
-fixes that would warrant being merged into urgent.
+The following changes since commit b67be92feb486f800d80d72c67fd87b47b79b18e:
+
+  Merge tag 'pwm/for-4.9-rc1' of git://git.kernel.org/pub/scm/linux/kernel/git/thierry.reding/linux-pwm (2016-10-12 11:11:05 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
+
+for you to fetch changes up to 0d5b726f1009d05657ec71c716ba6529dcc98d2b:
+
+  efi/arm: Fix absolute relocation detection for older toolchains (2016-10-14 10:57:59 +0100)
+
+----------------------------------------------------------------
+* Fix a build issue in the ARM version of libstub with slightly older
+  toolchains
+
+----------------------------------------------------------------
+Ard Biesheuvel (1):
+      efi/arm: Fix absolute relocation detection for older toolchains
+
+ drivers/firmware/efi/libstub/Makefile | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
