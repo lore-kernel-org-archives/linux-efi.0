@@ -1,106 +1,68 @@
-From: Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH V3 05/10] acpi: apei: handle SEA notification type for
- ARMv8
-Date: Tue, 18 Oct 2016 21:04:01 +0800
-Message-ID: <57c81498-78f1-8aac-01b1-b5445415d822@linaro.org>
-References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
- <1475875882-2604-6-git-send-email-tbaicar@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [GIT PULL 0/8] EFI changes for v4.10
+Date: Tue, 18 Oct 2016 15:33:10 +0100
+Message-ID: <20161018143318.15673-1-matt@codeblueprint.co.uk>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1475875882-2604-6-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tomasz.nowicki-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, Dkvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Naveen Kaje <nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Ivan Khoronzhuk <ivan.khoronzhuk-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Wei Yongjun <weiyongjun1-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Yisheng Xie <xieyisheng1-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 2016/10/8 5:31, Tyler Baicar wrote:
-> ARM APEI extension proposal added SEA (Synchrounous External
-> Abort) notification type for ARMv8.
-> Add a new GHES error source handling function for SEA. If an error
-> source's notification type is SEA, then this function can be registered
-> into the SEA exception handler. That way GHES will parse and report
-> SEA exceptions when they occur.
->
-> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> Signed-off-by: Naveen Kaje <nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> ---
->  arch/arm64/Kconfig        |  1 +
->  drivers/acpi/apei/Kconfig | 15 +++++++++
->  drivers/acpi/apei/ghes.c  | 83 +++++++++++++++++++++++++++++++++++++++++++++++
->  3 files changed, 99 insertions(+)
->
-> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-> index b380c87..ae34349 100644
-> --- a/arch/arm64/Kconfig
-> +++ b/arch/arm64/Kconfig
-> @@ -53,6 +53,7 @@ config ARM64
->  	select HANDLE_DOMAIN_IRQ
->  	select HARDIRQS_SW_RESEND
->  	select HAVE_ACPI_APEI if (ACPI && EFI)
-> +	select HAVE_ACPI_APEI_SEA if (ACPI && EFI)
->  	select HAVE_ALIGNED_STRUCT_PAGE if SLUB
->  	select HAVE_ARCH_AUDITSYSCALL
->  	select HAVE_ARCH_BITREVERSE
-> diff --git a/drivers/acpi/apei/Kconfig b/drivers/acpi/apei/Kconfig
-> index b0140c8..fb99c1c 100644
-> --- a/drivers/acpi/apei/Kconfig
-> +++ b/drivers/acpi/apei/Kconfig
-> @@ -4,6 +4,21 @@ config HAVE_ACPI_APEI
->  config HAVE_ACPI_APEI_NMI
->  	bool
->
-> +config HAVE_ACPI_APEI_SEA
-> +	bool "APEI Synchronous External Abort logging/recovering support"
-> +	depends on ARM64
-> +	help
-> +	  This option should be enabled if the system supports
-> +	  firmware first handling of SEA (Synchronous External Abort).
-> +	  SEA happens with certain faults of data abort or instruction
-> +	  abort synchronous exceptions on ARMv8 systems. If a system
-> +	  supports firmware first handling of SEA, the platform analyzes
-> +	  and handles hardware error notifications with SEA, and it may then
-> +	  form a HW error record for the OS to parse and handle. This
-> +	  option allows the OS to look for such HW error record, and
-> +	  take appropriate action.
+Folks, please queue up the following small changes for v4.10.
 
-OK, I can see that it's firmware first handling, so it's triggered
-by firmware to me, correct me if I'm wrong.
+Note that there is a patch to MAINTAINERS in this pull request that
+adds Ard as EFI co-maintainer. It'd probably be a good idea to send
+that to Linus before v4.10.
 
-[...]
->  #ifdef CONFIG_HAVE_ACPI_APEI_NMI
->  /*
->   * printk is not safe in NMI context.  So in NMI handler, we allocate
-> @@ -1023,6 +1083,14 @@ static int ghes_probe(struct platform_device *ghes_dev)
->  	case ACPI_HEST_NOTIFY_EXTERNAL:
->  	case ACPI_HEST_NOTIFY_SCI:
->  		break;
-> +	case ACPI_HEST_NOTIFY_SEA:
-> +		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_SEA)) {
-> +			pr_warn(GHES_PFX "Generic hardware error source: %d notified via SEA is not supported\n",
-> +				generic->header.source_id);
-> +			rc = -ENOTSUPP;
-> +			goto err;
-> +		}
-> +		break;
->  	case ACPI_HEST_NOTIFY_NMI:
->  		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_NMI)) {
->  			pr_warn(GHES_PFX "Generic hardware error source: %d notified via NMI interrupt is not supported!\n",
-> @@ -1034,6 +1102,13 @@ static int ghes_probe(struct platform_device *ghes_dev)
->  		pr_warning(GHES_PFX "Generic hardware error source: %d notified via local interrupt is not supported!\n",
->  			   generic->header.source_id);
->  		goto err;
-> +	case ACPI_HEST_NOTIFY_GPIO:
-> +	case ACPI_HEST_NOTIFY_SEI:
-> +	case ACPI_HEST_NOTIFY_GSIV:
-> +		pr_warn(GHES_PFX "Generic hardware error source: %d notified via notification type %u is not supported\n",
-> +			generic->header.source_id, generic->header.source_id);
+The following changes since commit 92dc33501bfba74655dbf3ec63ea82d040fd6d58:
 
-Hmm, some platform may trigger a interrupt to OS for firmware handling
-and it's in the ACPI 6.1 spec, is it a limitation now, or we need to
-add code later to support it?
+  x86/efi: Round EFI memmap reservations to EFI_PAGE_SIZE (2016-09-20 15:43:31 +0100)
 
-Thanks
-Hanjun
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+
+for you to fetch changes up to a8226a73b82256b82c167956b0f4d3cd39312531:
+
+  efi: efivar_ssdt_load: Don't return success on allocation failure (2016-10-13 11:55:40 +0100)
+
+----------------------------------------------------------------
+ * Add Ard as EFI co-maintainer in MAINTAINERS
+
+ * Misc cleanups for efi_test driver - Ivan Hu and Wei Yongjun
+
+ * Fix an early_memremap() leak for ARM/arm64 - Yisheng Xie
+
+ * Return an error code on failure instead of success in
+   efivar_ssdt_load() - Dan Carpenter
+
+ * Expose EFI framebuffer configuration, which allows rendering
+   localized status strings during firmware updates - Peter Jones
+
+----------------------------------------------------------------
+Ard Biesheuvel (1):
+      MAINTAINERS: add myself as EFI maintainer
+
+Dan Carpenter (1):
+      efi: efivar_ssdt_load: Don't return success on allocation failure
+
+Ivan Hu (3):
+      efi/efi_test: Fix the uninitialized value datasize
+      efi/efi_test: Fix the uninitialized value rv
+      efi/efi_test: Use memdup_user() as a cleanup
+
+Peter Jones (1):
+      efifb: show framebuffer layout as device attributes
+
+Wei Yongjun (1):
+      efi: Remove unused including <linux/version.h>
+
+Yisheng Xie (1):
+      efi/arm*: efi_init() error handling fix
+
+ MAINTAINERS                          |  3 +-
+ drivers/firmware/efi/arm-init.c      |  4 ++-
+ drivers/firmware/efi/efi.c           |  4 ++-
+ drivers/firmware/efi/test/efi_test.c | 15 +++------
+ drivers/video/fbdev/efifb.c          | 59 ++++++++++++++++++++++++++++--------
+ 5 files changed, 59 insertions(+), 26 deletions(-)
