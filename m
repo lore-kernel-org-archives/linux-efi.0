@@ -1,73 +1,115 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] efi/arm: Fix absolute relocation detection for older toolchains
-Date: Tue, 18 Oct 2016 16:53:11 +0100
-Message-ID: <1476805991-7160-2-git-send-email-ard.biesheuvel@linaro.org>
-References: <1476805991-7160-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1476805991-7160-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Brijesh Singh <brijesh.singh@amd.com>
+Subject: Re: [RFC PATCH v1 21/28] KVM: introduce KVM_SEV_ISSUE_CMD ioctl
+Date: Tue, 18 Oct 2016 14:32:07 -0500
+Message-ID: <014b833f-a6e6-fcde-ecc5-2109bf2a0382@amd.com>
+References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine>
+ <147190849706.9523.17127624683768628621.stgit@brijesh-build-machine>
+ <6a6e6a1a-eec8-c547-553d-7746d65fc182@redhat.com>
+ <59369ed7-9d35-baad-e0a9-ce4a62bc30bb@amd.com>
+ <28535418.4145222.1476735296810.JavaMail.zimbra@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <28535418.4145222.1476735296810.JavaMail.zimbra@redhat.com>
+Sender: owner-linux-mm@kvack.org
+To: Paolo Bonzini <pbonzini@redhat.com>
+Cc: brijesh.singh@amd.com, simon guinot <simon.guinot@sequanux.org>, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus walleij <linus.walleij@linaro.org>, linux-mm@kvack.org, paul gortmaker <paul.gortmaker@windriver.com>, hpa@zytor.com, dan j williams <dan.j.williams@intel.com>, aarcange@redhat.com, sfr@canb.auug.org.au, andriy shevchenko <andriy.shevchenko@linux.intel.com>, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross zwisler <ross.zwisler@linux.intel.com>, bp@suse.de, dyoung@redhat.com, thomas
+ lendacky <thomas.lendacky@amd.com>, jroedel@suse.de, keescook@chromium.org, toshi kani <toshi.kani@hpe.com>, mathieu desnoyers <mathieu.desnoyers@efficios.com>, devel@linuxdriverproject.org, tgl
 List-Id: linux-efi@vger.kernel.org
 
-When building the ARM kernel with CONFIG_EFI=y, the following build
-error may occur when using a less recent version of binutils (2.23 or
-older):
+Hi Paolo,
 
-   STUBCPY drivers/firmware/efi/libstub/lib-sort.stub.o
- 00000000 R_ARM_ABS32       sort
- 00000004 R_ARM_ABS32       __ksymtab_strings
- drivers/firmware/efi/libstub/lib-sort.stub.o: absolute symbol references
- not allowed in the EFI stub
+On 10/17/2016 03:14 PM, Paolo Bonzini wrote:
+>> I am not sure if I fully understand this feedback. Let me summaries what
+>> we have right now.
+>>
+>> At highest level SEV key management commands are divided into two sections:
+>>
+>> - platform  management : commands used during platform provisioning. PSP
+>> drv provides ioctl's for these commands. Qemu will not use these
+>> ioctl's, i believe these ioctl will be used by other tools.
+>>
+>> - guest management: command used during guest life cycle. PSP drv
+>> exports various function and KVM drv calls these function when it
+>> receives the SEV_ISSUE_CMD ioctl from qemu.
+>>
+>> If I understanding correctly then you are recommending that instead of
+>> exporting various functions from PSP drv we should expose one function
+>> for the all the guest command handling (something like this).
+>
+> My understanding is that a user could exhaust the ASIDs for encrypted
+> VMs if it was allowed to start an arbitrary number of KVM guests.  So
+> we would need some kind of control.  Is this correct?
+>
 
-(and when building with debug symbols, the list above is much longer, and
-contains all the internal references between the .debug sections and the
-actual code)
+Yes, there is limited number of ASIDs for encrypted VMs. Do we need to 
+pass the psp_fd into SEV_ISSUE_CMD ioctl or can we handle it from Qemu 
+itself ? e.g when user asks to transition a guest into SEV-enabled mode 
+then before calling LAUNCH_START Qemu tries to open /dev/psp device. If 
+open() returns success then we know user has permission to communicate 
+with PSP firmware. Please let me know if I am missing something.
 
-This issue is caused by the fact that objcopy v2.23 or earlier does not
-support wildcards in its -R and -j options, which means the following
-line from the Makefile:
+> If so, does /dev/psp provide any functionality that you believe is
+> dangerous for the KVM userspace (which runs in a very confined
+> environment)?  Is this functionality blocked through capability
+> checks?
+>
 
-  STUBCOPY_FLAGS-y		:= -R .debug* -R *ksymtab* -R *kcrctab*
+I do not see /dev/psp providing anything which would be dangerous to KVM 
+userspace. It should be safe to access /dev/psp into KVM userspace.
 
-fails to take effect, leaving harmless absolute relocations in the binary
-that are indistinguishable from relocations that may cause crashes at
-runtime due to the fact that these relocations are resolved at link time
-using the virtual address of the kernel, which is always different from
-the address at which the EFI firmware loads and invokes the stub.
+> Thanks,
+>
+> Paolo
+>
+>
+>> int psp_issue_cmd_external_user(struct file *filep,
+>> 			    	int cmd, unsigned long addr,
+>> 			    	int *psp_ret)
+>> {
+>> 	/* here we check to ensure that file->f_ops is a valid
+>> 	 * psp instance.
+>>           */
+>> 	if (filep->f_ops != &psp_fops)
+>> 		return -EINVAL;
+>>
+>> 	/* handle the command */
+>> 	return psp_issue_cmd (cmd, addr, timeout, psp_ret);
+>> }
+>>
+>> In KVM driver use something like this to invoke the PSP command handler.
+>>
+>> int kvm_sev_psp_cmd (struct kvm_sev_issue_cmd *input,
+>> 		     unsigned long data)
+>> {
+>> 	int ret;
+>> 	struct fd f;
+>>
+>> 	f = fdget(input->psp_fd);
+>> 	if (!f.file)
+>> 		return -EBADF;
+>> 	....
+>>
+>> 	psp_issue_cmd_external_user(f.file, input->cmd,
+>> 				    data, &input->psp_ret);
+>> 	....
+>> }
+>>
+>> Please let me know if I understood this correctly.
+>>
+>>>> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+>>>> ---
+>>>>  arch/x86/include/asm/kvm_host.h |    3 +
+>>>>  arch/x86/kvm/x86.c              |   13 ++++
+>>>>  include/uapi/linux/kvm.h        |  125
+>>>>  +++++++++++++++++++++++++++++++++++++++
+>>>>  3 files changed, 141 insertions(+)
+>>>>
+>>
 
-So, as a workaround, disable debug symbols explicitly when building the
-stub for ARM, and strip the ksymtab and kcrctab symbols for the only
-exported symbol we currently reuse in the stub, which is 'sort'.
-
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Tested-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/libstub/Makefile | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index c06945160a41..5e23e2d305e7 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -11,7 +11,7 @@ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ $(LINUX_INCLUDE) -O2 \
- 				   -mno-mmx -mno-sse
- 
- cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS))
--cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) \
-+cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) -g0 \
- 				   -fno-builtin -fpic -mno-single-pic-base
- 
- cflags-$(CONFIG_EFI_ARMSTUB)	+= -I$(srctree)/scripts/dtc/libfdt
-@@ -79,5 +79,6 @@ quiet_cmd_stubcopy = STUBCPY $@
- # decompressor. So move our .data to .data.efistub, which is preserved
- # explicitly by the decompressor linker script.
- #
--STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub
-+STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub \
-+				   -R ___ksymtab+sort -R ___kcrctab+sort
- STUBCOPY_RELOC-$(CONFIG_ARM)	:= R_ARM_ABS
--- 
-2.7.4
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
