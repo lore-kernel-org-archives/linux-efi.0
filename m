@@ -1,195 +1,110 @@
-From: Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCHv3 4/4] arm64: dump: Add checking for writable and exectuable pages
-Date: Tue, 18 Oct 2016 15:01:31 -0700
-Message-ID: <1476828091-17802-5-git-send-email-labbott@redhat.com>
+From: Laura Abbott <labbott@redhat.com>
+Subject: [PATCHv3 2/4] arm64: dump: Make the page table dumping seq_file optional
+Date: Tue, 18 Oct 2016 15:01:29 -0700
+Message-ID: <1476828091-17802-3-git-send-email-labbott@redhat.com>
 References: <1476828091-17802-1-git-send-email-labbott@redhat.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1476828091-17802-1-git-send-email-labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, David Brown <david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, kernel-hardening-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1476828091-17802-1-git-send-email-labbott@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: AKASHI Takahiro <takahiro.akashi@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Brown <david.brown@linaro.org>, Will Deacon <will.deacon@arm.com>, Catalin Marinas <catalin.marinas@arm.com>
+Cc: Laura Abbott <labbott@redhat.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Kees Cook <keescook@chromium.org>, kernel-hardening@lists.openwall.com, Matt Fleming <matt@codeblueprint.co.uk>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
 
-Page mappings with full RWX permissions are a security risk. x86
-has an option to walk the page tables and dump any bad pages.
-(See e1a58320a38d ("x86/mm: Warn on W^X mappings")). Add a similar
-implementation for arm64.
+The page table dumping code always assumes it will be dumping to a
+seq_file to userspace. Future code will be taking advantage of
+the page table dumping code but will not need the seq_file. Make
+the seq_file optional for these cases.
 
-Reviewed-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Reviewed-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Tested-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Signed-off-by: Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Reviewed-by: Kees Cook <keescook@chromium.org>
+Reviewed-by: Mark Rutland <mark.rutland@arm.com>
+Tested-by: Mark Rutland <mark.rutland@arm.com>
+Acked-by: Mark Rutland <mark.rutland@arm.com>
+Signed-off-by: Laura Abbott <labbott@redhat.com>
 ---
-v3: Rebased for header guard fixup, whitespace fixes
+v3: No changes
 ---
- arch/arm64/Kconfig.debug        | 29 +++++++++++++++++++++++
- arch/arm64/include/asm/ptdump.h |  8 +++++++
- arch/arm64/mm/dump.c            | 52 +++++++++++++++++++++++++++++++++++++++++
- arch/arm64/mm/mmu.c             |  2 ++
- 4 files changed, 91 insertions(+)
+ arch/arm64/mm/dump.c | 26 +++++++++++++++++++-------
+ 1 file changed, 19 insertions(+), 7 deletions(-)
 
-diff --git a/arch/arm64/Kconfig.debug b/arch/arm64/Kconfig.debug
-index 21a5b74..d1ebd46 100644
---- a/arch/arm64/Kconfig.debug
-+++ b/arch/arm64/Kconfig.debug
-@@ -42,6 +42,35 @@ config ARM64_RANDOMIZE_TEXT_OFFSET
- 	  of TEXT_OFFSET and platforms must not require a specific
- 	  value.
- 
-+config DEBUG_WX
-+	bool "Warn on W+X mappings at boot"
-+	select ARM64_PTDUMP_CORE
-+	---help---
-+	  Generate a warning if any W+X mappings are found at boot.
-+
-+	  This is useful for discovering cases where the kernel is leaving
-+	  W+X mappings after applying NX, as such mappings are a security risk.
-+	  This check also includes UXN, which should be set on all kernel
-+	  mappings.
-+
-+	  Look for a message in dmesg output like this:
-+
-+	    arm64/mm: Checked W+X mappings: passed, no W+X pages found.
-+
-+	  or like this, if the check failed:
-+
-+	    arm64/mm: Checked W+X mappings: FAILED, <N> W+X pages found.
-+
-+	  Note that even if the check fails, your kernel is possibly
-+	  still fine, as W+X mappings are not a security hole in
-+	  themselves, what they do is that they make the exploitation
-+	  of other unfixed kernel bugs easier.
-+
-+	  There is no runtime or memory usage effect of this option
-+	  once the kernel has booted up - it's a one time check.
-+
-+	  If in doubt, say "Y".
-+
- config DEBUG_SET_MODULE_RONX
- 	bool "Set loadable kernel module data as NX and text as RO"
- 	depends on MODULES
-diff --git a/arch/arm64/include/asm/ptdump.h b/arch/arm64/include/asm/ptdump.h
-index f72ee69..6afd847 100644
---- a/arch/arm64/include/asm/ptdump.h
-+++ b/arch/arm64/include/asm/ptdump.h
-@@ -42,5 +42,13 @@ static inline int ptdump_debugfs_register(struct ptdump_info *info,
- 	return 0;
- }
- #endif
-+void ptdump_check_wx(void);
- #endif /* CONFIG_ARM64_PTDUMP_CORE */
-+
-+#ifdef CONFIG_DEBUG_WX
-+#define debug_checkwx()	ptdump_check_wx()
-+#else
-+#define debug_checkwx()	do { } while (0)
-+#endif
-+
- #endif /* __ASM_PTDUMP_H */
 diff --git a/arch/arm64/mm/dump.c b/arch/arm64/mm/dump.c
-index bb36649..4913af5 100644
+index f0f0be7..bb36649 100644
 --- a/arch/arm64/mm/dump.c
 +++ b/arch/arm64/mm/dump.c
-@@ -74,6 +74,8 @@ struct pg_state {
- 	unsigned long start_address;
- 	unsigned level;
- 	u64 current_prot;
-+	bool check_wx;
-+	unsigned long wx_pages;
+@@ -50,6 +50,18 @@ static const struct addr_marker address_markers[] = {
+ 	{ -1,				NULL },
  };
  
- struct prot_bits {
-@@ -202,6 +204,35 @@ static void dump_prot(struct pg_state *st, const struct prot_bits *bits,
++#define pt_dump_seq_printf(m, fmt, args...)	\
++({						\
++	if (m)					\
++		seq_printf(m, fmt, ##args);	\
++})
++
++#define pt_dump_seq_puts(m, fmt)	\
++({					\
++	if (m)				\
++		seq_printf(m, fmt);	\
++})
++
+ /*
+  * The page dumper groups page table entries of the same type into a single
+  * description. It uses pg_state to track the range information while
+@@ -186,7 +198,7 @@ static void dump_prot(struct pg_state *st, const struct prot_bits *bits,
+ 			s = bits->clear;
+ 
+ 		if (s)
+-			seq_printf(st->seq, " %s", s);
++			pt_dump_seq_printf(st->seq, " %s", s);
  	}
  }
  
-+static void note_prot_uxn(struct pg_state *st, unsigned long addr)
-+{
-+	if (!st->check_wx)
-+		return;
-+
-+	if ((st->current_prot & PTE_UXN) == PTE_UXN)
-+		return;
-+
-+	WARN_ONCE(1, "arm64/mm: Found non-UXN mapping at address %p/%pS\n",
-+		  (void *)st->start_address, (void *)st->start_address);
-+
-+	st->wx_pages += (addr - st->start_address) / PAGE_SIZE;
-+}
-+
-+static void note_prot_wx(struct pg_state *st, unsigned long addr)
-+{
-+	if (!st->check_wx)
-+		return;
-+	if ((st->current_prot & PTE_RDONLY) == PTE_RDONLY)
-+		return;
-+	if ((st->current_prot & PTE_PXN) == PTE_PXN)
-+		return;
-+
-+	WARN_ONCE(1, "arm64/mm: Found insecure W+X mapping at address %p/%pS\n",
-+		  (void *)st->start_address, (void *)st->start_address);
-+
-+	st->wx_pages += (addr - st->start_address) / PAGE_SIZE;
-+}
-+
- static void note_page(struct pg_state *st, unsigned long addr, unsigned level,
- 				u64 val)
- {
-@@ -219,6 +250,8 @@ static void note_page(struct pg_state *st, unsigned long addr, unsigned level,
+@@ -200,14 +212,14 @@ static void note_page(struct pg_state *st, unsigned long addr, unsigned level,
+ 		st->level = level;
+ 		st->current_prot = prot;
+ 		st->start_address = addr;
+-		seq_printf(st->seq, "---[ %s ]---\n", st->marker->name);
++		pt_dump_seq_printf(st->seq, "---[ %s ]---\n", st->marker->name);
+ 	} else if (prot != st->current_prot || level != st->level ||
+ 		   addr >= st->marker[1].start_address) {
+ 		const char *unit = units;
  		unsigned long delta;
  
  		if (st->current_prot) {
-+			note_prot_uxn(st, addr);
-+			note_prot_wx(st, addr);
- 			pt_dump_seq_printf(st->seq, "0x%016lx-0x%016lx   ",
+-			seq_printf(st->seq, "0x%016lx-0x%016lx   ",
++			pt_dump_seq_printf(st->seq, "0x%016lx-0x%016lx   ",
  				   st->start_address, addr);
  
-@@ -344,6 +377,25 @@ static struct ptdump_info kernel_ptdump_info = {
- 	.base_addr	= VA_START,
- };
+ 			delta = (addr - st->start_address) >> 10;
+@@ -215,17 +227,17 @@ static void note_page(struct pg_state *st, unsigned long addr, unsigned level,
+ 				delta >>= 10;
+ 				unit++;
+ 			}
+-			seq_printf(st->seq, "%9lu%c %s", delta, *unit,
++			pt_dump_seq_printf(st->seq, "%9lu%c %s", delta, *unit,
+ 				   pg_level[st->level].name);
+ 			if (pg_level[st->level].bits)
+ 				dump_prot(st, pg_level[st->level].bits,
+ 					  pg_level[st->level].num);
+-			seq_puts(st->seq, "\n");
++			pt_dump_seq_puts(st->seq, "\n");
+ 		}
  
-+void ptdump_check_wx(void)
-+{
-+	struct pg_state st = {
-+		.seq = NULL,
-+		.marker = (struct addr_marker[]) {
-+			{ -1, NULL},
-+		},
-+		.check_wx = true,
-+	};
-+
-+	walk_pgd(&st, &init_mm, 0);
-+	note_page(&st, 0, 0, 0);
-+	if (st.wx_pages)
-+		pr_info("Checked W+X mappings: FAILED, %lu W+X pages found\n",
-+			st.wx_pages);
-+	else
-+		pr_info("Checked W+X mappings: passed, no W+X pages found\n");
-+}
-+
- static int ptdump_init(void)
- {
- 	ptdump_initialize();
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 05615a3..2cbe2fe 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -42,6 +42,7 @@
- #include <asm/tlb.h>
- #include <asm/memblock.h>
- #include <asm/mmu_context.h>
-+#include <asm/ptdump.h>
+ 		if (addr >= st->marker[1].start_address) {
+ 			st->marker++;
+-			seq_printf(st->seq, "---[ %s ]---\n", st->marker->name);
++			pt_dump_seq_printf(st->seq, "---[ %s ]---\n", st->marker->name);
+ 		}
  
- u64 idmap_t0sz = TCR_T0SZ(VA_BITS);
+ 		st->start_address = addr;
+@@ -235,7 +247,7 @@ static void note_page(struct pg_state *st, unsigned long addr, unsigned level,
  
-@@ -396,6 +397,7 @@ void mark_rodata_ro(void)
- 	section_size = (unsigned long)__init_begin - (unsigned long)__start_rodata;
- 	create_mapping_late(__pa(__start_rodata), (unsigned long)__start_rodata,
- 			    section_size, PAGE_KERNEL_RO);
-+	debug_checkwx();
+ 	if (addr >= st->marker[1].start_address) {
+ 		st->marker++;
+-		seq_printf(st->seq, "---[ %s ]---\n", st->marker->name);
++		pt_dump_seq_printf(st->seq, "---[ %s ]---\n", st->marker->name);
+ 	}
+ 
  }
- 
- static void __init map_kernel_segment(pgd_t *pgd, void *va_start, void *va_end,
 -- 
 2.7.4
