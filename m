@@ -1,7 +1,7 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 5/8] efi/efi_test: Fix the uninitialized value rv
-Date: Tue, 18 Oct 2016 15:33:15 +0100
-Message-ID: <20161018143318.15673-6-matt@codeblueprint.co.uk>
+Subject: [PATCH 4/8] efi/efi_test: Fix the uninitialized value datasize
+Date: Tue, 18 Oct 2016 15:33:14 +0100
+Message-ID: <20161018143318.15673-5-matt@codeblueprint.co.uk>
 References: <20161018143318.15673-1-matt@codeblueprint.co.uk>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20161018143318.15673-1-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
@@ -13,11 +13,10 @@ List-Id: linux-efi@vger.kernel.org
 From: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 
 Fix the minor issue found by CoverityScan
-520        kfree(name);
-CID 1358932 (#1 of 1): Uninitialized scalar variable (UNINIT)17.
-uninit_use: Using uninitialized value rv.
-521        return rv;
-522}
+CID 1358931 (#1 of 1): Uninitialized scalar variable (UNINIT)9.
+uninit_use: Using uninitialized value datasize.
+199        prev_datasize = datasize;
+200        status = efi.get_variable(name, vd, at, dz, data);
 
 Signed-off-by: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 Cc: Ivan Khoronzhuk <ivan.khoronzhuk-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -28,17 +27,17 @@ Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
-index 348efc9cf59f..bb26e12b0cfd 100644
+index ae51268737cc..348efc9cf59f 100644
 --- a/drivers/firmware/efi/test/efi_test.c
 +++ b/drivers/firmware/efi/test/efi_test.c
-@@ -428,7 +428,7 @@ static long efi_runtime_get_nextvariablename(unsigned long arg)
- 	efi_guid_t *vd = NULL;
- 	efi_guid_t vendor_guid;
+@@ -155,7 +155,7 @@ static long efi_runtime_get_variable(unsigned long arg)
+ {
+ 	struct efi_getvariable __user *getvariable_user;
+ 	struct efi_getvariable getvariable;
+-	unsigned long datasize, prev_datasize, *dz;
++	unsigned long datasize = 0, prev_datasize, *dz;
+ 	efi_guid_t vendor_guid, *vd = NULL;
+ 	efi_status_t status;
  	efi_char16_t *name = NULL;
--	int rv;
-+	int rv = 0;
- 
- 	getnextvariablename_user = (struct efi_getnextvariablename __user *)arg;
- 
 -- 
 2.10.0
