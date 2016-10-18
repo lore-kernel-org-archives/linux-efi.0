@@ -1,52 +1,33 @@
-From: Paolo Bonzini <pbonzini@redhat.com>
-Subject: Re: [RFC PATCH v1 21/28] KVM: introduce KVM_SEV_ISSUE_CMD ioctl
-Date: Tue, 18 Oct 2016 17:44:58 -0400 (EDT)
-Message-ID: <541138814.5117130.1476827098471.JavaMail.zimbra@redhat.com>
-References: <147190820782.9523.4967724730957229273.stgit@brijesh-build-machine> <147190849706.9523.17127624683768628621.stgit@brijesh-build-machine> <6a6e6a1a-eec8-c547-553d-7746d65fc182@redhat.com> <59369ed7-9d35-baad-e0a9-ce4a62bc30bb@amd.com> <28535418.4145222.1476735296810.JavaMail.zimbra@redhat.com> <014b833f-a6e6-fcde-ecc5-2109bf2a0382@amd.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <014b833f-a6e6-fcde-ecc5-2109bf2a0382@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Brijesh Singh <brijesh.singh@amd.com>
-Cc: simon guinot <simon.guinot@sequanux.org>, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linus walleij <linus.walleij@linaro.org>, linux-mm@kvack.org, paul gortmaker <paul.gortmaker@windriver.com>, hpa@zytor.com, dan j williams <dan.j.williams@intel.com>, aarcange@redhat.com, sfr@canb.auug.org.au, andriy shevchenko <andriy.shevchenko@linux.intel.com>, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, mingo@redhat.com, msalter@redhat.com, ross zwisler <ross.zwisler@linux.intel.com>, bp@suse.de, dyoung@redhat.com, thomas lendacky <thomas.lendacky@amd.com>, jroedel@suse.de, keescook@chromium.org, toshi kani <toshi.kani@hpe.com>, mathieu desnoyers <mathieu.desnoyers@efficios.com>de
+From: Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCHv3 0/4] WX checking for arm64
+Date: Tue, 18 Oct 2016 15:01:27 -0700
+Message-ID: <1476828091-17802-1-git-send-email-labbott@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, David Brown <david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, kernel-hardening-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+Hi,
 
-> > If I understanding correctly then you are recommending that instead of
-> > exporting various functions from PSP drv we should expose one function
-> > for the all the guest command handling (something like this).
-> >
-> > My understanding is that a user could exhaust the ASIDs for encrypted
-> > VMs if it was allowed to start an arbitrary number of KVM guests.  So
-> > we would need some kind of control.  Is this correct?
-> 
-> Yes, there is limited number of ASIDs for encrypted VMs. Do we need to
-> pass the psp_fd into SEV_ISSUE_CMD ioctl or can we handle it from Qemu
-> itself ? e.g when user asks to transition a guest into SEV-enabled mode
-> then before calling LAUNCH_START Qemu tries to open /dev/psp device. If
-> open() returns success then we know user has permission to communicate
-> with PSP firmware.
+This is v3 of the implementation to check for writable and executable pages on
+arm64. This is a basically a rebase + acks.
 
-No, this is a stateful mechanism and it's hard to implement.  Passing a
-/dev/psp file descriptor is the simplest way to "prove" that you have
-access to the device.
+Laura Abbott (4):
+  arm64: dump: Make ptdump debugfs a separate option
+  arm64: dump: Make the page table dumping seq_file optional
+  arm64: dump: Remove max_addr
+  arm64: dump: Add checking for writable and exectuable pages
 
-Thanks,
+ arch/arm64/Kconfig.debug           |  35 ++++++++++++-
+ arch/arm64/include/asm/ptdump.h    |  22 +++++---
+ arch/arm64/mm/Makefile             |   3 +-
+ arch/arm64/mm/dump.c               | 104 +++++++++++++++++++++++++++----------
+ arch/arm64/mm/mmu.c                |   2 +
+ arch/arm64/mm/ptdump_debugfs.c     |  31 +++++++++++
+ drivers/firmware/efi/arm-runtime.c |   5 +-
+ 7 files changed, 163 insertions(+), 39 deletions(-)
+ create mode 100644 arch/arm64/mm/ptdump_debugfs.c
 
-Paolo
-
-> > If so, does /dev/psp provide any functionality that you believe is
-> > dangerous for the KVM userspace (which runs in a very confined
-> > environment)?  Is this functionality blocked through capability
-> > checks?
-> 
-> I do not see /dev/psp providing anything which would be dangerous to KVM
-> userspace. It should be safe to access /dev/psp into KVM userspace.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+-- 
+2.7.4
