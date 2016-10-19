@@ -1,105 +1,311 @@
-From: "Cohen, Eugene" <eugene@hp.com>
-Subject: RE: [RFC PATCH 1/2] efi: libstub: preserve .debug sections after
- absolute relocation check
-Date: Wed, 19 Oct 2016 12:55:03 +0000
-Message-ID: <AT5PR84MB02917D53223005D45C59BA98B4D20@AT5PR84MB0291.NAMPRD84.PROD.OUTLOOK.COM>
-References: <1476877232-24308-1-git-send-email-ard.biesheuvel@linaro.org>
- <1476877232-24308-2-git-send-email-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v2 1/3] efi: Add device path parser
+Date: Wed, 19 Oct 2016 12:17:28 +0100
+Message-ID: <20161019111728.GC31476@codeblueprint.co.uk>
+References: <cover.1476698603.git.lukas@wunner.de>
+ <ece9b12b1d0b86c83e8369e4123fc7bc60db1fdc.1476698603.git.lukas@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1476877232-24308-2-git-send-email-ard.biesheuvel@linaro.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
-Cc: "mark.rutland@arm.com" <mark.rutland@arm.com>, "matt@codeblueprint.co.uk" <matt@codeblueprint.co.uk>, "leif.lindholm@linaro.org" <leif.lindholm@linaro.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <ece9b12b1d0b86c83e8369e4123fc7bc60db1fdc.1476698603.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-I was literally just looking at this.  I originally commented out the removal of debug (which I though was really annoying) but ran into the absolute relocations warning for symbols that it need not apply to.  Your two-pass solution is a nice one.
+(Cc'ing Peter since he's played with device path parsing before)
 
-> -----Original Message-----
-> From: Ard Biesheuvel [mailto:ard.biesheuvel@linaro.org]
-> Sent: Wednesday, October 19, 2016 5:41 AM
-> To: linux-efi@vger.kernel.org; linux-arm-kernel@lists.infradead.org
-> Cc: mark.rutland@arm.com; leif.lindholm@linaro.org; Cohen, Eugene
-> <eugene@hp.com>; matt@codeblueprint.co.uk; Ard Biesheuvel
-> <ard.biesheuvel@linaro.org>
-> Subject: [RFC PATCH 1/2] efi: libstub: preserve .debug sections after absolute
-> relocation check
+On Mon, 17 Oct, at 12:57:23PM, Lukas Wunner wrote:
+> We're about to extended the efistub to retrieve device properties from
+> EFI on Apple Macs. The properties use EFI Device Paths to indicate the
+> device they belong to. This commit adds a parser which, given an EFI
+> Device Path, locates the corresponding struct device and returns a
+> reference to it.
 > 
-> The build commands for the ARM and arm64 EFI stubs strips the .debug
-> sections and other sections that my legally contain absolute relocations,
-> in order to inspect the remaining sections for the presence of such
-> relocations.
+> Initially only ACPI and PCI Device Path nodes are supported, these are
+> the only types needed for Apple device properties (the corresponding
+> macOS function AppleACPIPlatformExpert::matchEFIDevicePath() does not
+> support any others). Further node types can be added with moderate
+> effort.
 > 
-> This leaves us without debugging symbols in the stub for no good reason,
-> given that these sections are omitted from the kernel binary, and that
-> these relocations are thus only interpreted by the debugger.
+> Apple device properties is currently the only use case of this parser,
+> but since this may be useful to others, make it a separate component
+> which can be selected with config option EFI_DEV_PATH_PARSER. It can
+> in principle be compiled as a module if acpi_get_first_physical_node()
+> and acpi_bus_type are exported (and get_device_by_efi_path() itself is
+> exported).
 > 
-> So if the relocation check succeeds, invoke objcopy again, but this time,
-> leave the .debug sections in place. Note that these sections may refer
-> to ksymtab/kcrctab contents, so leave those in place as well.
+> The dependency on CONFIG_ACPI is needed for acpi_match_device_ids().
+> It can be removed if an empty inline stub is added for that function.
 > 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-
-Reviewed-by: Eugene Cohen <eugene@hp.com>
-
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 > ---
->  drivers/firmware/efi/libstub/Makefile | 19 ++++++++++++++-----
->  1 file changed, 14 insertions(+), 5 deletions(-)
+>  drivers/firmware/efi/Kconfig           |   5 +
+>  drivers/firmware/efi/Makefile          |   1 +
+>  drivers/firmware/efi/dev-path-parser.c | 186 +++++++++++++++++++++++++++++++++
+>  include/linux/efi.h                    |  21 ++++
+>  4 files changed, 213 insertions(+)
+>  create mode 100644 drivers/firmware/efi/dev-path-parser.c
 > 
-> diff --git a/drivers/firmware/efi/libstub/Makefile
-> b/drivers/firmware/efi/libstub/Makefile
-> index c06945160a41..66584f173123 100644
-> --- a/drivers/firmware/efi/libstub/Makefile
-> +++ b/drivers/firmware/efi/libstub/Makefile
-> @@ -60,7 +60,7 @@ CFLAGS_arm64-stub.o 		:= -
-> DTEXT_OFFSET=$(TEXT_OFFSET)
->  extra-$(CONFIG_EFI_ARMSTUB)	:= $(lib-y)
->  lib-$(CONFIG_EFI_ARMSTUB)	:= $(patsubst %.o,%.stub.o,$(lib-y))
+> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+> index c981be1..893fda4 100644
+> --- a/drivers/firmware/efi/Kconfig
+> +++ b/drivers/firmware/efi/Kconfig
+> @@ -133,3 +133,8 @@ endmenu
+>  
+>  config UEFI_CPER
+>  	bool
+> +
+> +config EFI_DEV_PATH_PARSER
+> +	bool
+> +	depends on ACPI
+> +	default n
+> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+> index c8a439f..3e91ae3 100644
+> --- a/drivers/firmware/efi/Makefile
+> +++ b/drivers/firmware/efi/Makefile
+> @@ -21,6 +21,7 @@ obj-$(CONFIG_EFI_STUB)			+= libstub/
+>  obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
+>  obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
+>  obj-$(CONFIG_EFI_TEST)			+= test/
+> +obj-$(CONFIG_EFI_DEV_PATH_PARSER)	+= dev-path-parser.o
+>  
+>  arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
+>  obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+> diff --git a/drivers/firmware/efi/dev-path-parser.c b/drivers/firmware/efi/dev-path-parser.c
+> new file mode 100644
+> index 0000000..549f80b
+> --- /dev/null
+> +++ b/drivers/firmware/efi/dev-path-parser.c
+> @@ -0,0 +1,186 @@
+> +/*
+> + * dev-path-parser.c - EFI Device Path parser
+> + * Copyright (C) 2016 Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License (version 2) as
+> + * published by the Free Software Foundation.
+> + *
+> + * This program is distributed in the hope that it will be useful,
+> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> + * GNU General Public License for more details.
+> + *
+> + * You should have received a copy of the GNU General Public License
+> + * along with this program; if not, see <http://www.gnu.org/licenses/>.
+> + */
+> +
+> +#include <linux/acpi.h>
+> +#include <linux/efi.h>
+> +#include <linux/pci.h>
+> +
+> +struct acpi_hid_uid {
+> +	struct acpi_device_id hid[2];
+> +	char uid[11]; /* UINT_MAX + null byte */
+> +};
+> +
+> +static int __init acpi_match(struct device *dev, void *data)
+> +{
+> +	struct acpi_hid_uid hid_uid = *(struct acpi_hid_uid *)data;
+> +	struct acpi_device *adev = to_acpi_device(dev);
+> +
+> +	if (acpi_match_device_ids(adev, hid_uid.hid))
+> +		return 0;
+> +
+> +	if (adev->pnp.unique_id)
+> +		return !strcmp(adev->pnp.unique_id, hid_uid.uid);
+> +	else
+> +		return !strcmp("0", hid_uid.uid);
+> +}
+> +
+> +static int __init get_device_by_acpi_path(struct efi_dev_path *node,
+> +					  struct device *parent,
+> +					  struct device **child)
+> +{
+> +	struct acpi_hid_uid hid_uid = {};
+> +	struct device *phys_dev;
+> +
+> +	if (node->length != 12)
+> +		return -EINVAL;
+> +
+> +	sprintf(hid_uid.hid[0].id, "%c%c%c%04X",
+> +		'A' + ((node->acpi.hid >> 10) & 0x1f) - 1,
+> +		'A' + ((node->acpi.hid >>  5) & 0x1f) - 1,
+> +		'A' + ((node->acpi.hid >>  0) & 0x1f) - 1,
+> +			node->acpi.hid >> 16);
+> +	sprintf(hid_uid.uid, "%u", node->acpi.uid);
+> +
+> +	*child = bus_find_device(&acpi_bus_type, NULL, &hid_uid, acpi_match);
+> +	if (!*child)
+> +		return -ENODEV;
+> +
+> +	phys_dev = acpi_get_first_physical_node(to_acpi_device(*child));
+> +	if (phys_dev) {
+> +		get_device(phys_dev);
+> +		put_device(*child);
+> +		*child = phys_dev;
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+> +static int __init pci_match(struct device *dev, void *data)
+> +{
+> +	unsigned int devfn = *(unsigned int *)data;
+> +
+> +	return dev_is_pci(dev) && to_pci_dev(dev)->devfn == devfn;
+> +}
+> +
+> +static int __init get_device_by_pci_path(struct efi_dev_path *node,
+> +					 struct device *parent,
+> +					 struct device **child)
+> +{
+> +	unsigned int devfn;
+> +
+> +	if (node->length != 6)
+> +		return -EINVAL;
+> +	if (!parent)
+> +		return -EINVAL;
+> +
+> +	devfn = PCI_DEVFN(node->pci.dev, node->pci.fn);
+> +
+> +	*child = device_find_child(parent, &devfn, pci_match);
+> +	if (!*child)
+> +		return -ENODEV;
+> +
+> +	return 0;
+> +}
+> +
+> +/*
+> + * Insert parsers for further node types here.
+> + *
+> + * Each parser takes a pointer to the @node and to the @parent (will be NULL
+> + * for the first device path node). If a device corresponding to @node was
+> + * found below @parent, its reference count should be incremented and the
+> + * device returned in @child.
+> + *
+> + * The return value should be 0 on success or a negative int on failure.
+> + * The special return value 1 signals the end of the device path, only
+> + * get_device_by_end_path() is supposed to return this.
+> + *
+> + * Be sure to validate the node length and contents before commencing the
+> + * search for a device.
+> + */
+> +
+> +static int __init get_device_by_end_path(struct efi_dev_path *node,
+> +					 struct device *parent,
+> +					 struct device **child)
+> +{
+> +	if (node->length != 4)
+> +		return -EINVAL;
+> +	if (!parent)
+> +		return -ENODEV;
+> +
+> +	*child = get_device(parent);
+> +	return 1;
+> +}
+> +
+> +/**
+> + * get_device_by_efi_path - find device by EFI Device Path
+> + * @node: EFI Device Path
+> + * @len: maximum length of EFI Device Path in bytes
+> + * @dev: device found
+> + *
+> + * Parse a series of EFI Device Path nodes at @node and find the corresponding
+> + * device. If the device was found, its reference count is incremented and a
+> + * pointer to it is returned in @dev. The caller needs to drop the reference
+> + * with put_device() after use. The @node pointer is updated to point to the
+> + * location immediately after the "End Entire Device Path" node.
+> + *
+> + * If a Device Path node is malformed or its corresponding device is not found,
+> + * @node is updated to point to this offending node and @dev will be %NULL.
+> + *
+> + * Most buses instantiate devices in "subsys" initcall level, hence the
+> + * earliest initcall level in which this function should be called is "fs".
+> + *
+> + * Returns 0 on success,
+> + *	   %-ENODEV if no device was found,
+> + *	   %-EINVAL if a node is malformed or exceeds @len,
+> + *	   %-ENOTSUPP if support for a node type is not yet implemented.
+> + */
+> +int __init get_device_by_efi_path(struct efi_dev_path **node, size_t len,
+> +				  struct device **dev)
+> +{
+> +	struct device *parent = NULL, *child;
+> +	int ret = 0;
+> +
+> +	*dev = NULL;
+> +
+> +	while (ret != 1) {
+> +		if (len < 4 || len < (*node)->length)
+> +			ret = -EINVAL;
+> +		else if ((*node)->type     == EFI_DEV_ACPI &&
+> +			 (*node)->sub_type == EFI_DEV_BASIC_ACPI)
+> +			ret = get_device_by_acpi_path(*node, parent, &child);
+> +		else if ((*node)->type     == EFI_DEV_HW &&
+> +			 (*node)->sub_type == EFI_DEV_PCI)
+> +			ret = get_device_by_pci_path(*node, parent, &child);
+> +		else if (((*node)->type    == EFI_DEV_END_PATH ||
+> +			  (*node)->type    == EFI_DEV_END_PATH2) &&
+> +			 (*node)->sub_type == EFI_DEV_END_ENTIRE)
+> +			ret = get_device_by_end_path(*node, parent, &child);
+> +		else
+> +			ret = -ENOTSUPP;
+> +
+> +		put_device(parent);
+> +		if (ret < 0)
+> +			return ret;
+> +
+> +		parent = child;
+> +		*node  = (void *)*node + (*node)->length;
+> +		len   -= (*node)->length;
+> +	}
+> +
+> +	*dev = child;
+> +	return 0;
+> +}
+
+Where in your patch series is this function called? Am I missing
+something?
+
+Also, unless there's some existing namespace with "get_device_by_*"
+I'd prefer for this function name to have "efi_" as the prefix.
+
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 2d08948..4faf339 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -1145,6 +1145,27 @@ struct efi_generic_dev_path {
+>  	u16 length;
+>  } __attribute ((packed));
+>  
+> +struct efi_dev_path {
+> +	u8 type;	/* can be replaced with unnamed */
+> +	u8 sub_type;	/* struct efi_generic_dev_path; */
+> +	u16 length;	/* once we've moved to -std=c11 */
+> +	union {
+> +		struct {
+> +			u32 hid;
+> +			u32 uid;
+> +		} acpi;
+> +		struct {
+> +			u8 fn;
+> +			u8 dev;
+> +		} pci;
+> +	};
+> +} __attribute ((packed));
+> +
+> +#if IS_ENABLED(CONFIG_EFI_DEV_PATH_PARSER)
+> +int get_device_by_efi_path(struct efi_dev_path **node, size_t len,
+> +			   struct device **dev);
+> +#endif
+> +
+>  static inline void memrange_efi_to_native(u64 *addr, u64 *npages)
+>  {
+>  	*npages = PFN_UP(*addr + (*npages<<EFI_PAGE_SHIFT)) - PFN_DOWN(*addr);
+> -- 
+> 2.9.3
 > 
-> -STUBCOPY_FLAGS-y		:= -R .debug* -R *ksymtab* -R *kcrctab*
-> +STUBCOPY_RM			:= -R .debug* -R *ksymtab* -R *kcrctab*
->  STUBCOPY_FLAGS-$(CONFIG_ARM64)	+= --prefix-alloc-sections=.init \
->  				   --prefix-symbols=__efistub_
->  STUBCOPY_RELOC-$(CONFIG_ARM64)	:= R_AARCH64_ABS
-> @@ -68,11 +68,20 @@ STUBCOPY_RELOC-$(CONFIG_ARM64)	:=
-> R_AARCH64_ABS
->  $(obj)/%.stub.o: $(obj)/%.o FORCE
->  	$(call if_changed,stubcopy)
-> 
-> +#
-> +# This calls objcopy twice: the first time it includes STUBCOPY_RM, and inspects
-> +# the result to ensure that the actual code itself does not contain any absolute
-> +# references. If this succeeds, the objcopy is performed a second time, but this
-> +# time the .debug and other sections are retained, given that we know that the
-> +# absolute relocations they may contain are harmless.
-> +#
->  quiet_cmd_stubcopy = STUBCPY $@
-> -      cmd_stubcopy = if $(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@; then	\
-> -		     $(OBJDUMP) -r $@ | grep $(STUBCOPY_RELOC-y)	\
-> -		     && (echo >&2 "$@: absolute symbol references not allowed in
-> the EFI stub"; \
-> -			 rm -f $@; /bin/false); else /bin/false; fi
-> +      cmd_stubcopy = if $(OBJCOPY) $(STUBCOPY_FLAGS-y) $(STUBCOPY_RM) $<
-> $@; \
-> +		     then if $(OBJDUMP) -r $@ | grep $(STUBCOPY_RELOC-y);    \
-> +		     then (echo >&2 "$@: absolute symbol references not allowed
-> in the EFI stub"; \
-> +			 rm -f $@; /bin/false); 			     \
-> +		     else $(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@; fi	     \
-> +		     else /bin/false; fi
-> 
->  #
->  # ARM discards the .data section because it disallows r/w data in the
-> --
-> 2.7.4
