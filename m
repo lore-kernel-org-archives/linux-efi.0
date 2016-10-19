@@ -1,51 +1,41 @@
-From: Laura Abbott <labbott@redhat.com>
-Subject: [REGRESSION] EFI mixed mode patch triggers boot failure
-Date: Wed, 19 Oct 2016 13:04:36 -0700
-Message-ID: <dc0bc031-f20e-9ad0-57f4-cfa1e04f8f05@redhat.com>
+From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH 1/2] efi: add support for seeding the RNG from a UEFI
+ config table
+Date: Wed, 19 Oct 2016 13:14:08 -0700
+Message-ID: <CAGXu5jJ-KTVJLwAp6iZ-tp5AKnAzSHz80yZkg4dh3uYDz3MsJw@mail.gmail.com>
+References: <1475749646-10844-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1475749646-10844-2-git-send-email-ard.biesheuvel@linaro.org>
+ <20161019110926.GG9616@leverpostej> <CAKv+Gu9g1W8EfnJN2Y_Xgo=QKC1gHa95rjO32Dqt4uT+amzhnQ@mail.gmail.com>
+ <20161019112243.GD31476@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: "x86@kernel.org" <x86@kernel.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Justin Forbes <jforbes@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20161019112243.GD31476-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+On Wed, Oct 19, 2016 at 4:22 AM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Wed, 19 Oct, at 12:13:55PM, Ard Biesheuvel wrote:
+>> On 19 October 2016 at 12:09, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
+>>
+>> > I think to some extent this mush be treated as an ABI, given cases like
+>> > kexec.
+>> >
+>>
+>> Perhaps, yes. That would also allow GRUB or other EFI aware
+>> bootloaders to generate the seed.
+>
+> If we're going to go down this route, we should try and get the GUID
+> into the UEFI spec.
 
-Fedora received a bug report https://bugzilla.redhat.com/show_bug.cgi?id=1384238
-of a bootup failure with stable 4.7.6. efi=noruntime fixed the bootup problem.
-1297667083d5442aafe3e337b9413bf02b114edb was linked as the cause
-of the problem.
+It seems like maybe under UEFI, both this table (which sounds like
+it'll not be rotated regularly) could be mixed with calls to
+EFI_PROTOCOL_RNG by the kernel? (Similar to how kaslr is seeded?)
 
+-Kees
 
-x86/efi: Only map RAM into EFI page tables if in mixed-mode
-
-Waiman reported that booting with CONFIG_EFI_MIXED enabled on his
-multi-terabyte HP machine results in boot crashes, because the EFI
-region mapping functions loop forever while trying to map those
-regions describing RAM.
-
-While this patch doesn't fix the underlying hang, there's really no
-reason to map EFI_CONVENTIONAL_MEMORY regions into the EFI page tables
-when mixed-mode is not in use at runtime.
-
-Reported-by: Waiman Long <waiman.long@hpe.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-CC: Theodore Ts'o <tytso@mit.edu>
-Cc: Arnd Bergmann <arnd@arndb.de>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Scott J Norton <scott.norton@hpe.com>
-Cc: Douglas Hatch <doug.hatch@hpe.com>
-Cc: <stable@vger.kernel.org> # v4.6+
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-
-I made a request in the bugzilla for the reporter to
-give a bootlog with efi=debug which I'm still waiting on.
-
-Any ideas?
-
-Thanks,
-Laura
+-- 
+Kees Cook
+Nexus Security
