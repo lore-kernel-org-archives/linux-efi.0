@@ -1,33 +1,52 @@
-From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v2 0/3] efi: add support for seeding the kernel RNG from UEFI
-Date: Thu, 20 Oct 2016 11:34:13 -0700
-Message-ID: <CAGXu5jLo=UX+Rw8kLZdd+iz+aS2JtwpqoxL=-ZMNXAeLE=Ac5w@mail.gmail.com>
-References: <1476962486-18368-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: 4.9-rc1 boot regression, ambiguous bisect result
+Date: Thu, 20 Oct 2016 12:37:16 -0700
+Message-ID: <CAPcyv4gE0wtoR3Yxh6axiQpPE2MvDgGW=JLEz9b7OMSBQZ_HDQ@mail.gmail.com>
+References: <CAPcyv4gDYcahNJ6CEzf2eUGq8sGqW8Yo09T8cscGWTLoja7PXw@mail.gmail.com>
+ <20161020122931.GD19876@codeblueprint.co.uk> <CAPcyv4hT+yQvnQzfb49FP-+vVaVKHTYEj1EjNd9Xvu0Wr8T+Bg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1476962486-18368-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <CAPcyv4hT+yQvnQzfb49FP-+vVaVKHTYEj1EjNd9Xvu0Wr8T+Bg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ted Ts'o <tytso-3s7WtUTddSA@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Oct 20, 2016 at 4:21 AM, Ard Biesheuvel
-<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> This implements generic EFI core kernel code to seed the kernel entropy
-> pool from a Linux specific UEFI configuration table containing a random seed
-> supplied by the firmware. (#1)
+On Thu, Oct 20, 2016 at 8:22 AM, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> On Thu, Oct 20, 2016 at 5:29 AM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+>> On Wed, 19 Oct, at 09:04:29PM, Dan Williams wrote:
+>>> Hi,
+>>>
+>>> I am currently unable to boot a Yoga 900 with latest mainline, but 4.8 boots.
+>>>
+>>> The symptom is a reboot before the video console is available.
+>>>
+>>> I bisected to commit 816e76129ed5 "efi: Allow drivers to reserve boot
+>>> services forever".  However, that commit is known to be broken.  The
+>>> proposed fix, commit 92dc33501bfb "x86/efi: Round EFI memmap
+>>> reservations to EFI_PAGE_SIZE", also exhibits the reboot problem.
+>>>
+>>> During the bisect some of the stopping points landed on commits that
+>>> caused the boot process to hang rather than cause a reboot.  The
+>>> commits that resulted in a hang are marked "git bisect skip" in this
+>>> log: https://gist.github.com/djbw/1b501daa98192a42ae848f03bb59c30e
+>>>
+>>> I'll try treating those hangs as bad bisect results and re-run the
+>>> full bisect tomorrow.  In the meantime I wonder if the bisect log
+>>> implicates a better regression candidate?
+>>
+>> Could you mail the dmesg output when booting a known working kernel
+>> with efi=debug ?
 >
-> In addition, it wires it up for ARM and arm64, by invoking the EFI_RNG_PROTOCOL
-> UEFI protocol from the stub, and populating such a UEFI config table using its
-> output.
+> Here it is:
+>
+> https://gist.github.com/djbw/cae05e721b159d5ad7b146d7a93f5fa2
 
-Looks good to me! Now that I understand it. ;)
+I am able to build a kernel and boot the platform with the following
+set of reverts:
 
-Reviewed-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-
--Kees
-
--- 
-Kees Cook
-Nexus Security
+      Revert "x86/efi: Round EFI memmap reservations to EFI_PAGE_SIZE"
+      Revert "x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data"
+      Revert "efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()"
+      Revert "efi: Allow drivers to reserve boot services forever"
