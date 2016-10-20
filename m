@@ -1,98 +1,38 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [REGRESSION] EFI mixed mode patch triggers boot failure
-Date: Thu, 20 Oct 2016 13:03:57 +0100
-Message-ID: <20161020120357.GB19876@codeblueprint.co.uk>
-References: <dc0bc031-f20e-9ad0-57f4-cfa1e04f8f05@redhat.com>
- <7af87cde-ce79-d6e8-0797-54069a77f42b@redhat.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: 4.9-rc1 boot regression, ambiguous bisect result
+Date: Thu, 20 Oct 2016 13:29:31 +0100
+Message-ID: <20161020122931.GD19876@codeblueprint.co.uk>
+References: <CAPcyv4gDYcahNJ6CEzf2eUGq8sGqW8Yo09T8cscGWTLoja7PXw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <7af87cde-ce79-d6e8-0797-54069a77f42b-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Justin Forbes <jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <CAPcyv4gDYcahNJ6CEzf2eUGq8sGqW8Yo09T8cscGWTLoja7PXw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dan Williams <dan.j.williams@intel.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Peter Jones <pjones@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 19 Oct, at 02:13:00PM, Laura Abbott wrote:
-> On 10/19/2016 01:04 PM, Laura Abbott wrote:
-> >Hi,
-> >
-> >Fedora received a bug report https://bugzilla.redhat.com/show_bug.cgi?id=1384238
-> >of a bootup failure with stable 4.7.6. efi=noruntime fixed the bootup problem.
-> >1297667083d5442aafe3e337b9413bf02b114edb was linked as the cause
-> >of the problem.
-> >
-> >
-> >x86/efi: Only map RAM into EFI page tables if in mixed-mode
-> >
-> >Waiman reported that booting with CONFIG_EFI_MIXED enabled on his
-> >multi-terabyte HP machine results in boot crashes, because the EFI
-> >region mapping functions loop forever while trying to map those
-> >regions describing RAM.
-> >
-> >While this patch doesn't fix the underlying hang, there's really no
-> >reason to map EFI_CONVENTIONAL_MEMORY regions into the EFI page tables
-> >when mixed-mode is not in use at runtime.
-> >
-> >Reported-by: Waiman Long <waiman.long-ZPxbGqLxI0U@public.gmane.org>
-> >Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> >Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-> >Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-> >CC: Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>
-> >Cc: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-> >Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-> >Cc: Scott J Norton <scott.norton-ZPxbGqLxI0U@public.gmane.org>
-> >Cc: Douglas Hatch <doug.hatch-ZPxbGqLxI0U@public.gmane.org>
-> >Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org> # v4.6+
-> >Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> >
-> >I made a request in the bugzilla for the reporter to
-> >give a bootlog with efi=debug which I'm still waiting on.
-> >
-> >Any ideas?
-> >
-> >Thanks,
-> >Laura
+On Wed, 19 Oct, at 09:04:29PM, Dan Williams wrote:
+> Hi,
 > 
-> dmesg with efi=debug from the reporter is attached
+> I am currently unable to boot a Yoga 900 with latest mainline, but 4.8 boots.
+> 
+> The symptom is a reboot before the video console is available.
+> 
+> I bisected to commit 816e76129ed5 "efi: Allow drivers to reserve boot
+> services forever".  However, that commit is known to be broken.  The
+> proposed fix, commit 92dc33501bfb "x86/efi: Round EFI memmap
+> reservations to EFI_PAGE_SIZE", also exhibits the reboot problem.
+> 
+> During the bisect some of the stopping points landed on commits that
+> caused the boot process to hang rather than cause a reboot.  The
+> commits that resulted in a hang are marked "git bisect skip" in this
+> log: https://gist.github.com/djbw/1b501daa98192a42ae848f03bb59c30e
+> 
+> I'll try treating those hangs as bad bisect results and re-run the
+> full bisect tomorrow.  In the meantime I wonder if the bisect log
+> implicates a better regression candidate?
 
-> [    0.000000] DMI: Hewlett-Packard Compaq CQ58 Notebook PC/188B, BIOS F.36 06/07/2013
-
-Hmm.. this is a fairly old machine, what kernel versions has the
-reporter successfully run on it? The code that was nop'd out in the
-above commit for the native case only came into existence in v4.6.
-
-The fact that booting with efi=old_map does *not* seem to result in a
-booting kernel is very suspicious. Could you ask them to double-check?
-
-Maybe try this patch too on v4.7.6.
-
----
-
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 964c7022d31d..b07183c6b470 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -244,9 +244,12 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	 * text and allocate a new stack because we can't rely on the
- 	 * stack pointer being < 4GB.
- 	 */
--	if (!IS_ENABLED(CONFIG_EFI_MIXED) || efi_is_native())
-+	if (!IS_ENABLED(CONFIG_EFI_MIXED))
- 		return 0;
- 
-+	if (efi_is_native())
-+		goto map_text;
-+
- 	/*
- 	 * Map all of RAM so that we can access arguments in the 1:1
- 	 * mapping when making EFI runtime calls.
-@@ -273,6 +276,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	efi_scratch.phys_stack = virt_to_phys(page_address(page));
- 	efi_scratch.phys_stack += PAGE_SIZE; /* stack grows down */
- 
-+map_text:
- 	npages = (_etext - _text) >> PAGE_SHIFT;
- 	text = __pa(_text);
- 	pfn = text >> PAGE_SHIFT;
+Could you mail the dmesg output when booting a known working kernel
+with efi=debug ?
