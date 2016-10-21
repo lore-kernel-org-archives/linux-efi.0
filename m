@@ -1,80 +1,70 @@
-From: Dan Williams <dan.j.williams@intel.com>
-Subject: Re: 4.9-rc1 boot regression, ambiguous bisect result
-Date: Fri, 21 Oct 2016 11:20:12 -0700
-Message-ID: <CAPcyv4iijpLxn-s0Q-x+23y=+y4tUHcWqdET0R07rzmbbBgSKg@mail.gmail.com>
-References: <CAPcyv4gDYcahNJ6CEzf2eUGq8sGqW8Yo09T8cscGWTLoja7PXw@mail.gmail.com>
- <20161020122931.GD19876@codeblueprint.co.uk> <CAPcyv4hT+yQvnQzfb49FP-+vVaVKHTYEj1EjNd9Xvu0Wr8T+Bg@mail.gmail.com>
- <CAPcyv4gE0wtoR3Yxh6axiQpPE2MvDgGW=JLEz9b7OMSBQZ_HDQ@mail.gmail.com> <20161021070054.GA6301@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20161021070054.GA6301@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Peter Jones <pjones@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+Subject: [PATCH] Fix allocation size calculations
+Date: Fri, 21 Oct 2016 11:47:54 -0700
+Message-ID: <20161021184754.26844-1-roy.franz@hpe.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, roy.franz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Cc: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Oct 21, 2016 at 12:00 AM, Ingo Molnar <mingo@kernel.org> wrote:
->
-> * Dan Williams <dan.j.williams@intel.com> wrote:
->
->> On Thu, Oct 20, 2016 at 8:22 AM, Dan Williams <dan.j.williams@intel.com> wrote:
->> > On Thu, Oct 20, 2016 at 5:29 AM, Matt Fleming <matt@codeblueprint.co.uk> wrote:
->> >> On Wed, 19 Oct, at 09:04:29PM, Dan Williams wrote:
->> >>> Hi,
->> >>>
->> >>> I am currently unable to boot a Yoga 900 with latest mainline, but 4.8 boots.
->> >>>
->> >>> The symptom is a reboot before the video console is available.
->> >>>
->> >>> I bisected to commit 816e76129ed5 "efi: Allow drivers to reserve boot
->> >>> services forever".  However, that commit is known to be broken.  The
->> >>> proposed fix, commit 92dc33501bfb "x86/efi: Round EFI memmap
->> >>> reservations to EFI_PAGE_SIZE", also exhibits the reboot problem.
->> >>>
->> >>> During the bisect some of the stopping points landed on commits that
->> >>> caused the boot process to hang rather than cause a reboot.  The
->> >>> commits that resulted in a hang are marked "git bisect skip" in this
->> >>> log: https://gist.github.com/djbw/1b501daa98192a42ae848f03bb59c30e
->> >>>
->> >>> I'll try treating those hangs as bad bisect results and re-run the
->> >>> full bisect tomorrow.  In the meantime I wonder if the bisect log
->> >>> implicates a better regression candidate?
->> >>
->> >> Could you mail the dmesg output when booting a known working kernel
->> >> with efi=debug ?
->> >
->> > Here it is:
->> >
->> > https://gist.github.com/djbw/cae05e721b159d5ad7b146d7a93f5fa2
->>
->> I am able to build a kernel and boot the platform with the following
->> set of reverts:
->>
->>       Revert "x86/efi: Round EFI memmap reservations to EFI_PAGE_SIZE"
->>       Revert "x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data"
->>       Revert "efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()"
->>       Revert "efi: Allow drivers to reserve boot services forever"
->
-> Could you please describe the bootup behavior after each revert? I.e. wild guess:
->
->        vanilla kernel:
->    # spontaneous reboot
->        + Revert "x86/efi: Round EFI memmap reservations to EFI_PAGE_SIZE":
->    # spontaneous reboot
->        + Revert "x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data":
->    # hang
->        + Revert "efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()":
->    # hang
->        + Revert "efi: Allow drivers to reserve boot services forever":
->    == works
->
-> ?
+Adjust the size used in calculations to match the actual size of allocation
+that will be performed based on EFI size/alignment constraints.
+efi_high_alloc() and efi_low_alloc() use the passed size in bytes directly
+to find space in the memory map for the allocation, rather than the actual
+allocation size that has been adjusted for size and alignment constraints.
+This results in failed allocations and retries in efi_high_alloc().  The
+same error is present in efi_low_alloc(), although failure will only happen
+if the lowest memory block is small.
+Also use EFI_PAGE_SIZE consistently and remove use of EFI_PAGE_SHIFT to
+calculate page size.
 
-In this case all but the last revert produce the same result, instant
-reboot after loading the kernel.  I have not been able to pinpoint
-what changes that behavior to the hang conditions I saw mid-bisect.
+Signed-off-by: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+---
+This error seems to be present since the EFI stub was introduced, going
+back 3.10.
 
-The first three reverts are just there to get the kernel to build
-again after reverting "efi: Allow drivers to reserve boot services
-forever"
+
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index aded106..9575c44 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -194,6 +194,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 		align = EFI_ALLOC_ALIGN;
+ 
+ 	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
++	size = nr_pages * EFI_PAGE_SIZE;
+ again:
+ 	for (i = 0; i < map_size / desc_size; i++) {
+ 		efi_memory_desc_t *desc;
+@@ -208,7 +209,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 			continue;
+ 
+ 		start = desc->phys_addr;
+-		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
++		end = start + desc->num_pages * EFI_PAGE_SIZE;
+ 
+ 		if (end > max)
+ 			end = max;
+@@ -286,6 +287,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 		align = EFI_ALLOC_ALIGN;
+ 
+ 	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
++	size = nr_pages * EFI_PAGE_SIZE;
+ 	for (i = 0; i < map_size / desc_size; i++) {
+ 		efi_memory_desc_t *desc;
+ 		unsigned long m = (unsigned long)map;
+@@ -300,7 +302,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 			continue;
+ 
+ 		start = desc->phys_addr;
+-		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
++		end = start + desc->num_pages * EFI_PAGE_SIZE;
+ 
+ 		/*
+ 		 * Don't allocate at 0x0. It will confuse code that
+-- 
+2.9.3
