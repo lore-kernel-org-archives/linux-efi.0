@@ -1,10 +1,10 @@
 From: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
 Subject: [PATCH] Fix allocation size calculations
-Date: Fri, 21 Oct 2016 11:47:54 -0700
-Message-ID: <20161021184754.26844-1-roy.franz@hpe.com>
+Date: Fri, 21 Oct 2016 11:51:19 -0700
+Message-ID: <20161021185119.27437-1-roy.franz@hpe.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, roy.franz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+To: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, roy.franz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 Cc: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
@@ -21,6 +21,7 @@ calculate page size.
 
 Signed-off-by: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
 ---
+(Resend with fixed maintainer email address)
 This error seems to be present since the EFI stub was introduced, going
 back 3.10.
 
