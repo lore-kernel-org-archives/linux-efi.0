@@ -1,32 +1,41 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: 4.9-rc1 boot regression, ambiguous bisect result
-Date: Fri, 21 Oct 2016 21:20:36 +0100
-Message-ID: <20161021202022.GI27807@codeblueprint.co.uk>
-References: <CAPcyv4gDYcahNJ6CEzf2eUGq8sGqW8Yo09T8cscGWTLoja7PXw@mail.gmail.com>
- <20161020122931.GD19876@codeblueprint.co.uk>
- <CAPcyv4hT+yQvnQzfb49FP-+vVaVKHTYEj1EjNd9Xvu0Wr8T+Bg@mail.gmail.com>
- <CAPcyv4gE0wtoR3Yxh6axiQpPE2MvDgGW=JLEz9b7OMSBQZ_HDQ@mail.gmail.com>
- <20161021154129.GH27807@codeblueprint.co.uk>
+From: Steven Rostedt <rostedt@goodmis.org>
+Subject: Re: [PATCH V4 09/10] trace, ras: add ARM processor error trace event
+Date: Fri, 21 Oct 2016 16:34:10 -0400
+Message-ID: <20161021163410.0a827eab@gandalf.local.home>
+References: <1477071013-29563-1-git-send-email-tbaicar@codeaurora.org>
+ <1477071013-29563-10-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20161021154129.GH27807-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <1477071013-29563-10-git-send-email-tbaicar@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, lenb@kernel.org, harba@codeaurora.org, marc.zyngier@arm.com, punit.agrawal@arm.com, tomasz.nowicki@linaro.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 21 Oct, at 04:41:29PM, Matt Fleming wrote:
+On Fri, 21 Oct 2016 11:30:12 -0600
+Tyler Baicar <tbaicar@codeaurora.org> wrote:
+
+> Currently there are trace events for the various RAS
+> errors with the exception of ARM processor type errors.
+> Add a new trace event for such errors so that the user
+> will know when they occur. These trace events are
+> consistent with the ARM processor error section type
+> defined in UEFI 2.6 spec section N.2.4.4.
 > 
-> FYI, I've been able to reproduce some crash when using your EFI memory
-> map layout under Qemu and forcing the ESRT driver to reserve the space.
- 
-Nope, that was a bug in my hack. I can't get Qemu to crash while using
-your memory map layout.
+> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
 
-Any chance you can insert "while(1)" loops into the EFI boot paths for
-a kernel that is known to reboot or trigger a triple fault in kernels
-that hang, so that we can narrow in on the issue. See,
+Tracing part looks fine to me.
 
-  http://www.codeblueprint.co.uk/2015/04/early-x86-linux-boot-debug-tricks.html
+Acked-by: Steven Rostedt <rostedt@goodmis.org>
+
+-- Steve
