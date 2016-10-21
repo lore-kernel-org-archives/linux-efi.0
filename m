@@ -1,71 +1,32 @@
-From: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
-Subject: [PATCH] Fix allocation size calculations
-Date: Fri, 21 Oct 2016 11:51:19 -0700
-Message-ID: <20161021185119.27437-1-roy.franz@hpe.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: 4.9-rc1 boot regression, ambiguous bisect result
+Date: Fri, 21 Oct 2016 21:20:36 +0100
+Message-ID: <20161021202022.GI27807@codeblueprint.co.uk>
+References: <CAPcyv4gDYcahNJ6CEzf2eUGq8sGqW8Yo09T8cscGWTLoja7PXw@mail.gmail.com>
+ <20161020122931.GD19876@codeblueprint.co.uk>
+ <CAPcyv4hT+yQvnQzfb49FP-+vVaVKHTYEj1EjNd9Xvu0Wr8T+Bg@mail.gmail.com>
+ <CAPcyv4gE0wtoR3Yxh6axiQpPE2MvDgGW=JLEz9b7OMSBQZ_HDQ@mail.gmail.com>
+ <20161021154129.GH27807@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20161021154129.GH27807-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, roy.franz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Cc: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+To: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Adjust the size used in calculations to match the actual size of allocation
-that will be performed based on EFI size/alignment constraints.
-efi_high_alloc() and efi_low_alloc() use the passed size in bytes directly
-to find space in the memory map for the allocation, rather than the actual
-allocation size that has been adjusted for size and alignment constraints.
-This results in failed allocations and retries in efi_high_alloc().  The
-same error is present in efi_low_alloc(), although failure will only happen
-if the lowest memory block is small.
-Also use EFI_PAGE_SIZE consistently and remove use of EFI_PAGE_SHIFT to
-calculate page size.
+On Fri, 21 Oct, at 04:41:29PM, Matt Fleming wrote:
+> 
+> FYI, I've been able to reproduce some crash when using your EFI memory
+> map layout under Qemu and forcing the ESRT driver to reserve the space.
+ 
+Nope, that was a bug in my hack. I can't get Qemu to crash while using
+your memory map layout.
 
-Signed-off-by: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
----
-(Resend with fixed maintainer email address)
-This error seems to be present since the EFI stub was introduced, going
-back 3.10.
+Any chance you can insert "while(1)" loops into the EFI boot paths for
+a kernel that is known to reboot or trigger a triple fault in kernels
+that hang, so that we can narrow in on the issue. See,
 
-
- drivers/firmware/efi/libstub/efi-stub-helper.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index aded106..9575c44 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -194,6 +194,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
- 		align = EFI_ALLOC_ALIGN;
- 
- 	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
-+	size = nr_pages * EFI_PAGE_SIZE;
- again:
- 	for (i = 0; i < map_size / desc_size; i++) {
- 		efi_memory_desc_t *desc;
-@@ -208,7 +209,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
- 			continue;
- 
- 		start = desc->phys_addr;
--		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
-+		end = start + desc->num_pages * EFI_PAGE_SIZE;
- 
- 		if (end > max)
- 			end = max;
-@@ -286,6 +287,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
- 		align = EFI_ALLOC_ALIGN;
- 
- 	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
-+	size = nr_pages * EFI_PAGE_SIZE;
- 	for (i = 0; i < map_size / desc_size; i++) {
- 		efi_memory_desc_t *desc;
- 		unsigned long m = (unsigned long)map;
-@@ -300,7 +302,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
- 			continue;
- 
- 		start = desc->phys_addr;
--		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
-+		end = start + desc->num_pages * EFI_PAGE_SIZE;
- 
- 		/*
- 		 * Don't allocate at 0x0. It will confuse code that
--- 
-2.9.3
+  http://www.codeblueprint.co.uk/2015/04/early-x86-linux-boot-debug-tricks.html
