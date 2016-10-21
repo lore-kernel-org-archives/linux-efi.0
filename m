@@ -1,338 +1,154 @@
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v2 1/3] efi: Add device path parser
-Date: Fri, 21 Oct 2016 12:34:36 -0400
-Message-ID: <20161021163435.y2zlysz7dhw5ymho@redhat.com>
-References: <cover.1476698603.git.lukas@wunner.de>
- <ece9b12b1d0b86c83e8369e4123fc7bc60db1fdc.1476698603.git.lukas@wunner.de>
- <20161019111728.GC31476@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20161019111728.GC31476-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Tyler Baicar <tbaicar@codeaurora.org>
+Subject: [PATCH V4 00/10] Add UEFI 2.6 and ACPI 6.1 updates for RAS on ARM64
+Date: Fri, 21 Oct 2016 11:30:03 -0600
+Message-ID: <1477071013-29563-1-git-send-email-tbaicar@codeaurora.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, Suzuki.Poulose@arm.com, punit.agrawal
+Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Oct 19, 2016 at 12:17:28PM +0100, Matt Fleming wrote:
-> (Cc'ing Peter since he's played with device path parsing before)
+When a memory error, CPU error, PCIe error, or other type of hardware error
+that's covered by RAS occurs, firmware should populate the shared GHES memory
+location with the proper GHES structures to notify the OS of the error.
+For example, platforms that implement firmware first handling may implement
+separate GHES sources for corrected errors and uncorrected errors. If the
+error is an uncorrectable error, then the firmware will notify the OS
+immediately since the error needs to be handled ASAP. The OS will then be able
+to take the appropriate action needed such as offlining a page. If the error
+is a corrected error, then the firmware will not interrupt the OS immediately.
+Instead, the OS will see and report the error the next time it's GHES timer
+expires. The kernel will first parse the GHES structures and report the errors
+through the kernel logs and then notify the user space through RAS trace
+events. This allows user space applications such as RAS Daemon to see the
+errors and report them however the user desires. This patchset extends the
+kernel functionality for RAS errors based on updates in the UEFI 2.6 and
+ACPI 6.1 specifications.
 
-So the only two thoughts I have:
+An example flow from firmware to user space could be:
 
-1) I think we should probably be a bit more aggressive about bounds
-   checking.  Every once in a while there are implementations that build
-   device paths from templates and occasionally leave
-   efi_dev_path.length as 0 or 0xffff, or forget to put an End Entire
-   Device Path node at the end (or put an End Device Path Instance in
-   instead.)  So checking for ->length < PAGE_SIZE and that when a dp
-   node crosses a page boundary, the new page is actually in the same map
-   as the previous one wouldn't be a terrible idea.
-2) I think we should decide how multiple-instance device path are going
-   to work sooner rather than later, mostly because I have a use for them
-   and it seems harder to graft them in later.  My first idea here is to
-   make get_device_by_efi_path() return 0 for "stop iterating" and 1 for
-   "there's more device paths later", and then make it merely set *dev =
-   NULL when we just don't /support/ the device path we found, rather than
-   returning error.  Either case would still set *node to the (possibly
-   inexistent) next node.  If we did that, we could easily rename it
-   get_devices_by_path() and make get_device_by_path() a special case
-   with exactly the semantics we have now.
+                 +---------------+
+       +-------->|               |
+       |         |  GHES polling |--+
++-------------+  |    source     |  |   +---------------+   +------------+
+|             |  +---------------+  |   |  Kernel GHES  |   |            |
+|  Firmware   |                     +-->|  CPER AER and |-->|  RAS trace |
+|             |  +---------------+  |   |  EDAC drivers |   |   event    |
++-------------+  |               |  |   +---------------+   +------------+
+       |         |  GHES sci     |--+
+       +-------->|   source      |
+                 +---------------+
 
-> 
-> On Mon, 17 Oct, at 12:57:23PM, Lukas Wunner wrote:
-> > We're about to extended the efistub to retrieve device properties from
-> > EFI on Apple Macs. The properties use EFI Device Paths to indicate the
-> > device they belong to. This commit adds a parser which, given an EFI
-> > Device Path, locates the corresponding struct device and returns a
-> > reference to it.
-> > 
-> > Initially only ACPI and PCI Device Path nodes are supported, these are
-> > the only types needed for Apple device properties (the corresponding
-> > macOS function AppleACPIPlatformExpert::matchEFIDevicePath() does not
-> > support any others). Further node types can be added with moderate
-> > effort.
-> > 
-> > Apple device properties is currently the only use case of this parser,
-> > but since this may be useful to others, make it a separate component
-> > which can be selected with config option EFI_DEV_PATH_PARSER. It can
-> > in principle be compiled as a module if acpi_get_first_physical_node()
-> > and acpi_bus_type are exported (and get_device_by_efi_path() itself is
-> > exported).
-> > 
-> > The dependency on CONFIG_ACPI is needed for acpi_match_device_ids().
-> > It can be removed if an empty inline stub is added for that function.
-> > 
-> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> > Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-> > ---
-> >  drivers/firmware/efi/Kconfig           |   5 +
-> >  drivers/firmware/efi/Makefile          |   1 +
-> >  drivers/firmware/efi/dev-path-parser.c | 186 +++++++++++++++++++++++++++++++++
-> >  include/linux/efi.h                    |  21 ++++
-> >  4 files changed, 213 insertions(+)
-> >  create mode 100644 drivers/firmware/efi/dev-path-parser.c
-> > 
-> > diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-> > index c981be1..893fda4 100644
-> > --- a/drivers/firmware/efi/Kconfig
-> > +++ b/drivers/firmware/efi/Kconfig
-> > @@ -133,3 +133,8 @@ endmenu
-> >  
-> >  config UEFI_CPER
-> >  	bool
-> > +
-> > +config EFI_DEV_PATH_PARSER
-> > +	bool
-> > +	depends on ACPI
-> > +	default n
-> > diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-> > index c8a439f..3e91ae3 100644
-> > --- a/drivers/firmware/efi/Makefile
-> > +++ b/drivers/firmware/efi/Makefile
-> > @@ -21,6 +21,7 @@ obj-$(CONFIG_EFI_STUB)			+= libstub/
-> >  obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
-> >  obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
-> >  obj-$(CONFIG_EFI_TEST)			+= test/
-> > +obj-$(CONFIG_EFI_DEV_PATH_PARSER)	+= dev-path-parser.o
-> >  
-> >  arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
-> >  obj-$(CONFIG_ARM)			+= $(arm-obj-y)
-> > diff --git a/drivers/firmware/efi/dev-path-parser.c b/drivers/firmware/efi/dev-path-parser.c
-> > new file mode 100644
-> > index 0000000..549f80b
-> > --- /dev/null
-> > +++ b/drivers/firmware/efi/dev-path-parser.c
-> > @@ -0,0 +1,186 @@
-> > +/*
-> > + * dev-path-parser.c - EFI Device Path parser
-> > + * Copyright (C) 2016 Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-> > + *
-> > + * This program is free software; you can redistribute it and/or modify
-> > + * it under the terms of the GNU General Public License (version 2) as
-> > + * published by the Free Software Foundation.
-> > + *
-> > + * This program is distributed in the hope that it will be useful,
-> > + * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > + * GNU General Public License for more details.
-> > + *
-> > + * You should have received a copy of the GNU General Public License
-> > + * along with this program; if not, see <http://www.gnu.org/licenses/>.
-> > + */
-> > +
-> > +#include <linux/acpi.h>
-> > +#include <linux/efi.h>
-> > +#include <linux/pci.h>
-> > +
-> > +struct acpi_hid_uid {
-> > +	struct acpi_device_id hid[2];
-> > +	char uid[11]; /* UINT_MAX + null byte */
-> > +};
-> > +
-> > +static int __init acpi_match(struct device *dev, void *data)
-> > +{
-> > +	struct acpi_hid_uid hid_uid = *(struct acpi_hid_uid *)data;
-> > +	struct acpi_device *adev = to_acpi_device(dev);
-> > +
-> > +	if (acpi_match_device_ids(adev, hid_uid.hid))
-> > +		return 0;
-> > +
-> > +	if (adev->pnp.unique_id)
-> > +		return !strcmp(adev->pnp.unique_id, hid_uid.uid);
-> > +	else
-> > +		return !strcmp("0", hid_uid.uid);
-> > +}
-> > +
-> > +static int __init get_device_by_acpi_path(struct efi_dev_path *node,
-> > +					  struct device *parent,
-> > +					  struct device **child)
-> > +{
-> > +	struct acpi_hid_uid hid_uid = {};
-> > +	struct device *phys_dev;
-> > +
-> > +	if (node->length != 12)
-> > +		return -EINVAL;
-> > +
-> > +	sprintf(hid_uid.hid[0].id, "%c%c%c%04X",
-> > +		'A' + ((node->acpi.hid >> 10) & 0x1f) - 1,
-> > +		'A' + ((node->acpi.hid >>  5) & 0x1f) - 1,
-> > +		'A' + ((node->acpi.hid >>  0) & 0x1f) - 1,
-> > +			node->acpi.hid >> 16);
-> > +	sprintf(hid_uid.uid, "%u", node->acpi.uid);
-> > +
-> > +	*child = bus_find_device(&acpi_bus_type, NULL, &hid_uid, acpi_match);
-> > +	if (!*child)
-> > +		return -ENODEV;
-> > +
-> > +	phys_dev = acpi_get_first_physical_node(to_acpi_device(*child));
-> > +	if (phys_dev) {
-> > +		get_device(phys_dev);
-> > +		put_device(*child);
-> > +		*child = phys_dev;
-> > +	}
-> > +
-> > +	return 0;
-> > +}
-> > +
-> > +static int __init pci_match(struct device *dev, void *data)
-> > +{
-> > +	unsigned int devfn = *(unsigned int *)data;
-> > +
-> > +	return dev_is_pci(dev) && to_pci_dev(dev)->devfn == devfn;
-> > +}
-> > +
-> > +static int __init get_device_by_pci_path(struct efi_dev_path *node,
-> > +					 struct device *parent,
-> > +					 struct device **child)
-> > +{
-> > +	unsigned int devfn;
-> > +
-> > +	if (node->length != 6)
-> > +		return -EINVAL;
-> > +	if (!parent)
-> > +		return -EINVAL;
-> > +
-> > +	devfn = PCI_DEVFN(node->pci.dev, node->pci.fn);
-> > +
-> > +	*child = device_find_child(parent, &devfn, pci_match);
-> > +	if (!*child)
-> > +		return -ENODEV;
-> > +
-> > +	return 0;
-> > +}
-> > +
-> > +/*
-> > + * Insert parsers for further node types here.
-> > + *
-> > + * Each parser takes a pointer to the @node and to the @parent (will be NULL
-> > + * for the first device path node). If a device corresponding to @node was
-> > + * found below @parent, its reference count should be incremented and the
-> > + * device returned in @child.
-> > + *
-> > + * The return value should be 0 on success or a negative int on failure.
-> > + * The special return value 1 signals the end of the device path, only
-> > + * get_device_by_end_path() is supposed to return this.
-> > + *
-> > + * Be sure to validate the node length and contents before commencing the
-> > + * search for a device.
-> > + */
-> > +
-> > +static int __init get_device_by_end_path(struct efi_dev_path *node,
-> > +					 struct device *parent,
-> > +					 struct device **child)
-> > +{
-> > +	if (node->length != 4)
-> > +		return -EINVAL;
-> > +	if (!parent)
-> > +		return -ENODEV;
-> > +
-> > +	*child = get_device(parent);
-> > +	return 1;
-> > +}
-> > +
-> > +/**
-> > + * get_device_by_efi_path - find device by EFI Device Path
-> > + * @node: EFI Device Path
-> > + * @len: maximum length of EFI Device Path in bytes
-> > + * @dev: device found
-> > + *
-> > + * Parse a series of EFI Device Path nodes at @node and find the corresponding
-> > + * device. If the device was found, its reference count is incremented and a
-> > + * pointer to it is returned in @dev. The caller needs to drop the reference
-> > + * with put_device() after use. The @node pointer is updated to point to the
-> > + * location immediately after the "End Entire Device Path" node.
-> > + *
-> > + * If a Device Path node is malformed or its corresponding device is not found,
-> > + * @node is updated to point to this offending node and @dev will be %NULL.
-> > + *
-> > + * Most buses instantiate devices in "subsys" initcall level, hence the
-> > + * earliest initcall level in which this function should be called is "fs".
-> > + *
-> > + * Returns 0 on success,
-> > + *	   %-ENODEV if no device was found,
-> > + *	   %-EINVAL if a node is malformed or exceeds @len,
-> > + *	   %-ENOTSUPP if support for a node type is not yet implemented.
-> > + */
-> > +int __init get_device_by_efi_path(struct efi_dev_path **node, size_t len,
-> > +				  struct device **dev)
-> > +{
-> > +	struct device *parent = NULL, *child;
-> > +	int ret = 0;
-> > +
-> > +	*dev = NULL;
-> > +
-> > +	while (ret != 1) {
-> > +		if (len < 4 || len < (*node)->length)
-> > +			ret = -EINVAL;
-> > +		else if ((*node)->type     == EFI_DEV_ACPI &&
-> > +			 (*node)->sub_type == EFI_DEV_BASIC_ACPI)
-> > +			ret = get_device_by_acpi_path(*node, parent, &child);
-> > +		else if ((*node)->type     == EFI_DEV_HW &&
-> > +			 (*node)->sub_type == EFI_DEV_PCI)
-> > +			ret = get_device_by_pci_path(*node, parent, &child);
-> > +		else if (((*node)->type    == EFI_DEV_END_PATH ||
-> > +			  (*node)->type    == EFI_DEV_END_PATH2) &&
-> > +			 (*node)->sub_type == EFI_DEV_END_ENTIRE)
-> > +			ret = get_device_by_end_path(*node, parent, &child);
-> > +		else
-> > +			ret = -ENOTSUPP;
-> > +
-> > +		put_device(parent);
-> > +		if (ret < 0)
-> > +			return ret;
-> > +
-> > +		parent = child;
-> > +		*node  = (void *)*node + (*node)->length;
-> > +		len   -= (*node)->length;
-> > +	}
-> > +
-> > +	*dev = child;
-> > +	return 0;
-> > +}
-> 
-> Where in your patch series is this function called? Am I missing
-> something?
-> 
-> Also, unless there's some existing namespace with "get_device_by_*"
-> I'd prefer for this function name to have "efi_" as the prefix.
-> 
-> > diff --git a/include/linux/efi.h b/include/linux/efi.h
-> > index 2d08948..4faf339 100644
-> > --- a/include/linux/efi.h
-> > +++ b/include/linux/efi.h
-> > @@ -1145,6 +1145,27 @@ struct efi_generic_dev_path {
-> >  	u16 length;
-> >  } __attribute ((packed));
-> >  
-> > +struct efi_dev_path {
-> > +	u8 type;	/* can be replaced with unnamed */
-> > +	u8 sub_type;	/* struct efi_generic_dev_path; */
-> > +	u16 length;	/* once we've moved to -std=c11 */
-> > +	union {
-> > +		struct {
-> > +			u32 hid;
-> > +			u32 uid;
-> > +		} acpi;
-> > +		struct {
-> > +			u8 fn;
-> > +			u8 dev;
-> > +		} pci;
-> > +	};
-> > +} __attribute ((packed));
-> > +
-> > +#if IS_ENABLED(CONFIG_EFI_DEV_PATH_PARSER)
-> > +int get_device_by_efi_path(struct efi_dev_path **node, size_t len,
-> > +			   struct device **dev);
-> > +#endif
-> > +
-> >  static inline void memrange_efi_to_native(u64 *addr, u64 *npages)
-> >  {
-> >  	*npages = PFN_UP(*addr + (*npages<<EFI_PAGE_SHIFT)) - PFN_DOWN(*addr);
-> > -- 
-> > 2.9.3
-> > 
+Add support for Generic Hardware Error Source (GHES) v2, which introduces the
+capability for the OS to acknowledge the consumption of the error record
+generated by the Reliability, Availability and Serviceability (RAS) controller.
+This eliminates potential race conditions between the OS and the RAS controller.
+
+Add support for the timestamp field added to the Generic Error Data Entry v3,
+allowing the OS to log the time that the error is generated by the firmware,
+rather than the time the error is consumed. This improves the correctness of
+event sequences when analyzing error logs. The timestamp is added in
+ACPI 6.1, reference Table 18-343 Generic Error Data Entry.
+
+Add support for ARMv8 Common Platform Error Record (CPER) per UEFI 2.6
+specification. ARMv8 specific processor error information is reported as part of
+the CPER records.  This provides more detail on for processor error logs. This
+can help describe ARMv8 cache, tlb, and bus errors.
+
+Synchronous External Abort (SEA) represents a specific processor error condition
+in ARM systems. A handler is added to recognize SEA errors, and a notifier is
+added to parse and report the errors before the process is killed. Refer to
+section N.2.1.1 in the Common Platform Error Record appendix of the UEFI 2.6
+specification.
+
+Currently the kernel ignores CPER records that are unrecognized.
+On the other hand, UEFI spec allows for non-standard (eg. vendor
+proprietary) error section type in CPER (Common Platform Error Record),
+as defined in section N2.3 of UEFI version 2.5. Therefore, user
+is not able to see hardware error data of non-standard section.
+
+If section Type field of Generic Error Data Entry is unrecognized,
+prints out the raw data in dmesg buffer, and also adds a tracepoint
+for reporting such hardware errors.
+
+Currently even if an error status block's severity is fatal, the kernel
+does not honor the severity level and panic. With the firmware first
+model, the platform could inform the OS about a fatal hardware error
+through the non-NMI GHES notification type. The OS should panic when a
+hardware error record is received with this severity.
+
+Add support to handle SEAs that occur while a KVM guest kernel is
+running. Currently these are unsupported by the guest abort handling.
+
+Depends on: [PATCH v14] acpi, apei, arm64: APEI initial support for aarch64.
+            https://lkml.org/lkml/2016/8/10/231
+
+V4: Add bit offset left shift to read_ack_write value
+    Make HEST generic and generic_v2 structures a union in the ghes structure
+    Move gdata v3 helper functions into ghes.h to avoid duplication
+    Reorder the timestamp print and avoid memcpy
+    Add helper functions for gdata size checking
+    Rename the SEA functions
+    Add helper function for GHES panics
+    Set fru_id to NULL UUID at variable declaration
+    Limit ARM trace event parameters to the needed structures
+    Reorder the ARM trace event variables to save space
+    Add comment for why we don't pass SEAs to the guest when it aborts
+    Move ARM trace event call into GHES driver instead of CPER
+
+V3: Fix unmapped address to the read_ack_register in ghes.c
+    Add helper function to get the proper payload based on generic data entry
+     version
+    Move timestamp print to avoid changing function calls in cper.c
+    Remove patch "arm64: exception: handle instruction abort at current EL"
+     since the el1_ia handler is already added in 4.8
+    Add EFI and ARM64 dependencies for HAVE_ACPI_APEI_SEA
+    Add a new trace event for ARM type errors
+    Add support to handle KVM guest SEAs
+
+V2: Add PSCI state print for the ARMv8 error type.
+    Separate timestamp year into year and century using BCD format.
+    Rebase on top of ACPICA 20160318 release and remove header file changes
+     in include/acpi/actbl1.h.
+    Add panic OS with fatal error status block patch.
+    Add processing of unrecognized CPER error section patches with updates
+     from previous comments. Original patches: https://lkml.org/lkml/2015/9/8/646
+
+V1: https://lkml.org/lkml/2016/2/5/544
+
+Jonathan (Zhixiong) Zhang (1):
+  acpi: apei: panic OS with fatal error status block
+
+Tyler Baicar (9):
+  acpi: apei: read ack upon ghes record consumption
+  ras: acpi/apei: cper: generic error data entry v3 per ACPI 6.1
+  efi: parse ARMv8 processor error
+  arm64: exception: handle Synchronous External Abort
+  acpi: apei: handle SEA notification type for ARMv8
+  efi: print unrecognized CPER section
+  ras: acpi / apei: generate trace event for unrecognized CPER section
+  trace, ras: add ARM processor error trace event
+  arm64: KVM: add guest SEA support
+
+ arch/arm/include/asm/kvm_arm.h       |   1 +
+ arch/arm/include/asm/system_misc.h   |   5 +
+ arch/arm/kvm/mmu.c                   |  18 ++-
+ arch/arm64/Kconfig                   |   1 +
+ arch/arm64/include/asm/kvm_arm.h     |   1 +
+ arch/arm64/include/asm/system_misc.h |  15 +++
+ arch/arm64/mm/fault.c                |  71 ++++++++++--
+ drivers/acpi/apei/Kconfig            |  14 +++
+ drivers/acpi/apei/ghes.c             | 181 +++++++++++++++++++++++++++--
+ drivers/acpi/apei/hest.c             |   7 +-
+ drivers/firmware/efi/cper.c          | 215 ++++++++++++++++++++++++++++++++---
+ drivers/ras/ras.c                    |   2 +
+ include/acpi/ghes.h                  |  15 ++-
+ include/linux/cper.h                 |  84 ++++++++++++++
+ include/ras/ras_event.h              | 100 ++++++++++++++++
+ 15 files changed, 692 insertions(+), 38 deletions(-)
 
 -- 
-        Peter
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
+
