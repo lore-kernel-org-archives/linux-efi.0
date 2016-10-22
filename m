@@ -1,102 +1,411 @@
-From: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Subject: Re: [tip:x86/asm] x86/mm/64: Enable vmapped stacks (CONFIG_HAVE_ARCH_VMAP_STACK=y)
-Date: Fri, 21 Oct 2016 17:18:30 -0700
-Message-ID: <CALCETrUqhRg_G1fia=oFKrsxpF_YobEJLs1KpA3UF2Pnt6-u+w@mail.gmail.com>
-References: <c88f3e2920b18e6cc621d772a04a62c06869037e.1470907718.git.luto@kernel.org>
- <tip-e37e43a497d5a8b7c0cc1736d56986f432c394c9@git.kernel.org> <20161021123243.GC27807@codeblueprint.co.uk>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v2 1/3] efi: Add device path parser
+Date: Sat, 22 Oct 2016 12:16:08 +0200
+Message-ID: <20161022101608.GA4447@wunner.de>
+References: <cover.1476698603.git.lukas@wunner.de>
+ <ece9b12b1d0b86c83e8369e4123fc7bc60db1fdc.1476698603.git.lukas@wunner.de>
+ <20161019111728.GC31476@codeblueprint.co.uk>
+ <20161021163435.y2zlysz7dhw5ymho@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161021123243.GC27807-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20161021163435.y2zlysz7dhw5ymho-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-tip-commits-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tip-commits-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Nadav Amit <nadav.amit-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Oct 21, 2016 5:32 AM, "Matt Fleming" <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
->
-> On Wed, 24 Aug, at 06:03:04AM, tip-bot for Andy Lutomirski wrote:
-> > Commit-ID:  e37e43a497d5a8b7c0cc1736d56986f432c394c9
-> > Gitweb:     http://git.kernel.org/tip/e37e43a497d5a8b7c0cc1736d56986f432c394c9
-> > Author:     Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> > AuthorDate: Thu, 11 Aug 2016 02:35:23 -0700
-> > Committer:  Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> > CommitDate: Wed, 24 Aug 2016 12:11:42 +0200
-> >
-> > x86/mm/64: Enable vmapped stacks (CONFIG_HAVE_ARCH_VMAP_STACK=y)
-> >
-> > This allows x86_64 kernels to enable vmapped stacks by setting
-> > HAVE_ARCH_VMAP_STACK=y - which enables the CONFIG_VMAP_STACK=y
-> > high level Kconfig option.
-> >
-> > There are a couple of interesting bits:
->
-> This commit broke booting EFI mixed mode kernels. Here's what I've got
-> queued up to fix it.
->
-> ---
-> From acf11e55bfcef7a1dca7d1735f4a780e0cdb1c89 Mon Sep 17 00:00:00 2001
-> From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> Date: Thu, 20 Oct 2016 22:17:21 +0100
-> Subject: [PATCH] x86/efi: Prevent mixed mode boot corruption with
->  CONFIG_VMAP_STACK
->
-> Booting an EFI mixed mode kernel has been crashing since commit:
->
->   e37e43a497d5 ("x86/mm/64: Enable vmapped stacks (CONFIG_HAVE_ARCH_VMAP_STACK=y)")
->
-> The user-visible effect in my test setup was the kernel being unable
-> to find the root file system ramdisk. This was likely caused by silent
-> memory or page table corruption.
->
-> Enabling CONFIG_DEBUG_VIRTUAL immediately flagged the thunking code as
-> abusing virt_to_phys() because it was passing addresses that were not
-> part of the kernel direct mapping.
->
-> Use the slow version instead, which correctly handles all memory
-> regions by performing a page table walk.
->
-> Suggested-by: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-> Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> ---
->  arch/x86/platform/efi/efi_64.c | 59 +++++++++++++++++++++++++-----------------
->  1 file changed, 35 insertions(+), 24 deletions(-)
->
-> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-> index 58b0f801f66f..e3569a00885b 100644
-> --- a/arch/x86/platform/efi/efi_64.c
-> +++ b/arch/x86/platform/efi/efi_64.c
-> @@ -211,6 +211,17 @@ void efi_sync_low_kernel_mappings(void)
->         memcpy(pud_efi, pud_k, sizeof(pud_t) * num_entries);
->  }
->
-> +/*
-> + * Wrapper for slow_virt_to_phys() that handles NULL addresses.
-> + */
-> +static inline phys_addr_t virt_to_phys_or_null(void *va)
-> +{
-> +       if (!va)
-> +               return 0;
-> +
-> +       return slow_virt_to_phys(va);
-> +}
-> +
+On Fri, Oct 21, 2016 at 12:34:36PM -0400, Peter Jones wrote:
+> On Wed, Oct 19, 2016 at 12:17:28PM +0100, Matt Fleming wrote:
+> > (Cc'ing Peter since he's played with device path parsing before)
+> 
+> So the only two thoughts I have:
+> 
+> 1) I think we should probably be a bit more aggressive about bounds
+>    checking.  Every once in a while there are implementations that build
+>    device paths from templates and occasionally leave
+>    efi_dev_path.length as 0 or 0xffff,
 
-This is asking for trouble if any of the variable length parameters
-are on the stack.  How about adding a "size_t size" parameter and
-doing:
+The patch already handles this:  The length of each node is fixed
+for each type in the spec (e.g. 6 bytes for PCI nodes) and there's
+strict checking of this in the patch.  A node with length 0 or 0xffff
+would result in -EINVAL.
 
-if (!va) {
-  return 0;
-} else if (virt_addr_valid(va)) {
-  return virt_to_phys(va);
-} else {
-  /* A fully aligned variable on the stack is guaranteed not to cross
-a page boundary. */
-  WARN_ON(!IS_ALIGNED((uintptr_t)va, size) || size > PAGE_SIZE);
-  return slow_virt_to_phys(va);
-}
+
+>    or forget to put an End Entire
+>    Device Path node at the end (or put an End Device Path Instance in
+>    instead.)  So checking for ->length < PAGE_SIZE
+
+This is also already handled by the patch:  get_device_by_efi_path()
+is called with a maximum length parameter.  In the case of Apple device
+properties, I know the size of the payload which contains a device's
+properties, so I pass that as the maximum length.  If in your use case
+you don't have such an upper bound and feel that device paths should
+never exceed PAGE_SIZE, then just pass that as the maximum length
+argument to get_device_by_efi_path().
+
+
+>    and that when a dp
+>    node crosses a page boundary, the new page is actually in the same map
+>    as the previous one wouldn't be a terrible idea.
+
+In the case of Apple device properties, that isn't needed as they're
+all contained in one payload that gets mapped into virtual memory.
+I think checking page mapping should only be done if really needed,
+i.e. if you expect to get such a bogus device path, you should probably
+perform such checks in your code, but it shouldn't be done in
+get_device_by_efi_path(), i.e. for *every* device path.
+
+
+> 2) I think we should decide how multiple-instance device path are going
+>    to work sooner rather than later, mostly because I have a use for them
+>    and it seems harder to graft them in later.  My first idea here is to
+>    make get_device_by_efi_path() return 0 for "stop iterating" and 1 for
+>    "there's more device paths later"
+
+I'm fine with that approach.
+
+
+>    and then make it merely set *dev =
+>    NULL when we just don't /support/ the device path we found, rather than
+>    returning error.  Either case would still set *node to the (possibly
+>    inexistent) next node.
+
+That however I'm very sceptical about.
+
+If the device path is malformed (-EINVAL), e.g. because it contains a
+bogus length, all bets are off and I have to stop parsing.  It's just
+not safe to try to find any following instances.  If on the other hand
+the device path contains an unsupported node type (-ENOTSUPP), well,
+we should simply add support for it.  Which node types do you expect
+to parse that aren't currently supported by the patch?  (The patch
+supports ACPI and PCI device paths.)
+
+If I would pass over unsupported node types, I couldn't apply strict
+length checking, so I would indeed have to apply some heuristic,
+such as < PAGE_SIZE, which seems kludgy at best.
+
+Also, it is intentional that get_device_by_efi_path() stops parsing
+if it hits upon an unsupported node type because while ACPI and PCI
+nodes are currently the only ones used by Apple, it's possible that
+they'll add others in the future and in that case I want to get an
+error back and I want to know the position of the unsupported node
+type.  The caller unmarshal_devices() in patch [2/3] of this series
+prints a hex dump of the device path and the properties and an error
+message showing the position of the offending node, so that it's
+easy to identify what went wrong and which node type needs to be
+added.
+
+
+>    If we did that, we could easily rename it
+>    get_devices_by_path() and make get_device_by_path() a special case
+>    with exactly the semantics we have now.
+
+I don't quite follow.  With the approach to support multiple instances
+that you've outlined above, you'd simply do:
+
+	while ((ret = get_device_by_efi_path(node, len, &dev)) >= 0) {
+		/* do something */
+		if (ret == 0)
+			break;
+	}
+
+What would you need a get_devices_by_path() function for?
+
+Thanks,
+
+Lukas
+
+> > On Mon, 17 Oct, at 12:57:23PM, Lukas Wunner wrote:
+> > > We're about to extended the efistub to retrieve device properties from
+> > > EFI on Apple Macs. The properties use EFI Device Paths to indicate the
+> > > device they belong to. This commit adds a parser which, given an EFI
+> > > Device Path, locates the corresponding struct device and returns a
+> > > reference to it.
+> > > 
+> > > Initially only ACPI and PCI Device Path nodes are supported, these are
+> > > the only types needed for Apple device properties (the corresponding
+> > > macOS function AppleACPIPlatformExpert::matchEFIDevicePath() does not
+> > > support any others). Further node types can be added with moderate
+> > > effort.
+> > > 
+> > > Apple device properties is currently the only use case of this parser,
+> > > but since this may be useful to others, make it a separate component
+> > > which can be selected with config option EFI_DEV_PATH_PARSER. It can
+> > > in principle be compiled as a module if acpi_get_first_physical_node()
+> > > and acpi_bus_type are exported (and get_device_by_efi_path() itself is
+> > > exported).
+> > > 
+> > > The dependency on CONFIG_ACPI is needed for acpi_match_device_ids().
+> > > It can be removed if an empty inline stub is added for that function.
+> > > 
+> > > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> > > Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > > Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+> > > ---
+> > >  drivers/firmware/efi/Kconfig           |   5 +
+> > >  drivers/firmware/efi/Makefile          |   1 +
+> > >  drivers/firmware/efi/dev-path-parser.c | 186 +++++++++++++++++++++++++++++++++
+> > >  include/linux/efi.h                    |  21 ++++
+> > >  4 files changed, 213 insertions(+)
+> > >  create mode 100644 drivers/firmware/efi/dev-path-parser.c
+> > > 
+> > > diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+> > > index c981be1..893fda4 100644
+> > > --- a/drivers/firmware/efi/Kconfig
+> > > +++ b/drivers/firmware/efi/Kconfig
+> > > @@ -133,3 +133,8 @@ endmenu
+> > >  
+> > >  config UEFI_CPER
+> > >  	bool
+> > > +
+> > > +config EFI_DEV_PATH_PARSER
+> > > +	bool
+> > > +	depends on ACPI
+> > > +	default n
+> > > diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+> > > index c8a439f..3e91ae3 100644
+> > > --- a/drivers/firmware/efi/Makefile
+> > > +++ b/drivers/firmware/efi/Makefile
+> > > @@ -21,6 +21,7 @@ obj-$(CONFIG_EFI_STUB)			+= libstub/
+> > >  obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
+> > >  obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
+> > >  obj-$(CONFIG_EFI_TEST)			+= test/
+> > > +obj-$(CONFIG_EFI_DEV_PATH_PARSER)	+= dev-path-parser.o
+> > >  
+> > >  arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
+> > >  obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+> > > diff --git a/drivers/firmware/efi/dev-path-parser.c b/drivers/firmware/efi/dev-path-parser.c
+> > > new file mode 100644
+> > > index 0000000..549f80b
+> > > --- /dev/null
+> > > +++ b/drivers/firmware/efi/dev-path-parser.c
+> > > @@ -0,0 +1,186 @@
+> > > +/*
+> > > + * dev-path-parser.c - EFI Device Path parser
+> > > + * Copyright (C) 2016 Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+> > > + *
+> > > + * This program is free software; you can redistribute it and/or modify
+> > > + * it under the terms of the GNU General Public License (version 2) as
+> > > + * published by the Free Software Foundation.
+> > > + *
+> > > + * This program is distributed in the hope that it will be useful,
+> > > + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > > + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > > + * GNU General Public License for more details.
+> > > + *
+> > > + * You should have received a copy of the GNU General Public License
+> > > + * along with this program; if not, see <http://www.gnu.org/licenses/>.
+> > > + */
+> > > +
+> > > +#include <linux/acpi.h>
+> > > +#include <linux/efi.h>
+> > > +#include <linux/pci.h>
+> > > +
+> > > +struct acpi_hid_uid {
+> > > +	struct acpi_device_id hid[2];
+> > > +	char uid[11]; /* UINT_MAX + null byte */
+> > > +};
+> > > +
+> > > +static int __init acpi_match(struct device *dev, void *data)
+> > > +{
+> > > +	struct acpi_hid_uid hid_uid = *(struct acpi_hid_uid *)data;
+> > > +	struct acpi_device *adev = to_acpi_device(dev);
+> > > +
+> > > +	if (acpi_match_device_ids(adev, hid_uid.hid))
+> > > +		return 0;
+> > > +
+> > > +	if (adev->pnp.unique_id)
+> > > +		return !strcmp(adev->pnp.unique_id, hid_uid.uid);
+> > > +	else
+> > > +		return !strcmp("0", hid_uid.uid);
+> > > +}
+> > > +
+> > > +static int __init get_device_by_acpi_path(struct efi_dev_path *node,
+> > > +					  struct device *parent,
+> > > +					  struct device **child)
+> > > +{
+> > > +	struct acpi_hid_uid hid_uid = {};
+> > > +	struct device *phys_dev;
+> > > +
+> > > +	if (node->length != 12)
+> > > +		return -EINVAL;
+> > > +
+> > > +	sprintf(hid_uid.hid[0].id, "%c%c%c%04X",
+> > > +		'A' + ((node->acpi.hid >> 10) & 0x1f) - 1,
+> > > +		'A' + ((node->acpi.hid >>  5) & 0x1f) - 1,
+> > > +		'A' + ((node->acpi.hid >>  0) & 0x1f) - 1,
+> > > +			node->acpi.hid >> 16);
+> > > +	sprintf(hid_uid.uid, "%u", node->acpi.uid);
+> > > +
+> > > +	*child = bus_find_device(&acpi_bus_type, NULL, &hid_uid, acpi_match);
+> > > +	if (!*child)
+> > > +		return -ENODEV;
+> > > +
+> > > +	phys_dev = acpi_get_first_physical_node(to_acpi_device(*child));
+> > > +	if (phys_dev) {
+> > > +		get_device(phys_dev);
+> > > +		put_device(*child);
+> > > +		*child = phys_dev;
+> > > +	}
+> > > +
+> > > +	return 0;
+> > > +}
+> > > +
+> > > +static int __init pci_match(struct device *dev, void *data)
+> > > +{
+> > > +	unsigned int devfn = *(unsigned int *)data;
+> > > +
+> > > +	return dev_is_pci(dev) && to_pci_dev(dev)->devfn == devfn;
+> > > +}
+> > > +
+> > > +static int __init get_device_by_pci_path(struct efi_dev_path *node,
+> > > +					 struct device *parent,
+> > > +					 struct device **child)
+> > > +{
+> > > +	unsigned int devfn;
+> > > +
+> > > +	if (node->length != 6)
+> > > +		return -EINVAL;
+> > > +	if (!parent)
+> > > +		return -EINVAL;
+> > > +
+> > > +	devfn = PCI_DEVFN(node->pci.dev, node->pci.fn);
+> > > +
+> > > +	*child = device_find_child(parent, &devfn, pci_match);
+> > > +	if (!*child)
+> > > +		return -ENODEV;
+> > > +
+> > > +	return 0;
+> > > +}
+> > > +
+> > > +/*
+> > > + * Insert parsers for further node types here.
+> > > + *
+> > > + * Each parser takes a pointer to the @node and to the @parent (will be NULL
+> > > + * for the first device path node). If a device corresponding to @node was
+> > > + * found below @parent, its reference count should be incremented and the
+> > > + * device returned in @child.
+> > > + *
+> > > + * The return value should be 0 on success or a negative int on failure.
+> > > + * The special return value 1 signals the end of the device path, only
+> > > + * get_device_by_end_path() is supposed to return this.
+> > > + *
+> > > + * Be sure to validate the node length and contents before commencing the
+> > > + * search for a device.
+> > > + */
+> > > +
+> > > +static int __init get_device_by_end_path(struct efi_dev_path *node,
+> > > +					 struct device *parent,
+> > > +					 struct device **child)
+> > > +{
+> > > +	if (node->length != 4)
+> > > +		return -EINVAL;
+> > > +	if (!parent)
+> > > +		return -ENODEV;
+> > > +
+> > > +	*child = get_device(parent);
+> > > +	return 1;
+> > > +}
+> > > +
+> > > +/**
+> > > + * get_device_by_efi_path - find device by EFI Device Path
+> > > + * @node: EFI Device Path
+> > > + * @len: maximum length of EFI Device Path in bytes
+> > > + * @dev: device found
+> > > + *
+> > > + * Parse a series of EFI Device Path nodes at @node and find the corresponding
+> > > + * device. If the device was found, its reference count is incremented and a
+> > > + * pointer to it is returned in @dev. The caller needs to drop the reference
+> > > + * with put_device() after use. The @node pointer is updated to point to the
+> > > + * location immediately after the "End Entire Device Path" node.
+> > > + *
+> > > + * If a Device Path node is malformed or its corresponding device is not found,
+> > > + * @node is updated to point to this offending node and @dev will be %NULL.
+> > > + *
+> > > + * Most buses instantiate devices in "subsys" initcall level, hence the
+> > > + * earliest initcall level in which this function should be called is "fs".
+> > > + *
+> > > + * Returns 0 on success,
+> > > + *	   %-ENODEV if no device was found,
+> > > + *	   %-EINVAL if a node is malformed or exceeds @len,
+> > > + *	   %-ENOTSUPP if support for a node type is not yet implemented.
+> > > + */
+> > > +int __init get_device_by_efi_path(struct efi_dev_path **node, size_t len,
+> > > +				  struct device **dev)
+> > > +{
+> > > +	struct device *parent = NULL, *child;
+> > > +	int ret = 0;
+> > > +
+> > > +	*dev = NULL;
+> > > +
+> > > +	while (ret != 1) {
+> > > +		if (len < 4 || len < (*node)->length)
+> > > +			ret = -EINVAL;
+> > > +		else if ((*node)->type     == EFI_DEV_ACPI &&
+> > > +			 (*node)->sub_type == EFI_DEV_BASIC_ACPI)
+> > > +			ret = get_device_by_acpi_path(*node, parent, &child);
+> > > +		else if ((*node)->type     == EFI_DEV_HW &&
+> > > +			 (*node)->sub_type == EFI_DEV_PCI)
+> > > +			ret = get_device_by_pci_path(*node, parent, &child);
+> > > +		else if (((*node)->type    == EFI_DEV_END_PATH ||
+> > > +			  (*node)->type    == EFI_DEV_END_PATH2) &&
+> > > +			 (*node)->sub_type == EFI_DEV_END_ENTIRE)
+> > > +			ret = get_device_by_end_path(*node, parent, &child);
+> > > +		else
+> > > +			ret = -ENOTSUPP;
+> > > +
+> > > +		put_device(parent);
+> > > +		if (ret < 0)
+> > > +			return ret;
+> > > +
+> > > +		parent = child;
+> > > +		*node  = (void *)*node + (*node)->length;
+> > > +		len   -= (*node)->length;
+> > > +	}
+> > > +
+> > > +	*dev = child;
+> > > +	return 0;
+> > > +}
+> > 
+> > Where in your patch series is this function called? Am I missing
+> > something?
+> > 
+> > Also, unless there's some existing namespace with "get_device_by_*"
+> > I'd prefer for this function name to have "efi_" as the prefix.
+> > 
+> > > diff --git a/include/linux/efi.h b/include/linux/efi.h
+> > > index 2d08948..4faf339 100644
+> > > --- a/include/linux/efi.h
+> > > +++ b/include/linux/efi.h
+> > > @@ -1145,6 +1145,27 @@ struct efi_generic_dev_path {
+> > >  	u16 length;
+> > >  } __attribute ((packed));
+> > >  
+> > > +struct efi_dev_path {
+> > > +	u8 type;	/* can be replaced with unnamed */
+> > > +	u8 sub_type;	/* struct efi_generic_dev_path; */
+> > > +	u16 length;	/* once we've moved to -std=c11 */
+> > > +	union {
+> > > +		struct {
+> > > +			u32 hid;
+> > > +			u32 uid;
+> > > +		} acpi;
+> > > +		struct {
+> > > +			u8 fn;
+> > > +			u8 dev;
+> > > +		} pci;
+> > > +	};
+> > > +} __attribute ((packed));
+> > > +
+> > > +#if IS_ENABLED(CONFIG_EFI_DEV_PATH_PARSER)
+> > > +int get_device_by_efi_path(struct efi_dev_path **node, size_t len,
+> > > +			   struct device **dev);
+> > > +#endif
+> > > +
+> > >  static inline void memrange_efi_to_native(u64 *addr, u64 *npages)
+> > >  {
+> > >  	*npages = PFN_UP(*addr + (*npages<<EFI_PAGE_SHIFT)) - PFN_DOWN(*addr);
+> > > -- 
+> > > 2.9.3
