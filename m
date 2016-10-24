@@ -1,109 +1,169 @@
-From: Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [REGRESSION] EFI mixed mode patch triggers boot failure
-Date: Mon, 24 Oct 2016 12:54:11 -0700
-Message-ID: <e34311e8-fe39-3b65-bd6d-8f1594e56336@redhat.com>
-References: <dc0bc031-f20e-9ad0-57f4-cfa1e04f8f05@redhat.com>
- <7af87cde-ce79-d6e8-0797-54069a77f42b@redhat.com>
- <20161020120357.GB19876@codeblueprint.co.uk>
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V4 01/10] acpi: apei: read ack upon ghes record consumption
+Date: Mon, 24 Oct 2016 14:28:09 -0600
+Message-ID: <768254df-7b4a-65a4-81bf-665f63780073@codeaurora.org>
+References: <1477071013-29563-1-git-send-email-tbaicar@codeaurora.org>
+ <1477071013-29563-2-git-send-email-tbaicar@codeaurora.org>
+ <b4b69d66-ae37-a528-d64c-ee9b3fe7b02c@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161020120357.GB19876-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Justin Forbes <jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <b4b69d66-ae37-a528-d64c-ee9b3fe7b02c@arm.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Suzuki K Poulose <Suzuki.Poulose@arm.com>, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, punit.agrawal@arm.com, astone@redhat.com, harba@codeaurora.org, hanjun.guo@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-On 10/20/2016 05:03 AM, Matt Fleming wrote:
-> On Wed, 19 Oct, at 02:13:00PM, Laura Abbott wrote:
->> On 10/19/2016 01:04 PM, Laura Abbott wrote:
->>> Hi,
->>>
->>> Fedora received a bug report https://bugzilla.redhat.com/show_bug.cgi?id=1384238
->>> of a bootup failure with stable 4.7.6. efi=noruntime fixed the bootup problem.
->>> 1297667083d5442aafe3e337b9413bf02b114edb was linked as the cause
->>> of the problem.
->>>
->>>
->>> x86/efi: Only map RAM into EFI page tables if in mixed-mode
->>>
->>> Waiman reported that booting with CONFIG_EFI_MIXED enabled on his
->>> multi-terabyte HP machine results in boot crashes, because the EFI
->>> region mapping functions loop forever while trying to map those
->>> regions describing RAM.
->>>
->>> While this patch doesn't fix the underlying hang, there's really no
->>> reason to map EFI_CONVENTIONAL_MEMORY regions into the EFI page tables
->>> when mixed-mode is not in use at runtime.
->>>
->>> Reported-by: Waiman Long <waiman.long-ZPxbGqLxI0U@public.gmane.org>
->>> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
->>> Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
->>> CC: Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>
->>> Cc: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
->>> Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
->>> Cc: Scott J Norton <scott.norton-ZPxbGqLxI0U@public.gmane.org>
->>> Cc: Douglas Hatch <doug.hatch-ZPxbGqLxI0U@public.gmane.org>
->>> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org> # v4.6+
->>> Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
->>>
->>> I made a request in the bugzilla for the reporter to
->>> give a bootlog with efi=debug which I'm still waiting on.
->>>
->>> Any ideas?
->>>
->>> Thanks,
->>> Laura
+On 10/24/2016 2:51 AM, Suzuki K Poulose wrote:
+> On 21/10/16 18:30, Tyler Baicar wrote:
+>> A RAS (Reliability, Availability, Serviceability) controller
+>> may be a separate processor running in parallel with OS
+>> execution, and may generate error records for consumption by
+>> the OS. If the RAS controller produces multiple error records,
+>> then they may be overwritten before the OS has consumed them.
 >>
->> dmesg with efi=debug from the reporter is attached
+>> The Generic Hardware Error Source (GHES) v2 structure
+>> introduces the capability for the OS to acknowledge the
+>> consumption of the error record generated by the RAS
+>> controller. A RAS controller supporting GHESv2 shall wait for
+>> the acknowledgment before writing a new error record, thus
+>> eliminating the race condition.
+>>
+>> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+>> Signed-off-by: Richard Ruigrok <rruigrok@codeaurora.org>
+>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+>> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+>> ---
+>>  drivers/acpi/apei/ghes.c | 42 
+>> ++++++++++++++++++++++++++++++++++++++++++
+>>  drivers/acpi/apei/hest.c |  7 +++++--
+>>  include/acpi/ghes.h      |  5 ++++-
+>>  3 files changed, 51 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+>> index 60746ef..7d020b0 100644
+>> --- a/drivers/acpi/apei/ghes.c
+>> +++ b/drivers/acpi/apei/ghes.c
+>> @@ -45,6 +45,7 @@
+>>  #include <linux/aer.h>
+>>  #include <linux/nmi.h>
+>>
+>> +#include <acpi/actbl1.h>
+>>  #include <acpi/ghes.h>
+>>  #include <acpi/apei.h>
+>>  #include <asm/tlbflush.h>
+>> @@ -79,6 +80,10 @@
+>>      ((struct acpi_hest_generic_status *)                \
+>>       ((struct ghes_estatus_node *)(estatus_node) + 1))
+>>
+>> +#define HEST_TYPE_GENERIC_V2(ghes)                \
+>> +    ((struct acpi_hest_header *)ghes->generic)->type ==    \
+>> +     ACPI_HEST_TYPE_GENERIC_ERROR_V2
+>> +
+>>  /*
+>>   * This driver isn't really modular, however for the time being,
+>>   * continuing to use module_param is the easiest way to remain
+>> @@ -248,7 +253,15 @@ static struct ghes *ghes_new(struct 
+>> acpi_hest_generic *generic)
+>>      ghes = kzalloc(sizeof(*ghes), GFP_KERNEL);
+>>      if (!ghes)
+>>          return ERR_PTR(-ENOMEM);
+>> +
+>>      ghes->generic = generic;
+>> +    if (HEST_TYPE_GENERIC_V2(ghes)) {
+>> +        rc = apei_map_generic_address(
+>> +            &ghes->generic_v2->read_ack_register);
+>> +        if (rc)
+>> +            goto err_unmap;
 >
->> [    0.000000] DMI: Hewlett-Packard Compaq CQ58 Notebook PC/188B, BIOS F.36 06/07/2013
+> I think should be goto err_free, see more below.
 >
-> Hmm.. this is a fairly old machine, what kernel versions has the
-> reporter successfully run on it? The code that was nop'd out in the
-> above commit for the native case only came into existence in v4.6.
+>> +    }
+>> +
+>>      rc = apei_map_generic_address(&generic->error_status_address);
+>>      if (rc)
+>>          goto err_free;
+>> @@ -270,6 +283,9 @@ static struct ghes *ghes_new(struct 
+>> acpi_hest_generic *generic)
+>>
+>>  err_unmap:
+>> apei_unmap_generic_address(&generic->error_status_address);
+>> +    if (HEST_TYPE_GENERIC_V2(ghes))
+>> +        apei_unmap_generic_address(
+>> +            &ghes->generic_v2->read_ack_register);
 >
-> The fact that booting with efi=old_map does *not* seem to result in a
-> booting kernel is very suspicious. Could you ask them to double-check?
+> We might end up trying to unmap (error_status_address) which is not 
+> mapped
+> if we hit the error in mapping read_ack_register. The 
+> read_ack_register unmap
+> hunk should be moved below to err_free.
 >
-> Maybe try this patch too on v4.7.6.
+This needs to be changed, I'll add a separate label for unmapping 
+read_ack_register and error_status_address for the case that the 
+read_ack_register map succeeds but the error_status_address map fails.
 
-Was out for a few days, reporter says the below patch does not work.
-There was some confusion with secure boot so I've asked them to re-test
-with efi=old_map and secure boot off.
+err_unmap_status_addr:
+apei_unmap_generic_address(&generic->error_status_address);
+err_unmap_read_ack_addr:
+         if (HEST_TYPE_GENERIC_V2(ghes))
+                 apei_unmap_generic_address(
+&ghes->generic_v2->read_ack_register);
+err_free:
+         kfree(ghes);
+         return ERR_PTR(rc);
+
+If mapping read_ack_register fails, goto err_free.
+If mapping read_ack_register is successful but mapping 
+error_status_address fails, goto err_unmap_read_ack_addr.
+And if both mappings succeed but the kmalloc fails, then goto 
+err_unmap_status_addr.
+
+>
+>>  err_free:
+>>      kfree(ghes);
+>>      return ERR_PTR(rc);
+>> @@ -279,6 +295,9 @@ static void ghes_fini(struct ghes *ghes)
+>>  {
+>>      kfree(ghes->estatus);
+>> apei_unmap_generic_address(&ghes->generic->error_status_address);
+>> +    if (HEST_TYPE_GENERIC_V2(ghes))
+>> +        apei_unmap_generic_address(
+>> +            &ghes->generic_v2->read_ack_register);
+>>  }
+>>
+>>  static inline int ghes_severity(int severity)
+>> @@ -648,6 +667,23 @@ static void ghes_estatus_cache_add(
+>>      rcu_read_unlock();
+>>  }
+>>
+>
+>> +static int ghes_do_read_ack(struct acpi_hest_generic_v2 *generic_v2)
+>
+> nit: We are actually writing something to the read_ack_register. The 
+> names
+> read_ack_register (which may be as per standard) and more importantly the
+> function name (ghes_do_read_ack) sounds a bit misleading.
+It is called "Read Ack Register" in the spec (ACPI 6.1 table 18-344), 
+but I agree the function name can be improved.
+Maybe ghes_acknowledge_error or ghes_ack_error.
 
 Thanks,
-Laura
+Tyler
+>
+> Rest looks fine to me.
+>
+> Suzuki
+>
 
->
-> ---
->
-> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-> index 964c7022d31d..b07183c6b470 100644
-> --- a/arch/x86/platform/efi/efi_64.c
-> +++ b/arch/x86/platform/efi/efi_64.c
-> @@ -244,9 +244,12 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
->  	 * text and allocate a new stack because we can't rely on the
->  	 * stack pointer being < 4GB.
->  	 */
-> -	if (!IS_ENABLED(CONFIG_EFI_MIXED) || efi_is_native())
-> +	if (!IS_ENABLED(CONFIG_EFI_MIXED))
->  		return 0;
->
-> +	if (efi_is_native())
-> +		goto map_text;
-> +
->  	/*
->  	 * Map all of RAM so that we can access arguments in the 1:1
->  	 * mapping when making EFI runtime calls.
-> @@ -273,6 +276,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
->  	efi_scratch.phys_stack = virt_to_phys(page_address(page));
->  	efi_scratch.phys_stack += PAGE_SIZE; /* stack grows down */
->
-> +map_text:
->  	npages = (_etext - _text) >> PAGE_SHIFT;
->  	text = __pa(_text);
->  	pfn = text >> PAGE_SHIFT;
->
+-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
