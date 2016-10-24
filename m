@@ -1,62 +1,99 @@
-From: Hanjun Guo <guohanjun@huawei.com>
-Subject: Re: [PATCH V3 05/10] acpi: apei: handle SEA notification type for
- ARMv8
-Date: Sun, 23 Oct 2016 17:13:28 +0800
-Message-ID: <580C7F38.4010301@huawei.com>
-References: <1475875882-2604-1-git-send-email-tbaicar@codeaurora.org>
- <1475875882-2604-6-git-send-email-tbaicar@codeaurora.org>
- <496ddac3-a220-fd42-5ca1-3d0fb0238907@linaro.org>
- <1941586c-4c51-60d8-a77a-ad56fe5f3e3f@codeaurora.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] Fix allocation size calculations
+Date: Mon, 24 Oct 2016 09:17:23 +0100
+Message-ID: <CAKv+Gu-2fpui9xKhHN+OWHU39P3TWohfDLPpAU9pGgMR4iC_uw@mail.gmail.com>
+References: <20161021185119.27437-1-roy.franz@hpe.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <1941586c-4c51-60d8-a77a-ad56fe5f3e3f@codeaurora.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Abdulhamid, Harb" <harba@codeaurora.org>, Hanjun Guo <hanjun.guo@linaro.org>, Tyler Baicar <tbaicar@codeaurora.org>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, Dkvm@vger.kernel.org, linux-kernel
-Cc: Naveen Kaje <nkaje@codeaurora.org>, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20161021185119.27437-1-roy.franz-ZPxbGqLxI0U@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, roy.franz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Harb,
-
-On 2016/10/20 0:59, Abdulhamid, Harb wrote:
-> On 10/18/2016 8:44 AM, Hanjun Guo wrote:
->> Hi Tyler,
->>
->> On 2016/10/8 5:31, Tyler Baicar wrote:
->>> ARM APEI extension proposal added SEA (Synchrounous External
->>> Abort) notification type for ARMv8.
->>> Add a new GHES error source handling function for SEA. If an error
->>> source's notification type is SEA, then this function can be registered
->>> into the SEA exception handler. That way GHES will parse and report
->>> SEA exceptions when they occur.
->> Does this SEA is replayed by the firmware (firmware first handling)
->> or directly triggered by the hardware when error is happened?
-> Architecturally, an SEA must be synchronous and *precise*, so if you
-> take an SEA on a particular load instruction, firmware/hardware should
-> not be corrupting the context/state of the PE to allow software to
-> determine which thread/process encountered the abort.  GHES error status
-
-That's my concern too, and that's why I raised my question :)
-
-> block will be expose to software with information about the type,
-> severity, physical address impacted.
+On 21 October 2016 at 19:51, Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org> wrote:
+> Adjust the size used in calculations to match the actual size of allocation
+> that will be performed based on EFI size/alignment constraints.
+> efi_high_alloc() and efi_low_alloc() use the passed size in bytes directly
+> to find space in the memory map for the allocation, rather than the actual
+> allocation size that has been adjusted for size and alignment constraints.
+> This results in failed allocations and retries in efi_high_alloc().  The
+> same error is present in efi_low_alloc(), although failure will only happen
+> if the lowest memory block is small.
+> Also use EFI_PAGE_SIZE consistently and remove use of EFI_PAGE_SHIFT to
+> calculate page size.
 >
-> Generally the error status block is populated by firmware.  However, as
-> long as the above requirement is met, I don't think the spec precludes
-> error status block being populated by hardware.  Those details must be
-> completely transparent to software.
->
-> Finally, to answer your more specific question:  If the implementation
-> of firmware-first involves trapping the SEA in EL3 to do some firmware
-> first handling, firmware must maintain the context of the offending ELx,
-> generate an error record, and then "replay" the exception to normal
-> (non-secure) software at the appropriate vector base address.
+> Signed-off-by: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+> ---
+> (Resend with fixed maintainer email address)
+> This error seems to be present since the EFI stub was introduced, going
+> back 3.10.
 >
 
-Thank you for your answer, it clears my confusion now, I will try something
-similar on ARM64 platform, will get back to you if I get blocks.
+Hey Roy,
 
-Thanks
-Hanjun
+Thanks for spotting this, and thanks for the fix.
 
+>
+>  drivers/firmware/efi/libstub/efi-stub-helper.c | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> index aded106..9575c44 100644
+> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
+> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> @@ -194,6 +194,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+>                 align = EFI_ALLOC_ALIGN;
+>
+>         nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+> +       size = nr_pages * EFI_PAGE_SIZE;
+
+I think this is still not correct. EFI_ALLOC_ALIGN may be smaller than 'align'
+
+So could you please change this to
+
+size = round_up(size, align);
+nr_pages = size / EFI_PAGE_SIZE;
+
+Could you also expand the comment regarding the assigment of 'align'
+to clarify that not only the allocation base is aligned but the
+allocation size as well? This is not clear from the function prototype
+or from the code, but on arm64 it is important we don't end up with OS
+visible allocations that are not a 64k aligned multiples of 64k.
+
+Thanks,
+Ard.
+
+>  again:
+>         for (i = 0; i < map_size / desc_size; i++) {
+>                 efi_memory_desc_t *desc;
+> @@ -208,7 +209,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+>                         continue;
+>
+>                 start = desc->phys_addr;
+> -               end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
+> +               end = start + desc->num_pages * EFI_PAGE_SIZE;
+>
+>                 if (end > max)
+>                         end = max;
+> @@ -286,6 +287,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+>                 align = EFI_ALLOC_ALIGN;
+>
+>         nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+> +       size = nr_pages * EFI_PAGE_SIZE;
+>         for (i = 0; i < map_size / desc_size; i++) {
+>                 efi_memory_desc_t *desc;
+>                 unsigned long m = (unsigned long)map;
+> @@ -300,7 +302,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+>                         continue;
+>
+>                 start = desc->phys_addr;
+> -               end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
+> +               end = start + desc->num_pages * EFI_PAGE_SIZE;
+>
+>                 /*
+>                  * Don't allocate at 0x0. It will confuse code that
+> --
+> 2.9.3
+>
