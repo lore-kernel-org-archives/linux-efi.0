@@ -1,48 +1,113 @@
-From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V4 09/10] trace, ras: add ARM processor error trace event
-Date: Mon, 24 Oct 2016 11:21:21 -0600
-Message-ID: <7a8c62a7-c2f4-0cae-ce0a-24cbf827bd4f@codeaurora.org>
-References: <1477071013-29563-1-git-send-email-tbaicar@codeaurora.org>
- <1477071013-29563-10-git-send-email-tbaicar@codeaurora.org>
- <20161021163410.0a827eab@gandalf.local.home>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <20161021163410.0a827eab@gandalf.local.home>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Steven Rostedt <rostedt@goodmis.org>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, lenb@kernel.org, harba@codeaurora.org, marc.zyngier@arm.com, punit.agrawal@arm.com, tomasz.nowicki@linaro.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
+From: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+Subject: [PATCH v2] Fix allocation size calculations
+Date: Mon, 24 Oct 2016 12:06:13 -0700
+Message-ID: <20161024190613.8010-1-roy.franz@hpe.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, roy.franz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Cc: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 10/21/2016 2:34 PM, Steven Rostedt wrote:
-> On Fri, 21 Oct 2016 11:30:12 -0600
-> Tyler Baicar <tbaicar@codeaurora.org> wrote:
->
->> Currently there are trace events for the various RAS
->> errors with the exception of ARM processor type errors.
->> Add a new trace event for such errors so that the user
->> will know when they occur. These trace events are
->> consistent with the ARM processor error section type
->> defined in UEFI 2.6 spec section N.2.4.4.
->>
->> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> Tracing part looks fine to me.
->
-> Acked-by: Steven Rostedt <rostedt@goodmis.org>
->
-> -- Steve
-Thank you Steve!
+Adjust the size used in calculations to match the actual size of allocation
+that will be performed based on EFI size/alignment constraints.
+efi_high_alloc() and efi_low_alloc() used the passed size in bytes directly
+to find space in the memory map for the allocation, rather than the actual
+allocation size that has been adjusted for size and alignment constraints.
+This results in failed allocations and retries in efi_high_alloc().  The
+same error is present in efi_low_alloc(), although failure will only happen
+if the lowest memory block is small.
+Adjust allocation size computation to respect EFI_ALLOC_ALIGN, which is
+the minimum alignment that should always be enforced, and at 64k on arm64
+is bigger than EFI_PAGE_SIZE.
+Also use EFI_PAGE_SIZE consistently and remove use of EFI_PAGE_SHIFT to
+calculate page size.
 
+Signed-off-by: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+---
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 28 +++++++++++++++++---------
+ 1 file changed, 18 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index aded106..b97dfac 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -161,6 +161,7 @@ unsigned long get_dram_base(efi_system_table_t *sys_table_arg)
+ 
+ /*
+  * Allocate at the highest possible address that is not above 'max'.
++ * Align the allocation address and size to 'align'.
+  */
+ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 			    unsigned long size, unsigned long align,
+@@ -186,14 +187,17 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 		goto fail;
+ 
+ 	/*
+-	 * Enforce minimum alignment that EFI requires when requesting
+-	 * a specific address.  We are doing page-based allocations,
+-	 * so we must be aligned to a page.
++	 * Enforce minimum alignment that EFI or Linux requires when
++	 * requesting a specific address.  We are doing page-based (or
++	 * larger) allocations, and both the address and size must meet
++	 * alignment constraints. Arm64 requires 64k alignment, while other
++	 * arches simply require 4k.
+ 	 */
+ 	if (align < EFI_ALLOC_ALIGN)
+ 		align = EFI_ALLOC_ALIGN;
+ 
+-	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
++	nr_pages = round_up(size, align) / EFI_PAGE_SIZE;
++	size = nr_pages * EFI_PAGE_SIZE;
+ again:
+ 	for (i = 0; i < map_size / desc_size; i++) {
+ 		efi_memory_desc_t *desc;
+@@ -208,7 +212,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 			continue;
+ 
+ 		start = desc->phys_addr;
+-		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
++		end = start + desc->num_pages * EFI_PAGE_SIZE;
+ 
+ 		if (end > max)
+ 			end = max;
+@@ -254,6 +258,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 
+ /*
+  * Allocate at the lowest possible address.
++ * Align the allocation address and size to 'align'.
+  */
+ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 			   unsigned long size, unsigned long align,
+@@ -278,14 +283,17 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 		goto fail;
+ 
+ 	/*
+-	 * Enforce minimum alignment that EFI requires when requesting
+-	 * a specific address.  We are doing page-based allocations,
+-	 * so we must be aligned to a page.
++	 * Enforce minimum alignment that EFI or Linux requires when
++	 * requesting a specific address.  We are doing page-based (or
++	 * larger) allocations, and both the address and size must meet
++	 * alignment constraints. Arm64 requires 64k alignment, while other
++	 * arches simply require 4k.
+ 	 */
+ 	if (align < EFI_ALLOC_ALIGN)
+ 		align = EFI_ALLOC_ALIGN;
+ 
+-	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
++	nr_pages = round_up(size, align) / EFI_PAGE_SIZE;
++	size = nr_pages * EFI_PAGE_SIZE;
+ 	for (i = 0; i < map_size / desc_size; i++) {
+ 		efi_memory_desc_t *desc;
+ 		unsigned long m = (unsigned long)map;
+@@ -300,7 +308,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 			continue;
+ 
+ 		start = desc->phys_addr;
+-		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
++		end = start + desc->num_pages * EFI_PAGE_SIZE;
+ 
+ 		/*
+ 		 * Don't allocate at 0x0. It will confuse code that
 -- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+2.9.3
