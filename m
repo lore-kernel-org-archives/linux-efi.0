@@ -1,257 +1,259 @@
-From: Suzuki K Poulose <Suzuki.Poulose@arm.com>
-Subject: Re: [PATCH V4 02/10] ras: acpi/apei: cper: generic error data entry
- v3 per ACPI 6.1
-Date: Mon, 24 Oct 2016 10:50:46 +0100
-Message-ID: <da257bb4-48f3-b187-1d43-c68669427cef@arm.com>
-References: <1477071013-29563-1-git-send-email-tbaicar@codeaurora.org>
- <1477071013-29563-3-git-send-email-tbaicar@codeaurora.org>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [tip:x86/asm] x86/mm/64: Enable vmapped stacks
+ (CONFIG_HAVE_ARCH_VMAP_STACK=y)
+Date: Mon, 24 Oct 2016 14:09:31 +0100
+Message-ID: <20161024130931.GC20387@codeblueprint.co.uk>
+References: <c88f3e2920b18e6cc621d772a04a62c06869037e.1470907718.git.luto@kernel.org>
+ <tip-e37e43a497d5a8b7c0cc1736d56986f432c394c9@git.kernel.org>
+ <20161021123243.GC27807@codeblueprint.co.uk>
+ <CALCETrUqhRg_G1fia=oFKrsxpF_YobEJLs1KpA3UF2Pnt6-u+w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1477071013-29563-3-git-send-email-tbaicar@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tyler Baicar <tbaicar@codeaurora.org>, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, punit.
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CALCETrUqhRg_G1fia=oFKrsxpF_YobEJLs1KpA3UF2Pnt6-u+w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-tip-commits-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tip-commits-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Nadav Amit <nadav.amit-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 21/10/16 18:30, Tyler Baicar wrote:
-> Currently when a RAS error is reported it is not timestamped.
-> The ACPI 6.1 spec adds the timestamp field to the generic error
-> data entry v3 structure. The timestamp of when the firmware
-> generated the error is now being reported.
->
-> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-> Signed-off-by: Richard Ruigrok <rruigrok@codeaurora.org>
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
-> ---
->  drivers/acpi/apei/ghes.c    | 14 +++++++---
->  drivers/firmware/efi/cper.c | 67 +++++++++++++++++++++++++++++++++++++--------
->  include/acpi/ghes.h         | 10 +++++++
->  include/linux/cper.h        | 12 ++++++++
->  4 files changed, 88 insertions(+), 15 deletions(-)
->
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index 7d020b0..7610f08 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -419,7 +419,8 @@ static void ghes_handle_memory_failure(struct acpi_hest_generic_data *gdata, int
->  	int flags = -1;
->  	int sec_sev = ghes_severity(gdata->error_severity);
->  	struct cper_sec_mem_err *mem_err;
-> -	mem_err = (struct cper_sec_mem_err *)(gdata + 1);
-> +
-> +	mem_err = acpi_hest_generic_data_payload(gdata);
->
->  	if (!(mem_err->validation_bits & CPER_MEM_VALID_PA))
->  		return;
-> @@ -449,14 +450,18 @@ static void ghes_do_proc(struct ghes *ghes,
->  {
->  	int sev, sec_sev;
->  	struct acpi_hest_generic_data *gdata;
-> +	uuid_le sec_type;
->
->  	sev = ghes_severity(estatus->error_severity);
->  	apei_estatus_for_each_section(estatus, gdata) {
->  		sec_sev = ghes_severity(gdata->error_severity);
-> -		if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
-> +		sec_type = *(uuid_le *)gdata->section_type;
-> +
-> +		if (!uuid_le_cmp(sec_type,
->  				 CPER_SEC_PLATFORM_MEM)) {
->  			struct cper_sec_mem_err *mem_err;
-> -			mem_err = (struct cper_sec_mem_err *)(gdata+1);
-> +
-> +			mem_err = acpi_hest_generic_data_payload(gdata);
->  			ghes_edac_report_mem_error(ghes, sev, mem_err);
->
->  			arch_apei_report_mem_error(sev, mem_err);
-> @@ -466,7 +471,8 @@ static void ghes_do_proc(struct ghes *ghes,
->  		else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
->  				      CPER_SEC_PCIE)) {
->  			struct cper_sec_pcie *pcie_err;
-> -			pcie_err = (struct cper_sec_pcie *)(gdata+1);
-> +
-> +			pcie_err = acpi_hest_generic_data_payload(gdata);
->  			if (sev == GHES_SEV_RECOVERABLE &&
->  			    sec_sev == GHES_SEV_RECOVERABLE &&
->  			    pcie_err->validation_bits & CPER_PCIE_VALID_DEVICE_ID &&
-> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> index d425374..af7e1e9 100644
-> --- a/drivers/firmware/efi/cper.c
-> +++ b/drivers/firmware/efi/cper.c
-> @@ -32,6 +32,9 @@
->  #include <linux/acpi.h>
->  #include <linux/pci.h>
->  #include <linux/aer.h>
-> +#include <linux/printk.h>
-> +#include <linux/bcd.h>
-> +#include <acpi/ghes.h>
->
->  #define INDENT_SP	" "
->
-> @@ -386,13 +389,37 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
->  	pfx, pcie->bridge.secondary_status, pcie->bridge.control);
->  }
->
-> +static void cper_estatus_print_section_v300(const char *pfx,
-> +	const struct acpi_hest_generic_data_v300 *gdata)
-> +{
-> +	__u8 hour, min, sec, day, mon, year, century, *timestamp;
-> +
-> +	if (gdata->validation_bits & ACPI_HEST_GEN_VALID_TIMESTAMP) {
-> +		timestamp = (__u8 *)&(gdata->time_stamp);
-> +		sec = bcd2bin(timestamp[0]);
-> +		min = bcd2bin(timestamp[1]);
-> +		hour = bcd2bin(timestamp[2]);
-> +		day = bcd2bin(timestamp[4]);
-> +		mon = bcd2bin(timestamp[5]);
-> +		year = bcd2bin(timestamp[6]);
-> +		century = bcd2bin(timestamp[7]);
-> +		printk("%stime: %7s %02d%02d-%02d-%02d %02d:%02d:%02d\n", pfx,
-> +			0x01 & *(timestamp + 3) ? "precise" : "", century,
-> +			year, mon, day, hour, min, sec);
-> +	}
-> +}
-> +
->  static void cper_estatus_print_section(
-> -	const char *pfx, const struct acpi_hest_generic_data *gdata, int sec_no)
-> +	const char *pfx, struct acpi_hest_generic_data *gdata, int sec_no)
->  {
->  	uuid_le *sec_type = (uuid_le *)gdata->section_type;
->  	__u16 severity;
->  	char newpfx[64];
->
-> +	if (acpi_hest_generic_data_version(gdata))
-> +		cper_estatus_print_section_v300(pfx,
-> +			(const struct acpi_hest_generic_data_v300 *)gdata);
-> +
->  	severity = gdata->error_severity;
->  	printk("%s""Error %d, type: %s\n", pfx, sec_no,
->  	       cper_severity_str(severity));
-> @@ -403,14 +430,18 @@ static void cper_estatus_print_section(
->
->  	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
->  	if (!uuid_le_cmp(*sec_type, CPER_SEC_PROC_GENERIC)) {
-> -		struct cper_sec_proc_generic *proc_err = (void *)(gdata + 1);
-> +		struct cper_sec_proc_generic *proc_err;
-> +
-> +		proc_err = acpi_hest_generic_data_payload(gdata);
->  		printk("%s""section_type: general processor error\n", newpfx);
->  		if (gdata->error_data_length >= sizeof(*proc_err))
->  			cper_print_proc_generic(newpfx, proc_err);
->  		else
->  			goto err_section_too_small;
->  	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PLATFORM_MEM)) {
-> -		struct cper_sec_mem_err *mem_err = (void *)(gdata + 1);
-> +		struct cper_sec_mem_err *mem_err;
-> +
-> +		mem_err = acpi_hest_generic_data_payload(gdata);
->  		printk("%s""section_type: memory error\n", newpfx);
->  		if (gdata->error_data_length >=
->  		    sizeof(struct cper_sec_mem_err_old))
-> @@ -419,7 +450,9 @@ static void cper_estatus_print_section(
->  		else
->  			goto err_section_too_small;
->  	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PCIE)) {
-> -		struct cper_sec_pcie *pcie = (void *)(gdata + 1);
-> +		struct cper_sec_pcie *pcie;
-> +
-> +		pcie = acpi_hest_generic_data_payload(gdata);
->  		printk("%s""section_type: PCIe error\n", newpfx);
->  		if (gdata->error_data_length >= sizeof(*pcie))
->  			cper_print_pcie(newpfx, pcie, gdata);
-> @@ -438,6 +471,7 @@ void cper_estatus_print(const char *pfx,
->  			const struct acpi_hest_generic_status *estatus)
->  {
->  	struct acpi_hest_generic_data *gdata;
-> +	struct acpi_hest_generic_data_v300 *gdata_v3 = NULL;
->  	unsigned int data_len, gedata_len;
->  	int sec_no = 0;
->  	char newpfx[64];
-> @@ -451,12 +485,22 @@ void cper_estatus_print(const char *pfx,
->  	printk("%s""event severity: %s\n", pfx, cper_severity_str(severity));
->  	data_len = estatus->data_length;
->  	gdata = (struct acpi_hest_generic_data *)(estatus + 1);
-> +	if (acpi_hest_generic_data_version(gdata))
-> +		gdata_v3 = (struct acpi_hest_generic_data_v300 *)gdata;
+On Fri, 21 Oct, at 05:18:30PM, Andy Lutomirski wrote:
+> 
+> This is asking for trouble if any of the variable length parameters
+> are on the stack.  How about adding a "size_t size" parameter and
+> doing:
+> 
+> if (!va) {
+>   return 0;
+> } else if (virt_addr_valid(va)) {
+>   return virt_to_phys(va);
+> } else {
+>   /* A fully aligned variable on the stack is guaranteed not to cross
+> a page boundary. */
+>   WARN_ON(!IS_ALIGNED((uintptr_t)va, size) || size > PAGE_SIZE);
+>   return slow_virt_to_phys(va);
+> }
 
-I think the acpi_hest_generic_data_version() doesn't check if the version is
-V3 or higher ?
+Ah, good catch. Something like this?
 
-> +
->  	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
-> +
->  	while (data_len >= sizeof(*gdata)) {
->  		gedata_len = gdata->error_data_length;
->  		cper_estatus_print_section(newpfx, gdata, sec_no);
-> -		data_len -= gedata_len + sizeof(*gdata);
-> -		gdata = (void *)(gdata + 1) + gedata_len;
-> +		if(gdata_v3) {
-> +			data_len -= gedata_len + sizeof(*gdata_v3);
-> +			gdata_v3 = (void *)(gdata_v3 + 1) + gedata_len;
-> +			gdata = (struct acpi_hest_generic_data *)gdata_v3;
-> +		} else {
-> +			data_len -= gedata_len + sizeof(*gdata);
-> +			gdata = (void *)(gdata + 1) + gedata_len;
-> +		}
+---
 
-Could we not use the helpers we define below to unify the code here and avoid the
-switch ?
+>From d2c17f46686076677da3bf04caa2f69d654f8d8a Mon Sep 17 00:00:00 2001
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Date: Thu, 20 Oct 2016 22:17:21 +0100
+Subject: [PATCH] x86/efi: Prevent mixed mode boot corruption with
+ CONFIG_VMAP_STACK
 
+Booting an EFI mixed mode kernel has been crashing since commit:
 
+  e37e43a497d5 ("x86/mm/64: Enable vmapped stacks (CONFIG_HAVE_ARCH_VMAP_STACK=y)")
 
->  		sec_no++;
->  	}
->  }
-> @@ -486,12 +530,13 @@ int cper_estatus_check(const struct acpi_hest_generic_status *estatus)
->  		return rc;
->  	data_len = estatus->data_length;
->  	gdata = (struct acpi_hest_generic_data *)(estatus + 1);
-> -	while (data_len >= sizeof(*gdata)) {
-> -		gedata_len = gdata->error_data_length;
-> -		if (gedata_len > data_len - sizeof(*gdata))
-> +
-> +	while (data_len >= acpi_hest_generic_data_size(gdata)) {
-> +		gedata_len = acpi_hest_generic_data_error_length(gdata);
-> +		if (gedata_len > data_len - acpi_hest_generic_data_size(gdata))
->  			return -EINVAL;
-> -		data_len -= gedata_len + sizeof(*gdata);
-> -		gdata = (void *)(gdata + 1) + gedata_len;
-> +		data_len -= gedata_len + acpi_hest_generic_data_size(gdata);
-> +		gdata = acpi_hest_generic_data_next(gdata);
->  	}
->  	if (data_len)
->  		return -EINVAL;
-> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
-> index 68f088a..56b9679 100644
-> --- a/include/acpi/ghes.h
-> +++ b/include/acpi/ghes.h
-> @@ -73,3 +73,13 @@ static inline void ghes_edac_unregister(struct ghes *ghes)
->  {
->  }
->  #endif
-> +
-> +#define acpi_hest_generic_data_version(gdata)			\
-> +	(gdata->revision >> 8)
-> +
+The user-visible effect in my test setup was the kernel being unable
+to find the root file system ramdisk. This was likely caused by silent
+memory or page table corruption.
 
+Enabling CONFIG_DEBUG_VIRTUAL immediately flagged the thunking code as
+abusing virt_to_phys() because it was passing addresses that were not
+part of the kernel direct mapping.
 
->
-> +#define acpi_hest_generic_data_error_length(gdata)	\
-> +	(((struct acpi_hest_generic_data *)(gdata))->error_data_length)
-> +#define acpi_hest_generic_data_size(gdata)		\
-> +	((acpi_hest_generic_data_version(gdata) >= 3) ?	\
-> +	sizeof(struct acpi_hest_generic_data_v300) :	\
-> +	sizeof(struct acpi_hest_generic_data))
-> +#define acpi_hest_generic_data_record_size(gdata)	\
-> +	(acpi_hest_generic_data_size(gdata) +		\
-> +	acpi_hest_generic_data_error_length(gdata))
-> +#define acpi_hest_generic_data_next(gdata)		\
-> +	((void *)(gdata) + acpi_hest_generic_data_record_size(gdata))
-> +
+Use the slow version instead, which correctly handles all memory
+regions by performing a page table walk.
 
-Rest looks good
+Suggested-by: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+---
+ arch/x86/platform/efi/efi_64.c | 79 +++++++++++++++++++++++++++++-------------
+ 1 file changed, 55 insertions(+), 24 deletions(-)
 
-Cheers
-Suzuki
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 58b0f801f66f..010544293dda 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -31,6 +31,7 @@
+ #include <linux/io.h>
+ #include <linux/reboot.h>
+ #include <linux/slab.h>
++#include <linux/ucs2_string.h>
+ 
+ #include <asm/setup.h>
+ #include <asm/page.h>
+@@ -211,11 +212,36 @@ void efi_sync_low_kernel_mappings(void)
+ 	memcpy(pud_efi, pud_k, sizeof(pud_t) * num_entries);
+ }
+ 
++/*
++ * Wrapper for slow_virt_to_phys() that handles NULL addresses.
++ */
++static inline phys_addr_t
++virt_to_phys_or_null_size(void *va, unsigned long size)
++{
++	if (!va)
++		return 0;
++
++	if (virt_addr_valid(va))
++		return virt_to_phys(va);
++
++	/*
++	 * A fully aligned variable on the stack is guaranteed not to
++	 * cross a page bounary.
++	 */
++	WARN_ON(!IS_ALIGNED((unsigned long)va, size) || size > PAGE_SIZE);
++
++	return slow_virt_to_phys(va);
++}
++
++#define virt_to_phys_or_null(addr)				\
++	virt_to_phys_or_null_size((addr), sizeof(*(addr)))
++
+ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ {
+ 	unsigned long pfn, text;
+ 	struct page *page;
+ 	unsigned npages;
++	void *addr;
+ 	pgd_t *pgd;
+ 
+ 	if (efi_enabled(EFI_OLD_MEMMAP))
+@@ -251,7 +277,8 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	if (!page)
+ 		panic("Unable to allocate EFI runtime stack < 4GB\n");
+ 
+-	efi_scratch.phys_stack = virt_to_phys(page_address(page));
++	addr = page_address(page);
++	efi_scratch.phys_stack = virt_to_phys_or_null_size(addr, PAGE_SIZE);
+ 	efi_scratch.phys_stack += PAGE_SIZE; /* stack grows down */
+ 
+ 	npages = (_etext - _text) >> PAGE_SHIFT;
+@@ -494,8 +521,8 @@ static efi_status_t efi_thunk_get_time(efi_time_t *tm, efi_time_cap_t *tc)
+ 
+ 	spin_lock(&rtc_lock);
+ 
+-	phys_tm = virt_to_phys(tm);
+-	phys_tc = virt_to_phys(tc);
++	phys_tm = virt_to_phys_or_null(tm);
++	phys_tc = virt_to_phys_or_null(tc);
+ 
+ 	status = efi_thunk(get_time, phys_tm, phys_tc);
+ 
+@@ -511,7 +538,7 @@ static efi_status_t efi_thunk_set_time(efi_time_t *tm)
+ 
+ 	spin_lock(&rtc_lock);
+ 
+-	phys_tm = virt_to_phys(tm);
++	phys_tm = virt_to_phys_or_null(tm);
+ 
+ 	status = efi_thunk(set_time, phys_tm);
+ 
+@@ -529,9 +556,9 @@ efi_thunk_get_wakeup_time(efi_bool_t *enabled, efi_bool_t *pending,
+ 
+ 	spin_lock(&rtc_lock);
+ 
+-	phys_enabled = virt_to_phys(enabled);
+-	phys_pending = virt_to_phys(pending);
+-	phys_tm = virt_to_phys(tm);
++	phys_enabled = virt_to_phys_or_null(enabled);
++	phys_pending = virt_to_phys_or_null(pending);
++	phys_tm = virt_to_phys_or_null(tm);
+ 
+ 	status = efi_thunk(get_wakeup_time, phys_enabled,
+ 			     phys_pending, phys_tm);
+@@ -549,7 +576,7 @@ efi_thunk_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
+ 
+ 	spin_lock(&rtc_lock);
+ 
+-	phys_tm = virt_to_phys(tm);
++	phys_tm = virt_to_phys_or_null(tm);
+ 
+ 	status = efi_thunk(set_wakeup_time, enabled, phys_tm);
+ 
+@@ -558,6 +585,10 @@ efi_thunk_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
+ 	return status;
+ }
+ 
++static unsigned long efi_name_size(efi_char16_t *name)
++{
++	return ucs2_strsize(name, EFI_VAR_NAME_LEN) + 1;
++}
+ 
+ static efi_status_t
+ efi_thunk_get_variable(efi_char16_t *name, efi_guid_t *vendor,
+@@ -567,11 +598,11 @@ efi_thunk_get_variable(efi_char16_t *name, efi_guid_t *vendor,
+ 	u32 phys_name, phys_vendor, phys_attr;
+ 	u32 phys_data_size, phys_data;
+ 
+-	phys_data_size = virt_to_phys(data_size);
+-	phys_vendor = virt_to_phys(vendor);
+-	phys_name = virt_to_phys(name);
+-	phys_attr = virt_to_phys(attr);
+-	phys_data = virt_to_phys(data);
++	phys_data_size = virt_to_phys_or_null(data_size);
++	phys_vendor = virt_to_phys_or_null(vendor);
++	phys_name = virt_to_phys_or_null_size(name, efi_name_size(name));
++	phys_attr = virt_to_phys_or_null(attr);
++	phys_data = virt_to_phys_or_null_size(data, *data_size);
+ 
+ 	status = efi_thunk(get_variable, phys_name, phys_vendor,
+ 			   phys_attr, phys_data_size, phys_data);
+@@ -586,9 +617,9 @@ efi_thunk_set_variable(efi_char16_t *name, efi_guid_t *vendor,
+ 	u32 phys_name, phys_vendor, phys_data;
+ 	efi_status_t status;
+ 
+-	phys_name = virt_to_phys(name);
+-	phys_vendor = virt_to_phys(vendor);
+-	phys_data = virt_to_phys(data);
++	phys_name = virt_to_phys_or_null_size(name, efi_name_size(name));
++	phys_vendor = virt_to_phys_or_null(vendor);
++	phys_data = virt_to_phys_or_null_size(data, data_size);
+ 
+ 	/* If data_size is > sizeof(u32) we've got problems */
+ 	status = efi_thunk(set_variable, phys_name, phys_vendor,
+@@ -605,9 +636,9 @@ efi_thunk_get_next_variable(unsigned long *name_size,
+ 	efi_status_t status;
+ 	u32 phys_name_size, phys_name, phys_vendor;
+ 
+-	phys_name_size = virt_to_phys(name_size);
+-	phys_vendor = virt_to_phys(vendor);
+-	phys_name = virt_to_phys(name);
++	phys_name_size = virt_to_phys_or_null(name_size);
++	phys_vendor = virt_to_phys_or_null(vendor);
++	phys_name = virt_to_phys_or_null_size(name, *name_size);
+ 
+ 	status = efi_thunk(get_next_variable, phys_name_size,
+ 			   phys_name, phys_vendor);
+@@ -621,7 +652,7 @@ efi_thunk_get_next_high_mono_count(u32 *count)
+ 	efi_status_t status;
+ 	u32 phys_count;
+ 
+-	phys_count = virt_to_phys(count);
++	phys_count = virt_to_phys_or_null(count);
+ 	status = efi_thunk(get_next_high_mono_count, phys_count);
+ 
+ 	return status;
+@@ -633,7 +664,7 @@ efi_thunk_reset_system(int reset_type, efi_status_t status,
+ {
+ 	u32 phys_data;
+ 
+-	phys_data = virt_to_phys(data);
++	phys_data = virt_to_phys_or_null_size(data, data_size);
+ 
+ 	efi_thunk(reset_system, reset_type, status, data_size, phys_data);
+ }
+@@ -661,9 +692,9 @@ efi_thunk_query_variable_info(u32 attr, u64 *storage_space,
+ 	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+ 		return EFI_UNSUPPORTED;
+ 
+-	phys_storage = virt_to_phys(storage_space);
+-	phys_remaining = virt_to_phys(remaining_space);
+-	phys_max = virt_to_phys(max_variable_size);
++	phys_storage = virt_to_phys_or_null(storage_space);
++	phys_remaining = virt_to_phys_or_null(remaining_space);
++	phys_max = virt_to_phys_or_null(max_variable_size);
+ 
+ 	status = efi_thunk(query_variable_info, attr, phys_storage,
+ 			   phys_remaining, phys_max);
+-- 
+2.10.0
