@@ -1,259 +1,105 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [tip:x86/asm] x86/mm/64: Enable vmapped stacks
- (CONFIG_HAVE_ARCH_VMAP_STACK=y)
-Date: Mon, 24 Oct 2016 14:09:31 +0100
-Message-ID: <20161024130931.GC20387@codeblueprint.co.uk>
-References: <c88f3e2920b18e6cc621d772a04a62c06869037e.1470907718.git.luto@kernel.org>
- <tip-e37e43a497d5a8b7c0cc1736d56986f432c394c9@git.kernel.org>
- <20161021123243.GC27807@codeblueprint.co.uk>
- <CALCETrUqhRg_G1fia=oFKrsxpF_YobEJLs1KpA3UF2Pnt6-u+w@mail.gmail.com>
+From: <j.lahoda-aRb0bU7PRFPrBKCeMvbIDA@public.gmane.org>
+Subject: (unknown)
+Date: Mon, 24 Oct 2016 13:32:31 -0000
+Message-ID: <147731595170.13679.2158155676560615312@voxconexao.com.br>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: application/zip; name="EMAIL_270899766_linux-efi.zip"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CALCETrUqhRg_G1fia=oFKrsxpF_YobEJLs1KpA3UF2Pnt6-u+w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Subject: 
+Content-Disposition: attachment
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-tip-commits-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tip-commits-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Nadav Amit <nadav.amit-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 21 Oct, at 05:18:30PM, Andy Lutomirski wrote:
-> 
-> This is asking for trouble if any of the variable length parameters
-> are on the stack.  How about adding a "size_t size" parameter and
-> doing:
-> 
-> if (!va) {
->   return 0;
-> } else if (virt_addr_valid(va)) {
->   return virt_to_phys(va);
-> } else {
->   /* A fully aligned variable on the stack is guaranteed not to cross
-> a page boundary. */
->   WARN_ON(!IS_ALIGNED((uintptr_t)va, size) || size > PAGE_SIZE);
->   return slow_virt_to_phys(va);
-> }
-
-Ah, good catch. Something like this?
-
----
-
->From d2c17f46686076677da3bf04caa2f69d654f8d8a Mon Sep 17 00:00:00 2001
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Date: Thu, 20 Oct 2016 22:17:21 +0100
-Subject: [PATCH] x86/efi: Prevent mixed mode boot corruption with
- CONFIG_VMAP_STACK
-
-Booting an EFI mixed mode kernel has been crashing since commit:
-
-  e37e43a497d5 ("x86/mm/64: Enable vmapped stacks (CONFIG_HAVE_ARCH_VMAP_STACK=y)")
-
-The user-visible effect in my test setup was the kernel being unable
-to find the root file system ramdisk. This was likely caused by silent
-memory or page table corruption.
-
-Enabling CONFIG_DEBUG_VIRTUAL immediately flagged the thunking code as
-abusing virt_to_phys() because it was passing addresses that were not
-part of the kernel direct mapping.
-
-Use the slow version instead, which correctly handles all memory
-regions by performing a page table walk.
-
-Suggested-by: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
----
- arch/x86/platform/efi/efi_64.c | 79 +++++++++++++++++++++++++++++-------------
- 1 file changed, 55 insertions(+), 24 deletions(-)
-
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 58b0f801f66f..010544293dda 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -31,6 +31,7 @@
- #include <linux/io.h>
- #include <linux/reboot.h>
- #include <linux/slab.h>
-+#include <linux/ucs2_string.h>
- 
- #include <asm/setup.h>
- #include <asm/page.h>
-@@ -211,11 +212,36 @@ void efi_sync_low_kernel_mappings(void)
- 	memcpy(pud_efi, pud_k, sizeof(pud_t) * num_entries);
- }
- 
-+/*
-+ * Wrapper for slow_virt_to_phys() that handles NULL addresses.
-+ */
-+static inline phys_addr_t
-+virt_to_phys_or_null_size(void *va, unsigned long size)
-+{
-+	if (!va)
-+		return 0;
-+
-+	if (virt_addr_valid(va))
-+		return virt_to_phys(va);
-+
-+	/*
-+	 * A fully aligned variable on the stack is guaranteed not to
-+	 * cross a page bounary.
-+	 */
-+	WARN_ON(!IS_ALIGNED((unsigned long)va, size) || size > PAGE_SIZE);
-+
-+	return slow_virt_to_phys(va);
-+}
-+
-+#define virt_to_phys_or_null(addr)				\
-+	virt_to_phys_or_null_size((addr), sizeof(*(addr)))
-+
- int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- {
- 	unsigned long pfn, text;
- 	struct page *page;
- 	unsigned npages;
-+	void *addr;
- 	pgd_t *pgd;
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP))
-@@ -251,7 +277,8 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	if (!page)
- 		panic("Unable to allocate EFI runtime stack < 4GB\n");
- 
--	efi_scratch.phys_stack = virt_to_phys(page_address(page));
-+	addr = page_address(page);
-+	efi_scratch.phys_stack = virt_to_phys_or_null_size(addr, PAGE_SIZE);
- 	efi_scratch.phys_stack += PAGE_SIZE; /* stack grows down */
- 
- 	npages = (_etext - _text) >> PAGE_SHIFT;
-@@ -494,8 +521,8 @@ static efi_status_t efi_thunk_get_time(efi_time_t *tm, efi_time_cap_t *tc)
- 
- 	spin_lock(&rtc_lock);
- 
--	phys_tm = virt_to_phys(tm);
--	phys_tc = virt_to_phys(tc);
-+	phys_tm = virt_to_phys_or_null(tm);
-+	phys_tc = virt_to_phys_or_null(tc);
- 
- 	status = efi_thunk(get_time, phys_tm, phys_tc);
- 
-@@ -511,7 +538,7 @@ static efi_status_t efi_thunk_set_time(efi_time_t *tm)
- 
- 	spin_lock(&rtc_lock);
- 
--	phys_tm = virt_to_phys(tm);
-+	phys_tm = virt_to_phys_or_null(tm);
- 
- 	status = efi_thunk(set_time, phys_tm);
- 
-@@ -529,9 +556,9 @@ efi_thunk_get_wakeup_time(efi_bool_t *enabled, efi_bool_t *pending,
- 
- 	spin_lock(&rtc_lock);
- 
--	phys_enabled = virt_to_phys(enabled);
--	phys_pending = virt_to_phys(pending);
--	phys_tm = virt_to_phys(tm);
-+	phys_enabled = virt_to_phys_or_null(enabled);
-+	phys_pending = virt_to_phys_or_null(pending);
-+	phys_tm = virt_to_phys_or_null(tm);
- 
- 	status = efi_thunk(get_wakeup_time, phys_enabled,
- 			     phys_pending, phys_tm);
-@@ -549,7 +576,7 @@ efi_thunk_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
- 
- 	spin_lock(&rtc_lock);
- 
--	phys_tm = virt_to_phys(tm);
-+	phys_tm = virt_to_phys_or_null(tm);
- 
- 	status = efi_thunk(set_wakeup_time, enabled, phys_tm);
- 
-@@ -558,6 +585,10 @@ efi_thunk_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
- 	return status;
- }
- 
-+static unsigned long efi_name_size(efi_char16_t *name)
-+{
-+	return ucs2_strsize(name, EFI_VAR_NAME_LEN) + 1;
-+}
- 
- static efi_status_t
- efi_thunk_get_variable(efi_char16_t *name, efi_guid_t *vendor,
-@@ -567,11 +598,11 @@ efi_thunk_get_variable(efi_char16_t *name, efi_guid_t *vendor,
- 	u32 phys_name, phys_vendor, phys_attr;
- 	u32 phys_data_size, phys_data;
- 
--	phys_data_size = virt_to_phys(data_size);
--	phys_vendor = virt_to_phys(vendor);
--	phys_name = virt_to_phys(name);
--	phys_attr = virt_to_phys(attr);
--	phys_data = virt_to_phys(data);
-+	phys_data_size = virt_to_phys_or_null(data_size);
-+	phys_vendor = virt_to_phys_or_null(vendor);
-+	phys_name = virt_to_phys_or_null_size(name, efi_name_size(name));
-+	phys_attr = virt_to_phys_or_null(attr);
-+	phys_data = virt_to_phys_or_null_size(data, *data_size);
- 
- 	status = efi_thunk(get_variable, phys_name, phys_vendor,
- 			   phys_attr, phys_data_size, phys_data);
-@@ -586,9 +617,9 @@ efi_thunk_set_variable(efi_char16_t *name, efi_guid_t *vendor,
- 	u32 phys_name, phys_vendor, phys_data;
- 	efi_status_t status;
- 
--	phys_name = virt_to_phys(name);
--	phys_vendor = virt_to_phys(vendor);
--	phys_data = virt_to_phys(data);
-+	phys_name = virt_to_phys_or_null_size(name, efi_name_size(name));
-+	phys_vendor = virt_to_phys_or_null(vendor);
-+	phys_data = virt_to_phys_or_null_size(data, data_size);
- 
- 	/* If data_size is > sizeof(u32) we've got problems */
- 	status = efi_thunk(set_variable, phys_name, phys_vendor,
-@@ -605,9 +636,9 @@ efi_thunk_get_next_variable(unsigned long *name_size,
- 	efi_status_t status;
- 	u32 phys_name_size, phys_name, phys_vendor;
- 
--	phys_name_size = virt_to_phys(name_size);
--	phys_vendor = virt_to_phys(vendor);
--	phys_name = virt_to_phys(name);
-+	phys_name_size = virt_to_phys_or_null(name_size);
-+	phys_vendor = virt_to_phys_or_null(vendor);
-+	phys_name = virt_to_phys_or_null_size(name, *name_size);
- 
- 	status = efi_thunk(get_next_variable, phys_name_size,
- 			   phys_name, phys_vendor);
-@@ -621,7 +652,7 @@ efi_thunk_get_next_high_mono_count(u32 *count)
- 	efi_status_t status;
- 	u32 phys_count;
- 
--	phys_count = virt_to_phys(count);
-+	phys_count = virt_to_phys_or_null(count);
- 	status = efi_thunk(get_next_high_mono_count, phys_count);
- 
- 	return status;
-@@ -633,7 +664,7 @@ efi_thunk_reset_system(int reset_type, efi_status_t status,
- {
- 	u32 phys_data;
- 
--	phys_data = virt_to_phys(data);
-+	phys_data = virt_to_phys_or_null_size(data, data_size);
- 
- 	efi_thunk(reset_system, reset_type, status, data_size, phys_data);
- }
-@@ -661,9 +692,9 @@ efi_thunk_query_variable_info(u32 attr, u64 *storage_space,
- 	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
- 		return EFI_UNSUPPORTED;
- 
--	phys_storage = virt_to_phys(storage_space);
--	phys_remaining = virt_to_phys(remaining_space);
--	phys_max = virt_to_phys(max_variable_size);
-+	phys_storage = virt_to_phys_or_null(storage_space);
-+	phys_remaining = virt_to_phys_or_null(remaining_space);
-+	phys_max = virt_to_phys_or_null(max_variable_size);
- 
- 	status = efi_thunk(query_variable_info, attr, phys_storage,
- 			   phys_remaining, phys_max);
--- 
-2.10.0
+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
+AQBSAAAArhMAAAAA
