@@ -1,105 +1,48 @@
-From: <j.lahoda-aRb0bU7PRFPrBKCeMvbIDA@public.gmane.org>
-Subject: (unknown)
-Date: Mon, 24 Oct 2016 13:32:31 -0000
-Message-ID: <147731595170.13679.2158155676560615312@voxconexao.com.br>
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V4 09/10] trace, ras: add ARM processor error trace event
+Date: Mon, 24 Oct 2016 11:21:21 -0600
+Message-ID: <7a8c62a7-c2f4-0cae-ce0a-24cbf827bd4f@codeaurora.org>
+References: <1477071013-29563-1-git-send-email-tbaicar@codeaurora.org>
+ <1477071013-29563-10-git-send-email-tbaicar@codeaurora.org>
+ <20161021163410.0a827eab@gandalf.local.home>
 Mime-Version: 1.0
-Content-Type: application/zip; name="EMAIL_270899766_linux-efi.zip"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Subject: 
-Content-Disposition: attachment
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <20161021163410.0a827eab@gandalf.local.home>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Steven Rostedt <rostedt@goodmis.org>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, lenb@kernel.org, harba@codeaurora.org, marc.zyngier@arm.com, punit.agrawal@arm.com, tomasz.nowicki@linaro.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-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
-AQBSAAAArhMAAAAA
+On 10/21/2016 2:34 PM, Steven Rostedt wrote:
+> On Fri, 21 Oct 2016 11:30:12 -0600
+> Tyler Baicar <tbaicar@codeaurora.org> wrote:
+>
+>> Currently there are trace events for the various RAS
+>> errors with the exception of ARM processor type errors.
+>> Add a new trace event for such errors so that the user
+>> will know when they occur. These trace events are
+>> consistent with the ARM processor error section type
+>> defined in UEFI 2.6 spec section N.2.4.4.
+>>
+>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+> Tracing part looks fine to me.
+>
+> Acked-by: Steven Rostedt <rostedt@goodmis.org>
+>
+> -- Steve
+Thank you Steve!
+
+-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
