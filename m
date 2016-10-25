@@ -1,18 +1,19 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
 Subject: Re: [PATCH] efi: Add SHIM and image security database GUID definitions
-Date: Tue, 25 Oct 2016 18:44:19 +0100
-Message-ID: <CAKv+Gu-EmdVjM1A09=s9iP_qXVAaQX_p46Q1W0WxRyXvt=jzbA@mail.gmail.com>
+Date: Tue, 25 Oct 2016 14:04:13 -0400
+Message-ID: <CA+5PVA53Tf2QVN0j0JFO9_v-hGbsg9HByOGGfLCGsgeGCz5UKA@mail.gmail.com>
 References: <20161025174209.29073-1-jwboyer@fedoraproject.org> <CAKv+Gu8jkPMG4KGjg+UTeuLOe6m=g3KMKsC=BgwVegyBYnHm0g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <CAKv+Gu8jkPMG4KGjg+UTeuLOe6m=g3KMKsC=BgwVegyBYnHm0g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 25 October 2016 at 18:44, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+On Tue, Oct 25, 2016 at 1:44 PM, Ard Biesheuvel
+<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
 > Hi Josh,
 >
 > On 25 October 2016 at 18:42, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org> wrote:
@@ -37,8 +38,14 @@ On 25 October 2016 at 18:44, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE
 >> +
 >
 > Given that this patch is not part of the series, could you explain
-
-*a* series
-
 > what the point is of having these definitions in the kernel if they
 > are never referenced?
+
+Sure.
+
+The idea is to make sure a commonly used definition is both accessible
+and reserved in the kernel.  At the moment, most of the major distros
+are carrying a similar patch and projects like mokutil and xen are
+defining it themselves.
+
+josh
