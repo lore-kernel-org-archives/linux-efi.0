@@ -1,114 +1,70 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3] Fix allocation size calculations
-Date: Tue, 25 Oct 2016 19:03:00 +0100
-Message-ID: <CAKv+Gu8FDUQDD4-QCeB7ELFR9LHqr_qTHmjDVgp5xa6LnxNZXw@mail.gmail.com>
-References: <20161025163634.11893-1-roy.franz@hpe.com>
+From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH] efi: Add SHIM and image security database GUID definitions
+Date: Tue, 25 Oct 2016 14:25:06 -0400
+Message-ID: <CA+5PVA4-BnZWv2rktX+LrQT-N6jd8bT-FKgvxi8E4xDhNsruRg@mail.gmail.com>
+References: <20161025174209.29073-1-jwboyer@fedoraproject.org>
+ <CAKv+Gu8jkPMG4KGjg+UTeuLOe6m=g3KMKsC=BgwVegyBYnHm0g@mail.gmail.com>
+ <CA+5PVA53Tf2QVN0j0JFO9_v-hGbsg9HByOGGfLCGsgeGCz5UKA@mail.gmail.com> <580FA136.80006@caviumnetworks.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161025163634.11893-1-roy.franz-ZPxbGqLxI0U@public.gmane.org>
+In-Reply-To: <580FA136.80006-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Roy Franz <roy.franz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 25 October 2016 at 17:36, Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org> wrote:
-> Adjust the size used in calculations to match the actual size of allocation
-> that will be performed based on EFI size/alignment constraints.
-> efi_high_alloc() and efi_low_alloc() use the passed size in bytes directly
-> to find space in the memory map for the allocation, rather than the actual
-> allocation size that has been adjusted for size and alignment constraints.
-> This results in failed allocations and retries in efi_high_alloc().  The
-> same error is present in efi_low_alloc(), although failure will only happen
-> if the lowest memory block is small.
-> Also use EFI_PAGE_SIZE consistently and remove use of EFI_PAGE_SHIFT to
-> calculate page size.
+On Tue, Oct 25, 2016 at 2:15 PM, David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org> wrote:
+> On 10/25/2016 11:04 AM, Josh Boyer wrote:
+>>
+>> On Tue, Oct 25, 2016 at 1:44 PM, Ard Biesheuvel
+>> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>>
+>>> Hi Josh,
+>>>
+>>> On 25 October 2016 at 18:42, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+>>> wrote:
+>>>>
+>>>> Add the definitions for shim and image security database, both of which
+>>>> are used widely in various Linux distros.
+>>>>
+>>>> Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+>>>> ---
+>>>>   include/linux/efi.h | 3 +++
+>>>>   1 file changed, 3 insertions(+)
+>>>>
+>>>> diff --git a/include/linux/efi.h b/include/linux/efi.h
+>>>> index 2d089487d2da..ce943d5accfd 100644
+>>>> --- a/include/linux/efi.h
+>>>> +++ b/include/linux/efi.h
+>>>> @@ -592,6 +592,9 @@ void efi_native_runtime_setup(void);
+>>>>   #define EFI_MEMORY_ATTRIBUTES_TABLE_GUID       EFI_GUID(0xdcfa911d,
+>>>> 0x26eb, 0x469f,  0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
+>>>>   #define EFI_CONSOLE_OUT_DEVICE_GUID            EFI_GUID(0xd3b36f2c,
+>>>> 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+>>>>
+>>>> +#define EFI_IMAGE_SECURITY_DATABASE_GUID       EFI_GUID(0xd719b2cb,
+>>>> 0x3d3a, 0x4596, 0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
+>>>> +#define EFI_SHIM_LOCK_GUID
+>>>> EFI_GUID(0x605dab50, 0xe046, 0x4300, 0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd,
+>>>> 0x8b, 0x23)
+>>>> +
+>>>
+>>>
+>>> Given that this patch is not part of the series, could you explain
+>>> what the point is of having these definitions in the kernel if they
+>>> are never referenced?
+>>
+>>
+>> Sure.
+>>
+>> The idea is to make sure a commonly used definition is both accessible
+>> and reserved in the kernel.
 >
-> Signed-off-by: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+>
+> It is not in a uapi directory, so it cannot be used outside of the kernel.
 
-Reviewed-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Fair point.  Would there be value in creating an efi.h in uapi so that
+it can serve as the canonical source?
 
-> ---
->
-> v3:
->  * Revert incorrect additional size alignment
->  * Simplify size and nr_pages calculation
->  * Reword comments regarding alignment.  Old comments mention page
->    alignment, but for arm64 we enforce larger alignment.  Clarify that
->    the greater alignment is a Linux requirement, unlike the page alignment
->    that is an EFI requirement.
-> v2:
->  * Add addition size alignment
->  * Update comments regarding page alignment
->
->
->  drivers/firmware/efi/libstub/efi-stub-helper.c | 24 ++++++++++++++----------
->  1 file changed, 14 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-> index aded106..4b74bf8 100644
-> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-> @@ -186,14 +186,16 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
->                 goto fail;
->
->         /*
-> -        * Enforce minimum alignment that EFI requires when requesting
-> -        * a specific address.  We are doing page-based allocations,
-> -        * so we must be aligned to a page.
-> +        * Enforce minimum alignment that EFI or Linux requires when
-> +        * requesting a specific address.  We are doing page-based (or
-> +        * larger) allocations, and both the address and size must meet
-> +        * alignment constraints.
->          */
->         if (align < EFI_ALLOC_ALIGN)
->                 align = EFI_ALLOC_ALIGN;
->
-> -       nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
-> +       size = round_up(size, EFI_ALLOC_ALIGN);
-> +       nr_pages = size / EFI_PAGE_SIZE;
->  again:
->         for (i = 0; i < map_size / desc_size; i++) {
->                 efi_memory_desc_t *desc;
-> @@ -208,7 +210,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
->                         continue;
->
->                 start = desc->phys_addr;
-> -               end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
-> +               end = start + desc->num_pages * EFI_PAGE_SIZE;
->
->                 if (end > max)
->                         end = max;
-> @@ -278,14 +280,16 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
->                 goto fail;
->
->         /*
-> -        * Enforce minimum alignment that EFI requires when requesting
-> -        * a specific address.  We are doing page-based allocations,
-> -        * so we must be aligned to a page.
-> +        * Enforce minimum alignment that EFI or Linux requires when
-> +        * requesting a specific address.  We are doing page-based (or
-> +        * larger) allocations, and both the address and size must meet
-> +        * alignment constraints.
->          */
->         if (align < EFI_ALLOC_ALIGN)
->                 align = EFI_ALLOC_ALIGN;
->
-> -       nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
-> +       size = round_up(size, EFI_ALLOC_ALIGN);
-> +       nr_pages = size / EFI_PAGE_SIZE;
->         for (i = 0; i < map_size / desc_size; i++) {
->                 efi_memory_desc_t *desc;
->                 unsigned long m = (unsigned long)map;
-> @@ -300,7 +304,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
->                         continue;
->
->                 start = desc->phys_addr;
-> -               end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
-> +               end = start + desc->num_pages * EFI_PAGE_SIZE;
->
->                 /*
->                  * Don't allocate at 0x0. It will confuse code that
-> --
-> 2.9.3
->
+josh
