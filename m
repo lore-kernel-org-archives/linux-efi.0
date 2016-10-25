@@ -1,151 +1,105 @@
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v2 1/3] efi: Add device path parser
-Date: Tue, 25 Oct 2016 10:18:20 -0400
-Message-ID: <20161025141819.2z244yr2ubscrm2r@redhat.com>
-References: <cover.1476698603.git.lukas@wunner.de>
- <ece9b12b1d0b86c83e8369e4123fc7bc60db1fdc.1476698603.git.lukas@wunner.de>
- <20161019111728.GC31476@codeblueprint.co.uk>
- <20161021163435.y2zlysz7dhw5ymho@redhat.com>
- <20161022101608.GA4447@wunner.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+From: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+Subject: [PATCH v3] Fix allocation size calculations
+Date: Tue, 25 Oct 2016 09:36:34 -0700
+Message-ID: <20161025163634.11893-1-roy.franz@hpe.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20161022101608.GA4447-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, roy.franz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Cc: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Oct 22, 2016 at 12:16:08PM +0200, Lukas Wunner wrote:
-> On Fri, Oct 21, 2016 at 12:34:36PM -0400, Peter Jones wrote:
-> > On Wed, Oct 19, 2016 at 12:17:28PM +0100, Matt Fleming wrote:
-> > > (Cc'ing Peter since he's played with device path parsing before)
-> > 
-> > So the only two thoughts I have:
-> > 
-> > 1) I think we should probably be a bit more aggressive about bounds
-> >    checking.  Every once in a while there are implementations that build
-> >    device paths from templates and occasionally leave
-> >    efi_dev_path.length as 0 or 0xffff,
-> 
-> The patch already handles this:  The length of each node is fixed
-> for each type in the spec (e.g. 6 bytes for PCI nodes) and there's
-> strict checking of this in the patch.  A node with length 0 or 0xffff
-> would result in -EINVAL.
+Adjust the size used in calculations to match the actual size of allocation
+that will be performed based on EFI size/alignment constraints.
+efi_high_alloc() and efi_low_alloc() use the passed size in bytes directly
+to find space in the memory map for the allocation, rather than the actual
+allocation size that has been adjusted for size and alignment constraints.
+This results in failed allocations and retries in efi_high_alloc().  The
+same error is present in efi_low_alloc(), although failure will only happen
+if the lowest memory block is small.
+Also use EFI_PAGE_SIZE consistently and remove use of EFI_PAGE_SHIFT to
+calculate page size.
 
-But that's only true if we only handle device types with well defined
-sizes, which means no VendorMessage() or VendhorHardware() devices at
-all.  Apple might not be using those for what you're using this for so
-far, but lots of other vendors are, for lots of things.  Which
-effectively means we can't handle multiple-instance device paths.
+Signed-off-by: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+---
 
-> >    or forget to put an End Entire
-> >    Device Path node at the end (or put an End Device Path Instance in
-> >    instead.)  So checking for ->length < PAGE_SIZE
-> 
-> This is also already handled by the patch:  get_device_by_efi_path()
-> is called with a maximum length parameter.  In the case of Apple device
-> properties, I know the size of the payload which contains a device's
-> properties, so I pass that as the maximum length.  If in your use case
-> you don't have such an upper bound and feel that device paths should
-> never exceed PAGE_SIZE, then just pass that as the maximum length
-> argument to get_device_by_efi_path().
-
-Fair enough.
-
-> >    and that when a dp
-> >    node crosses a page boundary, the new page is actually in the same map
-> >    as the previous one wouldn't be a terrible idea.
-> 
-> In the case of Apple device properties, that isn't needed as they're
-> all contained in one payload that gets mapped into virtual memory.
-> I think checking page mapping should only be done if really needed,
-> i.e. if you expect to get such a bogus device path, you should probably
-> perform such checks in your code, but it shouldn't be done in
-> get_device_by_efi_path(), i.e. for *every* device path.
-
-Yeah, okay, I can buy that.
-
-> > 2) I think we should decide how multiple-instance device path are going
-> >    to work sooner rather than later, mostly because I have a use for them
-> >    and it seems harder to graft them in later.  My first idea here is to
-> >    make get_device_by_efi_path() return 0 for "stop iterating" and 1 for
-> >    "there's more device paths later"
-> 
-> I'm fine with that approach.
-> 
-> 
-> >    and then make it merely set *dev =
-> >    NULL when we just don't /support/ the device path we found, rather than
-> >    returning error.  Either case would still set *node to the (possibly
-> >    inexistent) next node.
-> 
-> That however I'm very sceptical about.
-> 
-> If the device path is malformed (-EINVAL), e.g. because it contains a
-> bogus length, all bets are off and I have to stop parsing.  It's just
-> not safe to try to find any following instances.  If on the other hand
-> the device path contains an unsupported node type (-ENOTSUPP), well,
-> we should simply add support for it.  Which node types do you expect
-> to parse that aren't currently supported by the patch?  (The patch
-> supports ACPI and PCI device paths.)
-
-By definition we cannot add any meaningful support for any of the vendor
-defined device paths.  In the spec, these are defined in sections 9.3.2.4,
-9.3.5.17, 9.3.6.3.  All we can do is say they are present and skip over
-them.
-
-So FWIW where I want to use this is matching up devices with the
-ConInDev/ConOutDev/ErrOutDev variables, so we can add sysfs attributes
-to devices to say the hardware supports using them as console.  These
-variables are multi-instance device paths, with one instance per
-hardware device.  A typical value is something like:
-
-PciRoot(0x0)/Pci(0x14,0x0)/VenMsg(...)/EndInstance/PciRoot(0x0)/Pci(0x14,0x0)/USB(1,0)/USB(0,0)/EndInstance/PciRoot(0x0)/Pci(0x2,0x0)/AcpiAdr(0x1)/EndEntire
+v3:
+ * Revert incorrect additional size alignment
+ * Simplify size and nr_pages calculation
+ * Reword comments regarding alignment.  Old comments mention page
+   alignment, but for arm64 we enforce larger alignment.  Clarify that
+   the greater alignment is a Linux requirement, unlike the page alignment
+   that is an EFI requirement.
+v2:
+ * Add addition size alignment
+ * Update comments regarding page alignment
 
 
-Without parsing the arbitrarily-sized vendor paths, we never get to the
-parts we can actually do something with.
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 24 ++++++++++++++----------
+ 1 file changed, 14 insertions(+), 10 deletions(-)
 
-> If I would pass over unsupported node types, I couldn't apply strict
-> length checking, so I would indeed have to apply some heuristic,
-> such as < PAGE_SIZE, which seems kludgy at best.
-
-Right, it's kludgy, it just might be the best thing we have given the
-arbitrary nature of the data.  We could apply any such heuristic to only
-the vendor paths, though.
-
-> Also, it is intentional that get_device_by_efi_path() stops parsing
-> if it hits upon an unsupported node type because while ACPI and PCI
-> nodes are currently the only ones used by Apple, it's possible that
-> they'll add others in the future and in that case I want to get an
-> error back and I want to know the position of the unsupported node
-> type.  The caller unmarshal_devices() in patch [2/3] of this series
-> prints a hex dump of the device path and the properties and an error
-> message showing the position of the offending node, so that it's
-> easy to identify what went wrong and which node type needs to be
-> added.
-
-Right - I know it's intentional, I just don't think that'll hold if we
-start using this for other purposes than yours.
-
-> >    If we did that, we could easily rename it
-> >    get_devices_by_path() and make get_device_by_path() a special case
-> >    with exactly the semantics we have now.
-> 
-> I don't quite follow.  With the approach to support multiple instances
-> that you've outlined above, you'd simply do:
-> 
-> 	while ((ret = get_device_by_efi_path(node, len, &dev)) >= 0) {
-> 		/* do something */
-> 		if (ret == 0)
-> 			break;
-> 	}
-> 
-> What would you need a get_devices_by_path() function for?
-
-I was just suggesting it as a convenience function; no reason to get
-hung up on it.
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index aded106..4b74bf8 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -186,14 +186,16 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 		goto fail;
+ 
+ 	/*
+-	 * Enforce minimum alignment that EFI requires when requesting
+-	 * a specific address.  We are doing page-based allocations,
+-	 * so we must be aligned to a page.
++	 * Enforce minimum alignment that EFI or Linux requires when
++	 * requesting a specific address.  We are doing page-based (or
++	 * larger) allocations, and both the address and size must meet
++	 * alignment constraints.
+ 	 */
+ 	if (align < EFI_ALLOC_ALIGN)
+ 		align = EFI_ALLOC_ALIGN;
+ 
+-	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
++	size = round_up(size, EFI_ALLOC_ALIGN);
++	nr_pages = size / EFI_PAGE_SIZE;
+ again:
+ 	for (i = 0; i < map_size / desc_size; i++) {
+ 		efi_memory_desc_t *desc;
+@@ -208,7 +210,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 			continue;
+ 
+ 		start = desc->phys_addr;
+-		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
++		end = start + desc->num_pages * EFI_PAGE_SIZE;
+ 
+ 		if (end > max)
+ 			end = max;
+@@ -278,14 +280,16 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 		goto fail;
+ 
+ 	/*
+-	 * Enforce minimum alignment that EFI requires when requesting
+-	 * a specific address.  We are doing page-based allocations,
+-	 * so we must be aligned to a page.
++	 * Enforce minimum alignment that EFI or Linux requires when
++	 * requesting a specific address.  We are doing page-based (or
++	 * larger) allocations, and both the address and size must meet
++	 * alignment constraints.
+ 	 */
+ 	if (align < EFI_ALLOC_ALIGN)
+ 		align = EFI_ALLOC_ALIGN;
+ 
+-	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
++	size = round_up(size, EFI_ALLOC_ALIGN);
++	nr_pages = size / EFI_PAGE_SIZE;
+ 	for (i = 0; i < map_size / desc_size; i++) {
+ 		efi_memory_desc_t *desc;
+ 		unsigned long m = (unsigned long)map;
+@@ -300,7 +304,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 			continue;
+ 
+ 		start = desc->phys_addr;
+-		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
++		end = start + desc->num_pages * EFI_PAGE_SIZE;
+ 
+ 		/*
+ 		 * Don't allocate at 0x0. It will confuse code that
 -- 
-  Peter
+2.9.3
