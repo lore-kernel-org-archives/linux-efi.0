@@ -1,285 +1,142 @@
-From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V4 02/10] ras: acpi/apei: cper: generic error data entry
- v3 per ACPI 6.1
-Date: Mon, 24 Oct 2016 14:33:54 -0600
-Message-ID: <2422a0c6-ebe4-7f51-2b8d-c42b9bb468b1@codeaurora.org>
-References: <1477071013-29563-1-git-send-email-tbaicar@codeaurora.org>
- <1477071013-29563-3-git-send-email-tbaicar@codeaurora.org>
- <da257bb4-48f3-b187-1d43-c68669427cef@arm.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2] Fix allocation size calculations
+Date: Tue, 25 Oct 2016 08:37:18 +0100
+Message-ID: <CAKv+Gu_7xGi4RhZW1P=NMoTWSmCrMqYYb9x9g8+nrgsH7ivFow@mail.gmail.com>
+References: <20161024190613.8010-1-roy.franz@hpe.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <da257bb4-48f3-b187-1d43-c68669427cef@arm.com>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Suzuki K Poulose <Suzuki.Poulose@arm.com>, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, punit.agrawal@arm.com, astone@redhat.com, harba@codeaurora.org, hanjun.guo@linaro.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20161024190613.8010-1-roy.franz-ZPxbGqLxI0U@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Roy Franz <roy.franz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 10/24/2016 3:50 AM, Suzuki K Poulose wrote:
-> On 21/10/16 18:30, Tyler Baicar wrote:
->> Currently when a RAS error is reported it is not timestamped.
->> The ACPI 6.1 spec adds the timestamp field to the generic error
->> data entry v3 structure. The timestamp of when the firmware
->> generated the error is now being reported.
->>
->> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
->> Signed-off-by: Richard Ruigrok <rruigrok@codeaurora.org>
->> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
->> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
->> ---
->>  drivers/acpi/apei/ghes.c    | 14 +++++++---
->>  drivers/firmware/efi/cper.c | 67 
->> +++++++++++++++++++++++++++++++++++++--------
->>  include/acpi/ghes.h         | 10 +++++++
->>  include/linux/cper.h        | 12 ++++++++
->>  4 files changed, 88 insertions(+), 15 deletions(-)
->>
->> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
->> index 7d020b0..7610f08 100644
->> --- a/drivers/acpi/apei/ghes.c
->> +++ b/drivers/acpi/apei/ghes.c
->> @@ -419,7 +419,8 @@ static void ghes_handle_memory_failure(struct 
->> acpi_hest_generic_data *gdata, int
->>      int flags = -1;
->>      int sec_sev = ghes_severity(gdata->error_severity);
->>      struct cper_sec_mem_err *mem_err;
->> -    mem_err = (struct cper_sec_mem_err *)(gdata + 1);
->> +
->> +    mem_err = acpi_hest_generic_data_payload(gdata);
->>
->>      if (!(mem_err->validation_bits & CPER_MEM_VALID_PA))
->>          return;
->> @@ -449,14 +450,18 @@ static void ghes_do_proc(struct ghes *ghes,
->>  {
->>      int sev, sec_sev;
->>      struct acpi_hest_generic_data *gdata;
->> +    uuid_le sec_type;
->>
->>      sev = ghes_severity(estatus->error_severity);
->>      apei_estatus_for_each_section(estatus, gdata) {
->>          sec_sev = ghes_severity(gdata->error_severity);
->> -        if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
->> +        sec_type = *(uuid_le *)gdata->section_type;
->> +
->> +        if (!uuid_le_cmp(sec_type,
->>                   CPER_SEC_PLATFORM_MEM)) {
->>              struct cper_sec_mem_err *mem_err;
->> -            mem_err = (struct cper_sec_mem_err *)(gdata+1);
->> +
->> +            mem_err = acpi_hest_generic_data_payload(gdata);
->>              ghes_edac_report_mem_error(ghes, sev, mem_err);
->>
->>              arch_apei_report_mem_error(sev, mem_err);
->> @@ -466,7 +471,8 @@ static void ghes_do_proc(struct ghes *ghes,
->>          else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
->>                        CPER_SEC_PCIE)) {
->>              struct cper_sec_pcie *pcie_err;
->> -            pcie_err = (struct cper_sec_pcie *)(gdata+1);
->> +
->> +            pcie_err = acpi_hest_generic_data_payload(gdata);
->>              if (sev == GHES_SEV_RECOVERABLE &&
->>                  sec_sev == GHES_SEV_RECOVERABLE &&
->>                  pcie_err->validation_bits & 
->> CPER_PCIE_VALID_DEVICE_ID &&
->> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
->> index d425374..af7e1e9 100644
->> --- a/drivers/firmware/efi/cper.c
->> +++ b/drivers/firmware/efi/cper.c
->> @@ -32,6 +32,9 @@
->>  #include <linux/acpi.h>
->>  #include <linux/pci.h>
->>  #include <linux/aer.h>
->> +#include <linux/printk.h>
->> +#include <linux/bcd.h>
->> +#include <acpi/ghes.h>
->>
->>  #define INDENT_SP    " "
->>
->> @@ -386,13 +389,37 @@ static void cper_print_pcie(const char *pfx, 
->> const struct cper_sec_pcie *pcie,
->>      pfx, pcie->bridge.secondary_status, pcie->bridge.control);
->>  }
->>
->> +static void cper_estatus_print_section_v300(const char *pfx,
->> +    const struct acpi_hest_generic_data_v300 *gdata)
->> +{
->> +    __u8 hour, min, sec, day, mon, year, century, *timestamp;
->> +
->> +    if (gdata->validation_bits & ACPI_HEST_GEN_VALID_TIMESTAMP) {
->> +        timestamp = (__u8 *)&(gdata->time_stamp);
->> +        sec = bcd2bin(timestamp[0]);
->> +        min = bcd2bin(timestamp[1]);
->> +        hour = bcd2bin(timestamp[2]);
->> +        day = bcd2bin(timestamp[4]);
->> +        mon = bcd2bin(timestamp[5]);
->> +        year = bcd2bin(timestamp[6]);
->> +        century = bcd2bin(timestamp[7]);
->> +        printk("%stime: %7s %02d%02d-%02d-%02d %02d:%02d:%02d\n", pfx,
->> +            0x01 & *(timestamp + 3) ? "precise" : "", century,
->> +            year, mon, day, hour, min, sec);
->> +    }
->> +}
->> +
->>  static void cper_estatus_print_section(
->> -    const char *pfx, const struct acpi_hest_generic_data *gdata, int 
->> sec_no)
->> +    const char *pfx, struct acpi_hest_generic_data *gdata, int sec_no)
->>  {
->>      uuid_le *sec_type = (uuid_le *)gdata->section_type;
->>      __u16 severity;
->>      char newpfx[64];
->>
->> +    if (acpi_hest_generic_data_version(gdata))
->> +        cper_estatus_print_section_v300(pfx,
->> +            (const struct acpi_hest_generic_data_v300 *)gdata);
->> +
->>      severity = gdata->error_severity;
->>      printk("%s""Error %d, type: %s\n", pfx, sec_no,
->>             cper_severity_str(severity));
->> @@ -403,14 +430,18 @@ static void cper_estatus_print_section(
->>
->>      snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
->>      if (!uuid_le_cmp(*sec_type, CPER_SEC_PROC_GENERIC)) {
->> -        struct cper_sec_proc_generic *proc_err = (void *)(gdata + 1);
->> +        struct cper_sec_proc_generic *proc_err;
->> +
->> +        proc_err = acpi_hest_generic_data_payload(gdata);
->>          printk("%s""section_type: general processor error\n", newpfx);
->>          if (gdata->error_data_length >= sizeof(*proc_err))
->>              cper_print_proc_generic(newpfx, proc_err);
->>          else
->>              goto err_section_too_small;
->>      } else if (!uuid_le_cmp(*sec_type, CPER_SEC_PLATFORM_MEM)) {
->> -        struct cper_sec_mem_err *mem_err = (void *)(gdata + 1);
->> +        struct cper_sec_mem_err *mem_err;
->> +
->> +        mem_err = acpi_hest_generic_data_payload(gdata);
->>          printk("%s""section_type: memory error\n", newpfx);
->>          if (gdata->error_data_length >=
->>              sizeof(struct cper_sec_mem_err_old))
->> @@ -419,7 +450,9 @@ static void cper_estatus_print_section(
->>          else
->>              goto err_section_too_small;
->>      } else if (!uuid_le_cmp(*sec_type, CPER_SEC_PCIE)) {
->> -        struct cper_sec_pcie *pcie = (void *)(gdata + 1);
->> +        struct cper_sec_pcie *pcie;
->> +
->> +        pcie = acpi_hest_generic_data_payload(gdata);
->>          printk("%s""section_type: PCIe error\n", newpfx);
->>          if (gdata->error_data_length >= sizeof(*pcie))
->>              cper_print_pcie(newpfx, pcie, gdata);
->> @@ -438,6 +471,7 @@ void cper_estatus_print(const char *pfx,
->>              const struct acpi_hest_generic_status *estatus)
->>  {
->>      struct acpi_hest_generic_data *gdata;
->> +    struct acpi_hest_generic_data_v300 *gdata_v3 = NULL;
->>      unsigned int data_len, gedata_len;
->>      int sec_no = 0;
->>      char newpfx[64];
->> @@ -451,12 +485,22 @@ void cper_estatus_print(const char *pfx,
->>      printk("%s""event severity: %s\n", pfx, 
->> cper_severity_str(severity));
->>      data_len = estatus->data_length;
->>      gdata = (struct acpi_hest_generic_data *)(estatus + 1);
->> +    if (acpi_hest_generic_data_version(gdata))
->> +        gdata_v3 = (struct acpi_hest_generic_data_v300 *)gdata;
->
-> I think the acpi_hest_generic_data_version() doesn't check if the 
-> version is
-> V3 or higher ?
-Oops :) I need to make sure that returns 3.
->
->> +
->>      snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
->> +
->>      while (data_len >= sizeof(*gdata)) {
->>          gedata_len = gdata->error_data_length;
->>          cper_estatus_print_section(newpfx, gdata, sec_no);
->> -        data_len -= gedata_len + sizeof(*gdata);
->> -        gdata = (void *)(gdata + 1) + gedata_len;
->> +        if(gdata_v3) {
->> +            data_len -= gedata_len + sizeof(*gdata_v3);
->> +            gdata_v3 = (void *)(gdata_v3 + 1) + gedata_len;
->> +            gdata = (struct acpi_hest_generic_data *)gdata_v3;
->> +        } else {
->> +            data_len -= gedata_len + sizeof(*gdata);
->> +            gdata = (void *)(gdata + 1) + gedata_len;
->> +        }
->
-> Could we not use the helpers we define below to unify the code here 
-> and avoid the
-> switch ?
->
-Yes, those helpers should be able to reduce the code here, I'll update this.
->
->>          sec_no++;
->>      }
->>  }
->> @@ -486,12 +530,13 @@ int cper_estatus_check(const struct 
->> acpi_hest_generic_status *estatus)
->>          return rc;
->>      data_len = estatus->data_length;
->>      gdata = (struct acpi_hest_generic_data *)(estatus + 1);
->> -    while (data_len >= sizeof(*gdata)) {
->> -        gedata_len = gdata->error_data_length;
->> -        if (gedata_len > data_len - sizeof(*gdata))
->> +
->> +    while (data_len >= acpi_hest_generic_data_size(gdata)) {
->> +        gedata_len = acpi_hest_generic_data_error_length(gdata);
->> +        if (gedata_len > data_len - acpi_hest_generic_data_size(gdata))
->>              return -EINVAL;
->> -        data_len -= gedata_len + sizeof(*gdata);
->> -        gdata = (void *)(gdata + 1) + gedata_len;
->> +        data_len -= gedata_len + acpi_hest_generic_data_size(gdata);
->> +        gdata = acpi_hest_generic_data_next(gdata);
->>      }
->>      if (data_len)
->>          return -EINVAL;
->> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
->> index 68f088a..56b9679 100644
->> --- a/include/acpi/ghes.h
->> +++ b/include/acpi/ghes.h
->> @@ -73,3 +73,13 @@ static inline void ghes_edac_unregister(struct 
->> ghes *ghes)
->>  {
->>  }
->>  #endif
->> +
->> +#define acpi_hest_generic_data_version(gdata)            \
->> +    (gdata->revision >> 8)
->> +
->
->
->>
->> +#define acpi_hest_generic_data_error_length(gdata)    \
->> +    (((struct acpi_hest_generic_data *)(gdata))->error_data_length)
->> +#define acpi_hest_generic_data_size(gdata)        \
->> +    ((acpi_hest_generic_data_version(gdata) >= 3) ?    \
->> +    sizeof(struct acpi_hest_generic_data_v300) :    \
->> +    sizeof(struct acpi_hest_generic_data))
->> +#define acpi_hest_generic_data_record_size(gdata)    \
->> +    (acpi_hest_generic_data_size(gdata) +        \
->> +    acpi_hest_generic_data_error_length(gdata))
->> +#define acpi_hest_generic_data_next(gdata)        \
->> +    ((void *)(gdata) + acpi_hest_generic_data_record_size(gdata))
->> +
->
-> Rest looks good
->
-> Cheers
-> Suzuki
-Thanks,
-Tyler
+Hey Roy,
 
--- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+On 24 October 2016 at 20:06, Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org> wrote:
+> Adjust the size used in calculations to match the actual size of allocation
+> that will be performed based on EFI size/alignment constraints.
+> efi_high_alloc() and efi_low_alloc() used the passed size in bytes directly
+> to find space in the memory map for the allocation, rather than the actual
+> allocation size that has been adjusted for size and alignment constraints.
+> This results in failed allocations and retries in efi_high_alloc().  The
+> same error is present in efi_low_alloc(), although failure will only happen
+> if the lowest memory block is small.
+> Adjust allocation size computation to respect EFI_ALLOC_ALIGN, which is
+> the minimum alignment that should always be enforced, and at 64k on arm64
+> is bigger than EFI_PAGE_SIZE.
+
+Apologies for confusing you (and myself), but I was wrong here.
+EFI_ALLOC_ALIGN already reflects the minimum base *and* size alignment
+for OS visible allocations, and so it is not necessary to round up the
+size to 'align', only to EFI_ALLOC_ALIGN. For instance, the 2 MB
+aligned allocation we do for the kernel image on arm64 does not need
+to be rounded up to 2 MB, only to 64 KB.
+
+So your v1 was actually correct, although I would prefer the notation
+below, if you don't mind
+
+> Also use EFI_PAGE_SIZE consistently and remove use of EFI_PAGE_SHIFT to
+> calculate page size.
+>
+> Signed-off-by: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+> ---
+>  drivers/firmware/efi/libstub/efi-stub-helper.c | 28 +++++++++++++++++---------
+>  1 file changed, 18 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> index aded106..b97dfac 100644
+> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
+> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> @@ -161,6 +161,7 @@ unsigned long get_dram_base(efi_system_table_t *sys_table_arg)
+>
+>  /*
+>   * Allocate at the highest possible address that is not above 'max'.
+> + * Align the allocation address and size to 'align'.
+>   */
+>  efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+>                             unsigned long size, unsigned long align,
+> @@ -186,14 +187,17 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+>                 goto fail;
+>
+>         /*
+> -        * Enforce minimum alignment that EFI requires when requesting
+> -        * a specific address.  We are doing page-based allocations,
+> -        * so we must be aligned to a page.
+> +        * Enforce minimum alignment that EFI or Linux requires when
+> +        * requesting a specific address.  We are doing page-based (or
+> +        * larger) allocations, and both the address and size must meet
+> +        * alignment constraints. Arm64 requires 64k alignment, while other
+> +        * arches simply require 4k.
+>          */
+>         if (align < EFI_ALLOC_ALIGN)
+>                 align = EFI_ALLOC_ALIGN;
+>
+> -       nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+> +       nr_pages = round_up(size, align) / EFI_PAGE_SIZE;
+> +       size = nr_pages * EFI_PAGE_SIZE;
+
+Please simplify to
+
+size = round_up(size, EFI_ALLOC_ALIGN);
+nr_pages = size / EFI_PAGE_SIZE;
+
+Thanks,
+Ard.
+
+
+>  again:
+>         for (i = 0; i < map_size / desc_size; i++) {
+>                 efi_memory_desc_t *desc;
+> @@ -208,7 +212,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+>                         continue;
+>
+>                 start = desc->phys_addr;
+> -               end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
+> +               end = start + desc->num_pages * EFI_PAGE_SIZE;
+>
+>                 if (end > max)
+>                         end = max;
+> @@ -254,6 +258,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+>
+>  /*
+>   * Allocate at the lowest possible address.
+> + * Align the allocation address and size to 'align'.
+>   */
+>  efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+>                            unsigned long size, unsigned long align,
+> @@ -278,14 +283,17 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+>                 goto fail;
+>
+>         /*
+> -        * Enforce minimum alignment that EFI requires when requesting
+> -        * a specific address.  We are doing page-based allocations,
+> -        * so we must be aligned to a page.
+> +        * Enforce minimum alignment that EFI or Linux requires when
+> +        * requesting a specific address.  We are doing page-based (or
+> +        * larger) allocations, and both the address and size must meet
+> +        * alignment constraints. Arm64 requires 64k alignment, while other
+> +        * arches simply require 4k.
+>          */
+>         if (align < EFI_ALLOC_ALIGN)
+>                 align = EFI_ALLOC_ALIGN;
+>
+> -       nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+> +       nr_pages = round_up(size, align) / EFI_PAGE_SIZE;
+> +       size = nr_pages * EFI_PAGE_SIZE;
+>         for (i = 0; i < map_size / desc_size; i++) {
+>                 efi_memory_desc_t *desc;
+>                 unsigned long m = (unsigned long)map;
+> @@ -300,7 +308,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+>                         continue;
+>
+>                 start = desc->phys_addr;
+> -               end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
+> +               end = start + desc->num_pages * EFI_PAGE_SIZE;
+>
+>                 /*
+>                  * Don't allocate at 0x0. It will confuse code that
+> --
+> 2.9.3
+>
