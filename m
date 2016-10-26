@@ -1,96 +1,88 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi: Add SHIM and image security database GUID definitions
-Date: Wed, 26 Oct 2016 09:01:28 +0100
-Message-ID: <CAKv+Gu_DLvXYmgU5kcPL4eoH__FYs_DtZbVTWVZyFytXyeJ6NA@mail.gmail.com>
-References: <20161025174209.29073-1-jwboyer@fedoraproject.org>
- <CAKv+Gu8jkPMG4KGjg+UTeuLOe6m=g3KMKsC=BgwVegyBYnHm0g@mail.gmail.com>
- <CA+5PVA53Tf2QVN0j0JFO9_v-hGbsg9HByOGGfLCGsgeGCz5UKA@mail.gmail.com>
- <580FA136.80006@caviumnetworks.com> <CA+5PVA4-BnZWv2rktX+LrQT-N6jd8bT-FKgvxi8E4xDhNsruRg@mail.gmail.com>
- <580FB996.9000302@caviumnetworks.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.8 104/140] x86/platform/UV: Fix support for EFI_OLD_MEMMAP after BIOS callback updates
+Date: Wed, 26 Oct 2016 14:22:44 +0200
+Message-ID: <20161026122224.839245613@linuxfoundation.org>
+References: <20161026122220.384323763@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <580FB996.9000302-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Cc: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20161026122220.384323763@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Alex Thorlton <athorlton@sgi.com>, Matt Fleming <matt@codeblueprint.co.uk>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, Dimitri Sivanich <sivanich@sgi.com>, "H. Peter Anvin" <hpa@zytor.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Mike Travis <travis@sgi.com>, Peter Zijlstra <peterz@infradead.org>, Russ Anderson <rja@sgi.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 25 October 2016 at 20:59, David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org> wrote:
-> On 10/25/2016 11:25 AM, Josh Boyer wrote:
->>
->> On Tue, Oct 25, 2016 at 2:15 PM, David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
->> wrote:
->>>
->>> On 10/25/2016 11:04 AM, Josh Boyer wrote:
->>>>
->>>>
->>>> On Tue, Oct 25, 2016 at 1:44 PM, Ard Biesheuvel
->>>> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>>>>
->>>>>
->>>>> Hi Josh,
->>>>>
->>>>> On 25 October 2016 at 18:42, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
->>>>> wrote:
->>>>>>
->>>>>>
->>>>>> Add the definitions for shim and image security database, both of
->>>>>> which
->>>>>> are used widely in various Linux distros.
->>>>>>
->>>>>> Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
->>>>>> ---
->>>>>>    include/linux/efi.h | 3 +++
->>>>>>    1 file changed, 3 insertions(+)
->>>>>>
->>>>>> diff --git a/include/linux/efi.h b/include/linux/efi.h
->>>>>> index 2d089487d2da..ce943d5accfd 100644
->>>>>> --- a/include/linux/efi.h
->>>>>> +++ b/include/linux/efi.h
->>>>>> @@ -592,6 +592,9 @@ void efi_native_runtime_setup(void);
->>>>>>    #define EFI_MEMORY_ATTRIBUTES_TABLE_GUID       EFI_GUID(0xdcfa911d,
->>>>>> 0x26eb, 0x469f,  0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
->>>>>>    #define EFI_CONSOLE_OUT_DEVICE_GUID            EFI_GUID(0xd3b36f2c,
->>>>>> 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
->>>>>>
->>>>>> +#define EFI_IMAGE_SECURITY_DATABASE_GUID       EFI_GUID(0xd719b2cb,
->>>>>> 0x3d3a, 0x4596, 0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
->>>>>> +#define EFI_SHIM_LOCK_GUID
->>>>>> EFI_GUID(0x605dab50, 0xe046, 0x4300, 0xab, 0xb6, 0x3d, 0xd8, 0x10,
->>>>>> 0xdd,
->>>>>> 0x8b, 0x23)
->>>>>> +
->>>>>
->>>>>
->>>>>
->>>>> Given that this patch is not part of the series, could you explain
->>>>> what the point is of having these definitions in the kernel if they
->>>>> are never referenced?
->>>>
->>>>
->>>>
->>>> Sure.
->>>>
->>>> The idea is to make sure a commonly used definition is both accessible
->>>> and reserved in the kernel.
->>>
->>>
->>>
->>> It is not in a uapi directory, so it cannot be used outside of the
->>> kernel.
->>
->>
->> Fair point.  Would there be value in creating an efi.h in uapi so that
->> it can serve as the canonical source?
->
->
-> I doubt it.  The kernel source tree is not meant to serve as an
-> authoritative registry for assigned numbers used by external projects.
->
+4.8-stable review patch.  If anyone has any objections, please let me know.
 
-I have to say I tend to agree here. These GUIDs are contracts between
-GRUB, shim and MokManager (IIUC), and apparently, these contracts are
-not codified anywhere in a canonical header file that is shared
-between these projects. That itself seems like a problem, given that
-those projects needs to agree on the *meaning* of these GUIDs as well.
+------------------
+
+From: Alex Thorlton <athorlton@sgi.com>
+
+commit caef78b6cdeddf4ad364f95910bba6b43b8eb9bf upstream.
+
+Some time ago, we brought our UV BIOS callback code up to speed with the
+new EFI memory mapping scheme, in commit:
+
+    d1be84a232e3 ("x86/uv: Update uv_bios_call() to use efi_call_virt_pointer()")
+
+By leveraging some changes that I made to a few of the EFI runtime
+callback mechanisms, in commit:
+
+    80e75596079f ("efi: Convert efi_call_virt() to efi_call_virt_pointer()")
+
+This got everything running smoothly on UV, with the new EFI mapping
+code.  However, this left one, small loose end, in that EFI_OLD_MEMMAP
+(a.k.a. efi=old_map) will no longer work on UV, on kernels that include
+the aforementioned changes.
+
+At the time this was not a major issue (in fact, it still really isn't),
+but there's no reason that EFI_OLD_MEMMAP *shouldn't* work on our
+systems.  This commit adds a check into uv_bios_call(), to see if we have
+the EFI_OLD_MEMMAP bit set in efi.flags.  If it is set, we fall back to
+using our old callback method, which uses efi_call() directly on the __va()
+of our function pointer.
+
+Signed-off-by: Alex Thorlton <athorlton@sgi.com>
+Acked-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Brian Gerst <brgerst@gmail.com>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>
+Cc: Dimitri Sivanich <sivanich@sgi.com>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Josh Poimboeuf <jpoimboe@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Mike Travis <travis@sgi.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Russ Anderson <rja@sgi.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/1476928131-170101-1-git-send-email-athorlton@sgi.com
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ arch/x86/platform/uv/bios_uv.c |   10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+--- a/arch/x86/platform/uv/bios_uv.c
++++ b/arch/x86/platform/uv/bios_uv.c
+@@ -40,7 +40,15 @@ s64 uv_bios_call(enum uv_bios_cmd which,
+ 		 */
+ 		return BIOS_STATUS_UNIMPLEMENTED;
+ 
+-	ret = efi_call_virt_pointer(tab, function, (u64)which, a1, a2, a3, a4, a5);
++	/*
++	 * If EFI_OLD_MEMMAP is set, we need to fall back to using our old EFI
++	 * callback method, which uses efi_call() directly, with the kernel page tables:
++	 */
++	if (unlikely(test_bit(EFI_OLD_MEMMAP, &efi.flags)))
++		ret = efi_call((void *)__va(tab->function), (u64)which, a1, a2, a3, a4, a5);
++	else
++		ret = efi_call_virt_pointer(tab, function, (u64)which, a1, a2, a3, a4, a5);
++
+ 	return ret;
+ }
+ EXPORT_SYMBOL_GPL(uv_bios_call);
