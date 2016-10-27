@@ -1,47 +1,41 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH] arm64: mm: Fix memmap to be initialized for the entire
- section
-Date: Thu, 27 Oct 2016 17:01:36 +0100
-Message-ID: <20161027160136.GD24290@arm.com>
-References: <1475747527-32387-1-git-send-email-rrichter@cavium.com>
- <CAKv+Gu-oYzSn_eeqaX3QVFeQjBGkaX-Wh7+oPcQFcXv7J6GOFQ@mail.gmail.com>
- <20161006161114.GH22012@rric.localdomain>
- <20161017185801.GT25086@rric.localdomain>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20161017185801.GT25086-vWBEXY7mpu582hYKe6nXyg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Robert Richter <rric-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+From: Laura Abbott <labbott@redhat.com>
+Subject: [PATCHv4 0/4] WX checking for arm64
+Date: Thu, 27 Oct 2016 09:27:30 -0700
+Message-ID: <1477585654-8908-1-git-send-email-labbott@redhat.com>
+Reply-To: kernel-hardening@lists.openwall.com
+Return-path: <kernel-hardening-return-5075-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+To: AKASHI Takahiro <takahiro.akashi@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Brown <david.brown@linaro.org>, Will Deacon <will.deacon@arm.com>, Catalin Marinas <catalin.marinas@arm.com>
+Cc: Laura Abbott <labbott@redhat.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Kees Cook <keescook@chromium.org>, kernel-hardening@lists.openwall.com, Matt Fleming <matt@codeblueprint.co.uk>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Robert,
+Hi,
 
-On Mon, Oct 17, 2016 at 08:58:01PM +0200, Robert Richter wrote:
-> Mark, Will, any opinion here?
+This is v4 of the implementation to check for writable and executable pages on
+arm64. This version contains a review from Ard and makes the UXN page count
+a separate variable. Overall, minor changes.
 
-Having looking at this, I'm inclined to agree with you; pfn_valid() is
-all about whether the underlying mem_map (struct page *) entry exists,
-not about whether the page is mappable or not.
+Thanks,
+Laura
 
-That said, setting the zone for pages representing NOMAP memory feels
-like a slippery slope to losing information about them being NOMAP in
-the first place and the whole problem getting out-of-hand. Whilst I'm
-happy for pfn_valid() to return true (in the sense that we're within
-bounds of mem_map etc), I'm less happy that we're also saying that the
-struct page contains useful information, such as the zone and the node
-information, which is then subsequently used by the NUMA code.
+Laura Abbott (4):
+  arm64: dump: Make ptdump debugfs a separate option
+  arm64: dump: Make the page table dumping seq_file optional
+  arm64: dump: Remove max_addr
+  arm64: dump: Add checking for writable and exectuable pages
 
-On top of that, pfn_valid is used in other places as a coarse "is this
-memory?" check, and will cause things like ioremap to fail whereas it
-wouldn't at the moment. It feels to me like NOMAP memory is a new type
-of memory where there *is* a struct page, but it shouldn't be used for
-anything. I don't think pfn_valid can describe that, given the way it's
-currently used, and flipping the logic is just likely to move the problem
-elsewhere.
+ arch/arm64/Kconfig.debug           |  35 ++++++++++++-
+ arch/arm64/include/asm/ptdump.h    |  22 +++++---
+ arch/arm64/mm/Makefile             |   3 +-
+ arch/arm64/mm/dump.c               | 105 +++++++++++++++++++++++++++----------
+ arch/arm64/mm/mmu.c                |   2 +
+ arch/arm64/mm/ptdump_debugfs.c     |  31 +++++++++++
+ drivers/firmware/efi/arm-runtime.c |   4 +-
+ 7 files changed, 164 insertions(+), 38 deletions(-)
+ create mode 100644 arch/arm64/mm/ptdump_debugfs.c
 
-What options do we have for fixing this in the NUMA code?
-
-Will
+-- 
+2.7.4
