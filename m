@@ -1,111 +1,61 @@
-From: <j.lahoda-aRb0bU7PRFPrBKCeMvbIDA@public.gmane.org>
-Subject: 776134 linux-efi
-Date: Sat, 29 Oct 2016 09:45:59 -0000
-Message-ID: <147773435957.26040.18071321847624180903@voxconexao.com.br>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 2/2] MAINTAINERS: add ARM and arm64 EFI specific files to
+ EFI subsystem
+Date: Sat, 29 Oct 2016 11:09:55 +0100
+Message-ID: <CAKv+Gu9B7X3CDVZrxZQFVsn3U2CT0A2Z3Owj7BQuFXPjk5Ln4Q@mail.gmail.com>
+References: <1474472114-12973-1-git-send-email-ard.biesheuvel@linaro.org> <1474472114-12973-2-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: application/zip; name="kdlinux-efi.zip"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: attachment
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1474472114-12973-2-git-send-email-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Russell King <rmk+kernel@armlinux.org.uk>
 List-Id: linux-efi@vger.kernel.org
 
-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
+On 21 September 2016 at 16:35, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+> Since I will be co-maintaining the EFI subsystem, it makes sense to
+> mention the ARM and arm64 EFI bits in the EFI section in MAINTAINERS
+> so that Matt, the list and I get cc'ed on proposed changes.
+>
+> Cc: Catalin Marinas <catalin.marinas@arm.com>
+> Cc: Will Deacon <will.deacon@arm.com>
+> Cc: Russell King <rmk+kernel@armlinux.org.uk>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> ---
+>  MAINTAINERS | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
+>
+
+Russell,
+
+do you have an objections to this change?
+
+Thanks,
+Ard.
+
+
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 224518556a84..cc8b36699f94 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -4562,12 +4562,14 @@ L:      linux-efi@vger.kernel.org
+>  T:     git git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
+>  S:     Maintained
+>  F:     Documentation/efi-stub.txt
+> -F:     arch/ia64/kernel/efi.c
+> +F:     arch/*/kernel/efi.c
+>  F:     arch/x86/boot/compressed/eboot.[ch]
+> -F:     arch/x86/include/asm/efi.h
+> +F:     arch/*/include/asm/efi.h
+>  F:     arch/x86/platform/efi/
+>  F:     drivers/firmware/efi/
+>  F:     include/linux/efi*.h
+> +F:     arch/arm/boot/compressed/efi-header.S
+> +F:     arch/arm64/kernel/efi-entry.S
+>
+>  EFI VARIABLE FILESYSTEM
+>  M:     Matthew Garrett <matthew.garrett@nebula.com>
+> --
+> 2.7.4
+>
