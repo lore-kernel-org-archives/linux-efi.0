@@ -1,61 +1,54 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 2/2] MAINTAINERS: add ARM and arm64 EFI specific files to
- EFI subsystem
-Date: Sat, 29 Oct 2016 11:09:55 +0100
-Message-ID: <CAKv+Gu9B7X3CDVZrxZQFVsn3U2CT0A2Z3Owj7BQuFXPjk5Ln4Q@mail.gmail.com>
-References: <1474472114-12973-1-git-send-email-ard.biesheuvel@linaro.org> <1474472114-12973-2-git-send-email-ard.biesheuvel@linaro.org>
+From: Thorsten Leemhuis <regressions-rCxcAJFjeRkk+I/owrrOrA@public.gmane.org>
+Subject: Re: 4.9-rc1 boot regression, ambiguous bisect result
+Date: Sun, 30 Oct 2016 13:08:44 +0100
+Message-ID: <4a73a7d8-599c-eb25-0f78-d921a16bb56f@leemhuis.info>
+References: <CAPcyv4gDYcahNJ6CEzf2eUGq8sGqW8Yo09T8cscGWTLoja7PXw@mail.gmail.com>
+ <20161020122931.GD19876@codeblueprint.co.uk>
+ <CAPcyv4hT+yQvnQzfb49FP-+vVaVKHTYEj1EjNd9Xvu0Wr8T+Bg@mail.gmail.com>
+ <CAPcyv4gE0wtoR3Yxh6axiQpPE2MvDgGW=JLEz9b7OMSBQZ_HDQ@mail.gmail.com>
+ <20161021154129.GH27807@codeblueprint.co.uk>
+ <20161021202022.GI27807@codeblueprint.co.uk>
+ <CAPcyv4jkVcBwecxwt1P+p-fMSuen9B9xHEVf0BjM5uJZ4_jAdw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1474472114-12973-2-git-send-email-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Russell King <rmk+kernel@armlinux.org.uk>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPcyv4jkVcBwecxwt1P+p-fMSuen9B9xHEVf0BjM5uJZ4_jAdw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 21 September 2016 at 16:35, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> Since I will be co-maintaining the EFI subsystem, it makes sense to
-> mention the ARM and arm64 EFI bits in the EFI section in MAINTAINERS
-> so that Matt, the list and I get cc'ed on proposed changes.
->
-> Cc: Catalin Marinas <catalin.marinas@arm.com>
-> Cc: Will Deacon <will.deacon@arm.com>
-> Cc: Russell King <rmk+kernel@armlinux.org.uk>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> ---
->  MAINTAINERS | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
->
+JFYI: I added this report to the list of regressions for Linux 4.9. I'll
+watch this thread for further updates on this issue to document progress
+in my weekly reports. Please let me know via regressions-rCxcAJFjeRkk+I/owrrOrA@public.gmane.org
+in case the discussion moves to a different place (bugzilla or another
+mail thread for example). tia!
 
-Russell,
+Current status (afaics) in my report: This looks stuck. Or was is
+discussed (or even fixed) somewhere else?
 
-do you have an objections to this change?
+Ciao, Thorsten
 
-Thanks,
-Ard.
-
-
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 224518556a84..cc8b36699f94 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -4562,12 +4562,14 @@ L:      linux-efi@vger.kernel.org
->  T:     git git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
->  S:     Maintained
->  F:     Documentation/efi-stub.txt
-> -F:     arch/ia64/kernel/efi.c
-> +F:     arch/*/kernel/efi.c
->  F:     arch/x86/boot/compressed/eboot.[ch]
-> -F:     arch/x86/include/asm/efi.h
-> +F:     arch/*/include/asm/efi.h
->  F:     arch/x86/platform/efi/
->  F:     drivers/firmware/efi/
->  F:     include/linux/efi*.h
-> +F:     arch/arm/boot/compressed/efi-header.S
-> +F:     arch/arm64/kernel/efi-entry.S
->
->  EFI VARIABLE FILESYSTEM
->  M:     Matthew Garrett <matthew.garrett@nebula.com>
-> --
-> 2.7.4
->
+On 22.10.2016 01:20, Dan Williams wrote:
+> On Fri, Oct 21, 2016 at 1:20 PM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+>> On Fri, 21 Oct, at 04:41:29PM, Matt Fleming wrote:
+>>>
+>>> FYI, I've been able to reproduce some crash when using your EFI memory
+>>> map layout under Qemu and forcing the ESRT driver to reserve the space.
+>>
+>> Nope, that was a bug in my hack. I can't get Qemu to crash while using
+>> your memory map layout.
+>>
+>> Any chance you can insert "while(1)" loops into the EFI boot paths for
+>> a kernel that is known to reboot or trigger a triple fault in kernels
+>> that hang, so that we can narrow in on the issue. See,
+>>
+>>   http://www.codeblueprint.co.uk/2015/04/early-x86-linux-boot-debug-tricks.html
+> 
+> I can take a look, but it will not be until Monday when I have
+> physical access to the system again.
+> 
+> http://news.gmane.org/find-root.php?message_id=CAPcyv4jkVcBwecxwt1P+p-fMSuen9B9xHEVf0BjM5uJZ4_jAdw%40mail.gmail.com 
+> http://mid.gmane.org/CAPcyv4jkVcBwecxwt1P+p-fMSuen9B9xHEVf0BjM5uJZ4_jAdw%40mail.gmail.com
+> 
