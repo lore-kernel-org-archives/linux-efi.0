@@ -1,33 +1,40 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3] Fix allocation size calculations
-Date: Mon, 31 Oct 2016 07:57:40 +0000
-Message-ID: <CAKv+Gu-XzL+CK_YuFJoJLuDB70K6gt07uLRiUjocDVYKD0j2vQ@mail.gmail.com>
-References: <20161025163634.11893-1-roy.franz@hpe.com> <CAKv+Gu8FDUQDD4-QCeB7ELFR9LHqr_qTHmjDVgp5xa6LnxNZXw@mail.gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: 4.9-rc1 boot regression, ambiguous bisect result
+Date: Mon, 31 Oct 2016 09:38:29 +0000
+Message-ID: <20161031093829.GA8845@codeblueprint.co.uk>
+References: <CAPcyv4gDYcahNJ6CEzf2eUGq8sGqW8Yo09T8cscGWTLoja7PXw@mail.gmail.com>
+ <20161020122931.GD19876@codeblueprint.co.uk>
+ <CAPcyv4hT+yQvnQzfb49FP-+vVaVKHTYEj1EjNd9Xvu0Wr8T+Bg@mail.gmail.com>
+ <CAPcyv4gE0wtoR3Yxh6axiQpPE2MvDgGW=JLEz9b7OMSBQZ_HDQ@mail.gmail.com>
+ <20161021154129.GH27807@codeblueprint.co.uk>
+ <20161021202022.GI27807@codeblueprint.co.uk>
+ <CAPcyv4jkVcBwecxwt1P+p-fMSuen9B9xHEVf0BjM5uJZ4_jAdw@mail.gmail.com>
+ <4a73a7d8-599c-eb25-0f78-d921a16bb56f@leemhuis.info>
+ <CAPcyv4gNyUMU+r-N-qa6ZrF0zG2AuirR0NqVRu40jAgNqc5MNw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu8FDUQDD4-QCeB7ELFR9LHqr_qTHmjDVgp5xa6LnxNZXw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAPcyv4gNyUMU+r-N-qa6ZrF0zG2AuirR0NqVRu40jAgNqc5MNw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Roy Franz <roy.franz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Thorsten Leemhuis <regressions-rCxcAJFjeRkk+I/owrrOrA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 25 October 2016 at 19:03, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 25 October 2016 at 17:36, Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org> wrote:
->> Adjust the size used in calculations to match the actual size of allocation
->> that will be performed based on EFI size/alignment constraints.
->> efi_high_alloc() and efi_low_alloc() use the passed size in bytes directly
->> to find space in the memory map for the allocation, rather than the actual
->> allocation size that has been adjusted for size and alignment constraints.
->> This results in failed allocations and retries in efi_high_alloc().  The
->> same error is present in efi_low_alloc(), although failure will only happen
->> if the lowest memory block is small.
->> Also use EFI_PAGE_SIZE consistently and remove use of EFI_PAGE_SHIFT to
->> calculate page size.
->>
->> Signed-off-by: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
->
-> Reviewed-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->
+On Sun, 30 Oct, at 08:59:58AM, Dan Williams wrote:
+> On Sun, Oct 30, 2016 at 5:08 AM, Thorsten Leemhuis
+> <regressions-rCxcAJFjeRkk+I/owrrOrA@public.gmane.org> wrote:
+> > JFYI: I added this report to the list of regressions for Linux 4.9. I'll
+> > watch this thread for further updates on this issue to document progress
+> > in my weekly reports. Please let me know via regressions-rCxcAJFjeRkk+I/owrrOrA@public.gmane.org
+> > in case the discussion moves to a different place (bugzilla or another
+> > mail thread for example). tia!
+> >
+> > Current status (afaics) in my report: This looks stuck. Or was is
+> > discussed (or even fixed) somewhere else?
+> 
+> Thanks, and no, not fixed yet. I've not found the time to run the
+> experiments Matt needs, but a colleague has offered to look into it.
 
-Applied, thanks.
+Of course, if you are willing to help with debugging, Thorsten, it
+would be much appreciated and this bug might get fixed sooner.
