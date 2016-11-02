@@ -1,49 +1,42 @@
-From: Linn Crosetto <linn@hpe.com>
-Subject: Re: [PATCH] EFI loader: remove dead code
-Date: Tue, 1 Nov 2016 16:09:50 -0700
-Message-ID: <20161101230950.GD3567@oranje.usa.hp.com>
-References: <20161101173808.GA2682@vnote>
+From: Eugene Korenevsky <ekorenevsky-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH v2] EFI loader: remove redundant code
+Date: Wed, 2 Nov 2016 07:18:55 +0300
+Message-ID: <20161102041855.GA4479@vnote>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20161101173808.GA2682@vnote>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Eugene Korenevsky <ekorenevsky@gmail.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Linn Crosetto <linn-ZPxbGqLxI0U@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 01, 2016 at 08:38:08PM +0300, Eugene Korenevsky wrote:
-> *e820ext is always NULL in 'alloc_e820ext()' (see the code of 'exit_boot()').
-> Therefore the 'if' condition is always false and the entire 'if' statement is
-> pointless. Remove it.
-> 
-> ---
->  arch/x86/boot/compressed/eboot.c | 6 ------
->  1 file changed, 6 deletions(-)
-> 
-> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> index cc69e37..edfd4d6 100644
-> --- a/arch/x86/boot/compressed/eboot.c
-> +++ b/arch/x86/boot/compressed/eboot.c
-> @@ -956,12 +956,6 @@ static efi_status_t alloc_e820ext(u32 nr_desc, struct setup_data **e820ext,
->  	size = sizeof(struct setup_data) +
->  		sizeof(struct e820entry) * nr_desc;
->  
-> -	if (*e820ext) {
-> -		efi_call_early(free_pool, *e820ext);
-> -		*e820ext = NULL;
-> -		*e820ext_size = 0;
-> -	}
-> -
+*e820ext is always NULL in 'alloc_e820ext()' (see the code of 'exit_boot()').
+Without loss of generality we can replace freeing with returning
+EFI_INVALID_PARAMETER. So if the caller would ever incorrectly pass non-NULL
+*e820ext, he will obtain a returned error code.
 
-I agree with your reading of the code. On the other hand, alloc_e820ext()
-has no knowledge of the 'first' flag used in exit_boot_func() so the call to
-free provides some assurance that memory isn't leaked if the calling code is
-changed.
+---
+ arch/x86/boot/compressed/eboot.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
 
-If the caller is responsible for freeing the memory in such a case, then
-alloc_e820ext() should at least return an error.
-
---
-Linn
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index cc69e37..6cc66c7 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -956,11 +956,8 @@ static efi_status_t alloc_e820ext(u32 nr_desc, struct setup_data **e820ext,
+ 	size = sizeof(struct setup_data) +
+ 		sizeof(struct e820entry) * nr_desc;
+ 
+-	if (*e820ext) {
+-		efi_call_early(free_pool, *e820ext);
+-		*e820ext = NULL;
+-		*e820ext_size = 0;
+-	}
++	if (*e820ext)
++		return EFI_INVALID_PARAMETER;
+ 
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+ 				size, (void **)e820ext);
+-- 
+2.10.2
