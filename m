@@ -1,45 +1,63 @@
-From: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: 4.9-rc1 boot regression, ambiguous bisect result
-Date: Wed, 2 Nov 2016 22:18:46 -0700
-Message-ID: <CAPcyv4hOD_ZsMOfSm=X8qq00CqNft=n=O07+oPjczV0xHMTb7w@mail.gmail.com>
-References: <CAPcyv4gDYcahNJ6CEzf2eUGq8sGqW8Yo09T8cscGWTLoja7PXw@mail.gmail.com>
- <20161020122931.GD19876@codeblueprint.co.uk> <CAPcyv4hT+yQvnQzfb49FP-+vVaVKHTYEj1EjNd9Xvu0Wr8T+Bg@mail.gmail.com>
- <CAPcyv4gE0wtoR3Yxh6axiQpPE2MvDgGW=JLEz9b7OMSBQZ_HDQ@mail.gmail.com>
- <20161021154129.GH27807@codeblueprint.co.uk> <20161021202022.GI27807@codeblueprint.co.uk>
- <CAPcyv4jkVcBwecxwt1P+p-fMSuen9B9xHEVf0BjM5uJZ4_jAdw@mail.gmail.com>
- <4a73a7d8-599c-eb25-0f78-d921a16bb56f@leemhuis.info> <CAPcyv4gNyUMU+r-N-qa6ZrF0zG2AuirR0NqVRu40jAgNqc5MNw@mail.gmail.com>
- <1478133678.2513.4.camel@ranerica-desktop>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Subject: [PATCH v3 0/3] Apple device properties
+Date: Thu, 3 Nov 2016 11:18:48 +0100
+Message-ID: <cover.1478145888.git.lukas@wunner.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1478133678.2513.4.camel@ranerica-desktop>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Neri, Ricardo" <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "regressions-rCxcAJFjeRkk+I/owrrOrA@public.gmane.org" <regressions-rCxcAJFjeRkk+I/owrrOrA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org" <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Nov 2, 2016 at 5:41 PM, Neri, Ricardo <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> On Sun, 2016-10-30 at 08:59 -0700, Dan Williams wrote:
->> On Sun, Oct 30, 2016 at 5:08 AM, Thorsten Leemhuis
->> <regressions-rCxcAJFjeRkk+I/owrrOrA@public.gmane.org> wrote:
->> > JFYI: I added this report to the list of regressions for Linux 4.9. I'll
->> > watch this thread for further updates on this issue to document progress
->> > in my weekly reports. Please let me know via regressions-rCxcAJFjeRkk+I/owrrOrA@public.gmane.org
->> > in case the discussion moves to a different place (bugzilla or another
->> > mail thread for example). tia!
->> >
->> > Current status (afaics) in my report: This looks stuck. Or was is
->> > discussed (or even fixed) somewhere else?
->>
->> Thanks, and no, not fixed yet. I've not found the time to run the
->> experiments Matt needs, but a colleague has offered to look into it.
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
->> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> Dan, was there a special configuration that you enabled for this bug?
-> The person working on the bug can't reproduce the bug in v4.9-rc1 or
-> v4.9-rc3.
+Retrieve device properties from EFI on Macs before ExitBootServices is
+called and assign them to devices (patch [2/3]). The devices that
+properties pertain to are encoded as EFI Device Paths, so add a parser
+for these (patch [1/3]). As a first use case, amend the Thunderbolt driver
+to take advantage of the Device ROM supplied by EFI (patch [3/3]).
 
-I am pxe-booting the platform to an nfs root filesystem.
+Changes since v2:
+
+- Renamed get_device_by_efi_path() to efi_get_device_by_path() in
+  patch [1/3]. (Matt Fleming)
+
+- Support multiple instance device paths in patch [1/3]. (Peter Jones)
+
+- Validate the size specified in the properties payload in patch [2/3].
+
+- Other than that, just some minor polishing and rebasing.
+
+Link to v2:
+http://www.spinics.net/lists/linux-efi/msg09498.html
+
+Browseable on GitHub:
+https://github.com/l1k/linux/commits/apple_properties_v3
+
+Thanks,
+
+Lukas
+
+
+Lukas Wunner (3):
+  efi: Add device path parser
+  x86/efi: Retrieve and assign Apple device properties
+  thunderbolt: Use Device ROM retrieved from EFI
+
+ Documentation/kernel-parameters.txt     |   5 +
+ arch/x86/boot/compressed/eboot.c        |  63 +++++++++
+ arch/x86/include/uapi/asm/bootparam.h   |   1 +
+ drivers/firmware/efi/Kconfig            |  18 +++
+ drivers/firmware/efi/Makefile           |   2 +
+ drivers/firmware/efi/apple-properties.c | 239 ++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/dev-path-parser.c  | 203 +++++++++++++++++++++++++++
+ drivers/thunderbolt/Kconfig             |   1 +
+ drivers/thunderbolt/eeprom.c            |  42 ++++++
+ drivers/thunderbolt/switch.c            |   2 +-
+ include/linux/efi.h                     |  37 +++++
+ 11 files changed, 612 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/firmware/efi/apple-properties.c
+ create mode 100644 drivers/firmware/efi/dev-path-parser.c
+
+-- 
+2.10.1
