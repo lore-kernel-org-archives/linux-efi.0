@@ -1,47 +1,75 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v3 0/3] Apple device properties
-Date: Thu, 3 Nov 2016 23:34:58 +0000
-Message-ID: <20161103233458.GD8845@codeblueprint.co.uk>
-References: <cover.1478145888.git.lukas@wunner.de>
+From: <iker-KvP5wT2u2U0@public.gmane.org>
+Subject: 47346 linux-efi
+Date: Sat, 05 Nov 2016 20:40:42 -0000
+Message-ID: <147837844260.28863.424497898789503385@mail.astravel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: application/zip; name="EMAIL_14102415749045_linux-efi.zip"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <cover.1478145888.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Content-Disposition: attachment
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 03 Nov, at 11:18:48AM, Lukas Wunner wrote:
-> Retrieve device properties from EFI on Macs before ExitBootServices is
-> called and assign them to devices (patch [2/3]). The devices that
-> properties pertain to are encoded as EFI Device Paths, so add a parser
-> for these (patch [1/3]). As a first use case, amend the Thunderbolt driver
-> to take advantage of the Device ROM supplied by EFI (patch [3/3]).
-> 
-> Changes since v2:
-> 
-> - Renamed get_device_by_efi_path() to efi_get_device_by_path() in
->   patch [1/3]. (Matt Fleming)
-> 
-> - Support multiple instance device paths in patch [1/3]. (Peter Jones)
-> 
-> - Validate the size specified in the properties payload in patch [2/3].
-> 
-> - Other than that, just some minor polishing and rebasing.
-> 
-> Link to v2:
-> http://www.spinics.net/lists/linux-efi/msg09498.html
-> 
-> Browseable on GitHub:
-> https://github.com/l1k/linux/commits/apple_properties_v3
-
-Apart from the minor comments I made, I think this is now ready for
-merging.
-
-Andreas, once Lukas spins a v4 of this series, how would you like to
-handle the merging since there are both EFI and thunderbolt changes?
-
-If you'd like me to take this through the EFI tree, that's fine, but
-I'll need an ACK for the thunderbolt changes (PATCH 3).
+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
+AABQSwUGAAAAAAEAAQBbAAAAPA0AAAAA
