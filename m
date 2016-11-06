@@ -1,75 +1,78 @@
-From: <iker-KvP5wT2u2U0@public.gmane.org>
-Subject: 47346 linux-efi
-Date: Sat, 05 Nov 2016 20:40:42 -0000
-Message-ID: <147837844260.28863.424497898789503385@mail.astravel.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: [PATCH] x86/efi: Fix EFI memmap pointer size warning
+Date: Sun, 6 Nov 2016 14:02:54 +0100
+Message-ID: <20161106130254.dxcguu4qh2nh2md7@pd.tnic>
 Mime-Version: 1.0
-Content-Type: application/zip; name="EMAIL_14102415749045_linux-efi.zip"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: attachment
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: linux-efi <linux-efi@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-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
-AABQSwUGAAAAAAEAAQBbAAAAPA0AAAAA
+Hi Matt,
+
+please doublecheck me on this but I think we're fine using an unsigned
+long.
+
+Thanks.
+
+---
+From: Borislav Petkov <bp@suse.de>
+Date: Sun, 6 Nov 2016 13:49:10 +0100
+Subject: [PATCH] x86/efi: Fix EFI memmap pointer size warning
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Fix this when building on 32-bit:
+
+  arch/x86/platform/efi/efi.c: In function ‘__efi_enter_virtual_mode’:
+  arch/x86/platform/efi/efi.c:911:5: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+       (efi_memory_desc_t *)pa);
+       ^
+  arch/x86/platform/efi/efi.c:918:5: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+       (efi_memory_desc_t *)pa);
+       ^
+
+The @pa local variable is declared as phys_addr_t and that is a u64 when
+CONFIG_PHYS_ADDR_T_64BIT=y. (The last is enabled on 32-bit on a PAE
+build.)
+
+However, its value comes from __pa() which is basically doing pointer
+arithmetic and checking, and returns unsigned long as it is the native
+pointer width.
+
+So let's use an unsigned long too. It should be fine to do so because
+the later users cast it to a pointer too.
+
+Signed-off-by: Borislav Petkov <bp@suse.de>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+---
+ arch/x86/platform/efi/efi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index bf99aa7005eb..936a488d6cf6 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -861,7 +861,7 @@ static void __init __efi_enter_virtual_mode(void)
+ 	int count = 0, pg_shift = 0;
+ 	void *new_memmap = NULL;
+ 	efi_status_t status;
+-	phys_addr_t pa;
++	unsigned long pa;
+ 
+ 	efi.systab = NULL;
+ 
+-- 
+2.10.0
+
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
