@@ -1,90 +1,35 @@
 From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 2/2] x86/efi: Deduplicate efi_char16_printk()
-Date: Mon, 7 Nov 2016 12:17:00 +0100
-Message-ID: <a07e587429c2a720a6afe51c2cc68ee6985e50d0.1478510356.git.lukas@wunner.de>
-References: <cover.1478510356.git.lukas@wunner.de>
+Subject: Re: [PATCH v3 3/3] thunderbolt: Use Device ROM retrieved from EFI
+Date: Mon, 7 Nov 2016 12:28:17 +0100
+Message-ID: <20161107112817.GA6428@wunner.de>
+References: <cover.1478145888.git.lukas@wunner.de>
+ <776fcc302f58628d1a122ba929751760c554cbfc.1478145888.git.lukas@wunner.de>
+ <CAMxnaaVfT+gxgq4q76Jz8gY_OfaBr_ToXQ8f-bYGwjcd2eS=9A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.1478510356.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAMxnaaVfT+gxgq4q76Jz8gY_OfaBr_ToXQ8f-bYGwjcd2eS=9A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Eliminate the separate 32 bit and 64 bit code paths by way of the shiny
-new efi_call_proto() macro.
+On Mon, Nov 07, 2016 at 12:02:32AM +0100, Andreas Noever wrote:
+> On Thu, Nov 3, 2016 at 11:18 AM, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
+> > +err:
+> > +       kfree(sw->drom);
+> 
+> Please also set sw->drom to NULL here. Otherwise sw->drom will be
+> freed again in the error path of tb_switch_alloc or in tb_switch_free.
 
-No functional change intended.
+Eeeeeeeeeeeek!  Thanks for spotting this, and thanks for the ack.
 
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
----
- arch/x86/boot/compressed/eboot.c | 26 ++------------------------
- include/linux/efi.h              |  8 ++++----
- 2 files changed, 6 insertions(+), 28 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index f1cf284..6d3aeab 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -101,30 +101,8 @@ efi_open_volume(efi_system_table_t *sys_table, void *__image, void **__fh)
- 
- void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
- {
--	unsigned long output_string;
--	size_t offset;
--
--	if (efi_early->is64) {
--		struct efi_simple_text_output_protocol_64 *out;
--		u64 *func;
--
--		offset = offsetof(typeof(*out), output_string);
--		output_string = efi_early->text_output + offset;
--		out = (typeof(out))(unsigned long)efi_early->text_output;
--		func = (u64 *)output_string;
--
--		efi_early->call(*func, out, str);
--	} else {
--		struct efi_simple_text_output_protocol_32 *out;
--		u32 *func;
--
--		offset = offsetof(typeof(*out), output_string);
--		output_string = efi_early->text_output + offset;
--		out = (typeof(out))(unsigned long)efi_early->text_output;
--		func = (u32 *)output_string;
--
--		efi_early->call(*func, out, str);
--	}
-+	efi_call_proto(efi_simple_text_output_protocol, output_string,
-+		       efi_early->text_output, str);
- }
- 
- static efi_status_t
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index a07a476..4995869 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1238,17 +1238,17 @@ struct efivar_entry {
- 	bool deleting;
- };
- 
--struct efi_simple_text_output_protocol_32 {
-+typedef struct {
- 	u32 reset;
- 	u32 output_string;
- 	u32 test_string;
--};
-+} efi_simple_text_output_protocol_32_t;
- 
--struct efi_simple_text_output_protocol_64 {
-+typedef struct {
- 	u64 reset;
- 	u64 output_string;
- 	u64 test_string;
--};
-+} efi_simple_text_output_protocol_64_t;
- 
- struct efi_simple_text_output_protocol {
- 	void *reset;
--- 
-2.10.1
+> btw: any success in decoding the path crumbs property?
+
+TBH I haven't had time to look yet. :-(
+
+Best regards,
+
+Lukas
