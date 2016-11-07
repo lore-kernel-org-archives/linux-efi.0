@@ -1,80 +1,78 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH] x86/efi: Fix EFI memmap pointer size warning
-Date: Mon, 7 Nov 2016 09:59:26 +0000
-Message-ID: <20161107095926.GF8845@codeblueprint.co.uk>
-References: <20161106130254.dxcguu4qh2nh2md7@pd.tnic>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Subject: [PATCH v4 0/4] Apple device properties
+Date: Mon, 7 Nov 2016 11:09:00 +0100
+Message-ID: <cover.1478506920.git.lukas@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20161106130254.dxcguu4qh2nh2md7@pd.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-efi <linux-efi@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 06 Nov, at 02:02:54PM, Borislav Petkov wrote:
-> Hi Matt,
-> 
-> please doublecheck me on this but I think we're fine using an unsigned
-> long.
-> 
-> Thanks.
-> 
-> ---
-> From: Borislav Petkov <bp@suse.de>
-> Date: Sun, 6 Nov 2016 13:49:10 +0100
-> Subject: [PATCH] x86/efi: Fix EFI memmap pointer size warning
-> MIME-Version: 1.0
-> Content-Type: text/plain; charset=UTF-8
-> Content-Transfer-Encoding: 8bit
-> 
-> Fix this when building on 32-bit:
-> 
->   arch/x86/platform/efi/efi.c: In function ‘__efi_enter_virtual_mode’:
->   arch/x86/platform/efi/efi.c:911:5: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
->        (efi_memory_desc_t *)pa);
->        ^
->   arch/x86/platform/efi/efi.c:918:5: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
->        (efi_memory_desc_t *)pa);
->        ^
-> 
-> The @pa local variable is declared as phys_addr_t and that is a u64 when
-> CONFIG_PHYS_ADDR_T_64BIT=y. (The last is enabled on 32-bit on a PAE
-> build.)
-> 
-> However, its value comes from __pa() which is basically doing pointer
-> arithmetic and checking, and returns unsigned long as it is the native
-> pointer width.
-> 
-> So let's use an unsigned long too. It should be fine to do so because
-> the later users cast it to a pointer too.
-> 
-> Signed-off-by: Borislav Petkov <bp@suse.de>
-> Cc: Matt Fleming <matt@codeblueprint.co.uk>
-> ---
->  arch/x86/platform/efi/efi.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index bf99aa7005eb..936a488d6cf6 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -861,7 +861,7 @@ static void __init __efi_enter_virtual_mode(void)
->  	int count = 0, pg_shift = 0;
->  	void *new_memmap = NULL;
->  	efi_status_t status;
-> -	phys_addr_t pa;
-> +	unsigned long pa;
->  
->  	efi.systab = NULL;
->  
+Retrieve device properties from EFI on Macs before ExitBootServices is
+called and assign them to devices (patch [3/4]). The devices that
+properties pertain to are encoded as EFI Device Paths, so add a parser
+for these (patch [1/4]). As a first use case, amend the Thunderbolt driver
+to take advantage of the Device ROM supplied by EFI (patch [4/4]).
 
-Right, this does look correct given that __pa() uses 'unsigned long'.
+Changes since v3:
 
-I think the reason this is safe on PAE is that __get_free_pages() is
-guaranteed to return a 32-bit address, and will not return HIGHMEM
-pages. Which makes __pa() legal and 'unsigned long' the correct type.
+- New patch [2/4] which introduces efi_call_proto() and efi_table_attr()
+  macros to allow bitness-agnostic EFI protocol calls and table lookups.
+  Previously when retrieving the properties in patch [3/4], a ternary
+  operator was used to make the code work in mixed-mode, but Matt
+  correctly remarked that it impacted readability.  The new approach
+  seeks to maintain readability while avoiding code duplication.
 
-Want me to take this through the EFI tree?
+- Address all other comments by Matt on patch [3/4]:  In eboot.c, move
+  comparison of fw_vendor and call to retrieve_apple_device_properties()
+  out of efi_main() and into a separate setup_quirks() function which
+  may accommodate future vendor- or device-specific quirks.  Fix up
+  comments and curly braces, add newlines and suffix typedefs with "_t"
+  as requested by Matt.
+
+- Fix bug in comparison of fw_vendor in patch [3/4] wherein the system
+  table was assumed to be the 64-bit version when compiling on x86_64,
+  which obviously didn't work in mixed-mode.
+
+- Fix double free in error path in patch [4/4] spotted by Andreas.
+
+Link to v3:
+http://www.spinics.net/lists/linux-efi/msg09647.html
+
+Browseable on GitHub:
+https://github.com/l1k/linux/commits/apple_properties_v4
+
+Thanks,
+
+Lukas
+
+
+Lukas Wunner (4):
+  efi: Add device path parser
+  efi: Allow bitness-agnostic protocol calls
+  x86/efi: Retrieve and assign Apple device properties
+  thunderbolt: Use Device ROM retrieved from EFI
+
+ Documentation/kernel-parameters.txt     |   5 +
+ arch/arm/include/asm/efi.h              |   3 +
+ arch/arm64/include/asm/efi.h            |   3 +
+ arch/x86/boot/compressed/eboot.c        |  65 +++++++++
+ arch/x86/include/asm/efi.h              |  16 ++-
+ arch/x86/include/uapi/asm/bootparam.h   |   1 +
+ drivers/firmware/efi/Kconfig            |  18 +++
+ drivers/firmware/efi/Makefile           |   2 +
+ drivers/firmware/efi/apple-properties.c | 248 ++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/dev-path-parser.c  | 203 ++++++++++++++++++++++++++
+ drivers/thunderbolt/Kconfig             |   1 +
+ drivers/thunderbolt/eeprom.c            |  43 ++++++
+ drivers/thunderbolt/switch.c            |   2 +-
+ include/linux/efi.h                     |  37 +++++
+ 14 files changed, 641 insertions(+), 6 deletions(-)
+ create mode 100644 drivers/firmware/efi/apple-properties.c
+ create mode 100644 drivers/firmware/efi/dev-path-parser.c
+
+-- 
+2.10.1
