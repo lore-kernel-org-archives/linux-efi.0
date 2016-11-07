@@ -1,47 +1,59 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [kernel-hardening] Re: [PATCHv4 0/4] WX checking for arm64
-Date: Mon, 7 Nov 2016 19:58:42 +0000
-Message-ID: <CAKv+Gu9c3PmC6CQ0Av9e=OmNr1cbbcwB4synSHiX5-d-xPg55w@mail.gmail.com>
-References: <1477585654-8908-1-git-send-email-labbott@redhat.com>
- <20161030150307.33vc2m7y5y6wzbqc@localhost> <20161107153802.GJ19796@leverpostej>
- <20161107194910.GM19796@leverpostej>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH] arm64: mm: Fix memmap to be initialized for the entire
+ section
+Date: Mon, 7 Nov 2016 21:05:14 +0000
+Message-ID: <20161107210514.GP20591@arm.com>
+References: <1475747527-32387-1-git-send-email-rrichter@cavium.com>
+ <CAKv+Gu-oYzSn_eeqaX3QVFeQjBGkaX-Wh7+oPcQFcXv7J6GOFQ@mail.gmail.com>
+ <20161006161114.GH22012@rric.localdomain>
+ <20161017185801.GT25086@rric.localdomain>
+ <20161027160136.GD24290@arm.com>
+ <20161028091905.GM22012@rric.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20161107194910.GM19796@leverpostej>
+Content-Disposition: inline
+In-Reply-To: <20161028091905.GM22012@rric.localdomain>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: Catalin Marinas <catalin.marinas@arm.com>, Laura Abbott <labbott@redhat.com>, AKASHI Takahiro <takahiro.akashi@linaro.org>, David Brown <david.brown@linaro.org>, Will Deacon <will.deacon@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Kees Cook <keescook@chromium.org>, kernel-hardening@lists.openwall.com, Matt Fleming <matt@codeblueprint.co.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Robert Richter <robert.richter@cavium.com>
+Cc: Robert Richter <rric@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, David Daney <david.daney@cavium.com>, Hanjun Guo <hanjun.guo@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 7 November 2016 at 19:49, Mark Rutland <mark.rutland@arm.com> wrote:
-> On Mon, Nov 07, 2016 at 03:38:02PM +0000, Mark Rutland wrote:
->> On Sun, Oct 30, 2016 at 03:03:07PM +0000, Catalin Marinas wrote:
->> > On Thu, Oct 27, 2016 at 09:27:30AM -0700, Laura Abbott wrote:
->> > > Laura Abbott (4):
->> > >   arm64: dump: Make ptdump debugfs a separate option
->> > >   arm64: dump: Make the page table dumping seq_file optional
->> > >   arm64: dump: Remove max_addr
->> > >   arm64: dump: Add checking for writable and exectuable pages
->> >
->> > Queued for 4.10. Thanks.
->>
->> Catalin mentioned to me that he saw some KASAN splats when testing; it
->> looks like need a fixup something like the below.
->
-> As an aside, it looks like any ptdump usage when KASAN is enabled takes
-> several minutes, which at boot time looks like a hang.
->
-> AFAICT, this is because KASAN allocates *huge* VA ranges (4TB+) worth of
-> zeroed shadow memory at pte granularity (reusing the same pmd, pud,
-> tables), and the ptdump code dutifully walks this with, with the added
-> KASAN instrumentation overhead.
->
-> I'll try to dig into that tomorrow; I suspect/hope it's not necessary to
-> keep all of that mapped.
->
+On Fri, Oct 28, 2016 at 11:19:05AM +0200, Robert Richter wrote:
+> On 27.10.16 17:01:36, Will Deacon wrote:
+> > It feels to me like NOMAP memory is a new type
+> > of memory where there *is* a struct page, but it shouldn't be used for
+> > anything.
+> 
+> IMO, a NOMAP page should just be handled like a reserved page except
+> that the page is marked reserved. See free_low_memory_core_early().
+> Thus, NOMAP pages are not in the free pages list or set to reserved.
+> It is simply not available for mapping at all. Isn't that exactly what
+> it should be?
+> 
+> I also did not yet understand the benefit of the differentiation
+> between NOMAP and reserved and the original motivation for its
+> implementation. I looked through the mail threads but could not find
+> any hint. The only difference I see now is that it is not listed as a
+> reserved page, but as long as it is not freed it should behave the
+> same. I remember the case to handle memory different (coherency,
+> etc.), but are not sure here. Ard, could you explain this?
+> 
+> > I don't think pfn_valid can describe that, given the way it's
+> > currently used, and flipping the logic is just likely to move the problem
+> > elsewhere.
+> > 
+> > What options do we have for fixing this in the NUMA code?
+> 
+> Out of my mind:
+> 
+> 1) Treat NOMAP pages same as reserved pages (my patch).
 
-I have noticed that in the past, but I see how this delay at boot time
-is an issue. However, I don't think there is a huge cost involved in
-terms of memory footprint: AFAIK, the same PMD/PTE/kasan zero page are
-mapped over and over across the range.
+Just to reiterate here, but your patch as it stands will break other parts
+of the kernel. For example, acpi_os_ioremap relies on being able to ioremap
+these regions afaict.
+
+I think any solution involving pfn_valid is just going to move the crash
+around.
+
+Will
