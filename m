@@ -1,35 +1,48 @@
-From: Catalin Marinas <catalin.marinas@arm.com>
-Subject: Re: [PATCHv4 0/4] WX checking for arm64
-Date: Mon, 7 Nov 2016 16:31:29 +0000
-Message-ID: <20161107163128.GA11975@e104818-lin.cambridge.arm.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: Re: [PATCHv4 0/4] WX checking for arm64
+Date: Mon, 7 Nov 2016 19:49:11 +0000
+Message-ID: <20161107194910.GM19796@leverpostej>
 References: <1477585654-8908-1-git-send-email-labbott@redhat.com>
  <20161030150307.33vc2m7y5y6wzbqc@localhost>
  <20161107153802.GJ19796@leverpostej>
- <07589590-7b7d-4ba1-67af-b39c40b16939@redhat.com>
 Reply-To: kernel-hardening@lists.openwall.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <kernel-hardening-return-5252-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+Return-path: <kernel-hardening-return-5253-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
 List-Post: <mailto:kernel-hardening@lists.openwall.com>
 List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
 List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
 List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
 Content-Disposition: inline
-In-Reply-To: <07589590-7b7d-4ba1-67af-b39c40b16939@redhat.com>
-To: Laura Abbott <labbott@redhat.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, linux-efi@vger.kernel.org, Kees Cook <keescook@chromium.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, David Brown <david.brown@linaro.org>, kernel-hardening@lists.openwall.com, linux-arm-kernel@lists.infradead.org
+In-Reply-To: <20161107153802.GJ19796@leverpostej>
+To: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Laura Abbott <labbott@redhat.com>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Brown <david.brown@linaro.org>, Will Deacon <will.deacon@arm.com>, linux-efi@vger.kernel.org, Kees Cook <keescook@chromium.org>, kernel-hardening@lists.openwall.com, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 07, 2016 at 08:26:34AM -0800, Laura Abbott wrote:
-> On 11/07/2016 07:38 AM, Mark Rutland wrote:
-> >From 06fef1ad1138d0808eec770e64458a350941bd2d Mon Sep 17 00:00:00 2001
-> >From: Mark Rutland <mark.rutland@arm.com>
-> >Date: Mon, 7 Nov 2016 15:24:40 +0000
-> >Subject: [PATCH] Fix KASAN splats with DEBUG_WX
-[...]
-> Acked-by: Laura Abbott <labbott@redhat.com>
+On Mon, Nov 07, 2016 at 03:38:02PM +0000, Mark Rutland wrote:
+> On Sun, Oct 30, 2016 at 03:03:07PM +0000, Catalin Marinas wrote:
+> > On Thu, Oct 27, 2016 at 09:27:30AM -0700, Laura Abbott wrote:
+> > > Laura Abbott (4):
+> > >   arm64: dump: Make ptdump debugfs a separate option
+> > >   arm64: dump: Make the page table dumping seq_file optional
+> > >   arm64: dump: Remove max_addr
+> > >   arm64: dump: Add checking for writable and exectuable pages
+> > 
+> > Queued for 4.10. Thanks.
+> 
+> Catalin mentioned to me that he saw some KASAN splats when testing; it
+> looks like need a fixup something like the below.
 
-Thanks. I'll queue the patch on top of the others.
+As an aside, it looks like any ptdump usage when KASAN is enabled takes
+several minutes, which at boot time looks like a hang.
 
--- 
-Catalin
+AFAICT, this is because KASAN allocates *huge* VA ranges (4TB+) worth of
+zeroed shadow memory at pte granularity (reusing the same pmd, pud,
+tables), and the ptdump code dutifully walks this with, with the added
+KASAN instrumentation overhead.
+
+I'll try to dig into that tomorrow; I suspect/hope it's not necessary to
+keep all of that mapped.
+
+Thanks,
+Mark.
