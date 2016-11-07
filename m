@@ -1,163 +1,132 @@
 From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH v4 4/4] thunderbolt: Use Device ROM retrieved from EFI
-Date: Mon, 7 Nov 2016 11:09:00 +0100
-Message-ID: <839f27591049b214299e2cdc44fcf5e6adf4a5c7.1478506920.git.lukas@wunner.de>
-References: <cover.1478506920.git.lukas@wunner.de>
+Subject: Re: [PATCH v3 2/3] x86/efi: Retrieve and assign Apple device
+ properties
+Date: Mon, 7 Nov 2016 11:48:27 +0100
+Message-ID: <20161107104827.GA6310@wunner.de>
+References: <cover.1478145888.git.lukas@wunner.de>
+ <495c463bcb78131bf04ece648719fc8b3e9bd4ba.1478145888.git.lukas@wunner.de>
+ <20161103233100.GC8845@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.1478506920.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20161103233100.GC8845-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Macs with Thunderbolt 1 do not have a unit-specific DROM: The DROM is
-empty with uid 0x1000000000000. (Apple started factory-burning a unit-
-specific DROM with Thunderbolt 2.)
+Hi Matt,
 
-Instead, the NHI EFI driver supplies a DROM in a device property. Use
-it if available. It's only available when booting with the efistub.
-If it's not available, silently fall back to our hardcoded DROM.
+Thanks a lot for the review and comments!
 
-The size of the DROM is always 256 bytes. The number is hardcoded into
-the NHI EFI driver. This commit can deal with an arbitrary size however,
-just in case they ever change that.
+On Thu, Nov 03, 2016 at 11:31:00PM +0000, Matt Fleming wrote:
+> On Thu, 03 Nov, at 11:18:48AM, Lukas Wunner wrote:
+> > +	if ((efi_is_64bit() ?
+> > +			((apple_properties_protocol_64 *)properties)->version :
+> > +			((apple_properties_protocol_32 *)properties)->version)
+> > +								   != 0x10000) {
+> > +		efi_printk(sys_table, "Unsupported properties proto version\n");
+> > +		return;
+> > +	}
+> 
+> It's a minor point, but please don't write the 32/64 code like this.
+> Either use two separate functions, like __file_size32() and
+> __file_size64(), or if that's two much code duplication stash the
+> version field and get_all pointer in stack-local variables at the
+> start of the function.
 
-Background information: The EFI firmware volume contains ROM files for
-the NHI, GMUX and several other chips as well as key material. This
-strategy allows Apple to deploy ROM or key updates by simply publishing
-an EFI firmware update on their website. Drivers do not access those
-files directly but rather through a file server via EFI protocol
-AC5E4829-A8FD-440B-AF33-9FFE013B12D8. Files are identified by GUID, the
-NHI DROM has 339370BD-CFC6-4454-8EF7-704653120818.
+My plan was to introduce an efi_call_proto() macro which hides the
+ternary operator similar to efi_call_early(), then use that to
+deduplicate the code in the EFI stub.  I wanted to postpone opening
+that can of worms until after this series has landed, hence the
+not so readable code above.  To address your (valid) objection,
+I've now included a commit with the efi_call_proto() macro in v4
+and I'll follow up with two separate patches to demonstrate the
+attainable code reduction.
 
-The NHI EFI driver amends that file with a unit-specific uid. The uid
-has 64 bit but its entropy is much lower: 24 bit represent the model,
-24 bit are taken from a serial number, 16 bit are fixed. The NHI EFI
-driver obtains the serial number via the DataHub protocol, copies it
-into the DROM, calculates the CRC and submits the result as a device
-property.
+So this is probably a bit different to what you had in mind.
+If you think this approach isn't well suited for some reason just
+let me know.
 
-A modification is needed in the resume code where we currently read the
-uid of all switches in the hierarchy to detect plug events that occurred
-during sleep. On Thunderbolt 1 root switches this will now lead to a
-mismatch between the uid of the empty DROM and the EFI DROM. Exempt the
-root switch from this check: It's built in, so the uid should never
-change. However we continue to *read* the uid of the root switch, this
-seems like a good way to test its reachability after resume.
 
-Cc: Pedro Vilaça <reverser-P1ImLx+pFc0@public.gmane.org>
-Tested-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> [MacBookPro9,1]
-Tested-by: Pierre Moreau <pierre.morrow-GANU6spQydw@public.gmane.org> [MacBookPro11,3]
-Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Acked-by: Andreas Noever <andreas.noever-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
----
- drivers/thunderbolt/Kconfig  |  1 +
- drivers/thunderbolt/eeprom.c | 43 +++++++++++++++++++++++++++++++++++++++++++
- drivers/thunderbolt/switch.c |  2 +-
- 3 files changed, 45 insertions(+), 1 deletion(-)
+> > +	if (!memcmp((void *)sys_table->fw_vendor, apple, sizeof(apple))) {
+> > +		if (IS_ENABLED(CONFIG_APPLE_PROPERTIES))
+> > +			retrieve_apple_device_properties(boot_params);
+> > +	}
+> > +
+> 
+> Could you split this off into a setup_apple_properties() function to
+> mirror setup_efi_pci()?
 
-diff --git a/drivers/thunderbolt/Kconfig b/drivers/thunderbolt/Kconfig
-index c121acc..0056df7 100644
---- a/drivers/thunderbolt/Kconfig
-+++ b/drivers/thunderbolt/Kconfig
-@@ -1,6 +1,7 @@
- menuconfig THUNDERBOLT
- 	tristate "Thunderbolt support for Apple devices"
- 	depends on PCI
-+	select APPLE_PROPERTIES
- 	select CRC32
- 	help
- 	  Cactus Ridge Thunderbolt Controller driver
-diff --git a/drivers/thunderbolt/eeprom.c b/drivers/thunderbolt/eeprom.c
-index 2b9602c..6392990 100644
---- a/drivers/thunderbolt/eeprom.c
-+++ b/drivers/thunderbolt/eeprom.c
-@@ -5,6 +5,7 @@
-  */
- 
- #include <linux/crc32.h>
-+#include <linux/property.h>
- #include <linux/slab.h>
- #include "tb.h"
- 
-@@ -360,6 +361,40 @@ static int tb_drom_parse_entries(struct tb_switch *sw)
- }
- 
- /**
-+ * tb_drom_copy_efi - copy drom supplied by EFI to sw->drom if present
-+ */
-+static int tb_drom_copy_efi(struct tb_switch *sw, u16 *size)
-+{
-+	struct device *dev = &sw->tb->nhi->pdev->dev;
-+	int len, res;
-+
-+	len = device_property_read_u8_array(dev, "ThunderboltDROM", NULL, 0);
-+	if (len < 0 || len < sizeof(struct tb_drom_header))
-+		return -EINVAL;
-+
-+	sw->drom = kmalloc(len, GFP_KERNEL);
-+	if (!sw->drom)
-+		return -ENOMEM;
-+
-+	res = device_property_read_u8_array(dev, "ThunderboltDROM", sw->drom,
-+									len);
-+	if (res)
-+		goto err;
-+
-+	*size = ((struct tb_drom_header *)sw->drom)->data_len +
-+							  TB_DROM_DATA_START;
-+	if (*size > len)
-+		goto err;
-+
-+	return 0;
-+
-+err:
-+	kfree(sw->drom);
-+	sw->drom = NULL;
-+	return -EINVAL;
-+}
-+
-+/**
-  * tb_drom_read - copy drom to sw->drom and parse it
-  */
- int tb_drom_read(struct tb_switch *sw)
-@@ -374,6 +409,13 @@ int tb_drom_read(struct tb_switch *sw)
- 
- 	if (tb_route(sw) == 0) {
- 		/*
-+		 * Apple's NHI EFI driver supplies a DROM for the root switch
-+		 * in a device property. Use it if available.
-+		 */
-+		if (tb_drom_copy_efi(sw, &size) == 0)
-+			goto parse;
-+
-+		/*
- 		 * The root switch contains only a dummy drom (header only,
- 		 * no entries). Hardcode the configuration here.
- 		 */
-@@ -418,6 +460,7 @@ int tb_drom_read(struct tb_switch *sw)
- 	if (res)
- 		goto err;
- 
-+parse:
- 	header = (void *) sw->drom;
- 
- 	if (header->data_len + TB_DROM_DATA_START != size) {
-diff --git a/drivers/thunderbolt/switch.c b/drivers/thunderbolt/switch.c
-index 9840fde..c6f30b1 100644
---- a/drivers/thunderbolt/switch.c
-+++ b/drivers/thunderbolt/switch.c
-@@ -460,7 +460,7 @@ int tb_switch_resume(struct tb_switch *sw)
- 		tb_sw_warn(sw, "uid read failed\n");
- 		return err;
- 	}
--	if (sw->uid != uid) {
-+	if (sw != sw->tb->root_switch && sw->uid != uid) {
- 		tb_sw_info(sw,
- 			"changed while suspended (uid %#llx -> %#llx)\n",
- 			sw->uid, uid);
--- 
-2.10.1
+We're going to need at least one other Apple-specific quirk to
+masquerade as MacOS X to EFI using another proprietary protocol:
+On 2013+ MacBook Pros with hybrid graphics the integrated Intel GPU
+is invisible to the OS (powered down) unless this identification
+scheme is used.  A preliminary patch for this has been floating around
+for a while but wasn't mainlined so far for a number of reasons:
+https://marc.info/?l=grub-deavel&m=141586614924917&w=2
+
+Conceivably we may need to add further vendor- or device-specific
+quirks to the EFI stub in the future, so I've moved this out of
+efi_main() and into a new setup_quirks() function.
+
+
+> > +
+> > +		key = kzalloc((key_len - sizeof(key_len)) * 4 + 1, GFP_KERNEL);
+> > +		if (!key) {
+> > +			dev_err(dev, "cannot allocate property name\n");
+> > +			break;
+> > +		}
+> 
+> Could you add a comment to document the kzalloc() size argument above?
+
+Ok, done.  I'm allocating 4 bytes for each character to accommodate UTF-8
+code points, plus 1 null byte.  I'm aware that the string may need much
+less than 4 bytes per character, but it's only allocated temporarily
+and freed after the properties have been assigned to the device.
+
+
+> > +	if (i != dev_header->prop_count) {
+> > +		dev_err(dev, "got %d device properties, expected %u\n", i,
+> > +			dev_header->prop_count);
+> > +		print_hex_dump(KERN_ERR, pr_fmt(), DUMP_PREFIX_OFFSET,
+> > +			16, 1, dev_header, dev_header->len, true);
+> > +	} else
+> > +		dev_info(dev, "assigning %d device properties\n", i);
+> 
+> Mismatched braces are frowned upon in the CodingStyle guide. Please
+> use braces for both the 'if' and 'else'. Alternatively, return early
+> for one of the conditions (and save a level of indentation too).
+
+Good idea, thanks.
+
+
+> Newline here please.
+[...]
+> And a newline here.
+[...]
+> Please sprinkle a few newlines to make this more readable.
+[...]
+> Newline please.
+[...]
+> Newline.
+[...]
+> Newline.
+[...]
+> Newline.
+
+Yes, sorry, I guess sometimes my "compact code" fetishism becomes a bit
+exaggerated.
+
+
+On Mon, Nov 07, 2016 at 09:37:14AM +0000, Matt Fleming wrote:
+> Ideally, I'd like to send the v4.10 material to tip by the end of the
+> week.
+
+Yes, thanks for the heads-up, it was already on my radar that you send
+out the pull after rc4 so I cooked this up over the weekend.
+
+Best regards,
+
+Lukas
