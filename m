@@ -1,143 +1,109 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: [RFC PATCH v3 20/20] x86: Add support to make use of Secure Memory
- Encryption
-Date: Wed, 9 Nov 2016 18:38:38 -0600
-Message-ID: <20161110003838.3280.23327.stgit@tlendack-t1.amdoffice.net>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [RFC PATCH v3 01/20] x86: Documentation for AMD Secure Memory
+ Encryption (SME)
+Date: Thu, 10 Nov 2016 11:51:14 +0100
+Message-ID: <20161110105114.oiwcgpb436dxrdpb@pd.tnic>
 References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+ <20161110003439.3280.82634.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
-Cc: Rik van Riel <riel@redhat.com>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo
- Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo
- Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas
- Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20161110003439.3280.82634.stgit@tlendack-t1.amdoffice.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-This patch adds the support to check if SME has been enabled and if the
-mem_encrypt=on command line option is set. If both of these conditions
-are true, then the encryption mask is set and the kernel is encrypted
-"in place."
+On Wed, Nov 09, 2016 at 06:34:39PM -0600, Tom Lendacky wrote:
+> This patch adds a Documenation entry to decribe the AMD Secure Memory
+> Encryption (SME) feature.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  Documentation/kernel-parameters.txt         |    5 +++
+>  Documentation/x86/amd-memory-encryption.txt |   40 +++++++++++++++++++++++++++
+>  2 files changed, 45 insertions(+)
+>  create mode 100644 Documentation/x86/amd-memory-encryption.txt
+> 
+> diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+> index 030e9e9..4c730b0 100644
+> --- a/Documentation/kernel-parameters.txt
+> +++ b/Documentation/kernel-parameters.txt
+> @@ -2282,6 +2282,11 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+>  			memory contents and reserves bad memory
+>  			regions that are detected.
+>  
+> +	mem_encrypt=	[X86-64] Enable AMD Secure Memory Encryption (SME)
+> +			Memory encryption is disabled by default, using this
+> +			switch, memory encryption can be enabled.
 
-Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
----
- arch/x86/kernel/head_64.S          |    1 +
- arch/x86/kernel/mem_encrypt_init.c |   60 +++++++++++++++++++++++++++++++++++-
- arch/x86/mm/mem_encrypt.c          |    2 +
- 3 files changed, 62 insertions(+), 1 deletion(-)
+I'd say here:
 
-diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
-index e8a7272..c225433 100644
---- a/arch/x86/kernel/head_64.S
-+++ b/arch/x86/kernel/head_64.S
-@@ -100,6 +100,7 @@ startup_64:
- 	 * to include it in the page table fixups.
- 	 */
- 	push	%rsi
-+	movq	%rsi, %rdi
- 	call	sme_enable
- 	pop	%rsi
- 	movq	%rax, %r12
-diff --git a/arch/x86/kernel/mem_encrypt_init.c b/arch/x86/kernel/mem_encrypt_init.c
-index 7bdd159..c94ceb8 100644
---- a/arch/x86/kernel/mem_encrypt_init.c
-+++ b/arch/x86/kernel/mem_encrypt_init.c
-@@ -16,9 +16,14 @@
- #include <linux/mm.h>
- 
- #include <asm/sections.h>
-+#include <asm/processor-flags.h>
-+#include <asm/msr.h>
-+#include <asm/cmdline.h>
- 
- #ifdef CONFIG_AMD_MEM_ENCRYPT
- 
-+static char sme_cmdline_arg[] __initdata = "mem_encrypt=on";
-+
- extern void sme_encrypt_execute(unsigned long, unsigned long, unsigned long,
- 				void *, pgd_t *);
- 
-@@ -219,7 +224,60 @@ unsigned long __init sme_get_me_mask(void)
- 	return sme_me_mask;
- }
- 
--unsigned long __init sme_enable(void)
-+unsigned long __init sme_enable(void *boot_data)
- {
-+#ifdef CONFIG_AMD_MEM_ENCRYPT
-+	struct boot_params *bp = boot_data;
-+	unsigned int eax, ebx, ecx, edx;
-+	u64 msr;
-+	unsigned long cmdline_ptr;
-+	void *cmdline_arg;
-+
-+	/* Check for an AMD processor */
-+	eax = 0;
-+	ecx = 0;
-+	native_cpuid(&eax, &ebx, &ecx, &edx);
-+	if ((ebx != 0x68747541) || (edx != 0x69746e65) || (ecx != 0x444d4163))
-+		goto out;
-+
-+	/* Check for the SME support leaf */
-+	eax = 0x80000000;
-+	ecx = 0;
-+	native_cpuid(&eax, &ebx, &ecx, &edx);
-+	if (eax < 0x8000001f)
-+		goto out;
-+
-+	/*
-+	 * Check for the SME feature:
-+	 *   CPUID Fn8000_001F[EAX] - Bit 0
-+	 *     Secure Memory Encryption support
-+	 *   CPUID Fn8000_001F[EBX] - Bits 5:0
-+	 *     Pagetable bit position used to indicate encryption
-+	 */
-+	eax = 0x8000001f;
-+	ecx = 0;
-+	native_cpuid(&eax, &ebx, &ecx, &edx);
-+	if (!(eax & 1))
-+		goto out;
-+
-+	/* Check if SME is enabled */
-+	msr = native_read_msr(MSR_K8_SYSCFG);
-+	if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
-+		goto out;
-+
-+	/*
-+	 * Fixups have not been to applied phys_base yet, so we must obtain
-+	 * the address to the SME command line option in the following way.
-+	 */
-+	asm ("lea sme_cmdline_arg(%%rip), %0"
-+	     : "=r" (cmdline_arg)
-+	     : "p" (sme_cmdline_arg));
-+	cmdline_ptr = bp->hdr.cmd_line_ptr | ((u64)bp->ext_cmd_line_ptr << 32);
-+	if (cmdline_find_option_bool((char *)cmdline_ptr, cmdline_arg))
-+		sme_me_mask = 1UL << (ebx & 0x3f);
-+
-+out:
-+#endif	/* CONFIG_AMD_MEM_ENCRYPT */
-+
- 	return sme_me_mask;
- }
-diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-index e351003..d0bc3f5 100644
---- a/arch/x86/mm/mem_encrypt.c
-+++ b/arch/x86/mm/mem_encrypt.c
-@@ -251,6 +251,8 @@ void __init mem_encrypt_init(void)
- 
- 	/* Make SWIOTLB use an unencrypted DMA area */
- 	swiotlb_clear_encryption();
-+
-+	pr_info("AMD Secure Memory Encryption active\n");
- }
- 
- void swiotlb_set_mem_unenc(void *vaddr, unsigned long size)
+			"Force-enable memory encryption if it is disabled in the
+			BIOS."
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+> +			on: enable memory encryption
+> +
+>  	meye.*=		[HW] Set MotionEye Camera parameters
+>  			See Documentation/video4linux/meye.txt.
+>  
+> diff --git a/Documentation/x86/amd-memory-encryption.txt b/Documentation/x86/amd-memory-encryption.txt
+> new file mode 100644
+> index 0000000..788d871
+> --- /dev/null
+> +++ b/Documentation/x86/amd-memory-encryption.txt
+> @@ -0,0 +1,40 @@
+> +Secure Memory Encryption (SME) is a feature found on AMD processors.
+> +
+> +SME provides the ability to mark individual pages of memory as encrypted using
+> +the standard x86 page tables.  A page that is marked encrypted will be
+> +automatically decrypted when read from DRAM and encrypted when written to
+> +DRAM.  SME can therefore be used to protect the contents of DRAM from physical
+> +attacks on the system.
+> +
+> +A page is encrypted when a page table entry has the encryption bit set (see
+> +below how to determine the position of the bit).  The encryption bit can be
+> +specified in the cr3 register, allowing the PGD table to be encrypted. Each
+> +successive level of page tables can also be encrypted.
+> +
+> +Support for SME can be determined through the CPUID instruction. The CPUID
+> +function 0x8000001f reports information related to SME:
+> +
+> +	0x8000001f[eax]:
+> +		Bit[0] indicates support for SME
+> +	0x8000001f[ebx]:
+> +		Bit[5:0]  pagetable bit number used to enable memory encryption
+> +		Bit[11:6] reduction in physical address space, in bits, when
+> +			  memory encryption is enabled (this only affects system
+> +			  physical addresses, not guest physical addresses)
+> +
+> +If support for SME is present, MSR 0xc00100010 (SYS_CFG) can be used to
+> +determine if SME is enabled and/or to enable memory encryption:
+> +
+> +	0xc0010010:
+> +		Bit[23]   0 = memory encryption features are disabled
+> +			  1 = memory encryption features are enabled
+> +
+> +Linux relies on BIOS to set this bit if BIOS has determined that the reduction
+> +in the physical address space as a result of enabling memory encryption (see
+> +CPUID information above) will not conflict with the address space resource
+> +requirements for the system.  If this bit is not set upon Linux startup then
+> +Linux itself will not set it and memory encryption will not be possible.
+> +
+> +SME support is configurable through the AMD_MEM_ENCRYPT config option.
+> +Additionally, the mem_encrypt=on command line parameter is required to activate
+> +memory encryption.
+
+So how am I to understand this? We won't have TSME or we will but it
+will be off by default and users will have to enable it in the BIOS or
+will have to boot with mem_encrypt=on...?
+
+Can you please expand on all the possible options there would be
+available to users?
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
