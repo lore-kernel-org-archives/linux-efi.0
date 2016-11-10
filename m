@@ -1,131 +1,420 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: [RFC PATCH v3 17/20] x86/kvm: Enable Secure Memory Encryption of
-	nested page tables
-Date: Wed, 9 Nov 2016 18:38:05 -0600
-Message-ID: <20161110003805.3280.49182.stgit@tlendack-t1.amdoffice.net>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: [RFC PATCH v3 19/20] x86: Add support to make use of Secure Memory
+ Encryption
+Date: Wed, 9 Nov 2016 18:38:26 -0600
+Message-ID: <20161110003826.3280.5546.stgit@tlendack-t1.amdoffice.net>
 References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20161110003426.3280.2999.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Cc: Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
+Cc: Rik van Riel <riel@redhat.com>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo
+ Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo
+ Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas
+ Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-Update the KVM support to include the memory encryption mask when creating
-and using nested page tables.
+This patch adds the support to check if SME has been enabled and if the
+mem_encrypt=on command line option is set. If both of these conditions
+are true, then the encryption mask is set and the kernel is encrypted
+"in place."
 
-Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/include/asm/kvm_host.h |    3 ++-
- arch/x86/kvm/mmu.c              |    8 ++++++--
- arch/x86/kvm/vmx.c              |    3 ++-
- arch/x86/kvm/x86.c              |    3 ++-
- 4 files changed, 12 insertions(+), 5 deletions(-)
+ arch/x86/kernel/Makefile           |    1 
+ arch/x86/kernel/mem_encrypt_boot.S |  156 +++++++++++++++++++++++++++++
+ arch/x86/kernel/mem_encrypt_init.c |  196 ++++++++++++++++++++++++++++++++++++
+ 3 files changed, 353 insertions(+)
+ create mode 100644 arch/x86/kernel/mem_encrypt_boot.S
 
-diff --git a/arch/x86/include/asm/kvm_host.h b/arch/x86/include/asm/kvm_host.h
-index 33ae3a4..c51c1cb 100644
---- a/arch/x86/include/asm/kvm_host.h
-+++ b/arch/x86/include/asm/kvm_host.h
-@@ -1039,7 +1039,8 @@ void kvm_mmu_setup(struct kvm_vcpu *vcpu);
- void kvm_mmu_init_vm(struct kvm *kvm);
- void kvm_mmu_uninit_vm(struct kvm *kvm);
- void kvm_mmu_set_mask_ptes(u64 user_mask, u64 accessed_mask,
--		u64 dirty_mask, u64 nx_mask, u64 x_mask, u64 p_mask);
-+		u64 dirty_mask, u64 nx_mask, u64 x_mask, u64 p_mask,
-+		u64 me_mask);
+diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
+index 27e22f4..020759f 100644
+--- a/arch/x86/kernel/Makefile
++++ b/arch/x86/kernel/Makefile
+@@ -143,4 +143,5 @@ ifeq ($(CONFIG_X86_64),y)
+ 	obj-y				+= vsmp_64.o
  
- void kvm_mmu_reset_context(struct kvm_vcpu *vcpu);
- void kvm_mmu_slot_remove_write_access(struct kvm *kvm,
-diff --git a/arch/x86/kvm/mmu.c b/arch/x86/kvm/mmu.c
-index 3d4cc8cc..a7040f4 100644
---- a/arch/x86/kvm/mmu.c
-+++ b/arch/x86/kvm/mmu.c
-@@ -122,7 +122,7 @@ module_param(dbg, bool, 0644);
- 					    * PT32_LEVEL_BITS))) - 1))
+ 	obj-y				+= mem_encrypt_init.o
++	obj-y				+= mem_encrypt_boot.o
+ endif
+diff --git a/arch/x86/kernel/mem_encrypt_boot.S b/arch/x86/kernel/mem_encrypt_boot.S
+new file mode 100644
+index 0000000..d4917ba
+--- /dev/null
++++ b/arch/x86/kernel/mem_encrypt_boot.S
+@@ -0,0 +1,156 @@
++/*
++ * AMD Memory Encryption Support
++ *
++ * Copyright (C) 2016 Advanced Micro Devices, Inc.
++ *
++ * Author: Tom Lendacky <thomas.lendacky@amd.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#include <linux/linkage.h>
++#include <asm/pgtable.h>
++#include <asm/page.h>
++#include <asm/processor-flags.h>
++#include <asm/msr-index.h>
++
++	.text
++	.code64
++ENTRY(sme_encrypt_execute)
++
++#ifdef CONFIG_AMD_MEM_ENCRYPT
++	/*
++	 * Entry parameters:
++	 *   RDI - virtual address for the encrypted kernel mapping
++	 *   RSI - virtual address for the un-encrypted kernel mapping
++	 *   RDX - length of kernel
++	 *   RCX - address of the encryption workarea
++	 *     - stack page (PAGE_SIZE)
++	 *     - encryption routine page (PAGE_SIZE)
++	 *     - intermediate copy buffer (PMD_PAGE_SIZE)
++	 *    R8 - address of the pagetables to use for encryption
++	 */
++
++	/* Set up a one page stack in the non-encrypted memory area */
++	movq	%rcx, %rax
++	addq	$PAGE_SIZE, %rax
++	movq	%rsp, %rbp
++	movq	%rax, %rsp
++	push	%rbp
++
++	push	%r12
++	push	%r13
++
++	movq	%rdi, %r10
++	movq	%rsi, %r11
++	movq	%rdx, %r12
++	movq	%rcx, %r13
++
++	/* Copy encryption routine into the workarea */
++	movq	%rax, %rdi
++	leaq	.Lencrypt_start(%rip), %rsi
++	movq	$(.Lencrypt_stop - .Lencrypt_start), %rcx
++	rep	movsb
++
++	/* Setup registers for call */
++	movq	%r10, %rdi
++	movq	%r11, %rsi
++	movq	%r8, %rdx
++	movq	%r12, %rcx
++	movq	%rax, %r8
++	addq	$PAGE_SIZE, %r8
++
++	/* Call the encryption routine */
++	call	*%rax
++
++	pop	%r13
++	pop	%r12
++
++	pop	%rsp			/* Restore original stack pointer */
++.Lencrypt_exit:
++#endif	/* CONFIG_AMD_MEM_ENCRYPT */
++
++	ret
++ENDPROC(sme_encrypt_execute)
++
++#ifdef CONFIG_AMD_MEM_ENCRYPT
++/*
++ * Routine used to encrypt kernel.
++ *   This routine must be run outside of the kernel proper since
++ *   the kernel will be encrypted during the process. So this
++ *   routine is defined here and then copied to an area outside
++ *   of the kernel where it will remain and run un-encrypted
++ *   during execution.
++ *
++ *   On entry the registers must be:
++ *     RDI - virtual address for the encrypted kernel mapping
++ *     RSI - virtual address for the un-encrypted kernel mapping
++ *     RDX - address of the pagetables to use for encryption
++ *     RCX - length of kernel
++ *      R8 - intermediate copy buffer
++ *
++ *     RAX - points to this routine
++ *
++ * The kernel will be encrypted by copying from the non-encrypted
++ * kernel space to an intermediate buffer and then copying from the
++ * intermediate buffer back to the encrypted kernel space. The physical
++ * addresses of the two kernel space mappings are the same which
++ * results in the kernel being encrypted "in place".
++ */
++.Lencrypt_start:
++	/* Enable the new page tables */
++	mov	%rdx, %cr3
++
++	/* Flush any global TLBs */
++	mov	%cr4, %rdx
++	andq	$~X86_CR4_PGE, %rdx
++	mov	%rdx, %cr4
++	orq	$X86_CR4_PGE, %rdx
++	mov	%rdx, %cr4
++
++	/* Set the PAT register PA5 entry to write-protect */
++	push	%rcx
++	movl	$MSR_IA32_CR_PAT, %ecx
++	rdmsr
++	push	%rdx			/* Save original PAT value */
++	andl	$0xffff00ff, %edx	/* Clear PA5 */
++	orl	$0x00000500, %edx	/* Set PA5 to WP */
++	wrmsr
++	pop	%rdx			/* RDX contains original PAT value */
++	pop	%rcx
++
++	movq	%rcx, %r9		/* Save length */
++	movq	%rdi, %r10		/* Save destination address */
++	movq	%rsi, %r11		/* Save source address */
++
++	wbinvd				/* Invalidate any cache entries */
++
++	/* Copy/encrypt 2MB at a time */
++1:
++	movq	%r11, %rsi
++	movq	%r8, %rdi
++	movq	$PMD_PAGE_SIZE, %rcx
++	rep	movsb
++
++	movq	%r8, %rsi
++	movq	%r10, %rdi
++	movq	$PMD_PAGE_SIZE, %rcx
++	rep	movsb
++
++	addq	$PMD_PAGE_SIZE, %r11
++	addq	$PMD_PAGE_SIZE, %r10
++	subq	$PMD_PAGE_SIZE, %r9
++	jnz	1b
++
++	/* Restore PAT register */
++	push	%rdx
++	movl	$MSR_IA32_CR_PAT, %ecx
++	rdmsr
++	pop	%rdx
++	wrmsr
++
++	ret
++.Lencrypt_stop:
++#endif	/* CONFIG_AMD_MEM_ENCRYPT */
+diff --git a/arch/x86/kernel/mem_encrypt_init.c b/arch/x86/kernel/mem_encrypt_init.c
+index 388d6fb..7bdd159 100644
+--- a/arch/x86/kernel/mem_encrypt_init.c
++++ b/arch/x86/kernel/mem_encrypt_init.c
+@@ -13,9 +13,205 @@
+ #include <linux/linkage.h>
+ #include <linux/init.h>
+ #include <linux/mem_encrypt.h>
++#include <linux/mm.h>
++
++#include <asm/sections.h>
++
++#ifdef CONFIG_AMD_MEM_ENCRYPT
++
++extern void sme_encrypt_execute(unsigned long, unsigned long, unsigned long,
++				void *, pgd_t *);
++
++#define PGD_FLAGS	_KERNPG_TABLE_NO_ENC
++#define PUD_FLAGS	_KERNPG_TABLE_NO_ENC
++#define PMD_FLAGS	__PAGE_KERNEL_LARGE_EXEC
++
++static void __init *sme_pgtable_entry(pgd_t *pgd, void *next_page,
++				      void *vaddr, pmdval_t pmd_val)
++{
++	pud_t *pud;
++	pmd_t *pmd;
++
++	pgd += pgd_index((unsigned long)vaddr);
++	if (pgd_none(*pgd)) {
++		pud = next_page;
++		memset(pud, 0, sizeof(*pud) * PTRS_PER_PUD);
++		native_set_pgd(pgd,
++			       native_make_pgd((unsigned long)pud + PGD_FLAGS));
++		next_page += sizeof(*pud) * PTRS_PER_PUD;
++	} else {
++		pud = (pud_t *)(native_pgd_val(*pgd) & ~PTE_FLAGS_MASK);
++	}
++
++	pud += pud_index((unsigned long)vaddr);
++	if (pud_none(*pud)) {
++		pmd = next_page;
++		memset(pmd, 0, sizeof(*pmd) * PTRS_PER_PMD);
++		native_set_pud(pud,
++			       native_make_pud((unsigned long)pmd + PUD_FLAGS));
++		next_page += sizeof(*pmd) * PTRS_PER_PMD;
++	} else {
++		pmd = (pmd_t *)(native_pud_val(*pud) & ~PTE_FLAGS_MASK);
++	}
++
++	pmd += pmd_index((unsigned long)vaddr);
++	if (pmd_none(*pmd) || !pmd_large(*pmd))
++		native_set_pmd(pmd, native_make_pmd(pmd_val));
++
++	return next_page;
++}
++
++static unsigned long __init sme_pgtable_calc(unsigned long start,
++					     unsigned long end)
++{
++	unsigned long addr, total;
++
++	total = 0;
++	addr = start;
++	while (addr < end) {
++		unsigned long pgd_end;
++
++		pgd_end = (addr & PGDIR_MASK) + PGDIR_SIZE;
++		if (pgd_end > end)
++			pgd_end = end;
++
++		total += sizeof(pud_t) * PTRS_PER_PUD * 2;
++
++		while (addr < pgd_end) {
++			unsigned long pud_end;
++
++			pud_end = (addr & PUD_MASK) + PUD_SIZE;
++			if (pud_end > end)
++				pud_end = end;
++
++			total += sizeof(pmd_t) * PTRS_PER_PMD * 2;
++
++			addr = pud_end;
++		}
++
++		addr = pgd_end;
++	}
++	total += sizeof(pgd_t) * PTRS_PER_PGD;
++
++	return total;
++}
++#endif	/* CONFIG_AMD_MEM_ENCRYPT */
  
- #define PT64_PERM_MASK (PT_PRESENT_MASK | PT_WRITABLE_MASK | shadow_user_mask \
--			| shadow_x_mask | shadow_nx_mask)
-+			| shadow_x_mask | shadow_nx_mask | shadow_me_mask)
- 
- #define ACC_EXEC_MASK    1
- #define ACC_WRITE_MASK   PT_WRITABLE_MASK
-@@ -177,6 +177,7 @@ static u64 __read_mostly shadow_accessed_mask;
- static u64 __read_mostly shadow_dirty_mask;
- static u64 __read_mostly shadow_mmio_mask;
- static u64 __read_mostly shadow_present_mask;
-+static u64 __read_mostly shadow_me_mask;
- 
- static void mmu_spte_set(u64 *sptep, u64 spte);
- static void mmu_free_roots(struct kvm_vcpu *vcpu);
-@@ -284,7 +285,8 @@ static bool check_mmio_spte(struct kvm_vcpu *vcpu, u64 spte)
- }
- 
- void kvm_mmu_set_mask_ptes(u64 user_mask, u64 accessed_mask,
--		u64 dirty_mask, u64 nx_mask, u64 x_mask, u64 p_mask)
-+		u64 dirty_mask, u64 nx_mask, u64 x_mask, u64 p_mask,
-+		u64 me_mask)
+ void __init sme_encrypt_kernel(void)
  {
- 	shadow_user_mask = user_mask;
- 	shadow_accessed_mask = accessed_mask;
-@@ -292,6 +294,7 @@ void kvm_mmu_set_mask_ptes(u64 user_mask, u64 accessed_mask,
- 	shadow_nx_mask = nx_mask;
- 	shadow_x_mask = x_mask;
- 	shadow_present_mask = p_mask;
-+	shadow_me_mask = me_mask;
++#ifdef CONFIG_AMD_MEM_ENCRYPT
++	pgd_t *pgd;
++	void *workarea, *next_page, *vaddr;
++	unsigned long kern_start, kern_end, kern_len;
++	unsigned long index, paddr, pmd_flags;
++	unsigned long exec_size, full_size;
++
++	/* If SME is not active then no need to prepare */
++	if (!sme_me_mask)
++		return;
++
++	/* Set the workarea to be after the kernel */
++	workarea = (void *)ALIGN(__pa_symbol(_end), PMD_PAGE_SIZE);
++
++	/*
++	 * Prepare for encrypting the kernel by building new pagetables with
++	 * the necessary attributes needed to encrypt the kernel in place.
++	 *
++	 *   One range of virtual addresses will map the memory occupied
++	 *   by the kernel as encrypted.
++	 *
++	 *   Another range of virtual addresses will map the memory occupied
++	 *   by the kernel as un-encrypted and write-protected.
++	 *
++	 *     The use of write-protect attribute will prevent any of the
++	 *     memory from being cached.
++	 */
++
++	/* Physical address gives us the identity mapped virtual address */
++	kern_start = __pa_symbol(_text);
++	kern_end = ALIGN(__pa_symbol(_end), PMD_PAGE_SIZE) - 1;
++	kern_len = kern_end - kern_start + 1;
++
++	/*
++	 * Calculate required number of workarea bytes needed:
++	 *   executable encryption area size:
++	 *     stack page (PAGE_SIZE)
++	 *     encryption routine page (PAGE_SIZE)
++	 *     intermediate copy buffer (PMD_PAGE_SIZE)
++	 *   pagetable structures for workarea (in case not currently mapped)
++	 *   pagetable structures for the encryption of the kernel
++	 */
++	exec_size = (PAGE_SIZE * 2) + PMD_PAGE_SIZE;
++
++	full_size = exec_size;
++	full_size += ALIGN(exec_size, PMD_PAGE_SIZE) / PMD_PAGE_SIZE *
++		     sizeof(pmd_t) * PTRS_PER_PMD;
++	full_size += sme_pgtable_calc(kern_start, kern_end + exec_size);
++
++	next_page = workarea + exec_size;
++
++	/* Make sure the current pagetables have entries for the workarea */
++	pgd = (pgd_t *)native_read_cr3();
++	paddr = (unsigned long)workarea;
++	while (paddr < (unsigned long)workarea + full_size) {
++		vaddr = (void *)paddr;
++		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
++					      paddr + PMD_FLAGS);
++
++		paddr += PMD_PAGE_SIZE;
++	}
++	native_write_cr3(native_read_cr3());
++
++	/* Calculate a PGD index to be used for the un-encrypted mapping */
++	index = (pgd_index(kern_end + full_size) + 1) & (PTRS_PER_PGD - 1);
++	index <<= PGDIR_SHIFT;
++
++	/* Set and clear the PGD */
++	pgd = next_page;
++	memset(pgd, 0, sizeof(*pgd) * PTRS_PER_PGD);
++	next_page += sizeof(*pgd) * PTRS_PER_PGD;
++
++	/* Add encrypted (identity) mappings for the kernel */
++	pmd_flags = PMD_FLAGS | _PAGE_ENC;
++	paddr = kern_start;
++	while (paddr < kern_end) {
++		vaddr = (void *)paddr;
++		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
++					      paddr + pmd_flags);
++
++		paddr += PMD_PAGE_SIZE;
++	}
++
++	/* Add un-encrypted (non-identity) mappings for the kernel */
++	pmd_flags = (PMD_FLAGS & ~_PAGE_CACHE_MASK) | (_PAGE_PAT | _PAGE_PWT);
++	paddr = kern_start;
++	while (paddr < kern_end) {
++		vaddr = (void *)(paddr + index);
++		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
++					      paddr + pmd_flags);
++
++		paddr += PMD_PAGE_SIZE;
++	}
++
++	/* Add the workarea to both mappings */
++	paddr = kern_end + 1;
++	while (paddr < (kern_end + exec_size)) {
++		vaddr = (void *)paddr;
++		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
++					      paddr + PMD_FLAGS);
++
++		vaddr = (void *)(paddr + index);
++		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
++					      paddr + PMD_FLAGS);
++
++		paddr += PMD_PAGE_SIZE;
++	}
++
++	/* Perform the encryption */
++	sme_encrypt_execute(kern_start, kern_start + index, kern_len,
++			    workarea, pgd);
++
++#endif	/* CONFIG_AMD_MEM_ENCRYPT */
  }
- EXPORT_SYMBOL_GPL(kvm_mmu_set_mask_ptes);
  
-@@ -2553,6 +2556,7 @@ static int set_spte(struct kvm_vcpu *vcpu, u64 *sptep,
- 		pte_access &= ~ACC_WRITE_MASK;
- 
- 	spte |= (u64)pfn << PAGE_SHIFT;
-+	spte |= shadow_me_mask;
- 
- 	if (pte_access & ACC_WRITE_MASK) {
- 
-diff --git a/arch/x86/kvm/vmx.c b/arch/x86/kvm/vmx.c
-index 121fdf6..1ae30c2 100644
---- a/arch/x86/kvm/vmx.c
-+++ b/arch/x86/kvm/vmx.c
-@@ -6482,7 +6482,8 @@ static __init int hardware_setup(void)
- 			(enable_ept_ad_bits) ? VMX_EPT_DIRTY_BIT : 0ull,
- 			0ull, VMX_EPT_EXECUTABLE_MASK,
- 			cpu_has_vmx_ept_execute_only() ?
--				      0ull : VMX_EPT_READABLE_MASK);
-+				      0ull : VMX_EPT_READABLE_MASK,
-+			0ull);
- 		ept_set_mmio_spte_mask();
- 		kvm_enable_tdp();
- 	} else
-diff --git a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
-index 2c7e775..3b4d967 100644
---- a/arch/x86/kvm/x86.c
-+++ b/arch/x86/kvm/x86.c
-@@ -65,6 +65,7 @@
- #include <asm/pvclock.h>
- #include <asm/div64.h>
- #include <asm/irq_remapping.h>
-+#include <asm/mem_encrypt.h>
- 
- #define CREATE_TRACE_POINTS
- #include "trace.h"
-@@ -5875,7 +5876,7 @@ int kvm_arch_init(void *opaque)
- 
- 	kvm_mmu_set_mask_ptes(PT_USER_MASK, PT_ACCESSED_MASK,
- 			PT_DIRTY_MASK, PT64_NX_MASK, 0,
--			PT_PRESENT_MASK);
-+			PT_PRESENT_MASK, sme_me_mask);
- 	kvm_timer_init();
- 
- 	perf_register_guest_info_callbacks(&kvm_guest_cbs);
+ unsigned long __init sme_get_me_mask(void)
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
