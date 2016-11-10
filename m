@@ -1,8 +1,8 @@
 From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: [RFC PATCH v3 11/20] x86: Add support for changing memory
-	encryption attribute
-Date: Wed, 9 Nov 2016 18:36:55 -0600
-Message-ID: <20161110003655.3280.57333.stgit@tlendack-t1.amdoffice.net>
+Subject: [RFC PATCH v3 12/20] x86: Decrypt trampoline area if memory
+	encryption is active
+Date: Wed, 9 Nov 2016 18:37:08 -0600
+Message-ID: <20161110003708.3280.29934.stgit@tlendack-t1.amdoffice.net>
 References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,211 +22,40 @@ To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z
 Cc: Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This patch adds support to be change the memory encryption attribute for
-one or more memory pages.
+When Secure Memory Encryption is enabled, the trampoline area must not
+be encrypted. A CPU running in real mode will not be able to decrypt
+memory that has been encrypted because it will not be able to use addresses
+with the memory encryption mask.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 ---
- arch/x86/include/asm/cacheflush.h  |    3 +
- arch/x86/include/asm/mem_encrypt.h |   13 ++++++
- arch/x86/mm/mem_encrypt.c          |   43 +++++++++++++++++++++
- arch/x86/mm/pageattr.c             |   73 ++++++++++++++++++++++++++++++++++++
- 4 files changed, 132 insertions(+)
+ arch/x86/realmode/init.c |    9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-diff --git a/arch/x86/include/asm/cacheflush.h b/arch/x86/include/asm/cacheflush.h
-index 61518cf..bfb08e5 100644
---- a/arch/x86/include/asm/cacheflush.h
-+++ b/arch/x86/include/asm/cacheflush.h
-@@ -13,6 +13,7 @@
-  * Executability : eXeutable, NoteXecutable
-  * Read/Write    : ReadOnly, ReadWrite
-  * Presence      : NotPresent
-+ * Encryption    : ENCrypted, DECrypted
-  *
-  * Within a category, the attributes are mutually exclusive.
-  *
-@@ -48,6 +49,8 @@ int set_memory_ro(unsigned long addr, int numpages);
- int set_memory_rw(unsigned long addr, int numpages);
- int set_memory_np(unsigned long addr, int numpages);
- int set_memory_4k(unsigned long addr, int numpages);
-+int set_memory_enc(unsigned long addr, int numpages);
-+int set_memory_dec(unsigned long addr, int numpages);
+diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
+index 5db706f1..44ed32a 100644
+--- a/arch/x86/realmode/init.c
++++ b/arch/x86/realmode/init.c
+@@ -6,6 +6,7 @@
+ #include <asm/pgtable.h>
+ #include <asm/realmode.h>
+ #include <asm/tlbflush.h>
++#include <asm/mem_encrypt.h>
  
- int set_memory_array_uc(unsigned long *addr, int addrinarray);
- int set_memory_array_wc(unsigned long *addr, int addrinarray);
-diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
-index 0b40f79..d544481 100644
---- a/arch/x86/include/asm/mem_encrypt.h
-+++ b/arch/x86/include/asm/mem_encrypt.h
-@@ -21,6 +21,9 @@
+ struct real_mode_header *real_mode_header;
+ u32 *trampoline_cr4_features;
+@@ -130,6 +131,14 @@ static void __init set_real_mode_permissions(void)
+ 	unsigned long text_start =
+ 		(unsigned long) __va(real_mode_header->text_start);
  
- extern unsigned long sme_me_mask;
- 
-+int sme_set_mem_enc(void *vaddr, unsigned long size);
-+int sme_set_mem_unenc(void *vaddr, unsigned long size);
-+
- void __init sme_early_mem_enc(resource_size_t paddr,
- 			      unsigned long size);
- void __init sme_early_mem_dec(resource_size_t paddr,
-@@ -39,6 +42,16 @@ void __init sme_early_init(void);
- 
- #define sme_me_mask	0UL
- 
-+static inline int sme_set_mem_enc(void *vaddr, unsigned long size)
-+{
-+	return 0;
-+}
-+
-+static inline int sme_set_mem_unenc(void *vaddr, unsigned long size)
-+{
-+	return 0;
-+}
-+
- static inline void __init sme_early_mem_enc(resource_size_t paddr,
- 					    unsigned long size)
- {
-diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-index 411210d..41cfdf9 100644
---- a/arch/x86/mm/mem_encrypt.c
-+++ b/arch/x86/mm/mem_encrypt.c
-@@ -18,6 +18,7 @@
- #include <asm/fixmap.h>
- #include <asm/setup.h>
- #include <asm/bootparam.h>
-+#include <asm/cacheflush.h>
- 
- extern pmdval_t early_pmd_flags;
- int __init __early_make_pgtable(unsigned long, pmdval_t);
-@@ -33,6 +34,48 @@ EXPORT_SYMBOL_GPL(sme_me_mask);
- /* Buffer used for early in-place encryption by BSP, no locking needed */
- static char sme_early_buffer[PAGE_SIZE] __aligned(PAGE_SIZE);
- 
-+int sme_set_mem_enc(void *vaddr, unsigned long size)
-+{
-+	unsigned long addr, numpages;
-+
-+	if (!sme_me_mask)
-+		return 0;
-+
-+	addr = (unsigned long)vaddr & PAGE_MASK;
-+	numpages = PAGE_ALIGN(size) >> PAGE_SHIFT;
-+
 +	/*
-+	 * The set_memory_xxx functions take an integer for numpages, make
-+	 * sure it doesn't exceed that.
++	 * If memory encryption is active, the trampoline area will need to
++	 * be in un-encrypted memory in order to bring up other processors
++	 * successfully.
 +	 */
-+	if (numpages > INT_MAX)
-+		return -EINVAL;
++	sme_early_mem_dec(__pa(base), size);
++	sme_set_mem_unenc(base, size);
 +
-+	return set_memory_enc(addr, numpages);
-+}
-+EXPORT_SYMBOL_GPL(sme_set_mem_enc);
-+
-+int sme_set_mem_unenc(void *vaddr, unsigned long size)
-+{
-+	unsigned long addr, numpages;
-+
-+	if (!sme_me_mask)
-+		return 0;
-+
-+	addr = (unsigned long)vaddr & PAGE_MASK;
-+	numpages = PAGE_ALIGN(size) >> PAGE_SHIFT;
-+
-+	/*
-+	 * The set_memory_xxx functions take an integer for numpages, make
-+	 * sure it doesn't exceed that.
-+	 */
-+	if (numpages > INT_MAX)
-+		return -EINVAL;
-+
-+	return set_memory_dec(addr, numpages);
-+}
-+EXPORT_SYMBOL_GPL(sme_set_mem_unenc);
-+
- /*
-  * This routine does not change the underlying encryption setting of the
-  * page(s) that map this memory. It assumes that eventually the memory is
-diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index b8e6bb5..babf3a6 100644
---- a/arch/x86/mm/pageattr.c
-+++ b/arch/x86/mm/pageattr.c
-@@ -1729,6 +1729,79 @@ int set_memory_4k(unsigned long addr, int numpages)
- 					__pgprot(0), 1, 0, NULL);
- }
- 
-+static int __set_memory_enc_dec(struct cpa_data *cpa)
-+{
-+	unsigned long addr;
-+	int numpages;
-+	int ret;
-+
-+	/* People should not be passing in unaligned addresses */
-+	if (WARN_ONCE(*cpa->vaddr & ~PAGE_MASK,
-+		      "misaligned address: %#lx\n", *cpa->vaddr))
-+		*cpa->vaddr &= PAGE_MASK;
-+
-+	addr = *cpa->vaddr;
-+	numpages = cpa->numpages;
-+
-+	/* Must avoid aliasing mappings in the highmem code */
-+	kmap_flush_unused();
-+	vm_unmap_aliases();
-+
-+	ret = __change_page_attr_set_clr(cpa, 1);
-+
-+	/* Check whether we really changed something */
-+	if (!(cpa->flags & CPA_FLUSHTLB))
-+		goto out;
-+
-+	/*
-+	 * On success we use CLFLUSH, when the CPU supports it to
-+	 * avoid the WBINVD.
-+	 */
-+	if (!ret && static_cpu_has(X86_FEATURE_CLFLUSH))
-+		cpa_flush_range(addr, numpages, 1);
-+	else
-+		cpa_flush_all(1);
-+
-+out:
-+	return ret;
-+}
-+
-+int set_memory_enc(unsigned long addr, int numpages)
-+{
-+	struct cpa_data cpa;
-+
-+	if (!sme_me_mask)
-+		return 0;
-+
-+	memset(&cpa, 0, sizeof(cpa));
-+	cpa.vaddr = &addr;
-+	cpa.numpages = numpages;
-+	cpa.mask_set = __pgprot(_PAGE_ENC);
-+	cpa.mask_clr = __pgprot(0);
-+	cpa.pgd = init_mm.pgd;
-+
-+	return __set_memory_enc_dec(&cpa);
-+}
-+EXPORT_SYMBOL(set_memory_enc);
-+
-+int set_memory_dec(unsigned long addr, int numpages)
-+{
-+	struct cpa_data cpa;
-+
-+	if (!sme_me_mask)
-+		return 0;
-+
-+	memset(&cpa, 0, sizeof(cpa));
-+	cpa.vaddr = &addr;
-+	cpa.numpages = numpages;
-+	cpa.mask_set = __pgprot(0);
-+	cpa.mask_clr = __pgprot(_PAGE_ENC);
-+	cpa.pgd = init_mm.pgd;
-+
-+	return __set_memory_enc_dec(&cpa);
-+}
-+EXPORT_SYMBOL(set_memory_dec);
-+
- int set_pages_uc(struct page *page, int numpages)
- {
- 	unsigned long addr = (unsigned long)page_address(page);
+ 	set_memory_nx((unsigned long) base, size >> PAGE_SHIFT);
+ 	set_memory_ro((unsigned long) base, ro_size >> PAGE_SHIFT);
+ 	set_memory_x((unsigned long) text_start, text_size >> PAGE_SHIFT);
