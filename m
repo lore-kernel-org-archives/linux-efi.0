@@ -1,55 +1,130 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: [RFC PATCH v3 14/20] iommu/amd: Disable AMD IOMMU if memory
-	encryption is active
-Date: Wed, 9 Nov 2016 18:37:32 -0600
-Message-ID: <20161110003731.3280.67205.stgit@tlendack-t1.amdoffice.net>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: [RFC PATCH v3 15/20] x86: Check for memory encryption on the APs
+Date: Wed, 9 Nov 2016 18:37:40 -0600
+Message-ID: <20161110003740.3280.57300.stgit@tlendack-t1.amdoffice.net>
 References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20161110003426.3280.2999.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Cc: Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
+Cc: Rik van Riel <riel@redhat.com>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo
+ Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo
+ Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas
+ Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-For now, disable the AMD IOMMU if memory encryption is active. A future
-patch will re-enable the function with full memory encryption support.
+Add support to check if memory encryption is active in the kernel and that
+it has been enabled on the AP. If memory encryption is active in the kernel
+but has not been enabled on the AP then do not allow the AP to continue
+start up.
 
-Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- drivers/iommu/amd_iommu_init.c |    5 +++++
- 1 file changed, 5 insertions(+)
+ arch/x86/include/asm/realmode.h      |   12 ++++++++++++
+ arch/x86/realmode/init.c             |    4 ++++
+ arch/x86/realmode/rm/trampoline_64.S |   19 +++++++++++++++++++
+ 3 files changed, 35 insertions(+)
 
-diff --git a/drivers/iommu/amd_iommu_init.c b/drivers/iommu/amd_iommu_init.c
-index 59741ea..136a24e 100644
---- a/drivers/iommu/amd_iommu_init.c
-+++ b/drivers/iommu/amd_iommu_init.c
-@@ -27,6 +27,7 @@
- #include <linux/amd-iommu.h>
- #include <linux/export.h>
- #include <linux/iommu.h>
-+#include <linux/mem_encrypt.h>
- #include <asm/pci-direct.h>
- #include <asm/iommu.h>
- #include <asm/gart.h>
-@@ -2388,6 +2389,10 @@ int __init amd_iommu_detect(void)
- 	if (amd_iommu_disabled)
- 		return -ENODEV;
+diff --git a/arch/x86/include/asm/realmode.h b/arch/x86/include/asm/realmode.h
+index 230e190..850dbe0 100644
+--- a/arch/x86/include/asm/realmode.h
++++ b/arch/x86/include/asm/realmode.h
+@@ -1,6 +1,15 @@
+ #ifndef _ARCH_X86_REALMODE_H
+ #define _ARCH_X86_REALMODE_H
  
-+	/* For now, disable the IOMMU if SME is active */
-+	if (sme_me_mask)
-+		return -ENODEV;
++/*
++ * Flag bit definitions for use with the flags field of the trampoline header
++ * when configured for X86_64
++ */
++#define TH_FLAGS_SME_ENABLE_BIT		0
++#define TH_FLAGS_SME_ENABLE		BIT_ULL(TH_FLAGS_SME_ENABLE_BIT)
 +
- 	ret = iommu_go_to_state(IOMMU_IVRS_DETECTED);
- 	if (ret)
- 		return ret;
++#ifndef __ASSEMBLY__
++
+ #include <linux/types.h>
+ #include <asm/io.h>
+ 
+@@ -38,6 +47,7 @@ struct trampoline_header {
+ 	u64 start;
+ 	u64 efer;
+ 	u32 cr4;
++	u32 flags;
+ #endif
+ };
+ 
+@@ -69,4 +79,6 @@ static inline size_t real_mode_size_needed(void)
+ void set_real_mode_mem(phys_addr_t mem, size_t size);
+ void reserve_real_mode(void);
+ 
++#endif /* __ASSEMBLY__ */
++
+ #endif /* _ARCH_X86_REALMODE_H */
+diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
+index 44ed32a..a8e7ebe 100644
+--- a/arch/x86/realmode/init.c
++++ b/arch/x86/realmode/init.c
+@@ -101,6 +101,10 @@ static void __init setup_real_mode(void)
+ 	trampoline_cr4_features = &trampoline_header->cr4;
+ 	*trampoline_cr4_features = mmu_cr4_features;
+ 
++	trampoline_header->flags = 0;
++	if (sme_me_mask)
++		trampoline_header->flags |= TH_FLAGS_SME_ENABLE;
++
+ 	trampoline_pgd = (u64 *) __va(real_mode_header->trampoline_pgd);
+ 	trampoline_pgd[0] = trampoline_pgd_entry.pgd;
+ 	trampoline_pgd[511] = init_level4_pgt[511].pgd;
+diff --git a/arch/x86/realmode/rm/trampoline_64.S b/arch/x86/realmode/rm/trampoline_64.S
+index dac7b20..94e29f4 100644
+--- a/arch/x86/realmode/rm/trampoline_64.S
++++ b/arch/x86/realmode/rm/trampoline_64.S
+@@ -30,6 +30,7 @@
+ #include <asm/msr.h>
+ #include <asm/segment.h>
+ #include <asm/processor-flags.h>
++#include <asm/realmode.h>
+ #include "realmode.h"
+ 
+ 	.text
+@@ -92,6 +93,23 @@ ENTRY(startup_32)
+ 	movl	%edx, %fs
+ 	movl	%edx, %gs
+ 
++	/* Check for memory encryption support */
++	bt	$TH_FLAGS_SME_ENABLE_BIT, pa_tr_flags
++	jnc	.Ldone
++	movl	$MSR_K8_SYSCFG, %ecx
++	rdmsr
++	bt	$MSR_K8_SYSCFG_MEM_ENCRYPT_BIT, %eax
++	jc	.Ldone
++
++	/*
++	 * Memory encryption is enabled but the MSR has not been set on this
++	 * CPU so we can't continue
++	 */
++.Lno_sme:
++	hlt
++	jmp	.Lno_sme
++.Ldone:
++
+ 	movl	pa_tr_cr4, %eax
+ 	movl	%eax, %cr4		# Enable PAE mode
+ 
+@@ -147,6 +165,7 @@ GLOBAL(trampoline_header)
+ 	tr_start:		.space	8
+ 	GLOBAL(tr_efer)		.space	8
+ 	GLOBAL(tr_cr4)		.space	4
++	GLOBAL(tr_flags)	.space	4
+ END(trampoline_header)
+ 
+ #include "trampoline_common.S"
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
