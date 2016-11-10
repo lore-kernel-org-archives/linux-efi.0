@@ -1,168 +1,340 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: [RFC PATCH v3 05/20] x86: Add Secure Memory Encryption (SME) support
-Date: Wed, 9 Nov 2016 18:35:25 -0600
-Message-ID: <20161110003524.3280.94337.stgit@tlendack-t1.amdoffice.net>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: [RFC PATCH v3 08/20] x86: Add support for early
+ encryption/decryption of memory
+Date: Wed, 9 Nov 2016 18:36:10 -0600
+Message-ID: <20161110003610.3280.22043.stgit@tlendack-t1.amdoffice.net>
 References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20161110003426.3280.2999.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Cc: Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
+Cc: Rik van Riel <riel@redhat.com>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo
+ Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo
+ Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas
+ Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-Add support for Secure Memory Encryption (SME). This initial support
-provides a Kconfig entry to build the SME support into the kernel and
-defines the memory encryption mask that will be used in subsequent
-patches to mark pages as encrypted.
+Add support to be able to either encrypt or decrypt data in place during
+the early stages of booting the kernel. This does not change the memory
+encryption attribute - it is used for ensuring that data present in either
+an encrypted or un-encrypted memory area is in the proper state (for
+example the initrd will have been loaded by the boot loader and will not be
+encrypted, but the memory that it resides in is marked as encrypted).
 
-Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+The early_memmap support is enhanced to specify encrypted and un-encrypted
+mappings with and without write-protection. The use of write-protection is
+necessary when encrypting data "in place". The write-protect attribute is
+considered cacheable for loads, but not stores. This implies that the
+hardware will never give the core a dirty line with this memtype.
+
+Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/Kconfig                   |    9 +++++++++
- arch/x86/include/asm/mem_encrypt.h |   30 ++++++++++++++++++++++++++++++
- arch/x86/mm/Makefile               |    1 +
- arch/x86/mm/mem_encrypt.c          |   21 +++++++++++++++++++++
- include/linux/mem_encrypt.h        |   30 ++++++++++++++++++++++++++++++
- 5 files changed, 91 insertions(+)
- create mode 100644 arch/x86/include/asm/mem_encrypt.h
- create mode 100644 arch/x86/mm/mem_encrypt.c
- create mode 100644 include/linux/mem_encrypt.h
+ arch/x86/include/asm/fixmap.h        |    9 +++
+ arch/x86/include/asm/mem_encrypt.h   |   15 +++++
+ arch/x86/include/asm/pgtable_types.h |    8 +++
+ arch/x86/mm/ioremap.c                |   28 +++++++++
+ arch/x86/mm/mem_encrypt.c            |  102 ++++++++++++++++++++++++++++++++++
+ include/asm-generic/early_ioremap.h  |    2 +
+ mm/early_ioremap.c                   |   15 +++++
+ 7 files changed, 179 insertions(+)
 
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 9b2d50a..cc57bc0 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -1368,6 +1368,15 @@ config X86_DIRECT_GBPAGES
- 	  supports them), so don't confuse the user by printing
- 	  that we have them enabled.
+diff --git a/arch/x86/include/asm/fixmap.h b/arch/x86/include/asm/fixmap.h
+index 83e91f0..4d41878 100644
+--- a/arch/x86/include/asm/fixmap.h
++++ b/arch/x86/include/asm/fixmap.h
+@@ -160,6 +160,15 @@ static inline void __set_fixmap(enum fixed_addresses idx,
+  */
+ #define FIXMAP_PAGE_NOCACHE PAGE_KERNEL_IO_NOCACHE
  
-+config AMD_MEM_ENCRYPT
-+	bool "AMD Secure Memory Encryption support"
-+	depends on X86_64 && CPU_SUP_AMD
-+	---help---
-+	  Say yes to enable the encryption of system memory. This requires
-+	  an AMD processor that supports Secure Memory Encryption (SME).
-+	  The encryption of system memory is disabled by default but can be
-+	  enabled with the mem_encrypt=on command line option.
++void __init *early_memremap_enc(resource_size_t phys_addr,
++				unsigned long size);
++void __init *early_memremap_enc_wp(resource_size_t phys_addr,
++				   unsigned long size);
++void __init *early_memremap_dec(resource_size_t phys_addr,
++				unsigned long size);
++void __init *early_memremap_dec_wp(resource_size_t phys_addr,
++				   unsigned long size);
 +
- # Common NUMA Features
- config NUMA
- 	bool "Numa Memory Allocation and Scheduler Support"
+ #include <asm-generic/fixmap.h>
+ 
+ #define __late_set_fixmap(idx, phys, flags) __set_fixmap(idx, phys, flags)
 diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
-new file mode 100644
-index 0000000..a105796
---- /dev/null
+index 5f1976d..2a8e186 100644
+--- a/arch/x86/include/asm/mem_encrypt.h
 +++ b/arch/x86/include/asm/mem_encrypt.h
-@@ -0,0 +1,30 @@
-+/*
-+ * AMD Memory Encryption Support
-+ *
-+ * Copyright (C) 2016 Advanced Micro Devices, Inc.
-+ *
-+ * Author: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
-+
-+#ifndef __X86_MEM_ENCRYPT_H__
-+#define __X86_MEM_ENCRYPT_H__
-+
-+#ifndef __ASSEMBLY__
-+
-+#ifdef CONFIG_AMD_MEM_ENCRYPT
-+
-+extern unsigned long sme_me_mask;
-+
-+#else	/* !CONFIG_AMD_MEM_ENCRYPT */
-+
-+#define sme_me_mask	0UL
-+
-+#endif	/* CONFIG_AMD_MEM_ENCRYPT */
-+
-+#endif	/* __ASSEMBLY__ */
-+
-+#endif	/* __X86_MEM_ENCRYPT_H__ */
-diff --git a/arch/x86/mm/Makefile b/arch/x86/mm/Makefile
-index 96d2b84..44d4d21 100644
---- a/arch/x86/mm/Makefile
-+++ b/arch/x86/mm/Makefile
-@@ -39,3 +39,4 @@ obj-$(CONFIG_X86_INTEL_MPX)	+= mpx.o
- obj-$(CONFIG_X86_INTEL_MEMORY_PROTECTION_KEYS) += pkeys.o
- obj-$(CONFIG_RANDOMIZE_MEMORY) += kaslr.o
+@@ -21,6 +21,11 @@
  
-+obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt.o
+ extern unsigned long sme_me_mask;
+ 
++void __init sme_early_mem_enc(resource_size_t paddr,
++			      unsigned long size);
++void __init sme_early_mem_dec(resource_size_t paddr,
++			      unsigned long size);
++
+ void __init sme_early_init(void);
+ 
+ #define __sme_pa(x)		(__pa((x)) | sme_me_mask)
+@@ -30,6 +35,16 @@ void __init sme_early_init(void);
+ 
+ #define sme_me_mask	0UL
+ 
++static inline void __init sme_early_mem_enc(resource_size_t paddr,
++					    unsigned long size)
++{
++}
++
++static inline void __init sme_early_mem_dec(resource_size_t paddr,
++					    unsigned long size)
++{
++}
++
+ static inline void __init sme_early_init(void)
+ {
+ }
+diff --git a/arch/x86/include/asm/pgtable_types.h b/arch/x86/include/asm/pgtable_types.h
+index cbfb83e..c456d56 100644
+--- a/arch/x86/include/asm/pgtable_types.h
++++ b/arch/x86/include/asm/pgtable_types.h
+@@ -161,6 +161,7 @@ enum page_cache_mode {
+ 
+ #define _PAGE_CACHE_MASK	(_PAGE_PAT | _PAGE_PCD | _PAGE_PWT)
+ #define _PAGE_NOCACHE		(cachemode2protval(_PAGE_CACHE_MODE_UC))
++#define _PAGE_CACHE_WP		(cachemode2protval(_PAGE_CACHE_MODE_WP))
+ 
+ #define PAGE_NONE	__pgprot(_PAGE_PROTNONE | _PAGE_ACCESSED)
+ #define PAGE_SHARED	__pgprot(_PAGE_PRESENT | _PAGE_RW | _PAGE_USER | \
+@@ -189,6 +190,7 @@ enum page_cache_mode {
+ #define __PAGE_KERNEL_VVAR		(__PAGE_KERNEL_RO | _PAGE_USER)
+ #define __PAGE_KERNEL_LARGE		(__PAGE_KERNEL | _PAGE_PSE)
+ #define __PAGE_KERNEL_LARGE_EXEC	(__PAGE_KERNEL_EXEC | _PAGE_PSE)
++#define __PAGE_KERNEL_WP		(__PAGE_KERNEL | _PAGE_CACHE_WP)
+ 
+ #define __PAGE_KERNEL_IO		(__PAGE_KERNEL)
+ #define __PAGE_KERNEL_IO_NOCACHE	(__PAGE_KERNEL_NOCACHE)
+@@ -202,6 +204,12 @@ enum page_cache_mode {
+ #define _KERNPG_TABLE	(_PAGE_PRESENT | _PAGE_RW | _PAGE_ACCESSED |	\
+ 			 _PAGE_DIRTY | _PAGE_ENC)
+ 
++#define __PAGE_KERNEL_ENC	(__PAGE_KERNEL | _PAGE_ENC)
++#define __PAGE_KERNEL_ENC_WP	(__PAGE_KERNEL_WP | _PAGE_ENC)
++
++#define __PAGE_KERNEL_DEC	(__PAGE_KERNEL)
++#define __PAGE_KERNEL_DEC_WP	(__PAGE_KERNEL_WP)
++
+ #define PAGE_KERNEL		__pgprot(__PAGE_KERNEL | _PAGE_ENC)
+ #define PAGE_KERNEL_RO		__pgprot(__PAGE_KERNEL_RO | _PAGE_ENC)
+ #define PAGE_KERNEL_EXEC	__pgprot(__PAGE_KERNEL_EXEC | _PAGE_ENC)
+diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
+index 7aaa263..ff542cd 100644
+--- a/arch/x86/mm/ioremap.c
++++ b/arch/x86/mm/ioremap.c
+@@ -418,6 +418,34 @@ void unxlate_dev_mem_ptr(phys_addr_t phys, void *addr)
+ 	iounmap((void __iomem *)((unsigned long)addr & PAGE_MASK));
+ }
+ 
++/* Remap memory with encryption */
++void __init *early_memremap_enc(resource_size_t phys_addr,
++				unsigned long size)
++{
++	return early_memremap_prot(phys_addr, size, __PAGE_KERNEL_ENC);
++}
++
++/* Remap memory with encryption and write-protected */
++void __init *early_memremap_enc_wp(resource_size_t phys_addr,
++				   unsigned long size)
++{
++	return early_memremap_prot(phys_addr, size, __PAGE_KERNEL_ENC_WP);
++}
++
++/* Remap memory without encryption */
++void __init *early_memremap_dec(resource_size_t phys_addr,
++				unsigned long size)
++{
++	return early_memremap_prot(phys_addr, size, __PAGE_KERNEL_DEC);
++}
++
++/* Remap memory without encryption and write-protected */
++void __init *early_memremap_dec_wp(resource_size_t phys_addr,
++				   unsigned long size)
++{
++	return early_memremap_prot(phys_addr, size, __PAGE_KERNEL_DEC_WP);
++}
++
+ static pte_t bm_pte[PAGE_SIZE/sizeof(pte_t)] __page_aligned_bss;
+ 
+ static inline pmd_t * __init early_ioremap_pmd(unsigned long addr)
 diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-new file mode 100644
-index 0000000..1ed75a4
---- /dev/null
+index d642cc5..06235b4 100644
+--- a/arch/x86/mm/mem_encrypt.c
 +++ b/arch/x86/mm/mem_encrypt.c
-@@ -0,0 +1,21 @@
+@@ -14,6 +14,9 @@
+ #include <linux/init.h>
+ #include <linux/mm.h>
+ 
++#include <asm/tlbflush.h>
++#include <asm/fixmap.h>
++
+ extern pmdval_t early_pmd_flags;
+ 
+ /*
+@@ -24,6 +27,105 @@ extern pmdval_t early_pmd_flags;
+ unsigned long sme_me_mask __section(.data) = 0;
+ EXPORT_SYMBOL_GPL(sme_me_mask);
+ 
++/* Buffer used for early in-place encryption by BSP, no locking needed */
++static char sme_early_buffer[PAGE_SIZE] __aligned(PAGE_SIZE);
++
 +/*
-+ * AMD Memory Encryption Support
-+ *
-+ * Copyright (C) 2016 Advanced Micro Devices, Inc.
-+ *
-+ * Author: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
++ * This routine does not change the underlying encryption setting of the
++ * page(s) that map this memory. It assumes that eventually the memory is
++ * meant to be accessed as encrypted but the contents are currently not
++ * encrypted.
 + */
++void __init sme_early_mem_enc(resource_size_t paddr, unsigned long size)
++{
++	void *src, *dst;
++	size_t len;
 +
-+#include <linux/linkage.h>
++	if (!sme_me_mask)
++		return;
++
++	local_flush_tlb();
++	wbinvd();
++
++	/*
++	 * There are limited number of early mapping slots, so map (at most)
++	 * one page at time.
++	 */
++	while (size) {
++		len = min_t(size_t, sizeof(sme_early_buffer), size);
++
++		/* Create a mapping for non-encrypted write-protected memory */
++		src = early_memremap_dec_wp(paddr, len);
++
++		/* Create a mapping for encrypted memory */
++		dst = early_memremap_enc(paddr, len);
++
++		/*
++		 * If a mapping can't be obtained to perform the encryption,
++		 * then encrypted access to that area will end up causing
++		 * a crash.
++		 */
++		BUG_ON(!src || !dst);
++
++		memcpy(sme_early_buffer, src, len);
++		memcpy(dst, sme_early_buffer, len);
++
++		early_memunmap(dst, len);
++		early_memunmap(src, len);
++
++		paddr += len;
++		size -= len;
++	}
++}
 +
 +/*
-+ * Since sme_me_mask is set early in the boot process it must reside in
-+ * the .data section so as not to be zeroed out when the .bss section is
-+ * later cleared.
++ * This routine does not change the underlying encryption setting of the
++ * page(s) that map this memory. It assumes that eventually the memory is
++ * meant to be accessed as not encrypted but the contents are currently
++ * encrypted.
 + */
-+unsigned long sme_me_mask __section(.data) = 0;
-+EXPORT_SYMBOL_GPL(sme_me_mask);
-diff --git a/include/linux/mem_encrypt.h b/include/linux/mem_encrypt.h
-new file mode 100644
-index 0000000..9fed068
---- /dev/null
-+++ b/include/linux/mem_encrypt.h
-@@ -0,0 +1,30 @@
-+/*
-+ * AMD Memory Encryption Support
-+ *
-+ * Copyright (C) 2016 Advanced Micro Devices, Inc.
-+ *
-+ * Author: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
++void __init sme_early_mem_dec(resource_size_t paddr, unsigned long size)
++{
++	void *src, *dst;
++	size_t len;
 +
-+#ifndef __MEM_ENCRYPT_H__
-+#define __MEM_ENCRYPT_H__
++	if (!sme_me_mask)
++		return;
 +
-+#ifndef __ASSEMBLY__
++	local_flush_tlb();
++	wbinvd();
 +
-+#ifdef CONFIG_AMD_MEM_ENCRYPT
++	/*
++	 * There are limited number of early mapping slots, so map (at most)
++	 * one page at time.
++	 */
++	while (size) {
++		len = min_t(size_t, sizeof(sme_early_buffer), size);
 +
-+#include <asm/mem_encrypt.h>
++		/* Create a mapping for encrypted write-protected memory */
++		src = early_memremap_enc_wp(paddr, len);
 +
-+#else	/* !CONFIG_AMD_MEM_ENCRYPT */
++		/* Create a mapping for non-encrypted memory */
++		dst = early_memremap_dec(paddr, len);
 +
-+#define sme_me_mask	0UL
++		/*
++		 * If a mapping can't be obtained to perform the decryption,
++		 * then un-encrypted access to that area will end up causing
++		 * a crash.
++		 */
++		BUG_ON(!src || !dst);
 +
-+#endif	/* CONFIG_AMD_MEM_ENCRYPT */
++		memcpy(sme_early_buffer, src, len);
++		memcpy(dst, sme_early_buffer, len);
 +
-+#endif	/* __ASSEMBLY__ */
++		early_memunmap(dst, len);
++		early_memunmap(src, len);
 +
-+#endif	/* __MEM_ENCRYPT_H__ */
++		paddr += len;
++		size -= len;
++	}
++}
++
+ void __init sme_early_init(void)
+ {
+ 	unsigned int i;
+diff --git a/include/asm-generic/early_ioremap.h b/include/asm-generic/early_ioremap.h
+index 734ad4d..2edef8d 100644
+--- a/include/asm-generic/early_ioremap.h
++++ b/include/asm-generic/early_ioremap.h
+@@ -13,6 +13,8 @@ extern void *early_memremap(resource_size_t phys_addr,
+ 			    unsigned long size);
+ extern void *early_memremap_ro(resource_size_t phys_addr,
+ 			       unsigned long size);
++extern void *early_memremap_prot(resource_size_t phys_addr,
++				 unsigned long size, unsigned long prot_val);
+ extern void early_iounmap(void __iomem *addr, unsigned long size);
+ extern void early_memunmap(void *addr, unsigned long size);
+ 
+diff --git a/mm/early_ioremap.c b/mm/early_ioremap.c
+index 6d5717b..d71b98b 100644
+--- a/mm/early_ioremap.c
++++ b/mm/early_ioremap.c
+@@ -226,6 +226,14 @@ early_memremap_ro(resource_size_t phys_addr, unsigned long size)
+ }
+ #endif
+ 
++void __init *
++early_memremap_prot(resource_size_t phys_addr, unsigned long size,
++		    unsigned long prot_val)
++{
++	return (__force void *)__early_ioremap(phys_addr, size,
++					       __pgprot(prot_val));
++}
++
+ #define MAX_MAP_CHUNK	(NR_FIX_BTMAPS << PAGE_SHIFT)
+ 
+ void __init copy_from_early_mem(void *dest, phys_addr_t src, unsigned long size)
+@@ -267,6 +275,13 @@ early_memremap_ro(resource_size_t phys_addr, unsigned long size)
+ 	return (void *)phys_addr;
+ }
+ 
++void __init *
++early_memremap_prot(resource_size_t phys_addr, unsigned long size,
++		    unsigned long prot_val)
++{
++	return (void *)phys_addr;
++}
++
+ void __init early_iounmap(void __iomem *addr, unsigned long size)
+ {
+ }
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
