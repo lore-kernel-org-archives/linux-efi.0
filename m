@@ -1,65 +1,45 @@
-From: <j.lahoda-aRb0bU7PRFPrBKCeMvbIDA@public.gmane.org>
-Subject: 9160 linux-efi
-Date: Thu, 10 Nov 2016 20:21:50 -0000
-Message-ID: <147880931048.6047.13777395272494915950@hinet.net>
+From: "Kani, Toshimitsu" <toshi.kani@hpe.com>
+Subject: Re: [RFC PATCH v3 02/20] x86: Set the write-protect cache mode for
+ full PAT support
+Date: Fri, 11 Nov 2016 01:26:48 +0000
+Message-ID: <1478827480.20881.142.camel@hpe.com>
+References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+	 <20161110003448.3280.27573.stgit@tlendack-t1.amdoffice.net>
+	 <20161110131400.bmeoojsrin2zi2w2@pd.tnic>
 Mime-Version: 1.0
-Content-Type: application/zip; name="MESSAGE_91276450820_linux-efi.zip"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: attachment
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20161110131400.bmeoojsrin2zi2w2@pd.tnic>
+Content-Language: en-US
+Content-ID: <5A008A45AA7B1344A2346C26C53E4AD3@NAMPRD84.PROD.OUTLOOK.COM>
+Sender: owner-linux-mm@kvack.org
+To: "thomas.lendacky@amd.com" <thomas.lendacky@amd.com>, "bp@alien8.de" <bp@alien8.de>
+Cc: "kvm@vger.kernel.org" <kvm@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "dvyukov@google.com" <dvyukov@google.com>, "corbet@lwn.net" <corbet@lwn.net>, "arnd@arndb.de" <arnd@arndb.de>, "matt@codeblueprint.co.uk" <matt@codeblueprint.co.uk>, "linux-mm@kvack.org" <linux-mm@kvack.org>, "aryabinin@virtuozzo.com" <aryabinin@virtuozzo.com>, "tglx@linutronix.de" <tglx@linutronix.de>, "konrad.wilk@oracle.com" <konrad.wilk@oracle.com>, "kasan-dev@googlegroups.com" <kasan-dev@googlegroups.com>, "x86@kernel.org" <x86@kernel.org>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>, "riel@redhat.com" <riel@redhat.com>, "lwoodman@redhat.com" <lwoodman@redhat.com>, "mingo@redhat.com" <mingo@redhat.com>, "joro@8bytes.org" <joro@8bytes.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "pbonzini@redhat.com" <pbonzini@redhat.>
 List-Id: linux-efi@vger.kernel.org
 
-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
-AAAAAA==
+T24gVGh1LCAyMDE2LTExLTEwIGF0IDE0OjE0ICswMTAwLCBCb3Jpc2xhdiBQZXRrb3Ygd3JvdGU6
+DQo+ICsgVG9zaGkuDQo+IA0KPiBPbiBXZWQsIE5vdiAwOSwgMjAxNiBhdCAwNjozNDo0OFBNIC0w
+NjAwLCBUb20gTGVuZGFja3kgd3JvdGU6DQo+ID4gDQo+ID4gRm9yIHByb2Nlc3NvcnMgdGhhdCBz
+dXBwb3J0IFBBVCwgc2V0IHRoZSB3cml0ZS1wcm90ZWN0IGNhY2hlIG1vZGUNCj4gPiAoX1BBR0Vf
+Q0FDSEVfTU9ERV9XUCkgZW50cnkgdG8gdGhlIGFjdHVhbCB3cml0ZS1wcm90ZWN0IHZhbHVlDQo+
+ID4gKHgwNSkuDQoNClVzaW5nIHNsb3QgNiBtYXkgYmUgbW9yZSBjYXV0aW91cyAoZm9yIHRoZSBz
+YW1lIHJlYXNvbiBzbG90IDcgd2FzIHVzZWQNCmZvciBXVCksIGJ1dCBJIGRvIG5vdCBoYXZlIGEg
+c3Ryb25nIG9waW5pb24gZm9yIGl0Lg0KDQpzZXRfcGFnZV9tZW10eXBlKCkgY2Fubm90IHRyYWNr
+IHRoZSB1c2Ugb2YgV1AgdHlwZSBzaW5jZSB0aGVyZSBpcyBubw0KZXh0cmEtYml0IGF2YWlsYWJs
+ZSBmb3IgV1AsIGJ1dCBXUCBpcyBvbmx5IHN1cHBvcnRlZCBieQ0KZWFybHlfbWVtcmVtYXBfeHgo
+KSBpbnRlcmZhY2VzIGluIHRoaXMgc2VyaWVzLiDCoFNvLCBJIHRoaW5rIHdlIHNob3VsZA0KanVz
+dCBkb2N1bWVudCB0aGF0IFdQIGlzIG9ubHkgaW50ZW5kZWQgZm9yIHRlbXBvcmFyeSBtYXBwaW5n
+cyBhdCBib290LQ0KdGltZSB1bnRpbCB0aGlzIGlzc3VlIGlzIHJlc29sdmVkLiDCoEFsc28sIHdl
+IG5lZWQgdG8gbWFrZSBzdXJlIHRoYXQNCnRoaXMgZWFybHlfbWVtcmVtYXAgZm9yIFdQIGlzIG9u
+bHkgY2FsbGVkIGFmdGVyIHBhdF9pbml0KCkgaXMgZG9uZS4NCg0KQSBuaXQgLSBwbGVhc2UgYWRk
+IFdQIHRvIHRoZSBmdW5jdGlvbiBoZWFkZXIgY29tbWVudCBiZWxvdy4NCiJUaGlzIGZ1bmN0aW9u
+IGluaXRpYWxpemVzIFBBVCBNU1IgYW5kIFBBVCB0YWJsZSB3aXRoIGFuIE9TLWRlZmluZWQNCnZh
+bHVlIHRvIGVuYWJsZSBhZGRpdGlvbmFsIGNhY2hlIGF0dHJpYnV0ZXMsIFdDIGFuZCBXVC4iDQoN
+ClRoYW5rcywNCi1Ub3NoaQ==
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
