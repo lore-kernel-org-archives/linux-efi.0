@@ -1,214 +1,60 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 2/2] x86/efi: Prevent mixed mode boot corruption with CONFIG_VMAP_STACK
-Date: Sat, 12 Nov 2016 21:04:24 +0000
-Message-ID: <20161112210424.5157-3-matt@codeblueprint.co.uk>
+Subject: [PATCH 1/2] x86/efi: Fix EFI memmap pointer size warning
+Date: Sat, 12 Nov 2016 21:04:23 +0000
+Message-ID: <20161112210424.5157-2-matt@codeblueprint.co.uk>
 References: <20161112210424.5157-1-matt@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20161112210424.5157-1-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Booting an EFI mixed mode kernel has been crashing since commit:
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 
-  e37e43a497d5 ("x86/mm/64: Enable vmapped stacks (CONFIG_HAVE_ARCH_VMAP_STACK=y)")
+Fix this when building on 32-bit:
 
-The user-visible effect in my test setup was the kernel being unable
-to find the root file system ramdisk. This was likely caused by silent
-memory or page table corruption.
+  arch/x86/platform/efi/efi.c: In function ‘__efi_enter_virtual_mode’:
+  arch/x86/platform/efi/efi.c:911:5: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+       (efi_memory_desc_t *)pa);
+       ^
+  arch/x86/platform/efi/efi.c:918:5: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+       (efi_memory_desc_t *)pa);
+       ^
 
-Enabling CONFIG_DEBUG_VIRTUAL immediately flagged the thunking code as
-abusing virt_to_phys() because it was passing addresses that were not
-part of the kernel direct mapping.
+The @pa local variable is declared as phys_addr_t and that is a u64 when
+CONFIG_PHYS_ADDR_T_64BIT=y. (The last is enabled on 32-bit on a PAE
+build.)
 
-Use the slow version instead, which correctly handles all memory
-regions by performing a page table walk.
+However, its value comes from __pa() which is basically doing pointer
+arithmetic and checking, and returns unsigned long as it is the native
+pointer width.
 
-Suggested-by: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+So let's use an unsigned long too. It should be fine to do so because
+the later users cast it to a pointer too.
+
+Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- arch/x86/platform/efi/efi_64.c | 80 ++++++++++++++++++++++++++++++------------
- 1 file changed, 57 insertions(+), 23 deletions(-)
+ arch/x86/platform/efi/efi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 58b0f801f66f..319148bd4b05 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -31,6 +31,7 @@
- #include <linux/io.h>
- #include <linux/reboot.h>
- #include <linux/slab.h>
-+#include <linux/ucs2_string.h>
- 
- #include <asm/setup.h>
- #include <asm/page.h>
-@@ -211,6 +212,35 @@ void efi_sync_low_kernel_mappings(void)
- 	memcpy(pud_efi, pud_k, sizeof(pud_t) * num_entries);
- }
- 
-+/*
-+ * Wrapper for slow_virt_to_phys() that handles NULL addresses.
-+ */
-+static inline phys_addr_t
-+virt_to_phys_or_null_size(void *va, unsigned long size)
-+{
-+	bool bad_size;
-+
-+	if (!va)
-+		return 0;
-+
-+	if (virt_addr_valid(va))
-+		return virt_to_phys(va);
-+
-+	/*
-+	 * A fully aligned variable on the stack is guaranteed not to
-+	 * cross a page bounary. Try to catch strings on the stack by
-+	 * checking that 'size' is a power of two.
-+	 */
-+	bad_size = size > PAGE_SIZE || !is_power_of_2(size);
-+
-+	WARN_ON(!IS_ALIGNED((unsigned long)va, size) || bad_size);
-+
-+	return slow_virt_to_phys(va);
-+}
-+
-+#define virt_to_phys_or_null(addr)				\
-+	virt_to_phys_or_null_size((addr), sizeof(*(addr)))
-+
- int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- {
- 	unsigned long pfn, text;
-@@ -494,8 +524,8 @@ static efi_status_t efi_thunk_get_time(efi_time_t *tm, efi_time_cap_t *tc)
- 
- 	spin_lock(&rtc_lock);
- 
--	phys_tm = virt_to_phys(tm);
--	phys_tc = virt_to_phys(tc);
-+	phys_tm = virt_to_phys_or_null(tm);
-+	phys_tc = virt_to_phys_or_null(tc);
- 
- 	status = efi_thunk(get_time, phys_tm, phys_tc);
- 
-@@ -511,7 +541,7 @@ static efi_status_t efi_thunk_set_time(efi_time_t *tm)
- 
- 	spin_lock(&rtc_lock);
- 
--	phys_tm = virt_to_phys(tm);
-+	phys_tm = virt_to_phys_or_null(tm);
- 
- 	status = efi_thunk(set_time, phys_tm);
- 
-@@ -529,9 +559,9 @@ efi_thunk_get_wakeup_time(efi_bool_t *enabled, efi_bool_t *pending,
- 
- 	spin_lock(&rtc_lock);
- 
--	phys_enabled = virt_to_phys(enabled);
--	phys_pending = virt_to_phys(pending);
--	phys_tm = virt_to_phys(tm);
-+	phys_enabled = virt_to_phys_or_null(enabled);
-+	phys_pending = virt_to_phys_or_null(pending);
-+	phys_tm = virt_to_phys_or_null(tm);
- 
- 	status = efi_thunk(get_wakeup_time, phys_enabled,
- 			     phys_pending, phys_tm);
-@@ -549,7 +579,7 @@ efi_thunk_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
- 
- 	spin_lock(&rtc_lock);
- 
--	phys_tm = virt_to_phys(tm);
-+	phys_tm = virt_to_phys_or_null(tm);
- 
- 	status = efi_thunk(set_wakeup_time, enabled, phys_tm);
- 
-@@ -558,6 +588,10 @@ efi_thunk_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
- 	return status;
- }
- 
-+static unsigned long efi_name_size(efi_char16_t *name)
-+{
-+	return ucs2_strsize(name, EFI_VAR_NAME_LEN) + 1;
-+}
- 
- static efi_status_t
- efi_thunk_get_variable(efi_char16_t *name, efi_guid_t *vendor,
-@@ -567,11 +601,11 @@ efi_thunk_get_variable(efi_char16_t *name, efi_guid_t *vendor,
- 	u32 phys_name, phys_vendor, phys_attr;
- 	u32 phys_data_size, phys_data;
- 
--	phys_data_size = virt_to_phys(data_size);
--	phys_vendor = virt_to_phys(vendor);
--	phys_name = virt_to_phys(name);
--	phys_attr = virt_to_phys(attr);
--	phys_data = virt_to_phys(data);
-+	phys_data_size = virt_to_phys_or_null(data_size);
-+	phys_vendor = virt_to_phys_or_null(vendor);
-+	phys_name = virt_to_phys_or_null_size(name, efi_name_size(name));
-+	phys_attr = virt_to_phys_or_null(attr);
-+	phys_data = virt_to_phys_or_null_size(data, *data_size);
- 
- 	status = efi_thunk(get_variable, phys_name, phys_vendor,
- 			   phys_attr, phys_data_size, phys_data);
-@@ -586,9 +620,9 @@ efi_thunk_set_variable(efi_char16_t *name, efi_guid_t *vendor,
- 	u32 phys_name, phys_vendor, phys_data;
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index bf99aa7005eb..936a488d6cf6 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -861,7 +861,7 @@ static void __init __efi_enter_virtual_mode(void)
+ 	int count = 0, pg_shift = 0;
+ 	void *new_memmap = NULL;
  	efi_status_t status;
+-	phys_addr_t pa;
++	unsigned long pa;
  
--	phys_name = virt_to_phys(name);
--	phys_vendor = virt_to_phys(vendor);
--	phys_data = virt_to_phys(data);
-+	phys_name = virt_to_phys_or_null_size(name, efi_name_size(name));
-+	phys_vendor = virt_to_phys_or_null(vendor);
-+	phys_data = virt_to_phys_or_null_size(data, data_size);
+ 	efi.systab = NULL;
  
- 	/* If data_size is > sizeof(u32) we've got problems */
- 	status = efi_thunk(set_variable, phys_name, phys_vendor,
-@@ -605,9 +639,9 @@ efi_thunk_get_next_variable(unsigned long *name_size,
- 	efi_status_t status;
- 	u32 phys_name_size, phys_name, phys_vendor;
- 
--	phys_name_size = virt_to_phys(name_size);
--	phys_vendor = virt_to_phys(vendor);
--	phys_name = virt_to_phys(name);
-+	phys_name_size = virt_to_phys_or_null(name_size);
-+	phys_vendor = virt_to_phys_or_null(vendor);
-+	phys_name = virt_to_phys_or_null_size(name, *name_size);
- 
- 	status = efi_thunk(get_next_variable, phys_name_size,
- 			   phys_name, phys_vendor);
-@@ -621,7 +655,7 @@ efi_thunk_get_next_high_mono_count(u32 *count)
- 	efi_status_t status;
- 	u32 phys_count;
- 
--	phys_count = virt_to_phys(count);
-+	phys_count = virt_to_phys_or_null(count);
- 	status = efi_thunk(get_next_high_mono_count, phys_count);
- 
- 	return status;
-@@ -633,7 +667,7 @@ efi_thunk_reset_system(int reset_type, efi_status_t status,
- {
- 	u32 phys_data;
- 
--	phys_data = virt_to_phys(data);
-+	phys_data = virt_to_phys_or_null_size(data, data_size);
- 
- 	efi_thunk(reset_system, reset_type, status, data_size, phys_data);
- }
-@@ -661,9 +695,9 @@ efi_thunk_query_variable_info(u32 attr, u64 *storage_space,
- 	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
- 		return EFI_UNSUPPORTED;
- 
--	phys_storage = virt_to_phys(storage_space);
--	phys_remaining = virt_to_phys(remaining_space);
--	phys_max = virt_to_phys(max_variable_size);
-+	phys_storage = virt_to_phys_or_null(storage_space);
-+	phys_remaining = virt_to_phys_or_null(remaining_space);
-+	phys_max = virt_to_phys_or_null(max_variable_size);
- 
- 	status = efi_thunk(query_variable_info, attr, phys_storage,
- 			   phys_remaining, phys_max);
 -- 
 2.10.0
