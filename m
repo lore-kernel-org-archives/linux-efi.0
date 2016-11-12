@@ -1,98 +1,130 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 1/9] efi/libstub: Fix allocation size calculations
-Date: Sat, 12 Nov 2016 21:32:29 +0000
-Message-ID: <20161112213237.8804-2-matt@codeblueprint.co.uk>
+Subject: [PATCH 4/9] efi/libstub: Add random.c to ARM build
+Date: Sat, 12 Nov 2016 21:32:32 +0000
+Message-ID: <20161112213237.8804-5-matt@codeblueprint.co.uk>
 References: <20161112213237.8804-1-matt@codeblueprint.co.uk>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20161112213237.8804-1-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Adjust the size used in calculations to match the actual size of allocation
-that will be performed based on EFI size/alignment constraints.
-efi_high_alloc() and efi_low_alloc() use the passed size in bytes directly
-to find space in the memory map for the allocation, rather than the actual
-allocation size that has been adjusted for size and alignment constraints.
-This results in failed allocations and retries in efi_high_alloc().  The
-same error is present in efi_low_alloc(), although failure will only happen
-if the lowest memory block is small.
-Also use EFI_PAGE_SIZE consistently and remove use of EFI_PAGE_SHIFT to
-calculate page size.
+Make random.c build for ARM by moving the fallback definition of
+EFI_ALLOC_ALIGN to efistub.h, and replacing a division by a value
+we know to be a power of 2 with a right shift (this is required since
+ARM does not have any integer division helper routines in its decompressor)
 
-Signed-off-by: Roy Franz <roy.franz-ZPxbGqLxI0U@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Reviewed-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/libstub/efi-stub-helper.c | 24 ++++++++++++++----------
- 1 file changed, 14 insertions(+), 10 deletions(-)
+ drivers/firmware/efi/libstub/Makefile          | 4 ++--
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 9 ---------
+ drivers/firmware/efi/libstub/efistub.h         | 9 +++++++++
+ drivers/firmware/efi/libstub/random.c          | 8 +++++---
+ 4 files changed, 16 insertions(+), 14 deletions(-)
 
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index c06945160a41..40ddf8f763a8 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -36,11 +36,11 @@ arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
+ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
+ 	$(call if_changed_rule,cc_o_c)
+ 
+-lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o \
++lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o random.o \
+ 				   $(patsubst %.c,lib-%.o,$(arm-deps))
+ 
+ lib-$(CONFIG_ARM)		+= arm32-stub.o
+-lib-$(CONFIG_ARM64)		+= arm64-stub.o random.o
++lib-$(CONFIG_ARM64)		+= arm64-stub.o
+ CFLAGS_arm64-stub.o 		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+ 
+ #
 diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index aded10662020..4b74bf86c74d 100644
+index 4b74bf86c74d..757badc1debb 100644
 --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
 +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -186,14 +186,16 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
- 		goto fail;
+@@ -32,15 +32,6 @@
  
- 	/*
--	 * Enforce minimum alignment that EFI requires when requesting
--	 * a specific address.  We are doing page-based allocations,
--	 * so we must be aligned to a page.
-+	 * Enforce minimum alignment that EFI or Linux requires when
-+	 * requesting a specific address.  We are doing page-based (or
-+	 * larger) allocations, and both the address and size must meet
-+	 * alignment constraints.
- 	 */
- 	if (align < EFI_ALLOC_ALIGN)
- 		align = EFI_ALLOC_ALIGN;
+ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
  
--	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
-+	size = round_up(size, EFI_ALLOC_ALIGN);
-+	nr_pages = size / EFI_PAGE_SIZE;
- again:
- 	for (i = 0; i < map_size / desc_size; i++) {
- 		efi_memory_desc_t *desc;
-@@ -208,7 +210,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
- 			continue;
+-/*
+- * Allow the platform to override the allocation granularity: this allows
+- * systems that have the capability to run with a larger page size to deal
+- * with the allocations for initrd and fdt more efficiently.
+- */
+-#ifndef EFI_ALLOC_ALIGN
+-#define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
+-#endif
+-
+ #define EFI_MMAP_NR_SLACK_SLOTS	8
  
- 		start = desc->phys_addr;
--		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
-+		end = start + desc->num_pages * EFI_PAGE_SIZE;
+ struct file_info {
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index ee49cd23ee63..fe1f22584c69 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -15,6 +15,15 @@
+  */
+ #undef __init
  
- 		if (end > max)
- 			end = max;
-@@ -278,14 +280,16 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
- 		goto fail;
++/*
++ * Allow the platform to override the allocation granularity: this allows
++ * systems that have the capability to run with a larger page size to deal
++ * with the allocations for initrd and fdt more efficiently.
++ */
++#ifndef EFI_ALLOC_ALIGN
++#define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
++#endif
++
+ void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
  
- 	/*
--	 * Enforce minimum alignment that EFI requires when requesting
--	 * a specific address.  We are doing page-based allocations,
--	 * so we must be aligned to a page.
-+	 * Enforce minimum alignment that EFI or Linux requires when
-+	 * requesting a specific address.  We are doing page-based (or
-+	 * larger) allocations, and both the address and size must meet
-+	 * alignment constraints.
- 	 */
- 	if (align < EFI_ALLOC_ALIGN)
- 		align = EFI_ALLOC_ALIGN;
+ efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg, void *__image,
+diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
+index 0c9f58c5ba50..f8e2e5ae6872 100644
+--- a/drivers/firmware/efi/libstub/random.c
++++ b/drivers/firmware/efi/libstub/random.c
+@@ -8,6 +8,7 @@
+  */
  
--	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
-+	size = round_up(size, EFI_ALLOC_ALIGN);
-+	nr_pages = size / EFI_PAGE_SIZE;
- 	for (i = 0; i < map_size / desc_size; i++) {
- 		efi_memory_desc_t *desc;
- 		unsigned long m = (unsigned long)map;
-@@ -300,7 +304,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
- 			continue;
+ #include <linux/efi.h>
++#include <linux/log2.h>
+ #include <asm/efi.h>
  
- 		start = desc->phys_addr;
--		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
-+		end = start + desc->num_pages * EFI_PAGE_SIZE;
+ #include "efistub.h"
+@@ -41,8 +42,9 @@ efi_status_t efi_get_random_bytes(efi_system_table_t *sys_table_arg,
+  */
+ static unsigned long get_entry_num_slots(efi_memory_desc_t *md,
+ 					 unsigned long size,
+-					 unsigned long align)
++					 unsigned long align_shift)
+ {
++	unsigned long align = 1UL << align_shift;
+ 	u64 start, end;
  
- 		/*
- 		 * Don't allocate at 0x0. It will confuse code that
+ 	if (md->type != EFI_CONVENTIONAL_MEMORY)
+@@ -55,7 +57,7 @@ static unsigned long get_entry_num_slots(efi_memory_desc_t *md,
+ 	if (start > end)
+ 		return 0;
+ 
+-	return (end - start + 1) / align;
++	return (end - start + 1) >> align_shift;
+ }
+ 
+ /*
+@@ -98,7 +100,7 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
+ 		efi_memory_desc_t *md = (void *)memory_map + map_offset;
+ 		unsigned long slots;
+ 
+-		slots = get_entry_num_slots(md, size, align);
++		slots = get_entry_num_slots(md, size, ilog2(align));
+ 		MD_NUM_SLOTS(md) = slots;
+ 		total_slots += slots;
+ 	}
 -- 
 2.10.0
