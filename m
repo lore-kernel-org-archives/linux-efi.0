@@ -1,204 +1,44 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
+From: Borislav Petkov <bp@alien8.de>
 Subject: Re: [RFC PATCH v3 06/20] x86: Add support to enable SME during early
  boot processing
-Date: Mon, 14 Nov 2016 12:18:44 -0600
-Message-ID: <178d7d21-ffbd-1083-9c64-f05378147e27@amd.com>
+Date: Mon, 14 Nov 2016 21:01:32 +0100
+Message-ID: <20161114200132.i54uar3wckqlzsbt@pd.tnic>
 References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
  <20161110003543.3280.99623.stgit@tlendack-t1.amdoffice.net>
  <20161114172930.27z7p2kytmhtcbsb@pd.tnic>
+ <178d7d21-ffbd-1083-9c64-f05378147e27@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20161114172930.27z7p2kytmhtcbsb@pd.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
+Content-Type: text/plain; charset=utf-8
+Return-path: <kvm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <178d7d21-ffbd-1083-9c64-f05378147e27@amd.com>
+Sender: kvm-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/14/2016 11:29 AM, Borislav Petkov wrote:
-> On Wed, Nov 09, 2016 at 06:35:43PM -0600, Tom Lendacky wrote:
->> This patch adds support to the early boot code to use Secure Memory
->> Encryption (SME).  Support is added to update the early pagetables with
->> the memory encryption mask and to encrypt the kernel in place.
->>
->> The routines to set the encryption mask and perform the encryption are
->> stub routines for now with full function to be added in a later patch.
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->>  arch/x86/kernel/Makefile           |    2 ++
->>  arch/x86/kernel/head_64.S          |   35 ++++++++++++++++++++++++++++++++++-
->>  arch/x86/kernel/mem_encrypt_init.c |   29 +++++++++++++++++++++++++++++
->>  3 files changed, 65 insertions(+), 1 deletion(-)
->>  create mode 100644 arch/x86/kernel/mem_encrypt_init.c
->>
->> diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
->> index 45257cf..27e22f4 100644
->> --- a/arch/x86/kernel/Makefile
->> +++ b/arch/x86/kernel/Makefile
->> @@ -141,4 +141,6 @@ ifeq ($(CONFIG_X86_64),y)
->>  
->>  	obj-$(CONFIG_PCI_MMCONFIG)	+= mmconf-fam10h_64.o
->>  	obj-y				+= vsmp_64.o
->> +
->> +	obj-y				+= mem_encrypt_init.o
->>  endif
->> diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
->> index c98a559..9a28aad 100644
->> --- a/arch/x86/kernel/head_64.S
->> +++ b/arch/x86/kernel/head_64.S
->> @@ -95,6 +95,17 @@ startup_64:
->>  	jnz	bad_address
->>  
->>  	/*
->> +	 * Enable Secure Memory Encryption (if available).  Save the mask
->> +	 * in %r12 for later use and add the memory encryption mask to %rbp
->> +	 * to include it in the page table fixups.
->> +	 */
->> +	push	%rsi
->> +	call	sme_enable
->> +	pop	%rsi
-> 
-> Why %rsi?
-> 
-> sme_enable() is void so no args in registers and returns in %rax.
-> 
-> /me is confused.
+On Mon, Nov 14, 2016 at 12:18:44PM -0600, Tom Lendacky wrote:
+> The %rsi register can be clobbered by the called function so I'm saving
+> it since it points to the real mode data.  I might be able to look into
+> saving it earlier and restoring it before needed, but I though this
+> might be clearer.
 
-The %rsi register can be clobbered by the called function so I'm saving
-it since it points to the real mode data.  I might be able to look into
-saving it earlier and restoring it before needed, but I though this
-might be clearer.
+Ah, that's already in the comment earlier, I missed that.
 
-> 
->> +	movq	%rax, %r12
->> +	addq	%r12, %rbp
->> +
->> +	/*
->>  	 * Fixup the physical addresses in the page table
->>  	 */
->>  	addq	%rbp, early_level4_pgt + (L4_START_KERNEL*8)(%rip)
->> @@ -117,6 +128,7 @@ startup_64:
->>  	shrq	$PGDIR_SHIFT, %rax
->>  
->>  	leaq	(4096 + _KERNPG_TABLE)(%rbx), %rdx
->> +	addq	%r12, %rdx
->>  	movq	%rdx, 0(%rbx,%rax,8)
->>  	movq	%rdx, 8(%rbx,%rax,8)
->>  
->> @@ -133,6 +145,7 @@ startup_64:
->>  	movq	%rdi, %rax
->>  	shrq	$PMD_SHIFT, %rdi
->>  	addq	$(__PAGE_KERNEL_LARGE_EXEC & ~_PAGE_GLOBAL), %rax
->> +	addq	%r12, %rax
->>  	leaq	(_end - 1)(%rip), %rcx
->>  	shrq	$PMD_SHIFT, %rcx
->>  	subq	%rdi, %rcx
->> @@ -163,9 +176,21 @@ startup_64:
->>  	cmp	%r8, %rdi
->>  	jne	1b
->>  
->> -	/* Fixup phys_base */
->> +	/*
->> +	 * Fixup phys_base, remove the memory encryption mask from %rbp
->> +	 * to obtain the true physical address.
->> +	 */
->> +	subq	%r12, %rbp
->>  	addq	%rbp, phys_base(%rip)
->>  
->> +	/*
->> +	 * The page tables have been updated with the memory encryption mask,
->> +	 * so encrypt the kernel if memory encryption is active
->> +	 */
->> +	push	%rsi
->> +	call	sme_encrypt_kernel
->> +	pop	%rsi
-> 
-> Ditto.
-> 
->> +
->>  	movq	$(early_level4_pgt - __START_KERNEL_map), %rax
->>  	jmp 1f
->>  ENTRY(secondary_startup_64)
->> @@ -186,9 +211,17 @@ ENTRY(secondary_startup_64)
->>  	/* Sanitize CPU configuration */
->>  	call verify_cpu
->>  
->> +	push	%rsi
->> +	call	sme_get_me_mask
->> +	pop	%rsi
-> 
-> Ditto.
-> 
->> +	movq	%rax, %r12
->> +
->>  	movq	$(init_level4_pgt - __START_KERNEL_map), %rax
->>  1:
->>  
->> +	/* Add the memory encryption mask to RAX */
-> 
-> I think that should say something like:
-> 
-> 	/*
-> 	 * Add the memory encryption mask to init_level4_pgt's physical address
-> 	 */
-> 
-> or so...
+> I can expand on the commit message about that.  I was trying to keep the
+> early boot-related code separate from the main code in arch/x86/mm dir.
 
-Yup, I'll expand on the comment for this.
+... because?
 
-> 
->> +	addq	%r12, %rax
->> +
->>  	/* Enable PAE mode and PGE */
->>  	movl	$(X86_CR4_PAE | X86_CR4_PGE), %ecx
->>  	movq	%rcx, %cr4
->> diff --git a/arch/x86/kernel/mem_encrypt_init.c b/arch/x86/kernel/mem_encrypt_init.c
->> new file mode 100644
->> index 0000000..388d6fb
->> --- /dev/null
->> +++ b/arch/x86/kernel/mem_encrypt_init.c
-> 
-> So nothing in the commit message explains why we need a separate
-> mem_encrypt_init.c file when we already have arch/x86/mm/mem_encrypt.c
-> for all memory encryption code...
+It all gets linked into one monolithic image anyway and mem_encrypt.c
+is not, like, really huge, right? IOW, I don't see a reason to spread
+the code around the tree. OTOH, having everything in one file is much
+better.
 
-I can expand on the commit message about that.  I was trying to keep the
-early boot-related code separate from the main code in arch/x86/mm dir.
+Or am I missing a good reason?
 
-Thanks,
-Tom
+-- 
+Regards/Gruss,
+    Boris.
 
-> 
->> @@ -0,0 +1,29 @@
->> +/*
->> + * AMD Memory Encryption Support
->> + *
->> + * Copyright (C) 2016 Advanced Micro Devices, Inc.
->> + *
->> + * Author: Tom Lendacky <thomas.lendacky@amd.com>
->> + *
->> + * This program is free software; you can redistribute it and/or modify
->> + * it under the terms of the GNU General Public License version 2 as
->> + * published by the Free Software Foundation.
->> + */
->> +
->> +#include <linux/linkage.h>
->> +#include <linux/init.h>
->> +#include <linux/mem_encrypt.h>
->> +
->> +void __init sme_encrypt_kernel(void)
->> +{
->> +}
->> +
->> +unsigned long __init sme_get_me_mask(void)
->> +{
->> +	return sme_me_mask;
->> +}
->> +
->> +unsigned long __init sme_enable(void)
->> +{
->> +	return sme_me_mask;
->> +}
-> 
+Good mailing practices for 400: avoid top-posting and trim the reply.
