@@ -1,116 +1,94 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [RFC PATCH v3 13/20] x86: DMA support for memory encryption
-Date: Tue, 15 Nov 2016 11:02:20 -0600
-Message-ID: <d5ebd13d-1278-8714-3f03-8ee7f04a2b38@amd.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v3 04/20] x86: Handle reduction in physical address
+ size with SME
+Date: Tue, 15 Nov 2016 11:08:37 -0600
+Message-ID: <92827ace-20c5-8549-e667-9fa2becaa1ff@amd.com>
 References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
-	<20161110003723.3280.62636.stgit@tlendack-t1.amdoffice.net>
-	<20161115143943.GC2185@potion>
+ <20161110003513.3280.12104.stgit@tlendack-t1.amdoffice.net>
+ <20161115121035.GD24857@8bytes.org> <20161115121456.f4slpk4i2jl3e2ke@pd.tnic>
+ <a4cc5b07-89e1-aaa0-1977-1de95883ba62@amd.com>
+ <20161115153338.a2cxmatnpqcgiaiy@pd.tnic>
+ <bb47e943-f5b6-0d73-cf9a-fea002a5c70e@amd.com>
+ <20161115163350.jal7sd6ghbmk5sqc@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20161115143943.GC2185@potion>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <kvm-owner@vger.kernel.org>
+In-Reply-To: <20161115163350.jal7sd6ghbmk5sqc@pd.tnic>
+Sender: kvm-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Joerg Roedel <joro@8bytes.org>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
 List-Id: linux-efi@vger.kernel.org
 
-T24gMTEvMTUvMjAxNiA4OjM5IEFNLCBSYWRpbSBLcsSNbcOhxZkgd3JvdGU6Cj4gMjAxNi0xMS0w
-OSAxODozNy0wNjAwLCBUb20gTGVuZGFja3k6Cj4+IFNpbmNlIERNQSBhZGRyZXNzZXMgd2lsbCBl
-ZmZlY3RpdmVseSBsb29rIGxpa2UgNDgtYml0IGFkZHJlc3NlcyB3aGVuIHRoZQo+PiBtZW1vcnkg
-ZW5jcnlwdGlvbiBtYXNrIGlzIHNldCwgU1dJT1RMQiBpcyBuZWVkZWQgaWYgdGhlIERNQSBtYXNr
-IG9mIHRoZQo+PiBkZXZpY2UgcGVyZm9ybWluZyB0aGUgRE1BIGRvZXMgbm90IHN1cHBvcnQgNDgt
-Yml0cy4gU1dJT1RMQiB3aWxsIGJlCj4+IGluaXRpYWxpemVkIHRvIGNyZWF0ZSB1bi1lbmNyeXB0
-ZWQgYm91bmNlIGJ1ZmZlcnMgZm9yIHVzZSBieSB0aGVzZSBkZXZpY2VzLgo+Pgo+PiBTaWduZWQt
-b2ZmLWJ5OiBUb20gTGVuZGFja3kgPHRob21hcy5sZW5kYWNreUBhbWQuY29tPgo+PiAtLS0KPj4g
-ZGlmZiAtLWdpdCBhL2FyY2gveDg2L2tlcm5lbC9wY2ktbm9tbXUuYyBiL2FyY2gveDg2L2tlcm5l
-bC9wY2ktbm9tbXUuYwo+PiBAQCAtMzAsNyArMzAsNyBAQCBzdGF0aWMgZG1hX2FkZHJfdCBub21t
-dV9tYXBfcGFnZShzdHJ1Y3QgZGV2aWNlICpkZXYsIHN0cnVjdCBwYWdlICpwYWdlLAo+PiAgCQkJ
-CSBlbnVtIGRtYV9kYXRhX2RpcmVjdGlvbiBkaXIsCj4+ICAJCQkJIHVuc2lnbmVkIGxvbmcgYXR0
-cnMpCj4+ICB7Cj4+IC0JZG1hX2FkZHJfdCBidXMgPSBwYWdlX3RvX3BoeXMocGFnZSkgKyBvZmZz
-ZXQ7Cj4+ICsJZG1hX2FkZHJfdCBidXMgPSBwaHlzX3RvX2RtYShkZXYsIHBhZ2VfdG9fcGh5cyhw
-YWdlKSkgKyBvZmZzZXQ7Cj4+ICAJV0FSTl9PTihzaXplID09IDApOwo+PiAgCWlmICghY2hlY2tf
-YWRkcigibWFwX3NpbmdsZSIsIGRldiwgYnVzLCBzaXplKSkKPj4gIAkJcmV0dXJuIERNQV9FUlJP
-Ul9DT0RFOwo+PiBkaWZmIC0tZ2l0IGEvYXJjaC94ODYva2VybmVsL3BjaS1zd2lvdGxiLmMgYi9h
-cmNoL3g4Ni9rZXJuZWwvcGNpLXN3aW90bGIuYwo+PiBAQCAtMTIsNiArMTIsOCBAQAo+PiAgaW50
-IHN3aW90bGIgX19yZWFkX21vc3RseTsKPj4gIAo+PiAgdm9pZCAqeDg2X3N3aW90bGJfYWxsb2Nf
-Y29oZXJlbnQoc3RydWN0IGRldmljZSAqaHdkZXYsIHNpemVfdCBzaXplLAo+PiBAQCAtNjQsMTMg
-KzY2LDE1IEBAIHN0YXRpYyBzdHJ1Y3QgZG1hX21hcF9vcHMgc3dpb3RsYl9kbWFfb3BzID0gewo+
-PiAgICogcGNpX3N3aW90bGJfZGV0ZWN0X292ZXJyaWRlIC0gc2V0IHN3aW90bGIgdG8gMSBpZiBu
-ZWNlc3NhcnkKPj4gICAqCj4+ICAgKiBUaGlzIHJldHVybnMgbm9uLXplcm8gaWYgd2UgYXJlIGZv
-cmNlZCB0byB1c2Ugc3dpb3RsYiAoYnkgdGhlIGJvb3QKPj4gLSAqIG9wdGlvbikuCj4+ICsgKiBv
-cHRpb24pLiBJZiBtZW1vcnkgZW5jcnlwdGlvbiBpcyBlbmFibGVkIHRoZW4gc3dpb3RsYiB3aWxs
-IGJlIHNldAo+PiArICogdG8gMSBzbyB0aGF0IGJvdW5jZSBidWZmZXJzIGFyZSBhbGxvY2F0ZWQg
-YW5kIHVzZWQgZm9yIGRldmljZXMgdGhhdAo+PiArICogZG8gbm90IHN1cHBvcnQgdGhlIGFkZHJl
-c3NpbmcgcmFuZ2UgcmVxdWlyZWQgZm9yIHRoZSBlbmNyeXB0aW9uIG1hc2suCj4+ICAgKi8KPj4g
-IGludCBfX2luaXQgcGNpX3N3aW90bGJfZGV0ZWN0X292ZXJyaWRlKHZvaWQpCj4+ICB7Cj4+ICAJ
-aW50IHVzZV9zd2lvdGxiID0gc3dpb3RsYiB8IHN3aW90bGJfZm9yY2U7Cj4+ICAKPj4gLQlpZiAo
-c3dpb3RsYl9mb3JjZSkKPj4gKwlpZiAoc3dpb3RsYl9mb3JjZSB8fCBzbWVfbWVfbWFzaykKPj4g
-IAkJc3dpb3RsYiA9IDE7Cj4+ICAKPj4gIAlyZXR1cm4gdXNlX3N3aW90bGI7Cj4gCj4gV2Ugd2Fu
-dCB0byByZXR1cm4gMSBldmVuIGlmIG9ubHkgc21lX21lX21hc2sgaXMgMSwgYmVjYXVzZSB0aGUg
-cmV0dXJuCj4gdmFsdWUgaXMgdXNlZCBmb3IgZGV0ZWN0aW9uLiAgVGhlIGZvbGxvd2luZyB3b3Vs
-ZCBiZSBsZXNzIG9ic2N1cmUsIElNTzoKPiAKPiAJaWYgKHN3aW90bGJfZm9yY2UgfHwgc21lX21l
-X21hc2spCj4gCQlzd2lvdGxiID0gMTsKPiAKPiAJcmV0dXJuIHN3aW90bGI7CgpJZiB3ZSBkbyB0
-aGF0IHRoZW4gYWxsIERNQSB3b3VsZCBnbyB0aHJvdWdoIHRoZSBzd2lvdGxiIGJvdW5jZSBidWZm
-ZXJzLgpCeSBzZXR0aW5nIHN3aW90bGIgdG8gMSB3ZSBpbmRpY2F0ZSB0aGF0IHRoZSBib3VuY2Ug
-YnVmZmVycyB3aWxsIGJlCm5lZWRlZCBmb3IgdGhvc2UgZGV2aWNlcyB0aGF0IGNhbid0IHN1cHBv
-cnQgdGhlIGFkZHJlc3NpbmcgcmFuZ2Ugd2hlbgp0aGUgZW5jcnlwdGlvbiBiaXQgaXMgc2V0ICg0
-OCBiaXQgRE1BKS4gQnV0IGlmIHRoZSBkZXZpY2UgY2FuIHN1cHBvcnQKdGhlIGFkZHJlc3Npbmcg
-cmFuZ2Ugd2Ugd29uJ3QgdXNlIHRoZSBib3VuY2UgYnVmZmVycy4KCj4gCj4+IGRpZmYgLS1naXQg
-YS9pbml0L21haW4uYyBiL2luaXQvbWFpbi5jCj4+IEBAIC01OTgsNiArNjAyLDE1IEBAIGFzbWxp
-bmthZ2UgX192aXNpYmxlIHZvaWQgX19pbml0IHN0YXJ0X2tlcm5lbCh2b2lkKQo+PiAgCSAqLwo+
-PiAgCWxvY2tpbmdfc2VsZnRlc3QoKTsKPj4gIAo+PiArCS8qCj4+ICsJICogVGhpcyBuZWVkcyB0
-byBiZSBjYWxsZWQgYmVmb3JlIGFueSBkZXZpY2VzIHBlcmZvcm0gRE1BCj4+ICsJICogb3BlcmF0
-aW9ucyB0aGF0IG1pZ2h0IHVzZSB0aGUgc3dpb3RsYiBib3VuY2UgYnVmZmVycy4KPj4gKwkgKiBU
-aGlzIGNhbGwgd2lsbCBtYXJrIHRoZSBib3VuY2UgYnVmZmVycyBhcyB1bi1lbmNyeXB0ZWQgc28K
-Pj4gKwkgKiB0aGF0IHRoZWlyIHVzYWdlIHdpbGwgbm90IGNhdXNlICJwbGFpbi10ZXh0IiBkYXRh
-IHRvIGJlCj4+ICsJICogZGVjcnlwdGVkIHdoZW4gYWNjZXNzZWQuCj4+ICsJICovCj4+ICsJbWVt
-X2VuY3J5cHRfaW5pdCgpOwo+IAo+IChDb21tZW50cyBiZWxvdyBhcmUgY29ubmVjdGVkIHRvIHRo
-ZSByZWFzb24gd2h5IHdlIGNhbGwgdGhpcy4pCj4gCj4+IGRpZmYgLS1naXQgYS9saWIvc3dpb3Rs
-Yi5jIGIvbGliL3N3aW90bGIuYwo+PiBAQCAtMTU5LDYgKzE3MSwzMSBAQCB2b2lkIHN3aW90bGJf
-cHJpbnRfaW5mbyh2b2lkKQo+PiArLyoKPj4gKyAqIElmIG1lbW9yeSBlbmNyeXB0aW9uIGlzIGFj
-dGl2ZSwgdGhlIERNQSBhZGRyZXNzIGZvciBhbiBlbmNyeXB0ZWQgcGFnZSBtYXkKPj4gKyAqIGJl
-IGJleW9uZCB0aGUgcmFuZ2Ugb2YgdGhlIGRldmljZS4gSWYgYm91bmNlIGJ1ZmZlcnMgYXJlIHJl
-cXVpcmVkIGJlIHN1cmUKPj4gKyAqIHRoYXQgdGhleSBhcmUgbm90IG9uIGFuIGVuY3J5cHRlZCBw
-YWdlLiBUaGlzIHNob3VsZCBiZSBjYWxsZWQgYmVmb3JlIHRoZQo+PiArICogaW90bGIgYXJlYSBp
-cyB1c2VkLgo+PiArICovCj4+ICt2b2lkIF9faW5pdCBzd2lvdGxiX2NsZWFyX2VuY3J5cHRpb24o
-dm9pZCkKPj4gK3sKPj4gKwl2b2lkICp2YWRkcjsKPj4gKwl1bnNpZ25lZCBsb25nIGJ5dGVzOwo+
-PiArCj4+ICsJaWYgKG5vX2lvdGxiX21lbW9yeSB8fCAhaW9fdGxiX3N0YXJ0IHx8IGxhdGVfYWxs
-b2MpCj4gCj4gaW9fdGxiX3N0YXJ0IHNlZW1zIHJlZHVuZGFudCAtLSB3aGVuIGNhbiAhbm9faW90
-bGJfbWVtb3J5ICYmCj4gIWlvX3RsYl9zdGFydCBoYXBwZW4/CgpZZXMsIHRoZSBpb190bGJfc3Rh
-cnQgY2hlY2sgY2FuIGJlIHJlbW92ZWQuCgo+IAo+IElzIHRoZSBvcmRlciBvZiBjYWxscwo+ICAg
-MSkgc3dpb3RsYiBpbml0Cj4gICAyKSBTTUUgaW5pdAo+ICAgMykgc3dpb3RsYiBsYXRlIGluaXQg
-Cj4gPwoKWWVzLCBzb3J0IG9mLiAgVGhlIHN3aW90bGIgbGF0ZSBpbml0IG1heSBub3QgYmUgY2Fs
-bGVkLgoKPiAKPiBXZSBzZXR1cCBlbmNyeXB0ZWQgc3dpb3RsYiBhbmQgdGhlbiBkZWNyeXB0IGl0
-LCBidXQgc29tZXRpbWVzIHNldCBpdCB1cAo+IGRlY3J5cHRlZCAobGF0ZV9hbGxvYykgLi4uIHdo
-eSBpc24ndCB0aGUgc3dpb3RsYiBzZXQgdXAgZGVjcnlwdGVkCj4gZGlyZWN0bHk/CgpXaGVuIHN3
-aW90bGIgaXMgYWxsb2NhdGVkIGluIHN3aW90bGJfaW5pdCgpLCBpdCBpcyB0b28gZWFybHkgdG8g
-bWFrZQp1c2Ugb2YgdGhlIGFwaSB0byB0aGUgY2hhbmdlIHRoZSBwYWdlIGF0dHJpYnV0ZXMuIEJl
-Y2F1c2Ugb2YgdGhpcywKdGhlIGNhbGxiYWNrIHRvIG1ha2UgdGhvc2UgY2hhbmdlcyBpcyBuZWVk
-ZWQuCgo+IAo+PiArCQlyZXR1cm47Cj4+ICsKPj4gKwl2YWRkciA9IHBoeXNfdG9fdmlydChpb190
-bGJfc3RhcnQpOwo+PiArCWJ5dGVzID0gUEFHRV9BTElHTihpb190bGJfbnNsYWJzIDw8IElPX1RM
-Ql9TSElGVCk7Cj4+ICsJc3dpb3RsYl9zZXRfbWVtX3VuZW5jKHZhZGRyLCBieXRlcyk7Cj4+ICsJ
-bWVtc2V0KHZhZGRyLCAwLCBieXRlcyk7Cj4+ICsKPj4gKwl2YWRkciA9IHBoeXNfdG9fdmlydChp
-b190bGJfb3ZlcmZsb3dfYnVmZmVyKTsKPj4gKwlieXRlcyA9IFBBR0VfQUxJR04oaW9fdGxiX292
-ZXJmbG93KTsKPj4gKwlzd2lvdGxiX3NldF9tZW1fdW5lbmModmFkZHIsIGJ5dGVzKTsKPj4gKwlt
-ZW1zZXQodmFkZHIsIDAsIGJ5dGVzKTsKPj4gK30KPj4gKwo+PiBAQCAtNTQxLDcgKzU4Myw3IEBA
-IHN0YXRpYyBwaHlzX2FkZHJfdAo+PiAgbWFwX3NpbmdsZShzdHJ1Y3QgZGV2aWNlICpod2Rldiwg
-cGh5c19hZGRyX3QgcGh5cywgc2l6ZV90IHNpemUsCj4+ICAJICAgZW51bSBkbWFfZGF0YV9kaXJl
-Y3Rpb24gZGlyKQo+PiAgewo+PiAtCWRtYV9hZGRyX3Qgc3RhcnRfZG1hX2FkZHIgPSBwaHlzX3Rv
-X2RtYShod2RldiwgaW9fdGxiX3N0YXJ0KTsKPj4gKwlkbWFfYWRkcl90IHN0YXJ0X2RtYV9hZGRy
-ID0gc3dpb3RsYl9waHlzX3RvX2RtYShod2RldiwgaW9fdGxiX3N0YXJ0KTsKPiAKPiBXZSBoYXZl
-IGRlY3J5cHRlZCBpb190bGJfc3RhcnQgYmVmb3JlLCBzbyBzaG91bGRuJ3QgaXRzIHBoeXNpY2Fs
-IGFkZHJlc3MKPiBiZSBzYXZlZCB3aXRob3V0IHRoZSBzbWUgYml0PyAgKFdoaWNoIGNoYW5nZXMg
-YSBsb3QgLi4uKQoKSSdtIG5vdCBzdXJlIHdoYXQgeW91IG1lYW4gaGVyZSwgY2FuIHlvdSBlbGFi
-b3JhdGUgYSBiaXQgbW9yZT8KClRoYW5rcywKVG9tCgo+IAo+IFRoYW5rcy4KPiAKX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KaW9tbXUgbWFpbGluZyBsaXN0
-CmlvbW11QGxpc3RzLmxpbnV4LWZvdW5kYXRpb24ub3JnCmh0dHBzOi8vbGlzdHMubGludXhmb3Vu
-ZGF0aW9uLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2lvbW11
+On 11/15/2016 10:33 AM, Borislav Petkov wrote:
+> On Tue, Nov 15, 2016 at 10:06:16AM -0600, Tom Lendacky wrote:
+>> Yes, but that doesn't relate to the physical address space reduction.
+>>
+>> Once the SYS_CFG MSR bit for SME is set, even if the encryption bit is
+>> never used, there is a physical reduction of the address space. So when
+>> checking whether to adjust the physical address bits I can't rely on the
+>> sme_me_mask, I have to look at the MSR.
+>>
+>> But when I'm looking to decide whether to encrypt or decrypt something,
+>> I use the sme_me_mask to decide if that is needed.  If the sme_me_mask
+>> is not set then the encrypt/decrypt op shouldn't be performed.
+>>
+>> I might not be grasping the point you're trying to make...
+> 
+> Ok, let me try to summarize how I see it. There are a couple of states:
+> 
+> * CPUID bit in 0x8000001f - that's SME supported
+> 
+> * Reduction of address space - MSR bit. That could be called "SME
+> BIOS-eenabled".
+> 
+> * SME active. That's both of the above and is sme_me_mask != 0.
+> 
+> Right?
+
+Correct.
+
+> 
+> So you said previously "The feature may be present and enabled even if
+> it is not currently active."
+> 
+> But then you say "active" below
+> 
+>>> And in patch 12 you have:
+>>>
+>>> +       /*
+>>> +        * If memory encryption is active, the trampoline area will need to
+>>> +        * be in un-encrypted memory in order to bring up other processors
+>>> +        * successfully.
+>>> +        */
+>>> +       sme_early_mem_dec(__pa(base), size);
+>>> +       sme_set_mem_unenc(base, size);
+> 
+> and test sme_me_mask. Which makes sense now after having explained which
+> hw setting controls what.
+> 
+> So can we agree on the nomenclature for all the different SME states
+> first and use those throughout the code? And hold those states down in
+> Documentation/x86/amd-memory-encryption.txt so that it is perfectly
+> clear to people looking at the code.
+
+Yup, that sounds good.  I'll update the documentation to clarify the
+various states/modes of SME.
+
+> 
+> Also, if we need to check those states more than once, we should add
+> inline helpers:
+> 
+> sme_supported()
+> sme_bios_enabled()
+> sme_active()
+> 
+> How does that sound?
+
+Sounds good.
+
+Thanks,
+Tom
+
+> 
+
