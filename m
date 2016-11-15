@@ -1,101 +1,80 @@
-From: Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 Subject: Re: [RFC PATCH v3 13/20] x86: DMA support for memory encryption
-Date: Tue, 15 Nov 2016 19:17:36 +0100
-Message-ID: <20161115181736.GA14060@potion>
+Date: Tue, 15 Nov 2016 12:29:35 -0600
+Message-ID: <4d97f998-5835-f4e0-9840-7f7979251275@amd.com>
 References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
- <20161110003723.3280.62636.stgit@tlendack-t1.amdoffice.net>
- <20161115143943.GC2185@potion>
- <d5ebd13d-1278-8714-3f03-8ee7f04a2b38@amd.com>
+	<20161110003723.3280.62636.stgit@tlendack-t1.amdoffice.net>
+	<20161115171443-mutt-send-email-mst@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <d5ebd13d-1278-8714-3f03-8ee7f04a2b38-5C7GfCeVMHo@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tgl>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20161115171443-mutt-send-email-mst-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-2016-11-15 11:02-0600, Tom Lendacky:
-> On 11/15/2016 8:39 AM, Radim Krčmář wrote:
->> 2016-11-09 18:37-0600, Tom Lendacky:
->>> Since DMA addresses will effectively look like 48-bit addresses when the
->>> memory encryption mask is set, SWIOTLB is needed if the DMA mask of the
->>> device performing the DMA does not support 48-bits. SWIOTLB will be
->>> initialized to create un-encrypted bounce buffers for use by these devices.
->>>
->>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
->>> ---
->>> diff --git a/arch/x86/kernel/pci-swiotlb.c b/arch/x86/kernel/pci-swiotlb.c
->>> @@ -64,13 +66,15 @@ static struct dma_map_ops swiotlb_dma_ops = {
->>>   * pci_swiotlb_detect_override - set swiotlb to 1 if necessary
->>>   *
->>>   * This returns non-zero if we are forced to use swiotlb (by the boot
->>> - * option).
->>> + * option). If memory encryption is enabled then swiotlb will be set
->>> + * to 1 so that bounce buffers are allocated and used for devices that
->>> + * do not support the addressing range required for the encryption mask.
->>>   */
->>>  int __init pci_swiotlb_detect_override(void)
->>>  {
->>>  	int use_swiotlb = swiotlb | swiotlb_force;
->>>  
->>> -	if (swiotlb_force)
->>> +	if (swiotlb_force || sme_me_mask)
->>>  		swiotlb = 1;
->>>  
->>>  	return use_swiotlb;
->> 
->> We want to return 1 even if only sme_me_mask is 1, because the return
->> value is used for detection.  The following would be less obscure, IMO:
->> 
->> 	if (swiotlb_force || sme_me_mask)
->> 		swiotlb = 1;
->> 
->> 	return swiotlb;
+On 11/15/2016 9:16 AM, Michael S. Tsirkin wrote:
+> On Wed, Nov 09, 2016 at 06:37:23PM -0600, Tom Lendacky wrote:
+>> Since DMA addresses will effectively look like 48-bit addresses when the
+>> memory encryption mask is set, SWIOTLB is needed if the DMA mask of the
+>> device performing the DMA does not support 48-bits. SWIOTLB will be
+>> initialized to create un-encrypted bounce buffers for use by these devices.
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+>> ---
+>>  arch/x86/include/asm/dma-mapping.h |    5 ++-
+>>  arch/x86/include/asm/mem_encrypt.h |    5 +++
+>>  arch/x86/kernel/pci-dma.c          |   11 ++++---
+>>  arch/x86/kernel/pci-nommu.c        |    2 +
+>>  arch/x86/kernel/pci-swiotlb.c      |    8 ++++-
+>>  arch/x86/mm/mem_encrypt.c          |   17 +++++++++++
+>>  include/linux/swiotlb.h            |    1 +
+>>  init/main.c                        |   13 ++++++++
+>>  lib/swiotlb.c                      |   58 +++++++++++++++++++++++++++++++-----
+>>  9 files changed, 103 insertions(+), 17 deletions(-)
+>>
+>> diff --git a/arch/x86/include/asm/dma-mapping.h b/arch/x86/include/asm/dma-mapping.h
+>> index 4446162..c9cdcae 100644
+>> --- a/arch/x86/include/asm/dma-mapping.h
+>> +++ b/arch/x86/include/asm/dma-mapping.h
+
+..SNIP...
+
+>>  
+>> +/*
+>> + * If memory encryption is active, the DMA address for an encrypted page may
+>> + * be beyond the range of the device. If bounce buffers are required be sure
+>> + * that they are not on an encrypted page. This should be called before the
+>> + * iotlb area is used.
 > 
-> If we do that then all DMA would go through the swiotlb bounce buffers.
+> Makes sense, but I think at least a dmesg warning here
+> might be a good idea.
 
-No, that is decided for example in swiotlb_map_page() and we need to
-call pci_swiotlb_init() to register that function.
+Good idea.  Should it be a warning when it is first being set up or
+a warning the first time the bounce buffers need to be used.  Or maybe
+both?
 
-> By setting swiotlb to 1 we indicate that the bounce buffers will be
-> needed for those devices that can't support the addressing range when
-> the encryption bit is set (48 bit DMA). But if the device can support
-> the addressing range we won't use the bounce buffers.
-
-If we return 0 here, then pci_swiotlb_init() will not be called =>
-dma_ops won't be set to swiotlb_dma_ops => we won't use bounce buffers.
-
->> We setup encrypted swiotlb and then decrypt it, but sometimes set it up
->> decrypted (late_alloc) ... why isn't the swiotlb set up decrypted
->> directly?
 > 
-> When swiotlb is allocated in swiotlb_init(), it is too early to make
-> use of the api to the change the page attributes. Because of this,
-> the callback to make those changes is needed.
+> A boot flag that says "don't enable devices that don't support
+> encryption" might be a good idea, too, since most people
+> don't read dmesg output and won't notice the message.
 
-Thanks. (I don't know page table setup enough to see a lesser evil. :])
+I'll look into this. It might be something that can be checked as
+part of the device setting its DMA mask or the first time a DMA
+API is used if the device doesn't explicitly set its mask.
 
->>> @@ -541,7 +583,7 @@ static phys_addr_t
->>>  map_single(struct device *hwdev, phys_addr_t phys, size_t size,
->>>  	   enum dma_data_direction dir)
->>>  {
->>> -	dma_addr_t start_dma_addr = phys_to_dma(hwdev, io_tlb_start);
->>> +	dma_addr_t start_dma_addr = swiotlb_phys_to_dma(hwdev, io_tlb_start);
->> 
->> We have decrypted io_tlb_start before, so shouldn't its physical address
->> be saved without the sme bit?  (Which changes a lot ...)
+Thanks,
+Tom
+
 > 
-> I'm not sure what you mean here, can you elaborate a bit more?
-
-The C-bit (sme bit) is a part of the physical address.
-If we know that a certain physical page should be accessed as
-unencrypted (the bounce buffer) then the C-bit is 0.
-I'm wondering why we save the physical address with the C-bit set when
-we know that it can't be accessed that way (because we remove it every
-time).
-
-The naming is a bit confusing, because physical addresses are actually
-virtualized by SME -- maybe we should be calling them SME addresses?
+> 
