@@ -1,94 +1,101 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v3 04/20] x86: Handle reduction in physical address
- size with SME
-Date: Tue, 15 Nov 2016 11:08:37 -0600
-Message-ID: <92827ace-20c5-8549-e667-9fa2becaa1ff@amd.com>
+From: Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [RFC PATCH v3 13/20] x86: DMA support for memory encryption
+Date: Tue, 15 Nov 2016 19:17:36 +0100
+Message-ID: <20161115181736.GA14060@potion>
 References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
- <20161110003513.3280.12104.stgit@tlendack-t1.amdoffice.net>
- <20161115121035.GD24857@8bytes.org> <20161115121456.f4slpk4i2jl3e2ke@pd.tnic>
- <a4cc5b07-89e1-aaa0-1977-1de95883ba62@amd.com>
- <20161115153338.a2cxmatnpqcgiaiy@pd.tnic>
- <bb47e943-f5b6-0d73-cf9a-fea002a5c70e@amd.com>
- <20161115163350.jal7sd6ghbmk5sqc@pd.tnic>
+ <20161110003723.3280.62636.stgit@tlendack-t1.amdoffice.net>
+ <20161115143943.GC2185@potion>
+ <d5ebd13d-1278-8714-3f03-8ee7f04a2b38@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <20161115163350.jal7sd6ghbmk5sqc@pd.tnic>
-Sender: kvm-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Joerg Roedel <joro@8bytes.org>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <d5ebd13d-1278-8714-3f03-8ee7f04a2b38-5C7GfCeVMHo@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tgl>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/15/2016 10:33 AM, Borislav Petkov wrote:
-> On Tue, Nov 15, 2016 at 10:06:16AM -0600, Tom Lendacky wrote:
->> Yes, but that doesn't relate to the physical address space reduction.
->>
->> Once the SYS_CFG MSR bit for SME is set, even if the encryption bit is
->> never used, there is a physical reduction of the address space. So when
->> checking whether to adjust the physical address bits I can't rely on the
->> sme_me_mask, I have to look at the MSR.
->>
->> But when I'm looking to decide whether to encrypt or decrypt something,
->> I use the sme_me_mask to decide if that is needed.  If the sme_me_mask
->> is not set then the encrypt/decrypt op shouldn't be performed.
->>
->> I might not be grasping the point you're trying to make...
-> 
-> Ok, let me try to summarize how I see it. There are a couple of states:
-> 
-> * CPUID bit in 0x8000001f - that's SME supported
-> 
-> * Reduction of address space - MSR bit. That could be called "SME
-> BIOS-eenabled".
-> 
-> * SME active. That's both of the above and is sme_me_mask != 0.
-> 
-> Right?
-
-Correct.
-
-> 
-> So you said previously "The feature may be present and enabled even if
-> it is not currently active."
-> 
-> But then you say "active" below
-> 
->>> And in patch 12 you have:
+2016-11-15 11:02-0600, Tom Lendacky:
+> On 11/15/2016 8:39 AM, Radim Krčmář wrote:
+>> 2016-11-09 18:37-0600, Tom Lendacky:
+>>> Since DMA addresses will effectively look like 48-bit addresses when the
+>>> memory encryption mask is set, SWIOTLB is needed if the DMA mask of the
+>>> device performing the DMA does not support 48-bits. SWIOTLB will be
+>>> initialized to create un-encrypted bounce buffers for use by these devices.
 >>>
->>> +       /*
->>> +        * If memory encryption is active, the trampoline area will need to
->>> +        * be in un-encrypted memory in order to bring up other processors
->>> +        * successfully.
->>> +        */
->>> +       sme_early_mem_dec(__pa(base), size);
->>> +       sme_set_mem_unenc(base, size);
+>>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+>>> ---
+>>> diff --git a/arch/x86/kernel/pci-swiotlb.c b/arch/x86/kernel/pci-swiotlb.c
+>>> @@ -64,13 +66,15 @@ static struct dma_map_ops swiotlb_dma_ops = {
+>>>   * pci_swiotlb_detect_override - set swiotlb to 1 if necessary
+>>>   *
+>>>   * This returns non-zero if we are forced to use swiotlb (by the boot
+>>> - * option).
+>>> + * option). If memory encryption is enabled then swiotlb will be set
+>>> + * to 1 so that bounce buffers are allocated and used for devices that
+>>> + * do not support the addressing range required for the encryption mask.
+>>>   */
+>>>  int __init pci_swiotlb_detect_override(void)
+>>>  {
+>>>  	int use_swiotlb = swiotlb | swiotlb_force;
+>>>  
+>>> -	if (swiotlb_force)
+>>> +	if (swiotlb_force || sme_me_mask)
+>>>  		swiotlb = 1;
+>>>  
+>>>  	return use_swiotlb;
+>> 
+>> We want to return 1 even if only sme_me_mask is 1, because the return
+>> value is used for detection.  The following would be less obscure, IMO:
+>> 
+>> 	if (swiotlb_force || sme_me_mask)
+>> 		swiotlb = 1;
+>> 
+>> 	return swiotlb;
 > 
-> and test sme_me_mask. Which makes sense now after having explained which
-> hw setting controls what.
+> If we do that then all DMA would go through the swiotlb bounce buffers.
+
+No, that is decided for example in swiotlb_map_page() and we need to
+call pci_swiotlb_init() to register that function.
+
+> By setting swiotlb to 1 we indicate that the bounce buffers will be
+> needed for those devices that can't support the addressing range when
+> the encryption bit is set (48 bit DMA). But if the device can support
+> the addressing range we won't use the bounce buffers.
+
+If we return 0 here, then pci_swiotlb_init() will not be called =>
+dma_ops won't be set to swiotlb_dma_ops => we won't use bounce buffers.
+
+>> We setup encrypted swiotlb and then decrypt it, but sometimes set it up
+>> decrypted (late_alloc) ... why isn't the swiotlb set up decrypted
+>> directly?
 > 
-> So can we agree on the nomenclature for all the different SME states
-> first and use those throughout the code? And hold those states down in
-> Documentation/x86/amd-memory-encryption.txt so that it is perfectly
-> clear to people looking at the code.
+> When swiotlb is allocated in swiotlb_init(), it is too early to make
+> use of the api to the change the page attributes. Because of this,
+> the callback to make those changes is needed.
 
-Yup, that sounds good.  I'll update the documentation to clarify the
-various states/modes of SME.
+Thanks. (I don't know page table setup enough to see a lesser evil. :])
 
+>>> @@ -541,7 +583,7 @@ static phys_addr_t
+>>>  map_single(struct device *hwdev, phys_addr_t phys, size_t size,
+>>>  	   enum dma_data_direction dir)
+>>>  {
+>>> -	dma_addr_t start_dma_addr = phys_to_dma(hwdev, io_tlb_start);
+>>> +	dma_addr_t start_dma_addr = swiotlb_phys_to_dma(hwdev, io_tlb_start);
+>> 
+>> We have decrypted io_tlb_start before, so shouldn't its physical address
+>> be saved without the sme bit?  (Which changes a lot ...)
 > 
-> Also, if we need to check those states more than once, we should add
-> inline helpers:
-> 
-> sme_supported()
-> sme_bios_enabled()
-> sme_active()
-> 
-> How does that sound?
+> I'm not sure what you mean here, can you elaborate a bit more?
 
-Sounds good.
+The C-bit (sme bit) is a part of the physical address.
+If we know that a certain physical page should be accessed as
+unencrypted (the bounce buffer) then the C-bit is 0.
+I'm wondering why we save the physical address with the C-bit set when
+we know that it can't be accessed that way (because we remove it every
+time).
 
-Thanks,
-Tom
-
-> 
-
+The naming is a bit confusing, because physical addresses are actually
+virtualized by SME -- maybe we should be calling them SME addresses?
