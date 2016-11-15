@@ -1,81 +1,110 @@
-From: "Michael S. Tsirkin" <mst@redhat.com>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 Subject: Re: [RFC PATCH v3 13/20] x86: DMA support for memory encryption
-Date: Tue, 15 Nov 2016 21:16:33 +0200
-Message-ID: <20161115211603-mutt-send-email-mst@kernel.org>
+Date: Tue, 15 Nov 2016 14:33:06 -0600
+Message-ID: <55bba6f6-b134-6c7b-fc20-10d2dbf781f1@amd.com>
 References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
- <20161110003723.3280.62636.stgit@tlendack-t1.amdoffice.net>
- <20161115171443-mutt-send-email-mst@kernel.org>
- <4d97f998-5835-f4e0-9840-7f7979251275@amd.com>
+	<20161110003723.3280.62636.stgit@tlendack-t1.amdoffice.net>
+	<20161115143943.GC2185@potion>
+	<d5ebd13d-1278-8714-3f03-8ee7f04a2b38@amd.com>
+	<20161115181736.GA14060@potion>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <4d97f998-5835-f4e0-9840-7f7979251275@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <gli>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20161115181736.GA14060@potion>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 15, 2016 at 12:29:35PM -0600, Tom Lendacky wrote:
-> On 11/15/2016 9:16 AM, Michael S. Tsirkin wrote:
-> > On Wed, Nov 09, 2016 at 06:37:23PM -0600, Tom Lendacky wrote:
-> >> Since DMA addresses will effectively look like 48-bit addresses when the
-> >> memory encryption mask is set, SWIOTLB is needed if the DMA mask of the
-> >> device performing the DMA does not support 48-bits. SWIOTLB will be
-> >> initialized to create un-encrypted bounce buffers for use by these devices.
-> >>
-> >> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> >> ---
-> >>  arch/x86/include/asm/dma-mapping.h |    5 ++-
-> >>  arch/x86/include/asm/mem_encrypt.h |    5 +++
-> >>  arch/x86/kernel/pci-dma.c          |   11 ++++---
-> >>  arch/x86/kernel/pci-nommu.c        |    2 +
-> >>  arch/x86/kernel/pci-swiotlb.c      |    8 ++++-
-> >>  arch/x86/mm/mem_encrypt.c          |   17 +++++++++++
-> >>  include/linux/swiotlb.h            |    1 +
-> >>  init/main.c                        |   13 ++++++++
-> >>  lib/swiotlb.c                      |   58 +++++++++++++++++++++++++++++++-----
-> >>  9 files changed, 103 insertions(+), 17 deletions(-)
-> >>
-> >> diff --git a/arch/x86/include/asm/dma-mapping.h b/arch/x86/include/asm/dma-mapping.h
-> >> index 4446162..c9cdcae 100644
-> >> --- a/arch/x86/include/asm/dma-mapping.h
-> >> +++ b/arch/x86/include/asm/dma-mapping.h
-> 
-> ..SNIP...
-> 
-> >>  
-> >> +/*
-> >> + * If memory encryption is active, the DMA address for an encrypted page may
-> >> + * be beyond the range of the device. If bounce buffers are required be sure
-> >> + * that they are not on an encrypted page. This should be called before the
-> >> + * iotlb area is used.
-> > 
-> > Makes sense, but I think at least a dmesg warning here
-> > might be a good idea.
-> 
-> Good idea.  Should it be a warning when it is first being set up or
-> a warning the first time the bounce buffers need to be used.  Or maybe
-> both?
-> 
-> > 
-> > A boot flag that says "don't enable devices that don't support
-> > encryption" might be a good idea, too, since most people
-> > don't read dmesg output and won't notice the message.
-> 
-> I'll look into this. It might be something that can be checked as
-> part of the device setting its DMA mask or the first time a DMA
-> API is used if the device doesn't explicitly set its mask.
-> 
-> Thanks,
-> Tom
-> 
-> > 
-
-I think setup time is nicer if it's possible.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+T24gMTEvMTUvMjAxNiAxMjoxNyBQTSwgUmFkaW0gS3LEjW3DocWZIHdyb3RlOgo+IDIwMTYtMTEt
+MTUgMTE6MDItMDYwMCwgVG9tIExlbmRhY2t5Ogo+PiBPbiAxMS8xNS8yMDE2IDg6MzkgQU0sIFJh
+ZGltIEtyxI1tw6HFmSB3cm90ZToKPj4+IDIwMTYtMTEtMDkgMTg6MzctMDYwMCwgVG9tIExlbmRh
+Y2t5Ogo+Pj4+IFNpbmNlIERNQSBhZGRyZXNzZXMgd2lsbCBlZmZlY3RpdmVseSBsb29rIGxpa2Ug
+NDgtYml0IGFkZHJlc3NlcyB3aGVuIHRoZQo+Pj4+IG1lbW9yeSBlbmNyeXB0aW9uIG1hc2sgaXMg
+c2V0LCBTV0lPVExCIGlzIG5lZWRlZCBpZiB0aGUgRE1BIG1hc2sgb2YgdGhlCj4+Pj4gZGV2aWNl
+IHBlcmZvcm1pbmcgdGhlIERNQSBkb2VzIG5vdCBzdXBwb3J0IDQ4LWJpdHMuIFNXSU9UTEIgd2ls
+bCBiZQo+Pj4+IGluaXRpYWxpemVkIHRvIGNyZWF0ZSB1bi1lbmNyeXB0ZWQgYm91bmNlIGJ1ZmZl
+cnMgZm9yIHVzZSBieSB0aGVzZSBkZXZpY2VzLgo+Pj4+Cj4+Pj4gU2lnbmVkLW9mZi1ieTogVG9t
+IExlbmRhY2t5IDx0aG9tYXMubGVuZGFja3lAYW1kLmNvbT4KPj4+PiAtLS0KPj4+PiBkaWZmIC0t
+Z2l0IGEvYXJjaC94ODYva2VybmVsL3BjaS1zd2lvdGxiLmMgYi9hcmNoL3g4Ni9rZXJuZWwvcGNp
+LXN3aW90bGIuYwo+Pj4+IEBAIC02NCwxMyArNjYsMTUgQEAgc3RhdGljIHN0cnVjdCBkbWFfbWFw
+X29wcyBzd2lvdGxiX2RtYV9vcHMgPSB7Cj4+Pj4gICAqIHBjaV9zd2lvdGxiX2RldGVjdF9vdmVy
+cmlkZSAtIHNldCBzd2lvdGxiIHRvIDEgaWYgbmVjZXNzYXJ5Cj4+Pj4gICAqCj4+Pj4gICAqIFRo
+aXMgcmV0dXJucyBub24temVybyBpZiB3ZSBhcmUgZm9yY2VkIHRvIHVzZSBzd2lvdGxiIChieSB0
+aGUgYm9vdAo+Pj4+IC0gKiBvcHRpb24pLgo+Pj4+ICsgKiBvcHRpb24pLiBJZiBtZW1vcnkgZW5j
+cnlwdGlvbiBpcyBlbmFibGVkIHRoZW4gc3dpb3RsYiB3aWxsIGJlIHNldAo+Pj4+ICsgKiB0byAx
+IHNvIHRoYXQgYm91bmNlIGJ1ZmZlcnMgYXJlIGFsbG9jYXRlZCBhbmQgdXNlZCBmb3IgZGV2aWNl
+cyB0aGF0Cj4+Pj4gKyAqIGRvIG5vdCBzdXBwb3J0IHRoZSBhZGRyZXNzaW5nIHJhbmdlIHJlcXVp
+cmVkIGZvciB0aGUgZW5jcnlwdGlvbiBtYXNrLgo+Pj4+ICAgKi8KPj4+PiAgaW50IF9faW5pdCBw
+Y2lfc3dpb3RsYl9kZXRlY3Rfb3ZlcnJpZGUodm9pZCkKPj4+PiAgewo+Pj4+ICAJaW50IHVzZV9z
+d2lvdGxiID0gc3dpb3RsYiB8IHN3aW90bGJfZm9yY2U7Cj4+Pj4gIAo+Pj4+IC0JaWYgKHN3aW90
+bGJfZm9yY2UpCj4+Pj4gKwlpZiAoc3dpb3RsYl9mb3JjZSB8fCBzbWVfbWVfbWFzaykKPj4+PiAg
+CQlzd2lvdGxiID0gMTsKPj4+PiAgCj4+Pj4gIAlyZXR1cm4gdXNlX3N3aW90bGI7Cj4+Pgo+Pj4g
+V2Ugd2FudCB0byByZXR1cm4gMSBldmVuIGlmIG9ubHkgc21lX21lX21hc2sgaXMgMSwgYmVjYXVz
+ZSB0aGUgcmV0dXJuCj4+PiB2YWx1ZSBpcyB1c2VkIGZvciBkZXRlY3Rpb24uICBUaGUgZm9sbG93
+aW5nIHdvdWxkIGJlIGxlc3Mgb2JzY3VyZSwgSU1POgo+Pj4KPj4+IAlpZiAoc3dpb3RsYl9mb3Jj
+ZSB8fCBzbWVfbWVfbWFzaykKPj4+IAkJc3dpb3RsYiA9IDE7Cj4+Pgo+Pj4gCXJldHVybiBzd2lv
+dGxiOwo+Pgo+PiBJZiB3ZSBkbyB0aGF0IHRoZW4gYWxsIERNQSB3b3VsZCBnbyB0aHJvdWdoIHRo
+ZSBzd2lvdGxiIGJvdW5jZSBidWZmZXJzLgo+IAo+IE5vLCB0aGF0IGlzIGRlY2lkZWQgZm9yIGV4
+YW1wbGUgaW4gc3dpb3RsYl9tYXBfcGFnZSgpIGFuZCB3ZSBuZWVkIHRvCj4gY2FsbCBwY2lfc3dp
+b3RsYl9pbml0KCkgdG8gcmVnaXN0ZXIgdGhhdCBmdW5jdGlvbi4KPiAKPj4gQnkgc2V0dGluZyBz
+d2lvdGxiIHRvIDEgd2UgaW5kaWNhdGUgdGhhdCB0aGUgYm91bmNlIGJ1ZmZlcnMgd2lsbCBiZQo+
+PiBuZWVkZWQgZm9yIHRob3NlIGRldmljZXMgdGhhdCBjYW4ndCBzdXBwb3J0IHRoZSBhZGRyZXNz
+aW5nIHJhbmdlIHdoZW4KPj4gdGhlIGVuY3J5cHRpb24gYml0IGlzIHNldCAoNDggYml0IERNQSku
+IEJ1dCBpZiB0aGUgZGV2aWNlIGNhbiBzdXBwb3J0Cj4+IHRoZSBhZGRyZXNzaW5nIHJhbmdlIHdl
+IHdvbid0IHVzZSB0aGUgYm91bmNlIGJ1ZmZlcnMuCj4gCj4gSWYgd2UgcmV0dXJuIDAgaGVyZSwg
+dGhlbiBwY2lfc3dpb3RsYl9pbml0KCkgd2lsbCBub3QgYmUgY2FsbGVkID0+Cj4gZG1hX29wcyB3
+b24ndCBiZSBzZXQgdG8gc3dpb3RsYl9kbWFfb3BzID0+IHdlIHdvbid0IHVzZSBib3VuY2UgYnVm
+ZmVycy4KPiAKCk9rLCBJIHNlZSB3aHkgdGhpcyB3YXMgd29ya2luZyBmb3IgbWUuLi4gIEJ5IHNl
+dHRpbmcgc3dpb3RsYiA9IDEgYW5kCnJldHVybmluZyAwIGl0IHdhcyBjb250aW51aW5nIHRvIHRo
+ZSBwY2lfc3dpb3RsYl9kZXRlY3RfNGdiIHRhYmxlIHdoaWNoCndvdWxkIHJldHVybiB0aGUgY3Vy
+cmVudCB2YWx1ZSBvZiBzd2lvdGxiLCB3aGljaCBpcyAxLCBhbmQgc28gdGhlCnN3aW90bGIgb3Bz
+IHdlcmUgc2V0dXAuCgpTbyB0aGUgY2hhbmdlIHRoYXQgeW91IG1lbnRpb25lZCB3aWxsIHdvcmss
+IHRoYW5rcyBmb3IgcG9pbnRpbmcgdGhhdCBvdXQKYW5kIGdldHRpbmcgbWUgdG8gZGlnIGRlZXBl
+ciBvbiBpdC4gIEknbGwgdXBkYXRlIHRoZSBwYXRjaC4KCj4+PiBXZSBzZXR1cCBlbmNyeXB0ZWQg
+c3dpb3RsYiBhbmQgdGhlbiBkZWNyeXB0IGl0LCBidXQgc29tZXRpbWVzIHNldCBpdCB1cAo+Pj4g
+ZGVjcnlwdGVkIChsYXRlX2FsbG9jKSAuLi4gd2h5IGlzbid0IHRoZSBzd2lvdGxiIHNldCB1cCBk
+ZWNyeXB0ZWQKPj4+IGRpcmVjdGx5Pwo+Pgo+PiBXaGVuIHN3aW90bGIgaXMgYWxsb2NhdGVkIGlu
+IHN3aW90bGJfaW5pdCgpLCBpdCBpcyB0b28gZWFybHkgdG8gbWFrZQo+PiB1c2Ugb2YgdGhlIGFw
+aSB0byB0aGUgY2hhbmdlIHRoZSBwYWdlIGF0dHJpYnV0ZXMuIEJlY2F1c2Ugb2YgdGhpcywKPj4g
+dGhlIGNhbGxiYWNrIHRvIG1ha2UgdGhvc2UgY2hhbmdlcyBpcyBuZWVkZWQuCj4gCj4gVGhhbmtz
+LiAoSSBkb24ndCBrbm93IHBhZ2UgdGFibGUgc2V0dXAgZW5vdWdoIHRvIHNlZSBhIGxlc3NlciBl
+dmlsLiA6XSkKPiAKPj4+PiBAQCAtNTQxLDcgKzU4Myw3IEBAIHN0YXRpYyBwaHlzX2FkZHJfdAo+
+Pj4+ICBtYXBfc2luZ2xlKHN0cnVjdCBkZXZpY2UgKmh3ZGV2LCBwaHlzX2FkZHJfdCBwaHlzLCBz
+aXplX3Qgc2l6ZSwKPj4+PiAgCSAgIGVudW0gZG1hX2RhdGFfZGlyZWN0aW9uIGRpcikKPj4+PiAg
+ewo+Pj4+IC0JZG1hX2FkZHJfdCBzdGFydF9kbWFfYWRkciA9IHBoeXNfdG9fZG1hKGh3ZGV2LCBp
+b190bGJfc3RhcnQpOwo+Pj4+ICsJZG1hX2FkZHJfdCBzdGFydF9kbWFfYWRkciA9IHN3aW90bGJf
+cGh5c190b19kbWEoaHdkZXYsIGlvX3RsYl9zdGFydCk7Cj4+Pgo+Pj4gV2UgaGF2ZSBkZWNyeXB0
+ZWQgaW9fdGxiX3N0YXJ0IGJlZm9yZSwgc28gc2hvdWxkbid0IGl0cyBwaHlzaWNhbCBhZGRyZXNz
+Cj4+PiBiZSBzYXZlZCB3aXRob3V0IHRoZSBzbWUgYml0PyAgKFdoaWNoIGNoYW5nZXMgYSBsb3Qg
+Li4uKQo+Pgo+PiBJJ20gbm90IHN1cmUgd2hhdCB5b3UgbWVhbiBoZXJlLCBjYW4geW91IGVsYWJv
+cmF0ZSBhIGJpdCBtb3JlPwo+IAo+IFRoZSBDLWJpdCAoc21lIGJpdCkgaXMgYSBwYXJ0IG9mIHRo
+ZSBwaHlzaWNhbCBhZGRyZXNzLgoKVGhlIEMtYml0IChzbWVfbWVfbWFzaykgaXNuJ3QgcGFydCBv
+ZiB0aGUgcGh5c2ljYWwgYWRkcmVzcyBmb3IKaW9fdGxiX3N0YXJ0LCBidXQgc2luY2UgdGhlIG9y
+aWdpbmFsIGNhbGwgd2FzIHRvIHBoeXNfdG9fZG1hKCksIHdoaWNoCm5vdyB3aWxsIGF1dG9tYXRp
+Y2FsbHkgIm9yIiBpbiB0aGUgQy1iaXQsIEkgbmVlZGVkIHRvIGFkanVzdCB0aGF0IGJ5CnVzaW5n
+IHN3aW90bGJfcGh5c190b19kbWEoKSB0byByZW1vdmUgdGhlIEMtYml0LgoKPiBJZiB3ZSBrbm93
+IHRoYXQgYSBjZXJ0YWluIHBoeXNpY2FsIHBhZ2Ugc2hvdWxkIGJlIGFjY2Vzc2VkIGFzCj4gdW5l
+bmNyeXB0ZWQgKHRoZSBib3VuY2UgYnVmZmVyKSB0aGVuIHRoZSBDLWJpdCBpcyAwLgo+IEknbSB3
+b25kZXJpbmcgd2h5IHdlIHNhdmUgdGhlIHBoeXNpY2FsIGFkZHJlc3Mgd2l0aCB0aGUgQy1iaXQg
+c2V0IHdoZW4KPiB3ZSBrbm93IHRoYXQgaXQgY2FuJ3QgYmUgYWNjZXNzZWQgdGhhdCB3YXkgKGJl
+Y2F1c2Ugd2UgcmVtb3ZlIGl0IGV2ZXJ5Cj4gdGltZSkuCgpJdCdzIG5vdCBzYXZlZCB3aXRoIHRo
+ZSBDLWJpdCwgYnV0IHRoZSBwaHlzX3RvX2RtYSBjYWxsIHdpbGwgIm9yIiBpbiB0aGUKQy1iaXQg
+YXV0b21hdGljYWxseS4gIEFuZCBzaW5jZSB0aGlzIGlzIGNvbW1vbiBjb2RlIEkgbmVlZCB0byBs
+ZWF2ZSB0aGF0CmNhbGwgdG8gcGh5c190b19kbWEgaW4uCgo+IAo+IFRoZSBuYW1pbmcgaXMgYSBi
+aXQgY29uZnVzaW5nLCBiZWNhdXNlIHBoeXNpY2FsIGFkZHJlc3NlcyBhcmUgYWN0dWFsbHkKPiB2
+aXJ0dWFsaXplZCBieSBTTUUgLS0gbWF5YmUgd2Ugc2hvdWxkIGJlIGNhbGxpbmcgdGhlbSBTTUUg
+YWRkcmVzc2VzPwoKSW50ZXJlc3RpbmcgaWRlYS4uLiAgSSdsbCBoYXZlIHRvIGxvb2sgYXQgaG93
+IHRoYXQgcGxheXMgb3V0IGluIHRoZQpwYXRjaGVzIGFuZCBkb2N1bWVudGF0aW9uLgoKVGhhbmtz
+LApUb20KCj4gCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+CmlvbW11IG1haWxpbmcgbGlzdAppb21tdUBsaXN0cy5saW51eC1mb3VuZGF0aW9uLm9yZwpodHRw
+czovL2xpc3RzLmxpbnV4Zm91bmRhdGlvbi5vcmcvbWFpbG1hbi9saXN0aW5mby9pb21tdQ==
