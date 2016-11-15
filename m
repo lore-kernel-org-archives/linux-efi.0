@@ -1,49 +1,44 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v3 04/20] x86: Handle reduction in physical address
- size with SME
-Date: Tue, 15 Nov 2016 08:40:05 -0600
-Message-ID: <a4cc5b07-89e1-aaa0-1977-1de95883ba62@amd.com>
-References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
- <20161110003513.3280.12104.stgit@tlendack-t1.amdoffice.net>
- <20161115121035.GD24857@8bytes.org> <20161115121456.f4slpk4i2jl3e2ke@pd.tnic>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH v2 2/3] efi/libstub: add random.c to ARM build
+Date: Tue, 15 Nov 2016 16:11:03 +0100
+Message-ID: <2189664.D28O3TYR8x@wuerfel>
+References: <1476962486-18368-1-git-send-email-ard.biesheuvel@linaro.org> <1476962486-18368-3-git-send-email-ard.biesheuvel@linaro.org> <CAKv+Gu_=et=2zHBTYOr9thz2kS0cXHHYg96oWGRdD3D10fqXtw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20161115121456.f4slpk4i2jl3e2ke@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>, Joerg Roedel <joro@8bytes.org>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKv+Gu_=et=2zHBTYOr9thz2kS0cXHHYg96oWGRdD3D10fqXtw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/15/2016 6:14 AM, Borislav Petkov wrote:
-> On Tue, Nov 15, 2016 at 01:10:35PM +0100, Joerg Roedel wrote:
->> Maybe add a comment here why you can't use cpu_has (yet).
+On Wednesday, November 2, 2016 9:37:13 AM CET Ard Biesheuvel wrote:
+> @@ -98,7 +100,7 @@
+>                 efi_memory_desc_t *md = (void *)memory_map + map_offset;
+>                 unsigned long slots;
 > 
-> So that could be alleviated by moving this function *after*
-> init_scattered_cpuid_features(). Then you can simply do *cpu_has().
-
-Yes, I can move it after init_scattered_cpuid_features() and then use
-the cpu_has() function.  I'll make sure to include a comment that the
-function needs to be called after init_scattered_cpuid_features().
-
+> -               slots = get_entry_num_slots(md, size, align);
+> +               slots = get_entry_num_slots(md, size, ilog2(align));
+>                 MD_NUM_SLOTS(md) = slots;
+>                 total_slots += slots;
+>         }
+> """
 > 
-> Also, I'm not sure why we're checking CPUID for the SME feature when we
-> have sme_get_me_mask() et al which have been setup much earlier...
+> This is because ARM does not have a division routine in the
+> decompressor, and the fact that the division by 'align' should always
+> involve a power of 2 is not visible to the compiler.
+> 
+> If nobody objects, I will fold this in when applying
+> 
 > 
 
-The feature may be present and enabled even if it is not currently
-active.  In other words, the SYS_CFG MSR bit could be set but we aren't
-actually using encryption (sme_me_mask is 0).  As long as the SYS_CFG
-MSR bit is set we need to take into account the physical reduction in
-address space.
+I'm getting a link error here when building with -Os:
 
-Thanks,
-Tom
+drivers/firmware/efi/libstub/random.stub.o: In function `efi_random_alloc':
+random.c:(.text.efi_random_alloc+0x264): undefined reference to `__aeabi_llsr'
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+If I compile this with -O2, the ilog2 gets inlined and everything
+works.
+
+	Arnd
