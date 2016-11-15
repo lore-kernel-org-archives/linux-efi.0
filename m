@@ -1,57 +1,59 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 2/3] efi/libstub: add random.c to ARM build
-Date: Tue, 15 Nov 2016 15:19:58 +0000
-Message-ID: <CAKv+Gu-=sdp6Mz75NpeAxmBnnHVtgT3waDTm7R=MdmKyqMr94g@mail.gmail.com>
-References: <1476962486-18368-1-git-send-email-ard.biesheuvel@linaro.org>
- <1476962486-18368-3-git-send-email-ard.biesheuvel@linaro.org>
- <CAKv+Gu_=et=2zHBTYOr9thz2kS0cXHHYg96oWGRdD3D10fqXtw@mail.gmail.com> <2189664.D28O3TYR8x@wuerfel>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [RFC PATCH v3 04/20] x86: Handle reduction in physical address
+	size with SME
+Date: Tue, 15 Nov 2016 16:33:39 +0100
+Message-ID: <20161115153338.a2cxmatnpqcgiaiy@pd.tnic>
+References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+	<20161110003513.3280.12104.stgit@tlendack-t1.amdoffice.net>
+	<20161115121035.GD24857@8bytes.org>
+	<20161115121456.f4slpk4i2jl3e2ke@pd.tnic>
+	<a4cc5b07-89e1-aaa0-1977-1de95883ba62@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <2189664.D28O3TYR8x@wuerfel>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <a4cc5b07-89e1-aaa0-1977-1de95883ba62-5C7GfCeVMHo@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 15 November 2016 at 15:11, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
-> On Wednesday, November 2, 2016 9:37:13 AM CET Ard Biesheuvel wrote:
->> @@ -98,7 +100,7 @@
->>                 efi_memory_desc_t *md = (void *)memory_map + map_offset;
->>                 unsigned long slots;
->>
->> -               slots = get_entry_num_slots(md, size, align);
->> +               slots = get_entry_num_slots(md, size, ilog2(align));
->>                 MD_NUM_SLOTS(md) = slots;
->>                 total_slots += slots;
->>         }
->> """
->>
->> This is because ARM does not have a division routine in the
->> decompressor, and the fact that the division by 'align' should always
->> involve a power of 2 is not visible to the compiler.
->>
->> If nobody objects, I will fold this in when applying
->>
->>
->
-> I'm getting a link error here when building with -Os:
->
-> drivers/firmware/efi/libstub/random.stub.o: In function `efi_random_alloc':
-> random.c:(.text.efi_random_alloc+0x264): undefined reference to `__aeabi_llsr'
->
-> If I compile this with -O2, the ilog2 gets inlined and everything
-> works.
->
+On Tue, Nov 15, 2016 at 08:40:05AM -0600, Tom Lendacky wrote:
+> The feature may be present and enabled even if it is not currently
+> active.  In other words, the SYS_CFG MSR bit could be set but we aren't
+> actually using encryption (sme_me_mask is 0).  As long as the SYS_CFG
+> MSR bit is set we need to take into account the physical reduction in
+> address space.
 
-This is caused by the fact that 'start' and 'end are u64 rather than
-unsigned long, and the stub does not have the u64 logical shift right
-routines.
-But interestingly, it does cover another issue with this code, i.e.,
-that you cannot do allocations over 4 GB in the ARM stub, even on LPAE
-capable hardware.
+But later in the series I see sme_early_mem_enc() which tests exactly
+that mask.
 
-I will send out a patch to fix this.
+And in patch 12 you have:
 
-Thanks,
-Ard.
++       /*
++        * If memory encryption is active, the trampoline area will need to
++        * be in un-encrypted memory in order to bring up other processors
++        * successfully.
++        */
++       sme_early_mem_dec(__pa(base), size);
++       sme_set_mem_unenc(base, size);
+
+What's up?
+
+IOW, it all sounds to me like you want to have an sme_active() helper
+and use it everywhere.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
