@@ -1,70 +1,240 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 6/9] efi: Add EFI signature data types
-Date: Wed, 16 Nov 2016 18:11:28 +0000
-Message-ID: <147931988803.16460.18213104388363289832.stgit@warthog.procyon.org.uk>
-References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [RFC PATCH v3 08/20] x86: Add support for early
+	encryption/decryption of memory
+Date: Wed, 16 Nov 2016 13:22:36 -0600
+Message-ID: <3a9e093a-9e80-8d2b-2615-56675cf6f147@amd.com>
+References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+	<20161110003610.3280.22043.stgit@tlendack-t1.amdoffice.net>
+	<20161116104656.qz5wp33zzyja373r@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-To: keyrings@vger.kernel.org
-Cc: dhowells@redhat.com, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20161116104656.qz5wp33zzyja373r-fF5Pk5pvG8Y@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Dave Howells <dhowells@redhat.com>
+On 11/16/2016 4:46 AM, Borislav Petkov wrote:
+> Btw, for your next submission, this patch can be split in two exactly
+> like the commit message paragraphs are:
 
-Add the data types that are used for containing hashes, keys and
-certificates for cryptographic verification along with their corresponding
-type GUIDs.
+I think I originally had it that way, I don't know why I combined them.
+I'll split them out.
 
-Signed-off-by: David Howells <dhowells@redhat.com>
----
+> 
+> On Wed, Nov 09, 2016 at 06:36:10PM -0600, Tom Lendacky wrote:
+>> Add support to be able to either encrypt or decrypt data in place during
+>> the early stages of booting the kernel. This does not change the memory
+>> encryption attribute - it is used for ensuring that data present in either
+>> an encrypted or un-encrypted memory area is in the proper state (for
+>> example the initrd will have been loaded by the boot loader and will not be
+>> encrypted, but the memory that it resides in is marked as encrypted).
+> 
+> Patch 2: users of the new memmap change
+> 
+>> The early_memmap support is enhanced to specify encrypted and un-encrypted
+>> mappings with and without write-protection. The use of write-protection is
+>> necessary when encrypting data "in place". The write-protect attribute is
+>> considered cacheable for loads, but not stores. This implies that the
+>> hardware will never give the core a dirty line with this memtype.
+> 
+> Patch 1: change memmap
+> 
+> This makes this aspect of the patchset much clearer and is better for
+> bisection.
+> 
+>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+>> ---
+>>  arch/x86/include/asm/fixmap.h        |    9 +++
+>>  arch/x86/include/asm/mem_encrypt.h   |   15 +++++
+>>  arch/x86/include/asm/pgtable_types.h |    8 +++
+>>  arch/x86/mm/ioremap.c                |   28 +++++++++
+>>  arch/x86/mm/mem_encrypt.c            |  102 ++++++++++++++++++++++++++++++++++
+>>  include/asm-generic/early_ioremap.h  |    2 +
+>>  mm/early_ioremap.c                   |   15 +++++
+>>  7 files changed, 179 insertions(+)
+> 
+> ...
+> 
+>> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+>> index d642cc5..06235b4 100644
+>> --- a/arch/x86/mm/mem_encrypt.c
+>> +++ b/arch/x86/mm/mem_encrypt.c
+>> @@ -14,6 +14,9 @@
+>>  #include <linux/init.h>
+>>  #include <linux/mm.h>
+>>  
+>> +#include <asm/tlbflush.h>
+>> +#include <asm/fixmap.h>
+>> +
+>>  extern pmdval_t early_pmd_flags;
+>>  
+>>  /*
+>> @@ -24,6 +27,105 @@ extern pmdval_t early_pmd_flags;
+>>  unsigned long sme_me_mask __section(.data) = 0;
+>>  EXPORT_SYMBOL_GPL(sme_me_mask);
+>>  
+>> +/* Buffer used for early in-place encryption by BSP, no locking needed */
+>> +static char sme_early_buffer[PAGE_SIZE] __aligned(PAGE_SIZE);
+>> +
+>> +/*
+>> + * This routine does not change the underlying encryption setting of the
+>> + * page(s) that map this memory. It assumes that eventually the memory is
+>> + * meant to be accessed as encrypted but the contents are currently not
+>> + * encrypted.
+>> + */
+>> +void __init sme_early_mem_enc(resource_size_t paddr, unsigned long size)
+>> +{
+>> +	void *src, *dst;
+>> +	size_t len;
+>> +
+>> +	if (!sme_me_mask)
+>> +		return;
+>> +
+>> +	local_flush_tlb();
+>> +	wbinvd();
+>> +
+>> +	/*
+>> +	 * There are limited number of early mapping slots, so map (at most)
+>> +	 * one page at time.
+>> +	 */
+>> +	while (size) {
+>> +		len = min_t(size_t, sizeof(sme_early_buffer), size);
+>> +
+>> +		/* Create a mapping for non-encrypted write-protected memory */
+>> +		src = early_memremap_dec_wp(paddr, len);
+>> +
+>> +		/* Create a mapping for encrypted memory */
+>> +		dst = early_memremap_enc(paddr, len);
+>> +
+>> +		/*
+>> +		 * If a mapping can't be obtained to perform the encryption,
+>> +		 * then encrypted access to that area will end up causing
+>> +		 * a crash.
+>> +		 */
+>> +		BUG_ON(!src || !dst);
+>> +
+>> +		memcpy(sme_early_buffer, src, len);
+>> +		memcpy(dst, sme_early_buffer, len);
+> 
+> I still am missing the short explanation why we need the temporary buffer.
 
- include/linux/efi.h |   24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+Ok, I'll add that.
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index acfdea8381de..6fb50bafedc7 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -594,6 +594,9 @@ void efi_native_runtime_setup(void);
- 
- #define EFI_IMAGE_SECURITY_DATABASE_GUID	EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596, 0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
- #define EFI_SHIM_LOCK_GUID			EFI_GUID(0x605dab50, 0xe046, 0x4300, 0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
-+#define EFI_CERT_SHA256_GUID			EFI_GUID(0xc1c41626, 0x504c, 0x4092, 0xac, 0xa9, 0x41, 0xf9, 0x36, 0x93, 0x43, 0x28 )
-+#define EFI_CERT_X509_GUID			EFI_GUID(0xa5c059a1, 0x94e4, 0x4aa7, 0x87, 0xb5, 0xab, 0x15, 0x5c, 0x2b, 0xf0, 0x72 )
-+#define EFI_CERT_X509_SHA256_GUID		EFI_GUID(0x3bd2a492, 0x96c0, 0x4079, 0xb4, 0x20, 0xfc, 0xf9, 0x8e, 0xf1, 0x03, 0xed );
- 
- /*
-  * This GUID is used to pass to the kernel proper the struct screen_info
-@@ -853,6 +856,27 @@ typedef struct {
- 	efi_memory_desc_t entry[0];
- } efi_memory_attributes_table_t;
- 
-+typedef struct  {
-+	efi_guid_t signature_owner;
-+	u8 signature_data[];
-+} efi_signature_data_t;
-+
-+typedef struct {
-+	efi_guid_t signature_type;
-+	u32 signature_list_size;
-+	u32 signature_header_size;
-+	u32 signature_size;
-+	u8 signature_header[];
-+	/* efi_signature_data_t signatures[][] */
-+} efi_signature_list_t;
-+
-+typedef u8 efi_sha256_hash_t[32];
-+
-+typedef struct {
-+	efi_sha256_hash_t to_be_signed_hash;
-+	efi_time_t time_of_revocation;
-+} efi_cert_x509_sha256_t;
-+
- /*
-  * All runtime access to EFI goes through this structure:
-  */
+> 
+> 
+> Oh, and we can save us the code duplication a little. Diff ontop of yours:
 
+Yup, makes sense.  I'll incorporate this.
+
+Thanks,
+Tom
+
+> 
+> ---
+> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+> index 06235b477d7c..50e2c4fc7338 100644
+> --- a/arch/x86/mm/mem_encrypt.c
+> +++ b/arch/x86/mm/mem_encrypt.c
+> @@ -36,7 +36,8 @@ static char sme_early_buffer[PAGE_SIZE] __aligned(PAGE_SIZE);
+>   * meant to be accessed as encrypted but the contents are currently not
+>   * encrypted.
+>   */
+> -void __init sme_early_mem_enc(resource_size_t paddr, unsigned long size)
+> +static void __init noinline
+> +__mem_enc_dec(resource_size_t paddr, unsigned long size, bool enc)
+>  {
+>  	void *src, *dst;
+>  	size_t len;
+> @@ -54,15 +55,15 @@ void __init sme_early_mem_enc(resource_size_t paddr, unsigned long size)
+>  	while (size) {
+>  		len = min_t(size_t, sizeof(sme_early_buffer), size);
+>  
+> -		/* Create a mapping for non-encrypted write-protected memory */
+> -		src = early_memremap_dec_wp(paddr, len);
+> +		src = (enc ? early_memremap_dec_wp(paddr, len)
+> +			   : early_memremap_enc_wp(paddr, len));
+>  
+> -		/* Create a mapping for encrypted memory */
+> -		dst = early_memremap_enc(paddr, len);
+> +		dst = (enc ? early_memremap_enc(paddr, len)
+> +			   : early_memremap_dec(paddr, len));
+>  
+>  		/*
+> -		 * If a mapping can't be obtained to perform the encryption,
+> -		 * then encrypted access to that area will end up causing
+> +		 * If a mapping can't be obtained to perform the dec/encryption,
+> +		 * then (un-)encrypted access to that area will end up causing
+>  		 * a crash.
+>  		 */
+>  		BUG_ON(!src || !dst);
+> @@ -78,52 +79,14 @@ void __init sme_early_mem_enc(resource_size_t paddr, unsigned long size)
+>  	}
+>  }
+>  
+> -/*
+> - * This routine does not change the underlying encryption setting of the
+> - * page(s) that map this memory. It assumes that eventually the memory is
+> - * meant to be accessed as not encrypted but the contents are currently
+> - * encrypted.
+> - */
+> -void __init sme_early_mem_dec(resource_size_t paddr, unsigned long size)
+> +void __init sme_early_mem_enc(resource_size_t paddr, unsigned long size)
+>  {
+> -	void *src, *dst;
+> -	size_t len;
+> -
+> -	if (!sme_me_mask)
+> -		return;
+> -
+> -	local_flush_tlb();
+> -	wbinvd();
+> -
+> -	/*
+> -	 * There are limited number of early mapping slots, so map (at most)
+> -	 * one page at time.
+> -	 */
+> -	while (size) {
+> -		len = min_t(size_t, sizeof(sme_early_buffer), size);
+> -
+> -		/* Create a mapping for encrypted write-protected memory */
+> -		src = early_memremap_enc_wp(paddr, len);
+> -
+> -		/* Create a mapping for non-encrypted memory */
+> -		dst = early_memremap_dec(paddr, len);
+> -
+> -		/*
+> -		 * If a mapping can't be obtained to perform the decryption,
+> -		 * then un-encrypted access to that area will end up causing
+> -		 * a crash.
+> -		 */
+> -		BUG_ON(!src || !dst);
+> -
+> -		memcpy(sme_early_buffer, src, len);
+> -		memcpy(dst, sme_early_buffer, len);
+> -
+> -		early_memunmap(dst, len);
+> -		early_memunmap(src, len);
+> +	return __mem_enc_dec(paddr, size, true);
+> +}
+>  
+> -		paddr += len;
+> -		size -= len;
+> -	}
+> +void __init sme_early_mem_dec(resource_size_t paddr, unsigned long size)
+> +{
+> +	return __mem_enc_dec(paddr, size, false);
+>  }
+>  
+>  void __init sme_early_init(void)
+> 
