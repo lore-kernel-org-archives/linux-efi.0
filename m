@@ -1,7 +1,8 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 03/16] efi: Disable secure boot if shim is in insecure mode
-Date: Wed, 16 Nov 2016 21:47:38 +0000
-Message-ID: <147933285855.19316.13896885410459473517.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 04/16] efi: Lock down the kernel if booted in secure boot
+ mode
+Date: Wed, 16 Nov 2016 21:47:45 +0000
+Message-ID: <147933286579.19316.5236862894522647474.stgit@warthog.procyon.org.uk>
 References: <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -10,61 +11,82 @@ Return-path: <linux-security-module-owner@vger.kernel.org>
 In-Reply-To: <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
 Sender: owner-linux-security-module@vger.kernel.org
 To: keyrings@vger.kernel.org
-Cc: matthew.garrett@nebula.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, Josh Boyer <jwboyer@fedoraproject.org>
+Cc: dhowells@redhat.com, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Josh Boyer <jwboyer@fedoraproject.org>
+UEFI Secure Boot provides a mechanism for ensuring that the firmware will
+only load signed bootloaders and kernels.  Certain use cases may also
+require that all kernel modules also be signed.  Add a configuration option
+that to lock down the kernel - which includes requiring validly signed
+modules - if the kernel is secure-booted.
 
-A user can manually tell the shim boot loader to disable validation of
-images it loads.  When a user does this, it creates a UEFI variable called
-MokSBState that does not have the runtime attribute set.  Given that the
-user explicitly disabled validation, we can honor that and not enable
-secure boot mode if that variable is set.
-
-Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- arch/x86/boot/compressed/eboot.c |   20 +++++++++++++++++++-
- 1 file changed, 19 insertions(+), 1 deletion(-)
+ arch/x86/Kconfig        |   12 ++++++++++++
+ arch/x86/kernel/setup.c |    7 +++++++
+ kernel/module.c         |    2 +-
+ 3 files changed, 20 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 17b376596c96..2729a3844673 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -540,8 +540,9 @@ static void setup_efi_pci(struct boot_params *params)
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index bada636d1065..5b19997d88d0 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -1786,6 +1786,18 @@ config EFI_MIXED
  
- static int get_secure_boot(void)
- {
--	u8 sb, setup;
-+	u8 sb, setup, moksbstate;
- 	unsigned long datasize = sizeof(sb);
-+	u32 attr;
- 	efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
- 	efi_status_t status;
+ 	   If unsure, say N.
  
-@@ -565,6 +566,23 @@ static int get_secure_boot(void)
- 	if (setup == 1)
- 		return 0;
- 
-+	/* See if a user has put shim into insecure_mode.  If so, and the variable
-+	 * doesn't have the runtime attribute set, we might as well honor that.
-+	 */
-+	var_guid = EFI_SHIM_LOCK_GUID;
-+	status = efi_early->call((unsigned long)sys_table->runtime->get_variable,
-+				L"MokSBState", &var_guid, &attr, &datasize,
-+				&moksbstate);
++config EFI_SECURE_BOOT_LOCK_DOWN
++	def_bool n
++	depends on EFI
++	prompt "Lock down the kernel when UEFI Secure Boot is enabled"
++	---help---
++	  UEFI Secure Boot provides a mechanism for ensuring that the firmware
++	  will only load signed bootloaders and kernels.  Certain use cases may
++	  also require that all kernel modules also be signed and that
++	  userspace is prevented from directly changing the running kernel
++	  image.  Say Y here to automatically lock down the kernel when a
++	  system boots with UEFI Secure Boot enabled.
 +
-+	/* If it fails, we don't care why.  Default to secure */
-+	if (status != EFI_SUCCESS)
-+		return 1;
-+
-+	if (!(attr & EFI_VARIABLE_RUNTIME_ACCESS)) {
-+		if (moksbstate == 1)
-+			return 0;
+ config SECCOMP
+ 	def_bool y
+ 	prompt "Enable seccomp to safely compute untrusted bytecode"
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 9c337b0e8ba7..9521acce8378 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -69,6 +69,7 @@
+ #include <linux/crash_dump.h>
+ #include <linux/tboot.h>
+ #include <linux/jiffies.h>
++#include <linux/security.h>
+ 
+ #include <video/edid.h>
+ 
+@@ -1160,6 +1161,12 @@ void __init setup_arch(char **cmdline_p)
+ 
+ 	io_delay_init();
+ 
++	if (boot_params.secure_boot &&
++	    IS_ENABLED(CONFIG_EFI_SECURE_BOOT_LOCK_DOWN)) {
++		lock_kernel_down();
++		pr_info("Secure boot enabled\n");
 +	}
 +
- 	return 1;
- }
+ 	/*
+ 	 * Parse the ACPI tables for possible boot-time SMP configuration.
+ 	 */
+diff --git a/kernel/module.c b/kernel/module.c
+index f57dd63186e6..2a021c340efd 100644
+--- a/kernel/module.c
++++ b/kernel/module.c
+@@ -2744,7 +2744,7 @@ static int module_sig_check(struct load_info *info, int flags)
+ 	}
  
+ 	/* Not having a signature is only an error if we're strict. */
+-	if (err == -ENOKEY && !sig_enforce)
++	if (err == -ENOKEY && !sig_enforce && !kernel_is_locked_down())
+ 		err = 0;
+ 
+ 	return err;
 
