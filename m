@@ -1,7 +1,7 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 05/16] efi: Add EFI_SECURE_BOOT bit
-Date: Wed, 16 Nov 2016 21:47:52 +0000
-Message-ID: <147933287290.19316.3360403691390019935.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 07/16] kexec: Disable at runtime if the kernel is locked down
+Date: Wed, 16 Nov 2016 21:48:07 +0000
+Message-ID: <147933288742.19316.17308231278815492742.stgit@warthog.procyon.org.uk>
 References: <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -10,43 +10,48 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: keyrings@vger.kernel.org
-Cc: matthew.garrett@nebula.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, Josh Boyer <jwboyer@fedoraproject.org>
+Cc: dhowells@redhat.com, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Josh Boyer <jwboyer@fedoraproject.org>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 
-UEFI machines can be booted in Secure Boot mode.  Add a EFI_SECURE_BOOT bit
-for use with efi_enabled.
+kexec permits the loading and execution of arbitrary code in ring 0, which
+is something that lock-down is meant to prevent. It makes sense to disable
+kexec in this situation.
 
-Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
+This does not affect kexec_file_load() which can check for a signature on the
+image to be booted.
+
+Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- arch/x86/kernel/setup.c |    1 +
- include/linux/efi.h     |    1 +
- 2 files changed, 2 insertions(+)
+ kernel/kexec.c |    8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 9521acce8378..539f29587712 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -1164,6 +1164,7 @@ void __init setup_arch(char **cmdline_p)
- 	if (boot_params.secure_boot &&
- 	    IS_ENABLED(CONFIG_EFI_SECURE_BOOT_LOCK_DOWN)) {
- 		lock_kernel_down();
-+		set_bit(EFI_SECURE_BOOT, &efi.flags);
- 		pr_info("Secure boot enabled\n");
- 	}
+diff --git a/kernel/kexec.c b/kernel/kexec.c
+index 980936a90ee6..c6aa4620d1bf 100644
+--- a/kernel/kexec.c
++++ b/kernel/kexec.c
+@@ -12,6 +12,7 @@
+ #include <linux/mm.h>
+ #include <linux/file.h>
+ #include <linux/kexec.h>
++#include <linux/security.h>
+ #include <linux/mutex.h>
+ #include <linux/list.h>
+ #include <linux/syscalls.h>
+@@ -194,6 +195,13 @@ SYSCALL_DEFINE4(kexec_load, unsigned long, entry, unsigned long, nr_segments,
+ 		return -EPERM;
  
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 11372fb8784c..5d7fb3e3400b 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1079,6 +1079,7 @@ extern int __init efi_setup_pcdp_console(char *);
- #define EFI_ARCH_1		7	/* First arch-specific bit */
- #define EFI_DBG			8	/* Print additional debug info at runtime */
- #define EFI_NX_PE_DATA		9	/* Can runtime data regions be mapped non-executable? */
-+#define EFI_SECURE_BOOT		10	/* Are we in Secure Boot mode? */
- 
- #ifdef CONFIG_EFI
- /*
+ 	/*
++	 * kexec can be used to circumvent module loading restrictions, so
++	 * prevent loading in that case
++	 */
++	if (kernel_is_locked_down())
++		return -EPERM;
++
++	/*
+ 	 * Verify we have a legal set of flags
+ 	 * This leaves us room for future extensions.
+ 	 */
