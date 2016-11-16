@@ -1,8 +1,7 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 5/9] efi: Add SHIM and image security database GUID
- definitions
-Date: Wed, 16 Nov 2016 18:11:20 +0000
-Message-ID: <147931988070.16460.13959373928802133298.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 8/9] MODSIGN: Import certificates from UEFI Secure Boot
+Date: Wed, 16 Nov 2016 18:11:42 +0000
+Message-ID: <147931990222.16460.11621102657967011265.stgit@warthog.procyon.org.uk>
 References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -14,27 +13,244 @@ To: keyrings@vger.kernel.org
 Cc: matthew.garrett@nebula.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, Josh Boyer <jwboyer@fedoraproject.org>
 List-Id: linux-efi@vger.kernel.org
 
-Add the definitions for shim and image security database, both of which
-are used widely in various Linux distros.
+From: Josh Boyer <jwboyer@fedoraproject.org>
+
+Secure Boot stores a list of allowed certificates in the 'db' variable.
+This imports those certificates into the system trusted keyring.  This
+allows for a third party signing certificate to be used in conjunction
+with signed modules.  By importing the public certificate into the 'db'
+variable, a user can allow a module signed with that certificate to
+load.  The shim UEFI bootloader has a similar certificate list stored
+in the 'MokListRT' variable.  We import those as well.
+
+Secure Boot also maintains a list of disallowed certificates in the 'dbx'
+variable.  We load those certificates into the newly introduced system
+blacklist keyring and forbid any module signed with those from loading and
+forbid the use within the kernel of any key with a matching hash.
+
+This facility is enabled by setting CONFIG_LOAD_UEFI_KEYS.
 
 Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- include/linux/efi.h |    3 +++
- 1 file changed, 3 insertions(+)
+ certs/Kconfig     |   16 +++++
+ certs/Makefile    |    4 +
+ certs/load_uefi.c |  168 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 188 insertions(+)
+ create mode 100644 certs/load_uefi.c
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 2d089487d2da..acfdea8381de 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -592,6 +592,9 @@ void efi_native_runtime_setup(void);
- #define EFI_MEMORY_ATTRIBUTES_TABLE_GUID	EFI_GUID(0xdcfa911d, 0x26eb, 0x469f,  0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
- #define EFI_CONSOLE_OUT_DEVICE_GUID		EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+diff --git a/certs/Kconfig b/certs/Kconfig
+index 630ae09bbea2..3b09c5edc1a2 100644
+--- a/certs/Kconfig
++++ b/certs/Kconfig
+@@ -90,4 +90,20 @@ config EFI_SIGNATURE_LIST_PARSER
+ 	  This option provides support for parsing EFI signature lists for
+ 	  X.509 certificates and turning them into keys.
  
-+#define EFI_IMAGE_SECURITY_DATABASE_GUID	EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596, 0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
-+#define EFI_SHIM_LOCK_GUID			EFI_GUID(0x605dab50, 0xe046, 0x4300, 0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
++config LOAD_UEFI_KEYS
++	bool "Load certs and blacklist from UEFI db for module checking"
++	depends on SYSTEM_BLACKLIST_KEYRING
++	depends on SECONDARY_TRUSTED_KEYRING
++	depends on EFI
++	select EFI_SIGNATURE_LIST_PARSER
++	help
++	  If the kernel is booted in secure boot mode, this option will cause
++	  the kernel to load the certificates from the UEFI db and MokListRT
++	  into the secondary trusted keyring.  It will also load any X.509
++	  SHA256 hashes in the dbx list into the blacklist.
 +
- /*
-  * This GUID is used to pass to the kernel proper the struct screen_info
-  * structure that was populated by the stub based on the GOP protocol instance
++	  The effect of this is that, if the kernel is booted in secure boot
++	  mode, modules signed with UEFI-stored keys will be permitted to be
++	  loaded and keys that match the blacklist will be rejected.
++
+ endmenu
+diff --git a/certs/Makefile b/certs/Makefile
+index 738151ac76af..a5e057af98a3 100644
+--- a/certs/Makefile
++++ b/certs/Makefile
+@@ -11,6 +11,10 @@ obj-$(CONFIG_SYSTEM_BLACKLIST_KEYRING) += blacklist_nohashes.o
+ endif
+ obj-$(CONFIG_EFI_SIGNATURE_LIST_PARSER) += efi_parser.o
+ 
++obj-$(CONFIG_LOAD_UEFI_KEYS) += load_uefi.o
++$(obj)/load_uefi.o: KBUILD_CFLAGS += -fshort-wchar
++
++
+ ifeq ($(CONFIG_SYSTEM_TRUSTED_KEYRING),y)
+ 
+ $(eval $(call config_filename,SYSTEM_TRUSTED_KEYS))
+diff --git a/certs/load_uefi.c b/certs/load_uefi.c
+new file mode 100644
+index 000000000000..b44e464c3ff4
+--- /dev/null
++++ b/certs/load_uefi.c
+@@ -0,0 +1,168 @@
++#include <linux/kernel.h>
++#include <linux/sched.h>
++#include <linux/cred.h>
++#include <linux/err.h>
++#include <linux/efi.h>
++#include <linux/slab.h>
++#include <keys/asymmetric-type.h>
++#include <keys/system_keyring.h>
++#include "internal.h"
++
++static __initdata efi_guid_t efi_cert_x509_guid = EFI_CERT_X509_GUID;
++static __initdata efi_guid_t efi_cert_x509_sha256_guid = EFI_CERT_X509_SHA256_GUID;
++static __initdata efi_guid_t efi_cert_sha256_guid = EFI_CERT_SHA256_GUID;
++
++/*
++ * Get a certificate list blob from the named EFI variable.
++ */
++static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
++				  unsigned long *size)
++{
++	efi_status_t status;
++	unsigned long lsize = 4;
++	unsigned long tmpdb[4];
++	void *db;
++
++	status = efi.get_variable(name, guid, NULL, &lsize, &tmpdb);
++	if (status != EFI_BUFFER_TOO_SMALL) {
++		pr_err("Couldn't get size: 0x%lx\n", status);
++		return NULL;
++	}
++
++	db = kmalloc(lsize, GFP_KERNEL);
++	if (!db) {
++		pr_err("Couldn't allocate memory for uefi cert list\n");
++		return NULL;
++	}
++
++	status = efi.get_variable(name, guid, NULL, &lsize, db);
++	if (status != EFI_SUCCESS) {
++		kfree(db);
++		pr_err("Error reading db var: 0x%lx\n", status);
++		return NULL;
++	}
++
++	*size = lsize;
++	return db;
++}
++
++/*
++ * Blacklist an X509 TBS hash.
++ */
++static __init void uefi_blacklist_x509_tbs(const char *source,
++					   const void *data, size_t len)
++{
++	char *hash, *p;
++
++	hash = kmalloc(4 + len * 2 + 1, GFP_KERNEL);
++	if (!hash)
++		return;
++	p = memcpy(hash, "tbs:", 4);
++	p += 4;
++	bin2hex(p, data, len);
++	p += len * 2;
++	*p = 0;
++
++	mark_hash_blacklisted(hash);
++	kfree(hash);
++}
++
++/*
++ * Blacklist the hash of an executable.
++ */
++static __init void uefi_blacklist_binary(const char *source,
++					 const void *data, size_t len)
++{
++	char *hash, *p;
++
++	hash = kmalloc(4 + len * 2 + 1, GFP_KERNEL);
++	if (!hash)
++		return;
++	p = memcpy(hash, "bin:", 4);
++	p += 4;
++	bin2hex(p, data, len);
++	p += len * 2;
++	*p = 0;
++
++	mark_hash_blacklisted(hash);
++	kfree(hash);
++}
++
++/*
++ * Return the appropriate handler for particular signature list types found in
++ * the UEFI db and MokListRT tables.
++ */
++static __init efi_element_handler_t get_handler_for_db(const efi_guid_t *sig_type)
++{
++	if (efi_guidcmp(*sig_type, efi_cert_x509_guid) == 0)
++		return add_trusted_secondary_key;
++	return 0;
++}
++
++/*
++ * Return the appropriate handler for particular signature list types found in
++ * the UEFI dbx and MokListXRT tables.
++ */
++static __init efi_element_handler_t get_handler_for_dbx(const efi_guid_t *sig_type)
++{
++	if (efi_guidcmp(*sig_type, efi_cert_x509_sha256_guid) == 0)
++		return uefi_blacklist_x509_tbs;
++	if (efi_guidcmp(*sig_type, efi_cert_sha256_guid) == 0)
++		return uefi_blacklist_binary;
++	return 0;
++}
++
++/*
++ * Load the certs contained in the UEFI databases
++ */
++static int __init load_uefi_certs(void)
++{
++	efi_guid_t secure_var = EFI_IMAGE_SECURITY_DATABASE_GUID;
++	efi_guid_t mok_var = EFI_SHIM_LOCK_GUID;
++	void *db = NULL, *dbx = NULL, *mok = NULL;
++	unsigned long dbsize = 0, dbxsize = 0, moksize = 0;
++	int rc = 0;
++
++	if (!efi.get_variable)
++		return false;
++
++	/* Get db, MokListRT, and dbx.  They might not exist, so it isn't
++	 * an error if we can't get them.
++	 */
++	db = get_cert_list(L"db", &secure_var, &dbsize);
++	if (!db) {
++		pr_err("MODSIGN: Couldn't get UEFI db list\n");
++	} else {
++		rc = parse_efi_signature_list("UEFI:db",
++					      db, dbsize, get_handler_for_db);
++		if (rc)
++			pr_err("Couldn't parse db signatures: %d\n", rc);
++		kfree(db);
++	}
++
++	mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
++	if (!mok) {
++		pr_info("MODSIGN: Couldn't get UEFI MokListRT\n");
++	} else {
++		rc = parse_efi_signature_list("UEFI:MokListRT",
++					      mok, moksize, get_handler_for_db);
++		if (rc)
++			pr_err("Couldn't parse MokListRT signatures: %d\n", rc);
++		kfree(mok);
++	}
++
++	dbx = get_cert_list(L"dbx", &secure_var, &dbxsize);
++	if (!dbx) {
++		pr_info("MODSIGN: Couldn't get UEFI dbx list\n");
++	} else {
++		rc = parse_efi_signature_list("UEFI:dbx",
++					      dbx, dbxsize,
++					      get_handler_for_dbx);
++		if (rc)
++			pr_err("Couldn't parse dbx signatures: %d\n", rc);
++		kfree(dbx);
++	}
++
++	return rc;
++}
++late_initcall(load_uefi_certs);
