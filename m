@@ -1,7 +1,8 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 3/9] PKCS#7: Handle blacklisted certificates
-Date: Wed, 16 Nov 2016 18:11:06 +0000
-Message-ID: <147931986662.16460.18285955227981592741.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 4/9] KEYS: Allow unrestricted boot-time addition of keys to
+ secondary keyring
+Date: Wed, 16 Nov 2016 18:11:13 +0000
+Message-ID: <147931987366.16460.12891767069975068260.stgit@warthog.procyon.org.uk>
 References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -13,97 +14,90 @@ To: keyrings@vger.kernel.org
 Cc: dhowells@redhat.com, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-PKCS#7: Handle certificates that are blacklisted when verifying the chain
-of trust on the signatures on a PKCS#7 message.
+Allow keys to be added to the system secondary certificates keyring during
+kernel initialisation in an unrestricted fashion.  Such keys are implicitly
+trusted and don't have their trust chains checked on link.
+
+This allows keys in the UEFI database to be added in secure boot mode for
+the purposes of module signing.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- crypto/asymmetric_keys/pkcs7_parser.h |    1 +
- crypto/asymmetric_keys/pkcs7_verify.c |   32 ++++++++++++++++++++++++--------
- 2 files changed, 25 insertions(+), 8 deletions(-)
+ certs/internal.h       |   18 ++++++++++++++++++
+ certs/system_keyring.c |   33 +++++++++++++++++++++++++++++++++
+ 2 files changed, 51 insertions(+)
+ create mode 100644 certs/internal.h
 
-diff --git a/crypto/asymmetric_keys/pkcs7_parser.h b/crypto/asymmetric_keys/pkcs7_parser.h
-index f4e81074f5e0..ac341e19e530 100644
---- a/crypto/asymmetric_keys/pkcs7_parser.h
-+++ b/crypto/asymmetric_keys/pkcs7_parser.h
-@@ -23,6 +23,7 @@ struct pkcs7_signed_info {
- 	struct x509_certificate *signer; /* Signing certificate (in msg->certs) */
- 	unsigned	index;
- 	bool		unsupported_crypto;	/* T if not usable due to missing crypto */
-+	bool		blacklisted;
- 
- 	/* Message digest - the digest of the Content Data (or NULL) */
- 	const void	*msgdigest;
-diff --git a/crypto/asymmetric_keys/pkcs7_verify.c b/crypto/asymmetric_keys/pkcs7_verify.c
-index 2ffd69769466..2d93d9eccb4d 100644
---- a/crypto/asymmetric_keys/pkcs7_verify.c
-+++ b/crypto/asymmetric_keys/pkcs7_verify.c
-@@ -190,6 +190,18 @@ static int pkcs7_verify_sig_chain(struct pkcs7_message *pkcs7,
- 			 x509->subject,
- 			 x509->raw_serial_size, x509->raw_serial);
- 		x509->seen = true;
-+
-+		if (x509->blacklisted) {
-+			/* If this cert is blacklisted, then mark everything
-+			 * that depends on this as blacklisted too.
-+			 */
-+			sinfo->blacklisted = true;
-+			for (p = sinfo->signer; p != x509; p = p->signer)
-+				p->blacklisted = true;
-+			pr_debug("- blacklisted\n");
-+			return 0;
-+		}
-+
- 		if (x509->unsupported_key)
- 			goto unsupported_crypto_in_x509;
- 
-@@ -357,17 +369,19 @@ static int pkcs7_verify_one(struct pkcs7_message *pkcs7,
-  *
-  *  (*) -EBADMSG if some part of the message was invalid, or:
-  *
-- *  (*) -ENOPKG if none of the signature chains are verifiable because suitable
-- *	crypto modules couldn't be found, or:
-+ *  (*) 0 if no signature chains were found to be blacklisted or to contain
-+ *	unsupported crypto, or:
-  *
-- *  (*) 0 if all the signature chains that don't incur -ENOPKG can be verified
-- *	(note that a signature chain may be of zero length), or:
-+ *  (*) -EKEYREJECTED if a blacklisted key was encountered, or:
+diff --git a/certs/internal.h b/certs/internal.h
+new file mode 100644
+index 000000000000..5dcbefb0c23a
+--- /dev/null
++++ b/certs/internal.h
+@@ -0,0 +1,18 @@
++/* Internal definitions
 + *
-+ *  (*) -ENOPKG if none of the signature chains are verifiable because suitable
-+ *	crypto modules couldn't be found.
-  */
- int pkcs7_verify(struct pkcs7_message *pkcs7,
- 		 enum key_being_used_for usage)
- {
- 	struct pkcs7_signed_info *sinfo;
--	int enopkg = -ENOPKG;
-+	int actual_ret = -ENOPKG;
- 	int ret;
++ * Copyright (C) 2016 Red Hat, Inc. All Rights Reserved.
++ * Written by David Howells (dhowells@redhat.com)
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public Licence
++ * as published by the Free Software Foundation; either version
++ * 2 of the Licence, or (at your option) any later version.
++ */
++
++/*
++ * system_keyring.c
++ */
++#ifdef CONFIG_SECONDARY_TRUSTED_KEYRING
++extern void __init add_trusted_secondary_key(const char *source,
++					     const void *data, size_t len);
++#endif
+diff --git a/certs/system_keyring.c b/certs/system_keyring.c
+index 50979d6dcecd..dfddcf6e6c88 100644
+--- a/certs/system_keyring.c
++++ b/certs/system_keyring.c
+@@ -17,6 +17,7 @@
+ #include <keys/asymmetric-type.h>
+ #include <keys/system_keyring.h>
+ #include <crypto/pkcs7.h>
++#include "internal.h"
  
- 	kenter("");
-@@ -412,6 +426,8 @@ int pkcs7_verify(struct pkcs7_message *pkcs7,
+ static struct key *builtin_trusted_keys;
+ #ifdef CONFIG_SECONDARY_TRUSTED_KEYRING
+@@ -242,3 +243,35 @@ int verify_pkcs7_signature(const void *data, size_t len,
+ EXPORT_SYMBOL_GPL(verify_pkcs7_signature);
  
- 	for (sinfo = pkcs7->signed_infos; sinfo; sinfo = sinfo->next) {
- 		ret = pkcs7_verify_one(pkcs7, sinfo);
-+		if (sinfo->blacklisted && actual_ret == -ENOPKG)
-+			actual_ret = -EKEYREJECTED;
- 		if (ret < 0) {
- 			if (ret == -ENOPKG) {
- 				sinfo->unsupported_crypto = true;
-@@ -420,11 +436,11 @@ int pkcs7_verify(struct pkcs7_message *pkcs7,
- 			kleave(" = %d", ret);
- 			return ret;
- 		}
--		enopkg = 0;
-+		actual_ret = 0;
- 	}
- 
--	kleave(" = %d", enopkg);
--	return enopkg;
-+	kleave(" = %d", actual_ret);
-+	return actual_ret;
- }
- EXPORT_SYMBOL_GPL(pkcs7_verify);
- 
+ #endif /* CONFIG_SYSTEM_DATA_VERIFICATION */
++
++#ifdef CONFIG_SECONDARY_TRUSTED_KEYRING
++/**
++ * add_trusted_secondary_key - Add to secondary keyring with no validation
++ * @source: Source of key
++ * @data: The blob holding the key
++ * @len: The length of the data blob
++ *
++ * Add a key to the secondary keyring without checking its trust chain.  This
++ * is available only during kernel initialisation.
++ */
++void __init add_trusted_secondary_key(const char *source,
++				      const void *data, size_t len)
++{
++	key_ref_t key;
++
++	key = key_create_or_update(make_key_ref(secondary_trusted_keys, 1),
++				   "asymmetric",
++				   NULL, data, len,
++				   (KEY_POS_ALL & ~KEY_POS_SETATTR) |
++				   KEY_USR_VIEW,
++				   KEY_ALLOC_NOT_IN_QUOTA |
++				   KEY_ALLOC_BYPASS_RESTRICTION);
++
++	if (IS_ERR(key))
++		pr_err("Problem loading %s X.509 certificate (%ld)\n",
++		       source, PTR_ERR(key));
++	else
++		pr_notice("Loaded %s cert '%s' linked to secondary sys keyring\n",
++			  source, key_ref_to_ptr(key)->description);
++}
++#endif /* CONFIG_SECONDARY_TRUSTED_KEYRING */
