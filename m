@@ -1,222 +1,97 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [RFC PATCH v3 08/20] x86: Add support for early
- encryption/decryption of memory
-Date: Wed, 16 Nov 2016 11:46:56 +0100
-Message-ID: <20161116104656.qz5wp33zzyja373r@pd.tnic>
-References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
- <20161110003610.3280.22043.stgit@tlendack-t1.amdoffice.net>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 0/9] KEYS: Blacklisting & UEFI database load
+Date: Wed, 16 Nov 2016 18:10:44 +0000
+Message-ID: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20161110003610.3280.22043.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+To: keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Btw, for your next submission, this patch can be split in two exactly
-like the commit message paragraphs are:
 
-On Wed, Nov 09, 2016 at 06:36:10PM -0600, Tom Lendacky wrote:
-> Add support to be able to either encrypt or decrypt data in place during
-> the early stages of booting the kernel. This does not change the memory
-> encryption attribute - it is used for ensuring that data present in either
-> an encrypted or un-encrypted memory area is in the proper state (for
-> example the initrd will have been loaded by the boot loader and will not be
-> encrypted, but the memory that it resides in is marked as encrypted).
+Here are two sets of patches.  Firstly, the first three patches provide a
+blacklist, making the following changes:
 
-Patch 2: users of the new memmap change
+ (1) Add a new key type, blacklist, that is a slimline key that just
+     contains a blacklisted hash and a note saying what it applies to.
 
-> The early_memmap support is enhanced to specify encrypted and un-encrypted
-> mappings with and without write-protection. The use of write-protection is
-> necessary when encrypting data "in place". The write-protect attribute is
-> considered cacheable for loads, but not stores. This implies that the
-> hardware will never give the core a dirty line with this memtype.
+ (2) Add a system keyring, .blacklist, that holds blacklisted hashes.
 
-Patch 1: change memmap
+ (3) Add a pair of functions, one that blacklists a hash and the other that
+     queries as to whether a hash is blacklisted.
 
-This makes this aspect of the patchset much clearer and is better for
-bisection.
+ (4) Check the TBS hash of an X.509 cert against the blacklist.
 
-> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-> ---
->  arch/x86/include/asm/fixmap.h        |    9 +++
->  arch/x86/include/asm/mem_encrypt.h   |   15 +++++
->  arch/x86/include/asm/pgtable_types.h |    8 +++
->  arch/x86/mm/ioremap.c                |   28 +++++++++
->  arch/x86/mm/mem_encrypt.c            |  102 ++++++++++++++++++++++++++++++++++
->  include/asm-generic/early_ioremap.h  |    2 +
->  mm/early_ioremap.c                   |   15 +++++
->  7 files changed, 179 insertions(+)
+ (5) Check the PKCS#7 content hash against the blacklist.
 
-...
+ (6) Allow a file of blacklisted hashes to be included in the build.
 
-> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-> index d642cc5..06235b4 100644
-> --- a/arch/x86/mm/mem_encrypt.c
-> +++ b/arch/x86/mm/mem_encrypt.c
-> @@ -14,6 +14,9 @@
->  #include <linux/init.h>
->  #include <linux/mm.h>
->  
-> +#include <asm/tlbflush.h>
-> +#include <asm/fixmap.h>
-> +
->  extern pmdval_t early_pmd_flags;
->  
->  /*
-> @@ -24,6 +27,105 @@ extern pmdval_t early_pmd_flags;
->  unsigned long sme_me_mask __section(.data) = 0;
->  EXPORT_SYMBOL_GPL(sme_me_mask);
->  
-> +/* Buffer used for early in-place encryption by BSP, no locking needed */
-> +static char sme_early_buffer[PAGE_SIZE] __aligned(PAGE_SIZE);
-> +
-> +/*
-> + * This routine does not change the underlying encryption setting of the
-> + * page(s) that map this memory. It assumes that eventually the memory is
-> + * meant to be accessed as encrypted but the contents are currently not
-> + * encrypted.
-> + */
-> +void __init sme_early_mem_enc(resource_size_t paddr, unsigned long size)
-> +{
-> +	void *src, *dst;
-> +	size_t len;
-> +
-> +	if (!sme_me_mask)
-> +		return;
-> +
-> +	local_flush_tlb();
-> +	wbinvd();
-> +
-> +	/*
-> +	 * There are limited number of early mapping slots, so map (at most)
-> +	 * one page at time.
-> +	 */
-> +	while (size) {
-> +		len = min_t(size_t, sizeof(sme_early_buffer), size);
-> +
-> +		/* Create a mapping for non-encrypted write-protected memory */
-> +		src = early_memremap_dec_wp(paddr, len);
-> +
-> +		/* Create a mapping for encrypted memory */
-> +		dst = early_memremap_enc(paddr, len);
-> +
-> +		/*
-> +		 * If a mapping can't be obtained to perform the encryption,
-> +		 * then encrypted access to that area will end up causing
-> +		 * a crash.
-> +		 */
-> +		BUG_ON(!src || !dst);
-> +
-> +		memcpy(sme_early_buffer, src, len);
-> +		memcpy(dst, sme_early_buffer, len);
+Secondly, the remaining patches allow the UEFI database to be used to load
+the system keyrings:
 
-I still am missing the short explanation why we need the temporary buffer.
+ (1) Kernel initialisation is permitted to add keys to the
+     .secondary_trusted_keys keyring.
 
+ (2) A parser is added to parse the contents of the UEFI variables that
+     contain keys and hashes.
 
-Oh, and we can save us the code duplication a little. Diff ontop of yours:
+ (3) The UEFI db and MokListRT variables are parsed for keys which are
+     loaded into the secondary keyring.
 
+ (4) The UEFI dbx variable is parsed for hashes to be blacklisted.
+
+ (5) Use of the UEFI db variable can be suppressed by another UEFI variable.
+
+The patches can be found here also:
+
+	http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/log/?h=keys-blacklist
+
+and:
+
+	http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/log/?h=keys-uefi
+
+David
 ---
-diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-index 06235b477d7c..50e2c4fc7338 100644
---- a/arch/x86/mm/mem_encrypt.c
-+++ b/arch/x86/mm/mem_encrypt.c
-@@ -36,7 +36,8 @@ static char sme_early_buffer[PAGE_SIZE] __aligned(PAGE_SIZE);
-  * meant to be accessed as encrypted but the contents are currently not
-  * encrypted.
-  */
--void __init sme_early_mem_enc(resource_size_t paddr, unsigned long size)
-+static void __init noinline
-+__mem_enc_dec(resource_size_t paddr, unsigned long size, bool enc)
- {
- 	void *src, *dst;
- 	size_t len;
-@@ -54,15 +55,15 @@ void __init sme_early_mem_enc(resource_size_t paddr, unsigned long size)
- 	while (size) {
- 		len = min_t(size_t, sizeof(sme_early_buffer), size);
- 
--		/* Create a mapping for non-encrypted write-protected memory */
--		src = early_memremap_dec_wp(paddr, len);
-+		src = (enc ? early_memremap_dec_wp(paddr, len)
-+			   : early_memremap_enc_wp(paddr, len));
- 
--		/* Create a mapping for encrypted memory */
--		dst = early_memremap_enc(paddr, len);
-+		dst = (enc ? early_memremap_enc(paddr, len)
-+			   : early_memremap_dec(paddr, len));
- 
- 		/*
--		 * If a mapping can't be obtained to perform the encryption,
--		 * then encrypted access to that area will end up causing
-+		 * If a mapping can't be obtained to perform the dec/encryption,
-+		 * then (un-)encrypted access to that area will end up causing
- 		 * a crash.
- 		 */
- 		BUG_ON(!src || !dst);
-@@ -78,52 +79,14 @@ void __init sme_early_mem_enc(resource_size_t paddr, unsigned long size)
- 	}
- }
- 
--/*
-- * This routine does not change the underlying encryption setting of the
-- * page(s) that map this memory. It assumes that eventually the memory is
-- * meant to be accessed as not encrypted but the contents are currently
-- * encrypted.
-- */
--void __init sme_early_mem_dec(resource_size_t paddr, unsigned long size)
-+void __init sme_early_mem_enc(resource_size_t paddr, unsigned long size)
- {
--	void *src, *dst;
--	size_t len;
--
--	if (!sme_me_mask)
--		return;
--
--	local_flush_tlb();
--	wbinvd();
--
--	/*
--	 * There are limited number of early mapping slots, so map (at most)
--	 * one page at time.
--	 */
--	while (size) {
--		len = min_t(size_t, sizeof(sme_early_buffer), size);
--
--		/* Create a mapping for encrypted write-protected memory */
--		src = early_memremap_enc_wp(paddr, len);
--
--		/* Create a mapping for non-encrypted memory */
--		dst = early_memremap_dec(paddr, len);
--
--		/*
--		 * If a mapping can't be obtained to perform the decryption,
--		 * then un-encrypted access to that area will end up causing
--		 * a crash.
--		 */
--		BUG_ON(!src || !dst);
--
--		memcpy(sme_early_buffer, src, len);
--		memcpy(dst, sme_early_buffer, len);
--
--		early_memunmap(dst, len);
--		early_memunmap(src, len);
-+	return __mem_enc_dec(paddr, size, true);
-+}
- 
--		paddr += len;
--		size -= len;
--	}
-+void __init sme_early_mem_dec(resource_size_t paddr, unsigned long size)
-+{
-+	return __mem_enc_dec(paddr, size, false);
- }
- 
- void __init sme_early_init(void)
+Dave Howells (2):
+      efi: Add EFI signature data types
+      efi: Add an EFI signature blob parser
 
--- 
-Regards/Gruss,
-    Boris.
+David Howells (5):
+      KEYS: Add a system blacklist keyring
+      X.509: Allow X.509 certs to be blacklisted
+      PKCS#7: Handle blacklisted certificates
+      KEYS: Allow unrestricted boot-time addition of keys to secondary keyring
+      efi: Add SHIM and image security database GUID definitions
 
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Josh Boyer (2):
+      MODSIGN: Import certificates from UEFI Secure Boot
+      MODSIGN: Allow the "db" UEFI variable to be suppressed
+
+
+ certs/Kconfig                            |   42 +++++++
+ certs/Makefile                           |   11 ++
+ certs/blacklist.c                        |  174 +++++++++++++++++++++++++++
+ certs/blacklist.h                        |    3 
+ certs/blacklist_hashes.c                 |    6 +
+ certs/blacklist_nohashes.c               |    5 +
+ certs/efi_parser.c                       |  112 ++++++++++++++++++
+ certs/internal.h                         |   18 +++
+ certs/load_uefi.c                        |  192 ++++++++++++++++++++++++++++++
+ certs/system_keyring.c                   |   33 +++++
+ crypto/asymmetric_keys/pkcs7_parser.h    |    1 
+ crypto/asymmetric_keys/pkcs7_verify.c    |   32 ++++-
+ crypto/asymmetric_keys/x509_parser.h     |    1 
+ crypto/asymmetric_keys/x509_public_key.c |   15 ++
+ include/keys/system_keyring.h            |   12 ++
+ include/linux/efi.h                      |   36 ++++++
+ 16 files changed, 685 insertions(+), 8 deletions(-)
+ create mode 100644 certs/blacklist.c
+ create mode 100644 certs/blacklist.h
+ create mode 100644 certs/blacklist_hashes.c
+ create mode 100644 certs/blacklist_nohashes.c
+ create mode 100644 certs/efi_parser.c
+ create mode 100644 certs/internal.h
+ create mode 100644 certs/load_uefi.c
