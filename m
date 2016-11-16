@@ -1,7 +1,7 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 9/9] MODSIGN: Allow the "db" UEFI variable to be suppressed
-Date: Wed, 16 Nov 2016 18:11:49 +0000
-Message-ID: <147931990959.16460.3038875071067540418.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 7/9] efi: Add an EFI signature blob parser
+Date: Wed, 16 Nov 2016 18:11:35 +0000
+Message-ID: <147931989504.16460.12600922180901894184.stgit@warthog.procyon.org.uk>
 References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -10,90 +10,199 @@ Return-path: <linux-security-module-owner@vger.kernel.org>
 In-Reply-To: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
 Sender: owner-linux-security-module@vger.kernel.org
 To: keyrings@vger.kernel.org
-Cc: matthew.garrett@nebula.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, Josh Boyer <jwboyer@fedoraproject.org>
+Cc: dhowells@redhat.com, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Josh Boyer <jwboyer@fedoraproject.org>
+From: Dave Howells <dhowells@redhat.com>
 
-If a user tells shim to not use the certs/hashes in the UEFI db variable
-for verification purposes, shim will set a UEFI variable called
-MokIgnoreDB.  Have the uefi import code look for this and ignore the db
-variable if it is found.
+Add a function to parse an EFI signature blob looking for elements of
+interest.  A list is made up of a series of sublists, where all the
+elements in a sublist are of the same type, but sublists can be of
+different types.
 
-Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
+For each sublist encountered, the function pointed to by the
+get_handler_for_guid argument is called with the type specifier GUID and
+returns either a pointer to a function to handle elements of that type or
+NULL if the type is not of interest.
+
+If the sublist is of interest, each element is passed to the handler
+function in turn.
+
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- certs/load_uefi.c |   44 ++++++++++++++++++++++++++++++++++----------
- 1 file changed, 34 insertions(+), 10 deletions(-)
+ certs/Kconfig       |    8 ++++
+ certs/Makefile      |    1 
+ certs/efi_parser.c  |  112 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/efi.h |    9 ++++
+ 4 files changed, 130 insertions(+)
+ create mode 100644 certs/efi_parser.c
 
-diff --git a/certs/load_uefi.c b/certs/load_uefi.c
-index b44e464c3ff4..3d8845986019 100644
---- a/certs/load_uefi.c
-+++ b/certs/load_uefi.c
-@@ -13,6 +13,26 @@ static __initdata efi_guid_t efi_cert_x509_sha256_guid = EFI_CERT_X509_SHA256_GU
- static __initdata efi_guid_t efi_cert_sha256_guid = EFI_CERT_SHA256_GUID;
+diff --git a/certs/Kconfig b/certs/Kconfig
+index 6ce51ede9e9b..630ae09bbea2 100644
+--- a/certs/Kconfig
++++ b/certs/Kconfig
+@@ -82,4 +82,12 @@ config SYSTEM_BLACKLIST_HASH_LIST
+ 	  wrapper to incorporate the list into the kernel.  Each <hash> should
+ 	  be a string of hex digits.
  
- /*
-+ * Look to see if a UEFI variable called MokIgnoreDB exists and return true if
-+ * it does.
++config EFI_SIGNATURE_LIST_PARSER
++	bool "EFI signature list parser"
++	depends on EFI
++	select X509_CERTIFICATE_PARSER
++	help
++	  This option provides support for parsing EFI signature lists for
++	  X.509 certificates and turning them into keys.
++
+ endmenu
+diff --git a/certs/Makefile b/certs/Makefile
+index 4119bb376ea1..738151ac76af 100644
+--- a/certs/Makefile
++++ b/certs/Makefile
+@@ -9,6 +9,7 @@ obj-$(CONFIG_SYSTEM_BLACKLIST_KEYRING) += blacklist_hashes.o
+ else
+ obj-$(CONFIG_SYSTEM_BLACKLIST_KEYRING) += blacklist_nohashes.o
+ endif
++obj-$(CONFIG_EFI_SIGNATURE_LIST_PARSER) += efi_parser.o
+ 
+ ifeq ($(CONFIG_SYSTEM_TRUSTED_KEYRING),y)
+ 
+diff --git a/certs/efi_parser.c b/certs/efi_parser.c
+new file mode 100644
+index 000000000000..4e396f98f5c7
+--- /dev/null
++++ b/certs/efi_parser.c
+@@ -0,0 +1,112 @@
++/* EFI signature/key/certificate list parser
 + *
-+ * This UEFI variable is set by the shim if a user tells the shim to not use
-+ * the certs/hashes in the UEFI db variable for verification purposes.  If it
-+ * is set, we should ignore the db variable also and the true return indicates
-+ * this.
++ * Copyright (C) 2012, 2016 Red Hat, Inc. All Rights Reserved.
++ * Written by David Howells (dhowells@redhat.com)
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public Licence
++ * as published by the Free Software Foundation; either version
++ * 2 of the Licence, or (at your option) any later version.
 + */
-+static __init bool uefi_check_ignore_db(void)
++
++#define pr_fmt(fmt) "EFI: "fmt
++#include <linux/module.h>
++#include <linux/printk.h>
++#include <linux/err.h>
++#include <linux/efi.h>
++
++/**
++ * parse_efi_signature_list - Parse an EFI signature list for certificates
++ * @source: The source of the key
++ * @data: The data blob to parse
++ * @size: The size of the data blob
++ * @get_handler_for_guid: Get the handler func for the sig type (or NULL)
++ *
++ * Parse an EFI signature list looking for elements of interest.  A list is
++ * made up of a series of sublists, where all the elements in a sublist are of
++ * the same type, but sublists can be of different types.
++ *
++ * For each sublist encountered, the @get_handler_for_guid function is called
++ * with the type specifier GUID and returns either a pointer to a function to
++ * handle elements of that type or NULL if the type is not of interest.
++ *
++ * If the sublist is of interest, each element is passed to the handler
++ * function in turn.
++ *
++ * Error EBADMSG is returned if the list doesn't parse correctly and 0 is
++ * returned if the list was parsed correctly.  No error can be returned from
++ * the @get_handler_for_guid function or the element handler function it
++ * returns.
++ */
++int __init parse_efi_signature_list(
++	const char *source,
++	const void *data, size_t size,
++	efi_element_handler_t (*get_handler_for_guid)(const efi_guid_t *))
 +{
-+	efi_status_t status;
-+	unsigned int db = 0;
-+	unsigned long size = sizeof(db);
-+	efi_guid_t guid = EFI_SHIM_LOCK_GUID;
++	efi_element_handler_t handler;
++	unsigned offs = 0;
 +
-+	status = efi.get_variable(L"MokIgnoreDB", &guid, NULL, &size, &db);
-+	return status == EFI_SUCCESS;
-+}
++	pr_devel("-->%s(,%zu)\n", __func__, size);
 +
-+/*
-  * Get a certificate list blob from the named EFI variable.
-  */
- static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
-@@ -113,7 +133,9 @@ static __init efi_element_handler_t get_handler_for_dbx(const efi_guid_t *sig_ty
- }
- 
- /*
-- * Load the certs contained in the UEFI databases
-+ * Load the certs contained in the UEFI databases into the secondary trusted
-+ * keyring and the UEFI blacklisted X.509 cert SHA256 hashes into the blacklist
-+ * keyring.
-  */
- static int __init load_uefi_certs(void)
- {
-@@ -129,15 +151,17 @@ static int __init load_uefi_certs(void)
- 	/* Get db, MokListRT, and dbx.  They might not exist, so it isn't
- 	 * an error if we can't get them.
- 	 */
--	db = get_cert_list(L"db", &secure_var, &dbsize);
--	if (!db) {
--		pr_err("MODSIGN: Couldn't get UEFI db list\n");
--	} else {
--		rc = parse_efi_signature_list("UEFI:db",
--					      db, dbsize, get_handler_for_db);
--		if (rc)
--			pr_err("Couldn't parse db signatures: %d\n", rc);
--		kfree(db);
-+	if (!uefi_check_ignore_db()) {
-+		db = get_cert_list(L"db", &secure_var, &dbsize);
-+		if (!db) {
-+			pr_err("MODSIGN: Couldn't get UEFI db list\n");
-+		} else {
-+			rc = parse_efi_signature_list("UEFI:db",
-+						      db, dbsize, get_handler_for_db);
-+			if (rc)
-+				pr_err("Couldn't parse db signatures: %d\n", rc);
-+			kfree(db);
++	while (size > 0) {
++		const efi_signature_data_t *elem;
++		efi_signature_list_t list;
++		size_t lsize, esize, hsize, elsize;
++
++		if (size < sizeof(list))
++			return -EBADMSG;
++
++		memcpy(&list, data, sizeof(list));
++		pr_devel("LIST[%04x] guid=%pUl ls=%x hs=%x ss=%x\n",
++			 offs,
++			 list.signature_type.b, list.signature_list_size,
++			 list.signature_header_size, list.signature_size);
++
++		lsize = list.signature_list_size;
++		hsize = list.signature_header_size;
++		esize = list.signature_size;
++		elsize = lsize - sizeof(list) - hsize;
++
++		if (lsize > size) {
++			pr_devel("<--%s() = -EBADMSG [overrun @%x]\n",
++				 __func__, offs);
++			return -EBADMSG;
 +		}
- 	}
++
++		if (lsize < sizeof(list) ||
++		    lsize - sizeof(list) < hsize ||
++		    esize < sizeof(*elem) ||
++		    elsize < esize ||
++		    elsize % esize != 0) {
++			pr_devel("- bad size combo @%x\n", offs);
++			return -EBADMSG;
++		}
++
++		handler = get_handler_for_guid(&list.signature_type);
++		if (!handler) {
++			data += lsize;
++			size -= lsize;
++			offs += lsize;
++			continue;
++		}
++
++		data += sizeof(list) + hsize;
++		size -= sizeof(list) + hsize;
++		offs += sizeof(list) + hsize;
++
++		for (; elsize > 0; elsize -= esize) {
++			elem = data;
++
++			pr_devel("ELEM[%04x]\n", offs);
++			handler(source,
++				&elem->signature_data,
++				esize - sizeof(*elem));
++
++			data += esize;
++			size -= esize;
++			offs += esize;
++		}
++	}
++
++	return 0;
++}
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 6fb50bafedc7..11372fb8784c 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1032,6 +1032,15 @@ extern int efi_memattr_apply_permissions(struct mm_struct *mm,
+ char * __init efi_md_typeattr_format(char *buf, size_t size,
+ 				     const efi_memory_desc_t *md);
  
- 	mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
++
++typedef void (*efi_element_handler_t)(const char *source,
++				      const void *element_data,
++				      size_t element_size);
++extern int __init parse_efi_signature_list(
++	const char *source,
++	const void *data, size_t size,
++	efi_element_handler_t (*get_handler_for_guid)(const efi_guid_t *));
++
+ /**
+  * efi_range_is_wc - check the WC bit on an address range
+  * @start: starting kvirt address
 
