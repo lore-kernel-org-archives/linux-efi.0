@@ -1,37 +1,33 @@
-From: One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+From: Justin Forbes <jmforbes@linuxtx.org>
 Subject: Re: [PATCH 00/16] Kernel lockdown
-Date: Wed, 16 Nov 2016 22:27:31 +0000
-Message-ID: <20161116222731.563fb85e@lxorguk.ukuu.org.uk>
+Date: Wed, 16 Nov 2016 16:28:31 -0600
+Message-ID: <CAFxkdApCfoTHtoDbBC_LoQh+C_FHLeQcdat4scZfM5fOfeffKA@mail.gmail.com>
 References: <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <147933283664.19316.12454053022687659937.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: keyrings@vger.kernel.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Whether it's a good idea aside
+On Wed, Nov 16, 2016 at 3:47 PM, David Howells <dhowells@redhat.com> wrote:
+>
+> These patches provide a facility by which a variety of avenues by which
+> userspace can feasibly modify the running kernel image can be locked down.
+> These include:
+>
 
-You need to filter or lock down kernel module options because a lot of
-modules let you set the I/O port or similar (eg mmio) which means you can
-hack the entire machine with say the 8250 driver just by using it with an
-mmio of the right location to patch the secure state to zero just by
-getting the ability to write to the modules conf file.
+Bit surprised to see this.  Not that I am opposed to the patches
+themselves.  These were pulled into my tree as the first step towards
+consolidating the implementation used for secure boot, and I know
+there is interest in using large parts outside of a secure boot
+context as well, but there were a few changes to be made after our
+discussions in Santa Fe. Those are going into
+http://git.kernel.org/cgit/linux/kernel/git/jforbes/linux.git/log/?h=lockdown
+I am completely happy to submit those changes as separate patches if
+people want to take these.  They do actually work, and are being
+shipped and supported by multiple distributions at this point.
 
-Without that at least fixed I don't see the point in merging this. Either
-we don't do it (which given the level of security the current Linux
-kernel provides, and also all the golden key messups from elsewhere might
-be the honest approach), or at least try and do the job right.
-
-Less security is better than fake security. If you've got less security
-your take appropriate precautions. If you rely on fake security you don't.
-
-The two other nasty cases you miss should be fine for x86 secure boot -
-but maybe not for secure boot in general. That is firmware loading and
-initial firewire state. Both should be fine on any 'secure' boot PC.
-
-
-Alan
+Justin
