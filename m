@@ -1,83 +1,261 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 11/16] x86: Lock down IO port access when the kernel is
- locked down
-Date: Wed, 16 Nov 2016 21:48:36 +0000
-Message-ID: <147933291647.19316.6065544311010705130.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells@redhat.com>
+Subject: [PATCH 06/16] Add a sysrq option to exit secure boot mode
+Date: Wed, 16 Nov 2016 21:48:00 +0000
+Message-ID: <147933288015.19316.13883500379332751105.stgit@warthog.procyon.org.uk>
 References: <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <147933283664.19316.12454053022687659937.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: keyrings@vger.kernel.org
+Cc: dhowells@redhat.com, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+From: Kyle McMartin <kyle@redhat.com>
 
-IO port access would permit users to gain access to PCI configuration
-registers, which in turn (on a lot of hardware) give access to MMIO register
-space. This would potentially permit root to trigger arbitrary DMA, so lock
-it down by default.
+Make sysrq+x exit secure boot mode on x86_64, thereby allowing the running
+kernel image to be modified.  This lifts the lockdown.
 
-Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- arch/x86/kernel/ioport.c |    5 +++--
- drivers/char/mem.c       |    4 ++++
- 2 files changed, 7 insertions(+), 2 deletions(-)
+ arch/x86/Kconfig            |   10 ++++++++++
+ arch/x86/kernel/setup.c     |   31 +++++++++++++++++++++++++++++++
+ drivers/input/misc/uinput.c |    1 +
+ drivers/tty/sysrq.c         |   19 +++++++++++++------
+ include/linux/input.h       |    5 +++++
+ include/linux/sysrq.h       |    8 +++++++-
+ kernel/debug/kdb/kdb_main.c |    2 +-
+ 7 files changed, 68 insertions(+), 8 deletions(-)
 
-diff --git a/arch/x86/kernel/ioport.c b/arch/x86/kernel/ioport.c
-index 589b3193f102..2ee24e9ff6d8 100644
---- a/arch/x86/kernel/ioport.c
-+++ b/arch/x86/kernel/ioport.c
-@@ -15,6 +15,7 @@
- #include <linux/thread_info.h>
- #include <linux/syscalls.h>
- #include <linux/bitmap.h>
-+#include <linux/security.h>
- #include <asm/syscalls.h>
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index 5b19997d88d0..c2b481b59931 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -1798,6 +1798,16 @@ config EFI_SECURE_BOOT_LOCK_DOWN
+ 	  image.  Say Y here to automatically lock down the kernel when a
+ 	  system boots with UEFI Secure Boot enabled.
  
- /*
-@@ -28,7 +29,7 @@ asmlinkage long sys_ioperm(unsigned long from, unsigned long num, int turn_on)
- 
- 	if ((from + num <= from) || (from + num > IO_BITMAP_BITS))
- 		return -EINVAL;
--	if (turn_on && !capable(CAP_SYS_RAWIO))
-+	if (turn_on && (!capable(CAP_SYS_RAWIO) || kernel_is_locked_down()))
- 		return -EPERM;
- 
- 	/*
-@@ -108,7 +109,7 @@ SYSCALL_DEFINE1(iopl, unsigned int, level)
- 		return -EINVAL;
- 	/* Trying to gain more privileges? */
- 	if (level > old) {
--		if (!capable(CAP_SYS_RAWIO))
-+		if (!capable(CAP_SYS_RAWIO) || kernel_is_locked_down())
- 			return -EPERM;
- 	}
- 	regs->flags = (regs->flags & ~X86_EFLAGS_IOPL) |
-diff --git a/drivers/char/mem.c b/drivers/char/mem.c
-index 5bb1985ec484..17e22cb2db14 100644
---- a/drivers/char/mem.c
-+++ b/drivers/char/mem.c
-@@ -28,6 +28,7 @@
- #include <linux/export.h>
- #include <linux/io.h>
- #include <linux/uio.h>
-+#include <linux/security.h>
- 
- #include <linux/uaccess.h>
- 
-@@ -580,6 +581,9 @@ static ssize_t write_port(struct file *file, const char __user *buf,
- 	unsigned long i = *ppos;
- 	const char __user *tmp = buf;
- 
-+	if (kernel_is_locked_down())
-+		return -EPERM;
++config EFI_ALLOW_SECURE_BOOT_EXIT
++	def_bool n
++	depends on EFI_SECURE_BOOT_LOCK_DOWN && MAGIC_SYSRQ
++	select ALLOW_LOCKDOWN_LIFT
++	prompt "Allow secure boot mode to be exited with SysRq+x on a keyboard"
++	---help---
++	  Allow secure boot mode to be exited and the kernel lockdown lifted by
++	  typing SysRq+x on a keyboard attached to the system (not permitted
++	  through procfs).
 +
- 	if (!access_ok(VERIFY_READ, buf, count))
- 		return -EFAULT;
- 	while (count-- > 0 && i < 65536) {
+ config SECCOMP
+ 	def_bool y
+ 	prompt "Enable seccomp to safely compute untrusted bytecode"
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 539f29587712..89786c2270bd 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -71,6 +71,11 @@
+ #include <linux/jiffies.h>
+ #include <linux/security.h>
+ 
++#include <linux/fips.h>
++#include <linux/cred.h>
++#include <linux/sysrq.h>
++#include <linux/init_task.h>
++
+ #include <video/edid.h>
+ 
+ #include <asm/mtrr.h>
+@@ -1291,6 +1296,32 @@ void __init i386_reserve_resources(void)
+ 
+ #endif /* CONFIG_X86_32 */
+ 
++#ifdef CONFIG_EFI_ALLOW_SECURE_BOOT_EXIT
++
++static void sysrq_handle_secure_boot(int key)
++{
++	if (!efi_enabled(EFI_SECURE_BOOT))
++		return;
++
++	pr_info("Secure boot disabled\n");
++	lift_kernel_lockdown();
++}
++static struct sysrq_key_op secure_boot_sysrq_op = {
++	.handler	=	sysrq_handle_secure_boot,
++	.help_msg	=	"unSB(x)",
++	.action_msg	=	"Disabling Secure Boot restrictions",
++	.enable_mask	=	SYSRQ_DISABLE_USERSPACE,
++};
++static int __init secure_boot_sysrq(void)
++{
++	if (efi_enabled(EFI_SECURE_BOOT))
++		register_sysrq_key('x', &secure_boot_sysrq_op);
++	return 0;
++}
++late_initcall(secure_boot_sysrq);
++#endif /*CONFIG_EFI_ALLOW_SECURE_BOOT_EXIT*/
++
++
+ static struct notifier_block kernel_offset_notifier = {
+ 	.notifier_call = dump_kernel_offset
+ };
+diff --git a/drivers/input/misc/uinput.c b/drivers/input/misc/uinput.c
+index 92595b98e7ed..894ed3f74f04 100644
+--- a/drivers/input/misc/uinput.c
++++ b/drivers/input/misc/uinput.c
+@@ -379,6 +379,7 @@ static int uinput_allocate_device(struct uinput_device *udev)
+ 	if (!udev->dev)
+ 		return -ENOMEM;
+ 
++	udev->dev->flags |= INPUTDEV_FLAGS_SYNTHETIC;
+ 	udev->dev->event = uinput_dev_event;
+ 	input_set_drvdata(udev->dev, udev);
+ 
+diff --git a/drivers/tty/sysrq.c b/drivers/tty/sysrq.c
+index 52bbd27e93ae..72f46a1a2ce7 100644
+--- a/drivers/tty/sysrq.c
++++ b/drivers/tty/sysrq.c
+@@ -479,6 +479,7 @@ static struct sysrq_key_op *sysrq_key_table[36] = {
+ 	/* x: May be registered on mips for TLB dump */
+ 	/* x: May be registered on ppc/powerpc for xmon */
+ 	/* x: May be registered on sparc64 for global PMU dump */
++	/* x: May be registered on x86_64 for disabling secure boot */
+ 	NULL,				/* x */
+ 	/* y: May be registered on sparc64 for global register dump */
+ 	NULL,				/* y */
+@@ -522,7 +523,7 @@ static void __sysrq_put_key_op(int key, struct sysrq_key_op *op_p)
+                 sysrq_key_table[i] = op_p;
+ }
+ 
+-void __handle_sysrq(int key, bool check_mask)
++void __handle_sysrq(int key, unsigned int from)
+ {
+ 	struct sysrq_key_op *op_p;
+ 	int orig_log_level;
+@@ -542,11 +543,15 @@ void __handle_sysrq(int key, bool check_mask)
+ 
+         op_p = __sysrq_get_key_op(key);
+         if (op_p) {
++		/* Ban synthetic events from some sysrq functionality */
++		if ((from == SYSRQ_FROM_PROC || from == SYSRQ_FROM_SYNTHETIC) &&
++		    op_p->enable_mask & SYSRQ_DISABLE_USERSPACE)
++			printk("This sysrq operation is disabled from userspace.\n");
+ 		/*
+ 		 * Should we check for enabled operations (/proc/sysrq-trigger
+ 		 * should not) and is the invoked operation enabled?
+ 		 */
+-		if (!check_mask || sysrq_on_mask(op_p->enable_mask)) {
++		if (from == SYSRQ_FROM_KERNEL || sysrq_on_mask(op_p->enable_mask)) {
+ 			pr_cont("%s\n", op_p->action_msg);
+ 			console_loglevel = orig_log_level;
+ 			op_p->handler(key);
+@@ -578,7 +583,7 @@ void __handle_sysrq(int key, bool check_mask)
+ void handle_sysrq(int key)
+ {
+ 	if (sysrq_on())
+-		__handle_sysrq(key, true);
++		__handle_sysrq(key, SYSRQ_FROM_KERNEL);
+ }
+ EXPORT_SYMBOL(handle_sysrq);
+ 
+@@ -659,7 +664,7 @@ static void sysrq_do_reset(unsigned long _state)
+ static void sysrq_handle_reset_request(struct sysrq_state *state)
+ {
+ 	if (state->reset_requested)
+-		__handle_sysrq(sysrq_xlate[KEY_B], false);
++		__handle_sysrq(sysrq_xlate[KEY_B], SYSRQ_FROM_KERNEL);
+ 
+ 	if (sysrq_reset_downtime_ms)
+ 		mod_timer(&state->keyreset_timer,
+@@ -810,8 +815,10 @@ static bool sysrq_handle_keypress(struct sysrq_state *sysrq,
+ 
+ 	default:
+ 		if (sysrq->active && value && value != 2) {
++			int from = sysrq->handle.dev->flags & INPUTDEV_FLAGS_SYNTHETIC ?
++					SYSRQ_FROM_SYNTHETIC : 0;
+ 			sysrq->need_reinject = false;
+-			__handle_sysrq(sysrq_xlate[code], true);
++			__handle_sysrq(sysrq_xlate[code], from);
+ 		}
+ 		break;
+ 	}
+@@ -1095,7 +1102,7 @@ static ssize_t write_sysrq_trigger(struct file *file, const char __user *buf,
+ 
+ 		if (get_user(c, buf))
+ 			return -EFAULT;
+-		__handle_sysrq(c, false);
++		__handle_sysrq(c, SYSRQ_FROM_PROC);
+ 	}
+ 
+ 	return count;
+diff --git a/include/linux/input.h b/include/linux/input.h
+index a65e3b24fb18..8b0357175049 100644
+--- a/include/linux/input.h
++++ b/include/linux/input.h
+@@ -42,6 +42,7 @@ struct input_value {
+  * @phys: physical path to the device in the system hierarchy
+  * @uniq: unique identification code for the device (if device has it)
+  * @id: id of the device (struct input_id)
++ * @flags: input device flags (SYNTHETIC, etc.)
+  * @propbit: bitmap of device properties and quirks
+  * @evbit: bitmap of types of events supported by the device (EV_KEY,
+  *	EV_REL, etc.)
+@@ -124,6 +125,8 @@ struct input_dev {
+ 	const char *uniq;
+ 	struct input_id id;
+ 
++	unsigned int flags;
++
+ 	unsigned long propbit[BITS_TO_LONGS(INPUT_PROP_CNT)];
+ 
+ 	unsigned long evbit[BITS_TO_LONGS(EV_CNT)];
+@@ -190,6 +193,8 @@ struct input_dev {
+ };
+ #define to_input_dev(d) container_of(d, struct input_dev, dev)
+ 
++#define	INPUTDEV_FLAGS_SYNTHETIC	0x000000001
++
+ /*
+  * Verify that we are in sync with input_device_id mod_devicetable.h #defines
+  */
+diff --git a/include/linux/sysrq.h b/include/linux/sysrq.h
+index 387fa7d05c98..f7c52a9ea394 100644
+--- a/include/linux/sysrq.h
++++ b/include/linux/sysrq.h
+@@ -28,6 +28,8 @@
+ #define SYSRQ_ENABLE_BOOT	0x0080
+ #define SYSRQ_ENABLE_RTNICE	0x0100
+ 
++#define SYSRQ_DISABLE_USERSPACE	0x00010000
++
+ struct sysrq_key_op {
+ 	void (*handler)(int);
+ 	char *help_msg;
+@@ -42,8 +44,12 @@ struct sysrq_key_op {
+  * are available -- else NULL's).
+  */
+ 
++#define SYSRQ_FROM_KERNEL	0x0001
++#define SYSRQ_FROM_PROC		0x0002
++#define SYSRQ_FROM_SYNTHETIC	0x0004
++
+ void handle_sysrq(int key);
+-void __handle_sysrq(int key, bool check_mask);
++void __handle_sysrq(int key, unsigned int from);
+ int register_sysrq_key(int key, struct sysrq_key_op *op);
+ int unregister_sysrq_key(int key, struct sysrq_key_op *op);
+ struct sysrq_key_op *__sysrq_get_key_op(int key);
+diff --git a/kernel/debug/kdb/kdb_main.c b/kernel/debug/kdb/kdb_main.c
+index 2a20c0dfdafc..d46d2e18a889 100644
+--- a/kernel/debug/kdb/kdb_main.c
++++ b/kernel/debug/kdb/kdb_main.c
+@@ -1968,7 +1968,7 @@ static int kdb_sr(int argc, const char **argv)
+ 		return KDB_ARGCOUNT;
+ 
+ 	kdb_trap_printk++;
+-	__handle_sysrq(*argv[1], check_mask);
++	__handle_sysrq(*argv[1], check_mask ? SYSRQ_FROM_KERNEL : 0);
+ 	kdb_trap_printk--;
+ 
+ 	return 0;
