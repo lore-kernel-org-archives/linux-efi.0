@@ -1,81 +1,121 @@
-From: Mat Martineau <mathew.j.martineau@linux.intel.com>
-Subject: Re: [PATCH 6/9] efi: Add EFI signature data types
-Date: Wed, 16 Nov 2016 15:43:48 -0800 (PST)
-Message-ID: <alpine.OSX.2.20.1611161535590.67352@mjmartin-mac01.local>
-References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk> <147931988803.16460.18213104388363289832.stgit@warthog.procyon.org.uk>
+From: Petko Manolov <petkan@mip-labs.com>
+Subject: Re: [PATCH 4/9] KEYS: Allow unrestricted boot-time addition of keys
+ to secondary keyring
+Date: Thu, 17 Nov 2016 08:41:00 +0200
+Message-ID: <20161117064100.hmjmfw42ytm526yh@p310>
+References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
+ <147931987366.16460.12891767069975068260.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; format=flowed; charset=US-ASCII
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <147931988803.16460.18213104388363289832.stgit@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <147931987366.16460.12891767069975068260.stgit@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
 To: David Howells <dhowells@redhat.com>
-Cc: keyrings@vger.kernel.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: keyrings@vger.kernel.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Mimi Zohar <zohar@linux.vnet.ibm.com>
 List-Id: linux-efi@vger.kernel.org
 
+On 16-11-16 18:11:13, David Howells wrote:
+> Allow keys to be added to the system secondary certificates keyring during 
+> kernel initialisation in an unrestricted fashion.  Such keys are implicitly 
+> trusted and don't have their trust chains checked on link.
 
-David,
+Well, I for one do not explicitly trust these keys.  I may even want to 
+completely remove or replace them.
 
-On Wed, 16 Nov 2016, David Howells wrote:
+> This allows keys in the UEFI database to be added in secure boot mode for the 
+> purposes of module signing.
 
-> From: Dave Howells <dhowells@redhat.com>
->
-> Add the data types that are used for containing hashes, keys and
-> certificates for cryptographic verification along with their corresponding
-> type GUIDs.
->
+The key import should not be automatic, it should be optional.  Same applies to 
+the validation process.
+
+
+		Petko
+
+
 > Signed-off-by: David Howells <dhowells@redhat.com>
 > ---
->
-> include/linux/efi.h |   24 ++++++++++++++++++++++++
-> 1 file changed, 24 insertions(+)
->
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index acfdea8381de..6fb50bafedc7 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -594,6 +594,9 @@ void efi_native_runtime_setup(void);
->
-> #define EFI_IMAGE_SECURITY_DATABASE_GUID	EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596, 0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
-> #define EFI_SHIM_LOCK_GUID			EFI_GUID(0x605dab50, 0xe046, 0x4300, 0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
-> +#define EFI_CERT_SHA256_GUID			EFI_GUID(0xc1c41626, 0x504c, 0x4092, 0xac, 0xa9, 0x41, 0xf9, 0x36, 0x93, 0x43, 0x28 )
-> +#define EFI_CERT_X509_GUID			EFI_GUID(0xa5c059a1, 0x94e4, 0x4aa7, 0x87, 0xb5, 0xab, 0x15, 0x5c, 0x2b, 0xf0, 0x72 )
-> +#define EFI_CERT_X509_SHA256_GUID		EFI_GUID(0x3bd2a492, 0x96c0, 0x4079, 0xb4, 0x20, 0xfc, 0xf9, 0x8e, 0xf1, 0x03, 0xed );
-
-The trailing ';' on EFI_CERT_X509_SHA256_GUID could trip someone up later. 
-As long as you're fixing that, the spaces before the closing parens are 
-inconsistent with the other GUID definitions in this file.
-
-> /*
->  * This GUID is used to pass to the kernel proper the struct screen_info
-> @@ -853,6 +856,27 @@ typedef struct {
-> 	efi_memory_desc_t entry[0];
-> } efi_memory_attributes_table_t;
->
-> +typedef struct  {
-> +	efi_guid_t signature_owner;
-> +	u8 signature_data[];
-> +} efi_signature_data_t;
+> 
+>  certs/internal.h       |   18 ++++++++++++++++++
+>  certs/system_keyring.c |   33 +++++++++++++++++++++++++++++++++
+>  2 files changed, 51 insertions(+)
+>  create mode 100644 certs/internal.h
+> 
+> diff --git a/certs/internal.h b/certs/internal.h
+> new file mode 100644
+> index 000000000000..5dcbefb0c23a
+> --- /dev/null
+> +++ b/certs/internal.h
+> @@ -0,0 +1,18 @@
+> +/* Internal definitions
+> + *
+> + * Copyright (C) 2016 Red Hat, Inc. All Rights Reserved.
+> + * Written by David Howells (dhowells@redhat.com)
+> + *
+> + * This program is free software; you can redistribute it and/or
+> + * modify it under the terms of the GNU General Public Licence
+> + * as published by the Free Software Foundation; either version
+> + * 2 of the Licence, or (at your option) any later version.
+> + */
 > +
-> +typedef struct {
-> +	efi_guid_t signature_type;
-> +	u32 signature_list_size;
-> +	u32 signature_header_size;
-> +	u32 signature_size;
-> +	u8 signature_header[];
-> +	/* efi_signature_data_t signatures[][] */
-> +} efi_signature_list_t;
+> +/*
+> + * system_keyring.c
+> + */
+> +#ifdef CONFIG_SECONDARY_TRUSTED_KEYRING
+> +extern void __init add_trusted_secondary_key(const char *source,
+> +					     const void *data, size_t len);
+> +#endif
+> diff --git a/certs/system_keyring.c b/certs/system_keyring.c
+> index 50979d6dcecd..dfddcf6e6c88 100644
+> --- a/certs/system_keyring.c
+> +++ b/certs/system_keyring.c
+> @@ -17,6 +17,7 @@
+>  #include <keys/asymmetric-type.h>
+>  #include <keys/system_keyring.h>
+>  #include <crypto/pkcs7.h>
+> +#include "internal.h"
+>  
+>  static struct key *builtin_trusted_keys;
+>  #ifdef CONFIG_SECONDARY_TRUSTED_KEYRING
+> @@ -242,3 +243,35 @@ int verify_pkcs7_signature(const void *data, size_t len,
+>  EXPORT_SYMBOL_GPL(verify_pkcs7_signature);
+>  
+>  #endif /* CONFIG_SYSTEM_DATA_VERIFICATION */
 > +
-> +typedef u8 efi_sha256_hash_t[32];
+> +#ifdef CONFIG_SECONDARY_TRUSTED_KEYRING
+> +/**
+> + * add_trusted_secondary_key - Add to secondary keyring with no validation
+> + * @source: Source of key
+> + * @data: The blob holding the key
+> + * @len: The length of the data blob
+> + *
+> + * Add a key to the secondary keyring without checking its trust chain.  This
+> + * is available only during kernel initialisation.
+> + */
+> +void __init add_trusted_secondary_key(const char *source,
+> +				      const void *data, size_t len)
+> +{
+> +	key_ref_t key;
 > +
-> +typedef struct {
-> +	efi_sha256_hash_t to_be_signed_hash;
-> +	efi_time_t time_of_revocation;
-> +} efi_cert_x509_sha256_t;
+> +	key = key_create_or_update(make_key_ref(secondary_trusted_keys, 1),
+> +				   "asymmetric",
+> +				   NULL, data, len,
+> +				   (KEY_POS_ALL & ~KEY_POS_SETATTR) |
+> +				   KEY_USR_VIEW,
+> +				   KEY_ALLOC_NOT_IN_QUOTA |
+> +				   KEY_ALLOC_BYPASS_RESTRICTION);
 > +
-> /*
->  * All runtime access to EFI goes through this structure:
->  */
-
---
-Mat Martineau
-Intel OTC
+> +	if (IS_ERR(key))
+> +		pr_err("Problem loading %s X.509 certificate (%ld)\n",
+> +		       source, PTR_ERR(key));
+> +	else
+> +		pr_notice("Loaded %s cert '%s' linked to secondary sys keyring\n",
+> +			  source, key_ref_to_ptr(key)->description);
+> +}
+> +#endif /* CONFIG_SECONDARY_TRUSTED_KEYRING */
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-security-module" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
