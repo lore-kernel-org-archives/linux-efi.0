@@ -1,419 +1,210 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [RFC PATCH v3 10/20] Add support to access boot related data in
- the clear
-Date: Thu, 17 Nov 2016 16:55:44 +0100
-Message-ID: <20161117155543.vg3domfqm3bhp4f7@pd.tnic>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [RFC PATCH v3 11/20] x86: Add support for changing memory
+	encryption attribute
+Date: Thu, 17 Nov 2016 18:39:45 +0100
+Message-ID: <20161117173945.gnar3arpyeeh5xm2@pd.tnic>
 References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
- <20161110003631.3280.73292.stgit@tlendack-t1.amdoffice.net>
+	<20161110003655.3280.57333.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20161110003631.3280.73292.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+In-Reply-To: <20161110003655.3280.57333.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Nov 09, 2016 at 06:36:31PM -0600, Tom Lendacky wrote:
-> Boot data (such as EFI related data) is not encrypted when the system is
-> booted and needs to be accessed unencrypted.  Add support to apply the
-> proper attributes to the EFI page tables and to the early_memremap and
-> memremap APIs to identify the type of data being accessed so that the
-> proper encryption attribute can be applied.
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+On Wed, Nov 09, 2016 at 06:36:55PM -0600, Tom Lendacky wrote:
+> This patch adds support to be change the memory encryption attribute for
+> one or more memory pages.
+
+"Add support for changing ..."
+
+> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 > ---
->  arch/x86/include/asm/e820.h    |    1 
->  arch/x86/kernel/e820.c         |   16 +++++++
->  arch/x86/mm/ioremap.c          |   89 ++++++++++++++++++++++++++++++++++++++++
->  arch/x86/platform/efi/efi_64.c |   12 ++++-
->  drivers/firmware/efi/efi.c     |   33 +++++++++++++++
->  include/linux/efi.h            |    2 +
->  kernel/memremap.c              |    8 +++-
->  mm/early_ioremap.c             |   18 +++++++-
->  8 files changed, 172 insertions(+), 7 deletions(-)
-> 
-> diff --git a/arch/x86/include/asm/e820.h b/arch/x86/include/asm/e820.h
-> index 476b574..186f1d04 100644
-> --- a/arch/x86/include/asm/e820.h
-> +++ b/arch/x86/include/asm/e820.h
-> @@ -16,6 +16,7 @@ extern struct e820map *e820_saved;
->  extern unsigned long pci_mem_start;
->  extern int e820_any_mapped(u64 start, u64 end, unsigned type);
->  extern int e820_all_mapped(u64 start, u64 end, unsigned type);
-> +extern unsigned int e820_get_entry_type(u64 start, u64 end);
->  extern void e820_add_region(u64 start, u64 size, int type);
->  extern void e820_print_map(char *who);
->  extern int
-> diff --git a/arch/x86/kernel/e820.c b/arch/x86/kernel/e820.c
-> index b85fe5f..92fce4e 100644
-> --- a/arch/x86/kernel/e820.c
-> +++ b/arch/x86/kernel/e820.c
-> @@ -107,6 +107,22 @@ int __init e820_all_mapped(u64 start, u64 end, unsigned type)
->  	return 0;
->  }
->  
-> +unsigned int e820_get_entry_type(u64 start, u64 end)
-> +{
-> +	int i;
-> +
-> +	for (i = 0; i < e820->nr_map; i++) {
-> +		struct e820entry *ei = &e820->map[i];
-> +
-> +		if (ei->addr >= end || ei->addr + ei->size <= start)
-> +			continue;
-> +
-> +		return ei->type;
-> +	}
-> +
-> +	return 0;
-
-Please add a
-
-#define E820_TYPE_INVALID	0
-
-or so and return it instead of the naked number 0.
-
-Also, this patch can be split in logical parts. The e820 stuff can be a
-separate pre-patch.
-
-efi_table_address_match() and the tables definitions is a second pre-patch.
-
-The rest is then the third patch.
+>  arch/x86/include/asm/cacheflush.h  |    3 +
+>  arch/x86/include/asm/mem_encrypt.h |   13 ++++++
+>  arch/x86/mm/mem_encrypt.c          |   43 +++++++++++++++++++++
+>  arch/x86/mm/pageattr.c             |   73 ++++++++++++++++++++++++++++++++++++
+>  4 files changed, 132 insertions(+)
 
 ...
 
-> +}
-> +
->  /*
->   * Add a memory region to the kernel e820 map.
->   */
-> diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
-> index ff542cd..ee347c2 100644
-> --- a/arch/x86/mm/ioremap.c
-> +++ b/arch/x86/mm/ioremap.c
-> @@ -20,6 +20,9 @@
->  #include <asm/tlbflush.h>
->  #include <asm/pgalloc.h>
->  #include <asm/pat.h>
-> +#include <asm/e820.h>
-> +#include <asm/setup.h>
-> +#include <linux/efi.h>
+> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+> index 411210d..41cfdf9 100644
+> --- a/arch/x86/mm/mem_encrypt.c
+> +++ b/arch/x86/mm/mem_encrypt.c
+> @@ -18,6 +18,7 @@
+>  #include <asm/fixmap.h>
+>  #include <asm/setup.h>
+>  #include <asm/bootparam.h>
+> +#include <asm/cacheflush.h>
 >  
->  #include "physaddr.h"
+>  extern pmdval_t early_pmd_flags;
+>  int __init __early_make_pgtable(unsigned long, pmdval_t);
+> @@ -33,6 +34,48 @@ EXPORT_SYMBOL_GPL(sme_me_mask);
+>  /* Buffer used for early in-place encryption by BSP, no locking needed */
+>  static char sme_early_buffer[PAGE_SIZE] __aligned(PAGE_SIZE);
 >  
-> @@ -418,6 +421,92 @@ void unxlate_dev_mem_ptr(phys_addr_t phys, void *addr)
->  	iounmap((void __iomem *)((unsigned long)addr & PAGE_MASK));
->  }
->  
-> +static bool memremap_setup_data(resource_size_t phys_addr,
-> +				unsigned long size)
-
-This function name doesn't read like what the function does.
-
+> +int sme_set_mem_enc(void *vaddr, unsigned long size)
 > +{
-> +	u64 paddr;
+> +	unsigned long addr, numpages;
 > +
-> +	if (phys_addr == boot_params.hdr.setup_data)
-> +		return true;
-> +
-> +	paddr = boot_params.efi_info.efi_memmap_hi;
-> +	paddr <<= 32;
-> +	paddr |= boot_params.efi_info.efi_memmap;
-> +	if (phys_addr == paddr)
-> +		return true;
-> +
-> +	paddr = boot_params.efi_info.efi_systab_hi;
-> +	paddr <<= 32;
-> +	paddr |= boot_params.efi_info.efi_systab;
-> +	if (phys_addr == paddr)
-> +		return true;
-> +
-> +	if (efi_table_address_match(phys_addr))
-> +		return true;
-> +
-> +	return false;
-> +}
-
-arch/x86/built-in.o: In function `memremap_setup_data':
-/home/boris/kernel/alt-linux/arch/x86/mm/ioremap.c:444: undefined reference to `efi_table_address_match'
-arch/x86/built-in.o: In function `memremap_apply_encryption':
-/home/boris/kernel/alt-linux/arch/x86/mm/ioremap.c:462: undefined reference to `efi_mem_type'
-make: *** [vmlinux] Error 1
-
-I guess due to
-
-# CONFIG_EFI is not set
-
-> +
-> +static bool memremap_apply_encryption(resource_size_t phys_addr,
-> +				      unsigned long size)
-
-This name is misleading too: it doesn't apply encryption but checks
-whether to apply encryption for @phys_addr or not. So something like:
-
-... memremap_should_encrypt(...)
-{
-	return true - for should
-	return false - for should not
-
-should make the whole thing much more straightforward. Or am I
-misunderstanding you here?
-
-> +{
-> +	/* SME is not active, just return true */
 > +	if (!sme_me_mask)
-> +		return true;
+> +		return 0;
 
-I don't understand the logic here: SME is not active -> apply encryption?!
+So those interfaces look duplicated to me: you have exported
+sme_set_mem_enc/sme_set_mem_unenc which take @size and then you have
+set_memory_enc/set_memory_dec which take numpages.
+
+And then you're testing sme_me_mask in both.
+
+What I'd prefer to have is only *two* set_memory_enc/set_memory_dec
+which take size in bytes and one workhorse __set_memory_enc_dec() which
+does it all. The user shouldn't have to care about numpages or size or
+whatever.
+
+Ok?
 
 > +
-> +	/* Check if the address is part of the setup data */
-
-That comment belongs over the function definition of
-memremap_setup_data() along with what it is supposed to do.
-
-> +	if (memremap_setup_data(phys_addr, size))
-> +		return false;
+> +	addr = (unsigned long)vaddr & PAGE_MASK;
+> +	numpages = PAGE_ALIGN(size) >> PAGE_SHIFT;
 > +
-> +	/* Check if the address is part of EFI boot/runtime data */
-> +	switch (efi_mem_type(phys_addr)) {
-
-Please send a pre-patch fix for efi_mem_type() to return
-EFI_RESERVED_TYPE instead of naked 0 in the failure case.
-
-> +	case EFI_BOOT_SERVICES_DATA:
-> +	case EFI_RUNTIME_SERVICES_DATA:
-> +		return false;
-> +	}
-> +
-> +	/* Check if the address is outside kernel usable area */
-> +	switch (e820_get_entry_type(phys_addr, phys_addr + size - 1)) {
-> +	case E820_RESERVED:
-> +	case E820_ACPI:
-> +	case E820_NVS:
-> +	case E820_UNUSABLE:
-> +		return false;
-> +	}
-> +
-> +	return true;
-> +}
-> +
-> +/*
-> + * Architecure override of __weak function to prevent ram remap and use the
-
-s/ram/RAM/
-
-> + * architectural remap function.
-> + */
-> +bool memremap_do_ram_remap(resource_size_t phys_addr, unsigned long size)
-> +{
-> +	if (!memremap_apply_encryption(phys_addr, size))
-> +		return false;
-> +
-> +	return true;
-
-Do I see it correctly that this could just very simply be:
-
-	return memremap_apply_encryption(phys_addr, size);
-
-?
-
-> +}
-> +
-> +/*
-> + * Architecure override of __weak function to adjust the protection attributes
-> + * used when remapping memory.
-> + */
-> +pgprot_t __init early_memremap_pgprot_adjust(resource_size_t phys_addr,
-> +					     unsigned long size,
-> +					     pgprot_t prot)
-> +{
-> +	unsigned long prot_val = pgprot_val(prot);
-> +
-> +	if (memremap_apply_encryption(phys_addr, size))
-> +		prot_val |= _PAGE_ENC;
-> +	else
-> +		prot_val &= ~_PAGE_ENC;
-> +
-> +	return __pgprot(prot_val);
-> +}
-> +
->  /* Remap memory with encryption */
->  void __init *early_memremap_enc(resource_size_t phys_addr,
->  				unsigned long size)
-> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-> index 58b0f80..3f89179 100644
-> --- a/arch/x86/platform/efi/efi_64.c
-> +++ b/arch/x86/platform/efi/efi_64.c
-> @@ -221,7 +221,13 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
->  	if (efi_enabled(EFI_OLD_MEMMAP))
->  		return 0;
->  
-> -	efi_scratch.efi_pgt = (pgd_t *)__pa(efi_pgd);
 > +	/*
-> +	 * Since the PGD is encrypted, set the encryption mask so that when
-> +	 * this value is loaded into cr3 the PGD will be decrypted during
-> +	 * the pagetable walk.
+> +	 * The set_memory_xxx functions take an integer for numpages, make
+> +	 * sure it doesn't exceed that.
 > +	 */
-> +	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(efi_pgd);
+> +	if (numpages > INT_MAX)
+> +		return -EINVAL;
 > +
->  	pgd = efi_pgd;
->  
->  	/*
-> @@ -231,7 +237,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
->  	 * phys_efi_set_virtual_address_map().
->  	 */
->  	pfn = pa_memmap >> PAGE_SHIFT;
-> -	if (kernel_map_pages_in_pgd(pgd, pfn, pa_memmap, num_pages, _PAGE_NX | _PAGE_RW)) {
-> +	if (kernel_map_pages_in_pgd(pgd, pfn, pa_memmap, num_pages, _PAGE_NX | _PAGE_RW | _PAGE_ENC)) {
-
-That line sticks too far out, let's shorten it:
-
-	unsigned long pf = _PAGE_NX | _PAGE_RW | _PAGE_ENC;
-
-	...
-
-	if (kernel_map_pages_in_pgd(pgd, pfn, pa_memmap, num_pages, pf)) {
-
-
-	..
-
-	pf = _PAGE_RW | _PAGE_ENC;
-	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, pf)) {
-
-	..
-
-
->  		pr_err("Error ident-mapping new memmap (0x%lx)!\n", pa_memmap);
->  		return 1;
->  	}
-> @@ -258,7 +264,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
->  	text = __pa(_text);
->  	pfn = text >> PAGE_SHIFT;
->  
-> -	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, _PAGE_RW)) {
-> +	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, _PAGE_RW | _PAGE_ENC)) {
->  		pr_err("Failed to map kernel text 1:1\n");
->  		return 1;
->  	}
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 1ac199c..91c06ec 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -51,6 +51,25 @@ struct efi __read_mostly efi = {
->  };
->  EXPORT_SYMBOL(efi);
->  
-> +static unsigned long *efi_tables[] = {
-> +	&efi.mps,
-> +	&efi.acpi,
-> +	&efi.acpi20,
-> +	&efi.smbios,
-> +	&efi.smbios3,
-> +	&efi.sal_systab,
-> +	&efi.boot_info,
-> +	&efi.hcdp,
-> +	&efi.uga,
-> +	&efi.uv_systab,
-> +	&efi.fw_vendor,
-> +	&efi.runtime,
-> +	&efi.config_table,
-> +	&efi.esrt,
-> +	&efi.properties_table,
-> +	&efi.mem_attr_table,
-> +};
-> +
->  static bool disable_runtime;
->  static int __init setup_noefi(char *arg)
->  {
-> @@ -822,3 +841,17 @@ int efi_status_to_err(efi_status_t status)
->  
->  	return err;
->  }
-> +
-> +bool efi_table_address_match(unsigned long phys_addr)
-> +{
-> +	int i;
-> +
-> +	if (phys_addr == EFI_INVALID_TABLE_ADDR)
-> +		return false;
-> +
-> +	for (i = 0; i < ARRAY_SIZE(efi_tables); i++)
-> +		if (*(efi_tables[i]) == phys_addr)
-> +			return true;
-> +
-> +	return false;
+> +	return set_memory_enc(addr, numpages);
 > +}
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index 2d08948..72d89bf 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -1070,6 +1070,8 @@ efi_capsule_pending(int *reset_type)
->  
->  extern int efi_status_to_err(efi_status_t status);
->  
-> +extern bool efi_table_address_match(unsigned long phys_addr);
+> +EXPORT_SYMBOL_GPL(sme_set_mem_enc);
+> +
+> +int sme_set_mem_unenc(void *vaddr, unsigned long size)
+> +{
+> +	unsigned long addr, numpages;
+> +
+> +	if (!sme_me_mask)
+> +		return 0;
+> +
+> +	addr = (unsigned long)vaddr & PAGE_MASK;
+> +	numpages = PAGE_ALIGN(size) >> PAGE_SHIFT;
+> +
+> +	/*
+> +	 * The set_memory_xxx functions take an integer for numpages, make
+> +	 * sure it doesn't exceed that.
+> +	 */
+> +	if (numpages > INT_MAX)
+> +		return -EINVAL;
+> +
+> +	return set_memory_dec(addr, numpages);
+> +}
+> +EXPORT_SYMBOL_GPL(sme_set_mem_unenc);
 > +
 >  /*
->   * Variable Attributes
->   */
-> diff --git a/kernel/memremap.c b/kernel/memremap.c
-> index b501e39..ac1437e 100644
-> --- a/kernel/memremap.c
-> +++ b/kernel/memremap.c
-> @@ -34,12 +34,18 @@ static void *arch_memremap_wb(resource_size_t offset, unsigned long size)
+>   * This routine does not change the underlying encryption setting of the
+>   * page(s) that map this memory. It assumes that eventually the memory is
+> diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+> index b8e6bb5..babf3a6 100644
+> --- a/arch/x86/mm/pageattr.c
+> +++ b/arch/x86/mm/pageattr.c
+> @@ -1729,6 +1729,79 @@ int set_memory_4k(unsigned long addr, int numpages)
+>  					__pgprot(0), 1, 0, NULL);
 >  }
->  #endif
 >  
-> +bool __weak memremap_do_ram_remap(resource_size_t offset, size_t size)
+> +static int __set_memory_enc_dec(struct cpa_data *cpa)
 > +{
-> +	return true;
+> +	unsigned long addr;
+> +	int numpages;
+> +	int ret;
+> +
+> +	/* People should not be passing in unaligned addresses */
+> +	if (WARN_ONCE(*cpa->vaddr & ~PAGE_MASK,
+> +		      "misaligned address: %#lx\n", *cpa->vaddr))
+> +		*cpa->vaddr &= PAGE_MASK;
+> +
+> +	addr = *cpa->vaddr;
+> +	numpages = cpa->numpages;
+> +
+> +	/* Must avoid aliasing mappings in the highmem code */
+> +	kmap_flush_unused();
+> +	vm_unmap_aliases();
+> +
+> +	ret = __change_page_attr_set_clr(cpa, 1);
+> +
+> +	/* Check whether we really changed something */
+> +	if (!(cpa->flags & CPA_FLUSHTLB))
+> +		goto out;
+
+That label is used only once - just "return ret;" here.
+
+> +	/*
+> +	 * On success we use CLFLUSH, when the CPU supports it to
+> +	 * avoid the WBINVD.
+> +	 */
+> +	if (!ret && static_cpu_has(X86_FEATURE_CLFLUSH))
+> +		cpa_flush_range(addr, numpages, 1);
+> +	else
+> +		cpa_flush_all(1);
+> +
+> +out:
+> +	return ret;
 > +}
 > +
-
-Why isn't this an inline in a header?
-
->  static void *try_ram_remap(resource_size_t offset, size_t size)
->  {
->  	unsigned long pfn = PHYS_PFN(offset);
->  
->  	/* In the simple case just return the existing linear address */
-> -	if (pfn_valid(pfn) && !PageHighMem(pfn_to_page(pfn)))
-> +	if (pfn_valid(pfn) && !PageHighMem(pfn_to_page(pfn)) &&
-> +	    memremap_do_ram_remap(offset, size))
->  		return __va(offset);
-
-<---- newline here.
-
->  	return NULL; /* fallback to arch_memremap_wb */
->  }
-> diff --git a/mm/early_ioremap.c b/mm/early_ioremap.c
-> index d71b98b..34af5b6 100644
-> --- a/mm/early_ioremap.c
-> +++ b/mm/early_ioremap.c
-> @@ -30,6 +30,13 @@ early_param("early_ioremap_debug", early_ioremap_debug_setup);
->  
->  static int after_paging_init __initdata;
->  
-> +pgprot_t __init __weak early_memremap_pgprot_adjust(resource_size_t phys_addr,
-> +						    unsigned long size,
-> +						    pgprot_t prot)
+> +int set_memory_enc(unsigned long addr, int numpages)
 > +{
-> +	return prot;
-> +}
+> +	struct cpa_data cpa;
+> +
+> +	if (!sme_me_mask)
+> +		return 0;
+> +
+> +	memset(&cpa, 0, sizeof(cpa));
+> +	cpa.vaddr = &addr;
+> +	cpa.numpages = numpages;
+> +	cpa.mask_set = __pgprot(_PAGE_ENC);
+> +	cpa.mask_clr = __pgprot(0);
+> +	cpa.pgd = init_mm.pgd;
 
-Also, why isn't this an inline in a header somewhere?
+You could move that...
+
+> +
+> +	return __set_memory_enc_dec(&cpa);
+> +}
+> +EXPORT_SYMBOL(set_memory_enc);
+> +
+> +int set_memory_dec(unsigned long addr, int numpages)
+> +{
+> +	struct cpa_data cpa;
+> +
+> +	if (!sme_me_mask)
+> +		return 0;
+> +
+> +	memset(&cpa, 0, sizeof(cpa));
+> +	cpa.vaddr = &addr;
+> +	cpa.numpages = numpages;
+> +	cpa.mask_set = __pgprot(0);
+> +	cpa.mask_clr = __pgprot(_PAGE_ENC);
+> +	cpa.pgd = init_mm.pgd;
+
+... and that into __set_memory_enc_dec() too and pass in a "bool dec" or
+"bool enc" or so which presets mask_set and mask_clr properly.
+
+See above. I think two functions exported to other in-kernel users are
+more than enough.
 
 -- 
 Regards/Gruss,
     Boris.
 
 Good mailing practices for 400: avoid top-posting and trim the reply.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
