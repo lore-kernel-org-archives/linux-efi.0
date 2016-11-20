@@ -1,75 +1,64 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v3 12/20] x86: Decrypt trampoline area if memory
- encryption is active
-Date: Sat, 19 Nov 2016 12:50:24 -0600
-Message-ID: <bb107821-3ddf-a3bd-e0c5-5a25daffb516@amd.com>
-References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
- <20161110003708.3280.29934.stgit@tlendack-t1.amdoffice.net>
- <20161117180913.ha5h4bfgrr5u6ccg@pd.tnic>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] arm64: mm: Fix memmap to be initialized for the entire section
+Date: Sun, 20 Nov 2016 17:07:44 +0000
+Message-ID: <CAKv+Gu-2uGJGovqQL-gbB54u=fQ9L9YUbDdRo6u3oWqF6znn6Q@mail.gmail.com>
+References: <1475747527-32387-1-git-send-email-rrichter@cavium.com>
+ <CAKv+Gu-oYzSn_eeqaX3QVFeQjBGkaX-Wh7+oPcQFcXv7J6GOFQ@mail.gmail.com>
+ <20161006161114.GH22012@rric.localdomain> <20161017185801.GT25086@rric.localdomain>
+ <20161027160136.GD24290@arm.com> <20161028091905.GM22012@rric.localdomain>
+ <20161107210514.GP20591@arm.com> <20161109195132.GZ22012@rric.localdomain>
+ <20161117142528.GJ22855@arm.com> <20161117151805.GJ2151@rric.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20161117180913.ha5h4bfgrr5u6ccg@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20161117151805.GJ2151-vWBEXY7mpu582hYKe6nXyg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Robert Richter <rric-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/17/2016 12:09 PM, Borislav Petkov wrote:
-> On Wed, Nov 09, 2016 at 06:37:08PM -0600, Tom Lendacky wrote:
->> When Secure Memory Encryption is enabled, the trampoline area must not
->> be encrypted. A CPU running in real mode will not be able to decrypt
->> memory that has been encrypted because it will not be able to use addresses
->> with the memory encryption mask.
+On 17 November 2016 at 15:18, Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org> wrote:
+> Thanks for your answer.
+>
+> On 17.11.16 14:25:29, Will Deacon wrote:
+>> On Wed, Nov 09, 2016 at 08:51:32PM +0100, Robert Richter wrote:
+>> > Thus, I don't see where my patch breaks code. Even acpi_os_ioremap()
+>> > keeps the same behaviour as before since it still uses memblock_is_
+>> > memory(). Could you more describe your concerns why do you think this
+>> > patch breaks the kernel and moves the problem somewhere else? I
+>> > believe it fixes the problem at all.
 >>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->>  arch/x86/realmode/init.c |    9 +++++++++
->>  1 file changed, 9 insertions(+)
->>
->> diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
->> index 5db706f1..44ed32a 100644
->> --- a/arch/x86/realmode/init.c
->> +++ b/arch/x86/realmode/init.c
->> @@ -6,6 +6,7 @@
->>  #include <asm/pgtable.h>
->>  #include <asm/realmode.h>
->>  #include <asm/tlbflush.h>
->> +#include <asm/mem_encrypt.h>
->>  
->>  struct real_mode_header *real_mode_header;
->>  u32 *trampoline_cr4_features;
->> @@ -130,6 +131,14 @@ static void __init set_real_mode_permissions(void)
->>  	unsigned long text_start =
->>  		(unsigned long) __va(real_mode_header->text_start);
->>  
->> +	/*
->> +	 * If memory encryption is active, the trampoline area will need to
->> +	 * be in un-encrypted memory in order to bring up other processors
->> +	 * successfully.
->> +	 */
->> +	sme_early_mem_dec(__pa(base), size);
->> +	sme_set_mem_unenc(base, size);
-> 
-> We're still unsure about the non-encrypted state: dec vs unenc. Please
-> unify those for ease of use, code reading, etc etc.
-> 
-> 	sme_early_decrypt(__pa(base), size);
-> 	sme_mark_decrypted(base, size);
-> 
-> or similar looks much more readable and understandable to me.
+>> acpi_os_ioremap always ends up in __ioremap_caller, regardless of
+>> memblock_is_memory(). __ioremap_caller then fails if pfn_valid is true.
+>
+> But that's the reason my patch changed the code to use memblock_is_
+> map_memory() instead. I was looking into the users of pfn_valid() esp.
+> in arm64 code and changed it where required.
+>
+> This week I looked into the kernel again for code that might break by
+> a pfn_valid() change. I found try_ram_remap() in memremap.c that has
+> changed behaviour now, but this is explicit for MEMREMAP_WB, so it
+> should be fine.
+>
+> Maybe it might be better to use page_is_ram() in addition to
+> pfn_valid() where necessary. This should work now after commit:
+>
+>  e7cd190385d1 arm64: mark reserved memblock regions explicitly in iomem
+>
+> I still think pfn_valid() is not the correct use to determine the mem
+> attributes for mappings, there are further checks required.
+>
+> The risk of breaking something with my patch is small and limited only
+> to the mapping of efi reserved regions (which is the state of 4.4). If
+> something breaks anyway it can easily be fixed by adding more checks
+> to pfn_valid() as suggested above.
+>
 
-Yeah, I'll go through and change everything so that the implication
-or action is expressed better.
+As I noted before, it looks to me like setting CONFIG_HOLES_IN_ZONE is
+the correct way to address this. However, doing that does uncover a
+bug in move_freepages() where the VM_BUG_ON_PAGE() dereferences struct
+page fields before the pfn_valid_within() check, so it seems those
+need to be switched around.
 
-Thanks,
-Tom
-
-> 
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Robert, you mentioned that CONFIG_HOLES_IN_ZONE seems inappropriate
+for sparsemem. Care to elaborate why?
