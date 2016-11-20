@@ -1,64 +1,59 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] arm64: mm: Fix memmap to be initialized for the entire section
-Date: Sun, 20 Nov 2016 17:07:44 +0000
-Message-ID: <CAKv+Gu-2uGJGovqQL-gbB54u=fQ9L9YUbDdRo6u3oWqF6znn6Q@mail.gmail.com>
-References: <1475747527-32387-1-git-send-email-rrichter@cavium.com>
- <CAKv+Gu-oYzSn_eeqaX3QVFeQjBGkaX-Wh7+oPcQFcXv7J6GOFQ@mail.gmail.com>
- <20161006161114.GH22012@rric.localdomain> <20161017185801.GT25086@rric.localdomain>
- <20161027160136.GD24290@arm.com> <20161028091905.GM22012@rric.localdomain>
- <20161107210514.GP20591@arm.com> <20161109195132.GZ22012@rric.localdomain>
- <20161117142528.GJ22855@arm.com> <20161117151805.GJ2151@rric.localdomain>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [RFC PATCH v3 10/20] Add support to access boot related data in
+ the clear
+Date: Mon, 21 Nov 2016 00:04:35 +0100
+Message-ID: <20161120230435.gqjp7gboshhqplbf@pd.tnic>
+References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+ <20161110003631.3280.73292.stgit@tlendack-t1.amdoffice.net>
+ <20161117155543.vg3domfqm3bhp4f7@pd.tnic>
+ <f7bf8301-7d91-dd43-d5f0-05e977c0c5a2@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161117151805.GJ2151-vWBEXY7mpu582hYKe6nXyg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Robert Richter <rric-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <f7bf8301-7d91-dd43-d5f0-05e977c0c5a2@amd.com>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 17 November 2016 at 15:18, Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org> wrote:
-> Thanks for your answer.
->
-> On 17.11.16 14:25:29, Will Deacon wrote:
->> On Wed, Nov 09, 2016 at 08:51:32PM +0100, Robert Richter wrote:
->> > Thus, I don't see where my patch breaks code. Even acpi_os_ioremap()
->> > keeps the same behaviour as before since it still uses memblock_is_
->> > memory(). Could you more describe your concerns why do you think this
->> > patch breaks the kernel and moves the problem somewhere else? I
->> > believe it fixes the problem at all.
->>
->> acpi_os_ioremap always ends up in __ioremap_caller, regardless of
->> memblock_is_memory(). __ioremap_caller then fails if pfn_valid is true.
->
-> But that's the reason my patch changed the code to use memblock_is_
-> map_memory() instead. I was looking into the users of pfn_valid() esp.
-> in arm64 code and changed it where required.
->
-> This week I looked into the kernel again for code that might break by
-> a pfn_valid() change. I found try_ram_remap() in memremap.c that has
-> changed behaviour now, but this is explicit for MEMREMAP_WB, so it
-> should be fine.
->
-> Maybe it might be better to use page_is_ram() in addition to
-> pfn_valid() where necessary. This should work now after commit:
->
->  e7cd190385d1 arm64: mark reserved memblock regions explicitly in iomem
->
-> I still think pfn_valid() is not the correct use to determine the mem
-> attributes for mappings, there are further checks required.
->
-> The risk of breaking something with my patch is small and limited only
-> to the mapping of efi reserved regions (which is the state of 4.4). If
-> something breaks anyway it can easily be fixed by adding more checks
-> to pfn_valid() as suggested above.
->
+On Sat, Nov 19, 2016 at 12:33:49PM -0600, Tom Lendacky wrote:
+> >> +{
+> >> +	/* SME is not active, just return true */
+> >> +	if (!sme_me_mask)
+> >> +		return true;
+> > 
+> > I don't understand the logic here: SME is not active -> apply encryption?!
+> 
+> It does seem counter-intuitive, but it is mainly because of the memremap
+> vs. early_memremap support. For the early_memremap support, if the
+> sme_me_mask is 0 it doesn't matter whether we return true or false since
+> the mask is zero even if you try to apply it. But for the memremap
+> support, it's used to determine whether to do the ram remap vs an
+> ioremap.
+> 
+> I'll pull the sme_me_mask check out of the function and put it in the
+> individual functions to remove the contradiction and make things
+> clearer.
 
-As I noted before, it looks to me like setting CONFIG_HOLES_IN_ZONE is
-the correct way to address this. However, doing that does uncover a
-bug in move_freepages() where the VM_BUG_ON_PAGE() dereferences struct
-page fields before the pfn_valid_within() check, so it seems those
-need to be switched around.
+But that would be more code, right?
 
-Robert, you mentioned that CONFIG_HOLES_IN_ZONE seems inappropriate
-for sparsemem. Care to elaborate why?
+Instead, you could simply explain in a comment above it what do you
+mean exactly. Something along the lines of "if sme_me_mask is not
+set, we should map encrypted because if not set, we can simply remap
+RAM. Otherwise we have to ioremap because we need to access it in the
+clear..."
+
+I presume - I still don't grok that difference here completely.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
