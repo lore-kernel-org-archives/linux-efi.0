@@ -1,7 +1,7 @@
 From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V5 04/10] arm64: exception: handle Synchronous External Abort
-Date: Mon, 21 Nov 2016 15:35:57 -0700
-Message-ID: <1479767763-27532-5-git-send-email-tbaicar@codeaurora.org>
+Subject: [PATCH V5 06/10] acpi: apei: panic OS with fatal error status block
+Date: Mon, 21 Nov 2016 15:35:59 -0700
+Message-ID: <1479767763-27532-7-git-send-email-tbaicar@codeaurora.org>
 References: <1479767763-27532-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,134 +21,83 @@ To: marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinu
 Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-SEA exceptions are often caused by an uncorrected hardware
-error, and are handled when data abort and instruction abort
-exception classes have specific values for their Fault Status
-Code.
-When SEA occurs, before killing the process, go through
-the handlers registered in the notification list.
-Update fault_info[] with specific SEA faults so that the
-new SEA handler is used.
+From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+
+Even if an error status block's severity is fatal, the kernel does not
+honor the severity level and panic.
+
+With the firmware first model, the platform could inform the OS about a
+fatal hardware error through the non-NMI GHES notification type. The OS
+should panic when a hardware error record is received with this
+severity.
+
+Call panic() after CPER data in error status block is printed if
+severity is fatal, before each error section is handled.
 
 Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
 Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
 ---
- arch/arm64/include/asm/system_misc.h | 13 ++++++++
- arch/arm64/mm/fault.c                | 58 +++++++++++++++++++++++++++++-------
- 2 files changed, 61 insertions(+), 10 deletions(-)
+ drivers/acpi/apei/ghes.c | 19 ++++++++++++++-----
+ 1 file changed, 14 insertions(+), 5 deletions(-)
 
-diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
-index 57f110b..9040e1d 100644
---- a/arch/arm64/include/asm/system_misc.h
-+++ b/arch/arm64/include/asm/system_misc.h
-@@ -64,4 +64,17 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index 839a0e2..28f801c 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -141,6 +141,8 @@ static unsigned long ghes_estatus_pool_size_request;
+ static struct ghes_estatus_cache *ghes_estatus_caches[GHES_ESTATUS_CACHES_SIZE];
+ static atomic_t ghes_estatus_cache_alloced;
  
- #endif	/* __ASSEMBLY__ */
- 
-+/*
-+ * The functions below are used to register and unregister callbacks
-+ * that are to be invoked when a Synchronous External Abort (SEA)
-+ * occurs. An SEA is raised by certain fault status codes that have
-+ * either data or instruction abort as the exception class, and
-+ * callbacks may be registered to parse or handle such hardware errors.
-+ *
-+ * Registered callbacks are run in an interrupt/atomic context. They
-+ * are not allowed to block or sleep.
-+ */
-+int register_synchronous_ext_abort_notifier(struct notifier_block *nb);
-+void unregister_synchronous_ext_abort_notifier(struct notifier_block *nb);
++static int ghes_panic_timeout __read_mostly = 30;
 +
- #endif	/* __ASM_SYSTEM_MISC_H */
-diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-index 05d2bd7..fcc49f1 100644
---- a/arch/arm64/mm/fault.c
-+++ b/arch/arm64/mm/fault.c
-@@ -39,6 +39,22 @@
- #include <asm/pgtable.h>
- #include <asm/tlbflush.h>
- 
-+/*
-+ * GHES SEA handler code may register a notifier call here to
-+ * handle HW error record passed from platform.
-+ */
-+static ATOMIC_NOTIFIER_HEAD(sea_handler_chain);
-+
-+int register_synchronous_ext_abort_notifier(struct notifier_block *nb)
-+{
-+	return atomic_notifier_chain_register(&sea_handler_chain, nb);
-+}
-+
-+void unregister_synchronous_ext_abort_notifier(struct notifier_block *nb)
-+{
-+	atomic_notifier_chain_unregister(&sea_handler_chain, nb);
-+}
-+
- static const char *fault_name(unsigned int esr);
- 
- #ifdef CONFIG_KPROBES
-@@ -480,6 +496,28 @@ static int do_bad(unsigned long addr, unsigned int esr, struct pt_regs *regs)
- 	return 1;
+ static int ghes_ioremap_init(void)
+ {
+ 	ghes_ioremap_area = __get_vm_area(PAGE_SIZE * GHES_IOREMAP_PAGES,
+@@ -695,6 +697,13 @@ static int ghes_ack_error(struct acpi_hest_generic_v2 *generic_v2)
+ 	return rc;
  }
  
-+/*
-+ * This abort handler deals with Synchronous External Abort.
-+ * It calls notifiers, and then returns "fault".
-+ */
-+static int do_synch_ext_abort(unsigned long addr, unsigned int esr, struct pt_regs *regs)
++static void __ghes_call_panic(void)
 +{
-+	struct siginfo info;
-+
-+	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
-+
-+	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
-+		 fault_name(esr), esr, addr);
-+
-+	info.si_signo = SIGBUS;
-+	info.si_errno = 0;
-+	info.si_code  = 0;
-+	info.si_addr  = (void __user *)addr;
-+	arm64_notify_die("", regs, &info, esr);
-+
-+	return 0;
++	if (panic_timeout == 0)
++		panic_timeout = ghes_panic_timeout;
++	panic("Fatal hardware error!");
 +}
 +
- static const struct fault_info {
- 	int	(*fn)(unsigned long addr, unsigned int esr, struct pt_regs *regs);
- 	int	sig;
-@@ -502,22 +540,22 @@ static const struct fault_info {
- 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 1 permission fault"	},
- 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
- 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 permission fault"	},
--	{ do_bad,		SIGBUS,  0,		"synchronous external abort"	},
-+	{ do_synch_ext_abort,	SIGBUS,  0,		"synchronous external abort"	},
- 	{ do_bad,		SIGBUS,  0,		"unknown 17"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 18"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 19"			},
--	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error"	},
-+	{ do_synch_ext_abort,	SIGBUS,  0,		"level 0 SEA (trans tbl walk)"	},
-+	{ do_synch_ext_abort,	SIGBUS,  0,		"level 1 SEA (trans tbl walk)"	},
-+	{ do_synch_ext_abort,	SIGBUS,  0,		"level 2 SEA (trans tbl walk)"	},
-+	{ do_synch_ext_abort,	SIGBUS,  0,		"level 3 SEA (trans tbl walk)"	},
-+	{ do_synch_ext_abort,	SIGBUS,  0,		"synchronous parity or ECC err" },
- 	{ do_bad,		SIGBUS,  0,		"unknown 25"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 26"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 27"			},
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
-+	{ do_synch_ext_abort,	SIGBUS,  0,		"level 0 synch parity error"	},
-+	{ do_synch_ext_abort,	SIGBUS,  0,		"level 1 synch parity error"	},
-+	{ do_synch_ext_abort,	SIGBUS,  0,		"level 2 synch parity error"	},
-+	{ do_synch_ext_abort,	SIGBUS,  0,		"level 3 synch parity error"	},
- 	{ do_bad,		SIGBUS,  0,		"unknown 32"			},
- 	{ do_alignment_fault,	SIGBUS,  BUS_ADRALN,	"alignment fault"		},
- 	{ do_bad,		SIGBUS,  0,		"unknown 34"			},
+ static int ghes_proc(struct ghes *ghes)
+ {
+ 	int rc;
+@@ -706,6 +715,10 @@ static int ghes_proc(struct ghes *ghes)
+ 		if (ghes_print_estatus(NULL, ghes->generic, ghes->estatus))
+ 			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+ 	}
++	if (ghes_severity(ghes->estatus->error_severity) >= GHES_SEV_PANIC) {
++		__ghes_call_panic();
++	}
++
+ 	ghes_do_proc(ghes, ghes->estatus);
+ 
+ 	if (HEST_TYPE_GENERIC_V2(ghes)) {
+@@ -850,8 +863,6 @@ static atomic_t ghes_in_nmi = ATOMIC_INIT(0);
+ 
+ static LIST_HEAD(ghes_nmi);
+ 
+-static int ghes_panic_timeout	__read_mostly = 30;
+-
+ static void ghes_proc_in_irq(struct irq_work *irq_work)
+ {
+ 	struct llist_node *llnode, *next;
+@@ -944,9 +955,7 @@ static void __ghes_panic(struct ghes *ghes)
+ 	__ghes_print_estatus(KERN_EMERG, ghes->generic, ghes->estatus);
+ 
+ 	/* reboot to log the error! */
+-	if (panic_timeout == 0)
+-		panic_timeout = ghes_panic_timeout;
+-	panic("Fatal hardware error!");
++	__ghes_call_panic();
+ }
+ 
+ static int ghes_notify_nmi(unsigned int cmd, struct pt_regs *regs)
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
