@@ -1,49 +1,70 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 02/16] efi: Get the secure boot status
-Date: Mon, 21 Nov 2016 13:14:52 +0000
-Message-ID: <CAKv+Gu8Lhm=u97hY1y+Y+Ladk=y7pSVNrow8ML1hQUJ9+74B-w@mail.gmail.com>
-References: <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
- <147933285147.19316.11046583275861569558.stgit@warthog.procyon.org.uk>
- <20161117123731.GA11573@wunner.de> <29779.1479728545@warthog.procyon.org.uk>
- <CAKv+Gu-frVDhzORDRZ6XT+FxewsTgrxhXmM=DqaS6Ns4mJhQ9g@mail.gmail.com> <5701.1479732075@warthog.procyon.org.uk>
+From: Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH 4/9] KEYS: Allow unrestricted boot-time addition of keys
+ to secondary keyring
+Date: Mon, 21 Nov 2016 09:04:55 -0500
+Message-ID: <1479737095.2487.34.camel@linux.vnet.ibm.com>
+References: <20161117064100.hmjmfw42ytm526yh@p310>
+         <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
+         <147931987366.16460.12891767069975068260.stgit@warthog.procyon.org.uk>
+         <26349.1479376560@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <5701.1479732075@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: Linn Crosetto <linn@hpe.com>, Lukas Wunner <lukas@wunner.de>, keyrings@vger.kernel.org, Matthew Garrett <matthew.garrett@nebula.com>, linux-security-module <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <26349.1479376560-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Petko Manolov <petkan-5DSaK1yNf91Wk0Htik3J/w@public.gmane.org>, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ima-devel <linux-ima-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 21 November 2016 at 12:41, David Howells <dhowells@redhat.com> wrote:
-> Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
->
->> > Looking in efi_get_secureboot(), is there a reason:
->> >
->> >         efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
->> >
->> > isn't static const?
->> >
->>
->> Not a good one, no. It used to be static const, but for some reason,
->> commit 30d7bf034c03 ("efi/arm64: Check SetupMode when determining
->> Secure Boot status") removed the static and the const (and I reviewed
->> it and did not complain AFAIR)
->> I'll gladly take a patch that reinstates that, though.
->
-> Also, is there a reason that:
->
-> typedef efi_status_t efi_get_variable_t (efi_char16_t *name, efi_guid_t *vendor, u32 *attr,
->                                          unsigned long *data_size, void *data);
->
-> Doesn't have const name and vendor?
->
+On Thu, 2016-11-17 at 09:56 +0000, David Howells wrote:
+> Petko Manolov <petkan-5DSaK1yNf91Wk0Htik3J/w@public.gmane.org> wrote:
+> 
+> > On 16-11-16 18:11:13, David Howells wrote:
+> > > Allow keys to be added to the system secondary certificates keyring during 
+> > > kernel initialisation in an unrestricted fashion.  Such keys are implicitly 
+> > > trusted and don't have their trust chains checked on link.
+> > 
+> > Well, I for one do not explicitly trust these keys.  I may even want to 
+> > completely remove or replace them.
+> 
+> Fine be me.  However, if you remove them all I would guess that you cannot
+> perform a secure boot.
+> 
+> Note that it's to be expected that the keys being loaded from the UEFI
+> database cannot have their signatures checked - which is why they would have
+> to be implicitly trusted.  For the same reason, the kernel does not check the
+> signatures on the keys compiled into the kernel image.
 
-Yes, but not a good one either.
+Sigh, we've been here before, discussed this before.  Different keys
+should be trusted at different levels.  Nothing has changed.  Just
+because I trust a key in UEFI for UEFI, doesn't mean that I trust that
+same key once the kernel has booted.
 
-Sadly, the prototypes in the UEFI spec completely ignore constness,
-and these definitions are intended to be identical to the ones in the
-spec. This also means, for instance, that most UEFI firmwares stores
-these kinds of GUIDs in read-write memory, which is a potential
-goldmine for hackers, given how GUIDs are UEFI's duct tape, i.e.,
-keeping the world together.
+This time not only are you bringing the keys from UEFI up to the kernel,
+but by adding these keys to the secondary trusted keyring, they are
+allowed to add other keys they've signed to the secondary trusted
+keyring.
+
+If the UEFI keys are just for verifying kernel modules, why not define a
+separate UEFI keyring, which can be used, if enabled, just for verifying
+kernel modules, instead of affecting all signature verification?
+
+IMA's root of trust goes back to UEFI, but transitions to the builtin
+kernel keyring and, if enabled,  the secondary keyring on boot.
+
+> > > This allows keys in the UEFI database to be added in secure boot mode for
+> > > the purposes of module signing.
+> > 
+> > The key import should not be automatic, it should be optional.
+> 
+> You can argue this either way.  There's a config option to allow you to turn
+> this on or off.  Arguably, this should be split in two: one for the whitelist
+> (db, MokListRT) and one for the blacklist (dbx).
+
+By "config", you're not referring to a Kconfig option, but a UEFI db
+option, making it hidden/unknown to someone building a kernel.  If you
+really want to add this support, make it clear and easily seen by
+defining a "restrict_link_by_builtin_or_uefi" function.
+
+Mimi
