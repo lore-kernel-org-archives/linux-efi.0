@@ -1,33 +1,48 @@
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 4/6] efi: Get the secure boot status
-Date: Tue, 22 Nov 2016 21:36:31 +0100
-Message-ID: <20161122203631.GB1844@wunner.de>
-References: <20161122104401.GC1552@wunner.de>
- <20161117123731.GA11573@wunner.de>
- <147977472115.6360.13015228230799369019.stgit@warthog.procyon.org.uk>
- <25371.1479826321@warthog.procyon.org.uk>
+From: "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [RFC PATCH v3 13/20] x86: DMA support for memory encryption
+Date: Tue, 22 Nov 2016 22:41:30 +0200
+Message-ID: <20161122224005-mutt-send-email-mst@kernel.org>
+References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+ <20161110003723.3280.62636.stgit@tlendack-t1.amdoffice.net>
+ <20161115171443-mutt-send-email-mst@kernel.org>
+ <4d97f998-5835-f4e0-9840-7f7979251275@amd.com>
+ <20161122113859.5dtlrfgizwpum6st@pd.tnic>
+ <20161122171455-mutt-send-email-mst@kernel.org>
+ <20161122154137.z5vp3xcl5cpesuiz@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <25371.1479826321-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+In-Reply-To: <20161122154137.z5vp3xcl5cpesuiz-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 22, 2016 at 02:52:01PM +0000, David Howells wrote:
-> Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
-> > You dropped the efi_system_table_t *sys_table_arg argument but this
-> > isn't defined anywhere as a static global.
+On Tue, Nov 22, 2016 at 04:41:37PM +0100, Borislav Petkov wrote:
+> On Tue, Nov 22, 2016 at 05:22:38PM +0200, Michael S. Tsirkin wrote:
+> > The issue is it's a (potential) security hole, not a slowdown.
 > 
-> It seems to me that passing this value in on x86 is probably a bad idea as
-> it's not mixed-mode safe.  Should I just pass NULL there in that case?
+> How? Because the bounce buffers will be unencrypted and someone might
+> intercept them?
 
-It's safe, it's merely a pointer below 4 Gig.  Just on dereference it
-needs to be cast to the correct variant.  Passing in sys_table_arg is
-done all over the place in the EFI stub, see e.g. efi_printk().
+Or even modify them. Guests generally trust devices since they
+assume they are under their control.
 
-Best regards,
-
-Lukas
+> > To disable unsecure things. If someone enables SEV one might have an
+> > expectation of security.  Might help push vendors to do the right thing
+> > as a side effect.
+> 
+> Ok, you're looking at the SEV-cloud-multiple-guests aspect. Right, that
+> makes sense.
+> 
+> I guess for SEV we should even flip the logic: disable such devices by
+> default and an opt-in option to enable them and issue a big fat warning.
+> I'd even want to let the guest users know that they're on a system which
+> cannot give them encrypted DMA to some devices...
+> 
+> -- 
+> Regards/Gruss,
+>     Boris.
+> 
+> Good mailing practices for 400: avoid top-posting and trim the reply.
