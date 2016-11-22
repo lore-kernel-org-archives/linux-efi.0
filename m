@@ -1,24 +1,78 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 4/6] efi: Get the secure boot status
-Date: Tue, 22 Nov 2016 14:52:01 +0000
-Message-ID: <25371.1479826321@warthog.procyon.org.uk>
-References: <20161122104401.GC1552@wunner.de> <20161117123731.GA11573@wunner.de> <147977472115.6360.13015228230799369019.stgit@warthog.procyon.org.uk>
+From: "Michael S. Tsirkin" <mst@redhat.com>
+Subject: Re: [RFC PATCH v3 13/20] x86: DMA support for memory encryption
+Date: Tue, 22 Nov 2016 17:22:38 +0200
+Message-ID: <20161122171455-mutt-send-email-mst@kernel.org>
+References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+ <20161110003723.3280.62636.stgit@tlendack-t1.amdoffice.net>
+ <20161115171443-mutt-send-email-mst@kernel.org>
+ <4d97f998-5835-f4e0-9840-7f7979251275@amd.com>
+ <20161122113859.5dtlrfgizwpum6st@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161122104401.GC1552-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Content-ID: <25370.1479826321.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20161122113859.5dtlrfgizwpum6st@pd.tnic>
+Sender: owner-linux-mm@kvack.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Tom Lendacky <thomas.lendacky@amd.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
 List-Id: linux-efi@vger.kernel.org
 
-Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
+On Tue, Nov 22, 2016 at 12:38:59PM +0100, Borislav Petkov wrote:
+> On Tue, Nov 15, 2016 at 12:29:35PM -0600, Tom Lendacky wrote:
+> > > Makes sense, but I think at least a dmesg warning here
+> > > might be a good idea.
+> > 
+> > Good idea.  Should it be a warning when it is first being set up or
+> > a warning the first time the bounce buffers need to be used.  Or maybe
+> > both?
+> 
+> Ok, let me put my user hat on...
+> 
+> (... puts a felt hat ...)
+> 
+> so what am I supposed to do about this as a user? Go and physically
+> remove those devices because I want to enable SME?!
+> 
+> IMO, the only thing we should do is issue a *single* warning -
+> pr_warn_once - along the lines of:
+> 
+> "... devices present which due to SME will use bounce buffers and will
+> cause their speed to diminish. Boot with sme=debug to see full info".
+> 
+> And then sme=debug will dump the whole gory details. I don't think
+> screaming for each device is going to change anything in many cases.
+> 99% of people don't care - they just want shit to work.
 
-> You dropped the efi_system_table_t *sys_table_arg argument but this
-> isn't defined anywhere as a static global.
+The issue is it's a (potential) security hole, not a slowdown.
 
-It seems to me that passing this value in on x86 is probably a bad idea as
-it's not mixed-mode safe.  Should I just pass NULL there in that case?
 
-David
+> > > A boot flag that says "don't enable devices that don't support
+> > > encryption" might be a good idea, too, since most people
+> > > don't read dmesg output and won't notice the message.
+> > 
+> > I'll look into this. It might be something that can be checked as
+> > part of the device setting its DMA mask or the first time a DMA
+> > API is used if the device doesn't explicitly set its mask.
+> 
+> Still with my user hat on, what would be the purpose of such an option?
+> 
+> We already use bounce buffers so those devices do support encryption,
+> albeit slower.
+> 
+> felt hat is confused.
+
+To disable unsecure things. If someone enables SEV one might have an
+expectation of security.  Might help push vendors to do the right thing
+as a side effect.
+
+> -- 
+> Regards/Gruss,
+>     Boris.
+> 
+> Good mailing practices for 400: avoid top-posting and trim the reply.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
