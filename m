@@ -1,71 +1,150 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2] efi/libstub: Make efi_random_alloc() allocate below 4 GB on 32-bit
-Date: Tue, 22 Nov 2016 09:57:23 +0000
-Message-ID: <1479808643-17437-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 1/6] x86/efi: Allow invocation of arbitrary runtime
+ services
+Date: Tue, 22 Nov 2016 11:20:18 +0100
+Message-ID: <20161122102018.GB1552@wunner.de>
+References: <20161117123731.GA11573@wunner.de>
+ <147977469914.6360.17194649697208113702.stgit@warthog.procyon.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <147977469914.6360.17194649697208113702.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Cc: arnd-r2nGTMty4D4@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-The UEFI stub executes in the context of the firmware, which identity
-maps the available system RAM, which implies that only memory below
-4 GB can be used for allocations on 32-bit architectures, even on [L]PAE
-capable hardware.
+On Tue, Nov 22, 2016 at 12:31:39AM +0000, David Howells wrote:
+> Provide the ability to perform mixed-mode runtime service calls for x86 in
+> the same way that commit 0a637ee61247bd4bed9b2a07568ef7a1cfc76187 provides
 
-So ignore any reported memory above 4 GB in efi_random_alloc(). This
-also fixes a reported build problem on ARM under -Os, where the 64-bit
-logical shift relies on a software routine that the ARM decompressor does
-not provide.
+Small nit, checkpatch usually complains that this should be written as
+12-character SHA-1 followed by the commit subject, i.e.
 
-A second [minor] issue is also fixed, where the '+ 1' is moved out of
-the shift, where it belongs: the reason for its presence is that a
-memory region where start == end should count as a single slot, given
-that 'end' takes the desired size and alignment of the allocation into
-account.
+0a637ee61247 ("x86/efi: Allow invocation of arbitrary boot services")
 
-To clarify the code in this regard, rename start/end to 'first_slot' and
-'last_slot', respectively, and introduce 'region_end' to describe the
-last usable address of the current region.
+Other than that LGTM.  Same for patch 2 of this series.
 
-Reported-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/libstub/random.c | 14 ++++++++------
- 1 file changed, 8 insertions(+), 6 deletions(-)
+Thanks,
 
-diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index 3a3feacc329f..63cd3f262b6e 100644
---- a/drivers/firmware/efi/libstub/random.c
-+++ b/drivers/firmware/efi/libstub/random.c
-@@ -45,19 +45,21 @@ static unsigned long get_entry_num_slots(efi_memory_desc_t *md,
- 					 unsigned long align_shift)
- {
- 	unsigned long align = 1UL << align_shift;
--	u64 start, end;
-+	u64 first_slot, last_slot, region_end;
- 
- 	if (md->type != EFI_CONVENTIONAL_MEMORY)
- 		return 0;
- 
--	start = round_up(md->phys_addr, align);
--	end = round_down(md->phys_addr + md->num_pages * EFI_PAGE_SIZE - size,
--			 align);
-+	region_end = min((u64)ULONG_MAX,
-+			 md->phys_addr + md->num_pages * EFI_PAGE_SIZE - 1);
- 
--	if (start > end)
-+	first_slot = round_up(md->phys_addr, align);
-+	last_slot = round_down(region_end - size + 1, align);
-+
-+	if (first_slot > last_slot)
- 		return 0;
- 
--	return (end - start + 1) >> align_shift;
-+	return ((unsigned long)(last_slot - first_slot) >> align_shift) + 1;
- }
- 
- /*
--- 
-2.7.4
+Lukas
+
+> the ability to invoke arbitrary boot services.
+> 
+> Suggested-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+> 
+>  arch/x86/boot/compressed/eboot.c   |    1 +
+>  arch/x86/boot/compressed/head_32.S |    6 +++---
+>  arch/x86/boot/compressed/head_64.S |    8 ++++----
+>  arch/x86/include/asm/efi.h         |    5 +++++
+>  4 files changed, 13 insertions(+), 7 deletions(-)
+> 
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> index ff01c8fc76f7..c8c32ebcdfdb 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -32,6 +32,7 @@ static void setup_boot_services##bits(struct efi_config *c)		\
+>  									\
+>  	table = (typeof(table))sys_table;				\
+>  									\
+> +	c->runtime_services = table->runtime;				\
+>  	c->boot_services = table->boottime;				\
+>  	c->text_output = table->con_out;				\
+>  }
+> diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+> index fd0b6a272dd5..d85b9625e836 100644
+> --- a/arch/x86/boot/compressed/head_32.S
+> +++ b/arch/x86/boot/compressed/head_32.S
+> @@ -82,7 +82,7 @@ ENTRY(efi_pe_entry)
+>  
+>  	/* Relocate efi_config->call() */
+>  	leal	efi32_config(%esi), %eax
+> -	add	%esi, 32(%eax)
+> +	add	%esi, 40(%eax)
+>  	pushl	%eax
+>  
+>  	call	make_boot_params
+> @@ -108,7 +108,7 @@ ENTRY(efi32_stub_entry)
+>  
+>  	/* Relocate efi_config->call() */
+>  	leal	efi32_config(%esi), %eax
+> -	add	%esi, 32(%eax)
+> +	add	%esi, 40(%eax)
+>  	pushl	%eax
+>  2:
+>  	call	efi_main
+> @@ -264,7 +264,7 @@ relocated:
+>  #ifdef CONFIG_EFI_STUB
+>  	.data
+>  efi32_config:
+> -	.fill 4,8,0
+> +	.fill 5,8,0
+>  	.long efi_call_phys
+>  	.long 0
+>  	.byte 0
+> diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+> index efdfba21a5b2..beab8322f72a 100644
+> --- a/arch/x86/boot/compressed/head_64.S
+> +++ b/arch/x86/boot/compressed/head_64.S
+> @@ -265,7 +265,7 @@ ENTRY(efi_pe_entry)
+>  	/*
+>  	 * Relocate efi_config->call().
+>  	 */
+> -	addq	%rbp, efi64_config+32(%rip)
+> +	addq	%rbp, efi64_config+40(%rip)
+>  
+>  	movq	%rax, %rdi
+>  	call	make_boot_params
+> @@ -285,7 +285,7 @@ handover_entry:
+>  	 * Relocate efi_config->call().
+>  	 */
+>  	movq	efi_config(%rip), %rax
+> -	addq	%rbp, 32(%rax)
+> +	addq	%rbp, 40(%rax)
+>  2:
+>  	movq	efi_config(%rip), %rdi
+>  	call	efi_main
+> @@ -457,14 +457,14 @@ efi_config:
+>  #ifdef CONFIG_EFI_MIXED
+>  	.global efi32_config
+>  efi32_config:
+> -	.fill	4,8,0
+> +	.fill	5,8,0
+>  	.quad	efi64_thunk
+>  	.byte	0
+>  #endif
+>  
+>  	.global efi64_config
+>  efi64_config:
+> -	.fill	4,8,0
+> +	.fill	5,8,0
+>  	.quad	efi_call
+>  	.byte	1
+>  #endif /* CONFIG_EFI_STUB */
+> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+> index e99675b9c861..2f77bcefe6b4 100644
+> --- a/arch/x86/include/asm/efi.h
+> +++ b/arch/x86/include/asm/efi.h
+> @@ -191,6 +191,7 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
+>  struct efi_config {
+>  	u64 image_handle;
+>  	u64 table;
+> +	u64 runtime_services;
+>  	u64 boot_services;
+>  	u64 text_output;
+>  	efi_status_t (*call)(unsigned long, ...);
+> @@ -226,6 +227,10 @@ static inline bool efi_is_64bit(void)
+>  #define __efi_call_early(f, ...)					\
+>  	__efi_early()->call((unsigned long)f, __VA_ARGS__);
+>  
+> +#define efi_call_runtime(f, ...)					\
+> +	__efi_early()->call(efi_table_attr(efi_runtime_services, f,	\
+> +		__efi_early()->runtime_services), __VA_ARGS__)
+> +
+>  extern bool efi_reboot_required(void);
+>  
+>  #else
+> 
