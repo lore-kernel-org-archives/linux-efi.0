@@ -1,49 +1,58 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [RFC PATCH v3 13/20] x86: DMA support for memory encryption
-Date: Tue, 22 Nov 2016 16:41:37 +0100
-Message-ID: <20161122154137.z5vp3xcl5cpesuiz@pd.tnic>
-References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
- <20161110003723.3280.62636.stgit@tlendack-t1.amdoffice.net>
- <20161115171443-mutt-send-email-mst@kernel.org>
- <4d97f998-5835-f4e0-9840-7f7979251275@amd.com>
- <20161122113859.5dtlrfgizwpum6st@pd.tnic>
- <20161122171455-mutt-send-email-mst@kernel.org>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 1/6] x86/efi: Allow invocation of arbitrary runtime services
+Date: Tue, 22 Nov 2016 15:52:41 +0000
+Message-ID: <24973.1479829961@warthog.procyon.org.uk>
+References: <1479826691.1942.11.camel@perches.com> <20161122102018.GB1552@wunner.de> <20161117123731.GA11573@wunner.de> <147977469914.6360.17194649697208113702.stgit@warthog.procyon.org.uk> <27422.1479824220@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20161122171455-mutt-send-email-mst@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: "Michael S. Tsirkin" <mst@redhat.com>
-Cc: Tom Lendacky <thomas.lendacky@amd.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1479826691.1942.11.camel-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
+Content-ID: <24972.1479829961.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Joe Perches <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
+Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 22, 2016 at 05:22:38PM +0200, Michael S. Tsirkin wrote:
-> The issue is it's a (potential) security hole, not a slowdown.
+Joe Perches <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org> wrote:
 
-How? Because the bounce buffers will be unencrypted and someone might
-intercept them?
+> > > Small nit, checkpatch usually complains that this should be written as
+> > > 12-character SHA-1 followed by the commit subject, i.e.
+> > > 
+> > > 0a637ee61247 ("x86/efi: Allow invocation of arbitrary boot services")
+> > 
+> > In this case, checkpatch is wrong.
+>
+> Why do you think so?
 
-> To disable unsecure things. If someone enables SEV one might have an
-> expectation of security.  Might help push vendors to do the right thing
-> as a side effect.
+Actually, checkpatch doesn't complain about embedded commit IDs anymore, so in
+that case, it's just about acceptable.
 
-Ok, you're looking at the SEV-cloud-multiple-guests aspect. Right, that
-makes sense.
+Apart from that, I think we should put in the full SHA-1 commit.  The
+probability of a collision in a 12-digit hex number for the >5,000,000 commits
+just in Linus's tree is currently at ~4.5% and gradually increasing.  Add in
+all the commits in not-yet-upstreamed trees - which might be another million
+commits, say - then we're over 6%..
 
-I guess for SEV we should even flip the logic: disable such devices by
-default and an opt-in option to enable them and issue a big fat warning.
-I'd even want to let the guest users know that they're on a system which
-cannot give them encrypted DMA to some devices...
+Oh, yes, and speaking of checkpatch, can you make it so that if it sees:
 
--- 
-Regards/Gruss,
-    Boris.
+commit 12345...
+Author: foo <foo@bar>
+Date: blah
 
-Good mailing practices for 400: avoid top-posting and trim the reply.
+   Subject line
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+   Description lines
+   ...
+   ...
+   ...
+   ...
+
+   Signed-off-by-and-suchline-lines
+
+diff ...
+
+with the all description indented by 4 spaces, then assume that it's the
+output of git show and not give the warnings about signed-off-by and other
+things being indented?
+
+David
