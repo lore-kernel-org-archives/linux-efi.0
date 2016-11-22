@@ -1,68 +1,71 @@
-From: Dominik Brodowski <linux@dominikbrodowski.net>
-Subject: Re: [PATCH] Lock down drivers that can have io ports, io mem, irqs
- and dma changed
-Date: Tue, 22 Nov 2016 07:12:33 +0100
-Message-ID: <20161122061233.GA4762@light.dominikbrodowski.net>
-References: <20161116222731.563fb85e@lxorguk.ukuu.org.uk>
- <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
- <26173.1479769852@warthog.procyon.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-security-module-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <26173.1479769852@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-Cc: dhowells@redhat.com, keyrings@vger.kernel.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2] efi/libstub: Make efi_random_alloc() allocate below 4 GB on 32-bit
+Date: Tue, 22 Nov 2016 09:57:23 +0000
+Message-ID: <1479808643-17437-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Cc: arnd-r2nGTMty4D4@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 21, 2016 at 11:10:52PM +0000, David Howells wrote:
-> One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk> wrote:
-> 
-> > You need to filter or lock down kernel module options because a lot of
-> > modules let you set the I/O port or similar (eg mmio) which means you can
-> > hack the entire machine with say the 8250 driver just by using it with an
-> > mmio of the right location to patch the secure state to zero just by
-> > getting the ability to write to the modules conf file.
-> 
-> Is the attached patch the right sort of idea?  [Note that I haven't actually
-> compiled most of these drivers to check my changes yet.]
-> 
-> David
-> ---
-> commit 8613a9655dad98c3358d82a9c4310cebdcb852ae
-> Author: David Howells <dhowells@redhat.com>
-> Date:   Mon Nov 21 22:43:27 2016 +0000
-> 
->     Lock down drivers that can have io ports, io mem, irqs and dma changed
->     
->     Lock down drivers that can have io ports, io mem, irqs and dma channels
->     changed so that they can't be used to cause hardware to access the kernel
->     image.
->     
->     Notes:
->     
->      (1) module_isa_driver() gets an extra parameter that, if true, will cause
->          the module load to be rejected if the kernel is locked down.
->     
->      (2) module_driver() calls module_lockdown_check() to ask if the module
->          load should be rejected if the kernel is locked down.  This is a macro
->          that should be #undef'd and then redefined right before
->          module_driver() is called.
->     
->      (3) module_pci_driver() is a wrapper around module_driver(), so the same
->          macro is used as in (2).
->     
->      (4) A number of drivers use parport 'ports' - so I haven't touched those.
+The UEFI stub executes in the context of the firmware, which identity
+maps the available system RAM, which implies that only memory below
+4 GB can be used for allocations on 32-bit architectures, even on [L]PAE
+capable hardware.
 
-You might also need to disable CIS overrides and CIS firmware loading for PCMCIA
-drivers, I presume. That needs two changes:
+So ignore any reported memory above 4 GB in efi_random_alloc(). This
+also fixes a reported build problem on ARM under -Os, where the 64-bit
+logical shift relies on a software routine that the ARM decompressor does
+not provide.
 
-	- Abort in drivers/pcmcia/ds.c::pcmcia_load_firmware() or disable
-	  the CONFIG_PCMCIA_LOAD_CIS config option permanently.
+A second [minor] issue is also fixed, where the '+ 1' is moved out of
+the shift, where it belongs: the reason for its presence is that a
+memory region where start == end should count as a single slot, given
+that 'end' takes the desired size and alignment of the allocation into
+account.
 
-	- Abort in drivers/pcmcia/cistpl.c::pccard_store_cis() or remove
-	  write access to the "cis" file in
-	  drivers/pcmcia/cistpl.c::pccard_cis_attr
+To clarify the code in this regard, rename start/end to 'first_slot' and
+'last_slot', respectively, and introduce 'region_end' to describe the
+last usable address of the current region.
 
-Best,
-	Dominik
+Reported-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/firmware/efi/libstub/random.c | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
+index 3a3feacc329f..63cd3f262b6e 100644
+--- a/drivers/firmware/efi/libstub/random.c
++++ b/drivers/firmware/efi/libstub/random.c
+@@ -45,19 +45,21 @@ static unsigned long get_entry_num_slots(efi_memory_desc_t *md,
+ 					 unsigned long align_shift)
+ {
+ 	unsigned long align = 1UL << align_shift;
+-	u64 start, end;
++	u64 first_slot, last_slot, region_end;
+ 
+ 	if (md->type != EFI_CONVENTIONAL_MEMORY)
+ 		return 0;
+ 
+-	start = round_up(md->phys_addr, align);
+-	end = round_down(md->phys_addr + md->num_pages * EFI_PAGE_SIZE - size,
+-			 align);
++	region_end = min((u64)ULONG_MAX,
++			 md->phys_addr + md->num_pages * EFI_PAGE_SIZE - 1);
+ 
+-	if (start > end)
++	first_slot = round_up(md->phys_addr, align);
++	last_slot = round_down(region_end - size + 1, align);
++
++	if (first_slot > last_slot)
+ 		return 0;
+ 
+-	return (end - start + 1) >> align_shift;
++	return ((unsigned long)(last_slot - first_slot) >> align_shift) + 1;
+ }
+ 
+ /*
+-- 
+2.7.4
