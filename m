@@ -1,63 +1,86 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [RFC PATCH v3 13/20] x86: DMA support for memory encryption
-Date: Tue, 22 Nov 2016 12:38:59 +0100
-Message-ID: <20161122113859.5dtlrfgizwpum6st@pd.tnic>
-References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
- <20161110003723.3280.62636.stgit@tlendack-t1.amdoffice.net>
- <20161115171443-mutt-send-email-mst@kernel.org>
- <4d97f998-5835-f4e0-9840-7f7979251275@amd.com>
+From: Lukas Wunner <lukas@wunner.de>
+Subject: Re: [PATCH 5/6] efi: Disable secure boot if shim is in insecure mode
+Date: Tue, 22 Nov 2016 14:03:31 +0100
+Message-ID: <20161122130331.GA1657@wunner.de>
+References: <20161117123731.GA11573@wunner.de>
+ <147977472850.6360.6174897435078432354.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-security-module-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4d97f998-5835-f4e0-9840-7f7979251275@amd.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>, "Michael S. Tsirkin" <mst@redhat.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>
+In-Reply-To: <147977472850.6360.6174897435078432354.stgit@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, Josh Boyer <jwboyer@fedoraproject.org>, keyrings@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 15, 2016 at 12:29:35PM -0600, Tom Lendacky wrote:
-> > Makes sense, but I think at least a dmesg warning here
-> > might be a good idea.
+On Tue, Nov 22, 2016 at 12:32:08AM +0000, David Howells wrote:
+> From: Josh Boyer <jwboyer@fedoraproject.org>
 > 
-> Good idea.  Should it be a warning when it is first being set up or
-> a warning the first time the bounce buffers need to be used.  Or maybe
-> both?
-
-Ok, let me put my user hat on...
-
-(... puts a felt hat ...)
-
-so what am I supposed to do about this as a user? Go and physically
-remove those devices because I want to enable SME?!
-
-IMO, the only thing we should do is issue a *single* warning -
-pr_warn_once - along the lines of:
-
-"... devices present which due to SME will use bounce buffers and will
-cause their speed to diminish. Boot with sme=debug to see full info".
-
-And then sme=debug will dump the whole gory details. I don't think
-screaming for each device is going to change anything in many cases.
-99% of people don't care - they just want shit to work.
-
-> > A boot flag that says "don't enable devices that don't support
-> > encryption" might be a good idea, too, since most people
-> > don't read dmesg output and won't notice the message.
+> A user can manually tell the shim boot loader to disable validation of
+> images it loads.  When a user does this, it creates a UEFI variable called
+> MokSBState that does not have the runtime attribute set.  Given that the
+> user explicitly disabled validation, we can honor that and not enable
+> secure boot mode if that variable is set.
 > 
-> I'll look into this. It might be something that can be checked as
-> part of the device setting its DMA mask or the first time a DMA
-> API is used if the device doesn't explicitly set its mask.
+> Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
+> Signed-off-by: David Howells <dhowells@redhat.com>
+> ---
+> 
+>  drivers/firmware/efi/libstub/secureboot.c |   22 +++++++++++++++++++++-
+>  1 file changed, 21 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
+> index e44d8c9ee150..d928398a3a52 100644
+> --- a/drivers/firmware/efi/libstub/secureboot.c
+> +++ b/drivers/firmware/efi/libstub/secureboot.c
+> @@ -23,10 +23,14 @@ int efi_get_secureboot(void)
+>  		'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0 };
+>  	static const efi_char16_t const sm_var_name[] = {
+>  		'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0 };
+> +	static efi_char16_t const MokSBState_var_name[] = {
+> +		'M', 'o', 'k', 'S', 'B', 'S', 't', 'a', 't', 'e', 0 };
+>  
+>  	static const efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
+> +	static const efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
+>  
+> -	u8 val;
+> +	u32 attr;
+> +	u8 val, moksbstate;
+>  	unsigned long size = sizeof(val);
+>  	efi_status_t status;
+>  
+> @@ -50,6 +54,22 @@ int efi_get_secureboot(void)
+>  	if (val == 1)
+>  		return 0;
+>  
+> +	/* See if a user has put shim into insecure mode.  If so, and if the
+> +	 * variable doesn't have the runtime attribute set, we might as well
+> +	 * honor that.
+> +	 */
+> +	size = sizeof(moksbstate);
+> +	status = f_getvar((efi_char16_t *)MokSBState_var_name, &shim_guid,
+> +			  &attr, &size, &moksbstate);
 
-Still with my user hat on, what would be the purpose of such an option?
+Please use efi_call_runtime() instead of f_getvar().
 
-We already use bounce buffers so those devices do support encryption,
-albeit slower.
+> +
+> +	/* If it fails, we don't care why.  Default to secure */
+> +	if (status != EFI_SUCCESS)
+> +		return 1;
+> +
+> +	if (!(attr & EFI_VARIABLE_RUNTIME_ACCESS) &&
+> +	    moksbstate == 1)
 
-felt hat is confused.
+This would fit on a single line.
 
--- 
-Regards/Gruss,
-    Boris.
+Thanks,
 
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Lukas
+
+> +		return 0;
+> +
+>  	return 1;
+>  
+>  out_efi_err:
+> 
