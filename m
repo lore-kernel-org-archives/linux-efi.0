@@ -1,303 +1,169 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 4/6] efi: Get the secure boot status
-Date: Tue, 22 Nov 2016 10:49:24 +0000
-Message-ID: <CAKv+Gu-8TpFMk_Y9pNOvp9qdBa22cUY0NQvsk4=HQzFa17-6bw@mail.gmail.com>
-References: <20161117123731.GA11573@wunner.de> <147977472115.6360.13015228230799369019.stgit@warthog.procyon.org.uk>
- <20161122104401.GC1552@wunner.de>
+From: John Garry <john.garry-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH V5 00/10] Add UEFI 2.6 and ACPI 6.1 updates for RAS on
+ ARM64
+Date: Tue, 22 Nov 2016 11:11:55 +0000
+Message-ID: <d5e199f2-c23e-9599-7ed7-e54475311a39@huawei.com>
+References: <1479767763-27532-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161122104401.GC1552-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+In-Reply-To: <1479767763-27532-1-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tomasz.nowicki-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TbrhsbdSgBK9A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 22 November 2016 at 10:44, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
-> On Tue, Nov 22, 2016 at 12:32:01AM +0000, David Howells wrote:
->> Get the firmware's secure-boot status in the kernel boot wrapper and stash
->> it somewhere that the main kernel image can find.
->
-> That's a bit terse.  You could write here that you're moving the
-> existing ARM function to generic stub code to be able to reuse it
-> on x86.
->
-> Further comments below.
->
->
->>
->> Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
->> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->> ---
->>
->>  Documentation/x86/zero-page.txt           |    2 +
->>  arch/x86/boot/compressed/eboot.c          |    5 ++
->>  arch/x86/include/uapi/asm/bootparam.h     |    3 +
->>  drivers/firmware/efi/libstub/Makefile     |    2 -
->>  drivers/firmware/efi/libstub/arm-stub.c   |   46 --------------------
->>  drivers/firmware/efi/libstub/secureboot.c |   66 +++++++++++++++++++++++++++++
->>  include/linux/efi.h                       |    2 +
->>  7 files changed, 78 insertions(+), 48 deletions(-)
->>  create mode 100644 drivers/firmware/efi/libstub/secureboot.c
->>
->> diff --git a/Documentation/x86/zero-page.txt b/Documentation/x86/zero-page.txt
->> index 95a4d34af3fd..b8527c6b7646 100644
->> --- a/Documentation/x86/zero-page.txt
->> +++ b/Documentation/x86/zero-page.txt
->> @@ -31,6 +31,8 @@ Offset      Proto   Name            Meaning
->>  1E9/001      ALL     eddbuf_entries  Number of entries in eddbuf (below)
->>  1EA/001      ALL     edd_mbr_sig_buf_entries Number of entries in edd_mbr_sig_buffer
->>                               (below)
->> +1EB/001      ALL     kbd_status      Numlock is enabled
->> +1EC/001      ALL     secure_boot     Secure boot is enabled in the firmware
->>  1EF/001      ALL     sentinel        Used to detect broken bootloaders
->>  290/040      ALL     edd_mbr_sig_buffer EDD MBR signatures
->>  2D0/A00      ALL     e820_map        E820 memory map table
->> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
->> index c8c32ebcdfdb..fd6506de480d 100644
->> --- a/arch/x86/boot/compressed/eboot.c
->> +++ b/arch/x86/boot/compressed/eboot.c
->> @@ -12,6 +12,7 @@
->>  #include <asm/efi.h>
->>  #include <asm/setup.h>
->>  #include <asm/desc.h>
->> +#include <asm/bootparam_utils.h>
->>
->>  #include "../string.h"
->>  #include "eboot.h"
->> @@ -1158,6 +1159,10 @@ struct boot_params *efi_main(struct efi_config *c,
->>       else
->>               setup_boot_services32(efi_early);
->>
->> +     sanitize_boot_params(boot_params);
->
-> What is the connection of this change to the rest of the patch?
-> Needs an explanation in the commit message.
->
->
->> +
->> +     boot_params->secure_boot = efi_get_secureboot();
->> +
->>       setup_graphics(boot_params);
->>
->>       setup_efi_pci(boot_params);
->> diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
->> index b10bf319ed20..5138dacf8bb8 100644
->> --- a/arch/x86/include/uapi/asm/bootparam.h
->> +++ b/arch/x86/include/uapi/asm/bootparam.h
->> @@ -135,7 +135,8 @@ struct boot_params {
->>       __u8  eddbuf_entries;                           /* 0x1e9 */
->>       __u8  edd_mbr_sig_buf_entries;                  /* 0x1ea */
->>       __u8  kbd_status;                               /* 0x1eb */
->> -     __u8  _pad5[3];                                 /* 0x1ec */
->> +     __u8  secure_boot;                              /* 0x1ec */
->> +     __u8  _pad5[2];                                 /* 0x1ed */
->>       /*
->>        * The sentinel is set to a nonzero value (0xff) in header.S.
->>        *
->> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
->> index 6621b13c370f..9af966863612 100644
->> --- a/drivers/firmware/efi/libstub/Makefile
->> +++ b/drivers/firmware/efi/libstub/Makefile
->> @@ -28,7 +28,7 @@ OBJECT_FILES_NON_STANDARD   := y
->>  # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
->>  KCOV_INSTRUMENT                      := n
->>
->> -lib-y                                := efi-stub-helper.o gop.o
->> +lib-y                                := efi-stub-helper.o gop.o secureboot.o
->>
->>  # include the stub's generic dependencies from lib/ when building for ARM/arm64
->>  arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
->> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
->> index b4f7d78f9e8b..552ee61ddbed 100644
->> --- a/drivers/firmware/efi/libstub/arm-stub.c
->> +++ b/drivers/firmware/efi/libstub/arm-stub.c
->> @@ -20,52 +20,6 @@
->>
->>  bool __nokaslr;
->>
->> -static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
->> -{
->> -     static efi_char16_t const sb_var_name[] = {
->> -             'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0 };
->> -     static efi_char16_t const sm_var_name[] = {
->> -             'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0 };
->> -
->> -     efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
->> -     efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
->> -     u8 val;
->> -     unsigned long size = sizeof(val);
->> -     efi_status_t status;
->> -
->> -     status = f_getvar((efi_char16_t *)sb_var_name, (efi_guid_t *)&var_guid,
->> -                       NULL, &size, &val);
->> -
->> -     if (status != EFI_SUCCESS)
->> -             goto out_efi_err;
->> -
->> -     if (val == 0)
->> -             return 0;
->> -
->> -     status = f_getvar((efi_char16_t *)sm_var_name, (efi_guid_t *)&var_guid,
->> -                       NULL, &size, &val);
->> -
->> -     if (status != EFI_SUCCESS)
->> -             goto out_efi_err;
->> -
->> -     if (val == 1)
->> -             return 0;
->> -
->> -     return 1;
->> -
->> -out_efi_err:
->> -     switch (status) {
->> -     case EFI_NOT_FOUND:
->> -             return 0;
->> -     case EFI_DEVICE_ERROR:
->> -             return -EIO;
->> -     case EFI_SECURITY_VIOLATION:
->> -             return -EACCES;
->> -     default:
->> -             return -EINVAL;
->> -     }
->> -}
->> -
->>  efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg,
->>                            void *__image, void **__fh)
->>  {
->> diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
->> new file mode 100644
->> index 000000000000..e44d8c9ee150
->> --- /dev/null
->> +++ b/drivers/firmware/efi/libstub/secureboot.c
->> @@ -0,0 +1,66 @@
->> +/*
->> + * Secure boot handling.
->> + *
->> + * Copyright (C) 2013,2014 Linaro Limited
->> + *     Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
->> + * Copyright (C) 2013 Red Hat, Inc.
->> + *     Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->> + *
->> + * This file is part of the Linux kernel, and is made available under the
->> + * terms of the GNU General Public License version 2.
->> + *
->> + */
->> +
->> +#include <linux/efi.h>
->> +#include <linux/sort.h>
->
-> You don't need sort.h.
->
->
->> +#include <asm/efi.h>
->> +
->> +#include "efistub.h"
->
-> From a cursory look at efistub.h, you don't seem to need this either.
->
->
->> +
->> +int efi_get_secureboot(void)
->
-> It looks like you didn't compile-test this on ARM.
->
-> You dropped the efi_system_table_t *sys_table_arg argument but this
-> isn't defined anywhere as a static global.
->
++
 
-That is actually a thing that has been annoying me: the efi_call_xxx
-macros on ARM/arm64 rely on sys_table_arg being defined in the current
-scope, which hides this dependency from users of the macro, and is
-also a pain given that you are forced to use the exact name
-'sys_table_arg'. Patches that clean that up are gladly accepted, or I
-may take a stab at this myself (but not for a week or two)
+We'll try and test this on our platform.
 
+Cheers,
+John
+
+On 21/11/2016 22:35, Tyler Baicar wrote:
+> When a memory error, CPU error, PCIe error, or other type of hardware error
+> that's covered by RAS occurs, firmware should populate the shared GHES memory
+> location with the proper GHES structures to notify the OS of the error.
+> For example, platforms that implement firmware first handling may implement
+> separate GHES sources for corrected errors and uncorrected errors. If the
+> error is an uncorrectable error, then the firmware will notify the OS
+> immediately since the error needs to be handled ASAP. The OS will then be able
+> to take the appropriate action needed such as offlining a page. If the error
+> is a corrected error, then the firmware will not interrupt the OS immediately.
+> Instead, the OS will see and report the error the next time it's GHES timer
+> expires. The kernel will first parse the GHES structures and report the errors
+> through the kernel logs and then notify the user space through RAS trace
+> events. This allows user space applications such as RAS Daemon to see the
+> errors and report them however the user desires. This patchset extends the
+> kernel functionality for RAS errors based on updates in the UEFI 2.6 and
+> ACPI 6.1 specifications.
 >
->> +{
->> +     static const efi_char16_t const sb_var_name[] = {
->> +             'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0 };
->> +     static const efi_char16_t const sm_var_name[] = {
->> +             'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0 };
->> +
->> +     static const efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
->> +
+> An example flow from firmware to user space could be:
 >
-> Gratuitous newline in-between variable declarations.
+>                  +---------------+
+>        +-------->|               |
+>        |         |  GHES polling |--+
+> +-------------+  |    source     |  |   +---------------+   +------------+
+> |             |  +---------------+  |   |  Kernel GHES  |   |            |
+> |  Firmware   |                     +-->|  CPER AER and |-->|  RAS trace |
+> |             |  +---------------+  |   |  EDAC drivers |   |   event    |
+> +-------------+  |               |  |   +---------------+   +------------+
+>        |         |  GHES sci     |--+
+>        +-------->|   source      |
+>                  +---------------+
 >
->> +     u8 val;
->> +     unsigned long size = sizeof(val);
->> +     efi_status_t status;
->> +
->> +#define f_getvar(...) efi_call_runtime(get_variable, __VA_ARGS__)
->> +
->> +     status = f_getvar((efi_char16_t *)sb_var_name, (efi_guid_t *)&var_guid,
->> +                       NULL, &size, &val);
+> Add support for Generic Hardware Error Source (GHES) v2, which introduces the
+> capability for the OS to acknowledge the consumption of the error record
+> generated by the Reliability, Availability and Serviceability (RAS) controller.
+> This eliminates potential race conditions between the OS and the RAS controller.
 >
-> Just replace the f_getvar yourself instead of having cpp do it:
+> Add support for the timestamp field added to the Generic Error Data Entry v3,
+> allowing the OS to log the time that the error is generated by the firmware,
+> rather than the time the error is consumed. This improves the correctness of
+> event sequences when analyzing error logs. The timestamp is added in
+> ACPI 6.1, reference Table 18-343 Generic Error Data Entry.
 >
->         status = efi_call_runtime(get_variable, (efi_char16_t *)sb_var_name,
->                                   (efi_guid_t *)&var_guid, NULL, &size, &val);
+> Add support for ARMv8 Common Platform Error Record (CPER) per UEFI 2.6
+> specification. ARMv8 specific processor error information is reported as part of
+> the CPER records.  This provides more detail on for processor error logs. This
+> can help describe ARMv8 cache, tlb, and bus errors.
 >
+> Synchronous External Abort (SEA) represents a specific processor error condition
+> in ARM systems. A handler is added to recognize SEA errors, and a notifier is
+> added to parse and report the errors before the process is killed. Refer to
+> section N.2.1.1 in the Common Platform Error Record appendix of the UEFI 2.6
+> specification.
 >
->> +
->> +     if (status != EFI_SUCCESS)
->> +             goto out_efi_err;
->> +
->> +     if (val == 0)
->> +             return 0;
->> +
->> +     status = f_getvar((efi_char16_t *)sm_var_name, (efi_guid_t *)&var_guid,
->> +                       NULL, &size, &val);
+> Currently the kernel ignores CPER records that are unrecognized.
+> On the other hand, UEFI spec allows for non-standard (eg. vendor
+> proprietary) error section type in CPER (Common Platform Error Record),
+> as defined in section N2.3 of UEFI version 2.5. Therefore, user
+> is not able to see hardware error data of non-standard section.
 >
-> Same here.
+> If section Type field of Generic Error Data Entry is unrecognized,
+> prints out the raw data in dmesg buffer, and also adds a tracepoint
+> for reporting such hardware errors.
 >
+> Currently even if an error status block's severity is fatal, the kernel
+> does not honor the severity level and panic. With the firmware first
+> model, the platform could inform the OS about a fatal hardware error
+> through the non-NMI GHES notification type. The OS should panic when a
+> hardware error record is received with this severity.
 >
->> +
->> +     if (status != EFI_SUCCESS)
->> +             goto out_efi_err;
->> +
->> +     if (val == 1)
->> +             return 0;
->> +
->> +     return 1;
->> +
->> +out_efi_err:
->> +     switch (status) {
->> +     case EFI_NOT_FOUND:
->> +             return 0;
->> +     case EFI_DEVICE_ERROR:
->> +             return -EIO;
->> +     case EFI_SECURITY_VIOLATION:
->> +             return -EACCES;
->> +     default:
->> +             return -EINVAL;
->> +     }
+> Add support to handle SEAs that occur while a KVM guest kernel is
+> running. Currently these are unsupported by the guest abort handling.
 >
-> The "out_efi_err" portion differs from the previous version of this
-> patch.  Setting a __u8 to a negative value, is this really what you
-> want?
+> Depends on: [PATCH v14] acpi, apei, arm64: APEI initial support for aarch64.
+>             https://lkml.org/lkml/2016/8/10/231
 >
-> Thanks,
+> V5: Fix GHES goto logic for error conditions
+>     Change ghes_do_read_ack to ghes_ack_error
+>     Make sure data version check is >= 3
+>     Use CPER helper functions in print functions
+>     Make handle_guest_sea() dummy function static for arm
+>     Add arm to subject line for KVM patch
 >
-> Lukas
+> V4: Add bit offset left shift to read_ack_write value
+>     Make HEST generic and generic_v2 structures a union in the ghes structure
+>     Move gdata v3 helper functions into ghes.h to avoid duplication
+>     Reorder the timestamp print and avoid memcpy
+>     Add helper functions for gdata size checking
+>     Rename the SEA functions
+>     Add helper function for GHES panics
+>     Set fru_id to NULL UUID at variable declaration
+>     Limit ARM trace event parameters to the needed structures
+>     Reorder the ARM trace event variables to save space
+>     Add comment for why we don't pass SEAs to the guest when it aborts
+>     Move ARM trace event call into GHES driver instead of CPER
 >
->> +}
->> diff --git a/include/linux/efi.h b/include/linux/efi.h
->> index 24db4e5ec817..615d8704f048 100644
->> --- a/include/linux/efi.h
->> +++ b/include/linux/efi.h
->> @@ -1477,6 +1477,8 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
->>  bool efi_runtime_disabled(void);
->>  extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
->>
->> +int efi_get_secureboot(void);
->> +
->>  /*
->>   * Arch code can implement the following three template macros, avoiding
->>   * reptition for the void/non-void return cases of {__,}efi_call_virt():
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> V3: Fix unmapped address to the read_ack_register in ghes.c
+>     Add helper function to get the proper payload based on generic data entry
+>      version
+>     Move timestamp print to avoid changing function calls in cper.c
+>     Remove patch "arm64: exception: handle instruction abort at current EL"
+>      since the el1_ia handler is already added in 4.8
+>     Add EFI and ARM64 dependencies for HAVE_ACPI_APEI_SEA
+>     Add a new trace event for ARM type errors
+>     Add support to handle KVM guest SEAs
+>
+> V2: Add PSCI state print for the ARMv8 error type.
+>     Separate timestamp year into year and century using BCD format.
+>     Rebase on top of ACPICA 20160318 release and remove header file changes
+>      in include/acpi/actbl1.h.
+>     Add panic OS with fatal error status block patch.
+>     Add processing of unrecognized CPER error section patches with updates
+>      from previous comments. Original patches: https://lkml.org/lkml/2015/9/8/646
+>
+> V1: https://lkml.org/lkml/2016/2/5/544
+>
+> Jonathan (Zhixiong) Zhang (1):
+>   acpi: apei: panic OS with fatal error status block
+>
+> Tyler Baicar (9):
+>   acpi: apei: read ack upon ghes record consumption
+>   ras: acpi/apei: cper: generic error data entry v3 per ACPI 6.1
+>   efi: parse ARMv8 processor error
+>   arm64: exception: handle Synchronous External Abort
+>   acpi: apei: handle SEA notification type for ARMv8
+>   efi: print unrecognized CPER section
+>   ras: acpi / apei: generate trace event for unrecognized CPER section
+>   trace, ras: add ARM processor error trace event
+>   arm/arm64: KVM: add guest SEA support
+>
+>  arch/arm/include/asm/kvm_arm.h       |   1 +
+>  arch/arm/include/asm/system_misc.h   |   5 +
+>  arch/arm/kvm/mmu.c                   |  18 ++-
+>  arch/arm64/Kconfig                   |   1 +
+>  arch/arm64/include/asm/kvm_arm.h     |   1 +
+>  arch/arm64/include/asm/system_misc.h |  15 +++
+>  arch/arm64/mm/fault.c                |  71 ++++++++++--
+>  drivers/acpi/apei/Kconfig            |  14 +++
+>  drivers/acpi/apei/ghes.c             | 188 ++++++++++++++++++++++++++++---
+>  drivers/acpi/apei/hest.c             |   7 +-
+>  drivers/firmware/efi/cper.c          | 210 ++++++++++++++++++++++++++++++++---
+>  drivers/ras/ras.c                    |   2 +
+>  include/acpi/ghes.h                  |  15 ++-
+>  include/linux/cper.h                 |  84 ++++++++++++++
+>  include/ras/ras_event.h              | 100 +++++++++++++++++
+>  15 files changed, 688 insertions(+), 44 deletions(-)
+>
