@@ -1,169 +1,63 @@
-From: John Garry <john.garry-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH V5 00/10] Add UEFI 2.6 and ACPI 6.1 updates for RAS on
- ARM64
-Date: Tue, 22 Nov 2016 11:11:55 +0000
-Message-ID: <d5e199f2-c23e-9599-7ed7-e54475311a39@huawei.com>
-References: <1479767763-27532-1-git-send-email-tbaicar@codeaurora.org>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [RFC PATCH v3 13/20] x86: DMA support for memory encryption
+Date: Tue, 22 Nov 2016 12:38:59 +0100
+Message-ID: <20161122113859.5dtlrfgizwpum6st@pd.tnic>
+References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+ <20161110003723.3280.62636.stgit@tlendack-t1.amdoffice.net>
+ <20161115171443-mutt-send-email-mst@kernel.org>
+ <4d97f998-5835-f4e0-9840-7f7979251275@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1479767763-27532-1-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tomasz.nowicki-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TbrhsbdSgBK9A@public.gmane.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <4d97f998-5835-f4e0-9840-7f7979251275@amd.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>, "Michael S. Tsirkin" <mst@redhat.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-+
+On Tue, Nov 15, 2016 at 12:29:35PM -0600, Tom Lendacky wrote:
+> > Makes sense, but I think at least a dmesg warning here
+> > might be a good idea.
+> 
+> Good idea.  Should it be a warning when it is first being set up or
+> a warning the first time the bounce buffers need to be used.  Or maybe
+> both?
 
-We'll try and test this on our platform.
+Ok, let me put my user hat on...
 
-Cheers,
-John
+(... puts a felt hat ...)
 
-On 21/11/2016 22:35, Tyler Baicar wrote:
-> When a memory error, CPU error, PCIe error, or other type of hardware error
-> that's covered by RAS occurs, firmware should populate the shared GHES memory
-> location with the proper GHES structures to notify the OS of the error.
-> For example, platforms that implement firmware first handling may implement
-> separate GHES sources for corrected errors and uncorrected errors. If the
-> error is an uncorrectable error, then the firmware will notify the OS
-> immediately since the error needs to be handled ASAP. The OS will then be able
-> to take the appropriate action needed such as offlining a page. If the error
-> is a corrected error, then the firmware will not interrupt the OS immediately.
-> Instead, the OS will see and report the error the next time it's GHES timer
-> expires. The kernel will first parse the GHES structures and report the errors
-> through the kernel logs and then notify the user space through RAS trace
-> events. This allows user space applications such as RAS Daemon to see the
-> errors and report them however the user desires. This patchset extends the
-> kernel functionality for RAS errors based on updates in the UEFI 2.6 and
-> ACPI 6.1 specifications.
->
-> An example flow from firmware to user space could be:
->
->                  +---------------+
->        +-------->|               |
->        |         |  GHES polling |--+
-> +-------------+  |    source     |  |   +---------------+   +------------+
-> |             |  +---------------+  |   |  Kernel GHES  |   |            |
-> |  Firmware   |                     +-->|  CPER AER and |-->|  RAS trace |
-> |             |  +---------------+  |   |  EDAC drivers |   |   event    |
-> +-------------+  |               |  |   +---------------+   +------------+
->        |         |  GHES sci     |--+
->        +-------->|   source      |
->                  +---------------+
->
-> Add support for Generic Hardware Error Source (GHES) v2, which introduces the
-> capability for the OS to acknowledge the consumption of the error record
-> generated by the Reliability, Availability and Serviceability (RAS) controller.
-> This eliminates potential race conditions between the OS and the RAS controller.
->
-> Add support for the timestamp field added to the Generic Error Data Entry v3,
-> allowing the OS to log the time that the error is generated by the firmware,
-> rather than the time the error is consumed. This improves the correctness of
-> event sequences when analyzing error logs. The timestamp is added in
-> ACPI 6.1, reference Table 18-343 Generic Error Data Entry.
->
-> Add support for ARMv8 Common Platform Error Record (CPER) per UEFI 2.6
-> specification. ARMv8 specific processor error information is reported as part of
-> the CPER records.  This provides more detail on for processor error logs. This
-> can help describe ARMv8 cache, tlb, and bus errors.
->
-> Synchronous External Abort (SEA) represents a specific processor error condition
-> in ARM systems. A handler is added to recognize SEA errors, and a notifier is
-> added to parse and report the errors before the process is killed. Refer to
-> section N.2.1.1 in the Common Platform Error Record appendix of the UEFI 2.6
-> specification.
->
-> Currently the kernel ignores CPER records that are unrecognized.
-> On the other hand, UEFI spec allows for non-standard (eg. vendor
-> proprietary) error section type in CPER (Common Platform Error Record),
-> as defined in section N2.3 of UEFI version 2.5. Therefore, user
-> is not able to see hardware error data of non-standard section.
->
-> If section Type field of Generic Error Data Entry is unrecognized,
-> prints out the raw data in dmesg buffer, and also adds a tracepoint
-> for reporting such hardware errors.
->
-> Currently even if an error status block's severity is fatal, the kernel
-> does not honor the severity level and panic. With the firmware first
-> model, the platform could inform the OS about a fatal hardware error
-> through the non-NMI GHES notification type. The OS should panic when a
-> hardware error record is received with this severity.
->
-> Add support to handle SEAs that occur while a KVM guest kernel is
-> running. Currently these are unsupported by the guest abort handling.
->
-> Depends on: [PATCH v14] acpi, apei, arm64: APEI initial support for aarch64.
->             https://lkml.org/lkml/2016/8/10/231
->
-> V5: Fix GHES goto logic for error conditions
->     Change ghes_do_read_ack to ghes_ack_error
->     Make sure data version check is >= 3
->     Use CPER helper functions in print functions
->     Make handle_guest_sea() dummy function static for arm
->     Add arm to subject line for KVM patch
->
-> V4: Add bit offset left shift to read_ack_write value
->     Make HEST generic and generic_v2 structures a union in the ghes structure
->     Move gdata v3 helper functions into ghes.h to avoid duplication
->     Reorder the timestamp print and avoid memcpy
->     Add helper functions for gdata size checking
->     Rename the SEA functions
->     Add helper function for GHES panics
->     Set fru_id to NULL UUID at variable declaration
->     Limit ARM trace event parameters to the needed structures
->     Reorder the ARM trace event variables to save space
->     Add comment for why we don't pass SEAs to the guest when it aborts
->     Move ARM trace event call into GHES driver instead of CPER
->
-> V3: Fix unmapped address to the read_ack_register in ghes.c
->     Add helper function to get the proper payload based on generic data entry
->      version
->     Move timestamp print to avoid changing function calls in cper.c
->     Remove patch "arm64: exception: handle instruction abort at current EL"
->      since the el1_ia handler is already added in 4.8
->     Add EFI and ARM64 dependencies for HAVE_ACPI_APEI_SEA
->     Add a new trace event for ARM type errors
->     Add support to handle KVM guest SEAs
->
-> V2: Add PSCI state print for the ARMv8 error type.
->     Separate timestamp year into year and century using BCD format.
->     Rebase on top of ACPICA 20160318 release and remove header file changes
->      in include/acpi/actbl1.h.
->     Add panic OS with fatal error status block patch.
->     Add processing of unrecognized CPER error section patches with updates
->      from previous comments. Original patches: https://lkml.org/lkml/2015/9/8/646
->
-> V1: https://lkml.org/lkml/2016/2/5/544
->
-> Jonathan (Zhixiong) Zhang (1):
->   acpi: apei: panic OS with fatal error status block
->
-> Tyler Baicar (9):
->   acpi: apei: read ack upon ghes record consumption
->   ras: acpi/apei: cper: generic error data entry v3 per ACPI 6.1
->   efi: parse ARMv8 processor error
->   arm64: exception: handle Synchronous External Abort
->   acpi: apei: handle SEA notification type for ARMv8
->   efi: print unrecognized CPER section
->   ras: acpi / apei: generate trace event for unrecognized CPER section
->   trace, ras: add ARM processor error trace event
->   arm/arm64: KVM: add guest SEA support
->
->  arch/arm/include/asm/kvm_arm.h       |   1 +
->  arch/arm/include/asm/system_misc.h   |   5 +
->  arch/arm/kvm/mmu.c                   |  18 ++-
->  arch/arm64/Kconfig                   |   1 +
->  arch/arm64/include/asm/kvm_arm.h     |   1 +
->  arch/arm64/include/asm/system_misc.h |  15 +++
->  arch/arm64/mm/fault.c                |  71 ++++++++++--
->  drivers/acpi/apei/Kconfig            |  14 +++
->  drivers/acpi/apei/ghes.c             | 188 ++++++++++++++++++++++++++++---
->  drivers/acpi/apei/hest.c             |   7 +-
->  drivers/firmware/efi/cper.c          | 210 ++++++++++++++++++++++++++++++++---
->  drivers/ras/ras.c                    |   2 +
->  include/acpi/ghes.h                  |  15 ++-
->  include/linux/cper.h                 |  84 ++++++++++++++
->  include/ras/ras_event.h              | 100 +++++++++++++++++
->  15 files changed, 688 insertions(+), 44 deletions(-)
->
+so what am I supposed to do about this as a user? Go and physically
+remove those devices because I want to enable SME?!
+
+IMO, the only thing we should do is issue a *single* warning -
+pr_warn_once - along the lines of:
+
+"... devices present which due to SME will use bounce buffers and will
+cause their speed to diminish. Boot with sme=debug to see full info".
+
+And then sme=debug will dump the whole gory details. I don't think
+screaming for each device is going to change anything in many cases.
+99% of people don't care - they just want shit to work.
+
+> > A boot flag that says "don't enable devices that don't support
+> > encryption" might be a good idea, too, since most people
+> > don't read dmesg output and won't notice the message.
+> 
+> I'll look into this. It might be something that can be checked as
+> part of the device setting its DMA mask or the first time a DMA
+> API is used if the device doesn't explicitly set its mask.
+
+Still with my user hat on, what would be the purpose of such an option?
+
+We already use bounce buffers so those devices do support encryption,
+albeit slower.
+
+felt hat is confused.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
