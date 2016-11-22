@@ -1,7 +1,7 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 4/6] efi: Get the secure boot status
-Date: Tue, 22 Nov 2016 00:32:01 +0000
-Message-ID: <147977472115.6360.13015228230799369019.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 5/6] efi: Disable secure boot if shim is in insecure mode
+Date: Tue, 22 Nov 2016 00:32:08 +0000
+Message-ID: <147977472850.6360.6174897435078432354.stgit@warthog.procyon.org.uk>
 References: <20161117123731.GA11573@wunner.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -10,228 +10,64 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20161117123731.GA11573@wunner.de>
 Sender: linux-kernel-owner@vger.kernel.org
 To: lukas@wunner.de
-Cc: Matthew Garrett <matthew.garrett@nebula.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, Josh Boyer <jwboyer@fedoraproject.org>, keyrings@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Get the firmware's secure-boot status in the kernel boot wrapper and stash
-it somewhere that the main kernel image can find.
+From: Josh Boyer <jwboyer@fedoraproject.org>
 
-Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
+A user can manually tell the shim boot loader to disable validation of
+images it loads.  When a user does this, it creates a UEFI variable called
+MokSBState that does not have the runtime attribute set.  Given that the
+user explicitly disabled validation, we can honor that and not enable
+secure boot mode if that variable is set.
+
+Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- Documentation/x86/zero-page.txt           |    2 +
- arch/x86/boot/compressed/eboot.c          |    5 ++
- arch/x86/include/uapi/asm/bootparam.h     |    3 +
- drivers/firmware/efi/libstub/Makefile     |    2 -
- drivers/firmware/efi/libstub/arm-stub.c   |   46 --------------------
- drivers/firmware/efi/libstub/secureboot.c |   66 +++++++++++++++++++++++++++++
- include/linux/efi.h                       |    2 +
- 7 files changed, 78 insertions(+), 48 deletions(-)
- create mode 100644 drivers/firmware/efi/libstub/secureboot.c
+ drivers/firmware/efi/libstub/secureboot.c |   22 +++++++++++++++++++++-
+ 1 file changed, 21 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/x86/zero-page.txt b/Documentation/x86/zero-page.txt
-index 95a4d34af3fd..b8527c6b7646 100644
---- a/Documentation/x86/zero-page.txt
-+++ b/Documentation/x86/zero-page.txt
-@@ -31,6 +31,8 @@ Offset	Proto	Name		Meaning
- 1E9/001	ALL	eddbuf_entries	Number of entries in eddbuf (below)
- 1EA/001	ALL	edd_mbr_sig_buf_entries	Number of entries in edd_mbr_sig_buffer
- 				(below)
-+1EB/001	ALL     kbd_status      Numlock is enabled
-+1EC/001	ALL     secure_boot	Secure boot is enabled in the firmware
- 1EF/001	ALL	sentinel	Used to detect broken bootloaders
- 290/040	ALL	edd_mbr_sig_buffer EDD MBR signatures
- 2D0/A00	ALL	e820_map	E820 memory map table
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index c8c32ebcdfdb..fd6506de480d 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -12,6 +12,7 @@
- #include <asm/efi.h>
- #include <asm/setup.h>
- #include <asm/desc.h>
-+#include <asm/bootparam_utils.h>
- 
- #include "../string.h"
- #include "eboot.h"
-@@ -1158,6 +1159,10 @@ struct boot_params *efi_main(struct efi_config *c,
- 	else
- 		setup_boot_services32(efi_early);
- 
-+	sanitize_boot_params(boot_params);
-+
-+	boot_params->secure_boot = efi_get_secureboot();
-+
- 	setup_graphics(boot_params);
- 
- 	setup_efi_pci(boot_params);
-diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
-index b10bf319ed20..5138dacf8bb8 100644
---- a/arch/x86/include/uapi/asm/bootparam.h
-+++ b/arch/x86/include/uapi/asm/bootparam.h
-@@ -135,7 +135,8 @@ struct boot_params {
- 	__u8  eddbuf_entries;				/* 0x1e9 */
- 	__u8  edd_mbr_sig_buf_entries;			/* 0x1ea */
- 	__u8  kbd_status;				/* 0x1eb */
--	__u8  _pad5[3];					/* 0x1ec */
-+	__u8  secure_boot;				/* 0x1ec */
-+	__u8  _pad5[2];					/* 0x1ed */
- 	/*
- 	 * The sentinel is set to a nonzero value (0xff) in header.S.
- 	 *
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 6621b13c370f..9af966863612 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -28,7 +28,7 @@ OBJECT_FILES_NON_STANDARD	:= y
- # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
- KCOV_INSTRUMENT			:= n
- 
--lib-y				:= efi-stub-helper.o gop.o
-+lib-y				:= efi-stub-helper.o gop.o secureboot.o
- 
- # include the stub's generic dependencies from lib/ when building for ARM/arm64
- arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index b4f7d78f9e8b..552ee61ddbed 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -20,52 +20,6 @@
- 
- bool __nokaslr;
- 
--static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
--{
--	static efi_char16_t const sb_var_name[] = {
--		'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0 };
--	static efi_char16_t const sm_var_name[] = {
--		'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0 };
--
--	efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
--	efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
--	u8 val;
--	unsigned long size = sizeof(val);
--	efi_status_t status;
--
--	status = f_getvar((efi_char16_t *)sb_var_name, (efi_guid_t *)&var_guid,
--			  NULL, &size, &val);
--
--	if (status != EFI_SUCCESS)
--		goto out_efi_err;
--
--	if (val == 0)
--		return 0;
--
--	status = f_getvar((efi_char16_t *)sm_var_name, (efi_guid_t *)&var_guid,
--			  NULL, &size, &val);
--
--	if (status != EFI_SUCCESS)
--		goto out_efi_err;
--
--	if (val == 1)
--		return 0;
--
--	return 1;
--
--out_efi_err:
--	switch (status) {
--	case EFI_NOT_FOUND:
--		return 0;
--	case EFI_DEVICE_ERROR:
--		return -EIO;
--	case EFI_SECURITY_VIOLATION:
--		return -EACCES;
--	default:
--		return -EINVAL;
--	}
--}
--
- efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg,
- 			     void *__image, void **__fh)
- {
 diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-new file mode 100644
-index 000000000000..e44d8c9ee150
---- /dev/null
+index e44d8c9ee150..d928398a3a52 100644
+--- a/drivers/firmware/efi/libstub/secureboot.c
 +++ b/drivers/firmware/efi/libstub/secureboot.c
-@@ -0,0 +1,66 @@
-+/*
-+ * Secure boot handling.
-+ *
-+ * Copyright (C) 2013,2014 Linaro Limited
-+ *     Roy Franz <roy.franz@linaro.org
-+ * Copyright (C) 2013 Red Hat, Inc.
-+ *     Mark Salter <msalter@redhat.com>
-+ *
-+ * This file is part of the Linux kernel, and is made available under the
-+ * terms of the GNU General Public License version 2.
-+ *
-+ */
-+
-+#include <linux/efi.h>
-+#include <linux/sort.h>
-+#include <asm/efi.h>
-+
-+#include "efistub.h"
-+
-+int efi_get_secureboot(void)
-+{
-+	static const efi_char16_t const sb_var_name[] = {
-+		'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0 };
-+	static const efi_char16_t const sm_var_name[] = {
-+		'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0 };
-+
-+	static const efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
-+
-+	u8 val;
-+	unsigned long size = sizeof(val);
-+	efi_status_t status;
-+
-+#define f_getvar(...) efi_call_runtime(get_variable, __VA_ARGS__)
-+
-+	status = f_getvar((efi_char16_t *)sb_var_name, (efi_guid_t *)&var_guid,
-+			  NULL, &size, &val);
-+
-+	if (status != EFI_SUCCESS)
-+		goto out_efi_err;
-+
-+	if (val == 0)
-+		return 0;
-+
-+	status = f_getvar((efi_char16_t *)sm_var_name, (efi_guid_t *)&var_guid,
-+			  NULL, &size, &val);
-+
-+	if (status != EFI_SUCCESS)
-+		goto out_efi_err;
-+
-+	if (val == 1)
-+		return 0;
-+
-+	return 1;
-+
-+out_efi_err:
-+	switch (status) {
-+	case EFI_NOT_FOUND:
-+		return 0;
-+	case EFI_DEVICE_ERROR:
-+		return -EIO;
-+	case EFI_SECURITY_VIOLATION:
-+		return -EACCES;
-+	default:
-+		return -EINVAL;
-+	}
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 24db4e5ec817..615d8704f048 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1477,6 +1477,8 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
- bool efi_runtime_disabled(void);
- extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
+@@ -23,10 +23,14 @@ int efi_get_secureboot(void)
+ 		'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0 };
+ 	static const efi_char16_t const sm_var_name[] = {
+ 		'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0 };
++	static efi_char16_t const MokSBState_var_name[] = {
++		'M', 'o', 'k', 'S', 'B', 'S', 't', 'a', 't', 'e', 0 };
  
-+int efi_get_secureboot(void);
+ 	static const efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
++	static const efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
+ 
+-	u8 val;
++	u32 attr;
++	u8 val, moksbstate;
+ 	unsigned long size = sizeof(val);
+ 	efi_status_t status;
+ 
+@@ -50,6 +54,22 @@ int efi_get_secureboot(void)
+ 	if (val == 1)
+ 		return 0;
+ 
++	/* See if a user has put shim into insecure mode.  If so, and if the
++	 * variable doesn't have the runtime attribute set, we might as well
++	 * honor that.
++	 */
++	size = sizeof(moksbstate);
++	status = f_getvar((efi_char16_t *)MokSBState_var_name, &shim_guid,
++			  &attr, &size, &moksbstate);
 +
- /*
-  * Arch code can implement the following three template macros, avoiding
-  * reptition for the void/non-void return cases of {__,}efi_call_virt():
++	/* If it fails, we don't care why.  Default to secure */
++	if (status != EFI_SUCCESS)
++		return 1;
++
++	if (!(attr & EFI_VARIABLE_RUNTIME_ACCESS) &&
++	    moksbstate == 1)
++		return 0;
++
+ 	return 1;
+ 
+ out_efi_err:
