@@ -1,58 +1,62 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 0/6] efi: Pass secure boot mode to kernel [ver #2]
-Date: Wed, 23 Nov 2016 00:22:28 +0000
-Message-ID: <147986054870.13790.8640536414645705863.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 6/6] efi: Add EFI_SECURE_BOOT bit [ver #2]
+Date: Wed, 23 Nov 2016 00:23:12 +0000
+Message-ID: <147986059202.13790.3471243422582131819.stgit@warthog.procyon.org.uk>
+References: <147986054870.13790.8640536414645705863.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
-Sender: owner-linux-security-module@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <147986054870.13790.8640536414645705863.stgit@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
 To: lukas@wunner.de
-Cc: linux-efi@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, Josh Boyer <jwboyer@fedoraproject.org>, keyrings@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
+From: Josh Boyer <jwboyer@fedoraproject.org>
 
-Here's a set of patches that can determine the secure boot state of the
-UEFI BIOS and pass that along to the main kernel image.  This involves
-generalising ARM's efi_get_secureboot() function and making it mixed-mode
-safe.
+UEFI machines can be booted in Secure Boot mode.  Add a EFI_SECURE_BOOT bit
+that can be passed to efi_enabled() to find out whether secure boot is
+enabled.
 
-The patches can be found here also:
+This will be used by the SysRq+x handler, registered by the x86 arch, to find
+out whether secure boot mode is enabled so that it can be disabled.
 
-	http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/log/?h=efi-secure-boot
-
-at tag:
-
-	efi-secure-boot-20161123
-
-Note that the patches are not terminal on the branch.
-
-David
+Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
+Signed-off-by: David Howells <dhowells@redhat.com>
 ---
-David Howells (4):
-      x86/efi: Allow invocation of arbitrary runtime services
-      arm/efi: Allow invocation of arbitrary runtime services
-      efi: Add SHIM and image security database GUID definitions
-      efi: Get the secure boot status
 
-Josh Boyer (2):
-      efi: Disable secure boot if shim is in insecure mode
-      efi: Add EFI_SECURE_BOOT bit
+ arch/x86/kernel/setup.c |    7 +++++++
+ include/linux/efi.h     |    1 +
+ 2 files changed, 8 insertions(+)
 
-
- Documentation/x86/zero-page.txt           |    2 +
- arch/arm/include/asm/efi.h                |    1 
- arch/arm64/include/asm/efi.h              |    1 
- arch/x86/boot/compressed/eboot.c          |    3 +
- arch/x86/boot/compressed/head_32.S        |    6 +-
- arch/x86/boot/compressed/head_64.S        |    8 +-
- arch/x86/include/asm/efi.h                |    5 ++
- arch/x86/include/uapi/asm/bootparam.h     |    3 +
- arch/x86/kernel/setup.c                   |    7 ++
- drivers/firmware/efi/libstub/Makefile     |    2 -
- drivers/firmware/efi/libstub/arm-stub.c   |   46 --------------
- drivers/firmware/efi/libstub/secureboot.c |   93 +++++++++++++++++++++++++++++
- include/linux/efi.h                       |    6 ++
- 13 files changed, 128 insertions(+), 55 deletions(-)
- create mode 100644 drivers/firmware/efi/libstub/secureboot.c
-
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 9c337b0e8ba7..522915d6de1f 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -1160,6 +1160,13 @@ void __init setup_arch(char **cmdline_p)
+ 
+ 	io_delay_init();
+ 
++#ifdef CONFIG_EFI
++	if (boot_params.secure_boot) {
++		set_bit(EFI_SECURE_BOOT, &efi.flags);
++		pr_info("Secure boot enabled\n");
++	}
++#endif
++
+ 	/*
+ 	 * Parse the ACPI tables for possible boot-time SMP configuration.
+ 	 */
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index ff01ad6f2823..d95bb9e69974 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1066,6 +1066,7 @@ extern int __init efi_setup_pcdp_console(char *);
+ #define EFI_ARCH_1		7	/* First arch-specific bit */
+ #define EFI_DBG			8	/* Print additional debug info at runtime */
+ #define EFI_NX_PE_DATA		9	/* Can runtime data regions be mapped non-executable? */
++#define EFI_SECURE_BOOT		10	/* Are we in Secure Boot mode? */
+ 
+ #ifdef CONFIG_EFI
+ /*
