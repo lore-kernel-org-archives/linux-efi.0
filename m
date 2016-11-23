@@ -1,40 +1,40 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 6/6] efi: Add EFI_SECURE_BOOT bit [ver #2]
-Date: Wed, 23 Nov 2016 10:09:30 +0000
-Message-ID: <10465.1479895770@warthog.procyon.org.uk>
-References: <3710.1479895641@warthog.procyon.org.uk> <20161123092735.GA2071@wunner.de> <147986054870.13790.8640536414645705863.stgit@warthog.procyon.org.uk> <147986059202.13790.3471243422582131819.stgit@warthog.procyon.org.uk>
+From: Lukas Wunner <lukas@wunner.de>
+Subject: Re: [PATCH 4/6] efi: Get the secure boot status [ver #2]
+Date: Wed, 23 Nov 2016 11:10:50 +0100
+Message-ID: <20161123101050.GA2113@wunner.de>
+References: <20161123093122.GB2071@wunner.de>
+ <147986054870.13790.8640536414645705863.stgit@warthog.procyon.org.uk>
+ <147986057768.13790.3027173260868896792.stgit@warthog.procyon.org.uk>
+ <31281.1479894780@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <3710.1479895641@warthog.procyon.org.uk>
-Content-ID: <10464.1479895770.1@warthog.procyon.org.uk>
+Content-Disposition: inline
+In-Reply-To: <31281.1479894780@warthog.procyon.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Lukas Wunner <lukas@wunner.de>
-Cc: dhowells@redhat.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, Josh Boyer <jwboyer@fedoraproject.org>, keyrings@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: linux-efi@vger.kernel.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-David Howells <dhowells@redhat.com> wrote:
-
-> > > +#ifdef CONFIG_EFI
-> > > +	if (boot_params.secure_boot) {
-> > > +		set_bit(EFI_SECURE_BOOT, &efi.flags);
-> > > +		pr_info("Secure boot enabled\n");
-> > > +	}
-> > > +#endif
-> > > +
-> > 
-> > Section 20 of Documentation/CodingStyle recommends IS_ENABLED()
-> > instead of #ifdef.
+On Wed, Nov 23, 2016 at 09:53:00AM +0000, David Howells wrote:
+> Lukas Wunner <lukas@wunner.de> wrote:
+> > It just occurred to me that the boot_params struct is populated in
+> > make_boot_params(), perhaps it makes sense to move this line there.
+> > Otherwise LGTM.
 > 
-> The problem is this:
+> Ummm...  Looking at arch/x86/boot/compressed/head_64.S, make_boot_params() is
+> only called if the stub is entered through efi_pe_entry, not if entered
+> through efi64_stub_entry, whereas efi_main() is called in both cases.  I think
+> entry through efi32_stub_entry may also skip make_boot_params().
 > 
-> 	arch/x86/include/asm/bitops.h:75: undefined reference to `efi'
-> 
-> To quote section 20: "... Thus, you still have to use an #ifdef if the code
-> inside the block references symbols that will not exist if the condition is
-> not met."
+> The comment on make_boot_params() suggests that this function is only used if
+> whoever booted the kernel didn't supply it.
 
-Okay, I take that back - it does actually work.  However, should I follow the
-scheme of the rest of the file?
+Good point. :-) I didn't dig this deep, it was just something that
+crossed my mind when skimming over the patch.
 
-David
+You're also right about the (efi_##f##_t *) addition in patch 2.
+
+Thanks,
+
+Lukas
