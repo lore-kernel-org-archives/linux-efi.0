@@ -1,57 +1,45 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 4/6] efi: Get the secure boot status [ver #2]
-Date: Wed, 23 Nov 2016 14:55:33 +0000
-Message-ID: <2794.1479912933@warthog.procyon.org.uk>
-References: <20161123142440.GJ24624@leverpostej> <20161123134219.GH24624@leverpostej> <20161123104757.GE24624@leverpostej> <147986054870.13790.8640536414645705863.stgit@warthog.procyon.org.uk> <147986057768.13790.3027173260868896792.stgit@warthog.procyon.org.uk> <18007.1479900357@warthog.procyon.org.uk> <31974.1479910408@warthog.procyon.org.uk>
+From: Dominik Brodowski <linux@dominikbrodowski.net>
+Subject: Re: [PATCH] Lock down drivers that can have io ports, io mem, irqs
+ and dma changed
+Date: Wed, 23 Nov 2016 20:21:43 +0100
+Message-ID: <20161123192143.GA482@light.dominikbrodowski.net>
+References: <20161122061233.GA4762@light.dominikbrodowski.net>
+ <20161116222731.563fb85e@lxorguk.ukuu.org.uk>
+ <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
+ <26173.1479769852@warthog.procyon.org.uk>
+ <8342.1479905906@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20161123142440.GJ24624@leverpostej>
-Content-ID: <2792.1479912933.1@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>, Matthew Garrett <mjg59@coreos.com>
-Cc: dhowells@redhat.com, lukas@wunner.de, linux-efi@vger.kernel.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-security-module-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <8342.1479905906@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: keyrings@vger.kernel.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk
 List-Id: linux-efi@vger.kernel.org
 
-Mark Rutland <mark.rutland@arm.com> wrote:
-
-> On Wed, Nov 23, 2016 at 02:13:28PM +0000, David Howells wrote:
-> > Mark Rutland <mark.rutland@arm.com> wrote:
-> > 
-> > > > > 	if (secure_boot < 0)
-> > > > > 		pr_efi_err(sys_table,
-> > > > > 			"could not determine UEFI Secure Boot status.\n");
-> > > > 
-> > > > In which case, should this be moved into efi_get_secureboot() and it
-> > > > return a bool?
-> > > 
-> > > That would make sense to me, provided we're only likely to call that
-> > > once (and only log once).
-> > > 
-> > > I guess it would also make sense to change the latter case to soemthing
-> > > like:
-> > > 	
-> > > 	Could not determine UEFI Secure Boot status. Assuming enabled.
-> > > 
-> > > ... so as to make it clear what the effect is.
-> > 
-> > Actually, the two arches have a different interpretation on how to deal
-> > with an error.  Matthew Garrett's original x86 patch assumes that if we
-> > get an error when trying to read SecureBoot and SetupMode that we're *not*
-> > in secure mode, but ARM assumes the opposite.
+On Wed, Nov 23, 2016 at 12:58:26PM +0000, David Howells wrote:
+> Dominik Brodowski <linux@dominikbrodowski.net> wrote:
 > 
-> Ok.
+> > You might also need to disable CIS overrides and CIS firmware loading for
+> > PCMCIA drivers, I presume. That needs two changes:
+> > 
+> > 	- Abort in drivers/pcmcia/ds.c::pcmcia_load_firmware() or disable
+> > 	  the CONFIG_PCMCIA_LOAD_CIS config option permanently.
 > 
-> IIUC, that x86 patch was never upstream, so is there any need to follow
-> that example?
+> This really ought to be handled through signature checking in
+> request_firmware().
+> 
+> > 	- Abort in drivers/pcmcia/cistpl.c::pccard_store_cis() or remove
+> > 	  write access to the "cis" file in
+> > 	  drivers/pcmcia/cistpl.c::pccard_cis_attr
+> 
+> What is that doing?  Allowing the device to be reconfigured?
 
-Whilst that may be true, that doesn't mean a lot of people aren't using it.
+Exactly. It is a different interface for updating the firmware -- which
+includes ioports etc. In theory, any access should be limited to areas which
+are registered to the bridge devices. But you never know...
 
-> Was there a rationale for that, or can we simply follow the upstream ARM
-> example?
->
-> Perhaps it's best to ask Matthew?
+Best
+	Dominik
 
-Sure - adding him to the To: line.
-
-David
