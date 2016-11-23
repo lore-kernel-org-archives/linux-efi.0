@@ -1,60 +1,144 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 7/7] efi: Add EFI_SECURE_BOOT bit [ver #3]
-Date: Wed, 23 Nov 2016 12:54:25 +0000
-Message-ID: <147990566529.7576.3473031193517498415.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 2/7] x86/efi: Allow invocation of arbitrary runtime services
+ [ver #3]
+Date: Wed, 23 Nov 2016 12:53:48 +0000
+Message-ID: <147990562795.7576.18368336842576716129.stgit@warthog.procyon.org.uk>
 References: <147990561294.7576.6464430479448167484.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <147990561294.7576.6464430479448167484.stgit@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: lukas@wunner.de
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, Josh Boyer <jwboyer@fedoraproject.org>, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Josh Boyer <jwboyer@fedoraproject.org>
+Provide the ability to perform mixed-mode runtime service calls for x86 in
+the same way that commit 0a637ee61247bd4bed9b2a07568ef7a1cfc76187
+("x86/efi: Allow invocation of arbitrary boot services") provides the
+ability to invoke arbitrary boot services.
 
-UEFI machines can be booted in Secure Boot mode.  Add a EFI_SECURE_BOOT bit
-that can be passed to efi_enabled() to find out whether secure boot is
-enabled.
-
-This will be used by the SysRq+x handler, registered by the x86 arch, to find
-out whether secure boot mode is enabled so that it can be disabled.
-
-Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
+Suggested-by: Lukas Wunner <lukas@wunner.de>
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- arch/x86/kernel/setup.c |    5 +++++
- include/linux/efi.h     |    1 +
- 2 files changed, 6 insertions(+)
+ arch/x86/boot/compressed/eboot.c   |    1 +
+ arch/x86/boot/compressed/head_32.S |    6 +++---
+ arch/x86/boot/compressed/head_64.S |    8 ++++----
+ arch/x86/include/asm/efi.h         |    5 +++++
+ 4 files changed, 13 insertions(+), 7 deletions(-)
 
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 9c337b0e8ba7..aa972b4cb680 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -1160,6 +1160,11 @@ void __init setup_arch(char **cmdline_p)
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index ff01c8fc76f7..c8c32ebcdfdb 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -32,6 +32,7 @@ static void setup_boot_services##bits(struct efi_config *c)		\
+ 									\
+ 	table = (typeof(table))sys_table;				\
+ 									\
++	c->runtime_services = table->runtime;				\
+ 	c->boot_services = table->boottime;				\
+ 	c->text_output = table->con_out;				\
+ }
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index fd0b6a272dd5..d85b9625e836 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -82,7 +82,7 @@ ENTRY(efi_pe_entry)
  
- 	io_delay_init();
+ 	/* Relocate efi_config->call() */
+ 	leal	efi32_config(%esi), %eax
+-	add	%esi, 32(%eax)
++	add	%esi, 40(%eax)
+ 	pushl	%eax
  
-+	if (IS_ENABLED(CONFIG_EFI) && boot_params.secure_boot) {
-+		set_bit(EFI_SECURE_BOOT, &efi.flags);
-+		pr_info("Secure boot enabled\n");
-+	}
-+
+ 	call	make_boot_params
+@@ -108,7 +108,7 @@ ENTRY(efi32_stub_entry)
+ 
+ 	/* Relocate efi_config->call() */
+ 	leal	efi32_config(%esi), %eax
+-	add	%esi, 32(%eax)
++	add	%esi, 40(%eax)
+ 	pushl	%eax
+ 2:
+ 	call	efi_main
+@@ -264,7 +264,7 @@ relocated:
+ #ifdef CONFIG_EFI_STUB
+ 	.data
+ efi32_config:
+-	.fill 4,8,0
++	.fill 5,8,0
+ 	.long efi_call_phys
+ 	.long 0
+ 	.byte 0
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index efdfba21a5b2..beab8322f72a 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -265,7 +265,7 @@ ENTRY(efi_pe_entry)
  	/*
- 	 * Parse the ACPI tables for possible boot-time SMP configuration.
+ 	 * Relocate efi_config->call().
  	 */
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 5d6c60a9caf8..333d31bf55bf 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1066,6 +1066,7 @@ extern int __init efi_setup_pcdp_console(char *);
- #define EFI_ARCH_1		7	/* First arch-specific bit */
- #define EFI_DBG			8	/* Print additional debug info at runtime */
- #define EFI_NX_PE_DATA		9	/* Can runtime data regions be mapped non-executable? */
-+#define EFI_SECURE_BOOT		10	/* Are we in Secure Boot mode? */
+-	addq	%rbp, efi64_config+32(%rip)
++	addq	%rbp, efi64_config+40(%rip)
  
- #ifdef CONFIG_EFI
- /*
+ 	movq	%rax, %rdi
+ 	call	make_boot_params
+@@ -285,7 +285,7 @@ handover_entry:
+ 	 * Relocate efi_config->call().
+ 	 */
+ 	movq	efi_config(%rip), %rax
+-	addq	%rbp, 32(%rax)
++	addq	%rbp, 40(%rax)
+ 2:
+ 	movq	efi_config(%rip), %rdi
+ 	call	efi_main
+@@ -457,14 +457,14 @@ efi_config:
+ #ifdef CONFIG_EFI_MIXED
+ 	.global efi32_config
+ efi32_config:
+-	.fill	4,8,0
++	.fill	5,8,0
+ 	.quad	efi64_thunk
+ 	.byte	0
+ #endif
+ 
+ 	.global efi64_config
+ efi64_config:
+-	.fill	4,8,0
++	.fill	5,8,0
+ 	.quad	efi_call
+ 	.byte	1
+ #endif /* CONFIG_EFI_STUB */
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index e99675b9c861..2f77bcefe6b4 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -191,6 +191,7 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
+ struct efi_config {
+ 	u64 image_handle;
+ 	u64 table;
++	u64 runtime_services;
+ 	u64 boot_services;
+ 	u64 text_output;
+ 	efi_status_t (*call)(unsigned long, ...);
+@@ -226,6 +227,10 @@ static inline bool efi_is_64bit(void)
+ #define __efi_call_early(f, ...)					\
+ 	__efi_early()->call((unsigned long)f, __VA_ARGS__);
+ 
++#define efi_call_runtime(f, ...)					\
++	__efi_early()->call(efi_table_attr(efi_runtime_services, f,	\
++		__efi_early()->runtime_services), __VA_ARGS__)
++
+ extern bool efi_reboot_required(void);
+ 
+ #else
