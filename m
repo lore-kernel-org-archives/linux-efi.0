@@ -1,33 +1,61 @@
 From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 2/6] arm/efi: Allow invocation of arbitrary runtime services [ver #2]
-Date: Wed, 23 Nov 2016 11:51:09 +0000
-Message-ID: <6258.1479901869@warthog.procyon.org.uk>
-References: <CAKv+Gu92VwUo=1Fh39r1WxNWo-mQRLx8sDby+rGcero8oyi-WA@mail.gmail.com> <147986054870.13790.8640536414645705863.stgit@warthog.procyon.org.uk> <147986056324.13790.12670822944798392730.stgit@warthog.procyon.org.uk> <5320.1479893643@warthog.procyon.org.uk>
+Subject: [PATCH 0/7] efi: Pass secure boot mode to kernel [ver #3]
+Date: Wed, 23 Nov 2016 12:53:33 +0000
+Message-ID: <147990561294.7576.6464430479448167484.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu92VwUo=1Fh39r1WxNWo-mQRLx8sDby+rGcero8oyi-WA@mail.gmail.com>
-Content-ID: <6257.1479901869.1@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: dhowells@redhat.com, Lukas Wunner <lukas@wunner.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, keyrings@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-security-module-owner@vger.kernel.org>
+Sender: owner-linux-security-module@vger.kernel.org
+To: lukas@wunner.de
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 
-> > What I've changed the ARM and ARM64 things to is:
-> >
-> >         #define efi_call_runtime(f, ...)        ((efi_##f##_t *)sys_table_arg->runtime->f)(__VA_ARGS__)
-> >
-> 
-> Could we please instead fix the definition of efi_runtime_services_t,
-> given that we have typedefs already for all its members?
+Here's a set of patches that can determine the secure boot state of the
+UEFI BIOS and pass that along to the main kernel image.  This involves
+generalising ARM's efi_get_secureboot() function and making it mixed-mode
+safe.
 
-Okay, I've pulled in your patch and removed the cast.
+The patches can be found here also:
 
-I would like to provide wrapper static inlines for things like
-efi_get_variable() to get the parameter checking, but the sys_table_arg
-behind-the-scenes parameter is tricky to deal with in that case.
+	http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/log/?h=efi-secure-boot
+
+at tag:
+
+	efi-secure-boot-20161123-2
+
+Note that the patches are not terminal on the branch.
 
 David
+---
+Ard Biesheuvel (1):
+      efi: use typed function pointers for runtime services table
+
+David Howells (4):
+      x86/efi: Allow invocation of arbitrary runtime services
+      arm/efi: Allow invocation of arbitrary runtime services
+      efi: Add SHIM and image security database GUID definitions
+      efi: Get the secure boot status
+
+Josh Boyer (2):
+      efi: Disable secure boot if shim is in insecure mode
+      efi: Add EFI_SECURE_BOOT bit
+
+
+ Documentation/x86/zero-page.txt           |    2 +
+ arch/arm/include/asm/efi.h                |    1 
+ arch/arm64/include/asm/efi.h              |    1 
+ arch/x86/boot/compressed/eboot.c          |    3 +
+ arch/x86/boot/compressed/head_32.S        |    6 +-
+ arch/x86/boot/compressed/head_64.S        |    8 +-
+ arch/x86/include/asm/efi.h                |    5 ++
+ arch/x86/include/uapi/asm/bootparam.h     |    3 +
+ arch/x86/kernel/setup.c                   |    5 ++
+ drivers/firmware/efi/libstub/Makefile     |    2 -
+ drivers/firmware/efi/libstub/arm-stub.c   |   46 --------------
+ drivers/firmware/efi/libstub/secureboot.c |   93 +++++++++++++++++++++++++++++
+ include/linux/efi.h                       |   42 +++++++------
+ 13 files changed, 144 insertions(+), 73 deletions(-)
+ create mode 100644 drivers/firmware/efi/libstub/secureboot.c
+
