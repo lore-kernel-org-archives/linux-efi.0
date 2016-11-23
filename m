@@ -1,37 +1,58 @@
 From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 4/6] efi: Get the secure boot status
-Date: Wed, 23 Nov 2016 00:02:27 +0000
-Message-ID: <17874.1479859347@warthog.procyon.org.uk>
-References: <20161122203058.GA1844@wunner.de> <20161122104401.GC1552@wunner.de> <20161117123731.GA11573@wunner.de> <147977472115.6360.13015228230799369019.stgit@warthog.procyon.org.uk> <7199.1479826047@warthog.procyon.org.uk>
+Subject: [PATCH 0/6] efi: Pass secure boot mode to kernel [ver #2]
+Date: Wed, 23 Nov 2016 00:22:28 +0000
+Message-ID: <147986054870.13790.8640536414645705863.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <20161122203058.GA1844@wunner.de>
-Content-ID: <17873.1479859347.1@warthog.procyon.org.uk>
 Sender: owner-linux-security-module@vger.kernel.org
-To: Lukas Wunner <lukas@wunner.de>
-Cc: dhowells@redhat.com, Matthew Garrett <matthew.garrett@nebula.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org
+To: lukas@wunner.de
+Cc: linux-efi@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Lukas Wunner <lukas@wunner.de> wrote:
 
-> On Tue, Nov 22, 2016 at 02:47:27PM +0000, David Howells wrote:
-> > Lukas Wunner <lukas@wunner.de> wrote:
-> > > The "out_efi_err" portion differs from the previous version of this
-> > > patch.  Setting a __u8 to a negative value, is this really what you
-> > > want?
-> > 
-> > Eh?  efi_get_secureboot() returns an int as before.  The out_efi_err:
-> > portions are exactly the same:
-> 
-> By "the previous version of this patch" I was referring to your
-> submission of Nov 16, not the existing code in the kernel.
-> Your patch didn't contain the out_efi_err portion.
-> 
-> You're assigning a negative value to boot_params->secure_boot
-> (which is declared __u8).
+Here's a set of patches that can determine the secure boot state of the
+UEFI BIOS and pass that along to the main kernel image.  This involves
+generalising ARM's efi_get_secureboot() function and making it mixed-mode
+safe.
 
-Ah, yes.  Sorry, you confused me by specifying a comparison against the last
-version.
+The patches can be found here also:
+
+	http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/log/?h=efi-secure-boot
+
+at tag:
+
+	efi-secure-boot-20161123
+
+Note that the patches are not terminal on the branch.
 
 David
+---
+David Howells (4):
+      x86/efi: Allow invocation of arbitrary runtime services
+      arm/efi: Allow invocation of arbitrary runtime services
+      efi: Add SHIM and image security database GUID definitions
+      efi: Get the secure boot status
+
+Josh Boyer (2):
+      efi: Disable secure boot if shim is in insecure mode
+      efi: Add EFI_SECURE_BOOT bit
+
+
+ Documentation/x86/zero-page.txt           |    2 +
+ arch/arm/include/asm/efi.h                |    1 
+ arch/arm64/include/asm/efi.h              |    1 
+ arch/x86/boot/compressed/eboot.c          |    3 +
+ arch/x86/boot/compressed/head_32.S        |    6 +-
+ arch/x86/boot/compressed/head_64.S        |    8 +-
+ arch/x86/include/asm/efi.h                |    5 ++
+ arch/x86/include/uapi/asm/bootparam.h     |    3 +
+ arch/x86/kernel/setup.c                   |    7 ++
+ drivers/firmware/efi/libstub/Makefile     |    2 -
+ drivers/firmware/efi/libstub/arm-stub.c   |   46 --------------
+ drivers/firmware/efi/libstub/secureboot.c |   93 +++++++++++++++++++++++++++++
+ include/linux/efi.h                       |    6 ++
+ 13 files changed, 128 insertions(+), 55 deletions(-)
+ create mode 100644 drivers/firmware/efi/libstub/secureboot.c
+
