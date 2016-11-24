@@ -1,71 +1,44 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] arm64: mm: Fix memmap to be initialized for the entire section
-Date: Thu, 24 Nov 2016 19:42:47 +0000
-Message-ID: <CAKv+Gu_C_17RtAiw2U0OOzVik3G7KkwUTo5eiGK-HDo-maQ-bA@mail.gmail.com>
-References: <CAKv+Gu-2uGJGovqQL-gbB54u=fQ9L9YUbDdRo6u3oWqF6znn6Q@mail.gmail.com>
- <20161123211538.GH10776@rric.localdomain> <CAKv+Gu8aWpz5vXSWdKHwL5Xk2aWyQBOoR1WHOnVPaWZOwqojBQ@mail.gmail.com>
- <20161124134238.GI10776@rric.localdomain> <CAKv+Gu_Ug3XOD6jy5xziy1pS7WV=TC0RLD4j3DT6nytujQDzRQ@mail.gmail.com>
- <20161124135151.GJ10776@rric.localdomain> <CAKv+Gu9qB7P2epMGdwFJ3vJR3vt-bBxU0nKwmKdpaOpTKdqzzA@mail.gmail.com>
- <20161124141149.GE2213@rric.localdomain> <CAKv+Gu-SXX_Vv1Wi1Nm=5vdaXSS0MBp20QBpQVacSKPLfdH0-A@mail.gmail.com>
- <20161124150918.GF2213@rric.localdomain> <20161124192659.GH2213@rric.localdomain>
+From: Dominik Brodowski <linux@dominikbrodowski.net>
+Subject: Re: [PATCH] Lock down drivers that can have io ports, io mem, irqs
+ and dma changed
+Date: Thu, 24 Nov 2016 21:19:39 +0100
+Message-ID: <20161124201939.GA3782@isilmar-4.linta.de>
+References: <20161123192143.GA482@light.dominikbrodowski.net>
+ <20161122061233.GA4762@light.dominikbrodowski.net>
+ <20161116222731.563fb85e@lxorguk.ukuu.org.uk>
+ <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
+ <26173.1479769852@warthog.procyon.org.uk>
+ <8342.1479905906@warthog.procyon.org.uk>
+ <30473.1480008885@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20161124192659.GH2213@rric.localdomain>
+Content-Disposition: inline
+In-Reply-To: <30473.1480008885@warthog.procyon.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Robert Richter <robert.richter@cavium.com>
-Cc: Will Deacon <will.deacon@arm.com>, Robert Richter <rric@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, David Daney <david.daney@cavium.com>, Hanjun Guo <hanjun.guo@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: David Howells <dhowells@redhat.com>
+Cc: keyrings@vger.kernel.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk
 List-Id: linux-efi@vger.kernel.org
 
-On 24 November 2016 at 19:26, Robert Richter <robert.richter@cavium.com> wrote:
-> Ard,
->
->> > >> On 24 November 2016 at 13:51, Robert Richter <robert.richter@cavium.com> wrote:
->> > >> > On 24.11.16 13:44:31, Ard Biesheuvel wrote:
->
->> > >> Regions containing firmware tables are owned by the firmware, and it
->> > >> is the firmware that tells us which memory attributes we are allowed
->> > >> to use. If those attributes include WB, it is perfectly legal to use a
->> > >> cacheable mapping. That does *not* mean they should be covered by the
->> > >> linear mapping. The linear mapping is read-write-non-exec, for
->> > >> instance, and we may prefer to use a read-only mapping and/or
->> > >> executable mapping.
->> > >
->> > > Ok, I am going to fix try_ram_remap().
->
-> I revisited the code and it is working well already since:
->
->  e7cd190385d1 arm64: mark reserved memblock regions explicitly in iomem
->
-> Now, try_ram_remap() is only called if the region to be mapped is
-> entirely in IORESOURCE_SYSTEM_RAM. This is only true for normal mem
-> ranges and not NOMAP mem. region_intersects() then returns
-> REGION_INTERSECTS and calls try_ram_remap(). For the NOMAP memory case
-> REGION_DISJOINT would be returned and thus arch_memremap_wb() being
-> called directly. Before the e7cd190385d1 change try_ram_remap() was
-> called also for nomap regions.
->
-> So we can leave memremap() as it is and just apply this patch
-> unmodified. What do you think?
+On Thu, Nov 24, 2016 at 05:34:45PM +0000, David Howells wrote:
+> Dominik Brodowski <linux@dominikbrodowski.net> wrote:
+> 
+> > > > 	- Abort in drivers/pcmcia/cistpl.c::pccard_store_cis() or remove
+> > > > 	  write access to the "cis" file in
+> > > > 	  drivers/pcmcia/cistpl.c::pccard_cis_attr
+> > > 
+> > > What is that doing?  Allowing the device to be reconfigured?
+> > 
+> > Exactly. It is a different interface for updating the firmware -- which
+> > includes ioports etc. In theory, any access should be limited to areas which
+> > are registered to the bridge devices. But you never know...
+> 
+> Ah, I see.  Should this be using request_firmware()?
 
-I agree. The pfn_valid() check in try_ram_remap() is still appropriate
-simply because the PageHighmem check requires a valid struct page. But
-if we don't enter that code path anymore for NOMAP regions, I think
-we're ok.
+For most cases, request_firmware() is being used -- for some rare cases,
+however, this alternative interface is provided for. It should be pretty
+safe nowadays to make pccard_cis_attr read-only (and who uses PCMCIA
+nowadays anyway?).
 
-> Please ack.
->
-
-I still don't fully understand how it is guaranteed that *all* memory
-(i.e., all regions for which memblock_is_memory() returns true) is
-covered by a struct page, but marked as reserved. Are we relying on
-the fact that NOMAP memory is also memblock_reserve()'d?
-
-> I am going to prepare the pfn_is_ram() change in addition to this
-> patch, but that should not be required for this fix to work correcly.
->
-
-I don't think you need to bother with page_is_ram() then. The only
-place we use it is in devmem_is_allowed(), and there it makes sense to
-allow NOMAP regions to be accessed (provided that you think /dev/mem
-is a good idea in the first place).
+Best,
+	Dominik
