@@ -1,55 +1,61 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Subject: Re: [PATCH 8/9] MODSIGN: Import certificates from UEFI Secure Boot
-Date: Thu, 24 Nov 2016 11:22:17 -0800
-Message-ID: <1480015337.2444.12.camel@HansenPartnership.com>
-References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
-         <147931990222.16460.11621102657967011265.stgit@warthog.procyon.org.uk>
-         <CAKv+Gu_QVyd1Jx7ZdnBzYmZzUnH4ZuhQgiGO-zx-JPViWosjXQ@mail.gmail.com>
-         <CA+5PVA6dWw-p3q9SBmJwQvuru4k7JZAraRZeb2=VDf8E=c=SmA@mail.gmail.com>
+From: Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] arm64: mm: Fix memmap to be initialized for the entire
+ section
+Date: Thu, 24 Nov 2016 20:26:59 +0100
+Message-ID: <20161124192659.GH2213@rric.localdomain>
+References: <CAKv+Gu-2uGJGovqQL-gbB54u=fQ9L9YUbDdRo6u3oWqF6znn6Q@mail.gmail.com>
+ <20161123211538.GH10776@rric.localdomain>
+ <CAKv+Gu8aWpz5vXSWdKHwL5Xk2aWyQBOoR1WHOnVPaWZOwqojBQ@mail.gmail.com>
+ <20161124134238.GI10776@rric.localdomain>
+ <CAKv+Gu_Ug3XOD6jy5xziy1pS7WV=TC0RLD4j3DT6nytujQDzRQ@mail.gmail.com>
+ <20161124135151.GJ10776@rric.localdomain>
+ <CAKv+Gu9qB7P2epMGdwFJ3vJR3vt-bBxU0nKwmKdpaOpTKdqzzA@mail.gmail.com>
+ <20161124141149.GE2213@rric.localdomain>
+ <CAKv+Gu-SXX_Vv1Wi1Nm=5vdaXSS0MBp20QBpQVacSKPLfdH0-A@mail.gmail.com>
+ <20161124150918.GF2213@rric.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CA+5PVA6dWw-p3q9SBmJwQvuru4k7JZAraRZeb2=VDf8E=c=SmA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20161124150918.GF2213-vWBEXY7mpu582hYKe6nXyg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Robert Richter <rric-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2016-11-21 at 11:25 -0500, Josh Boyer wrote:
-> On Mon, Nov 21, 2016 at 11:16 AM, Ard Biesheuvel
-> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> > On 16 November 2016 at 18:11, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > wrote:
-> > > From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-> > > 
-> > > Secure Boot stores a list of allowed certificates in the 'db' 
-> > > variable. This imports those certificates into the system trusted 
-> > > keyring.   This allows for a third party signing certificate to 
-> > > be used in conjunction with signed modules.  By importing the 
-> > > public certificate into the 'db' variable, a user can allow a 
-> > > module signed with that certificate to load.  The shim UEFI 
-> > > bootloader has a similar certificate list stored in the
-> > > 'MokListRT' variable.  We import those as well.
-> > > 
-> > 
-> > This sounds like a bad idea to me. For the standard databases like 
-> > db and dbx, we can rely on the firmware to ensure that they are 
-> > what you expect. For MokListRt, not so much: anyone with sufficient
-> > capabilities can generate such a variable from userland, and not 
-> > every arch/distro combo will be using shim and/or mokmanager. (The
-> > debates are still ongoing, but my position is that there is no need 
-> > for shim at all on ARM given that the M$ problem only exists on
-> > x86)
-> 
-> In order for MokListRT to be modified, the user has to have physical
-> access and boot into Mok and complete the enrollment.  That is no
-> different than simply enrolling in db or dbx.  I don't see a
-> difference in security under the thread model that Secure Boot is
-> attempting to protect against.
+Ard,
 
-Isn't a potential attack to write to MokListRT and then force a kexec? 
- That means shim doesn't validate the variable yet you treat it as
-though it has been validated.
+> > >> On 24 November 2016 at 13:51, Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org> wrote:
+> > >> > On 24.11.16 13:44:31, Ard Biesheuvel wrote:
 
-James
+> > >> Regions containing firmware tables are owned by the firmware, and it
+> > >> is the firmware that tells us which memory attributes we are allowed
+> > >> to use. If those attributes include WB, it is perfectly legal to use a
+> > >> cacheable mapping. That does *not* mean they should be covered by the
+> > >> linear mapping. The linear mapping is read-write-non-exec, for
+> > >> instance, and we may prefer to use a read-only mapping and/or
+> > >> executable mapping.
+> > >
+> > > Ok, I am going to fix try_ram_remap().
+
+I revisited the code and it is working well already since:
+
+ e7cd190385d1 arm64: mark reserved memblock regions explicitly in iomem
+
+Now, try_ram_remap() is only called if the region to be mapped is
+entirely in IORESOURCE_SYSTEM_RAM. This is only true for normal mem
+ranges and not NOMAP mem. region_intersects() then returns
+REGION_INTERSECTS and calls try_ram_remap(). For the NOMAP memory case
+REGION_DISJOINT would be returned and thus arch_memremap_wb() being
+called directly. Before the e7cd190385d1 change try_ram_remap() was
+called also for nomap regions.
+
+So we can leave memremap() as it is and just apply this patch
+unmodified. What do you think? Please ack.
+
+I am going to prepare the pfn_is_ram() change in addition to this
+patch, but that should not be required for this fix to work correcly.
+
+Thanks,
+
+-Robert
