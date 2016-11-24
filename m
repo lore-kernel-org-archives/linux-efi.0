@@ -1,44 +1,30 @@
-From: Dominik Brodowski <linux@dominikbrodowski.net>
-Subject: Re: [PATCH] Lock down drivers that can have io ports, io mem, irqs
- and dma changed
-Date: Thu, 24 Nov 2016 21:19:39 +0100
-Message-ID: <20161124201939.GA3782@isilmar-4.linta.de>
-References: <20161123192143.GA482@light.dominikbrodowski.net>
- <20161122061233.GA4762@light.dominikbrodowski.net>
- <20161116222731.563fb85e@lxorguk.ukuu.org.uk>
- <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
- <26173.1479769852@warthog.procyon.org.uk>
- <8342.1479905906@warthog.procyon.org.uk>
- <30473.1480008885@warthog.procyon.org.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] efi: use typed function pointers for runtime services
+ table
+Date: Thu, 24 Nov 2016 21:34:51 +0000
+Message-ID: <20161124213451.GA3549@codeblueprint.co.uk>
+References: <1479897764-29871-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <30473.1480008885@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: keyrings@vger.kernel.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk
+In-Reply-To: <1479897764-29871-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Nov 24, 2016 at 05:34:45PM +0000, David Howells wrote:
-> Dominik Brodowski <linux@dominikbrodowski.net> wrote:
+On Wed, 23 Nov, at 10:42:44AM, Ard Biesheuvel wrote:
+> Instead of using void pointers, and casting them to correctly typed
+> function pointers upon use, declare the runtime services pointers
+> as function pointers using their respective prototypes, for which
+> typedefs are already available.
 > 
-> > > > 	- Abort in drivers/pcmcia/cistpl.c::pccard_store_cis() or remove
-> > > > 	  write access to the "cis" file in
-> > > > 	  drivers/pcmcia/cistpl.c::pccard_cis_attr
-> > > 
-> > > What is that doing?  Allowing the device to be reconfigured?
-> > 
-> > Exactly. It is a different interface for updating the firmware -- which
-> > includes ioports etc. In theory, any access should be limited to areas which
-> > are registered to the bridge devices. But you never know...
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
 > 
-> Ah, I see.  Should this be using request_firmware()?
+> Build tested on arm64 only
 
-For most cases, request_firmware() is being used -- for some rare cases,
-however, this alternative interface is provided for. It should be pretty
-safe nowadays to make pccard_cis_attr read-only (and who uses PCMCIA
-nowadays anyway?).
+Builds fine for i386, x86-64 and ia64 too.
 
-Best,
-	Dominik
+Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
