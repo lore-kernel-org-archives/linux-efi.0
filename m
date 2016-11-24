@@ -1,345 +1,56 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [RFC PATCH v3 19/20] x86: Add support to make use of Secure
- Memory Encryption
-Date: Thu, 24 Nov 2016 13:50:38 +0100
-Message-ID: <20161124125038.j4wmtzgv2ju3v2ym@pd.tnic>
-References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
- <20161110003826.3280.5546.stgit@tlendack-t1.amdoffice.net>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] arm64: mm: Fix memmap to be initialized for the entire section
+Date: Thu, 24 Nov 2016 13:44:31 +0000
+Message-ID: <CAKv+Gu_Ug3XOD6jy5xziy1pS7WV=TC0RLD4j3DT6nytujQDzRQ@mail.gmail.com>
+References: <20161017185801.GT25086@rric.localdomain> <20161027160136.GD24290@arm.com>
+ <20161028091905.GM22012@rric.localdomain> <20161107210514.GP20591@arm.com>
+ <20161109195132.GZ22012@rric.localdomain> <20161117142528.GJ22855@arm.com>
+ <20161117151805.GJ2151@rric.localdomain> <CAKv+Gu-2uGJGovqQL-gbB54u=fQ9L9YUbDdRo6u3oWqF6znn6Q@mail.gmail.com>
+ <20161123211538.GH10776@rric.localdomain> <CAKv+Gu8aWpz5vXSWdKHwL5Xk2aWyQBOoR1WHOnVPaWZOwqojBQ@mail.gmail.com>
+ <20161124134238.GI10776@rric.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20161110003826.3280.5546.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+In-Reply-To: <20161124134238.GI10776-vWBEXY7mpu582hYKe6nXyg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+To: Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Robert Richter <rric-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Nov 09, 2016 at 06:38:26PM -0600, Tom Lendacky wrote:
-> This patch adds the support to check if SME has been enabled and if the
-> mem_encrypt=on command line option is set. If both of these conditions
-> are true, then the encryption mask is set and the kernel is encrypted
-> "in place."
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-> ---
->  arch/x86/kernel/Makefile           |    1 
->  arch/x86/kernel/mem_encrypt_boot.S |  156 +++++++++++++++++++++++++++++
->  arch/x86/kernel/mem_encrypt_init.c |  196 ++++++++++++++++++++++++++++++++++++
->  3 files changed, 353 insertions(+)
->  create mode 100644 arch/x86/kernel/mem_encrypt_boot.S
-> 
-> diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
-> index 27e22f4..020759f 100644
-> --- a/arch/x86/kernel/Makefile
-> +++ b/arch/x86/kernel/Makefile
-> @@ -143,4 +143,5 @@ ifeq ($(CONFIG_X86_64),y)
->  	obj-y				+= vsmp_64.o
->  
->  	obj-y				+= mem_encrypt_init.o
-> +	obj-y				+= mem_encrypt_boot.o
+On 24 November 2016 at 13:42, Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org> wrote:
+> On 23.11.16 21:25:06, Ard Biesheuvel wrote:
+>> Why? MEMREMAP_WB is used often, among other things for mapping
+>> firmware tables, which are marked as NOMAP, so in these cases, the
+>> linear address is not mapped.
+>
+> If fw tables are mapped wb, that is wrong and needs a separate fix.
+>
 
-So there's a lot of ifdeffery below which is not really needed and those
-objects above get built-in by default.
+Why is that wrong?
 
-So let's clean that up:
+>> > If you think pfn_valid() is wrong here, I am happy to send a patch
+>> > that fixes this by using page_is_ram(). In any case, the worst case
+>> > that may happen is to behave the same as v4.4, we might fix then the
+>> > wrong use of pfn_valid() where it is not correctly used to check for
+>> > ram.
+>> >
+>>
+>> page_is_ram() uses string comparisons to look for regions called
+>> 'System RAM'. Is that something we can tolerate for each pfn_valid()
+>> calll?
+>>
+>> Perhaps the solution is to reimplement page_is_ram() for arm64 using
+>> memblock_is_memory() instead, But that still means we need to modify
+>> the generic memremap() code first to switch to it before changing the
+>> arm64 implementation of pfn_valid
+>
+> No, that's not the solution. pfn_valid() should just check if there is
+> a valid struct page, as other archs do. And if there is a mis-use of
+> pfn_valid() to check for ram, only that calls should be fixed to use
+> page_is_ram(), however this is implemented, or something appropriate.
+> But I don't see any problematic code, and if so, I will fix that.
+>
 
-obj-$(CONFIG_AMD_MEM_ENCRYPT)		+= ...
-
-for all .c files.
-
-Then, put prototypes of all externally visible elements - functions,
-vars, etc - in include/linux/mem_encrypt.h in the
-
-#else   /* !CONFIG_AMD_MEM_ENCRYPT */
-
-branch so that the build works too for people who don't enable
-CONFIG_AMD_MEM_ENCRYPT. Much cleaner this way.
-
->  endif
-> diff --git a/arch/x86/kernel/mem_encrypt_boot.S b/arch/x86/kernel/mem_encrypt_boot.S
-> new file mode 100644
-> index 0000000..d4917ba
-> --- /dev/null
-> +++ b/arch/x86/kernel/mem_encrypt_boot.S
-> @@ -0,0 +1,156 @@
-> +/*
-> + * AMD Memory Encryption Support
-> + *
-> + * Copyright (C) 2016 Advanced Micro Devices, Inc.
-> + *
-> + * Author: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License version 2 as
-> + * published by the Free Software Foundation.
-> + */
-> +
-> +#include <linux/linkage.h>
-> +#include <asm/pgtable.h>
-> +#include <asm/page.h>
-> +#include <asm/processor-flags.h>
-> +#include <asm/msr-index.h>
-> +
-> +	.text
-> +	.code64
-> +ENTRY(sme_encrypt_execute)
-
-sme_encrypt() looks perfectly fine to me.
-
-Btw, is this the reason why this is still in asm:
-
-"(not everything could be converted, e.g. the routine that does the
-actual encryption needs to be copied into a safe location and it is
-difficult to determine the actual length of the function in order to
-copy it)"
-
-?
-
-If so, ELF symbols have sizes and you can query function sizes, perhaps
-lookup_symbol_attrs() in kernel/kallsyms.c which returns size in one of
-its args, etc.
-
-Alternatively, we can have markers around the function if the kallsyms
-game doesn't work.
-
-Below are just some small nits, I'll review this fully once we solve the
-in-asm question.
-
-> diff --git a/arch/x86/kernel/mem_encrypt_init.c b/arch/x86/kernel/mem_encrypt_init.c
-> index 388d6fb..7bdd159 100644
-> --- a/arch/x86/kernel/mem_encrypt_init.c
-> +++ b/arch/x86/kernel/mem_encrypt_init.c
-> @@ -13,9 +13,205 @@
->  #include <linux/linkage.h>
->  #include <linux/init.h>
->  #include <linux/mem_encrypt.h>
-> +#include <linux/mm.h>
-> +
-> +#include <asm/sections.h>
-> +
-> +#ifdef CONFIG_AMD_MEM_ENCRYPT
-> +
-> +extern void sme_encrypt_execute(unsigned long, unsigned long, unsigned long,
-> +				void *, pgd_t *);
-> +
-> +#define PGD_FLAGS	_KERNPG_TABLE_NO_ENC
-> +#define PUD_FLAGS	_KERNPG_TABLE_NO_ENC
-> +#define PMD_FLAGS	__PAGE_KERNEL_LARGE_EXEC
-> +
-> +static void __init *sme_pgtable_entry(pgd_t *pgd, void *next_page,
-> +				      void *vaddr, pmdval_t pmd_val)
-> +{
-> +	pud_t *pud;
-> +	pmd_t *pmd;
-> +
-> +	pgd += pgd_index((unsigned long)vaddr);
-> +	if (pgd_none(*pgd)) {
-> +		pud = next_page;
-> +		memset(pud, 0, sizeof(*pud) * PTRS_PER_PUD);
-> +		native_set_pgd(pgd,
-> +			       native_make_pgd((unsigned long)pud + PGD_FLAGS));
-> +		next_page += sizeof(*pud) * PTRS_PER_PUD;
-> +	} else {
-> +		pud = (pud_t *)(native_pgd_val(*pgd) & ~PTE_FLAGS_MASK);
-> +	}
-> +
-> +	pud += pud_index((unsigned long)vaddr);
-> +	if (pud_none(*pud)) {
-> +		pmd = next_page;
-> +		memset(pmd, 0, sizeof(*pmd) * PTRS_PER_PMD);
-> +		native_set_pud(pud,
-> +			       native_make_pud((unsigned long)pmd + PUD_FLAGS));
-> +		next_page += sizeof(*pmd) * PTRS_PER_PMD;
-> +	} else {
-> +		pmd = (pmd_t *)(native_pud_val(*pud) & ~PTE_FLAGS_MASK);
-> +	}
-> +
-> +	pmd += pmd_index((unsigned long)vaddr);
-> +	if (pmd_none(*pmd) || !pmd_large(*pmd))
-> +		native_set_pmd(pmd, native_make_pmd(pmd_val));
-> +
-> +	return next_page;
-> +}
-> +
-> +static unsigned long __init sme_pgtable_calc(unsigned long start,
-> +					     unsigned long end)
-> +{
-> +	unsigned long addr, total;
-> +
-> +	total = 0;
-> +	addr = start;
-> +	while (addr < end) {
-> +		unsigned long pgd_end;
-> +
-> +		pgd_end = (addr & PGDIR_MASK) + PGDIR_SIZE;
-> +		if (pgd_end > end)
-> +			pgd_end = end;
-> +
-> +		total += sizeof(pud_t) * PTRS_PER_PUD * 2;
-> +
-> +		while (addr < pgd_end) {
-> +			unsigned long pud_end;
-> +
-> +			pud_end = (addr & PUD_MASK) + PUD_SIZE;
-> +			if (pud_end > end)
-> +				pud_end = end;
-> +
-> +			total += sizeof(pmd_t) * PTRS_PER_PMD * 2;
-> +
-> +			addr = pud_end;
-> +		}
-> +
-> +		addr = pgd_end;
-> +	}
-> +	total += sizeof(pgd_t) * PTRS_PER_PGD;
-> +
-> +	return total;
-> +}
-> +#endif	/* CONFIG_AMD_MEM_ENCRYPT */
->  
->  void __init sme_encrypt_kernel(void)
->  {
-> +#ifdef CONFIG_AMD_MEM_ENCRYPT
-> +	pgd_t *pgd;
-> +	void *workarea, *next_page, *vaddr;
-> +	unsigned long kern_start, kern_end, kern_len;
-> +	unsigned long index, paddr, pmd_flags;
-> +	unsigned long exec_size, full_size;
-
-Args in reversed christmas tree order please:
-
-	unsigned long kern_start, kern_end, kern_len;
-	unsigned long index, paddr, pmd_flags;
-	void *workarea, *next_page, *vaddr;
-	unsigned long exec_size, full_size;
-	pgd_t *pgd;
-
-> +
-> +	/* If SME is not active then no need to prepare */
-> +	if (!sme_me_mask)
-> +		return;
-> +
-> +	/* Set the workarea to be after the kernel */
-> +	workarea = (void *)ALIGN(__pa_symbol(_end), PMD_PAGE_SIZE);
-> +
-> +	/*
-> +	 * Prepare for encrypting the kernel by building new pagetables with
-> +	 * the necessary attributes needed to encrypt the kernel in place.
-> +	 *
-> +	 *   One range of virtual addresses will map the memory occupied
-> +	 *   by the kernel as encrypted.
-> +	 *
-> +	 *   Another range of virtual addresses will map the memory occupied
-> +	 *   by the kernel as un-encrypted and write-protected.
-> +	 *
-> +	 *     The use of write-protect attribute will prevent any of the
-> +	 *     memory from being cached.
-> +	 */
-> +
-> +	/* Physical address gives us the identity mapped virtual address */
-> +	kern_start = __pa_symbol(_text);
-> +	kern_end = ALIGN(__pa_symbol(_end), PMD_PAGE_SIZE) - 1;
-> +	kern_len = kern_end - kern_start + 1;
-> +
-> +	/*
-> +	 * Calculate required number of workarea bytes needed:
-> +	 *   executable encryption area size:
-> +	 *     stack page (PAGE_SIZE)
-> +	 *     encryption routine page (PAGE_SIZE)
-> +	 *     intermediate copy buffer (PMD_PAGE_SIZE)
-> +	 *   pagetable structures for workarea (in case not currently mapped)
-> +	 *   pagetable structures for the encryption of the kernel
-> +	 */
-> +	exec_size = (PAGE_SIZE * 2) + PMD_PAGE_SIZE;
-> +
-> +	full_size = exec_size;
-> +	full_size += ALIGN(exec_size, PMD_PAGE_SIZE) / PMD_PAGE_SIZE *
-
-Is that a fancy way of saying "2"?
-
-IOW, something like:
-
-	/* + 2 pmd_t pagetable pages for the executable encryption area size */
-	full_size += 2 * PAGE_SIZE;
-
-looks much more readable to me...
-
-> +		     sizeof(pmd_t) * PTRS_PER_PMD;
-> +	full_size += sme_pgtable_calc(kern_start, kern_end + exec_size);
-> +
-> +	next_page = workarea + exec_size;
-> +
-> +	/* Make sure the current pagetables have entries for the workarea */
-> +	pgd = (pgd_t *)native_read_cr3();
-> +	paddr = (unsigned long)workarea;
-> +	while (paddr < (unsigned long)workarea + full_size) {
-> +		vaddr = (void *)paddr;
-> +		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
-> +					      paddr + PMD_FLAGS);
-> +
-> +		paddr += PMD_PAGE_SIZE;
-> +	}
-> +	native_write_cr3(native_read_cr3());
-> +
-> +	/* Calculate a PGD index to be used for the un-encrypted mapping */
-> +	index = (pgd_index(kern_end + full_size) + 1) & (PTRS_PER_PGD - 1);
-> +	index <<= PGDIR_SHIFT;
-> +
-> +	/* Set and clear the PGD */
-> +	pgd = next_page;
-> +	memset(pgd, 0, sizeof(*pgd) * PTRS_PER_PGD);
-> +	next_page += sizeof(*pgd) * PTRS_PER_PGD;
-> +
-> +	/* Add encrypted (identity) mappings for the kernel */
-> +	pmd_flags = PMD_FLAGS | _PAGE_ENC;
-> +	paddr = kern_start;
-> +	while (paddr < kern_end) {
-> +		vaddr = (void *)paddr;
-> +		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
-> +					      paddr + pmd_flags);
-> +
-> +		paddr += PMD_PAGE_SIZE;
-> +	}
-> +
-> +	/* Add un-encrypted (non-identity) mappings for the kernel */
-> +	pmd_flags = (PMD_FLAGS & ~_PAGE_CACHE_MASK) | (_PAGE_PAT | _PAGE_PWT);
-> +	paddr = kern_start;
-> +	while (paddr < kern_end) {
-> +		vaddr = (void *)(paddr + index);
-> +		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
-> +					      paddr + pmd_flags);
-> +
-> +		paddr += PMD_PAGE_SIZE;
-> +	}
-> +
-> +	/* Add the workarea to both mappings */
-> +	paddr = kern_end + 1;
-> +	while (paddr < (kern_end + exec_size)) {
-> +		vaddr = (void *)paddr;
-> +		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
-> +					      paddr + PMD_FLAGS);
-> +
-> +		vaddr = (void *)(paddr + index);
-> +		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
-> +					      paddr + PMD_FLAGS);
-> +
-> +		paddr += PMD_PAGE_SIZE;
-> +	}
-> +
-> +	/* Perform the encryption */
-> +	sme_encrypt_execute(kern_start, kern_start + index, kern_len,
-> +			    workarea, pgd);
-> +
-> +#endif	/* CONFIG_AMD_MEM_ENCRYPT */
->  }
->  
->  unsigned long __init sme_get_me_mask(void)
-> 
-> 
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+memremap() uses pfn_valid() to decide whether some address is covered
+by the linear mapping. If we correct pfn_valid() to adhere to your
+definition, we will need to fix memremap() first in any case.
