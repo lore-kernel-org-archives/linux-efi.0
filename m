@@ -1,37 +1,73 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [GIT PULL] one more EFI patch for v4.10
-Date: Thu, 24 Nov 2016 18:02:22 +0000
-Message-ID: <1480010543-25709-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH] efi/libstub: Make efi_random_alloc() allocate below 4 GB on 32-bit
+Date: Thu, 24 Nov 2016 18:02:23 +0000
+Message-ID: <1480010543-25709-2-git-send-email-ard.biesheuvel@linaro.org>
+References: <1480010543-25709-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1480010543-25709-1-git-send-email-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-The following changes since commit 9110bc036062fcd31994a35540d63f8deed22efa:
+The UEFI stub executes in the context of the firmware, which identity
+maps the available system RAM, which implies that only memory below
+4 GB can be used for allocations on 32-bit architectures, even on [L]PAE
+capable hardware.
 
-  thunderbolt: Use Device ROM retrieved from EFI (2016-11-12 21:14:43 +0000)
+So ignore any reported memory above 4 GB in efi_random_alloc(). This
+also fixes a reported build problem on ARM under -Os, where the 64-bit
+logical shift relies on a software routine that the ARM decompressor does
+not provide.
 
-are available in the git repository at:
+A second [minor] issue is also fixed, where the '+ 1' is moved out of
+the shift, where it belongs: the reason for its presence is that a
+memory region where start == end should count as a single slot, given
+that 'end' takes the desired size and alignment of the allocation into
+account.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+To clarify the code in this regard, rename start/end to 'first_slot' and
+'last_slot', respectively, and introduce 'region_end' to describe the
+last usable address of the current region.
 
-for you to fetch changes up to bec0c3c8151b7e1506fa2ae19500a8b8a32a79c0:
-
-  efi/libstub: Make efi_random_alloc() allocate below 4 GB on 32-bit (2016-11-22 09:53:49 +0000)
-
-----------------------------------------------------------------
-A single fix, for commit a6a144698d ("efi/libstub: Add random.c to ARM
-build") that is queued for v4.10 in efi/core in the tip tree, since it
-turned out that the compiler ends up emitting a call to a compiler
-intrinsic to perform 64-bit logical shift when called with -Os. Upon
-closer inspection of that code, it turned out we should explicitly ensure
-that we do not allocate above 4 GB, which is not addressable by the stub
-on 32-bit ARM.
-
-----------------------------------------------------------------
-Ard Biesheuvel (1):
-      efi/libstub: Make efi_random_alloc() allocate below 4 GB on 32-bit
-
+Reported-by: Arnd Bergmann <arnd@arndb.de>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
  drivers/firmware/efi/libstub/random.c | 14 ++++++++------
  1 file changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
+index 3a3feacc329f..63cd3f262b6e 100644
+--- a/drivers/firmware/efi/libstub/random.c
++++ b/drivers/firmware/efi/libstub/random.c
+@@ -45,19 +45,21 @@ static unsigned long get_entry_num_slots(efi_memory_desc_t *md,
+ 					 unsigned long align_shift)
+ {
+ 	unsigned long align = 1UL << align_shift;
+-	u64 start, end;
++	u64 first_slot, last_slot, region_end;
+ 
+ 	if (md->type != EFI_CONVENTIONAL_MEMORY)
+ 		return 0;
+ 
+-	start = round_up(md->phys_addr, align);
+-	end = round_down(md->phys_addr + md->num_pages * EFI_PAGE_SIZE - size,
+-			 align);
++	region_end = min((u64)ULONG_MAX,
++			 md->phys_addr + md->num_pages * EFI_PAGE_SIZE - 1);
+ 
+-	if (start > end)
++	first_slot = round_up(md->phys_addr, align);
++	last_slot = round_down(region_end - size + 1, align);
++
++	if (first_slot > last_slot)
+ 		return 0;
+ 
+-	return (end - start + 1) >> align_shift;
++	return ((unsigned long)(last_slot - first_slot) >> align_shift) + 1;
+ }
+ 
+ /*
+-- 
+2.7.4
