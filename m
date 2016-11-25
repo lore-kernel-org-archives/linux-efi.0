@@ -1,28 +1,26 @@
 From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH] Lock down drivers that can have io ports, io mem, irqs and dma changed
-Date: Fri, 25 Nov 2016 14:49:06 +0000
-Message-ID: <7958.1480085346@warthog.procyon.org.uk>
-References: <20161124201939.GA3782@isilmar-4.linta.de> <20161123192143.GA482@light.dominikbrodowski.net> <20161122061233.GA4762@light.dominikbrodowski.net> <20161116222731.563fb85e@lxorguk.ukuu.org.uk> <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk> <26173.1479769852@warthog.procyon.org.uk> <8342.1479905906@warthog.procyon.org.uk> <30473.1480008885@warthog.procyon.org.uk>
+Subject: Re: [PATCH 5/7] efi: Get the secure boot status [ver #3]
+Date: Fri, 25 Nov 2016 15:59:11 +0000
+Message-ID: <5143.1480089551@warthog.procyon.org.uk>
+References: <CAKv+Gu9qkPrq1rXN_7=BbZ=8v14Px+oHBqST0OnarUWVwhtZyg@mail.gmail.com> <147990561294.7576.6464430479448167484.stgit@warthog.procyon.org.uk> <147990565051.7576.9673287945782426886.stgit@warthog.procyon.org.uk> <1480016487.2444.18.camel@HansenPartnership.com> <15173.1480066220@warthog.procyon.org.uk> <CAKv+Gu_JxNLDjaK5jGbX9ACzM0uHJYMOFx7XDo4t7DtBMtFRGA@mail.gmail.com> <16661.1480075392@warthog.procyon.org.uk> <CAKv+Gu_d5+Kvo7Tptnpg7kfjpqxhQ3a3nsQ0Ufsm6rBOFry+mQ@mail.gmail.com> <17565.1480077303@warthog.procyon.org.uk> <CAKv+Gu9c-C2uXZ0fVatCM8ffXJZDgjBcDb_T0nsFecGqgrF11Q@mail.gmail.com> <31374.1480078855@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
 Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <20161124201939.GA3782@isilmar-4.linta.de>
-Content-ID: <7957.1480085346.1@warthog.procyon.org.uk>
+In-Reply-To: <CAKv+Gu9qkPrq1rXN_7=BbZ=8v14Px+oHBqST0OnarUWVwhtZyg@mail.gmail.com>
+Content-ID: <5142.1480089551.1@warthog.procyon.org.uk>
 Sender: owner-linux-security-module@vger.kernel.org
-To: Dominik Brodowski <linux@dominikbrodowski.net>
-Cc: dhowells@redhat.com, keyrings@vger.kernel.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: dhowells@redhat.com, James Bottomley <James.Bottomley@hansenpartnership.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, Lukas Wunner <lukas@wunner.de>, keyrings@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-Dominik Brodowski <linux@dominikbrodowski.net> wrote:
+Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 
-> For most cases, request_firmware() is being used -- for some rare cases,
-> however, this alternative interface is provided for. It should be pretty
-> safe nowadays to make pccard_cis_attr read-only (and who uses PCMCIA
-> nowadays anyway?).
+> > +               if (val != 1)
+> > +                       return 0;
+> 
+> val == 0 is better imo, since that will prevent unexpected values from
+> being interpreted as 'secure boot disabled'
 
-Have a look at the top patch here:
-
-	http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/log/?h=efi-lock-down
+I've made that change.
 
 David
