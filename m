@@ -1,15 +1,14 @@
 From: James Morse <james.morse@arm.com>
-Subject: Re: [PATCH V5 02/10] ras: acpi/apei: cper: generic error data entry
- v3 per ACPI 6.1
-Date: Fri, 25 Nov 2016 18:20:16 +0000
-Message-ID: <583880E0.8080705@arm.com>
+Subject: Re: [PATCH V5 03/10] efi: parse ARMv8 processor error
+Date: Fri, 25 Nov 2016 18:23:15 +0000
+Message-ID: <58388193.6000202@arm.com>
 References: <1479767763-27532-1-git-send-email-tbaicar@codeaurora.org>
- <1479767763-27532-3-git-send-email-tbaicar@codeaurora.org>
+ <1479767763-27532-4-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <1479767763-27532-3-git-send-email-tbaicar@codeaurora.org>
+In-Reply-To: <1479767763-27532-4-git-send-email-tbaicar@codeaurora.org>
 List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
 List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
@@ -26,243 +25,154 @@ List-Id: linux-efi@vger.kernel.org
 Hi Tyler,
 
 On 21/11/16 22:35, Tyler Baicar wrote:
-> Currently when a RAS error is reported it is not timestamped.
-> The ACPI 6.1 spec adds the timestamp field to the generic error
-> data entry v3 structure. The timestamp of when the firmware
-> generated the error is now being reported.
+> Add support for ARMv8 Common Platform Error Record (CPER).
+> UEFI 2.6 specification adds support for ARMv8 specific
+> processor error information to be reported as part of the
+> CPER records. This provides more detail on for processor error logs.
 
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index b79abc5..9063d68 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -420,7 +420,8 @@ static void ghes_handle_memory_failure(struct acpi_hest_generic_data *gdata, int
->  	int flags = -1;
->  	int sec_sev = ghes_severity(gdata->error_severity);
->  	struct cper_sec_mem_err *mem_err;
-> -	mem_err = (struct cper_sec_mem_err *)(gdata + 1);
-> +
-> +	mem_err = acpi_hest_generic_data_payload(gdata);
->  
->  	if (!(mem_err->validation_bits & CPER_MEM_VALID_PA))
->  		return;
-> @@ -450,14 +451,18 @@ static void ghes_do_proc(struct ghes *ghes,
->  {
->  	int sev, sec_sev;
->  	struct acpi_hest_generic_data *gdata;
-> +	uuid_le sec_type;
-
-ghes.c doesn't include <linux/uuid.h>, but I see it already uses uuid_le_cmp().
-Worth fixing as part of this patch?
+I think I'm missing a big part of the puzzle here, I will come back to this next
+week. I can't quite line up some of the masks and shifts with the table
+descriptions in the UEFI spec[0].
 
 
->  
->  	sev = ghes_severity(estatus->error_severity);
->  	apei_estatus_for_each_section(estatus, gdata) {
->  		sec_sev = ghes_severity(gdata->error_severity);
-> -		if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
-> +		sec_type = *(uuid_le *)gdata->section_type;
-> +
-
-You don't use sec_type again here, why change this?
-(should it be in a later patch?)
-
-
-> +		if (!uuid_le_cmp(sec_type,
->  				 CPER_SEC_PLATFORM_MEM)) {
->  			struct cper_sec_mem_err *mem_err;
-> -			mem_err = (struct cper_sec_mem_err *)(gdata+1);
-> +
-> +			mem_err = acpi_hest_generic_data_payload(gdata);
->  			ghes_edac_report_mem_error(ghes, sev, mem_err);
->  
->  			arch_apei_report_mem_error(sev, mem_err);
-> @@ -467,7 +472,8 @@ static void ghes_do_proc(struct ghes *ghes,
->  		else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
->  				      CPER_SEC_PCIE)) {
->  			struct cper_sec_pcie *pcie_err;
-> -			pcie_err = (struct cper_sec_pcie *)(gdata+1);
-> +
-> +			pcie_err = acpi_hest_generic_data_payload(gdata);
->  			if (sev == GHES_SEV_RECOVERABLE &&
->  			    sec_sev == GHES_SEV_RECOVERABLE &&
->  			    pcie_err->validation_bits & CPER_PCIE_VALID_DEVICE_ID &&
-> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> index d425374..7e2439e 100644
-> --- a/drivers/firmware/efi/cper.c
-> +++ b/drivers/firmware/efi/cper.c
-> @@ -32,6 +32,9 @@
->  #include <linux/acpi.h>
->  #include <linux/pci.h>
->  #include <linux/aer.h>
-> +#include <linux/printk.h>
-> +#include <linux/bcd.h>
-> +#include <acpi/ghes.h>
->  
->  #define INDENT_SP	" "
->  
-> @@ -386,13 +389,37 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
->  	pfx, pcie->bridge.secondary_status, pcie->bridge.control);
->  }
->  
-> +static void cper_estatus_print_section_v300(const char *pfx,
-> +	const struct acpi_hest_generic_data_v300 *gdata)
-> +{
-> +	__u8 hour, min, sec, day, mon, year, century, *timestamp;
-> +
-> +	if (gdata->validation_bits & ACPI_HEST_GEN_VALID_TIMESTAMP) {
-> +		timestamp = (__u8 *)&(gdata->time_stamp);
-> +		sec = bcd2bin(timestamp[0]);
-> +		min = bcd2bin(timestamp[1]);
-> +		hour = bcd2bin(timestamp[2]);
-> +		day = bcd2bin(timestamp[4]);
-> +		mon = bcd2bin(timestamp[5]);
-> +		year = bcd2bin(timestamp[6]);
-> +		century = bcd2bin(timestamp[7]);
-> +		printk("%stime: %7s %02d%02d-%02d-%02d %02d:%02d:%02d\n", pfx,
-> +			0x01 & *(timestamp + 3) ? "precise" : "", century,
-> +			year, mon, day, hour, min, sec);
-> +	}
-> +}
-> +
->  static void cper_estatus_print_section(
-> -	const char *pfx, const struct acpi_hest_generic_data *gdata, int sec_no)
-> +	const char *pfx, struct acpi_hest_generic_data *gdata, int sec_no)
->  {
->  	uuid_le *sec_type = (uuid_le *)gdata->section_type;
->  	__u16 severity;
->  	char newpfx[64];
->  
-> +	if (acpi_hest_generic_data_version(gdata) >= 3)
-> +		cper_estatus_print_section_v300(pfx,
-> +			(const struct acpi_hest_generic_data_v300 *)gdata);
-> +
->  	severity = gdata->error_severity;
->  	printk("%s""Error %d, type: %s\n", pfx, sec_no,
->  	       cper_severity_str(severity));
-> @@ -403,14 +430,18 @@ static void cper_estatus_print_section(
->  
->  	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
->  	if (!uuid_le_cmp(*sec_type, CPER_SEC_PROC_GENERIC)) {
-> -		struct cper_sec_proc_generic *proc_err = (void *)(gdata + 1);
-> +		struct cper_sec_proc_generic *proc_err;
-> +
-> +		proc_err = acpi_hest_generic_data_payload(gdata);
->  		printk("%s""section_type: general processor error\n", newpfx);
->  		if (gdata->error_data_length >= sizeof(*proc_err))
->  			cper_print_proc_generic(newpfx, proc_err);
->  		else
->  			goto err_section_too_small;
->  	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PLATFORM_MEM)) {
-> -		struct cper_sec_mem_err *mem_err = (void *)(gdata + 1);
-> +		struct cper_sec_mem_err *mem_err;
-> +
-> +		mem_err = acpi_hest_generic_data_payload(gdata);
->  		printk("%s""section_type: memory error\n", newpfx);
->  		if (gdata->error_data_length >=
->  		    sizeof(struct cper_sec_mem_err_old))
-> @@ -419,7 +450,9 @@ static void cper_estatus_print_section(
->  		else
->  			goto err_section_too_small;
->  	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PCIE)) {
-> -		struct cper_sec_pcie *pcie = (void *)(gdata + 1);
-> +		struct cper_sec_pcie *pcie;
-> +
-> +		pcie = acpi_hest_generic_data_payload(gdata);
->  		printk("%s""section_type: PCIe error\n", newpfx);
->  		if (gdata->error_data_length >= sizeof(*pcie))
->  			cper_print_pcie(newpfx, pcie, gdata);
-> @@ -438,7 +471,7 @@ void cper_estatus_print(const char *pfx,
->  			const struct acpi_hest_generic_status *estatus)
->  {
->  	struct acpi_hest_generic_data *gdata;
-> -	unsigned int data_len, gedata_len;
-> +	unsigned int data_len;
->  	int sec_no = 0;
->  	char newpfx[64];
->  	__u16 severity;
-> @@ -451,12 +484,12 @@ void cper_estatus_print(const char *pfx,
->  	printk("%s""event severity: %s\n", pfx, cper_severity_str(severity));
->  	data_len = estatus->data_length;
->  	gdata = (struct acpi_hest_generic_data *)(estatus + 1);
-> +
->  	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
-> -	while (data_len >= sizeof(*gdata)) {
-> -		gedata_len = gdata->error_data_length;
-> +
-> +	while (data_len >= acpi_hest_generic_data_size(gdata)) {
->  		cper_estatus_print_section(newpfx, gdata, sec_no);
-> -		data_len -= gedata_len + sizeof(*gdata);
-> -		gdata = (void *)(gdata + 1) + gedata_len;
-> +		gdata = acpi_hest_generic_data_next(gdata);
->  		sec_no++;
->  	}
->  }
-> @@ -486,12 +519,13 @@ int cper_estatus_check(const struct acpi_hest_generic_status *estatus)
->  		return rc;
->  	data_len = estatus->data_length;
->  	gdata = (struct acpi_hest_generic_data *)(estatus + 1);
-> -	while (data_len >= sizeof(*gdata)) {
-> -		gedata_len = gdata->error_data_length;
-> -		if (gedata_len > data_len - sizeof(*gdata))
-> +
-> +	while (data_len >= acpi_hest_generic_data_size(gdata)) {
-> +		gedata_len = acpi_hest_generic_data_error_length(gdata);
-> +		if (gedata_len > data_len - acpi_hest_generic_data_size(gdata))
->  			return -EINVAL;
-> -		data_len -= gedata_len + sizeof(*gdata);
-> -		gdata = (void *)(gdata + 1) + gedata_len;
-> +		data_len -= gedata_len + acpi_hest_generic_data_size(gdata);
-> +		gdata = acpi_hest_generic_data_next(gdata);
->  	}
->  	if (data_len)
->  		return -EINVAL;
-> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
-> index 68f088a..56b9679 100644
-> --- a/include/acpi/ghes.h
-> +++ b/include/acpi/ghes.h
-> @@ -73,3 +73,13 @@ static inline void ghes_edac_unregister(struct ghes *ghes)
->  {
->  }
->  #endif
-> +
-> +#define acpi_hest_generic_data_version(gdata)			\
-> +	(gdata->revision >> 8)
-> +
-> +static inline void *acpi_hest_generic_data_payload(struct acpi_hest_generic_data *gdata)
-> +{
-> +	return acpi_hest_generic_data_version(gdata) >= 3 ?
-> +		(void *)(((struct acpi_hest_generic_data_v300 *)(gdata)) + 1) :
-> +		gdata + 1;
-> +}
 > diff --git a/include/linux/cper.h b/include/linux/cper.h
-> index dcacb1a..13ea41c 100644
+> index 13ea41c..2a9d553 100644
 > --- a/include/linux/cper.h
 > +++ b/include/linux/cper.h
-> @@ -255,6 +255,18 @@ enum {
+
+> @@ -180,6 +185,10 @@ enum {
+>  #define CPER_SEC_PROC_IPF						\
+>  	UUID_LE(0xE429FAF1, 0x3CB7, 0x11D4, 0x0B, 0xCA, 0x07, 0x00,	\
+>  		0x80, 0xC7, 0x3C, 0x88, 0x81)
+> +/* Processor Specific: ARMv8 */
+> +#define CPER_SEC_PROC_ARMV8						\
+> +	UUID_LE(0xE19E3D16, 0xBC11, 0x11E4, 0x9C, 0xAA, 0xC2, 0x05,	\
+> +		0x1D, 0x5D, 0x46, 0xB0)
+
+Nit: UEFI v2.6 N.2.2 (table 249) describes this as 'ARM' not 'ARMV8' (which is
+an architectural version).
+
+
+>  /* Platform Memory */
+>  #define CPER_SEC_PLATFORM_MEM						\
+>  	UUID_LE(0xA5BC1114, 0x6F64, 0x4EDE, 0xB8, 0x63, 0x3E, 0x83,	\
+> @@ -255,6 +264,34 @@ enum {
 >  
 >  #define CPER_PCIE_SLOT_SHIFT			3
 >  
+> +#define CPER_ARMV8_ERR_INFO_NUM_MASK		0x00000000000000FF
+> +#define CPER_ARMV8_CTX_INFO_NUM_MASK		0x0000000000FFFF00
 
-> +#define acpi_hest_generic_data_error_length(gdata)	\
-> +	(((struct acpi_hest_generic_data *)(gdata))->error_data_length)
-> +#define acpi_hest_generic_data_size(gdata)		\
-> +	((acpi_hest_generic_data_version(gdata) >= 3) ?	\
-> +	sizeof(struct acpi_hest_generic_data_v300) :	\
-> +	sizeof(struct acpi_hest_generic_data))
-> +#define acpi_hest_generic_data_record_size(gdata)	\
-> +	(acpi_hest_generic_data_size(gdata) +		\
-> +	acpi_hest_generic_data_error_length(gdata))
-> +#define acpi_hest_generic_data_next(gdata)		\
-> +	((void *)(gdata) + acpi_hest_generic_data_record_size(gdata))
+Table 260 describes both ERR_INFO_NUM and CONTEXT_INFO_NUM for as both being
+2bytes long, as does your struct cper_sec_proc_armv8 below. Are these for
+something else? Do these correspond with one of the four bitfield formats
+described in Table 262->265?
+
+I can't see where they are used, and they look like they are reaching across
+multiple fields in a struct.
+
+
+> +#define CPER_ARMV8_CTX_INFO_NUM_SHIFT		8
+> +
+> +#define CPER_ARMV8_VALID_MPIDR			0x00000001
+> +#define CPER_ARMV8_VALID_AFFINITY_LEVEL		0x00000002
+> +#define CPER_ARMV8_VALID_RUNNING_STATE		0x00000004
+> +#define CPER_ARMV8_VALID_VENDOR_INFO		0x00000008
+> +
+> +#define CPER_ARMV8_INFO_VALID_MULTI_ERR		0x0001
+> +#define CPER_ARMV8_INFO_VALID_FLAGS		0x0002
+> +#define CPER_ARMV8_INFO_VALID_ERR_INFO		0x0004
+> +#define CPER_ARMV8_INFO_VALID_VIRT_ADDR		0x0008
+> +#define CPER_ARMV8_INFO_VALID_PHYSICAL_ADDR	0x0010
+> +
+> +#define CPER_ARMV8_INFO_FLAGS_FIRST		0x0001
+> +#define CPER_ARMV8_INFO_FLAGS_LAST		0x0002
+> +#define CPER_ARMV8_INFO_FLAGS_PROPAGATED	0x0004
+> +
+> +#define CPER_AARCH64_CTX_LEN			368
+> +#define CPER_AARCH32_CTX_LEN			256
+
+Are these the worst case sizes for combinations of the structures in N2.4.4.2?
+(Tables 266 to 273)
+
+If so is there any chance they could be sizeof(<some union of structs>), even if
+the structs are things like:
+> /* ARMv8 AArch64 GPRs (Type 4) - defined in UEFI Spec N2.4.4.2 */
+> struct cper_armv8_aarch64_gprs {
+> 	u64 regs[32];
+> }
+
+This way its easier to check the number is correct, and if a new type is added
+this won't get forgotten.
+
+
+> +#define CPER_ARMV8_CTX_TYPE_MASK		0x000000000000000F
+> +#define CPER_ARMV8_CTX_EL_MASK			0x0000000000000070
+> +#define CPER_ARMV8_CTX_NS_MASK			0x0000000000000080
+> +#define CPER_ARMV8_CTX_EL_SHIFT			4
+> +#define CPER_ARMV8_CTX_NS_SHIFT			7
 > +
 
-How come these aren't in ghes.h?
+Again, I can't work out what these correspond to. I can't see a secure bit or EL
+field in any of those UEFI tables.
+
+Is this one of the 'ARM Vendor Specific Micro-Architecture Error Structure's? If
+so we should have some infrastructure for picking the correct (or unknown)
+decode function based on a range of MIDRs.
 
 
+>  #define acpi_hest_generic_data_error_length(gdata)	\
+>  	(((struct acpi_hest_generic_data *)(gdata))->error_data_length)
+>  #define acpi_hest_generic_data_size(gdata)		\
+> @@ -352,6 +389,41 @@ struct cper_ia_proc_ctx {
+>  	__u64	mm_reg_addr;
+>  };
+>  
+> +/* ARMv8 Processor Error Section */
+> +struct cper_sec_proc_armv8 {
+> +	__u32	validation_bits;
+> +	__u16	err_info_num; /* Number of Processor Error Info */
+> +	__u16	context_info_num; /* Number of Processor Context Info Records*/
+> +	__u32	section_length;
+> +	__u8	affinity_level;
+> +	__u8	reserved[3];	/* must be zero */
+> +	__u64	mpidr;
+> +	__u64	midr;
+> +	__u32	running_state; /* Bit 0 set - Processor running. PSCI = 0 */
+> +	__u32	psci_state;
+> +};
+> +
+> +/* ARMv8 Processor Error Information Structure */
+> +struct cper_armv8_err_info {
+> +	__u8	version;
+> +	__u8	length;
+> +	__u16	validation_bits;
+> +	__u8	type;
+> +	__u16	multiple_error;
+> +	__u8	flags;
+> +	__u64	error_info;
+> +	__u64	virt_fault_addr;
+> +	__u64	physical_fault_addr;
+> +};
 
-Reviewed-by: James Morse <james.morse@arm.com>
+
+> +/* ARMv8 AARCH64 Processor Context Information Structure */
+> +struct cper_armv8_aarch64_ctx {
+> +	__u8	type_el_ns;
+> +	__u8	reserved[7];	/* must be zero */
+> +	__u8	gpr[288];
+> +	__u8	spr[68];
+> +};
+
+Is this:
+"Table 265. ARM Processor Error Context Information Header Structure"?
+
+
+Sorry if I've missed something blindingly obvious!
 
 
 Thanks,
 
 James
+
+[0] http://www.uefi.org/sites/default/files/resources/UEFI%20Spec%202_6.pdf
