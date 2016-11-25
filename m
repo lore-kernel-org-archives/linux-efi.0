@@ -1,104 +1,233 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] arm64: mm: Fix memmap to be initialized for the entire
- section
-Date: Fri, 25 Nov 2016 17:01:01 +0000
-Message-ID: <CAKv+Gu8Hbf1sY4zMGoosYjGa1esApqP8a4Zs2Zqj4nNZ8AdtSw@mail.gmail.com>
-References: <CAKv+Gu8aWpz5vXSWdKHwL5Xk2aWyQBOoR1WHOnVPaWZOwqojBQ@mail.gmail.com>
- <20161124134238.GI10776@rric.localdomain>
- <CAKv+Gu_Ug3XOD6jy5xziy1pS7WV=TC0RLD4j3DT6nytujQDzRQ@mail.gmail.com>
- <20161124135151.GJ10776@rric.localdomain>
- <CAKv+Gu9qB7P2epMGdwFJ3vJR3vt-bBxU0nKwmKdpaOpTKdqzzA@mail.gmail.com>
- <20161124141149.GE2213@rric.localdomain>
- <CAKv+Gu-SXX_Vv1Wi1Nm=5vdaXSS0MBp20QBpQVacSKPLfdH0-A@mail.gmail.com>
- <20161124150918.GF2213@rric.localdomain>
- <20161124192659.GH2213@rric.localdomain>
- <CAKv+Gu_C_17RtAiw2U0OOzVik3G7KkwUTo5eiGK-HDo-maQ-bA@mail.gmail.com>
- <20161125112914.GI2213@rric.localdomain>
- <CAKv+Gu9h2YWJd8-+FhSYSftUsddj1f-HTA2D-6nC=8Wk6U1iAg@mail.gmail.com>
+From: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH V5 01/10] acpi: apei: read ack upon ghes record consumption
+Date: Fri, 25 Nov 2016 18:19:03 +0000
+Message-ID: <58388097.9000106@arm.com>
+References: <1479767763-27532-1-git-send-email-tbaicar@codeaurora.org> <1479767763-27532-2-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAKv+Gu9h2YWJd8-+FhSYSftUsddj1f-HTA2D-6nC=8Wk6U1iAg@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Robert Richter <robert.richter@cavium.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Robert Richter <rric@kernel.org>, David Daney <david.daney@cavium.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hanjun Guo <hanjun.guo@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1479767763-27532-2-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Cc: marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tomasz.nowicki-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Suzuki.Poulose-5wv7dgnIgG8@public.gmane.org, punit.agrawal-5wv7dgnIgG8@public.gmane.org, astone-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 25 November 2016 at 12:28, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> On 25 November 2016 at 11:29, Robert Richter <robert.richter@cavium.com> wrote:
->> On 24.11.16 19:42:47, Ard Biesheuvel wrote:
->>> On 24 November 2016 at 19:26, Robert Richter <robert.richter@cavium.com> wrote:
->>
->>> > I revisited the code and it is working well already since:
->>> >
->>> >  e7cd190385d1 arm64: mark reserved memblock regions explicitly in iomem
->>> >
->>> > Now, try_ram_remap() is only called if the region to be mapped is
->>> > entirely in IORESOURCE_SYSTEM_RAM. This is only true for normal mem
->>> > ranges and not NOMAP mem. region_intersects() then returns
->>> > REGION_INTERSECTS and calls try_ram_remap(). For the NOMAP memory case
->>> > REGION_DISJOINT would be returned and thus arch_memremap_wb() being
->>> > called directly. Before the e7cd190385d1 change try_ram_remap() was
->>> > called also for nomap regions.
->>> >
->>> > So we can leave memremap() as it is and just apply this patch
->>> > unmodified. What do you think?
->>>
->>> I agree. The pfn_valid() check in try_ram_remap() is still appropriate
->>> simply because the PageHighmem check requires a valid struct page. But
->>> if we don't enter that code path anymore for NOMAP regions, I think
->>> we're ok.
->>>
->>> > Please ack.
->>> >
->>>
->>> I still don't fully understand how it is guaranteed that *all* memory
->>> (i.e., all regions for which memblock_is_memory() returns true) is
->>> covered by a struct page, but marked as reserved. Are we relying on
->>> the fact that NOMAP memory is also memblock_reserve()'d?
->>
->> See free_low_memory_core_early():
->>
->> ----
->>         for_each_free_mem_range(i, NUMA_NO_NODE, MEMBLOCK_NONE, &start, &end,
->>                                 NULL)
->>                 count += __free_memory_core(start, end);
->> ----
->>
->> Only mem with the MEMBLOCK_NONE flag is added. And NOMAP pages are
->> also *not* marked reserved. So nothing at all from NOMAP mem is
->> reported to mm, it is not present (see below for a mem config, note
->> flags: 0x4 mem regions).
->>
->
-> OK, thanks for clearing that up. But that still does not explain how
-> we can be certain that NOMAP regions are guaranteed to be covered by a
-> struct page, does it? Because that is ultimately what pfn_valid()
-> means, that it is safe to, e.g., look at the page flags.
->
+Hi Tyler,
 
-Answering to self: arm64_memory_present() registers all memory as
-present, which means that sparse_init() will allocate struct page
-backing for all of memory, including NOMAP regions.
+On 21/11/16 22:35, Tyler Baicar wrote:
+> A RAS (Reliability, Availability, Serviceability) controller
+> may be a separate processor running in parallel with OS
+> execution, and may generate error records for consumption by
+> the OS. If the RAS controller produces multiple error records,
+> then they may be overwritten before the OS has consumed them.
+> 
+> The Generic Hardware Error Source (GHES) v2 structure
+> introduces the capability for the OS to acknowledge the
+> consumption of the error record generated by the RAS
+> controller. A RAS controller supporting GHESv2 shall wait for
+> the acknowledgment before writing a new error record, thus
+> eliminating the race condition.
 
-We could ask ourselves whether it makes sense to disregard NOMAP
-memory here, but that probably buys us very little (but I do wonder
-how it affects the occurrence of the bug).
+This patch also adds support for parsing GHESv2 sub-tables.
+Before they would be rejected as an unknown hardware error source.
 
-In any case, it looks to me like your patch is safe, i.e., calling
-pfn_valid() on NOMAP pages is safe, although I still find it debatable
-whether the kernel should be tracking memory it does not own. However,
-for performance reasons, it probably makes sense to apply your patch,
-and if anyone ever comes up with a use case where this is problematic
-(e.g., gigabytes of NOMAP memory), we can look into it then.
 
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+
+Nit: the patch author's Sign-off should come first, you either need a 'From:
+Jonathan (Zhixiong) Zhang ...' on this patch, or re-order these Signed-off-by's.
+
+
+> Signed-off-by: Richard Ruigrok <rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> Signed-off-by: Naveen Kaje <nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> ---
+>  drivers/acpi/apei/ghes.c | 49 +++++++++++++++++++++++++++++++++++++++++++++---
+>  drivers/acpi/apei/hest.c |  7 +++++--
+>  include/acpi/ghes.h      |  5 ++++-
+>  3 files changed, 55 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index 60746ef..b79abc5 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -45,6 +45,7 @@
+>  #include <linux/aer.h>
+>  #include <linux/nmi.h>
+>  
+> +#include <acpi/actbl1.h>
+>  #include <acpi/ghes.h>
+>  #include <acpi/apei.h>
+>  #include <asm/tlbflush.h>
+> @@ -79,6 +80,10 @@
+>  	((struct acpi_hest_generic_status *)				\
+>  	 ((struct ghes_estatus_node *)(estatus_node) + 1))
+>  
+> +#define HEST_TYPE_GENERIC_V2(ghes)				\
+> +	((struct acpi_hest_header *)ghes->generic)->type ==	\
+> +	 ACPI_HEST_TYPE_GENERIC_ERROR_V2
+> +
+
+IS_ HEST_TYPE_GENERIC_V2() ? (for the sake of readability)
+
+
+>  /*
+>   * This driver isn't really modular, however for the time being,
+>   * continuing to use module_param is the easiest way to remain
+> @@ -248,10 +253,18 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+>  	ghes = kzalloc(sizeof(*ghes), GFP_KERNEL);
+>  	if (!ghes)
+>  		return ERR_PTR(-ENOMEM);
+> +
+>  	ghes->generic = generic;
+> +	if (HEST_TYPE_GENERIC_V2(ghes)) {
+> +		rc = apei_map_generic_address(
+> +			&ghes->generic_v2->read_ack_register);
+> +		if (rc)
+> +			goto err_free;
+> +	}
+> +
+>  	rc = apei_map_generic_address(&generic->error_status_address);
+>  	if (rc)
+> -		goto err_free;
+> +		goto err_unmap_read_ack_addr;
+>  	error_block_length = generic->error_block_length;
+>  	if (error_block_length > GHES_ESTATUS_MAX_SIZE) {
+>  		pr_warning(FW_WARN GHES_PFX
+> @@ -263,13 +276,17 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+>  	ghes->estatus = kmalloc(error_block_length, GFP_KERNEL);
+>  	if (!ghes->estatus) {
+>  		rc = -ENOMEM;
+> -		goto err_unmap;
+> +		goto err_unmap_status_addr;
+>  	}
+>  
+>  	return ghes;
+>  
+> -err_unmap:
+> +err_unmap_status_addr:
+>  	apei_unmap_generic_address(&generic->error_status_address);
+> +err_unmap_read_ack_addr:
+> +	if (HEST_TYPE_GENERIC_V2(ghes))
+> +		apei_unmap_generic_address(
+> +			&ghes->generic_v2->read_ack_register);
+>  err_free:
+>  	kfree(ghes);
+>  	return ERR_PTR(rc);
+> @@ -279,6 +296,9 @@ static void ghes_fini(struct ghes *ghes)
+>  {
+>  	kfree(ghes->estatus);
+>  	apei_unmap_generic_address(&ghes->generic->error_status_address);
+> +	if (HEST_TYPE_GENERIC_V2(ghes))
+> +		apei_unmap_generic_address(
+> +			&ghes->generic_v2->read_ack_register);
+>  }
+>  
+>  static inline int ghes_severity(int severity)
+> @@ -648,6 +668,23 @@ static void ghes_estatus_cache_add(
+>  	rcu_read_unlock();
+>  }
+>  
+> +static int ghes_ack_error(struct acpi_hest_generic_v2 *generic_v2)
+> +{
+> +	int rc;
+> +	u64 val = 0;
+> +
+> +	rc = apei_read(&val, &generic_v2->read_ack_register);
+> +	if (rc)
+> +		return rc;
+> +	val &= generic_v2->read_ack_preserve <<
+> +		generic_v2->read_ack_register.bit_offset;
+> +	val |= generic_v2->read_ack_write <<
+> +		generic_v2->read_ack_register.bit_offset;
+
+Is this bit_offset shifting needed in case the read_ack_register is in the
+'system io' (or embedded controller) address space and shares a register with
+some other stuff?
+
+The read_ack_{preserve,write} values are u64, so if bit_offset is non-zero the
+high order bits get lost, but both ends of this are in the firmware's control.
+
+(I assumed this thing would always be in memory and these fields would never be
+used - but I guess that isn't true!)
+
+
+> +	rc = apei_write(val, &generic_v2->read_ack_register);
+> +
+> +	return rc;
+> +}
+> +
+>  static int ghes_proc(struct ghes *ghes)
+>  {
+>  	int rc;
+> @@ -660,6 +697,12 @@ static int ghes_proc(struct ghes *ghes)
+>  			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+>  	}
+>  	ghes_do_proc(ghes, ghes->estatus);
+> +
+> +	if (HEST_TYPE_GENERIC_V2(ghes)) {
+> +		rc = ghes_ack_error(ghes->generic_v2);
+> +		if (rc)
+> +			return rc;
+> +	}
+>  out:
+>  	ghes_clear_estatus(ghes);
+>  	return 0;
+> diff --git a/drivers/acpi/apei/hest.c b/drivers/acpi/apei/hest.c
+> index 792a0d9..ef725a9 100644
+> --- a/drivers/acpi/apei/hest.c
+> +++ b/drivers/acpi/apei/hest.c
+> @@ -52,6 +52,7 @@ static const int hest_esrc_len_tab[ACPI_HEST_TYPE_RESERVED] = {
+>  	[ACPI_HEST_TYPE_AER_ENDPOINT] = sizeof(struct acpi_hest_aer),
+>  	[ACPI_HEST_TYPE_AER_BRIDGE] = sizeof(struct acpi_hest_aer_bridge),
+>  	[ACPI_HEST_TYPE_GENERIC_ERROR] = sizeof(struct acpi_hest_generic),
+> +	[ACPI_HEST_TYPE_GENERIC_ERROR_V2] = sizeof(struct acpi_hest_generic_v2),
+>  };
+>  
+>  static int hest_esrc_len(struct acpi_hest_header *hest_hdr)
+> @@ -146,7 +147,8 @@ static int __init hest_parse_ghes_count(struct acpi_hest_header *hest_hdr, void
+>  {
+>  	int *count = data;
+>  
+> -	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR)
+> +	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR ||
+> +	    hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+>  		(*count)++;
+>  	return 0;
+>  }
+> @@ -157,7 +159,8 @@ static int __init hest_parse_ghes(struct acpi_hest_header *hest_hdr, void *data)
+>  	struct ghes_arr *ghes_arr = data;
+>  	int rc, i;
+>  
+> -	if (hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR)
+> +	if (hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR &&
+> +	    hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+>  		return 0;
+>  
+>  	if (!((struct acpi_hest_generic *)hest_hdr)->enabled)
+> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+> index 720446c..68f088a 100644
+> --- a/include/acpi/ghes.h
+> +++ b/include/acpi/ghes.h
+> @@ -13,7 +13,10 @@
+>  #define GHES_EXITING		0x0002
+>  
+>  struct ghes {
+> -	struct acpi_hest_generic *generic;
+> +	union {
+> +		struct acpi_hest_generic *generic;
+> +		struct acpi_hest_generic_v2 *generic_v2;
+> +	};
+>  	struct acpi_hest_generic_status *estatus;
+>  	u64 buffer_paddr;
+>  	unsigned long flags;
+> 
+
+Looks good to me, for what its worth:
+Reviewed-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+
+
+Thanks,
+
+James
