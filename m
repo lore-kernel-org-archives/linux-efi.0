@@ -1,75 +1,547 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [RFC PATCH v3 20/20] x86: Add support to make use of Secure
- Memory Encryption
-Date: Sat, 26 Nov 2016 21:47:03 +0100
-Message-ID: <20161126204703.wlcd6cw7dxzvpxyc@pd.tnic>
-References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
- <20161110003838.3280.23327.stgit@tlendack-t1.amdoffice.net>
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V5 01/10] acpi: apei: read ack upon ghes record consumption
+Date: Mon, 28 Nov 2016 11:34:56 -0700
+Message-ID: <f2aaa324-6bba-bb1b-f8b8-ef7d9efa2a64@codeaurora.org>
+References: <1479767763-27532-1-git-send-email-tbaicar@codeaurora.org>
+ <1479767763-27532-2-git-send-email-tbaicar@codeaurora.org>
+ <58388097.9000106@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20161110003838.3280.23327.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+Content-Type: multipart/mixed; boundary="===============8656977185912611613=="
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <58388097.9000106@arm.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: James Morse <james.morse@arm.com>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, lenb@kernel.org, harba@codeaurora.org, marc.zyngier@arm.com, punit.agrawal@arm.com, tomasz.nowicki@linaro.org, nkaje@codeaurora.org, rostedt@goodmis.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Nov 09, 2016 at 06:38:38PM -0600, Tom Lendacky wrote:
-> This patch adds the support to check if SME has been enabled and if the
-> mem_encrypt=on command line option is set. If both of these conditions
-> are true, then the encryption mask is set and the kernel is encrypted
-> "in place."
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/kernel/head_64.S          |    1 +
->  arch/x86/kernel/mem_encrypt_init.c |   60 +++++++++++++++++++++++++++++++++++-
->  arch/x86/mm/mem_encrypt.c          |    2 +
->  3 files changed, 62 insertions(+), 1 deletion(-)
-> 
-> diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
-> index e8a7272..c225433 100644
-> --- a/arch/x86/kernel/head_64.S
-> +++ b/arch/x86/kernel/head_64.S
-> @@ -100,6 +100,7 @@ startup_64:
->  	 * to include it in the page table fixups.
->  	 */
->  	push	%rsi
-> +	movq	%rsi, %rdi
->  	call	sme_enable
->  	pop	%rsi
->  	movq	%rax, %r12
-> diff --git a/arch/x86/kernel/mem_encrypt_init.c b/arch/x86/kernel/mem_encrypt_init.c
-> index 7bdd159..c94ceb8 100644
-> --- a/arch/x86/kernel/mem_encrypt_init.c
-> +++ b/arch/x86/kernel/mem_encrypt_init.c
-> @@ -16,9 +16,14 @@
->  #include <linux/mm.h>
->  
->  #include <asm/sections.h>
-> +#include <asm/processor-flags.h>
-> +#include <asm/msr.h>
-> +#include <asm/cmdline.h>
->  
->  #ifdef CONFIG_AMD_MEM_ENCRYPT
->  
-> +static char sme_cmdline_arg[] __initdata = "mem_encrypt=on";
+This is a multi-part message in MIME format.
+--===============8656977185912611613==
+Content-Type: multipart/alternative;
+ boundary="------------17E7D77F7011E4C3285C1028"
 
-One more thing: just like we're adding an =on switch, we'd need an =off
-switch in case something's wrong with the SME code. IOW, if a user
-supplies "mem_encrypt=off", we do not encrypt.
+This is a multi-part message in MIME format.
+--------------17E7D77F7011E4C3285C1028
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 
-Thanks.
+Hello James,
+
+Thank you for your feedback!
+
+On 11/25/2016 11:19 AM, James Morse wrote:
+> Hi Tyler,
+>
+> On 21/11/16 22:35, Tyler Baicar wrote:
+>> A RAS (Reliability, Availability, Serviceability) controller
+>> may be a separate processor running in parallel with OS
+>> execution, and may generate error records for consumption by
+>> the OS. If the RAS controller produces multiple error records,
+>> then they may be overwritten before the OS has consumed them.
+>>
+>> The Generic Hardware Error Source (GHES) v2 structure
+>> introduces the capability for the OS to acknowledge the
+>> consumption of the error record generated by the RAS
+>> controller. A RAS controller supporting GHESv2 shall wait for
+>> the acknowledgment before writing a new error record, thus
+>> eliminating the race condition.
+> This patch also adds support for parsing GHESv2 sub-tables.
+> Before they would be rejected as an unknown hardware error source.
+Yes, I will add that to the text.
+>> Signed-off-by: Jonathan (Zhixiong) Zhang<zjzhang@codeaurora.org>
+> Nit: the patch author's Sign-off should come first, you either need a 'From:
+> Jonathan (Zhixiong) Zhang ...' on this patch, or re-order these Signed-off-by's.
+I'll reorder them in the next set.
+>> Signed-off-by: Richard Ruigrok<rruigrok@codeaurora.org>
+>> Signed-off-by: Tyler Baicar<tbaicar@codeaurora.org>
+>> Signed-off-by: Naveen Kaje<nkaje@codeaurora.org>
+>> ---
+>>   drivers/acpi/apei/ghes.c | 49 +++++++++++++++++++++++++++++++++++++++++++++---
+>>   drivers/acpi/apei/hest.c |  7 +++++--
+>>   include/acpi/ghes.h      |  5 ++++-
+>>   3 files changed, 55 insertions(+), 6 deletions(-)
+>>
+>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+>> index 60746ef..b79abc5 100644
+>> --- a/drivers/acpi/apei/ghes.c
+>> +++ b/drivers/acpi/apei/ghes.c
+>> @@ -45,6 +45,7 @@
+>>   #include <linux/aer.h>
+>>   #include <linux/nmi.h>
+>>   
+>> +#include <acpi/actbl1.h>
+>>   #include <acpi/ghes.h>
+>>   #include <acpi/apei.h>
+>>   #include <asm/tlbflush.h>
+>> @@ -79,6 +80,10 @@
+>>   	((struct acpi_hest_generic_status *)				\
+>>   	 ((struct ghes_estatus_node *)(estatus_node) + 1))
+>>   
+>> +#define HEST_TYPE_GENERIC_V2(ghes)				\
+>> +	((struct acpi_hest_header *)ghes->generic)->type ==	\
+>> +	 ACPI_HEST_TYPE_GENERIC_ERROR_V2
+>> +
+> IS_ HEST_TYPE_GENERIC_V2() ? (for the sake of readability)
+>
+Will do.
+>>   /*
+>>    * This driver isn't really modular, however for the time being,
+>>    * continuing to use module_param is the easiest way to remain
+>> @@ -248,10 +253,18 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+>>   	ghes = kzalloc(sizeof(*ghes), GFP_KERNEL);
+>>   	if (!ghes)
+>>   		return ERR_PTR(-ENOMEM);
+>> +
+>>   	ghes->generic = generic;
+>> +	if (HEST_TYPE_GENERIC_V2(ghes)) {
+>> +		rc = apei_map_generic_address(
+>> +			&ghes->generic_v2->read_ack_register);
+>> +		if (rc)
+>> +			goto err_free;
+>> +	}
+>> +
+>>   	rc = apei_map_generic_address(&generic->error_status_address);
+>>   	if (rc)
+>> -		goto err_free;
+>> +		goto err_unmap_read_ack_addr;
+>>   	error_block_length = generic->error_block_length;
+>>   	if (error_block_length > GHES_ESTATUS_MAX_SIZE) {
+>>   		pr_warning(FW_WARN GHES_PFX
+>> @@ -263,13 +276,17 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+>>   	ghes->estatus = kmalloc(error_block_length, GFP_KERNEL);
+>>   	if (!ghes->estatus) {
+>>   		rc = -ENOMEM;
+>> -		goto err_unmap;
+>> +		goto err_unmap_status_addr;
+>>   	}
+>>   
+>>   	return ghes;
+>>   
+>> -err_unmap:
+>> +err_unmap_status_addr:
+>>   	apei_unmap_generic_address(&generic->error_status_address);
+>> +err_unmap_read_ack_addr:
+>> +	if (HEST_TYPE_GENERIC_V2(ghes))
+>> +		apei_unmap_generic_address(
+>> +			&ghes->generic_v2->read_ack_register);
+>>   err_free:
+>>   	kfree(ghes);
+>>   	return ERR_PTR(rc);
+>> @@ -279,6 +296,9 @@ static void ghes_fini(struct ghes *ghes)
+>>   {
+>>   	kfree(ghes->estatus);
+>>   	apei_unmap_generic_address(&ghes->generic->error_status_address);
+>> +	if (HEST_TYPE_GENERIC_V2(ghes))
+>> +		apei_unmap_generic_address(
+>> +			&ghes->generic_v2->read_ack_register);
+>>   }
+>>   
+>>   static inline int ghes_severity(int severity)
+>> @@ -648,6 +668,23 @@ static void ghes_estatus_cache_add(
+>>   	rcu_read_unlock();
+>>   }
+>>   
+>> +static int ghes_ack_error(struct acpi_hest_generic_v2 *generic_v2)
+>> +{
+>> +	int rc;
+>> +	u64 val = 0;
+>> +
+>> +	rc = apei_read(&val, &generic_v2->read_ack_register);
+>> +	if (rc)
+>> +		return rc;
+>> +	val &= generic_v2->read_ack_preserve <<
+>> +		generic_v2->read_ack_register.bit_offset;
+>> +	val |= generic_v2->read_ack_write <<
+>> +		generic_v2->read_ack_register.bit_offset;
+> Is this bit_offset shifting needed in case the read_ack_register is in the
+> 'system io' (or embedded controller) address space and shares a register with
+> some other stuff?
+>
+> The read_ack_{preserve,write} values are u64, so if bit_offset is non-zero the
+> high order bits get lost, but both ends of this are in the firmware's control.
+>
+> (I assumed this thing would always be in memory and these fields would never be
+> used - but I guess that isn't true!)
+>
+Yeah, we are not using these values, but they are defined this way in 
+the ACPI 6.1 spec (Table 18-344).
+read_ack_register is defined as a Generic Address Structure which has 
+this offset defined in
+Table 5-26.
+
+I assume it is defined this way for shared registers as you mentioned 
+though. With this
+flexibility the firmware is able to specify exactly what to write.
+>> +	rc = apei_write(val, &generic_v2->read_ack_register);
+>> +
+>> +	return rc;
+>> +}
+>> +
+>>   static int ghes_proc(struct ghes *ghes)
+>>   {
+>>   	int rc;
+>> @@ -660,6 +697,12 @@ static int ghes_proc(struct ghes *ghes)
+>>   			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+>>   	}
+>>   	ghes_do_proc(ghes, ghes->estatus);
+>> +
+>> +	if (HEST_TYPE_GENERIC_V2(ghes)) {
+>> +		rc = ghes_ack_error(ghes->generic_v2);
+>> +		if (rc)
+>> +			return rc;
+>> +	}
+>>   out:
+>>   	ghes_clear_estatus(ghes);
+>>   	return 0;
+>> diff --git a/drivers/acpi/apei/hest.c b/drivers/acpi/apei/hest.c
+>> index 792a0d9..ef725a9 100644
+>> --- a/drivers/acpi/apei/hest.c
+>> +++ b/drivers/acpi/apei/hest.c
+>> @@ -52,6 +52,7 @@ static const int hest_esrc_len_tab[ACPI_HEST_TYPE_RESERVED] = {
+>>   	[ACPI_HEST_TYPE_AER_ENDPOINT] = sizeof(struct acpi_hest_aer),
+>>   	[ACPI_HEST_TYPE_AER_BRIDGE] = sizeof(struct acpi_hest_aer_bridge),
+>>   	[ACPI_HEST_TYPE_GENERIC_ERROR] = sizeof(struct acpi_hest_generic),
+>> +	[ACPI_HEST_TYPE_GENERIC_ERROR_V2] = sizeof(struct acpi_hest_generic_v2),
+>>   };
+>>   
+>>   static int hest_esrc_len(struct acpi_hest_header *hest_hdr)
+>> @@ -146,7 +147,8 @@ static int __init hest_parse_ghes_count(struct acpi_hest_header *hest_hdr, void
+>>   {
+>>   	int *count = data;
+>>   
+>> -	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR)
+>> +	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR ||
+>> +	    hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+>>   		(*count)++;
+>>   	return 0;
+>>   }
+>> @@ -157,7 +159,8 @@ static int __init hest_parse_ghes(struct acpi_hest_header *hest_hdr, void *data)
+>>   	struct ghes_arr *ghes_arr = data;
+>>   	int rc, i;
+>>   
+>> -	if (hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR)
+>> +	if (hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR &&
+>> +	    hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+>>   		return 0;
+>>   
+>>   	if (!((struct acpi_hest_generic *)hest_hdr)->enabled)
+>> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+>> index 720446c..68f088a 100644
+>> --- a/include/acpi/ghes.h
+>> +++ b/include/acpi/ghes.h
+>> @@ -13,7 +13,10 @@
+>>   #define GHES_EXITING		0x0002
+>>   
+>>   struct ghes {
+>> -	struct acpi_hest_generic *generic;
+>> +	union {
+>> +		struct acpi_hest_generic *generic;
+>> +		struct acpi_hest_generic_v2 *generic_v2;
+>> +	};
+>>   	struct acpi_hest_generic_status *estatus;
+>>   	u64 buffer_paddr;
+>>   	unsigned long flags;
+>>
+> Looks good to me, for what its worth:
+> Reviewed-by: James Morse<james.morse@arm.com>
+Thanks!
+Tyler
 
 -- 
-Regards/Gruss,
-    Boris.
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
 
-Good mailing practices for 400: avoid top-posting and trim the reply.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+--------------17E7D77F7011E4C3285C1028
+Content-Type: text/html; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+
+<html>
+  <head>
+    <meta content="text/html; charset=windows-1252"
+      http-equiv="Content-Type">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    Hello James,<br>
+    <br>
+    Thank you for your feedback!<br>
+    <br>
+    <div class="moz-cite-prefix">On 11/25/2016 11:19 AM, James Morse
+      wrote:<br>
+    </div>
+    <blockquote cite="mid:58388097.9000106@arm.com" type="cite">
+      <pre wrap="">Hi Tyler,
+
+On 21/11/16 22:35, Tyler Baicar wrote:
+</pre>
+      <blockquote type="cite">
+        <pre wrap="">A RAS (Reliability, Availability, Serviceability) controller
+may be a separate processor running in parallel with OS
+execution, and may generate error records for consumption by
+the OS. If the RAS controller produces multiple error records,
+then they may be overwritten before the OS has consumed them.
+
+The Generic Hardware Error Source (GHES) v2 structure
+introduces the capability for the OS to acknowledge the
+consumption of the error record generated by the RAS
+controller. A RAS controller supporting GHESv2 shall wait for
+the acknowledgment before writing a new error record, thus
+eliminating the race condition.
+</pre>
+      </blockquote>
+      <pre wrap="">This patch also adds support for parsing GHESv2 sub-tables.
+Before they would be rejected as an unknown hardware error source.
+</pre>
+    </blockquote>
+    Yes, I will add that to the text.<br>
+    <blockquote cite="mid:58388097.9000106@arm.com" type="cite">
+      <blockquote type="cite">
+        <pre wrap="">Signed-off-by: Jonathan (Zhixiong) Zhang <a class="moz-txt-link-rfc2396E" href="mailto:zjzhang@codeaurora.org">&lt;zjzhang@codeaurora.org&gt;</a>
+</pre>
+      </blockquote>
+      <pre wrap="">Nit: the patch author's Sign-off should come first, you either need a 'From:
+Jonathan (Zhixiong) Zhang ...' on this patch, or re-order these Signed-off-by's.
+</pre>
+    </blockquote>
+    I'll reorder them in the next set.<br>
+    <blockquote cite="mid:58388097.9000106@arm.com" type="cite">
+      <blockquote type="cite">
+        <pre wrap="">Signed-off-by: Richard Ruigrok <a class="moz-txt-link-rfc2396E" href="mailto:rruigrok@codeaurora.org">&lt;rruigrok@codeaurora.org&gt;</a>
+Signed-off-by: Tyler Baicar <a class="moz-txt-link-rfc2396E" href="mailto:tbaicar@codeaurora.org">&lt;tbaicar@codeaurora.org&gt;</a>
+Signed-off-by: Naveen Kaje <a class="moz-txt-link-rfc2396E" href="mailto:nkaje@codeaurora.org">&lt;nkaje@codeaurora.org&gt;</a>
+---
+ drivers/acpi/apei/ghes.c | 49 +++++++++++++++++++++++++++++++++++++++++++++---
+ drivers/acpi/apei/hest.c |  7 +++++--
+ include/acpi/ghes.h      |  5 ++++-
+ 3 files changed, 55 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index 60746ef..b79abc5 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -45,6 +45,7 @@
+ #include &lt;linux/aer.h&gt;
+ #include &lt;linux/nmi.h&gt;
+ 
++#include &lt;acpi/actbl1.h&gt;
+ #include &lt;acpi/ghes.h&gt;
+ #include &lt;acpi/apei.h&gt;
+ #include &lt;asm/tlbflush.h&gt;
+@@ -79,6 +80,10 @@
+ 	((struct acpi_hest_generic_status *)				\
+ 	 ((struct ghes_estatus_node *)(estatus_node) + 1))
+ 
++#define HEST_TYPE_GENERIC_V2(ghes)				\
++	((struct acpi_hest_header *)ghes-&gt;generic)-&gt;type ==	\
++	 ACPI_HEST_TYPE_GENERIC_ERROR_V2
++
+</pre>
+      </blockquote>
+      <pre wrap="">IS_ HEST_TYPE_GENERIC_V2() ? (for the sake of readability)
+
+</pre>
+    </blockquote>
+    Will do.<br>
+    <blockquote cite="mid:58388097.9000106@arm.com" type="cite">
+      <blockquote type="cite">
+        <pre wrap=""> /*
+  * This driver isn't really modular, however for the time being,
+  * continuing to use module_param is the easiest way to remain
+@@ -248,10 +253,18 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+ 	ghes = kzalloc(sizeof(*ghes), GFP_KERNEL);
+ 	if (!ghes)
+ 		return ERR_PTR(-ENOMEM);
++
+ 	ghes-&gt;generic = generic;
++	if (HEST_TYPE_GENERIC_V2(ghes)) {
++		rc = apei_map_generic_address(
++			&amp;ghes-&gt;generic_v2-&gt;read_ack_register);
++		if (rc)
++			goto err_free;
++	}
++
+ 	rc = apei_map_generic_address(&amp;generic-&gt;error_status_address);
+ 	if (rc)
+-		goto err_free;
++		goto err_unmap_read_ack_addr;
+ 	error_block_length = generic-&gt;error_block_length;
+ 	if (error_block_length &gt; GHES_ESTATUS_MAX_SIZE) {
+ 		pr_warning(FW_WARN GHES_PFX
+@@ -263,13 +276,17 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+ 	ghes-&gt;estatus = kmalloc(error_block_length, GFP_KERNEL);
+ 	if (!ghes-&gt;estatus) {
+ 		rc = -ENOMEM;
+-		goto err_unmap;
++		goto err_unmap_status_addr;
+ 	}
+ 
+ 	return ghes;
+ 
+-err_unmap:
++err_unmap_status_addr:
+ 	apei_unmap_generic_address(&amp;generic-&gt;error_status_address);
++err_unmap_read_ack_addr:
++	if (HEST_TYPE_GENERIC_V2(ghes))
++		apei_unmap_generic_address(
++			&amp;ghes-&gt;generic_v2-&gt;read_ack_register);
+ err_free:
+ 	kfree(ghes);
+ 	return ERR_PTR(rc);
+@@ -279,6 +296,9 @@ static void ghes_fini(struct ghes *ghes)
+ {
+ 	kfree(ghes-&gt;estatus);
+ 	apei_unmap_generic_address(&amp;ghes-&gt;generic-&gt;error_status_address);
++	if (HEST_TYPE_GENERIC_V2(ghes))
++		apei_unmap_generic_address(
++			&amp;ghes-&gt;generic_v2-&gt;read_ack_register);
+ }
+ 
+ static inline int ghes_severity(int severity)
+@@ -648,6 +668,23 @@ static void ghes_estatus_cache_add(
+ 	rcu_read_unlock();
+ }
+ 
++static int ghes_ack_error(struct acpi_hest_generic_v2 *generic_v2)
++{
++	int rc;
++	u64 val = 0;
++
++	rc = apei_read(&amp;val, &amp;generic_v2-&gt;read_ack_register);
++	if (rc)
++		return rc;
++	val &amp;= generic_v2-&gt;read_ack_preserve &lt;&lt;
++		generic_v2-&gt;read_ack_register.bit_offset;
++	val |= generic_v2-&gt;read_ack_write &lt;&lt;
++		generic_v2-&gt;read_ack_register.bit_offset;
+</pre>
+      </blockquote>
+      <pre wrap="">Is this bit_offset shifting needed in case the read_ack_register is in the
+'system io' (or embedded controller) address space and shares a register with
+some other stuff?
+
+The read_ack_{preserve,write} values are u64, so if bit_offset is non-zero the
+high order bits get lost, but both ends of this are in the firmware's control.
+
+(I assumed this thing would always be in memory and these fields would never be
+used - but I guess that isn't true!)
+
+</pre>
+    </blockquote>
+    Yeah, we are not using these values, but they are defined this way
+    in the ACPI 6.1 spec (Table 18-344).<br>
+    read_ack_register is defined as a Generic Address Structure which
+    has this offset defined in<br>
+    Table 5-26.<br>
+    <br>
+    I assume it is defined this way for shared registers as you
+    mentioned though. With this<br>
+    flexibility the firmware is able to specify exactly what to write.<br>
+    <blockquote cite="mid:58388097.9000106@arm.com" type="cite">
+      <blockquote type="cite">
+        <pre wrap="">+	rc = apei_write(val, &amp;generic_v2-&gt;read_ack_register);
++
++	return rc;
++}
++
+ static int ghes_proc(struct ghes *ghes)
+ {
+ 	int rc;
+@@ -660,6 +697,12 @@ static int ghes_proc(struct ghes *ghes)
+ 			ghes_estatus_cache_add(ghes-&gt;generic, ghes-&gt;estatus);
+ 	}
+ 	ghes_do_proc(ghes, ghes-&gt;estatus);
++
++	if (HEST_TYPE_GENERIC_V2(ghes)) {
++		rc = ghes_ack_error(ghes-&gt;generic_v2);
++		if (rc)
++			return rc;
++	}
+ out:
+ 	ghes_clear_estatus(ghes);
+ 	return 0;
+diff --git a/drivers/acpi/apei/hest.c b/drivers/acpi/apei/hest.c
+index 792a0d9..ef725a9 100644
+--- a/drivers/acpi/apei/hest.c
++++ b/drivers/acpi/apei/hest.c
+@@ -52,6 +52,7 @@ static const int hest_esrc_len_tab[ACPI_HEST_TYPE_RESERVED] = {
+ 	[ACPI_HEST_TYPE_AER_ENDPOINT] = sizeof(struct acpi_hest_aer),
+ 	[ACPI_HEST_TYPE_AER_BRIDGE] = sizeof(struct acpi_hest_aer_bridge),
+ 	[ACPI_HEST_TYPE_GENERIC_ERROR] = sizeof(struct acpi_hest_generic),
++	[ACPI_HEST_TYPE_GENERIC_ERROR_V2] = sizeof(struct acpi_hest_generic_v2),
+ };
+ 
+ static int hest_esrc_len(struct acpi_hest_header *hest_hdr)
+@@ -146,7 +147,8 @@ static int __init hest_parse_ghes_count(struct acpi_hest_header *hest_hdr, void
+ {
+ 	int *count = data;
+ 
+-	if (hest_hdr-&gt;type == ACPI_HEST_TYPE_GENERIC_ERROR)
++	if (hest_hdr-&gt;type == ACPI_HEST_TYPE_GENERIC_ERROR ||
++	    hest_hdr-&gt;type == ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+ 		(*count)++;
+ 	return 0;
+ }
+@@ -157,7 +159,8 @@ static int __init hest_parse_ghes(struct acpi_hest_header *hest_hdr, void *data)
+ 	struct ghes_arr *ghes_arr = data;
+ 	int rc, i;
+ 
+-	if (hest_hdr-&gt;type != ACPI_HEST_TYPE_GENERIC_ERROR)
++	if (hest_hdr-&gt;type != ACPI_HEST_TYPE_GENERIC_ERROR &amp;&amp;
++	    hest_hdr-&gt;type != ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+ 		return 0;
+ 
+ 	if (!((struct acpi_hest_generic *)hest_hdr)-&gt;enabled)
+diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+index 720446c..68f088a 100644
+--- a/include/acpi/ghes.h
++++ b/include/acpi/ghes.h
+@@ -13,7 +13,10 @@
+ #define GHES_EXITING		0x0002
+ 
+ struct ghes {
+-	struct acpi_hest_generic *generic;
++	union {
++		struct acpi_hest_generic *generic;
++		struct acpi_hest_generic_v2 *generic_v2;
++	};
+ 	struct acpi_hest_generic_status *estatus;
+ 	u64 buffer_paddr;
+ 	unsigned long flags;
+
+</pre>
+      </blockquote>
+      <pre wrap="">Looks good to me, for what its worth:
+Reviewed-by: James Morse <a class="moz-txt-link-rfc2396E" href="mailto:james.morse@arm.com">&lt;james.morse@arm.com&gt;</a>
+</pre>
+    </blockquote>
+    Thanks!<br>
+    Tyler<br>
+    <pre class="moz-signature" cols="72">-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.</pre>
+  </body>
+</html>
+
+--------------17E7D77F7011E4C3285C1028--
+
+--===============8656977185912611613==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+kvmarm mailing list
+kvmarm@lists.cs.columbia.edu
+https://lists.cs.columbia.edu/mailman/listinfo/kvmarm
+
+--===============8656977185912611613==--
