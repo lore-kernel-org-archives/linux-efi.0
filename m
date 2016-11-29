@@ -1,79 +1,62 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
+From: Borislav Petkov <bp@alien8.de>
 Subject: Re: [RFC PATCH v3 20/20] x86: Add support to make use of Secure
  Memory Encryption
-Date: Tue, 29 Nov 2016 12:48:17 -0600
-Message-ID: <4cffdd71-dcc6-35e9-2654-e39067a525a8@amd.com>
+Date: Tue, 29 Nov 2016 20:56:18 +0100
+Message-ID: <20161129195618.ewuiw5rdsu26yf7w@pd.tnic>
 References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
  <20161110003838.3280.23327.stgit@tlendack-t1.amdoffice.net>
  <20161126204703.wlcd6cw7dxzvpxyc@pd.tnic>
+ <4cffdd71-dcc6-35e9-2654-e39067a525a8@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20161126204703.wlcd6cw7dxzvpxyc@pd.tnic>
+Content-Disposition: inline
+In-Reply-To: <4cffdd71-dcc6-35e9-2654-e39067a525a8@amd.com>
 Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/26/2016 2:47 PM, Borislav Petkov wrote:
-> On Wed, Nov 09, 2016 at 06:38:38PM -0600, Tom Lendacky wrote:
->> This patch adds the support to check if SME has been enabled and if the
->> mem_encrypt=on command line option is set. If both of these conditions
->> are true, then the encryption mask is set and the kernel is encrypted
->> "in place."
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->>  arch/x86/kernel/head_64.S          |    1 +
->>  arch/x86/kernel/mem_encrypt_init.c |   60 +++++++++++++++++++++++++++++++++++-
->>  arch/x86/mm/mem_encrypt.c          |    2 +
->>  3 files changed, 62 insertions(+), 1 deletion(-)
->>
->> diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
->> index e8a7272..c225433 100644
->> --- a/arch/x86/kernel/head_64.S
->> +++ b/arch/x86/kernel/head_64.S
->> @@ -100,6 +100,7 @@ startup_64:
->>  	 * to include it in the page table fixups.
->>  	 */
->>  	push	%rsi
->> +	movq	%rsi, %rdi
->>  	call	sme_enable
->>  	pop	%rsi
->>  	movq	%rax, %r12
->> diff --git a/arch/x86/kernel/mem_encrypt_init.c b/arch/x86/kernel/mem_encrypt_init.c
->> index 7bdd159..c94ceb8 100644
->> --- a/arch/x86/kernel/mem_encrypt_init.c
->> +++ b/arch/x86/kernel/mem_encrypt_init.c
->> @@ -16,9 +16,14 @@
->>  #include <linux/mm.h>
->>  
->>  #include <asm/sections.h>
->> +#include <asm/processor-flags.h>
->> +#include <asm/msr.h>
->> +#include <asm/cmdline.h>
->>  
->>  #ifdef CONFIG_AMD_MEM_ENCRYPT
->>  
->> +static char sme_cmdline_arg[] __initdata = "mem_encrypt=on";
+On Tue, Nov 29, 2016 at 12:48:17PM -0600, Tom Lendacky wrote:
+> > One more thing: just like we're adding an =on switch, we'd need an =off
+> > switch in case something's wrong with the SME code. IOW, if a user
+> > supplies "mem_encrypt=off", we do not encrypt.
 > 
-> One more thing: just like we're adding an =on switch, we'd need an =off
-> switch in case something's wrong with the SME code. IOW, if a user
-> supplies "mem_encrypt=off", we do not encrypt.
+> Well, we can document "off", but if the exact string "mem_encrypt=on"
+> isn't specified on the command line then the encryption won't occur.
 
-Well, we can document "off", but if the exact string "mem_encrypt=on"
-isn't specified on the command line then the encryption won't occur.
-The cmdline_find_option_bool() function looks for the exact string and
-isn't interpreting the value on the right side of the equal sign. So
-omitting mem_encrypt=on or using mem_encrypt=off is the same.
+So you have this:
 
-Thanks,
-Tom
++       /*
++        * Fixups have not been to applied phys_base yet, so we must obtain
++        * the address to the SME command line option in the following way.
++        */
++       asm ("lea sme_cmdline_arg(%%rip), %0"
++            : "=r" (cmdline_arg)
++            : "p" (sme_cmdline_arg));
++       cmdline_ptr = bp->hdr.cmd_line_ptr | ((u64)bp->ext_cmd_line_ptr << 32);
++       if (cmdline_find_option_bool((char *)cmdline_ptr, cmdline_arg))
++               sme_me_mask = 1UL << (ebx & 0x3f);
 
-> 
-> Thanks.
-> 
+If I parse this right, we will enable SME *only* if mem_encrypt=on is
+explicitly supplied on the command line.
+
+Which means, users will have to *know* about that cmdline switch first.
+Which then means, we have to go and tell them. Do you see where I'm
+going with this?
+
+I know we talked about this already but I still think we should enable
+it by default and people who don't want it will use the =off switch. We
+can also do something like CONFIG_AMD_SME_ENABLED_BY_DEFAULT which we
+can be selected during build for the different setups.
+
+Hmmm.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
