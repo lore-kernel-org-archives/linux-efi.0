@@ -1,235 +1,212 @@
-From: Corey Minyard <minyard-HInyCGIudOg@public.gmane.org>
-Subject: Re: [PATCH] Lock down drivers that can have io ports, io mem, irqs
- and dma changed
-Date: Tue, 29 Nov 2016 08:35:00 -0600
-Message-ID: <fe67917f-0204-77e0-0955-64d6a94aa235@acm.org>
-References: <2cd73312-c074-1367-6daa-710d11ac68f1@acm.org>
- <a4642e43-4598-96ca-c25a-2bd844631a47@acm.org>
- <20161116222731.563fb85e@lxorguk.ukuu.org.uk>
- <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
- <26173.1479769852@warthog.procyon.org.uk>
- <10164.1480378260@warthog.procyon.org.uk>
- <6973.1480428211@warthog.procyon.org.uk>
-Reply-To: minyard-HInyCGIudOg@public.gmane.org
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V5 03/10] efi: parse ARMv8 processor error
+Date: Tue, 29 Nov 2016 08:37:53 -0700
+Message-ID: <b2a957b5-bf3b-f12c-ecba-28ddd97cb84f@codeaurora.org>
+References: <1479767763-27532-1-git-send-email-tbaicar@codeaurora.org>
+ <1479767763-27532-4-git-send-email-tbaicar@codeaurora.org>
+ <58388193.6000202@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <6973.1480428211-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Transfer-Encoding: 8bit
+Return-path: <kvm-owner@vger.kernel.org>
+In-Reply-To: <58388193.6000202@arm.com>
+Sender: kvm-owner@vger.kernel.org
+To: James Morse <james.morse@arm.com>
+Cc: marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tomasz.nowicki@linaro.org, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, Suzuki.Poulose@arm.com, punit.agrawal@arm.com, astone@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On 11/29/2016 08:03 AM, David Howells wrote:
-> How about the attached?  Obviously it need extending to other drivers.
+Hello James,
 
-This is great, I like it a lot better.
-
-Reviewed-by: Corey Minyard <cminyard-Igf4POYTYCDQT0dZR+AlfA@public.gmane.org>
-
--corey
-
-> I thought that if I'm changing the module_param annotations anyway then it's
-> probably worth bunging in an extra parameter that notes what the parameter
-> modifies (ioport, iomem, etc.) for future reference, even if we don't store
-> it.
+On 11/25/2016 11:23 AM, James Morse wrote:
+> Hi Tyler,
 >
-> David
-> ---
-> diff --git a/drivers/char/ipmi/ipmi_si_intf.c b/drivers/char/ipmi/ipmi_si_intf.c
-> index 7fb9c299a183..157e96391eca 100644
-> --- a/drivers/char/ipmi/ipmi_si_intf.c
-> +++ b/drivers/char/ipmi/ipmi_si_intf.c
-> @@ -1375,39 +1375,39 @@ MODULE_PARM_DESC(type, "Defines the type of each interface, each"
->   		 " interface separated by commas.  The types are 'kcs',"
->   		 " 'smic', and 'bt'.  For example si_type=kcs,bt will set"
->   		 " the first interface to kcs and the second to bt");
-> -module_param_array(addrs, ulong, &num_addrs, 0);
-> +module_param_hw_array(addrs, ulong, iomem, &num_addrs, 0);
->   MODULE_PARM_DESC(addrs, "Sets the memory address of each interface, the"
->   		 " addresses separated by commas.  Only use if an interface"
->   		 " is in memory.  Otherwise, set it to zero or leave"
->   		 " it blank.");
-> -module_param_array(ports, uint, &num_ports, 0);
-> +module_param_hw_array(ports, uint, ioport, &num_ports, 0);
->   MODULE_PARM_DESC(ports, "Sets the port address of each interface, the"
->   		 " addresses separated by commas.  Only use if an interface"
->   		 " is a port.  Otherwise, set it to zero or leave"
->   		 " it blank.");
-> -module_param_array(irqs, int, &num_irqs, 0);
-> +module_param_hw_array(irqs, int, irq, &num_irqs, 0);
->   MODULE_PARM_DESC(irqs, "Sets the interrupt of each interface, the"
->   		 " addresses separated by commas.  Only use if an interface"
->   		 " has an interrupt.  Otherwise, set it to zero or leave"
->   		 " it blank.");
-> -module_param_array(regspacings, int, &num_regspacings, 0);
-> +module_param_hw_array(regspacings, int, other, &num_regspacings, 0);
->   MODULE_PARM_DESC(regspacings, "The number of bytes between the start address"
->   		 " and each successive register used by the interface.  For"
->   		 " instance, if the start address is 0xca2 and the spacing"
->   		 " is 2, then the second address is at 0xca4.  Defaults"
->   		 " to 1.");
-> -module_param_array(regsizes, int, &num_regsizes, 0);
-> +module_param_hw_array(regsizes, int, other, &num_regsizes, 0);
->   MODULE_PARM_DESC(regsizes, "The size of the specific IPMI register in bytes."
->   		 " This should generally be 1, 2, 4, or 8 for an 8-bit,"
->   		 " 16-bit, 32-bit, or 64-bit register.  Use this if you"
->   		 " the 8-bit IPMI register has to be read from a larger"
->   		 " register.");
-> -module_param_array(regshifts, int, &num_regshifts, 0);
-> +module_param_hw_array(regshifts, int, other, &num_regshifts, 0);
->   MODULE_PARM_DESC(regshifts, "The amount to shift the data read from the."
->   		 " IPMI register, in bits.  For instance, if the data"
->   		 " is read from a 32-bit word and the IPMI data is in"
->   		 " bit 8-15, then the shift would be 8");
-> -module_param_array(slave_addrs, int, &num_slave_addrs, 0);
-> +module_param_hw_array(slave_addrs, int, other, &num_slave_addrs, 0);
->   MODULE_PARM_DESC(slave_addrs, "Set the default IPMB slave address for"
->   		 " the controller.  Normally this is 0x20, but can be"
->   		 " overridden by this parm.  This is an array indexed"
-> @@ -3725,12 +3725,6 @@ static int init_ipmi_si(void)
->   	struct smi_info *e;
->   	enum ipmi_addr_src type = SI_INVALID;
->   
-> -	if ((num_addrs || num_ports || num_irqs) &&
-> -	    kernel_is_locked_down()) {
-> -		pr_err(PFX "Kernel is locked down\n");
-> -		return -EPERM;
-> -	}
-> -
->   	if (initialized)
->   		return 0;
->   	initialized = 1;
-> diff --git a/include/linux/moduleparam.h b/include/linux/moduleparam.h
-> index 52666d90ca94..bdb884fba79a 100644
-> --- a/include/linux/moduleparam.h
-> +++ b/include/linux/moduleparam.h
-> @@ -60,9 +60,11 @@ struct kernel_param_ops {
->    * Flags available for kernel_param
->    *
->    * UNSAFE - the parameter is dangerous and setting it will taint the kernel
-> + * HWPARAM - Hardware param not permitted in lockdown mode
->    */
->   enum {
-> -	KERNEL_PARAM_FL_UNSAFE = (1 << 0)
-> +	KERNEL_PARAM_FL_UNSAFE	= (1 << 0),
-> +	KERNEL_PARAM_FL_HWPARAM	= (1 << 1),
->   };
->   
->   struct kernel_param {
-> @@ -451,6 +453,62 @@ extern int param_set_bint(const char *val, const struct kernel_param *kp);
->   			    perm, -1, 0);				\
->   	__MODULE_PARM_TYPE(name, "array of " #type)
->   
-> +enum hwparam_type {
-> +	hwparam_ioport,		/* Module parameter configures an I/O port */
-> +	hwparam_iomem,		/* Module parameter configures an I/O mem address */
-> +	hwparam_irq,		/* Module parameter configures an I/O port */
-> +	hwparam_dma,		/* Module parameter configures a DMA channel */
-> +	hwparam_dma_addr,	/* Module parameter configures a DMA buffer address */
-> +	hwparam_other,		/* Module parameter configures some other value */
-> +};
-> +
-> +/**
-> + * module_param_hw - A parameter representing a hw parameters
-> + * @name: a valid C identifier which is the parameter name.
-> + * @type: the type of the parameter
-> + * @hwtype: what the value represents (enum hwparam_type)
-> + * @perm: visibility in sysfs.
-> + *
-> + * Usually it's a good idea to have variable names and user-exposed names the
-> + * same, but that's harder if the variable must be non-static or is inside a
-> + * structure.  This allows exposure under a different name.
-> + */
-> +#define module_param_hw(name, type, hwtype, perm)			\
-> +	param_check_##type(name, &(name));				\
-> +	__module_param_call(MODULE_PARAM_PREFIX, name,			\
-> +			    &param_ops_##type, &name,			\
-> +			    perm, -1,					\
-> +			    KERNEL_PARAM_FL_HWPARAM | (hwparam_##hwtype & 0));	\
-> +	__MODULE_PARM_TYPE(name, #type)
-> +
-> +/**
-> + * module_param_hw_array - A parameter representing an array of hw parameters
-> + * @name: the name of the array variable
-> + * @type: the type, as per module_param()
-> + * @hwtype: what the value represents (enum hwparam_type)
-> + * @nump: optional pointer filled in with the number written
-> + * @perm: visibility in sysfs
-> + *
-> + * Input and output are as comma-separated values.  Commas inside values
-> + * don't work properly (eg. an array of charp).
-> + *
-> + * ARRAY_SIZE(@name) is used to determine the number of elements in the
-> + * array, so the definition must be visible.
-> + */
-> +#define module_param_hw_array(name, type, hwtype, nump, perm)		\
-> +	param_check_##type(name, &(name)[0]);				\
-> +	static const struct kparam_array __param_arr_##name		\
-> +	= { .max = ARRAY_SIZE(name), .num = nump,			\
-> +	    .ops = &param_ops_##type,					\
-> +	    .elemsize = sizeof(name[0]), .elem = name };		\
-> +	__module_param_call(MODULE_PARAM_PREFIX, name,			\
-> +			    &param_array_ops,				\
-> +			    .arr = &__param_arr_##name,			\
-> +			    perm, -1,					\
-> +			    KERNEL_PARAM_FL_HWPARAM | (hwparam_##hwtype & 0));	\
-> +	__MODULE_PARM_TYPE(name, "array of " #type)
-> +
-> +
->   extern const struct kernel_param_ops param_array_ops;
->   
->   extern const struct kernel_param_ops param_ops_string;
-> diff --git a/kernel/params.c b/kernel/params.c
-> index a6d6149c0fe6..2b68e6dad677 100644
-> --- a/kernel/params.c
-> +++ b/kernel/params.c
-> @@ -108,13 +108,20 @@ bool parameq(const char *a, const char *b)
->   	return parameqn(a, b, strlen(a)+1);
->   }
->   
-> -static void param_check_unsafe(const struct kernel_param *kp)
-> +static bool param_check_unsafe(const struct kernel_param *kp,
-> +			       const char *doing)
->   {
->   	if (kp->flags & KERNEL_PARAM_FL_UNSAFE) {
->   		pr_warn("Setting dangerous option %s - tainting kernel\n",
->   			kp->name);
->   		add_taint(TAINT_USER, LOCKDEP_STILL_OK);
->   	}
-> +
-> +	if (kp->flags & KERNEL_PARAM_FL_HWPARAM && kernel_is_locked_down()) {
-> +		pr_err("Command line-specified device addresses, irqs and dma channels are not permitted when the kernel is locked down (%s.%s)\n", doing, kp->name);
-> +		return false;
-> +	}
-> +	return true;
->   }
->   
->   static int parse_one(char *param,
-> @@ -144,8 +151,10 @@ static int parse_one(char *param,
->   			pr_debug("handling %s with %p\n", param,
->   				params[i].ops->set);
->   			kernel_param_lock(params[i].mod);
-> -			param_check_unsafe(&params[i]);
-> -			err = params[i].ops->set(val, &params[i]);
-> +			if (param_check_unsafe(&params[i], doing))
-> +				err = params[i].ops->set(val, &params[i]);
-> +			else
-> +				err = -EPERM;
->   			kernel_param_unlock(params[i].mod);
->   			return err;
->   		}
-> @@ -620,8 +629,10 @@ static ssize_t param_attr_store(struct module_attribute *mattr,
->   		return -EPERM;
->   
->   	kernel_param_lock(mk->mod);
-> -	param_check_unsafe(attribute->param);
-> -	err = attribute->param->ops->set(buf, attribute->param);
-> +	if (param_check_unsafe(attribute->param, mk->mod->name))
-> +		err = attribute->param->ops->set(buf, attribute->param);
-> +	else
-> +		err = -EPERM;
->   	kernel_param_unlock(mk->mod);
->   	if (!err)
->   		return len;
+> On 21/11/16 22:35, Tyler Baicar wrote:
+>> Add support for ARMv8 Common Platform Error Record (CPER).
+>> UEFI 2.6 specification adds support for ARMv8 specific
+>> processor error information to be reported as part of the
+>> CPER records. This provides more detail on for processor error logs.
+> I think I'm missing a big part of the puzzle here, I will come back to this next
+> week. I can't quite line up some of the masks and shifts with the table
+> descriptions in the UEFI spec[0].
+
+It looks like there was some misunderstanding when the context info 
+parsing was added here
+(probably because the spec has some issues that I describe below).
+I'll need to clean quite a bit of the context info parsing up. I didn't 
+catch this earlier because
+we aren't reporting context info in firmware right now for the errors I 
+have been testing.
+
+>> diff --git a/include/linux/cper.h b/include/linux/cper.h
+>> index 13ea41c..2a9d553 100644
+>> --- a/include/linux/cper.h
+>> +++ b/include/linux/cper.h
+>> @@ -180,6 +185,10 @@ enum {
+>>   #define CPER_SEC_PROC_IPF						\
+>>   	UUID_LE(0xE429FAF1, 0x3CB7, 0x11D4, 0x0B, 0xCA, 0x07, 0x00,	\
+>>   		0x80, 0xC7, 0x3C, 0x88, 0x81)
+>> +/* Processor Specific: ARMv8 */
+>> +#define CPER_SEC_PROC_ARMV8						\
+>> +	UUID_LE(0xE19E3D16, 0xBC11, 0x11E4, 0x9C, 0xAA, 0xC2, 0x05,	\
+>> +		0x1D, 0x5D, 0x46, 0xB0)
+> Nit: UEFI v2.6 N.2.2 (table 249) describes this as 'ARM' not 'ARMV8' (which is
+> an architectural version).
+
+I'll change it in the next set.
+
+>>   /* Platform Memory */
+>>   #define CPER_SEC_PLATFORM_MEM						\
+>>   	UUID_LE(0xA5BC1114, 0x6F64, 0x4EDE, 0xB8, 0x63, 0x3E, 0x83,	\
+>> @@ -255,6 +264,34 @@ enum {
+>>   
+>>   #define CPER_PCIE_SLOT_SHIFT			3
+>>   
+>> +#define CPER_ARMV8_ERR_INFO_NUM_MASK		0x00000000000000FF
+>> +#define CPER_ARMV8_CTX_INFO_NUM_MASK		0x0000000000FFFF00
+> Table 260 describes both ERR_INFO_NUM and CONTEXT_INFO_NUM for as both being
+> 2bytes long, as does your struct cper_sec_proc_armv8 below. Are these for
+> something else? Do these correspond with one of the four bitfield formats
+> described in Table 262->265?
+>
+> I can't see where they are used, and they look like they are reaching across
+> multiple fields in a struct.
+
+I will remove these as they aren't needed.
+
+>> +#define CPER_ARMV8_CTX_INFO_NUM_SHIFT		8
+>> +
+>> +#define CPER_ARMV8_VALID_MPIDR			0x00000001
+>> +#define CPER_ARMV8_VALID_AFFINITY_LEVEL		0x00000002
+>> +#define CPER_ARMV8_VALID_RUNNING_STATE		0x00000004
+>> +#define CPER_ARMV8_VALID_VENDOR_INFO		0x00000008
+>> +
+>> +#define CPER_ARMV8_INFO_VALID_MULTI_ERR		0x0001
+>> +#define CPER_ARMV8_INFO_VALID_FLAGS		0x0002
+>> +#define CPER_ARMV8_INFO_VALID_ERR_INFO		0x0004
+>> +#define CPER_ARMV8_INFO_VALID_VIRT_ADDR		0x0008
+>> +#define CPER_ARMV8_INFO_VALID_PHYSICAL_ADDR	0x0010
+>> +
+>> +#define CPER_ARMV8_INFO_FLAGS_FIRST		0x0001
+>> +#define CPER_ARMV8_INFO_FLAGS_LAST		0x0002
+>> +#define CPER_ARMV8_INFO_FLAGS_PROPAGATED	0x0004
+>> +
+>> +#define CPER_AARCH64_CTX_LEN			368
+>> +#define CPER_AARCH32_CTX_LEN			256
+> Are these the worst case sizes for combinations of the structures in N2.4.4.2?
+> (Tables 266 to 273)
+>
+> If so is there any chance they could be sizeof(<some union of structs>), even if
+> the structs are things like:
+>> /* ARMv8 AArch64 GPRs (Type 4) - defined in UEFI Spec N2.4.4.2 */
+>> struct cper_armv8_aarch64_gprs {
+>> 	u64 regs[32];
+>> }
+> This way its easier to check the number is correct, and if a new type is added
+> this won't get forgotten.
+
+These were representing the sizes of table 266 and table 267, but 
+looking at this more it seems
+like some of the spec doesn't make sense:
+
+Table 260 has the Processor Context field which only mentions tables 266 
+and 267.
+I think that should really be tables 266 - 274 representing all 9 
+context types.
+
+Table 265 then has the Register Array field which mentions the contents 
+of the array
+are described in tables 267 - 271. I think this also should be tables 
+266 - 274 to cover
+all 9 context types.
+
+And then the text before table 274 is clearly wrong calling it table 
+275...seems like there
+are several mistakes in the table numbering mentioned in this section.
+
+I'm going to need to update the context info parsing code and add the 
+other register array
+sizes based on all of the context tables. Looks like the code will need 
+to be restructured
+some because otherwise there will be quite a bit of duplication.
+
+>> +#define CPER_ARMV8_CTX_TYPE_MASK		0x000000000000000F
+>> +#define CPER_ARMV8_CTX_EL_MASK			0x0000000000000070
+>> +#define CPER_ARMV8_CTX_NS_MASK			0x0000000000000080
+>> +#define CPER_ARMV8_CTX_EL_SHIFT			4
+>> +#define CPER_ARMV8_CTX_NS_SHIFT			7
+>> +
+> Again, I can't work out what these correspond to. I can't see a secure bit or EL
+> field in any of those UEFI tables.
+>
+> Is this one of the 'ARM Vendor Specific Micro-Architecture Error Structure's? If
+> so we should have some infrastructure for picking the correct (or unknown)
+> decode function based on a range of MIDRs.
+
+These will be removed. The exception level and secure context 
+information will be covered by
+which register context type is being reported.
+
+0 – AArch32 GPRs (General Purpose Registers).
+1 -- AArch32 EL1 context registers
+2 -- AArch32 EL2 context registers
+3 -- Aarch32 secure context registers
+4 – AArch64 GPRs
+5 -- AArch64 EL1 context registers
+6 – Aarch64 EL2 context registers
+7 -- AArch64 EL3 context registers
+8 – Misc. System Register Structure
+
+>>   #define acpi_hest_generic_data_error_length(gdata)	\
+>>   	(((struct acpi_hest_generic_data *)(gdata))->error_data_length)
+>>   #define acpi_hest_generic_data_size(gdata)		\
+>> @@ -352,6 +389,41 @@ struct cper_ia_proc_ctx {
+>>   	__u64	mm_reg_addr;
+>>   };
+>>   
+>> +/* ARMv8 Processor Error Section */
+>> +struct cper_sec_proc_armv8 {
+>> +	__u32	validation_bits;
+>> +	__u16	err_info_num; /* Number of Processor Error Info */
+>> +	__u16	context_info_num; /* Number of Processor Context Info Records*/
+>> +	__u32	section_length;
+>> +	__u8	affinity_level;
+>> +	__u8	reserved[3];	/* must be zero */
+>> +	__u64	mpidr;
+>> +	__u64	midr;
+>> +	__u32	running_state; /* Bit 0 set - Processor running. PSCI = 0 */
+>> +	__u32	psci_state;
+>> +};
+>> +
+>> +/* ARMv8 Processor Error Information Structure */
+>> +struct cper_armv8_err_info {
+>> +	__u8	version;
+>> +	__u8	length;
+>> +	__u16	validation_bits;
+>> +	__u8	type;
+>> +	__u16	multiple_error;
+>> +	__u8	flags;
+>> +	__u64	error_info;
+>> +	__u64	virt_fault_addr;
+>> +	__u64	physical_fault_addr;
+>> +};
+>
+>> +/* ARMv8 AARCH64 Processor Context Information Structure */
+>> +struct cper_armv8_aarch64_ctx {
+>> +	__u8	type_el_ns;
+>> +	__u8	reserved[7];	/* must be zero */
+>> +	__u8	gpr[288];
+>> +	__u8	spr[68];
+>> +};
+> Is this:
+> "Table 265. ARM Processor Error Context Information Header Structure"?
+
+This structure should be removed, it doesn't get used in code now.
+
+Thanks,
+Tyler
+
+-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
+
