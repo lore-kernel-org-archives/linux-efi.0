@@ -1,39 +1,372 @@
-From: Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 4/6] efi: Get the secure boot status [ver #2]
-Date: Tue, 29 Nov 2016 10:11:18 -0800
-Message-ID: <CAPeXnHs2J2Vcj5vu3G1iP0QcAuSw_1erAUqarALkgf2uhVDEFQ@mail.gmail.com>
-References: <20161123134219.GH24624@leverpostej> <20161123104757.GE24624@leverpostej>
- <147986054870.13790.8640536414645705863.stgit@warthog.procyon.org.uk>
- <147986057768.13790.3027173260868896792.stgit@warthog.procyon.org.uk>
- <18007.1479900357@warthog.procyon.org.uk> <31974.1479910408@warthog.procyon.org.uk>
- <20161123142440.GJ24624@leverpostej> <2794.1479912933@warthog.procyon.org.uk>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v3 19/20] x86: Add support to make use of Secure
+ Memory Encryption
+Date: Tue, 29 Nov 2016 12:40:06 -0600
+Message-ID: <78d7ed9a-e709-86e3-dcde-1f67cfa7684c@amd.com>
+References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+ <20161110003826.3280.5546.stgit@tlendack-t1.amdoffice.net>
+ <20161124125038.j4wmtzgv2ju3v2ym@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <2794.1479912933-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20161124125038.j4wmtzgv2ju3v2ym@pd.tnic>
+Sender: owner-linux-mm@kvack.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Nov 23, 2016 at 6:55 AM, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
->> > Actually, the two arches have a different interpretation on how to deal
->> > with an error.  Matthew Garrett's original x86 patch assumes that if we
->> > get an error when trying to read SecureBoot and SetupMode that we're *not*
->> > in secure mode, but ARM assumes the opposite.
+On 11/24/2016 6:50 AM, Borislav Petkov wrote:
+> On Wed, Nov 09, 2016 at 06:38:26PM -0600, Tom Lendacky wrote:
+>> This patch adds the support to check if SME has been enabled and if the
+>> mem_encrypt=on command line option is set. If both of these conditions
+>> are true, then the encryption mask is set and the kernel is encrypted
+>> "in place."
 >>
->> Ok.
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>> ---
+>>  arch/x86/kernel/Makefile           |    1 
+>>  arch/x86/kernel/mem_encrypt_boot.S |  156 +++++++++++++++++++++++++++++
+>>  arch/x86/kernel/mem_encrypt_init.c |  196 ++++++++++++++++++++++++++++++++++++
+>>  3 files changed, 353 insertions(+)
+>>  create mode 100644 arch/x86/kernel/mem_encrypt_boot.S
 >>
->> IIUC, that x86 patch was never upstream, so is there any need to follow
->> that example?
->
-> Whilst that may be true, that doesn't mean a lot of people aren't using it.
+>> diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
+>> index 27e22f4..020759f 100644
+>> --- a/arch/x86/kernel/Makefile
+>> +++ b/arch/x86/kernel/Makefile
+>> @@ -143,4 +143,5 @@ ifeq ($(CONFIG_X86_64),y)
+>>  	obj-y				+= vsmp_64.o
+>>  
+>>  	obj-y				+= mem_encrypt_init.o
+>> +	obj-y				+= mem_encrypt_boot.o
+> 
+> So there's a lot of ifdeffery below which is not really needed and those
+> objects above get built-in by default.
+> 
+> So let's clean that up:
+> 
+> obj-$(CONFIG_AMD_MEM_ENCRYPT)		+= ...
+> 
+> for all .c files.
+> 
+> Then, put prototypes of all externally visible elements - functions,
+> vars, etc - in include/linux/mem_encrypt.h in the
+> 
+> #else   /* !CONFIG_AMD_MEM_ENCRYPT */
+> 
+> branch so that the build works too for people who don't enable
+> CONFIG_AMD_MEM_ENCRYPT. Much cleaner this way.
 
-A conforming implementation that supports secure boot should always
-return those variables without error. If they're not present (which is
-valid for x86 systems - many predate the feature) then assuming Secure
-Boot is disabled is correct. The question of what to do in the event
-of other errors is more open, but it wouldn't surprise me if there are
-implementations that return non-spec errors for missing variables
-under certain circumstances.
+This was mainly done to avoid putting #ifdefs around the calls in
+head_64.S.  I'll look closer as to what I can do to make this cleaner
+but it may be a trade off on where the #ifdefs go when dealing with
+assembler files.
+
+> 
+>>  endif
+>> diff --git a/arch/x86/kernel/mem_encrypt_boot.S b/arch/x86/kernel/mem_encrypt_boot.S
+>> new file mode 100644
+>> index 0000000..d4917ba
+>> --- /dev/null
+>> +++ b/arch/x86/kernel/mem_encrypt_boot.S
+>> @@ -0,0 +1,156 @@
+>> +/*
+>> + * AMD Memory Encryption Support
+>> + *
+>> + * Copyright (C) 2016 Advanced Micro Devices, Inc.
+>> + *
+>> + * Author: Tom Lendacky <thomas.lendacky@amd.com>
+>> + *
+>> + * This program is free software; you can redistribute it and/or modify
+>> + * it under the terms of the GNU General Public License version 2 as
+>> + * published by the Free Software Foundation.
+>> + */
+>> +
+>> +#include <linux/linkage.h>
+>> +#include <asm/pgtable.h>
+>> +#include <asm/page.h>
+>> +#include <asm/processor-flags.h>
+>> +#include <asm/msr-index.h>
+>> +
+>> +	.text
+>> +	.code64
+>> +ENTRY(sme_encrypt_execute)
+> 
+> sme_encrypt() looks perfectly fine to me.
+> 
+> Btw, is this the reason why this is still in asm:
+> 
+> "(not everything could be converted, e.g. the routine that does the
+> actual encryption needs to be copied into a safe location and it is
+> difficult to determine the actual length of the function in order to
+> copy it)"
+> 
+> ?
+> 
+> If so, ELF symbols have sizes and you can query function sizes, perhaps
+> lookup_symbol_attrs() in kernel/kallsyms.c which returns size in one of
+> its args, etc.
+> 
+> Alternatively, we can have markers around the function if the kallsyms
+> game doesn't work.
+
+I'll look into that a bit more, but with the small assembler routines
+it might be safer to stay with assembler rather than worrying about how
+the compiler may do things in the future and what effects that might
+have.
+
+> 
+> Below are just some small nits, I'll review this fully once we solve the
+> in-asm question.
+> 
+>> diff --git a/arch/x86/kernel/mem_encrypt_init.c b/arch/x86/kernel/mem_encrypt_init.c
+>> index 388d6fb..7bdd159 100644
+>> --- a/arch/x86/kernel/mem_encrypt_init.c
+>> +++ b/arch/x86/kernel/mem_encrypt_init.c
+>> @@ -13,9 +13,205 @@
+>>  #include <linux/linkage.h>
+>>  #include <linux/init.h>
+>>  #include <linux/mem_encrypt.h>
+>> +#include <linux/mm.h>
+>> +
+>> +#include <asm/sections.h>
+>> +
+>> +#ifdef CONFIG_AMD_MEM_ENCRYPT
+>> +
+>> +extern void sme_encrypt_execute(unsigned long, unsigned long, unsigned long,
+>> +				void *, pgd_t *);
+>> +
+>> +#define PGD_FLAGS	_KERNPG_TABLE_NO_ENC
+>> +#define PUD_FLAGS	_KERNPG_TABLE_NO_ENC
+>> +#define PMD_FLAGS	__PAGE_KERNEL_LARGE_EXEC
+>> +
+>> +static void __init *sme_pgtable_entry(pgd_t *pgd, void *next_page,
+>> +				      void *vaddr, pmdval_t pmd_val)
+>> +{
+>> +	pud_t *pud;
+>> +	pmd_t *pmd;
+>> +
+>> +	pgd += pgd_index((unsigned long)vaddr);
+>> +	if (pgd_none(*pgd)) {
+>> +		pud = next_page;
+>> +		memset(pud, 0, sizeof(*pud) * PTRS_PER_PUD);
+>> +		native_set_pgd(pgd,
+>> +			       native_make_pgd((unsigned long)pud + PGD_FLAGS));
+>> +		next_page += sizeof(*pud) * PTRS_PER_PUD;
+>> +	} else {
+>> +		pud = (pud_t *)(native_pgd_val(*pgd) & ~PTE_FLAGS_MASK);
+>> +	}
+>> +
+>> +	pud += pud_index((unsigned long)vaddr);
+>> +	if (pud_none(*pud)) {
+>> +		pmd = next_page;
+>> +		memset(pmd, 0, sizeof(*pmd) * PTRS_PER_PMD);
+>> +		native_set_pud(pud,
+>> +			       native_make_pud((unsigned long)pmd + PUD_FLAGS));
+>> +		next_page += sizeof(*pmd) * PTRS_PER_PMD;
+>> +	} else {
+>> +		pmd = (pmd_t *)(native_pud_val(*pud) & ~PTE_FLAGS_MASK);
+>> +	}
+>> +
+>> +	pmd += pmd_index((unsigned long)vaddr);
+>> +	if (pmd_none(*pmd) || !pmd_large(*pmd))
+>> +		native_set_pmd(pmd, native_make_pmd(pmd_val));
+>> +
+>> +	return next_page;
+>> +}
+>> +
+>> +static unsigned long __init sme_pgtable_calc(unsigned long start,
+>> +					     unsigned long end)
+>> +{
+>> +	unsigned long addr, total;
+>> +
+>> +	total = 0;
+>> +	addr = start;
+>> +	while (addr < end) {
+>> +		unsigned long pgd_end;
+>> +
+>> +		pgd_end = (addr & PGDIR_MASK) + PGDIR_SIZE;
+>> +		if (pgd_end > end)
+>> +			pgd_end = end;
+>> +
+>> +		total += sizeof(pud_t) * PTRS_PER_PUD * 2;
+>> +
+>> +		while (addr < pgd_end) {
+>> +			unsigned long pud_end;
+>> +
+>> +			pud_end = (addr & PUD_MASK) + PUD_SIZE;
+>> +			if (pud_end > end)
+>> +				pud_end = end;
+>> +
+>> +			total += sizeof(pmd_t) * PTRS_PER_PMD * 2;
+>> +
+>> +			addr = pud_end;
+>> +		}
+>> +
+>> +		addr = pgd_end;
+>> +	}
+>> +	total += sizeof(pgd_t) * PTRS_PER_PGD;
+>> +
+>> +	return total;
+>> +}
+>> +#endif	/* CONFIG_AMD_MEM_ENCRYPT */
+>>  
+>>  void __init sme_encrypt_kernel(void)
+>>  {
+>> +#ifdef CONFIG_AMD_MEM_ENCRYPT
+>> +	pgd_t *pgd;
+>> +	void *workarea, *next_page, *vaddr;
+>> +	unsigned long kern_start, kern_end, kern_len;
+>> +	unsigned long index, paddr, pmd_flags;
+>> +	unsigned long exec_size, full_size;
+> 
+> Args in reversed christmas tree order please:
+> 
+> 	unsigned long kern_start, kern_end, kern_len;
+> 	unsigned long index, paddr, pmd_flags;
+> 	void *workarea, *next_page, *vaddr;
+> 	unsigned long exec_size, full_size;
+> 	pgd_t *pgd;
+
+Ok
+
+> 
+>> +
+>> +	/* If SME is not active then no need to prepare */
+>> +	if (!sme_me_mask)
+>> +		return;
+>> +
+>> +	/* Set the workarea to be after the kernel */
+>> +	workarea = (void *)ALIGN(__pa_symbol(_end), PMD_PAGE_SIZE);
+>> +
+>> +	/*
+>> +	 * Prepare for encrypting the kernel by building new pagetables with
+>> +	 * the necessary attributes needed to encrypt the kernel in place.
+>> +	 *
+>> +	 *   One range of virtual addresses will map the memory occupied
+>> +	 *   by the kernel as encrypted.
+>> +	 *
+>> +	 *   Another range of virtual addresses will map the memory occupied
+>> +	 *   by the kernel as un-encrypted and write-protected.
+>> +	 *
+>> +	 *     The use of write-protect attribute will prevent any of the
+>> +	 *     memory from being cached.
+>> +	 */
+>> +
+>> +	/* Physical address gives us the identity mapped virtual address */
+>> +	kern_start = __pa_symbol(_text);
+>> +	kern_end = ALIGN(__pa_symbol(_end), PMD_PAGE_SIZE) - 1;
+>> +	kern_len = kern_end - kern_start + 1;
+>> +
+>> +	/*
+>> +	 * Calculate required number of workarea bytes needed:
+>> +	 *   executable encryption area size:
+>> +	 *     stack page (PAGE_SIZE)
+>> +	 *     encryption routine page (PAGE_SIZE)
+>> +	 *     intermediate copy buffer (PMD_PAGE_SIZE)
+>> +	 *   pagetable structures for workarea (in case not currently mapped)
+>> +	 *   pagetable structures for the encryption of the kernel
+>> +	 */
+>> +	exec_size = (PAGE_SIZE * 2) + PMD_PAGE_SIZE;
+>> +
+>> +	full_size = exec_size;
+>> +	full_size += ALIGN(exec_size, PMD_PAGE_SIZE) / PMD_PAGE_SIZE *
+> 
+> Is that a fancy way of saying "2"?
+> 
+> IOW, something like:
+> 
+> 	/* + 2 pmd_t pagetable pages for the executable encryption area size */
+> 	full_size += 2 * PAGE_SIZE;
+> 
+> looks much more readable to me...
+
+Given the current way it's implemented, yes, it's a fancy way of saying
+2 * PAGE_SIZE.  I did it that way so that if exec_size changes then
+nothing else would have to be changed.  I also used the "sizeof(pmd_t) *
+PTRS_PER_PMD" to be consistent with where that is used elsewhere.
+
+Thanks,
+Tom
+
+> 
+>> +		     sizeof(pmd_t) * PTRS_PER_PMD;
+>> +	full_size += sme_pgtable_calc(kern_start, kern_end + exec_size);
+>> +
+>> +	next_page = workarea + exec_size;
+>> +
+>> +	/* Make sure the current pagetables have entries for the workarea */
+>> +	pgd = (pgd_t *)native_read_cr3();
+>> +	paddr = (unsigned long)workarea;
+>> +	while (paddr < (unsigned long)workarea + full_size) {
+>> +		vaddr = (void *)paddr;
+>> +		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
+>> +					      paddr + PMD_FLAGS);
+>> +
+>> +		paddr += PMD_PAGE_SIZE;
+>> +	}
+>> +	native_write_cr3(native_read_cr3());
+>> +
+>> +	/* Calculate a PGD index to be used for the un-encrypted mapping */
+>> +	index = (pgd_index(kern_end + full_size) + 1) & (PTRS_PER_PGD - 1);
+>> +	index <<= PGDIR_SHIFT;
+>> +
+>> +	/* Set and clear the PGD */
+>> +	pgd = next_page;
+>> +	memset(pgd, 0, sizeof(*pgd) * PTRS_PER_PGD);
+>> +	next_page += sizeof(*pgd) * PTRS_PER_PGD;
+>> +
+>> +	/* Add encrypted (identity) mappings for the kernel */
+>> +	pmd_flags = PMD_FLAGS | _PAGE_ENC;
+>> +	paddr = kern_start;
+>> +	while (paddr < kern_end) {
+>> +		vaddr = (void *)paddr;
+>> +		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
+>> +					      paddr + pmd_flags);
+>> +
+>> +		paddr += PMD_PAGE_SIZE;
+>> +	}
+>> +
+>> +	/* Add un-encrypted (non-identity) mappings for the kernel */
+>> +	pmd_flags = (PMD_FLAGS & ~_PAGE_CACHE_MASK) | (_PAGE_PAT | _PAGE_PWT);
+>> +	paddr = kern_start;
+>> +	while (paddr < kern_end) {
+>> +		vaddr = (void *)(paddr + index);
+>> +		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
+>> +					      paddr + pmd_flags);
+>> +
+>> +		paddr += PMD_PAGE_SIZE;
+>> +	}
+>> +
+>> +	/* Add the workarea to both mappings */
+>> +	paddr = kern_end + 1;
+>> +	while (paddr < (kern_end + exec_size)) {
+>> +		vaddr = (void *)paddr;
+>> +		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
+>> +					      paddr + PMD_FLAGS);
+>> +
+>> +		vaddr = (void *)(paddr + index);
+>> +		next_page = sme_pgtable_entry(pgd, next_page, vaddr,
+>> +					      paddr + PMD_FLAGS);
+>> +
+>> +		paddr += PMD_PAGE_SIZE;
+>> +	}
+>> +
+>> +	/* Perform the encryption */
+>> +	sme_encrypt_execute(kern_start, kern_start + index, kern_len,
+>> +			    workarea, pgd);
+>> +
+>> +#endif	/* CONFIG_AMD_MEM_ENCRYPT */
+>>  }
+>>  
+>>  unsigned long __init sme_get_me_mask(void)
+>>
+>>
+> 
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
