@@ -1,65 +1,41 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [RFC PATCH v3 20/20] x86: Add support to make use of Secure
- Memory Encryption
-Date: Tue, 29 Nov 2016 20:56:18 +0100
-Message-ID: <20161129195618.ewuiw5rdsu26yf7w@pd.tnic>
-References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
- <20161110003838.3280.23327.stgit@tlendack-t1.amdoffice.net>
- <20161126204703.wlcd6cw7dxzvpxyc@pd.tnic>
- <4cffdd71-dcc6-35e9-2654-e39067a525a8@amd.com>
+From: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
+Subject: Re: [PATCH 00/16] Kernel lockdown
+Date: Wed, 30 Nov 2016 14:27:24 +0000
+Message-ID: <20161130142724.1da771d0@lxorguk.ukuu.org.uk>
+References: <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk>
+        <20161116222731.563fb85e@lxorguk.ukuu.org.uk>
+        <CAKv+Gu-6CpLK1fO_aRo77UGqXqnv4Wy0=beJNpkvovXvNmYF-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <4cffdd71-dcc6-35e9-2654-e39067a525a8@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <CAKv+Gu-6CpLK1fO_aRo77UGqXqnv4Wy0=beJNpkvovXvNmYF-w@mail.gmail.com>
+Sender: owner-linux-security-module@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: David Howells <dhowells@redhat.com>, keyrings@vger.kernel.org, Matthew Garrett <matthew.garrett@nebula.com>, linux-security-module <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 29, 2016 at 12:48:17PM -0600, Tom Lendacky wrote:
-> > One more thing: just like we're adding an =on switch, we'd need an =off
-> > switch in case something's wrong with the SME code. IOW, if a user
-> > supplies "mem_encrypt=off", we do not encrypt.
+> This applies equally to the kernel command line, and given that we
+> cannot authenticate it, we should whitelist params that we know to be
+> safe, and filter out all others. A similar concern exists for the
+> device tree on ARM/arm64, and we already disable the DTB loader in the
+> UEFI stub if secure boot is enabled.
+
+Or you sign the boot command line.
+
+> > Without that at least fixed I don't see the point in merging this. Either
+> > we don't do it (which given the level of security the current Linux
+> > kernel provides, and also all the golden key messups from elsewhere might
+> > be the honest approach), or at least try and do the job right.
+> >
+> > Less security is better than fake security. If you've got less security
+> > your take appropriate precautions. If you rely on fake security you don't.
+> >  
 > 
-> Well, we can document "off", but if the exact string "mem_encrypt=on"
-> isn't specified on the command line then the encryption won't occur.
+> In general, I think kernel hardening is an important topic
 
-So you have this:
+It is - so pushing something with known trivial holes isn't a useful way
+to do this. The module parameter hole needs to be addressed before this
+is fit for upstream.
 
-+       /*
-+        * Fixups have not been to applied phys_base yet, so we must obtain
-+        * the address to the SME command line option in the following way.
-+        */
-+       asm ("lea sme_cmdline_arg(%%rip), %0"
-+            : "=r" (cmdline_arg)
-+            : "p" (sme_cmdline_arg));
-+       cmdline_ptr = bp->hdr.cmd_line_ptr | ((u64)bp->ext_cmd_line_ptr << 32);
-+       if (cmdline_find_option_bool((char *)cmdline_ptr, cmdline_arg))
-+               sme_me_mask = 1UL << (ebx & 0x3f);
-
-If I parse this right, we will enable SME *only* if mem_encrypt=on is
-explicitly supplied on the command line.
-
-Which means, users will have to *know* about that cmdline switch first.
-Which then means, we have to go and tell them. Do you see where I'm
-going with this?
-
-I know we talked about this already but I still think we should enable
-it by default and people who don't want it will use the =off switch. We
-can also do something like CONFIG_AMD_SME_ENABLED_BY_DEFAULT which we
-can be selected during build for the different setups.
-
-Hmmm.
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Alan
