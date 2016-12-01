@@ -1,42 +1,94 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 4/6] efi: Get the secure boot status [ver #2]
-Date: Wed, 30 Nov 2016 16:51:18 +0000
-Message-ID: <31767.1480524678@warthog.procyon.org.uk>
-References: <20161123104757.GE24624@leverpostej> <147986054870.13790.8640536414645705863.stgit@warthog.procyon.org.uk> <147986057768.13790.3027173260868896792.stgit@warthog.procyon.org.uk>
+From: Samuel Bernardo <samuelbernardo.mail@gmail.com>
+Subject: linux kernel support for logitech g502 proteus
+Date: Thu, 1 Dec 2016 15:57:52 +0000
+Message-ID: <2916ca4f-c4cf-06c9-3189-e33635ca621f@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161123104757.GE24624@leverpostej>
-Content-ID: <31766.1480524678.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="oiOHFVip8rC8c60iVWvXg9lCg8JwiEbpm"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-modules@vger.kernel.org, linux-newbie@vger.kernel.org, linux-efi@vger.kernel.org, kernel-janitors@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--oiOHFVip8rC8c60iVWvXg9lCg8JwiEbpm
+Content-Type: multipart/mixed; boundary="cLa1dKfbBRdqHo9g9icsWrtm4NtEuDpPE"
+From: Samuel Bernardo <samuelbernardo.mail@gmail.com>
+To: linux-kernel@vger.kernel.org, linux-modules@vger.kernel.org,
+ linux-newbie@vger.kernel.org, linux-efi@vger.kernel.org,
+ kernel-janitors@vger.kernel.org
+Message-ID: <2916ca4f-c4cf-06c9-3189-e33635ca621f@gmail.com>
+Subject: linux kernel support for logitech g502 proteus
 
-> > +	boot_params->secure_boot = (efi_get_secureboot(sys_table) == 1);
-> 
-> In the arm stub's efi_entry(), we fail-safe, and assume secure boot for any
-> non-zero status (including errors). e.g. 
+--cLa1dKfbBRdqHo9g9icsWrtm4NtEuDpPE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Okay, given what Matthew said:
+Hello,
 
-	A conforming implementation that supports secure boot should always
-	return those variables without error. If they're not present (which is
-	valid for x86 systems - many predate the feature) then assuming Secure
-	Boot is disabled is correct. The question of what to do in the event
-	of other errors is more open, but it wouldn't surprise me if there are
-	implementations that return non-spec errors for missing variables
-	under certain circumstances.
+I'm sorry if I'm spamming some lists with this help request, but I don't
+know exactly what's the right mailing list.
 
-I think I have to assume the default to be that secure boot is *not* enabled
-in the case of one of the variables we need to check is not being present.
+I would like to use Logitech G502 RGB gaming mouse with programmed
+profiles from their software, but I realized that generic driver in
+linux didn't support it. Logitech discards any support for Linux OS.
+This is the only reason I need a dual boot with Windows for programming
+the mouse or generate the xml template for the key bindings.
 
-As for getting other errors, I think we have to assume a buggy BIOS.  In this
-case, I would also go with assuming we're not in secure boot.
+In Windows key mapping for mouse can be loaded from a xml file that
+stores profiles or programmed directly into the mouse, but limited to
+the keys available in keyboard or software.The following guides explains
+the setup:
 
-Another possibility is to punt the decision and make it compile-time
-configurable.
+http://support.logitech.com/en_us/article/26855
 
-David
+http://support.logitech.com/en_us/article/26862?product=3Da0q31000009u2F9=
+AAI
+
+With xml template is also possible to configure additional keys like F13
+that are usefull to map macros for example in an IDE software. The guide
+explaining how to change xml file is below:
+
+http://i.imgur.com/NbmjWCS.png
+
+This mouse has many programmable keys that I would like to use in linux.
+
+I suspect that xml configuration is loaded with the windows driver for
+g502. Since with actual generic driver in linux 4.8 the profile could
+not be loaded, I ask if I you could help giving additional support for
+it in linux kernel?
+
+Thanks,
+
+Samuel
+
+
+
+
+
+--cLa1dKfbBRdqHo9g9icsWrtm4NtEuDpPE--
+
+--oiOHFVip8rC8c60iVWvXg9lCg8JwiEbpm
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAEBCAAGBQJYQEiBAAoJEO2Nqc2/qzs5ad4P/2HV35dLocPYbz38qVnmy06A
+KGNcvyUDJpJWEyB0mkmztWneqGZkWWP5gx2srLkokSrcUOjmM45xjjYVPlHAAYBR
+FCYgmQWna34Rxs6NZiucD6mfQTyw/77eeLZxWda4K0ZxnjTL8taAzvmoMZyB/gwC
+g+peSlEN2NzXgTyLNEujPbykKh19W8ZihSpkDxuJeEiu9NCp9aXfIW4cmM5UHNM+
+sjVqDKPxNLuukQC3IHZCOIUXIT39PtzErc7On5YdD4BXIRSy9PE8IjCBvfvFnyVT
+MY2AuoGoh/rDmiZnCfBPWaWP8r9lrAiy8aT3oqIbuCbKeIeGfHvV9gcJiO4fdybR
+PHeFEF6o68sIVd+7Kkl5IVOZBHxNp9iCOOpXrgYDtrVMFOCG9aZKoer6nN5jTNcq
+JnpTorAVWgJeJRorzy5guMHSPsiZE/0PUyid7P2jS0tav6e91I4wEVVN5jlI//xV
+rRN5TIJD9nOfZltGYLzKsjdcV1uhF15H5Ov+iFEvzY9uxT/WaCpuhEEyHSQ7ATp/
+OaF+9izIzQp9uBlDfvfe1jIvG2ELim8lZSI5q9jqQuKFSSb44BfJ2jCXk1wtevDC
+AFTC2zNoxlSbyB8L/pQ8s1Pu1eavE1aMZy7rg58W0Mq2xG0QsB0DbQgPx/TSj9/K
+IOYEVBVmJ5OmycR9jdcb
+=IXxD
+-----END PGP SIGNATURE-----
+
+--oiOHFVip8rC8c60iVWvXg9lCg8JwiEbpm--
