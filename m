@@ -1,94 +1,100 @@
-From: Samuel Bernardo <samuelbernardo.mail@gmail.com>
-Subject: linux kernel support for logitech g502 proteus
-Date: Thu, 1 Dec 2016 15:57:52 +0000
-Message-ID: <2916ca4f-c4cf-06c9-3189-e33635ca621f@gmail.com>
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
+Subject: Re: [PATCH 8/9] MODSIGN: Import certificates from UEFI Secure Boot
+Date: Fri, 02 Dec 2016 10:57:48 -0800
+Message-ID: <1480705068.2410.64.camel@HansenPartnership.com>
+References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
+         <147931990222.16460.11621102657967011265.stgit@warthog.procyon.org.uk>
+         <CAKv+Gu_QVyd1Jx7ZdnBzYmZzUnH4ZuhQgiGO-zx-JPViWosjXQ@mail.gmail.com>
+         <1480015063.2444.9.camel@HansenPartnership.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="oiOHFVip8rC8c60iVWvXg9lCg8JwiEbpm"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-modules@vger.kernel.org, linux-newbie@vger.kernel.org, linux-efi@vger.kernel.org, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <1480015063.2444.9.camel@HansenPartnership.com>
+Sender: owner-linux-security-module@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Howells <dhowells@redhat.com>
+Cc: keyrings@vger.kernel.org, Matthew Garrett <matthew.garrett@nebula.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, Josh Boyer <jwboyer@fedoraproject.org>, Mimi Zohar <zohar@linux.vnet.ibm.com>
 List-Id: linux-efi@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---oiOHFVip8rC8c60iVWvXg9lCg8JwiEbpm
-Content-Type: multipart/mixed; boundary="cLa1dKfbBRdqHo9g9icsWrtm4NtEuDpPE"
-From: Samuel Bernardo <samuelbernardo.mail@gmail.com>
-To: linux-kernel@vger.kernel.org, linux-modules@vger.kernel.org,
- linux-newbie@vger.kernel.org, linux-efi@vger.kernel.org,
- kernel-janitors@vger.kernel.org
-Message-ID: <2916ca4f-c4cf-06c9-3189-e33635ca621f@gmail.com>
-Subject: linux kernel support for logitech g502 proteus
+On Thu, 2016-11-24 at 11:17 -0800, James Bottomley wrote:
+> On Mon, 2016-11-21 at 16:16 +0000, Ard Biesheuvel wrote:
+> > On 16 November 2016 at 18:11, David Howells <dhowells@redhat.com>
+> > wrote:
+> > > From: Josh Boyer <jwboyer@fedoraproject.org>
+> > > 
+> > > Secure Boot stores a list of allowed certificates in the 'db' 
+> > > variable. This imports those certificates into the system trusted
+> > > keyring.   This allows for a third party signing certificate to 
+> > > be used in conjunction with signed modules.  By importing the 
+> > > public certificate into the 'db' variable, a user can allow a 
+> > > module signed with that certificate to load.  The shim UEFI 
+> > > bootloader has a similar certificate list stored in the 
+> > > 'MokListRT' variable.   We import those as well.
+> > > 
+> > 
+> > This sounds like a bad idea to me. For the standard databases like 
+> > db and dbx, we can rely on the firmware to ensure that they are 
+> > what you expect.
+> 
+> Actually, I think it's a bad idea for the opposite reason: Shim
+> explicitly pivots the root of trust away from the db keys to its own
+> Moklist keys.  We have no choice and are forced to trust db for the
+> secure boot part, but once we're in the kernel proper, I'd argue that
+> we would only want to trust the pivoted root, i.e. Moklist.
+> 
+> Trusting both could generate unwanted consequences, like pressure on
+> Microsoft to sign modules or worse, pressure on OEMs to include 
+> module keys or hashes ... or worst of all OEMs signing external
+> modules.
+> 
+> >  For MokListRt, not so much: anyone with sufficient
+> > capabilities can generate such a variable from userland, and not 
+> > every arch/distro combo will be using shim and/or mokmanager. (The 
+> > debates are still ongoing, but my position is that there is no need
+> > for shim at all on ARM given that the M$ problem only exists on
+> > x86)
+> 
+> OK, so on this point, I'm already not using Shim on my x86 box. 
+>  However, what you find if you're using grub is that because grub
+> doesn't do signature verification, you still have to use the shim
+> protocol callout, so you need something between UEFI and grub to load
+> at least this protocol.  I suppose this would go away once we can
+> persuade grub to verify signatures.
 
---cLa1dKfbBRdqHo9g9icsWrtm4NtEuDpPE
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hm, that got crickets.
 
-Hello,
+Let me propose an alternative mechanism then.
 
-I'm sorry if I'm spamming some lists with this help request, but I don't
-know exactly what's the right mailing list.
+My problem is that although I am forced to trust the secure boot keys
+for the UEFI security boundary, I don't necessarily want to trust them
+for signing things for my kernel, so I want to pivot (or at
+leastselectively weed out) keys.  Shim already has this concept
+partially with MokIgnoreDB.
 
-I would like to use Logitech G502 RGB gaming mouse with programmed
-profiles from their software, but I realized that generic driver in
-linux didn't support it. Logitech discards any support for Linux OS.
-This is the only reason I need a dual boot with Windows for programming
-the mouse or generate the xml template for the key bindings.
+For the purposes of the kernel, I think we simply need a variable, lets
+call it MokKernelCerts, that gives the list of certificates to import
+into the kernel keyring.  I think this variable should be BS NV only
+(not RT) meaning we have to collect it before ExitBootServices().  The
+reason for this is to ensure it's populated by a trusted entity within
+the UEFI secure boot boundary.  This will cause a kexec problem, so we
+might have to relax this and use a RT shadow as we already do for
+MokList.  The idea is that we populate the kernel certificates only
+from this variable, so policy can be decided by the bootloader (or
+something else which runs within the secure boot environment).
 
-In Windows key mapping for mouse can be loaded from a xml file that
-stores profiles or programmed directly into the mouse, but limited to
-the keys available in keyboard or software.The following guides explains
-the setup:
+You can stop reading here if you're not interested in *how* this policy
+would work.
 
-http://support.logitech.com/en_us/article/26855
+To make it work, Shim or one of the other intermediates would set up
+the variable.  we could communicate policy to it with the usual Foo,
+FooUpdate mechanism we already use for MokList.  The default policy (if
+the variable doesn't exist on firstboot) can be whatever the distro
+wants, so if Fedora wants all the secure boot certs, it can do that and
+other distros can follow their own stricter or less strict policies. 
+ The user would be able to overwrite this using the Update process,
+which could be password verified like MokList already is.
 
-http://support.logitech.com/en_us/article/26862?product=3Da0q31000009u2F9=
-AAI
+Does this sound acceptable to everyone?
 
-With xml template is also possible to configure additional keys like F13
-that are usefull to map macros for example in an IDE software. The guide
-explaining how to change xml file is below:
+James
 
-http://i.imgur.com/NbmjWCS.png
-
-This mouse has many programmable keys that I would like to use in linux.
-
-I suspect that xml configuration is loaded with the windows driver for
-g502. Since with actual generic driver in linux 4.8 the profile could
-not be loaded, I ask if I you could help giving additional support for
-it in linux kernel?
-
-Thanks,
-
-Samuel
-
-
-
-
-
---cLa1dKfbBRdqHo9g9icsWrtm4NtEuDpPE--
-
---oiOHFVip8rC8c60iVWvXg9lCg8JwiEbpm
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAEBCAAGBQJYQEiBAAoJEO2Nqc2/qzs5ad4P/2HV35dLocPYbz38qVnmy06A
-KGNcvyUDJpJWEyB0mkmztWneqGZkWWP5gx2srLkokSrcUOjmM45xjjYVPlHAAYBR
-FCYgmQWna34Rxs6NZiucD6mfQTyw/77eeLZxWda4K0ZxnjTL8taAzvmoMZyB/gwC
-g+peSlEN2NzXgTyLNEujPbykKh19W8ZihSpkDxuJeEiu9NCp9aXfIW4cmM5UHNM+
-sjVqDKPxNLuukQC3IHZCOIUXIT39PtzErc7On5YdD4BXIRSy9PE8IjCBvfvFnyVT
-MY2AuoGoh/rDmiZnCfBPWaWP8r9lrAiy8aT3oqIbuCbKeIeGfHvV9gcJiO4fdybR
-PHeFEF6o68sIVd+7Kkl5IVOZBHxNp9iCOOpXrgYDtrVMFOCG9aZKoer6nN5jTNcq
-JnpTorAVWgJeJRorzy5guMHSPsiZE/0PUyid7P2jS0tav6e91I4wEVVN5jlI//xV
-rRN5TIJD9nOfZltGYLzKsjdcV1uhF15H5Ov+iFEvzY9uxT/WaCpuhEEyHSQ7ATp/
-OaF+9izIzQp9uBlDfvfe1jIvG2ELim8lZSI5q9jqQuKFSSb44BfJ2jCXk1wtevDC
-AFTC2zNoxlSbyB8L/pQ8s1Pu1eavE1aMZy7rg58W0Mq2xG0QsB0DbQgPx/TSj9/K
-IOYEVBVmJ5OmycR9jdcb
-=IXxD
------END PGP SIGNATURE-----
-
---oiOHFVip8rC8c60iVWvXg9lCg8JwiEbpm--
