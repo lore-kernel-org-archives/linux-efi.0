@@ -1,58 +1,70 @@
-From: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH 0/4] UEFI: EFI_MEMORY_ATTRIBUTES_TABLE support for x86
-Date: Tue,  6 Dec 2016 11:15:59 -0800
-Message-ID: <1481051763-8705-1-git-send-email-sai.praneeth.prakhya@intel.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: jlee-IBi9RG/b67k@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Subject: [PATCH 4/4] efi: Skip parsing of EFI_PROPERTIES_TABLE if EFI_MEMORY_ATTRIBUTES_TABLE is detected
+Date: Tue,  6 Dec 2016 11:16:03 -0800
+Message-ID: <1481051763-8705-5-git-send-email-sai.praneeth.prakhya@intel.com>
+References: <1481051763-8705-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1481051763-8705-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: jlee@suse.com, bp@alien8.de, ricardo.neri@intel.com, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org, ravi.v.shankar@intel.com, fenghua.yu@intel.com, Sai Praneeth <sai.praneeth.prakhya@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-UEFI v2.6 introduces EFI_MEMORY_ATTRIBUTES_TABLE which describes memory 
-protections that may be applied to EFI Runtime code and data regions by 
-kernel. This helps kernel to map efi runtime regions more strictly and 
-hence allowing only appropriate accesses to these regions. Please refer 
-to "EFI_MEMORY_ATTRIBUTES_TABLE" in section 4.6 of UEFI specification 
-v2.6 for more information on this table.
+UEFI specification v2.6 recommends not to use
+"EFI_PROPERTIES_RUNTIME_MEMORY_PROTECTION_NON_EXECUTABLE_PE_DATA"
+attribute of EFI_PROPERTIES_TABLE. Presently, this is the *only* bit
+defined in EFI_PROPERTIES_TABLE. This bit implies that EFI Runtime code
+and data regions of an executable image are separate and are aligned as
+specified in spec. Please refer to "EFI_PROPERTIES_TABLE" in section 4.6
+of UEFI specification v2.6 for more information on this table.
 
-This patch set relies on commit a604af075a32 ("efi: Add support for the 
-EFI_MEMORY_ATTRIBUTES_TABLE config table"), commit 10f0d2f57705 ("efi: 
-Implement generic support for the Memory Attributes table") and hence 
-implements support for only x86.
+UEFI v2.6 introduces EFI_MEMORY_ATTRIBUTES_TABLE and is intended to
+replace EFI_PROPERTIES_TABLE. If EFI_MEMORY_ATTRIBUTES_TABLE is found we
+skip updating of efi runtime region mappings based on
+EFI_PROPERTIES_TABLE, so let's also skip parsing of EFI_PROPERTIES_TABLE
+if we find EFI_MEMORY_ATTRIBUTES_TABLE because we are not using this
+table anyways. The only caveat here is, if further versions of UEFI spec
+adds some more bits (hence some more attributes) to EFI_PROPERTIES_TABLE
+then we might need to parse it again, otherwise there is no good in
+doing that. We can also expect that the same attributes might be reflected in
+EFI_MEMORY_ATTRIBUTES_TABLE and hence saving us from parsing
+EFI_PROPERTIES_TABLE again.
 
-Since the above commits have already implemented early discovery and 
-validation of table, the following patches implement a call back 
-function for x86 which is called only when EFI_MEMORY_ATTRIBUTES_TABLE 
-is detected.
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Lee, Chun-Yi <jlee@suse.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+Cc: Fenghua Yu <fenghua.yu@intel.com>
+---
+ drivers/firmware/efi/efi.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-Patch #1 makes the efi_memory_attributes table detection code generic 
-across all architectures
-
-Patch #2 adds EFI_MEM_ATTR bit to keep track of this feature
-
-Patch #3 Implements call back function that does stricter mappings based 
-on this table
-
-Patch #4 Skip parsing of EFI_PROPERTIES_TABLE if EFI_MEMORY_ATTRIBUTES_TABLE 
-is detected
-
-Sai Praneeth (4):
-  efi: Make EFI_MEMORY_ATTRIBUTES_TABLE initialization common across all
-    architectures
-  efi: Introduce EFI_MEM_ATTR bit and set it from memory attributes
-    table
-  x86/efi: Add support for EFI_MEMORY_ATTRIBUTES_TABLE
-  efi: Skip parsing of EFI_PROPERTIES_TABLE if
-    EFI_MEMORY_ATTRIBUTES_TABLE is detected
-
- arch/x86/platform/efi/efi_64.c  | 64 ++++++++++++++++++++++++++++++++++-------
- drivers/firmware/efi/arm-init.c |  1 -
- drivers/firmware/efi/efi.c      | 13 +++++++++
- drivers/firmware/efi/memattr.c  |  6 +++-
- include/linux/efi.h             |  1 +
- 5 files changed, 73 insertions(+), 12 deletions(-)
-
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index e7d404059b73..e6c6feaa4d78 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -531,6 +531,17 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 
+ 	efi_memattr_init();
+ 
++	/*
++	 * Since EFI_MEMORY_ATTRIBUTES_TABLE is intended to replace
++	 * EFI_PROPERTIES_TABLE, let's skip parsing of EFI_PROPERTIES_TABLE
++	 * if we find EFI_MEMORY_ATTRIBUTES_TABLE.
++	 * Note: We might need to *re-enable* parsing of EFI_PROPERTIES_TABLE
++	 * if it defines some bits that are not defined in
++	 * EFI_MEMORY_ATTRIBUTES_TABLE.
++	 */
++	if (efi_enabled(EFI_MEM_ATTR))
++		return 0;
++
+ 	/* Parse the EFI Properties table if it exists */
+ 	if (efi.properties_table != EFI_INVALID_TABLE_ADDR) {
+ 		efi_properties_table_t *tbl;
 -- 
 2.1.4
