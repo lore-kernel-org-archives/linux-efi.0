@@ -1,7 +1,7 @@
 From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH 4/4] efi: Skip parsing of EFI_PROPERTIES_TABLE if EFI_MEMORY_ATTRIBUTES_TABLE is detected
-Date: Tue,  6 Dec 2016 11:16:03 -0800
-Message-ID: <1481051763-8705-5-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH 1/4] efi: Make EFI_MEMORY_ATTRIBUTES_TABLE initialization common across all architectures
+Date: Tue,  6 Dec 2016 11:16:00 -0800
+Message-ID: <1481051763-8705-2-git-send-email-sai.praneeth.prakhya@intel.com>
 References: <1481051763-8705-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1481051763-8705-1-git-send-email-sai.praneeth.prakhya@intel.com>
@@ -12,25 +12,13 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-UEFI specification v2.6 recommends not to use
-"EFI_PROPERTIES_RUNTIME_MEMORY_PROTECTION_NON_EXECUTABLE_PE_DATA"
-attribute of EFI_PROPERTIES_TABLE. Presently, this is the *only* bit
-defined in EFI_PROPERTIES_TABLE. This bit implies that EFI Runtime code
-and data regions of an executable image are separate and are aligned as
-specified in spec. Please refer to "EFI_PROPERTIES_TABLE" in section 4.6
-of UEFI specification v2.6 for more information on this table.
-
-UEFI v2.6 introduces EFI_MEMORY_ATTRIBUTES_TABLE and is intended to
-replace EFI_PROPERTIES_TABLE. If EFI_MEMORY_ATTRIBUTES_TABLE is found we
-skip updating of efi runtime region mappings based on
-EFI_PROPERTIES_TABLE, so let's also skip parsing of EFI_PROPERTIES_TABLE
-if we find EFI_MEMORY_ATTRIBUTES_TABLE because we are not using this
-table anyways. The only caveat here is, if further versions of UEFI spec
-adds some more bits (hence some more attributes) to EFI_PROPERTIES_TABLE
-then we might need to parse it again, otherwise there is no good in
-doing that. We can also expect that the same attributes might be reflected in
-EFI_MEMORY_ATTRIBUTES_TABLE and hence saving us from parsing
-EFI_PROPERTIES_TABLE again.
+Since EFI_PROPERTIES_TABLE and EFI_MEMORY_ATTRIBUTES_TABLE deal with
+updating memory region attributes, it makes sense to call
+EFI_MEMORY_ATTRIBUTES_TABLE initialization function from the same place
+as EFI_PROPERTIES_TABLE. This also moves the EFI_MEMORY_ATTRIBUTES_TABLE
+initialization code to a more generic efi initialization path rather
+than ARM specific efi initialization. This is important because
+EFI_MEMORY_ATTRIBUTES_TABLE will be supported by x86 as well.
 
 Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 Cc: Lee, Chun-Yi <jlee@suse.com>
@@ -41,27 +29,31 @@ Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: Ravi Shankar <ravi.v.shankar@intel.com>
 Cc: Fenghua Yu <fenghua.yu@intel.com>
 ---
- drivers/firmware/efi/efi.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ drivers/firmware/efi/arm-init.c | 1 -
+ drivers/firmware/efi/efi.c      | 2 ++
+ 2 files changed, 2 insertions(+), 1 deletion(-)
 
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index f853ad2c4ca0..1027d7b44358 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -250,7 +250,6 @@ void __init efi_init(void)
+ 	}
+ 
+ 	reserve_regions();
+-	efi_memattr_init();
+ 	efi_esrt_init();
+ 	efi_memmap_unmap();
+ 
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index e7d404059b73..e6c6feaa4d78 100644
+index 92914801e388..e7d404059b73 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
-@@ -531,6 +531,17 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+@@ -529,6 +529,8 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 		}
+ 	}
  
- 	efi_memattr_init();
- 
-+	/*
-+	 * Since EFI_MEMORY_ATTRIBUTES_TABLE is intended to replace
-+	 * EFI_PROPERTIES_TABLE, let's skip parsing of EFI_PROPERTIES_TABLE
-+	 * if we find EFI_MEMORY_ATTRIBUTES_TABLE.
-+	 * Note: We might need to *re-enable* parsing of EFI_PROPERTIES_TABLE
-+	 * if it defines some bits that are not defined in
-+	 * EFI_MEMORY_ATTRIBUTES_TABLE.
-+	 */
-+	if (efi_enabled(EFI_MEM_ATTR))
-+		return 0;
++	efi_memattr_init();
 +
  	/* Parse the EFI Properties table if it exists */
  	if (efi.properties_table != EFI_INVALID_TABLE_ADDR) {
