@@ -1,7 +1,7 @@
 From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V6 07/10] efi: print unrecognized CPER section
-Date: Wed,  7 Dec 2016 14:48:20 -0700
-Message-ID: <1481147303-7979-8-git-send-email-tbaicar@codeaurora.org>
+Subject: [PATCH V6 09/10] trace, ras: add ARM processor error trace event
+Date: Wed,  7 Dec 2016 14:48:22 -0700
+Message-ID: <1481147303-7979-10-git-send-email-tbaicar@codeaurora.org>
 References: <1481147303-7979-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,63 +21,129 @@ To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrc
 Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-UEFI spec allows for non-standard section in Common Platform Error
-Record. This is defined in section N.2.3 of UEFI version 2.5.
-
-Currently if the CPER section's type (UUID) does not match with
-one of the section types that the kernel knows how to parse, the
-section is skipped. Therefore, user is not able to see
-such CPER data, for instance, error record of non-standard section.
-
-For above mentioned case, this change prints out the raw data in
-hex in dmesg buffer. Data length is taken from Error Data length
-field of Generic Error Data Entry.
-
-Following is a sample output from dmesg:
-[  115.771702] {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 2
-[  115.779042] {1}[Hardware Error]: It has been corrected by h/w and requires no further action
-[  115.787456] {1}[Hardware Error]: event severity: corrected
-[  115.792927] {1}[Hardware Error]:  Error 0, type: corrected
-[  115.798415] {1}[Hardware Error]:  fru_id: 00000000-0000-0000-0000-000000000000
-[  115.805596] {1}[Hardware Error]:  fru_text:
-[  115.816105] {1}[Hardware Error]:  section type: d2e2621c-f936-468d-0d84-15a4ed015c8b
-[  115.823880] {1}[Hardware Error]:  section length: 88
-[  115.828779] {1}[Hardware Error]:   00000000: 01000001 00000002 5f434345 525f4543
-[  115.836153] {1}[Hardware Error]:   00000010: 0000574d 00000000 00000000 00000000
-[  115.843531] {1}[Hardware Error]:   00000020: 00000000 00000000 00000000 00000000
-[  115.850908] {1}[Hardware Error]:   00000030: 00000000 00000000 00000000 00000000
-[  115.858288] {1}[Hardware Error]:   00000040: fe800000 00000000 00000004 5f434345
-[  115.865665] {1}[Hardware Error]:   00000050: 525f4543 0000574d
+Currently there are trace events for the various RAS
+errors with the exception of ARM processor type errors.
+Add a new trace event for such errors so that the user
+will know when they occur. These trace events are
+consistent with the ARM processor error section type
+defined in UEFI 2.6 spec section N.2.4.4.
 
 Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+Acked-by: Steven Rostedt <rostedt@goodmis.org>
 ---
- drivers/firmware/efi/cper.c | 12 ++++++++++--
- 1 file changed, 10 insertions(+), 2 deletions(-)
+ drivers/acpi/apei/ghes.c    |  9 +++++++-
+ drivers/firmware/efi/cper.c |  1 +
+ drivers/ras/ras.c           |  1 +
+ include/ras/ras_event.h     | 55 +++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 65 insertions(+), 1 deletion(-)
 
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index f2217da..49e6c25 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -517,7 +517,14 @@ static void ghes_do_proc(struct ghes *ghes,
+ 
+ 		}
+ #endif
+-		else {
++		else if (!uuid_le_cmp(sec_type, CPER_SEC_PROC_ARM)) {
++			struct cper_sec_proc_arm *arm_err;
++			struct cper_arm_err_info *err_info;
++
++			arm_err = acpi_hest_generic_data_payload(gdata);
++			err_info = (void *)(arm_err +1);
++			trace_arm_event(arm_err, err_info);
++		} else {
+ 			void *unknown_err = acpi_hest_generic_data_payload(gdata);
+ 			trace_unknown_sec_event(&sec_type,
+ 					fru_id, fru_text, sec_sev,
 diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index 1ac2572..6cfcaa2 100644
+index 6cfcaa2..3cc0104 100644
 --- a/drivers/firmware/efi/cper.c
 +++ b/drivers/firmware/efi/cper.c
-@@ -586,8 +586,16 @@ static void cper_estatus_print_section(
- 			cper_print_proc_arm(newpfx, arm_err);
- 		else
- 			goto err_section_too_small;
--	} else
--		printk("%s""section type: unknown, %pUl\n", newpfx, sec_type);
-+	} else {
-+		const void *unknown_err;
+@@ -35,6 +35,7 @@
+ #include <linux/printk.h>
+ #include <linux/bcd.h>
+ #include <acpi/ghes.h>
++#include <ras/ras_event.h>
+ 
+ #define INDENT_SP	" "
+ 
+diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
+index fb2500b..8ba5a94 100644
+--- a/drivers/ras/ras.c
++++ b/drivers/ras/ras.c
+@@ -28,3 +28,4 @@ EXPORT_TRACEPOINT_SYMBOL_GPL(extlog_mem_event);
+ #endif
+ EXPORT_TRACEPOINT_SYMBOL_GPL(mc_event);
+ EXPORT_TRACEPOINT_SYMBOL_GPL(unknown_sec_event);
++EXPORT_TRACEPOINT_SYMBOL_GPL(arm_event);
+diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
+index 5861b6f..860a5f1 100644
+--- a/include/ras/ras_event.h
++++ b/include/ras/ras_event.h
+@@ -162,6 +162,61 @@ TRACE_EVENT(mc_event,
+ );
+ 
+ /*
++ * ARM Processor Events Report
++ *
++ * This event is generated when hardware detects an ARM processor error
++ * has occurred. UEFI 2.6 spec section N.2.4.4.
++ */
++TRACE_EVENT(arm_event,
 +
-+		unknown_err = acpi_hest_generic_data_payload(gdata);
-+		printk("%ssection type: %pUl\n", newpfx, sec_type);
-+		printk("%ssection length: %d\n", newpfx,
-+		       gdata->error_data_length);
-+		print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4,
-+			       unknown_err, gdata->error_data_length, 0);
-+	}
- 
- 	return;
- 
++	TP_PROTO(const struct cper_sec_proc_arm *proc,
++		 struct cper_arm_err_info *err_info),
++
++	TP_ARGS(proc, err_info),
++
++	TP_STRUCT__entry(
++		__field(u64, mpidr)
++		__field(u64, midr)
++		__field(u64, info)
++		__field(u64, virt_fault_addr)
++		__field(u64, phys_fault_addr)
++		__field(u32, running_state)
++		__field(u32, psci_state)
++		__field(u16, err_count)
++		__field(u8, affinity)
++		__field(u8, version)
++		__field(u8, type)
++		__field(u8, flags)
++	),
++
++	TP_fast_assign(
++		__entry->affinity = proc->affinity_level;
++		__entry->mpidr = proc->mpidr;
++		__entry->midr = proc->midr;
++		__entry->running_state = proc->running_state;
++		__entry->psci_state = proc->psci_state;
++		__entry->version = err_info->version;
++		__entry->type = err_info->type;
++		__entry->err_count = err_info->multiple_error;
++		__entry->flags = err_info->flags;
++		__entry->info = err_info->error_info;
++		__entry->virt_fault_addr = err_info->virt_fault_addr;
++		__entry->phys_fault_addr = err_info->physical_fault_addr;
++	),
++
++	TP_printk("affinity level: %d; MPIDR: %016llx; MIDR: %016llx; "
++		  "running state: %d; PSCI state: %d; version: %d; type: %d; "
++		  "error count: 0x%04x; flags: 0x%02x; info: %016llx; "
++		  "virtual fault address: %016llx; "
++		  "physical fault address: %016llx",
++		  __entry->affinity, __entry->mpidr, __entry->midr,
++		  __entry->running_state, __entry->psci_state, __entry->version,
++		  __entry->type, __entry->err_count, __entry->flags,
++		  __entry->info, __entry->virt_fault_addr,
++		  __entry->phys_fault_addr)
++);
++
++/*
+  * Unknown Section Report
+  *
+  * This event is generated when hardware detected a hardware
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
