@@ -1,8 +1,8 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 1/8] efi: use typed function pointers for runtime services
- table [ver #5]
-Date: Wed, 07 Dec 2016 13:18:09 +0000
-Message-ID: <148111668993.23390.8165077275527037412.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 2/8] x86/efi: Allow invocation of arbitrary runtime services
+ [ver #5]
+Date: Wed, 07 Dec 2016 13:18:17 +0000
+Message-ID: <148111669741.23390.6939632510264070245.stgit@warthog.procyon.org.uk>
 References: <148111668193.23390.6340512985876251017.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -14,71 +14,123 @@ To: matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
 Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Provide the ability to perform mixed-mode runtime service calls for x86 in
+the same way that commit 0a637ee61247bd4bed9b2a07568ef7a1cfc76187
+("x86/efi: Allow invocation of arbitrary boot services") provides the
+ability to invoke arbitrary boot services.
 
-Instead of using void pointers, and casting them to correctly typed
-function pointers upon use, declare the runtime services pointers
-as function pointers using their respective prototypes, for which
-typedefs are already available.
-
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Suggested-by: Lukas Wunner <lukas@wunner.de>
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- include/linux/efi.h |   36 ++++++++++++++++++------------------
- 1 file changed, 18 insertions(+), 18 deletions(-)
+ arch/x86/boot/compressed/eboot.c   |    1 +
+ arch/x86/boot/compressed/head_32.S |    6 +++---
+ arch/x86/boot/compressed/head_64.S |    8 ++++----
+ arch/x86/include/asm/efi.h         |    5 +++++
+ 4 files changed, 13 insertions(+), 7 deletions(-)
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index a07a476178cd..93a82de167eb 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -508,24 +508,6 @@ typedef struct {
- 	u64 query_variable_info;
- } efi_runtime_services_64_t;
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index ff01c8fc76f7..c8c32ebcdfdb 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -32,6 +32,7 @@ static void setup_boot_services##bits(struct efi_config *c)		\
+ 									\
+ 	table = (typeof(table))sys_table;				\
+ 									\
++	c->runtime_services = table->runtime;				\
+ 	c->boot_services = table->boottime;				\
+ 	c->text_output = table->con_out;				\
+ }
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index fd0b6a272dd5..d85b9625e836 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -82,7 +82,7 @@ ENTRY(efi_pe_entry)
  
--typedef struct {
--	efi_table_hdr_t hdr;
--	void *get_time;
--	void *set_time;
--	void *get_wakeup_time;
--	void *set_wakeup_time;
--	void *set_virtual_address_map;
--	void *convert_pointer;
--	void *get_variable;
--	void *get_next_variable;
--	void *set_variable;
--	void *get_next_high_mono_count;
--	void *reset_system;
--	void *update_capsule;
--	void *query_capsule_caps;
--	void *query_variable_info;
--} efi_runtime_services_t;
--
- typedef efi_status_t efi_get_time_t (efi_time_t *tm, efi_time_cap_t *tc);
- typedef efi_status_t efi_set_time_t (efi_time_t *tm);
- typedef efi_status_t efi_get_wakeup_time_t (efi_bool_t *enabled, efi_bool_t *pending,
-@@ -560,6 +542,24 @@ typedef efi_status_t efi_query_variable_store_t(u32 attributes,
- 						unsigned long size,
- 						bool nonblocking);
+ 	/* Relocate efi_config->call() */
+ 	leal	efi32_config(%esi), %eax
+-	add	%esi, 32(%eax)
++	add	%esi, 40(%eax)
+ 	pushl	%eax
  
-+typedef struct {
-+	efi_table_hdr_t			hdr;
-+	efi_get_time_t			*get_time;
-+	efi_set_time_t			*set_time;
-+	efi_get_wakeup_time_t		*get_wakeup_time;
-+	efi_set_wakeup_time_t		*set_wakeup_time;
-+	efi_set_virtual_address_map_t	*set_virtual_address_map;
-+	void				*convert_pointer;
-+	efi_get_variable_t		*get_variable;
-+	efi_get_next_variable_t		*get_next_variable;
-+	efi_set_variable_t		*set_variable;
-+	efi_get_next_high_mono_count_t	*get_next_high_mono_count;
-+	efi_reset_system_t		*reset_system;
-+	efi_update_capsule_t		*update_capsule;
-+	efi_query_capsule_caps_t	*query_capsule_caps;
-+	efi_query_variable_info_t	*query_variable_info;
-+} efi_runtime_services_t;
+ 	call	make_boot_params
+@@ -108,7 +108,7 @@ ENTRY(efi32_stub_entry)
+ 
+ 	/* Relocate efi_config->call() */
+ 	leal	efi32_config(%esi), %eax
+-	add	%esi, 32(%eax)
++	add	%esi, 40(%eax)
+ 	pushl	%eax
+ 2:
+ 	call	efi_main
+@@ -264,7 +264,7 @@ relocated:
+ #ifdef CONFIG_EFI_STUB
+ 	.data
+ efi32_config:
+-	.fill 4,8,0
++	.fill 5,8,0
+ 	.long efi_call_phys
+ 	.long 0
+ 	.byte 0
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index efdfba21a5b2..beab8322f72a 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -265,7 +265,7 @@ ENTRY(efi_pe_entry)
+ 	/*
+ 	 * Relocate efi_config->call().
+ 	 */
+-	addq	%rbp, efi64_config+32(%rip)
++	addq	%rbp, efi64_config+40(%rip)
+ 
+ 	movq	%rax, %rdi
+ 	call	make_boot_params
+@@ -285,7 +285,7 @@ handover_entry:
+ 	 * Relocate efi_config->call().
+ 	 */
+ 	movq	efi_config(%rip), %rax
+-	addq	%rbp, 32(%rax)
++	addq	%rbp, 40(%rax)
+ 2:
+ 	movq	efi_config(%rip), %rdi
+ 	call	efi_main
+@@ -457,14 +457,14 @@ efi_config:
+ #ifdef CONFIG_EFI_MIXED
+ 	.global efi32_config
+ efi32_config:
+-	.fill	4,8,0
++	.fill	5,8,0
+ 	.quad	efi64_thunk
+ 	.byte	0
+ #endif
+ 
+ 	.global efi64_config
+ efi64_config:
+-	.fill	4,8,0
++	.fill	5,8,0
+ 	.quad	efi_call
+ 	.byte	1
+ #endif /* CONFIG_EFI_STUB */
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index e99675b9c861..2f77bcefe6b4 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -191,6 +191,7 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
+ struct efi_config {
+ 	u64 image_handle;
+ 	u64 table;
++	u64 runtime_services;
+ 	u64 boot_services;
+ 	u64 text_output;
+ 	efi_status_t (*call)(unsigned long, ...);
+@@ -226,6 +227,10 @@ static inline bool efi_is_64bit(void)
+ #define __efi_call_early(f, ...)					\
+ 	__efi_early()->call((unsigned long)f, __VA_ARGS__);
+ 
++#define efi_call_runtime(f, ...)					\
++	__efi_early()->call(efi_table_attr(efi_runtime_services, f,	\
++		__efi_early()->runtime_services), __VA_ARGS__)
 +
- void efi_native_runtime_setup(void);
+ extern bool efi_reboot_required(void);
  
- /*
+ #else
