@@ -1,7 +1,7 @@
 From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 2/4] efi: efi_map_region(): traceback if we try to map invalid sized regions
-Date: Wed,  7 Dec 2016 16:38:28 -0500
-Message-ID: <20161207213830.15984-2-pjones@redhat.com>
+Subject: [PATCH 3/4] efi: efi_memmap_insert(): don't insert a region more than once
+Date: Wed,  7 Dec 2016 16:38:29 -0500
+Message-ID: <20161207213830.15984-3-pjones@redhat.com>
 References: <20161207213830.15984-1-pjones@redhat.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20161207213830.15984-1-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
@@ -12,65 +12,108 @@ List-Id: linux-efi@vger.kernel.org
 
 Some machines, such as the Lenovo ThinkPad W541 with firmware GNET80WW
 (2.28), include memory map entries with phys_addr=0x0 and num_pages=0.
-We shouldn't ever try to map these errors, so if we get as far as
-efi_map_region(), show a traceback.
 
-This additionally makes should_map_region() say not to map them, but I
-fixed both places in case another caller of efi_map_region() ever arises
-in the future.
+When this is true on a machine with an ESRT config table,
+efi_esrt_init() will try to reserve that table with efi_mem_reserve().
+When it does, efi_arch_mem_reserve() will use efi_mem_desc_lookup() to
+find the memory map in question, call efi_memmap_split_count() to
+determine how many regions it will be split into, allocates new ram for
+the map, and calls efi_memmap_insert() to add the entry.
+
+efi_memmap_insert() iterates across all regions in the old map, and for
+each region, it tests whether the address for the new map is within that
+region.  Unfortunately we'll try to insert the new map in *each* of
+these entries, causing even more duplicate entries.  But
+efi_memmap_split_count() only returned the split count for the first
+entry, because it was called with the result of efi_mem_desc_lookup(),
+which only returns the first entry it came across.  As a result, this
+will overflow the memory map's allocation and eventually panic.
+
+Unfortunately the method of computing the size does not handle the
+0xffffffffffffffff or 0x0 edge cases well, and all valid addresses wind
+up being covered by any such entry.  Even if the math weren't off by 1
+byte in the num_pages=0 case, a duplicate entry in the table, or an
+entry with num_pages of ((u64)-1LL >> EFI_PAGE_SHIFT) or (u64)-1LL (i.e.
+either the maximum number of virtually addressable pages or just the
+largest value you can stuff in the field) would have the same effect.
+
+In any case, if we see more than one memory map in efi_memmap_insert()
+that covers the same region, it is an error to try to split up more than
+one of them, overflowing the allocation.  So this makes it never try to
+split more than one region per invocation of efi_arch_mem_reserve().
+
+I have not attempted to address the math error.
 
 Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/x86/platform/efi/efi.c    |  4 ++++
- arch/x86/platform/efi/efi_64.c | 19 ++++++++++++++++---
- 2 files changed, 20 insertions(+), 3 deletions(-)
+ drivers/firmware/efi/memmap.c | 29 ++++++++++++++++++++++++++++-
+ 1 file changed, 28 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 0263391..d9f7131 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -707,6 +707,10 @@ static bool should_map_region(efi_memory_desc_t *md)
- 	if (IS_ENABLED(CONFIG_X86_32))
- 		return false;
+diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+index f03ddec..5b71c71 100644
+--- a/drivers/firmware/efi/memmap.c
++++ b/drivers/firmware/efi/memmap.c
+@@ -219,6 +219,7 @@ void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
+ 	efi_memory_desc_t *md;
+ 	u64 start, end;
+ 	void *old, *new;
++	bool did_split=false;
  
-+	if (md->num_pages == 0 ||
-+	    md->num_pages >= (((u64)-1LL) >> EFI_PAGE_SHIFT))
-+		return false;
+ 	/* modifying range */
+ 	m_start = mem->range.start;
+@@ -251,6 +252,15 @@ void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
+ 
+ 		if (m_start <= start &&
+ 		    (start < m_end && m_end < end)) {
++			if (did_split) {
++				pr_warn_once("%s: memory map for 0x%llx pages at 0x%016llx also covers address 0x%016llx.  Not splitting.\n",
++					     __func__,
++					     md->num_pages, md->phys_addr,
++					     m_start);
++				continue;
++			}
 +
- 	/*
- 	 * Map all of RAM so that we can access arguments in the 1:1
- 	 * mapping when making EFI runtime calls.
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 319148b..7ee5d97 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -313,11 +313,24 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
++			did_split = true;
+ 			/* first part */
+ 			md->attribute |= m_attr;
+ 			md->num_pages = (m_end - md->phys_addr + 1) >>
+@@ -265,9 +275,18 @@ void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
+ 		}
  
- void __init efi_map_region(efi_memory_desc_t *md)
- {
--	unsigned long size = md->num_pages << PAGE_SHIFT;
-+	u64 size = md->num_pages << PAGE_SHIFT;
- 	u64 pa = md->phys_addr;
- 
--	if (efi_enabled(EFI_OLD_MEMMAP))
--		return old_map_region(md);
-+	/*
-+	 * hah hah the system firmware is having a good one on us
-+	 */
-+	if (md->num_pages == 0 ||
-+	    md->num_pages >= (((u64)-1LL) >> EFI_PAGE_SHIFT)) {
-+		pr_err("memmap from %p to %p is unreasonable.  Not mapping it.\n",
-+		       (void *)pa, (void *)(pa+size));
-+		WARN_ON(1);
-+		return;
-+	}
+ 		if ((start < m_start && m_start < end) && m_end < end) {
++			if (did_split) {
++				pr_warn_once("%s: memory map for 0x%llx pages at 0x%016llx also covers address 0x%016llx.  Not splitting.\n",
++					     __func__,
++					     md->num_pages, md->phys_addr,
++					     m_start);
++				continue;
++			}
++			did_split = true;
+ 			/* first part */
+ 			md->num_pages = (m_start - md->phys_addr) >>
+ 				EFI_PAGE_SHIFT;
 +
-+	if (efi_enabled(EFI_OLD_MEMMAP)) {
-+		old_map_region(md);
-+		return;
-+	}
- 
- 	/*
- 	 * Make sure the 1:1 mappings are present as a catch-all for b0rked
+ 			/* middle part */
+ 			new += old_memmap->desc_size;
+ 			memcpy(new, old, old_memmap->desc_size);
+@@ -284,9 +303,17 @@ void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
+ 			md->num_pages = (end - m_end) >>
+ 				EFI_PAGE_SHIFT;
+ 		}
+-
++// else
+ 		if ((start < m_start && m_start < end) &&
+ 		    (end <= m_end)) {
++			if (did_split) {
++				pr_warn_once("%s: memory map for 0x%llx pages at 0x%016llx also covers address 0x%016llx.  Not splitting.\n",
++					     __func__,
++					     md->num_pages, md->phys_addr,
++					     m_start);
++				continue;
++			}
++			did_split = true;
+ 			/* first part */
+ 			md->num_pages = (m_start - md->phys_addr) >>
+ 				EFI_PAGE_SHIFT;
 -- 
 2.9.3
