@@ -1,60 +1,41 @@
-From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH 2/4] efi: Introduce EFI_MEM_ATTR bit and set it from memory attributes table
-Date: Tue,  6 Dec 2016 11:16:01 -0800
-Message-ID: <1481051763-8705-3-git-send-email-sai.praneeth.prakhya@intel.com>
-References: <1481051763-8705-1-git-send-email-sai.praneeth.prakhya@intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1481051763-8705-1-git-send-email-sai.praneeth.prakhya@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: jlee@suse.com, bp@alien8.de, ricardo.neri@intel.com, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org, ravi.v.shankar@intel.com, fenghua.yu@intel.com, Sai Praneeth <sai.praneeth.prakhya@intel.com>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 4/8] efi: Add SHIM and image security database GUID
+ definitions [ver #4]
+Date: Wed, 07 Dec 2016 11:11:47 +0000
+Message-ID: <148110910775.11513.14817191393567276171.stgit@warthog.procyon.org.uk>
+References: <148110907725.11513.15923870640212286383.stgit@warthog.procyon.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <148110907725.11513.15923870640212286383.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+Add the definitions for shim and image security database, both of which
+are used widely in various Linux distros.
 
-UEFI v2.6 introduces a configuration table called
-EFI_MEMORY_ATTRIBUTES_TABLE which provides additional information about
-efi runtime regions. Currently this table describes memory protections
-that may be applied to EFI Runtime code and data regions by kernel.
-Allocate a EFI_XXX bit to keep track of whether this feature is
-published by firmware or not.
-
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: Lee, Chun-Yi <jlee@suse.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Ricardo Neri <ricardo.neri@intel.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-Cc: Fenghua Yu <fenghua.yu@intel.com>
+Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/memattr.c | 1 +
- include/linux/efi.h            | 1 +
- 2 files changed, 2 insertions(+)
 
-diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
-index 236004b9a50d..402197460507 100644
---- a/drivers/firmware/efi/memattr.c
-+++ b/drivers/firmware/efi/memattr.c
-@@ -43,6 +43,7 @@ int __init efi_memattr_init(void)
- 
- 	tbl_size = sizeof(*tbl) + tbl->num_entries * tbl->desc_size;
- 	memblock_reserve(efi.mem_attr_table, tbl_size);
-+	set_bit(EFI_MEM_ATTR, &efi.flags);
- 
- unmap:
- 	early_memunmap(tbl, sizeof(*tbl));
+ include/linux/efi.h |    3 +++
+ 1 file changed, 3 insertions(+)
+
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index a07a476178cd..41047ea555e3 100644
+index 93a82de167eb..c7904556d7a8 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
-@@ -1063,6 +1063,7 @@ extern int __init efi_setup_pcdp_console(char *);
- #define EFI_ARCH_1		7	/* First arch-specific bit */
- #define EFI_DBG			8	/* Print additional debug info at runtime */
- #define EFI_NX_PE_DATA		9	/* Can runtime data regions be mapped non-executable? */
-+#define EFI_MEM_ATTR		10	/* Did firmware publish EFI_MEMORY_ATTRIBUTES table? */
+@@ -610,6 +610,9 @@ void efi_native_runtime_setup(void);
+ #define EFI_CONSOLE_OUT_DEVICE_GUID		EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+ #define APPLE_PROPERTIES_PROTOCOL_GUID		EFI_GUID(0x91bd12fe, 0xf6c3, 0x44fb,  0xa5, 0xb7, 0x51, 0x22, 0xab, 0x30, 0x3a, 0xe0)
  
- #ifdef CONFIG_EFI
++#define EFI_IMAGE_SECURITY_DATABASE_GUID	EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596, 0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
++#define EFI_SHIM_LOCK_GUID			EFI_GUID(0x605dab50, 0xe046, 0x4300, 0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
++
  /*
--- 
-2.1.4
+  * This GUID is used to pass to the kernel proper the struct screen_info
+  * structure that was populated by the stub based on the GOP protocol instance
