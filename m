@@ -1,41 +1,85 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 4/8] efi: Add SHIM and image security database GUID
- definitions [ver #4]
-Date: Wed, 07 Dec 2016 11:11:47 +0000
-Message-ID: <148110910775.11513.14817191393567276171.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells@redhat.com>
+Subject: [PATCH 1/8] efi: use typed function pointers for runtime services
+ table [ver #4]
+Date: Wed, 07 Dec 2016 11:11:25 +0000
+Message-ID: <148110908500.11513.7332744237852389781.stgit@warthog.procyon.org.uk>
 References: <148110907725.11513.15923870640212286383.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <148110907725.11513.15923870640212286383.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <148110907725.11513.15923870640212286383.stgit@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Add the definitions for shim and image security database, both of which
-are used widely in various Linux distros.
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Reviewed-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Instead of using void pointers, and casting them to correctly typed
+function pointers upon use, declare the runtime services pointers
+as function pointers using their respective prototypes, for which
+typedefs are already available.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- include/linux/efi.h |    3 +++
- 1 file changed, 3 insertions(+)
+ include/linux/efi.h |   36 ++++++++++++++++++------------------
+ 1 file changed, 18 insertions(+), 18 deletions(-)
 
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 93a82de167eb..c7904556d7a8 100644
+index a07a476178cd..93a82de167eb 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
-@@ -610,6 +610,9 @@ void efi_native_runtime_setup(void);
- #define EFI_CONSOLE_OUT_DEVICE_GUID		EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
- #define APPLE_PROPERTIES_PROTOCOL_GUID		EFI_GUID(0x91bd12fe, 0xf6c3, 0x44fb,  0xa5, 0xb7, 0x51, 0x22, 0xab, 0x30, 0x3a, 0xe0)
+@@ -508,24 +508,6 @@ typedef struct {
+ 	u64 query_variable_info;
+ } efi_runtime_services_64_t;
  
-+#define EFI_IMAGE_SECURITY_DATABASE_GUID	EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596, 0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
-+#define EFI_SHIM_LOCK_GUID			EFI_GUID(0x605dab50, 0xe046, 0x4300, 0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
+-typedef struct {
+-	efi_table_hdr_t hdr;
+-	void *get_time;
+-	void *set_time;
+-	void *get_wakeup_time;
+-	void *set_wakeup_time;
+-	void *set_virtual_address_map;
+-	void *convert_pointer;
+-	void *get_variable;
+-	void *get_next_variable;
+-	void *set_variable;
+-	void *get_next_high_mono_count;
+-	void *reset_system;
+-	void *update_capsule;
+-	void *query_capsule_caps;
+-	void *query_variable_info;
+-} efi_runtime_services_t;
+-
+ typedef efi_status_t efi_get_time_t (efi_time_t *tm, efi_time_cap_t *tc);
+ typedef efi_status_t efi_set_time_t (efi_time_t *tm);
+ typedef efi_status_t efi_get_wakeup_time_t (efi_bool_t *enabled, efi_bool_t *pending,
+@@ -560,6 +542,24 @@ typedef efi_status_t efi_query_variable_store_t(u32 attributes,
+ 						unsigned long size,
+ 						bool nonblocking);
+ 
++typedef struct {
++	efi_table_hdr_t			hdr;
++	efi_get_time_t			*get_time;
++	efi_set_time_t			*set_time;
++	efi_get_wakeup_time_t		*get_wakeup_time;
++	efi_set_wakeup_time_t		*set_wakeup_time;
++	efi_set_virtual_address_map_t	*set_virtual_address_map;
++	void				*convert_pointer;
++	efi_get_variable_t		*get_variable;
++	efi_get_next_variable_t		*get_next_variable;
++	efi_set_variable_t		*set_variable;
++	efi_get_next_high_mono_count_t	*get_next_high_mono_count;
++	efi_reset_system_t		*reset_system;
++	efi_update_capsule_t		*update_capsule;
++	efi_query_capsule_caps_t	*query_capsule_caps;
++	efi_query_variable_info_t	*query_variable_info;
++} efi_runtime_services_t;
 +
+ void efi_native_runtime_setup(void);
+ 
  /*
-  * This GUID is used to pass to the kernel proper the struct screen_info
-  * structure that was populated by the stub based on the GOP protocol instance
+
