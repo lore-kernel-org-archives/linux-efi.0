@@ -1,36 +1,64 @@
-From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: Re: [PATCH 0/4] UEFI: EFI_MEMORY_ATTRIBUTES_TABLE support for x86
-Date: Wed, 07 Dec 2016 12:13:28 -0800
-Message-ID: <1481141608.15606.133.camel@intel.com>
-References: <1481051763-8705-1-git-send-email-sai.praneeth.prakhya@intel.com>
-         <20161207135646.GC17720@codeblueprint.co.uk>
-         <1481137266.15606.131.camel@intel.com>
-         <20161207200408.GC5462@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20161207200408.GC5462@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, jlee@suse.com, bp@alien8.de, ricardo.neri@intel.com, ard.biesheuvel@linaro.org, ravi.v.shankar@intel.com, fenghua.yu@intel.com
+From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 1/4] efi: efi_print_memmap(): Call out invalid entries in the memory map early.
+Date: Wed,  7 Dec 2016 16:38:27 -0500
+Message-ID: <20161207213830.15984-1-pjones@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 2016-12-07 at 20:04 +0000, Matt Fleming wrote:
-> On Wed, 07 Dec, at 11:01:06AM, Sai Praneeth Prakhya wrote:
-> > 
-> > Thanks Matt!
-> > 
-> > Would you like to see a new version of these patch series addressing
-> > your comments? Like
-> > 1. Dropping of patch #4
-> > 2. Adding Reviewed-by tag of Joey (Sorry for that)
-> > 3. This time with correct version number
-> 
-> No need, they're already in the 'next' branch of the EFI tree.
+Some machines, such as the Lenovo ThinkPad W541 with firmware GNET80WW
+(2.28), include memory map entries with phys_addr=0x0 and num_pages=0.
+Currently the log output for this case (with efi=debug) looks like:
 
-Great! Just saw the patches in 'next' branch.
-Thanks again Matt.
+[    0.000000] efi: mem45: [Reserved           |   |  |  |  |  |  |  |  |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
 
-Regards,
-Sai
+This is clearly wrong, and also not as informative as it could be.  This
+patch changes it so that if we find obviously invalid memory map
+entries, say so when we're printing the memory map.  It also detects the
+display of the address range calculation overflow, so the new output is:
+
+[    0.000000] efi: [Firmware Bug]: Invalid EFI memory map entry for 0x0 pages at 0x0000000000000000
+[    0.000000] efi: mem45: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0x0000000000000000] (0MB)
+
+Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/platform/efi/efi.c | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 936a488..0263391 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -217,11 +217,27 @@ void __init efi_print_memmap(void)
+ 
+ 	for_each_efi_memory_desc(md) {
+ 		char buf[64];
++		bool valid = true;
++		u64 size = (md->num_pages << EFI_PAGE_SHIFT) - 1;
++
++		if (md->num_pages == 0) {
++			size = 0;
++			valid = false;
++		}
++
++		if (md->num_pages >= (((u64)-1LL) >> EFI_PAGE_SHIFT)) {
++			size = (u64)-1LL;
++			valid = false;
++		}
++
++		if (!valid)
++			pr_info(FW_BUG "Invalid EFI memory map entry for 0x%llx pages at 0x%016llx\n",
++				md->num_pages, md->phys_addr);
+ 
+ 		pr_info("mem%02u: %s range=[0x%016llx-0x%016llx] (%lluMB)\n",
+ 			i++, efi_md_typeattr_format(buf, sizeof(buf), md),
+ 			md->phys_addr,
+-			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1,
++			md->phys_addr + size,
+ 			(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
+ 	}
+ }
+-- 
+2.9.3
