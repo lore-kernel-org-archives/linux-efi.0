@@ -1,80 +1,41 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 6/8] efi: Disable secure boot if shim is in insecure mode
- [ver #6]
-Date: Thu, 08 Dec 2016 12:30:53 +0000
-Message-ID: <148120025337.5854.14162686732874030327.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells@redhat.com>
+Subject: [PATCH 4/8] efi: Add SHIM and image security database GUID
+ definitions [ver #6]
+Date: Thu, 08 Dec 2016 12:30:38 +0000
+Message-ID: <148120023832.5854.17212261149893762411.stgit@warthog.procyon.org.uk>
 References: <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <148120020832.5854.5448601415491330495.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+Add the definitions for shim and image security database, both of which
+are used widely in various Linux distros.
 
-A user can manually tell the shim boot loader to disable validation of
-images it loads.  When a user does this, it creates a UEFI variable called
-MokSBState that does not have the runtime attribute set.  Given that the
-user explicitly disabled validation, we can honor that and not enable
-secure boot mode if that variable is set.
-
-Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
+Signed-off-by: David Howells <dhowells@redhat.com>
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
 
- drivers/firmware/efi/libstub/secureboot.c |   24 +++++++++++++++++++++++-
- 1 file changed, 23 insertions(+), 1 deletion(-)
+ include/linux/efi.h |    3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-index 62d6904da800..39c91e091f6a 100644
---- a/drivers/firmware/efi/libstub/secureboot.c
-+++ b/drivers/firmware/efi/libstub/secureboot.c
-@@ -23,6 +23,12 @@ static const efi_char16_t const efi_SetupMode_name[] = {
- 	'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0
- };
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 93a82de167eb..c7904556d7a8 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -610,6 +610,9 @@ void efi_native_runtime_setup(void);
+ #define EFI_CONSOLE_OUT_DEVICE_GUID		EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+ #define APPLE_PROPERTIES_PROTOCOL_GUID		EFI_GUID(0x91bd12fe, 0xf6c3, 0x44fb,  0xa5, 0xb7, 0x51, 0x22, 0xab, 0x30, 0x3a, 0xe0)
  
-+/* SHIM variables */
-+static const efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
-+static efi_char16_t const shim_MokSBState_name[] = {
-+	'M', 'o', 'k', 'S', 'B', 'S', 't', 'a', 't', 'e', 0
-+};
++#define EFI_IMAGE_SECURITY_DATABASE_GUID	EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596, 0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
++#define EFI_SHIM_LOCK_GUID			EFI_GUID(0x605dab50, 0xe046, 0x4300, 0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
 +
- #define get_efi_var(name, vendor, ...) \
- 	efi_call_runtime(get_variable, \
- 			 (efi_char16_t *)(name), (efi_guid_t *)(vendor), \
-@@ -33,7 +39,8 @@ static const efi_char16_t const efi_SetupMode_name[] = {
-  */
- enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
- {
--	u8 secboot, setupmode;
-+	u32 attr;
-+	u8 secboot, setupmode, moksbstate;
- 	unsigned long size;
- 	efi_status_t status;
- 
-@@ -52,6 +59,21 @@ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
- 	if (secboot == 0 || setupmode == 1)
- 		return efi_secureboot_mode_disabled;
- 
-+	/* See if a user has put shim into insecure mode.  If so, and if the
-+	 * variable doesn't have the runtime attribute set, we might as well
-+	 * honor that.
-+	 */
-+	size = sizeof(moksbstate);
-+	status = get_efi_var(shim_MokSBState_name, &shim_guid,
-+			     &attr, &size, &moksbstate);
-+
-+	/* If it fails, we don't care why.  Default to secure */
-+	if (status != EFI_SUCCESS)
-+		goto secure_boot_enabled;
-+	if (!(attr & EFI_VARIABLE_RUNTIME_ACCESS) && moksbstate == 1)
-+		return efi_secureboot_mode_disabled;
-+
-+secure_boot_enabled:
- 	pr_efi(sys_table_arg, "UEFI Secure Boot is enabled.\n");
- 	return efi_secureboot_mode_enabled;
- 
+ /*
+  * This GUID is used to pass to the kernel proper the struct screen_info
+  * structure that was populated by the stub based on the GOP protocol instance
