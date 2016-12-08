@@ -1,85 +1,85 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 0/8] efi: Pass secure boot mode to kernel [ver #6]
-Date: Thu, 08 Dec 2016 12:30:08 +0000
-Message-ID: <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells@redhat.com>
+Subject: [PATCH 1/8] efi: use typed function pointers for runtime services
+ table [ver #6]
+Date: Thu, 08 Dec 2016 12:30:16 +0000
+Message-ID: <148120021602.5854.12944033569399590772.stgit@warthog.procyon.org.uk>
+References: <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Here's a set of patches that can determine the secure boot state of the
-UEFI BIOS and pass that along to the main kernel image.  This involves
-generalising ARM's efi_get_secureboot() function and making it mixed-mode
-safe.
+Instead of using void pointers, and casting them to correctly typed
+function pointers upon use, declare the runtime services pointers
+as function pointers using their respective prototypes, for which
+typedefs are already available.
 
-Changes:
-
- Ver 6:
-
-  - Removed unnecessary variable init and trimmed comment.
-  - Return efi_secureboot_mode_disabled directly rather than going to a
-    place that just returns it.
-  - Switched the last two patches.
-
- Ver 5:
-
-  - Fix i386 compilation error (rsi should've been changed to esi).
-  - Fix arm64 compilation error ('sys_table_arg' is a hidden macro parameter).
-
- Ver 4:
-
-  - Use an enum to tell the kernel whether secure boot mode is enabled,
-    disabled, couldn't be determined or wasn't even tried due to not being
-    in EFI mode.
-  - Support the UEFI-2.6 DeployedMode flag.
-  - Don't clear boot_params->secure_boot in x86 sanitize_boot_params().
-  - Preclear the boot_params->secure_boot on x86 head_*.S entry if we may
-    not go through efi_main().
-
-The patches can be found here also:
-
-	http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/log/?h=efi-secure-boot
-
-at tag:
-
-	efi-secure-boot-20161207-2
-
-David
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: David Howells <dhowells@redhat.com>
 ---
-Ard Biesheuvel (1):
-      efi: use typed function pointers for runtime services table
 
-David Howells (5):
-      x86/efi: Allow invocation of arbitrary runtime services
-      arm/efi: Allow invocation of arbitrary runtime services
-      efi: Add SHIM and image security database GUID definitions
-      efi: Get the secure boot status
-      efi: Handle secure boot from UEFI-2.6
+ include/linux/efi.h |   36 ++++++++++++++++++------------------
+ 1 file changed, 18 insertions(+), 18 deletions(-)
 
-Josh Boyer (2):
-      efi: Disable secure boot if shim is in insecure mode
-      efi: Add EFI_SECURE_BOOT bit
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index a07a476178cd..93a82de167eb 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -508,24 +508,6 @@ typedef struct {
+ 	u64 query_variable_info;
+ } efi_runtime_services_64_t;
+ 
+-typedef struct {
+-	efi_table_hdr_t hdr;
+-	void *get_time;
+-	void *set_time;
+-	void *get_wakeup_time;
+-	void *set_wakeup_time;
+-	void *set_virtual_address_map;
+-	void *convert_pointer;
+-	void *get_variable;
+-	void *get_next_variable;
+-	void *set_variable;
+-	void *get_next_high_mono_count;
+-	void *reset_system;
+-	void *update_capsule;
+-	void *query_capsule_caps;
+-	void *query_variable_info;
+-} efi_runtime_services_t;
+-
+ typedef efi_status_t efi_get_time_t (efi_time_t *tm, efi_time_cap_t *tc);
+ typedef efi_status_t efi_set_time_t (efi_time_t *tm);
+ typedef efi_status_t efi_get_wakeup_time_t (efi_bool_t *enabled, efi_bool_t *pending,
+@@ -560,6 +542,24 @@ typedef efi_status_t efi_query_variable_store_t(u32 attributes,
+ 						unsigned long size,
+ 						bool nonblocking);
+ 
++typedef struct {
++	efi_table_hdr_t			hdr;
++	efi_get_time_t			*get_time;
++	efi_set_time_t			*set_time;
++	efi_get_wakeup_time_t		*get_wakeup_time;
++	efi_set_wakeup_time_t		*set_wakeup_time;
++	efi_set_virtual_address_map_t	*set_virtual_address_map;
++	void				*convert_pointer;
++	efi_get_variable_t		*get_variable;
++	efi_get_next_variable_t		*get_next_variable;
++	efi_set_variable_t		*set_variable;
++	efi_get_next_high_mono_count_t	*get_next_high_mono_count;
++	efi_reset_system_t		*reset_system;
++	efi_update_capsule_t		*update_capsule;
++	efi_query_capsule_caps_t	*query_capsule_caps;
++	efi_query_variable_info_t	*query_variable_info;
++} efi_runtime_services_t;
++
+ void efi_native_runtime_setup(void);
+ 
+ /*
 
-
- Documentation/x86/zero-page.txt           |    2 +
- arch/arm/include/asm/efi.h                |    1 
- arch/arm64/include/asm/efi.h              |    1 
- arch/x86/boot/compressed/eboot.c          |    3 +
- arch/x86/boot/compressed/head_32.S        |    7 +-
- arch/x86/boot/compressed/head_64.S        |    9 +--
- arch/x86/include/asm/bootparam_utils.h    |    5 +
- arch/x86/include/asm/efi.h                |    5 +
- arch/x86/include/uapi/asm/bootparam.h     |    3 +
- arch/x86/kernel/asm-offsets.c             |    1 
- arch/x86/kernel/setup.c                   |   15 ++++
- drivers/firmware/efi/libstub/Makefile     |    2 -
- drivers/firmware/efi/libstub/arm-stub.c   |   63 ++----------------
- drivers/firmware/efi/libstub/secureboot.c |   99 +++++++++++++++++++++++++++++
- include/linux/efi.h                       |   52 ++++++++++-----
- 15 files changed, 182 insertions(+), 86 deletions(-)
- create mode 100644 drivers/firmware/efi/libstub/secureboot.c
