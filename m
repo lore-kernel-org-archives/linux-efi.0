@@ -1,52 +1,80 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 3/8] arm/efi: Allow invocation of arbitrary runtime services
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 6/8] efi: Disable secure boot if shim is in insecure mode
  [ver #6]
-Date: Thu, 08 Dec 2016 12:30:30 +0000
-Message-ID: <148120023092.5854.16725756467360467984.stgit@warthog.procyon.org.uk>
+Date: Thu, 08 Dec 2016 12:30:53 +0000
+Message-ID: <148120025337.5854.14162686732874030327.stgit@warthog.procyon.org.uk>
 References: <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <148120020832.5854.5448601415491330495.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-efi_call_runtime() is provided for x86 to be able abstract mixed mode
-support.  Provide this for ARM also so that common code work in mixed mode
-also.
+From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
 
-Suggested-by: Lukas Wunner <lukas@wunner.de>
-Signed-off-by: David Howells <dhowells@redhat.com>
+A user can manually tell the shim boot loader to disable validation of
+images it loads.  When a user does this, it creates a UEFI variable called
+MokSBState that does not have the runtime attribute set.  Given that the
+user explicitly disabled validation, we can honor that and not enable
+secure boot mode if that variable is set.
+
+Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
 
- arch/arm/include/asm/efi.h   |    1 +
- arch/arm64/include/asm/efi.h |    1 +
- 2 files changed, 2 insertions(+)
+ drivers/firmware/efi/libstub/secureboot.c |   24 +++++++++++++++++++++++-
+ 1 file changed, 23 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-index 0b06f5341b45..e4e6a9d6a825 100644
---- a/arch/arm/include/asm/efi.h
-+++ b/arch/arm/include/asm/efi.h
-@@ -55,6 +55,7 @@ void efi_virtmap_unload(void);
+diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
+index 62d6904da800..39c91e091f6a 100644
+--- a/drivers/firmware/efi/libstub/secureboot.c
++++ b/drivers/firmware/efi/libstub/secureboot.c
+@@ -23,6 +23,12 @@ static const efi_char16_t const efi_SetupMode_name[] = {
+ 	'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0
+ };
  
- #define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
- #define __efi_call_early(f, ...)	f(__VA_ARGS__)
-+#define efi_call_runtime(f, ...)	sys_table_arg->runtime->f(__VA_ARGS__)
- #define efi_is_64bit()			(false)
++/* SHIM variables */
++static const efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
++static efi_char16_t const shim_MokSBState_name[] = {
++	'M', 'o', 'k', 'S', 'B', 'S', 't', 'a', 't', 'e', 0
++};
++
+ #define get_efi_var(name, vendor, ...) \
+ 	efi_call_runtime(get_variable, \
+ 			 (efi_char16_t *)(name), (efi_guid_t *)(vendor), \
+@@ -33,7 +39,8 @@ static const efi_char16_t const efi_SetupMode_name[] = {
+  */
+ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
+ {
+-	u8 secboot, setupmode;
++	u32 attr;
++	u8 secboot, setupmode, moksbstate;
+ 	unsigned long size;
+ 	efi_status_t status;
  
- #define efi_call_proto(protocol, f, instance, ...)			\
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index 771b3f0bc757..d74ae223d89f 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -49,6 +49,7 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
+@@ -52,6 +59,21 @@ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
+ 	if (secboot == 0 || setupmode == 1)
+ 		return efi_secureboot_mode_disabled;
  
- #define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
- #define __efi_call_early(f, ...)	f(__VA_ARGS__)
-+#define efi_call_runtime(f, ...)	sys_table_arg->runtime->f(__VA_ARGS__)
- #define efi_is_64bit()			(true)
++	/* See if a user has put shim into insecure mode.  If so, and if the
++	 * variable doesn't have the runtime attribute set, we might as well
++	 * honor that.
++	 */
++	size = sizeof(moksbstate);
++	status = get_efi_var(shim_MokSBState_name, &shim_guid,
++			     &attr, &size, &moksbstate);
++
++	/* If it fails, we don't care why.  Default to secure */
++	if (status != EFI_SUCCESS)
++		goto secure_boot_enabled;
++	if (!(attr & EFI_VARIABLE_RUNTIME_ACCESS) && moksbstate == 1)
++		return efi_secureboot_mode_disabled;
++
++secure_boot_enabled:
+ 	pr_efi(sys_table_arg, "UEFI Secure Boot is enabled.\n");
+ 	return efi_secureboot_mode_enabled;
  
- #define efi_call_proto(protocol, f, instance, ...)			\
