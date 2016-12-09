@@ -1,57 +1,159 @@
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 5/8] efi: Get the secure boot status [ver #5]
-Date: Fri, 9 Dec 2016 01:35:27 +0100
-Message-ID: <20161209003527.GA9062@wunner.de>
-References: <20161208124236.GA8757@wunner.de>
- <20161208065735.GB8549@wunner.de>
- <148111668193.23390.6340512985876251017.stgit@warthog.procyon.org.uk>
- <148111671977.23390.12452925207541146423.stgit@warthog.procyon.org.uk>
- <6009.1481184981@warthog.procyon.org.uk>
- <14655.1481218273@warthog.procyon.org.uk>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v3 10/20] Add support to access boot related data in
+ the clear
+Date: Fri, 9 Dec 2016 08:26:40 -0600
+Message-ID: <8aebb166-12ae-64aa-bf1a-3f46fe8b52dd@amd.com>
+References: <20161110003426.3280.2999.stgit@tlendack-t1.amdoffice.net>
+ <20161110003631.3280.73292.stgit@tlendack-t1.amdoffice.net>
+ <20161207131903.GU20785@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <14655.1481218273-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20161207131903.GU20785@codeblueprint.co.uk>
+Sender: owner-linux-mm@kvack.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Dec 08, 2016 at 05:31:13PM +0000, David Howells wrote:
-> Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
-> > > +out_efi_err:
-> > > +	pr_efi_err(sys_table_arg, "Could not determine UEFI Secure Boot status.\n");
-> > > +	if (status == EFI_NOT_FOUND)
-> > > +		return efi_secureboot_mode_disabled;
-> > > +	return efi_secureboot_mode_unknown;
-> > > +}
-> > 
-> > In the out_efi_err path, the if-statement needs to come before the
-> > pr_efi_err() call.  Otherwise it would be a change of behaviour for
-> > ARM to what we have now.
+On 12/7/2016 7:19 AM, Matt Fleming wrote:
+> On Wed, 09 Nov, at 06:36:31PM, Tom Lendacky wrote:
+>> Boot data (such as EFI related data) is not encrypted when the system is
+>> booted and needs to be accessed unencrypted.  Add support to apply the
+>> proper attributes to the EFI page tables and to the early_memremap and
+>> memremap APIs to identify the type of data being accessed so that the
+>> proper encryption attribute can be applied.
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>> ---
+>>  arch/x86/include/asm/e820.h    |    1 
+>>  arch/x86/kernel/e820.c         |   16 +++++++
+>>  arch/x86/mm/ioremap.c          |   89 ++++++++++++++++++++++++++++++++++++++++
+>>  arch/x86/platform/efi/efi_64.c |   12 ++++-
+>>  drivers/firmware/efi/efi.c     |   33 +++++++++++++++
+>>  include/linux/efi.h            |    2 +
+>>  kernel/memremap.c              |    8 +++-
+>>  mm/early_ioremap.c             |   18 +++++++-
+>>  8 files changed, 172 insertions(+), 7 deletions(-)
+>  
+> FWIW, I think this version is an improvement over all the previous
+> ones.
 > 
-> As I understand it, if the BIOS is an EFI BIOS, these variables must exist -
-> in which case I would argue that the pr_efi_err-statement should be before
-> the if-statement.
+> [...]
+> 
+>> diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
+>> index ff542cd..ee347c2 100644
+>> --- a/arch/x86/mm/ioremap.c
+>> +++ b/arch/x86/mm/ioremap.c
+>> @@ -20,6 +20,9 @@
+>>  #include <asm/tlbflush.h>
+>>  #include <asm/pgalloc.h>
+>>  #include <asm/pat.h>
+>> +#include <asm/e820.h>
+>> +#include <asm/setup.h>
+>> +#include <linux/efi.h>
+>>  
+>>  #include "physaddr.h"
+>>  
+>> @@ -418,6 +421,92 @@ void unxlate_dev_mem_ptr(phys_addr_t phys, void *addr)
+>>  	iounmap((void __iomem *)((unsigned long)addr & PAGE_MASK));
+>>  }
+>>  
+>> +static bool memremap_setup_data(resource_size_t phys_addr,
+>> +				unsigned long size)
+>> +{
+>> +	u64 paddr;
+>> +
+>> +	if (phys_addr == boot_params.hdr.setup_data)
+>> +		return true;
+>> +
+> 
+> Why is the setup_data linked list not traversed when checking for
+> matching addresses? Am I reading this incorrectly? I don't see how
+> this can work.
 
-The existing efi_get_secureboot() in arm-stub.c returns 0 in the
-EFI_NOT_FOUND case and the "Could not determine ..."  error is only
-printed if the return value is < 0.  So you're introducing a change
-of behaviour.
+Yeah, I caught that too after I sent this out. I think the best way to
+handle this would be to create a list/array of setup data addresses in
+the parse_setup_data() routine and then check the address against that
+list in this routine.
 
-If you feel the change is justified, fine, I won't argue against it
-since I don't have a dog in this fight.
+> 
+>> +	paddr = boot_params.efi_info.efi_memmap_hi;
+>> +	paddr <<= 32;
+>> +	paddr |= boot_params.efi_info.efi_memmap;
+>> +	if (phys_addr == paddr)
+>> +		return true;
+>> +
+>> +	paddr = boot_params.efi_info.efi_systab_hi;
+>> +	paddr <<= 32;
+>> +	paddr |= boot_params.efi_info.efi_systab;
+>> +	if (phys_addr == paddr)
+>> +		return true;
+>> +
+>> +	if (efi_table_address_match(phys_addr))
+>> +		return true;
+>> +
+>> +	return false;
+>> +}
+>> +
+>> +static bool memremap_apply_encryption(resource_size_t phys_addr,
+>> +				      unsigned long size)
+>> +{
+>> +	/* SME is not active, just return true */
+>> +	if (!sme_me_mask)
+>> +		return true;
+>> +
+>> +	/* Check if the address is part of the setup data */
+>> +	if (memremap_setup_data(phys_addr, size))
+>> +		return false;
+>> +
+>> +	/* Check if the address is part of EFI boot/runtime data */
+>> +	switch (efi_mem_type(phys_addr)) {
+>> +	case EFI_BOOT_SERVICES_DATA:
+>> +	case EFI_RUNTIME_SERVICES_DATA:
+>> +		return false;
+>> +	}
+> 
+> EFI_LOADER_DATA is notable by its absence.
+> 
+> We use that memory type for allocations inside of the EFI boot stub
+> that are than used while the kernel is running. One use that comes to
+> mind is for initrd files, see handle_cmdline_files().
+> 
+> Oh I see you handle that in PATCH 9, never mind.
+> 
+>> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+>> index 58b0f80..3f89179 100644
+>> --- a/arch/x86/platform/efi/efi_64.c
+>> +++ b/arch/x86/platform/efi/efi_64.c
+>> @@ -221,7 +221,13 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+>>  	if (efi_enabled(EFI_OLD_MEMMAP))
+>>  		return 0;
+>>  
+>> -	efi_scratch.efi_pgt = (pgd_t *)__pa(efi_pgd);
+>> +	/*
+>> +	 * Since the PGD is encrypted, set the encryption mask so that when
+>> +	 * this value is loaded into cr3 the PGD will be decrypted during
+>> +	 * the pagetable walk.
+>> +	 */
+>> +	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(efi_pgd);
+>> +
+>>  	pgd = efi_pgd;
+>>  
+>>  	/*
+> 
+> Do all callers of __pa() in arch/x86 need fixing up like this?
 
-But obviously it's something that a reader of your patch will trip over,
-so at least explain it in the commit message.  It would also be good to
-explain why you're moving the pr_efi_err() calls in the first place.
-ISTR it has to do with the different interpretation of an error,
-what I wrote in my previous e-mail: x86 defaults to considering secureboot
-disabled on error, ARM to enabled.  I'm not even sure that's correct,
-I'd have to go re-read the whole thread, which again shows that there's
-too little documentation in the commit message.
+No, currently this is only be needed when we're dealing with values that
+will be used in the cr3 register.
 
 Thanks,
+Tom
 
-Lukas
+> 
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
