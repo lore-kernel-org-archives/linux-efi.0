@@ -1,1544 +1,740 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: [GIT PULL] EFI changes for v4.10
-Date: Mon, 12 Dec 2016 09:07:36 +0100
-Message-ID: <20161212080736.GA5982@gmail.com>
+From: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH] efi/libstub: arm*: Pass latest memory map to the kernel
+Date: Mon, 12 Dec 2016 09:35:12 +0000
+Message-ID: <584E6F50.3020901@arm.com>
+References: <1481307843-18521-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Andrew Morton <akpm@linux-foundation.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1481307843-18521-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Linus,
+Hi Ard,
 
-Please pull the latest EFI tree from:
+On 09/12/16 18:24, Ard Biesheuvel wrote:
+> As reported by James, the current libstub code involving the annotated
+> memory map only works somewhat correctly by accident, due to the fact
+> that a pool allocation happens to be reused immediately, retaining its
+> former contents.
+> 
+> Instead of juggling memory maps, which makes the code more complex than
+> it needs to be, simply put a placholder value into the FDT, and only
+> write the actual value after ExitBootServices() has been called.
 
-   git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
+> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+> index a6a93116a8f0..5d39dff77f17 100644
+> --- a/drivers/firmware/efi/libstub/fdt.c
+> +++ b/drivers/firmware/efi/libstub/fdt.c
+> @@ -101,7 +101,7 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+>  	if (status)
+>  		goto fdt_set_fail;
+>  
+> -	fdt_val64 = cpu_to_fdt64((u64)(unsigned long)memory_map);
+> +	fdt_val64 = U64_MAX; /* placeholder */
+>  	status = fdt_setprop(fdt, node, "linux,uefi-mmap-start",
+>  			     &fdt_val64,  sizeof(fdt_val64));
+>  	if (status)
+> @@ -148,6 +148,24 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+>  	return EFI_LOAD_ERROR;
+>  }
+>  
+> +static efi_status_t update_fdt_memmap(void *fdt, u64 memmap)
+> +{
+> +	int node = fdt_path_offset(fdt, "/chosen");
+> +	efi_status_t status;
+> +
+> +	if (node < 0)
+> +		return EFI_LOAD_ERROR;
+> +
+> +	memmap = cpu_to_fdt64(memmap);
+> +	status = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-start",
+> +				     &memmap, sizeof(memmap));
+> +
+> +	if (status)
+> +		return EFI_LOAD_ERROR;
+> +
+> +	return EFI_SUCCESS;
+> +}
 
-   # HEAD: 018edcfac4c3b140366ad51b0907f3becb5bb624 efi/libstub: Make efi_random_alloc() allocate below 4 GB on 32-bit
-
-The main changes in this development cycle were:
-
- - Implement EFI dev path parser and other changes to fully support thunderbolt
-   devices on Apple Macbooks (Lukas Wunner)
-
- - Add RNG seeding via the EFI stub, on ARM/arm64 (Ard Biesheuvel)
-
- - Expose EFI framebuffer configuration to user-space, to improve tooling
-   (Peter Jones)
-
- - Misc fixes and cleanups (Ivan Hu, Wei Yongjun, Yisheng Xie, Dan Carpenter,
-   Roy Franz)
-
- Thanks,
-
-	Ingo
-
------------------->
-
-Dan Carpenter (1):
-      efi/efivar_ssdt_load: Don't return success on allocation failure
-
-Ivan Hu (3):
-      efi/efi_test: Fix uninitialized variable 'datasize'
-      efi/efi_test: Fix uninitialized variable 'rv'
-      efi/efi_test: Use memdup_user() as a cleanup
-
-Lukas Wunner (7):
-      efi: Add device path parser
-      efi: Allow bitness-agnostic protocol calls
-      x86/efi: Retrieve and assign Apple device properties
-      thunderbolt: Use Device ROM retrieved from EFI
-      thunderbolt, efi: Fix Kconfig dependencies
-      thunderbolt, efi: Fix Kconfig dependencies harder
-      thunderbolt: Compile on x86 only
-
-Peter Jones (1):
-      efifb: Show framebuffer layout as device attributes
-
-Roy Franz (1):
-      efi/libstub: Fix allocation size calculations
-
-Wei Yongjun (1):
-      efi: Remove unused include of <linux/version.h>
-
-Yisheng Xie (1):
-      efi/arm*: Fix efi_init() error handling
+v4.9.0 with this patch doesn't boot on my Seattle (with known buggy UEFI FW)
+[0]. It looks like the memory map is truncated (and missing a runtime region,
+compare with [1]). Should 'linux,uefi-mmap-size' be updated too? (Otherwise its
+the size when we retrieved the runtime mapping, but before we allocated the FDT)
 
 
- Documentation/kernel-parameters.txt            |   5 +
- MAINTAINERS                                    |   6 +-
- arch/arm/include/asm/efi.h                     |   3 +
- arch/arm64/include/asm/efi.h                   |   3 +
- arch/x86/boot/compressed/eboot.c               |  65 +++++++
- arch/x86/include/asm/efi.h                     |  16 +-
- arch/x86/include/uapi/asm/bootparam.h          |   1 +
- drivers/firmware/efi/Kconfig                   |  18 ++
- drivers/firmware/efi/Makefile                  |   2 +
- drivers/firmware/efi/apple-properties.c        | 248 +++++++++++++++++++++++++
- drivers/firmware/efi/arm-init.c                |   4 +-
- drivers/firmware/efi/dev-path-parser.c         | 203 ++++++++++++++++++++
- drivers/firmware/efi/efi.c                     |  76 +++++++-
- drivers/firmware/efi/libstub/Makefile          |   4 +-
- drivers/firmware/efi/libstub/arm-stub.c        |   2 +
- drivers/firmware/efi/libstub/efi-stub-helper.c |  33 ++--
- drivers/firmware/efi/libstub/efistub.h         |  11 ++
- drivers/firmware/efi/libstub/random.c          |  67 ++++++-
- drivers/firmware/efi/test/efi_test.c           |  15 +-
- drivers/thunderbolt/Kconfig                    |   2 +
- drivers/thunderbolt/eeprom.c                   |  43 +++++
- drivers/thunderbolt/switch.c                   |   2 +-
- drivers/video/fbdev/efifb.c                    |  59 ++++--
- include/linux/efi.h                            |  46 +++++
- 24 files changed, 872 insertions(+), 62 deletions(-)
- create mode 100644 drivers/firmware/efi/apple-properties.c
- create mode 100644 drivers/firmware/efi/dev-path-parser.c
+> +
+>  #ifndef EFI_FDT_ALIGN
+>  #define EFI_FDT_ALIGN EFI_PAGE_SIZE
+>  #endif
+> @@ -243,15 +261,6 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+>  			goto fail;
+>  		}
+>  
+> -		/*
+> -		 * Now that we have done our final memory allocation (and free)
+> -		 * we can get the memory map key  needed for
+> -		 * exit_boot_services().
+> -		 */
+> -		status = efi_get_memory_map(sys_table, &map);
+> -		if (status != EFI_SUCCESS)
+> -			goto fail_free_new_fdt;
+> -
+>  		status = update_fdt(sys_table,
+>  				    (void *)fdt_addr, fdt_size,
+>  				    (void *)*new_fdt_addr, new_fdt_size,
+                                    cmdline_ptr, initrd_addr, initrd_size,
+                                    memory_map, map_size, desc_size, desc_ver);
 
-diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-index 37babf91f2cb..86a31dfc036e 100644
---- a/Documentation/kernel-parameters.txt
-+++ b/Documentation/kernel-parameters.txt
-@@ -1062,6 +1062,11 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
- 
- 	dscc4.setup=	[NET]
- 
-+	dump_apple_properties	[X86]
-+			Dump name and content of EFI device properties on
-+			x86 Macs.  Useful for driver authors to determine
-+			what data is available or for reverse-engineering.
-+
- 	dyndbg[="val"]		[KNL,DYNAMIC_DEBUG]
- 	module.dyndbg[="val"]
- 			Enable debug messages at boot time.  See
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 851b89b9edcb..afaf24f95f46 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -4631,12 +4631,14 @@ L:	linux-efi@vger.kernel.org
- T:	git git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
- S:	Maintained
- F:	Documentation/efi-stub.txt
--F:	arch/ia64/kernel/efi.c
-+F:	arch/*/kernel/efi.c
- F:	arch/x86/boot/compressed/eboot.[ch]
--F:	arch/x86/include/asm/efi.h
-+F:	arch/*/include/asm/efi.h
- F:	arch/x86/platform/efi/
- F:	drivers/firmware/efi/
- F:	include/linux/efi*.h
-+F:	arch/arm/boot/compressed/efi-header.S
-+F:	arch/arm64/kernel/efi-entry.S
- 
- EFI VARIABLE FILESYSTEM
- M:	Matthew Garrett <matthew.garrett@nebula.com>
-diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-index 766bf9b78160..0b06f5341b45 100644
---- a/arch/arm/include/asm/efi.h
-+++ b/arch/arm/include/asm/efi.h
-@@ -57,6 +57,9 @@ void efi_virtmap_unload(void);
- #define __efi_call_early(f, ...)	f(__VA_ARGS__)
- #define efi_is_64bit()			(false)
- 
-+#define efi_call_proto(protocol, f, instance, ...)			\
-+	((protocol##_t *)instance)->f(instance, ##__VA_ARGS__)
-+
- struct screen_info *alloc_screen_info(efi_system_table_t *sys_table_arg);
- void free_screen_info(efi_system_table_t *sys_table, struct screen_info *si);
- 
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index a9e54aad15ef..771b3f0bc757 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -51,6 +51,9 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
- #define __efi_call_early(f, ...)	f(__VA_ARGS__)
- #define efi_is_64bit()			(true)
- 
-+#define efi_call_proto(protocol, f, instance, ...)			\
-+	((protocol##_t *)instance)->f(instance, ##__VA_ARGS__)
-+
- #define alloc_screen_info(x...)		&screen_info
- #define free_screen_info(x...)
- 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index cc69e37548db..ff01c8fc76f7 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -537,6 +537,69 @@ static void setup_efi_pci(struct boot_params *params)
- 	efi_call_early(free_pool, pci_handle);
- }
- 
-+static void retrieve_apple_device_properties(struct boot_params *boot_params)
-+{
-+	efi_guid_t guid = APPLE_PROPERTIES_PROTOCOL_GUID;
-+	struct setup_data *data, *new;
-+	efi_status_t status;
-+	u32 size = 0;
-+	void *p;
-+
-+	status = efi_call_early(locate_protocol, &guid, NULL, &p);
-+	if (status != EFI_SUCCESS)
-+		return;
-+
-+	if (efi_table_attr(apple_properties_protocol, version, p) != 0x10000) {
-+		efi_printk(sys_table, "Unsupported properties proto version\n");
-+		return;
-+	}
-+
-+	efi_call_proto(apple_properties_protocol, get_all, p, NULL, &size);
-+	if (!size)
-+		return;
-+
-+	do {
-+		status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-+					size + sizeof(struct setup_data), &new);
-+		if (status != EFI_SUCCESS) {
-+			efi_printk(sys_table,
-+					"Failed to alloc mem for properties\n");
-+			return;
-+		}
-+
-+		status = efi_call_proto(apple_properties_protocol, get_all, p,
-+					new->data, &size);
-+
-+		if (status == EFI_BUFFER_TOO_SMALL)
-+			efi_call_early(free_pool, new);
-+	} while (status == EFI_BUFFER_TOO_SMALL);
-+
-+	new->type = SETUP_APPLE_PROPERTIES;
-+	new->len  = size;
-+	new->next = 0;
-+
-+	data = (struct setup_data *)(unsigned long)boot_params->hdr.setup_data;
-+	if (!data)
-+		boot_params->hdr.setup_data = (unsigned long)new;
-+	else {
-+		while (data->next)
-+			data = (struct setup_data *)(unsigned long)data->next;
-+		data->next = (unsigned long)new;
-+	}
-+}
-+
-+static void setup_quirks(struct boot_params *boot_params)
-+{
-+	efi_char16_t const apple[] = { 'A', 'p', 'p', 'l', 'e', 0 };
-+	efi_char16_t *fw_vendor = (efi_char16_t *)(unsigned long)
-+		efi_table_attr(efi_system_table, fw_vendor, sys_table);
-+
-+	if (!memcmp(fw_vendor, apple, sizeof(apple))) {
-+		if (IS_ENABLED(CONFIG_APPLE_PROPERTIES))
-+			retrieve_apple_device_properties(boot_params);
-+	}
-+}
-+
- static efi_status_t
- setup_uga32(void **uga_handle, unsigned long size, u32 *width, u32 *height)
- {
-@@ -1098,6 +1161,8 @@ struct boot_params *efi_main(struct efi_config *c,
- 
- 	setup_efi_pci(boot_params);
- 
-+	setup_quirks(boot_params);
-+
- 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
- 				sizeof(*gdt), (void **)&gdt);
- 	if (status != EFI_SUCCESS) {
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 389d700b961e..e99675b9c861 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -210,12 +210,18 @@ static inline bool efi_is_64bit(void)
- 	return __efi_early()->is64;
- }
- 
-+#define efi_table_attr(table, attr, instance)				\
-+	(efi_is_64bit() ?						\
-+		((table##_64_t *)(unsigned long)instance)->attr :	\
-+		((table##_32_t *)(unsigned long)instance)->attr)
-+
-+#define efi_call_proto(protocol, f, instance, ...)			\
-+	__efi_early()->call(efi_table_attr(protocol, f, instance),	\
-+		instance, ##__VA_ARGS__)
-+
- #define efi_call_early(f, ...)						\
--	__efi_early()->call(efi_is_64bit() ?				\
--		((efi_boot_services_64_t *)(unsigned long)		\
--			__efi_early()->boot_services)->f :		\
--		((efi_boot_services_32_t *)(unsigned long)		\
--			__efi_early()->boot_services)->f, __VA_ARGS__)
-+	__efi_early()->call(efi_table_attr(efi_boot_services, f,	\
-+		__efi_early()->boot_services), __VA_ARGS__)
- 
- #define __efi_call_early(f, ...)					\
- 	__efi_early()->call((unsigned long)f, __VA_ARGS__);
-diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
-index c18ce67495fa..b10bf319ed20 100644
---- a/arch/x86/include/uapi/asm/bootparam.h
-+++ b/arch/x86/include/uapi/asm/bootparam.h
-@@ -7,6 +7,7 @@
- #define SETUP_DTB			2
- #define SETUP_PCI			3
- #define SETUP_EFI			4
-+#define SETUP_APPLE_PROPERTIES		5
- 
- /* ram_size flags */
- #define RAMDISK_IMAGE_START_MASK	0x07FF
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index c981be17d3c0..2e78b0b96d74 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -129,7 +129,25 @@ config EFI_TEST
- 	  Say Y here to enable the runtime services support via /dev/efi_test.
- 	  If unsure, say N.
- 
-+config APPLE_PROPERTIES
-+	bool "Apple Device Properties"
-+	depends on EFI_STUB && X86
-+	select EFI_DEV_PATH_PARSER
-+	select UCS2_STRING
-+	help
-+	  Retrieve properties from EFI on Apple Macs and assign them to
-+	  devices, allowing for improved support of Apple hardware.
-+	  Properties that would otherwise be missing include the
-+	  Thunderbolt Device ROM and GPU configuration data.
-+
-+	  If unsure, say Y if you have a Mac.  Otherwise N.
-+
- endmenu
- 
- config UEFI_CPER
- 	bool
-+
-+config EFI_DEV_PATH_PARSER
-+	bool
-+	depends on ACPI
-+	default n
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index c8a439f6d715..ad67342313ed 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -21,6 +21,8 @@ obj-$(CONFIG_EFI_STUB)			+= libstub/
- obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
- obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
- obj-$(CONFIG_EFI_TEST)			+= test/
-+obj-$(CONFIG_EFI_DEV_PATH_PARSER)	+= dev-path-parser.o
-+obj-$(CONFIG_APPLE_PROPERTIES)		+= apple-properties.o
- 
- arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
- obj-$(CONFIG_ARM)			+= $(arm-obj-y)
-diff --git a/drivers/firmware/efi/apple-properties.c b/drivers/firmware/efi/apple-properties.c
-new file mode 100644
-index 000000000000..c473f4c5ca34
---- /dev/null
-+++ b/drivers/firmware/efi/apple-properties.c
-@@ -0,0 +1,248 @@
-+/*
-+ * apple-properties.c - EFI device properties on Macs
-+ * Copyright (C) 2016 Lukas Wunner <lukas@wunner.de>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License (version 2) as
-+ * published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
-+ */
-+
-+#define pr_fmt(fmt) "apple-properties: " fmt
-+
-+#include <linux/bootmem.h>
-+#include <linux/dmi.h>
-+#include <linux/efi.h>
-+#include <linux/property.h>
-+#include <linux/slab.h>
-+#include <linux/ucs2_string.h>
-+#include <asm/setup.h>
-+
-+static bool dump_properties __initdata;
-+
-+static int __init dump_properties_enable(char *arg)
-+{
-+	dump_properties = true;
-+	return 0;
-+}
-+
-+__setup("dump_apple_properties", dump_properties_enable);
-+
-+struct dev_header {
-+	u32 len;
-+	u32 prop_count;
-+	struct efi_dev_path path[0];
-+	/*
-+	 * followed by key/value pairs, each key and value preceded by u32 len,
-+	 * len includes itself, value may be empty (in which case its len is 4)
-+	 */
-+};
-+
-+struct properties_header {
-+	u32 len;
-+	u32 version;
-+	u32 dev_count;
-+	struct dev_header dev_header[0];
-+};
-+
-+static u8 one __initdata = 1;
-+
-+static void __init unmarshal_key_value_pairs(struct dev_header *dev_header,
-+					     struct device *dev, void *ptr,
-+					     struct property_entry entry[])
-+{
-+	int i;
-+
-+	for (i = 0; i < dev_header->prop_count; i++) {
-+		int remaining = dev_header->len - (ptr - (void *)dev_header);
-+		u32 key_len, val_len;
-+		char *key;
-+
-+		if (sizeof(key_len) > remaining)
-+			break;
-+
-+		key_len = *(typeof(key_len) *)ptr;
-+		if (key_len + sizeof(val_len) > remaining ||
-+		    key_len < sizeof(key_len) + sizeof(efi_char16_t) ||
-+		    *(efi_char16_t *)(ptr + sizeof(key_len)) == 0) {
-+			dev_err(dev, "invalid property name len at %#zx\n",
-+				ptr - (void *)dev_header);
-+			break;
-+		}
-+
-+		val_len = *(typeof(val_len) *)(ptr + key_len);
-+		if (key_len + val_len > remaining ||
-+		    val_len < sizeof(val_len)) {
-+			dev_err(dev, "invalid property val len at %#zx\n",
-+				ptr - (void *)dev_header + key_len);
-+			break;
-+		}
-+
-+		/* 4 bytes to accommodate UTF-8 code points + null byte */
-+		key = kzalloc((key_len - sizeof(key_len)) * 4 + 1, GFP_KERNEL);
-+		if (!key) {
-+			dev_err(dev, "cannot allocate property name\n");
-+			break;
-+		}
-+		ucs2_as_utf8(key, ptr + sizeof(key_len),
-+			     key_len - sizeof(key_len));
-+
-+		entry[i].name = key;
-+		entry[i].is_array = true;
-+		entry[i].length = val_len - sizeof(val_len);
-+		entry[i].pointer.raw_data = ptr + key_len + sizeof(val_len);
-+		if (!entry[i].length) {
-+			/* driver core doesn't accept empty properties */
-+			entry[i].length = 1;
-+			entry[i].pointer.raw_data = &one;
-+		}
-+
-+		if (dump_properties) {
-+			dev_info(dev, "property: %s\n", entry[i].name);
-+			print_hex_dump(KERN_INFO, pr_fmt(), DUMP_PREFIX_OFFSET,
-+				16, 1, entry[i].pointer.raw_data,
-+				entry[i].length, true);
-+		}
-+
-+		ptr += key_len + val_len;
-+	}
-+
-+	if (i != dev_header->prop_count) {
-+		dev_err(dev, "got %d device properties, expected %u\n", i,
-+			dev_header->prop_count);
-+		print_hex_dump(KERN_ERR, pr_fmt(), DUMP_PREFIX_OFFSET,
-+			16, 1, dev_header, dev_header->len, true);
-+		return;
-+	}
-+
-+	dev_info(dev, "assigning %d device properties\n", i);
-+}
-+
-+static int __init unmarshal_devices(struct properties_header *properties)
-+{
-+	size_t offset = offsetof(struct properties_header, dev_header[0]);
-+
-+	while (offset + sizeof(struct dev_header) < properties->len) {
-+		struct dev_header *dev_header = (void *)properties + offset;
-+		struct property_entry *entry = NULL;
-+		struct device *dev;
-+		size_t len;
-+		int ret, i;
-+		void *ptr;
-+
-+		if (offset + dev_header->len > properties->len ||
-+		    dev_header->len <= sizeof(*dev_header)) {
-+			pr_err("invalid len in dev_header at %#zx\n", offset);
-+			return -EINVAL;
-+		}
-+
-+		ptr = dev_header->path;
-+		len = dev_header->len - sizeof(*dev_header);
-+
-+		dev = efi_get_device_by_path((struct efi_dev_path **)&ptr, &len);
-+		if (IS_ERR(dev)) {
-+			pr_err("device path parse error %ld at %#zx:\n",
-+			       PTR_ERR(dev), ptr - (void *)dev_header);
-+			print_hex_dump(KERN_ERR, pr_fmt(), DUMP_PREFIX_OFFSET,
-+			       16, 1, dev_header, dev_header->len, true);
-+			dev = NULL;
-+			goto skip_device;
-+		}
-+
-+		entry = kcalloc(dev_header->prop_count + 1, sizeof(*entry),
-+				GFP_KERNEL);
-+		if (!entry) {
-+			dev_err(dev, "cannot allocate properties\n");
-+			goto skip_device;
-+		}
-+
-+		unmarshal_key_value_pairs(dev_header, dev, ptr, entry);
-+		if (!entry[0].name)
-+			goto skip_device;
-+
-+		ret = device_add_properties(dev, entry); /* makes deep copy */
-+		if (ret)
-+			dev_err(dev, "error %d assigning properties\n", ret);
-+
-+		for (i = 0; entry[i].name; i++)
-+			kfree(entry[i].name);
-+
-+skip_device:
-+		kfree(entry);
-+		put_device(dev);
-+		offset += dev_header->len;
-+	}
-+
-+	return 0;
-+}
-+
-+static int __init map_properties(void)
-+{
-+	struct properties_header *properties;
-+	struct setup_data *data;
-+	u32 data_len;
-+	u64 pa_data;
-+	int ret;
-+
-+	if (!dmi_match(DMI_SYS_VENDOR, "Apple Inc.") &&
-+	    !dmi_match(DMI_SYS_VENDOR, "Apple Computer, Inc."))
-+		return 0;
-+
-+	pa_data = boot_params.hdr.setup_data;
-+	while (pa_data) {
-+		data = ioremap(pa_data, sizeof(*data));
-+		if (!data) {
-+			pr_err("cannot map setup_data header\n");
-+			return -ENOMEM;
-+		}
-+
-+		if (data->type != SETUP_APPLE_PROPERTIES) {
-+			pa_data = data->next;
-+			iounmap(data);
-+			continue;
-+		}
-+
-+		data_len = data->len;
-+		iounmap(data);
-+
-+		data = ioremap(pa_data, sizeof(*data) + data_len);
-+		if (!data) {
-+			pr_err("cannot map setup_data payload\n");
-+			return -ENOMEM;
-+		}
-+
-+		properties = (struct properties_header *)data->data;
-+		if (properties->version != 1) {
-+			pr_err("unsupported version:\n");
-+			print_hex_dump(KERN_ERR, pr_fmt(), DUMP_PREFIX_OFFSET,
-+			       16, 1, properties, data_len, true);
-+			ret = -ENOTSUPP;
-+		} else if (properties->len != data_len) {
-+			pr_err("length mismatch, expected %u\n", data_len);
-+			print_hex_dump(KERN_ERR, pr_fmt(), DUMP_PREFIX_OFFSET,
-+			       16, 1, properties, data_len, true);
-+			ret = -EINVAL;
-+		} else
-+			ret = unmarshal_devices(properties);
-+
-+		/*
-+		 * Can only free the setup_data payload but not its header
-+		 * to avoid breaking the chain of ->next pointers.
-+		 */
-+		data->len = 0;
-+		iounmap(data);
-+		free_bootmem_late(pa_data + sizeof(*data), data_len);
-+
-+		return ret;
-+	}
-+	return 0;
-+}
-+
-+fs_initcall(map_properties);
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 8efe13075c92..f853ad2c4ca0 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -244,8 +244,10 @@ void __init efi_init(void)
- 	     "Unexpected EFI_MEMORY_DESCRIPTOR version %ld",
- 	      efi.memmap.desc_version);
- 
--	if (uefi_init() < 0)
-+	if (uefi_init() < 0) {
-+		efi_memmap_unmap();
- 		return;
-+	}
- 
- 	reserve_regions();
- 	efi_memattr_init();
-diff --git a/drivers/firmware/efi/dev-path-parser.c b/drivers/firmware/efi/dev-path-parser.c
-new file mode 100644
-index 000000000000..85d1834ee9b7
---- /dev/null
-+++ b/drivers/firmware/efi/dev-path-parser.c
-@@ -0,0 +1,203 @@
-+/*
-+ * dev-path-parser.c - EFI Device Path parser
-+ * Copyright (C) 2016 Lukas Wunner <lukas@wunner.de>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License (version 2) as
-+ * published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
-+ */
-+
-+#include <linux/acpi.h>
-+#include <linux/efi.h>
-+#include <linux/pci.h>
-+
-+struct acpi_hid_uid {
-+	struct acpi_device_id hid[2];
-+	char uid[11]; /* UINT_MAX + null byte */
-+};
-+
-+static int __init match_acpi_dev(struct device *dev, void *data)
-+{
-+	struct acpi_hid_uid hid_uid = *(struct acpi_hid_uid *)data;
-+	struct acpi_device *adev = to_acpi_device(dev);
-+
-+	if (acpi_match_device_ids(adev, hid_uid.hid))
-+		return 0;
-+
-+	if (adev->pnp.unique_id)
-+		return !strcmp(adev->pnp.unique_id, hid_uid.uid);
-+	else
-+		return !strcmp("0", hid_uid.uid);
-+}
-+
-+static long __init parse_acpi_path(struct efi_dev_path *node,
-+				   struct device *parent, struct device **child)
-+{
-+	struct acpi_hid_uid hid_uid = {};
-+	struct device *phys_dev;
-+
-+	if (node->length != 12)
-+		return -EINVAL;
-+
-+	sprintf(hid_uid.hid[0].id, "%c%c%c%04X",
-+		'A' + ((node->acpi.hid >> 10) & 0x1f) - 1,
-+		'A' + ((node->acpi.hid >>  5) & 0x1f) - 1,
-+		'A' + ((node->acpi.hid >>  0) & 0x1f) - 1,
-+			node->acpi.hid >> 16);
-+	sprintf(hid_uid.uid, "%u", node->acpi.uid);
-+
-+	*child = bus_find_device(&acpi_bus_type, NULL, &hid_uid,
-+				 match_acpi_dev);
-+	if (!*child)
-+		return -ENODEV;
-+
-+	phys_dev = acpi_get_first_physical_node(to_acpi_device(*child));
-+	if (phys_dev) {
-+		get_device(phys_dev);
-+		put_device(*child);
-+		*child = phys_dev;
-+	}
-+
-+	return 0;
-+}
-+
-+static int __init match_pci_dev(struct device *dev, void *data)
-+{
-+	unsigned int devfn = *(unsigned int *)data;
-+
-+	return dev_is_pci(dev) && to_pci_dev(dev)->devfn == devfn;
-+}
-+
-+static long __init parse_pci_path(struct efi_dev_path *node,
-+				  struct device *parent, struct device **child)
-+{
-+	unsigned int devfn;
-+
-+	if (node->length != 6)
-+		return -EINVAL;
-+	if (!parent)
-+		return -EINVAL;
-+
-+	devfn = PCI_DEVFN(node->pci.dev, node->pci.fn);
-+
-+	*child = device_find_child(parent, &devfn, match_pci_dev);
-+	if (!*child)
-+		return -ENODEV;
-+
-+	return 0;
-+}
-+
-+/*
-+ * Insert parsers for further node types here.
-+ *
-+ * Each parser takes a pointer to the @node and to the @parent (will be NULL
-+ * for the first device path node). If a device corresponding to @node was
-+ * found below @parent, its reference count should be incremented and the
-+ * device returned in @child.
-+ *
-+ * The return value should be 0 on success or a negative int on failure.
-+ * The special return values 0x01 (EFI_DEV_END_INSTANCE) and 0xFF
-+ * (EFI_DEV_END_ENTIRE) signal the end of the device path, only
-+ * parse_end_path() is supposed to return this.
-+ *
-+ * Be sure to validate the node length and contents before commencing the
-+ * search for a device.
-+ */
-+
-+static long __init parse_end_path(struct efi_dev_path *node,
-+				  struct device *parent, struct device **child)
-+{
-+	if (node->length != 4)
-+		return -EINVAL;
-+	if (node->sub_type != EFI_DEV_END_INSTANCE &&
-+	    node->sub_type != EFI_DEV_END_ENTIRE)
-+		return -EINVAL;
-+	if (!parent)
-+		return -ENODEV;
-+
-+	*child = get_device(parent);
-+	return node->sub_type;
-+}
-+
-+/**
-+ * efi_get_device_by_path - find device by EFI Device Path
-+ * @node: EFI Device Path
-+ * @len: maximum length of EFI Device Path in bytes
-+ *
-+ * Parse a series of EFI Device Path nodes at @node and find the corresponding
-+ * device.  If the device was found, its reference count is incremented and a
-+ * pointer to it is returned.  The caller needs to drop the reference with
-+ * put_device() after use.  The @node pointer is updated to point to the
-+ * location immediately after the "End of Hardware Device Path" node.
-+ *
-+ * If another Device Path instance follows, @len is decremented by the number
-+ * of bytes consumed.  Otherwise @len is set to %0.
-+ *
-+ * If a Device Path node is malformed or its corresponding device is not found,
-+ * @node is updated to point to this offending node and an ERR_PTR is returned.
-+ *
-+ * If @len is initially %0, the function returns %NULL.  Thus, to iterate over
-+ * all instances in a path, the following idiom may be used:
-+ *
-+ *	while (!IS_ERR_OR_NULL(dev = efi_get_device_by_path(&node, &len))) {
-+ *		// do something with dev
-+ *		put_device(dev);
-+ *	}
-+ *	if (IS_ERR(dev))
-+ *		// report error
-+ *
-+ * Devices can only be found if they're already instantiated. Most buses
-+ * instantiate devices in the "subsys" initcall level, hence the earliest
-+ * initcall level in which this function should be called is "fs".
-+ *
-+ * Returns the device on success or
-+ *	%ERR_PTR(-ENODEV) if no device was found,
-+ *	%ERR_PTR(-EINVAL) if a node is malformed or exceeds @len,
-+ *	%ERR_PTR(-ENOTSUPP) if support for a node type is not yet implemented.
-+ */
-+struct device * __init efi_get_device_by_path(struct efi_dev_path **node,
-+					      size_t *len)
-+{
-+	struct device *parent = NULL, *child;
-+	long ret = 0;
-+
-+	if (!*len)
-+		return NULL;
-+
-+	while (!ret) {
-+		if (*len < 4 || *len < (*node)->length)
-+			ret = -EINVAL;
-+		else if ((*node)->type     == EFI_DEV_ACPI &&
-+			 (*node)->sub_type == EFI_DEV_BASIC_ACPI)
-+			ret = parse_acpi_path(*node, parent, &child);
-+		else if ((*node)->type     == EFI_DEV_HW &&
-+			 (*node)->sub_type == EFI_DEV_PCI)
-+			ret = parse_pci_path(*node, parent, &child);
-+		else if (((*node)->type    == EFI_DEV_END_PATH ||
-+			  (*node)->type    == EFI_DEV_END_PATH2))
-+			ret = parse_end_path(*node, parent, &child);
-+		else
-+			ret = -ENOTSUPP;
-+
-+		put_device(parent);
-+		if (ret < 0)
-+			return ERR_PTR(ret);
-+
-+		parent = child;
-+		*node  = (void *)*node + (*node)->length;
-+		*len  -= (*node)->length;
-+	}
-+
-+	if (ret == EFI_DEV_END_ENTIRE)
-+		*len = 0;
-+
-+	return child;
-+}
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 1ac199cd75e7..92914801e388 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -23,7 +23,10 @@
- #include <linux/of.h>
- #include <linux/of_fdt.h>
- #include <linux/io.h>
-+#include <linux/kexec.h>
- #include <linux/platform_device.h>
-+#include <linux/random.h>
-+#include <linux/reboot.h>
- #include <linux/slab.h>
- #include <linux/acpi.h>
- #include <linux/ucs2_string.h>
-@@ -48,6 +51,7 @@ struct efi __read_mostly efi = {
- 	.esrt			= EFI_INVALID_TABLE_ADDR,
- 	.properties_table	= EFI_INVALID_TABLE_ADDR,
- 	.mem_attr_table		= EFI_INVALID_TABLE_ADDR,
-+	.rng_seed		= EFI_INVALID_TABLE_ADDR,
- };
- EXPORT_SYMBOL(efi);
- 
-@@ -259,8 +263,10 @@ static __init int efivar_ssdt_load(void)
- 		}
- 
- 		data = kmalloc(size, GFP_KERNEL);
--		if (!data)
-+		if (!data) {
-+			ret = -ENOMEM;
- 			goto free_entry;
-+		}
- 
- 		ret = efivar_entry_get(entry, NULL, &size, data);
- 		if (ret) {
-@@ -438,6 +444,7 @@ static __initdata efi_config_table_type_t common_tables[] = {
- 	{EFI_SYSTEM_RESOURCE_TABLE_GUID, "ESRT", &efi.esrt},
- 	{EFI_PROPERTIES_TABLE_GUID, "PROP", &efi.properties_table},
- 	{EFI_MEMORY_ATTRIBUTES_TABLE_GUID, "MEMATTR", &efi.mem_attr_table},
-+	{LINUX_EFI_RANDOM_SEED_TABLE_GUID, "RNG", &efi.rng_seed},
- 	{NULL_GUID, NULL, NULL},
- };
- 
-@@ -499,6 +506,29 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
- 	pr_cont("\n");
- 	set_bit(EFI_CONFIG_TABLES, &efi.flags);
- 
-+	if (efi.rng_seed != EFI_INVALID_TABLE_ADDR) {
-+		struct linux_efi_random_seed *seed;
-+		u32 size = 0;
-+
-+		seed = early_memremap(efi.rng_seed, sizeof(*seed));
-+		if (seed != NULL) {
-+			size = seed->size;
-+			early_memunmap(seed, sizeof(*seed));
-+		} else {
-+			pr_err("Could not map UEFI random seed!\n");
-+		}
-+		if (size > 0) {
-+			seed = early_memremap(efi.rng_seed,
-+					      sizeof(*seed) + size);
-+			if (seed != NULL) {
-+				add_device_randomness(seed->bits, seed->size);
-+				early_memunmap(seed, sizeof(*seed) + size);
-+			} else {
-+				pr_err("Could not map UEFI random seed!\n");
-+			}
-+		}
-+	}
-+
- 	/* Parse the EFI Properties table if it exists */
- 	if (efi.properties_table != EFI_INVALID_TABLE_ADDR) {
- 		efi_properties_table_t *tbl;
-@@ -822,3 +852,47 @@ int efi_status_to_err(efi_status_t status)
- 
- 	return err;
- }
-+
-+#ifdef CONFIG_KEXEC
-+static int update_efi_random_seed(struct notifier_block *nb,
-+				  unsigned long code, void *unused)
-+{
-+	struct linux_efi_random_seed *seed;
-+	u32 size = 0;
-+
-+	if (!kexec_in_progress)
-+		return NOTIFY_DONE;
-+
-+	seed = memremap(efi.rng_seed, sizeof(*seed), MEMREMAP_WB);
-+	if (seed != NULL) {
-+		size = min(seed->size, 32U);
-+		memunmap(seed);
-+	} else {
-+		pr_err("Could not map UEFI random seed!\n");
-+	}
-+	if (size > 0) {
-+		seed = memremap(efi.rng_seed, sizeof(*seed) + size,
-+				MEMREMAP_WB);
-+		if (seed != NULL) {
-+			seed->size = size;
-+			get_random_bytes(seed->bits, seed->size);
-+			memunmap(seed);
-+		} else {
-+			pr_err("Could not map UEFI random seed!\n");
-+		}
-+	}
-+	return NOTIFY_DONE;
-+}
-+
-+static struct notifier_block efi_random_seed_nb = {
-+	.notifier_call = update_efi_random_seed,
-+};
-+
-+static int register_update_efi_random_seed(void)
-+{
-+	if (efi.rng_seed == EFI_INVALID_TABLE_ADDR)
-+		return 0;
-+	return register_reboot_notifier(&efi_random_seed_nb);
-+}
-+late_initcall(register_update_efi_random_seed);
-+#endif
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 5e23e2d305e7..6621b13c370f 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -36,11 +36,11 @@ arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
- $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
- 	$(call if_changed_rule,cc_o_c)
- 
--lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o \
-+lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o random.o \
- 				   $(patsubst %.c,lib-%.o,$(arm-deps))
- 
- lib-$(CONFIG_ARM)		+= arm32-stub.o
--lib-$(CONFIG_ARM64)		+= arm64-stub.o random.o
-+lib-$(CONFIG_ARM64)		+= arm64-stub.o
- CFLAGS_arm64-stub.o 		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
- 
- #
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 993aa56755f6..b4f7d78f9e8b 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -340,6 +340,8 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 	if (status != EFI_SUCCESS)
- 		pr_efi_err(sys_table, "Failed initrd from command line!\n");
- 
-+	efi_random_get_seed(sys_table);
-+
- 	new_fdt_addr = fdt_addr;
- 	status = allocate_new_fdt_and_exit_boot(sys_table, handle,
- 				&new_fdt_addr, dram_base + MAX_FDT_OFFSET,
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index aded10662020..757badc1debb 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -32,15 +32,6 @@
- 
- static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
- 
--/*
-- * Allow the platform to override the allocation granularity: this allows
-- * systems that have the capability to run with a larger page size to deal
-- * with the allocations for initrd and fdt more efficiently.
-- */
--#ifndef EFI_ALLOC_ALIGN
--#define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
--#endif
--
- #define EFI_MMAP_NR_SLACK_SLOTS	8
- 
- struct file_info {
-@@ -186,14 +177,16 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
- 		goto fail;
- 
- 	/*
--	 * Enforce minimum alignment that EFI requires when requesting
--	 * a specific address.  We are doing page-based allocations,
--	 * so we must be aligned to a page.
-+	 * Enforce minimum alignment that EFI or Linux requires when
-+	 * requesting a specific address.  We are doing page-based (or
-+	 * larger) allocations, and both the address and size must meet
-+	 * alignment constraints.
- 	 */
- 	if (align < EFI_ALLOC_ALIGN)
- 		align = EFI_ALLOC_ALIGN;
- 
--	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
-+	size = round_up(size, EFI_ALLOC_ALIGN);
-+	nr_pages = size / EFI_PAGE_SIZE;
- again:
- 	for (i = 0; i < map_size / desc_size; i++) {
- 		efi_memory_desc_t *desc;
-@@ -208,7 +201,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
- 			continue;
- 
- 		start = desc->phys_addr;
--		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
-+		end = start + desc->num_pages * EFI_PAGE_SIZE;
- 
- 		if (end > max)
- 			end = max;
-@@ -278,14 +271,16 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
- 		goto fail;
- 
- 	/*
--	 * Enforce minimum alignment that EFI requires when requesting
--	 * a specific address.  We are doing page-based allocations,
--	 * so we must be aligned to a page.
-+	 * Enforce minimum alignment that EFI or Linux requires when
-+	 * requesting a specific address.  We are doing page-based (or
-+	 * larger) allocations, and both the address and size must meet
-+	 * alignment constraints.
- 	 */
- 	if (align < EFI_ALLOC_ALIGN)
- 		align = EFI_ALLOC_ALIGN;
- 
--	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
-+	size = round_up(size, EFI_ALLOC_ALIGN);
-+	nr_pages = size / EFI_PAGE_SIZE;
- 	for (i = 0; i < map_size / desc_size; i++) {
- 		efi_memory_desc_t *desc;
- 		unsigned long m = (unsigned long)map;
-@@ -300,7 +295,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
- 			continue;
- 
- 		start = desc->phys_addr;
--		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
-+		end = start + desc->num_pages * EFI_PAGE_SIZE;
- 
- 		/*
- 		 * Don't allocate at 0x0. It will confuse code that
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index ee49cd23ee63..b98824e3800a 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -15,6 +15,15 @@
-  */
- #undef __init
- 
-+/*
-+ * Allow the platform to override the allocation granularity: this allows
-+ * systems that have the capability to run with a larger page size to deal
-+ * with the allocations for initrd and fdt more efficiently.
-+ */
-+#ifndef EFI_ALLOC_ALIGN
-+#define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
-+#endif
-+
- void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
- 
- efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg, void *__image,
-@@ -62,4 +71,6 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
- 
- efi_status_t check_platform_features(efi_system_table_t *sys_table_arg);
- 
-+efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg);
-+
- #endif
-diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index 0c9f58c5ba50..7e72954d5860 100644
---- a/drivers/firmware/efi/libstub/random.c
-+++ b/drivers/firmware/efi/libstub/random.c
-@@ -8,6 +8,7 @@
-  */
- 
- #include <linux/efi.h>
-+#include <linux/log2.h>
- #include <asm/efi.h>
- 
- #include "efistub.h"
-@@ -41,21 +42,23 @@ efi_status_t efi_get_random_bytes(efi_system_table_t *sys_table_arg,
-  */
- static unsigned long get_entry_num_slots(efi_memory_desc_t *md,
- 					 unsigned long size,
--					 unsigned long align)
-+					 unsigned long align_shift)
- {
--	u64 start, end;
-+	unsigned long align = 1UL << align_shift;
-+	u64 first_slot, last_slot, region_end;
- 
- 	if (md->type != EFI_CONVENTIONAL_MEMORY)
- 		return 0;
- 
--	start = round_up(md->phys_addr, align);
--	end = round_down(md->phys_addr + md->num_pages * EFI_PAGE_SIZE - size,
--			 align);
-+	region_end = min((u64)ULONG_MAX, md->phys_addr + md->num_pages*EFI_PAGE_SIZE - 1);
- 
--	if (start > end)
-+	first_slot = round_up(md->phys_addr, align);
-+	last_slot = round_down(region_end - size + 1, align);
-+
-+	if (first_slot > last_slot)
- 		return 0;
- 
--	return (end - start + 1) / align;
-+	return ((unsigned long)(last_slot - first_slot) >> align_shift) + 1;
- }
- 
- /*
-@@ -98,7 +101,7 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
- 		efi_memory_desc_t *md = (void *)memory_map + map_offset;
- 		unsigned long slots;
- 
--		slots = get_entry_num_slots(md, size, align);
-+		slots = get_entry_num_slots(md, size, ilog2(align));
- 		MD_NUM_SLOTS(md) = slots;
- 		total_slots += slots;
- 	}
-@@ -141,3 +144,51 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
- 
- 	return status;
- }
-+
-+#define RANDOM_SEED_SIZE	32
-+
-+efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg)
-+{
-+	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
-+	efi_guid_t rng_algo_raw = EFI_RNG_ALGORITHM_RAW;
-+	efi_guid_t rng_table_guid = LINUX_EFI_RANDOM_SEED_TABLE_GUID;
-+	struct efi_rng_protocol *rng;
-+	struct linux_efi_random_seed *seed;
-+	efi_status_t status;
-+
-+	status = efi_call_early(locate_protocol, &rng_proto, NULL,
-+				(void **)&rng);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	status = efi_call_early(allocate_pool, EFI_RUNTIME_SERVICES_DATA,
-+				sizeof(*seed) + RANDOM_SEED_SIZE,
-+				(void **)&seed);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	status = rng->get_rng(rng, &rng_algo_raw, RANDOM_SEED_SIZE,
-+			      seed->bits);
-+	if (status == EFI_UNSUPPORTED)
-+		/*
-+		 * Use whatever algorithm we have available if the raw algorithm
-+		 * is not implemented.
-+		 */
-+		status = rng->get_rng(rng, NULL, RANDOM_SEED_SIZE,
-+				      seed->bits);
-+
-+	if (status != EFI_SUCCESS)
-+		goto err_freepool;
-+
-+	seed->size = RANDOM_SEED_SIZE;
-+	status = efi_call_early(install_configuration_table, &rng_table_guid,
-+				seed);
-+	if (status != EFI_SUCCESS)
-+		goto err_freepool;
-+
-+	return EFI_SUCCESS;
-+
-+err_freepool:
-+	efi_call_early(free_pool, seed);
-+	return status;
-+}
-diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
-index f61bb52be318..8cd578f62059 100644
---- a/drivers/firmware/efi/test/efi_test.c
-+++ b/drivers/firmware/efi/test/efi_test.c
-@@ -8,7 +8,6 @@
-  *
-  */
- 
--#include <linux/version.h>
- #include <linux/miscdevice.h>
- #include <linux/module.h>
- #include <linux/init.h>
-@@ -156,7 +155,7 @@ static long efi_runtime_get_variable(unsigned long arg)
- {
- 	struct efi_getvariable __user *getvariable_user;
- 	struct efi_getvariable getvariable;
--	unsigned long datasize, prev_datasize, *dz;
-+	unsigned long datasize = 0, prev_datasize, *dz;
- 	efi_guid_t vendor_guid, *vd = NULL;
- 	efi_status_t status;
- 	efi_char16_t *name = NULL;
-@@ -266,14 +265,10 @@ static long efi_runtime_set_variable(unsigned long arg)
- 			return rv;
- 	}
- 
--	data = kmalloc(setvariable.data_size, GFP_KERNEL);
--	if (!data) {
-+	data = memdup_user(setvariable.data, setvariable.data_size);
-+	if (IS_ERR(data)) {
- 		kfree(name);
--		return -ENOMEM;
--	}
--	if (copy_from_user(data, setvariable.data, setvariable.data_size)) {
--		rv = -EFAULT;
--		goto out;
-+		return PTR_ERR(data);
- 	}
- 
- 	status = efi.set_variable(name, &vendor_guid,
-@@ -429,7 +424,7 @@ static long efi_runtime_get_nextvariablename(unsigned long arg)
- 	efi_guid_t *vd = NULL;
- 	efi_guid_t vendor_guid;
- 	efi_char16_t *name = NULL;
--	int rv;
-+	int rv = 0;
- 
- 	getnextvariablename_user = (struct efi_getnextvariablename __user *)arg;
- 
-diff --git a/drivers/thunderbolt/Kconfig b/drivers/thunderbolt/Kconfig
-index c121acc15bfe..d35db16aa43f 100644
---- a/drivers/thunderbolt/Kconfig
-+++ b/drivers/thunderbolt/Kconfig
-@@ -1,6 +1,8 @@
- menuconfig THUNDERBOLT
- 	tristate "Thunderbolt support for Apple devices"
- 	depends on PCI
-+	depends on X86 || COMPILE_TEST
-+	select APPLE_PROPERTIES if EFI_STUB && X86
- 	select CRC32
- 	help
- 	  Cactus Ridge Thunderbolt Controller driver
-diff --git a/drivers/thunderbolt/eeprom.c b/drivers/thunderbolt/eeprom.c
-index 2b9602c2c355..6392990c984d 100644
---- a/drivers/thunderbolt/eeprom.c
-+++ b/drivers/thunderbolt/eeprom.c
-@@ -5,6 +5,7 @@
-  */
- 
- #include <linux/crc32.h>
-+#include <linux/property.h>
- #include <linux/slab.h>
- #include "tb.h"
- 
-@@ -360,6 +361,40 @@ static int tb_drom_parse_entries(struct tb_switch *sw)
- }
- 
- /**
-+ * tb_drom_copy_efi - copy drom supplied by EFI to sw->drom if present
-+ */
-+static int tb_drom_copy_efi(struct tb_switch *sw, u16 *size)
-+{
-+	struct device *dev = &sw->tb->nhi->pdev->dev;
-+	int len, res;
-+
-+	len = device_property_read_u8_array(dev, "ThunderboltDROM", NULL, 0);
-+	if (len < 0 || len < sizeof(struct tb_drom_header))
-+		return -EINVAL;
-+
-+	sw->drom = kmalloc(len, GFP_KERNEL);
-+	if (!sw->drom)
-+		return -ENOMEM;
-+
-+	res = device_property_read_u8_array(dev, "ThunderboltDROM", sw->drom,
-+									len);
-+	if (res)
-+		goto err;
-+
-+	*size = ((struct tb_drom_header *)sw->drom)->data_len +
-+							  TB_DROM_DATA_START;
-+	if (*size > len)
-+		goto err;
-+
-+	return 0;
-+
-+err:
-+	kfree(sw->drom);
-+	sw->drom = NULL;
-+	return -EINVAL;
-+}
-+
-+/**
-  * tb_drom_read - copy drom to sw->drom and parse it
-  */
- int tb_drom_read(struct tb_switch *sw)
-@@ -374,6 +409,13 @@ int tb_drom_read(struct tb_switch *sw)
- 
- 	if (tb_route(sw) == 0) {
- 		/*
-+		 * Apple's NHI EFI driver supplies a DROM for the root switch
-+		 * in a device property. Use it if available.
-+		 */
-+		if (tb_drom_copy_efi(sw, &size) == 0)
-+			goto parse;
-+
-+		/*
- 		 * The root switch contains only a dummy drom (header only,
- 		 * no entries). Hardcode the configuration here.
- 		 */
-@@ -418,6 +460,7 @@ int tb_drom_read(struct tb_switch *sw)
- 	if (res)
- 		goto err;
- 
-+parse:
- 	header = (void *) sw->drom;
- 
- 	if (header->data_len + TB_DROM_DATA_START != size) {
-diff --git a/drivers/thunderbolt/switch.c b/drivers/thunderbolt/switch.c
-index 9840fdecb73b..c6f30b1695a9 100644
---- a/drivers/thunderbolt/switch.c
-+++ b/drivers/thunderbolt/switch.c
-@@ -460,7 +460,7 @@ int tb_switch_resume(struct tb_switch *sw)
- 		tb_sw_warn(sw, "uid read failed\n");
- 		return err;
- 	}
--	if (sw->uid != uid) {
-+	if (sw != sw->tb->root_switch && sw->uid != uid) {
- 		tb_sw_info(sw,
- 			"changed while suspended (uid %#llx -> %#llx)\n",
- 			sw->uid, uid);
-diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
-index 37a37c4d04cb..8c4dc1e1f94f 100644
---- a/drivers/video/fbdev/efifb.c
-+++ b/drivers/video/fbdev/efifb.c
-@@ -118,6 +118,31 @@ static inline bool fb_base_is_valid(void)
- 	return false;
- }
- 
-+#define efifb_attr_decl(name, fmt)					\
-+static ssize_t name##_show(struct device *dev,				\
-+			   struct device_attribute *attr,		\
-+			   char *buf)					\
-+{									\
-+	return sprintf(buf, fmt "\n", (screen_info.lfb_##name));	\
-+}									\
-+static DEVICE_ATTR_RO(name)
-+
-+efifb_attr_decl(base, "0x%x");
-+efifb_attr_decl(linelength, "%u");
-+efifb_attr_decl(height, "%u");
-+efifb_attr_decl(width, "%u");
-+efifb_attr_decl(depth, "%u");
-+
-+static struct attribute *efifb_attrs[] = {
-+	&dev_attr_base.attr,
-+	&dev_attr_linelength.attr,
-+	&dev_attr_width.attr,
-+	&dev_attr_height.attr,
-+	&dev_attr_depth.attr,
-+	NULL
-+};
-+ATTRIBUTE_GROUPS(efifb);
-+
- static int efifb_probe(struct platform_device *dev)
- {
- 	struct fb_info *info;
-@@ -205,14 +230,13 @@ static int efifb_probe(struct platform_device *dev)
- 	} else {
- 		/* We cannot make this fatal. Sometimes this comes from magic
- 		   spaces our resource handlers simply don't know about */
--		printk(KERN_WARNING
--		       "efifb: cannot reserve video memory at 0x%lx\n",
-+		pr_warn("efifb: cannot reserve video memory at 0x%lx\n",
- 			efifb_fix.smem_start);
- 	}
- 
- 	info = framebuffer_alloc(sizeof(u32) * 16, &dev->dev);
- 	if (!info) {
--		printk(KERN_ERR "efifb: cannot allocate framebuffer\n");
-+		pr_err("efifb: cannot allocate framebuffer\n");
- 		err = -ENOMEM;
- 		goto err_release_mem;
- 	}
-@@ -230,16 +254,15 @@ static int efifb_probe(struct platform_device *dev)
- 
- 	info->screen_base = ioremap_wc(efifb_fix.smem_start, efifb_fix.smem_len);
- 	if (!info->screen_base) {
--		printk(KERN_ERR "efifb: abort, cannot ioremap video memory "
--				"0x%x @ 0x%lx\n",
-+		pr_err("efifb: abort, cannot ioremap video memory 0x%x @ 0x%lx\n",
- 			efifb_fix.smem_len, efifb_fix.smem_start);
- 		err = -EIO;
- 		goto err_release_fb;
- 	}
- 
--	printk(KERN_INFO "efifb: framebuffer at 0x%lx, using %dk, total %dk\n",
-+	pr_info("efifb: framebuffer at 0x%lx, using %dk, total %dk\n",
- 	       efifb_fix.smem_start, size_remap/1024, size_total/1024);
--	printk(KERN_INFO "efifb: mode is %dx%dx%d, linelength=%d, pages=%d\n",
-+	pr_info("efifb: mode is %dx%dx%d, linelength=%d, pages=%d\n",
- 	       efifb_defined.xres, efifb_defined.yres,
- 	       efifb_defined.bits_per_pixel, efifb_fix.line_length,
- 	       screen_info.pages);
-@@ -247,7 +270,7 @@ static int efifb_probe(struct platform_device *dev)
- 	efifb_defined.xres_virtual = efifb_defined.xres;
- 	efifb_defined.yres_virtual = efifb_fix.smem_len /
- 					efifb_fix.line_length;
--	printk(KERN_INFO "efifb: scrolling: redraw\n");
-+	pr_info("efifb: scrolling: redraw\n");
- 	efifb_defined.yres_virtual = efifb_defined.yres;
- 
- 	/* some dummy values for timing to make fbset happy */
-@@ -265,7 +288,7 @@ static int efifb_probe(struct platform_device *dev)
- 	efifb_defined.transp.offset = screen_info.rsvd_pos;
- 	efifb_defined.transp.length = screen_info.rsvd_size;
- 
--	printk(KERN_INFO "efifb: %s: "
-+	pr_info("efifb: %s: "
- 	       "size=%d:%d:%d:%d, shift=%d:%d:%d:%d\n",
- 	       "Truecolor",
- 	       screen_info.rsvd_size,
-@@ -285,12 +308,19 @@ static int efifb_probe(struct platform_device *dev)
- 	info->fix = efifb_fix;
- 	info->flags = FBINFO_FLAG_DEFAULT | FBINFO_MISC_FIRMWARE;
- 
--	if ((err = fb_alloc_cmap(&info->cmap, 256, 0)) < 0) {
--		printk(KERN_ERR "efifb: cannot allocate colormap\n");
-+	err = sysfs_create_groups(&dev->dev.kobj, efifb_groups);
-+	if (err) {
-+		pr_err("efifb: cannot add sysfs attrs\n");
- 		goto err_unmap;
- 	}
--	if ((err = register_framebuffer(info)) < 0) {
--		printk(KERN_ERR "efifb: cannot register framebuffer\n");
-+	err = fb_alloc_cmap(&info->cmap, 256, 0);
-+	if (err < 0) {
-+		pr_err("efifb: cannot allocate colormap\n");
-+		goto err_groups;
-+	}
-+	err = register_framebuffer(info);
-+	if (err < 0) {
-+		pr_err("efifb: cannot register framebuffer\n");
- 		goto err_fb_dealoc;
- 	}
- 	fb_info(info, "%s frame buffer device\n", info->fix.id);
-@@ -298,6 +328,8 @@ static int efifb_probe(struct platform_device *dev)
- 
- err_fb_dealoc:
- 	fb_dealloc_cmap(&info->cmap);
-+err_groups:
-+	sysfs_remove_groups(&dev->dev.kobj, efifb_groups);
- err_unmap:
- 	iounmap(info->screen_base);
- err_release_fb:
-@@ -313,6 +345,7 @@ static int efifb_remove(struct platform_device *pdev)
- 	struct fb_info *info = platform_get_drvdata(pdev);
- 
- 	unregister_framebuffer(info);
-+	sysfs_remove_groups(&pdev->dev.kobj, efifb_groups);
- 	framebuffer_release(info);
- 
- 	return 0;
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 2d089487d2da..a07a476178cd 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -443,6 +443,22 @@ typedef struct {
- #define EFI_PCI_IO_ATTRIBUTE_VGA_PALETTE_IO_16 0x20000
- #define EFI_PCI_IO_ATTRIBUTE_VGA_IO_16 0x40000
- 
-+typedef struct {
-+	u32 version;
-+	u32 get;
-+	u32 set;
-+	u32 del;
-+	u32 get_all;
-+} apple_properties_protocol_32_t;
-+
-+typedef struct {
-+	u64 version;
-+	u64 get;
-+	u64 set;
-+	u64 del;
-+	u64 get_all;
-+} apple_properties_protocol_64_t;
-+
- /*
-  * Types and defines for EFI ResetSystem
-  */
-@@ -589,8 +605,10 @@ void efi_native_runtime_setup(void);
- #define DEVICE_TREE_GUID			EFI_GUID(0xb1b621d5, 0xf19c, 0x41a5,  0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0)
- #define EFI_PROPERTIES_TABLE_GUID		EFI_GUID(0x880aaca3, 0x4adc, 0x4a04,  0x90, 0x79, 0xb7, 0x47, 0x34, 0x08, 0x25, 0xe5)
- #define EFI_RNG_PROTOCOL_GUID			EFI_GUID(0x3152bca5, 0xeade, 0x433d,  0x86, 0x2e, 0xc0, 0x1c, 0xdc, 0x29, 0x1f, 0x44)
-+#define EFI_RNG_ALGORITHM_RAW			EFI_GUID(0xe43176d7, 0xb6e8, 0x4827,  0xb7, 0x84, 0x7f, 0xfd, 0xc4, 0xb6, 0x85, 0x61)
- #define EFI_MEMORY_ATTRIBUTES_TABLE_GUID	EFI_GUID(0xdcfa911d, 0x26eb, 0x469f,  0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
- #define EFI_CONSOLE_OUT_DEVICE_GUID		EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
-+#define APPLE_PROPERTIES_PROTOCOL_GUID		EFI_GUID(0x91bd12fe, 0xf6c3, 0x44fb,  0xa5, 0xb7, 0x51, 0x22, 0xab, 0x30, 0x3a, 0xe0)
- 
- /*
-  * This GUID is used to pass to the kernel proper the struct screen_info
-@@ -599,6 +617,7 @@ void efi_native_runtime_setup(void);
-  */
- #define LINUX_EFI_ARM_SCREEN_INFO_TABLE_GUID	EFI_GUID(0xe03fc20a, 0x85dc, 0x406e,  0xb9, 0x0e, 0x4a, 0xb5, 0x02, 0x37, 0x1d, 0x95)
- #define LINUX_EFI_LOADER_ENTRY_GUID		EFI_GUID(0x4a67b082, 0x0a4c, 0x41cf,  0xb6, 0xc7, 0x44, 0x0b, 0x29, 0xbb, 0x8c, 0x4f)
-+#define LINUX_EFI_RANDOM_SEED_TABLE_GUID	EFI_GUID(0x1ce1e5bc, 0x7ceb, 0x42f2,  0x81, 0xe5, 0x8a, 0xad, 0xf1, 0x80, 0xf5, 0x7b)
- 
- typedef struct {
- 	efi_guid_t guid;
-@@ -872,6 +891,7 @@ extern struct efi {
- 	unsigned long esrt;		/* ESRT table */
- 	unsigned long properties_table;	/* properties table */
- 	unsigned long mem_attr_table;	/* memory attributes table */
-+	unsigned long rng_seed;		/* UEFI firmware random seed */
- 	efi_get_time_t *get_time;
- 	efi_set_time_t *set_time;
- 	efi_get_wakeup_time_t *get_wakeup_time;
-@@ -1145,6 +1165,26 @@ struct efi_generic_dev_path {
- 	u16 length;
- } __attribute ((packed));
- 
-+struct efi_dev_path {
-+	u8 type;	/* can be replaced with unnamed */
-+	u8 sub_type;	/* struct efi_generic_dev_path; */
-+	u16 length;	/* once we've moved to -std=c11 */
-+	union {
-+		struct {
-+			u32 hid;
-+			u32 uid;
-+		} acpi;
-+		struct {
-+			u8 fn;
-+			u8 dev;
-+		} pci;
-+	};
-+} __attribute ((packed));
-+
-+#if IS_ENABLED(CONFIG_EFI_DEV_PATH_PARSER)
-+struct device *efi_get_device_by_path(struct efi_dev_path **node, size_t *len);
-+#endif
-+
- static inline void memrange_efi_to_native(u64 *addr, u64 *npages)
- {
- 	*npages = PFN_UP(*addr + (*npages<<EFI_PAGE_SHIFT)) - PFN_DOWN(*addr);
-@@ -1493,4 +1533,10 @@ efi_status_t efi_exit_boot_services(efi_system_table_t *sys_table,
- 				    struct efi_boot_memmap *map,
- 				    void *priv,
- 				    efi_exit_boot_map_processing priv_func);
-+
-+struct linux_efi_random_seed {
-+	u32	size;
-+	u8	bits[];
-+};
-+
- #endif /* _LINUX_EFI_H */
+Removing the efi_get_memory_map() call means memory_map is an uninitialised
+pointer passed here. It looks like the compiler spots that its also unused so
+doesn't generate a warning.
+
+Wouldn't it be better to remove the argument (as its unused), or pass the
+placeholder value here? (readability is in the eye of the beholder...)
+
+
+
+> @@ -266,20 +275,16 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+>  			/*
+>  			 * We need to allocate more space for the new
+>  			 * device tree, so free existing buffer that is
+> -			 * too small.  Also free memory map, as we will need
+> -			 * to get new one that reflects the free/alloc we do
+> -			 * on the device tree buffer.
+> +			 * too small.
+>  			 */
+>  			efi_free(sys_table, new_fdt_size, *new_fdt_addr);
+> -			sys_table->boottime->free_pool(memory_map);
+>  			new_fdt_size += EFI_PAGE_SIZE;
+>  		} else {
+>  			pr_efi_err(sys_table, "Unable to construct new device tree.\n");
+> -			goto fail_free_mmap;
+> +			goto fail_free_new_fdt;
+>  		}
+>  	}
+>  
+> -	sys_table->boottime->free_pool(memory_map);
+>  	priv.runtime_map = runtime_map;
+>  	priv.runtime_entry_count = &runtime_entry_count;
+>  	status = efi_exit_boot_services(sys_table, handle, &map, &priv,
+> @@ -288,6 +293,17 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+>  	if (status == EFI_SUCCESS) {
+>  		efi_set_virtual_address_map_t *svam;
+>  
+> +		status = update_fdt_memmap((void *)*new_fdt_addr,
+> +					   (u64)memory_map);
+> +		if (status != EFI_SUCCESS) {
+> +			/*
+> +			 * The kernel won't get far without the memory map, but
+> +			 * may still be able to print something meaningful so
+> +			 * return success here.
+> +			 */
+> +			return EFI_SUCCESS;
+> +		}
+> +
+>  		/* Install the new virtual address map */
+>  		svam = sys_table->runtime->set_virtual_address_map;
+>  		status = svam(runtime_entry_count * desc_size, desc_size,
+> @@ -319,9 +335,6 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+>  
+>  	pr_efi_err(sys_table, "Exit boot services failed.\n");
+>  
+> -fail_free_mmap:
+> -	sys_table->boottime->free_pool(memory_map);
+> -
+>  fail_free_new_fdt:
+>  	efi_free(sys_table, new_fdt_size, *new_fdt_addr);
+>  
+> 
+
+Looks better than my attempt!
+
+Thanks,
+
+James
+
+[0] Seattle broken boot, v4.9.0:defconfig + this patch
+Shell> efi\morse\Image console=ttyAMA0,115200
+root=PARTUUID=b2edf709-3b28-4cb3-8809-203f262e2bcc rw earlycon=pl011,0xe1010000
+crashkernel=1G stacktrace ignore_loglevel=1 acpi=on efi=debug resume=/dev/sda3
+EFI stub: Booting Linux Kernel...
+EFI stub: Using DTB from configuration table
+EFI stub: Exiting boot services and installing virtual address map...
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Linux version 4.9.0-00001-gd0a79eca7083 (morse@melchizedek) (gcc
+version 5.2.1 20150903 (Debian 5.2.1-16) ) #6482 SMP PREEMPT Mon Dec 12 08:41:16
+GMT 2016
+[    0.000000] Boot CPU: AArch64 Processor [411fd072]
+[    0.000000] earlycon: pl11 at MMIO 0x00000000e1010000 (options '')
+[    0.000000] bootconsole [pl11] enabled
+[    0.000000] debug: ignoring loglevel setting.
+[    0.000000] efi: Getting EFI parameters from FDT:
+[    0.000000] efi:   System Table: 0x00000083ff34bf18
+[    0.000000] efi:   MemMap Address: 0x00000083fced4018
+[    0.000000] efi:   MemMap Size: 0x000004e0
+[    0.000000] efi:   MemMap Desc. Size: 0x00000030
+[    0.000000] efi:   MemMap Desc. Version: 0x00000001
+[    0.000000] efi: EFI v2.40 by American Megatrends
+[    0.000000] efi:  ACPI 2.0=0x83ff1c3000  SMBIOS 3.0=0x83ff347798
+[    0.000000] efi: Processing EFI memory map:
+[    0.000000] efi:   0x0000e1050000-0x0000e105ffff [Memory Mapped I/O  |RUN|  |
+ |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x0000e1300000-0x0000e1300fff [Memory Mapped I/O  |RUN|  |
+ |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x0000e8200000-0x0000e827ffff [Memory Mapped I/O  |RUN|  |
+ |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x008000000000-0x008001e7ffff [Runtime Data       |RUN|  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x008001e80000-0x008001ffffff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x008002000000-0x008002e6ffff [Loader Data        |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x008002e70000-0x00801fdfffff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x00801fe00000-0x00801fe0ffff [Loader Data        |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x00801fe10000-0x00801fffbfff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x00801fffc000-0x00801fffffff [Boot Data          |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x008020000000-0x0083f0ffffff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083f1000000-0x0083f101ffff [Boot Data          |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083f1020000-0x0083fb347fff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fb348000-0x0083fc133fff [Loader Code        |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fc134000-0x0083fced3fff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fced4000-0x0083fced4fff [Loader Data        |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fced5000-0x0083fcff0fff [Loader Code        |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fcff1000-0x0083fea67fff [Boot Data          |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fea68000-0x0083febd3fff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083febd4000-0x0083ff186fff [Boot Code          |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff187000-0x0083ff1b6fff [Reserved           |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff1b7000-0x0083ff1c4fff [ACPI Reclaim Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff1c5000-0x0083ff20ffff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff210000-0x0083ff224fff [Loader Data        |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff225000-0x0083ff226fff [ACPI Memory NVS    |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff227000-0x0083ff34bfff [Runtime Data       |RUN|  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] cma: Reserved 16 MiB at 0x00000080ff000000
+[    0.000000] ACPI: Early table checksum verification disabled
+[    0.000000] ACPI: RSDP 0x00000083FF1C3000 000024 (v02 AMDINC)
+[    0.000000] ACPI: XSDT 0x00000083FF1C3028 000084 (v01 AMDINC SEATTLE
+00000000 AMI  00010013)
+[    0.000000] ACPI: FACP 0x00000083FF1C30B0 00010C (v05 AMDINC SEATTLE
+00000000 AMI  00010013)
+[    0.000000] ACPI: DSDT 0x00000083FF1C31C0 000967 (v02 AMDINC SEATTLE
+00000003 INTL 20140926)
+[    0.000000] ACPI: MCFG 0x00000083FF1C3B28 00003C (v01 AMDINC SEATTLE
+00000000 MSFT 00000097)
+[    0.000000] ACPI: DBG2 0x00000083FF1C3B68 00005A (v00 AMDINC SEATTLE
+00000000 AMI  00000000)
+[    0.000000] ACPI: GTDT 0x00000083FF1C3BC8 000060 (v02 AMDINC SEATTLE
+00000000 AMI  00000000)
+[    0.000000] ACPI: APIC 0x00000083FF1C3C28 0002BC (v03 AMDINC SEATTLE
+00000000 AMI  00000000)
+[    0.000000] ACPI: CSRT 0x00000083FF1C3EE8 000060 (v00 AMDINC
+00000000 AMI  00000000)
+[    0.000000] ACPI: SSDT 0x00000083FF1C3F48 00011B (v02 AMDINC CPUSSDT
+00000000 AMI  00000000)
+[    0.000000] ACPI: SSDT 0x00000083FF1C4068 00008A (v01 AMDINC SATASSDT
+00000003 INTL 20140926)
+[    0.000000] ACPI: SSDT 0x00000083FF1C40F8 0004B3 (v01 AMDINC ETHSSDT
+00000003 INTL 20140926)
+[    0.000000] ACPI: SPCR 0x00000083FF1C45B0 000050 (v02 A M I  APTIO V
+00000000 AMI. 00000005)
+[    0.000000] ACPI: HEST 0x00000083FF1C4600 0001A8 (v01 AMD    AMD HEST
+00000000      00000000)
+[    0.000000] ACPI: BERT 0x00000083FF1C47A8 000030 (v01 AMD    AMD BERT
+00000000      00000000)
+[    0.000000] ACPI: SPCR: console: pl011,mmio,0xe1010000,115200
+[    0.000000] ACPI: NUMA: Failed to initialise from firmware
+[    0.000000] NUMA: Faking a node at [mem 0x0000000000000000-0x00000083ff34bfff]
+[    0.000000] NUMA: Adding memblock [0x8000000000 - 0x8001e7ffff] on node 0
+[    0.000000] NUMA: Adding memblock [0x8001e80000 - 0x83ff186fff] on node 0
+[    0.000000] NUMA: Adding memblock [0x83ff187000 - 0x83ff1c4fff] on node 0
+[    0.000000] NUMA: Adding memblock [0x83ff1c5000 - 0x83ff224fff] on node 0
+[    0.000000] NUMA: Adding memblock [0x83ff225000 - 0x83ff34bfff] on node 0
+[    0.000000] NUMA: Initmem setup node 0 [mem 0x8000000000-0x83ff34bfff]
+[    0.000000] NUMA: NODE_DATA [mem 0x83ff214500-0x83ff215fff]
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000008000000000-0x00000080ffffffff]
+[    0.000000]   Normal   [mem 0x0000008100000000-0x00000083ff34bfff]
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000008000000000-0x0000008001e7ffff]
+[    0.000000]   node   0: [mem 0x0000008001e80000-0x00000083ff186fff]
+[    0.000000]   node   0: [mem 0x00000083ff187000-0x00000083ff1c4fff]
+[    0.000000]   node   0: [mem 0x00000083ff1c5000-0x00000083ff224fff]
+[    0.000000]   node   0: [mem 0x00000083ff225000-0x00000083ff34bfff]
+[    0.000000] Initmem setup node 0 [mem 0x0000008000000000-0x00000083ff34bfff]
+[    0.000000] On node 0 totalpages: 4191052
+[    0.000000]   DMA zone: 16384 pages used for memmap
+[    0.000000]   DMA zone: 0 pages reserved
+[    0.000000]   DMA zone: 1048576 pages, LIFO batch:31
+[    0.000000]   Normal zone: 49102 pages used for memmap
+[    0.000000]   Normal zone: 3142476 pages, LIFO batch:31
+[    0.000000] psci: probing for conduit method from ACPI.
+[    0.000000] psci: PSCIv0.2 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: MIGRATE_INFO_TYPE not supported.
+[    0.000000] percpu: Embedded 21 pages/cpu @ffff8003ff0df000 s47896 r8192
+d29928 u86016
+[    0.000000] pcpu-alloc: s47896 r8192 d29928 u86016 alloc=21*4096
+[    0.000000] pcpu-alloc: [0] 0 [0] 1 [0] 2 [0] 3 [0] 4 [0] 5 [0] 6 [0] 7
+[    0.000000] Detected PIPT I-cache on CPU0
+[    0.000000] CPU features: enabling workaround for ARM erratum 832075
+[    0.000000] CPU features: enabling workaround for ARM erratum 834220
+[    0.000000] Built 1 zonelists in Node order, mobility grouping on.  Total
+pages: 4125566
+[    0.000000] Policy zone: Normal
+[    0.000000] Kernel command line: efi\morse\Image console=ttyAMA0,115200
+root=PARTUUID=b2edf709-3b28-4cb3-8809-203f262e2bcc rw earlycon=pl011,0xe1010000
+crashkernel=1G stacktrace ignore_loglevel=1 acpi=on efi=debug resume=/dev/sda3
+[    0.000000] log_buf_len individual max cpu contribution: 4096 bytes
+[    0.000000] log_buf_len total cpu_extra contributions: 28672 bytes
+[    0.000000] log_buf_len min size: 16384 bytes
+[    0.000000] log_buf_len: 65536 bytes
+[    0.000000] early log buf free: 7932(48%)
+[    0.000000] PID hash table entries: 4096 (order: 3, 32768 bytes)
+[    0.000000] software IO TLB [mem 0x80fafff000-0x80fefff000] (64MB) mapped at
+[ffff8000fafff000-ffff8000feffefff]
+[    0.000000] Memory: 16371940K/16764208K available (8444K kernel code, 834K
+rwdata, 3624K rodata, 1024K init, 277K bss, 375884K reserved, 16384K cma-reserved)
+[    0.000000] Virtual kernel memory layout:
+[    0.000000]     modules : 0xffff000000000000 - 0xffff000008000000   (   128 MB)
+[    0.000000]     vmalloc : 0xffff000008000000 - 0xffff7dffbfff0000   (129022 GB)
+[    0.000000]       .text : 0xffff000008080000 - 0xffff0000088c0000   (  8448 KB)
+[    0.000000]     .rodata : 0xffff0000088c0000 - 0xffff000008c50000   (  3648 KB)
+[    0.000000]       .init : 0xffff000008c50000 - 0xffff000008d50000   (  1024 KB)
+[    0.000000]       .data : 0xffff000008d50000 - 0xffff000008e20a00   (   835 KB)
+[    0.000000]        .bss : 0xffff000008e20a00 - 0xffff000008e65fbc   (   278 KB)
+[    0.000000]     fixed   : 0xffff7dfffe7fd000 - 0xffff7dfffec00000   (  4108 KB)
+[    0.000000]     PCI I/O : 0xffff7dfffee00000 - 0xffff7dffffe00000   (    16 MB)
+[    0.000000]     vmemmap : 0xffff7e0000000000 - 0xffff800000000000   (  2048
+GB maximum)
+[    0.000000]               0xffff7e0000000000 - 0xffff7e000ffcd300   (   255
+MB actual)
+[    0.000000]     memory  : 0xffff800000000000 - 0xffff8003ff34c000   ( 16371 MB)
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=8, Nodes=1
+[    0.000000] Preemptible hierarchical RCU implementation.
+[    0.000000]  Build-time adjustment of leaf fanout to 64.
+[    0.000000]  RCU restricting CPUs from NR_CPUS=64 to nr_cpu_ids=8.
+[    0.000000] RCU: Adjusting geometry for rcu_fanout_leaf=64, nr_cpu_ids=8
+[    0.000000] NR_IRQS:64 nr_irqs:64 0
+[    0.000000] GIC: Using split EOI/Deactivate mode
+[    0.000000] GICv2m: range[mem 0xe1180000-0xe1180fff], SPI[64:319]
+[    0.000000] arm_arch_timer: Architected cp15 timer(s) running at 250.00MHz
+(phys).
+[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles:
+0x7350b89c29, max_idle_ns: 881590431910 ns
+[    0.000001] sched_clock: 56 bits at 250MHz, resolution 4ns, wraps every
+4398046511102ns
+[    0.008135] Console: colour dummy device 80x25
+[    0.012700] Calibrating delay loop (skipped), value calculated using timer
+frequency.. 500.00 BogoMIPS (lpj=1000000)
+[    0.023333] pid_max: default: 32768 minimum: 301
+[    0.027997] ACPI: Core revision 20160831
+[    0.032378] ACPI: 4 ACPI AML tables successfully acquired and loaded
+[    0.038819] Security Framework initialized
+[    0.044630] Dentry cache hash table entries: 2097152 (order: 12, 16777216 bytes)
+[    0.056118] Inode-cache hash table entries: 1048576 (order: 11, 8388608 bytes)
+[    0.064713] Mount-cache hash table entries: 32768 (order: 6, 262144 bytes)
+[    0.071683] Mountpoint-cache hash table entries: 32768 (order: 6, 262144 bytes)
+[    0.079547] ASID allocator initialised with 65536 entries
+[    0.117078] Remapping and enabling EFI services.
+[    0.121756]   EFI remap 0x00000000e1050000 => 0000000020000000
+[    0.127645]   EFI remap 0x00000000e1300000 => 0000000020010000
+[    0.133531]   EFI remap 0x00000000e8200000 => 0000000020020000
+[    0.139459]   EFI remap 0x0000008000000000 => 0000000020200000
+[    0.145348]   EFI remap 0x00000083ff227000 => 0000000022087000
+[    0.209377] Detected PIPT I-cache on CPU1
+[    0.209397] CPU1: Booted secondary processor [411fd072]
+[    0.255389] Detected PIPT I-cache on CPU2
+[    0.255406] CPU2: Booted secondary processor [411fd072]
+[    0.297453] Detected PIPT I-cache on CPU3
+[    0.297465] CPU3: Booted secondary processor [411fd072]
+[    0.343475] Detected PIPT I-cache on CPU4
+[    0.343489] CPU4: Booted secondary processor [411fd072]
+[    0.385539] Detected PIPT I-cache on CPU5
+[    0.385551] CPU5: Booted secondary processor [411fd072]
+[    0.431557] Detected PIPT I-cache on CPU6
+[    0.431572] CPU6: Booted secondary processor [411fd072]
+[    0.473621] Detected PIPT I-cache on CPU7
+[    0.473633] CPU7: Booted secondary processor [411fd072]
+[    0.473661] Brought up 8 CPUs
+[    0.541646] SMP: Total of 8 processors activated.
+[    0.546379] CPU features: detected feature: 32-bit EL0 Support
+[    0.552287] CPU: All CPU(s) started at EL2
+[    0.556418] alternatives: patching kernel code
+[    0.564405] devtmpfs: initialized
+[    0.568066] SMBIOS 3.0.0 present.
+[    0.571469] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff,
+max_idle_ns: 7645041785100000 ns
+[    0.581454] pinctrl core: initialized pinctrl subsystem
+[    0.587047] NET: Registered protocol family 16
+[    0.615078] cpuidle: using governor menu
+[    0.619095] vdso: 2 pages (1 code @ ffff0000088c7000, 1 data @ ffff000008d54000)
+[    0.626550] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+[    0.633729] DMA: preallocated 256 KiB pool for atomic allocations
+[    0.639929] ACPI: bus type PCI registered
+[    0.644002] Serial: AMBA PL011 UART driver
+[    0.664262] HugeTLB registered 2 MB page size, pre-allocated 0 pages
+[    0.670997] ACPI: Added _OSI(Module Device)
+[    0.675210] ACPI: Added _OSI(Processor Device)
+[    0.679681] ACPI: Added _OSI(3.0 _SCP Extensions)
+[    0.684413] ACPI: Added _OSI(Processor Aggregator Device)
+[    0.690715] ACPI: Interpreter enabled
+[    0.694400] ACPI: Using GIC for interrupt routing
+[    0.699149] ACPI: MCFG table detected, 1 entries
+[    0.706008] AMDI0511:00: ttyAMA0 at MMIO 0xe1010000 (irq = 8, base_baud = 0)
+is a SBSA
+[    0.713985] console [ttyAMA0] enabled
+[    0.713985] console [ttyAMA0] enabled
+[    0.721314] bootconsole [pl11] disabled
+[    0.721314] bootconsole [pl11] disabled
+[    0.729170] acpi AMDI0400:01: amba_handler_attach(): amba_device_add() failed
+(-19)
+[    0.737230] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-0f])
+[    0.743407] acpi PNP0A08:00: _OSC: OS supports [ExtendedConfig ASPM ClockPM
+Segments MSI]
+[    0.751790] acpi PNP0A08:00: _OSC: OS now controls [PCIeHotplug PME AER
+PCIeCapability]
+[    0.759793] acpi PNP0A08:00: ECAM at [mem 0xf0000000-0xf0ffffff] for [bus 00-0f]
+[    0.767211] Remapped I/O 0x00000001dffe0000 to [io  0x0000-0xffff window]
+[    0.774105] PCI host bridge to bus 0000:00
+[    0.778194] pci_bus 0000:00: root bus resource [mem 0x40000000-0x5fffffff window]
+[    0.785667] pci_bus 0000:00: root bus resource [mem 0x60000000-0x7fffffff window]
+[    0.793141] pci_bus 0000:00: root bus resource [mem 0x80000000-0x9fffffff window]
+[    0.800616] pci_bus 0000:00: root bus resource [mem 0xa0000000-0xbfffffff window]
+[    0.808089] pci_bus 0000:00: root bus resource [mem 0x100000000-0x1ffffffff
+window]
+[    0.815735] pci_bus 0000:00: root bus resource [mem 0x200000000-0x3ffffffff
+window]
+[    0.823380] pci_bus 0000:00: root bus resource [mem 0x400000000-0x7ffffffff
+window]
+[    0.831026] pci_bus 0000:00: root bus resource [mem 0x800000000-0xfffffffff
+window]
+[    0.838672] pci_bus 0000:00: root bus resource [mem 0x1000000000-0x1fffffffff
+window]
+[    0.846492] pci_bus 0000:00: root bus resource [mem 0x2000000000-0x3fffffffff
+window]
+[    0.854311] pci_bus 0000:00: root bus resource [mem 0x4000000000-0x7fffffffff
+window]
+[    0.862130] pci_bus 0000:00: root bus resource [io  0x0000-0xffff window]
+(bus address [0xefff0000-0xefffffff])
+[    0.872206] pci_bus 0000:00: root bus resource [bus 00-0f]
+[    0.877687] pci 0000:00:00.0: [1022:1a00] type 00 class 0x060000
+[    0.883770] pci 0000:00:02.0: [1022:1a01] type 00 class 0x060000
+[    0.889848] pci 0000:00:02.1: [1022:1a02] type 01 class 0x060400
+[    0.895882] pci 0000:00:02.1: PME# supported from D0 D3hot D3cold
+[    0.902102] pci 0000:01:00.0: [10ec:8168] type 00 class 0x020000
+[    0.908115] pci 0000:01:00.0: reg 0x10: initial BAR value 0x00000000 invalid
+[    0.915153] pci 0000:01:00.0: reg 0x10: [io  size 0x0100]
+[    0.920565] pci 0000:01:00.0: reg 0x18: [mem 0xbff00000-0xbff00fff 64bit]
+[    0.927356] pci 0000:01:00.0: reg 0x20: [mem 0x7ffff00000-0x7ffff03fff 64bit
+pref]
+[    0.934988] pci 0000:01:00.0: supports D1 D2
+[    0.939249] pci 0000:01:00.0: PME# supported from D0 D1 D2 D3hot D3cold
+[    0.957880] pci 0000:00:02.1: BAR 14: assigned [mem 0x40000000-0x400fffff]
+[    0.964751] pci 0000:00:02.1: BAR 15: assigned [mem 0x100000000-0x1000fffff
+64bit pref]
+[    0.972746] pci 0000:00:02.1: BAR 13: assigned [io  0x1000-0x1fff]
+[    0.978918] pci 0000:01:00.0: BAR 4: assigned [mem 0x100000000-0x100003fff
+64bit pref]
+[    0.986834] pci 0000:01:00.0: BAR 2: assigned [mem 0x40000000-0x40000fff 64bit]
+[    0.994141] pci 0000:01:00.0: BAR 0: assigned [io  0x1000-0x10ff]
+[    1.000229] pci 0000:00:02.1: PCI bridge to [bus 01]
+[    1.005184] pci 0000:00:02.1:   bridge window [io  0x1000-0x1fff]
+[    1.011267] pci 0000:00:02.1:   bridge window [mem 0x40000000-0x400fffff]
+[    1.018045] pci 0000:00:02.1:   bridge window [mem 0x100000000-0x1000fffff
+64bit pref]
+[    1.026555] vgaarb: loaded
+[    1.029330] SCSI subsystem initialized
+[    1.033135] libata version 3.00 loaded.
+[    1.037015] ACPI: bus type USB registered
+[    1.041052] usbcore: registered new interface driver usbfs
+[    1.046545] usbcore: registered new interface driver hub
+[    1.051878] usbcore: registered new device driver usb
+[    1.057097] ------------[ cut here ]------------
+[    1.061709] WARNING: CPU: 2 PID: 1 at
+../drivers/i2c/busses/i2c-designware-core.c:293 i2c_dw_clk_rate+0x3c/0x48
+[    1.071780] Modules linked in:
+[    1.074823]
+[    1.076303] CPU: 2 PID: 1 Comm: swapper/0 Not tainted
+4.9.0-00001-gd0a79eca7083 #6482
+[    1.084119] Hardware name: AMD Overdrive/Supercharger/Default string, BIOS
+ROD1002C 04/08/2016
+[    1.092717] task: ffff8003ecd08000 task.stack: ffff8003ecd10000
+[    1.098623] PC is at i2c_dw_clk_rate+0x3c/0x48
+[    1.103055] LR is at i2c_dw_init+0xfc/0x3c8
+[    1.107225] pc : [<ffff000008704e74>] lr : [<ffff0000087056b4>] pstate: 60000045
+[    1.114607] sp : ffff8003ecd13ba0
+[    1.117908] x29: ffff8003ecd13ba0 x28: 0000000000000000
+[    1.123211] x27: ffff000008d0d158 x26: ffff000008c50450
+[    1.128514] x25: ffff000008ca2798 x24: ffff000008c46b38
+[    1.133815] x23: 00000000431bde83 x22: 000000000000012c
+[    1.139116] x21: 00000000000707ae x20: 000000000000012c
+[    1.144417] x19: ffff8003eca7b018 x18: ffff00000806dfff
+[    1.149718] x17: 0000000000000000 x16: 0000000000000001
+[    1.155019] x15: ffff00000806dfff x14: efffffffefff0000
+[    1.160320] x13: 00000000030c0100 x12: 0000000000000018
+[    1.165621] x11: 0000000000000000 x10: 0101010101010101
+[    1.170922] x9 : 0000000000000000 x8 : ffff8003ecbfc880
+[    1.176223] x7 : 0000000000000000 x6 : 000000000000003f
+[    1.181524] x5 : 0000000000000000 x4 : 0000000000000000
+[    1.186825] x3 : ffff00000806d06c x2 : 0000000000000000
+[    1.192126] x1 : 0000000000000001 x0 : ffff000008e10000
+[    1.197426]
+
+[    1.198906] ---[ end trace f3069799ac0efee6 ]---
+[    1.203510] Call trace:
+[    1.205945] Exception stack(0xffff8003ecd139d0 to 0xffff8003ecd13b00)
+[    1.212372] 39c0:                                   ffff8003eca7b018
+0001000000000000
+[    1.220188] 39e0: ffff8003ecd13ba0 ffff000008704e74 ffff8003ecd13a90
+ffff000008451794
+[    1.228005] 3a00: ffff8003ecbfc818 0000000000000000 ffff8003ee8137a8
+ffff8003ecbfc818
+[    1.235821] 3a20: 0000000000000000 ffff8003ee8137a8 ffff000008ca2798
+ffff000008c50450
+[    1.243637] 3a40: ffff8003ecd13a90 ffff0000084517a0 0000000000000005
+0000000000000000
+[    1.251453] 3a60: ffff8003ee8137a8 ffff8003ecbfc818 ffff000008e10000
+0000000000000001
+[    1.259269] 3a80: 0000000000000000 ffff00000806d06c 0000000000000000
+0000000000000000
+[    1.267084] 3aa0: 000000000000003f 0000000000000000 ffff8003ecbfc880
+0000000000000000
+[    1.274900] 3ac0: 0101010101010101 0000000000000000 0000000000000018
+00000000030c0100
+[    1.282716] 3ae0: efffffffefff0000 ffff00000806dfff 0000000000000001
+0000000000000000
+[    1.290533] [<ffff000008704e74>] i2c_dw_clk_rate+0x3c/0x48
+[    1.296006] [<ffff0000087059b8>] i2c_dw_probe+0x38/0x250
+[    1.301305] [<ffff000008706410>] dw_i2c_plat_probe+0x1d0/0x430
+[    1.307127] [<ffff000008521a40>] platform_drv_probe+0x50/0xb8
+[    1.312861] [<ffff00000851ff2c>] driver_probe_device+0x1fc/0x2a8
+[    1.318854] [<ffff000008520084>] __driver_attach+0xac/0xb0
+[    1.324326] [<ffff00000851df48>] bus_for_each_dev+0x60/0xa0
+[    1.329886] [<ffff00000851f718>] driver_attach+0x20/0x28
+[    1.335185] [<ffff00000851f318>] bus_add_driver+0x1d0/0x238
+[    1.340744] [<ffff000008520848>] driver_register+0x60/0xf8
+[    1.346217] [<ffff000008521980>] __platform_driver_register+0x40/0x48
+[    1.352646] [<ffff000008c8fccc>] dw_i2c_init_driver+0x18/0x20
+[    1.358380] [<ffff0000080830b8>] do_one_initcall+0x38/0x128
+[    1.363941] [<ffff000008c50cf8>] kernel_init_freeable+0x1ac/0x250
+[    1.370023] [<ffff0000088ae008>] kernel_init+0x10/0x108
+[    1.375234] [<ffff000008082e80>] ret_from_fork+0x10/0x50
+[    1.381032] pps_core: LinuxPPS API ver. 1 registered
+[    1.385988] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo
+Giometti <giometti-k2GhghHVRtY@public.gmane.org>
+[    1.395116] PTP clock support registered
+[    1.399087] Registered efivars operations
+[    1.403091] Unable to handle kernel paging request at virtual address 22c4a238
+[    1.410303] pgd = ffff000008e69000
+[    1.413691] [22c4a238] *pgd=00000083ff223003[    1.417777] ,
+*pud=00000083ff222003
+, *pmd=0000000000000000[    1.423254]
+[    1.424734] Internal error: Oops: 86000006 [#1] PREEMPT SMP
+[    1.430292] Modules linked in:
+[    1.433336] CPU: 2 PID: 1 Comm: swapper/0 Tainted: G        W
+4.9.0-00001-gd0a79eca7083 #6482
+[    1.442367] Hardware name: AMD Overdrive/Supercharger/Default string, BIOS
+ROD1002C 04/08/2016
+[    1.450963] task: ffff8003ecd08000 task.stack: ffff8003ecd10000
+[    1.456869] PC is at 0x22c4a238
+[    1.460001] LR is at virt_efi_get_next_variable+0x88/0xc8
+[    1.465386] pc : [<0000000022c4a238>] lr : [<ffff00000875e7d0>] pstate: 20000045
+[    1.472766] sp : ffff8003ecd13c70
+[    1.476068] x29: ffff8003ecd13c70 x28: ffff000008e0bc68
+[    1.481369] x27: ffff8003ecd13dc0 x26: ffff000008c50450
+[    1.486670] x25: ffff000008e0b000 x24: 0000000000000001
+[    1.491971] x23: 0000000000000040 x22: ffff8003ecd13d30
+[    1.497271] x21: ffff8003eca32800 x20: ffff8003ecd13d28
+[    1.502571] x19: ffff000008e0bf20 x18: 0000000000000006
+[    1.507871] x17: 0000000000000000 x16: 0000000000000001
+[    1.513172] x15: ffff000008e2cc35 x14: 0000000000000127
+[    1.518472] x13: 0000000000000001 x12: 0000000005f5e0ff
+[    1.523773] x11: 0000000000000006 x10: 0000000000000128
+[    1.529073] x9 : 0000000000000000 x8 : ffff8003eca32c00
+[    1.534373] x7 : 0000000000000000 x6 : 0000000000000000
+[    1.539673] x5 : 0000000000000000 x4 : 0000000000000004
+[    1.544974] x3 : 0000000022c4a238 x2 : ffff8003ecd13d30
+[    1.550274] x1 : ffff8003eca32800 x0 : ffff8003ecd13d28
+[    1.555574]
+[    1.557053] Process swapper/0 (pid: 1, stack limit = 0xffff8003ecd10020)
+[    1.563740] Stack: (0xffff8003ecd13c70 to 0xffff8003ecd14000)
+[    1.569472] 3c60:                                   ffff8003ecd13cb0
+ffff00000875c8ac
+[    1.577288] 3c80: ffff8003eca32800 ffff000008e58000 ffff8003ecd13dc0
+0000000000000400
+[    1.585104] 3ca0: ffff000008e58568 ffff8003ecd13d20 ffff8003ecd13d60
+ffff000008c930fc
+[    1.592920] 3cc0: 0000000000000000 ffff000008e58000 ffff000008d5bf88
+ffff8003ecd13dc0
+[    1.600735] 3ce0: ffff000008e25000 ffff000008c46b38 ffff000008ca2798
+ffff000008c50450
+[    1.608551] 3d00: ffff000008d0d1b0 0000000000000000 ffff000008e0bc68
+ffff000008c92d30
+[    1.616367] 3d20: ffff8003ecd13d60 0000000000000400 ffff8003ecd10000
+ffff000008e58000
+[    1.624183] 3d40: ffff000008d5bf88 0000000000000004 ffff000008e25000
+ffff000008e58000
+[    1.631998] 3d60: ffff8003ecd13dd0 ffff0000080830b8 ffff8003ecd10000
+ffff000008c93028
+[    1.639813] 3d80: 0000000000000000 0000000000000004 ffff000008e25000
+ffff000008c46b38
+[    1.647628] 3da0: ffff000008ca2798 ffff000008c91bdc ffff8003ecd13dd0
+ffff0000080830b8
+[    1.655444] 3dc0: ffff8003ecd13dc0 ffff8003ecd13dc0 ffff8003ecd13e40
+ffff000008c50cf8
+[    1.663259] 3de0: 000000000000011e ffff000008e25000 ffff000008ca2840
+0000000000000004
+[    1.671074] 3e00: ffff000008d0cf00 0000000000000000 ffff000008e25000
+ffff000008b2da98
+[    1.678890] 3e20: 0000000400000004 0000000000000000 0000000000000000
+ffff000008c46b38
+[    1.686705] 3e40: ffff8003ecd13ea0 ffff0000088ae008 ffff0000088adff8
+0000000000000000
+[    1.694520] 3e60: 0000000000000000 0000000000000000 0000000000000000
+0000000000000000
+[    1.702336] 3e80: 0000000000000000 0000000000000000 0000000000000000
+0000000000000000
+[    1.710151] 3ea0: 0000000000000000 ffff000008082e80 ffff0000088adff8
+0000000000000000
+[    1.717966] 3ec0: 0000000000000000 0000000000000000 0000000000000000
+0000000000000000
+[    1.725781] 3ee0: 0000000000000000 0000000000000000 0000000000000000
+0000000000000000
+[    1.733597] 3f00: 0000000000000000 0000000000000000 0000000000000000
+0000000000000000
+[    1.741412] 3f20: 0000000000000000 0000000000000000 0000000000000000
+0000000000000000
+[    1.749227] 3f40: 0000000000000000 0000000000000000 0000000000000000
+0000000000000000
+[    1.757042] 3f60: 0000000000000000 0000000000000000 0000000000000000
+0000000000000000
+[    1.764858] 3f80: 0000000000000000 0000000000000000 0000000000000000
+0000000000000000
+[    1.772673] 3fa0: 0000000000000000 0000000000000000 0000000000000000
+0000000000000000
+[    1.780488] 3fc0: 0000000000000000 0000000000000005 0000000000000000
+0000000000000000
+[    1.788304] 3fe0: 0000000000000000 0000000000000000 0000000000000000
+0000000000000000
+[    1.796118] Call trace:
+[    1.798551] Exception stack(0xffff8003ecd13aa0 to 0xffff8003ecd13bd0)
+[    1.804978] 3aa0: ffff000008e0bf20 0001000000000000 ffff8003ecd13c70
+0000000022c4a238
+[    1.812794] 3ac0: ffff000008e2c6b8 0000000000000000 0000000000000000
+ffff8003ecd13b20
+[    1.820609] 3ae0: ffff0000080ff730 ffff8003ecd13b20 ffff8003ecd13b20
+ffff0000080ff7a4
+[    1.828425] 3b00: ffff8003ecd13b20 ffff0000080ff7dc ffff000008e2c000
+ffff000008e2c6b8
+[    1.836240] 3b20: ffff8003ecd13ba0 ffff0000080ffcfc ffff000008e2c000
+ffff000008d6e398
+[    1.844055] 3b40: ffff8003ecd13d28 ffff8003eca32800 ffff8003ecd13d30
+0000000022c4a238
+[    1.851871] 3b60: 0000000000000004 0000000000000000 0000000000000000
+0000000000000000
+[    1.859686] 3b80: ffff8003eca32c00 0000000000000000 0000000000000128
+0000000000000006
+[    1.867502] 3ba0: 0000000005f5e0ff 0000000000000001 0000000000000127
+ffff000008e2cc35
+[    1.875316] 3bc0: 0000000000000001 0000000000000000
+[    1.880181] [<0000000022c4a238>] 0x22c4a238
+[    1.884352] [<ffff00000875c8ac>] efivar_init+0x8c/0x348
+[    1.889565] [<ffff000008c930fc>] efisubsys_init+0xd4/0x270
+[    1.895037] [<ffff0000080830b8>] do_one_initcall+0x38/0x128
+[    1.900596] [<ffff000008c50cf8>] kernel_init_freeable+0x1ac/0x250
+[    1.906676] [<ffff0000088ae008>] kernel_init+0x10/0x108
+[    1.911887] [<ffff000008082e80>] ret_from_fork+0x10/0x50
+[    1.917187] Code: bad PC value
+[    1.920238] ---[ end trace f3069799ac0efee7 ]---
+[    1.924847] note: swapper/0[1] exited with preempt_count 2
+[    1.930329] Kernel panic - not syncing: Attempted to kill init!
+exitcode=0x0000000b
+[    1.930329]
+[    1.939447] SMP: stopping secondary CPUs
+[    1.943361] ---[ end Kernel panic - not syncing: Attempted to kill init!
+exitcode=0x0000000b
+[    1.943361]
+
+
+
+[1] efi=debug output for v4.9.0:defconfig
+[    0.000000] efi:   0x0000e1050000-0x0000e105ffff [Memory Mapped I/O  |RUN|  |
+ |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x0000e1300000-0x0000e1300fff [Memory Mapped I/O  |RUN|  |
+ |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x0000e8200000-0x0000e827ffff [Memory Mapped I/O  |RUN|  |
+ |  |  |  |  |   |  |  |  |UC]
+[    0.000000] efi:   0x008000000000-0x008001e7ffff [Runtime Data       |RUN|  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x008001e80000-0x008001ffffff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x008002000000-0x008002e7ffff [Loader Data        |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x008002e80000-0x00801fdfffff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x00801fe00000-0x00801fe0ffff [Loader Data        |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x00801fe10000-0x00801fffbfff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x00801fffc000-0x00801fffffff [Boot Data          |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x008020000000-0x0083f0ffffff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083f1000000-0x0083f101ffff [Boot Data          |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083f1020000-0x0083fb33afff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fb33b000-0x0083fc12dfff [Loader Code        |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fc12e000-0x0083fced3fff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fced4000-0x0083fced4fff [Loader Data        |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fced5000-0x0083fcff0fff [Loader Code        |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fcff1000-0x0083fea67fff [Boot Data          |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083fea68000-0x0083febd3fff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083febd4000-0x0083ff186fff [Boot Code          |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff187000-0x0083ff1b6fff [Reserved           |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff1b7000-0x0083ff1c4fff [ACPI Reclaim Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff1c5000-0x0083ff20ffff [Conventional Memory|   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff210000-0x0083ff224fff [Loader Data        |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff225000-0x0083ff226fff [ACPI Memory NVS    |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff227000-0x0083ff34bfff [Runtime Data       |RUN|  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ff34c000-0x0083ffe42fff [Runtime Code       |RUN|  |
+ |  |  |  |  |   |WB|WT|WC|UC]
+[    0.000000] efi:   0x0083ffe43000-0x0083ffffffff [Boot Data          |   |  |
+ |  |  |  |  |   |WB|WT|WC|UC]
