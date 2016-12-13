@@ -1,156 +1,78 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3] efi: prune invalid memory map entries
-Date: Tue, 13 Dec 2016 10:25:10 +0000
-Message-ID: <1481624710-20892-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 1/4] efi: efi_print_memmap(): Call out invalid entries in
+ the memory map early.
+Date: Tue, 13 Dec 2016 10:09:47 -0500
+Message-ID: <20161213150946.2uwupnebehhahnx7@redhat.com>
+References: <20161207213830.15984-1-pjones@redhat.com>
+ <CAKv+Gu9Qs=bEee_Ks6ycsVEyb_W4bFB5YzGYXPXAm5f7QrtDNQ@mail.gmail.com>
+ <20161212234030.3mu4bv5bjm5ysz2d@redhat.com>
+ <CAKv+Gu9iGOsytENrEvOsHx81exxexbS_NdtTmL3WOsQr6B4_9Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu9iGOsytENrEvOsHx81exxexbS_NdtTmL3WOsQr6B4_9Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+On Tue, Dec 13, 2016 at 09:19:26AM +0000, Ard Biesheuvel wrote:
+> 
+> > Though given the first patch, it's not clear that the second or fourth
+> > one are really needed any more.  They'd only protect against bad entries
+> > we've added ourselves.  But I've left them intact until we've discussed
+> > this further.
+> >
+> > One question - we should probably be doing this on non-x86 as well.
+> > What's the best way to do that?
+> >
+> 
+> I don't think there is any point to going out of our way to recheck
+> for bogus entries if we've already removed them from our copy of the
+> memory map.
 
-Some machines, such as the Lenovo ThinkPad W541 with firmware GNET80WW
-(2.28), include memory map entries with phys_addr=0x0 and num_pages=0.
+Yeah, that sounds reasonable enough.  We probably should still do the
+third patch in the series, btw.  I wrote that one before I realized
+these were 0-page maps instead of U64_MAX-page maps, and the end
+calculations underrun if the num_pages value is 0.  So the result was
+that the 0-page entries all had U64_MAX sizes (and thus spanned all of
+memory), but I think it's still relevant even once we've made those
+entries not exist.
 
-Currently the log output for this case (with efi=debug) looks like:
+AFAICS if there's ever a second entry that matches the same address
+efi_memmap_insert() will split more times than efi_memmap_split_count()
+indicates, and that's clearly not as intended.  And I can easily believe
+in a situation where some misguided firmware vendor has a call that says
+RegisterConfigurationTable(addr, size) that creates a new
+EfiRuntimeServicesData memory map entry, but refuses to split up an
+entry that's EfiACPIMemoryNVS when they call it on ACPI table data.
+It's just too easy to get wrong.
 
-[    0.000000] efi: mem45: [Reserved           |   |  |  |  |  |  |  |  |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
+I'm also really thinking the three big clauses in efi_memmap_insert()
+should have an "else" stuck between each of them, since the case of
+split_count=3 is clearly the middle one, and it's not supposed to
+reflect that the first and third case might each fire.   But since the
+bug can trigger over multiple entries, and we have to walk the whole
+table each time, we need to ensure it will only trigger once across the
+whole run.
 
-This is clearly wrong, and also not as informative as it could be.  This
-patch changes it so that if we find obviously invalid memory map
-entries, we print an error and those entries.  It also detects the
-display of the address range calculation overflow, so the new output is:
+And, you know, it's not like any of us believe we won't see more memory
+maps with errors in the future.
 
-[    0.000000] efi: [Firmware Bug]: Invalid EFI memory map entries:
-[    0.000000] efi: mem45: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0x0000000000000000] (invalid)
+> As far as ARM/arm64 are concerned: we are still in normative mode, and
+> firmware that breaks booting on Linux is unlikely to ship. Instead, we
+> should probably push for a clarification in the spec that the memory
+> map should not contain entries with a zero page count. (Other bogus
+> entries are already banned implicitly since they cannot accurately
+> reflect reality)
 
-It also detects memory map sizes that would overflow the physical
-address, for example phys_addr=0xfffffffffffff000 and
-num_pages=0x0200000000000001, and prints:
+Fair enough regarding ARM - must be nice ;)  I'll write up an ECR for
+USWG to handle the rest of the world.  I'm going to add language to
+explicitly ban the impossible values as well - belt and suspenders, etc.
+It should be pretty straightforward.
 
-[    0.000000] efi: [Firmware Bug]: Invalid EFI memory map entries:
-[    0.000000] efi: mem45: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[phys_addr=0xfffffffffffff000-0x20ffffffffffffffff] (invalid)
+Thanks!
 
-It then removes these entries from the memory map.
-
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-[ardb: refactor for clarity with no functional changes, avoid PAGE_SHIFT]
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
-
-I took the liberty of refactoring the code because I found it difficult
-to understand. No functional changes are intended, although I couldn't
-figure out if the memcpy() in the original code is (a) correct, and (b)
-attempts to copy multiple entries at once.
-
-Also, pr_warn sounds more appropriate for complaining about broken firmware,
-but perhaps this is archite-cultural thing as well.
-
- arch/x86/platform/efi/efi.c | 70 ++++++++++++++++++++
- include/linux/efi.h         |  1 +
- 2 files changed, 71 insertions(+)
-
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index bf99aa7005eb..0a1550b82beb 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -210,6 +210,74 @@ int __init efi_memblock_x86_reserve_range(void)
- 	return 0;
- }
- 
-+#define OVERFLOW_ADDR_SHIFT	(64 - EFI_PAGE_SHIFT)
-+#define OVERFLOW_ADDR_MASK	(U64_MAX << OVERFLOW_ADDR_SHIFT)
-+#define U64_HIGH_BIT		(~(U64_MAX >> 1))
-+
-+static bool __init efi_memmap_entry_valid(const efi_memory_desc_t *md, int i)
-+{
-+	static __initdata bool once = true;
-+	u64 end = (md->num_pages << EFI_PAGE_SHIFT) + md->phys_addr - 1;
-+	u64 end_hi = 0;
-+	char buf[64];
-+
-+	if (md->num_pages == 0) {
-+		end = 0;
-+	} else if (md->num_pages > EFI_PAGES_MAX ||
-+		   EFI_PAGES_MAX - md->num_pages <
-+		   (md->phys_addr >> EFI_PAGE_SHIFT)) {
-+		end_hi = (md->num_pages & OVERFLOW_ADDR_MASK)
-+			>> OVERFLOW_ADDR_SHIFT;
-+
-+		if ((md->phys_addr & U64_HIGH_BIT) && !(end & U64_HIGH_BIT))
-+			end_hi += 1;
-+	} else {
-+		return true;
-+	}
-+
-+	if (once) {
-+		pr_warn(FW_BUG "Invalid EFI memory map entries:\n");
-+		once = false;
-+	}
-+
-+	if (end_hi) {
-+		pr_warn("mem%02u: %s range=[0x%016llx-0x%llx%016llx] (invalid)\n",
-+			i, efi_md_typeattr_format(buf, sizeof(buf), md),
-+			md->phys_addr, end_hi, end);
-+	} else {
-+		pr_warn("mem%02u: %s range=[0x%016llx-0x%016llx] (invalid)\n",
-+			i, efi_md_typeattr_format(buf, sizeof(buf), md),
-+			md->phys_addr, end);
-+	}
-+	return false;
-+}
-+
-+static void __init efi_clean_memmap(void)
-+{
-+	efi_memory_desc_t *out = efi.memmap.map;
-+	const efi_memory_desc_t *in = out;
-+	const efi_memory_desc_t *end = efi.memmap.map_end;
-+	int i, n_removal;
-+
-+	for (i = n_removal = 0; in < end; i++) {
-+		if (efi_memmap_entry_valid(in, i)) {
-+			if (out != in)
-+				memcpy(out, in, efi.memmap.desc_size);
-+			out = (void *)out + efi.memmap.desc_size;
-+		} else {
-+			n_removal++;
-+		}
-+		in = (void *)in + efi.memmap.desc_size;
-+	}
-+
-+	if (n_removal > 0) {
-+		u64 size = efi.memmap.nr_map - n_removal;
-+
-+		pr_warn("Removing %d invalid memory map entries.\n", n_removal);
-+		efi_memmap_install(efi.memmap.phys_map, size);
-+	}
-+}
-+
- void __init efi_print_memmap(void)
- {
- 	efi_memory_desc_t *md;
-@@ -472,6 +540,8 @@ void __init efi_init(void)
- 		}
- 	}
- 
-+	efi_clean_memmap();
-+
- 	if (efi_enabled(EFI_DBG))
- 		efi_print_memmap();
- }
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 2d089487d2da..fda79cdf9f10 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -103,6 +103,7 @@ typedef	struct {
- 
- #define EFI_PAGE_SHIFT		12
- #define EFI_PAGE_SIZE		(1UL << EFI_PAGE_SHIFT)
-+#define EFI_PAGES_MAX		(U64_MAX >> EFI_PAGE_SHIFT)
- 
- typedef struct {
- 	u32 type;
 -- 
-2.7.4
+  Peter
