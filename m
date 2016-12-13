@@ -1,53 +1,46 @@
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 4/4] efi: efi_memmap_insert(): don't split regions with invalid sizes.
-Date: Mon, 12 Dec 2016 18:42:31 -0500
-Message-ID: <20161212234231.27256-4-pjones@redhat.com>
-References: <20161212234030.3mu4bv5bjm5ysz2d@redhat.com>
- <20161212234231.27256-1-pjones@redhat.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH 0/4] UEFI: EFI_MEMORY_ATTRIBUTES_TABLE support for x86
+Date: Tue, 13 Dec 2016 14:47:26 +0800
+Message-ID: <20161213064726.GF2462@linux-l9pv.suse>
+References: <1481051763-8705-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <20161207135646.GC17720@codeblueprint.co.uk>
+ <1481137266.15606.131.camel@intel.com>
+ <20161207200408.GC5462@codeblueprint.co.uk>
+ <1481141608.15606.133.camel@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161212234231.27256-1-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1481141608.15606.133.camel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Some machines, such as the Lenovo ThinkPad W541 with firmware GNET80WW
-(2.28), include memory map entries with phys_addr=0x0 and num_pages=0.
+Hi Sai,
 
-If we're inserting a new memmap and we find a map that is either 0
-pages or all of possible memory (or more!), skip it.  When a map exists
-at 0 that's 0 pages, the "end" math here winds up making *every* address
-within the range, and so it'll try to split that entry, and things go
-poorly after that.  The same would be true if num_pages were U64_MAX or
-(U64_MAX >> EFI_PAGE_SHIFT) (i.e. all bits set as a size in bytes, but
-then shifted to page size to fill the table in).
+On Wed, Dec 07, 2016 at 12:13:28PM -0800, Sai Praneeth Prakhya wrote:
+> On Wed, 2016-12-07 at 20:04 +0000, Matt Fleming wrote:
+> > On Wed, 07 Dec, at 11:01:06AM, Sai Praneeth Prakhya wrote:
+> > > 
+> > > Thanks Matt!
+> > > 
+> > > Would you like to see a new version of these patch series addressing
+> > > your comments? Like
+> > > 1. Dropping of patch #4
+> > > 2. Adding Reviewed-by tag of Joey (Sorry for that)
+> > > 3. This time with correct version number
+> > 
+> > No need, they're already in the 'next' branch of the EFI tree.
+> 
+> Great! Just saw the patches in 'next' branch.
+> Thanks again Matt.
+> 
+> Regards,
+> Sai
+> 
+>
 
-Don't even try to split those entries, they're nonsense.
+Thanks for your patches to enable this function for x86.
 
-Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- drivers/firmware/efi/memmap.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
-
-diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
-index d3ba722..4503971 100644
---- a/drivers/firmware/efi/memmap.c
-+++ b/drivers/firmware/efi/memmap.c
-@@ -244,6 +244,15 @@ void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
- 		/* copy original EFI memory descriptor */
- 		memcpy(new, old, old_memmap->desc_size);
- 		md = new;
-+		if (md->num_pages == 0 ||
-+		    md->num_pages > EFI_PAGES_MAX ||
-+		    EFI_PAGES_MAX - md->num_pages <
-+		    (md->phys_addr >> EFI_PAGE_SHIFT)) {
-+			pr_warn("%s: Skipping absurd memory map entry for 0x%llx pages at 0x%016llx.\n",
-+				__func__, md->num_pages, md->phys_addr);
-+			continue;
-+		}
-+
- 		start = md->phys_addr;
- 		end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1;
- 
--- 
-2.9.3
+Joey Lee 
