@@ -1,57 +1,221 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH v1 2/2] firmware: dmi_scan: Pass dmi_entry_point to
- kexec'ed kernel
-Date: Sat, 17 Dec 2016 18:57:21 +0800
-Message-ID: <20161217105721.GB6922@dhcp-128-65.nay.redhat.com>
-References: <20161202195416.58953-1-andriy.shevchenko@linux.intel.com>
- <20161202195416.58953-3-andriy.shevchenko@linux.intel.com>
- <20161215122856.7d24b7a8@endymion>
- <20161216023213.GA4505@dhcp-128-65.nay.redhat.com>
- <1481890738.9552.70.camel@linux.intel.com>
- <20161216143330.69e9c8ee@endymion>
+From: James Morse <james.morse@arm.com>
+Subject: [PATCH v2] efi/libstub: arm*: Pass latest memory map to the kernel
+Date: Mon, 19 Dec 2016 14:24:19 +0000
+Message-ID: <20161219142419.16780-1-james.morse@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20161216143330.69e9c8ee@endymion>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jean Delvare <jdelvare@suse.de>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, kexec@lists.infradead.org, Mika Westerberg <mika.westerberg@linux.intel.com>, Eric Biederman <ebiederm@xmission.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-efi@vger.kernel.org
+Cc: matt@codeblueprint.co.uk, jhugo@codeaurora.org, linux-arm-kernel@lists.infradead.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Ccing efi people.
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-On 12/16/16 at 02:33pm, Jean Delvare wrote:
-> On Fri, 16 Dec 2016 14:18:58 +0200, Andy Shevchenko wrote:
-> > On Fri, 2016-12-16 at 10:32 +0800, Dave Young wrote:
-> > > On 12/15/16 at 12:28pm, Jean Delvare wrote:
-> > > > I am no kexec expert but this confuses me. Shouldn't the second
-> > > > kernel have access to the EFI systab as the first kernel does? It
-> > > > includes many more pointers than just ACPI and DMI tables, and it
-> > > > would seem inconvenient to have to pass all these addresses
-> > > > individually explicitly.
-> > > 
-> > > Yes, in modern linux kernel, kexec has the support for EFI, I think it
-> > > should work naturally at least in x86_64.
-> > 
-> > Thanks for this good news!
-> > 
-> > Unfortunately Intel Galileo is 32-bit platform.
-> 
-> If it was done for X86_64 then maybe it can be generalized to X86?
+As reported by James, the current libstub code involving the annotated
+memory map only works somewhat correctly by accident, due to the fact
+that a pool allocation happens to be reused immediately, retaining its
+former contents.
 
-For X86_64, we have a new way for efi runtime memmory mapping, in i386
-code it still use old ioremap way. It is impossible to use same way as
-the X86_64 since the virtual address space is limited.
+Instead of juggling memory maps, which makes the code more complex than
+it needs to be, simply put a placholder value into the FDT, and only
+write the actual value after ExitBootServices() has been called.
 
-But maybe for 32bit, kexec kernel can run in physical mode, but I'm not
-sure, I would suggest Andy to do a test first with efi=noruntime for
-kexec 2nd kernel.
+Reported-by: James Morse <james.morse@arm.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+[Update mmap-size too, remove updated_fdt()s unused params and header entry]
+Signed-off-by: James Morse <james.morse@arm.com>
+---
+Hi Ard,
 
-Thanks
-Dave
+This is a v2 of your patch that updates the mmap-size too. This solves the
+truncated memmap problem I saw with v1 on Seattle.
 
-> 
-> -- 
-> Jean Delvare
-> SUSE L3 Support
+The original patch was CC-stable, so I think this should also have:
+Cc: <stable@vger.kernel.org>
+Fixes: ed9cc156c42f ("efi/libstub: Use efi_exit_boot_services() in FDT")
+
+
+Thanks,
+
+James
+
+ drivers/firmware/efi/libstub/efistub.h |  8 ----
+ drivers/firmware/efi/libstub/fdt.c     | 75 +++++++++++++++++++++-------------
+ 2 files changed, 47 insertions(+), 36 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index ee49cd23ee63..fac67992bede 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -30,14 +30,6 @@ efi_status_t efi_file_close(void *handle);
+ 
+ unsigned long get_dram_base(efi_system_table_t *sys_table_arg);
+ 
+-efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+-			unsigned long orig_fdt_size,
+-			void *fdt, int new_fdt_size, char *cmdline_ptr,
+-			u64 initrd_addr, u64 initrd_size,
+-			efi_memory_desc_t *memory_map,
+-			unsigned long map_size, unsigned long desc_size,
+-			u32 desc_ver);
+-
+ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 					    void *handle,
+ 					    unsigned long *new_fdt_addr,
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index a6a93116a8f0..6d33d709f6b3 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -16,13 +16,11 @@
+ 
+ #include "efistub.h"
+ 
+-efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+-			unsigned long orig_fdt_size,
+-			void *fdt, int new_fdt_size, char *cmdline_ptr,
+-			u64 initrd_addr, u64 initrd_size,
+-			efi_memory_desc_t *memory_map,
+-			unsigned long map_size, unsigned long desc_size,
+-			u32 desc_ver)
++static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
++			       unsigned long orig_fdt_size,
++			       void *fdt, int new_fdt_size, char *cmdline_ptr,
++			       u64 initrd_addr, u64 initrd_size,
++			       unsigned long desc_size, u32 desc_ver)
+ {
+ 	int node, num_rsv;
+ 	int status;
+@@ -101,13 +99,13 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 	if (status)
+ 		goto fdt_set_fail;
+ 
+-	fdt_val64 = cpu_to_fdt64((u64)(unsigned long)memory_map);
++	fdt_val64 = U64_MAX; /* placeholder */
+ 	status = fdt_setprop(fdt, node, "linux,uefi-mmap-start",
+ 			     &fdt_val64,  sizeof(fdt_val64));
+ 	if (status)
+ 		goto fdt_set_fail;
+ 
+-	fdt_val32 = cpu_to_fdt32(map_size);
++	fdt_val32 = U32_MAX; /* placeholder */
+ 	status = fdt_setprop(fdt, node, "linux,uefi-mmap-size",
+ 			     &fdt_val32,  sizeof(fdt_val32));
+ 	if (status)
+@@ -148,6 +146,32 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 	return EFI_LOAD_ERROR;
+ }
+ 
++static efi_status_t update_fdt_memmap(void *fdt, u64 memmap, u32 map_size)
++{
++	int node = fdt_path_offset(fdt, "/chosen");
++	efi_status_t status;
++
++	if (node < 0)
++		return EFI_LOAD_ERROR;
++
++	memmap = cpu_to_fdt64(memmap);
++	status = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-start",
++				     &memmap, sizeof(memmap));
++
++	if (status)
++		return EFI_LOAD_ERROR;
++
++	map_size = cpu_to_fdt32(map_size);
++	status = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-size",
++				     &map_size, sizeof(map_size));
++
++	if (status)
++		return EFI_LOAD_ERROR;
++
++
++	return EFI_SUCCESS;
++}
++
+ #ifndef EFI_FDT_ALIGN
+ #define EFI_FDT_ALIGN EFI_PAGE_SIZE
+ #endif
+@@ -243,20 +267,11 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 			goto fail;
+ 		}
+ 
+-		/*
+-		 * Now that we have done our final memory allocation (and free)
+-		 * we can get the memory map key  needed for
+-		 * exit_boot_services().
+-		 */
+-		status = efi_get_memory_map(sys_table, &map);
+-		if (status != EFI_SUCCESS)
+-			goto fail_free_new_fdt;
+-
+ 		status = update_fdt(sys_table,
+ 				    (void *)fdt_addr, fdt_size,
+ 				    (void *)*new_fdt_addr, new_fdt_size,
+ 				    cmdline_ptr, initrd_addr, initrd_size,
+-				    memory_map, map_size, desc_size, desc_ver);
++				    desc_size, desc_ver);
+ 
+ 		/* Succeeding the first time is the expected case. */
+ 		if (status == EFI_SUCCESS)
+@@ -266,20 +281,16 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 			/*
+ 			 * We need to allocate more space for the new
+ 			 * device tree, so free existing buffer that is
+-			 * too small.  Also free memory map, as we will need
+-			 * to get new one that reflects the free/alloc we do
+-			 * on the device tree buffer.
++			 * too small.
+ 			 */
+ 			efi_free(sys_table, new_fdt_size, *new_fdt_addr);
+-			sys_table->boottime->free_pool(memory_map);
+ 			new_fdt_size += EFI_PAGE_SIZE;
+ 		} else {
+ 			pr_efi_err(sys_table, "Unable to construct new device tree.\n");
+-			goto fail_free_mmap;
++			goto fail_free_new_fdt;
+ 		}
+ 	}
+ 
+-	sys_table->boottime->free_pool(memory_map);
+ 	priv.runtime_map = runtime_map;
+ 	priv.runtime_entry_count = &runtime_entry_count;
+ 	status = efi_exit_boot_services(sys_table, handle, &map, &priv,
+@@ -288,6 +299,17 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 	if (status == EFI_SUCCESS) {
+ 		efi_set_virtual_address_map_t *svam;
+ 
++		status = update_fdt_memmap((void *)*new_fdt_addr,
++					   (u64)memory_map, (u32)map_size);
++		if (status != EFI_SUCCESS) {
++			/*
++			 * The kernel won't get far without the memory map, but
++			 * may still be able to print something meaningful so
++			 * return success here.
++			 */
++			return EFI_SUCCESS;
++		}
++
+ 		/* Install the new virtual address map */
+ 		svam = sys_table->runtime->set_virtual_address_map;
+ 		status = svam(runtime_entry_count * desc_size, desc_size,
+@@ -319,9 +341,6 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 
+ 	pr_efi_err(sys_table, "Exit boot services failed.\n");
+ 
+-fail_free_mmap:
+-	sys_table->boottime->free_pool(memory_map);
+-
+ fail_free_new_fdt:
+ 	efi_free(sys_table, new_fdt_size, *new_fdt_addr);
+ 
+-- 
+2.10.1
