@@ -1,67 +1,101 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [efi:urgent 1/1] drivers/firmware/efi/libstub/fdt.c:303:9:
- warning: cast from pointer to integer of different size
-Date: Tue, 20 Dec 2016 11:39:56 +0000
-Message-ID: <20161220113956.GB2225@codeblueprint.co.uk>
-References: <201612200741.F41hYqms%fengguang.wu@intel.com>
+Subject: Re: [PATCH v3] efi: prune invalid memory map entries
+Date: Tue, 20 Dec 2016 12:53:45 +0000
+Message-ID: <20161220125345.GC2225@codeblueprint.co.uk>
+References: <1481624710-20892-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <201612200741.F41hYqms%fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1481624710-20892-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: kbuild test robot <fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, kbuild-all-JC7UmRfGjtg@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 20 Dec, at 07:04:42AM, Fengguang Wu wrote:
-> tree:   https://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git urgent
-> head:   5615742edc64c99bbdec5e98bf9d9d872756d99c
-> commit: 5615742edc64c99bbdec5e98bf9d9d872756d99c [1/1] efi/libstub: arm*: Pass latest memory map to the kernel
-> config: arm-multi_v7_defconfig (attached as .config)
-> compiler: arm-linux-gnueabi-gcc (Debian 6.1.1-9) 6.1.1 20160705
-> reproduce:
->         wget https://git.kernel.org/cgit/linux/kernel/git/wfg/lkp-tests.git/plain/sbin/make.cross -O ~/bin/make.cross
->         chmod +x ~/bin/make.cross
->         git checkout 5615742edc64c99bbdec5e98bf9d9d872756d99c
->         # save the attached .config to linux build tree
->         make.cross ARCH=arm 
+On Tue, 13 Dec, at 10:25:10AM, Ard Biesheuvel wrote:
+> From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 > 
-> All warnings (new ones prefixed by >>):
+> Some machines, such as the Lenovo ThinkPad W541 with firmware GNET80WW
+> (2.28), include memory map entries with phys_addr=0x0 and num_pages=0.
 > 
->    drivers/firmware/efi/libstub/fdt.c: In function 'allocate_new_fdt_and_exit_boot':
-> >> drivers/firmware/efi/libstub/fdt.c:303:9: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
->             (u64)memory_map, (u32)map_size);
->             ^
+> Currently the log output for this case (with efi=debug) looks like:
 > 
-> vim +303 drivers/firmware/efi/libstub/fdt.c
+> [    0.000000] efi: mem45: [Reserved           |   |  |  |  |  |  |  |  |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
 > 
->    287				new_fdt_size += EFI_PAGE_SIZE;
->    288			} else {
->    289				pr_efi_err(sys_table, "Unable to construct new device tree.\n");
->    290				goto fail_free_new_fdt;
->    291			}
->    292		}
->    293	
->    294		priv.runtime_map = runtime_map;
->    295		priv.runtime_entry_count = &runtime_entry_count;
->    296		status = efi_exit_boot_services(sys_table, handle, &map, &priv,
->    297						exit_boot_func);
->    298	
->    299		if (status == EFI_SUCCESS) {
->    300			efi_set_virtual_address_map_t *svam;
->    301	
->    302			status = update_fdt_memmap((void *)*new_fdt_addr,
->  > 303						   (u64)memory_map, (u32)map_size);
->    304			if (status != EFI_SUCCESS) {
->    305				/*
->    306				 * The kernel won't get far without the memory map, but
->    307				 * may still be able to print something meaningful so
->    308				 * return success here.
->    309				 */
->    310				return EFI_SUCCESS;
->    311			}
+> This is clearly wrong, and also not as informative as it could be.  This
+> patch changes it so that if we find obviously invalid memory map
+> entries, we print an error and those entries.  It also detects the
+> display of the address range calculation overflow, so the new output is:
 > 
+> [    0.000000] efi: [Firmware Bug]: Invalid EFI memory map entries:
+> [    0.000000] efi: mem45: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0x0000000000000000] (invalid)
+> 
+> It also detects memory map sizes that would overflow the physical
+> address, for example phys_addr=0xfffffffffffff000 and
+> num_pages=0x0200000000000001, and prints:
+> 
+> [    0.000000] efi: [Firmware Bug]: Invalid EFI memory map entries:
+> [    0.000000] efi: mem45: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[phys_addr=0xfffffffffffff000-0x20ffffffffffffffff] (invalid)
+> 
+> It then removes these entries from the memory map.
+> 
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> [ardb: refactor for clarity with no functional changes, avoid PAGE_SHIFT]
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+> 
+> I took the liberty of refactoring the code because I found it difficult
+> to understand. No functional changes are intended, although I couldn't
+> figure out if the memcpy() in the original code is (a) correct, and (b)
+> attempts to copy multiple entries at once.
+> 
+> Also, pr_warn sounds more appropriate for complaining about broken firmware,
+> but perhaps this is archite-cultural thing as well.
+> 
+>  arch/x86/platform/efi/efi.c | 70 ++++++++++++++++++++
+>  include/linux/efi.h         |  1 +
+>  2 files changed, 71 insertions(+)
+> 
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index bf99aa7005eb..0a1550b82beb 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -210,6 +210,74 @@ int __init efi_memblock_x86_reserve_range(void)
+>  	return 0;
+>  }
+>  
+> +#define OVERFLOW_ADDR_SHIFT	(64 - EFI_PAGE_SHIFT)
+> +#define OVERFLOW_ADDR_MASK	(U64_MAX << OVERFLOW_ADDR_SHIFT)
+> +#define U64_HIGH_BIT		(~(U64_MAX >> 1))
+> +
+> +static bool __init efi_memmap_entry_valid(const efi_memory_desc_t *md, int i)
+> +{
+> +	static __initdata bool once = true;
+> +	u64 end = (md->num_pages << EFI_PAGE_SHIFT) + md->phys_addr - 1;
+> +	u64 end_hi = 0;
+> +	char buf[64];
+> +
+> +	if (md->num_pages == 0) {
+> +		end = 0;
+> +	} else if (md->num_pages > EFI_PAGES_MAX ||
+> +		   EFI_PAGES_MAX - md->num_pages <
+> +		   (md->phys_addr >> EFI_PAGE_SHIFT)) {
+> +		end_hi = (md->num_pages & OVERFLOW_ADDR_MASK)
+> +			>> OVERFLOW_ADDR_SHIFT;
+> +
+> +		if ((md->phys_addr & U64_HIGH_BIT) && !(end & U64_HIGH_BIT))
+> +			end_hi += 1;
+> +	} else {
+> +		return true;
+> +	}
+> +
+> +	if (once) {
+> +		pr_warn(FW_BUG "Invalid EFI memory map entries:\n");
+> +		once = false;
+> +	}
 
-James, could you take care of fixing this up? You need to cast
-memory_map to unsigned long before u64 on ARM.
+Maybe use pr_warn_once() here instead of rolling your own 'once' flag?
+
+Otherwise this looks fine to me.
