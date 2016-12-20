@@ -1,80 +1,94 @@
-From: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH V6 05/10] acpi: apei: handle SEA notification type for
- ARMv8
-Date: Tue, 20 Dec 2016 15:29:38 +0000
-Message-ID: <58594E62.3050003@arm.com>
-References: <1481147303-7979-1-git-send-email-tbaicar@codeaurora.org> <1481147303-7979-6-git-send-email-tbaicar@codeaurora.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2] efi/libstub: arm*: Pass latest memory map to the kernel
+Date: Tue, 20 Dec 2016 22:32:33 +0000
+Message-ID: <CAKv+Gu8_8+GdaV86_ctf=PzKxPvT3tbUOcuz5OkyBya5OC+ekw@mail.gmail.com>
+References: <20161219142419.16780-1-james.morse@arm.com> <20161219213859.GA2225@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1481147303-7979-6-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+In-Reply-To: <20161219213859.GA2225-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org, Suzuki.Po
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Jeff Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Tyler,
+On 19 December 2016 at 21:38, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Mon, 19 Dec, at 02:24:19PM, James Morse wrote:
+>> From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>
+>> As reported by James, the current libstub code involving the annotated
+>> memory map only works somewhat correctly by accident, due to the fact
+>> that a pool allocation happens to be reused immediately, retaining its
+>> former contents.
+>>
+>> Instead of juggling memory maps, which makes the code more complex than
+>> it needs to be, simply put a placholder value into the FDT, and only
+>> write the actual value after ExitBootServices() has been called.
+>>
+>> Reported-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> [Update mmap-size too, remove updated_fdt()s unused params and header entry]
+>> Signed-off-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+>> ---
+>> Hi Ard,
+>>
+>> This is a v2 of your patch that updates the mmap-size too. This solves the
+>> truncated memmap problem I saw with v1 on Seattle.
+>>
+>> The original patch was CC-stable, so I think this should also have:
+>> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+>> Fixes: ed9cc156c42f ("efi/libstub: Use efi_exit_boot_services() in FDT")
+>>
+>>
+>> Thanks,
+>>
+>> James
+>>
+>>  drivers/firmware/efi/libstub/efistub.h |  8 ----
+>>  drivers/firmware/efi/libstub/fdt.c     | 75 +++++++++++++++++++++-------------
+>>  2 files changed, 47 insertions(+), 36 deletions(-)
+>
+> Thanks James. I've queued this one up in the 'urgent' queue and tagged
+> it for stable. I'll send it to tip before the end of the week.
 
-On 07/12/16 21:48, Tyler Baicar wrote:
-> ARM APEI extension proposal added SEA (Synchrounous External
-> Abort) notification type for ARMv8.
-> Add a new GHES error source handling function for SEA. If an error
-> source's notification type is SEA, then this function can be registered
-> into the SEA exception handler. That way GHES will parse and report
-> SEA exceptions when they occur.
+Could we fold the hunk below, please?
 
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index 2acbc60..66ab3fd 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -767,6 +771,62 @@ static struct notifier_block ghes_notifier_sci = {
->  	.notifier_call = ghes_notify_sci,
->  };
->  
-> +#ifdef CONFIG_HAVE_ACPI_APEI_SEA
-> +static LIST_HEAD(ghes_sea);
-> +
-> +static int ghes_notify_sea(struct notifier_block *this,
-> +				  unsigned long event, void *data)
-> +{
-> +	struct ghes *ghes;
-> +	int ret = NOTIFY_DONE;
-> +
-> +	rcu_read_lock();
-> +	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
-> +		if (!ghes_proc(ghes))
-> +			ret = NOTIFY_OK;
-> +	}
-> +	rcu_read_unlock();
-> +
-> +	return ret;
-> +}
+diff --git a/drivers/firmware/efi/libstub/fdt.c
+b/drivers/firmware/efi/libstub/fdt.c
+index 9b11b0559a23..90ab96845937 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -149,26 +149,25 @@ static efi_status_t
+update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ static efi_status_t update_fdt_memmap(void *fdt, u64 memmap, u32 map_size)
+ {
+        int node = fdt_path_offset(fdt, "/chosen");
+-       efi_status_t status;
++       int err;
 
-What stops this from being re-entrant?
+        if (node < 0)
+                return EFI_LOAD_ERROR;
 
-ghes_copy_tofrom_phs() takes the ghes_ioremap_lock_irq spinlock, but there is
-nothing to stop a subsequent instruction fetch or memory access causing another
-(maybe different) Synchronous External Abort which deadlocks trying to take the
-same lock.
+        memmap = cpu_to_fdt64(memmap);
+-       status = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-start",
+-                                    &memmap, sizeof(memmap));
++       err = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-start",
++                                 &memmap, sizeof(memmap));
 
-ghes_notify_sea() looks to be based on ghes_notify_sci(), which (if I've found
-the right part of the ACPI spec) is a level-low interrupt. spin_lock_irqsave()
-would mask interrupts so there is no risk of a different notification firing on
-the same CPU, (it looks like they are almost all ultimately an irq).
+        if (status)
+                return EFI_LOAD_ERROR;
 
-NMI is the odd one out because its not maskable like this, but ghes_notify_nmi()
-has:
->	if (!atomic_add_unless(&ghes_in_nmi, 1, 1))
-> 		return ret;
+        map_size = cpu_to_fdt32(map_size);
+-       status = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-size",
+-                                    &map_size, sizeof(map_size));
++       err = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-size",
++                                 &map_size, sizeof(map_size));
 
-To ensure there is only ever one thread poking around in this code.
+        if (status)
+                return EFI_LOAD_ERROR;
 
-What happens if a system describes two GHES sources, one using an irq the other
-SEA? The SEA error can interrupt the irq error while its holding the above lock.
-I guess this is also why all the NMI code in that file is separate.
+-
+        return EFI_SUCCESS;
+ }
 
-
-Thanks,
-
-James
+My mistake, and harmless in practice, but sloppy nonetheless
