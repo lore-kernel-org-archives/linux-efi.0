@@ -1,98 +1,44 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] efi/libstub: arm*: Pass latest memory map to the kernel
-Date: Tue, 20 Dec 2016 22:33:28 +0000
-Message-ID: <CAKv+Gu9OM5e+vxPiYB=i5uvthMDg3OkKfiZPaNJz2og0JWGOLQ@mail.gmail.com>
-References: <20161219142419.16780-1-james.morse@arm.com> <20161219213859.GA2225@codeblueprint.co.uk>
- <CAKv+Gu8_8+GdaV86_ctf=PzKxPvT3tbUOcuz5OkyBya5OC+ekw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Petr Oros <poros-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] x86/efi Fix regression in efi_arch_mem_reserve
+Date: Wed, 21 Dec 2016 14:11:38 +0100
+Message-ID: <20161221131138.10512-1-poros@redhat.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu8_8+GdaV86_ctf=PzKxPvT3tbUOcuz5OkyBya5OC+ekw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Jeff Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Cc: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 20 December 2016 at 22:32, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 19 December 2016 at 21:38, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
->> On Mon, 19 Dec, at 02:24:19PM, James Morse wrote:
->>> From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>>
->>> As reported by James, the current libstub code involving the annotated
->>> memory map only works somewhat correctly by accident, due to the fact
->>> that a pool allocation happens to be reused immediately, retaining its
->>> former contents.
->>>
->>> Instead of juggling memory maps, which makes the code more complex than
->>> it needs to be, simply put a placholder value into the FDT, and only
->>> write the actual value after ExitBootServices() has been called.
->>>
->>> Reported-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
->>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>> [Update mmap-size too, remove updated_fdt()s unused params and header entry]
->>> Signed-off-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
->>> ---
->>> Hi Ard,
->>>
->>> This is a v2 of your patch that updates the mmap-size too. This solves the
->>> truncated memmap problem I saw with v1 on Seattle.
->>>
->>> The original patch was CC-stable, so I think this should also have:
->>> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
->>> Fixes: ed9cc156c42f ("efi/libstub: Use efi_exit_boot_services() in FDT")
->>>
->>>
->>> Thanks,
->>>
->>> James
->>>
->>>  drivers/firmware/efi/libstub/efistub.h |  8 ----
->>>  drivers/firmware/efi/libstub/fdt.c     | 75 +++++++++++++++++++++-------------
->>>  2 files changed, 47 insertions(+), 36 deletions(-)
->>
->> Thanks James. I've queued this one up in the 'urgent' queue and tagged
->> it for stable. I'll send it to tip before the end of the week.
->
-> Could we fold the hunk below, please?
->
-> diff --git a/drivers/firmware/efi/libstub/fdt.c
-> b/drivers/firmware/efi/libstub/fdt.c
-> index 9b11b0559a23..90ab96845937 100644
-> --- a/drivers/firmware/efi/libstub/fdt.c
-> +++ b/drivers/firmware/efi/libstub/fdt.c
-> @@ -149,26 +149,25 @@ static efi_status_t
-> update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
->  static efi_status_t update_fdt_memmap(void *fdt, u64 memmap, u32 map_size)
->  {
->         int node = fdt_path_offset(fdt, "/chosen");
-> -       efi_status_t status;
-> +       int err;
->
->         if (node < 0)
->                 return EFI_LOAD_ERROR;
->
->         memmap = cpu_to_fdt64(memmap);
-> -       status = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-start",
-> -                                    &memmap, sizeof(memmap));
-> +       err = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-start",
-> +                                 &memmap, sizeof(memmap));
->
->         if (status)
->                 return EFI_LOAD_ERROR;
->
->         map_size = cpu_to_fdt32(map_size);
-> -       status = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-size",
-> -                                    &map_size, sizeof(map_size));
-> +       err = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-size",
-> +                                 &map_size, sizeof(map_size));
->
->         if (status)
->                 return EFI_LOAD_ERROR;
->
-> -
->         return EFI_SUCCESS;
->  }
->
-> My mistake, and harmless in practice, but sloppy nonetheless
+  Booting on EFI with ESRT table has been stop since commit:
+    8e80632 efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()
 
-... but with the 'if (status)' replaced as well, of course (2x)
+  This is caused by this commit:
+    816e761 efi: Allow drivers to reserve boot services forever
+
+  Problem is, that efi_memmap_insert need memory aligned
+  on EFI_PAGE_SIZE. If memory not aligned, efi_memmap_insert
+  just return and let efi.memmap in inconsistent state.
+  This breaking boot.
+
+  Tested in my machine, which stop booting
+  after upgrade to 4.9
+
+Signed-off-by: Petr Oros <poros-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/platform/efi/quirks.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 10aca63..7678857 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -214,7 +214,7 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
+ 
+ 	new_size = efi.memmap.desc_size * num_entries;
+ 
+-	new_phys = memblock_alloc(new_size, 0);
++	new_phys = memblock_alloc(new_size, EFI_PAGE_SIZE);
+ 	if (!new_phys) {
+ 		pr_err("Could not allocate boot services memmap\n");
+ 		return;
+-- 
+2.10.2
