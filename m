@@ -1,42 +1,64 @@
-From: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: efi_mem_reserve(): don't reserve through memblock after mm_init()
-Date: Thu, 22 Dec 2016 11:26:36 +0100
-Message-ID: <87zijoz2cj.fsf@gmail.com>
-References: <20161221182846.2968-1-nicstange@gmail.com>
-        <20161221182846.2968-2-nicstange@gmail.com>
-        <c7bf34ba-56f0-8346-36d1-7069f2115dcf@nextfour.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH v2 1/2] x86/efi: don't allocate memmap through memblock
+ after mm_init()
+Date: Fri, 23 Dec 2016 14:52:06 +0000
+Message-ID: <20161223145206.GC16838@codeblueprint.co.uk>
+References: <20161222102340.2689-1-nicstange@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <c7bf34ba-56f0-8346-36d1-7069f2115dcf-MRsr7dthA9VWk0Htik3J/w@public.gmane.org> ("Mika
-        \=\?utf-8\?Q\?Penttil\=C3\=A4\=22's\?\= message of "Wed, 21 Dec 2016 20:45:13
- +0200")
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mika =?utf-8?Q?Penttil=C3=A4?= <mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org>
-Cc: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20161222102340.2689-1-nicstange@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Nicolai Stange <nicstange@gmail.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Mika =?iso-8859-1?Q?Penttil=E4?= <mika.penttila@nextfour.com>
 List-Id: linux-efi@vger.kernel.org
 
-Mika Penttil=C3=A4 <mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org> writes:
+On Thu, 22 Dec, at 11:23:39AM, Nicolai Stange wrote:
+> With commit 4bc9f92e64c8 ("x86/efi-bgrt: Use efi_mem_reserve() to avoid
+> copying image data"), efi_bgrt_init() calls into the memblock allocator
+> through efi_mem_reserve() => efi_arch_mem_reserve() *after* mm_init()
+> has been called.
+> 
+> Indeed, KASAN reports a bad read access later on in
+> efi_free_boot_services():
+> 
+>   BUG: KASAN: use-after-free in efi_free_boot_services+0xae/0x24c
+>             at addr ffff88022de12740
+>   Read of size 4 by task swapper/0/0
+>   page:ffffea0008b78480 count:0 mapcount:-127
+>   mapping:          (null) index:0x1 flags: 0x5fff8000000000()
+>   [...]
+>   Call Trace:
+>    dump_stack+0x68/0x9f
+>    kasan_report_error+0x4c8/0x500
+>    kasan_report+0x58/0x60
+>    __asan_load4+0x61/0x80
+>    efi_free_boot_services+0xae/0x24c
+>    start_kernel+0x527/0x562
+>    x86_64_start_reservations+0x24/0x26
+>    x86_64_start_kernel+0x157/0x17a
+>    start_cpu+0x5/0x14
+> 
+> The instruction at the given address is the first read from the memmap's
+> memory, i.e. the read of md->type in efi_free_boot_services().
+> 
+> Note that the writes earlier in efi_arch_mem_reserve() don't splat because
+> they're done through early_memremap()ed addresses.
+> 
+> So, after memblock is gone, allocations should be done through the "normal"
+> page allocator. Introduce a helper, efi_memmap_alloc() for this. Use
+> it from efi_arch_mem_reserve() and from efi_free_boot_services() as well.
+> 
+> Fixes: 4bc9f92e64c8 ("x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data")
+> Signed-off-by: Nicolai Stange <nicstange@gmail.com>
+> ---
+>  arch/x86/platform/efi/quirks.c |  4 ++--
+>  drivers/firmware/efi/memmap.c  | 38 ++++++++++++++++++++++++++++++++++++++
+>  include/linux/efi.h            |  1 +
+>  3 files changed, 41 insertions(+), 2 deletions(-)
 
-> On 21.12.2016 20:28, Nicolai Stange wrote:
->>  /**
->>   * efi_mem_reserve - Reserve an EFI memory region
->> @@ -419,7 +422,7 @@ void __init __weak efi_arch_mem_reserve(phys_addr_t =
-addr, u64 size) {}
->>   */
->>  void __init efi_mem_reserve(phys_addr_t addr, u64 size)
->>  {
->> -	if (!memblock_is_region_reserved(addr, size))
->> +	if (slab_is_available() && !memblock_is_region_reserved(addr, size))
->>  		memblock_reserve(addr, size);
-> Maybe !slab_is_available() ?
-
-You're right, thanks for catching this!
-
-Fixed in v2 at http://lkml.kernel.org/r/20161222102340.2689-2-nicstange@gma=
-il.com
-
-Thanks,
-
-Nicolai
+Nice catch. Could you also modify efi_fake_memmap() to use your new
+efi_memmap_alloc() function for consistency (note that all
+memblock_alloc()s should probably be PAGE_SIZE aligned like the
+fakemem code)?
