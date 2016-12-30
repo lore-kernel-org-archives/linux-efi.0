@@ -1,28 +1,22 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 01/16] Add the ability to lock down access to the running kernel image
-Date: Sun, 25 Dec 2016 21:44:29 +0000
-Message-ID: <26272.1482702269@warthog.procyon.org.uk>
-References: <20161225212023.GB26891@amd> <147933283664.19316.12454053022687659937.stgit@warthog.procyon.org.uk> <147933284407.19316.17886320817060158597.stgit@warthog.procyon.org.uk>
+From: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Subject: =?utf-8?Q?=D0=9A=D0=BB=D0=B8=D0=B5=D0=BD=D1=82=D1=81=D0?=
+        =?utf-8?Q?=BA=D1=83=D1=8E_=D0=B1=D0=B0=D0=B7=D1=83=3F_Mai?=
+        =?utf-8?Q?l=3A_prodawez392=40gmail=2Ecom_Skype=3A_prodawe?=
+        =?utf-8?Q?z390_=D1=82_+79139230330_=28whats=5Cviber=5Ctel?=
+        =?utf-8?Q?egr=29_=D0=9F=D0=BE=D0=B4=D1=80=D0=BE=D0=B1=D0?=
+        =?utf-8?Q?=BD=D0=B5=D0=B5!?=
+Date: Fri, 30 Dec 2016 17:23:40 +0300
+Message-ID: <807AE961BA6E40F32F2A63DFCB478D0D@vger.kernel.org>
+Reply-To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <prodawez392-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20161225212023.GB26891@amd>
-Content-ID: <26271.1482702269.1@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: dhowells@redhat.com, keyrings@vger.kernel.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain;
+        format=flowed;
+        charset="utf-8";
+        reply-type=original
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Pavel Machek <pavel@ucw.cz> wrote:
-
-> > +config ALLOW_LOCKDOWN_LIFT
-> > +	bool
-> 
-> Don't you need to add 'bool "something"' so that user can actually
-> select this?
-
-No - see patch 6.  This option merely makes the function available.  Actually,
-I haven't done it quite right: the function in the .c file should be
-conditionalised too.
-
-David
+Соберем для Вас в интернет базу данных клиентов Email: prodawez392-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org Skype: prodawez390 тел +79139230330 (whatsapp\viber\telegram) Узнайте подробнее! 
