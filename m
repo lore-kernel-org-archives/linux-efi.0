@@ -1,196 +1,418 @@
 From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 03/10] efi: Constify GetVariable() / SetVariable() arguments
+Subject: [PATCH 04/10] efi: Constify HandleProtocol() / LocateHandle() /
+ LocateProtocol()
 Date: Mon, 2 Jan 2017 11:24:33 +0100
-Message-ID: <2be92e87ff7855bcd88c86a7436f46d3488483f0.1483318593.git.lukas@wunner.de>
+Message-ID: <d9c3a58dc67462e16afb778161f25b415a517d3b.1483318593.git.lukas@wunner.de>
 References: <cover.1483318593.git.lukas@wunner.de>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <cover.1483318593.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Artur Paszkiewicz <artur.paszkiewicz-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mike Marciniszyn <mike.marciniszyn-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dennis Dalessandro <dennis.dalessandro-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-GUIDs and variable names passed to GetVariable() / SetVariable() are not
-modified, so declare them const.  This allows the compiler to place them
-in the rodata section instead of generating them on the stack at
+GUIDs passed to HandleProtocol() / LocateHandle() / LocateProtocol() are
+not modified, so declare them const.  This allows the compiler to place
+them in the rodata section instead of generating them on the stack at
 runtime.  Pass GUIDs as literals rather than assigning them to temporary
-variables to save a bit on code.
+variables to save a bit on code.  (Except for UGA and GOP GUIDs as they
+are passed around between functions.)  Constification of the GUIDs is
+in compliance with the EFI spec which marks them "IN" for said boot
+services.
 
 Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>
-Cc: Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>
-Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Artur Paszkiewicz <artur.paszkiewicz-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Mike Marciniszyn <mike.marciniszyn-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Dennis Dalessandro <dennis.dalessandro-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 ---
- arch/ia64/kernel/efi.c                  | 15 ++++-----------
- arch/x86/platform/efi/quirks.c          |  2 +-
- drivers/firmware/efi/efi-pstore.c       |  4 ++--
- drivers/firmware/efi/efibc.c            |  3 +--
- drivers/firmware/efi/libstub/arm-stub.c |  5 ++---
- drivers/infiniband/hw/hfi1/efivar.c     |  6 +-----
- drivers/scsi/isci/probe_roms.c          |  2 +-
- 7 files changed, 12 insertions(+), 25 deletions(-)
+ arch/x86/boot/compressed/eboot.c        | 48 ++++++++++++++++-----------------
+ drivers/firmware/efi/libstub/arm-stub.c | 10 +++----
+ drivers/firmware/efi/libstub/gop.c      | 12 ++++-----
+ drivers/firmware/efi/libstub/random.c   |  6 ++---
+ include/linux/efi.h                     |  9 ++++---
+ 5 files changed, 39 insertions(+), 46 deletions(-)
 
-diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
-index f57d089..f1264ab 100644
---- a/arch/ia64/kernel/efi.c
-+++ b/arch/ia64/kernel/efi.c
-@@ -919,22 +919,15 @@ static void __init handle_palo(unsigned long phys_addr)
- efi_uart_console_only(void)
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 6d3aeab..61014f5 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -43,13 +43,12 @@ static inline efi_status_t __open_volume32(void *__image, void **__fh)
+ 	efi_file_io_interface_t *io;
+ 	efi_loaded_image_32_t *image = __image;
+ 	efi_file_handle_32_t *fh;
+-	efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
+ 	efi_status_t status;
+ 	void *handle = (void *)(unsigned long)image->device_handle;
+ 	unsigned long func;
+ 
+ 	status = efi_call_early(handle_protocol, handle,
+-				&fs_proto, (void **)&io);
++				&EFI_FILE_SYSTEM_GUID, (void **)&io);
+ 	if (status != EFI_SUCCESS) {
+ 		efi_printk(sys_table, "Failed to handle fs_proto\n");
+ 		return status;
+@@ -69,13 +68,12 @@ static inline efi_status_t __open_volume64(void *__image, void **__fh)
+ 	efi_file_io_interface_t *io;
+ 	efi_loaded_image_64_t *image = __image;
+ 	efi_file_handle_64_t *fh;
+-	efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
+ 	efi_status_t status;
+ 	void *handle = (void *)(unsigned long)image->device_handle;
+ 	unsigned long func;
+ 
+ 	status = efi_call_early(handle_protocol, handle,
+-				&fs_proto, (void **)&io);
++				&EFI_FILE_SYSTEM_GUID, (void **)&io);
+ 	if (status != EFI_SUCCESS) {
+ 		efi_printk(sys_table, "Failed to handle fs_proto\n");
+ 		return status;
+@@ -173,7 +171,6 @@ void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
+ 		unsigned long size)
+ {
+ 	efi_pci_io_protocol_32 *pci = NULL;
+-	efi_guid_t pci_proto = EFI_PCI_IO_PROTOCOL_GUID;
+ 	u32 *handles = (u32 *)(unsigned long)pci_handle;
+ 	efi_status_t status;
+ 	unsigned long nr_pci;
+@@ -191,7 +188,8 @@ void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
+ 		u32 h = handles[i];
+ 
+ 		status = efi_call_early(handle_protocol, h,
+-					&pci_proto, (void **)&pci);
++					&EFI_PCI_IO_PROTOCOL_GUID,
++					(void **)&pci);
+ 
+ 		if (status != EFI_SUCCESS)
+ 			continue;
+@@ -280,7 +278,6 @@ void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
+ 		unsigned long size)
+ {
+ 	efi_pci_io_protocol_64 *pci = NULL;
+-	efi_guid_t pci_proto = EFI_PCI_IO_PROTOCOL_GUID;
+ 	u64 *handles = (u64 *)(unsigned long)pci_handle;
+ 	efi_status_t status;
+ 	unsigned long nr_pci;
+@@ -298,7 +295,8 @@ void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
+ 		u64 h = handles[i];
+ 
+ 		status = efi_call_early(handle_protocol, h,
+-					&pci_proto, (void **)&pci);
++					&EFI_PCI_IO_PROTOCOL_GUID,
++					(void **)&pci);
+ 
+ 		if (status != EFI_SUCCESS)
+ 			continue;
+@@ -333,12 +331,12 @@ static void setup_efi_pci(struct boot_params *params)
  {
  	efi_status_t status;
--	char *s, name[] = "ConOut";
--	efi_guid_t guid = EFI_GLOBAL_VARIABLE_GUID;
--	efi_char16_t *utf16, name_utf16[32];
-+	const char name[] = "ConOut";
-+	const efi_char16_t name_utf16[] = { 'C', 'o', 'n', 'O', 'u', 't', 0 };
- 	unsigned char data[1024];
- 	unsigned long size = sizeof(data);
- 	struct efi_generic_dev_path *hdr, *end_addr;
- 	int uart = 0;
+ 	void **pci_handle = NULL;
+-	efi_guid_t pci_proto = EFI_PCI_IO_PROTOCOL_GUID;
+ 	unsigned long size = 0;
  
--	/* Convert to UTF-16 */
--	utf16 = name_utf16;
--	s = name;
--	while (*s)
--		*utf16++ = *s++ & 0x7f;
--	*utf16 = 0;
--
--	status = efi.get_variable(name_utf16, &guid, NULL, &size, data);
-+	status = efi.get_variable(name_utf16, &EFI_GLOBAL_VARIABLE_GUID,
-+				  NULL, &size, data);
+ 	status = efi_call_early(locate_handle,
+ 				EFI_LOCATE_BY_PROTOCOL,
+-				&pci_proto, NULL, &size, pci_handle);
++				&EFI_PCI_IO_PROTOCOL_GUID,
++				NULL, &size, pci_handle);
+ 
+ 	if (status == EFI_BUFFER_TOO_SMALL) {
+ 		status = efi_call_early(allocate_pool,
+@@ -351,7 +349,8 @@ static void setup_efi_pci(struct boot_params *params)
+ 		}
+ 
+ 		status = efi_call_early(locate_handle,
+-					EFI_LOCATE_BY_PROTOCOL, &pci_proto,
++					EFI_LOCATE_BY_PROTOCOL,
++					&EFI_PCI_IO_PROTOCOL_GUID,
+ 					NULL, &size, pci_handle);
+ 	}
+ 
+@@ -369,13 +368,13 @@ static void setup_efi_pci(struct boot_params *params)
+ 
+ static void retrieve_apple_device_properties(struct boot_params *boot_params)
+ {
+-	efi_guid_t guid = APPLE_PROPERTIES_PROTOCOL_GUID;
+ 	struct setup_data *data, *new;
+ 	efi_status_t status;
+ 	u32 size = 0;
+ 	void *p;
+ 
+-	status = efi_call_early(locate_protocol, &guid, NULL, &p);
++	status = efi_call_early(locate_protocol,
++				&APPLE_PROPERTIES_PROTOCOL_GUID, NULL, &p);
+ 	if (status != EFI_SUCCESS)
+ 		return;
+ 
+@@ -434,7 +433,7 @@ static void setup_quirks(struct boot_params *boot_params)
+ setup_uga32(void **uga_handle, unsigned long size, u32 *width, u32 *height)
+ {
+ 	struct efi_uga_draw_protocol *uga = NULL, *first_uga;
+-	efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
++	const efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
+ 	unsigned long nr_ugas;
+ 	u32 *handles = (u32 *)uga_handle;;
+ 	efi_status_t status = EFI_INVALID_PARAMETER;
+@@ -443,7 +442,6 @@ static void setup_quirks(struct boot_params *boot_params)
+ 	first_uga = NULL;
+ 	nr_ugas = size / sizeof(u32);
+ 	for (i = 0; i < nr_ugas; i++) {
+-		efi_guid_t pciio_proto = EFI_PCI_IO_PROTOCOL_GUID;
+ 		u32 w, h, depth, refresh;
+ 		void *pciio;
+ 		u32 handle = handles[i];
+@@ -453,7 +451,8 @@ static void setup_quirks(struct boot_params *boot_params)
+ 		if (status != EFI_SUCCESS)
+ 			continue;
+ 
+-		efi_call_early(handle_protocol, handle, &pciio_proto, &pciio);
++		efi_call_early(handle_protocol, handle,
++			       &EFI_PCI_IO_PROTOCOL_GUID, &pciio);
+ 
+ 		status = efi_early->call((unsigned long)uga->get_mode, uga,
+ 					 &w, &h, &depth, &refresh);
+@@ -479,7 +478,7 @@ static void setup_quirks(struct boot_params *boot_params)
+ setup_uga64(void **uga_handle, unsigned long size, u32 *width, u32 *height)
+ {
+ 	struct efi_uga_draw_protocol *uga = NULL, *first_uga;
+-	efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
++	const efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
+ 	unsigned long nr_ugas;
+ 	u64 *handles = (u64 *)uga_handle;;
+ 	efi_status_t status = EFI_INVALID_PARAMETER;
+@@ -488,7 +487,6 @@ static void setup_quirks(struct boot_params *boot_params)
+ 	first_uga = NULL;
+ 	nr_ugas = size / sizeof(u64);
+ 	for (i = 0; i < nr_ugas; i++) {
+-		efi_guid_t pciio_proto = EFI_PCI_IO_PROTOCOL_GUID;
+ 		u32 w, h, depth, refresh;
+ 		void *pciio;
+ 		u64 handle = handles[i];
+@@ -498,7 +496,8 @@ static void setup_quirks(struct boot_params *boot_params)
+ 		if (status != EFI_SUCCESS)
+ 			continue;
+ 
+-		efi_call_early(handle_protocol, handle, &pciio_proto, &pciio);
++		efi_call_early(handle_protocol, handle,
++			       &EFI_PCI_IO_PROTOCOL_GUID, &pciio);
+ 
+ 		status = efi_early->call((unsigned long)uga->get_mode, uga,
+ 					 &w, &h, &depth, &refresh);
+@@ -523,8 +522,8 @@ static void setup_quirks(struct boot_params *boot_params)
+ /*
+  * See if we have Universal Graphics Adapter (UGA) protocol
+  */
+-static efi_status_t setup_uga(struct screen_info *si, efi_guid_t *uga_proto,
+-			      unsigned long size)
++static efi_status_t setup_uga(struct screen_info *si,
++			      const efi_guid_t *uga_proto, unsigned long size)
+ {
+ 	efi_status_t status;
+ 	u32 width, height;
+@@ -575,9 +574,9 @@ static efi_status_t setup_uga(struct screen_info *si, efi_guid_t *uga_proto,
+ 
+ void setup_graphics(struct boot_params *boot_params)
+ {
+-	efi_guid_t graphics_proto = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
++	const efi_guid_t graphics_proto = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+ 	struct screen_info *si;
+-	efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
++	const efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
+ 	efi_status_t status;
+ 	unsigned long size;
+ 	void **gop_handle = NULL;
+@@ -618,7 +617,6 @@ struct boot_params *make_boot_params(struct efi_config *c)
+ 	struct setup_header *hdr;
+ 	efi_loaded_image_t *image;
+ 	void *options, *handle;
+-	efi_guid_t proto = LOADED_IMAGE_PROTOCOL_GUID;
+ 	int options_size = 0;
+ 	efi_status_t status;
+ 	char *cmdline_ptr;
+@@ -642,7 +640,7 @@ struct boot_params *make_boot_params(struct efi_config *c)
+ 		setup_boot_services32(efi_early);
+ 
+ 	status = efi_call_early(handle_protocol, handle,
+-				&proto, (void *)&image);
++				&LOADED_IMAGE_PROTOCOL_GUID, (void *)&image);
  	if (status != EFI_SUCCESS) {
- 		printk(KERN_ERR "No EFI %s variable?\n", name);
- 		return 0;
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 10aca63..aad3701 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -19,7 +19,7 @@
- #define EFI_DUMMY_GUID \
- 	EFI_GUID(0x4424ac57, 0xbe4b, 0x47dd, 0x9e, 0x97, 0xed, 0x50, 0xf0, 0x9f, 0x92, 0xa9)
- 
--static efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
-+static const efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
- 
- static bool efi_no_storage_paranoia;
- 
-diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-index f402ba2..0911449 100644
---- a/drivers/firmware/efi/efi-pstore.c
-+++ b/drivers/firmware/efi/efi-pstore.c
-@@ -265,7 +265,6 @@ static int efi_pstore_write(enum pstore_type_id type,
- {
- 	char name[DUMP_NAME_LEN];
- 	efi_char16_t efi_name[DUMP_NAME_LEN];
--	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
- 	int i, ret = 0;
- 
- 	sprintf(name, "dump-type%u-%u-%d-%lu-%c", type, part, count,
-@@ -274,7 +273,8 @@ static int efi_pstore_write(enum pstore_type_id type,
- 	for (i = 0; i < DUMP_NAME_LEN; i++)
- 		efi_name[i] = name[i];
- 
--	efivar_entry_set_safe(efi_name, vendor, PSTORE_EFI_ATTRIBUTES,
-+	efivar_entry_set_safe(efi_name, LINUX_EFI_CRASH_GUID,
-+			      PSTORE_EFI_ATTRIBUTES,
- 			      !pstore_cannot_block_path(reason),
- 			      size, psi->buf);
- 
-diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
-index 503bbe2..57ddf8c 100644
---- a/drivers/firmware/efi/efibc.c
-+++ b/drivers/firmware/efi/efibc.c
-@@ -32,7 +32,6 @@ static void efibc_str_to_str16(const char *str, efi_char16_t *str16)
- static int efibc_set_variable(const char *name, const char *value)
- {
- 	int ret;
--	efi_guid_t guid = LINUX_EFI_LOADER_ENTRY_GUID;
- 	struct efivar_entry *entry;
- 	size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
- 
-@@ -49,7 +48,7 @@ static int efibc_set_variable(const char *name, const char *value)
- 
- 	efibc_str_to_str16(name, entry->var.VariableName);
- 	efibc_str_to_str16(value, (efi_char16_t *)entry->var.Data);
--	memcpy(&entry->var.VendorGuid, &guid, sizeof(guid));
-+	entry->var.VendorGuid = LINUX_EFI_LOADER_ENTRY_GUID;
- 
- 	ret = efivar_entry_set(entry,
- 			       EFI_VARIABLE_NON_VOLATILE
+ 		efi_printk(sys_table, "Failed to get handle for LOADED_IMAGE_PROTOCOL\n");
+ 		return NULL;
 diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 6fca48c..da72bfb 100644
+index da72bfb..70d6722 100644
 --- a/drivers/firmware/efi/libstub/arm-stub.c
 +++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -27,13 +27,12 @@ static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
- 	static efi_char16_t const sm_var_name[] = {
- 		'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0 };
- 
--	efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
- 	efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
- 	u8 val;
- 	unsigned long size = sizeof(val);
+@@ -71,12 +71,11 @@ efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg,
+ 	efi_file_io_interface_t *io;
+ 	efi_loaded_image_t *image = __image;
+ 	efi_file_handle_t *fh;
+-	efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
  	efi_status_t status;
+ 	void *handle = (void *)(unsigned long)image->device_handle;
  
--	status = f_getvar((efi_char16_t *)sb_var_name, (efi_guid_t *)&var_guid,
-+	status = f_getvar(sb_var_name, &EFI_GLOBAL_VARIABLE_GUID,
- 			  NULL, &size, &val);
+-	status = sys_table_arg->boottime->handle_protocol(handle,
+-				 &fs_proto, (void **)&io);
++	status = efi_call_early(handle_protocol, handle,
++				&EFI_FILE_SYSTEM_GUID, (void **)&io);
+ 	if (status != EFI_SUCCESS) {
+ 		efi_printk(sys_table_arg, "Failed to handle fs_proto\n");
+ 		return status;
+@@ -101,7 +100,7 @@ void efi_char16_printk(efi_system_table_t *sys_table_arg,
  
- 	if (status != EFI_SUCCESS)
-@@ -42,7 +41,7 @@ static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
- 	if (val == 0)
- 		return 0;
+ static struct screen_info *setup_graphics(efi_system_table_t *sys_table_arg)
+ {
+-	efi_guid_t gop_proto = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
++	const efi_guid_t gop_proto = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+ 	efi_status_t status;
+ 	unsigned long size;
+ 	void **gop_handle = NULL;
+@@ -153,7 +152,6 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 	char *cmdline_ptr = NULL;
+ 	int cmdline_size = 0;
+ 	unsigned long new_fdt_addr;
+-	efi_guid_t loaded_image_proto = LOADED_IMAGE_PROTOCOL_GUID;
+ 	unsigned long reserve_addr = 0;
+ 	unsigned long reserve_size = 0;
+ 	int secure_boot = 0;
+@@ -175,7 +173,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 	 * line.
+ 	 */
+ 	status = sys_table->boottime->handle_protocol(handle,
+-					&loaded_image_proto, (void *)&image);
++				&LOADED_IMAGE_PROTOCOL_GUID, (void *)&image);
+ 	if (status != EFI_SUCCESS) {
+ 		pr_efi_err(sys_table, "Failed to get loaded image protocol\n");
+ 		goto fail;
+diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
+index 932742e..9513a98 100644
+--- a/drivers/firmware/efi/libstub/gop.c
++++ b/drivers/firmware/efi/libstub/gop.c
+@@ -111,7 +111,7 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
  
--	status = f_getvar((efi_char16_t *)sm_var_name, (efi_guid_t *)&var_guid,
-+	status = f_getvar(sm_var_name, &EFI_GLOBAL_VARIABLE_GUID,
- 			  NULL, &size, &val);
+ static efi_status_t
+ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+-            efi_guid_t *proto, unsigned long size, void **gop_handle)
++	    const efi_guid_t *proto, unsigned long size, void **gop_handle)
+ {
+ 	struct efi_graphics_output_protocol_32 *gop32, *first_gop;
+ 	unsigned long nr_gops;
+@@ -131,7 +131,6 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
+ 	nr_gops = size / sizeof(u32);
+ 	for (i = 0; i < nr_gops; i++) {
+ 		struct efi_graphics_output_mode_info *info = NULL;
+-		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
+ 		bool conout_found = false;
+ 		void *dummy = NULL;
+ 		efi_handle_t h = (efi_handle_t)(unsigned long)handles[i];
+@@ -143,7 +142,7 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
+ 			continue;
  
- 	if (status != EFI_SUCCESS)
-diff --git a/drivers/infiniband/hw/hfi1/efivar.c b/drivers/infiniband/hw/hfi1/efivar.c
-index 106349f..f769cc2 100644
---- a/drivers/infiniband/hw/hfi1/efivar.c
-+++ b/drivers/infiniband/hw/hfi1/efivar.c
-@@ -66,7 +66,6 @@ static int read_efi_var(const char *name, unsigned long *size,
+ 		status = efi_call_early(handle_protocol, h,
+-					&conout_proto, &dummy);
++					&EFI_CONSOLE_OUT_DEVICE_GUID, &dummy);
+ 		if (status == EFI_SUCCESS)
+ 			conout_found = true;
+ 
+@@ -228,7 +227,7 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
+ 
+ static efi_status_t
+ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+-	    efi_guid_t *proto, unsigned long size, void **gop_handle)
++	    const efi_guid_t *proto, unsigned long size, void **gop_handle)
+ {
+ 	struct efi_graphics_output_protocol_64 *gop64, *first_gop;
+ 	unsigned long nr_gops;
+@@ -248,7 +247,6 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
+ 	nr_gops = size / sizeof(u64);
+ 	for (i = 0; i < nr_gops; i++) {
+ 		struct efi_graphics_output_mode_info *info = NULL;
+-		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
+ 		bool conout_found = false;
+ 		void *dummy = NULL;
+ 		efi_handle_t h = (efi_handle_t)(unsigned long)handles[i];
+@@ -260,7 +258,7 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
+ 			continue;
+ 
+ 		status = efi_call_early(handle_protocol, h,
+-					&conout_proto, &dummy);
++					&EFI_CONSOLE_OUT_DEVICE_GUID, &dummy);
+ 		if (status == EFI_SUCCESS)
+ 			conout_found = true;
+ 
+@@ -323,7 +321,7 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
+  * See if we have Graphics Output Protocol
+  */
+ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
+-			   struct screen_info *si, efi_guid_t *proto,
++			   struct screen_info *si, const efi_guid_t *proto,
+ 			   unsigned long size)
  {
  	efi_status_t status;
- 	efi_char16_t *uni_name;
--	efi_guid_t guid;
- 	unsigned long temp_size;
- 	void *temp_buffer;
- 	void *data;
-@@ -95,13 +94,10 @@ static int read_efi_var(const char *name, unsigned long *size,
- 	for (i = 0; name[i]; i++)
- 		uni_name[i] = name[i];
+diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
+index 7e72954..ffb1130 100644
+--- a/drivers/firmware/efi/libstub/random.c
++++ b/drivers/firmware/efi/libstub/random.c
+@@ -23,11 +23,10 @@ struct efi_rng_protocol {
+ efi_status_t efi_get_random_bytes(efi_system_table_t *sys_table_arg,
+ 				  unsigned long size, u8 *out)
+ {
+-	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
+ 	efi_status_t status;
+ 	struct efi_rng_protocol *rng;
  
--	/* need a variable for our GUID */
--	guid = HFI1_EFIVAR_GUID;
--
- 	/* call into EFI runtime services */
- 	status = efi.get_variable(
- 			uni_name,
--			&guid,
-+			&HFI1_EFIVAR_GUID,
- 			NULL,
- 			&temp_size,
- 			temp_buffer);
-diff --git a/drivers/scsi/isci/probe_roms.c b/drivers/scsi/isci/probe_roms.c
-index 8ac646e..d2c17c1 100644
---- a/drivers/scsi/isci/probe_roms.c
-+++ b/drivers/scsi/isci/probe_roms.c
-@@ -34,7 +34,7 @@
- #include "task.h"
- #include "probe_roms.h"
+-	status = efi_call_early(locate_protocol, &rng_proto, NULL,
++	status = efi_call_early(locate_protocol, &EFI_RNG_PROTOCOL_GUID, NULL,
+ 				(void **)&rng);
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+@@ -149,14 +148,13 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
  
--static efi_char16_t isci_efivar_name[] = {
-+static const efi_char16_t isci_efivar_name[] = {
- 	'R', 's', 't', 'S', 'c', 'u', 'O'
- };
+ efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg)
+ {
+-	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
+ 	efi_guid_t rng_algo_raw = EFI_RNG_ALGORITHM_RAW;
+ 	efi_guid_t rng_table_guid = LINUX_EFI_RANDOM_SEED_TABLE_GUID;
+ 	struct efi_rng_protocol *rng;
+ 	struct linux_efi_random_seed *seed;
+ 	efi_status_t status;
  
+-	status = efi_call_early(locate_protocol, &rng_proto, NULL,
++	status = efi_call_early(locate_protocol, &EFI_RNG_PROTOCOL_GUID, NULL,
+ 				(void **)&rng);
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 6ade102..c4923c1f 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -293,10 +293,11 @@ struct efi_boot_memmap {
+ 	void *install_protocol_interface;
+ 	void *reinstall_protocol_interface;
+ 	void *uninstall_protocol_interface;
+-	efi_status_t (*handle_protocol)(efi_handle_t, efi_guid_t *, void **);
++	efi_status_t (*handle_protocol)(efi_handle_t, const efi_guid_t *,
++					void **);
+ 	void *__reserved;
+ 	void *register_protocol_notify;
+-	efi_status_t (*locate_handle)(int, efi_guid_t *, void *,
++	efi_status_t (*locate_handle)(int, const efi_guid_t *, void *,
+ 				      unsigned long *, efi_handle_t *);
+ 	void *locate_device_path;
+ 	efi_status_t (*install_configuration_table)(efi_guid_t *, void *);
+@@ -315,7 +316,7 @@ struct efi_boot_memmap {
+ 	void *open_protocol_information;
+ 	void *protocols_per_handle;
+ 	void *locate_handle_buffer;
+-	efi_status_t (*locate_protocol)(efi_guid_t *, void *, void **);
++	efi_status_t (*locate_protocol)(const efi_guid_t *, void *, void **);
+ 	void *install_multiple_protocol_interfaces;
+ 	void *uninstall_multiple_protocol_interfaces;
+ 	void *calculate_crc32;
+@@ -1472,7 +1473,7 @@ efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ efi_status_t efi_parse_options(char *cmdline);
+ 
+ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
+-			   struct screen_info *si, efi_guid_t *proto,
++			   struct screen_info *si, const efi_guid_t *proto,
+ 			   unsigned long size);
+ 
+ bool efi_runtime_disabled(void);
 -- 
 2.11.0
