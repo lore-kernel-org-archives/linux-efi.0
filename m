@@ -1,326 +1,196 @@
 From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 02/10] efi: Constify GetVariable() / SetVariable() signatures
+Subject: [PATCH 03/10] efi: Constify GetVariable() / SetVariable() arguments
 Date: Mon, 2 Jan 2017 11:24:33 +0100
-Message-ID: <bd030e11cd114fb1d568b21eddfc1fa75cd42e5e.1483318593.git.lukas@wunner.de>
+Message-ID: <2be92e87ff7855bcd88c86a7436f46d3488483f0.1483318593.git.lukas@wunner.de>
 References: <cover.1483318593.git.lukas@wunner.de>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <cover.1483318593.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>
+Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Artur Paszkiewicz <artur.paszkiewicz-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mike Marciniszyn <mike.marciniszyn-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dennis Dalessandro <dennis.dalessandro-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-GetVariable() / SetVariable() is typically called with immutable
-VendorGuid and VariableName arguments.  SetVariable() is also often
-called with an immutable Data argument.  However declaring these const
-in the caller results in a compiler warning since they're not marked
-const in the function signatures.  Rectify that, in keeping with the EFI
-spec which marks these arguments "IN".
+GUIDs and variable names passed to GetVariable() / SetVariable() are not
+modified, so declare them const.  This allows the compiler to place them
+in the rodata section instead of generating them on the stack at
+runtime.  Pass GUIDs as literals rather than assigning them to temporary
+variables to save a bit on code.
 
 Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Cc: Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Cc: David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
-Cc: Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>
+Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>
+Cc: Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>
+Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Artur Paszkiewicz <artur.paszkiewicz-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Mike Marciniszyn <mike.marciniszyn-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Dennis Dalessandro <dennis.dalessandro-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 ---
- arch/ia64/kernel/efi.c                  |  9 ++++-----
- arch/x86/include/asm/xen/interface.h    |  1 +
- arch/x86/platform/efi/efi_64.c          | 18 +++++++++---------
- drivers/firmware/efi/runtime-wrappers.c | 15 ++++++++-------
- drivers/firmware/google/gsmi.c          | 10 +++++-----
- drivers/xen/efi.c                       | 12 ++++++------
- include/linux/efi.h                     | 10 ++++++----
- include/xen/arm/interface.h             |  1 +
- include/xen/interface/platform.h        | 11 +++++++++--
- include/xen/xen-ops.h                   | 12 ++++++------
- 10 files changed, 55 insertions(+), 44 deletions(-)
+ arch/ia64/kernel/efi.c                  | 15 ++++-----------
+ arch/x86/platform/efi/quirks.c          |  2 +-
+ drivers/firmware/efi/efi-pstore.c       |  4 ++--
+ drivers/firmware/efi/efibc.c            |  3 +--
+ drivers/firmware/efi/libstub/arm-stub.c |  5 ++---
+ drivers/infiniband/hw/hfi1/efivar.c     |  6 +-----
+ drivers/scsi/isci/probe_roms.c          |  2 +-
+ 7 files changed, 12 insertions(+), 25 deletions(-)
 
 diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
-index 1212956..f57d089 100644
+index f57d089..f1264ab 100644
 --- a/arch/ia64/kernel/efi.c
 +++ b/arch/ia64/kernel/efi.c
-@@ -125,8 +125,8 @@
- 
- #define STUB_GET_VARIABLE(prefix, adjust_arg)				       \
- static efi_status_t							       \
--prefix##_get_variable (efi_char16_t *name, efi_guid_t *vendor, u32 *attr,      \
--		       unsigned long *data_size, void *data)		       \
-+prefix##_get_variable (const efi_char16_t *name, const efi_guid_t *vendor,     \
-+		       u32 *attr, unsigned long *data_size, void *data)        \
- {									       \
- 	struct ia64_fpreg fr[6];					       \
- 	u32 *aattr = NULL;						       \
-@@ -161,9 +161,8 @@
- 
- #define STUB_SET_VARIABLE(prefix, adjust_arg)				       \
- static efi_status_t							       \
--prefix##_set_variable (efi_char16_t *name, efi_guid_t *vendor,		       \
--		       u32 attr, unsigned long data_size,		       \
--		       void *data)					       \
-+prefix##_set_variable (const efi_char16_t *name, const efi_guid_t *vendor,     \
-+		       u32 attr, unsigned long data_size, const void *data)    \
- {									       \
- 	struct ia64_fpreg fr[6];					       \
- 	efi_status_t ret;						       \
-diff --git a/arch/x86/include/asm/xen/interface.h b/arch/x86/include/asm/xen/interface.h
-index 62ca03e..543716c 100644
---- a/arch/x86/include/asm/xen/interface.h
-+++ b/arch/x86/include/asm/xen/interface.h
-@@ -86,6 +86,7 @@
- /* Guest handles for primitive C types. */
- __DEFINE_GUEST_HANDLE(uchar, unsigned char);
- __DEFINE_GUEST_HANDLE(uint,  unsigned int);
-+__DEFINE_GUEST_HANDLE(cvoid, const void);
- DEFINE_GUEST_HANDLE(char);
- DEFINE_GUEST_HANDLE(int);
- DEFINE_GUEST_HANDLE(void);
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index ee966aa..2a7d423 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -632,13 +632,13 @@ static efi_status_t efi_thunk_set_time(efi_time_t *tm)
- 	return status;
- }
- 
--static unsigned long efi_name_size(efi_char16_t *name)
-+static unsigned long efi_name_size(const efi_char16_t *name)
- {
- 	return ucs2_strsize(name, EFI_VAR_NAME_LEN) + 1;
- }
- 
- static efi_status_t
--efi_thunk_get_variable(efi_char16_t *name, efi_guid_t *vendor,
-+efi_thunk_get_variable(const efi_char16_t *name, const efi_guid_t *vendor,
- 		       u32 *attr, unsigned long *data_size, void *data)
+@@ -919,22 +919,15 @@ static void __init handle_palo(unsigned long phys_addr)
+ efi_uart_console_only(void)
  {
  	efi_status_t status;
-@@ -646,8 +646,8 @@ static unsigned long efi_name_size(efi_char16_t *name)
- 	u32 phys_data_size, phys_data;
+-	char *s, name[] = "ConOut";
+-	efi_guid_t guid = EFI_GLOBAL_VARIABLE_GUID;
+-	efi_char16_t *utf16, name_utf16[32];
++	const char name[] = "ConOut";
++	const efi_char16_t name_utf16[] = { 'C', 'o', 'n', 'O', 'u', 't', 0 };
+ 	unsigned char data[1024];
+ 	unsigned long size = sizeof(data);
+ 	struct efi_generic_dev_path *hdr, *end_addr;
+ 	int uart = 0;
  
- 	phys_data_size = virt_to_phys_or_null(data_size);
--	phys_vendor = virt_to_phys_or_null(vendor);
--	phys_name = virt_to_phys_or_null_size(name, efi_name_size(name));
-+	phys_vendor = virt_to_phys_or_null((void *)vendor);
-+	phys_name = virt_to_phys_or_null_size((void *)name, efi_name_size(name));
- 	phys_attr = virt_to_phys_or_null(attr);
- 	phys_data = virt_to_phys_or_null_size(data, *data_size);
+-	/* Convert to UTF-16 */
+-	utf16 = name_utf16;
+-	s = name;
+-	while (*s)
+-		*utf16++ = *s++ & 0x7f;
+-	*utf16 = 0;
+-
+-	status = efi.get_variable(name_utf16, &guid, NULL, &size, data);
++	status = efi.get_variable(name_utf16, &EFI_GLOBAL_VARIABLE_GUID,
++				  NULL, &size, data);
+ 	if (status != EFI_SUCCESS) {
+ 		printk(KERN_ERR "No EFI %s variable?\n", name);
+ 		return 0;
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 10aca63..aad3701 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -19,7 +19,7 @@
+ #define EFI_DUMMY_GUID \
+ 	EFI_GUID(0x4424ac57, 0xbe4b, 0x47dd, 0x9e, 0x97, 0xed, 0x50, 0xf0, 0x9f, 0x92, 0xa9)
  
-@@ -658,15 +658,15 @@ static unsigned long efi_name_size(efi_char16_t *name)
- }
+-static efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
++static const efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
  
- static efi_status_t
--efi_thunk_set_variable(efi_char16_t *name, efi_guid_t *vendor,
--		       u32 attr, unsigned long data_size, void *data)
-+efi_thunk_set_variable(const efi_char16_t *name, const efi_guid_t *vendor,
-+		       u32 attr, unsigned long data_size, const void *data)
+ static bool efi_no_storage_paranoia;
+ 
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+index f402ba2..0911449 100644
+--- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -265,7 +265,6 @@ static int efi_pstore_write(enum pstore_type_id type,
  {
- 	u32 phys_name, phys_vendor, phys_data;
+ 	char name[DUMP_NAME_LEN];
+ 	efi_char16_t efi_name[DUMP_NAME_LEN];
+-	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
+ 	int i, ret = 0;
+ 
+ 	sprintf(name, "dump-type%u-%u-%d-%lu-%c", type, part, count,
+@@ -274,7 +273,8 @@ static int efi_pstore_write(enum pstore_type_id type,
+ 	for (i = 0; i < DUMP_NAME_LEN; i++)
+ 		efi_name[i] = name[i];
+ 
+-	efivar_entry_set_safe(efi_name, vendor, PSTORE_EFI_ATTRIBUTES,
++	efivar_entry_set_safe(efi_name, LINUX_EFI_CRASH_GUID,
++			      PSTORE_EFI_ATTRIBUTES,
+ 			      !pstore_cannot_block_path(reason),
+ 			      size, psi->buf);
+ 
+diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
+index 503bbe2..57ddf8c 100644
+--- a/drivers/firmware/efi/efibc.c
++++ b/drivers/firmware/efi/efibc.c
+@@ -32,7 +32,6 @@ static void efibc_str_to_str16(const char *str, efi_char16_t *str16)
+ static int efibc_set_variable(const char *name, const char *value)
+ {
+ 	int ret;
+-	efi_guid_t guid = LINUX_EFI_LOADER_ENTRY_GUID;
+ 	struct efivar_entry *entry;
+ 	size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
+ 
+@@ -49,7 +48,7 @@ static int efibc_set_variable(const char *name, const char *value)
+ 
+ 	efibc_str_to_str16(name, entry->var.VariableName);
+ 	efibc_str_to_str16(value, (efi_char16_t *)entry->var.Data);
+-	memcpy(&entry->var.VendorGuid, &guid, sizeof(guid));
++	entry->var.VendorGuid = LINUX_EFI_LOADER_ENTRY_GUID;
+ 
+ 	ret = efivar_entry_set(entry,
+ 			       EFI_VARIABLE_NON_VOLATILE
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index 6fca48c..da72bfb 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -27,13 +27,12 @@ static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
+ 	static efi_char16_t const sm_var_name[] = {
+ 		'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0 };
+ 
+-	efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
+ 	efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
+ 	u8 val;
+ 	unsigned long size = sizeof(val);
  	efi_status_t status;
  
--	phys_name = virt_to_phys_or_null_size(name, efi_name_size(name));
--	phys_vendor = virt_to_phys_or_null(vendor);
--	phys_data = virt_to_phys_or_null_size(data, data_size);
-+	phys_name = virt_to_phys_or_null_size((void *)name, efi_name_size(name));
-+	phys_vendor = virt_to_phys_or_null((void *)vendor);
-+	phys_data = virt_to_phys_or_null_size((void *)data, data_size);
+-	status = f_getvar((efi_char16_t *)sb_var_name, (efi_guid_t *)&var_guid,
++	status = f_getvar(sb_var_name, &EFI_GLOBAL_VARIABLE_GUID,
+ 			  NULL, &size, &val);
  
- 	/* If data_size is > sizeof(u32) we've got problems */
- 	status = efi_thunk(set_variable, phys_name, phys_vendor,
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index ae54870b..a98de14 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -136,8 +136,8 @@ static efi_status_t virt_efi_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
- 	return status;
- }
+ 	if (status != EFI_SUCCESS)
+@@ -42,7 +41,7 @@ static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
+ 	if (val == 0)
+ 		return 0;
  
--static efi_status_t virt_efi_get_variable(efi_char16_t *name,
--					  efi_guid_t *vendor,
-+static efi_status_t virt_efi_get_variable(const efi_char16_t *name,
-+					  const efi_guid_t *vendor,
- 					  u32 *attr,
- 					  unsigned long *data_size,
- 					  void *data)
-@@ -165,11 +165,11 @@ static efi_status_t virt_efi_get_next_variable(unsigned long *name_size,
- 	return status;
- }
+-	status = f_getvar((efi_char16_t *)sm_var_name, (efi_guid_t *)&var_guid,
++	status = f_getvar(sm_var_name, &EFI_GLOBAL_VARIABLE_GUID,
+ 			  NULL, &size, &val);
  
--static efi_status_t virt_efi_set_variable(efi_char16_t *name,
--					  efi_guid_t *vendor,
-+static efi_status_t virt_efi_set_variable(const efi_char16_t *name,
-+					  const efi_guid_t *vendor,
- 					  u32 attr,
- 					  unsigned long data_size,
--					  void *data)
-+					  const void *data)
+ 	if (status != EFI_SUCCESS)
+diff --git a/drivers/infiniband/hw/hfi1/efivar.c b/drivers/infiniband/hw/hfi1/efivar.c
+index 106349f..f769cc2 100644
+--- a/drivers/infiniband/hw/hfi1/efivar.c
++++ b/drivers/infiniband/hw/hfi1/efivar.c
+@@ -66,7 +66,6 @@ static int read_efi_var(const char *name, unsigned long *size,
  {
  	efi_status_t status;
+ 	efi_char16_t *uni_name;
+-	efi_guid_t guid;
+ 	unsigned long temp_size;
+ 	void *temp_buffer;
+ 	void *data;
+@@ -95,13 +94,10 @@ static int read_efi_var(const char *name, unsigned long *size,
+ 	for (i = 0; name[i]; i++)
+ 		uni_name[i] = name[i];
  
-@@ -182,9 +182,10 @@ static efi_status_t virt_efi_set_variable(efi_char16_t *name,
- }
+-	/* need a variable for our GUID */
+-	guid = HFI1_EFIVAR_GUID;
+-
+ 	/* call into EFI runtime services */
+ 	status = efi.get_variable(
+ 			uni_name,
+-			&guid,
++			&HFI1_EFIVAR_GUID,
+ 			NULL,
+ 			&temp_size,
+ 			temp_buffer);
+diff --git a/drivers/scsi/isci/probe_roms.c b/drivers/scsi/isci/probe_roms.c
+index 8ac646e..d2c17c1 100644
+--- a/drivers/scsi/isci/probe_roms.c
++++ b/drivers/scsi/isci/probe_roms.c
+@@ -34,7 +34,7 @@
+ #include "task.h"
+ #include "probe_roms.h"
  
- static efi_status_t
--virt_efi_set_variable_nonblocking(efi_char16_t *name, efi_guid_t *vendor,
-+virt_efi_set_variable_nonblocking(const efi_char16_t *name,
-+				  const efi_guid_t *vendor,
- 				  u32 attr, unsigned long data_size,
--				  void *data)
-+				  const void *data)
- {
- 	efi_status_t status;
+-static efi_char16_t isci_efivar_name[] = {
++static const efi_char16_t isci_efivar_name[] = {
+ 	'R', 's', 't', 'S', 'c', 'u', 'O'
+ };
  
-diff --git a/drivers/firmware/google/gsmi.c b/drivers/firmware/google/gsmi.c
-index c463871..a1b3cd9 100644
---- a/drivers/firmware/google/gsmi.c
-+++ b/drivers/firmware/google/gsmi.c
-@@ -289,8 +289,8 @@ static int gsmi_exec(u8 func, u8 sub)
- 	return rc;
- }
- 
--static efi_status_t gsmi_get_variable(efi_char16_t *name,
--				      efi_guid_t *vendor, u32 *attr,
-+static efi_status_t gsmi_get_variable(const efi_char16_t *name,
-+				      const efi_guid_t *vendor, u32 *attr,
- 				      unsigned long *data_size,
- 				      void *data)
- {
-@@ -410,11 +410,11 @@ static efi_status_t gsmi_get_next_variable(unsigned long *name_size,
- 	return ret;
- }
- 
--static efi_status_t gsmi_set_variable(efi_char16_t *name,
--				      efi_guid_t *vendor,
-+static efi_status_t gsmi_set_variable(const efi_char16_t *name,
-+				      const efi_guid_t *vendor,
- 				      u32 attr,
- 				      unsigned long data_size,
--				      void *data)
-+				      const void *data)
- {
- 	struct gsmi_nvram_var_param param = {
- 		.name_ptr = gsmi_dev.name_buf->address,
-diff --git a/drivers/xen/efi.c b/drivers/xen/efi.c
-index 22f71ff..248740a 100644
---- a/drivers/xen/efi.c
-+++ b/drivers/xen/efi.c
-@@ -117,9 +117,9 @@ efi_status_t xen_efi_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
- }
- EXPORT_SYMBOL_GPL(xen_efi_set_wakeup_time);
- 
--efi_status_t xen_efi_get_variable(efi_char16_t *name, efi_guid_t *vendor,
--				  u32 *attr, unsigned long *data_size,
--				  void *data)
-+efi_status_t xen_efi_get_variable(const efi_char16_t *name,
-+				  const efi_guid_t *vendor, u32 *attr,
-+				  unsigned long *data_size, void *data)
- {
- 	struct xen_platform_op op = INIT_EFI_OP(get_variable);
- 
-@@ -165,9 +165,9 @@ efi_status_t xen_efi_get_next_variable(unsigned long *name_size,
- }
- EXPORT_SYMBOL_GPL(xen_efi_get_next_variable);
- 
--efi_status_t xen_efi_set_variable(efi_char16_t *name, efi_guid_t *vendor,
--				 u32 attr, unsigned long data_size,
--				 void *data)
-+efi_status_t xen_efi_set_variable(const efi_char16_t *name,
-+				  const efi_guid_t *vendor, u32 attr,
-+				  unsigned long data_size, const void *data)
- {
- 	struct xen_platform_op op = INIT_EFI_OP(set_variable);
- 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 889d40d..6ade102 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -514,13 +514,15 @@ struct efi_boot_memmap {
- typedef efi_status_t efi_get_wakeup_time_t (efi_bool_t *enabled, efi_bool_t *pending,
- 					    efi_time_t *tm);
- typedef efi_status_t efi_set_wakeup_time_t (efi_bool_t enabled, efi_time_t *tm);
--typedef efi_status_t efi_get_variable_t (efi_char16_t *name, efi_guid_t *vendor, u32 *attr,
-+typedef efi_status_t efi_get_variable_t (const efi_char16_t *name,
-+					 const efi_guid_t *vendor, u32 *attr,
- 					 unsigned long *data_size, void *data);
- typedef efi_status_t efi_get_next_variable_t (unsigned long *name_size, efi_char16_t *name,
- 					      efi_guid_t *vendor);
--typedef efi_status_t efi_set_variable_t (efi_char16_t *name, efi_guid_t *vendor, 
--					 u32 attr, unsigned long data_size,
--					 void *data);
-+typedef efi_status_t efi_set_variable_t (const efi_char16_t *name,
-+					 const efi_guid_t *vendor, u32 attr,
-+					 unsigned long data_size,
-+					 const void *data);
- typedef efi_status_t efi_get_next_high_mono_count_t (u32 *count);
- typedef void efi_reset_system_t (int reset_type, efi_status_t status,
- 				 unsigned long data_size, efi_char16_t *data);
-diff --git a/include/xen/arm/interface.h b/include/xen/arm/interface.h
-index 75d5968..daa2956 100644
---- a/include/xen/arm/interface.h
-+++ b/include/xen/arm/interface.h
-@@ -47,6 +47,7 @@
- /* Guest handles for primitive C types. */
- __DEFINE_GUEST_HANDLE(uchar, unsigned char);
- __DEFINE_GUEST_HANDLE(uint,  unsigned int);
-+__DEFINE_GUEST_HANDLE(cvoid, const void);
- DEFINE_GUEST_HANDLE(char);
- DEFINE_GUEST_HANDLE(int);
- DEFINE_GUEST_HANDLE(void);
-diff --git a/include/xen/interface/platform.h b/include/xen/interface/platform.h
-index 732efb0..b7e249c 100644
---- a/include/xen/interface/platform.h
-+++ b/include/xen/interface/platform.h
-@@ -171,7 +171,7 @@ struct xenpf_efi_runtime_call {
- #define XEN_EFI_VARIABLE_BOOTSERVICE_ACCESS 0x00000002
- #define XEN_EFI_VARIABLE_RUNTIME_ACCESS     0x00000004
- 		struct {
--			GUEST_HANDLE(void) name;  /* UCS-2/UTF-16 string */
-+			GUEST_HANDLE(cvoid) name;  /* UCS-2/UTF-16 string */
- 			xen_ulong_t size;
- 			GUEST_HANDLE(void) data;
- 			struct xenpf_efi_guid {
-@@ -180,7 +180,14 @@ struct xenpf_efi_runtime_call {
- 				uint16_t data3;
- 				uint8_t data4[8];
- 			} vendor_guid;
--		} get_variable, set_variable;
-+		} get_variable;
-+
-+		struct {
-+			GUEST_HANDLE(cvoid) name;  /* UCS-2/UTF-16 string */
-+			xen_ulong_t size;
-+			GUEST_HANDLE(cvoid) data;
-+			struct xenpf_efi_guid vendor_guid;
-+		} set_variable;
- 
- 		struct {
- 			xen_ulong_t size;
-diff --git a/include/xen/xen-ops.h b/include/xen/xen-ops.h
-index b5486e6..b118f56 100644
---- a/include/xen/xen-ops.h
-+++ b/include/xen/xen-ops.h
-@@ -103,14 +103,14 @@ int xen_xlate_map_ballooned_pages(xen_pfn_t **pfns, void **vaddr,
- efi_status_t xen_efi_get_wakeup_time(efi_bool_t *enabled, efi_bool_t *pending,
- 				     efi_time_t *tm);
- efi_status_t xen_efi_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm);
--efi_status_t xen_efi_get_variable(efi_char16_t *name, efi_guid_t *vendor,
--				  u32 *attr, unsigned long *data_size,
--				  void *data);
-+efi_status_t xen_efi_get_variable(const efi_char16_t *name,
-+				  const efi_guid_t *vendor, u32 *attr,
-+				  unsigned long *data_size, void *data);
- efi_status_t xen_efi_get_next_variable(unsigned long *name_size,
- 				       efi_char16_t *name, efi_guid_t *vendor);
--efi_status_t xen_efi_set_variable(efi_char16_t *name, efi_guid_t *vendor,
--				  u32 attr, unsigned long data_size,
--				  void *data);
-+efi_status_t xen_efi_set_variable(const efi_char16_t *name,
-+				  const efi_guid_t *vendor, u32 attr,
-+				  unsigned long data_size, const void *data);
- efi_status_t xen_efi_query_variable_info(u32 attr, u64 *storage_space,
- 					 u64 *remaining_space,
- 					 u64 *max_variable_size);
 -- 
 2.11.0
