@@ -1,40 +1,17 @@
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH] efi: use typed function pointers for runtime services
- table
-Date: Mon, 2 Jan 2017 11:42:55 +0100
-Message-ID: <20170102104255.GA20016@wunner.de>
-References: <1479897764-29871-1-git-send-email-ard.biesheuvel@linaro.org>
- <20161124213451.GA3549@codeblueprint.co.uk>
+From: "Dr. David White" <"wd."@eagle.ocn.ne.jp>
+Subject: Urgent Please;;
+Date: Tue, 3 Jan 2017 02:34:38 +0900 (JST)
+Message-ID: <603429211.116392312.1483378478267.JavaMail.root__3837.61488269574$1483379674$gmane$org@eagle.ocn.ne.jp>
+Reply-To: "Dr. David White" <david_white34-SMvu0/A6zywAvxtiuMwx3w@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-2022-JP
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20161124213451.GA3549-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Nov 24, 2016 at 09:34:51PM +0000, Matt Fleming wrote:
-> On Wed, 23 Nov, at 10:42:44AM, Ard Biesheuvel wrote:
-> > Instead of using void pointers, and casting them to correctly typed
-> > function pointers upon use, declare the runtime services pointers
-> > as function pointers using their respective prototypes, for which
-> > typedefs are already available.
-> > 
-> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > ---
-> > 
-> > Build tested on arm64 only
-> 
-> Builds fine for i386, x86-64 and ia64 too.
-> 
-> Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Dear,
+With due respect to your person and much sincerity of purpose. I have a business proposal which I will like to handle with you and $14.5 Million USD is involve. But be rest assured that everything is legal and risk free as I have concluded all the arrangements and the legal papers that will back the transaction up. Kindly indicate your interest as to enable me tell you more detail of the proposal. Waiting for your urgent response.
 
-This hasn't been applied to efi.git/next yet so I resubmitted as part
-of my consification series.  (And I'm afraid I forgot to include your
-Reviewed-by, sorry.)
-
-Thanks,
-
-Lukas
+Yours Faithfully,
+Dr. David White
