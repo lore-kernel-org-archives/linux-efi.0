@@ -1,97 +1,89 @@
 From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 08/10] efi: Constify
- EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL.OutputString()
+Subject: [PATCH 09/10] efi: Constify efi_guidcmp() arguments
 Date: Mon, 2 Jan 2017 11:24:33 +0100
-Message-ID: <38bdd3bb76c7f3ac958a13d1bb9d31132f05d931.1483318593.git.lukas@wunner.de>
+Message-ID: <6cbd46695186be8648555a1ce01548ac8888fee2.1483318593.git.lukas@wunner.de>
 References: <cover.1483318593.git.lukas@wunner.de>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <cover.1483318593.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-UCS-2 strings passed to EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL.OutputString()
-are not modified, so can be declared const.  This allows the compiler to
-place them in the rodata section instead of generating them on the stack
-at runtime, such as with the '\r' string passed from efi_printk() to
-efi_char16_printk().  Constification of such strings is in compliance
-with the EFI spec which marks them "IN" for this protocol function.
+GUIDs passed to efi_guidcmp() are not modified, so declare them const.
+This allows the compiler to place them in the rodata section instead of
+generating them on the stack at runtime.  Pass GUIDs as literals rather
+than assigning them to temporary variables to save a bit on code.
 
 Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>
+Cc: Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>
+Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 ---
- arch/x86/boot/compressed/eboot.c               | 2 +-
- drivers/firmware/efi/libstub/arm-stub.c        | 2 +-
- drivers/firmware/efi/libstub/efi-stub-helper.c | 2 +-
- drivers/firmware/efi/libstub/efistub.h         | 2 +-
- include/linux/efi.h                            | 2 +-
- 5 files changed, 5 insertions(+), 5 deletions(-)
+ drivers/firmware/efi/efi-pstore.c  | 6 ++----
+ drivers/firmware/efi/libstub/fdt.c | 3 +--
+ 2 files changed, 3 insertions(+), 6 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 61014f5..fee5693 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -97,7 +97,7 @@ static inline efi_status_t __open_volume64(void *__image, void **__fh)
- 	return __open_volume32(__image, __fh);
- }
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+index 0911449..e7c9fd1 100644
+--- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -46,7 +46,6 @@ static inline u64 generic_id(unsigned long timestamp,
  
--void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
-+void efi_char16_printk(efi_system_table_t *table, const efi_char16_t *str)
+ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
  {
- 	efi_call_proto(efi_simple_text_output_protocol, output_string,
- 		       efi_early->text_output, str);
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 70d6722..1053ec2 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -90,7 +90,7 @@ efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg,
- }
+-	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
+ 	struct pstore_read_data *cb_data = data;
+ 	char name[DUMP_NAME_LEN], data_type;
+ 	int i;
+@@ -54,7 +53,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
+ 	unsigned int part;
+ 	unsigned long time, size;
  
- void efi_char16_printk(efi_system_table_t *sys_table_arg,
--			      efi_char16_t *str)
-+		       const efi_char16_t *str)
+-	if (efi_guidcmp(entry->var.VendorGuid, vendor))
++	if (efi_guidcmp(entry->var.VendorGuid, LINUX_EFI_CRASH_GUID))
+ 		return 0;
+ 
+ 	for (i = 0; i < DUMP_NAME_LEN; i++)
+@@ -299,14 +298,13 @@ struct pstore_erase_data {
+ static int efi_pstore_erase_func(struct efivar_entry *entry, void *data)
  {
- 	struct efi_simple_text_output_protocol *out;
+ 	struct pstore_erase_data *ed = data;
+-	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
+ 	efi_char16_t efi_name_old[DUMP_NAME_LEN];
+ 	efi_char16_t *efi_name = ed->name;
+ 	unsigned long ucs2_len = ucs2_strlen(ed->name);
+ 	char name_old[DUMP_NAME_LEN];
+ 	int i;
  
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 8e06307..a9b6e4d 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -48,7 +48,7 @@ void efi_printk(efi_system_table_t *sys_table_arg, char *str)
+-	if (efi_guidcmp(entry->var.VendorGuid, vendor))
++	if (efi_guidcmp(entry->var.VendorGuid, LINUX_EFI_CRASH_GUID))
+ 		return 0;
  
- 		ch[0] = *s8;
- 		if (*s8 == '\n') {
--			efi_char16_t nl[2] = { '\r', 0 };
-+			const efi_char16_t nl[2] = { '\r', 0 };
- 			efi_char16_printk(sys_table_arg, nl);
- 		}
+ 	if (ucs2_strncmp(entry->var.VariableName,
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index a6a9311..6ebc3bb 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -332,7 +332,6 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
  
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index 2fe7746..12dee6b 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -24,7 +24,7 @@
- #define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
- #endif
+ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
+ {
+-	efi_guid_t fdt_guid = DEVICE_TREE_GUID;
+ 	efi_config_table_t *tables;
+ 	void *fdt;
+ 	int i;
+@@ -341,7 +340,7 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
+ 	fdt = NULL;
  
--void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
-+void efi_char16_printk(efi_system_table_t *, const efi_char16_t *);
- 
- efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg, void *__image,
- 			     void **__fh);
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 6ed28e1..24a3e55 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1257,7 +1257,7 @@ struct efivar_entry {
- 
- struct efi_simple_text_output_protocol {
- 	void *reset;
--	efi_status_t (*output_string)(void *, void *);
-+	efi_status_t (*output_string)(void *, const void *);
- 	void *test_string;
- };
- 
+ 	for (i = 0; i < sys_table->nr_tables; i++)
+-		if (efi_guidcmp(tables[i].guid, fdt_guid) == 0) {
++		if (efi_guidcmp(tables[i].guid, DEVICE_TREE_GUID) == 0) {
+ 			fdt = (void *) tables[i].table;
+ 			if (fdt_check_header(fdt) != 0) {
+ 				pr_efi_err(sys_table, "Invalid header detected on UEFI supplied FDT, ignoring ...\n");
 -- 
 2.11.0
