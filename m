@@ -1,89 +1,115 @@
 From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 09/10] efi: Constify efi_guidcmp() arguments
+Subject: [PATCH 10/10] uuid: Constify UUID compound literals
 Date: Mon, 2 Jan 2017 11:24:33 +0100
-Message-ID: <6cbd46695186be8648555a1ce01548ac8888fee2.1483318593.git.lukas@wunner.de>
+Message-ID: <c61bbe4733f78c830f6073e86f32159751bbda8c.1483318593.git.lukas@wunner.de>
 References: <cover.1483318593.git.lukas@wunner.de>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <cover.1483318593.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-GUIDs passed to efi_guidcmp() are not modified, so declare them const.
-This allows the compiler to place them in the rodata section instead of
-generating them on the stack at runtime.  Pass GUIDs as literals rather
-than assigning them to temporary variables to save a bit on code.
+The UUID_BE() and UUID_LE() macros (as well as the derived EFI_GUID())
+generate a compound literal for a 128-bit ID.  By default, these are not
+stored in the rodata section but generated on the stack at runtime in a
+very time- and space-inefficient manner.
 
+E.g. EFI_FILE_SYSTEM_GUID (964E5B22-6459-11D2-8E39-00A0C969723B) results
+in x86_64 code which requires 80 bytes text instead of 16 bytes rodata:
+
+    c6 44 24 20 22                   movb   $0x22,0x20(%rsp)
+    c6 44 24 21 5b                   movb   $0x5b,0x21(%rsp)
+    c6 44 24 22 4e                   movb   $0x4e,0x22(%rsp)
+    c6 44 24 23 96                   movb   $0x96,0x23(%rsp)
+    c6 44 24 24 59                   movb   $0x59,0x24(%rsp)
+    c6 44 24 25 64                   movb   $0x64,0x25(%rsp)
+    c6 44 24 26 d2                   movb   $0xd2,0x26(%rsp)
+    c6 44 24 27 11                   movb   $0x11,0x27(%rsp)
+    c6 44 24 28 8e                   movb   $0x8e,0x28(%rsp)
+    c6 44 24 29 39                   movb   $0x39,0x29(%rsp)
+    c6 44 24 2a 00                   movb   $0x0,0x2a(%rsp)
+    c6 44 24 2b a0                   movb   $0xa0,0x2b(%rsp)
+    c6 44 24 2c c9                   movb   $0xc9,0x2c(%rsp)
+    c6 44 24 2d 69                   movb   $0x69,0x2d(%rsp)
+    c6 44 24 2e 72                   movb   $0x72,0x2e(%rsp)
+    c6 44 24 2f 3b                   movb   $0x3b,0x2f(%rsp)
+
+gcc 7 improves on this by using 2x movabs + 2x mov instructions,
+amounting to 30 bytes text instead of 16 bytes rodata.  That's more
+space-efficient than 80 bytes but still undesirable from a performance
+and security perspective:
+
+    48 b8 22 5b 4e 96 59 64 d2 11    movabs $0x11d26459964e5b,%rax
+    48 89 44 24 20                   mov    %rax,0x20(%rsp)
+    48 b8 8e 39 00 a0 c9 69 72 3b    movabs $0x3b7269c9a00039,%rax
+    48 89 44 24 28                   mov    %rax,0x28(%rsp)
+
+The reason for generating compound literals on the stack is that they're
+allowed to be modified.  E.g. a pointer to a UUID might be used to
+change some of its 16 bytes.  In the context of UUIDs this seems silly
+though:  The uuid_be, uuid_le and efi_guid_t data types hide the
+distinct bytes making up the ID, the bytes are not meant to be modified.
+Moreover, the UUIDs are usually pre-defined in a spec such as UEFI and
+there's no reason at all to modify them.
+
+Thus, change the UUID_BE and UUID_LE macros to declare the generated
+compound literal const, allowing the compiler to put it in rodata.
+
+When using the compound literal as an initializer for a variable, that
+variable has to be declared const as well for the UUID to become rodata.
+
+Is that all?  Unfortunately not.  Under certain conditions gcc refuses
+to store compound literals in rodata despite them being declared const.
+Rasmus Villemoes opened a bugzilla entry for this in December 2015:
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68725
+
+The upshot is that if a UUID is passed by value to a function (either
+directly or as a variable), it is stored in rodata.  This is the case
+for efi_guidcmp().  But if the UUID is passed by reference, it is
+generated on the stack, in spite of it being declared const and the
+function parameter being declared const.  This is the case for the
+various EFI boot and runtime services calls such as GetVariable.
+A workaround is to declare a *static* const variable, assign the UUID to
+it and pass the variable by reference to the function.
+
+This issue also affects efi_char16_t strings which are only declared
+const (and not static const).  They're likewise generated on the stack
+at runtime.
+
+clang 3.9 is not better than gcc:  It does the exact opposite by putting
+UUIDs in rodata if they're passed by reference, and generating them on
+the stack if they're passed by value.
+
+Cc: Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>
 Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>
-Cc: Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>
-Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 ---
- drivers/firmware/efi/efi-pstore.c  | 6 ++----
- drivers/firmware/efi/libstub/fdt.c | 3 +--
- 2 files changed, 3 insertions(+), 6 deletions(-)
+ include/uapi/linux/uuid.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-index 0911449..e7c9fd1 100644
---- a/drivers/firmware/efi/efi-pstore.c
-+++ b/drivers/firmware/efi/efi-pstore.c
-@@ -46,7 +46,6 @@ static inline u64 generic_id(unsigned long timestamp,
+diff --git a/include/uapi/linux/uuid.h b/include/uapi/linux/uuid.h
+index 3738e5f..9184f01 100644
+--- a/include/uapi/linux/uuid.h
++++ b/include/uapi/linux/uuid.h
+@@ -29,14 +29,14 @@
+ } uuid_be;
  
- static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
- {
--	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
- 	struct pstore_read_data *cb_data = data;
- 	char name[DUMP_NAME_LEN], data_type;
- 	int i;
-@@ -54,7 +53,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
- 	unsigned int part;
- 	unsigned long time, size;
+ #define UUID_LE(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)		\
+-((uuid_le)								\
++((const uuid_le)							\
+ {{ (a) & 0xff, ((a) >> 8) & 0xff, ((a) >> 16) & 0xff, ((a) >> 24) & 0xff, \
+    (b) & 0xff, ((b) >> 8) & 0xff,					\
+    (c) & 0xff, ((c) >> 8) & 0xff,					\
+    (d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7) }})
  
--	if (efi_guidcmp(entry->var.VendorGuid, vendor))
-+	if (efi_guidcmp(entry->var.VendorGuid, LINUX_EFI_CRASH_GUID))
- 		return 0;
- 
- 	for (i = 0; i < DUMP_NAME_LEN; i++)
-@@ -299,14 +298,13 @@ struct pstore_erase_data {
- static int efi_pstore_erase_func(struct efivar_entry *entry, void *data)
- {
- 	struct pstore_erase_data *ed = data;
--	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
- 	efi_char16_t efi_name_old[DUMP_NAME_LEN];
- 	efi_char16_t *efi_name = ed->name;
- 	unsigned long ucs2_len = ucs2_strlen(ed->name);
- 	char name_old[DUMP_NAME_LEN];
- 	int i;
- 
--	if (efi_guidcmp(entry->var.VendorGuid, vendor))
-+	if (efi_guidcmp(entry->var.VendorGuid, LINUX_EFI_CRASH_GUID))
- 		return 0;
- 
- 	if (ucs2_strncmp(entry->var.VariableName,
-diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index a6a9311..6ebc3bb 100644
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -332,7 +332,6 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
- 
- void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
- {
--	efi_guid_t fdt_guid = DEVICE_TREE_GUID;
- 	efi_config_table_t *tables;
- 	void *fdt;
- 	int i;
-@@ -341,7 +340,7 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
- 	fdt = NULL;
- 
- 	for (i = 0; i < sys_table->nr_tables; i++)
--		if (efi_guidcmp(tables[i].guid, fdt_guid) == 0) {
-+		if (efi_guidcmp(tables[i].guid, DEVICE_TREE_GUID) == 0) {
- 			fdt = (void *) tables[i].table;
- 			if (fdt_check_header(fdt) != 0) {
- 				pr_efi_err(sys_table, "Invalid header detected on UEFI supplied FDT, ignoring ...\n");
+ #define UUID_BE(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)		\
+-((uuid_be)								\
++((const uuid_be)							\
+ {{ ((a) >> 24) & 0xff, ((a) >> 16) & 0xff, ((a) >> 8) & 0xff, (a) & 0xff, \
+    ((b) >> 8) & 0xff, (b) & 0xff,					\
+    ((c) >> 8) & 0xff, (c) & 0xff,					\
 -- 
 2.11.0
