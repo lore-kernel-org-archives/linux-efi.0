@@ -1,56 +1,81 @@
-From: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH] efi/libstub: arm*: double cast memory_map to hide
- compiler warning
-Date: Tue, 3 Jan 2017 14:11:53 -0700
-Message-ID: <976c2a58-7522-96d5-7b37-2baffdaa409d@codeaurora.org>
-References: <20161220113956.GB2225@codeblueprint.co.uk>
- <20161220135207.32492-1-james.morse@arm.com>
- <20161220140728.GE2225@codeblueprint.co.uk>
+From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH 00/10] efi: Constify all the things
+Date: Tue, 3 Jan 2017 13:19:58 -0800
+Message-ID: <CAGXu5j+TtaPmVKmpSVXNswRSBkJz11xQ60tA5WbjWtL8UEq23Q@mail.gmail.com>
+References: <cover.1483318593.git.lukas@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161220140728.GE2225-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <cover.1483318593.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Artur Paszkiewicz <artur.paszkiewicz-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mike Marciniszyn <mike.marciniszyn-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dennis Dalessandro <dennis.dalessandro-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 12/20/2016 7:07 AM, Matt Fleming wrote:
-> On Tue, 20 Dec, at 01:52:07PM, James Morse wrote:
->> "efi/libstub: arm*: Pass latest memory map to the kernel" added a new
->> call to update fdt in-place. This caused a new warning on 32bit ARM:
->>
->> ../drivers/firmware/efi/libstub/fdt.c: In function 'allocate_new_fdt_and_exit_boot':
->> ../drivers/firmware/efi/libstub/fdt.c:303:9: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
->>          (u64)memory_map, (u32)map_size);
->>          ^
->>
->> Cast to an integer of native pointer size first.
->>
->> Reported-by: kbuild test robot <fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->> Signed-off-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
->> ---
->> I guess this too needs to go to stable unless you intend to squash it?
->>
->>  drivers/firmware/efi/libstub/fdt.c | 3 ++-
->>  1 file changed, 2 insertions(+), 1 deletion(-)
+On Mon, Jan 2, 2017 at 2:24 AM, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
+> When disassembling the EFI stub I noticed that GUIDs and efi_char16_t
+> strings are not placed in rodata but generated on the stack at runtime.
+> GUIDs occupy up to 80 bytes of text instead of just 16 bytes rodata
+> which annoyed me enough to go down the rabbit hole of fixing it.
+> This series constifies all GUIDs and EFI-related strings I could find.
 >
-> Thanks James, I've folded this into your previous patch.
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> The most important patch is [10/10] to constify the EFI_GUID() macro.
+> This has to be at the end of the series to avoid compiler warnings.
+> Reviewers may want to read its commit message first as it contains
+> background information.  In particular it explains why this series
+> only fixes the kernel side of things.  Additional work is necessary
+> on the compiler side to actually have all the GUIDs and strings in
+> rodata.  At the moment both gcc and clang achieve that only partially.
 >
+> Ard Biesheuvel expressed an interest in these patches in November but
+> stressed the importance that arguments to EFI boot/runtime/protocol
+> services may only be declared const if the spec marks them "IN":
+> https://lkml.org/lkml/2016/11/21/459
+>
+> Hence I've split the series by boot/runtime/protocol services to allow
+> for easy verification of this fact.  Constification of GetVariable() /
+> SetVariable() is further split in one patch for the function signatures
+> and another for the actual arguments because changing the function
+> signatures is quite involved in this case.
+>
+> efi.git/next needs to be rebased on v4.10-rc1 before this series can be
+> applied because it requires commits f6697df36bdf ("x86/efi: Prevent mixed
+> mode boot corruption with CONFIG_VMAP_STACK=y") and 2fbadc3002c5
+> ("arm/arm64: xen: Move shared architecture headers to include/xen/arm").
+>
+> Unfortunately I was not able to compile-test on ia64, there's no cross-
+> compiler package available on Debian. :-(  I did not receive complaints
+> from 0-day, so I'm cautiously optimistic that I didn't cause breakage
+> there.
+>
+> I've pushed the patches to GitHub to ease reviewing/fetching:
+> https://github.com/l1k/linux/commits/efi_const_v1
+>
+> Thanks,
+>
+> Lukas
+>
+>
+> Ard Biesheuvel (1):
+>   efi: use typed function pointers for runtime services table
+>
+> Lukas Wunner (9):
+>   efi: Constify GetVariable() / SetVariable() signatures
+>   efi: Constify GetVariable() / SetVariable() arguments
+>   efi: Constify HandleProtocol() / LocateHandle() / LocateProtocol()
+>   efi: Constify InstallConfigurationTable()
+>   efi: Constify EFI_FILE_PROTOCOL.GetInfo()
+>   efi: Constify EFI_RNG_PROTOCOL.GetRNG()
+>   efi: Constify EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL.OutputString()
+>   efi: Constify efi_guidcmp() arguments
+>   uuid: Constify UUID compound literals
 
-Thanks James.  I'm happy to see this got cleaned up and sorted out while 
-I was on vacation.  I see Ard submitted a pull request already, but for 
-what its worth, the latest version on the EFI urgent branch tested ok on 
-the platforms I have available.
+Cool! Thanks for doing this!
+
+Reviewed-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+
+-Kees
 
 -- 
-Jeffrey Hugo
-Qualcomm Datacenter Technologies as an affiliate of Qualcomm 
-Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the
-Code Aurora Forum, a Linux Foundation Collaborative Project.
+Kees Cook
+Nexus Security
