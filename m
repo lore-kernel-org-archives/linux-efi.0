@@ -1,117 +1,118 @@
-From: Will Deacon <will.deacon@arm.com>
-Subject: Re: [PATCH V6 04/10] arm64: exception: handle Synchronous External
- Abort
-Date: Wed, 4 Jan 2017 13:54:13 +0000
-Message-ID: <20170104135413.GE18193@arm.com>
-References: <1481147303-7979-1-git-send-email-tbaicar@codeaurora.org>
- <1481147303-7979-5-git-send-email-tbaicar@codeaurora.org>
+From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 08/29] efi: Allow drivers to reserve boot services forever
+Date: Wed, 4 Jan 2017 09:25:27 -0500
+Message-ID: <20170104142526.wudj4ub2yzmc3bng@redhat.com>
+References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
+ <20160909151851.27577-9-matt@codeblueprint.co.uk>
+ <CAA9_cmffnH0CH+3DaUW3ytVnRWbZCHa1VcAfWgwMCfbncN_QcA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1481147303-7979-5-git-send-email-tbaicar@codeaurora.org>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+In-Reply-To: <CAA9_cmffnH0CH+3DaUW3ytVnRWbZCHa1VcAfWgwMCfbncN_QcA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "Verma, Vishal L" <vishal.l.verma-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, poros-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Dec 07, 2016 at 02:48:17PM -0700, Tyler Baicar wrote:
-> SEA exceptions are often caused by an uncorrected hardware
-> error, and are handled when data abort and instruction abort
-> exception classes have specific values for their Fault Status
-> Code.
-> When SEA occurs, before killing the process, go through
-> the handlers registered in the notification list.
-> Update fault_info[] with specific SEA faults so that the
-> new SEA handler is used.
+On Tue, Jan 03, 2017 at 06:48:43PM -0800, Dan Williams wrote:
+> On Fri, Sep 9, 2016 at 8:18 AM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> > Today, it is not possible for drivers to reserve EFI boot services for
+> > access after efi_free_boot_services() has been called on x86. For
+> > ARM/arm64 it can be done simply by calling memblock_reserve().
+> >
+> > Having this ability for all three architectures is desirable for a
+> > couple of reasons,
+> >
+> >   1) It saves drivers copying data out of those regions
+> >   2) kexec reboot can now make use of things like ESRT
+> >
+> > Instead of using the standard memblock_reserve() which is insufficient
+> > to reserve the region on x86 (see efi_reserve_boot_services()), a new
+> > API is introduced in this patch; efi_mem_reserve().
+> >
+> > efi.memmap now always represents which EFI memory regions are
+> > available. On x86 the EFI boot services regions that have not been
+> > reserved via efi_mem_reserve() will be removed from efi.memmap during
+> > efi_free_boot_services().
+> >
+> > This has implications for kexec, since it is not possible for a newly
+> > kexec'd kernel to access the same boot services regions that the
+> > initial boot kernel had access to unless they are reserved by every
+> > kexec kernel in the chain.
+> >
+> > Tested-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> [kexec/kdump]
+> > Tested-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> [arm]
+> > Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+> > Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> > Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 > 
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
-> ---
->  arch/arm64/include/asm/system_misc.h | 13 ++++++++
->  arch/arm64/mm/fault.c                | 58 +++++++++++++++++++++++++++++-------
->  2 files changed, 61 insertions(+), 10 deletions(-)
+> This commit appears to cause a boot regression between v4.8 and v4.9.
+
+Can you verify that the memory map looks reasonable?  This looks similar
+(but not identical) to the traceback I was hitting on some ThinkPads
+with ESRT last month, so there's some chance, if it is caused by bad
+memory map entries, it may be fixed by 1cb209f63 on efi/next .
+
 > 
-> diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
-> index 57f110b..9040e1d 100644
-> --- a/arch/arm64/include/asm/system_misc.h
-> +++ b/arch/arm64/include/asm/system_misc.h
-> @@ -64,4 +64,17 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
->  
->  #endif	/* __ASSEMBLY__ */
->  
-> +/*
-> + * The functions below are used to register and unregister callbacks
-> + * that are to be invoked when a Synchronous External Abort (SEA)
-> + * occurs. An SEA is raised by certain fault status codes that have
-> + * either data or instruction abort as the exception class, and
-> + * callbacks may be registered to parse or handle such hardware errors.
-> + *
-> + * Registered callbacks are run in an interrupt/atomic context. They
-> + * are not allowed to block or sleep.
-> + */
-> +int register_synchronous_ext_abort_notifier(struct notifier_block *nb);
-> +void unregister_synchronous_ext_abort_notifier(struct notifier_block *nb);
+> BUG: unable to handle kernel paging request at ffff8830281bf1c8
+> IP: [<ffffffff81a21266>] __next_mem_range_rev+0x13a/0x1d6
+> PGD 3193067 PUD 3196067 PTE 80000030281bf060
+> Oops: 0000 1 SMP DEBUG_PAGEALLOC
+> Modules linked in:
+> CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.9.0+ #2
+> task: ffffffff82011540 task.stack: ffffffff82000000
+> RIP: 0010:[<ffffffff81a21266>] [<ffffffff81a21266>]
+> __next_mem_range_rev+0x13a/0x1d6
+> RSP: 0000:ffffffff82003dd8 EFLAGS: 00010202
+> RAX: ffff8830281bf1e0 RBX: ffffffff82003e60 RCX: ffffffff82167490
+> RDX: 0000000000000000 RSI: 00000000ffffffff RDI: 0000001840000000
+> RBP: ffffffff82003e18 R08: ffffffff821674b0 R09: 000000000000008f
+> R10: 000000000000008f R11: ffffffff82011cf0 R12: 0000000000000004
+> R13: 0000003040000000 R14: 0000000000000000 R15: 0000000000000001
+> FS: 0000000000000000(0000) GS:ffff8817e0800000(0000) knlGS:0000000000000000
+> CS: 0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> CR2: ffff8830281bf1c8 CR3: 000000000200a000 CR4: 00000000007406f0
+> DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+> DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+> PKRU: 00000000
+> Stack:
+> ffffea0000001700 ffffffff82003e50 0000000000000000
+> 00000000000010000000003040000000 ffffffff82003e58 0000000000000180
+> ffffffffffffffc0
+> ffffffff82003e98 ffffffff81a21395 ffffffff82003e58 0000000000000000
+> Call Trace:
+> [<ffffffff81a21395>] memblock_find_in_range_node+0x93/0x13a
+> [<ffffffff8221e3b1>] memblock_alloc_range_nid+0x1b/0x3e
+> [<ffffffff8221e5b9>] __memblock_alloc_base+0x15/0x17
+> [<ffffffff8221e5cd>] memblock_alloc_base+0x12/0x2e
+> [<ffffffff8221e5f4>] memblock_alloc+0xb/0xd
+> [<ffffffff82208e22>] efi_free_boot_services+0x46/0x180
+> [<ffffffff821e818b>] start_kernel+0x4a1/0x4cc
+> [<ffffffff821e7ad8>] ? set_init_arg+0x55/0x55
+> [<ffffffff821e7120>] ? early_idt_handler_array+0x120/0x120
+> [<ffffffff821e75d6>] x86_64_start_reservations+0x2a/0x2c
+> [<ffffffff821e7724>] x86_64_start_kernel+0x14c/0x16f
+> Code: 18 44 89 38 41 8d 44 24 ff 49 c1 e1 20 4c 09 c8 48 89 03 e9 a0
+> 00 00 00 4d 63 d1 4c 89 d0 48 c1 e0 05 49 03 40 18 45 85 c9 74 28 <48>
+> 8b 50 e8 48 03 50 e0 49 83 cb ff 4d 3b 10 73 03 4c 8b 18 49 ^M
+> RIP [<ffffffff81a21266>] __next_mem_range_rev+0x13a/0x1d6
+> 
+> I also see that Petr may have run into it as well [1]? Petr is this
+> the same signature you are seeing? Can you post a boot log with
+> "efi=debug" on the kernel command line?
+> 
+> It also fails on 4.10-rc2.  However, if I revert the following commits
+> it boots fine:
+> 
+> 4bc9f92e64c8 x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data
+> 8e80632fb23f efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()
+> 816e76129ed5 efi: Allow drivers to reserve boot services forever
+> 
+> [1]: https://lkml.org/lkml/2016/12/21/197
 
-I think that we may as well use the "SEA" acronym consistently in code,
-expanding it only for strings and comments, so these can be renamed to
-{register,unregister}_sea_notifier. That said, what is the use of having a
-notifier chain here as well as in the ghes code? If the ghes code is the
-only place to register a notifier, we may as well start simple and call that
-code directly, like we call handle_mm_fault directly for data aborts.
-
->  static const struct fault_info {
->  	int	(*fn)(unsigned long addr, unsigned int esr, struct pt_regs *regs);
->  	int	sig;
-> @@ -502,22 +540,22 @@ static const struct fault_info {
->  	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 1 permission fault"	},
->  	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
->  	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 permission fault"	},
-> -	{ do_bad,		SIGBUS,  0,		"synchronous external abort"	},
-> +	{ do_synch_ext_abort,	SIGBUS,  0,		"synchronous external abort"	},
-
-Again, just stick with do_sea for the function name...
-
->  	{ do_bad,		SIGBUS,  0,		"unknown 17"			},
->  	{ do_bad,		SIGBUS,  0,		"unknown 18"			},
->  	{ do_bad,		SIGBUS,  0,		"unknown 19"			},
-> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
-> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
-> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
-> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
-> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error"	},
-> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 0 SEA (trans tbl walk)"	},
-
-... but there's no need to abbreviate "translation table walk" here. Long
-strings that run over 80 chars are fine. Similarly for "SEA".
-
-> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 1 SEA (trans tbl walk)"	},
-> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 2 SEA (trans tbl walk)"	},
-> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 3 SEA (trans tbl walk)"	},
-> +	{ do_synch_ext_abort,	SIGBUS,  0,		"synchronous parity or ECC err" },
->  	{ do_bad,		SIGBUS,  0,		"unknown 25"			},
->  	{ do_bad,		SIGBUS,  0,		"unknown 26"			},
->  	{ do_bad,		SIGBUS,  0,		"unknown 27"			},
-> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
-> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
-> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
-> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
-> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 0 synch parity error"	},
-> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 1 synch parity error"	},
-> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 2 synch parity error"	},
-> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 3 synch parity error"	},
-
-Please keep mention of "translation table walk", since we have exception
-levels too and it's confusing just saying "level n".
-
-Will
+-- 
+        Peter
