@@ -1,59 +1,117 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi/libstub: arm*: double cast memory_map to hide
- compiler warning
-Date: Wed, 4 Jan 2017 13:37:10 +0000
-Message-ID: <CAKv+Gu-6w=fHtMnNT1sf=78_E_vbQHFydyRigFBbMAe0ZYbiPg@mail.gmail.com>
-References: <20161220113956.GB2225@codeblueprint.co.uk> <20161220135207.32492-1-james.morse@arm.com>
- <20161220140728.GE2225@codeblueprint.co.uk> <976c2a58-7522-96d5-7b37-2baffdaa409d@codeaurora.org>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH V6 04/10] arm64: exception: handle Synchronous External
+ Abort
+Date: Wed, 4 Jan 2017 13:54:13 +0000
+Message-ID: <20170104135413.GE18193@arm.com>
+References: <1481147303-7979-1-git-send-email-tbaicar@codeaurora.org>
+ <1481147303-7979-5-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <976c2a58-7522-96d5-7b37-2baffdaa409d-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+Content-Disposition: inline
+In-Reply-To: <1481147303-7979-5-git-send-email-tbaicar@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-On 3 January 2017 at 21:11, Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
-> On 12/20/2016 7:07 AM, Matt Fleming wrote:
->>
->> On Tue, 20 Dec, at 01:52:07PM, James Morse wrote:
->>>
->>> "efi/libstub: arm*: Pass latest memory map to the kernel" added a new
->>> call to update fdt in-place. This caused a new warning on 32bit ARM:
->>>
->>> ../drivers/firmware/efi/libstub/fdt.c: In function
->>> 'allocate_new_fdt_and_exit_boot':
->>> ../drivers/firmware/efi/libstub/fdt.c:303:9: warning: cast from pointer
->>> to integer of different size [-Wpointer-to-int-cast]
->>>          (u64)memory_map, (u32)map_size);
->>>          ^
->>>
->>> Cast to an integer of native pointer size first.
->>>
->>> Reported-by: kbuild test robot <fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->>> Signed-off-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
->>> ---
->>> I guess this too needs to go to stable unless you intend to squash it?
->>>
->>>  drivers/firmware/efi/libstub/fdt.c | 3 ++-
->>>  1 file changed, 2 insertions(+), 1 deletion(-)
->>
->>
->> Thanks James, I've folded this into your previous patch.
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
->> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> Thanks James.  I'm happy to see this got cleaned up and sorted out while I
-> was on vacation.  I see Ard submitted a pull request already, but for what
-> its worth, the latest version on the EFI urgent branch tested ok on the
-> platforms I have available.
->
+On Wed, Dec 07, 2016 at 02:48:17PM -0700, Tyler Baicar wrote:
+> SEA exceptions are often caused by an uncorrected hardware
+> error, and are handled when data abort and instruction abort
+> exception classes have specific values for their Fault Status
+> Code.
+> When SEA occurs, before killing the process, go through
+> the handlers registered in the notification list.
+> Update fault_info[] with specific SEA faults so that the
+> new SEA handler is used.
+> 
+> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+> ---
+>  arch/arm64/include/asm/system_misc.h | 13 ++++++++
+>  arch/arm64/mm/fault.c                | 58 +++++++++++++++++++++++++++++-------
+>  2 files changed, 61 insertions(+), 10 deletions(-)
+> 
+> diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
+> index 57f110b..9040e1d 100644
+> --- a/arch/arm64/include/asm/system_misc.h
+> +++ b/arch/arm64/include/asm/system_misc.h
+> @@ -64,4 +64,17 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
+>  
+>  #endif	/* __ASSEMBLY__ */
+>  
+> +/*
+> + * The functions below are used to register and unregister callbacks
+> + * that are to be invoked when a Synchronous External Abort (SEA)
+> + * occurs. An SEA is raised by certain fault status codes that have
+> + * either data or instruction abort as the exception class, and
+> + * callbacks may be registered to parse or handle such hardware errors.
+> + *
+> + * Registered callbacks are run in an interrupt/atomic context. They
+> + * are not allowed to block or sleep.
+> + */
+> +int register_synchronous_ext_abort_notifier(struct notifier_block *nb);
+> +void unregister_synchronous_ext_abort_notifier(struct notifier_block *nb);
 
-Thanks for confirming
+I think that we may as well use the "SEA" acronym consistently in code,
+expanding it only for strings and comments, so these can be renamed to
+{register,unregister}_sea_notifier. That said, what is the use of having a
+notifier chain here as well as in the ghes code? If the ghes code is the
+only place to register a notifier, we may as well start simple and call that
+code directly, like we call handle_mm_fault directly for data aborts.
 
-Cheers,
-Ard.
+>  static const struct fault_info {
+>  	int	(*fn)(unsigned long addr, unsigned int esr, struct pt_regs *regs);
+>  	int	sig;
+> @@ -502,22 +540,22 @@ static const struct fault_info {
+>  	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 1 permission fault"	},
+>  	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
+>  	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 permission fault"	},
+> -	{ do_bad,		SIGBUS,  0,		"synchronous external abort"	},
+> +	{ do_synch_ext_abort,	SIGBUS,  0,		"synchronous external abort"	},
+
+Again, just stick with do_sea for the function name...
+
+>  	{ do_bad,		SIGBUS,  0,		"unknown 17"			},
+>  	{ do_bad,		SIGBUS,  0,		"unknown 18"			},
+>  	{ do_bad,		SIGBUS,  0,		"unknown 19"			},
+> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error"	},
+> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 0 SEA (trans tbl walk)"	},
+
+... but there's no need to abbreviate "translation table walk" here. Long
+strings that run over 80 chars are fine. Similarly for "SEA".
+
+> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 1 SEA (trans tbl walk)"	},
+> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 2 SEA (trans tbl walk)"	},
+> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 3 SEA (trans tbl walk)"	},
+> +	{ do_synch_ext_abort,	SIGBUS,  0,		"synchronous parity or ECC err" },
+>  	{ do_bad,		SIGBUS,  0,		"unknown 25"			},
+>  	{ do_bad,		SIGBUS,  0,		"unknown 26"			},
+>  	{ do_bad,		SIGBUS,  0,		"unknown 27"			},
+> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
+> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
+> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
+> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
+> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 0 synch parity error"	},
+> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 1 synch parity error"	},
+> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 2 synch parity error"	},
+> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 3 synch parity error"	},
+
+Please keep mention of "translation table walk", since we have exception
+levels too and it's confusing just saying "level n".
+
+Will
