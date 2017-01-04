@@ -1,93 +1,136 @@
-From: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 08/29] efi: Allow drivers to reserve boot services forever
-Date: Wed, 04 Jan 2017 18:45:41 +0100
-Message-ID: <87y3yq3eii.fsf@gmail.com>
-References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
-        <20160909151851.27577-9-matt@codeblueprint.co.uk>
-        <CAA9_cmffnH0CH+3DaUW3ytVnRWbZCHa1VcAfWgwMCfbncN_QcA@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 10/10] uuid: Constify UUID compound literals
+Date: Wed, 4 Jan 2017 17:54:08 +0000
+Message-ID: <CAKv+Gu8GqCrjOM6nTTHQckyUzrv+BO-B=st35yOptPfjA7Hitg@mail.gmail.com>
+References: <cover.1483318593.git.lukas@wunner.de> <c61bbe4733f78c830f6073e86f32159751bbda8c.1483318593.git.lukas@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAA9_cmffnH0CH+3DaUW3ytVnRWbZCHa1VcAfWgwMCfbncN_QcA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-        (Dan Williams's message of "Tue, 3 Jan 2017 18:48:43 -0800")
+In-Reply-To: <c61bbe4733f78c830f6073e86f32159751bbda8c.1483318593.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Verma, Vishal L" <vishal.l.verma-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, poros-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> writes:
+Hi Lukas,
 
-> This commit appears to cause a boot regression between v4.8 and v4.9.
+On 2 January 2017 at 10:24, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
+> The UUID_BE() and UUID_LE() macros (as well as the derived EFI_GUID())
+> generate a compound literal for a 128-bit ID.  By default, these are not
+> stored in the rodata section but generated on the stack at runtime in a
+> very time- and space-inefficient manner.
 >
-> BUG: unable to handle kernel paging request at ffff8830281bf1c8
-> IP: [<ffffffff81a21266>] __next_mem_range_rev+0x13a/0x1d6
-> PGD 3193067 PUD 3196067 PTE 80000030281bf060
-> Oops: 0000 1 SMP DEBUG_PAGEALLOC
-> Modules linked in:
-> CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.9.0+ #2
-> task: ffffffff82011540 task.stack: ffffffff82000000
-> RIP: 0010:[<ffffffff81a21266>] [<ffffffff81a21266>]
-> __next_mem_range_rev+0x13a/0x1d6
-> RSP: 0000:ffffffff82003dd8 EFLAGS: 00010202
-> RAX: ffff8830281bf1e0 RBX: ffffffff82003e60 RCX: ffffffff82167490
-> RDX: 0000000000000000 RSI: 00000000ffffffff RDI: 0000001840000000
-> RBP: ffffffff82003e18 R08: ffffffff821674b0 R09: 000000000000008f
-> R10: 000000000000008f R11: ffffffff82011cf0 R12: 0000000000000004
-> R13: 0000003040000000 R14: 0000000000000000 R15: 0000000000000001
-> FS: 0000000000000000(0000) GS:ffff8817e0800000(0000) knlGS:0000000000000000
-> CS: 0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> CR2: ffff8830281bf1c8 CR3: 000000000200a000 CR4: 00000000007406f0
-> DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-> PKRU: 00000000
-> Stack:
-> ffffea0000001700 ffffffff82003e50 0000000000000000
-> 00000000000010000000003040000000 ffffffff82003e58 0000000000000180
-> ffffffffffffffc0
-> ffffffff82003e98 ffffffff81a21395 ffffffff82003e58 0000000000000000
-> Call Trace:
-> [<ffffffff81a21395>] memblock_find_in_range_node+0x93/0x13a
-> [<ffffffff8221e3b1>] memblock_alloc_range_nid+0x1b/0x3e
-> [<ffffffff8221e5b9>] __memblock_alloc_base+0x15/0x17
-> [<ffffffff8221e5cd>] memblock_alloc_base+0x12/0x2e
-> [<ffffffff8221e5f4>] memblock_alloc+0xb/0xd
-> [<ffffffff82208e22>] efi_free_boot_services+0x46/0x180
-> [<ffffffff821e818b>] start_kernel+0x4a1/0x4cc
-> [<ffffffff821e7ad8>] ? set_init_arg+0x55/0x55
-> [<ffffffff821e7120>] ? early_idt_handler_array+0x120/0x120
-> [<ffffffff821e75d6>] x86_64_start_reservations+0x2a/0x2c
-> [<ffffffff821e7724>] x86_64_start_kernel+0x14c/0x16f
-> Code: 18 44 89 38 41 8d 44 24 ff 49 c1 e1 20 4c 09 c8 48 89 03 e9 a0
-> 00 00 00 4d 63 d1 4c 89 d0 48 c1 e0 05 49 03 40 18 45 85 c9 74 28 <48>
-> 8b 50 e8 48 03 50 e0 49 83 cb ff 4d 3b 10 73 03 4c 8b 18 49 ^M
-> RIP [<ffffffff81a21266>] __next_mem_range_rev+0x13a/0x1d6
+
+This is not true if you declare those variables static const (in
+function scope).
+
+In general, I think we should avoid touching uapi headers for this, so
+I would like to explore if we can reach the same result without this
+patch. Another objection I have to this patch is that it is context
+dependent whether the UUID_[LE_BE]() macros in fact generate compound
+literals: this is true for an assignment to a pointer variable, but
+when they are used in initializers this is not the case, and so adding
+'const' to their definitions is not always appropriate imo.
+
+Are there any instances where simply turning those automatic variables
+into static const doesn't work?
+
+> E.g. EFI_FILE_SYSTEM_GUID (964E5B22-6459-11D2-8E39-00A0C969723B) results
+> in x86_64 code which requires 80 bytes text instead of 16 bytes rodata:
 >
-> I also see that Petr may have run into it as well [1]? Petr is this
-> the same signature you are seeing? Can you post a boot log with
-> "efi=debug" on the kernel command line?
+>     c6 44 24 20 22                   movb   $0x22,0x20(%rsp)
+>     c6 44 24 21 5b                   movb   $0x5b,0x21(%rsp)
+>     c6 44 24 22 4e                   movb   $0x4e,0x22(%rsp)
+>     c6 44 24 23 96                   movb   $0x96,0x23(%rsp)
+>     c6 44 24 24 59                   movb   $0x59,0x24(%rsp)
+>     c6 44 24 25 64                   movb   $0x64,0x25(%rsp)
+>     c6 44 24 26 d2                   movb   $0xd2,0x26(%rsp)
+>     c6 44 24 27 11                   movb   $0x11,0x27(%rsp)
+>     c6 44 24 28 8e                   movb   $0x8e,0x28(%rsp)
+>     c6 44 24 29 39                   movb   $0x39,0x29(%rsp)
+>     c6 44 24 2a 00                   movb   $0x0,0x2a(%rsp)
+>     c6 44 24 2b a0                   movb   $0xa0,0x2b(%rsp)
+>     c6 44 24 2c c9                   movb   $0xc9,0x2c(%rsp)
+>     c6 44 24 2d 69                   movb   $0x69,0x2d(%rsp)
+>     c6 44 24 2e 72                   movb   $0x72,0x2e(%rsp)
+>     c6 44 24 2f 3b                   movb   $0x3b,0x2f(%rsp)
 >
-> It also fails on 4.10-rc2.  However, if I revert the following commits
-> it boots fine:
+> gcc 7 improves on this by using 2x movabs + 2x mov instructions,
+> amounting to 30 bytes text instead of 16 bytes rodata.  That's more
+> space-efficient than 80 bytes but still undesirable from a performance
+> and security perspective:
 >
-> 4bc9f92e64c8 x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data
-> 8e80632fb23f efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()
-> 816e76129ed5 efi: Allow drivers to reserve boot services forever
+>     48 b8 22 5b 4e 96 59 64 d2 11    movabs $0x11d26459964e5b,%rax
+>     48 89 44 24 20                   mov    %rax,0x20(%rsp)
+>     48 b8 8e 39 00 a0 c9 69 72 3b    movabs $0x3b7269c9a00039,%rax
+>     48 89 44 24 28                   mov    %rax,0x28(%rsp)
 >
-> [1]: https://lkml.org/lkml/2016/12/21/197
-
-
-Looks very similiar to a problem I've seen with DEBUG_PAGEALLOC=y.
-
-Can you try whether this patch
-
-  http://lkml.kernel.org/r/20161222102340.2689-1-nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-
-fixes it for you?
-
-It makes efi_free_boot_services() not to call into the memblock
-allocator -- it must not do that after mm_init().
-
-
-Thanks,
-
-Nicolai
+> The reason for generating compound literals on the stack is that they're
+> allowed to be modified.  E.g. a pointer to a UUID might be used to
+> change some of its 16 bytes.  In the context of UUIDs this seems silly
+> though:  The uuid_be, uuid_le and efi_guid_t data types hide the
+> distinct bytes making up the ID, the bytes are not meant to be modified.
+> Moreover, the UUIDs are usually pre-defined in a spec such as UEFI and
+> there's no reason at all to modify them.
+>
+> Thus, change the UUID_BE and UUID_LE macros to declare the generated
+> compound literal const, allowing the compiler to put it in rodata.
+>
+> When using the compound literal as an initializer for a variable, that
+> variable has to be declared const as well for the UUID to become rodata.
+>
+> Is that all?  Unfortunately not.  Under certain conditions gcc refuses
+> to store compound literals in rodata despite them being declared const.
+> Rasmus Villemoes opened a bugzilla entry for this in December 2015:
+> https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68725
+>
+> The upshot is that if a UUID is passed by value to a function (either
+> directly or as a variable), it is stored in rodata.  This is the case
+> for efi_guidcmp().  But if the UUID is passed by reference, it is
+> generated on the stack, in spite of it being declared const and the
+> function parameter being declared const.  This is the case for the
+> various EFI boot and runtime services calls such as GetVariable.
+> A workaround is to declare a *static* const variable, assign the UUID to
+> it and pass the variable by reference to the function.
+>
+> This issue also affects efi_char16_t strings which are only declared
+> const (and not static const).  They're likewise generated on the stack
+> at runtime.
+>
+> clang 3.9 is not better than gcc:  It does the exact opposite by putting
+> UUIDs in rodata if they're passed by reference, and generating them on
+> the stack if they're passed by value.
+>
+> Cc: Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+> ---
+>  include/uapi/linux/uuid.h | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/include/uapi/linux/uuid.h b/include/uapi/linux/uuid.h
+> index 3738e5f..9184f01 100644
+> --- a/include/uapi/linux/uuid.h
+> +++ b/include/uapi/linux/uuid.h
+> @@ -29,14 +29,14 @@
+>  } uuid_be;
+>
+>  #define UUID_LE(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)               \
+> -((uuid_le)                                                             \
+> +((const uuid_le)                                                       \
+>  {{ (a) & 0xff, ((a) >> 8) & 0xff, ((a) >> 16) & 0xff, ((a) >> 24) & 0xff, \
+>     (b) & 0xff, ((b) >> 8) & 0xff,                                      \
+>     (c) & 0xff, ((c) >> 8) & 0xff,                                      \
+>     (d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7) }})
+>
+>  #define UUID_BE(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)               \
+> -((uuid_be)                                                             \
+> +((const uuid_be)                                                       \
+>  {{ ((a) >> 24) & 0xff, ((a) >> 16) & 0xff, ((a) >> 8) & 0xff, (a) & 0xff, \
+>     ((b) >> 8) & 0xff, (b) & 0xff,                                      \
+>     ((c) >> 8) & 0xff, (c) & 0xff,                                      \
+> --
+> 2.11.0
+>
