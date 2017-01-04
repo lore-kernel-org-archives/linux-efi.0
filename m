@@ -1,118 +1,206 @@
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 08/29] efi: Allow drivers to reserve boot services forever
-Date: Wed, 4 Jan 2017 09:25:27 -0500
-Message-ID: <20170104142526.wudj4ub2yzmc3bng@redhat.com>
-References: <20160909151851.27577-1-matt@codeblueprint.co.uk>
- <20160909151851.27577-9-matt@codeblueprint.co.uk>
- <CAA9_cmffnH0CH+3DaUW3ytVnRWbZCHa1VcAfWgwMCfbncN_QcA@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 03/10] efi: Constify GetVariable() / SetVariable() arguments
+Date: Wed, 4 Jan 2017 17:38:13 +0000
+Message-ID: <CAKv+Gu8UnAzQGsmyWYsWsOY3B+J9HXechwBX_Vk-rntBtO+Dug@mail.gmail.com>
+References: <cover.1483318593.git.lukas@wunner.de> <2be92e87ff7855bcd88c86a7436f46d3488483f0.1483318593.git.lukas@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAA9_cmffnH0CH+3DaUW3ytVnRWbZCHa1VcAfWgwMCfbncN_QcA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <2be92e87ff7855bcd88c86a7436f46d3488483f0.1483318593.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "Verma, Vishal L" <vishal.l.verma-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, poros-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Artur Paszkiewicz <artur.paszkiewicz-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mike Marciniszyn <mike.marciniszyn-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dennis Dalessandro <dennis.dalessandro-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jan 03, 2017 at 06:48:43PM -0800, Dan Williams wrote:
-> On Fri, Sep 9, 2016 at 8:18 AM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> > Today, it is not possible for drivers to reserve EFI boot services for
-> > access after efi_free_boot_services() has been called on x86. For
-> > ARM/arm64 it can be done simply by calling memblock_reserve().
-> >
-> > Having this ability for all three architectures is desirable for a
-> > couple of reasons,
-> >
-> >   1) It saves drivers copying data out of those regions
-> >   2) kexec reboot can now make use of things like ESRT
-> >
-> > Instead of using the standard memblock_reserve() which is insufficient
-> > to reserve the region on x86 (see efi_reserve_boot_services()), a new
-> > API is introduced in this patch; efi_mem_reserve().
-> >
-> > efi.memmap now always represents which EFI memory regions are
-> > available. On x86 the EFI boot services regions that have not been
-> > reserved via efi_mem_reserve() will be removed from efi.memmap during
-> > efi_free_boot_services().
-> >
-> > This has implications for kexec, since it is not possible for a newly
-> > kexec'd kernel to access the same boot services regions that the
-> > initial boot kernel had access to unless they are reserved by every
-> > kexec kernel in the chain.
-> >
-> > Tested-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> [kexec/kdump]
-> > Tested-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> [arm]
-> > Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-> > Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> > Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> 
-> This commit appears to cause a boot regression between v4.8 and v4.9.
+On 2 January 2017 at 10:24, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
+> GUIDs and variable names passed to GetVariable() / SetVariable() are not
+> modified, so declare them const.  This allows the compiler to place them
+> in the rodata section instead of generating them on the stack at
+> runtime.  Pass GUIDs as literals rather than assigning them to temporary
+> variables to save a bit on code.
+>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>
+> Cc: Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>
+> Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> Cc: Artur Paszkiewicz <artur.paszkiewicz-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Mike Marciniszyn <mike.marciniszyn-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Dennis Dalessandro <dennis.dalessandro-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+> ---
+>  arch/ia64/kernel/efi.c                  | 15 ++++-----------
+>  arch/x86/platform/efi/quirks.c          |  2 +-
+>  drivers/firmware/efi/efi-pstore.c       |  4 ++--
+>  drivers/firmware/efi/efibc.c            |  3 +--
+>  drivers/firmware/efi/libstub/arm-stub.c |  5 ++---
+>  drivers/infiniband/hw/hfi1/efivar.c     |  6 +-----
+>  drivers/scsi/isci/probe_roms.c          |  2 +-
+>  7 files changed, 12 insertions(+), 25 deletions(-)
+>
+> diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
+> index f57d089..f1264ab 100644
+> --- a/arch/ia64/kernel/efi.c
+> +++ b/arch/ia64/kernel/efi.c
+> @@ -919,22 +919,15 @@ static void __init handle_palo(unsigned long phys_addr)
+>  efi_uart_console_only(void)
+>  {
+>         efi_status_t status;
+> -       char *s, name[] = "ConOut";
+> -       efi_guid_t guid = EFI_GLOBAL_VARIABLE_GUID;
+> -       efi_char16_t *utf16, name_utf16[32];
+> +       const char name[] = "ConOut";
+> +       const efi_char16_t name_utf16[] = { 'C', 'o', 'n', 'O', 'u', 't', 0 };
 
-Can you verify that the memory map looks reasonable?  This looks similar
-(but not identical) to the traceback I was hitting on some ThinkPads
-with ESRT last month, so there's some chance, if it is caused by bad
-memory map entries, it may be fixed by 1cb209f63 on efi/next .
+I know you mention 'static' in 10/10, but I don't understand why you
+don't make these static to begin with. That also allows you to
+annotate them as __initconst, which is not possible for compound
+initializers (including the GUID)
 
-> 
-> BUG: unable to handle kernel paging request at ffff8830281bf1c8
-> IP: [<ffffffff81a21266>] __next_mem_range_rev+0x13a/0x1d6
-> PGD 3193067 PUD 3196067 PTE 80000030281bf060
-> Oops: 0000 1 SMP DEBUG_PAGEALLOC
-> Modules linked in:
-> CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.9.0+ #2
-> task: ffffffff82011540 task.stack: ffffffff82000000
-> RIP: 0010:[<ffffffff81a21266>] [<ffffffff81a21266>]
-> __next_mem_range_rev+0x13a/0x1d6
-> RSP: 0000:ffffffff82003dd8 EFLAGS: 00010202
-> RAX: ffff8830281bf1e0 RBX: ffffffff82003e60 RCX: ffffffff82167490
-> RDX: 0000000000000000 RSI: 00000000ffffffff RDI: 0000001840000000
-> RBP: ffffffff82003e18 R08: ffffffff821674b0 R09: 000000000000008f
-> R10: 000000000000008f R11: ffffffff82011cf0 R12: 0000000000000004
-> R13: 0000003040000000 R14: 0000000000000000 R15: 0000000000000001
-> FS: 0000000000000000(0000) GS:ffff8817e0800000(0000) knlGS:0000000000000000
-> CS: 0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> CR2: ffff8830281bf1c8 CR3: 000000000200a000 CR4: 00000000007406f0
-> DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-> PKRU: 00000000
-> Stack:
-> ffffea0000001700 ffffffff82003e50 0000000000000000
-> 00000000000010000000003040000000 ffffffff82003e58 0000000000000180
-> ffffffffffffffc0
-> ffffffff82003e98 ffffffff81a21395 ffffffff82003e58 0000000000000000
-> Call Trace:
-> [<ffffffff81a21395>] memblock_find_in_range_node+0x93/0x13a
-> [<ffffffff8221e3b1>] memblock_alloc_range_nid+0x1b/0x3e
-> [<ffffffff8221e5b9>] __memblock_alloc_base+0x15/0x17
-> [<ffffffff8221e5cd>] memblock_alloc_base+0x12/0x2e
-> [<ffffffff8221e5f4>] memblock_alloc+0xb/0xd
-> [<ffffffff82208e22>] efi_free_boot_services+0x46/0x180
-> [<ffffffff821e818b>] start_kernel+0x4a1/0x4cc
-> [<ffffffff821e7ad8>] ? set_init_arg+0x55/0x55
-> [<ffffffff821e7120>] ? early_idt_handler_array+0x120/0x120
-> [<ffffffff821e75d6>] x86_64_start_reservations+0x2a/0x2c
-> [<ffffffff821e7724>] x86_64_start_kernel+0x14c/0x16f
-> Code: 18 44 89 38 41 8d 44 24 ff 49 c1 e1 20 4c 09 c8 48 89 03 e9 a0
-> 00 00 00 4d 63 d1 4c 89 d0 48 c1 e0 05 49 03 40 18 45 85 c9 74 28 <48>
-> 8b 50 e8 48 03 50 e0 49 83 cb ff 4d 3b 10 73 03 4c 8b 18 49 ^M
-> RIP [<ffffffff81a21266>] __next_mem_range_rev+0x13a/0x1d6
-> 
-> I also see that Petr may have run into it as well [1]? Petr is this
-> the same signature you are seeing? Can you post a boot log with
-> "efi=debug" on the kernel command line?
-> 
-> It also fails on 4.10-rc2.  However, if I revert the following commits
-> it boots fine:
-> 
-> 4bc9f92e64c8 x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data
-> 8e80632fb23f efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()
-> 816e76129ed5 efi: Allow drivers to reserve boot services forever
-> 
-> [1]: https://lkml.org/lkml/2016/12/21/197
-
--- 
-        Peter
+>         unsigned char data[1024];
+>         unsigned long size = sizeof(data);
+>         struct efi_generic_dev_path *hdr, *end_addr;
+>         int uart = 0;
+>
+> -       /* Convert to UTF-16 */
+> -       utf16 = name_utf16;
+> -       s = name;
+> -       while (*s)
+> -               *utf16++ = *s++ & 0x7f;
+> -       *utf16 = 0;
+> -
+> -       status = efi.get_variable(name_utf16, &guid, NULL, &size, data);
+> +       status = efi.get_variable(name_utf16, &EFI_GLOBAL_VARIABLE_GUID,
+> +                                 NULL, &size, data);
+>         if (status != EFI_SUCCESS) {
+>                 printk(KERN_ERR "No EFI %s variable?\n", name);
+>                 return 0;
+> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+> index 10aca63..aad3701 100644
+> --- a/arch/x86/platform/efi/quirks.c
+> +++ b/arch/x86/platform/efi/quirks.c
+> @@ -19,7 +19,7 @@
+>  #define EFI_DUMMY_GUID \
+>         EFI_GUID(0x4424ac57, 0xbe4b, 0x47dd, 0x9e, 0x97, 0xed, 0x50, 0xf0, 0x9f, 0x92, 0xa9)
+>
+> -static efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
+> +static const efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
+>
+>  static bool efi_no_storage_paranoia;
+>
+> diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+> index f402ba2..0911449 100644
+> --- a/drivers/firmware/efi/efi-pstore.c
+> +++ b/drivers/firmware/efi/efi-pstore.c
+> @@ -265,7 +265,6 @@ static int efi_pstore_write(enum pstore_type_id type,
+>  {
+>         char name[DUMP_NAME_LEN];
+>         efi_char16_t efi_name[DUMP_NAME_LEN];
+> -       efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
+>         int i, ret = 0;
+>
+>         sprintf(name, "dump-type%u-%u-%d-%lu-%c", type, part, count,
+> @@ -274,7 +273,8 @@ static int efi_pstore_write(enum pstore_type_id type,
+>         for (i = 0; i < DUMP_NAME_LEN; i++)
+>                 efi_name[i] = name[i];
+>
+> -       efivar_entry_set_safe(efi_name, vendor, PSTORE_EFI_ATTRIBUTES,
+> +       efivar_entry_set_safe(efi_name, LINUX_EFI_CRASH_GUID,
+> +                             PSTORE_EFI_ATTRIBUTES,
+>                               !pstore_cannot_block_path(reason),
+>                               size, psi->buf);
+>
+> diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
+> index 503bbe2..57ddf8c 100644
+> --- a/drivers/firmware/efi/efibc.c
+> +++ b/drivers/firmware/efi/efibc.c
+> @@ -32,7 +32,6 @@ static void efibc_str_to_str16(const char *str, efi_char16_t *str16)
+>  static int efibc_set_variable(const char *name, const char *value)
+>  {
+>         int ret;
+> -       efi_guid_t guid = LINUX_EFI_LOADER_ENTRY_GUID;
+>         struct efivar_entry *entry;
+>         size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
+>
+> @@ -49,7 +48,7 @@ static int efibc_set_variable(const char *name, const char *value)
+>
+>         efibc_str_to_str16(name, entry->var.VariableName);
+>         efibc_str_to_str16(value, (efi_char16_t *)entry->var.Data);
+> -       memcpy(&entry->var.VendorGuid, &guid, sizeof(guid));
+> +       entry->var.VendorGuid = LINUX_EFI_LOADER_ENTRY_GUID;
+>
+>         ret = efivar_entry_set(entry,
+>                                EFI_VARIABLE_NON_VOLATILE
+> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+> index 6fca48c..da72bfb 100644
+> --- a/drivers/firmware/efi/libstub/arm-stub.c
+> +++ b/drivers/firmware/efi/libstub/arm-stub.c
+> @@ -27,13 +27,12 @@ static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
+>         static efi_char16_t const sm_var_name[] = {
+>                 'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0 };
+>
+> -       efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
+>         efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
+>         u8 val;
+>         unsigned long size = sizeof(val);
+>         efi_status_t status;
+>
+> -       status = f_getvar((efi_char16_t *)sb_var_name, (efi_guid_t *)&var_guid,
+> +       status = f_getvar(sb_var_name, &EFI_GLOBAL_VARIABLE_GUID,
+>                           NULL, &size, &val);
+>
+>         if (status != EFI_SUCCESS)
+> @@ -42,7 +41,7 @@ static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
+>         if (val == 0)
+>                 return 0;
+>
+> -       status = f_getvar((efi_char16_t *)sm_var_name, (efi_guid_t *)&var_guid,
+> +       status = f_getvar(sm_var_name, &EFI_GLOBAL_VARIABLE_GUID,
+>                           NULL, &size, &val);
+>
+>         if (status != EFI_SUCCESS)
+> diff --git a/drivers/infiniband/hw/hfi1/efivar.c b/drivers/infiniband/hw/hfi1/efivar.c
+> index 106349f..f769cc2 100644
+> --- a/drivers/infiniband/hw/hfi1/efivar.c
+> +++ b/drivers/infiniband/hw/hfi1/efivar.c
+> @@ -66,7 +66,6 @@ static int read_efi_var(const char *name, unsigned long *size,
+>  {
+>         efi_status_t status;
+>         efi_char16_t *uni_name;
+> -       efi_guid_t guid;
+>         unsigned long temp_size;
+>         void *temp_buffer;
+>         void *data;
+> @@ -95,13 +94,10 @@ static int read_efi_var(const char *name, unsigned long *size,
+>         for (i = 0; name[i]; i++)
+>                 uni_name[i] = name[i];
+>
+> -       /* need a variable for our GUID */
+> -       guid = HFI1_EFIVAR_GUID;
+> -
+>         /* call into EFI runtime services */
+>         status = efi.get_variable(
+>                         uni_name,
+> -                       &guid,
+> +                       &HFI1_EFIVAR_GUID,
+>                         NULL,
+>                         &temp_size,
+>                         temp_buffer);
+> diff --git a/drivers/scsi/isci/probe_roms.c b/drivers/scsi/isci/probe_roms.c
+> index 8ac646e..d2c17c1 100644
+> --- a/drivers/scsi/isci/probe_roms.c
+> +++ b/drivers/scsi/isci/probe_roms.c
+> @@ -34,7 +34,7 @@
+>  #include "task.h"
+>  #include "probe_roms.h"
+>
+> -static efi_char16_t isci_efivar_name[] = {
+> +static const efi_char16_t isci_efivar_name[] = {
+>         'R', 's', 't', 'S', 'c', 'u', 'O'
+>  };
+>
+> --
+> 2.11.0
+>
