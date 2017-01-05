@@ -1,79 +1,108 @@
-From: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v3 1/2] x86/efi: don't allocate memmap through memblock
- after mm_init()
-Date: Thu, 5 Jan 2017 13:30:51 -0800
-Message-ID: <CAPcyv4gFwJeswaqgp341X0KQL9eDD7q8KKua6FPpboSMb_bo7g@mail.gmail.com>
-References: <20170105125130.2815-1-nicstange@gmail.com>
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V6 05/10] acpi: apei: handle SEA notification type for
+ ARMv8
+Date: Thu, 5 Jan 2017 15:31:06 -0700
+Message-ID: <8b7fa162-0d44-025f-758d-d61cfa75c787@codeaurora.org>
+References: <1481147303-7979-1-git-send-email-tbaicar@codeaurora.org>
+ <1481147303-7979-6-git-send-email-tbaicar@codeaurora.org>
+ <58594E62.3050003@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170105125130.2815-1-nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, =?UTF-8?Q?Mika_Penttil=C3=A4?= <mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <58594E62.3050003@arm.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: James Morse <james.morse@arm.com>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jan 5, 2017 at 4:51 AM, Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> With commit 4bc9f92e64c8 ("x86/efi-bgrt: Use efi_mem_reserve() to avoid
-> copying image data"), efi_bgrt_init() calls into the memblock allocator
-> through efi_mem_reserve() => efi_arch_mem_reserve() *after* mm_init()
-> has been called.
+On 12/20/2016 8:29 AM, James Morse wrote:
+> Hi Tyler,
 >
-> Indeed, KASAN reports a bad read access later on in
-> efi_free_boot_services():
+> On 07/12/16 21:48, Tyler Baicar wrote:
+>> ARM APEI extension proposal added SEA (Synchrounous External
+>> Abort) notification type for ARMv8.
+>> Add a new GHES error source handling function for SEA. If an error
+>> source's notification type is SEA, then this function can be registered
+>> into the SEA exception handler. That way GHES will parse and report
+>> SEA exceptions when they occur.
+>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+>> index 2acbc60..66ab3fd 100644
+>> --- a/drivers/acpi/apei/ghes.c
+>> +++ b/drivers/acpi/apei/ghes.c
+>> @@ -767,6 +771,62 @@ static struct notifier_block ghes_notifier_sci = {
+>>   	.notifier_call = ghes_notify_sci,
+>>   };
+>>   
+>> +#ifdef CONFIG_HAVE_ACPI_APEI_SEA
+>> +static LIST_HEAD(ghes_sea);
+>> +
+>> +static int ghes_notify_sea(struct notifier_block *this,
+>> +				  unsigned long event, void *data)
+>> +{
+>> +	struct ghes *ghes;
+>> +	int ret = NOTIFY_DONE;
+>> +
+>> +	rcu_read_lock();
+>> +	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
+>> +		if (!ghes_proc(ghes))
+>> +			ret = NOTIFY_OK;
+>> +	}
+>> +	rcu_read_unlock();
+>> +
+>> +	return ret;
+>> +}
+> What stops this from being re-entrant?
 >
->   BUG: KASAN: use-after-free in efi_free_boot_services+0xae/0x24c
->             at addr ffff88022de12740
->   Read of size 4 by task swapper/0/0
->   page:ffffea0008b78480 count:0 mapcount:-127
->   mapping:          (null) index:0x1 flags: 0x5fff8000000000()
->   [...]
->   Call Trace:
->    dump_stack+0x68/0x9f
->    kasan_report_error+0x4c8/0x500
->    kasan_report+0x58/0x60
->    __asan_load4+0x61/0x80
->    efi_free_boot_services+0xae/0x24c
->    start_kernel+0x527/0x562
->    x86_64_start_reservations+0x24/0x26
->    x86_64_start_kernel+0x157/0x17a
->    start_cpu+0x5/0x14
+> ghes_copy_tofrom_phs() takes the ghes_ioremap_lock_irq spinlock, but there is
+> nothing to stop a subsequent instruction fetch or memory access causing another
+> (maybe different) Synchronous External Abort which deadlocks trying to take the
+> same lock.
 >
-> The instruction at the given address is the first read from the memmap's
-> memory, i.e. the read of md->type in efi_free_boot_services().
+> ghes_notify_sea() looks to be based on ghes_notify_sci(), which (if I've found
+> the right part of the ACPI spec) is a level-low interrupt. spin_lock_irqsave()
+> would mask interrupts so there is no risk of a different notification firing on
+> the same CPU, (it looks like they are almost all ultimately an irq).
 >
-> Note that the writes earlier in efi_arch_mem_reserve() don't splat because
-> they're done through early_memremap()ed addresses.
+> NMI is the odd one out because its not maskable like this, but ghes_notify_nmi()
+> has:
+>> 	if (!atomic_add_unless(&ghes_in_nmi, 1, 1))
+>> 		return ret;
+> To ensure there is only ever one thread poking around in this code.
 >
-> So, after memblock is gone, allocations should be done through the "normal"
-> page allocator. Introduce a helper, efi_memmap_alloc() for this. Use
-> it from efi_arch_mem_reserve(), efi_free_boot_services() and, for the sake
-> of consistency, from efi_fake_memmap() as well.
->
-> Note that for the latter, the memmap allocations cease to be page aligned.
-> This isn't needed though.
->
-> Fixes: 4bc9f92e64c8 ("x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data")
-> Signed-off-by: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> ---
-> Applicable to next-20170105.
-> Boot-tested with an efi_fake_mem= parameter on x86_64.
->
-> v2 of this patch got a
->
->   Tested-by: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> What happens if a system describes two GHES sources, one using an irq the other
+> SEA? The SEA error can interrupt the irq error while its holding the above lock.
+> I guess this is also why all the NMI code in that file is separate.
 >
 >
-> Changes to v2:
->  - Use the new efi_memmap_alloc() from efi_fake_memmap(), too.
->  - Update commit message accordingly.
+> Thanks,
 >
->  arch/x86/platform/efi/quirks.c  |  4 ++--
->  drivers/firmware/efi/fake_mem.c |  3 +--
->  drivers/firmware/efi/memmap.c   | 38 ++++++++++++++++++++++++++++++++++++++
->  include/linux/efi.h             |  1 +
->  4 files changed, 42 insertions(+), 4 deletions(-)
+> James
+Hi James,
 
-v3 works as well:
+Let me see if I'm following you right :)
+I should use spin_lock_irqsave() in ghes_notify_sea() to avoid 
+ghes_notify_sci() from
+interrupting this process and potentially causing the deadlock?
 
-Tested-by: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+This race condition does seem valid. We are using the same 
+acknowledgment for all our
+HEST table entries, so our firmware will not populate more than one 
+entry at a time. That
+gets us around this race condition.
+
+Thanks,
+Tyler
+
+-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
