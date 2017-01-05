@@ -1,169 +1,61 @@
 From: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v3 1/2] x86/efi: don't allocate memmap through memblock after mm_init()
-Date: Thu,  5 Jan 2017 13:51:29 +0100
-Message-ID: <20170105125130.2815-1-nicstange@gmail.com>
+Subject: [PATCH v3 2/2] efi: efi_mem_reserve(): don't reserve through memblock after mm_init()
+Date: Thu,  5 Jan 2017 13:51:30 +0100
+Message-ID: <20170105125130.2815-2-nicstange@gmail.com>
+References: <20170105125130.2815-1-nicstange@gmail.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170105125130.2815-1-nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, =?UTF-8?q?Mika=20Penttil=C3=A4?= <mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-With commit 4bc9f92e64c8 ("x86/efi-bgrt: Use efi_mem_reserve() to avoid
-copying image data"), efi_bgrt_init() calls into the memblock allocator
-through efi_mem_reserve() => efi_arch_mem_reserve() *after* mm_init()
-has been called.
+Before invoking the arch specific handler, efi_mem_reserve() reserves
+the given memory region through memblock.
 
-Indeed, KASAN reports a bad read access later on in
-efi_free_boot_services():
+efi_mem_reserve() can get called after mm_init() though -- through
+efi_bgrt_init(), for example. After mm_init(), memblock is dead and should
+not be used anymore.
 
-  BUG: KASAN: use-after-free in efi_free_boot_services+0xae/0x24c
-            at addr ffff88022de12740
-  Read of size 4 by task swapper/0/0
-  page:ffffea0008b78480 count:0 mapcount:-127
-  mapping:          (null) index:0x1 flags: 0x5fff8000000000()
-  [...]
-  Call Trace:
-   dump_stack+0x68/0x9f
-   kasan_report_error+0x4c8/0x500
-   kasan_report+0x58/0x60
-   __asan_load4+0x61/0x80
-   efi_free_boot_services+0xae/0x24c
-   start_kernel+0x527/0x562
-   x86_64_start_reservations+0x24/0x26
-   x86_64_start_kernel+0x157/0x17a
-   start_cpu+0x5/0x14
-
-The instruction at the given address is the first read from the memmap's
-memory, i.e. the read of md->type in efi_free_boot_services().
-
-Note that the writes earlier in efi_arch_mem_reserve() don't splat because
-they're done through early_memremap()ed addresses.
-
-So, after memblock is gone, allocations should be done through the "normal"
-page allocator. Introduce a helper, efi_memmap_alloc() for this. Use
-it from efi_arch_mem_reserve(), efi_free_boot_services() and, for the sake
-of consistency, from efi_fake_memmap() as well.
-
-Note that for the latter, the memmap allocations cease to be page aligned.
-This isn't needed though.
+Let efi_mem_reserve() check whether memblock is dead and not do the
+reservation if so. Emit a warning from the generic efi_arch mem_reserve()
+in this case: if the architecture doesn't provide any other means of
+registering the region as reserved, the operation would be a nop.
 
 Fixes: 4bc9f92e64c8 ("x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data")
 Signed-off-by: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 ---
 Applicable to next-20170105.
-Boot-tested with an efi_fake_mem= parameter on x86_64.
+No changes to v2.
+Boot-tested on x86_64.
 
-v2 of this patch got a
+ drivers/firmware/efi/efi.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-  Tested-by: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-
-
-Changes to v2:
- - Use the new efi_memmap_alloc() from efi_fake_memmap(), too.
- - Update commit message accordingly.
-
- arch/x86/platform/efi/quirks.c  |  4 ++--
- drivers/firmware/efi/fake_mem.c |  3 +--
- drivers/firmware/efi/memmap.c   | 38 ++++++++++++++++++++++++++++++++++++++
- include/linux/efi.h             |  1 +
- 4 files changed, 42 insertions(+), 4 deletions(-)
-
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 10aca63a50d7..30031d5293c4 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -214,7 +214,7 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 92914801e388..158a8df2f4af 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -403,7 +403,10 @@ u64 __init efi_mem_desc_end(efi_memory_desc_t *md)
+ 	return end;
+ }
  
- 	new_size = efi.memmap.desc_size * num_entries;
- 
--	new_phys = memblock_alloc(new_size, 0);
-+	new_phys = efi_memmap_alloc(num_entries);
- 	if (!new_phys) {
- 		pr_err("Could not allocate boot services memmap\n");
- 		return;
-@@ -355,7 +355,7 @@ void __init efi_free_boot_services(void)
- 	}
- 
- 	new_size = efi.memmap.desc_size * num_entries;
--	new_phys = memblock_alloc(new_size, 0);
-+	new_phys = efi_memmap_alloc(num_entries);
- 	if (!new_phys) {
- 		pr_err("Failed to allocate new EFI memmap\n");
- 		return;
-diff --git a/drivers/firmware/efi/fake_mem.c b/drivers/firmware/efi/fake_mem.c
-index 520a40e5e0e4..6c7d60c239b5 100644
---- a/drivers/firmware/efi/fake_mem.c
-+++ b/drivers/firmware/efi/fake_mem.c
-@@ -71,8 +71,7 @@ void __init efi_fake_memmap(void)
- 	}
- 
- 	/* allocate memory for new EFI memmap */
--	new_memmap_phy = memblock_alloc(efi.memmap.desc_size * new_nr_map,
--					PAGE_SIZE);
-+	new_memmap_phy = efi_memmap_alloc(new_nr_map);
- 	if (!new_memmap_phy)
- 		return;
- 
-diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
-index f03ddecd232b..78686443cb37 100644
---- a/drivers/firmware/efi/memmap.c
-+++ b/drivers/firmware/efi/memmap.c
-@@ -9,6 +9,44 @@
- #include <linux/efi.h>
- #include <linux/io.h>
- #include <asm/early_ioremap.h>
-+#include <linux/memblock.h>
-+#include <linux/slab.h>
-+
-+static phys_addr_t __init __efi_memmap_alloc_early(unsigned long size)
+-void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size) {}
++void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size)
 +{
-+	return memblock_alloc(size, 0);
-+}
-+
-+static phys_addr_t __init __efi_memmap_alloc_late(unsigned long size)
-+{
-+	unsigned int order = get_order(size);
-+	struct page *p = alloc_pages(GFP_KERNEL, order);
-+
-+	if (!p)
-+		return 0;
-+
-+	return PFN_PHYS(page_to_pfn(p));
-+}
-+
-+/**
-+ * efi_memmap_alloc - Allocate memory for the EFI memory map
-+ * @num_entries: Number of entries in the allocated map.
-+ *
-+ * Depending on whether mm_init() has already been invoked or not,
-+ * either memblock or "normal" page allocation is used.
-+ *
-+ * Returns the physical address of the allocated memory map on
-+ * success, zero on failure.
-+ */
-+phys_addr_t __init efi_memmap_alloc(unsigned int num_entries)
-+{
-+	unsigned long size = num_entries * efi.memmap.desc_size;
-+
-+	if (slab_is_available())
-+		return __efi_memmap_alloc_late(size);
-+
-+	return __efi_memmap_alloc_early(size);
++	WARN(slab_is_available(), "efi_mem_reserve() has no effect");
 +}
  
  /**
-  * __efi_memmap_init - Common code for mapping the EFI memory map
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index a07a476178cd..0c5420208c40 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -950,6 +950,7 @@ static inline efi_status_t efi_query_variable_store(u32 attributes,
- #endif
- extern void __iomem *efi_lookup_mapped_addr(u64 phys_addr);
+  * efi_mem_reserve - Reserve an EFI memory region
+@@ -419,7 +422,7 @@ void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size) {}
+  */
+ void __init efi_mem_reserve(phys_addr_t addr, u64 size)
+ {
+-	if (!memblock_is_region_reserved(addr, size))
++	if (!slab_is_available() && !memblock_is_region_reserved(addr, size))
+ 		memblock_reserve(addr, size);
  
-+extern phys_addr_t __init efi_memmap_alloc(unsigned int num_entries);
- extern int __init efi_memmap_init_early(struct efi_memory_map_data *data);
- extern int __init efi_memmap_init_late(phys_addr_t addr, unsigned long size);
- extern void __init efi_memmap_unmap(void);
+ 	/*
 -- 
 2.11.0
