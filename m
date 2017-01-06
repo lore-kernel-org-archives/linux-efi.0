@@ -1,237 +1,132 @@
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 03/10] efi: Constify GetVariable() / SetVariable()
- arguments
-Date: Fri, 6 Jan 2017 11:16:52 +0100
-Message-ID: <20170106101652.GB21850@wunner.de>
-References: <cover.1483318593.git.lukas@wunner.de>
- <2be92e87ff7855bcd88c86a7436f46d3488483f0.1483318593.git.lukas@wunner.de>
- <CAKv+Gu8UnAzQGsmyWYsWsOY3B+J9HXechwBX_Vk-rntBtO+Dug@mail.gmail.com>
+From: James Morse <james.morse@arm.com>
+Subject: Re: [PATCH V6 05/10] acpi: apei: handle SEA notification type for
+ ARMv8
+Date: Fri, 06 Jan 2017 10:43:39 +0000
+Message-ID: <586F74DB.3020107@arm.com>
+References: <1481147303-7979-1-git-send-email-tbaicar@codeaurora.org>
+ <1481147303-7979-6-git-send-email-tbaicar@codeaurora.org>
+ <58594E62.3050003@arm.com>
+ <8b7fa162-0d44-025f-758d-d61cfa75c787@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu8UnAzQGsmyWYsWsOY3B+J9HXechwBX_Vk-rntBtO+Dug-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Artur Paszkiewicz <artur.paszkiewicz-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mike Marciniszyn <mike.marciniszyn-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dennis Dalessandro <dennis.dalessandro-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <8b7fa162-0d44-025f-758d-d61cfa75c787@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jan 04, 2017 at 05:38:13PM +0000, Ard Biesheuvel wrote:
-> On 2 January 2017 at 10:24, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
-> > GUIDs and variable names passed to GetVariable() / SetVariable() are not
-> > modified, so declare them const.  This allows the compiler to place them
-> > in the rodata section instead of generating them on the stack at
-> > runtime.  Pass GUIDs as literals rather than assigning them to temporary
-> > variables to save a bit on code.
-> >
-> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> > Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > Cc: Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>
-> > Cc: Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>
-> > Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-> > Cc: Artur Paszkiewicz <artur.paszkiewicz-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > Cc: Mike Marciniszyn <mike.marciniszyn-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > Cc: Dennis Dalessandro <dennis.dalessandro-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-> > ---
-> >  arch/ia64/kernel/efi.c                  | 15 ++++-----------
-> >  arch/x86/platform/efi/quirks.c          |  2 +-
-> >  drivers/firmware/efi/efi-pstore.c       |  4 ++--
-> >  drivers/firmware/efi/efibc.c            |  3 +--
-> >  drivers/firmware/efi/libstub/arm-stub.c |  5 ++---
-> >  drivers/infiniband/hw/hfi1/efivar.c     |  6 +-----
-> >  drivers/scsi/isci/probe_roms.c          |  2 +-
-> >  7 files changed, 12 insertions(+), 25 deletions(-)
-> >
-> > diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
-> > index f57d089..f1264ab 100644
-> > --- a/arch/ia64/kernel/efi.c
-> > +++ b/arch/ia64/kernel/efi.c
-> > @@ -919,22 +919,15 @@ static void __init handle_palo(unsigned long phys_addr)
-> >  efi_uart_console_only(void)
-> >  {
-> >         efi_status_t status;
-> > -       char *s, name[] = "ConOut";
-> > -       efi_guid_t guid = EFI_GLOBAL_VARIABLE_GUID;
-> > -       efi_char16_t *utf16, name_utf16[32];
-> > +       const char name[] = "ConOut";
-> > +       const efi_char16_t name_utf16[] = { 'C', 'o', 'n', 'O', 'u', 't', 0 };
-> 
-> I know you mention 'static' in 10/10, but I don't understand why you
-> don't make these static to begin with. That also allows you to
-> annotate them as __initconst, which is not possible for compound
-> initializers (including the GUID)
+Hi Tyler,
 
-Right, I hadn't thought of __initconst.  In this particular case indeed
-it might make sense to use "static const efi_guid_t guid __initconst = ...",
-and arguably for the strings as well.  But where should I draw the line?
+On 05/01/17 22:31, Baicar, Tyler wrote:
+> On 12/20/2016 8:29 AM, James Morse wrote:
+>> On 07/12/16 21:48, Tyler Baicar wrote:
+>>> ARM APEI extension proposal added SEA (Synchrounous External
+>>> Abort) notification type for ARMv8.
+>>> Add a new GHES error source handling function for SEA. If an error
+>>> source's notification type is SEA, then this function can be registered
+>>> into the SEA exception handler. That way GHES will parse and report
+>>> SEA exceptions when they occur.
+>>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+>>> index 2acbc60..66ab3fd 100644
+>>> --- a/drivers/acpi/apei/ghes.c
+>>> +++ b/drivers/acpi/apei/ghes.c
+>>> @@ -767,6 +771,62 @@ static struct notifier_block ghes_notifier_sci = {
+>>>       .notifier_call = ghes_notify_sci,
+>>>   };
+>>>   +#ifdef CONFIG_HAVE_ACPI_APEI_SEA
+>>> +static LIST_HEAD(ghes_sea);
+>>> +
+>>> +static int ghes_notify_sea(struct notifier_block *this,
+>>> +                  unsigned long event, void *data)
+>>> +{
+>>> +    struct ghes *ghes;
+>>> +    int ret = NOTIFY_DONE;
+>>> +
+>>> +    rcu_read_lock();
+>>> +    list_for_each_entry_rcu(ghes, &ghes_sea, list) {
+>>> +        if (!ghes_proc(ghes))
+>>> +            ret = NOTIFY_OK;
+>>> +    }
+>>> +    rcu_read_unlock();
+>>> +
+>>> +    return ret;
+>>> +}
 
-There are a handful of other GUIDs used in __init functions, e.g. in
-arch/ia64/ there's ESI_TABLE_GUID in kernel/esi.c:esi_init() and
-SAL_SYSTEM_TABLE_GUID in sn/kernel/setup.c:early_sn_setup().
-This patch set results in them being placed in rodata, but not
-init.rodata.  Should I declare a temporary "static const __initconst"
-variable for each of them?  That would give us 16 bytes in each of the
-two cases being freed after kernel initialization.
+>> What stops this from being re-entrant?
+>>
+>> ghes_copy_tofrom_phs() takes the ghes_ioremap_lock_irq spinlock, but there is
+>> nothing to stop a subsequent instruction fetch or memory access causing another
+>> (maybe different) Synchronous External Abort which deadlocks trying to take the
+>> same lock.
+>>
+>> ghes_notify_sea() looks to be based on ghes_notify_sci(), which (if I've found
+>> the right part of the ACPI spec) is a level-low interrupt. spin_lock_irqsave()
+>> would mask interrupts so there is no risk of a different notification firing on
+>> the same CPU, (it looks like they are almost all ultimately an irq).
+>>
+>> NMI is the odd one out because its not maskable like this, but ghes_notify_nmi()
+>> has:
+>>>     if (!atomic_add_unless(&ghes_in_nmi, 1, 1))
+>>>         return ret;
+>> To ensure there is only ever one thread poking around in this code.
+>>
+>> What happens if a system describes two GHES sources, one using an irq the other
+>> SEA? The SEA error can interrupt the irq error while its holding the above lock.
+>> I guess this is also why all the NMI code in that file is separate.
 
-However string literals aren't put in init.rodata either even though
-they're declared in an __init function.  E.g. early_sn_setup() contains
-a string literal "failed to find SAL entry point\n".  That's 31 bytes.
-esi_init() contains even 103 bytes of string literals.
 
-So I'm not sure if it's worth to move the GUIDs to init.rodata (at the
-expense of an additional LoC to declare a temporary variable) even
-though we waste more space for string literals.
+> Let me see if I'm following you right :)
+> I should use spin_lock_irqsave() in ghes_notify_sea() to avoid ghes_notify_sci()
+> from
+> interrupting this process and potentially causing the deadlock?
+
+This way round you are already safe: The CPU masks interrupts when it takes the
+exception, they should still be masked by the time we get in here...
+
+The other way round is a lot more fun!
+
+What happens if APEI is processing some error record that was notified via an
+interrupt, and then takes the Synchronous External Abort, and ends up back in
+this code? Masking interrupts doesn't stop the external-abort, and trying to
+take the ghes_ioremap_lock_irq will deadlock.
+
+What happens if we interrupt printk() holding all its locks is another thing I
+haven't worked out yet.
+
+
+> This race condition does seem valid. We are using the same acknowledgment for
+> all our
+> HEST table entries, so our firmware will not populate more than one entry at a
+> time. That
+> gets us around this race condition.
+
+Ah, so your firmware will wait for the interrupt-signalled error to be finished
+before it triggers the Synchronous External Abort. I think this would still be a
+linux bug if the firmware didn't do this.
+
+x86 could have done the same with NMI notifications, but we have all this 'if
+(in_nmi)' to allow interrupts-masked GHES handling to be interrupted.
+
+What do you think to re-using the 'if (in_nmi)' code for SEA? We can argue that
+SEA is NMI-like in that it can't be masked, and it interrupts code that had
+interrupts masked. It 'should' be as simple as putting 'HAVE_NMI' in arm64's
+Kconfig, and wrapping the atomic notifier call with nmi_enter()/nmi_exit() from
+linux/hardirq.h. (...famous last words...)
+
+This probably answers my printk() questions too, but I need to look into it some
+more.
+
 
 Thanks,
 
-Lukas
-
-> 
-> >         unsigned char data[1024];
-> >         unsigned long size = sizeof(data);
-> >         struct efi_generic_dev_path *hdr, *end_addr;
-> >         int uart = 0;
-> >
-> > -       /* Convert to UTF-16 */
-> > -       utf16 = name_utf16;
-> > -       s = name;
-> > -       while (*s)
-> > -               *utf16++ = *s++ & 0x7f;
-> > -       *utf16 = 0;
-> > -
-> > -       status = efi.get_variable(name_utf16, &guid, NULL, &size, data);
-> > +       status = efi.get_variable(name_utf16, &EFI_GLOBAL_VARIABLE_GUID,
-> > +                                 NULL, &size, data);
-> >         if (status != EFI_SUCCESS) {
-> >                 printk(KERN_ERR "No EFI %s variable?\n", name);
-> >                 return 0;
-> > diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-> > index 10aca63..aad3701 100644
-> > --- a/arch/x86/platform/efi/quirks.c
-> > +++ b/arch/x86/platform/efi/quirks.c
-> > @@ -19,7 +19,7 @@
-> >  #define EFI_DUMMY_GUID \
-> >         EFI_GUID(0x4424ac57, 0xbe4b, 0x47dd, 0x9e, 0x97, 0xed, 0x50, 0xf0, 0x9f, 0x92, 0xa9)
-> >
-> > -static efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
-> > +static const efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
-> >
-> >  static bool efi_no_storage_paranoia;
-> >
-> > diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-> > index f402ba2..0911449 100644
-> > --- a/drivers/firmware/efi/efi-pstore.c
-> > +++ b/drivers/firmware/efi/efi-pstore.c
-> > @@ -265,7 +265,6 @@ static int efi_pstore_write(enum pstore_type_id type,
-> >  {
-> >         char name[DUMP_NAME_LEN];
-> >         efi_char16_t efi_name[DUMP_NAME_LEN];
-> > -       efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
-> >         int i, ret = 0;
-> >
-> >         sprintf(name, "dump-type%u-%u-%d-%lu-%c", type, part, count,
-> > @@ -274,7 +273,8 @@ static int efi_pstore_write(enum pstore_type_id type,
-> >         for (i = 0; i < DUMP_NAME_LEN; i++)
-> >                 efi_name[i] = name[i];
-> >
-> > -       efivar_entry_set_safe(efi_name, vendor, PSTORE_EFI_ATTRIBUTES,
-> > +       efivar_entry_set_safe(efi_name, LINUX_EFI_CRASH_GUID,
-> > +                             PSTORE_EFI_ATTRIBUTES,
-> >                               !pstore_cannot_block_path(reason),
-> >                               size, psi->buf);
-> >
-> > diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
-> > index 503bbe2..57ddf8c 100644
-> > --- a/drivers/firmware/efi/efibc.c
-> > +++ b/drivers/firmware/efi/efibc.c
-> > @@ -32,7 +32,6 @@ static void efibc_str_to_str16(const char *str, efi_char16_t *str16)
-> >  static int efibc_set_variable(const char *name, const char *value)
-> >  {
-> >         int ret;
-> > -       efi_guid_t guid = LINUX_EFI_LOADER_ENTRY_GUID;
-> >         struct efivar_entry *entry;
-> >         size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
-> >
-> > @@ -49,7 +48,7 @@ static int efibc_set_variable(const char *name, const char *value)
-> >
-> >         efibc_str_to_str16(name, entry->var.VariableName);
-> >         efibc_str_to_str16(value, (efi_char16_t *)entry->var.Data);
-> > -       memcpy(&entry->var.VendorGuid, &guid, sizeof(guid));
-> > +       entry->var.VendorGuid = LINUX_EFI_LOADER_ENTRY_GUID;
-> >
-> >         ret = efivar_entry_set(entry,
-> >                                EFI_VARIABLE_NON_VOLATILE
-> > diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-> > index 6fca48c..da72bfb 100644
-> > --- a/drivers/firmware/efi/libstub/arm-stub.c
-> > +++ b/drivers/firmware/efi/libstub/arm-stub.c
-> > @@ -27,13 +27,12 @@ static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
-> >         static efi_char16_t const sm_var_name[] = {
-> >                 'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0 };
-> >
-> > -       efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
-> >         efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
-> >         u8 val;
-> >         unsigned long size = sizeof(val);
-> >         efi_status_t status;
-> >
-> > -       status = f_getvar((efi_char16_t *)sb_var_name, (efi_guid_t *)&var_guid,
-> > +       status = f_getvar(sb_var_name, &EFI_GLOBAL_VARIABLE_GUID,
-> >                           NULL, &size, &val);
-> >
-> >         if (status != EFI_SUCCESS)
-> > @@ -42,7 +41,7 @@ static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
-> >         if (val == 0)
-> >                 return 0;
-> >
-> > -       status = f_getvar((efi_char16_t *)sm_var_name, (efi_guid_t *)&var_guid,
-> > +       status = f_getvar(sm_var_name, &EFI_GLOBAL_VARIABLE_GUID,
-> >                           NULL, &size, &val);
-> >
-> >         if (status != EFI_SUCCESS)
-> > diff --git a/drivers/infiniband/hw/hfi1/efivar.c b/drivers/infiniband/hw/hfi1/efivar.c
-> > index 106349f..f769cc2 100644
-> > --- a/drivers/infiniband/hw/hfi1/efivar.c
-> > +++ b/drivers/infiniband/hw/hfi1/efivar.c
-> > @@ -66,7 +66,6 @@ static int read_efi_var(const char *name, unsigned long *size,
-> >  {
-> >         efi_status_t status;
-> >         efi_char16_t *uni_name;
-> > -       efi_guid_t guid;
-> >         unsigned long temp_size;
-> >         void *temp_buffer;
-> >         void *data;
-> > @@ -95,13 +94,10 @@ static int read_efi_var(const char *name, unsigned long *size,
-> >         for (i = 0; name[i]; i++)
-> >                 uni_name[i] = name[i];
-> >
-> > -       /* need a variable for our GUID */
-> > -       guid = HFI1_EFIVAR_GUID;
-> > -
-> >         /* call into EFI runtime services */
-> >         status = efi.get_variable(
-> >                         uni_name,
-> > -                       &guid,
-> > +                       &HFI1_EFIVAR_GUID,
-> >                         NULL,
-> >                         &temp_size,
-> >                         temp_buffer);
-> > diff --git a/drivers/scsi/isci/probe_roms.c b/drivers/scsi/isci/probe_roms.c
-> > index 8ac646e..d2c17c1 100644
-> > --- a/drivers/scsi/isci/probe_roms.c
-> > +++ b/drivers/scsi/isci/probe_roms.c
-> > @@ -34,7 +34,7 @@
-> >  #include "task.h"
-> >  #include "probe_roms.h"
-> >
-> > -static efi_char16_t isci_efivar_name[] = {
-> > +static const efi_char16_t isci_efivar_name[] = {
-> >         'R', 's', 't', 'S', 'c', 'u', 'O'
-> >  };
-> >
-> > --
-> > 2.11.0
-> >
+James
