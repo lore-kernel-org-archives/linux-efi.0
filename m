@@ -1,68 +1,195 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 2/2] efi: efi_mem_reserve(): don't reserve through
- memblock after mm_init()
-Date: Fri, 6 Jan 2017 08:35:52 +0000
-Message-ID: <CAKv+Gu8RHsMKmEHBqNv=q4SB-spCtuydbCshs2ut1+Kk8vraOQ@mail.gmail.com>
-References: <20170105125130.2815-1-nicstange@gmail.com> <20170105125130.2815-2-nicstange@gmail.com>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 10/10] uuid: Constify UUID compound literals
+Date: Fri, 6 Jan 2017 10:57:11 +0100
+Message-ID: <20170106095711.GA21850@wunner.de>
+References: <cover.1483318593.git.lukas@wunner.de>
+ <c61bbe4733f78c830f6073e86f32159751bbda8c.1483318593.git.lukas@wunner.de>
+ <CAKv+Gu8GqCrjOM6nTTHQckyUzrv+BO-B=st35yOptPfjA7Hitg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170105125130.2815-2-nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu8GqCrjOM6nTTHQckyUzrv+BO-B=st35yOptPfjA7Hitg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, =?UTF-8?Q?Mika_Penttil=C3=A4?= <mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 5 January 2017 at 12:51, Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Before invoking the arch specific handler, efi_mem_reserve() reserves
-> the given memory region through memblock.
->
-> efi_mem_reserve() can get called after mm_init() though -- through
-> efi_bgrt_init(), for example. After mm_init(), memblock is dead and should
-> not be used anymore.
->
-> Let efi_mem_reserve() check whether memblock is dead and not do the
-> reservation if so. Emit a warning from the generic efi_arch mem_reserve()
-> in this case: if the architecture doesn't provide any other means of
-> registering the region as reserved, the operation would be a nop.
->
-> Fixes: 4bc9f92e64c8 ("x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data")
-> Signed-off-by: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> ---
-> Applicable to next-20170105.
-> No changes to v2.
-> Boot-tested on x86_64.
->
->  drivers/firmware/efi/efi.c | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 92914801e388..158a8df2f4af 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -403,7 +403,10 @@ u64 __init efi_mem_desc_end(efi_memory_desc_t *md)
->         return end;
->  }
->
-> -void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size) {}
-> +void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size)
-> +{
-> +       WARN(slab_is_available(), "efi_mem_reserve() has no effect");
-> +}
->
->  /**
->   * efi_mem_reserve - Reserve an EFI memory region
-> @@ -419,7 +422,7 @@ void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size) {}
->   */
->  void __init efi_mem_reserve(phys_addr_t addr, u64 size)
->  {
-> -       if (!memblock_is_region_reserved(addr, size))
-> +       if (!slab_is_available() && !memblock_is_region_reserved(addr, size))
->                 memblock_reserve(addr, size);
->
+On Wed, Jan 04, 2017 at 05:54:08PM +0000, Ard Biesheuvel wrote:
+> On 2 January 2017 at 10:24, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
+> > The UUID_BE() and UUID_LE() macros (as well as the derived EFI_GUID())
+> > generate a compound literal for a 128-bit ID.  By default, these are not
+> > stored in the rodata section but generated on the stack at runtime in a
+> > very time- and space-inefficient manner.
+> 
+> This is not true if you declare those variables static const (in
+> function scope).
+> 
+> In general, I think we should avoid touching uapi headers for this, so
+> I would like to explore if we can reach the same result without this
+> patch. Another objection I have to this patch is that it is context
+> dependent whether the UUID_[LE_BE]() macros in fact generate compound
+> literals: this is true for an assignment to a pointer variable, but
+> when they are used in initializers this is not the case, and so adding
+> 'const' to their definitions is not always appropriate imo.
+> 
+> Are there any instances where simply turning those automatic variables
+> into static const doesn't work?
 
-I share Dave's concern: on x86, this will silently ignore the
-reservation if slab_is_available() returns true, so we should at least
-warn here. I don't think this patch solves any known issues, so I'd
-rather defer this for now, and pick up the discussion when Matt is
-back,
+The number of GUIDs used in the kernel is vast, it's many more than this
+patch set makes it appear.  In a lot of cases, they're used as literals.
+I would have to declare a temporary "static const" variable for each of
+them and this patch set would become much larger and more intrusive.
+Additionally the necessity to use a static const variable instead of a
+literal seems clumsy and ugly.
+
+As an example, consider arch/ia64/kernel/mca_drv.c:mca_make_slidx() which
+contains an if-else-if ladder with 9 entries, each using a GUID literal.
+I would have expected objections on grounds of severe ugliness if I had
+changed all of these to temporary "static const" variables.
+
+By contrast, just changing the UUID_LE() and UUID_BE() macros causes these
+literals to be placed in rodata automatically.
+
+It seems that the only reason for uuid.h to be in uapi is its usage by
+two other uapi headers, hyperv.h and mei.h.  The two don't even use the
+UUID_LE() and UUID_BE() macros.
+
+The impact of adding const to these macros is limited:  If the macros are
+used as an initializer in a user space application and the variable they're
+assigned to isn't declared const, gcc will silently make them non-const.
+
+Worst thing that can happen is that compiling the user space application
+results in a compiler warning.  This only occurs if the UUID is passed by
+reference into a function.  E.g. if this patch wasn't at the end of the
+series, these 3 warnings would occur:
+
+arch/x86/platform/efi/quirks.c: In function 'efi_delete_dummy_variable':
+arch/x86/platform/efi/quirks.c:52:35: warning: passing argument 2 of 'efi.set_variable' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
+                                   ^
+arch/x86/platform/efi/quirks.c:52:35: note: expected 'efi_guid_t * {aka struct <anonymous> *}' but argument is of type 'const uuid_le * {aka const struct <anonymous> *}'
+
+arch/x86/platform/efi/quirks.c: In function 'efi_query_variable_store':
+arch/x86/platform/efi/quirks.c:129:45: warning: passing argument 2 of 'efi.set_variable' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+   status = efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
+                                             ^
+arch/x86/platform/efi/quirks.c:129:45: note: expected 'efi_guid_t * {aka struct <anonymous> *}' but argument is of type 'const uuid_le * {aka const struct <anonymous> *}'
+
+drivers/scsi/isci/probe_roms.c: In function 'isci_get_efi_var':
+drivers/scsi/isci/probe_roms.c:190:8: warning: passing argument 2 of 'get_efi()->get_variable' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+        &ISCI_EFI_VENDOR_GUID,
+        ^
+drivers/scsi/isci/probe_roms.c:190:8: note: expected 'efi_guid_t * {aka struct <anonymous> *}' but argument is of type 'const uuid_le * {aka const struct <anonymous> *}'
+
+This can easily be fixed in the user space application by adding "const"
+to function declarations.
+
+To reiterate what I wrote in the commit message, I don't see why anyone
+would want to modify the distinct bytes making up the UUID after declaring
+it, so marking UUIDs const seems natural.
+
+Thanks,
+
+Lukas
+
+> 
+> > E.g. EFI_FILE_SYSTEM_GUID (964E5B22-6459-11D2-8E39-00A0C969723B) results
+> > in x86_64 code which requires 80 bytes text instead of 16 bytes rodata:
+> >
+> >     c6 44 24 20 22                   movb   $0x22,0x20(%rsp)
+> >     c6 44 24 21 5b                   movb   $0x5b,0x21(%rsp)
+> >     c6 44 24 22 4e                   movb   $0x4e,0x22(%rsp)
+> >     c6 44 24 23 96                   movb   $0x96,0x23(%rsp)
+> >     c6 44 24 24 59                   movb   $0x59,0x24(%rsp)
+> >     c6 44 24 25 64                   movb   $0x64,0x25(%rsp)
+> >     c6 44 24 26 d2                   movb   $0xd2,0x26(%rsp)
+> >     c6 44 24 27 11                   movb   $0x11,0x27(%rsp)
+> >     c6 44 24 28 8e                   movb   $0x8e,0x28(%rsp)
+> >     c6 44 24 29 39                   movb   $0x39,0x29(%rsp)
+> >     c6 44 24 2a 00                   movb   $0x0,0x2a(%rsp)
+> >     c6 44 24 2b a0                   movb   $0xa0,0x2b(%rsp)
+> >     c6 44 24 2c c9                   movb   $0xc9,0x2c(%rsp)
+> >     c6 44 24 2d 69                   movb   $0x69,0x2d(%rsp)
+> >     c6 44 24 2e 72                   movb   $0x72,0x2e(%rsp)
+> >     c6 44 24 2f 3b                   movb   $0x3b,0x2f(%rsp)
+> >
+> > gcc 7 improves on this by using 2x movabs + 2x mov instructions,
+> > amounting to 30 bytes text instead of 16 bytes rodata.  That's more
+> > space-efficient than 80 bytes but still undesirable from a performance
+> > and security perspective:
+> >
+> >     48 b8 22 5b 4e 96 59 64 d2 11    movabs $0x11d26459964e5b,%rax
+> >     48 89 44 24 20                   mov    %rax,0x20(%rsp)
+> >     48 b8 8e 39 00 a0 c9 69 72 3b    movabs $0x3b7269c9a00039,%rax
+> >     48 89 44 24 28                   mov    %rax,0x28(%rsp)
+> >
+> > The reason for generating compound literals on the stack is that they're
+> > allowed to be modified.  E.g. a pointer to a UUID might be used to
+> > change some of its 16 bytes.  In the context of UUIDs this seems silly
+> > though:  The uuid_be, uuid_le and efi_guid_t data types hide the
+> > distinct bytes making up the ID, the bytes are not meant to be modified.
+> > Moreover, the UUIDs are usually pre-defined in a spec such as UEFI and
+> > there's no reason at all to modify them.
+> >
+> > Thus, change the UUID_BE and UUID_LE macros to declare the generated
+> > compound literal const, allowing the compiler to put it in rodata.
+> >
+> > When using the compound literal as an initializer for a variable, that
+> > variable has to be declared const as well for the UUID to become rodata.
+> >
+> > Is that all?  Unfortunately not.  Under certain conditions gcc refuses
+> > to store compound literals in rodata despite them being declared const.
+> > Rasmus Villemoes opened a bugzilla entry for this in December 2015:
+> > https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68725
+> >
+> > The upshot is that if a UUID is passed by value to a function (either
+> > directly or as a variable), it is stored in rodata.  This is the case
+> > for efi_guidcmp().  But if the UUID is passed by reference, it is
+> > generated on the stack, in spite of it being declared const and the
+> > function parameter being declared const.  This is the case for the
+> > various EFI boot and runtime services calls such as GetVariable.
+> > A workaround is to declare a *static* const variable, assign the UUID to
+> > it and pass the variable by reference to the function.
+> >
+> > This issue also affects efi_char16_t strings which are only declared
+> > const (and not static const).  They're likewise generated on the stack
+> > at runtime.
+> >
+> > clang 3.9 is not better than gcc:  It does the exact opposite by putting
+> > UUIDs in rodata if they're passed by reference, and generating them on
+> > the stack if they're passed by value.
+> >
+> > Cc: Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> > Cc: Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>
+> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> > Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+> > ---
+> >  include/uapi/linux/uuid.h | 4 ++--
+> >  1 file changed, 2 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/include/uapi/linux/uuid.h b/include/uapi/linux/uuid.h
+> > index 3738e5f..9184f01 100644
+> > --- a/include/uapi/linux/uuid.h
+> > +++ b/include/uapi/linux/uuid.h
+> > @@ -29,14 +29,14 @@
+> >  } uuid_be;
+> >
+> >  #define UUID_LE(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)               \
+> > -((uuid_le)                                                             \
+> > +((const uuid_le)                                                       \
+> >  {{ (a) & 0xff, ((a) >> 8) & 0xff, ((a) >> 16) & 0xff, ((a) >> 24) & 0xff, \
+> >     (b) & 0xff, ((b) >> 8) & 0xff,                                      \
+> >     (c) & 0xff, ((c) >> 8) & 0xff,                                      \
+> >     (d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7) }})
+> >
+> >  #define UUID_BE(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)               \
+> > -((uuid_be)                                                             \
+> > +((const uuid_be)                                                       \
+> >  {{ ((a) >> 24) & 0xff, ((a) >> 16) & 0xff, ((a) >> 8) & 0xff, (a) & 0xff, \
+> >     ((b) >> 8) & 0xff, (b) & 0xff,                                      \
+> >     ((c) >> 8) & 0xff, (c) & 0xff,                                      \
+> > --
+> > 2.11.0
+> >
