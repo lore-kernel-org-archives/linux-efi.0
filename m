@@ -1,132 +1,109 @@
-From: James Morse <james.morse@arm.com>
-Subject: Re: [PATCH V6 05/10] acpi: apei: handle SEA notification type for
- ARMv8
-Date: Fri, 06 Jan 2017 10:43:39 +0000
-Message-ID: <586F74DB.3020107@arm.com>
-References: <1481147303-7979-1-git-send-email-tbaicar@codeaurora.org>
- <1481147303-7979-6-git-send-email-tbaicar@codeaurora.org>
- <58594E62.3050003@arm.com>
- <8b7fa162-0d44-025f-758d-d61cfa75c787@codeaurora.org>
+From: Nicolai Stange <nicstange@gmail.com>
+Subject: Re: [PATCH v3 2/2] efi: efi_mem_reserve(): don't reserve through memblock after mm_init()
+Date: Fri, 06 Jan 2017 14:02:31 +0100
+Message-ID: <87wpe8mjdk.fsf@gmail.com>
+References: <20170105125130.2815-1-nicstange@gmail.com>
+        <20170105125130.2815-2-nicstange@gmail.com>
+        <CAKv+Gu8RHsMKmEHBqNv=q4SB-spCtuydbCshs2ut1+Kk8vraOQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <8b7fa162-0d44-025f-758d-d61cfa75c787@codeaurora.org>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAKv+Gu8RHsMKmEHBqNv=q4SB-spCtuydbCshs2ut1+Kk8vraOQ@mail.gmail.com>
+        (Ard Biesheuvel's message of "Fri, 6 Jan 2017 08:35:52 +0000")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Nicolai Stange <nicstange@gmail.com>, Ingo Molnar <mingo@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, Mika =?utf-8?Q?Penttil=C3=A4?= <mika.penttila@nextfour.com>, Dan Williams <dan.j.williams@intel.com>, Dave Young <dyoung@redhat.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Tyler,
+Ard Biesheuvel <ard.biesheuvel@linaro.org> writes:
 
-On 05/01/17 22:31, Baicar, Tyler wrote:
-> On 12/20/2016 8:29 AM, James Morse wrote:
->> On 07/12/16 21:48, Tyler Baicar wrote:
->>> ARM APEI extension proposal added SEA (Synchrounous External
->>> Abort) notification type for ARMv8.
->>> Add a new GHES error source handling function for SEA. If an error
->>> source's notification type is SEA, then this function can be registered
->>> into the SEA exception handler. That way GHES will parse and report
->>> SEA exceptions when they occur.
->>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
->>> index 2acbc60..66ab3fd 100644
->>> --- a/drivers/acpi/apei/ghes.c
->>> +++ b/drivers/acpi/apei/ghes.c
->>> @@ -767,6 +771,62 @@ static struct notifier_block ghes_notifier_sci = {
->>>       .notifier_call = ghes_notify_sci,
->>>   };
->>>   +#ifdef CONFIG_HAVE_ACPI_APEI_SEA
->>> +static LIST_HEAD(ghes_sea);
->>> +
->>> +static int ghes_notify_sea(struct notifier_block *this,
->>> +                  unsigned long event, void *data)
->>> +{
->>> +    struct ghes *ghes;
->>> +    int ret = NOTIFY_DONE;
->>> +
->>> +    rcu_read_lock();
->>> +    list_for_each_entry_rcu(ghes, &ghes_sea, list) {
->>> +        if (!ghes_proc(ghes))
->>> +            ret = NOTIFY_OK;
->>> +    }
->>> +    rcu_read_unlock();
->>> +
->>> +    return ret;
->>> +}
-
->> What stops this from being re-entrant?
+> On 5 January 2017 at 12:51, Nicolai Stange <nicstange@gmail.com> wrote:
+>> Before invoking the arch specific handler, efi_mem_reserve() reserves
+>> the given memory region through memblock.
 >>
->> ghes_copy_tofrom_phs() takes the ghes_ioremap_lock_irq spinlock, but there is
->> nothing to stop a subsequent instruction fetch or memory access causing another
->> (maybe different) Synchronous External Abort which deadlocks trying to take the
->> same lock.
+>> efi_mem_reserve() can get called after mm_init() though -- through
+>> efi_bgrt_init(), for example. After mm_init(), memblock is dead and should
+>> not be used anymore.
 >>
->> ghes_notify_sea() looks to be based on ghes_notify_sci(), which (if I've found
->> the right part of the ACPI spec) is a level-low interrupt. spin_lock_irqsave()
->> would mask interrupts so there is no risk of a different notification firing on
->> the same CPU, (it looks like they are almost all ultimately an irq).
+>> Let efi_mem_reserve() check whether memblock is dead and not do the
+>> reservation if so. Emit a warning from the generic efi_arch mem_reserve()
+>> in this case: if the architecture doesn't provide any other means of
+>> registering the region as reserved, the operation would be a nop.
 >>
->> NMI is the odd one out because its not maskable like this, but ghes_notify_nmi()
->> has:
->>>     if (!atomic_add_unless(&ghes_in_nmi, 1, 1))
->>>         return ret;
->> To ensure there is only ever one thread poking around in this code.
+>> Fixes: 4bc9f92e64c8 ("x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data")
+>> Signed-off-by: Nicolai Stange <nicstange@gmail.com>
+>> ---
+>> Applicable to next-20170105.
+>> No changes to v2.
+>> Boot-tested on x86_64.
 >>
->> What happens if a system describes two GHES sources, one using an irq the other
->> SEA? The SEA error can interrupt the irq error while its holding the above lock.
->> I guess this is also why all the NMI code in that file is separate.
+>>  drivers/firmware/efi/efi.c | 7 +++++--
+>>  1 file changed, 5 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+>> index 92914801e388..158a8df2f4af 100644
+>> --- a/drivers/firmware/efi/efi.c
+>> +++ b/drivers/firmware/efi/efi.c
+>> @@ -403,7 +403,10 @@ u64 __init efi_mem_desc_end(efi_memory_desc_t *md)
+>>         return end;
+>>  }
+>>
+>> -void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size) {}
+>> +void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size)
+>> +{
+>> +       WARN(slab_is_available(), "efi_mem_reserve() has no effect");
+>> +}
+>>
+>>  /**
+>>   * efi_mem_reserve - Reserve an EFI memory region
+>> @@ -419,7 +422,7 @@ void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size) {}
+>>   */
+>>  void __init efi_mem_reserve(phys_addr_t addr, u64 size)
+>>  {
+>> -       if (!memblock_is_region_reserved(addr, size))
+>> +       if (!slab_is_available() && !memblock_is_region_reserved(addr, size))
+>>                 memblock_reserve(addr, size);
+>>
+
+More context:
+
+            /*
+             * Some architectures (x86) reserve all boot services ranges
+             * until efi_free_boot_services() because of buggy firmware
+             * implementations. This means the above memblock_reserve() is
+             * superfluous on x86 and instead what it needs to do is
+             * ensure the @start, @size is not freed.
+             */
+            efi_arch_mem_reserve(addr, size);
+    }
 
 
-> Let me see if I'm following you right :)
-> I should use spin_lock_irqsave() in ghes_notify_sea() to avoid ghes_notify_sci()
-> from
-> interrupting this process and potentially causing the deadlock?
+> I share Dave's concern: on x86, this will silently ignore the
+> reservation if slab_is_available() returns true,
 
-This way round you are already safe: The CPU masks interrupts when it takes the
-exception, they should still be masked by the time we get in here...
+AFAICS, x86 has got an efi_arch_mem_reserve() which doesn't ignore the
+reservation at any stage.
 
-The other way round is a lot more fun!
+The default implementation of efi_arch_mem_reserve() used on ARM is
+empty though ... 
 
-What happens if APEI is processing some error record that was notified via an
-interrupt, and then takes the Synchronous External Abort, and ends up back in
-this code? Masking interrupts doesn't stop the external-abort, and trying to
-take the ghes_ioremap_lock_irq will deadlock.
+> so we should at least warn here.
 
-What happens if we interrupt printk() holding all its locks is another thing I
-haven't worked out yet.
+... and this patch adds a WARN() to the empty stub.
 
 
-> This race condition does seem valid. We are using the same acknowledgment for
-> all our
-> HEST table entries, so our firmware will not populate more than one entry at a
-> time. That
-> gets us around this race condition.
+> I don't think this patch solves any known issues, so I'd
+> rather defer this for now, and pick up the discussion when Matt is
+> back,
 
-Ah, so your firmware will wait for the interrupt-signalled error to be finished
-before it triggers the Synchronous External Abort. I think this would still be a
-linux bug if the firmware didn't do this.
+I'm fine with either way and yes, no splat has been observed in the
+wild.
 
-x86 could have done the same with NMI notifications, but we have all this 'if
-(in_nmi)' to allow interrupts-masked GHES handling to be interrupted.
-
-What do you think to re-using the 'if (in_nmi)' code for SEA? We can argue that
-SEA is NMI-like in that it can't be masked, and it interrupts code that had
-interrupts masked. It 'should' be as simple as putting 'HAVE_NMI' in arm64's
-Kconfig, and wrapping the atomic notifier call with nmi_enter()/nmi_exit() from
-linux/hardirq.h. (...famous last words...)
-
-This probably answers my printk() questions too, but I need to look into it some
-more.
-
+Just to make it explicit: the issue addressed here is a potential
+use-after-free (both, read and write) on memblock.reserved.regions in
+case of CONFIG_ARCH_DISCARD_MEMBLOCK=y. It would certainly make sense to
+clarify the commit description in the next iteration...
 
 Thanks,
 
-James
+Nicolai
