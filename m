@@ -1,207 +1,235 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 10/10] uuid: Constify UUID compound literals
-Date: Fri, 6 Jan 2017 16:26:46 +0000
-Message-ID: <CAKv+Gu9ZF7ROmT+7nG_pDqVfc7QT70QbCCdqBgZifeX3bcmMdA@mail.gmail.com>
-References: <cover.1483318593.git.lukas@wunner.de> <c61bbe4733f78c830f6073e86f32159751bbda8c.1483318593.git.lukas@wunner.de>
- <CAKv+Gu8GqCrjOM6nTTHQckyUzrv+BO-B=st35yOptPfjA7Hitg@mail.gmail.com> <20170106095711.GA21850@wunner.de>
+Subject: Re: [PATCH 03/10] efi: Constify GetVariable() / SetVariable() arguments
+Date: Fri, 6 Jan 2017 16:28:28 +0000
+Message-ID: <CAKv+Gu-izRwdrUu7zZLSnf_mjCwFFZ0AsyF5iMR49+UXkmpsgQ@mail.gmail.com>
+References: <cover.1483318593.git.lukas@wunner.de> <2be92e87ff7855bcd88c86a7436f46d3488483f0.1483318593.git.lukas@wunner.de>
+ <CAKv+Gu8UnAzQGsmyWYsWsOY3B+J9HXechwBX_Vk-rntBtO+Dug@mail.gmail.com> <20170106101652.GB21850@wunner.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170106095711.GA21850-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+In-Reply-To: <20170106101652.GB21850-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>
+To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Artur Paszkiewicz <artur.paszkiewicz-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mike Marciniszyn <mike.marciniszyn-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dennis Dalessandro <dennis.dalessandro-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 6 January 2017 at 09:57, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
-> On Wed, Jan 04, 2017 at 05:54:08PM +0000, Ard Biesheuvel wrote:
+On 6 January 2017 at 10:16, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
+> On Wed, Jan 04, 2017 at 05:38:13PM +0000, Ard Biesheuvel wrote:
 >> On 2 January 2017 at 10:24, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
->> > The UUID_BE() and UUID_LE() macros (as well as the derived EFI_GUID())
->> > generate a compound literal for a 128-bit ID.  By default, these are not
->> > stored in the rodata section but generated on the stack at runtime in a
->> > very time- and space-inefficient manner.
->>
->> This is not true if you declare those variables static const (in
->> function scope).
->>
->> In general, I think we should avoid touching uapi headers for this, so
->> I would like to explore if we can reach the same result without this
->> patch. Another objection I have to this patch is that it is context
->> dependent whether the UUID_[LE_BE]() macros in fact generate compound
->> literals: this is true for an assignment to a pointer variable, but
->> when they are used in initializers this is not the case, and so adding
->> 'const' to their definitions is not always appropriate imo.
->>
->> Are there any instances where simply turning those automatic variables
->> into static const doesn't work?
->
-> The number of GUIDs used in the kernel is vast, it's many more than this
-> patch set makes it appear.  In a lot of cases, they're used as literals.
-> I would have to declare a temporary "static const" variable for each of
-> them and this patch set would become much larger and more intrusive.
-> Additionally the necessity to use a static const variable instead of a
-> literal seems clumsy and ugly.
->
-> As an example, consider arch/ia64/kernel/mca_drv.c:mca_make_slidx() which
-> contains an if-else-if ladder with 9 entries, each using a GUID literal.
-> I would have expected objections on grounds of severe ugliness if I had
-> changed all of these to temporary "static const" variables.
->
-
-Yes, but we can macroize that: something like
-
-#define __efiguid_ref(x) ({static const efi_guid_t __x = (x); __x; })
-
-and
-
-#define __efiguid_initref(x) ({static const __initconst efi_guid_t __x
-= (x); __x; })
-
-should do the trick I think?
-
-
-> By contrast, just changing the UUID_LE() and UUID_BE() macros causes these
-> literals to be placed in rodata automatically.
->
-> It seems that the only reason for uuid.h to be in uapi is its usage by
-> two other uapi headers, hyperv.h and mei.h.  The two don't even use the
-> UUID_LE() and UUID_BE() macros.
->
-> The impact of adding const to these macros is limited:  If the macros are
-> used as an initializer in a user space application and the variable they're
-> assigned to isn't declared const, gcc will silently make them non-const.
->
-> Worst thing that can happen is that compiling the user space application
-> results in a compiler warning.  This only occurs if the UUID is passed by
-> reference into a function.  E.g. if this patch wasn't at the end of the
-> series, these 3 warnings would occur:
->
-> arch/x86/platform/efi/quirks.c: In function 'efi_delete_dummy_variable':
-> arch/x86/platform/efi/quirks.c:52:35: warning: passing argument 2 of 'efi.set_variable' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
->   efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
->                                    ^
-> arch/x86/platform/efi/quirks.c:52:35: note: expected 'efi_guid_t * {aka struct <anonymous> *}' but argument is of type 'const uuid_le * {aka const struct <anonymous> *}'
->
-> arch/x86/platform/efi/quirks.c: In function 'efi_query_variable_store':
-> arch/x86/platform/efi/quirks.c:129:45: warning: passing argument 2 of 'efi.set_variable' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
->    status = efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
->                                              ^
-> arch/x86/platform/efi/quirks.c:129:45: note: expected 'efi_guid_t * {aka struct <anonymous> *}' but argument is of type 'const uuid_le * {aka const struct <anonymous> *}'
->
-> drivers/scsi/isci/probe_roms.c: In function 'isci_get_efi_var':
-> drivers/scsi/isci/probe_roms.c:190:8: warning: passing argument 2 of 'get_efi()->get_variable' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
->         &ISCI_EFI_VENDOR_GUID,
->         ^
-> drivers/scsi/isci/probe_roms.c:190:8: note: expected 'efi_guid_t * {aka struct <anonymous> *}' but argument is of type 'const uuid_le * {aka const struct <anonymous> *}'
->
-> This can easily be fixed in the user space application by adding "const"
-> to function declarations.
->
-> To reiterate what I wrote in the commit message, I don't see why anyone
-> would want to modify the distinct bytes making up the UUID after declaring
-> it, so marking UUIDs const seems natural.
->
-> Thanks,
->
-> Lukas
->
->>
->> > E.g. EFI_FILE_SYSTEM_GUID (964E5B22-6459-11D2-8E39-00A0C969723B) results
->> > in x86_64 code which requires 80 bytes text instead of 16 bytes rodata:
+>> > GUIDs and variable names passed to GetVariable() / SetVariable() are not
+>> > modified, so declare them const.  This allows the compiler to place them
+>> > in the rodata section instead of generating them on the stack at
+>> > runtime.  Pass GUIDs as literals rather than assigning them to temporary
+>> > variables to save a bit on code.
 >> >
->> >     c6 44 24 20 22                   movb   $0x22,0x20(%rsp)
->> >     c6 44 24 21 5b                   movb   $0x5b,0x21(%rsp)
->> >     c6 44 24 22 4e                   movb   $0x4e,0x22(%rsp)
->> >     c6 44 24 23 96                   movb   $0x96,0x23(%rsp)
->> >     c6 44 24 24 59                   movb   $0x59,0x24(%rsp)
->> >     c6 44 24 25 64                   movb   $0x64,0x25(%rsp)
->> >     c6 44 24 26 d2                   movb   $0xd2,0x26(%rsp)
->> >     c6 44 24 27 11                   movb   $0x11,0x27(%rsp)
->> >     c6 44 24 28 8e                   movb   $0x8e,0x28(%rsp)
->> >     c6 44 24 29 39                   movb   $0x39,0x29(%rsp)
->> >     c6 44 24 2a 00                   movb   $0x0,0x2a(%rsp)
->> >     c6 44 24 2b a0                   movb   $0xa0,0x2b(%rsp)
->> >     c6 44 24 2c c9                   movb   $0xc9,0x2c(%rsp)
->> >     c6 44 24 2d 69                   movb   $0x69,0x2d(%rsp)
->> >     c6 44 24 2e 72                   movb   $0x72,0x2e(%rsp)
->> >     c6 44 24 2f 3b                   movb   $0x3b,0x2f(%rsp)
->> >
->> > gcc 7 improves on this by using 2x movabs + 2x mov instructions,
->> > amounting to 30 bytes text instead of 16 bytes rodata.  That's more
->> > space-efficient than 80 bytes but still undesirable from a performance
->> > and security perspective:
->> >
->> >     48 b8 22 5b 4e 96 59 64 d2 11    movabs $0x11d26459964e5b,%rax
->> >     48 89 44 24 20                   mov    %rax,0x20(%rsp)
->> >     48 b8 8e 39 00 a0 c9 69 72 3b    movabs $0x3b7269c9a00039,%rax
->> >     48 89 44 24 28                   mov    %rax,0x28(%rsp)
->> >
->> > The reason for generating compound literals on the stack is that they're
->> > allowed to be modified.  E.g. a pointer to a UUID might be used to
->> > change some of its 16 bytes.  In the context of UUIDs this seems silly
->> > though:  The uuid_be, uuid_le and efi_guid_t data types hide the
->> > distinct bytes making up the ID, the bytes are not meant to be modified.
->> > Moreover, the UUIDs are usually pre-defined in a spec such as UEFI and
->> > there's no reason at all to modify them.
->> >
->> > Thus, change the UUID_BE and UUID_LE macros to declare the generated
->> > compound literal const, allowing the compiler to put it in rodata.
->> >
->> > When using the compound literal as an initializer for a variable, that
->> > variable has to be declared const as well for the UUID to become rodata.
->> >
->> > Is that all?  Unfortunately not.  Under certain conditions gcc refuses
->> > to store compound literals in rodata despite them being declared const.
->> > Rasmus Villemoes opened a bugzilla entry for this in December 2015:
->> > https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68725
->> >
->> > The upshot is that if a UUID is passed by value to a function (either
->> > directly or as a variable), it is stored in rodata.  This is the case
->> > for efi_guidcmp().  But if the UUID is passed by reference, it is
->> > generated on the stack, in spite of it being declared const and the
->> > function parameter being declared const.  This is the case for the
->> > various EFI boot and runtime services calls such as GetVariable.
->> > A workaround is to declare a *static* const variable, assign the UUID to
->> > it and pass the variable by reference to the function.
->> >
->> > This issue also affects efi_char16_t strings which are only declared
->> > const (and not static const).  They're likewise generated on the stack
->> > at runtime.
->> >
->> > clang 3.9 is not better than gcc:  It does the exact opposite by putting
->> > UUIDs in rodata if they're passed by reference, and generating them on
->> > the stack if they're passed by value.
->> >
->> > Cc: Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->> > Cc: Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>
 >> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 >> > Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> > Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>> > Cc: Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>> > Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>
+>> > Cc: Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>
+>> > Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+>> > Cc: Artur Paszkiewicz <artur.paszkiewicz-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>> > Cc: Mike Marciniszyn <mike.marciniszyn-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>> > Cc: Dennis Dalessandro <dennis.dalessandro-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 >> > Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 >> > ---
->> >  include/uapi/linux/uuid.h | 4 ++--
->> >  1 file changed, 2 insertions(+), 2 deletions(-)
+>> >  arch/ia64/kernel/efi.c                  | 15 ++++-----------
+>> >  arch/x86/platform/efi/quirks.c          |  2 +-
+>> >  drivers/firmware/efi/efi-pstore.c       |  4 ++--
+>> >  drivers/firmware/efi/efibc.c            |  3 +--
+>> >  drivers/firmware/efi/libstub/arm-stub.c |  5 ++---
+>> >  drivers/infiniband/hw/hfi1/efivar.c     |  6 +-----
+>> >  drivers/scsi/isci/probe_roms.c          |  2 +-
+>> >  7 files changed, 12 insertions(+), 25 deletions(-)
 >> >
->> > diff --git a/include/uapi/linux/uuid.h b/include/uapi/linux/uuid.h
->> > index 3738e5f..9184f01 100644
->> > --- a/include/uapi/linux/uuid.h
->> > +++ b/include/uapi/linux/uuid.h
->> > @@ -29,14 +29,14 @@
->> >  } uuid_be;
+>> > diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
+>> > index f57d089..f1264ab 100644
+>> > --- a/arch/ia64/kernel/efi.c
+>> > +++ b/arch/ia64/kernel/efi.c
+>> > @@ -919,22 +919,15 @@ static void __init handle_palo(unsigned long phys_addr)
+>> >  efi_uart_console_only(void)
+>> >  {
+>> >         efi_status_t status;
+>> > -       char *s, name[] = "ConOut";
+>> > -       efi_guid_t guid = EFI_GLOBAL_VARIABLE_GUID;
+>> > -       efi_char16_t *utf16, name_utf16[32];
+>> > +       const char name[] = "ConOut";
+>> > +       const efi_char16_t name_utf16[] = { 'C', 'o', 'n', 'O', 'u', 't', 0 };
+>>
+>> I know you mention 'static' in 10/10, but I don't understand why you
+>> don't make these static to begin with. That also allows you to
+>> annotate them as __initconst, which is not possible for compound
+>> initializers (including the GUID)
+>
+> Right, I hadn't thought of __initconst.  In this particular case indeed
+> it might make sense to use "static const efi_guid_t guid __initconst = ...",
+> and arguably for the strings as well.  But where should I draw the line?
+>
+> There are a handful of other GUIDs used in __init functions, e.g. in
+> arch/ia64/ there's ESI_TABLE_GUID in kernel/esi.c:esi_init() and
+> SAL_SYSTEM_TABLE_GUID in sn/kernel/setup.c:early_sn_setup().
+> This patch set results in them being placed in rodata, but not
+> init.rodata.  Should I declare a temporary "static const __initconst"
+> variable for each of them?  That would give us 16 bytes in each of the
+> two cases being freed after kernel initialization.
+>
+> However string literals aren't put in init.rodata either even though
+> they're declared in an __init function.  E.g. early_sn_setup() contains
+> a string literal "failed to find SAL entry point\n".  That's 31 bytes.
+> esi_init() contains even 103 bytes of string literals.
+>
+> So I'm not sure if it's worth to move the GUIDs to init.rodata (at the
+> expense of an additional LoC to declare a temporary variable) even
+> though we waste more space for string literals.
+>
+
+For the string literals I think there are some solutions possible
+involving compiler plugins. Kees?
+
+>>
+>> >         unsigned char data[1024];
+>> >         unsigned long size = sizeof(data);
+>> >         struct efi_generic_dev_path *hdr, *end_addr;
+>> >         int uart = 0;
 >> >
->> >  #define UUID_LE(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)               \
->> > -((uuid_le)                                                             \
->> > +((const uuid_le)                                                       \
->> >  {{ (a) & 0xff, ((a) >> 8) & 0xff, ((a) >> 16) & 0xff, ((a) >> 24) & 0xff, \
->> >     (b) & 0xff, ((b) >> 8) & 0xff,                                      \
->> >     (c) & 0xff, ((c) >> 8) & 0xff,                                      \
->> >     (d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7) }})
+>> > -       /* Convert to UTF-16 */
+>> > -       utf16 = name_utf16;
+>> > -       s = name;
+>> > -       while (*s)
+>> > -               *utf16++ = *s++ & 0x7f;
+>> > -       *utf16 = 0;
+>> > -
+>> > -       status = efi.get_variable(name_utf16, &guid, NULL, &size, data);
+>> > +       status = efi.get_variable(name_utf16, &EFI_GLOBAL_VARIABLE_GUID,
+>> > +                                 NULL, &size, data);
+>> >         if (status != EFI_SUCCESS) {
+>> >                 printk(KERN_ERR "No EFI %s variable?\n", name);
+>> >                 return 0;
+>> > diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+>> > index 10aca63..aad3701 100644
+>> > --- a/arch/x86/platform/efi/quirks.c
+>> > +++ b/arch/x86/platform/efi/quirks.c
+>> > @@ -19,7 +19,7 @@
+>> >  #define EFI_DUMMY_GUID \
+>> >         EFI_GUID(0x4424ac57, 0xbe4b, 0x47dd, 0x9e, 0x97, 0xed, 0x50, 0xf0, 0x9f, 0x92, 0xa9)
 >> >
->> >  #define UUID_BE(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)               \
->> > -((uuid_be)                                                             \
->> > +((const uuid_be)                                                       \
->> >  {{ ((a) >> 24) & 0xff, ((a) >> 16) & 0xff, ((a) >> 8) & 0xff, (a) & 0xff, \
->> >     ((b) >> 8) & 0xff, (b) & 0xff,                                      \
->> >     ((c) >> 8) & 0xff, (c) & 0xff,                                      \
+>> > -static efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
+>> > +static const efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
+>> >
+>> >  static bool efi_no_storage_paranoia;
+>> >
+>> > diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+>> > index f402ba2..0911449 100644
+>> > --- a/drivers/firmware/efi/efi-pstore.c
+>> > +++ b/drivers/firmware/efi/efi-pstore.c
+>> > @@ -265,7 +265,6 @@ static int efi_pstore_write(enum pstore_type_id type,
+>> >  {
+>> >         char name[DUMP_NAME_LEN];
+>> >         efi_char16_t efi_name[DUMP_NAME_LEN];
+>> > -       efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
+>> >         int i, ret = 0;
+>> >
+>> >         sprintf(name, "dump-type%u-%u-%d-%lu-%c", type, part, count,
+>> > @@ -274,7 +273,8 @@ static int efi_pstore_write(enum pstore_type_id type,
+>> >         for (i = 0; i < DUMP_NAME_LEN; i++)
+>> >                 efi_name[i] = name[i];
+>> >
+>> > -       efivar_entry_set_safe(efi_name, vendor, PSTORE_EFI_ATTRIBUTES,
+>> > +       efivar_entry_set_safe(efi_name, LINUX_EFI_CRASH_GUID,
+>> > +                             PSTORE_EFI_ATTRIBUTES,
+>> >                               !pstore_cannot_block_path(reason),
+>> >                               size, psi->buf);
+>> >
+>> > diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
+>> > index 503bbe2..57ddf8c 100644
+>> > --- a/drivers/firmware/efi/efibc.c
+>> > +++ b/drivers/firmware/efi/efibc.c
+>> > @@ -32,7 +32,6 @@ static void efibc_str_to_str16(const char *str, efi_char16_t *str16)
+>> >  static int efibc_set_variable(const char *name, const char *value)
+>> >  {
+>> >         int ret;
+>> > -       efi_guid_t guid = LINUX_EFI_LOADER_ENTRY_GUID;
+>> >         struct efivar_entry *entry;
+>> >         size_t size = (strlen(value) + 1) * sizeof(efi_char16_t);
+>> >
+>> > @@ -49,7 +48,7 @@ static int efibc_set_variable(const char *name, const char *value)
+>> >
+>> >         efibc_str_to_str16(name, entry->var.VariableName);
+>> >         efibc_str_to_str16(value, (efi_char16_t *)entry->var.Data);
+>> > -       memcpy(&entry->var.VendorGuid, &guid, sizeof(guid));
+>> > +       entry->var.VendorGuid = LINUX_EFI_LOADER_ENTRY_GUID;
+>> >
+>> >         ret = efivar_entry_set(entry,
+>> >                                EFI_VARIABLE_NON_VOLATILE
+>> > diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+>> > index 6fca48c..da72bfb 100644
+>> > --- a/drivers/firmware/efi/libstub/arm-stub.c
+>> > +++ b/drivers/firmware/efi/libstub/arm-stub.c
+>> > @@ -27,13 +27,12 @@ static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
+>> >         static efi_char16_t const sm_var_name[] = {
+>> >                 'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0 };
+>> >
+>> > -       efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
+>> >         efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
+>> >         u8 val;
+>> >         unsigned long size = sizeof(val);
+>> >         efi_status_t status;
+>> >
+>> > -       status = f_getvar((efi_char16_t *)sb_var_name, (efi_guid_t *)&var_guid,
+>> > +       status = f_getvar(sb_var_name, &EFI_GLOBAL_VARIABLE_GUID,
+>> >                           NULL, &size, &val);
+>> >
+>> >         if (status != EFI_SUCCESS)
+>> > @@ -42,7 +41,7 @@ static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
+>> >         if (val == 0)
+>> >                 return 0;
+>> >
+>> > -       status = f_getvar((efi_char16_t *)sm_var_name, (efi_guid_t *)&var_guid,
+>> > +       status = f_getvar(sm_var_name, &EFI_GLOBAL_VARIABLE_GUID,
+>> >                           NULL, &size, &val);
+>> >
+>> >         if (status != EFI_SUCCESS)
+>> > diff --git a/drivers/infiniband/hw/hfi1/efivar.c b/drivers/infiniband/hw/hfi1/efivar.c
+>> > index 106349f..f769cc2 100644
+>> > --- a/drivers/infiniband/hw/hfi1/efivar.c
+>> > +++ b/drivers/infiniband/hw/hfi1/efivar.c
+>> > @@ -66,7 +66,6 @@ static int read_efi_var(const char *name, unsigned long *size,
+>> >  {
+>> >         efi_status_t status;
+>> >         efi_char16_t *uni_name;
+>> > -       efi_guid_t guid;
+>> >         unsigned long temp_size;
+>> >         void *temp_buffer;
+>> >         void *data;
+>> > @@ -95,13 +94,10 @@ static int read_efi_var(const char *name, unsigned long *size,
+>> >         for (i = 0; name[i]; i++)
+>> >                 uni_name[i] = name[i];
+>> >
+>> > -       /* need a variable for our GUID */
+>> > -       guid = HFI1_EFIVAR_GUID;
+>> > -
+>> >         /* call into EFI runtime services */
+>> >         status = efi.get_variable(
+>> >                         uni_name,
+>> > -                       &guid,
+>> > +                       &HFI1_EFIVAR_GUID,
+>> >                         NULL,
+>> >                         &temp_size,
+>> >                         temp_buffer);
+>> > diff --git a/drivers/scsi/isci/probe_roms.c b/drivers/scsi/isci/probe_roms.c
+>> > index 8ac646e..d2c17c1 100644
+>> > --- a/drivers/scsi/isci/probe_roms.c
+>> > +++ b/drivers/scsi/isci/probe_roms.c
+>> > @@ -34,7 +34,7 @@
+>> >  #include "task.h"
+>> >  #include "probe_roms.h"
+>> >
+>> > -static efi_char16_t isci_efivar_name[] = {
+>> > +static const efi_char16_t isci_efivar_name[] = {
+>> >         'R', 's', 't', 'S', 'c', 'u', 'O'
+>> >  };
+>> >
 >> > --
 >> > 2.11.0
 >> >
