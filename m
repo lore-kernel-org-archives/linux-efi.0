@@ -1,108 +1,68 @@
-From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V6 05/10] acpi: apei: handle SEA notification type for
- ARMv8
-Date: Thu, 5 Jan 2017 15:31:06 -0700
-Message-ID: <8b7fa162-0d44-025f-758d-d61cfa75c787@codeaurora.org>
-References: <1481147303-7979-1-git-send-email-tbaicar@codeaurora.org>
- <1481147303-7979-6-git-send-email-tbaicar@codeaurora.org>
- <58594E62.3050003@arm.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 2/2] efi: efi_mem_reserve(): don't reserve through
+ memblock after mm_init()
+Date: Fri, 6 Jan 2017 08:35:52 +0000
+Message-ID: <CAKv+Gu8RHsMKmEHBqNv=q4SB-spCtuydbCshs2ut1+Kk8vraOQ@mail.gmail.com>
+References: <20170105125130.2815-1-nicstange@gmail.com> <20170105125130.2815-2-nicstange@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <58594E62.3050003@arm.com>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: James Morse <james.morse@arm.com>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170105125130.2815-2-nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, =?UTF-8?Q?Mika_Penttil=C3=A4?= <mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 12/20/2016 8:29 AM, James Morse wrote:
-> Hi Tyler,
+On 5 January 2017 at 12:51, Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Before invoking the arch specific handler, efi_mem_reserve() reserves
+> the given memory region through memblock.
 >
-> On 07/12/16 21:48, Tyler Baicar wrote:
->> ARM APEI extension proposal added SEA (Synchrounous External
->> Abort) notification type for ARMv8.
->> Add a new GHES error source handling function for SEA. If an error
->> source's notification type is SEA, then this function can be registered
->> into the SEA exception handler. That way GHES will parse and report
->> SEA exceptions when they occur.
->> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
->> index 2acbc60..66ab3fd 100644
->> --- a/drivers/acpi/apei/ghes.c
->> +++ b/drivers/acpi/apei/ghes.c
->> @@ -767,6 +771,62 @@ static struct notifier_block ghes_notifier_sci = {
->>   	.notifier_call = ghes_notify_sci,
->>   };
->>   
->> +#ifdef CONFIG_HAVE_ACPI_APEI_SEA
->> +static LIST_HEAD(ghes_sea);
->> +
->> +static int ghes_notify_sea(struct notifier_block *this,
->> +				  unsigned long event, void *data)
->> +{
->> +	struct ghes *ghes;
->> +	int ret = NOTIFY_DONE;
->> +
->> +	rcu_read_lock();
->> +	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
->> +		if (!ghes_proc(ghes))
->> +			ret = NOTIFY_OK;
->> +	}
->> +	rcu_read_unlock();
->> +
->> +	return ret;
->> +}
-> What stops this from being re-entrant?
+> efi_mem_reserve() can get called after mm_init() though -- through
+> efi_bgrt_init(), for example. After mm_init(), memblock is dead and should
+> not be used anymore.
 >
-> ghes_copy_tofrom_phs() takes the ghes_ioremap_lock_irq spinlock, but there is
-> nothing to stop a subsequent instruction fetch or memory access causing another
-> (maybe different) Synchronous External Abort which deadlocks trying to take the
-> same lock.
+> Let efi_mem_reserve() check whether memblock is dead and not do the
+> reservation if so. Emit a warning from the generic efi_arch mem_reserve()
+> in this case: if the architecture doesn't provide any other means of
+> registering the region as reserved, the operation would be a nop.
 >
-> ghes_notify_sea() looks to be based on ghes_notify_sci(), which (if I've found
-> the right part of the ACPI spec) is a level-low interrupt. spin_lock_irqsave()
-> would mask interrupts so there is no risk of a different notification firing on
-> the same CPU, (it looks like they are almost all ultimately an irq).
+> Fixes: 4bc9f92e64c8 ("x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data")
+> Signed-off-by: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> ---
+> Applicable to next-20170105.
+> No changes to v2.
+> Boot-tested on x86_64.
 >
-> NMI is the odd one out because its not maskable like this, but ghes_notify_nmi()
-> has:
->> 	if (!atomic_add_unless(&ghes_in_nmi, 1, 1))
->> 		return ret;
-> To ensure there is only ever one thread poking around in this code.
+>  drivers/firmware/efi/efi.c | 7 +++++--
+>  1 file changed, 5 insertions(+), 2 deletions(-)
 >
-> What happens if a system describes two GHES sources, one using an irq the other
-> SEA? The SEA error can interrupt the irq error while its holding the above lock.
-> I guess this is also why all the NMI code in that file is separate.
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 92914801e388..158a8df2f4af 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -403,7 +403,10 @@ u64 __init efi_mem_desc_end(efi_memory_desc_t *md)
+>         return end;
+>  }
 >
+> -void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size) {}
+> +void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size)
+> +{
+> +       WARN(slab_is_available(), "efi_mem_reserve() has no effect");
+> +}
 >
-> Thanks,
+>  /**
+>   * efi_mem_reserve - Reserve an EFI memory region
+> @@ -419,7 +422,7 @@ void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size) {}
+>   */
+>  void __init efi_mem_reserve(phys_addr_t addr, u64 size)
+>  {
+> -       if (!memblock_is_region_reserved(addr, size))
+> +       if (!slab_is_available() && !memblock_is_region_reserved(addr, size))
+>                 memblock_reserve(addr, size);
 >
-> James
-Hi James,
 
-Let me see if I'm following you right :)
-I should use spin_lock_irqsave() in ghes_notify_sea() to avoid 
-ghes_notify_sci() from
-interrupting this process and potentially causing the deadlock?
-
-This race condition does seem valid. We are using the same 
-acknowledgment for all our
-HEST table entries, so our firmware will not populate more than one 
-entry at a time. That
-gets us around this race condition.
-
-Thanks,
-Tyler
-
--- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+I share Dave's concern: on x86, this will silently ignore the
+reservation if slab_is_available() returns true, so we should at least
+warn here. I don't think this patch solves any known issues, so I'd
+rather defer this for now, and pick up the discussion when Matt is
+back,
