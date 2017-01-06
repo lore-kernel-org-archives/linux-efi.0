@@ -1,129 +1,138 @@
-From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V6 04/10] arm64: exception: handle Synchronous External
- Abort
-Date: Fri, 6 Jan 2017 09:58:54 -0700
-Message-ID: <05841914-183d-f2b6-37d8-4c34ea42b135@codeaurora.org>
-References: <1481147303-7979-1-git-send-email-tbaicar@codeaurora.org>
- <1481147303-7979-5-git-send-email-tbaicar@codeaurora.org>
- <20170104135413.GE18193@arm.com>
+From: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v3 2/2] efi: efi_mem_reserve(): don't reserve through memblock after mm_init()
+Date: Fri, 06 Jan 2017 18:46:37 +0100
+Message-ID: <87showm682.fsf@gmail.com>
+References: <20170105125130.2815-1-nicstange@gmail.com>
+        <20170105125130.2815-2-nicstange@gmail.com>
+        <CAKv+Gu8RHsMKmEHBqNv=q4SB-spCtuydbCshs2ut1+Kk8vraOQ@mail.gmail.com>
+        <87wpe8mjdk.fsf@gmail.com>
+        <CAKv+Gu_BnSf_LMsWHTeFaTak8iV1Cwex7WBEsufwYRrBzY8KzQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <20170104135413.GE18193@arm.com>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Will Deacon <will.deacon@arm.com>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+Content-Type: text/plain
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKv+Gu_BnSf_LMsWHTeFaTak8iV1Cwex7WBEsufwYRrBzY8KzQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+        (Ard Biesheuvel's message of "Fri, 6 Jan 2017 16:41:41 +0000")
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86@kernel.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mika =?utf-8?Q?Penttil=C3=A4?= <mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi@vger.kernel.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel@vger.kernel.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Will,
+Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> writes:
 
-On 1/4/2017 6:54 AM, Will Deacon wrote:
-> On Wed, Dec 07, 2016 at 02:48:17PM -0700, Tyler Baicar wrote:
->> SEA exceptions are often caused by an uncorrected hardware
->> error, and are handled when data abort and instruction abort
->> exception classes have specific values for their Fault Status
->> Code.
->> When SEA occurs, before killing the process, go through
->> the handlers registered in the notification list.
->> Update fault_info[] with specific SEA faults so that the
->> new SEA handler is used.
+> On 6 January 2017 at 13:02, Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>> Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> writes:
 >>
->> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
->> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
->> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
->> ---
->>   arch/arm64/include/asm/system_misc.h | 13 ++++++++
->>   arch/arm64/mm/fault.c                | 58 +++++++++++++++++++++++++++++-------
->>   2 files changed, 61 insertions(+), 10 deletions(-)
+>>> On 5 January 2017 at 12:51, Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>>>> Before invoking the arch specific handler, efi_mem_reserve() reserves
+>>>> the given memory region through memblock.
+>>>>
+>>>> efi_mem_reserve() can get called after mm_init() though -- through
+>>>> efi_bgrt_init(), for example. After mm_init(), memblock is dead and should
+>>>> not be used anymore.
+>>>>
+>>>> Let efi_mem_reserve() check whether memblock is dead and not do the
+>>>> reservation if so. Emit a warning from the generic efi_arch mem_reserve()
+>>>> in this case: if the architecture doesn't provide any other means of
+>>>> registering the region as reserved, the operation would be a nop.
+>>>>
+>>>> Fixes: 4bc9f92e64c8 ("x86/efi-bgrt: Use efi_mem_reserve() to avoid copying image data")
+>>>> Signed-off-by: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+>>>> ---
+>>>> Applicable to next-20170105.
+>>>> No changes to v2.
+>>>> Boot-tested on x86_64.
+>>>>
+>>>>  drivers/firmware/efi/efi.c | 7 +++++--
+>>>>  1 file changed, 5 insertions(+), 2 deletions(-)
+>>>>
+>>>> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+>>>> index 92914801e388..158a8df2f4af 100644
+>>>> --- a/drivers/firmware/efi/efi.c
+>>>> +++ b/drivers/firmware/efi/efi.c
+>>>> @@ -403,7 +403,10 @@ u64 __init efi_mem_desc_end(efi_memory_desc_t *md)
+>>>>         return end;
+>>>>  }
+>>>>
+>>>> -void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size) {}
+>>>> +void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size)
+>>>> +{
+>>>> +       WARN(slab_is_available(), "efi_mem_reserve() has no effect");
+>>>> +}
+>>>>
+>>>>  /**
+>>>>   * efi_mem_reserve - Reserve an EFI memory region
+>>>> @@ -419,7 +422,7 @@ void __init __weak efi_arch_mem_reserve(phys_addr_t addr, u64 size) {}
+>>>>   */
+>>>>  void __init efi_mem_reserve(phys_addr_t addr, u64 size)
+>>>>  {
+>>>> -       if (!memblock_is_region_reserved(addr, size))
+>>>> +       if (!slab_is_available() && !memblock_is_region_reserved(addr, size))
+>>>>                 memblock_reserve(addr, size);
+>>>>
 >>
->> diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
->> index 57f110b..9040e1d 100644
->> --- a/arch/arm64/include/asm/system_misc.h
->> +++ b/arch/arm64/include/asm/system_misc.h
->> @@ -64,4 +64,17 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
->>   
->>   #endif	/* __ASSEMBLY__ */
->>   
->> +/*
->> + * The functions below are used to register and unregister callbacks
->> + * that are to be invoked when a Synchronous External Abort (SEA)
->> + * occurs. An SEA is raised by certain fault status codes that have
->> + * either data or instruction abort as the exception class, and
->> + * callbacks may be registered to parse or handle such hardware errors.
->> + *
->> + * Registered callbacks are run in an interrupt/atomic context. They
->> + * are not allowed to block or sleep.
->> + */
->> +int register_synchronous_ext_abort_notifier(struct notifier_block *nb);
->> +void unregister_synchronous_ext_abort_notifier(struct notifier_block *nb);
-> I think that we may as well use the "SEA" acronym consistently in code,
-> expanding it only for strings and comments, so these can be renamed to
-> {register,unregister}_sea_notifier. That said, what is the use of having a
-> notifier chain here as well as in the ghes code? If the ghes code is the
-> only place to register a notifier, we may as well start simple and call that
-> code directly, like we call handle_mm_fault directly for data aborts.
-I originally used the acronym and got feedback to expand it, but I'll 
-revert back to just using the acronym.
-Using a notifier here is consistent with the SCI error type in the GHES 
-code which is also only registered in
-the GHES code. I can remove the notifier for SEA if you think making the 
-call directly is better here.
->>   static const struct fault_info {
->>   	int	(*fn)(unsigned long addr, unsigned int esr, struct pt_regs *regs);
->>   	int	sig;
->> @@ -502,22 +540,22 @@ static const struct fault_info {
->>   	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 1 permission fault"	},
->>   	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
->>   	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 permission fault"	},
->> -	{ do_bad,		SIGBUS,  0,		"synchronous external abort"	},
->> +	{ do_synch_ext_abort,	SIGBUS,  0,		"synchronous external abort"	},
-> Again, just stick with do_sea for the function name...
+>> More context:
+>>
+>>             /*
+>>              * Some architectures (x86) reserve all boot services ranges
+>>              * until efi_free_boot_services() because of buggy firmware
+>>              * implementations. This means the above memblock_reserve() is
+>>              * superfluous on x86 and instead what it needs to do is
+>>              * ensure the @start, @size is not freed.
+>>              */
+>>             efi_arch_mem_reserve(addr, size);
+>>     }
+>>
+>>
+>>> I share Dave's concern: on x86, this will silently ignore the
+>>> reservation if slab_is_available() returns true,
+>>
+>> AFAICS, x86 has got an efi_arch_mem_reserve() which doesn't ignore the
+>> reservation at any stage.
+>>
 >
->>   	{ do_bad,		SIGBUS,  0,		"unknown 17"			},
->>   	{ do_bad,		SIGBUS,  0,		"unknown 18"			},
->>   	{ do_bad,		SIGBUS,  0,		"unknown 19"			},
->> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
->> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
->> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
->> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
->> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error"	},
->> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 0 SEA (trans tbl walk)"	},
-> ... but there's no need to abbreviate "translation table walk" here. Long
-> strings that run over 80 chars are fine. Similarly for "SEA".
-I will expand this in the next patchset.
->> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 1 SEA (trans tbl walk)"	},
->> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 2 SEA (trans tbl walk)"	},
->> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 3 SEA (trans tbl walk)"	},
->> +	{ do_synch_ext_abort,	SIGBUS,  0,		"synchronous parity or ECC err" },
->>   	{ do_bad,		SIGBUS,  0,		"unknown 25"			},
->>   	{ do_bad,		SIGBUS,  0,		"unknown 26"			},
->>   	{ do_bad,		SIGBUS,  0,		"unknown 27"			},
->> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
->> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
->> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
->> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
->> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 0 synch parity error"	},
->> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 1 synch parity error"	},
->> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 2 synch parity error"	},
->> +	{ do_synch_ext_abort,	SIGBUS,  0,		"level 3 synch parity error"	},
-> Please keep mention of "translation table walk", since we have exception
-> levels too and it's confusing just saying "level n".
-I will add them back in the next patchset.
+> Thanks for the clarification. But my concern is whether changing the
+> EFI memory map is going to have any effect at this stage, i.e., after
+> slab_is_available() returns true: haven't we already communicated to
+> the kernel which RAM regions it may allocate from? How does it know
+> the memory map has changed, and how do we ensure that it has not
+> already allocated from the region we are reserving here?
+
+Ah, I see what you mean. I think it works like this on x86:
+
+All EFI_BOOT_SERVICES_* regions as reported by the firmware are marked
+as reserved at memblock unconditionally through the early setup_arch()
+=> efi_reserve_boot_services(). This prevents these from getting handed
+over to the "normal" kernel MM until efi_free_boot_services()
+gets called later on. The latter frees these EFI_BOOT_SERVICES_* regions,
+but only if their EFI_MEMORY_RUNTIME flag is not set.
+
+Now, efi_arch_mem_reserve() basically just sets the EFI_MEMORY_RUNTIME
+flag, allowing the given region to survive beyond efi_free_boot_services().
+
+Corrolary 1: any efi_mem_reserve() after efi_free_boot_services wouldn't
+have any effect.
+
+Corollary 2: anything handed to efi_arch_mem_reserve() must live within
+some memory region which had been reported by firmware already.
+
+Indeed, at its very top, there is
+
+  if (efi_mem_desc_lookup(addr, &md)) {
+    pr_err("Failed to lookup EFI memory descriptor for %pa\n", &addr);
+    return;
+  }
+
+  if (addr + size > md.phys_addr + (md.num_pages << EFI_PAGE_SHIFT)) {
+  	pr_err("Region spans EFI memory descriptors, %pa\n", &addr);
+  	return;
+  }
+
+For further information, the comment at the x86's efi_arch_mem_reserve()
+might be helpful.
+
+
+I hope this is correct and helps.
 
 Thanks,
-Tyler
-> Will
 
--- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+Nicolai
