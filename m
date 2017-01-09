@@ -1,48 +1,40 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH v2 2/2] efi: efi_mem_reserve(): don't reserve through
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v3 2/2] efi: efi_mem_reserve(): don't reserve through
  memblock after mm_init()
-Date: Mon, 9 Jan 2017 11:44:00 +0000
-Message-ID: <20170109114400.GF16838@codeblueprint.co.uk>
-References: <20161222102340.2689-1-nicstange@gmail.com>
- <20161222102340.2689-2-nicstange@gmail.com>
- <20170105091242.GA11021@dhcp-128-65.nay.redhat.com>
+Date: Mon, 9 Jan 2017 13:00:33 +0000
+Message-ID: <20170109130033.GH16838@codeblueprint.co.uk>
+References: <20170105125130.2815-1-nicstange@gmail.com>
+ <20170105125130.2815-2-nicstange@gmail.com>
+ <CAKv+Gu8RHsMKmEHBqNv=q4SB-spCtuydbCshs2ut1+Kk8vraOQ@mail.gmail.com>
+ <87wpe8mjdk.fsf@gmail.com>
+ <CAKv+Gu_BnSf_LMsWHTeFaTak8iV1Cwex7WBEsufwYRrBzY8KzQ@mail.gmail.com>
+ <87showm682.fsf@gmail.com>
+ <CAKv+Gu9B_amUwKuQCfMj6d96EpcLdeBDm732E0iqKSkRp11Z4w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20170105091242.GA11021@dhcp-128-65.nay.redhat.com>
-Sender: owner-linux-mm@kvack.org
-To: Dave Young <dyoung@redhat.com>
-Cc: Nicolai Stange <nicstange@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Mika =?iso-8859-1?Q?Penttil=E4?= <mika.penttila@nextfour.com>, Andrew Morton <akpm@linux-foundation.org>, linux-mm@kvack.org, Vlastimil Babka <vbabka@suse.cz>, Michal Hocko <mhocko@suse.cz>, Mel Gorman <mgorman@techsingularity.net>
+In-Reply-To: <CAKv+Gu9B_amUwKuQCfMj6d96EpcLdeBDm732E0iqKSkRp11Z4w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mika =?iso-8859-1?Q?Penttil=E4?= <mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 05 Jan, at 05:12:42PM, Dave Young wrote:
-> On 12/22/16 at 11:23am, Nicolai Stange wrote:
-> > Before invoking the arch specific handler, efi_mem_reserve() reserves
-> > the given memory region through memblock.
-> > 
-> > efi_mem_reserve() can get called after mm_init() though -- through
-> > efi_bgrt_init(), for example. After mm_init(), memblock is dead and should
-> > not be used anymore.
+On Fri, 06 Jan, at 07:28:40PM, Ard Biesheuvel wrote:
 > 
-> It did not fail during previous test so we did not catch this bug, if memblock
-> can not be used after mm_init(), IMHO it should fail instead of silently succeed.
- 
-This must literally be the fifth time or so that I've been caught out
-by this over the years because there's no hard error if you call the
-memblock code after slab and co. are up.
+> This is my point exactly. But it appears efi_free_boot_services()
+> occurs much later than I thought, and so there is a sizabe time window
+> where SLAB is up but reservations can still be made. But we don't
+> check whether efi_free_boot_services() has been called.
 
-MM folks, is there some way to catch these errors without requiring
-the sprinkling of slab_is_available() everywhere?
+True. This has only been correct thus far because all code has been
+audited, but adding a check to catch future offenders is a good idea.
 
-> Matt, can we move the efi_mem_reserve to earlier code for example in
-> efi_memblock_x86_reserve_range just after reserving the memmap?
- 
-No, it *needs* to be callable from efi_bgrt_init(), because you only
-want to reserve those regions if you have the BGRT driver available.
+> Another problem is that we never check that the reservation is
+> covered by a BootServicesData region, which are the only ones that
+> are guaranteed to be retained up to this point.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+The runtime regions are guaranteed to be retained too.
+
+Again, this shouldn't actually be a problem today, but the potential
+for breakage here warrants some kind of check and loud warning. 
