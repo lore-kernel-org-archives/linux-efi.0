@@ -1,38 +1,53 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH v2 2/2] efi: efi_mem_reserve(): don't reserve through
- memblock after mm_init()
-Date: Tue, 10 Jan 2017 12:51:50 +0000
-Message-ID: <20170110125150.GA31377@codeblueprint.co.uk>
-References: <20161222102340.2689-1-nicstange@gmail.com>
- <20161222102340.2689-2-nicstange@gmail.com>
- <20170105091242.GA11021@dhcp-128-65.nay.redhat.com>
- <20170109114400.GF16838@codeblueprint.co.uk>
- <20170110003735.GA2809@dhcp-128-65.nay.redhat.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.9 099/206] efi/efivar_ssdt_load: Dont return success on allocation failure
+Date: Tue, 10 Jan 2017 14:36:22 +0100
+Message-ID: <20170110131507.141194322@linuxfoundation.org>
+References: <20170110131502.767555407@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170110003735.GA2809@dhcp-128-65.nay.redhat.com>
-Sender: owner-linux-mm@kvack.org
-To: Dave Young <dyoung@redhat.com>
-Cc: Nicolai Stange <nicstange@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Mika =?iso-8859-1?Q?Penttil=E4?= <mika.penttila@nextfour.com>, Andrew Morton <akpm@linux-foundation.org>, linux-mm@kvack.org, Vlastimil Babka <vbabka@suse.cz>, Michal Hocko <mhocko@suse.cz>, Mel Gorman <mgorman@techsingularity.net>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170110131502.767555407@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Dan Carpenter <dan.carpenter@oracle.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 10 Jan, at 08:37:35AM, Dave Young wrote:
-> 
-> It is true that it depends on acpi init, I was wondering if bgrt parsing can
-> be moved to early acpi code. But anyway I'm not sure it is doable and
-> worth.
+4.9-stable review patch.  If anyone has any objections, please let me know.
 
-That's a good question. I think I gave up last time I tried to move
-the BGRT code to early boot because of the dependencies involved with
-having the ACPI table parsing code initialised.
+------------------
 
-But if you want to take a crack at it, I'd be happy to review the
-patches.
+From: Dan Carpenter <dan.carpenter@oracle.com>
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+commit a75dcb5848359f488c32c0aef8711d9bd37a77b8 upstream.
+
+We should return -ENOMEM here, instead of success.
+
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Fixes: 475fb4e8b2f4 ("efi / ACPI: load SSTDs from EFI variables")
+Link: http://lkml.kernel.org/r/20161018143318.15673-9-matt@codeblueprint.co.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ drivers/firmware/efi/efi.c |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -259,8 +259,10 @@ static __init int efivar_ssdt_load(void)
+ 		}
+ 
+ 		data = kmalloc(size, GFP_KERNEL);
+-		if (!data)
++		if (!data) {
++			ret = -ENOMEM;
+ 			goto free_entry;
++		}
+ 
+ 		ret = efivar_entry_get(entry, NULL, &size, data);
+ 		if (ret) {
