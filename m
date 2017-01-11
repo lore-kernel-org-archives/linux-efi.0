@@ -1,35 +1,22 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 8/8] efi: Add EFI_SECURE_BOOT bit [ver #6]
-Date: Wed, 11 Jan 2017 15:29:24 +0000
-Message-ID: <7979.1484148564@warthog.procyon.org.uk>
-References: <20170111145138.GB29649@codeblueprint.co.uk>
- <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
- <148120026820.5854.13036556358308461345.stgit@warthog.procyon.org.uk>
+From: katyalid115-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Subject: =?UTF-8?B?0J3QsNC/0LjRiNGDINC60L7QvdGC0LXQvdGCIA==?=
+Date: Wed, 11 Jan 2017 18:04:01 +0000
+Message-ID: <001a1140feb0f267400545d56c01@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170111145138.GB29649@codeblueprint.co.uk>
-Content-ID: <7978.1484148564.1@warthog.procyon.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8; format=flowed; delsp=yes
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Matt Fleming <matt@codeblueprint.co.uk> wrote:
-
-> Before we add more efi.flags bits I'd like this series to include the
-> patch that makes use of EFI_SECURE_BOOT. Alternatively, you move this
-> last patch to a new series.
-
-Are you willing to take the kernel lock-down patches also?
-
-David
+0JTQvtCx0YDQvtCz0L4g0LTQvdGPIQ0KDQrQpdC+0YfRgywg0LXRgdC70Lgg0L3QtSDQstC+0LfR
+gNCw0LbQsNC10YLQtSwg0JLQsNC8INC/0YDQtdC00LvQvtC20LjRgtGMINGB0L7QstC80LXRgdGC
+0L3QvtC1INGB0L7RgtGA0YPQtNC90LjRh9C10YHRgtCy0L4g0LIg0YHRhNC10YDQtSAgDQrQutC+
+0L/QuNGA0LDQudGC0LjQvdCz0LAuINCe0YHQvdC+0LLQvdC+0LUg0L3QsNC/0YDQsNCy0LvQtdC9
+0LjQtSAtINGN0YLQviDQv9GA0L7QtNCy0LjQttC10L3QuNC1INGB0LDQudGC0L7QsiDQsiDQmNC9
+0YLQtdGA0L3QtdGC0LUuICANCtCS0LDQvCDQuNC90YLQtdGA0LXRgdC90L4g0LHRi9C70L4g0LHR
+iyDRg9C30L3QsNGC0Ywg0L/QvtC00YDQvtCx0L3QtdC5INC+INGB0L7RgtGA0YPQtNC90LjRh9C1
+0YHRgtCy0LU/DQoNCtCe0YLQv9GA0LDQstC40YLRjCDQktCw0Lwg0L/RgNC40LzQtdGA0Ysg0YHR
+gtCw0YLQtdC5LCDRgNCw0YHRhtC10L3QutC4Pw0KDQrQoSDRg9Cy0LDQttC10L3QuNC10Lwg0Log
+0JLQsNC8LA0K0JXQutCw0YLQtdGA0LjQvdCwINCbLg0K
