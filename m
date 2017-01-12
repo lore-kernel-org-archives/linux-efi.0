@@ -1,8 +1,7 @@
 From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V7 02/10] ras: acpi/apei: cper: generic error data entry v3
- per ACPI 6.1
-Date: Thu, 12 Jan 2017 11:15:16 -0700
-Message-ID: <1484244924-24786-3-git-send-email-tbaicar@codeaurora.org>
+Subject: [PATCH V7 03/10] efi: parse ARM processor error
+Date: Thu, 12 Jan 2017 11:15:17 -0700
+Message-ID: <1484244924-24786-4-git-send-email-tbaicar@codeaurora.org>
 References: <1484244924-24786-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,224 +21,270 @@ To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrc
 Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-Currently when a RAS error is reported it is not timestamped.
-The ACPI 6.1 spec adds the timestamp field to the generic error
-data entry v3 structure. The timestamp of when the firmware
-generated the error is now being reported.
+Add support for ARM Common Platform Error Record (CPER).
+UEFI 2.6 specification adds support for ARM specific
+processor error information to be reported as part of the
+CPER records. This provides more detail on for processor error logs.
 
 Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
 Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-Signed-off-by: Richard Ruigrok <rruigrok@codeaurora.org>
 Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
 Reviewed-by: James Morse <james.morse@arm.com>
 ---
- drivers/acpi/apei/ghes.c    |  9 ++++---
- drivers/firmware/efi/cper.c | 63 +++++++++++++++++++++++++++++++++++----------
- include/acpi/ghes.h         | 22 ++++++++++++++++
- 3 files changed, 77 insertions(+), 17 deletions(-)
+ drivers/firmware/efi/cper.c | 133 ++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/cper.h        |  54 ++++++++++++++++++
+ 2 files changed, 187 insertions(+)
 
-diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index b23160d..2acbc60 100644
---- a/drivers/acpi/apei/ghes.c
-+++ b/drivers/acpi/apei/ghes.c
-@@ -420,7 +420,8 @@ static void ghes_handle_memory_failure(struct acpi_hest_generic_data *gdata, int
- 	int flags = -1;
- 	int sec_sev = ghes_severity(gdata->error_severity);
- 	struct cper_sec_mem_err *mem_err;
--	mem_err = (struct cper_sec_mem_err *)(gdata + 1);
-+
-+	mem_err = acpi_hest_generic_data_payload(gdata);
- 
- 	if (!(mem_err->validation_bits & CPER_MEM_VALID_PA))
- 		return;
-@@ -457,7 +458,8 @@ static void ghes_do_proc(struct ghes *ghes,
- 		if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
- 				 CPER_SEC_PLATFORM_MEM)) {
- 			struct cper_sec_mem_err *mem_err;
--			mem_err = (struct cper_sec_mem_err *)(gdata+1);
-+
-+			mem_err = acpi_hest_generic_data_payload(gdata);
- 			ghes_edac_report_mem_error(ghes, sev, mem_err);
- 
- 			arch_apei_report_mem_error(sev, mem_err);
-@@ -467,7 +469,8 @@ static void ghes_do_proc(struct ghes *ghes,
- 		else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
- 				      CPER_SEC_PCIE)) {
- 			struct cper_sec_pcie *pcie_err;
--			pcie_err = (struct cper_sec_pcie *)(gdata+1);
-+
-+			pcie_err = acpi_hest_generic_data_payload(gdata);
- 			if (sev == GHES_SEV_RECOVERABLE &&
- 			    sec_sev == GHES_SEV_RECOVERABLE &&
- 			    pcie_err->validation_bits & CPER_PCIE_VALID_DEVICE_ID &&
 diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index d425374..8fa4e23 100644
+index 8fa4e23..c2b0a12 100644
 --- a/drivers/firmware/efi/cper.c
 +++ b/drivers/firmware/efi/cper.c
-@@ -32,6 +32,9 @@
- #include <linux/acpi.h>
- #include <linux/pci.h>
- #include <linux/aer.h>
-+#include <linux/printk.h>
-+#include <linux/bcd.h>
-+#include <acpi/ghes.h>
+@@ -110,12 +110,15 @@ void cper_print_bits(const char *pfx, unsigned int bits,
+ static const char * const proc_type_strs[] = {
+ 	"IA32/X64",
+ 	"IA64",
++	"ARM",
+ };
  
- #define INDENT_SP	" "
+ static const char * const proc_isa_strs[] = {
+ 	"IA32",
+ 	"IA64",
+ 	"X64",
++	"ARM A32/T32",
++	"ARM A64",
+ };
  
-@@ -386,13 +389,37 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
- 	pfx, pcie->bridge.secondary_status, pcie->bridge.control);
+ static const char * const proc_error_type_strs[] = {
+@@ -139,6 +142,18 @@ static const char * const proc_flag_strs[] = {
+ 	"corrected",
+ };
+ 
++static const char * const arm_reg_ctx_strs[] = {
++	"AArch32 general purpose registers",
++	"AArch32 EL1 context registers",
++	"AArch32 EL2 context registers",
++	"AArch32 secure context registers",
++	"AArch64 general purpose registers",
++	"AArch64 EL1 context registers",
++	"AArch64 EL2 context registers",
++	"AArch64 EL3 context registers",
++	"Misc. system register structure",
++};
++
+ static void cper_print_proc_generic(const char *pfx,
+ 				    const struct cper_sec_proc_generic *proc)
+ {
+@@ -184,6 +199,114 @@ static void cper_print_proc_generic(const char *pfx,
+ 		printk("%s""IP: 0x%016llx\n", pfx, proc->ip);
  }
  
-+static void cper_estatus_print_section_v300(const char *pfx,
-+	const struct acpi_hest_generic_data_v300 *gdata)
++static void cper_print_proc_arm(const char *pfx,
++				const struct cper_sec_proc_arm *proc)
 +{
-+	__u8 hour, min, sec, day, mon, year, century, *timestamp;
++	int i, len, max_ctx_type;
++	struct cper_arm_err_info *err_info;
++	struct cper_arm_ctx_info *ctx_info;
++	char newpfx[64];
 +
-+	if (gdata->validation_bits & ACPI_HEST_GEN_VALID_TIMESTAMP) {
-+		timestamp = (__u8 *)&(gdata->time_stamp);
-+		sec = bcd2bin(timestamp[0]);
-+		min = bcd2bin(timestamp[1]);
-+		hour = bcd2bin(timestamp[2]);
-+		day = bcd2bin(timestamp[4]);
-+		mon = bcd2bin(timestamp[5]);
-+		year = bcd2bin(timestamp[6]);
-+		century = bcd2bin(timestamp[7]);
-+		printk("%stime: %7s %02d%02d-%02d-%02d %02d:%02d:%02d\n", pfx,
-+			0x01 & *(timestamp + 3) ? "precise" : "", century,
-+			year, mon, day, hour, min, sec);
++	printk("%s""section length: %d\n", pfx, proc->section_length);
++	printk("%s""MIDR: 0x%016llx\n", pfx, proc->midr);
++
++	len = proc->section_length - (sizeof(*proc) +
++		proc->err_info_num * (sizeof(*err_info)));
++	if (len < 0) {
++		printk("%s""section length is too small\n", pfx);
++		printk("%s""firmware-generated error record is incorrect\n", pfx);
++		printk("%s""ERR_INFO_NUM is %d\n", pfx, proc->err_info_num);
++		return;
++	}
++
++	if (proc->validation_bits & CPER_ARM_VALID_MPIDR)
++		printk("%s""MPIDR: 0x%016llx\n", pfx, proc->mpidr);
++	if (proc->validation_bits & CPER_ARM_VALID_AFFINITY_LEVEL)
++		printk("%s""error affinity level: %d\n", pfx,
++			proc->affinity_level);
++	if (proc->validation_bits & CPER_ARM_VALID_RUNNING_STATE) {
++		printk("%s""running state: 0x%x\n", pfx, proc->running_state);
++		printk("%s""PSCI state: %d\n", pfx, proc->psci_state);
++	}
++
++	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
++
++	err_info = (struct cper_arm_err_info *)(proc + 1);
++	for (i = 0; i < proc->err_info_num; i++) {
++		printk("%s""Error info structure %d:\n", pfx, i);
++		printk("%s""version:%d\n", newpfx, err_info->version);
++		printk("%s""length:%d\n", newpfx, err_info->length);
++		if (err_info->validation_bits &
++		    CPER_ARM_INFO_VALID_MULTI_ERR) {
++			if (err_info->multiple_error == 0)
++				printk("%s""single error\n", newpfx);
++			else if (err_info->multiple_error == 1)
++				printk("%s""multiple errors\n", newpfx);
++			else
++				printk("%s""multiple errors count:%u\n",
++				newpfx, err_info->multiple_error);
++		}
++		if (err_info->validation_bits & CPER_ARM_INFO_VALID_FLAGS) {
++			if (err_info->flags & CPER_ARM_INFO_FLAGS_FIRST)
++				printk("%s""first error captured\n", newpfx);
++			if (err_info->flags & CPER_ARM_INFO_FLAGS_LAST)
++				printk("%s""last error captured\n", newpfx);
++			if (err_info->flags & CPER_ARM_INFO_FLAGS_PROPAGATED)
++				printk("%s""propagated error captured\n",
++				       newpfx);
++			if (err_info->flags & CPER_ARM_INFO_FLAGS_OVERFLOW)
++				printk("%s""overflow occurred, error info is incomplete\n",
++				       newpfx);
++		}
++		printk("%s""error_type: %d, %s\n", newpfx, err_info->type,
++			err_info->type < ARRAY_SIZE(proc_error_type_strs) ?
++			proc_error_type_strs[err_info->type] : "unknown");
++		if (err_info->validation_bits & CPER_ARM_INFO_VALID_ERR_INFO)
++			printk("%s""error_info: 0x%016llx\n", newpfx,
++			       err_info->error_info);
++		if (err_info->validation_bits & CPER_ARM_INFO_VALID_VIRT_ADDR)
++			printk("%s""virtual fault address: 0x%016llx\n",
++				newpfx, err_info->virt_fault_addr);
++		if (err_info->validation_bits &
++		    CPER_ARM_INFO_VALID_PHYSICAL_ADDR)
++			printk("%s""physical fault address: 0x%016llx\n",
++				newpfx, err_info->physical_fault_addr);
++		err_info += 1;
++	}
++	ctx_info = (struct cper_arm_ctx_info *)err_info;
++	max_ctx_type = ARRAY_SIZE(arm_reg_ctx_strs) - 1;
++	for (i = 0; i < proc->context_info_num; i++) {
++		int size = sizeof(*ctx_info) + ctx_info->size;
++
++		printk("%s""Context info structure %d:\n", pfx, i);
++		if (len < size) {
++			printk("%s""section length is too small\n", newpfx);
++			printk("%s""firmware-generated error record is incorrect\n", pfx);
++			return;
++		}
++		if (ctx_info->type > max_ctx_type) {
++			printk("%s""Invalid context type: %d\n", newpfx,
++							ctx_info->type);
++			printk("%s""Max context type: %d\n", newpfx,
++							max_ctx_type);
++			return;
++		}
++		printk("%s""register context type %d: %s\n", newpfx,
++			ctx_info->type, arm_reg_ctx_strs[ctx_info->type]);
++		print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4,
++				(ctx_info + 1), ctx_info->size, 0);
++		len -= size;
++		ctx_info = (struct cper_arm_ctx_info *)((long)ctx_info + size);
++	}
++
++	if (len > 0) {
++		printk("%s""Vendor specific error info has %u bytes:\n", pfx,
++		       len);
++		print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4, ctx_info,
++				len, 0);
 +	}
 +}
 +
- static void cper_estatus_print_section(
--	const char *pfx, const struct acpi_hest_generic_data *gdata, int sec_no)
-+	const char *pfx, struct acpi_hest_generic_data *gdata, int sec_no)
- {
- 	uuid_le *sec_type = (uuid_le *)gdata->section_type;
- 	__u16 severity;
- 	char newpfx[64];
- 
-+	if (acpi_hest_generic_data_version(gdata) >= 3)
-+		cper_estatus_print_section_v300(pfx,
-+			(const struct acpi_hest_generic_data_v300 *)gdata);
-+
- 	severity = gdata->error_severity;
- 	printk("%s""Error %d, type: %s\n", pfx, sec_no,
- 	       cper_severity_str(severity));
-@@ -403,14 +430,18 @@ static void cper_estatus_print_section(
- 
- 	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
- 	if (!uuid_le_cmp(*sec_type, CPER_SEC_PROC_GENERIC)) {
--		struct cper_sec_proc_generic *proc_err = (void *)(gdata + 1);
-+		struct cper_sec_proc_generic *proc_err;
-+
-+		proc_err = acpi_hest_generic_data_payload(gdata);
- 		printk("%s""section_type: general processor error\n", newpfx);
- 		if (gdata->error_data_length >= sizeof(*proc_err))
- 			cper_print_proc_generic(newpfx, proc_err);
- 		else
- 			goto err_section_too_small;
- 	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PLATFORM_MEM)) {
--		struct cper_sec_mem_err *mem_err = (void *)(gdata + 1);
-+		struct cper_sec_mem_err *mem_err;
-+
-+		mem_err = acpi_hest_generic_data_payload(gdata);
- 		printk("%s""section_type: memory error\n", newpfx);
- 		if (gdata->error_data_length >=
- 		    sizeof(struct cper_sec_mem_err_old))
-@@ -419,7 +450,9 @@ static void cper_estatus_print_section(
- 		else
- 			goto err_section_too_small;
- 	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PCIE)) {
--		struct cper_sec_pcie *pcie = (void *)(gdata + 1);
-+		struct cper_sec_pcie *pcie;
-+
-+		pcie = acpi_hest_generic_data_payload(gdata);
- 		printk("%s""section_type: PCIe error\n", newpfx);
- 		if (gdata->error_data_length >= sizeof(*pcie))
+ static const char * const mem_err_type_strs[] = {
+ 	"unknown",
+ 	"no error",
+@@ -458,6 +581,16 @@ static void cper_estatus_print_section(
  			cper_print_pcie(newpfx, pcie, gdata);
-@@ -438,7 +471,7 @@ void cper_estatus_print(const char *pfx,
- 			const struct acpi_hest_generic_status *estatus)
- {
- 	struct acpi_hest_generic_data *gdata;
--	unsigned int data_len, gedata_len;
-+	unsigned int data_len;
- 	int sec_no = 0;
- 	char newpfx[64];
- 	__u16 severity;
-@@ -451,12 +484,13 @@ void cper_estatus_print(const char *pfx,
- 	printk("%s""event severity: %s\n", pfx, cper_severity_str(severity));
- 	data_len = estatus->data_length;
- 	gdata = (struct acpi_hest_generic_data *)(estatus + 1);
+ 		else
+ 			goto err_section_too_small;
++	} else if ((IS_ENABLED(CONFIG_ARM64) || IS_ENABLED(CONFIG_ARM)) &&
++		   !uuid_le_cmp(*sec_type, CPER_SEC_PROC_ARM)) {
++		struct cper_sec_proc_arm *arm_err;
 +
- 	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
--	while (data_len >= sizeof(*gdata)) {
--		gedata_len = gdata->error_data_length;
-+
-+	while (data_len >= acpi_hest_generic_data_size(gdata)) {
- 		cper_estatus_print_section(newpfx, gdata, sec_no);
--		data_len -= gedata_len + sizeof(*gdata);
--		gdata = (void *)(gdata + 1) + gedata_len;
-+		data_len -= acpi_hest_generic_data_record_size(gdata);
-+		gdata = acpi_hest_generic_data_next(gdata);
- 		sec_no++;
- 	}
- }
-@@ -486,12 +520,13 @@ int cper_estatus_check(const struct acpi_hest_generic_status *estatus)
- 		return rc;
- 	data_len = estatus->data_length;
- 	gdata = (struct acpi_hest_generic_data *)(estatus + 1);
--	while (data_len >= sizeof(*gdata)) {
--		gedata_len = gdata->error_data_length;
--		if (gedata_len > data_len - sizeof(*gdata))
-+
-+	while (data_len >= acpi_hest_generic_data_size(gdata)) {
-+		gedata_len = acpi_hest_generic_data_error_length(gdata);
-+		if (gedata_len > data_len - acpi_hest_generic_data_size(gdata))
- 			return -EINVAL;
--		data_len -= gedata_len + sizeof(*gdata);
--		gdata = (void *)(gdata + 1) + gedata_len;
-+		data_len -= gedata_len + acpi_hest_generic_data_size(gdata);
-+		gdata = acpi_hest_generic_data_next(gdata);
- 	}
- 	if (data_len)
- 		return -EINVAL;
-diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
-index 68f088a..6ae318b 100644
---- a/include/acpi/ghes.h
-+++ b/include/acpi/ghes.h
-@@ -12,6 +12,18 @@
- #define GHES_TO_CLEAR		0x0001
- #define GHES_EXITING		0x0002
++		arm_err = acpi_hest_generic_data_payload(gdata);
++		printk("%ssection_type: ARM processor error\n", newpfx);
++		if (gdata->error_data_length >= sizeof(*arm_err))
++			cper_print_proc_arm(newpfx, arm_err);
++		else
++			goto err_section_too_small;
+ 	} else
+ 		printk("%s""section type: unknown, %pUl\n", newpfx, sec_type);
  
-+#define acpi_hest_generic_data_error_length(gdata)	\
-+	(((struct acpi_hest_generic_data *)(gdata))->error_data_length)
-+#define acpi_hest_generic_data_size(gdata)		\
-+	((acpi_hest_generic_data_version(gdata) >= 3) ?	\
-+	sizeof(struct acpi_hest_generic_data_v300) :	\
-+	sizeof(struct acpi_hest_generic_data))
-+#define acpi_hest_generic_data_record_size(gdata)	\
-+	(acpi_hest_generic_data_size(gdata) +		\
-+	acpi_hest_generic_data_error_length(gdata))
-+#define acpi_hest_generic_data_next(gdata)		\
-+	((void *)(gdata) + acpi_hest_generic_data_record_size(gdata))
+diff --git a/include/linux/cper.h b/include/linux/cper.h
+index dcacb1a..85450f3 100644
+--- a/include/linux/cper.h
++++ b/include/linux/cper.h
+@@ -180,6 +180,10 @@ enum {
+ #define CPER_SEC_PROC_IPF						\
+ 	UUID_LE(0xE429FAF1, 0x3CB7, 0x11D4, 0x0B, 0xCA, 0x07, 0x00,	\
+ 		0x80, 0xC7, 0x3C, 0x88, 0x81)
++/* Processor Specific: ARM */
++#define CPER_SEC_PROC_ARM						\
++	UUID_LE(0xE19E3D16, 0xBC11, 0x11E4, 0x9C, 0xAA, 0xC2, 0x05,	\
++		0x1D, 0x5D, 0x46, 0xB0)
+ /* Platform Memory */
+ #define CPER_SEC_PLATFORM_MEM						\
+ 	UUID_LE(0xA5BC1114, 0x6F64, 0x4EDE, 0xB8, 0x63, 0x3E, 0x83,	\
+@@ -255,6 +259,22 @@ enum {
+ 
+ #define CPER_PCIE_SLOT_SHIFT			3
+ 
++#define CPER_ARM_VALID_MPIDR			0x00000001
++#define CPER_ARM_VALID_AFFINITY_LEVEL		0x00000002
++#define CPER_ARM_VALID_RUNNING_STATE		0x00000004
++#define CPER_ARM_VALID_VENDOR_INFO		0x00000008
 +
- struct ghes {
- 	union {
- 		struct acpi_hest_generic *generic;
-@@ -73,3 +85,13 @@ static inline void ghes_edac_unregister(struct ghes *ghes)
- {
- }
- #endif
++#define CPER_ARM_INFO_VALID_MULTI_ERR		0x0001
++#define CPER_ARM_INFO_VALID_FLAGS		0x0002
++#define CPER_ARM_INFO_VALID_ERR_INFO		0x0004
++#define CPER_ARM_INFO_VALID_VIRT_ADDR		0x0008
++#define CPER_ARM_INFO_VALID_PHYSICAL_ADDR	0x0010
 +
-+#define acpi_hest_generic_data_version(gdata)			\
-+	(gdata->revision >> 8)
++#define CPER_ARM_INFO_FLAGS_FIRST		0x0001
++#define CPER_ARM_INFO_FLAGS_LAST		0x0002
++#define CPER_ARM_INFO_FLAGS_PROPAGATED		0x0004
++#define CPER_ARM_INFO_FLAGS_OVERFLOW		0x0008
 +
-+static inline void *acpi_hest_generic_data_payload(struct acpi_hest_generic_data *gdata)
-+{
-+	return acpi_hest_generic_data_version(gdata) >= 3 ?
-+		(void *)(((struct acpi_hest_generic_data_v300 *)(gdata)) + 1) :
-+		gdata + 1;
-+}
+ /*
+  * All tables and structs must be byte-packed to match CPER
+  * specification, since the tables are provided by the system BIOS
+@@ -340,6 +360,40 @@ struct cper_ia_proc_ctx {
+ 	__u64	mm_reg_addr;
+ };
+ 
++/* ARM Processor Error Section */
++struct cper_sec_proc_arm {
++	__u32	validation_bits;
++	__u16	err_info_num; /* Number of Processor Error Info */
++	__u16	context_info_num; /* Number of Processor Context Info Records*/
++	__u32	section_length;
++	__u8	affinity_level;
++	__u8	reserved[3];	/* must be zero */
++	__u64	mpidr;
++	__u64	midr;
++	__u32	running_state; /* Bit 0 set - Processor running. PSCI = 0 */
++	__u32	psci_state;
++};
++
++/* ARM Processor Error Information Structure */
++struct cper_arm_err_info {
++	__u8	version;
++	__u8	length;
++	__u16	validation_bits;
++	__u8	type;
++	__u16	multiple_error;
++	__u8	flags;
++	__u64	error_info;
++	__u64	virt_fault_addr;
++	__u64	physical_fault_addr;
++};
++
++/* ARM Processor Context Information Structure */
++struct cper_arm_ctx_info {
++	__u16	version;
++	__u16	type;
++	__u32	size;
++};
++
+ /* Old Memory Error Section UEFI 2.1, 2.2 */
+ struct cper_sec_mem_err_old {
+ 	__u64	validation_bits;
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
