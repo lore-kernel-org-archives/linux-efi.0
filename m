@@ -1,103 +1,276 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 1/4] efi/x86: make efi_memmap_reserve only insert into boot mem areas
-Date: Thu, 12 Jan 2017 17:41:19 +0800
-Message-ID: <20170112094214.860924858@redhat.com>
+From: Dave Young <dyoung@redhat.com>
+Subject: [PATCH 2/4] efi/x86: move efi bgrt init code to early init code
+Date: Thu, 12 Jan 2017 17:41:20 +0800
+Message-ID: <20170112094214.909117564@redhat.com>
 References: <20170112094118.815108042@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline; filename=efi-memmap-insert-fix.patch
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org, bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline; filename=efi-bgrt-fix.patch
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dyoung@redhat.com, x86@kernel.org, Nicolai Stange <nicstange@gmail.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, hpa@zytor.com, Dan Williams <dan.j.williams@intel.com>, mika.penttila@nextfour.com, bhsharma@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-There are memory ranges like below when I testing early efi_mem_reserve:
+Before invoking the arch specific handler, efi_mem_reserve() reserves
+the given memory region through memblock.
 
-efi: mem62: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
-efi: mem63: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
-efi: mem64: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
-efi: mem65: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
-efi: mem66: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
-efi: mem67: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
+efi_bgrt_init will call efi_mem_reserve after mm_init(), at that time
+memblock is dead and it should not be used any more.
 
-So efi_memmap_insert will run into inserting same region multiple times,
-also because efi_memmap_insert does not consider the duplicate ranges it will
-cause memmap buffer overflow due to the size is pre-calculated, and kernel boot
-fail with a panic.  We did not detect such issue because current users of
-efi_mem_insert do it very late after switching to virtual mode, at that time
-the new cooked efi.memmap contains only runtime needed memory ranges.
+efi bgrt code depend on acpi intialization to get the bgrt acpi table,
+moving bgrt parsing to acpi early boot code can make sure efi_mem_reserve
+in efi bgrt code still use memblock safely. 
 
-efi_mem_reserve cares only about boot services regions and maybe loader areas.
-So add a new argument to efi_memmap_insert for this purpose.
- 
-Later patches depend on this one for moving bgrt reservation to early code.
-
-Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Dave Young <dyoung@redhat.com>
 ---
- arch/x86/platform/efi/quirks.c  |    2 +-
- drivers/firmware/efi/fake_mem.c |    3 ++-
- drivers/firmware/efi/memmap.c   |    8 +++++++-
- include/linux/efi.h             |    4 ++--
- 4 files changed, 12 insertions(+), 5 deletions(-)
+ arch/x86/kernel/acpi/boot.c      |   12 +++++++++++
+ arch/x86/platform/efi/efi-bgrt.c |   42 +++++++++++++--------------------------
+ arch/x86/platform/efi/efi.c      |    5 ----
+ drivers/acpi/bgrt.c              |   21 +++++++++++++------
+ include/linux/efi-bgrt.h         |    7 ++----
+ init/main.c                      |    1 
+ 6 files changed, 45 insertions(+), 43 deletions(-)
 
---- linux-x86.orig/drivers/firmware/efi/memmap.c
-+++ linux-x86/drivers/firmware/efi/memmap.c
-@@ -213,7 +213,7 @@ int __init efi_memmap_split_count(efi_me
-  * to see how large @buf needs to be.
-  */
- void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
--			      struct efi_mem_range *mem)
-+			      struct efi_mem_range *mem, bool boot_only)
- {
- 	u64 m_start, m_end, m_attr;
- 	efi_memory_desc_t *md;
-@@ -246,6 +246,12 @@ void __init efi_memmap_insert(struct efi
- 		start = md->phys_addr;
- 		end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1;
+--- linux-x86.orig/arch/x86/kernel/acpi/boot.c
++++ linux-x86/arch/x86/kernel/acpi/boot.c
+@@ -35,6 +35,7 @@
+ #include <linux/bootmem.h>
+ #include <linux/ioport.h>
+ #include <linux/pci.h>
++#include <linux/efi-bgrt.h>
  
-+		if (boot_only && !(md->type == EFI_LOADER_DATA ||
-+		    md->type == EFI_LOADER_CODE ||
-+		    md->type == EFI_BOOT_SERVICES_CODE ||
-+		    md->type == EFI_BOOT_SERVICES_DATA))
-+			continue;
+ #include <asm/irqdomain.h>
+ #include <asm/pci_x86.h>
+@@ -1557,6 +1558,14 @@ int __init early_acpi_boot_init(void)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_ACPI_BGRT
++static int __init acpi_parse_bgrt(struct acpi_table_header *table)
++{
++	efi_bgrt_init(table);
++	return 0;
++}
++#endif
 +
- 		if (m_start <= start && end <= m_end)
- 			md->attribute |= m_attr;
+ int __init acpi_boot_init(void)
+ {
+ 	/* those are executed after early-quirks are executed */
+@@ -1581,6 +1590,9 @@ int __init acpi_boot_init(void)
+ 	acpi_process_madt();
  
---- linux-x86.orig/arch/x86/platform/efi/quirks.c
-+++ linux-x86/arch/x86/platform/efi/quirks.c
-@@ -226,7 +226,7 @@ void __init efi_arch_mem_reserve(phys_ad
+ 	acpi_table_parse(ACPI_SIG_HPET, acpi_parse_hpet);
++#ifdef CONFIG_ACPI_BGRT
++	acpi_table_parse("BGRT", acpi_parse_bgrt);
++#endif
+ 
+ 	if (!acpi_noirq)
+ 		x86_init.pci.init = pci_acpi_init;
+--- linux-x86.orig/arch/x86/platform/efi/efi-bgrt.c
++++ linux-x86/arch/x86/platform/efi/efi-bgrt.c
+@@ -19,8 +19,7 @@
+ #include <linux/efi.h>
+ #include <linux/efi-bgrt.h>
+ 
+-struct acpi_table_bgrt *bgrt_tab;
+-void *__initdata bgrt_image;
++struct acpi_table_bgrt bgrt_tab;
+ size_t __initdata bgrt_image_size;
+ 
+ struct bmp_header {
+@@ -28,53 +27,49 @@ struct bmp_header {
+ 	u32 size;
+ } __packed;
+ 
+-void __init efi_bgrt_init(void)
++void __init efi_bgrt_init(struct acpi_table_header *table)
+ {
+-	acpi_status status;
+ 	void *image;
+ 	struct bmp_header bmp_header;
+ 
+ 	if (acpi_disabled)
+ 		return;
+ 
+-	status = acpi_get_table("BGRT", 0,
+-	                        (struct acpi_table_header **)&bgrt_tab);
+-	if (ACPI_FAILURE(status))
+-		return;
++	bgrt_tab = *(struct acpi_table_bgrt *)table;
+ 
+-	if (bgrt_tab->header.length < sizeof(*bgrt_tab)) {
++	if (bgrt_tab.header.length < sizeof(bgrt_tab)) {
+ 		pr_notice("Ignoring BGRT: invalid length %u (expected %zu)\n",
+-		       bgrt_tab->header.length, sizeof(*bgrt_tab));
++		       bgrt_tab.header.length, sizeof(bgrt_tab));
+ 		return;
+ 	}
+-	if (bgrt_tab->version != 1) {
++	if (bgrt_tab.version != 1) {
+ 		pr_notice("Ignoring BGRT: invalid version %u (expected 1)\n",
+-		       bgrt_tab->version);
++		       bgrt_tab.version);
+ 		return;
+ 	}
+-	if (bgrt_tab->status & 0xfe) {
++	if (bgrt_tab.status & 0xfe) {
+ 		pr_notice("Ignoring BGRT: reserved status bits are non-zero %u\n",
+-		       bgrt_tab->status);
++		       bgrt_tab.status);
+ 		return;
+ 	}
+-	if (bgrt_tab->image_type != 0) {
++	if (bgrt_tab.image_type != 0) {
+ 		pr_notice("Ignoring BGRT: invalid image type %u (expected 0)\n",
+-		       bgrt_tab->image_type);
++		       bgrt_tab.image_type);
+ 		return;
+ 	}
+-	if (!bgrt_tab->image_address) {
++	if (!bgrt_tab.image_address) {
+ 		pr_notice("Ignoring BGRT: null image address\n");
  		return;
  	}
  
--	efi_memmap_insert(&efi.memmap, new, &mr);
-+	efi_memmap_insert(&efi.memmap, new, &mr, true);
- 	early_memunmap(new, new_size);
- 
- 	efi_memmap_install(new_phys, num_entries);
---- linux-x86.orig/drivers/firmware/efi/fake_mem.c
-+++ linux-x86/drivers/firmware/efi/fake_mem.c
-@@ -85,7 +85,8 @@ void __init efi_fake_memmap(void)
+-	image = memremap(bgrt_tab->image_address, sizeof(bmp_header), MEMREMAP_WB);
++	image = early_memremap(bgrt_tab.image_address, sizeof(bmp_header));
+ 	if (!image) {
+ 		pr_notice("Ignoring BGRT: failed to map image header memory\n");
+ 		return;
  	}
  
- 	for (i = 0; i < nr_fake_mem; i++)
--		efi_memmap_insert(&efi.memmap, new_memmap, &fake_mems[i]);
-+		efi_memmap_insert(&efi.memmap, new_memmap, &fake_mems[i],
-+				  false);
+ 	memcpy(&bmp_header, image, sizeof(bmp_header));
+-	memunmap(image);
++	early_memunmap(image, sizeof(bmp_header));
+ 	if (bmp_header.id != 0x4d42) {
+ 		pr_notice("Ignoring BGRT: Incorrect BMP magic number 0x%x (expected 0x4d42)\n",
+ 			bmp_header.id);
+@@ -82,12 +77,5 @@ void __init efi_bgrt_init(void)
+ 	}
+ 	bgrt_image_size = bmp_header.size;
  
- 	/* swap into new EFI memmap */
- 	early_memunmap(new_memmap, efi.memmap.desc_size * new_nr_map);
---- linux-x86.orig/include/linux/efi.h
-+++ linux-x86/include/linux/efi.h
-@@ -957,8 +957,8 @@ extern int __init efi_memmap_install(phy
- extern int __init efi_memmap_split_count(efi_memory_desc_t *md,
- 					 struct range *range);
- extern void __init efi_memmap_insert(struct efi_memory_map *old_memmap,
--				     void *buf, struct efi_mem_range *mem);
+-	bgrt_image = memremap(bgrt_tab->image_address, bmp_header.size, MEMREMAP_WB);
+-	if (!bgrt_image) {
+-		pr_notice("Ignoring BGRT: failed to map image memory\n");
+-		bgrt_image = NULL;
+-		return;
+-	}
 -
-+				     void *buf, struct efi_mem_range *mem,
-+				     bool boot_only);
- extern int efi_config_init(efi_config_table_type_t *arch_tables);
- #ifdef CONFIG_EFI_ESRT
- extern void __init efi_esrt_init(void);
+-	efi_mem_reserve(bgrt_tab->image_address, bgrt_image_size);
++	efi_mem_reserve(bgrt_tab.image_address, bgrt_image_size);
+ }
+--- linux-x86.orig/drivers/acpi/bgrt.c
++++ linux-x86/drivers/acpi/bgrt.c
+@@ -15,40 +15,41 @@
+ #include <linux/sysfs.h>
+ #include <linux/efi-bgrt.h>
+ 
++static void *bgrt_image;
+ static struct kobject *bgrt_kobj;
+ 
+ static ssize_t show_version(struct device *dev,
+ 			    struct device_attribute *attr, char *buf)
+ {
+-	return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab->version);
++	return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab.version);
+ }
+ static DEVICE_ATTR(version, S_IRUGO, show_version, NULL);
+ 
+ static ssize_t show_status(struct device *dev,
+ 			   struct device_attribute *attr, char *buf)
+ {
+-	return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab->status);
++	return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab.status);
+ }
+ static DEVICE_ATTR(status, S_IRUGO, show_status, NULL);
+ 
+ static ssize_t show_type(struct device *dev,
+ 			 struct device_attribute *attr, char *buf)
+ {
+-	return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab->image_type);
++	return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab.image_type);
+ }
+ static DEVICE_ATTR(type, S_IRUGO, show_type, NULL);
+ 
+ static ssize_t show_xoffset(struct device *dev,
+ 			    struct device_attribute *attr, char *buf)
+ {
+-	return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab->image_offset_x);
++	return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab.image_offset_x);
+ }
+ static DEVICE_ATTR(xoffset, S_IRUGO, show_xoffset, NULL);
+ 
+ static ssize_t show_yoffset(struct device *dev,
+ 			    struct device_attribute *attr, char *buf)
+ {
+-	return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab->image_offset_y);
++	return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab.image_offset_y);
+ }
+ static DEVICE_ATTR(yoffset, S_IRUGO, show_yoffset, NULL);
+ 
+@@ -84,9 +85,17 @@ static int __init bgrt_init(void)
+ {
+ 	int ret;
+ 
+-	if (!bgrt_image)
++	if (!bgrt_tab.image_address)
+ 		return -ENODEV;
+ 
++	bgrt_image = memremap(bgrt_tab.image_address, bgrt_image_size,
++			      MEMREMAP_WB);
++	if (!bgrt_image) {
++		pr_notice("Ignoring BGRT: failed to map image memory\n");
++		bgrt_image = NULL;
++		return -ENOMEM;
++	}
++
+ 	bin_attr_image.private = bgrt_image;
+ 	bin_attr_image.size = bgrt_image_size;
+ 
+--- linux-x86.orig/include/linux/efi-bgrt.h
++++ linux-x86/include/linux/efi-bgrt.h
+@@ -5,16 +5,15 @@
+ 
+ #include <linux/acpi.h>
+ 
+-void efi_bgrt_init(void);
++void efi_bgrt_init(struct acpi_table_header *table);
+ 
+ /* The BGRT data itself; only valid if bgrt_image != NULL. */
+-extern void *bgrt_image;
+ extern size_t bgrt_image_size;
+-extern struct acpi_table_bgrt *bgrt_tab;
++extern struct acpi_table_bgrt bgrt_tab;
+ 
+ #else /* !CONFIG_ACPI_BGRT */
+ 
+-static inline void efi_bgrt_init(void) {}
++static inline void efi_bgrt_init(struct acpi_table_header *table) {}
+ 
+ #endif /* !CONFIG_ACPI_BGRT */
+ 
+--- linux-x86.orig/arch/x86/platform/efi/efi.c
++++ linux-x86/arch/x86/platform/efi/efi.c
+@@ -476,11 +476,6 @@ void __init efi_init(void)
+ 		efi_print_memmap();
+ }
+ 
+-void __init efi_late_init(void)
+-{
+-	efi_bgrt_init();
+-}
+-
+ void __init efi_set_executable(efi_memory_desc_t *md, bool executable)
+ {
+ 	u64 addr, npages;
+--- linux-x86.orig/init/main.c
++++ linux-x86/init/main.c
+@@ -663,7 +663,6 @@ asmlinkage __visible void __init start_k
+ 	sfi_init_late();
+ 
+ 	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+-		efi_late_init();
+ 		efi_free_boot_services();
+ 	}
+ 
