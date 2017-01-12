@@ -1,7 +1,7 @@
 From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V7 05/10] acpi: apei: handle SEA notification type for ARMv8
-Date: Thu, 12 Jan 2017 11:15:19 -0700
-Message-ID: <1484244924-24786-6-git-send-email-tbaicar@codeaurora.org>
+Subject: [PATCH V7 07/10] efi: print unrecognized CPER section
+Date: Thu, 12 Jan 2017 11:15:21 -0700
+Message-ID: <1484244924-24786-8-git-send-email-tbaicar@codeaurora.org>
 References: <1484244924-24786-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,196 +21,63 @@ To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrc
 Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-ARM APEI extension proposal added SEA (Synchrounous External
-Abort) notification type for ARMv8.
-Add a new GHES error source handling function for SEA. If an error
-source's notification type is SEA, then this function can be registered
-into the SEA exception handler. That way GHES will parse and report
-SEA exceptions when they occur.
+UEFI spec allows for non-standard section in Common Platform Error
+Record. This is defined in section N.2.3 of UEFI version 2.5.
+
+Currently if the CPER section's type (UUID) does not match with
+one of the section types that the kernel knows how to parse, the
+section is skipped. Therefore, user is not able to see
+such CPER data, for instance, error record of non-standard section.
+
+For above mentioned case, this change prints out the raw data in
+hex in dmesg buffer. Data length is taken from Error Data length
+field of Generic Error Data Entry.
+
+Following is a sample output from dmesg:
+[  115.771702] {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 2
+[  115.779042] {1}[Hardware Error]: It has been corrected by h/w and requires no further action
+[  115.787456] {1}[Hardware Error]: event severity: corrected
+[  115.792927] {1}[Hardware Error]:  Error 0, type: corrected
+[  115.798415] {1}[Hardware Error]:  fru_id: 00000000-0000-0000-0000-000000000000
+[  115.805596] {1}[Hardware Error]:  fru_text:
+[  115.816105] {1}[Hardware Error]:  section type: d2e2621c-f936-468d-0d84-15a4ed015c8b
+[  115.823880] {1}[Hardware Error]:  section length: 88
+[  115.828779] {1}[Hardware Error]:   00000000: 01000001 00000002 5f434345 525f4543
+[  115.836153] {1}[Hardware Error]:   00000010: 0000574d 00000000 00000000 00000000
+[  115.843531] {1}[Hardware Error]:   00000020: 00000000 00000000 00000000 00000000
+[  115.850908] {1}[Hardware Error]:   00000030: 00000000 00000000 00000000 00000000
+[  115.858288] {1}[Hardware Error]:   00000040: fe800000 00000000 00000004 5f434345
+[  115.865665] {1}[Hardware Error]:   00000050: 525f4543 0000574d
 
 Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
 Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
 ---
- arch/arm64/Kconfig        |  2 ++
- drivers/acpi/apei/Kconfig | 14 ++++++++
- drivers/acpi/apei/ghes.c  | 84 +++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 100 insertions(+)
+ drivers/firmware/efi/cper.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index b380c87..0465601 100644
---- a/arch/arm64/Kconfig
-+++ b/arch/arm64/Kconfig
-@@ -53,6 +53,8 @@ config ARM64
- 	select HANDLE_DOMAIN_IRQ
- 	select HARDIRQS_SW_RESEND
- 	select HAVE_ACPI_APEI if (ACPI && EFI)
-+	select HAVE_ACPI_APEI_SEA if (ACPI && EFI)
-+	select HAVE_NMI if HAVE_ACPI_APEI_SEA
- 	select HAVE_ALIGNED_STRUCT_PAGE if SLUB
- 	select HAVE_ARCH_AUDITSYSCALL
- 	select HAVE_ARCH_BITREVERSE
-diff --git a/drivers/acpi/apei/Kconfig b/drivers/acpi/apei/Kconfig
-index b0140c8..3786ff1 100644
---- a/drivers/acpi/apei/Kconfig
-+++ b/drivers/acpi/apei/Kconfig
-@@ -4,6 +4,20 @@ config HAVE_ACPI_APEI
- config HAVE_ACPI_APEI_NMI
- 	bool
- 
-+config HAVE_ACPI_APEI_SEA
-+	bool "APEI Synchronous External Abort logging/recovering support"
-+	depends on ARM64
-+	help
-+	  This option should be enabled if the system supports
-+	  firmware first handling of SEA (Synchronous External Abort).
-+	  SEA happens with certain faults of data abort or instruction
-+	  abort synchronous exceptions on ARMv8 systems. If a system
-+	  supports firmware first handling of SEA, the platform analyzes
-+	  and handles hardware error notifications with SEA, and it may then
-+	  form a HW error record for the OS to parse and handle. This
-+	  option allows the OS to look for such HW error record, and
-+	  take appropriate action.
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index c2b0a12..48cb8ee 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -591,8 +591,16 @@ static void cper_estatus_print_section(
+ 			cper_print_proc_arm(newpfx, arm_err);
+ 		else
+ 			goto err_section_too_small;
+-	} else
+-		printk("%s""section type: unknown, %pUl\n", newpfx, sec_type);
++	} else {
++		const void *unknown_err;
 +
- config ACPI_APEI
- 	bool "ACPI Platform Error Interface (APEI)"
- 	select MISC_FILESYSTEMS
-diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 2acbc60..87efe26 100644
---- a/drivers/acpi/apei/ghes.c
-+++ b/drivers/acpi/apei/ghes.c
-@@ -44,12 +44,17 @@
- #include <linux/pci.h>
- #include <linux/aer.h>
- #include <linux/nmi.h>
-+#include <linux/hardirq.h>
- 
- #include <acpi/actbl1.h>
- #include <acpi/ghes.h>
- #include <acpi/apei.h>
- #include <asm/tlbflush.h>
- 
-+#ifdef CONFIG_HAVE_ACPI_APEI_SEA
-+#include <asm/system_misc.h>
-+#endif
-+
- #include "apei-internal.h"
- 
- #define GHES_PFX	"GHES: "
-@@ -767,6 +772,62 @@ static struct notifier_block ghes_notifier_sci = {
- 	.notifier_call = ghes_notify_sci,
- };
- 
-+#ifdef CONFIG_HAVE_ACPI_APEI_SEA
-+static LIST_HEAD(ghes_sea);
-+
-+static int ghes_notify_sea(struct notifier_block *this,
-+				  unsigned long event, void *data)
-+{
-+	struct ghes *ghes;
-+	int ret = NOTIFY_DONE;
-+
-+	nmi_enter();
-+	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
-+		if (!ghes_proc(ghes))
-+			ret = NOTIFY_OK;
++		unknown_err = acpi_hest_generic_data_payload(gdata);
++		printk("%ssection type: %pUl\n", newpfx, sec_type);
++		printk("%ssection length: %d\n", newpfx,
++		       gdata->error_data_length);
++		print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4,
++			       unknown_err, gdata->error_data_length, 0);
 +	}
-+	nmi_exit();
-+
-+	return ret;
-+}
-+
-+static struct notifier_block ghes_notifier_sea = {
-+	.notifier_call = ghes_notify_sea,
-+};
-+
-+static int ghes_sea_add(struct ghes *ghes)
-+{
-+	mutex_lock(&ghes_list_mutex);
-+	if (list_empty(&ghes_sea))
-+		register_sea_notifier(&ghes_notifier_sea);
-+	list_add_rcu(&ghes->list, &ghes_sea);
-+	mutex_unlock(&ghes_list_mutex);
-+	return 0;
-+}
-+
-+static void ghes_sea_remove(struct ghes *ghes)
-+{
-+	mutex_lock(&ghes_list_mutex);
-+	list_del_rcu(&ghes->list);
-+	if (list_empty(&ghes_sea))
-+		unregister_sea_notifier(&ghes_notifier_sea);
-+	mutex_unlock(&ghes_list_mutex);
-+}
-+#else /* CONFIG_HAVE_ACPI_APEI_SEA */
-+static inline int ghes_sea_add(struct ghes *ghes)
-+{
-+	pr_err(GHES_PFX "ID: %d, trying to add SEA notification which is not supported\n",
-+	       ghes->generic->header.source_id);
-+	return -ENOTSUPP;
-+}
-+
-+static inline void ghes_sea_remove(struct ghes *ghes)
-+{
-+	pr_err(GHES_PFX "ID: %d, trying to remove SEA notification which is not supported\n",
-+	       ghes->generic->header.source_id);
-+}
-+#endif /* CONFIG_HAVE_ACPI_APEI_SEA */
-+
- #ifdef CONFIG_HAVE_ACPI_APEI_NMI
- /*
-  * printk is not safe in NMI context.  So in NMI handler, we allocate
-@@ -1011,6 +1072,14 @@ static int ghes_probe(struct platform_device *ghes_dev)
- 	case ACPI_HEST_NOTIFY_EXTERNAL:
- 	case ACPI_HEST_NOTIFY_SCI:
- 		break;
-+	case ACPI_HEST_NOTIFY_SEA:
-+		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_SEA)) {
-+			pr_warn(GHES_PFX "Generic hardware error source: %d notified via SEA is not supported\n",
-+				generic->header.source_id);
-+			rc = -ENOTSUPP;
-+			goto err;
-+		}
-+		break;
- 	case ACPI_HEST_NOTIFY_NMI:
- 		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_NMI)) {
- 			pr_warn(GHES_PFX "Generic hardware error source: %d notified via NMI interrupt is not supported!\n",
-@@ -1022,6 +1091,13 @@ static int ghes_probe(struct platform_device *ghes_dev)
- 		pr_warning(GHES_PFX "Generic hardware error source: %d notified via local interrupt is not supported!\n",
- 			   generic->header.source_id);
- 		goto err;
-+	case ACPI_HEST_NOTIFY_GPIO:
-+	case ACPI_HEST_NOTIFY_SEI:
-+	case ACPI_HEST_NOTIFY_GSIV:
-+		pr_warn(GHES_PFX "Generic hardware error source: %d notified via notification type %u is not supported\n",
-+			generic->header.source_id, generic->header.source_id);
-+		rc = -ENOTSUPP;
-+		goto err;
- 	default:
- 		pr_warning(FW_WARN GHES_PFX "Unknown notification type: %u for generic hardware error source: %d\n",
- 			   generic->notify.type, generic->header.source_id);
-@@ -1076,6 +1152,11 @@ static int ghes_probe(struct platform_device *ghes_dev)
- 		list_add_rcu(&ghes->list, &ghes_sci);
- 		mutex_unlock(&ghes_list_mutex);
- 		break;
-+	case ACPI_HEST_NOTIFY_SEA:
-+		rc = ghes_sea_add(ghes);
-+		if (rc)
-+			goto err_edac_unreg;
-+		break;
- 	case ACPI_HEST_NOTIFY_NMI:
- 		ghes_nmi_add(ghes);
- 		break;
-@@ -1118,6 +1199,9 @@ static int ghes_remove(struct platform_device *ghes_dev)
- 			unregister_acpi_hed_notifier(&ghes_notifier_sci);
- 		mutex_unlock(&ghes_list_mutex);
- 		break;
-+	case ACPI_HEST_NOTIFY_SEA:
-+		ghes_sea_remove(ghes);
-+		break;
- 	case ACPI_HEST_NOTIFY_NMI:
- 		ghes_nmi_remove(ghes);
- 		break;
+ 
+ 	return;
+ 
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
