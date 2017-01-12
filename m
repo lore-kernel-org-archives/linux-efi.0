@@ -1,84 +1,78 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH 3/4] efi/x86: move efi_print_memmap to
- drivers/firmware/efi/memmap.c
-Date: Fri, 13 Jan 2017 05:40:29 +0800
-Message-ID: <20170112214029.GE2709@dhcp-128-65.nay.redhat.com>
+From: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 2/4] efi/x86: move efi bgrt init code to early init code
+Date: Fri, 13 Jan 2017 00:11:53 +0100
+Message-ID: <87shonooue.fsf@gmail.com>
 References: <20170112094118.815108042@redhat.com>
- <20170112094214.964092881@redhat.com>
- <87wpe0o50c.fsf@gmail.com>
+        <20170112094214.909117564@redhat.com> <871sw8pk73.fsf@gmail.com>
+        <20170112213939.GD2709@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <87wpe0o50c.fsf@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Nicolai Stange <nicstange@gmail.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, hpa@zytor.com, Dan Williams <dan.j.williams@intel.com>, mika.penttila@nextfour.com, bhsharma@redhat.com
+Content-Type: text/plain
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170112213939.GD2709-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org> (Dave Young's
+        message of "Fri, 13 Jan 2017 05:39:39 +0800")
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org, bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 01/12/17 at 01:08pm, Nicolai Stange wrote:
-> On Thu, Jan 12 2017, Dave Young wrote:
-> 
-> > Signed-off-by: Dave Young <dyoung@redhat.com>
-> > ---
-> >  arch/x86/platform/efi/efi.c   |   16 ----------------
-> >  drivers/firmware/efi/memmap.c |   16 ++++++++++++++++
-> >  2 files changed, 16 insertions(+), 16 deletions(-)
-> >
-> > --- linux-x86.orig/arch/x86/platform/efi/efi.c
-> > +++ linux-x86/arch/x86/platform/efi/efi.c
-> > @@ -210,22 +210,6 @@ int __init efi_memblock_x86_reserve_rang
-> >  	return 0;
-> >  }
-> >  
-> > -void __init efi_print_memmap(void)
-> > -{
-> > -	efi_memory_desc_t *md;
-> > -	int i = 0;
-> > -
-> > -	for_each_efi_memory_desc(md) {
-> > -		char buf[64];
-> > -
-> > -		pr_info("mem%02u: %s range=[0x%016llx-0x%016llx] (%lluMB)\n",
-> > -			i++, efi_md_typeattr_format(buf, sizeof(buf), md),
-> > -			md->phys_addr,
-> > -			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1,
-> > -			(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
-> > -	}
-> > -}
-> > -
-> >  static int __init efi_systab_init(void *phys)
-> >  {
-> >  	if (efi_enabled(EFI_64BIT)) {
-> > --- linux-x86.orig/drivers/firmware/efi/memmap.c
-> > +++ linux-x86/drivers/firmware/efi/memmap.c
-> > @@ -10,6 +10,22 @@
-> >  #include <linux/io.h>
-> >  #include <asm/early_ioremap.h>
-> >  
-> > +void __init efi_print_memmap(void)
-> > +{
-> > +	efi_memory_desc_t *md;
-> > +	int i = 0;
-> > +
-> > +	for_each_efi_memory_desc(md) {
-> > +		char buf[64];
-> > +
-> > +		pr_info("mem%02u: %s range=[0x%016llx-0x%016llx] (%lluMB)\n",
-> > +			i++, efi_md_typeattr_format(buf, sizeof(buf), md),
-> > +			md->phys_addr,
-> > +			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1,
-> > +			(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
-> > +	}
-> > +}
-> > +
-> >  /**
-> >   * __efi_memmap_init - Common code for mapping the EFI memory map
-> >   * @data: EFI memory map data
-> 
-> Shouldn't the declaration in arch/x86/include/asm/efi.h get moved as well?
+On Fri, Jan 13 2017, Dave Young wrote:
 
-Good catch, will change it as well
+> On 01/12/17 at 12:54pm, Nicolai Stange wrote:
+>> On Thu, Jan 12 2017, Dave Young wrote:
+>> 
+>> > -void __init efi_bgrt_init(void)
+>> > +void __init efi_bgrt_init(struct acpi_table_header *table)
+>> >  {
+>> > -	acpi_status status;
+>> >  	void *image;
+>> >  	struct bmp_header bmp_header;
+>> >  
+>> >  	if (acpi_disabled)
+>> >  		return;
+>> >  
+>> > -	status = acpi_get_table("BGRT", 0,
+>> > -	                        (struct acpi_table_header **)&bgrt_tab);
+>> > -	if (ACPI_FAILURE(status))
+>> > -		return;
+>> 
+>> 
+>> Not sure, but wouldn't it be safer to reverse the order of this assignment
+>> 
+>> > +	bgrt_tab = *(struct acpi_table_bgrt *)table;
+>
+> Nicolai, sorry, I'm not sure I understand the comment, is it about above line?
+> Could you elaborate a bit?
+>
+>> 
+>> and this length check
+>> 
+>
+> I also do not get this :(
 
-Thanks
-Dave
+Ah sorry, my point is this: the length check should perhaps be made
+before doing the assignment to bgrt_tab because otherwise, we might end
+up reading from invalid memory.
+
+I.e. if (struct acpi_table_bgrt *)table->length < sizeof(bgrt_tab), then
+
+  bgrt_tab = *(struct acpi_table_bgrt *)table;
+
+would read past the table's end.
+
+I'm not sure whether this is a real problem though -- that is, whether
+this read could ever hit some unmapped memory.
+
+
+>> > -	if (bgrt_tab->header.length < sizeof(*bgrt_tab)) {
+>> > +	if (bgrt_tab.header.length < sizeof(bgrt_tab)) {
+>> >  		pr_notice("Ignoring BGRT: invalid length %u (expected %zu)\n",
+>> > -		       bgrt_tab->header.length, sizeof(*bgrt_tab));
+>> > +		       bgrt_tab.header.length, sizeof(bgrt_tab));
+>> >  		return;
+>> >  	}
+>> 
+>> ?
+
+Thanks,
+
+Nicolai
