@@ -1,79 +1,55 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 2/4] efi/x86: move efi bgrt init code to early init code
-Date: Fri, 13 Jan 2017 11:04:04 +0800
-Message-ID: <20170113030404.GA14023@dhcp-128-65.nay.redhat.com>
+From: Dave Young <dyoung@redhat.com>
+Subject: Re: [PATCH 1/4] efi/x86: make efi_memmap_reserve only insert into
+ boot mem areas
+Date: Fri, 13 Jan 2017 16:10:23 +0800
+Message-ID: <20170113081015.GA5328@dhcp-128-65.nay.redhat.com>
 References: <20170112094118.815108042@redhat.com>
- <20170112094214.909117564@redhat.com>
- <871sw8pk73.fsf@gmail.com>
- <20170112213939.GD2709@dhcp-128-65.nay.redhat.com>
- <87shonooue.fsf@gmail.com>
- <20170113022106.GA3266@dhcp-128-65.nay.redhat.com>
+ <20170112094214.860924858@redhat.com>
+ <CAKv+Gu-cdhvAM2Vkqv8uokZAqD3k0kLbGu1UYwgQOYj5Es0g=g@mail.gmail.com>
+ <20170112211953.GA2709@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20170113022106.GA3266-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org, bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+In-Reply-To: <20170112211953.GA2709@dhcp-128-65.nay.redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, Nicolai Stange <nicstange@gmail.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "hpa@zytor.com" <hpa@zytor.com>, Dan Williams <dan.j.williams@intel.com>, Mika =?iso-8859-1?Q?Penttil=E4?= <mika.penttila@nextfour.com>, bhsharma@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On 01/13/17 at 10:21am, Dave Young wrote:
-> On 01/13/17 at 12:11am, Nicolai Stange wrote:
-> > On Fri, Jan 13 2017, Dave Young wrote:
+On 01/13/17 at 05:20am, Dave Young wrote:
+> On 01/12/17 at 04:15pm, Ard Biesheuvel wrote:
+> > Hello Dave,
 > > 
-> > > On 01/12/17 at 12:54pm, Nicolai Stange wrote:
-> > >> On Thu, Jan 12 2017, Dave Young wrote:
-> > >> 
-> > >> > -void __init efi_bgrt_init(void)
-> > >> > +void __init efi_bgrt_init(struct acpi_table_header *table)
-> > >> >  {
-> > >> > -	acpi_status status;
-> > >> >  	void *image;
-> > >> >  	struct bmp_header bmp_header;
-> > >> >  
-> > >> >  	if (acpi_disabled)
-> > >> >  		return;
-> > >> >  
-> > >> > -	status = acpi_get_table("BGRT", 0,
-> > >> > -	                        (struct acpi_table_header **)&bgrt_tab);
-> > >> > -	if (ACPI_FAILURE(status))
-> > >> > -		return;
-> > >> 
-> > >> 
-> > >> Not sure, but wouldn't it be safer to reverse the order of this assignment
-> > >> 
-> > >> > +	bgrt_tab = *(struct acpi_table_bgrt *)table;
+> > On 12 January 2017 at 09:41, Dave Young <dyoung@redhat.com> wrote:
+> > > There are memory ranges like below when I testing early efi_mem_reserve:
 > > >
-> > > Nicolai, sorry, I'm not sure I understand the comment, is it about above line?
-> > > Could you elaborate a bit?
+> > > efi: mem62: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
+> > > efi: mem63: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
+> > > efi: mem64: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
+> > > efi: mem65: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
+> > > efi: mem66: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
+> > > efi: mem67: [Reserved           |   |  |  |  |  |  |  |   |  |  |  |  ] range=[0x0000000000000000-0xffffffffffffffff] (0MB)
 > > >
-> > >> 
-> > >> and this length check
-> > >> 
-> > >
-> > > I also do not get this :(
 > > 
-> > Ah sorry, my point is this: the length check should perhaps be made
-> > before doing the assignment to bgrt_tab because otherwise, we might end
-> > up reading from invalid memory.
+> > Did you spot Peter's patch to prune invalid memmap entries?
 > > 
-> > I.e. if (struct acpi_table_bgrt *)table->length < sizeof(bgrt_tab), then
+> > https://git.kernel.org/cgit/linux/kernel/git/efi/efi.git/commit/?h=next&id=b2a91a35445229
 > > 
-> >   bgrt_tab = *(struct acpi_table_bgrt *)table;
-> > 
-> > would read past the table's end.
-> > 
-> > I'm not sure whether this is a real problem though -- that is, whether
-> > this read could ever hit some unmapped memory.
+> > I would expect this patch to no longer be necessary with that in place, no?
 > 
-> Nicolai, thanks for the explanation. It make sense to move it to even later
-> at the end of the function.
+> Ard, good suggestion, I did not notice that patch, will try. Actually
+> I'm not sure about fake_mem handling, if we can filter out the invalid
+> ranges then it will be natural to drop this one after a test.
 
-Indeed assignment should be after the length checking, but with another
-tmp variable the assignment to global var can be moved to the end to
-avoid clear the image_address field..
+The commit works for me. I updated the series.
 
-> 
-> Thanks
-> Dave
+I addressed comments known, moved patch 1 to 4/4 with only boot service
+(dropped loader areas checking), I plan to send them out next Monday
+see if there are more comments. 
+
+If anyone who want to try them now, feel free to download from below url:
+http://people.redhat.com/~ruyang/efi-bgrt/
+
+Thanks
+Dave
