@@ -1,160 +1,431 @@
-From: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 2/4] efi/x86: move efi bgrt init code to early init code
-Date: Fri, 13 Jan 2017 13:21:52 +0100
-Message-ID: <87o9zbno9r.fsf@gmail.com>
-References: <20170112094118.815108042@redhat.com>
-        <20170112094214.909117564@redhat.com> <871sw8pk73.fsf@gmail.com>
-        <20170112213939.GD2709@dhcp-128-65.nay.redhat.com>
-        <87shonooue.fsf@gmail.com>
-        <20170113022106.GA3266@dhcp-128-65.nay.redhat.com>
-        <20170113030404.GA14023@dhcp-128-65.nay.redhat.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: [GIT PULL] EFI fixes
+Date: Sun, 15 Jan 2017 10:53:11 +0100
+Message-ID: <20170115095310.GA30496@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170113030404.GA14023-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org> (Dave Young's
-        message of "Fri, 13 Jan 2017 11:04:04 +0800")
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org, bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jan 13 2017, Dave Young wrote:
+Linus,
 
-> On 01/13/17 at 10:21am, Dave Young wrote:
->> On 01/13/17 at 12:11am, Nicolai Stange wrote:
->> > On Fri, Jan 13 2017, Dave Young wrote:
->> > 
->> > > On 01/12/17 at 12:54pm, Nicolai Stange wrote:
->> > >> On Thu, Jan 12 2017, Dave Young wrote:
->> > >> 
->> > >> > -void __init efi_bgrt_init(void)
->> > >> > +void __init efi_bgrt_init(struct acpi_table_header *table)
->> > >> >  {
->> > >> > -	acpi_status status;
->> > >> >  	void *image;
->> > >> >  	struct bmp_header bmp_header;
->> > >> >  
->> > >> >  	if (acpi_disabled)
->> > >> >  		return;
->> > >> >  
->> > >> > -	status = acpi_get_table("BGRT", 0,
->> > >> > -	                        (struct acpi_table_header **)&bgrt_tab);
->> > >> > -	if (ACPI_FAILURE(status))
->> > >> > -		return;
->> > >> 
->> > >> 
->> > >> Not sure, but wouldn't it be safer to reverse the order of this
->> > >> assignment
->> > >> 
->> > >> > +	bgrt_tab = *(struct acpi_table_bgrt *)table;
->> > >
->> > > Nicolai, sorry, I'm not sure I understand the comment, is it
->> > > about above line?
->> > > Could you elaborate a bit?
->> > >
->> > >> 
->> > >> and this length check
->> > >> 
->> > >
->> > > I also do not get this :(
->> > 
->> > Ah sorry, my point is this: the length check should perhaps be made
->> > before doing the assignment to bgrt_tab because otherwise, we might end
->> > up reading from invalid memory.
->> > 
->> > I.e. if (struct acpi_table_bgrt *)table->length < sizeof(bgrt_tab), then
->> > 
->> >   bgrt_tab = *(struct acpi_table_bgrt *)table;
->> > 
->> > would read past the table's end.
->> > 
->> > I'm not sure whether this is a real problem though -- that is, whether
->> > this read could ever hit some unmapped memory.
->> 
->> Nicolai, thanks for the explanation. It make sense to move it to even later
->> at the end of the function.
->
-> Indeed assignment should be after the length checking, but with another
-> tmp variable the assignment to global var can be moved to the end to
-> avoid clear the image_address field..
+Please pull the latest efi-urgent-for-linus git tree from:
 
-I had a look at your updated patches at
-http://people.redhat.com/~ruyang/efi-bgrt/ and they look fine to me.
+   git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-urgent-for-linus
 
-One minor remark:
+   # HEAD: 0100a3e67a9cef64d72cd3a1da86f3ddbee50363 efi/x86: Prune invalid memory map entries and fix boot regression
 
-sizeof(acpi_table_bgrt) == 56 and it might be better to avoid the extra
-tmp copy in efi_bgrt_init() by
-- assigning directly to bgrt_tab
-- do a 'goto err' rather than a 'return' from all the error paths
-- do a memset(&bgrt_tab, 0, sizeof(bgrt_tab)) at 'err:'
+A number of regression fixes:
+
+ - Fix a boot hang on machines that have somewhat unusual memory map entries of
+   phys_addr=0x0 num_pages=0, which broke due to a recent commit. This commit got 
+   cherry-picked from the v4.11 queue because the bug is affecting real machines.
+
+ - Fix a boot hang also reported by KASAN, caused by incorrect init ordering 
+   introduced by a recent optimization.
+
+ - Fix a recent robustification fix to allocate_new_fdt_and_exit_boot() that
+   introduced an invalid assumption. Neither bugs were seen in the wild AFAIK.
+
+ Thanks,
+
+	Ingo
+
+------------------>
+Ard Biesheuvel (1):
+      efi/libstub/arm*: Pass latest memory map to the kernel
+
+Nicolai Stange (1):
+      x86/efi: Don't allocate memmap through memblock after mm_init()
+
+Peter Jones (1):
+      efi/x86: Prune invalid memory map entries and fix boot regression
 
 
-With the copy to the on-stack 'bgrt', gcc 6.2.0 emits this for each of
-the two copies:
+ arch/x86/platform/efi/efi.c            | 66 ++++++++++++++++++++++++++
+ arch/x86/platform/efi/quirks.c         |  4 +-
+ drivers/firmware/efi/fake_mem.c        |  3 +-
+ drivers/firmware/efi/libstub/efistub.h |  8 ----
+ drivers/firmware/efi/libstub/fdt.c     | 87 ++++++++++++++++++++++------------
+ drivers/firmware/efi/memmap.c          | 38 +++++++++++++++
+ include/linux/efi.h                    |  2 +
+ 7 files changed, 165 insertions(+), 43 deletions(-)
 
-  41:   8a 07                   mov    (%rdi),%al
-  43:   88 45 d7                mov    %al,-0x29(%rbp)
-  46:   8a 47 01                mov    0x1(%rdi),%al
-  49:   88 45 d6                mov    %al,-0x2a(%rbp)
-  4c:   8a 47 02                mov    0x2(%rdi),%al
-  4f:   88 45 d5                mov    %al,-0x2b(%rbp)
-  52:   8a 47 03                mov    0x3(%rdi),%al
-  55:   88 45 d4                mov    %al,-0x2c(%rbp)
-  58:   8a 47 08                mov    0x8(%rdi),%al
-  5b:   88 45 d3                mov    %al,-0x2d(%rbp)
-  5e:   8a 47 09                mov    0x9(%rdi),%al
-  61:   88 45 d2                mov    %al,-0x2e(%rbp)
-  64:   8a 47 0a                mov    0xa(%rdi),%al
-  67:   88 45 d1                mov    %al,-0x2f(%rbp)
-  6a:   8a 47 0b                mov    0xb(%rdi),%al
-  6d:   88 45 d0                mov    %al,-0x30(%rbp)
-  70:   8a 47 0c                mov    0xc(%rdi),%al
-  73:   88 45 cf                mov    %al,-0x31(%rbp)
-  76:   8a 47 0d                mov    0xd(%rdi),%al
-  79:   88 45 ce                mov    %al,-0x32(%rbp)
-  7c:   8a 47 0e                mov    0xe(%rdi),%al
-  7f:   88 45 cd                mov    %al,-0x33(%rbp)
-  82:   8a 47 0f                mov    0xf(%rdi),%al
-  85:   88 45 cc                mov    %al,-0x34(%rbp)
-  88:   8a 47 10                mov    0x10(%rdi),%al
-  8b:   88 45 cb                mov    %al,-0x35(%rbp)
-  8e:   8a 47 11                mov    0x11(%rdi),%al
-  91:   88 45 ca                mov    %al,-0x36(%rbp)
-  94:   8a 47 12                mov    0x12(%rdi),%al
-  97:   88 45 c9                mov    %al,-0x37(%rbp)
-  9a:   8a 47 13                mov    0x13(%rdi),%al
-  9d:   88 45 c8                mov    %al,-0x38(%rbp)
-  a0:   8a 47 14                mov    0x14(%rdi),%al
-  a3:   8a 5f 26                mov    0x26(%rdi),%bl
-  a6:   0f b6 77 27             movzbl 0x27(%rdi),%esi
-  aa:   4c 8b 67 28             mov    0x28(%rdi),%r12
-  ae:   88 45 c7                mov    %al,-0x39(%rbp)
-  b1:   8a 47 15                mov    0x15(%rdi),%al
-  b4:   44 8b 6f 30             mov    0x30(%rdi),%r13d
-  b8:   44 8b 7f 34             mov    0x34(%rdi),%r15d
-  bc:   88 45 c6                mov    %al,-0x3a(%rbp)
-  bf:   8a 47 16                mov    0x16(%rdi),%al
-  c2:   88 45 c5                mov    %al,-0x3b(%rbp)
-  c5:   8a 47 17                mov    0x17(%rdi),%al
-  c8:   88 45 c4                mov    %al,-0x3c(%rbp)
-  cb:   8b 47 18                mov    0x18(%rdi),%eax
-  ce:   89 45 c0                mov    %eax,-0x40(%rbp)
-  d1:   8a 47 1c                mov    0x1c(%rdi),%al
-  d4:   88 45 bf                mov    %al,-0x41(%rbp)
-  d7:   8a 47 1d                mov    0x1d(%rdi),%al
-  da:   88 45 be                mov    %al,-0x42(%rbp)
-  dd:   8a 47 1e                mov    0x1e(%rdi),%al
-  e0:   88 45 bd                mov    %al,-0x43(%rbp)
-  e3:   8a 47 1f                mov    0x1f(%rdi),%al
-  e6:   88 45 bc                mov    %al,-0x44(%rbp)
-  e9:   8b 47 20                mov    0x20(%rdi),%eax
-  ec:   89 45 b8                mov    %eax,-0x48(%rbp)
-  ef:   66 8b 47 24             mov    0x24(%rdi),%ax
-
-Not sure why gcc would think that storing bgrt in reversed order on the
-stack might be a good idea, but well...
-
-Thanks,
-
-Nicolai
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 936a488d6cf6..274dfc481849 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -210,6 +210,70 @@ int __init efi_memblock_x86_reserve_range(void)
+ 	return 0;
+ }
+ 
++#define OVERFLOW_ADDR_SHIFT	(64 - EFI_PAGE_SHIFT)
++#define OVERFLOW_ADDR_MASK	(U64_MAX << OVERFLOW_ADDR_SHIFT)
++#define U64_HIGH_BIT		(~(U64_MAX >> 1))
++
++static bool __init efi_memmap_entry_valid(const efi_memory_desc_t *md, int i)
++{
++	u64 end = (md->num_pages << EFI_PAGE_SHIFT) + md->phys_addr - 1;
++	u64 end_hi = 0;
++	char buf[64];
++
++	if (md->num_pages == 0) {
++		end = 0;
++	} else if (md->num_pages > EFI_PAGES_MAX ||
++		   EFI_PAGES_MAX - md->num_pages <
++		   (md->phys_addr >> EFI_PAGE_SHIFT)) {
++		end_hi = (md->num_pages & OVERFLOW_ADDR_MASK)
++			>> OVERFLOW_ADDR_SHIFT;
++
++		if ((md->phys_addr & U64_HIGH_BIT) && !(end & U64_HIGH_BIT))
++			end_hi += 1;
++	} else {
++		return true;
++	}
++
++	pr_warn_once(FW_BUG "Invalid EFI memory map entries:\n");
++
++	if (end_hi) {
++		pr_warn("mem%02u: %s range=[0x%016llx-0x%llx%016llx] (invalid)\n",
++			i, efi_md_typeattr_format(buf, sizeof(buf), md),
++			md->phys_addr, end_hi, end);
++	} else {
++		pr_warn("mem%02u: %s range=[0x%016llx-0x%016llx] (invalid)\n",
++			i, efi_md_typeattr_format(buf, sizeof(buf), md),
++			md->phys_addr, end);
++	}
++	return false;
++}
++
++static void __init efi_clean_memmap(void)
++{
++	efi_memory_desc_t *out = efi.memmap.map;
++	const efi_memory_desc_t *in = out;
++	const efi_memory_desc_t *end = efi.memmap.map_end;
++	int i, n_removal;
++
++	for (i = n_removal = 0; in < end; i++) {
++		if (efi_memmap_entry_valid(in, i)) {
++			if (out != in)
++				memcpy(out, in, efi.memmap.desc_size);
++			out = (void *)out + efi.memmap.desc_size;
++		} else {
++			n_removal++;
++		}
++		in = (void *)in + efi.memmap.desc_size;
++	}
++
++	if (n_removal > 0) {
++		u64 size = efi.memmap.nr_map - n_removal;
++
++		pr_warn("Removing %d invalid memory map entries.\n", n_removal);
++		efi_memmap_install(efi.memmap.phys_map, size);
++	}
++}
++
+ void __init efi_print_memmap(void)
+ {
+ 	efi_memory_desc_t *md;
+@@ -472,6 +536,8 @@ void __init efi_init(void)
+ 		}
+ 	}
+ 
++	efi_clean_memmap();
++
+ 	if (efi_enabled(EFI_DBG))
+ 		efi_print_memmap();
+ }
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 10aca63a50d7..30031d5293c4 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -214,7 +214,7 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
+ 
+ 	new_size = efi.memmap.desc_size * num_entries;
+ 
+-	new_phys = memblock_alloc(new_size, 0);
++	new_phys = efi_memmap_alloc(num_entries);
+ 	if (!new_phys) {
+ 		pr_err("Could not allocate boot services memmap\n");
+ 		return;
+@@ -355,7 +355,7 @@ void __init efi_free_boot_services(void)
+ 	}
+ 
+ 	new_size = efi.memmap.desc_size * num_entries;
+-	new_phys = memblock_alloc(new_size, 0);
++	new_phys = efi_memmap_alloc(num_entries);
+ 	if (!new_phys) {
+ 		pr_err("Failed to allocate new EFI memmap\n");
+ 		return;
+diff --git a/drivers/firmware/efi/fake_mem.c b/drivers/firmware/efi/fake_mem.c
+index 520a40e5e0e4..6c7d60c239b5 100644
+--- a/drivers/firmware/efi/fake_mem.c
++++ b/drivers/firmware/efi/fake_mem.c
+@@ -71,8 +71,7 @@ void __init efi_fake_memmap(void)
+ 	}
+ 
+ 	/* allocate memory for new EFI memmap */
+-	new_memmap_phy = memblock_alloc(efi.memmap.desc_size * new_nr_map,
+-					PAGE_SIZE);
++	new_memmap_phy = efi_memmap_alloc(new_nr_map);
+ 	if (!new_memmap_phy)
+ 		return;
+ 
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index b98824e3800a..0e2a96b12cb3 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -39,14 +39,6 @@ efi_status_t efi_file_close(void *handle);
+ 
+ unsigned long get_dram_base(efi_system_table_t *sys_table_arg);
+ 
+-efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+-			unsigned long orig_fdt_size,
+-			void *fdt, int new_fdt_size, char *cmdline_ptr,
+-			u64 initrd_addr, u64 initrd_size,
+-			efi_memory_desc_t *memory_map,
+-			unsigned long map_size, unsigned long desc_size,
+-			u32 desc_ver);
+-
+ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 					    void *handle,
+ 					    unsigned long *new_fdt_addr,
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index a6a93116a8f0..921dfa047202 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -16,13 +16,10 @@
+ 
+ #include "efistub.h"
+ 
+-efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+-			unsigned long orig_fdt_size,
+-			void *fdt, int new_fdt_size, char *cmdline_ptr,
+-			u64 initrd_addr, u64 initrd_size,
+-			efi_memory_desc_t *memory_map,
+-			unsigned long map_size, unsigned long desc_size,
+-			u32 desc_ver)
++static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
++			       unsigned long orig_fdt_size,
++			       void *fdt, int new_fdt_size, char *cmdline_ptr,
++			       u64 initrd_addr, u64 initrd_size)
+ {
+ 	int node, num_rsv;
+ 	int status;
+@@ -101,25 +98,23 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 	if (status)
+ 		goto fdt_set_fail;
+ 
+-	fdt_val64 = cpu_to_fdt64((u64)(unsigned long)memory_map);
++	fdt_val64 = U64_MAX; /* placeholder */
+ 	status = fdt_setprop(fdt, node, "linux,uefi-mmap-start",
+ 			     &fdt_val64,  sizeof(fdt_val64));
+ 	if (status)
+ 		goto fdt_set_fail;
+ 
+-	fdt_val32 = cpu_to_fdt32(map_size);
++	fdt_val32 = U32_MAX; /* placeholder */
+ 	status = fdt_setprop(fdt, node, "linux,uefi-mmap-size",
+ 			     &fdt_val32,  sizeof(fdt_val32));
+ 	if (status)
+ 		goto fdt_set_fail;
+ 
+-	fdt_val32 = cpu_to_fdt32(desc_size);
+ 	status = fdt_setprop(fdt, node, "linux,uefi-mmap-desc-size",
+ 			     &fdt_val32, sizeof(fdt_val32));
+ 	if (status)
+ 		goto fdt_set_fail;
+ 
+-	fdt_val32 = cpu_to_fdt32(desc_ver);
+ 	status = fdt_setprop(fdt, node, "linux,uefi-mmap-desc-ver",
+ 			     &fdt_val32, sizeof(fdt_val32));
+ 	if (status)
+@@ -148,6 +143,43 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 	return EFI_LOAD_ERROR;
+ }
+ 
++static efi_status_t update_fdt_memmap(void *fdt, struct efi_boot_memmap *map)
++{
++	int node = fdt_path_offset(fdt, "/chosen");
++	u64 fdt_val64;
++	u32 fdt_val32;
++	int err;
++
++	if (node < 0)
++		return EFI_LOAD_ERROR;
++
++	fdt_val64 = cpu_to_fdt64((unsigned long)*map->map);
++	err = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-start",
++				  &fdt_val64, sizeof(fdt_val64));
++	if (err)
++		return EFI_LOAD_ERROR;
++
++	fdt_val32 = cpu_to_fdt32(*map->map_size);
++	err = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-size",
++				  &fdt_val32, sizeof(fdt_val32));
++	if (err)
++		return EFI_LOAD_ERROR;
++
++	fdt_val32 = cpu_to_fdt32(*map->desc_size);
++	err = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-desc-size",
++				  &fdt_val32, sizeof(fdt_val32));
++	if (err)
++		return EFI_LOAD_ERROR;
++
++	fdt_val32 = cpu_to_fdt32(*map->desc_ver);
++	err = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-desc-ver",
++				  &fdt_val32, sizeof(fdt_val32));
++	if (err)
++		return EFI_LOAD_ERROR;
++
++	return EFI_SUCCESS;
++}
++
+ #ifndef EFI_FDT_ALIGN
+ #define EFI_FDT_ALIGN EFI_PAGE_SIZE
+ #endif
+@@ -243,20 +275,10 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 			goto fail;
+ 		}
+ 
+-		/*
+-		 * Now that we have done our final memory allocation (and free)
+-		 * we can get the memory map key  needed for
+-		 * exit_boot_services().
+-		 */
+-		status = efi_get_memory_map(sys_table, &map);
+-		if (status != EFI_SUCCESS)
+-			goto fail_free_new_fdt;
+-
+ 		status = update_fdt(sys_table,
+ 				    (void *)fdt_addr, fdt_size,
+ 				    (void *)*new_fdt_addr, new_fdt_size,
+-				    cmdline_ptr, initrd_addr, initrd_size,
+-				    memory_map, map_size, desc_size, desc_ver);
++				    cmdline_ptr, initrd_addr, initrd_size);
+ 
+ 		/* Succeeding the first time is the expected case. */
+ 		if (status == EFI_SUCCESS)
+@@ -266,20 +288,16 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 			/*
+ 			 * We need to allocate more space for the new
+ 			 * device tree, so free existing buffer that is
+-			 * too small.  Also free memory map, as we will need
+-			 * to get new one that reflects the free/alloc we do
+-			 * on the device tree buffer.
++			 * too small.
+ 			 */
+ 			efi_free(sys_table, new_fdt_size, *new_fdt_addr);
+-			sys_table->boottime->free_pool(memory_map);
+ 			new_fdt_size += EFI_PAGE_SIZE;
+ 		} else {
+ 			pr_efi_err(sys_table, "Unable to construct new device tree.\n");
+-			goto fail_free_mmap;
++			goto fail_free_new_fdt;
+ 		}
+ 	}
+ 
+-	sys_table->boottime->free_pool(memory_map);
+ 	priv.runtime_map = runtime_map;
+ 	priv.runtime_entry_count = &runtime_entry_count;
+ 	status = efi_exit_boot_services(sys_table, handle, &map, &priv,
+@@ -288,6 +306,16 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 	if (status == EFI_SUCCESS) {
+ 		efi_set_virtual_address_map_t *svam;
+ 
++		status = update_fdt_memmap((void *)*new_fdt_addr, &map);
++		if (status != EFI_SUCCESS) {
++			/*
++			 * The kernel won't get far without the memory map, but
++			 * may still be able to print something meaningful so
++			 * return success here.
++			 */
++			return EFI_SUCCESS;
++		}
++
+ 		/* Install the new virtual address map */
+ 		svam = sys_table->runtime->set_virtual_address_map;
+ 		status = svam(runtime_entry_count * desc_size, desc_size,
+@@ -319,9 +347,6 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 
+ 	pr_efi_err(sys_table, "Exit boot services failed.\n");
+ 
+-fail_free_mmap:
+-	sys_table->boottime->free_pool(memory_map);
+-
+ fail_free_new_fdt:
+ 	efi_free(sys_table, new_fdt_size, *new_fdt_addr);
+ 
+diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+index f03ddecd232b..78686443cb37 100644
+--- a/drivers/firmware/efi/memmap.c
++++ b/drivers/firmware/efi/memmap.c
+@@ -9,6 +9,44 @@
+ #include <linux/efi.h>
+ #include <linux/io.h>
+ #include <asm/early_ioremap.h>
++#include <linux/memblock.h>
++#include <linux/slab.h>
++
++static phys_addr_t __init __efi_memmap_alloc_early(unsigned long size)
++{
++	return memblock_alloc(size, 0);
++}
++
++static phys_addr_t __init __efi_memmap_alloc_late(unsigned long size)
++{
++	unsigned int order = get_order(size);
++	struct page *p = alloc_pages(GFP_KERNEL, order);
++
++	if (!p)
++		return 0;
++
++	return PFN_PHYS(page_to_pfn(p));
++}
++
++/**
++ * efi_memmap_alloc - Allocate memory for the EFI memory map
++ * @num_entries: Number of entries in the allocated map.
++ *
++ * Depending on whether mm_init() has already been invoked or not,
++ * either memblock or "normal" page allocation is used.
++ *
++ * Returns the physical address of the allocated memory map on
++ * success, zero on failure.
++ */
++phys_addr_t __init efi_memmap_alloc(unsigned int num_entries)
++{
++	unsigned long size = num_entries * efi.memmap.desc_size;
++
++	if (slab_is_available())
++		return __efi_memmap_alloc_late(size);
++
++	return __efi_memmap_alloc_early(size);
++}
+ 
+ /**
+  * __efi_memmap_init - Common code for mapping the EFI memory map
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index a07a476178cd..5b1af30ece55 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -103,6 +103,7 @@ typedef	struct {
+ 
+ #define EFI_PAGE_SHIFT		12
+ #define EFI_PAGE_SIZE		(1UL << EFI_PAGE_SHIFT)
++#define EFI_PAGES_MAX		(U64_MAX >> EFI_PAGE_SHIFT)
+ 
+ typedef struct {
+ 	u32 type;
+@@ -950,6 +951,7 @@ static inline efi_status_t efi_query_variable_store(u32 attributes,
+ #endif
+ extern void __iomem *efi_lookup_mapped_addr(u64 phys_addr);
+ 
++extern phys_addr_t __init efi_memmap_alloc(unsigned int num_entries);
+ extern int __init efi_memmap_init_early(struct efi_memory_map_data *data);
+ extern int __init efi_memmap_init_late(phys_addr_t addr, unsigned long size);
+ extern void __init efi_memmap_unmap(void);
