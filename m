@@ -1,175 +1,143 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 2/4] efi/x86: move efi bgrt init code to early init code
-Date: Mon, 16 Jan 2017 10:55:19 +0800
-Message-ID: <20170116025519.GA3798@dhcp-128-65.nay.redhat.com>
-References: <20170112094118.815108042@redhat.com>
- <20170112094214.909117564@redhat.com>
- <871sw8pk73.fsf@gmail.com>
- <20170112213939.GD2709@dhcp-128-65.nay.redhat.com>
- <87shonooue.fsf@gmail.com>
- <20170113022106.GA3266@dhcp-128-65.nay.redhat.com>
- <20170113030404.GA14023@dhcp-128-65.nay.redhat.com>
- <87o9zbno9r.fsf@gmail.com>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH V7 04/10] arm64: exception: handle Synchronous External
+ Abort
+Date: Mon, 16 Jan 2017 11:53:10 +0000
+Message-ID: <20170116115309.GE1510@arm.com>
+References: <1484244924-24786-1-git-send-email-tbaicar@codeaurora.org>
+ <1484244924-24786-5-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <87o9zbno9r.fsf-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org, bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+In-Reply-To: <1484244924-24786-5-git-send-email-tbaicar@codeaurora.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org, S
 List-Id: linux-efi@vger.kernel.org
 
-On 01/13/17 at 01:21pm, Nicolai Stange wrote:
-> On Fri, Jan 13 2017, Dave Young wrote:
+On Thu, Jan 12, 2017 at 11:15:18AM -0700, Tyler Baicar wrote:
+> SEA exceptions are often caused by an uncorrected hardware
+> error, and are handled when data abort and instruction abort
+> exception classes have specific values for their Fault Status
+> Code.
+> When SEA occurs, before killing the process, go through
+> the handlers registered in the notification list.
+> Update fault_info[] with specific SEA faults so that the
+> new SEA handler is used.
 > 
-> > On 01/13/17 at 10:21am, Dave Young wrote:
-> >> On 01/13/17 at 12:11am, Nicolai Stange wrote:
-> >> > On Fri, Jan 13 2017, Dave Young wrote:
-> >> > 
-> >> > > On 01/12/17 at 12:54pm, Nicolai Stange wrote:
-> >> > >> On Thu, Jan 12 2017, Dave Young wrote:
-> >> > >> 
-> >> > >> > -void __init efi_bgrt_init(void)
-> >> > >> > +void __init efi_bgrt_init(struct acpi_table_header *table)
-> >> > >> >  {
-> >> > >> > -	acpi_status status;
-> >> > >> >  	void *image;
-> >> > >> >  	struct bmp_header bmp_header;
-> >> > >> >  
-> >> > >> >  	if (acpi_disabled)
-> >> > >> >  		return;
-> >> > >> >  
-> >> > >> > -	status = acpi_get_table("BGRT", 0,
-> >> > >> > -	                        (struct acpi_table_header **)&bgrt_tab);
-> >> > >> > -	if (ACPI_FAILURE(status))
-> >> > >> > -		return;
-> >> > >> 
-> >> > >> 
-> >> > >> Not sure, but wouldn't it be safer to reverse the order of this
-> >> > >> assignment
-> >> > >> 
-> >> > >> > +	bgrt_tab = *(struct acpi_table_bgrt *)table;
-> >> > >
-> >> > > Nicolai, sorry, I'm not sure I understand the comment, is it
-> >> > > about above line?
-> >> > > Could you elaborate a bit?
-> >> > >
-> >> > >> 
-> >> > >> and this length check
-> >> > >> 
-> >> > >
-> >> > > I also do not get this :(
-> >> > 
-> >> > Ah sorry, my point is this: the length check should perhaps be made
-> >> > before doing the assignment to bgrt_tab because otherwise, we might end
-> >> > up reading from invalid memory.
-> >> > 
-> >> > I.e. if (struct acpi_table_bgrt *)table->length < sizeof(bgrt_tab), then
-> >> > 
-> >> >   bgrt_tab = *(struct acpi_table_bgrt *)table;
-> >> > 
-> >> > would read past the table's end.
-> >> > 
-> >> > I'm not sure whether this is a real problem though -- that is, whether
-> >> > this read could ever hit some unmapped memory.
-> >> 
-> >> Nicolai, thanks for the explanation. It make sense to move it to even later
-> >> at the end of the function.
-> >
-> > Indeed assignment should be after the length checking, but with another
-> > tmp variable the assignment to global var can be moved to the end to
-> > avoid clear the image_address field..
+> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+> ---
+>  arch/arm64/include/asm/system_misc.h | 13 ++++++++
+>  arch/arm64/mm/fault.c                | 58 +++++++++++++++++++++++++++++-------
+>  2 files changed, 61 insertions(+), 10 deletions(-)
 > 
-> I had a look at your updated patches at
-> http://people.redhat.com/~ruyang/efi-bgrt/ and they look fine to me.
+> diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
+> index 57f110b..e7f3440 100644
+> --- a/arch/arm64/include/asm/system_misc.h
+> +++ b/arch/arm64/include/asm/system_misc.h
+> @@ -64,4 +64,17 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
+>  
+>  #endif	/* __ASSEMBLY__ */
+>  
+> +/*
+> + * The functions below are used to register and unregister callbacks
+> + * that are to be invoked when a Synchronous External Abort (SEA)
+> + * occurs. An SEA is raised by certain fault status codes that have
+> + * either data or instruction abort as the exception class, and
+> + * callbacks may be registered to parse or handle such hardware errors.
+> + *
+> + * Registered callbacks are run in an interrupt/atomic context. They
+> + * are not allowed to block or sleep.
+> + */
+> +int register_sea_notifier(struct notifier_block *nb);
+> +void unregister_sea_notifier(struct notifier_block *nb);
 
-Many thanks~
+I still don't understand why you need notifiers for this. You register
+precisely one hook in the series.
 
-> 
-> One minor remark:
-> 
-> sizeof(acpi_table_bgrt) == 56 and it might be better to avoid the extra
-> tmp copy in efi_bgrt_init() by
-> - assigning directly to bgrt_tab
-> - do a 'goto err' rather than a 'return' from all the error paths
-> - do a memset(&bgrt_tab, 0, sizeof(bgrt_tab)) at 'err:'
+>  #endif	/* __ASM_SYSTEM_MISC_H */
+> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+> index 05d2bd7..81039c7 100644
+> --- a/arch/arm64/mm/fault.c
+> +++ b/arch/arm64/mm/fault.c
+> @@ -39,6 +39,22 @@
+>  #include <asm/pgtable.h>
+>  #include <asm/tlbflush.h>
+>  
+> +/*
+> + * GHES SEA handler code may register a notifier call here to
+> + * handle HW error record passed from platform.
+> + */
+> +static ATOMIC_NOTIFIER_HEAD(sea_handler_chain);
+> +
+> +int register_sea_notifier(struct notifier_block *nb)
+> +{
+> +	return atomic_notifier_chain_register(&sea_handler_chain, nb);
+> +}
+> +
+> +void unregister_sea_notifier(struct notifier_block *nb)
+> +{
+> +	atomic_notifier_chain_unregister(&sea_handler_chain, nb);
+> +}
+> +
+>  static const char *fault_name(unsigned int esr);
+>  
+>  #ifdef CONFIG_KPROBES
+> @@ -480,6 +496,28 @@ static int do_bad(unsigned long addr, unsigned int esr, struct pt_regs *regs)
+>  	return 1;
+>  }
+>  
+> +/*
+> + * This abort handler deals with Synchronous External Abort.
+> + * It calls notifiers, and then returns "fault".
+> + */
+> +static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
+> +{
+> +	struct siginfo info;
+> +
+> +	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
+> +
+> +	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
+> +		 fault_name(esr), esr, addr);
+> +
+> +	info.si_signo = SIGBUS;
+> +	info.si_errno = 0;
+> +	info.si_code  = 0;
+> +	info.si_addr  = (void __user *)addr;
+> +	arm64_notify_die("", regs, &info, esr);
+> +
+> +	return 0;
+> +}
+> +
+>  static const struct fault_info {
+>  	int	(*fn)(unsigned long addr, unsigned int esr, struct pt_regs *regs);
+>  	int	sig;
+> @@ -502,22 +540,22 @@ static const struct fault_info {
+>  	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 1 permission fault"	},
+>  	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
+>  	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 permission fault"	},
+> -	{ do_bad,		SIGBUS,  0,		"synchronous external abort"	},
+> +	{ do_sea,		SIGBUS,  0,		"synchronous external abort"	},
+>  	{ do_bad,		SIGBUS,  0,		"unknown 17"			},
+>  	{ do_bad,		SIGBUS,  0,		"unknown 18"			},
+>  	{ do_bad,		SIGBUS,  0,		"unknown 19"			},
+> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error"	},
+> +	{ do_sea,		SIGBUS,  0,		"level 0 SEA (translation table walk)"	},
+> +	{ do_sea,		SIGBUS,  0,		"level 1 SEA (translation table walk)"	},
+> +	{ do_sea,		SIGBUS,  0,		"level 2 SEA (translation table walk)"	},
+> +	{ do_sea,		SIGBUS,  0,		"level 3 SEA (translation table walk)"	},
 
-Updated in V2, indeed text size shrunk from 1199 to 762.
+Perhaps I wasn't clear enough in my previous review, but please expand the
+acronym for strings and comments.
 
-> 
-> 
-> With the copy to the on-stack 'bgrt', gcc 6.2.0 emits this for each of
-> the two copies:
-> 
->   41:   8a 07                   mov    (%rdi),%al
->   43:   88 45 d7                mov    %al,-0x29(%rbp)
->   46:   8a 47 01                mov    0x1(%rdi),%al
->   49:   88 45 d6                mov    %al,-0x2a(%rbp)
->   4c:   8a 47 02                mov    0x2(%rdi),%al
->   4f:   88 45 d5                mov    %al,-0x2b(%rbp)
->   52:   8a 47 03                mov    0x3(%rdi),%al
->   55:   88 45 d4                mov    %al,-0x2c(%rbp)
->   58:   8a 47 08                mov    0x8(%rdi),%al
->   5b:   88 45 d3                mov    %al,-0x2d(%rbp)
->   5e:   8a 47 09                mov    0x9(%rdi),%al
->   61:   88 45 d2                mov    %al,-0x2e(%rbp)
->   64:   8a 47 0a                mov    0xa(%rdi),%al
->   67:   88 45 d1                mov    %al,-0x2f(%rbp)
->   6a:   8a 47 0b                mov    0xb(%rdi),%al
->   6d:   88 45 d0                mov    %al,-0x30(%rbp)
->   70:   8a 47 0c                mov    0xc(%rdi),%al
->   73:   88 45 cf                mov    %al,-0x31(%rbp)
->   76:   8a 47 0d                mov    0xd(%rdi),%al
->   79:   88 45 ce                mov    %al,-0x32(%rbp)
->   7c:   8a 47 0e                mov    0xe(%rdi),%al
->   7f:   88 45 cd                mov    %al,-0x33(%rbp)
->   82:   8a 47 0f                mov    0xf(%rdi),%al
->   85:   88 45 cc                mov    %al,-0x34(%rbp)
->   88:   8a 47 10                mov    0x10(%rdi),%al
->   8b:   88 45 cb                mov    %al,-0x35(%rbp)
->   8e:   8a 47 11                mov    0x11(%rdi),%al
->   91:   88 45 ca                mov    %al,-0x36(%rbp)
->   94:   8a 47 12                mov    0x12(%rdi),%al
->   97:   88 45 c9                mov    %al,-0x37(%rbp)
->   9a:   8a 47 13                mov    0x13(%rdi),%al
->   9d:   88 45 c8                mov    %al,-0x38(%rbp)
->   a0:   8a 47 14                mov    0x14(%rdi),%al
->   a3:   8a 5f 26                mov    0x26(%rdi),%bl
->   a6:   0f b6 77 27             movzbl 0x27(%rdi),%esi
->   aa:   4c 8b 67 28             mov    0x28(%rdi),%r12
->   ae:   88 45 c7                mov    %al,-0x39(%rbp)
->   b1:   8a 47 15                mov    0x15(%rdi),%al
->   b4:   44 8b 6f 30             mov    0x30(%rdi),%r13d
->   b8:   44 8b 7f 34             mov    0x34(%rdi),%r15d
->   bc:   88 45 c6                mov    %al,-0x3a(%rbp)
->   bf:   8a 47 16                mov    0x16(%rdi),%al
->   c2:   88 45 c5                mov    %al,-0x3b(%rbp)
->   c5:   8a 47 17                mov    0x17(%rdi),%al
->   c8:   88 45 c4                mov    %al,-0x3c(%rbp)
->   cb:   8b 47 18                mov    0x18(%rdi),%eax
->   ce:   89 45 c0                mov    %eax,-0x40(%rbp)
->   d1:   8a 47 1c                mov    0x1c(%rdi),%al
->   d4:   88 45 bf                mov    %al,-0x41(%rbp)
->   d7:   8a 47 1d                mov    0x1d(%rdi),%al
->   da:   88 45 be                mov    %al,-0x42(%rbp)
->   dd:   8a 47 1e                mov    0x1e(%rdi),%al
->   e0:   88 45 bd                mov    %al,-0x43(%rbp)
->   e3:   8a 47 1f                mov    0x1f(%rdi),%al
->   e6:   88 45 bc                mov    %al,-0x44(%rbp)
->   e9:   8b 47 20                mov    0x20(%rdi),%eax
->   ec:   89 45 b8                mov    %eax,-0x48(%rbp)
->   ef:   66 8b 47 24             mov    0x24(%rdi),%ax
-> 
-> Not sure why gcc would think that storing bgrt in reversed order on the
-> stack might be a good idea, but well...
+> +	{ do_sea,		SIGBUS,  0,		"synchronous parity or ECC err" },
 
-I have no idea about this..
+s/err/error/
 
-> 
-> Thanks,
-> 
-> Nicolai
-
-Thanks
-Dave
+Will
