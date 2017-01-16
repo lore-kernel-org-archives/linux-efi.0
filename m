@@ -1,16 +1,15 @@
 From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V7 04/10] arm64: exception: handle Synchronous External
- Abort
-Date: Mon, 16 Jan 2017 13:09:22 -0700
-Message-ID: <0ca6c70e-6033-4cca-8833-15cb8573a939@codeaurora.org>
+Subject: Re: [PATCH V7 10/10] arm/arm64: KVM: add guest SEA support
+Date: Mon, 16 Jan 2017 13:14:06 -0700
+Message-ID: <3175d58f-1820-32c1-acf7-1f591619a21f@codeaurora.org>
 References: <1484244924-24786-1-git-send-email-tbaicar@codeaurora.org>
- <1484244924-24786-5-git-send-email-tbaicar@codeaurora.org>
- <20170116115309.GE1510@arm.com>
+ <1484244924-24786-11-git-send-email-tbaicar@codeaurora.org>
+ <98ed774f-fcc1-e10d-05ef-ebea52e916d2@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
 Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <20170116115309.GE1510@arm.com>
+In-Reply-To: <98ed774f-fcc1-e10d-05ef-ebea52e916d2@arm.com>
 List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
 List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
@@ -20,142 +19,156 @@ List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
 Errors-To: kvmarm-bounces@lists.cs.columbia.edu
 Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Will Deacon <will.deacon@arm.com>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+To: Marc Zyngier <marc.zyngier@arm.com>, christoffer.dall@linaro.org, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org, Suzuki.Poulose@arm.com, punit.agrawal@arm.com, astone@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-Hello Will,
+Hello Marc,
 
 
-On 1/16/2017 4:53 AM, Will Deacon wrote:
-> On Thu, Jan 12, 2017 at 11:15:18AM -0700, Tyler Baicar wrote:
->> SEA exceptions are often caused by an uncorrected hardware
->> error, and are handled when data abort and instruction abort
->> exception classes have specific values for their Fault Status
->> Code.
->> When SEA occurs, before killing the process, go through
->> the handlers registered in the notification list.
->> Update fault_info[] with specific SEA faults so that the
->> new SEA handler is used.
+On 1/16/2017 4:58 AM, Marc Zyngier wrote:
+> Hi Tyler,
+>
+> On 12/01/17 18:15, Tyler Baicar wrote:
+>> Currently external aborts are unsupported by the guest abort
+>> handling. Add handling for SEAs so that the host kernel reports
+>> SEAs which occur in the guest kernel.
 >>
 >> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
->> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
->> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
 >> ---
->>   arch/arm64/include/asm/system_misc.h | 13 ++++++++
->>   arch/arm64/mm/fault.c                | 58 +++++++++++++++++++++++++++++-------
->>   2 files changed, 61 insertions(+), 10 deletions(-)
+>>   arch/arm/include/asm/kvm_arm.h       |  1 +
+>>   arch/arm/include/asm/system_misc.h   |  5 +++++
+>>   arch/arm/kvm/mmu.c                   | 18 ++++++++++++++++--
+>>   arch/arm64/include/asm/kvm_arm.h     |  1 +
+>>   arch/arm64/include/asm/system_misc.h |  2 ++
+>>   arch/arm64/mm/fault.c                | 13 +++++++++++++
+>>   6 files changed, 38 insertions(+), 2 deletions(-)
 >>
+>> diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
+>> index e22089f..33a77509 100644
+>> --- a/arch/arm/include/asm/kvm_arm.h
+>> +++ b/arch/arm/include/asm/kvm_arm.h
+>> @@ -187,6 +187,7 @@
+>>   #define FSC_FAULT	(0x04)
+>>   #define FSC_ACCESS	(0x08)
+>>   #define FSC_PERM	(0x0c)
+>> +#define FSC_EXTABT	(0x10)
+>>   
+>>   /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
+>>   #define HPFAR_MASK	(~0xf)
+>> diff --git a/arch/arm/include/asm/system_misc.h b/arch/arm/include/asm/system_misc.h
+>> index a3d61ad..ea45d94 100644
+>> --- a/arch/arm/include/asm/system_misc.h
+>> +++ b/arch/arm/include/asm/system_misc.h
+>> @@ -24,4 +24,9 @@ extern unsigned int user_debug;
+>>   
+>>   #endif /* !__ASSEMBLY__ */
+>>   
+>> +static inline int handle_guest_sea(unsigned long addr, unsigned int esr)
+>> +{
+>> +	return -1;
+>> +}
+>> +
+>>   #endif /* __ASM_ARM_SYSTEM_MISC_H */
+>> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
+>> index e9a5c0e..1152966 100644
+>> --- a/arch/arm/kvm/mmu.c
+>> +++ b/arch/arm/kvm/mmu.c
+>> @@ -29,6 +29,7 @@
+>>   #include <asm/kvm_asm.h>
+>>   #include <asm/kvm_emulate.h>
+>>   #include <asm/virt.h>
+>> +#include <asm/system_misc.h>
+>>   
+>>   #include "trace.h"
+>>   
+>> @@ -1441,8 +1442,21 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
+>>   
+>>   	/* Check the stage-2 fault is trans. fault or write fault */
+>>   	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
+>> -	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>> -	    fault_status != FSC_ACCESS) {
+>> +
+>> +	/* The host kernel will handle the synchronous external abort. There
+>> +	 * is no need to pass the error into the guest.
+>> +	 */
+>> +	if (fault_status == FSC_EXTABT) {
+>> +		if(handle_guest_sea((unsigned long)fault_ipa,
+>> +				    kvm_vcpu_get_hsr(vcpu))) {
+>> +			kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
+>> +				kvm_vcpu_trap_get_class(vcpu),
+>> +				(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+>> +				(unsigned long)kvm_vcpu_get_hsr(vcpu));
+> So there's one thing I don't like here, which is that we just gave the
+> guest a very nice way to pollute the host's kernel log with spurious
+> messages. So I'd rather make it silent, or at the very least rate limited.
+Before this patch, if a guest exits with FSC_EXTABT, then the below 
+print for
+"Unsupported FSC..." would happen. So this print isn't really adding any 
+noise
+that isn't already there. Also, this print would only happen if 
+handle_guest_sea
+fails. If you still think this print should be removed then I will 
+remove it though.
+>> +			return -EFAULT;
+>> +		}
+>> +	} else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>> +		   fault_status != FSC_ACCESS) {
+>>   		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
+>>   			kvm_vcpu_trap_get_class(vcpu),
+>>   			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+>> diff --git a/arch/arm64/include/asm/kvm_arm.h b/arch/arm64/include/asm/kvm_arm.h
+>> index 4b5c977..be0efb6 100644
+>> --- a/arch/arm64/include/asm/kvm_arm.h
+>> +++ b/arch/arm64/include/asm/kvm_arm.h
+>> @@ -201,6 +201,7 @@
+>>   #define FSC_FAULT	ESR_ELx_FSC_FAULT
+>>   #define FSC_ACCESS	ESR_ELx_FSC_ACCESS
+>>   #define FSC_PERM	ESR_ELx_FSC_PERM
+>> +#define FSC_EXTABT	ESR_ELx_FSC_EXTABT
+>>   
+>>   /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
+>>   #define HPFAR_MASK	(~UL(0xf))
 >> diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
->> index 57f110b..e7f3440 100644
+>> index e7f3440..27816cb 100644
 >> --- a/arch/arm64/include/asm/system_misc.h
 >> +++ b/arch/arm64/include/asm/system_misc.h
->> @@ -64,4 +64,17 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
+>> @@ -77,4 +77,6 @@ extern void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
+>>   int register_sea_notifier(struct notifier_block *nb);
+>>   void unregister_sea_notifier(struct notifier_block *nb);
 >>   
->>   #endif	/* __ASSEMBLY__ */
->>   
->> +/*
->> + * The functions below are used to register and unregister callbacks
->> + * that are to be invoked when a Synchronous External Abort (SEA)
->> + * occurs. An SEA is raised by certain fault status codes that have
->> + * either data or instruction abort as the exception class, and
->> + * callbacks may be registered to parse or handle such hardware errors.
->> + *
->> + * Registered callbacks are run in an interrupt/atomic context. They
->> + * are not allowed to block or sleep.
->> + */
->> +int register_sea_notifier(struct notifier_block *nb);
->> +void unregister_sea_notifier(struct notifier_block *nb);
-> I still don't understand why you need notifiers for this. You register
-> precisely one hook in the series.
-I didn't see a response to my last comment on the previous series so I 
-just left it in for this series.
-The notifier usage is consistent with the GHES code for SCI errors which 
-are also only used a single
-time in the code. If you think making the call directly is a better 
-option I will remove the notifiers.
+>> +int handle_guest_sea(unsigned long addr, unsigned int esr);
+>> +
 >>   #endif	/* __ASM_SYSTEM_MISC_H */
 >> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
->> index 05d2bd7..81039c7 100644
+>> index 81039c7..fa8d4d7 100644
 >> --- a/arch/arm64/mm/fault.c
 >> +++ b/arch/arm64/mm/fault.c
->> @@ -39,6 +39,22 @@
->>   #include <asm/pgtable.h>
->>   #include <asm/tlbflush.h>
->>   
->> +/*
->> + * GHES SEA handler code may register a notifier call here to
->> + * handle HW error record passed from platform.
->> + */
->> +static ATOMIC_NOTIFIER_HEAD(sea_handler_chain);
->> +
->> +int register_sea_notifier(struct notifier_block *nb)
->> +{
->> +	return atomic_notifier_chain_register(&sea_handler_chain, nb);
->> +}
->> +
->> +void unregister_sea_notifier(struct notifier_block *nb)
->> +{
->> +	atomic_notifier_chain_unregister(&sea_handler_chain, nb);
->> +}
->> +
->>   static const char *fault_name(unsigned int esr);
->>   
->>   #ifdef CONFIG_KPROBES
->> @@ -480,6 +496,28 @@ static int do_bad(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->>   	return 1;
+>> @@ -597,6 +597,19 @@ static const char *fault_name(unsigned int esr)
 >>   }
 >>   
->> +/*
->> + * This abort handler deals with Synchronous External Abort.
->> + * It calls notifiers, and then returns "fault".
+>>   /*
+>> + * Handle Synchronous External Aborts that occur in a guest kernel.
 >> + */
->> +static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
+>> +int handle_guest_sea(unsigned long addr, unsigned int esr)
 >> +{
->> +	struct siginfo info;
->> +
 >> +	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
 >> +
 >> +	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
->> +		 fault_name(esr), esr, addr);
->> +
->> +	info.si_signo = SIGBUS;
->> +	info.si_errno = 0;
->> +	info.si_code  = 0;
->> +	info.si_addr  = (void __user *)addr;
->> +	arm64_notify_die("", regs, &info, esr);
+>> +		fault_name(esr), esr, addr);
+> Same here.
+I will remove this print.
 >> +
 >> +	return 0;
 >> +}
 >> +
->>   static const struct fault_info {
->>   	int	(*fn)(unsigned long addr, unsigned int esr, struct pt_regs *regs);
->>   	int	sig;
->> @@ -502,22 +540,22 @@ static const struct fault_info {
->>   	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 1 permission fault"	},
->>   	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
->>   	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 permission fault"	},
->> -	{ do_bad,		SIGBUS,  0,		"synchronous external abort"	},
->> +	{ do_sea,		SIGBUS,  0,		"synchronous external abort"	},
->>   	{ do_bad,		SIGBUS,  0,		"unknown 17"			},
->>   	{ do_bad,		SIGBUS,  0,		"unknown 18"			},
->>   	{ do_bad,		SIGBUS,  0,		"unknown 19"			},
->> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
->> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
->> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
->> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
->> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error"	},
->> +	{ do_sea,		SIGBUS,  0,		"level 0 SEA (translation table walk)"	},
->> +	{ do_sea,		SIGBUS,  0,		"level 1 SEA (translation table walk)"	},
->> +	{ do_sea,		SIGBUS,  0,		"level 2 SEA (translation table walk)"	},
->> +	{ do_sea,		SIGBUS,  0,		"level 3 SEA (translation table walk)"	},
-> Perhaps I wasn't clear enough in my previous review, but please expand the
-> acronym for strings and comments.
-Sorry, I will expand these.
->> +	{ do_sea,		SIGBUS,  0,		"synchronous parity or ECC err" },
-> s/err/error/
+>> +/*
+>>    * Dispatch a data abort to the relevant handler.
+>>    */
+>>   asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
+>>
+> Thanks,
 >
-> Will
+> 	M.
 Thanks,
 Tyler
 
