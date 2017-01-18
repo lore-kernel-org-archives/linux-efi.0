@@ -1,94 +1,113 @@
 From: Dave Young <dyoung@redhat.com>
 Subject: Re: [PATCH V2 4/4] efi/x86: make efi_memmap_reserve only insert into
  boot mem areas
-Date: Wed, 18 Jan 2017 19:01:05 +0800
-Message-ID: <20170118110105.GA7377@dhcp-128-65.nay.redhat.com>
+Date: Wed, 18 Jan 2017 21:33:32 +0800
+Message-ID: <20170118133332.GA10481@dhcp-128-65.nay.redhat.com>
 References: <20170116024554.461236678@redhat.com>
  <20170116025026.586405871@redhat.com>
  <CAKv+Gu8C2btUOOO28LVUJ3umiS-BvEk6xi7a_OMTsuh28hoDbQ@mail.gmail.com>
  <871sw131t7.fsf@gmail.com>
+ <20170118110105.GA7377@dhcp-128-65.nay.redhat.com>
+ <20170118110612.GA7487@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <871sw131t7.fsf@gmail.com>
+In-Reply-To: <20170118110612.GA7487@dhcp-128-65.nay.redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Nicolai Stange <nicstange@gmail.com>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "hpa@zytor.com" <hpa@zytor.com>, Dan Williams <dan.j.williams@intel.com>, Mika =?iso-8859-1?Q?Penttil=E4?= <mika.penttila@nextfour.com>, Bhupesh Sharma <bhsharma@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 01/17/17 at 08:48pm, Nicolai Stange wrote:
-> On Tue, Jan 17 2017, Ard Biesheuvel wrote:
-> 
-> > On 16 January 2017 at 02:45, Dave Young <dyoung@redhat.com> wrote:
-> >> efi_mem_reserve cares only about boot services regions, for making sure
-> >> later efi_free_boot_services does not free areas which are still useful,
-> >> such as bgrt image buffer.
-> >>
-> >> So add a new argument to efi_memmap_insert for this purpose.
-> >>
-> >
-> > So what happens is we try to efi_mem_reserve() a regions that is not
-> > bootservices code or data?
-> > We shouldn't simply ignore it, because it is a serious condition.
-> 
-> The efi_mem_desc_lookup() call in efi_arch_mem_reserve() wouldn't return
-> anything and the latter would
-> 
->   pr_err("Failed to lookup EFI memory descriptor for %pa\n", &addr);
-> 
-> then.
-> 
-> This is so because efi_mem_desc_lookup() searches only for regions that
-> either
-> - are of type EFI_BOOT_SERVICES_DATA or EFI_RUNTIME_SERVICES_DATA
-> - or which have EFI_MEMORY_RUNTIME set already:
-> 
-> 	if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
-> 	    md->type != EFI_BOOT_SERVICES_DATA &&
-> 	    md->type != EFI_RUNTIME_SERVICES_DATA) {
-> 		continue;
-> 	}
-> 
-> For EFI_RUNTIME_SERVICES_DATA and EFI_MEMORY_RUNTIME,
-> efi_arch_mem_reserve() would be a nop.
-> 
-> So we're fine here? Do you want to have a more descriptive error message
-> than "Failed to lookup EFI memory descriptor"?
-> 
-> 
-> For the other checks you suggested in that other thread, i.e. for the
-> post-slab_is_available() condition and so: let me wait until Dave's
-> series has stabilized (or even picked) and I'll submit patches for
-> what remains to be sanity checked then.
-> 
-> Also, since Dave eliminated the need for late efi_mem_reserve()'s,
-> my 20b1e22d01a4 ("x86/efi: Don't allocate memmap through memblock after
-> mm_init()") should certainly get reverted at some point.
+On 01/18/17 at 07:06pm, Dave Young wrote:
+> On 01/18/17 at 07:01pm, Dave Young wrote:
+> > On 01/17/17 at 08:48pm, Nicolai Stange wrote:
+> > > On Tue, Jan 17 2017, Ard Biesheuvel wrote:
+> > > 
+> > > > On 16 January 2017 at 02:45, Dave Young <dyoung@redhat.com> wrote:
+> > > >> efi_mem_reserve cares only about boot services regions, for making sure
+> > > >> later efi_free_boot_services does not free areas which are still useful,
+> > > >> such as bgrt image buffer.
+> > > >>
+> > > >> So add a new argument to efi_memmap_insert for this purpose.
+> > > >>
+> > > >
+> > > > So what happens is we try to efi_mem_reserve() a regions that is not
+> > > > bootservices code or data?
+> > > > We shouldn't simply ignore it, because it is a serious condition.
+> > > 
+> > > The efi_mem_desc_lookup() call in efi_arch_mem_reserve() wouldn't return
+> > > anything and the latter would
+> > > 
+> > >   pr_err("Failed to lookup EFI memory descriptor for %pa\n", &addr);
+> > > 
+> > > then.
+> > > 
+> > > This is so because efi_mem_desc_lookup() searches only for regions that
+> > > either
+> > > - are of type EFI_BOOT_SERVICES_DATA or EFI_RUNTIME_SERVICES_DATA
+> > > - or which have EFI_MEMORY_RUNTIME set already:
+> > > 
+> > > 	if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
+> > > 	    md->type != EFI_BOOT_SERVICES_DATA &&
+> > > 	    md->type != EFI_RUNTIME_SERVICES_DATA) {
+> > > 		continue;
+> > > 	}
+> > > 
+> > > For EFI_RUNTIME_SERVICES_DATA and EFI_MEMORY_RUNTIME,
+> > > efi_arch_mem_reserve() would be a nop.
+> > > 
+> > > So we're fine here? Do you want to have a more descriptive error message
+> > > than "Failed to lookup EFI memory descriptor"?
+> > > 
+> > > 
+> > > For the other checks you suggested in that other thread, i.e. for the
+> > > post-slab_is_available() condition and so: let me wait until Dave's
+> > > series has stabilized (or even picked) and I'll submit patches for
+> > > what remains to be sanity checked then.
+> > > 
+> > > Also, since Dave eliminated the need for late efi_mem_reserve()'s,
+> > > my 20b1e22d01a4 ("x86/efi: Don't allocate memmap through memblock after
+> > > mm_init()") should certainly get reverted at some point.
+> > 
+> > While testing my patches with latest edk2, I found another thing to be
+> > fixed, I will repost bgrt patch according to Ard's comment tomorrow,
+> > maybe with below patch as another fix to the memblock_alloc late
+> > callback.
 
-While testing my patches with latest edk2, I found another thing to be
-fixed, I will repost bgrt patch according to Ard's comment tomorrow,
-maybe with below patch as another fix to the memblock_alloc late
-callback.
+Please ignore the comment, your patch already addressed this, that
+means it is still necessary after bgrt being moved early because
+efi_free_boot_services still need it.
 
----
- arch/x86/platform/efi/quirks.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
---- linux-x86.orig/arch/x86/platform/efi/quirks.c
-+++ linux-x86/arch/x86/platform/efi/quirks.c
-@@ -355,7 +355,7 @@ void __init efi_free_boot_services(void)
- 	}
- 
- 	new_size = efi.memmap.desc_size * num_entries;
--	new_phys = kzalloc(new_size, GFP_KERNEL);
-+	new_phys = efi_memmap_alloc(num_entries);
- 	if (!new_phys) {
- 		pr_err("Failed to allocate new EFI memmap\n");
- 		return;
-
+Apologize for the noise..
+> > 
+> > ---
+> >  arch/x86/platform/efi/quirks.c |    2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > --- linux-x86.orig/arch/x86/platform/efi/quirks.c
+> > +++ linux-x86/arch/x86/platform/efi/quirks.c
+> > @@ -355,7 +355,7 @@ void __init efi_free_boot_services(void)
+> >  	}
+> >  
+> >  	new_size = efi.memmap.desc_size * num_entries;
+> > -	new_phys = kzalloc(new_size, GFP_KERNEL);
 > 
+> Oops, it was memblock_alloc(), this is a middle test code used for
+> debugging. Just ignore it.
 > 
-> Thanks,
+> > +	new_phys = efi_memmap_alloc(num_entries);
 > 
-> Nicolai
+> Maybe a efi_memmap_late_alloc is enough, will see if I can get a better
+> version, maybe your previous patch can be dropped partially or just
+> kept.
+> 
+> >  	if (!new_phys) {
+> >  		pr_err("Failed to allocate new EFI memmap\n");
+> >  		return;
+> > 
+> > > 
+> > > 
+> > > Thanks,
+> > > 
+> > > Nicolai
