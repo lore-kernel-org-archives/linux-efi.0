@@ -1,242 +1,105 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 032/120] efi/libstub/arm*: Pass latest memory map to the
- kernel
-Date: Wed, 18 Jan 2017 11:45:50 +0100
-Message-ID: <20170118104649.424491332@linuxfoundation.org>
-References: <20170118104648.120216880@linuxfoundation.org>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH V2 4/4] efi/x86: make efi_memmap_reserve only insert into
+ boot mem areas
+Date: Wed, 18 Jan 2017 19:06:12 +0800
+Message-ID: <20170118110612.GA7487@dhcp-128-65.nay.redhat.com>
+References: <20170116024554.461236678@redhat.com>
+ <20170116025026.586405871@redhat.com>
+ <CAKv+Gu8C2btUOOO28LVUJ3umiS-BvEk6xi7a_OMTsuh28hoDbQ@mail.gmail.com>
+ <871sw131t7.fsf@gmail.com>
+ <20170118110105.GA7377@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170118104648.120216880@linuxfoundation.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jeffrey Hugo <jhugo@codeaurora.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, James Morse <james.morse@arm.com>, Thomas Gleixner <tglx@linutronix.de>, Linus Torvalds <torvalds@linux-foundation.org>, Ingo Molnar <mingo@kernel.org>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170118110105.GA7377-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mika =?iso-8859-1?Q?Penttil=E4?= <mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.9-stable review patch.  If anyone has any objections, please let me know.
+On 01/18/17 at 07:01pm, Dave Young wrote:
+> On 01/17/17 at 08:48pm, Nicolai Stange wrote:
+> > On Tue, Jan 17 2017, Ard Biesheuvel wrote:
+> > 
+> > > On 16 January 2017 at 02:45, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> > >> efi_mem_reserve cares only about boot services regions, for making sure
+> > >> later efi_free_boot_services does not free areas which are still useful,
+> > >> such as bgrt image buffer.
+> > >>
+> > >> So add a new argument to efi_memmap_insert for this purpose.
+> > >>
+> > >
+> > > So what happens is we try to efi_mem_reserve() a regions that is not
+> > > bootservices code or data?
+> > > We shouldn't simply ignore it, because it is a serious condition.
+> > 
+> > The efi_mem_desc_lookup() call in efi_arch_mem_reserve() wouldn't return
+> > anything and the latter would
+> > 
+> >   pr_err("Failed to lookup EFI memory descriptor for %pa\n", &addr);
+> > 
+> > then.
+> > 
+> > This is so because efi_mem_desc_lookup() searches only for regions that
+> > either
+> > - are of type EFI_BOOT_SERVICES_DATA or EFI_RUNTIME_SERVICES_DATA
+> > - or which have EFI_MEMORY_RUNTIME set already:
+> > 
+> > 	if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
+> > 	    md->type != EFI_BOOT_SERVICES_DATA &&
+> > 	    md->type != EFI_RUNTIME_SERVICES_DATA) {
+> > 		continue;
+> > 	}
+> > 
+> > For EFI_RUNTIME_SERVICES_DATA and EFI_MEMORY_RUNTIME,
+> > efi_arch_mem_reserve() would be a nop.
+> > 
+> > So we're fine here? Do you want to have a more descriptive error message
+> > than "Failed to lookup EFI memory descriptor"?
+> > 
+> > 
+> > For the other checks you suggested in that other thread, i.e. for the
+> > post-slab_is_available() condition and so: let me wait until Dave's
+> > series has stabilized (or even picked) and I'll submit patches for
+> > what remains to be sanity checked then.
+> > 
+> > Also, since Dave eliminated the need for late efi_mem_reserve()'s,
+> > my 20b1e22d01a4 ("x86/efi: Don't allocate memmap through memblock after
+> > mm_init()") should certainly get reverted at some point.
+> 
+> While testing my patches with latest edk2, I found another thing to be
+> fixed, I will repost bgrt patch according to Ard's comment tomorrow,
+> maybe with below patch as another fix to the memblock_alloc late
+> callback.
+> 
+> ---
+>  arch/x86/platform/efi/quirks.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> --- linux-x86.orig/arch/x86/platform/efi/quirks.c
+> +++ linux-x86/arch/x86/platform/efi/quirks.c
+> @@ -355,7 +355,7 @@ void __init efi_free_boot_services(void)
+>  	}
+>  
+>  	new_size = efi.memmap.desc_size * num_entries;
+> -	new_phys = kzalloc(new_size, GFP_KERNEL);
 
-------------------
+Oops, it was memblock_alloc(), this is a middle test code used for
+debugging. Just ignore it.
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> +	new_phys = efi_memmap_alloc(num_entries);
 
-commit abfb7b686a3e5be27bf81db62f9c5c895b76f5d1 upstream.
+Maybe a efi_memmap_late_alloc is enough, will see if I can get a better
+version, maybe your previous patch can be dropped partially or just
+kept.
 
-As reported by James Morse, the current libstub code involving the
-annotated memory map only works somewhat correctly by accident, due
-to the fact that a pool allocation happens to be reused immediately,
-retaining its former contents on most implementations of the
-UEFI boot services.
-
-Instead of juggling memory maps, which makes the code more complex than
-it needs to be, simply put placeholder values into the FDT for the memory
-map parameters, and only write the actual values after ExitBootServices()
-has been called.
-
-Reported-by: James Morse <james.morse@arm.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Jeffrey Hugo <jhugo@codeaurora.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: linux-efi@vger.kernel.org
-Fixes: ed9cc156c42f ("efi/libstub: Use efi_exit_boot_services() in FDT")
-Link: http://lkml.kernel.org/r/1482587963-20183-2-git-send-email-ard.biesheuvel@linaro.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
----
- drivers/firmware/efi/libstub/efistub.h |    8 ---
- drivers/firmware/efi/libstub/fdt.c     |   87 +++++++++++++++++++++------------
- 2 files changed, 56 insertions(+), 39 deletions(-)
-
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -30,14 +30,6 @@ efi_status_t efi_file_close(void *handle
- 
- unsigned long get_dram_base(efi_system_table_t *sys_table_arg);
- 
--efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
--			unsigned long orig_fdt_size,
--			void *fdt, int new_fdt_size, char *cmdline_ptr,
--			u64 initrd_addr, u64 initrd_size,
--			efi_memory_desc_t *memory_map,
--			unsigned long map_size, unsigned long desc_size,
--			u32 desc_ver);
--
- efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
- 					    void *handle,
- 					    unsigned long *new_fdt_addr,
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -16,13 +16,10 @@
- 
- #include "efistub.h"
- 
--efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
--			unsigned long orig_fdt_size,
--			void *fdt, int new_fdt_size, char *cmdline_ptr,
--			u64 initrd_addr, u64 initrd_size,
--			efi_memory_desc_t *memory_map,
--			unsigned long map_size, unsigned long desc_size,
--			u32 desc_ver)
-+static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
-+			       unsigned long orig_fdt_size,
-+			       void *fdt, int new_fdt_size, char *cmdline_ptr,
-+			       u64 initrd_addr, u64 initrd_size)
- {
- 	int node, num_rsv;
- 	int status;
-@@ -101,25 +98,23 @@ efi_status_t update_fdt(efi_system_table
- 	if (status)
- 		goto fdt_set_fail;
- 
--	fdt_val64 = cpu_to_fdt64((u64)(unsigned long)memory_map);
-+	fdt_val64 = U64_MAX; /* placeholder */
- 	status = fdt_setprop(fdt, node, "linux,uefi-mmap-start",
- 			     &fdt_val64,  sizeof(fdt_val64));
- 	if (status)
- 		goto fdt_set_fail;
- 
--	fdt_val32 = cpu_to_fdt32(map_size);
-+	fdt_val32 = U32_MAX; /* placeholder */
- 	status = fdt_setprop(fdt, node, "linux,uefi-mmap-size",
- 			     &fdt_val32,  sizeof(fdt_val32));
- 	if (status)
- 		goto fdt_set_fail;
- 
--	fdt_val32 = cpu_to_fdt32(desc_size);
- 	status = fdt_setprop(fdt, node, "linux,uefi-mmap-desc-size",
- 			     &fdt_val32, sizeof(fdt_val32));
- 	if (status)
- 		goto fdt_set_fail;
- 
--	fdt_val32 = cpu_to_fdt32(desc_ver);
- 	status = fdt_setprop(fdt, node, "linux,uefi-mmap-desc-ver",
- 			     &fdt_val32, sizeof(fdt_val32));
- 	if (status)
-@@ -148,6 +143,43 @@ fdt_set_fail:
- 	return EFI_LOAD_ERROR;
- }
- 
-+static efi_status_t update_fdt_memmap(void *fdt, struct efi_boot_memmap *map)
-+{
-+	int node = fdt_path_offset(fdt, "/chosen");
-+	u64 fdt_val64;
-+	u32 fdt_val32;
-+	int err;
-+
-+	if (node < 0)
-+		return EFI_LOAD_ERROR;
-+
-+	fdt_val64 = cpu_to_fdt64((unsigned long)*map->map);
-+	err = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-start",
-+				  &fdt_val64, sizeof(fdt_val64));
-+	if (err)
-+		return EFI_LOAD_ERROR;
-+
-+	fdt_val32 = cpu_to_fdt32(*map->map_size);
-+	err = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-size",
-+				  &fdt_val32, sizeof(fdt_val32));
-+	if (err)
-+		return EFI_LOAD_ERROR;
-+
-+	fdt_val32 = cpu_to_fdt32(*map->desc_size);
-+	err = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-desc-size",
-+				  &fdt_val32, sizeof(fdt_val32));
-+	if (err)
-+		return EFI_LOAD_ERROR;
-+
-+	fdt_val32 = cpu_to_fdt32(*map->desc_ver);
-+	err = fdt_setprop_inplace(fdt, node, "linux,uefi-mmap-desc-ver",
-+				  &fdt_val32, sizeof(fdt_val32));
-+	if (err)
-+		return EFI_LOAD_ERROR;
-+
-+	return EFI_SUCCESS;
-+}
-+
- #ifndef EFI_FDT_ALIGN
- #define EFI_FDT_ALIGN EFI_PAGE_SIZE
- #endif
-@@ -243,20 +275,10 @@ efi_status_t allocate_new_fdt_and_exit_b
- 			goto fail;
- 		}
- 
--		/*
--		 * Now that we have done our final memory allocation (and free)
--		 * we can get the memory map key  needed for
--		 * exit_boot_services().
--		 */
--		status = efi_get_memory_map(sys_table, &map);
--		if (status != EFI_SUCCESS)
--			goto fail_free_new_fdt;
--
- 		status = update_fdt(sys_table,
- 				    (void *)fdt_addr, fdt_size,
- 				    (void *)*new_fdt_addr, new_fdt_size,
--				    cmdline_ptr, initrd_addr, initrd_size,
--				    memory_map, map_size, desc_size, desc_ver);
-+				    cmdline_ptr, initrd_addr, initrd_size);
- 
- 		/* Succeeding the first time is the expected case. */
- 		if (status == EFI_SUCCESS)
-@@ -266,20 +288,16 @@ efi_status_t allocate_new_fdt_and_exit_b
- 			/*
- 			 * We need to allocate more space for the new
- 			 * device tree, so free existing buffer that is
--			 * too small.  Also free memory map, as we will need
--			 * to get new one that reflects the free/alloc we do
--			 * on the device tree buffer.
-+			 * too small.
- 			 */
- 			efi_free(sys_table, new_fdt_size, *new_fdt_addr);
--			sys_table->boottime->free_pool(memory_map);
- 			new_fdt_size += EFI_PAGE_SIZE;
- 		} else {
- 			pr_efi_err(sys_table, "Unable to construct new device tree.\n");
--			goto fail_free_mmap;
-+			goto fail_free_new_fdt;
- 		}
- 	}
- 
--	sys_table->boottime->free_pool(memory_map);
- 	priv.runtime_map = runtime_map;
- 	priv.runtime_entry_count = &runtime_entry_count;
- 	status = efi_exit_boot_services(sys_table, handle, &map, &priv,
-@@ -288,6 +306,16 @@ efi_status_t allocate_new_fdt_and_exit_b
- 	if (status == EFI_SUCCESS) {
- 		efi_set_virtual_address_map_t *svam;
- 
-+		status = update_fdt_memmap((void *)*new_fdt_addr, &map);
-+		if (status != EFI_SUCCESS) {
-+			/*
-+			 * The kernel won't get far without the memory map, but
-+			 * may still be able to print something meaningful so
-+			 * return success here.
-+			 */
-+			return EFI_SUCCESS;
-+		}
-+
- 		/* Install the new virtual address map */
- 		svam = sys_table->runtime->set_virtual_address_map;
- 		status = svam(runtime_entry_count * desc_size, desc_size,
-@@ -319,9 +347,6 @@ efi_status_t allocate_new_fdt_and_exit_b
- 
- 	pr_efi_err(sys_table, "Exit boot services failed.\n");
- 
--fail_free_mmap:
--	sys_table->boottime->free_pool(memory_map);
--
- fail_free_new_fdt:
- 	efi_free(sys_table, new_fdt_size, *new_fdt_addr);
+>  	if (!new_phys) {
+>  		pr_err("Failed to allocate new EFI memmap\n");
+>  		return;
+> 
+> > 
+> > 
+> > Thanks,
+> > 
+> > Nicolai
