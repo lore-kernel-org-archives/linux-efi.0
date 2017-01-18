@@ -1,16 +1,16 @@
 From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V7 04/10] arm64: exception: handle Synchronous External
- Abort
-Date: Wed, 18 Jan 2017 16:26:10 -0700
-Message-ID: <e8c0151e-2087-d49c-42fc-906755aca052@codeaurora.org>
+Subject: Re: [PATCH V7 05/10] acpi: apei: handle SEA notification type for
+ ARMv8
+Date: Wed, 18 Jan 2017 16:51:05 -0700
+Message-ID: <3de443d7-2c68-f179-daae-bc8f851470b7@codeaurora.org>
 References: <1484244924-24786-1-git-send-email-tbaicar@codeaurora.org>
- <1484244924-24786-5-git-send-email-tbaicar@codeaurora.org>
- <587DF279.1010402@arm.com>
+ <1484244924-24786-6-git-send-email-tbaicar@codeaurora.org>
+ <587F80A7.10008@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
 Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <587DF279.1010402@arm.com>
+In-Reply-To: <587F80A7.10008@arm.com>
 List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
 List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
@@ -27,76 +27,152 @@ List-Id: linux-efi@vger.kernel.org
 Hello James,
 
 
-On 1/17/2017 3:31 AM, James Morse wrote:
+On 1/18/2017 7:50 AM, James Morse wrote:
 > Hi Tyler,
 >
 > On 12/01/17 18:15, Tyler Baicar wrote:
->> SEA exceptions are often caused by an uncorrected hardware
->> error, and are handled when data abort and instruction abort
->> exception classes have specific values for their Fault Status
->> Code.
->> When SEA occurs, before killing the process, go through
->> the handlers registered in the notification list.
->> Update fault_info[] with specific SEA faults so that the
->> new SEA handler is used.
->> @@ -480,6 +496,28 @@ static int do_bad(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->>   	return 1;
->>   }
+>> ARM APEI extension proposal added SEA (Synchrounous External
+> Nit: Synchronous
+I'll fix that :)
+>> Abort) notification type for ARMv8.
+>> Add a new GHES error source handling function for SEA. If an error
+>> source's notification type is SEA, then this function can be registered
+>> into the SEA exception handler. That way GHES will parse and report
+>> SEA exceptions when they occur.
+>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+>> index 2acbc60..87efe26 100644
+>> --- a/drivers/acpi/apei/ghes.c
+>> +++ b/drivers/acpi/apei/ghes.c
+>> @@ -767,6 +772,62 @@ static struct notifier_block ghes_notifier_sci = {
+>>   	.notifier_call = ghes_notify_sci,
+>>   };
 >>   
->> +/*
->> + * This abort handler deals with Synchronous External Abort.
->> + * It calls notifiers, and then returns "fault".
->> + */
->> +static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
+>> +#ifdef CONFIG_HAVE_ACPI_APEI_SEA
+>> +static LIST_HEAD(ghes_sea);
+>> +
+>> +static int ghes_notify_sea(struct notifier_block *this,
+>> +				  unsigned long event, void *data)
 >> +{
->> +	struct siginfo info;
+>> +	struct ghes *ghes;
+>> +	int ret = NOTIFY_DONE;
 >> +
->> +	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
->> +
->> +	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
->> +		 fault_name(esr), esr, addr);
->> +
->> +	info.si_signo = SIGBUS;
->> +	info.si_errno = 0;
->> +	info.si_code  = 0;
-> Half of the other do_*() functions in this file read the signo and code from the
-> fault_info table.
+>> +	nmi_enter();
+> Can we move this into the arch code? Its because we got here from a
+> synchronous-exception that makes this nmi-like, I think it only makes sense for
+> it be called from under /arch/.
+So move the nmi_enter/exit calls into do_sea of the previous patch? I 
+can do that in the next patchset.
+> Where did the rcu_read_lock() go? I can see its missing from ghes_notify_nmi()
+> too, but I don't know enough about RCU to know if that's safe!
 >
+> The second paragraph in the comment above rcu_read_lock() describes it as
+> preventing call_rcu() during a read-side critical section that was running
+> concurrently. Doesn't this mean we can race with ghes_sea_remove() on another
+> CPU because we wait for the wrong grace period?
 >
->> +	info.si_addr  = (void __user *)addr;
-> addr here was read from FAR_EL1, but for some of the classes of exception you
-> have listed below this register isn't updated with the faulting address.
->
-> The ARM-ARM version 'k' in D1.10.5 "Summary of registers on faults taken to an
-> Exception level that is using Aarch64" has:
->> The architecture permits that the FAR_ELx is UNKNOWN for Synchronous External
->> Aborts other than Synchronous External Aborts on Translation Table Walks. In
->> this case, the ISS.FnV bit returned in ESR_ELx  indicates whether FAR_ELx is
->> valid.
-> This is a problem if we get 'synchronous external abort' or 'synchronous parity
-> error' while a user space process was running.
-It looks like this would just cause an incorrect address to be printed 
-in the above pr_err.
-Unless I'm missing something, I don't see arm64_notify_die or anything 
-that gets called from
-there using the info.si_addr variable.
-
-What do you suggest I do here? The firmware should be reporting the 
-physical and virtual
-address information if it is available in the HEST entry that the kernel 
-will parse. So should I
-just remove the use of the addr parameter in do_sea?
-
-Thanks,
-Tyler
->> +	arm64_notify_die("", regs, &info, esr);
+> The same comment talks about how these read-side critical sections can nest, so
+> I think its quite safe to make these 'lock' calls here.
+Sorry, I thought we wanted nmi_enter/exit instead of the 
+rcu_read_lock/unlock. I guess the rcu locks
+will not cause the deadlock scenario you described in the previous 
+patchset if we have the
+nmi_enter/exit wrapped around the rcu critical section.
+>> +	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
+>> +		if (!ghes_proc(ghes))
+>> +			ret = NOTIFY_OK;
+>> +	}
+>> +	nmi_exit();
 >> +
+>> +	return ret;
+>> +}
+>> +
+>> +static struct notifier_block ghes_notifier_sea = {
+>> +	.notifier_call = ghes_notify_sea,
+>> +};
+>> +
+>> +static int ghes_sea_add(struct ghes *ghes)
+>> +{
+>> +	mutex_lock(&ghes_list_mutex);
+>> +	if (list_empty(&ghes_sea))
+>> +		register_sea_notifier(&ghes_notifier_sea);
+>> +	list_add_rcu(&ghes->list, &ghes_sea);
+>> +	mutex_unlock(&ghes_list_mutex);
 >> +	return 0;
 >> +}
 >> +
->>   static const struct fault_info {
->>   	int	(*fn)(unsigned long addr, unsigned int esr, struct pt_regs *regs);
->>   	int	sig;
+>> +static void ghes_sea_remove(struct ghes *ghes)
+>> +{
+>> +	mutex_lock(&ghes_list_mutex);
+>> +	list_del_rcu(&ghes->list);
+>> +	if (list_empty(&ghes_sea))
+>> +		unregister_sea_notifier(&ghes_notifier_sea);
+>> +	mutex_unlock(&ghes_list_mutex);
+> ghes_nmi_remove() has:
+>> 	/*
+>>   	* To synchronize with NMI handler, ghes can only be
+>>   	* freed after NMI handler finishes.
+>> 	*/
+>> 	synchronize_rcu()
+> This 'waits until a grace period has elapsed'. This is because ghes_remove()
+> goes and kfree()s the ghes object while another CPU may be holding that entry in
+> the list in ghes_notify_sea().
+I will add synchronize_rcu() in the next patchset.
+>> +}
+>> +#else /* CONFIG_HAVE_ACPI_APEI_SEA */
+>> +static inline int ghes_sea_add(struct ghes *ghes)
+>> +{
+>> +	pr_err(GHES_PFX "ID: %d, trying to add SEA notification which is not supported\n",
+>> +	       ghes->generic->header.source_id);
+>> +	return -ENOTSUPP;
+>> +}
+>> +
+>> +static inline void ghes_sea_remove(struct ghes *ghes)
+>> +{
+>> +	pr_err(GHES_PFX "ID: %d, trying to remove SEA notification which is not supported\n",
+>> +	       ghes->generic->header.source_id);
+>> +}
+>> +#endif /* CONFIG_HAVE_ACPI_APEI_SEA */
+>> +
+>>   #ifdef CONFIG_HAVE_ACPI_APEI_NMI
+>>   /*
+>>    * printk is not safe in NMI context.  So in NMI handler, we allocate
+>> @@ -1011,6 +1072,14 @@ static int ghes_probe(struct platform_device *ghes_dev)
+>>   	case ACPI_HEST_NOTIFY_EXTERNAL:
+>>   	case ACPI_HEST_NOTIFY_SCI:
+>>   		break;
+>> +	case ACPI_HEST_NOTIFY_SEA:
+>> +		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_SEA)) {
+>> +			pr_warn(GHES_PFX "Generic hardware error source: %d notified via SEA is not supported\n",
+>> +				generic->header.source_id);
+>> +			rc = -ENOTSUPP;
+>> +			goto err;
+>> +		}
+>> +		break;
+>>   	case ACPI_HEST_NOTIFY_NMI:
+>>   		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_NMI)) {
+>>   			pr_warn(GHES_PFX "Generic hardware error source: %d notified via NMI interrupt is not supported!\n",
+>> @@ -1022,6 +1091,13 @@ static int ghes_probe(struct platform_device *ghes_dev)
+>>   		pr_warning(GHES_PFX "Generic hardware error source: %d notified via local interrupt is not supported!\n",
+>>   			   generic->header.source_id);
+>>   		goto err;
+>
+>> +	case ACPI_HEST_NOTIFY_GPIO:
+>> +	case ACPI_HEST_NOTIFY_SEI:
+>> +	case ACPI_HEST_NOTIFY_GSIV:
+> These three weren't mentioned in the commit message. I guess they are drive-by
+> cleanup?
+SEI and GSIV were also added in the ACPI 6.1 spec (18.3.2.9 Hardware 
+Error Notification) and GPIO was missing, so I added all three.
+
+Thanks,
+Tyler
+>> +		pr_warn(GHES_PFX "Generic hardware error source: %d notified via notification type %u is not supported\n",
+>> +			generic->header.source_id, generic->header.source_id);
+>> +		rc = -ENOTSUPP;
+>> +		goto err;
+>>   	default:
+>>   		pr_warning(FW_WARN GHES_PFX "Unknown notification type: %u for generic hardware error source: %d\n",
+>>   			   generic->notify.type, generic->header.source_id);
 >
 > Thanks,
 >
