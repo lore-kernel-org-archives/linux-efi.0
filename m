@@ -1,346 +1,112 @@
-From: Bhupesh Sharma <bhsharma@redhat.com>
-Subject: Re: [PATCH V3 1/4] efi/x86: move efi bgrt init code to early init code
-Date: Thu, 19 Jan 2017 00:54:50 +0530
-Message-ID: <CACi5LpO6SbVv9Ld++sECN=KSMdrXEoJNfVh2+dsVj5Jndyou6A@mail.gmail.com>
-References: <20170116024554.461236678@redhat.com> <20170116025026.435634158@redhat.com>
- <CAKv+Gu-pLxSceJnYTb-to93S5OeVc6bNyGbZ_R6SPg11vJd-0w@mail.gmail.com>
- <20170118134836.GA30798@dhcp-128-65.nay.redhat.com> <CAKv+Gu8o4O+zyZPYpUyi7uDfpi7Zjc+Fa_himqLLfaRT__aKzQ@mail.gmail.com>
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V7 04/10] arm64: exception: handle Synchronous External
+ Abort
+Date: Wed, 18 Jan 2017 15:52:03 -0700
+Message-ID: <9185f5f2-7bc4-5727-af3a-920dd22578dc@codeaurora.org>
+References: <1484244924-24786-1-git-send-email-tbaicar@codeaurora.org>
+ <1484244924-24786-5-git-send-email-tbaicar@codeaurora.org>
+ <20170116115309.GE1510@arm.com> <587DF0B6.4060000@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu8o4O+zyZPYpUyi7uDfpi7Zjc+Fa_himqLLfaRT__aKzQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Dave Young <dyoung@redhat.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, Nicolai Stange <nicstange@gmail.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "hpa@zytor.com" <hpa@zytor.com>, Dan Williams <dan.j.williams@intel.com>, =?UTF-8?Q?Mika_Penttil=C3=A4?= <mika.penttila@nextfour.com>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <587DF0B6.4060000@arm.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: James Morse <james.morse@arm.com>
+Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Will Deacon <will.deacon@arm.com>, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, tn@semihalf.com, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, Suzuki.Poulose@arm.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.orgb
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jan 18, 2017 at 7:30 PM, Ard Biesheuvel
-<ard.biesheuvel@linaro.org> wrote:
-> On 18 January 2017 at 13:48, Dave Young <dyoung@redhat.com> wrote:
->> Before invoking the arch specific handler, efi_mem_reserve() reserves
->> the given memory region through memblock.
->>
->> efi_bgrt_init will call efi_mem_reserve after mm_init(), at that time
->> memblock is dead and it should not be used any more.
->>
->> efi bgrt code depend on acpi intialization to get the bgrt acpi table,
->> moving bgrt parsing to acpi early boot code can make sure efi_mem_reserve
->> in efi bgrt code still use memblock safely.
->>
->> Signed-off-by: Dave Young <dyoung@redhat.com>
+On 1/17/2017 3:23 AM, James Morse wrote:
+> Hi Tyler,
 >
-> This patch looks fine to me know
+> On 16/01/17 11:53, Will Deacon wrote:
+>> On Thu, Jan 12, 2017 at 11:15:18AM -0700, Tyler Baicar wrote:
+>>> SEA exceptions are often caused by an uncorrected hardware
+>>> error, and are handled when data abort and instruction abort
+>>> exception classes have specific values for their Fault Status
+>>> Code.
+>>> When SEA occurs, before killing the process, go through
+>>> the handlers registered in the notification list.
+>>> Update fault_info[] with specific SEA faults so that the
+>>> new SEA handler is used.
+>>> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+>>> index 05d2bd7..81039c7 100644
+>>> --- a/arch/arm64/mm/fault.c
+>>> +++ b/arch/arm64/mm/fault.c
+>>> @@ -480,6 +496,28 @@ static int do_bad(unsigned long addr, unsigned int esr, struct pt_regs *regs)
+>>>   	return 1;
+>>>   }
+>>>   
+>>> +/*
+>>> + * This abort handler deals with Synchronous External Abort.
+>>> + * It calls notifiers, and then returns "fault".
+>>> + */
+>>> +static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
+>>> +{
+>>> +	struct siginfo info;
+>>> +
+>>> +	atomic_notifier_call_chain(&sea_handler_chain, 0, NULL);
+>>> +
+>>> +	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
+>>> +		 fault_name(esr), esr, addr);
+>>> +
+>>> +	info.si_signo = SIGBUS;
+>>> +	info.si_errno = 0;
+>>> +	info.si_code  = 0;
+>>> +	info.si_addr  = (void __user *)addr;
+>>> +	arm64_notify_die("", regs, &info, esr);
+>>> +
+>>> +	return 0;
+>>> +}
+>>> +
+>>>   static const struct fault_info {
+>>>   	int	(*fn)(unsigned long addr, unsigned int esr, struct pt_regs *regs);
+>>>   	int	sig;
+>>> @@ -502,22 +540,22 @@ static const struct fault_info {
+>>>   	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 1 permission fault"	},
+>>>   	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
+>>>   	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 permission fault"	},
+>>> -	{ do_bad,		SIGBUS,  0,		"synchronous external abort"	},
+>>> +	{ do_sea,		SIGBUS,  0,		"synchronous external abort"	},
+>>>   	{ do_bad,		SIGBUS,  0,		"unknown 17"			},
+>>>   	{ do_bad,		SIGBUS,  0,		"unknown 18"			},
+>>>   	{ do_bad,		SIGBUS,  0,		"unknown 19"			},
+>>> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+>>> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+>>> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+>>> -	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+>>> -	{ do_bad,		SIGBUS,  0,		"synchronous parity error"	},
+>>> +	{ do_sea,		SIGBUS,  0,		"level 0 SEA (translation table walk)"	},
+>>> +	{ do_sea,		SIGBUS,  0,		"level 1 SEA (translation table walk)"	},
+>>> +	{ do_sea,		SIGBUS,  0,		"level 2 SEA (translation table walk)"	},
+>>> +	{ do_sea,		SIGBUS,  0,		"level 3 SEA (translation table walk)"	},
+>> Perhaps I wasn't clear enough in my previous review, but please expand the
+>> acronym for strings and comments.
 >
-> Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->
-> but before applying it, I'd like
->
-> - Bhupesh to confirm that this patch is a move in the right direction
-> with regard to enabling BGRT on arm64/ACPI,
+> The 'SEA' in this user-string doesn't add anything. Now that these use do_sea()
+> instead of do_bad(), when they are printed won't it be:
+>> Synchronous External Abort: level 3 SEA (translation table walk) (...) at ....
 
-I gave the changes from Dave a try on top of the following combination:
-4.10-rc3 + efi/next patches not available in 4.10-rc3 + Nicolai's patches
+Good point, yes they will:
 
-and was able to get the BGRT table working properly with OVMF on a
-QEMU-x86_64 machine. So you can add my tested-by for this patch
-series.
++	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
++		 fault_name(esr), esr, addr);
 
-I think this is the right direction for the ARM64 BGRT handling
-patches as well and I will post a RFC in two phases as suggested by
-Ard, once Dave's patches are accepted (in efi/next?).
+I can just remove SEA here then.
 
-Regards,
-Bhupesh
+Thanks,
+Tyler
 
-> - an ack from the ACPI maintainers (cc'ed)
->
-> Thanks,
-> Ard.
->
->
->> ---
->> v1->v2: efi_bgrt_init: check table length first before copying bgrt table
->>         error checking in drivers/acpi/bgrt.c
->> v2->v3: drop #ifdef added before; efi-bgrt.h build warning fix
->>         since only changed this patch, so I just only resend this one.
->>  arch/x86/kernel/acpi/boot.c      |    9 +++++
->>  arch/x86/platform/efi/efi-bgrt.c |   59 ++++++++++++++++-----------------------
->>  arch/x86/platform/efi/efi.c      |    5 ---
->>  drivers/acpi/bgrt.c              |   28 +++++++++++++-----
->>  include/linux/efi-bgrt.h         |   11 +++----
->>  init/main.c                      |    1
->>  6 files changed, 59 insertions(+), 54 deletions(-)
->>
->> --- linux-x86.orig/arch/x86/kernel/acpi/boot.c
->> +++ linux-x86/arch/x86/kernel/acpi/boot.c
->> @@ -35,6 +35,7 @@
->>  #include <linux/bootmem.h>
->>  #include <linux/ioport.h>
->>  #include <linux/pci.h>
->> +#include <linux/efi-bgrt.h>
->>
->>  #include <asm/irqdomain.h>
->>  #include <asm/pci_x86.h>
->> @@ -1557,6 +1558,12 @@ int __init early_acpi_boot_init(void)
->>         return 0;
->>  }
->>
->> +static int __init acpi_parse_bgrt(struct acpi_table_header *table)
->> +{
->> +       efi_bgrt_init(table);
->> +       return 0;
->> +}
->> +
->>  int __init acpi_boot_init(void)
->>  {
->>         /* those are executed after early-quirks are executed */
->> @@ -1581,6 +1588,8 @@ int __init acpi_boot_init(void)
->>         acpi_process_madt();
->>
->>         acpi_table_parse(ACPI_SIG_HPET, acpi_parse_hpet);
->> +       if (IS_ENABLED(CONFIG_ACPI_BGRT))
->> +               acpi_table_parse(ACPI_SIG_BGRT, acpi_parse_bgrt);
->>
->>         if (!acpi_noirq)
->>                 x86_init.pci.init = pci_acpi_init;
->> --- linux-x86.orig/arch/x86/platform/efi/efi-bgrt.c
->> +++ linux-x86/arch/x86/platform/efi/efi-bgrt.c
->> @@ -19,8 +19,7 @@
->>  #include <linux/efi.h>
->>  #include <linux/efi-bgrt.h>
->>
->> -struct acpi_table_bgrt *bgrt_tab;
->> -void *__initdata bgrt_image;
->> +struct acpi_table_bgrt bgrt_tab;
->>  size_t __initdata bgrt_image_size;
->>
->>  struct bmp_header {
->> @@ -28,66 +27,58 @@ struct bmp_header {
->>         u32 size;
->>  } __packed;
->>
->> -void __init efi_bgrt_init(void)
->> +void __init efi_bgrt_init(struct acpi_table_header *table)
->>  {
->> -       acpi_status status;
->>         void *image;
->>         struct bmp_header bmp_header;
->> +       struct acpi_table_bgrt *bgrt = &bgrt_tab;
->>
->>         if (acpi_disabled)
->>                 return;
->>
->> -       status = acpi_get_table("BGRT", 0,
->> -                               (struct acpi_table_header **)&bgrt_tab);
->> -       if (ACPI_FAILURE(status))
->> -               return;
->> -
->> -       if (bgrt_tab->header.length < sizeof(*bgrt_tab)) {
->> +       if (table->length < sizeof(bgrt_tab)) {
->>                 pr_notice("Ignoring BGRT: invalid length %u (expected %zu)\n",
->> -                      bgrt_tab->header.length, sizeof(*bgrt_tab));
->> +                      table->length, sizeof(bgrt_tab));
->>                 return;
->>         }
->> -       if (bgrt_tab->version != 1) {
->> +       *bgrt = *(struct acpi_table_bgrt *)table;
->> +       if (bgrt->version != 1) {
->>                 pr_notice("Ignoring BGRT: invalid version %u (expected 1)\n",
->> -                      bgrt_tab->version);
->> -               return;
->> +                      bgrt->version);
->> +               goto out;
->>         }
->> -       if (bgrt_tab->status & 0xfe) {
->> +       if (bgrt->status & 0xfe) {
->>                 pr_notice("Ignoring BGRT: reserved status bits are non-zero %u\n",
->> -                      bgrt_tab->status);
->> -               return;
->> +                      bgrt->status);
->> +               goto out;
->>         }
->> -       if (bgrt_tab->image_type != 0) {
->> +       if (bgrt->image_type != 0) {
->>                 pr_notice("Ignoring BGRT: invalid image type %u (expected 0)\n",
->> -                      bgrt_tab->image_type);
->> -               return;
->> +                      bgrt->image_type);
->> +               goto out;
->>         }
->> -       if (!bgrt_tab->image_address) {
->> +       if (!bgrt->image_address) {
->>                 pr_notice("Ignoring BGRT: null image address\n");
->> -               return;
->> +               goto out;
->>         }
->>
->> -       image = memremap(bgrt_tab->image_address, sizeof(bmp_header), MEMREMAP_WB);
->> +       image = early_memremap(bgrt->image_address, sizeof(bmp_header));
->>         if (!image) {
->>                 pr_notice("Ignoring BGRT: failed to map image header memory\n");
->> -               return;
->> +               goto out;
->>         }
->>
->>         memcpy(&bmp_header, image, sizeof(bmp_header));
->> -       memunmap(image);
->> +       early_memunmap(image, sizeof(bmp_header));
->>         if (bmp_header.id != 0x4d42) {
->>                 pr_notice("Ignoring BGRT: Incorrect BMP magic number 0x%x (expected 0x4d42)\n",
->>                         bmp_header.id);
->> -               return;
->> +               goto out;
->>         }
->>         bgrt_image_size = bmp_header.size;
->> +       efi_mem_reserve(bgrt->image_address, bgrt_image_size);
->>
->> -       bgrt_image = memremap(bgrt_tab->image_address, bmp_header.size, MEMREMAP_WB);
->> -       if (!bgrt_image) {
->> -               pr_notice("Ignoring BGRT: failed to map image memory\n");
->> -               bgrt_image = NULL;
->> -               return;
->> -       }
->> -
->> -       efi_mem_reserve(bgrt_tab->image_address, bgrt_image_size);
->> +       return;
->> +out:
->> +       memset(bgrt, 0, sizeof(bgrt_tab));
->>  }
->> --- linux-x86.orig/drivers/acpi/bgrt.c
->> +++ linux-x86/drivers/acpi/bgrt.c
->> @@ -15,40 +15,41 @@
->>  #include <linux/sysfs.h>
->>  #include <linux/efi-bgrt.h>
->>
->> +static void *bgrt_image;
->>  static struct kobject *bgrt_kobj;
->>
->>  static ssize_t show_version(struct device *dev,
->>                             struct device_attribute *attr, char *buf)
->>  {
->> -       return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab->version);
->> +       return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab.version);
->>  }
->>  static DEVICE_ATTR(version, S_IRUGO, show_version, NULL);
->>
->>  static ssize_t show_status(struct device *dev,
->>                            struct device_attribute *attr, char *buf)
->>  {
->> -       return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab->status);
->> +       return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab.status);
->>  }
->>  static DEVICE_ATTR(status, S_IRUGO, show_status, NULL);
->>
->>  static ssize_t show_type(struct device *dev,
->>                          struct device_attribute *attr, char *buf)
->>  {
->> -       return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab->image_type);
->> +       return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab.image_type);
->>  }
->>  static DEVICE_ATTR(type, S_IRUGO, show_type, NULL);
->>
->>  static ssize_t show_xoffset(struct device *dev,
->>                             struct device_attribute *attr, char *buf)
->>  {
->> -       return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab->image_offset_x);
->> +       return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab.image_offset_x);
->>  }
->>  static DEVICE_ATTR(xoffset, S_IRUGO, show_xoffset, NULL);
->>
->>  static ssize_t show_yoffset(struct device *dev,
->>                             struct device_attribute *attr, char *buf)
->>  {
->> -       return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab->image_offset_y);
->> +       return snprintf(buf, PAGE_SIZE, "%d\n", bgrt_tab.image_offset_y);
->>  }
->>  static DEVICE_ATTR(yoffset, S_IRUGO, show_yoffset, NULL);
->>
->> @@ -84,15 +85,24 @@ static int __init bgrt_init(void)
->>  {
->>         int ret;
->>
->> -       if (!bgrt_image)
->> +       if (!bgrt_tab.image_address)
->>                 return -ENODEV;
->>
->> +       bgrt_image = memremap(bgrt_tab.image_address, bgrt_image_size,
->> +                             MEMREMAP_WB);
->> +       if (!bgrt_image) {
->> +               pr_notice("Ignoring BGRT: failed to map image memory\n");
->> +               return -ENOMEM;
->> +       }
->> +
->>         bin_attr_image.private = bgrt_image;
->>         bin_attr_image.size = bgrt_image_size;
->>
->>         bgrt_kobj = kobject_create_and_add("bgrt", acpi_kobj);
->> -       if (!bgrt_kobj)
->> -               return -EINVAL;
->> +       if (!bgrt_kobj) {
->> +               ret = -EINVAL;
->> +               goto out_memmap;
->> +       }
->>
->>         ret = sysfs_create_group(bgrt_kobj, &bgrt_attribute_group);
->>         if (ret)
->> @@ -102,6 +112,8 @@ static int __init bgrt_init(void)
->>
->>  out_kobject:
->>         kobject_put(bgrt_kobj);
->> +out_memmap:
->> +       memunmap(bgrt_image);
->>         return ret;
->>  }
->>  device_initcall(bgrt_init);
->> --- linux-x86.orig/include/linux/efi-bgrt.h
->> +++ linux-x86/include/linux/efi-bgrt.h
->> @@ -1,20 +1,19 @@
->>  #ifndef _LINUX_EFI_BGRT_H
->>  #define _LINUX_EFI_BGRT_H
->>
->> -#ifdef CONFIG_ACPI_BGRT
->> -
->>  #include <linux/acpi.h>
->>
->> -void efi_bgrt_init(void);
->> +#ifdef CONFIG_ACPI_BGRT
->> +
->> +void efi_bgrt_init(struct acpi_table_header *table);
->>
->>  /* The BGRT data itself; only valid if bgrt_image != NULL. */
->> -extern void *bgrt_image;
->>  extern size_t bgrt_image_size;
->> -extern struct acpi_table_bgrt *bgrt_tab;
->> +extern struct acpi_table_bgrt bgrt_tab;
->>
->>  #else /* !CONFIG_ACPI_BGRT */
->>
->> -static inline void efi_bgrt_init(void) {}
->> +static inline void efi_bgrt_init(struct acpi_table_header *table) {}
->>
->>  #endif /* !CONFIG_ACPI_BGRT */
->>
->> --- linux-x86.orig/arch/x86/platform/efi/efi.c
->> +++ linux-x86/arch/x86/platform/efi/efi.c
->> @@ -542,11 +542,6 @@ void __init efi_init(void)
->>                 efi_print_memmap();
->>  }
->>
->> -void __init efi_late_init(void)
->> -{
->> -       efi_bgrt_init();
->> -}
->> -
->>  void __init efi_set_executable(efi_memory_desc_t *md, bool executable)
->>  {
->>         u64 addr, npages;
->> --- linux-x86.orig/init/main.c
->> +++ linux-x86/init/main.c
->> @@ -663,7 +663,6 @@ asmlinkage __visible void __init start_k
->>         sfi_init_late();
->>
->>         if (efi_enabled(EFI_RUNTIME_SERVICES)) {
->> -               efi_late_init();
->>                 efi_free_boot_services();
->>         }
->>
+
+-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
