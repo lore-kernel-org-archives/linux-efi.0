@@ -1,67 +1,40 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH v2 2/2] arm64: efi: add vmlinux debug link to the Image
- binary
-Date: Thu, 26 Jan 2017 18:44:23 +0000
-Message-ID: <20170126184423.GB24043@leverpostej>
-References: <1485340759-28975-1-git-send-email-ard.biesheuvel@linaro.org>
- <1485340759-28975-3-git-send-email-ard.biesheuvel@linaro.org>
- <20170125115305.GA29027@leverpostej>
- <CAKv+Gu-GQAQU2Ety+rBvZ-9VbUHe+jQQosFJ-63UTQ7pPHHh0Q@mail.gmail.com>
- <20170126182453.GA24043@leverpostej>
- <CAKv+Gu-Psxd_pT0v_0cM0u=_Rfou6w3TM+PPFDfOW0LaqF6n=g@mail.gmail.com>
+From: Andy Lutomirski <luto@amacapital.net>
+Subject: Re: [PATCH v2 2/3] x86: Remap GDT tables in the Fixmap section
+Date: Thu, 26 Jan 2017 10:52:18 -0800
+Message-ID: <CALCETrVCM5Ex2HWh64Lc8=jEyTCA4h9JiB0pMuZdZBEkjbChUw@mail.gmail.com>
+References: <20170126165940.30799-1-thgarnie@google.com> <20170126165940.30799-2-thgarnie@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-Psxd_pT0v_0cM0u=_Rfou6w3TM+PPFDfOW0LaqF6n=g@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Leif Lindholm <leif.lindholm@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <kernel-hardening-return-6177-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+In-Reply-To: <20170126165940.30799-2-thgarnie@google.com>
+To: Thomas Garnier <thgarnie@google.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Kees Cook <keescook@chromium.org>, Andy Lutomirski <luto@kernel.org>, Arjan van de Ven <arjan@linux.intel.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Borislav Petkov <bp@suse.de>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Rusty Russell <rusty@rustcorp.com.au>, Christian Borntraeger <borntraeger@de.ibm.com>, Fenghua Yu <fenghua.yu@intel.com>, He Chen <he.chen@linux.intel.com>, Brian
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jan 26, 2017 at 06:33:19PM +0000, Ard Biesheuvel wrote:
-> On 26 January 2017 at 18:26, Mark Rutland <mark.rutland@arm.com> wrote:
-> > On Wed, Jan 25, 2017 at 12:00:44PM +0000, Ard Biesheuvel wrote:
-> >> On 25 January 2017 at 11:53, Mark Rutland <mark.rutland@arm.com> wrote:
-> >> > On Wed, Jan 25, 2017 at 10:39:19AM +0000, Ard Biesheuvel wrote:
-> >> >> When building with debugging symbols, take the absolute path to the
-> >> >> vmlinux binary and add it to the special PE/COFF debug table entry.
-> >> >>
-> >> >> These entries are used internally by EDK2 based* debug builds of UEFI
-> >> >> to populate the DebugImageInfo table, which can be used by debuggers
-> >> >> as well as by the OS itself to retrieve information about all loaded
-> >> >> PE/COFF executables. This is highly useful for source level debugging
-> >> >> of the UEFI stub.
-> >> >
-> >> > Does that mean EFI_IMAGE_DEBUG_DIRECTORY_ENTRY and friends are
-> >> > EDK2-specific?
-> >> >
-> >> > Or just that the way EDK2 happens to use those is EDK2-specific?
-> >>
-> >> Those values are defined by the PE/COFF spec, and I assume that a
-> >> CodeView type entry in the debug table usually contains a NUL
-> >> terminated string as well, given that the EDK2 crowd is very
-> >> Wintel-heavy.
-> >
-> > So we don't actually have a definition of the format of a CodeView
-> > entry, and we're guessing?
-> >
-> > That does feel a little scary, especially given the fields are named
-> > "Unknown". :(
-> 
-> No, we are emitting them in exactly the same way as the EDK2 tooling
-> emits them,
+On Thu, Jan 26, 2017 at 8:59 AM, Thomas Garnier <thgarnie@google.com> wrote:
+> Each processor holds a GDT in its per-cpu structure. The sgdt
+> instruction gives the base address of the current GDT. This address can
+> be used to bypass KASLR memory randomization. With another bug, an
+> attacker could target other per-cpu structures or deduce the base of
+> the main memory section (PAGE_OFFSET).
+>
+> This patch relocates the GDT table for each processor inside the
+> Fixmap section. The space is reserved based on number of supported
+> processors.
+>
+> For consistency, the remapping is done by default on 32 and 64 bit.
+>
+> Each processor switches to its remapped GDT at the end of
+> initialization. For hibernation, the main processor returns with the
+> original GDT and switches back to the remapping at completion.
+>
+> This patch was tested on both architectures. Hibernation and KVM were
+> both tested specially for their usage of the GDT.
 
-Ah. That's fine by me, then.
+I like this version much better.  Thanks!
 
-Thanks,
-Mark,
+--Andy
