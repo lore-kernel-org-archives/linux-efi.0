@@ -1,101 +1,121 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v3 1/2] efi: libstub: Preserve .debug sections after absolute
- relocation check
-Date: Thu, 26 Jan 2017 19:24:45 +0000
-Message-ID: <1485458686-32544-2-git-send-email-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v3 2/2] efi: arm64: Add vmlinux debug link to the Image binary
+Date: Thu, 26 Jan 2017 19:24:46 +0000
+Message-ID: <1485458686-32544-3-git-send-email-ard.biesheuvel@linaro.org>
 References: <1485458686-32544-1-git-send-email-ard.biesheuvel@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1485458686-32544-1-git-send-email-ard.biesheuvel@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt@codeblueprint.co.uk, mark.rutland@arm.com, will.deacon@arm.com, catalin.marinas@arm.com
-Cc: leif.lindholm@linaro.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1485458686-32544-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The build commands for the ARM and arm64 EFI stubs strip the .debug
-sections and other sections that may legally contain absolute relocations,
-in order to inspect the remaining sections for the presence of such
-relocations.
+When building with debugging symbols, take the absolute path to the
+vmlinux binary and add it to the special PE/COFF debug table entry.
+This allows a debug EFI build to find the vmlinux binary, which is
+very helpful in debugging, given that the offset where the Image is
+first loaded by EFI is highly unpredictable.
 
-This leaves us without debugging symbols in the stub for no good reason,
-considering that these sections are omitted from the kernel binary anyway,
-and that these relocations are thus only consumed by users of the ELF
-binary, such as debuggers.
+On implementations of UEFI that choose to implement it, this
+information is exposed via the EFI debug support table, which is a UEFI
+configuration table that is accessible both by the firmware at boot time
+and by the OS at runtime, and lists all PE/COFF images loaded by the
+system.
 
-So move to 'strip' for performing the relocation check, and if it succeeds,
-invoke objcopy as before, but leaving the .debug sections in place. Note
-that these sections may refer to ksymtab/kcrctab contents, so leave those
-in place as well.
+The format of the NB10 Codeview entry is based on the definition used
+by EDK2, which is not entirely unreasonable given that our implementation
+of the PE/COFF header targets UEFI specifically, and is not for general
+consumption of PE/COFF compatible systems.
 
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/libstub/Makefile | 24 +++++++++++++-------
- 1 file changed, 16 insertions(+), 8 deletions(-)
+ arch/arm64/kernel/Makefile |  4 ++
+ arch/arm64/kernel/head.S   | 46 +++++++++++++++++++-
+ 2 files changed, 49 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index d564d25df8ab..33e0e2f1a730 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -11,7 +11,7 @@ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ -O2 \
- 				   -mno-mmx -mno-sse
+diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
+index 7d66bbaafc0c..6dbc0e5527f5 100644
+--- a/arch/arm64/kernel/Makefile
++++ b/arch/arm64/kernel/Makefile
+@@ -55,3 +55,7 @@ obj-y					+= $(arm64-obj-y) vdso/ probes/
+ obj-m					+= $(arm64-obj-m)
+ head-y					:= head.o
+ extra-y					+= $(head-y) vmlinux.lds
++
++ifeq ($(CONFIG_EFI)$(CONFIG_DEBUG_INFO),yy)
++AFLAGS_head.o += -DVMLINUX_PATH="\"$(shell readlink -f $(objtree)/vmlinux)\""
++endif
+diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
+index 4b1abac3485a..3942d2af3f67 100644
+--- a/arch/arm64/kernel/head.S
++++ b/arch/arm64/kernel/head.S
+@@ -149,7 +149,7 @@ extra_header_fields:
+ 	.quad	0				// SizeOfHeapReserve
+ 	.quad	0				// SizeOfHeapCommit
+ 	.long	0				// LoaderFlags
+-	.long	0x6				// NumberOfRvaAndSizes
++	.long	(section_table - .) / 8		// NumberOfRvaAndSizes
  
- cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS))
--cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) -g0 \
-+cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) \
- 				   -fno-builtin -fpic -mno-single-pic-base
+ 	.quad	0				// ExportTable
+ 	.quad	0				// ImportTable
+@@ -158,6 +158,11 @@ extra_header_fields:
+ 	.quad	0				// CertificationTable
+ 	.quad	0				// BaseRelocationTable
  
- cflags-$(CONFIG_EFI_ARMSTUB)	+= -I$(srctree)/scripts/dtc/libfdt
-@@ -60,7 +60,7 @@ CFLAGS_arm64-stub.o 		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
- extra-$(CONFIG_EFI_ARMSTUB)	:= $(lib-y)
- lib-$(CONFIG_EFI_ARMSTUB)	:= $(patsubst %.o,%.stub.o,$(lib-y))
++#ifdef CONFIG_DEBUG_INFO
++	.long	efi_debug_table - _head		// DebugTable
++	.long	efi_debug_table_size
++#endif
++
+ 	// Section table
+ section_table:
  
--STUBCOPY_FLAGS-y		:= -R .debug* -R *ksymtab* -R *kcrctab*
-+STUBCOPY_RM-y			:= -R *ksymtab* -R *kcrctab*
- STUBCOPY_FLAGS-$(CONFIG_ARM64)	+= --prefix-alloc-sections=.init \
- 				   --prefix-symbols=__efistub_
- STUBCOPY_RELOC-$(CONFIG_ARM64)	:= R_AARCH64_ABS
-@@ -68,17 +68,25 @@ STUBCOPY_RELOC-$(CONFIG_ARM64)	:= R_AARCH64_ABS
- $(obj)/%.stub.o: $(obj)/%.o FORCE
- 	$(call if_changed,stubcopy)
+@@ -195,6 +200,45 @@ section_table:
+ 	.short	0		// NumberOfLineNumbers  (0 for executables)
+ 	.long	0xe0500020	// Characteristics (section flags)
  
-+#
-+# Strip debug sections and some other sections that may legally contain
-+# absolute relocations, so that we can inspect the remaining sections for
-+# such relocations. If none are found, regenerate the output object, but
-+# this time, use objcopy and leave all sections in place.
-+#
- quiet_cmd_stubcopy = STUBCPY $@
--      cmd_stubcopy = if $(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@; then	\
--		     $(OBJDUMP) -r $@ | grep $(STUBCOPY_RELOC-y)	\
--		     && (echo >&2 "$@: absolute symbol references not allowed in the EFI stub"; \
--			 rm -f $@; /bin/false); else /bin/false; fi
-+      cmd_stubcopy = if $(STRIP) --strip-debug $(STUBCOPY_RM-y) -o $@ $<; \
-+		     then if $(OBJDUMP) -r $@ | grep $(STUBCOPY_RELOC-y); \
-+		     then (echo >&2 "$@: absolute symbol references not allowed in the EFI stub"; \
-+			   rm -f $@; /bin/false); 			  \
-+		     else $(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@; fi	  \
-+		     else /bin/false; fi
- 
- #
- # ARM discards the .data section because it disallows r/w data in the
- # decompressor. So move our .data to .data.efistub, which is preserved
- # explicitly by the decompressor linker script.
- #
--STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub \
--				   -R ___ksymtab+sort -R ___kcrctab+sort
-+STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub
-+STUBCOPY_RM-$(CONFIG_ARM)	+= -R ___ksymtab+sort -R ___kcrctab+sort
- STUBCOPY_RELOC-$(CONFIG_ARM)	:= R_ARM_ABS
++#ifdef CONFIG_DEBUG_INFO
++	/*
++	 * The debug table is referenced via its Relative Virtual Address (RVA),
++	 * which is only defined for those parts of the image that are covered
++	 * by a section declaration. Since this header is not covered by any
++	 * section, the debug table must be emitted elsewhere. So stick it in
++	 * the .init.rodata section instead.
++	 *
++	 * Note that the EFI debug entry itself may legally have a zero RVA,
++	 * which means we can simply put it right after the section headers.
++	 */
++	__INITRODATA
++	.align	2
++efi_debug_table:
++	// EFI_IMAGE_DEBUG_DIRECTORY_ENTRY
++	.long	0			// Characteristics
++	.long	0			// TimeDateStamp
++	.short	0			// MajorVersion
++	.short	0			// MinorVersion
++	.long	2			// Type == EFI_IMAGE_DEBUG_TYPE_CODEVIEW
++	.long	efi_debug_entry_size	// SizeOfData
++	.long	0			// RVA
++	.long	efi_debug_entry - _head	// FileOffset
++
++	.set	efi_debug_table_size, . - efi_debug_table
++	.previous
++
++efi_debug_entry:
++	// EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY
++	.long	0x3031424E		// Signature
++	.long	0			// Unknown
++	.long	0			// Unknown2
++	.long	0			// Unknown3
++
++	.asciz	VMLINUX_PATH
++
++	.set	efi_debug_entry_size, . - efi_debug_entry
++#endif
++
+ 	/*
+ 	 * EFI will load .text onwards at the 4k section alignment
+ 	 * described in the PE/COFF header. To ensure that instruction
 -- 
 2.7.4
