@@ -1,64 +1,43 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 5/8] efi: Get the secure boot status [ver #6]
-Date: Fri, 27 Jan 2017 14:01:01 +0000
-Message-ID: <20170127140101.GD31613@codeblueprint.co.uk>
-References: <20170123212642.GA2766@codeblueprint.co.uk>
- <20170116144954.GB27351@codeblueprint.co.uk>
- <20170111143304.GA29649@codeblueprint.co.uk>
- <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
- <148120024570.5854.10638278395097394138.stgit@warthog.procyon.org.uk>
- <7948.1484148443@warthog.procyon.org.uk>
- <794.1484581158@warthog.procyon.org.uk>
- <6306.1485209503@warthog.procyon.org.uk>
+Subject: Re: [PATCH 1/4] efi/x86: make efi_memmap_reserve only insert into
+ boot mem areas
+Date: Fri, 27 Jan 2017 14:48:13 +0000
+Message-ID: <20170127144813.GE31613@codeblueprint.co.uk>
+References: <20170112094118.815108042@redhat.com>
+ <20170112094214.860924858@redhat.com>
+ <87r348r0k9.fsf@gmail.com>
+ <20170112212952.GB2709@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <6306.1485209503@warthog.procyon.org.uk>
+In-Reply-To: <20170112212952.GB2709@dhcp-128-65.nay.redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org, "H. Peter Anvin" <hpa@zytor.com>, Peter Jones <pjones@redhat.com>, Michael Chang <mchang@suse.com>
+To: Dave Young <dyoung@redhat.com>
+Cc: Nicolai Stange <nicstange@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, hpa@zytor.com, Dan Williams <dan.j.williams@intel.com>, mika.penttila@nextfour.com, bhsharma@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 23 Jan, at 10:11:43PM, David Howells wrote:
-> Matt Fleming <matt@codeblueprint.co.uk> wrote:
+On Fri, 13 Jan, at 05:29:52AM, Dave Young wrote:
 > 
-> > >  (4) extract_kernel() calls sanitize_boot_params() which would otherwise clear
-> > >      the secure-boot flag.
-> >  
-> > The ->sentinel flag should be clear (because you zero'd boot_params on
-> > alloc), so the code inside of sanitize_boot_params() should never
-> > trigger for the secure boot case.
+> It sounds reasonable though I'm still not sure about EFI_LOADER*.
 > 
-> But it *does* trigger, otherwise I wouldn't've noticed this.
+> The main purpose of this patch is to address the invalid mem ranges
+> case. As Ard mentioned I will test with Peter's patch first, if it works
+> fine I would like to either drop this patch as a future improvement or add
+> it at the end of the next post.
+> 
+> Matt, what's your opinion about the boot_only check and the EFI_LOADERS*
+> question?
 
-This looks like it's triggered because of a grub2 bug, if I'm reading
-the code correctly (big if).
+The main reason that efi_mem_reserve() isn't used for EFI_LOADER
+regions today is because we already have a mechanism for reserving it
+via memblock_reserve(), which we do during a very early stage of boot
+when parsing all the different types of SETUP_* objects.
 
-grub2 memcpy()'s 1024 bytes from the start of kernel image header into
-the allocated (and zeroed) boot_params object. Unfortunately, it
-should only be copying the second 512-byte chunk, not the first too.
+It's questionable whether it would make sense to switch to
+efi_mem_reserve() for EFI_LOADER regions because then you'd
+potentially have different APIs for different SETUP_* objects.
 
-The boot loader should only fill out those fields in the first 512
-bytes that it understands. Everything else should be zero, which
-allows us to add fields (and give them default non-zero values in the
-header) in the future without breaking old boot loaders.
-
-Something like this might fix it (not compiled tested). Could one of
-the grub2 folks take a look?
-
----->8----
-
-diff --git a/grub-core/loader/i386/efi/linux.c b/grub-core/loader/i386/efi/linux.c
-index 010bf98..fe5771e 100644
---- a/grub-core/loader/i386/efi/linux.c
-+++ b/grub-core/loader/i386/efi/linux.c
-@@ -269,7 +269,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
-   loaded=1;
- 
-   lh.code32_start = (grub_uint32_t)(grub_uint64_t) kernel_mem;
--  grub_memcpy (params, &lh, 2 * 512);
-+  grub_memcpy (params, (grub_uint8_t *)&lh[512], 512);
- 
-   params->type_of_loader = 0x21;
- 
+As things stand today, I would suggest triggering a WARN_ON() if
+someone tries to efi_mem_reserve() an EFI_LOADER region, until/unless
+the day comes when a user exists in the kernel.
