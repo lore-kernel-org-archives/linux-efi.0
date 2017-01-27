@@ -1,53 +1,43 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH V2 0/4] efi/x86: move efi bgrt init code to early init
-Date: Fri, 27 Jan 2017 17:03:36 +0000
-Message-ID: <CAKv+Gu9C75q3J_8w68d+m=ZMcUh2MxU+c-1xvLwyY+mceSigbg@mail.gmail.com>
-References: <20170116024554.461236678@redhat.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 1/4] efi/x86: make efi_memmap_reserve only insert into
+ boot mem areas
+Date: Fri, 27 Jan 2017 17:04:50 +0000
+Message-ID: <CAKv+Gu8oos1Ksp4fMXXn5ug4Gc-GS9KkbQNZb3A7__6wg5X5AQ@mail.gmail.com>
+References: <20170112094118.815108042@redhat.com> <20170112094214.860924858@redhat.com>
+ <87r348r0k9.fsf@gmail.com> <20170112212952.GB2709@dhcp-128-65.nay.redhat.com> <20170127144813.GE31613@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170116024554.461236678@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Young <dyoung@redhat.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, Nicolai Stange <nicstange@gmail.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "hpa@zytor.com" <hpa@zytor.com>, Dan Williams <dan.j.williams@intel.com>, =?UTF-8?Q?Mika_Penttil=C3=A4?= <mika.penttila@nextfour.com>, Bhupesh Sharma <bhsharma@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170127144813.GE31613-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, =?UTF-8?Q?Mika_Penttil=C3=A4?= <mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 16 January 2017 at 02:45, Dave Young <dyoung@redhat.com> wrote:
-> Hi,
+On 27 January 2017 at 14:48, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Fri, 13 Jan, at 05:29:52AM, Dave Young wrote:
+>>
+>> It sounds reasonable though I'm still not sure about EFI_LOADER*.
+>>
+>> The main purpose of this patch is to address the invalid mem ranges
+>> case. As Ard mentioned I will test with Peter's patch first, if it works
+>> fine I would like to either drop this patch as a future improvement or add
+>> it at the end of the next post.
+>>
+>> Matt, what's your opinion about the boot_only check and the EFI_LOADERS*
+>> question?
 >
-> Here the the update of the series for moving bgrt init code to early init.
+> The main reason that efi_mem_reserve() isn't used for EFI_LOADER
+> regions today is because we already have a mechanism for reserving it
+> via memblock_reserve(), which we do during a very early stage of boot
+> when parsing all the different types of SETUP_* objects.
 >
-> Main changes is:
-> - Move the 1st patch to the last because it does not block the 2nd patch
-> any more with Peter's patch to prune invlid memmap entries:
-> https://git.kernel.org/cgit/linux/kernel/git/efi/efi.git/commit/?h=next&id=b2a91
-> a35445229
-> But it is still tood to have since efi_mem_reserve only cares about boot related
-> mem ranges.
+> It's questionable whether it would make sense to switch to
+> efi_mem_reserve() for EFI_LOADER regions because then you'd
+> potentially have different APIs for different SETUP_* objects.
 >
-> - Other comments about code itself, details please the the patches themselves.
->
->  arch/x86/include/asm/efi.h       |    1
->  arch/x86/kernel/acpi/boot.c      |   12 +++++++
->  arch/x86/platform/efi/efi-bgrt.c |   59 ++++++++++++++++-----------------------
->  arch/x86/platform/efi/efi.c      |   26 +++--------------
->  arch/x86/platform/efi/quirks.c   |    2 -
->  drivers/acpi/bgrt.c              |   28 +++++++++++++-----
->  drivers/firmware/efi/fake_mem.c  |    3 +
->  drivers/firmware/efi/memmap.c    |   22 +++++++++++++-
->  include/linux/efi-bgrt.h         |    7 +---
->  include/linux/efi.h              |    5 +--
->  init/main.c                      |    1
->  11 files changed, 92 insertions(+), 74 deletions(-)
->
+> As things stand today, I would suggest triggering a WARN_ON() if
+> someone tries to efi_mem_reserve() an EFI_LOADER region, until/unless
+> the day comes when a user exists in the kernel.
 
-Dave,
-
-I have pushed these to efi/next: please double check if I did it
-correctly. I had some trouble applying these given that I rebased
-efi/next onto -rc4. However, the fact that you are not using standard
-git cover letters and emails doesn't help things, so could you
-*please* use standard git send-email to post to linux-efi in the
-future? Thanks.
-
-Ard.
+Hmm, I just queued this. Should we drop it again?
