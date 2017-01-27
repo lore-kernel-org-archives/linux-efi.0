@@ -1,121 +1,64 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 2/2] efi: arm64: Add vmlinux debug link to the Image binary
-Date: Thu, 26 Jan 2017 19:24:46 +0000
-Message-ID: <1485458686-32544-3-git-send-email-ard.biesheuvel@linaro.org>
-References: <1485458686-32544-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1485458686-32544-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org
-Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH 5/8] efi: Get the secure boot status [ver #6]
+Date: Fri, 27 Jan 2017 14:01:01 +0000
+Message-ID: <20170127140101.GD31613@codeblueprint.co.uk>
+References: <20170123212642.GA2766@codeblueprint.co.uk>
+ <20170116144954.GB27351@codeblueprint.co.uk>
+ <20170111143304.GA29649@codeblueprint.co.uk>
+ <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
+ <148120024570.5854.10638278395097394138.stgit@warthog.procyon.org.uk>
+ <7948.1484148443@warthog.procyon.org.uk>
+ <794.1484581158@warthog.procyon.org.uk>
+ <6306.1485209503@warthog.procyon.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <6306.1485209503@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org, "H. Peter Anvin" <hpa@zytor.com>, Peter Jones <pjones@redhat.com>, Michael Chang <mchang@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-When building with debugging symbols, take the absolute path to the
-vmlinux binary and add it to the special PE/COFF debug table entry.
-This allows a debug EFI build to find the vmlinux binary, which is
-very helpful in debugging, given that the offset where the Image is
-first loaded by EFI is highly unpredictable.
+On Mon, 23 Jan, at 10:11:43PM, David Howells wrote:
+> Matt Fleming <matt@codeblueprint.co.uk> wrote:
+> 
+> > >  (4) extract_kernel() calls sanitize_boot_params() which would otherwise clear
+> > >      the secure-boot flag.
+> >  
+> > The ->sentinel flag should be clear (because you zero'd boot_params on
+> > alloc), so the code inside of sanitize_boot_params() should never
+> > trigger for the secure boot case.
+> 
+> But it *does* trigger, otherwise I wouldn't've noticed this.
 
-On implementations of UEFI that choose to implement it, this
-information is exposed via the EFI debug support table, which is a UEFI
-configuration table that is accessible both by the firmware at boot time
-and by the OS at runtime, and lists all PE/COFF images loaded by the
-system.
+This looks like it's triggered because of a grub2 bug, if I'm reading
+the code correctly (big if).
 
-The format of the NB10 Codeview entry is based on the definition used
-by EDK2, which is not entirely unreasonable given that our implementation
-of the PE/COFF header targets UEFI specifically, and is not for general
-consumption of PE/COFF compatible systems.
+grub2 memcpy()'s 1024 bytes from the start of kernel image header into
+the allocated (and zeroed) boot_params object. Unfortunately, it
+should only be copying the second 512-byte chunk, not the first too.
 
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm64/kernel/Makefile |  4 ++
- arch/arm64/kernel/head.S   | 46 +++++++++++++++++++-
- 2 files changed, 49 insertions(+), 1 deletion(-)
+The boot loader should only fill out those fields in the first 512
+bytes that it understands. Everything else should be zero, which
+allows us to add fields (and give them default non-zero values in the
+header) in the future without breaking old boot loaders.
 
-diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
-index 7d66bbaafc0c..6dbc0e5527f5 100644
---- a/arch/arm64/kernel/Makefile
-+++ b/arch/arm64/kernel/Makefile
-@@ -55,3 +55,7 @@ obj-y					+= $(arm64-obj-y) vdso/ probes/
- obj-m					+= $(arm64-obj-m)
- head-y					:= head.o
- extra-y					+= $(head-y) vmlinux.lds
-+
-+ifeq ($(CONFIG_EFI)$(CONFIG_DEBUG_INFO),yy)
-+AFLAGS_head.o += -DVMLINUX_PATH="\"$(shell readlink -f $(objtree)/vmlinux)\""
-+endif
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index 4b1abac3485a..3942d2af3f67 100644
---- a/arch/arm64/kernel/head.S
-+++ b/arch/arm64/kernel/head.S
-@@ -149,7 +149,7 @@ extra_header_fields:
- 	.quad	0				// SizeOfHeapReserve
- 	.quad	0				// SizeOfHeapCommit
- 	.long	0				// LoaderFlags
--	.long	0x6				// NumberOfRvaAndSizes
-+	.long	(section_table - .) / 8		// NumberOfRvaAndSizes
+Something like this might fix it (not compiled tested). Could one of
+the grub2 folks take a look?
+
+---->8----
+
+diff --git a/grub-core/loader/i386/efi/linux.c b/grub-core/loader/i386/efi/linux.c
+index 010bf98..fe5771e 100644
+--- a/grub-core/loader/i386/efi/linux.c
++++ b/grub-core/loader/i386/efi/linux.c
+@@ -269,7 +269,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+   loaded=1;
  
- 	.quad	0				// ExportTable
- 	.quad	0				// ImportTable
-@@ -158,6 +158,11 @@ extra_header_fields:
- 	.quad	0				// CertificationTable
- 	.quad	0				// BaseRelocationTable
+   lh.code32_start = (grub_uint32_t)(grub_uint64_t) kernel_mem;
+-  grub_memcpy (params, &lh, 2 * 512);
++  grub_memcpy (params, (grub_uint8_t *)&lh[512], 512);
  
-+#ifdef CONFIG_DEBUG_INFO
-+	.long	efi_debug_table - _head		// DebugTable
-+	.long	efi_debug_table_size
-+#endif
-+
- 	// Section table
- section_table:
+   params->type_of_loader = 0x21;
  
-@@ -195,6 +200,45 @@ section_table:
- 	.short	0		// NumberOfLineNumbers  (0 for executables)
- 	.long	0xe0500020	// Characteristics (section flags)
- 
-+#ifdef CONFIG_DEBUG_INFO
-+	/*
-+	 * The debug table is referenced via its Relative Virtual Address (RVA),
-+	 * which is only defined for those parts of the image that are covered
-+	 * by a section declaration. Since this header is not covered by any
-+	 * section, the debug table must be emitted elsewhere. So stick it in
-+	 * the .init.rodata section instead.
-+	 *
-+	 * Note that the EFI debug entry itself may legally have a zero RVA,
-+	 * which means we can simply put it right after the section headers.
-+	 */
-+	__INITRODATA
-+	.align	2
-+efi_debug_table:
-+	// EFI_IMAGE_DEBUG_DIRECTORY_ENTRY
-+	.long	0			// Characteristics
-+	.long	0			// TimeDateStamp
-+	.short	0			// MajorVersion
-+	.short	0			// MinorVersion
-+	.long	2			// Type == EFI_IMAGE_DEBUG_TYPE_CODEVIEW
-+	.long	efi_debug_entry_size	// SizeOfData
-+	.long	0			// RVA
-+	.long	efi_debug_entry - _head	// FileOffset
-+
-+	.set	efi_debug_table_size, . - efi_debug_table
-+	.previous
-+
-+efi_debug_entry:
-+	// EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY
-+	.long	0x3031424E		// Signature
-+	.long	0			// Unknown
-+	.long	0			// Unknown2
-+	.long	0			// Unknown3
-+
-+	.asciz	VMLINUX_PATH
-+
-+	.set	efi_debug_entry_size, . - efi_debug_entry
-+#endif
-+
- 	/*
- 	 * EFI will load .text onwards at the 4k section alignment
- 	 * described in the PE/COFF header. To ensure that instruction
--- 
-2.7.4
