@@ -1,43 +1,53 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/4] efi/x86: make efi_memmap_reserve only insert into
- boot mem areas
-Date: Fri, 27 Jan 2017 17:04:50 +0000
-Message-ID: <CAKv+Gu8oos1Ksp4fMXXn5ug4Gc-GS9KkbQNZb3A7__6wg5X5AQ@mail.gmail.com>
-References: <20170112094118.815108042@redhat.com> <20170112094214.860924858@redhat.com>
- <87r348r0k9.fsf@gmail.com> <20170112212952.GB2709@dhcp-128-65.nay.redhat.com> <20170127144813.GE31613@codeblueprint.co.uk>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 0/8] efi: Pass secure boot mode to kernel [ver #6]
+Date: Fri, 27 Jan 2017 18:03:09 +0000
+Message-ID: <CAKv+Gu8TuQxPGh5F2VPvpwUJ2=cJw9H+1C4BFJkYwJX9M1P-Mw@mail.gmail.com>
+References: <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
+ <20170111150150.GC29649@codeblueprint.co.uk>
+ <CAKv+Gu-PR9KoEe+RwgohC-BSyE+5CPR98HjnohSiGL8yw17-HA@mail.gmail.com>
+ <CAKv+Gu9+i=QvNYN9SbphzG2Ye6aY=9DvAd+TnWN_Bn76LS8kMQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170127144813.GE31613-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, =?UTF-8?Q?Mika_Penttil=C3=A4?= <mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAKv+Gu9+i=QvNYN9SbphzG2Ye6aY=9DvAd+TnWN_Bn76LS8kMQ@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Howells <dhowells@redhat.com>, linux-security-module <linux-security-module@vger.kernel.org>, keyrings@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 27 January 2017 at 14:48, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Fri, 13 Jan, at 05:29:52AM, Dave Young wrote:
+On 24 January 2017 at 17:15, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+> On 11 January 2017 at 15:05, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+>> On 11 January 2017 at 15:01, Matt Fleming <matt@codeblueprint.co.uk> wrote:
+>>> On Thu, 08 Dec, at 12:30:08PM, David Howells wrote:
+>>>>
+>>>> Here's a set of patches that can determine the secure boot state of the
+>>>> UEFI BIOS and pass that along to the main kernel image.  This involves
+>>>> generalising ARM's efi_get_secureboot() function and making it mixed-mode
+>>>> safe.
+>>>
+>>> This version looks OK to me apart from the couple of comments I made.
+>>>
+>>> Ard, did you take a look? In particular some boot testing on ARM/arm64
+>>> would be useful. x86 boots fine in both regular and mixed mode but
+>>> I've only tested without Secure Boot enabled.
 >>
->> It sounds reasonable though I'm still not sure about EFI_LOADER*.
->>
->> The main purpose of this patch is to address the invalid mem ranges
->> case. As Ard mentioned I will test with Peter's patch first, if it works
->> fine I would like to either drop this patch as a future improvement or add
->> it at the end of the next post.
->>
->> Matt, what's your opinion about the boot_only check and the EFI_LOADERS*
->> question?
+>> I did take a look at these patches (and commented on them) as they
+>> were coming in, but I haven't yet gone through them as thoroughly as I
+>> should. I will test them on ARM/arm64 as well.
 >
-> The main reason that efi_mem_reserve() isn't used for EFI_LOADER
-> regions today is because we already have a mechanism for reserving it
-> via memblock_reserve(), which we do during a very early stage of boot
-> when parsing all the different types of SETUP_* objects.
->
-> It's questionable whether it would make sense to switch to
-> efi_mem_reserve() for EFI_LOADER regions because then you'd
-> potentially have different APIs for different SETUP_* objects.
->
-> As things stand today, I would suggest triggering a WARN_ON() if
-> someone tries to efi_mem_reserve() an EFI_LOADER region, until/unless
-> the day comes when a user exists in the kernel.
+> Apologies for the tardiness. I intend to look into these tomorrow.
 
-Hmm, I just queued this. Should we drop it again?
+These patches build and run fine on arm, including on secure boot
+systems, so I don't have any objections.
+
+Once the open discussion points re x86 are resolved, I can proceed and
+merge them if desired. Matt?
