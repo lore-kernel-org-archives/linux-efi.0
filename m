@@ -1,65 +1,80 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/4] efi/x86: make efi_memmap_reserve only insert into
- boot mem areas
-Date: Fri, 27 Jan 2017 22:15:26 +0000
-Message-ID: <CAKv+Gu_koToJSq1i2TG2bBrMzwHaLpva3GKAbD9jzNN99VfvYw@mail.gmail.com>
-References: <20170112094118.815108042@redhat.com> <20170112094214.860924858@redhat.com>
- <87r348r0k9.fsf@gmail.com> <20170112212952.GB2709@dhcp-128-65.nay.redhat.com>
- <20170127144813.GE31613@codeblueprint.co.uk> <CAKv+Gu8oos1Ksp4fMXXn5ug4Gc-GS9KkbQNZb3A7__6wg5X5AQ@mail.gmail.com>
- <20170127221311.GH31613@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH] x86/efi: Always map first physical page into EFI pagetables
+Date: Fri, 27 Jan 2017 22:25:52 +0000
+Message-ID: <20170127222552.22336-1-matt@codeblueprint.co.uk>
+References: <20170127220604.21302-1-matt@codeblueprint.co.uk>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170127221311.GH31613-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <20170127220604.21302-1-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, =?UTF-8?Q?Mika_Penttil=C3=A4?= <mika.penttila-MRsr7dthA9VWk0Htik3J/w@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Hanka Pavlikova <hanka-+ZI9xUNit7I@public.gmane.org>, Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-+ZI9xUNit7I@public.gmane.org>, Waiman Long <waiman.long-ZPxbGqLxI0U@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 27 January 2017 at 22:13, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Fri, 27 Jan, at 05:04:50PM, Ard Biesheuvel wrote:
->> On 27 January 2017 at 14:48, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
->> > On Fri, 13 Jan, at 05:29:52AM, Dave Young wrote:
->> >>
->> >> It sounds reasonable though I'm still not sure about EFI_LOADER*.
->> >>
->> >> The main purpose of this patch is to address the invalid mem ranges
->> >> case. As Ard mentioned I will test with Peter's patch first, if it works
->> >> fine I would like to either drop this patch as a future improvement or add
->> >> it at the end of the next post.
->> >>
->> >> Matt, what's your opinion about the boot_only check and the EFI_LOADERS*
->> >> question?
->> >
->> > The main reason that efi_mem_reserve() isn't used for EFI_LOADER
->> > regions today is because we already have a mechanism for reserving it
->> > via memblock_reserve(), which we do during a very early stage of boot
->> > when parsing all the different types of SETUP_* objects.
->> >
->> > It's questionable whether it would make sense to switch to
->> > efi_mem_reserve() for EFI_LOADER regions because then you'd
->> > potentially have different APIs for different SETUP_* objects.
->> >
->> > As things stand today, I would suggest triggering a WARN_ON() if
->> > someone tries to efi_mem_reserve() an EFI_LOADER region, until/unless
->> > the day comes when a user exists in the kernel.
->>
->> Hmm, I just queued this. Should we drop it again?
->
-> Does dropping it break the entire series?
->
-> Having had some time to re-read Dave's commit log, it sounds like it
-> just papers over a bug, which is that efi_memmap_insert() cannot deal
-> with reserved entries, which all look like they describe the same
-> region.
->
+From: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
 
-No, it cannot deal with bogus entries, and Peter already fixed that.
-Dave confirmed that Peter's patch (the one we moved from next to
-urgen) made the problem go away.
+Commit 129766708 ("x86/efi: Only map RAM into EFI page tables if in
+mixed-mode") stopped creating 1:1 mapping for all RAM in case of running
+in native 64bit mode.
 
-> So I guess my question is: Shouldn't you fix that instead of requiring
-> the caller of efi_memmap_insert() to understand what type of entries
-> it's mapping?
+It turns out though that there are 64bit EFI implementations in the wild
+(this particular problem has been reported on Lenovo Yoga 710-11IKB) which
+still make use of first physical page for their own private use even
+though they explicitly mark it EFI_CONVENTIONAL_MEMORY in the memory map.
 
-Indeed. So I don't think the patch is actually needed anymore
+In case there is no mapping for this particular frame in EFI pagetables,
+as soon as firmware tries to make use of it, triple fault occurs and the
+system reboots (in case of Yoga 710-11IKB this is very early during boot).
+
+Fix that by always mapping the first page of physical memory into EFI
+pagetables. We're on a safe side, as trim_bios_range() will reserve the
+first page and isolate it away from memory allocators anyway.
+
+Note: just reverting 129766708 is not enough on v4.9-rc1+ to fix the
+regression on affected hardware, as commit ab72a27da ("x86/efi:
+Consolidate region mapping logic") later made the first physical frame not
+to be mapped anyway.
+
+Reported-by: Hanka Pavlikova <hanka-+ZI9xUNit7I@public.gmane.org>
+Signed-off-by: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
+Cc: stable-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org # v4.8+
+Cc: Waiman Long <waiman.long-ZPxbGqLxI0U@public.gmane.org>
+Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Cc: Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Vojtech Pavlik <vojtech-+ZI9xUNit7I@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Fixes: 129766708 ("x86/efi: Only map RAM into EFI page tables if in mixed-mode")
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+---
+ arch/x86/platform/efi/efi_64.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 319148bd4b05..79c21cac1133 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -269,6 +269,22 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	efi_scratch.use_pgd = true;
+ 
+ 	/*
++	 * Certain firmware versions are way too sentimential and still believe
++	 * they are exclusive and unquestionable owners of first physical page
++	 * even though they explicitly mark it as EFI_CONVENTIONAL_MEMORY
++	 * (but then write-access it later during SetVirtualAddressMap()).
++	 *
++	 * Create 1:1 mapping for this page to avoid triple faults during early
++	 * boot with such firmware. We're on a safe side, as trim_bios_range()
++	 * will reserve the first page and isolate it away from memory
++	 * allocators anyway.
++	 */
++	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, _PAGE_RW)) {
++		pr_err("Failed to create 1:1 mapping of first page\n");
++		return 1;
++	}
++
++	/*
+ 	 * When making calls to the firmware everything needs to be 1:1
+ 	 * mapped and addressable with 32-bit pointers. Map the kernel
+ 	 * text and allocate a new stack because we can't rely on the
+-- 
+2.10.0
