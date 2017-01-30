@@ -1,44 +1,46 @@
-From: Jiri Kosina <jikos@kernel.org>
-Subject: Re: [REGRESSION] EFI mixed mode patch triggers boot failure
-Date: Mon, 30 Jan 2017 14:10:37 +0100 (CET)
-Message-ID: <alpine.LSU.2.20.1701301409270.25515@cbobk.fhfr.pm>
-References: <dc0bc031-f20e-9ad0-57f4-cfa1e04f8f05@redhat.com> <7af87cde-ce79-d6e8-0797-54069a77f42b@redhat.com> <20161020120357.GB19876@codeblueprint.co.uk> <e34311e8-fe39-3b65-bd6d-8f1594e56336@redhat.com> <20170127223441.GJ31613@codeblueprint.co.uk>
- <f7d8f786-6000-cbbe-feb2-c97c0378b6e9@redhat.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: What should the default lockdown mode be if the bootloader
+ sentinel triggers sanitization?
+Date: Mon, 30 Jan 2017 13:50:02 +0000
+Message-ID: <20170130135002.GL31613@codeblueprint.co.uk>
+References: <20170127140101.GD31613@codeblueprint.co.uk>
+ <20170123212642.GA2766@codeblueprint.co.uk>
+ <20170116144954.GB27351@codeblueprint.co.uk>
+ <20170111143304.GA29649@codeblueprint.co.uk>
+ <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
+ <148120024570.5854.10638278395097394138.stgit@warthog.procyon.org.uk>
+ <7948.1484148443@warthog.procyon.org.uk>
+ <794.1484581158@warthog.procyon.org.uk>
+ <6306.1485209503@warthog.procyon.org.uk>
+ <25118.1485778229@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <f7d8f786-6000-cbbe-feb2-c97c0378b6e9@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Laura Abbott <labbott@redhat.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, "x86@kernel.org" <x86@kernel.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Justin Forbes <jforbes@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <25118.1485778229@warthog.procyon.org.uk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: David Howells <dhowells@redhat.com>
+Cc: mjg59@srcf.ucam.org, linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org, linux-kernel@vger.kernel.org, Michael Chang <mchang@suse.com>, linux-security-module@vger.kernel.org, Peter Jones <pjones@redhat.com>, keyrings@vger.kernel.org, "H. Peter Anvin" <hpa@zytor.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 28 Jan 2017, Laura Abbott wrote:
-
-> > > Was out for a few days, reporter says the below patch does not work.
-> > > There was some confusion with secure boot so I've asked them to re-test
-> > > with efi=old_map and secure boot off.
-> > 
-> > FYI, you may want to ask the reporter to try out Jiri's patch if this
-> > is still an issue for them,
-> > 
-> >   https://lkml.kernel.org/r/alpine.LSU.2.20.1701271638240.25515@cbobk.fhfr.pm
-> > 
+On Mon, 30 Jan, at 12:10:29PM, David Howells wrote:
 > 
-> Thanks! I pulled this into the latest Fedora update so I'll be asking
-> a couple of people to test.
-
-BTW where exactly is this tracked for Fedora, please? I'd like to get an 
-idea how widespread this behavior is among different BIOS vendors.
-
-I've found
-
-	https://bugzilla.redhat.com/show_bug.cgi?id=1384238
-
-is that the primary tracking bug on your side?
-
-Thanks,
-
--- 
-Jiri Kosina
-SUSE Labs
+> Matt argues, however, that boot_params->secure_boot should be propagated from
+> the bootloader and if the bootloader wants to set it, then we should skip the
+> check in efi_main() and go with the bootloader's opinion.  This is something
+> we probably want to do with kexec() so that the lockdown state is propagated
+> there.
+ 
+Actually what I was arguing for was that if the boot loader wants to
+set it and bypass the EFI boot stub, e.g. by going via the legacy
+64-bit entry point, startup_64, then we should allow that as well as
+setting the flag in the EFI boot stub.
