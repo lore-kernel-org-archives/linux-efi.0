@@ -1,63 +1,44 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: What should the default lockdown mode be if the bootloader sentinel triggers sanitization?
-Date: Mon, 30 Jan 2017 12:10:29 +0000
-Message-ID: <25118.1485778229@warthog.procyon.org.uk>
-References: <20170127140101.GD31613@codeblueprint.co.uk> <20170123212642.GA2766@codeblueprint.co.uk> <20170116144954.GB27351@codeblueprint.co.uk> <20170111143304.GA29649@codeblueprint.co.uk> <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk> <148120024570.5854.10638278395097394138.stgit@warthog.procyon.org.uk> <7948.1484148443@warthog.procyon.org.uk> <794.1484581158@warthog.procyon.org.uk> <6306.1485209503@warthog.procyon.org.uk>
+From: Jiri Kosina <jikos@kernel.org>
+Subject: Re: [REGRESSION] EFI mixed mode patch triggers boot failure
+Date: Mon, 30 Jan 2017 14:10:37 +0100 (CET)
+Message-ID: <alpine.LSU.2.20.1701301409270.25515@cbobk.fhfr.pm>
+References: <dc0bc031-f20e-9ad0-57f4-cfa1e04f8f05@redhat.com> <7af87cde-ce79-d6e8-0797-54069a77f42b@redhat.com> <20161020120357.GB19876@codeblueprint.co.uk> <e34311e8-fe39-3b65-bd6d-8f1594e56336@redhat.com> <20170127223441.GJ31613@codeblueprint.co.uk>
+ <f7d8f786-6000-cbbe-feb2-c97c0378b6e9@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-ID: <25117.1485778229.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Michael Chang <mchang-IBi9RG/b67k@public.gmane.org>
+Content-Type: text/plain; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <f7d8f786-6000-cbbe-feb2-c97c0378b6e9@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Laura Abbott <labbott@redhat.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, "x86@kernel.org" <x86@kernel.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Justin Forbes <jforbes@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi all,
+On Sat, 28 Jan 2017, Laura Abbott wrote:
 
-There's an interesting issue with the way the x86 boot parameters are passed
-into the kernel if we want to store the secure-boot mode flag in there.
+> > > Was out for a few days, reporter says the below patch does not work.
+> > > There was some confusion with secure boot so I've asked them to re-test
+> > > with efi=old_map and secure boot off.
+> > 
+> > FYI, you may want to ask the reporter to try out Jiri's patch if this
+> > is still an issue for them,
+> > 
+> >   https://lkml.kernel.org/r/alpine.LSU.2.20.1701271638240.25515@cbobk.fhfr.pm
+> > 
+> 
+> Thanks! I pulled this into the latest Fedora update so I'll be asking
+> a couple of people to test.
 
-My patches add boot_params->secure_boot, into which is placed the secure boot
-mode as deduced by the EFI boot wrapper, if it is invoked.  This, however,
-gets scrubbed by sanitize_boot_params() if the ->sentinel flag is set.  It
-turns out that grub2 has a bug in it whereby it initialises boot_params by
-copying the wrong stuff over it, thereby setting the ->sentinel flag.
+BTW where exactly is this tracked for Fedora, please? I'd like to get an 
+idea how widespread this behavior is among different BIOS vendors.
 
-In my patch I saw that sanitisation was happening and I stopped
-sanitize_boot_params() from clobbering that particular byte and instead zeroed
-it on entry to the boot wrapper.  This seemed reasonable since the boot
-wrapper calculates the flag and simply overwrites whatever the boot loader had
-placed there - and the value was getting clobbered by sanitisation called
-during kernel decompression.
+I've found
 
-Matt argues, however, that boot_params->secure_boot should be propagated from
-the bootloader and if the bootloader wants to set it, then we should skip the
-check in efi_main() and go with the bootloader's opinion.  This is something
-we probably want to do with kexec() so that the lockdown state is propagated
-there.
+	https://bugzilla.redhat.com/show_bug.cgi?id=1384238
 
-However, what should happen in the core kernel if the bootloader doesn't
-properly initialise ->sentinel and sanitisation is done that then clobbers
-->secure_boot?  Should the kernel be locked down by default or left open by
-default if lockdown was enabled in the kernel config?
+is that the primary tracking bug on your side?
 
-But, as I mentioned, a bug in grub2 whereby it is copying the wrong
-initialisation data over boot_params is causing sanitisation to be triggered.
+Thanks,
 
-Some questions that should clarify how we proceed:
-
- (1) Do we actually want to propagate the mode determination from the boot
-     loader?
-
- (2) Do we have to determine the secure-boot status in the EFI boot wrapper
-     (we don't use it there) or can we determine it in the core kernel?
-
- (3) What's the default mode in the case of sanitisation when lockdown is
-     configured?
-
- (4) How do we handle the initialisation being mucked up such that ->sentinel
-     ends up 0 and ->secure_boot ends up essentially random?
-
-Any thoughts?
-
-David
+-- 
+Jiri Kosina
+SUSE Labs
