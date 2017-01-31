@@ -1,58 +1,79 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: What should the default lockdown mode be if the bootloader
- sentinel triggers sanitization?
-Date: Tue, 31 Jan 2017 11:57:01 +0000
-Message-ID: <20170131115701.GN31613@codeblueprint.co.uk>
-References: <20170123212642.GA2766@codeblueprint.co.uk>
- <20170116144954.GB27351@codeblueprint.co.uk>
- <20170111143304.GA29649@codeblueprint.co.uk>
- <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
- <148120024570.5854.10638278395097394138.stgit@warthog.procyon.org.uk>
- <7948.1484148443@warthog.procyon.org.uk>
- <794.1484581158@warthog.procyon.org.uk>
- <6306.1485209503@warthog.procyon.org.uk>
- <25118.1485778229@warthog.procyon.org.uk>
- <12081.1485784892@warthog.procyon.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <12081.1485784892@warthog.procyon.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: David Howells <dhowells@redhat.com>
-Cc: mjg59@srcf.ucam.org, linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org, linux-kernel@vger.kernel.org, Michael Chang <mchang@suse.com>, linux-security-module@vger.kernel.org, Peter Jones <pjones@redhat.com>, keyrings@vger.kernel.org, "H. Peter Anvin" <hpa@zytor.com>, linux-arm-kernel@lists.infradead.org
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 07/10] efi: Use typed function pointers for runtime services table
+Date: Tue, 31 Jan 2017 13:21:39 +0000
+Message-ID: <1485868902-20401-8-git-send-email-ard.biesheuvel@linaro.org>
+References: <1485868902-20401-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1485868902-20401-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 30 Jan, at 02:01:32PM, David Howells wrote:
-> Matt Fleming <matt@codeblueprint.co.uk> wrote:
-> 
-> > > Matt argues, however, that boot_params->secure_boot should be propagated from
-> > > the bootloader and if the bootloader wants to set it, then we should skip the
-> > > check in efi_main() and go with the bootloader's opinion.  This is something
-> > > we probably want to do with kexec() so that the lockdown state is propagated
-> > > there.
-> >  
-> > Actually what I was arguing for was that if the boot loader wants to
-> > set it and bypass the EFI boot stub, e.g. by going via the legacy
-> > 64-bit entry point, startup_64, then we should allow that as well as
-> > setting the flag in the EFI boot stub.
-> 
-> That brings up another question:  Should the non-EFI entry points clear the
-> secure_boot mode flag and set a default?
+Instead of using void pointers, and casting them to correctly typed
+function pointers upon use, declare the runtime services pointers
+as function pointers using their respective prototypes, for which
+typedefs are already available.
 
-There are no non-EFI boot entry points. EFI worked before we added the
-EFI boot stub. The boot stub just provides new features (and allows us
-to bundle firmware/boot fixes workarounds with kernel updates).
+Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ include/linux/efi.h | 36 ++++++++++++++++++------------------
+ 1 file changed, 18 insertions(+), 18 deletions(-)
 
-This is exactly why we should allow, or at least not actively
-prohibit, the boot loader to set ->secure_boot and jump to the old
-entry point if it wants to do that.
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index b17f73113bd2..8c6e007a5408 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -509,24 +509,6 @@ typedef struct {
+ 	u64 query_variable_info;
+ } efi_runtime_services_64_t;
+ 
+-typedef struct {
+-	efi_table_hdr_t hdr;
+-	void *get_time;
+-	void *set_time;
+-	void *get_wakeup_time;
+-	void *set_wakeup_time;
+-	void *set_virtual_address_map;
+-	void *convert_pointer;
+-	void *get_variable;
+-	void *get_next_variable;
+-	void *set_variable;
+-	void *get_next_high_mono_count;
+-	void *reset_system;
+-	void *update_capsule;
+-	void *query_capsule_caps;
+-	void *query_variable_info;
+-} efi_runtime_services_t;
+-
+ typedef efi_status_t efi_get_time_t (efi_time_t *tm, efi_time_cap_t *tc);
+ typedef efi_status_t efi_set_time_t (efi_time_t *tm);
+ typedef efi_status_t efi_get_wakeup_time_t (efi_bool_t *enabled, efi_bool_t *pending,
+@@ -561,6 +543,24 @@ typedef efi_status_t efi_query_variable_store_t(u32 attributes,
+ 						unsigned long size,
+ 						bool nonblocking);
+ 
++typedef struct {
++	efi_table_hdr_t			hdr;
++	efi_get_time_t			*get_time;
++	efi_set_time_t			*set_time;
++	efi_get_wakeup_time_t		*get_wakeup_time;
++	efi_set_wakeup_time_t		*set_wakeup_time;
++	efi_set_virtual_address_map_t	*set_virtual_address_map;
++	void				*convert_pointer;
++	efi_get_variable_t		*get_variable;
++	efi_get_next_variable_t		*get_next_variable;
++	efi_set_variable_t		*set_variable;
++	efi_get_next_high_mono_count_t	*get_next_high_mono_count;
++	efi_reset_system_t		*reset_system;
++	efi_update_capsule_t		*update_capsule;
++	efi_query_capsule_caps_t	*query_capsule_caps;
++	efi_query_variable_info_t	*query_variable_info;
++} efi_runtime_services_t;
++
+ void efi_native_runtime_setup(void);
+ 
+ /*
+-- 
+2.7.4
