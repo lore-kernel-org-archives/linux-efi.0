@@ -1,83 +1,81 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 6/7] efi: Handle secure boot from UEFI-2.6 [ver #7]
-Date: Tue, 31 Jan 2017 15:14:08 +0000
-Message-ID: <148587564847.4026.5759345672956585977.stgit@warthog.procyon.org.uk>
-References: <148587558696.4026.16034622623568539004.stgit@warthog.procyon.org.uk>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH] efi: libstub: Make file I/O chunking x86-specific
+Date: Tue, 31 Jan 2017 15:52:29 +0000
+Message-ID: <1485877949-21981-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <148587558696.4026.16034622623568539004.stgit@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-To: matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
-Cc: dhowells@redhat.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, James Bottomley <James.Bottomley@HansenPartnership.com>, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: matt@codeblueprint.co.uk, arnd@arndb.de, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-UEFI-2.6 adds a new variable, DeployedMode.  If it exists, this must be 1
-if we're to engage lockdown mode.
+The ARM decompressor is finicky when it comes to uninitialized variables
+with local linkage, the reason being that it may relocate .text and .bss
+independently when executing from ROM. This is only possible if all
+references into .bss from .text are absolute, and this happens to be the
+case for references emitted under -fpic to symbols with external linkage,
+and so all .bss references must involve symbols with external linkage.
 
-Reported-by: James Bottomley <James.Bottomley@HansenPartnership.com>
-Signed-off-by: David Howells <dhowells@redhat.com>
+When building the ARM stub using clang, the initialized local variable
+__chunk_size is optimized into a zero-initialized flag that indicates
+whether chunking is in effect or not. This flag is therefore emitted into
+.bss, which triggers the ARM decompressor's diagnostics, resulting in a
+failed build.
+
+Under UEFI, we never execute the decompressor from ROM, so the diagnostic
+makes little sense here. But we can easily work around the issue by making
+__chunk_size global instead.
+
+However, given that the file I/O chunking that is controlled by the
+__chunk_size variable is intended to work around known bugs on various
+x86 implementations of UEFI, we can simply make the chunking an x86
+specific feature. This is an improvement by itself, and also removes the
+need to parse the efi= options in the stub entirely.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
 
- drivers/firmware/efi/libstub/secureboot.c |   16 +++++++++++++++-
- include/linux/efi.h                       |    4 ++++
- 2 files changed, 19 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-index 39c91e091f6a..d653f76b9725 100644
---- a/drivers/firmware/efi/libstub/secureboot.c
-+++ b/drivers/firmware/efi/libstub/secureboot.c
-@@ -22,6 +22,9 @@ static const efi_char16_t const efi_SecureBoot_name[] = {
- static const efi_char16_t const efi_SetupMode_name[] = {
- 	'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0
- };
-+static const efi_char16_t const efi_DeployedMode_name[] = {
-+	'D', 'e', 'p', 'l', 'o', 'y', 'e', 'd', 'M', 'o', 'd', 'e', 0
-+};
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index 757badc1debb..5a418a6a33bf 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -351,6 +351,14 @@ efi_status_t efi_parse_options(char *cmdline)
+ 	char *str;
  
- /* SHIM variables */
- static const efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
-@@ -40,7 +43,7 @@ static efi_char16_t const shim_MokSBState_name[] = {
- enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
- {
- 	u32 attr;
--	u8 secboot, setupmode, moksbstate;
-+	u8 secboot, setupmode, deployedmode, moksbstate;
- 	unsigned long size;
- 	efi_status_t status;
- 
-@@ -59,6 +62,17 @@ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
- 	if (secboot == 0 || setupmode == 1)
- 		return efi_secureboot_mode_disabled;
- 
-+	/* UEFI-2.6 requires DeployedMode to be 1. */
-+	if (sys_table_arg->hdr.revision >= EFI_2_60_SYSTEM_TABLE_REVISION) {
-+		size = sizeof(deployedmode);
-+		status = get_efi_var(efi_DeployedMode_name, &efi_variable_guid,
-+				     NULL, &size, &deployedmode);
-+		if (status != EFI_SUCCESS)
-+			goto out_efi_err;
-+		if (deployedmode == 0)
-+			return efi_secureboot_mode_disabled;
-+	}
+ 	/*
++	 * Currently, the only efi= option we look for is 'nochunk', which
++	 * is intended to work around known issues on certain x86 UEFI
++	 * versions. So ignore for now on other architectures.
++	 */
++	if (!IS_ENABLED(CONFIG_X86))
++		return EFI_SUCCESS;
 +
- 	/* See if a user has put shim into insecure mode.  If so, and if the
- 	 * variable doesn't have the runtime attribute set, we might as well
- 	 * honor that.
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 1c200cdbdc05..87c1a6993f17 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -646,6 +646,10 @@ typedef struct {
- 
- #define EFI_SYSTEM_TABLE_SIGNATURE ((u64)0x5453595320494249ULL)
- 
-+#define EFI_2_60_SYSTEM_TABLE_REVISION  ((2 << 16) | (60))
-+#define EFI_2_50_SYSTEM_TABLE_REVISION  ((2 << 16) | (50))
-+#define EFI_2_40_SYSTEM_TABLE_REVISION  ((2 << 16) | (40))
-+#define EFI_2_31_SYSTEM_TABLE_REVISION  ((2 << 16) | (31))
- #define EFI_2_30_SYSTEM_TABLE_REVISION  ((2 << 16) | (30))
- #define EFI_2_20_SYSTEM_TABLE_REVISION  ((2 << 16) | (20))
- #define EFI_2_10_SYSTEM_TABLE_REVISION  ((2 << 16) | (10))
-
++	/*
+ 	 * If no EFI parameters were specified on the cmdline we've got
+ 	 * nothing to do.
+ 	 */
+@@ -523,7 +531,9 @@ efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 			size = files[j].size;
+ 			while (size) {
+ 				unsigned long chunksize;
+-				if (size > __chunk_size)
++
++				if (IS_ENABLED(CONFIG_X86) &&
++				    size > __chunk_size)
+ 					chunksize = __chunk_size;
+ 				else
+ 					chunksize = size;
+-- 
+2.7.4
