@@ -1,79 +1,38 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 07/10] efi: Use typed function pointers for runtime services table
-Date: Tue, 31 Jan 2017 13:21:39 +0000
-Message-ID: <1485868902-20401-8-git-send-email-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 06/10] efi/esrt: Fix spelling mistake "doen't"
+Date: Tue, 31 Jan 2017 13:21:38 +0000
+Message-ID: <1485868902-20401-7-git-send-email-ard.biesheuvel@linaro.org>
 References: <1485868902-20401-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1485868902-20401-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1485868902-20401-1-git-send-email-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Colin Ian King <colin.king@canonical.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-Instead of using void pointers, and casting them to correctly typed
-function pointers upon use, declare the runtime services pointers
-as function pointers using their respective prototypes, for which
-typedefs are already available.
+From: Colin Ian King <colin.king@canonical.com>
 
-Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Trivial fix to spelling mistake "doen't" to "doesn't" in pr_err message
+
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Colin Ian King <colin.king@canonical.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- include/linux/efi.h | 36 ++++++++++++++++++------------------
- 1 file changed, 18 insertions(+), 18 deletions(-)
+ drivers/firmware/efi/esrt.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index b17f73113bd2..8c6e007a5408 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -509,24 +509,6 @@ typedef struct {
- 	u64 query_variable_info;
- } efi_runtime_services_64_t;
+diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+index 14914074f716..08b026864d4e 100644
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -269,7 +269,7 @@ void __init efi_esrt_init(void)
+ 	max -= efi.esrt;
  
--typedef struct {
--	efi_table_hdr_t hdr;
--	void *get_time;
--	void *set_time;
--	void *get_wakeup_time;
--	void *set_wakeup_time;
--	void *set_virtual_address_map;
--	void *convert_pointer;
--	void *get_variable;
--	void *get_next_variable;
--	void *set_variable;
--	void *get_next_high_mono_count;
--	void *reset_system;
--	void *update_capsule;
--	void *query_capsule_caps;
--	void *query_variable_info;
--} efi_runtime_services_t;
--
- typedef efi_status_t efi_get_time_t (efi_time_t *tm, efi_time_cap_t *tc);
- typedef efi_status_t efi_set_time_t (efi_time_t *tm);
- typedef efi_status_t efi_get_wakeup_time_t (efi_bool_t *enabled, efi_bool_t *pending,
-@@ -561,6 +543,24 @@ typedef efi_status_t efi_query_variable_store_t(u32 attributes,
- 						unsigned long size,
- 						bool nonblocking);
- 
-+typedef struct {
-+	efi_table_hdr_t			hdr;
-+	efi_get_time_t			*get_time;
-+	efi_set_time_t			*set_time;
-+	efi_get_wakeup_time_t		*get_wakeup_time;
-+	efi_set_wakeup_time_t		*set_wakeup_time;
-+	efi_set_virtual_address_map_t	*set_virtual_address_map;
-+	void				*convert_pointer;
-+	efi_get_variable_t		*get_variable;
-+	efi_get_next_variable_t		*get_next_variable;
-+	efi_set_variable_t		*set_variable;
-+	efi_get_next_high_mono_count_t	*get_next_high_mono_count;
-+	efi_reset_system_t		*reset_system;
-+	efi_update_capsule_t		*update_capsule;
-+	efi_query_capsule_caps_t	*query_capsule_caps;
-+	efi_query_variable_info_t	*query_variable_info;
-+} efi_runtime_services_t;
-+
- void efi_native_runtime_setup(void);
- 
- /*
+ 	if (max < size) {
+-		pr_err("ESRT header doen't fit on single memory map entry. (size: %zu max: %zu)\n",
++		pr_err("ESRT header doesn't fit on single memory map entry. (size: %zu max: %zu)\n",
+ 		       size, max);
+ 		return;
+ 	}
 -- 
 2.7.4
