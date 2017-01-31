@@ -1,81 +1,106 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH] efi: libstub: Make file I/O chunking x86-specific
-Date: Tue, 31 Jan 2017 15:52:29 +0000
-Message-ID: <1485877949-21981-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 0/7] efi: Pass secure boot mode to kernel [ver #7]
+Date: Tue, 31 Jan 2017 16:45:13 +0000
+Message-ID: <CAKv+Gu9cTtmV+9-kWSzvFui7KHxrG6MsUfz0VET=714m2cGhbQ@mail.gmail.com>
+References: <148587558696.4026.16034622623568539004.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: matt@codeblueprint.co.uk, arnd@arndb.de, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <148587558696.4026.16034622623568539004.stgit@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, keyrings@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-The ARM decompressor is finicky when it comes to uninitialized variables
-with local linkage, the reason being that it may relocate .text and .bss
-independently when executing from ROM. This is only possible if all
-references into .bss from .text are absolute, and this happens to be the
-case for references emitted under -fpic to symbols with external linkage,
-and so all .bss references must involve symbols with external linkage.
+Hello David,
 
-When building the ARM stub using clang, the initialized local variable
-__chunk_size is optimized into a zero-initialized flag that indicates
-whether chunking is in effect or not. This flag is therefore emitted into
-.bss, which triggers the ARM decompressor's diagnostics, resulting in a
-failed build.
+On 31 January 2017 at 15:13, David Howells <dhowells@redhat.com> wrote:
+>
+> Here's a set of patches that can determine the secure boot state of the
+> UEFI BIOS and pass that along to the main kernel image.  This involves
+> generalising ARM's efi_get_secureboot() function and making it mixed-mode
+> safe.
+>
 
-Under UEFI, we never execute the decompressor from ROM, so the diagnostic
-makes little sense here. But we can easily work around the issue by making
-__chunk_size global instead.
+Could you please resend with the [ver #7] removed from the subject
+lines? It is a bit tedious to have to manually modify each patch when
+applying.
 
-However, given that the file I/O chunking that is controlled by the
-__chunk_size variable is intended to work around known bugs on various
-x86 implementations of UEFI, we can simply make the chunking an x86
-specific feature. This is an improvement by itself, and also removes the
-need to parse the efi= options in the stub entirely.
+Thanks,
+Ard.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/libstub/efi-stub-helper.c | 12 +++++++++++-
- 1 file changed, 11 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 757badc1debb..5a418a6a33bf 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -351,6 +351,14 @@ efi_status_t efi_parse_options(char *cmdline)
- 	char *str;
- 
- 	/*
-+	 * Currently, the only efi= option we look for is 'nochunk', which
-+	 * is intended to work around known issues on certain x86 UEFI
-+	 * versions. So ignore for now on other architectures.
-+	 */
-+	if (!IS_ENABLED(CONFIG_X86))
-+		return EFI_SUCCESS;
-+
-+	/*
- 	 * If no EFI parameters were specified on the cmdline we've got
- 	 * nothing to do.
- 	 */
-@@ -523,7 +531,9 @@ efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
- 			size = files[j].size;
- 			while (size) {
- 				unsigned long chunksize;
--				if (size > __chunk_size)
-+
-+				if (IS_ENABLED(CONFIG_X86) &&
-+				    size > __chunk_size)
- 					chunksize = __chunk_size;
- 				else
- 					chunksize = size;
--- 
-2.7.4
+> Changes:
+>
+>  Ver 7:
+>
+>   - Rebased on efi/next.
+>   - Remove the EFI_SECURE_BOOT flag bit and defer it for later.  Don't
+>   - Preclear boot_params->secure_boot and don't clear it in
+>     sanitize_boot_params()[*]
+>   - Don't probe for the secure-boot mode if the boot loader gives us this
+>     mode (ie. if boot_params->secure_boot is non-zero).
+>
+>     [*] There's a bug in grub2 whereby it copies too much, sets the sentinel
+>         byte and triggers the sanitisation.
+>
+>  Ver 6:
+>
+>   - Removed unnecessary variable init and trimmed comment.
+>   - Return efi_secureboot_mode_disabled directly rather than going to a
+>     place that just returns it.
+>   - Switched the last two patches.
+>
+>  Ver 5:
+>
+>   - Fix i386 compilation error (rsi should've been changed to esi).
+>   - Fix arm64 compilation error ('sys_table_arg' is a hidden macro parameter).
+>
+>  Ver 4:
+>
+>   - Use an enum to tell the kernel whether secure boot mode is enabled,
+>     disabled, couldn't be determined or wasn't even tried due to not being
+>     in EFI mode.
+>   - Support the UEFI-2.6 DeployedMode flag.
+>   - Don't clear boot_params->secure_boot in x86 sanitize_boot_params().
+>   - Preclear the boot_params->secure_boot on x86 head_*.S entry if we may
+>     not go through efi_main().
+>
+> The patches can be found here also:
+>
+>         http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/log/?h=efi-secure-boot
+>
+> at tag:
+>
+>         efi-secure-boot-20170131
+>
+> David
+> ---
+> David Howells (6):
+>       x86/efi: Allow invocation of arbitrary runtime services
+>       arm/efi: Allow invocation of arbitrary runtime services
+>       efi: Add SHIM and image security database GUID definitions
+>       efi: Get the secure boot status
+>       efi: Handle secure boot from UEFI-2.6
+>       efi: Print the secure boot status in x86 setup_arch()
+>
+> Josh Boyer (1):
+>       efi: Disable secure boot if shim is in insecure mode
+>
+>
+>  Documentation/x86/zero-page.txt           |    2 +
+>  arch/arm/include/asm/efi.h                |    1
+>  arch/arm64/include/asm/efi.h              |    1
+>  arch/x86/boot/compressed/eboot.c          |    7 ++
+>  arch/x86/boot/compressed/head_32.S        |    6 +-
+>  arch/x86/boot/compressed/head_64.S        |    8 +-
+>  arch/x86/include/asm/efi.h                |    5 +
+>  arch/x86/include/uapi/asm/bootparam.h     |    3 +
+>  arch/x86/kernel/asm-offsets.c             |    1
+>  arch/x86/kernel/setup.c                   |   14 ++++
+>  drivers/firmware/efi/libstub/Makefile     |    2 -
+>  drivers/firmware/efi/libstub/arm-stub.c   |   63 ++----------------
+>  drivers/firmware/efi/libstub/secureboot.c |   99 +++++++++++++++++++++++++++++
+>  include/linux/efi.h                       |   15 ++++
+>  14 files changed, 161 insertions(+), 66 deletions(-)
+>  create mode 100644 drivers/firmware/efi/libstub/secureboot.c
+>
