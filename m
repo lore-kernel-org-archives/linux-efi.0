@@ -1,53 +1,41 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 2/7] arm/efi: Allow invocation of arbitrary runtime services
- [ver #7]
-Date: Tue, 31 Jan 2017 15:13:29 +0000
-Message-ID: <148587560927.4026.13631713806987809459.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 3/7] efi: Add SHIM and image security database GUID
+ definitions [ver #7]
+Date: Tue, 31 Jan 2017 15:13:39 +0000
+Message-ID: <148587561989.4026.5585251129829235146.stgit@warthog.procyon.org.uk>
 References: <148587558696.4026.16034622623568539004.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <148587558696.4026.16034622623568539004.stgit@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-To: matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <148587558696.4026.16034622623568539004.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-efi_call_runtime() is provided for x86 to be able abstract mixed mode
-support.  Provide this for ARM also so that common code work in mixed mode
-also.
+Add the definitions for shim and image security database, both of which
+are used widely in various Linux distros.
 
-Suggested-by: Lukas Wunner <lukas@wunner.de>
-Signed-off-by: David Howells <dhowells@redhat.com>
+Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
 
- arch/arm/include/asm/efi.h   |    1 +
- arch/arm64/include/asm/efi.h |    1 +
- 2 files changed, 2 insertions(+)
+ include/linux/efi.h |    3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-index 0b06f5341b45..e4e6a9d6a825 100644
---- a/arch/arm/include/asm/efi.h
-+++ b/arch/arm/include/asm/efi.h
-@@ -55,6 +55,7 @@ void efi_virtmap_unload(void);
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 8c6e007a5408..58c9dd48f42a 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -611,6 +611,9 @@ void efi_native_runtime_setup(void);
+ #define EFI_CONSOLE_OUT_DEVICE_GUID		EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+ #define APPLE_PROPERTIES_PROTOCOL_GUID		EFI_GUID(0x91bd12fe, 0xf6c3, 0x44fb,  0xa5, 0xb7, 0x51, 0x22, 0xab, 0x30, 0x3a, 0xe0)
  
- #define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
- #define __efi_call_early(f, ...)	f(__VA_ARGS__)
-+#define efi_call_runtime(f, ...)	sys_table_arg->runtime->f(__VA_ARGS__)
- #define efi_is_64bit()			(false)
- 
- #define efi_call_proto(protocol, f, instance, ...)			\
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index 0b6b1633017f..e7445281e534 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -50,6 +50,7 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
- 
- #define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
- #define __efi_call_early(f, ...)	f(__VA_ARGS__)
-+#define efi_call_runtime(f, ...)	sys_table_arg->runtime->f(__VA_ARGS__)
- #define efi_is_64bit()			(true)
- 
- #define efi_call_proto(protocol, f, instance, ...)			\
-
++#define EFI_IMAGE_SECURITY_DATABASE_GUID	EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596, 0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
++#define EFI_SHIM_LOCK_GUID			EFI_GUID(0x605dab50, 0xe046, 0x4300, 0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
++
+ /*
+  * This GUID is used to pass to the kernel proper the struct screen_info
+  * structure that was populated by the stub based on the GOP protocol instance
