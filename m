@@ -1,41 +1,94 @@
 From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 5/8] efi: Get the secure boot status [ver #6]
-Date: Tue, 31 Jan 2017 14:02:56 +0000
-Message-ID: <5842.1485871376@warthog.procyon.org.uk>
-References: <20170127140101.GD31613@codeblueprint.co.uk>
- <20170123212642.GA2766@codeblueprint.co.uk>
- <20170116144954.GB27351@codeblueprint.co.uk>
- <20170111143304.GA29649@codeblueprint.co.uk>
- <148120020832.5854.5448601415491330495.stgit@warthog.procyon.org.uk>
- <148120024570.5854.10638278395097394138.stgit@warthog.procyon.org.uk>
- <7948.1484148443@warthog.procyon.org.uk>
- <794.1484581158@warthog.procyon.org.uk>
- <6306.1485209503@warthog.procyon.org.uk>
+Subject: [PATCH 0/7] efi: Pass secure boot mode to kernel [ver #7]
+Date: Tue, 31 Jan 2017 15:13:07 +0000
+Message-ID: <148587558696.4026.16034622623568539004.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170127140101.GD31613@codeblueprint.co.uk>
-Content-ID: <5841.1485871376.1@warthog.procyon.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org, Peter Jones <pjones@redhat.com>, linux-kernel@vger.kernel.org, Michael Chang <mchang@suse.com>, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, "H. Peter Anvin" <hpa@zytor.com>, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-security-module-owner@vger.kernel.org>
+Sender: owner-linux-security-module@vger.kernel.org
+To: matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-Matt Fleming <matt@codeblueprint.co.uk> wrote:
 
-> -  grub_memcpy (params, &lh, 2 * 512);
-> +  grub_memcpy (params, (grub_uint8_t *)&lh[512], 512);
+Here's a set of patches that can determine the secure boot state of the
+UEFI BIOS and pass that along to the main kernel image.  This involves
+generalising ARM's efi_get_secureboot() function and making it mixed-mode
+safe.
 
-It would appear this change is wrong and params needs to be changed to params
-+ 512 or something similar.
+Changes:
+
+ Ver 7:
+
+  - Rebased on efi/next.
+  - Remove the EFI_SECURE_BOOT flag bit and defer it for later.  Don't
+  - Preclear boot_params->secure_boot and don't clear it in
+    sanitize_boot_params()[*]
+  - Don't probe for the secure-boot mode if the boot loader gives us this
+    mode (ie. if boot_params->secure_boot is non-zero).
+  
+    [*] There's a bug in grub2 whereby it copies too much, sets the sentinel
+    	byte and triggers the sanitisation.
+
+ Ver 6:
+
+  - Removed unnecessary variable init and trimmed comment.
+  - Return efi_secureboot_mode_disabled directly rather than going to a
+    place that just returns it.
+  - Switched the last two patches.
+
+ Ver 5:
+
+  - Fix i386 compilation error (rsi should've been changed to esi).
+  - Fix arm64 compilation error ('sys_table_arg' is a hidden macro parameter).
+
+ Ver 4:
+
+  - Use an enum to tell the kernel whether secure boot mode is enabled,
+    disabled, couldn't be determined or wasn't even tried due to not being
+    in EFI mode.
+  - Support the UEFI-2.6 DeployedMode flag.
+  - Don't clear boot_params->secure_boot in x86 sanitize_boot_params().
+  - Preclear the boot_params->secure_boot on x86 head_*.S entry if we may
+    not go through efi_main().
+
+The patches can be found here also:
+
+	http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/log/?h=efi-secure-boot
+
+at tag:
+
+	efi-secure-boot-20170131
 
 David
+---
+David Howells (6):
+      x86/efi: Allow invocation of arbitrary runtime services
+      arm/efi: Allow invocation of arbitrary runtime services
+      efi: Add SHIM and image security database GUID definitions
+      efi: Get the secure boot status
+      efi: Handle secure boot from UEFI-2.6
+      efi: Print the secure boot status in x86 setup_arch()
+
+Josh Boyer (1):
+      efi: Disable secure boot if shim is in insecure mode
+
+
+ Documentation/x86/zero-page.txt           |    2 +
+ arch/arm/include/asm/efi.h                |    1 
+ arch/arm64/include/asm/efi.h              |    1 
+ arch/x86/boot/compressed/eboot.c          |    7 ++
+ arch/x86/boot/compressed/head_32.S        |    6 +-
+ arch/x86/boot/compressed/head_64.S        |    8 +-
+ arch/x86/include/asm/efi.h                |    5 +
+ arch/x86/include/uapi/asm/bootparam.h     |    3 +
+ arch/x86/kernel/asm-offsets.c             |    1 
+ arch/x86/kernel/setup.c                   |   14 ++++
+ drivers/firmware/efi/libstub/Makefile     |    2 -
+ drivers/firmware/efi/libstub/arm-stub.c   |   63 ++----------------
+ drivers/firmware/efi/libstub/secureboot.c |   99 +++++++++++++++++++++++++++++
+ include/linux/efi.h                       |   15 ++++
+ 14 files changed, 161 insertions(+), 66 deletions(-)
+ create mode 100644 drivers/firmware/efi/libstub/secureboot.c
+
