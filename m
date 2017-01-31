@@ -1,365 +1,77 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 01/10] efi: Deduplicate efi_file_size() / _read() / _close()
-Date: Tue, 31 Jan 2017 13:21:33 +0000
-Message-ID: <1485868902-20401-2-git-send-email-ard.biesheuvel@linaro.org>
-References: <1485868902-20401-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1485868902-20401-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [GIT PULL 00/10] EFI updates for v4.11
+Date: Tue, 31 Jan 2017 13:21:32 +0000
+Message-ID: <1485868902-20401-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Colin Ian King <colin.king@canonical.com>, Dave Young <dyoung@redhat.com>, Fenghua Yu <fenghua.yu@intel.com>, "Lee, Chun-Yi" <jlee@suse.com>, Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org, Lukas Wunner <lukas@wunner.de>, Matt Fleming <matt@codeblueprint.co.uk>, Nicolai Stange <nicstange@gmail.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Ravi Shankar <ravi.v.shankar@intel.com>, Ricardo Neri <ricardo.neri@intel.com>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+The following changes since commit 49def1853334396f948dcb4cedb9347abb318df5:
 
-There's one ARM, one x86_32 and one x86_64 version which can be folded
-into a single shared version by masking their differences with the shiny
-new efi_call_proto() macro.
+  Linux 4.10-rc4 (2017-01-15 16:21:59 -0800)
 
-No functional change intended.
+are available in the git repository at:
 
-Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/x86/boot/compressed/eboot.c               | 148 -------------------------
- drivers/firmware/efi/libstub/arm-stub.c        |  69 ------------
- drivers/firmware/efi/libstub/efi-stub-helper.c |  63 +++++++++++
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+
+for you to fetch changes up to 39d6b56c4c2a41cf4d11c720c05c1396b74920a0:
+
+  efi: libstub: Preserve .debug sections after absolute relocation check (2017-01-31 13:11:19 +0000)
+
+NOTE: the BGRT patch touches drivers/acpi, but lacks an ack from the ACPI
+      maintainers. They have been cc'ed on the patch (and on this pull
+      request).
+
+----------------------------------------------------------------
+* Wire up the UEFI memory attributes table for x86. This eliminates any
+  runtime memory regions that are both writable and executable on recent
+  firmware versions. (Sai Praneeth)
+
+* Move the BGRT init code to an earlier stage so that we can still use
+  efi_mem_reserve() (Dave Young)
+
+* Preserve debug symbols in the ARM/arm64 UEFI stub (Ard)
+
+* Some deduplication work and various other cleanups
+
+----------------------------------------------------------------
+Ard Biesheuvel (2):
+      efi: Use typed function pointers for runtime services table
+      efi: libstub: Preserve .debug sections after absolute relocation check
+
+Colin Ian King (1):
+      efi/esrt: Fix spelling mistake "doen't"
+
+Dave Young (2):
+      efi/x86: Move EFI BGRT init code to early init code
+      efi/x86: Add debug code to print cooked memmap
+
+Lukas Wunner (2):
+      efi: Deduplicate efi_file_size() / _read() / _close()
+      x86/efi: Deduplicate efi_char16_printk()
+
+Sai Praneeth (3):
+      efi: Make EFI_MEMORY_ATTRIBUTES_TABLE initialization common across all architectures
+      efi: Introduce EFI_MEM_ATTR bit and set it from memory attributes table
+      x86/efi: Add support for EFI_MEMORY_ATTRIBUTES_TABLE
+
+ arch/x86/boot/compressed/eboot.c               | 174 +------------------------
+ arch/x86/kernel/acpi/boot.c                    |   9 ++
+ arch/x86/platform/efi/efi-bgrt.c               |  59 ++++-----
+ arch/x86/platform/efi/efi.c                    |  10 +-
+ arch/x86/platform/efi/efi_64.c                 |  64 +++++++--
+ drivers/acpi/bgrt.c                            |  28 ++--
+ drivers/firmware/efi/arm-init.c                |   1 -
+ drivers/firmware/efi/efi.c                     |   2 +
+ drivers/firmware/efi/esrt.c                    |   2 +-
+ drivers/firmware/efi/libstub/Makefile          |  24 ++--
+ drivers/firmware/efi/libstub/arm-stub.c        |  69 ----------
+ drivers/firmware/efi/libstub/efi-stub-helper.c |  63 +++++++++
  drivers/firmware/efi/libstub/efistub.h         |   8 --
- 4 files changed, 63 insertions(+), 225 deletions(-)
-
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index ff01c8fc76f7..f1cf284d631e 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -38,154 +38,6 @@ static void setup_boot_services##bits(struct efi_config *c)		\
- BOOT_SERVICES(32);
- BOOT_SERVICES(64);
- 
--void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
--
--static efi_status_t
--__file_size32(void *__fh, efi_char16_t *filename_16,
--	      void **handle, u64 *file_sz)
--{
--	efi_file_handle_32_t *h, *fh = __fh;
--	efi_file_info_t *info;
--	efi_status_t status;
--	efi_guid_t info_guid = EFI_FILE_INFO_ID;
--	u32 info_sz;
--
--	status = efi_early->call((unsigned long)fh->open, fh, &h, filename_16,
--				 EFI_FILE_MODE_READ, (u64)0);
--	if (status != EFI_SUCCESS) {
--		efi_printk(sys_table, "Failed to open file: ");
--		efi_char16_printk(sys_table, filename_16);
--		efi_printk(sys_table, "\n");
--		return status;
--	}
--
--	*handle = h;
--
--	info_sz = 0;
--	status = efi_early->call((unsigned long)h->get_info, h, &info_guid,
--				 &info_sz, NULL);
--	if (status != EFI_BUFFER_TOO_SMALL) {
--		efi_printk(sys_table, "Failed to get file info size\n");
--		return status;
--	}
--
--grow:
--	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
--				info_sz, (void **)&info);
--	if (status != EFI_SUCCESS) {
--		efi_printk(sys_table, "Failed to alloc mem for file info\n");
--		return status;
--	}
--
--	status = efi_early->call((unsigned long)h->get_info, h, &info_guid,
--				 &info_sz, info);
--	if (status == EFI_BUFFER_TOO_SMALL) {
--		efi_call_early(free_pool, info);
--		goto grow;
--	}
--
--	*file_sz = info->file_size;
--	efi_call_early(free_pool, info);
--
--	if (status != EFI_SUCCESS)
--		efi_printk(sys_table, "Failed to get initrd info\n");
--
--	return status;
--}
--
--static efi_status_t
--__file_size64(void *__fh, efi_char16_t *filename_16,
--	      void **handle, u64 *file_sz)
--{
--	efi_file_handle_64_t *h, *fh = __fh;
--	efi_file_info_t *info;
--	efi_status_t status;
--	efi_guid_t info_guid = EFI_FILE_INFO_ID;
--	u64 info_sz;
--
--	status = efi_early->call((unsigned long)fh->open, fh, &h, filename_16,
--				 EFI_FILE_MODE_READ, (u64)0);
--	if (status != EFI_SUCCESS) {
--		efi_printk(sys_table, "Failed to open file: ");
--		efi_char16_printk(sys_table, filename_16);
--		efi_printk(sys_table, "\n");
--		return status;
--	}
--
--	*handle = h;
--
--	info_sz = 0;
--	status = efi_early->call((unsigned long)h->get_info, h, &info_guid,
--				 &info_sz, NULL);
--	if (status != EFI_BUFFER_TOO_SMALL) {
--		efi_printk(sys_table, "Failed to get file info size\n");
--		return status;
--	}
--
--grow:
--	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
--				info_sz, (void **)&info);
--	if (status != EFI_SUCCESS) {
--		efi_printk(sys_table, "Failed to alloc mem for file info\n");
--		return status;
--	}
--
--	status = efi_early->call((unsigned long)h->get_info, h, &info_guid,
--				 &info_sz, info);
--	if (status == EFI_BUFFER_TOO_SMALL) {
--		efi_call_early(free_pool, info);
--		goto grow;
--	}
--
--	*file_sz = info->file_size;
--	efi_call_early(free_pool, info);
--
--	if (status != EFI_SUCCESS)
--		efi_printk(sys_table, "Failed to get initrd info\n");
--
--	return status;
--}
--efi_status_t
--efi_file_size(efi_system_table_t *sys_table, void *__fh,
--	      efi_char16_t *filename_16, void **handle, u64 *file_sz)
--{
--	if (efi_early->is64)
--		return __file_size64(__fh, filename_16, handle, file_sz);
--
--	return __file_size32(__fh, filename_16, handle, file_sz);
--}
--
--efi_status_t
--efi_file_read(void *handle, unsigned long *size, void *addr)
--{
--	unsigned long func;
--
--	if (efi_early->is64) {
--		efi_file_handle_64_t *fh = handle;
--
--		func = (unsigned long)fh->read;
--		return efi_early->call(func, handle, size, addr);
--	} else {
--		efi_file_handle_32_t *fh = handle;
--
--		func = (unsigned long)fh->read;
--		return efi_early->call(func, handle, size, addr);
--	}
--}
--
--efi_status_t efi_file_close(void *handle)
--{
--	if (efi_early->is64) {
--		efi_file_handle_64_t *fh = handle;
--
--		return efi_early->call((unsigned long)fh->close, handle);
--	} else {
--		efi_file_handle_32_t *fh = handle;
--
--		return efi_early->call((unsigned long)fh->close, handle);
--	}
--}
--
- static inline efi_status_t __open_volume32(void *__image, void **__fh)
- {
- 	efi_file_io_interface_t *io;
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index b4f7d78f9e8b..6fca48c9e054 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -91,75 +91,6 @@ efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg,
- 	return status;
- }
- 
--efi_status_t efi_file_close(void *handle)
--{
--	efi_file_handle_t *fh = handle;
--
--	return fh->close(handle);
--}
--
--efi_status_t
--efi_file_read(void *handle, unsigned long *size, void *addr)
--{
--	efi_file_handle_t *fh = handle;
--
--	return fh->read(handle, size, addr);
--}
--
--
--efi_status_t
--efi_file_size(efi_system_table_t *sys_table_arg, void *__fh,
--	      efi_char16_t *filename_16, void **handle, u64 *file_sz)
--{
--	efi_file_handle_t *h, *fh = __fh;
--	efi_file_info_t *info;
--	efi_status_t status;
--	efi_guid_t info_guid = EFI_FILE_INFO_ID;
--	unsigned long info_sz;
--
--	status = fh->open(fh, &h, filename_16, EFI_FILE_MODE_READ, (u64)0);
--	if (status != EFI_SUCCESS) {
--		efi_printk(sys_table_arg, "Failed to open file: ");
--		efi_char16_printk(sys_table_arg, filename_16);
--		efi_printk(sys_table_arg, "\n");
--		return status;
--	}
--
--	*handle = h;
--
--	info_sz = 0;
--	status = h->get_info(h, &info_guid, &info_sz, NULL);
--	if (status != EFI_BUFFER_TOO_SMALL) {
--		efi_printk(sys_table_arg, "Failed to get file info size\n");
--		return status;
--	}
--
--grow:
--	status = sys_table_arg->boottime->allocate_pool(EFI_LOADER_DATA,
--				 info_sz, (void **)&info);
--	if (status != EFI_SUCCESS) {
--		efi_printk(sys_table_arg, "Failed to alloc mem for file info\n");
--		return status;
--	}
--
--	status = h->get_info(h, &info_guid, &info_sz,
--						   info);
--	if (status == EFI_BUFFER_TOO_SMALL) {
--		sys_table_arg->boottime->free_pool(info);
--		goto grow;
--	}
--
--	*file_sz = info->file_size;
--	sys_table_arg->boottime->free_pool(info);
--
--	if (status != EFI_SUCCESS)
--		efi_printk(sys_table_arg, "Failed to get initrd info\n");
--
--	return status;
--}
--
--
--
- void efi_char16_printk(efi_system_table_t *sys_table_arg,
- 			      efi_char16_t *str)
- {
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 757badc1debb..6ee9164251a9 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -338,6 +338,69 @@ void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
- 	efi_call_early(free_pages, addr, nr_pages);
- }
- 
-+static efi_status_t efi_file_size(efi_system_table_t *sys_table_arg, void *__fh,
-+				  efi_char16_t *filename_16, void **handle,
-+				  u64 *file_sz)
-+{
-+	efi_file_handle_t *h, *fh = __fh;
-+	efi_file_info_t *info;
-+	efi_status_t status;
-+	efi_guid_t info_guid = EFI_FILE_INFO_ID;
-+	unsigned long info_sz;
-+
-+	status = efi_call_proto(efi_file_handle, open, fh, &h, filename_16,
-+				EFI_FILE_MODE_READ, (u64)0);
-+	if (status != EFI_SUCCESS) {
-+		efi_printk(sys_table_arg, "Failed to open file: ");
-+		efi_char16_printk(sys_table_arg, filename_16);
-+		efi_printk(sys_table_arg, "\n");
-+		return status;
-+	}
-+
-+	*handle = h;
-+
-+	info_sz = 0;
-+	status = efi_call_proto(efi_file_handle, get_info, h, &info_guid,
-+				&info_sz, NULL);
-+	if (status != EFI_BUFFER_TOO_SMALL) {
-+		efi_printk(sys_table_arg, "Failed to get file info size\n");
-+		return status;
-+	}
-+
-+grow:
-+	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-+				info_sz, (void **)&info);
-+	if (status != EFI_SUCCESS) {
-+		efi_printk(sys_table_arg, "Failed to alloc mem for file info\n");
-+		return status;
-+	}
-+
-+	status = efi_call_proto(efi_file_handle, get_info, h, &info_guid,
-+				&info_sz, info);
-+	if (status == EFI_BUFFER_TOO_SMALL) {
-+		efi_call_early(free_pool, info);
-+		goto grow;
-+	}
-+
-+	*file_sz = info->file_size;
-+	efi_call_early(free_pool, info);
-+
-+	if (status != EFI_SUCCESS)
-+		efi_printk(sys_table_arg, "Failed to get initrd info\n");
-+
-+	return status;
-+}
-+
-+static efi_status_t efi_file_read(void *handle, unsigned long *size, void *addr)
-+{
-+	return efi_call_proto(efi_file_handle, read, handle, size, addr);
-+}
-+
-+static efi_status_t efi_file_close(void *handle)
-+{
-+	return efi_call_proto(efi_file_handle, close, handle);
-+}
-+
- /*
-  * Parse the ASCII string 'cmdline' for EFI options, denoted by the efi=
-  * option, e.g. efi=nochunk.
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index 0e2a96b12cb3..71c4d0e3c4ed 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -29,14 +29,6 @@ void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
- efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg, void *__image,
- 			     void **__fh);
- 
--efi_status_t efi_file_size(efi_system_table_t *sys_table_arg, void *__fh,
--			   efi_char16_t *filename_16, void **handle,
--			   u64 *file_sz);
--
--efi_status_t efi_file_read(void *handle, unsigned long *size, void *addr);
--
--efi_status_t efi_file_close(void *handle);
--
- unsigned long get_dram_base(efi_system_table_t *sys_table_arg);
- 
- efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
--- 
-2.7.4
+ drivers/firmware/efi/memattr.c                 |   6 +-
+ include/linux/efi-bgrt.h                       |  11 +-
+ include/linux/efi.h                            |  45 +++----
+ init/main.c                                    |   1 -
+ 17 files changed, 230 insertions(+), 346 deletions(-)
