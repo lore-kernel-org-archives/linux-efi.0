@@ -1,42 +1,29 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH] efi: libstub: Make file I/O chunking x86-specific
-Date: Tue, 31 Jan 2017 19:42:31 +0100
-Message-ID: <CAK8P3a3R4Tg8xW7YOyoLqebofC=ABeWyXsKKVj=2mUWDS868xQ@mail.gmail.com>
-References: <1485877949-21981-1-git-send-email-ard.biesheuvel@linaro.org>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 4/7] efi: Get the secure boot status [ver #7]
+Date: Tue, 31 Jan 2017 18:52:56 +0000
+Message-ID: <10308.1485888776@warthog.procyon.org.uk>
+References: <CAKv+Gu92yTWcEguxGzMOQAvoUexCLtsVVBa2Xzz3cPPWQD9nSQ@mail.gmail.com> <148587562967.4026.18171897997650345605.stgit@warthog.procyon.org.uk> <201702010101.EljWXBuB%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1485877949-21981-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <CAKv+Gu92yTWcEguxGzMOQAvoUexCLtsVVBa2Xzz3cPPWQD9nSQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-ID: <10307.1485888776.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jan 31, 2017 at 4:52 PM, Ard Biesheuvel
-<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> The ARM decompressor is finicky when it comes to uninitialized variables
-> with local linkage, the reason being that it may relocate .text and .bss
-> independently when executing from ROM. This is only possible if all
-> references into .bss from .text are absolute, and this happens to be the
-> case for references emitted under -fpic to symbols with external linkage,
-> and so all .bss references must involve symbols with external linkage.
->
-> When building the ARM stub using clang, the initialized local variable
-> __chunk_size is optimized into a zero-initialized flag that indicates
-> whether chunking is in effect or not. This flag is therefore emitted into
-> .bss, which triggers the ARM decompressor's diagnostics, resulting in a
-> failed build.
->
-> Under UEFI, we never execute the decompressor from ROM, so the diagnostic
-> makes little sense here. But we can easily work around the issue by making
-> __chunk_size global instead.
->
-> However, given that the file I/O chunking that is controlled by the
-> __chunk_size variable is intended to work around known bugs on various
-> x86 implementations of UEFI, we can simply make the chunking an x86
-> specific feature. This is an improvement by itself, and also removes the
-> need to parse the efi= options in the stub entirely.
->
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
 
-Tested-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org
+> > base:   https://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git next
+> 
+> This is the wrong repo ^^^
+> 
+> I am not sure if there is anything we can do about this, but perhaps
+> you should simply remove it now that we've migrated to the new repo.
+
+Is the error a derivative of the rebase?  I'm sure this was working in the
+un-rebased code.
+
+David
