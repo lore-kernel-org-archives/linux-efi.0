@@ -1,153 +1,365 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 05/10] x86/efi: Add support for EFI_MEMORY_ATTRIBUTES_TABLE
-Date: Tue, 31 Jan 2017 13:21:37 +0000
-Message-ID: <1485868902-20401-6-git-send-email-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 01/10] efi: Deduplicate efi_file_size() / _read() / _close()
+Date: Tue, 31 Jan 2017 13:21:33 +0000
+Message-ID: <1485868902-20401-2-git-send-email-ard.biesheuvel@linaro.org>
 References: <1485868902-20401-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1485868902-20401-1-git-send-email-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Fenghua Yu <fenghua.yu@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1485868902-20401-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 
-UEFI v2.6 introduces EFI_MEMORY_ATTRIBUTES_TABLE which describes memory
-protections that may be applied to EFI Runtime code and data regions by
-kernel. This enables kernel to map these regions more strictly thereby
-increasing security. Presently, the only valid bits for attribute field
-of a memory descriptor are EFI_MEMORY_RO and EFI_MEMORY_XP, hence use
-these bits to update mappings in efi_pgd.
+There's one ARM, one x86_32 and one x86_64 version which can be folded
+into a single shared version by masking their differences with the shiny
+new efi_call_proto() macro.
 
-UEFI specification recommends to use this feature instead of
-EFI_PROPERTIES_TABLE and hence while updating efi mappings we first
-check for EFI_MEMORY_ATTRIBUTES_TABLE and if it's present we update
-mappings according to this table and hence disregarding
-EFI_PROPERTIES_TABLE even if it's published by firmware. We consider
-EFI_PROPERTIES_TABLE only when EFI_MEMORY_ATTRIBUTES_TABLE is absent.
+No functional change intended.
 
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: "Lee, Chun-Yi" <jlee@suse.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Ricardo Neri <ricardo.neri@intel.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-Cc: Fenghua Yu <fenghua.yu@intel.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/x86/platform/efi/efi_64.c | 64 +++++++++++++++++++++++++++++++++++-------
- drivers/firmware/efi/memattr.c |  5 +++-
- 2 files changed, 58 insertions(+), 11 deletions(-)
+ arch/x86/boot/compressed/eboot.c               | 148 -------------------------
+ drivers/firmware/efi/libstub/arm-stub.c        |  69 ------------
+ drivers/firmware/efi/libstub/efi-stub-helper.c |  63 +++++++++++
+ drivers/firmware/efi/libstub/efistub.h         |   8 --
+ 4 files changed, 63 insertions(+), 225 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 319148bd4b05..ee966aaf51b2 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -398,10 +398,44 @@ void __init parse_efi_setup(u64 phys_addr, u32 data_len)
- 	efi_setup = phys_addr + sizeof(struct setup_data);
- }
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index ff01c8fc76f7..f1cf284d631e 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -38,154 +38,6 @@ static void setup_boot_services##bits(struct efi_config *c)		\
+ BOOT_SERVICES(32);
+ BOOT_SERVICES(64);
  
--void __init efi_runtime_update_mappings(void)
-+static int __init efi_update_mappings(efi_memory_desc_t *md, unsigned long pf)
- {
- 	unsigned long pfn;
- 	pgd_t *pgd = efi_pgd;
-+	int err1, err2;
-+
-+	/* Update the 1:1 mapping */
-+	pfn = md->phys_addr >> PAGE_SHIFT;
-+	err1 = kernel_map_pages_in_pgd(pgd, pfn, md->phys_addr, md->num_pages, pf);
-+	if (err1) {
-+		pr_err("Error while updating 1:1 mapping PA 0x%llx -> VA 0x%llx!\n",
-+			   md->phys_addr, md->virt_addr);
-+	}
-+
-+	err2 = kernel_map_pages_in_pgd(pgd, pfn, md->virt_addr, md->num_pages, pf);
-+	if (err2) {
-+		pr_err("Error while updating VA mapping PA 0x%llx -> VA 0x%llx!\n",
-+			   md->phys_addr, md->virt_addr);
-+	}
-+
-+	return err1 || err2;
-+}
-+
-+static int __init efi_update_mem_attr(struct mm_struct *mm, efi_memory_desc_t *md)
-+{
-+	unsigned long pf = 0;
-+
-+	if (md->attribute & EFI_MEMORY_XP)
-+		pf |= _PAGE_NX;
-+
-+	if (!(md->attribute & EFI_MEMORY_RO))
-+		pf |= _PAGE_RW;
-+
-+	return efi_update_mappings(md, pf);
-+}
-+
-+void __init efi_runtime_update_mappings(void)
-+{
- 	efi_memory_desc_t *md;
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP)) {
-@@ -410,6 +444,24 @@ void __init efi_runtime_update_mappings(void)
- 		return;
- 	}
- 
-+	/*
-+	 * Use EFI Memory Attribute Table for mapping permissions if it
-+	 * exists, since it is intended to supersede EFI_PROPERTIES_TABLE.
-+	 */
-+	if (efi_enabled(EFI_MEM_ATTR)) {
-+		efi_memattr_apply_permissions(NULL, efi_update_mem_attr);
-+		return;
-+	}
-+
-+	/*
-+	 * EFI_MEMORY_ATTRIBUTES_TABLE is intended to replace
-+	 * EFI_PROPERTIES_TABLE. So, use EFI_PROPERTIES_TABLE to update
-+	 * permissions only if EFI_MEMORY_ATTRIBUTES_TABLE is not
-+	 * published by firmware. Even if we find a buggy implementation of
-+	 * EFI_MEMORY_ATTRIBUTES_TABLE don't fall back to
-+	 * EFI_PROPERTIES_TABLE because of the same above mentioned reason.
-+	 */
-+
- 	if (!efi_enabled(EFI_NX_PE_DATA))
- 		return;
- 
-@@ -430,15 +482,7 @@ void __init efi_runtime_update_mappings(void)
- 			(md->type != EFI_RUNTIME_SERVICES_CODE))
- 			pf |= _PAGE_RW;
- 
--		/* Update the 1:1 mapping */
--		pfn = md->phys_addr >> PAGE_SHIFT;
--		if (kernel_map_pages_in_pgd(pgd, pfn, md->phys_addr, md->num_pages, pf))
--			pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
--				   md->phys_addr, md->virt_addr);
+-void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
 -
--		if (kernel_map_pages_in_pgd(pgd, pfn, md->virt_addr, md->num_pages, pf))
--			pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
--				   md->phys_addr, md->virt_addr);
-+		efi_update_mappings(md, pf);
- 	}
+-static efi_status_t
+-__file_size32(void *__fh, efi_char16_t *filename_16,
+-	      void **handle, u64 *file_sz)
+-{
+-	efi_file_handle_32_t *h, *fh = __fh;
+-	efi_file_info_t *info;
+-	efi_status_t status;
+-	efi_guid_t info_guid = EFI_FILE_INFO_ID;
+-	u32 info_sz;
+-
+-	status = efi_early->call((unsigned long)fh->open, fh, &h, filename_16,
+-				 EFI_FILE_MODE_READ, (u64)0);
+-	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table, "Failed to open file: ");
+-		efi_char16_printk(sys_table, filename_16);
+-		efi_printk(sys_table, "\n");
+-		return status;
+-	}
+-
+-	*handle = h;
+-
+-	info_sz = 0;
+-	status = efi_early->call((unsigned long)h->get_info, h, &info_guid,
+-				 &info_sz, NULL);
+-	if (status != EFI_BUFFER_TOO_SMALL) {
+-		efi_printk(sys_table, "Failed to get file info size\n");
+-		return status;
+-	}
+-
+-grow:
+-	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+-				info_sz, (void **)&info);
+-	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table, "Failed to alloc mem for file info\n");
+-		return status;
+-	}
+-
+-	status = efi_early->call((unsigned long)h->get_info, h, &info_guid,
+-				 &info_sz, info);
+-	if (status == EFI_BUFFER_TOO_SMALL) {
+-		efi_call_early(free_pool, info);
+-		goto grow;
+-	}
+-
+-	*file_sz = info->file_size;
+-	efi_call_early(free_pool, info);
+-
+-	if (status != EFI_SUCCESS)
+-		efi_printk(sys_table, "Failed to get initrd info\n");
+-
+-	return status;
+-}
+-
+-static efi_status_t
+-__file_size64(void *__fh, efi_char16_t *filename_16,
+-	      void **handle, u64 *file_sz)
+-{
+-	efi_file_handle_64_t *h, *fh = __fh;
+-	efi_file_info_t *info;
+-	efi_status_t status;
+-	efi_guid_t info_guid = EFI_FILE_INFO_ID;
+-	u64 info_sz;
+-
+-	status = efi_early->call((unsigned long)fh->open, fh, &h, filename_16,
+-				 EFI_FILE_MODE_READ, (u64)0);
+-	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table, "Failed to open file: ");
+-		efi_char16_printk(sys_table, filename_16);
+-		efi_printk(sys_table, "\n");
+-		return status;
+-	}
+-
+-	*handle = h;
+-
+-	info_sz = 0;
+-	status = efi_early->call((unsigned long)h->get_info, h, &info_guid,
+-				 &info_sz, NULL);
+-	if (status != EFI_BUFFER_TOO_SMALL) {
+-		efi_printk(sys_table, "Failed to get file info size\n");
+-		return status;
+-	}
+-
+-grow:
+-	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+-				info_sz, (void **)&info);
+-	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table, "Failed to alloc mem for file info\n");
+-		return status;
+-	}
+-
+-	status = efi_early->call((unsigned long)h->get_info, h, &info_guid,
+-				 &info_sz, info);
+-	if (status == EFI_BUFFER_TOO_SMALL) {
+-		efi_call_early(free_pool, info);
+-		goto grow;
+-	}
+-
+-	*file_sz = info->file_size;
+-	efi_call_early(free_pool, info);
+-
+-	if (status != EFI_SUCCESS)
+-		efi_printk(sys_table, "Failed to get initrd info\n");
+-
+-	return status;
+-}
+-efi_status_t
+-efi_file_size(efi_system_table_t *sys_table, void *__fh,
+-	      efi_char16_t *filename_16, void **handle, u64 *file_sz)
+-{
+-	if (efi_early->is64)
+-		return __file_size64(__fh, filename_16, handle, file_sz);
+-
+-	return __file_size32(__fh, filename_16, handle, file_sz);
+-}
+-
+-efi_status_t
+-efi_file_read(void *handle, unsigned long *size, void *addr)
+-{
+-	unsigned long func;
+-
+-	if (efi_early->is64) {
+-		efi_file_handle_64_t *fh = handle;
+-
+-		func = (unsigned long)fh->read;
+-		return efi_early->call(func, handle, size, addr);
+-	} else {
+-		efi_file_handle_32_t *fh = handle;
+-
+-		func = (unsigned long)fh->read;
+-		return efi_early->call(func, handle, size, addr);
+-	}
+-}
+-
+-efi_status_t efi_file_close(void *handle)
+-{
+-	if (efi_early->is64) {
+-		efi_file_handle_64_t *fh = handle;
+-
+-		return efi_early->call((unsigned long)fh->close, handle);
+-	} else {
+-		efi_file_handle_32_t *fh = handle;
+-
+-		return efi_early->call((unsigned long)fh->close, handle);
+-	}
+-}
+-
+ static inline efi_status_t __open_volume32(void *__image, void **__fh)
+ {
+ 	efi_file_io_interface_t *io;
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index b4f7d78f9e8b..6fca48c9e054 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -91,75 +91,6 @@ efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg,
+ 	return status;
  }
  
-diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
-index 402197460507..8986757eafaf 100644
---- a/drivers/firmware/efi/memattr.c
-+++ b/drivers/firmware/efi/memattr.c
-@@ -175,8 +175,11 @@ int __init efi_memattr_apply_permissions(struct mm_struct *mm,
- 				md.phys_addr + size - 1,
- 				efi_md_typeattr_format(buf, sizeof(buf), &md));
+-efi_status_t efi_file_close(void *handle)
+-{
+-	efi_file_handle_t *fh = handle;
+-
+-	return fh->close(handle);
+-}
+-
+-efi_status_t
+-efi_file_read(void *handle, unsigned long *size, void *addr)
+-{
+-	efi_file_handle_t *fh = handle;
+-
+-	return fh->read(handle, size, addr);
+-}
+-
+-
+-efi_status_t
+-efi_file_size(efi_system_table_t *sys_table_arg, void *__fh,
+-	      efi_char16_t *filename_16, void **handle, u64 *file_sz)
+-{
+-	efi_file_handle_t *h, *fh = __fh;
+-	efi_file_info_t *info;
+-	efi_status_t status;
+-	efi_guid_t info_guid = EFI_FILE_INFO_ID;
+-	unsigned long info_sz;
+-
+-	status = fh->open(fh, &h, filename_16, EFI_FILE_MODE_READ, (u64)0);
+-	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table_arg, "Failed to open file: ");
+-		efi_char16_printk(sys_table_arg, filename_16);
+-		efi_printk(sys_table_arg, "\n");
+-		return status;
+-	}
+-
+-	*handle = h;
+-
+-	info_sz = 0;
+-	status = h->get_info(h, &info_guid, &info_sz, NULL);
+-	if (status != EFI_BUFFER_TOO_SMALL) {
+-		efi_printk(sys_table_arg, "Failed to get file info size\n");
+-		return status;
+-	}
+-
+-grow:
+-	status = sys_table_arg->boottime->allocate_pool(EFI_LOADER_DATA,
+-				 info_sz, (void **)&info);
+-	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table_arg, "Failed to alloc mem for file info\n");
+-		return status;
+-	}
+-
+-	status = h->get_info(h, &info_guid, &info_sz,
+-						   info);
+-	if (status == EFI_BUFFER_TOO_SMALL) {
+-		sys_table_arg->boottime->free_pool(info);
+-		goto grow;
+-	}
+-
+-	*file_sz = info->file_size;
+-	sys_table_arg->boottime->free_pool(info);
+-
+-	if (status != EFI_SUCCESS)
+-		efi_printk(sys_table_arg, "Failed to get initrd info\n");
+-
+-	return status;
+-}
+-
+-
+-
+ void efi_char16_printk(efi_system_table_t *sys_table_arg,
+ 			      efi_char16_t *str)
+ {
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index 757badc1debb..6ee9164251a9 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -338,6 +338,69 @@ void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
+ 	efi_call_early(free_pages, addr, nr_pages);
+ }
  
--		if (valid)
-+		if (valid) {
- 			ret = fn(mm, &md);
-+			if (ret)
-+				pr_err("Error updating mappings, skipping subsequent md's\n");
-+		}
- 	}
- 	memunmap(tbl);
- 	return ret;
++static efi_status_t efi_file_size(efi_system_table_t *sys_table_arg, void *__fh,
++				  efi_char16_t *filename_16, void **handle,
++				  u64 *file_sz)
++{
++	efi_file_handle_t *h, *fh = __fh;
++	efi_file_info_t *info;
++	efi_status_t status;
++	efi_guid_t info_guid = EFI_FILE_INFO_ID;
++	unsigned long info_sz;
++
++	status = efi_call_proto(efi_file_handle, open, fh, &h, filename_16,
++				EFI_FILE_MODE_READ, (u64)0);
++	if (status != EFI_SUCCESS) {
++		efi_printk(sys_table_arg, "Failed to open file: ");
++		efi_char16_printk(sys_table_arg, filename_16);
++		efi_printk(sys_table_arg, "\n");
++		return status;
++	}
++
++	*handle = h;
++
++	info_sz = 0;
++	status = efi_call_proto(efi_file_handle, get_info, h, &info_guid,
++				&info_sz, NULL);
++	if (status != EFI_BUFFER_TOO_SMALL) {
++		efi_printk(sys_table_arg, "Failed to get file info size\n");
++		return status;
++	}
++
++grow:
++	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
++				info_sz, (void **)&info);
++	if (status != EFI_SUCCESS) {
++		efi_printk(sys_table_arg, "Failed to alloc mem for file info\n");
++		return status;
++	}
++
++	status = efi_call_proto(efi_file_handle, get_info, h, &info_guid,
++				&info_sz, info);
++	if (status == EFI_BUFFER_TOO_SMALL) {
++		efi_call_early(free_pool, info);
++		goto grow;
++	}
++
++	*file_sz = info->file_size;
++	efi_call_early(free_pool, info);
++
++	if (status != EFI_SUCCESS)
++		efi_printk(sys_table_arg, "Failed to get initrd info\n");
++
++	return status;
++}
++
++static efi_status_t efi_file_read(void *handle, unsigned long *size, void *addr)
++{
++	return efi_call_proto(efi_file_handle, read, handle, size, addr);
++}
++
++static efi_status_t efi_file_close(void *handle)
++{
++	return efi_call_proto(efi_file_handle, close, handle);
++}
++
+ /*
+  * Parse the ASCII string 'cmdline' for EFI options, denoted by the efi=
+  * option, e.g. efi=nochunk.
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 0e2a96b12cb3..71c4d0e3c4ed 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -29,14 +29,6 @@ void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
+ efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg, void *__image,
+ 			     void **__fh);
+ 
+-efi_status_t efi_file_size(efi_system_table_t *sys_table_arg, void *__fh,
+-			   efi_char16_t *filename_16, void **handle,
+-			   u64 *file_sz);
+-
+-efi_status_t efi_file_read(void *handle, unsigned long *size, void *addr);
+-
+-efi_status_t efi_file_close(void *handle);
+-
+ unsigned long get_dram_base(efi_system_table_t *sys_table_arg);
+ 
+ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
 -- 
 2.7.4
