@@ -1,90 +1,29 @@
-From: Riku Voipio <riku.voipio-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi: fdt: avoid FDT manipulation after ExitBootServices()
-Date: Wed, 1 Feb 2017 16:46:08 +0200
-Message-ID: <CAAqcGH=X=nH=r610-R4madsCG-GWj2y0dP05BrVSDgPCbb3XGw@mail.gmail.com>
-References: <1485954693-25750-1-git-send-email-ard.biesheuvel@linaro.org>
+From: David Howells <dhowells@redhat.com>
+Subject: Re: [PATCH 6/7] efi: Handle secure boot from UEFI-2.6 [ver #7]
+Date: Wed, 01 Feb 2017 15:00:17 +0000
+Message-ID: <23750.1485961217@warthog.procyon.org.uk>
+References: <CAKv+Gu8FOcMx0UXXdd3nhE+PUPzbEn9X=kBQDfkLOZBvVu-8fg@mail.gmail.com> <148587558696.4026.16034622623568539004.stgit@warthog.procyon.org.uk> <148587564847.4026.5759345672956585977.stgit@warthog.procyon.org.uk> <CAKv+Gu8dnKB1sRGb3U+XB1eoA7Eyo4qSFBtPRbvGV912xPViVw@mail.gmail.com> <10454.1485889162@warthog.procyon.org.uk> <CAKv+Gu_gy6575axL6M64OSo33ZM2dnbs7cajqJRd8VtbjAXCTw@mail.gmail.com> <20578.1485952425@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1485954693-25750-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <CAKv+Gu8FOcMx0UXXdd3nhE+PUPzbEn9X=kBQDfkLOZBvVu-8fg@mail.gmail.com>
+Content-ID: <23749.1485961217.1@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: dhowells@redhat.com, James Bottomley <James.Bottomley@hansenpartnership.com>, Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, keyrings@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 1 February 2017 at 15:11, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> Some AArch64 UEFI implementations disable the MMU in ExitBootServices(),
-> after which unaligned accesses to RAM are no longer supported.
->
-> Commit abfb7b686a3e ("efi/libstub/arm*: Pass latest memory map to the
-> kernel") fixed an issue in the memory map handling of the stub FDT code,
-> but inadvertently created an issue with such firmwares, by moving some
-> of the FDT manipulation to after the invocation of ExitBootServices().
-> However, the stub's libfdt implementation uses the ordinary, accelerated
-> string functions, which rely on hardware handling of unaligned accesses,
-> resulting in alignment faults when executed with the MMU off.
->
-> Whether disabling the MMU in ExitBootServices() complies with the UEFI
-> spec is unclear, but it is a reality we have to deal with, given that
-> it wasn't a problem before commit abfb7b686a3e was applied.
->
-> So fix the situation by moving the update_fdt_memmap() into the callback
-> invoked by efi_exit_boot_services() right before it hits the button.
->
-> Fixes: abfb7b686a3e ("efi/libstub/arm*: Pass latest memory map to the kernel")
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 
-Tested-by: Riku Voipio <riku.voipio-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> From the OS pov, UserMode and DeployedMode are the same, the only
+> difference being that AuditMode may be entered from UserMode simply by
+> setting the variable to 0x1 (which can only be done before
+> ExitBootServices()). And since AuditMode implies SetupMode (according
+> to the diagram), you are right that we don't need to care about
+> AuditMode either. AFAICT, that makes the entire patch unnecessary, so
+> let's drop it for now.
 
-> ---
->  drivers/firmware/efi/libstub/fdt.c | 14 +++-----------
->  1 file changed, 3 insertions(+), 11 deletions(-)
->
-> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-> index 921dfa047202..260c4b4b492e 100644
-> --- a/drivers/firmware/efi/libstub/fdt.c
-> +++ b/drivers/firmware/efi/libstub/fdt.c
-> @@ -187,6 +187,7 @@ static efi_status_t update_fdt_memmap(void *fdt, struct efi_boot_memmap *map)
->  struct exit_boot_struct {
->         efi_memory_desc_t *runtime_map;
->         int *runtime_entry_count;
-> +       void *new_fdt_addr;
->  };
->
->  static efi_status_t exit_boot_func(efi_system_table_t *sys_table_arg,
-> @@ -202,7 +203,7 @@ static efi_status_t exit_boot_func(efi_system_table_t *sys_table_arg,
->         efi_get_virtmap(*map->map, *map->map_size, *map->desc_size,
->                         p->runtime_map, p->runtime_entry_count);
->
-> -       return EFI_SUCCESS;
-> +       return update_fdt_memmap(p->new_fdt_addr, map);
->  }
->
->  /*
-> @@ -300,22 +301,13 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
->
->         priv.runtime_map = runtime_map;
->         priv.runtime_entry_count = &runtime_entry_count;
-> +       priv.new_fdt_addr = (void *)*new_fdt_addr;
->         status = efi_exit_boot_services(sys_table, handle, &map, &priv,
->                                         exit_boot_func);
->
->         if (status == EFI_SUCCESS) {
->                 efi_set_virtual_address_map_t *svam;
->
-> -               status = update_fdt_memmap((void *)*new_fdt_addr, &map);
-> -               if (status != EFI_SUCCESS) {
-> -                       /*
-> -                        * The kernel won't get far without the memory map, but
-> -                        * may still be able to print something meaningful so
-> -                        * return success here.
-> -                        */
-> -                       return EFI_SUCCESS;
-> -               }
-> -
->                 /* Install the new virtual address map */
->                 svam = sys_table->runtime->set_virtual_address_map;
->                 status = svam(runtime_entry_count * desc_size, desc_size,
-> --
-> 2.7.4
->
+Okay, in that case, do you want me to reissue and place a signed tag on my
+patchset without that patch, or can you pull the other patches individually?
+
+David
