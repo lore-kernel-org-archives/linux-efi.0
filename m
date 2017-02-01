@@ -1,20 +1,22 @@
-From: Leif Lindholm <leif.lindholm@linaro.org>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 Subject: Re: [PATCH] efi: fdt: avoid FDT manipulation after ExitBootServices()
-Date: Wed, 1 Feb 2017 17:49:30 +0000
-Message-ID: <20170201174930.GD25883@bivouac.eciton.net>
+Date: Wed, 1 Feb 2017 20:03:41 +0100
+Message-ID: <20170201190341.GA1060@gmail.com>
 References: <1485971102-23330-1-git-send-email-ard.biesheuvel@linaro.org>
  <1485971102-23330-2-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1485971102-23330-2-git-send-email-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: mark.rutland@arm.com, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, linux-arm-kernel@lists.infradead.org, riku.voipio@linaro.org, matt@codeblueprint.co.uk, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
+In-Reply-To: <1485971102-23330-2-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, riku.voipio-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Feb 01, 2017 at 05:45:02PM +0000, Ard Biesheuvel wrote:
+
+* Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+
 > Some AArch64 UEFI implementations disable the MMU in ExitBootServices(),
 > after which unaligned accesses to RAM are no longer supported.
 > 
@@ -37,13 +39,10 @@ On Wed, Feb 01, 2017 at 05:45:02PM +0000, Ard Biesheuvel wrote:
 > (i.e., involving a stack) can never be done in a way that is architecturally
 > safe.
 > 
-> Cc: <stable@vger.kernel.org>
+> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 > Fixes: abfb7b686a3e ("efi/libstub/arm*: Pass latest memory map to the kernel")
-> Tested-by: Riku Voipio <riku.voipio@linaro.org>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-
-Acked-by: Leif Lindholm <leif.lindholm@linaro.org>
-
+> Tested-by: Riku Voipio <riku.voipio-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
 >  drivers/firmware/efi/libstub/fdt.c | 14 +++-----------
 >  1 file changed, 3 insertions(+), 11 deletions(-)
@@ -74,29 +73,9 @@ Acked-by: Leif Lindholm <leif.lindholm@linaro.org>
 >  	priv.runtime_map = runtime_map;
 >  	priv.runtime_entry_count = &runtime_entry_count;
 > +	priv.new_fdt_addr = (void *)*new_fdt_addr;
->  	status = efi_exit_boot_services(sys_table, handle, &map, &priv,
->  					exit_boot_func);
->  
->  	if (status == EFI_SUCCESS) {
->  		efi_set_virtual_address_map_t *svam;
->  
-> -		status = update_fdt_memmap((void *)*new_fdt_addr, &map);
-> -		if (status != EFI_SUCCESS) {
-> -			/*
-> -			 * The kernel won't get far without the memory map, but
-> -			 * may still be able to print something meaningful so
-> -			 * return success here.
-> -			 */
-> -			return EFI_SUCCESS;
-> -		}
-> -
->  		/* Install the new virtual address map */
->  		svam = sys_table->runtime->set_virtual_address_map;
->  		status = svam(runtime_entry_count * desc_size, desc_size,
-> -- 
-> 2.7.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Nit: could the type cast by dropped?
+
+Thanks,
+
+	Ingo
