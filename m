@@ -1,55 +1,34 @@
-From: Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [REGRESSION] EFI mixed mode patch triggers boot failure
-Date: Wed, 1 Feb 2017 09:35:44 -0800
-Message-ID: <1208352f-ab6a-4489-d6b1-2f3e537f5e60@redhat.com>
-References: <dc0bc031-f20e-9ad0-57f4-cfa1e04f8f05@redhat.com>
- <7af87cde-ce79-d6e8-0797-54069a77f42b@redhat.com>
- <20161020120357.GB19876@codeblueprint.co.uk>
- <e34311e8-fe39-3b65-bd6d-8f1594e56336@redhat.com>
- <20170127223441.GJ31613@codeblueprint.co.uk>
- <f7d8f786-6000-cbbe-feb2-c97c0378b6e9@redhat.com>
- <alpine.LSU.2.20.1701301409270.25515@cbobk.fhfr.pm>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <alpine.LSU.2.20.1701301409270.25515-YHPUNQjx9ReKbouaWp301Q@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jiri Kosina <jikos-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Justin Forbes <jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [GIT PULL] EFI urgent fix for v4.10
+Date: Wed,  1 Feb 2017 17:45:01 +0000
+Message-ID: <1485971102-23330-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: leif.lindholm@linaro.org, mark.rutland@arm.com, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: linux-arm-kernel@lists.infradead.org, riku.voipio@linaro.org, matt@codeblueprint.co.uk, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 01/30/2017 05:10 AM, Jiri Kosina wrote:
-> On Sat, 28 Jan 2017, Laura Abbott wrote:
-> 
->>>> Was out for a few days, reporter says the below patch does not work.
->>>> There was some confusion with secure boot so I've asked them to re-test
->>>> with efi=old_map and secure boot off.
->>>
->>> FYI, you may want to ask the reporter to try out Jiri's patch if this
->>> is still an issue for them,
->>>
->>>   https://lkml.kernel.org/r/alpine.LSU.2.20.1701271638240.25515-YHPUNQjx9ReKbouaWp301Q@public.gmane.org
->>>
->>
->> Thanks! I pulled this into the latest Fedora update so I'll be asking
->> a couple of people to test.
-> 
-> BTW where exactly is this tracked for Fedora, please? I'd like to get an 
-> idea how widespread this behavior is among different BIOS vendors.
-> 
-> I've found
-> 
-> 	https://bugzilla.redhat.com/show_bug.cgi?id=1384238
-> 
-> is that the primary tracking bug on your side?
-> 
-> Thanks,
-> 
+The following changes since commit 090abfc9dc7faf3f84799f956158c8c3af149a81:
 
-That's the main one where debugging was happening. There may be a couple
-of others floating around that I hadn't had time to fully investigate.
-I'll dupe them to the above if I find them.
+  x86/efi: Always map first physical page into EFI pagetables (2017-01-27 20:20:01 +0000)
 
-Thanks,
-Laura
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
+
+for you to fetch changes up to 3436384c23eec3afff9bde221c7582f9b504ce9e:
+
+  efi: fdt: avoid FDT manipulation after ExitBootServices() (2017-02-01 16:33:37 +0000)
+
+----------------------------------------------------------------
+* Fix for unexpected fallout of a previous urgent fix that addressed handling
+  of the memory map in the EFI stub FDT code, which turns out to break systems
+  that disable the MMU in ExitBootServices() (which is a highly questionable
+  practice by itself)
+
+----------------------------------------------------------------
+Ard Biesheuvel (1):
+      efi: fdt: avoid FDT manipulation after ExitBootServices()
+
+ drivers/firmware/efi/libstub/fdt.c | 14 +++-----------
+ 1 file changed, 3 insertions(+), 11 deletions(-)
