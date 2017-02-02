@@ -1,134 +1,43 @@
-From: Steven Rostedt <rostedt@goodmis.org>
-Subject: Re: [PATCH V8 09/10] trace, ras: add ARM processor error trace event
-Date: Wed, 1 Feb 2017 22:15:44 -0500
-Message-ID: <20170201221544.3d8651e5@grimm.local.home>
-References: <1485969413-23577-1-git-send-email-tbaicar@codeaurora.org>
- <1485969413-23577-10-git-send-email-tbaicar@codeaurora.org>
+From: Andy Lutomirski <luto@kernel.org>
+Subject: Re: [PATCH v2 3/3] x86: Make the GDT remapping read-only on 64 bit
+Date: Wed, 1 Feb 2017 21:13:55 -0800
+Message-ID: <CALCETrU_WPm+HonkiRtaO0kTTqkfAcyhANp22yPGiSAPkNsRGQ@mail.gmail.com>
+References: <20170126165940.30799-1-thgarnie@google.com> <20170126165940.30799-3-thgarnie@google.com>
+ <20170201091534.GA25025@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <1485969413-23577-10-git-send-email-tbaicar@codeaurora.org>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <kernel-hardening-return-6221-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+In-Reply-To: <20170201091534.GA25025@gmail.com>
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Thomas Garnier <thgarnie@google.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Kees Cook <keescook@chromium.org>, Andy Lutomirski <luto@kernel.org>, Arjan van de Ven <arjan@linux.intel.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Borislav Petkov <bp@suse.de>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Rusty Russell <rusty@rustcorp.com.au>, Christian Borntraeger <borntraeger@de.ibm.com>, Fenghua Yu <fenghua.yu@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed,  1 Feb 2017 10:16:52 -0700
-Tyler Baicar <tbaicar@codeaurora.org> wrote:
+On Wed, Feb 1, 2017 at 1:15 AM, Ingo Molnar <mingo@kernel.org> wrote:
+>
+> * Thomas Garnier <thgarnie@google.com> wrote:
+>
+>> This patch makes the GDT remapped pages read-only to prevent corruption.
+>> This change is done only on 64 bit.
+>
 
-> Currently there are trace events for the various RAS
-> errors with the exception of ARM processor type errors.
-> Add a new trace event for such errors so that the user
-> will know when they occur. These trace events are
-> consistent with the ARM processor error section type
-> defined in UEFI 2.6 spec section N.2.4.4.
-> 
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> Acked-by: Steven Rostedt <rostedt@goodmis.org>
-> ---
->  drivers/acpi/apei/ghes.c    |  7 ++++++-
->  drivers/firmware/efi/cper.c |  1 +
->  drivers/ras/ras.c           |  1 +
->  include/ras/ras_event.h     | 34 ++++++++++++++++++++++++++++++++++
->  4 files changed, 42 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index a989345..013faf0 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -512,7 +512,12 @@ static void ghes_do_proc(struct ghes *ghes,
->  
->  		}
->  #endif
-> -		else {
-> +		else if (!uuid_le_cmp(sec_type, CPER_SEC_PROC_ARM)) {
-> +			struct cper_sec_proc_arm *arm_err;
-> +
-> +			arm_err = acpi_hest_generic_data_payload(gdata);
-> +			trace_arm_event(arm_err);
 
-According to the kbuild failure, I'm guessing this file requires a:
+>>
+>> -     table_base = gdt->address;
+>> +     table_base = (unsigned long)get_current_direct_gdt();
+>
+> Instead of spreading these type casts far and wide please introduce another
+> accessor the returns 'unsigned long':
+>
+>         get_cpu_gdt_rw_vaddr()
+>
 
- #include <ras/ras_event.h>
+That whole function is an abomination.  How about replacing 'unsigned
+long table_base' with 'struct desc_struct *table'?  If you're feeling
+really adventurous, *delete* that function and replace all of its
+users with something sane.
 
--- Steve
-
-> +		} else {
->  			void *unknown_err = acpi_hest_generic_data_payload(gdata);
->  			trace_unknown_sec_event(&sec_type,
->  					fru_id, fru_text, sec_sev,
-> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> index 48cb8ee..0ec678e 100644
-> --- a/drivers/firmware/efi/cper.c
-> +++ b/drivers/firmware/efi/cper.c
-> @@ -35,6 +35,7 @@
->  #include <linux/printk.h>
->  #include <linux/bcd.h>
->  #include <acpi/ghes.h>
-> +#include <ras/ras_event.h>
->  
->  #define INDENT_SP	" "
->  
-> diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
-> index fb2500b..8ba5a94 100644
-> --- a/drivers/ras/ras.c
-> +++ b/drivers/ras/ras.c
-> @@ -28,3 +28,4 @@ static int __init ras_init(void)
->  #endif
->  EXPORT_TRACEPOINT_SYMBOL_GPL(mc_event);
->  EXPORT_TRACEPOINT_SYMBOL_GPL(unknown_sec_event);
-> +EXPORT_TRACEPOINT_SYMBOL_GPL(arm_event);
-> diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
-> index 5861b6f..b36db48 100644
-> --- a/include/ras/ras_event.h
-> +++ b/include/ras/ras_event.h
-> @@ -162,6 +162,40 @@
->  );
->  
->  /*
-> + * ARM Processor Events Report
-> + *
-> + * This event is generated when hardware detects an ARM processor error
-> + * has occurred. UEFI 2.6 spec section N.2.4.4.
-> + */
-> +TRACE_EVENT(arm_event,
-> +
-> +	TP_PROTO(const struct cper_sec_proc_arm *proc),
-> +
-> +	TP_ARGS(proc),
-> +
-> +	TP_STRUCT__entry(
-> +		__field(u64, mpidr)
-> +		__field(u64, midr)
-> +		__field(u32, running_state)
-> +		__field(u32, psci_state)
-> +		__field(u8, affinity)
-> +	),
-> +
-> +	TP_fast_assign(
-> +		__entry->affinity = proc->affinity_level;
-> +		__entry->mpidr = proc->mpidr;
-> +		__entry->midr = proc->midr;
-> +		__entry->running_state = proc->running_state;
-> +		__entry->psci_state = proc->psci_state;
-> +	),
-> +
-> +	TP_printk("affinity level: %d; MPIDR: %016llx; MIDR: %016llx; "
-> +		  "running state: %d; PSCI state: %d",
-> +		  __entry->affinity, __entry->mpidr, __entry->midr,
-> +		  __entry->running_state, __entry->psci_state)
-> +);
-> +
-> +/*
->   * Unknown Section Report
->   *
->   * This event is generated when hardware detected a hardware
+--Andy
