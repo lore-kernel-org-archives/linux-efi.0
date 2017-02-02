@@ -1,40 +1,54 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [REGRESSION][v4.9.y][v4.10.y] x86/efi: Only map RAM into EFI page
  tables if in mixed-mode
-Date: Thu, 2 Feb 2017 20:34:31 +0000
-Message-ID: <CAKv+Gu8g0wYDfdnnns448UZhFO-O6iyejSr13NjxPp_5wEZDQQ@mail.gmail.com>
+Date: Thu, 2 Feb 2017 12:36:11 -0800
+Message-ID: <d5f1ba6b-06ed-b5b0-1b0e-58d5f385f7c2@redhat.com>
 References: <31c63945-fa81-de18-941b-9021f3d9f16c@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <31c63945-fa81-de18-941b-9021f3d9f16c@canonical.com>
-Sender: stable-owner@vger.kernel.org
-To: Joseph Salisbury <joseph.salisbury@canonical.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, waiman.long@hpe.com, Borislav Petkov <bp@alien8.de>, Linus Torvalds <torvalds@linux-foundation.org>, Theodore Ts'o <tytso@mit.edu>, Arnd Bergmann <arnd@arndb.de>, Greg KH <gregkh@linuxfoundation.org>, scott.norton@hpe.com, doug.hatch@hpe.com, "stable@vger.kernel.org" <stable@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <31c63945-fa81-de18-941b-9021f3d9f16c-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Joseph Salisbury <joseph.salisbury-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Cc: waiman.long-ZPxbGqLxI0U@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, tytso-3s7WtUTddSA@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, scott.norton-ZPxbGqLxI0U@public.gmane.org, doug.hatch-ZPxbGqLxI0U@public.gmane.org, "stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 2 February 2017 at 20:17, Joseph Salisbury
-<joseph.salisbury@canonical.com> wrote:
+On 02/02/2017 12:17 PM, Joseph Salisbury wrote:
 > Hi Matt,
->
+> 
 > A kernel bug report was opened against Ubuntu [0].  After a kernel
 > bisect, it was found that reverting the following commit resolved this bug:
->
+> 
 > commit 1297667083d5442aafe3e337b9413bf02b114edb
-> Author: Matt Fleming <matt@codeblueprint.co.uk>
+> Author: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 > Date:   Mon Sep 19 13:09:09 2016 +0100
->
+> 
 >     x86/efi: Only map RAM into EFI page tables if in mixed-mode
->
->
+> 
+> 
 > The regression was introduced as of v4.8-rc8.  It also still affects
 > current mainline.
->
+> 
 > I was hoping to get your feedback, since you are the patch author.  Do
 > you think gathering any additional data will help diagnose this issue,
 > or would it be best to submit a revert request?
->
+> 
+> 
+> Thanks,
+> 
+> Joe
+> 
+> [0] http://pad.lv/1659340
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe stable" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+You might try https://marc.info/?l=linux-kernel&m=148553171703761
+which fixed https://bugzilla.redhat.com/show_bug.cgi?id=1384238
 
-Does this patch help at all?
-
-https://git.kernel.org/cgit/linux/kernel/git/efi/efi.git/commit/?h=urgent&id=090abfc9dc7faf3f84799f956158c8c3af149a81
+Thanks,
+Laura
