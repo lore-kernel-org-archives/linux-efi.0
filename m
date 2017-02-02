@@ -1,21 +1,20 @@
 From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH V8 08/10] ras: acpi / apei: generate trace event for
- unrecognized CPER section
-Date: Thu, 2 Feb 2017 07:20:57 +0800
-Message-ID: <201702020753.3LL3zhm1%fengguang.wu@intel.com>
-References: <1485969413-23577-9-git-send-email-tbaicar@codeaurora.org>
+Subject: Re: [PATCH V8 09/10] trace, ras: add ARM processor error trace event
+Date: Thu, 2 Feb 2017 10:34:00 +0800
+Message-ID: <201702021014.xd63mfiV%fengguang.wu@intel.com>
+References: <1485969413-23577-10-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="gBBFr7Ir9EOA20Yy"
+Content-Type: multipart/mixed; boundary="KsGdsel6WgEHnImy"
 Return-path: <linux-acpi-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1485969413-23577-9-git-send-email-tbaicar@codeaurora.org>
+In-Reply-To: <1485969413-23577-10-git-send-email-tbaicar@codeaurora.org>
 Sender: linux-acpi-owner@vger.kernel.org
 To: Tyler Baicar <tbaicar@codeaurora.org>
 Cc: kbuild-all@01.org, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.orglinux-
 List-Id: linux-efi@vger.kernel.org
 
 
---gBBFr7Ir9EOA20Yy
+--KsGdsel6WgEHnImy
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
@@ -36,20 +35,23 @@ reproduce:
 All errors (new ones prefixed by >>):
 
    drivers/built-in.o: In function `ghes_do_proc.isra.9':
->> ghes.c:(.text+0x92f3a): undefined reference to `__tracepoint_unknown_sec_event'
-   ghes.c:(.text+0x92f73): undefined reference to `__tracepoint_unknown_sec_event'
-   ghes.c:(.text+0x92fdb): undefined reference to `__tracepoint_unknown_sec_event'
+>> ghes.c:(.text+0x92fda): undefined reference to `__tracepoint_arm_event'
+   ghes.c:(.text+0x9300a): undefined reference to `__tracepoint_arm_event'
+   ghes.c:(.text+0x93054): undefined reference to `__tracepoint_arm_event'
+   ghes.c:(.text+0x93083): undefined reference to `__tracepoint_unknown_sec_event'
+   ghes.c:(.text+0x930b8): undefined reference to `__tracepoint_unknown_sec_event'
+   ghes.c:(.text+0x93121): undefined reference to `__tracepoint_unknown_sec_event'
 
 ---
 0-DAY kernel test infrastructure                Open Source Technology Center
 https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
 
---gBBFr7Ir9EOA20Yy
+--KsGdsel6WgEHnImy
 Content-Type: application/gzip
 Content-Disposition: attachment; filename=".config.gz"
 Content-Transfer-Encoding: base64
 
-H4sICPpbklgAAy5jb25maWcAlFxLd+O2kt7fX6HTmcW9i3Tb7m7fzpnjBUSCEiKSoAFQlrzh
+H4sICPyMklgAAy5jb25maWcAlFxLd+O2kt7fX6HTmcW9i3Tb7m7fzpnjBUSCEiKSoAFQlrzh
 cWx1xye21WPJecyvn6oCHwAIKneySCJU4V2Pr6pA//CPH2bs7bh/vjs+3t89Pf01+7Z72b3e
 HXcPs6+PT7v/nqVyVkoz46kw74E5f3x5+/PDn18um8tPs0/vz8/en/34en85W+1eX3ZPs2T/
 8vXx2xsM8Lh/+ccP/0hkmYkF8M6Fufqr+7mh7t7v4YcotVF1YoQsm5QnMuVqIMraVLVpMqkK
@@ -530,4 +532,4 @@ ZrdVZf1yKJ2Ej27Ap3zE23Xd5uEvQr+aGuK0kRrXF8jvHozEzItU27IM3IfgY5wo+CI7EZT8
 3Bd9Nnp1YA49eLTWqTz9kMOlJeP8/Z5tSOyTMbGdd2BxD2xFE8pWh5pZea3IS95ZZ7C/24dx
 8PGFAQA=
 
---gBBFr7Ir9EOA20Yy--
+--KsGdsel6WgEHnImy--
