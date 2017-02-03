@@ -1,62 +1,108 @@
-From: Joseph Salisbury <joseph.salisbury-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: Re: [REGRESSION][v4.9.y][v4.10.y] x86/efi: Only map RAM into EFI page
- tables if in mixed-mode
-Date: Fri, 3 Feb 2017 09:16:48 -0500
-Message-ID: <f8b36e38-c1f6-82f8-0ed9-0c934ace44ac@canonical.com>
-References: <31c63945-fa81-de18-941b-9021f3d9f16c@canonical.com>
- <d5f1ba6b-06ed-b5b0-1b0e-58d5f385f7c2@redhat.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v4] efi: arm64: Add vmlinux debug link to the Image binary
+Date: Fri, 3 Feb 2017 14:50:40 +0000
+Message-ID: <CAKv+Gu9VmbjtvFVveAXiRtpBtZCWJV6pMGmnEzTc5gPrOnYvnQ@mail.gmail.com>
+References: <1486056799-4825-1-git-send-email-ard.biesheuvel@linaro.org>
+ <20170202183000.GN13839@arm.com> <CAKv+Gu82NmBNavpVQ8z7xZ6++HPqAWNnn3dM=dKw0JaWLZocSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <d5f1ba6b-06ed-b5b0-1b0e-58d5f385f7c2-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <CAKv+Gu82NmBNavpVQ8z7xZ6++HPqAWNnn3dM=dKw0JaWLZocSw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Cc: waiman.long-ZPxbGqLxI0U@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, tytso-3s7WtUTddSA@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, scott.norton-ZPxbGqLxI0U@public.gmane.org, doug.hatch-ZPxbGqLxI0U@public.gmane.org, "stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 02/02/2017 03:36 PM, Laura Abbott wrote:
-> On 02/02/2017 12:17 PM, Joseph Salisbury wrote:
->> Hi Matt,
+On 2 February 2017 at 18:36, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On 2 February 2017 at 18:30, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
+>> Hi Ard,
 >>
->> A kernel bug report was opened against Ubuntu [0].  After a kernel
->> bisect, it was found that reverting the following commit resolved this bug:
+>> On Thu, Feb 02, 2017 at 05:33:19PM +0000, Ard Biesheuvel wrote:
+>>> When building with debugging symbols, take the absolute path to the
+>>> vmlinux binary and add it to the special PE/COFF debug table entry.
+>>> This allows a debug EFI build to find the vmlinux binary, which is
+>>> very helpful in debugging, given that the offset where the Image is
+>>> first loaded by EFI is highly unpredictable.
+>>>
+>>> On implementations of UEFI that choose to implement it, this
+>>> information is exposed via the EFI debug support table, which is a UEFI
+>>> configuration table that is accessible both by the firmware at boot time
+>>> and by the OS at runtime, and lists all PE/COFF images loaded by the
+>>> system.
+>>>
+>>> The format of the NB10 Codeview entry is based on the definition used
+>>> by EDK2, which is our primary reference when it comes to the use of
+>>> PE/COFF in the context of UEFI firmware.
+>>>
+>>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>> ---
+>>> v4: add a separate DEBUG_EFI debug option so that this feature is disabled
+>>>     by default
+>>>     dropped 1/2 which has been queued already in the EFI tree
+>>>     use ASCII rather than an opaque constant for "NB10" signature
+>>>
+>>>  arch/arm64/Kconfig.debug   |  8 ++++
+>>>  arch/arm64/kernel/Makefile |  4 ++
+>>>  arch/arm64/kernel/head.S   | 47 +++++++++++++++++++-
+>>>  3 files changed, 58 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/arch/arm64/Kconfig.debug b/arch/arm64/Kconfig.debug
+>>> index d1ebd46872fd..f7f38b1aab14 100644
+>>> --- a/arch/arm64/Kconfig.debug
+>>> +++ b/arch/arm64/Kconfig.debug
+>>> @@ -95,6 +95,14 @@ config DEBUG_ALIGN_RODATA
+>>>
+>>>         If in doubt, say N.
+>>>
+>>> +config DEBUG_EFI
+>>> +     depends on EFI && DEBUG_INFO
+>>> +     bool "UEFI debugging"
+>>> +     help
+>>> +       Enable this option to include EFI specific debugging features into
+>>> +       the kernel that are only useful when using a debug build of the
+>>> +       UEFI firmware
+>>> +
 >>
->> commit 1297667083d5442aafe3e337b9413bf02b114edb
->> Author: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
->> Date:   Mon Sep 19 13:09:09 2016 +0100
+>> I don't much like embedding the absolute host build path in the kernel
+>> image, but if that's what the tools expect then so be it.
 >>
->>     x86/efi: Only map RAM into EFI page tables if in mixed-mode
+>>>  source "drivers/hwtracing/coresight/Kconfig"
+>>>
+>>>  endmenu
+>>> diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
+>>> index 7d66bbaafc0c..2600c60337ac 100644
+>>> --- a/arch/arm64/kernel/Makefile
+>>> +++ b/arch/arm64/kernel/Makefile
+>>> @@ -55,3 +55,7 @@ obj-y                                       += $(arm64-obj-y) vdso/ probes/
+>>>  obj-m                                        += $(arm64-obj-m)
+>>>  head-y                                       := head.o
+>>>  extra-y                                      += $(head-y) vmlinux.lds
+>>> +
+>>> +ifeq ($(CONFIG_DEBUG_EFI),y)
+>>> +AFLAGS_head.o += -DVMLINUX_PATH="\"$(shell readlink -f $(objtree)/vmlinux)\""
+>>> +endif
 >>
+>> Can we use the Make realpath directive instead of calling out to the shell?
 >>
->> The regression was introduced as of v4.8-rc8.  It also still affects
->> current mainline.
->>
->> I was hoping to get your feedback, since you are the patch author.  Do
->> you think gathering any additional data will help diagnose this issue,
->> or would it be best to submit a revert request?
->>
->>
->> Thanks,
->>
->> Joe
->>
->> [0] http://pad.lv/1659340
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe stable" in
->> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> You might try https://marc.info/?l=linux-kernel&m=148553171703761
-> which fixed https://bugzilla.redhat.com/show_bug.cgi?id=1384238
 >
-> Thanks,
-> Laura
+> Yep. This works as expected:
+>
+> diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
+> index 2600c60337ac..1606c6b2a280 100644
+> --- a/arch/arm64/kernel/Makefile
+> +++ b/arch/arm64/kernel/Makefile
+> @@ -57,5 +57,5 @@ head-y                                        := head.o
+>  extra-y                                        += $(head-y) vmlinux.lds
+>
+>  ifeq ($(CONFIG_DEBUG_EFI),y)
+> -AFLAGS_head.o += -DVMLINUX_PATH="\"$(shell readlink -f $(objtree)/vmlinux)\""
+> +AFLAGS_head.o += -DVMLINUX_PATH="\"$(realpath $(objtree)/vmlinux)\""
+>  endif
+>
+>
+>> Do you want me to merge this via arm64?
+>>
+>
+> Yes, please
 
-This patch resolves the bug for multiple users.  Thanks again for the
-pointer, Laura and Ard!
-
-
-Joe
+Should I respin this?
