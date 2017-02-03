@@ -1,32 +1,52 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 6/7] efi: Handle secure boot from UEFI-2.6 [ver #7]
-Date: Thu, 2 Feb 2017 21:45:47 +0000
-Message-ID: <720A4D70-602D-4EBC-9232-F74679A94067@linaro.org>
-References: <148587558696.4026.16034622623568539004.stgit@warthog.procyon.org.uk> <148587564847.4026.5759345672956585977.stgit@warthog.procyon.org.uk> <CAKv+Gu8dnKB1sRGb3U+XB1eoA7Eyo4qSFBtPRbvGV912xPViVw@mail.gmail.com> <10454.1485889162@warthog.procyon.org.uk> <CAKv+Gu_gy6575axL6M64OSo33ZM2dnbs7cajqJRd8VtbjAXCTw@mail.gmail.com> <20578.1485952425@warthog.procyon.org.uk> <CAKv+Gu8FOcMx0UXXdd3nhE+PUPzbEn9X=kBQDfkLOZBvVu-8fg@mail.gmail.com> <23750.1485961217@warthog.procyon.org.uk> <CAKv+Gu9ACE23ZMcQN3NpZ_N-CWzg=N6qFVu3_UruH0miPe=izA@mail.gmail.com> <20170202213626.GQ31613@codeblueprint.co.uk>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 7bit
+From: Ye Xiaolong <xiaolong.ye-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 4/7] efi: Get the secure boot status [ver #7]
+Date: Fri, 3 Feb 2017 10:48:46 +0800
+Message-ID: <20170203024845.GE23647@yexl-desktop>
+References: <148587562967.4026.18171897997650345605.stgit@warthog.procyon.org.uk>
+ <201702010101.EljWXBuB%fengguang.wu@intel.com>
+ <CAKv+Gu92yTWcEguxGzMOQAvoUexCLtsVVBa2Xzz3cPPWQD9nSQ@mail.gmail.com>
+ <10308.1485888776@warthog.procyon.org.uk>
+ <CAKv+Gu_oUcbQ9CYLTentjoHWreVX7Y2-SN5BBcxZ_g4-pNG1yw@mail.gmail.com>
+ <20170201214806.GO31613@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170202213626.GQ31613-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170201214806.GO31613-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Wu, Fengguang" <fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, lkp <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On 02/02, Matt Fleming wrote:
+>On Tue, 31 Jan, at 08:18:16PM, Ard Biesheuvel wrote:
+>> On 31 January 2017 at 18:52, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>> > Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> >
+>> >> > base:   https://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git next
+>> >>
+>> >> This is the wrong repo ^^^
+>> >>
+>> >> I am not sure if there is anything we can do about this, but perhaps
+>> >> you should simply remove it now that we've migrated to the new repo.
+>> >
+>> > Is the error a derivative of the rebase?  I'm sure this was working in the
+>> > un-rebased code.
+>> >
+>>
+>> Well, indirectly. The kbuild robot is applying the patches onto an
+>> outdated EFI branch owned by Matt, rather than the official one which
+>> has my patch that turns the runtime services struct from a collection
+>> of pointers to void into properly typed function pointers.
+>
+>Fengguang, can you update the official EFI repository to now be,
+>
+>  https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
 
+Done, just send a patch to replace the outdated repo.
 
-> On 2 Feb 2017, at 21:36, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> 
->> On Wed, 01 Feb, at 03:02:14PM, Ard Biesheuvel wrote:
->> 
->> Let's wait for Matt to comment on the x86 bits before reissuing
->> anything, but if the subsequent patches still apply cleanly, I don't
->> think there is a need to resend or re-sign.
-> 
-> This all looks fine to me now, thanks for the re-work David.
-> 
-> Ard, do you want to apply these patches along with a fixup for the
-> multi-line comments and send a second v4.11 pull to tip?
-
-Sure, I'll take care of it tomorrow
+Thanks,
+Xiaolong
+>
+>Thanks!
+>
