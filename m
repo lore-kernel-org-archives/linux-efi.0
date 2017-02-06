@@ -1,53 +1,53 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 6/7] efi: Print the secure boot status in x86 setup_arch()
-Date: Mon,  6 Feb 2017 11:22:45 +0000
-Message-ID: <1486380166-31868-7-git-send-email-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 2/7] arm/efi: Allow invocation of arbitrary runtime services
+Date: Mon,  6 Feb 2017 11:22:41 +0000
+Message-ID: <1486380166-31868-3-git-send-email-ard.biesheuvel@linaro.org>
 References: <1486380166-31868-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1486380166-31868-1-git-send-email-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: matt@codeblueprint.co.uk, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: David Howells <dhowells@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1486380166-31868-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: David Howells <dhowells@redhat.com>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-Print the secure boot status in the x86 setup_arch() but otherwise do
-nothing more for now. More functionality will be added later, but this at
-least allows for testing.
+efi_call_runtime() is provided for x86 to be able abstract mixed mode
+support.  Provide this for ARM also so that common code work in mixed mode
+also.
 
-Signed-off-by: David Howells <dhowells@redhat.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-[ardb: use efi_enabled() instead of IS_ENABLED(CONFIG_EFI)]
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Suggested-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/x86/kernel/setup.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+ arch/arm/include/asm/efi.h   | 1 +
+ arch/arm64/include/asm/efi.h | 1 +
+ 2 files changed, 2 insertions(+)
 
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 4cfba947d774..69780edf0dde 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -1176,6 +1176,20 @@ void __init setup_arch(char **cmdline_p)
- 	/* Allocate bigger log buffer */
- 	setup_log_buf(1);
+diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
+index 0b06f5341b45..e4e6a9d6a825 100644
+--- a/arch/arm/include/asm/efi.h
++++ b/arch/arm/include/asm/efi.h
+@@ -55,6 +55,7 @@ void efi_virtmap_unload(void);
  
-+	if (efi_enabled(EFI_BOOT)) {
-+		switch (boot_params.secure_boot) {
-+		case efi_secureboot_mode_disabled:
-+			pr_info("Secure boot disabled\n");
-+			break;
-+		case efi_secureboot_mode_enabled:
-+			pr_info("Secure boot enabled\n");
-+			break;
-+		default:
-+			pr_info("Secure boot could not be determined\n");
-+			break;
-+		}
-+	}
-+
- 	reserve_initrd();
+ #define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
+ #define __efi_call_early(f, ...)	f(__VA_ARGS__)
++#define efi_call_runtime(f, ...)	sys_table_arg->runtime->f(__VA_ARGS__)
+ #define efi_is_64bit()			(false)
  
- 	acpi_table_upgrade();
+ #define efi_call_proto(protocol, f, instance, ...)			\
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index 0b6b1633017f..e7445281e534 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -50,6 +50,7 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
+ 
+ #define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
+ #define __efi_call_early(f, ...)	f(__VA_ARGS__)
++#define efi_call_runtime(f, ...)	sys_table_arg->runtime->f(__VA_ARGS__)
+ #define efi_is_64bit()			(true)
+ 
+ #define efi_call_proto(protocol, f, instance, ...)			\
 -- 
 2.7.4
