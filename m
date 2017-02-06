@@ -1,68 +1,137 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [GIT PULL 0/7] EFI updates for v4.11 part 2
-Date: Mon,  6 Feb 2017 11:22:39 +0000
-Message-ID: <1486380166-31868-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/7] x86/efi: Allow invocation of arbitrary runtime services
+Date: Mon,  6 Feb 2017 11:22:40 +0000
+Message-ID: <1486380166-31868-2-git-send-email-ard.biesheuvel@linaro.org>
+References: <1486380166-31868-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1486380166-31868-1-git-send-email-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: matt@codeblueprint.co.uk, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: David Howells <dhowells@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-These are patches that were still being discussed when I sent the first pull
-request last week, but we feel they are now in shape to be merged.
+From: David Howells <dhowells@redhat.com>
 
-Please pull.
+Provide the ability to perform mixed-mode runtime service calls for x86 in
+the same way that commit 0a637ee61247bd4bed9b2a07568ef7a1cfc76187
+("x86/efi: Allow invocation of arbitrary boot services") provides the
+ability to invoke arbitrary boot services.
 
-The following changes since commit a21a300289bb5a582cc96be23446fa35236a6a9a:
+Suggested-by: Lukas Wunner <lukas@wunner.de>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: David Howells <dhowells@redhat.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/x86/boot/compressed/eboot.c   | 1 +
+ arch/x86/boot/compressed/head_32.S | 6 +++---
+ arch/x86/boot/compressed/head_64.S | 8 ++++----
+ arch/x86/include/asm/efi.h         | 5 +++++
+ 4 files changed, 13 insertions(+), 7 deletions(-)
 
-  efi: libstub: Preserve .debug sections after absolute relocation check (2017-01-31 11:47:39 +0000)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
-
-for you to fetch changes up to dfe7b0e7e1ab9dc02d754c7dd11e465be0944603:
-
-  efi: libstub: Make file I/O chunking x86-specific (2017-02-03 17:01:06 +0000)
-
-----------------------------------------------------------------
-Some more EFI changes we've queued up for v4.11:
-* Changes to the EFI init code to infer from various EFI and shim variables
-  whether secure boot authentication was performed at boot time. (Note that
-  this is the uncontroversial part: I expect some fierce debate about future
-  patches that impose or relax certain restrictions based on this information,
-  but collecting it is useful in itself.)
-* Disable a x86 specific file I/O chunking workaround on ARM so it does not
-  spuriously trigger build time checks in the ARM decompressor.
-
-----------------------------------------------------------------
-Ard Biesheuvel (1):
-      efi: libstub: Make file I/O chunking x86-specific
-
-David Howells (5):
-      x86/efi: Allow invocation of arbitrary runtime services
-      arm/efi: Allow invocation of arbitrary runtime services
-      efi: Add SHIM and image security database GUID definitions
-      efi: Get the secure boot status
-      efi: Print the secure boot status in x86 setup_arch()
-
-Josh Boyer (1):
-      efi: Disable secure boot if shim is in insecure mode
-
- Documentation/x86/zero-page.txt                |  2 +
- arch/arm/include/asm/efi.h                     |  1 +
- arch/arm64/include/asm/efi.h                   |  1 +
- arch/x86/boot/compressed/eboot.c               |  8 +++
- arch/x86/boot/compressed/head_32.S             |  6 +-
- arch/x86/boot/compressed/head_64.S             |  8 +--
- arch/x86/include/asm/efi.h                     |  5 ++
- arch/x86/include/uapi/asm/bootparam.h          |  3 +-
- arch/x86/kernel/asm-offsets.c                  |  1 +
- arch/x86/kernel/setup.c                        | 14 +++++
- drivers/firmware/efi/libstub/Makefile          |  2 +-
- drivers/firmware/efi/libstub/arm-stub.c        | 63 ++-----------------
- drivers/firmware/efi/libstub/efi-stub-helper.c | 12 +++-
- drivers/firmware/efi/libstub/secureboot.c      | 86 ++++++++++++++++++++++++++
- include/linux/efi.h                            | 11 ++++
- 15 files changed, 156 insertions(+), 67 deletions(-)
- create mode 100644 drivers/firmware/efi/libstub/secureboot.c
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 6d3aeabbce68..f99978db6b6f 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -32,6 +32,7 @@ static void setup_boot_services##bits(struct efi_config *c)		\
+ 									\
+ 	table = (typeof(table))sys_table;				\
+ 									\
++	c->runtime_services = table->runtime;				\
+ 	c->boot_services = table->boottime;				\
+ 	c->text_output = table->con_out;				\
+ }
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index fd0b6a272dd5..d85b9625e836 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -82,7 +82,7 @@ ENTRY(efi_pe_entry)
+ 
+ 	/* Relocate efi_config->call() */
+ 	leal	efi32_config(%esi), %eax
+-	add	%esi, 32(%eax)
++	add	%esi, 40(%eax)
+ 	pushl	%eax
+ 
+ 	call	make_boot_params
+@@ -108,7 +108,7 @@ ENTRY(efi32_stub_entry)
+ 
+ 	/* Relocate efi_config->call() */
+ 	leal	efi32_config(%esi), %eax
+-	add	%esi, 32(%eax)
++	add	%esi, 40(%eax)
+ 	pushl	%eax
+ 2:
+ 	call	efi_main
+@@ -264,7 +264,7 @@ relocated:
+ #ifdef CONFIG_EFI_STUB
+ 	.data
+ efi32_config:
+-	.fill 4,8,0
++	.fill 5,8,0
+ 	.long efi_call_phys
+ 	.long 0
+ 	.byte 0
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 4d85e600db78..d2ae1f821e0c 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -264,7 +264,7 @@ ENTRY(efi_pe_entry)
+ 	/*
+ 	 * Relocate efi_config->call().
+ 	 */
+-	addq	%rbp, efi64_config+32(%rip)
++	addq	%rbp, efi64_config+40(%rip)
+ 
+ 	movq	%rax, %rdi
+ 	call	make_boot_params
+@@ -284,7 +284,7 @@ handover_entry:
+ 	 * Relocate efi_config->call().
+ 	 */
+ 	movq	efi_config(%rip), %rax
+-	addq	%rbp, 32(%rax)
++	addq	%rbp, 40(%rax)
+ 2:
+ 	movq	efi_config(%rip), %rdi
+ 	call	efi_main
+@@ -456,14 +456,14 @@ efi_config:
+ #ifdef CONFIG_EFI_MIXED
+ 	.global efi32_config
+ efi32_config:
+-	.fill	4,8,0
++	.fill	5,8,0
+ 	.quad	efi64_thunk
+ 	.byte	0
+ #endif
+ 
+ 	.global efi64_config
+ efi64_config:
+-	.fill	4,8,0
++	.fill	5,8,0
+ 	.quad	efi_call
+ 	.byte	1
+ #endif /* CONFIG_EFI_STUB */
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index e99675b9c861..2f77bcefe6b4 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -191,6 +191,7 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
+ struct efi_config {
+ 	u64 image_handle;
+ 	u64 table;
++	u64 runtime_services;
+ 	u64 boot_services;
+ 	u64 text_output;
+ 	efi_status_t (*call)(unsigned long, ...);
+@@ -226,6 +227,10 @@ static inline bool efi_is_64bit(void)
+ #define __efi_call_early(f, ...)					\
+ 	__efi_early()->call((unsigned long)f, __VA_ARGS__);
+ 
++#define efi_call_runtime(f, ...)					\
++	__efi_early()->call(efi_table_attr(efi_runtime_services, f,	\
++		__efi_early()->runtime_services), __VA_ARGS__)
++
+ extern bool efi_reboot_required(void);
+ 
+ #else
+-- 
+2.7.4
