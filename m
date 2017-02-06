@@ -1,137 +1,80 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 1/7] x86/efi: Allow invocation of arbitrary runtime services
-Date: Mon,  6 Feb 2017 11:22:40 +0000
-Message-ID: <1486380166-31868-2-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 5/7] efi: Disable secure boot if shim is in insecure mode
+Date: Mon,  6 Feb 2017 11:22:44 +0000
+Message-ID: <1486380166-31868-6-git-send-email-ard.biesheuvel@linaro.org>
 References: <1486380166-31868-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1486380166-31868-1-git-send-email-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: matt@codeblueprint.co.uk, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: David Howells <dhowells@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
+Cc: Josh Boyer <jwboyer@fedoraproject.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, David Howells <dhowells@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: David Howells <dhowells@redhat.com>
+From: Josh Boyer <jwboyer@fedoraproject.org>
 
-Provide the ability to perform mixed-mode runtime service calls for x86 in
-the same way that commit 0a637ee61247bd4bed9b2a07568ef7a1cfc76187
-("x86/efi: Allow invocation of arbitrary boot services") provides the
-ability to invoke arbitrary boot services.
+A user can manually tell the shim boot loader to disable validation of
+images it loads.  When a user does this, it creates a UEFI variable called
+MokSBState that does not have the runtime attribute set.  Given that the
+user explicitly disabled validation, we can honor that and not enable
+secure boot mode if that variable is set.
 
-Suggested-by: Lukas Wunner <lukas@wunner.de>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
 Signed-off-by: David Howells <dhowells@redhat.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/boot/compressed/eboot.c   | 1 +
- arch/x86/boot/compressed/head_32.S | 6 +++---
- arch/x86/boot/compressed/head_64.S | 8 ++++----
- arch/x86/include/asm/efi.h         | 5 +++++
- 4 files changed, 13 insertions(+), 7 deletions(-)
+ drivers/firmware/efi/libstub/secureboot.c | 25 ++++++++++++++++++++++++-
+ 1 file changed, 24 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 6d3aeabbce68..f99978db6b6f 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -32,6 +32,7 @@ static void setup_boot_services##bits(struct efi_config *c)		\
- 									\
- 	table = (typeof(table))sys_table;				\
- 									\
-+	c->runtime_services = table->runtime;				\
- 	c->boot_services = table->boottime;				\
- 	c->text_output = table->con_out;				\
- }
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index fd0b6a272dd5..d85b9625e836 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -82,7 +82,7 @@ ENTRY(efi_pe_entry)
+diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
+index 62d6904da800..766ac06dac84 100644
+--- a/drivers/firmware/efi/libstub/secureboot.c
++++ b/drivers/firmware/efi/libstub/secureboot.c
+@@ -23,6 +23,12 @@ static const efi_char16_t const efi_SetupMode_name[] = {
+ 	'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0
+ };
  
- 	/* Relocate efi_config->call() */
- 	leal	efi32_config(%esi), %eax
--	add	%esi, 32(%eax)
-+	add	%esi, 40(%eax)
- 	pushl	%eax
- 
- 	call	make_boot_params
-@@ -108,7 +108,7 @@ ENTRY(efi32_stub_entry)
- 
- 	/* Relocate efi_config->call() */
- 	leal	efi32_config(%esi), %eax
--	add	%esi, 32(%eax)
-+	add	%esi, 40(%eax)
- 	pushl	%eax
- 2:
- 	call	efi_main
-@@ -264,7 +264,7 @@ relocated:
- #ifdef CONFIG_EFI_STUB
- 	.data
- efi32_config:
--	.fill 4,8,0
-+	.fill 5,8,0
- 	.long efi_call_phys
- 	.long 0
- 	.byte 0
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 4d85e600db78..d2ae1f821e0c 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -264,7 +264,7 @@ ENTRY(efi_pe_entry)
- 	/*
- 	 * Relocate efi_config->call().
- 	 */
--	addq	%rbp, efi64_config+32(%rip)
-+	addq	%rbp, efi64_config+40(%rip)
- 
- 	movq	%rax, %rdi
- 	call	make_boot_params
-@@ -284,7 +284,7 @@ handover_entry:
- 	 * Relocate efi_config->call().
- 	 */
- 	movq	efi_config(%rip), %rax
--	addq	%rbp, 32(%rax)
-+	addq	%rbp, 40(%rax)
- 2:
- 	movq	efi_config(%rip), %rdi
- 	call	efi_main
-@@ -456,14 +456,14 @@ efi_config:
- #ifdef CONFIG_EFI_MIXED
- 	.global efi32_config
- efi32_config:
--	.fill	4,8,0
-+	.fill	5,8,0
- 	.quad	efi64_thunk
- 	.byte	0
- #endif
- 
- 	.global efi64_config
- efi64_config:
--	.fill	4,8,0
-+	.fill	5,8,0
- 	.quad	efi_call
- 	.byte	1
- #endif /* CONFIG_EFI_STUB */
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index e99675b9c861..2f77bcefe6b4 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -191,6 +191,7 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
- struct efi_config {
- 	u64 image_handle;
- 	u64 table;
-+	u64 runtime_services;
- 	u64 boot_services;
- 	u64 text_output;
- 	efi_status_t (*call)(unsigned long, ...);
-@@ -226,6 +227,10 @@ static inline bool efi_is_64bit(void)
- #define __efi_call_early(f, ...)					\
- 	__efi_early()->call((unsigned long)f, __VA_ARGS__);
- 
-+#define efi_call_runtime(f, ...)					\
-+	__efi_early()->call(efi_table_attr(efi_runtime_services, f,	\
-+		__efi_early()->runtime_services), __VA_ARGS__)
++/* SHIM variables */
++static const efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
++static efi_char16_t const shim_MokSBState_name[] = {
++	'M', 'o', 'k', 'S', 'B', 'S', 't', 'a', 't', 'e', 0
++};
 +
- extern bool efi_reboot_required(void);
+ #define get_efi_var(name, vendor, ...) \
+ 	efi_call_runtime(get_variable, \
+ 			 (efi_char16_t *)(name), (efi_guid_t *)(vendor), \
+@@ -33,7 +39,8 @@ static const efi_char16_t const efi_SetupMode_name[] = {
+  */
+ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
+ {
+-	u8 secboot, setupmode;
++	u32 attr;
++	u8 secboot, setupmode, moksbstate;
+ 	unsigned long size;
+ 	efi_status_t status;
  
- #else
+@@ -52,6 +59,22 @@ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
+ 	if (secboot == 0 || setupmode == 1)
+ 		return efi_secureboot_mode_disabled;
+ 
++	/*
++	 * See if a user has put shim into insecure mode. If so, and if the
++	 * variable doesn't have the runtime attribute set, we might as well
++	 * honor that.
++	 */
++	size = sizeof(moksbstate);
++	status = get_efi_var(shim_MokSBState_name, &shim_guid,
++			     &attr, &size, &moksbstate);
++
++	/* If it fails, we don't care why.  Default to secure */
++	if (status != EFI_SUCCESS)
++		goto secure_boot_enabled;
++	if (!(attr & EFI_VARIABLE_RUNTIME_ACCESS) && moksbstate == 1)
++		return efi_secureboot_mode_disabled;
++
++secure_boot_enabled:
+ 	pr_efi(sys_table_arg, "UEFI Secure Boot is enabled.\n");
+ 	return efi_secureboot_mode_enabled;
+ 
 -- 
 2.7.4
