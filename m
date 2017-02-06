@@ -1,53 +1,113 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 2/7] arm/efi: Allow invocation of arbitrary runtime services
-Date: Mon,  6 Feb 2017 11:22:41 +0000
-Message-ID: <1486380166-31868-3-git-send-email-ard.biesheuvel@linaro.org>
-References: <1486380166-31868-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1486380166-31868-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Thomas Garnier <thgarnie@google.com>
+Subject: Re: [PATCH v2 3/3] x86: Make the GDT remapping read-only on 64 bit
+Date: Mon, 6 Feb 2017 14:10:36 -0800
+Message-ID: <CAJcbSZHiL3OmswxAJ9gVkC9a4O01qdiy7yjsb5dvofhOn8s+8Q@mail.gmail.com>
+References: <20170126165940.30799-1-thgarnie@google.com> <20170126165940.30799-3-thgarnie@google.com>
+ <CALCETrU=KY7QgdLWm43LA=_jpu_oXJgGLqv0yUVr4vR7ROYh0Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <kernel-hardening-return-6353-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+In-Reply-To: <CALCETrU=KY7QgdLWm43LA=_jpu_oXJgGLqv0yUVr4vR7ROYh0Q@mail.gmail.com>
+To: Andy Lutomirski <luto@kernel.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Kees Cook <keescook@chromium.org>, Arjan van de Ven <arjan@linux.intel.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Borislav Petkov <bp@suse.de>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Rusty Russell <rusty@rustcorp.com.au>, Christian Borntraeger <borntraeger@de.ibm.com>, Fenghua Yu <fenghua.yu@intel.com>, He Chen <he.chen@linux.intel.com>, Brian Gerst <brgerst@gmail.com>, Luis
 List-Id: linux-efi@vger.kernel.org
 
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+On Wed, Feb 1, 2017 at 9:14 PM, Andy Lutomirski <luto@kernel.org> wrote:
+> On Thu, Jan 26, 2017 at 8:59 AM, Thomas Garnier <thgarnie@google.com> wro=
+te:
+>> This patch makes the GDT remapped pages read-only to prevent corruption.
+>> This change is done only on 64 bit.
+>>
+>> The native_load_tr_desc function was adapted to correctly handle a
+>> read-only GDT. The LTR instruction always writes to the GDT TSS entry.
+>> This generates a page fault if the GDT is read-only. This change checks
+>> if the current GDT is a remap and swap GDTs as needed. This function was
+>> tested by booting multiple machines and checking hibernation works
+>> properly.
+>>
+>> KVM SVM and VMX were adapted to use the writeable GDT. On VMX, the
+>> per-cpu variable was removed for functions to fetch the original GDT.
+>> Instead of reloading the previous GDT, VMX will reload the fixmap GDT as
+>> expected. For testing, VMs were started and restored on multiple
+>> configurations.
+>>
+>> Signed-off-by: Thomas Garnier <thgarnie@google.com>
+>> ---
+>> Based on next-20170125
+>> ---
+>>  arch/x86/include/asm/desc.h      | 46 +++++++++++++++++++++++++++++++++=
+++-----
+>>  arch/x86/include/asm/processor.h |  1 +
+>>  arch/x86/kernel/cpu/common.c     | 28 ++++++++++++++++++------
+>>  arch/x86/kvm/svm.c               |  4 +---
+>>  arch/x86/kvm/vmx.c               | 15 +++++--------
+>>  5 files changed, 70 insertions(+), 24 deletions(-)
+>>
+>> diff --git a/arch/x86/include/asm/desc.h b/arch/x86/include/asm/desc.h
+>> index 4cc176f57b78..ca7b2224fcb4 100644
+>> --- a/arch/x86/include/asm/desc.h
+>> +++ b/arch/x86/include/asm/desc.h
+>> @@ -52,6 +52,12 @@ static inline struct desc_struct *get_cpu_direct_gdt(=
+unsigned int cpu)
+>>         return per_cpu(gdt_page, cpu).gdt;
+>>  }
+>>
+>> +/* Provide the current original GDT */
+>> +static inline struct desc_struct *get_current_direct_gdt(void)
+>> +{
+>> +       return this_cpu_ptr(&gdt_page)->gdt;
+>> +}
+>
+> I'm assuming that the reason that this isn't part of patch 2 and used
+> instead of the version that takes cpu as a parameter is that TLS
+> doesn't work until the GDT is set up.  If so, perhaps that's worthy of
+> a comment in patch 2.
+>
+> But give this_cpu_read(gdt_page.gdt) a try, please.
+>
 
-efi_call_runtime() is provided for x86 to be able abstract mixed mode
-support.  Provide this for ARM also so that common code work in mixed mode
-also.
+I tried but I can't get it working properly because the gdt field is
+an array, not a pointer. For example with this_cpu_read(gdt_page.gdt),
+I get:
 
-Suggested-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm/include/asm/efi.h   | 1 +
- arch/arm64/include/asm/efi.h | 1 +
- 2 files changed, 2 insertions(+)
+./arch/x86/include/asm/desc.h: In function =E2=80=98get_current_gdt_rw=E2=
+=80=99:
+./include/linux/percpu-defs.h:308:21: error: incompatible types when
+assigning to type =E2=80=98struct desc_struct[16]=E2=80=99 from type =E2=80=
+=98struct
+desc_struct *=E2=80=99
+  case 1: pscr_ret__ =3D stem##1(variable); break;   \
+                     ^
+I tried different variants without success. What do you think?
 
-diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-index 0b06f5341b45..e4e6a9d6a825 100644
---- a/arch/arm/include/asm/efi.h
-+++ b/arch/arm/include/asm/efi.h
-@@ -55,6 +55,7 @@ void efi_virtmap_unload(void);
- 
- #define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
- #define __efi_call_early(f, ...)	f(__VA_ARGS__)
-+#define efi_call_runtime(f, ...)	sys_table_arg->runtime->f(__VA_ARGS__)
- #define efi_is_64bit()			(false)
- 
- #define efi_call_proto(protocol, f, instance, ...)			\
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index 0b6b1633017f..e7445281e534 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -50,6 +50,7 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
- 
- #define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
- #define __efi_call_early(f, ...)	f(__VA_ARGS__)
-+#define efi_call_runtime(f, ...)	sys_table_arg->runtime->f(__VA_ARGS__)
- #define efi_is_64bit()			(true)
- 
- #define efi_call_proto(protocol, f, instance, ...)			\
--- 
-2.7.4
+>> +/*
+>> + * The LTR instruction marks the TSS GDT entry as busy. In 64bit, the G=
+DT is
+>> + * a read-only remapping. To prevent a page fault, the GDT is switched =
+to the
+>> + * original writeable version when needed.
+>> + */
+>> +#ifdef CONFIG_X86_64
+>> +static inline void native_load_tr_desc(void)
+>> +{
+>> +       struct desc_ptr gdt;
+>> +       int cpu =3D raw_smp_processor_id();
+>> +       bool restore =3D false;
+>> +       struct desc_struct *fixmap_gdt;
+>> +
+>> +       native_store_gdt(&gdt);
+>
+> Off the top of my head, this is something like 10 cycles.  IMO that's
+> fast enough not to worry about the regression this will cause to KVM
+> exits.  In any event, we'll get that back and *much* more when we do
+> the optimizations that this series enables.
+
+
+
+--=20
+Thomas
