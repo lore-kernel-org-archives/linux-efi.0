@@ -1,113 +1,45 @@
-From: Thomas Garnier <thgarnie@google.com>
-Subject: Re: [PATCH v2 3/3] x86: Make the GDT remapping read-only on 64 bit
-Date: Mon, 6 Feb 2017 14:10:36 -0800
-Message-ID: <CAJcbSZHiL3OmswxAJ9gVkC9a4O01qdiy7yjsb5dvofhOn8s+8Q@mail.gmail.com>
-References: <20170126165940.30799-1-thgarnie@google.com> <20170126165940.30799-3-thgarnie@google.com>
- <CALCETrU=KY7QgdLWm43LA=_jpu_oXJgGLqv0yUVr4vR7ROYh0Q@mail.gmail.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH 3/7] efi: Add SHIM and image security database GUID
+ definitions
+Date: Tue, 7 Feb 2017 08:52:20 +0100
+Message-ID: <20170207075219.GB24528@gmail.com>
+References: <1486380166-31868-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1486380166-31868-4-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <kernel-hardening-return-6353-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-In-Reply-To: <CALCETrU=KY7QgdLWm43LA=_jpu_oXJgGLqv0yUVr4vR7ROYh0Q@mail.gmail.com>
-To: Andy Lutomirski <luto@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Kees Cook <keescook@chromium.org>, Arjan van de Ven <arjan@linux.intel.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Borislav Petkov <bp@suse.de>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Rusty Russell <rusty@rustcorp.com.au>, Christian Borntraeger <borntraeger@de.ibm.com>, Fenghua Yu <fenghua.yu@intel.com>, He Chen <he.chen@linux.intel.com>, Brian Gerst <brgerst@gmail.com>, Luis
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1486380166-31868-4-git-send-email-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: matt@codeblueprint.co.uk, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, David Howells <dhowells@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Josh Boyer <jwboyer@fedoraproject.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Feb 1, 2017 at 9:14 PM, Andy Lutomirski <luto@kernel.org> wrote:
-> On Thu, Jan 26, 2017 at 8:59 AM, Thomas Garnier <thgarnie@google.com> wro=
-te:
->> This patch makes the GDT remapped pages read-only to prevent corruption.
->> This change is done only on 64 bit.
->>
->> The native_load_tr_desc function was adapted to correctly handle a
->> read-only GDT. The LTR instruction always writes to the GDT TSS entry.
->> This generates a page fault if the GDT is read-only. This change checks
->> if the current GDT is a remap and swap GDTs as needed. This function was
->> tested by booting multiple machines and checking hibernation works
->> properly.
->>
->> KVM SVM and VMX were adapted to use the writeable GDT. On VMX, the
->> per-cpu variable was removed for functions to fetch the original GDT.
->> Instead of reloading the previous GDT, VMX will reload the fixmap GDT as
->> expected. For testing, VMs were started and restored on multiple
->> configurations.
->>
->> Signed-off-by: Thomas Garnier <thgarnie@google.com>
->> ---
->> Based on next-20170125
->> ---
->>  arch/x86/include/asm/desc.h      | 46 +++++++++++++++++++++++++++++++++=
-++-----
->>  arch/x86/include/asm/processor.h |  1 +
->>  arch/x86/kernel/cpu/common.c     | 28 ++++++++++++++++++------
->>  arch/x86/kvm/svm.c               |  4 +---
->>  arch/x86/kvm/vmx.c               | 15 +++++--------
->>  5 files changed, 70 insertions(+), 24 deletions(-)
->>
->> diff --git a/arch/x86/include/asm/desc.h b/arch/x86/include/asm/desc.h
->> index 4cc176f57b78..ca7b2224fcb4 100644
->> --- a/arch/x86/include/asm/desc.h
->> +++ b/arch/x86/include/asm/desc.h
->> @@ -52,6 +52,12 @@ static inline struct desc_struct *get_cpu_direct_gdt(=
-unsigned int cpu)
->>         return per_cpu(gdt_page, cpu).gdt;
->>  }
->>
->> +/* Provide the current original GDT */
->> +static inline struct desc_struct *get_current_direct_gdt(void)
->> +{
->> +       return this_cpu_ptr(&gdt_page)->gdt;
->> +}
->
-> I'm assuming that the reason that this isn't part of patch 2 and used
-> instead of the version that takes cpu as a parameter is that TLS
-> doesn't work until the GDT is set up.  If so, perhaps that's worthy of
-> a comment in patch 2.
->
-> But give this_cpu_read(gdt_page.gdt) a try, please.
->
 
-I tried but I can't get it working properly because the gdt field is
-an array, not a pointer. For example with this_cpu_read(gdt_page.gdt),
-I get:
+* Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 
-./arch/x86/include/asm/desc.h: In function =E2=80=98get_current_gdt_rw=E2=
-=80=99:
-./include/linux/percpu-defs.h:308:21: error: incompatible types when
-assigning to type =E2=80=98struct desc_struct[16]=E2=80=99 from type =E2=80=
-=98struct
-desc_struct *=E2=80=99
-  case 1: pscr_ret__ =3D stem##1(variable); break;   \
-                     ^
-I tried different variants without success. What do you think?
+> From: David Howells <dhowells@redhat.com>
+> 
+> Add the definitions for shim and image security database, both of which
+> are used widely in various Linux distros.
+> 
+> Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
+> Signed-off-by: David Howells <dhowells@redhat.com>
+> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
->> +/*
->> + * The LTR instruction marks the TSS GDT entry as busy. In 64bit, the G=
-DT is
->> + * a read-only remapping. To prevent a page fault, the GDT is switched =
-to the
->> + * original writeable version when needed.
->> + */
->> +#ifdef CONFIG_X86_64
->> +static inline void native_load_tr_desc(void)
->> +{
->> +       struct desc_ptr gdt;
->> +       int cpu =3D raw_smp_processor_id();
->> +       bool restore =3D false;
->> +       struct desc_struct *fixmap_gdt;
->> +
->> +       native_store_gdt(&gdt);
->
-> Off the top of my head, this is something like 10 cycles.  IMO that's
-> fast enough not to worry about the regression this will cause to KVM
-> exits.  In any event, we'll get that back and *much* more when we do
-> the optimizations that this series enables.
+That's not a valid SOB chain: the SOB of the author of the patch (David Howells) 
+must come first.
 
+I changed it to:
 
+  Signed-off-by: David Howells <dhowells@redhat.com>
+  Acked-by: Josh Boyer <jwboyer@fedoraproject.org>
+  Cc: Matt Fleming <matt@codeblueprint.co.uk>
+  Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
---=20
-Thomas
+Please holler if that's not OK.
+
+Thanks,
+
+	Ingo
