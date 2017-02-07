@@ -1,44 +1,117 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 3/7] efi: Add SHIM and image security database GUID
- definitions
-Date: Tue, 7 Feb 2017 10:42:34 +0100
-Message-ID: <20170207094234.GA9829@gmail.com>
-References: <20170207075219.GB24528@gmail.com>
- <1486380166-31868-1-git-send-email-ard.biesheuvel@linaro.org>
- <1486380166-31868-4-git-send-email-ard.biesheuvel@linaro.org>
- <27407.1486459390@warthog.procyon.org.uk>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.9 04/66] efi/fdt: Avoid FDT manipulation after
+ ExitBootServices()
+Date: Tue,  7 Feb 2017 13:58:38 +0100
+Message-ID: <20170207124528.503692416@linuxfoundation.org>
+References: <20170207124528.281881183@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <27407.1486459390-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20170207124528.281881183@linuxfoundation.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-kernel@vger.kernel.org
+Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, matt@codeblueprint.co.uk, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Riku Voipio <riku.voipio@linaro.org>, stable@vger.kernel.org, leif.lindholm@linaro.org, Ingo Molnar <mingo@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
+4.9-stable review patch.  If anyone has any objections, please let me know.
 
-* David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+------------------
 
-> Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> 
-> > That's not a valid SOB chain: the SOB of the author of the patch (David Howells) 
-> > must come first.
-> > 
-> > I changed it to:
-> > 
-> >   Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> >   Acked-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-> >   Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> >   Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > 
-> > Please holler if that's not OK.
-> 
-> Actually, it should be authored by Josh Boyer.  Somehow the authorship got
-> lost.
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Ok, I have fixed it accordingly.
+commit c8f325a59cfc718d13a50fbc746ed9b415c25e92 upstream.
 
-Thanks,
+Some AArch64 UEFI implementations disable the MMU in ExitBootServices(),
+after which unaligned accesses to RAM are no longer supported.
 
-	Ingo
+Commit:
+
+  abfb7b686a3e ("efi/libstub/arm*: Pass latest memory map to the kernel")
+
+fixed an issue in the memory map handling of the stub FDT code, but
+inadvertently created an issue with such firmware, by moving some
+of the FDT manipulation to after the invocation of ExitBootServices().
+
+Given that the stub's libfdt implementation uses the ordinary, accelerated
+string functions, which rely on hardware handling of unaligned accesses,
+manipulating the FDT with the MMU off may result in alignment faults.
+
+So fix the situation by moving the update_fdt_memmap() call into the
+callback function invoked by efi_exit_boot_services() right before it
+calls the ExitBootServices() UEFI service (which is arguably a better
+place for it anyway)
+
+Note that disabling the MMU in ExitBootServices() is not compliant with
+the UEFI spec, and carries great risk due to the fact that switching from
+cached to uncached memory accesses halfway through compiler generated code
+(i.e., involving a stack) can never be done in a way that is architecturally
+safe.
+
+Fixes: abfb7b686a3e ("efi/libstub/arm*: Pass latest memory map to the kernel")
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Tested-by: Riku Voipio <riku.voipio@linaro.org>
+Cc: mark.rutland@arm.com
+Cc: linux-efi@vger.kernel.org
+Cc: matt@codeblueprint.co.uk
+Cc: leif.lindholm@linaro.org
+Cc: linux-arm-kernel@lists.infradead.org
+Link: http://lkml.kernel.org/r/1485971102-23330-2-git-send-email-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ drivers/firmware/efi/libstub/fdt.c |   14 +++-----------
+ 1 file changed, 3 insertions(+), 11 deletions(-)
+
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -187,6 +187,7 @@ static efi_status_t update_fdt_memmap(vo
+ struct exit_boot_struct {
+ 	efi_memory_desc_t *runtime_map;
+ 	int *runtime_entry_count;
++	void *new_fdt_addr;
+ };
+ 
+ static efi_status_t exit_boot_func(efi_system_table_t *sys_table_arg,
+@@ -202,7 +203,7 @@ static efi_status_t exit_boot_func(efi_s
+ 	efi_get_virtmap(*map->map, *map->map_size, *map->desc_size,
+ 			p->runtime_map, p->runtime_entry_count);
+ 
+-	return EFI_SUCCESS;
++	return update_fdt_memmap(p->new_fdt_addr, map);
+ }
+ 
+ /*
+@@ -300,22 +301,13 @@ efi_status_t allocate_new_fdt_and_exit_b
+ 
+ 	priv.runtime_map = runtime_map;
+ 	priv.runtime_entry_count = &runtime_entry_count;
++	priv.new_fdt_addr = (void *)*new_fdt_addr;
+ 	status = efi_exit_boot_services(sys_table, handle, &map, &priv,
+ 					exit_boot_func);
+ 
+ 	if (status == EFI_SUCCESS) {
+ 		efi_set_virtual_address_map_t *svam;
+ 
+-		status = update_fdt_memmap((void *)*new_fdt_addr, &map);
+-		if (status != EFI_SUCCESS) {
+-			/*
+-			 * The kernel won't get far without the memory map, but
+-			 * may still be able to print something meaningful so
+-			 * return success here.
+-			 */
+-			return EFI_SUCCESS;
+-		}
+-
+ 		/* Install the new virtual address map */
+ 		svam = sys_table->runtime->set_virtual_address_map;
+ 		status = svam(runtime_entry_count * desc_size, desc_size,
