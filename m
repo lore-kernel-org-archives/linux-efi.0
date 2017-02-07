@@ -1,117 +1,97 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 04/66] efi/fdt: Avoid FDT manipulation after
- ExitBootServices()
-Date: Tue,  7 Feb 2017 13:58:38 +0100
-Message-ID: <20170207124528.503692416@linuxfoundation.org>
+Subject: [PATCH 4.9 03/66] x86/efi: Always map the first physical page into the EFI pagetables
+Date: Tue,  7 Feb 2017 13:58:37 +0100
+Message-ID: <20170207124528.440025103@linuxfoundation.org>
 References: <20170207124528.281881183@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170207124528.281881183@linuxfoundation.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, matt@codeblueprint.co.uk, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Riku Voipio <riku.voipio@linaro.org>, stable@vger.kernel.org, leif.lindholm@linaro.org, Ingo Molnar <mingo@kernel.org>, linux-arm-kernel@lists.infradead.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Hanka Pavlikova <hanka@ucw.cz>, Jiri Kosina <jkosina@suse.cz>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Borislav Petkov <bp@suse.de>, Laura Abbott <labbott@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, Vojtech Pavlik <vojtech@ucw.cz>, Waiman Long <waiman.long@hpe.com>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
 4.9-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Jiri Kosina <jkosina@suse.cz>
 
-commit c8f325a59cfc718d13a50fbc746ed9b415c25e92 upstream.
-
-Some AArch64 UEFI implementations disable the MMU in ExitBootServices(),
-after which unaligned accesses to RAM are no longer supported.
+commit bf29bddf0417a4783da3b24e8c9e017ac649326f upstream.
 
 Commit:
 
-  abfb7b686a3e ("efi/libstub/arm*: Pass latest memory map to the kernel")
+  129766708 ("x86/efi: Only map RAM into EFI page tables if in mixed-mode")
 
-fixed an issue in the memory map handling of the stub FDT code, but
-inadvertently created an issue with such firmware, by moving some
-of the FDT manipulation to after the invocation of ExitBootServices().
+stopped creating 1:1 mappings for all RAM, when running in native 64-bit mode.
 
-Given that the stub's libfdt implementation uses the ordinary, accelerated
-string functions, which rely on hardware handling of unaligned accesses,
-manipulating the FDT with the MMU off may result in alignment faults.
+It turns out though that there are 64-bit EFI implementations in the wild
+(this particular problem has been reported on a Lenovo Yoga 710-11IKB),
+which still make use of the first physical page for their own private use,
+even though they explicitly mark it EFI_CONVENTIONAL_MEMORY in the memory
+map.
 
-So fix the situation by moving the update_fdt_memmap() call into the
-callback function invoked by efi_exit_boot_services() right before it
-calls the ExitBootServices() UEFI service (which is arguably a better
-place for it anyway)
+In case there is no mapping for this particular frame in the EFI pagetables,
+as soon as firmware tries to make use of it, a triple fault occurs and the
+system reboots (in case of the Yoga 710-11IKB this is very early during bootup).
 
-Note that disabling the MMU in ExitBootServices() is not compliant with
-the UEFI spec, and carries great risk due to the fact that switching from
-cached to uncached memory accesses halfway through compiler generated code
-(i.e., involving a stack) can never be done in a way that is architecturally
-safe.
+Fix that by always mapping the first page of physical memory into the EFI
+pagetables. We're free to hand this page to the BIOS, as trim_bios_range()
+will reserve the first page and isolate it away from memory allocators anyway.
 
-Fixes: abfb7b686a3e ("efi/libstub/arm*: Pass latest memory map to the kernel")
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Tested-by: Riku Voipio <riku.voipio@linaro.org>
-Cc: mark.rutland@arm.com
+Note that just reverting 129766708 alone is not enough on v4.9-rc1+ to fix the
+regression on affected hardware, as this commit:
+
+   ab72a27da ("x86/efi: Consolidate region mapping logic")
+
+later made the first physical frame not to be mapped anyway.
+
+Reported-by: Hanka Pavlikova <hanka@ucw.cz>
+Signed-off-by: Jiri Kosina <jkosina@suse.cz>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Borislav Petkov <bp@suse.de>
+Cc: Laura Abbott <labbott@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Vojtech Pavlik <vojtech@ucw.cz>
+Cc: Waiman Long <waiman.long@hpe.com>
 Cc: linux-efi@vger.kernel.org
-Cc: matt@codeblueprint.co.uk
-Cc: leif.lindholm@linaro.org
-Cc: linux-arm-kernel@lists.infradead.org
-Link: http://lkml.kernel.org/r/1485971102-23330-2-git-send-email-ard.biesheuvel@linaro.org
+Fixes: 129766708 ("x86/efi: Only map RAM into EFI page tables if in mixed-mode")
+Link: http://lkml.kernel.org/r/20170127222552.22336-1-matt@codeblueprint.co.uk
+[ Tidied up the changelog and the comment. ]
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 ---
- drivers/firmware/efi/libstub/fdt.c |   14 +++-----------
- 1 file changed, 3 insertions(+), 11 deletions(-)
+ arch/x86/platform/efi/efi_64.c |   16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
 
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -187,6 +187,7 @@ static efi_status_t update_fdt_memmap(vo
- struct exit_boot_struct {
- 	efi_memory_desc_t *runtime_map;
- 	int *runtime_entry_count;
-+	void *new_fdt_addr;
- };
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -269,6 +269,22 @@ int __init efi_setup_page_tables(unsigne
+ 	efi_scratch.use_pgd = true;
  
- static efi_status_t exit_boot_func(efi_system_table_t *sys_table_arg,
-@@ -202,7 +203,7 @@ static efi_status_t exit_boot_func(efi_s
- 	efi_get_virtmap(*map->map, *map->map_size, *map->desc_size,
- 			p->runtime_map, p->runtime_entry_count);
- 
--	return EFI_SUCCESS;
-+	return update_fdt_memmap(p->new_fdt_addr, map);
- }
- 
- /*
-@@ -300,22 +301,13 @@ efi_status_t allocate_new_fdt_and_exit_b
- 
- 	priv.runtime_map = runtime_map;
- 	priv.runtime_entry_count = &runtime_entry_count;
-+	priv.new_fdt_addr = (void *)*new_fdt_addr;
- 	status = efi_exit_boot_services(sys_table, handle, &map, &priv,
- 					exit_boot_func);
- 
- 	if (status == EFI_SUCCESS) {
- 		efi_set_virtual_address_map_t *svam;
- 
--		status = update_fdt_memmap((void *)*new_fdt_addr, &map);
--		if (status != EFI_SUCCESS) {
--			/*
--			 * The kernel won't get far without the memory map, but
--			 * may still be able to print something meaningful so
--			 * return success here.
--			 */
--			return EFI_SUCCESS;
--		}
--
- 		/* Install the new virtual address map */
- 		svam = sys_table->runtime->set_virtual_address_map;
- 		status = svam(runtime_entry_count * desc_size, desc_size,
+ 	/*
++	 * Certain firmware versions are way too sentimential and still believe
++	 * they are exclusive and unquestionable owners of the first physical page,
++	 * even though they explicitly mark it as EFI_CONVENTIONAL_MEMORY
++	 * (but then write-access it later during SetVirtualAddressMap()).
++	 *
++	 * Create a 1:1 mapping for this page, to avoid triple faults during early
++	 * boot with such firmware. We are free to hand this page to the BIOS,
++	 * as trim_bios_range() will reserve the first page and isolate it away
++	 * from memory allocators anyway.
++	 */
++	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, _PAGE_RW)) {
++		pr_err("Failed to create 1:1 mapping for the first page!\n");
++		return 1;
++	}
++
++	/*
+ 	 * When making calls to the firmware everything needs to be 1:1
+ 	 * mapped and addressable with 32-bit pointers. Map the kernel
+ 	 * text and allocate a new stack because we can't rely on the
