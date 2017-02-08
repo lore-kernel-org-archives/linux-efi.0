@@ -1,7 +1,7 @@
 From: Jeffrey Hugo <jhugo@codeaurora.org>
 Subject: Re: [PATCH v3 06/10] arm64: efi: add EFI stub
-Date: Wed, 8 Feb 2017 10:22:36 -0700
-Message-ID: <423ec003-225e-8a5f-c071-0fcbbec2679e@codeaurora.org>
+Date: Wed, 8 Feb 2017 10:30:37 -0700
+Message-ID: <a39d60da-ff74-0bcb-4a02-05cb41e58fa5@codeaurora.org>
 References: <1396637113-22790-1-git-send-email-leif.lindholm@linaro.org>
  <1396637113-22790-7-git-send-email-leif.lindholm@linaro.org>
  <CAOZdJXWU1dmFfCc88RMp3SvouU7roDiJsA=3aHzwijwhMH7naA@mail.gmail.com>
@@ -46,16 +46,6 @@ On 2/8/2017 10:03 AM, Mark Rutland wrote:
 >> "~0", everything works.
 >
 > Just to check, how big is that initrd?
-
-120MB right now.  Probably could be optimized, but I don't think that's 
-really the issue here.
-
-The big problem is we don't have much memory free as the platform 
-requires that all of firmware exists in the first 512MB.  On systems 
-with a lot of devices (ie 16+ STAT drives), UEFI ends up doing a lot of 
-allocations, which pushes the platform over the edge due to the limited 
-memory and fragmentation of what is available.
-
 >
 > I guess it's possible that there simply isn't sufficient contiguous free
 > memory in that range, even if the initrd isn't that large. Can you share
@@ -72,6 +62,11 @@ memory and fragmentation of what is available.
 >
 > ... so I think the EFI stub should be able to take advantage of that
 > relaxation.
+
+I agree.  The wrinkle I can see in this is it looks like KASLR can put 
+the kernel anywhere in RAM.  How do we ensure initrd is within 32GB of 
+the kernel on a system with 256 GB of RAM?
+
 >
 > Ard?
 >
