@@ -1,97 +1,71 @@
-From: James Morse <james.morse@arm.com>
-Subject: Re: [PATCH V8 06/10] acpi: apei: panic OS with fatal error status
- block
-Date: Thu, 09 Feb 2017 10:48:42 +0000
-Message-ID: <589C490A.9080109@arm.com>
-References: <1485969413-23577-1-git-send-email-tbaicar@codeaurora.org>
- <1485969413-23577-7-git-send-email-tbaicar@codeaurora.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efi/esrt: cleanup bad memory map log messages
+Date: Thu, 9 Feb 2017 11:30:56 +0000
+Message-ID: <CAKv+Gu-E388RcUhoNHR7WjLePUByEDN53avtGiDznWhXYtD+RQ@mail.gmail.com>
+References: <20170207190823.10223-1-drake@endlessm.com> <20170208142201.bjwafwxykj3i2icu@redhat.com>
+ <CAD8Lp46MUW95vWVMayYYAwOyjOOze-ABc7Qj+RvtrbGVf46wtw@mail.gmail.com> <20170208155646.rxtctllfvqywrdor@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <1485969413-23577-7-git-send-email-tbaicar@codeaurora.org>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Tyler Baicar <tbaicar@codeaurora.org>, zjzhang@codeaurora.org
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170208155646.rxtctllfvqywrdor-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Daniel Drake <drake-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Upstreaming Team <linux-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Jonathan, Tyler,
+On 8 February 2017 at 15:56, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> On Wed, Feb 08, 2017 at 09:42:34AM -0600, Daniel Drake wrote:
+>> On Wed, Feb 8, 2017 at 8:22 AM, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>> > The machine you've got does seem to be presenting a valid (if poorly
+>> > considered) table, but I don't quite think this is the right approach.
+>>
+>> I don't think it is fully valid. Section 22.3 of the UEFI spec says:
+>> "The ESRT shall be stored in memory of type EfiBootServicesData"
+>>
+>> > The first hunk of your patch is fine, but the test on the result of
+>> > efi_mem_desc_lookup() is more or less our check for "might reading this
+>> > table reboot the system or worse".  You're demoting it to a warning
+>> > while still /treating/ it as an error, so at least it remains safe,
+>> > but the when we get to that point, they've (plausibly) given us data
+>> > that could cause horrible behavior, and that is a thing worth logging an
+>> > error about.
+>>
+>> Although from the user's perspective (thinking about graphical
+>> experience) it's a bit unfortunate to have early boot code like this
+>> print a cryptic error on-screen, when the system is otherwise
+>> perfectly usable and they might not even be interested in the ESRT's
+>> functionality.
+>
+> Fair enough.
+>
+>> > It would be better to /check/ if it straddles multiple contiguous
+>> > segments which both have reasonable access modes and print an error if
+>> > there are gaps.  I'm still in favor of printing a warning to the log if
+>> > it straddles them and there /aren't/ gaps, because we're *going* to see
+>> > other weird bugs from any code base that decides it's stitching config
+>> > tables together from separate allocations.  It's not a fundamentally
+>> > reasonable thing to do, and as a lens it shows us some code with a
+>> > really worrisome internal structure.
+>>
+>> If I'm following your suggestion correctly I think it would not affect
+>> the system I have here, where the ESRT sits entirely within a gap in
+>> the memory map, without touching the allocations on either side.
+>
+> Oh!  Then I've misunderstood your commit message.  You said:
+>
+>> Out of curiosity I looked closer at the Weibu F3C. There is no entry
+>> in the UEFI-provided memory map which corresponds to the ESRT pointer,
+>> but hacking the code to map it anyway, the ESRT does appear to be
+>> valid with 2 entries.
+>
+> And I read "valid with 2 entries" to mean it straddles across two memory
+> map entries, but what you're saying is it has two entries in the ESRT.
+>
+> So the machine is buggy, but you're right.
+>
+> Acked-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>
 
-On 01/02/17 17:16, Tyler Baicar wrote:
-> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-> 
-> Even if an error status block's severity is fatal, the kernel does not
-> honor the severity level and panic.
-> 
-> With the firmware first model, the platform could inform the OS about a
-> fatal hardware error through the non-NMI GHES notification type. The OS
-> should panic when a hardware error record is received with this
-> severity.
-> 
-> Call panic() after CPER data in error status block is printed if
-> severity is fatal, before each error section is handled.
-
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index 8756172..86c1f15 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -687,6 +689,13 @@ static int ghes_ack_error(struct acpi_hest_generic_v2 *generic_v2)
->  	return rc;
->  }
->  
-> +static void __ghes_call_panic(void)
-> +{
-> +	if (panic_timeout == 0)
-> +		panic_timeout = ghes_panic_timeout;
-> +	panic("Fatal hardware error!");
-> +}
-> +
-
-__ghes_panic() also has:
->	__ghes_print_estatus(KERN_EMERG, ghes->generic, ghes->estatus);
-
-Which prints this estatus regardless of rate limiting and cache-ing.
-
-[ ... ]
-
-> @@ -698,6 +707,10 @@ static int ghes_proc(struct ghes *ghes)
->  		if (ghes_print_estatus(NULL, ghes->generic, ghes->estatus))
-
-ghes_print_estatus() uses some custom rate limiting '2 messages every 5
-seconds', GHES_SEV_PANIC shares the same limit as GHES_SEV_RECOVERABLE.
-
-I think its possible to get 2 recoverable messages, then a panic in a 5 second
-window. The rate limit will kick in to stop the panic estatus block being
-printed, but we still go on to call panic() without the real reason being printed...
-
-(the caching thing only seems to consider identical messages, given we would
-never see two panic messages, I don't think that will cause any problems.)
-
->  			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
->  	}
-> +	if (ghes_severity(ghes->estatus->error_severity) >= GHES_SEV_PANIC) {
-> +		__ghes_call_panic();
-> +	}
-> +
-
-I think this ghes_severity() then panic() should go above the:
->	if (!ghes_estatus_cached(ghes->estatus)) {
-and we should call __ghes_print_estatus() here too, to make sure the message
-definitely got out!
-
-
-With that,
-Reviewed-by: James Morse <james.morse@arm.com>
-
+Applied with Peter's ack
 
 Thanks,
-
-James
