@@ -1,128 +1,97 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi: arm-stub: Correct FDT and initrd allocation rules
- for arm64
-Date: Thu, 9 Feb 2017 10:20:02 +0000
-Message-ID: <CAKv+Gu9i8AUOXcxoyZEYbH7N6XVMpfqXHcPQRM=G7Q4antf6Fg@mail.gmail.com>
-References: <1486635389-26974-1-git-send-email-ard.biesheuvel@linaro.org>
+From: James Morse <james.morse@arm.com>
+Subject: Re: [PATCH V8 06/10] acpi: apei: panic OS with fatal error status
+ block
+Date: Thu, 09 Feb 2017 10:48:42 +0000
+Message-ID: <589C490A.9080109@arm.com>
+References: <1485969413-23577-1-git-send-email-tbaicar@codeaurora.org>
+ <1485969413-23577-7-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1486635389-26974-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Timur Tabi <timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Jeff Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <1485969413-23577-7-git-send-email-tbaicar@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Tyler Baicar <tbaicar@codeaurora.org>, zjzhang@codeaurora.org
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-On 9 February 2017 at 10:16, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On arm64, we have made some changes over the past year to the way the
-> kernel itself is allocated and to how it deals with the initrd and FDT.
-> This patch brings the allocation logic in the EFI stub in line with that,
-> which is necessary because the introduction of KASLR has created the
-> possibility for the initrd to be allocated in a place where the kernel
-> may not be able to map it. (This is currently a theoretical scenario,
-> since it only affects systems where the size of RAM exceeds the size of
-> the linear mapping.)
->
+Hi Jonathan, Tyler,
 
-Actually, this affects systems where the RAM /footprint/ exceeds the
-size of the linear region, and it isn't that theoretical given that
-some Freescale systems were already affected by this in some way. But
-we switched to 48-bit VAs by default, and in that configuration, this
-issue is unlikely to occur at present.
+On 01/02/17 17:16, Tyler Baicar wrote:
+> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+> 
+> Even if an error status block's severity is fatal, the kernel does not
+> honor the severity level and panic.
+> 
+> With the firmware first model, the platform could inform the OS about a
+> fatal hardware error through the non-NMI GHES notification type. The OS
+> should panic when a hardware error record is received with this
+> severity.
+> 
+> Call panic() after CPER data in error status block is printed if
+> severity is fatal, before each error section is handled.
+
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index 8756172..86c1f15 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -687,6 +689,13 @@ static int ghes_ack_error(struct acpi_hest_generic_v2 *generic_v2)
+>  	return rc;
+>  }
+>  
+> +static void __ghes_call_panic(void)
+> +{
+> +	if (panic_timeout == 0)
+> +		panic_timeout = ghes_panic_timeout;
+> +	panic("Fatal hardware error!");
+> +}
+> +
+
+__ghes_panic() also has:
+>	__ghes_print_estatus(KERN_EMERG, ghes->generic, ghes->estatus);
+
+Which prints this estatus regardless of rate limiting and cache-ing.
+
+[ ... ]
+
+> @@ -698,6 +707,10 @@ static int ghes_proc(struct ghes *ghes)
+>  		if (ghes_print_estatus(NULL, ghes->generic, ghes->estatus))
+
+ghes_print_estatus() uses some custom rate limiting '2 messages every 5
+seconds', GHES_SEV_PANIC shares the same limit as GHES_SEV_RECOVERABLE.
+
+I think its possible to get 2 recoverable messages, then a panic in a 5 second
+window. The rate limit will kick in to stop the panic estatus block being
+printed, but we still go on to call panic() without the real reason being printed...
+
+(the caching thing only seems to consider identical messages, given we would
+never see two panic messages, I don't think that will cause any problems.)
+
+>  			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+>  	}
+> +	if (ghes_severity(ghes->estatus->error_severity) >= GHES_SEV_PANIC) {
+> +		__ghes_call_panic();
+> +	}
+> +
+
+I think this ghes_severity() then panic() should go above the:
+>	if (!ghes_estatus_cached(ghes->estatus)) {
+and we should call __ghes_print_estatus() here too, to make sure the message
+definitely got out!
 
 
-> So adhere to the arm64 boot protocol, and make sure that the initrd is
-> fully inside a 1GB aligned 32 GB window that covers the kernel as well.
->
-> The FDT may be anywhere in memory on arm64 now that we map it via the
-> fixmap, so we can lift the address restriction there completely.
->
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/arm/include/asm/efi.h              | 14 +++++++++++++-
->  arch/arm64/include/asm/efi.h            | 19 ++++++++++++++++++-
->  drivers/firmware/efi/libstub/arm-stub.c |  7 ++++---
->  3 files changed, 35 insertions(+), 5 deletions(-)
->
-> diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-> index 0b06f5341b45..62620451f60b 100644
-> --- a/arch/arm/include/asm/efi.h
-> +++ b/arch/arm/include/asm/efi.h
-> @@ -84,6 +84,18 @@ static inline void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
->   */
->  #define ZIMAGE_OFFSET_LIMIT    SZ_128M
->  #define MIN_ZIMAGE_OFFSET      MAX_UNCOMP_KERNEL_SIZE
-> -#define MAX_FDT_OFFSET         ZIMAGE_OFFSET_LIMIT
-> +
-> +/* on ARM, the FDT should be located in the first 128 MB of RAM */
-> +static inline unsigned long efi_get_max_fdt_addr(unsigned long dram_base)
-> +{
-> +               return dram_base + ZIMAGE_OFFSET_LIMIT;
-> +}
-> +
-> +/* on ARM, the initrd should be loaded in a lowmem region */
-> +static inline unsigned long efi_get_max_initrd_addr(unsigned long dram_base,
-> +                                                   unsigned long image_addr)
-> +{
-> +       return dram_base + SZ_512M;
-> +}
->
->  #endif /* _ASM_ARM_EFI_H */
-> diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-> index 0b6b1633017f..6a6c8a0d1424 100644
-> --- a/arch/arm64/include/asm/efi.h
-> +++ b/arch/arm64/include/asm/efi.h
-> @@ -46,7 +46,24 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
->   * 2MiB so we know it won't cross a 2MiB boundary.
->   */
->  #define EFI_FDT_ALIGN  SZ_2M   /* used by allocate_new_fdt_and_exit_boot() */
-> -#define MAX_FDT_OFFSET SZ_512M
-> +
-> +/* on arm64, the FDT may be located anywhere in system RAM */
-> +static inline unsigned long efi_get_max_fdt_addr(unsigned long dram_base)
-> +{
-> +       return ULONG_MAX;
-> +}
-> +
-> +/*
-> + * On arm64, the initrd must be completely inside a 1 GB aligned 32 GB window
-> + * that covers Image as well. Since we allocate from the top down, set a max
-> + * address that is virtually guaranteed to produce a suitable allocation even
-> + * when the physical address of Image is randomized.
-> + */
-> +static inline unsigned long efi_get_max_initrd_addr(unsigned long dram_base,
-> +                                                   unsigned long image_addr)
-> +{
-> +       return ALIGN(image_addr, SZ_1G) + 31UL * SZ_1G;
-> +}
->
->  #define efi_call_early(f, ...)         sys_table_arg->boottime->f(__VA_ARGS__)
->  #define __efi_call_early(f, ...)       f(__VA_ARGS__)
-> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-> index b4f7d78f9e8b..557281fe375f 100644
-> --- a/drivers/firmware/efi/libstub/arm-stub.c
-> +++ b/drivers/firmware/efi/libstub/arm-stub.c
-> @@ -333,8 +333,9 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
->         if (!fdt_addr)
->                 pr_efi(sys_table, "Generating empty DTB\n");
->
-> -       status = handle_cmdline_files(sys_table, image, cmdline_ptr,
-> -                                     "initrd=", dram_base + SZ_512M,
-> +       status = handle_cmdline_files(sys_table, image, cmdline_ptr, "initrd=",
-> +                                     efi_get_max_initrd_addr(dram_base,
-> +                                                             *image_addr),
->                                       (unsigned long *)&initrd_addr,
->                                       (unsigned long *)&initrd_size);
->         if (status != EFI_SUCCESS)
-> @@ -344,7 +345,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
->
->         new_fdt_addr = fdt_addr;
->         status = allocate_new_fdt_and_exit_boot(sys_table, handle,
-> -                               &new_fdt_addr, dram_base + MAX_FDT_OFFSET,
-> +                               &new_fdt_addr, efi_get_max_fdt_addr(dram_base),
->                                 initrd_addr, initrd_size, cmdline_ptr,
->                                 fdt_addr, fdt_size);
->
-> --
-> 2.7.4
->
+With that,
+Reviewed-by: James Morse <james.morse@arm.com>
+
+
+Thanks,
+
+James
