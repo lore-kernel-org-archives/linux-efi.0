@@ -1,105 +1,154 @@
-From: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH] x86/efi: Add missing 1:1 mappings to support buggy firmware
-Date: Wed,  8 Feb 2017 18:39:08 -0800
-Message-ID: <1486607948-1509-1-git-send-email-sai.praneeth.prakhya@intel.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: "AKASHI, Takahiro" <takahiro.akashi@linaro.org>
+Subject: Re: [PATCH] efi/libstub/arm*: Set default address and size cells
+ values for an empty dtb
+Date: Thu, 9 Feb 2017 17:27:04 +0900
+Message-ID: <20170209082702.GC18445@linaro.org>
+References: <1486490390-25251-1-git-send-email-jhugo@codeaurora.org>
+ <CAKv+Gu963uZB4MaMDuwTGd5-AqEN53Er8tExVLMZNVx3krJrZw@mail.gmail.com>
+ <1f47fcdd-c5d8-4082-70a3-ca9b1746d7ca@codeaurora.org>
+ <20170207190113.GG26173@leverpostej>
+ <c49cc64e-4ca1-8d82-5faf-74c0355c35ef@codeaurora.org>
+ <20170207191320.GI26173@leverpostej>
+ <252539a6-72f6-1afa-6ed5-3cf6a1aa24c2@codeaurora.org>
+ <20170207195558.GK26173@leverpostej>
+ <20170208074301.GB18445@linaro.org>
+ <CAKv+Gu8OXn20JvtFkE_bS=cbWV3XZ5b7a+XaG7tvea+4BqrHfw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu8OXn20JvtFkE_bS=cbWV3XZ5b7a+XaG7tvea+4BqrHfw@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, Jeffrey Hugo <jhugo@codeaurora.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Sameer Goel <sgoel@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+On Wed, Feb 08, 2017 at 10:40:53AM +0000, Ard Biesheuvel wrote:
+> On 8 February 2017 at 07:43, AKASHI, Takahiro
+> <takahiro.akashi@linaro.org> wrote:
+> > Hi Mark,
+> >
+> > Thank you for this heads-up.
+> >
+> > On Tue, Feb 07, 2017 at 07:55:59PM +0000, Mark Rutland wrote:
+> >> On Tue, Feb 07, 2017 at 12:29:38PM -0700, Jeffrey Hugo wrote:
+> >> > On 2/7/2017 12:13 PM, Mark Rutland wrote:
+> >> > >On Tue, Feb 07, 2017 at 12:07:56PM -0700, Jeffrey Hugo wrote:
+> >> > >>On 2/7/2017 12:01 PM, Mark Rutland wrote:
+> >> > >>>I take it this is specific to the kdump properties?
+> >> > >>>
+> >> > >>>I can't immediately see what would matter for the !kdump case.
+> >> > >>>properties inserted under /chosen are not truncated?
+> >> > >>
+> >> > >>The kexec/kdump properties are added under /chosen, therefore yes,
+> >> > >>properties added under /chosen are truncated, per our observations.
+> >> > >
+> >> > >Sorry for the dodgy (and confusing) reply above.
+> >> > >
+> >> > >What I was trying to ask was does this *only* affect kdump properties?
+> >> > >I note that kdump is not yet upstream for arm64.
+> >> > >
+> >> > >Or are there regular kexec properties that this affects?
+> >> > >
+> >> > >Or !kdump && !kexec properties?
+> >> > >
+> >> > >Can you please enumerate the set of properties for which this matters?
+> >> >
+> >> > "linux,elfcorehdr" and "linux,usable-memory-range"
+> >> >
+> >> > We are not aware of !kdump && !kexec properties where this is an issue.
+> >>
+> >> Ok, I understand the problem now. Thanks for clarifying the !kdump
+> >> situation.
+> >>
+> >> As per my reply to Timur, given this only affects kdump, this is all
+> >> happening in code that is not upstream, and therefore this is not
+> >> *currently* an issue.
+> >>
+> >> In future, please report this kind of issue in reply to relevant
+> >> postings (e.g. [1]). At the very least, refer to these, with relevant
+> >> people Cc'd (e.g. Takahiro-san in this case).
+> >>
+> >> I think there are three things which should happen:
+> >>
+> >> (a) The userspace kexec-tools kdump code should take /#address-cells and
+> >>     /#size-cells into account when inserting the linux,elfcorehdr and
+> >>     linux,usable-memory-range properties. There can be DTs for 64 bit
+> >>     platforms where these are not 2.
+> >>
+> >>     Takahiro-san, from looking at your kexec-tools repo, this is not
+> >>     currently the case. Could you address that?
+> >
+> > Yup, I will, but if this is the case,
+> > we might need to think about another case where /#address-cells and /#size-cells
+> > are <1> but the range of crash dump kernel can be still 64-bit wide since
+> > the system memory information comes from ACPI table (not DT).
+> >
+> > Therefore, the properties in this case should look like:
+> > / {
+> >     #address-cells = <1>;
+> >     #size-cells = <1>;
+> >     chosen {
+> >          ...
+> >          linux,usable-memory-range {
+> >              #address-cells = <2>;
+> >              #size-cells = <2>; may be omitted if possible
+> >              reg = < ... >;
+> >          }
+> >          linux,elfcorehdr {
+> >              #address-cells = <2>;
+> >              #size-cells = <2>; may be omitted if possible
+> >              reg = < ... >;
+> >          }
+> >          ...
+> >     }
+> > }
+> >
+> > Is this what you meant?
+> > (Obviously, I will have to modify the kernel patches as well.)
+> >
+> 
+> I think the cell sizes of reg properties are defined in terms of the
+> #address/size-cells attributes of the parent node. This makes sense
+> when you think of it, because the regs of all nodes under the same
+> parent should have the same size, given that they all live in their
+> parent's address space. Of course, /chosen is special since it does
+> not describe a bus.
 
-There are some machines with buggy firmware that access EFI regions in
-1:1 mode (or physical mode) rather than virtual mode even after kernel
-being booted. On these machines, if we invoke an EFI runtime service
-(that does these buggy accesses) then it causes a page fault and hence
-results in kernel hang. The page fault happens because the requested
-region doesn't have appropriate page attributes set or the mapping for
-the region might be missing. This issue was introduced by commit
-67a9108ed431 ("x86/efi: Build our own page table structures"). Before
-this commit, 1:1 mappings for EFI regions were in swapper_pgd and were
-not needed to be synced, but this commit introduced efi_pgd which missed
-these mappings.
+I see.
 
-Below shown are the efi_pgd dumps before and after the bad commit.
-efi_dump_pagetable() is called before calling efi_merge_regions() in
-__efi_enter_virtual_mode() and this kernel is booted on qemu to obtain
-page table dumps.
+> So that means the tooling /could/ inject #address-cells/size-cells
+> properties either at the root, or in /chosen, but not in the kdump
 
-EFI_PGT_DUMP before commit:
----------------------------
-[0.007041] ---[ User Space ]---
-[0.007427] 0x0000000000000000-0x0000000000200000 2M    RW     GLB NX pte
-[0.008609] 0x0000000000200000-0x0000000000800000 6M    RW PSE GLB NX pmd
-[0.010069] 0x0000000000800000-0x0000000000808000 32K                 pte
-[0.011068] 0x0000000000808000-0x0000000000810000 32K   RW     GLB NX pte
-[0.012325] 0x0000000000810000-0x0000000000900000 960K                pte
-[0.013071] 0x0000000000900000-0x0000000000a00000 1M    RW     GLB NX pte
-[0.014579] 0x0000000000a00000-0x000000007e800000 2014M RW PSE GLB NX pmd
-[0.015593] 0x000000007e800000-0x000000007e9b6000 1752K RW     GLB NX pte
-[0.016600] 0x000000007e9b6000-0x000000007e9fe000 288K                pte
-[0.018003] 0x000000007e9fe000-0x000000007ea00000 8K    RW     GLB NX pte
-[0.019165] 0x000000007ea00000-0x000000007ec00000 2M    RW PSE GLB NX pmd
-[0.020331] 0x000000007ec00000-0x000000007eda9000 1700K RW     GLB NX pte
-[0.021483] 0x000000007eda9000-0x000000007ee14000 428K                pte
-[0.022500] 0x000000007ee14000-0x000000007f000000 1968K RW     GLB NX pte
-[0.023596] 0x000000007f000000-0x000000007fe00000 14M   RW PSE GLB NX pmd
-[0.025004] 0x000000007fe00000-0x000000007fe94000 592K  RW     GLB NX pte
-[0.026220] 0x000000007fe94000-0x000000007fef8000 400K                pte
-[0.027069] 0x000000007fef8000-0x000000007ffd0000 864K  RW     GLB NX pte
-[0.028420] 0x000000007ffd0000-0x000000007fff0000 128K                pte
-[0.029551] 0x000000007fff0000-0x0000000080000000 64K   RW     GLB NX pte
-[0.030601] 0x0000000080000000-0x0000008000000000 510G                pud
-[0.031499] 0x0000008000000000-0xffff800000000000 17179737600G        pgd
-[0.032152] ---[ Kernel Space ]---
+/chosen, too?
+Now I believe that /chosen should not have #address-cells/size-cells
+because there is no assumption that all the nodes under /chosen
+have the same values for #address-cells/#size-cells.
+(Anyhow, this is very exceptional given the meanings of /chosen.)
 
-EFI_PGT_DUMP after commit:
---------------------------
-[0.005620] ---[ User Space ]---
-[0.005838] 0x0000000000000000-0xffff800000000000 16777088T           pgd
-[0.005873] ---[ Kernel Space ]---
+> properties themselves. However, that is not the point.
+> 
+> The point is that the tooling should take *existing* cell counts into
+> account: if there are no address-cells/size-cells properties under
+> /chosen or under the root node, the tooling should use 32-bit
+> quantities for address and size. If there are such properties, it
+> should emit reg tuples of the same size as the cells properties
+> describe.
 
-While not having these mappings isn't a bug but we need these mappings
-to support machines with buggy firmware.
+Let me make sure one thing:
+is there a requirement that the root node must have #address-cells/
+#size-cells?
+I found such a statement, at least, in booting-without-of.txt
+(only applied to ppc? See III-5-a).
 
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
- arch/x86/platform/efi/efi_64.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
-
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 622fbc7c01cd..43f9cc45ae52 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -137,6 +137,7 @@ int __init efi_alloc_page_tables(void)
- 	pgd_t *pgd;
- 	pud_t *pud;
- 	gfp_t gfp_mask;
-+	unsigned num_pgds;
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		return 0;
-@@ -156,6 +157,13 @@ int __init efi_alloc_page_tables(void)
- 
- 	pgd_populate(NULL, pgd, pud);
- 
-+	/*
-+	 * Sync 1:1 mappings to support buggy firmware which haven't updated
-+	 * their addresses even after kernel has booted.
-+	 */
-+	num_pgds = pgd_index(VMALLOC_START) - pgd_index(PAGE_OFFSET);
-+	memcpy(efi_pgd, pgd_offset_k(PAGE_OFFSET), sizeof(pgd_t) * num_pgds);
-+
- 	return 0;
- }
- 
--- 
-2.1.4
+Thanks,
+-Takahiro AKASHI
