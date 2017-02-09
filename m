@@ -1,154 +1,113 @@
-From: "AKASHI, Takahiro" <takahiro.akashi@linaro.org>
-Subject: Re: [PATCH] efi/libstub/arm*: Set default address and size cells
- values for an empty dtb
-Date: Thu, 9 Feb 2017 17:27:04 +0900
-Message-ID: <20170209082702.GC18445@linaro.org>
-References: <1486490390-25251-1-git-send-email-jhugo@codeaurora.org>
- <CAKv+Gu963uZB4MaMDuwTGd5-AqEN53Er8tExVLMZNVx3krJrZw@mail.gmail.com>
- <1f47fcdd-c5d8-4082-70a3-ca9b1746d7ca@codeaurora.org>
- <20170207190113.GG26173@leverpostej>
- <c49cc64e-4ca1-8d82-5faf-74c0355c35ef@codeaurora.org>
- <20170207191320.GI26173@leverpostej>
- <252539a6-72f6-1afa-6ed5-3cf6a1aa24c2@codeaurora.org>
- <20170207195558.GK26173@leverpostej>
- <20170208074301.GB18445@linaro.org>
- <CAKv+Gu8OXn20JvtFkE_bS=cbWV3XZ5b7a+XaG7tvea+4BqrHfw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu8OXn20JvtFkE_bS=cbWV3XZ5b7a+XaG7tvea+4BqrHfw@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, Jeffrey Hugo <jhugo@codeaurora.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Sameer Goel <sgoel@codeaurora.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] efi: arm-stub: Correct FDT and initrd allocation rules for arm64
+Date: Thu,  9 Feb 2017 10:16:29 +0000
+Message-ID: <1486635389-26974-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
+Cc: timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Feb 08, 2017 at 10:40:53AM +0000, Ard Biesheuvel wrote:
-> On 8 February 2017 at 07:43, AKASHI, Takahiro
-> <takahiro.akashi@linaro.org> wrote:
-> > Hi Mark,
-> >
-> > Thank you for this heads-up.
-> >
-> > On Tue, Feb 07, 2017 at 07:55:59PM +0000, Mark Rutland wrote:
-> >> On Tue, Feb 07, 2017 at 12:29:38PM -0700, Jeffrey Hugo wrote:
-> >> > On 2/7/2017 12:13 PM, Mark Rutland wrote:
-> >> > >On Tue, Feb 07, 2017 at 12:07:56PM -0700, Jeffrey Hugo wrote:
-> >> > >>On 2/7/2017 12:01 PM, Mark Rutland wrote:
-> >> > >>>I take it this is specific to the kdump properties?
-> >> > >>>
-> >> > >>>I can't immediately see what would matter for the !kdump case.
-> >> > >>>properties inserted under /chosen are not truncated?
-> >> > >>
-> >> > >>The kexec/kdump properties are added under /chosen, therefore yes,
-> >> > >>properties added under /chosen are truncated, per our observations.
-> >> > >
-> >> > >Sorry for the dodgy (and confusing) reply above.
-> >> > >
-> >> > >What I was trying to ask was does this *only* affect kdump properties?
-> >> > >I note that kdump is not yet upstream for arm64.
-> >> > >
-> >> > >Or are there regular kexec properties that this affects?
-> >> > >
-> >> > >Or !kdump && !kexec properties?
-> >> > >
-> >> > >Can you please enumerate the set of properties for which this matters?
-> >> >
-> >> > "linux,elfcorehdr" and "linux,usable-memory-range"
-> >> >
-> >> > We are not aware of !kdump && !kexec properties where this is an issue.
-> >>
-> >> Ok, I understand the problem now. Thanks for clarifying the !kdump
-> >> situation.
-> >>
-> >> As per my reply to Timur, given this only affects kdump, this is all
-> >> happening in code that is not upstream, and therefore this is not
-> >> *currently* an issue.
-> >>
-> >> In future, please report this kind of issue in reply to relevant
-> >> postings (e.g. [1]). At the very least, refer to these, with relevant
-> >> people Cc'd (e.g. Takahiro-san in this case).
-> >>
-> >> I think there are three things which should happen:
-> >>
-> >> (a) The userspace kexec-tools kdump code should take /#address-cells and
-> >>     /#size-cells into account when inserting the linux,elfcorehdr and
-> >>     linux,usable-memory-range properties. There can be DTs for 64 bit
-> >>     platforms where these are not 2.
-> >>
-> >>     Takahiro-san, from looking at your kexec-tools repo, this is not
-> >>     currently the case. Could you address that?
-> >
-> > Yup, I will, but if this is the case,
-> > we might need to think about another case where /#address-cells and /#size-cells
-> > are <1> but the range of crash dump kernel can be still 64-bit wide since
-> > the system memory information comes from ACPI table (not DT).
-> >
-> > Therefore, the properties in this case should look like:
-> > / {
-> >     #address-cells = <1>;
-> >     #size-cells = <1>;
-> >     chosen {
-> >          ...
-> >          linux,usable-memory-range {
-> >              #address-cells = <2>;
-> >              #size-cells = <2>; may be omitted if possible
-> >              reg = < ... >;
-> >          }
-> >          linux,elfcorehdr {
-> >              #address-cells = <2>;
-> >              #size-cells = <2>; may be omitted if possible
-> >              reg = < ... >;
-> >          }
-> >          ...
-> >     }
-> > }
-> >
-> > Is this what you meant?
-> > (Obviously, I will have to modify the kernel patches as well.)
-> >
-> 
-> I think the cell sizes of reg properties are defined in terms of the
-> #address/size-cells attributes of the parent node. This makes sense
-> when you think of it, because the regs of all nodes under the same
-> parent should have the same size, given that they all live in their
-> parent's address space. Of course, /chosen is special since it does
-> not describe a bus.
+On arm64, we have made some changes over the past year to the way the
+kernel itself is allocated and to how it deals with the initrd and FDT.
+This patch brings the allocation logic in the EFI stub in line with that,
+which is necessary because the introduction of KASLR has created the
+possibility for the initrd to be allocated in a place where the kernel
+may not be able to map it. (This is currently a theoretical scenario,
+since it only affects systems where the size of RAM exceeds the size of
+the linear mapping.)
 
-I see.
+So adhere to the arm64 boot protocol, and make sure that the initrd is
+fully inside a 1GB aligned 32 GB window that covers the kernel as well.
 
-> So that means the tooling /could/ inject #address-cells/size-cells
-> properties either at the root, or in /chosen, but not in the kdump
+The FDT may be anywhere in memory on arm64 now that we map it via the
+fixmap, so we can lift the address restriction there completely.
 
-/chosen, too?
-Now I believe that /chosen should not have #address-cells/size-cells
-because there is no assumption that all the nodes under /chosen
-have the same values for #address-cells/#size-cells.
-(Anyhow, this is very exceptional given the meanings of /chosen.)
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/arm/include/asm/efi.h              | 14 +++++++++++++-
+ arch/arm64/include/asm/efi.h            | 19 ++++++++++++++++++-
+ drivers/firmware/efi/libstub/arm-stub.c |  7 ++++---
+ 3 files changed, 35 insertions(+), 5 deletions(-)
 
-> properties themselves. However, that is not the point.
-> 
-> The point is that the tooling should take *existing* cell counts into
-> account: if there are no address-cells/size-cells properties under
-> /chosen or under the root node, the tooling should use 32-bit
-> quantities for address and size. If there are such properties, it
-> should emit reg tuples of the same size as the cells properties
-> describe.
-
-Let me make sure one thing:
-is there a requirement that the root node must have #address-cells/
-#size-cells?
-I found such a statement, at least, in booting-without-of.txt
-(only applied to ppc? See III-5-a).
-
-Thanks,
--Takahiro AKASHI
+diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
+index 0b06f5341b45..62620451f60b 100644
+--- a/arch/arm/include/asm/efi.h
++++ b/arch/arm/include/asm/efi.h
+@@ -84,6 +84,18 @@ static inline void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
+  */
+ #define ZIMAGE_OFFSET_LIMIT	SZ_128M
+ #define MIN_ZIMAGE_OFFSET	MAX_UNCOMP_KERNEL_SIZE
+-#define MAX_FDT_OFFSET		ZIMAGE_OFFSET_LIMIT
++
++/* on ARM, the FDT should be located in the first 128 MB of RAM */
++static inline unsigned long efi_get_max_fdt_addr(unsigned long dram_base)
++{
++		return dram_base + ZIMAGE_OFFSET_LIMIT;
++}
++
++/* on ARM, the initrd should be loaded in a lowmem region */
++static inline unsigned long efi_get_max_initrd_addr(unsigned long dram_base,
++						    unsigned long image_addr)
++{
++	return dram_base + SZ_512M;
++}
+ 
+ #endif /* _ASM_ARM_EFI_H */
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index 0b6b1633017f..6a6c8a0d1424 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -46,7 +46,24 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
+  * 2MiB so we know it won't cross a 2MiB boundary.
+  */
+ #define EFI_FDT_ALIGN	SZ_2M   /* used by allocate_new_fdt_and_exit_boot() */
+-#define MAX_FDT_OFFSET	SZ_512M
++
++/* on arm64, the FDT may be located anywhere in system RAM */
++static inline unsigned long efi_get_max_fdt_addr(unsigned long dram_base)
++{
++	return ULONG_MAX;
++}
++
++/*
++ * On arm64, the initrd must be completely inside a 1 GB aligned 32 GB window
++ * that covers Image as well. Since we allocate from the top down, set a max
++ * address that is virtually guaranteed to produce a suitable allocation even
++ * when the physical address of Image is randomized.
++ */
++static inline unsigned long efi_get_max_initrd_addr(unsigned long dram_base,
++						    unsigned long image_addr)
++{
++	return ALIGN(image_addr, SZ_1G) + 31UL * SZ_1G;
++}
+ 
+ #define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
+ #define __efi_call_early(f, ...)	f(__VA_ARGS__)
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index b4f7d78f9e8b..557281fe375f 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -333,8 +333,9 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 	if (!fdt_addr)
+ 		pr_efi(sys_table, "Generating empty DTB\n");
+ 
+-	status = handle_cmdline_files(sys_table, image, cmdline_ptr,
+-				      "initrd=", dram_base + SZ_512M,
++	status = handle_cmdline_files(sys_table, image, cmdline_ptr, "initrd=",
++				      efi_get_max_initrd_addr(dram_base,
++							      *image_addr),
+ 				      (unsigned long *)&initrd_addr,
+ 				      (unsigned long *)&initrd_size);
+ 	if (status != EFI_SUCCESS)
+@@ -344,7 +345,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 
+ 	new_fdt_addr = fdt_addr;
+ 	status = allocate_new_fdt_and_exit_boot(sys_table, handle,
+-				&new_fdt_addr, dram_base + MAX_FDT_OFFSET,
++				&new_fdt_addr, efi_get_max_fdt_addr(dram_base),
+ 				initrd_addr, initrd_size, cmdline_ptr,
+ 				fdt_addr, fdt_size);
+ 
+-- 
+2.7.4
