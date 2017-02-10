@@ -1,72 +1,36 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v2 04/14] arm64: efi: clean up Image header after PE
- header has been split off
-Date: Fri, 10 Feb 2017 14:30:42 +0000
-Message-ID: <CAKv+Gu8W3fxAonQiC2mG5wxSg7X=W3PnGMi0WVEys-N6dXnY8A@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 05/14] arm64: efi: remove forbidden values from the
+ PE/COFF header
+Date: Fri, 10 Feb 2017 14:31:31 +0000
+Message-ID: <CAKv+Gu8sT2CLquxAdneNSQ+YqasbPM96E3h9NMc0JMCR5Wa+bA@mail.gmail.com>
 References: <1486554947-3964-1-git-send-email-ard.biesheuvel@linaro.org>
- <1486554947-3964-5-git-send-email-ard.biesheuvel@linaro.org> <20170210101152.GC28753@leverpostej>
+ <1486554947-3964-6-git-send-email-ard.biesheuvel@linaro.org> <20170210101329.GD28753@leverpostej>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <kernel-hardening-return-6463-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-In-Reply-To: <20170210101152.GC28753@leverpostej>
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Leif Lindholm <leif.lindholm@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Russell King <linux@armlinux.org.uk>, kernel-hardening@lists.openwall.com, Laura Abbott <labbott@fedoraproject.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170210101329.GD28753@leverpostej>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, kernel-hardening-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org, Laura Abbott <labbott-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 10 February 2017 at 10:11, Mark Rutland <mark.rutland@arm.com> wrote:
-> On Wed, Feb 08, 2017 at 11:55:37AM +0000, Ard Biesheuvel wrote:
->> After having split off the PE header, clean up the bits that remain:
->> use .long consistently, merge two adjacent #ifdef CONFIG_EFI blocks,
->> fix the offset of the PE header pointer and remove the redundant .align
->> that follows it.
+On 10 February 2017 at 10:13, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
+> On Wed, Feb 08, 2017 at 11:55:38AM +0000, Ard Biesheuvel wrote:
+>> Bring the PE/COFF header in line with the PE/COFF spec, by setting
+>> NumberOfSymbols to 0, and removing the section alignment flags.
 >>
->> Also, since we will be eliminating all open coded constants from the
->> EFI header in subsequent patches, let's replace the open coded "ARM\x64"
->> magic number with its .ascii equivalent.
->>
->> No changes to the resulting binary image are intended.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->> ---
->>  arch/arm64/kernel/head.S | 17 ++++++++---------
->>  1 file changed, 8 insertions(+), 9 deletions(-)
->>
->> diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
->> index f779a7483736..aa8f6cd8c33f 100644
->> --- a/arch/arm64/kernel/head.S
->> +++ b/arch/arm64/kernel/head.S
->> @@ -91,20 +91,19 @@ _head:
->>       .quad   0                               // reserved
->>       .quad   0                               // reserved
->>       .quad   0                               // reserved
->> -     .byte   0x41                            // Magic number, "ARM\x64"
->> -     .byte   0x52
->> -     .byte   0x4d
->> -     .byte   0x64
->> +     .ascii  "ARM\x64"                       // Magic number
->>  #ifdef CONFIG_EFI
->> +     /*
->> +      * PE/COFF requires the offset to the PE header
->> +      * to be stored at offset 0x3c into the file.
->> +      */
->> +     .org    _head + 0x3c
->>       .long   pe_header - _head               // Offset to the PE header.
+>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 >
+> I take it that in practice EFI implementations don't care about these?
+
+Not at all. I just spotted it when I was cleaning up the header.
+
+> Assuming so:
 >
-> Do we really need the .org? We expect all the other fields to stay in
-> place without one, and it seems odd to special-case the PE header.
+> Acked-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+>
+> Otherwise, we might want to fix this first, so that we can easily
+> backport it.
 >
 
-No, we don't. But the PE header offset is the only header field that
-covered by a requirement that goes beyond what we stipulate ourselves,
-so it makes sense to make that explicit imo. However, I'm happy to
-drop it if people disagree.
-
-> Otherwise, this looks good to me.
->
-
-Cheers,
+I wouldn't bother
