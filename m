@@ -1,54 +1,47 @@
-From: "Ruigrok, Richard" <rruigrok@codeaurora.org>
-Subject: Re: [PATCH] efi: arm-stub: Correct FDT and initrd allocation rules
- for arm64
-Date: Thu, 9 Feb 2017 17:28:16 -0700
-Message-ID: <c74a72db-c032-a55f-eee6-2441929c7d7c@codeaurora.org>
-References: <1486635389-26974-1-git-send-email-ard.biesheuvel@linaro.org>
+From: "Ruigrok, Richard" <rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH v2 1/2] efi: arm-stub: Correct FDT and initrd allocation
+ rules for arm64
+Date: Thu, 9 Feb 2017 17:42:01 -0700
+Message-ID: <a7058407-a770-d413-e072-ba3edd7df197@codeaurora.org>
+References: <1486676573-19237-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1486635389-26974-1-git-send-email-ard.biesheuvel@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt@codeblueprint.co.uk, mark.rutland@arm.com
-Cc: jhugo@codeaurora.org, catalin.marinas@arm.com, timur@codeaurora.org, leif.lindholm@linaro.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1486676573-19237-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
+Cc: timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
 
 
-On 2/9/2017 3:16 AM, Ard Biesheuvel wrote:
+On 2/9/2017 2:42 PM, Ard Biesheuvel wrote:
 > On arm64, we have made some changes over the past year to the way the
 > kernel itself is allocated and to how it deals with the initrd and FDT.
 > This patch brings the allocation logic in the EFI stub in line with that,
 > which is necessary because the introduction of KASLR has created the
 > possibility for the initrd to be allocated in a place where the kernel
-> may not be able to map it. (This is currently a theoretical scenario,
-> since it only affects systems where the size of RAM exceeds the size of
-> the linear mapping.)
+> may not be able to map it. (This is mostly a theoretical scenario, since
+> it only affects systems where the physical memory footprint exceeds the
+> size of the linear mapping.)
 >
-> So adhere to the arm64 boot protocol, and make sure that the initrd is
-> fully inside a 1GB aligned 32 GB window that covers the kernel as well.
+> Since we know the kernel itself will be covered by the linear mapping,
+> choose a suitably sized window (i.e., based on the size of the linear
+> region) covering the kernel when allocating memory for the initrd.
 >
 > The FDT may be anywhere in memory on arm64 now that we map it via the
 > fixmap, so we can lift the address restriction there completely.
 >
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
 >  arch/arm/include/asm/efi.h              | 14 +++++++++++++-
->  arch/arm64/include/asm/efi.h            | 19 ++++++++++++++++++-
+>  arch/arm64/include/asm/efi.h            | 18 +++++++++++++++++-
 >  drivers/firmware/efi/libstub/arm-stub.c |  7 ++++---
->  3 files changed, 35 insertions(+), 5 deletions(-)
+>  3 files changed, 34 insertions(+), 5 deletions(-)
 >
 > diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-> index 0b06f5341b45..62620451f60b 100644
+> index 0b06f5341b45..2de0195dfd1e 100644
 > --- a/arch/arm/include/asm/efi.h
 > +++ b/arch/arm/include/asm/efi.h
 > @@ -84,6 +84,18 @@ static inline void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
@@ -60,7 +53,7 @@ On 2/9/2017 3:16 AM, Ard Biesheuvel wrote:
 > +/* on ARM, the FDT should be located in the first 128 MB of RAM */
 > +static inline unsigned long efi_get_max_fdt_addr(unsigned long dram_base)
 > +{
-> +		return dram_base + ZIMAGE_OFFSET_LIMIT;
+> +	return dram_base + ZIMAGE_OFFSET_LIMIT;
 > +}
 > +
 > +/* on ARM, the initrd should be loaded in a lowmem region */
@@ -72,10 +65,10 @@ On 2/9/2017 3:16 AM, Ard Biesheuvel wrote:
 >  
 >  #endif /* _ASM_ARM_EFI_H */
 > diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-> index 0b6b1633017f..6a6c8a0d1424 100644
+> index 0b6b1633017f..342e90d6d204 100644
 > --- a/arch/arm64/include/asm/efi.h
 > +++ b/arch/arm64/include/asm/efi.h
-> @@ -46,7 +46,24 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
+> @@ -46,7 +46,23 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
 >   * 2MiB so we know it won't cross a 2MiB boundary.
 >   */
 >  #define EFI_FDT_ALIGN	SZ_2M   /* used by allocate_new_fdt_and_exit_boot() */
@@ -88,17 +81,18 @@ On 2/9/2017 3:16 AM, Ard Biesheuvel wrote:
 > +}
 > +
 > +/*
-> + * On arm64, the initrd must be completely inside a 1 GB aligned 32 GB window
-> + * that covers Image as well. Since we allocate from the top down, set a max
-> + * address that is virtually guaranteed to produce a suitable allocation even
-> + * when the physical address of Image is randomized.
+> + * On arm64, we have to ensure that the initrd ends up in the linear region,
+> + * which is a 1 GB aligned region of size '1UL << (VA_BITS - 1)' that is
+> + * guaranteed to cover the kernel Image.
 > + */
 > +static inline unsigned long efi_get_max_initrd_addr(unsigned long dram_base,
 > +						    unsigned long image_addr)
 > +{
-> +	return ALIGN(image_addr, SZ_1G) + 31UL * SZ_1G;
+> +	return (image_addr & ~(SZ_1G - 1UL)) + (1UL << (VA_BITS - 1));
 > +}
 >  
+Please update booting.txt which specifies a window of 32G for ARM64
+
 >  #define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
 >  #define __efi_call_early(f, ...)	f(__VA_ARGS__)
 > diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
@@ -126,10 +120,6 @@ On 2/9/2017 3:16 AM, Ard Biesheuvel wrote:
 >  				initrd_addr, initrd_size, cmdline_ptr,
 >  				fdt_addr, fdt_size);
 >  
-
-This was tested successfully on our QDT2400 system on which we found this failure.
-
-Tested-by: Richard Ruigrok <rruigrok@codeaurora.org>
 
 -- 
 Qualcomm Datacenter Technologies as an affiliate of Qualcomm Technologies, Inc.
