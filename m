@@ -1,135 +1,78 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH v2 07/14] arm64: efi: replace open coded constants with
- symbolic ones
-Date: Fri, 10 Feb 2017 10:19:23 +0000
-Message-ID: <20170210101923.GE28753@leverpostej>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v2 08/14] arm64: efi: split Image code and data into
+ separate PE/COFF sections
+Date: Fri, 10 Feb 2017 10:49:43 +0000
+Message-ID: <20170210104942.GF28753@leverpostej>
 References: <1486554947-3964-1-git-send-email-ard.biesheuvel@linaro.org>
- <1486554947-3964-8-git-send-email-ard.biesheuvel@linaro.org>
+ <1486554947-3964-9-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1486554947-3964-8-git-send-email-ard.biesheuvel@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi@vger.kernel.org, kernel-hardening@lists.openwall.com, catalin.marinas@arm.com, linux@armlinux.org.uk, leif.lindholm@linaro.org, linux-arm-kernel@lists.infradead.org, labbott@fedoraproject.org
+In-Reply-To: <1486554947-3964-9-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, kernel-hardening-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org, labbott-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Feb 08, 2017 at 11:55:40AM +0000, Ard Biesheuvel wrote:
-> Replace open coded constants with symbolic ones throughout the
-> Image and the EFI headers. No binary level changes are intended.
+On Wed, Feb 08, 2017 at 11:55:41AM +0000, Ard Biesheuvel wrote:
+> To prevent unintended modifications to the kernel text (malicious or
+> otherwise) while running the EFI stub, describe the kernel image as
+> two separate sections: a .text section with read-execute permissions,
+> covering .text, .rodata and .init.text, and a .data section with
+> read-write permissions, covering .init.data, .data and .bss.
 > 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> This relies on the firmware to actually take the section permission
+> flags into account, but this is something that is currently being
+> implemented in EDK2, which means we will likely start seeing it in
+> the wild between one and two years from now.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Acked-by: Mark Rutland <mark.rutland@arm.com>
+> diff --git a/arch/arm64/kernel/vmlinux.lds.S b/arch/arm64/kernel/vmlinux.lds.S
+> index b8deffa9e1bf..a93cc2b6f50b 100644
+> --- a/arch/arm64/kernel/vmlinux.lds.S
+> +++ b/arch/arm64/kernel/vmlinux.lds.S
+> @@ -149,6 +149,9 @@ SECTIONS
+>  		ARM_EXIT_KEEP(EXIT_TEXT)
+>  	}
+>  
+> +	. = ALIGN(SZ_4K);
+> +	__pecoff_data_start = .;
+> +
+
+I understand that the stub needs to split the init text/data since
+unlike the kernel it'll map those with separate permissions, but it
+feels odd to do this specifically for the EFI stub.
+
+Yould it perhaps make more sense to always use separate segments for
+init/exit text/data, and also apply the permission split in the kernel?
+
+With that, I don't think we'd need additional stub-specific linker
+script changes.
 
 Thanks,
 Mark.
 
-> ---
->  arch/arm64/kernel/efi-header.S | 38 +++++++++++---------
->  1 file changed, 21 insertions(+), 17 deletions(-)
-> 
-> diff --git a/arch/arm64/kernel/efi-header.S b/arch/arm64/kernel/efi-header.S
-> index 8786d58af2df..7637226ea9ca 100644
-> --- a/arch/arm64/kernel/efi-header.S
-> +++ b/arch/arm64/kernel/efi-header.S
-> @@ -7,22 +7,24 @@
->   * published by the Free Software Foundation.
->   */
+>  	.init.data : {
+>  		INIT_DATA
+>  		INIT_SETUP(16)
+> @@ -206,6 +209,7 @@ SECTIONS
+>  	}
 >  
-> +#include <linux/pe.h>
-> +#include <linux/sizes.h>
-> +
->  	.macro	__EFI_PE_HEADER
-> -	.ascii	"PE"
-> -	.short 	0
-> +	.long	PE_MAGIC
->  coff_header:
-> -	.short	0xaa64					// AArch64
-> -	.short	1					// nr_sections
-> +	.short	IMAGE_FILE_MACHINE_ARM64		// Machine
-> +	.short	section_count				// NumberOfSections
->  	.long	0 					// TimeDateStamp
->  	.long	0					// PointerToSymbolTable
->  	.long	0					// NumberOfSymbols
->  	.short	section_table - optional_header		// SizeOfOptionalHeader
-> -	.short	0x206					// Characteristics.
-> -							// IMAGE_FILE_DEBUG_STRIPPED |
-> -							// IMAGE_FILE_EXECUTABLE_IMAGE |
-> -							// IMAGE_FILE_LINE_NUMS_STRIPPED
-> +	.short	IMAGE_FILE_DEBUG_STRIPPED | \
-> +		IMAGE_FILE_EXECUTABLE_IMAGE | \
-> +		IMAGE_FILE_LINE_NUMS_STRIPPED		// Characteristics
-> +
->  optional_header:
-> -	.short	0x20b					// PE32+ format
-> +	.short	PE_OPT_MAGIC_PE32PLUS			// PE32+ format
->  	.byte	0x02					// MajorLinkerVersion
->  	.byte	0x14					// MinorLinkerVersion
->  	.long	_end - efi_header_end			// SizeOfCode
-> @@ -33,7 +35,7 @@ optional_header:
+>  	PECOFF_EDATA_PADDING
+> +	__pecoff_data_rawsize = ABSOLUTE(. - __pecoff_data_start);
+>  	_edata = .;
 >  
->  extra_header_fields:
->  	.quad	0					// ImageBase
-> -	.long	0x1000					// SectionAlignment
-> +	.long	SZ_4K					// SectionAlignment
->  	.long	PECOFF_FILE_ALIGNMENT			// FileAlignment
->  	.short	0					// MajorOperatingSystemVersion
->  	.short	0					// MinorOperatingSystemVersion
-> @@ -48,7 +50,7 @@ extra_header_fields:
->  	// Everything before the kernel image is considered part of the header
->  	.long	efi_header_end - _head			// SizeOfHeaders
->  	.long	0					// CheckSum
-> -	.short	0xa					// Subsystem (EFI application)
-> +	.short	IMAGE_SUBSYSTEM_EFI_APPLICATION		// Subsystem
->  	.short	0					// DllCharacteristics
->  	.quad	0					// SizeOfStackReserve
->  	.quad	0					// SizeOfStackCommit
-> @@ -71,10 +73,7 @@ extra_header_fields:
+>  	BSS_SECTION(0, 0, 0)
+> @@ -221,6 +225,7 @@ SECTIONS
+>  	. += RESERVED_TTBR0_SIZE;
+>  #endif
 >  
->  	// Section table
->  section_table:
-> -	.ascii	".text"
-> -	.byte	0
-> -	.byte	0
-> -	.byte	0        				// end of 0 padding of section name
-> +	.ascii	".text\0\0\0"
->  	.long	_end - efi_header_end			// VirtualSize
->  	.long	efi_header_end - _head			// VirtualAddress
->  	.long	_edata - efi_header_end			// SizeOfRawData
-> @@ -84,7 +83,12 @@ section_table:
->  	.long	0					// PointerToLineNumbers
->  	.short	0					// NumberOfRelocations
->  	.short	0					// NumberOfLineNumbers
-> -	.long	0xe0000020				// Characteristics
-> +	.long	IMAGE_SCN_CNT_CODE | \
-> +		IMAGE_SCN_MEM_EXECUTE | \
-> +		IMAGE_SCN_MEM_READ | \
-> +		IMAGE_SCN_MEM_WRITE			// Characteristics
-> +
-> +	.set	section_count, (. - section_table) / 40
+> +	__pecoff_data_size = ABSOLUTE(. - __pecoff_data_start);
+>  	_end = .;
 >  
->  #ifdef CONFIG_DEBUG_EFI
->  	/*
-> @@ -106,7 +110,7 @@ efi_debug_table:
->  	.long	0					// TimeDateStamp
->  	.short	0					// MajorVersion
->  	.short	0					// MinorVersion
-> -	.long	2					// Type == EFI_IMAGE_DEBUG_TYPE_CODEVIEW
-> +	.long	IMAGE_DEBUG_TYPE_CODEVIEW		// Type
->  	.long	efi_debug_entry_size			// SizeOfData
->  	.long	0					// RVA
->  	.long	efi_debug_entry - _head			// FileOffset
+>  	STABS_DEBUG
 > -- 
 > 2.7.4
 > 
