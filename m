@@ -1,288 +1,121 @@
-From: Thomas Garnier <thgarnie@google.com>
-Subject: [PATCH v3 3/4] x86: Make the GDT remapping read-only on 64-bit
-Date: Tue, 14 Feb 2017 11:42:58 -0800
-Message-ID: <20170214194259.75960-3-thgarnie@google.com>
-References: <20170214194259.75960-1-thgarnie@google.com>
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <20170214194259.75960-1-thgarnie@google.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Thomas Garnier <thgarnie@google.com>, Kees Cook <keescook@chromium.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Paul Gortmaker <paul.gortmaker@windriver.com>, Andy Lutomirski <luto@amacapital.net>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>
-Cc: x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-pm@vger.kernel.org, linux-efi@vger.kernel.org, xen-devel@lists.xenproject.org, lguest@lists.ozlabs.org, kvm@vger.kernel.org, kernel-hardening@lists.openwall.com
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: Add missing 1:1 mappings to support buggy
+ firmware
+Date: Tue, 14 Feb 2017 20:51:39 +0000
+Message-ID: <20170214205139.GB28416@codeblueprint.co.uk>
+References: <1486607948-1509-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1486607948-1509-1-git-send-email-sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This patch makes the GDT remapped pages read-only to prevent corruption.
-This change is done only on 64-bit.
+On Wed, 08 Feb, at 06:39:08PM, Sai Praneeth Prakhya wrote:
+> From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> 
+> There are some machines with buggy firmware that access EFI regions in
+> 1:1 mode (or physical mode) rather than virtual mode even after kernel
+> being booted. On these machines, if we invoke an EFI runtime service
+> (that does these buggy accesses) then it causes a page fault and hence
+> results in kernel hang. The page fault happens because the requested
 
-The native_load_tr_desc function was adapted to correctly handle a
-read-only GDT. The LTR instruction always writes to the GDT TSS entry.
-This generates a page fault if the GDT is read-only. This change checks
-if the current GDT is a remap and swap GDTs as needed. This function was
-tested by booting multiple machines and checking hibernation works
-properly.
+Could you include a small amount of the page fault output in the
+commit message? We don't need the callstack, but the IP of the
+faulting instruction and the rest of the page fault message would be
+good (along with which runtime service faulted).
 
-KVM SVM and VMX were adapted to use the writeable GDT. On VMX, the
-per-cpu variable was removed for functions to fetch the original GDT.
-Instead of reloading the previous GDT, VMX will reload the fixmap GDT as
-expected. For testing, VMs were started and restored on multiple
-configurations.
+> region doesn't have appropriate page attributes set or the mapping for
+> the region might be missing. This issue was introduced by commit
+> 67a9108ed431 ("x86/efi: Build our own page table structures"). Before
+> this commit, 1:1 mappings for EFI regions were in swapper_pgd and were
+> not needed to be synced, but this commit introduced efi_pgd which missed
+> these mappings.
+ 
+Oops, good catch.
 
-Signed-off-by: Thomas Garnier <thgarnie@google.com>
----
-Based on next-20170213
----
- arch/x86/include/asm/desc.h      | 51 ++++++++++++++++++++++++++++++++++++----
- arch/x86/include/asm/processor.h |  1 +
- arch/x86/kernel/cpu/common.c     | 28 +++++++++++++++++-----
- arch/x86/kvm/svm.c               |  4 +---
- arch/x86/kvm/vmx.c               | 15 ++++--------
- 5 files changed, 75 insertions(+), 24 deletions(-)
+> Below shown are the efi_pgd dumps before and after the bad commit.
+> efi_dump_pagetable() is called before calling efi_merge_regions() in
+> __efi_enter_virtual_mode() and this kernel is booted on qemu to obtain
+> page table dumps.
+> 
+> EFI_PGT_DUMP before commit:
+> ---------------------------
+> [0.007041] ---[ User Space ]---
+> [0.007427] 0x0000000000000000-0x0000000000200000 2M    RW     GLB NX pte
+> [0.008609] 0x0000000000200000-0x0000000000800000 6M    RW PSE GLB NX pmd
+> [0.010069] 0x0000000000800000-0x0000000000808000 32K                 pte
+> [0.011068] 0x0000000000808000-0x0000000000810000 32K   RW     GLB NX pte
+> [0.012325] 0x0000000000810000-0x0000000000900000 960K                pte
+> [0.013071] 0x0000000000900000-0x0000000000a00000 1M    RW     GLB NX pte
+> [0.014579] 0x0000000000a00000-0x000000007e800000 2014M RW PSE GLB NX pmd
+> [0.015593] 0x000000007e800000-0x000000007e9b6000 1752K RW     GLB NX pte
+> [0.016600] 0x000000007e9b6000-0x000000007e9fe000 288K                pte
+> [0.018003] 0x000000007e9fe000-0x000000007ea00000 8K    RW     GLB NX pte
+> [0.019165] 0x000000007ea00000-0x000000007ec00000 2M    RW PSE GLB NX pmd
+> [0.020331] 0x000000007ec00000-0x000000007eda9000 1700K RW     GLB NX pte
+> [0.021483] 0x000000007eda9000-0x000000007ee14000 428K                pte
+> [0.022500] 0x000000007ee14000-0x000000007f000000 1968K RW     GLB NX pte
+> [0.023596] 0x000000007f000000-0x000000007fe00000 14M   RW PSE GLB NX pmd
+> [0.025004] 0x000000007fe00000-0x000000007fe94000 592K  RW     GLB NX pte
+> [0.026220] 0x000000007fe94000-0x000000007fef8000 400K                pte
+> [0.027069] 0x000000007fef8000-0x000000007ffd0000 864K  RW     GLB NX pte
+> [0.028420] 0x000000007ffd0000-0x000000007fff0000 128K                pte
+> [0.029551] 0x000000007fff0000-0x0000000080000000 64K   RW     GLB NX pte
+> [0.030601] 0x0000000080000000-0x0000008000000000 510G                pud
+> [0.031499] 0x0000008000000000-0xffff800000000000 17179737600G        pgd
+> [0.032152] ---[ Kernel Space ]---
+> 
+> EFI_PGT_DUMP after commit:
+> --------------------------
+> [0.005620] ---[ User Space ]---
+> [0.005838] 0x0000000000000000-0xffff800000000000 16777088T           pgd
+> [0.005873] ---[ Kernel Space ]---
+> 
+> While not having these mappings isn't a bug but we need these mappings
+> to support machines with buggy firmware.
+> 
+> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+> Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> ---
+>  arch/x86/platform/efi/efi_64.c | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+> 
+> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+> index 622fbc7c01cd..43f9cc45ae52 100644
+> --- a/arch/x86/platform/efi/efi_64.c
+> +++ b/arch/x86/platform/efi/efi_64.c
+> @@ -137,6 +137,7 @@ int __init efi_alloc_page_tables(void)
+>  	pgd_t *pgd;
+>  	pud_t *pud;
+>  	gfp_t gfp_mask;
+> +	unsigned num_pgds;
+>  
+>  	if (efi_enabled(EFI_OLD_MEMMAP))
+>  		return 0;
+> @@ -156,6 +157,13 @@ int __init efi_alloc_page_tables(void)
+>  
+>  	pgd_populate(NULL, pgd, pud);
+>  
+> +	/*
+> +	 * Sync 1:1 mappings to support buggy firmware which haven't updated
+> +	 * their addresses even after kernel has booted.
+> +	 */
+> +	num_pgds = pgd_index(VMALLOC_START) - pgd_index(PAGE_OFFSET);
+> +	memcpy(efi_pgd, pgd_offset_k(PAGE_OFFSET), sizeof(pgd_t) * num_pgds);
+> +
+>  	return 0;
+>  }
 
-diff --git a/arch/x86/include/asm/desc.h b/arch/x86/include/asm/desc.h
-index 5d4ba1311737..15b2a86c9267 100644
---- a/arch/x86/include/asm/desc.h
-+++ b/arch/x86/include/asm/desc.h
-@@ -57,6 +57,17 @@ static inline unsigned long get_cpu_gdt_rw_vaddr(unsigned int cpu)
- 	return (unsigned long)get_cpu_gdt_rw(cpu);
- }
- 
-+/* Provide the current original GDT */
-+static inline struct desc_struct *get_current_gdt_rw(void)
-+{
-+	return this_cpu_ptr(&gdt_page)->gdt;
-+}
-+
-+static inline unsigned long get_current_gdt_rw_vaddr(void)
-+{
-+	return (unsigned long)get_current_gdt_rw();
-+}
-+
- /* Get the fixmap index for a specific processor */
- static inline unsigned int get_cpu_gdt_ro_index(int cpu)
- {
-@@ -233,11 +244,6 @@ static inline void native_set_ldt(const void *addr, unsigned int entries)
- 	}
- }
- 
--static inline void native_load_tr_desc(void)
--{
--	asm volatile("ltr %w0"::"q" (GDT_ENTRY_TSS*8));
--}
--
- static inline void native_load_gdt(const struct desc_ptr *dtr)
- {
- 	asm volatile("lgdt %0"::"m" (*dtr));
-@@ -258,6 +264,41 @@ static inline void native_store_idt(struct desc_ptr *dtr)
- 	asm volatile("sidt %0":"=m" (*dtr));
- }
- 
-+/*
-+ * The LTR instruction marks the TSS GDT entry as busy. On 64-bit, the GDT is
-+ * a read-only remapping. To prevent a page fault, the GDT is switched to the
-+ * original writeable version when needed.
-+ */
-+#ifdef CONFIG_X86_64
-+static inline void native_load_tr_desc(void)
-+{
-+	struct desc_ptr gdt;
-+	int cpu = raw_smp_processor_id();
-+	bool restore = 0;
-+	struct desc_struct *fixmap_gdt;
-+
-+	native_store_gdt(&gdt);
-+	fixmap_gdt = get_cpu_gdt_ro(cpu);
-+
-+	/*
-+	 * If the current GDT is the read-only fixmap, swap to the original
-+	 * writeable version. Swap back at the end.
-+	 */
-+	if (gdt.address == (unsigned long)fixmap_gdt) {
-+		load_direct_gdt(cpu);
-+		restore = 1;
-+	}
-+	asm volatile("ltr %w0"::"q" (GDT_ENTRY_TSS*8));
-+	if (restore)
-+		load_fixmap_gdt(cpu);
-+}
-+#else
-+static inline void native_load_tr_desc(void)
-+{
-+	asm volatile("ltr %w0"::"q" (GDT_ENTRY_TSS*8));
-+}
-+#endif
-+
- static inline unsigned long native_store_tr(void)
- {
- 	unsigned long tr;
-diff --git a/arch/x86/include/asm/processor.h b/arch/x86/include/asm/processor.h
-index c441d1f7e275..6ea9e419a856 100644
---- a/arch/x86/include/asm/processor.h
-+++ b/arch/x86/include/asm/processor.h
-@@ -706,6 +706,7 @@ extern struct desc_ptr		early_gdt_descr;
- 
- extern void cpu_set_gdt(int);
- extern void switch_to_new_gdt(int);
-+extern void load_direct_gdt(int);
- extern void load_fixmap_gdt(int);
- extern void load_percpu_segment(int);
- extern void cpu_init(void);
-diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 2853a42ded2d..bdf521383900 100644
---- a/arch/x86/kernel/cpu/common.c
-+++ b/arch/x86/kernel/cpu/common.c
-@@ -444,13 +444,31 @@ void load_percpu_segment(int cpu)
- 	load_stack_canary_segment();
- }
- 
-+/* On 64-bit the GDT remapping is read-only */
-+#ifdef CONFIG_X86_64
-+#define PAGE_FIXMAP_GDT PAGE_KERNEL_RO
-+#else
-+#define PAGE_FIXMAP_GDT PAGE_KERNEL
-+#endif
-+
- /* Setup the fixmap mapping only once per-processor */
- static inline void setup_fixmap_gdt(int cpu)
- {
- 	__set_fixmap(get_cpu_gdt_ro_index(cpu),
--		     __pa(get_cpu_gdt_rw(cpu)), PAGE_KERNEL);
-+		     __pa(get_cpu_gdt_rw(cpu)), PAGE_FIXMAP_GDT);
- }
- 
-+/* Load the original GDT from the per-cpu structure */
-+void load_direct_gdt(int cpu)
-+{
-+	struct desc_ptr gdt_descr;
-+
-+	gdt_descr.address = (long)get_cpu_gdt_rw(cpu);
-+	gdt_descr.size = GDT_SIZE - 1;
-+	load_gdt(&gdt_descr);
-+}
-+EXPORT_SYMBOL_GPL(load_direct_gdt);
-+
- /* Load a fixmap remapping of the per-cpu GDT */
- void load_fixmap_gdt(int cpu)
- {
-@@ -460,6 +478,7 @@ void load_fixmap_gdt(int cpu)
- 	gdt_descr.size = GDT_SIZE - 1;
- 	load_gdt(&gdt_descr);
- }
-+EXPORT_SYMBOL_GPL(load_fixmap_gdt);
- 
- /*
-  * Current gdt points %fs at the "master" per-cpu area: after this,
-@@ -467,11 +486,8 @@ void load_fixmap_gdt(int cpu)
-  */
- void switch_to_new_gdt(int cpu)
- {
--	struct desc_ptr gdt_descr;
--
--	gdt_descr.address = (long)get_cpu_gdt_rw(cpu);
--	gdt_descr.size = GDT_SIZE - 1;
--	load_gdt(&gdt_descr);
-+	/* Load the original GDT */
-+	load_direct_gdt(cpu);
- 	/* Reload the per-cpu base */
- 	load_percpu_segment(cpu);
- }
-diff --git a/arch/x86/kvm/svm.c b/arch/x86/kvm/svm.c
-index d0414f054bdf..7b9a71e465b1 100644
---- a/arch/x86/kvm/svm.c
-+++ b/arch/x86/kvm/svm.c
-@@ -741,7 +741,6 @@ static int svm_hardware_enable(void)
- 
- 	struct svm_cpu_data *sd;
- 	uint64_t efer;
--	struct desc_ptr gdt_descr;
- 	struct desc_struct *gdt;
- 	int me = raw_smp_processor_id();
- 
-@@ -763,8 +762,7 @@ static int svm_hardware_enable(void)
- 	sd->max_asid = cpuid_ebx(SVM_CPUID_FUNC) - 1;
- 	sd->next_asid = sd->max_asid + 1;
- 
--	native_store_gdt(&gdt_descr);
--	gdt = (struct desc_struct *)gdt_descr.address;
-+	gdt = get_current_gdt_rw();
- 	sd->tss_desc = (struct kvm_ldttss_desc *)(gdt + GDT_ENTRY_TSS);
- 
- 	wrmsrl(MSR_EFER, efer | EFER_SVME);
-diff --git a/arch/x86/kvm/vmx.c b/arch/x86/kvm/vmx.c
-index 7c3e42623090..99167f20bc34 100644
---- a/arch/x86/kvm/vmx.c
-+++ b/arch/x86/kvm/vmx.c
-@@ -935,7 +935,6 @@ static DEFINE_PER_CPU(struct vmcs *, current_vmcs);
-  * when a CPU is brought down, and we need to VMCLEAR all VMCSs loaded on it.
-  */
- static DEFINE_PER_CPU(struct list_head, loaded_vmcss_on_cpu);
--static DEFINE_PER_CPU(struct desc_ptr, host_gdt);
- 
- /*
-  * We maintian a per-CPU linked-list of vCPU, so in wakeup_handler() we
-@@ -1997,10 +1996,9 @@ static void reload_tss(void)
- 	/*
- 	 * VT restores TR but not its size.  Useless.
- 	 */
--	struct desc_ptr *gdt = this_cpu_ptr(&host_gdt);
- 	struct desc_struct *descs;
- 
--	descs = (void *)gdt->address;
-+	descs = get_current_gdt_rw();
- 	descs[GDT_ENTRY_TSS].type = 9; /* available TSS */
- 	load_TR_desc();
- }
-@@ -2061,7 +2059,6 @@ static bool update_transition_efer(struct vcpu_vmx *vmx, int efer_offset)
- 
- static unsigned long segment_base(u16 selector)
- {
--	struct desc_ptr *gdt = this_cpu_ptr(&host_gdt);
- 	struct desc_struct *d;
- 	unsigned long table_base;
- 	unsigned long v;
-@@ -2069,7 +2066,7 @@ static unsigned long segment_base(u16 selector)
- 	if (!(selector & ~3))
- 		return 0;
- 
--	table_base = gdt->address;
-+	table_base = get_current_gdt_rw_vaddr();
- 
- 	if (selector & 4) {           /* from ldt */
- 		u16 ldt_selector = kvm_read_ldt();
-@@ -2185,7 +2182,7 @@ static void __vmx_load_host_state(struct vcpu_vmx *vmx)
- #endif
- 	if (vmx->host_state.msr_host_bndcfgs)
- 		wrmsrl(MSR_IA32_BNDCFGS, vmx->host_state.msr_host_bndcfgs);
--	load_gdt(this_cpu_ptr(&host_gdt));
-+	load_fixmap_gdt(raw_smp_processor_id());
- }
- 
- static void vmx_load_host_state(struct vcpu_vmx *vmx)
-@@ -2287,7 +2284,7 @@ static void vmx_vcpu_load(struct kvm_vcpu *vcpu, int cpu)
- 	}
- 
- 	if (!already_loaded) {
--		struct desc_ptr *gdt = this_cpu_ptr(&host_gdt);
-+		unsigned long gdt = get_current_gdt_rw_vaddr();
- 		unsigned long sysenter_esp;
- 
- 		kvm_make_request(KVM_REQ_TLB_FLUSH, vcpu);
-@@ -2297,7 +2294,7 @@ static void vmx_vcpu_load(struct kvm_vcpu *vcpu, int cpu)
- 		 * processors.
- 		 */
- 		vmcs_writel(HOST_TR_BASE, kvm_read_tr_base()); /* 22.2.4 */
--		vmcs_writel(HOST_GDTR_BASE, gdt->address);   /* 22.2.4 */
-+		vmcs_writel(HOST_GDTR_BASE, gdt);   /* 22.2.4 */
- 
- 		rdmsrl(MSR_IA32_SYSENTER_ESP, sysenter_esp);
- 		vmcs_writel(HOST_IA32_SYSENTER_ESP, sysenter_esp); /* 22.2.3 */
-@@ -3523,8 +3520,6 @@ static int hardware_enable(void)
- 		ept_sync_global();
- 	}
- 
--	native_store_gdt(this_cpu_ptr(&host_gdt));
--
- 	return 0;
- }
- 
--- 
-2.11.0.483.g087da7b7c-goog
-
+Is there a reason you didn't add this code to
+efi_sync_low_kernel_mappings()? That would seem like the logical place
+to put it because that's where we already do some PGD copying.
