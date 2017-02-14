@@ -1,100 +1,102 @@
-From: "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH V8 06/10] acpi: apei: panic OS with fatal error status
- block
-Date: Mon, 13 Feb 2017 15:45:44 -0700
-Message-ID: <5b06372d-e389-5157-ccb4-a7b023990d4d@codeaurora.org>
-References: <1485969413-23577-1-git-send-email-tbaicar@codeaurora.org>
- <1485969413-23577-7-git-send-email-tbaicar@codeaurora.org>
- <589C490A.9080109@arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <589C490A.9080109-5wv7dgnIgG8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
-Cc: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org, Suzuki.Poulose-5wv7dgnIgG8@public.gmane.org, punit.agr
+From: Thomas Garnier <thgarnie@google.com>
+Subject: [PATCH v3 1/4] x86/mm: Adapt MODULES_END based on Fixmap section size
+Date: Tue, 14 Feb 2017 11:42:56 -0800
+Message-ID: <20170214194259.75960-1-thgarnie@google.com>
+Return-path: <linux-pm-owner@vger.kernel.org>
+Sender: linux-pm-owner@vger.kernel.org
+To: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Thomas Garnier <thgarnie@google.com>, Kees Cook <keescook@chromium.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Paul Gortmaker <paul.gortmaker@windriver.com>, Andy Lutomirski <luto@amacapital.net>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>
+Cc: x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-pm@vger.kernel.org, linux-efi@vger.kernel.org, xen-devel@lists.xenproject.org, lguest@lists.ozlabs.org, kvm@vger.kernel.org, kernel-hardening@lists.openwall.com
 List-Id: linux-efi@vger.kernel.org
 
-Hello James,
+This patch aligns MODULES_END to the beginning of the Fixmap section.
+It optimizes the space available for both sections. The address is
+pre-computed based on the number of pages required by the Fixmap
+section.
 
+It will allow GDT remapping in the Fixmap section. The current
+MODULES_END static address does not provide enough space for the kernel
+to support a large number of processors.
 
-On 2/9/2017 3:48 AM, James Morse wrote:
-> Hi Jonathan, Tyler,
->
-> On 01/02/17 17:16, Tyler Baicar wrote:
->> From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
->>
->> Even if an error status block's severity is fatal, the kernel does not
->> honor the severity level and panic.
->>
->> With the firmware first model, the platform could inform the OS about a
->> fatal hardware error through the non-NMI GHES notification type. The OS
->> should panic when a hardware error record is received with this
->> severity.
->>
->> Call panic() after CPER data in error status block is printed if
->> severity is fatal, before each error section is handled.
->> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
->> index 8756172..86c1f15 100644
->> --- a/drivers/acpi/apei/ghes.c
->> +++ b/drivers/acpi/apei/ghes.c
->> @@ -687,6 +689,13 @@ static int ghes_ack_error(struct acpi_hest_generic_v2 *generic_v2)
->>   	return rc;
->>   }
->>   
->> +static void __ghes_call_panic(void)
->> +{
->> +	if (panic_timeout == 0)
->> +		panic_timeout = ghes_panic_timeout;
->> +	panic("Fatal hardware error!");
->> +}
->> +
-> __ghes_panic() also has:
->> 	__ghes_print_estatus(KERN_EMERG, ghes->generic, ghes->estatus);
-> Which prints this estatus regardless of rate limiting and cache-ing.
->
-> [ ... ]
->
->> @@ -698,6 +707,10 @@ static int ghes_proc(struct ghes *ghes)
->>   		if (ghes_print_estatus(NULL, ghes->generic, ghes->estatus))
-> ghes_print_estatus() uses some custom rate limiting '2 messages every 5
-> seconds', GHES_SEV_PANIC shares the same limit as GHES_SEV_RECOVERABLE.
->
-> I think its possible to get 2 recoverable messages, then a panic in a 5 second
-> window. The rate limit will kick in to stop the panic estatus block being
-> printed, but we still go on to call panic() without the real reason being printed...
->
-> (the caching thing only seems to consider identical messages, given we would
-> never see two panic messages, I don't think that will cause any problems.)
->
->>   			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
->>   	}
->> +	if (ghes_severity(ghes->estatus->error_severity) >= GHES_SEV_PANIC) {
->> +		__ghes_call_panic();
->> +	}
->> +
-> I think this ghes_severity() then panic() should go above the:
->> 	if (!ghes_estatus_cached(ghes->estatus)) {
-> and we should call __ghes_print_estatus() here too, to make sure the message
-> definitely got out!
-Okay, that makes sense. If we move this up, is there a problem with 
-calling __ghes_panic() instead of making the __ghes_print_estatus() and 
-__ghes_call_panic() calls here? It looks like that will just add a call 
-to oops_begin() and ghes_print_queued_estatus() as well, but this is 
-what ghes_notify_nmi() does if the severity is panic.
+Signed-off-by: Thomas Garnier <thgarnie@google.com>
+---
+Based on next-20170213
+---
+ arch/x86/include/asm/fixmap.h           | 8 ++++++++
+ arch/x86/include/asm/pgtable_64_types.h | 3 ---
+ arch/x86/kernel/module.c                | 1 +
+ arch/x86/mm/dump_pagetables.c           | 1 +
+ arch/x86/mm/kasan_init_64.c             | 1 +
+ 5 files changed, 11 insertions(+), 3 deletions(-)
 
-Thanks,
-Tyler
-> With that,
-> Reviewed-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
->
->
-> Thanks,
->
-> James
-
+diff --git a/arch/x86/include/asm/fixmap.h b/arch/x86/include/asm/fixmap.h
+index 8554f960e21b..20231189e0e3 100644
+--- a/arch/x86/include/asm/fixmap.h
++++ b/arch/x86/include/asm/fixmap.h
+@@ -132,6 +132,14 @@ enum fixed_addresses {
+ 
+ extern void reserve_top_address(unsigned long reserve);
+ 
++/* On 64-bit, the module sections ends with the start of the fixmap */
++#ifdef CONFIG_X86_64
++#define MODULES_VADDR    (__START_KERNEL_map + KERNEL_IMAGE_SIZE)
++#define MODULES_END   __fix_to_virt(__end_of_fixed_addresses + 1)
++#define MODULES_LEN   (MODULES_END - MODULES_VADDR)
++#endif /* CONFIG_X86_64 */
++
++
+ #define FIXADDR_SIZE	(__end_of_permanent_fixed_addresses << PAGE_SHIFT)
+ #define FIXADDR_START		(FIXADDR_TOP - FIXADDR_SIZE)
+ 
+diff --git a/arch/x86/include/asm/pgtable_64_types.h b/arch/x86/include/asm/pgtable_64_types.h
+index 3a264200c62f..de8bace10200 100644
+--- a/arch/x86/include/asm/pgtable_64_types.h
++++ b/arch/x86/include/asm/pgtable_64_types.h
+@@ -66,9 +66,6 @@ typedef struct { pteval_t pte; } pte_t;
+ #define VMEMMAP_START	__VMEMMAP_BASE
+ #endif /* CONFIG_RANDOMIZE_MEMORY */
+ #define VMALLOC_END	(VMALLOC_START + _AC((VMALLOC_SIZE_TB << 40) - 1, UL))
+-#define MODULES_VADDR    (__START_KERNEL_map + KERNEL_IMAGE_SIZE)
+-#define MODULES_END      _AC(0xffffffffff000000, UL)
+-#define MODULES_LEN   (MODULES_END - MODULES_VADDR)
+ #define ESPFIX_PGD_ENTRY _AC(-2, UL)
+ #define ESPFIX_BASE_ADDR (ESPFIX_PGD_ENTRY << PGDIR_SHIFT)
+ #define EFI_VA_START	 ( -4 * (_AC(1, UL) << 30))
+diff --git a/arch/x86/kernel/module.c b/arch/x86/kernel/module.c
+index 477ae806c2fa..fad61caac75e 100644
+--- a/arch/x86/kernel/module.c
++++ b/arch/x86/kernel/module.c
+@@ -35,6 +35,7 @@
+ #include <asm/page.h>
+ #include <asm/pgtable.h>
+ #include <asm/setup.h>
++#include <asm/fixmap.h>
+ 
+ #if 0
+ #define DEBUGP(fmt, ...)				\
+diff --git a/arch/x86/mm/dump_pagetables.c b/arch/x86/mm/dump_pagetables.c
+index 8aa6bea1cd6c..90170415f08a 100644
+--- a/arch/x86/mm/dump_pagetables.c
++++ b/arch/x86/mm/dump_pagetables.c
+@@ -19,6 +19,7 @@
+ #include <linux/seq_file.h>
+ 
+ #include <asm/pgtable.h>
++#include <asm/fixmap.h>
+ 
+ /*
+  * The dumper groups pagetable entries of the same type into one, and for
+diff --git a/arch/x86/mm/kasan_init_64.c b/arch/x86/mm/kasan_init_64.c
+index 0493c17b8a51..34f167cf3316 100644
+--- a/arch/x86/mm/kasan_init_64.c
++++ b/arch/x86/mm/kasan_init_64.c
+@@ -8,6 +8,7 @@
+ 
+ #include <asm/tlbflush.h>
+ #include <asm/sections.h>
++#include <asm/fixmap.h>
+ 
+ extern pgd_t early_level4_pgt[PTRS_PER_PGD];
+ extern struct range pfn_mapped[E820_X_MAX];
 -- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+2.11.0.483.g087da7b7c-goog
+
