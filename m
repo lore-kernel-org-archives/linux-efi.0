@@ -1,127 +1,113 @@
-From: Bhupesh Sharma <bhsharma@redhat.com>
-Subject: [PATCH 2/2] bgrt: Make ACPI BGRT parsing code common for ARCHs
-Date: Wed, 15 Feb 2017 18:34:52 +0530
-Message-ID: <1487163892-27701-3-git-send-email-bhsharma@redhat.com>
-References: <1487163892-27701-1-git-send-email-bhsharma@redhat.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [PATCH v3 1/4] x86/mm: Adapt MODULES_END based on Fixmap section
+ size
+Date: Wed, 15 Feb 2017 14:58:24 +0100
+Message-ID: <20170215135824.tflwuf3esu2npwwo@pd.tnic>
+References: <20170214194259.75960-1-thgarnie@google.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1487163892-27701-1-git-send-email-bhsharma@redhat.com>
+Content-Disposition: inline
+In-Reply-To: <20170214194259.75960-1-thgarnie@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, x86@kernel.org, linux-acpi@vger.kernel.org
-Cc: nicstange@gmail.com, leif.lindholm@linaro.org, sai.praneeth.prakhya@intel.com, pjones@redhat.com, bhupesh.linux@gmail.com, Bhupesh Sharma <bhsharma@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Ingo Molnar <mingo@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Dan Williams <dan.j.williams@intel.com>, Dave Young <dyoung@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Mark Rutland <mark.rutland@arm.com>, Will Deacon <will.deacon@arm.com>
+To: Thomas Garnier <thgarnie@google.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Kees Cook <keescook@chromium.org>, Andy Lutomirski <luto@kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Andy Lutomirski <luto@amacapital.net>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Rusty Russell <rusty@rustcorp.com.au>, Peter Zijlstra <peterz@infradead>
 List-Id: linux-efi@vger.kernel.org
 
-This patch (2) of a patchset containing (2) patches, allows
-the ACPI BGRT table parsing code to be invoked in a similar
-fashion accross x86 and AARCH64 ARCHs (which can be later easily extended
-for other ARCHs which support ACPI tables in future).
+On Tue, Feb 14, 2017 at 11:42:56AM -0800, Thomas Garnier wrote:
+> This patch aligns MODULES_END to the beginning of the Fixmap section.
+> It optimizes the space available for both sections. The address is
+> pre-computed based on the number of pages required by the Fixmap
+> section.
+> 
+> It will allow GDT remapping in the Fixmap section. The current
+> MODULES_END static address does not provide enough space for the kernel
+> to support a large number of processors.
+> 
+> Signed-off-by: Thomas Garnier <thgarnie@google.com>
+> ---
+> Based on next-20170213
+> ---
+>  arch/x86/include/asm/fixmap.h           | 8 ++++++++
+>  arch/x86/include/asm/pgtable_64_types.h | 3 ---
+>  arch/x86/kernel/module.c                | 1 +
+>  arch/x86/mm/dump_pagetables.c           | 1 +
+>  arch/x86/mm/kasan_init_64.c             | 1 +
+>  5 files changed, 11 insertions(+), 3 deletions(-)
+> 
+> diff --git a/arch/x86/include/asm/fixmap.h b/arch/x86/include/asm/fixmap.h
+> index 8554f960e21b..20231189e0e3 100644
+> --- a/arch/x86/include/asm/fixmap.h
+> +++ b/arch/x86/include/asm/fixmap.h
+> @@ -132,6 +132,14 @@ enum fixed_addresses {
+>  
+>  extern void reserve_top_address(unsigned long reserve);
+>  
+> +/* On 64-bit, the module sections ends with the start of the fixmap */
+> +#ifdef CONFIG_X86_64
+> +#define MODULES_VADDR    (__START_KERNEL_map + KERNEL_IMAGE_SIZE)
+> +#define MODULES_END   __fix_to_virt(__end_of_fixed_addresses + 1)
+> +#define MODULES_LEN   (MODULES_END - MODULES_VADDR)
+> +#endif /* CONFIG_X86_64 */
 
-The approach has been tested on QEMU based VMs for both
-x86 and AARCH64.
+JFYI: so there's another patchset which adds KERNEL_MAPPING_SIZE:
 
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Dan Williams <dan.j.williams@intel.com>
-Cc: Dave Young <dyoung@redhat.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Will Deacon <will.deacon@arm.com>
-Signed-off-by: Bhupesh Sharma <bhsharma@redhat.com>
+https://lkml.kernel.org/r/1486040077-3719-1-git-send-email-bhe@redhat.com
+
+and makes it a 1G, i.e., the KASLR default. I guess the above will have
+to be KERNEL_MAPPING_SIZE then.
+
+And why are you moving those to fixmap.h? What's wrong with
+including fixmap.h into pgtable_64_types.h so that you can get
+__end_of_fixed_addresses?
+
+FWIW, I didn't even have to add any includes with my .config, i.e., that builds:
+
 ---
- arch/arm64/kernel/acpi.c    | 3 +++
- arch/x86/kernel/acpi/boot.c | 6 ------
- drivers/acpi/Kconfig        | 2 +-
- drivers/acpi/bgrt.c         | 6 ++++++
- include/linux/efi-bgrt.h    | 2 ++
- 5 files changed, 12 insertions(+), 7 deletions(-)
+diff --git a/arch/x86/include/asm/pgtable_64_types.h b/arch/x86/include/asm/pgtable_64_types.h
+index 3a264200c62f..eda7fa856fa9 100644
+--- a/arch/x86/include/asm/pgtable_64_types.h
++++ b/arch/x86/include/asm/pgtable_64_types.h
+@@ -67,7 +67,7 @@ typedef struct { pteval_t pte; } pte_t;
+ #endif /* CONFIG_RANDOMIZE_MEMORY */
+ #define VMALLOC_END	(VMALLOC_START + _AC((VMALLOC_SIZE_TB << 40) - 1, UL))
+ #define MODULES_VADDR    (__START_KERNEL_map + KERNEL_IMAGE_SIZE)
+-#define MODULES_END      _AC(0xffffffffff000000, UL)
++#define MODULES_END   __fix_to_virt(__end_of_fixed_addresses + 1)
+ #define MODULES_LEN   (MODULES_END - MODULES_VADDR)
+ #define ESPFIX_PGD_ENTRY _AC(-2, UL)
+ #define ESPFIX_BASE_ADDR (ESPFIX_PGD_ENTRY << PGDIR_SHIFT)
+---
 
-diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
-index 64d9cbd6..e25c11e 100644
---- a/arch/arm64/kernel/acpi.c
-+++ b/arch/arm64/kernel/acpi.c
-@@ -18,6 +18,7 @@
- #include <linux/acpi.h>
- #include <linux/bootmem.h>
- #include <linux/cpumask.h>
-+#include <linux/efi-bgrt.h>
- #include <linux/init.h>
- #include <linux/irq.h>
- #include <linux/irqdomain.h>
-@@ -233,6 +234,8 @@ void __init acpi_boot_table_init(void)
- 			early_init_dt_scan_chosen_stdout();
- 	} else {
- 		parse_spcr(earlycon_init_is_deferred);
-+		if (IS_ENABLED(CONFIG_ACPI_BGRT))
-+			acpi_table_parse(ACPI_SIG_BGRT, acpi_parse_bgrt);
- 	}
- }
- 
-diff --git a/arch/x86/kernel/acpi/boot.c b/arch/x86/kernel/acpi/boot.c
-index 7ff007e..4a6ee24 100644
---- a/arch/x86/kernel/acpi/boot.c
-+++ b/arch/x86/kernel/acpi/boot.c
-@@ -1558,12 +1558,6 @@ int __init early_acpi_boot_init(void)
- 	return 0;
- }
- 
--static int __init acpi_parse_bgrt(struct acpi_table_header *table)
--{
--	efi_bgrt_init(table);
--	return 0;
--}
--
- int __init acpi_boot_init(void)
- {
- 	/* those are executed after early-quirks are executed */
-diff --git a/drivers/acpi/Kconfig b/drivers/acpi/Kconfig
-index 83e5f7e..dad02c0 100644
---- a/drivers/acpi/Kconfig
-+++ b/drivers/acpi/Kconfig
-@@ -440,7 +440,7 @@ config ACPI_CUSTOM_METHOD
- 
- config ACPI_BGRT
- 	bool "Boottime Graphics Resource Table support"
--	depends on EFI && X86
-+	depends on EFI && (X86 || ARM64)
-         help
- 	  This driver adds support for exposing the ACPI Boottime Graphics
- 	  Resource Table, which allows the operating system to obtain
-diff --git a/drivers/acpi/bgrt.c b/drivers/acpi/bgrt.c
-index ca28aa57..df1c629 100644
---- a/drivers/acpi/bgrt.c
-+++ b/drivers/acpi/bgrt.c
-@@ -81,6 +81,12 @@ static struct attribute_group bgrt_attribute_group = {
- 	.bin_attrs = bgrt_bin_attributes,
- };
- 
-+int __init acpi_parse_bgrt(struct acpi_table_header *table)
-+{
-+	efi_bgrt_init(table);
-+	return 0;
-+}
-+
- static int __init bgrt_init(void)
- {
- 	int ret;
-diff --git a/include/linux/efi-bgrt.h b/include/linux/efi-bgrt.h
-index 2fd3993..33640cd 100644
---- a/include/linux/efi-bgrt.h
-+++ b/include/linux/efi-bgrt.h
-@@ -6,6 +6,7 @@
- #ifdef CONFIG_ACPI_BGRT
- 
- void efi_bgrt_init(struct acpi_table_header *table);
-+int __init acpi_parse_bgrt(struct acpi_table_header *table);
- 
- /* The BGRT data itself; only valid if bgrt_image != NULL. */
- extern size_t bgrt_image_size;
-@@ -14,6 +15,7 @@ extern struct acpi_table_bgrt bgrt_tab;
- #else /* !CONFIG_ACPI_BGRT */
- 
- static inline void efi_bgrt_init(struct acpi_table_header *table) {}
-+static inline int __init acpi_parse_bgrt(struct acpi_table_header *table) {}
- 
- #endif /* !CONFIG_ACPI_BGRT */
- 
+but I wouldn't be surprised if some strange configuration would need it.
+
+>  #define FIXADDR_SIZE	(__end_of_permanent_fixed_addresses << PAGE_SHIFT)
+>  #define FIXADDR_START		(FIXADDR_TOP - FIXADDR_SIZE)
+>  
+> diff --git a/arch/x86/include/asm/pgtable_64_types.h b/arch/x86/include/asm/pgtable_64_types.h
+> index 3a264200c62f..de8bace10200 100644
+> --- a/arch/x86/include/asm/pgtable_64_types.h
+> +++ b/arch/x86/include/asm/pgtable_64_types.h
+> @@ -66,9 +66,6 @@ typedef struct { pteval_t pte; } pte_t;
+>  #define VMEMMAP_START	__VMEMMAP_BASE
+>  #endif /* CONFIG_RANDOMIZE_MEMORY */
+>  #define VMALLOC_END	(VMALLOC_START + _AC((VMALLOC_SIZE_TB << 40) - 1, UL))
+> -#define MODULES_VADDR    (__START_KERNEL_map + KERNEL_IMAGE_SIZE)
+> -#define MODULES_END      _AC(0xffffffffff000000, UL)
+
+How much of an ABI breakage would that be? See
+Documentation/x86/x86_64/mm.txt.
+
+With my .config MODULES_END becomes 0xffffffffff1fe000 and it'll remain
+dynamic depending on .config. No idea how much in userspace relies on
+MODULES_END being static 0xffffffffff000000...
+
+Hmm.
+
 -- 
-2.7.4
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
