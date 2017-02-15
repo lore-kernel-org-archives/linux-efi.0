@@ -1,45 +1,202 @@
-From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
- images
-Date: Wed, 15 Feb 2017 19:59:30 +0100
-Message-ID: <4014c5e6-b5a0-7552-166f-a42992532c09@siemens.com>
-References: <cover.1487182480.git.jan.kiszka@siemens.com>
- <CAHp75VeVZo8f_aXZ=R8Y+++RSQeT=tFZmL6NNfekKJTkJc-nZA@mail.gmail.com>
- <1bf3c9d8-56aa-818b-350f-deb62ad14e08@siemens.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1bf3c9d8-56aa-818b-350f-deb62ad14e08-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+From: Tyler Baicar <tbaicar@codeaurora.org>
+Subject: [PATCH V10 00/10] Add UEFI 2.6 and ACPI 6.1 updates for RAS on ARM64
+Date: Wed, 15 Feb 2017 12:51:12 -0700
+Message-ID: <1487188282-2568-1-git-send-email-tbaicar@codeaurora.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org
+Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 2017-02-15 19:50, Jan Kiszka wrote:
-> On 2017-02-15 19:46, Andy Shevchenko wrote:
->> On Wed, Feb 15, 2017 at 8:14 PM, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
->>> See patch 2 for the background.
->>>
->>> Series has been tested on the Galileo Gen2, to exclude regressions, with
->>> a firmware.cap without security header and the SIMATIC IOT2040 which
->>> requires the header because of its mandatory secure boot.
->>
->> Briefly looking to the code it looks like a real hack.
->> Sorry, but it would be carefully (re-)designed.
-> 
-> The interface that the firmware provides us? That should have been done
-> differently, I agree, but I'm not too much into those firmware details,
-> specifically when it comes to signatures.
-> 
-> The Linux code was designed around that suboptimal situation. If there
-> are better ideas, I'm all ears.
-> 
+Hi Rafael,
+Do you think this series should go through your tree like the other recent
+APEI patches?
 
-Expanding CC's as requested by Andy.
+When a memory error, CPU error, PCIe error, or other type of hardware error
+that's covered by RAS occurs, firmware should populate the shared GHES memory
+location with the proper GHES structures to notify the OS of the error.
+For example, platforms that implement firmware first handling may implement
+separate GHES sources for corrected errors and uncorrected errors. If the
+error is an uncorrectable error, then the firmware will notify the OS
+immediately since the error needs to be handled ASAP. The OS will then be able
+to take the appropriate action needed such as offlining a page. If the error
+is a corrected error, then the firmware will not interrupt the OS immediately.
+Instead, the OS will see and report the error the next time it's GHES timer
+expires. The kernel will first parse the GHES structures and report the errors
+through the kernel logs and then notify the user space through RAS trace
+events. This allows user space applications such as RAS Daemon to see the
+errors and report them however the user desires. This patchset extends the
+kernel functionality for RAS errors based on updates in the UEFI 2.6 and
+ACPI 6.1 specifications.
 
-Jan
+An example flow from firmware to user space could be:
+
+                 +---------------+
+       +-------->|               |
+       |         |  GHES polling |--+
++-------------+  |    source     |  |   +---------------+   +------------+
+|             |  +---------------+  |   |  Kernel GHES  |   |            |
+|  Firmware   |                     +-->|  CPER AER and |-->|  RAS trace |
+|             |  +---------------+  |   |  EDAC drivers |   |   event    |
++-------------+  |               |  |   +---------------+   +------------+
+       |         |  GHES sci     |--+
+       +-------->|   source      |
+                 +---------------+
+
+Add support for Generic Hardware Error Source (GHES) v2, which introduces the
+capability for the OS to acknowledge the consumption of the error record
+generated by the Reliability, Availability and Serviceability (RAS) controller.
+This eliminates potential race conditions between the OS and the RAS controller.
+
+Add support for the timestamp field added to the Generic Error Data Entry v3,
+allowing the OS to log the time that the error is generated by the firmware,
+rather than the time the error is consumed. This improves the correctness of
+event sequences when analyzing error logs. The timestamp is added in
+ACPI 6.1, reference Table 18-343 Generic Error Data Entry.
+
+Add support for ARMv8 Common Platform Error Record (CPER) per UEFI 2.6
+specification. ARMv8 specific processor error information is reported as part of
+the CPER records.  This provides more detail on for processor error logs. This
+can help describe ARMv8 cache, tlb, and bus errors.
+
+Synchronous External Abort (SEA) represents a specific processor error condition
+in ARM systems. A handler is added to recognize SEA errors, and a notifier is
+added to parse and report the errors before the process is killed. Refer to
+section N.2.1.1 in the Common Platform Error Record appendix of the UEFI 2.6
+specification.
+
+Currently the kernel ignores CPER records that are unrecognized.
+On the other hand, UEFI spec allows for non-standard (eg. vendor
+proprietary) error section type in CPER (Common Platform Error Record),
+as defined in section N2.3 of UEFI version 2.5. Therefore, user
+is not able to see hardware error data of non-standard section.
+
+If section Type field of Generic Error Data Entry is unrecognized,
+prints out the raw data in dmesg buffer, and also adds a tracepoint
+for reporting such hardware errors.
+
+Currently even if an error status block's severity is fatal, the kernel
+does not honor the severity level and panic. With the firmware first
+model, the platform could inform the OS about a fatal hardware error
+through the non-NMI GHES notification type. The OS should panic when a
+hardware error record is received with this severity.
+
+Add support to handle SEAs that occur while a KVM guest kernel is
+running. Currently these are unsupported by the guest abort handling.
+
+V10:Fix spacing of trace event enabled if statement
+V9: Move SEA_FnV_MASK to ESR_ELx_FnV
+    Move HAVE_NMI into alphabetical order
+    Remove duplicate hardirq.h include
+    Only call ghes_notify_sea if HAVE_ACPI_APEI_SEA
+    Make ACPI_APEI_SEA depend on ACPI_APEI_GHES
+    Use phys_addr_t for physical address variable
+    Make ghes_sea_add() return void
+    Add include guard to ghes.h
+    Verify HAVE_RAS before calling ras trace events
+    Call __ghes_print_estatus() before __ghes_call_panic()
+    Add trace_*_event_enabled() checks for both new trace events
+
+V8: Remove SEA notifier
+    Add FAR not valid bit check when populating the SEA error address
+    Move nmi_enter/exit() to architecture specific code
+    Add synchronize_rcu() usage to SEA handling
+    Make GHES_IOREMAP_PAGES always 2
+    Update ghes_ioremap_pfn_nmi() to work like ghes_ioremap_pfn_irq()
+    Remove the SEA print from handle_guest_sea()
+
+V7: Update a couple prints for ARM processor errors
+    Add Print notifying if overflow occurred for ARM processor errors
+    Check for ARM configuration to allow the compiler to ignore ARM code
+     on non-ARM systems
+    Use SEA acronym instead of spelling it out
+    Update fault_info prints to be more clear
+    Add NMI locking to SEA notification
+    Remove error info structure from ARM trace event since there can be
+     a variable amount of these structures
+
+V6: Change HEST_TYPE_GENERIC_V2 to IS_HEST_TYPE_GENERIC_V2 for readability
+    Move APEI helper defines from cper.h to ghes.h
+    Add data_len decrement back into print loop
+    Change references to ARMv8 to just ARM
+    Rewrite ARM processor context info parsing
+    Check valid bit of ARM error info field before printing it
+    Add include of linux/uuid.h in ghes.c
+
+V5: Fix GHES goto logic for error conditions
+    Change ghes_do_read_ack to ghes_ack_error
+    Make sure data version check is >= 3
+    Use CPER helper functions in print functions
+    Make handle_guest_sea() dummy function static for arm
+    Add arm to subject line for KVM patch
+
+V4: Add bit offset left shift to read_ack_write value
+    Make HEST generic and generic_v2 structures a union in the ghes structure
+    Move gdata v3 helper functions into ghes.h to avoid duplication
+    Reorder the timestamp print and avoid memcpy
+    Add helper functions for gdata size checking
+    Rename the SEA functions
+    Add helper function for GHES panics
+    Set fru_id to NULL UUID at variable declaration
+    Limit ARM trace event parameters to the needed structures
+    Reorder the ARM trace event variables to save space
+    Add comment for why we don't pass SEAs to the guest when it aborts
+    Move ARM trace event call into GHES driver instead of CPER
+
+V3: Fix unmapped address to the read_ack_register in ghes.c
+    Add helper function to get the proper payload based on generic data entry
+     version
+    Move timestamp print to avoid changing function calls in cper.c
+    Remove patch "arm64: exception: handle instruction abort at current EL"
+     since the el1_ia handler is already added in 4.8
+    Add EFI and ARM64 dependencies for HAVE_ACPI_APEI_SEA
+    Add a new trace event for ARM type errors
+    Add support to handle KVM guest SEAs
+
+V2: Add PSCI state print for the ARMv8 error type.
+    Separate timestamp year into year and century using BCD format.
+    Rebase on top of ACPICA 20160318 release and remove header file changes
+     in include/acpi/actbl1.h.
+    Add panic OS with fatal error status block patch.
+    Add processing of unrecognized CPER error section patches with updates
+     from previous comments. Original patches: https://lkml.org/lkml/2015/9/8/646
+
+V1: https://lkml.org/lkml/2016/2/5/544
+
+Jonathan (Zhixiong) Zhang (1):
+  acpi: apei: panic OS with fatal error status block
+
+Tyler Baicar (9):
+  acpi: apei: read ack upon ghes record consumption
+  ras: acpi/apei: cper: generic error data entry v3 per ACPI 6.1
+  efi: parse ARM processor error
+  arm64: exception: handle Synchronous External Abort
+  acpi: apei: handle SEA notification type for ARMv8
+  efi: print unrecognized CPER section
+  ras: acpi / apei: generate trace event for unrecognized CPER section
+  trace, ras: add ARM processor error trace event
+  arm/arm64: KVM: add guest SEA support
+
+ arch/arm/include/asm/kvm_arm.h       |   1 +
+ arch/arm/include/asm/system_misc.h   |   5 +
+ arch/arm/kvm/mmu.c                   |  18 ++-
+ arch/arm64/Kconfig                   |   2 +
+ arch/arm64/include/asm/esr.h         |   1 +
+ arch/arm64/include/asm/kvm_arm.h     |   1 +
+ arch/arm64/include/asm/system_misc.h |   2 +
+ arch/arm64/mm/fault.c                |  74 +++++++++++--
+ drivers/acpi/apei/Kconfig            |  14 +++
+ drivers/acpi/apei/ghes.c             | 184 ++++++++++++++++++++++++++----
+ drivers/acpi/apei/hest.c             |   7 +-
+ drivers/firmware/efi/cper.c          | 209 ++++++++++++++++++++++++++++++++---
+ drivers/ras/ras.c                    |   2 +
+ include/acpi/ghes.h                  |  34 +++++-
+ include/linux/cper.h                 |  54 +++++++++
+ include/ras/ras_event.h              |  79 +++++++++++++
+ 16 files changed, 637 insertions(+), 50 deletions(-)
 
 -- 
-Siemens AG, Corporate Technology, CT RDA ITP SES-DE
-Corporate Competence Center Embedded Linux
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
+
