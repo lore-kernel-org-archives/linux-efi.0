@@ -1,147 +1,268 @@
-From: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH V2] x86/efi: Add missing 1:1 mappings to support buggy firmware
-Date: Tue, 14 Feb 2017 20:03:41 -0800
-Message-ID: <1487131421-23703-1-git-send-email-sai.praneeth.prakhya@intel.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Zhengqiang <zhengqiang10@huawei.com>
+Subject: Re: [PATCH V8 05/10] acpi: apei: handle SEA notification type for
+ ARMv8
+Date: Wed, 15 Feb 2017 14:24:49 +0800
+Message-ID: <58A3F431.9040808@huawei.com>
+References: <1485969413-23577-1-git-send-email-tbaicar@codeaurora.org>
+ <1485969413-23577-6-git-send-email-tbaicar@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1485969413-23577-6-git-send-email-tbaicar@codeaurora.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kern
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Hi Tyler:
 
-There are some machines with buggy firmware that access EFI regions in
-1:1 mode (or physical mode) rather than virtual mode even after kernel
-being booted. On these machines, if we invoke an EFI runtime service
-(that does these buggy accesses) then it causes a page fault and hence
-results in kernel hang. The page fault happens because the requested
-region doesn't have appropriate page attributes set or the mapping for
-the region might be missing. This issue was introduced by commit
-67a9108ed431 ("x86/efi: Build our own page table structures"). Before
-this commit, 1:1 mappings for EFI regions were in swapper_pgd and were
-not needed to be synced, but this commit introduced efi_pgd which missed
-these mappings.
+On 2017/2/2 1:16, Tyler Baicar wrote:
+> ARM APEI extension proposal added SEA (Synchronous External Abort)
+> notification type for ARMv8.
+> Add a new GHES error source handling function for SEA. If an error
+> source's notification type is SEA, then this function can be registered
+> into the SEA exception handler. That way GHES will parse and report
+> SEA exceptions when they occur.
+> 
+> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+> ---
+>  arch/arm64/Kconfig        |  2 ++
+>  arch/arm64/mm/fault.c     | 11 +++++++
+>  drivers/acpi/apei/Kconfig | 14 +++++++++
+>  drivers/acpi/apei/ghes.c  | 78 ++++++++++++++++++++++++++++++++++++++++++-----
+>  include/acpi/ghes.h       |  2 ++
+>  5 files changed, 100 insertions(+), 7 deletions(-)
+> 
+> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+> index 1117421..f92778d 100644
+> --- a/arch/arm64/Kconfig
+> +++ b/arch/arm64/Kconfig
+> @@ -53,6 +53,8 @@ config ARM64
+>  	select HANDLE_DOMAIN_IRQ
+>  	select HARDIRQS_SW_RESEND
+>  	select HAVE_ACPI_APEI if (ACPI && EFI)
+> +	select HAVE_ACPI_APEI_SEA if (ACPI && EFI)
+> +	select HAVE_NMI if HAVE_ACPI_APEI_SEA
+>  	select HAVE_ALIGNED_STRUCT_PAGE if SLUB
+>  	select HAVE_ARCH_AUDITSYSCALL
+>  	select HAVE_ARCH_BITREVERSE
+> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+> index 9ae7e65..5a5a096 100644
+> --- a/arch/arm64/mm/fault.c
+> +++ b/arch/arm64/mm/fault.c
+> @@ -30,6 +30,7 @@
+>  #include <linux/highmem.h>
+>  #include <linux/perf_event.h>
+>  #include <linux/preempt.h>
+> +#include <linux/hardirq.h>
+>  
+>  #include <asm/bug.h>
+>  #include <asm/cpufeature.h>
+> @@ -41,6 +42,8 @@
+>  #include <asm/pgtable.h>
+>  #include <asm/tlbflush.h>
+>  
+> +#include <acpi/ghes.h>
+> +
+>  static const char *fault_name(unsigned int esr);
+>  
+>  #ifdef CONFIG_KPROBES
+> @@ -500,6 +503,14 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
+>  	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
+>  		 fault_name(esr), esr, addr);
+>  
+> +	/*
+> +	 * synchronize_rcu() will wait for nmi_exit(), so no need to
+> +	 * rcu_read_lock().
+> +	 */
+> +	nmi_enter();
+> +	ghes_notify_sea();
+> +	nmi_exit();
+> +
 
-Below is the edited version of the page fault output that I noticed:
+For fatal error:
+ghes_notify_sea() -> ghes_proc() -> __ghes_call_panic(),cause panic;
+do_sea() function also call arm64_notify_die(), will cause panic too;
+Does it can happen, panic will be called twice ?
 
-BUG: unable to handle kernel paging request at 0000000018847980
-IP: [<fffffffef6981ec3>] 0xfffffffef6981ec3
-PGD 4324d3063 PUD 4324e4063 PMD 0
-Oops: 0000 [#1] SMP
-Modules linked in: efi_runtime(O) chipsec(O) igb e1000e [last unloaded:
-efi_runtime]
-CPU: 5 PID: 2308 Comm: fwts Tainted: G   W  O    4.7.0-yocto-standard #1
-Hardware name: Gigabyte Technology Co., Ltd. Z87X-UD5H/Z87X-UD5H-CF,
-BIOS F9 03/18/2014
-task: ffff88041974d900 ti: ffff880418844000 task.ti: ffff880418844000
-RIP: 0010:[<fffffffef6981ec3>]  [<fffffffef6981ec3>] 0xfffffffef6981ec3
-RSP: 0018:ffff880418847868  EFLAGS: 00010297
-RAX: 00000000000000e0 RBX: 0000000000000000 RCX: ffff880418847a50
-RDX: 0000000018847980 RSI: ffff880418847a10 RDI: 0000000000000020
-RBP: 0000000000000001 R08: ffff880418847a68 R09: 0000000000000000
-R10: ffff880418847a70 R11: 0000000000000008 R12: ffff88042005c130
-R13: 0000000000000010 R14: ffff880418847e30 R15: 0000000000000000
-FS:  00007fb94251e700(0000) GS:ffff880432b40000(0000)
-knlGS:0000000000000000
-CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-CR2: 0000000018847980 CR3: 00000004324d1000 CR4: 00000000001406e0
-DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-Call Trace:
-[<ffffffff810abf01>] ? __lock_acquire+0x121/0x1480
-[<ffffffff810ac57f>] ? __lock_acquire+0x79f/0x1480
-[<ffffffff810599a8>] ? efi_call+0x58/0x90
-[<ffffffff81748e4b>] ? virt_efi_set_variable+0x7b/0x190
-[<ffffffffa0065e63>] ? efi_runtime_ioctl+0xe43/0x108c [efi_runtime]
-[<ffffffff810893b4>] ? __might_sleep+0x44/0x80
-[<ffffffff811e07de>] ? do_vfs_ioctl+0x8e/0x660
-[<ffffffff8133dd4e>] ? security_file_ioctl+0x3e/0x60
-[<ffffffff811e0e24>] ? SyS_ioctl+0x74/0x80
-[<ffffffff81a20de5>] ? entry_SYSCALL_64_fastpath+0x18/0xa8
+>  	info.si_signo = SIGBUS;
+>  	info.si_errno = 0;
+>  	info.si_code  = 0;
+> diff --git a/drivers/acpi/apei/Kconfig b/drivers/acpi/apei/Kconfig
+> index b0140c8..3786ff1 100644
+> --- a/drivers/acpi/apei/Kconfig
+> +++ b/drivers/acpi/apei/Kconfig
+> @@ -4,6 +4,20 @@ config HAVE_ACPI_APEI
+>  config HAVE_ACPI_APEI_NMI
+>  	bool
+>  
+> +config HAVE_ACPI_APEI_SEA
+> +	bool "APEI Synchronous External Abort logging/recovering support"
+> +	depends on ARM64
+> +	help
+> +	  This option should be enabled if the system supports
+> +	  firmware first handling of SEA (Synchronous External Abort).
+> +	  SEA happens with certain faults of data abort or instruction
+> +	  abort synchronous exceptions on ARMv8 systems. If a system
+> +	  supports firmware first handling of SEA, the platform analyzes
+> +	  and handles hardware error notifications with SEA, and it may then
+> +	  form a HW error record for the OS to parse and handle. This
+> +	  option allows the OS to look for such HW error record, and
+> +	  take appropriate action.
+> +
+>  config ACPI_APEI
+>  	bool "ACPI Platform Error Interface (APEI)"
+>  	select MISC_FILESYSTEMS
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index b25e7cf..8756172 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -114,11 +114,7 @@
+>   * Two virtual pages are used, one for IRQ/PROCESS context, the other for
+>   * NMI context (optionally).
+>   */
+> -#ifdef CONFIG_HAVE_ACPI_APEI_NMI
+>  #define GHES_IOREMAP_PAGES           2
+> -#else
+> -#define GHES_IOREMAP_PAGES           1
+> -#endif
+>  #define GHES_IOREMAP_IRQ_PAGE(base)	(base)
+>  #define GHES_IOREMAP_NMI_PAGE(base)	((base) + PAGE_SIZE)
+>  
+> @@ -156,11 +152,14 @@ static void ghes_ioremap_exit(void)
+>  
+>  static void __iomem *ghes_ioremap_pfn_nmi(u64 pfn)
+>  {
+> -	unsigned long vaddr;
+> +	unsigned long vaddr, paddr;
+> +	pgprot_t prot;
+>  
+>  	vaddr = (unsigned long)GHES_IOREMAP_NMI_PAGE(ghes_ioremap_area->addr);
+> -	ioremap_page_range(vaddr, vaddr + PAGE_SIZE,
+> -			   pfn << PAGE_SHIFT, PAGE_KERNEL);
+> +
+> +	paddr = pfn << PAGE_SHIFT;
+> +	prot = arch_apei_get_mem_attribute(paddr);
+> +	ioremap_page_range(vaddr, vaddr + PAGE_SIZE, paddr, prot);
+>  
+>  	return (void __iomem *)vaddr;
+>  }
+> @@ -767,6 +766,48 @@ static int ghes_notify_sci(struct notifier_block *this,
+>  	.notifier_call = ghes_notify_sci,
+>  };
+>  
+> +#ifdef CONFIG_HAVE_ACPI_APEI_SEA
+> +static LIST_HEAD(ghes_sea);
+> +
+> +void ghes_notify_sea(void)
+> +{
+> +	struct ghes *ghes;
+> +
+> +	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
+> +		ghes_proc(ghes);
+> +	}
+> +}
+> +
+> +static int ghes_sea_add(struct ghes *ghes)
+> +{
+> +	mutex_lock(&ghes_list_mutex);
+> +	list_add_rcu(&ghes->list, &ghes_sea);
+> +	mutex_unlock(&ghes_list_mutex);
+> +	return 0;
+> +}
+> +
+> +static void ghes_sea_remove(struct ghes *ghes)
+> +{
+> +	mutex_lock(&ghes_list_mutex);
+> +	list_del_rcu(&ghes->list);
+> +	mutex_unlock(&ghes_list_mutex);
+> +	synchronize_rcu();
+> +}
+> +#else /* CONFIG_HAVE_ACPI_APEI_SEA */
+> +static inline int ghes_sea_add(struct ghes *ghes)
+> +{
+> +	pr_err(GHES_PFX "ID: %d, trying to add SEA notification which is not supported\n",
+> +	       ghes->generic->header.source_id);
+> +	return -ENOTSUPP;
+> +}
+> +
+> +static inline void ghes_sea_remove(struct ghes *ghes)
+> +{
+> +	pr_err(GHES_PFX "ID: %d, trying to remove SEA notification which is not supported\n",
+> +	       ghes->generic->header.source_id);
+> +}
+> +#endif /* CONFIG_HAVE_ACPI_APEI_SEA */
+> +
+>  #ifdef CONFIG_HAVE_ACPI_APEI_NMI
+>  /*
+>   * printk is not safe in NMI context.  So in NMI handler, we allocate
+> @@ -1012,6 +1053,14 @@ static int ghes_probe(struct platform_device *ghes_dev)
+>  	case ACPI_HEST_NOTIFY_EXTERNAL:
+>  	case ACPI_HEST_NOTIFY_SCI:
+>  		break;
+> +	case ACPI_HEST_NOTIFY_SEA:
+> +		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_SEA)) {
+> +			pr_warn(GHES_PFX "Generic hardware error source: %d notified via SEA is not supported\n",
+> +				generic->header.source_id);
+> +			rc = -ENOTSUPP;
+> +			goto err;
+> +		}
+> +		break;
+>  	case ACPI_HEST_NOTIFY_NMI:
+>  		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_NMI)) {
+>  			pr_warn(GHES_PFX "Generic hardware error source: %d notified via NMI interrupt is not supported!\n",
+> @@ -1023,6 +1072,13 @@ static int ghes_probe(struct platform_device *ghes_dev)
+>  		pr_warning(GHES_PFX "Generic hardware error source: %d notified via local interrupt is not supported!\n",
+>  			   generic->header.source_id);
+>  		goto err;
+> +	case ACPI_HEST_NOTIFY_GPIO:
+> +	case ACPI_HEST_NOTIFY_SEI:
+> +	case ACPI_HEST_NOTIFY_GSIV:
+> +		pr_warn(GHES_PFX "Generic hardware error source: %d notified via notification type %u is not supported\n",
+> +			generic->header.source_id, generic->header.source_id);
+> +		rc = -ENOTSUPP;
+> +		goto err;
+>  	default:
+>  		pr_warning(FW_WARN GHES_PFX "Unknown notification type: %u for generic hardware error source: %d\n",
+>  			   generic->notify.type, generic->header.source_id);
+> @@ -1077,6 +1133,11 @@ static int ghes_probe(struct platform_device *ghes_dev)
+>  		list_add_rcu(&ghes->list, &ghes_sci);
+>  		mutex_unlock(&ghes_list_mutex);
+>  		break;
+> +	case ACPI_HEST_NOTIFY_SEA:
+> +		rc = ghes_sea_add(ghes);
+> +		if (rc)
+> +			goto err_edac_unreg;
+> +		break;
+>  	case ACPI_HEST_NOTIFY_NMI:
+>  		ghes_nmi_add(ghes);
+>  		break;
+> @@ -1119,6 +1180,9 @@ static int ghes_remove(struct platform_device *ghes_dev)
+>  			unregister_acpi_hed_notifier(&ghes_notifier_sci);
+>  		mutex_unlock(&ghes_list_mutex);
+>  		break;
+> +	case ACPI_HEST_NOTIFY_SEA:
+> +		ghes_sea_remove(ghes);
+> +		break;
+>  	case ACPI_HEST_NOTIFY_NMI:
+>  		ghes_nmi_remove(ghes);
+>  		break;
+> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+> index 6ae318b..adf5455 100644
+> --- a/include/acpi/ghes.h
+> +++ b/include/acpi/ghes.h
+> @@ -95,3 +95,5 @@ static inline void *acpi_hest_generic_data_payload(struct acpi_hest_generic_data
+>  		(void *)(((struct acpi_hest_generic_data_v300 *)(gdata)) + 1) :
+>  		gdata + 1;
+>  }
+> +
+> +void ghes_notify_sea(void);
+> 
 
-I have looked at EFI Memory map for the faulted address and found that
-it belongs to memory region of type "Conventional Memory". So, this
-firmware bug is not same as accessing EFI_BOOT_SERVICES_* regions after
-boot, but firmware accessing *illegal regions* in *1:1 mode*.
+Thanks,
 
-Below shown are the efi_pgd dumps before and after the bad commit.
-efi_dump_pagetable() is called before calling efi_merge_regions() in
-__efi_enter_virtual_mode() and this kernel is booted on qemu to obtain
-page table dumps.
+Zhengqiang
 
-EFI_PGT_DUMP before commit:
----------------------------
-[0.007041] ---[ User Space ]---
-[0.007427] 0x0000000000000000-0x0000000000200000 2M    RW     GLB NX pte
-[0.008609] 0x0000000000200000-0x0000000000800000 6M    RW PSE GLB NX pmd
-[0.010069] 0x0000000000800000-0x0000000000808000 32K                 pte
-[0.011068] 0x0000000000808000-0x0000000000810000 32K   RW     GLB NX pte
-[0.012325] 0x0000000000810000-0x0000000000900000 960K                pte
-[0.013071] 0x0000000000900000-0x0000000000a00000 1M    RW     GLB NX pte
-[0.014579] 0x0000000000a00000-0x000000007e800000 2014M RW PSE GLB NX pmd
-[0.015593] 0x000000007e800000-0x000000007e9b6000 1752K RW     GLB NX pte
-[0.016600] 0x000000007e9b6000-0x000000007e9fe000 288K                pte
-[0.018003] 0x000000007e9fe000-0x000000007ea00000 8K    RW     GLB NX pte
-[0.019165] 0x000000007ea00000-0x000000007ec00000 2M    RW PSE GLB NX pmd
-[0.020331] 0x000000007ec00000-0x000000007eda9000 1700K RW     GLB NX pte
-[0.021483] 0x000000007eda9000-0x000000007ee14000 428K                pte
-[0.022500] 0x000000007ee14000-0x000000007f000000 1968K RW     GLB NX pte
-[0.023596] 0x000000007f000000-0x000000007fe00000 14M   RW PSE GLB NX pmd
-[0.025004] 0x000000007fe00000-0x000000007fe94000 592K  RW     GLB NX pte
-[0.026220] 0x000000007fe94000-0x000000007fef8000 400K                pte
-[0.027069] 0x000000007fef8000-0x000000007ffd0000 864K  RW     GLB NX pte
-[0.028420] 0x000000007ffd0000-0x000000007fff0000 128K                pte
-[0.029551] 0x000000007fff0000-0x0000000080000000 64K   RW     GLB NX pte
-[0.030601] 0x0000000080000000-0x0000008000000000 510G                pud
-[0.031499] 0x0000008000000000-0xffff800000000000 17179737600G        pgd
-[0.032152] ---[ Kernel Space ]---
-
-EFI_PGT_DUMP after commit:
---------------------------
-[0.005620] ---[ User Space ]---
-[0.005838] 0x0000000000000000-0xffff800000000000 16777088T           pgd
-[0.005873] ---[ Kernel Space ]---
-
-While not having these mappings isn't a bug but we need these mappings
-to support machines with buggy firmware.
-
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
- arch/x86/platform/efi/efi_64.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
-
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index de9652bd19d4..8d2fd6568b91 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -139,6 +139,7 @@ int __init efi_alloc_page_tables(void)
- 	pgd_t *pgd;
- 	pud_t *pud;
- 	gfp_t gfp_mask;
-+	unsigned num_pgds;
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		return 0;
-@@ -158,6 +159,13 @@ int __init efi_alloc_page_tables(void)
- 
- 	pgd_populate(NULL, pgd, pud);
- 
-+	/*
-+	 * Sync 1:1 mappings to support buggy firmware which haven't updated
-+	 * their addresses even after kernel has booted.
-+	 */
-+	num_pgds = pgd_index(VMALLOC_START) - pgd_index(PAGE_OFFSET);
-+	memcpy(efi_pgd, pgd_offset_k(PAGE_OFFSET), sizeof(pgd_t) * num_pgds);
-+
- 	return 0;
- }
- 
--- 
-2.1.4
