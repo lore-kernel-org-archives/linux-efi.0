@@ -1,144 +1,76 @@
-From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V10 10/10] arm/arm64: KVM: add guest SEA support
-Date: Wed, 15 Feb 2017 12:51:22 -0700
-Message-ID: <1487188282-2568-11-git-send-email-tbaicar@codeaurora.org>
+From: Joe Perches <joe@perches.com>
+Subject: Re: [PATCH V10 07/10] efi: print unrecognized CPER section
+Date: Wed, 15 Feb 2017 12:07:03 -0800
+Message-ID: <1487189223.6214.60.camel@perches.com>
 References: <1487188282-2568-1-git-send-email-tbaicar@codeaurora.org>
+         <1487188282-2568-8-git-send-email-tbaicar@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1487188282-2568-1-git-send-email-tbaicar@codeaurora.org>
+In-Reply-To: <1487188282-2568-8-git-send-email-tbaicar@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org
-Cc: Tyler Baicar <tbaicar@codeaurora.org>
+To: Tyler Baicar <tbaicar@codeaurora.org>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vge
 List-Id: linux-efi@vger.kernel.org
 
-Currently external aborts are unsupported by the guest abort
-handling. Add handling for SEAs so that the host kernel reports
-SEAs which occur in the guest kernel.
+On Wed, 2017-02-15 at 12:51 -0700, Tyler Baicar wrote:
+> UEFI spec allows for non-standard section in Common Platform Error
+> Record. This is defined in section N.2.3 of UEFI version 2.5.
+> 
+> Currently if the CPER section's type (UUID) does not match with
+> one of the section types that the kernel knows how to parse, the
+> section is skipped. Therefore, user is not able to see
+> such CPER data, for instance, error record of non-standard section.
+> 
+> For above mentioned case, this change prints out the raw data in
+> hex in dmesg buffer. Data length is taken from Error Data length
+> field of Generic Error Data Entry.
+> 
+> Following is a sample output from dmesg:
+> [  115.771702] {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 2
+> [  115.779042] {1}[Hardware Error]: It has been corrected by h/w and requires no further action
+> [  115.787456] {1}[Hardware Error]: event severity: corrected
+> [  115.792927] {1}[Hardware Error]:  Error 0, type: corrected
+> [  115.798415] {1}[Hardware Error]:  fru_id: 00000000-0000-0000-0000-000000000000
+> [  115.805596] {1}[Hardware Error]:  fru_text:
+> [  115.816105] {1}[Hardware Error]:  section type: d2e2621c-f936-468d-0d84-15a4ed015c8b
+> [  115.823880] {1}[Hardware Error]:  section length: 88
+> [  115.828779] {1}[Hardware Error]:   00000000: 01000001 00000002 5f434345 525f4543
+> [  115.836153] {1}[Hardware Error]:   00000010: 0000574d 00000000 00000000 00000000
+> [  115.843531] {1}[Hardware Error]:   00000020: 00000000 00000000 00000000 00000000
+> [  115.850908] {1}[Hardware Error]:   00000030: 00000000 00000000 00000000 00000000
+> [  115.858288] {1}[Hardware Error]:   00000040: fe800000 00000000 00000004 5f434345
+> [  115.865665] {1}[Hardware Error]:   00000050: 525f4543 0000574d
+> 
+> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+> ---
+>  drivers/firmware/efi/cper.c | 12 ++++++++++--
+>  1 file changed, 10 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+> index c2b0a12..48cb8ee 100644
+> --- a/drivers/firmware/efi/cper.c
+> +++ b/drivers/firmware/efi/cper.c
+> @@ -591,8 +591,16 @@ static void cper_estatus_print_section(
+>  			cper_print_proc_arm(newpfx, arm_err);
+>  		else
+>  			goto err_section_too_small;
+> -	} else
+> -		printk("%s""section type: unknown, %pUl\n", newpfx, sec_type);
+> +	} else {
+> +		const void *unknown_err;
+> +
+> +		unknown_err = acpi_hest_generic_data_payload(gdata);
+> +		printk("%ssection type: %pUl\n", newpfx, sec_type);
+> +		printk("%ssection length: %d\n", newpfx,
+> +		       gdata->error_data_length);
+> +		print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4,
+> +			       unknown_err, gdata->error_data_length, 0);
 
-Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
----
- arch/arm/include/asm/kvm_arm.h       |  1 +
- arch/arm/include/asm/system_misc.h   |  5 +++++
- arch/arm/kvm/mmu.c                   | 18 ++++++++++++++++--
- arch/arm64/include/asm/kvm_arm.h     |  1 +
- arch/arm64/include/asm/system_misc.h |  2 ++
- arch/arm64/mm/fault.c                | 18 ++++++++++++++++++
- 6 files changed, 43 insertions(+), 2 deletions(-)
+I suggest using true instead of 0 for the last argument
 
-diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
-index e22089f..33a77509 100644
---- a/arch/arm/include/asm/kvm_arm.h
-+++ b/arch/arm/include/asm/kvm_arm.h
-@@ -187,6 +187,7 @@
- #define FSC_FAULT	(0x04)
- #define FSC_ACCESS	(0x08)
- #define FSC_PERM	(0x0c)
-+#define FSC_EXTABT	(0x10)
- 
- /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
- #define HPFAR_MASK	(~0xf)
-diff --git a/arch/arm/include/asm/system_misc.h b/arch/arm/include/asm/system_misc.h
-index a3d61ad..ea45d94 100644
---- a/arch/arm/include/asm/system_misc.h
-+++ b/arch/arm/include/asm/system_misc.h
-@@ -24,4 +24,9 @@
- 
- #endif /* !__ASSEMBLY__ */
- 
-+static inline int handle_guest_sea(unsigned long addr, unsigned int esr)
-+{
-+	return -1;
-+}
-+
- #endif /* __ASM_ARM_SYSTEM_MISC_H */
-diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
-index a5265ed..04f1dd50 100644
---- a/arch/arm/kvm/mmu.c
-+++ b/arch/arm/kvm/mmu.c
-@@ -29,6 +29,7 @@
- #include <asm/kvm_asm.h>
- #include <asm/kvm_emulate.h>
- #include <asm/virt.h>
-+#include <asm/system_misc.h>
- 
- #include "trace.h"
- 
-@@ -1444,8 +1445,21 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
- 
- 	/* Check the stage-2 fault is trans. fault or write fault */
- 	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
--	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
--	    fault_status != FSC_ACCESS) {
-+
-+	/* The host kernel will handle the synchronous external abort. There
-+	 * is no need to pass the error into the guest.
-+	 */
-+	if (fault_status == FSC_EXTABT) {
-+		if(handle_guest_sea((unsigned long)fault_ipa,
-+				    kvm_vcpu_get_hsr(vcpu))) {
-+			kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
-+				kvm_vcpu_trap_get_class(vcpu),
-+				(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
-+				(unsigned long)kvm_vcpu_get_hsr(vcpu));
-+			return -EFAULT;
-+		}
-+	} else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
-+		   fault_status != FSC_ACCESS) {
- 		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
- 			kvm_vcpu_trap_get_class(vcpu),
- 			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
-diff --git a/arch/arm64/include/asm/kvm_arm.h b/arch/arm64/include/asm/kvm_arm.h
-index 2a2752b..2b11d59 100644
---- a/arch/arm64/include/asm/kvm_arm.h
-+++ b/arch/arm64/include/asm/kvm_arm.h
-@@ -201,6 +201,7 @@
- #define FSC_FAULT	ESR_ELx_FSC_FAULT
- #define FSC_ACCESS	ESR_ELx_FSC_ACCESS
- #define FSC_PERM	ESR_ELx_FSC_PERM
-+#define FSC_EXTABT	ESR_ELx_FSC_EXTABT
- 
- /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
- #define HPFAR_MASK	(~UL(0xf))
-diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
-index bc81243..5b2cecd1 100644
---- a/arch/arm64/include/asm/system_misc.h
-+++ b/arch/arm64/include/asm/system_misc.h
-@@ -58,4 +58,6 @@ void hook_debug_fault_code(int nr, int (*fn)(unsigned long, unsigned int,
- 
- #endif	/* __ASSEMBLY__ */
- 
-+int handle_guest_sea(unsigned long addr, unsigned int esr);
-+
- #endif	/* __ASM_SYSTEM_MISC_H */
-diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-index 4e35c72..ae8b7c6 100644
---- a/arch/arm64/mm/fault.c
-+++ b/arch/arm64/mm/fault.c
-@@ -602,6 +602,24 @@ static const char *fault_name(unsigned int esr)
- }
- 
- /*
-+ * Handle Synchronous External Aborts that occur in a guest kernel.
-+ */
-+int handle_guest_sea(unsigned long addr, unsigned int esr)
-+{
-+	/*
-+	 * synchronize_rcu() will wait for nmi_exit(), so no need to
-+	 * rcu_read_lock().
-+	 */
-+	if(IS_ENABLED(HAVE_ACPI_APEI_SEA)) {
-+		nmi_enter();
-+		ghes_notify_sea();
-+		nmi_exit();
-+	}
-+
-+	return 0;
-+}
-+
-+/*
-  * Dispatch a data abort to the relevant handler.
-  */
- asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
--- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+		print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4,
+			       unknown_err, gdata->error_data_length, true);
+
+It might help make deciphering the hex block a little easier.
