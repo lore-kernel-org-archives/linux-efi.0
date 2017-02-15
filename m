@@ -1,7 +1,7 @@
 From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V10 04/10] arm64: exception: handle Synchronous External Abort
-Date: Wed, 15 Feb 2017 12:51:16 -0700
-Message-ID: <1487188282-2568-5-git-send-email-tbaicar@codeaurora.org>
+Subject: [PATCH V10 06/10] acpi: apei: panic OS with fatal error status block
+Date: Wed, 15 Feb 2017 12:51:18 -0700
+Message-ID: <1487188282-2568-7-git-send-email-tbaicar@codeaurora.org>
 References: <1487188282-2568-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,103 +21,84 @@ To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrc
 Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-SEA exceptions are often caused by an uncorrected hardware
-error, and are handled when data abort and instruction abort
-exception classes have specific values for their Fault Status
-Code.
-When SEA occurs, before killing the process, report the error
-in the kernel logs.
-Update fault_info[] with specific SEA faults so that the
-new SEA handler is used.
+From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 
-Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+Even if an error status block's severity is fatal, the kernel does not
+honor the severity level and panic.
+
+With the firmware first model, the platform could inform the OS about a
+fatal hardware error through the non-NMI GHES notification type. The OS
+should panic when a hardware error record is received with this
+severity.
+
+Call panic() after CPER data in error status block is printed if
+severity is fatal, before each error section is handled.
+
 Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
 Reviewed-by: James Morse <james.morse@arm.com>
 ---
- arch/arm64/include/asm/esr.h |  1 +
- arch/arm64/mm/fault.c        | 43 +++++++++++++++++++++++++++++++++----------
- 2 files changed, 34 insertions(+), 10 deletions(-)
+ drivers/acpi/apei/ghes.c | 19 ++++++++++++++-----
+ 1 file changed, 14 insertions(+), 5 deletions(-)
 
-diff --git a/arch/arm64/include/asm/esr.h b/arch/arm64/include/asm/esr.h
-index d14c478..f20c64a 100644
---- a/arch/arm64/include/asm/esr.h
-+++ b/arch/arm64/include/asm/esr.h
-@@ -83,6 +83,7 @@
- #define ESR_ELx_WNR		(UL(1) << 6)
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index 87045dc..9f105ce 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -133,6 +133,8 @@
+ static struct ghes_estatus_cache *ghes_estatus_caches[GHES_ESTATUS_CACHES_SIZE];
+ static atomic_t ghes_estatus_cache_alloced;
  
- /* Shared ISS field definitions for Data/Instruction aborts */
-+#define ESR_ELx_FnV		(UL(1) << 10)
- #define ESR_ELx_EA		(UL(1) << 9)
- #define ESR_ELx_S1PTW		(UL(1) << 7)
- 
-diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-index 156169c..d178dc0 100644
---- a/arch/arm64/mm/fault.c
-+++ b/arch/arm64/mm/fault.c
-@@ -487,6 +487,29 @@ static int do_bad(unsigned long addr, unsigned int esr, struct pt_regs *regs)
- 	return 1;
++static int ghes_panic_timeout __read_mostly = 30;
++
+ static int ghes_ioremap_init(void)
+ {
+ 	ghes_ioremap_area = __get_vm_area(PAGE_SIZE * GHES_IOREMAP_PAGES,
+@@ -688,6 +690,13 @@ static int ghes_ack_error(struct acpi_hest_generic_v2 *generic_v2)
+ 	return rc;
  }
  
-+/*
-+ * This abort handler deals with Synchronous External Abort.
-+ * It calls notifiers, and then returns "fault".
-+ */
-+static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
++static void __ghes_call_panic(void)
 +{
-+	struct siginfo info;
-+
-+	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
-+		 fault_name(esr), esr, addr);
-+
-+	info.si_signo = SIGBUS;
-+	info.si_errno = 0;
-+	info.si_code  = 0;
-+	if (esr & ESR_ELx_FnV)
-+		info.si_addr = 0;
-+	else
-+		info.si_addr  = (void __user *)addr;
-+	arm64_notify_die("", regs, &info, esr);
-+
-+	return 0;
++	if (panic_timeout == 0)
++		panic_timeout = ghes_panic_timeout;
++	panic("Fatal hardware error!");
 +}
 +
- static const struct fault_info {
- 	int	(*fn)(unsigned long addr, unsigned int esr, struct pt_regs *regs);
- 	int	sig;
-@@ -509,22 +532,22 @@ static int do_bad(unsigned long addr, unsigned int esr, struct pt_regs *regs)
- 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 1 permission fault"	},
- 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
- 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 permission fault"	},
--	{ do_bad,		SIGBUS,  0,		"synchronous external abort"	},
-+	{ do_sea,		SIGBUS,  0,		"synchronous external abort"	},
- 	{ do_bad,		SIGBUS,  0,		"unknown 17"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 18"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 19"			},
--	{ do_bad,		SIGBUS,  0,		"synchronous external abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous external abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous external abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous external abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error"	},
-+	{ do_sea,		SIGBUS,  0,		"level 0 (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 1 (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 2 (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 3 (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"synchronous parity or ECC error" },
- 	{ do_bad,		SIGBUS,  0,		"unknown 25"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 26"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 27"			},
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
-+	{ do_sea,		SIGBUS,  0,		"level 0 synchronous parity error (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 1 synchronous parity error (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 2 synchronous parity error (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 3 synchronous parity error (translation table walk)"	},
- 	{ do_bad,		SIGBUS,  0,		"unknown 32"			},
- 	{ do_alignment_fault,	SIGBUS,  BUS_ADRALN,	"alignment fault"		},
- 	{ do_bad,		SIGBUS,  0,		"unknown 34"			},
+ static int ghes_proc(struct ghes *ghes)
+ {
+ 	int rc;
+@@ -695,6 +704,10 @@ static int ghes_proc(struct ghes *ghes)
+ 	rc = ghes_read_estatus(ghes, 0);
+ 	if (rc)
+ 		goto out;
++	if (ghes_severity(ghes->estatus->error_severity) >= GHES_SEV_PANIC) {
++		__ghes_print_estatus(KERN_EMERG, ghes->generic, ghes->estatus);
++		__ghes_call_panic();
++	}
+ 	if (!ghes_estatus_cached(ghes->estatus)) {
+ 		if (ghes_print_estatus(NULL, ghes->generic, ghes->estatus))
+ 			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+@@ -831,8 +844,6 @@ static inline void ghes_sea_remove(struct ghes *ghes)
+ 
+ static LIST_HEAD(ghes_nmi);
+ 
+-static int ghes_panic_timeout	__read_mostly = 30;
+-
+ static void ghes_proc_in_irq(struct irq_work *irq_work)
+ {
+ 	struct llist_node *llnode, *next;
+@@ -925,9 +936,7 @@ static void __ghes_panic(struct ghes *ghes)
+ 	__ghes_print_estatus(KERN_EMERG, ghes->generic, ghes->estatus);
+ 
+ 	/* reboot to log the error! */
+-	if (panic_timeout == 0)
+-		panic_timeout = ghes_panic_timeout;
+-	panic("Fatal hardware error!");
++	__ghes_call_panic();
+ }
+ 
+ static int ghes_notify_nmi(unsigned int cmd, struct pt_regs *regs)
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
