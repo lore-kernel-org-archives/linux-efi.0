@@ -1,175 +1,107 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 2/2] efi: arm-stub: Round up FDT allocation to mapping size
-Date: Wed, 15 Feb 2017 17:29:22 +0000
-Message-ID: <CAKv+Gu9LVb1_RESam3VFVQepn8U7n5PcTq9HS=ksXS65vV8uig@mail.gmail.com>
-References: <1486676573-19237-1-git-send-email-ard.biesheuvel@linaro.org>
- <1486676573-19237-2-git-send-email-ard.biesheuvel@linaro.org> <9355065f-5782-e935-e8dc-9f6c0676b7f2@codeaurora.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 0/2] RFC: Move efi bgrt code out of arch/x86
+Date: Wed, 15 Feb 2017 17:44:28 +0000
+Message-ID: <CAKv+Gu-qv83fi9qBugA=Od2htcLb966SPBpZXSnXdH=AYw-COw@mail.gmail.com>
+References: <1487163892-27701-1-git-send-email-bhsharma@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <9355065f-5782-e935-e8dc-9f6c0676b7f2-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Timur Tabi <timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1487163892-27701-1-git-send-email-bhsharma@redhat.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, Nicolai Stange <nicstange@gmail.com>, Leif Lindholm <leif.lindholm@linaro.org>, "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>, Peter Jones <pjones@redhat.com>, Bhupesh SHARMA <bhupesh.linux@gmail.com>, Ingo Molnar <mingo@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Dan Williams <dan.j.williams@intel.com>, Dave Young <dyoung@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Mark Rutland <mark.rutland@arm.com>, Will Deacon <will.deacon@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 12 February 2017 at 20:10, Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
-> On 2/9/2017 2:42 PM, Ard Biesheuvel wrote:
->>
->> The FDT is mapped via a fixmap entry that is at least 2 MB in size and
->> 2 MB aligned on 4 KB page size kernels.
->>
->> On UEFI systems, the FDT allocation may share this 2 MB block with a
->> reserved region, or another memory region that we should never map,
->> unless we account for this in the size of the allocation (the alignment
->> is already 2 MB)
->>
->> So instead of taking guesses at the needed space, simply allocate 2 MB
->> immediately. The allocation will be recorded as a EFI_LOADER_DATA, and
->> the kernel only memblock_reserve()'s the actual size of the FDT, so the
->> unused space will be released to the kernel.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
+Hello Bhupesh,
+
+On 15 February 2017 at 13:04, Bhupesh Sharma <bhsharma@redhat.com> wrote:
+> This patchset presents a RFC approach to move the ACPI BGRT table
+> handling related code out of 'arch/x86' and place it inside
+> 'drivers/firmware/efi' so that it can be used to support
+> ACPI BGRT table and BGRT logo across x86 and AARCH64 ARCHs.
+>
+> Note that this patchset is primarily tested on Qemu VMs for x86_64
+> and AARCH64 environments, while I try to get my hands on a real
+> AARCH64 hardware which supports a graphic card and whose boot firmware
+> I can modify to support the ACPI BGRT table to be passed to the kernel.
+>
+> Here are some details/outputs about/from the test environment:
+>
+> AARCH64:
+> ========
+> 1. I used the latest Qemu (master branch) and compiled it for aarch64 with softmmu support.
+>    Here is the command line I use to launch the same:
+>
+> # qemu-system-aarch64 -cpu cortex-a57 -M virt -m 2048 -bios QEMU_EFI.fd -kernel Image -initrd rootfs.cpio -serial stdio --append "acpi=force" -device virtio-gpu-pci
+>
+> where, QEMU_EFI.fd is the DEBUG build of EDK2 ArmVirtQemu.dsc (master branch)
+>        rootfs.cpio is the AARCH64 build of Buildroot (Little Endian AARCH64)
+>        -device virtio-gpu-pci provides the Graphical support required to have BGRT logo.
 >
 >
-> Reviewed-By: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> 2. Here are some test results once Linux boots up, which show a valid BGRT table/logo being
+>    seen by the kernel:
+>
+> # acpidump
+> ...
+>
+> BGRT @ 0x0000000000000000
+>   0000: 42 47 52 54 38 00 00 00 01 B4 49 4E 54 45 4C 20  BGRT8.....INTEL
+>   0010: 45 44 4B 32 20 20 20 20 02 00 00 00 20 20 20 20  EDK2    ....
+>   0020: 13 00 00 01 01 00 01 00 00 80 B0 BA 00 00 00 00  ................
+>   0030: 2F 01 00 00 0F 01 00 00                          /.......
+>
+> # dmesg | grep -i BGRT
+> [    0.000000] ACPI: BGRT 0x00000000B8640000 000038 (v01 INTEL  EDK2     00000002      01000013)
+>
+>
+> # ls -lah /sys/firmware/acpi/bgrt/image
+> -r--r--r--    1 root     root       32.9K Feb 15 11:27 /sys/firmware/acpi/bgrt/image
+>
+> x86:
+> ====
+> 1. I used the latest Qemu (master branch) and compiled it for x86.
+>    Here is the command line I use to launch the same:
+>
+> # qemu-system-x86_64 -enable-kvm -sdl -m 2048 -vga std -boot c -cpu host -bios OVMF_CODE.fd -kernel bzImage -initrd rootfs.cpio -serial stdio
+>
+> where, OVMF_CODE.fd is the RELEASE build of EDK2 OvmfPkg (master branch)
+>        rootfs.cpio is the x86_64 build of Buildroot
+>
+> 2. Similar test results are seen as noted for the AARCH64 case above, which show a valid BGRT table/logo being
+>    seen by the kernel.
+>
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Cc: Ingo Molnar <mingo@kernel.org>
+> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+> Cc: Dan Williams <dan.j.williams@intel.com>
+> Cc: Dave Young <dyoung@redhat.com>
+> Cc: Thomas Gleixner <tglx@linutronix.de>
+> Cc: Mark Rutland <mark.rutland@arm.com>
+> Cc: Will Deacon <will.deacon@arm.com>
+>
+> Bhupesh Sharma (2):
+>   x86/efi-bgrt: Move efi-bgrt handling out of arch/x86
+>   bgrt: Make ACPI BGRT parsing code common for ARCHs
+>
+>  arch/arm64/kernel/acpi.c                               | 3 +++
+>  arch/x86/kernel/acpi/boot.c                            | 6 ------
+>  arch/x86/platform/efi/Makefile                         | 1 -
+>  drivers/acpi/Kconfig                                   | 2 +-
+>  drivers/acpi/bgrt.c                                    | 6 ++++++
+>  drivers/firmware/efi/Makefile                          | 1 +
+>  {arch/x86/platform => drivers/firmware}/efi/efi-bgrt.c | 0
+>  include/linux/efi-bgrt.h                               | 2 ++
+>  8 files changed, 13 insertions(+), 8 deletions(-)
+>  rename {arch/x86/platform => drivers/firmware}/efi/efi-bgrt.c (100%)
 >
 
-Thanks, Jeffrey.
+These patches look fine to me, and I think we should be able to merge
+them without any changes.
 
-Mark: anything to add? Thanks.
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
->
->>  arch/arm64/include/asm/efi.h       |  1 +
->>  drivers/firmware/efi/libstub/fdt.c | 57 +++++++++-----------
->>  2 files changed, 25 insertions(+), 33 deletions(-)
->>
->> diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
->> index 342e90d6d204..f642565fc1d0 100644
->> --- a/arch/arm64/include/asm/efi.h
->> +++ b/arch/arm64/include/asm/efi.h
->> @@ -1,6 +1,7 @@
->>  #ifndef _ASM_EFI_H
->>  #define _ASM_EFI_H
->>
->> +#include <asm/boot.h>
->>  #include <asm/cpufeature.h>
->>  #include <asm/io.h>
->>  #include <asm/mmu_context.h>
->> diff --git a/drivers/firmware/efi/libstub/fdt.c
->> b/drivers/firmware/efi/libstub/fdt.c
->> index 260c4b4b492e..41f457be64e8 100644
->> --- a/drivers/firmware/efi/libstub/fdt.c
->> +++ b/drivers/firmware/efi/libstub/fdt.c
->> @@ -206,6 +206,10 @@ static efi_status_t exit_boot_func(efi_system_table_t
->> *sys_table_arg,
->>         return update_fdt_memmap(p->new_fdt_addr, map);
->>  }
->>
->> +#ifndef MAX_FDT_SIZE
->> +#define MAX_FDT_SIZE   SZ_2M
->> +#endif
->> +
->>  /*
->>   * Allocate memory for a new FDT, then add EFI, commandline, and
->>   * initrd related fields to the FDT.  This routine increases the
->> @@ -233,7 +237,6 @@ efi_status_t
->> allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
->>         u32 desc_ver;
->>         unsigned long mmap_key;
->>         efi_memory_desc_t *memory_map, *runtime_map;
->> -       unsigned long new_fdt_size;
->>         efi_status_t status;
->>         int runtime_entry_count = 0;
->>         struct efi_boot_memmap map;
->> @@ -262,41 +265,29 @@ efi_status_t
->> allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
->>                "Exiting boot services and installing virtual address
->> map...\n");
->>
->>         map.map = &memory_map;
->> +       status = efi_high_alloc(sys_table, MAX_FDT_SIZE, EFI_FDT_ALIGN,
->> +                               new_fdt_addr, max_addr);
->> +       if (status != EFI_SUCCESS) {
->> +               pr_efi_err(sys_table,
->> +                          "Unable to allocate memory for new device
->> tree.\n");
->> +               goto fail;
->> +       }
->> +
->>         /*
->> -        * Estimate size of new FDT, and allocate memory for it. We
->> -        * will allocate a bigger buffer if this ends up being too
->> -        * small, so a rough guess is OK here.
->> +        * Now that we have done our final memory allocation (and free)
->> +        * we can get the memory map key needed for exit_boot_services().
->>          */
->> -       new_fdt_size = fdt_size + EFI_PAGE_SIZE;
->> -       while (1) {
->> -               status = efi_high_alloc(sys_table, new_fdt_size,
->> EFI_FDT_ALIGN,
->> -                                       new_fdt_addr, max_addr);
->> -               if (status != EFI_SUCCESS) {
->> -                       pr_efi_err(sys_table, "Unable to allocate memory
->> for new device tree.\n");
->> -                       goto fail;
->> -               }
->> -
->> -               status = update_fdt(sys_table,
->> -                                   (void *)fdt_addr, fdt_size,
->> -                                   (void *)*new_fdt_addr, new_fdt_size,
->> -                                   cmdline_ptr, initrd_addr,
->> initrd_size);
->> +       status = efi_get_memory_map(sys_table, &map);
->> +       if (status != EFI_SUCCESS)
->> +               goto fail_free_new_fdt;
->>
->> -               /* Succeeding the first time is the expected case. */
->> -               if (status == EFI_SUCCESS)
->> -                       break;
->> +       status = update_fdt(sys_table, (void *)fdt_addr, fdt_size,
->> +                           (void *)*new_fdt_addr, MAX_FDT_SIZE,
->> cmdline_ptr,
->> +                           initrd_addr, initrd_size);
->>
->> -               if (status == EFI_BUFFER_TOO_SMALL) {
->> -                       /*
->> -                        * We need to allocate more space for the new
->> -                        * device tree, so free existing buffer that is
->> -                        * too small.
->> -                        */
->> -                       efi_free(sys_table, new_fdt_size, *new_fdt_addr);
->> -                       new_fdt_size += EFI_PAGE_SIZE;
->> -               } else {
->> -                       pr_efi_err(sys_table, "Unable to construct new
->> device tree.\n");
->> -                       goto fail_free_new_fdt;
->> -               }
->> +       if (status != EFI_SUCCESS) {
->> +               pr_efi_err(sys_table, "Unable to construct new device
->> tree.\n");
->> +               goto fail_free_new_fdt;
->>         }
->>
->>         priv.runtime_map = runtime_map;
->> @@ -340,7 +331,7 @@ efi_status_t
->> allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
->>         pr_efi_err(sys_table, "Exit boot services failed.\n");
->>
->>  fail_free_new_fdt:
->> -       efi_free(sys_table, new_fdt_size, *new_fdt_addr);
->> +       efi_free(sys_table, MAX_FDT_SIZE, *new_fdt_addr);
->>
->>  fail:
->>         sys_table->boottime->free_pool(runtime_map);
->>
->
->
-> --
-> Jeffrey Hugo
->
-> Qualcomm Datacenter Technologies as an affiliate of Qualcomm Technologies,
-> Inc.
-> Qualcomm Technologies, Inc. is a member of the
-> Code Aurora Forum, a Linux Foundation Collaborative Project.
+You only failed to cc the ACPI maintainers, please add Len and Rafael next time.
+
+Thanks,
+Ard.
