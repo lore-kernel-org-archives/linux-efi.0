@@ -1,52 +1,87 @@
-From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V8 08/10] ras: acpi / apei: generate trace event for
- unrecognized CPER section
-Date: Wed, 15 Feb 2017 10:06:23 -0700
-Message-ID: <b1e44c1f-ff88-e43b-6bd3-96ac5e6a31bd@codeaurora.org>
+From: "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH V8 06/10] acpi: apei: panic OS with fatal error status
+ block
+Date: Wed, 15 Feb 2017 10:07:25 -0700
+Message-ID: <c6af9776-abff-36b8-6ad6-148990664c04@codeaurora.org>
 References: <1485969413-23577-1-git-send-email-tbaicar@codeaurora.org>
- <1485969413-23577-9-git-send-email-tbaicar@codeaurora.org>
- <20170215105234.4921db1f@gandalf.local.home>
- <e50b7673-a441-3a6b-cf75-c267881c1a92@codeaurora.org>
- <20170215120342.48eff95d@gandalf.local.home>
+ <1485969413-23577-7-git-send-email-tbaicar@codeaurora.org>
+ <589C490A.9080109@arm.com>
+ <5b06372d-e389-5157-ccb4-a7b023990d4d@codeaurora.org>
+ <58A445D5.7030501@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <20170215120342.48eff95d@gandalf.local.home>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Steven Rostedt <rostedt@goodmis.org>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <58A445D5.7030501-5wv7dgnIgG8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
+Cc: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org, Suzuki.Poulose-5wv7dgnIgG8@public.gmane.org, punit.agr
 List-Id: linux-efi@vger.kernel.org
 
-On 2/15/2017 10:03 AM, Steven Rostedt wrote:
-> On Wed, 15 Feb 2017 09:54:09 -0700
-> "Baicar, Tyler" <tbaicar@codeaurora.org> wrote:
-> \
->> In v9 I currently have this and the ARM trace event from this series
->> both wrapped in an
->> ifdef verifying that CONFIG_RAS is enabled. This resolves the kbuild
->> failures and
->> will have this code compiled out when that config isn't enabled. Do you
->> think I
->> should use the ifdef or use these *_enabled() functions?
->>
-> I believe you need both. The *_enabled() functions wont prevent build
-> errors. But since tracing is seldom enabled (usually only when you want
-> to see what's happening), the *_enabled() functions optimize the code
-> to not perform tasks that are only needed when tracing is enabled. When
-> I say "enabled" I mean actively tracing, as supposed to being just
-> enabled in the kernel.
+On 2/15/2017 5:13 AM, James Morse wrote:
+> Hi Tyler,
 >
-> -- Steve
-Got it, I will add both!
+> On 13/02/17 22:45, Baicar, Tyler wrote:
+>> On 2/9/2017 3:48 AM, James Morse wrote:
+>>> On 01/02/17 17:16, Tyler Baicar wrote:
+>>>> From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>>>>
+>>>> Even if an error status block's severity is fatal, the kernel does not
+>>>> honor the severity level and panic.
+>>>>
+>>>> With the firmware first model, the platform could inform the OS about a
+>>>> fatal hardware error through the non-NMI GHES notification type. The OS
+>>>> should panic when a hardware error record is received with this
+>>>> severity.
+>>>>
+>>>> Call panic() after CPER data in error status block is printed if
+>>>> severity is fatal, before each error section is handled.
+>>>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+>>>> index 8756172..86c1f15 100644
+>>>> --- a/drivers/acpi/apei/ghes.c
+>>>> +++ b/drivers/acpi/apei/ghes.c
+>>>> @@ -687,6 +689,13 @@ static int ghes_ack_error(struct acpi_hest_generic_v2
+>>>> *generic_v2)
+>>>>        return rc;
+>>>>    }
+>>>>    +static void __ghes_call_panic(void)
+>>>> +{
+>>>> +    if (panic_timeout == 0)
+>>>> +        panic_timeout = ghes_panic_timeout;
+>>>> +    panic("Fatal hardware error!");
+>>>> +}
+>>>> +
+>>> __ghes_panic() also has:
+>>>>      __ghes_print_estatus(KERN_EMERG, ghes->generic, ghes->estatus);
+>>> Which prints this estatus regardless of rate limiting and cache-ing.
+> [...]
+>
+>>>>                ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+>>>>        }
+>>>> +    if (ghes_severity(ghes->estatus->error_severity) >= GHES_SEV_PANIC) {
+>>>> +        __ghes_call_panic();
+>>>> +    }
+>>> I think this ghes_severity() then panic() should go above the:
+>>>>      if (!ghes_estatus_cached(ghes->estatus)) {
+>>> and we should call __ghes_print_estatus() here too, to make sure the message
+>>> definitely got out!
+>
+>> Okay, that makes sense. If we move this up, is there a problem with calling
+>> __ghes_panic() instead of making the __ghes_print_estatus() and
+>> __ghes_call_panic() calls here? It looks like that will just add a call to
+>> oops_begin() and ghes_print_queued_estatus() as well, but this is what
+>> ghes_notify_nmi() does if the severity is panic.
+>
+> I don't think the queued stuff is relevant, isn't that just for x86-NMI messages
+> that it doesn't print out directly?
+>
+> A quick grep shows arm64 doesn't have oops_begin(), you may have to add some
+> equivalent mechanism. Lets try and avoid that rabbit hole!
+>
+> Given __ghes_panic() calls __ghes_print_estatus() too, you could try moving that
+> into your new __ghes_call_panic().... or whatever results in the least lines
+> changed!
+Sounds good, I will just use __ghes_print_estatus() and __ghes_call_panic().
 
 Thanks,
 Tyler
