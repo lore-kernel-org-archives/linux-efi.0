@@ -1,8 +1,8 @@
 From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: [RFC PATCH v4 23/28] x86/kvm: Enable Secure Memory Encryption of
-	nested page tables
-Date: Thu, 16 Feb 2017 09:47:11 -0600
-Message-ID: <20170216154711.19244.36719.stgit@tlendack-t1.amdoffice.net>
+Subject: [RFC PATCH v4 24/28] x86: Access the setup data through debugfs
+	decrypted
+Date: Thu, 16 Feb 2017 09:47:24 -0600
+Message-ID: <20170216154724.19244.71396.stgit@tlendack-t1.amdoffice.net>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,110 +22,71 @@ To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z
 Cc: Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Update the KVM support to include the memory encryption mask when creating
-and using nested page tables.
+Use memremap() to map the setup data.  This simplifies the code and will
+make the appropriate decision as to whether a RAM remapping can be done
+or if a fallback to ioremap_cache() is needed (which includes checking
+PageHighMem).
 
 Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 ---
- arch/x86/include/asm/kvm_host.h |    3 ++-
- arch/x86/kvm/mmu.c              |    8 ++++++--
- arch/x86/kvm/vmx.c              |    3 ++-
- arch/x86/kvm/x86.c              |    3 ++-
- 4 files changed, 12 insertions(+), 5 deletions(-)
+ arch/x86/kernel/kdebugfs.c |   30 +++++++++++-------------------
+ 1 file changed, 11 insertions(+), 19 deletions(-)
 
-diff --git a/arch/x86/include/asm/kvm_host.h b/arch/x86/include/asm/kvm_host.h
-index a7066dc..37326b5 100644
---- a/arch/x86/include/asm/kvm_host.h
-+++ b/arch/x86/include/asm/kvm_host.h
-@@ -1050,7 +1050,8 @@ struct kvm_arch_async_pf {
- void kvm_mmu_init_vm(struct kvm *kvm);
- void kvm_mmu_uninit_vm(struct kvm *kvm);
- void kvm_mmu_set_mask_ptes(u64 user_mask, u64 accessed_mask,
--		u64 dirty_mask, u64 nx_mask, u64 x_mask, u64 p_mask);
-+		u64 dirty_mask, u64 nx_mask, u64 x_mask, u64 p_mask,
-+		u64 me_mask);
+diff --git a/arch/x86/kernel/kdebugfs.c b/arch/x86/kernel/kdebugfs.c
+index bdb83e4..c3d354d 100644
+--- a/arch/x86/kernel/kdebugfs.c
++++ b/arch/x86/kernel/kdebugfs.c
+@@ -48,17 +48,13 @@ static ssize_t setup_data_read(struct file *file, char __user *user_buf,
  
- void kvm_mmu_reset_context(struct kvm_vcpu *vcpu);
- void kvm_mmu_slot_remove_write_access(struct kvm *kvm,
-diff --git a/arch/x86/kvm/mmu.c b/arch/x86/kvm/mmu.c
-index d8d235b..46f246c 100644
---- a/arch/x86/kvm/mmu.c
-+++ b/arch/x86/kvm/mmu.c
-@@ -123,7 +123,7 @@ enum {
- 					    * PT32_LEVEL_BITS))) - 1))
+ 	pa = node->paddr + sizeof(struct setup_data) + pos;
+ 	pg = pfn_to_page((pa + count - 1) >> PAGE_SHIFT);
+-	if (PageHighMem(pg)) {
+-		p = ioremap_cache(pa, count);
+-		if (!p)
+-			return -ENXIO;
+-	} else
+-		p = __va(pa);
++	p = memremap(pa, count, MEMREMAP_WB);
++	if (!p)
++		return -ENXIO;
  
- #define PT64_PERM_MASK (PT_PRESENT_MASK | PT_WRITABLE_MASK | shadow_user_mask \
--			| shadow_x_mask | shadow_nx_mask)
-+			| shadow_x_mask | shadow_nx_mask | shadow_me_mask)
+ 	remain = copy_to_user(user_buf, p, count);
  
- #define ACC_EXEC_MASK    1
- #define ACC_WRITE_MASK   PT_WRITABLE_MASK
-@@ -178,6 +178,7 @@ struct kvm_shadow_walk_iterator {
- static u64 __read_mostly shadow_dirty_mask;
- static u64 __read_mostly shadow_mmio_mask;
- static u64 __read_mostly shadow_present_mask;
-+static u64 __read_mostly shadow_me_mask;
+-	if (PageHighMem(pg))
+-		iounmap(p);
++	memunmap(p);
  
- static void mmu_spte_set(u64 *sptep, u64 spte);
- static void mmu_free_roots(struct kvm_vcpu *vcpu);
-@@ -285,7 +286,8 @@ static bool check_mmio_spte(struct kvm_vcpu *vcpu, u64 spte)
- }
+ 	if (remain)
+ 		return -EFAULT;
+@@ -127,15 +123,12 @@ static int __init create_setup_data_nodes(struct dentry *parent)
+ 		}
  
- void kvm_mmu_set_mask_ptes(u64 user_mask, u64 accessed_mask,
--		u64 dirty_mask, u64 nx_mask, u64 x_mask, u64 p_mask)
-+		u64 dirty_mask, u64 nx_mask, u64 x_mask, u64 p_mask,
-+		u64 me_mask)
- {
- 	shadow_user_mask = user_mask;
- 	shadow_accessed_mask = accessed_mask;
-@@ -293,6 +295,7 @@ void kvm_mmu_set_mask_ptes(u64 user_mask, u64 accessed_mask,
- 	shadow_nx_mask = nx_mask;
- 	shadow_x_mask = x_mask;
- 	shadow_present_mask = p_mask;
-+	shadow_me_mask = me_mask;
- }
- EXPORT_SYMBOL_GPL(kvm_mmu_set_mask_ptes);
+ 		pg = pfn_to_page((pa_data+sizeof(*data)-1) >> PAGE_SHIFT);
+-		if (PageHighMem(pg)) {
+-			data = ioremap_cache(pa_data, sizeof(*data));
+-			if (!data) {
+-				kfree(node);
+-				error = -ENXIO;
+-				goto err_dir;
+-			}
+-		} else
+-			data = __va(pa_data);
++		data = memremap(pa_data, sizeof(*data), MEMREMAP_WB);
++		if (!data) {
++			kfree(node);
++			error = -ENXIO;
++			goto err_dir;
++		}
  
-@@ -2546,6 +2549,7 @@ static int set_spte(struct kvm_vcpu *vcpu, u64 *sptep,
- 		pte_access &= ~ACC_WRITE_MASK;
+ 		node->paddr = pa_data;
+ 		node->type = data->type;
+@@ -143,8 +136,7 @@ static int __init create_setup_data_nodes(struct dentry *parent)
+ 		error = create_setup_data_node(d, no, node);
+ 		pa_data = data->next;
  
- 	spte |= (u64)pfn << PAGE_SHIFT;
-+	spte |= shadow_me_mask;
- 
- 	if (pte_access & ACC_WRITE_MASK) {
- 
-diff --git a/arch/x86/kvm/vmx.c b/arch/x86/kvm/vmx.c
-index a236dec..fac3c27 100644
---- a/arch/x86/kvm/vmx.c
-+++ b/arch/x86/kvm/vmx.c
-@@ -6703,7 +6703,8 @@ static __init int hardware_setup(void)
- 			(enable_ept_ad_bits) ? VMX_EPT_DIRTY_BIT : 0ull,
- 			0ull, VMX_EPT_EXECUTABLE_MASK,
- 			cpu_has_vmx_ept_execute_only() ?
--				      0ull : VMX_EPT_READABLE_MASK);
-+				      0ull : VMX_EPT_READABLE_MASK,
-+			0ull);
- 		ept_set_mmio_spte_mask();
- 		kvm_enable_tdp();
- 	} else
-diff --git a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
-index a719783..9e6a593 100644
---- a/arch/x86/kvm/x86.c
-+++ b/arch/x86/kvm/x86.c
-@@ -67,6 +67,7 @@
- #include <asm/pvclock.h>
- #include <asm/div64.h>
- #include <asm/irq_remapping.h>
-+#include <asm/mem_encrypt.h>
- 
- #define CREATE_TRACE_POINTS
- #include "trace.h"
-@@ -6027,7 +6028,7 @@ int kvm_arch_init(void *opaque)
- 
- 	kvm_mmu_set_mask_ptes(PT_USER_MASK, PT_ACCESSED_MASK,
- 			PT_DIRTY_MASK, PT64_NX_MASK, 0,
--			PT_PRESENT_MASK);
-+			PT_PRESENT_MASK, sme_me_mask);
- 	kvm_timer_init();
- 
- 	perf_register_guest_info_callbacks(&kvm_guest_cbs);
+-		if (PageHighMem(pg))
+-			iounmap(data);
++		memunmap(data);
+ 		if (error)
+ 			goto err_dir;
+ 		no++;
