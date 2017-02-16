@@ -1,7 +1,8 @@
 From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: [RFC PATCH v4 12/28] efi: Add an EFI table address match function
-Date: Thu, 16 Feb 2017 09:44:41 -0600
-Message-ID: <20170216154441.19244.96367.stgit@tlendack-t1.amdoffice.net>
+Subject: [RFC PATCH v4 13/28] efi: Update efi_mem_type() to return defined
+	EFI mem types
+Date: Thu, 16 Feb 2017 09:44:57 -0600
+Message-ID: <20170216154457.19244.5369.stgit@tlendack-t1.amdoffice.net>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,88 +22,33 @@ To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z
 Cc: Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This patch adds support that will determine if a supplied physical address
-matches the address of an EFI table.
+Update the efi_mem_type() to return EFI_RESERVED_TYPE instead of a
+hardcoded 0.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 ---
- drivers/firmware/efi/efi.c |   33 +++++++++++++++++++++++++++++++++
- include/linux/efi.h        |    7 +++++++
- 2 files changed, 40 insertions(+)
+ arch/x86/platform/efi/efi.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index e7d4040..e8dbcdf 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -55,6 +55,25 @@ struct efi __read_mostly efi = {
- };
- EXPORT_SYMBOL(efi);
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index a15cf81..6407103 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -1037,7 +1037,7 @@ u32 efi_mem_type(unsigned long phys_addr)
+ 	efi_memory_desc_t *md;
  
-+static unsigned long *efi_tables[] = {
-+	&efi.mps,
-+	&efi.acpi,
-+	&efi.acpi20,
-+	&efi.smbios,
-+	&efi.smbios3,
-+	&efi.sal_systab,
-+	&efi.boot_info,
-+	&efi.hcdp,
-+	&efi.uga,
-+	&efi.uv_systab,
-+	&efi.fw_vendor,
-+	&efi.runtime,
-+	&efi.config_table,
-+	&efi.esrt,
-+	&efi.properties_table,
-+	&efi.mem_attr_table,
-+};
-+
- static bool disable_runtime;
- static int __init setup_noefi(char *arg)
- {
-@@ -855,6 +874,20 @@ int efi_status_to_err(efi_status_t status)
- 	return err;
+ 	if (!efi_enabled(EFI_MEMMAP))
+-		return 0;
++		return EFI_RESERVED_TYPE;
+ 
+ 	for_each_efi_memory_desc(md) {
+ 		if ((md->phys_addr <= phys_addr) &&
+@@ -1045,7 +1045,7 @@ u32 efi_mem_type(unsigned long phys_addr)
+ 				  (md->num_pages << EFI_PAGE_SHIFT))))
+ 			return md->type;
+ 	}
+-	return 0;
++	return EFI_RESERVED_TYPE;
  }
  
-+bool efi_table_address_match(unsigned long phys_addr)
-+{
-+	unsigned int i;
-+
-+	if (phys_addr == EFI_INVALID_TABLE_ADDR)
-+		return false;
-+
-+	for (i = 0; i < ARRAY_SIZE(efi_tables); i++)
-+		if (*(efi_tables[i]) == phys_addr)
-+			return true;
-+
-+	return false;
-+}
-+
- #ifdef CONFIG_KEXEC
- static int update_efi_random_seed(struct notifier_block *nb,
- 				  unsigned long code, void *unused)
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 94d34e0..7694b23 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1079,6 +1079,8 @@ static inline bool efi_enabled(int feature)
- 	return test_bit(feature, &efi.flags) != 0;
- }
- extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
-+
-+extern bool efi_table_address_match(unsigned long phys_addr);
- #else
- static inline bool efi_enabled(int feature)
- {
-@@ -1092,6 +1094,11 @@ static inline bool efi_enabled(int feature)
- {
- 	return false;
- }
-+
-+static inline bool efi_table_address_match(unsigned long phys_addr)
-+{
-+	return false;
-+}
- #endif
- 
- extern int efi_status_to_err(efi_status_t status);
+ static int __init arch_parse_efi_cmdline(char *str)
