@@ -1,8 +1,8 @@
 From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: [RFC PATCH v4 01/28] x86: Documentation for AMD Secure Memory
-	Encryption (SME)
-Date: Thu, 16 Feb 2017 09:42:11 -0600
-Message-ID: <20170216154211.19244.76656.stgit@tlendack-t1.amdoffice.net>
+Subject: [RFC PATCH v4 02/28] x86: Set the write-protect cache mode for full
+	PAT support
+Date: Thu, 16 Feb 2017 09:42:25 -0600
+Message-ID: <20170216154225.19244.96438.stgit@tlendack-t1.amdoffice.net>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,98 +22,43 @@ To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z
 Cc: Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This patch adds a Documenation entry to decribe the AMD Secure Memory
-Encryption (SME) feature.
+For processors that support PAT, set the write-protect cache mode
+(_PAGE_CACHE_MODE_WP) entry to the actual write-protect value (x05).
 
+Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 ---
- Documentation/admin-guide/kernel-parameters.txt |   11 ++++
- Documentation/x86/amd-memory-encryption.txt     |   57 +++++++++++++++++++++++
- 2 files changed, 68 insertions(+)
- create mode 100644 Documentation/x86/amd-memory-encryption.txt
+ arch/x86/mm/pat.c |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 110745e..91c40fa 100644
---- a/Documentation/admin-guide/kernel-parameters.txt
-+++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -2145,6 +2145,17 @@
- 			memory contents and reserves bad memory
- 			regions that are detected.
+diff --git a/arch/x86/mm/pat.c b/arch/x86/mm/pat.c
+index 9b78685..6753d9c 100644
+--- a/arch/x86/mm/pat.c
++++ b/arch/x86/mm/pat.c
+@@ -295,7 +295,7 @@ static void init_cache_modes(void)
+  * pat_init - Initialize PAT MSR and PAT table
+  *
+  * This function initializes PAT MSR and PAT table with an OS-defined value
+- * to enable additional cache attributes, WC and WT.
++ * to enable additional cache attributes, WC, WT and WP.
+  *
+  * This function must be called on all CPUs using the specific sequence of
+  * operations defined in Intel SDM. mtrr_rendezvous_handler() provides this
+@@ -356,7 +356,7 @@ void pat_init(void)
+ 		 *      010    2    UC-: _PAGE_CACHE_MODE_UC_MINUS
+ 		 *      011    3    UC : _PAGE_CACHE_MODE_UC
+ 		 *      100    4    WB : Reserved
+-		 *      101    5    WC : Reserved
++		 *      101    5    WP : _PAGE_CACHE_MODE_WP
+ 		 *      110    6    UC-: Reserved
+ 		 *      111    7    WT : _PAGE_CACHE_MODE_WT
+ 		 *
+@@ -364,7 +364,7 @@ void pat_init(void)
+ 		 * corresponding types in the presence of PAT errata.
+ 		 */
+ 		pat = PAT(0, WB) | PAT(1, WC) | PAT(2, UC_MINUS) | PAT(3, UC) |
+-		      PAT(4, WB) | PAT(5, WC) | PAT(6, UC_MINUS) | PAT(7, WT);
++		      PAT(4, WB) | PAT(5, WP) | PAT(6, UC_MINUS) | PAT(7, WT);
+ 	}
  
-+	mem_encrypt=	[X86-64] AMD Secure Memory Encryption (SME) control
-+			Valid arguments: on, off
-+			Default (depends on kernel configuration option):
-+			  on  (CONFIG_AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT=y)
-+			  off (CONFIG_AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT=n)
-+			mem_encrypt=on:		Activate SME
-+			mem_encrypt=off:	Do not activate SME
-+
-+			Refer to the SME documentation for details on when
-+			memory encryption can be activated.
-+
- 	mem_sleep_default=	[SUSPEND] Default system suspend mode:
- 			s2idle  - Suspend-To-Idle
- 			shallow - Power-On Suspend or equivalent (if supported)
-diff --git a/Documentation/x86/amd-memory-encryption.txt b/Documentation/x86/amd-memory-encryption.txt
-new file mode 100644
-index 0000000..0938e89
---- /dev/null
-+++ b/Documentation/x86/amd-memory-encryption.txt
-@@ -0,0 +1,57 @@
-+Secure Memory Encryption (SME) is a feature found on AMD processors.
-+
-+SME provides the ability to mark individual pages of memory as encrypted using
-+the standard x86 page tables.  A page that is marked encrypted will be
-+automatically decrypted when read from DRAM and encrypted when written to
-+DRAM.  SME can therefore be used to protect the contents of DRAM from physical
-+attacks on the system.
-+
-+A page is encrypted when a page table entry has the encryption bit set (see
-+below how to determine the position of the bit).  The encryption bit can be
-+specified in the cr3 register, allowing the PGD table to be encrypted. Each
-+successive level of page tables can also be encrypted.
-+
-+Support for SME can be determined through the CPUID instruction. The CPUID
-+function 0x8000001f reports information related to SME:
-+
-+	0x8000001f[eax]:
-+		Bit[0] indicates support for SME
-+	0x8000001f[ebx]:
-+		Bit[5:0]  pagetable bit number used to activate memory
-+			  encryption
-+		Bit[11:6] reduction in physical address space, in bits, when
-+			  memory encryption is enabled (this only affects system
-+			  physical addresses, not guest physical addresses)
-+
-+If support for SME is present, MSR 0xc00100010 (SYS_CFG) can be used to
-+determine if SME is enabled and/or to enable memory encryption:
-+
-+	0xc0010010:
-+		Bit[23]   0 = memory encryption features are disabled
-+			  1 = memory encryption features are enabled
-+
-+Linux relies on BIOS to set this bit if BIOS has determined that the reduction
-+in the physical address space as a result of enabling memory encryption (see
-+CPUID information above) will not conflict with the address space resource
-+requirements for the system.  If this bit is not set upon Linux startup then
-+Linux itself will not set it and memory encryption will not be possible.
-+
-+The state of SME in the Linux kernel can be documented as follows:
-+	- Supported:
-+	  The CPU supports SME (determined through CPUID instruction).
-+
-+	- Enabled:
-+	  Supported and bit 23 of the SYS_CFG MSR is set.
-+
-+	- Active:
-+	  Supported, Enabled and the Linux kernel is actively applying
-+	  the encryption bit to page table entries (the SME mask in the
-+	  kernel is non-zero).
-+
-+SME can also be enabled and activated in the BIOS. If SME is enabled and
-+activated in the BIOS, then all memory accesses will be encrypted and it will
-+not be necessary to activate the Linux memory encryption support.  If the BIOS
-+merely enables SME (sets bit 23 of the SYS_CFG MSR), then Linux can activate
-+memory encryption.  However, if BIOS does not enable SME, then Linux will not
-+attempt to activate memory encryption, even if configured to do so by default
-+or the mem_encrypt=on command line parameter is specified.
+ 	if (!boot_cpu_done) {
