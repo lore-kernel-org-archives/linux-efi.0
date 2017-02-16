@@ -1,192 +1,131 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: [RFC PATCH v4 22/28] x86: Do not specify encrypted memory for video
- mappings
-Date: Thu, 16 Feb 2017 09:47:00 -0600
-Message-ID: <20170216154700.19244.74874.stgit@tlendack-t1.amdoffice.net>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: [RFC PATCH v4 23/28] x86/kvm: Enable Secure Memory Encryption of
+	nested page tables
+Date: Thu, 16 Feb 2017 09:47:11 -0600
+Message-ID: <20170216154711.19244.36719.stgit@tlendack-t1.amdoffice.net>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
-Cc: Rik van Riel <riel@redhat.com>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>, Larry Woodman <lwoodman@redhat.com>, Dmitry Vyukov <dvyukov@google.com>
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20170216154158.19244.66630.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Cc: Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Since video memory needs to be accessed decrypted, be sure that the
-memory encryption mask is not set for the video ranges.
+Update the KVM support to include the memory encryption mask when creating
+and using nested page tables.
 
-Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 ---
- arch/x86/include/asm/vga.h       |   13 +++++++++++++
- drivers/gpu/drm/drm_gem.c        |    2 ++
- drivers/gpu/drm/drm_vm.c         |    4 ++++
- drivers/gpu/drm/ttm/ttm_bo_vm.c  |    7 +++++--
- drivers/gpu/drm/udl/udl_fb.c     |    4 ++++
- drivers/video/fbdev/core/fbmem.c |   12 ++++++++++++
- 6 files changed, 40 insertions(+), 2 deletions(-)
+ arch/x86/include/asm/kvm_host.h |    3 ++-
+ arch/x86/kvm/mmu.c              |    8 ++++++--
+ arch/x86/kvm/vmx.c              |    3 ++-
+ arch/x86/kvm/x86.c              |    3 ++-
+ 4 files changed, 12 insertions(+), 5 deletions(-)
 
-diff --git a/arch/x86/include/asm/vga.h b/arch/x86/include/asm/vga.h
-index c4b9dc2..5c7567a 100644
---- a/arch/x86/include/asm/vga.h
-+++ b/arch/x86/include/asm/vga.h
-@@ -7,12 +7,25 @@
- #ifndef _ASM_X86_VGA_H
- #define _ASM_X86_VGA_H
+diff --git a/arch/x86/include/asm/kvm_host.h b/arch/x86/include/asm/kvm_host.h
+index a7066dc..37326b5 100644
+--- a/arch/x86/include/asm/kvm_host.h
++++ b/arch/x86/include/asm/kvm_host.h
+@@ -1050,7 +1050,8 @@ struct kvm_arch_async_pf {
+ void kvm_mmu_init_vm(struct kvm *kvm);
+ void kvm_mmu_uninit_vm(struct kvm *kvm);
+ void kvm_mmu_set_mask_ptes(u64 user_mask, u64 accessed_mask,
+-		u64 dirty_mask, u64 nx_mask, u64 x_mask, u64 p_mask);
++		u64 dirty_mask, u64 nx_mask, u64 x_mask, u64 p_mask,
++		u64 me_mask);
  
-+#include <asm/cacheflush.h>
-+
- /*
-  *	On the PC, we can just recalculate addresses and then
-  *	access the videoram directly without any black magic.
-+ *	To support memory encryption however, we need to access
-+ *	the videoram as decrypted memory.
-  */
+ void kvm_mmu_reset_context(struct kvm_vcpu *vcpu);
+ void kvm_mmu_slot_remove_write_access(struct kvm *kvm,
+diff --git a/arch/x86/kvm/mmu.c b/arch/x86/kvm/mmu.c
+index d8d235b..46f246c 100644
+--- a/arch/x86/kvm/mmu.c
++++ b/arch/x86/kvm/mmu.c
+@@ -123,7 +123,7 @@ enum {
+ 					    * PT32_LEVEL_BITS))) - 1))
  
-+#ifdef CONFIG_AMD_MEM_ENCRYPT
-+#define VGA_MAP_MEM(x, s)					\
-+({								\
-+	unsigned long start = (unsigned long)phys_to_virt(x);	\
-+	set_memory_decrypted(start, (s) >> PAGE_SHIFT);		\
-+	start;							\
-+})
-+#else
- #define VGA_MAP_MEM(x, s) (unsigned long)phys_to_virt(x)
-+#endif
+ #define PT64_PERM_MASK (PT_PRESENT_MASK | PT_WRITABLE_MASK | shadow_user_mask \
+-			| shadow_x_mask | shadow_nx_mask)
++			| shadow_x_mask | shadow_nx_mask | shadow_me_mask)
  
- #define vga_readb(x) (*(x))
- #define vga_writeb(x, y) (*(y) = (x))
-diff --git a/drivers/gpu/drm/drm_gem.c b/drivers/gpu/drm/drm_gem.c
-index 465bacd..f9b3be0 100644
---- a/drivers/gpu/drm/drm_gem.c
-+++ b/drivers/gpu/drm/drm_gem.c
-@@ -36,6 +36,7 @@
- #include <linux/pagemap.h>
- #include <linux/shmem_fs.h>
- #include <linux/dma-buf.h>
-+#include <linux/mem_encrypt.h>
- #include <drm/drmP.h>
- #include <drm/drm_vma_manager.h>
- #include <drm/drm_gem.h>
-@@ -928,6 +929,7 @@ int drm_gem_mmap_obj(struct drm_gem_object *obj, unsigned long obj_size,
- 	vma->vm_ops = dev->driver->gem_vm_ops;
- 	vma->vm_private_data = obj;
- 	vma->vm_page_prot = pgprot_writecombine(vm_get_page_prot(vma->vm_flags));
-+	vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
+ #define ACC_EXEC_MASK    1
+ #define ACC_WRITE_MASK   PT_WRITABLE_MASK
+@@ -178,6 +178,7 @@ struct kvm_shadow_walk_iterator {
+ static u64 __read_mostly shadow_dirty_mask;
+ static u64 __read_mostly shadow_mmio_mask;
+ static u64 __read_mostly shadow_present_mask;
++static u64 __read_mostly shadow_me_mask;
  
- 	/* Take a ref for this mapping of the object, so that the fault
- 	 * handler can dereference the mmap offset's pointer to the object.
-diff --git a/drivers/gpu/drm/drm_vm.c b/drivers/gpu/drm/drm_vm.c
-index bd311c7..f0fc52a 100644
---- a/drivers/gpu/drm/drm_vm.c
-+++ b/drivers/gpu/drm/drm_vm.c
-@@ -40,6 +40,7 @@
- #include <linux/efi.h>
- #include <linux/slab.h>
- #endif
-+#include <linux/mem_encrypt.h>
- #include <asm/pgtable.h>
- #include "drm_internal.h"
- #include "drm_legacy.h"
-@@ -58,6 +59,9 @@ static pgprot_t drm_io_prot(struct drm_local_map *map,
+ static void mmu_spte_set(u64 *sptep, u64 spte);
+ static void mmu_free_roots(struct kvm_vcpu *vcpu);
+@@ -285,7 +286,8 @@ static bool check_mmio_spte(struct kvm_vcpu *vcpu, u64 spte)
+ }
+ 
+ void kvm_mmu_set_mask_ptes(u64 user_mask, u64 accessed_mask,
+-		u64 dirty_mask, u64 nx_mask, u64 x_mask, u64 p_mask)
++		u64 dirty_mask, u64 nx_mask, u64 x_mask, u64 p_mask,
++		u64 me_mask)
  {
- 	pgprot_t tmp = vm_get_page_prot(vma->vm_flags);
+ 	shadow_user_mask = user_mask;
+ 	shadow_accessed_mask = accessed_mask;
+@@ -293,6 +295,7 @@ void kvm_mmu_set_mask_ptes(u64 user_mask, u64 accessed_mask,
+ 	shadow_nx_mask = nx_mask;
+ 	shadow_x_mask = x_mask;
+ 	shadow_present_mask = p_mask;
++	shadow_me_mask = me_mask;
+ }
+ EXPORT_SYMBOL_GPL(kvm_mmu_set_mask_ptes);
  
-+	/* We don't want graphics memory to be mapped encrypted */
-+	tmp = pgprot_decrypted(tmp);
-+
- #if defined(__i386__) || defined(__x86_64__) || defined(__powerpc__)
- 	if (map->type == _DRM_REGISTERS && !(map->flags & _DRM_WRITE_COMBINING))
- 		tmp = pgprot_noncached(tmp);
-diff --git a/drivers/gpu/drm/ttm/ttm_bo_vm.c b/drivers/gpu/drm/ttm/ttm_bo_vm.c
-index 68ef993..09f2e73 100644
---- a/drivers/gpu/drm/ttm/ttm_bo_vm.c
-+++ b/drivers/gpu/drm/ttm/ttm_bo_vm.c
-@@ -39,6 +39,7 @@
- #include <linux/rbtree.h>
- #include <linux/module.h>
- #include <linux/uaccess.h>
-+#include <linux/mem_encrypt.h>
+@@ -2546,6 +2549,7 @@ static int set_spte(struct kvm_vcpu *vcpu, u64 *sptep,
+ 		pte_access &= ~ACC_WRITE_MASK;
  
- #define TTM_BO_VM_NUM_PREFAULT 16
+ 	spte |= (u64)pfn << PAGE_SHIFT;
++	spte |= shadow_me_mask;
  
-@@ -218,9 +219,11 @@ static int ttm_bo_vm_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
- 	 * first page.
- 	 */
- 	for (i = 0; i < TTM_BO_VM_NUM_PREFAULT; ++i) {
--		if (bo->mem.bus.is_iomem)
-+		if (bo->mem.bus.is_iomem) {
-+			/* Iomem should not be marked encrypted */
-+			cvma.vm_page_prot = pgprot_decrypted(cvma.vm_page_prot);
- 			pfn = ((bo->mem.bus.base + bo->mem.bus.offset) >> PAGE_SHIFT) + page_offset;
--		else {
-+		} else {
- 			page = ttm->pages[page_offset];
- 			if (unlikely(!page && i == 0)) {
- 				retval = VM_FAULT_OOM;
-diff --git a/drivers/gpu/drm/udl/udl_fb.c b/drivers/gpu/drm/udl/udl_fb.c
-index 167f42c..2207ec0 100644
---- a/drivers/gpu/drm/udl/udl_fb.c
-+++ b/drivers/gpu/drm/udl/udl_fb.c
-@@ -14,6 +14,7 @@
- #include <linux/slab.h>
- #include <linux/fb.h>
- #include <linux/dma-buf.h>
-+#include <linux/mem_encrypt.h>
+ 	if (pte_access & ACC_WRITE_MASK) {
  
- #include <drm/drmP.h>
- #include <drm/drm_crtc.h>
-@@ -169,6 +170,9 @@ static int udl_fb_mmap(struct fb_info *info, struct vm_area_struct *vma)
- 	pr_notice("mmap() framebuffer addr:%lu size:%lu\n",
- 		  pos, size);
+diff --git a/arch/x86/kvm/vmx.c b/arch/x86/kvm/vmx.c
+index a236dec..fac3c27 100644
+--- a/arch/x86/kvm/vmx.c
++++ b/arch/x86/kvm/vmx.c
+@@ -6703,7 +6703,8 @@ static __init int hardware_setup(void)
+ 			(enable_ept_ad_bits) ? VMX_EPT_DIRTY_BIT : 0ull,
+ 			0ull, VMX_EPT_EXECUTABLE_MASK,
+ 			cpu_has_vmx_ept_execute_only() ?
+-				      0ull : VMX_EPT_READABLE_MASK);
++				      0ull : VMX_EPT_READABLE_MASK,
++			0ull);
+ 		ept_set_mmio_spte_mask();
+ 		kvm_enable_tdp();
+ 	} else
+diff --git a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
+index a719783..9e6a593 100644
+--- a/arch/x86/kvm/x86.c
++++ b/arch/x86/kvm/x86.c
+@@ -67,6 +67,7 @@
+ #include <asm/pvclock.h>
+ #include <asm/div64.h>
+ #include <asm/irq_remapping.h>
++#include <asm/mem_encrypt.h>
  
-+	/* We don't want the framebuffer to be mapped encrypted */
-+	vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
-+
- 	while (size > 0) {
- 		page = vmalloc_to_pfn((void *)pos);
- 		if (remap_pfn_range(vma, start, page, PAGE_SIZE, PAGE_SHARED))
-diff --git a/drivers/video/fbdev/core/fbmem.c b/drivers/video/fbdev/core/fbmem.c
-index 76c1ad9..b895e60 100644
---- a/drivers/video/fbdev/core/fbmem.c
-+++ b/drivers/video/fbdev/core/fbmem.c
-@@ -32,6 +32,7 @@
- #include <linux/device.h>
- #include <linux/efi.h>
- #include <linux/fb.h>
-+#include <linux/mem_encrypt.h>
+ #define CREATE_TRACE_POINTS
+ #include "trace.h"
+@@ -6027,7 +6028,7 @@ int kvm_arch_init(void *opaque)
  
- #include <asm/fb.h>
+ 	kvm_mmu_set_mask_ptes(PT_USER_MASK, PT_ACCESSED_MASK,
+ 			PT_DIRTY_MASK, PT64_NX_MASK, 0,
+-			PT_PRESENT_MASK);
++			PT_PRESENT_MASK, sme_me_mask);
+ 	kvm_timer_init();
  
-@@ -1405,6 +1406,12 @@ static long fb_compat_ioctl(struct file *file, unsigned int cmd,
- 	mutex_lock(&info->mm_lock);
- 	if (fb->fb_mmap) {
- 		int res;
-+
-+		/*
-+		 * The framebuffer needs to be accessed decrypted, be sure
-+		 * SME protection is removed ahead of the call
-+		 */
-+		vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
- 		res = fb->fb_mmap(info, vma);
- 		mutex_unlock(&info->mm_lock);
- 		return res;
-@@ -1430,6 +1437,11 @@ static long fb_compat_ioctl(struct file *file, unsigned int cmd,
- 	mutex_unlock(&info->mm_lock);
- 
- 	vma->vm_page_prot = vm_get_page_prot(vma->vm_flags);
-+	/*
-+	 * The framebuffer needs to be accessed decrypted, be sure
-+	 * SME protection is removed
-+	 */
-+	vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
- 	fb_pgprotect(file, vma, start);
- 
- 	return vm_iomap_memory(vma, start, len);
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+ 	perf_register_guest_info_callbacks(&kvm_guest_cbs);
