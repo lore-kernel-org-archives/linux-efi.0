@@ -1,7 +1,8 @@
 From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: [RFC PATCH v4 21/28] x86: Check for memory encryption on the APs
-Date: Thu, 16 Feb 2017 09:46:47 -0600
-Message-ID: <20170216154647.19244.18733.stgit@tlendack-t1.amdoffice.net>
+Subject: [RFC PATCH v4 22/28] x86: Do not specify encrypted memory for video
+ mappings
+Date: Thu, 16 Feb 2017 09:47:00 -0600
+Message-ID: <20170216154700.19244.74874.stgit@tlendack-t1.amdoffice.net>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -13,110 +14,176 @@ To: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, 
 Cc: Rik van Riel <riel@redhat.com>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>, Larry Woodman <lwoodman@redhat.com>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-Add support to check if memory encryption is active in the kernel and that
-it has been enabled on the AP. If memory encryption is active in the kernel
-but has not been enabled on the AP, then set the SYS_CFG MSR bit to enable
-memory encryption on that AP and allow the AP to continue start up.
+Since video memory needs to be accessed decrypted, be sure that the
+memory encryption mask is not set for the video ranges.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/include/asm/realmode.h      |   12 ++++++++++++
- arch/x86/realmode/init.c             |    4 ++++
- arch/x86/realmode/rm/trampoline_64.S |   17 +++++++++++++++++
- 3 files changed, 33 insertions(+)
+ arch/x86/include/asm/vga.h       |   13 +++++++++++++
+ drivers/gpu/drm/drm_gem.c        |    2 ++
+ drivers/gpu/drm/drm_vm.c         |    4 ++++
+ drivers/gpu/drm/ttm/ttm_bo_vm.c  |    7 +++++--
+ drivers/gpu/drm/udl/udl_fb.c     |    4 ++++
+ drivers/video/fbdev/core/fbmem.c |   12 ++++++++++++
+ 6 files changed, 40 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/include/asm/realmode.h b/arch/x86/include/asm/realmode.h
-index 230e190..4f7ef53 100644
---- a/arch/x86/include/asm/realmode.h
-+++ b/arch/x86/include/asm/realmode.h
-@@ -1,6 +1,15 @@
- #ifndef _ARCH_X86_REALMODE_H
- #define _ARCH_X86_REALMODE_H
+diff --git a/arch/x86/include/asm/vga.h b/arch/x86/include/asm/vga.h
+index c4b9dc2..5c7567a 100644
+--- a/arch/x86/include/asm/vga.h
++++ b/arch/x86/include/asm/vga.h
+@@ -7,12 +7,25 @@
+ #ifndef _ASM_X86_VGA_H
+ #define _ASM_X86_VGA_H
  
-+/*
-+ * Flag bit definitions for use with the flags field of the trampoline header
-+ * int the CONFIG_X86_64 variant.
-+ */
-+#define TH_FLAGS_SME_ACTIVE_BIT		0
-+#define TH_FLAGS_SME_ACTIVE		BIT(TH_FLAGS_SME_ACTIVE_BIT)
++#include <asm/cacheflush.h>
 +
-+#ifndef __ASSEMBLY__
-+
- #include <linux/types.h>
- #include <asm/io.h>
+ /*
+  *	On the PC, we can just recalculate addresses and then
+  *	access the videoram directly without any black magic.
++ *	To support memory encryption however, we need to access
++ *	the videoram as decrypted memory.
+  */
  
-@@ -38,6 +47,7 @@ struct trampoline_header {
- 	u64 start;
- 	u64 efer;
- 	u32 cr4;
-+	u32 flags;
++#ifdef CONFIG_AMD_MEM_ENCRYPT
++#define VGA_MAP_MEM(x, s)					\
++({								\
++	unsigned long start = (unsigned long)phys_to_virt(x);	\
++	set_memory_decrypted(start, (s) >> PAGE_SHIFT);		\
++	start;							\
++})
++#else
+ #define VGA_MAP_MEM(x, s) (unsigned long)phys_to_virt(x)
++#endif
+ 
+ #define vga_readb(x) (*(x))
+ #define vga_writeb(x, y) (*(y) = (x))
+diff --git a/drivers/gpu/drm/drm_gem.c b/drivers/gpu/drm/drm_gem.c
+index 465bacd..f9b3be0 100644
+--- a/drivers/gpu/drm/drm_gem.c
++++ b/drivers/gpu/drm/drm_gem.c
+@@ -36,6 +36,7 @@
+ #include <linux/pagemap.h>
+ #include <linux/shmem_fs.h>
+ #include <linux/dma-buf.h>
++#include <linux/mem_encrypt.h>
+ #include <drm/drmP.h>
+ #include <drm/drm_vma_manager.h>
+ #include <drm/drm_gem.h>
+@@ -928,6 +929,7 @@ int drm_gem_mmap_obj(struct drm_gem_object *obj, unsigned long obj_size,
+ 	vma->vm_ops = dev->driver->gem_vm_ops;
+ 	vma->vm_private_data = obj;
+ 	vma->vm_page_prot = pgprot_writecombine(vm_get_page_prot(vma->vm_flags));
++	vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
+ 
+ 	/* Take a ref for this mapping of the object, so that the fault
+ 	 * handler can dereference the mmap offset's pointer to the object.
+diff --git a/drivers/gpu/drm/drm_vm.c b/drivers/gpu/drm/drm_vm.c
+index bd311c7..f0fc52a 100644
+--- a/drivers/gpu/drm/drm_vm.c
++++ b/drivers/gpu/drm/drm_vm.c
+@@ -40,6 +40,7 @@
+ #include <linux/efi.h>
+ #include <linux/slab.h>
  #endif
- };
++#include <linux/mem_encrypt.h>
+ #include <asm/pgtable.h>
+ #include "drm_internal.h"
+ #include "drm_legacy.h"
+@@ -58,6 +59,9 @@ static pgprot_t drm_io_prot(struct drm_local_map *map,
+ {
+ 	pgprot_t tmp = vm_get_page_prot(vma->vm_flags);
  
-@@ -69,4 +79,6 @@ static inline size_t real_mode_size_needed(void)
- void set_real_mode_mem(phys_addr_t mem, size_t size);
- void reserve_real_mode(void);
- 
-+#endif /* __ASSEMBLY__ */
++	/* We don't want graphics memory to be mapped encrypted */
++	tmp = pgprot_decrypted(tmp);
 +
- #endif /* _ARCH_X86_REALMODE_H */
-diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
-index 21d7506..5010089 100644
---- a/arch/x86/realmode/init.c
-+++ b/arch/x86/realmode/init.c
-@@ -102,6 +102,10 @@ static void __init setup_real_mode(void)
- 	trampoline_cr4_features = &trampoline_header->cr4;
- 	*trampoline_cr4_features = mmu_cr4_features;
+ #if defined(__i386__) || defined(__x86_64__) || defined(__powerpc__)
+ 	if (map->type == _DRM_REGISTERS && !(map->flags & _DRM_WRITE_COMBINING))
+ 		tmp = pgprot_noncached(tmp);
+diff --git a/drivers/gpu/drm/ttm/ttm_bo_vm.c b/drivers/gpu/drm/ttm/ttm_bo_vm.c
+index 68ef993..09f2e73 100644
+--- a/drivers/gpu/drm/ttm/ttm_bo_vm.c
++++ b/drivers/gpu/drm/ttm/ttm_bo_vm.c
+@@ -39,6 +39,7 @@
+ #include <linux/rbtree.h>
+ #include <linux/module.h>
+ #include <linux/uaccess.h>
++#include <linux/mem_encrypt.h>
  
-+	trampoline_header->flags = 0;
-+	if (sme_active())
-+		trampoline_header->flags |= TH_FLAGS_SME_ACTIVE;
+ #define TTM_BO_VM_NUM_PREFAULT 16
+ 
+@@ -218,9 +219,11 @@ static int ttm_bo_vm_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
+ 	 * first page.
+ 	 */
+ 	for (i = 0; i < TTM_BO_VM_NUM_PREFAULT; ++i) {
+-		if (bo->mem.bus.is_iomem)
++		if (bo->mem.bus.is_iomem) {
++			/* Iomem should not be marked encrypted */
++			cvma.vm_page_prot = pgprot_decrypted(cvma.vm_page_prot);
+ 			pfn = ((bo->mem.bus.base + bo->mem.bus.offset) >> PAGE_SHIFT) + page_offset;
+-		else {
++		} else {
+ 			page = ttm->pages[page_offset];
+ 			if (unlikely(!page && i == 0)) {
+ 				retval = VM_FAULT_OOM;
+diff --git a/drivers/gpu/drm/udl/udl_fb.c b/drivers/gpu/drm/udl/udl_fb.c
+index 167f42c..2207ec0 100644
+--- a/drivers/gpu/drm/udl/udl_fb.c
++++ b/drivers/gpu/drm/udl/udl_fb.c
+@@ -14,6 +14,7 @@
+ #include <linux/slab.h>
+ #include <linux/fb.h>
+ #include <linux/dma-buf.h>
++#include <linux/mem_encrypt.h>
+ 
+ #include <drm/drmP.h>
+ #include <drm/drm_crtc.h>
+@@ -169,6 +170,9 @@ static int udl_fb_mmap(struct fb_info *info, struct vm_area_struct *vma)
+ 	pr_notice("mmap() framebuffer addr:%lu size:%lu\n",
+ 		  pos, size);
+ 
++	/* We don't want the framebuffer to be mapped encrypted */
++	vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
 +
- 	trampoline_pgd = (u64 *) __va(real_mode_header->trampoline_pgd);
- 	trampoline_pgd[0] = trampoline_pgd_entry.pgd;
- 	trampoline_pgd[511] = init_level4_pgt[511].pgd;
-diff --git a/arch/x86/realmode/rm/trampoline_64.S b/arch/x86/realmode/rm/trampoline_64.S
-index dac7b20..a88c3d1 100644
---- a/arch/x86/realmode/rm/trampoline_64.S
-+++ b/arch/x86/realmode/rm/trampoline_64.S
-@@ -30,6 +30,7 @@
- #include <asm/msr.h>
- #include <asm/segment.h>
- #include <asm/processor-flags.h>
-+#include <asm/realmode.h>
- #include "realmode.h"
+ 	while (size > 0) {
+ 		page = vmalloc_to_pfn((void *)pos);
+ 		if (remap_pfn_range(vma, start, page, PAGE_SIZE, PAGE_SHARED))
+diff --git a/drivers/video/fbdev/core/fbmem.c b/drivers/video/fbdev/core/fbmem.c
+index 76c1ad9..b895e60 100644
+--- a/drivers/video/fbdev/core/fbmem.c
++++ b/drivers/video/fbdev/core/fbmem.c
+@@ -32,6 +32,7 @@
+ #include <linux/device.h>
+ #include <linux/efi.h>
+ #include <linux/fb.h>
++#include <linux/mem_encrypt.h>
  
- 	.text
-@@ -92,6 +93,21 @@ ENTRY(startup_32)
- 	movl	%edx, %fs
- 	movl	%edx, %gs
+ #include <asm/fb.h>
  
-+	/* Check for memory encryption support */
-+	bt	$TH_FLAGS_SME_ACTIVE_BIT, pa_tr_flags
-+	jnc	.Ldone
-+	movl	$MSR_K8_SYSCFG, %ecx
-+	rdmsr
-+	bts	$MSR_K8_SYSCFG_MEM_ENCRYPT_BIT, %eax
-+	jc	.Ldone
+@@ -1405,6 +1406,12 @@ static long fb_compat_ioctl(struct file *file, unsigned int cmd,
+ 	mutex_lock(&info->mm_lock);
+ 	if (fb->fb_mmap) {
+ 		int res;
 +
++		/*
++		 * The framebuffer needs to be accessed decrypted, be sure
++		 * SME protection is removed ahead of the call
++		 */
++		vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
+ 		res = fb->fb_mmap(info, vma);
+ 		mutex_unlock(&info->mm_lock);
+ 		return res;
+@@ -1430,6 +1437,11 @@ static long fb_compat_ioctl(struct file *file, unsigned int cmd,
+ 	mutex_unlock(&info->mm_lock);
+ 
+ 	vma->vm_page_prot = vm_get_page_prot(vma->vm_flags);
 +	/*
-+	 * Memory encryption is enabled but the SME enable bit for this
-+	 * CPU has has not been set.  It is safe to set it, so do so.
++	 * The framebuffer needs to be accessed decrypted, be sure
++	 * SME protection is removed
 +	 */
-+	wrmsr
-+.Ldone:
-+
- 	movl	pa_tr_cr4, %eax
- 	movl	%eax, %cr4		# Enable PAE mode
++	vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
+ 	fb_pgprotect(file, vma, start);
  
-@@ -147,6 +163,7 @@ GLOBAL(trampoline_header)
- 	tr_start:		.space	8
- 	GLOBAL(tr_efer)		.space	8
- 	GLOBAL(tr_cr4)		.space	4
-+	GLOBAL(tr_flags)	.space	4
- END(trampoline_header)
- 
- #include "trampoline_common.S"
+ 	return vm_iomap_memory(vma, start, len);
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
