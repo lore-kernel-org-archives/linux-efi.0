@@ -1,57 +1,256 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [RFC PATCH v4 03/28] x86: Add the Secure Memory Encryption CPU
-	feature
-Date: Thu, 16 Feb 2017 19:13:55 +0100
-Message-ID: <20170216181355.bjxo2h6vlhukz4ih@pd.tnic>
-References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
-	<20170216154236.19244.7580.stgit@tlendack-t1.amdoffice.net>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH V10 02/10] ras: acpi/apei: cper: generic error data entry
+ v3 per ACPI 6.1
+Date: Thu, 16 Feb 2017 18:25:28 +0000
+Message-ID: <CAKv+Gu8d-ObM4bGTmWUhZTmFMfKomBEpyj6OckXjOyhqYhF0KA@mail.gmail.com>
+References: <1487188282-2568-1-git-send-email-tbaicar@codeaurora.org>
+ <1487188282-2568-3-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170216154236.19244.7580.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <1487188282-2568-3-git-send-email-tbaicar@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, KVM devel mailing list <kvm@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Robert Moore <robert.moore@intel.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Lv Zheng <lv.zheng@intel.com>, "kvmarm@lists.cs.columbia.edu" <kvmarm@lists.cs.columbia.edu>, Fu Wei <fu.wei@linaro.org>, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, Russell King <linux@armlinux.org.uk>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, eun.taik.lee@samsung.com, shijie.huang@arm.com, Laura Abbott <labbott@redhat.com>, Len Brown <lenb@kernel.org>, harba@codeaurora.org, john.garry@huawei.com, Marc Zyngier <marc.zyngier@arm.com>, Punit Agrawal <punit.agrawal@arm.com>, Steven Rostedt <rostedt@goodmis.org>, nkaje@codeaurora.org, sand
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Feb 16, 2017 at 09:42:36AM -0600, Tom Lendacky wrote:
-> Update the CPU features to include identifying and reporting on the
-> Secure Memory Encryption (SME) feature.  SME is identified by CPUID
-> 0x8000001f, but requires BIOS support to enable it (set bit 23 of
-> SYS_CFG MSR).  Only show the SME feature as available if reported by
-> CPUID and enabled by BIOS.
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+On 15 February 2017 at 19:51, Tyler Baicar <tbaicar@codeaurora.org> wrote:
+> Currently when a RAS error is reported it is not timestamped.
+> The ACPI 6.1 spec adds the timestamp field to the generic error
+> data entry v3 structure. The timestamp of when the firmware
+> generated the error is now being reported.
+>
+> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+> Signed-off-by: Richard Ruigrok <rruigrok@codeaurora.org>
+> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+> Reviewed-by: James Morse <james.morse@arm.com>
+
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+
 > ---
->  arch/x86/include/asm/cpufeature.h        |    7 +++++--
->  arch/x86/include/asm/cpufeatures.h       |    5 ++++-
->  arch/x86/include/asm/disabled-features.h |    3 ++-
->  arch/x86/include/asm/msr-index.h         |    2 ++
->  arch/x86/include/asm/required-features.h |    3 ++-
->  arch/x86/kernel/cpu/common.c             |   19 +++++++++++++++++++
->  6 files changed, 34 insertions(+), 5 deletions(-)
-
-What happened here?
-
-You had it already:
-
-https://lkml.kernel.org/r/20161110003459.3280.25796.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org
-
-The bit in get_cpu_cap() with checking the MSR you can add at the end of
-init_amd() for example.
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+>  drivers/acpi/apei/ghes.c    |  9 ++++---
+>  drivers/firmware/efi/cper.c | 63 +++++++++++++++++++++++++++++++++++----------
+>  include/acpi/ghes.h         | 22 ++++++++++++++++
+>  3 files changed, 77 insertions(+), 17 deletions(-)
+>
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index 5e1ec41..b25e7cf 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -420,7 +420,8 @@ static void ghes_handle_memory_failure(struct acpi_hest_generic_data *gdata, int
+>         int flags = -1;
+>         int sec_sev = ghes_severity(gdata->error_severity);
+>         struct cper_sec_mem_err *mem_err;
+> -       mem_err = (struct cper_sec_mem_err *)(gdata + 1);
+> +
+> +       mem_err = acpi_hest_generic_data_payload(gdata);
+>
+>         if (!(mem_err->validation_bits & CPER_MEM_VALID_PA))
+>                 return;
+> @@ -457,7 +458,8 @@ static void ghes_do_proc(struct ghes *ghes,
+>                 if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
+>                                  CPER_SEC_PLATFORM_MEM)) {
+>                         struct cper_sec_mem_err *mem_err;
+> -                       mem_err = (struct cper_sec_mem_err *)(gdata+1);
+> +
+> +                       mem_err = acpi_hest_generic_data_payload(gdata);
+>                         ghes_edac_report_mem_error(ghes, sev, mem_err);
+>
+>                         arch_apei_report_mem_error(sev, mem_err);
+> @@ -467,7 +469,8 @@ static void ghes_do_proc(struct ghes *ghes,
+>                 else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
+>                                       CPER_SEC_PCIE)) {
+>                         struct cper_sec_pcie *pcie_err;
+> -                       pcie_err = (struct cper_sec_pcie *)(gdata+1);
+> +
+> +                       pcie_err = acpi_hest_generic_data_payload(gdata);
+>                         if (sev == GHES_SEV_RECOVERABLE &&
+>                             sec_sev == GHES_SEV_RECOVERABLE &&
+>                             pcie_err->validation_bits & CPER_PCIE_VALID_DEVICE_ID &&
+> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+> index d425374..8fa4e23 100644
+> --- a/drivers/firmware/efi/cper.c
+> +++ b/drivers/firmware/efi/cper.c
+> @@ -32,6 +32,9 @@
+>  #include <linux/acpi.h>
+>  #include <linux/pci.h>
+>  #include <linux/aer.h>
+> +#include <linux/printk.h>
+> +#include <linux/bcd.h>
+> +#include <acpi/ghes.h>
+>
+>  #define INDENT_SP      " "
+>
+> @@ -386,13 +389,37 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
+>         pfx, pcie->bridge.secondary_status, pcie->bridge.control);
+>  }
+>
+> +static void cper_estatus_print_section_v300(const char *pfx,
+> +       const struct acpi_hest_generic_data_v300 *gdata)
+> +{
+> +       __u8 hour, min, sec, day, mon, year, century, *timestamp;
+> +
+> +       if (gdata->validation_bits & ACPI_HEST_GEN_VALID_TIMESTAMP) {
+> +               timestamp = (__u8 *)&(gdata->time_stamp);
+> +               sec = bcd2bin(timestamp[0]);
+> +               min = bcd2bin(timestamp[1]);
+> +               hour = bcd2bin(timestamp[2]);
+> +               day = bcd2bin(timestamp[4]);
+> +               mon = bcd2bin(timestamp[5]);
+> +               year = bcd2bin(timestamp[6]);
+> +               century = bcd2bin(timestamp[7]);
+> +               printk("%stime: %7s %02d%02d-%02d-%02d %02d:%02d:%02d\n", pfx,
+> +                       0x01 & *(timestamp + 3) ? "precise" : "", century,
+> +                       year, mon, day, hour, min, sec);
+> +       }
+> +}
+> +
+>  static void cper_estatus_print_section(
+> -       const char *pfx, const struct acpi_hest_generic_data *gdata, int sec_no)
+> +       const char *pfx, struct acpi_hest_generic_data *gdata, int sec_no)
+>  {
+>         uuid_le *sec_type = (uuid_le *)gdata->section_type;
+>         __u16 severity;
+>         char newpfx[64];
+>
+> +       if (acpi_hest_generic_data_version(gdata) >= 3)
+> +               cper_estatus_print_section_v300(pfx,
+> +                       (const struct acpi_hest_generic_data_v300 *)gdata);
+> +
+>         severity = gdata->error_severity;
+>         printk("%s""Error %d, type: %s\n", pfx, sec_no,
+>                cper_severity_str(severity));
+> @@ -403,14 +430,18 @@ static void cper_estatus_print_section(
+>
+>         snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
+>         if (!uuid_le_cmp(*sec_type, CPER_SEC_PROC_GENERIC)) {
+> -               struct cper_sec_proc_generic *proc_err = (void *)(gdata + 1);
+> +               struct cper_sec_proc_generic *proc_err;
+> +
+> +               proc_err = acpi_hest_generic_data_payload(gdata);
+>                 printk("%s""section_type: general processor error\n", newpfx);
+>                 if (gdata->error_data_length >= sizeof(*proc_err))
+>                         cper_print_proc_generic(newpfx, proc_err);
+>                 else
+>                         goto err_section_too_small;
+>         } else if (!uuid_le_cmp(*sec_type, CPER_SEC_PLATFORM_MEM)) {
+> -               struct cper_sec_mem_err *mem_err = (void *)(gdata + 1);
+> +               struct cper_sec_mem_err *mem_err;
+> +
+> +               mem_err = acpi_hest_generic_data_payload(gdata);
+>                 printk("%s""section_type: memory error\n", newpfx);
+>                 if (gdata->error_data_length >=
+>                     sizeof(struct cper_sec_mem_err_old))
+> @@ -419,7 +450,9 @@ static void cper_estatus_print_section(
+>                 else
+>                         goto err_section_too_small;
+>         } else if (!uuid_le_cmp(*sec_type, CPER_SEC_PCIE)) {
+> -               struct cper_sec_pcie *pcie = (void *)(gdata + 1);
+> +               struct cper_sec_pcie *pcie;
+> +
+> +               pcie = acpi_hest_generic_data_payload(gdata);
+>                 printk("%s""section_type: PCIe error\n", newpfx);
+>                 if (gdata->error_data_length >= sizeof(*pcie))
+>                         cper_print_pcie(newpfx, pcie, gdata);
+> @@ -438,7 +471,7 @@ void cper_estatus_print(const char *pfx,
+>                         const struct acpi_hest_generic_status *estatus)
+>  {
+>         struct acpi_hest_generic_data *gdata;
+> -       unsigned int data_len, gedata_len;
+> +       unsigned int data_len;
+>         int sec_no = 0;
+>         char newpfx[64];
+>         __u16 severity;
+> @@ -451,12 +484,13 @@ void cper_estatus_print(const char *pfx,
+>         printk("%s""event severity: %s\n", pfx, cper_severity_str(severity));
+>         data_len = estatus->data_length;
+>         gdata = (struct acpi_hest_generic_data *)(estatus + 1);
+> +
+>         snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
+> -       while (data_len >= sizeof(*gdata)) {
+> -               gedata_len = gdata->error_data_length;
+> +
+> +       while (data_len >= acpi_hest_generic_data_size(gdata)) {
+>                 cper_estatus_print_section(newpfx, gdata, sec_no);
+> -               data_len -= gedata_len + sizeof(*gdata);
+> -               gdata = (void *)(gdata + 1) + gedata_len;
+> +               data_len -= acpi_hest_generic_data_record_size(gdata);
+> +               gdata = acpi_hest_generic_data_next(gdata);
+>                 sec_no++;
+>         }
+>  }
+> @@ -486,12 +520,13 @@ int cper_estatus_check(const struct acpi_hest_generic_status *estatus)
+>                 return rc;
+>         data_len = estatus->data_length;
+>         gdata = (struct acpi_hest_generic_data *)(estatus + 1);
+> -       while (data_len >= sizeof(*gdata)) {
+> -               gedata_len = gdata->error_data_length;
+> -               if (gedata_len > data_len - sizeof(*gdata))
+> +
+> +       while (data_len >= acpi_hest_generic_data_size(gdata)) {
+> +               gedata_len = acpi_hest_generic_data_error_length(gdata);
+> +               if (gedata_len > data_len - acpi_hest_generic_data_size(gdata))
+>                         return -EINVAL;
+> -               data_len -= gedata_len + sizeof(*gdata);
+> -               gdata = (void *)(gdata + 1) + gedata_len;
+> +               data_len -= gedata_len + acpi_hest_generic_data_size(gdata);
+> +               gdata = acpi_hest_generic_data_next(gdata);
+>         }
+>         if (data_len)
+>                 return -EINVAL;
+> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+> index 68f088a..6ae318b 100644
+> --- a/include/acpi/ghes.h
+> +++ b/include/acpi/ghes.h
+> @@ -12,6 +12,18 @@
+>  #define GHES_TO_CLEAR          0x0001
+>  #define GHES_EXITING           0x0002
+>
+> +#define acpi_hest_generic_data_error_length(gdata)     \
+> +       (((struct acpi_hest_generic_data *)(gdata))->error_data_length)
+> +#define acpi_hest_generic_data_size(gdata)             \
+> +       ((acpi_hest_generic_data_version(gdata) >= 3) ? \
+> +       sizeof(struct acpi_hest_generic_data_v300) :    \
+> +       sizeof(struct acpi_hest_generic_data))
+> +#define acpi_hest_generic_data_record_size(gdata)      \
+> +       (acpi_hest_generic_data_size(gdata) +           \
+> +       acpi_hest_generic_data_error_length(gdata))
+> +#define acpi_hest_generic_data_next(gdata)             \
+> +       ((void *)(gdata) + acpi_hest_generic_data_record_size(gdata))
+> +
+>  struct ghes {
+>         union {
+>                 struct acpi_hest_generic *generic;
+> @@ -73,3 +85,13 @@ static inline void ghes_edac_unregister(struct ghes *ghes)
+>  {
+>  }
+>  #endif
+> +
+> +#define acpi_hest_generic_data_version(gdata)                  \
+> +       (gdata->revision >> 8)
+> +
+> +static inline void *acpi_hest_generic_data_payload(struct acpi_hest_generic_data *gdata)
+> +{
+> +       return acpi_hest_generic_data_version(gdata) >= 3 ?
+> +               (void *)(((struct acpi_hest_generic_data_v300 *)(gdata)) + 1) :
+> +               gdata + 1;
+> +}
+> --
+> Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+> Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+> a Linux Foundation Collaborative Project.
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
