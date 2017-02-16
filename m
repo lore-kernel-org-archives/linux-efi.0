@@ -1,113 +1,55 @@
-From: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
-Subject: Re: [PATCH 0/2] RFC: Move efi bgrt code out of arch/x86
-Date: Thu, 16 Feb 2017 00:44:47 +0100
-Message-ID: <4695986.Exl6llDaHp@aspire.rjw.lan>
-References: <1487163892-27701-1-git-send-email-bhsharma@redhat.com> <CAKv+Gu-qv83fi9qBugA=Od2htcLb966SPBpZXSnXdH=AYw-COw@mail.gmail.com>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
+ images
+Date: Thu, 16 Feb 2017 03:00:51 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C5DE533B3@PGSMSX102.gar.corp.intel.com>
+References: <cover.1487182480.git.jan.kiszka@siemens.com>
+ <CAHp75VeVZo8f_aXZ=R8Y+++RSQeT=tFZmL6NNfekKJTkJc-nZA@mail.gmail.com>
+ <1bf3c9d8-56aa-818b-350f-deb62ad14e08@siemens.com>
+ <4014c5e6-b5a0-7552-166f-a42992532c09@siemens.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu-qv83fi9qBugA=Od2htcLb966SPBpZXSnXdH=AYw-COw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <4014c5e6-b5a0-7552-166f-a42992532c09-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Prakhya, Sai Praneeth" <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Mark Rutland <mark.rutland@arm.>
+To: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wednesday, February 15, 2017 05:44:28 PM Ard Biesheuvel wrote:
-> Hello Bhupesh,
-> 
-> On 15 February 2017 at 13:04, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> > This patchset presents a RFC approach to move the ACPI BGRT table
-> > handling related code out of 'arch/x86' and place it inside
-> > 'drivers/firmware/efi' so that it can be used to support
-> > ACPI BGRT table and BGRT logo across x86 and AARCH64 ARCHs.
-> >
-> > Note that this patchset is primarily tested on Qemu VMs for x86_64
-> > and AARCH64 environments, while I try to get my hands on a real
-> > AARCH64 hardware which supports a graphic card and whose boot firmware
-> > I can modify to support the ACPI BGRT table to be passed to the kernel.
-> >
-> > Here are some details/outputs about/from the test environment:
-> >
-> > AARCH64:
-> > ========
-> > 1. I used the latest Qemu (master branch) and compiled it for aarch64 with softmmu support.
-> >    Here is the command line I use to launch the same:
-> >
-> > # qemu-system-aarch64 -cpu cortex-a57 -M virt -m 2048 -bios QEMU_EFI.fd -kernel Image -initrd rootfs.cpio -serial stdio --append "acpi=force" -device virtio-gpu-pci
-> >
-> > where, QEMU_EFI.fd is the DEBUG build of EDK2 ArmVirtQemu.dsc (master branch)
-> >        rootfs.cpio is the AARCH64 build of Buildroot (Little Endian AARCH64)
-> >        -device virtio-gpu-pci provides the Graphical support required to have BGRT logo.
-> >
-> >
-> > 2. Here are some test results once Linux boots up, which show a valid BGRT table/logo being
-> >    seen by the kernel:
-> >
-> > # acpidump
-> > ...
-> >
-> > BGRT @ 0x0000000000000000
-> >   0000: 42 47 52 54 38 00 00 00 01 B4 49 4E 54 45 4C 20  BGRT8.....INTEL
-> >   0010: 45 44 4B 32 20 20 20 20 02 00 00 00 20 20 20 20  EDK2    ....
-> >   0020: 13 00 00 01 01 00 01 00 00 80 B0 BA 00 00 00 00  ................
-> >   0030: 2F 01 00 00 0F 01 00 00                          /.......
-> >
-> > # dmesg | grep -i BGRT
-> > [    0.000000] ACPI: BGRT 0x00000000B8640000 000038 (v01 INTEL  EDK2     00000002      01000013)
-> >
-> >
-> > # ls -lah /sys/firmware/acpi/bgrt/image
-> > -r--r--r--    1 root     root       32.9K Feb 15 11:27 /sys/firmware/acpi/bgrt/image
-> >
-> > x86:
-> > ====
-> > 1. I used the latest Qemu (master branch) and compiled it for x86.
-> >    Here is the command line I use to launch the same:
-> >
-> > # qemu-system-x86_64 -enable-kvm -sdl -m 2048 -vga std -boot c -cpu host -bios OVMF_CODE.fd -kernel bzImage -initrd rootfs.cpio -serial stdio
-> >
-> > where, OVMF_CODE.fd is the RELEASE build of EDK2 OvmfPkg (master branch)
-> >        rootfs.cpio is the x86_64 build of Buildroot
-> >
-> > 2. Similar test results are seen as noted for the AARCH64 case above, which show a valid BGRT table/logo being
-> >    seen by the kernel.
-> >
-> > Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> > Cc: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-> > Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> > Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-> >
-> > Bhupesh Sharma (2):
-> >   x86/efi-bgrt: Move efi-bgrt handling out of arch/x86
-> >   bgrt: Make ACPI BGRT parsing code common for ARCHs
-> >
-> >  arch/arm64/kernel/acpi.c                               | 3 +++
-> >  arch/x86/kernel/acpi/boot.c                            | 6 ------
-> >  arch/x86/platform/efi/Makefile                         | 1 -
-> >  drivers/acpi/Kconfig                                   | 2 +-
-> >  drivers/acpi/bgrt.c                                    | 6 ++++++
-> >  drivers/firmware/efi/Makefile                          | 1 +
-> >  {arch/x86/platform => drivers/firmware}/efi/efi-bgrt.c | 0
-> >  include/linux/efi-bgrt.h                               | 2 ++
-> >  8 files changed, 13 insertions(+), 8 deletions(-)
-> >  rename {arch/x86/platform => drivers/firmware}/efi/efi-bgrt.c (100%)
-> >
-> 
-> These patches look fine to me, and I think we should be able to merge
-> them without any changes.
-> 
-> Reviewed-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> 
-> You only failed to cc the ACPI maintainers, please add Len and Rafael next time.
-
-No worries.
-
-The changes are fine by me.
-
-Thanks,
-Rafael
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBKYW4gS2lzemthIFttYWlsdG86
+amFuLmtpc3prYUBzaWVtZW5zLmNvbV0NCj4gU2VudDogVGh1cnNkYXksIEZlYnJ1YXJ5IDE2LCAy
+MDE3IDM6MDAgQU0NCj4gVG86IEFuZHkgU2hldmNoZW5rbyA8YW5keS5zaGV2Y2hlbmtvQGdtYWls
+LmNvbT4NCj4gQ2M6IE1hdHQgRmxlbWluZyA8bWF0dEBjb2RlYmx1ZXByaW50LmNvLnVrPjsgQXJk
+IEJpZXNoZXV2ZWwNCj4gPGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc+OyBsaW51eC1lZmlAdmdl
+ci5rZXJuZWwub3JnOyBMaW51eCBLZXJuZWwgTWFpbGluZw0KPiBMaXN0IDxsaW51eC1rZXJuZWxA
+dmdlci5rZXJuZWwub3JnPjsgQm9yaXNsYXYgUGV0a292IDxicEBhbGllbjguZGU+OyBLd2VoLA0K
+PiBIb2NrIExlb25nIDxob2NrLmxlb25nLmt3ZWhAaW50ZWwuY29tPjsgQnJ5YW4gTydEb25vZ2h1
+ZQ0KPiA8cHVyZS5sb2dpY0BuZXh1cy1zb2Z0d2FyZS5pZT4NCj4gU3ViamVjdDogUmU6IFtQQVRD
+SCAwLzJdIGVmaTogRW5oYW5jZSBjYXBzdWxlIGxvYWRlciB0byBzdXBwb3J0IHNpZ25lZCBRdWFy
+aw0KPiBpbWFnZXMNCj4gDQo+IE9uIDIwMTctMDItMTUgMTk6NTAsIEphbiBLaXN6a2Egd3JvdGU6
+DQo+ID4gT24gMjAxNy0wMi0xNSAxOTo0NiwgQW5keSBTaGV2Y2hlbmtvIHdyb3RlOg0KPiA+PiBP
+biBXZWQsIEZlYiAxNSwgMjAxNyBhdCA4OjE0IFBNLCBKYW4gS2lzemthIDxqYW4ua2lzemthQHNp
+ZW1lbnMuY29tPg0KPiB3cm90ZToNCj4gPj4+IFNlZSBwYXRjaCAyIGZvciB0aGUgYmFja2dyb3Vu
+ZC4NCj4gPj4+DQo+ID4+PiBTZXJpZXMgaGFzIGJlZW4gdGVzdGVkIG9uIHRoZSBHYWxpbGVvIEdl
+bjIsIHRvIGV4Y2x1ZGUgcmVncmVzc2lvbnMsDQo+ID4+PiB3aXRoIGEgZmlybXdhcmUuY2FwIHdp
+dGhvdXQgc2VjdXJpdHkgaGVhZGVyIGFuZCB0aGUgU0lNQVRJQyBJT1QyMDQwDQo+ID4+PiB3aGlj
+aCByZXF1aXJlcyB0aGUgaGVhZGVyIGJlY2F1c2Ugb2YgaXRzIG1hbmRhdG9yeSBzZWN1cmUgYm9v
+dC4NCj4gPj4NCj4gPj4gQnJpZWZseSBsb29raW5nIHRvIHRoZSBjb2RlIGl0IGxvb2tzIGxpa2Ug
+YSByZWFsIGhhY2suDQo+ID4+IFNvcnJ5LCBidXQgaXQgd291bGQgYmUgY2FyZWZ1bGx5IChyZS0p
+ZGVzaWduZWQuDQo+ID4NCj4gPiBUaGUgaW50ZXJmYWNlIHRoYXQgdGhlIGZpcm13YXJlIHByb3Zp
+ZGVzIHVzPyBUaGF0IHNob3VsZCBoYXZlIGJlZW4NCj4gPiBkb25lIGRpZmZlcmVudGx5LCBJIGFn
+cmVlLCBidXQgSSdtIG5vdCB0b28gbXVjaCBpbnRvIHRob3NlIGZpcm13YXJlDQo+ID4gZGV0YWls
+cywgc3BlY2lmaWNhbGx5IHdoZW4gaXQgY29tZXMgdG8gc2lnbmF0dXJlcy4NCj4gPg0KPiA+IFRo
+ZSBMaW51eCBjb2RlIHdhcyBkZXNpZ25lZCBhcm91bmQgdGhhdCBzdWJvcHRpbWFsIHNpdHVhdGlv
+bi4gSWYgdGhlcmUNCj4gPiBhcmUgYmV0dGVyIGlkZWFzLCBJJ20gYWxsIGVhcnMuDQo+ID4NCj4g
+DQo+IEV4cGFuZGluZyBDQydzIGFzIHJlcXVlc3RlZCBieSBBbmR5Lg0KPiANCj4gSmFuDQo+IA0K
+DQpIaSBKYW4sDQoNCldoaWxlIEkgdXBzdHJlYW1pbmcgdGhlIGNhcHN1bGUgbG9hZGVyIHBhdGNo
+ZXMsIEkgZGlkIHdvcmsgd2l0aCBtYWludGFpbmVyDQpNYXR0IGFuZCBsb29rIGludG8gdGhpcyBz
+ZWN1cml0eSBoZWFkZXIgY3JlYXRlZCBmb3IgUXVhcmsuIEV2ZW50dWFsbHkgYm90aA0Kb2YgdXMg
+YWdyZWVkIHRoYXQgdGhpcyB3aWxsIG5vdCBiZSB1cHN0cmVhbSB0byBtYWlubGluZSBhcyBpdCBp
+cyByZWFsbHkgYSBRdWFyaw0Kc3BlY2lmaWMgaW1wbGVtZW50YXRpb24uDQoNClRoZSBwcm9wZXIg
+aW1wbGVtZW50YXRpb24gbWF5IHJlcXVpcmUgdG8gd29yayB3aXRoIFVFRkkgY29tbXVuaXR5DQp0
+byBleHBhbmQgaXRzIGNhcHN1bGUgc3BlYyB0byBzdXBwb3J0IHNpZ25lZCBiaW5hcnkuIA0KDQoN
+ClJlZ2FyZHMsDQpXaWxzb24NCg0K
