@@ -1,103 +1,108 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: [RFC PATCH v4 11/28] x86: Add support to determine the E820 type of
- an address
-Date: Thu, 16 Feb 2017 09:44:30 -0600
-Message-ID: <20170216154430.19244.95519.stgit@tlendack-t1.amdoffice.net>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: [RFC PATCH v4 12/28] efi: Add an EFI table address match function
+Date: Thu, 16 Feb 2017 09:44:41 -0600
+Message-ID: <20170216154441.19244.96367.stgit@tlendack-t1.amdoffice.net>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
-Cc: Rik van Riel <riel@redhat.com>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>, Larry Woodman <lwoodman@redhat.com>, Dmitry Vyukov <dvyukov@google.com>
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20170216154158.19244.66630.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Cc: Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This patch adds support to return the E820 type associated with an address
-range.
+This patch adds support that will determine if a supplied physical address
+matches the address of an EFI table.
 
-Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 ---
- arch/x86/include/asm/e820/api.h   |    2 ++
- arch/x86/include/asm/e820/types.h |    2 ++
- arch/x86/kernel/e820.c            |   26 +++++++++++++++++++++++---
- 3 files changed, 27 insertions(+), 3 deletions(-)
+ drivers/firmware/efi/efi.c |   33 +++++++++++++++++++++++++++++++++
+ include/linux/efi.h        |    7 +++++++
+ 2 files changed, 40 insertions(+)
 
-diff --git a/arch/x86/include/asm/e820/api.h b/arch/x86/include/asm/e820/api.h
-index 8e0f8b8..7c1bdc9 100644
---- a/arch/x86/include/asm/e820/api.h
-+++ b/arch/x86/include/asm/e820/api.h
-@@ -38,6 +38,8 @@
- extern void e820__reallocate_tables(void);
- extern void e820__register_nosave_regions(unsigned long limit_pfn);
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index e7d4040..e8dbcdf 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -55,6 +55,25 @@ struct efi __read_mostly efi = {
+ };
+ EXPORT_SYMBOL(efi);
  
-+extern enum e820_type e820__get_entry_type(u64 start, u64 end);
++static unsigned long *efi_tables[] = {
++	&efi.mps,
++	&efi.acpi,
++	&efi.acpi20,
++	&efi.smbios,
++	&efi.smbios3,
++	&efi.sal_systab,
++	&efi.boot_info,
++	&efi.hcdp,
++	&efi.uga,
++	&efi.uv_systab,
++	&efi.fw_vendor,
++	&efi.runtime,
++	&efi.config_table,
++	&efi.esrt,
++	&efi.properties_table,
++	&efi.mem_attr_table,
++};
 +
- /*
-  * Returns true iff the specified range [start,end) is completely contained inside
-  * the ISA region.
-diff --git a/arch/x86/include/asm/e820/types.h b/arch/x86/include/asm/e820/types.h
-index 4adeed0..bf49591 100644
---- a/arch/x86/include/asm/e820/types.h
-+++ b/arch/x86/include/asm/e820/types.h
-@@ -7,6 +7,8 @@
-  * These are the E820 types known to the kernel:
-  */
- enum e820_type {
-+	E820_TYPE_INVALID	= 0,
-+
- 	E820_TYPE_RAM		= 1,
- 	E820_TYPE_RESERVED	= 2,
- 	E820_TYPE_ACPI		= 3,
-diff --git a/arch/x86/kernel/e820.c b/arch/x86/kernel/e820.c
-index 6e9b26f..2ee7ee2 100644
---- a/arch/x86/kernel/e820.c
-+++ b/arch/x86/kernel/e820.c
-@@ -84,7 +84,8 @@ bool e820__mapped_any(u64 start, u64 end, enum e820_type type)
-  * Note: this function only works correctly once the E820 table is sorted and
-  * not-overlapping (at least for the range specified), which is the case normally.
-  */
--bool __init e820__mapped_all(u64 start, u64 end, enum e820_type type)
-+static struct e820_entry *__e820__mapped_all(u64 start, u64 end,
-+					     enum e820_type type)
+ static bool disable_runtime;
+ static int __init setup_noefi(char *arg)
  {
- 	int i;
- 
-@@ -110,9 +111,28 @@ bool __init e820__mapped_all(u64 start, u64 end, enum e820_type type)
- 		 * coverage of the desired range exists:
- 		 */
- 		if (start >= end)
--			return 1;
-+			return entry;
- 	}
--	return 0;
-+
-+	return NULL;
-+}
-+
-+/*
-+ * This function checks if the entire range <start,end> is mapped with type.
-+ */
-+bool __init e820__mapped_all(u64 start, u64 end, enum e820_type type)
-+{
-+	return __e820__mapped_all(start, end, type) ? 1 : 0;
-+}
-+
-+/*
-+ * This function returns the type associated with the range <start,end>.
-+ */
-+enum e820_type e820__get_entry_type(u64 start, u64 end)
-+{
-+	struct e820_entry *entry = __e820__mapped_all(start, end, 0);
-+
-+	return entry ? entry->type : E820_TYPE_INVALID;
+@@ -855,6 +874,20 @@ int efi_status_to_err(efi_status_t status)
+ 	return err;
  }
  
- /*
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
++bool efi_table_address_match(unsigned long phys_addr)
++{
++	unsigned int i;
++
++	if (phys_addr == EFI_INVALID_TABLE_ADDR)
++		return false;
++
++	for (i = 0; i < ARRAY_SIZE(efi_tables); i++)
++		if (*(efi_tables[i]) == phys_addr)
++			return true;
++
++	return false;
++}
++
+ #ifdef CONFIG_KEXEC
+ static int update_efi_random_seed(struct notifier_block *nb,
+ 				  unsigned long code, void *unused)
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 94d34e0..7694b23 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1079,6 +1079,8 @@ static inline bool efi_enabled(int feature)
+ 	return test_bit(feature, &efi.flags) != 0;
+ }
+ extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
++
++extern bool efi_table_address_match(unsigned long phys_addr);
+ #else
+ static inline bool efi_enabled(int feature)
+ {
+@@ -1092,6 +1094,11 @@ static inline bool efi_enabled(int feature)
+ {
+ 	return false;
+ }
++
++static inline bool efi_table_address_match(unsigned long phys_addr)
++{
++	return false;
++}
+ #endif
+ 
+ extern int efi_status_to_err(efi_status_t status);
