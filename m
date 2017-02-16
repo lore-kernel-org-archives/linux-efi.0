@@ -1,89 +1,126 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: EFI stub kexec probelm
-Date: Thu, 16 Feb 2017 16:05:09 +0800
-Message-ID: <20170216080509.GA2841@dhcp-128-65.nay.redhat.com>
-References: <7b5d8a74-2b5d-92f9-5265-b892b3bea2aa@camlintechnologies.com>
- <87bmu21w4k.fsf@xmission.com>
- <20170216072005.GD3942@dhcp-128-65.nay.redhat.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 0/2] RFC: Move efi bgrt code out of arch/x86
+Date: Thu, 16 Feb 2017 11:58:15 +0000
+Message-ID: <CAKv+Gu8njGy25L1STfjb0Nk8g+avh0NuFEgcURJDtENYSj2rtQ@mail.gmail.com>
+References: <1487163892-27701-1-git-send-email-bhsharma@redhat.com>
+ <CAKv+Gu-qv83fi9qBugA=Od2htcLb966SPBpZXSnXdH=AYw-COw@mail.gmail.com>
+ <4695986.Exl6llDaHp@aspire.rjw.lan> <CACi5LpMwvwm8RVi=OZTHhWsUUpkzhzrvhJ4m6Kcgf3=eW1O1gQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170216072005.GD3942-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Eric W. Biederman" <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>, =?utf-8?B?UGF3ZcWC?= Lenkow <p.lenkow-WZXhJxzPxo0FoECaAgFIynS5uNuOjpZe@public.gmane.org>
-Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, Kexec Mailing List <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <CACi5LpMwvwm8RVi=OZTHhWsUUpkzhzrvhJ4m6Kcgf3=eW1O1gQ@mail.gmail.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, Nicolai Stange <nicstange@gmail.com>, Leif Lindholm <leif.lindholm@linaro.org>, "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>, Peter Jones <pjones@redhat.com>, Bhupesh SHARMA <bhupesh.linux@gmail.com>, Ingo Molnar <mingo@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Dan Williams <dan.j.williams@intel.com>, Dave Young <dyoung@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Mark Rutland <mark.rutland@a>
 List-Id: linux-efi@vger.kernel.org
 
-On 02/16/17 at 03:20pm, Dave Young wrote:
-> On 02/16/17 at 07:35pm, Eric W. Biederman wrote:
-> > Paweł Lenkow <p.lenkow-WZXhJxzPxo0FoECaAgFIynS5uNuOjpZe@public.gmane.org> writes:
-> > 
-> > > Hi!
-> > >
-> > > I am trying to run EFI stub kernel using kexec and unfortunately 2nd kernel
-> > > crashes.
-> > 
-> > Adding the kexec list as there may be someone there who may be more
-> > knowledgeable about our problem.
-> > 
-> > > First kernel is loaded by UEFI, starts simple init with shell and then
-> > > I am loading the same image using kexec.
-> > >
-> > > It looks like a lack of correct mappings for EFI tables because it
-> > > calls address zero (RDI register) in efi_call.
-> > >
-> > > Does kernel support such configuration?
+On 16 February 2017 at 04:34, Bhupesh Sharma <bhsharma@redhat.com> wrote:
+> Hi Ard, Rafael
+>
+> On Thu, Feb 16, 2017 at 5:14 AM, Rafael J. Wysocki <rjw@rjwysocki.net> wrote:
+>> On Wednesday, February 15, 2017 05:44:28 PM Ard Biesheuvel wrote:
+>>> Hello Bhupesh,
+>>>
+>>> On 15 February 2017 at 13:04, Bhupesh Sharma <bhsharma@redhat.com> wrote:
+>>> > This patchset presents a RFC approach to move the ACPI BGRT table
+>>> > handling related code out of 'arch/x86' and place it inside
+>>> > 'drivers/firmware/efi' so that it can be used to support
+>>> > ACPI BGRT table and BGRT logo across x86 and AARCH64 ARCHs.
+>>> >
+>>> > Note that this patchset is primarily tested on Qemu VMs for x86_64
+>>> > and AARCH64 environments, while I try to get my hands on a real
+>>> > AARCH64 hardware which supports a graphic card and whose boot firmware
+>>> > I can modify to support the ACPI BGRT table to be passed to the kernel.
+>>> >
+>>> > Here are some details/outputs about/from the test environment:
+>>> >
+>>> > AARCH64:
+>>> > ========
+>>> > 1. I used the latest Qemu (master branch) and compiled it for aarch64 with softmmu support.
+>>> >    Here is the command line I use to launch the same:
+>>> >
+>>> > # qemu-system-aarch64 -cpu cortex-a57 -M virt -m 2048 -bios QEMU_EFI.fd -kernel Image -initrd rootfs.cpio -serial stdio --append "acpi=force" -device virtio-gpu-pci
+>>> >
+>>> > where, QEMU_EFI.fd is the DEBUG build of EDK2 ArmVirtQemu.dsc (master branch)
+>>> >        rootfs.cpio is the AARCH64 build of Buildroot (Little Endian AARCH64)
+>>> >        -device virtio-gpu-pci provides the Graphical support required to have BGRT logo.
+>>> >
+>>> >
+>>> > 2. Here are some test results once Linux boots up, which show a valid BGRT table/logo being
+>>> >    seen by the kernel:
+>>> >
+>>> > # acpidump
+>>> > ...
+>>> >
+>>> > BGRT @ 0x0000000000000000
+>>> >   0000: 42 47 52 54 38 00 00 00 01 B4 49 4E 54 45 4C 20  BGRT8.....INTEL
+>>> >   0010: 45 44 4B 32 20 20 20 20 02 00 00 00 20 20 20 20  EDK2    ....
+>>> >   0020: 13 00 00 01 01 00 01 00 00 80 B0 BA 00 00 00 00  ................
+>>> >   0030: 2F 01 00 00 0F 01 00 00                          /.......
+>>> >
+>>> > # dmesg | grep -i BGRT
+>>> > [    0.000000] ACPI: BGRT 0x00000000B8640000 000038 (v01 INTEL  EDK2     00000002      01000013)
+>>> >
+>>> >
+>>> > # ls -lah /sys/firmware/acpi/bgrt/image
+>>> > -r--r--r--    1 root     root       32.9K Feb 15 11:27 /sys/firmware/acpi/bgrt/image
+>>> >
+>>> > x86:
+>>> > ====
+>>> > 1. I used the latest Qemu (master branch) and compiled it for x86.
+>>> >    Here is the command line I use to launch the same:
+>>> >
+>>> > # qemu-system-x86_64 -enable-kvm -sdl -m 2048 -vga std -boot c -cpu host -bios OVMF_CODE.fd -kernel bzImage -initrd rootfs.cpio -serial stdio
+>>> >
+>>> > where, OVMF_CODE.fd is the RELEASE build of EDK2 OvmfPkg (master branch)
+>>> >        rootfs.cpio is the x86_64 build of Buildroot
+>>> >
+>>> > 2. Similar test results are seen as noted for the AARCH64 case above, which show a valid BGRT table/logo being
+>>> >    seen by the kernel.
+>>> >
+>>> > Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>>> > Cc: Ingo Molnar <mingo@kernel.org>
+>>> > Cc: Matt Fleming <matt@codeblueprint.co.uk>
+>>> > Cc: Dan Williams <dan.j.williams@intel.com>
+>>> > Cc: Dave Young <dyoung@redhat.com>
+>>> > Cc: Thomas Gleixner <tglx@linutronix.de>
+>>> > Cc: Mark Rutland <mark.rutland@arm.com>
+>>> > Cc: Will Deacon <will.deacon@arm.com>
+>>> >
+>>> > Bhupesh Sharma (2):
+>>> >   x86/efi-bgrt: Move efi-bgrt handling out of arch/x86
+>>> >   bgrt: Make ACPI BGRT parsing code common for ARCHs
+>>> >
+>>> >  arch/arm64/kernel/acpi.c                               | 3 +++
+>>> >  arch/x86/kernel/acpi/boot.c                            | 6 ------
+>>> >  arch/x86/platform/efi/Makefile                         | 1 -
+>>> >  drivers/acpi/Kconfig                                   | 2 +-
+>>> >  drivers/acpi/bgrt.c                                    | 6 ++++++
+>>> >  drivers/firmware/efi/Makefile                          | 1 +
+>>> >  {arch/x86/platform => drivers/firmware}/efi/efi-bgrt.c | 0
+>>> >  include/linux/efi-bgrt.h                               | 2 ++
+>>> >  8 files changed, 13 insertions(+), 8 deletions(-)
+>>> >  rename {arch/x86/platform => drivers/firmware}/efi/efi-bgrt.c (100%)
+>>> >
+>>>
+>>> These patches look fine to me, and I think we should be able to merge
+>>> them without any changes.
+>>>
+>>> Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>>>
+>>> You only failed to cc the ACPI maintainers, please add Len and Rafael next time.
+>
+> Oops. Will take care in future.
+>
+>> No worries.
+>>
+>> The changes are fine by me.
+>>
+>
 
-Yes, it *should* works, at least works for me previously on Lenovo
-laptops. What is the hardware in this case?
+Thanks Rafael
 
-> > >
-> > > If yes what could be wrong?
-> > 
-> > I don't know exactly where the support is, I haven't looked recently.
-> > 
-> > There is a major challenge with efi.  The call to place efi in virtual
-> > mode may be called exactly once.  There has been work on at least ia64
-> > to make it possible to capture the efi virtual address bass and pass it
-> > through to the kernel calling kexec.  I don't remember seeing the work
-> > to do that happen on other platforms.
-> > 
-> > I personally think we should just abandon running efi in virtual mode
-> > and always run efi in physicall mode, but the feedback when I suggested
-> > that was that efi didn't actually work if you did that.  *Shrug*
-> > 
-> > Given that efi_enter_virtual_mode is in your call trace I am guessing
-> > that the problem is the historical problem I have mentioned above.
+I will queue these for v4.12 in efi/next
 
-In latest kernel we have a stable va address space for efi runtime,
-kexec-tools will copy the runtime maps in 1st kernel so that efi runtime
-still can be still usable after kexec kernel boot up but do not entering
-virtual mode again.
-
-There might be some bug either in kernel or some special firmware
-problem..
-
-> > 
-> > Eric
-> > 
-> > 
-> > 
-> > > Using grub-efi all works fine, but it is not enough for me.
-> > >
-> > > See log below:
-> > >
-> > >
-> > > / # kexec -l /mnt/INSTALL/vmlinuz -s
-> 
-> What is the kexec-tools version? And does kexec -l works (without -s)?
-> 
-> A test with efi=debug parameters may help, also full logs of both
-> pre-kexec boot and post-kexec boot could also help to find something..
-
-This questions obviously are for Paweł Lenkow, add him to "To" list..
-
-> 
-> Thanks
-> Dave
+-- 
+Ard.
