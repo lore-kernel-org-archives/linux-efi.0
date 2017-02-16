@@ -1,64 +1,164 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: [RFC PATCH v4 02/28] x86: Set the write-protect cache mode for full
-	PAT support
-Date: Thu, 16 Feb 2017 09:42:25 -0600
-Message-ID: <20170216154225.19244.96438.stgit@tlendack-t1.amdoffice.net>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: [RFC PATCH v4 03/28] x86: Add the Secure Memory Encryption CPU
+ feature
+Date: Thu, 16 Feb 2017 09:42:36 -0600
+Message-ID: <20170216154236.19244.7580.stgit@tlendack-t1.amdoffice.net>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20170216154158.19244.66630.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Cc: Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
+Cc: Rik van Riel <riel@redhat.com>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>, Larry Woodman <lwoodman@redhat.com>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-For processors that support PAT, set the write-protect cache mode
-(_PAGE_CACHE_MODE_WP) entry to the actual write-protect value (x05).
+Update the CPU features to include identifying and reporting on the
+Secure Memory Encryption (SME) feature.  SME is identified by CPUID
+0x8000001f, but requires BIOS support to enable it (set bit 23 of
+SYS_CFG MSR).  Only show the SME feature as available if reported by
+CPUID and enabled by BIOS.
 
-Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/mm/pat.c |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ arch/x86/include/asm/cpufeature.h        |    7 +++++--
+ arch/x86/include/asm/cpufeatures.h       |    5 ++++-
+ arch/x86/include/asm/disabled-features.h |    3 ++-
+ arch/x86/include/asm/msr-index.h         |    2 ++
+ arch/x86/include/asm/required-features.h |    3 ++-
+ arch/x86/kernel/cpu/common.c             |   19 +++++++++++++++++++
+ 6 files changed, 34 insertions(+), 5 deletions(-)
 
-diff --git a/arch/x86/mm/pat.c b/arch/x86/mm/pat.c
-index 9b78685..6753d9c 100644
---- a/arch/x86/mm/pat.c
-+++ b/arch/x86/mm/pat.c
-@@ -295,7 +295,7 @@ static void init_cache_modes(void)
-  * pat_init - Initialize PAT MSR and PAT table
-  *
-  * This function initializes PAT MSR and PAT table with an OS-defined value
-- * to enable additional cache attributes, WC and WT.
-+ * to enable additional cache attributes, WC, WT and WP.
-  *
-  * This function must be called on all CPUs using the specific sequence of
-  * operations defined in Intel SDM. mtrr_rendezvous_handler() provides this
-@@ -356,7 +356,7 @@ void pat_init(void)
- 		 *      010    2    UC-: _PAGE_CACHE_MODE_UC_MINUS
- 		 *      011    3    UC : _PAGE_CACHE_MODE_UC
- 		 *      100    4    WB : Reserved
--		 *      101    5    WC : Reserved
-+		 *      101    5    WP : _PAGE_CACHE_MODE_WP
- 		 *      110    6    UC-: Reserved
- 		 *      111    7    WT : _PAGE_CACHE_MODE_WT
- 		 *
-@@ -364,7 +364,7 @@ void pat_init(void)
- 		 * corresponding types in the presence of PAT errata.
- 		 */
- 		pat = PAT(0, WB) | PAT(1, WC) | PAT(2, UC_MINUS) | PAT(3, UC) |
--		      PAT(4, WB) | PAT(5, WC) | PAT(6, UC_MINUS) | PAT(7, WT);
-+		      PAT(4, WB) | PAT(5, WP) | PAT(6, UC_MINUS) | PAT(7, WT);
- 	}
+diff --git a/arch/x86/include/asm/cpufeature.h b/arch/x86/include/asm/cpufeature.h
+index d59c15c..ea2de6a 100644
+--- a/arch/x86/include/asm/cpufeature.h
++++ b/arch/x86/include/asm/cpufeature.h
+@@ -28,6 +28,7 @@ enum cpuid_leafs
+ 	CPUID_8000_000A_EDX,
+ 	CPUID_7_ECX,
+ 	CPUID_8000_0007_EBX,
++	CPUID_8000_001F_EAX,
+ };
  
- 	if (!boot_cpu_done) {
+ #ifdef CONFIG_X86_FEATURE_NAMES
+@@ -78,8 +79,9 @@ enum cpuid_leafs
+ 	   CHECK_BIT_IN_MASK_WORD(REQUIRED_MASK, 15, feature_bit) ||	\
+ 	   CHECK_BIT_IN_MASK_WORD(REQUIRED_MASK, 16, feature_bit) ||	\
+ 	   CHECK_BIT_IN_MASK_WORD(REQUIRED_MASK, 17, feature_bit) ||	\
++	   CHECK_BIT_IN_MASK_WORD(REQUIRED_MASK, 18, feature_bit) ||	\
+ 	   REQUIRED_MASK_CHECK					  ||	\
+-	   BUILD_BUG_ON_ZERO(NCAPINTS != 18))
++	   BUILD_BUG_ON_ZERO(NCAPINTS != 19))
+ 
+ #define DISABLED_MASK_BIT_SET(feature_bit)				\
+ 	 ( CHECK_BIT_IN_MASK_WORD(DISABLED_MASK,  0, feature_bit) ||	\
+@@ -100,8 +102,9 @@ enum cpuid_leafs
+ 	   CHECK_BIT_IN_MASK_WORD(DISABLED_MASK, 15, feature_bit) ||	\
+ 	   CHECK_BIT_IN_MASK_WORD(DISABLED_MASK, 16, feature_bit) ||	\
+ 	   CHECK_BIT_IN_MASK_WORD(DISABLED_MASK, 17, feature_bit) ||	\
++	   CHECK_BIT_IN_MASK_WORD(DISABLED_MASK, 18, feature_bit) ||	\
+ 	   DISABLED_MASK_CHECK					  ||	\
+-	   BUILD_BUG_ON_ZERO(NCAPINTS != 18))
++	   BUILD_BUG_ON_ZERO(NCAPINTS != 19))
+ 
+ #define cpu_has(c, bit)							\
+ 	(__builtin_constant_p(bit) && REQUIRED_MASK_BIT_SET(bit) ? 1 :	\
+diff --git a/arch/x86/include/asm/cpufeatures.h b/arch/x86/include/asm/cpufeatures.h
+index d45ab4b..331fb81 100644
+--- a/arch/x86/include/asm/cpufeatures.h
++++ b/arch/x86/include/asm/cpufeatures.h
+@@ -12,7 +12,7 @@
+ /*
+  * Defines x86 CPU feature bits
+  */
+-#define NCAPINTS	18	/* N 32-bit words worth of info */
++#define NCAPINTS	19	/* N 32-bit words worth of info */
+ #define NBUGINTS	1	/* N 32-bit bug flags */
+ 
+ /*
+@@ -296,6 +296,9 @@
+ #define X86_FEATURE_SUCCOR	(17*32+1) /* Uncorrectable error containment and recovery */
+ #define X86_FEATURE_SMCA	(17*32+3) /* Scalable MCA */
+ 
++/* AMD-defined CPU features, CPUID level 0x8000001f (eax), word 18 */
++#define X86_FEATURE_SME		(18*32+0) /* Secure Memory Encryption */
++
+ /*
+  * BUG word(s)
+  */
+diff --git a/arch/x86/include/asm/disabled-features.h b/arch/x86/include/asm/disabled-features.h
+index 85599ad..8b45e08 100644
+--- a/arch/x86/include/asm/disabled-features.h
++++ b/arch/x86/include/asm/disabled-features.h
+@@ -57,6 +57,7 @@
+ #define DISABLED_MASK15	0
+ #define DISABLED_MASK16	(DISABLE_PKU|DISABLE_OSPKE)
+ #define DISABLED_MASK17	0
+-#define DISABLED_MASK_CHECK BUILD_BUG_ON_ZERO(NCAPINTS != 18)
++#define DISABLED_MASK18	0
++#define DISABLED_MASK_CHECK BUILD_BUG_ON_ZERO(NCAPINTS != 19)
+ 
+ #endif /* _ASM_X86_DISABLED_FEATURES_H */
+diff --git a/arch/x86/include/asm/msr-index.h b/arch/x86/include/asm/msr-index.h
+index 00293a9..e2d0503 100644
+--- a/arch/x86/include/asm/msr-index.h
++++ b/arch/x86/include/asm/msr-index.h
+@@ -339,6 +339,8 @@
+ #define MSR_K8_TOP_MEM1			0xc001001a
+ #define MSR_K8_TOP_MEM2			0xc001001d
+ #define MSR_K8_SYSCFG			0xc0010010
++#define MSR_K8_SYSCFG_MEM_ENCRYPT_BIT	23
++#define MSR_K8_SYSCFG_MEM_ENCRYPT	BIT_ULL(MSR_K8_SYSCFG_MEM_ENCRYPT_BIT)
+ #define MSR_K8_INT_PENDING_MSG		0xc0010055
+ /* C1E active bits in int pending message */
+ #define K8_INTP_C1E_ACTIVE_MASK		0x18000000
+diff --git a/arch/x86/include/asm/required-features.h b/arch/x86/include/asm/required-features.h
+index fac9a5c..6847d85 100644
+--- a/arch/x86/include/asm/required-features.h
++++ b/arch/x86/include/asm/required-features.h
+@@ -100,6 +100,7 @@
+ #define REQUIRED_MASK15	0
+ #define REQUIRED_MASK16	0
+ #define REQUIRED_MASK17	0
+-#define REQUIRED_MASK_CHECK BUILD_BUG_ON_ZERO(NCAPINTS != 18)
++#define REQUIRED_MASK18	0
++#define REQUIRED_MASK_CHECK BUILD_BUG_ON_ZERO(NCAPINTS != 19)
+ 
+ #endif /* _ASM_X86_REQUIRED_FEATURES_H */
+diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
+index c188ae5..b33bc06 100644
+--- a/arch/x86/kernel/cpu/common.c
++++ b/arch/x86/kernel/cpu/common.c
+@@ -763,6 +763,25 @@ void get_cpu_cap(struct cpuinfo_x86 *c)
+ 	if (c->extended_cpuid_level >= 0x8000000a)
+ 		c->x86_capability[CPUID_8000_000A_EDX] = cpuid_edx(0x8000000a);
+ 
++	if (c->extended_cpuid_level >= 0x8000001f) {
++		cpuid(0x8000001f, &eax, &ebx, &ecx, &edx);
++
++		/* SME feature support */
++		if ((c->x86_vendor == X86_VENDOR_AMD) && (eax & 0x01)) {
++			u64 msr;
++
++			/*
++			 * For SME, BIOS support is required. If BIOS has not
++			 * enabled SME don't advertise the feature.
++			 */
++			rdmsrl(MSR_K8_SYSCFG, msr);
++			if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
++				eax &= ~0x01;
++		}
++
++		c->x86_capability[CPUID_8000_001F_EAX] = eax;
++	}
++
+ 	init_scattered_cpuid_features(c);
+ 
+ 	/*
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
