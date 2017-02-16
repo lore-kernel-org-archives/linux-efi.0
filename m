@@ -1,121 +1,100 @@
-From: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 0/2] RFC: Move efi bgrt code out of arch/x86
-Date: Thu, 16 Feb 2017 10:04:23 +0530
-Message-ID: <CACi5LpMwvwm8RVi=OZTHhWsUUpkzhzrvhJ4m6Kcgf3=eW1O1gQ@mail.gmail.com>
-References: <1487163892-27701-1-git-send-email-bhsharma@redhat.com>
- <CAKv+Gu-qv83fi9qBugA=Od2htcLb966SPBpZXSnXdH=AYw-COw@mail.gmail.com> <4695986.Exl6llDaHp@aspire.rjw.lan>
+From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
+ images
+Date: Thu, 16 Feb 2017 08:29:21 +0100
+Message-ID: <b95b71b7-6b5f-f9cc-79e4-3600e9a3f7e5@siemens.com>
+References: <cover.1487182480.git.jan.kiszka@siemens.com>
+ <CAHp75VeVZo8f_aXZ=R8Y+++RSQeT=tFZmL6NNfekKJTkJc-nZA@mail.gmail.com>
+ <1bf3c9d8-56aa-818b-350f-deb62ad14e08@siemens.com>
+ <4014c5e6-b5a0-7552-166f-a42992532c09@siemens.com>
+ <F54AEECA5E2B9541821D670476DAE19C5DE533B3@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <4695986.Exl6llDaHp-yvgW3jdyMHm1GS7QM15AGw@public.gmane.org>
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C5DE533B3-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Nicolai Stange <nicstange-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Prakhya, Sai Praneeth" <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Mark Rutland <mark.rutlan>
+To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Daniel Wagner <daniel.wagner-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Ard, Rafael
-
-On Thu, Feb 16, 2017 at 5:14 AM, Rafael J. Wysocki <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org> wrote:
-> On Wednesday, February 15, 2017 05:44:28 PM Ard Biesheuvel wrote:
->> Hello Bhupesh,
+On 2017-02-16 04:00, Kweh, Hock Leong wrote:
+>> -----Original Message-----
+>> From: Jan Kiszka [mailto:jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org]
+>> Sent: Thursday, February 16, 2017 3:00 AM
+>> To: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+>> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>; Ard Biesheuvel
+>> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>; linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Linux Kernel Mailing
+>> List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>; Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>; Kweh,
+>> Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>; Bryan O'Donoghue
+>> <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+>> Subject: Re: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
+>> images
 >>
->> On 15 February 2017 at 13:04, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> > This patchset presents a RFC approach to move the ACPI BGRT table
->> > handling related code out of 'arch/x86' and place it inside
->> > 'drivers/firmware/efi' so that it can be used to support
->> > ACPI BGRT table and BGRT logo across x86 and AARCH64 ARCHs.
->> >
->> > Note that this patchset is primarily tested on Qemu VMs for x86_64
->> > and AARCH64 environments, while I try to get my hands on a real
->> > AARCH64 hardware which supports a graphic card and whose boot firmware
->> > I can modify to support the ACPI BGRT table to be passed to the kernel.
->> >
->> > Here are some details/outputs about/from the test environment:
->> >
->> > AARCH64:
->> > ========
->> > 1. I used the latest Qemu (master branch) and compiled it for aarch64 with softmmu support.
->> >    Here is the command line I use to launch the same:
->> >
->> > # qemu-system-aarch64 -cpu cortex-a57 -M virt -m 2048 -bios QEMU_EFI.fd -kernel Image -initrd rootfs.cpio -serial stdio --append "acpi=force" -device virtio-gpu-pci
->> >
->> > where, QEMU_EFI.fd is the DEBUG build of EDK2 ArmVirtQemu.dsc (master branch)
->> >        rootfs.cpio is the AARCH64 build of Buildroot (Little Endian AARCH64)
->> >        -device virtio-gpu-pci provides the Graphical support required to have BGRT logo.
->> >
->> >
->> > 2. Here are some test results once Linux boots up, which show a valid BGRT table/logo being
->> >    seen by the kernel:
->> >
->> > # acpidump
->> > ...
->> >
->> > BGRT @ 0x0000000000000000
->> >   0000: 42 47 52 54 38 00 00 00 01 B4 49 4E 54 45 4C 20  BGRT8.....INTEL
->> >   0010: 45 44 4B 32 20 20 20 20 02 00 00 00 20 20 20 20  EDK2    ....
->> >   0020: 13 00 00 01 01 00 01 00 00 80 B0 BA 00 00 00 00  ................
->> >   0030: 2F 01 00 00 0F 01 00 00                          /.......
->> >
->> > # dmesg | grep -i BGRT
->> > [    0.000000] ACPI: BGRT 0x00000000B8640000 000038 (v01 INTEL  EDK2     00000002      01000013)
->> >
->> >
->> > # ls -lah /sys/firmware/acpi/bgrt/image
->> > -r--r--r--    1 root     root       32.9K Feb 15 11:27 /sys/firmware/acpi/bgrt/image
->> >
->> > x86:
->> > ====
->> > 1. I used the latest Qemu (master branch) and compiled it for x86.
->> >    Here is the command line I use to launch the same:
->> >
->> > # qemu-system-x86_64 -enable-kvm -sdl -m 2048 -vga std -boot c -cpu host -bios OVMF_CODE.fd -kernel bzImage -initrd rootfs.cpio -serial stdio
->> >
->> > where, OVMF_CODE.fd is the RELEASE build of EDK2 OvmfPkg (master branch)
->> >        rootfs.cpio is the x86_64 build of Buildroot
->> >
->> > 2. Similar test results are seen as noted for the AARCH64 case above, which show a valid BGRT table/logo being
->> >    seen by the kernel.
->> >
->> > Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> > Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
->> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
->> > Cc: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->> > Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->> > Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
->> > Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
->> > Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
->> >
->> > Bhupesh Sharma (2):
->> >   x86/efi-bgrt: Move efi-bgrt handling out of arch/x86
->> >   bgrt: Make ACPI BGRT parsing code common for ARCHs
->> >
->> >  arch/arm64/kernel/acpi.c                               | 3 +++
->> >  arch/x86/kernel/acpi/boot.c                            | 6 ------
->> >  arch/x86/platform/efi/Makefile                         | 1 -
->> >  drivers/acpi/Kconfig                                   | 2 +-
->> >  drivers/acpi/bgrt.c                                    | 6 ++++++
->> >  drivers/firmware/efi/Makefile                          | 1 +
->> >  {arch/x86/platform => drivers/firmware}/efi/efi-bgrt.c | 0
->> >  include/linux/efi-bgrt.h                               | 2 ++
->> >  8 files changed, 13 insertions(+), 8 deletions(-)
->> >  rename {arch/x86/platform => drivers/firmware}/efi/efi-bgrt.c (100%)
->> >
+>> On 2017-02-15 19:50, Jan Kiszka wrote:
+>>> On 2017-02-15 19:46, Andy Shevchenko wrote:
+>>>> On Wed, Feb 15, 2017 at 8:14 PM, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+>> wrote:
+>>>>> See patch 2 for the background.
+>>>>>
+>>>>> Series has been tested on the Galileo Gen2, to exclude regressions,
+>>>>> with a firmware.cap without security header and the SIMATIC IOT2040
+>>>>> which requires the header because of its mandatory secure boot.
+>>>>
+>>>> Briefly looking to the code it looks like a real hack.
+>>>> Sorry, but it would be carefully (re-)designed.
+>>>
+>>> The interface that the firmware provides us? That should have been
+>>> done differently, I agree, but I'm not too much into those firmware
+>>> details, specifically when it comes to signatures.
+>>>
+>>> The Linux code was designed around that suboptimal situation. If there
+>>> are better ideas, I'm all ears.
+>>>
 >>
->> These patches look fine to me, and I think we should be able to merge
->> them without any changes.
+>> Expanding CC's as requested by Andy.
 >>
->> Reviewed-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> Jan
 >>
->> You only failed to cc the ACPI maintainers, please add Len and Rafael next time.
+> 
+> Hi Jan,
+> 
+> While I upstreaming the capsule loader patches, I did work with maintainer
+> Matt and look into this security header created for Quark. Eventually both
+> of us agreed that this will not be upstream to mainline as it is really a Quark
+> specific implementation.
 
-Oops. Will take care in future.
+This is ... [swallowing down a lengthy rant about Quark upstreaming]
+unfortunate given that Intel hands out firmware and BSPs to their
+customers without further explanations on this "minor detail".
 
-> No worries.
->
-> The changes are fine by me.
->
+I have no idea what other integrators of the X102x did with that, but my
+customer has now thousands and thousands of devices in the field with
+firmware that works exactly this way. Only for that feature, we will now
+have to provide a non-upstream kernel in order to keep the installed
+devices updatable. Or create and maintain a different mechanism. Beautiful.
 
-Thanks Rafael and Ard.
+> 
+> The proper implementation may require to work with UEFI community
+> to expand its capsule spec to support signed binary. 
+> 
 
-Regards,
-Bhupesh
+Are you working on this? How is this solved on other platforms that
+require signatures? No one tried that yet? In any case, this sounds like
+a lengthy, way too late considered process that will not solve our issue
+in the foreseeable future.
+
+Don't get me wrong, I'm not intending to push this into the kernel
+because "What the heck?!" was my first reaction as well once I found out
+how this update interface is actually working. But maybe you can bring
+this topic up on your side as well so that we come to an upstreamable
+solution in all affected projects.
+
+Thanks,
+Jan
+
+PS: @Daniel, another example for your presentation. ;)
+
+-- 
+Siemens AG, Corporate Technology, CT RDA ITP SES-DE
+Corporate Competence Center Embedded Linux
