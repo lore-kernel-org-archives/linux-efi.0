@@ -1,41 +1,91 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] efi: libstub: treat missing SecureBoot variable as S/B disabled
-Date: Fri, 17 Feb 2017 07:08:19 +0000
-Message-ID: <CAKv+Gu_=BwvYJoyuf89PUVjnrJeJyvr-p6yFAu4Mw+ErLc4nxQ@mail.gmail.com>
-References: <1487268503-21570-1-git-send-email-ard.biesheuvel@linaro.org> <20170217051355.GA1141@wunner.de>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
+ images
+Date: Fri, 17 Feb 2017 08:23:49 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C5DE5373E@PGSMSX102.gar.corp.intel.com>
+References: <cover.1487182480.git.jan.kiszka@siemens.com>
+ <CAHp75VeVZo8f_aXZ=R8Y+++RSQeT=tFZmL6NNfekKJTkJc-nZA@mail.gmail.com>
+ <1bf3c9d8-56aa-818b-350f-deb62ad14e08@siemens.com>
+ <4014c5e6-b5a0-7552-166f-a42992532c09@siemens.com>
+ <F54AEECA5E2B9541821D670476DAE19C5DE533B3@PGSMSX102.gar.corp.intel.com>
+ <f4f63644-e099-b192-5337-15c07d761fb4@nexus-software.ie>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170217051355.GA1141-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+In-Reply-To: <f4f63644-e099-b192-5337-15c07d761fb4-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+To: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Mok, Tze Siong" <tze.siong.mok-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 17 February 2017 at 05:13, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
-> On Thu, Feb 16, 2017 at 06:08:23PM +0000, Ard Biesheuvel wrote:
->> The newly refactored code that infers the firmware's Secure Boot state
->> prints the following error when the variables 'SecureBoot' is missing.
->>
->>   EFI stub: ERROR: Could not determine UEFI Secure Boot status.
->>
->> However, this variable is only guaranteed to be defined on a system that
->> is Secure Boot capable to begin with, and so it is not an error if it is
->> missing. So report Secure Boot as being disabled in this case, without
->> printing any error messages.
->
-> In fact I pointed out this change of behaviour on ARM during the
-> review process:
->
-> https://lkml.org/lkml/2016/12/8/702
->
-> But David thought otherwise. :-(
->
-
-I do remember that discussion. But I think David catered for that by
-returning enabled/disabled/unknown, deferring the decision how to deal
-with 'unknown' to the caller.
-
-But I did not appreciate at the time that this was a change in
-behavior nonetheless, and printing errors that are not errors only
-confuses people.
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCcnlhbiBPJ0Rvbm9naHVlIFtt
+YWlsdG86cHVyZS5sb2dpY0BuZXh1cy1zb2Z0d2FyZS5pZV0NCj4gU2VudDogRnJpZGF5LCBGZWJy
+dWFyeSAxNywgMjAxNyA4OjU0IEFNDQo+IFRvOiBLd2VoLCBIb2NrIExlb25nIDxob2NrLmxlb25n
+Lmt3ZWhAaW50ZWwuY29tPjsgSmFuIEtpc3prYQ0KPiA8amFuLmtpc3prYUBzaWVtZW5zLmNvbT47
+IEFuZHkgU2hldmNoZW5rbyA8YW5keS5zaGV2Y2hlbmtvQGdtYWlsLmNvbT4NCj4gQ2M6IE1hdHQg
+RmxlbWluZyA8bWF0dEBjb2RlYmx1ZXByaW50LmNvLnVrPjsgQXJkIEJpZXNoZXV2ZWwNCj4gPGFy
+ZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc+OyBsaW51eC1lZmlAdmdlci5rZXJuZWwub3JnOyBMaW51
+eCBLZXJuZWwgTWFpbGluZw0KPiBMaXN0IDxsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnPjsg
+Qm9yaXNsYXYgUGV0a292IDxicEBhbGllbjguZGU+DQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMC8y
+XSBlZmk6IEVuaGFuY2UgY2Fwc3VsZSBsb2FkZXIgdG8gc3VwcG9ydCBzaWduZWQgUXVhcmsNCj4g
+aW1hZ2VzDQo+IA0KPiANCj4gDQo+IE9uIDE2LzAyLzE3IDAzOjAwLCBLd2VoLCBIb2NrIExlb25n
+IHdyb3RlOg0KPiA+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+PiBGcm9tOiBKYW4g
+S2lzemthIFttYWlsdG86amFuLmtpc3prYUBzaWVtZW5zLmNvbV0NCj4gPj4gU2VudDogVGh1cnNk
+YXksIEZlYnJ1YXJ5IDE2LCAyMDE3IDM6MDAgQU0NCj4gPj4gVG86IEFuZHkgU2hldmNoZW5rbyA8
+YW5keS5zaGV2Y2hlbmtvQGdtYWlsLmNvbT4NCj4gPj4gQ2M6IE1hdHQgRmxlbWluZyA8bWF0dEBj
+b2RlYmx1ZXByaW50LmNvLnVrPjsgQXJkIEJpZXNoZXV2ZWwNCj4gPj4gPGFyZC5iaWVzaGV1dmVs
+QGxpbmFyby5vcmc+OyBsaW51eC1lZmlAdmdlci5rZXJuZWwub3JnOyBMaW51eCBLZXJuZWwNCj4g
+Pj4gTWFpbGluZyBMaXN0IDxsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnPjsgQm9yaXNsYXYg
+UGV0a292DQo+ID4+IDxicEBhbGllbjguZGU+OyBLd2VoLCBIb2NrIExlb25nIDxob2NrLmxlb25n
+Lmt3ZWhAaW50ZWwuY29tPjsgQnJ5YW4NCj4gPj4gTydEb25vZ2h1ZSA8cHVyZS5sb2dpY0BuZXh1
+cy1zb2Z0d2FyZS5pZT4NCj4gPj4gU3ViamVjdDogUmU6IFtQQVRDSCAwLzJdIGVmaTogRW5oYW5j
+ZSBjYXBzdWxlIGxvYWRlciB0byBzdXBwb3J0DQo+ID4+IHNpZ25lZCBRdWFyayBpbWFnZXMNCj4g
+Pj4NCj4gPj4gT24gMjAxNy0wMi0xNSAxOTo1MCwgSmFuIEtpc3prYSB3cm90ZToNCj4gPj4+IE9u
+IDIwMTctMDItMTUgMTk6NDYsIEFuZHkgU2hldmNoZW5rbyB3cm90ZToNCj4gPj4+PiBPbiBXZWQs
+IEZlYiAxNSwgMjAxNyBhdCA4OjE0IFBNLCBKYW4gS2lzemthDQo+ID4+Pj4gPGphbi5raXN6a2FA
+c2llbWVucy5jb20+DQo+ID4+IHdyb3RlOg0KPiA+Pj4+PiBTZWUgcGF0Y2ggMiBmb3IgdGhlIGJh
+Y2tncm91bmQuDQo+ID4+Pj4+DQo+ID4+Pj4+IFNlcmllcyBoYXMgYmVlbiB0ZXN0ZWQgb24gdGhl
+IEdhbGlsZW8gR2VuMiwgdG8gZXhjbHVkZQ0KPiA+Pj4+PiByZWdyZXNzaW9ucywgd2l0aCBhIGZp
+cm13YXJlLmNhcCB3aXRob3V0IHNlY3VyaXR5IGhlYWRlciBhbmQgdGhlDQo+ID4+Pj4+IFNJTUFU
+SUMgSU9UMjA0MCB3aGljaCByZXF1aXJlcyB0aGUgaGVhZGVyIGJlY2F1c2Ugb2YgaXRzIG1hbmRh
+dG9yeQ0KPiBzZWN1cmUgYm9vdC4NCj4gPj4+Pg0KPiA+Pj4+IEJyaWVmbHkgbG9va2luZyB0byB0
+aGUgY29kZSBpdCBsb29rcyBsaWtlIGEgcmVhbCBoYWNrLg0KPiA+Pj4+IFNvcnJ5LCBidXQgaXQg
+d291bGQgYmUgY2FyZWZ1bGx5IChyZS0pZGVzaWduZWQuDQo+ID4+Pg0KPiA+Pj4gVGhlIGludGVy
+ZmFjZSB0aGF0IHRoZSBmaXJtd2FyZSBwcm92aWRlcyB1cz8gVGhhdCBzaG91bGQgaGF2ZSBiZWVu
+DQo+ID4+PiBkb25lIGRpZmZlcmVudGx5LCBJIGFncmVlLCBidXQgSSdtIG5vdCB0b28gbXVjaCBp
+bnRvIHRob3NlIGZpcm13YXJlDQo+ID4+PiBkZXRhaWxzLCBzcGVjaWZpY2FsbHkgd2hlbiBpdCBj
+b21lcyB0byBzaWduYXR1cmVzLg0KPiA+Pj4NCj4gPj4+IFRoZSBMaW51eCBjb2RlIHdhcyBkZXNp
+Z25lZCBhcm91bmQgdGhhdCBzdWJvcHRpbWFsIHNpdHVhdGlvbi4gSWYNCj4gPj4+IHRoZXJlIGFy
+ZSBiZXR0ZXIgaWRlYXMsIEknbSBhbGwgZWFycy4NCj4gPj4+DQo+ID4+DQo+ID4+IEV4cGFuZGlu
+ZyBDQydzIGFzIHJlcXVlc3RlZCBieSBBbmR5Lg0KPiA+Pg0KPiA+PiBKYW4NCj4gPj4NCj4gPg0K
+PiA+IEhpIEphbiwNCj4gPg0KPiA+IFdoaWxlIEkgdXBzdHJlYW1pbmcgdGhlIGNhcHN1bGUgbG9h
+ZGVyIHBhdGNoZXMsIEkgZGlkIHdvcmsgd2l0aA0KPiA+IG1haW50YWluZXIgTWF0dCBhbmQgbG9v
+ayBpbnRvIHRoaXMgc2VjdXJpdHkgaGVhZGVyIGNyZWF0ZWQgZm9yIFF1YXJrLg0KPiA+IEV2ZW50
+dWFsbHkgYm90aCBvZiB1cyBhZ3JlZWQgdGhhdCB0aGlzIHdpbGwgbm90IGJlIHVwc3RyZWFtIHRv
+DQo+ID4gbWFpbmxpbmUgYXMgaXQgaXMgcmVhbGx5IGEgUXVhcmsgc3BlY2lmaWMgaW1wbGVtZW50
+YXRpb24uDQo+IA0KPiBXaGF0J3MgdGhlIGxvZ2ljIG9mIHRoYXQgPw0KPiANCj4gSXQgc2hvdWxk
+IGJlIHBvc3NpYmxlIHRvIHByb3ZpZGUgYSBob29rIChvciBhIGN1c3RvbSBmdW5jdGlvbikuDQo+
+IA0KPiA+DQo+ID4gVGhlIHByb3BlciBpbXBsZW1lbnRhdGlvbiBtYXkgcmVxdWlyZSB0byB3b3Jr
+IHdpdGggVUVGSSBjb21tdW5pdHkgdG8NCj4gPiBleHBhbmQgaXRzIGNhcHN1bGUgc3BlYyB0byBz
+dXBwb3J0IHNpZ25lZCBiaW5hcnkuDQo+IA0KPiBBcmUgeW91IHZvbHVudGVlcmluZyB0byBkbyB0
+aGF0IHdpdGggLSBnZXR0aW5nIHRoZSBDU0ggaW50byB0aGUgVUVGSSBzcGVjID8NCj4gDQo+IElm
+IG5vdCB0aGVuIHdlIHNob3VsZCBoYXZlIGEgbWV0aG9kIHRvIGxvYWQvaWdub3JlIGEgY2Fwc3Vs
+ZSBpbmNsdWRpbmcgdGhlIENTSCwNCj4gaWYgc28gdGhlbiB3ZSBzaG91bGQgaGF2ZSBhIHJlYWxp
+c3RpYyB0aW1lbGluZSBsYWlkIG91dCBmb3IgZ2V0dGluZyB0aGF0IHNwZWMgd29yaw0KPiBkb25l
+Lg0KPiANCj4gSGludDogSSBkb24ndCBiZWxpZXZlIGludGVncmF0aW5nIHRoZSBDU0ggaW50byB0
+aGUgVUVGSSBzdGFuZGFyZCB3aWxsIGhhcHBlbi4uLg0KPiANCg0KSGkgSmFuICYgQnJ5YW4sDQoN
+ClBsZWFzZSBkb24ndCBnZXQgbWUgd3JvbmcuIEkgYW0gbm90IHJlamVjdGluZyB0aGUgcGF0Y2gg
+c3VibWlzc2lvbi4NCkkgYW0ganVzdCBzaGFyaW5nIGEgc3VtbWFyeSBmb3IgdGhlIGRpc2N1c3Np
+b24gdGhhdCBJIGhhZCBoYWQgaXQgYSB5ZWFyIGJhY2sNCndpdGggbWFpbnRhaW5lciBNYXR0IGZv
+ciB0aGlzIHRvcGljLiBGcm9tIHRoZSBkaXNjdXNzaW9uLCB3ZSBkaWQgbWVudGlvbg0Kd2hhdCB3
+b3VsZCBiZSB0aGUgcHJvcGVyIGhhbmRsaW5nIHRvIHRoaXMgY2FzZS4gQW5kIHRvIGhhdmUgVUVG
+SSBleHBhbmQNCml0IGNhcHN1bGUgc3VwcG9ydCBhbmQgdGFrZSBpbiBzaWduZWQgYmluYXJ5IHdv
+dWxkIGJlIGEgbW9yZSBzZWN1cmVkIHdheS4NClNvLCBpbmZsdWVuY2luZyBVRUZJIGNvbW11bml0
+eSB0byBoYXZlIHN1Y2ggc3VwcG9ydCB3b3VsZCBiZSB0aGUgcmlnaHQNCm1vdmUgdGhyb3VnaG91
+dCB0aGUgZGlzY3Vzc2lvbi4gVGhhdCBpcyBteSBzdW1tYXJ5Lg0KDQpPZiBjb3Vyc2UsIGluZmx1
+ZW5jaW5nIHRoZSBVRUZJIGNvbW11bml0eSB3b3VsZCBiZSB0aGUgbG9uZ2VyIHBhdGguDQpJIHRo
+aW5rIGl0IGlzIHdvcnRoIGZvciB0cnkgdG8gYnJpbmcgdGhlIHRvcGljIHVwIGhlcmUgYWdhaW4g
+dG8gc2VlIGlmIE1hdHQNCndvdWxkIHJlY29uc2lkZXIgaXQuIA0KDQoNClJlZ2FyZHMsDQpXaWxz
+b24NCg0K
