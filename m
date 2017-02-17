@@ -1,73 +1,56 @@
-From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
- images
-Date: Fri, 17 Feb 2017 11:14:46 +0100
-Message-ID: <87df71cd-8f45-351f-30bb-ac7e66005c2a@siemens.com>
-References: <cover.1487182480.git.jan.kiszka@siemens.com>
- <CAHp75VeVZo8f_aXZ=R8Y+++RSQeT=tFZmL6NNfekKJTkJc-nZA@mail.gmail.com>
- <1bf3c9d8-56aa-818b-350f-deb62ad14e08@siemens.com>
- <4014c5e6-b5a0-7552-166f-a42992532c09@siemens.com>
- <F54AEECA5E2B9541821D670476DAE19C5DE533B3@PGSMSX102.gar.corp.intel.com>
- <f4f63644-e099-b192-5337-15c07d761fb4@nexus-software.ie>
- <F54AEECA5E2B9541821D670476DAE19C5DE5373E@PGSMSX102.gar.corp.intel.com>
- <89831548-506f-9199-57ae-400ce020081a@nexus-software.ie>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [RFC PATCH v4 04/28] x86: Handle reduction in physical address
+ size with SME
+Date: Fri, 17 Feb 2017 12:04:32 +0100
+Message-ID: <20170217110432.tgi4cnkl22vyspk5@pd.tnic>
+References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
+ <20170216154253.19244.70114.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <89831548-506f-9199-57ae-400ce020081a-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Mok, Tze Siong" <tze.siong.mok-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170216154253.19244.70114.stgit@tlendack-t1.amdoffice.net>
+Sender: linux-doc-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 2017-02-17 10:51, Bryan O'Donoghue wrote:
-> On 17/02/17 08:23, Kweh, Hock Leong wrote:
->> And to have UEFI expand
->> it capsule support and take in signed binary would be a more secured way.
->> So, influencing UEFI community to have such support would be the right
->> move throughout the discussion. That is my summary.
+On Thu, Feb 16, 2017 at 09:42:54AM -0600, Tom Lendacky wrote:
+> When System Memory Encryption (SME) is enabled, the physical address
+> space is reduced. Adjust the x86_phys_bits value to reflect this
+> reduction.
 > 
-> CSH stands for "Clanton Secure Header" - Clanton being the internal
-> code-name for Quark X1000 prior to release.
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/kernel/cpu/common.c |   10 +++++++---
+>  1 file changed, 7 insertions(+), 3 deletions(-)
 > 
-> There is no chance the UEFI standard (which can be used on ARM and
-> potentially other architectures) will accept a SoC specific
-> route-of-trust prepended header.
-> 
-> Sure some kind of binary signed headers might become part of the
-> standard eventually but, definitely _not_ a CSH.
-> 
-> The fact is CSH exists in the real-world and a UEFI firmware supports
-> accepting the CSH/UEFI-capsule pair for updating itself.
-> 
-> I think a far more practical solution is to accommodate the defacto
-> implementation (the only ? current implementation). To me it defies
-> reason to have Quark X1000 be the only system (that I know of) capable
-> of doing a capsule update - have capsule code in the kernel - but _not_
-> support the header prepended to that capsule that the Quark
-> firmware/bootrom require.
-> 
-> Right now the capsule code is dead code on Quark x1000. Let's do the
-> right thing and make it usable. I fully support having a
-> separate/parallel conversation with the UEFI body but, I'd be amazed if
-> the "Clanton Secure Header" made it into the standard...
-> 
+> diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
+> index b33bc06..358208d7 100644
+> --- a/arch/x86/kernel/cpu/common.c
+> +++ b/arch/x86/kernel/cpu/common.c
+> @@ -771,11 +771,15 @@ void get_cpu_cap(struct cpuinfo_x86 *c)
+>  			u64 msr;
+>  
+>  			/*
+> -			 * For SME, BIOS support is required. If BIOS has not
+> -			 * enabled SME don't advertise the feature.
+> +			 * For SME, BIOS support is required. If BIOS has
+> +			 * enabled SME adjust x86_phys_bits by the SME
+> +			 * physical address space reduction value. If BIOS
+> +			 * has not enabled SME don't advertise the feature.
+>  			 */
+>  			rdmsrl(MSR_K8_SYSCFG, msr);
+> -			if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
+> +			if (msr & MSR_K8_SYSCFG_MEM_ENCRYPT)
+> +				c->x86_phys_bits -= (ebx >> 6) & 0x3f;
+> +			else
+>  				eax &= ~0x01;
 
-To be precise, CSH is only required on X102x. The X100x SoCs, those are
-also found on the Galileo Gen2 maker board, do not support secure boot
-and do not use the header. IIRC, there used to be an eval system with
-the X1020 as well, but I think it's no longer available.
-
-Interestingly, the capsule file found in Intel's Galileo firmware update
-package [1] contains the CSH header. But I only succeeded flashing it on
-a Gen2 by removing the header first.
-
-Jan
-
-[1]
-https://downloadcenter.intel.com/download/26417/Intel-Galileo-Firmware-Updater-and-Drivers?product=83137
+Right, as I mentioned yesterday, this should go to arch/x86/kernel/cpu/amd.c
 
 -- 
-Siemens AG, Corporate Technology, CT RDA ITP SES-DE
-Corporate Competence Center Embedded Linux
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
