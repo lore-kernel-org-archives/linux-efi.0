@@ -1,34 +1,104 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [RFC PATCH v4 02/28] x86: Set the write-protect cache mode for
- full PAT support
-Date: Fri, 17 Feb 2017 12:07:24 +0100
-Message-ID: <20170217110724.ah5s3rz6emwxoc3u@pd.tnic>
-References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
- <20170216154225.19244.96438.stgit@tlendack-t1.amdoffice.net>
+From: Bryan O'Donoghue <pure.logic@nexus-software.ie>
+Subject: Re: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
+ images
+Date: Fri, 17 Feb 2017 11:42:34 +0000
+Message-ID: <ef2d9e8b-9a6e-4790-da1c-a76f1496fdcb@nexus-software.ie>
+References: <cover.1487182480.git.jan.kiszka@siemens.com>
+ <CAHp75VeVZo8f_aXZ=R8Y+++RSQeT=tFZmL6NNfekKJTkJc-nZA@mail.gmail.com>
+ <1bf3c9d8-56aa-818b-350f-deb62ad14e08@siemens.com>
+ <4014c5e6-b5a0-7552-166f-a42992532c09@siemens.com>
+ <F54AEECA5E2B9541821D670476DAE19C5DE533B3@PGSMSX102.gar.corp.intel.com>
+ <f4f63644-e099-b192-5337-15c07d761fb4@nexus-software.ie>
+ <F54AEECA5E2B9541821D670476DAE19C5DE5373E@PGSMSX102.gar.corp.intel.com>
+ <89831548-506f-9199-57ae-400ce020081a@nexus-software.ie>
+ <87df71cd-8f45-351f-30bb-ac7e66005c2a@siemens.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170216154225.19244.96438.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <87df71cd-8f45-351f-30bb-ac7e66005c2a@siemens.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jan Kiszka <jan.kiszka@siemens.com>, "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@alien8.de>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, "Mok, Tze Siong" <tze.siong.mok@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Feb 16, 2017 at 09:42:25AM -0600, Tom Lendacky wrote:
-> For processors that support PAT, set the write-protect cache mode
-> (_PAGE_CACHE_MODE_WP) entry to the actual write-protect value (x05).
+On 17/02/17 10:14, Jan Kiszka wrote:
+> On 2017-02-17 10:51, Bryan O'Donoghue wrote:
+>> On 17/02/17 08:23, Kweh, Hock Leong wrote:
+>>> And to have UEFI expand
+>>> it capsule support and take in signed binary would be a more secured way.
+>>> So, influencing UEFI community to have such support would be the right
+>>> move throughout the discussion. That is my summary.
+>>
+>> CSH stands for "Clanton Secure Header" - Clanton being the internal
+>> code-name for Quark X1000 prior to release.
+>>
+>> There is no chance the UEFI standard (which can be used on ARM and
+>> potentially other architectures) will accept a SoC specific
+>> route-of-trust prepended header.
+>>
+>> Sure some kind of binary signed headers might become part of the
+>> standard eventually but, definitely _not_ a CSH.
+>>
+>> The fact is CSH exists in the real-world and a UEFI firmware supports
+>> accepting the CSH/UEFI-capsule pair for updating itself.
+>>
+>> I think a far more practical solution is to accommodate the defacto
+>> implementation (the only ? current implementation). To me it defies
+>> reason to have Quark X1000 be the only system (that I know of) capable
+>> of doing a capsule update - have capsule code in the kernel - but _not_
+>> support the header prepended to that capsule that the Quark
+>> firmware/bootrom require.
+>>
+>> Right now the capsule code is dead code on Quark x1000. Let's do the
+>> right thing and make it usable. I fully support having a
+>> separate/parallel conversation with the UEFI body but, I'd be amazed if
+>> the "Clanton Secure Header" made it into the standard...
+>>
 > 
-> Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+> To be precise, CSH is only required on X102x. The X100x SoCs, those are
+> also found on the Galileo Gen2 maker board, do not support secure boot
+> and do not use the header.
 
-Just a nit:
+The CSH is supported on the non-secure SoCs - the BSP on Gen1 certainly did.
 
-Subject should have "x86/mm/pat: " prefix but that can be fixed when
-applying.
+https://downloadcenter.intel.com/download/23197/Intel-Quark-SoC-X1000-Board-Support-Package-BSP-
+
+- > QuarkPlatformPkg/Platform/Dxe/PlatformInit/DxeCapsuleSecurity.c
+
+CreateCapsuleBufferForWriting()
+
+Looks like it will tolerate a lack of CSH but, obviously that's no
+solution for the secure boot parts.
+
+> IIRC, there used to be an eval system with
+> the X1020 as well, but I think it's no longer available.
+> 
+> Interestingly, the capsule file found in Intel's Galileo firmware update
+> package [1] contains the CSH header. But I only succeeded flashing it on
+> a Gen2 by removing the header first.
+
+Hmm - the out of the box firmware will accept capsules from the website.
+Gen1 and Gen2 should be the same in that respect - if you use the BSP
+kernel.
+
+You should validate the out-of-the-box capsule update - with the kernel
+on SPI flash works with the CSH in place.
+
+Next step then is to get it working on tip-of-tree.
+
+I have one Gen1 left (which I won't be experimenting with) - and I think
+one Gen2 (which I don't especially mind blowing up).
+
+Let's take the time to validate (or repudiate)
+
+1. Out of the box BSP works with CSH capsules in place
+2. New tip-of-tree addition supports CSH capsules
+
+and review.
+
+Stripping the CSH shouldn't be necessary (and breaks the secure boot
+parts anyway).
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+bod
