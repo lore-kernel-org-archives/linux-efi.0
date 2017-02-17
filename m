@@ -1,90 +1,148 @@
 From: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-Subject: Re: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
- images
-Date: Fri, 17 Feb 2017 00:53:46 +0000
-Message-ID: <f4f63644-e099-b192-5337-15c07d761fb4@nexus-software.ie>
+Subject: Re: [PATCH 2/2] efi/capsule: Add support for Quark security header
+Date: Fri, 17 Feb 2017 01:30:26 +0000
+Message-ID: <9949ecad-4b73-cccc-7e66-0afe0d2f4087@nexus-software.ie>
 References: <cover.1487182480.git.jan.kiszka@siemens.com>
- <CAHp75VeVZo8f_aXZ=R8Y+++RSQeT=tFZmL6NNfekKJTkJc-nZA@mail.gmail.com>
- <1bf3c9d8-56aa-818b-350f-deb62ad14e08@siemens.com>
- <4014c5e6-b5a0-7552-166f-a42992532c09@siemens.com>
- <F54AEECA5E2B9541821D670476DAE19C5DE533B3@PGSMSX102.gar.corp.intel.com>
+ <47e493c47aa79b68be52f743ac1790fddab22938.1487182480.git.jan.kiszka@siemens.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C5DE533B3-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
+In-Reply-To: <47e493c47aa79b68be52f743ac1790fddab22938.1487182480.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+To: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
 
 
-On 16/02/17 03:00, Kweh, Hock Leong wrote:
->> -----Original Message-----
->> From: Jan Kiszka [mailto:jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org]
->> Sent: Thursday, February 16, 2017 3:00 AM
->> To: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>; Ard Biesheuvel
->> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>; linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Linux Kernel Mailing
->> List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>; Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>; Kweh,
->> Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>; Bryan O'Donoghue
->> <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
->> Subject: Re: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
->> images
->>
->> On 2017-02-15 19:50, Jan Kiszka wrote:
->>> On 2017-02-15 19:46, Andy Shevchenko wrote:
->>>> On Wed, Feb 15, 2017 at 8:14 PM, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
->> wrote:
->>>>> See patch 2 for the background.
->>>>>
->>>>> Series has been tested on the Galileo Gen2, to exclude regressions,
->>>>> with a firmware.cap without security header and the SIMATIC IOT2040
->>>>> which requires the header because of its mandatory secure boot.
->>>>
->>>> Briefly looking to the code it looks like a real hack.
->>>> Sorry, but it would be carefully (re-)designed.
->>>
->>> The interface that the firmware provides us? That should have been
->>> done differently, I agree, but I'm not too much into those firmware
->>> details, specifically when it comes to signatures.
->>>
->>> The Linux code was designed around that suboptimal situation. If there
->>> are better ideas, I'm all ears.
->>>
->>
->> Expanding CC's as requested by Andy.
->>
->> Jan
->>
+On 15/02/17 18:14, Jan Kiszka wrote:
+> The firmware for Quark X102x prepends a security header to the capsule
+> which is needed to support the mandatory secure boot on this processor.
+> The header can be detected by checking for the "_CSH" signature and -
+> to avoid any GUID conflict - validating its size field to contain the
+> expected value. Then we need to look for the EFI header right after the
+> security header and pass the image offset to efi_capsule_update while
+> keeping the whole image in RAM - the firmware will look for the header
+> on its own.
 >
-> Hi Jan,
+> Signed-off-by: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+> ---
+>  drivers/firmware/efi/capsule-loader.c | 73 ++++++++++++++++++++++++++++++-----
+>  1 file changed, 63 insertions(+), 10 deletions(-)
 >
-> While I upstreaming the capsule loader patches, I did work with maintainer
-> Matt and look into this security header created for Quark. Eventually both
-> of us agreed that this will not be upstream to mainline as it is really a Quark
-> specific implementation.
-
-What's the logic of that ?
-
-It should be possible to provide a hook (or a custom function).
-
+> diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+> index 63ceca9..571d931 100644
+> --- a/drivers/firmware/efi/capsule-loader.c
+> +++ b/drivers/firmware/efi/capsule-loader.c
+> @@ -26,10 +26,32 @@ struct capsule_info {
+>  	long		index;
+>  	size_t		count;
+>  	size_t		total_size;
+> +	unsigned int	efi_hdr_offset;
+>  	struct page	**pages;
+>  	size_t		page_bytes_remain;
+>  };
 >
-> The proper implementation may require to work with UEFI community
-> to expand its capsule spec to support signed binary.
+> +#define QUARK_CSH_SIGNATURE		0x5f435348	/* _CSH */
+> +#define QUARK_SECURITY_HEADER_SIZE	0x400
+> +
+> +struct efi_quark_security_header {
+> +	u32 csh_signature;
+> +	u32 version;
+> +	u32 modulesize;
+> +	u32 security_version_number_index;
+> +	u32 security_version_number;
+> +	u32 rsvd_module_id;
+> +	u32 rsvd_module_vendor;
+> +	u32 rsvd_date;
+> +	u32 headersize;
+> +	u32 hash_algo;
+> +	u32 cryp_algo;
+> +	u32 keysize;
+> +	u32 signaturesize;
+> +	u32 rsvd_next_header;
+> +	u32 rsvd[2];
+> +};
 
-Are you volunteering to do that with - getting the CSH into the UEFI spec ?
+This is a real nitpick (sorry) - but it'd be nice to have a document 
+reference or a link to describe this header i.e. it is officially 
+documented - outside of the UEFI specification. Make life easy for 
+someone reading this header and make an document reference.
 
-If not then we should have a method to load/ignore a capsule including 
-the CSH, if so then we should have a realistic timeline laid out for 
-getting that spec work done.
+Also it'd be appreciated if you could describe the format of the 
+structure with
 
-Hint: I don't believe integrating the CSH into the UEFI standard will 
-happen...
+@member	member-attribute description
 
+> +
+>  /**
+>   * efi_free_all_buff_pages - free all previous allocated buffer pages
+>   * @cap_info: pointer to current instance of capsule_info structure
+> @@ -56,18 +78,46 @@ static void efi_free_all_buff_pages(struct capsule_info *cap_info)
+>  static ssize_t efi_capsule_setup_info(struct capsule_info *cap_info,
+>  				      void *kbuff, size_t hdr_bytes)
+>  {
+> +	struct efi_quark_security_header *quark_hdr;
+>  	efi_capsule_header_t *cap_hdr;
+>  	size_t pages_needed;
+>  	int ret;
+>  	void *temp_page;
 >
+> -	/* Only process data block that is larger than efi header size */
+> -	if (hdr_bytes < sizeof(efi_capsule_header_t))
+> +	/* Only process data block that is larger than the security header
+> +	 * (which is larger than the EFI header) */
+> +	if (hdr_bytes < sizeof(struct efi_quark_security_header))
+>  		return 0;
 >
-> Regards,
-> Wilson
->
+>  	/* Reset back to the correct offset of header */
+>  	cap_hdr = kbuff - cap_info->count;
+> -	pages_needed = ALIGN(cap_hdr->imagesize, PAGE_SIZE) >> PAGE_SHIFT;
+> +
+> +	quark_hdr = (struct efi_quark_security_header *)cap_hdr;
+> +
+> +	if (quark_hdr->csh_signature == QUARK_CSH_SIGNATURE &&
+> +	    quark_hdr->headersize == QUARK_SECURITY_HEADER_SIZE) {
+> +		/* Only process data block if EFI header is included */
+> +		if (hdr_bytes < QUARK_SECURITY_HEADER_SIZE +
+> +				sizeof(efi_capsule_header_t))
+> +			return 0;
+
+At this point if cap_info->header_obtained == false then this is an 
+error - you should be barfing on this - not literally barfing - at least 
+not on your keyboard :)
+
+return -ETHISHEADERSUCKS or some other sensible value -EINVAL like you 
+have below.
+
+Point being you've validated the signature, the header size and 
+cap_info->header_obtained is false then you definitely have a bogus 
+capsule..
+
+
+> +
+> +		pr_debug("%s: Quark security header detected\n", __func__);
+
+... and %s __func__ is verboten don't do it. actually there's a bunch of 
+those pairs all over this code - if you have the time in a supplementary 
+patch please kill them - there must be a a dev pointer we can get at 
+somewhere that makes sense to use dev_dbg- if not those __func__ 
+parameters still need to go away - please kill them.
+
+> +
+> +		if (quark_hdr->rsvd_next_header != 0) {
+> +			pr_err("%s: multiple security headers not supported\n",
+> +			       __func__);
+> +			return -EINVAL;
+> +		}
+
+
+> +
+> +		cap_hdr = (void *)cap_hdr + quark_hdr->headersize;
+
+You could have a separate void * variable and not have the cast.
+
+
+---
+bod
