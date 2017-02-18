@@ -1,127 +1,45 @@
-From: Jim Mattson <jmattson@google.com>
-Subject: Re: [PATCH v3 4/4] KVM: VMX: Simplify segment_base
-Date: Fri, 17 Feb 2017 13:00:51 -0800
-Message-ID: <CALMp9eQAZchjpgmqP1=qj-FXka8+Xbwqiu3xDz9KoLQ60nh-UQ@mail.gmail.com>
-References: <20170214194259.75960-1-thgarnie@google.com> <20170214194259.75960-4-thgarnie@google.com>
- <CALMp9eT_G_Mhsk1k7Xc8L+bnpFwTUoC=ae4LhB1ppqKynKEQ9g@mail.gmail.com> <CAJcbSZESdSQncHeKNVzHO90W7UJUKxKGy-h+rM82OhBc-Nh=cg@mail.gmail.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [RFC PATCH v4 00/28] x86: Secure Memory Encryption (AMD)
+Date: Sat, 18 Feb 2017 19:12:09 +0100
+Message-ID: <20170218181209.xk5ut4g65f2fedzi@pd.tnic>
+References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <kernel-hardening-return-6751-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-In-Reply-To: <CAJcbSZESdSQncHeKNVzHO90W7UJUKxKGy-h+rM82OhBc-Nh=cg@mail.gmail.com>
-To: Thomas Garnier <thgarnie@google.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Kees Cook <keescook@chromium.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Paul Gortmaker <paul.gortmaker@windriver.com>, Andy Lutomirski <luto@amacapital.net>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Rusty Russell <rusty@rustcorp.com.au>, Peter Zijlstra <peterz@infradead.org>, Christian Borntraeger <borntraeger@de.ibm.com>, "Luis R . Rodriguez" <mcgrof@kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170216154158.19244.66630.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Feb 17, 2017 at 12:11 PM, Thomas Garnier <thgarnie@google.com> wrot=
-e:
-> On Fri, Feb 17, 2017 at 9:49 AM, Jim Mattson <jmattson@google.com> wrote:
->>
->> Can we use the read-only GDT here? When expanding the virtual address
->> for 64-bit system descriptors, isn't it sufficient to check (d->s =3D=3D=
- 0
->> && d->type !=3D 0)?
->
-> We can use the readonly GDT but I think doesn't matter one or the
-> other here. We have to check specific types for LDT or TSS, other
-> values describe other entries (cf Intel volume 3, 3.5) (for example 14
-> & 15 on 64-bits are for trap & interrupt gates).
+On Thu, Feb 16, 2017 at 09:41:59AM -0600, Tom Lendacky wrote:
+>  create mode 100644 Documentation/x86/amd-memory-encryption.txt
+>  create mode 100644 arch/x86/include/asm/mem_encrypt.h
+>  create mode 100644 arch/x86/kernel/mem_encrypt_boot.S
+>  create mode 100644 arch/x86/kernel/mem_encrypt_init.c
+>  create mode 100644 arch/x86/mm/mem_encrypt.c
 
-According to volume 3 of the SDM, section 3.5.2:
+I don't see anything standing in the way of merging those last two and
+having a single:
 
-The following system descriptors expand to 16 bytes:
-=E2=80=94 Call gate descriptors (see Section 5.8.3.1, =E2=80=9CIA-32e Mode =
-Call Gates=E2=80=9D)
-=E2=80=94 IDT gate descriptors (see Section 6.14.1, =E2=80=9C64-Bit Mode ID=
-T=E2=80=9D)
-=E2=80=94 LDT and TSS descriptors (see Section 7.2.3, =E2=80=9CTSS Descript=
-or in 64-bit mode=E2=80=9D).
+arch/x86/kernel/mem_encrypt.c
 
-All legal system descriptor types (except for 0: Upper 8 bytes of an 16-byt=
-e
-descriptor) should get the high 32 bits of the base address from the next 8=
--byte
-descriptor.
+with all functionality in there with ifdeffery around it so
+that sme_encrypt_kernel() et all are still visible in the
+!CONFIG_AMD_MEM_ENCRYPT case.
 
->
->>
->>
->> On Tue, Feb 14, 2017 at 11:42 AM, Thomas Garnier <thgarnie@google.com> w=
-rote:
->> > The KVM segment_base function is confusing. This patch replaces intege=
-rs
->> > with appropriate flags, simplify constructs and add comments.
->> >
->> > Signed-off-by: Thomas Garnier <thgarnie@google.com>
->> > ---
->> > Based on next-20170213
->> > ---
->> >  arch/x86/kvm/vmx.c | 26 ++++++++++++++++++--------
->> >  1 file changed, 18 insertions(+), 8 deletions(-)
->> >
->> > diff --git a/arch/x86/kvm/vmx.c b/arch/x86/kvm/vmx.c
->> > index 99167f20bc34..edb8326108dd 100644
->> > --- a/arch/x86/kvm/vmx.c
->> > +++ b/arch/x86/kvm/vmx.c
->> > @@ -2062,25 +2062,35 @@ static unsigned long segment_base(u16 selector=
-)
->> >         struct desc_struct *d;
->> >         unsigned long table_base;
->> >         unsigned long v;
->> > +       u32 high32;
->> >
->> > -       if (!(selector & ~3))
->> > +       if (!(selector & ~SEGMENT_RPL_MASK))
->> >                 return 0;
->> >
->> > -       table_base =3D get_current_gdt_rw_vaddr();
->> > -
->> > -       if (selector & 4) {           /* from ldt */
->> > +       /* LDT selector */
->> > +       if ((selector & SEGMENT_TI_MASK) =3D=3D SEGMENT_LDT) {
->> >                 u16 ldt_selector =3D kvm_read_ldt();
->> >
->> > -               if (!(ldt_selector & ~3))
->> > +               if (!(ldt_selector & ~SEGMENT_RPL_MASK))
->> >                         return 0;
->> >
->> >                 table_base =3D segment_base(ldt_selector);
->> > +       } else {
->> > +               table_base =3D get_current_gdt_rw_vaddr();
->> >         }
->> > -       d =3D (struct desc_struct *)(table_base + (selector & ~7));
->> > +
->> > +       d =3D (struct desc_struct *)table_base + (selector >> 3);
->> >         v =3D get_desc_base(d);
->> >  #ifdef CONFIG_X86_64
->> > -       if (d->s =3D=3D 0 && (d->type =3D=3D 2 || d->type =3D=3D 9 || =
-d->type =3D=3D 11))
->> > -               v |=3D ((unsigned long)((struct ldttss_desc64 *)d)->ba=
-se3) << 32;
->> > +       /*
->> > +        * Extend the virtual address if we have a system descriptor e=
-ntry for
->> > +        * LDT or TSS (available or busy).
->> > +        */
->> > +       if (d->s =3D=3D 0 && (d->type =3D=3D DESC_LDT || d->type =3D=
-=3D DESC_TSS ||
->> > +                         d->type =3D=3D 11/*Busy TSS */)) {
->> > +               high32 =3D ((struct ldttss_desc64 *)d)->base3;
->> > +               v |=3D (u64)high32 << 32;
->> > +       }
->> >  #endif
->> >         return v;
->> >  }
->> > --
->> > 2.11.0.483.g087da7b7c-goog
->> >
->
->
->
->
-> --
-> Thomas
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
