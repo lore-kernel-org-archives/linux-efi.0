@@ -1,121 +1,30 @@
-From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
- images
-Date: Sun, 19 Feb 2017 17:52:37 -0800
-Message-ID: <b4271434-3868-6014-1dfd-dde5c1381c9d@siemens.com>
-References: <cover.1487182480.git.jan.kiszka@siemens.com>
- <CAHp75VeVZo8f_aXZ=R8Y+++RSQeT=tFZmL6NNfekKJTkJc-nZA@mail.gmail.com>
- <1bf3c9d8-56aa-818b-350f-deb62ad14e08@siemens.com>
- <4014c5e6-b5a0-7552-166f-a42992532c09@siemens.com>
- <F54AEECA5E2B9541821D670476DAE19C5DE533B3@PGSMSX102.gar.corp.intel.com>
- <b95b71b7-6b5f-f9cc-79e4-3600e9a3f7e5@siemens.com>
- <CAKv+Gu_2edBA++6ywE4FE2NSbkCWjEULPmriS1iBifsRCgA+OA@mail.gmail.com>
- <3641f43d-ecfd-03dd-9e5d-ca32d587d318@siemens.com>
- <c1beeeb5-2359-d9c1-4759-b112c7d1a613@nexus-software.ie>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2] efi: libstub: treat missing SecureBoot variable as S/B disabled
+Date: Mon, 20 Feb 2017 08:53:57 +0000
+Message-ID: <34A83E6D-1162-4055-9ACF-A32AFC837CA4@linaro.org>
+References: <CAKv+Gu_=BwvYJoyuf89PUVjnrJeJyvr-p6yFAu4Mw+ErLc4nxQ@mail.gmail.com> <1487268503-21570-1-git-send-email-ard.biesheuvel@linaro.org> <20170217051355.GA1141@wunner.de> <12887.1487321781@warthog.procyon.org.uk>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain;
+        charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <c1beeeb5-2359-d9c1-4759-b112c7d1a613-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+In-Reply-To: <12887.1487321781-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Daniel Wagner <daniel.wagner-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 2017-02-19 17:33, Bryan O'Donoghue wrote:
-> 
-> 
-> On 19/02/17 13:33, Jan Kiszka wrote:
->>> I would not object strongly to having conditionally compiled code in
->>> mainline that adds support for this, but bodging the default code path
->>> like this for a Quark quirk is out of the question imo.
->> I'm open for any consensus that avoids bending mainline too much and
->> still helps us (and maybe also other Quark X1020 integrators) getting
->> rid of additional patches.
-> 
-> We could make efi_capsule_setup_info() a weak symbol just like
-> 
-> drivers/firmware/efi/reboot.c:
-> bool __weak efi_poweroff_required(void)
-> 
-> that way Arm is none the wiser and we can bury the Quark Quirk in
-> x86/platform/efi/quirks.c - where you're right Ard it arguably belongs -
-> not in the core code.
-> 
-> diff --git a/arch/x86/platform/efi/quirks.c
-> b/arch/x86/platform/efi/quirks.c
-> index 30031d5..950663da 100644
-> --- a/arch/x86/platform/efi/quirks.c
-> +++ b/arch/x86/platform/efi/quirks.c
-> @@ -495,3 +495,19 @@ bool efi_poweroff_required(void)
->  {
->         return acpi_gbl_reduced_hardware || acpi_no_s5;
->  }
-> +
-> +ssize_t csh_efi_capsule_setup_info(struct capsule_info *cap_info,
-> +                                  void *kbuff, size_t hdr_bytes)
-> +{
-> +       /* Code to deal with the CSH goes here */
-> +       return 0;
-> +}
-> +
-> +ssize_t efi_capsule_setup_info(struct capsule_info *cap_info,
-> +                              void *kbuff, size_t hdr_bytes)
-> +{
-> +       if (quark)
-> +               return csh_efi_capsule_setup_info(cap_info, kbuff,
-> hdr_bytes);
-> +       else
-> +               return __efi_capsule_setup_info(cap_info, kbuff,
-> hdr_bytes);
-> +}
-> 
-> diff --git a/drivers/firmware/efi/capsule-loader.c
-> b/drivers/firmware/efi/capsule-loader.c
-> index 9ae6c11..d8bdc6f 100644
-> --- a/drivers/firmware/efi/capsule-loader.c
-> +++ b/drivers/firmware/efi/capsule-loader.c
-> @@ -53,7 +53,7 @@ static void efi_free_all_buff_pages(struct
-> capsule_info *cap_info)
->   * @kbuff: a mapped first page buffer pointer
->   * @hdr_bytes: the total received number of bytes for efi header
->   **/
-> -static ssize_t efi_capsule_setup_info(struct capsule_info *cap_info,
-> +ssize_t __efi_capsule_setup_info(struct capsule_info *cap_info,
->                                       void *kbuff, size_t hdr_bytes)
->  {
->         efi_capsule_header_t *cap_hdr;
-> @@ -98,6 +98,13 @@ static ssize_t efi_capsule_setup_info(struct
-> capsule_info *cap_info,
-> 
->         return 0;
->  }
-> +EXPORT_SYMBOL_GPL(__efi_capsule_setup_info);
-> +
-> +ssize_t __weak efi_capsule_setup_info(struct capsule_info *cap_info,
-> +                                            void *kbuff, size_t hdr_bytes)
-> +{
-> +       return __efi_capsule_setup_info(cap_info, kbuff, hdr_bytes);
-> +}
->
 
-Good idea.
-
-> One thing we want is to continue to have Quark work on ia32 builds
-> without having to compile a Quark specific kernel just to get this
-> feature working.
+> On 17 Feb 2017, at 08:56, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
 > 
-> Jan I haven't had time to look at what you said about the BSP code not
-> working with capsules on Gen2 (I will during the week though). If you
-> currently have to strip the CSH to make this work then we're missing a
-> trick on tip-of-tree and need to sort that out for the final version of
-> this.
+> Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> 
+>> But I did not appreciate at the time that this was a change in
+>> behavior nonetheless, and printing errors that are not errors only
+>> confuses people.
+> 
+> Perhaps just take the error message out and leave it to the main kernel to
+> deal with?
+> 
 
-Yes, I agree. I will look into this when I'm back from ELC next week (no
-related hardware with me).
-
-Jan
-
--- 
-Siemens AG, Corporate Technology, CT RDA ITP SES-DE
-Corporate Competence Center Embedded Linux
+No, a non-existent SecureBoot variable is simply not an error condition
