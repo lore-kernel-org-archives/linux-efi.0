@@ -1,42 +1,100 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [RFC PATCH v4 00/28] x86: Secure Memory Encryption (AMD)
-Date: Tue, 21 Feb 2017 18:53:31 +0100
-Message-ID: <20170221175331.hpbvw7tepxfkilko@pd.tnic>
-References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
-	<20170218181209.xk5ut4g65f2fedzi@pd.tnic>
-	<1487698965.17158.8.camel@redhat.com>
+From: James Morse <james.morse@arm.com>
+Subject: Re: [PATCH V10 07/10] efi: print unrecognized CPER section
+Date: Tue, 21 Feb 2017 19:10:11 +0000
+Message-ID: <58AC9093.5020303@arm.com>
+References: <1487188282-2568-1-git-send-email-tbaicar@codeaurora.org>
+ <1487188282-2568-8-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1487698965.17158.8.camel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <1487188282-2568-8-git-send-email-tbaicar@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 21, 2017 at 12:42:45PM -0500, Rik van Riel wrote:
-> Do we want that in kernel/ or in arch/x86/mm/ ?
+Hi Tyler,
 
-If you'd ask me, I don't have a strong preference. It is a pile of
-functionality which is part of the SME feature and as such, it is closer
-to the CPU. So arch/x86/cpu/sme.c or so.
+On 15/02/17 19:51, Tyler Baicar wrote:
+> UEFI spec allows for non-standard section in Common Platform Error
+> Record. This is defined in section N.2.3 of UEFI version 2.5.
+> 
+> Currently if the CPER section's type (UUID) does not match with
+> one of the section types that the kernel knows how to parse, the
+> section is skipped. Therefore, user is not able to see
+> such CPER data, for instance, error record of non-standard section.
+> 
+> For above mentioned case, this change prints out the raw data in
+> hex in dmesg buffer. Data length is taken from Error Data length
+> field of Generic Error Data Entry.
+> 
+> Following is a sample output from dmesg:
+> [  115.771702] {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 2
+> [  115.779042] {1}[Hardware Error]: It has been corrected by h/w and requires no further action
+> [  115.787456] {1}[Hardware Error]: event severity: corrected
+> [  115.792927] {1}[Hardware Error]:  Error 0, type: corrected
+> [  115.798415] {1}[Hardware Error]:  fru_id: 00000000-0000-0000-0000-000000000000
+> [  115.805596] {1}[Hardware Error]:  fru_text:
+> [  115.816105] {1}[Hardware Error]:  section type: d2e2621c-f936-468d-0d84-15a4ed015c8b
+> [  115.823880] {1}[Hardware Error]:  section length: 88
+> [  115.828779] {1}[Hardware Error]:   00000000: 01000001 00000002 5f434345 525f4543
+> [  115.836153] {1}[Hardware Error]:   00000010: 0000574d 00000000 00000000 00000000
+> [  115.843531] {1}[Hardware Error]:   00000020: 00000000 00000000 00000000 00000000
+> [  115.850908] {1}[Hardware Error]:   00000030: 00000000 00000000 00000000 00000000
+> [  115.858288] {1}[Hardware Error]:   00000040: fe800000 00000000 00000004 5f434345
+> [  115.865665] {1}[Hardware Error]:   00000050: 525f4543 0000574d
 
-But then it is mm-related in a way as it is RAM encryption...
+The use-case for this is to capture the data and decode it with a vendor tool?
+(if so, please mention that in the commit message!)
 
-Meh, ask me something easier :-)
 
--- 
-Regards/Gruss,
-    Boris.
+> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+> index c2b0a12..48cb8ee 100644
+> --- a/drivers/firmware/efi/cper.c
+> +++ b/drivers/firmware/efi/cper.c
+> @@ -591,8 +591,16 @@ static void cper_estatus_print_section(
+>  			cper_print_proc_arm(newpfx, arm_err);
+>  		else
+>  			goto err_section_too_small;
+> -	} else
+> -		printk("%s""section type: unknown, %pUl\n", newpfx, sec_type);
 
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Nit: Its odd that you remove the 'unknown' from this, but we don't get told what
+it is, so surely its still unknown.
+
+
+> +	} else {
+> +		const void *unknown_err;
+> +
+> +		unknown_err = acpi_hest_generic_data_payload(gdata);
+> +		printk("%ssection type: %pUl\n", newpfx, sec_type);
+> +		printk("%ssection length: %d\n", newpfx,
+
+Nit: please use the "%s""section... that this file consistently uses. This means
+this code will still work as expected when someone adds '%ss' support to printk!
+
+
+> +		       gdata->error_data_length);
+> +		print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4,
+> +			       unknown_err, gdata->error_data_length, 0);
+> +	}
+>  
+>  	return;
+
+
+FWIW:
+Reviewed-by: James Morse <james.morse@arm.com>
+
+
+Thanks,
+
+James
