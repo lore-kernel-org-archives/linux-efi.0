@@ -1,44 +1,95 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [RFC PATCH v4 06/28] x86: Add support to enable SME during early
-	boot processing
-Date: Tue, 21 Feb 2017 16:10:39 +0100
-Message-ID: <20170221151039.nheny3gazbnwaidp@pd.tnic>
-References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
-	<20170216154319.19244.7863.stgit@tlendack-t1.amdoffice.net>
-	<20170220125131.cenb2subqjcqf2xr@pd.tnic>
-	<a23be4fa-d7ef-4e7a-5b6b-73e120a5ca80@amd.com>
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V10 05/10] acpi: apei: handle SEA notification type for
+ ARMv8
+Date: Tue, 21 Feb 2017 09:52:54 -0700
+Message-ID: <8c6130c4-7ccd-1f8a-7c7b-7d097f9b298a@codeaurora.org>
+References: <1487188282-2568-1-git-send-email-tbaicar@codeaurora.org>
+ <1487188282-2568-6-git-send-email-tbaicar@codeaurora.org>
+ <CAKv+Gu_+w4UW4ds-2hLe+c36Ch+H4Zx-pMzrkTkqDYbzTHrxnA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <a23be4fa-d7ef-4e7a-5b6b-73e120a5ca80-5C7GfCeVMHo@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <CAKv+Gu_+w4UW4ds-2hLe+c36Ch+H4Zx-pMzrkTkqDYbzTHrxnA@mail.gmail.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Christoffer Dall <christoffer.dall@linaro.org>, Marc Zyngier <marc.zyngier@arm.com>, Paolo Bonzini <pbonzini@redhat.com>, rkrcmar@redhat.com, Russell King <linux@armlinux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Robert Moore <robert.moore@intel.com>, Lv Zheng <lv.zheng@intel.com>, nkaje@codeaurora.org, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, Mark Rutland <mark.rutland@arm.com>, James Morse <james.morse@arm.com>, Andrew Morton <akpm@linux-foundation.org>, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, Laura Abbott <labbott@redhat.com>, shijie.huang@arm.comRichard Ruigrok <r>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 21, 2017 at 08:55:30AM -0600, Tom Lendacky wrote:
-> Actually, %rbp will have the encryption bit set in it at the time of the
-> check so if SME is active we won't take the jump to .Lskip_fixup.
+Hello Ard,
 
-Ha, I didn't think of that! Do you see now what I mean with being
-explicit in the asm boot code? :-)
 
-Please note that in the comment above sme_encrypt_kernel().
+On 2/16/2017 11:32 AM, Ard Biesheuvel wrote:
+> On 15 February 2017 at 19:51, Tyler Baicar <tbaicar@codeaurora.org> wrote:
+>> ARM APEI extension proposal added SEA (Synchronous External Abort)
+>> notification type for ARMv8.
+>> Add a new GHES error source handling function for SEA. If an error
+>> source's notification type is SEA, then this function can be registered
+>> into the SEA exception handler. That way GHES will parse and report
+>> SEA exceptions when they occur.
+>> An SEA can interrupt code that had interrupts masked and is treated as
+>> an NMI. To aid this the page of address space for mapping APEI buffers
+>> while in_nmi() is always reserved, and ghes_ioremap_pfn_nmi() is
+>> changed to use the helper methods to find the prot_t to map with in
+>> the same way as ghes_ioremap_pfn_irq().
+>>
+>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+>> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+>> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+>> ---
+>>   arch/arm64/Kconfig        |  2 ++
+>>   arch/arm64/mm/fault.c     | 13 ++++++++
+>>   drivers/acpi/apei/Kconfig | 14 +++++++++
+>>   drivers/acpi/apei/ghes.c  | 77 +++++++++++++++++++++++++++++++++++++++++++----
+>>   include/acpi/ghes.h       |  7 +++++
+>>   5 files changed, 107 insertions(+), 6 deletions(-)
+>>
+>> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+>> index 1117421..8557556 100644
+>> --- a/arch/arm64/Kconfig
+>> +++ b/arch/arm64/Kconfig
+>>
+>> @@ -498,6 +500,17 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
+>>          pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
+>>                   fault_name(esr), esr, addr);
+>>
+>> +       /*
+>> +        * Synchronous aborts may interrupt code which had interrupts masked.
+>> +        * Before calling out into the wider kernel tell the interested
+>> +        * subsystems.
+>> +        */
+>> +       if(IS_ENABLED(HAVE_ACPI_APEI_SEA)) {
+> Missing space after 'if'
+I'll add that in.
+>> +               nmi_enter();
+>> +               ghes_notify_sea();
+>> +               nmi_exit();
+>> +       }
+>> +
+>>          info.si_signo = SIGBUS;
+>>          info.si_errno = 0;
+>>          info.si_code  = 0;
+>> diff --git a/drivers/acpi/apei/Kconfig b/drivers/acpi/apei/Kconfig
+>> index b0140c8..ef7f7bd 100644
+>> --- a/drivers/acpi/apei/Kconfig
+>> +++ b/drivers/acpi/apei/Kconfig
+>> @@ -4,6 +4,20 @@ config HAVE_ACPI_APEI
+>>   config HAVE_ACPI_APEI_NMI
+>>          bool
+>>
+>> +config HAVE_ACPI_APEI_SEA
+> HAVE_xxx Kconfig options are typically non user selectable, so I
+> suggest to drop the HAVE_ prefix here. Also, you should probably make
+> it 'default y' rather than select it elsewhere; this will still honour
+> the dependency on ARM64 && ACPI_APEI_GHES
+>
+Okay, I will drop the HAVE_ and add in the default y
 
-Thanks.
+Thanks,
+Tyler
 
 -- 
-Regards/Gruss,
-    Boris.
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
 
-Good mailing practices for 400: avoid top-posting and trim the reply.
