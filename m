@@ -1,32 +1,59 @@
-From: Paolo Bonzini <pbonzini@redhat.com>
-Subject: Re: [PATCH v3 4/4] KVM: VMX: Simplify segment_base
-Date: Tue, 21 Feb 2017 05:28:18 -0500 (EST)
-Message-ID: <211929849.24027362.1487672898147.JavaMail.zimbra@redhat.com>
-References: <20170214194259.75960-1-thgarnie@google.com> <CAJcbSZESdSQncHeKNVzHO90W7UJUKxKGy-h+rM82OhBc-Nh=cg@mail.gmail.com> <CALMp9eQAZchjpgmqP1=qj-FXka8+Xbwqiu3xDz9KoLQ60nh-UQ@mail.gmail.com> <CAJcbSZEkqFPVNzygmAjkyxNssZxnJTYBYuMbvjms+3ZGcCY_sQ@mail.gmail.com> <CALCETrV4JqVfHQhz4EuFKfHXK=zABsmwZpgz4ijz89O8v4GdfA@mail.gmail.com> <CAJcbSZHh+q-hSk9XHZuEfE9VWUTdNZHFEbf68=Qk4uPhB2jhoQ@mail.gmail.com> <CAJcbSZEPHBK5FfbU5uorQVkpVbENG0ZBdiA=acJ10rqtLn+TwQ@mail.gmail.com> <20170221080332.GB3125@gmail.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [RFC PATCH v4 13/28] efi: Update efi_mem_type() to return
+ defined EFI mem types
+Date: Tue, 21 Feb 2017 12:05:05 +0000
+Message-ID: <20170221120505.GQ28416@codeblueprint.co.uk>
+References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
+ <20170216154457.19244.5369.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <kernel-hardening-return-6794-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-In-Reply-To: <20170221080332.GB3125@gmail.com>
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Thomas Garnier <thgarnie@google.com>, Andy Lutomirski <luto@amacapital.net>, Jim Mattson <jmattson@google.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Kees Cook <keescook@chromium.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Paul Gortmaker <paul.gortmaker@windriver.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jg>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170216154457.19244.5369.stgit@tlendack-t1.amdoffice.net>
+Sender: linux-doc-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Bori
 List-Id: linux-efi@vger.kernel.org
 
+On Thu, 16 Feb, at 09:44:57AM, Tom Lendacky wrote:
+> Update the efi_mem_type() to return EFI_RESERVED_TYPE instead of a
+> hardcoded 0.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/platform/efi/efi.c |    4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index a15cf81..6407103 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -1037,7 +1037,7 @@ u32 efi_mem_type(unsigned long phys_addr)
+>  	efi_memory_desc_t *md;
+>  
+>  	if (!efi_enabled(EFI_MEMMAP))
+> -		return 0;
+> +		return EFI_RESERVED_TYPE;
+>  
+>  	for_each_efi_memory_desc(md) {
+>  		if ((md->phys_addr <= phys_addr) &&
+> @@ -1045,7 +1045,7 @@ u32 efi_mem_type(unsigned long phys_addr)
+>  				  (md->num_pages << EFI_PAGE_SHIFT))))
+>  			return md->type;
+>  	}
+> -	return 0;
+> +	return EFI_RESERVED_TYPE;
+>  }
 
-> Paolo, how stable, non-rebasing are the KVM tree commits?
+I see what you're getting at here, but arguably the return value in
+these cases never should have been zero to begin with (your change
+just makes that more obvious).
 
-Whatever ends in linux-next is stable.  I have a separate rebasing branch,
-but it's not part of linux-next by design.
+Returning EFI_RESERVED_TYPE implies an EFI memmap entry exists for
+this address, which is misleading because it doesn't in the hunks
+you've modified above.
 
-> Or should we keep Andy's KVM patches together with the GDT patches? Either
-> workflow works for me - it's your call as these are predominantly KVM
-> changes.
-
-I'll delay my pull request to Linus a couple days so that I can test
-Andy's 6 patches. Then you can just base your branch on Linus's tree.
-
-Paolo
+Instead, could you look at returning a negative error value in the
+usual way we do in the Linux kernel, and update the function prototype
+to match? I don't think any callers actually require the return type
+to be u32.
