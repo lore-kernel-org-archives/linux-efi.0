@@ -1,60 +1,42 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+From: Dave Hansen <dave.hansen@intel.com>
 Subject: Re: [RFC PATCH v4 07/28] x86: Provide general kernel support for
  memory encryption
-Date: Wed, 22 Feb 2017 10:43:41 -0600
-Message-ID: <9b048215-0e78-dbf0-e82c-de3a1ee91ff3@amd.com>
+Date: Wed, 22 Feb 2017 10:13:00 -0800
+Message-ID: <a3f56612-396e-b230-d909-93a7128ea2fc@intel.com>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
  <20170216154332.19244.55451.stgit@tlendack-t1.amdoffice.net>
- <20170220183823.k7bsg77wbb4xyc2s@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170220183823.k7bsg77wbb4xyc2s-fF5Pk5pvG8Y@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Andy
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20170216154332.19244.55451.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
+Cc: Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>, Larry Woodman <lwoodman@redhat.com>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 2/20/2017 12:38 PM, Borislav Petkov wrote:
-> On Thu, Feb 16, 2017 at 09:43:32AM -0600, Tom Lendacky wrote:
->> Adding general kernel support for memory encryption includes:
->> - Modify and create some page table macros to include the Secure Memory
->>   Encryption (SME) memory encryption mask
->> - Modify and create some macros for calculating physical and virtual
->>   memory addresses
->> - Provide an SME initialization routine to update the protection map with
->>   the memory encryption mask so that it is used by default
->> - #undef CONFIG_AMD_MEM_ENCRYPT in the compressed boot path
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
->
-> ...
->
->> +#define __sme_pa(x)		(__pa((x)) | sme_me_mask)
->> +#define __sme_pa_nodebug(x)	(__pa_nodebug((x)) | sme_me_mask)
->> +
->>  #else	/* !CONFIG_AMD_MEM_ENCRYPT */
->>
->>  #ifndef sme_me_mask
->> @@ -35,6 +42,13 @@ static inline bool sme_active(void)
->>  }
->>  #endif
->>
->> +static inline void __init sme_early_init(void)
->> +{
->> +}
->> +
->> +#define __sme_pa		__pa
->> +#define __sme_pa_nodebug	__pa_nodebug
->
-> One more thing - in the !CONFIG_AMD_MEM_ENCRYPT case, sme_me_mask is 0
-> so you don't need to define __sme_pa* again.
+On 02/16/2017 07:43 AM, Tom Lendacky wrote:
+>  static inline unsigned long pte_pfn(pte_t pte)
+>  {
+> -	return (pte_val(pte) & PTE_PFN_MASK) >> PAGE_SHIFT;
+> +	return (pte_val(pte) & ~sme_me_mask & PTE_PFN_MASK) >> PAGE_SHIFT;
+>  }
+>  
+>  static inline unsigned long pmd_pfn(pmd_t pmd)
+>  {
+> -	return (pmd_val(pmd) & pmd_pfn_mask(pmd)) >> PAGE_SHIFT;
+> +	return (pmd_val(pmd) & ~sme_me_mask & pmd_pfn_mask(pmd)) >> PAGE_SHIFT;
+>  }
 
-Makes sense.  I'll move those macros outside the #ifdef (I'll do the
-same for the new __sme_clr() and __sme_set() macros, too).
+Could you talk a bit about why you chose to do the "~sme_me_mask" bit in
+here instead of making it a part of PTE_PFN_MASK / pmd_pfn_mask(pmd)?
 
-Thanks,
-Tom
+It might not matter, but I'd be worried that this ends up breaking
+direct users of PTE_PFN_MASK / pmd_pfn_mask(pmd) since they now no
+longer mask the PFN out of a PTE.
 
->
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
