@@ -1,61 +1,40 @@
-From: James Morse <james.morse@arm.com>
-Subject: Re: [PATCH V10 07/10] efi: print unrecognized CPER section
-Date: Wed, 22 Feb 2017 10:13:28 +0000
-Message-ID: <58AD6448.1070301@arm.com>
-References: <1487188282-2568-1-git-send-email-tbaicar@codeaurora.org> <1487188282-2568-8-git-send-email-tbaicar@codeaurora.org> <58AC9093.5020303@arm.com> <20170222011241.GX21222@n2100.armlinux.org.uk>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [RFC PATCH v4 07/28] x86: Provide general kernel support for
+ memory encryption
+Date: Wed, 22 Feb 2017 13:08:03 +0100
+Message-ID: <20170222120802.ke3wvs3ixa72fj2l@pd.tnic>
+References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
+ <20170216154332.19244.55451.stgit@tlendack-t1.amdoffice.net>
+ <20170220152152.apdfjjuvu2u56tik@pd.tnic>
+ <78e1d42a-3a7b-2508-28d6-38a9d45a1c55@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <20170222011241.GX21222@n2100.armlinux.org.uk>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Russell King - ARM Linux <linux@armlinux.org.uk>
-Cc: Tyler Baicar <tbaicar@codeaurora.org>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpic
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <78e1d42a-3a7b-2508-28d6-38a9d45a1c55@amd.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 22/02/17 01:12, Russell King - ARM Linux wrote:
-> On Tue, Feb 21, 2017 at 07:10:11PM +0000, James Morse wrote:
->> Hi Tyler,
->>
->> On 15/02/17 19:51, Tyler Baicar wrote:
->>> +	} else {
->>> +		const void *unknown_err;
->>> +
->>> +		unknown_err = acpi_hest_generic_data_payload(gdata);
->>> +		printk("%ssection type: %pUl\n", newpfx, sec_type);
->>> +		printk("%ssection length: %d\n", newpfx,
->>
->> Nit: please use the "%s""section... that this file consistently uses. This means
->> this code will still work as expected when someone adds '%ss' support to printk!
-> 
-> No.  That is wrong:
-> 
-> "%s""section" is stored in memory as bytes containing:
-> 
-> '%' 's' 's' 'e' 'c' 't' 'i' 'o' 'n'
-> 
-> whereas "%ssection" is stored in memory as bytes containing:
-> 
-> '%' 's' 's' 'e' 'c' 't' 'i' 'o' 'n'
-> 
-> They're exactly the same, so when printk() comes to parse the string, it
-> sees exactly the same byte sequence.  So, the only thing that's happening
-> is code obfuscation for no good reason what so ever.
-> 
-> If you don't believe me, run some build tests and look at the resulting
-> strings... also look at the C standard.  "Adjacent string literal tokens
-> are concatenated."
-> 
-> Please get rid of this obfuscation.
+On Tue, Feb 21, 2017 at 11:18:08AM -0600, Tom Lendacky wrote:
+> It's the latter.  It's really only used for working with values that
+> will either be written to or read from cr3.  I'll add some comments
+> around the macros as well as expand on it in the commit message.
 
-Sure, I was always told not do this, clearly I didn't think about it for very long!
+Ok, that makes sense. Normally we will have the mask in the lower levels
+of the pagetable hierarchy but we need to add it to the CR3 value by
+hand. Yap.
 
-This file otherwise consistently uses the now-weird "%s""otherstring" pattern.
+> Ok, I'll try and come up with something...  maybe __sme_rm or
+> __sme_clear (__sme_clr).
 
+__sme_clr looks nice to me :)
 
+Thanks.
 
-Thanks,
+-- 
+Regards/Gruss,
+    Boris.
 
-James
-
-
+Good mailing practices for 400: avoid top-posting and trim the reply.
