@@ -1,46 +1,61 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [PATCH v3 4/4] KVM: VMX: Simplify segment_base
-Date: Wed, 22 Feb 2017 07:34:15 +0100
-Message-ID: <20170222063415.GA27700@gmail.com>
-References: <20170214194259.75960-1-thgarnie@google.com>
- <CAJcbSZESdSQncHeKNVzHO90W7UJUKxKGy-h+rM82OhBc-Nh=cg@mail.gmail.com>
- <CALMp9eQAZchjpgmqP1=qj-FXka8+Xbwqiu3xDz9KoLQ60nh-UQ@mail.gmail.com>
- <CAJcbSZEkqFPVNzygmAjkyxNssZxnJTYBYuMbvjms+3ZGcCY_sQ@mail.gmail.com>
- <CALCETrV4JqVfHQhz4EuFKfHXK=zABsmwZpgz4ijz89O8v4GdfA@mail.gmail.com>
- <CAJcbSZHh+q-hSk9XHZuEfE9VWUTdNZHFEbf68=Qk4uPhB2jhoQ@mail.gmail.com>
- <CAJcbSZEPHBK5FfbU5uorQVkpVbENG0ZBdiA=acJ10rqtLn+TwQ@mail.gmail.com>
- <20170221080332.GB3125@gmail.com>
- <211929849.24027362.1487672898147.JavaMail.zimbra@redhat.com>
+From: James Morse <james.morse@arm.com>
+Subject: Re: [PATCH V10 07/10] efi: print unrecognized CPER section
+Date: Wed, 22 Feb 2017 10:13:28 +0000
+Message-ID: <58AD6448.1070301@arm.com>
+References: <1487188282-2568-1-git-send-email-tbaicar@codeaurora.org> <1487188282-2568-8-git-send-email-tbaicar@codeaurora.org> <58AC9093.5020303@arm.com> <20170222011241.GX21222@n2100.armlinux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <kernel-hardening-return-6818-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-Sender: Ingo Molnar <mingo.kernel.org@gmail.com>
-Content-Disposition: inline
-In-Reply-To: <211929849.24027362.1487672898147.JavaMail.zimbra@redhat.com>
-To: Paolo Bonzini <pbonzini@redhat.com>
-Cc: Thomas Garnier <thgarnie@google.com>, Andy Lutomirski <luto@amacapital.net>, Jim Mattson <jmattson@google.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Kees Cook <keescook@chromium.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Paul Gortmaker <paul.gortmaker@windriver.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Rusty Russell <rusty@rustcorp.com.au>, Peter Zijlstra <peterz@infradead.org>, Christian
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20170222011241.GX21222@n2100.armlinux.org.uk>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Russell King - ARM Linux <linux@armlinux.org.uk>
+Cc: Tyler Baicar <tbaicar@codeaurora.org>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpic
 List-Id: linux-efi@vger.kernel.org
 
-
-* Paolo Bonzini <pbonzini@redhat.com> wrote:
-
-> > Paolo, how stable, non-rebasing are the KVM tree commits?
+On 22/02/17 01:12, Russell King - ARM Linux wrote:
+> On Tue, Feb 21, 2017 at 07:10:11PM +0000, James Morse wrote:
+>> Hi Tyler,
+>>
+>> On 15/02/17 19:51, Tyler Baicar wrote:
+>>> +	} else {
+>>> +		const void *unknown_err;
+>>> +
+>>> +		unknown_err = acpi_hest_generic_data_payload(gdata);
+>>> +		printk("%ssection type: %pUl\n", newpfx, sec_type);
+>>> +		printk("%ssection length: %d\n", newpfx,
+>>
+>> Nit: please use the "%s""section... that this file consistently uses. This means
+>> this code will still work as expected when someone adds '%ss' support to printk!
 > 
-> Whatever ends in linux-next is stable.  I have a separate rebasing branch,
-> but it's not part of linux-next by design.
-
-Ok, that's nice!
-
-> > Or should we keep Andy's KVM patches together with the GDT patches? Either 
-> > workflow works for me - it's your call as these are predominantly KVM changes.
+> No.  That is wrong:
 > 
-> I'll delay my pull request to Linus a couple days so that I can test Andy's 6 
-> patches. Then you can just base your branch on Linus's tree.
+> "%s""section" is stored in memory as bytes containing:
+> 
+> '%' 's' 's' 'e' 'c' 't' 'i' 'o' 'n'
+> 
+> whereas "%ssection" is stored in memory as bytes containing:
+> 
+> '%' 's' 's' 'e' 'c' 't' 'i' 'o' 'n'
+> 
+> They're exactly the same, so when printk() comes to parse the string, it
+> sees exactly the same byte sequence.  So, the only thing that's happening
+> is code obfuscation for no good reason what so ever.
+> 
+> If you don't believe me, run some build tests and look at the resulting
+> strings... also look at the C standard.  "Adjacent string literal tokens
+> are concatenated."
+> 
+> Please get rid of this obfuscation.
 
-Fantastic, thank you!
+Sure, I was always told not do this, clearly I didn't think about it for very long!
 
-	Ingo
+This file otherwise consistently uses the now-weird "%s""otherstring" pattern.
+
+
+
+Thanks,
+
+James
+
+
