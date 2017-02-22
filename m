@@ -1,8 +1,8 @@
 From: Dave Hansen <dave.hansen@intel.com>
 Subject: Re: [RFC PATCH v4 07/28] x86: Provide general kernel support for
  memory encryption
-Date: Wed, 22 Feb 2017 10:13:00 -0800
-Message-ID: <a3f56612-396e-b230-d909-93a7128ea2fc@intel.com>
+Date: Wed, 22 Feb 2017 10:13:57 -0800
+Message-ID: <cd11c396-d5d2-9f06-086e-6d6f54352fa6@intel.com>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
  <20170216154332.19244.55451.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
@@ -16,24 +16,16 @@ Cc: Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@re
 List-Id: linux-efi@vger.kernel.org
 
 On 02/16/2017 07:43 AM, Tom Lendacky wrote:
->  static inline unsigned long pte_pfn(pte_t pte)
->  {
-> -	return (pte_val(pte) & PTE_PFN_MASK) >> PAGE_SHIFT;
-> +	return (pte_val(pte) & ~sme_me_mask & PTE_PFN_MASK) >> PAGE_SHIFT;
->  }
->  
->  static inline unsigned long pmd_pfn(pmd_t pmd)
->  {
-> -	return (pmd_val(pmd) & pmd_pfn_mask(pmd)) >> PAGE_SHIFT;
-> +	return (pmd_val(pmd) & ~sme_me_mask & pmd_pfn_mask(pmd)) >> PAGE_SHIFT;
->  }
+> )
+> @@ -673,7 +683,7 @@ static inline unsigned long pgd_page_vaddr(pgd_t pgd)
+>   * Currently stuck as a macro due to indirect forward reference to
+>   * linux/mmzone.h's __section_mem_map_addr() definition:
+>   */
+> -#define pgd_page(pgd)		pfn_to_page(pgd_val(pgd) >> PAGE_SHIFT)
+> +#define pgd_page(pgd)	pfn_to_page(pgd_pfn(pgd))
 
-Could you talk a bit about why you chose to do the "~sme_me_mask" bit in
-here instead of making it a part of PTE_PFN_MASK / pmd_pfn_mask(pmd)?
-
-It might not matter, but I'd be worried that this ends up breaking
-direct users of PTE_PFN_MASK / pmd_pfn_mask(pmd) since they now no
-longer mask the PFN out of a PTE.
+FWIW, these seem like good cleanups that can go in separately from the
+rest of your series.
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
