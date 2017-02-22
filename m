@@ -1,195 +1,60 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v4 09/28] x86: Add support for early
- encryption/decryption of memory
-Date: Wed, 22 Feb 2017 09:48:52 -0600
-Message-ID: <7b8d7258-d5b5-6dbb-afe3-755f6a453d40@amd.com>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [RFC PATCH v4 07/28] x86: Provide general kernel support for
+ memory encryption
+Date: Wed, 22 Feb 2017 10:43:41 -0600
+Message-ID: <9b048215-0e78-dbf0-e82c-de3a1ee91ff3@amd.com>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
- <20170216154358.19244.6082.stgit@tlendack-t1.amdoffice.net>
- <20170220182256.qorlso5f4c72hl6o@pd.tnic>
+ <20170216154332.19244.55451.stgit@tlendack-t1.amdoffice.net>
+ <20170220183823.k7bsg77wbb4xyc2s@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170220182256.qorlso5f4c72hl6o@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S.
- Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@li>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170220183823.k7bsg77wbb4xyc2s-fF5Pk5pvG8Y@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Andy
 List-Id: linux-efi@vger.kernel.org
 
-On 2/20/2017 12:22 PM, Borislav Petkov wrote:
-> On Thu, Feb 16, 2017 at 09:43:58AM -0600, Tom Lendacky wrote:
->> Add support to be able to either encrypt or decrypt data in place during
->> the early stages of booting the kernel. This does not change the memory
->> encryption attribute - it is used for ensuring that data present in either
->> an encrypted or decrypted memory area is in the proper state (for example
->> the initrd will have been loaded by the boot loader and will not be
->> encrypted, but the memory that it resides in is marked as encrypted).
+On 2/20/2017 12:38 PM, Borislav Petkov wrote:
+> On Thu, Feb 16, 2017 at 09:43:32AM -0600, Tom Lendacky wrote:
+>> Adding general kernel support for memory encryption includes:
+>> - Modify and create some page table macros to include the Secure Memory
+>>   Encryption (SME) memory encryption mask
+>> - Modify and create some macros for calculating physical and virtual
+>>   memory addresses
+>> - Provide an SME initialization routine to update the protection map with
+>>   the memory encryption mask so that it is used by default
+>> - #undef CONFIG_AMD_MEM_ENCRYPT in the compressed boot path
 >>
->> The early_memmap support is enhanced to specify encrypted and decrypted
->> mappings with and without write-protection. The use of write-protection is
->> necessary when encrypting data "in place". The write-protect attribute is
->> considered cacheable for loads, but not stores. This implies that the
->> hardware will never give the core a dirty line with this memtype.
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->>  arch/x86/include/asm/mem_encrypt.h |   15 +++++++
->>  arch/x86/mm/mem_encrypt.c          |   79 ++++++++++++++++++++++++++++++++++++
->>  2 files changed, 94 insertions(+)
+>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 >
 > ...
 >
->> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
->> index d71df97..ac3565c 100644
->> --- a/arch/x86/mm/mem_encrypt.c
->> +++ b/arch/x86/mm/mem_encrypt.c
->> @@ -14,6 +14,9 @@
->>  #include <linux/init.h>
->>  #include <linux/mm.h>
->>
->> +#include <asm/tlbflush.h>
->> +#include <asm/fixmap.h>
+>> +#define __sme_pa(x)		(__pa((x)) | sme_me_mask)
+>> +#define __sme_pa_nodebug(x)	(__pa_nodebug((x)) | sme_me_mask)
 >> +
->>  extern pmdval_t early_pmd_flags;
+>>  #else	/* !CONFIG_AMD_MEM_ENCRYPT */
 >>
->>  /*
->> @@ -24,6 +27,82 @@
->>  unsigned long sme_me_mask __section(.data) = 0;
->>  EXPORT_SYMBOL_GPL(sme_me_mask);
+>>  #ifndef sme_me_mask
+>> @@ -35,6 +42,13 @@ static inline bool sme_active(void)
+>>  }
+>>  #endif
 >>
->> +/* Buffer used for early in-place encryption by BSP, no locking needed */
->> +static char sme_early_buffer[PAGE_SIZE] __aligned(PAGE_SIZE);
->> +
->> +/*
->> + * This routine does not change the underlying encryption setting of the
->> + * page(s) that map this memory. It assumes that eventually the memory is
->> + * meant to be accessed as either encrypted or decrypted but the contents
->> + * are currently not in the desired stated.
->
-> 				       state.
-
-Will fix.
-
->
->> + *
->> + * This routine follows the steps outlined in the AMD64 Architecture
->> + * Programmer's Manual Volume 2, Section 7.10.8 Encrypt-in-Place.
->> + */
->> +static void __init __sme_early_enc_dec(resource_size_t paddr,
->> +				       unsigned long size, bool enc)
+>> +static inline void __init sme_early_init(void)
 >> +{
->> +	void *src, *dst;
->> +	size_t len;
+>> +}
 >> +
->> +	if (!sme_me_mask)
->> +		return;
->> +
->> +	local_flush_tlb();
->> +	wbinvd();
->> +
->> +	/*
->> +	 * There are limited number of early mapping slots, so map (at most)
->> +	 * one page at time.
->> +	 */
->> +	while (size) {
->> +		len = min_t(size_t, sizeof(sme_early_buffer), size);
->> +
->> +		/*
->> +		 * Create write protected mappings for the current format
+>> +#define __sme_pa		__pa
+>> +#define __sme_pa_nodebug	__pa_nodebug
 >
-> 			  write-protected
+> One more thing - in the !CONFIG_AMD_MEM_ENCRYPT case, sme_me_mask is 0
+> so you don't need to define __sme_pa* again.
 
-Ok.
-
->
->> +		 * of the memory.
->> +		 */
->> +		src = enc ? early_memremap_decrypted_wp(paddr, len) :
->> +			    early_memremap_encrypted_wp(paddr, len);
->> +
->> +		/*
->> +		 * Create mappings for the desired format of the memory.
->> +		 */
->
-> That comment can go - you already say that in the previous one.
-
-Ok.
-
->
->> +		dst = enc ? early_memremap_encrypted(paddr, len) :
->> +			    early_memremap_decrypted(paddr, len);
->
-> Btw, looking at this again, it seems to me that if you write it this
-> way:
->
->                 if (enc) {
->                         src = early_memremap_decrypted_wp(paddr, len);
->                         dst = early_memremap_encrypted(paddr, len);
->                 } else {
->                         src = early_memremap_encrypted_wp(paddr, len);
->                         dst = early_memremap_decrypted(paddr, len);
->                 }
->
-> it might become even more readable. Anyway, just an idea - your decision
-> which is better.
-
-I go back and forth on that one, too.  Not sure what I'll do, I guess it
-will depend on my mood :).
-
->
->> +
->> +		/*
->> +		 * If a mapping can't be obtained to perform the operation,
->> +		 * then eventual access of that area will in the desired
->
-> s/will //
-
-Yup.
+Makes sense.  I'll move those macros outside the #ifdef (I'll do the
+same for the new __sme_clr() and __sme_set() macros, too).
 
 Thanks,
 Tom
 
 >
->> +		 * mode will cause a crash.
->> +		 */
->> +		BUG_ON(!src || !dst);
->> +
->> +		/*
->> +		 * Use a temporary buffer, of cache-line multiple size, to
->> +		 * avoid data corruption as documented in the APM.
->> +		 */
->> +		memcpy(sme_early_buffer, src, len);
->> +		memcpy(dst, sme_early_buffer, len);
->> +
->> +		early_memunmap(dst, len);
->> +		early_memunmap(src, len);
->> +
->> +		paddr += len;
->> +		size -= len;
->> +	}
->> +}
->> +
->> +void __init sme_early_encrypt(resource_size_t paddr, unsigned long size)
->> +{
->> +	__sme_early_enc_dec(paddr, size, true);
->> +}
->> +
->> +void __init sme_early_decrypt(resource_size_t paddr, unsigned long size)
->> +{
->> +	__sme_early_enc_dec(paddr, size, false);
->> +}
->> +
->>  void __init sme_early_init(void)
->>  {
->>  	unsigned int i;
->>
->>
->
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
