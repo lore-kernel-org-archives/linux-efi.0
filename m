@@ -1,182 +1,143 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v4 10/28] x86: Insure that boot memory areas are
- mapped properly
-Date: Wed, 22 Feb 2017 12:34:39 -0600
-Message-ID: <7e9fa3ee-b120-998c-9752-53f7bc3d1d0f@amd.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [RFC PATCH v4 16/28] x86: Add support for changing memory
+ encryption attribute
+Date: Wed, 22 Feb 2017 19:52:15 +0100
+Message-ID: <20170222185215.atbntnyw7252kkbk@pd.tnic>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
- <20170216154411.19244.99258.stgit@tlendack-t1.amdoffice.net>
- <20170220194529.7dekuruclq7hfyhk@pd.tnic>
+ <20170216154535.19244.6294.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170220194529.7dekuruclq7hfyhk@pd.tnic>
+Content-Disposition: inline
+In-Reply-To: <20170216154535.19244.6294.stgit@tlendack-t1.amdoffice.net>
 Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S.
- Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@li>
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
-On 2/20/2017 1:45 PM, Borislav Petkov wrote:
-> On Thu, Feb 16, 2017 at 09:44:11AM -0600, Tom Lendacky wrote:
->> The boot data and command line data are present in memory in a decrypted
->> state and are copied early in the boot process.  The early page fault
->> support will map these areas as encrypted, so before attempting to copy
->> them, add decrypted mappings so the data is accessed properly when copied.
->>
->> For the initrd, encrypt this data in place. Since the future mapping of the
->> initrd area will be mapped as encrypted the data will be accessed properly.
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->
-> ...
->
->> diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
->> index 182a4c7..03f8e74 100644
->> --- a/arch/x86/kernel/head64.c
->> +++ b/arch/x86/kernel/head64.c
->> @@ -46,13 +46,18 @@ static void __init reset_early_page_tables(void)
->>  	write_cr3(__sme_pa_nodebug(early_level4_pgt));
->>  }
->>
->> +void __init __early_pgtable_flush(void)
->> +{
->> +	write_cr3(__sme_pa_nodebug(early_level4_pgt));
->> +}
->
-> Move that to mem_encrypt.c where it is used and make it static. The diff
-> below, ontop of this patch, seems to build fine here.
+On Thu, Feb 16, 2017 at 09:45:35AM -0600, Tom Lendacky wrote:
+> Add support for changing the memory encryption attribute for one or more
+> memory pages.
 
-Ok, I can do that.
+"This will be useful when we, ...., for example."
 
->
-> Also, aren't those mappings global so that you need to toggle CR4.PGE
-> for that?
->
-> PAGE_KERNEL at least has _PAGE_GLOBAL set.
-
-The early_pmd_flags has _PAGE_GLOBAL cleared:
-
-pmdval_t early_pmd_flags = __PAGE_KERNEL_LARGE & ~(_PAGE_GLOBAL | _PAGE_NX);
-
-so I didn't do the CR4.PGE toggle. I could always add it to be safe in
-case that is ever changed. It only happens twice, on the map and on the
-unmap, so it shouldn't be a big deal.
-
->
->> +
->>  /* Create a new PMD entry */
->> -int __init early_make_pgtable(unsigned long address)
->> +int __init __early_make_pgtable(unsigned long address, pmdval_t pmd)
->
-> __early_make_pmd() then, since it creates a PMD entry.
->
->>  	unsigned long physaddr = address - __PAGE_OFFSET;
->>  	pgdval_t pgd, *pgd_p;
->>  	pudval_t pud, *pud_p;
->> -	pmdval_t pmd, *pmd_p;
->> +	pmdval_t *pmd_p;
->>
->>  	/* Invalid address or early pgt is done ?  */
->>  	if (physaddr >= MAXMEM || read_cr3() != __sme_pa_nodebug(early_level4_pgt))
->
-> ...
->
->> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
->> index ac3565c..ec548e9 100644
->> --- a/arch/x86/mm/mem_encrypt.c
->> +++ b/arch/x86/mm/mem_encrypt.c
->> @@ -16,8 +16,12 @@
->>
->>  #include <asm/tlbflush.h>
->>  #include <asm/fixmap.h>
->> +#include <asm/setup.h>
->> +#include <asm/bootparam.h>
->>
->>  extern pmdval_t early_pmd_flags;
->> +int __init __early_make_pgtable(unsigned long, pmdval_t);
->> +void __init __early_pgtable_flush(void);
->
-> What's with the forward declarations?
->
-> Those should be in some header AFAICT.
-
-I can add them to a header, probably arch/x86/include/asm/pgtable.h.
-
-Thanks,
-Tom
-
->
->>   * Since SME related variables are set early in the boot process they must
->> @@ -103,6 +107,76 @@ void __init sme_early_decrypt(resource_size_t paddr, unsigned long size)
->>  	__sme_early_enc_dec(paddr, size, false);
->>  }
->
-> ...
->
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 > ---
-> diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
-> index 03f8e74c7223..c47500d72330 100644
-> --- a/arch/x86/kernel/head64.c
-> +++ b/arch/x86/kernel/head64.c
-> @@ -46,11 +46,6 @@ static void __init reset_early_page_tables(void)
->  	write_cr3(__sme_pa_nodebug(early_level4_pgt));
+>  arch/x86/include/asm/cacheflush.h |    3 ++
+>  arch/x86/mm/pageattr.c            |   66 +++++++++++++++++++++++++++++++++++++
+>  2 files changed, 69 insertions(+)
+> 
+> diff --git a/arch/x86/include/asm/cacheflush.h b/arch/x86/include/asm/cacheflush.h
+> index 872877d..33ae60a 100644
+> --- a/arch/x86/include/asm/cacheflush.h
+> +++ b/arch/x86/include/asm/cacheflush.h
+> @@ -12,6 +12,7 @@
+>   * Executability : eXeutable, NoteXecutable
+>   * Read/Write    : ReadOnly, ReadWrite
+>   * Presence      : NotPresent
+> + * Encryption    : Encrypted, Decrypted
+>   *
+>   * Within a category, the attributes are mutually exclusive.
+>   *
+> @@ -47,6 +48,8 @@
+>  int set_memory_rw(unsigned long addr, int numpages);
+>  int set_memory_np(unsigned long addr, int numpages);
+>  int set_memory_4k(unsigned long addr, int numpages);
+> +int set_memory_encrypted(unsigned long addr, int numpages);
+> +int set_memory_decrypted(unsigned long addr, int numpages);
+>  
+>  int set_memory_array_uc(unsigned long *addr, int addrinarray);
+>  int set_memory_array_wc(unsigned long *addr, int addrinarray);
+> diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+> index 91c5c63..9710f5c 100644
+> --- a/arch/x86/mm/pageattr.c
+> +++ b/arch/x86/mm/pageattr.c
+> @@ -1742,6 +1742,72 @@ int set_memory_4k(unsigned long addr, int numpages)
+>  					__pgprot(0), 1, 0, NULL);
 >  }
->
-> -void __init __early_pgtable_flush(void)
-> -{
-> -	write_cr3(__sme_pa_nodebug(early_level4_pgt));
-> -}
-> -
->  /* Create a new PMD entry */
->  int __init __early_make_pgtable(unsigned long address, pmdval_t pmd)
->  {
-> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-> index ec548e9a76f1..0af020b36232 100644
-> --- a/arch/x86/mm/mem_encrypt.c
-> +++ b/arch/x86/mm/mem_encrypt.c
-> @@ -21,7 +21,7 @@
->
->  extern pmdval_t early_pmd_flags;
->  int __init __early_make_pgtable(unsigned long, pmdval_t);
-> -void __init __early_pgtable_flush(void);
-> +extern pgd_t early_level4_pgt[PTRS_PER_PGD];
->
->  /*
->   * Since SME related variables are set early in the boot process they must
-> @@ -34,6 +34,11 @@ EXPORT_SYMBOL_GPL(sme_me_mask);
->  /* Buffer used for early in-place encryption by BSP, no locking needed */
->  static char sme_early_buffer[PAGE_SIZE] __aligned(PAGE_SIZE);
->
-> +static void __init early_pgtable_flush(void)
+>  
+> +static int __set_memory_enc_dec(unsigned long addr, int numpages, bool enc)
 > +{
-> +	write_cr3(__sme_pa_nodebug(early_level4_pgt));
-> +}
+> +	struct cpa_data cpa;
+> +	unsigned long start;
+> +	int ret;
 > +
->  /*
->   * This routine does not change the underlying encryption setting of the
->   * page(s) that map this memory. It assumes that eventually the memory is
-> @@ -158,7 +163,7 @@ void __init sme_unmap_bootdata(char *real_mode_data)
->  	 */
->  	__sme_map_unmap_bootdata(real_mode_data, false);
->
-> -	__early_pgtable_flush();
-> +	early_pgtable_flush();
->  }
->
->  void __init sme_map_bootdata(char *real_mode_data)
-> @@ -174,7 +179,7 @@ void __init sme_map_bootdata(char *real_mode_data)
->  	 */
->  	__sme_map_unmap_bootdata(real_mode_data, true);
->
-> -	__early_pgtable_flush();
-> +	early_pgtable_flush();
->  }
->
->  void __init sme_early_init(void)
->
+> +	/* Nothing to do if the _PAGE_ENC attribute is zero */
+> +	if (_PAGE_ENC == 0)
+
+Why not:
+
+	if (!sme_active())
+
+?
+
+> +		return 0;
+> +
+> +	/* Save original start address since it will be modified */
+
+That's obvious - it is a small-enough function to fit on the screen. No
+need for the comment.
+
+> +	start = addr;
+> +
+> +	memset(&cpa, 0, sizeof(cpa));
+> +	cpa.vaddr = &addr;
+> +	cpa.numpages = numpages;
+> +	cpa.mask_set = enc ? __pgprot(_PAGE_ENC) : __pgprot(0);
+> +	cpa.mask_clr = enc ? __pgprot(0) : __pgprot(_PAGE_ENC);
+> +	cpa.pgd = init_mm.pgd;
+> +
+> +	/* Should not be working on unaligned addresses */
+> +	if (WARN_ONCE(*cpa.vaddr & ~PAGE_MASK,
+> +		      "misaligned address: %#lx\n", *cpa.vaddr))
+
+Use addr here so that you don't have to deref. gcc is probably smart
+enough but the code should look more readable this way too.
+
+> +		*cpa.vaddr &= PAGE_MASK;
+
+I know, you must use cpa.vaddr here but if you move that alignment check
+over the cpa assignment, you can use addr solely.
+
+> +
+> +	/* Must avoid aliasing mappings in the highmem code */
+> +	kmap_flush_unused();
+> +	vm_unmap_aliases();
+> +
+> +	/*
+> +	 * Before changing the encryption attribute, we need to flush caches.
+> +	 */
+> +	if (static_cpu_has(X86_FEATURE_CLFLUSH))
+> +		cpa_flush_range(start, numpages, 1);
+> +	else
+> +		cpa_flush_all(1);
+
+I guess we don't really need the distinction since a SME CPU most
+definitely implies CLFLUSH support but ok, let's be careful.
+
+> +
+> +	ret = __change_page_attr_set_clr(&cpa, 1);
+> +
+> +	/*
+> +	 * After changing the encryption attribute, we need to flush TLBs
+> +	 * again in case any speculative TLB caching occurred (but no need
+> +	 * to flush caches again).  We could just use cpa_flush_all(), but
+> +	 * in case TLB flushing gets optimized in the cpa_flush_range()
+> +	 * path use the same logic as above.
+> +	 */
+> +	if (static_cpu_has(X86_FEATURE_CLFLUSH))
+> +		cpa_flush_range(start, numpages, 0);
+> +	else
+> +		cpa_flush_all(0);
+> +
+> +	return ret;
+> +}
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
