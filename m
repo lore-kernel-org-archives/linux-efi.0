@@ -1,50 +1,52 @@
-From: Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [REGRESSION] EFI mixed mode patch triggers boot failure
-Date: Thu, 23 Feb 2017 15:02:58 -0800
-Message-ID: <9ab9be94-fb2b-4804-8de3-cd0d8ab7134b@redhat.com>
-References: <dc0bc031-f20e-9ad0-57f4-cfa1e04f8f05@redhat.com>
- <7af87cde-ce79-d6e8-0797-54069a77f42b@redhat.com>
- <20161020120357.GB19876@codeblueprint.co.uk>
- <e34311e8-fe39-3b65-bd6d-8f1594e56336@redhat.com>
- <20170127223441.GJ31613@codeblueprint.co.uk>
- <f7d8f786-6000-cbbe-feb2-c97c0378b6e9@redhat.com>
- <alpine.LSU.2.20.1701301409270.25515@cbobk.fhfr.pm>
- <1208352f-ab6a-4489-d6b1-2f3e537f5e60@redhat.com>
- <alpine.LSU.2.20.1702232132360.24579@cbobk.fhfr.pm>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v4 07/28] x86: Provide general kernel support for
+ memory encryption
+Date: Thu, 23 Feb 2017 17:12:38 -0600
+Message-ID: <73a2c1f7-bc71-3ca8-c312-9a930250cb18@amd.com>
+References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
+ <20170216154332.19244.55451.stgit@tlendack-t1.amdoffice.net>
+ <a3f56612-396e-b230-d909-93a7128ea2fc@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <alpine.LSU.2.20.1702232132360.24579-YHPUNQjx9ReKbouaWp301Q@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jiri Kosina <jikos-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Justin Forbes <jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Gary Lin <glin-IBi9RG/b67k@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <a3f56612-396e-b230-d909-93a7128ea2fc@intel.com>
+Sender: owner-linux-mm@kvack.org
+To: Dave Hansen <dave.hansen@intel.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
+Cc: Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>, Larry Woodman <lwoodman@redhat.com>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 02/23/2017 12:34 PM, Jiri Kosina wrote:
-> On Wed, 1 Feb 2017, Laura Abbott wrote:
-> 
->> That's the main one where debugging was happening. There may be a couple 
->> of others floating around that I hadn't had time to fully investigate. 
->> I'll dupe them to the above if I find them.
-> 
-> [ adding Joey and Gary to CC ]
-> 
-> Laura,
-> 
-> have you by any chance heard back from anyone who's been able to trigger 
-> the original problem?
-> 
-> We're now trying to figure out how widespread the problem might be (and 
-> which part of the BIOS is to blame), so any further datapoints would be 
-> helpful.
-> 
-> Thanks,
-> 
+On 2/22/2017 12:13 PM, Dave Hansen wrote:
+> On 02/16/2017 07:43 AM, Tom Lendacky wrote:
+>>  static inline unsigned long pte_pfn(pte_t pte)
+>>  {
+>> -	return (pte_val(pte) & PTE_PFN_MASK) >> PAGE_SHIFT;
+>> +	return (pte_val(pte) & ~sme_me_mask & PTE_PFN_MASK) >> PAGE_SHIFT;
+>>  }
+>>
+>>  static inline unsigned long pmd_pfn(pmd_t pmd)
+>>  {
+>> -	return (pmd_val(pmd) & pmd_pfn_mask(pmd)) >> PAGE_SHIFT;
+>> +	return (pmd_val(pmd) & ~sme_me_mask & pmd_pfn_mask(pmd)) >> PAGE_SHIFT;
+>>  }
+>
+> Could you talk a bit about why you chose to do the "~sme_me_mask" bit in
+> here instead of making it a part of PTE_PFN_MASK / pmd_pfn_mask(pmd)?
 
-Apart from the original reporter I have not heard back from anyone
-specifically. The original reporter did say the bug was fixed.There
-were a bunch of reporters who didn't respond to requests for info.
+I think that's a good catch.  Let me look at it, but I believe that it
+should be possible to do and avoid what you're worried about below.
 
 Thanks,
-Laura
+Tom
+
+>
+> It might not matter, but I'd be worried that this ends up breaking
+> direct users of PTE_PFN_MASK / pmd_pfn_mask(pmd) since they now no
+> longer mask the PFN out of a PTE.
+>
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
