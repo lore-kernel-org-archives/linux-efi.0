@@ -1,143 +1,76 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [RFC PATCH v4 16/28] x86: Add support for changing memory
- encryption attribute
-Date: Wed, 22 Feb 2017 19:52:15 +0100
-Message-ID: <20170222185215.atbntnyw7252kkbk@pd.tnic>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v4 13/28] efi: Update efi_mem_type() to return defined
+ EFI mem types
+Date: Thu, 23 Feb 2017 11:27:55 -0600
+Message-ID: <41d5df05-14be-ff33-a7e2-6b2f51e2605a@amd.com>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
- <20170216154535.19244.6294.stgit@tlendack-t1.amdoffice.net>
+ <20170216154457.19244.5369.stgit@tlendack-t1.amdoffice.net>
+ <20170221120505.GQ28416@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170216154535.19244.6294.stgit@tlendack-t1.amdoffice.net>
+In-Reply-To: <20170221120505.GQ28416@codeblueprint.co.uk>
 Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Feb 16, 2017 at 09:45:35AM -0600, Tom Lendacky wrote:
-> Add support for changing the memory encryption attribute for one or more
-> memory pages.
+On 2/21/2017 6:05 AM, Matt Fleming wrote:
+> On Thu, 16 Feb, at 09:44:57AM, Tom Lendacky wrote:
+>> Update the efi_mem_type() to return EFI_RESERVED_TYPE instead of a
+>> hardcoded 0.
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>> ---
+>>  arch/x86/platform/efi/efi.c |    4 ++--
+>>  1 file changed, 2 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+>> index a15cf81..6407103 100644
+>> --- a/arch/x86/platform/efi/efi.c
+>> +++ b/arch/x86/platform/efi/efi.c
+>> @@ -1037,7 +1037,7 @@ u32 efi_mem_type(unsigned long phys_addr)
+>>  	efi_memory_desc_t *md;
+>>
+>>  	if (!efi_enabled(EFI_MEMMAP))
+>> -		return 0;
+>> +		return EFI_RESERVED_TYPE;
+>>
+>>  	for_each_efi_memory_desc(md) {
+>>  		if ((md->phys_addr <= phys_addr) &&
+>> @@ -1045,7 +1045,7 @@ u32 efi_mem_type(unsigned long phys_addr)
+>>  				  (md->num_pages << EFI_PAGE_SHIFT))))
+>>  			return md->type;
+>>  	}
+>> -	return 0;
+>> +	return EFI_RESERVED_TYPE;
+>>  }
+>
+> I see what you're getting at here, but arguably the return value in
+> these cases never should have been zero to begin with (your change
+> just makes that more obvious).
+>
+> Returning EFI_RESERVED_TYPE implies an EFI memmap entry exists for
+> this address, which is misleading because it doesn't in the hunks
+> you've modified above.
+>
+> Instead, could you look at returning a negative error value in the
+> usual way we do in the Linux kernel, and update the function prototype
+> to match? I don't think any callers actually require the return type
+> to be u32.
 
-"This will be useful when we, ...., for example."
+I can do that, I'll change the return type to an int. For the
+!efi_enabled I can return -ENOTSUPP and for when an entry isn't
+found I can return -EINVAL.  Sound good?
 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/include/asm/cacheflush.h |    3 ++
->  arch/x86/mm/pageattr.c            |   66 +++++++++++++++++++++++++++++++++++++
->  2 files changed, 69 insertions(+)
-> 
-> diff --git a/arch/x86/include/asm/cacheflush.h b/arch/x86/include/asm/cacheflush.h
-> index 872877d..33ae60a 100644
-> --- a/arch/x86/include/asm/cacheflush.h
-> +++ b/arch/x86/include/asm/cacheflush.h
-> @@ -12,6 +12,7 @@
->   * Executability : eXeutable, NoteXecutable
->   * Read/Write    : ReadOnly, ReadWrite
->   * Presence      : NotPresent
-> + * Encryption    : Encrypted, Decrypted
->   *
->   * Within a category, the attributes are mutually exclusive.
->   *
-> @@ -47,6 +48,8 @@
->  int set_memory_rw(unsigned long addr, int numpages);
->  int set_memory_np(unsigned long addr, int numpages);
->  int set_memory_4k(unsigned long addr, int numpages);
-> +int set_memory_encrypted(unsigned long addr, int numpages);
-> +int set_memory_decrypted(unsigned long addr, int numpages);
->  
->  int set_memory_array_uc(unsigned long *addr, int addrinarray);
->  int set_memory_array_wc(unsigned long *addr, int addrinarray);
-> diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-> index 91c5c63..9710f5c 100644
-> --- a/arch/x86/mm/pageattr.c
-> +++ b/arch/x86/mm/pageattr.c
-> @@ -1742,6 +1742,72 @@ int set_memory_4k(unsigned long addr, int numpages)
->  					__pgprot(0), 1, 0, NULL);
->  }
->  
-> +static int __set_memory_enc_dec(unsigned long addr, int numpages, bool enc)
-> +{
-> +	struct cpa_data cpa;
-> +	unsigned long start;
-> +	int ret;
-> +
-> +	/* Nothing to do if the _PAGE_ENC attribute is zero */
-> +	if (_PAGE_ENC == 0)
+The ia64 arch is the only other arch that defines the function. It
+has just a single return 0 that I'll change to -EINVAL.
 
-Why not:
+Thanks,
+Tom
 
-	if (!sme_active())
-
-?
-
-> +		return 0;
-> +
-> +	/* Save original start address since it will be modified */
-
-That's obvious - it is a small-enough function to fit on the screen. No
-need for the comment.
-
-> +	start = addr;
-> +
-> +	memset(&cpa, 0, sizeof(cpa));
-> +	cpa.vaddr = &addr;
-> +	cpa.numpages = numpages;
-> +	cpa.mask_set = enc ? __pgprot(_PAGE_ENC) : __pgprot(0);
-> +	cpa.mask_clr = enc ? __pgprot(0) : __pgprot(_PAGE_ENC);
-> +	cpa.pgd = init_mm.pgd;
-> +
-> +	/* Should not be working on unaligned addresses */
-> +	if (WARN_ONCE(*cpa.vaddr & ~PAGE_MASK,
-> +		      "misaligned address: %#lx\n", *cpa.vaddr))
-
-Use addr here so that you don't have to deref. gcc is probably smart
-enough but the code should look more readable this way too.
-
-> +		*cpa.vaddr &= PAGE_MASK;
-
-I know, you must use cpa.vaddr here but if you move that alignment check
-over the cpa assignment, you can use addr solely.
-
-> +
-> +	/* Must avoid aliasing mappings in the highmem code */
-> +	kmap_flush_unused();
-> +	vm_unmap_aliases();
-> +
-> +	/*
-> +	 * Before changing the encryption attribute, we need to flush caches.
-> +	 */
-> +	if (static_cpu_has(X86_FEATURE_CLFLUSH))
-> +		cpa_flush_range(start, numpages, 1);
-> +	else
-> +		cpa_flush_all(1);
-
-I guess we don't really need the distinction since a SME CPU most
-definitely implies CLFLUSH support but ok, let's be careful.
-
-> +
-> +	ret = __change_page_attr_set_clr(&cpa, 1);
-> +
-> +	/*
-> +	 * After changing the encryption attribute, we need to flush TLBs
-> +	 * again in case any speculative TLB caching occurred (but no need
-> +	 * to flush caches again).  We could just use cpa_flush_all(), but
-> +	 * in case TLB flushing gets optimized in the cpa_flush_range()
-> +	 * path use the same logic as above.
-> +	 */
-> +	if (static_cpu_has(X86_FEATURE_CLFLUSH))
-> +		cpa_flush_range(start, numpages, 0);
-> +	else
-> +		cpa_flush_all(0);
-> +
-> +	return ret;
-> +}
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+>
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
