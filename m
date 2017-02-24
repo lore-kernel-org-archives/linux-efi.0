@@ -1,20 +1,22 @@
-From: Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 Subject: Re: [PATCH v2] efi/libstub/arm*: Set default address and size cells
  values for an empty dtb
-Date: Fri, 24 Feb 2017 15:36:08 +0000
-Message-ID: <b901a792-5ca0-1489-6dcf-b17a66920bc6@arm.com>
+Date: Fri, 24 Feb 2017 15:36:44 +0000
+Message-ID: <20170224153644.GE417@leverpostej>
 References: <1486502360-18071-1-git-send-email-jhugo@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
 In-Reply-To: <1486502360-18071-1-git-send-email-jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Sameer Goel <sgoel-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+To: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Sameer Goel <sgoel-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 07/02/17 21:19, Jeffrey Hugo wrote:
+Hi,
+
+On Tue, Feb 07, 2017 at 02:19:20PM -0700, Jeffrey Hugo wrote:
 > From: Sameer Goel <sgoel-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 > 
 > In cases where a device tree is not provided (ie ACPI based system), an
@@ -32,16 +34,24 @@ On 07/02/17 21:19, Jeffrey Hugo wrote:
 > 
 > Setting #address-cells and #size-cells to 2 at creation of the empty fdt
 > resolves the observed issue, and makes the fdt less fragile.
-
-Hang on, if this code is shared with 32-bit ARM, doesn't this just move
-the problem around? If arm64 kexec is blindly punting reg properties
-into a DT assuming *-cells == 2, then wouldn't ARM kexec likely be doing
-the same relying on *-cells == 1?
-
-Robin.
-
+> 
 > Signed-off-by: Sameer Goel <sgoel-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 > Signed-off-by: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+
+Technically the kdump ABI isn't set in stone yet, and this isn't a
+problem until that goes in.
+
+So while this generally looks ok, it's possible that this may be
+unnecessary, and on reflection I do symptahise with Ard's earlier
+comment that this shouldn't otherwise be necessary for the empty dt.
+
+So I'd prefer if this were folded into the kdump series if it's
+necessary. That way this goes in if it's necessary, and we can drop it
+otherwise.
+
+Thanks,
+Mark.
+
 > ---
 > 
 > [v2]
@@ -101,4 +111,8 @@ Robin.
 >  
 >  	if (status != 0)
 >  		goto fdt_set_fail;
+> -- 
+> Qualcomm Datacenter Technologies as an affiliate of Qualcomm Technologies, Inc.
+> Qualcomm Technologies, Inc. is a member of the
+> Code Aurora Forum, a Linux Foundation Collaborative Project.
 > 
