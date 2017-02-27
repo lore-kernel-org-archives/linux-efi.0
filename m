@@ -1,93 +1,109 @@
-From: James Morse <james.morse@arm.com>
-Subject: Re: [PATCH V11 10/10] arm/arm64: KVM: add guest SEA support
-Date: Mon, 27 Feb 2017 13:58:42 +0000
-Message-ID: <58B43092.6040401@arm.com>
-References: <1487712121-16688-1-git-send-email-tbaicar@codeaurora.org>
- <1487712121-16688-11-git-send-email-tbaicar@codeaurora.org>
- <df6ba5dc-d93f-925a-46bf-1e1e209d17f3@huawei.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [RFC PATCH v4 19/28] swiotlb: Add warnings for use of bounce
+ buffers with SME
+Date: Mon, 27 Feb 2017 18:52:59 +0100
+Message-ID: <20170227175259.whl75utazbzxp7jo@pd.tnic>
+References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
+ <20170216154619.19244.76653.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <df6ba5dc-d93f-925a-46bf-1e1e209d17f3@huawei.com>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Xiongfeng Wang <wangxiongfeng2@huawei.com>, punit.agrawal@arm.com
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Tyler Baicar <tbaicar@codeaurora.org>, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, marc.zyngier@arm.com, john.garry@huawei.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+Content-Type: text/plain; charset=utf-8
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170216154619.19244.76653.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Wang Xiongfeng,
+On Thu, Feb 16, 2017 at 09:46:19AM -0600, Tom Lendacky wrote:
+> Add warnings to let the user know when bounce buffers are being used for
+> DMA when SME is active.  Since the bounce buffers are not in encrypted
+> memory, these notifications are to allow the user to determine some
+> appropriate action - if necessary.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/include/asm/mem_encrypt.h |   11 +++++++++++
+>  include/linux/dma-mapping.h        |   11 +++++++++++
+>  include/linux/mem_encrypt.h        |    6 ++++++
+>  lib/swiotlb.c                      |    3 +++
+>  4 files changed, 31 insertions(+)
+> 
+> diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
+> index 87e816f..5a17f1b 100644
+> --- a/arch/x86/include/asm/mem_encrypt.h
+> +++ b/arch/x86/include/asm/mem_encrypt.h
+> @@ -26,6 +26,11 @@ static inline bool sme_active(void)
+>  	return (sme_me_mask) ? true : false;
+>  }
+>  
+> +static inline u64 sme_dma_mask(void)
+> +{
+> +	return ((u64)sme_me_mask << 1) - 1;
+> +}
+> +
+>  void __init sme_early_encrypt(resource_size_t paddr,
+>  			      unsigned long size);
+>  void __init sme_early_decrypt(resource_size_t paddr,
+> @@ -53,6 +58,12 @@ static inline bool sme_active(void)
+>  {
+>  	return false;
+>  }
+> +
+> +static inline u64 sme_dma_mask(void)
+> +{
+> +	return 0ULL;
+> +}
+> +
+>  #endif
+>  
+>  static inline void __init sme_early_encrypt(resource_size_t paddr,
+> diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
+> index 10c5a17..130bef7 100644
+> --- a/include/linux/dma-mapping.h
+> +++ b/include/linux/dma-mapping.h
+> @@ -10,6 +10,7 @@
+>  #include <linux/scatterlist.h>
+>  #include <linux/kmemcheck.h>
+>  #include <linux/bug.h>
+> +#include <linux/mem_encrypt.h>
+>  
+>  /**
+>   * List of possible attributes associated with a DMA mapping. The semantics
+> @@ -557,6 +558,11 @@ static inline int dma_set_mask(struct device *dev, u64 mask)
+>  
+>  	if (!dev->dma_mask || !dma_supported(dev, mask))
+>  		return -EIO;
+> +
+> +	if (sme_active() && (mask < sme_dma_mask()))
+> +		dev_warn(dev,
+> +			 "SME is active, device will require DMA bounce buffers\n");
+> +
 
-On 25/02/17 07:15, Xiongfeng Wang wrote:
-> On 2017/2/22 5:22, Tyler Baicar wrote:
->> Currently external aborts are unsupported by the guest abort
->> handling. Add handling for SEAs so that the host kernel reports
->> SEAs which occur in the guest kernel.
+Yes, definitely _once() here.
 
->> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
->> index a5265ed..04f1dd50 100644
->> --- a/arch/arm/kvm/mmu.c
->> +++ b/arch/arm/kvm/mmu.c
->> @@ -1444,8 +1445,21 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
->>  
->>  	/* Check the stage-2 fault is trans. fault or write fault */
->>  	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
->> -	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
->> -	    fault_status != FSC_ACCESS) {
->> +
->> +	/* The host kernel will handle the synchronous external abort. There
->> +	 * is no need to pass the error into the guest.
->> +	 */
+It could be extended later to be per-device if the need arises.
 
-> Can we inject an sea into the guest, so that the guest can kill the
-> application which causes the error if the guest won't be terminated
-> later. I'm not sure whether ghes_handle_memory_failure() called in
-> ghes_do_proc() will kill the qemu process. I think it only kill user
-> processes marked with PF_MCE_PROCESS & PF_MCE_EARLY.
+Also, a bit above in this function, we test if (ops->set_dma_mask) so
+device drivers which supply even an empty ->set_dma_mask will circumvent
+this check.
 
-My understanding is the pages will get unmapped and recovered where possible
-(e.g. re-read from disk), the user space process will get SIGBUS/SIGSEV when it
-next tries to access that page, which could be some time later.
-These flags in find_early_kill_thread() are a way to make the memory-failure
-code signal the process early, before it does any recovery. The 'MCE' makes me
-think its x86 specific.
-(early and late are described more in [0])
+It probably doesn't matter all that much right now because the
+only driver I see right now defining this method, though, is
+ethernet/intel/fm10k/fm10k_pf.c and some other arches' functionality
+which is unrelated here.
+
+But still...
 
 
-Guests are a special case as QEMU may never access the faulty memory itself, so
-it won't receive the 'late' signal. It looks like ARM/arm64 KVM lacks support
-for KVM_PFN_ERR_HWPOISON which sends SIGBUS from KVM's fault-handling code. I
-have patches to add support for this which I intend to send at rc1.
+-- 
+Regards/Gruss,
+    Boris.
 
-[0] suggests 'KVM qemu' sets these MCE flags to take the 'early' path, but given
-x86s KVM_PFN_ERR_HWPOISON, this may be out of date.
+Good mailing practices for 400: avoid top-posting and trim the reply.
 
-
-Either way, once QEMU gets a signal indicating the virtual address, it can
-generate its own APEI CPER records and use the KVM APIs to mock up an
-Synchronous External Abort, (or inject an IRQ or run the vcpu waiting for the
-guest's polling thread to come round, whichever was described to the guest via
-the HEST/GHES tables).
-
-We can't hand the APEI CPER records we have in the kernel to the guest, as they
-hold a host physical address, and maybe a host virtual address. We don't know
-where in guest memory we could write new APEI CPER records as these locations
-have to be reserved in the guests-UEFI memory map, and only QEMU knows where
-they are.
-
-To deliver RAS events to a guest we have to get QEMU involved.
-
-
-Thanks,
-
-James
-
-
-[0] https://www.kernel.org/doc/Documentation/vm/hwpoison.txt
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
