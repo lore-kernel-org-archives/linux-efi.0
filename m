@@ -1,109 +1,124 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [RFC PATCH v4 19/28] swiotlb: Add warnings for use of bounce
- buffers with SME
-Date: Mon, 27 Feb 2017 18:52:59 +0100
-Message-ID: <20170227175259.whl75utazbzxp7jo@pd.tnic>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [RFC PATCH v4 21/28] x86: Check for memory encryption on the APs
+Date: Mon, 27 Feb 2017 19:17:01 +0100
+Message-ID: <20170227181701.2lynk4rm77yk4msf@pd.tnic>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
- <20170216154619.19244.76653.stgit@tlendack-t1.amdoffice.net>
+	<20170216154647.19244.18733.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20170216154619.19244.76653.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>
+In-Reply-To: <20170216154647.19244.18733.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Feb 16, 2017 at 09:46:19AM -0600, Tom Lendacky wrote:
-> Add warnings to let the user know when bounce buffers are being used for
-> DMA when SME is active.  Since the bounce buffers are not in encrypted
-> memory, these notifications are to allow the user to determine some
-> appropriate action - if necessary.
+On Thu, Feb 16, 2017 at 09:46:47AM -0600, Tom Lendacky wrote:
+> Add support to check if memory encryption is active in the kernel and that
+> it has been enabled on the AP. If memory encryption is active in the kernel
+> but has not been enabled on the AP, then set the SYS_CFG MSR bit to enable
+> memory encryption on that AP and allow the AP to continue start up.
 > 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 > ---
->  arch/x86/include/asm/mem_encrypt.h |   11 +++++++++++
->  include/linux/dma-mapping.h        |   11 +++++++++++
->  include/linux/mem_encrypt.h        |    6 ++++++
->  lib/swiotlb.c                      |    3 +++
->  4 files changed, 31 insertions(+)
+>  arch/x86/include/asm/realmode.h      |   12 ++++++++++++
+>  arch/x86/realmode/init.c             |    4 ++++
+>  arch/x86/realmode/rm/trampoline_64.S |   17 +++++++++++++++++
+>  3 files changed, 33 insertions(+)
 > 
-> diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
-> index 87e816f..5a17f1b 100644
-> --- a/arch/x86/include/asm/mem_encrypt.h
-> +++ b/arch/x86/include/asm/mem_encrypt.h
-> @@ -26,6 +26,11 @@ static inline bool sme_active(void)
->  	return (sme_me_mask) ? true : false;
->  }
+> diff --git a/arch/x86/include/asm/realmode.h b/arch/x86/include/asm/realmode.h
+> index 230e190..4f7ef53 100644
+> --- a/arch/x86/include/asm/realmode.h
+> +++ b/arch/x86/include/asm/realmode.h
+> @@ -1,6 +1,15 @@
+>  #ifndef _ARCH_X86_REALMODE_H
+>  #define _ARCH_X86_REALMODE_H
 >  
-> +static inline u64 sme_dma_mask(void)
-> +{
-> +	return ((u64)sme_me_mask << 1) - 1;
-> +}
+> +/*
+> + * Flag bit definitions for use with the flags field of the trampoline header
+> + * int the CONFIG_X86_64 variant.
+
+s/int/in/
+
+> + */
+> +#define TH_FLAGS_SME_ACTIVE_BIT		0
+> +#define TH_FLAGS_SME_ACTIVE		BIT(TH_FLAGS_SME_ACTIVE_BIT)
 > +
->  void __init sme_early_encrypt(resource_size_t paddr,
->  			      unsigned long size);
->  void __init sme_early_decrypt(resource_size_t paddr,
-> @@ -53,6 +58,12 @@ static inline bool sme_active(void)
->  {
->  	return false;
->  }
+> +#ifndef __ASSEMBLY__
 > +
-> +static inline u64 sme_dma_mask(void)
-> +{
-> +	return 0ULL;
-> +}
-> +
+>  #include <linux/types.h>
+>  #include <asm/io.h>
+>  
+> @@ -38,6 +47,7 @@ struct trampoline_header {
+>  	u64 start;
+>  	u64 efer;
+>  	u32 cr4;
+> +	u32 flags;
 >  #endif
+>  };
 >  
->  static inline void __init sme_early_encrypt(resource_size_t paddr,
-> diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
-> index 10c5a17..130bef7 100644
-> --- a/include/linux/dma-mapping.h
-> +++ b/include/linux/dma-mapping.h
-> @@ -10,6 +10,7 @@
->  #include <linux/scatterlist.h>
->  #include <linux/kmemcheck.h>
->  #include <linux/bug.h>
-> +#include <linux/mem_encrypt.h>
+> @@ -69,4 +79,6 @@ static inline size_t real_mode_size_needed(void)
+>  void set_real_mode_mem(phys_addr_t mem, size_t size);
+>  void reserve_real_mode(void);
 >  
->  /**
->   * List of possible attributes associated with a DMA mapping. The semantics
-> @@ -557,6 +558,11 @@ static inline int dma_set_mask(struct device *dev, u64 mask)
->  
->  	if (!dev->dma_mask || !dma_supported(dev, mask))
->  		return -EIO;
+> +#endif /* __ASSEMBLY__ */
 > +
-> +	if (sme_active() && (mask < sme_dma_mask()))
-> +		dev_warn(dev,
-> +			 "SME is active, device will require DMA bounce buffers\n");
+>  #endif /* _ARCH_X86_REALMODE_H */
+> diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
+> index 21d7506..5010089 100644
+> --- a/arch/x86/realmode/init.c
+> +++ b/arch/x86/realmode/init.c
+> @@ -102,6 +102,10 @@ static void __init setup_real_mode(void)
+>  	trampoline_cr4_features = &trampoline_header->cr4;
+>  	*trampoline_cr4_features = mmu_cr4_features;
+>  
+> +	trampoline_header->flags = 0;
+> +	if (sme_active())
+> +		trampoline_header->flags |= TH_FLAGS_SME_ACTIVE;
 > +
+>  	trampoline_pgd = (u64 *) __va(real_mode_header->trampoline_pgd);
+>  	trampoline_pgd[0] = trampoline_pgd_entry.pgd;
+>  	trampoline_pgd[511] = init_level4_pgt[511].pgd;
+> diff --git a/arch/x86/realmode/rm/trampoline_64.S b/arch/x86/realmode/rm/trampoline_64.S
+> index dac7b20..a88c3d1 100644
+> --- a/arch/x86/realmode/rm/trampoline_64.S
+> +++ b/arch/x86/realmode/rm/trampoline_64.S
+> @@ -30,6 +30,7 @@
+>  #include <asm/msr.h>
+>  #include <asm/segment.h>
+>  #include <asm/processor-flags.h>
+> +#include <asm/realmode.h>
+>  #include "realmode.h"
+>  
+>  	.text
+> @@ -92,6 +93,21 @@ ENTRY(startup_32)
+>  	movl	%edx, %fs
+>  	movl	%edx, %gs
+>  
+> +	/* Check for memory encryption support */
 
-Yes, definitely _once() here.
+Let's add some blurb here about this being a safety net in case BIOS
+f*cks up. Which wouldn't be that far-fetched... :-)
 
-It could be extended later to be per-device if the need arises.
-
-Also, a bit above in this function, we test if (ops->set_dma_mask) so
-device drivers which supply even an empty ->set_dma_mask will circumvent
-this check.
-
-It probably doesn't matter all that much right now because the
-only driver I see right now defining this method, though, is
-ethernet/intel/fm10k/fm10k_pf.c and some other arches' functionality
-which is unrelated here.
-
-But still...
-
+> +	bt	$TH_FLAGS_SME_ACTIVE_BIT, pa_tr_flags
+> +	jnc	.Ldone
+> +	movl	$MSR_K8_SYSCFG, %ecx
+> +	rdmsr
+> +	bts	$MSR_K8_SYSCFG_MEM_ENCRYPT_BIT, %eax
+> +	jc	.Ldone
 
 -- 
 Regards/Gruss,
     Boris.
 
 Good mailing practices for 400: avoid top-posting and trim the reply.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
