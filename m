@@ -1,124 +1,186 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [RFC PATCH v4 21/28] x86: Check for memory encryption on the APs
-Date: Mon, 27 Feb 2017 19:17:01 +0100
-Message-ID: <20170227181701.2lynk4rm77yk4msf@pd.tnic>
-References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
-	<20170216154647.19244.18733.stgit@tlendack-t1.amdoffice.net>
+From: Paul Gortmaker <paul.gortmaker@windriver.com>
+Subject: Re: [RFC PATCH V1 v4.10-rc3 1/1] acpi: apei: handle GSIV
+ notification type
+Date: Mon, 27 Feb 2017 13:58:19 -0500
+Message-ID: <20170227185818.GA8577@windriver.com>
+References: <86258A5CC0A3704780874CF6004BA8A62DCAB57E@lhreml502-mbs>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <20170216154647.19244.18733.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <86258A5CC0A3704780874CF6004BA8A62DCAB57E@lhreml502-mbs>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Shiju Jose <shiju.jose@huawei.com>
+Cc: "mark.rutland@arm.com" <mark.rutland@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "kvm@vger.kernel.org" <kvm@vger.kernel.org>, "rkrcmar@redhat.com" <rkrcmar@redhat.com>, "matt@codeblueprint.co.uk" <matt@codeblueprint.co.uk>, "catalin.marinas@arm.com" <catalin.marinas@arm.com>, Tyler Baicar <tbaicar@codeaurora.org>, "will.deacon@arm.com" <will.deacon@arm.com>, "robert.moore@intel.com" <robert.moore@intel.com>, "lv.zheng@intel.com" <lv.zheng@intel.com>, "Guohanjun (Hanjun Guo)" <guohanjun@huawei.com>, "kvmarm@lists.cs.columbia.edu" <kvmarm@lists.cs.columbia.edu>, "fu.wei@linaro.org" <fu.wei@linaro.org>, Gabriele Paoloni <gabriele.paoloni@huawei.com>, "tn@semihalf.com" <tn@semihalf.com>, "zjzhang@codeaurora.org" <zjzhang@codeaurora.org>, "linux@armlinux.org.uk" <linux@armlinux.org.uk>, "wangxiongfeng (C)" <wangxiongfeng2@huawei.com>, linux-ac
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Feb 16, 2017 at 09:46:47AM -0600, Tom Lendacky wrote:
-> Add support to check if memory encryption is active in the kernel and that
-> it has been enabled on the AP. If memory encryption is active in the kernel
-> but has not been enabled on the AP, then set the SYS_CFG MSR bit to enable
-> memory encryption on that AP and allow the AP to continue start up.
+[[RFC PATCH V1 v4.10-rc3 1/1] acpi: apei: handle GSIV notification type] On 27/02/2017 (Mon 18:19) Shiju Jose wrote:
+
+> Add a new GHES error source handling function for
+> GSIV(Global System Interrupt Vector).
+> If an error source's notification type is GSIV,
+> then this handling function can be registered
+> into the GSIV handler and it can parse
+> and report error information when they occur.
 > 
-> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+> Signed-off-by: Xiongfeng Wang <wangxiongfeng2@huawei.com>
+> Signed-off-by: Shiju Jose <shiju.jose@huawei.com>
 > ---
->  arch/x86/include/asm/realmode.h      |   12 ++++++++++++
->  arch/x86/realmode/init.c             |    4 ++++
->  arch/x86/realmode/rm/trampoline_64.S |   17 +++++++++++++++++
->  3 files changed, 33 insertions(+)
+>  arch/arm64/Kconfig        |  1 +
+>  drivers/acpi/apei/Kconfig |  9 +++++++
+>  drivers/acpi/apei/ghes.c  | 66 +++++++++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 76 insertions(+)
 > 
-> diff --git a/arch/x86/include/asm/realmode.h b/arch/x86/include/asm/realmode.h
-> index 230e190..4f7ef53 100644
-> --- a/arch/x86/include/asm/realmode.h
-> +++ b/arch/x86/include/asm/realmode.h
+> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+> index 1117421..e41fdcf 100644
+> --- a/arch/arm64/Kconfig
+> +++ b/arch/arm64/Kconfig
+> @@ -53,6 +53,7 @@ config ARM64
+>  	select HANDLE_DOMAIN_IRQ
+>  	select HARDIRQS_SW_RESEND
+>  	select HAVE_ACPI_APEI if (ACPI && EFI)
+> +	select HAVE_ACPI_APEI_GSIV if (ACPI && EFI)
+>  	select HAVE_ALIGNED_STRUCT_PAGE if SLUB
+>  	select HAVE_ARCH_AUDITSYSCALL
+>  	select HAVE_ARCH_BITREVERSE
+> diff --git a/drivers/acpi/apei/Kconfig b/drivers/acpi/apei/Kconfig
+> index b0140c8..f45ddb5 100644
+> --- a/drivers/acpi/apei/Kconfig
+> +++ b/drivers/acpi/apei/Kconfig
 > @@ -1,6 +1,15 @@
->  #ifndef _ARCH_X86_REALMODE_H
->  #define _ARCH_X86_REALMODE_H
+>  config HAVE_ACPI_APEI
+>  	bool
 >  
-> +/*
-> + * Flag bit definitions for use with the flags field of the trampoline header
-> + * int the CONFIG_X86_64 variant.
-
-s/int/in/
-
-> + */
-> +#define TH_FLAGS_SME_ACTIVE_BIT		0
-> +#define TH_FLAGS_SME_ACTIVE		BIT(TH_FLAGS_SME_ACTIVE_BIT)
+> +config HAVE_ACPI_APEI_GSIV
+> +        bool "APEI GSIV(Global System Interrupt) logging/recovering support"
+> +        depends on ACPI_APEI && ACPI_APEI_GHES
+> +        help
+> +          This option should be enabled if the system supports
+> +          firmware first handling of GSIV (Global System Interrupt)
+> +	  for the hardware errors and allows OS to do error
+> +          recovery/logging.
 > +
-> +#ifndef __ASSEMBLY__
-> +
->  #include <linux/types.h>
->  #include <asm/io.h>
+>  config HAVE_ACPI_APEI_NMI
+>  	bool
+
+A "config HAVE_<foo>" option normally doesn't have a "help" section
+since it isn't meant to be user selected.  You can see that in the other
+two options that exist right here in the context of your patch.
+
+Also your Cc list here seems rather large; not sure how you came up with
+such a large list...
+
+P.
+--
+
 >  
-> @@ -38,6 +47,7 @@ struct trampoline_header {
->  	u64 start;
->  	u64 efer;
->  	u32 cr4;
-> +	u32 flags;
->  #endif
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index e53bef6..e1611d2 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -721,6 +721,58 @@ static struct notifier_block ghes_notifier_sci = {
+>  	.notifier_call = ghes_notify_sci,
 >  };
 >  
-> @@ -69,4 +79,6 @@ static inline size_t real_mode_size_needed(void)
->  void set_real_mode_mem(phys_addr_t mem, size_t size);
->  void reserve_real_mode(void);
->  
-> +#endif /* __ASSEMBLY__ */
+> +#ifdef CONFIG_HAVE_ACPI_APEI_GSIV
+> +static LIST_HEAD(ghes_gsiv);
 > +
->  #endif /* _ARCH_X86_REALMODE_H */
-> diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
-> index 21d7506..5010089 100644
-> --- a/arch/x86/realmode/init.c
-> +++ b/arch/x86/realmode/init.c
-> @@ -102,6 +102,10 @@ static void __init setup_real_mode(void)
->  	trampoline_cr4_features = &trampoline_header->cr4;
->  	*trampoline_cr4_features = mmu_cr4_features;
->  
-> +	trampoline_header->flags = 0;
-> +	if (sme_active())
-> +		trampoline_header->flags |= TH_FLAGS_SME_ACTIVE;
+> +static int ghes_notify_gsiv(struct notifier_block *this,
+> +				unsigned long event, void *data)
+> +{
+> +	struct ghes *ghes;
+> +	int ret = NOTIFY_DONE;
 > +
->  	trampoline_pgd = (u64 *) __va(real_mode_header->trampoline_pgd);
->  	trampoline_pgd[0] = trampoline_pgd_entry.pgd;
->  	trampoline_pgd[511] = init_level4_pgt[511].pgd;
-> diff --git a/arch/x86/realmode/rm/trampoline_64.S b/arch/x86/realmode/rm/trampoline_64.S
-> index dac7b20..a88c3d1 100644
-> --- a/arch/x86/realmode/rm/trampoline_64.S
-> +++ b/arch/x86/realmode/rm/trampoline_64.S
-> @@ -30,6 +30,7 @@
->  #include <asm/msr.h>
->  #include <asm/segment.h>
->  #include <asm/processor-flags.h>
-> +#include <asm/realmode.h>
->  #include "realmode.h"
->  
->  	.text
-> @@ -92,6 +93,21 @@ ENTRY(startup_32)
->  	movl	%edx, %fs
->  	movl	%edx, %gs
->  
-> +	/* Check for memory encryption support */
-
-Let's add some blurb here about this being a safety net in case BIOS
-f*cks up. Which wouldn't be that far-fetched... :-)
-
-> +	bt	$TH_FLAGS_SME_ACTIVE_BIT, pa_tr_flags
-> +	jnc	.Ldone
-> +	movl	$MSR_K8_SYSCFG, %ecx
-> +	rdmsr
-> +	bts	$MSR_K8_SYSCFG_MEM_ENCRYPT_BIT, %eax
-> +	jc	.Ldone
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+> +	rcu_read_lock();
+> +	list_for_each_entry_rcu(ghes, &ghes_gsiv, list) {
+> +	if (!ghes_proc(ghes))
+> +		ret = NOTIFY_OK;
+> +	}
+> +	rcu_read_unlock();
+> +	return ret;
+> +}
+> +static struct notifier_block ghes_notifier_gsiv = {
+> +	.notifier_call = ghes_notify_gsiv,
+> +};
+> +
+> +static void ghes_gsiv_add(struct ghes *ghes)
+> +{
+> +	mutex_lock(&ghes_list_mutex);
+> +	if (list_empty(&ghes_gsiv))
+> +		register_acpi_hed_notifier(&ghes_notifier_gsiv);
+> +	list_add_rcu(&ghes->list, &ghes_gsiv);
+> +	mutex_unlock(&ghes_list_mutex);
+> +}
+> +
+> +static void ghes_gsiv_remove(struct ghes *ghes)
+> +{
+> +	mutex_lock(&ghes_list_mutex);
+> +	list_del_rcu(&ghes->list);
+> +	if (list_empty(&ghes_gsiv))
+> +		unregister_acpi_hed_notifier(&ghes_notifier_gsiv);
+> +	mutex_unlock(&ghes_list_mutex);
+> +}
+> +#else /* CONFIG_HAVE_ACPI_APEI_GSIV */
+> +static inline void ghes_gsiv_add(struct ghes *ghes)
+> +{
+> +	pr_err(GHES_PFX "ID: %d, trying to add GSIV notification which is not supported\n",
+> +	       ghes->generic->header.source_id);
+> +}
+> +
+> +static inline void ghes_gsiv_remove(struct ghes *ghes)
+> +{
+> +	pr_err(GHES_PFX "ID: %d, trying to remove GSIV notification which is not supported\n",
+> +	       ghes->generic->header.source_id);
+> +}
+> +#endif /* CONFIG_HAVE_ACPI_APEI_GSIV */
+> +
+>  #ifdef CONFIG_HAVE_ACPI_APEI_NMI
+>  /*
+>   * printk is not safe in NMI context.  So in NMI handler, we allocate
+> @@ -973,6 +1025,14 @@ static int ghes_probe(struct platform_device *ghes_dev)
+>  			goto err;
+>  		}
+>  		break;
+> +	case ACPI_HEST_NOTIFY_GSIV:
+> +		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_GSIV)) {
+> +			pr_warn(GHES_PFX "Generic hardware error source: %d notified via notification GSIV is not supported\n",
+> +				generic->header.source_id);
+> +			rc = -ENOTSUPP;
+> +			goto err;
+> +		}
+> +		break;
+>  	case ACPI_HEST_NOTIFY_LOCAL:
+>  		pr_warning(GHES_PFX "Generic hardware error source: %d notified via local interrupt is not supported!\n",
+>  			   generic->header.source_id);
+> @@ -1034,6 +1094,9 @@ static int ghes_probe(struct platform_device *ghes_dev)
+>  	case ACPI_HEST_NOTIFY_NMI:
+>  		ghes_nmi_add(ghes);
+>  		break;
+> +	case ACPI_HEST_NOTIFY_GSIV:
+> +		ghes_gsiv_add(ghes);
+> +		break;
+>  	default:
+>  		BUG();
+>  	}
+> @@ -1076,6 +1139,9 @@ static int ghes_remove(struct platform_device *ghes_dev)
+>  	case ACPI_HEST_NOTIFY_NMI:
+>  		ghes_nmi_remove(ghes);
+>  		break;
+> +	case ACPI_HEST_NOTIFY_GSIV:
+> +		ghes_gsiv_remove(ghes);
+> +		break;
+>  	default:
+>  		BUG();
+>  		break;
+> -- 
+> 2.1.4
+> 
