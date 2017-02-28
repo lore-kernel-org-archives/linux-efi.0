@@ -1,134 +1,93 @@
-From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V11 10/10] arm/arm64: KVM: add guest SEA support
-Date: Tue, 28 Feb 2017 12:43:08 -0700
-Message-ID: <ff3aa805-0e03-9854-e294-ff6934c57f3f@codeaurora.org>
-References: <1487712121-16688-1-git-send-email-tbaicar@codeaurora.org>
- <1487712121-16688-11-git-send-email-tbaicar@codeaurora.org>
- <58B00E12.5020602@arm.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v4 11/28] x86: Add support to determine the E820 type
+ of an address
+Date: Tue, 28 Feb 2017 16:34:39 -0600
+Message-ID: <e6146786-16c5-99ab-52c9-2bdd50c7d9ba@amd.com>
+References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
+ <20170216154430.19244.95519.stgit@tlendack-t1.amdoffice.net>
+ <20170220200955.32e2wqxgulswnr55@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <58B00E12.5020602@arm.com>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: James Morse <james.morse@arm.com>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20170220200955.32e2wqxgulswnr55@pd.tnic>
+Sender: owner-linux-mm@kvack.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S.
+ Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
+ Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@li>
 List-Id: linux-efi@vger.kernel.org
 
-Hello James,
-
-
-On 2/24/2017 3:42 AM, James Morse wrote:
-> On 21/02/17 21:22, Tyler Baicar wrote:
->> Currently external aborts are unsupported by the guest abort
->> handling. Add handling for SEAs so that the host kernel reports
->> SEAs which occur in the guest kernel.
->> diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
->> index e22089f..33a77509 100644
->> --- a/arch/arm/include/asm/kvm_arm.h
->> +++ b/arch/arm/include/asm/kvm_arm.h
->> @@ -187,6 +187,7 @@
->>   #define FSC_FAULT	(0x04)
->>   #define FSC_ACCESS	(0x08)
->>   #define FSC_PERM	(0x0c)
->> +#define FSC_EXTABT	(0x10)
-> arm64 has ESR_ELx_FSC_EXTABT which is used in inject_abt64(), but for matching
-> an external abort coming from hardware the range is wider.
+On 2/20/2017 2:09 PM, Borislav Petkov wrote:
+> On Thu, Feb 16, 2017 at 09:44:30AM -0600, Tom Lendacky wrote:
+>> This patch adds support to return the E820 type associated with an address
 >
-> Looking at the ARM-ARMs 'ISS encoding for an exception from an Instruction
-> Abort' in 'D7.2.27 ESR_ELx, Exception Syndrome Register (ELx)' (page D7-1954 of
-> version 'k'...iss10775), the ten flavours of you Synchronous abort you hooked
-> with do_sea() in patch 4 occupy 0x10 to 0x1f...
+> s/This patch adds/Add/
 >
->
->> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
->> index a5265ed..04f1dd50 100644
->> --- a/arch/arm/kvm/mmu.c
->> +++ b/arch/arm/kvm/mmu.c
->> @@ -29,6 +29,7 @@
->>   #include <asm/kvm_asm.h>
->>   #include <asm/kvm_emulate.h>
->>   #include <asm/virt.h>
->> +#include <asm/system_misc.h>
->>   
->>   #include "trace.h"
->>   
->> @@ -1444,8 +1445,21 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
->>   
->>   	/* Check the stage-2 fault is trans. fault or write fault */
->>   	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
-> ... kvm_vcpu_trap_get_fault_type() on both arm and arm64 masks the HSR/ESR_EL2
-> with 0x3c ...
->
->
->> -	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
->> -	    fault_status != FSC_ACCESS) {
->> +
->> +	/* The host kernel will handle the synchronous external abort. There
->> +	 * is no need to pass the error into the guest.
->> +	 */
->> +	if (fault_status == FSC_EXTABT) {
-> ... but here we only check for 'Synchronous external abort, not on a translation
-> table walk'. Are the other types relevant?
-I believe the others should be relevant here as well. I haven't been 
-able to test the other types within a guest though.
-> If so we need some helper as this range is sparse and 'all other values are
-> reserved'. The aarch32 HSR format is slightly different. (G6-4411 ISS encoding
-> from an exception from a Data Abort).
-I can add a helper so that this if statement matches any of the 10 FSC 
-values which are mapped to the do_sea in the host code.
-> If not, can we change patch 4 to check this type too so we don't call out to
-> APEI for a fault type we know isn't relevant.
->
->
->> +		if(handle_guest_sea((unsigned long)fault_ipa,
->> +				    kvm_vcpu_get_hsr(vcpu))) {
->> +			kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
->> +				kvm_vcpu_trap_get_class(vcpu),
->> +				(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
->> +				(unsigned long)kvm_vcpu_get_hsr(vcpu));
->> +			return -EFAULT;
->> +		}
->> +	} else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
->> +		   fault_status != FSC_ACCESS) {
->>   		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
->>   			kvm_vcpu_trap_get_class(vcpu),
->>   			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
->> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
->> index b2d57fc..403277b 100644
->> --- a/arch/arm64/mm/fault.c
->> +++ b/arch/arm64/mm/fault.c
->> @@ -602,6 +602,24 @@ static const char *fault_name(unsigned int esr)
->>   }
+>> range.
 >>
->>   /*
->> + * Handle Synchronous External Aborts that occur in a guest kernel.
->> + */
->> +int handle_guest_sea(unsigned long addr, unsigned int esr)
->> +{
->> +	if(IS_ENABLED(HAVE_ACPI_APEI_SEA)) {
->> +		nmi_enter();
->> +		ghes_notify_sea();
->> +		nmi_exit();
-> This nmi stuff was needed for synchronous aborts that may have interrupted
-> APEI's interrupts-masked code. We want to avoid trying to take the same set of
-> locks, hence taking the in_nmi() path through APEI. Here we know we interrupted
-> a guest, so there is no risk that we have interrupted APEI on the host.
-> ghes_notify_sea() can safely take the normal path.
-Makes sense, I can remove the nmi_* calls here.
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>> ---
+>>  arch/x86/include/asm/e820/api.h   |    2 ++
+>>  arch/x86/include/asm/e820/types.h |    2 ++
+>>  arch/x86/kernel/e820.c            |   26 +++++++++++++++++++++++---
+>>  3 files changed, 27 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/arch/x86/include/asm/e820/api.h b/arch/x86/include/asm/e820/api.h
+>> index 8e0f8b8..7c1bdc9 100644
+>> --- a/arch/x86/include/asm/e820/api.h
+>> +++ b/arch/x86/include/asm/e820/api.h
+>> @@ -38,6 +38,8 @@
+>>  extern void e820__reallocate_tables(void);
+>>  extern void e820__register_nosave_regions(unsigned long limit_pfn);
+>>
+>> +extern enum e820_type e820__get_entry_type(u64 start, u64 end);
+>> +
+>>  /*
+>>   * Returns true iff the specified range [start,end) is completely contained inside
+>>   * the ISA region.
+>> diff --git a/arch/x86/include/asm/e820/types.h b/arch/x86/include/asm/e820/types.h
+>> index 4adeed0..bf49591 100644
+>> --- a/arch/x86/include/asm/e820/types.h
+>> +++ b/arch/x86/include/asm/e820/types.h
+>> @@ -7,6 +7,8 @@
+>>   * These are the E820 types known to the kernel:
+>>   */
+>>  enum e820_type {
+>> +	E820_TYPE_INVALID	= 0,
+>> +
+>
+> Now this is strange - ACPI spec doesn't explicitly say that range type 0
+> is invalid. Am I looking at the wrong place?
+>
+> "Table 15-312 Address Range Types12" in ACPI spec 6.
+>
+> If 0 is really the invalid entry, then e820_print_type() needs updating
+> too. And then the invalid-entry-add should be a separate patch.
+
+The 0 return (originally) was to indicate that an e820 entry for the
+range wasn't found. This series just gave it a name.  So it's not that
+the type field held a 0.  Since 0 isn't defined in the ACPI spec I don't
+see an issue with creating it and I can add a comment to the effect that
+this value is used for the type when an e820 entry isn't found. I could
+always rename it to E820_TYPE_NOT_FOUND if that would help.
+
+Or if we want to guard against ACPI adding a type 0 in the future, I
+could make the function return an int and then return -EINVAL if an e820
+entry isn't found.  This might be the better option.
 
 Thanks,
-Tyler
+Tom
 
--- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+
+>
+>>  	E820_TYPE_RAM		= 1,
+>>  	E820_TYPE_RESERVED	= 2,
+>>  	E820_TYPE_ACPI		= 3,
+>
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
