@@ -1,181 +1,148 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH V2] x86/efi: Add missing 1:1 mappings to support buggy
- firmware
-Date: Tue, 28 Feb 2017 11:51:04 +0000
-Message-ID: <20170228115104.GC28416@codeblueprint.co.uk>
-References: <1487131421-23703-1-git-send-email-sai.praneeth.prakhya@intel.com>
+From: James Morse <james.morse@arm.com>
+Subject: Re: [PATCH V11 10/10] arm/arm64: KVM: add guest SEA support
+Date: Tue, 28 Feb 2017 13:21:05 +0000
+Message-ID: <58B57941.3000703@arm.com>
+References: <1487712121-16688-1-git-send-email-tbaicar@codeaurora.org>
+ <1487712121-16688-11-git-send-email-tbaicar@codeaurora.org>
+ <df6ba5dc-d93f-925a-46bf-1e1e209d17f3@huawei.com> <58B43092.6040401@arm.com>
+ <3df82a7b-1a32-e2d7-ae78-7132a4eab1a0@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1487131421-23703-1-git-send-email-sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <3df82a7b-1a32-e2d7-ae78-7132a4eab1a0@huawei.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Xiongfeng Wang <wangxiongfeng2@huawei.com>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Tyler Baicar <tbaicar@codeaurora.org>, will.deacon@arm.com, linux@armlinux.org.uk, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, robert.moore@intel.com, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 14 Feb, at 08:03:41PM, Sai Praneeth Prakhya wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Hi,
+
+On 28/02/17 06:25, Xiongfeng Wang wrote:
+> On 2017/2/27 21:58, James Morse wrote:
+>> On 25/02/17 07:15, Xiongfeng Wang wrote:
+>>> Can we inject an sea into the guest, so that the guest can kill the
+>>> application which causes the error if the guest won't be terminated
+>>> later. I'm not sure whether ghes_handle_memory_failure() called in
+>>> ghes_do_proc() will kill the qemu process. I think it only kill user
+>>> processes marked with PF_MCE_PROCESS & PF_MCE_EARLY.
+>>
+>> My understanding is the pages will get unmapped and recovered where possible
+>> (e.g. re-read from disk), the user space process will get SIGBUS/SIGSEV when it
+>> next tries to access that page, which could be some time later.
+>> These flags in find_early_kill_thread() are a way to make the memory-failure
+>> code signal the process early, before it does any recovery. The 'MCE' makes me
+>> think its x86 specific.
+>> (early and late are described more in [0])
+>>
+>>
+>> Guests are a special case as QEMU may never access the faulty memory itself, so
+>> it won't receive the 'late' signal. It looks like ARM/arm64 KVM lacks support
+>> for KVM_PFN_ERR_HWPOISON which sends SIGBUS from KVM's fault-handling code. I
+>> have patches to add support for this which I intend to send at rc1.
+>>
+>> [0] suggests 'KVM qemu' sets these MCE flags to take the 'early' path, but given
+>> x86s KVM_PFN_ERR_HWPOISON, this may be out of date.
+>>
+>>
+>> Either way, once QEMU gets a signal indicating the virtual address, it can
+>> generate its own APEI CPER records and use the KVM APIs to mock up an
+>> Synchronous External Abort, (or inject an IRQ or run the vcpu waiting for the
+>> guest's polling thread to come round, whichever was described to the guest via
+>> the HEST/GHES tables).
+>>
+>> We can't hand the APEI CPER records we have in the kernel to the guest, as they
+>> hold a host physical address, and maybe a host virtual address. We don't know
+>> where in guest memory we could write new APEI CPER records as these locations
+>> have to be reserved in the guests-UEFI memory map, and only QEMU knows where
+>> they are.
+>>
+>> To deliver RAS events to a guest we have to get QEMU involved.
+
+> I have another idea about the handling procedure of SEA. Can we divide
+> the SEA handing procedure into two procedures? The first procedure does
+> the more urgent work, including sending SIGBUS to user process or panic,
+> just as PATCH 04/10 does.
+
+How do we know which user processes to signal? (There may be more than one - we
+need a memory address to find them).
+How do we know if this error is serious and we should panic?
+This information is in the APEI CPER records.
+
+
+> The second procedure does the APEI analysis
+> work, including calling memory_failure. The second procedure is executed
+> when actual errors detected in memory, such as a 2-bit ECC error is
+> detected  on memory read or write, in which case, a fault handling
+> interrupt is generated by the memory controller, as RAS Extension
+> specification says.
+
+You are splitting the APEI notification and the processing of records. One has
+to happen immediately after the other because we want to contain the error.
+
+
+> We can route this fault handling interrupt into EL3. After BIOS has
+> filled the HEST table, it can notify OS with an IRQ. And the second
+> procedure is executed in the IRQ handler. The notification type of
+> HEST/GHES tables is GSIV.
 > 
-> There are some machines with buggy firmware that access EFI regions in
-> 1:1 mode (or physical mode) rather than virtual mode even after kernel
-> being booted. On these machines, if we invoke an EFI runtime service
-> (that does these buggy accesses) then it causes a page fault and hence
-> results in kernel hang. The page fault happens because the requested
-> region doesn't have appropriate page attributes set or the mapping for
-> the region might be missing. This issue was introduced by commit
-> 67a9108ed431 ("x86/efi: Build our own page table structures"). Before
-> this commit, 1:1 mappings for EFI regions were in swapper_pgd and were
-> not needed to be synced, but this commit introduced efi_pgd which missed
-> these mappings.
- 
-The subject line needs to mention EFI_CONVENTIONAL_MEMORY, because we
-already have 1:1 mappings for some regions, just not for
-EFI_CONVENTIONAL_MEMORY (by default). Those are the missing mappings.
+> When uncorrectable data error is detected on write data, a fault
+> handling interrupt is generated, and no SEA is generated,
 
-> Below is the edited version of the page fault output that I noticed:
-> 
-> BUG: unable to handle kernel paging request at 0000000018847980
-> IP: [<fffffffef6981ec3>] 0xfffffffef6981ec3
-> PGD 4324d3063 PUD 4324e4063 PMD 0
-> Oops: 0000 [#1] SMP
-> Modules linked in: efi_runtime(O) chipsec(O) igb e1000e [last unloaded:
-> efi_runtime]
-> CPU: 5 PID: 2308 Comm: fwts Tainted: G   W  O    4.7.0-yocto-standard #1
-> Hardware name: Gigabyte Technology Co., Ltd. Z87X-UD5H/Z87X-UD5H-CF,
-> BIOS F9 03/18/2014
-> task: ffff88041974d900 ti: ffff880418844000 task.ti: ffff880418844000
-> RIP: 0010:[<fffffffef6981ec3>]  [<fffffffef6981ec3>] 0xfffffffef6981ec3
-> RSP: 0018:ffff880418847868  EFLAGS: 00010297
-> RAX: 00000000000000e0 RBX: 0000000000000000 RCX: ffff880418847a50
-> RDX: 0000000018847980 RSI: ffff880418847a10 RDI: 0000000000000020
-> RBP: 0000000000000001 R08: ffff880418847a68 R09: 0000000000000000
-> R10: ffff880418847a70 R11: 0000000000000008 R12: ffff88042005c130
-> R13: 0000000000000010 R14: ffff880418847e30 R15: 0000000000000000
-> FS:  00007fb94251e700(0000) GS:ffff880432b40000(0000)
-> knlGS:0000000000000000
-> CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> CR2: 0000000018847980 CR3: 00000004324d1000 CR4: 00000000001406e0
-> DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-> Call Trace:
-> [<ffffffff810abf01>] ? __lock_acquire+0x121/0x1480
-> [<ffffffff810ac57f>] ? __lock_acquire+0x79f/0x1480
-> [<ffffffff810599a8>] ? efi_call+0x58/0x90
-> [<ffffffff81748e4b>] ? virt_efi_set_variable+0x7b/0x190
-> [<ffffffffa0065e63>] ? efi_runtime_ioctl+0xe43/0x108c [efi_runtime]
-> [<ffffffff810893b4>] ? __might_sleep+0x44/0x80
-> [<ffffffff811e07de>] ? do_vfs_ioctl+0x8e/0x660
-> [<ffffffff8133dd4e>] ? security_file_ioctl+0x3e/0x60
-> [<ffffffff811e0e24>] ? SyS_ioctl+0x74/0x80
-> [<ffffffff81a20de5>] ? entry_SYSCALL_64_fastpath+0x18/0xa8
-> 
-> I have looked at EFI Memory map for the faulted address and found that
-> it belongs to memory region of type "Conventional Memory". So, this
-> firmware bug is not same as accessing EFI_BOOT_SERVICES_* regions after
-> boot, but firmware accessing *illegal regions* in *1:1 mode*.
- 
-Can you confirm that the firmware is accessing the corresponding
-physical address of a virtual address that was passed an argument to
-the EFI runtime service? In other words, is the firmware accessing
-memory (via the wrong mapping) that the kernel has passed, or is it
-accessing memory locations it shouldn't be?
+This sounds more like ACPI's firmware first error handling. Yes errors should be
+routed to EL3 where firmware can do some platform-specific work, then describe
+them to the host OS via CPER records.
+By doing this, you could prevent a hardware-generated External Abort reaching
+the host OS, but you still need to notify the OS via one of the mechanisms in
+'18.3.2.9 Hardware Error Notification'.
 
-> Below shown are the efi_pgd dumps before and after the bad commit.
-> efi_dump_pagetable() is called before calling efi_merge_regions() in
-> __efi_enter_virtual_mode() and this kernel is booted on qemu to obtain
-> page table dumps.
-> 
-> EFI_PGT_DUMP before commit:
-> ---------------------------
-> [0.007041] ---[ User Space ]---
-> [0.007427] 0x0000000000000000-0x0000000000200000 2M    RW     GLB NX pte
-> [0.008609] 0x0000000000200000-0x0000000000800000 6M    RW PSE GLB NX pmd
-> [0.010069] 0x0000000000800000-0x0000000000808000 32K                 pte
-> [0.011068] 0x0000000000808000-0x0000000000810000 32K   RW     GLB NX pte
-> [0.012325] 0x0000000000810000-0x0000000000900000 960K                pte
-> [0.013071] 0x0000000000900000-0x0000000000a00000 1M    RW     GLB NX pte
-> [0.014579] 0x0000000000a00000-0x000000007e800000 2014M RW PSE GLB NX pmd
-> [0.015593] 0x000000007e800000-0x000000007e9b6000 1752K RW     GLB NX pte
-> [0.016600] 0x000000007e9b6000-0x000000007e9fe000 288K                pte
-> [0.018003] 0x000000007e9fe000-0x000000007ea00000 8K    RW     GLB NX pte
-> [0.019165] 0x000000007ea00000-0x000000007ec00000 2M    RW PSE GLB NX pmd
-> [0.020331] 0x000000007ec00000-0x000000007eda9000 1700K RW     GLB NX pte
-> [0.021483] 0x000000007eda9000-0x000000007ee14000 428K                pte
-> [0.022500] 0x000000007ee14000-0x000000007f000000 1968K RW     GLB NX pte
-> [0.023596] 0x000000007f000000-0x000000007fe00000 14M   RW PSE GLB NX pmd
-> [0.025004] 0x000000007fe00000-0x000000007fe94000 592K  RW     GLB NX pte
-> [0.026220] 0x000000007fe94000-0x000000007fef8000 400K                pte
-> [0.027069] 0x000000007fef8000-0x000000007ffd0000 864K  RW     GLB NX pte
-> [0.028420] 0x000000007ffd0000-0x000000007fff0000 128K                pte
-> [0.029551] 0x000000007fff0000-0x0000000080000000 64K   RW     GLB NX pte
-> [0.030601] 0x0000000080000000-0x0000008000000000 510G                pud
-> [0.031499] 0x0000008000000000-0xffff800000000000 17179737600G        pgd
-> [0.032152] ---[ Kernel Space ]---
-> 
-> EFI_PGT_DUMP after commit:
-> --------------------------
-> [0.005620] ---[ User Space ]---
-> [0.005838] 0x0000000000000000-0xffff800000000000 16777088T           pgd
-> [0.005873] ---[ Kernel Space ]---
-> 
-> While not having these mappings isn't a bug but we need these mappings
-> to support machines with buggy firmware.
- 
-If buggy machines do not boot because we do not have these mappings,
-then yes, it is a bug.
+If the error is synchronous (we read a bad page of memory instead of it being
+detected on background DRAM scrub) we need to notify the OS synchronously. Using
+SEA would be a firmware-generated External Abort delivered to EL2/EL1.
 
-> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-> Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->  arch/x86/platform/efi/efi_64.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
-> 
-> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-> index de9652bd19d4..8d2fd6568b91 100644
-> --- a/arch/x86/platform/efi/efi_64.c
-> +++ b/arch/x86/platform/efi/efi_64.c
-> @@ -139,6 +139,7 @@ int __init efi_alloc_page_tables(void)
->  	pgd_t *pgd;
->  	pud_t *pud;
->  	gfp_t gfp_mask;
-> +	unsigned num_pgds;
->  
->  	if (efi_enabled(EFI_OLD_MEMMAP))
->  		return 0;
-> @@ -158,6 +159,13 @@ int __init efi_alloc_page_tables(void)
->  
->  	pgd_populate(NULL, pgd, pud);
->  
-> +	/*
-> +	 * Sync 1:1 mappings to support buggy firmware which haven't updated
-> +	 * their addresses even after kernel has booted.
-> +	 */
-> +	num_pgds = pgd_index(VMALLOC_START) - pgd_index(PAGE_OFFSET);
-> +	memcpy(efi_pgd, pgd_offset_k(PAGE_OFFSET), sizeof(pgd_t) * num_pgds);
-> +
->  	return 0;
->  }
->  
+However the notification is done it needs to match one of the GHES records in
+the HEST, so firmware has to decide which notification methods it will use
+before we boot the OS.
 
-I don't think we should be adding yet another place in the EFI code
-where we're modifying the page tables. 
 
-We already have the ability to map EFI_CONVENTIONAL_MEMORY regions
-inside of efi_map_regions() via the should_map_region() function.
+> In ARM/arm64 KVM situation, when an SEA takes place, an SEA is injected
+> into guest os directly in kvm_handle_guest_abort(). And the guest os can
+> execute the first procedure.
 
-Currently, unless you're booting in mixed mode that function will
-return 'false' if the region type is EFI_CONVENTIONAL_MEMORY, so to
-get your machine booting you need to do two things,
+What can the guest do with this? Without the APEI CPER records it doesn't know
+what happened. Was it unrecoverable memory corruption? In which case killing the
+running task is a start... Which memory ranges should we mark as unusable? Maybe
+it was something more catastrophic for the running CPU, in which case we should
+panic().
 
-  1) Modify should_map_region() to allow EFI_CONVENTIONAL_MEMORY to be
-     mapped
 
-  2) Modify the 64-bit version of efi_map_region() to *only* create
-     1:1 mapping for EFI_CONVENTIONAL_MEMORY regions.
+> When the host OS executes the second procedure and analyses the HEST
+> table, it sends SIGBUS to qemu process in memory_failure(). And the qemu
+> process can mock up a HEST table with IPA of the error data. Then the
+> qemu process can notify the guest OS with an IRQ, and the second
+> procedure is executed in guest OS. Is this idea reasonable?
+
+So we tell the guest something happened, and it should wait a while to find out
+what... I don't think this will work. It is best to not run the guest until Qemu
+has done its work and called VCPU_RUN again. This way we only notify the guest
+once the records are available for processing. This is how APEI's firmware-first
+works between the host OS and EL3, it should be the same between a guest and
+QEMU (which plays the part of firmware for the guest).
+
+
+Can you share more details of the problem you are trying to solve? I don't think
+we can get RAS support in a guest 'for free', somewhere along the line we need
+support from Qemu.
+
+
+Thanks,
+
+James
