@@ -1,94 +1,124 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH v2 2/2] efi: efi_mem_reserve(): don't reserve through
- memblock after mm_init()
-Date: Mon, 27 Feb 2017 21:57:45 +0000
-Message-ID: <20170227215745.GA28416@codeblueprint.co.uk>
-References: <20161222102340.2689-1-nicstange@gmail.com>
- <20161222102340.2689-2-nicstange@gmail.com>
- <20170105091242.GA11021@dhcp-128-65.nay.redhat.com>
- <20170109114400.GF16838@codeblueprint.co.uk>
- <20170109133152.2izkcrzgzinxdwux@techsingularity.net>
+From: Xiongfeng Wang <wangxiongfeng2@huawei.com>
+Subject: Re: [PATCH V11 10/10] arm/arm64: KVM: add guest SEA support
+Date: Tue, 28 Feb 2017 14:25:07 +0800
+Message-ID: <3df82a7b-1a32-e2d7-ae78-7132a4eab1a0@huawei.com>
+References: <1487712121-16688-1-git-send-email-tbaicar@codeaurora.org>
+ <1487712121-16688-11-git-send-email-tbaicar@codeaurora.org>
+ <df6ba5dc-d93f-925a-46bf-1e1e209d17f3@huawei.com> <58B43092.6040401@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170109133152.2izkcrzgzinxdwux@techsingularity.net>
-Sender: owner-linux-mm@kvack.org
-To: Mel Gorman <mgorman@techsingularity.net>
-Cc: Dave Young <dyoung@redhat.com>, Nicolai Stange <nicstange@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Mika =?iso-8859-1?Q?Penttil=E4?= <mika.penttila@nextfour.com>, Andrew Morton <akpm@linux-foundation.org>, linux-mm@kvack.org, Vlastimil Babka <vbabka@suse.cz>, Michal Hocko <mhocko@suse.cz>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <58B43092.6040401@arm.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: James Morse <james.morse@arm.com>, punit.agrawal@arm.com
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Tyler Baicar <tbaicar@codeaurora.org>, will.deacon@arm.com, linux@armlinux.org.uk, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, robert.moore@intel.com, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, marc.zyngier@arm.com, john.garry@huawei.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 09 Jan, at 01:31:52PM, Mel Gorman wrote:
+Hi James,
+
+On 2017/2/27 21:58, James Morse wrote:
+> Hi Wang Xiongfeng,
 > 
-> Well, you could put in a __init global variable about availability into
-> mm/memblock.c and then check it in memblock APIs like memblock_reserve()
-> to BUG_ON? I know BUG_ON is frowned upon but this is not likely to be a
-> situation that can be sensibly recovered.
+> On 25/02/17 07:15, Xiongfeng Wang wrote:
+>> On 2017/2/22 5:22, Tyler Baicar wrote:
+>>> Currently external aborts are unsupported by the guest abort
+>>> handling. Add handling for SEAs so that the host kernel reports
+>>> SEAs which occur in the guest kernel.
+> 
+>>> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
+>>> index a5265ed..04f1dd50 100644
+>>> --- a/arch/arm/kvm/mmu.c
+>>> +++ b/arch/arm/kvm/mmu.c
+>>> @@ -1444,8 +1445,21 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
+>>>  
+>>>  	/* Check the stage-2 fault is trans. fault or write fault */
+>>>  	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
+>>> -	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>>> -	    fault_status != FSC_ACCESS) {
+>>> +
+>>> +	/* The host kernel will handle the synchronous external abort. There
+>>> +	 * is no need to pass the error into the guest.
+>>> +	 */
+> 
+>> Can we inject an sea into the guest, so that the guest can kill the
+>> application which causes the error if the guest won't be terminated
+>> later. I'm not sure whether ghes_handle_memory_failure() called in
+>> ghes_do_proc() will kill the qemu process. I think it only kill user
+>> processes marked with PF_MCE_PROCESS & PF_MCE_EARLY.
+> 
+> My understanding is the pages will get unmapped and recovered where possible
+> (e.g. re-read from disk), the user space process will get SIGBUS/SIGSEV when it
+> next tries to access that page, which could be some time later.
+> These flags in find_early_kill_thread() are a way to make the memory-failure
+> code signal the process early, before it does any recovery. The 'MCE' makes me
+> think its x86 specific.
+> (early and late are described more in [0])
+> 
+> 
+> Guests are a special case as QEMU may never access the faulty memory itself, so
+> it won't receive the 'late' signal. It looks like ARM/arm64 KVM lacks support
+> for KVM_PFN_ERR_HWPOISON which sends SIGBUS from KVM's fault-handling code. I
+> have patches to add support for this which I intend to send at rc1.
+> 
+> [0] suggests 'KVM qemu' sets these MCE flags to take the 'early' path, but given
+> x86s KVM_PFN_ERR_HWPOISON, this may be out of date.
+> 
+> 
+> Either way, once QEMU gets a signal indicating the virtual address, it can
+> generate its own APEI CPER records and use the KVM APIs to mock up an
+> Synchronous External Abort, (or inject an IRQ or run the vcpu waiting for the
+> guest's polling thread to come round, whichever was described to the guest via
+> the HEST/GHES tables).
+> 
+> We can't hand the APEI CPER records we have in the kernel to the guest, as they
+> hold a host physical address, and maybe a host virtual address. We don't know
+> where in guest memory we could write new APEI CPER records as these locations
+> have to be reserved in the guests-UEFI memory map, and only QEMU knows where
+> they are.
+> 
+> To deliver RAS events to a guest we have to get QEMU involved.
 
-What about something like this?
+Thanks for your reply!
 
-BUG_ON() shouldn't actually be necessary because I couldn't think of a
-situation where A) memblock would be unavailable and B) returning an
-error would prevent us from making progress.
+I have another idea about the handling procedure of SEA. Can we divide
+the SEA handing procedure into two procedures? The first procedure does
+the more urgent work, including sending SIGBUS to user process or panic,
+just as PATCH 04/10 does. The second procedure does the APEI analysis
+work, including calling memory_failure. The second procedure is executed
+when actual errors detected in memory, such as a 2-bit ECC error is
+detected  on memory read or write, in which case, a fault handling
+interrupt is generated by the memory controller, as RAS Extension
+specification says.
 
----->8----
+We can route this fault handling interrupt into EL3. After BIOS has
+filled the HEST table, it can notify OS with an IRQ. And the second
+procedure is executed in the IRQ handler. The notification type of
+HEST/GHES tables is GSIV.
 
->From 1c1c06664d23c5d256016918c54e01802af4e891 Mon Sep 17 00:00:00 2001
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Date: Mon, 27 Feb 2017 21:14:29 +0000
-Subject: [PATCH] mm/memblock: Warn if used after slab is up and prevent memory
- corruption
+When uncorrectable data error is detected on write data, a fault
+handling interrupt is generated, and no SEA is generated, as RAS
+extension specification 6.4.4 says. In this situation, the second
+procedure should be executed since error occurs in memory.
 
-Historically there have been many memory corruption bugs caused by
-using the memblock API after its internal data structures have been
-destroyed. The latest bug was fixed in commit,
+In ARM/arm64 KVM situation, when an SEA takes place, an SEA is injected
+into guest os directly in kvm_handle_guest_abort(). And the guest os can
+execute the first procedure.
 
-  20b1e22d01a4 ("x86/efi: Don't allocate memmap through memblock after mm_init()")
+When the host OS executes the second procedure and analyses the HEST
+table, it sends SIGBUS to qemu process in memory_failure(). And the qemu
+process can mock up a HEST table with IPA of the error data. Then the
+qemu process can notify the guest OS with an IRQ, and the second
+procedure is executed in guest OS. Is this idea reasonable?
 
-Instead of modifying the memblock data structures that no longer exist
-and silently corrupting memory, WARN and return with an error.
 
-Cc: Nicolai Stange <nicstange@gmail.com>
-Cc: Dave Young <dyoung@redhat.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Mel Gorman <mgorman@techsingularity.net>
-Cc: Andrew Morton <akpm@linux-foundation.org>
-Cc: Vlastimil Babka <vbabka@suse.cz>
-Cc: Michal Hocko <mhocko@suse.cz>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
----
- mm/memblock.c | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/mm/memblock.c b/mm/memblock.c
-index 7608bc305936..4dbd86f2fddb 100644
---- a/mm/memblock.c
-+++ b/mm/memblock.c
-@@ -530,6 +530,9 @@ int __init_memblock memblock_add_range(struct memblock_type *type,
- 	if (!size)
- 		return 0;
- 
-+	if (WARN_ONCE(slab_is_available(), "memblock no longer available\n"))
-+		return -EINVAL;
-+
- 	/* special case for empty array */
- 	if (type->regions[0].size == 0) {
- 		WARN_ON(type->cnt != 1 || type->total_size);
-@@ -648,6 +651,9 @@ static int __init_memblock memblock_isolate_range(struct memblock_type *type,
- 	if (!size)
- 		return 0;
- 
-+	if (WARN_ONCE(slab_is_available(), "memblock no longer available\n"))
-+		return -EINVAL;
-+
- 	/* we'll create at most two more regions */
- 	while (type->cnt + 2 > type->max)
- 		if (memblock_double_array(type, base, size) < 0)
--- 
-2.10.0
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Thanks!
+Wang Xiongfeng
