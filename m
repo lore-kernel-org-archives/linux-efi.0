@@ -1,93 +1,162 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v4 11/28] x86: Add support to determine the E820 type
- of an address
-Date: Tue, 28 Feb 2017 16:34:39 -0600
-Message-ID: <e6146786-16c5-99ab-52c9-2bdd50c7d9ba@amd.com>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [RFC PATCH v4 16/28] x86: Add support for changing memory
+	encryption attribute
+Date: Tue, 28 Feb 2017 16:46:15 -0600
+Message-ID: <409ec9f1-896d-a9f0-0e4c-4d102cbf86cf@amd.com>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
- <20170216154430.19244.95519.stgit@tlendack-t1.amdoffice.net>
- <20170220200955.32e2wqxgulswnr55@pd.tnic>
+	<20170216154535.19244.6294.stgit@tlendack-t1.amdoffice.net>
+	<20170222185215.atbntnyw7252kkbk@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170220200955.32e2wqxgulswnr55@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S.
- Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@li>
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20170222185215.atbntnyw7252kkbk-fF5Pk5pvG8Y@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter
+	Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S.
+	Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 2/20/2017 2:09 PM, Borislav Petkov wrote:
-> On Thu, Feb 16, 2017 at 09:44:30AM -0600, Tom Lendacky wrote:
->> This patch adds support to return the E820 type associated with an address
+On 2/22/2017 12:52 PM, Borislav Petkov wrote:
+> On Thu, Feb 16, 2017 at 09:45:35AM -0600, Tom Lendacky wrote:
+>> Add support for changing the memory encryption attribute for one or more
+>> memory pages.
 >
-> s/This patch adds/Add/
+> "This will be useful when we, ...., for example."
+
+Yup, will expand on the "why".
+
 >
->> range.
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 >> ---
->>  arch/x86/include/asm/e820/api.h   |    2 ++
->>  arch/x86/include/asm/e820/types.h |    2 ++
->>  arch/x86/kernel/e820.c            |   26 +++++++++++++++++++++++---
->>  3 files changed, 27 insertions(+), 3 deletions(-)
+>>  arch/x86/include/asm/cacheflush.h |    3 ++
+>>  arch/x86/mm/pageattr.c            |   66 +++++++++++++++++++++++++++++++++++++
+>>  2 files changed, 69 insertions(+)
 >>
->> diff --git a/arch/x86/include/asm/e820/api.h b/arch/x86/include/asm/e820/api.h
->> index 8e0f8b8..7c1bdc9 100644
->> --- a/arch/x86/include/asm/e820/api.h
->> +++ b/arch/x86/include/asm/e820/api.h
->> @@ -38,6 +38,8 @@
->>  extern void e820__reallocate_tables(void);
->>  extern void e820__register_nosave_regions(unsigned long limit_pfn);
+>> diff --git a/arch/x86/include/asm/cacheflush.h b/arch/x86/include/asm/cacheflush.h
+>> index 872877d..33ae60a 100644
+>> --- a/arch/x86/include/asm/cacheflush.h
+>> +++ b/arch/x86/include/asm/cacheflush.h
+>> @@ -12,6 +12,7 @@
+>>   * Executability : eXeutable, NoteXecutable
+>>   * Read/Write    : ReadOnly, ReadWrite
+>>   * Presence      : NotPresent
+>> + * Encryption    : Encrypted, Decrypted
+>>   *
+>>   * Within a category, the attributes are mutually exclusive.
+>>   *
+>> @@ -47,6 +48,8 @@
+>>  int set_memory_rw(unsigned long addr, int numpages);
+>>  int set_memory_np(unsigned long addr, int numpages);
+>>  int set_memory_4k(unsigned long addr, int numpages);
+>> +int set_memory_encrypted(unsigned long addr, int numpages);
+>> +int set_memory_decrypted(unsigned long addr, int numpages);
 >>
->> +extern enum e820_type e820__get_entry_type(u64 start, u64 end);
+>>  int set_memory_array_uc(unsigned long *addr, int addrinarray);
+>>  int set_memory_array_wc(unsigned long *addr, int addrinarray);
+>> diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+>> index 91c5c63..9710f5c 100644
+>> --- a/arch/x86/mm/pageattr.c
+>> +++ b/arch/x86/mm/pageattr.c
+>> @@ -1742,6 +1742,72 @@ int set_memory_4k(unsigned long addr, int numpages)
+>>  					__pgprot(0), 1, 0, NULL);
+>>  }
+>>
+>> +static int __set_memory_enc_dec(unsigned long addr, int numpages, bool enc)
+>> +{
+>> +	struct cpa_data cpa;
+>> +	unsigned long start;
+>> +	int ret;
 >> +
->>  /*
->>   * Returns true iff the specified range [start,end) is completely contained inside
->>   * the ISA region.
->> diff --git a/arch/x86/include/asm/e820/types.h b/arch/x86/include/asm/e820/types.h
->> index 4adeed0..bf49591 100644
->> --- a/arch/x86/include/asm/e820/types.h
->> +++ b/arch/x86/include/asm/e820/types.h
->> @@ -7,6 +7,8 @@
->>   * These are the E820 types known to the kernel:
->>   */
->>  enum e820_type {
->> +	E820_TYPE_INVALID	= 0,
+>> +	/* Nothing to do if the _PAGE_ENC attribute is zero */
+>> +	if (_PAGE_ENC == 0)
+>
+> Why not:
+>
+> 	if (!sme_active())
+>
+> ?
+
+Yup, it would be more clear.
+
+>
+>> +		return 0;
 >> +
+>> +	/* Save original start address since it will be modified */
 >
-> Now this is strange - ACPI spec doesn't explicitly say that range type 0
-> is invalid. Am I looking at the wrong place?
->
-> "Table 15-312 Address Range Types12" in ACPI spec 6.
->
-> If 0 is really the invalid entry, then e820_print_type() needs updating
-> too. And then the invalid-entry-add should be a separate patch.
+> That's obvious - it is a small-enough function to fit on the screen. No
+> need for the comment.
 
-The 0 return (originally) was to indicate that an e820 entry for the
-range wasn't found. This series just gave it a name.  So it's not that
-the type field held a 0.  Since 0 isn't defined in the ACPI spec I don't
-see an issue with creating it and I can add a comment to the effect that
-this value is used for the type when an e820 entry isn't found. I could
-always rename it to E820_TYPE_NOT_FOUND if that would help.
-
-Or if we want to guard against ACPI adding a type 0 in the future, I
-could make the function return an int and then return -EINVAL if an e820
-entry isn't found.  This might be the better option.
-
-Thanks,
-Tom
-
+Ok.
 
 >
->>  	E820_TYPE_RAM		= 1,
->>  	E820_TYPE_RESERVED	= 2,
->>  	E820_TYPE_ACPI		= 3,
+>> +	start = addr;
+>> +
+>> +	memset(&cpa, 0, sizeof(cpa));
+>> +	cpa.vaddr = &addr;
+>> +	cpa.numpages = numpages;
+>> +	cpa.mask_set = enc ? __pgprot(_PAGE_ENC) : __pgprot(0);
+>> +	cpa.mask_clr = enc ? __pgprot(0) : __pgprot(_PAGE_ENC);
+>> +	cpa.pgd = init_mm.pgd;
+>> +
+>> +	/* Should not be working on unaligned addresses */
+>> +	if (WARN_ONCE(*cpa.vaddr & ~PAGE_MASK,
+>> +		      "misaligned address: %#lx\n", *cpa.vaddr))
+>
+> Use addr here so that you don't have to deref. gcc is probably smart
+> enough but the code should look more readable this way too.
 >
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Ok.
+
+>> +		*cpa.vaddr &= PAGE_MASK;
+>
+> I know, you must use cpa.vaddr here but if you move that alignment check
+> over the cpa assignment, you can use addr solely.
+
+Ok.
+
+>
+>> +
+>> +	/* Must avoid aliasing mappings in the highmem code */
+>> +	kmap_flush_unused();
+>> +	vm_unmap_aliases();
+>> +
+>> +	/*
+>> +	 * Before changing the encryption attribute, we need to flush caches.
+>> +	 */
+>> +	if (static_cpu_has(X86_FEATURE_CLFLUSH))
+>> +		cpa_flush_range(start, numpages, 1);
+>> +	else
+>> +		cpa_flush_all(1);
+>
+> I guess we don't really need the distinction since a SME CPU most
+> definitely implies CLFLUSH support but ok, let's be careful.
+>
+>> +
+>> +	ret = __change_page_attr_set_clr(&cpa, 1);
+>> +
+>> +	/*
+>> +	 * After changing the encryption attribute, we need to flush TLBs
+>> +	 * again in case any speculative TLB caching occurred (but no need
+>> +	 * to flush caches again).  We could just use cpa_flush_all(), but
+>> +	 * in case TLB flushing gets optimized in the cpa_flush_range()
+>> +	 * path use the same logic as above.
+>> +	 */
+>> +	if (static_cpu_has(X86_FEATURE_CLFLUSH))
+>> +		cpa_flush_range(start, numpages, 0);
+>> +	else
+>> +		cpa_flush_all(0);
+>> +
+>> +	return ret;
+>> +}
+>
