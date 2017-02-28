@@ -1,58 +1,52 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Add missing 1:1 mappings to support buggy
- firmware
-Date: Tue, 28 Feb 2017 11:36:30 +0000
-Message-ID: <20170228113630.GB28416@codeblueprint.co.uk>
-References: <1486607948-1509-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <20170214205139.GB28416@codeblueprint.co.uk>
- <1487130120.2150.23.camel@intel.com>
+Subject: Re: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
+ images
+Date: Tue, 28 Feb 2017 12:12:55 +0000
+Message-ID: <20170228121255.GD28416@codeblueprint.co.uk>
+References: <cover.1487182480.git.jan.kiszka@siemens.com>
+ <CAHp75VeVZo8f_aXZ=R8Y+++RSQeT=tFZmL6NNfekKJTkJc-nZA@mail.gmail.com>
+ <1bf3c9d8-56aa-818b-350f-deb62ad14e08@siemens.com>
+ <4014c5e6-b5a0-7552-166f-a42992532c09@siemens.com>
+ <F54AEECA5E2B9541821D670476DAE19C5DE533B3@PGSMSX102.gar.corp.intel.com>
+ <f4f63644-e099-b192-5337-15c07d761fb4@nexus-software.ie>
+ <F54AEECA5E2B9541821D670476DAE19C5DE5373E@PGSMSX102.gar.corp.intel.com>
+ <5da59d02-d299-f5c7-48fa-a67bdd017252@siemens.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1487130120.2150.23.camel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <5da59d02-d299-f5c7-48fa-a67bdd017252-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Cc: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Mok, Tze Siong" <tze.siong.mok-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 14 Feb, at 07:42:00PM, Sai Praneeth Prakhya wrote:
+On Fri, 17 Feb, at 10:24:41AM, Jan Kiszka wrote:
 > 
-> It makes sense that "efi_sync_low_kernel_mappings()" would be the best
-> place but I added them here for these reasons
+> I just can re-express my frustration that this essential step hasn't
+> been started years ago by whoever designed the extension. Then I bet
+> there would have been constructive feedback on the interface BEFORE its
+> ugliness spread to broader use.
 > 
-> 1. These mappings refer to "direct mapping of all physical memory" and
-> thus in "efi_map_regions()" we update *these* mappings to create 1:1
-> mappings (to allow physical mode accesses by buggy firmware), so if we
-> copy these mappings in "efi_sync_low_kernel_mappings()" which is called
-> later than efi_map_regions(), we will overwrite previous 1:1 mappings
-> created by efi_map_regions() and hence kernel panics.
-> 
-> 2. The other reason for adding these mappings in
-> "efi_alloc_page_tables()" is because that's the way mappings looked in
-> swapper_pgd before we shifted EFI stuff to efi_pgd.
-> 
-> I have tested this by moving this code to
-> "efi_sync_low_kernel_mappings()" and I see that kernel panics in
-> set_virtual_address_map().
-> 
-> Please do correct me if you think otherwise.
-> 
-> Thanks for the review, Matt
+> Or is there a technical need, in general or on Quark, to have the
+> signature header right before the standard capsule *for the handover* to
+> the firmware? I mean, I would naively put it into another capsule and
+> prepend that to the core so that the existing UEFI API can palate it
+> transparently and cleanly.
 
-OK, I now realise that I misunderstood this patch when I reviewed it
-the first time. Sorry about that.
+I'm fairly sure this was my first thought when we discussed this
+originally, some years ago now.
 
-I see that the problem you're addressing is that some firmware will
-access the physical address of EFI_CONVENTIONAL_MEMORY regions while
-executing runtime services. And unless we're running in EFI mixed
-mode, we don't map EFI_CONVENTIONAL_MEMORY regions into the EFI page
-tables.
+The whole CSH concept is, frankly, stupid. It makes a mockery of
+everything the capsule interface was designed to be.
 
-We already have code to handle the 1:1 mapping of
-EFI_CONVENTIONAL_MEMORY because we need to do this for the EFI mixed
-mode scenario. The difference for non-mixed mode is that we only want
-to create the 1:1 mapping for EFI_CONVENTIONAL_MEMORY, we don't want
-the virtual mapping too.
+I have long been holding out in hope that someone would patch the
+firmware to work around this CSH requirement, something along the
+lines of the double wrapping Jan mentions above. It's not like the
+Quark is the only platform that wants to verify capsules.
 
-Lemme go and reply to your v2.
+But to my knowledge, that hasn't happened.
+
+Nevertheless my answer is still the same - someone needs to go and
+update the Quark firmware source to work with the generic capsule
+mechanism.
