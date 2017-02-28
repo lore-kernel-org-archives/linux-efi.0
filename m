@@ -1,65 +1,134 @@
-From: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-Subject: Re: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
- images
-Date: Tue, 28 Feb 2017 17:42:25 +0000
-Message-ID: <ce0ddedb-ee72-8dba-0e60-8d5e2d7a69a0@nexus-software.ie>
-References: <cover.1487182480.git.jan.kiszka@siemens.com>
- <4014c5e6-b5a0-7552-166f-a42992532c09@siemens.com>
- <F54AEECA5E2B9541821D670476DAE19C5DE533B3@PGSMSX102.gar.corp.intel.com>
- <f4f63644-e099-b192-5337-15c07d761fb4@nexus-software.ie>
- <F54AEECA5E2B9541821D670476DAE19C5DE5373E@PGSMSX102.gar.corp.intel.com>
- <5da59d02-d299-f5c7-48fa-a67bdd017252@siemens.com>
- <20170228121255.GD28416@codeblueprint.co.uk>
- <fb94de5b-e359-ab8d-bb9b-52efcad91bc5@siemens.com>
- <20170228122947.GE28416@codeblueprint.co.uk>
- <CAKv+Gu-OCr1nX0-kWnWg4=DnDpZvM-ipSCfLbBA8h1e5eJYBbw@mail.gmail.com>
- <CAHp75VcQ8ZoGqR=iOzVq0WbieMvGFnkTQZ-TBmwBTZT0B1NS_Q@mail.gmail.com>
- <CAHp75VcQcALWdcWAM-odAAnR1uEwE=4rOhtB2E9WtS84ORH8Qw@mail.gmail.com>
- <1fb1a428-672b-be4b-e05b-4363c4b286dd@nexus-software.ie>
- <CAHp75Vd-1RLX+-saZcK1+zMtAUEMDLo+QCiKhfCnr+_u6DSmmA@mail.gmail.com>
- <d5313198-dc0d-8627-cd9e-a9c0b706faa2@nexus-software.ie>
- <CAHp75VdELFFeoJXXHbsHHuyd2xBY0y4T+M7q5+ZFN=ep3Qy9HQ@mail.gmail.com>
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V11 10/10] arm/arm64: KVM: add guest SEA support
+Date: Tue, 28 Feb 2017 12:43:08 -0700
+Message-ID: <ff3aa805-0e03-9854-e294-ff6934c57f3f@codeaurora.org>
+References: <1487712121-16688-1-git-send-email-tbaicar@codeaurora.org>
+ <1487712121-16688-11-git-send-email-tbaicar@codeaurora.org>
+ <58B00E12.5020602@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAHp75VdELFFeoJXXHbsHHuyd2xBY0y4T+M7q5+ZFN=ep3Qy9HQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Mok, Tze Siong" <tze.siong.mok-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <58B00E12.5020602@arm.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: James Morse <james.morse@arm.com>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-On 28/02/17 17:18, Andy Shevchenko wrote:
-> On Tue, Feb 28, 2017 at 6:52 PM, Bryan O'Donoghue
->> A kernel compiled like this
->>
->> make menuconfig ARCH=i386
-> 
-> I hope you care that it is equivalent to
-> 
-> make menuconfig ARCH=i686
-> 
->> make bzImage -j 8
->>
->> will run just fine on Quark x1000 I do it regularly. CPUID ought to (and
->> does) inform the runtime kernel of what to do re: MSRs etc.
->>
->> We won't execute xmm/mmx, we won't touch 686 specific MSRs etc, etc.
-> 
-> It is i*6*86 code still.
-> 
-> So, summarize, you state that
-> 1. CONFIG_SMP=y and
-> 2. CONFIG_M686=y and
-> 3. Kernel works on Quark
-> 
-> Is it correct?
+Hello James,
 
-Logically yes. It's a very long time since I looked in detail. No harm
-in checking it out though.
 
-I'll compile up the above kernel this evening (GMT) and verify.
+On 2/24/2017 3:42 AM, James Morse wrote:
+> On 21/02/17 21:22, Tyler Baicar wrote:
+>> Currently external aborts are unsupported by the guest abort
+>> handling. Add handling for SEAs so that the host kernel reports
+>> SEAs which occur in the guest kernel.
+>> diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
+>> index e22089f..33a77509 100644
+>> --- a/arch/arm/include/asm/kvm_arm.h
+>> +++ b/arch/arm/include/asm/kvm_arm.h
+>> @@ -187,6 +187,7 @@
+>>   #define FSC_FAULT	(0x04)
+>>   #define FSC_ACCESS	(0x08)
+>>   #define FSC_PERM	(0x0c)
+>> +#define FSC_EXTABT	(0x10)
+> arm64 has ESR_ELx_FSC_EXTABT which is used in inject_abt64(), but for matching
+> an external abort coming from hardware the range is wider.
+>
+> Looking at the ARM-ARMs 'ISS encoding for an exception from an Instruction
+> Abort' in 'D7.2.27 ESR_ELx, Exception Syndrome Register (ELx)' (page D7-1954 of
+> version 'k'...iss10775), the ten flavours of you Synchronous abort you hooked
+> with do_sea() in patch 4 occupy 0x10 to 0x1f...
+>
+>
+>> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
+>> index a5265ed..04f1dd50 100644
+>> --- a/arch/arm/kvm/mmu.c
+>> +++ b/arch/arm/kvm/mmu.c
+>> @@ -29,6 +29,7 @@
+>>   #include <asm/kvm_asm.h>
+>>   #include <asm/kvm_emulate.h>
+>>   #include <asm/virt.h>
+>> +#include <asm/system_misc.h>
+>>   
+>>   #include "trace.h"
+>>   
+>> @@ -1444,8 +1445,21 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
+>>   
+>>   	/* Check the stage-2 fault is trans. fault or write fault */
+>>   	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
+> ... kvm_vcpu_trap_get_fault_type() on both arm and arm64 masks the HSR/ESR_EL2
+> with 0x3c ...
+>
+>
+>> -	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>> -	    fault_status != FSC_ACCESS) {
+>> +
+>> +	/* The host kernel will handle the synchronous external abort. There
+>> +	 * is no need to pass the error into the guest.
+>> +	 */
+>> +	if (fault_status == FSC_EXTABT) {
+> ... but here we only check for 'Synchronous external abort, not on a translation
+> table walk'. Are the other types relevant?
+I believe the others should be relevant here as well. I haven't been 
+able to test the other types within a guest though.
+> If so we need some helper as this range is sparse and 'all other values are
+> reserved'. The aarch32 HSR format is slightly different. (G6-4411 ISS encoding
+> from an exception from a Data Abort).
+I can add a helper so that this if statement matches any of the 10 FSC 
+values which are mapped to the do_sea in the host code.
+> If not, can we change patch 4 to check this type too so we don't call out to
+> APEI for a fault type we know isn't relevant.
+>
+>
+>> +		if(handle_guest_sea((unsigned long)fault_ipa,
+>> +				    kvm_vcpu_get_hsr(vcpu))) {
+>> +			kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
+>> +				kvm_vcpu_trap_get_class(vcpu),
+>> +				(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+>> +				(unsigned long)kvm_vcpu_get_hsr(vcpu));
+>> +			return -EFAULT;
+>> +		}
+>> +	} else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>> +		   fault_status != FSC_ACCESS) {
+>>   		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
+>>   			kvm_vcpu_trap_get_class(vcpu),
+>>   			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+>> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+>> index b2d57fc..403277b 100644
+>> --- a/arch/arm64/mm/fault.c
+>> +++ b/arch/arm64/mm/fault.c
+>> @@ -602,6 +602,24 @@ static const char *fault_name(unsigned int esr)
+>>   }
+>>
+>>   /*
+>> + * Handle Synchronous External Aborts that occur in a guest kernel.
+>> + */
+>> +int handle_guest_sea(unsigned long addr, unsigned int esr)
+>> +{
+>> +	if(IS_ENABLED(HAVE_ACPI_APEI_SEA)) {
+>> +		nmi_enter();
+>> +		ghes_notify_sea();
+>> +		nmi_exit();
+> This nmi stuff was needed for synchronous aborts that may have interrupted
+> APEI's interrupts-masked code. We want to avoid trying to take the same set of
+> locks, hence taking the in_nmi() path through APEI. Here we know we interrupted
+> a guest, so there is no risk that we have interrupted APEI on the host.
+> ghes_notify_sea() can safely take the normal path.
+Makes sense, I can remove the nmi_* calls here.
 
+Thanks,
+Tyler
 
 -- 
-bod
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
