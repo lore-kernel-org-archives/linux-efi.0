@@ -1,42 +1,181 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
- images
-Date: Tue, 28 Feb 2017 12:29:47 +0000
-Message-ID: <20170228122947.GE28416@codeblueprint.co.uk>
-References: <cover.1487182480.git.jan.kiszka@siemens.com>
- <CAHp75VeVZo8f_aXZ=R8Y+++RSQeT=tFZmL6NNfekKJTkJc-nZA@mail.gmail.com>
- <1bf3c9d8-56aa-818b-350f-deb62ad14e08@siemens.com>
- <4014c5e6-b5a0-7552-166f-a42992532c09@siemens.com>
- <F54AEECA5E2B9541821D670476DAE19C5DE533B3@PGSMSX102.gar.corp.intel.com>
- <f4f63644-e099-b192-5337-15c07d761fb4@nexus-software.ie>
- <F54AEECA5E2B9541821D670476DAE19C5DE5373E@PGSMSX102.gar.corp.intel.com>
- <5da59d02-d299-f5c7-48fa-a67bdd017252@siemens.com>
- <20170228121255.GD28416@codeblueprint.co.uk>
- <fb94de5b-e359-ab8d-bb9b-52efcad91bc5@siemens.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH V2] x86/efi: Add missing 1:1 mappings to support buggy
+ firmware
+Date: Tue, 28 Feb 2017 11:51:04 +0000
+Message-ID: <20170228115104.GC28416@codeblueprint.co.uk>
+References: <1487131421-23703-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <fb94de5b-e359-ab8d-bb9b-52efcad91bc5@siemens.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jan Kiszka <jan.kiszka@siemens.com>
-Cc: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Bryan O'Donoghue <pure.logic@nexus-software.ie>, Andy Shevchenko <andy.shevchenko@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@alien8.de>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, "Mok, Tze Siong" <tze.siong.mok@intel.com>
+In-Reply-To: <1487131421-23703-1-git-send-email-sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 28 Feb, at 01:20:25PM, Jan Kiszka wrote:
+On Tue, 14 Feb, at 08:03:41PM, Sai Praneeth Prakhya wrote:
+> From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > 
-> From you POV, does this exclude upstream quirk support for already
-> shipped devices?
+> There are some machines with buggy firmware that access EFI regions in
+> 1:1 mode (or physical mode) rather than virtual mode even after kernel
+> being booted. On these machines, if we invoke an EFI runtime service
+> (that does these buggy accesses) then it causes a page fault and hence
+> results in kernel hang. The page fault happens because the requested
+> region doesn't have appropriate page attributes set or the mapping for
+> the region might be missing. This issue was introduced by commit
+> 67a9108ed431 ("x86/efi: Build our own page table structures"). Before
+> this commit, 1:1 mappings for EFI regions were in swapper_pgd and were
+> not needed to be synced, but this commit introduced efi_pgd which missed
+> these mappings.
+ 
+The subject line needs to mention EFI_CONVENTIONAL_MEMORY, because we
+already have 1:1 mappings for some regions, just not for
+EFI_CONVENTIONAL_MEMORY (by default). Those are the missing mappings.
 
-It would need to be an extremely small, well-contained change, that
-had no chance of disrupting other users of the capsule interface and
-where I had a good feeling that supporting it wouldn't turn into a
-maintenance nightmare (mountains of DMI strings or new platforms
-coming to market that used it).
+> Below is the edited version of the page fault output that I noticed:
+> 
+> BUG: unable to handle kernel paging request at 0000000018847980
+> IP: [<fffffffef6981ec3>] 0xfffffffef6981ec3
+> PGD 4324d3063 PUD 4324e4063 PMD 0
+> Oops: 0000 [#1] SMP
+> Modules linked in: efi_runtime(O) chipsec(O) igb e1000e [last unloaded:
+> efi_runtime]
+> CPU: 5 PID: 2308 Comm: fwts Tainted: G   W  O    4.7.0-yocto-standard #1
+> Hardware name: Gigabyte Technology Co., Ltd. Z87X-UD5H/Z87X-UD5H-CF,
+> BIOS F9 03/18/2014
+> task: ffff88041974d900 ti: ffff880418844000 task.ti: ffff880418844000
+> RIP: 0010:[<fffffffef6981ec3>]  [<fffffffef6981ec3>] 0xfffffffef6981ec3
+> RSP: 0018:ffff880418847868  EFLAGS: 00010297
+> RAX: 00000000000000e0 RBX: 0000000000000000 RCX: ffff880418847a50
+> RDX: 0000000018847980 RSI: ffff880418847a10 RDI: 0000000000000020
+> RBP: 0000000000000001 R08: ffff880418847a68 R09: 0000000000000000
+> R10: ffff880418847a70 R11: 0000000000000008 R12: ffff88042005c130
+> R13: 0000000000000010 R14: ffff880418847e30 R15: 0000000000000000
+> FS:  00007fb94251e700(0000) GS:ffff880432b40000(0000)
+> knlGS:0000000000000000
+> CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> CR2: 0000000018847980 CR3: 00000004324d1000 CR4: 00000000001406e0
+> DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+> DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+> Call Trace:
+> [<ffffffff810abf01>] ? __lock_acquire+0x121/0x1480
+> [<ffffffff810ac57f>] ? __lock_acquire+0x79f/0x1480
+> [<ffffffff810599a8>] ? efi_call+0x58/0x90
+> [<ffffffff81748e4b>] ? virt_efi_set_variable+0x7b/0x190
+> [<ffffffffa0065e63>] ? efi_runtime_ioctl+0xe43/0x108c [efi_runtime]
+> [<ffffffff810893b4>] ? __might_sleep+0x44/0x80
+> [<ffffffff811e07de>] ? do_vfs_ioctl+0x8e/0x660
+> [<ffffffff8133dd4e>] ? security_file_ioctl+0x3e/0x60
+> [<ffffffff811e0e24>] ? SyS_ioctl+0x74/0x80
+> [<ffffffff81a20de5>] ? entry_SYSCALL_64_fastpath+0x18/0xa8
+> 
+> I have looked at EFI Memory map for the faulted address and found that
+> it belongs to memory region of type "Conventional Memory". So, this
+> firmware bug is not same as accessing EFI_BOOT_SERVICES_* regions after
+> boot, but firmware accessing *illegal regions* in *1:1 mode*.
+ 
+Can you confirm that the firmware is accessing the corresponding
+physical address of a virtual address that was passed an argument to
+the EFI runtime service? In other words, is the firmware accessing
+memory (via the wrong mapping) that the kernel has passed, or is it
+accessing memory locations it shouldn't be?
 
-That's a tall order, and I'm pretty skeptical. Still, I'll never say
-never. Plus Ard would need convincing to give his ACK too.
+> Below shown are the efi_pgd dumps before and after the bad commit.
+> efi_dump_pagetable() is called before calling efi_merge_regions() in
+> __efi_enter_virtual_mode() and this kernel is booted on qemu to obtain
+> page table dumps.
+> 
+> EFI_PGT_DUMP before commit:
+> ---------------------------
+> [0.007041] ---[ User Space ]---
+> [0.007427] 0x0000000000000000-0x0000000000200000 2M    RW     GLB NX pte
+> [0.008609] 0x0000000000200000-0x0000000000800000 6M    RW PSE GLB NX pmd
+> [0.010069] 0x0000000000800000-0x0000000000808000 32K                 pte
+> [0.011068] 0x0000000000808000-0x0000000000810000 32K   RW     GLB NX pte
+> [0.012325] 0x0000000000810000-0x0000000000900000 960K                pte
+> [0.013071] 0x0000000000900000-0x0000000000a00000 1M    RW     GLB NX pte
+> [0.014579] 0x0000000000a00000-0x000000007e800000 2014M RW PSE GLB NX pmd
+> [0.015593] 0x000000007e800000-0x000000007e9b6000 1752K RW     GLB NX pte
+> [0.016600] 0x000000007e9b6000-0x000000007e9fe000 288K                pte
+> [0.018003] 0x000000007e9fe000-0x000000007ea00000 8K    RW     GLB NX pte
+> [0.019165] 0x000000007ea00000-0x000000007ec00000 2M    RW PSE GLB NX pmd
+> [0.020331] 0x000000007ec00000-0x000000007eda9000 1700K RW     GLB NX pte
+> [0.021483] 0x000000007eda9000-0x000000007ee14000 428K                pte
+> [0.022500] 0x000000007ee14000-0x000000007f000000 1968K RW     GLB NX pte
+> [0.023596] 0x000000007f000000-0x000000007fe00000 14M   RW PSE GLB NX pmd
+> [0.025004] 0x000000007fe00000-0x000000007fe94000 592K  RW     GLB NX pte
+> [0.026220] 0x000000007fe94000-0x000000007fef8000 400K                pte
+> [0.027069] 0x000000007fef8000-0x000000007ffd0000 864K  RW     GLB NX pte
+> [0.028420] 0x000000007ffd0000-0x000000007fff0000 128K                pte
+> [0.029551] 0x000000007fff0000-0x0000000080000000 64K   RW     GLB NX pte
+> [0.030601] 0x0000000080000000-0x0000008000000000 510G                pud
+> [0.031499] 0x0000008000000000-0xffff800000000000 17179737600G        pgd
+> [0.032152] ---[ Kernel Space ]---
+> 
+> EFI_PGT_DUMP after commit:
+> --------------------------
+> [0.005620] ---[ User Space ]---
+> [0.005838] 0x0000000000000000-0xffff800000000000 16777088T           pgd
+> [0.005873] ---[ Kernel Space ]---
+> 
+> While not having these mappings isn't a bug but we need these mappings
+> to support machines with buggy firmware.
+ 
+If buggy machines do not boot because we do not have these mappings,
+then yes, it is a bug.
 
-P.S. Has anyone actually investigated what would be required to fix
-the firmware to be able to extract the CSH if it was contained inside
-a capsule?
+> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+> Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> ---
+>  arch/x86/platform/efi/efi_64.c | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+> 
+> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+> index de9652bd19d4..8d2fd6568b91 100644
+> --- a/arch/x86/platform/efi/efi_64.c
+> +++ b/arch/x86/platform/efi/efi_64.c
+> @@ -139,6 +139,7 @@ int __init efi_alloc_page_tables(void)
+>  	pgd_t *pgd;
+>  	pud_t *pud;
+>  	gfp_t gfp_mask;
+> +	unsigned num_pgds;
+>  
+>  	if (efi_enabled(EFI_OLD_MEMMAP))
+>  		return 0;
+> @@ -158,6 +159,13 @@ int __init efi_alloc_page_tables(void)
+>  
+>  	pgd_populate(NULL, pgd, pud);
+>  
+> +	/*
+> +	 * Sync 1:1 mappings to support buggy firmware which haven't updated
+> +	 * their addresses even after kernel has booted.
+> +	 */
+> +	num_pgds = pgd_index(VMALLOC_START) - pgd_index(PAGE_OFFSET);
+> +	memcpy(efi_pgd, pgd_offset_k(PAGE_OFFSET), sizeof(pgd_t) * num_pgds);
+> +
+>  	return 0;
+>  }
+>  
+
+I don't think we should be adding yet another place in the EFI code
+where we're modifying the page tables. 
+
+We already have the ability to map EFI_CONVENTIONAL_MEMORY regions
+inside of efi_map_regions() via the should_map_region() function.
+
+Currently, unless you're booting in mixed mode that function will
+return 'false' if the region type is EFI_CONVENTIONAL_MEMORY, so to
+get your machine booting you need to do two things,
+
+  1) Modify should_map_region() to allow EFI_CONVENTIONAL_MEMORY to be
+     mapped
+
+  2) Modify the 64-bit version of efi_map_region() to *only* create
+     1:1 mapping for EFI_CONVENTIONAL_MEMORY regions.
