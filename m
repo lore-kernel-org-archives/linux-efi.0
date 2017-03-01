@@ -1,301 +1,214 @@
-From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V11 05/10] acpi: apei: handle SEA notification type for
- ARMv8
-Date: Wed, 1 Mar 2017 12:22:40 -0700
-Message-ID: <5f0b63c0-8a0d-8161-efcb-3d60e3275a21@codeaurora.org>
-References: <1487712121-16688-1-git-send-email-tbaicar@codeaurora.org>
- <1487712121-16688-6-git-send-email-tbaicar@codeaurora.org>
- <58B67B69.8000702@huawei.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v1 1/2] efi/capsule: Add 'capsule' lookup support
+Date: Wed, 1 Mar 2017 20:44:59 +0000
+Message-ID: <CAKv+Gu8Ew1Bn0+od87+PkE067aJ4RHseAxwnGKDco6C=q0haew@mail.gmail.com>
+References: <20170228174528.23542-1-qiuxu.zhuo@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <58B67B69.8000702@huawei.com>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Xie XiuQi <xiexiuqi@huawei.com>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org, Suzuki.Poulose@arm.com, punit.agrawal@arm.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170228174528.23542-1-qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hello Xie XiuQi,
-
-
-On 3/1/2017 12:42 AM, Xie XiuQi wrote:
-> Hi Tyler,
+On 28 February 2017 at 17:45, Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> Add the interface to get the array of EFI capsules when
+> parsing the configuration tables.
 >
-> On 2017/2/22 5:21, Tyler Baicar wrote:
->> ARM APEI extension proposal added SEA (Synchronous External Abort)
->> notification type for ARMv8.
->> Add a new GHES error source handling function for SEA. If an error
->> source's notification type is SEA, then this function can be registered
->> into the SEA exception handler. That way GHES will parse and report
->> SEA exceptions when they occur.
-> I have a question about ghes_proc. In ghes_proc, we just parse and report
-> the error information, but no one use it for error recovery now.
+> This code is based on Matt Fleming previous work from:
+> https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=capsule-pstore&id=99c5f047133555aa0442f64064e85b7da2d4a45f
 >
-> Take the SEA case for example, we get the physical address from parsing
-> the GHES table. But the memory management system or other drivers/modules
-> know what the really meaning of the error address/page. There is no way to
-> notify them to do the recovery now.
+> Signed-off-by: Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> ---
+>  drivers/firmware/efi/capsule.c | 107 +++++++++++++++++++++++++++++++++++++++++
+>  drivers/firmware/efi/efi.c     |   4 ++
+>  include/linux/efi.h            |   4 ++
+>  3 files changed, 115 insertions(+)
 >
-> So, could we add a notify at appropriate position. All drivers or modules
-> which are interested in this error could receive and take the corresponding
-> action.
-Error recovery is outside the scope of these patches. These patches are 
-supposed to setup the infrastructure to parse/report the SEAs. Error 
-recovery can be added after the fact which is what has been done for 
-platform memory errors; the page off-lining support was added after the 
-error parsing/reporting code was in.
+> diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
+> index 6eedff4..51e1a43 100644
+> --- a/drivers/firmware/efi/capsule.c
+> +++ b/drivers/firmware/efi/capsule.c
+> @@ -24,6 +24,11 @@ typedef struct {
+>  static bool capsule_pending;
+>  static bool stop_capsules;
+>  static int efi_reset_type = -1;
+> +/*
+> + * Information about capsules we pulled from the EFI System Table.
+> + */
+> +static efi_capsule_header_t **prev_capsules;
+> +static u32 efi_capsule_num;
+>
+>  /*
+>   * capsule_mutex serialises access to both capsule_pending and
+> @@ -288,6 +293,108 @@ int efi_capsule_update(efi_capsule_header_t *capsule, struct page **pages)
+>  }
+>  EXPORT_SYMBOL_GPL(efi_capsule_update);
+>
+> +static int extract_capsules(void)
+> +{
+> +       void *capsule;
+> +       size_t size;
+> +
+> +       if (efi.capsule == EFI_INVALID_TABLE_ADDR)
+> +               return 0;
+> +
+> +       capsule = ioremap(efi.capsule, sizeof(efi_capsule_num));
 
-Thanks,
-Tyler
->
->> An SEA can interrupt code that had interrupts masked and is treated as
->> an NMI. To aid this the page of address space for mapping APEI buffers
->> while in_nmi() is always reserved, and ghes_ioremap_pfn_nmi() is
->> changed to use the helper methods to find the prot_t to map with in
->> the same way as ghes_ioremap_pfn_irq().
->>
->> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
->> CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
->> ---
->>   arch/arm64/Kconfig        |  1 +
->>   arch/arm64/mm/fault.c     | 13 ++++++++
->>   drivers/acpi/apei/Kconfig | 15 +++++++++
->>   drivers/acpi/apei/ghes.c  | 77 +++++++++++++++++++++++++++++++++++++++++++----
->>   include/acpi/ghes.h       |  7 +++++
->>   5 files changed, 107 insertions(+), 6 deletions(-)
->>
->> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
->> index 1117421..fca4dc1 100644
->> --- a/arch/arm64/Kconfig
->> +++ b/arch/arm64/Kconfig
->> @@ -88,6 +88,7 @@ config ARM64
->>   	select HAVE_IRQ_TIME_ACCOUNTING
->>   	select HAVE_MEMBLOCK
->>   	select HAVE_MEMBLOCK_NODE_MAP if NUMA
->> +	select HAVE_NMI if ACPI_APEI_SEA
->>   	select HAVE_PATA_PLATFORM
->>   	select HAVE_PERF_EVENTS
->>   	select HAVE_PERF_REGS
->> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
->> index d178dc0..b2d57fc 100644
->> --- a/arch/arm64/mm/fault.c
->> +++ b/arch/arm64/mm/fault.c
->> @@ -41,6 +41,8 @@
->>   #include <asm/pgtable.h>
->>   #include <asm/tlbflush.h>
->>   
->> +#include <acpi/ghes.h>
->> +
->>   static const char *fault_name(unsigned int esr);
->>   
->>   #ifdef CONFIG_KPROBES
->> @@ -498,6 +500,17 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->>   	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
->>   		 fault_name(esr), esr, addr);
->>   
->> +	/*
->> +	 * Synchronous aborts may interrupt code which had interrupts masked.
->> +	 * Before calling out into the wider kernel tell the interested
->> +	 * subsystems.
->> +	 */
->> +	if (IS_ENABLED(ACPI_APEI_SEA)) {
->> +		nmi_enter();
->> +		ghes_notify_sea();
->> +		nmi_exit();
->> +	}
->> +
->>   	info.si_signo = SIGBUS;
->>   	info.si_errno = 0;
->>   	info.si_code  = 0;
->> diff --git a/drivers/acpi/apei/Kconfig b/drivers/acpi/apei/Kconfig
->> index b0140c8..c545dd1 100644
->> --- a/drivers/acpi/apei/Kconfig
->> +++ b/drivers/acpi/apei/Kconfig
->> @@ -39,6 +39,21 @@ config ACPI_APEI_PCIEAER
->>   	  PCIe AER errors may be reported via APEI firmware first mode.
->>   	  Turn on this option to enable the corresponding support.
->>   
->> +config ACPI_APEI_SEA
->> +	bool "APEI Synchronous External Abort logging/recovering support"
->> +	depends on ARM64 && ACPI_APEI && ACPI_APEI_GHES
->> +	default y
->> +	help
->> +	  This option should be enabled if the system supports
->> +	  firmware first handling of SEA (Synchronous External Abort).
->> +	  SEA happens with certain faults of data abort or instruction
->> +	  abort synchronous exceptions on ARMv8 systems. If a system
->> +	  supports firmware first handling of SEA, the platform analyzes
->> +	  and handles hardware error notifications from SEA, and it may then
->> +	  form a HW error record for the OS to parse and handle. This
->> +	  option allows the OS to look for such hardware error record, and
->> +	  take appropriate action.
->> +
->>   config ACPI_APEI_MEMORY_FAILURE
->>   	bool "APEI memory error recovering support"
->>   	depends on ACPI_APEI && MEMORY_FAILURE
->> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
->> index b25e7cf..b0596ba 100644
->> --- a/drivers/acpi/apei/ghes.c
->> +++ b/drivers/acpi/apei/ghes.c
->> @@ -114,11 +114,7 @@
->>    * Two virtual pages are used, one for IRQ/PROCESS context, the other for
->>    * NMI context (optionally).
->>    */
->> -#ifdef CONFIG_HAVE_ACPI_APEI_NMI
->>   #define GHES_IOREMAP_PAGES           2
->> -#else
->> -#define GHES_IOREMAP_PAGES           1
->> -#endif
->>   #define GHES_IOREMAP_IRQ_PAGE(base)	(base)
->>   #define GHES_IOREMAP_NMI_PAGE(base)	((base) + PAGE_SIZE)
->>   
->> @@ -157,10 +153,14 @@ static void ghes_ioremap_exit(void)
->>   static void __iomem *ghes_ioremap_pfn_nmi(u64 pfn)
->>   {
->>   	unsigned long vaddr;
->> +	phys_addr_t paddr;
->> +	pgprot_t prot;
->>   
->>   	vaddr = (unsigned long)GHES_IOREMAP_NMI_PAGE(ghes_ioremap_area->addr);
->> -	ioremap_page_range(vaddr, vaddr + PAGE_SIZE,
->> -			   pfn << PAGE_SHIFT, PAGE_KERNEL);
->> +
->> +	paddr = pfn << PAGE_SHIFT;
->> +	prot = arch_apei_get_mem_attribute(paddr);
->> +	ioremap_page_range(vaddr, vaddr + PAGE_SIZE, paddr, prot);
->>   
->>   	return (void __iomem *)vaddr;
->>   }
->> @@ -767,6 +767,50 @@ static int ghes_notify_sci(struct notifier_block *this,
->>   	.notifier_call = ghes_notify_sci,
->>   };
->>   
->> +#ifdef CONFIG_ACPI_APEI_SEA
->> +static LIST_HEAD(ghes_sea);
->> +
->> +void ghes_notify_sea(void)
->> +{
->> +	struct ghes *ghes;
->> +
->> +	/*
->> +	 * synchronize_rcu() will wait for nmi_exit(), so no need to
->> +	 * rcu_read_lock().
->> +	 */
->> +	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
->> +		ghes_proc(ghes);
->> +	}
->> +}
->> +
->> +static void ghes_sea_add(struct ghes *ghes)
->> +{
->> +	mutex_lock(&ghes_list_mutex);
->> +	list_add_rcu(&ghes->list, &ghes_sea);
->> +	mutex_unlock(&ghes_list_mutex);
->> +}
->> +
->> +static void ghes_sea_remove(struct ghes *ghes)
->> +{
->> +	mutex_lock(&ghes_list_mutex);
->> +	list_del_rcu(&ghes->list);
->> +	mutex_unlock(&ghes_list_mutex);
->> +	synchronize_rcu();
->> +}
->> +#else /* CONFIG_ACPI_APEI_SEA */
->> +static inline void ghes_sea_add(struct ghes *ghes)
->> +{
->> +	pr_err(GHES_PFX "ID: %d, trying to add SEA notification which is not supported\n",
->> +	       ghes->generic->header.source_id);
->> +}
->> +
->> +static inline void ghes_sea_remove(struct ghes *ghes)
->> +{
->> +	pr_err(GHES_PFX "ID: %d, trying to remove SEA notification which is not supported\n",
->> +	       ghes->generic->header.source_id);
->> +}
->> +#endif /* CONFIG_ACPI_APEI_SEA */
->> +
->>   #ifdef CONFIG_HAVE_ACPI_APEI_NMI
->>   /*
->>    * printk is not safe in NMI context.  So in NMI handler, we allocate
->> @@ -1012,6 +1056,14 @@ static int ghes_probe(struct platform_device *ghes_dev)
->>   	case ACPI_HEST_NOTIFY_EXTERNAL:
->>   	case ACPI_HEST_NOTIFY_SCI:
->>   		break;
->> +	case ACPI_HEST_NOTIFY_SEA:
->> +		if (!IS_ENABLED(CONFIG_ACPI_APEI_SEA)) {
->> +			pr_warn(GHES_PFX "Generic hardware error source: %d notified via SEA is not supported\n",
->> +				generic->header.source_id);
->> +			rc = -ENOTSUPP;
->> +			goto err;
->> +		}
->> +		break;
->>   	case ACPI_HEST_NOTIFY_NMI:
->>   		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_NMI)) {
->>   			pr_warn(GHES_PFX "Generic hardware error source: %d notified via NMI interrupt is not supported!\n",
->> @@ -1023,6 +1075,13 @@ static int ghes_probe(struct platform_device *ghes_dev)
->>   		pr_warning(GHES_PFX "Generic hardware error source: %d notified via local interrupt is not supported!\n",
->>   			   generic->header.source_id);
->>   		goto err;
->> +	case ACPI_HEST_NOTIFY_GPIO:
->> +	case ACPI_HEST_NOTIFY_SEI:
->> +	case ACPI_HEST_NOTIFY_GSIV:
->> +		pr_warn(GHES_PFX "Generic hardware error source: %d notified via notification type %u is not supported\n",
->> +			generic->header.source_id, generic->header.source_id);
->> +		rc = -ENOTSUPP;
->> +		goto err;
->>   	default:
->>   		pr_warning(FW_WARN GHES_PFX "Unknown notification type: %u for generic hardware error source: %d\n",
->>   			   generic->notify.type, generic->header.source_id);
->> @@ -1077,6 +1136,9 @@ static int ghes_probe(struct platform_device *ghes_dev)
->>   		list_add_rcu(&ghes->list, &ghes_sci);
->>   		mutex_unlock(&ghes_list_mutex);
->>   		break;
->> +	case ACPI_HEST_NOTIFY_SEA:
->> +		ghes_sea_add(ghes);
->> +		break;
->>   	case ACPI_HEST_NOTIFY_NMI:
->>   		ghes_nmi_add(ghes);
->>   		break;
->> @@ -1119,6 +1181,9 @@ static int ghes_remove(struct platform_device *ghes_dev)
->>   			unregister_acpi_hed_notifier(&ghes_notifier_sci);
->>   		mutex_unlock(&ghes_list_mutex);
->>   		break;
->> +	case ACPI_HEST_NOTIFY_SEA:
->> +		ghes_sea_remove(ghes);
->> +		break;
->>   	case ACPI_HEST_NOTIFY_NMI:
->>   		ghes_nmi_remove(ghes);
->>   		break;
->> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
->> index 6ae318b..18bc935 100644
->> --- a/include/acpi/ghes.h
->> +++ b/include/acpi/ghes.h
->> @@ -1,3 +1,6 @@
->> +#ifndef GHES_H
->> +#define GHES_H
->> +
->>   #include <acpi/apei.h>
->>   #include <acpi/hed.h>
->>   
->> @@ -95,3 +98,7 @@ static inline void *acpi_hest_generic_data_payload(struct acpi_hest_generic_data
->>   		(void *)(((struct acpi_hest_generic_data_v300 *)(gdata)) + 1) :
->>   		gdata + 1;
->>   }
->> +
->> +void ghes_notify_sea(void);
->> +
->> +#endif /* GHES_H */
->>
+Please use memremap not ioremap when mapping firmware tables.
 
--- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+> +       if (!capsule)
+> +               return -ENOMEM;
+> +
+> +       /*
+> +        * The array of capsules is prefixed with the number of
+> +        * capsule entries in the array.
+> +        */
+> +       efi_capsule_num = *(uint32_t *)capsule;
+> +       iounmap(capsule);
+> +
+> +       if (!efi_capsule_num) {
+> +               pr_info("No capsules on extraction\n");
+> +               return 0;
+> +       }
+> +
+> +       size = efi_capsule_num * sizeof(*capsule);
+> +       capsule = ioremap(efi.capsule, size);
+> +       if (!capsule)
+> +               return -ENOMEM;
+> +
+> +       capsule += sizeof(uint32_t);
+> +       prev_capsules = (efi_capsule_header_t **)capsule;
+> +       if (!*prev_capsules)
+> +               pr_err("Capsule array has no entries\n");
+> +
+> +       return 0;
+> +}
+> +
+> +/**
+> + * efi_capsule_lookup - search capsule array for entries.
+> + * @guid: the guid to search for.
+> + * @nr_caps: the number of entries found.
+> + *
+> + * Map each capsule header into the kernel's virtual address space and
+> + * inspect the guid. Build an array of capsule headers with every
+> + * capsule that is found with @guid. If a match is found the capsule
+> + * remains mapped, otherwise it is unmapped.
+> + *
+> + * Returns an array of capsule headers, each element of which has the
+> + * guid @guid. The number of elements in the array is stored in
+> + * @nr_caps. Returns %NULL if no capsules were found and stores zero
+> + * in @nr_caps.
+> + */
+> +efi_capsule_header_t **efi_capsule_lookup(efi_guid_t guid, uint32_t *nr_caps)
+> +{
+> +       efi_capsule_header_t **capsules = NULL, **tmp;
+> +       size_t capsule_size = 0;
+> +       int i, rv;
+> +
+> +       rv = extract_capsules();
+> +       if (rv)
+> +               return ERR_PTR(rv);
+> +
+> +       *nr_caps = 0;
+> +       for (i = 0; i < efi_capsule_num; i++) {
+> +               efi_capsule_header_t *c;
+> +               size_t size;
+> +
+> +               c = ioremap((resource_size_t)prev_capsules[i], sizeof(*c));
+> +               if (!c) {
+> +                       pr_err("Failed to ioremap capsule\n");
+> +                       continue;
+> +               }
+> +
+> +               size = c->imagesize;
+> +               iounmap(c);
+> +
+> +               c = ioremap((resource_size_t)prev_capsules[i], size);
+> +               if (!c) {
+> +                       pr_err("Failed to ioremap header + data\n");
+> +                       continue;
+> +               }
+> +
+> +               if (!efi_guidcmp(c->guid, guid)) {
+> +                       capsule_size += sizeof(*capsules);
+> +                       tmp = krealloc(capsules, capsule_size, GFP_KERNEL);
+> +                       if (!tmp) {
+> +                               kfree(capsules);
+> +                               return ERR_PTR(-ENOMEM);
+> +                       }
+> +
+> +                       capsules = tmp;
+> +                       capsules[(*nr_caps)++] = c;
+> +                       continue;
+> +               }
+> +
+> +               iounmap(c);
+> +       }
+> +
+> +       return capsules;
+> +}
+> +EXPORT_SYMBOL_GPL(efi_capsule_lookup);
+> +
+>  static int capsule_reboot_notify(struct notifier_block *nb, unsigned long event, void *cmd)
+>  {
+>         mutex_lock(&capsule_mutex);
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 9291480..03be9b8 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -52,6 +52,7 @@ struct efi __read_mostly efi = {
+>         .properties_table       = EFI_INVALID_TABLE_ADDR,
+>         .mem_attr_table         = EFI_INVALID_TABLE_ADDR,
+>         .rng_seed               = EFI_INVALID_TABLE_ADDR,
+> +       .capsule                = EFI_INVALID_TABLE_ADDR,
+>  };
+>  EXPORT_SYMBOL(efi);
+>
+> @@ -120,6 +121,8 @@ static ssize_t systab_show(struct kobject *kobj,
+>                 str += sprintf(str, "BOOTINFO=0x%lx\n", efi.boot_info);
+>         if (efi.uga != EFI_INVALID_TABLE_ADDR)
+>                 str += sprintf(str, "UGA=0x%lx\n", efi.uga);
+> +       if (efi.capsule != EFI_INVALID_TABLE_ADDR)
+> +               str += sprintf(str, "CAPSULE=0x%lx\n", efi.capsule);
+>
+>         return str - buf;
+>  }
+> @@ -445,6 +448,7 @@ static __initdata efi_config_table_type_t common_tables[] = {
+>         {EFI_PROPERTIES_TABLE_GUID, "PROP", &efi.properties_table},
+>         {EFI_MEMORY_ATTRIBUTES_TABLE_GUID, "MEMATTR", &efi.mem_attr_table},
+>         {LINUX_EFI_RANDOM_SEED_TABLE_GUID, "RNG", &efi.rng_seed},
+> +       {LINUX_EFI_CRASH_GUID, "CAPSULE", &efi.capsule},
+
+LINUX_EFI_CRASH_GUID ??
+
+>         {NULL_GUID, NULL, NULL},
+>  };
+>
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 5b1af30..3296724e 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -893,6 +893,7 @@ extern struct efi {
+>         unsigned long properties_table; /* properties table */
+>         unsigned long mem_attr_table;   /* memory attributes table */
+>         unsigned long rng_seed;         /* UEFI firmware random seed */
+> +       unsigned long capsule;          /* EFI capsule table */
+>         efi_get_time_t *get_time;
+>         efi_set_time_t *set_time;
+>         efi_get_wakeup_time_t *get_wakeup_time;
+> @@ -1401,6 +1402,9 @@ extern int efi_capsule_supported(efi_guid_t guid, u32 flags,
+>  extern int efi_capsule_update(efi_capsule_header_t *capsule,
+>                               struct page **pages);
+>
+> +extern efi_capsule_header_t **efi_capsule_lookup(efi_guid_t guid,
+> +                             uint32_t *nr_caps);
+> +
+>  #ifdef CONFIG_EFI_RUNTIME_MAP
+>  int efi_runtime_map_init(struct kobject *);
+>  int efi_get_runtime_map_size(void);
+> --
+> 2.9.0.GIT
+>
