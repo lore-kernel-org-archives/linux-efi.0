@@ -1,67 +1,40 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [RFC PATCH v4 26/28] x86: Allow kexec to be used with SME
-Date: Wed, 1 Mar 2017 17:27:44 +0800
-Message-ID: <20170301092736.GA8491@dhcp-128-65.nay.redhat.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [RFC PATCH v4 19/28] swiotlb: Add warnings for use of bounce
+ buffers with SME
+Date: Wed, 1 Mar 2017 12:17:37 +0100
+Message-ID: <20170301111737.z3bwfpdoj7ndzmyd@pd.tnic>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
- <20170216154755.19244.51276.stgit@tlendack-t1.amdoffice.net>
- <20170217155756.GJ30272@char.us.ORACLE.com>
- <d2f16b24-f2ef-a22b-3c72-2d8ad585553e@amd.com>
- <20170301092536.GB8353@dhcp-128-65.nay.redhat.com>
+ <20170216154619.19244.76653.stgit@tlendack-t1.amdoffice.net>
+ <20170227175259.whl75utazbzxp7jo@pd.tnic>
+ <9b5af67b-0969-5402-cc01-3ea98f41b748@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <20170301092536.GB8353@dhcp-128-65.nay.redhat.com>
+In-Reply-To: <9b5af67b-0969-5402-cc01-3ea98f41b748@amd.com>
 Sender: owner-linux-mm@kvack.org
 To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, kexec@lists.infradead.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
-Add kexec list..
+On Tue, Feb 28, 2017 at 05:19:51PM -0600, Tom Lendacky wrote:
+> Device drivers don't supply set_dma_mask() since that is part of the
+> dma_map_ops structure. The fm10k_pf.c file function is unrelated to this
+> (it's part of an internal driver structure). The dma_map_ops structure
+> is setup by the arch or an iommu.
 
-On 03/01/17 at 05:25pm, Dave Young wrote:
-> Hi Tom,
-> 
-> On 02/17/17 at 10:43am, Tom Lendacky wrote:
-> > On 2/17/2017 9:57 AM, Konrad Rzeszutek Wilk wrote:
-> > > On Thu, Feb 16, 2017 at 09:47:55AM -0600, Tom Lendacky wrote:
-> > > > Provide support so that kexec can be used to boot a kernel when SME is
-> > > > enabled.
-> > > 
-> > > Is the point of kexec and kdump to ehh, dump memory ? But if the
-> > > rest of the memory is encrypted you won't get much, will you?
-> > 
-> > Kexec can be used to reboot a system without going back through BIOS.
-> > So you can use kexec without using kdump.
-> > 
-> > For kdump, just taking a quick look, the option to enable memory
-> > encryption can be provided on the crash kernel command line and then
-> 
-> Is there a simple way to get the SME status? Probably add some sysfs
-> file for this purpose.
-> 
-> > crash kernel can would be able to copy the memory decrypted if the
-> > pagetable is set up properly. It looks like currently ioremap_cache()
-> > is used to map the old memory page.  That might be able to be changed
-> > to a memremap() so that the encryption bit is set in the mapping. That
-> > will mean that memory that is not marked encrypted (EFI tables, swiotlb
-> > memory, etc) would not be read correctly.
-> 
-> Manage to store info about those ranges which are not encrypted so that
-> memremap can handle them?
-> 
-> > 
-> > > 
-> > > Would it make sense to include some printk to the user if they
-> > > are setting up kdump that they won't get anything out of it?
-> > 
-> > Probably a good idea to add something like that.
-> 
-> It will break kdump functionality, it should be fixed instead of
-> just adding printk to warn user..
-> 
-> Thanks
-> Dave
+That was certainly a brainfart, sorry.
+
+Joerg explained to me on IRC how the whole dma_map_ops handling is
+supposed to be happening.
+
+Thanks.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
