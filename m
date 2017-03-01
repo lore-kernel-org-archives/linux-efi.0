@@ -1,281 +1,84 @@
-From: Xie XiuQi <xiexiuqi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH V11 05/10] acpi: apei: handle SEA notification type for
- ARMv8
-Date: Wed, 1 Mar 2017 15:42:33 +0800
-Message-ID: <58B67B69.8000702__15781.9819789895$1488354396$gmane$org@huawei.com>
-References: <1487712121-16688-1-git-send-email-tbaicar@codeaurora.org>
- <1487712121-16688-6-git-send-email-tbaicar@codeaurora.org>
+From: Hanjun Guo <hanjun.guo@linaro.org>
+Subject: Re: [RFC PATCH V1 v4.10-rc3 1/1] acpi: apei: handle GSIV notification
+ type
+Date: Wed, 1 Mar 2017 16:27:25 +0800
+Message-ID: <43507f99-d80b-6409-d249-b9b18425a1da@linaro.org>
+References: <86258A5CC0A3704780874CF6004BA8A62DCAB57E@lhreml502-mbs>
+ <58B579A1.90109@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1487712121-16688-6-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm@vg
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <58B579A1.90109@arm.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: James Morse <james.morse@arm.com>, Shiju Jose <shiju.jose@huawei.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "kvm@vger.kernel.org" <kvm@vger.kernel.org>, "matt@codeblueprint.co.uk" <matt@codeblueprint.co.uk>, "catalin.marinas@arm.com" <catalin.marinas@arm.com>, Tyler Baicar <tbaicar@codeaurora.org>, "will.deacon@arm.com" <will.deacon@arm.com>, "robert.moore@intel.com" <robert.moore@intel.com>, "paul.gortmaker@windriver.com" <paul.gortmaker@windriver.com>, "lv.zheng@intel.com" <lv.zheng@intel.com>, "Guohanjun (Hanjun Guo)" <guohanjun@huawei.com>, "kvmarm@lists.cs.columbia.edu" <kvmarm@lists.cs.columbia.edu>, "fu.wei@linaro.org" <fu.wei@linaro.org>, Gabriele Paoloni <gabriele.paoloni@huawei.com>, "zjzhang@codeaurora.org" <zjzhang@codeaurora.org>, "linux@armlinux.org.uk" <linux@armlinux.org.uk>, "wangxiongfeng (C)" <wangxiongfeng2@huawei.com>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, eun.taik.lee@s
 List-Id: linux-efi@vger.kernel.org
 
-Hi Tyler,
+Hi James,
 
-On 2017/2/22 5:21, Tyler Baicar wrote:
-> ARM APEI extension proposal added SEA (Synchronous External Abort)
-> notification type for ARMv8.
-> Add a new GHES error source handling function for SEA. If an error
-> source's notification type is SEA, then this function can be registered
-> into the SEA exception handler. That way GHES will parse and report
-> SEA exceptions when they occur.
+On 2017/2/28 21:22, James Morse wrote:
+> Hi Shiju,
+>
+> On 27/02/17 18:19, Shiju Jose wrote:
+>> Add a new GHES error source handling function for
+>> GSIV(Global System Interrupt Vector).
+>> If an error source's notification type is GSIV,
+>> then this handling function can be registered
+>> into the GSIV handler and it can parse
+>> and report error information when they occur.
+>
+> I'm missing some of the story here, but how is GSIV different from 'External
+> Interrupt'? I'm guessing something other than the CPU takes this 'interrupt'...
 
-I have a question about ghes_proc. In ghes_proc, we just parse and report
-the error information, but no one use it for error recovery now.
+Yes, it's the same from CPU side (they are interrupts!), but there
+is history behind them and the usage is different.
 
-Take the SEA case for example, we get the physical address from parsing
-the GHES table. But the memory management system or other drivers/modules
-know what the really meaning of the error address/page. There is no way to
-notify them to do the recovery now.
+I think External Interrupt was introduced before ACPI is available on
+ARM (hardware reduced platforms), so I guess it was used for errors
+reported to OS which were not using SCI mechanism, for example, some
+IO error reporting.
 
-So, could we add a notify at appropriate position. All drivers or modules
-which are interested in this error could receive and take the corresponding
-action.
+For External Interrupt, we don't use the ACPI event system, so for
+the firmware, it just report the errors associate with the interrupt
+number, the kernel map the interrupt number and install the
+irq handler for it.
 
----
-Thanks,
-Xie XiuQi
+For GSIV based event, it was introduced for hardware reduced platform
+in recent ACPI revision, and ARM64 is one of its consumers. When
+errors are reported via GSIV, ACPI event notification needs to be
+implemented and requires the platform to define a hardware error device
+(PNP0C33) in ACPI namespace, and also a generic event device ACPI0013.
 
+For example, if we are using SPI (ARM GIC) 100 to report errors, there
+is a ACPI0013 driver in drivers/acpi/evged.c to register the irq, when
+error happened and trigger the interrupt, ACPI0013 driver will
+notify the error device (PNP0C33), then error device driver
+(drivers/acpi/hed.c) will process the error data form APEI table...
 
-> An SEA can interrupt code that had interrupts masked and is treated as
-> an NMI. To aid this the page of address space for mapping APEI buffers
-> while in_nmi() is always reserved, and ghes_ioremap_pfn_nmi() is
-> changed to use the helper methods to find the prot_t to map with in
-> the same way as ghes_ioremap_pfn_irq().
-> 
-> Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> CC: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> ---
->  arch/arm64/Kconfig        |  1 +
->  arch/arm64/mm/fault.c     | 13 ++++++++
->  drivers/acpi/apei/Kconfig | 15 +++++++++
->  drivers/acpi/apei/ghes.c  | 77 +++++++++++++++++++++++++++++++++++++++++++----
->  include/acpi/ghes.h       |  7 +++++
->  5 files changed, 107 insertions(+), 6 deletions(-)
-> 
-> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-> index 1117421..fca4dc1 100644
-> --- a/arch/arm64/Kconfig
-> +++ b/arch/arm64/Kconfig
-> @@ -88,6 +88,7 @@ config ARM64
->  	select HAVE_IRQ_TIME_ACCOUNTING
->  	select HAVE_MEMBLOCK
->  	select HAVE_MEMBLOCK_NODE_MAP if NUMA
-> +	select HAVE_NMI if ACPI_APEI_SEA
->  	select HAVE_PATA_PLATFORM
->  	select HAVE_PERF_EVENTS
->  	select HAVE_PERF_REGS
-> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-> index d178dc0..b2d57fc 100644
-> --- a/arch/arm64/mm/fault.c
-> +++ b/arch/arm64/mm/fault.c
-> @@ -41,6 +41,8 @@
->  #include <asm/pgtable.h>
->  #include <asm/tlbflush.h>
->  
-> +#include <acpi/ghes.h>
-> +
->  static const char *fault_name(unsigned int esr);
->  
->  #ifdef CONFIG_KPROBES
-> @@ -498,6 +500,17 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->  	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
->  		 fault_name(esr), esr, addr);
->  
-> +	/*
-> +	 * Synchronous aborts may interrupt code which had interrupts masked.
-> +	 * Before calling out into the wider kernel tell the interested
-> +	 * subsystems.
-> +	 */
-> +	if (IS_ENABLED(ACPI_APEI_SEA)) {
-> +		nmi_enter();
-> +		ghes_notify_sea();
-> +		nmi_exit();
-> +	}
-> +
->  	info.si_signo = SIGBUS;
->  	info.si_errno = 0;
->  	info.si_code  = 0;
-> diff --git a/drivers/acpi/apei/Kconfig b/drivers/acpi/apei/Kconfig
-> index b0140c8..c545dd1 100644
-> --- a/drivers/acpi/apei/Kconfig
-> +++ b/drivers/acpi/apei/Kconfig
-> @@ -39,6 +39,21 @@ config ACPI_APEI_PCIEAER
->  	  PCIe AER errors may be reported via APEI firmware first mode.
->  	  Turn on this option to enable the corresponding support.
->  
-> +config ACPI_APEI_SEA
-> +	bool "APEI Synchronous External Abort logging/recovering support"
-> +	depends on ARM64 && ACPI_APEI && ACPI_APEI_GHES
-> +	default y
-> +	help
-> +	  This option should be enabled if the system supports
-> +	  firmware first handling of SEA (Synchronous External Abort).
-> +	  SEA happens with certain faults of data abort or instruction
-> +	  abort synchronous exceptions on ARMv8 systems. If a system
-> +	  supports firmware first handling of SEA, the platform analyzes
-> +	  and handles hardware error notifications from SEA, and it may then
-> +	  form a HW error record for the OS to parse and handle. This
-> +	  option allows the OS to look for such hardware error record, and
-> +	  take appropriate action.
-> +
->  config ACPI_APEI_MEMORY_FAILURE
->  	bool "APEI memory error recovering support"
->  	depends on ACPI_APEI && MEMORY_FAILURE
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index b25e7cf..b0596ba 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -114,11 +114,7 @@
->   * Two virtual pages are used, one for IRQ/PROCESS context, the other for
->   * NMI context (optionally).
->   */
-> -#ifdef CONFIG_HAVE_ACPI_APEI_NMI
->  #define GHES_IOREMAP_PAGES           2
-> -#else
-> -#define GHES_IOREMAP_PAGES           1
-> -#endif
->  #define GHES_IOREMAP_IRQ_PAGE(base)	(base)
->  #define GHES_IOREMAP_NMI_PAGE(base)	((base) + PAGE_SIZE)
->  
-> @@ -157,10 +153,14 @@ static void ghes_ioremap_exit(void)
->  static void __iomem *ghes_ioremap_pfn_nmi(u64 pfn)
->  {
->  	unsigned long vaddr;
-> +	phys_addr_t paddr;
-> +	pgprot_t prot;
->  
->  	vaddr = (unsigned long)GHES_IOREMAP_NMI_PAGE(ghes_ioremap_area->addr);
-> -	ioremap_page_range(vaddr, vaddr + PAGE_SIZE,
-> -			   pfn << PAGE_SHIFT, PAGE_KERNEL);
-> +
-> +	paddr = pfn << PAGE_SHIFT;
-> +	prot = arch_apei_get_mem_attribute(paddr);
-> +	ioremap_page_range(vaddr, vaddr + PAGE_SIZE, paddr, prot);
->  
->  	return (void __iomem *)vaddr;
->  }
-> @@ -767,6 +767,50 @@ static int ghes_notify_sci(struct notifier_block *this,
->  	.notifier_call = ghes_notify_sci,
->  };
->  
-> +#ifdef CONFIG_ACPI_APEI_SEA
-> +static LIST_HEAD(ghes_sea);
-> +
-> +void ghes_notify_sea(void)
-> +{
-> +	struct ghes *ghes;
-> +
-> +	/*
-> +	 * synchronize_rcu() will wait for nmi_exit(), so no need to
-> +	 * rcu_read_lock().
-> +	 */
-> +	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
-> +		ghes_proc(ghes);
-> +	}
-> +}
-> +
-> +static void ghes_sea_add(struct ghes *ghes)
-> +{
-> +	mutex_lock(&ghes_list_mutex);
-> +	list_add_rcu(&ghes->list, &ghes_sea);
-> +	mutex_unlock(&ghes_list_mutex);
-> +}
-> +
-> +static void ghes_sea_remove(struct ghes *ghes)
-> +{
-> +	mutex_lock(&ghes_list_mutex);
-> +	list_del_rcu(&ghes->list);
-> +	mutex_unlock(&ghes_list_mutex);
-> +	synchronize_rcu();
-> +}
-> +#else /* CONFIG_ACPI_APEI_SEA */
-> +static inline void ghes_sea_add(struct ghes *ghes)
-> +{
-> +	pr_err(GHES_PFX "ID: %d, trying to add SEA notification which is not supported\n",
-> +	       ghes->generic->header.source_id);
-> +}
-> +
-> +static inline void ghes_sea_remove(struct ghes *ghes)
-> +{
-> +	pr_err(GHES_PFX "ID: %d, trying to remove SEA notification which is not supported\n",
-> +	       ghes->generic->header.source_id);
-> +}
-> +#endif /* CONFIG_ACPI_APEI_SEA */
-> +
->  #ifdef CONFIG_HAVE_ACPI_APEI_NMI
->  /*
->   * printk is not safe in NMI context.  So in NMI handler, we allocate
-> @@ -1012,6 +1056,14 @@ static int ghes_probe(struct platform_device *ghes_dev)
->  	case ACPI_HEST_NOTIFY_EXTERNAL:
->  	case ACPI_HEST_NOTIFY_SCI:
->  		break;
-> +	case ACPI_HEST_NOTIFY_SEA:
-> +		if (!IS_ENABLED(CONFIG_ACPI_APEI_SEA)) {
-> +			pr_warn(GHES_PFX "Generic hardware error source: %d notified via SEA is not supported\n",
-> +				generic->header.source_id);
-> +			rc = -ENOTSUPP;
-> +			goto err;
-> +		}
-> +		break;
->  	case ACPI_HEST_NOTIFY_NMI:
->  		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_NMI)) {
->  			pr_warn(GHES_PFX "Generic hardware error source: %d notified via NMI interrupt is not supported!\n",
-> @@ -1023,6 +1075,13 @@ static int ghes_probe(struct platform_device *ghes_dev)
->  		pr_warning(GHES_PFX "Generic hardware error source: %d notified via local interrupt is not supported!\n",
->  			   generic->header.source_id);
->  		goto err;
-> +	case ACPI_HEST_NOTIFY_GPIO:
-> +	case ACPI_HEST_NOTIFY_SEI:
-> +	case ACPI_HEST_NOTIFY_GSIV:
-> +		pr_warn(GHES_PFX "Generic hardware error source: %d notified via notification type %u is not supported\n",
-> +			generic->header.source_id, generic->header.source_id);
-> +		rc = -ENOTSUPP;
-> +		goto err;
->  	default:
->  		pr_warning(FW_WARN GHES_PFX "Unknown notification type: %u for generic hardware error source: %d\n",
->  			   generic->notify.type, generic->header.source_id);
-> @@ -1077,6 +1136,9 @@ static int ghes_probe(struct platform_device *ghes_dev)
->  		list_add_rcu(&ghes->list, &ghes_sci);
->  		mutex_unlock(&ghes_list_mutex);
->  		break;
-> +	case ACPI_HEST_NOTIFY_SEA:
-> +		ghes_sea_add(ghes);
-> +		break;
->  	case ACPI_HEST_NOTIFY_NMI:
->  		ghes_nmi_add(ghes);
->  		break;
-> @@ -1119,6 +1181,9 @@ static int ghes_remove(struct platform_device *ghes_dev)
->  			unregister_acpi_hed_notifier(&ghes_notifier_sci);
->  		mutex_unlock(&ghes_list_mutex);
->  		break;
-> +	case ACPI_HEST_NOTIFY_SEA:
-> +		ghes_sea_remove(ghes);
-> +		break;
->  	case ACPI_HEST_NOTIFY_NMI:
->  		ghes_nmi_remove(ghes);
->  		break;
-> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
-> index 6ae318b..18bc935 100644
-> --- a/include/acpi/ghes.h
-> +++ b/include/acpi/ghes.h
-> @@ -1,3 +1,6 @@
-> +#ifndef GHES_H
-> +#define GHES_H
-> +
->  #include <acpi/apei.h>
->  #include <acpi/hed.h>
->  
-> @@ -95,3 +98,7 @@ static inline void *acpi_hest_generic_data_payload(struct acpi_hest_generic_data
->  		(void *)(((struct acpi_hest_generic_data_v300 *)(gdata)) + 1) :
->  		gdata + 1;
->  }
-> +
-> +void ghes_notify_sea(void);
-> +
-> +#endif /* GHES_H */
-> 
+So GSIV is quite different from 'External interrupt' in the way of
+working from both firmware and kernel side.
+
+>
+>
+> The GHES GSIV code below is identical to the behaviour of the SCI Notification
+> type... are these two names for the same thing? (I'm confused!)
+
+SCI is also an 'interrupt' but it's a special irq number for ACPI
+event, and it has GPE (general purpose event) registers behind it,
+which is used only on Intel platforms. SCI based event use
+Method(\_GPE._L0x) to notify the error device (PNP0C33), but GSIV
+is used for HW-reduced platform which has no GPEs.
+
+Hope it can clarify something :)
+
+Thanks
+Hanjun
