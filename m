@@ -1,246 +1,69 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [RFC PATCH v4 00/28] x86: Secure Memory Encryption (AMD)
-Date: Wed, 1 Mar 2017 17:17:25 +0800
-Message-ID: <20170301091725.GA8353@dhcp-128-65.nay.redhat.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [RFC PATCH v4 26/28] x86: Allow kexec to be used with SME
+Date: Wed, 1 Mar 2017 17:25:36 +0800
+Message-ID: <20170301092536.GB8353@dhcp-128-65.nay.redhat.com>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
+	<20170216154755.19244.51276.stgit@tlendack-t1.amdoffice.net>
+	<20170217155756.GJ30272@char.us.ORACLE.com>
+	<d2f16b24-f2ef-a22b-3c72-2d8ad585553e@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, kexec@lists.infradead.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.>
+In-Reply-To: <d2f16b24-f2ef-a22b-3c72-2d8ad585553e-5C7GfCeVMHo@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
 Hi Tom,
 
-On 02/16/17 at 09:41am, Tom Lendacky wrote:
-> This RFC patch series provides support for AMD's new Secure Memory
-> Encryption (SME) feature.
+On 02/17/17 at 10:43am, Tom Lendacky wrote:
+> On 2/17/2017 9:57 AM, Konrad Rzeszutek Wilk wrote:
+> > On Thu, Feb 16, 2017 at 09:47:55AM -0600, Tom Lendacky wrote:
+> > > Provide support so that kexec can be used to boot a kernel when SME is
+> > > enabled.
+> > 
+> > Is the point of kexec and kdump to ehh, dump memory ? But if the
+> > rest of the memory is encrypted you won't get much, will you?
 > 
-> SME can be used to mark individual pages of memory as encrypted through the
-> page tables. A page of memory that is marked encrypted will be automatically
-> decrypted when read from DRAM and will be automatically encrypted when
-> written to DRAM. Details on SME can found in the links below.
+> Kexec can be used to reboot a system without going back through BIOS.
+> So you can use kexec without using kdump.
 > 
-> The SME feature is identified through a CPUID function and enabled through
-> the SYSCFG MSR. Once enabled, page table entries will determine how the
-> memory is accessed. If a page table entry has the memory encryption mask set,
-> then that memory will be accessed as encrypted memory. The memory encryption
-> mask (as well as other related information) is determined from settings
-> returned through the same CPUID function that identifies the presence of the
-> feature.
-> 
-> The approach that this patch series takes is to encrypt everything possible
-> starting early in the boot where the kernel is encrypted. Using the page
-> table macros the encryption mask can be incorporated into all page table
-> entries and page allocations. By updating the protection map, userspace
-> allocations are also marked encrypted. Certain data must be accounted for
-> as having been placed in memory before SME was enabled (EFI, initrd, etc.)
-> and accessed accordingly.
-> 
-> This patch series is a pre-cursor to another AMD processor feature called
-> Secure Encrypted Virtualization (SEV). The support for SEV will build upon
-> the SME support and will be submitted later. Details on SEV can be found
-> in the links below.
-> 
-> The following links provide additional detail:
-> 
-> AMD Memory Encryption whitepaper:
->    http://amd-dev.wpengine.netdna-cdn.com/wordpress/media/2013/12/AMD_Memory_Encryption_Whitepaper_v7-Public.pdf
-> 
-> AMD64 Architecture Programmer's Manual:
->    http://support.amd.com/TechDocs/24593.pdf
->    SME is section 7.10
->    SEV is section 15.34
-> 
-> This patch series is based off of the master branch of tip.
->   Commit a27cb9e1b2b4 ("Merge branch 'WIP.sched/core'")
-> 
-> ---
-> 
-> Still to do: IOMMU enablement support
-> 
-> Changes since v3:
-> - Broke out some of the patches into smaller individual patches
-> - Updated Documentation
-> - Added a message to indicate why the IOMMU was disabled
-> - Updated CPU feature support for SME by taking into account whether
->   BIOS has enabled SME
-> - Eliminated redundant functions
-> - Added some warning messages for DMA usage of bounce buffers when SME
->   is active
-> - Added support for persistent memory
-> - Added support to determine when setup data is being mapped and be sure
->   to map it un-encrypted
-> - Added CONFIG support to set the default action of whether to activate
->   SME if it is supported/enabled
-> - Added support for (re)booting with kexec
+> For kdump, just taking a quick look, the option to enable memory
+> encryption can be provided on the crash kernel command line and then
 
-Could you please add kexec list in cc when you updating the patches so
-that kexec/kdump people do not miss them?
+Is there a simple way to get the SME status? Probably add some sysfs
+file for this purpose.
+
+> crash kernel can would be able to copy the memory decrypted if the
+> pagetable is set up properly. It looks like currently ioremap_cache()
+> is used to map the old memory page.  That might be able to be changed
+> to a memremap() so that the encryption bit is set in the mapping. That
+> will mean that memory that is not marked encrypted (EFI tables, swiotlb
+> memory, etc) would not be read correctly.
+
+Manage to store info about those ranges which are not encrypted so that
+memremap can handle them?
 
 > 
-> Changes since v2:
-> - Updated Documentation
-> - Make the encryption mask available outside of arch/x86 through a
->   standard include file
-> - Conversion of assembler routines to C where possible (not everything
->   could be converted, e.g. the routine that does the actual encryption
->   needs to be copied into a safe location and it is difficult to
->   determine the actual length of the function in order to copy it)
-> - Fix SME feature use of scattered CPUID feature
-> - Creation of SME specific functions for things like encrypting
->   the setup data, ramdisk, etc.
-> - New take on early_memremap / memremap encryption support
-> - Additional support for accessing video buffers (fbdev/gpu) as
->   un-encrypted
-> - Disable IOMMU for now - need to investigate further in relation to
->   how it needs to be programmed relative to accessing physical memory
+> > 
+> > Would it make sense to include some printk to the user if they
+> > are setting up kdump that they won't get anything out of it?
 > 
-> Changes since v1:
-> - Added Documentation.
-> - Removed AMD vendor check for setting the PAT write protect mode
-> - Updated naming of trampoline flag for SME as well as moving of the
->   SME check to before paging is enabled.
-> - Change to early_memremap to identify the data being mapped as either
->   boot data or kernel data.  The idea being that boot data will have
->   been placed in memory as un-encrypted data and would need to be accessed
->   as such.
-> - Updated debugfs support for the bootparams to access the data properly.
-> - Do not set the SYSCFG[MEME] bit, only check it.  The setting of the
->   MemEncryptionModeEn bit results in a reduction of physical address size
->   of the processor.  It is possible that BIOS could have configured resources
->   resources into a range that will now not be addressable.  To prevent this,
->   rely on BIOS to set the SYSCFG[MEME] bit and only then enable memory
->   encryption support in the kernel.
-> 
-> Tom Lendacky (28):
->       x86: Documentation for AMD Secure Memory Encryption (SME)
->       x86: Set the write-protect cache mode for full PAT support
->       x86: Add the Secure Memory Encryption CPU feature
->       x86: Handle reduction in physical address size with SME
->       x86: Add Secure Memory Encryption (SME) support
->       x86: Add support to enable SME during early boot processing
->       x86: Provide general kernel support for memory encryption
->       x86: Extend the early_memremap support with additional attrs
->       x86: Add support for early encryption/decryption of memory
->       x86: Insure that boot memory areas are mapped properly
->       x86: Add support to determine the E820 type of an address
->       efi: Add an EFI table address match function
->       efi: Update efi_mem_type() to return defined EFI mem types
->       Add support to access boot related data in the clear
->       Add support to access persistent memory in the clear
->       x86: Add support for changing memory encryption attribute
->       x86: Decrypt trampoline area if memory encryption is active
->       x86: DMA support for memory encryption
->       swiotlb: Add warnings for use of bounce buffers with SME
->       iommu/amd: Disable AMD IOMMU if memory encryption is active
->       x86: Check for memory encryption on the APs
->       x86: Do not specify encrypted memory for video mappings
->       x86/kvm: Enable Secure Memory Encryption of nested page tables
->       x86: Access the setup data through debugfs decrypted
->       x86: Access the setup data through sysfs decrypted
->       x86: Allow kexec to be used with SME
->       x86: Add support to encrypt the kernel in-place
->       x86: Add support to make use of Secure Memory Encryption
-> 
-> 
->  Documentation/admin-guide/kernel-parameters.txt |   11 +
->  Documentation/x86/amd-memory-encryption.txt     |   57 ++++
->  arch/x86/Kconfig                                |   26 ++
->  arch/x86/boot/compressed/pagetable.c            |    7 +
->  arch/x86/include/asm/cacheflush.h               |    5 
->  arch/x86/include/asm/cpufeature.h               |    7 -
->  arch/x86/include/asm/cpufeatures.h              |    5 
->  arch/x86/include/asm/disabled-features.h        |    3 
->  arch/x86/include/asm/dma-mapping.h              |    5 
->  arch/x86/include/asm/e820/api.h                 |    2 
->  arch/x86/include/asm/e820/types.h               |    2 
->  arch/x86/include/asm/fixmap.h                   |   20 +
->  arch/x86/include/asm/init.h                     |    1 
->  arch/x86/include/asm/io.h                       |    3 
->  arch/x86/include/asm/kvm_host.h                 |    3 
->  arch/x86/include/asm/mem_encrypt.h              |  108 ++++++++
->  arch/x86/include/asm/msr-index.h                |    2 
->  arch/x86/include/asm/page.h                     |    4 
->  arch/x86/include/asm/pgtable.h                  |   26 +-
->  arch/x86/include/asm/pgtable_types.h            |   54 +++-
->  arch/x86/include/asm/processor.h                |    3 
->  arch/x86/include/asm/realmode.h                 |   12 +
->  arch/x86/include/asm/required-features.h        |    3 
->  arch/x86/include/asm/setup.h                    |    8 +
->  arch/x86/include/asm/vga.h                      |   13 +
->  arch/x86/kernel/Makefile                        |    3 
->  arch/x86/kernel/cpu/common.c                    |   23 ++
->  arch/x86/kernel/e820.c                          |   26 ++
->  arch/x86/kernel/espfix_64.c                     |    2 
->  arch/x86/kernel/head64.c                        |   46 +++
->  arch/x86/kernel/head_64.S                       |   65 ++++-
->  arch/x86/kernel/kdebugfs.c                      |   30 +-
->  arch/x86/kernel/ksysfs.c                        |   27 +-
->  arch/x86/kernel/machine_kexec_64.c              |    3 
->  arch/x86/kernel/mem_encrypt_boot.S              |  156 ++++++++++++
->  arch/x86/kernel/mem_encrypt_init.c              |  310 +++++++++++++++++++++++
->  arch/x86/kernel/pci-dma.c                       |   11 +
->  arch/x86/kernel/pci-nommu.c                     |    2 
->  arch/x86/kernel/pci-swiotlb.c                   |    8 -
->  arch/x86/kernel/process.c                       |   43 +++
->  arch/x86/kernel/setup.c                         |   43 +++
->  arch/x86/kernel/smp.c                           |    4 
->  arch/x86/kvm/mmu.c                              |    8 -
->  arch/x86/kvm/vmx.c                              |    3 
->  arch/x86/kvm/x86.c                              |    3 
->  arch/x86/mm/Makefile                            |    1 
->  arch/x86/mm/ident_map.c                         |    6 
->  arch/x86/mm/ioremap.c                           |  157 ++++++++++++
->  arch/x86/mm/kasan_init_64.c                     |    4 
->  arch/x86/mm/mem_encrypt.c                       |  218 ++++++++++++++++
->  arch/x86/mm/pageattr.c                          |   71 +++++
->  arch/x86/mm/pat.c                               |    6 
->  arch/x86/platform/efi/efi.c                     |    4 
->  arch/x86/platform/efi/efi_64.c                  |   16 +
->  arch/x86/realmode/init.c                        |   16 +
->  arch/x86/realmode/rm/trampoline_64.S            |   17 +
->  drivers/firmware/efi/efi.c                      |   33 ++
->  drivers/gpu/drm/drm_gem.c                       |    2 
->  drivers/gpu/drm/drm_vm.c                        |    4 
->  drivers/gpu/drm/ttm/ttm_bo_vm.c                 |    7 -
->  drivers/gpu/drm/udl/udl_fb.c                    |    4 
->  drivers/iommu/amd_iommu_init.c                  |    7 +
->  drivers/video/fbdev/core/fbmem.c                |   12 +
->  include/asm-generic/early_ioremap.h             |    2 
->  include/asm-generic/pgtable.h                   |    8 +
->  include/linux/dma-mapping.h                     |   11 +
->  include/linux/efi.h                             |    7 +
->  include/linux/mem_encrypt.h                     |   53 ++++
->  include/linux/swiotlb.h                         |    1 
->  init/main.c                                     |   13 +
->  kernel/kexec_core.c                             |   24 ++
->  kernel/memremap.c                               |   11 +
->  lib/swiotlb.c                                   |   59 ++++
->  mm/early_ioremap.c                              |   28 ++
->  74 files changed, 1880 insertions(+), 128 deletions(-)
->  create mode 100644 Documentation/x86/amd-memory-encryption.txt
->  create mode 100644 arch/x86/include/asm/mem_encrypt.h
->  create mode 100644 arch/x86/kernel/mem_encrypt_boot.S
->  create mode 100644 arch/x86/kernel/mem_encrypt_init.c
->  create mode 100644 arch/x86/mm/mem_encrypt.c
->  create mode 100644 include/linux/mem_encrypt.h
-> 
-> -- 
-> Tom Lendacky
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Probably a good idea to add something like that.
 
-Thanks a lot!
+It will break kdump functionality, it should be fixed instead of
+just adding printk to warn user..
+
+Thanks
 Dave
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
