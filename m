@@ -1,52 +1,39 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 1/2] efi: libstub: Treat missing SecureBoot variable as S/B disabled
-Date: Wed,  1 Mar 2017 19:04:35 +0000
-Message-ID: <1488395076-29712-2-git-send-email-ard.biesheuvel@linaro.org>
-References: <1488395076-29712-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1488395076-29712-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [GIT PULL 0/2] EFI fixes for v4.11-rc
+Date: Wed,  1 Mar 2017 19:04:34 +0000
+Message-ID: <1488395076-29712-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: matt@codeblueprint.co.uk, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-The newly refactored code that infers the firmware's Secure Boot state
-prints the following error when the EFI variable 'SecureBoot' does not
-exist:
+The following changes since commit 6053dc981449718d90a429933e99b441e1adaea6:
 
-  EFI stub: ERROR: Could not determine UEFI Secure Boot status.
+  Merge tag 'arm64-fixes' of git://git.kernel.org/pub/scm/linux/kernel/git/arm64/linux (2017-03-01 10:32:30 -0800)
 
-However, this variable is only guaranteed to be defined on a system that
-is Secure Boot capable to begin with, and so it is not an error if it is
-missing. So report Secure Boot as being disabled in this case, without
-printing any error messages.
+are available in the git repository at:
 
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
+
+for you to fetch changes up to 2f0db11e7e12538bfe5483f7f113481c3443f151:
+
+  efi: arm: Fix boot crash with CONFIG_CPUMASK_OFFSTACK=y (2017-03-01 18:45:02 +0000)
+
+Please pull.
+
+----------------------------------------------------------------
+Two bug fixes for UEFI:
+- don't complain about the Secure Boot status being undetectable on systems
+  that are not Secure Boot capable to begin with,
+- for stable: fix a panic when booting Fedora's 32-bit ARM kernel in UEFI mode,
+  caused by an unexpected interaction with CONFIG_CPUMASK_OFFSTACK=y.
+
+----------------------------------------------------------------
+Ard Biesheuvel (2):
+      efi: libstub: Treat missing SecureBoot variable as S/B disabled
+      efi: arm: Fix boot crash with CONFIG_CPUMASK_OFFSTACK=y
+
+ drivers/firmware/efi/arm-runtime.c        | 1 +
  drivers/firmware/efi/libstub/secureboot.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-index 6def402bf569..5da36e56b36a 100644
---- a/drivers/firmware/efi/libstub/secureboot.c
-+++ b/drivers/firmware/efi/libstub/secureboot.c
-@@ -45,6 +45,8 @@ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
- 	size = sizeof(secboot);
- 	status = get_efi_var(efi_SecureBoot_name, &efi_variable_guid,
- 			     NULL, &size, &secboot);
-+	if (status == EFI_NOT_FOUND)
-+		return efi_secureboot_mode_disabled;
- 	if (status != EFI_SUCCESS)
- 		goto out_efi_err;
- 
-@@ -78,7 +80,5 @@ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
- 
- out_efi_err:
- 	pr_efi_err(sys_table_arg, "Could not determine UEFI Secure Boot status.\n");
--	if (status == EFI_NOT_FOUND)
--		return efi_secureboot_mode_disabled;
- 	return efi_secureboot_mode_unknown;
- }
--- 
-2.7.4
+ 2 files changed, 3 insertions(+), 2 deletions(-)
