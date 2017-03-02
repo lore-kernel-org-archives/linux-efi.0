@@ -1,8 +1,8 @@
 From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [RFC PATCH v2 08/32] x86: Use PAGE_KERNEL protection for ioremap of
- memory page
-Date: Thu, 2 Mar 2017 10:13:32 -0500
-Message-ID: <148846761276.2349.4899767672892365544.stgit@brijesh-build-machine>
+Subject: [RFC PATCH v2 09/32] x86: Change early_ioremap to early_memremap
+ for BOOT data
+Date: Thu, 2 Mar 2017 10:13:53 -0500
+Message-ID: <148846763334.2349.9327692408737971533.stgit@brijesh-build-machine>
 References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -15,101 +15,108 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Tom Lendacky <thomas.lendacky@amd.com>
 
-In order for memory pages to be properly mapped when SEV is active, we
-need to use the PAGE_KERNEL protection attribute as the base protection.
-This will insure that memory mapping of, e.g. ACPI tables, receives the
-proper mapping attributes.
+In order to map BOOT data with the proper encryption bit, the
+early_ioremap() function calls are changed to early_memremap() calls.
+This allows the proper access for both SME and SEV.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/mm/ioremap.c |    8 ++++++++
- include/linux/mm.h    |    1 +
- kernel/resource.c     |   40 ++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 49 insertions(+)
+ arch/x86/kernel/acpi/boot.c |    4 ++--
+ arch/x86/kernel/mpparse.c   |   10 +++++-----
+ drivers/sfi/sfi_core.c      |    6 +++---
+ 3 files changed, 10 insertions(+), 10 deletions(-)
 
-diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
-index c400ab5..481c999 100644
---- a/arch/x86/mm/ioremap.c
-+++ b/arch/x86/mm/ioremap.c
-@@ -151,7 +151,15 @@ static void __iomem *__ioremap_caller(resource_size_t phys_addr,
- 		pcm = new_pcm;
+diff --git a/arch/x86/kernel/acpi/boot.c b/arch/x86/kernel/acpi/boot.c
+index 35174c6..468c25a 100644
+--- a/arch/x86/kernel/acpi/boot.c
++++ b/arch/x86/kernel/acpi/boot.c
+@@ -124,7 +124,7 @@ char *__init __acpi_map_table(unsigned long phys, unsigned long size)
+ 	if (!phys || !size)
+ 		return NULL;
+ 
+-	return early_ioremap(phys, size);
++	return early_memremap(phys, size);
+ }
+ 
+ void __init __acpi_unmap_table(char *map, unsigned long size)
+@@ -132,7 +132,7 @@ void __init __acpi_unmap_table(char *map, unsigned long size)
+ 	if (!map || !size)
+ 		return;
+ 
+-	early_iounmap(map, size);
++	early_memunmap(map, size);
+ }
+ 
+ #ifdef CONFIG_X86_LOCAL_APIC
+diff --git a/arch/x86/kernel/mpparse.c b/arch/x86/kernel/mpparse.c
+index 0d904d7..fd37f39 100644
+--- a/arch/x86/kernel/mpparse.c
++++ b/arch/x86/kernel/mpparse.c
+@@ -436,9 +436,9 @@ static unsigned long __init get_mpc_size(unsigned long physptr)
+ 	struct mpc_table *mpc;
+ 	unsigned long size;
+ 
+-	mpc = early_ioremap(physptr, PAGE_SIZE);
++	mpc = early_memremap(physptr, PAGE_SIZE);
+ 	size = mpc->length;
+-	early_iounmap(mpc, PAGE_SIZE);
++	early_memunmap(mpc, PAGE_SIZE);
+ 	apic_printk(APIC_VERBOSE, "  mpc: %lx-%lx\n", physptr, physptr + size);
+ 
+ 	return size;
+@@ -450,7 +450,7 @@ static int __init check_physptr(struct mpf_intel *mpf, unsigned int early)
+ 	unsigned long size;
+ 
+ 	size = get_mpc_size(mpf->physptr);
+-	mpc = early_ioremap(mpf->physptr, size);
++	mpc = early_memremap(mpf->physptr, size);
+ 	/*
+ 	 * Read the physical hardware table.  Anything here will
+ 	 * override the defaults.
+@@ -461,10 +461,10 @@ static int __init check_physptr(struct mpf_intel *mpf, unsigned int early)
+ #endif
+ 		pr_err("BIOS bug, MP table errors detected!...\n");
+ 		pr_cont("... disabling SMP support. (tell your hw vendor)\n");
+-		early_iounmap(mpc, size);
++		early_memunmap(mpc, size);
+ 		return -1;
  	}
+-	early_iounmap(mpc, size);
++	early_memunmap(mpc, size);
  
-+	/*
-+	 * If the page being mapped is in memory and SEV is active then
-+	 * make sure the memory encryption attribute is enabled in the
-+	 * resulting mapping.
-+	 */
- 	prot = PAGE_KERNEL_IO;
-+	if (sev_active() && page_is_mem(pfn))
-+		prot = __pgprot(pgprot_val(prot) | _PAGE_ENC);
-+
- 	switch (pcm) {
- 	case _PAGE_CACHE_MODE_UC:
- 	default:
-diff --git a/include/linux/mm.h b/include/linux/mm.h
-index b84615b..825df27 100644
---- a/include/linux/mm.h
-+++ b/include/linux/mm.h
-@@ -445,6 +445,7 @@ static inline int get_page_unless_zero(struct page *page)
+ 	if (early)
+ 		return -1;
+diff --git a/drivers/sfi/sfi_core.c b/drivers/sfi/sfi_core.c
+index 296db7a..d00ae3f 100644
+--- a/drivers/sfi/sfi_core.c
++++ b/drivers/sfi/sfi_core.c
+@@ -92,7 +92,7 @@ static struct sfi_table_simple *syst_va __read_mostly;
+ static u32 sfi_use_ioremap __read_mostly;
+ 
+ /*
+- * sfi_un/map_memory calls early_ioremap/iounmap which is a __init function
++ * sfi_un/map_memory calls early_memremap/memunmap which is a __init function
+  * and introduces section mismatch. So use __ref to make it calm.
+  */
+ static void __iomem * __ref sfi_map_memory(u64 phys, u32 size)
+@@ -103,7 +103,7 @@ static void __iomem * __ref sfi_map_memory(u64 phys, u32 size)
+ 	if (sfi_use_ioremap)
+ 		return ioremap_cache(phys, size);
+ 	else
+-		return early_ioremap(phys, size);
++		return early_memremap(phys, size);
  }
  
- extern int page_is_ram(unsigned long pfn);
-+extern int page_is_mem(unsigned long pfn);
- 
- enum {
- 	REGION_INTERSECTS,
-diff --git a/kernel/resource.c b/kernel/resource.c
-index 9b5f044..db56ba3 100644
---- a/kernel/resource.c
-+++ b/kernel/resource.c
-@@ -518,6 +518,46 @@ int __weak page_is_ram(unsigned long pfn)
+ static void __ref sfi_unmap_memory(void __iomem *virt, u32 size)
+@@ -114,7 +114,7 @@ static void __ref sfi_unmap_memory(void __iomem *virt, u32 size)
+ 	if (sfi_use_ioremap)
+ 		iounmap(virt);
+ 	else
+-		early_iounmap(virt, size);
++		early_memunmap(virt, size);
  }
- EXPORT_SYMBOL_GPL(page_is_ram);
  
-+/*
-+ * This function returns true if the target memory is marked as
-+ * IORESOURCE_MEM and IORESOUCE_BUSY and described as other than
-+ * IORES_DESC_NONE (e.g. IORES_DESC_ACPI_TABLES).
-+ */
-+static int walk_mem_range(unsigned long start_pfn, unsigned long nr_pages)
-+{
-+	struct resource res;
-+	unsigned long pfn, end_pfn;
-+	u64 orig_end;
-+	int ret = -1;
-+
-+	res.start = (u64) start_pfn << PAGE_SHIFT;
-+	res.end = ((u64)(start_pfn + nr_pages) << PAGE_SHIFT) - 1;
-+	res.flags = IORESOURCE_MEM | IORESOURCE_BUSY;
-+	orig_end = res.end;
-+	while ((res.start < res.end) &&
-+		(find_next_iomem_res(&res, IORES_DESC_NONE, true) >= 0)) {
-+		pfn = (res.start + PAGE_SIZE - 1) >> PAGE_SHIFT;
-+		end_pfn = (res.end + 1) >> PAGE_SHIFT;
-+		if (end_pfn > pfn)
-+			ret = (res.desc != IORES_DESC_NONE) ? 1 : 0;
-+		if (ret)
-+			break;
-+		res.start = res.end + 1;
-+		res.end = orig_end;
-+	}
-+	return ret;
-+}
-+
-+/*
-+ * This generic page_is_mem() returns true if specified address is
-+ * registered as memory in iomem_resource list.
-+ */
-+int __weak page_is_mem(unsigned long pfn)
-+{
-+	return walk_mem_range(pfn, 1) == 1;
-+}
-+EXPORT_SYMBOL_GPL(page_is_mem);
-+
- /**
-  * region_intersects() - determine intersection of region with known resources
-  * @start: region start address
+ static void sfi_print_table_header(unsigned long long pa,
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
