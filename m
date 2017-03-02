@@ -1,8 +1,7 @@
 From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [RFC PATCH v2 09/32] x86: Change early_ioremap to early_memremap
- for BOOT data
-Date: Thu, 2 Mar 2017 10:13:53 -0500
-Message-ID: <148846763334.2349.9327692408737971533.stgit@brijesh-build-machine>
+Subject: [RFC PATCH v2 10/32] x86: DMA support for SEV memory encryption
+Date: Thu, 2 Mar 2017 10:14:25 -0500
+Message-ID: <148846766532.2349.4832844575566575886.stgit@brijesh-build-machine>
 References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -15,108 +14,113 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Tom Lendacky <thomas.lendacky@amd.com>
 
-In order to map BOOT data with the proper encryption bit, the
-early_ioremap() function calls are changed to early_memremap() calls.
-This allows the proper access for both SME and SEV.
+DMA access to memory mapped as encrypted while SEV is active can not be
+encrypted during device write or decrypted during device read. In order
+for DMA to properly work when SEV is active, the swiotlb bounce buffers
+must be used.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/kernel/acpi/boot.c |    4 ++--
- arch/x86/kernel/mpparse.c   |   10 +++++-----
- drivers/sfi/sfi_core.c      |    6 +++---
- 3 files changed, 10 insertions(+), 10 deletions(-)
+ arch/x86/mm/mem_encrypt.c |   77 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 77 insertions(+)
 
-diff --git a/arch/x86/kernel/acpi/boot.c b/arch/x86/kernel/acpi/boot.c
-index 35174c6..468c25a 100644
---- a/arch/x86/kernel/acpi/boot.c
-+++ b/arch/x86/kernel/acpi/boot.c
-@@ -124,7 +124,7 @@ char *__init __acpi_map_table(unsigned long phys, unsigned long size)
- 	if (!phys || !size)
- 		return NULL;
- 
--	return early_ioremap(phys, size);
-+	return early_memremap(phys, size);
+diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+index 090419b..7df5f4c 100644
+--- a/arch/x86/mm/mem_encrypt.c
++++ b/arch/x86/mm/mem_encrypt.c
+@@ -197,8 +197,81 @@ void __init sme_early_init(void)
+ 	/* Update the protection map with memory encryption mask */
+ 	for (i = 0; i < ARRAY_SIZE(protection_map); i++)
+ 		protection_map[i] = pgprot_encrypted(protection_map[i]);
++
++	if (sev_active())
++		swiotlb_force = SWIOTLB_FORCE;
++}
++
++static void *sme_alloc(struct device *dev, size_t size, dma_addr_t *dma_handle,
++		       gfp_t gfp, unsigned long attrs)
++{
++	unsigned long dma_mask;
++	unsigned int order;
++	struct page *page;
++	void *vaddr = NULL;
++
++	dma_mask = dma_alloc_coherent_mask(dev, gfp);
++	order = get_order(size);
++
++	gfp &= ~__GFP_ZERO;
++
++	page = alloc_pages_node(dev_to_node(dev), gfp, order);
++	if (page) {
++		dma_addr_t addr;
++
++		/*
++		 * Since we will be clearing the encryption bit, check the
++		 * mask with it already cleared.
++		 */
++		addr = phys_to_dma(dev, page_to_phys(page)) & ~sme_me_mask;
++		if ((addr + size) > dma_mask) {
++			__free_pages(page, get_order(size));
++		} else {
++			vaddr = page_address(page);
++			*dma_handle = addr;
++		}
++	}
++
++	if (!vaddr)
++		vaddr = swiotlb_alloc_coherent(dev, size, dma_handle, gfp);
++
++	if (!vaddr)
++		return NULL;
++
++	/* Clear the SME encryption bit for DMA use if not swiotlb area */
++	if (!is_swiotlb_buffer(dma_to_phys(dev, *dma_handle))) {
++		set_memory_decrypted((unsigned long)vaddr, 1 << order);
++		*dma_handle &= ~sme_me_mask;
++	}
++
++	return vaddr;
  }
  
- void __init __acpi_unmap_table(char *map, unsigned long size)
-@@ -132,7 +132,7 @@ void __init __acpi_unmap_table(char *map, unsigned long size)
- 	if (!map || !size)
- 		return;
++static void sme_free(struct device *dev, size_t size, void *vaddr,
++		     dma_addr_t dma_handle, unsigned long attrs)
++{
++	/* Set the SME encryption bit for re-use if not swiotlb area */
++	if (!is_swiotlb_buffer(dma_to_phys(dev, dma_handle)))
++		set_memory_encrypted((unsigned long)vaddr,
++				     1 << get_order(size));
++
++	swiotlb_free_coherent(dev, size, vaddr, dma_handle);
++}
++
++static struct dma_map_ops sme_dma_ops = {
++	.alloc                  = sme_alloc,
++	.free                   = sme_free,
++	.map_page               = swiotlb_map_page,
++	.unmap_page             = swiotlb_unmap_page,
++	.map_sg                 = swiotlb_map_sg_attrs,
++	.unmap_sg               = swiotlb_unmap_sg_attrs,
++	.sync_single_for_cpu    = swiotlb_sync_single_for_cpu,
++	.sync_single_for_device = swiotlb_sync_single_for_device,
++	.sync_sg_for_cpu        = swiotlb_sync_sg_for_cpu,
++	.sync_sg_for_device     = swiotlb_sync_sg_for_device,
++	.mapping_error          = swiotlb_dma_mapping_error,
++};
++
+ /* Architecture __weak replacement functions */
+ void __init mem_encrypt_init(void)
+ {
+@@ -208,6 +281,10 @@ void __init mem_encrypt_init(void)
+ 	/* Call into SWIOTLB to update the SWIOTLB DMA buffers */
+ 	swiotlb_update_mem_attributes();
  
--	early_iounmap(map, size);
-+	early_memunmap(map, size);
++	/* Use SEV DMA operations if SEV is active */
++	if (sev_active())
++		dma_ops = &sme_dma_ops;
++
+ 	pr_info("AMD Secure Memory Encryption (SME) active\n");
  }
  
- #ifdef CONFIG_X86_LOCAL_APIC
-diff --git a/arch/x86/kernel/mpparse.c b/arch/x86/kernel/mpparse.c
-index 0d904d7..fd37f39 100644
---- a/arch/x86/kernel/mpparse.c
-+++ b/arch/x86/kernel/mpparse.c
-@@ -436,9 +436,9 @@ static unsigned long __init get_mpc_size(unsigned long physptr)
- 	struct mpc_table *mpc;
- 	unsigned long size;
- 
--	mpc = early_ioremap(physptr, PAGE_SIZE);
-+	mpc = early_memremap(physptr, PAGE_SIZE);
- 	size = mpc->length;
--	early_iounmap(mpc, PAGE_SIZE);
-+	early_memunmap(mpc, PAGE_SIZE);
- 	apic_printk(APIC_VERBOSE, "  mpc: %lx-%lx\n", physptr, physptr + size);
- 
- 	return size;
-@@ -450,7 +450,7 @@ static int __init check_physptr(struct mpf_intel *mpf, unsigned int early)
- 	unsigned long size;
- 
- 	size = get_mpc_size(mpf->physptr);
--	mpc = early_ioremap(mpf->physptr, size);
-+	mpc = early_memremap(mpf->physptr, size);
- 	/*
- 	 * Read the physical hardware table.  Anything here will
- 	 * override the defaults.
-@@ -461,10 +461,10 @@ static int __init check_physptr(struct mpf_intel *mpf, unsigned int early)
- #endif
- 		pr_err("BIOS bug, MP table errors detected!...\n");
- 		pr_cont("... disabling SMP support. (tell your hw vendor)\n");
--		early_iounmap(mpc, size);
-+		early_memunmap(mpc, size);
- 		return -1;
- 	}
--	early_iounmap(mpc, size);
-+	early_memunmap(mpc, size);
- 
- 	if (early)
- 		return -1;
-diff --git a/drivers/sfi/sfi_core.c b/drivers/sfi/sfi_core.c
-index 296db7a..d00ae3f 100644
---- a/drivers/sfi/sfi_core.c
-+++ b/drivers/sfi/sfi_core.c
-@@ -92,7 +92,7 @@ static struct sfi_table_simple *syst_va __read_mostly;
- static u32 sfi_use_ioremap __read_mostly;
- 
- /*
-- * sfi_un/map_memory calls early_ioremap/iounmap which is a __init function
-+ * sfi_un/map_memory calls early_memremap/memunmap which is a __init function
-  * and introduces section mismatch. So use __ref to make it calm.
-  */
- static void __iomem * __ref sfi_map_memory(u64 phys, u32 size)
-@@ -103,7 +103,7 @@ static void __iomem * __ref sfi_map_memory(u64 phys, u32 size)
- 	if (sfi_use_ioremap)
- 		return ioremap_cache(phys, size);
- 	else
--		return early_ioremap(phys, size);
-+		return early_memremap(phys, size);
- }
- 
- static void __ref sfi_unmap_memory(void __iomem *virt, u32 size)
-@@ -114,7 +114,7 @@ static void __ref sfi_unmap_memory(void __iomem *virt, u32 size)
- 	if (sfi_use_ioremap)
- 		iounmap(virt);
- 	else
--		early_iounmap(virt, size);
-+		early_memunmap(virt, size);
- }
- 
- static void sfi_print_table_header(unsigned long long pa,
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
