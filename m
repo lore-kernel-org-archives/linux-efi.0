@@ -1,7 +1,7 @@
 From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [RFC PATCH v2 22/32] kvm: svm: prepare to reserve asid for SEV guest
-Date: Thu, 2 Mar 2017 10:16:56 -0500
-Message-ID: <148846781666.2349.1816322796563357670.stgit@brijesh-build-machine>
+Subject: [RFC PATCH v2 23/32] kvm: introduce KVM_MEMORY_ENCRYPT_OP ioctl
+Date: Thu, 2 Mar 2017 10:17:11 -0500
+Message-ID: <148846783136.2349.9362218518503742320.stgit@brijesh-build-machine>
 References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -12,45 +12,72 @@ Sender: owner-linux-mm@kvack.org
 To: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, brijesh.singh@amd.com, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproj
 List-Id: linux-efi@vger.kernel.org
 
-In current implementation, asid allocation starts from 1, this patch
-adds a min_asid variable in svm_vcpu structure to allow starting asid
-from something other than 1.
+If hardware supports encrypting then KVM_MEMORY_ENCRYPT_OP ioctl can
+be used by qemu to issue platform specific memory encryption commands.
 
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
-Reviewed-by: Paolo Bonzini <pbonzini@redhat.com>
 ---
- arch/x86/kvm/svm.c |    4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ arch/x86/include/asm/kvm_host.h |    2 ++
+ arch/x86/kvm/x86.c              |   12 ++++++++++++
+ include/uapi/linux/kvm.h        |    2 ++
+ 3 files changed, 16 insertions(+)
 
-diff --git a/arch/x86/kvm/svm.c b/arch/x86/kvm/svm.c
-index b581499..8d8fe62 100644
---- a/arch/x86/kvm/svm.c
-+++ b/arch/x86/kvm/svm.c
-@@ -507,6 +507,7 @@ struct svm_cpu_data {
- 	u64 asid_generation;
- 	u32 max_asid;
- 	u32 next_asid;
-+	u32 min_asid;
- 	struct kvm_ldttss_desc *tss_desc;
+diff --git a/arch/x86/include/asm/kvm_host.h b/arch/x86/include/asm/kvm_host.h
+index bff1f15..62651ad 100644
+--- a/arch/x86/include/asm/kvm_host.h
++++ b/arch/x86/include/asm/kvm_host.h
+@@ -1033,6 +1033,8 @@ struct kvm_x86_ops {
+ 	void (*cancel_hv_timer)(struct kvm_vcpu *vcpu);
  
- 	struct page *save_area;
-@@ -763,6 +764,7 @@ static int svm_hardware_enable(void)
- 	sd->asid_generation = 1;
- 	sd->max_asid = cpuid_ebx(SVM_CPUID_FUNC) - 1;
- 	sd->next_asid = sd->max_asid + 1;
-+	sd->min_asid = 1;
+ 	void (*setup_mce)(struct kvm_vcpu *vcpu);
++
++	int (*memory_encryption_op)(struct kvm *kvm, void __user *argp);
+ };
  
- 	native_store_gdt(&gdt_descr);
- 	gdt = (struct desc_struct *)gdt_descr.address;
-@@ -2026,7 +2028,7 @@ static void new_asid(struct vcpu_svm *svm, struct svm_cpu_data *sd)
+ struct kvm_arch_async_pf {
+diff --git a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
+index 2099df8..6a737e9 100644
+--- a/arch/x86/kvm/x86.c
++++ b/arch/x86/kvm/x86.c
+@@ -3926,6 +3926,14 @@ static int kvm_vm_ioctl_enable_cap(struct kvm *kvm,
+ 	return r;
+ }
+ 
++static int kvm_vm_ioctl_memory_encryption_op(struct kvm *kvm, void __user *argp)
++{
++	if (kvm_x86_ops->memory_encryption_op)
++		return kvm_x86_ops->memory_encryption_op(kvm, argp);
++
++	return -ENOTTY;
++}
++
+ long kvm_arch_vm_ioctl(struct file *filp,
+ 		       unsigned int ioctl, unsigned long arg)
  {
- 	if (sd->next_asid > sd->max_asid) {
- 		++sd->asid_generation;
--		sd->next_asid = 1;
-+		sd->next_asid = sd->min_asid;
- 		svm->vmcb->control.tlb_ctl = TLB_CONTROL_FLUSH_ALL_ASID;
+@@ -4189,6 +4197,10 @@ long kvm_arch_vm_ioctl(struct file *filp,
+ 		r = kvm_vm_ioctl_enable_cap(kvm, &cap);
+ 		break;
  	}
++	case KVM_MEMORY_ENCRYPT_OP: {
++		r = kvm_vm_ioctl_memory_encryption_op(kvm, argp);
++		break;
++	}
+ 	default:
+ 		r = kvm_vm_ioctl_assigned_device(kvm, ioctl, arg);
+ 	}
+diff --git a/include/uapi/linux/kvm.h b/include/uapi/linux/kvm.h
+index cac48ed..fef7d83 100644
+--- a/include/uapi/linux/kvm.h
++++ b/include/uapi/linux/kvm.h
+@@ -1281,6 +1281,8 @@ struct kvm_s390_ucas_mapping {
+ #define KVM_S390_GET_IRQ_STATE	  _IOW(KVMIO, 0xb6, struct kvm_s390_irq_state)
+ /* Available with KVM_CAP_X86_SMM */
+ #define KVM_SMI                   _IO(KVMIO,   0xb7)
++/* Memory Encryption Commands */
++#define KVM_MEMORY_ENCRYPT_OP	  _IOWR(KVMIO, 0xb8, unsigned long)
  
+ #define KVM_DEV_ASSIGN_ENABLE_IOMMU	(1 << 0)
+ #define KVM_DEV_ASSIGN_PCI_2_3		(1 << 1)
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
