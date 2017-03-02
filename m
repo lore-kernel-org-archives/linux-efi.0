@@ -1,63 +1,150 @@
-From: Marc Zyngier <marc.zyngier@arm.com>
-Subject: Re: [PATCH V11 10/10] arm/arm64: KVM: add guest SEA support
-Date: Thu, 2 Mar 2017 09:39:21 +0000
-Message-ID: <6d0fa5a5-bcbf-38b8-45ac-d645220ee9e2@arm.com>
-References: <1487712121-16688-1-git-send-email-tbaicar@codeaurora.org>
- <1487712121-16688-11-git-send-email-tbaicar@codeaurora.org>
- <df6ba5dc-d93f-925a-46bf-1e1e209d17f3@huawei.com> <58B43092.6040401@arm.com>
- <3df82a7b-1a32-e2d7-ae78-7132a4eab1a0@huawei.com> <58B57941.3000703@arm.com>
- <4ff98823-d6f0-eb2e-4b98-f6d5e255f6c3@huawei.com>
+From: AKASHI Takahiro <takahiro.akashi@linaro.org>
+Subject: Re: [PATCH v2] efi/libstub/arm*: Set default address and size cells
+ values for an empty dtb
+Date: Thu, 2 Mar 2017 19:23:29 +0900
+Message-ID: <20170302102328.GB1746@linaro.org>
+References: <1486502360-18071-1-git-send-email-jhugo@codeaurora.org>
+ <20170224153644.GE417@leverpostej>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <4ff98823-d6f0-eb2e-4b98-f6d5e255f6c3@huawei.com>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Xiongfeng Wang <wangxiongfeng2@huawei.com>, James Morse <james.morse@arm.com>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Tyler Baicar <tbaicar@codeaurora.org>, will.deacon@arm.com, linux@armlinux.org.uk, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, robert.moore@intel.com, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20170224153644.GE417@leverpostej>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org, Jeffrey Hugo <jhugo@codeaurora.org>, timur@codeaurora.org, Sameer Goel <sgoel@codeaurora.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On 01/03/17 02:31, Xiongfeng Wang wrote:
+Mark,
 
-[lot of things]
-
-> If an SEA is injected into guest OS, the guest OS will jump to the SEA
-> exception entry when the context switched to guest OS. And the CPSR and
-> FAR_EL1 are recovered according to the content of vcpu. Then the guest
-> OS can signal a process or panic. If another guest process read the
-> error data, another SEA will be generated and it will be single too.
+On Fri, Feb 24, 2017 at 03:36:44PM +0000, Mark Rutland wrote:
+> Hi,
 > 
-> Without QEMU involved, the drawback is that no APEI table can be mocked
-> up in guest OS, and no memory_failure() will be called. So the memory of
-> error data will be released into buddy system and assigned to another
-> process. If the error was caused by instantaneous radiation or
-> electromagnetic, the memory is usable again if it is written with a
-> correct data. If the memory has wore out and a correct data is written,
-> the ECC error may occurs again with high possibility. Before a 2-bit ECC
-> error is reported, much more 1-bit errors will be reported. This is
-> report to host os, the host os can determine the memory node has worn
-> out and hot-plug out the memory node, and guest os may be terminated if
-> its memory data can't be migrated.
+> On Tue, Feb 07, 2017 at 02:19:20PM -0700, Jeffrey Hugo wrote:
+> > From: Sameer Goel <sgoel@codeaurora.org>
+> > 
+> > In cases where a device tree is not provided (ie ACPI based system), an
+> > empty fdt is generated by efistub.  #address-cells and #size-cells are not
+> > set in the empty fdt, so they default to 1 (4 byte wide).  This can be an
+> > issue on 64-bit systems where values representing addresses, etc may be
+> > 8 bytes wide as the default value does not align with the general
+> > requirements for an empty DTB, and is fragile when passed to other agents
+> > as extra care is required to read the entire width of a value.
+> > 
+> > This issue is observed on Qualcomm Technologies QDF24XX platforms when
+> > kexec-tools inserts 64-bit addresses into the "linux,elfcorehdr" and
+> > "linux,usable-memory-range" properties of the fdt.  When the values are
+> > later consumed, they are truncated to 32-bit.
+> > 
+> > Setting #address-cells and #size-cells to 2 at creation of the empty fdt
+> > resolves the observed issue, and makes the fdt less fragile.
+> > 
+> > Signed-off-by: Sameer Goel <sgoel@codeaurora.org>
+> > Signed-off-by: Jeffrey Hugo <jhugo@codeaurora.org>
 > 
-> Of course, it is better to get QEMU involved, so the memory_failure can
-> be executed in guest OS. But before that implemented, can we add SEA
-> injection in kvm_handle_guest_abort()?
+> Technically the kdump ABI isn't set in stone yet, and this isn't a
+> problem until that goes in.
+> 
+> So while this generally looks ok, it's possible that this may be
+> unnecessary, and on reflection I do symptahise with Ard's earlier
+> comment that this shouldn't otherwise be necessary for the empty dt.
+> 
+> So I'd prefer if this were folded into the kdump series if it's
+> necessary. That way this goes in if it's necessary, and we can drop it
+> otherwise.
 
-No. I will strongly object to that. This is a platform decision to
-forward SEAs, not an architectural one. The core KVM code is only
-concerned about implementing the ARM architecture, and not something
-that is firmware dependent.
+I don't have any problem in folding this patch into my kdump series,
+but I don't know how we should address Robin's comment:
+
+> Hang on, if this code is shared with 32-bit ARM, doesn't this just move
+> the problem around?
+
+Since the values of *-cells under root node should reflect the hardware,
+the kernel has no way to determine whether they be 1 or 2 here.
+
+Thinking of this circumstance, I'd prefer to always use 64-bit values
+for the address and the size. This aligns with other properties under /chosen
+node, like initrd-* and uefi-*, whose values are also 64-bit wide.
+
+(I know that the current kernel cannot boot if the entire memory is
+located at >4GB, but it's a different issue.)
 
 Thanks,
+-Takahiro AKASHI
 
-	M.
--- 
-Jazz is not dead. It just smells funny...
+> Thanks,
+> Mark.
+> 
+> > ---
+> > 
+> > [v2]
+> > -Add braces to an if when the corresponding else has braces
+> > -Remove print statements
+> > -Reword commit text
+> > -Removed gerrit tag
+> > 
+> >  drivers/firmware/efi/libstub/fdt.c | 28 ++++++++++++++++++++++++++--
+> >  1 file changed, 26 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+> > index 921dfa0..22ea73b 100644
+> > --- a/drivers/firmware/efi/libstub/fdt.c
+> > +++ b/drivers/firmware/efi/libstub/fdt.c
+> > @@ -16,6 +16,22 @@
+> >  
+> >  #include "efistub.h"
+> >  
+> > +#define EFI_DT_ADDR_CELLS_DEFAULT 2
+> > +#define EFI_DT_SIZE_CELLS_DEFAULT 2
+> > +
+> > +static void fdt_update_cell_size(efi_system_table_t *sys_table, void *fdt)
+> > +{
+> > +	int offset;
+> > +
+> > +	offset = fdt_path_offset(fdt, "/");
+> > +	/* Set the #address-cells and #size-cells values for an empty tree */
+> > +
+> > +	fdt_setprop_u32(fdt, offset, "#address-cells",
+> > +			EFI_DT_ADDR_CELLS_DEFAULT);
+> > +
+> > +	fdt_setprop_u32(fdt, offset, "#size-cells", EFI_DT_SIZE_CELLS_DEFAULT);
+> > +}
+> > +
+> >  static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+> >  			       unsigned long orig_fdt_size,
+> >  			       void *fdt, int new_fdt_size, char *cmdline_ptr,
+> > @@ -42,10 +58,18 @@ static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+> >  		}
+> >  	}
+> >  
+> > -	if (orig_fdt)
+> > +	if (orig_fdt) {
+> >  		status = fdt_open_into(orig_fdt, fdt, new_fdt_size);
+> > -	else
+> > +	} else {
+> >  		status = fdt_create_empty_tree(fdt, new_fdt_size);
+> > +		if (status == 0) {
+> > +			/*
+> > +			 * Any failure from the following function is non
+> > +			 * critical
+> > +			 */
+> > +			fdt_update_cell_size(sys_table, fdt);
+> > +		}
+> > +	}
+> >  
+> >  	if (status != 0)
+> >  		goto fdt_set_fail;
+> > -- 
+> > Qualcomm Datacenter Technologies as an affiliate of Qualcomm Technologies, Inc.
+> > Qualcomm Technologies, Inc. is a member of the
+> > Code Aurora Forum, a Linux Foundation Collaborative Project.
+> > 
