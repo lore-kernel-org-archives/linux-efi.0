@@ -1,8 +1,7 @@
 From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [RFC PATCH v2 03/32] KVM: SVM: prepare for new bit definition in
- nested_ctl
-Date: Thu, 2 Mar 2017 10:12:37 -0500
-Message-ID: <148846755776.2349.6707914627128907579.stgit@brijesh-build-machine>
+Subject: [RFC PATCH v2 04/32] KVM: SVM: Add SEV feature definitions to KVM
+Date: Thu, 2 Mar 2017 10:12:48 -0500
+Message-ID: <148846756856.2349.18360437323368784256.stgit@brijesh-build-machine>
 References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -15,63 +14,43 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Tom Lendacky <thomas.lendacky@amd.com>
 
-Currently the nested_ctl variable in the vmcb_control_area structure is
-used to indicate nested paging support. The nested paging support field
-is actually defined as bit 0 of the field. In order to support a new
-feature flag the usage of the nested_ctl and nested paging support must
-be converted to operate on a single bit.
+Define a new KVM CPU feature for Secure Encrypted Virtualization (SEV).
+The kernel will check for the presence of this feature to determine if
+it is running with SEV active.
+
+Define the SEV enable bit for the VMCB control structure. The hypervisor
+will use this bit to enable SEV in the guest.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/include/asm/svm.h |    2 ++
- arch/x86/kvm/svm.c         |    7 ++++---
- 2 files changed, 6 insertions(+), 3 deletions(-)
+ arch/x86/include/asm/svm.h           |    1 +
+ arch/x86/include/uapi/asm/kvm_para.h |    1 +
+ 2 files changed, 2 insertions(+)
 
 diff --git a/arch/x86/include/asm/svm.h b/arch/x86/include/asm/svm.h
-index 14824fc..2aca535 100644
+index 2aca535..fba2a7b 100644
 --- a/arch/x86/include/asm/svm.h
 +++ b/arch/x86/include/asm/svm.h
-@@ -136,6 +136,8 @@ struct __attribute__ ((__packed__)) vmcb_control_area {
- #define SVM_VM_CR_SVM_LOCK_MASK 0x0008ULL
+@@ -137,6 +137,7 @@ struct __attribute__ ((__packed__)) vmcb_control_area {
  #define SVM_VM_CR_SVM_DIS_MASK  0x0010ULL
  
-+#define SVM_NESTED_CTL_NP_ENABLE	BIT(0)
-+
+ #define SVM_NESTED_CTL_NP_ENABLE	BIT(0)
++#define SVM_NESTED_CTL_SEV_ENABLE	BIT(1)
+ 
  struct __attribute__ ((__packed__)) vmcb_seg {
  	u16 selector;
- 	u16 attrib;
-diff --git a/arch/x86/kvm/svm.c b/arch/x86/kvm/svm.c
-index 08a4d3a..75b0645 100644
---- a/arch/x86/kvm/svm.c
-+++ b/arch/x86/kvm/svm.c
-@@ -1246,7 +1246,7 @@ static void init_vmcb(struct vcpu_svm *svm)
+diff --git a/arch/x86/include/uapi/asm/kvm_para.h b/arch/x86/include/uapi/asm/kvm_para.h
+index 1421a65..bc2802f 100644
+--- a/arch/x86/include/uapi/asm/kvm_para.h
++++ b/arch/x86/include/uapi/asm/kvm_para.h
+@@ -24,6 +24,7 @@
+ #define KVM_FEATURE_STEAL_TIME		5
+ #define KVM_FEATURE_PV_EOI		6
+ #define KVM_FEATURE_PV_UNHALT		7
++#define KVM_FEATURE_SEV			8
  
- 	if (npt_enabled) {
- 		/* Setup VMCB for Nested Paging */
--		control->nested_ctl = 1;
-+		control->nested_ctl |= SVM_NESTED_CTL_NP_ENABLE;
- 		clr_intercept(svm, INTERCEPT_INVLPG);
- 		clr_exception_intercept(svm, PF_VECTOR);
- 		clr_cr_intercept(svm, INTERCEPT_CR3_READ);
-@@ -2840,7 +2840,8 @@ static bool nested_vmcb_checks(struct vmcb *vmcb)
- 	if (vmcb->control.asid == 0)
- 		return false;
- 
--	if (vmcb->control.nested_ctl && !npt_enabled)
-+	if ((vmcb->control.nested_ctl & SVM_NESTED_CTL_NP_ENABLE) &&
-+	    !npt_enabled)
- 		return false;
- 
- 	return true;
-@@ -2915,7 +2916,7 @@ static bool nested_svm_vmrun(struct vcpu_svm *svm)
- 	else
- 		svm->vcpu.arch.hflags &= ~HF_HIF_MASK;
- 
--	if (nested_vmcb->control.nested_ctl) {
-+	if (nested_vmcb->control.nested_ctl & SVM_NESTED_CTL_NP_ENABLE) {
- 		kvm_mmu_unload(&svm->vcpu);
- 		svm->nested.nested_cr3 = nested_vmcb->control.nested_cr3;
- 		nested_svm_init_mmu_context(&svm->vcpu);
+ /* The last 8 bits are used to indicate how to interpret the flags field
+  * in pvclock structure. If no bits are set, all flags are ignored.
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
