@@ -1,36 +1,98 @@
-From: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v2 0/2] capsule pstore backend
-Date: Fri, 3 Mar 2017 09:23:19 -0800
-Message-ID: <20170303172319.GA27957@intel.com>
-References: <20170301175943.87444-1-qiuxu.zhuo@intel.com>
- <CAKv+Gu-PjFD8eAAOau6wPXH+pQ8JfKh-huFqiB+Go+5YTth3tQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Daniel Drake <drake-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
+Subject: Multiple Acer laptops hang on ACPI poweroff
+Date: Fri,  3 Mar 2017 14:15:24 -0600
+Message-ID: <20170303201524.8150-1-drake@endlessm.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-PjFD8eAAOau6wPXH+pQ8JfKh-huFqiB+Go+5YTth3tQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-6IF/jdPJHihWk0Htik3J/w@public.gmane.org, chiu-6IF/jdPJHihWk0Htik3J/w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Mar 03, 2017 at 03:19:51PM +0000, Ard Biesheuvel wrote:
-> On 1 March 2017 at 17:59, Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> > *** BLURB HERE ***
-> >
-> 
-> FYI the UEFI spec is vague about the exact format of the per-GUID
-> capsule configuration table entries, and so we have asked the USWG for
-> clarification. In the mean time, I'd like to refrain from merging
-> anything based on it, so unfortunately, we are going to have to park
-> this for now.
+Some particular Acer/Packard Bell machines hang during shutdown.
+The system completely hangs while doing bit operations for turning on SLP_EN
+bit in ACPI PM1A control address and Sleep Control Register. Thus the
+normal acpi_power_off path can never complete the shutdown process.
 
-Ard,
+We have found a workaround to force these systems to use EFI for poweroff,
+included below, but I wonder if anything better can be done. It is especially
+not ideal because the system hangs the same way when going into suspend and
+we don't have a workaround for that.
 
-Any estimates on how long that process takes? How often does the USWG
-meet? How would clarification be communicated (would we have to wait
-for the next version of the UEFI spec!?)
+Any debugging tips for how to diagnose such problems?
 
 Thanks
+Daniel
 
--Tony
+---
+ drivers/firmware/efi/reboot.c | 42 +++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 41 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/reboot.c b/drivers/firmware/efi/reboot.c
+index 62ead9b..6d1496d 100644
+--- a/drivers/firmware/efi/reboot.c
++++ b/drivers/firmware/efi/reboot.c
+@@ -4,6 +4,7 @@
+  */
+ #include <linux/efi.h>
+ #include <linux/reboot.h>
++#include <linux/dmi.h>
+ 
+ int efi_reboot_quirk_mode = -1;
+ 
+@@ -43,6 +44,45 @@ void efi_reboot(enum reboot_mode reboot_mode, const char *__unused)
+ 	efi.reset_system(efi_mode, EFI_SUCCESS, 0, NULL);
+ }
+ 
++static const struct dmi_system_id force_efi_poweroff[] = {
++        {
++                .ident = "Packard Bell Easynote ENLG81AP",
++                .matches = {
++                        DMI_MATCH(DMI_SYS_VENDOR, "Packard Bell"),
++                        DMI_MATCH(DMI_PRODUCT_NAME, "Easynote ENLG81AP"),
++                },
++        },
++        {
++                .ident = "Packard Bell Easynote ENTE69AP",
++                .matches = {
++                        DMI_MATCH(DMI_SYS_VENDOR, "Packard Bell"),
++                        DMI_MATCH(DMI_PRODUCT_NAME, "Easynote ENTE69AP"),
++                },
++        },
++        {
++                .ident = "Acer Aspire ES1-533",
++                .matches = {
++                        DMI_MATCH(DMI_SYS_VENDOR, "Acer"),
++                        DMI_MATCH(DMI_PRODUCT_NAME, "Aspire ES1-533"),
++                },
++        },
++        {
++                .ident = "Acer Aspire ES1-732",
++                .matches = {
++                        DMI_MATCH(DMI_SYS_VENDOR, "Acer"),
++                        DMI_MATCH(DMI_PRODUCT_NAME, "Aspire ES1-732"),
++                },
++        },
++        {}
++};
++
++bool efi_poweroff_forced(void)
++{
++	if (dmi_check_system(force_efi_poweroff))
++		return true;
++	return false;
++}
++
+ bool __weak efi_poweroff_required(void)
+ {
+ 	return false;
+@@ -58,7 +98,7 @@ static int __init efi_shutdown_init(void)
+ 	if (!efi_enabled(EFI_RUNTIME_SERVICES))
+ 		return -ENODEV;
+ 
+-	if (efi_poweroff_required())
++	if (efi_poweroff_required() || efi_poweroff_forced())
+ 		pm_power_off = efi_power_off;
+ 
+ 	return 0;
+-- 
+2.9.3
