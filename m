@@ -1,98 +1,26 @@
-From: Daniel Drake <drake-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
-Subject: Multiple Acer laptops hang on ACPI poweroff
-Date: Fri,  3 Mar 2017 14:15:24 -0600
-Message-ID: <20170303201524.8150-1-drake@endlessm.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-6IF/jdPJHihWk0Htik3J/w@public.gmane.org, chiu-6IF/jdPJHihWk0Htik3J/w@public.gmane.org
+From: Bjorn Helgaas <helgaas@kernel.org>
+Subject: Re: [RFC PATCH v2 00/32] x86: Secure Encrypted Virtualization (AMD)
+Date: Fri, 3 Mar 2017 14:33:23 -0600
+Message-ID: <20170303203323.GA5305@bhelgaas-glaptop.roam.corp.google.com>
+References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
+Sender: owner-linux-mm@kvack.org
+To: Brijesh Singh <brijesh.singh@amd.com>
+Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas@google.com, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com
 List-Id: linux-efi@vger.kernel.org
 
-Some particular Acer/Packard Bell machines hang during shutdown.
-The system completely hangs while doing bit operations for turning on SLP_EN
-bit in ACPI PM1A control address and Sleep Control Register. Thus the
-normal acpi_power_off path can never complete the shutdown process.
+On Thu, Mar 02, 2017 at 10:12:01AM -0500, Brijesh Singh wrote:
+> This RFC series provides support for AMD's new Secure Encrypted Virtualization
+> (SEV) feature. This RFC is build upon Secure Memory Encryption (SME) RFCv4 [1].
 
-We have found a workaround to force these systems to use EFI for poweroff,
-included below, but I wonder if anything better can be done. It is especially
-not ideal because the system hangs the same way when going into suspend and
-we don't have a workaround for that.
+What kernel version is this series based on?
 
-Any debugging tips for how to diagnose such problems?
-
-Thanks
-Daniel
-
----
- drivers/firmware/efi/reboot.c | 42 +++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 41 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/reboot.c b/drivers/firmware/efi/reboot.c
-index 62ead9b..6d1496d 100644
---- a/drivers/firmware/efi/reboot.c
-+++ b/drivers/firmware/efi/reboot.c
-@@ -4,6 +4,7 @@
-  */
- #include <linux/efi.h>
- #include <linux/reboot.h>
-+#include <linux/dmi.h>
- 
- int efi_reboot_quirk_mode = -1;
- 
-@@ -43,6 +44,45 @@ void efi_reboot(enum reboot_mode reboot_mode, const char *__unused)
- 	efi.reset_system(efi_mode, EFI_SUCCESS, 0, NULL);
- }
- 
-+static const struct dmi_system_id force_efi_poweroff[] = {
-+        {
-+                .ident = "Packard Bell Easynote ENLG81AP",
-+                .matches = {
-+                        DMI_MATCH(DMI_SYS_VENDOR, "Packard Bell"),
-+                        DMI_MATCH(DMI_PRODUCT_NAME, "Easynote ENLG81AP"),
-+                },
-+        },
-+        {
-+                .ident = "Packard Bell Easynote ENTE69AP",
-+                .matches = {
-+                        DMI_MATCH(DMI_SYS_VENDOR, "Packard Bell"),
-+                        DMI_MATCH(DMI_PRODUCT_NAME, "Easynote ENTE69AP"),
-+                },
-+        },
-+        {
-+                .ident = "Acer Aspire ES1-533",
-+                .matches = {
-+                        DMI_MATCH(DMI_SYS_VENDOR, "Acer"),
-+                        DMI_MATCH(DMI_PRODUCT_NAME, "Aspire ES1-533"),
-+                },
-+        },
-+        {
-+                .ident = "Acer Aspire ES1-732",
-+                .matches = {
-+                        DMI_MATCH(DMI_SYS_VENDOR, "Acer"),
-+                        DMI_MATCH(DMI_PRODUCT_NAME, "Aspire ES1-732"),
-+                },
-+        },
-+        {}
-+};
-+
-+bool efi_poweroff_forced(void)
-+{
-+	if (dmi_check_system(force_efi_poweroff))
-+		return true;
-+	return false;
-+}
-+
- bool __weak efi_poweroff_required(void)
- {
- 	return false;
-@@ -58,7 +98,7 @@ static int __init efi_shutdown_init(void)
- 	if (!efi_enabled(EFI_RUNTIME_SERVICES))
- 		return -ENODEV;
- 
--	if (efi_poweroff_required())
-+	if (efi_poweroff_required() || efi_poweroff_forced())
- 		pm_power_off = efi_power_off;
- 
- 	return 0;
--- 
-2.9.3
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
