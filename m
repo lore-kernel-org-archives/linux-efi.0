@@ -1,57 +1,49 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: Re: [RFC PATCH v2 19/32] crypto: ccp: Introduce the AMD Secure
- Processor device
-Date: Fri, 03 Mar 2017 15:55:18 +0200
-Message-ID: <1488549318.20145.76.camel@linux.intel.com>
-References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
-	 <148846777589.2349.11698765767451886038.stgit@brijesh-build-machine>
-	 <20170302173936.GC11970@leverpostej>
-	 <0db0055f-9208-524f-74aa-674894ee90d3@amd.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 0/2] capsule pstore backend
+Date: Fri, 3 Mar 2017 15:19:51 +0000
+Message-ID: <CAKv+Gu-PjFD8eAAOau6wPXH+pQ8JfKh-huFqiB+Go+5YTth3tQ@mail.gmail.com>
+References: <20170301175943.87444-1-qiuxu.zhuo@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <0db0055f-9208-524f-74aa-674894ee90d3@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Brijesh Singh <brijesh.singh@amd.com>, Mark Rutland <mark.rutland@arm.com>
-Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas@google.com, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedoraproject.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170301175943.87444-1-qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2017-03-02 at 13:11 -0600, Brijesh Singh wrote:
-> Hi Mark,
-> 
-> On 03/02/2017 11:39 AM, Mark Rutland wrote:
-> > On Thu, Mar 02, 2017 at 10:16:15AM -0500, Brijesh Singh wrote:
+On 1 March 2017 at 17:59, Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> *** BLURB HERE ***
+>
 
-> > > 
-> > > +ccp-$(CONFIG_CRYPTO_DEV_CCP) += ccp-dev.o \
-> > >  	    ccp-ops.o \
-> > >  	    ccp-dev-v3.o \
-> > >  	    ccp-dev-v5.o \
-> > > -	    ccp-platform.o \
-> > >  	    ccp-dmaengine.o
-> > 
-> > It looks like ccp-platform.c has morphed into sp-platform.c (judging
-> > by
-> > the compatible string and general shape of the code), and the
-> > original
-> > ccp-platform.c is no longer built.
-> > 
-> > Shouldn't ccp-platform.c be deleted by this patch?
-> > 
-> 
-> Good catch. Both ccp-platform.c and ccp-pci.c should have been
-> deleted 
-> by this patch. I missed deleting it, will fix in next rev.
+FYI the UEFI spec is vague about the exact format of the per-GUID
+capsule configuration table entries, and so we have asked the USWG for
+clarification. In the mean time, I'd like to refrain from merging
+anything based on it, so unfortunately, we are going to have to park
+this for now.
 
-Don't forget to use -M -C when preparing / sending patches.
+Regards,
+Ard.
 
--- 
-Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Intel Finland Oy
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+> Qiuxu Zhuo (2):
+>   efi/capsule: Add 'capsule' lookup support
+>   efi: capsule pstore backend
+>
+>  drivers/firmware/efi/Kconfig          |  21 ++
+>  drivers/firmware/efi/Makefile         |   1 +
+>  drivers/firmware/efi/capsule-pstore.c | 527 ++++++++++++++++++++++++++++++++++
+>  drivers/firmware/efi/capsule.c        | 107 +++++++
+>  drivers/firmware/efi/efi.c            |   4 +
+>  include/linux/efi.h                   |   4 +
+>  6 files changed, 664 insertions(+)
+>  create mode 100644 drivers/firmware/efi/capsule-pstore.c
+> --
+>
+> Change Log (v1->v2):
+>   - Use memremap() instead of ioremap() for firmware tables
+>   - Remove "default n" in Kconfig file
+>   - Move check_capsule_support() up a bit
+>   - Update SoB chain
+> --
+> 2.9.0.GIT
+>
