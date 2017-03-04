@@ -1,44 +1,66 @@
-From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: Re: [RFC PATCH v2 00/32] x86: Secure Encrypted Virtualization (AMD)
-Date: Fri, 3 Mar 2017 15:15:30 -0600
-Message-ID: <d1ded08e-1a53-4762-84af-c5979bf9ed32@amd.com>
-References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <20170303203323.GA5305@bhelgaas-glaptop.roam.corp.google.com>
+From: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v2 0/2] capsule pstore backend
+Date: Sat, 4 Mar 2017 00:31:04 +0000
+Message-ID: <E6AF1AFDEA62A94A97508F458CBDD47F6EBCE115@SHSMSX101.ccr.corp.intel.com>
+References: <20170301175943.87444-1-qiuxu.zhuo@intel.com>
+ <CAKv+Gu-PjFD8eAAOau6wPXH+pQ8JfKh-huFqiB+Go+5YTth3tQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170303203323.GA5305@bhelgaas-glaptop.roam.corp.google.com>
-Sender: owner-linux-mm@kvack.org
-To: Bjorn Helgaas <helgaas@kernel.org>
-Cc: brijesh.singh@amd.com, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproj
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKv+Gu-PjFD8eAAOau6wPXH+pQ8JfKh-huFqiB+Go+5YTth3tQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Bjorn,
-
-On 03/03/2017 02:33 PM, Bjorn Helgaas wrote:
-> On Thu, Mar 02, 2017 at 10:12:01AM -0500, Brijesh Singh wrote:
->> This RFC series provides support for AMD's new Secure Encrypted Virtualization
->> (SEV) feature. This RFC is build upon Secure Memory Encryption (SME) RFCv4 [1].
->
-> What kernel version is this series based on?
->
-
-This patch series is based off of the master branch of tip.
-   Commit a27cb9e1b2b4 ("Merge branch 'WIP.sched/core'")
-   Tom's RFC v4 patches (http://marc.info/?l=linux-mm&m=148725973013686&w=2)
-
-Accidentally, I ended up rebasing SEV RFCv2 patches from updated SME v4 
-instead of original SME v4. So you may need to apply patch [1]
-
-[1] http://marc.info/?l=linux-mm&m=148857523132253&w=2
-
-Optionally, I have posted the full git tree here [2]
-
-[2] https://github.com/codomania/tip/branches
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+SGkgQXJkLA0KDQogICBUaGVyZSBpcyBzb21lIGluZm9ybWF0aW9uIGluIFVFRkkgMi40IHNwZWMg
+IHNlY3Rpb24gNy41LjMgIHAyNTg6ICAiVGhlIEVGSSBTeXN0ZW0gVGFibGUgZW50cnkgbXVzdCB1
+c2UgdGhlIEdVSUQgZnJvbSB0aGUgQ2Fwc3VsZUd1aWQgZmllbGQgb2YgdGhlIEVGSV9DQVBTVUxF
+X0hFQURFUi4gVGhlIEVGSSBTeXN0ZW0gVGFibGUgZW50cnkgbXVzdCBwb2ludCB0byBhbiBhcnJh
+eSBvZiBjYXBzdWxlcyB0aGF0IGNvbnRhaW4gdGhlIHNhbWUgQ2Fwc3VsZUd1aWQgdmFsdWUuIFRo
+ZSBhcnJheSBtdXN0IGJlIHByZWZpeGVkIGJ5IGEgVUlOVDMyIHRoYXQgcmVwcmVzZW50cyB0aGUg
+c2l6ZSBvZiB0aGUgYXJyYXkgb2YgY2Fwc3VsZXMiLiANCg0KU28gbXkgdW5kZXJzdGFuZGluZyBp
+cyB0aGF0IHRoZSBwZXItR1VJRCBjYXBzdWxlIGNvbmZpZ3VyYXRpb24gdGFibGUgZW50cmllcyBs
+b29rIGxpa2UgYmVsb3cgbGF5b3V0Og0KDQpGb3IgY2Fwc3VsZSBndWlkIHh4eDogICAgICAgICAg
+fCAgKHUzMikgY2Fwc3VsZSBudW1iZXIgYSB8ICh1NjQpICAxc3QgY2Fwc3VsZSBwaHlzaWNhbCBh
+ZGRyICB8ICh1NjQpICAybmQgY2Fwc3VsZSBwaHlzaWNhbCBhZGRyIHwgLi4uICB8ICAodTY0KSAg
+YS1zdCBjYXBzdWxlIHBoeXNpY2FsIGFkZHIgfA0KRm9yIGNhcHN1bGUgZ3VpZCB5eXk6ICAgICAg
+ICAgIHwgICh1MzIpIGNhcHN1bGUgbnVtYmVyIGIgfCAodTY0KSAgMXN0IGNhcHN1bGUgcGh5c2lj
+YWwgYWRkciAgfCAodTY0KSAgMm5kIGNhcHN1bGUgcGh5c2ljYWwgYWRkciB8IC4uLiAgfCAgKHU2
+NCkgIGItc3QgY2Fwc3VsZSBwaHlzaWNhbCBhZGRyIHwNCi4uLiAgDQpGb3IgY2Fwc3VsZSBndWlk
+IHp6ejogICAgICAgICAgIHwgICh1MzIpIGNhcHN1bGUgbnVtYmVyIGMgfCAodTY0KSAgMXN0IGNh
+cHN1bGUgcGh5c2ljYWwgYWRkciAgfCAodTY0KSAgMm5kIGNhcHN1bGUgcGh5c2ljYWwgYWRkciB8
+IC4uLiAgfCAgKHU2NCkgIGMtc3QgY2Fwc3VsZSBwaHlzaWNhbCBhZGRyIHwNCg0KVGhlIHdheSB5
+b3UgbWVudGlvbmVkIHRvIGdvIG92ZXIgdGhlIGNvbmZpZyB0YWJsZSBhcnJheSAodGhlbiB3ZSBj
+YW4gZ2V0IHJpZCBvZiBnbG9iYWwgc3RhZmYgJ2NhcHN1bGUnIGluIHN0cnVjdCBlZmkpIHRvIGdl
+dCBhIGdyb3VwIG9mIGNhcHN1bGVzIHBlci1HVUlEIGlzIHN1aXRhYmxlLg0KDQpUaGlzIGlzIG15
+IHVuZGVyc3RhbmRpbmcsIGlmIHdyb25nIHBsZWFzZSBjb3JyZWN0IG1lLCB0aGFua3MhDQoNCkJS
+DQpxaXV4dQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogQXJkIEJpZXNoZXV2
+ZWwgW21haWx0bzphcmQuYmllc2hldXZlbEBsaW5hcm8ub3JnXSANClNlbnQ6IEZyaWRheSwgTWFy
+Y2ggMywgMjAxNyAxMToyMCBQTQ0KVG86IFpodW8sIFFpdXh1IDxxaXV4dS56aHVvQGludGVsLmNv
+bT4NCkNjOiBNYXR0IEZsZW1pbmcgPG1hdHRAY29kZWJsdWVwcmludC5jby51az47IGxpbnV4LWVm
+aUB2Z2VyLmtlcm5lbC5vcmc7IEx1Y2ssIFRvbnkgPHRvbnkubHVja0BpbnRlbC5jb20+DQpTdWJq
+ZWN0OiBSZTogW1BBVENIIHYyIDAvMl0gY2Fwc3VsZSBwc3RvcmUgYmFja2VuZA0KDQpPbiAxIE1h
+cmNoIDIwMTcgYXQgMTc6NTksIFFpdXh1IFpodW8gPHFpdXh1LnpodW9AaW50ZWwuY29tPiB3cm90
+ZToNCj4gKioqIEJMVVJCIEhFUkUgKioqDQo+DQoNCkZZSSB0aGUgVUVGSSBzcGVjIGlzIHZhZ3Vl
+IGFib3V0IHRoZSBleGFjdCBmb3JtYXQgb2YgdGhlIHBlci1HVUlEIGNhcHN1bGUgY29uZmlndXJh
+dGlvbiB0YWJsZSBlbnRyaWVzLCBhbmQgc28gd2UgaGF2ZSBhc2tlZCB0aGUgVVNXRyBmb3IgY2xh
+cmlmaWNhdGlvbi4gSW4gdGhlIG1lYW4gdGltZSwgSSdkIGxpa2UgdG8gcmVmcmFpbiBmcm9tIG1l
+cmdpbmcgYW55dGhpbmcgYmFzZWQgb24gaXQsIHNvIHVuZm9ydHVuYXRlbHksIHdlIGFyZSBnb2lu
+ZyB0byBoYXZlIHRvIHBhcmsgdGhpcyBmb3Igbm93Lg0KDQpSZWdhcmRzLA0KQXJkLg0KDQo+IFFp
+dXh1IFpodW8gKDIpOg0KPiAgIGVmaS9jYXBzdWxlOiBBZGQgJ2NhcHN1bGUnIGxvb2t1cCBzdXBw
+b3J0DQo+ICAgZWZpOiBjYXBzdWxlIHBzdG9yZSBiYWNrZW5kDQo+DQo+ICBkcml2ZXJzL2Zpcm13
+YXJlL2VmaS9LY29uZmlnICAgICAgICAgIHwgIDIxICsrDQo+ICBkcml2ZXJzL2Zpcm13YXJlL2Vm
+aS9NYWtlZmlsZSAgICAgICAgIHwgICAxICsNCj4gIGRyaXZlcnMvZmlybXdhcmUvZWZpL2NhcHN1
+bGUtcHN0b3JlLmMgfCA1MjcgKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKw0KPiAg
+ZHJpdmVycy9maXJtd2FyZS9lZmkvY2Fwc3VsZS5jICAgICAgICB8IDEwNyArKysrKysrDQo+ICBk
+cml2ZXJzL2Zpcm13YXJlL2VmaS9lZmkuYyAgICAgICAgICAgIHwgICA0ICsNCj4gIGluY2x1ZGUv
+bGludXgvZWZpLmggICAgICAgICAgICAgICAgICAgfCAgIDQgKw0KPiAgNiBmaWxlcyBjaGFuZ2Vk
+LCA2NjQgaW5zZXJ0aW9ucygrKQ0KPiAgY3JlYXRlIG1vZGUgMTAwNjQ0IGRyaXZlcnMvZmlybXdh
+cmUvZWZpL2NhcHN1bGUtcHN0b3JlLmMNCj4gLS0NCj4NCj4gQ2hhbmdlIExvZyAodjEtPnYyKToN
+Cj4gICAtIFVzZSBtZW1yZW1hcCgpIGluc3RlYWQgb2YgaW9yZW1hcCgpIGZvciBmaXJtd2FyZSB0
+YWJsZXMNCj4gICAtIFJlbW92ZSAiZGVmYXVsdCBuIiBpbiBLY29uZmlnIGZpbGUNCj4gICAtIE1v
+dmUgY2hlY2tfY2Fwc3VsZV9zdXBwb3J0KCkgdXAgYSBiaXQNCj4gICAtIFVwZGF0ZSBTb0IgY2hh
+aW4NCj4gLS0NCj4gMi45LjAuR0lUDQo+DQo=
