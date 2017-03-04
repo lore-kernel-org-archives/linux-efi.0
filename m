@@ -1,61 +1,43 @@
-From: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH v2 1/2] efi/capsule: Add 'capsule' lookup support
-Date: Sat, 4 Mar 2017 00:54:19 +0000
-Message-ID: <E6AF1AFDEA62A94A97508F458CBDD47F6EBCE12C@SHSMSX101.ccr.corp.intel.com>
-References: <20170301175943.87444-1-qiuxu.zhuo@intel.com>
- <20170301175943.87444-2-qiuxu.zhuo@intel.com>
- <CAKv+Gu8=_D_ghJkxeLtnVN2fNV8ybS_2+cjs3ih_TmGtTJM4+Q@mail.gmail.com>
- <20170302164402.GB9522@codeblueprint.co.uk>
- <CAKv+Gu8aKUMrZa0mwjVugmzAZvkSJC5xe4xerMvrsa5x+xH5xA@mail.gmail.com>
- <CAKv+Gu__kQsbb9dZM9h2FFms9Od4VEgXGeRUycqwzM54WG7=yg@mail.gmail.com>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Subject: Re: the Mail Archive is now (again) subscribed to this list...
+Date: Sat, 4 Mar 2017 09:02:22 +0100
+Message-ID: <20170304080222.GA3042@wunner.de>
+References: <f063d8b0-e6fc-b8db-00c2-8402acefd909@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu__kQsbb9dZM9h2FFms9Od4VEgXGeRUycqwzM54WG7=yg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <f063d8b0-e6fc-b8db-00c2-8402acefd909-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: efi kernel list <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, postmaster-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-SGkgQXJkLA0KDQogICAgIFRoZSBjYXBzdWxlIGNvbmZpZ3VyYXRpb24gdGFibGUgZW50cnkgbWVt
-b3J5IGxheW91dCBoZXJlIGxvb2tzIGxpa2U6IA0KICAgICBGb3IgY2Fwc3VsZSBndWlkIHh4eDog
-fCAgKHUzMikgY2Fwc3VsZSBudW1iZXIgYSB8ICh1NjQpICAxc3QgY2Fwc3VsZSBwaHlzaWNhbCBh
-ZGRyICB8ICh1NjQpICAybmQgY2Fwc3VsZSBwaHlzaWNhbCBhZGRyIHwgLi4uICB8ICAodTY0KSAg
-YS1zdCBjYXBzdWxlIHBoeXNpY2FsIGFkZHIgfA0KICAgICBTbyBpZiBJIGRvICJjYXBzdWxlICs9
-IHNpemVvZigqdWludDMyX3QpOyIgdGhlbiB0aGUgdmFsdWUgZm9yIGVhY2ggY2Fwc3VsZSBwaHlz
-aWNhbCBhZGRyZXNzIHdpbGwgYmUgc2hpZnRlZCA0IGJ5dGVzIGJhY2t3YXJkLg0KDQogICAgRG8g
-eW91IHRoaW5rIHRoZSB3YXkgdGhhdCB3ZSBkZWZpbmUgYSAnX19wYWNrZWQnIHN0cnVjdHVyZSBh
-cyBsaWtlIGJlbG93LCBtYXAgaXQgdG8gdGhlIGNvbmZpZ3VyYXRpb24gdGFibGUsIGFuZCB0aGVu
-IHVzZSBpdCB0byBmZXRjaCB0aGUgY2Fwc3VsZSBudW1iZXIgYW5kIGVhY2ggY2Fwc3VsZSBwaHlz
-aWNhbCBhZGRyZXNzIGlzIG9rID8NCiAgICB0eXBlZGVmIHN0cnVjdCB7DQogICAgICAgICAgdTMy
-IGNhcHN1bGVfYXJyYXlfbnVtYmVyOw0KICAgICAgICAgIHZvaWQgKmNhcHN1bGVfYWRkcltdOw0K
-ICAgfSBfX3BhY2tlZCBlZmlfY2Fwc3VsZV90YWJsZV90Ow0KICAgICAgDQpUaGFua3MhDQoNCkJS
-DQpxaXV4dQ0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICANCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEFyZCBCaWVzaGV1dmVsIFtt
-YWlsdG86YXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZ10gDQpTZW50OiBGcmlkYXksIE1hcmNoIDMs
-IDIwMTcgMTI6NDYgQU0NClRvOiBNYXR0IEZsZW1pbmcgPG1hdHRAY29kZWJsdWVwcmludC5jby51
-az4NCkNjOiBaaHVvLCBRaXV4dSA8cWl1eHUuemh1b0BpbnRlbC5jb20+OyBsaW51eC1lZmlAdmdl
-ci5rZXJuZWwub3JnOyBMdWNrLCBUb255IDx0b255Lmx1Y2tAaW50ZWwuY29tPg0KU3ViamVjdDog
-UmU6IFtQQVRDSCB2MiAxLzJdIGVmaS9jYXBzdWxlOiBBZGQgJ2NhcHN1bGUnIGxvb2t1cCBzdXBw
-b3J0DQoNCk9uIDIgTWFyY2ggMjAxNyBhdCAxNjo0NSwgQXJkIEJpZXNoZXV2ZWwgPGFyZC5iaWVz
-aGV1dmVsQGxpbmFyby5vcmc+IHdyb3RlOg0KPiBPbiAyIE1hcmNoIDIwMTcgYXQgMTY6NDQsIE1h
-dHQgRmxlbWluZyA8bWF0dEBjb2RlYmx1ZXByaW50LmNvLnVrPiB3cm90ZToNCj4+IE9uIFRodSwg
-MDIgTWFyLCBhdCAwMzozODo1MVBNLCBBcmQgQmllc2hldXZlbCB3cm90ZToNCj4+Pg0KPj4+ID4g
-KyAgICAgICBpZiAoIWNhcHN1bGUpDQo+Pj4gPiArICAgICAgICAgICAgICAgcmV0dXJuIC1FTk9N
-RU07DQo+Pj4gPiArDQo+Pj4gPiArICAgICAgIGNhcHN1bGUgKz0gc2l6ZW9mKHVpbnQzMl90KTsN
-Cj4+Pg0KPj4+IFRoaXMgaXMgaW5jb3JyZWN0IGZvciA2NC1iaXQuIFlvdSBuZWVkIHRvIGluY3Jl
-bWVudCBieSB0aGUgc2l6ZSBvZiANCj4+PiB1bnNpZ25lZCBsb25nIGhlcmUsIHJlZ2FyZGxlc3Mg
-b2YgdGhlIHNpemUgb2YgZWZpX2NhcHN1bGVfbnVtLg0KPj4NCj4+IEknbSBhbG1vc3QgcG9zaXRp
-dmUgdGhpcyBpcyBjb3JyZWN0LCBidXQgSSBjYW4ndCBmaW5kIHRoZSBiaXQgaW4gdGhlIA0KPj4g
-c3BlYyB0aGF0IHNheXMgd2h5LiBXZSdyZSBub3QgdHJ5aW5nIHRvIHN0ZXAgb3ZlciBhIHBvaW50
-ZXIgaGVyZSwgaWYgDQo+PiBtZW1vcnkgc2VydmVzLCBpdCdzIGEgY2Fwc3VsZSBjb3VudCBvciBz
-b21ldGhpbmcgYW5kIHVpbnQzMl90IGlzIHRoZSANCj4+IHJpZ2h0IHR5cGUuDQo+Pg0KPg0KPiBZ
-ZXMsIGJ1dCB0aGUgbmV4dCBzdHJ1Y3QgbWVtYmVyIGlzIGFuIGFycmF5IG9mIHBvaW50ZXJzLCBz
-byB5b3UgbmVlZCANCj4gdG8gYWR2YW5jZSA4IGJ5dGVzIHRvIGdldCB0byBpdCBkdWUgdG8gaXRz
-IGFsaWdubWVudA0KDQpGcm9tIEVESzI6DQoNCnR5cGVkZWYgc3RydWN0IHsNCiAgLy8vDQogIC8v
-LyB0aGUgc2l6ZSBvZiB0aGUgYXJyYXkgb2YgY2Fwc3VsZXMuDQogIC8vLw0KICBVSU5UMzIgICBD
-YXBzdWxlQXJyYXlOdW1iZXI7DQogIC8vLw0KICAvLy8gUG9pbnQgdG8gYW4gYXJyYXkgb2YgY2Fw
-c3VsZXMgdGhhdCBjb250YWluIHRoZSBzYW1lIENhcHN1bGVHdWlkIHZhbHVlLg0KICAvLy8NCiAg
-Vk9JRCogICAgQ2Fwc3VsZVB0clsxXTsNCn0gRUZJX0NBUFNVTEVfVEFCTEU7DQo=
+On Fri, Mar 03, 2017 at 10:50:10AM +0100, Laszlo Ersek wrote:
+> ... and so linux-efi finally has a public archive again (because GMANE
+> has been defunct for a while now):
+> 
+>   https://www.mail-archive.com/linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org/
+
+Thanks for doing this.
+
+
+> Whoever administers this list, please consider updating the info box at:
+> 
+>   http://vger.kernel.org/vger-lists.html#linux-efi
+> 
+[...]
+> Also, the info box at <http://vger.kernel.org/vger-lists.html#linux-efi>
+> is almost entirely useless, it doesn't even tell me who runs linux-efi,
+> so that I could have contacted them in person, for adding the Mail
+> Archive directly to the subscriber list (a practice recommended by the
+> Mail Archive themselves, see the link above).
+
+It says postmaster-u79uwXL29TY76Z2rM5mHXA@public.gmane.org at the bottom of the page, so
+adding that to cc.  If this doesn't work out, Konstantin Ryabitsev
+<konstantin-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> may be able to forward it to the
+person responsible.
+
+Best regards,
+
+Lukas
