@@ -1,50 +1,56 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [RFC PATCH v2 01/32] x86: Add the Secure Encrypted
- Virtualization CPU feature
-Date: Sat, 4 Mar 2017 11:11:13 +0100
-Message-ID: <20170304101113.k6ontjjbljanm6tv@pd.tnic>
-References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <148846752953.2349.17505492128445909591.stgit@brijesh-build-machine>
- <20170303165915.3233fx7wo74vsslx@pd.tnic>
- <404fafd8-bbd6-b8c7-1abb-787ac083ea41@amd.com>
+From: Fabian Tschiatschek <fabian.tschiatschek-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: PROBLEM: Unexpected contents of load options (EFI Boot Stub)
+Date: Sat, 4 Mar 2017 11:45:11 +0100
+Message-ID: <773c29b9-37b4-e007-c336-c4beab7cde91@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-Content-Disposition: inline
-In-Reply-To: <404fafd8-bbd6-b8c7-1abb-787ac083ea41@amd.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Brijesh Singh <brijesh.singh@amd.com>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, hpa@zytor.com, cl@linux.com, tglx@linutronix.de, aarcange@redhat.com, sfr@canb.auug.org.au, mchehab@kernel.org, simon.guinot@sequanux.org, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, labbott@fedoraproject.org, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, pbonzini@redhat.com, bhelgaas@google.com, dan.j.williams@intel.com, andriy.shevchenko@linux.intel.com, akpm@linux-foundation.org, herbert@gondor.apana.org.au, tony.luck@intel.com, pau
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-T24gRnJpLCBNYXIgMDMsIDIwMTcgYXQgMDM6MDE6MjNQTSAtMDYwMCwgQnJpamVzaCBTaW5naCB3
-cm90ZToKPiArbWVyZWx5IGVuYWJsZXMgU01FIChzZXRzIGJpdCAyMyBvZiB0aGUgTVNSX0s4X1NZ
-U0NGRyksIHRoZW4gTGludXggY2FuCj4gYWN0aXZhdGUKPiArbWVtb3J5IGVuY3J5cHRpb24gYnkg
-ZGVmYXVsdCAoQ09ORklHX0FNRF9NRU1fRU5DUllQVF9BQ1RJVkVfQllfREVGQVVMVD15KQo+IG9y
-Cj4gK2J5IHN1cHBseWluZyBtZW1fZW5jcnlwdD1vbiBvbiB0aGUga2VybmVsIGNvbW1hbmQgbGlu
-ZS4gIEhvd2V2ZXIsIGlmIEJJT1MKPiBkb2VzCj4gK25vdCBlbmFibGUgU01FLCB0aGVuIExpbnV4
-IHdpbGwgbm90IGJlIGFibGUgdG8gYWN0aXZhdGUgbWVtb3J5IGVuY3J5cHRpb24sCj4gZXZlbgo+
-ICtpZiBjb25maWd1cmVkIHRvIGRvIHNvIGJ5IGRlZmF1bHQgb3IgdGhlIG1lbV9lbmNyeXB0PW9u
-IGNvbW1hbmQgbGluZQo+IHBhcmFtZXRlcgo+ICtpcyBzcGVjaWZpZWQuCgpUaGlzIGxvb2tzIGxp
-a2UgYSB3cmFwYXJvdW5kLi4uCgokIHRlc3QtYXBwbHkuc2ggL3RtcC9icmlqZXNoLnNpbmdoLmRl
-bHRhCmNoZWNraW5nIGZpbGUgRG9jdW1lbnRhdGlvbi9hZG1pbi1ndWlkZS9rZXJuZWwtcGFyYW1l
-dGVycy50eHQKSHVuayAjMSBzdWNjZWVkZWQgYXQgMjE0NCAob2Zmc2V0IC05IGxpbmVzKS4KY2hl
-Y2tpbmcgZmlsZSBEb2N1bWVudGF0aW9uL3g4Ni9hbWQtbWVtb3J5LWVuY3J5cHRpb24udHh0CnBh
-dGNoOiAqKioqIG1hbGZvcm1lZCBwYXRjaCBhdCBsaW5lIDIzOiBEUkFNIGZyb20gcGh5c2ljYWwK
-CllhcC4KCkxvb2tzIGxpa2UgZXhjaGFuZ2Ugb3IgeW91ciBtYWlsIGNsaWVudCBkZWNpZGVkIHRv
-IGRvIHNvbWUgcGF0Y2ggZWRpdGluZwpvbiBpdHMgb3duLgoKUGxlYXNlIHNlbmQgaXQgdG8geW91
-cnNlbGYgZmlyc3QgYW5kIHRyeSBhcHBseWluZy4KCi0tIApSZWdhcmRzL0dydXNzLAogICAgQm9y
-aXMuCgpTVVNFIExpbnV4IEdtYkgsIEdGOiBGZWxpeCBJbWVuZMO2cmZmZXIsIEphbmUgU21pdGhh
-cmQsIEdyYWhhbSBOb3J0b24sIEhSQiAyMTI4NCAoQUcgTsO8cm5iZXJnKQotLSAKX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KZGV2ZWwgbWFpbGluZyBsaXN0
-CmRldmVsQGxpbnV4ZHJpdmVycHJvamVjdC5vcmcKaHR0cDovL2RyaXZlcmRldi5saW51eGRyaXZl
-cnByb2plY3Qub3JnL21haWxtYW4vbGlzdGluZm8vZHJpdmVyZGV2LWRldmVsCg==
+Trying to load Linux 4.10.0 (x86_64) on a Dell XPS 15 9550 [1]
+using the firmware boot manager (BIOS revision 1.2.19; dated
+January 23, 2017 on Dell's website) results in the following
+kernel panic:
+
+   VFS: Unable to mount root fs on unknown-block(0,0)
+
+The kernel panic occurs even though a valid initrd kernel
+parameter is supplied through the OptionalData parameter [2]
+of the corresponding load option descriptor.
+
+Adding debug output to function make_boot_params in eboot.c to
+display a hex dump of the memory contents at the location pointed
+to by member load_options of efi_loaded_image_t indicates that
+load_options points to the beginning of the load option
+descriptor, i.e. to the Attributes parameter [3]. This seems to
+be unexpected behavior since later on the function tries to
+interpret the memory area as UTF-16 string. The code seems to
+assume that load_options points to the OptionalData parameter.
+
+In my case the Attributes parameter [2] has value 1 and thus the
+upper 16 bits of it are zero. This causes efi_convert_cmdline to
+stop converting after one (non-printing) character. Since the
+kernel command line obtained in this way misses the initrd
+kernel parameter the system fails to boot.
+
+If I adjust members load_options and load_options_size of
+efi_loaded_image_t by calculating the offset to parameter
+OptionalData as described under parameters FilePathListLength
+and OptionalData in [2] the system boots correctly.
+
+Is there anything I am missing? How should I proceed to fix this
+issue?
+
+Thanks for your attention.
+
+Fabian
+
+[1] Hardware name: Dell Inc. XPS 15 9550/0N7TVV, BIOS 1.2.19 12/22/2016
+[2] Unified Extensible Firmware Interface Specification, Version 2.4 
+Errata C, April, 2015, p. 68
+[3] Unified Extensible Firmware Interface Specification, Version 2.4 
+Errata C, April, 2015, p. 67
