@@ -1,7 +1,7 @@
 From: Kees Cook <keescook@chromium.org>
-Subject: [PATCH 14/18] pstore: Do not duplicate record metadata
-Date: Mon,  6 Mar 2017 13:55:28 -0800
-Message-ID: <1488837332-71582-15-git-send-email-keescook@chromium.org>
+Subject: [PATCH 15/18] pstore: Replace arguments for erase() API
+Date: Mon,  6 Mar 2017 13:55:29 -0800
+Message-ID: <1488837332-71582-16-git-send-email-keescook@chromium.org>
 References: <1488837332-71582-1-git-send-email-keescook@chromium.org>
 Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
 In-Reply-To: <1488837332-71582-1-git-send-email-keescook@chromium.org>
@@ -19,188 +19,202 @@ To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, linux-doc@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Pan Xinhui <xinhui.pan@linux.vnet.ibm.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Paul Mackerras <paulus@samba.org>, Anton Vorontsov <anton@enomsg.org>, linux-acpi@vger.kernel.org, Nathan Fontenot <nfont@linux.vnet.ibm.com>, Len Brown <lenb@kernel.org>, Kees Cook <keescook@chromium.org>, Nobuhiro Iwamatsu <nobuhiro.iwamatsu.kw@hitachi.com>, Geliang Tang <geliangtang@163.com>, Tony Luck <tony.luck@intel.com>, Daniel Axtens <dja@axtens.net>, Qiuxu Zhuo <qiuxu.zhuo@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Colin Cross <ccross@android.com>, linuxppc-dev@lists.ozlabs.org
 List-Id: linux-efi@vger.kernel.org
 
-This switches the inode-private data from carrying duplicate metadata to
-keeping the record passed in during pstore_mkfile().
+This removes the argument list for the erase() callback and replaces it
+with a pointer to the backend record details to be removed.
 
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- fs/pstore/inode.c    | 57 ++++++++++++++++++++++++++--------------------------
- fs/pstore/platform.c |  6 ++----
- 2 files changed, 30 insertions(+), 33 deletions(-)
+ drivers/acpi/apei/erst.c          |  8 +++-----
+ drivers/firmware/efi/efi-pstore.c | 26 +++++++++++---------------
+ fs/pstore/inode.c                 | 12 +++++-------
+ fs/pstore/ram.c                   | 15 +++++++--------
+ include/linux/pstore.h            | 16 +++++-----------
+ 5 files changed, 31 insertions(+), 46 deletions(-)
 
-diff --git a/fs/pstore/inode.c b/fs/pstore/inode.c
-index 3d1f047e4f41..0ea281b457fa 100644
---- a/fs/pstore/inode.c
-+++ b/fs/pstore/inode.c
-@@ -47,12 +47,8 @@ static LIST_HEAD(allpstore);
+diff --git a/drivers/acpi/apei/erst.c b/drivers/acpi/apei/erst.c
+index 440588d189e7..7207e5fc9d3d 100644
+--- a/drivers/acpi/apei/erst.c
++++ b/drivers/acpi/apei/erst.c
+@@ -927,8 +927,7 @@ static int erst_open_pstore(struct pstore_info *psi);
+ static int erst_close_pstore(struct pstore_info *psi);
+ static ssize_t erst_reader(struct pstore_record *record);
+ static int erst_writer(struct pstore_record *record);
+-static int erst_clearer(enum pstore_type_id type, u64 id, int count,
+-			struct timespec time, struct pstore_info *psi);
++static int erst_clearer(struct pstore_record *record);
  
- struct pstore_private {
- 	struct list_head list;
--	struct pstore_info *psi;
--	enum pstore_type_id type;
--	u64	id;
--	int	count;
--	ssize_t	size;
--	char    *buf;
-+	struct pstore_record *record;
-+	size_t total_size;
+ static struct pstore_info erst_info = {
+ 	.owner		= THIS_MODULE,
+@@ -1100,10 +1099,9 @@ static int erst_writer(struct pstore_record *record)
+ 	return ret;
+ }
+ 
+-static int erst_clearer(enum pstore_type_id type, u64 id, int count,
+-			struct timespec time, struct pstore_info *psi)
++static int erst_clearer(struct pstore_record *record)
+ {
+-	return erst_clear(id);
++	return erst_clear(record->id);
+ }
+ 
+ static int __init erst_init(void)
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+index f81e3ec6f1c0..93d8cdbe7ef4 100644
+--- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -266,10 +266,7 @@ static int efi_pstore_write(struct pstore_record *record)
  };
  
- struct pstore_ftrace_seq_data {
-@@ -67,7 +63,10 @@ static void free_pstore_private(struct pstore_private *private)
- {
- 	if (!private)
- 		return;
--	kfree(private->buf);
-+	if (private->record) {
-+		kfree(private->record->buf);
-+		kfree(private->record);
-+	}
- 	kfree(private);
+ struct pstore_erase_data {
+-	u64 id;
+-	enum pstore_type_id type;
+-	int count;
+-	struct timespec time;
++	struct pstore_record *record;
+ 	efi_char16_t *name;
+ };
+ 
+@@ -295,8 +292,9 @@ static int efi_pstore_erase_func(struct efivar_entry *entry, void *data)
+ 		 * Check if an old format, which doesn't support
+ 		 * holding multiple logs, remains.
+ 		 */
+-		sprintf(name_old, "dump-type%u-%u-%lu", ed->type,
+-			(unsigned int)ed->id, ed->time.tv_sec);
++		snprintf(name_old, sizeof(name_old), "dump-type%u-%u-%lu",
++			ed->record->type, (unsigned int)ed->record->id,
++			ed->record->time.tv_sec);
+ 
+ 		for (i = 0; i < DUMP_NAME_LEN; i++)
+ 			efi_name_old[i] = name_old[i];
+@@ -321,8 +319,7 @@ static int efi_pstore_erase_func(struct efivar_entry *entry, void *data)
+ 	return 1;
  }
  
-@@ -80,9 +79,9 @@ static void *pstore_ftrace_seq_start(struct seq_file *s, loff_t *pos)
- 	if (!data)
- 		return NULL;
- 
--	data->off = ps->size % REC_SIZE;
-+	data->off = ps->total_size % REC_SIZE;
- 	data->off += *pos * REC_SIZE;
--	if (data->off + REC_SIZE > ps->size) {
-+	if (data->off + REC_SIZE > ps->total_size) {
- 		kfree(data);
- 		return NULL;
- 	}
-@@ -102,7 +101,7 @@ static void *pstore_ftrace_seq_next(struct seq_file *s, void *v, loff_t *pos)
- 	struct pstore_ftrace_seq_data *data = v;
- 
- 	data->off += REC_SIZE;
--	if (data->off + REC_SIZE > ps->size)
-+	if (data->off + REC_SIZE > ps->total_size)
- 		return NULL;
- 
- 	(*pos)++;
-@@ -113,7 +112,9 @@ static int pstore_ftrace_seq_show(struct seq_file *s, void *v)
+-static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
+-			    struct timespec time, struct pstore_info *psi)
++static int efi_pstore_erase(struct pstore_record *record)
  {
- 	struct pstore_private *ps = s->private;
- 	struct pstore_ftrace_seq_data *data = v;
--	struct pstore_ftrace_record *rec = (void *)(ps->buf + data->off);
-+	struct pstore_ftrace_record *rec;
-+
-+	rec = (struct pstore_ftrace_record *)(ps->record->buf + data->off);
+ 	struct pstore_erase_data edata;
+ 	struct efivar_entry *entry = NULL;
+@@ -331,17 +328,16 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
+ 	int found, i;
+ 	unsigned int part;
  
- 	seq_printf(s, "CPU:%d ts:%llu %08lx  %08lx  %pf <- %pF\n",
- 		   pstore_ftrace_decode_cpu(rec),
-@@ -133,7 +134,7 @@ static const struct seq_operations pstore_ftrace_seq_ops = {
+-	do_div(id, 1000);
+-	part = do_div(id, 100);
+-	sprintf(name, "dump-type%u-%u-%d-%lu", type, part, count, time.tv_sec);
++	do_div(record->id, 1000);
++	part = do_div(record->id, 100);
++	snprintf(name, sizeof(name), "dump-type%u-%u-%d-%lu",
++		 record->type, record->part, record->count,
++		 record->time.tv_sec);
  
- static int pstore_check_syslog_permissions(struct pstore_private *ps)
- {
--	switch (ps->type) {
-+	switch (ps->record->type) {
- 	case PSTORE_TYPE_DMESG:
- 	case PSTORE_TYPE_CONSOLE:
- 		return check_syslog_permissions(SYSLOG_ACTION_READ_ALL,
-@@ -149,9 +150,10 @@ static ssize_t pstore_file_read(struct file *file, char __user *userbuf,
- 	struct seq_file *sf = file->private_data;
- 	struct pstore_private *ps = sf->private;
+ 	for (i = 0; i < DUMP_NAME_LEN; i++)
+ 		efi_name[i] = name[i];
  
--	if (ps->type == PSTORE_TYPE_FTRACE)
-+	if (ps->record->type == PSTORE_TYPE_FTRACE)
- 		return seq_read(file, userbuf, count, ppos);
--	return simple_read_from_buffer(userbuf, count, ppos, ps->buf, ps->size);
-+	return simple_read_from_buffer(userbuf, count, ppos,
-+				       ps->record->buf, ps->total_size);
- }
+-	edata.id = part;
+-	edata.type = type;
+-	edata.count = count;
+-	edata.time = time;
++	edata.record = record;
+ 	edata.name = efi_name;
  
- static int pstore_file_open(struct inode *inode, struct file *file)
-@@ -165,7 +167,7 @@ static int pstore_file_open(struct inode *inode, struct file *file)
+ 	if (efivar_entry_iter_begin())
+diff --git a/fs/pstore/inode.c b/fs/pstore/inode.c
+index 0ea281b457fa..06504b69575b 100644
+--- a/fs/pstore/inode.c
++++ b/fs/pstore/inode.c
+@@ -210,14 +210,12 @@ static int pstore_unlink(struct inode *dir, struct dentry *dentry)
  	if (err)
  		return err;
  
--	if (ps->type == PSTORE_TYPE_FTRACE)
-+	if (ps->record->type == PSTORE_TYPE_FTRACE)
- 		sops = &pstore_ftrace_seq_ops;
- 
- 	err = seq_open(file, sops);
-@@ -201,17 +203,18 @@ static const struct file_operations pstore_file_operations = {
- static int pstore_unlink(struct inode *dir, struct dentry *dentry)
- {
- 	struct pstore_private *p = d_inode(dentry)->i_private;
-+	struct pstore_record *record = p->record;
- 	int err;
- 
- 	err = pstore_check_syslog_permissions(p);
- 	if (err)
- 		return err;
- 
--	if (p->psi->erase) {
--		mutex_lock(&p->psi->read_mutex);
--		p->psi->erase(p->type, p->id, p->count,
--			      d_inode(dentry)->i_ctime, p->psi);
--		mutex_unlock(&p->psi->read_mutex);
-+	if (record->psi->erase) {
-+		mutex_lock(&record->psi->read_mutex);
-+		record->psi->erase(record->type, record->id, record->count,
-+			      d_inode(dentry)->i_ctime, record->psi);
-+		mutex_unlock(&record->psi->read_mutex);
- 	} else {
+-	if (record->psi->erase) {
+-		mutex_lock(&record->psi->read_mutex);
+-		record->psi->erase(record->type, record->id, record->count,
+-			      d_inode(dentry)->i_ctime, record->psi);
+-		mutex_unlock(&record->psi->read_mutex);
+-	} else {
++	if (!record->psi->erase)
  		return -EPERM;
- 	}
-@@ -323,9 +326,9 @@ int pstore_mkfile(struct pstore_record *record)
+-	}
++
++	mutex_lock(&record->psi->read_mutex);
++	record->psi->erase(record);
++	mutex_unlock(&record->psi->read_mutex);
  
- 	spin_lock_irqsave(&allpstore_lock, flags);
- 	list_for_each_entry(pos, &allpstore, list) {
--		if (pos->type == record->type &&
--		    pos->id == record->id &&
--		    pos->psi == record->psi) {
-+		if (pos->record->type == record->type &&
-+		    pos->record->id == record->id &&
-+		    pos->record->psi == record->psi) {
- 			rc = -EEXIST;
- 			break;
- 		}
-@@ -343,10 +346,7 @@ int pstore_mkfile(struct pstore_record *record)
- 	private = kzalloc(sizeof(*private), GFP_KERNEL);
- 	if (!private)
- 		goto fail_alloc;
--	private->type = record->type;
--	private->id = record->id;
--	private->count = record->count;
--	private->psi = record->psi;
-+	private->record = record;
+ 	return simple_unlink(dir, dentry);
+ }
+diff --git a/fs/pstore/ram.c b/fs/pstore/ram.c
+index ca6e2a814e37..a18575fe32e9 100644
+--- a/fs/pstore/ram.c
++++ b/fs/pstore/ram.c
+@@ -469,25 +469,24 @@ static int notrace ramoops_pstore_write_buf_user(enum pstore_type_id type,
+ 	return -EINVAL;
+ }
  
- 	switch (record->type) {
+-static int ramoops_pstore_erase(enum pstore_type_id type, u64 id, int count,
+-				struct timespec time, struct pstore_info *psi)
++static int ramoops_pstore_erase(struct pstore_record *record)
+ {
+-	struct ramoops_context *cxt = psi->data;
++	struct ramoops_context *cxt = record->psi->data;
+ 	struct persistent_ram_zone *prz;
+ 
+-	switch (type) {
++	switch (record->type) {
  	case PSTORE_TYPE_DMESG:
-@@ -402,8 +402,7 @@ int pstore_mkfile(struct pstore_record *record)
- 	if (!dentry)
- 		goto fail_lockedalloc;
+-		if (id >= cxt->max_dump_cnt)
++		if (record->id >= cxt->max_dump_cnt)
+ 			return -EINVAL;
+-		prz = cxt->dprzs[id];
++		prz = cxt->dprzs[record->id];
+ 		break;
+ 	case PSTORE_TYPE_CONSOLE:
+ 		prz = cxt->cprz;
+ 		break;
+ 	case PSTORE_TYPE_FTRACE:
+-		if (id >= cxt->max_ftrace_cnt)
++		if (record->id >= cxt->max_ftrace_cnt)
+ 			return -EINVAL;
+-		prz = cxt->fprzs[id];
++		prz = cxt->fprzs[record->id];
+ 		break;
+ 	case PSTORE_TYPE_PMSG:
+ 		prz = cxt->mprz;
+diff --git a/include/linux/pstore.h b/include/linux/pstore.h
+index c672de41e9b5..a4b2c21a512e 100644
+--- a/include/linux/pstore.h
++++ b/include/linux/pstore.h
+@@ -177,15 +177,11 @@ struct pstore_record {
+  *
+  * @erase:
+  *	Delete a record from backend storage.  Different backends
+- *	identify records differently, so all possible methods of
+- *	identification are included to help the backend locate the
+- *	record to remove.
++ *	identify records differently, so entire original record is
++ *	passed back to assist in identification of what the backend
++ *	should remove from storage.
+  *
+- *	@type:	in: pstore record type to write
+- *	@id:	in: per-type unique identifier for the record
+- *	@count:	in: Oops count
+- *	@time:	in: timestamp for the record
+- *	@psi:	in: pointer to the struct pstore_info for the backend
++ *	@record:	pointer to record metadata.
+  *
+  *	Returns 0 on success, and non-zero on error.
+  *
+@@ -215,9 +211,7 @@ struct pstore_info {
+ 			enum kmsg_dump_reason reason, u64 *id,
+ 			unsigned int part, const char __user *buf,
+ 			bool compressed, size_t size, struct pstore_info *psi);
+-	int		(*erase)(enum pstore_type_id type, u64 id,
+-			int count, struct timespec time,
+-			struct pstore_info *psi);
++	int		(*erase)(struct pstore_record *record);
+ };
  
--	private->buf = record->buf;
--	inode->i_size = private->size = size;
-+	inode->i_size = private->total_size = size;
- 
- 	inode->i_private = private;
- 
-diff --git a/fs/pstore/platform.c b/fs/pstore/platform.c
-index 072326625629..aa3d6e572ede 100644
---- a/fs/pstore/platform.c
-+++ b/fs/pstore/platform.c
-@@ -852,14 +852,12 @@ void pstore_get_records(int quiet)
- 		decompress_record(record);
- 		rc = pstore_mkfile(record);
- 		if (rc) {
--			/* pstore_mkfile() did not take buf, so free it. */
-+			/* pstore_mkfile() did not take record, so free it. */
- 			kfree(record->buf);
-+			kfree(record);
- 			if (rc != -EEXIST || !quiet)
- 				failed++;
- 		}
--
--		/* Reset for next record. */
--		kfree(record);
- 	}
- 	if (psi->close)
- 		psi->close(psi);
+ /* Supported frontends */
 -- 
 2.7.4
