@@ -1,74 +1,101 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: PROBLEM: Unexpected contents of load options (EFI Boot Stub)
-Date: Sat, 4 Mar 2017 15:45:57 +0000
-Message-ID: <CAKv+Gu9NqGWyw==dBKEdS9XwZcJhh9_Hg94G+sjbu48=aEbYTA@mail.gmail.com>
-References: <773c29b9-37b4-e007-c336-c4beab7cde91@gmail.com>
+From: gengdongjiu <gengdj.1984@gmail.com>
+Subject: Re: [PATCH V11 10/10] arm/arm64: KVM: add guest SEA support
+Date: Mon, 6 Mar 2017 09:28:50 +0800
+Message-ID: <CAMj-D2CepweZ4y38-U=XX3V8xsKs2vnxGz6RyRTtjA0CcitFAg@mail.gmail.com>
+References: <1487712121-16688-1-git-send-email-tbaicar@codeaurora.org>
+ <1487712121-16688-11-git-send-email-tbaicar@codeaurora.org>
+ <df6ba5dc-d93f-925a-46bf-1e1e209d17f3@huawei.com> <58B43092.6040401@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <773c29b9-37b4-e007-c336-c4beab7cde91-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Fabian Tschiatschek <fabian.tschiatschek-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <58B43092.6040401@arm.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: James Morse <james.morse@arm.com>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Tyler Baicar <tbaicar@codeaurora.org>, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, Xiongfeng Wang <wangxiongfeng2@huawei.com>, Fu Wei <fu.wei@linaro.org>, zjzhang@codeaurora.org, linux@armlinux.org.uk, kvmarm@lists.cs.columbia.edu, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, Len Brown <lenb@kernel.org>, harba@codeaurora.org, john.garry@huawei.com, Marc Zyngier <marc.zyngier@arm.com>, Punit Agrawal <punit.agrawal@arm.com>, rostedt@goodmis.org, nkaje@codeaurora.org, Sandeepa Prabhu <sandeepa.s.prabhu@gmail.com>, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, Hanjun Guo <hanj>
 List-Id: linux-efi@vger.kernel.org
 
-On 4 March 2017 at 10:45, Fabian Tschiatschek
-<fabian.tschiatschek-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Trying to load Linux 4.10.0 (x86_64) on a Dell XPS 15 9550 [1]
-> using the firmware boot manager (BIOS revision 1.2.19; dated
-> January 23, 2017 on Dell's website) results in the following
-> kernel panic:
->
->   VFS: Unable to mount root fs on unknown-block(0,0)
->
-> The kernel panic occurs even though a valid initrd kernel
-> parameter is supplied through the OptionalData parameter [2]
-> of the corresponding load option descriptor.
->
-> Adding debug output to function make_boot_params in eboot.c to
-> display a hex dump of the memory contents at the location pointed
-> to by member load_options of efi_loaded_image_t indicates that
-> load_options points to the beginning of the load option
-> descriptor, i.e. to the Attributes parameter [3]. This seems to
-> be unexpected behavior since later on the function tries to
-> interpret the memory area as UTF-16 string. The code seems to
-> assume that load_options points to the OptionalData parameter.
->
-> In my case the Attributes parameter [2] has value 1 and thus the
-> upper 16 bits of it are zero. This causes efi_convert_cmdline to
-> stop converting after one (non-printing) character. Since the
-> kernel command line obtained in this way misses the initrd
-> kernel parameter the system fails to boot.
->
-> If I adjust members load_options and load_options_size of
-> efi_loaded_image_t by calculating the offset to parameter
-> OptionalData as described under parameters FilePathListLength
-> and OptionalData in [2] the system boots correctly.
->
-> Is there anything I am missing? How should I proceed to fix this
-> issue
->
+Hi James,
 
-The EFI_LOAD_OPTION struct that you refer to defines the format of
-Boot#### and Driver#### UEFI variables. If the firmware is setting the
-LoadOptions member of EFI_LOADED_IMAGE_PROTOCOL instances to point to
-the top of such a structure rather than to its OptionalData member, it
-is violating the spec.
 
-EFI_LOAD_OPTION::OptionalData is described as
+> Hi Wang Xiongfeng,
+>
+> On 25/02/17 07:15, Xiongfeng Wang wrote:
+>> On 2017/2/22 5:22, Tyler Baicar wrote:
+>>> Currently external aborts are unsupported by the guest abort
+>>> handling. Add handling for SEAs so that the host kernel reports
+>>> SEAs which occur in the guest kernel.
+>
+>>> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
+>>> index a5265ed..04f1dd50 100644
+>>> --- a/arch/arm/kvm/mmu.c
+>>> +++ b/arch/arm/kvm/mmu.c
+>>> @@ -1444,8 +1445,21 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
+>>>
+>>>      /* Check the stage-2 fault is trans. fault or write fault */
+>>>      fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
+>>> -    if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>>> -        fault_status != FSC_ACCESS) {
+>>> +
+>>> +    /* The host kernel will handle the synchronous external abort. There
+>>> +     * is no need to pass the error into the guest.
+>>> +     */
+>
+>> Can we inject an sea into the guest, so that the guest can kill the
+>> application which causes the error if the guest won't be terminated
+>> later. I'm not sure whether ghes_handle_memory_failure() called in
+>> ghes_do_proc() will kill the qemu process. I think it only kill user
+>> processes marked with PF_MCE_PROCESS & PF_MCE_EARLY.
+>
+> My understanding is the pages will get unmapped and recovered where possible
+> (e.g. re-read from disk), the user space process will get SIGBUS/SIGSEV when it
+> next tries to access that page, which could be some time later.
+> These flags in find_early_kill_thread() are a way to make the memory-failure
+> code signal the process early, before it does any recovery. The 'MCE' makes me
+> think its x86 specific.
+> (early and late are described more in [0])
+>
+>
+> Guests are a special case as QEMU may never access the faulty memory itself, so
+> it won't receive the 'late' signal. It looks like ARM/arm64 KVM lacks support
+> for KVM_PFN_ERR_HWPOISON which sends SIGBUS from KVM's fault-handling code. I
+> have patches to add support for this which I intend to send at rc1.
 
-"""
-OptionalData
-The remaining bytes in the load option descriptor are a binary
-data buffer that is passed to the loaded image. If the field is zero
-bytes long, a NULL pointer is passed to the loaded image. The
-number of bytes in OptionalData can be computed by
-subtracting the starting offset of OptionalData from total size
-in bytes of the EFI_LOAD_OPTION.
-"""
+could you push this patch to opensource?
 
-So the binary data buffer is passed to the loaded image, which implies
-that whatever comes before it is not.
 
-I'm afraid your only option is to use an intermediate loader such as
-GRUB which does not take any command line arguments.
+>
+> [0] suggests 'KVM qemu' sets these MCE flags to take the 'early' path, but given
+> x86s KVM_PFN_ERR_HWPOISON, this may be out of date.
+>
+>
+> Either way, once QEMU gets a signal indicating the virtual address, it can
+> generate its own APEI CPER records and use the KVM APIs to mock up an
+> Synchronous External Abort, (or inject an IRQ or run the vcpu waiting for the
+> guest's polling thread to come round, whichever was described to the guest via
+> the HEST/GHES tables).
+>
+> We can't hand the APEI CPER records we have in the kernel to the guest, as they
+> hold a host physical address, and maybe a host virtual address. We don't know
+> where in guest memory we could write new APEI CPER records as these locations
+> have to be reserved in the guests-UEFI memory map, and only QEMU knows where
+> they are.
+>
+> To deliver RAS events to a guest we have to get QEMU involved.
+>
+>
+> Thanks,
+>
+> James
+>
+>
+> [0] https://www.kernel.org/doc/Documentation/vm/hwpoison.txt
+>
