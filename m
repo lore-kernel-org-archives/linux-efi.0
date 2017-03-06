@@ -1,190 +1,187 @@
 From: Kees Cook <keescook@chromium.org>
-Subject: [PATCH 05/18] pstore: Add kernel-doc for struct pstore_info
-Date: Mon,  6 Mar 2017 13:55:19 -0800
-Message-ID: <1488837332-71582-6-git-send-email-keescook@chromium.org>
+Subject: [PATCH 08/18] pstore: Switch pstore_mkfile to pass record
+Date: Mon,  6 Mar 2017 13:55:22 -0800
+Message-ID: <1488837332-71582-9-git-send-email-keescook@chromium.org>
 References: <1488837332-71582-1-git-send-email-keescook@chromium.org>
-Return-path: <linux-doc-owner@vger.kernel.org>
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
 In-Reply-To: <1488837332-71582-1-git-send-email-keescook@chromium.org>
-Sender: linux-doc-owner@vger.kernel.org
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
 To: linux-kernel@vger.kernel.org
-Cc: Kees Cook <keescook@chromium.org>, Nobuhiro Iwamatsu <nobuhiro.iwamatsu.kw@hitachi.com>, Qiuxu Zhuo <qiuxu.zhuo@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Nathan Fontenot <nfont@linux.vnet.ibm.com>, Pan Xinhui <xinhui.pan@linux.vnet.ibm.com>, Daniel Axtens <dja@axtens.net>, Paul Gortmaker <paul.gortmaker@windriver.com>, Geliang Tang <geliangtang@163.com>, linuxppc-dev@lists.ozlabs.org, linux-acpi@
+Cc: linux-efi@vger.kernel.org, linux-doc@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Pan Xinhui <xinhui.pan@linux.vnet.ibm.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Paul Mackerras <paulus@samba.org>, Anton Vorontsov <anton@enomsg.org>, linux-acpi@vger.kernel.org, Nathan Fontenot <nfont@linux.vnet.ibm.com>, Len Brown <lenb@kernel.org>, Kees Cook <keescook@chromium.org>, Nobuhiro Iwamatsu <nobuhiro.iwamatsu.kw@hitachi.com>, Geliang Tang <geliangtang@163.com>, Tony Luck <tony.luck@intel.com>, Daniel Axtens <dja@axtens.net>, Qiuxu Zhuo <qiuxu.zhuo@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Colin Cross <ccross@android.com>, linuxppc-dev@lists.ozlabs.org
 List-Id: linux-efi@vger.kernel.org
 
-This adds documentation for struct pstore_info, which also includes
-the basic API the backends need to implement.
+Instead of the long list of arguments, just pass the new record struct.
 
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- include/linux/pstore.h | 133 +++++++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 128 insertions(+), 5 deletions(-)
+ fs/pstore/inode.c    | 57 +++++++++++++++++++++++++++++-----------------------
+ fs/pstore/internal.h |  5 +----
+ fs/pstore/platform.c |  6 +-----
+ 3 files changed, 34 insertions(+), 34 deletions(-)
 
-diff --git a/include/linux/pstore.h b/include/linux/pstore.h
-index 0da29cae009b..083b10bacd4a 100644
---- a/include/linux/pstore.h
-+++ b/include/linux/pstore.h
-@@ -30,7 +30,7 @@
- #include <linux/time.h>
- #include <linux/types.h>
+diff --git a/fs/pstore/inode.c b/fs/pstore/inode.c
+index 57c0646479f5..a98787bab3e6 100644
+--- a/fs/pstore/inode.c
++++ b/fs/pstore/inode.c
+@@ -302,9 +302,7 @@ bool pstore_is_mounted(void)
+  * Load it up with "size" bytes of data from "buf".
+  * Set the mtime & ctime to the date that this record was originally stored.
+  */
+-int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
+-		  char *data, bool compressed, size_t size,
+-		  struct timespec time, struct pstore_info *psi)
++int pstore_mkfile(struct pstore_record *record)
+ {
+ 	struct dentry		*root = pstore_sb->s_root;
+ 	struct dentry		*dentry;
+@@ -313,12 +311,13 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
+ 	char			name[PSTORE_NAMELEN];
+ 	struct pstore_private	*private, *pos;
+ 	unsigned long		flags;
++	size_t			size = record->size + record->ecc_notice_size;
  
--/* types */
-+/* pstore record types (see fs/pstore/inode.c for filename templates) */
- enum pstore_type_id {
- 	PSTORE_TYPE_DMESG	= 0,
- 	PSTORE_TYPE_MCE		= 1,
-@@ -47,14 +47,138 @@ enum pstore_type_id {
+ 	spin_lock_irqsave(&allpstore_lock, flags);
+ 	list_for_each_entry(pos, &allpstore, list) {
+-		if (pos->type == type &&
+-		    pos->id == id &&
+-		    pos->psi == psi) {
++		if (pos->type == record->type &&
++		    pos->id == record->id &&
++		    pos->psi == record->psi) {
+ 			rc = -EEXIST;
+ 			break;
+ 		}
+@@ -336,48 +335,56 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
+ 	private = kmalloc(sizeof *private + size, GFP_KERNEL);
+ 	if (!private)
+ 		goto fail_alloc;
+-	private->type = type;
+-	private->id = id;
+-	private->count = count;
+-	private->psi = psi;
++	private->type = record->type;
++	private->id = record->id;
++	private->count = record->count;
++	private->psi = record->psi;
  
- struct module;
+-	switch (type) {
++	switch (record->type) {
+ 	case PSTORE_TYPE_DMESG:
+ 		scnprintf(name, sizeof(name), "dmesg-%s-%lld%s",
+-			  psname, id, compressed ? ".enc.z" : "");
++			  record->psi->name, record->id,
++			  record->compressed ? ".enc.z" : "");
+ 		break;
+ 	case PSTORE_TYPE_CONSOLE:
+-		scnprintf(name, sizeof(name), "console-%s-%lld", psname, id);
++		scnprintf(name, sizeof(name), "console-%s-%lld",
++			  record->psi->name, record->id);
+ 		break;
+ 	case PSTORE_TYPE_FTRACE:
+-		scnprintf(name, sizeof(name), "ftrace-%s-%lld", psname, id);
++		scnprintf(name, sizeof(name), "ftrace-%s-%lld",
++			  record->psi->name, record->id);
+ 		break;
+ 	case PSTORE_TYPE_MCE:
+-		scnprintf(name, sizeof(name), "mce-%s-%lld", psname, id);
++		scnprintf(name, sizeof(name), "mce-%s-%lld",
++			  record->psi->name, record->id);
+ 		break;
+ 	case PSTORE_TYPE_PPC_RTAS:
+-		scnprintf(name, sizeof(name), "rtas-%s-%lld", psname, id);
++		scnprintf(name, sizeof(name), "rtas-%s-%lld",
++			  record->psi->name, record->id);
+ 		break;
+ 	case PSTORE_TYPE_PPC_OF:
+ 		scnprintf(name, sizeof(name), "powerpc-ofw-%s-%lld",
+-			  psname, id);
++			  record->psi->name, record->id);
+ 		break;
+ 	case PSTORE_TYPE_PPC_COMMON:
+ 		scnprintf(name, sizeof(name), "powerpc-common-%s-%lld",
+-			  psname, id);
++			  record->psi->name, record->id);
+ 		break;
+ 	case PSTORE_TYPE_PMSG:
+-		scnprintf(name, sizeof(name), "pmsg-%s-%lld", psname, id);
++		scnprintf(name, sizeof(name), "pmsg-%s-%lld",
++			  record->psi->name, record->id);
+ 		break;
+ 	case PSTORE_TYPE_PPC_OPAL:
+-		sprintf(name, "powerpc-opal-%s-%lld", psname, id);
++		scnprintf(name, sizeof(name), "powerpc-opal-%s-%lld",
++			  record->psi->name, record->id);
+ 		break;
+ 	case PSTORE_TYPE_UNKNOWN:
+-		scnprintf(name, sizeof(name), "unknown-%s-%lld", psname, id);
++		scnprintf(name, sizeof(name), "unknown-%s-%lld",
++			  record->psi->name, record->id);
+ 		break;
+ 	default:
+ 		scnprintf(name, sizeof(name), "type%d-%s-%lld",
+-			  type, psname, id);
++			  record->type, record->psi->name, record->id);
+ 		break;
+ 	}
  
-+/**
-+ * struct pstore_info - backend pstore driver structure
-+ *
-+ * @owner:	module which is repsonsible for this backend driver
-+ * @name:	name of the backend driver
-+ *
-+ * @buf_lock:	spinlock to serialize access to @buf
-+ * @buf:	preallocated crash dump buffer
-+ * @bufsize:	size of @buf available for crash dump writes
-+ *
-+ * @read_mutex:	mutex to serialize @open, @read, and @close callbacks
-+ * @flags:	bitfield of frontends the backend can accept writes for
-+ * @data:	backend-private pointer passed back during callbacks
-+ *
-+ * Callbacks:
-+ *
-+ * @open:
-+ *	Notify backend that pstore is starting a full read of backend
-+ *	records. Followed by one or more @read calls, and a final @close.
-+ *
-+ *	@psi:	in: pointer to the struct pstore_info for the backend
-+ *
-+ *	Returns 0 on success, and non-zero on error.
-+ *
-+ * @close:
-+ *	Notify backend that pstore has finished a full read of backend
-+ *	records. Always preceded by an @open call and one or more @read
-+ *	calls.
-+ *
-+ *	@psi:	in: pointer to the struct pstore_info for the backend
-+ *
-+ *	Returns 0 on success, and non-zero on error. (Though pstore will
-+ *	ignore the error.)
-+ *
-+ * @read:
-+ *	Read next available backend record. Called after a successful
-+ *	@open.
-+ *
-+ *	@id:	out: unique identifier for the record
-+ *	@type:	out: pstore record type
-+ *	@count: out: for PSTORE_TYPE_DMESG, the Oops count.
-+ *	@time:	out: timestamp for the record
-+ *	@buf:	out: kmalloc copy of record contents, to be freed by pstore
-+ *	@compressed:
-+ *		out: if the record contents are compressed
-+ *	@ecc_notice_size:
-+ *		out: ECC information
-+ *	@psi:	in: pointer to the struct pstore_info for the backend
-+ *
-+ *	Returns record size on success, zero when no more records are
-+ *	available, or negative on error.
-+ *
-+ * @write:
-+ *	Perform a frontend notification of a write to a backend record. The
-+ *	data to be stored has already been written to the registered @buf
-+ *	of the @psi structure.
-+ *
-+ *	@type:	in: pstore record type to write
-+ *	@reason:
-+ *		in: pstore write reason
-+ *	@id:	out: unique identifier for the record
-+ *	@part:	in: position in a multipart write
-+ *	@count:	in: increasing from 0 since boot, the number of this Oops
-+ *	@compressed:
-+ *		in: if the record is compressed
-+ *	@size:	in: size of the write
-+ *	@psi:	in: pointer to the struct pstore_info for the backend
-+ *
-+ *	Returns 0 on success, and non-zero on error.
-+ *
-+ * @write_buf:
-+ *	Perform a frontend write to a backend record, using a specified
-+ *	buffer. Unlike @write, this does not use the @psi @buf.
-+ *
-+ *	@type:	in: pstore record type to write
-+ *	@reason:
-+ *		in: pstore write reason
-+ *	@id:	out: unique identifier for the record
-+ *	@part:	in: position in a multipart write
-+ *	@buf:	in: pointer to contents to write to backend record
-+ *	@compressed:
-+ *		in: if the record is compressed
-+ *	@size:	in: size of the write
-+ *	@psi:	in: pointer to the struct pstore_info for the backend
-+ *
-+ *	Returns 0 on success, and non-zero on error.
-+ *
-+ * @write_buf_user:
-+ *	Perform a frontend write to a backend record, using a specified
-+ *	buffer that is coming directly from userspace.
-+ *
-+ *	@type:	in: pstore record type to write
-+ *	@reason:
-+ *		in: pstore write reason
-+ *	@id:	out: unique identifier for the record
-+ *	@part:	in: position in a multipart write
-+ *	@buf:	in: pointer to userspace contents to write to backend record
-+ *	@compressed:
-+ *		in: if the record is compressed
-+ *	@size:	in: size of the write
-+ *	@psi:	in: pointer to the struct pstore_info for the backend
-+ *
-+ *	Returns 0 on success, and non-zero on error.
-+ *
-+ * @erase:
-+ *	Delete a record from backend storage.  Different backends
-+ *	identify records differently, so all possible methods of
-+ *	identification are included to help the backend locate the
-+ *	record to remove.
-+ *
-+ *	@type:	in: pstore record type to write
-+ *	@id:	in: per-type unique identifier for the record
-+ *	@count:	in: Oops count
-+ *	@time:	in: timestamp for the record
-+ *	@psi:	in: pointer to the struct pstore_info for the backend
-+ *
-+ *	Returns 0 on success, and non-zero on error.
-+ *
-+ */
- struct pstore_info {
- 	struct module	*owner;
- 	char		*name;
--	spinlock_t	buf_lock;	/* serialize access to 'buf' */
-+
-+	spinlock_t	buf_lock;
- 	char		*buf;
- 	size_t		bufsize;
--	struct mutex	read_mutex;	/* serialize open/read/close */
-+
-+	struct mutex	read_mutex;
-+
- 	int		flags;
-+	void		*data;
-+
- 	int		(*open)(struct pstore_info *psi);
- 	int		(*close)(struct pstore_info *psi);
- 	ssize_t		(*read)(u64 *id, enum pstore_type_id *type,
-@@ -76,11 +200,10 @@ struct pstore_info {
- 	int		(*erase)(enum pstore_type_id type, u64 id,
- 			int count, struct timespec time,
- 			struct pstore_info *psi);
--	void		*data;
- };
+@@ -387,13 +394,13 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
+ 	if (!dentry)
+ 		goto fail_lockedalloc;
  
-+/* Supported frontends */
- #define PSTORE_FLAGS_DMESG	(1 << 0)
--#define PSTORE_FLAGS_FRAGILE	PSTORE_FLAGS_DMESG
- #define PSTORE_FLAGS_CONSOLE	(1 << 1)
- #define PSTORE_FLAGS_FTRACE	(1 << 2)
- #define PSTORE_FLAGS_PMSG	(1 << 3)
+-	memcpy(private->data, data, size);
++	memcpy(private->data, record->buf, size);
+ 	inode->i_size = private->size = size;
+ 
+ 	inode->i_private = private;
+ 
+-	if (time.tv_sec)
+-		inode->i_mtime = inode->i_ctime = time;
++	if (record->time.tv_sec)
++		inode->i_mtime = inode->i_ctime = record->time;
+ 
+ 	d_add(dentry, inode);
+ 
+diff --git a/fs/pstore/internal.h b/fs/pstore/internal.h
+index da416e6591c9..af1df5a36d86 100644
+--- a/fs/pstore/internal.h
++++ b/fs/pstore/internal.h
+@@ -25,10 +25,7 @@ extern struct pstore_info *psinfo;
+ 
+ extern void	pstore_set_kmsg_bytes(int);
+ extern void	pstore_get_records(int);
+-extern int	pstore_mkfile(enum pstore_type_id, char *psname, u64 id,
+-			      int count, char *data, bool compressed,
+-			      size_t size, struct timespec time,
+-			      struct pstore_info *psi);
++extern int	pstore_mkfile(struct pstore_record *record);
+ extern bool	pstore_is_mounted(void);
+ 
+ #endif
+diff --git a/fs/pstore/platform.c b/fs/pstore/platform.c
+index 0503380704de..168e03fd5e58 100644
+--- a/fs/pstore/platform.c
++++ b/fs/pstore/platform.c
+@@ -814,11 +814,7 @@ void pstore_get_records(int quiet)
+ 				 record.psi)) > 0) {
+ 
+ 		decompress_record(&record);
+-		rc = pstore_mkfile(record.type, psi->name, record.id,
+-				   record.count, record.buf,
+-				   record.compressed,
+-				   record.size + record.ecc_notice_size,
+-				   record.time, record.psi);
++		rc = pstore_mkfile(&record);
+ 
+ 		/* Free buffer other than big oops */
+ 		if (record.buf != big_oops_buf)
 -- 
 2.7.4
-
