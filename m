@@ -1,17 +1,18 @@
 From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 Subject: Re: [RFC PATCH v4 26/28] x86: Allow kexec to be used with SME
-Date: Mon, 6 Mar 2017 11:58:40 -0600
-Message-ID: <998eb58b-eefd-3093-093f-9ae25ddda472@amd.com>
+Date: Mon, 6 Mar 2017 12:04:28 -0600
+Message-ID: <87ecaf44-b5a0-61c6-30b1-a798cc535983@amd.com>
 References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
 	<20170216154755.19244.51276.stgit@tlendack-t1.amdoffice.net>
 	<20170217155756.GJ30272@char.us.ORACLE.com>
 	<d2f16b24-f2ef-a22b-3c72-2d8ad585553e@amd.com>
 	<20170301092536.GB8353@dhcp-128-65.nay.redhat.com>
+	<998eb58b-eefd-3093-093f-9ae25ddda472@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
 Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20170301092536.GB8353-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+In-Reply-To: <998eb58b-eefd-3093-093f-9ae25ddda472-5C7GfCeVMHo@public.gmane.org>
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
 	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
@@ -22,70 +23,73 @@ List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
 Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
 To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S.
-	Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Paolo
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S.
+	Tsirkin" <mst>
 List-Id: linux-efi@vger.kernel.org
 
-On 3/1/2017 3:25 AM, Dave Young wrote:
-> Hi Tom,
++kexec-list
 
-Hi Dave,
-
+On 3/6/2017 11:58 AM, Tom Lendacky wrote:
+> On 3/1/2017 3:25 AM, Dave Young wrote:
+>> Hi Tom,
 >
-> On 02/17/17 at 10:43am, Tom Lendacky wrote:
->> On 2/17/2017 9:57 AM, Konrad Rzeszutek Wilk wrote:
->>> On Thu, Feb 16, 2017 at 09:47:55AM -0600, Tom Lendacky wrote:
->>>> Provide support so that kexec can be used to boot a kernel when SME is
->>>> enabled.
+> Hi Dave,
+>
+>>
+>> On 02/17/17 at 10:43am, Tom Lendacky wrote:
+>>> On 2/17/2017 9:57 AM, Konrad Rzeszutek Wilk wrote:
+>>>> On Thu, Feb 16, 2017 at 09:47:55AM -0600, Tom Lendacky wrote:
+>>>>> Provide support so that kexec can be used to boot a kernel when SME is
+>>>>> enabled.
+>>>>
+>>>> Is the point of kexec and kdump to ehh, dump memory ? But if the
+>>>> rest of the memory is encrypted you won't get much, will you?
 >>>
->>> Is the point of kexec and kdump to ehh, dump memory ? But if the
->>> rest of the memory is encrypted you won't get much, will you?
+>>> Kexec can be used to reboot a system without going back through BIOS.
+>>> So you can use kexec without using kdump.
+>>>
+>>> For kdump, just taking a quick look, the option to enable memory
+>>> encryption can be provided on the crash kernel command line and then
 >>
->> Kexec can be used to reboot a system without going back through BIOS.
->> So you can use kexec without using kdump.
+>> Is there a simple way to get the SME status? Probably add some sysfs
+>> file for this purpose.
+>
+> Currently there is not.  I can look at adding something, maybe just the
+> sme_me_mask value, which if non-zero, would indicate SME is active.
+>
 >>
->> For kdump, just taking a quick look, the option to enable memory
->> encryption can be provided on the crash kernel command line and then
+>>> crash kernel can would be able to copy the memory decrypted if the
+>>> pagetable is set up properly. It looks like currently ioremap_cache()
+>>> is used to map the old memory page.  That might be able to be changed
+>>> to a memremap() so that the encryption bit is set in the mapping. That
+>>> will mean that memory that is not marked encrypted (EFI tables, swiotlb
+>>> memory, etc) would not be read correctly.
+>>
+>> Manage to store info about those ranges which are not encrypted so that
+>> memremap can handle them?
 >
-> Is there a simple way to get the SME status? Probably add some sysfs
-> file for this purpose.
-
-Currently there is not.  I can look at adding something, maybe just the
-sme_me_mask value, which if non-zero, would indicate SME is active.
-
->
->> crash kernel can would be able to copy the memory decrypted if the
->> pagetable is set up properly. It looks like currently ioremap_cache()
->> is used to map the old memory page.  That might be able to be changed
->> to a memremap() so that the encryption bit is set in the mapping. That
->> will mean that memory that is not marked encrypted (EFI tables, swiotlb
->> memory, etc) would not be read correctly.
->
-> Manage to store info about those ranges which are not encrypted so that
-> memremap can handle them?
-
-I can look into whether something can be done in this area. Any input
-you can provide as to what would be the best way/place to store the
-range info so kdump can make use of it, would be greatly appreciated.
-
+> I can look into whether something can be done in this area. Any input
+> you can provide as to what would be the best way/place to store the
+> range info so kdump can make use of it, would be greatly appreciated.
 >
 >>
 >>>
->>> Would it make sense to include some printk to the user if they
->>> are setting up kdump that they won't get anything out of it?
+>>>>
+>>>> Would it make sense to include some printk to the user if they
+>>>> are setting up kdump that they won't get anything out of it?
+>>>
+>>> Probably a good idea to add something like that.
 >>
->> Probably a good idea to add something like that.
+>> It will break kdump functionality, it should be fixed instead of
+>> just adding printk to warn user..
 >
-> It will break kdump functionality, it should be fixed instead of
-> just adding printk to warn user..
-
-I do want kdump to work. I'll investigate further what can be done in
-this area.
-
-Thanks,
-Tom
-
+> I do want kdump to work. I'll investigate further what can be done in
+> this area.
 >
-> Thanks
-> Dave
+> Thanks,
+> Tom
 >
+>>
+>> Thanks
+>> Dave
+>>
