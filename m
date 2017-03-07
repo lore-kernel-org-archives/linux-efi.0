@@ -1,84 +1,54 @@
-From: Namhyung Kim <namhyung@gmail.com>
-Subject: Re: [PATCH 06/18] pstore: Extract common arguments into structure
-Date: Wed, 8 Mar 2017 01:22:01 +0900
-Message-ID: <CADWwUUZ3+ZwZaijPxAtacegjtp_0uPVpKZyH8jE045+n1Bp-zQ@mail.gmail.com>
-References: <1488837332-71582-1-git-send-email-keescook@chromium.org> <1488837332-71582-7-git-send-email-keescook@chromium.org>
+From: Namhyung Kim <namhyung-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 03/18] pstore: Avoid race in module unloading
+Date: Wed, 8 Mar 2017 01:16:43 +0900
+Message-ID: <CADWwUUZAxwUqHU9eRrtP5Hk7KO9KkyvdBy7Z5Xehwhv43fvZVQ@mail.gmail.com>
+References: <1488837332-71582-1-git-send-email-keescook@chromium.org> <1488837332-71582-4-git-send-email-keescook@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <1488837332-71582-7-git-send-email-keescook@chromium.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Kees Cook <keescook@chromium.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, Nobuhiro Iwamatsu <nobuhiro.iwamatsu.kw@hitachi.com>, Qiuxu Zhuo <qiuxu.zhuo@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Nathan Fontenot <nfont@linux.vnet.ibm.com>, Pan Xinhui <xinhui.pan@linux.vnet.ibm.com>, Daniel Axtens <dja@axtens.net>, Paul Gortmaker <paul.gortmaker@windriver.com>, Geliang Tang <geliangtang@163.com>, linuxppc-dev@lists.ozlabs.org, linux-acp
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1488837332-71582-4-git-send-email-keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Nobuhiro Iwamatsu <nobuhiro.iwamatsu.kw-FCd8Q96Dh0JBDgjK7y7TUQ@public.gmane.org>, Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Benjamin Herrenschmidt <benh-XVmvHMARGAS8U2dJNN8I7kB+6BGkLq7r@public.gmane.org>, Paul Mackerras <paulus-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Michael Ellerman <mpe-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Nathan Fontenot <nfont-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, Pan Xinhui <xinhui.pan-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, Daniel Axtens <dja-Yfaxwxk/+vWsTnJN9+BGXg@public.gmane.org>, Paul Gortmaker <paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-acp
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Mar 7, 2017 at 6:55 AM, Kees Cook <keescook@chromium.org> wrote:
-> The read/mkfile pair pass the same arguments and should be cleared
-> between calls. Move to a structure and wipe it after every loop.
->
-> Signed-off-by: Kees Cook <keescook@chromium.org>
-> ---
->  fs/pstore/platform.c   | 55 +++++++++++++++++++++++++++-----------------------
->  include/linux/pstore.h | 28 ++++++++++++++++++++++++-
->  2 files changed, 57 insertions(+), 26 deletions(-)
->
-> diff --git a/fs/pstore/platform.c b/fs/pstore/platform.c
-> index 320a673ecb5b..3fa1575a6e36 100644
-> --- a/fs/pstore/platform.c
-> +++ b/fs/pstore/platform.c
-> @@ -766,16 +766,9 @@ EXPORT_SYMBOL_GPL(pstore_unregister);
->  void pstore_get_records(int quiet)
->  {
->         struct pstore_info *psi = psinfo;
-> -       char                    *buf = NULL;
-> -       ssize_t                 size;
-> -       u64                     id;
-> -       int                     count;
-> -       enum pstore_type_id     type;
-> -       struct timespec         time;
-> +       struct pstore_record    record = { .psi = psi, };
->         int                     failed = 0, rc;
-> -       bool                    compressed;
->         int                     unzipped_len = -1;
-> -       ssize_t                 ecc_notice_size = 0;
->
->         if (!psi)
->                 return;
-> @@ -784,39 +777,51 @@ void pstore_get_records(int quiet)
->         if (psi->open && psi->open(psi))
->                 goto out;
->
-> -       while ((size = psi->read(&id, &type, &count, &time, &buf, &compressed,
-> -                                &ecc_notice_size, psi)) > 0) {
-> -               if (compressed && (type == PSTORE_TYPE_DMESG)) {
-> +       while ((record.size = psi->read(&record.id, &record.type,
-> +                                &record.count, &record.time,
-> +                                &record.buf, &record.compressed,
-> +                                &record.ecc_notice_size,
-> +                                record.psi)) > 0) {
-> +               if (record.compressed &&
-> +                   record.type == PSTORE_TYPE_DMESG) {
->                         if (big_oops_buf)
-> -                               unzipped_len = pstore_decompress(buf,
-> -                                                       big_oops_buf, size,
-> +                               unzipped_len = pstore_decompress(
-> +                                                       record.buf,
-> +                                                       big_oops_buf,
-> +                                                       record.size,
->                                                         big_oops_buf_sz);
->
->                         if (unzipped_len > 0) {
-> -                               if (ecc_notice_size)
-> +                               if (record.ecc_notice_size)
->                                         memcpy(big_oops_buf + unzipped_len,
-> -                                              buf + size, ecc_notice_size);
-> -                               kfree(buf);
-> -                               buf = big_oops_buf;
-> -                               size = unzipped_len;
-> -                               compressed = false;
-> +                                              record.buf + recorrecord.size,
+Hi Kees,
 
-A typo on record.size.
+On Tue, Mar 7, 2017 at 6:55 AM, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+> Technically, it might be possible for struct pstore_info to go out of
+> scope after the module_put(), so report the backend name first.
+
+But in that case, using pstore will crash the kernel anyway, right?
+If so, why pstore doesn't keep a reference until unregister?
+Do I miss something?
 
 Thanks,
 Namhyung
+
+
+>
+> Signed-off-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> ---
+>  fs/pstore/platform.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/fs/pstore/platform.c b/fs/pstore/platform.c
+> index 074fe85a2078..d69ef8a840b9 100644
+> --- a/fs/pstore/platform.c
+> +++ b/fs/pstore/platform.c
+> @@ -722,10 +722,10 @@ int pstore_register(struct pstore_info *psi)
+>          */
+>         backend = psi->name;
+>
+> -       module_put(owner);
+> -
+>         pr_info("Registered %s as persistent store backend\n", psi->name);
+>
+> +       module_put(owner);
+> +
+>         return 0;
+>  }
+>  EXPORT_SYMBOL_GPL(pstore_register);
+> --
+> 2.7.4
+>
