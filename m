@@ -1,105 +1,156 @@
-From: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH V12 05/10] acpi: apei: handle SEA notification type for
- ARMv8
-Date: Tue, 07 Mar 2017 11:37:34 +0000
-Message-ID: <58BE9B7E.4070904@arm.com>
-References: <1488833103-21082-1-git-send-email-tbaicar@codeaurora.org> <1488833103-21082-6-git-send-email-tbaicar@codeaurora.org>
+From: James Morse <james.morse@arm.com>
+Subject: Re: [PATCH V12 10/10] arm/arm64: KVM: add guest SEA support
+Date: Tue, 07 Mar 2017 11:48:36 +0000
+Message-ID: <58BE9E14.6040208@arm.com>
+References: <1488833103-21082-1-git-send-email-tbaicar@codeaurora.org>
+ <1488833103-21082-11-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1488833103-21082-6-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org, Suzuki.Po
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <1488833103-21082-11-git-send-email-tbaicar@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
 Hi Tyler,
 
-On 06/03/17 20:44, Tyler Baicar wrote:
-> ARM APEI extension proposal added SEA (Synchronous External Abort)
-> notification type for ARMv8.
-> Add a new GHES error source handling function for SEA. If an error
-> source's notification type is SEA, then this function can be registered
-> into the SEA exception handler. That way GHES will parse and report
-> SEA exceptions when they occur.
-> An SEA can interrupt code that had interrupts masked and is treated as
-> an NMI. To aid this the page of address space for mapping APEI buffers
-> while in_nmi() is always reserved, and ghes_ioremap_pfn_nmi() is
-> changed to use the helper methods to find the prot_t to map with in
-> the same way as ghes_ioremap_pfn_irq().
+On 06/03/17 20:45, Tyler Baicar wrote:
+> Currently external aborts are unsupported by the guest abort
+> handling. Add handling for SEAs so that the host kernel reports
+> SEAs which occur in the guest kernel.
+
+> diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
+> index e22089f..a1a3dff 100644
+> --- a/arch/arm/include/asm/kvm_arm.h
+> +++ b/arch/arm/include/asm/kvm_arm.h
+> @@ -187,6 +187,16 @@
+>  #define FSC_FAULT	(0x04)
+>  #define FSC_ACCESS	(0x08)
+>  #define FSC_PERM	(0x0c)
+> +#define FSC_SEA		(0x10)
+> +#define FSC_SEA_TTW0	(0x14)
+> +#define FSC_SEA_TTW1	(0x15)
+> +#define FSC_SEA_TTW2	(0x16)
+> +#define FSC_SEA_TTW3	(0x17)
+> +#define FSC_SECC	(0x18)
+> +#define FSC_SECC_TTW0	(0x1c)
+
+aarch32 doesn't have either of these 'TW0' values, it's an unused encoding.
+(However ...)
+
+> +#define FSC_SECC_TTW1	(0x1d)
+> +#define FSC_SECC_TTW2	(0x1e)
+> +#define FSC_SECC_TTW3	(0x1f)
+>  
+>  /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
+>  #define HPFAR_MASK	(~0xf)
+
+>  #endif /* __ASM_ARM_SYSTEM_MISC_H */
+> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
+> index a5265ed..f3608c9 100644
+> --- a/arch/arm/kvm/mmu.c
+> +++ b/arch/arm/kvm/mmu.c
+> @@ -1444,8 +1463,21 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
+>  
+>  	/* Check the stage-2 fault is trans. fault or write fault */
+>  	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
+> -	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+> -	    fault_status != FSC_ACCESS) {
+> +
+> +	/* The host kernel will handle the synchronous external abort. There
+> +	 * is no need to pass the error into the guest.
+> +	 */
+> +	if (is_abort_synchronous(fault_status)) {
+> +		if(handle_guest_sea((unsigned long)fault_ipa,
+> +				    kvm_vcpu_get_hsr(vcpu))) {
+
+
+... Looking further up in this function:
+>	is_iabt = kvm_vcpu_trap_is_iabt(vcpu);
+>	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu))) {
+>		kvm_inject_vabt(vcpu);
+>		return 1;
+>	}
+
+... so external data aborts will have already been 'claimed' by kvm and dealt
+with, and we already have a helper for spotting external aborts. (sorry I didn't
+spot it earlier).
+
+We need to do the handle_guest_sea() before this code.
+
+kvm_inject_vabt() makes an SError interrupt pending for the guest. This makes a
+synchronous error asynchronous as the guest may have SError interrupts masked.
+
+I guess this was the best that could be done at the time of (4055710baca8
+"arm/arm64: KVM: Inject virtual abort when guest exits on external abort"), but
+in the light of this firmware-first handling, I'm not sure its the right thing
+to do.
+
+Is it possible for handle_guest_sea() to return whether it actually found any
+work to do? If there was none I think we should keep this kvm_inject_vabt() as
+it is the existing behaviour.
+
+
+> +			kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
+> +				kvm_vcpu_trap_get_class(vcpu),
+> +				(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+> +				(unsigned long)kvm_vcpu_get_hsr(vcpu));
+> +			return -EFAULT;
+> +		}
+> +	} else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+> +		   fault_status != FSC_ACCESS) {
+>  		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
+>  			kvm_vcpu_trap_get_class(vcpu),
+>  			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+
 
 > diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-> index d178dc0..b2d57fc 100644
+> index b2d57fc..31c5171 100644
 > --- a/arch/arm64/mm/fault.c
 > +++ b/arch/arm64/mm/fault.c
-> @@ -41,6 +41,8 @@
->  #include <asm/pgtable.h>
->  #include <asm/tlbflush.h>
+> @@ -602,6 +602,24 @@ static const char *fault_name(unsigned int esr)
+>  }
 >  
-> +#include <acpi/ghes.h>
-> +
->  static const char *fault_name(unsigned int esr);
->  
->  #ifdef CONFIG_KPROBES
-> @@ -498,6 +500,17 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->  	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
->  		 fault_name(esr), esr, addr);
->  
+>  /*
+> + * Handle Synchronous External Aborts that occur in a guest kernel.
+> + */
+> +int handle_guest_sea(unsigned long addr, unsigned int esr)
+> +{
 > +	/*
-> +	 * Synchronous aborts may interrupt code which had interrupts masked.
-> +	 * Before calling out into the wider kernel tell the interested
-> +	 * subsystems.
+> +	 * synchronize_rcu() will wait for nmi_exit(), so no need to
+> +	 * rcu_read_lock().
 > +	 */
-> +	if (IS_ENABLED(ACPI_APEI_SEA)) {
 
-IS_ENABLED() needs the CONFIG_ version of the symbols, otherwise this doesn't
-get built.
+This comment has a life of its own! Given we don't always call ghes_notify_sea()
+when we interrupted un-interruptable code its not always true. I think the
+rcu_read_{,un}lock() should go against the list walk (so it looks like the
+examples), and ditch the comment!
 
-(I guess the testing from the previous always-enabled version is still valid)
 
-
-> +		nmi_enter();
+> +	if(IS_ENABLED(ACPI_APEI_SEA)) {
+> +		rcu_read_lock();
 > +		ghes_notify_sea();
-> +		nmi_exit();
+> +		rcu_read_unlock();
 > +	}
 > +
->  	info.si_signo = SIGBUS;
->  	info.si_errno = 0;
->  	info.si_code  = 0;
-> diff --git a/drivers/acpi/apei/Kconfig b/drivers/acpi/apei/Kconfig
-> index b0140c8..c545dd1 100644
-> --- a/drivers/acpi/apei/Kconfig
-> +++ b/drivers/acpi/apei/Kconfig
-> @@ -39,6 +39,21 @@ config ACPI_APEI_PCIEAER
->  	  PCIe AER errors may be reported via APEI firmware first mode.
->  	  Turn on this option to enable the corresponding support.
->  
-> +config ACPI_APEI_SEA
-> +	bool "APEI Synchronous External Abort logging/recovering support"
-> +	depends on ARM64 && ACPI_APEI && ACPI_APEI_GHES
-
-Nit: ACPI_APEI_GHES already depends on ACPI_APEI
-
-
-> +	default y
-> +	help
-> +	  This option should be enabled if the system supports
-> +	  firmware first handling of SEA (Synchronous External Abort).
-> +	  SEA happens with certain faults of data abort or instruction
-> +	  abort synchronous exceptions on ARMv8 systems. If a system
-> +	  supports firmware first handling of SEA, the platform analyzes
-> +	  and handles hardware error notifications from SEA, and it may then
-> +	  form a HW error record for the OS to parse and handle. This
-> +	  option allows the OS to look for such hardware error record, and
-> +	  take appropriate action.
+> +	return 0;
+> +}
 > +
->  config ACPI_APEI_MEMORY_FAILURE
->  	bool "APEI memory error recovering support"
->  	depends on ACPI_APEI && MEMORY_FAILURE
-
-
-Reviewed-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+> +/*
+>   * Dispatch a data abort to the relevant handler.
+>   */
+>  asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
+> 
 
 
 Thanks,
