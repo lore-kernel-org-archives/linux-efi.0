@@ -1,193 +1,78 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v4 28/28] x86: Add support to make use of Secure
- Memory Encryption
-Date: Tue, 7 Mar 2017 10:05:00 -0600
-Message-ID: <7e6c308f-3caf-5531-3cb2-9b6986f4288e@amd.com>
-References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
- <20170216154825.19244.32545.stgit@tlendack-t1.amdoffice.net>
- <20170301184055.gl3iic3gir6zzb23@pd.tnic>
+From: Kees Cook <keescook@chromium.org>
+Subject: Re: [PATCH 03/18] pstore: Avoid race in module unloading
+Date: Tue, 7 Mar 2017 08:18:40 -0800
+Message-ID: <CAGXu5jLWBFVH92PK+vPAsv5sDyLCX6=85NWFXNetC0JDBNUUqQ@mail.gmail.com>
+References: <1488837332-71582-1-git-send-email-keescook@chromium.org>
+ <1488837332-71582-4-git-send-email-keescook@chromium.org>
+ <CADWwUUZAxwUqHU9eRrtP5Hk7KO9KkyvdBy7Z5Xehwhv43fvZVQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170301184055.gl3iic3gir6zzb23@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S.
- Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@li>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <CADWwUUZAxwUqHU9eRrtP5Hk7KO9KkyvdBy7Z5Xehwhv43fvZVQ@mail.gmail.com>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Namhyung Kim <namhyung@gmail.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Pan Xinhui <xinhui.pan@linux.vnet.ibm.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Paul Mackerras <paulus@samba.org>, Anton Vorontsov <anton@enomsg.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Nathan Fontenot <nfont@linux.vnet.ibm.com>, Len Brown <lenb@kernel.org>, Nobuhiro Iwamatsu <nobuhiro.iwamatsu.kw@hitachi.com>, Geliang Tang <geliangtang@163.com>, Tony Luck <tony.luck@intel.com>, Daniel Axtens <dja@axtens.net>, Qiuxu Zhuo <qiuxu.zhuo@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, LKML <linux-kernel@vger.kernel.org>, Colin Cross <ccross@android.com>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 3/1/2017 12:40 PM, Borislav Petkov wrote:
-> On Thu, Feb 16, 2017 at 09:48:25AM -0600, Tom Lendacky wrote:
->> This patch adds the support to check if SME has been enabled and if
->> memory encryption should be activated (checking of command line option
->> based on the configuration of the default state).  If memory encryption
->> is to be activated, then the encryption mask is set and the kernel is
->> encrypted "in place."
+On Tue, Mar 7, 2017 at 8:16 AM, Namhyung Kim <namhyung@gmail.com> wrote:
+> Hi Kees,
+>
+> On Tue, Mar 7, 2017 at 6:55 AM, Kees Cook <keescook@chromium.org> wrote:
+>> Technically, it might be possible for struct pstore_info to go out of
+>> scope after the module_put(), so report the backend name first.
+>
+> But in that case, using pstore will crash the kernel anyway, right?
+> If so, why pstore doesn't keep a reference until unregister?
+> Do I miss something?
+
+I could be wrong with this, since the backend can't call unregister
+until register has finished... I'll drop this patch.
+
+-Kees
+
+>
+> Thanks,
+> Namhyung
+>
+>
 >>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>> Signed-off-by: Kees Cook <keescook@chromium.org>
 >> ---
->>  arch/x86/kernel/head_64.S          |    1 +
->>  arch/x86/kernel/mem_encrypt_init.c |   71 +++++++++++++++++++++++++++++++++++-
->>  arch/x86/mm/mem_encrypt.c          |    2 +
->>  3 files changed, 73 insertions(+), 1 deletion(-)
+>>  fs/pstore/platform.c | 4 ++--
+>>  1 file changed, 2 insertions(+), 2 deletions(-)
 >>
->> diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
->> index edd2f14..e6820e7 100644
->> --- a/arch/x86/kernel/head_64.S
->> +++ b/arch/x86/kernel/head_64.S
->> @@ -97,6 +97,7 @@ startup_64:
->>  	 * Save the returned mask in %r12 for later use.
->>  	 */
->>  	push	%rsi
->> +	movq	%rsi, %rdi
->>  	call	sme_enable
->>  	pop	%rsi
->>  	movq	%rax, %r12
->> diff --git a/arch/x86/kernel/mem_encrypt_init.c b/arch/x86/kernel/mem_encrypt_init.c
->> index 07cbb90..35c5e3d 100644
->> --- a/arch/x86/kernel/mem_encrypt_init.c
->> +++ b/arch/x86/kernel/mem_encrypt_init.c
->> @@ -19,6 +19,12 @@
->>  #include <linux/mm.h>
+>> diff --git a/fs/pstore/platform.c b/fs/pstore/platform.c
+>> index 074fe85a2078..d69ef8a840b9 100644
+>> --- a/fs/pstore/platform.c
+>> +++ b/fs/pstore/platform.c
+>> @@ -722,10 +722,10 @@ int pstore_register(struct pstore_info *psi)
+>>          */
+>>         backend = psi->name;
 >>
->>  #include <asm/sections.h>
->> +#include <asm/processor-flags.h>
->> +#include <asm/msr.h>
->> +#include <asm/cmdline.h>
+>> -       module_put(owner);
+>> -
+>>         pr_info("Registered %s as persistent store backend\n", psi->name);
+>>
+>> +       module_put(owner);
 >> +
->> +static char sme_cmdline_arg_on[] __initdata = "mem_encrypt=on";
->> +static char sme_cmdline_arg_off[] __initdata = "mem_encrypt=off";
->>
->>  extern void sme_encrypt_execute(unsigned long, unsigned long, unsigned long,
->>  				void *, pgd_t *);
->> @@ -217,8 +223,71 @@ unsigned long __init sme_get_me_mask(void)
->>  	return sme_me_mask;
+>>         return 0;
 >>  }
+>>  EXPORT_SYMBOL_GPL(pstore_register);
+>> --
+>> 2.7.4
 >>
->> -unsigned long __init sme_enable(void)
->> +unsigned long __init sme_enable(void *boot_data)
->
-> unsigned long __init sme_enable(struct boot_params *bp)
->
-> works too.
 
-Ok, will do.
 
->
-> And then you need to correct the function signature in the
-> !CONFIG_AMD_MEM_ENCRYPT case, at the end of this file, too:
->
-> unsigned long __init sme_enable(struct boot_params *bp)		{ return 0; }
 
-Yup, missed that.  I'll make it match.
-
->
->>  {
->> +	struct boot_params *bp = boot_data;
->> +	unsigned int eax, ebx, ecx, edx;
->> +	unsigned long cmdline_ptr;
->> +	bool enable_if_found;
->> +	void *cmdline_arg;
->> +	u64 msr;
->> +
->> +	/* Check for an AMD processor */
->> +	eax = 0;
->> +	ecx = 0;
->> +	native_cpuid(&eax, &ebx, &ecx, &edx);
->> +	if ((ebx != 0x68747541) || (edx != 0x69746e65) || (ecx != 0x444d4163))
->> +		goto out;
->> +
->> +	/* Check for the SME support leaf */
->> +	eax = 0x80000000;
->> +	ecx = 0;
->> +	native_cpuid(&eax, &ebx, &ecx, &edx);
->> +	if (eax < 0x8000001f)
->> +		goto out;
->> +
->> +	/*
->> +	 * Check for the SME feature:
->> +	 *   CPUID Fn8000_001F[EAX] - Bit 0
->> +	 *     Secure Memory Encryption support
->> +	 *   CPUID Fn8000_001F[EBX] - Bits 5:0
->> +	 *     Pagetable bit position used to indicate encryption
->> +	 */
->> +	eax = 0x8000001f;
->> +	ecx = 0;
->> +	native_cpuid(&eax, &ebx, &ecx, &edx);
->> +	if (!(eax & 1))
->> +		goto out;
->> +
->> +	/* Check if SME is enabled */
->> +	msr = native_read_msr(MSR_K8_SYSCFG);
->
-> This native_read_msr() wankery is adding this check:
->
-> 	if (msr_tracepoint_active(__tracepoint_read_msr))
->
-> and here it is clearly too early for tracepoints. Please use __rdmsr()
-> which is purely doing the MSR operation. (... and exception handling for
-
-Ah, good catch.  I'll switch to __rdmsr().
-
-> when the RDMSR itself raises an exception but we're very early here too
-> so the MSR better be there, otherwise we'll blow up).
-
-Yes, it will be there if SME support is indicated in the CPUID result.
-
->
->> +	if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
->> +		goto out;
->> +
->> +	/*
->> +	 * Fixups have not been to applied phys_base yet, so we must obtain
->
-> 		...    not been applied to phys_base yet ...
-
-Yup.
-
->
->> +	 * the address to the SME command line option in the following way.
->> +	 */
->> +	if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT)) {
->> +		asm ("lea sme_cmdline_arg_off(%%rip), %0"
->> +		     : "=r" (cmdline_arg)
->> +		     : "p" (sme_cmdline_arg_off));
->> +		enable_if_found = false;
->> +	} else {
->> +		asm ("lea sme_cmdline_arg_on(%%rip), %0"
->> +		     : "=r" (cmdline_arg)
->> +		     : "p" (sme_cmdline_arg_on));
->> +		enable_if_found = true;
->> +	}
->> +
->> +	cmdline_ptr = bp->hdr.cmd_line_ptr | ((u64)bp->ext_cmd_line_ptr << 32);
->> +
->> +	if (cmdline_find_option_bool((char *)cmdline_ptr, cmdline_arg))
->> +		sme_me_mask = enable_if_found ? 1UL << (ebx & 0x3f) : 0;
->> +	else
->> +		sme_me_mask = enable_if_found ? 0 : 1UL << (ebx & 0x3f);
->
-> I have a better idea: you can copy __cmdline_find_option() +
-> cmdline_find_option() to arch/x86/lib/cmdline.c in a pre-patch. Then,
-> pass in a buffer and check for "on" and "off". This way you don't
-> have to misuse the _bool() variant for something which is actually
-> "option=argument".
-
-I can do that.  Because phys_base hasn't been updated yet, I'll have to
-create "on" and "off" constants and get their address in a similar way
-to the command line option so that I can do the strncmp properly.
-
-Thanks,
-Tom
-
->
-> Thanks.
->
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+-- 
+Kees Cook
+Pixel Security
