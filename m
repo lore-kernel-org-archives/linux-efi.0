@@ -1,40 +1,44 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [RFC PATCH v2 02/32] x86: Secure Encrypted Virtualization (SEV)
- support
-Date: Tue, 7 Mar 2017 12:19:31 +0100
-Message-ID: <20170307111931.3rz5ia3ewimfi7gq@pd.tnic>
-References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <148846754069.2349.4698319264278045964.stgit@brijesh-build-machine>
+From: James Morse <james.morse@arm.com>
+Subject: Re: [PATCH V12 00/10] Add UEFI 2.6 and ACPI 6.1 updates for RAS on
+ ARM64
+Date: Tue, 07 Mar 2017 11:37:15 +0000
+Message-ID: <58BE9B6B.3020000@arm.com>
+References: <1488833103-21082-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-Content-Disposition: inline
-In-Reply-To: <148846754069.2349.4698319264278045964.stgit@brijesh-build-machine>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Brijesh Singh <brijesh.singh@amd.com>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, hpa@zytor.com, cl@linux.com, tglx@linutronix.de, aarcange@redhat.com, sfr@canb.auug.org.au, mchehab@kernel.org, simon.guinot@sequanux.org, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, labbott@fedoraproject.org, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, pbonzini@redhat.com, bhelgaas@google.com, dan.j.williams@intel.com, andriy.shevchenko@linux.intel.com, akpm@linux-foundation.org, herbert@gondor.apana.org.au, tony.luck@intel.com, pau
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <kvm-owner@vger.kernel.org>
+In-Reply-To: <1488833103-21082-1-git-send-email-tbaicar@codeaurora.org>
+Sender: kvm-owner@vger.kernel.org
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org, Suzuki.Po
 List-Id: linux-efi@vger.kernel.org
 
-T24gVGh1LCBNYXIgMDIsIDIwMTcgYXQgMTA6MTI6MjBBTSAtMDUwMCwgQnJpamVzaCBTaW5naCB3
-cm90ZToKPiBGcm9tOiBUb20gTGVuZGFja3kgPHRob21hcy5sZW5kYWNreUBhbWQuY29tPgo+IAo+
-IFByb3ZpZGUgc3VwcG9ydCBmb3IgU2VjdXJlIEVuY3lycHRlZCBWaXJ0dWFsaXphdGlvbiAoU0VW
-KS4gVGhpcyBpbml0aWFsCj4gc3VwcG9ydCBkZWZpbmVzIGEgZmxhZyB0aGF0IGlzIHVzZWQgYnkg
-dGhlIGtlcm5lbCB0byBkZXRlcm1pbmUgaWYgaXQgaXMKPiBydW5uaW5nIHdpdGggU0VWIGFjdGl2
-ZS4KPiAKPiBTaWduZWQtb2ZmLWJ5OiBUb20gTGVuZGFja3kgPHRob21hcy5sZW5kYWNreUBhbWQu
-Y29tPgoKQnR3LAoKeW91IG5lZWQgdG8gYWRkIHlvdXIgU2lnbmVkLW9mZi1ieSBoZXJlIGFmdGVy
-IFRvbSdzIHRvIGRlbm90ZSB0aGF0CnlvdSdyZSBoYW5kaW5nIHRoYXQgcGF0Y2ggZm9yd2FyZC4K
-Ci0tIApSZWdhcmRzL0dydXNzLAogICAgQm9yaXMuCgpTVVNFIExpbnV4IEdtYkgsIEdGOiBGZWxp
-eCBJbWVuZMO2cmZmZXIsIEphbmUgU21pdGhhcmQsIEdyYWhhbSBOb3J0b24sIEhSQiAyMTI4NCAo
-QUcgTsO8cm5iZXJnKQotLSAKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX18KZGV2ZWwgbWFpbGluZyBsaXN0CmRldmVsQGxpbnV4ZHJpdmVycHJvamVjdC5vcmcK
-aHR0cDovL2RyaXZlcmRldi5saW51eGRyaXZlcnByb2plY3Qub3JnL21haWxtYW4vbGlzdGluZm8v
-ZHJpdmVyZGV2LWRldmVsCg==
+Hi Tyler,
+
+On 06/03/17 20:44, Tyler Baicar wrote:
+> When a memory error, CPU error, PCIe error, or other type of hardware error
+> that's covered by RAS occurs, firmware should populate the shared GHES memory
+> location with the proper GHES structures to notify the OS of the error.
+> For example, platforms that implement firmware first handling may implement
+> separate GHES sources for corrected errors and uncorrected errors. If the
+> error is an uncorrectable error, then the firmware will notify the OS
+> immediately since the error needs to be handled ASAP. The OS will then be able
+> to take the appropriate action needed such as offlining a page. If the error
+> is a corrected error, then the firmware will not interrupt the OS immediately.
+> Instead, the OS will see and report the error the next time it's GHES timer
+> expires. The kernel will first parse the GHES structures and report the errors
+> through the kernel logs and then notify the user space through RAS trace
+> events. This allows user space applications such as RAS Daemon to see the
+> errors and report them however the user desires. This patchset extends the
+> kernel functionality for RAS errors based on updates in the UEFI 2.6 and
+> ACPI 6.1 specifications.
+
+This series doesn't apply cleanly to v4.11-rc1, what did you base it on?
+
+Please base this on a v4.11 release candidate if you want it considered for v4.12.
+
+
+Thanks,
+
+James
