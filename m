@@ -1,117 +1,190 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [RFC PATCH v2 08/32] x86: Use PAGE_KERNEL protection for ioremap
- of memory page
-Date: Tue, 7 Mar 2017 15:59:54 +0100
-Message-ID: <20170307145954.l2fqy5s5h65wbtyz@pd.tnic>
-References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <148846761276.2349.4899767672892365544.stgit@brijesh-build-machine>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v4 28/28] x86: Add support to make use of Secure
+ Memory Encryption
+Date: Tue, 7 Mar 2017 10:05:00 -0600
+Message-ID: <7e6c308f-3caf-5531-3cb2-9b6986f4288e@amd.com>
+References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
+ <20170216154825.19244.32545.stgit@tlendack-t1.amdoffice.net>
+ <20170301184055.gl3iic3gir6zzb23@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <148846761276.2349.4899767672892365544.stgit@brijesh-build-machine>
+In-Reply-To: <20170301184055.gl3iic3gir6zzb23@pd.tnic>
 Sender: owner-linux-mm@kvack.org
-To: Brijesh Singh <brijesh.singh@amd.com>
-Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas@google.com, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedo
+To: Borislav Petkov <bp@alien8.de>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S.
+ Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
+ Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@li>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Mar 02, 2017 at 10:13:32AM -0500, Brijesh Singh wrote:
-> From: Tom Lendacky <thomas.lendacky@amd.com>
-> 
-> In order for memory pages to be properly mapped when SEV is active, we
-> need to use the PAGE_KERNEL protection attribute as the base protection.
-> This will insure that memory mapping of, e.g. ACPI tables, receives the
-> proper mapping attributes.
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
+On 3/1/2017 12:40 PM, Borislav Petkov wrote:
+> On Thu, Feb 16, 2017 at 09:48:25AM -0600, Tom Lendacky wrote:
+>> This patch adds the support to check if SME has been enabled and if
+>> memory encryption should be activated (checking of command line option
+>> based on the configuration of the default state).  If memory encryption
+>> is to be activated, then the encryption mask is set and the kernel is
+>> encrypted "in place."
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>> ---
+>>  arch/x86/kernel/head_64.S          |    1 +
+>>  arch/x86/kernel/mem_encrypt_init.c |   71 +++++++++++++++++++++++++++++++++++-
+>>  arch/x86/mm/mem_encrypt.c          |    2 +
+>>  3 files changed, 73 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
+>> index edd2f14..e6820e7 100644
+>> --- a/arch/x86/kernel/head_64.S
+>> +++ b/arch/x86/kernel/head_64.S
+>> @@ -97,6 +97,7 @@ startup_64:
+>>  	 * Save the returned mask in %r12 for later use.
+>>  	 */
+>>  	push	%rsi
+>> +	movq	%rsi, %rdi
+>>  	call	sme_enable
+>>  	pop	%rsi
+>>  	movq	%rax, %r12
+>> diff --git a/arch/x86/kernel/mem_encrypt_init.c b/arch/x86/kernel/mem_encrypt_init.c
+>> index 07cbb90..35c5e3d 100644
+>> --- a/arch/x86/kernel/mem_encrypt_init.c
+>> +++ b/arch/x86/kernel/mem_encrypt_init.c
+>> @@ -19,6 +19,12 @@
+>>  #include <linux/mm.h>
+>>
+>>  #include <asm/sections.h>
+>> +#include <asm/processor-flags.h>
+>> +#include <asm/msr.h>
+>> +#include <asm/cmdline.h>
+>> +
+>> +static char sme_cmdline_arg_on[] __initdata = "mem_encrypt=on";
+>> +static char sme_cmdline_arg_off[] __initdata = "mem_encrypt=off";
+>>
+>>  extern void sme_encrypt_execute(unsigned long, unsigned long, unsigned long,
+>>  				void *, pgd_t *);
+>> @@ -217,8 +223,71 @@ unsigned long __init sme_get_me_mask(void)
+>>  	return sme_me_mask;
+>>  }
+>>
+>> -unsigned long __init sme_enable(void)
+>> +unsigned long __init sme_enable(void *boot_data)
+>
+> unsigned long __init sme_enable(struct boot_params *bp)
+>
+> works too.
 
-> diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
-> index c400ab5..481c999 100644
-> --- a/arch/x86/mm/ioremap.c
-> +++ b/arch/x86/mm/ioremap.c
-> @@ -151,7 +151,15 @@ static void __iomem *__ioremap_caller(resource_size_t phys_addr,
->                 pcm = new_pcm;
->         }
-> 
-> +       /*
-> +        * If the page being mapped is in memory and SEV is active then
-> +        * make sure the memory encryption attribute is enabled in the
-> +        * resulting mapping.
-> +        */
->         prot = PAGE_KERNEL_IO;
-> +       if (sev_active() && page_is_mem(pfn))
+Ok, will do.
 
-Hmm, a resource tree walk per ioremap call. This could get expensive for
-ioremap-heavy workloads.
+>
+> And then you need to correct the function signature in the
+> !CONFIG_AMD_MEM_ENCRYPT case, at the end of this file, too:
+>
+> unsigned long __init sme_enable(struct boot_params *bp)		{ return 0; }
 
-__ioremap_caller() gets called here during boot 55 times so not a whole
-lot but I wouldn't be surprised if there were some nasty use cases which
-ioremap a lot.
+Yup, missed that.  I'll make it match.
 
-...
+>
+>>  {
+>> +	struct boot_params *bp = boot_data;
+>> +	unsigned int eax, ebx, ecx, edx;
+>> +	unsigned long cmdline_ptr;
+>> +	bool enable_if_found;
+>> +	void *cmdline_arg;
+>> +	u64 msr;
+>> +
+>> +	/* Check for an AMD processor */
+>> +	eax = 0;
+>> +	ecx = 0;
+>> +	native_cpuid(&eax, &ebx, &ecx, &edx);
+>> +	if ((ebx != 0x68747541) || (edx != 0x69746e65) || (ecx != 0x444d4163))
+>> +		goto out;
+>> +
+>> +	/* Check for the SME support leaf */
+>> +	eax = 0x80000000;
+>> +	ecx = 0;
+>> +	native_cpuid(&eax, &ebx, &ecx, &edx);
+>> +	if (eax < 0x8000001f)
+>> +		goto out;
+>> +
+>> +	/*
+>> +	 * Check for the SME feature:
+>> +	 *   CPUID Fn8000_001F[EAX] - Bit 0
+>> +	 *     Secure Memory Encryption support
+>> +	 *   CPUID Fn8000_001F[EBX] - Bits 5:0
+>> +	 *     Pagetable bit position used to indicate encryption
+>> +	 */
+>> +	eax = 0x8000001f;
+>> +	ecx = 0;
+>> +	native_cpuid(&eax, &ebx, &ecx, &edx);
+>> +	if (!(eax & 1))
+>> +		goto out;
+>> +
+>> +	/* Check if SME is enabled */
+>> +	msr = native_read_msr(MSR_K8_SYSCFG);
+>
+> This native_read_msr() wankery is adding this check:
+>
+> 	if (msr_tracepoint_active(__tracepoint_read_msr))
+>
+> and here it is clearly too early for tracepoints. Please use __rdmsr()
+> which is purely doing the MSR operation. (... and exception handling for
 
-> diff --git a/kernel/resource.c b/kernel/resource.c
-> index 9b5f044..db56ba3 100644
-> --- a/kernel/resource.c
-> +++ b/kernel/resource.c
-> @@ -518,6 +518,46 @@ int __weak page_is_ram(unsigned long pfn)
->  }
->  EXPORT_SYMBOL_GPL(page_is_ram);
->  
-> +/*
-> + * This function returns true if the target memory is marked as
-> + * IORESOURCE_MEM and IORESOUCE_BUSY and described as other than
-> + * IORES_DESC_NONE (e.g. IORES_DESC_ACPI_TABLES).
-> + */
-> +static int walk_mem_range(unsigned long start_pfn, unsigned long nr_pages)
-> +{
-> +	struct resource res;
-> +	unsigned long pfn, end_pfn;
-> +	u64 orig_end;
-> +	int ret = -1;
-> +
-> +	res.start = (u64) start_pfn << PAGE_SHIFT;
-> +	res.end = ((u64)(start_pfn + nr_pages) << PAGE_SHIFT) - 1;
-> +	res.flags = IORESOURCE_MEM | IORESOURCE_BUSY;
-> +	orig_end = res.end;
-> +	while ((res.start < res.end) &&
-> +		(find_next_iomem_res(&res, IORES_DESC_NONE, true) >= 0)) {
-> +		pfn = (res.start + PAGE_SIZE - 1) >> PAGE_SHIFT;
-> +		end_pfn = (res.end + 1) >> PAGE_SHIFT;
-> +		if (end_pfn > pfn)
-> +			ret = (res.desc != IORES_DESC_NONE) ? 1 : 0;
-> +		if (ret)
-> +			break;
-> +		res.start = res.end + 1;
-> +		res.end = orig_end;
-> +	}
-> +	return ret;
-> +}
+Ah, good catch.  I'll switch to __rdmsr().
 
-So the relevant difference between this one and walk_system_ram_range()
-is this:
+> when the RDMSR itself raises an exception but we're very early here too
+> so the MSR better be there, otherwise we'll blow up).
 
--			ret = (*func)(pfn, end_pfn - pfn, arg);
-+			ret = (res.desc != IORES_DESC_NONE) ? 1 : 0;
+Yes, it will be there if SME support is indicated in the CPUID result.
 
-so it seems to me you can have your own *func() pointer which does that
-IORES_DESC_NONE comparison. And then you can define your own workhorse
-__walk_memory_range() which gets called by both walk_mem_range() and
-walk_system_ram_range() instead of almost duplicating them.
+>
+>> +	if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
+>> +		goto out;
+>> +
+>> +	/*
+>> +	 * Fixups have not been to applied phys_base yet, so we must obtain
+>
+> 		...    not been applied to phys_base yet ...
 
-And looking at walk_system_ram_res(), that one looks similar too except
-the pfn computation. But AFAICT the pfn/end_pfn things are computed from
-res.start and res.end so it looks to me like all those three functions
-are crying for unification...
+Yup.
 
--- 
-Regards/Gruss,
-    Boris.
+>
+>> +	 * the address to the SME command line option in the following way.
+>> +	 */
+>> +	if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT)) {
+>> +		asm ("lea sme_cmdline_arg_off(%%rip), %0"
+>> +		     : "=r" (cmdline_arg)
+>> +		     : "p" (sme_cmdline_arg_off));
+>> +		enable_if_found = false;
+>> +	} else {
+>> +		asm ("lea sme_cmdline_arg_on(%%rip), %0"
+>> +		     : "=r" (cmdline_arg)
+>> +		     : "p" (sme_cmdline_arg_on));
+>> +		enable_if_found = true;
+>> +	}
+>> +
+>> +	cmdline_ptr = bp->hdr.cmd_line_ptr | ((u64)bp->ext_cmd_line_ptr << 32);
+>> +
+>> +	if (cmdline_find_option_bool((char *)cmdline_ptr, cmdline_arg))
+>> +		sme_me_mask = enable_if_found ? 1UL << (ebx & 0x3f) : 0;
+>> +	else
+>> +		sme_me_mask = enable_if_found ? 0 : 1UL << (ebx & 0x3f);
+>
+> I have a better idea: you can copy __cmdline_find_option() +
+> cmdline_find_option() to arch/x86/lib/cmdline.c in a pre-patch. Then,
+> pass in a buffer and check for "on" and "off". This way you don't
+> have to misuse the _bool() variant for something which is actually
+> "option=argument".
 
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+I can do that.  Because phys_base hasn't been updated yet, I'll have to
+create "on" and "off" constants and get their address in a similar way
+to the command line option so that I can do the strncmp properly.
+
+Thanks,
+Tom
+
+>
+> Thanks.
+>
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
