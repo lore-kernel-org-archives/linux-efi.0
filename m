@@ -1,79 +1,127 @@
-From: Thomas Garnier <thgarnie@google.com>
-Subject: Re: [PATCH 2/2] x86/mm/KASLR: Correct the upper boundary of KALSR mm
- regions if adjacent to EFI
-Date: Wed, 8 Mar 2017 07:32:41 -0800
-Message-ID: <CAJcbSZH9aKLDYpvbjooB=c+BWsRnv4Xvsmg7ScEjHSBDwWXWLw@mail.gmail.com>
-References: <1488959258-4731-1-git-send-email-bhe@redhat.com>
- <1488959258-4731-2-git-send-email-bhe@redhat.com> <20170308081857.GB12600@dhcp-128-65.nay.redhat.com>
- <CACi5LpNOyiVmy4hTSXAJWT1p=DD65=wijgJMTcOAo9YudiD_pw@mail.gmail.com>
+From: James Morse <james.morse@arm.com>
+Subject: Re: [PATCH V12 10/10] arm/arm64: KVM: add guest SEA support
+Date: Wed, 08 Mar 2017 16:09:06 +0000
+Message-ID: <58C02CA2.4030601@arm.com>
+References: <1488833103-21082-1-git-send-email-tbaicar@codeaurora.org>
+ <1488833103-21082-11-git-send-email-tbaicar@codeaurora.org>
+ <58BE9E14.6040208@arm.com>
+ <783e18ac-9495-aaf6-8fbd-5a48c0b68f5b@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACi5LpNOyiVmy4hTSXAJWT1p=DD65=wijgJMTcOAo9YudiD_pw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Bhupesh Sharma <bhsharma@redhat.com>
-Cc: Dave Young <dyoung@redhat.com>, Baoquan He <bhe@redhat.com>, LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, the arch/x86 maintainers <x86@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <783e18ac-9495-aaf6-8fbd-5a48c0b68f5b@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-Thanks for the change.
+On 07/03/17 17:58, Baicar, Tyler wrote:
+> On 3/7/2017 4:48 AM, James Morse wrote:
+>> On 06/03/17 20:45, Tyler Baicar wrote:
+>>> Currently external aborts are unsupported by the guest abort
+>>> handling. Add handling for SEAs so that the host kernel reports
+>>> SEAs which occur in the guest kernel.
 
-Acked-by: Thomas Garnier <thgarnie@google.com>
-
-On Wed, Mar 8, 2017 at 12:35 AM, Bhupesh Sharma <bhsharma@redhat.com> wrote:
-> On Wed, Mar 8, 2017 at 1:48 PM, Dave Young <dyoung@redhat.com> wrote:
->> On 03/08/17 at 03:47pm, Baoquan He wrote:
->>> EFI allocates runtime services regions top-down, starting from EFI_VA_START
->>> to EFI_VA_END. So EFI_VA_START is bigger than EFI_VA_END and is the end of
->>> EFI region. The upper boundary of memory regions randomized by KASLR should
->>> be EFI_VA_END if it's adjacent to EFI region, but not EFI_VA_START.
->>>
->>> Correct it in this patch.
->>>
->>> Signed-off-by: Baoquan He <bhe@redhat.com>
->>> ---
->>>  arch/x86/mm/kaslr.c | 4 ++--
->>>  1 file changed, 2 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/arch/x86/mm/kaslr.c b/arch/x86/mm/kaslr.c
->>> index 887e571..aed2064 100644
->>> --- a/arch/x86/mm/kaslr.c
->>> +++ b/arch/x86/mm/kaslr.c
->>> @@ -48,7 +48,7 @@ static const unsigned long vaddr_start = __PAGE_OFFSET_BASE;
->>>  #if defined(CONFIG_X86_ESPFIX64)
->>>  static const unsigned long vaddr_end = ESPFIX_BASE_ADDR;
->>>  #elif defined(CONFIG_EFI)
->>> -static const unsigned long vaddr_end = EFI_VA_START;
->>> +static const unsigned long vaddr_end = EFI_VA_END;
->>>  #else
->>>  static const unsigned long vaddr_end = __START_KERNEL_map;
->>>  #endif
->>> @@ -105,7 +105,7 @@ void __init kernel_randomize_memory(void)
->>>        */
->>>       BUILD_BUG_ON(vaddr_start >= vaddr_end);
->>>       BUILD_BUG_ON(IS_ENABLED(CONFIG_X86_ESPFIX64) &&
->>> -                  vaddr_end >= EFI_VA_START);
->>> +                  vaddr_end >= EFI_VA_END);
->>>       BUILD_BUG_ON((IS_ENABLED(CONFIG_X86_ESPFIX64) ||
->>>                     IS_ENABLED(CONFIG_EFI)) &&
->>>                    vaddr_end >= __START_KERNEL_map);
->>> --
->>> 2.5.5
->>>
+>>> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
+>>> index a5265ed..f3608c9 100644
+>>> --- a/arch/arm/kvm/mmu.c
+>>> +++ b/arch/arm/kvm/mmu.c
+>>> @@ -1444,8 +1463,21 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu,
+>>> struct kvm_run *run)
+>>>         /* Check the stage-2 fault is trans. fault or write fault */
+>>>       fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
+>>> -    if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>>> -        fault_status != FSC_ACCESS) {
+>>> +
+>>> +    /* The host kernel will handle the synchronous external abort. There
+>>> +     * is no need to pass the error into the guest.
+>>> +     */
+>>> +    if (is_abort_synchronous(fault_status)) {
+>>> +        if(handle_guest_sea((unsigned long)fault_ipa,
+>>> +                    kvm_vcpu_get_hsr(vcpu))) {
 >>
->> Acked-by: Dave Young <dyoung@redhat.com>
+>> ... Looking further up in this function:
+>>>     is_iabt = kvm_vcpu_trap_is_iabt(vcpu);
+>>>     if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu))) {
+>>>         kvm_inject_vabt(vcpu);
+>>>         return 1;
+>>>     }
+>> ... so external data aborts will have already been 'claimed' by kvm and dealt
+>> with, and we already have a helper for spotting external aborts. (sorry I didn't
+>> spot it earlier).
 >>
->
-> Thanks Bao for this fix. This makes the KASLR code consistent with
-> Address space markers hints in [1]
->
-> [1] http://lxr.free-electrons.com/source/arch/x86/mm/dump_pagetables.c#L82
->
-> Reviewed-by: Bhupesh Sharma <bhsharma@redhat.com>
->
-> Regards,
-> Bhupesh
+>> We need to do the handle_guest_sea() before this code.
+>>
+>> kvm_inject_vabt() makes an SError interrupt pending for the guest. This makes a
+>> synchronous error asynchronous as the guest may have SError interrupts masked.
+>>
+>> I guess this was the best that could be done at the time of (4055710baca8
+>> "arm/arm64: KVM: Inject virtual abort when guest exits on external abort"), but
+>> in the light of this firmware-first handling, I'm not sure its the right thing
+>> to do.
+>>
+>> Is it possible for handle_guest_sea() to return whether it actually found any
+>> work to do? If there was none I think we should keep this kvm_inject_vabt() as
+>> it is the existing behaviour.
+
+> Yes, I'll move the handle_guest_sea() call above this. My testing didn't call
+> into that if statement for some reason...it made it to the handle_guest_sea()
+> call successfully.
+
+I guess you're not using data aborts for testing then.
 
 
+> If there is no work for the GHES code to do it will return and could still make
+> the kvm_inject_vabt() call. It will also return and do that same thing if the
+> error was not fatal in GHES...would that be an issue?
 
--- 
-Thomas
+We might inject a superfluous SError Interrupt in that case.
+
+For memory errors we may do the whole unmapping and signalling thing to handle
+the fault. For recoverable faults, QEMU can generate its own CPER records for
+the guest and do the work to notify the guest. Everything looks fine until the
+guest gets the extra SError interrupt.
+
+If there is firmware-first RAS data, we should skip the injected SError
+Interrupt as the host's RAS code should choose what to do. If this Synchronous
+External Abort was nothing to do with RAS, we should inject the SError interrupt
+as it's the existing behaviour, and not all platforms will have this Synchronous
+External Abort mechanism.
+
+x86's APEI NMI needs to know if the NMI was due to RAS, so we can probably
+borrow the same trick. ghes_notify_nmi() calls ghes_read_estatus() for each
+struct ghes. If they all return an error, there was no work to do.
+
+
+(I assume firmware will only generate one of these at a time, so there is no
+risk of one list-walker processing two entries, then the second finding nothing
+to do?)
+
+
+Thanks,
+
+James
+
+
+>>> +            kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx
+>>> ESR_EL2=%#lx\n",
+>>> +                kvm_vcpu_trap_get_class(vcpu),
+>>> +                (unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+>>> +                (unsigned long)kvm_vcpu_get_hsr(vcpu));
+>>> +            return -EFAULT;
+>>> +        }
+>>> +    } else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>>> +           fault_status != FSC_ACCESS) {
+>>>           kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
+>>>               kvm_vcpu_trap_get_class(vcpu),
+>>>               (unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+>>
