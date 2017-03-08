@@ -1,69 +1,56 @@
 From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH 1/2] x86/efi: Correct a tiny mistake in code comment
-Date: Wed, 8 Mar 2017 11:50:47 +0100
-Message-ID: <20170308105047.pggc6hai3gplsbg2@pd.tnic>
-References: <1488959258-4731-1-git-send-email-bhe@redhat.com>
- <20170308081812.GA12600@dhcp-128-65.nay.redhat.com>
- <CACi5LpOjxiiCEvdOHGxHj_c+G-W3HKHr8EgOURpZ-cb5XqQnNQ@mail.gmail.com>
- <20170308090955.GB6570@x1>
- <20170308093555.yrhygjxx4mu562lp@pd.tnic>
- <20170308101750.GD6570@x1>
+Subject: Re: [RFC PATCH v4 28/28] x86: Add support to make use of Secure
+ Memory Encryption
+Date: Wed, 8 Mar 2017 16:05:20 +0100
+Message-ID: <20170308150520.fwdrit6bjweqsztq@pd.tnic>
+References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
+ <20170216154825.19244.32545.stgit@tlendack-t1.amdoffice.net>
+ <20170301184055.gl3iic3gir6zzb23@pd.tnic>
+ <7e6c308f-3caf-5531-3cb2-9b6986f4288e@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <20170308101750.GD6570@x1>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Baoquan He <bhe@redhat.com>
-Cc: Bhupesh Sharma <bhsharma@redhat.com>, Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, thgarnie@google.com, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, akpm@linux-foundation.org
+In-Reply-To: <7e6c308f-3caf-5531-3cb2-9b6986f4288e@amd.com>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Mar 08, 2017 at 06:17:50PM +0800, Baoquan He wrote:
-> All right, I will just update the code comment. Just back ported kaslr
-> to our OS product, people reviewed and found the upper boundary of kaslr
-> mm region is EFI_VA_START, that's not correct, it has to be corrected
-> firstly in upstream. Then found the confusion in code comment.
+On Tue, Mar 07, 2017 at 10:05:00AM -0600, Tom Lendacky wrote:
+> > And then you need to correct the function signature in the
+> > !CONFIG_AMD_MEM_ENCRYPT case, at the end of this file, too:
+> > 
+> > unsigned long __init sme_enable(struct boot_params *bp)		{ return 0; }
+> 
+> Yup, missed that.  I'll make it match.
 
-        BUILD_BUG_ON(IS_ENABLED(CONFIG_X86_ESPFIX64) &&
-+                    vaddr_end >= EFI_VA_END);
+Or, you can do this:
 
-so I think that once we've done the mapping, we won't need anymore VA
-space so we could simply check the range [efi_va, EFI_VA_START] instead.
+unsigned long __init sme_enable(void *boot_data)
+{
+#ifdef CONFIG_AMD_MEM_ENCRYPT
+        struct boot_params *bp = boot_data;
+        unsigned int eax, ebx, ecx, edx;
+        unsigned long cmdline_ptr;
 
-However, that won't work currently because evi_va is not valid at
-build time. And it won't work at boot time either because, AFAICT,
-kernel_randomize_memory() runs before efi_enter_virtual_mode() so ...
+	...
 
-So yours is probably OK.
+out:
+#endif /* CONFIG_AMD_MEM_ENCRYPT */
+        return sme_me_mask;
+}
 
-I guess what's confusing there is the naming - EFI_VA_START and
-EFI_VA_END. They're kinda swapped because of the direction we take when
-we start mapping runtime services, i.e., from the higher (unsigned)
-address to lower.
-
-I guess we could swap the naming so that it doesn't confuse people but
-that would be up to EFI maintainers.
-
-Then stuff like that:
-
-# ifdef CONFIG_EFI
-        { EFI_VA_END,           "EFI Runtime Services" },
-# endif
-
-will make more sense when they are:
-
-# ifdef CONFIG_EFI
-        { EFI_VA_START,           "EFI Runtime Services" },
-# endif
-
-But changing it now could confuse more people who have the current
-mental picture of the mapping direction so I'd vote for the simple fix
-above.
-
-Again, as previously, this is a maintainer decision.
+and never worry for function headers going out of whack.
 
 -- 
 Regards/Gruss,
     Boris.
 
 Good mailing practices for 400: avoid top-posting and trim the reply.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
