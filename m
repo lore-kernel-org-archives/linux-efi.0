@@ -1,35 +1,69 @@
-From: Borislav Petkov <bp@suse.de>
+From: Borislav Petkov <bp@alien8.de>
 Subject: Re: [PATCH 1/2] x86/efi: Correct a tiny mistake in code comment
-Date: Wed, 8 Mar 2017 09:54:47 +0100
-Message-ID: <20170308085447.pt55rref5eqmuf5x@pd.tnic>
+Date: Wed, 8 Mar 2017 11:50:47 +0100
+Message-ID: <20170308105047.pggc6hai3gplsbg2@pd.tnic>
 References: <1488959258-4731-1-git-send-email-bhe@redhat.com>
  <20170308081812.GA12600@dhcp-128-65.nay.redhat.com>
- <20170308084513.GF18014@x1>
+ <CACi5LpOjxiiCEvdOHGxHj_c+G-W3HKHr8EgOURpZ-cb5XqQnNQ@mail.gmail.com>
+ <20170308090955.GB6570@x1>
+ <20170308093555.yrhygjxx4mu562lp@pd.tnic>
+ <20170308101750.GD6570@x1>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20170308084513.GF18014@x1>
+In-Reply-To: <20170308101750.GD6570@x1>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Baoquan He <bhe@redhat.com>
-Cc: Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, thgarnie@google.com, keescook@chromium.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, akpm@linux-foundation.org
+Cc: Bhupesh Sharma <bhsharma@redhat.com>, Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, thgarnie@google.com, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, akpm@linux-foundation.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Mar 08, 2017 at 04:45:13PM +0800, Baoquan He wrote:
-> -4G and -68G just a trick which makes people understand easily, still we
-> think kernel text mapping region is in higher addr area then vmalloc. I
-> personnally think.
+On Wed, Mar 08, 2017 at 06:17:50PM +0800, Baoquan He wrote:
+> All right, I will just update the code comment. Just back ported kaslr
+> to our OS product, people reviewed and found the upper boundary of kaslr
+> mm region is EFI_VA_START, that's not correct, it has to be corrected
+> firstly in upstream. Then found the confusion in code comment.
 
-Just remove the direction: bottom-up or top-down, it will confuse people.
+        BUILD_BUG_ON(IS_ENABLED(CONFIG_X86_ESPFIX64) &&
++                    vaddr_end >= EFI_VA_END);
 
-"We allocate runtime services regions starting from -4G, i.e.
-0xffff_ffff_0000_0000 and decrement as we go. The EFI VA mapping space
-is limited to 64G."
+so I think that once we've done the mapping, we won't need anymore VA
+space so we could simply check the range [efi_va, EFI_VA_START] instead.
+
+However, that won't work currently because evi_va is not valid at
+build time. And it won't work at boot time either because, AFAICT,
+kernel_randomize_memory() runs before efi_enter_virtual_mode() so ...
+
+So yours is probably OK.
+
+I guess what's confusing there is the naming - EFI_VA_START and
+EFI_VA_END. They're kinda swapped because of the direction we take when
+we start mapping runtime services, i.e., from the higher (unsigned)
+address to lower.
+
+I guess we could swap the naming so that it doesn't confuse people but
+that would be up to EFI maintainers.
+
+Then stuff like that:
+
+# ifdef CONFIG_EFI
+        { EFI_VA_END,           "EFI Runtime Services" },
+# endif
+
+will make more sense when they are:
+
+# ifdef CONFIG_EFI
+        { EFI_VA_START,           "EFI Runtime Services" },
+# endif
+
+But changing it now could confuse more people who have the current
+mental picture of the mapping direction so I'd vote for the simple fix
+above.
+
+Again, as previously, this is a maintainer decision.
 
 -- 
 Regards/Gruss,
     Boris.
 
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+Good mailing practices for 400: avoid top-posting and trim the reply.
