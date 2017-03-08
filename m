@@ -1,68 +1,66 @@
-From: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 2/2] x86/mm/KASLR: Correct the upper boundary of KALSR mm
- regions if adjacent to EFI
-Date: Wed, 8 Mar 2017 14:05:53 +0530
-Message-ID: <CACi5LpNOyiVmy4hTSXAJWT1p=DD65=wijgJMTcOAo9YudiD_pw@mail.gmail.com>
-References: <1488959258-4731-1-git-send-email-bhe@redhat.com>
- <1488959258-4731-2-git-send-email-bhe@redhat.com> <20170308081857.GB12600@dhcp-128-65.nay.redhat.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [RFC PATCH v2 09/32] x86: Change early_ioremap to early_memremap
+ for BOOT data
+Date: Wed, 8 Mar 2017 09:46:02 +0100
+Message-ID: <20170308084602.z6t44k2izdum3w3v@pd.tnic>
+References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
+ <148846763334.2349.9327692408737971533.stgit@brijesh-build-machine>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170308081857.GB12600-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <148846763334.2349.9327692408737971533.stgit@brijesh-build-machine>
+Sender: owner-linux-mm@kvack.org
+To: Brijesh Singh <brijesh.singh@amd.com>
+Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas@google.com, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedo
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Mar 8, 2017 at 1:48 PM, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On 03/08/17 at 03:47pm, Baoquan He wrote:
->> EFI allocates runtime services regions top-down, starting from EFI_VA_START
->> to EFI_VA_END. So EFI_VA_START is bigger than EFI_VA_END and is the end of
->> EFI region. The upper boundary of memory regions randomized by KASLR should
->> be EFI_VA_END if it's adjacent to EFI region, but not EFI_VA_START.
->>
->> Correct it in this patch.
->>
->> Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->> ---
->>  arch/x86/mm/kaslr.c | 4 ++--
->>  1 file changed, 2 insertions(+), 2 deletions(-)
->>
->> diff --git a/arch/x86/mm/kaslr.c b/arch/x86/mm/kaslr.c
->> index 887e571..aed2064 100644
->> --- a/arch/x86/mm/kaslr.c
->> +++ b/arch/x86/mm/kaslr.c
->> @@ -48,7 +48,7 @@ static const unsigned long vaddr_start = __PAGE_OFFSET_BASE;
->>  #if defined(CONFIG_X86_ESPFIX64)
->>  static const unsigned long vaddr_end = ESPFIX_BASE_ADDR;
->>  #elif defined(CONFIG_EFI)
->> -static const unsigned long vaddr_end = EFI_VA_START;
->> +static const unsigned long vaddr_end = EFI_VA_END;
->>  #else
->>  static const unsigned long vaddr_end = __START_KERNEL_map;
->>  #endif
->> @@ -105,7 +105,7 @@ void __init kernel_randomize_memory(void)
->>        */
->>       BUILD_BUG_ON(vaddr_start >= vaddr_end);
->>       BUILD_BUG_ON(IS_ENABLED(CONFIG_X86_ESPFIX64) &&
->> -                  vaddr_end >= EFI_VA_START);
->> +                  vaddr_end >= EFI_VA_END);
->>       BUILD_BUG_ON((IS_ENABLED(CONFIG_X86_ESPFIX64) ||
->>                     IS_ENABLED(CONFIG_EFI)) &&
->>                    vaddr_end >= __START_KERNEL_map);
->> --
->> 2.5.5
->>
->
-> Acked-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->
+On Thu, Mar 02, 2017 at 10:13:53AM -0500, Brijesh Singh wrote:
+> From: Tom Lendacky <thomas.lendacky@amd.com>
+> 
+> In order to map BOOT data with the proper encryption bit, the
 
-Thanks Bao for this fix. This makes the KASLR code consistent with
-Address space markers hints in [1]
+Btw, what does that all-caps spelling "BOOT" denote? Something I'm
+missing?
 
-[1] http://lxr.free-electrons.com/source/arch/x86/mm/dump_pagetables.c#L82
+> early_ioremap() function calls are changed to early_memremap() calls.
+> This allows the proper access for both SME and SEV.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/kernel/acpi/boot.c |    4 ++--
+>  arch/x86/kernel/mpparse.c   |   10 +++++-----
+>  drivers/sfi/sfi_core.c      |    6 +++---
+>  3 files changed, 10 insertions(+), 10 deletions(-)
+> 
+> diff --git a/arch/x86/kernel/acpi/boot.c b/arch/x86/kernel/acpi/boot.c
+> index 35174c6..468c25a 100644
+> --- a/arch/x86/kernel/acpi/boot.c
+> +++ b/arch/x86/kernel/acpi/boot.c
+> @@ -124,7 +124,7 @@ char *__init __acpi_map_table(unsigned long phys, unsigned long size)
+>  	if (!phys || !size)
+>  		return NULL;
+>  
+> -	return early_ioremap(phys, size);
+> +	return early_memremap(phys, size);
 
-Reviewed-by: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Right, the question will keep popping up why we can simply replace
+memremap with ioremap and the general difference wrt to SME/SEV. So it
+would be a good idea to have a comment in, say, arch/x86/mm/ioremap.c,
+explaining the general situation.
 
-Regards,
-Bhupesh
+Thanks.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
