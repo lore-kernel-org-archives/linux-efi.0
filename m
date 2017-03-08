@@ -1,63 +1,51 @@
-From: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 1/2] x86/efi: Correct a tiny mistake in code comment
-Date: Thu, 9 Mar 2017 01:35:00 +0530
-Message-ID: <CACi5LpOXgCfysVdSnaCW=VPGp4VVJm9EKssvGK0T4wZ6ew7cvw@mail.gmail.com>
-References: <1488959258-4731-1-git-send-email-bhe@redhat.com>
- <20170308081812.GA12600@dhcp-128-65.nay.redhat.com> <CACi5LpOjxiiCEvdOHGxHj_c+G-W3HKHr8EgOURpZ-cb5XqQnNQ@mail.gmail.com>
- <20170308090955.GB6570@x1> <20170308093555.yrhygjxx4mu562lp@pd.tnic>
+From: Timur Tabi <timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH v2] efi/libstub/arm*: Set default address and size cells
+ values for an empty dtb
+Date: Wed, 8 Mar 2017 17:32:53 -0600
+Message-ID: <CAOZdJXX+tUeqq=CbwJ6oect2RLuB-VD5Ugzf6m6esmtPjJH5qw@mail.gmail.com>
+References: <1486502360-18071-1-git-send-email-jhugo@codeaurora.org>
+ <b901a792-5ca0-1489-6dcf-b17a66920bc6@arm.com> <9084badb-3340-fdca-9b41-8ab657d4bb15@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170308093555.yrhygjxx4mu562lp-fF5Pk5pvG8Y@public.gmane.org>
+In-Reply-To: <9084badb-3340-fdca-9b41-8ab657d4bb15-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org
+To: "Goel, Sameer" <sgoel-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
+Cc: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Timur Tabi <timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Mar 8, 2017 at 3:05 PM, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org> wrote:
-> On Wed, Mar 08, 2017 at 05:09:55PM +0800, Baoquan He wrote:
->> Yes, it looks better. I can repost with this change. Thanks.
->
-> No it doesn't:
->
-> #define EFI_VA_START     ( -4 * (_AC(1, UL) << 30))
-> #define EFI_VA_END       (-68 * (_AC(1, UL) << 30))
->
-> That's -4G (the shift by 30) and -68G, respectively.
->
->> > #define EFI_VA_START    _AC(0xfffffffeffffffff, UL)
->> > #define EFI_VA_END    _AC(0xffffffef00000000, UL)
->
-> That is something which I need to type into a calculator first.
+On Thu, Mar 2, 2017 at 9:23 AM, Goel, Sameer <sgoel-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
 
-Right, my point was that this -4G convention stands out, as compared
-to the rest of the addressing convention used throughout
-'arch/x86/include/asm/pgtable_64_types.h'.
+> Any tool making the device tree update should be checking for the cell sizes before
+> assuming a 32 bit or a 64 bit value.
 
-For e.g.:
+To be clear, Akashi's patches already look at the cell sizes:
 
-#define __VMALLOC_BASE    _AC(0xffffc90000000000, UL)
-#define __VMEMMAP_BASE    _AC(0xffffea0000000000, UL)
-..
-#define MODULES_END      _AC(0xffffffffff000000, UL)
-..
-and so on.
++static int __init early_init_dt_scan_usablemem(unsigned long node,
++               const char *uname, int depth, void *data)
++{
++       struct memblock_region *usablemem = data;
++       const __be32 *reg;
++       int len;
++
++       if (depth != 1 || strcmp(uname, "chosen") != 0)
++               return 0;
++
++       reg = of_get_flat_dt_prop(node, "linux,usable-memory-range", &len);
++       if (!reg || (len < (dt_root_addr_cells + dt_root_size_cells)))
++               return 1;
++
++       usablemem->base = dt_mem_next_cell(dt_root_addr_cells, &reg);
++       usablemem->size = dt_mem_next_cell(dt_root_size_cells, &reg);
++
++       return 1;
++}
 
-Also it seems inconsistent to the convention used in
-'Documentation/x86/x86_64/mm.txt'
+This function uses dt_root_addr_cells and dt_root_size_cells.  With
+Sameer's patch, those values should be 2 and 2, respectively, on ARM64
+systems.
 
-As you noted in one of your other comments in this thread, this causes
-a confusion as to whether the EFI_VA_END and EFI_VA_START macros need
-to be swapped or the comments elsewhere in the x86 code which use
-these MACROS are incorrect.
-
-However, I think it is more a matter of code readability and each of
-these styles have their own advantages.
-
-I would be happy to cook up a patch to have uniformity in the
-addressing conventions used across pgtable_64_types.h (if it is
-required at all), but it would be a different topic and not related to
-this patch.
-
-Regards,
-Bhupesh
+-- 
+Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
