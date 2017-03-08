@@ -1,70 +1,79 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [GIT PULL] EFI fixes
-Date: Tue, 7 Mar 2017 21:21:08 +0100
-Message-ID: <20170307202107.GA7091@gmail.com>
+From: Dave Young <dyoung@redhat.com>
+Subject: Re: [RFC PATCH v4 14/28] Add support to access boot related data in
+ the clear
+Date: Wed, 8 Mar 2017 14:55:55 +0800
+Message-ID: <20170308065555.GA11045@dhcp-128-65.nay.redhat.com>
+References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
+ <20170216154508.19244.58580.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+In-Reply-To: <20170216154508.19244.58580.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa>
 List-Id: linux-efi@vger.kernel.org
 
-Linus,
+On 02/16/17 at 09:45am, Tom Lendacky wrote:
+[snip]
+> + * This function determines if an address should be mapped encrypted.
+> + * Boot setup data, EFI data and E820 areas are checked in making this
+> + * determination.
+> + */
+> +static bool memremap_should_map_encrypted(resource_size_t phys_addr,
+> +					  unsigned long size)
+> +{
+> +	/*
+> +	 * SME is not active, return true:
+> +	 *   - For early_memremap_pgprot_adjust(), returning true or false
+> +	 *     results in the same protection value
+> +	 *   - For arch_memremap_do_ram_remap(), returning true will allow
+> +	 *     the RAM remap to occur instead of falling back to ioremap()
+> +	 */
+> +	if (!sme_active())
+> +		return true;
 
-Please pull the latest efi-urgent-for-linus git tree from:
+>From the function name shouldn't above be return false? 
 
-   git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-urgent-for-linus
+> +
+> +	/* Check if the address is part of the setup data */
+> +	if (memremap_is_setup_data(phys_addr, size))
+> +		return false;
+> +
+> +	/* Check if the address is part of EFI boot/runtime data */
+> +	switch (efi_mem_type(phys_addr)) {
+> +	case EFI_BOOT_SERVICES_DATA:
+> +	case EFI_RUNTIME_SERVICES_DATA:
 
-   # HEAD: d1eb98143c56f24fef125f5bbed49ae0b52fb7d6 efi/arm: Fix boot crash with CONFIG_CPUMASK_OFFSTACK=y
+Only these two types needed? I'm not sure about this, just bring up the
+question.
 
-A boot crash fix, and a secure boot related boot messages fix.
+> +		return false;
+> +	default:
+> +		break;
+> +	}
+> +
+> +	/* Check if the address is outside kernel usable area */
+> +	switch (e820__get_entry_type(phys_addr, phys_addr + size - 1)) {
+> +	case E820_TYPE_RESERVED:
+> +	case E820_TYPE_ACPI:
+> +	case E820_TYPE_NVS:
+> +	case E820_TYPE_UNUSABLE:
+> +		return false;
+> +	default:
+> +		break;
+> +	}
+> +
+> +	return true;
+> +}
+> +
 
- Thanks,
+Thanks
+Dave
 
-	Ingo
-
------------------->
-Ard Biesheuvel (2):
-      efi/libstub: Treat missing SecureBoot variable as Secure Boot disabled
-      efi/arm: Fix boot crash with CONFIG_CPUMASK_OFFSTACK=y
-
-
- drivers/firmware/efi/arm-runtime.c        | 1 +
- drivers/firmware/efi/libstub/secureboot.c | 4 ++--
- 2 files changed, 3 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 349dc3e1e52e..974c5a31a005 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -65,6 +65,7 @@ static bool __init efi_virtmap_init(void)
- 	bool systab_found;
- 
- 	efi_mm.pgd = pgd_alloc(&efi_mm);
-+	mm_init_cpumask(&efi_mm);
- 	init_new_context(NULL, &efi_mm);
- 
- 	systab_found = false;
-diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-index 6def402bf569..5da36e56b36a 100644
---- a/drivers/firmware/efi/libstub/secureboot.c
-+++ b/drivers/firmware/efi/libstub/secureboot.c
-@@ -45,6 +45,8 @@ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
- 	size = sizeof(secboot);
- 	status = get_efi_var(efi_SecureBoot_name, &efi_variable_guid,
- 			     NULL, &size, &secboot);
-+	if (status == EFI_NOT_FOUND)
-+		return efi_secureboot_mode_disabled;
- 	if (status != EFI_SUCCESS)
- 		goto out_efi_err;
- 
-@@ -78,7 +80,5 @@ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
- 
- out_efi_err:
- 	pr_efi_err(sys_table_arg, "Could not determine UEFI Secure Boot status.\n");
--	if (status == EFI_NOT_FOUND)
--		return efi_secureboot_mode_disabled;
- 	return efi_secureboot_mode_unknown;
- }
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
