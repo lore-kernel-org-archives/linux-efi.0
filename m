@@ -1,33 +1,66 @@
-From: Baoquan He <bhe@redhat.com>
+From: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH 1/2] x86/efi: Correct a tiny mistake in code comment
-Date: Wed, 8 Mar 2017 17:08:33 +0800
-Message-ID: <20170308090833.GA6570@x1>
+Date: Wed, 8 Mar 2017 17:09:55 +0800
+Message-ID: <20170308090955.GB6570@x1>
 References: <1488959258-4731-1-git-send-email-bhe@redhat.com>
  <20170308081812.GA12600@dhcp-128-65.nay.redhat.com>
- <20170308084513.GF18014@x1>
- <20170308085447.pt55rref5eqmuf5x@pd.tnic>
+ <CACi5LpOjxiiCEvdOHGxHj_c+G-W3HKHr8EgOURpZ-cb5XqQnNQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20170308085447.pt55rref5eqmuf5x@pd.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@suse.de>
-Cc: Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, thgarnie@google.com, keescook@chromium.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, akpm@linux-foundation.org
+In-Reply-To: <CACi5LpOjxiiCEvdOHGxHj_c+G-W3HKHr8EgOURpZ-cb5XqQnNQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 03/08/17 at 09:54am, Borislav Petkov wrote:
-> On Wed, Mar 08, 2017 at 04:45:13PM +0800, Baoquan He wrote:
-> > -4G and -68G just a trick which makes people understand easily, still we
-> > think kernel text mapping region is in higher addr area then vmalloc. I
-> > personnally think.
+On 03/08/17 at 02:30pm, Bhupesh Sharma wrote:
+> Hi Dave,
 > 
-> Just remove the direction: bottom-up or top-down, it will confuse people.
+> On Wed, Mar 8, 2017 at 1:48 PM, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> > On 03/08/17 at 03:47pm, Baoquan He wrote:
+> >> EFI allocate runtime services regions down from EFI_VA_START, -4G.
+> >> It should be top-down handling.
+> >>
+> >> Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> >> ---
+> >>  arch/x86/platform/efi/efi_64.c | 2 +-
+> >>  1 file changed, 1 insertion(+), 1 deletion(-)
+> >>
+> >> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+> >> index a4695da..6cbf9e0 100644
+> >> --- a/arch/x86/platform/efi/efi_64.c
+> >> +++ b/arch/x86/platform/efi/efi_64.c
+> >> @@ -47,7 +47,7 @@
+> >>  #include <asm/pgalloc.h>
+> >>
+> >>  /*
+> >> - * We allocate runtime services regions bottom-up, starting from -4G, i.e.
+> >> + * We allocate runtime services regions top-down, starting from -4G, i.e.
+> >
+> > Baoquan, I think original bottom-up is right, it is just considering
+> > -68G as up, see the x86_64 mm.txt. We regard vmalloc as higher address
+> > although from mathematics view it is lower then positive addresses.
 > 
-> "We allocate runtime services regions starting from -4G, i.e.
-> 0xffff_ffff_0000_0000 and decrement as we go. The EFI VA mapping space
-> is limited to 64G."
+> I think you have a valid point, but I think the -4G convention is
+> probably too confusing to read and may lead to issues when we use this
+> for future feature addition as well. It would be more useful to use
+> the macros similar to the MODULES_{} addresses we use currently in
+> 'arch/x86/include/asm/pgtable_64_types.h':
+> 
+> #define MODULES_VADDR    (__START_KERNEL_map + KERNEL_IMAGE_SIZE)
+> #define MODULES_END      _AC(0xffffffffff000000, UL)
+> #define MODULES_LEN   (MODULES_END - MODULES_VADDR)
+> 
+> May be we can use the following convention for the EFI_VA_{} addresses
+> as per 'http://lxr.free-electrons.com/source/Documentation/x86/x86_64/mm.txt#L19':
+> 
+> #define EFI_VA_START    _AC(0xfffffffeffffffff, UL)
+> #define EFI_VA_END    _AC(0xffffffef00000000, UL)
+> 
+> which is less confusing to read in my opinion.
+> 
+> @Baoquan: Please share your views.
 
-Right, will repost one.
-
-Thanks!
+Yes, it looks better. I can repost with this change. Thanks.
