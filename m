@@ -1,66 +1,63 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [RFC PATCH v2 09/32] x86: Change early_ioremap to early_memremap
- for BOOT data
-Date: Wed, 8 Mar 2017 09:46:02 +0100
-Message-ID: <20170308084602.z6t44k2izdum3w3v@pd.tnic>
-References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <148846763334.2349.9327692408737971533.stgit@brijesh-build-machine>
+From: Bhupesh Sharma <bhsharma@redhat.com>
+Subject: Re: [PATCH 1/2] x86/efi: Correct a tiny mistake in code comment
+Date: Wed, 8 Mar 2017 14:30:14 +0530
+Message-ID: <CACi5LpOjxiiCEvdOHGxHj_c+G-W3HKHr8EgOURpZ-cb5XqQnNQ@mail.gmail.com>
+References: <1488959258-4731-1-git-send-email-bhe@redhat.com> <20170308081812.GA12600@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <148846763334.2349.9327692408737971533.stgit@brijesh-build-machine>
-Sender: owner-linux-mm@kvack.org
-To: Brijesh Singh <brijesh.singh@amd.com>
-Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas@google.com, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedo
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170308081812.GA12600@dhcp-128-65.nay.redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dave Young <dyoung@redhat.com>
+Cc: Baoquan He <bhe@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, thgarnie@google.com, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, akpm@linux-foundation.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Mar 02, 2017 at 10:13:53AM -0500, Brijesh Singh wrote:
-> From: Tom Lendacky <thomas.lendacky@amd.com>
-> 
-> In order to map BOOT data with the proper encryption bit, the
+Hi Dave,
 
-Btw, what does that all-caps spelling "BOOT" denote? Something I'm
-missing?
+On Wed, Mar 8, 2017 at 1:48 PM, Dave Young <dyoung@redhat.com> wrote:
+> On 03/08/17 at 03:47pm, Baoquan He wrote:
+>> EFI allocate runtime services regions down from EFI_VA_START, -4G.
+>> It should be top-down handling.
+>>
+>> Signed-off-by: Baoquan He <bhe@redhat.com>
+>> ---
+>>  arch/x86/platform/efi/efi_64.c | 2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+>> index a4695da..6cbf9e0 100644
+>> --- a/arch/x86/platform/efi/efi_64.c
+>> +++ b/arch/x86/platform/efi/efi_64.c
+>> @@ -47,7 +47,7 @@
+>>  #include <asm/pgalloc.h>
+>>
+>>  /*
+>> - * We allocate runtime services regions bottom-up, starting from -4G, i.e.
+>> + * We allocate runtime services regions top-down, starting from -4G, i.e.
+>
+> Baoquan, I think original bottom-up is right, it is just considering
+> -68G as up, see the x86_64 mm.txt. We regard vmalloc as higher address
+> although from mathematics view it is lower then positive addresses.
 
-> early_ioremap() function calls are changed to early_memremap() calls.
-> This allows the proper access for both SME and SEV.
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/kernel/acpi/boot.c |    4 ++--
->  arch/x86/kernel/mpparse.c   |   10 +++++-----
->  drivers/sfi/sfi_core.c      |    6 +++---
->  3 files changed, 10 insertions(+), 10 deletions(-)
-> 
-> diff --git a/arch/x86/kernel/acpi/boot.c b/arch/x86/kernel/acpi/boot.c
-> index 35174c6..468c25a 100644
-> --- a/arch/x86/kernel/acpi/boot.c
-> +++ b/arch/x86/kernel/acpi/boot.c
-> @@ -124,7 +124,7 @@ char *__init __acpi_map_table(unsigned long phys, unsigned long size)
->  	if (!phys || !size)
->  		return NULL;
->  
-> -	return early_ioremap(phys, size);
-> +	return early_memremap(phys, size);
+I think you have a valid point, but I think the -4G convention is
+probably too confusing to read and may lead to issues when we use this
+for future feature addition as well. It would be more useful to use
+the macros similar to the MODULES_{} addresses we use currently in
+'arch/x86/include/asm/pgtable_64_types.h':
 
-Right, the question will keep popping up why we can simply replace
-memremap with ioremap and the general difference wrt to SME/SEV. So it
-would be a good idea to have a comment in, say, arch/x86/mm/ioremap.c,
-explaining the general situation.
+#define MODULES_VADDR    (__START_KERNEL_map + KERNEL_IMAGE_SIZE)
+#define MODULES_END      _AC(0xffffffffff000000, UL)
+#define MODULES_LEN   (MODULES_END - MODULES_VADDR)
 
-Thanks.
+May be we can use the following convention for the EFI_VA_{} addresses
+as per 'http://lxr.free-electrons.com/source/Documentation/x86/x86_64/mm.txt#L19':
 
--- 
-Regards/Gruss,
-    Boris.
+#define EFI_VA_START    _AC(0xfffffffeffffffff, UL)
+#define EFI_VA_END    _AC(0xffffffef00000000, UL)
 
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+which is less confusing to read in my opinion.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+@Baoquan: Please share your views.
+
+Regards,
+Bhupesh
