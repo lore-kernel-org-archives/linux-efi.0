@@ -1,51 +1,76 @@
-From: Timur Tabi <timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH v2] efi/libstub/arm*: Set default address and size cells
- values for an empty dtb
-Date: Wed, 8 Mar 2017 17:32:53 -0600
-Message-ID: <CAOZdJXX+tUeqq=CbwJ6oect2RLuB-VD5Ugzf6m6esmtPjJH5qw@mail.gmail.com>
-References: <1486502360-18071-1-git-send-email-jhugo@codeaurora.org>
- <b901a792-5ca0-1489-6dcf-b17a66920bc6@arm.com> <9084badb-3340-fdca-9b41-8ab657d4bb15@codeaurora.org>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 1/2] x86/efi: Correct a tiny mistake in code comment
+Date: Thu, 9 Mar 2017 08:48:59 +0800
+Message-ID: <20170309004859.GC12600@dhcp-128-65.nay.redhat.com>
+References: <1488959258-4731-1-git-send-email-bhe@redhat.com>
+ <20170308081812.GA12600@dhcp-128-65.nay.redhat.com>
+ <CACi5LpOjxiiCEvdOHGxHj_c+G-W3HKHr8EgOURpZ-cb5XqQnNQ@mail.gmail.com>
+ <20170308090955.GB6570@x1>
+ <20170308093555.yrhygjxx4mu562lp@pd.tnic>
+ <20170308101750.GD6570@x1>
+ <20170308105047.pggc6hai3gplsbg2@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <9084badb-3340-fdca-9b41-8ab657d4bb15-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170308105047.pggc6hai3gplsbg2-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Goel, Sameer" <sgoel-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>
-Cc: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Timur Tabi <timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Mar 2, 2017 at 9:23 AM, Goel, Sameer <sgoel-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
+On 03/08/17 at 11:50am, Borislav Petkov wrote:
+> On Wed, Mar 08, 2017 at 06:17:50PM +0800, Baoquan He wrote:
+> > All right, I will just update the code comment. Just back ported kaslr
+> > to our OS product, people reviewed and found the upper boundary of kaslr
+> > mm region is EFI_VA_START, that's not correct, it has to be corrected
+> > firstly in upstream. Then found the confusion in code comment.
+> 
+>         BUILD_BUG_ON(IS_ENABLED(CONFIG_X86_ESPFIX64) &&
+> +                    vaddr_end >= EFI_VA_END);
+> 
+> so I think that once we've done the mapping, we won't need anymore VA
+> space so we could simply check the range [efi_va, EFI_VA_START] instead.
+> 
+> However, that won't work currently because evi_va is not valid at
+> build time. And it won't work at boot time either because, AFAICT,
+> kernel_randomize_memory() runs before efi_enter_virtual_mode() so ...
+> 
+> So yours is probably OK.
+> 
+> I guess what's confusing there is the naming - EFI_VA_START and
+> EFI_VA_END. They're kinda swapped because of the direction we take when
+> we start mapping runtime services, i.e., from the higher (unsigned)
+> address to lower.
+> 
+> I guess we could swap the naming so that it doesn't confuse people but
+> that would be up to EFI maintainers.
+> 
+> Then stuff like that:
+> 
+> # ifdef CONFIG_EFI
+>         { EFI_VA_END,           "EFI Runtime Services" },
+> # endif
+> 
+> will make more sense when they are:
+> 
+> # ifdef CONFIG_EFI
+>         { EFI_VA_START,           "EFI Runtime Services" },
+> # endif
+> 
+> But changing it now could confuse more people who have the current
+> mental picture of the mapping direction so I'd vote for the simple fix
+> above.
 
-> Any tool making the device tree update should be checking for the cell sizes before
-> assuming a 32 bit or a 64 bit value.
+People should understand the meaning of the macro then use it correctly,
+one should not assume START == lower address unless they are sure. 
 
-To be clear, Akashi's patches already look at the cell sizes:
+> 
+> Again, as previously, this is a maintainer decision.
+> 
 
-+static int __init early_init_dt_scan_usablemem(unsigned long node,
-+               const char *uname, int depth, void *data)
-+{
-+       struct memblock_region *usablemem = data;
-+       const __be32 *reg;
-+       int len;
-+
-+       if (depth != 1 || strcmp(uname, "chosen") != 0)
-+               return 0;
-+
-+       reg = of_get_flat_dt_prop(node, "linux,usable-memory-range", &len);
-+       if (!reg || (len < (dt_root_addr_cells + dt_root_size_cells)))
-+               return 1;
-+
-+       usablemem->base = dt_mem_next_cell(dt_root_addr_cells, &reg);
-+       usablemem->size = dt_mem_next_cell(dt_root_size_cells, &reg);
-+
-+       return 1;
-+}
+Personally I think current way is just fine, but agreed it is up to efi
+maintainer. 
 
-This function uses dt_root_addr_cells and dt_root_size_cells.  With
-Sameer's patch, those values should be 2 and 2, respectively, on ARM64
-systems.
-
--- 
-Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+Thanks
+Dave
