@@ -1,137 +1,118 @@
-From: Xie XiuQi <xiexiuqi@huawei.com>
-Subject: Re: [PATCH V12 09/10] trace, ras: add ARM processor error trace event
-Date: Thu, 9 Mar 2017 17:41:22 +0800
-Message-ID: <58C12342.2090701@huawei.com>
-References: <1488833103-21082-1-git-send-email-tbaicar@codeaurora.org>
- <1488833103-21082-10-git-send-email-tbaicar@codeaurora.org>
+From: Omar Sandoval <osandov@osandov.com>
+Subject: Re: kexec regression since 4.9 caused by efi
+Date: Thu, 9 Mar 2017 01:54:08 -0800
+Message-ID: <20170309095408.GA17883@vader>
+References: <20170308201616.GC8598@vader>
+ <20170309063806.GB17257@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <1488833103-21082-10-git-send-email-tbaicar@codeaurora.org>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Tyler Baicar <tbaicar@codeaurora.org>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kern
+Content-Type: multipart/mixed; boundary="3MwIy2ne0vdjdPXF"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170309063806.GB17257@dhcp-128-65.nay.redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dave Young <dyoung@redhat.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ingo Molnar <mingo@kernel.org>, linux-kernel@vger.kernel.org, kernel-team@fb.com, kexec@lists.infradead.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Tyler Baicar,
 
-On 2017/3/7 4:45, Tyler Baicar wrote:
-> Currently there are trace events for the various RAS
-> errors with the exception of ARM processor type errors.
-> Add a new trace event for such errors so that the user
-> will know when they occur. These trace events are
-> consistent with the ARM processor error section type
-> defined in UEFI 2.6 spec section N.2.4.4.
+--3MwIy2ne0vdjdPXF
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+On Thu, Mar 09, 2017 at 02:38:06PM +0800, Dave Young wrote:
+> Add efi/kexec list.
 > 
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> Acked-by: Steven Rostedt <rostedt@goodmis.org>
-> ---
->  drivers/acpi/apei/ghes.c    |  8 +++++++-
->  drivers/firmware/efi/cper.c |  1 +
->  drivers/ras/ras.c           |  1 +
->  include/ras/ras_event.h     | 34 ++++++++++++++++++++++++++++++++++
->  4 files changed, 43 insertions(+), 1 deletion(-)
+> On 03/08/17 at 12:16pm, Omar Sandoval wrote:
+
+[snip]
+
+> I have no more clue yet from your provided log, but the runtime value is
+> odd to me. It is set in below code:
 > 
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index 842c0cc..81d7b79 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -514,7 +514,13 @@ static void ghes_do_proc(struct ghes *ghes,
->  		}
->  #endif
->  #ifdef CONFIG_RAS
-> -		else if (trace_unknown_sec_event_enabled()) {
-> +		else if (!uuid_le_cmp(sec_type, CPER_SEC_PROC_ARM) &&
-> +			 trace_arm_event_enabled()) {
-> +			struct cper_sec_proc_arm *arm_err;
-> +
-> +			arm_err = acpi_hest_generic_data_payload(gdata);
-> +			trace_arm_event(arm_err);
-> +		} else if (trace_unknown_sec_event_enabled()) {
->  			void *unknown_err = acpi_hest_generic_data_payload(gdata);
->  			trace_unknown_sec_event(&sec_type,
->  					fru_id, fru_text, sec_sev,
-> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> index 545a6c2..e9fb56a 100644
-> --- a/drivers/firmware/efi/cper.c
-> +++ b/drivers/firmware/efi/cper.c
-> @@ -35,6 +35,7 @@
->  #include <linux/printk.h>
->  #include <linux/bcd.h>
->  #include <acpi/ghes.h>
-> +#include <ras/ras_event.h>
->  
->  #define INDENT_SP	" "
->  
-> diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
-> index fb2500b..8ba5a94 100644
-> --- a/drivers/ras/ras.c
-> +++ b/drivers/ras/ras.c
-> @@ -28,3 +28,4 @@ static int __init ras_init(void)
->  #endif
->  EXPORT_TRACEPOINT_SYMBOL_GPL(mc_event);
->  EXPORT_TRACEPOINT_SYMBOL_GPL(unknown_sec_event);
-> +EXPORT_TRACEPOINT_SYMBOL_GPL(arm_event);
-> diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
-> index 5861b6f..b36db48 100644
-> --- a/include/ras/ras_event.h
-> +++ b/include/ras/ras_event.h
-> @@ -162,6 +162,40 @@
->  );
->  
->  /*
-> + * ARM Processor Events Report
-> + *
-> + * This event is generated when hardware detects an ARM processor error
-> + * has occurred. UEFI 2.6 spec section N.2.4.4.
-> + */
-> +TRACE_EVENT(arm_event,
-> +
-> +	TP_PROTO(const struct cper_sec_proc_arm *proc),
-> +
-> +	TP_ARGS(proc),
-> +
-> +	TP_STRUCT__entry(
-> +		__field(u64, mpidr)
-> +		__field(u64, midr)
-> +		__field(u32, running_state)
-> +		__field(u32, psci_state)
-> +		__field(u8, affinity)
-> +	),
-> +
-> +	TP_fast_assign(
-> +		__entry->affinity = proc->affinity_level;
-> +		__entry->mpidr = proc->mpidr;
-> +		__entry->midr = proc->midr;
-> +		__entry->running_state = proc->running_state;
-> +		__entry->psci_state = proc->psci_state;
-> +	),
-> +
-> +	TP_printk("affinity level: %d; MPIDR: %016llx; MIDR: %016llx; "
-> +		  "running state: %d; PSCI state: %d",
-> +		  __entry->affinity, __entry->mpidr, __entry->midr,
-> +		  __entry->running_state, __entry->psci_state)
-> +);
-> +
-
-I think these fields are not enough, we need also export arm processor error
-information (UEFI 2.6 spec section N.2.4.4.1), or at least the error type,
-address, etc. So that the userspace (such as rasdaemon tool) could know what
-error occurred.
-
-Thanks,
-Xie XiuQi
-
-> +/*
->   * Unknown Section Report
->   *
->   * This event is generated when hardware detected a hardware
+> arch/x86/platform/efi/efi.c: efi_systab_init()
+> 	efi_systab.runtime = data ?
+> 			     (void *)(unsigned long)data->runtime :
+> 			     (void *)(unsigne long)systab64->runtime;
 > 
+> Here data is the setup_data passed by kexec-tools from normal kernel to
+> kexec kernel, efi_setup_data structure is like below: 
+> struct efi_setup_data {
+>         u64 fw_vendor;
+>         u64 runtime;
+>         u64 tables;
+>         u64 smbios;
+>         u64 reserved[8];
+> };
+> 
+> kexec-tools get the runtime address from /sys/firmware/efi/runtime
+> 
+> So can you do some debuggin on your side, eg. see the sysfs runtime
+> value is correct or not. And add some printk in efi init path etc.
+
+The attached patch fixes this for me.
+
+--3MwIy2ne0vdjdPXF
+Content-Type: text/x-diff; charset=us-ascii
+Content-Disposition: attachment; filename="0001-efi-adjust-virt_addr-when-splitting-descriptors-in-e.patch"
+
+>From 4b343f0b0b408469f28c973ea52877797a166313 Mon Sep 17 00:00:00 2001
+Message-Id: <4b343f0b0b408469f28c973ea52877797a166313.1489053164.git.osandov@fb.com>
+From: Omar Sandoval <osandov@fb.com>
+Date: Thu, 9 Mar 2017 01:46:19 -0800
+Subject: [PATCH] efi: adjust virt_addr when splitting descriptors in
+ efi_memmap_insert()
+
+When we split efi memory descriptors, we adjust the physical address but
+not the virtual address it maps to. This leads to bogus memory mappings
+later when these virtual addresses are used.
+
+This fixes a kexec boot regression since 8e80632fb23f ("efi/esrt: Use
+efi_mem_reserve() and avoid a kmalloc()"), although the bug was only
+exposed by that commit.
+
+Signed-off-by: Omar Sandoval <osandov@fb.com>
+---
+ drivers/firmware/efi/memmap.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+index 78686443cb37..ca614db76faf 100644
+--- a/drivers/firmware/efi/memmap.c
++++ b/drivers/firmware/efi/memmap.c
+@@ -298,6 +298,7 @@ void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
+ 			memcpy(new, old, old_memmap->desc_size);
+ 			md = new;
+ 			md->phys_addr = m_end + 1;
++			md->virt_addr += md->phys_addr - start;
+ 			md->num_pages = (end - md->phys_addr + 1) >>
+ 				EFI_PAGE_SHIFT;
+ 		}
+@@ -312,6 +313,7 @@ void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
+ 			md = new;
+ 			md->attribute |= m_attr;
+ 			md->phys_addr = m_start;
++			md->virt_addr += md->phys_addr - start;
+ 			md->num_pages = (m_end - m_start + 1) >>
+ 				EFI_PAGE_SHIFT;
+ 			/* last part */
+@@ -319,6 +321,7 @@ void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
+ 			memcpy(new, old, old_memmap->desc_size);
+ 			md = new;
+ 			md->phys_addr = m_end + 1;
++			md->virt_addr += md->phys_addr - start;
+ 			md->num_pages = (end - m_end) >>
+ 				EFI_PAGE_SHIFT;
+ 		}
+@@ -333,6 +336,7 @@ void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
+ 			memcpy(new, old, old_memmap->desc_size);
+ 			md = new;
+ 			md->phys_addr = m_start;
++			md->virt_addr += md->phys_addr - start;
+ 			md->num_pages = (end - md->phys_addr + 1) >>
+ 				EFI_PAGE_SHIFT;
+ 			md->attribute |= m_attr;
+-- 
+2.12.0
+
+
+--3MwIy2ne0vdjdPXF--
