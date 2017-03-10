@@ -1,159 +1,93 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [RFC PATCH v2 14/32] x86: mm: Provide support to use memblock
- when spliting large pages
-Date: Fri, 10 Mar 2017 12:06:57 +0100
-Message-ID: <20170310110657.hophlog2juw5hpzz@pd.tnic>
+From: Brijesh Singh <brijesh.singh@amd.com>
+Subject: Re: [RFC PATCH v2 12/32] x86: Add early boot support when running
+ with SEV active
+Date: Fri, 10 Mar 2017 10:35:30 -0600
+Message-ID: <1fe1e177-f588-fe5a-dc13-e9fde00e8958@amd.com>
 References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <148846771545.2349.9373586041426414252.stgit@brijesh-build-machine>
+ <148846768878.2349.15757532025749214650.stgit@brijesh-build-machine>
+ <20170309140748.tg67yo2jmc5ahck3@pd.tnic>
+ <5d62b16f-16ef-1bd7-1551-f0c4c43573f4@redhat.com>
+ <20170309162942.jwtb3l33632zhbaz@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <148846771545.2349.9373586041426414252.stgit@brijesh-build-machine>
+In-Reply-To: <20170309162942.jwtb3l33632zhbaz@pd.tnic>
 Sender: owner-linux-mm@kvack.org
-To: Brijesh Singh <brijesh.singh@amd.com>, Paolo Bonzini <pbonzini@redhat.com>
-Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas@google.com, tglx@linutronix.de, mchehab@kernel.org, iamjoonsoo.kim@lge.com, labbott@fedo
+To: Borislav Petkov <bp@suse.de>, Paolo Bonzini <pbonzini@redhat.com>
+Cc: brijesh.singh@amd.com, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhel
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Mar 02, 2017 at 10:15:15AM -0500, Brijesh Singh wrote:
-> If kernel_maps_pages_in_pgd is called early in boot process to change the
+Hi Boris and Paolo,
 
-kernel_map_pages_in_pgd()
+On 03/09/2017 10:29 AM, Borislav Petkov wrote:
+> On Thu, Mar 09, 2017 at 05:13:33PM +0100, Paolo Bonzini wrote:
+>> This is not how you check if running under a hypervisor; you should
+>> check the HYPERVISOR bit, i.e. bit 31 of cpuid(1).ecx.  This in turn
+>> tells you if leaf 0x40000000 is valid.
+>
+> Ah, good point, I already do that in the microcode loader :)
+>
+>         /*
+>          * CPUID(1).ECX[31]: reserved for hypervisor use. This is still not
+>          * completely accurate as xen pv guests don't see that CPUID bit set but
+>          * that's good enough as they don't land on the BSP path anyway.
+>          */
+>         if (native_cpuid_ecx(1) & BIT(31))
+>                 return *res;
+>
+>> That said, the main issue with this function is that it hardcodes the
+>> behavior for KVM.  It is possible that another hypervisor defines its
+>> 0x40000001 leaf in such a way that KVM_FEATURE_SEV has a different meaning.
+>>
+>> Instead, AMD should define a "well-known" bit in its own space (i.e.
+>> 0x800000xx) that is only used by hypervisors that support SEV.  This is
+>> similar to how Intel defined one bit in leaf 1 to say "is leaf
+>> 0x40000000 valid".
+>>
+>>> +	if (eax > 0x40000000) {
+>>> +		eax = 0x40000001;
+>>> +		ecx = 0;
+>>> +		native_cpuid(&eax, &ebx, &ecx, &edx);
+>>> +		if (!(eax & BIT(KVM_FEATURE_SEV)))
+>>> +			goto out;
+>>> +
+>>> +		eax = 0x8000001f;
+>>> +		ecx = 0;
+>>> +		native_cpuid(&eax, &ebx, &ecx, &edx);
+>>> +		if (!(eax & 1))
+>
+> Right, so this is testing CPUID_0x8000001f_ECX(0)[0], SME. Why not
+> simply set that bit for the guest too, in kvm?
+>
 
-> memory attributes then it fails to allocate memory when spliting large
-> pages. The patch extends the cpa_data to provide the support to use
-> memblock_alloc when slab allocator is not available.
-> 
-> The feature will be used in Secure Encrypted Virtualization (SEV) mode,
-> where we may need to change the memory region attributes in early boot
-> process.
-> 
-> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
-> ---
->  arch/x86/mm/pageattr.c |   51 ++++++++++++++++++++++++++++++++++++++++--------
->  1 file changed, 42 insertions(+), 9 deletions(-)
-> 
-> diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-> index 46cc89d..9e4ab3b 100644
-> --- a/arch/x86/mm/pageattr.c
-> +++ b/arch/x86/mm/pageattr.c
-> @@ -14,6 +14,7 @@
->  #include <linux/gfp.h>
->  #include <linux/pci.h>
->  #include <linux/vmalloc.h>
-> +#include <linux/memblock.h>
->  
->  #include <asm/e820/api.h>
->  #include <asm/processor.h>
-> @@ -37,6 +38,7 @@ struct cpa_data {
->  	int		flags;
->  	unsigned long	pfn;
->  	unsigned	force_split : 1;
-> +	unsigned	force_memblock :1;
->  	int		curpage;
->  	struct page	**pages;
->  };
-> @@ -627,9 +629,8 @@ try_preserve_large_page(pte_t *kpte, unsigned long address,
->  
->  static int
->  __split_large_page(struct cpa_data *cpa, pte_t *kpte, unsigned long address,
-> -		   struct page *base)
-> +		  pte_t *pbase, unsigned long new_pfn)
->  {
-> -	pte_t *pbase = (pte_t *)page_address(base);
->  	unsigned long ref_pfn, pfn, pfninc = 1;
->  	unsigned int i, level;
->  	pte_t *tmp;
-> @@ -646,7 +647,7 @@ __split_large_page(struct cpa_data *cpa, pte_t *kpte, unsigned long address,
->  		return 1;
->  	}
->  
-> -	paravirt_alloc_pte(&init_mm, page_to_pfn(base));
-> +	paravirt_alloc_pte(&init_mm, new_pfn);
->  
->  	switch (level) {
->  	case PG_LEVEL_2M:
-> @@ -707,7 +708,8 @@ __split_large_page(struct cpa_data *cpa, pte_t *kpte, unsigned long address,
->  	 * pagetable protections, the actual ptes set above control the
->  	 * primary protection behavior:
->  	 */
-> -	__set_pmd_pte(kpte, address, mk_pte(base, __pgprot(_KERNPG_TABLE)));
-> +	__set_pmd_pte(kpte, address,
-> +		native_make_pte((new_pfn << PAGE_SHIFT) + _KERNPG_TABLE));
->  
->  	/*
->  	 * Intel Atom errata AAH41 workaround.
-> @@ -723,21 +725,50 @@ __split_large_page(struct cpa_data *cpa, pte_t *kpte, unsigned long address,
->  	return 0;
->  }
->  
-> +static pte_t *try_alloc_pte(struct cpa_data *cpa, unsigned long *pfn)
-> +{
-> +	unsigned long phys;
-> +	struct page *base;
-> +
-> +	if (cpa->force_memblock) {
-> +		phys = memblock_alloc(PAGE_SIZE, PAGE_SIZE);
+CPUID_8000_001F[EAX] indicates whether the feature is supported.
+CPUID_0x8000001F[EAX]:
+  * Bit 0 - SME supported
+  * Bit 1 - SEV supported
+  * Bit 3 - SEV-ES supported
 
-Maybe there's a reason this fires:
+We can use MSR_K8_SYSCFG[MemEncryptionModeEnc] to check if memory encryption is enabled.
+Currently, KVM returns zero when guest OS read MSR_K8_SYSCFG. I can update my patch sets
+to set this bit for SEV enabled guests.
 
-WARNING: modpost: Found 2 section mismatch(es).
-To see full details build your kernel with:
-'make CONFIG_DEBUG_SECTION_MISMATCH=y'
+We could update this patch to use the below logic:
 
-WARNING: vmlinux.o(.text+0x48edc): Section mismatch in reference from the function __change_page_attr() to the function .init.text:memblock_alloc()
-The function __change_page_attr() references
-the function __init memblock_alloc().
-This is often because __change_page_attr lacks a __init
-annotation or the annotation of memblock_alloc is wrong.
+  * CPUID(0) - Check for AuthenticAMD
+  * CPID(1) - Check if under hypervisor
+  * CPUID(0x80000000) - Check for highest supported leaf
+  * CPUID(0x8000001F).EAX - Check for SME and SEV support
+  * rdmsr (MSR_K8_SYSCFG)[MemEncryptionModeEnc] - Check if SMEE is set
 
-WARNING: vmlinux.o(.text+0x491d1): Section mismatch in reference from the function __change_page_attr() to the function .meminit.text:memblock_free()
-The function __change_page_attr() references
-the function __meminit memblock_free().
-This is often because __change_page_attr lacks a __meminit
-annotation or the annotation of memblock_free is wrong.
 
-Why do we need this whole early mapping? For the guest? I don't like
-that memblock thing at all.
+Paolo,
 
-So I think the approach with the .data..percpu..hv_shared section is
-fine and we should consider SEV-ES
+One question, do we need "AuthenticAMD" check when we are running under hypervisor ?
+I was looking at qemu code and found that qemu exposes parameters to change the CPU
+vendor id. The above check will fail if user changes the vendor id while launching
+the SEV guest.
 
-http://support.amd.com/TechDocs/Protecting%20VM%20Register%20State%20with%20SEV-ES.pdf
-
-and do this right from the get-go so that when SEV-ES comes along, we
-should simply be ready and extend that mechanism to put the whole Guest
-Hypervisor Communication Block in there.
-
-But then the fact that you're mapping those decrypted in init_mm.pgd
-makes me think you don't need that early mapping thing at all. Those are
-the decrypted mappings of the hypervisor. And that you can do late.
-
-Now, what would be better, IMHO (and I have no idea about virtualization
-design so take with a grain of salt) is if the guest would allocate
-enough memory for the GHCB and mark it decrypted from the very
-beginning. It will be the communication vehicle with the hypervisor
-anyway.
-
-And we already do similar things in sme_map_bootdata() for the baremetal
-kernel to map boot_data, initrd, EFI, ... and so on things decrypted.
-
-And we should extend that mechanism to map the GHCB in the guest too and
-then we can get rid of all that need for ->force_memblock which makes
-the crazy mess in pageattr.c even crazier. And it would be lovely if we
-can do it without it.
-
-But maybe Paolo might have an even better idea...
-
-Thanks.
-
--- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+-Brijesh
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
