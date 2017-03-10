@@ -1,76 +1,78 @@
-From: Boris Ostrovsky <boris.ostrovsky@oracle.com>
-Subject: Re: [Xen-devel] [PATCH v5 2/3] x86: Remap GDT tables in the Fixmap
- section
-Date: Thu, 9 Mar 2017 18:17:18 -0500
-Message-ID: <36579cc4-05e7-a448-767c-b9ad940362fc@oracle.com>
-References: <20170306220348.79702-1-thgarnie@google.com>
- <20170306220348.79702-2-thgarnie@google.com>
- <CALCETrVXHc-EAhBtdhL9FXSW1G2VbohRY4UJuOtpRG1K0Q-Ogg@mail.gmail.com>
- <17ffcc5b-1c9a-51b6-272a-5eaecf1bc0c4@citrix.com>
- <CALCETrWv-u7OdjWDY+5eF7p-ngPun-yYf0QegMzYc6MGVQd-4w@mail.gmail.com>
- <CAJcbSZExVWA0jvAoxLLc+58Ag9cHchifrHP=fFfzU_onHo2PyA@mail.gmail.com>
- <5cf31779-45c5-d37f-86bc-d5afb3fb7ab6@oracle.com>
- <51c23e92-d1f0-427f-e069-c92fc4ed6226@oracle.com>
- <CAJcbSZEnUBfLHjf+bHqY0JQhQXD9urX45BXrQjx=1=A5gPpp_w@mail.gmail.com>
+From: Dave Young <dyoung@redhat.com>
+Subject: Re: kexec regression since 4.9 caused by efi
+Date: Fri, 10 Mar 2017 09:39:45 +0800
+Message-ID: <20170310013945.GA2995@dhcp-128-65.nay.redhat.com>
+References: <20170308201616.GC8598@vader>
+ <20170309063806.GB17257@dhcp-128-65.nay.redhat.com>
+ <20170309095408.GA17883@vader>
+ <CAKv+Gu-gRmt=Vq=QCcT5ETY9DwLzJe0f4gHR_9sFMKX7-vK++w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <CAJcbSZEnUBfLHjf+bHqY0JQhQXD9urX45BXrQjx=1=A5gPpp_w@mail.gmail.com>
-Sender: owner-linux-mm@kvack.org
-To: Thomas Garnier <thgarnie@google.com>
-Cc: Michal Hocko <mhocko@suse.com>, Stanislaw Gruszka <sgruszka@redhat.com>, kvm list <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Frederic Weisbecker <fweisbec@gmail.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Chris Wilson <chris@chris-wilson.co.uk>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Dave Hansen <dave.hansen@intel.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Alexander Potapenko <glider@google.com>, Pavel Machek <pavel@ucw.cz>, "H . Peter Anvin" <hpa@zytor.com>, "kernel-hardening@lists.openwall.com" <kernel-hardening@lists.openwall.com>, Jiri Olsa <jolsa@redhat.com>, zijun_hu <zijun_hu@htc.com>, Prarit
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu-gRmt=Vq=QCcT5ETY9DwLzJe0f4gHR_9sFMKX7-vK++w@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Omar Sandoval <osandov@osandov.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ingo Molnar <mingo@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kernel-team@fb.com, "kexec@lists.infradead.org" <kexec@lists.infradead.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/09/2017 05:31 PM, Thomas Garnier wrote:
-> On Thu, Mar 9, 2017 at 2:13 PM, Boris Ostrovsky
-> <boris.ostrovsky@oracle.com> wrote:
->>>> I don't have any experience with Xen so it would be great if virtme can test it.
->>> I am pretty sure I tested this series at some point but I'll test it again.
->>>
->>
->> Fails 32-bit build:
->>
->>
->> /home/build/linux-boris/arch/x86/kvm/vmx.c: In function ‘segment_base’:
->> /home/build/linux-boris/arch/x86/kvm/vmx.c:2054: error: ‘host_gdt’
->> undeclared (first use in this function)
->> /home/build/linux-boris/arch/x86/kvm/vmx.c:2054: error: (Each undeclared
->> identifier is reported only once
->> /home/build/linux-boris/arch/x86/kvm/vmx.c:2054: error: for each
->> function it appears in.)
->> /home/build/linux-boris/arch/x86/kvm/vmx.c:2054: error: type defaults to
->> ‘int’ in declaration of ‘type name’
->> /home/build/linux-boris/arch/x86/kvm/vmx.c:2054: error: type defaults to
->> ‘int’ in declaration of ‘type name’
->> /home/build/linux-boris/arch/x86/kvm/vmx.c:2054: warning: initialization
->> from incompatible pointer type
->> /home/build/linux-boris/arch/x86/kvm/vmx.c:2054: warning: unused
->> variable ‘gdt’
->>
->>
->> -boris
-> It seems that I forgot to remove line 2054 on the rebase. My 32-bit
-> build comes clean but I assume it is not good enough compare to the
-> full version I build for 64-bit KVM testing.
->
-> Remove just this line and it should build fine, I will fix this on the
-> next iteration.
->
-> Thanks for testing,
->
+On 03/09/17 at 12:53pm, Ard Biesheuvel wrote:
+> On 9 March 2017 at 10:54, Omar Sandoval <osandov@osandov.com> wrote:
+> > On Thu, Mar 09, 2017 at 02:38:06PM +0800, Dave Young wrote:
+> >> Add efi/kexec list.
+> >>
+> >> On 03/08/17 at 12:16pm, Omar Sandoval wrote:
+> >
+> > [snip]
+> >
+> >> I have no more clue yet from your provided log, but the runtime value is
+> >> odd to me. It is set in below code:
+> >>
+> >> arch/x86/platform/efi/efi.c: efi_systab_init()
+> >>       efi_systab.runtime = data ?
+> >>                            (void *)(unsigned long)data->runtime :
+> >>                            (void *)(unsigne long)systab64->runtime;
+> >>
+> >> Here data is the setup_data passed by kexec-tools from normal kernel to
+> >> kexec kernel, efi_setup_data structure is like below:
+> >> struct efi_setup_data {
+> >>         u64 fw_vendor;
+> >>         u64 runtime;
+> >>         u64 tables;
+> >>         u64 smbios;
+> >>         u64 reserved[8];
+> >> };
+> >>
+> >> kexec-tools get the runtime address from /sys/firmware/efi/runtime
+> >>
+> >> So can you do some debuggin on your side, eg. see the sysfs runtime
+> >> value is correct or not. And add some printk in efi init path etc.
+> >
+> > The attached patch fixes this for me.
+> 
+> Hi Omar,
+> 
+> Thanks for tracking this down.
+> 
+> I wonder if this is an unintended side effect of the way we repurpose
+> the EFI_MEMORY_RUNTIME attribute in efi_arch_mem_reserve(). AFAIUI,
+> splitting memory map entries should only be necessary for regions that
+> are not runtime memory regions to begin with, and so whether their
+> virtual mapping address makes sense or not should be irrelevant.
 
+In this case the esrt chunk are Runtime Data which is not necessary to
+be reserved explicitly. I think efi_arch_mem_reserve are for boot areas.
 
-So this, in fact, does break Xen in that the hypercall to set GDT fails.
+Probably there could be esrt data which belongs to boot data? If we are
+sure they are all runtime, the better fix may be just dropping the
+efi_mem_reserve in esrt.c
 
-I will have lo look at this tomorrow but I definitely at least built
-with v3 of this series. And I don't see why I wouldn't have tested it
-once I built it.
+> 
+> Perhaps this only illustrates my lack of understanding of the x86 way
+> of doing this, so perhaps Matt can shed some light on this?
+> 
+> Thanks,
+> Ard.
 
--boris
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Thanks
+Dave
