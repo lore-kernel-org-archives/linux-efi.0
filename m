@@ -1,96 +1,136 @@
-From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: Re: [RFC PATCH v2 12/32] x86: Add early boot support when running
- with SEV active
-Date: Fri, 10 Mar 2017 10:35:30 -0600
-Message-ID: <1fe1e177-f588-fe5a-dc13-e9fde00e8958@amd.com>
-References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <148846768878.2349.15757532025749214650.stgit@brijesh-build-machine>
- <20170309140748.tg67yo2jmc5ahck3@pd.tnic>
- <5d62b16f-16ef-1bd7-1551-f0c4c43573f4@redhat.com>
- <20170309162942.jwtb3l33632zhbaz@pd.tnic>
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V12 10/10] arm/arm64: KVM: add guest SEA support
+Date: Fri, 10 Mar 2017 11:15:29 -0700
+Message-ID: <9e2dee3d-afb3-72f6-a8f2-4fa090e87ee8@codeaurora.org>
+References: <1488833103-21082-1-git-send-email-tbaicar@codeaurora.org>
+ <1488833103-21082-11-git-send-email-tbaicar@codeaurora.org>
+ <58BE9E14.6040208@arm.com>
+ <783e18ac-9495-aaf6-8fbd-5a48c0b68f5b@codeaurora.org>
+ <58C02CA2.4030601@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170309162942.jwtb3l33632zhbaz@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@suse.de>, Paolo Bonzini <pbonzini@redhat.com>
-Cc: brijesh.singh@amd.com, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhel
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <58C02CA2.4030601@arm.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: James Morse <james.morse@arm.com>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-Hi Boris and Paolo,
+Hello James,
 
-On 03/09/2017 10:29 AM, Borislav Petkov wrote:
-> On Thu, Mar 09, 2017 at 05:13:33PM +0100, Paolo Bonzini wrote:
->> This is not how you check if running under a hypervisor; you should
->> check the HYPERVISOR bit, i.e. bit 31 of cpuid(1).ecx.  This in turn
->> tells you if leaf 0x40000000 is valid.
+
+On 3/8/2017 9:09 AM, James Morse wrote:
+> On 07/03/17 17:58, Baicar, Tyler wrote:
+>> On 3/7/2017 4:48 AM, James Morse wrote:
+>>> On 06/03/17 20:45, Tyler Baicar wrote:
+>>>> Currently external aborts are unsupported by the guest abort
+>>>> handling. Add handling for SEAs so that the host kernel reports
+>>>> SEAs which occur in the guest kernel.
+>>>> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
+>>>> index a5265ed..f3608c9 100644
+>>>> --- a/arch/arm/kvm/mmu.c
+>>>> +++ b/arch/arm/kvm/mmu.c
+>>>> @@ -1444,8 +1463,21 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu,
+>>>> struct kvm_run *run)
+>>>>          /* Check the stage-2 fault is trans. fault or write fault */
+>>>>        fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
+>>>> -    if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>>>> -        fault_status != FSC_ACCESS) {
+>>>> +
+>>>> +    /* The host kernel will handle the synchronous external abort. There
+>>>> +     * is no need to pass the error into the guest.
+>>>> +     */
+>>>> +    if (is_abort_synchronous(fault_status)) {
+>>>> +        if(handle_guest_sea((unsigned long)fault_ipa,
+>>>> +                    kvm_vcpu_get_hsr(vcpu))) {
+>>> ... Looking further up in this function:
+>>>>      is_iabt = kvm_vcpu_trap_is_iabt(vcpu);
+>>>>      if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu))) {
+>>>>          kvm_inject_vabt(vcpu);
+>>>>          return 1;
+>>>>      }
+>>> ... so external data aborts will have already been 'claimed' by kvm and dealt
+>>> with, and we already have a helper for spotting external aborts. (sorry I didn't
+>>> spot it earlier).
+>>>
+>>> We need to do the handle_guest_sea() before this code.
+>>>
+>>> kvm_inject_vabt() makes an SError interrupt pending for the guest. This makes a
+>>> synchronous error asynchronous as the guest may have SError interrupts masked.
+>>>
+>>> I guess this was the best that could be done at the time of (4055710baca8
+>>> "arm/arm64: KVM: Inject virtual abort when guest exits on external abort"), but
+>>> in the light of this firmware-first handling, I'm not sure its the right thing
+>>> to do.
+>>>
+>>> Is it possible for handle_guest_sea() to return whether it actually found any
+>>> work to do? If there was none I think we should keep this kvm_inject_vabt() as
+>>> it is the existing behaviour.
+>> Yes, I'll move the handle_guest_sea() call above this. My testing didn't call
+>> into that if statement for some reason...it made it to the handle_guest_sea()
+>> call successfully.
+> I guess you're not using data aborts for testing then.
 >
-> Ah, good point, I already do that in the microcode loader :)
 >
->         /*
->          * CPUID(1).ECX[31]: reserved for hypervisor use. This is still not
->          * completely accurate as xen pv guests don't see that CPUID bit set but
->          * that's good enough as they don't land on the BSP path anyway.
->          */
->         if (native_cpuid_ecx(1) & BIT(31))
->                 return *res;
+>> If there is no work for the GHES code to do it will return and could still make
+>> the kvm_inject_vabt() call. It will also return and do that same thing if the
+>> error was not fatal in GHES...would that be an issue?
+> We might inject a superfluous SError Interrupt in that case.
 >
->> That said, the main issue with this function is that it hardcodes the
->> behavior for KVM.  It is possible that another hypervisor defines its
->> 0x40000001 leaf in such a way that KVM_FEATURE_SEV has a different meaning.
->>
->> Instead, AMD should define a "well-known" bit in its own space (i.e.
->> 0x800000xx) that is only used by hypervisors that support SEV.  This is
->> similar to how Intel defined one bit in leaf 1 to say "is leaf
->> 0x40000000 valid".
->>
->>> +	if (eax > 0x40000000) {
->>> +		eax = 0x40000001;
->>> +		ecx = 0;
->>> +		native_cpuid(&eax, &ebx, &ecx, &edx);
->>> +		if (!(eax & BIT(KVM_FEATURE_SEV)))
->>> +			goto out;
->>> +
->>> +		eax = 0x8000001f;
->>> +		ecx = 0;
->>> +		native_cpuid(&eax, &ebx, &ecx, &edx);
->>> +		if (!(eax & 1))
+> For memory errors we may do the whole unmapping and signalling thing to handle
+> the fault. For recoverable faults, QEMU can generate its own CPER records for
+> the guest and do the work to notify the guest. Everything looks fine until the
+> guest gets the extra SError interrupt.
 >
-> Right, so this is testing CPUID_0x8000001f_ECX(0)[0], SME. Why not
-> simply set that bit for the guest too, in kvm?
+> If there is firmware-first RAS data, we should skip the injected SError
+> Interrupt as the host's RAS code should choose what to do. If this Synchronous
+> External Abort was nothing to do with RAS, we should inject the SError interrupt
+> as it's the existing behaviour, and not all platforms will have this Synchronous
+> External Abort mechanism.
 >
+> x86's APEI NMI needs to know if the NMI was due to RAS, so we can probably
+> borrow the same trick. ghes_notify_nmi() calls ghes_read_estatus() for each
+> struct ghes. If they all return an error, there was no work to do.
+>
+>
+> (I assume firmware will only generate one of these at a time, so there is no
+> risk of one list-walker processing two entries, then the second finding nothing
+> to do?)
+>
+Okay, I will add in this functionality to avoid injecting an SEI if 
+there is actually a GHES error populated.
 
-CPUID_8000_001F[EAX] indicates whether the feature is supported.
-CPUID_0x8000001F[EAX]:
-  * Bit 0 - SME supported
-  * Bit 1 - SEV supported
-  * Bit 3 - SEV-ES supported
+Firmware that supports the new specs should only generate one of these 
+at a time, it will wait for the ack from kernel before sending a second 
+error (patch 1 of this series).
 
-We can use MSR_K8_SYSCFG[MemEncryptionModeEnc] to check if memory encryption is enabled.
-Currently, KVM returns zero when guest OS read MSR_K8_SYSCFG. I can update my patch sets
-to set this bit for SEV enabled guests.
+Thanks,
+Tyler
+>
+>
+>>>> +            kvm_err("Failed to handle guest SEA, FSC: EC=%#x xFSC=%#lx
+>>>> ESR_EL2=%#lx\n",
+>>>> +                kvm_vcpu_trap_get_class(vcpu),
+>>>> +                (unsigned long)kvm_vcpu_trap_get_fault(vcpu),
+>>>> +                (unsigned long)kvm_vcpu_get_hsr(vcpu));
+>>>> +            return -EFAULT;
+>>>> +        }
+>>>> +    } else if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+>>>> +           fault_status != FSC_ACCESS) {
+>>>>            kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
+>>>>                kvm_vcpu_trap_get_class(vcpu),
+>>>>                (unsigned long)kvm_vcpu_trap_get_fault(vcpu),
 
-We could update this patch to use the below logic:
-
-  * CPUID(0) - Check for AuthenticAMD
-  * CPID(1) - Check if under hypervisor
-  * CPUID(0x80000000) - Check for highest supported leaf
-  * CPUID(0x8000001F).EAX - Check for SME and SEV support
-  * rdmsr (MSR_K8_SYSCFG)[MemEncryptionModeEnc] - Check if SMEE is set
-
-
-Paolo,
-
-One question, do we need "AuthenticAMD" check when we are running under hypervisor ?
-I was looking at qemu code and found that qemu exposes parameters to change the CPU
-vendor id. The above check will fail if user changes the vendor id while launching
-the SEV guest.
-
--Brijesh
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
