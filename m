@@ -1,42 +1,61 @@
-From: "Kalugin, Evgeny" <evgeny.kalugin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH] pstore: return error code (if any) from efi_pstore_write
-Date: Mon, 13 Mar 2017 12:46:26 +0000
-Message-ID: <1489416765.32205.14.camel@evgeny-pc.tm.intel.com>
+From: Steven Rostedt <rostedt@goodmis.org>
+Subject: Re: [PATCH V12 09/10] trace, ras: add ARM processor error trace
+ event
+Date: Mon, 13 Mar 2017 09:58:52 -0400
+Message-ID: <20170313095852.0c424d53@gandalf.local.home>
+References: <1488833103-21082-1-git-send-email-tbaicar@codeaurora.org>
+        <1488833103-21082-10-git-send-email-tbaicar@codeaurora.org>
+        <58C12342.2090701@huawei.com>
+        <14545228-7ff1-b31c-1fa5-daacf89a44b9@codeaurora.org>
+        <58C60485.2070509@huawei.com>
+        <58C65FCB.3040508@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Language: en-US
-Content-ID: <103991DD905FB843974CA140E110B192-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org" <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org" <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <58C65FCB.3040508@huawei.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Xie XiuQi <xiexiuqi@huawei.com>
+Cc: "Baicar, Tyler" <tbaicar@codeaurora.org>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-RnJvbSA2NTVhMjYxZDcxYWY5ZGU2MmUwZTIzYWUwZWI2Zjc1MDM3YWU1ZTNlIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQ0KRnJvbTogRXZnZW55IEthbHVnaW4gPGV2Z2VueS5rYWx1Z2luQGludGVs
-LmNvbT4NCkRhdGU6IFR1ZSwgNyBNYXIgMjAxNyAxNDoyMjoyNSArMDAwMA0KU3ViamVjdDogW1BB
-VENIXSBwc3RvcmU6IHJldHVybiBlcnJvciBjb2RlIChpZiBhbnkpIGZyb20gZWZpX3BzdG9yZV93
-cml0ZQ0KDQpGb3Igc29tZSByZWFzb24gcmV0dXJuIHZhbHVlIGZyb20gYWN0dWFsIHZhcmlhYmxl
-IHNldHRpbmcgd2FzIGlnbm9yZWQuDQpXaXRoIHRoaXMgY2hhbmdlIGVycm9yIGNvZGUgZ2V0IHRy
-YW5zZmVycmVkIHVwd2FyZHMgdGhyb3VnaCBjYWxsIHN0YWNrLg0KDQpTaWduZWQtb2ZmLWJ5OiBF
-dmdlbnkgS2FsdWdpbiA8ZXZnZW55LmthbHVnaW5AaW50ZWwuY29tPg0KLS0tDQogZHJpdmVycy9m
-aXJtd2FyZS9lZmkvZWZpLXBzdG9yZS5jIHwgMiArLQ0KIDEgZmlsZSBjaGFuZ2VkLCAxIGluc2Vy
-dGlvbigrKSwgMSBkZWxldGlvbigtKQ0KDQpkaWZmIC0tZ2l0IGEvZHJpdmVycy9maXJtd2FyZS9l
-ZmkvZWZpLXBzdG9yZS5jIGIvZHJpdmVycy9maXJtd2FyZS9lZmkvZWZpLXBzdG9yZS5jDQppbmRl
-eCBmNDAyYmEyLi4yZWE4MDhlIDEwMDY0NA0KLS0tIGEvZHJpdmVycy9maXJtd2FyZS9lZmkvZWZp
-LXBzdG9yZS5jDQorKysgYi9kcml2ZXJzL2Zpcm13YXJlL2VmaS9lZmktcHN0b3JlLmMNCkBAIC0y
-NzQsNyArMjc0LDcgQEAgc3RhdGljIGludCBlZmlfcHN0b3JlX3dyaXRlKGVudW0gcHN0b3JlX3R5
-cGVfaWQgdHlwZSwNCiAJZm9yIChpID0gMDsgaSA8IERVTVBfTkFNRV9MRU47IGkrKykNCiAJCWVm
-aV9uYW1lW2ldID0gbmFtZVtpXTsNCiANCi0JZWZpdmFyX2VudHJ5X3NldF9zYWZlKGVmaV9uYW1l
-LCB2ZW5kb3IsIFBTVE9SRV9FRklfQVRUUklCVVRFUywNCisJcmV0ID0gZWZpdmFyX2VudHJ5X3Nl
-dF9zYWZlKGVmaV9uYW1lLCB2ZW5kb3IsIFBTVE9SRV9FRklfQVRUUklCVVRFUywNCiAJCQkgICAg
-ICAhcHN0b3JlX2Nhbm5vdF9ibG9ja19wYXRoKHJlYXNvbiksDQogCQkJICAgICAgc2l6ZSwgcHNp
-LT5idWYpOw0KIA0KLS0gDQoxLjkuMQ0KDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KSW50ZWwgRmlubGFuZCBPeQpS
-ZWdpc3RlcmVkIEFkZHJlc3M6IFBMIDI4MSwgMDAxODEgSGVsc2lua2kgCkJ1c2luZXNzIElkZW50
-aXR5IENvZGU6IDAzNTc2MDYgLSA0IApEb21pY2lsZWQgaW4gSGVsc2lua2kgCgpUaGlzIGUtbWFp
-bCBhbmQgYW55IGF0dGFjaG1lbnRzIG1heSBjb250YWluIGNvbmZpZGVudGlhbCBtYXRlcmlhbCBm
-b3IKdGhlIHNvbGUgdXNlIG9mIHRoZSBpbnRlbmRlZCByZWNpcGllbnQocykuIEFueSByZXZpZXcg
-b3IgZGlzdHJpYnV0aW9uCmJ5IG90aGVycyBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3Ug
-YXJlIG5vdCB0aGUgaW50ZW5kZWQKcmVjaXBpZW50LCBwbGVhc2UgY29udGFjdCB0aGUgc2VuZGVy
-IGFuZCBkZWxldGUgYWxsIGNvcGllcy4K
+On Mon, 13 Mar 2017 17:00:59 +0800
+Xie XiuQi <xiexiuqi@huawei.com> wrote:
+
+> ---
+>  drivers/acpi/apei/ghes.c |  8 +++++
+>  include/linux/cper.h     |  5 +++
+>  include/ras/ras_event.h  | 87 ++++++++++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 100 insertions(+)
+> 
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index 251d7e0..6d34c26 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -518,9 +518,17 @@ static void ghes_do_proc(struct ghes *ghes,
+>  		else if (!uuid_le_cmp(sec_type, CPER_SEC_PROC_ARM) &&
+>  			 trace_arm_event_enabled()) {
+>  			struct cper_sec_proc_arm *arm_err;
+> +			struct cper_arm_err_info *err_info;
+> +			int i;
+> 
+>  			arm_err = acpi_hest_generic_data_payload(gdata);
+>  			trace_arm_event(arm_err);
+> +
+
+		if (trace_arm_proc_err_enabled()) {
+
+> +			err_info = (struct cper_arm_err_info *)(arm_err + 1);
+> +			for (i = 0; i < arm_err->err_info_num; i++) {
+> +				trace_arm_proc_err(err_info);
+> +				err_info += 1;
+> +			}
+
+		}
+
+-- Steve
+
+>  		} else if (trace_unknown_sec_event_enabled()) {
+>  			void *unknown_err = acpi_hest_generic_data_payload(gdata);
+>  			trace_unknown_sec_event(&sec_type,
+> diff --git a/include/linux/cper.h b/include/linux/cper.h
