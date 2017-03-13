@@ -1,184 +1,111 @@
-From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: Re: [RFC PATCH v2 14/32] x86: mm: Provide support to use memblock
- when spliting large pages
-Date: Fri, 10 Mar 2017 16:41:56 -0600
-Message-ID: <cb6a9a56-2c52-d98d-3ff6-3b61d0e5875e@amd.com>
-References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <148846771545.2349.9373586041426414252.stgit@brijesh-build-machine>
- <20170310110657.hophlog2juw5hpzz@pd.tnic>
+From: Xie XiuQi <xiexiuqi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH V12 09/10] trace, ras: add ARM processor error trace event
+Date: Mon, 13 Mar 2017 10:31:33 +0800
+Message-ID: <58C60485.2070509@huawei.com>
+References: <1488833103-21082-1-git-send-email-tbaicar@codeaurora.org>
+ <1488833103-21082-10-git-send-email-tbaicar@codeaurora.org>
+ <58C12342.2090701@huawei.com>
+ <14545228-7ff1-b31c-1fa5-daacf89a44b9@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-crypto-owner@vger.kernel.org>
-In-Reply-To: <20170310110657.hophlog2juw5hpzz@pd.tnic>
-Sender: linux-crypto-owner@vger.kernel.org
-To: Borislav Petkov <bp@suse.de>, Paolo Bonzini <pbonzini@redhat.com>
-Cc: brijesh.singh@amd.com, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <14545228-7ff1-b31c-1fa5-daacf89a44b9-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.orgkvm
 List-Id: linux-efi@vger.kernel.org
 
-Hi Boris,
+Hi Baicar Tyler,
 
-On 03/10/2017 05:06 AM, Borislav Petkov wrote:
-> On Thu, Mar 02, 2017 at 10:15:15AM -0500, Brijesh Singh wrote:
->> If kernel_maps_pages_in_pgd is called early in boot process to change the
+On 2017/3/11 2:23, Baicar, Tyler wrote:
+> Hello Xie XiuQi,
+> 
+> 
+> On 3/9/2017 2:41 AM, Xie XiuQi wrote:
+>> On 2017/3/7 4:45, Tyler Baicar wrote:
+>>> Currently there are trace events for the various RAS
+>>> errors with the exception of ARM processor type errors.
+>>> Add a new trace event for such errors so that the user
+>>> will know when they occur. These trace events are
+>>> consistent with the ARM processor error section type
+>>> defined in UEFI 2.6 spec section N.2.4.4.
+>>>
+>>> Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>>> Acked-by: Steven Rostedt <rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org>
+>>> ---
+>>>   drivers/acpi/apei/ghes.c    |  8 +++++++-
+>>>   drivers/firmware/efi/cper.c |  1 +
+>>>   drivers/ras/ras.c           |  1 +
+>>>   include/ras/ras_event.h     | 34 ++++++++++++++++++++++++++++++++++
+>>>   4 files changed, 43 insertions(+), 1 deletion(-)
+> 
+>>> diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
+>>> index 5861b6f..b36db48 100644
+>>> --- a/include/ras/ras_event.h
+>>> +++ b/include/ras/ras_event.h
+>>> @@ -162,6 +162,40 @@
+>>>   );
+>>>     /*
+>>> + * ARM Processor Events Report
+>>> + *
+>>> + * This event is generated when hardware detects an ARM processor error
+>>> + * has occurred. UEFI 2.6 spec section N.2.4.4.
+>>> + */
+>>> +TRACE_EVENT(arm_event,
+>>> +
+>>> +    TP_PROTO(const struct cper_sec_proc_arm *proc),
+>>> +
+>>> +    TP_ARGS(proc),
+>>> +
+>>> +    TP_STRUCT__entry(
+>>> +        __field(u64, mpidr)
+>>> +        __field(u64, midr)
+>>> +        __field(u32, running_state)
+>>> +        __field(u32, psci_state)
+>>> +        __field(u8, affinity)
+>>> +    ),
+>>> +
+>>> +    TP_fast_assign(
+>>> +        __entry->affinity = proc->affinity_level;
+>>> +        __entry->mpidr = proc->mpidr;
+>>> +        __entry->midr = proc->midr;
+>>> +        __entry->running_state = proc->running_state;
+>>> +        __entry->psci_state = proc->psci_state;
+>>> +    ),
+>>> +
+>>> +    TP_printk("affinity level: %d; MPIDR: %016llx; MIDR: %016llx; "
+>>> +          "running state: %d; PSCI state: %d",
+>>> +          __entry->affinity, __entry->mpidr, __entry->midr,
+>>> +          __entry->running_state, __entry->psci_state)
+>>> +);
+>>> +
+>> I think these fields are not enough, we need also export arm processor error
+>> information (UEFI 2.6 spec section N.2.4.4.1), or at least the error type,
+>> address, etc. So that the userspace (such as rasdaemon tool) could know what
+>> error occurred.
 >
-> kernel_map_pages_in_pgd()
->
->> memory attributes then it fails to allocate memory when spliting large
->> pages. The patch extends the cpa_data to provide the support to use
->> memblock_alloc when slab allocator is not available.
->>
->> The feature will be used in Secure Encrypted Virtualization (SEV) mode,
->> where we may need to change the memory region attributes in early boot
->> process.
->>
->> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
->> ---
->>  arch/x86/mm/pageattr.c |   51 ++++++++++++++++++++++++++++++++++++++++--------
->>  1 file changed, 42 insertions(+), 9 deletions(-)
->>
->> diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
->> index 46cc89d..9e4ab3b 100644
->> --- a/arch/x86/mm/pageattr.c
->> +++ b/arch/x86/mm/pageattr.c
->> @@ -14,6 +14,7 @@
->>  #include <linux/gfp.h>
->>  #include <linux/pci.h>
->>  #include <linux/vmalloc.h>
->> +#include <linux/memblock.h>
->>
->>  #include <asm/e820/api.h>
->>  #include <asm/processor.h>
->> @@ -37,6 +38,7 @@ struct cpa_data {
->>  	int		flags;
->>  	unsigned long	pfn;
->>  	unsigned	force_split : 1;
->> +	unsigned	force_memblock :1;
->>  	int		curpage;
->>  	struct page	**pages;
->>  };
->> @@ -627,9 +629,8 @@ try_preserve_large_page(pte_t *kpte, unsigned long address,
->>
->>  static int
->>  __split_large_page(struct cpa_data *cpa, pte_t *kpte, unsigned long address,
->> -		   struct page *base)
->> +		  pte_t *pbase, unsigned long new_pfn)
->>  {
->> -	pte_t *pbase = (pte_t *)page_address(base);
->>  	unsigned long ref_pfn, pfn, pfninc = 1;
->>  	unsigned int i, level;
->>  	pte_t *tmp;
->> @@ -646,7 +647,7 @@ __split_large_page(struct cpa_data *cpa, pte_t *kpte, unsigned long address,
->>  		return 1;
->>  	}
->>
->> -	paravirt_alloc_pte(&init_mm, page_to_pfn(base));
->> +	paravirt_alloc_pte(&init_mm, new_pfn);
->>
->>  	switch (level) {
->>  	case PG_LEVEL_2M:
->> @@ -707,7 +708,8 @@ __split_large_page(struct cpa_data *cpa, pte_t *kpte, unsigned long address,
->>  	 * pagetable protections, the actual ptes set above control the
->>  	 * primary protection behavior:
->>  	 */
->> -	__set_pmd_pte(kpte, address, mk_pte(base, __pgprot(_KERNPG_TABLE)));
->> +	__set_pmd_pte(kpte, address,
->> +		native_make_pte((new_pfn << PAGE_SHIFT) + _KERNPG_TABLE));
->>
->>  	/*
->>  	 * Intel Atom errata AAH41 workaround.
->> @@ -723,21 +725,50 @@ __split_large_page(struct cpa_data *cpa, pte_t *kpte, unsigned long address,
->>  	return 0;
->>  }
->>
->> +static pte_t *try_alloc_pte(struct cpa_data *cpa, unsigned long *pfn)
->> +{
->> +	unsigned long phys;
->> +	struct page *base;
->> +
->> +	if (cpa->force_memblock) {
->> +		phys = memblock_alloc(PAGE_SIZE, PAGE_SIZE);
->
-> Maybe there's a reason this fires:
->
-> WARNING: modpost: Found 2 section mismatch(es).
-> To see full details build your kernel with:
-> 'make CONFIG_DEBUG_SECTION_MISMATCH=y'
->
-> WARNING: vmlinux.o(.text+0x48edc): Section mismatch in reference from the function __change_page_attr() to the function .init.text:memblock_alloc()
-> The function __change_page_attr() references
-> the function __init memblock_alloc().
-> This is often because __change_page_attr lacks a __init
-> annotation or the annotation of memblock_alloc is wrong.
->
-> WARNING: vmlinux.o(.text+0x491d1): Section mismatch in reference from the function __change_page_attr() to the function .meminit.text:memblock_free()
-> The function __change_page_attr() references
-> the function __meminit memblock_free().
-> This is often because __change_page_attr lacks a __meminit
-> annotation or the annotation of memblock_free is wrong.
->
+> This is something I am planning on adding in later. It is not clear to me how to
+> actually do this at this point. If you look at the spec, there is not a single
+> error information structure. There is at least one, but possibly a lot. There is
+> also an unknown amount of context information structures. In "Table 260. ARM Processor
+> Error Section" there are ERR_INFO_NUM and CONTEXT_INFO_NUM which give the number of these
+> structures. I think there will need to be separate trace events added in for each of
+> these structures because I don't think there is a way to have variable amounts of
+> structures inside of a trace event.
 
-I can take a look at fixing those warning. In my initial attempt was to create
-a new function to clear encryption bit but it ended up looking very similar to
-__change_page_attr_set_clr() hence decided to extend the exiting function to
-use memblock_alloc().
+Yes, I agree.
 
+Additional, cper_sec_proc_arm has validation bit, which indicates whether or not each of
+the fields is valid in this section. How could we show it in this trace event? If the filed
+is invalid, we would get a wrong value here.
 
-> Why do we need this whole early mapping? For the guest? I don't like
-> that memblock thing at all.
+--
+Thanks,
+Xie XiuQi
 
-Early in boot process, guest kernel allocates some structure (its either
-statically allocated or dynamic allocated via memblock_alloc). And shares the physical
-address of these structure with hypervisor. Since entire guest memory area is mapped
-as encrypted hence those structure's are mapped as encrypted memory range. We need
-a method to clear the encryption bit. Sometime these structure maybe part of 2M pages
-and need to split into smaller pages.
-
->
-> So I think the approach with the .data..percpu..hv_shared section is
-> fine and we should consider SEV-ES
->
-> http://support.amd.com/TechDocs/Protecting%20VM%20Register%20State%20with%20SEV-ES.pdf
->
-> and do this right from the get-go so that when SEV-ES comes along, we
-> should simply be ready and extend that mechanism to put the whole Guest
-> Hypervisor Communication Block in there.
->
-
-> But then the fact that you're mapping those decrypted in init_mm.pgd
-> makes me think you don't need that early mapping thing at all. Those are
-> the decrypted mappings of the hypervisor. And that you can do late.
->
-
-In most cases, guest and hypervisor communication starts as soon as guest provides
-the physical address to hypervisor. So we must map the pages as decrypted before
-sharing the physical address to hypervisor.
-
-> Now, what would be better, IMHO (and I have no idea about virtualization
-> design so take with a grain of salt) is if the guest would allocate
-> enough memory for the GHCB and mark it decrypted from the very
-> beginning. It will be the communication vehicle with the hypervisor
-> anyway.
->
-> And we already do similar things in sme_map_bootdata() for the baremetal
-> kernel to map boot_data, initrd, EFI, ... and so on things decrypted.
->
-
-I will take a look at sme_map_bootdata but I believe the main difference is,
-in case of SME those memory regions were allocated by bios or bootloader as
-decrypted and sme_map_bootdata clears the encryptions bit.
-
-In case of guest, memory maybe dynamically allocated at boot time and may not have same
-attribute as early mapping.
-
-> And we should extend that mechanism to map the GHCB in the guest too and
-> then we can get rid of all that need for ->force_memblock which makes
-> the crazy mess in pageattr.c even crazier. And it would be lovely if we
-> can do it without it.
->
-> But maybe Paolo might have an even better idea...
->
-
-I am sure he will have better idea :)
-
--Brijesh
+> 
+> The ARM processor error section also has a vendor specific error info buffer which will need to be exposed to userspace. This may be something that can reuse the unknown section type trace event or have it's own trace event for.
+> 
+> Thanks,
+> Tyler
+> 
