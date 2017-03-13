@@ -1,46 +1,125 @@
-From: Thomas Garnier <thgarnie@google.com>
-Subject: Re: [Xen-devel] [PATCH v5 2/3] x86: Remap GDT tables in the Fixmap section
-Date: Mon, 13 Mar 2017 12:24:21 -0700
-Message-ID: <CAJcbSZG75_cHxWp2eJ+XPiKZMbf2NNGwoS+8qkmXQ=rH2FURCQ@mail.gmail.com>
-References: <20170306220348.79702-1-thgarnie@google.com> <20170306220348.79702-2-thgarnie@google.com>
- <CALCETrVXHc-EAhBtdhL9FXSW1G2VbohRY4UJuOtpRG1K0Q-Ogg@mail.gmail.com>
- <17ffcc5b-1c9a-51b6-272a-5eaecf1bc0c4@citrix.com> <CALCETrWv-u7OdjWDY+5eF7p-ngPun-yYf0QegMzYc6MGVQd-4w@mail.gmail.com>
- <CAJcbSZExVWA0jvAoxLLc+58Ag9cHchifrHP=fFfzU_onHo2PyA@mail.gmail.com>
- <5cf31779-45c5-d37f-86bc-d5afb3fb7ab6@oracle.com> <51c23e92-d1f0-427f-e069-c92fc4ed6226@oracle.com>
- <CAJcbSZEnUBfLHjf+bHqY0JQhQXD9urX45BXrQjx=1=A5gPpp_w@mail.gmail.com>
- <36579cc4-05e7-a448-767c-b9ad940362fc@oracle.com> <f2230734-a13f-6c0d-8a01-15fd4408e799@oracle.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v2 06/32] x86/pci: Use memremap when walking setup
+ data
+Date: Mon, 13 Mar 2017 15:08:52 -0500
+Message-ID: <a0c3ebb9-37b4-3f47-86df-eac110c07032@amd.com>
+References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
+ <148846759008.2349.8274808454274279039.stgit@brijesh-build-machine>
+ <20170303204209.GA31767@bhelgaas-glaptop.roam.corp.google.com>
+ <df526224-0a4b-abc6-6377-efbca77284b1@amd.com>
+ <20170307000349.GC5305@bhelgaas-glaptop.roam.corp.google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <f2230734-a13f-6c0d-8a01-15fd4408e799@oracle.com>
+In-Reply-To: <20170307000349.GC5305@bhelgaas-glaptop.roam.corp.google.com>
 Sender: owner-linux-mm@kvack.org
-To: Boris Ostrovsky <boris.ostrovsky@oracle.com>
-Cc: Michal Hocko <mhocko@suse.com>, Stanislaw Gruszka <sgruszka@redhat.com>, kvm list <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Frederic Weisbecker <fweisbec@gmail.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Chris Wilson <chris@chris-wilson.co.uk>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Dave Hansen <dave.hansen@intel.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Alexander Potapenko <glider@google.com>, Pavel Machek <pavel@ucw.cz>, "H . Peter Anvin" <hpa@zytor.com>, "kernel-hardening@lists.openwall.com" <kernel-hardening@lists.openwall.com>, Jiri Olsa <jolsa@redhat.com>, zijun_hu <zijun_hu@htc.com>, Prarit Bhargava <prarit@redhat.com>, Andi Kleen <ak@linux.intel.com>, Len Brown <len.brown@intel.com>Jonathan Corbet <c>
+To: Bjorn Helgaas <helgaas@kernel.org>
+Cc: Brijesh Singh <brijesh.singh@amd.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.orgbhe
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Mar 13, 2017 at 11:32 AM, Boris Ostrovsky
-<boris.ostrovsky@oracle.com> wrote:
-> There are a couple of problems for Xen PV guests that need to be addressed:
-> 1. Xen's set_fixmap op needs non-default handling for
-> FIX_GDT_REMAP_BEGIN range
-> 2. GDT remapping for PV guests needs to be RO for both 64 and 32-bit guests.
+On 3/6/2017 6:03 PM, Bjorn Helgaas wrote:
+> On Fri, Mar 03, 2017 at 03:15:34PM -0600, Tom Lendacky wrote:
+>> On 3/3/2017 2:42 PM, Bjorn Helgaas wrote:
+>>> On Thu, Mar 02, 2017 at 10:13:10AM -0500, Brijesh Singh wrote:
+>>>> From: Tom Lendacky <thomas.lendacky@amd.com>
+>>>>
+>>>> The use of ioremap will force the setup data to be mapped decrypted even
+>>>> though setup data is encrypted.  Switch to using memremap which will be
+>>>> able to perform the proper mapping.
+>>>
+>>> How should callers decide whether to use ioremap() or memremap()?
+>>>
+>>> memremap() existed before SME and SEV, and this code is used even if
+>>> SME and SEV aren't supported, so the rationale for this change should
+>>> not need the decryption argument.
+>>
+>> When SME or SEV is active an ioremap() will remove the encryption bit
+>> from the pagetable entry when it is mapped.  This allows MMIO, which
+>> doesn't support SME/SEV, to be performed successfully.  So my take is
+>> that ioremap() should be used for MMIO and memremap() for pages in RAM.
 >
-> I don't know how you prefer to deal with (2), patch below is one
-> suggestion. With it all my boot tests (Xen and bare-metal) passed.
+> OK, thanks.  The commit message should say something like "this is
+> RAM, not MMIO, so we should map it with memremap(), not ioremap()".
+> That's the part that determines whether the change is correct.
+>
+> You can mention the encryption part, too, but it's definitely
+> secondary because the change has to make sense on its own, without
+> SME/SEV.
 >
 
-Good suggestion, I think I will use most of it. Thanks!
+Ok, that makes sense, will do.
 
-> One problem with applying it directly is that kernel becomes
-> not-bisectable (Xen-wise) between patches 2 and 3 so perhaps you might
-> pull some of the changes from patch 3 to patch 2.
+> The following commits (from https://github.com/codomania/tip/branches)
+> all do basically the same thing so the changelogs (and summaries)
+> should all be basically the same:
 >
+>   cb0d0d1eb0a6 x86: Change early_ioremap to early_memremap for BOOT data
+>   91acb68b8333 x86/pci: Use memremap when walking setup data
+>   4f687503e23f x86: Access the setup data through sysfs decrypted
+>   e90246b8c229 x86: Access the setup data through debugfs decrypted
+>
+> I would collect them all together and move them to the beginning of
+> your series, since they don't depend on anything else.
 
-Yes that make sense, I will have to add the global variable on patch 2
-and rebase 3 correctly.
+I'll do that.
 
--- 
-Thomas
+>
+> Also, change "x86/pci: " to "x86/PCI" so it matches the previous
+> convention.
+
+Will do.
+
+Thanks,
+Tom
+
+>
+>>>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>
+> Acked-by: Bjorn Helgaas <bhelgaas@google.com>
+>
+>>>> ---
+>>>> arch/x86/pci/common.c |    4 ++--
+>>>> 1 file changed, 2 insertions(+), 2 deletions(-)
+>>>>
+>>>> diff --git a/arch/x86/pci/common.c b/arch/x86/pci/common.c
+>>>> index a4fdfa7..0b06670 100644
+>>>> --- a/arch/x86/pci/common.c
+>>>> +++ b/arch/x86/pci/common.c
+>>>> @@ -691,7 +691,7 @@ int pcibios_add_device(struct pci_dev *dev)
+>>>>
+>>>> 	pa_data = boot_params.hdr.setup_data;
+>>>> 	while (pa_data) {
+>>>> -		data = ioremap(pa_data, sizeof(*rom));
+>>>> +		data = memremap(pa_data, sizeof(*rom), MEMREMAP_WB);
+>>>
+>>> I can't quite connect the dots here.  ioremap() on x86 would do
+>>> ioremap_nocache().  memremap(MEMREMAP_WB) would do arch_memremap_wb(),
+>>> which is ioremap_cache().  Is making a cacheable mapping the important
+>>> difference?
+>>
+>> The memremap(MEMREMAP_WB) will actually check to see if it can perform
+>> a __va(pa_data) in try_ram_remap() and then fallback to the
+>> arch_memremap_wb().  So it's actually the __va() vs the ioremap_cache()
+>> that is the difference.
+>>
+>> Thanks,
+>> Tom
+>>
+>>>
+>>>> 		if (!data)
+>>>> 			return -ENOMEM;
+>>>>
+>>>> @@ -710,7 +710,7 @@ int pcibios_add_device(struct pci_dev *dev)
+>>>> 			}
+>>>> 		}
+>>>> 		pa_data = data->next;
+>>>> -		iounmap(data);
+>>>> +		memunmap(data);
+>>>> 	}
+>>>> 	set_dma_domain_ops(dev);
+>>>> 	set_dev_domain_options(dev);
+>>>>
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
