@@ -1,50 +1,124 @@
-From: "Kalugin, Evgeny" <evgeny.kalugin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] pstore: return error code (if any) from efi_pstore_write
-Date: Tue, 14 Mar 2017 09:59:25 +0000
-Message-ID: <1489493144.11640.29.camel@evgeny-pc.tm.intel.com>
-References: <1489416765.32205.14.camel@evgeny-pc.tm.intel.com>
-         <CAKv+Gu92Lq62aJF4Ki2DU577xs09JWPLaOfRENRo=+VSyEBhVQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu92Lq62aJF4Ki2DU577xs09JWPLaOfRENRo=+VSyEBhVQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Content-ID: <D663B1AE2E06154ABFBAC61EECA64444-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org" <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org" <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>
+From: Thomas Garnier <thgarnie@google.com>
+Subject: [PATCH v7 1/3] x86/mm: Adapt MODULES_END based on Fixmap section size
+Date: Tue, 14 Mar 2017 10:05:06 -0700
+Message-ID: <20170314170508.100882-1-thgarnie@google.com>
+Return-path: <owner-linux-mm@kvack.org>
+Sender: owner-linux-mm@kvack.org
+To: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Jonathan Corbet <corbet@lwn.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Thomas Garnier <thgarnie@google.com>, Lorenzo Stoakes <lstoakes@gmail.com>, Kees Cook <keescook@chromium.org>, Juergen Gross <jgross@suse.com>, Andy Lutomirski <luto@kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Andrew Morton <akpm@linux-foundation.org>, Michal Hocko <mhocko@suse.com>, zijun_hu <zijun_hu@htc.com>, Chris Wilson <chris@chris-wilson.co.uk>, Andy Lutomirski <luto@amacapital.net>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheu>
+Cc: x86@kernel.org, linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, linux-pm@vger.kernel.org, linux-efi@vger.kernel.org, xen-devel@lists.xenproject.org, lguest@lists.ozlabs.org, kvm@vger.kernel.org, kernel-hardening@lists.openwall.com
 List-Id: linux-efi@vger.kernel.org
 
-T24gVHVlLCAyMDE3LTAzLTE0IGF0IDA4OjI0ICswMDAwLCBBcmQgQmllc2hldXZlbCB3cm90ZToN
-Cj4gT24gMTMgTWFyY2ggMjAxNyBhdCAxMjo0NiwgS2FsdWdpbiwgRXZnZW55IDxldmdlbnkua2Fs
-dWdpbkBpbnRlbC5jb20+IHdyb3RlOg0KPiA+IEZyb20gNjU1YTI2MWQ3MWFmOWRlNjJlMGUyM2Fl
-MGViNmY3NTAzN2FlNWUzZSBNb24gU2VwIDE3IDAwOjAwOjAwIDIwMDENCj4gPiBGcm9tOiBFdmdl
-bnkgS2FsdWdpbiA8ZXZnZW55LmthbHVnaW5AaW50ZWwuY29tPg0KPiA+IERhdGU6IFR1ZSwgNyBN
-YXIgMjAxNyAxNDoyMjoyNSArMDAwMA0KPiA+IFN1YmplY3Q6IFtQQVRDSF0gcHN0b3JlOiByZXR1
-cm4gZXJyb3IgY29kZSAoaWYgYW55KSBmcm9tIGVmaV9wc3RvcmVfd3JpdGUNCj4gPg0KPiA+IEZv
-ciBzb21lIHJlYXNvbiByZXR1cm4gdmFsdWUgZnJvbSBhY3R1YWwgdmFyaWFibGUgc2V0dGluZyB3
-YXMgaWdub3JlZC4NCj4gPiBXaXRoIHRoaXMgY2hhbmdlIGVycm9yIGNvZGUgZ2V0IHRyYW5zZmVy
-cmVkIHVwd2FyZHMgdGhyb3VnaCBjYWxsIHN0YWNrLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTog
-RXZnZW55IEthbHVnaW4gPGV2Z2VueS5rYWx1Z2luQGludGVsLmNvbT4NCj4gDQo+IFRoYW5rcyBm
-b3IgdGhlIHBhdGNoLg0KPiANCj4gQ291bGQgeW91IGdpdmUgYSBiaXQgbW9yZSBkZXRhaWwgb24g
-aG93IHRoaXMgYnJva2UgdGhpbmdzIGZvciB5b3U/DQoNCldlbGwsIGl0IGhhdmVuJ3QgYnJva2Vu
-IG11Y2ggdGhpbmdzIGZvciBtZSB5ZXQuIEkganVzdCBmb3VuZCBpdCB3aGVuDQp0cmllZCB0byBk
-ZWJ1ZyBvbmUgcHJvYmxlbSBpbiBlZmktcHN0b3JlLiBUaGVyZSBJIHdhcyBhYm91dCB0byB3YXRj
-aA0KcmV0dXJuIHZhbHVlIGZyb20gd3JpdGUgY2FsbCwgd2hlbiBub3RpY2VkIHRoYXQgaXQgaXMg
-YWx3YXlzIHplcm8gYW5kDQp0aGF0IGhhcyBub3Qgc28gbXVjaCBzZW5zZSBvYnZpb3VzbHkuDQoN
-Cj4gDQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvZmlybXdhcmUvZWZpL2VmaS1wc3RvcmUuYyB8IDIg
-Ky0NCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pDQo+
-ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9maXJtd2FyZS9lZmkvZWZpLXBzdG9yZS5jIGIv
-ZHJpdmVycy9maXJtd2FyZS9lZmkvZWZpLXBzdG9yZS5jDQo+ID4gaW5kZXggZjQwMmJhMi4uMmVh
-ODA4ZSAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL2Zpcm13YXJlL2VmaS9lZmktcHN0b3JlLmMN
-Cj4gPiArKysgYi9kcml2ZXJzL2Zpcm13YXJlL2VmaS9lZmktcHN0b3JlLmMNCj4gPiBAQCAtMjc0
-LDcgKzI3NCw3IEBAIHN0YXRpYyBpbnQgZWZpX3BzdG9yZV93cml0ZShlbnVtIHBzdG9yZV90eXBl
-X2lkIHR5cGUsDQo+ID4gICAgICAgICBmb3IgKGkgPSAwOyBpIDwgRFVNUF9OQU1FX0xFTjsgaSsr
-KQ0KPiA+ICAgICAgICAgICAgICAgICBlZmlfbmFtZVtpXSA9IG5hbWVbaV07DQo+ID4NCj4gPiAt
-ICAgICAgIGVmaXZhcl9lbnRyeV9zZXRfc2FmZShlZmlfbmFtZSwgdmVuZG9yLCBQU1RPUkVfRUZJ
-X0FUVFJJQlVURVMsDQo+ID4gKyAgICAgICByZXQgPSBlZml2YXJfZW50cnlfc2V0X3NhZmUoZWZp
-X25hbWUsIHZlbmRvciwgUFNUT1JFX0VGSV9BVFRSSUJVVEVTLA0KPiA+ICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICFwc3RvcmVfY2Fubm90X2Jsb2NrX3BhdGgocmVhc29uKSwNCj4gPiAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzaXplLCBwc2ktPmJ1Zik7DQo+ID4NCj4gPiAt
-LQ0KPiA+IDEuOS4xDQo+ID4NCg0K
+This patch aligns MODULES_END to the beginning of the Fixmap section.
+It optimizes the space available for both sections. The address is
+pre-computed based on the number of pages required by the Fixmap
+section.
+
+It will allow GDT remapping in the Fixmap section. The current
+MODULES_END static address does not provide enough space for the kernel
+to support a large number of processors.
+
+Signed-off-by: Thomas Garnier <thgarnie@google.com>
+---
+Based on next-20170308
+---
+ Documentation/x86/x86_64/mm.txt         | 5 ++++-
+ arch/x86/include/asm/pgtable_64_types.h | 3 ++-
+ arch/x86/kernel/module.c                | 1 +
+ arch/x86/mm/dump_pagetables.c           | 1 +
+ arch/x86/mm/kasan_init_64.c             | 1 +
+ mm/vmalloc.c                            | 1 +
+ 6 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/Documentation/x86/x86_64/mm.txt b/Documentation/x86/x86_64/mm.txt
+index 5724092db811..ee3f9c30957c 100644
+--- a/Documentation/x86/x86_64/mm.txt
++++ b/Documentation/x86/x86_64/mm.txt
+@@ -19,7 +19,7 @@ ffffff0000000000 - ffffff7fffffffff (=39 bits) %esp fixup stacks
+ ffffffef00000000 - fffffffeffffffff (=64 GB) EFI region mapping space
+ ... unused hole ...
+ ffffffff80000000 - ffffffff9fffffff (=512 MB)  kernel text mapping, from phys 0
+-ffffffffa0000000 - ffffffffff5fffff (=1526 MB) module mapping space
++ffffffffa0000000 - ffffffffff5fffff (=1526 MB) module mapping space (variable)
+ ffffffffff600000 - ffffffffffdfffff (=8 MB) vsyscalls
+ ffffffffffe00000 - ffffffffffffffff (=2 MB) unused hole
+ 
+@@ -39,6 +39,9 @@ memory window (this size is arbitrary, it can be raised later if needed).
+ The mappings are not part of any other kernel PGD and are only available
+ during EFI runtime calls.
+ 
++The module mapping space size changes based on the CONFIG requirements for the
++following fixmap section.
++
+ Note that if CONFIG_RANDOMIZE_MEMORY is enabled, the direct mapping of all
+ physical memory, vmalloc/ioremap space and virtual memory map are randomized.
+ Their order is preserved but their base will be offset early at boot time.
+diff --git a/arch/x86/include/asm/pgtable_64_types.h b/arch/x86/include/asm/pgtable_64_types.h
+index 3a264200c62f..bb05e21cf3c7 100644
+--- a/arch/x86/include/asm/pgtable_64_types.h
++++ b/arch/x86/include/asm/pgtable_64_types.h
+@@ -67,7 +67,8 @@ typedef struct { pteval_t pte; } pte_t;
+ #endif /* CONFIG_RANDOMIZE_MEMORY */
+ #define VMALLOC_END	(VMALLOC_START + _AC((VMALLOC_SIZE_TB << 40) - 1, UL))
+ #define MODULES_VADDR    (__START_KERNEL_map + KERNEL_IMAGE_SIZE)
+-#define MODULES_END      _AC(0xffffffffff000000, UL)
++/* The module sections ends with the start of the fixmap */
++#define MODULES_END   __fix_to_virt(__end_of_fixed_addresses + 1)
+ #define MODULES_LEN   (MODULES_END - MODULES_VADDR)
+ #define ESPFIX_PGD_ENTRY _AC(-2, UL)
+ #define ESPFIX_BASE_ADDR (ESPFIX_PGD_ENTRY << PGDIR_SHIFT)
+diff --git a/arch/x86/kernel/module.c b/arch/x86/kernel/module.c
+index 477ae806c2fa..fad61caac75e 100644
+--- a/arch/x86/kernel/module.c
++++ b/arch/x86/kernel/module.c
+@@ -35,6 +35,7 @@
+ #include <asm/page.h>
+ #include <asm/pgtable.h>
+ #include <asm/setup.h>
++#include <asm/fixmap.h>
+ 
+ #if 0
+ #define DEBUGP(fmt, ...)				\
+diff --git a/arch/x86/mm/dump_pagetables.c b/arch/x86/mm/dump_pagetables.c
+index 58b5bee7ea27..75efeecc85eb 100644
+--- a/arch/x86/mm/dump_pagetables.c
++++ b/arch/x86/mm/dump_pagetables.c
+@@ -20,6 +20,7 @@
+ 
+ #include <asm/kasan.h>
+ #include <asm/pgtable.h>
++#include <asm/fixmap.h>
+ 
+ /*
+  * The dumper groups pagetable entries of the same type into one, and for
+diff --git a/arch/x86/mm/kasan_init_64.c b/arch/x86/mm/kasan_init_64.c
+index 8d63d7a104c3..1bde19ef86bd 100644
+--- a/arch/x86/mm/kasan_init_64.c
++++ b/arch/x86/mm/kasan_init_64.c
+@@ -9,6 +9,7 @@
+ 
+ #include <asm/tlbflush.h>
+ #include <asm/sections.h>
++#include <asm/fixmap.h>
+ 
+ extern pgd_t early_level4_pgt[PTRS_PER_PGD];
+ extern struct range pfn_mapped[E820_X_MAX];
+diff --git a/mm/vmalloc.c b/mm/vmalloc.c
+index 32979d945766..1fc9598ed019 100644
+--- a/mm/vmalloc.c
++++ b/mm/vmalloc.c
+@@ -35,6 +35,7 @@
+ #include <linux/uaccess.h>
+ #include <asm/tlbflush.h>
+ #include <asm/shmparam.h>
++#include <asm/fixmap.h>
+ 
+ #include "internal.h"
+ 
+-- 
+2.12.0.367.g23dc2f6d3c-goog
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
