@@ -1,333 +1,113 @@
-From: Thomas Garnier <thgarnie@google.com>
-Subject: [PATCH v7 3/3] x86: Make the GDT remapping read-only on 64-bit
-Date: Tue, 14 Mar 2017 10:05:08 -0700
-Message-ID: <20170314170508.100882-3-thgarnie@google.com>
-References: <20170314170508.100882-1-thgarnie@google.com>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170314170508.100882-1-thgarnie@google.com>
-Sender: owner-linux-mm@kvack.org
-To: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Jonathan Corbet <corbet@lwn.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Thomas Garnier <thgarnie@google.com>, Lorenzo Stoakes <lstoakes@gmail.com>, Kees Cook <keescook@chromium.org>, Juergen Gross <jgross@suse.com>, Andy Lutomirski <luto@kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Andrew Morton <akpm@linux-foundation.org>, Michal Hocko <mhocko@suse.com>, zijun_hu <zijun_hu@htc.com>, Chris Wilson <chris@chris-wilson.co.uk>, Andy Lutomirski <luto@amacapital.net>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheu>
-Cc: x86@kernel.org, linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, linux-pm@vger.kernel.org, linux-efi@vger.kernel.org, xen-devel@lists.xenproject.org, lguest@lists.ozlabs.org, kvm@vger.kernel.org, kernel-hardening@lists.openwall.com
+From: "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH V12 09/10] trace, ras: add ARM processor error trace event
+Date: Tue, 14 Mar 2017 13:29:08 -0600
+Message-ID: <1aceb614-a1ad-8e7c-e488-0437c4bc1502@codeaurora.org>
+References: <1488833103-21082-1-git-send-email-tbaicar@codeaurora.org>
+ <1488833103-21082-10-git-send-email-tbaicar@codeaurora.org>
+ <58C12342.2090701@huawei.com>
+ <14545228-7ff1-b31c-1fa5-daacf89a44b9@codeaurora.org>
+ <58C60485.2070509@huawei.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <58C60485.2070509-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Xie XiuQi <xiexiuqi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29Tb/PtFMR13I2A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-This patch makes the GDT remapped pages read-only to prevent corruption.
-This change is done only on 64-bit.
+Hello Xie XiUQi,
 
-The native_load_tr_desc function was adapted to correctly handle a
-read-only GDT. The LTR instruction always writes to the GDT TSS entry.
-This generates a page fault if the GDT is read-only. This change checks
-if the current GDT is a remap and swap GDTs as needed. This function was
-tested by booting multiple machines and checking hibernation works
-properly.
 
-KVM SVM and VMX were adapted to use the writeable GDT. On VMX, the
-per-cpu variable was removed for functions to fetch the original GDT.
-Instead of reloading the previous GDT, VMX will reload the fixmap GDT as
-expected. For testing, VMs were started and restored on multiple
-configurations.
+On 3/12/2017 8:31 PM, Xie XiuQi wrote:
+> Hi Baicar Tyler,
+>
+> On 2017/3/11 2:23, Baicar, Tyler wrote:
+>> Hello Xie XiuQi,
+>>
+>>
+>> On 3/9/2017 2:41 AM, Xie XiuQi wrote:
+>>> On 2017/3/7 4:45, Tyler Baicar wrote:
+>>>> Currently there are trace events for the various RAS
+>>>> errors with the exception of ARM processor type errors.
+>>>> Add a new trace event for such errors so that the user
+>>>> will know when they occur. These trace events are
+>>>> consistent with the ARM processor error section type
+>>>> defined in UEFI 2.6 spec section N.2.4.4.
+>>>>
+>>>> Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>>>> Acked-by: Steven Rostedt <rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org>
+>>>> ---
+>>>>    drivers/acpi/apei/ghes.c    |  8 +++++++-
+>>>>    drivers/firmware/efi/cper.c |  1 +
+>>>>    drivers/ras/ras.c           |  1 +
+>>>>    include/ras/ras_event.h     | 34 ++++++++++++++++++++++++++++++++++
+>>>>    4 files changed, 43 insertions(+), 1 deletion(-)
+>>>> diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
+>>>> index 5861b6f..b36db48 100644
+>>>> --- a/include/ras/ras_event.h
+>>>> +++ b/include/ras/ras_event.h
+>>>> @@ -162,6 +162,40 @@
+>>>>    );
+>>>>      /*
+>>>> + * ARM Processor Events Report
+>>>> + *
+>>>> + * This event is generated when hardware detects an ARM processor error
+>>>> + * has occurred. UEFI 2.6 spec section N.2.4.4.
+>>>> + */
+>>>> +TRACE_EVENT(arm_event,
+>>>> +
+>>>> +    TP_PROTO(const struct cper_sec_proc_arm *proc),
+>>>> +
+>>>> +    TP_ARGS(proc),
+>>>> +
+>>>> +    TP_STRUCT__entry(
+>>>> +        __field(u64, mpidr)
+>>>> +        __field(u64, midr)
+>>>> +        __field(u32, running_state)
+>>>> +        __field(u32, psci_state)
+>>>> +        __field(u8, affinity)
+>>>> +    ),
+>>>> +
+>>>> +    TP_fast_assign(
+>>>> +        __entry->affinity = proc->affinity_level;
+>>>> +        __entry->mpidr = proc->mpidr;
+>>>> +        __entry->midr = proc->midr;
+>>>> +        __entry->running_state = proc->running_state;
+>>>> +        __entry->psci_state = proc->psci_state;
+>>>> +    ),
+>>>> +
+>>>> +    TP_printk("affinity level: %d; MPIDR: %016llx; MIDR: %016llx; "
+>>>> +          "running state: %d; PSCI state: %d",
+>>>> +          __entry->affinity, __entry->mpidr, __entry->midr,
+>>>> +          __entry->running_state, __entry->psci_state)
+>>>> +);
+>>>> +
+>>> I think these fields are not enough, we need also export arm processor error
+>>> information (UEFI 2.6 spec section N.2.4.4.1), or at least the error type,
+>>> address, etc. So that the userspace (such as rasdaemon tool) could know what
+>>> error occurred.
+>> This is something I am planning on adding in later. It is not clear to me how to
+>> actually do this at this point. If you look at the spec, there is not a single
+>> error information structure. There is at least one, but possibly a lot. There is
+>> also an unknown amount of context information structures. In "Table 260. ARM Processor
+>> Error Section" there are ERR_INFO_NUM and CONTEXT_INFO_NUM which give the number of these
+>> structures. I think there will need to be separate trace events added in for each of
+>> these structures because I don't think there is a way to have variable amounts of
+>> structures inside of a trace event.
+> Yes, I agree.
+>
+> Additional, cper_sec_proc_arm has validation bit, which indicates whether or not each of
+> the fields is valid in this section. How could we show it in this trace event? If the filed
+> is invalid, we would get a wrong value here.
+>
+I will add in checks for whether the fields are valid similar to what 
+you did for the error info patch.
 
-Signed-off-by: Thomas Garnier <thgarnie@google.com>
----
-Based on next-20170308
----
- arch/x86/include/asm/desc.h      | 106 +++++++++++++++++++++++++--------------
- arch/x86/include/asm/processor.h |   1 +
- arch/x86/kernel/cpu/common.c     |  28 ++++++++---
- arch/x86/kvm/svm.c               |   4 +-
- arch/x86/kvm/vmx.c               |  12 ++---
- 5 files changed, 96 insertions(+), 55 deletions(-)
+Thanks,
+Tyler
 
-diff --git a/arch/x86/include/asm/desc.h b/arch/x86/include/asm/desc.h
-index 4b5ef0c64291..ec05f9c1a62c 100644
---- a/arch/x86/include/asm/desc.h
-+++ b/arch/x86/include/asm/desc.h
-@@ -248,9 +248,77 @@ static inline void native_set_ldt(const void *addr, unsigned int entries)
- 	}
- }
- 
-+static inline void native_load_gdt(const struct desc_ptr *dtr)
-+{
-+	asm volatile("lgdt %0"::"m" (*dtr));
-+}
-+
-+static inline void native_load_idt(const struct desc_ptr *dtr)
-+{
-+	asm volatile("lidt %0"::"m" (*dtr));
-+}
-+
-+static inline void native_store_gdt(struct desc_ptr *dtr)
-+{
-+	asm volatile("sgdt %0":"=m" (*dtr));
-+}
-+
-+static inline void native_store_idt(struct desc_ptr *dtr)
-+{
-+	asm volatile("sidt %0":"=m" (*dtr));
-+}
-+
-+/*
-+ * The LTR instruction marks the TSS GDT entry as busy. On 64-bit, the GDT is
-+ * a read-only remapping. To prevent a page fault, the GDT is switched to the
-+ * original writeable version when needed.
-+ */
-+#ifdef CONFIG_X86_64
- static inline void native_load_tr_desc(void)
- {
-+	struct desc_ptr gdt;
-+	int cpu = raw_smp_processor_id();
-+	bool restore = 0;
-+	struct desc_struct *fixmap_gdt;
-+
-+	native_store_gdt(&gdt);
-+	fixmap_gdt = get_cpu_gdt_ro(cpu);
-+
-+	/*
-+	 * If the current GDT is the read-only fixmap, swap to the original
-+	 * writeable version. Swap back at the end.
-+	 */
-+	if (gdt.address == (unsigned long)fixmap_gdt) {
-+		load_direct_gdt(cpu);
-+		restore = 1;
-+	}
- 	asm volatile("ltr %w0"::"q" (GDT_ENTRY_TSS*8));
-+	if (restore)
-+		load_fixmap_gdt(cpu);
-+}
-+#else
-+static inline void native_load_tr_desc(void)
-+{
-+	asm volatile("ltr %w0"::"q" (GDT_ENTRY_TSS*8));
-+}
-+#endif
-+
-+static inline unsigned long native_store_tr(void)
-+{
-+	unsigned long tr;
-+
-+	asm volatile("str %0":"=r" (tr));
-+
-+	return tr;
-+}
-+
-+static inline void native_load_tls(struct thread_struct *t, unsigned int cpu)
-+{
-+	struct desc_struct *gdt = get_cpu_gdt_rw(cpu);
-+	unsigned int i;
-+
-+	for (i = 0; i < GDT_ENTRY_TLS_ENTRIES; i++)
-+		gdt[GDT_ENTRY_TLS_MIN + i] = t->tls_array[i];
- }
- 
- DECLARE_PER_CPU(bool, __tss_limit_invalid);
-@@ -305,44 +373,6 @@ static inline void invalidate_tss_limit(void)
- 		this_cpu_write(__tss_limit_invalid, true);
- }
- 
--static inline void native_load_gdt(const struct desc_ptr *dtr)
--{
--	asm volatile("lgdt %0"::"m" (*dtr));
--}
--
--static inline void native_load_idt(const struct desc_ptr *dtr)
--{
--	asm volatile("lidt %0"::"m" (*dtr));
--}
--
--static inline void native_store_gdt(struct desc_ptr *dtr)
--{
--	asm volatile("sgdt %0":"=m" (*dtr));
--}
--
--static inline void native_store_idt(struct desc_ptr *dtr)
--{
--	asm volatile("sidt %0":"=m" (*dtr));
--}
--
--static inline unsigned long native_store_tr(void)
--{
--	unsigned long tr;
--
--	asm volatile("str %0":"=r" (tr));
--
--	return tr;
--}
--
--static inline void native_load_tls(struct thread_struct *t, unsigned int cpu)
--{
--	struct desc_struct *gdt = get_cpu_gdt_rw(cpu);
--	unsigned int i;
--
--	for (i = 0; i < GDT_ENTRY_TLS_ENTRIES; i++)
--		gdt[GDT_ENTRY_TLS_MIN + i] = t->tls_array[i];
--}
--
- /* This intentionally ignores lm, since 32-bit apps don't have that field. */
- #define LDT_empty(info)					\
- 	((info)->base_addr		== 0	&&	\
-diff --git a/arch/x86/include/asm/processor.h b/arch/x86/include/asm/processor.h
-index 2ec4d2dc559b..28828f1f99a4 100644
---- a/arch/x86/include/asm/processor.h
-+++ b/arch/x86/include/asm/processor.h
-@@ -716,6 +716,7 @@ extern struct desc_ptr		early_gdt_descr;
- 
- extern void cpu_set_gdt(int);
- extern void switch_to_new_gdt(int);
-+extern void load_direct_gdt(int);
- extern void load_fixmap_gdt(int);
- extern void load_percpu_segment(int);
- extern void cpu_init(void);
-diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 3cf1590ec9ce..f8e22dbad86c 100644
---- a/arch/x86/kernel/cpu/common.c
-+++ b/arch/x86/kernel/cpu/common.c
-@@ -448,8 +448,15 @@ void load_percpu_segment(int cpu)
- 	load_stack_canary_segment();
- }
- 
--/* Used by XEN to force the GDT read-only when required */
-+/*
-+ * On 64-bit the GDT remapping is read-only.
-+ * A global is used for Xen to change the default when required.
-+ */
-+#ifdef CONFIG_X86_64
-+pgprot_t pg_fixmap_gdt_flags = PAGE_KERNEL_RO;
-+#else
- pgprot_t pg_fixmap_gdt_flags = PAGE_KERNEL;
-+#endif
- 
- /* Setup the fixmap mapping only once per-processor */
- static inline void setup_fixmap_gdt(int cpu)
-@@ -458,6 +465,17 @@ static inline void setup_fixmap_gdt(int cpu)
- 		     __pa(get_cpu_gdt_rw(cpu)), pg_fixmap_gdt_flags);
- }
- 
-+/* Load the original GDT from the per-cpu structure */
-+void load_direct_gdt(int cpu)
-+{
-+	struct desc_ptr gdt_descr;
-+
-+	gdt_descr.address = (long)get_cpu_gdt_rw(cpu);
-+	gdt_descr.size = GDT_SIZE - 1;
-+	load_gdt(&gdt_descr);
-+}
-+EXPORT_SYMBOL_GPL(load_direct_gdt);
-+
- /* Load a fixmap remapping of the per-cpu GDT */
- void load_fixmap_gdt(int cpu)
- {
-@@ -467,6 +485,7 @@ void load_fixmap_gdt(int cpu)
- 	gdt_descr.size = GDT_SIZE - 1;
- 	load_gdt(&gdt_descr);
- }
-+EXPORT_SYMBOL_GPL(load_fixmap_gdt);
- 
- /*
-  * Current gdt points %fs at the "master" per-cpu area: after this,
-@@ -474,11 +493,8 @@ void load_fixmap_gdt(int cpu)
-  */
- void switch_to_new_gdt(int cpu)
- {
--	struct desc_ptr gdt_descr;
--
--	gdt_descr.address = (long)get_cpu_gdt_rw(cpu);
--	gdt_descr.size = GDT_SIZE - 1;
--	load_gdt(&gdt_descr);
-+	/* Load the original GDT */
-+	load_direct_gdt(cpu);
- 	/* Reload the per-cpu base */
- 	load_percpu_segment(cpu);
- }
-diff --git a/arch/x86/kvm/svm.c b/arch/x86/kvm/svm.c
-index d1efe2c62b3f..c02b9af2056a 100644
---- a/arch/x86/kvm/svm.c
-+++ b/arch/x86/kvm/svm.c
-@@ -741,7 +741,6 @@ static int svm_hardware_enable(void)
- 
- 	struct svm_cpu_data *sd;
- 	uint64_t efer;
--	struct desc_ptr gdt_descr;
- 	struct desc_struct *gdt;
- 	int me = raw_smp_processor_id();
- 
-@@ -763,8 +762,7 @@ static int svm_hardware_enable(void)
- 	sd->max_asid = cpuid_ebx(SVM_CPUID_FUNC) - 1;
- 	sd->next_asid = sd->max_asid + 1;
- 
--	native_store_gdt(&gdt_descr);
--	gdt = (struct desc_struct *)gdt_descr.address;
-+	gdt = get_current_gdt_rw();
- 	sd->tss_desc = (struct kvm_ldttss_desc *)(gdt + GDT_ENTRY_TSS);
- 
- 	wrmsrl(MSR_EFER, efer | EFER_SVME);
-diff --git a/arch/x86/kvm/vmx.c b/arch/x86/kvm/vmx.c
-index 283aa8601833..cfed1fff43ec 100644
---- a/arch/x86/kvm/vmx.c
-+++ b/arch/x86/kvm/vmx.c
-@@ -935,7 +935,6 @@ static DEFINE_PER_CPU(struct vmcs *, current_vmcs);
-  * when a CPU is brought down, and we need to VMCLEAR all VMCSs loaded on it.
-  */
- static DEFINE_PER_CPU(struct list_head, loaded_vmcss_on_cpu);
--static DEFINE_PER_CPU(struct desc_ptr, host_gdt);
- 
- /*
-  * We maintian a per-CPU linked-list of vCPU, so in wakeup_handler() we
-@@ -2052,14 +2051,13 @@ static bool update_transition_efer(struct vcpu_vmx *vmx, int efer_offset)
-  */
- static unsigned long segment_base(u16 selector)
- {
--	struct desc_ptr *gdt = this_cpu_ptr(&host_gdt);
- 	struct desc_struct *table;
- 	unsigned long v;
- 
- 	if (!(selector & ~SEGMENT_RPL_MASK))
- 		return 0;
- 
--	table = (struct desc_struct *)gdt->address;
-+	table = get_current_gdt_ro();
- 
- 	if ((selector & SEGMENT_TI_MASK) == SEGMENT_LDT) {
- 		u16 ldt_selector = kvm_read_ldt();
-@@ -2164,7 +2162,7 @@ static void __vmx_load_host_state(struct vcpu_vmx *vmx)
- #endif
- 	if (vmx->host_state.msr_host_bndcfgs)
- 		wrmsrl(MSR_IA32_BNDCFGS, vmx->host_state.msr_host_bndcfgs);
--	load_gdt(this_cpu_ptr(&host_gdt));
-+	load_fixmap_gdt(raw_smp_processor_id());
- }
- 
- static void vmx_load_host_state(struct vcpu_vmx *vmx)
-@@ -2266,7 +2264,7 @@ static void vmx_vcpu_load(struct kvm_vcpu *vcpu, int cpu)
- 	}
- 
- 	if (!already_loaded) {
--		struct desc_ptr *gdt = this_cpu_ptr(&host_gdt);
-+		unsigned long gdt = get_current_gdt_ro_vaddr();
- 		unsigned long sysenter_esp;
- 
- 		kvm_make_request(KVM_REQ_TLB_FLUSH, vcpu);
-@@ -2277,7 +2275,7 @@ static void vmx_vcpu_load(struct kvm_vcpu *vcpu, int cpu)
- 		 */
- 		vmcs_writel(HOST_TR_BASE,
- 			    (unsigned long)this_cpu_ptr(&cpu_tss));
--		vmcs_writel(HOST_GDTR_BASE, gdt->address);
-+		vmcs_writel(HOST_GDTR_BASE, gdt);   /* 22.2.4 */
- 
- 		/*
- 		 * VM exits change the host TR limit to 0x67 after a VM
-@@ -3465,8 +3463,6 @@ static int hardware_enable(void)
- 		ept_sync_global();
- 	}
- 
--	native_store_gdt(this_cpu_ptr(&host_gdt));
--
- 	return 0;
- }
- 
 -- 
-2.12.0.367.g23dc2f6d3c-goog
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
