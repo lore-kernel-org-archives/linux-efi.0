@@ -1,109 +1,79 @@
-From: Thomas Garnier <thgarnie@google.com>
-Subject: Re: [PATCH v7 1/3] x86/mm: Adapt MODULES_END based on Fixmap section size
-Date: Thu, 16 Mar 2017 08:33:32 -0700
-Message-ID: <CAJcbSZEB09inR2KLF_puOnmAK7QUv-zJHcguiF0qucUYTtg1Pw@mail.gmail.com>
-References: <20170314170508.100882-1-thgarnie@google.com> <20170316081013.GB7815@gmail.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v2 12/32] x86: Add early boot support when running
+ with SEV active
+Date: Thu, 16 Mar 2017 11:11:26 -0500
+Message-ID: <cb1693fc-6876-a448-f485-1a6c70aa6ff5@amd.com>
+References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
+ <148846768878.2349.15757532025749214650.stgit@brijesh-build-machine>
+ <20170309140748.tg67yo2jmc5ahck3@pd.tnic>
+ <5d62b16f-16ef-1bd7-1551-f0c4c43573f4@redhat.com>
+ <20170309162942.jwtb3l33632zhbaz@pd.tnic>
+ <1fe1e177-f588-fe5a-dc13-e9fde00e8958@amd.com>
+ <20170316101656.dcwgtn4qdtyp5hip@pd.tnic>
+ <b27126ee-aff0-ab11-706b-fc6d8d4901db@amd.com>
+ <20170316150957.dos6wp3pmhos4hkj@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170316081013.GB7815@gmail.com>
+In-Reply-To: <20170316150957.dos6wp3pmhos4hkj@pd.tnic>
 Sender: owner-linux-mm@kvack.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Jonathan Corbet <corbet@lwn.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Lorenzo Stoakes <lstoakes@gmail.com>, Kees Cook <keescook@chromium.org>, Juergen Gross <jgross@suse.com>, Andy Lutomirski <luto@kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Andrew Morton <akpm@linux-foundation.org>, Michal Hocko <mhocko@suse.com>, zijun_hu <zijun_hu@htc.com>, Chris Wilson <chris@chris-wilson.co.uk>, Andy Lutomirski <luto@amacapital.net>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.o>
+To: Borislav Petkov <bp@suse.de>
+Cc: Brijesh Singh <brijesh.singh@amd.com>, Paolo Bonzini <pbonzini@redhat.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linux
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Mar 16, 2017 at 1:10 AM, Ingo Molnar <mingo@kernel.org> wrote:
+On 3/16/2017 10:09 AM, Borislav Petkov wrote:
+> On Thu, Mar 16, 2017 at 09:28:58AM -0500, Tom Lendacky wrote:
+>> Because there are differences between how SME and SEV behave
+>> (instruction fetches are always decrypted under SEV, DMA to an
+>> encrypted location is not supported under SEV, etc.) we need to
+>> determine which mode we are in so that things can be setup properly
+>> during boot. For example, if SEV is active the kernel will already
+>> be encrypted and so we don't perform that step or the trampoline area
+>> for bringing up an AP must be decrypted for SME but encrypted for SEV.
 >
-> Note that asm/fixmap.h is an x86-ism that isn't present in many other
-> architectures, so this hunk will break the build.
+> So with SEV enabled, it seems to me a guest doesn't know anything about
+> encryption and can run as if SME is disabled. So sme_active() will be
+> false. And then the kernel can bypass all that code dealing with SME.
 >
-> To make progress with these patches I've fixed it up with an ugly #ifdef
-> CONFIG_X86, but it needs a real solution instead before this can be pushed
-> upstream.
+> So a guest should simply run like on baremetal with no SME, IMHO.
+>
 
-I also saw an error on x86 tip on special configuration. I found this
-new patch below to be a good solution to both.
+Not quite. The guest still needs to understand about the encryption mask
+so that it can protect memory by setting the encryption mask in the
+pagetable entries.  It can also decide when to share memory with the
+hypervisor by not setting the encryption mask in the pagetable entries.
 
-Let me know what you think.
+> But then there's that part: "instruction fetches are always decrypted
+> under SEV". What does that mean exactly? And how much of that code can
 
-=====
+"Instruction fetches are always decrypted under SEV" means that,
+regardless of how a virtual address is mapped, encrypted or decrypted,
+if an instruction fetch is performed by the CPU from that address it
+will always be decrypted. This is to prevent the hypervisor from
+injecting executable code into the guest since it would have to be
+valid encrypted instructions.
 
-This patch aligns MODULES_END to the beginning of the Fixmap section.
-It optimizes the space available for both sections. The address is
-pre-computed based on the number of pages required by the Fixmap
-section.
+> be reused so that
+>
+> * SME on baremetal
+> * SEV on guest
+>
+> use the same logic?
 
-It will allow GDT remapping in the Fixmap section. The current
-MODULES_END static address does not provide enough space for the kernel
-to support a large number of processors.
+There are many areas that use the same logic, but there are certain
+situations where we need to check between SME vs SEV (e.g. DMA operation
+setup or decrypting the trampoline area) and act accordingly.
 
-Signed-off-by: Thomas Garnier <thgarnie@google.com>
----
-Based on next-20170308
----
- Documentation/x86/x86_64/mm.txt         | 5 ++++-
- arch/x86/include/asm/pgtable_64.h       | 1 +
- arch/x86/include/asm/pgtable_64_types.h | 3 ++-
- 3 files changed, 7 insertions(+), 2 deletions(-)
+Thanks,
+Tom
 
-diff --git a/Documentation/x86/x86_64/mm.txt b/Documentation/x86/x86_64/mm.txt
-index 5724092db811..ee3f9c30957c 100644
---- a/Documentation/x86/x86_64/mm.txt
-+++ b/Documentation/x86/x86_64/mm.txt
-@@ -19,7 +19,7 @@ ffffff0000000000 - ffffff7fffffffff (=39 bits) %esp
-fixup stacks
- ffffffef00000000 - fffffffeffffffff (=64 GB) EFI region mapping space
- ... unused hole ...
- ffffffff80000000 - ffffffff9fffffff (=512 MB)  kernel text mapping, from phys 0
--ffffffffa0000000 - ffffffffff5fffff (=1526 MB) module mapping space
-+ffffffffa0000000 - ffffffffff5fffff (=1526 MB) module mapping space (variable)
- ffffffffff600000 - ffffffffffdfffff (=8 MB) vsyscalls
- ffffffffffe00000 - ffffffffffffffff (=2 MB) unused hole
-
-@@ -39,6 +39,9 @@ memory window (this size is arbitrary, it can be
-raised later if needed).
- The mappings are not part of any other kernel PGD and are only available
- during EFI runtime calls.
-
-+The module mapping space size changes based on the CONFIG requirements for the
-+following fixmap section.
-+
- Note that if CONFIG_RANDOMIZE_MEMORY is enabled, the direct mapping of all
- physical memory, vmalloc/ioremap space and virtual memory map are randomized.
- Their order is preserved but their base will be offset early at boot time.
-diff --git a/arch/x86/include/asm/pgtable_64.h
-b/arch/x86/include/asm/pgtable_64.h
-index 73c7ccc38912..67608d4abc2c 100644
---- a/arch/x86/include/asm/pgtable_64.h
-+++ b/arch/x86/include/asm/pgtable_64.h
-@@ -13,6 +13,7 @@
- #include <asm/processor.h>
- #include <linux/bitops.h>
- #include <linux/threads.h>
-+#include <asm/fixmap.h>
-
- extern pud_t level3_kernel_pgt[512];
- extern pud_t level3_ident_pgt[512];
-diff --git a/arch/x86/include/asm/pgtable_64_types.h
-b/arch/x86/include/asm/pgtable_64_types.h
-index 3a264200c62f..bb05e21cf3c7 100644
---- a/arch/x86/include/asm/pgtable_64_types.h
-+++ b/arch/x86/include/asm/pgtable_64_types.h
-@@ -67,7 +67,8 @@ typedef struct { pteval_t pte; } pte_t;
- #endif /* CONFIG_RANDOMIZE_MEMORY */
- #define VMALLOC_END (VMALLOC_START + _AC((VMALLOC_SIZE_TB << 40) - 1, UL))
- #define MODULES_VADDR    (__START_KERNEL_map + KERNEL_IMAGE_SIZE)
--#define MODULES_END      _AC(0xffffffffff000000, UL)
-+/* The module sections ends with the start of the fixmap */
-+#define MODULES_END   __fix_to_virt(__end_of_fixed_addresses + 1)
- #define MODULES_LEN   (MODULES_END - MODULES_VADDR)
- #define ESPFIX_PGD_ENTRY _AC(-2, UL)
- #define ESPFIX_BASE_ADDR (ESPFIX_PGD_ENTRY << PGDIR_SHIFT)
--- 
-2.12.0.367.g23dc2f6d3c-goog
-
--- 
-Thomas
+>
+> Having the larger SEV preparation part on the kvm host side is perfectly
+> fine. But I'd like to keep kernel initialization paths clean.
+>
+> Thanks.
+>
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
