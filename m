@@ -1,59 +1,86 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] efi/libstub: skip GOP with PIXEL_BLT_ONLY format
-Date: Thu, 16 Mar 2017 07:51:02 +0000
-Message-ID: <1489650662-3598-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, "Cohen, Eugene" <eugene-VXdhtT5mjnY@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH v7 1/3] x86/mm: Adapt MODULES_END based on Fixmap section
+ size
+Date: Thu, 16 Mar 2017 09:10:13 +0100
+Message-ID: <20170316081013.GB7815@gmail.com>
+References: <20170314170508.100882-1-thgarnie@google.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170314170508.100882-1-thgarnie@google.com>
+Sender: owner-linux-mm@kvack.org
+To: Thomas Garnier <thgarnie@google.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Jonathan Corbet <corbet@lwn.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Lorenzo Stoakes <lstoakes@gmail.com>, Kees Cook <keescook@chromium.org>, Juergen Gross <jgross@suse.com>, Andy Lutomirski <luto@kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Andrew Morton <akpm@linux-foundation.org>, Michal Hocko <mhocko@suse.com>, zijun_hu <zijun_hu@htc.com>, Chris Wilson <chris@chris-wilson.co.uk>, Andy Lutomirski <luto@amacapital.net>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ost>
 List-Id: linux-efi@vger.kernel.org
 
-From: "Cohen, Eugene" <eugene-VXdhtT5mjnY@public.gmane.org>
 
-The UEFI Specification permits Graphics Output Protocol (GOP) instances
-without direct framebuffer access. This is indicated in the Mode structure
-with a PixelFormat enumeration value of PIXEL_BLT_ONLY. Given that the
-kernel does not know how to drive a Blt() only framebuffer (which is only
-permitted before ExitBootServices() anyway), we should disregard such
-framebuffers when looking for a GOP instance that is suitable for use as
-the boot console.
+* Thomas Garnier <thgarnie@google.com> wrote:
 
-So modify the EFI GOP initialization to not use a PIXEL_BLT_ONLY instance,
-preventing attempts later in boot to use an invalid screen_info.lfb_base
-address.
+> This patch aligns MODULES_END to the beginning of the Fixmap section.
+> It optimizes the space available for both sections. The address is
+> pre-computed based on the number of pages required by the Fixmap
+> section.
+> 
+> It will allow GDT remapping in the Fixmap section. The current
+> MODULES_END static address does not provide enough space for the kernel
+> to support a large number of processors.
+> 
+> Signed-off-by: Thomas Garnier <thgarnie@google.com>
+> ---
+> Based on next-20170308
+> ---
+>  Documentation/x86/x86_64/mm.txt         | 5 ++++-
+>  arch/x86/include/asm/pgtable_64_types.h | 3 ++-
+>  arch/x86/kernel/module.c                | 1 +
+>  arch/x86/mm/dump_pagetables.c           | 1 +
+>  arch/x86/mm/kasan_init_64.c             | 1 +
+>  mm/vmalloc.c                            | 1 +
 
-Signed-off-by: Eugene Cohen <eugene-VXdhtT5mjnY@public.gmane.org>
-[ardb: clarify that Blt() only GOPs are unusable by the kernel]
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/libstub/gop.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+> --- a/mm/vmalloc.c
+> +++ b/mm/vmalloc.c
+> @@ -35,6 +35,7 @@
+>  #include <linux/uaccess.h>
+>  #include <asm/tlbflush.h>
+>  #include <asm/shmparam.h>
+> +#include <asm/fixmap.h>
+>  
+>  #include "internal.h"
 
-diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index 932742e4cf23..b05b282b470d 100644
---- a/drivers/firmware/efi/libstub/gop.c
-+++ b/drivers/firmware/efi/libstub/gop.c
-@@ -178,6 +178,10 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 	if (!first_gop)
- 		goto out;
- 
-+	/* Does the GOP implement a BLT-only framebuffer? */
-+	if (pixel_format == PIXEL_BLT_ONLY)
-+		goto out;
+Note that asm/fixmap.h is an x86-ism that isn't present in many other 
+architectures, so this hunk will break the build.
+
+To make progress with these patches I've fixed it up with an ugly #ifdef 
+CONFIG_X86, but it needs a real solution instead before this can be pushed 
+upstream.
+
+Thanks,
+
+	Ingo
+
+=====================>
+ mm/vmalloc.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/mm/vmalloc.c b/mm/vmalloc.c
+index dabea6a29fad..b7d2a23349f4 100644
+--- a/mm/vmalloc.c
++++ b/mm/vmalloc.c
+@@ -35,7 +35,10 @@
+ #include <linux/uaccess.h>
+ #include <asm/tlbflush.h>
+ #include <asm/shmparam.h>
+-#include <asm/fixmap.h>
 +
- 	/* EFI framebuffer */
- 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
++#ifdef CONFIG_X86
++# include <asm/fixmap.h>
++#endif
  
-@@ -295,6 +299,10 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 	if (!first_gop)
- 		goto out;
+ #include "internal.h"
  
-+	/* Does the GOP implement a BLT-only framebuffer? */
-+	if (pixel_format == PIXEL_BLT_ONLY)
-+		goto out;
-+
- 	/* EFI framebuffer */
- 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
- 
--- 
-2.7.4
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
