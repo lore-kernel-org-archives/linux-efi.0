@@ -1,38 +1,59 @@
-From: Boris Ostrovsky <boris.ostrovsky@oracle.com>
-Subject: Re: [PATCH v7 1/3] x86/mm: Adapt MODULES_END based on Fixmap section
- size
-Date: Wed, 15 Mar 2017 09:52:54 -0400
-Message-ID: <799314af-e529-bc83-6322-54f5f5d28a40@oracle.com>
-References: <20170314170508.100882-1-thgarnie@google.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170314170508.100882-1-thgarnie@google.com>
-Sender: owner-linux-mm@kvack.org
-To: Thomas Garnier <thgarnie@google.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Jonathan Corbet <corbet@lwn.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Lorenzo Stoakes <lstoakes@gmail.com>, Kees Cook <keescook@chromium.org>, Juergen Gross <jgross@suse.com>, Andy Lutomirski <luto@kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Andrew Morton <akpm@linux-foundation.org>, Michal Hocko <mhocko@suse.com>, zijun_hu <zijun_hu@htc.com>, Chris Wilson <chris@chris-wilson.co.uk>, Andy Lutomirski <luto@amacapital.net>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>
-Cc: x86@kernel.org, linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, linux-pm@vger.kernel.org, linux-efi@vger.kernel.org, xen-devel@lists.xenproject.org, lguest@lists.ozlabs.org, kvm@vger.kernel.org, kernel-hardening@lists.openwall.com
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] efi/libstub: skip GOP with PIXEL_BLT_ONLY format
+Date: Thu, 16 Mar 2017 07:51:02 +0000
+Message-ID: <1489650662-3598-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, "Cohen, Eugene" <eugene-VXdhtT5mjnY@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/14/2017 01:05 PM, Thomas Garnier wrote:
-> This patch aligns MODULES_END to the beginning of the Fixmap section.
-> It optimizes the space available for both sections. The address is
-> pre-computed based on the number of pages required by the Fixmap
-> section.
->
-> It will allow GDT remapping in the Fixmap section. The current
-> MODULES_END static address does not provide enough space for the kernel
-> to support a large number of processors.
->
-> Signed-off-by: Thomas Garnier <thgarnie@google.com>
+From: "Cohen, Eugene" <eugene-VXdhtT5mjnY@public.gmane.org>
 
-For Xen bits (and to some extent bare-metal):
+The UEFI Specification permits Graphics Output Protocol (GOP) instances
+without direct framebuffer access. This is indicated in the Mode structure
+with a PixelFormat enumeration value of PIXEL_BLT_ONLY. Given that the
+kernel does not know how to drive a Blt() only framebuffer (which is only
+permitted before ExitBootServices() anyway), we should disregard such
+framebuffers when looking for a GOP instance that is suitable for use as
+the boot console.
 
-Reviewed-and-Tested-by: Boris Ostrovsky <boris.ostrovsky@oracle.com>
+So modify the EFI GOP initialization to not use a PIXEL_BLT_ONLY instance,
+preventing attempts later in boot to use an invalid screen_info.lfb_base
+address.
 
+Signed-off-by: Eugene Cohen <eugene-VXdhtT5mjnY@public.gmane.org>
+[ardb: clarify that Blt() only GOPs are unusable by the kernel]
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/firmware/efi/libstub/gop.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
+index 932742e4cf23..b05b282b470d 100644
+--- a/drivers/firmware/efi/libstub/gop.c
++++ b/drivers/firmware/efi/libstub/gop.c
+@@ -178,6 +178,10 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	if (!first_gop)
+ 		goto out;
+ 
++	/* Does the GOP implement a BLT-only framebuffer? */
++	if (pixel_format == PIXEL_BLT_ONLY)
++		goto out;
++
+ 	/* EFI framebuffer */
+ 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
+ 
+@@ -295,6 +299,10 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	if (!first_gop)
+ 		goto out;
+ 
++	/* Does the GOP implement a BLT-only framebuffer? */
++	if (pixel_format == PIXEL_BLT_ONLY)
++		goto out;
++
+ 	/* EFI framebuffer */
+ 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
+ 
+-- 
+2.7.4
