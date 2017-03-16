@@ -1,16 +1,16 @@
 From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: Re: [RFC PATCH v2 30/32] kvm: svm: Add support for SEV DEBUG_ENCRYPT
+Subject: Re: [RFC PATCH v2 29/32] kvm: svm: Add support for SEV DEBUG_DECRYPT
  command
-Date: Thu, 16 Mar 2017 13:34:19 -0500
-Message-ID: <1d195fc9-8021-cd6d-727f-845586f70375@amd.com>
+Date: Thu, 16 Mar 2017 13:41:36 -0500
+Message-ID: <d89ef60d-a97c-b712-fb0f-0242ebebb91a@amd.com>
 References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <148846790758.2349.16768762953657853550.stgit@brijesh-build-machine>
- <05dbd756-e8e9-9384-2759-898e230a6909@redhat.com>
+ <148846789744.2349.167641684941925238.stgit@brijesh-build-machine>
+ <4579cfdd-1797-8b47-8e00-254e3f6eb73f@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <05dbd756-e8e9-9384-2759-898e230a6909@redhat.com>
+In-Reply-To: <4579cfdd-1797-8b47-8e00-254e3f6eb73f@redhat.com>
 Sender: owner-linux-mm@kvack.org
 To: Paolo Bonzini <pbonzini@redhat.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@lin
 Cc: brijesh.singh@amd.com
@@ -18,71 +18,66 @@ List-Id: linux-efi@vger.kernel.org
 
 
 
-On 03/16/2017 06:03 AM, Paolo Bonzini wrote:
+On 03/16/2017 05:54 AM, Paolo Bonzini wrote:
 >
 >
 > On 02/03/2017 16:18, Brijesh Singh wrote:
->> +	data = (void *) get_zeroed_page(GFP_KERNEL);
->
-> The page does not need to be zeroed, does it?
->
-
-No, we don't have to zero it. I will fix it.
-
+>> +static int __sev_dbg_decrypt_page(struct kvm *kvm, unsigned long src,
+>> +		void *dst, int *error)
+>> +{
+>> +	inpages = sev_pin_memory(src, PAGE_SIZE, &npages);
+>> +	if (!inpages) {
+>> +		ret = -ENOMEM;
+>> +		goto err_1;
+>> +	}
 >> +
->> +	if ((len & 15) || (dst_addr & 15)) {
->> +		/* if destination address and length are not 16-byte
->> +		 * aligned then:
->> +		 * a) decrypt destination page into temporary buffer
->> +		 * b) copy source data into temporary buffer at correct offset
->> +		 * c) encrypt temporary buffer
->> +		 */
->> +		ret = __sev_dbg_decrypt_page(kvm, dst_addr, data, &argp->error);
->
-> Ah, I see now you're using this function here for read-modify-write.
-> data is already pinned here, so even if you keep the function it makes
-> sense to push pinning out of __sev_dbg_decrypt_page and into
-> sev_dbg_decrypt.
-
-I can push out pinning part outside __sev_dbg_decrypt_page
-
->
->> +		if (ret)
->> +			goto err_3;
->> +		d_off = dst_addr & (PAGE_SIZE - 1);
+>> +	data->handle = sev_get_handle(kvm);
+>> +	data->dst_addr = __psp_pa(dst);
+>> +	data->src_addr = __sev_page_pa(inpages[0]);
+>> +	data->length = PAGE_SIZE;
 >> +
->> +		if (copy_from_user(data + d_off,
->> +					(uint8_t *)debug.src_addr, len)) {
->> +			ret = -EFAULT;
->> +			goto err_3;
->> +		}
+>> +	ret = sev_issue_cmd(kvm, SEV_CMD_DBG_DECRYPT, data, error);
+>> +	if (ret)
+>> +		printk(KERN_ERR "SEV: DEBUG_DECRYPT %d (%#010x)\n",
+>> +				ret, *error);
+>> +	sev_unpin_memory(inpages, npages);
+>> +err_1:
+>> +	kfree(data);
+>> +	return ret;
+>> +}
 >> +
->> +		encrypt->length = PAGE_SIZE;
+>> +static int sev_dbg_decrypt(struct kvm *kvm, struct kvm_sev_cmd *argp)
+>> +{
+>> +	void *data;
+>> +	int ret, offset, len;
+>> +	struct kvm_sev_dbg debug;
+>> +
+>> +	if (!sev_guest(kvm))
+>> +		return -ENOTTY;
+>> +
+>> +	if (copy_from_user(&debug, (void *)argp->data,
+>> +				sizeof(struct kvm_sev_dbg)))
+>> +		return -EFAULT;
+>> +	/*
+>> +	 * TODO: add support for decrypting length which crosses the
+>> +	 * page boundary.
+>> +	 */
+>> +	offset = debug.src_addr & (PAGE_SIZE - 1);
+>> +	if (offset + debug.length > PAGE_SIZE)
+>> +		return -EINVAL;
+>> +
 >
-> Why decrypt/re-encrypt all the page instead of just the 16 byte area
-> around the [dst_addr, dst_addr+len) range?
+> Please do add it, it doesn't seem very different from what you're doing
+> in LAUNCH_UPDATE_DATA.  There's no need for a separate
+> __sev_dbg_decrypt_page function, you can just pin/unpin here and do a
+> per-page loop as in LAUNCH_UPDATE_DATA.
 >
 
-good catch, I should be fine just decrypting a 16 byte area. Will fix in next rev
+I can certainly add support to handle crossing the page boundary cases.
+Should we limit the size to prevent user passing arbitrary long length
+and we end up looping inside the kernel? I was thinking to limit to a PAGE_SIZE.
 
->> +		encrypt->src_addr = __psp_pa(data);
->> +		encrypt->dst_addr =  __sev_page_pa(inpages[0]);
->> +	} else {
->> +		if (copy_from_user(data, (uint8_t *)debug.src_addr, len)) {
->> +			ret = -EFAULT;
->> +			goto err_3;
->> +		}
->
-> Do you need copy_from_user, or can you just pin/unpin memory as for
-> DEBUG_DECRYPT?
->
-
-We can work either with pin/unpin or copy_from_user. I think I choose copy_from_user because
-in most of time ENCRYPT path was used when I set breakpoint through gdb which basically
-requires copying pretty small data into guest memory. It may be very much possible that
-someone can try to copy lot more data and then pin/unpin can speedup the things.
-
--Brijesh
+~ Brijesh
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
