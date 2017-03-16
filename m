@@ -1,122 +1,142 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v2 08/32] x86: Use PAGE_KERNEL protection for ioremap
- of memory page
-Date: Thu, 16 Mar 2017 15:04:42 -0500
-Message-ID: <413f12e9-818a-745d-374b-3dbc439e972c@amd.com>
-References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <148846761276.2349.4899767672892365544.stgit@brijesh-build-machine>
- <20170307145954.l2fqy5s5h65wbtyz@pd.tnic>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efi/arm32-stub: allow boottime allocations in the vmlinux region
+Date: Thu, 16 Mar 2017 22:02:32 +0000
+Message-ID: <CAKv+Gu-=Q3aiECtT7krscjUcBsmDZsRRCUTjpOUfdg_NgV90=Q@mail.gmail.com>
+References: <1489661776-12946-1-git-send-email-ard.biesheuvel@linaro.org>
+ <20170316112653.GA16034@bivouac.eciton.net> <CAKWsp+whVJxoCrycACjWXRmK6rYvcOhLMeHKYYKRMXhhQ8A8Og@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170307145954.l2fqy5s5h65wbtyz@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@suse.de>, Brijesh Singh <brijesh.singh@amd.com>
-Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas@google.com, tglx@linutronix.de, mchehab@ke
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKWsp+whVJxoCrycACjWXRmK6rYvcOhLMeHKYYKRMXhhQ8A8Og-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <rfranz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Cohen, Eugene" <eugene-VXdhtT5mjnY@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 3/7/2017 8:59 AM, Borislav Petkov wrote:
-> On Thu, Mar 02, 2017 at 10:13:32AM -0500, Brijesh Singh wrote:
->> From: Tom Lendacky <thomas.lendacky@amd.com>
+On 16 March 2017 at 21:56, Roy Franz <rfranz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org> wrote:
+> On Thu, Mar 16, 2017 at 4:26 AM, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> On Thu, Mar 16, 2017 at 10:56:16AM +0000, Ard Biesheuvel wrote:
+>>> The arm32 kernel decompresses itself to the base of DRAM unconditionally,
+>>> and so it is the EFI stub's job to ensure that the region is available.
+>>>
+>>> Currently, we do this by creating an allocation there, and giving up if
+>>> that fails. However, any boot services regions occupying this area are
+>>> not an issue, given that the decompressor executes strictly after the
+>>> stub calls ExitBootServices().
+>>>
+>>> So let's try a bit harder to proceed if the initial allocation fails,
+>>> and check whether any memory map entries occupying the region may be
+>>> considered safe.
+>>>
+>>> Reported-by: Eugene Cohen <eugene-VXdhtT5mjnY@public.gmane.org>
+>>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>> ---
+>>>
+>>> NOTE: This patch appears to have uncovered a bug in DxeCore's AllocatePages
+>>> routine. If the first allocate_pages(EFI_ALLOCATE_ADDRESS) call fails, we may
+>>> still end up with a memory map that reflects a kind of limbo state where the
+>>> intended allocation is carved out and partially converted.
+>>>
+>>> For example, starting from
+>>>
+>>> 0x000040000000-0x00004007ffff [ConventionalMemory ]
+>>> 0x000040080000-0x00004009ffff [Boot Data          ]
+>>> 0x0000400a0000-0x000047ffffff [ConventionalMemory ]
+>>>
+>>> the failed allocation of 32 MB of LoaderData @ 0x4000_0000 will result in
+>>>
+>>> 0x000040000000-0x00004007ffff [Loader Data        ]
+>>> 0x000040080000-0x00004009ffff [Boot Data          ]
+>>> 0x0000400a0000-0x000047ffffff [ConventionalMemory ]
+>>>
+>>> after which scanning the region for LoaderData regions (which we should reject
+>>> given that they could be freed and replaced with, e.g., runtime services data
+>>> regions) will always fail.
+>>>
+>>> For this reason, the allocate_pages(EFI_ALLOCATE_ADDRESS) has been modified to
+>>> use EfiBootServicesData instead. In the mean time, I will report this to the
+>>> EDK2 development mailing list.
 >>
->> In order for memory pages to be properly mapped when SEV is active, we
->> need to use the PAGE_KERNEL protection attribute as the base protection.
->> This will insure that memory mapping of, e.g. ACPI tables, receives the
->> proper mapping attributes.
+>> That feels a little bit eeew, but I can't see it breaking anything.
 >>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
+> (Sorry for HTML the first time...)
 >
->> diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
->> index c400ab5..481c999 100644
->> --- a/arch/x86/mm/ioremap.c
->> +++ b/arch/x86/mm/ioremap.c
->> @@ -151,7 +151,15 @@ static void __iomem *__ioremap_caller(resource_size_t phys_addr,
->>                 pcm = new_pcm;
->>         }
->>
->> +       /*
->> +        * If the page being mapped is in memory and SEV is active then
->> +        * make sure the memory encryption attribute is enabled in the
->> +        * resulting mapping.
->> +        */
->>         prot = PAGE_KERNEL_IO;
->> +       if (sev_active() && page_is_mem(pfn))
+> Would it be reasonable to do a trial allocation with
+>  EFI_BOOT_SERVICES_DATA first, and if that passes then free
+> it and do the allocation with EFI_LOADER_DATA?  This keeps the final
+> allocation of the desired type,
+> but since this allocation is short lived I don't think it matters that much.
+> If left as is, I think it deserves a comment in the source so this
+> non-standard allocation is identified (and not copied).
 >
-> Hmm, a resource tree walk per ioremap call. This could get expensive for
-> ioremap-heavy workloads.
->
-> __ioremap_caller() gets called here during boot 55 times so not a whole
-> lot but I wouldn't be surprised if there were some nasty use cases which
-> ioremap a lot.
->
-> ...
->
->> diff --git a/kernel/resource.c b/kernel/resource.c
->> index 9b5f044..db56ba3 100644
->> --- a/kernel/resource.c
->> +++ b/kernel/resource.c
->> @@ -518,6 +518,46 @@ int __weak page_is_ram(unsigned long pfn)
->>  }
->>  EXPORT_SYMBOL_GPL(page_is_ram);
->>
->> +/*
->> + * This function returns true if the target memory is marked as
->> + * IORESOURCE_MEM and IORESOUCE_BUSY and described as other than
->> + * IORES_DESC_NONE (e.g. IORES_DESC_ACPI_TABLES).
->> + */
->> +static int walk_mem_range(unsigned long start_pfn, unsigned long nr_pages)
->> +{
->> +	struct resource res;
->> +	unsigned long pfn, end_pfn;
->> +	u64 orig_end;
->> +	int ret = -1;
->> +
->> +	res.start = (u64) start_pfn << PAGE_SHIFT;
->> +	res.end = ((u64)(start_pfn + nr_pages) << PAGE_SHIFT) - 1;
->> +	res.flags = IORESOURCE_MEM | IORESOURCE_BUSY;
->> +	orig_end = res.end;
->> +	while ((res.start < res.end) &&
->> +		(find_next_iomem_res(&res, IORES_DESC_NONE, true) >= 0)) {
->> +		pfn = (res.start + PAGE_SIZE - 1) >> PAGE_SHIFT;
->> +		end_pfn = (res.end + 1) >> PAGE_SHIFT;
->> +		if (end_pfn > pfn)
->> +			ret = (res.desc != IORES_DESC_NONE) ? 1 : 0;
->> +		if (ret)
->> +			break;
->> +		res.start = res.end + 1;
->> +		res.end = orig_end;
->> +	}
->> +	return ret;
->> +}
->
-> So the relevant difference between this one and walk_system_ram_range()
-> is this:
->
-> -			ret = (*func)(pfn, end_pfn - pfn, arg);
-> +			ret = (res.desc != IORES_DESC_NONE) ? 1 : 0;
->
-> so it seems to me you can have your own *func() pointer which does that
-> IORES_DESC_NONE comparison. And then you can define your own workhorse
-> __walk_memory_range() which gets called by both walk_mem_range() and
-> walk_system_ram_range() instead of almost duplicating them.
->
-> And looking at walk_system_ram_res(), that one looks similar too except
-> the pfn computation. But AFAICT the pfn/end_pfn things are computed from
-> res.start and res.end so it looks to me like all those three functions
-> are crying for unification...
-
-I'll take a look at what it takes to consolidate these with a pre-patch. 
-Then I'll add the new support.
-
-Thanks,
-Tom
-
+> Also, if the fallback case fails, we may leave a bunch of memory allocated,
+> which could interfere with something
+> run after a failed kernel boot.  I'm guessing in practice there won't be
+> anything run that needs a lot of memory,
+> but we're not being a good citizen in this regard.
 >
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+The thing is that we are not actually allocating anything there, we
+only allocate it to ensure that nothing else uses the region. This
+means the second time around (e.g., if the stub exits to the uefi
+shell for some reason, and is invoked again), we will not reserve even
+more memory, but simply notice that the region we want to claim for
+the decompressed kernels has already been claimed.
+
+> I don't feel strongly about either of the above, as they are more
+> theoretical problems.
+>
+> Reviewed-by: Roy Franz <roy.franz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+>>>  drivers/firmware/efi/libstub/arm32-stub.c | 137 +++++++++++++++++---
+>>>  1 file changed, 117 insertions(+), 20 deletions(-)
+>>>
+>>> diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
+>>> index e1f0b28e1dcb..4e1b6478986e 100644
+>>> --- a/drivers/firmware/efi/libstub/arm32-stub.c
+>>> +++ b/drivers/firmware/efi/libstub/arm32-stub.c
+>>> @@ -63,6 +63,121 @@ void free_screen_info(efi_system_table_t *sys_table_arg, struct screen_info *si)
+>>>       efi_call_early(free_pool, si);
+>>>  }
+>>>
+>>> +static efi_status_t reserve_kernel_base(efi_system_table_t *sys_table_arg,
+>>> +                                     unsigned long dram_base,
+>>> +                                     unsigned long *reserve_addr,
+>>> +                                     unsigned long *reserve_size)
+>>> +{
+>>> +     efi_physical_addr_t alloc_addr;
+>>> +     efi_memory_desc_t *memory_map;
+>>> +     unsigned long nr_pages, map_size, desc_size, buff_size;
+>>> +     efi_status_t status;
+>>> +     unsigned long l;
+>>> +
+>>> +     struct efi_boot_memmap map = {
+>>> +             .map            = &memory_map,
+>>> +             .map_size       = &map_size,
+>>> +             .desc_size      = &desc_size,
+>>> +             .desc_ver       = NULL,
+>>> +             .key_ptr        = NULL,
+>>> +             .buff_size      = &buff_size,
+>>> +     };
+>>> +
+>>> +     /*
+>>> +      * Reserve memory for the uncompressed kernel image. This is
+>>> +      * all that prevents any future allocations from conflicting
+>>> +      * with the kernel. Since we can't tell from the compressed
+>>> +      * image how much DRAM the kernel actually uses (due to BSS
+>>> +      * size uncertainty) we allocate the maximum possible size.
+>>> +      * Do this very early, as prints can cause memory allocations
+>>> +      * that may conflict with this.
+>>> +      */
+>>> +     alloc_addr = dram_base;
+>>> +     *reserve_size = MAX_UNCOMP_KERNEL_SIZE;
+>>> +     nr_pages = round_up(*reserve_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
+>>> +     status = sys_table_arg->boottime->allocate_pages(EFI_ALLOCATE_ADDRESS,
+>>> +                                                      EFI_BOOT_SERVICES_DATA,
+>>> +                                                      nr_pages, &alloc_addr);
+>
+> This should use efi_call_early() to be consistent with the rest of the
+> file.  (It was
+> the only direct call before, so we should fix that now.)
+>
+
+Good point, I will change that
