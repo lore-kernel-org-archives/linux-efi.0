@@ -1,62 +1,59 @@
-From: Omar Sandoval <osandov@osandov.com>
-Subject: Re: kexec regression since 4.9 caused by efi
-Date: Thu, 16 Mar 2017 10:50:48 -0700
-Message-ID: <20170316175048.GA25230@vader.DHCP.thefacebook.com>
-References: <20170308201616.GC8598@vader>
- <20170309063806.GB17257@dhcp-128-65.nay.redhat.com>
- <20170309095408.GA17883@vader>
- <20170313073748.GA6332@dhcp-128-65.nay.redhat.com>
- <20170316124132.GF6261@codeblueprint.co.uk>
+From: Brijesh Singh <brijesh.singh@amd.com>
+Subject: Re: [RFC PATCH v2 32/32] x86: kvm: Pin the guest memory when SEV is
+ active
+Date: Thu, 16 Mar 2017 13:17:47 -0500
+Message-ID: <b2a3cb42-1467-823e-affd-72a0be577932@amd.com>
+References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
+ <148846793743.2349.8478208161427437950.stgit@brijesh-build-machine>
+ <453770c9-f9d7-4806-dbae-d19876f2a22e@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170316124132.GF6261@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Dave Young <dyoung@redhat.com>, Ingo Molnar <mingo@kernel.org>, linux-kernel@vger.kernel.org, kernel-team@fb.com, kexec@lists.infradead.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <453770c9-f9d7-4806-dbae-d19876f2a22e@redhat.com>
+Sender: owner-linux-mm@kvack.org
+To: Paolo Bonzini <pbonzini@redhat.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@lin
+Cc: brijesh.singh@amd.com
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Mar 16, 2017 at 12:41:32PM +0000, Matt Fleming wrote:
-> On Mon, 13 Mar, at 03:37:48PM, Dave Young wrote:
-> > 
-> > Omar, could you try below patch? Looking at the efi_mem_desc_lookup, it is not
-> > correct to be used in efi_arch_mem_reserve, if it passed your test, I
-> > can rewrite patch log with more background and send it out:
-> > 
-> >         for_each_efi_memory_desc(md) {
-> > 		[snip]
-> >                 if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
-> >                     md->type != EFI_BOOT_SERVICES_DATA &&
-> >                     md->type != EFI_RUNTIME_SERVICES_DATA) {
-> >                         continue;
-> >                 }
-> > 
-> > In above code, it meant to get a md of EFI_MEMORY_RUNTIME of either boot
-> > data or runtime data, this is wrong for efi_mem_reserve, because we are
-> > reserving boot data which has no EFI_MEMORY_RUNTIME attribute at the
-> > running time. Just is happened to work and we did not capture the error.
-> 
-> Wouldn't something like this be simpler?
-> 
-> ---
-> 
-> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-> index 30031d5293c4..cdfe8c628959 100644
-> --- a/arch/x86/platform/efi/quirks.c
-> +++ b/arch/x86/platform/efi/quirks.c
-> @@ -201,6 +201,10 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
->  		return;
->  	}
->  
-> +	/* No need to reserve regions that will never be freed. */
-> +	if (md.attribute & EFI_MEMORY_RUNTIME)
-> +		return;
-> +
->  	size += addr % EFI_PAGE_SIZE;
->  	size = round_up(size, EFI_PAGE_SIZE);
->  	addr = round_down(addr, EFI_PAGE_SIZE);
 
-This works for me.
 
-Reported-and-tested-by: Omar Sandoval <osandov@fb.com>
+On 03/16/2017 05:38 AM, Paolo Bonzini wrote:
+>
+>
+> On 02/03/2017 16:18, Brijesh Singh wrote:
+>> The SEV memory encryption engine uses a tweak such that two identical
+>> plaintexts at different location will have a different ciphertexts.
+>> So swapping or moving ciphertexts of two pages will not result in
+>> plaintexts being swapped. Relocating (or migrating) a physical backing pages
+>> for SEV guest will require some additional steps. The current SEV key
+>> management spec [1] does not provide commands to swap or migrate (move)
+>> ciphertexts. For now we pin the memory allocated for the SEV guest. In
+>> future when SEV key management spec provides the commands to support the
+>> page migration we can update the KVM code to remove the pinning logical
+>> without making any changes into userspace (qemu).
+>>
+>> The patch pins userspace memory when a new slot is created and unpin the
+>> memory when slot is removed.
+>>
+>> [1] http://support.amd.com/TechDocs/55766_SEV-KM%20API_Spec.pdf
+>
+> This is not enough, because memory can be hidden temporarily from the
+> guest and remapped later.  Think of a PCI BAR that is backed by RAM, or
+> also SMRAM.  The pinning must be kept even in that case.
+>
+> You need to add a pair of KVM_MEMORY_ENCRYPT_OPs (one that doesn't map
+> to a PSP operation), such as KVM_REGISTER/UNREGISTER_ENCRYPTED_RAM.  In
+> QEMU you can use a RAMBlockNotifier to invoke the ioctls.
+>
+
+I was hoping to avoid adding new ioctl, but I see your point. Will add a pair of ioctl's
+and use RAMBlocNotifier to invoke those ioctls.
+
+-Brijesh
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
