@@ -1,54 +1,72 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v2 12/32] x86: Add early boot support when running
- with SEV active
-Date: Thu, 16 Mar 2017 09:28:58 -0500
-Message-ID: <b27126ee-aff0-ab11-706b-fc6d8d4901db@amd.com>
-References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <148846768878.2349.15757532025749214650.stgit@brijesh-build-machine>
- <20170309140748.tg67yo2jmc5ahck3@pd.tnic>
- <5d62b16f-16ef-1bd7-1551-f0c4c43573f4@redhat.com>
- <20170309162942.jwtb3l33632zhbaz@pd.tnic>
- <1fe1e177-f588-fe5a-dc13-e9fde00e8958@amd.com>
- <20170316101656.dcwgtn4qdtyp5hip@pd.tnic>
+From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: [PATCH 4.10 19/48] efi/arm: Fix boot crash with CONFIG_CPUMASK_OFFSTACK=y
+Date: Thu, 16 Mar 2017 23:30:03 +0900
+Message-ID: <20170316142921.749143958@linuxfoundation.org>
+References: <20170316142920.761502205@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-crypto-owner@vger.kernel.org>
-In-Reply-To: <20170316101656.dcwgtn4qdtyp5hip@pd.tnic>
-Sender: linux-crypto-owner@vger.kernel.org
-To: Borislav Petkov <bp@suse.de>, Brijesh Singh <brijesh.singh@amd.com>
-Cc: Paolo Bonzini <pbonzini@redhat.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, math
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170316142920.761502205-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 3/16/2017 5:16 AM, Borislav Petkov wrote:
-> On Fri, Mar 10, 2017 at 10:35:30AM -0600, Brijesh Singh wrote:
->> We could update this patch to use the below logic:
->>
->>  * CPUID(0) - Check for AuthenticAMD
->>  * CPID(1) - Check if under hypervisor
->>  * CPUID(0x80000000) - Check for highest supported leaf
->>  * CPUID(0x8000001F).EAX - Check for SME and SEV support
->>  * rdmsr (MSR_K8_SYSCFG)[MemEncryptionModeEnc] - Check if SMEE is set
->
-> Actually, it is still not clear to me *why* we need to do anything
-> special wrt SEV in the guest.
->
-> Lemme clarify: why can't the guest boot just like a normal Linux on
-> baremetal and use the SME(!) detection code to set sme_enable and so
-> on? IOW, I'd like to avoid all those checks whether we're running under
-> hypervisor and handle all that like we're running on baremetal.
+4.10-stable review patch.  If anyone has any objections, please let me know.
 
-Because there are differences between how SME and SEV behave
-(instruction fetches are always decrypted under SEV, DMA to an
-encrypted location is not supported under SEV, etc.) we need to
-determine which mode we are in so that things can be setup properly
-during boot. For example, if SEV is active the kernel will already
-be encrypted and so we don't perform that step or the trampoline area
-for bringing up an AP must be decrypted for SME but encrypted for SEV.
-The hypervisor check will provide that ability to determine how we
-handle things.
+------------------
 
-Thanks,
-Tom
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
->
+commit d1eb98143c56f24fef125f5bbed49ae0b52fb7d6 upstream.
+
+On ARM and arm64, we use a dedicated mm_struct to map the UEFI
+Runtime Services regions, which allows us to map those regions
+on demand, and in a way that is guaranteed to be compatible
+with incoming kernels across kexec.
+
+As it turns out, we don't fully initialize the mm_struct in the
+same way as process mm_structs are initialized on fork(), which
+results in the following crash on ARM if CONFIG_CPUMASK_OFFSTACK=y
+is enabled:
+
+  ...
+  EFI Variables Facility v0.08 2004-May-17
+  Unable to handle kernel NULL pointer dereference at virtual address 00000000
+  [...]
+  Process swapper/0 (pid: 1)
+  ...
+  __memzero()
+  check_and_switch_context()
+  virt_efi_get_next_variable()
+  efivar_init()
+  efivars_sysfs_init()
+  do_one_initcall()
+  ...
+
+This is due to a missing call to mm_init_cpumask(), so add it.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Link: http://lkml.kernel.org/r/1488395154-29786-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+
+---
+ drivers/firmware/efi/arm-runtime.c |    1 +
+ 1 file changed, 1 insertion(+)
+
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -65,6 +65,7 @@ static bool __init efi_virtmap_init(void
+ 	bool systab_found;
+ 
+ 	efi_mm.pgd = pgd_alloc(&efi_mm);
++	mm_init_cpumask(&efi_mm);
+ 	init_new_context(NULL, &efi_mm);
+ 
+ 	systab_found = false;
