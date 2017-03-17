@@ -1,70 +1,70 @@
-From: James Morse <james.morse@arm.com>
-Subject: Re: [PATCH V12 05/10] acpi: apei: handle SEA notification type for
- ARMv8
-Date: Fri, 17 Mar 2017 16:43:11 +0000
-Message-ID: <58CC121F.5030807@arm.com>
-References: <1488833103-21082-1-git-send-email-tbaicar@codeaurora.org>
- <1488833103-21082-6-git-send-email-tbaicar@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <1488833103-21082-6-git-send-email-tbaicar@codeaurora.org>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] efi/esrt: Cleanup bad memory map log messages
+Date: Fri, 17 Mar 2017 19:06:45 +0000
+Message-ID: <1489777605-8363-2-git-send-email-ard.biesheuvel@linaro.org>
+References: <1489777605-8363-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1489777605-8363-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Daniel Drake <drake-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Tyler,
+From: Daniel Drake <drake-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
 
-On 06/03/17 20:44, Tyler Baicar wrote:
-> ARM APEI extension proposal added SEA (Synchronous External Abort)
-> notification type for ARMv8.
-> Add a new GHES error source handling function for SEA. If an error
-> source's notification type is SEA, then this function can be registered
-> into the SEA exception handler. That way GHES will parse and report
-> SEA exceptions when they occur.
-> An SEA can interrupt code that had interrupts masked and is treated as
-> an NMI. To aid this the page of address space for mapping APEI buffers
-> while in_nmi() is always reserved, and ghes_ioremap_pfn_nmi() is
-> changed to use the helper methods to find the prot_t to map with in
-> the same way as ghes_ioremap_pfn_irq().
+The Intel Compute Stick STCK1A8LFC and Weibu F3C platforms both
+log 2 error messages during boot:
 
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index b25e7cf..b0596ba 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -1023,6 +1075,13 @@ static int ghes_probe(struct platform_device *ghes_dev)
->  		pr_warning(GHES_PFX "Generic hardware error source: %d notified via local interrupt is not supported!\n",
->  			   generic->header.source_id);
->  		goto err;
-> +	case ACPI_HEST_NOTIFY_GPIO:
-> +	case ACPI_HEST_NOTIFY_SEI:
-> +	case ACPI_HEST_NOTIFY_GSIV:
-> +		pr_warn(GHES_PFX "Generic hardware error source: %d notified via notification type %u is not supported\n",
-> +			generic->header.source_id, generic->header.source_id);
-> +		rc = -ENOTSUPP;
-> +		goto err;
->  	default:
->  		pr_warning(FW_WARN GHES_PFX "Unknown notification type: %u for generic hardware error source: %d\n",
->  			   generic->notify.type, generic->header.source_id);
+   efi: requested map not found.
+   esrt: ESRT header is not in the memory map.
 
+Searching the web, this seems to affect many other platforms too.
+Since these messages are logged as errors, they appear on-screen during
+the boot process even when using the "quiet" boot parameter used by
+distros.
 
-This hunk will conflict with Shiju Jose's patch[0] that adds GPIO and GSIV
-support. Can we remove it?
+Demote the ESRT error to a warning so that it does not appear on-screen,
+and delete the error logging from efi_mem_desc_lookup; both callsites
+of that function log more specific messages upon failure.
 
+Out of curiosity I looked closer at the Weibu F3C. There is no entry in
+the UEFI-provided memory map which corresponds to the ESRT pointer, but
+hacking the code to map it anyway, the ESRT does appear to be valid with
+2 entries.
 
-Thanks,
+Signed-off-by: Daniel Drake <drake-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Acked-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/firmware/efi/efi.c  | 1 -
+ drivers/firmware/efi/esrt.c | 2 +-
+ 2 files changed, 1 insertion(+), 2 deletions(-)
 
-James
-
-
-[0] https://www.spinics.net/lists/linux-acpi/msg72654.html
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index e7d404059b73..b372aad3b449 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -389,7 +389,6 @@ int __init efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md)
+ 			return 0;
+ 		}
+ 	}
+-	pr_err_once("requested map not found.\n");
+ 	return -ENOENT;
+ }
+ 
+diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+index 08b026864d4e..8554d7aec31c 100644
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -254,7 +254,7 @@ void __init efi_esrt_init(void)
+ 
+ 	rc = efi_mem_desc_lookup(efi.esrt, &md);
+ 	if (rc < 0) {
+-		pr_err("ESRT header is not in the memory map.\n");
++		pr_warn("ESRT header is not in the memory map.\n");
+ 		return;
+ 	}
+ 
+-- 
+2.7.4
