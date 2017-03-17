@@ -1,121 +1,87 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi/arm32-stub: allow boottime allocations in the vmlinux region
-Date: Thu, 16 Mar 2017 23:54:37 +0000
-Message-ID: <CAKv+Gu--Z+g18GT7dwqaaEA7u87oFu3ZKRNxhacdOxxAu2XE7Q@mail.gmail.com>
-References: <1489661776-12946-1-git-send-email-ard.biesheuvel@linaro.org>
- <20170316112653.GA16034@bivouac.eciton.net> <CAKWsp+whVJxoCrycACjWXRmK6rYvcOhLMeHKYYKRMXhhQ8A8Og@mail.gmail.com>
- <CAKv+Gu-=Q3aiECtT7krscjUcBsmDZsRRCUTjpOUfdg_NgV90=Q@mail.gmail.com> <CAKWsp+zPE1fUNvXhSOZ90PgrJDyH8gk9GxPpe7+sSDZyJy9T2g@mail.gmail.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: kexec regression since 4.9 caused by efi
+Date: Fri, 17 Mar 2017 10:09:51 +0800
+Message-ID: <20170317020951.GA3942@dhcp-128-65.nay.redhat.com>
+References: <20170308201616.GC8598@vader>
+ <20170309063806.GB17257@dhcp-128-65.nay.redhat.com>
+ <20170309095408.GA17883@vader>
+ <20170313073748.GA6332@dhcp-128-65.nay.redhat.com>
+ <20170316124132.GF6261@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKWsp+zPE1fUNvXhSOZ90PgrJDyH8gk9GxPpe7+sSDZyJy9T2g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <rfranz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Cohen, Eugene" <eugene-VXdhtT5mjnY@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170316124132.GF6261-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Omar Sandoval <osandov-nWWhXC5lh1RBDgjK7y7TUQ@public.gmane.org>, kernel-team-b10kYP2dOMg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 16 March 2017 at 23:07, Roy Franz <rfranz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org> wrote:
-> On Thu, Mar 16, 2017 at 3:02 PM, Ard Biesheuvel
-> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> On 16 March 2017 at 21:56, Roy Franz <rfranz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org> wrote:
->>> On Thu, Mar 16, 2017 at 4:26 AM, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>>> On Thu, Mar 16, 2017 at 10:56:16AM +0000, Ard Biesheuvel wrote:
->>>>> The arm32 kernel decompresses itself to the base of DRAM unconditionally,
->>>>> and so it is the EFI stub's job to ensure that the region is available.
->>>>>
->>>>> Currently, we do this by creating an allocation there, and giving up if
->>>>> that fails. However, any boot services regions occupying this area are
->>>>> not an issue, given that the decompressor executes strictly after the
->>>>> stub calls ExitBootServices().
->>>>>
->>>>> So let's try a bit harder to proceed if the initial allocation fails,
->>>>> and check whether any memory map entries occupying the region may be
->>>>> considered safe.
->>>>>
->>>>> Reported-by: Eugene Cohen <eugene-VXdhtT5mjnY@public.gmane.org>
->>>>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>>>> ---
->>>>>
->>>>> NOTE: This patch appears to have uncovered a bug in DxeCore's AllocatePages
->>>>> routine. If the first allocate_pages(EFI_ALLOCATE_ADDRESS) call fails, we may
->>>>> still end up with a memory map that reflects a kind of limbo state where the
->>>>> intended allocation is carved out and partially converted.
->>>>>
->>>>> For example, starting from
->>>>>
->>>>> 0x000040000000-0x00004007ffff [ConventionalMemory ]
->>>>> 0x000040080000-0x00004009ffff [Boot Data          ]
->>>>> 0x0000400a0000-0x000047ffffff [ConventionalMemory ]
->>>>>
->>>>> the failed allocation of 32 MB of LoaderData @ 0x4000_0000 will result in
->>>>>
->>>>> 0x000040000000-0x00004007ffff [Loader Data        ]
->>>>> 0x000040080000-0x00004009ffff [Boot Data          ]
->>>>> 0x0000400a0000-0x000047ffffff [ConventionalMemory ]
->>>>>
->>>>> after which scanning the region for LoaderData regions (which we should reject
->>>>> given that they could be freed and replaced with, e.g., runtime services data
->>>>> regions) will always fail.
->>>>>
->>>>> For this reason, the allocate_pages(EFI_ALLOCATE_ADDRESS) has been modified to
->>>>> use EfiBootServicesData instead. In the mean time, I will report this to the
->>>>> EDK2 development mailing list.
->>>>
->>>> That feels a little bit eeew, but I can't see it breaking anything.
->>>>
->>> (Sorry for HTML the first time...)
->>>
->>> Would it be reasonable to do a trial allocation with
->>>  EFI_BOOT_SERVICES_DATA first, and if that passes then free
->>> it and do the allocation with EFI_LOADER_DATA?  This keeps the final
->>> allocation of the desired type,
->>> but since this allocation is short lived I don't think it matters that much.
->>> If left as is, I think it deserves a comment in the source so this
->>> non-standard allocation is identified (and not copied).
->>>
->>> Also, if the fallback case fails, we may leave a bunch of memory allocated,
->>> which could interfere with something
->>> run after a failed kernel boot.  I'm guessing in practice there won't be
->>> anything run that needs a lot of memory,
->>> but we're not being a good citizen in this regard.
->>>
->>
->> The thing is that we are not actually allocating anything there, we
->> only allocate it to ensure that nothing else uses the region. This
->> means the second time around (e.g., if the stub exits to the uefi
->> shell for some reason, and is invoked again), we will not reserve even
->> more memory, but simply notice that the region we want to claim for
->> the decompressed kernels has already been claimed.
->
-> We're calling allocate_pages(), so we are allocating memory, right?
-> I'm thinking more of some other application that would allocate memory,
-> such as a diagnostic, etc - this memory won't be available to that
-> application if
-> it is run after a failed boot that allocates memory during the fallback loop.
-> I don't think the stub will re-use any previously allocated memory
-> on a second attempt - it allocates as EFI_LOADER_DATA, and in the
-> loop that checks memory EFI_LOADER_DATA is treated as unusable.
->
+On 03/16/17 at 12:41pm, Matt Fleming wrote:
+> On Mon, 13 Mar, at 03:37:48PM, Dave Young wrote:
+> > 
+> > Omar, could you try below patch? Looking at the efi_mem_desc_lookup, it is not
+> > correct to be used in efi_arch_mem_reserve, if it passed your test, I
+> > can rewrite patch log with more background and send it out:
+> > 
+> >         for_each_efi_memory_desc(md) {
+> > 		[snip]
+> >                 if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
+> >                     md->type != EFI_BOOT_SERVICES_DATA &&
+> >                     md->type != EFI_RUNTIME_SERVICES_DATA) {
+> >                         continue;
+> >                 }
+> > 
+> > In above code, it meant to get a md of EFI_MEMORY_RUNTIME of either boot
+> > data or runtime data, this is wrong for efi_mem_reserve, because we are
+> > reserving boot data which has no EFI_MEMORY_RUNTIME attribute at the
+> > running time. Just is happened to work and we did not capture the error.
+> 
+> Wouldn't something like this be simpler?
+> 
+> ---
+> 
+> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+> index 30031d5293c4..cdfe8c628959 100644
+> --- a/arch/x86/platform/efi/quirks.c
+> +++ b/arch/x86/platform/efi/quirks.c
+> @@ -201,6 +201,10 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
+>  		return;
+>  	}
+>  
+> +	/* No need to reserve regions that will never be freed. */
+> +	if (md.attribute & EFI_MEMORY_RUNTIME)
+> +		return;
+> +
 
-No, that is not what it does. The 32 MB allocation for the
-uncompressed kernel always resides at the base of DRAM, regardles of
-how many boot attempts you have made. The reason EFI_LOADER_DATA is
-treated as unusable is that such allocations may be freed before
-ExitBootServices(), which means the space they occupy may be given the
-other allocations, which is a problem if those are of a runtime type.
+Matt, I think it should be fine although I think the md type checking in
+efi_mem_desc_lookup() is causing confusion and not easy to understand..
 
-So if the stub behaves as we think it does, all loader data
-allocations will be freed again if the stub exists without booting the
-kernel. The 32 MB block will not be released, but additional attempts
-to boot will simply notice that the 32 MB block is already covered by
-a memory allocation of a type that does not conflict with the
-uncompressed kernel, and not allocate any additional memory for it.
+How about move the if chunk early like below because it seems no need
+to sanity check the addr + size any more if the md is still RUNTIME?
 
-> Neither of these things is likely a big deal - not much that would be run after
-> a failed Linux boot will need this memory, and unless action could be taken to
-> free the memory that caused the full-size allocation to fail addition
-> boot attempts
-> wouldn't be successful anyway.
->
+--- linux-x86.orig/arch/x86/platform/efi/quirks.c
++++ linux-x86/arch/x86/platform/efi/quirks.c
+@@ -196,6 +196,10 @@ void __init efi_arch_mem_reserve(phys_ad
+ 		return;
+ 	}
+ 
++	/* No need to reserve regions that will never be freed. */
++	if (md.attribute & EFI_MEMORY_RUNTIME)
++		return;
++
+ 	if (addr + size > md.phys_addr + (md.num_pages << EFI_PAGE_SHIFT)) {
+ 		pr_err("Region spans EFI memory descriptors, %pa\n", &addr);
+ 		return;
 
-True.
+Thanks
+Dave
