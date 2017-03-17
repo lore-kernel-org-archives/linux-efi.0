@@ -1,70 +1,42 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] efi/esrt: Cleanup bad memory map log messages
-Date: Fri, 17 Mar 2017 19:06:45 +0000
-Message-ID: <1489777605-8363-2-git-send-email-ard.biesheuvel@linaro.org>
-References: <1489777605-8363-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1489777605-8363-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Daniel Drake <drake-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [GIT PULL] UEFI fix for v4.11-rc
+Date: Fri, 17 Mar 2017 19:06:44 +0000
+Message-ID: <1489777605-8363-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Daniel Drake <drake@endlessm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Daniel Drake <drake-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
+Hi all,
 
-The Intel Compute Stick STCK1A8LFC and Weibu F3C platforms both
-log 2 error messages during boot:
+At Matt's request, we are proposing this single patch as a bugfix for v4.11.
+Please pull.
 
-   efi: requested map not found.
-   esrt: ESRT header is not in the memory map.
+The following changes since commit 4495c08e84729385774601b5146d51d9e5849f81:
 
-Searching the web, this seems to affect many other platforms too.
-Since these messages are logged as errors, they appear on-screen during
-the boot process even when using the "quiet" boot parameter used by
-distros.
+  Linux 4.11-rc2 (2017-03-12 14:47:08 -0700)
 
-Demote the ESRT error to a warning so that it does not appear on-screen,
-and delete the error logging from efi_mem_desc_lookup; both callsites
-of that function log more specific messages upon failure.
+are available in the git repository at:
 
-Out of curiosity I looked closer at the Weibu F3C. There is no entry in
-the UEFI-provided memory map which corresponds to the ESRT pointer, but
-hacking the code to map it anyway, the ESRT does appear to be valid with
-2 entries.
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
 
-Signed-off-by: Daniel Drake <drake-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Acked-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
+for you to fetch changes up to 822f5845f710e57d7e2df1fd1ee00d6e19d334fe:
+
+  efi/esrt: Cleanup bad memory map log messages (2017-03-17 18:53:12 +0000)
+
+----------------------------------------------------------------
+A single UEFI fix:
+- Reduce the severity of the notice that appears when the ESRT table points
+  to memory that is not covered by the memory map. It is scaring our users
+  and interfering with their nice splash screens. Note that the ESRT may still
+  be perfectly usable, and is currently (to my knowledge) not widely used to
+  begin with.
+
+----------------------------------------------------------------
+Daniel Drake (1):
+      efi/esrt: Cleanup bad memory map log messages
+
  drivers/firmware/efi/efi.c  | 1 -
  drivers/firmware/efi/esrt.c | 2 +-
  2 files changed, 1 insertion(+), 2 deletions(-)
-
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index e7d404059b73..b372aad3b449 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -389,7 +389,6 @@ int __init efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md)
- 			return 0;
- 		}
- 	}
--	pr_err_once("requested map not found.\n");
- 	return -ENOENT;
- }
- 
-diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
-index 08b026864d4e..8554d7aec31c 100644
---- a/drivers/firmware/efi/esrt.c
-+++ b/drivers/firmware/efi/esrt.c
-@@ -254,7 +254,7 @@ void __init efi_esrt_init(void)
- 
- 	rc = efi_mem_desc_lookup(efi.esrt, &md);
- 	if (rc < 0) {
--		pr_err("ESRT header is not in the memory map.\n");
-+		pr_warn("ESRT header is not in the memory map.\n");
- 		return;
- 	}
- 
--- 
-2.7.4
