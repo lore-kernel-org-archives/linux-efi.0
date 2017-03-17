@@ -1,87 +1,69 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: kexec regression since 4.9 caused by efi
-Date: Fri, 17 Mar 2017 10:09:51 +0800
-Message-ID: <20170317020951.GA3942@dhcp-128-65.nay.redhat.com>
-References: <20170308201616.GC8598@vader>
- <20170309063806.GB17257@dhcp-128-65.nay.redhat.com>
- <20170309095408.GA17883@vader>
- <20170313073748.GA6332@dhcp-128-65.nay.redhat.com>
- <20170316124132.GF6261@codeblueprint.co.uk>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH v7 1/3] x86/mm: Adapt MODULES_END based on Fixmap section
+ size
+Date: Fri, 17 Mar 2017 08:34:37 +0100
+Message-ID: <20170317073437.GA14797@gmail.com>
+References: <20170314170508.100882-1-thgarnie@google.com>
+ <20170316081013.GB7815@gmail.com>
+ <CAJcbSZEB09inR2KLF_puOnmAK7QUv-zJHcguiF0qucUYTtg1Pw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <20170316124132.GF6261-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Omar Sandoval <osandov-nWWhXC5lh1RBDgjK7y7TUQ@public.gmane.org>, kernel-team-b10kYP2dOMg@public.gmane.org
+In-Reply-To: <CAJcbSZEB09inR2KLF_puOnmAK7QUv-zJHcguiF0qucUYTtg1Pw@mail.gmail.com>
+Sender: owner-linux-mm@kvack.org
+To: Thomas Garnier <thgarnie@google.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Jonathan Corbet <corbet@lwn.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Lorenzo Stoakes <lstoakes@gmail.com>, Kees Cook <keescook@chromium.org>, Juergen Gross <jgross@suse.com>, Andy Lutomirski <luto@kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Andrew Morton <akpm@linux-foundation.org>, Michal Hocko <mhocko@suse.com>, zijun_hu <zijun_hu@htc.com>, Chris Wilson <chris@chris-wilson.co.uk>, Andy Lutomirski <luto@amacapital.net>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ost>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/16/17 at 12:41pm, Matt Fleming wrote:
-> On Mon, 13 Mar, at 03:37:48PM, Dave Young wrote:
-> > 
-> > Omar, could you try below patch? Looking at the efi_mem_desc_lookup, it is not
-> > correct to be used in efi_arch_mem_reserve, if it passed your test, I
-> > can rewrite patch log with more background and send it out:
-> > 
-> >         for_each_efi_memory_desc(md) {
-> > 		[snip]
-> >                 if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
-> >                     md->type != EFI_BOOT_SERVICES_DATA &&
-> >                     md->type != EFI_RUNTIME_SERVICES_DATA) {
-> >                         continue;
-> >                 }
-> > 
-> > In above code, it meant to get a md of EFI_MEMORY_RUNTIME of either boot
-> > data or runtime data, this is wrong for efi_mem_reserve, because we are
-> > reserving boot data which has no EFI_MEMORY_RUNTIME attribute at the
-> > running time. Just is happened to work and we did not capture the error.
+
+* Thomas Garnier <thgarnie@google.com> wrote:
+
+> On Thu, Mar 16, 2017 at 1:10 AM, Ingo Molnar <mingo@kernel.org> wrote:
+> >
+> > Note that asm/fixmap.h is an x86-ism that isn't present in many other
+> > architectures, so this hunk will break the build.
+> >
+> > To make progress with these patches I've fixed it up with an ugly #ifdef
+> > CONFIG_X86, but it needs a real solution instead before this can be pushed
+> > upstream.
 > 
-> Wouldn't something like this be simpler?
+> I also saw an error on x86 tip on special configuration. I found this
+> new patch below to be a good solution to both.
 > 
+> Let me know what you think.
+> 
+> =====
+> 
+> This patch aligns MODULES_END to the beginning of the Fixmap section.
+> It optimizes the space available for both sections. The address is
+> pre-computed based on the number of pages required by the Fixmap
+> section.
+> 
+> It will allow GDT remapping in the Fixmap section. The current
+> MODULES_END static address does not provide enough space for the kernel
+> to support a large number of processors.
+> 
+> Signed-off-by: Thomas Garnier <thgarnie@google.com>
 > ---
-> 
-> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-> index 30031d5293c4..cdfe8c628959 100644
-> --- a/arch/x86/platform/efi/quirks.c
-> +++ b/arch/x86/platform/efi/quirks.c
-> @@ -201,6 +201,10 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
->  		return;
->  	}
->  
-> +	/* No need to reserve regions that will never be freed. */
-> +	if (md.attribute & EFI_MEMORY_RUNTIME)
-> +		return;
-> +
+> Based on next-20170308
+> ---
+>  Documentation/x86/x86_64/mm.txt         | 5 ++++-
+>  arch/x86/include/asm/pgtable_64.h       | 1 +
+>  arch/x86/include/asm/pgtable_64_types.h | 3 ++-
+>  3 files changed, 7 insertions(+), 2 deletions(-)
 
-Matt, I think it should be fine although I think the md type checking in
-efi_mem_desc_lookup() is causing confusion and not easy to understand..
+The patch is heavily whitespace and line wrap damaged :-(
 
-How about move the if chunk early like below because it seems no need
-to sanity check the addr + size any more if the md is still RUNTIME?
+Please send a properly titled, changelogged delta patch against tip:master (or 
+tip:x86/mm) to remove the CONFIG_X86 hack and fix the build bug.
 
---- linux-x86.orig/arch/x86/platform/efi/quirks.c
-+++ linux-x86/arch/x86/platform/efi/quirks.c
-@@ -196,6 +196,10 @@ void __init efi_arch_mem_reserve(phys_ad
- 		return;
- 	}
- 
-+	/* No need to reserve regions that will never be freed. */
-+	if (md.attribute & EFI_MEMORY_RUNTIME)
-+		return;
-+
- 	if (addr + size > md.phys_addr + (md.num_pages << EFI_PAGE_SHIFT)) {
- 		pr_err("Region spans EFI memory descriptors, %pa\n", &addr);
- 		return;
+Thanks,
 
-Thanks
-Dave
+	Ingo
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
