@@ -1,66 +1,60 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [PATCH v7 1/3] x86/mm: Adapt MODULES_END based on Fixmap section
- size
-Date: Fri, 17 Mar 2017 08:34:37 +0100
-Message-ID: <20170317073437.GA14797@gmail.com>
-References: <20170314170508.100882-1-thgarnie@google.com>
- <20170316081013.GB7815@gmail.com>
- <CAJcbSZEB09inR2KLF_puOnmAK7QUv-zJHcguiF0qucUYTtg1Pw@mail.gmail.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [RFC PATCH v2 14/32] x86: mm: Provide support to use memblock
+ when spliting large pages
+Date: Fri, 17 Mar 2017 11:17:37 +0100
+Message-ID: <20170317101737.icdois7sdmtutt6b@pd.tnic>
+References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
+ <148846771545.2349.9373586041426414252.stgit@brijesh-build-machine>
+ <20170310110657.hophlog2juw5hpzz@pd.tnic>
+ <cb6a9a56-2c52-d98d-3ff6-3b61d0e5875e@amd.com>
+ <20170316182836.tyvxoeq56thtc4pd@pd.tnic>
+ <ec134379-6a48-905c-26e4-f6f2738814dc@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <CAJcbSZEB09inR2KLF_puOnmAK7QUv-zJHcguiF0qucUYTtg1Pw@mail.gmail.com>
+In-Reply-To: <ec134379-6a48-905c-26e4-f6f2738814dc@redhat.com>
 Sender: owner-linux-mm@kvack.org
-To: Thomas Garnier <thgarnie@google.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Jonathan Corbet <corbet@lwn.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Lorenzo Stoakes <lstoakes@gmail.com>, Kees Cook <keescook@chromium.org>, Juergen Gross <jgross@suse.com>, Andy Lutomirski <luto@kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Andrew Morton <akpm@linux-foundation.org>, Michal Hocko <mhocko@suse.com>, zijun_hu <zijun_hu@htc.com>, Chris Wilson <chris@chris-wilson.co.uk>, Andy Lutomirski <luto@amacapital.net>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Jiri Kosina <jikos@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ost>
+To: Paolo Bonzini <pbonzini@redhat.com>
+Cc: Brijesh Singh <brijesh.singh@amd.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas@google.com, tglx@linutronix.de, mchehab@kernel.org
 List-Id: linux-efi@vger.kernel.org
 
+On Thu, Mar 16, 2017 at 11:25:36PM +0100, Paolo Bonzini wrote:
+> The kvmclock memory is initially zero so there is no need for the
+> hypervisor to allocate anything; the point of these patches is just to
+> access the data in a natural way from Linux source code.
 
-* Thomas Garnier <thgarnie@google.com> wrote:
+I realize that.
 
-> On Thu, Mar 16, 2017 at 1:10 AM, Ingo Molnar <mingo@kernel.org> wrote:
-> >
-> > Note that asm/fixmap.h is an x86-ism that isn't present in many other
-> > architectures, so this hunk will break the build.
-> >
-> > To make progress with these patches I've fixed it up with an ugly #ifdef
-> > CONFIG_X86, but it needs a real solution instead before this can be pushed
-> > upstream.
-> 
-> I also saw an error on x86 tip on special configuration. I found this
-> new patch below to be a good solution to both.
-> 
-> Let me know what you think.
-> 
-> =====
-> 
-> This patch aligns MODULES_END to the beginning of the Fixmap section.
-> It optimizes the space available for both sections. The address is
-> pre-computed based on the number of pages required by the Fixmap
-> section.
-> 
-> It will allow GDT remapping in the Fixmap section. The current
-> MODULES_END static address does not provide enough space for the kernel
-> to support a large number of processors.
-> 
-> Signed-off-by: Thomas Garnier <thgarnie@google.com>
-> ---
-> Based on next-20170308
-> ---
->  Documentation/x86/x86_64/mm.txt         | 5 ++++-
->  arch/x86/include/asm/pgtable_64.h       | 1 +
->  arch/x86/include/asm/pgtable_64_types.h | 3 ++-
->  3 files changed, 7 insertions(+), 2 deletions(-)
+> I also don't really like the patch as is (plus it fails modpost), but
+> IMO reusing __change_page_attr and __split_large_page is the right thing
+> to do.
 
-The patch is heavily whitespace and line wrap damaged :-(
+Right, so teaching pageattr.c about memblock could theoretically come
+around and bite us later when a page allocated with memblock gets freed
+with free_page().
 
-Please send a properly titled, changelogged delta patch against tip:master (or 
-tip:x86/mm) to remove the CONFIG_X86 hack and fix the build bug.
+And looking at this more, we have all this kernel pagetable preparation
+code down the init_mem_mapping() call and the pagetable setup in
+arch/x86/mm/init_{32,64}.c
 
-Thanks,
+And that code even does some basic page splitting. Oh and it uses
+alloc_low_pages() which knows whether to do memblock reservation or the
+common __get_free_pages() when slabs are up.
 
-	Ingo
+So what would be much cleaner, IMHO, is if one would reuse that code to
+change init_mm.pgd mappings early without copying pageattr.c.
+
+init_mem_mapping() gets called before kvm_guest_init() in setup_arch()
+so the guest would simply fixup its pagetable right there.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
