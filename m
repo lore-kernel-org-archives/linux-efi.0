@@ -1,45 +1,65 @@
-From: Paolo Bonzini <pbonzini@redhat.com>
-Subject: Re: [RFC PATCH v2 29/32] kvm: svm: Add support for SEV DEBUG_DECRYPT
- command
-Date: Fri, 17 Mar 2017 12:09:42 +0100
-Message-ID: <ca24bbc2-25cf-a5ca-cd39-5862036214bb@redhat.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [RFC PATCH v2 14/32] x86: mm: Provide support to use memblock
+ when spliting large pages
+Date: Fri, 17 Mar 2017 12:33:47 +0100
+Message-ID: <20170317113337.syvpat3c4s2l4nuz@pd.tnic>
 References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <148846789744.2349.167641684941925238.stgit@brijesh-build-machine>
- <4579cfdd-1797-8b47-8e00-254e3f6eb73f@redhat.com>
- <d89ef60d-a97c-b712-fb0f-0242ebebb91a@amd.com>
+ <148846771545.2349.9373586041426414252.stgit@brijesh-build-machine>
+ <20170310110657.hophlog2juw5hpzz@pd.tnic>
+ <cb6a9a56-2c52-d98d-3ff6-3b61d0e5875e@amd.com>
+ <20170316182836.tyvxoeq56thtc4pd@pd.tnic>
+ <ec134379-6a48-905c-26e4-f6f2738814dc@redhat.com>
+ <20170317101737.icdois7sdmtutt6b@pd.tnic>
+ <b6f9f46c-58c4-a19c-4955-2d07bd411443@redhat.com>
+ <20170317105610.musvo4baokgssvye@pd.tnic>
+ <78c99889-f175-f60f-716b-34a62203418a@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <d89ef60d-a97c-b712-fb0f-0242ebebb91a@amd.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Brijesh Singh <brijesh.singh@amd.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, bp@suse.de, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas@google.com, tglx@linutronix.de, mcheha
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <78c99889-f175-f60f-716b-34a62203418a@redhat.com>
+Sender: owner-linux-mm@kvack.org
+To: Paolo Bonzini <pbonzini@redhat.com>
+Cc: Brijesh Singh <brijesh.singh@amd.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas@google.com, tglx@linutronix.de, mchehab@kernel.org
 List-Id: linux-efi@vger.kernel.org
 
+On Fri, Mar 17, 2017 at 12:03:31PM +0100, Paolo Bonzini wrote:
 
+> If it is possible to do it in a fairly hypervisor-independent manner,
+> I'm all for it.  That is, only by looking at AMD-specified CPUID leaves
+> and at kernel ELF sections.
 
-On 16/03/2017 19:41, Brijesh Singh wrote:
->>
->> Please do add it, it doesn't seem very different from what you're doing
->> in LAUNCH_UPDATE_DATA.  There's no need for a separate
->> __sev_dbg_decrypt_page function, you can just pin/unpin here and do a
->> per-page loop as in LAUNCH_UPDATE_DATA.
-> 
-> I can certainly add support to handle crossing the page boundary cases.
-> Should we limit the size to prevent user passing arbitrary long length
-> and we end up looping inside the kernel? I was thinking to limit to a
-> PAGE_SIZE.
+Not even that.
 
-I guess it depends on how it's used.  PAGE_SIZE makes sense since you
-only know if a physical address is encrypted when you reach it from a
-visit of the page tables.
+What that needs to be able to do is:
 
-Paolo
+	kvm_map_percpu_hv_shared(st, sizeof(*st)))
+
+where st is the percpu steal time ptr:
+
+	struct kvm_steal_time *st = &per_cpu(steal_time, cpu);
+
+Underneath, what it does basically is it clears the encryption mask from
+the pte, see patch 16/32.
+
+And I keep talking about SEV-ES because this is going to expand on the
+need of having a shared memory region which the hypervisor and the guest
+needs to access, thus unencrypted. See
+
+http://support.amd.com/TechDocs/Protecting%20VM%20Register%20State%20with%20SEV-ES.pdf
+
+This is where you come in and say what would be the best approach there...
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
