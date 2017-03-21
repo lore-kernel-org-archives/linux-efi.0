@@ -1,73 +1,112 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH] efi/libstub: arm/arm64: make debug prints dependent on
- efi=debug
-Date: Tue, 21 Mar 2017 11:58:05 +0000
-Message-ID: <20170321115805.GC22188@leverpostej>
-References: <1490043425-20118-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efifb: avoid reconfiguration of BAR that covers the framebuffer
+Date: Tue, 21 Mar 2017 11:59:16 +0000
+Message-ID: <CAKv+Gu9oLVWY4QOf=eONT6a8v1+m8BKUUR79LUamysKZhbb2CQ@mail.gmail.com>
+References: <1490048037-1850-1-git-send-email-ard.biesheuvel@linaro.org> <20170321115447.GA3667@red-moon>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1490043425-20118-1-git-send-email-ard.biesheuvel@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: matt@codeblueprint.co.uk, rfranz@cavium.com, linux-efi@vger.kernel.org, leif.lindholm@linaro.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170321115447.GA3667@red-moon>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Lorenzo Pieralisi <lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heyi Guo <heyi.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Mar 20, 2017 at 08:57:05PM +0000, Ard Biesheuvel wrote:
-> The EFI stub currently prints a number of diagnostic messages that do
-> not carry a lot of information. Since these prints are not controlled
-> by 'loglevel' or other command line parameters, and since they appear on
-> the EFI framebuffer as well (if enabled), it would be nice if we could
-> turn them off.
-> 
-> So let's only print them if 'efi=debug' is passed on the command line,
-> or when CONFIG_DEBUG_EFI is set in the kernel build configuration.
-> 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> ---
->  drivers/firmware/efi/libstub/arm32-stub.c      |  2 ++
->  drivers/firmware/efi/libstub/efi-stub-helper.c | 23 ++++++++++++++---------
->  drivers/firmware/efi/libstub/efistub.h         |  9 +++++++++
->  drivers/firmware/efi/libstub/secureboot.c      |  2 ++
->  include/linux/efi.h                            |  3 ---
->  5 files changed, 27 insertions(+), 12 deletions(-)
+On 21 March 2017 at 11:54, Lorenzo Pieralisi <lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org> wrote:
+> [+Bjorn]
+>
+> On Mon, Mar 20, 2017 at 10:13:57PM +0000, Ard Biesheuvel wrote:
+>> On UEFI systems, the PCI subsystem is enumerated by the firmware,
+>> and if a graphical framebuffer is exposed by a PCI device, its base
+>> address and size are exposed to the OS via the Graphics Output
+>> Protocol (GOP).
+>>
+>> On arm64 PCI systems, the entire PCI hierarchy is reconfigured from
+>> scratch at boot. This may result in the GOP framebuffer address to
+>> become stale, if the BAR covering the framebuffer is modified. This
+>> will cause the framebuffer to become unresponsive, and may in some
+>> cases result in unpredictable behavior if the range is reassigned to
+>> another device.
+>
+> How does it currently work on eg x86 ? I suspect it just works because
+> on x86 resources are claimed at boot and if the FB memory BAR contains
+> reasonable values it is left alone by the kernel code reassigning
+> resources on x86.
+>
 
-> diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-> index 71c4d0e3c4ed..5ed16e6e166f 100644
-> --- a/drivers/firmware/efi/libstub/efistub.h
-> +++ b/drivers/firmware/efi/libstub/efistub.h
-> @@ -24,6 +24,15 @@
->  #define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
->  #endif
->  
-> +extern int __pure debug_enabled(void);
-> +
-> +#define pr_efi(sys_table, msg)		do {				\
-> +	if (debug_enabled()) efi_printk(sys_table, "EFI stub: "msg);	\
-> +} while (0)
+This is my understanding, yes.
 
-I was going to say that it's somewhat unfortunate to lose some of these
-messages by default, but I guess this only adds one additional
-round-trip when debugging a remote issue, and gives us the freedom to
-add more comprehensive debug messages in future.
+>> So add a quirk to the EFI fb driver to find the BAR associated with
+>> the GOP base address, and set the IORESOURCE_PCI_FIXED attribute so
+>> that the PCI core will leave it alone.
+>>
+>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> ---
+>>  drivers/video/fbdev/efifb.c | 33 ++++++++++++++++++++
+>>  1 file changed, 33 insertions(+)
+>>
+>> diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
+>> index 8c4dc1e1f94f..97a3b15b6f04 100644
+>> --- a/drivers/video/fbdev/efifb.c
+>> +++ b/drivers/video/fbdev/efifb.c
+>> @@ -10,6 +10,7 @@
+>>  #include <linux/efi.h>
+>>  #include <linux/errno.h>
+>>  #include <linux/fb.h>
+>> +#include <linux/pci.h>
+>>  #include <linux/platform_device.h>
+>>  #include <linux/screen_info.h>
+>>  #include <video/vga.h>
+>> @@ -360,3 +361,35 @@ static struct platform_driver efifb_driver = {
+>>  };
+>>
+>>  builtin_platform_driver(efifb_driver);
+>> +
+>> +static bool resource_found;
+>> +
+>> +static void efifb_fixup_resources(struct pci_dev *dev)
+>> +{
+>> +     u64 fb_base = screen_info.lfb_base;
+>> +     u64 fb_size = screen_info.lfb_size;
+>> +     int i;
+>> +
+>> +     if (resource_found || screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
+>> +             return;
+>> +
+>> +     if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
+>> +             fb_base |= (u64)screen_info.ext_lfb_base << 32;
+>> +
+>> +     if (!fb_base)
+>> +             return;
+>> +
+>> +     for (i = 0; i < PCI_STD_RESOURCE_END; i++) {
+>> +             struct resource *res = &dev->resource[i];
+>> +
+>> +             if (!(res->flags & IORESOURCE_MEM))
+>> +                     continue;
+>> +
+>> +             if (res->start <= fb_base && res->end >= fb_base + fb_size) {
+>
+> You are checking for a live resource here right (ie PCI device should be
+> enabled) ? I am not sure that just checking the resource range is safe
+> (I mean it would be most certainly a FW bug to have a PCI disabled
+> device with memory BAR programmed with the FB addresses but thought it
+> was worth mentioning).
+>
 
-Is the idea is to make the EFI stub completely silent in the successful
-case, or is the aim just to minimise the number of messages?
+It is implied that the device is enabled. The GOP protocol exposes a
+live framebuffer base/size with some metadata regarding the pixel
+format/color depth etc. It contains no annotations as to whether the
+device is PCI or simply a framebuffer mapped in system memory, and so
+we can only assume that the device is enabled.
 
-If it's only the latter, we could log a message regarding the existence
-of efi=debug in the default case, which might help with bug reports.
-
-No strong feelings from me.
-
-Thanks,
-Mark.
+>> +                     res->flags |= IORESOURCE_PCI_FIXED;
+>> +                     resource_found = true;
+>> +                     break;
+>> +             }
+>> +     }
+>> +}
+>> +DECLARE_PCI_FIXUP_HEADER(PCI_ANY_ID, PCI_ANY_ID, efifb_fixup_resources);
+>> --
+>> 2.7.4
+>>
