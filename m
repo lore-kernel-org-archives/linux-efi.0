@@ -1,138 +1,127 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v3] efifb: avoid reconfiguration of BAR that covers the
- framebuffer
-Date: Wed, 22 Mar 2017 15:30:29 +0000
-Message-ID: <1490196629-28088-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: kexec regression since 4.9 caused by efi
+Date: Wed, 22 Mar 2017 16:10:51 +0000
+Message-ID: <CAKv+Gu-hD9TbSX7iyWZSJ+S2SV5n95S+hcYGnH4OBfi_=M49hA@mail.gmail.com>
+References: <20170308201616.GC8598@vader> <20170309063806.GB17257@dhcp-128-65.nay.redhat.com>
+ <20170309095408.GA17883@vader> <20170313073748.GA6332@dhcp-128-65.nay.redhat.com>
+ <20170316124132.GF6261@codeblueprint.co.uk> <20170317020951.GA3942@dhcp-128-65.nay.redhat.com>
+ <20170317133232.GI6261@codeblueprint.co.uk> <20170320021412.GA3793@dhcp-128-65.nay.redhat.com>
+ <20170321074826.GA4571@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org
-Cc: lorenzo.pieralisi@arm.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, heyi.guo@linaro.org, pjones@redhat.com, hanjun.guo@linaro.org, bhelgaas@google.com, yinghai@kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170321074826.GA4571-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Omar Sandoval <osandov-nWWhXC5lh1RBDgjK7y7TUQ@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, kernel-team-b10kYP2dOMg@public.gmane.org, "kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On UEFI systems, the PCI subsystem is enumerated by the firmware,
-and if a graphical framebuffer is exposed by a PCI device, its base
-address and size are exposed to the OS via the Graphics Output
-Protocol (GOP).
+On 21 March 2017 at 07:48, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> On 03/20/17 at 10:14am, Dave Young wrote:
+>> On 03/17/17 at 01:32pm, Matt Fleming wrote:
+>> > On Fri, 17 Mar, at 10:09:51AM, Dave Young wrote:
+>> > >
+>> > > Matt, I think it should be fine although I think the md type checking in
+>> > > efi_mem_desc_lookup() is causing confusion and not easy to understand..
+>> >
+>> > Could you make that a separate patch if you think of improvements
+>> > there?
+>>
+>> Duplicate the lookup function is indeed a little ugly, will do it when I
+>> have a better idea, we can leave it as is since it works.
+>
+> Matt, rethinking about this, how about doint something below, not
+> tested, just seeking for idea and opinons, in this way no need duplicate
+> a function, but there is an assumption that no overlapped mem ranges in
+> efi memmap.
+>
+> Also the case Omar reported is the esrt memory range type is
+> RUNTIME_DATA, that is a little different with the mem attribute of
+> RUNTIME which also includes BOOT_DATA which has been set the RUNTIME
+> attribute, like bgrt in kexec reboot. Should we distinguish the two
+> cases and give out some warnings or debug info?
+>
+>
+> ---
+>  arch/x86/platform/efi/quirks.c |    5 +++++
+>  drivers/firmware/efi/efi.c     |    6 ------
+>  drivers/firmware/efi/esrt.c    |    7 +++++++
+>  3 files changed, 12 insertions(+), 6 deletions(-)
+>
+> --- linux-x86.orig/drivers/firmware/efi/efi.c
+> +++ linux-x86/drivers/firmware/efi/efi.c
+> @@ -376,12 +376,6 @@ int __init efi_mem_desc_lookup(u64 phys_
+>                 u64 size;
+>                 u64 end;
+>
+> -               if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
+> -                   md->type != EFI_BOOT_SERVICES_DATA &&
+> -                   md->type != EFI_RUNTIME_SERVICES_DATA) {
+> -                       continue;
+> -               }
+> -
+>                 size = md->num_pages << EFI_PAGE_SHIFT;
+>                 end = md->phys_addr + size;
+>                 if (phys_addr >= md->phys_addr && phys_addr < end) {
+> --- linux-x86.orig/drivers/firmware/efi/esrt.c
+> +++ linux-x86/drivers/firmware/efi/esrt.c
+> @@ -258,6 +258,13 @@ void __init efi_esrt_init(void)
+>                 return;
+>         }
+>
+> +       if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
+> +             md->type != EFI_BOOT_SERVICES_DATA &&
+> +             md->type != EFI_RUNTIME_SERVICES_DATA) {
+> +               pr_err("ESRT header memory map type is invalid\n");
+> +               return;
+> +       }
+> +
 
-On arm64 PCI systems, the entire PCI hierarchy is reconfigured from
-scratch at boot. This may result in the GOP framebuffer address to
-become stale, if the BAR covering the framebuffer is modified. This
-will cause the framebuffer to become unresponsive, and may in some
-cases result in unpredictable behavior if the range is reassigned to
-another device.
+This looks wrong to me. While the meanings get convoluted in practice,
+the EFI_MEMORY_RUNTIME attribute only means that the firmware requests
+a virtual mapping for the region. It is perfectly legal for a
+EFI_RUNTIME_SERVICES_DATA region not to have the EFI_MEMORY_RUNTIME
+attribute, if the region is never accessed by the runtime services
+themselves, and this is not entirely unlikely for tables that the
+firmware exposes to the OS
 
-So add a quirk to the EFI fb driver to find the BAR associated with
-the GOP base address, and set the IORESOURCE_PCI_FIXED attribute so
-that the PCI core will leave it alone.
-
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Peter Jones <pjones@redhat.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
-v3: check device is enabled before attempting to claim the resource
-
- drivers/video/fbdev/efifb.c | 60 +++++++++++++++++++-
- 1 file changed, 59 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
-index 8c4dc1e1f94f..88f653864a01 100644
---- a/drivers/video/fbdev/efifb.c
-+++ b/drivers/video/fbdev/efifb.c
-@@ -10,6 +10,7 @@
- #include <linux/efi.h>
- #include <linux/errno.h>
- #include <linux/fb.h>
-+#include <linux/pci.h>
- #include <linux/platform_device.h>
- #include <linux/screen_info.h>
- #include <video/vga.h>
-@@ -143,6 +144,9 @@ static struct attribute *efifb_attrs[] = {
- };
- ATTRIBUTE_GROUPS(efifb);
- 
-+static bool pci_bar_found;	/* did we find a BAR matching the efifb base? */
-+static bool pci_dev_disabled;	/* was the device disabled? */
-+
- static int efifb_probe(struct platform_device *dev)
- {
- 	struct fb_info *info;
-@@ -152,7 +156,7 @@ static int efifb_probe(struct platform_device *dev)
- 	unsigned int size_total;
- 	char *option = NULL;
- 
--	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
-+	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI || pci_dev_disabled)
- 		return -ENODEV;
- 
- 	if (fb_get_options("efifb", &option))
-@@ -360,3 +364,57 @@ static struct platform_driver efifb_driver = {
- };
- 
- builtin_platform_driver(efifb_driver);
-+
-+static void claim_efifb_bar(struct pci_dev *dev, int idx)
-+{
-+	u16 word;
-+
-+	pci_bar_found = true;
-+
-+	pci_read_config_word(dev, PCI_COMMAND, &word);
-+	if (!(word & PCI_COMMAND_MEMORY)) {
-+		pci_dev_disabled = true;
-+		dev_err(&dev->dev,
-+			"BAR %d: assigned to efifb but device is disabled!\n",
-+			idx);
-+		return;
-+	}
-+
-+	if (pci_claim_resource(dev, idx)) {
-+		pci_dev_disabled = true;
-+		dev_err(&dev->dev,
-+			"BAR %d: failed to claim resource for efifb!\n", idx);
-+		return;
-+	}
-+
-+	dev_info(&dev->dev, "BAR %d: assigned to efifb\n", idx);
-+}
-+
-+static void efifb_fixup_resources(struct pci_dev *dev)
-+{
-+	u64 base = screen_info.lfb_base;
-+	u64 size = screen_info.lfb_size;
-+	int i;
-+
-+	if (pci_bar_found || screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
-+		return;
-+
-+	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-+		base |= (u64)screen_info.ext_lfb_base << 32;
-+
-+	if (!base)
-+		return;
-+
-+	for (i = 0; i < PCI_STD_RESOURCE_END; i++) {
-+		struct resource *res = &dev->resource[i];
-+
-+		if (!(res->flags & IORESOURCE_MEM))
-+			continue;
-+
-+		if (res->start <= base && res->end >= base + size - 1) {
-+			claim_efifb_bar(dev, i);
-+			break;
-+		}
-+	}
-+}
-+DECLARE_PCI_FIXUP_HEADER(PCI_ANY_ID, PCI_ANY_ID, efifb_fixup_resources);
--- 
-2.7.4
+>         max = efi_mem_desc_end(&md);
+>         if (max < efi.esrt) {
+>                 pr_err("EFI memory descriptor is invalid. (esrt: %p max: %p)\n",
+> --- linux-x86.orig/arch/x86/platform/efi/quirks.c
+> +++ linux-x86/arch/x86/platform/efi/quirks.c
+> @@ -201,6 +201,11 @@ void __init efi_arch_mem_reserve(phys_ad
+>                 return;
+>         }
+>
+> +       if (md->attribute & EFI_MEMORY_RUNTIME ||
+> +             md->type != EFI_BOOT_SERVICES_DATA) {
+> +               return;
+> +       }
+> +
+>         size += addr % EFI_PAGE_SIZE;
+>         size = round_up(size, EFI_PAGE_SIZE);
+>         addr = round_down(addr, EFI_PAGE_SIZE);
+>
+>>
+>> >
+>> > > How about move the if chunk early like below because it seems no need
+>> > > to sanity check the addr + size any more if the md is still RUNTIME?
+>> >
+>> > My original version did as you suggest, but I changed it because we
+>> > *really* want to know if someone tries to reserve a range that spans
+>> > regions. That would be totally unexpected and a warning about a
+>> > potential bug/issue.
+>>
+>> Matt, I'm fine if you prefer to capture the range checking errors.
+>> Would you like me to post it or just you send it out?
+>>
+>> Thanks
+>> Dave
+>
+> Thanks
+> Dave
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
