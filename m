@@ -1,41 +1,109 @@
-From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH V13 10/10] arm/arm64: KVM: add guest SEA support
-Date: Thu, 23 Mar 2017 17:58:05 +0000
-Message-ID: <20170323175805.GC32309@e104818-lin.cambridge.arm.com>
-References: <1490136425-4324-1-git-send-email-tbaicar@codeaurora.org>
- <1490136425-4324-11-git-send-email-tbaicar@codeaurora.org>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC PATCH v4 15/28] Add support to access persistent memory in
+ the clear
+Date: Thu, 23 Mar 2017 16:02:53 -0500
+Message-ID: <01d5f854-c8ea-61db-7e1b-1f97952bff75@amd.com>
+References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
+ <20170216154521.19244.89502.stgit@tlendack-t1.amdoffice.net>
+ <DF4PR84MB01694A716568EFB01F5C1C5EAB390@DF4PR84MB0169.NAMPRD84.PROD.OUTLOOK.COM>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1490136425-4324-11-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org, Suzuk
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <DF4PR84MB01694A716568EFB01F5C1C5EAB390@DF4PR84MB0169.NAMPRD84.PROD.OUTLOOK.COM>
+Sender: owner-linux-mm@kvack.org
+To: "Elliott, Robert (Persistent Memory)" <elliott@hpe.com>, "linux-arch@vger.kernel.org" <linux-arch@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "kvm@vger.kernel.org" <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "kasan-dev@googlegroups.com" <kasan-dev@googlegroups.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>
+Cc: Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, "Kani, Toshimitsu" <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>, Larry Woodman <lwoodman@redhat.com>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Mar 21, 2017 at 04:47:05PM -0600, Tyler Baicar wrote:
-> Currently external aborts are unsupported by the guest abort
-> handling. Add handling for SEAs so that the host kernel reports
-> SEAs which occur in the guest kernel.
-> 
-> Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+On 3/17/2017 5:58 PM, Elliott, Robert (Persistent Memory) wrote:
+>
+>
+>> -----Original Message-----
+>> From: linux-kernel-owner@vger.kernel.org [mailto:linux-kernel-
+>> owner@vger.kernel.org] On Behalf Of Tom Lendacky
+>> Sent: Thursday, February 16, 2017 9:45 AM
+>> Subject: [RFC PATCH v4 15/28] Add support to access persistent memory in
+>> the clear
+>>
+>> Persistent memory is expected to persist across reboots. The encryption
+>> key used by SME will change across reboots which will result in corrupted
+>> persistent memory.  Persistent memory is handed out by block devices
+>> through memory remapping functions, so be sure not to map this memory as
+>> encrypted.
+>
+> The system might be able to save and restore the correct encryption key for a
+> region of persistent memory, in which case it does need to be mapped as
+> encrypted.
+
+If the OS could get some indication that BIOS/UEFI has saved and
+restored the encryption key, then it could be mapped encrypted.
+
+>
+> This might deserve a new EFI_MEMORY_ENCRYPTED attribute bit so the
+> system firmware can communicate that information to the OS (in the
+> UEFI memory map and the ACPI NFIT SPA Range structures).  It wouldn't
+> likely ever be added to the E820h table - ACPI 6.1 already obsoleted the
+> Extended Attribute for AddressRangeNonVolatile.
+
+An attribute bit in some form would be a nice way to inform the OS that
+the persistent memory can be mapped encrypted.
+
+>
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>> ---
+>>  arch/x86/mm/ioremap.c |    2 ++
+>>  1 file changed, 2 insertions(+)
+>>
+>> diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
+>> index b0ff6bc..c6cb921 100644
+>> --- a/arch/x86/mm/ioremap.c
+>> +++ b/arch/x86/mm/ioremap.c
+>> @@ -498,6 +498,8 @@ static bool
+>> memremap_should_map_encrypted(resource_size_t phys_addr,
+>>  	case E820_TYPE_ACPI:
+>>  	case E820_TYPE_NVS:
+>>  	case E820_TYPE_UNUSABLE:
+>> +	case E820_TYPE_PMEM:
+>> +	case E820_TYPE_PRAM:
+>>  		return false;
+>>  	default:
+>>  		break;
+>
+> E820_TYPE_RESERVED is also used to report persistent memory in
+> some systems (patch 16 adds that for other reasons).
+>
+> You might want to intercept the persistent memory types in the
+> efi_mem_type(phys_addr) switch statement earlier in the function
+> as well.  https://lkml.org/lkml/2017/3/13/357 recently mentioned that
+> "in qemu hotpluggable memory isn't put into E820," with the latest
+> information only in the UEFI memory map.
+>
+> Persistent memory can be reported there as:
+> * EfiReservedMemoryType type with the EFI_MEMORY_NV attribute
+> * EfiPersistentMemory type with the EFI_MEMORY_NV attribute
+>
+> Even the UEFI memory map is not authoritative, though.  To really
+> determine what is in these regions requires parsing the ACPI NFIT
+> SPA Ranges structures.  Parts of the E820 or UEFI regions could be
+> reported as volatile there and should thus be encrypted.
+
+Thanks for the details on this. I'll take a closer look at this and
+update the checks appropriately.
+
+Thanks,
+Tom
+
+>
 > ---
->  arch/arm/include/asm/kvm_arm.h       | 10 +++++++++
->  arch/arm/include/asm/system_misc.h   |  5 +++++
->  arch/arm/kvm/mmu.c                   | 41 ++++++++++++++++++++++++++++++------
->  arch/arm64/include/asm/kvm_arm.h     | 10 +++++++++
->  arch/arm64/include/asm/system_misc.h |  2 ++
->  arch/arm64/mm/fault.c                | 19 +++++++++++++++--
->  drivers/acpi/apei/ghes.c             | 13 ++++++------
->  include/acpi/ghes.h                  |  2 +-
->  8 files changed, 86 insertions(+), 16 deletions(-)
+> Robert Elliott, HPE Persistent Memory
+>
+>
+>
 
-For arm64:
-
-Acked-by: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-
-Marc, Christoffer, could you please check the kvm bits in here? Thanks.
-
--- 
-Catalin
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
