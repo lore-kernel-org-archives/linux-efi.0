@@ -1,294 +1,181 @@
-From: Marc Zyngier <marc.zyngier@arm.com>
-Subject: Re: [PATCH V13 10/10] arm/arm64: KVM: add guest SEA support
-Date: Fri, 24 Mar 2017 14:03:03 +0000
-Message-ID: <bb4b4608-85ba-fd20-53b1-c19d99019de1@arm.com>
-References: <1490136425-4324-1-git-send-email-tbaicar@codeaurora.org>
- <1490136425-4324-11-git-send-email-tbaicar@codeaurora.org>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH 3/4] efi/libstub: arm/arm64: disable debug prints on
+ 'quiet' cmdline arg
+Date: Fri, 24 Mar 2017 14:15:56 +0000
+Message-ID: <20170324141556.GB29588@leverpostej>
+References: <20170324132410.16628-1-ard.biesheuvel@linaro.org>
+ <20170324132410.16628-4-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <1490136425-4324-11-git-send-email-tbaicar@codeaurora.org>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Tyler Baicar <tbaicar@codeaurora.org>, christoffer.dall@linaro.org, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org, Suzuki.Poulose@arm.com, punit.agrawal@arm.com, astone@redhat.co
+Content-Type: text/plain; charset=us-ascii
+Return-path: <kernel-hardening-return-7102-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+Content-Disposition: inline
+In-Reply-To: <20170324132410.16628-4-ard.biesheuvel@linaro.org>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt@codeblueprint.co.uk, leif.lindholm@linaro.org, rfranz@cavium.com, mingo@kernel.org, bp@alien8.de, kernel-hardening@lists.openwall.com
 List-Id: linux-efi@vger.kernel.org
 
-On 21/03/17 22:47, Tyler Baicar wrote:
-> Currently external aborts are unsupported by the guest abort
-> handling. Add handling for SEAs so that the host kernel reports
-> SEAs which occur in the guest kernel.
+On Fri, Mar 24, 2017 at 01:24:09PM +0000, Ard Biesheuvel wrote:
+> The EFI stub currently prints a number of diagnostic messages that do
+> not carry a lot of information. Since these prints are not controlled
+> by 'loglevel' or other command line parameters, and since they appear on
+> the EFI framebuffer as well (if enabled), it would be nice if we could
+> turn them off.
 > 
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+> So let's add support for the 'quiet' command line parameter in the stub,
+> and disable the non-error prints if it is passed.
+> 
+> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 > ---
->  arch/arm/include/asm/kvm_arm.h       | 10 +++++++++
->  arch/arm/include/asm/system_misc.h   |  5 +++++
->  arch/arm/kvm/mmu.c                   | 41 ++++++++++++++++++++++++++++++------
->  arch/arm64/include/asm/kvm_arm.h     | 10 +++++++++
->  arch/arm64/include/asm/system_misc.h |  2 ++
->  arch/arm64/mm/fault.c                | 19 +++++++++++++++--
->  drivers/acpi/apei/ghes.c             | 13 ++++++------
->  include/acpi/ghes.h                  |  2 +-
->  8 files changed, 86 insertions(+), 16 deletions(-)
+> This was previously sent out as a separate patch. The difference is that this
+> version looks for 'quiet' rather than 'efi=debug', and preserves the noisy
+> console as the default.
+
+This addresses my prior concern, so FWIW:
+
+Acked-by: Mark Rutland <mark.rutland@arm.com>
+
+Mark.
+
+>  drivers/firmware/efi/libstub/arm-stub.c        | 12 ++++++------
+>  drivers/firmware/efi/libstub/arm32-stub.c      |  2 ++
+>  drivers/firmware/efi/libstub/efi-stub-helper.c |  9 +++++++++
+>  drivers/firmware/efi/libstub/efistub.h         |  7 +++++++
+>  drivers/firmware/efi/libstub/secureboot.c      |  2 ++
+>  include/linux/efi.h                            |  3 ---
+>  6 files changed, 26 insertions(+), 9 deletions(-)
 > 
-> diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
-> index a3f0b3d..ebf020b 100644
-> --- a/arch/arm/include/asm/kvm_arm.h
-> +++ b/arch/arm/include/asm/kvm_arm.h
-> @@ -187,6 +187,16 @@
->  #define FSC_FAULT	(0x04)
->  #define FSC_ACCESS	(0x08)
->  #define FSC_PERM	(0x0c)
-> +#define FSC_SEA		(0x10)
-> +#define FSC_SEA_TTW0	(0x14)
-> +#define FSC_SEA_TTW1	(0x15)
-> +#define FSC_SEA_TTW2	(0x16)
-> +#define FSC_SEA_TTW3	(0x17)
-> +#define FSC_SECC	(0x18)
-> +#define FSC_SECC_TTW0	(0x1c)
-> +#define FSC_SECC_TTW1	(0x1d)
-> +#define FSC_SECC_TTW2	(0x1e)
-> +#define FSC_SECC_TTW3	(0x1f)
+> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+> index fcd34057dc1c..6f522e3091af 100644
+> --- a/drivers/firmware/efi/libstub/arm-stub.c
+> +++ b/drivers/firmware/efi/libstub/arm-stub.c
+> @@ -116,8 +116,6 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+>  	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+>  		goto fail;
 >  
->  /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
->  #define HPFAR_MASK	(~0xf)
-> diff --git a/arch/arm/include/asm/system_misc.h b/arch/arm/include/asm/system_misc.h
-> index a3d61ad..ea45d94 100644
-> --- a/arch/arm/include/asm/system_misc.h
-> +++ b/arch/arm/include/asm/system_misc.h
-> @@ -24,4 +24,9 @@
->  
->  #endif /* !__ASSEMBLY__ */
->  
-> +static inline int handle_guest_sea(unsigned long addr, unsigned int esr)
-> +{
-> +	return -1;
-> +}
-> +
-
-Shouldn't this be in the #ifndef __ASSEMBLY__ block? The assembler is
-definitely going to barf on that...
-
->  #endif /* __ASM_ARM_SYSTEM_MISC_H */
-> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
-> index 962616f..105b6ab 100644
-> --- a/arch/arm/kvm/mmu.c
-> +++ b/arch/arm/kvm/mmu.c
-> @@ -29,6 +29,7 @@
->  #include <asm/kvm_asm.h>
->  #include <asm/kvm_emulate.h>
->  #include <asm/virt.h>
-> +#include <asm/system_misc.h>
->  
->  #include "trace.h"
->  
-> @@ -1406,6 +1407,24 @@ static void handle_access_fault(struct kvm_vcpu *vcpu, phys_addr_t fault_ipa)
->  		kvm_set_pfn_accessed(pfn);
->  }
->  
-> +static bool is_abort_synchronous(unsigned long fault_status) {
-> +	switch (fault_status) {
-> +	case FSC_SEA:
-> +	case FSC_SEA_TTW0:
-> +	case FSC_SEA_TTW1:
-> +	case FSC_SEA_TTW2:
-> +	case FSC_SEA_TTW3:
-> +	case FSC_SECC:
-> +	case FSC_SECC_TTW0:
-> +	case FSC_SECC_TTW1:
-> +	case FSC_SECC_TTW2:
-> +	case FSC_SECC_TTW3:
-> +		return true;
-> +	default:
-> +		return false;
-> +	}
-> +}
-> +
->  /**
->   * kvm_handle_guest_abort - handles all 2nd stage aborts
->   * @vcpu:	the VCPU pointer
-> @@ -1426,23 +1445,31 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
->  	unsigned long hva;
->  	bool is_iabt, write_fault, writable;
->  	gfn_t gfn;
-> -	int ret, idx;
-> +	int ret, idx, sea_status = 1;
-> +
-> +	/* Check the stage-2 fault is trans. fault or write fault */
-> +	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
-> +
-> +	fault_ipa = kvm_vcpu_get_fault_ipa(vcpu);
-> +
-> +	/* The host kernel will handle the synchronous external abort. There
-> +	 * is no need to pass the error into the guest.
-> +	 */
-> +	if (is_abort_synchronous(fault_status))
-> +		sea_status = handle_guest_sea((unsigned long)fault_ipa,
-> +				    kvm_vcpu_get_hsr(vcpu));
->  
->  	is_iabt = kvm_vcpu_trap_is_iabt(vcpu);
-> -	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu))) {
-> +	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu)) && sea_status) {
->  		kvm_inject_vabt(vcpu);
->  		return 1;
->  	}
->  
-> -	fault_ipa = kvm_vcpu_get_fault_ipa(vcpu);
+> -	pr_efi(sys_table, "Booting Linux Kernel...\n");
 > -
->  	trace_kvm_guest_fault(*vcpu_pc(vcpu), kvm_vcpu_get_hsr(vcpu),
->  			      kvm_vcpu_get_hfar(vcpu), fault_ipa);
->  
-> -	/* Check the stage-2 fault is trans. fault or write fault */
-> -	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
->  	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
-> -	    fault_status != FSC_ACCESS) {
-> +	    fault_status != FSC_ACCESS && sea_status) {
->  		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
->  			kvm_vcpu_trap_get_class(vcpu),
->  			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
-> diff --git a/arch/arm64/include/asm/kvm_arm.h b/arch/arm64/include/asm/kvm_arm.h
-> index 6e99978..61d694c 100644
-> --- a/arch/arm64/include/asm/kvm_arm.h
-> +++ b/arch/arm64/include/asm/kvm_arm.h
-> @@ -204,6 +204,16 @@
->  #define FSC_FAULT	ESR_ELx_FSC_FAULT
->  #define FSC_ACCESS	ESR_ELx_FSC_ACCESS
->  #define FSC_PERM	ESR_ELx_FSC_PERM
-> +#define FSC_SEA		ESR_ELx_FSC_EXTABT
-> +#define FSC_SEA_TTW0	(0x14)
-> +#define FSC_SEA_TTW1	(0x15)
-> +#define FSC_SEA_TTW2	(0x16)
-> +#define FSC_SEA_TTW3	(0x17)
-> +#define FSC_SECC	(0x18)
-> +#define FSC_SECC_TTW0	(0x1c)
-> +#define FSC_SECC_TTW1	(0x1d)
-> +#define FSC_SECC_TTW2	(0x1e)
-> +#define FSC_SECC_TTW3	(0x1f)
->  
->  /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
->  #define HPFAR_MASK	(~UL(0xf))
-> diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
-> index bc81243..5b2cecd 100644
-> --- a/arch/arm64/include/asm/system_misc.h
-> +++ b/arch/arm64/include/asm/system_misc.h
-> @@ -58,4 +58,6 @@ void hook_debug_fault_code(int nr, int (*fn)(unsigned long, unsigned int,
->  
->  #endif	/* __ASSEMBLY__ */
->  
-> +int handle_guest_sea(unsigned long addr, unsigned int esr);
-
-Same remark here.
-
-> +
->  #endif	/* __ASM_SYSTEM_MISC_H */
-> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-> index f7372ce..ee96307 100644
-> --- a/arch/arm64/mm/fault.c
-> +++ b/arch/arm64/mm/fault.c
-> @@ -497,6 +497,7 @@ static int do_bad(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->  static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->  {
->  	struct siginfo info;
-> +	int ret = 0;
->  
->  	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
->  		 fault_name(esr), esr, addr);
-> @@ -508,7 +509,7 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->  	 */
->  	if (IS_ENABLED(CONFIG_ACPI_APEI_SEA)) {
->  		nmi_enter();
-> -		ghes_notify_sea();
-> +		ret = ghes_notify_sea();
->  		nmi_exit();
+>  	status = check_platform_features(sys_table);
+>  	if (status != EFI_SUCCESS)
+>  		goto fail;
+> @@ -151,6 +149,12 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+>  		goto fail;
 >  	}
 >  
-> @@ -521,7 +522,7 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->  		info.si_addr  = (void __user *)addr;
->  	arm64_notify_die("", regs, &info, esr);
+> +	status = efi_parse_options(cmdline_ptr);
+> +	if (status != EFI_SUCCESS)
+> +		pr_efi_err(sys_table, "Failed to parse EFI cmdline options\n");
+> +
+> +	pr_efi(sys_table, "Booting Linux Kernel...\n");
+> +
+>  	si = setup_graphics(sys_table);
 >  
-> -	return 0;
-> +	return ret;
+>  	status = handle_kernel_image(sys_table, image_addr, &image_size,
+> @@ -162,10 +166,6 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+>  		goto fail_free_cmdline;
+>  	}
+>  
+> -	status = efi_parse_options(cmdline_ptr);
+> -	if (status != EFI_SUCCESS)
+> -		pr_efi_err(sys_table, "Failed to parse EFI cmdline options\n");
+> -
+>  	secure_boot = efi_get_secureboot(sys_table);
+>  
+>  	/*
+> diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
+> index 18a8b5eb55e7..becbda445913 100644
+> --- a/drivers/firmware/efi/libstub/arm32-stub.c
+> +++ b/drivers/firmware/efi/libstub/arm32-stub.c
+> @@ -9,6 +9,8 @@
+>  #include <linux/efi.h>
+>  #include <asm/efi.h>
+>  
+> +#include "efistub.h"
+> +
+>  efi_status_t check_platform_features(efi_system_table_t *sys_table_arg)
+>  {
+>  	int block;
+> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> index 1575b566cd4a..93685f79f9e8 100644
+> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
+> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> @@ -33,11 +33,16 @@
+>  static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
+>  
+>  static int __section(.data) __nokaslr;
+> +static int __section(.data) __quiet;
+>  
+>  int __pure nokaslr(void)
+>  {
+>  	return __nokaslr;
 >  }
->  
->  static const struct fault_info {
-> @@ -603,6 +604,20 @@ static const char *fault_name(unsigned int esr)
->  }
->  
->  /*
-> + * Handle Synchronous External Aborts that occur in a guest kernel.
-> + */
-> +int handle_guest_sea(unsigned long addr, unsigned int esr)
+> +int __pure is_quiet(void)
 > +{
-> +	int ret = -ENOENT;
-> +
-> +	if(IS_ENABLED(CONFIG_ACPI_APEI_SEA)) {
-> +		ret = ghes_notify_sea();
-> +	}
-> +
-> +	return ret;
+> +	return __quiet;
 > +}
+>  
+>  #define EFI_MMAP_NR_SLACK_SLOTS	8
+>  
+> @@ -428,6 +433,10 @@ efi_status_t efi_parse_options(char const *cmdline)
+>  	if (str == cmdline || (str && str > cmdline && *(str - 1) == ' '))
+>  		__nokaslr = 1;
+>  
+> +	str = strstr(cmdline, "quiet");
+> +	if (str == cmdline || (str && str > cmdline && *(str - 1) == ' '))
+> +		__quiet = 1;
 > +
-> +/*
->   * Dispatch a data abort to the relevant handler.
->   */
->  asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index 230b095..81eabc6 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -810,17 +810,18 @@ static int ghes_notify_sci(struct notifier_block *this,
->  #ifdef CONFIG_ACPI_APEI_SEA
->  static LIST_HEAD(ghes_sea);
+>  	/*
+>  	 * If no EFI parameters were specified on the cmdline we've got
+>  	 * nothing to do.
+> diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+> index a7a2a2c3f199..83f268c05007 100644
+> --- a/drivers/firmware/efi/libstub/efistub.h
+> +++ b/drivers/firmware/efi/libstub/efistub.h
+> @@ -25,6 +25,13 @@
+>  #endif
 >  
-> -void ghes_notify_sea(void)
-> +int ghes_notify_sea(void)
->  {
->  	struct ghes *ghes;
-> +	int ret = -ENOENT;
+>  extern int __pure nokaslr(void);
+> +extern int __pure is_quiet(void);
+> +
+> +#define pr_efi(sys_table, msg)		do {				\
+> +	if (!is_quiet()) efi_printk(sys_table, "EFI stub: "msg);	\
+> +} while (0)
+> +
+> +#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
 >  
-> -	/*
-> -	 * synchronize_rcu() will wait for nmi_exit(), so no need to
-> -	 * rcu_read_lock().
-> -	 */
-> +	rcu_read_lock();
->  	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
-> -		ghes_proc(ghes);
-> +		if(!ghes_proc(ghes))
-> +			ret = 0;
->  	}
-> +	rcu_read_unlock();
-> +	return ret;
->  }
+>  void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
 >  
->  static void ghes_sea_add(struct ghes *ghes)
-> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
-> index 18bc935..2a727dc 100644
-> --- a/include/acpi/ghes.h
-> +++ b/include/acpi/ghes.h
-> @@ -99,6 +99,6 @@ static inline void *acpi_hest_generic_data_payload(struct acpi_hest_generic_data
->  		gdata + 1;
->  }
+> diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
+> index 5da36e56b36a..8c34d50a4d80 100644
+> --- a/drivers/firmware/efi/libstub/secureboot.c
+> +++ b/drivers/firmware/efi/libstub/secureboot.c
+> @@ -12,6 +12,8 @@
+>  #include <linux/efi.h>
+>  #include <asm/efi.h>
 >  
-> -void ghes_notify_sea(void);
-> +int ghes_notify_sea(void);
+> +#include "efistub.h"
+> +
+>  /* BIOS variables */
+>  static const efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
+>  static const efi_char16_t const efi_SecureBoot_name[] = {
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index e485e87615d1..ec36f42a2add 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -1435,9 +1435,6 @@ static inline int efi_runtime_map_copy(void *buf, size_t bufsz)
 >  
->  #endif /* GHES_H */
+>  /* prototypes shared between arch specific and generic stub code */
+>  
+> -#define pr_efi(sys_table, msg)     efi_printk(sys_table, "EFI stub: "msg)
+> -#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
+> -
+>  void efi_printk(efi_system_table_t *sys_table_arg, char *str);
+>  
+>  void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
+> -- 
+> 2.9.3
 > 
-
-Otherwise, the KVM changes look good to me. Assuming you fix the two
-nits above:
-
-Acked-by: Marc Zyngier <marc.zyngier@arm.com>
-
-Thanks,
-	
-	M.
--- 
-Jazz is not dead. It just smells funny...
