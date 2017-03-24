@@ -1,39 +1,46 @@
-From: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v2] x86/efi: Clean up a minor mistake in code comment
-Date: Fri, 24 Mar 2017 17:17:20 +0800
-Message-ID: <1490347040-28720-1-git-send-email-bhe@redhat.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH v2] x86/mm/KASLR: EFI region is mistakenly included into
+ KASLR VA space for randomization
+Date: Fri, 24 Mar 2017 10:24:34 +0100
+Message-ID: <20170324092433.GA3237@gmail.com>
+References: <1490331592-31860-1-git-send-email-bhe@redhat.com>
+ <20170324080833.GA15200@gmail.com>
+ <20170324083451.GC30442@x1>
+ <20170324084609.GA6807@dhcp-128-65.nay.redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <stable-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170324084609.GA6807@dhcp-128-65.nay.redhat.com>
+Sender: stable-owner@vger.kernel.org
+To: Dave Young <dyoung@redhat.com>
+Cc: Baoquan He <bhe@redhat.com>, linux-kernel@vger.kernel.org, stable@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, Thomas Garnier <thgarnie@google.com>, Kees Cook <keescook@chromium.org>, Borislav Petkov <bp@alien8.de>, Andrew Morton <akpm@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Bhupesh Sharma <bhsharma@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-EFI allocate runtime services regions from EFI_VA_START, -4G, down
-to -68G, EFI_VA_END, 64G altogether. The mechanism was introduced in
-commit d2f7cbe7b26a7 ("x86/efi: Runtime services virtual mapping").
 
-Clean it up to avoid confusion.
+* Dave Young <dyoung@redhat.com> wrote:
 
-Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
-v1->v2:
-  Update patch log to corret a description mistake Ard pointed out.
+> > > So I applied this kexec fix and extended the changelog to clearly show why 
+> > > this fix matters in practice.
+> > 
+> > I thought it only impacts kexec, but Dave thought it will impact 1st kenrel 
+> > either.
+> 
+> Yes, I think no need to mention kexec, it is a general issue.
+> 
+> First, the space is reserved for EFI, so kernel should not use it for kaslr. 
 
- arch/x86/platform/efi/efi_64.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+It's the kernel's EFI code, and we map whatever address we want (and then pass 
+that to the EFI runtime), so wether it's randomized or not is the Linux kernel's 
+policy decision...
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index a4695da..6cbf9e0 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -47,7 +47,7 @@
- #include <asm/pgalloc.h>
- 
- /*
-- * We allocate runtime services regions bottom-up, starting from -4G, i.e.
-+ * We allocate runtime services regions top-down, starting from -4G, i.e.
-  * 0xffff_ffff_0000_0000 and limit EFI VA mapping space to 64G.
-  */
- static u64 efi_va = EFI_VA_START;
--- 
-2.5.5
+So that's my question: can these memory regions include security sensitive data, 
+and if yes, how can we best randomize it while kexec and other kernel and EFI 
+features still work?
+
+Preserving virtual addresses for kexec is a red herring: the randomized offset 
+could be passed to the kexec-ed kernel just fine.
+
+Thanks,
+
+	Ingo
