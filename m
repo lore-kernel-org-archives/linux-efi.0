@@ -1,44 +1,219 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [PATCH v2] x86/mm/KASLR: EFI region is mistakenly included into
- KASLR VA space for randomization
-Date: Fri, 24 Mar 2017 11:54:52 +0100
-Message-ID: <20170324105452.GA20282@gmail.com>
-References: <1490331592-31860-1-git-send-email-bhe@redhat.com>
- <20170324080833.GA15200@gmail.com>
- <20170324083451.GC30442@x1>
- <20170324084609.GA6807@dhcp-128-65.nay.redhat.com>
- <20170324092433.GA3237@gmail.com>
- <CAKv+Gu_V_VAWuDtKyOY9RS+cdhi+c5z2a7n2kcXVybvvdmPYBw@mail.gmail.com>
- <20170324103624.GA6231@gmail.com>
- <CAKv+Gu-d3M6-T1HbZYjFnPA_KYtdQyCx36fRSXD5vNurjAqXuw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-d3M6-T1HbZYjFnPA_KYtdQyCx36fRSXD5vNurjAqXuw@mail.gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Dave Young <dyoung@redhat.com>, Baoquan He <bhe@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Thomas Garnier <thgarnie@google.com>, Kees Cook <keescook@chromium.org>, Borislav Petkov <bp@alien8.de>, Andrew Morton <akpm@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Bhupesh Sharma <bhsharma@redhat.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2] efi/arm32-stub: allow boottime allocations in the vmlinux region
+Date: Fri, 24 Mar 2017 11:33:01 +0000
+Message-ID: <20170324113301.13636-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, eugene-VXdhtT5mjnY@public.gmane.org, rfranz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+The arm32 kernel decompresses itself to the base of DRAM unconditionally,
+and so it is the EFI stub's job to ensure that the region is available.
 
-* Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+Currently, we do this by creating an allocation there, and giving up if
+that fails. However, any boot services regions occupying this area are
+not an issue, given that the decompressor executes strictly after the
+stub calls ExitBootServices().
 
-> > Turning KASLR off actively degrades that randomization of the kernel virtual 
-> > addresses.
-> >
-> > Am I missing anything?
-> >
-> 
-> No, I think you are right. UEFI runtime services region are likely to consist of 
-> R+W+X mappings for the foreseeable future on x86, and the more we tighten down 
-> security in other places, the more appealing the UEFI regions become for 
-> exploitation (even if they are only mapped while runtime services calls are in 
-> progress).
+So let's try a bit harder to proceed if the initial allocation fails,
+and check whether any memory map entries occupying the region may be
+considered safe.
 
-Ok, so I'm fine with the current proposed patch as a temporary workaround, but 
-only if we are going to get a real fix as well, ASAP.
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Reviewed-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Reviewed-by: Eugene Cohen <eugene-VXdhtT5mjnY@public.gmane.org>
+Reviewed-by: Roy Franz <roy.franz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+v2: - use efi_call_early() instead of dereferencing sys_table->boottime
+      directly
+    - use EFI_ALLOCATE_MAX_ADDRESS for the first attempt rather then
+      EFI_ALLOCATE_ADDRESS, which is affected by a EDK2 bug (this could
+      return a base address lower than expected, if dram_base is greater
+      than the real base of DRAM, and part of the region we attempt to
+      reserve is already occupied)
 
-Thanks,
+ drivers/firmware/efi/libstub/arm32-stub.c | 148 +++++++++++++++++---
+ 1 file changed, 128 insertions(+), 20 deletions(-)
 
-	Ingo
+diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
+index e1f0b28e1dcb..a4a5687cf8fd 100644
+--- a/drivers/firmware/efi/libstub/arm32-stub.c
++++ b/drivers/firmware/efi/libstub/arm32-stub.c
+@@ -63,6 +63,132 @@ void free_screen_info(efi_system_table_t *sys_table_arg, struct screen_info *si)
+ 	efi_call_early(free_pool, si);
+ }
+ 
++static efi_status_t reserve_kernel_base(efi_system_table_t *sys_table_arg,
++					unsigned long dram_base,
++					unsigned long *reserve_addr,
++					unsigned long *reserve_size)
++{
++	efi_physical_addr_t alloc_addr;
++	efi_memory_desc_t *memory_map;
++	unsigned long nr_pages, map_size, desc_size, buff_size;
++	efi_status_t status;
++	unsigned long l;
++
++	struct efi_boot_memmap map = {
++		.map		= &memory_map,
++		.map_size	= &map_size,
++		.desc_size	= &desc_size,
++		.desc_ver	= NULL,
++		.key_ptr	= NULL,
++		.buff_size	= &buff_size,
++	};
++
++	/*
++	 * Reserve memory for the uncompressed kernel image. This is
++	 * all that prevents any future allocations from conflicting
++	 * with the kernel. Since we can't tell from the compressed
++	 * image how much DRAM the kernel actually uses (due to BSS
++	 * size uncertainty) we allocate the maximum possible size.
++	 * Do this very early, as prints can cause memory allocations
++	 * that may conflict with this.
++	 */
++	alloc_addr = dram_base + MAX_UNCOMP_KERNEL_SIZE;
++	nr_pages = MAX_UNCOMP_KERNEL_SIZE / EFI_PAGE_SIZE;
++	status = efi_call_early(allocate_pages, EFI_ALLOCATE_MAX_ADDRESS,
++				EFI_BOOT_SERVICES_DATA, nr_pages, &alloc_addr);
++	if (status == EFI_SUCCESS) {
++		if (alloc_addr == dram_base) {
++			*reserve_addr = alloc_addr;
++			*reserve_size = MAX_UNCOMP_KERNEL_SIZE;
++			return EFI_SUCCESS;
++		}
++		/*
++		 * If we end up here, the allocation succeeded but starts below
++		 * dram_base. This can only occur if the real base of DRAM is
++		 * not a multiple of 128 MB, in which case dram_base will have
++		 * been rounded up. Since this implies that a part of the region
++		 * was already occupied, we need to fall through to the code
++		 * below to ensure that the existing allocations don't conflict.
++		 * For this reason, we use EFI_BOOT_SERVICES_DATA above and not
++		 * EFI_LOADER_DATA, which we wouldn't able to distinguish from
++		 * allocations that we want to disallow.
++		 */
++	}
++
++	/*
++	 * If the allocation above failed, we may still be able to proceed:
++	 * if the only allocations in the region are of types that will be
++	 * released to the OS after ExitBootServices(), the decompressor can
++	 * safely overwrite them.
++	 */
++	status = efi_get_memory_map(sys_table_arg, &map);
++	if (status != EFI_SUCCESS) {
++		pr_efi_err(sys_table_arg,
++			   "reserve_kernel_base(): Unable to retrieve memory map.\n");
++		return status;
++	}
++
++	for (l = 0; l < map_size; l += desc_size) {
++		efi_memory_desc_t *desc;
++		u64 start, end;
++
++		desc = (void *)memory_map + l;
++		start = desc->phys_addr;
++		end = start + desc->num_pages * EFI_PAGE_SIZE;
++
++		/* Skip if entry does not intersect with region */
++		if (start >= dram_base + MAX_UNCOMP_KERNEL_SIZE ||
++		    end <= dram_base)
++			continue;
++
++		switch (desc->type) {
++		case EFI_BOOT_SERVICES_CODE:
++		case EFI_BOOT_SERVICES_DATA:
++			/* Ignore types that are released to the OS anyway */
++			continue;
++
++		case EFI_CONVENTIONAL_MEMORY:
++			/*
++			 * Reserve the intersection between this entry and the
++			 * region.
++			 */
++			start = max(start, (u64)dram_base);
++			end = min(end, (u64)dram_base + MAX_UNCOMP_KERNEL_SIZE);
++
++			status = efi_call_early(allocate_pages,
++						EFI_ALLOCATE_ADDRESS,
++						EFI_LOADER_DATA,
++						(end - start) / EFI_PAGE_SIZE,
++						&start);
++			if (status != EFI_SUCCESS) {
++				pr_efi_err(sys_table_arg,
++					"reserve_kernel_base(): alloc failed.\n");
++				goto out;
++			}
++			break;
++
++		case EFI_LOADER_CODE:
++		case EFI_LOADER_DATA:
++			/*
++			 * These regions may be released and reallocated for
++			 * another purpose (including EFI_RUNTIME_SERVICE_DATA)
++			 * at any time during the execution of the OS loader,
++			 * so we cannot consider them as safe.
++			 */
++		default:
++			/*
++			 * Treat any other allocation in the region as unsafe */
++			status = EFI_OUT_OF_RESOURCES;
++			goto out;
++		}
++	}
++
++	status = EFI_SUCCESS;
++out:
++	efi_call_early(free_pool, memory_map);
++	return status;
++}
++
+ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 				 unsigned long *image_addr,
+ 				 unsigned long *image_size,
+@@ -71,10 +197,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 				 unsigned long dram_base,
+ 				 efi_loaded_image_t *image)
+ {
+-	unsigned long nr_pages;
+ 	efi_status_t status;
+-	/* Use alloc_addr to tranlsate between types */
+-	efi_physical_addr_t alloc_addr;
+ 
+ 	/*
+ 	 * Verify that the DRAM base address is compatible with the ARM
+@@ -85,27 +208,12 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 	 */
+ 	dram_base = round_up(dram_base, SZ_128M);
+ 
+-	/*
+-	 * Reserve memory for the uncompressed kernel image. This is
+-	 * all that prevents any future allocations from conflicting
+-	 * with the kernel. Since we can't tell from the compressed
+-	 * image how much DRAM the kernel actually uses (due to BSS
+-	 * size uncertainty) we allocate the maximum possible size.
+-	 * Do this very early, as prints can cause memory allocations
+-	 * that may conflict with this.
+-	 */
+-	alloc_addr = dram_base;
+-	*reserve_size = MAX_UNCOMP_KERNEL_SIZE;
+-	nr_pages = round_up(*reserve_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
+-	status = sys_table->boottime->allocate_pages(EFI_ALLOCATE_ADDRESS,
+-						     EFI_LOADER_DATA,
+-						     nr_pages, &alloc_addr);
++	status = reserve_kernel_base(sys_table, dram_base, reserve_addr,
++				     reserve_size);
+ 	if (status != EFI_SUCCESS) {
+-		*reserve_size = 0;
+ 		pr_efi_err(sys_table, "Unable to allocate memory for uncompressed kernel.\n");
+ 		return status;
+ 	}
+-	*reserve_addr = alloc_addr;
+ 
+ 	/*
+ 	 * Relocate the zImage, so that it appears in the lowest 128 MB
+-- 
+2.9.3
