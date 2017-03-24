@@ -1,181 +1,127 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH 3/4] efi/libstub: arm/arm64: disable debug prints on
- 'quiet' cmdline arg
-Date: Fri, 24 Mar 2017 14:15:56 +0000
-Message-ID: <20170324141556.GB29588@leverpostej>
-References: <20170324132410.16628-1-ard.biesheuvel@linaro.org>
- <20170324132410.16628-4-ard.biesheuvel@linaro.org>
+From: Jan Kiszka <jan.kiszka@siemens.com>
+Subject: Re: [PATCH 0/2] efi: Enhance capsule loader to support signed Quark
+ images
+Date: Fri, 24 Mar 2017 16:18:20 +0100
+Message-ID: <716974af-d63d-ffe7-3846-a3f8c98f9d7c@siemens.com>
+References: <cover.1487182480.git.jan.kiszka@siemens.com>
+ <CAHp75VeVZo8f_aXZ=R8Y+++RSQeT=tFZmL6NNfekKJTkJc-nZA@mail.gmail.com>
+ <1bf3c9d8-56aa-818b-350f-deb62ad14e08@siemens.com>
+ <4014c5e6-b5a0-7552-166f-a42992532c09@siemens.com>
+ <F54AEECA5E2B9541821D670476DAE19C5DE533B3@PGSMSX102.gar.corp.intel.com>
+ <b95b71b7-6b5f-f9cc-79e4-3600e9a3f7e5@siemens.com>
+ <CAKv+Gu_2edBA++6ywE4FE2NSbkCWjEULPmriS1iBifsRCgA+OA@mail.gmail.com>
+ <3641f43d-ecfd-03dd-9e5d-ca32d587d318@siemens.com>
+ <c1beeeb5-2359-d9c1-4759-b112c7d1a613@nexus-software.ie>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <kernel-hardening-return-7102-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-Content-Disposition: inline
-In-Reply-To: <20170324132410.16628-4-ard.biesheuvel@linaro.org>
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt@codeblueprint.co.uk, leif.lindholm@linaro.org, rfranz@cavium.com, mingo@kernel.org, bp@alien8.de, kernel-hardening@lists.openwall.com
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <c1beeeb5-2359-d9c1-4759-b112c7d1a613@nexus-software.ie>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Bryan O'Donoghue <pure.logic@nexus-software.ie>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Andy Shevchenko <andy.shevchenko@gmail.com>, Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@alien8.de>, Sascha Weisenberger <sascha.weisenberger@siemens.com>, Daniel Wagner <daniel.wagner@siemens.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Mar 24, 2017 at 01:24:09PM +0000, Ard Biesheuvel wrote:
-> The EFI stub currently prints a number of diagnostic messages that do
-> not carry a lot of information. Since these prints are not controlled
-> by 'loglevel' or other command line parameters, and since they appear on
-> the EFI framebuffer as well (if enabled), it would be nice if we could
-> turn them off.
+On 2017-02-20 02:33, Bryan O'Donoghue wrote:
 > 
-> So let's add support for the 'quiet' command line parameter in the stub,
-> and disable the non-error prints if it is passed.
 > 
-> Cc: Matt Fleming <matt@codeblueprint.co.uk>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> ---
-> This was previously sent out as a separate patch. The difference is that this
-> version looks for 'quiet' rather than 'efi=debug', and preserves the noisy
-> console as the default.
-
-This addresses my prior concern, so FWIW:
-
-Acked-by: Mark Rutland <mark.rutland@arm.com>
-
-Mark.
-
->  drivers/firmware/efi/libstub/arm-stub.c        | 12 ++++++------
->  drivers/firmware/efi/libstub/arm32-stub.c      |  2 ++
->  drivers/firmware/efi/libstub/efi-stub-helper.c |  9 +++++++++
->  drivers/firmware/efi/libstub/efistub.h         |  7 +++++++
->  drivers/firmware/efi/libstub/secureboot.c      |  2 ++
->  include/linux/efi.h                            |  3 ---
->  6 files changed, 26 insertions(+), 9 deletions(-)
+> On 19/02/17 13:33, Jan Kiszka wrote:
+>>> I would not object strongly to having conditionally compiled code in
+>>> mainline that adds support for this, but bodging the default code path
+>>> like this for a Quark quirk is out of the question imo.
+>> I'm open for any consensus that avoids bending mainline too much and
+>> still helps us (and maybe also other Quark X1020 integrators) getting
+>> rid of additional patches.
 > 
-> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-> index fcd34057dc1c..6f522e3091af 100644
-> --- a/drivers/firmware/efi/libstub/arm-stub.c
-> +++ b/drivers/firmware/efi/libstub/arm-stub.c
-> @@ -116,8 +116,6 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
->  	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
->  		goto fail;
->  
-> -	pr_efi(sys_table, "Booting Linux Kernel...\n");
-> -
->  	status = check_platform_features(sys_table);
->  	if (status != EFI_SUCCESS)
->  		goto fail;
-> @@ -151,6 +149,12 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
->  		goto fail;
->  	}
->  
-> +	status = efi_parse_options(cmdline_ptr);
-> +	if (status != EFI_SUCCESS)
-> +		pr_efi_err(sys_table, "Failed to parse EFI cmdline options\n");
-> +
-> +	pr_efi(sys_table, "Booting Linux Kernel...\n");
-> +
->  	si = setup_graphics(sys_table);
->  
->  	status = handle_kernel_image(sys_table, image_addr, &image_size,
-> @@ -162,10 +166,6 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
->  		goto fail_free_cmdline;
->  	}
->  
-> -	status = efi_parse_options(cmdline_ptr);
-> -	if (status != EFI_SUCCESS)
-> -		pr_efi_err(sys_table, "Failed to parse EFI cmdline options\n");
-> -
->  	secure_boot = efi_get_secureboot(sys_table);
->  
->  	/*
-> diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
-> index 18a8b5eb55e7..becbda445913 100644
-> --- a/drivers/firmware/efi/libstub/arm32-stub.c
-> +++ b/drivers/firmware/efi/libstub/arm32-stub.c
-> @@ -9,6 +9,8 @@
->  #include <linux/efi.h>
->  #include <asm/efi.h>
->  
-> +#include "efistub.h"
-> +
->  efi_status_t check_platform_features(efi_system_table_t *sys_table_arg)
+> We could make efi_capsule_setup_info() a weak symbol just like
+> 
+> drivers/firmware/efi/reboot.c:
+> bool __weak efi_poweroff_required(void)
+> 
+> that way Arm is none the wiser and we can bury the Quark Quirk in
+> x86/platform/efi/quirks.c - where you're right Ard it arguably belongs -
+> not in the core code.
+> 
+> diff --git a/arch/x86/platform/efi/quirks.c
+> b/arch/x86/platform/efi/quirks.c
+> index 30031d5..950663da 100644
+> --- a/arch/x86/platform/efi/quirks.c
+> +++ b/arch/x86/platform/efi/quirks.c
+> @@ -495,3 +495,19 @@ bool efi_poweroff_required(void)
 >  {
->  	int block;
-> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-> index 1575b566cd4a..93685f79f9e8 100644
-> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-> @@ -33,11 +33,16 @@
->  static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
->  
->  static int __section(.data) __nokaslr;
-> +static int __section(.data) __quiet;
->  
->  int __pure nokaslr(void)
->  {
->  	return __nokaslr;
+>         return acpi_gbl_reduced_hardware || acpi_no_s5;
 >  }
-> +int __pure is_quiet(void)
+> +
+> +ssize_t csh_efi_capsule_setup_info(struct capsule_info *cap_info,
+> +                                  void *kbuff, size_t hdr_bytes)
 > +{
-> +	return __quiet;
+> +       /* Code to deal with the CSH goes here */
+> +       return 0;
 > +}
->  
->  #define EFI_MMAP_NR_SLACK_SLOTS	8
->  
-> @@ -428,6 +433,10 @@ efi_status_t efi_parse_options(char const *cmdline)
->  	if (str == cmdline || (str && str > cmdline && *(str - 1) == ' '))
->  		__nokaslr = 1;
->  
-> +	str = strstr(cmdline, "quiet");
-> +	if (str == cmdline || (str && str > cmdline && *(str - 1) == ' '))
-> +		__quiet = 1;
 > +
->  	/*
->  	 * If no EFI parameters were specified on the cmdline we've got
->  	 * nothing to do.
-> diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-> index a7a2a2c3f199..83f268c05007 100644
-> --- a/drivers/firmware/efi/libstub/efistub.h
-> +++ b/drivers/firmware/efi/libstub/efistub.h
-> @@ -25,6 +25,13 @@
->  #endif
->  
->  extern int __pure nokaslr(void);
-> +extern int __pure is_quiet(void);
-> +
-> +#define pr_efi(sys_table, msg)		do {				\
-> +	if (!is_quiet()) efi_printk(sys_table, "EFI stub: "msg);	\
-> +} while (0)
-> +
-> +#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
->  
->  void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
->  
-> diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-> index 5da36e56b36a..8c34d50a4d80 100644
-> --- a/drivers/firmware/efi/libstub/secureboot.c
-> +++ b/drivers/firmware/efi/libstub/secureboot.c
-> @@ -12,6 +12,8 @@
->  #include <linux/efi.h>
->  #include <asm/efi.h>
->  
-> +#include "efistub.h"
-> +
->  /* BIOS variables */
->  static const efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
->  static const efi_char16_t const efi_SecureBoot_name[] = {
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index e485e87615d1..ec36f42a2add 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -1435,9 +1435,6 @@ static inline int efi_runtime_map_copy(void *buf, size_t bufsz)
->  
->  /* prototypes shared between arch specific and generic stub code */
->  
-> -#define pr_efi(sys_table, msg)     efi_printk(sys_table, "EFI stub: "msg)
-> -#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
-> -
->  void efi_printk(efi_system_table_t *sys_table_arg, char *str);
->  
->  void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
-> -- 
-> 2.9.3
+> +ssize_t efi_capsule_setup_info(struct capsule_info *cap_info,
+> +                              void *kbuff, size_t hdr_bytes)
+> +{
+> +       if (quark)
+> +               return csh_efi_capsule_setup_info(cap_info, kbuff,
+> hdr_bytes);
+> +       else
+> +               return __efi_capsule_setup_info(cap_info, kbuff,
+> hdr_bytes);
+> +}
 > 
+> diff --git a/drivers/firmware/efi/capsule-loader.c
+> b/drivers/firmware/efi/capsule-loader.c
+> index 9ae6c11..d8bdc6f 100644
+> --- a/drivers/firmware/efi/capsule-loader.c
+> +++ b/drivers/firmware/efi/capsule-loader.c
+> @@ -53,7 +53,7 @@ static void efi_free_all_buff_pages(struct
+> capsule_info *cap_info)
+>   * @kbuff: a mapped first page buffer pointer
+>   * @hdr_bytes: the total received number of bytes for efi header
+>   **/
+> -static ssize_t efi_capsule_setup_info(struct capsule_info *cap_info,
+> +ssize_t __efi_capsule_setup_info(struct capsule_info *cap_info,
+>                                       void *kbuff, size_t hdr_bytes)
+>  {
+>         efi_capsule_header_t *cap_hdr;
+> @@ -98,6 +98,13 @@ static ssize_t efi_capsule_setup_info(struct
+> capsule_info *cap_info,
+> 
+>         return 0;
+>  }
+> +EXPORT_SYMBOL_GPL(__efi_capsule_setup_info);
+> +
+> +ssize_t __weak efi_capsule_setup_info(struct capsule_info *cap_info,
+> +                                            void *kbuff, size_t hdr_bytes)
+> +{
+> +       return __efi_capsule_setup_info(cap_info, kbuff, hdr_bytes);
+> +}
+> 
+> One thing we want is to continue to have Quark work on ia32 builds
+> without having to compile a Quark specific kernel just to get this
+> feature working.
+
+Done now in my newer patches. Some refactoring in the core is still
+required, but the Quark logic will be active only on x86 and fully
+executed only on Quark CPUs.
+
+> 
+> Jan I haven't had time to look at what you said about the BSP code not
+> working with capsules on Gen2 (I will during the week though). If you
+> currently have to strip the CSH to make this work then we're missing a
+> trick on tip-of-tree and need to sort that out for the final version of
+> this.
+
+No idea what went wrong back then, but I was able to reflash a Gen2
+multiple times these days with the original 1.1.0 and 1.0.4 capsules
+Intel ships for that board - without removing the CSH. IOW, we can
+finally use capsule support on the Galileo.
+
+Patches to come soon.
+
+Jan
+
+-- 
+Siemens AG, Corporate Technology, CT RDA ITP SES-DE
+Corporate Competence Center Embedded Linux
