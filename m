@@ -1,39 +1,51 @@
-From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH v2 4/7] efi/capsule: Adjust return type of efi_capsule_setup_info
-Date: Fri, 24 Mar 2017 18:34:17 +0100
-Message-ID: <dba2c6aba6aa905a63b91f5dd51b572ba5268a1f.1490376860.git.jan.kiszka@siemens.com>
-References: <cover.1490376860.git.jan.kiszka@siemens.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.1490376860.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-In-Reply-To: <cover.1490376860.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-References: <cover.1490376860.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Hock Leong Kweh <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v2 1/7] efi/capsule: Fix return code on failing kmap/vmap
+Date: Fri, 24 Mar 2017 18:14:31 +0000
+Message-ID: <CAKv+Gu_ebG0Pji4QHdNPOZQoLGb0BaS4e+R6mcjJihuJ=JRxaw@mail.gmail.com>
+References: <cover.1490376860.git.jan.kiszka@siemens.com> <d031a1bf1416b40143ae84a9e0f5f9df26c8fc2a.1490376860.git.jan.kiszka@siemens.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <d031a1bf1416b40143ae84a9e0f5f9df26c8fc2a.1490376860.git.jan.kiszka@siemens.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jan Kiszka <jan.kiszka@siemens.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, Bryan O'Donoghue <pure.logic@nexus-software.ie>, Hock Leong Kweh <hock.leong.kweh@intel.com>, Borislav Petkov <bp@alien8.de>, Sascha Weisenberger <sascha.weisenberger@siemens.com>
 List-Id: linux-efi@vger.kernel.org
 
-We actually expect int at the caller and never return any size
-information.
+On 24 March 2017 at 17:34, Jan Kiszka <jan.kiszka@siemens.com> wrote:
+> If kmap or vmap fail, it means we ran out of memory. There are no
+> user-provided addressed involved that would justify EFAULT.
+>
+> Signed-off-by: Jan Kiszka <jan.kiszka@siemens.com>
 
-Signed-off-by: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
----
- drivers/firmware/efi/capsule-loader.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-index 3fb91e1..37d3f6e 100644
---- a/drivers/firmware/efi/capsule-loader.c
-+++ b/drivers/firmware/efi/capsule-loader.c
-@@ -53,8 +53,8 @@ static void efi_free_all_buff_pages(struct capsule_info *cap_info)
-  * @kbuff: a mapped first page buffer pointer
-  * @hdr_bytes: the total received number of bytes for efi header
-  **/
--static ssize_t efi_capsule_setup_info(struct capsule_info *cap_info,
--				      void *kbuff, size_t hdr_bytes)
-+static int efi_capsule_setup_info(struct capsule_info *cap_info,
-+				  void *kbuff, size_t hdr_bytes)
- {
- 	efi_capsule_header_t *cap_hdr;
- 	size_t pages_needed;
--- 
-2.10.2
+> ---
+>  drivers/firmware/efi/capsule-loader.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+> index 9ae6c11..91e91f7 100644
+> --- a/drivers/firmware/efi/capsule-loader.c
+> +++ b/drivers/firmware/efi/capsule-loader.c
+> @@ -113,7 +113,7 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
+>                         VM_MAP, PAGE_KERNEL);
+>         if (!cap_hdr_temp) {
+>                 pr_debug("%s: vmap() failed\n", __func__);
+> -               return -EFAULT;
+> +               return -ENOMEM;
+>         }
+>
+>         ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
+> @@ -185,7 +185,7 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
+>         kbuff = kmap(page);
+>         if (!kbuff) {
+>                 pr_debug("%s: kmap() failed\n", __func__);
+> -               ret = -EFAULT;
+> +               ret = -ENOMEM;
+>                 goto failed;
+>         }
+>         kbuff += PAGE_SIZE - cap_info->page_bytes_remain;
+> --
+> 2.10.2
+>
