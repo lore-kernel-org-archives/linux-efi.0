@@ -1,32 +1,31 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v2] x86/mm/KASLR: EFI region is mistakenly included into
- KASLR VA space for randomization
-Date: Fri, 24 Mar 2017 09:42:40 +0000
-Message-ID: <CAKv+Gu9cyMccPSjzr9XGT6Gkhq57is+i_VajsZMTbd9eOAMkwQ@mail.gmail.com>
-References: <1490331592-31860-1-git-send-email-bhe@redhat.com>
- <20170324080833.GA15200@gmail.com> <20170324083451.GC30442@x1>
- <20170324084609.GA6807@dhcp-128-65.nay.redhat.com> <20170324092433.GA3237@gmail.com>
- <CAKv+Gu_V_VAWuDtKyOY9RS+cdhi+c5z2a7n2kcXVybvvdmPYBw@mail.gmail.com> <20170324094034.2afxgg43wlezdka5@pd.tnic>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2] x86/efi: Clean up a minor mistake in code comment
+Date: Fri, 24 Mar 2017 09:43:34 +0000
+Message-ID: <CAKv+Gu_ojQ48eTqqd3m9SxqqLygVPFGAUWJHxjznr8t6WYbygQ@mail.gmail.com>
+References: <1490347040-28720-1-git-send-email-bhe@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20170324094034.2afxgg43wlezdka5@pd.tnic>
-Sender: stable-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Ingo Molnar <mingo@kernel.org>, Dave Young <dyoung@redhat.com>, Baoquan He <bhe@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Thomas Garnier <thgarnie@google.com>, Kees Cook <keescook@chromium.org>, Andrew Morton <akpm@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Bhupesh Sharma <bhsharma@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1490347040-28720-1-git-send-email-bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 24 March 2017 at 09:40, Borislav Petkov <bp@alien8.de> wrote:
-> On Fri, Mar 24, 2017 at 09:37:36AM +0000, Ard Biesheuvel wrote:
->> No. It is the firmware's EFI code, and the virtual translation applied
->> by the OS is made known to the firmware by means of a call into the
->> runtime service SetVirtualAddressMap().
+On 24 March 2017 at 09:17, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> EFI allocate runtime services regions from EFI_VA_START, -4G, down
+> to -68G, EFI_VA_END, 64G altogether. The mechanism was introduced in
+> commit d2f7cbe7b26a7 ("x86/efi: Runtime services virtual mapping").
 >
-> We can still randomize within those 64G before calling
-> SetVirtualAddressMap(). The question is, do we want to or need to, even?
+> Clean it up to avoid confusion.
+>
+> Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+> v1->v2:
+>   Update patch log to corret a description mistake Ard pointed out.
 >
 
-That is a different matter. If the regions are only mapped while
-runtime services invocations are in progress (as we do on ARM), I am
-not sure if it matters that much, given how rarely that occurs in
-normal use.
+Queued in efi/next for v4.12
+
+Thanks,
+Ard.
