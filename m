@@ -1,333 +1,174 @@
-From: Christoffer Dall <cdall@linaro.org>
-Subject: Re: [PATCH V13 10/10] arm/arm64: KVM: add guest SEA support
-Date: Fri, 24 Mar 2017 17:01:58 +0100
-Message-ID: <20170324160158.GH25903@cbox>
-References: <1490136425-4324-1-git-send-email-tbaicar@codeaurora.org>
- <1490136425-4324-11-git-send-email-tbaicar@codeaurora.org>
+From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 2/2] efi/capsule: Add support for Quark security header
+Date: Fri, 24 Mar 2017 17:44:34 +0100
+Message-ID: <a7e8db47-2ea7-bae4-ef4d-59d352286175@siemens.com>
+References: <cover.1487182480.git.jan.kiszka@siemens.com>
+ <47e493c47aa79b68be52f743ac1790fddab22938.1487182480.git.jan.kiszka@siemens.com>
+ <9949ecad-4b73-cccc-7e66-0afe0d2f4087@nexus-software.ie>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-Content-Disposition: inline
-In-Reply-To: <1490136425-4324-11-git-send-email-tbaicar@codeaurora.org>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <9949ecad-4b73-cccc-7e66-0afe0d2f4087-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Mar 21, 2017 at 04:47:05PM -0600, Tyler Baicar wrote:
-> Currently external aborts are unsupported by the guest abort
-> handling. Add handling for SEAs so that the host kernel reports
-> SEAs which occur in the guest kernel.
+(restarting this topic, new patches are in the make)
 
-The logic in kvm_handle_guest_abort could deserve an explanation here.
+On 2017-02-17 02:30, Bryan O'Donoghue wrote:
+> 
+> 
+> On 15/02/17 18:14, Jan Kiszka wrote:
+>> The firmware for Quark X102x prepends a security header to the capsule
+>> which is needed to support the mandatory secure boot on this processor.
+>> The header can be detected by checking for the "_CSH" signature and -
+>> to avoid any GUID conflict - validating its size field to contain the
+>> expected value. Then we need to look for the EFI header right after the
+>> security header and pass the image offset to efi_capsule_update while
+>> keeping the whole image in RAM - the firmware will look for the header
+>> on its own.
+>>
+>> Signed-off-by: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+>> ---
+>>  drivers/firmware/efi/capsule-loader.c | 73
+>> ++++++++++++++++++++++++++++++-----
+>>  1 file changed, 63 insertions(+), 10 deletions(-)
+>>
+>> diff --git a/drivers/firmware/efi/capsule-loader.c
+>> b/drivers/firmware/efi/capsule-loader.c
+>> index 63ceca9..571d931 100644
+>> --- a/drivers/firmware/efi/capsule-loader.c
+>> +++ b/drivers/firmware/efi/capsule-loader.c
+>> @@ -26,10 +26,32 @@ struct capsule_info {
+>>      long        index;
+>>      size_t        count;
+>>      size_t        total_size;
+>> +    unsigned int    efi_hdr_offset;
+>>      struct page    **pages;
+>>      size_t        page_bytes_remain;
+>>  };
+>>
+>> +#define QUARK_CSH_SIGNATURE        0x5f435348    /* _CSH */
+>> +#define QUARK_SECURITY_HEADER_SIZE    0x400
+>> +
+>> +struct efi_quark_security_header {
+>> +    u32 csh_signature;
+>> +    u32 version;
+>> +    u32 modulesize;
+>> +    u32 security_version_number_index;
+>> +    u32 security_version_number;
+>> +    u32 rsvd_module_id;
+>> +    u32 rsvd_module_vendor;
+>> +    u32 rsvd_date;
+>> +    u32 headersize;
+>> +    u32 hash_algo;
+>> +    u32 cryp_algo;
+>> +    u32 keysize;
+>> +    u32 signaturesize;
+>> +    u32 rsvd_next_header;
+>> +    u32 rsvd[2];
+>> +};
+> 
+> This is a real nitpick (sorry) - but it'd be nice to have a document
+> reference or a link to describe this header i.e. it is officially
+> documented - outside of the UEFI specification. Make life easy for
+> someone reading this header and make an document reference.
+> 
+> Also it'd be appreciated if you could describe the format of the
+> structure with
+> 
+> @member    member-attribute description
 
-Surely the whole logic of how KVM fits into the picture here and how
-we're dealing with synchronous errors could be explained here, based on
-the long conversations between you and James on many prior iterations on
-this patch.
+Done.
 
 > 
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> ---
->  arch/arm/include/asm/kvm_arm.h       | 10 +++++++++
->  arch/arm/include/asm/system_misc.h   |  5 +++++
->  arch/arm/kvm/mmu.c                   | 41 ++++++++++++++++++++++++++++++------
->  arch/arm64/include/asm/kvm_arm.h     | 10 +++++++++
->  arch/arm64/include/asm/system_misc.h |  2 ++
->  arch/arm64/mm/fault.c                | 19 +++++++++++++++--
->  drivers/acpi/apei/ghes.c             | 13 ++++++------
->  include/acpi/ghes.h                  |  2 +-
->  8 files changed, 86 insertions(+), 16 deletions(-)
+>> +
+>>  /**
+>>   * efi_free_all_buff_pages - free all previous allocated buffer pages
+>>   * @cap_info: pointer to current instance of capsule_info structure
+>> @@ -56,18 +78,46 @@ static void efi_free_all_buff_pages(struct
+>> capsule_info *cap_info)
+>>  static ssize_t efi_capsule_setup_info(struct capsule_info *cap_info,
+>>                        void *kbuff, size_t hdr_bytes)
+>>  {
+>> +    struct efi_quark_security_header *quark_hdr;
+>>      efi_capsule_header_t *cap_hdr;
+>>      size_t pages_needed;
+>>      int ret;
+>>      void *temp_page;
+>>
+>> -    /* Only process data block that is larger than efi header size */
+>> -    if (hdr_bytes < sizeof(efi_capsule_header_t))
+>> +    /* Only process data block that is larger than the security header
+>> +     * (which is larger than the EFI header) */
+>> +    if (hdr_bytes < sizeof(struct efi_quark_security_header))
+>>          return 0;
+>>
+>>      /* Reset back to the correct offset of header */
+>>      cap_hdr = kbuff - cap_info->count;
+>> -    pages_needed = ALIGN(cap_hdr->imagesize, PAGE_SIZE) >> PAGE_SHIFT;
+>> +
+>> +    quark_hdr = (struct efi_quark_security_header *)cap_hdr;
+>> +
+>> +    if (quark_hdr->csh_signature == QUARK_CSH_SIGNATURE &&
+>> +        quark_hdr->headersize == QUARK_SECURITY_HEADER_SIZE) {
+>> +        /* Only process data block if EFI header is included */
+>> +        if (hdr_bytes < QUARK_SECURITY_HEADER_SIZE +
+>> +                sizeof(efi_capsule_header_t))
+>> +            return 0;
 > 
-> diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
-> index a3f0b3d..ebf020b 100644
-> --- a/arch/arm/include/asm/kvm_arm.h
-> +++ b/arch/arm/include/asm/kvm_arm.h
-> @@ -187,6 +187,16 @@
->  #define FSC_FAULT	(0x04)
->  #define FSC_ACCESS	(0x08)
->  #define FSC_PERM	(0x0c)
-> +#define FSC_SEA		(0x10)
-> +#define FSC_SEA_TTW0	(0x14)
-> +#define FSC_SEA_TTW1	(0x15)
-> +#define FSC_SEA_TTW2	(0x16)
-> +#define FSC_SEA_TTW3	(0x17)
-> +#define FSC_SECC	(0x18)
-> +#define FSC_SECC_TTW0	(0x1c)
-> +#define FSC_SECC_TTW1	(0x1d)
-> +#define FSC_SECC_TTW2	(0x1e)
-> +#define FSC_SECC_TTW3	(0x1f)
->  
->  /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
->  #define HPFAR_MASK	(~0xf)
-> diff --git a/arch/arm/include/asm/system_misc.h b/arch/arm/include/asm/system_misc.h
-> index a3d61ad..ea45d94 100644
-> --- a/arch/arm/include/asm/system_misc.h
-> +++ b/arch/arm/include/asm/system_misc.h
-> @@ -24,4 +24,9 @@
->  
->  #endif /* !__ASSEMBLY__ */
->  
-> +static inline int handle_guest_sea(unsigned long addr, unsigned int esr)
-> +{
-> +	return -1;
-> +}
-> +
->  #endif /* __ASM_ARM_SYSTEM_MISC_H */
-> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
-> index 962616f..105b6ab 100644
-> --- a/arch/arm/kvm/mmu.c
-> +++ b/arch/arm/kvm/mmu.c
-> @@ -29,6 +29,7 @@
->  #include <asm/kvm_asm.h>
->  #include <asm/kvm_emulate.h>
->  #include <asm/virt.h>
-> +#include <asm/system_misc.h>
->  
->  #include "trace.h"
->  
-> @@ -1406,6 +1407,24 @@ static void handle_access_fault(struct kvm_vcpu *vcpu, phys_addr_t fault_ipa)
->  		kvm_set_pfn_accessed(pfn);
->  }
->  
-> +static bool is_abort_synchronous(unsigned long fault_status) {
-
-this naming feels a bit weird to me.  For example, this will return
-false for a normal translation fault, which is indeed synchronous.
-
-Below you cann handle_guest_sea conditionally based on the result of
-this function, so could it be called is_abort_sea ?
-
-> +	switch (fault_status) {
-> +	case FSC_SEA:
-> +	case FSC_SEA_TTW0:
-> +	case FSC_SEA_TTW1:
-> +	case FSC_SEA_TTW2:
-> +	case FSC_SEA_TTW3:
-> +	case FSC_SECC:
-> +	case FSC_SECC_TTW0:
-> +	case FSC_SECC_TTW1:
-> +	case FSC_SECC_TTW2:
-> +	case FSC_SECC_TTW3:
-> +		return true;
-> +	default:
-> +		return false;
-> +	}
-> +}
-> +
->  /**
->   * kvm_handle_guest_abort - handles all 2nd stage aborts
->   * @vcpu:	the VCPU pointer
-> @@ -1426,23 +1445,31 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
->  	unsigned long hva;
->  	bool is_iabt, write_fault, writable;
->  	gfn_t gfn;
-> -	int ret, idx;
-> +	int ret, idx, sea_status = 1;
-> +
-> +	/* Check the stage-2 fault is trans. fault or write fault */
-
-I think this comment was supposed to belong with the check for the three
-types below, not for calling kvm_vcpu_trap_get_fault_type, and I also
-think the comment is outdated, because it doesn't mention the access
-flag.
-
-I suggest either removing the comment, or keep it where it was and
-change to say "trans. fault, write fault, acces flag fault, or
-sea_status", with some insight into what sea_status means here.
-
-> +	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
-> +
-> +	fault_ipa = kvm_vcpu_get_fault_ipa(vcpu);
-> +
-> +	/* The host kernel will handle the synchronous external abort. There
-> +	 * is no need to pass the error into the guest.
-> +	 */
-
-nit: commenting style.
-
-> +	if (is_abort_synchronous(fault_status))
-> +		sea_status = handle_guest_sea((unsigned long)fault_ipa,
-
-will this ever be used on AArch32 in the future?
-
-If so, casting a phys_addr_t for an IPA to an unsigned long is an
-incredibly bad idea.  Why not just use phys_addr_t for handle_guest_sea?
-
-> +				    kvm_vcpu_get_hsr(vcpu));
->  
->  	is_iabt = kvm_vcpu_trap_is_iabt(vcpu);
-> -	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu))) {
-> +	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu)) && sea_status) {
->  		kvm_inject_vabt(vcpu);
->  		return 1;
->  	}
->  
-> -	fault_ipa = kvm_vcpu_get_fault_ipa(vcpu);
-> -
->  	trace_kvm_guest_fault(*vcpu_pc(vcpu), kvm_vcpu_get_hsr(vcpu),
->  			      kvm_vcpu_get_hfar(vcpu), fault_ipa);
->  
-> -	/* Check the stage-2 fault is trans. fault or write fault */
-> -	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
->  	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
-> -	    fault_status != FSC_ACCESS) {
-> +	    fault_status != FSC_ACCESS && sea_status) {
-
-I don't understand the maning of sea_status here.  If sea_status is
-non-zero then the fault_status matters, but if sea_status is zero, then
-we just continue by handling this as an MMIO abort or a user fault?
-
-What am I missing here?
-
-
-
->  		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
->  			kvm_vcpu_trap_get_class(vcpu),
->  			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
-> diff --git a/arch/arm64/include/asm/kvm_arm.h b/arch/arm64/include/asm/kvm_arm.h
-> index 6e99978..61d694c 100644
-> --- a/arch/arm64/include/asm/kvm_arm.h
-> +++ b/arch/arm64/include/asm/kvm_arm.h
-> @@ -204,6 +204,16 @@
->  #define FSC_FAULT	ESR_ELx_FSC_FAULT
->  #define FSC_ACCESS	ESR_ELx_FSC_ACCESS
->  #define FSC_PERM	ESR_ELx_FSC_PERM
-> +#define FSC_SEA		ESR_ELx_FSC_EXTABT
-> +#define FSC_SEA_TTW0	(0x14)
-> +#define FSC_SEA_TTW1	(0x15)
-> +#define FSC_SEA_TTW2	(0x16)
-> +#define FSC_SEA_TTW3	(0x17)
-> +#define FSC_SECC	(0x18)
-> +#define FSC_SECC_TTW0	(0x1c)
-> +#define FSC_SECC_TTW1	(0x1d)
-> +#define FSC_SECC_TTW2	(0x1e)
-> +#define FSC_SECC_TTW3	(0x1f)
->  
->  /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
->  #define HPFAR_MASK	(~UL(0xf))
-> diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
-> index bc81243..5b2cecd 100644
-> --- a/arch/arm64/include/asm/system_misc.h
-> +++ b/arch/arm64/include/asm/system_misc.h
-> @@ -58,4 +58,6 @@ void hook_debug_fault_code(int nr, int (*fn)(unsigned long, unsigned int,
->  
->  #endif	/* __ASSEMBLY__ */
->  
-> +int handle_guest_sea(unsigned long addr, unsigned int esr);
-> +
->  #endif	/* __ASM_SYSTEM_MISC_H */
-> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-> index f7372ce..ee96307 100644
-> --- a/arch/arm64/mm/fault.c
-> +++ b/arch/arm64/mm/fault.c
-> @@ -497,6 +497,7 @@ static int do_bad(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->  static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->  {
->  	struct siginfo info;
-> +	int ret = 0;
->  
->  	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
->  		 fault_name(esr), esr, addr);
-> @@ -508,7 +509,7 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->  	 */
->  	if (IS_ENABLED(CONFIG_ACPI_APEI_SEA)) {
->  		nmi_enter();
-> -		ghes_notify_sea();
-> +		ret = ghes_notify_sea();
->  		nmi_exit();
->  	}
->  
-> @@ -521,7 +522,7 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
->  		info.si_addr  = (void __user *)addr;
->  	arm64_notify_die("", regs, &info, esr);
->  
-> -	return 0;
-> +	return ret;
->  }
->  
->  static const struct fault_info {
-> @@ -603,6 +604,20 @@ static const char *fault_name(unsigned int esr)
->  }
->  
->  /*
-> + * Handle Synchronous External Aborts that occur in a guest kernel.
-> + */
-
-Can you document what the return value here means?
-
-I have no idea what the semantics of ghes_notify_sea() are.
-
-> +int handle_guest_sea(unsigned long addr, unsigned int esr)
-> +{
-> +	int ret = -ENOENT;
-> +
-> +	if(IS_ENABLED(CONFIG_ACPI_APEI_SEA)) {
-> +		ret = ghes_notify_sea();
-> +	}
-> +
-> +	return ret;
-> +}
-> +
-> +/*
->   * Dispatch a data abort to the relevant handler.
->   */
->  asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index 230b095..81eabc6 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -810,17 +810,18 @@ static int ghes_notify_sci(struct notifier_block *this,
->  #ifdef CONFIG_ACPI_APEI_SEA
->  static LIST_HEAD(ghes_sea);
->  
-> -void ghes_notify_sea(void)
-> +int ghes_notify_sea(void)
->  {
->  	struct ghes *ghes;
-> +	int ret = -ENOENT;
->  
-> -	/*
-> -	 * synchronize_rcu() will wait for nmi_exit(), so no need to
-> -	 * rcu_read_lock().
-> -	 */
-> +	rcu_read_lock();
->  	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
-> -		ghes_proc(ghes);
-> +		if(!ghes_proc(ghes))
-> +			ret = 0;
->  	}
-> +	rcu_read_unlock();
-> +	return ret;
->  }
->  
->  static void ghes_sea_add(struct ghes *ghes)
-> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
-> index 18bc935..2a727dc 100644
-> --- a/include/acpi/ghes.h
-> +++ b/include/acpi/ghes.h
-> @@ -99,6 +99,6 @@ static inline void *acpi_hest_generic_data_payload(struct acpi_hest_generic_data
->  		gdata + 1;
->  }
->  
-> -void ghes_notify_sea(void);
-> +int ghes_notify_sea(void);
->  
->  #endif /* GHES_H */
-> -- 
-> Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-> Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-> a Linux Foundation Collaborative Project.
+> At this point if cap_info->header_obtained == false then this is an
+> error - you should be barfing on this - not literally barfing - at least
+> not on your keyboard :)
 > 
+> return -ETHISHEADERSUCKS or some other sensible value -EINVAL like you
+> have below.
+> 
+> Point being you've validated the signature, the header size and
+> cap_info->header_obtained is false then you definitely have a bogus
+> capsule..
+
+Nope: efi_capsule_setup_info is called whenever the user wrote some bits
+to the device, not necessarily enough to evaluate all the headers. We
+need to return 0 here (and not set header_obtained) until we find enough
+data to declare the capsule valid or broken.
+
+> 
+> 
+>> +
+>> +        pr_debug("%s: Quark security header detected\n", __func__);
+> 
+> ... and %s __func__ is verboten don't do it. actually there's a bunch of
+> those pairs all over this code - if you have the time in a supplementary
+> patch please kill them - there must be a a dev pointer we can get at
+> somewhere that makes sense to use dev_dbg- if not those __func__
+> parameters still need to go away - please kill them.
+
+I've written some cleanup patches for this module and refrain from
+adding my own mess.
+
+> 
+>> +
+>> +        if (quark_hdr->rsvd_next_header != 0) {
+>> +            pr_err("%s: multiple security headers not supported\n",
+>> +                   __func__);
+>> +            return -EINVAL;
+>> +        }
+> 
+> 
+>> +
+>> +        cap_hdr = (void *)cap_hdr + quark_hdr->headersize;
+> 
+> You could have a separate void * variable and not have the cast.
+> 
+
+Done.
 
 Thanks,
--Christoffer
+Jan
+
+-- 
+Siemens AG, Corporate Technology, CT RDA ITP SES-DE
+Corporate Competence Center Embedded Linux
