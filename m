@@ -1,109 +1,106 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC PATCH v4 15/28] Add support to access persistent memory in
- the clear
-Date: Thu, 23 Mar 2017 16:02:53 -0500
-Message-ID: <01d5f854-c8ea-61db-7e1b-1f97952bff75@amd.com>
-References: <20170216154158.19244.66630.stgit@tlendack-t1.amdoffice.net>
- <20170216154521.19244.89502.stgit@tlendack-t1.amdoffice.net>
- <DF4PR84MB01694A716568EFB01F5C1C5EAB390@DF4PR84MB0169.NAMPRD84.PROD.OUTLOOK.COM>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v1 RESEND 1/2] x86/mm/KASLR: EFI region is mistakenly
+ included into KASLR VA space for randomization
+Date: Fri, 24 Mar 2017 11:05:23 +0800
+Message-ID: <20170324030523.GA4069@dhcp-128-65.nay.redhat.com>
+References: <1490239655-20902-1-git-send-email-bhe@redhat.com>
+ <1490239655-20902-2-git-send-email-bhe@redhat.com>
+ <20170324022953.GA3715@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <DF4PR84MB01694A716568EFB01F5C1C5EAB390@DF4PR84MB0169.NAMPRD84.PROD.OUTLOOK.COM>
-Sender: owner-linux-mm@kvack.org
-To: "Elliott, Robert (Persistent Memory)" <elliott@hpe.com>, "linux-arch@vger.kernel.org" <linux-arch@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "kvm@vger.kernel.org" <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "kasan-dev@googlegroups.com" <kasan-dev@googlegroups.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>
-Cc: Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, "Kani, Toshimitsu" <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Alexander Potapenko <glider@google.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>, Larry Woodman <lwoodman@redhat.com>, Dmitry Vyukov <dvyukov@google.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170324022953.GA3715-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 3/17/2017 5:58 PM, Elliott, Robert (Persistent Memory) wrote:
->
->
->> -----Original Message-----
->> From: linux-kernel-owner@vger.kernel.org [mailto:linux-kernel-
->> owner@vger.kernel.org] On Behalf Of Tom Lendacky
->> Sent: Thursday, February 16, 2017 9:45 AM
->> Subject: [RFC PATCH v4 15/28] Add support to access persistent memory in
->> the clear
->>
->> Persistent memory is expected to persist across reboots. The encryption
->> key used by SME will change across reboots which will result in corrupted
->> persistent memory.  Persistent memory is handed out by block devices
->> through memory remapping functions, so be sure not to map this memory as
->> encrypted.
->
-> The system might be able to save and restore the correct encryption key for a
-> region of persistent memory, in which case it does need to be mapped as
-> encrypted.
+This should also cc linux-efi
 
-If the OS could get some indication that BIOS/UEFI has saved and
-restored the encryption key, then it could be mapped encrypted.
+On 03/24/17 at 10:29am, Dave Young wrote:
+> Hi, Baoquan
+> 
+> On 03/23/17 at 11:27am, Baoquan He wrote:
+> > Currently KASLR is enabled on three regions: the direct mapping of physical
+> > memory, vamlloc and vmemmap. However EFI region is also mistakenly included
+> > for VA space randomization because of misusing EFI_VA_START macro and
+> > assuming EFI_VA_START < EFI_VA_END.
+> > 
+> > The EFI region is reserved for EFI runtime services virtual mapping which
+> > should not be included in kaslr ranges. It will be re-used by kexec/kdump
+> > kernel, the mistake may cause failure when jump to kexec/kdump kernel if
+> > vmemmap allocation stomps on the allocated efi mapping region.
+> 
+> No need to mention kexec/kdump in changelog although it is true that
+> kexec kernel will use the persistent efi runtime mapping. The main point
+> is it is wrong to use the reserved vm space for efi.
 
->
-> This might deserve a new EFI_MEMORY_ENCRYPTED attribute bit so the
-> system firmware can communicate that information to the OS (in the
-> UEFI memory map and the ACPI NFIT SPA Range structures).  It wouldn't
-> likely ever be added to the E820h table - ACPI 6.1 already obsoleted the
-> Extended Attribute for AddressRangeNonVolatile.
+Explain more about this:
 
-An attribute bit in some form would be a nice way to inform the OS that
-the persistent memory can be mapped encrypted.
+It is a general issue instead of a kexec/kdump issue and it is a real
+bug. Although efi has its own page tables, it will still sync kernel
+page tables along with the mapping of efi reserved area. So if vmalloc
+etc use the vm space of efi reserved area, then some of them will be
+missed when efi sync the low kernel page tables..
 
->
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->>  arch/x86/mm/ioremap.c |    2 ++
->>  1 file changed, 2 insertions(+)
->>
->> diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
->> index b0ff6bc..c6cb921 100644
->> --- a/arch/x86/mm/ioremap.c
->> +++ b/arch/x86/mm/ioremap.c
->> @@ -498,6 +498,8 @@ static bool
->> memremap_should_map_encrypted(resource_size_t phys_addr,
->>  	case E820_TYPE_ACPI:
->>  	case E820_TYPE_NVS:
->>  	case E820_TYPE_UNUSABLE:
->> +	case E820_TYPE_PMEM:
->> +	case E820_TYPE_PRAM:
->>  		return false;
->>  	default:
->>  		break;
->
-> E820_TYPE_RESERVED is also used to report persistent memory in
-> some systems (patch 16 adds that for other reasons).
->
-> You might want to intercept the persistent memory types in the
-> efi_mem_type(phys_addr) switch statement earlier in the function
-> as well.  https://lkml.org/lkml/2017/3/13/357 recently mentioned that
-> "in qemu hotpluggable memory isn't put into E820," with the latest
-> information only in the UEFI memory map.
->
-> Persistent memory can be reported there as:
-> * EfiReservedMemoryType type with the EFI_MEMORY_NV attribute
-> * EfiPersistentMemory type with the EFI_MEMORY_NV attribute
->
-> Even the UEFI memory map is not authoritative, though.  To really
-> determine what is in these regions requires parsing the ACPI NFIT
-> SPA Ranges structures.  Parts of the E820 or UEFI regions could be
-> reported as volatile there and should thus be encrypted.
-
-Thanks for the details on this. I'll take a closer look at this and
-update the checks appropriately.
-
-Thanks,
-Tom
-
->
-> ---
-> Robert Elliott, HPE Persistent Memory
->
->
->
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+> 
+> Also I think this patch can be sent as a standalone patch, no need to be
+> a patch series. For the second patch I think it depends on efi
+> maintainer's opinion, personally I think only this simple fix for kaslr only
+> will be better.
+> 
+> > 
+> > In Documentation/x86/x86_64/mm.txt, we can see:
+> >   ffffffef00000000 - fffffffeffffffff (=64 GB) EFI region mapping space
+> > EFI use the space from -4G to -64G thus EFI_VA_START > EFI_VA_END
+> > Here EFI_VA_START = -4G, and EFI_VA_END = -64G
+> > 
+> > Changing EFI_VA_START to EFI_VA_END in mm/kaslr.c fixes this problem.
+> > 
+> > Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org> #4.8+
+> > Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > Acked-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > Reviewed-by: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > Acked-by: Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+> > Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+> > Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org> 
+> > Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+> > Cc: Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+> > Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> > Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+> > Cc: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+> > Cc: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
+> > ---
+> >  arch/x86/mm/kaslr.c | 4 ++--
+> >  1 file changed, 2 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/arch/x86/mm/kaslr.c b/arch/x86/mm/kaslr.c
+> > index 887e571..aed2064 100644
+> > --- a/arch/x86/mm/kaslr.c
+> > +++ b/arch/x86/mm/kaslr.c
+> > @@ -48,7 +48,7 @@ static const unsigned long vaddr_start = __PAGE_OFFSET_BASE;
+> >  #if defined(CONFIG_X86_ESPFIX64)
+> >  static const unsigned long vaddr_end = ESPFIX_BASE_ADDR;
+> >  #elif defined(CONFIG_EFI)
+> > -static const unsigned long vaddr_end = EFI_VA_START;
+> > +static const unsigned long vaddr_end = EFI_VA_END;
+> >  #else
+> >  static const unsigned long vaddr_end = __START_KERNEL_map;
+> >  #endif
+> > @@ -105,7 +105,7 @@ void __init kernel_randomize_memory(void)
+> >  	 */
+> >  	BUILD_BUG_ON(vaddr_start >= vaddr_end);
+> >  	BUILD_BUG_ON(IS_ENABLED(CONFIG_X86_ESPFIX64) &&
+> > -		     vaddr_end >= EFI_VA_START);
+> > +		     vaddr_end >= EFI_VA_END);
+> >  	BUILD_BUG_ON((IS_ENABLED(CONFIG_X86_ESPFIX64) ||
+> >  		      IS_ENABLED(CONFIG_EFI)) &&
+> >  		     vaddr_end >= __START_KERNEL_map);
+> > -- 
+> > 2.5.5
+> > 
+> 
+> Thanks
+> Dave
