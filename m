@@ -1,68 +1,55 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH v2] x86/mm/KASLR: EFI region is mistakenly included into
- KASLR VA space for randomization
-Date: Fri, 24 Mar 2017 16:53:55 +0800
-Message-ID: <20170324085355.GB6807@dhcp-128-65.nay.redhat.com>
-References: <1490331592-31860-1-git-send-email-bhe@redhat.com>
- <20170324080833.GA15200@gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v1 RESEND 2/2] x86/efi: Clean up a minor mistake in code comment
+Date: Fri, 24 Mar 2017 08:57:30 +0000
+Message-ID: <CAKv+Gu9Dk22L+Jdw872zR8SgaXpHQNcyHvyX8F7ntMxm9aCduA@mail.gmail.com>
+References: <1490239655-20902-1-git-send-email-bhe@redhat.com> <1490239655-20902-3-git-send-email-bhe@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170324080833.GA15200@gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Baoquan He <bhe@redhat.com>, linux-kernel@vger.kernel.org, stable@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, Thomas Garnier <thgarnie@google.com>, Kees Cook <keescook@chromium.org>, Borislav Petkov <bp@alien8.de>, Andrew Morton <akpm@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Bhupesh Sharma <bhsharma@redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1490239655-20902-3-git-send-email-bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/24/17 at 09:08am, Ingo Molnar wrote:
-> 
-> * Baoquan He <bhe@redhat.com> wrote:
-> 
-> > Currently KASLR is enabled on three regions: the direct mapping of physical
-> > memory, vamlloc and vmemmap. However EFI region is also mistakenly included
-> > for VA space randomization because of misusing EFI_VA_START macro and
-> > assuming EFI_VA_START < EFI_VA_END.
-> > 
-> > The EFI region is reserved for EFI runtime services virtual mapping which
-> > should not be included in kaslr ranges. In Documentation/x86/x86_64/mm.txt,
-> > we can see:
-> >   ffffffef00000000 - fffffffeffffffff (=64 GB) EFI region mapping space
-> > EFI use the space from -4G to -64G thus EFI_VA_START > EFI_VA_END,
-> > Here EFI_VA_START = -4G, and EFI_VA_END = -64G.
-> > 
-> > Changing EFI_VA_START to EFI_VA_END in mm/kaslr.c fixes this problem.
-> > 
-> > Cc: <stable@vger.kernel.org> #4.8+
-> > Signed-off-by: Baoquan He <bhe@redhat.com>
-> > Acked-by: Dave Young <dyoung@redhat.com>
-> > Reviewed-by: Bhupesh Sharma <bhsharma@redhat.com>
-> > Acked-by: Thomas Garnier <thgarnie@google.com>
-> > Cc: Thomas Gleixner <tglx@linutronix.de>
-> > Cc: Ingo Molnar <mingo@redhat.com>
-> > Cc: "H. Peter Anvin" <hpa@zytor.com>
-> > Cc: x86@kernel.org
-> > Cc: linux-efi@vger.kernel.org
-> > Cc: Thomas Garnier <thgarnie@google.com>
-> > Cc: Kees Cook <keescook@chromium.org>
-> > Cc: Borislav Petkov <bp@alien8.de>
-> > Cc: Andrew Morton <akpm@linux-foundation.org>
-> > Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
-> > Cc: Dave Young <dyoung@redhat.com>
-> > Cc: Bhupesh Sharma <bhsharma@redhat.com>
-> 
-> So I applied this kexec fix and extended the changelog to clearly show why this 
-> fix matters in practice.
-> 
-> Also, to make sure I understood it correctly: these addresses are all dynamic on 
-> 64-bit kernels, i.e. we are establishing and then tearing down these page tables 
-> around EFI calls, and they are 'normally' not present at all, right?
+On 23 March 2017 at 03:27, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> EFI allocate runtime services regions from EFI_VA_START, -4G, down
+> to -64G, EFI_VA_END.
 
-Ingo, if I understand the question right "these addresses" means EFI va addresses
-then it is right, EFI switch to its own page tables, so they are not
-present in kernel page tables.
+OK, so is the size of the region 60 GB or 64 GB? This suggests 60 GB,
+but the comment you update suggests 64 GB.
 
-> 
-> Thanks,
-> 
-> 	Ingo
+> The mechanism was introduced in
+> commit d2f7cbe7b26a7 ("x86/efi: Runtime services virtual mapping").
+>
+> Clean it up to avoid confusion.
+>
+> Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+> Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+> Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> ---
+>  arch/x86/platform/efi/efi_64.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+> index a4695da..6cbf9e0 100644
+> --- a/arch/x86/platform/efi/efi_64.c
+> +++ b/arch/x86/platform/efi/efi_64.c
+> @@ -47,7 +47,7 @@
+>  #include <asm/pgalloc.h>
+>
+>  /*
+> - * We allocate runtime services regions bottom-up, starting from -4G, i.e.
+> + * We allocate runtime services regions top-down, starting from -4G, i.e.
+>   * 0xffff_ffff_0000_0000 and limit EFI VA mapping space to 64G.
+>   */
+>  static u64 efi_va = EFI_VA_START;
+> --
+> 2.5.5
+>
