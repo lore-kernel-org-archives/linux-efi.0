@@ -1,174 +1,166 @@
-From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi/capsule: Add support for Quark security header
-Date: Fri, 24 Mar 2017 17:44:34 +0100
-Message-ID: <a7e8db47-2ea7-bae4-ef4d-59d352286175@siemens.com>
-References: <cover.1487182480.git.jan.kiszka@siemens.com>
- <47e493c47aa79b68be52f743ac1790fddab22938.1487182480.git.jan.kiszka@siemens.com>
- <9949ecad-4b73-cccc-7e66-0afe0d2f4087@nexus-software.ie>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [RFC PATCH v2 15/32] x86: Add support for changing memory
+ encryption attribute in early boot
+Date: Fri, 24 Mar 2017 18:12:57 +0100
+Message-ID: <20170324171257.lgvqcdqec3nla5nb@pd.tnic>
+References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
+ <148846772794.2349.1396854638510933455.stgit@brijesh-build-machine>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <9949ecad-4b73-cccc-7e66-0afe0d2f4087-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-pci-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <148846772794.2349.1396854638510933455.stgit@brijesh-build-machine>
+Sender: linux-pci-owner@vger.kernel.org
+To: Brijesh Singh <brijesh.singh@amd.com>
+Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas
 List-Id: linux-efi@vger.kernel.org
 
-(restarting this topic, new patches are in the make)
+On Thu, Mar 02, 2017 at 10:15:28AM -0500, Brijesh Singh wrote:
+> Some KVM-specific custom MSRs shares the guest physical address with
+> hypervisor. When SEV is active, the shared physical address must be mapped
+> with encryption attribute cleared so that both hypervsior and guest can
+> access the data.
+> 
+> Add APIs to change memory encryption attribute in early boot code.
+> 
+> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+> ---
+>  arch/x86/include/asm/mem_encrypt.h |   15 +++++++++
+>  arch/x86/mm/mem_encrypt.c          |   63 ++++++++++++++++++++++++++++++++++++
+>  2 files changed, 78 insertions(+)
+> 
+> diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
+> index 9799835..95bbe4c 100644
+> --- a/arch/x86/include/asm/mem_encrypt.h
+> +++ b/arch/x86/include/asm/mem_encrypt.h
+> @@ -47,6 +47,9 @@ void __init sme_unmap_bootdata(char *real_mode_data);
+>  
+>  void __init sme_early_init(void);
+>  
+> +int __init early_set_memory_decrypted(void *addr, unsigned long size);
+> +int __init early_set_memory_encrypted(void *addr, unsigned long size);
+> +
+>  /* Architecture __weak replacement functions */
+>  void __init mem_encrypt_init(void);
+>  
+> @@ -110,6 +113,18 @@ static inline void __init sme_early_init(void)
+>  {
+>  }
+>  
+> +static inline int __init early_set_memory_decrypted(void *addr,
+> +						    unsigned long size)
+> +{
+> +	return 1;
+	^^^^^^^^
 
-On 2017-02-17 02:30, Bryan O'Donoghue wrote:
-> 
-> 
-> On 15/02/17 18:14, Jan Kiszka wrote:
->> The firmware for Quark X102x prepends a security header to the capsule
->> which is needed to support the mandatory secure boot on this processor.
->> The header can be detected by checking for the "_CSH" signature and -
->> to avoid any GUID conflict - validating its size field to contain the
->> expected value. Then we need to look for the EFI header right after the
->> security header and pass the image offset to efi_capsule_update while
->> keeping the whole image in RAM - the firmware will look for the header
->> on its own.
->>
->> Signed-off-by: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
->> ---
->>  drivers/firmware/efi/capsule-loader.c | 73
->> ++++++++++++++++++++++++++++++-----
->>  1 file changed, 63 insertions(+), 10 deletions(-)
->>
->> diff --git a/drivers/firmware/efi/capsule-loader.c
->> b/drivers/firmware/efi/capsule-loader.c
->> index 63ceca9..571d931 100644
->> --- a/drivers/firmware/efi/capsule-loader.c
->> +++ b/drivers/firmware/efi/capsule-loader.c
->> @@ -26,10 +26,32 @@ struct capsule_info {
->>      long        index;
->>      size_t        count;
->>      size_t        total_size;
->> +    unsigned int    efi_hdr_offset;
->>      struct page    **pages;
->>      size_t        page_bytes_remain;
->>  };
->>
->> +#define QUARK_CSH_SIGNATURE        0x5f435348    /* _CSH */
->> +#define QUARK_SECURITY_HEADER_SIZE    0x400
->> +
->> +struct efi_quark_security_header {
->> +    u32 csh_signature;
->> +    u32 version;
->> +    u32 modulesize;
->> +    u32 security_version_number_index;
->> +    u32 security_version_number;
->> +    u32 rsvd_module_id;
->> +    u32 rsvd_module_vendor;
->> +    u32 rsvd_date;
->> +    u32 headersize;
->> +    u32 hash_algo;
->> +    u32 cryp_algo;
->> +    u32 keysize;
->> +    u32 signaturesize;
->> +    u32 rsvd_next_header;
->> +    u32 rsvd[2];
->> +};
-> 
-> This is a real nitpick (sorry) - but it'd be nice to have a document
-> reference or a link to describe this header i.e. it is officially
-> documented - outside of the UEFI specification. Make life easy for
-> someone reading this header and make an document reference.
-> 
-> Also it'd be appreciated if you could describe the format of the
-> structure with
-> 
-> @member    member-attribute description
+return 1 when !CONFIG_AMD_MEM_ENCRYPT ?
 
-Done.
+The non-early variants return 0.
 
-> 
->> +
->>  /**
->>   * efi_free_all_buff_pages - free all previous allocated buffer pages
->>   * @cap_info: pointer to current instance of capsule_info structure
->> @@ -56,18 +78,46 @@ static void efi_free_all_buff_pages(struct
->> capsule_info *cap_info)
->>  static ssize_t efi_capsule_setup_info(struct capsule_info *cap_info,
->>                        void *kbuff, size_t hdr_bytes)
->>  {
->> +    struct efi_quark_security_header *quark_hdr;
->>      efi_capsule_header_t *cap_hdr;
->>      size_t pages_needed;
->>      int ret;
->>      void *temp_page;
->>
->> -    /* Only process data block that is larger than efi header size */
->> -    if (hdr_bytes < sizeof(efi_capsule_header_t))
->> +    /* Only process data block that is larger than the security header
->> +     * (which is larger than the EFI header) */
->> +    if (hdr_bytes < sizeof(struct efi_quark_security_header))
->>          return 0;
->>
->>      /* Reset back to the correct offset of header */
->>      cap_hdr = kbuff - cap_info->count;
->> -    pages_needed = ALIGN(cap_hdr->imagesize, PAGE_SIZE) >> PAGE_SHIFT;
->> +
->> +    quark_hdr = (struct efi_quark_security_header *)cap_hdr;
->> +
->> +    if (quark_hdr->csh_signature == QUARK_CSH_SIGNATURE &&
->> +        quark_hdr->headersize == QUARK_SECURITY_HEADER_SIZE) {
->> +        /* Only process data block if EFI header is included */
->> +        if (hdr_bytes < QUARK_SECURITY_HEADER_SIZE +
->> +                sizeof(efi_capsule_header_t))
->> +            return 0;
-> 
-> At this point if cap_info->header_obtained == false then this is an
-> error - you should be barfing on this - not literally barfing - at least
-> not on your keyboard :)
-> 
-> return -ETHISHEADERSUCKS or some other sensible value -EINVAL like you
-> have below.
-> 
-> Point being you've validated the signature, the header size and
-> cap_info->header_obtained is false then you definitely have a bogus
-> capsule..
+> +}
+> +
+> +static inline int __init early_set_memory_encrypted(void *addr,
+> +						    unsigned long size)
+> +{
+> +	return 1;
+> +}
+> +
+>  #define __sme_pa		__pa
+>  #define __sme_pa_nodebug	__pa_nodebug
+>  
+> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+> index 7df5f4c..567e0d8 100644
+> --- a/arch/x86/mm/mem_encrypt.c
+> +++ b/arch/x86/mm/mem_encrypt.c
+> @@ -15,6 +15,7 @@
+>  #include <linux/mm.h>
+>  #include <linux/dma-mapping.h>
+>  #include <linux/swiotlb.h>
+> +#include <linux/mem_encrypt.h>
+>  
+>  #include <asm/tlbflush.h>
+>  #include <asm/fixmap.h>
+> @@ -258,6 +259,68 @@ static void sme_free(struct device *dev, size_t size, void *vaddr,
+>  	swiotlb_free_coherent(dev, size, vaddr, dma_handle);
+>  }
+>  
+> +static unsigned long __init get_pte_flags(unsigned long address)
+> +{
+> +	int level;
+> +	pte_t *pte;
+> +	unsigned long flags = _KERNPG_TABLE_NOENC | _PAGE_ENC;
+> +
+> +	pte = lookup_address(address, &level);
+> +	if (!pte)
+> +		return flags;
+> +
+> +	switch (level) {
+> +	case PG_LEVEL_4K:
+> +		flags = pte_flags(*pte);
+> +		break;
+> +	case PG_LEVEL_2M:
+> +		flags = pmd_flags(*(pmd_t *)pte);
+> +		break;
+> +	case PG_LEVEL_1G:
+> +		flags = pud_flags(*(pud_t *)pte);
+> +		break;
+> +	default:
+> +		break;
+> +	}
+> +
+> +	return flags;
+> +}
+> +
+> +int __init early_set_memory_enc_dec(void *vaddr, unsigned long size,
+> +				    unsigned long flags)
+> +{
+> +	unsigned long pfn, npages;
+> +	unsigned long addr = (unsigned long)vaddr & PAGE_MASK;
+> +
+> +	/* We are going to change the physical page attribute from C=1 to C=0.
+> +	 * Flush the caches to ensure that all the data with C=1 is flushed to
+> +	 * memory. Any caching of the vaddr after function returns will
+> +	 * use C=0.
+> +	 */
 
-Nope: efi_capsule_setup_info is called whenever the user wrote some bits
-to the device, not necessarily enough to evaluate all the headers. We
-need to return 0 here (and not set header_obtained) until we find enough
-data to declare the capsule valid or broken.
+Kernel comments style is:
 
-> 
-> 
->> +
->> +        pr_debug("%s: Quark security header detected\n", __func__);
-> 
-> ... and %s __func__ is verboten don't do it. actually there's a bunch of
-> those pairs all over this code - if you have the time in a supplementary
-> patch please kill them - there must be a a dev pointer we can get at
-> somewhere that makes sense to use dev_dbg- if not those __func__
-> parameters still need to go away - please kill them.
+	/*
+	 * A sentence ending with a full-stop.
+	 * Another sentence. ...
+	 * More sentences. ...
+	 */
 
-I've written some cleanup patches for this module and refrain from
-adding my own mess.
+> +	clflush_cache_range(vaddr, size);
+> +
+> +	npages = PAGE_ALIGN(size) >> PAGE_SHIFT;
+> +	pfn = slow_virt_to_phys((void *)addr) >> PAGE_SHIFT;
+> +
+> +	return kernel_map_pages_in_pgd(init_mm.pgd, pfn, addr, npages,
+> +					flags & ~sme_me_mask);
+> +
+> +}
+> +
+> +int __init early_set_memory_decrypted(void *vaddr, unsigned long size)
+> +{
+> +	unsigned long flags = get_pte_flags((unsigned long)vaddr);
 
-> 
->> +
->> +        if (quark_hdr->rsvd_next_header != 0) {
->> +            pr_err("%s: multiple security headers not supported\n",
->> +                   __func__);
->> +            return -EINVAL;
->> +        }
-> 
-> 
->> +
->> +        cap_hdr = (void *)cap_hdr + quark_hdr->headersize;
-> 
-> You could have a separate void * variable and not have the cast.
-> 
+So this does lookup_address()...
 
-Done.
+> +	return early_set_memory_enc_dec(vaddr, size, flags & ~sme_me_mask);
 
-Thanks,
-Jan
+... and this does it too in slow_virt_to_phys(). So you do it twice per
+vaddr.
+
+So why don't you define a __slow_virt_to_phys() helper - notice
+the "__" - which returns flags in its second parameter and which
+slow_virt_to_phys() calls with a NULL second parameter in the other
+cases?
 
 -- 
-Siemens AG, Corporate Technology, CT RDA ITP SES-DE
-Corporate Competence Center Embedded Linux
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
