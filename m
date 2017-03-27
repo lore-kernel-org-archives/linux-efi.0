@@ -1,170 +1,164 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 3/4] efi/libstub: arm/arm64: disable debug prints on 'quiet' cmdline arg
-Date: Mon, 27 Mar 2017 18:17:02 +0100
-Message-ID: <20170327171703.15489-4-ard.biesheuvel@linaro.org>
-References: <20170327171703.15489-1-ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] efi: arm: enable DMI/SMBIOS
+Date: Mon, 27 Mar 2017 18:22:02 +0100
+Message-ID: <CAKv+Gu_jk6EDJBiRt+PazFkFnXxVXcyLg-tM3cy2AAFvDMUJCA@mail.gmail.com>
+References: <1488410642-13176-1-git-send-email-ard.biesheuvel@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170327171703.15489-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1488410642-13176-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Graeme Gregory <graeme.gregory-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The EFI stub currently prints a number of diagnostic messages that do
-not carry a lot of information. Since these prints are not controlled
-by 'loglevel' or other command line parameters, and since they appear on
-the EFI framebuffer as well (if enabled), it would be nice if we could
-turn them off.
+On 1 March 2017 at 23:24, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> Wire up the existing support for SMBIOS tables (aka DMI), by moving the
+> arm64 init code to drivers/firmware/efi/arm-runtime.c, which is shared
+> between ARM and arm64, and adding a asm/dmi.h header to ARM that defines
+> the mapping routines for the firmware tables.
+>
+> This allows userspace to access these tables to discover system information
+> exposed by the firmware. It also sets the hardware name used in crash
+> dumps, e.g.,
+>
+>   Unable to handle kernel NULL pointer dereference at virtual address 00000000
+>   pgd = ed3c0000
+>   [00000000] *pgd=bf1f3835
+>   Internal error: Oops: 817 [#1] SMP THUMB2
+>   Modules linked in:
+>   CPU: 0 PID: 759 Comm: bash Not tainted 4.10.0-09601-g0e8f38792120-dirty #112
+>   Hardware name: QEMU KVM Virtual Machine, BIOS 0.0.0 02/06/2015
+>   ^^^
+>
+> NOTE: This does *NOT* enable or encourage the use of DMI quirks, i.e., the
+>       the practice of identifying the platform via DMI to decide whether
+>       certain workarounds for buggy hardware and/or firmware need to be
+>       enabled. This would require the DMI subsystem to be enabled much
+>       earlier than we do on ARM, which is non-trivial.
+>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-So let's add support for the 'quiet' command line parameter in the stub,
-and disable the non-error prints if it is passed.
+If there are no concerns with this patch, I would like to queue it for
+v4.12 in the EFI tree.
 
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Acked-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/libstub/arm-stub.c        | 20 ++++++++++----------
- drivers/firmware/efi/libstub/arm32-stub.c      |  2 ++
- drivers/firmware/efi/libstub/efi-stub-helper.c |  9 +++++++++
- drivers/firmware/efi/libstub/efistub.h         |  7 +++++++
- drivers/firmware/efi/libstub/secureboot.c      |  2 ++
- include/linux/efi.h                            |  3 ---
- 6 files changed, 30 insertions(+), 13 deletions(-)
+Russell, do you have any objections?
 
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index ac3222f6f805..657bb72c9e0b 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -116,8 +116,6 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
- 		goto fail;
- 
--	pr_efi(sys_table, "Booting Linux Kernel...\n");
--
- 	status = check_platform_features(sys_table);
- 	if (status != EFI_SUCCESS)
- 		goto fail;
-@@ -151,6 +149,16 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 		goto fail;
- 	}
- 
-+	if (IS_ENABLED(CONFIG_CMDLINE_EXTEND) ||
-+	    IS_ENABLED(CONFIG_CMDLINE_FORCE) ||
-+	    cmdline_size == 0)
-+		efi_parse_options(CONFIG_CMDLINE);
-+
-+	if (!IS_ENABLED(CONFIG_CMDLINE_FORCE) && cmdline_size > 0)
-+		efi_parse_options(cmdline_ptr);
-+
-+	pr_efi(sys_table, "Booting Linux Kernel...\n");
-+
- 	si = setup_graphics(sys_table);
- 
- 	status = handle_kernel_image(sys_table, image_addr, &image_size,
-@@ -162,14 +170,6 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 		goto fail_free_cmdline;
- 	}
- 
--	if (IS_ENABLED(CONFIG_CMDLINE_EXTEND) ||
--	    IS_ENABLED(CONFIG_CMDLINE_FORCE) ||
--	    cmdline_size == 0)
--		efi_parse_options(CONFIG_CMDLINE);
--
--	if (!IS_ENABLED(CONFIG_CMDLINE_FORCE) && cmdline_size > 0)
--		efi_parse_options(cmdline_ptr);
--
- 	secure_boot = efi_get_secureboot(sys_table);
- 
- 	/*
-diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
-index 18a8b5eb55e7..becbda445913 100644
---- a/drivers/firmware/efi/libstub/arm32-stub.c
-+++ b/drivers/firmware/efi/libstub/arm32-stub.c
-@@ -9,6 +9,8 @@
- #include <linux/efi.h>
- #include <asm/efi.h>
- 
-+#include "efistub.h"
-+
- efi_status_t check_platform_features(efi_system_table_t *sys_table_arg)
- {
- 	int block;
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 2e17d2b8787c..b0184360efc6 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -33,11 +33,16 @@
- static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
- 
- static int __section(.data) __nokaslr;
-+static int __section(.data) __quiet;
- 
- int __pure nokaslr(void)
- {
- 	return __nokaslr;
- }
-+int __pure is_quiet(void)
-+{
-+	return __quiet;
-+}
- 
- #define EFI_MMAP_NR_SLACK_SLOTS	8
- 
-@@ -424,6 +429,10 @@ efi_status_t efi_parse_options(char const *cmdline)
- 	if (str == cmdline || (str && str > cmdline && *(str - 1) == ' '))
- 		__nokaslr = 1;
- 
-+	str = strstr(cmdline, "quiet");
-+	if (str == cmdline || (str && str > cmdline && *(str - 1) == ' '))
-+		__quiet = 1;
-+
- 	/*
- 	 * If no EFI parameters were specified on the cmdline we've got
- 	 * nothing to do.
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index a7a2a2c3f199..83f268c05007 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -25,6 +25,13 @@
- #endif
- 
- extern int __pure nokaslr(void);
-+extern int __pure is_quiet(void);
-+
-+#define pr_efi(sys_table, msg)		do {				\
-+	if (!is_quiet()) efi_printk(sys_table, "EFI stub: "msg);	\
-+} while (0)
-+
-+#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
- 
- void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
- 
-diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-index 5da36e56b36a..8c34d50a4d80 100644
---- a/drivers/firmware/efi/libstub/secureboot.c
-+++ b/drivers/firmware/efi/libstub/secureboot.c
-@@ -12,6 +12,8 @@
- #include <linux/efi.h>
- #include <asm/efi.h>
- 
-+#include "efistub.h"
-+
- /* BIOS variables */
- static const efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
- static const efi_char16_t const efi_SecureBoot_name[] = {
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index e485e87615d1..ec36f42a2add 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1435,9 +1435,6 @@ static inline int efi_runtime_map_copy(void *buf, size_t bufsz)
- 
- /* prototypes shared between arch specific and generic stub code */
- 
--#define pr_efi(sys_table, msg)     efi_printk(sys_table, "EFI stub: "msg)
--#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
--
- void efi_printk(efi_system_table_t *sys_table_arg, char *str);
- 
- void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
--- 
-2.9.3
+Thanks,
+Ard.
+
+
+> ---
+>  arch/arm/Kconfig                   | 11 +++++++++++
+>  arch/arm/include/asm/dmi.h         | 19 +++++++++++++++++++
+>  arch/arm64/kernel/efi.c            | 15 ---------------
+>  drivers/firmware/efi/arm-runtime.c | 15 +++++++++++++++
+>  4 files changed, 45 insertions(+), 15 deletions(-)
+>  create mode 100644 arch/arm/include/asm/dmi.h
+>
+> diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+> index fda6a46d27cf..8214ea99b2f3 100644
+> --- a/arch/arm/Kconfig
+> +++ b/arch/arm/Kconfig
+> @@ -2089,6 +2089,17 @@ config EFI
+>           is only useful for kernels that may run on systems that have
+>           UEFI firmware.
+>
+> +config DMI
+> +       bool "Enable support for SMBIOS (DMI) tables"
+> +       depends on EFI
+> +       default y
+> +       help
+> +         This enables SMBIOS/DMI feature for systems.
+> +
+> +         This option is only useful on systems that have UEFI firmware.
+> +         However, even with this option, the resultant kernel should
+> +         continue to boot on existing non-UEFI platforms.
+> +
+>  endmenu
+>
+>  menu "CPU Power Management"
+> diff --git a/arch/arm/include/asm/dmi.h b/arch/arm/include/asm/dmi.h
+> new file mode 100644
+> index 000000000000..df2d2ff06f5b
+> --- /dev/null
+> +++ b/arch/arm/include/asm/dmi.h
+> @@ -0,0 +1,19 @@
+> +/*
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + */
+> +
+> +#ifndef __ASM_DMI_H
+> +#define __ASM_DMI_H
+> +
+> +#include <linux/io.h>
+> +#include <linux/slab.h>
+> +
+> +#define dmi_early_remap(x, l)          memremap(x, l, MEMREMAP_WB)
+> +#define dmi_early_unmap(x, l)          memunmap(x)
+> +#define dmi_remap(x, l)                        memremap(x, l, MEMREMAP_WB)
+> +#define dmi_unmap(x)                   memunmap(x)
+> +#define dmi_alloc(l)                   kzalloc(l, GFP_KERNEL)
+> +
+> +#endif
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index 5d17f377d905..82cd07592519 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -11,7 +11,6 @@
+>   *
+>   */
+>
+> -#include <linux/dmi.h>
+>  #include <linux/efi.h>
+>  #include <linux/init.h>
+>
+> @@ -117,20 +116,6 @@ int __init efi_set_mapping_permissions(struct mm_struct *mm,
+>                                    set_permissions, md);
+>  }
+>
+> -static int __init arm64_dmi_init(void)
+> -{
+> -       /*
+> -        * On arm64, DMI depends on UEFI, and dmi_scan_machine() needs to
+> -        * be called early because dmi_id_init(), which is an arch_initcall
+> -        * itself, depends on dmi_scan_machine() having been called already.
+> -        */
+> -       dmi_scan_machine();
+> -       if (dmi_available)
+> -               dmi_set_dump_stack_arch_desc();
+> -       return 0;
+> -}
+> -core_initcall(arm64_dmi_init);
+> -
+>  /*
+>   * UpdateCapsule() depends on the system being shutdown via
+>   * ResetSystem().
+> diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+> index 349dc3e1e52e..7149d2f48bb1 100644
+> --- a/drivers/firmware/efi/arm-runtime.c
+> +++ b/drivers/firmware/efi/arm-runtime.c
+> @@ -165,3 +165,18 @@ void efi_virtmap_unload(void)
+>         efi_set_pgd(current->active_mm);
+>         preempt_enable();
+>  }
+> +
+> +
+> +static int __init arm_dmi_init(void)
+> +{
+> +       /*
+> +        * On arm64/ARM, DMI depends on UEFI, and dmi_scan_machine() needs to
+> +        * be called early because dmi_id_init(), which is an arch_initcall
+> +        * itself, depends on dmi_scan_machine() having been called already.
+> +        */
+> +       dmi_scan_machine();
+> +       if (dmi_available)
+> +               dmi_set_dump_stack_arch_desc();
+> +       return 0;
+> +}
+> +core_initcall(arm_dmi_init);
+> --
+> 2.7.4
+>
