@@ -1,50 +1,103 @@
-From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH v2 0/7] efi: Enhance capsule loader to support signed
- Quark images
-Date: Mon, 27 Mar 2017 13:19:03 +0200
-Message-ID: <dfca6e01-a9a4-cfc0-aabd-f2001c776421@siemens.com>
-References: <cover.1490376860.git.jan.kiszka@siemens.com>
- <CAHp75VdDQTW=ejQbv5JUELWkomQz7O1_k0UOcUw_pL-enJQL6g@mail.gmail.com>
+From: Brijesh Singh <brijesh.singh@amd.com>
+Subject: Re: [RFC PATCH v2 15/32] x86: Add support for changing memory
+ encryption attribute in early boot
+Date: Mon, 27 Mar 2017 10:07:00 -0500
+Message-ID: <f8c57c98-4d42-4bfe-f05f-37c607a81a42@amd.com>
+References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
+ <148846772794.2349.1396854638510933455.stgit@brijesh-build-machine>
+ <20170324171257.lgvqcdqec3nla5nb@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAHp75VdDQTW=ejQbv5JUELWkomQz7O1_k0UOcUw_pL-enJQL6g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Hock Leong Kweh <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20170324171257.lgvqcdqec3nla5nb@pd.tnic>
+Sender: owner-linux-mm@kvack.org
+To: Borislav Petkov <bp@suse.de>
+Cc: brijesh.singh@amd.com, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhel
 List-Id: linux-efi@vger.kernel.org
 
-On 2017-03-24 21:39, Andy Shevchenko wrote:
-> On Fri, Mar 24, 2017 at 7:34 PM, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
->> This addresses the review feedback provided on round 1, specifically
->> - refactored queue to keep the Quark mess in
->> - only check for CSH on Quark CPUs
->> - added some smaller cleanups of the capsule loader
->> - documented capsule header / linked to original code
+Hi Boris,
+
+On 03/24/2017 12:12 PM, Borislav Petkov wrote:
+>>  }
 >>
->> See last patch for the background of the series.
->>
->> The series has been tested on the Galileo Gen2, to exclude regressions,
->> with a firmware.cap with AND without security header and the SIMATIC
->> IOT2040 which requires the header because of its mandatory secure boot.
-> 
-> The series looks good to me from code prospective. It's clean and
-> understandable, though I have couple of comments (see related
-> patches).
-> Please, address them.
+>> +static inline int __init early_set_memory_decrypted(void *addr,
+>> +						    unsigned long size)
+>> +{
+>> +	return 1;
+> 	^^^^^^^^
+>
+> return 1 when !CONFIG_AMD_MEM_ENCRYPT ?
+>
+> The non-early variants return 0.
+>
 
-Done, also the kbuild reboot finding and another build issue along that.
-Will send v3 after testing again (unfortunately not on the Galileo - my
-board died).
+I will fix it and use the same return value.
 
-> 
-> I wasn't able to test it, thus FWIW:
-> Reviewed-by: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+>> +}
+>> +
+>> +static inline int __init early_set_memory_encrypted(void *addr,
+>> +						    unsigned long size)
+>> +{
+>> +	return 1;
+>> +}
+>> +
+>>  #define __sme_pa		__pa
 
-Thanks,
-Jan
+>> +	unsigned long pfn, npages;
+>> +	unsigned long addr = (unsigned long)vaddr & PAGE_MASK;
+>> +
+>> +	/* We are going to change the physical page attribute from C=1 to C=0.
+>> +	 * Flush the caches to ensure that all the data with C=1 is flushed to
+>> +	 * memory. Any caching of the vaddr after function returns will
+>> +	 * use C=0.
+>> +	 */
+>
+> Kernel comments style is:
+>
+> 	/*
+> 	 * A sentence ending with a full-stop.
+> 	 * Another sentence. ...
+> 	 * More sentences. ...
+> 	 */
+>
 
--- 
-Siemens AG, Corporate Technology, CT RDA ITP SES-DE
-Corporate Competence Center Embedded Linux
+I will update to use kernel comment style.
+
+
+>> +	clflush_cache_range(vaddr, size);
+>> +
+>> +	npages = PAGE_ALIGN(size) >> PAGE_SHIFT;
+>> +	pfn = slow_virt_to_phys((void *)addr) >> PAGE_SHIFT;
+>> +
+>> +	return kernel_map_pages_in_pgd(init_mm.pgd, pfn, addr, npages,
+>> +					flags & ~sme_me_mask);
+>> +
+>> +}
+>> +
+>> +int __init early_set_memory_decrypted(void *vaddr, unsigned long size)
+>> +{
+>> +	unsigned long flags = get_pte_flags((unsigned long)vaddr);
+>
+> So this does lookup_address()...
+>
+>> +	return early_set_memory_enc_dec(vaddr, size, flags & ~sme_me_mask);
+>
+> ... and this does it too in slow_virt_to_phys(). So you do it twice per
+> vaddr.
+>
+> So why don't you define a __slow_virt_to_phys() helper - notice
+> the "__" - which returns flags in its second parameter and which
+> slow_virt_to_phys() calls with a NULL second parameter in the other
+> cases?
+>
+
+I will look into creating a helper function. thanks
+
+-Brijesh
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
