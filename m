@@ -1,139 +1,220 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 5/7] efi/capsule: Prepare for loading images with
- security header
-Date: Tue, 28 Mar 2017 18:23:29 +0100
-Message-ID: <CAKv+Gu9Qf=-atcuz+UcuR9OTaLM3JjUDnmmSMfYeiFKiU5BZvg@mail.gmail.com>
-References: <cover.1490376860.git.jan.kiszka@siemens.com> <47e87c8eccc0ee5c4033ece037c0bffc32782876.1490376860.git.jan.kiszka@siemens.com>
- <CAKv+Gu_+SVNr-g+BR1dGsSn_QGY9fA-TepQ2k6rHmW74VanPFQ@mail.gmail.com>
- <a3d4da19-015d-0559-f837-550631f1d491@siemens.com> <8d26028c-0c1f-82be-a8b1-588ab7222ccd@siemens.com>
- <CAKv+Gu8FqhyhdpOa3=EOAG8bBgyAJbFzkVSgQbrVdUT0y1wHsw@mail.gmail.com>
- <1fa542ed-6638-bac1-64cb-72ed7132f9d1@siemens.com> <CAKv+Gu8S-688JNBtLgE6s3fvYVXtdeRAOyq=A7b9yJsuLtFDYA@mail.gmail.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [RFC PATCH v2 16/32] x86: kvm: Provide support to create Guest
+ and HV shared per-CPU variables
+Date: Tue, 28 Mar 2017 20:39:31 +0200
+Message-ID: <20170328183931.rqorduu5fnp5r3y2@pd.tnic>
+References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
+ <148846773666.2349.9492983018843773590.stgit@brijesh-build-machine>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu8S-688JNBtLgE6s3fvYVXtdeRAOyq=A7b9yJsuLtFDYA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Hock Leong Kweh <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-pci-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <148846773666.2349.9492983018843773590.stgit@brijesh-build-machine>
+Sender: linux-pci-owner@vger.kernel.org
+To: Brijesh Singh <brijesh.singh@amd.com>
+Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas
 List-Id: linux-efi@vger.kernel.org
 
-On 28 March 2017 at 18:17, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 28 March 2017 at 17:18, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
->> On 2017-03-28 17:52, Ard Biesheuvel wrote:
->>> On 28 March 2017 at 16:43, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
->>>> On 2017-03-28 17:13, Jan Kiszka wrote:
->>>>> On 2017-03-28 15:49, Ard Biesheuvel wrote:
->>> [..]
->>>>>> Could you please have a look at
->>>>>>
->>>>>> https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=quark-capsule
->>>>>>
->>>>>> and tell me if that would work for you? I will send them out for
->>>>>> proper review in any case, but to avoid confusion (if I missed
->>>>>> something obvious), I don't want to send them out just yet.
->>>>>
->>>>> There is more needed to make things work again, maybe around passing the
->>>>> right image size. I'm looking into this.
->>>>>
->>>>
->>>> This makes CSH images being accepted again:
->>>>
->>>> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
->>>> index 4b6f93f..a4e2311 100644
->>>> --- a/arch/x86/platform/efi/quirks.c
->>>> +++ b/arch/x86/platform/efi/quirks.c
->>>> @@ -562,6 +562,8 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
->>>>  {
->>>>         struct quark_security_header *csh = kbuff;
->>>>
->>>> +       cap_info->total_size = 0;
->>>> +
->>>>         if (!x86_match_cpu(quark_ids))
->>>>                 goto fallback;
->>>>
->>>> @@ -587,12 +589,16 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
->>>>
->>>>         kbuff += csh->headersize;
->>>>
->>>> +       cap_info->total_size = csh->headersize;
->>>> +
->>>>  fallback:
->>>>         if (hdr_bytes < sizeof(efi_capsule_header_t))
->>>>                 return 0;
->>>>
->>>>         memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
->>>>
->>>> +       cap_info->total_size += cap_info->header.imagesize;
->>>> +
->>>>         return __efi_capsule_setup_info(cap_info);
->>>>  }
->>>>
->>>> diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
->>>> index e851951..40dc354 100644
->>>> --- a/drivers/firmware/efi/capsule-loader.c
->>>> +++ b/drivers/firmware/efi/capsule-loader.c
->>>> @@ -42,7 +42,7 @@ int __efi_capsule_setup_info(struct capsule_info *cap_info)
->>>>         int ret;
->>>>         void *temp_page;
->>>>
->>>> -       pages_needed = ALIGN(cap_info->header.imagesize, PAGE_SIZE) / PAGE_SIZE;
->>>> +       pages_needed = ALIGN(cap_info->total_size, PAGE_SIZE) / PAGE_SIZE;
->>>>
->>>>         if (pages_needed == 0) {
->>>>                 pr_err("invalid capsule size");
->>>> @@ -59,7 +59,6 @@ int __efi_capsule_setup_info(struct capsule_info *cap_info)
->>>>                 return ret;
->>>>         }
->>>>
->>>> -       cap_info->total_size = cap_info->header.imagesize;
->>>>         temp_page = krealloc(cap_info->pages,
->>>>                              pages_needed * sizeof(void *),
->>>>                              GFP_KERNEL | __GFP_ZERO);
->>>> @@ -87,6 +86,8 @@ int __weak efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
->>>>
->>>>         memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
->>>>
->>>> +       cap_info->total_size = cap_info->header.imagesize;
->>>> +
->>>>         return __efi_capsule_setup_info(cap_info);
->>>>  }
->>>>
->>>
->>> OK, thanks for debugging that.
->>>
->>>> But then my changes to efi_capsule_update are missing the present the
->>>> right format to the loader. As efi_capsule_update needs to lay out the
->>>> sg-list in as special way, excluding the CSH on the first page, it needs
->>>> to know about the displacement.
->>>>
->>>> Any suggestions how to address that without rolling back to my aproach?
->>>>
->>>
->>> OK, I'm a bit lost now: for my understanding, could you please
->>> reiterate how the CSH image deviates from the ordinary one? Or more
->>> specifically, what exactly is preventing us from simply chopping off
->>> the CSH header and pushing the capsule header + payload into
->>> /dev/capsule_loader?
->>>
->>
->> Devices that mandate a signed capsule for updates expect the CSH in
->> front of the regular capsule image. The interface to UEFI remains
->> unchanged, i.e. you pass the virtually chopped off capsule, but you have
->> to leave the CSH in RAM right in front of that very same image. It's a
->> "nice" side-channel API.
->>
->
-> Wow, that is worse than I thought.
->
-> So my suggestion (which I coded up, please pull again),
+On Thu, Mar 02, 2017 at 10:15:36AM -0500, Brijesh Singh wrote:
+> Some KVM specific MSR's (steal-time, asyncpf, avic_eio) allocates per-CPU
+> variable at compile time and share its physical address with hypervisor.
+> It presents a challege when SEV is active in guest OS. When SEV is active,
+> guest memory is encrypted with guest key and hypervisor will no longer able
+> to modify the guest memory. When SEV is active, we need to clear the
+> encryption attribute of shared physical addresses so that both guest and
+> hypervisor can access the data.
+> 
+> To solve this problem, I have tried these three options:
+> 
+> 1) Convert the static per-CPU to dynamic per-CPU allocation. When SEV is
+> detected then clear the encryption attribute. But while doing so I found
+> that per-CPU dynamic allocator was not ready when kvm_guest_cpu_init was
+> called.
+> 
+> 2) Since the encryption attributes works on PAGE_SIZE hence add some extra
+> padding to 'struct kvm-steal-time' to make it PAGE_SIZE and then at runtime
+> clear the encryption attribute of the full PAGE. The downside of this was
+> now we need to modify structure which may break the compatibility.
 
-Hmm, it does not build on x86 atm. Let me fix that up first (~15 min)
+>From SEV-ES whitepaper:
 
-> is to replace
-> the array of struct page pointers with an array of physical addresses
-> in the capsule_info struct. This way, your special version of
-> efi_capsule_setup_info() can advance the first one by the size of the
-> header.
->
-> I hope this works for you. I am not sure whether imagesize needs to be
-> modified, so I left it alone for now (but I suspect it should be).
+"To facilitate this communication, the SEV-ES architecture defines
+a Guest Hypervisor Communication Block (GHCB). The GHCB resides in
+page of shared memory so it is accessible to both the guest VM and the
+hypervisor."
+
+So this is kinda begging to be implemented with a shared page between
+guest and host. And then put steal-time, ... etc in there too. Provided
+there's enough room in the single page for the GHCB *and* our stuff.
+
+> 
+> 3) Define a new per-CPU section (.data..percpu.hv_shared) which will be
+> used to hold the compile time shared per-CPU variables. When SEV is
+> detected we map this section with encryption attribute cleared.
+> 
+> This patch implements #3. It introduces a new DEFINE_PER_CPU_HV_SHAHRED
+> macro to create a compile time per-CPU variable. When SEV is detected we
+> map the per-CPU variable as decrypted (i.e with encryption attribute cleared).
+> 
+> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+> ---
+>  arch/x86/kernel/kvm.c             |   43 +++++++++++++++++++++++++++++++------
+>  include/asm-generic/vmlinux.lds.h |    3 +++
+>  include/linux/percpu-defs.h       |    9 ++++++++
+>  3 files changed, 48 insertions(+), 7 deletions(-)
+> 
+> diff --git a/arch/x86/kernel/kvm.c b/arch/x86/kernel/kvm.c
+> index 099fcba..706a08e 100644
+> --- a/arch/x86/kernel/kvm.c
+> +++ b/arch/x86/kernel/kvm.c
+> @@ -75,8 +75,8 @@ static int parse_no_kvmclock_vsyscall(char *arg)
+>  
+>  early_param("no-kvmclock-vsyscall", parse_no_kvmclock_vsyscall);
+>  
+> -static DEFINE_PER_CPU(struct kvm_vcpu_pv_apf_data, apf_reason) __aligned(64);
+> -static DEFINE_PER_CPU(struct kvm_steal_time, steal_time) __aligned(64);
+> +static DEFINE_PER_CPU_HV_SHARED(struct kvm_vcpu_pv_apf_data, apf_reason) __aligned(64);
+> +static DEFINE_PER_CPU_HV_SHARED(struct kvm_steal_time, steal_time) __aligned(64);
+>  static int has_steal_clock = 0;
+>  
+>  /*
+> @@ -290,6 +290,22 @@ static void __init paravirt_ops_setup(void)
+>  #endif
+>  }
+>  
+> +static int kvm_map_percpu_hv_shared(void *addr, unsigned long size)
+> +{
+> +	/* When SEV is active, the percpu static variables initialized
+> +	 * in data section will contain the encrypted data so we first
+> +	 * need to decrypt it and then map it as decrypted.
+> +	 */
+
+Kernel comments style is:
+
+	/*
+	 * A sentence ending with a full-stop.
+	 * Another sentence. ...
+	 * More sentences. ...
+	 */
+
+But you get the idea. Please check your whole patchset for this.
+
+> +	if (sev_active()) {
+> +		unsigned long pa = slow_virt_to_phys(addr);
+> +
+> +		sme_early_decrypt(pa, size);
+> +		return early_set_memory_decrypted(addr, size);
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+>  static void kvm_register_steal_time(void)
+>  {
+>  	int cpu = smp_processor_id();
+> @@ -298,12 +314,17 @@ static void kvm_register_steal_time(void)
+>  	if (!has_steal_clock)
+>  		return;
+>  
+> +	if (kvm_map_percpu_hv_shared(st, sizeof(*st))) {
+> +		pr_err("kvm-stealtime: failed to map hv_shared percpu\n");
+> +		return;
+> +	}
+> +
+>  	wrmsrl(MSR_KVM_STEAL_TIME, (slow_virt_to_phys(st) | KVM_MSR_ENABLED));
+>  	pr_info("kvm-stealtime: cpu %d, msr %llx\n",
+>  		cpu, (unsigned long long) slow_virt_to_phys(st));
+>  }
+>  
+> -static DEFINE_PER_CPU(unsigned long, kvm_apic_eoi) = KVM_PV_EOI_DISABLED;
+> +static DEFINE_PER_CPU_HV_SHARED(unsigned long, kvm_apic_eoi) = KVM_PV_EOI_DISABLED;
+>  
+>  static notrace void kvm_guest_apic_eoi_write(u32 reg, u32 val)
+>  {
+> @@ -327,25 +348,33 @@ static void kvm_guest_cpu_init(void)
+>  	if (kvm_para_has_feature(KVM_FEATURE_ASYNC_PF) && kvmapf) {
+>  		u64 pa = slow_virt_to_phys(this_cpu_ptr(&apf_reason));
+>  
+> +		if (kvm_map_percpu_hv_shared(this_cpu_ptr(&apf_reason),
+> +					sizeof(struct kvm_vcpu_pv_apf_data)))
+> +			goto skip_asyncpf;
+>  #ifdef CONFIG_PREEMPT
+>  		pa |= KVM_ASYNC_PF_SEND_ALWAYS;
+>  #endif
+>  		wrmsrl(MSR_KVM_ASYNC_PF_EN, pa | KVM_ASYNC_PF_ENABLED);
+>  		__this_cpu_write(apf_reason.enabled, 1);
+> -		printk(KERN_INFO"KVM setup async PF for cpu %d\n",
+> -		       smp_processor_id());
+> +		printk(KERN_INFO"KVM setup async PF for cpu %d msr %llx\n",
+> +		       smp_processor_id(), pa);
+>  	}
+> -
+> +skip_asyncpf:
+>  	if (kvm_para_has_feature(KVM_FEATURE_PV_EOI)) {
+>  		unsigned long pa;
+>  		/* Size alignment is implied but just to make it explicit. */
+>  		BUILD_BUG_ON(__alignof__(kvm_apic_eoi) < 4);
+> +		if (kvm_map_percpu_hv_shared(this_cpu_ptr(&kvm_apic_eoi),
+> +					sizeof(unsigned long)))
+> +			goto skip_pv_eoi;
+>  		__this_cpu_write(kvm_apic_eoi, 0);
+>  		pa = slow_virt_to_phys(this_cpu_ptr(&kvm_apic_eoi))
+>  			| KVM_MSR_ENABLED;
+>  		wrmsrl(MSR_KVM_PV_EOI_EN, pa);
+> +		printk(KERN_INFO"KVM setup PV EOI for cpu %d msr %lx\n",
+> +		       smp_processor_id(), pa);
+>  	}
+> -
+> +skip_pv_eoi:
+>  	if (has_steal_clock)
+>  		kvm_register_steal_time();
+>  }
+> diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
+> index 0968d13..8d29910 100644
+> --- a/include/asm-generic/vmlinux.lds.h
+> +++ b/include/asm-generic/vmlinux.lds.h
+> @@ -773,6 +773,9 @@
+>  	. = ALIGN(cacheline);						\
+>  	*(.data..percpu)						\
+>  	*(.data..percpu..shared_aligned)				\
+> +	. = ALIGN(PAGE_SIZE);						\
+> +	*(.data..percpu..hv_shared)					\
+> +	. = ALIGN(PAGE_SIZE);						\
+>  	VMLINUX_SYMBOL(__per_cpu_end) = .;
+>  
+>  /**
+> diff --git a/include/linux/percpu-defs.h b/include/linux/percpu-defs.h
+> index 8f16299..5af366e 100644
+> --- a/include/linux/percpu-defs.h
+> +++ b/include/linux/percpu-defs.h
+> @@ -172,6 +172,15 @@
+>  #define DEFINE_PER_CPU_READ_MOSTLY(type, name)				\
+>  	DEFINE_PER_CPU_SECTION(type, name, "..read_mostly")
+>  
+> +/* Declaration/definition used for per-CPU variables that must be shared
+> + * between hypervisor and guest OS.
+> + */
+> +#define DECLARE_PER_CPU_HV_SHARED(type, name)				\
+> +	DECLARE_PER_CPU_SECTION(type, name, "..hv_shared")
+> +
+> +#define DEFINE_PER_CPU_HV_SHARED(type, name)				\
+> +	DEFINE_PER_CPU_SECTION(type, name, "..hv_shared")
+> +
+
+If we end up doing something like that, this needs to be in
+
+#ifdef CONFIG_VIRTUALIZATION
+
+...
+
+#endif
+
+Above too.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
