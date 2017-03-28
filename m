@@ -1,32 +1,31 @@
-From: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-Subject: Re: [PATCH v2 0/7] efi: Enhance capsule loader to support signed
- Quark images
-Date: Tue, 28 Mar 2017 01:48:38 +0100
-Message-ID: <8c09afc1-9b1d-d1e4-e634-f2b405340840@nexus-software.ie>
-References: <cover.1490376860.git.jan.kiszka@siemens.com>
- <d3c887cb-fede-bfc6-8b1d-a6dca262b5bc@nexus-software.ie>
- <7cff4583-d417-7107-80a3-34eb63d43be1@siemens.com>
+From: gengdongjiu <gengdongjiu@huawei.com>
+Subject: Re: [PATCH V13 10/10] arm/arm64: KVM: add guest SEA support
+Date: Tue, 28 Mar 2017 12:19:43 +0800
+Message-ID: <734ab018-2112-eddf-10dc-426f8ebe3848@huawei.com>
+References: <1490136425-4324-1-git-send-email-tbaicar@codeaurora.org>
+ <1490136425-4324-11-git-send-email-tbaicar@codeaurora.org>
+ <20170324160158.GH25903@cbox>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <7cff4583-d417-7107-80a3-34eb63d43be1-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hock Leong Kweh <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170324160158.GH25903@cbox>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Christoffer Dall <cdall@linaro.org>, Tyler Baicar <tbaicar@codeaurora.org>
+Cc: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kern
 List-Id: linux-efi@vger.kernel.org
 
+Hi Tyler,
 
+I have a question for below code.
 
-On 27/03/17 12:01, Jan Kiszka wrote:
-> The reset method is auto-adjusted by the kernel when an update is
-> pending. So firmware update is now seriously simple. But I can write a 2
-> or 3-lines readme if it's preferred.
+On 2017/3/25 0:01, Christoffer Dall wrote:
+>  	is_iabt = kvm_vcpu_trap_is_iabt(vcpu);
+> -	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu))) {
+> +	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu)) && sea_status) {
+>  		kvm_inject_vabt(vcpu);
+when it is SEA synchronized abort, why here inject a asynchronous abort through kvm_inject_vabt(vcpu) instead of synchronized abort? seem the original kvm source code is also do that, so I am confused about that.
+thanks .
 
-Using myself as a benchmark I'd say, never assume anything is idiot 
-proof to a sufficiently talented idiot, better to document it to be sure 
-and give you're spinning a new patch for some comments from Andy I'd say 
-it's a worthwhile addition to the set.
-
----
-bod
+>  		return 1;
+>  	}
