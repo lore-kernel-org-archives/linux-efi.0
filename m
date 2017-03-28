@@ -1,235 +1,234 @@
 From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V14 00/10] Add UEFI 2.6 and ACPI 6.1 updates for RAS on ARM64
-Date: Tue, 28 Mar 2017 13:30:30 -0600
-Message-ID: <1490729440-32591-1-git-send-email-tbaicar@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org, Suzuki.Poulose@arm.com, punit.agrawal@arm.com, astone@redhat.com, harba@codeaur
+Subject: [PATCH V14 02/10] ras: acpi/apei: cper: generic error data entry v3 per ACPI 6.1
+Date: Tue, 28 Mar 2017 13:30:32 -0600
+Message-ID: <1490729440-32591-3-git-send-email-tbaicar@codeaurora.org>
+References: <1490729440-32591-1-git-send-email-tbaicar@codeaurora.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1490729440-32591-1-git-send-email-tbaicar@codeaurora.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org
 Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-When a memory error, CPU error, PCIe error, or other type of hardware error
-that's covered by RAS occurs, firmware should populate the shared GHES memory
-location with the proper GHES structures to notify the OS of the error.
-For example, platforms that implement firmware first handling may implement
-separate GHES sources for corrected errors and uncorrected errors. If the
-error is an uncorrectable error, then the firmware will notify the OS
-immediately since the error needs to be handled ASAP. The OS will then be able
-to take the appropriate action needed such as offlining a page. If the error
-is a corrected error, then the firmware will not interrupt the OS immediately.
-Instead, the OS will see and report the error the next time it's GHES timer
-expires. The kernel will first parse the GHES structures and report the errors
-through the kernel logs and then notify the user space through RAS trace
-events. This allows user space applications such as RAS Daemon to see the
-errors and report them however the user desires. This patchset extends the
-kernel functionality for RAS errors based on updates in the UEFI 2.6 and
-ACPI 6.1 specifications.
+Currently when a RAS error is reported it is not timestamped.
+The ACPI 6.1 spec adds the timestamp field to the generic error
+data entry v3 structure. The timestamp of when the firmware
+generated the error is now being reported.
 
-An example flow from firmware to user space could be:
+Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+Reviewed-by: James Morse <james.morse@arm.com>
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/acpi/apei/ghes.c    |  9 ++++---
+ drivers/firmware/efi/cper.c | 63 +++++++++++++++++++++++++++++++++++----------
+ include/acpi/ghes.h         | 22 ++++++++++++++++
+ 3 files changed, 77 insertions(+), 17 deletions(-)
 
-                 +---------------+
-       +-------->|               |
-       |         |  GHES polling |--+
-+-------------+  |    source     |  |   +---------------+   +------------+
-|             |  +---------------+  |   |  Kernel GHES  |   |            |
-|  Firmware   |                     +-->|  CPER AER and |-->|  RAS trace |
-|             |  +---------------+  |   |  EDAC drivers |   |   event    |
-+-------------+  |               |  |   +---------------+   +------------+
-       |         |  GHES sci     |--+
-       +-------->|   source      |
-                 +---------------+
-
-Add support for Generic Hardware Error Source (GHES) v2, which introduces the
-capability for the OS to acknowledge the consumption of the error record
-generated by the Reliability, Availability and Serviceability (RAS) controller.
-This eliminates potential race conditions between the OS and the RAS controller.
-
-Add support for the timestamp field added to the Generic Error Data Entry v3,
-allowing the OS to log the time that the error is generated by the firmware,
-rather than the time the error is consumed. This improves the correctness of
-event sequences when analyzing error logs. The timestamp is added in
-ACPI 6.1, reference Table 18-343 Generic Error Data Entry.
-
-Add support for ARMv8 Common Platform Error Record (CPER) per UEFI 2.6
-specification. ARMv8 specific processor error information is reported as part of
-the CPER records.  This provides more detail on for processor error logs. This
-can help describe ARMv8 cache, tlb, and bus errors.
-
-Synchronous External Abort (SEA) represents a specific processor error condition
-in ARM systems. A handler is added to recognize SEA errors, and a notifier is
-added to parse and report the errors before the process is killed. Refer to
-section N.2.1.1 in the Common Platform Error Record appendix of the UEFI 2.6
-specification.
-
-Currently the kernel ignores CPER records that are unrecognized.
-On the other hand, UEFI spec allows for non-standard (eg. vendor
-proprietary) error section type in CPER (Common Platform Error Record),
-as defined in section N2.3 of UEFI version 2.5. Therefore, user
-is not able to see hardware error data of non-standard section.
-
-If section Type field of Generic Error Data Entry is unrecognized,
-prints out the raw data in dmesg buffer, and also adds a tracepoint
-for reporting such hardware errors.
-
-Currently even if an error status block's severity is fatal, the kernel
-does not honor the severity level and panic. With the firmware first
-model, the platform could inform the OS about a fatal hardware error
-through the non-NMI GHES notification type. The OS should panic when a
-hardware error record is received with this severity.
-
-Add support to handle SEAs that occur while a KVM guest kernel is
-running. Currently these are unsupported by the guest abort handling.
-
-V14:Make sure function prototypes are in the __ASSEMBLY__ block
-    Change is_abort_synchronous to is_abort_sea
-    Use phys_addr_t for SEA address
-    Return after successful SEA handling in handle_guest_abort()
-
-V13:Rebase on 4.11rc2
-    Print decimal and hex sizes for unknown CPER section errors
-    Use proper CONFIG_* when using IS_ENABLED
-    Move handle_guest_sea call prior to SEI check
-    Add a return value to handle_guest_sea
-    Move RCU locking into ghes_notify_sea
-    Add valid bit checks to ARM trace event
-    Remove GPIO, SEI, and GSIV cases in GHES
-    Add ARCH_HAVE_NMI_SAFE_CMPXCHG since we added NMI usage
-
-V12:Remove double quotes from CPER code
-    Add helper function to check all SEA cases in KVM patch
-    Replace nmi_enter/exit with rcu_read_lock/unlock for KVM SEA
-    Change HAVE_ACPI_APEI_SEA to ACPI_APEI_SEA in KVM SEA case
-
-V11:Change print_hex_dump calls to include ASCII output
-    Change HAVE_ACPI_APEI_SEA to ACPI_APEI_SEA and make it 'default y'
-    Add unknown print back when printing unknown CPER section
-    Make sure to use "%s"" in CPER code
-    Spacing fix when checking if SEA is enabled
-
-V10:Fix spacing of trace event enabled if statement
-
-V9: Move SEA_FnV_MASK to ESR_ELx_FnV
-    Move HAVE_NMI into alphabetical order
-    Remove duplicate hardirq.h include
-    Only call ghes_notify_sea if HAVE_ACPI_APEI_SEA
-    Make ACPI_APEI_SEA depend on ACPI_APEI_GHES
-    Use phys_addr_t for physical address variable
-    Make ghes_sea_add() return void
-    Add include guard to ghes.h
-    Verify HAVE_RAS before calling ras trace events
-    Call __ghes_print_estatus() before __ghes_call_panic()
-    Add trace_*_event_enabled() checks for both new trace events
-
-V8: Remove SEA notifier
-    Add FAR not valid bit check when populating the SEA error address
-    Move nmi_enter/exit() to architecture specific code
-    Add synchronize_rcu() usage to SEA handling
-    Make GHES_IOREMAP_PAGES always 2
-    Update ghes_ioremap_pfn_nmi() to work like ghes_ioremap_pfn_irq()
-    Remove the SEA print from handle_guest_sea()
-
-V7: Update a couple prints for ARM processor errors
-    Add Print notifying if overflow occurred for ARM processor errors
-    Check for ARM configuration to allow the compiler to ignore ARM code
-     on non-ARM systems
-    Use SEA acronym instead of spelling it out
-    Update fault_info prints to be more clear
-    Add NMI locking to SEA notification
-    Remove error info structure from ARM trace event since there can be
-     a variable amount of these structures
-
-V6: Change HEST_TYPE_GENERIC_V2 to IS_HEST_TYPE_GENERIC_V2 for readability
-    Move APEI helper defines from cper.h to ghes.h
-    Add data_len decrement back into print loop
-    Change references to ARMv8 to just ARM
-    Rewrite ARM processor context info parsing
-    Check valid bit of ARM error info field before printing it
-    Add include of linux/uuid.h in ghes.c
-
-V5: Fix GHES goto logic for error conditions
-    Change ghes_do_read_ack to ghes_ack_error
-    Make sure data version check is >= 3
-    Use CPER helper functions in print functions
-    Make handle_guest_sea() dummy function static for arm
-    Add arm to subject line for KVM patch
-
-V4: Add bit offset left shift to read_ack_write value
-    Make HEST generic and generic_v2 structures a union in the ghes structure
-    Move gdata v3 helper functions into ghes.h to avoid duplication
-    Reorder the timestamp print and avoid memcpy
-    Add helper functions for gdata size checking
-    Rename the SEA functions
-    Add helper function for GHES panics
-    Set fru_id to NULL UUID at variable declaration
-    Limit ARM trace event parameters to the needed structures
-    Reorder the ARM trace event variables to save space
-    Add comment for why we don't pass SEAs to the guest when it aborts
-    Move ARM trace event call into GHES driver instead of CPER
-
-V3: Fix unmapped address to the read_ack_register in ghes.c
-    Add helper function to get the proper payload based on generic data entry
-     version
-    Move timestamp print to avoid changing function calls in cper.c
-    Remove patch "arm64: exception: handle instruction abort at current EL"
-     since the el1_ia handler is already added in 4.8
-    Add EFI and ARM64 dependencies for HAVE_ACPI_APEI_SEA
-    Add a new trace event for ARM type errors
-    Add support to handle KVM guest SEAs
-
-V2: Add PSCI state print for the ARMv8 error type.
-    Separate timestamp year into year and century using BCD format.
-    Rebase on top of ACPICA 20160318 release and remove header file changes
-     in include/acpi/actbl1.h.
-    Add panic OS with fatal error status block patch.
-    Add processing of unrecognized CPER error section patches with updates
-     from previous comments. Original patches: https://lkml.org/lkml/2015/9/8/646
-
-V1: https://lkml.org/lkml/2016/2/5/544
-
-Jonathan (Zhixiong) Zhang (1):
-  acpi: apei: panic OS with fatal error status block
-
-Tyler Baicar (9):
-  acpi: apei: read ack upon ghes record consumption
-  ras: acpi/apei: cper: generic error data entry v3 per ACPI 6.1
-  efi: parse ARM processor error
-  arm64: exception: handle Synchronous External Abort
-  acpi: apei: handle SEA notification type for ARMv8
-  efi: print unrecognized CPER section
-  ras: acpi / apei: generate trace event for unrecognized CPER section
-  trace, ras: add ARM processor error trace event
-  arm/arm64: KVM: add guest SEA support
-
- arch/arm/include/asm/kvm_arm.h       |  10 ++
- arch/arm/include/asm/system_misc.h   |   5 +
- arch/arm/kvm/mmu.c                   |  34 +++++-
- arch/arm64/Kconfig                   |   2 +
- arch/arm64/include/asm/esr.h         |   1 +
- arch/arm64/include/asm/kvm_arm.h     |  10 ++
- arch/arm64/include/asm/system_misc.h |   2 +
- arch/arm64/mm/fault.c                |  75 +++++++++++--
- drivers/acpi/apei/Kconfig            |  15 +++
- drivers/acpi/apei/ghes.c             | 178 +++++++++++++++++++++++++----
- drivers/acpi/apei/hest.c             |   7 +-
- drivers/firmware/efi/cper.c          | 209 ++++++++++++++++++++++++++++++++---
- drivers/ras/ras.c                    |   2 +
- include/acpi/ghes.h                  |  34 +++++-
- include/linux/cper.h                 |  54 +++++++++
- include/ras/ras_event.h              |  90 +++++++++++++++
- 16 files changed, 677 insertions(+), 51 deletions(-)
-
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index 0241e36..9ddbb93 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -421,7 +421,8 @@ static void ghes_handle_memory_failure(struct acpi_hest_generic_data *gdata, int
+ 	int flags = -1;
+ 	int sec_sev = ghes_severity(gdata->error_severity);
+ 	struct cper_sec_mem_err *mem_err;
+-	mem_err = (struct cper_sec_mem_err *)(gdata + 1);
++
++	mem_err = acpi_hest_generic_data_payload(gdata);
+ 
+ 	if (!(mem_err->validation_bits & CPER_MEM_VALID_PA))
+ 		return;
+@@ -458,7 +459,8 @@ static void ghes_do_proc(struct ghes *ghes,
+ 		if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
+ 				 CPER_SEC_PLATFORM_MEM)) {
+ 			struct cper_sec_mem_err *mem_err;
+-			mem_err = (struct cper_sec_mem_err *)(gdata+1);
++
++			mem_err = acpi_hest_generic_data_payload(gdata);
+ 			ghes_edac_report_mem_error(ghes, sev, mem_err);
+ 
+ 			arch_apei_report_mem_error(sev, mem_err);
+@@ -468,7 +470,8 @@ static void ghes_do_proc(struct ghes *ghes,
+ 		else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
+ 				      CPER_SEC_PCIE)) {
+ 			struct cper_sec_pcie *pcie_err;
+-			pcie_err = (struct cper_sec_pcie *)(gdata+1);
++
++			pcie_err = acpi_hest_generic_data_payload(gdata);
+ 			if (sev == GHES_SEV_RECOVERABLE &&
+ 			    sec_sev == GHES_SEV_RECOVERABLE &&
+ 			    pcie_err->validation_bits & CPER_PCIE_VALID_DEVICE_ID &&
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index d425374..8fa4e23 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -32,6 +32,9 @@
+ #include <linux/acpi.h>
+ #include <linux/pci.h>
+ #include <linux/aer.h>
++#include <linux/printk.h>
++#include <linux/bcd.h>
++#include <acpi/ghes.h>
+ 
+ #define INDENT_SP	" "
+ 
+@@ -386,13 +389,37 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
+ 	pfx, pcie->bridge.secondary_status, pcie->bridge.control);
+ }
+ 
++static void cper_estatus_print_section_v300(const char *pfx,
++	const struct acpi_hest_generic_data_v300 *gdata)
++{
++	__u8 hour, min, sec, day, mon, year, century, *timestamp;
++
++	if (gdata->validation_bits & ACPI_HEST_GEN_VALID_TIMESTAMP) {
++		timestamp = (__u8 *)&(gdata->time_stamp);
++		sec = bcd2bin(timestamp[0]);
++		min = bcd2bin(timestamp[1]);
++		hour = bcd2bin(timestamp[2]);
++		day = bcd2bin(timestamp[4]);
++		mon = bcd2bin(timestamp[5]);
++		year = bcd2bin(timestamp[6]);
++		century = bcd2bin(timestamp[7]);
++		printk("%stime: %7s %02d%02d-%02d-%02d %02d:%02d:%02d\n", pfx,
++			0x01 & *(timestamp + 3) ? "precise" : "", century,
++			year, mon, day, hour, min, sec);
++	}
++}
++
+ static void cper_estatus_print_section(
+-	const char *pfx, const struct acpi_hest_generic_data *gdata, int sec_no)
++	const char *pfx, struct acpi_hest_generic_data *gdata, int sec_no)
+ {
+ 	uuid_le *sec_type = (uuid_le *)gdata->section_type;
+ 	__u16 severity;
+ 	char newpfx[64];
+ 
++	if (acpi_hest_generic_data_version(gdata) >= 3)
++		cper_estatus_print_section_v300(pfx,
++			(const struct acpi_hest_generic_data_v300 *)gdata);
++
+ 	severity = gdata->error_severity;
+ 	printk("%s""Error %d, type: %s\n", pfx, sec_no,
+ 	       cper_severity_str(severity));
+@@ -403,14 +430,18 @@ static void cper_estatus_print_section(
+ 
+ 	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
+ 	if (!uuid_le_cmp(*sec_type, CPER_SEC_PROC_GENERIC)) {
+-		struct cper_sec_proc_generic *proc_err = (void *)(gdata + 1);
++		struct cper_sec_proc_generic *proc_err;
++
++		proc_err = acpi_hest_generic_data_payload(gdata);
+ 		printk("%s""section_type: general processor error\n", newpfx);
+ 		if (gdata->error_data_length >= sizeof(*proc_err))
+ 			cper_print_proc_generic(newpfx, proc_err);
+ 		else
+ 			goto err_section_too_small;
+ 	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PLATFORM_MEM)) {
+-		struct cper_sec_mem_err *mem_err = (void *)(gdata + 1);
++		struct cper_sec_mem_err *mem_err;
++
++		mem_err = acpi_hest_generic_data_payload(gdata);
+ 		printk("%s""section_type: memory error\n", newpfx);
+ 		if (gdata->error_data_length >=
+ 		    sizeof(struct cper_sec_mem_err_old))
+@@ -419,7 +450,9 @@ static void cper_estatus_print_section(
+ 		else
+ 			goto err_section_too_small;
+ 	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PCIE)) {
+-		struct cper_sec_pcie *pcie = (void *)(gdata + 1);
++		struct cper_sec_pcie *pcie;
++
++		pcie = acpi_hest_generic_data_payload(gdata);
+ 		printk("%s""section_type: PCIe error\n", newpfx);
+ 		if (gdata->error_data_length >= sizeof(*pcie))
+ 			cper_print_pcie(newpfx, pcie, gdata);
+@@ -438,7 +471,7 @@ void cper_estatus_print(const char *pfx,
+ 			const struct acpi_hest_generic_status *estatus)
+ {
+ 	struct acpi_hest_generic_data *gdata;
+-	unsigned int data_len, gedata_len;
++	unsigned int data_len;
+ 	int sec_no = 0;
+ 	char newpfx[64];
+ 	__u16 severity;
+@@ -451,12 +484,13 @@ void cper_estatus_print(const char *pfx,
+ 	printk("%s""event severity: %s\n", pfx, cper_severity_str(severity));
+ 	data_len = estatus->data_length;
+ 	gdata = (struct acpi_hest_generic_data *)(estatus + 1);
++
+ 	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
+-	while (data_len >= sizeof(*gdata)) {
+-		gedata_len = gdata->error_data_length;
++
++	while (data_len >= acpi_hest_generic_data_size(gdata)) {
+ 		cper_estatus_print_section(newpfx, gdata, sec_no);
+-		data_len -= gedata_len + sizeof(*gdata);
+-		gdata = (void *)(gdata + 1) + gedata_len;
++		data_len -= acpi_hest_generic_data_record_size(gdata);
++		gdata = acpi_hest_generic_data_next(gdata);
+ 		sec_no++;
+ 	}
+ }
+@@ -486,12 +520,13 @@ int cper_estatus_check(const struct acpi_hest_generic_status *estatus)
+ 		return rc;
+ 	data_len = estatus->data_length;
+ 	gdata = (struct acpi_hest_generic_data *)(estatus + 1);
+-	while (data_len >= sizeof(*gdata)) {
+-		gedata_len = gdata->error_data_length;
+-		if (gedata_len > data_len - sizeof(*gdata))
++
++	while (data_len >= acpi_hest_generic_data_size(gdata)) {
++		gedata_len = acpi_hest_generic_data_error_length(gdata);
++		if (gedata_len > data_len - acpi_hest_generic_data_size(gdata))
+ 			return -EINVAL;
+-		data_len -= gedata_len + sizeof(*gdata);
+-		gdata = (void *)(gdata + 1) + gedata_len;
++		data_len -= gedata_len + acpi_hest_generic_data_size(gdata);
++		gdata = acpi_hest_generic_data_next(gdata);
+ 	}
+ 	if (data_len)
+ 		return -EINVAL;
+diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+index 68f088a..6ae318b 100644
+--- a/include/acpi/ghes.h
++++ b/include/acpi/ghes.h
+@@ -12,6 +12,18 @@
+ #define GHES_TO_CLEAR		0x0001
+ #define GHES_EXITING		0x0002
+ 
++#define acpi_hest_generic_data_error_length(gdata)	\
++	(((struct acpi_hest_generic_data *)(gdata))->error_data_length)
++#define acpi_hest_generic_data_size(gdata)		\
++	((acpi_hest_generic_data_version(gdata) >= 3) ?	\
++	sizeof(struct acpi_hest_generic_data_v300) :	\
++	sizeof(struct acpi_hest_generic_data))
++#define acpi_hest_generic_data_record_size(gdata)	\
++	(acpi_hest_generic_data_size(gdata) +		\
++	acpi_hest_generic_data_error_length(gdata))
++#define acpi_hest_generic_data_next(gdata)		\
++	((void *)(gdata) + acpi_hest_generic_data_record_size(gdata))
++
+ struct ghes {
+ 	union {
+ 		struct acpi_hest_generic *generic;
+@@ -73,3 +85,13 @@ static inline void ghes_edac_unregister(struct ghes *ghes)
+ {
+ }
+ #endif
++
++#define acpi_hest_generic_data_version(gdata)			\
++	(gdata->revision >> 8)
++
++static inline void *acpi_hest_generic_data_payload(struct acpi_hest_generic_data *gdata)
++{
++	return acpi_hest_generic_data_version(gdata) >= 3 ?
++		(void *)(((struct acpi_hest_generic_data_v300 *)(gdata)) + 1) :
++		gdata + 1;
++}
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project.
+
