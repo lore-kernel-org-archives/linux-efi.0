@@ -1,220 +1,209 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [RFC PATCH v2 16/32] x86: kvm: Provide support to create Guest
- and HV shared per-CPU variables
-Date: Tue, 28 Mar 2017 20:39:31 +0200
-Message-ID: <20170328183931.rqorduu5fnp5r3y2@pd.tnic>
-References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
- <148846773666.2349.9492983018843773590.stgit@brijesh-build-machine>
+From: Tyler Baicar <tbaicar@codeaurora.org>
+Subject: [PATCH V14 01/10] acpi: apei: read ack upon ghes record consumption
+Date: Tue, 28 Mar 2017 13:30:31 -0600
+Message-ID: <1490729440-32591-2-git-send-email-tbaicar@codeaurora.org>
+References: <1490729440-32591-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-pci-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <148846773666.2349.9492983018843773590.stgit@brijesh-build-machine>
-Sender: linux-pci-owner@vger.kernel.org
-To: Brijesh Singh <brijesh.singh@amd.com>
-Cc: simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <1490729440-32591-1-git-send-email-tbaicar@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org, Suzuki.Poulose@arm.com, punit.agrawal@arm.com, astone@redhat.com, harba@codeaur
+Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Mar 02, 2017 at 10:15:36AM -0500, Brijesh Singh wrote:
-> Some KVM specific MSR's (steal-time, asyncpf, avic_eio) allocates per-CPU
-> variable at compile time and share its physical address with hypervisor.
-> It presents a challege when SEV is active in guest OS. When SEV is active,
-> guest memory is encrypted with guest key and hypervisor will no longer able
-> to modify the guest memory. When SEV is active, we need to clear the
-> encryption attribute of shared physical addresses so that both guest and
-> hypervisor can access the data.
-> 
-> To solve this problem, I have tried these three options:
-> 
-> 1) Convert the static per-CPU to dynamic per-CPU allocation. When SEV is
-> detected then clear the encryption attribute. But while doing so I found
-> that per-CPU dynamic allocator was not ready when kvm_guest_cpu_init was
-> called.
-> 
-> 2) Since the encryption attributes works on PAGE_SIZE hence add some extra
-> padding to 'struct kvm-steal-time' to make it PAGE_SIZE and then at runtime
-> clear the encryption attribute of the full PAGE. The downside of this was
-> now we need to modify structure which may break the compatibility.
+A RAS (Reliability, Availability, Serviceability) controller
+may be a separate processor running in parallel with OS
+execution, and may generate error records for consumption by
+the OS. If the RAS controller produces multiple error records,
+then they may be overwritten before the OS has consumed them.
 
->From SEV-ES whitepaper:
+The Generic Hardware Error Source (GHES) v2 structure
+introduces the capability for the OS to acknowledge the
+consumption of the error record generated by the RAS
+controller. A RAS controller supporting GHESv2 shall wait for
+the acknowledgment before writing a new error record, thus
+eliminating the race condition.
 
-"To facilitate this communication, the SEV-ES architecture defines
-a Guest Hypervisor Communication Block (GHCB). The GHCB resides in
-page of shared memory so it is accessible to both the guest VM and the
-hypervisor."
+Add support for parsing of GHESv2 sub-tables as well.
 
-So this is kinda begging to be implemented with a shared page between
-guest and host. And then put steal-time, ... etc in there too. Provided
-there's enough room in the single page for the GHCB *and* our stuff.
+Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+Reviewed-by: James Morse <james.morse@arm.com>
+---
+ drivers/acpi/apei/ghes.c | 49 +++++++++++++++++++++++++++++++++++++++++++++---
+ drivers/acpi/apei/hest.c |  7 +++++--
+ include/acpi/ghes.h      |  5 ++++-
+ 3 files changed, 55 insertions(+), 6 deletions(-)
 
-> 
-> 3) Define a new per-CPU section (.data..percpu.hv_shared) which will be
-> used to hold the compile time shared per-CPU variables. When SEV is
-> detected we map this section with encryption attribute cleared.
-> 
-> This patch implements #3. It introduces a new DEFINE_PER_CPU_HV_SHAHRED
-> macro to create a compile time per-CPU variable. When SEV is detected we
-> map the per-CPU variable as decrypted (i.e with encryption attribute cleared).
-> 
-> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
-> ---
->  arch/x86/kernel/kvm.c             |   43 +++++++++++++++++++++++++++++++------
->  include/asm-generic/vmlinux.lds.h |    3 +++
->  include/linux/percpu-defs.h       |    9 ++++++++
->  3 files changed, 48 insertions(+), 7 deletions(-)
-> 
-> diff --git a/arch/x86/kernel/kvm.c b/arch/x86/kernel/kvm.c
-> index 099fcba..706a08e 100644
-> --- a/arch/x86/kernel/kvm.c
-> +++ b/arch/x86/kernel/kvm.c
-> @@ -75,8 +75,8 @@ static int parse_no_kvmclock_vsyscall(char *arg)
->  
->  early_param("no-kvmclock-vsyscall", parse_no_kvmclock_vsyscall);
->  
-> -static DEFINE_PER_CPU(struct kvm_vcpu_pv_apf_data, apf_reason) __aligned(64);
-> -static DEFINE_PER_CPU(struct kvm_steal_time, steal_time) __aligned(64);
-> +static DEFINE_PER_CPU_HV_SHARED(struct kvm_vcpu_pv_apf_data, apf_reason) __aligned(64);
-> +static DEFINE_PER_CPU_HV_SHARED(struct kvm_steal_time, steal_time) __aligned(64);
->  static int has_steal_clock = 0;
->  
->  /*
-> @@ -290,6 +290,22 @@ static void __init paravirt_ops_setup(void)
->  #endif
->  }
->  
-> +static int kvm_map_percpu_hv_shared(void *addr, unsigned long size)
-> +{
-> +	/* When SEV is active, the percpu static variables initialized
-> +	 * in data section will contain the encrypted data so we first
-> +	 * need to decrypt it and then map it as decrypted.
-> +	 */
-
-Kernel comments style is:
-
-	/*
-	 * A sentence ending with a full-stop.
-	 * Another sentence. ...
-	 * More sentences. ...
-	 */
-
-But you get the idea. Please check your whole patchset for this.
-
-> +	if (sev_active()) {
-> +		unsigned long pa = slow_virt_to_phys(addr);
-> +
-> +		sme_early_decrypt(pa, size);
-> +		return early_set_memory_decrypted(addr, size);
-> +	}
-> +
-> +	return 0;
-> +}
-> +
->  static void kvm_register_steal_time(void)
->  {
->  	int cpu = smp_processor_id();
-> @@ -298,12 +314,17 @@ static void kvm_register_steal_time(void)
->  	if (!has_steal_clock)
->  		return;
->  
-> +	if (kvm_map_percpu_hv_shared(st, sizeof(*st))) {
-> +		pr_err("kvm-stealtime: failed to map hv_shared percpu\n");
-> +		return;
-> +	}
-> +
->  	wrmsrl(MSR_KVM_STEAL_TIME, (slow_virt_to_phys(st) | KVM_MSR_ENABLED));
->  	pr_info("kvm-stealtime: cpu %d, msr %llx\n",
->  		cpu, (unsigned long long) slow_virt_to_phys(st));
->  }
->  
-> -static DEFINE_PER_CPU(unsigned long, kvm_apic_eoi) = KVM_PV_EOI_DISABLED;
-> +static DEFINE_PER_CPU_HV_SHARED(unsigned long, kvm_apic_eoi) = KVM_PV_EOI_DISABLED;
->  
->  static notrace void kvm_guest_apic_eoi_write(u32 reg, u32 val)
->  {
-> @@ -327,25 +348,33 @@ static void kvm_guest_cpu_init(void)
->  	if (kvm_para_has_feature(KVM_FEATURE_ASYNC_PF) && kvmapf) {
->  		u64 pa = slow_virt_to_phys(this_cpu_ptr(&apf_reason));
->  
-> +		if (kvm_map_percpu_hv_shared(this_cpu_ptr(&apf_reason),
-> +					sizeof(struct kvm_vcpu_pv_apf_data)))
-> +			goto skip_asyncpf;
->  #ifdef CONFIG_PREEMPT
->  		pa |= KVM_ASYNC_PF_SEND_ALWAYS;
->  #endif
->  		wrmsrl(MSR_KVM_ASYNC_PF_EN, pa | KVM_ASYNC_PF_ENABLED);
->  		__this_cpu_write(apf_reason.enabled, 1);
-> -		printk(KERN_INFO"KVM setup async PF for cpu %d\n",
-> -		       smp_processor_id());
-> +		printk(KERN_INFO"KVM setup async PF for cpu %d msr %llx\n",
-> +		       smp_processor_id(), pa);
->  	}
-> -
-> +skip_asyncpf:
->  	if (kvm_para_has_feature(KVM_FEATURE_PV_EOI)) {
->  		unsigned long pa;
->  		/* Size alignment is implied but just to make it explicit. */
->  		BUILD_BUG_ON(__alignof__(kvm_apic_eoi) < 4);
-> +		if (kvm_map_percpu_hv_shared(this_cpu_ptr(&kvm_apic_eoi),
-> +					sizeof(unsigned long)))
-> +			goto skip_pv_eoi;
->  		__this_cpu_write(kvm_apic_eoi, 0);
->  		pa = slow_virt_to_phys(this_cpu_ptr(&kvm_apic_eoi))
->  			| KVM_MSR_ENABLED;
->  		wrmsrl(MSR_KVM_PV_EOI_EN, pa);
-> +		printk(KERN_INFO"KVM setup PV EOI for cpu %d msr %lx\n",
-> +		       smp_processor_id(), pa);
->  	}
-> -
-> +skip_pv_eoi:
->  	if (has_steal_clock)
->  		kvm_register_steal_time();
->  }
-> diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
-> index 0968d13..8d29910 100644
-> --- a/include/asm-generic/vmlinux.lds.h
-> +++ b/include/asm-generic/vmlinux.lds.h
-> @@ -773,6 +773,9 @@
->  	. = ALIGN(cacheline);						\
->  	*(.data..percpu)						\
->  	*(.data..percpu..shared_aligned)				\
-> +	. = ALIGN(PAGE_SIZE);						\
-> +	*(.data..percpu..hv_shared)					\
-> +	. = ALIGN(PAGE_SIZE);						\
->  	VMLINUX_SYMBOL(__per_cpu_end) = .;
->  
->  /**
-> diff --git a/include/linux/percpu-defs.h b/include/linux/percpu-defs.h
-> index 8f16299..5af366e 100644
-> --- a/include/linux/percpu-defs.h
-> +++ b/include/linux/percpu-defs.h
-> @@ -172,6 +172,15 @@
->  #define DEFINE_PER_CPU_READ_MOSTLY(type, name)				\
->  	DEFINE_PER_CPU_SECTION(type, name, "..read_mostly")
->  
-> +/* Declaration/definition used for per-CPU variables that must be shared
-> + * between hypervisor and guest OS.
-> + */
-> +#define DECLARE_PER_CPU_HV_SHARED(type, name)				\
-> +	DECLARE_PER_CPU_SECTION(type, name, "..hv_shared")
-> +
-> +#define DEFINE_PER_CPU_HV_SHARED(type, name)				\
-> +	DEFINE_PER_CPU_SECTION(type, name, "..hv_shared")
-> +
-
-If we end up doing something like that, this needs to be in
-
-#ifdef CONFIG_VIRTUALIZATION
-
-...
-
-#endif
-
-Above too.
-
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index b192b42..0241e36 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -46,6 +46,7 @@
+ #include <linux/nmi.h>
+ #include <linux/sched/clock.h>
+ 
++#include <acpi/actbl1.h>
+ #include <acpi/ghes.h>
+ #include <acpi/apei.h>
+ #include <asm/tlbflush.h>
+@@ -80,6 +81,10 @@
+ 	((struct acpi_hest_generic_status *)				\
+ 	 ((struct ghes_estatus_node *)(estatus_node) + 1))
+ 
++#define IS_HEST_TYPE_GENERIC_V2(ghes)				\
++	((struct acpi_hest_header *)ghes->generic)->type ==	\
++	 ACPI_HEST_TYPE_GENERIC_ERROR_V2
++
+ /*
+  * This driver isn't really modular, however for the time being,
+  * continuing to use module_param is the easiest way to remain
+@@ -249,10 +254,18 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+ 	ghes = kzalloc(sizeof(*ghes), GFP_KERNEL);
+ 	if (!ghes)
+ 		return ERR_PTR(-ENOMEM);
++
+ 	ghes->generic = generic;
++	if (IS_HEST_TYPE_GENERIC_V2(ghes)) {
++		rc = apei_map_generic_address(
++			&ghes->generic_v2->read_ack_register);
++		if (rc)
++			goto err_free;
++	}
++
+ 	rc = apei_map_generic_address(&generic->error_status_address);
+ 	if (rc)
+-		goto err_free;
++		goto err_unmap_read_ack_addr;
+ 	error_block_length = generic->error_block_length;
+ 	if (error_block_length > GHES_ESTATUS_MAX_SIZE) {
+ 		pr_warning(FW_WARN GHES_PFX
+@@ -264,13 +277,17 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+ 	ghes->estatus = kmalloc(error_block_length, GFP_KERNEL);
+ 	if (!ghes->estatus) {
+ 		rc = -ENOMEM;
+-		goto err_unmap;
++		goto err_unmap_status_addr;
+ 	}
+ 
+ 	return ghes;
+ 
+-err_unmap:
++err_unmap_status_addr:
+ 	apei_unmap_generic_address(&generic->error_status_address);
++err_unmap_read_ack_addr:
++	if (IS_HEST_TYPE_GENERIC_V2(ghes))
++		apei_unmap_generic_address(
++			&ghes->generic_v2->read_ack_register);
+ err_free:
+ 	kfree(ghes);
+ 	return ERR_PTR(rc);
+@@ -280,6 +297,9 @@ static void ghes_fini(struct ghes *ghes)
+ {
+ 	kfree(ghes->estatus);
+ 	apei_unmap_generic_address(&ghes->generic->error_status_address);
++	if (IS_HEST_TYPE_GENERIC_V2(ghes))
++		apei_unmap_generic_address(
++			&ghes->generic_v2->read_ack_register);
+ }
+ 
+ static inline int ghes_severity(int severity)
+@@ -649,6 +669,23 @@ static void ghes_estatus_cache_add(
+ 	rcu_read_unlock();
+ }
+ 
++static int ghes_ack_error(struct acpi_hest_generic_v2 *generic_v2)
++{
++	int rc;
++	u64 val = 0;
++
++	rc = apei_read(&val, &generic_v2->read_ack_register);
++	if (rc)
++		return rc;
++	val &= generic_v2->read_ack_preserve <<
++		generic_v2->read_ack_register.bit_offset;
++	val |= generic_v2->read_ack_write <<
++		generic_v2->read_ack_register.bit_offset;
++	rc = apei_write(val, &generic_v2->read_ack_register);
++
++	return rc;
++}
++
+ static int ghes_proc(struct ghes *ghes)
+ {
+ 	int rc;
+@@ -661,6 +698,12 @@ static int ghes_proc(struct ghes *ghes)
+ 			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+ 	}
+ 	ghes_do_proc(ghes, ghes->estatus);
++
++	if (IS_HEST_TYPE_GENERIC_V2(ghes)) {
++		rc = ghes_ack_error(ghes->generic_v2);
++		if (rc)
++			return rc;
++	}
+ out:
+ 	ghes_clear_estatus(ghes);
+ 	return rc;
+diff --git a/drivers/acpi/apei/hest.c b/drivers/acpi/apei/hest.c
+index 8f2a98e..456b488 100644
+--- a/drivers/acpi/apei/hest.c
++++ b/drivers/acpi/apei/hest.c
+@@ -52,6 +52,7 @@
+ 	[ACPI_HEST_TYPE_AER_ENDPOINT] = sizeof(struct acpi_hest_aer),
+ 	[ACPI_HEST_TYPE_AER_BRIDGE] = sizeof(struct acpi_hest_aer_bridge),
+ 	[ACPI_HEST_TYPE_GENERIC_ERROR] = sizeof(struct acpi_hest_generic),
++	[ACPI_HEST_TYPE_GENERIC_ERROR_V2] = sizeof(struct acpi_hest_generic_v2),
+ };
+ 
+ static int hest_esrc_len(struct acpi_hest_header *hest_hdr)
+@@ -141,7 +142,8 @@ static int __init hest_parse_ghes_count(struct acpi_hest_header *hest_hdr, void
+ {
+ 	int *count = data;
+ 
+-	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR)
++	if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR ||
++	    hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+ 		(*count)++;
+ 	return 0;
+ }
+@@ -152,7 +154,8 @@ static int __init hest_parse_ghes(struct acpi_hest_header *hest_hdr, void *data)
+ 	struct ghes_arr *ghes_arr = data;
+ 	int rc, i;
+ 
+-	if (hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR)
++	if (hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR &&
++	    hest_hdr->type != ACPI_HEST_TYPE_GENERIC_ERROR_V2)
+ 		return 0;
+ 
+ 	if (!((struct acpi_hest_generic *)hest_hdr)->enabled)
+diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+index 720446c..68f088a 100644
+--- a/include/acpi/ghes.h
++++ b/include/acpi/ghes.h
+@@ -13,7 +13,10 @@
+ #define GHES_EXITING		0x0002
+ 
+ struct ghes {
+-	struct acpi_hest_generic *generic;
++	union {
++		struct acpi_hest_generic *generic;
++		struct acpi_hest_generic_v2 *generic_v2;
++	};
+ 	struct acpi_hest_generic_status *estatus;
+ 	u64 buffer_paddr;
+ 	unsigned long flags;
 -- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
