@@ -1,74 +1,133 @@
-From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V13 10/10] arm/arm64: KVM: add guest SEA support
-Date: Tue, 28 Mar 2017 10:44:48 -0600
-Message-ID: <35db9a6e-7ae3-3326-db1c-5cfff9ea27f3@codeaurora.org>
-References: <1490136425-4324-1-git-send-email-tbaicar@codeaurora.org>
- <1490136425-4324-11-git-send-email-tbaicar@codeaurora.org>
- <5c7f6092-9358-08ac-5341-2364637c2008@huawei.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 5/7] efi/capsule: Prepare for loading images with
+ security header
+Date: Tue, 28 Mar 2017 18:17:26 +0100
+Message-ID: <CAKv+Gu8S-688JNBtLgE6s3fvYVXtdeRAOyq=A7b9yJsuLtFDYA@mail.gmail.com>
+References: <cover.1490376860.git.jan.kiszka@siemens.com> <47e87c8eccc0ee5c4033ece037c0bffc32782876.1490376860.git.jan.kiszka@siemens.com>
+ <CAKv+Gu_+SVNr-g+BR1dGsSn_QGY9fA-TepQ2k6rHmW74VanPFQ@mail.gmail.com>
+ <a3d4da19-015d-0559-f837-550631f1d491@siemens.com> <8d26028c-0c1f-82be-a8b1-588ab7222ccd@siemens.com>
+ <CAKv+Gu8FqhyhdpOa3=EOAG8bBgyAJbFzkVSgQbrVdUT0y1wHsw@mail.gmail.com> <1fa542ed-6638-bac1-64cb-72ed7132f9d1@siemens.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <5c7f6092-9358-08ac-5341-2364637c2008@huawei.com>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: gengdongjiu <gengdongjiu@huawei.com>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org, Suzuki.Poulose@arm.com, punit.agrawal@arm
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1fa542ed-6638-bac1-64cb-72ed7132f9d1-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Hock Leong Kweh <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hello,
-
-
-On 3/28/2017 3:53 AM, gengdongjiu wrote:
-> Hi,
+On 28 March 2017 at 17:18, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
+> On 2017-03-28 17:52, Ard Biesheuvel wrote:
+>> On 28 March 2017 at 16:43, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
+>>> On 2017-03-28 17:13, Jan Kiszka wrote:
+>>>> On 2017-03-28 15:49, Ard Biesheuvel wrote:
+>> [..]
+>>>>> Could you please have a look at
+>>>>>
+>>>>> https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=quark-capsule
+>>>>>
+>>>>> and tell me if that would work for you? I will send them out for
+>>>>> proper review in any case, but to avoid confusion (if I missed
+>>>>> something obvious), I don't want to send them out just yet.
+>>>>
+>>>> There is more needed to make things work again, maybe around passing the
+>>>> right image size. I'm looking into this.
+>>>>
+>>>
+>>> This makes CSH images being accepted again:
+>>>
+>>> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+>>> index 4b6f93f..a4e2311 100644
+>>> --- a/arch/x86/platform/efi/quirks.c
+>>> +++ b/arch/x86/platform/efi/quirks.c
+>>> @@ -562,6 +562,8 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
+>>>  {
+>>>         struct quark_security_header *csh = kbuff;
+>>>
+>>> +       cap_info->total_size = 0;
+>>> +
+>>>         if (!x86_match_cpu(quark_ids))
+>>>                 goto fallback;
+>>>
+>>> @@ -587,12 +589,16 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
+>>>
+>>>         kbuff += csh->headersize;
+>>>
+>>> +       cap_info->total_size = csh->headersize;
+>>> +
+>>>  fallback:
+>>>         if (hdr_bytes < sizeof(efi_capsule_header_t))
+>>>                 return 0;
+>>>
+>>>         memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
+>>>
+>>> +       cap_info->total_size += cap_info->header.imagesize;
+>>> +
+>>>         return __efi_capsule_setup_info(cap_info);
+>>>  }
+>>>
+>>> diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+>>> index e851951..40dc354 100644
+>>> --- a/drivers/firmware/efi/capsule-loader.c
+>>> +++ b/drivers/firmware/efi/capsule-loader.c
+>>> @@ -42,7 +42,7 @@ int __efi_capsule_setup_info(struct capsule_info *cap_info)
+>>>         int ret;
+>>>         void *temp_page;
+>>>
+>>> -       pages_needed = ALIGN(cap_info->header.imagesize, PAGE_SIZE) / PAGE_SIZE;
+>>> +       pages_needed = ALIGN(cap_info->total_size, PAGE_SIZE) / PAGE_SIZE;
+>>>
+>>>         if (pages_needed == 0) {
+>>>                 pr_err("invalid capsule size");
+>>> @@ -59,7 +59,6 @@ int __efi_capsule_setup_info(struct capsule_info *cap_info)
+>>>                 return ret;
+>>>         }
+>>>
+>>> -       cap_info->total_size = cap_info->header.imagesize;
+>>>         temp_page = krealloc(cap_info->pages,
+>>>                              pages_needed * sizeof(void *),
+>>>                              GFP_KERNEL | __GFP_ZERO);
+>>> @@ -87,6 +86,8 @@ int __weak efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
+>>>
+>>>         memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
+>>>
+>>> +       cap_info->total_size = cap_info->header.imagesize;
+>>> +
+>>>         return __efi_capsule_setup_info(cap_info);
+>>>  }
+>>>
+>>
+>> OK, thanks for debugging that.
+>>
+>>> But then my changes to efi_capsule_update are missing the present the
+>>> right format to the loader. As efi_capsule_update needs to lay out the
+>>> sg-list in as special way, excluding the CSH on the first page, it needs
+>>> to know about the displacement.
+>>>
+>>> Any suggestions how to address that without rolling back to my aproach?
+>>>
+>>
+>> OK, I'm a bit lost now: for my understanding, could you please
+>> reiterate how the CSH image deviates from the ordinary one? Or more
+>> specifically, what exactly is preventing us from simply chopping off
+>> the CSH header and pushing the capsule header + payload into
+>> /dev/capsule_loader?
+>>
 >
-> On 2017/3/22 6:47, Tyler Baicar wrote:
->> +	fault_ipa = kvm_vcpu_get_fault_ipa(vcpu);
->> +
->> +	/* The host kernel will handle the synchronous external abort. There
->> +	 * is no need to pass the error into the guest.
->> +	 */
->> +	if (is_abort_synchronous(fault_status))
->> +		sea_status = handle_guest_sea((unsigned long)fault_ipa,
->> +				    kvm_vcpu_get_hsr(vcpu));
->>   
->>   	is_iabt = kvm_vcpu_trap_is_iabt(vcpu);
->> -	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu))) {
->> +	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu)) && sea_status) {
->>   		kvm_inject_vabt(vcpu);
->>   		return 1;
->>   	}
->         After the host kernel correctly handle the synchronous external abort, the sea_status
->         will return 0, so the code logical will be continue go-no, whether it is better directly return
->         after correctly handle the SEA? such as below.
+> Devices that mandate a signed capsule for updates expect the CSH in
+> front of the regular capsule image. The interface to UEFI remains
+> unchanged, i.e. you pass the virtually chopped off capsule, but you have
+> to leave the CSH in RAM right in front of that very same image. It's a
+> "nice" side-channel API.
 >
-> 	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu)) && sea_status) {
->    		kvm_inject_vabt(vcpu);
->    		return 1;
->    	} else
->                  return 1;
-Yes, I will return after successful SEA handling in the next patch set.
 
-Thanks,
-Tyler
->
->>   
->> -	fault_ipa = kvm_vcpu_get_fault_ipa(vcpu);
->> -
->>   	trace_kvm_guest_fault(*vcpu_pc(vcpu), kvm_vcpu_get_hsr(vcpu),
->>   			      kvm_vcpu_get_hfar(vcpu), fault_ipa);
->>   
->> -	/* Check the stage-2 fault is trans. fault or write fault */
->> -	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
->>   	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+Wow, that is worse than I thought.
 
--- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+So my suggestion (which I coded up, please pull again), is to replace
+the array of struct page pointers with an array of physical addresses
+in the capsule_info struct. This way, your special version of
+efi_capsule_setup_info() can advance the first one by the size of the
+header.
+
+I hope this works for you. I am not sure whether imagesize needs to be
+modified, so I left it alone for now (but I suspect it should be).
