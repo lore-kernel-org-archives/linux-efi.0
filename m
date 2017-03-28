@@ -1,107 +1,179 @@
-From: James Morse <james.morse@arm.com>
-Subject: Re: [PATCH V13 10/10] arm/arm64: KVM: add guest SEA support
-Date: Tue, 28 Mar 2017 11:57:52 +0100
-Message-ID: <58DA41B0.8080203@arm.com>
-References: <1490136425-4324-1-git-send-email-tbaicar@codeaurora.org>
- <1490136425-4324-11-git-send-email-tbaicar@codeaurora.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 5/7] efi/capsule: Prepare for loading images with
+ security header
+Date: Tue, 28 Mar 2017 14:49:42 +0100
+Message-ID: <CAKv+Gu_+SVNr-g+BR1dGsSn_QGY9fA-TepQ2k6rHmW74VanPFQ@mail.gmail.com>
+References: <cover.1490376860.git.jan.kiszka@siemens.com> <47e87c8eccc0ee5c4033ece037c0bffc32782876.1490376860.git.jan.kiszka@siemens.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <1490136425-4324-11-git-send-email-tbaicar@codeaurora.org>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <47e87c8eccc0ee5c4033ece037c0bffc32782876.1490376860.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Hock Leong Kweh <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Tyler,
+On 24 March 2017 at 17:34, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
+> The Quark security header is nicely located in front of the capsule
+> image, but we still need to pass the image to the update service as if
+> there was none. Prepare efi_capsule_update and its user for this by
+> defining and evaluating a EFI header displacement in the image located
+> in memory. For standard-conforming capsules, this displacement is 0.
+>
+> Signed-off-by: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 
-On 21/03/17 22:47, Tyler Baicar wrote:
-> Currently external aborts are unsupported by the guest abort
-> handling. Add handling for SEAs so that the host kernel reports
-> SEAs which occur in the guest kernel.
+Hello Jan,
 
-Looks good,
+Thanks for taking the time to respin this.
 
-Can we squash the APEI changes into the patch that added them? This would be one
-fewer patches that then need the ACPI maintainer to review.
+I played around with these patches a bit (I can't really test them
+since I don't have the hardware), and I am not really happy with the
+non-trivial changes to the generic code, only to allow a header
+displacement.
 
+So instead, I attempted to come up with an alternative which does not
+use a displacement field, but makes the core capsule routines work
+with a copy of the capsule header rather than mandating that it exists
+at the start of the buffer. This way, we can override the code that
+performs the copy, and make it originate from somewhere else.
 
-> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
-> index 962616f..105b6ab 100644
-> --- a/arch/arm/kvm/mmu.c
-> +++ b/arch/arm/kvm/mmu.c
-> @@ -1406,6 +1407,24 @@ static void handle_access_fault(struct kvm_vcpu *vcpu, phys_addr_t fault_ipa)
->  		kvm_set_pfn_accessed(pfn);
->  }
->  
-> +static bool is_abort_synchronous(unsigned long fault_status) {
+Could you please have a look at
 
-I missed kvm_vcpu_dabt_isextabt() when I suggested we would need a helper (my
-fault). Can we use that instead?
+https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=quark-capsule
 
-(my argument that the unused encodings are reserved doesn't hold if KVM is
-already doing this... )
-
-
-> @@ -1426,23 +1445,31 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
->  	unsigned long hva;
->  	bool is_iabt, write_fault, writable;
->  	gfn_t gfn;
-> -	int ret, idx;
-> +	int ret, idx, sea_status = 1;
-> +
-> +	/* Check the stage-2 fault is trans. fault or write fault */
-> +	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
-> +
-> +	fault_ipa = kvm_vcpu_get_fault_ipa(vcpu);
-> +
-> +	/* The host kernel will handle the synchronous external abort. There
-> +	 * is no need to pass the error into the guest.
-> +	 */
-> +	if (is_abort_synchronous(fault_status))
-> +		sea_status = handle_guest_sea((unsigned long)fault_ipa,
-> +				    kvm_vcpu_get_hsr(vcpu));
-
-
-Why not return from here if the error has been handled?
-
-You use sea_status to skip the next two things that KVM might do, but it goes on
-to try and process this, possibly calling user_mem_abort(), surely all this is
-unnecessary?
-
-
->  
->  	is_iabt = kvm_vcpu_trap_is_iabt(vcpu);
-> -	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu))) {
-> +	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu)) && sea_status) {
->  		kvm_inject_vabt(vcpu);
->  		return 1;
->  	}
->  
-> -	fault_ipa = kvm_vcpu_get_fault_ipa(vcpu);
-> -
->  	trace_kvm_guest_fault(*vcpu_pc(vcpu), kvm_vcpu_get_hsr(vcpu),
->  			      kvm_vcpu_get_hfar(vcpu), fault_ipa);
->  
-> -	/* Check the stage-2 fault is trans. fault or write fault */
-> -	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
->  	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
-> -	    fault_status != FSC_ACCESS) {
-> +	    fault_status != FSC_ACCESS && sea_status) {
->  		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
->  			kvm_vcpu_trap_get_class(vcpu),
->  			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
-
+and tell me if that would work for you? I will send them out for
+proper review in any case, but to avoid confusion (if I missed
+something obvious), I don't want to send them out just yet.
 
 Thanks,
+Ard.
 
-James
+
+> ---
+>  drivers/firmware/efi/capsule-loader.c | 19 +++++++++++++------
+>  drivers/firmware/efi/capsule.c        | 21 +++++++++++++++++----
+>  include/linux/efi.h                   |  1 +
+>  3 files changed, 31 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+> index 37d3f6e..59e2694 100644
+> --- a/drivers/firmware/efi/capsule-loader.c
+> +++ b/drivers/firmware/efi/capsule-loader.c
+> @@ -26,6 +26,7 @@ struct capsule_info {
+>         long            index;
+>         size_t          count;
+>         size_t          total_size;
+> +       unsigned int    efi_hdr_displacement;
+>         struct page     **pages;
+>         size_t          page_bytes_remain;
+>  };
+> @@ -83,6 +84,8 @@ static int efi_capsule_setup_info(struct capsule_info *cap_info,
+>                 return ret;
+>         }
+>
+> +       cap_info->efi_hdr_displacement = 0;
+> +
+>         cap_info->total_size = cap_hdr->imagesize;
+>         temp_page = krealloc(cap_info->pages,
+>                              pages_needed * sizeof(void *),
+> @@ -103,16 +106,20 @@ static int efi_capsule_setup_info(struct capsule_info *cap_info,
+>   **/
+>  static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
+>  {
+> +       efi_capsule_header_t *cap_hdr;
+> +       void *mapped_pages;
+>         int ret;
+> -       void *cap_hdr_temp;
+>
+> -       cap_hdr_temp = vmap(cap_info->pages, cap_info->index,
+> -                       VM_MAP, PAGE_KERNEL);
+> -       if (!cap_hdr_temp)
+> +       mapped_pages = vmap(cap_info->pages, cap_info->index,
+> +                           VM_MAP, PAGE_KERNEL);
+> +       if (!mapped_pages)
+>                 return -ENOMEM;
+>
+> -       ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
+> -       vunmap(cap_hdr_temp);
+> +       cap_hdr = mapped_pages + cap_info->efi_hdr_displacement;
+> +
+> +       ret = efi_capsule_update(cap_hdr, cap_info->efi_hdr_displacement,
+> +                                cap_info->pages);
+> +       vunmap(mapped_pages);
+>         if (ret) {
+>                 pr_err("capsule update failed\n");
+>                 return ret;
+> diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
+> index 6eedff4..a60c4c4 100644
+> --- a/drivers/firmware/efi/capsule.c
+> +++ b/drivers/firmware/efi/capsule.c
+> @@ -184,6 +184,8 @@ efi_capsule_update_locked(efi_capsule_header_t *capsule,
+>  /**
+>   * efi_capsule_update - send a capsule to the firmware
+>   * @capsule: capsule to send to firmware
+> + * @efi_hdr_displacement: EFI header offset on first data page (only needed for
+> + * non-conforming CSH capsules)
+>   * @pages: an array of capsule data pages
+>   *
+>   * Build a scatter gather list with EFI capsule block descriptors to
+> @@ -214,9 +216,12 @@ efi_capsule_update_locked(efi_capsule_header_t *capsule,
+>   *
+>   * Return 0 on success, a converted EFI status code on failure.
+>   */
+> -int efi_capsule_update(efi_capsule_header_t *capsule, struct page **pages)
+> +int efi_capsule_update(efi_capsule_header_t *capsule,
+> +                      unsigned int efi_hdr_displacement,
+> +                      struct page **pages)
+>  {
+>         u32 imagesize = capsule->imagesize;
+> +       u32 total_size = imagesize + efi_hdr_displacement;
+>         efi_guid_t guid = capsule->guid;
+>         unsigned int count, sg_count;
+>         u32 flags = capsule->flags;
+> @@ -224,11 +229,14 @@ int efi_capsule_update(efi_capsule_header_t *capsule, struct page **pages)
+>         int rv, reset_type;
+>         int i, j;
+>
+> -       rv = efi_capsule_supported(guid, flags, imagesize, &reset_type);
+> +       if (efi_hdr_displacement > PAGE_SIZE - sizeof(efi_capsule_header_t))
+> +               return -EINVAL;
+> +
+> +       rv = efi_capsule_supported(guid, flags, total_size, &reset_type);
+>         if (rv)
+>                 return rv;
+>
+> -       count = DIV_ROUND_UP(imagesize, PAGE_SIZE);
+> +       count = DIV_ROUND_UP(total_size, PAGE_SIZE);
+>         sg_count = sg_pages_num(count);
+>
+>         sg_pages = kzalloc(sg_count * sizeof(*sg_pages), GFP_KERNEL);
+> @@ -255,8 +263,13 @@ int efi_capsule_update(efi_capsule_header_t *capsule, struct page **pages)
+>                 for (j = 0; j < SGLIST_PER_PAGE && count > 0; j++) {
+>                         u64 sz = min_t(u64, imagesize, PAGE_SIZE);
+>
+> -                       sglist[j].length = sz;
+>                         sglist[j].data = page_to_phys(*pages++);
+> +                       if (efi_hdr_displacement > 0) {
+> +                               sglist[j].data += efi_hdr_displacement;
+> +                               sz -= efi_hdr_displacement;
+> +                               efi_hdr_displacement = 0;
+> +                       }
+> +                       sglist[j].length = sz;
+>
+>                         imagesize -= sz;
+>                         count--;
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 94d34e0..d83095c6 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -1403,6 +1403,7 @@ extern int efi_capsule_supported(efi_guid_t guid, u32 flags,
+>                                  size_t size, int *reset);
+>
+>  extern int efi_capsule_update(efi_capsule_header_t *capsule,
+> +                             unsigned int efi_hdr_displacement,
+>                               struct page **pages);
+>
+>  #ifdef CONFIG_EFI_RUNTIME_MAP
+> --
+> 2.10.2
+>
