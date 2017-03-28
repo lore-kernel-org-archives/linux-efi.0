@@ -1,15 +1,15 @@
 From: "Baicar, Tyler" <tbaicar@codeaurora.org>
 Subject: Re: [PATCH V13 10/10] arm/arm64: KVM: add guest SEA support
-Date: Tue, 28 Mar 2017 10:35:22 -0600
-Message-ID: <ba39628f-f389-afe2-ea45-4b1e2de5c2e9@codeaurora.org>
+Date: Tue, 28 Mar 2017 10:42:51 -0600
+Message-ID: <35e482f3-7ca8-87d9-cdad-75d3316ec85f@codeaurora.org>
 References: <1490136425-4324-1-git-send-email-tbaicar@codeaurora.org>
  <1490136425-4324-11-git-send-email-tbaicar@codeaurora.org>
- <bb4b4608-85ba-fd20-53b1-c19d99019de1@arm.com>
+ <20170324160158.GH25903@cbox>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
 Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <bb4b4608-85ba-fd20-53b1-c19d99019de1@arm.com>
+In-Reply-To: <20170324160158.GH25903@cbox>
 List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
 List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
@@ -19,18 +19,25 @@ List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
 Errors-To: kvmarm-bounces@lists.cs.columbia.edu
 Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Marc Zyngier <marc.zyngier@arm.com>, christoffer.dall@linaro.org, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org, Suzuki.Poulose@arm.com, punit.agrawal@arm.com, astone@redhat.com
+To: Christoffer Dall <cdall@linaro.org>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-Hello Marc,
+Hello Christoffer,
 
 
-On 3/24/2017 8:03 AM, Marc Zyngier wrote:
-> On 21/03/17 22:47, Tyler Baicar wrote:
+On 3/24/2017 10:01 AM, Christoffer Dall wrote:
+> On Tue, Mar 21, 2017 at 04:47:05PM -0600, Tyler Baicar wrote:
 >> Currently external aborts are unsupported by the guest abort
 >> handling. Add handling for SEAs so that the host kernel reports
 >> SEAs which occur in the guest kernel.
->>
+> The logic in kvm_handle_guest_abort could deserve an explanation here.
+>
+> Surely the whole logic of how KVM fits into the picture here and how
+> we're dealing with synchronous errors could be explained here, based on
+> the long conversations between you and James on many prior iterations on
+> this patch.
+I will add additional info here.
 >> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
 >> ---
 >>   arch/arm/include/asm/kvm_arm.h       | 10 +++++++++
@@ -77,9 +84,6 @@ On 3/24/2017 8:03 AM, Marc Zyngier wrote:
 >> +	return -1;
 >> +}
 >> +
-> Shouldn't this be in the #ifndef __ASSEMBLY__ block? The assembler is
-> definitely going to barf on that...
-I will move this in the next patch set.
 >>   #endif /* __ASM_ARM_SYSTEM_MISC_H */
 >> diff --git a/arch/arm/kvm/mmu.c b/arch/arm/kvm/mmu.c
 >> index 962616f..105b6ab 100644
@@ -98,6 +102,12 @@ I will move this in the next patch set.
 >>   }
 >>   
 >> +static bool is_abort_synchronous(unsigned long fault_status) {
+> this naming feels a bit weird to me.  For example, this will return
+> false for a normal translation fault, which is indeed synchronous.
+>
+> Below you cann handle_guest_sea conditionally based on the result of
+> this function, so could it be called is_abort_sea ?
+Yes, I will change the naming.
 >> +	switch (fault_status) {
 >> +	case FSC_SEA:
 >> +	case FSC_SEA_TTW0:
@@ -126,6 +136,16 @@ I will move this in the next patch set.
 >> +	int ret, idx, sea_status = 1;
 >> +
 >> +	/* Check the stage-2 fault is trans. fault or write fault */
+> I think this comment was supposed to belong with the check for the three
+> types below, not for calling kvm_vcpu_trap_get_fault_type, and I also
+> think the comment is outdated, because it doesn't mention the access
+> flag.
+>
+> I suggest either removing the comment, or keep it where it was and
+> change to say "trans. fault, write fault, acces flag fault, or
+> sea_status", with some insight into what sea_status means here.
+Will remove.
+>
 >> +	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
 >> +
 >> +	fault_ipa = kvm_vcpu_get_fault_ipa(vcpu);
@@ -133,8 +153,16 @@ I will move this in the next patch set.
 >> +	/* The host kernel will handle the synchronous external abort. There
 >> +	 * is no need to pass the error into the guest.
 >> +	 */
+> nit: commenting style.
+Will change.
 >> +	if (is_abort_synchronous(fault_status))
 >> +		sea_status = handle_guest_sea((unsigned long)fault_ipa,
+> will this ever be used on AArch32 in the future?
+>
+> If so, casting a phys_addr_t for an IPA to an unsigned long is an
+> incredibly bad idea.  Why not just use phys_addr_t for handle_guest_sea?
+I'll change it to phys_addr_t.
+>
 >> +				    kvm_vcpu_get_hsr(vcpu));
 >>   
 >>   	is_iabt = kvm_vcpu_trap_is_iabt(vcpu);
@@ -154,6 +182,17 @@ I will move this in the next patch set.
 >>   	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
 >> -	    fault_status != FSC_ACCESS) {
 >> +	    fault_status != FSC_ACCESS && sea_status) {
+> I don't understand the maning of sea_status here.  If sea_status is
+> non-zero then the fault_status matters, but if sea_status is zero, then
+> we just continue by handling this as an MMIO abort or a user fault?
+>
+> What am I missing here?
+Basically if the SEA was already handled we do not fall into this if. It 
+wouldn't make sense to print unsupported FSC after properly handling an 
+SEA. This will probably be removed as I will just return after the SEA 
+handling.
+>
+>
 >>   		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
 >>   			kvm_vcpu_trap_get_class(vcpu),
 >>   			(unsigned long)kvm_vcpu_trap_get_fault(vcpu),
@@ -187,9 +226,6 @@ I will move this in the next patch set.
 >>   #endif	/* __ASSEMBLY__ */
 >>   
 >> +int handle_guest_sea(unsigned long addr, unsigned int esr);
-> Same remark here.
-Same here.
->
 >> +
 >>   #endif	/* __ASM_SYSTEM_MISC_H */
 >> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
@@ -228,6 +264,14 @@ Same here.
 >>   /*
 >> + * Handle Synchronous External Aborts that occur in a guest kernel.
 >> + */
+> Can you document what the return value here means?
+>
+> I have no idea what the semantics of ghes_notify_sea() are.
+>
+Yes, will do.
+
+Thanks,
+Tyler
 >> +int handle_guest_sea(unsigned long addr, unsigned int esr)
 >> +{
 >> +	int ret = -ENOENT;
@@ -284,13 +328,13 @@ Same here.
 >> +int ghes_notify_sea(void);
 >>   
 >>   #endif /* GHES_H */
+>> -- 
+>> Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+>> Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+>> a Linux Foundation Collaborative Project.
 >>
-> Otherwise, the KVM changes look good to me. Assuming you fix the two
-> nits above:
->
-> Acked-by: Marc Zyngier <marc.zyngier@arm.com>
-Thanks!
-Tyler
+> Thanks,
+> -Christoffer
 
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
