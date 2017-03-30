@@ -1,106 +1,146 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3] efifb: avoid reconfiguration of BAR that covers the framebuffer
-Date: Thu, 30 Mar 2017 09:46:39 +0100
-Message-ID: <CAKv+Gu-qRg8-YRCairppKrEfeLcW+OwVF8qZHp7vxXJA_AwPOw@mail.gmail.com>
-References: <1490196629-28088-1-git-send-email-ard.biesheuvel@linaro.org>
- <20170322193111.GA8190@wunner.de> <CAKv+Gu_X-SEnz7h9J8boqqjOQGHQawwdSAq4haH-OGu8zdfNfA@mail.gmail.com>
- <20170323084819.GA23281@h08.hostsharing.net> <CAKv+Gu93eJ-js3g7M6Jdm6XGMaWMswFmzBG2qNT4rn+3=1+EyA@mail.gmail.com>
- <20170323105727.GA2441@red-moon> <466dcd2b-a781-2fe7-6ef0-5a3767c793e0@codeaurora.org>
- <CAKv+Gu9LbwpnJNi1OL25MWvYPxEOfKRHcs2jA2121BPaQWPzow@mail.gmail.com> <27f50de3-721e-e8ec-00c8-b7a9d3cff0d6@codeaurora.org>
+From: Jan Kiszka <jan.kiszka@siemens.com>
+Subject: Re: [PATCH v2 5/7] efi/capsule: Prepare for loading images with
+ security header
+Date: Thu, 30 Mar 2017 11:06:05 +0200
+Message-ID: <ccc0ba5b-7150-724f-bf29-92463abe14c6@siemens.com>
+References: <cover.1490376860.git.jan.kiszka@siemens.com>
+ <47e87c8eccc0ee5c4033ece037c0bffc32782876.1490376860.git.jan.kiszka@siemens.com>
+ <CAKv+Gu_+SVNr-g+BR1dGsSn_QGY9fA-TepQ2k6rHmW74VanPFQ@mail.gmail.com>
+ <a3d4da19-015d-0559-f837-550631f1d491@siemens.com>
+ <8d26028c-0c1f-82be-a8b1-588ab7222ccd@siemens.com>
+ <CAKv+Gu8FqhyhdpOa3=EOAG8bBgyAJbFzkVSgQbrVdUT0y1wHsw@mail.gmail.com>
+ <1fa542ed-6638-bac1-64cb-72ed7132f9d1@siemens.com>
+ <CAKv+Gu8S-688JNBtLgE6s3fvYVXtdeRAOyq=A7b9yJsuLtFDYA@mail.gmail.com>
+ <CAKv+Gu9Qf=-atcuz+UcuR9OTaLM3JjUDnmmSMfYeiFKiU5BZvg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <27f50de3-721e-e8ec-00c8-b7a9d3cff0d6-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sinan Kaya <okaya-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: Lorenzo Pieralisi <lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org>, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heyi Guo <heyi.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-pci <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAKv+Gu9Qf=-atcuz+UcuR9OTaLM3JjUDnmmSMfYeiFKiU5BZvg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, Bryan O'Donoghue <pure.logic@nexus-software.ie>, Hock Leong Kweh <hock.leong.kweh@intel.com>, Borislav Petkov <bp@alien8.de>, Sascha Weisenberger <sascha.weisenberger@siemens.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 28 March 2017 at 22:49, Sinan Kaya <okaya-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
-> On 3/28/2017 5:39 PM, Ard Biesheuvel wrote:
->> On 28 March 2017 at 22:27, Sinan Kaya <okaya-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
->>> Hi Lorenzo,
+On 2017-03-28 19:23, Ard Biesheuvel wrote:
+> On 28 March 2017 at 18:17, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+>> On 28 March 2017 at 17:18, Jan Kiszka <jan.kiszka@siemens.com> wrote:
+>>> On 2017-03-28 17:52, Ard Biesheuvel wrote:
+>>>> On 28 March 2017 at 16:43, Jan Kiszka <jan.kiszka@siemens.com> wrote:
+>>>>> On 2017-03-28 17:13, Jan Kiszka wrote:
+>>>>>> On 2017-03-28 15:49, Ard Biesheuvel wrote:
+>>>> [..]
+>>>>>>> Could you please have a look at
+>>>>>>>
+>>>>>>> https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=quark-capsule
+>>>>>>>
+>>>>>>> and tell me if that would work for you? I will send them out for
+>>>>>>> proper review in any case, but to avoid confusion (if I missed
+>>>>>>> something obvious), I don't want to send them out just yet.
+>>>>>>
+>>>>>> There is more needed to make things work again, maybe around passing the
+>>>>>> right image size. I'm looking into this.
+>>>>>>
+>>>>>
+>>>>> This makes CSH images being accepted again:
+>>>>>
+>>>>> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+>>>>> index 4b6f93f..a4e2311 100644
+>>>>> --- a/arch/x86/platform/efi/quirks.c
+>>>>> +++ b/arch/x86/platform/efi/quirks.c
+>>>>> @@ -562,6 +562,8 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
+>>>>>  {
+>>>>>         struct quark_security_header *csh = kbuff;
+>>>>>
+>>>>> +       cap_info->total_size = 0;
+>>>>> +
+>>>>>         if (!x86_match_cpu(quark_ids))
+>>>>>                 goto fallback;
+>>>>>
+>>>>> @@ -587,12 +589,16 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
+>>>>>
+>>>>>         kbuff += csh->headersize;
+>>>>>
+>>>>> +       cap_info->total_size = csh->headersize;
+>>>>> +
+>>>>>  fallback:
+>>>>>         if (hdr_bytes < sizeof(efi_capsule_header_t))
+>>>>>                 return 0;
+>>>>>
+>>>>>         memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
+>>>>>
+>>>>> +       cap_info->total_size += cap_info->header.imagesize;
+>>>>> +
+>>>>>         return __efi_capsule_setup_info(cap_info);
+>>>>>  }
+>>>>>
+>>>>> diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+>>>>> index e851951..40dc354 100644
+>>>>> --- a/drivers/firmware/efi/capsule-loader.c
+>>>>> +++ b/drivers/firmware/efi/capsule-loader.c
+>>>>> @@ -42,7 +42,7 @@ int __efi_capsule_setup_info(struct capsule_info *cap_info)
+>>>>>         int ret;
+>>>>>         void *temp_page;
+>>>>>
+>>>>> -       pages_needed = ALIGN(cap_info->header.imagesize, PAGE_SIZE) / PAGE_SIZE;
+>>>>> +       pages_needed = ALIGN(cap_info->total_size, PAGE_SIZE) / PAGE_SIZE;
+>>>>>
+>>>>>         if (pages_needed == 0) {
+>>>>>                 pr_err("invalid capsule size");
+>>>>> @@ -59,7 +59,6 @@ int __efi_capsule_setup_info(struct capsule_info *cap_info)
+>>>>>                 return ret;
+>>>>>         }
+>>>>>
+>>>>> -       cap_info->total_size = cap_info->header.imagesize;
+>>>>>         temp_page = krealloc(cap_info->pages,
+>>>>>                              pages_needed * sizeof(void *),
+>>>>>                              GFP_KERNEL | __GFP_ZERO);
+>>>>> @@ -87,6 +86,8 @@ int __weak efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
+>>>>>
+>>>>>         memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
+>>>>>
+>>>>> +       cap_info->total_size = cap_info->header.imagesize;
+>>>>> +
+>>>>>         return __efi_capsule_setup_info(cap_info);
+>>>>>  }
+>>>>>
+>>>>
+>>>> OK, thanks for debugging that.
+>>>>
+>>>>> But then my changes to efi_capsule_update are missing the present the
+>>>>> right format to the loader. As efi_capsule_update needs to lay out the
+>>>>> sg-list in as special way, excluding the CSH on the first page, it needs
+>>>>> to know about the displacement.
+>>>>>
+>>>>> Any suggestions how to address that without rolling back to my aproach?
+>>>>>
+>>>>
+>>>> OK, I'm a bit lost now: for my understanding, could you please
+>>>> reiterate how the CSH image deviates from the ordinary one? Or more
+>>>> specifically, what exactly is preventing us from simply chopping off
+>>>> the CSH header and pushing the capsule header + payload into
+>>>> /dev/capsule_loader?
+>>>>
 >>>
->>> On 3/23/2017 6:57 AM, Lorenzo Pieralisi wrote:
->>>>> Correct. But on x86 (or rather, on a PC), you can be sure that UEFI
->>>>> (or the legacy PCI bios) performed the resource assignment already.
->>>>> One could argue that this is equally the case when running arm64 in
->>>>> ACPI mode, but in general, you cannot assume the presence of firmware
->>>>> on ARM/arm64 that has already taken care of this, and so the state of
->>>>> the BARs has to be presumed invalid.
->>>> The story is a bit more convoluted than that owing to x86 (and other
->>>> arches) legacy.
->>>>
->>>> x86 tries to claim all PCI resources (in two passes - first enabled
->>>> devices, second disabled devices) and that predates ACPI/UEFI.
->>>>
->>>> Mind, x86 reassign resources that can't be claimed too, the only
->>>> difference with ARM64 is that, for the better or the worse, we
->>>> have decided not to claim the FW PCI set-up on ARM64 even if it
->>>> is sane, we do not even try, it was a deliberate choice.
->>>>
->>>> This patch should be harmless on x86 since if the FB PCI BAR is set
->>>> up sanely, claiming it again should be a nop (to be checked).
->>>>
->>>> For all the talk about PCI being arch agnostic as I said manifold
->>>> times before, that's just theory. In practice different arches
->>>> treat PCI FW set-up differently, it would be ideal to make them
->>>> uniform but legacy is huge and there is a massive risk of triggering
->>>> regressions, it is no mean feat (if achievable at all).
->>>
->>> Can we explore having a uniform behavior across ALL ACPI bases systems
->>> by trying to reuse the resources assigned by firmware first and reassign
->>> them only if something is wrong?
->>>
->>> There are protocols like hotplug reservation in UEFI. It looks like Linux
->>> is not honoring any of these protocols by being too smart.
+>>> Devices that mandate a signed capsule for updates expect the CSH in
+>>> front of the regular capsule image. The interface to UEFI remains
+>>> unchanged, i.e. you pass the virtually chopped off capsule, but you have
+>>> to leave the CSH in RAM right in front of that very same image. It's a
+>>> "nice" side-channel API.
 >>>
 >>
->> Could you be more specific? Which protocol do you mean exactly, and
->> how does not reusing resources interfere with it?
+>> Wow, that is worse than I thought.
 >>
->
-> Let's assume for the moment that if ARM64 adaptation of PCIE reused the firmware
-> assigned BAR addresses, would you still have this problem that you are trying to
-> fix by a quirk?
->
+>> So my suggestion (which I coded up, please pull again),
+> 
+> Hmm, it does not build on x86 atm. Let me fix that up first (~15 min)
+> 
 
-Probably not. Although I should point out that the same issue exists
-on DT systems, and so we will need this patch regardless.
+I'm without access to the test device till next Tuesday. Will come back
+to you then.
 
-> The protocol that I was looking at specifically is called hotplug reservation
-> protocol.
->
-> http://www.intel.com/content/www/us/en/architecture-and-technology/unified-extensible-firmware-interface/efi-hot-plug-pci-initialization-protocol-specification.html
->
-> The idea is to pad the PCIe bridge window by some amount in UEFI. You boot the
-> system without any cards present. when you do to hotplug, OS uses the range
-> reserved by the BIOS for inserting the new card.
->
-> what I see is that the bridge windows get overridden by the OS.
->
-> I'm asking why we don't fix the actual problem in PCIe ARM64 adaptation instead
-> of working around it by quirks.
->
-> I don't see any reason why ACPI ARM64 should carry the burden of legacy systems.
->
-> Legacy only applies to DT based systems.
->
+Jan
 
-I fully agree with this point: ACPI implies firmware, and so we should
-be able to rely on firmware to have initialized the PCIe subsystem by
-the time the kernel gets to access it.
-
-> If there is still a legacy problem in ACPI ARM64, generic Linux code deals with
-> this using some DMI/SMBIOS and setting a time bomb like products after this date
-> shall follow the new behavior.
->
-> We are not in a very hardened position when it comes to changes for ACPI based
-> systems.
->
-> Sinan
->
-> --
-> Sinan Kaya
-> Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-> Qualcomm Technologies, Inc. is a member of the Code Aurora Forum, a Linux Foundation Collaborative Project.
+-- 
+Siemens AG, Corporate Technology, CT RDA ITP SES-DE
+Corporate Competence Center Embedded Linux
