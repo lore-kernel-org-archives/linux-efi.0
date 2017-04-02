@@ -1,71 +1,73 @@
-From: <asn-request-tfHHCSmtYoI@public.gmane.org>
-Subject: 12911 linux-efi
-Date: Sat, 01 Apr 2017 02:12:04 -0000
-Message-ID: <149101272491.6120.13845768283710911760@htnet.com.br>
-Reply-To: <asn-request-tfHHCSmtYoI@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3] efifb: avoid reconfiguration of BAR that covers the framebuffer
+Date: Sun, 2 Apr 2017 16:16:27 +0100
+Message-ID: <CAKv+Gu8x0rQUnTUorknW-mW9LFgrxFYsXyy4LU_w9JbA-m_sjA@mail.gmail.com>
+References: <1490196629-28088-1-git-send-email-ard.biesheuvel@linaro.org>
+ <20170322193111.GA8190@wunner.de> <CAKv+Gu_X-SEnz7h9J8boqqjOQGHQawwdSAq4haH-OGu8zdfNfA@mail.gmail.com>
+ <20170323084819.GA23281@h08.hostsharing.net> <CAKv+Gu93eJ-js3g7M6Jdm6XGMaWMswFmzBG2qNT4rn+3=1+EyA@mail.gmail.com>
+ <20170323105727.GA2441@red-moon> <466dcd2b-a781-2fe7-6ef0-5a3767c793e0@codeaurora.org>
+ <CAKv+Gu9LbwpnJNi1OL25MWvYPxEOfKRHcs2jA2121BPaQWPzow@mail.gmail.com>
+ <27f50de3-721e-e8ec-00c8-b7a9d3cff0d6@codeaurora.org> <CAKv+Gu-qRg8-YRCairppKrEfeLcW+OwVF8qZHp7vxXJA_AwPOw@mail.gmail.com>
+ <20170330100524.GA22801@red-moon> <CAKv+Gu-ff98HrPK3f+E8soGJUXaaMxPLs2AuJ+rvXd0HWX-jXw@mail.gmail.com>
+ <CAKv+Gu8YjySTDMgsrtGqEPMOtVhHc8gvTHZ4C5Ga8OTYdC9R3A@mail.gmail.com> <ae87ae28-f50d-095f-576e-f3fd7f96dea2@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: application/zip; name="36921875.zip"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: attachment
+In-Reply-To: <ae87ae28-f50d-095f-576e-f3fd7f96dea2-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Sinan Kaya <okaya-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Cc: Lorenzo Pieralisi <lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heyi Guo <heyi.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-pci <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-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
-AAEAAQBOAAAAIwwAAAAA
+On 30 March 2017 at 14:50, Sinan Kaya <okaya-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
+> On 3/30/2017 9:38 AM, Ard Biesheuvel wrote:
+>> On 30 March 2017 at 11:09, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>> On 30 March 2017 at 11:05, Lorenzo Pieralisi <lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org> wrote:
+>>>> On Thu, Mar 30, 2017 at 09:46:39AM +0100, Ard Biesheuvel wrote:
+>>>>
+>>>> [...]
+>>>>
+>>>>>> I'm asking why we don't fix the actual problem in PCIe ARM64 adaptation instead
+>>>>>> of working around it by quirks.
+>>>>>>
+>>>>>> I don't see any reason why ACPI ARM64 should carry the burden of legacy systems.
+>>>>>>
+>>>>>> Legacy only applies to DT based systems.
+>>>>>>
+>>>>>
+>>>>> I fully agree with this point: ACPI implies firmware, and so we should
+>>>>> be able to rely on firmware to have initialized the PCIe subsystem by
+>>>>> the time the kernel gets to access it.
+>>>>
+>>>> https://lkml.org/lkml/2016/3/3/458
+>>>>
+>>>
+>>> I don't think the fact that at least one system existed over a year
+>>> ago whose UEFI assigned resources incorrectly should prevent us from
+>>> being normative in this case.
+>>
+>> In any case, given that EFIFB is enabled by default on some distros,
+>> and the fact that DT boot is affected as well, I should get this patch
+>> in to prevent serious potential issues that could arise when someone
+>> with a graphical UEFI stack updates to such a new kernel.
+>>
+>> So I think we are in agreement that this is needed on both ARM and
+>> arm64, since their PCI configuration is usually not preserved. The
+>> open question is whether there is any harm in enabling it for x86 as
+>> well.
+>>
+>
+> Agreed, the other issue is about compatibility with UEFI and future
+> proofing Linux for other potential issues like hotplug reservation.
+>
+
+OK, given the lack of feedback regarding the suitability of this patch
+for x86, I am going to rework it as a ARM/arm64 only patch, and queue
+it as a fix for v4.11. This way, we can backport it to stable (which
+is arguably appropriate, given that upgrading to a EFIFB enabled
+kernel may cause severe breakage for existing systems that implement
+the GOP protocol), and easily change the patch to apply to x86 going
+forwards, by removing the #ifdefs
+
+-- 
+Ard.
