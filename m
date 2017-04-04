@@ -1,206 +1,141 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 01/12] x86/efi: Clean up efi CR3 save/restore
-Date: Tue,  4 Apr 2017 17:02:36 +0100
-Message-ID: <20170404160245.27812-3-ard.biesheuvel@linaro.org>
+Subject: [PATCH 03/12] efi: arm-stub: Round up FDT allocation to mapping size
+Date: Tue,  4 Apr 2017 17:02:39 +0100
+Message-ID: <20170404160245.27812-6-ard.biesheuvel@linaro.org>
 References: <20170404160245.27812-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170404160245.27812-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Andy Lutomirski <luto@kernel.org>
+The FDT is mapped via a fixmap entry that is at least 2 MB in size and
+2 MB aligned on 4 KB page size kernels.
 
-efi_call_phys_prolog() used to return a "pgd_t *" that meant one of
-three different things depending on kernel and system configuration.
-Clean it up so it uses a union and is more explicit about what's
-going on.
+On UEFI systems, the FDT allocation may share this 2 MB mapping with a
+reserved region (or another memory region that we should never map),
+unless we account for this in the size of the allocation (the alignment
+is already 2 MB)
 
-Signed-off-by: Andy Lutomirski <luto@kernel.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Andy Lutomirski <luto@amacapital.net>
-Cc: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+So instead of taking guesses at the needed space, simply allocate 2 MB
+immediately. The allocation will be recorded as EFI_LOADER_DATA, and the
+kernel only memblock_reserve()'s the actual size of the FDT, so the
+unused space will be released back to the kernel.
+
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Tested-by: Richard Ruigrok <rruigrok@codeaurora.org>
+Reviewed-By: Jeffrey Hugo <jhugo@codeaurora.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/include/asm/efi.h     | 17 +++++++++++++++--
- arch/x86/platform/efi/efi.c    |  6 +++---
- arch/x86/platform/efi/efi_32.c | 12 ++++++------
- arch/x86/platform/efi/efi_64.c | 22 ++++++++++++----------
- 4 files changed, 36 insertions(+), 21 deletions(-)
+ arch/arm64/include/asm/efi.h       |  1 +
+ drivers/firmware/efi/libstub/fdt.c | 57 ++++++++++++++++----------------------
+ 2 files changed, 25 insertions(+), 33 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 2f77bcefe6b4..6d74cc3802e6 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -111,11 +111,24 @@ extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index 083a52d3b59f..8f3043aba873 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -1,6 +1,7 @@
+ #ifndef _ASM_EFI_H
+ #define _ASM_EFI_H
  
- #endif /* CONFIG_X86_32 */
++#include <asm/boot.h>
+ #include <asm/cpufeature.h>
+ #include <asm/io.h>
+ #include <asm/mmu_context.h>
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index 260c4b4b492e..41f457be64e8 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -206,6 +206,10 @@ static efi_status_t exit_boot_func(efi_system_table_t *sys_table_arg,
+ 	return update_fdt_memmap(p->new_fdt_addr, map);
+ }
  
-+union efi_saved_pgd {
-+	/*
-+	 * If !EFI_OLD_MEMMAP or we're 32-bit, this is a verbatim saved CR3
-+	 * value.
-+	 */
-+	unsigned long cr3;
-+
-+#ifdef CONFIG_X86_64
-+	/* If EFI_OLD_MEMMAP, this is a kmalloced copy of the pgd. */
-+	pgd_t *pgd;
++#ifndef MAX_FDT_SIZE
++#define MAX_FDT_SIZE	SZ_2M
 +#endif
-+};
 +
- extern struct efi_scratch efi_scratch;
- extern void __init efi_set_executable(efi_memory_desc_t *md, bool executable);
- extern int __init efi_memblock_x86_reserve_range(void);
--extern pgd_t * __init efi_call_phys_prolog(void);
--extern void __init efi_call_phys_epilog(pgd_t *save_pgd);
-+extern union efi_saved_pgd __init efi_call_phys_prolog(void);
-+extern void __init efi_call_phys_epilog(union efi_saved_pgd saved_pgd);
- extern void __init efi_print_memmap(void);
- extern void __init efi_memory_uc(u64 addr, unsigned long size);
- extern void __init efi_map_region(efi_memory_desc_t *md);
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 565dff3c9a12..217dc166c649 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -81,9 +81,9 @@ static efi_status_t __init phys_efi_set_virtual_address_map(
- {
+ /*
+  * Allocate memory for a new FDT, then add EFI, commandline, and
+  * initrd related fields to the FDT.  This routine increases the
+@@ -233,7 +237,6 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 	u32 desc_ver;
+ 	unsigned long mmap_key;
+ 	efi_memory_desc_t *memory_map, *runtime_map;
+-	unsigned long new_fdt_size;
  	efi_status_t status;
- 	unsigned long flags;
--	pgd_t *save_pgd;
-+	union efi_saved_pgd saved_pgd;
+ 	int runtime_entry_count = 0;
+ 	struct efi_boot_memmap map;
+@@ -262,41 +265,29 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 	       "Exiting boot services and installing virtual address map...\n");
  
--	save_pgd = efi_call_phys_prolog();
-+	saved_pgd = efi_call_phys_prolog();
- 
- 	/* Disable interrupts around EFI calls: */
- 	local_irq_save(flags);
-@@ -92,7 +92,7 @@ static efi_status_t __init phys_efi_set_virtual_address_map(
- 			       descriptor_version, virtual_map);
- 	local_irq_restore(flags);
- 
--	efi_call_phys_epilog(save_pgd);
-+	efi_call_phys_epilog(saved_pgd);
- 
- 	return status;
- }
-diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
-index cef39b097649..9b1abcf6e7bb 100644
---- a/arch/x86/platform/efi/efi_32.c
-+++ b/arch/x86/platform/efi/efi_32.c
-@@ -58,13 +58,13 @@ void __init efi_map_region(efi_memory_desc_t *md)
- void __init efi_map_region_fixed(efi_memory_desc_t *md) {}
- void __init parse_efi_setup(u64 phys_addr, u32 data_len) {}
- 
--pgd_t * __init efi_call_phys_prolog(void)
-+union efi_saved_pgd __init efi_call_phys_prolog(void)
- {
- 	struct desc_ptr gdt_descr;
--	pgd_t *save_pgd;
-+	union efi_saved_pgd saved_pgd;
- 
- 	/* Current pgd is swapper_pg_dir, we'll restore it later: */
--	save_pgd = swapper_pg_dir;
-+	saved_pgd.cr3 = __pa(swapper_pg_dir);
- 	load_cr3(initial_page_table);
- 	__flush_tlb_all();
- 
-@@ -72,10 +72,10 @@ pgd_t * __init efi_call_phys_prolog(void)
- 	gdt_descr.size = GDT_SIZE - 1;
- 	load_gdt(&gdt_descr);
- 
--	return save_pgd;
-+	return saved_pgd;
- }
- 
--void __init efi_call_phys_epilog(pgd_t *save_pgd)
-+void __init efi_call_phys_epilog(union efi_saved_pgd saved_pgd)
- {
- 	struct desc_ptr gdt_descr;
- 
-@@ -83,7 +83,7 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 	gdt_descr.size = GDT_SIZE - 1;
- 	load_gdt(&gdt_descr);
- 
--	load_cr3(save_pgd);
-+	write_cr3(saved_pgd.cr3);
- 	__flush_tlb_all();
- }
- 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index a4695da42d77..d56dd864fb1c 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -69,16 +69,16 @@ static void __init early_code_mapping_set_exec(int executable)
- 	}
- }
- 
--pgd_t * __init efi_call_phys_prolog(void)
-+union efi_saved_pgd __init efi_call_phys_prolog(void)
- {
- 	unsigned long vaddress;
--	pgd_t *save_pgd;
-+	union efi_saved_pgd saved_pgd;
- 
- 	int pgd;
- 	int n_pgds;
- 
- 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
--		save_pgd = (pgd_t *)read_cr3();
-+		saved_pgd.cr3 = read_cr3();
- 		write_cr3((unsigned long)efi_scratch.efi_pgt);
- 		goto out;
- 	}
-@@ -86,20 +86,21 @@ pgd_t * __init efi_call_phys_prolog(void)
- 	early_code_mapping_set_exec(1);
- 
- 	n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
--	save_pgd = kmalloc_array(n_pgds, sizeof(*save_pgd), GFP_KERNEL);
-+	saved_pgd.pgd = kmalloc_array(n_pgds, sizeof(*saved_pgd.pgd),
-+				      GFP_KERNEL);
- 
- 	for (pgd = 0; pgd < n_pgds; pgd++) {
--		save_pgd[pgd] = *pgd_offset_k(pgd * PGDIR_SIZE);
-+		saved_pgd.pgd[pgd] = *pgd_offset_k(pgd * PGDIR_SIZE);
- 		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
- 		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
- 	}
- out:
- 	__flush_tlb_all();
- 
--	return save_pgd;
-+	return saved_pgd;
- }
- 
--void __init efi_call_phys_epilog(pgd_t *save_pgd)
-+void __init efi_call_phys_epilog(union efi_saved_pgd saved_pgd)
- {
+ 	map.map = &memory_map;
++	status = efi_high_alloc(sys_table, MAX_FDT_SIZE, EFI_FDT_ALIGN,
++				new_fdt_addr, max_addr);
++	if (status != EFI_SUCCESS) {
++		pr_efi_err(sys_table,
++			   "Unable to allocate memory for new device tree.\n");
++		goto fail;
++	}
++
  	/*
- 	 * After the lock is released, the original page table is restored.
-@@ -108,7 +109,7 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 	int nr_pgds;
+-	 * Estimate size of new FDT, and allocate memory for it. We
+-	 * will allocate a bigger buffer if this ends up being too
+-	 * small, so a rough guess is OK here.
++	 * Now that we have done our final memory allocation (and free)
++	 * we can get the memory map key needed for exit_boot_services().
+ 	 */
+-	new_fdt_size = fdt_size + EFI_PAGE_SIZE;
+-	while (1) {
+-		status = efi_high_alloc(sys_table, new_fdt_size, EFI_FDT_ALIGN,
+-					new_fdt_addr, max_addr);
+-		if (status != EFI_SUCCESS) {
+-			pr_efi_err(sys_table, "Unable to allocate memory for new device tree.\n");
+-			goto fail;
+-		}
+-
+-		status = update_fdt(sys_table,
+-				    (void *)fdt_addr, fdt_size,
+-				    (void *)*new_fdt_addr, new_fdt_size,
+-				    cmdline_ptr, initrd_addr, initrd_size);
++	status = efi_get_memory_map(sys_table, &map);
++	if (status != EFI_SUCCESS)
++		goto fail_free_new_fdt;
  
- 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
--		write_cr3((unsigned long)save_pgd);
-+		write_cr3(saved_pgd.cr3);
- 		__flush_tlb_all();
- 		return;
+-		/* Succeeding the first time is the expected case. */
+-		if (status == EFI_SUCCESS)
+-			break;
++	status = update_fdt(sys_table, (void *)fdt_addr, fdt_size,
++			    (void *)*new_fdt_addr, MAX_FDT_SIZE, cmdline_ptr,
++			    initrd_addr, initrd_size);
+ 
+-		if (status == EFI_BUFFER_TOO_SMALL) {
+-			/*
+-			 * We need to allocate more space for the new
+-			 * device tree, so free existing buffer that is
+-			 * too small.
+-			 */
+-			efi_free(sys_table, new_fdt_size, *new_fdt_addr);
+-			new_fdt_size += EFI_PAGE_SIZE;
+-		} else {
+-			pr_efi_err(sys_table, "Unable to construct new device tree.\n");
+-			goto fail_free_new_fdt;
+-		}
++	if (status != EFI_SUCCESS) {
++		pr_efi_err(sys_table, "Unable to construct new device tree.\n");
++		goto fail_free_new_fdt;
  	}
-@@ -116,9 +117,10 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 	nr_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
  
- 	for (pgd_idx = 0; pgd_idx < nr_pgds; pgd_idx++)
--		set_pgd(pgd_offset_k(pgd_idx * PGDIR_SIZE), save_pgd[pgd_idx]);
-+		set_pgd(pgd_offset_k(pgd_idx * PGDIR_SIZE),
-+			saved_pgd.pgd[pgd_idx]);
+ 	priv.runtime_map = runtime_map;
+@@ -340,7 +331,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 	pr_efi_err(sys_table, "Exit boot services failed.\n");
  
--	kfree(save_pgd);
-+	kfree(saved_pgd.pgd);
+ fail_free_new_fdt:
+-	efi_free(sys_table, new_fdt_size, *new_fdt_addr);
++	efi_free(sys_table, MAX_FDT_SIZE, *new_fdt_addr);
  
- 	__flush_tlb_all();
- 	early_code_mapping_set_exec(0);
+ fail:
+ 	sys_table->boottime->free_pool(runtime_map);
 -- 
 2.9.3
