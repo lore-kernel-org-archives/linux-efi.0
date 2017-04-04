@@ -1,29 +1,45 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: kexec regression since 4.9 caused by efi
-Date: Tue, 4 Apr 2017 14:37:19 +0100
-Message-ID: <20170404133719.GE19827@codeblueprint.co.uk>
-References: <20170308201616.GC8598@vader>
- <20170309063806.GB17257@dhcp-128-65.nay.redhat.com>
- <20170309095408.GA17883@vader>
- <20170313073748.GA6332@dhcp-128-65.nay.redhat.com>
- <20170316124132.GF6261@codeblueprint.co.uk>
- <20170317020951.GA3942@dhcp-128-65.nay.redhat.com>
- <20170317133232.GI6261@codeblueprint.co.uk>
- <20170320021412.GA3793@dhcp-128-65.nay.redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [GIT PULL 0/2] EFI fixes for v4.11
+Date: Tue,  4 Apr 2017 16:27:42 +0100
+Message-ID: <20170404152744.26687-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170320021412.GA3793-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Omar Sandoval <osandov-nWWhXC5lh1RBDgjK7y7TUQ@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-team-b10kYP2dOMg@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Eugene Cohen <eugene-VXdhtT5mjnY@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 20 Mar, at 10:14:12AM, Dave Young wrote:
-> 
-> Matt, I'm fine if you prefer to capture the range checking errors.
-> Would you like me to post it or just you send it out?
+Hello all,
 
-Can you please send out the patch with the minimal change to
-efi_arch_mem_reserve() and we'll get it into urgent ASAP.
+Please pull these fixes for EFI framebuffer support on ARM/arm64 systems.
+
+The following changes since commit 822f5845f710e57d7e2df1fd1ee00d6e19d334fe:
+
+  efi/esrt: Cleanup bad memory map log messages (2017-03-17 18:53:12 +0000)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
+
+for you to fetch changes up to e73c2811538bd36ec1340d01bafdc080af31914e:
+
+  efifb: Avoid reconfiguration of BAR that covers the framebuffer (2017-04-04 15:56:43 +0100)
+
+----------------------------------------------------------------
+Two fixes related to the EFI framebuffer driver:
+- Ignore Graphics Output Protocol (GOP) implementations that are marked as
+  BLT-only -- the framebuffer base address is invalid in this case, and the
+  Blt() method is not accessible to the kernel.
+- If the GOP framebuffer base address coincides with a memory BAR of a PCI
+  device that has memory decoding enabled, claim the memory resource so that
+  the PCI core will not attempt to move it later on.
+
+----------------------------------------------------------------
+Ard Biesheuvel (1):
+      efifb: Avoid reconfiguration of BAR that covers the framebuffer
+
+Cohen, Eugene (1):
+      efi/libstub: Skip GOP with PIXEL_BLT_ONLY format
+
+ drivers/firmware/efi/libstub/gop.c |  6 ++--
+ drivers/video/fbdev/efifb.c        | 66 +++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 69 insertions(+), 3 deletions(-)
