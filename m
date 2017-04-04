@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 2/2] efifb: Avoid reconfiguration of BAR that covers the framebuffer
-Date: Tue,  4 Apr 2017 17:02:38 +0100
-Message-ID: <20170404160245.27812-5-ard.biesheuvel@linaro.org>
+Subject: [PATCH 09/12] efi/libstub: Fix harmless command line parsing bug
+Date: Tue,  4 Apr 2017 17:02:45 +0100
+Message-ID: <20170404160245.27812-12-ard.biesheuvel@linaro.org>
 References: <20170404160245.27812-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20170404160245.27812-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,125 +10,38 @@ To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On UEFI systems, the PCI subsystem is enumerated by the firmware,
-and if a graphical framebuffer is exposed by a PCI device, its base
-address and size are exposed to the OS via the Graphics Output
-Protocol (GOP).
+When we parse the 'efi=' command line parameter in the stub, we
+fail to take spaces into account. Currently, the only way this
+could result in unexpected behavior is when the string 'nochunk'
+appears as a separate command line argument after 'efi=xxx,yyy,zzz ',
+so this is harmless in practice. But let's fix it nonetheless.
 
-On arm64 PCI systems, the entire PCI hierarchy is reconfigured from
-scratch at boot. This may result in the GOP framebuffer address to
-become stale, if the BAR covering the framebuffer is modified. This
-will cause the framebuffer to become unresponsive, and may in some
-cases result in unpredictable behavior if the range is reassigned to
-another device.
-
-So add a non-x86 quirk to the EFI fb driver to find the BAR associated
-with the GOP base address, and claim the BAR resource so that the PCI
-core will not move it.
-
-Fixes: 9822504c1fa5 ("efifb: Enable the efi-framebuffer platform driver ...")
-Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org> # v4.7+
 Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/video/fbdev/efifb.c | 66 ++++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 65 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
-index 8c4dc1e1f94f..758960b6aec9 100644
---- a/drivers/video/fbdev/efifb.c
-+++ b/drivers/video/fbdev/efifb.c
-@@ -10,6 +10,7 @@
- #include <linux/efi.h>
- #include <linux/errno.h>
- #include <linux/fb.h>
-+#include <linux/pci.h>
- #include <linux/platform_device.h>
- #include <linux/screen_info.h>
- #include <video/vga.h>
-@@ -143,6 +144,8 @@ static struct attribute *efifb_attrs[] = {
- };
- ATTRIBUTE_GROUPS(efifb);
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index 919822b7773d..3290fae0b38f 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -436,14 +436,14 @@ efi_status_t efi_parse_options(char *cmdline)
+ 	 * Remember, because efi= is also used by the kernel we need to
+ 	 * skip over arguments we don't understand.
+ 	 */
+-	while (*str) {
++	while (*str && *str != ' ') {
+ 		if (!strncmp(str, "nochunk", 7)) {
+ 			str += strlen("nochunk");
+ 			__chunk_size = -1UL;
+ 		}
  
-+static bool pci_dev_disabled;	/* FB base matches BAR of a disabled device */
-+
- static int efifb_probe(struct platform_device *dev)
- {
- 	struct fb_info *info;
-@@ -152,7 +155,7 @@ static int efifb_probe(struct platform_device *dev)
- 	unsigned int size_total;
- 	char *option = NULL;
+ 		/* Group words together, delimited by "," */
+-		while (*str && *str != ',')
++		while (*str && *str != ' ' && *str != ',')
+ 			str++;
  
--	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
-+	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI || pci_dev_disabled)
- 		return -ENODEV;
- 
- 	if (fb_get_options("efifb", &option))
-@@ -360,3 +363,64 @@ static struct platform_driver efifb_driver = {
- };
- 
- builtin_platform_driver(efifb_driver);
-+
-+#ifndef CONFIG_X86
-+
-+static bool pci_bar_found;	/* did we find a BAR matching the efifb base? */
-+
-+static void claim_efifb_bar(struct pci_dev *dev, int idx)
-+{
-+	u16 word;
-+
-+	pci_bar_found = true;
-+
-+	pci_read_config_word(dev, PCI_COMMAND, &word);
-+	if (!(word & PCI_COMMAND_MEMORY)) {
-+		pci_dev_disabled = true;
-+		dev_err(&dev->dev,
-+			"BAR %d: assigned to efifb but device is disabled!\n",
-+			idx);
-+		return;
-+	}
-+
-+	if (pci_claim_resource(dev, idx)) {
-+		pci_dev_disabled = true;
-+		dev_err(&dev->dev,
-+			"BAR %d: failed to claim resource for efifb!\n", idx);
-+		return;
-+	}
-+
-+	dev_info(&dev->dev, "BAR %d: assigned to efifb\n", idx);
-+}
-+
-+static void efifb_fixup_resources(struct pci_dev *dev)
-+{
-+	u64 base = screen_info.lfb_base;
-+	u64 size = screen_info.lfb_size;
-+	int i;
-+
-+	if (pci_bar_found || screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
-+		return;
-+
-+	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-+		base |= (u64)screen_info.ext_lfb_base << 32;
-+
-+	if (!base)
-+		return;
-+
-+	for (i = 0; i < PCI_STD_RESOURCE_END; i++) {
-+		struct resource *res = &dev->resource[i];
-+
-+		if (!(res->flags & IORESOURCE_MEM))
-+			continue;
-+
-+		if (res->start <= base && res->end >= base + size - 1) {
-+			claim_efifb_bar(dev, i);
-+			break;
-+		}
-+	}
-+}
-+DECLARE_PCI_FIXUP_CLASS_HEADER(PCI_ANY_ID, PCI_ANY_ID, PCI_BASE_CLASS_DISPLAY,
-+			       16, efifb_fixup_resources);
-+
-+#endif
+ 		if (*str == ',')
 -- 
 2.9.3
