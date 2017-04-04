@@ -1,171 +1,156 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 11/12] efi/libstub: arm/arm64: Disable debug prints on 'quiet' cmdline arg
-Date: Tue,  4 Apr 2017 17:09:09 +0100
-Message-ID: <20170404160910.28115-2-ard.biesheuvel@linaro.org>
-References: <20170404160245.27812-1-ard.biesheuvel@linaro.org>
- <20170404160910.28115-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170404160910.28115-1-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: matt@codeblueprint.co.uk, mark.rutland@arm.com, roy.franz@cavium.com, rruigrok@codeaurora.org, leif.lindholm@linaro.org, jhugo@codeaurora.org, evgeny.kalugin@intel.com, eugene@hp.com, bp@alien8.de, bhsharma@redhat.com, bhe@redhat.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH v2 5/7] efi/capsule: Prepare for loading images with
+ security header
+Date: Tue, 4 Apr 2017 19:39:49 +0200
+Message-ID: <87067f08-4569-f614-3066-09ef4e6a65ed@siemens.com>
+References: <cover.1490376860.git.jan.kiszka@siemens.com>
+ <47e87c8eccc0ee5c4033ece037c0bffc32782876.1490376860.git.jan.kiszka@siemens.com>
+ <CAKv+Gu_+SVNr-g+BR1dGsSn_QGY9fA-TepQ2k6rHmW74VanPFQ@mail.gmail.com>
+ <a3d4da19-015d-0559-f837-550631f1d491@siemens.com>
+ <8d26028c-0c1f-82be-a8b1-588ab7222ccd@siemens.com>
+ <CAKv+Gu8FqhyhdpOa3=EOAG8bBgyAJbFzkVSgQbrVdUT0y1wHsw@mail.gmail.com>
+ <1fa542ed-6638-bac1-64cb-72ed7132f9d1@siemens.com>
+ <CAKv+Gu8S-688JNBtLgE6s3fvYVXtdeRAOyq=A7b9yJsuLtFDYA@mail.gmail.com>
+ <CAKv+Gu9Qf=-atcuz+UcuR9OTaLM3JjUDnmmSMfYeiFKiU5BZvg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKv+Gu9Qf=-atcuz+UcuR9OTaLM3JjUDnmmSMfYeiFKiU5BZvg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Hock Leong Kweh <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The EFI stub currently prints a number of diagnostic messages that do
-not carry a lot of information. Since these prints are not controlled
-by 'loglevel' or other command line parameters, and since they appear on
-the EFI framebuffer as well (if enabled), it would be nice if we could
-turn them off.
+On 2017-03-28 19:23, Ard Biesheuvel wrote:
+> On 28 March 2017 at 18:17, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> On 28 March 2017 at 17:18, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
+>>> On 2017-03-28 17:52, Ard Biesheuvel wrote:
+>>>> On 28 March 2017 at 16:43, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
+>>>>> On 2017-03-28 17:13, Jan Kiszka wrote:
+>>>>>> On 2017-03-28 15:49, Ard Biesheuvel wrote:
+>>>> [..]
+>>>>>>> Could you please have a look at
+>>>>>>>
+>>>>>>> https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=quark-capsule
+>>>>>>>
+>>>>>>> and tell me if that would work for you? I will send them out for
+>>>>>>> proper review in any case, but to avoid confusion (if I missed
+>>>>>>> something obvious), I don't want to send them out just yet.
+>>>>>>
+>>>>>> There is more needed to make things work again, maybe around passing the
+>>>>>> right image size. I'm looking into this.
+>>>>>>
+>>>>>
+>>>>> This makes CSH images being accepted again:
+>>>>>
+>>>>> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+>>>>> index 4b6f93f..a4e2311 100644
+>>>>> --- a/arch/x86/platform/efi/quirks.c
+>>>>> +++ b/arch/x86/platform/efi/quirks.c
+>>>>> @@ -562,6 +562,8 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
+>>>>>  {
+>>>>>         struct quark_security_header *csh = kbuff;
+>>>>>
+>>>>> +       cap_info->total_size = 0;
+>>>>> +
+>>>>>         if (!x86_match_cpu(quark_ids))
+>>>>>                 goto fallback;
+>>>>>
+>>>>> @@ -587,12 +589,16 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
+>>>>>
+>>>>>         kbuff += csh->headersize;
+>>>>>
+>>>>> +       cap_info->total_size = csh->headersize;
+>>>>> +
+>>>>>  fallback:
+>>>>>         if (hdr_bytes < sizeof(efi_capsule_header_t))
+>>>>>                 return 0;
+>>>>>
+>>>>>         memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
+>>>>>
+>>>>> +       cap_info->total_size += cap_info->header.imagesize;
+>>>>> +
+>>>>>         return __efi_capsule_setup_info(cap_info);
+>>>>>  }
+>>>>>
+>>>>> diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+>>>>> index e851951..40dc354 100644
+>>>>> --- a/drivers/firmware/efi/capsule-loader.c
+>>>>> +++ b/drivers/firmware/efi/capsule-loader.c
+>>>>> @@ -42,7 +42,7 @@ int __efi_capsule_setup_info(struct capsule_info *cap_info)
+>>>>>         int ret;
+>>>>>         void *temp_page;
+>>>>>
+>>>>> -       pages_needed = ALIGN(cap_info->header.imagesize, PAGE_SIZE) / PAGE_SIZE;
+>>>>> +       pages_needed = ALIGN(cap_info->total_size, PAGE_SIZE) / PAGE_SIZE;
+>>>>>
+>>>>>         if (pages_needed == 0) {
+>>>>>                 pr_err("invalid capsule size");
+>>>>> @@ -59,7 +59,6 @@ int __efi_capsule_setup_info(struct capsule_info *cap_info)
+>>>>>                 return ret;
+>>>>>         }
+>>>>>
+>>>>> -       cap_info->total_size = cap_info->header.imagesize;
+>>>>>         temp_page = krealloc(cap_info->pages,
+>>>>>                              pages_needed * sizeof(void *),
+>>>>>                              GFP_KERNEL | __GFP_ZERO);
+>>>>> @@ -87,6 +86,8 @@ int __weak efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
+>>>>>
+>>>>>         memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
+>>>>>
+>>>>> +       cap_info->total_size = cap_info->header.imagesize;
+>>>>> +
+>>>>>         return __efi_capsule_setup_info(cap_info);
+>>>>>  }
+>>>>>
+>>>>
+>>>> OK, thanks for debugging that.
+>>>>
+>>>>> But then my changes to efi_capsule_update are missing the present the
+>>>>> right format to the loader. As efi_capsule_update needs to lay out the
+>>>>> sg-list in as special way, excluding the CSH on the first page, it needs
+>>>>> to know about the displacement.
+>>>>>
+>>>>> Any suggestions how to address that without rolling back to my aproach?
+>>>>>
+>>>>
+>>>> OK, I'm a bit lost now: for my understanding, could you please
+>>>> reiterate how the CSH image deviates from the ordinary one? Or more
+>>>> specifically, what exactly is preventing us from simply chopping off
+>>>> the CSH header and pushing the capsule header + payload into
+>>>> /dev/capsule_loader?
+>>>>
+>>>
+>>> Devices that mandate a signed capsule for updates expect the CSH in
+>>> front of the regular capsule image. The interface to UEFI remains
+>>> unchanged, i.e. you pass the virtually chopped off capsule, but you have
+>>> to leave the CSH in RAM right in front of that very same image. It's a
+>>> "nice" side-channel API.
+>>>
+>>
+>> Wow, that is worse than I thought.
+>>
+>> So my suggestion (which I coded up, please pull again),
+> 
+> Hmm, it does not build on x86 atm. Let me fix that up first (~15 min)
+> 
 
-So let's add support for the 'quiet' command line parameter in the stub,
-and disable the non-error prints if it is passed.
+Just tested the patches from b51f20c780 on top of our queue, and this
+time the flashing worked fine!
 
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Acked-by: Mark Rutland <mark.rutland@arm.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/libstub/arm-stub.c        | 20 ++++++++++----------
- drivers/firmware/efi/libstub/arm32-stub.c      |  2 ++
- drivers/firmware/efi/libstub/efi-stub-helper.c |  9 +++++++++
- drivers/firmware/efi/libstub/efistub.h         |  7 +++++++
- drivers/firmware/efi/libstub/secureboot.c      |  2 ++
- include/linux/efi.h                            |  3 ---
- 6 files changed, 30 insertions(+), 13 deletions(-)
+Thanks,
+Jan
 
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index ac3222f6f805..657bb72c9e0b 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -116,8 +116,6 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
- 		goto fail;
- 
--	pr_efi(sys_table, "Booting Linux Kernel...\n");
--
- 	status = check_platform_features(sys_table);
- 	if (status != EFI_SUCCESS)
- 		goto fail;
-@@ -151,6 +149,16 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 		goto fail;
- 	}
- 
-+	if (IS_ENABLED(CONFIG_CMDLINE_EXTEND) ||
-+	    IS_ENABLED(CONFIG_CMDLINE_FORCE) ||
-+	    cmdline_size == 0)
-+		efi_parse_options(CONFIG_CMDLINE);
-+
-+	if (!IS_ENABLED(CONFIG_CMDLINE_FORCE) && cmdline_size > 0)
-+		efi_parse_options(cmdline_ptr);
-+
-+	pr_efi(sys_table, "Booting Linux Kernel...\n");
-+
- 	si = setup_graphics(sys_table);
- 
- 	status = handle_kernel_image(sys_table, image_addr, &image_size,
-@@ -162,14 +170,6 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 		goto fail_free_cmdline;
- 	}
- 
--	if (IS_ENABLED(CONFIG_CMDLINE_EXTEND) ||
--	    IS_ENABLED(CONFIG_CMDLINE_FORCE) ||
--	    cmdline_size == 0)
--		efi_parse_options(CONFIG_CMDLINE);
--
--	if (!IS_ENABLED(CONFIG_CMDLINE_FORCE) && cmdline_size > 0)
--		efi_parse_options(cmdline_ptr);
--
- 	secure_boot = efi_get_secureboot(sys_table);
- 
- 	/*
-diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
-index 18a8b5eb55e7..becbda445913 100644
---- a/drivers/firmware/efi/libstub/arm32-stub.c
-+++ b/drivers/firmware/efi/libstub/arm32-stub.c
-@@ -9,6 +9,8 @@
- #include <linux/efi.h>
- #include <asm/efi.h>
- 
-+#include "efistub.h"
-+
- efi_status_t check_platform_features(efi_system_table_t *sys_table_arg)
- {
- 	int block;
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 2e17d2b8787c..b0184360efc6 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -33,11 +33,16 @@
- static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
- 
- static int __section(.data) __nokaslr;
-+static int __section(.data) __quiet;
- 
- int __pure nokaslr(void)
- {
- 	return __nokaslr;
- }
-+int __pure is_quiet(void)
-+{
-+	return __quiet;
-+}
- 
- #define EFI_MMAP_NR_SLACK_SLOTS	8
- 
-@@ -424,6 +429,10 @@ efi_status_t efi_parse_options(char const *cmdline)
- 	if (str == cmdline || (str && str > cmdline && *(str - 1) == ' '))
- 		__nokaslr = 1;
- 
-+	str = strstr(cmdline, "quiet");
-+	if (str == cmdline || (str && str > cmdline && *(str - 1) == ' '))
-+		__quiet = 1;
-+
- 	/*
- 	 * If no EFI parameters were specified on the cmdline we've got
- 	 * nothing to do.
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index a7a2a2c3f199..83f268c05007 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -25,6 +25,13 @@
- #endif
- 
- extern int __pure nokaslr(void);
-+extern int __pure is_quiet(void);
-+
-+#define pr_efi(sys_table, msg)		do {				\
-+	if (!is_quiet()) efi_printk(sys_table, "EFI stub: "msg);	\
-+} while (0)
-+
-+#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
- 
- void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
- 
-diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-index 5da36e56b36a..8c34d50a4d80 100644
---- a/drivers/firmware/efi/libstub/secureboot.c
-+++ b/drivers/firmware/efi/libstub/secureboot.c
-@@ -12,6 +12,8 @@
- #include <linux/efi.h>
- #include <asm/efi.h>
- 
-+#include "efistub.h"
-+
- /* BIOS variables */
- static const efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
- static const efi_char16_t const efi_SecureBoot_name[] = {
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index e485e87615d1..ec36f42a2add 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1435,9 +1435,6 @@ static inline int efi_runtime_map_copy(void *buf, size_t bufsz)
- 
- /* prototypes shared between arch specific and generic stub code */
- 
--#define pr_efi(sys_table, msg)     efi_printk(sys_table, "EFI stub: "msg)
--#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
--
- void efi_printk(efi_system_table_t *sys_table_arg, char *str);
- 
- void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
+>> is to replace
+>> the array of struct page pointers with an array of physical addresses
+>> in the capsule_info struct. This way, your special version of
+>> efi_capsule_setup_info() can advance the first one by the size of the
+>> header.
+>>
+>> I hope this works for you. I am not sure whether imagesize needs to be
+>> modified, so I left it alone for now (but I suspect it should be).
+
 -- 
-2.9.3
+Siemens AG, Corporate Technology, CT RDA ITP SES-DE
+Corporate Competence Center Embedded Linux
