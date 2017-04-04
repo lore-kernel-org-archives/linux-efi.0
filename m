@@ -1,123 +1,213 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 05/12] efi: bgrt: Enable ACPI BGRT handling on arm64
-Date: Tue,  4 Apr 2017 17:02:41 +0100
-Message-ID: <20170404160245.27812-8-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 08/12] efi/arm32-stub: Allow boottime allocations in the vmlinux region
+Date: Tue,  4 Apr 2017 17:02:44 +0100
+Message-ID: <20170404160245.27812-11-ard.biesheuvel@linaro.org>
 References: <20170404160245.27812-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170404160245.27812-1-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Bhupesh Sharma <bhsharma@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170404160245.27812-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Bhupesh Sharma <bhsharma@redhat.com>
+The arm32 kernel decompresses itself to the base of DRAM unconditionally,
+and so it is the EFI stub's job to ensure that the region is available.
 
-Now that the ACPI BGRT handling code has been made generic, we can
-enable it for arm64.
+Currently, we do this by creating an allocation there, and giving up if
+that fails. However, any boot services regions occupying this area are
+not an issue, given that the decompressor executes strictly after the
+stub calls ExitBootServices().
 
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Signed-off-by: Bhupesh Sharma <bhsharma@redhat.com>
-[ardb: - update commit log to reflect that BGRT is only enabled for arm64
-       - add missing 'return' statement to dummy acpi_parse_bgrt()]
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+So let's try a bit harder to proceed if the initial allocation fails,
+and check whether any memory map entries occupying the region may be
+considered safe.
+
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Reviewed-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Reviewed-by: Eugene Cohen <eugene-VXdhtT5mjnY@public.gmane.org>
+Reviewed-by: Roy Franz <roy.franz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/kernel/acpi.c    | 3 +++
- arch/x86/kernel/acpi/boot.c | 6 ------
- drivers/acpi/Kconfig        | 2 +-
- drivers/acpi/bgrt.c         | 6 ++++++
- include/linux/efi-bgrt.h    | 5 +++++
- 5 files changed, 15 insertions(+), 7 deletions(-)
+ drivers/firmware/efi/libstub/arm32-stub.c | 148 ++++++++++++++++++++++++++----
+ 1 file changed, 128 insertions(+), 20 deletions(-)
 
-diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
-index 64d9cbd61678..e25c11e727fe 100644
---- a/arch/arm64/kernel/acpi.c
-+++ b/arch/arm64/kernel/acpi.c
-@@ -18,6 +18,7 @@
- #include <linux/acpi.h>
- #include <linux/bootmem.h>
- #include <linux/cpumask.h>
-+#include <linux/efi-bgrt.h>
- #include <linux/init.h>
- #include <linux/irq.h>
- #include <linux/irqdomain.h>
-@@ -233,6 +234,8 @@ void __init acpi_boot_table_init(void)
- 			early_init_dt_scan_chosen_stdout();
- 	} else {
- 		parse_spcr(earlycon_init_is_deferred);
-+		if (IS_ENABLED(CONFIG_ACPI_BGRT))
-+			acpi_table_parse(ACPI_SIG_BGRT, acpi_parse_bgrt);
- 	}
+diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
+index e1f0b28e1dcb..18a8b5eb55e7 100644
+--- a/drivers/firmware/efi/libstub/arm32-stub.c
++++ b/drivers/firmware/efi/libstub/arm32-stub.c
+@@ -63,6 +63,132 @@ void free_screen_info(efi_system_table_t *sys_table_arg, struct screen_info *si)
+ 	efi_call_early(free_pool, si);
  }
  
-diff --git a/arch/x86/kernel/acpi/boot.c b/arch/x86/kernel/acpi/boot.c
-index ae32838cac5f..a9d4fbcd1fd6 100644
---- a/arch/x86/kernel/acpi/boot.c
-+++ b/arch/x86/kernel/acpi/boot.c
-@@ -1559,12 +1559,6 @@ int __init early_acpi_boot_init(void)
- 	return 0;
- }
- 
--static int __init acpi_parse_bgrt(struct acpi_table_header *table)
--{
--	efi_bgrt_init(table);
--	return 0;
--}
--
- int __init acpi_boot_init(void)
- {
- 	/* those are executed after early-quirks are executed */
-diff --git a/drivers/acpi/Kconfig b/drivers/acpi/Kconfig
-index 83e5f7e1a20d..dad02c0f21b9 100644
---- a/drivers/acpi/Kconfig
-+++ b/drivers/acpi/Kconfig
-@@ -440,7 +440,7 @@ config ACPI_CUSTOM_METHOD
- 
- config ACPI_BGRT
- 	bool "Boottime Graphics Resource Table support"
--	depends on EFI && X86
-+	depends on EFI && (X86 || ARM64)
-         help
- 	  This driver adds support for exposing the ACPI Boottime Graphics
- 	  Resource Table, which allows the operating system to obtain
-diff --git a/drivers/acpi/bgrt.c b/drivers/acpi/bgrt.c
-index ca28aa572aa9..df1c629205e7 100644
---- a/drivers/acpi/bgrt.c
-+++ b/drivers/acpi/bgrt.c
-@@ -81,6 +81,12 @@ static struct attribute_group bgrt_attribute_group = {
- 	.bin_attrs = bgrt_bin_attributes,
- };
- 
-+int __init acpi_parse_bgrt(struct acpi_table_header *table)
++static efi_status_t reserve_kernel_base(efi_system_table_t *sys_table_arg,
++					unsigned long dram_base,
++					unsigned long *reserve_addr,
++					unsigned long *reserve_size)
 +{
-+	efi_bgrt_init(table);
-+	return 0;
++	efi_physical_addr_t alloc_addr;
++	efi_memory_desc_t *memory_map;
++	unsigned long nr_pages, map_size, desc_size, buff_size;
++	efi_status_t status;
++	unsigned long l;
++
++	struct efi_boot_memmap map = {
++		.map		= &memory_map,
++		.map_size	= &map_size,
++		.desc_size	= &desc_size,
++		.desc_ver	= NULL,
++		.key_ptr	= NULL,
++		.buff_size	= &buff_size,
++	};
++
++	/*
++	 * Reserve memory for the uncompressed kernel image. This is
++	 * all that prevents any future allocations from conflicting
++	 * with the kernel. Since we can't tell from the compressed
++	 * image how much DRAM the kernel actually uses (due to BSS
++	 * size uncertainty) we allocate the maximum possible size.
++	 * Do this very early, as prints can cause memory allocations
++	 * that may conflict with this.
++	 */
++	alloc_addr = dram_base + MAX_UNCOMP_KERNEL_SIZE;
++	nr_pages = MAX_UNCOMP_KERNEL_SIZE / EFI_PAGE_SIZE;
++	status = efi_call_early(allocate_pages, EFI_ALLOCATE_MAX_ADDRESS,
++				EFI_BOOT_SERVICES_DATA, nr_pages, &alloc_addr);
++	if (status == EFI_SUCCESS) {
++		if (alloc_addr == dram_base) {
++			*reserve_addr = alloc_addr;
++			*reserve_size = MAX_UNCOMP_KERNEL_SIZE;
++			return EFI_SUCCESS;
++		}
++		/*
++		 * If we end up here, the allocation succeeded but starts below
++		 * dram_base. This can only occur if the real base of DRAM is
++		 * not a multiple of 128 MB, in which case dram_base will have
++		 * been rounded up. Since this implies that a part of the region
++		 * was already occupied, we need to fall through to the code
++		 * below to ensure that the existing allocations don't conflict.
++		 * For this reason, we use EFI_BOOT_SERVICES_DATA above and not
++		 * EFI_LOADER_DATA, which we wouldn't able to distinguish from
++		 * allocations that we want to disallow.
++		 */
++	}
++
++	/*
++	 * If the allocation above failed, we may still be able to proceed:
++	 * if the only allocations in the region are of types that will be
++	 * released to the OS after ExitBootServices(), the decompressor can
++	 * safely overwrite them.
++	 */
++	status = efi_get_memory_map(sys_table_arg, &map);
++	if (status != EFI_SUCCESS) {
++		pr_efi_err(sys_table_arg,
++			   "reserve_kernel_base(): Unable to retrieve memory map.\n");
++		return status;
++	}
++
++	for (l = 0; l < map_size; l += desc_size) {
++		efi_memory_desc_t *desc;
++		u64 start, end;
++
++		desc = (void *)memory_map + l;
++		start = desc->phys_addr;
++		end = start + desc->num_pages * EFI_PAGE_SIZE;
++
++		/* Skip if entry does not intersect with region */
++		if (start >= dram_base + MAX_UNCOMP_KERNEL_SIZE ||
++		    end <= dram_base)
++			continue;
++
++		switch (desc->type) {
++		case EFI_BOOT_SERVICES_CODE:
++		case EFI_BOOT_SERVICES_DATA:
++			/* Ignore types that are released to the OS anyway */
++			continue;
++
++		case EFI_CONVENTIONAL_MEMORY:
++			/*
++			 * Reserve the intersection between this entry and the
++			 * region.
++			 */
++			start = max(start, (u64)dram_base);
++			end = min(end, (u64)dram_base + MAX_UNCOMP_KERNEL_SIZE);
++
++			status = efi_call_early(allocate_pages,
++						EFI_ALLOCATE_ADDRESS,
++						EFI_LOADER_DATA,
++						(end - start) / EFI_PAGE_SIZE,
++						&start);
++			if (status != EFI_SUCCESS) {
++				pr_efi_err(sys_table_arg,
++					"reserve_kernel_base(): alloc failed.\n");
++				goto out;
++			}
++			break;
++
++		case EFI_LOADER_CODE:
++		case EFI_LOADER_DATA:
++			/*
++			 * These regions may be released and reallocated for
++			 * another purpose (including EFI_RUNTIME_SERVICE_DATA)
++			 * at any time during the execution of the OS loader,
++			 * so we cannot consider them as safe.
++			 */
++		default:
++			/*
++			 * Treat any other allocation in the region as unsafe */
++			status = EFI_OUT_OF_RESOURCES;
++			goto out;
++		}
++	}
++
++	status = EFI_SUCCESS;
++out:
++	efi_call_early(free_pool, memory_map);
++	return status;
 +}
 +
- static int __init bgrt_init(void)
+ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 				 unsigned long *image_addr,
+ 				 unsigned long *image_size,
+@@ -71,10 +197,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 				 unsigned long dram_base,
+ 				 efi_loaded_image_t *image)
  {
- 	int ret;
-diff --git a/include/linux/efi-bgrt.h b/include/linux/efi-bgrt.h
-index 2fd3993c370b..e6f624b53c3d 100644
---- a/include/linux/efi-bgrt.h
-+++ b/include/linux/efi-bgrt.h
-@@ -6,6 +6,7 @@
- #ifdef CONFIG_ACPI_BGRT
+-	unsigned long nr_pages;
+ 	efi_status_t status;
+-	/* Use alloc_addr to tranlsate between types */
+-	efi_physical_addr_t alloc_addr;
  
- void efi_bgrt_init(struct acpi_table_header *table);
-+int __init acpi_parse_bgrt(struct acpi_table_header *table);
+ 	/*
+ 	 * Verify that the DRAM base address is compatible with the ARM
+@@ -85,27 +208,12 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 	 */
+ 	dram_base = round_up(dram_base, SZ_128M);
  
- /* The BGRT data itself; only valid if bgrt_image != NULL. */
- extern size_t bgrt_image_size;
-@@ -14,6 +15,10 @@ extern struct acpi_table_bgrt bgrt_tab;
- #else /* !CONFIG_ACPI_BGRT */
+-	/*
+-	 * Reserve memory for the uncompressed kernel image. This is
+-	 * all that prevents any future allocations from conflicting
+-	 * with the kernel. Since we can't tell from the compressed
+-	 * image how much DRAM the kernel actually uses (due to BSS
+-	 * size uncertainty) we allocate the maximum possible size.
+-	 * Do this very early, as prints can cause memory allocations
+-	 * that may conflict with this.
+-	 */
+-	alloc_addr = dram_base;
+-	*reserve_size = MAX_UNCOMP_KERNEL_SIZE;
+-	nr_pages = round_up(*reserve_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
+-	status = sys_table->boottime->allocate_pages(EFI_ALLOCATE_ADDRESS,
+-						     EFI_LOADER_DATA,
+-						     nr_pages, &alloc_addr);
++	status = reserve_kernel_base(sys_table, dram_base, reserve_addr,
++				     reserve_size);
+ 	if (status != EFI_SUCCESS) {
+-		*reserve_size = 0;
+ 		pr_efi_err(sys_table, "Unable to allocate memory for uncompressed kernel.\n");
+ 		return status;
+ 	}
+-	*reserve_addr = alloc_addr;
  
- static inline void efi_bgrt_init(struct acpi_table_header *table) {}
-+static inline int __init acpi_parse_bgrt(struct acpi_table_header *table)
-+{
-+	return 0;
-+}
- 
- #endif /* !CONFIG_ACPI_BGRT */
- 
+ 	/*
+ 	 * Relocate the zImage, so that it appears in the lowest 128 MB
 -- 
 2.9.3
