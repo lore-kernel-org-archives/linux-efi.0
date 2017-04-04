@@ -1,123 +1,87 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 02/12] efi: arm-stub: Correct FDT and initrd allocation rules for arm64
-Date: Tue,  4 Apr 2017 17:02:37 +0100
-Message-ID: <20170404160245.27812-4-ard.biesheuvel@linaro.org>
-References: <20170404160245.27812-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170404160245.27812-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [GIT PULL 00/12] EFI updates for v4.12
+Date: Tue,  4 Apr 2017 17:02:34 +0100
+Message-ID: <20170404160245.27812-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Andy Lutomirski <luto@amacapital.net>, Andy Lutomirski <luto@kernel.org>, Baoquan He <bhe@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Eugene Cohen <eugene@hp.com>, Evgeny Kalugin <evgeny.kalugin@intel.com>, Jeffrey Hugo <jhugo@codeaurora.org>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Richard Ruigrok <rruigrok@codeaurora.org>, Roy Franz <roy.franz@cavium.com>
 List-Id: linux-efi@vger.kernel.org
 
-On arm64, we have made some changes over the past year to the way the
-kernel itself is allocated and to how it deals with the initrd and FDT.
-This patch brings the allocation logic in the EFI stub in line with that,
-which is necessary because the introduction of KASLR has created the
-possibility for the initrd to be allocated in a place where the kernel
-may not be able to map it. (This is mostly a theoretical scenario, since
-it only affects systems where the physical memory footprint exceeds the
-size of the linear mapping.)
+Hello all,
 
-Since we know the kernel itself will be covered by the linear mapping,
-choose a suitably sized window (i.e., based on the size of the linear
-region) covering the kernel when allocating memory for the initrd.
+This is what we have queued up for v4.12 so far. Please pull it so that it
+gets some exposure in -next before the merge window.
 
-The FDT may be anywhere in memory on arm64 now that we map it via the
-fixmap, so we can lift the address restriction there completely.
+The following changes since commit 4495c08e84729385774601b5146d51d9e5849f81:
 
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Tested-by: Richard Ruigrok <rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Reviewed-by: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm/include/asm/efi.h              | 14 +++++++++++++-
- arch/arm64/include/asm/efi.h            | 23 ++++++++++++++++++++++-
- drivers/firmware/efi/libstub/arm-stub.c |  7 ++++---
- 3 files changed, 39 insertions(+), 5 deletions(-)
+  Linux 4.11-rc2 (2017-03-12 14:47:08 -0700)
 
-diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-index e4e6a9d6a825..17f1f1a814ff 100644
---- a/arch/arm/include/asm/efi.h
-+++ b/arch/arm/include/asm/efi.h
-@@ -85,6 +85,18 @@ static inline void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
-  */
- #define ZIMAGE_OFFSET_LIMIT	SZ_128M
- #define MIN_ZIMAGE_OFFSET	MAX_UNCOMP_KERNEL_SIZE
--#define MAX_FDT_OFFSET		ZIMAGE_OFFSET_LIMIT
-+
-+/* on ARM, the FDT should be located in the first 128 MB of RAM */
-+static inline unsigned long efi_get_max_fdt_addr(unsigned long dram_base)
-+{
-+	return dram_base + ZIMAGE_OFFSET_LIMIT;
-+}
-+
-+/* on ARM, the initrd should be loaded in a lowmem region */
-+static inline unsigned long efi_get_max_initrd_addr(unsigned long dram_base,
-+						    unsigned long image_addr)
-+{
-+	return dram_base + SZ_512M;
-+}
- 
- #endif /* _ASM_ARM_EFI_H */
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index e7445281e534..083a52d3b59f 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -46,7 +46,28 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
-  * 2MiB so we know it won't cross a 2MiB boundary.
-  */
- #define EFI_FDT_ALIGN	SZ_2M   /* used by allocate_new_fdt_and_exit_boot() */
--#define MAX_FDT_OFFSET	SZ_512M
-+
-+/* on arm64, the FDT may be located anywhere in system RAM */
-+static inline unsigned long efi_get_max_fdt_addr(unsigned long dram_base)
-+{
-+	return ULONG_MAX;
-+}
-+
-+/*
-+ * On arm64, we have to ensure that the initrd ends up in the linear region,
-+ * which is a 1 GB aligned region of size '1UL << (VA_BITS - 1)' that is
-+ * guaranteed to cover the kernel Image.
-+ *
-+ * Since the EFI stub is part of the kernel Image, we can relax the
-+ * usual requirements in Documentation/arm64/booting.txt, which still
-+ * apply to other bootloaders, and are required for some kernel
-+ * configurations.
-+ */
-+static inline unsigned long efi_get_max_initrd_addr(unsigned long dram_base,
-+						    unsigned long image_addr)
-+{
-+	return (image_addr & ~(SZ_1G - 1UL)) + (1UL << (VA_BITS - 1));
-+}
- 
- #define efi_call_early(f, ...)		sys_table_arg->boottime->f(__VA_ARGS__)
- #define __efi_call_early(f, ...)	f(__VA_ARGS__)
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index d4056c6be1ec..02049ff25c6b 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -213,8 +213,9 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 	if (!fdt_addr)
- 		pr_efi(sys_table, "Generating empty DTB\n");
- 
--	status = handle_cmdline_files(sys_table, image, cmdline_ptr,
--				      "initrd=", dram_base + SZ_512M,
-+	status = handle_cmdline_files(sys_table, image, cmdline_ptr, "initrd=",
-+				      efi_get_max_initrd_addr(dram_base,
-+							      *image_addr),
- 				      (unsigned long *)&initrd_addr,
- 				      (unsigned long *)&initrd_size);
- 	if (status != EFI_SUCCESS)
-@@ -224,7 +225,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 
- 	new_fdt_addr = fdt_addr;
- 	status = allocate_new_fdt_and_exit_boot(sys_table, handle,
--				&new_fdt_addr, dram_base + MAX_FDT_OFFSET,
-+				&new_fdt_addr, efi_get_max_fdt_addr(dram_base),
- 				initrd_addr, initrd_size, cmdline_ptr,
- 				fdt_addr, fdt_size);
- 
--- 
-2.9.3
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+
+for you to fetch changes up to efc491b0f06f65ea588f6591f0bc31db779e0594:
+
+  ef/libstub: arm/arm64: Randomize the base of the UEFI rt services region (2017-04-02 16:36:29 +0100)
+
+----------------------------------------------------------------
+EFI changes for v4.12:
+- move BGRT handling to drivers/acpi so it can be shared between x86
+  and ARM
+- bring the EFI stub's initrd and FDT allocation logic in line with
+  the latest changes to the arm64 boot protocol
+- some changes to the EFI stub's command line parsing routines -- share
+  more code, fix a minor buglet and add support for the 'quiet' command
+  line parameter on ARM/arm64 (whose EFI stub is a bit noisy by default)
+- randomize the virtual mapping of the UEFI runtime services on ARM/arm64
+- other minor enhancements and fixes
+
+----------------------------------------------------------------
+Andy Lutomirski (1):
+      x86/efi: Clean up efi CR3 save/restore
+
+Ard Biesheuvel (7):
+      efi: arm-stub: Correct FDT and initrd allocation rules for arm64
+      efi: arm-stub: Round up FDT allocation to mapping size
+      efi/arm32-stub: Allow boottime allocations in the vmlinux region
+      efi/libstub: Fix harmless command line parsing bug
+      efi/libstub: Unify command line param parsing
+      efi/libstub: arm/arm64: Disable debug prints on 'quiet' cmdline arg
+      ef/libstub: arm/arm64: Randomize the base of the UEFI rt services region
+
+Baoquan He (1):
+      x86/efi: Clean up a minor mistake in code comment
+
+Bhupesh Sharma (2):
+      x86/efi-bgrt: Move efi-bgrt handling out of arch/x86
+      efi: bgrt: Enable ACPI BGRT handling on arm64
+
+Evgeny Kalugin (1):
+      pstore: return error code (if any) from efi_pstore_write
+
+ arch/arm/include/asm/efi.h                         |  14 +-
+ arch/arm64/include/asm/efi.h                       |  24 +++-
+ arch/arm64/kernel/acpi.c                           |   3 +
+ arch/x86/include/asm/efi.h                         |  17 ++-
+ arch/x86/kernel/acpi/boot.c                        |   6 -
+ arch/x86/platform/efi/Makefile                     |   1 -
+ arch/x86/platform/efi/efi.c                        |   6 +-
+ arch/x86/platform/efi/efi_32.c                     |  12 +-
+ arch/x86/platform/efi/efi_64.c                     |  24 ++--
+ drivers/acpi/Kconfig                               |   2 +-
+ drivers/acpi/bgrt.c                                |   6 +
+ drivers/firmware/efi/Makefile                      |   1 +
+ .../platform => drivers/firmware}/efi/efi-bgrt.c   |   0
+ drivers/firmware/efi/efi-pstore.c                  |   6 +-
+ drivers/firmware/efi/libstub/arm-stub.c            |  80 ++++++-----
+ drivers/firmware/efi/libstub/arm32-stub.c          | 150 ++++++++++++++++++---
+ drivers/firmware/efi/libstub/arm64-stub.c          |   4 +-
+ drivers/firmware/efi/libstub/efi-stub-helper.c     |  32 +++--
+ drivers/firmware/efi/libstub/efistub.h             |   9 ++
+ drivers/firmware/efi/libstub/fdt.c                 |  57 ++++----
+ drivers/firmware/efi/libstub/secureboot.c          |   2 +
+ include/linux/efi-bgrt.h                           |   5 +
+ include/linux/efi.h                                |   5 +-
+ 23 files changed, 328 insertions(+), 138 deletions(-)
+ rename {arch/x86/platform => drivers/firmware}/efi/efi-bgrt.c (100%)
