@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 5/8] efi/capsule-loader: use cached copy of capsule header
-Date: Wed,  5 Apr 2017 10:23:14 +0100
-Message-ID: <20170405092317.27921-6-ard.biesheuvel@linaro.org>
+Subject: [PATCH 8/8] efi/capsule: Add support for Quark security header
+Date: Wed,  5 Apr 2017 10:23:17 +0100
+Message-ID: <20170405092317.27921-9-ard.biesheuvel@linaro.org>
 References: <20170405092317.27921-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20170405092317.27921-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,123 +10,179 @@ To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org, hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org, jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Instead of kmapping the capsule data twice, copy the capsule header
-into the capsule info struct we keep locally. This is an improvement
-by itself, but will also enable handling of non-standard header formats
-more easily.
+From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 
+The firmware for Quark X102x prepends a security header to the capsule
+which is needed to support the mandatory secure boot on this processor.
+The header can be detected by checking for the "_CSH" signature and -
+to avoid any GUID conflict - validating its size field to contain the
+expected value. Then we need to look for the EFI header right after the
+security header and pass the real header to __efi_capsule_setup_info.
+
+To be minimally invasive and maximally safe, the quirk version of
+efi_capsule_identify_image is only effective on Quark processors.
+
+Signed-off-by: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+[ardb: refactor using an override of efi_capsule_setup_info()]
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/capsule-loader.c | 41 ++++++++------------
- 1 file changed, 17 insertions(+), 24 deletions(-)
+ arch/x86/platform/efi/quirks.c | 112 ++++++++++++++++++++
+ drivers/firmware/efi/Kconfig   |   9 ++
+ 2 files changed, 121 insertions(+)
 
-diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-index 37d3f6ec2d28..5b012a467d7d 100644
---- a/drivers/firmware/efi/capsule-loader.c
-+++ b/drivers/firmware/efi/capsule-loader.c
-@@ -21,13 +21,13 @@
- #define NO_FURTHER_WRITE_ACTION -1
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 30031d5293c4..ee922e1b7008 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -13,12 +13,66 @@
+ #include <linux/dmi.h>
+ #include <asm/efi.h>
+ #include <asm/uv/uv.h>
++#include <asm/cpu_device_id.h>
  
- struct capsule_info {
--	bool		header_obtained;
--	int		reset_type;
--	long		index;
--	size_t		count;
--	size_t		total_size;
--	struct page	**pages;
--	size_t		page_bytes_remain;
-+	efi_capsule_header_t	header;
-+	int			reset_type;
-+	long			index;
-+	size_t			count;
-+	size_t			total_size;
-+	struct page		**pages;
-+	size_t			page_bytes_remain;
- };
+ #define EFI_MIN_RESERVE 5120
  
- /**
-@@ -56,7 +56,6 @@ static void efi_free_all_buff_pages(struct capsule_info *cap_info)
- static int efi_capsule_setup_info(struct capsule_info *cap_info,
- 				  void *kbuff, size_t hdr_bytes)
+ #define EFI_DUMMY_GUID \
+ 	EFI_GUID(0x4424ac57, 0xbe4b, 0x47dd, 0x9e, 0x97, 0xed, 0x50, 0xf0, 0x9f, 0x92, 0xa9)
+ 
++#define QUARK_CSH_SIGNATURE		0x5f435348	/* _CSH */
++#define QUARK_SECURITY_HEADER_SIZE	0x400
++
++/*
++ * Header prepended to the standard EFI capsule on Quark systems the are based
++ * on Intel firmware BSP.
++ * @csh_signature:	Unique identifier to sanity check signed module
++ * 			presence ("_CSH").
++ * @version:		Current version of CSH used. Should be one for Quark A0.
++ * @modulesize:		Size of the entire module including the module header
++ * 			and payload.
++ * @security_version_number_index: Index of SVN to use for validation of signed
++ * 			module.
++ * @security_version_number: Used to prevent against roll back of modules.
++ * @rsvd_module_id:	Currently unused for Clanton (Quark).
++ * @rsvd_module_vendor:	Vendor Identifier. For Intel products value is
++ * 			0x00008086.
++ * @rsvd_date:		BCD representation of build date as yyyymmdd, where
++ * 			yyyy=4 digit year, mm=1-12, dd=1-31.
++ * @headersize:		Total length of the header including including any
++ * 			padding optionally added by the signing tool.
++ * @hash_algo:		What Hash is used in the module signing.
++ * @cryp_algo:		What Crypto is used in the module signing.
++ * @keysize:		Total length of the key data including including any
++ * 			padding optionally added by the signing tool.
++ * @signaturesize:	Total length of the signature including including any
++ * 			padding optionally added by the signing tool.
++ * @rsvd_next_header:	32-bit pointer to the next Secure Boot Module in the
++ * 			chain, if there is a next header.
++ * @rsvd:		Reserved, padding structure to required size.
++ *
++ * See also QuartSecurityHeader_t in
++ * Quark_EDKII_v1.2.1.1/QuarkPlatformPkg/Include/QuarkBootRom.h
++ * from https://downloadcenter.intel.com/download/23197/Intel-Quark-SoC-X1000-Board-Support-Package-BSP
++ */
++struct quark_security_header {
++	u32 csh_signature;
++	u32 version;
++	u32 modulesize;
++	u32 security_version_number_index;
++	u32 security_version_number;
++	u32 rsvd_module_id;
++	u32 rsvd_module_vendor;
++	u32 rsvd_date;
++	u32 headersize;
++	u32 hash_algo;
++	u32 cryp_algo;
++	u32 keysize;
++	u32 signaturesize;
++	u32 rsvd_next_header;
++	u32 rsvd[2];
++};
++
+ static efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
+ 
+ static bool efi_no_storage_paranoia;
+@@ -495,3 +549,61 @@ bool efi_poweroff_required(void)
  {
--	efi_capsule_header_t *cap_hdr;
- 	size_t pages_needed;
- 	int ret;
- 	void *temp_page;
-@@ -66,8 +65,9 @@ static int efi_capsule_setup_info(struct capsule_info *cap_info,
- 		return 0;
- 
- 	/* Reset back to the correct offset of header */
--	cap_hdr = kbuff - cap_info->count;
--	pages_needed = ALIGN(cap_hdr->imagesize, PAGE_SIZE) >> PAGE_SHIFT;
-+	kbuff -= cap_info->count;
-+	memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
-+	pages_needed = ALIGN(cap_info->header.imagesize, PAGE_SIZE) / PAGE_SIZE;
- 
- 	if (pages_needed == 0) {
- 		pr_err("invalid capsule size");
-@@ -75,15 +75,16 @@ static int efi_capsule_setup_info(struct capsule_info *cap_info,
- 	}
- 
- 	/* Check if the capsule binary supported */
--	ret = efi_capsule_supported(cap_hdr->guid, cap_hdr->flags,
--				    cap_hdr->imagesize,
-+	ret = efi_capsule_supported(cap_info->header.guid,
-+				    cap_info->header.flags,
-+				    cap_info->header.imagesize,
- 				    &cap_info->reset_type);
- 	if (ret) {
- 		pr_err("capsule not supported\n");
- 		return ret;
- 	}
- 
--	cap_info->total_size = cap_hdr->imagesize;
-+	cap_info->total_size = cap_info->header.imagesize;
- 	temp_page = krealloc(cap_info->pages,
- 			     pages_needed * sizeof(void *),
- 			     GFP_KERNEL | __GFP_ZERO);
-@@ -91,7 +92,6 @@ static int efi_capsule_setup_info(struct capsule_info *cap_info,
- 		return -ENOMEM;
- 
- 	cap_info->pages = temp_page;
--	cap_info->header_obtained = true;
- 
- 	return 0;
+ 	return acpi_gbl_reduced_hardware || acpi_no_s5;
  }
-@@ -104,15 +104,8 @@ static int efi_capsule_setup_info(struct capsule_info *cap_info,
- static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
- {
- 	int ret;
--	void *cap_hdr_temp;
++
++#ifdef CONFIG_EFI_CAPSULE_QUIRK_QUARK_CSH
++
++static const struct x86_cpu_id quark_ids[] = {
++	{ X86_VENDOR_INTEL, 5, 9 },	/* Intel Quark X1000 */
++	{ }
++};
++
++int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
++			   size_t hdr_bytes)
++{
++	struct quark_security_header *csh = kbuff;
++
++	cap_info->total_size = 0;
++
++	if (!x86_match_cpu(quark_ids))
++		goto fallback;
++
++	/* Only process data block that is larger than the security header */
++	if (hdr_bytes < sizeof(struct quark_security_header))
++		return 0;
++
++	if (csh->csh_signature != QUARK_CSH_SIGNATURE ||
++	    csh->headersize != QUARK_SECURITY_HEADER_SIZE)
++		goto fallback;
++
++	/* Only process data block if EFI header is included */
++	if (hdr_bytes < QUARK_SECURITY_HEADER_SIZE +
++			sizeof(efi_capsule_header_t))
++		return 0;
++
++	pr_debug("Quark security header detected\n");
++
++	if (csh->rsvd_next_header != 0) {
++		pr_err("multiple Quark security headers not supported\n");
++		return -EINVAL;
++	}
++
++	kbuff += csh->headersize;
++	cap_info->total_size = csh->headersize;
++
++	/*
++	 * Update the first page pointer to skip over the CSH header.
++	 */
++	cap_info->pages[0] += csh->headersize;
++
++fallback:
++	if (hdr_bytes < sizeof(efi_capsule_header_t))
++		return 0;
++
++	memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
++
++	cap_info->total_size += cap_info->header.imagesize;
++
++	return __efi_capsule_setup_info(cap_info);
++}
++
++#endif
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 2e78b0b96d74..394db40ed374 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -112,6 +112,15 @@ config EFI_CAPSULE_LOADER
  
--	cap_hdr_temp = vmap(cap_info->pages, cap_info->index,
--			VM_MAP, PAGE_KERNEL);
--	if (!cap_hdr_temp)
--		return -ENOMEM;
--
--	ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
--	vunmap(cap_hdr_temp);
-+	ret = efi_capsule_update(&cap_info->header, cap_info->pages);
- 	if (ret) {
- 		pr_err("capsule update failed\n");
- 		return ret;
-@@ -192,7 +185,7 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
- 	cap_info->page_bytes_remain -= write_byte;
+ 	  Most users should say N.
  
- 	/* Setup capsule binary info structure */
--	if (!cap_info->header_obtained) {
-+	if (cap_info->header.headersize == 0) {
- 		ret = efi_capsule_setup_info(cap_info, kbuff,
- 					     cap_info->count + write_byte);
- 		if (ret)
-@@ -203,7 +196,7 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
- 	kunmap(page);
- 
- 	/* Submit the full binary to efi_capsule_update() API */
--	if (cap_info->header_obtained &&
-+	if (cap_info->header.headersize > 0 &&
- 	    cap_info->count >= cap_info->total_size) {
- 		if (cap_info->count > cap_info->total_size) {
- 			pr_err("capsule upload size exceeded header defined size\n");
++config EFI_CAPSULE_QUIRK_QUARK_CSH
++	boolean "Add support for Quark capsules with non-standard headers"
++	depends on X86 && !64BIT
++	select EFI_CAPSULE_LOADER
++	default y
++	help
++	  Add support for processing Quark X1000 EFI capsules, whose header
++	  layout deviates from the layout mandated by the UEFI specification.
++
+ config EFI_TEST
+ 	tristate "EFI Runtime Service Tests Support"
+ 	depends on EFI
 -- 
 2.9.3
