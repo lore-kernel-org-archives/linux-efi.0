@@ -1,8 +1,7 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 14/24] x86: Restrict MSR access when the kernel is locked
- down
-Date: Wed, 05 Apr 2017 21:16:33 +0100
-Message-ID: <149142339340.5101.1283602261267937893.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 04/24] Enforce module signatures if the kernel is locked down
+Date: Wed, 05 Apr 2017 21:15:03 +0100
+Message-ID: <149142330358.5101.11872619513155932508.stgit@warthog.procyon.org.uk>
 References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -11,47 +10,29 @@ Return-path: <linux-security-module-owner@vger.kernel.org>
 In-Reply-To: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
 Sender: owner-linux-security-module@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: matthew.garrett@nebula.com, linux-efi@vger.kernel.org, Kees Cook <keescook@chromium.org>, gnomes@lxorguk.ukuu.org.uk, gregkh@linuxfoundation.org, x86@kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org
+Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Matthew Garrett <matthew.garrett@nebula.com>
+If the kernel is locked down, require that all modules have valid
+signatures that we can verify.
 
-Writing to MSRs should not be allowed if the kernel is locked down, since
-it could lead to execution of arbitrary code in kernel mode.  Based on a
-patch by Kees Cook.
-
-Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
-Acked-by: Kees Cook <keescook@chromium.org>
-cc: x86@kernel.org
 ---
 
- arch/x86/kernel/msr.c |    7 +++++++
- 1 file changed, 7 insertions(+)
+ kernel/module.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/x86/kernel/msr.c b/arch/x86/kernel/msr.c
-index ef688804f80d..fbcce028e502 100644
---- a/arch/x86/kernel/msr.c
-+++ b/arch/x86/kernel/msr.c
-@@ -84,6 +84,9 @@ static ssize_t msr_write(struct file *file, const char __user *buf,
- 	int err = 0;
- 	ssize_t bytes = 0;
+diff --git a/kernel/module.c b/kernel/module.c
+index 7eba6dea4f41..3331f2eb9b93 100644
+--- a/kernel/module.c
++++ b/kernel/module.c
+@@ -2756,7 +2756,7 @@ static int module_sig_check(struct load_info *info, int flags)
+ 	}
  
-+	if (kernel_is_locked_down())
-+		return -EPERM;
-+
- 	if (count % 8)
- 		return -EINVAL;	/* Invalid chunk size */
+ 	/* Not having a signature is only an error if we're strict. */
+-	if (err == -ENOKEY && !sig_enforce)
++	if (err == -ENOKEY && !sig_enforce && !kernel_is_locked_down())
+ 		err = 0;
  
-@@ -131,6 +134,10 @@ static long msr_ioctl(struct file *file, unsigned int ioc, unsigned long arg)
- 			err = -EBADF;
- 			break;
- 		}
-+		if (kernel_is_locked_down()) {
-+			err = -EPERM;
-+			break;
-+		}
- 		if (copy_from_user(&regs, uregs, sizeof regs)) {
- 			err = -EFAULT;
- 			break;
+ 	return err;
 
