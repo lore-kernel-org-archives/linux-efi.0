@@ -1,68 +1,55 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 20/24] bpf: Restrict kernel image access functions when the
- kernel is locked down
-Date: Wed, 05 Apr 2017 21:17:25 +0100
-Message-ID: <149142344547.5101.4518618716303032193.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 19/24] acpi: Disable APEI error injection if the kernel is
+ locked down
+Date: Wed, 05 Apr 2017 21:17:16 +0100
+Message-ID: <149142343682.5101.14960696203158482012.stgit@warthog.procyon.org.uk>
 References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <netdev-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
-Sender: netdev-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: dhowells@redhat.com, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, netdev@vger.kernel.org, Chun-Yi Lee <jlee@suse.com>, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, gregkh@linuxfoundation.org, matthew.garrett@nebula.com
+Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, Linn Crosetto <linn@hpe.com>, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, dhowells@redhat.com, linux-acpi@vger.kernel.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Chun-Yi Lee <jlee@suse.com>
+From: Linn Crosetto <linn@hpe.com>
 
-There are some bpf functions can be used to read kernel memory:
-bpf_probe_read, bpf_probe_write_user and bpf_trace_printk.  These allow
-private keys in kernel memory (e.g. the hibernation image signing key) to
-be read by an eBPF program.  Prohibit those functions when the kernel is
-locked down.
+ACPI provides an error injection mechanism, EINJ, for debugging and testing
+the ACPI Platform Error Interface (APEI) and other RAS features.  If
+supported by the firmware, ACPI specification 5.0 and later provide for a
+way to specify a physical memory address to which to inject the error.
 
-Signed-off-by: Chun-Yi Lee <jlee@suse.com>
+Injecting errors through EINJ can produce errors which to the platform are
+indistinguishable from real hardware errors.  This can have undesirable
+side-effects, such as causing the platform to mark hardware as needing
+replacement.
+
+While it does not provide a method to load unauthenticated privileged code,
+the effect of these errors may persist across reboots and affect trust in
+the underlying hardware, so disable error injection through EINJ if
+the kernel is locked down.
+
+Signed-off-by: Linn Crosetto <linn@hpe.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: netdev@vger.kernel.org
+cc: linux-acpi@vger.kernel.org
 ---
 
- kernel/trace/bpf_trace.c |   11 +++++++++++
- 1 file changed, 11 insertions(+)
+ drivers/acpi/apei/einj.c |    3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/kernel/trace/bpf_trace.c b/kernel/trace/bpf_trace.c
-index cee9802cf3e0..7fde851f207b 100644
---- a/kernel/trace/bpf_trace.c
-+++ b/kernel/trace/bpf_trace.c
-@@ -65,6 +65,11 @@ BPF_CALL_3(bpf_probe_read, void *, dst, u32, size, const void *, unsafe_ptr)
- {
- 	int ret;
+diff --git a/drivers/acpi/apei/einj.c b/drivers/acpi/apei/einj.c
+index ec50c32ea3da..e082718d01c2 100644
+--- a/drivers/acpi/apei/einj.c
++++ b/drivers/acpi/apei/einj.c
+@@ -518,6 +518,9 @@ static int einj_error_inject(u32 type, u32 flags, u64 param1, u64 param2,
+ 	int rc;
+ 	u64 base_addr, size;
  
-+	if (kernel_is_locked_down()) {
-+		memset(dst, 0, size);
-+		return -EPERM;
-+	}
-+
- 	ret = probe_kernel_read(dst, unsafe_ptr, size);
- 	if (unlikely(ret < 0))
- 		memset(dst, 0, size);
-@@ -84,6 +89,9 @@ static const struct bpf_func_proto bpf_probe_read_proto = {
- BPF_CALL_3(bpf_probe_write_user, void *, unsafe_ptr, const void *, src,
- 	   u32, size)
- {
 +	if (kernel_is_locked_down())
 +		return -EPERM;
 +
- 	/*
- 	 * Ensure we're in user context which is safe for the helper to
- 	 * run. This helper has no business in a kthread.
-@@ -143,6 +151,9 @@ BPF_CALL_5(bpf_trace_printk, char *, fmt, u32, fmt_size, u64, arg1,
- 	if (fmt[--fmt_size] != 0)
- 		return -EINVAL;
- 
-+	if (kernel_is_locked_down())
-+		return __trace_printk(1, fmt, 0, 0, 0);
-+
- 	/* check format string for allowed specifiers */
- 	for (i = 0; i < fmt_size; i++) {
- 		if ((!isprint(fmt[i]) && !isspace(fmt[i])) || !isascii(fmt[i]))
+ 	/* If user manually set "flags", make sure it is legal */
+ 	if (flags && (flags &
+ 		~(SETWA_FLAGS_APICID|SETWA_FLAGS_MEM|SETWA_FLAGS_PCIE_SBDF)))
