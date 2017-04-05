@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 1/8] efi/capsule: Fix return code on failing kmap/vmap
-Date: Wed,  5 Apr 2017 10:23:10 +0100
-Message-ID: <20170405092317.27921-2-ard.biesheuvel@linaro.org>
+Subject: [PATCH 4/8] efi/capsule: Adjust return type of efi_capsule_setup_info
+Date: Wed,  5 Apr 2017 10:23:13 +0100
+Message-ID: <20170405092317.27921-5-ard.biesheuvel@linaro.org>
 References: <20170405092317.27921-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20170405092317.27921-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -12,8 +12,8 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 
-If kmap or vmap fail, it means we ran out of memory. There are no
-user-provided addressed involved that would justify EFAULT.
+We actually expect int at the caller and never return any size
+information.
 
 Signed-off-by: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
@@ -23,26 +23,19 @@ Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gman
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-index 9ae6c116c474..91e91f7a8807 100644
+index 3fb91e1597a9..37d3f6ec2d28 100644
 --- a/drivers/firmware/efi/capsule-loader.c
 +++ b/drivers/firmware/efi/capsule-loader.c
-@@ -113,7 +113,7 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
- 			VM_MAP, PAGE_KERNEL);
- 	if (!cap_hdr_temp) {
- 		pr_debug("%s: vmap() failed\n", __func__);
--		return -EFAULT;
-+		return -ENOMEM;
- 	}
- 
- 	ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
-@@ -185,7 +185,7 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
- 	kbuff = kmap(page);
- 	if (!kbuff) {
- 		pr_debug("%s: kmap() failed\n", __func__);
--		ret = -EFAULT;
-+		ret = -ENOMEM;
- 		goto failed;
- 	}
- 	kbuff += PAGE_SIZE - cap_info->page_bytes_remain;
+@@ -53,8 +53,8 @@ static void efi_free_all_buff_pages(struct capsule_info *cap_info)
+  * @kbuff: a mapped first page buffer pointer
+  * @hdr_bytes: the total received number of bytes for efi header
+  **/
+-static ssize_t efi_capsule_setup_info(struct capsule_info *cap_info,
+-				      void *kbuff, size_t hdr_bytes)
++static int efi_capsule_setup_info(struct capsule_info *cap_info,
++				  void *kbuff, size_t hdr_bytes)
+ {
+ 	efi_capsule_header_t *cap_hdr;
+ 	size_t pages_needed;
 -- 
 2.9.3
