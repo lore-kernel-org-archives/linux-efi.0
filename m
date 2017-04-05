@@ -1,114 +1,68 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 12/24] PCI: Lock down BAR access when the kernel is locked
- down
-Date: Wed, 05 Apr 2017 21:16:18 +0100
-Message-ID: <149142337836.5101.13971561682218232219.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 20/24] bpf: Restrict kernel image access functions when the
+ kernel is locked down
+Date: Wed, 05 Apr 2017 21:17:25 +0100
+Message-ID: <149142344547.5101.4518618716303032193.stgit@warthog.procyon.org.uk>
 References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <netdev-owner@vger.kernel.org>
 In-Reply-To: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: netdev-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: matthew.garrett@nebula.com, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-pci@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, gregkh@linuxfoundation.org
+Cc: dhowells@redhat.com, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, netdev@vger.kernel.org, Chun-Yi Lee <jlee@suse.com>, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, gregkh@linuxfoundation.org, matthew.garrett@nebula.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Matthew Garrett <matthew.garrett@nebula.com>
+From: Chun-Yi Lee <jlee@suse.com>
 
-Any hardware that can potentially generate DMA has to be locked down in
-order to avoid it being possible for an attacker to modify kernel code,
-allowing them to circumvent disabled module loading or module signing.
-Default to paranoid - in future we can potentially relax this for
-sufficiently IOMMU-isolated devices.
+There are some bpf functions can be used to read kernel memory:
+bpf_probe_read, bpf_probe_write_user and bpf_trace_printk.  These allow
+private keys in kernel memory (e.g. the hibernation image signing key) to
+be read by an eBPF program.  Prohibit those functions when the kernel is
+locked down.
 
-Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
+Signed-off-by: Chun-Yi Lee <jlee@suse.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: linux-pci@vger.kernel.org
+cc: netdev@vger.kernel.org
 ---
 
- drivers/pci/pci-sysfs.c |    9 +++++++++
- drivers/pci/proc.c      |    8 +++++++-
- drivers/pci/syscall.c   |    2 +-
- 3 files changed, 17 insertions(+), 2 deletions(-)
+ kernel/trace/bpf_trace.c |   11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-diff --git a/drivers/pci/pci-sysfs.c b/drivers/pci/pci-sysfs.c
-index 25d010d449a3..f70b3668036f 100644
---- a/drivers/pci/pci-sysfs.c
-+++ b/drivers/pci/pci-sysfs.c
-@@ -727,6 +727,9 @@ static ssize_t pci_write_config(struct file *filp, struct kobject *kobj,
- 	loff_t init_off = off;
- 	u8 *data = (u8 *) buf;
+diff --git a/kernel/trace/bpf_trace.c b/kernel/trace/bpf_trace.c
+index cee9802cf3e0..7fde851f207b 100644
+--- a/kernel/trace/bpf_trace.c
++++ b/kernel/trace/bpf_trace.c
+@@ -65,6 +65,11 @@ BPF_CALL_3(bpf_probe_read, void *, dst, u32, size, const void *, unsafe_ptr)
+ {
+ 	int ret;
  
-+	if (kernel_is_locked_down())
++	if (kernel_is_locked_down()) {
++		memset(dst, 0, size);
 +		return -EPERM;
++	}
 +
- 	if (off > dev->cfg_size)
- 		return 0;
- 	if (off + count > dev->cfg_size) {
-@@ -1018,6 +1021,9 @@ static int pci_mmap_resource(struct kobject *kobj, struct bin_attribute *attr,
- 	resource_size_t start, end;
- 	int i;
- 
-+	if (kernel_is_locked_down())
-+		return -EPERM;
-+
- 	for (i = 0; i < PCI_ROM_RESOURCE; i++)
- 		if (res == &pdev->resource[i])
- 			break;
-@@ -1117,6 +1123,9 @@ static ssize_t pci_write_resource_io(struct file *filp, struct kobject *kobj,
- 				     struct bin_attribute *attr, char *buf,
- 				     loff_t off, size_t count)
+ 	ret = probe_kernel_read(dst, unsafe_ptr, size);
+ 	if (unlikely(ret < 0))
+ 		memset(dst, 0, size);
+@@ -84,6 +89,9 @@ static const struct bpf_func_proto bpf_probe_read_proto = {
+ BPF_CALL_3(bpf_probe_write_user, void *, unsafe_ptr, const void *, src,
+ 	   u32, size)
  {
 +	if (kernel_is_locked_down())
 +		return -EPERM;
 +
- 	return pci_resource_io(filp, kobj, attr, buf, off, count, true);
- }
- 
-diff --git a/drivers/pci/proc.c b/drivers/pci/proc.c
-index f82710a8694d..139d6f09ae7b 100644
---- a/drivers/pci/proc.c
-+++ b/drivers/pci/proc.c
-@@ -116,6 +116,9 @@ static ssize_t proc_bus_pci_write(struct file *file, const char __user *buf,
- 	int size = dev->cfg_size;
- 	int cnt;
+ 	/*
+ 	 * Ensure we're in user context which is safe for the helper to
+ 	 * run. This helper has no business in a kthread.
+@@ -143,6 +151,9 @@ BPF_CALL_5(bpf_trace_printk, char *, fmt, u32, fmt_size, u64, arg1,
+ 	if (fmt[--fmt_size] != 0)
+ 		return -EINVAL;
  
 +	if (kernel_is_locked_down())
-+		return -EPERM;
++		return __trace_printk(1, fmt, 0, 0, 0);
 +
- 	if (pos >= size)
- 		return 0;
- 	if (nbytes >= size)
-@@ -195,6 +198,9 @@ static long proc_bus_pci_ioctl(struct file *file, unsigned int cmd,
- #endif /* HAVE_PCI_MMAP */
- 	int ret = 0;
- 
-+	if (kernel_is_locked_down())
-+		return -EPERM;
-+
- 	switch (cmd) {
- 	case PCIIOC_CONTROLLER:
- 		ret = pci_domain_nr(dev->bus);
-@@ -233,7 +239,7 @@ static int proc_bus_pci_mmap(struct file *file, struct vm_area_struct *vma)
- 	struct pci_filp_private *fpriv = file->private_data;
- 	int i, ret, write_combine;
- 
--	if (!capable(CAP_SYS_RAWIO))
-+	if (!capable(CAP_SYS_RAWIO) || kernel_is_locked_down())
- 		return -EPERM;
- 
- 	/* Make sure the caller is mapping a real resource for this device */
-diff --git a/drivers/pci/syscall.c b/drivers/pci/syscall.c
-index 9bf993e1f71e..c09524738ceb 100644
---- a/drivers/pci/syscall.c
-+++ b/drivers/pci/syscall.c
-@@ -92,7 +92,7 @@ SYSCALL_DEFINE5(pciconfig_write, unsigned long, bus, unsigned long, dfn,
- 	u32 dword;
- 	int err = 0;
- 
--	if (!capable(CAP_SYS_ADMIN))
-+	if (!capable(CAP_SYS_ADMIN) || kernel_is_locked_down())
- 		return -EPERM;
- 
- 	dev = pci_get_bus_and_slot(bus, dfn);
+ 	/* check format string for allowed specifiers */
+ 	for (i = 0; i < fmt_size; i++) {
+ 		if ((!isprint(fmt[i]) && !isspace(fmt[i])) || !isascii(fmt[i]))
