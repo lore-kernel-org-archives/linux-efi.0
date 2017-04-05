@@ -1,8 +1,8 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 09/24] kexec_file: Disable at runtime if securelevel has
- been set
-Date: Wed, 05 Apr 2017 18:11:21 +0100
-Message-ID: <149141228170.31282.6899985667525868658.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 08/24] Copy secure_boot flag in boot params across kexec
+ reboot
+Date: Wed, 05 Apr 2017 18:11:07 +0100
+Message-ID: <149141226780.31282.16496246694992359013.stgit@warthog.procyon.org.uk>
 References: <149141219387.31282.6648284836568938717.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -11,40 +11,39 @@ Return-path: <linux-security-module-owner@vger.kernel.org>
 In-Reply-To: <149141219387.31282.6648284836568938717.stgit@warthog.procyon.org.uk>
 Sender: owner-linux-security-module@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>, dhowells@redhat.com, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, gregkh@linuxfoundation.org, Chun-Yi Lee <jlee@suse.com>, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, matthew.garrett@nebula.com
+Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, Dave Young <dyoung@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Chun-Yi Lee <joeyli.kernel@gmail.com>
+From: Dave Young <dyoung@redhat.com>
 
-When KEXEC_VERIFY_SIG is not enabled, kernel should not loads image
-through kexec_file systemcall if securelevel has been set.
+Kexec reboot in case secure boot being enabled does not keep the secure
+boot mode in new kernel, so later one can load unsigned kernel via legacy
+kexec_load.  In this state, the system is missing the protections provided
+by secure boot.
 
-This code was showed in Matthew's patch but not in git:
-https://lkml.org/lkml/2015/3/13/778
+Adding a patch to fix this by retain the secure_boot flag in original
+kernel.
 
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>
-Signed-off-by: Chun-Yi Lee <jlee@suse.com>
+secure_boot flag in boot_params is set in EFI stub, but kexec bypasses the
+stub.  Fixing this issue by copying secure_boot flag across kexec reboot.
+
+Signed-off-by: Dave Young <dyoung@redhat.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- kernel/kexec_file.c |    6 ++++++
- 1 file changed, 6 insertions(+)
+ arch/x86/kernel/kexec-bzimage64.c |    1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/kernel/kexec_file.c b/kernel/kexec_file.c
-index b118735fea9d..f6937eecd1eb 100644
---- a/kernel/kexec_file.c
-+++ b/kernel/kexec_file.c
-@@ -268,6 +268,12 @@ SYSCALL_DEFINE5(kexec_file_load, int, kernel_fd, int, initrd_fd,
- 	if (!capable(CAP_SYS_BOOT) || kexec_load_disabled)
- 		return -EPERM;
+diff --git a/arch/x86/kernel/kexec-bzimage64.c b/arch/x86/kernel/kexec-bzimage64.c
+index d0a814a9d96a..3551bcaa1eaf 100644
+--- a/arch/x86/kernel/kexec-bzimage64.c
++++ b/arch/x86/kernel/kexec-bzimage64.c
+@@ -179,6 +179,7 @@ setup_efi_state(struct boot_params *params, unsigned long params_load_addr,
+ 	if (efi_enabled(EFI_OLD_MEMMAP))
+ 		return 0;
  
-+	/* Don't permit images to be loaded into trusted kernels if we're not
-+	 * going to verify the signature on them
-+	 */
-+	if (!IS_ENABLED(CONFIG_KEXEC_VERIFY_SIG) && kernel_is_locked_down())
-+		return -EPERM;
-+
- 	/* Make sure we have a legal set of flags */
- 	if (flags != (flags & KEXEC_FILE_FLAGS))
- 		return -EINVAL;
++	params->secure_boot = boot_params.secure_boot;
+ 	ei->efi_loader_signature = current_ei->efi_loader_signature;
+ 	ei->efi_systab = current_ei->efi_systab;
+ 	ei->efi_systab_hi = current_ei->efi_systab_hi;
 
