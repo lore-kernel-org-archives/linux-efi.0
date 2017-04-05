@@ -1,44 +1,43 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 17/24] acpi: Ignore acpi_rsdp kernel param when the kernel
- has been locked down
-Date: Wed, 05 Apr 2017 21:16:57 +0100
-Message-ID: <149142341772.5101.12366553346604485034.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 11/24] uswsusp: Disable when the kernel is locked down
+Date: Wed, 05 Apr 2017 21:16:09 +0100
+Message-ID: <149142336965.5101.2946578135980499557.stgit@warthog.procyon.org.uk>
 References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, Josh Boyer <jwboyer@redhat.com>, gregkh@linuxfoundation.org, dhowells@redhat.com, linux-acpi@vger.kernel.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, matthew.garrett@nebula.com
+Cc: Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, gregkh@linuxfoundation.org, linux-pm@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, matthew.garrett@nebula.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Josh Boyer <jwboyer@redhat.com>
+From: Matthew Garrett <mjg59@srcf.ucam.org>
 
-This option allows userspace to pass the RSDP address to the kernel, which
-makes it possible for a user to circumvent any restrictions imposed on
-loading modules.  Ignore the option when the kernel is locked down.
+uswsusp allows a user process to dump and then restore kernel state, which
+makes it possible to modify the running kernel.  Disable this if the kernel
+is locked down.
 
-Signed-off-by: Josh Boyer <jwboyer@redhat.com>
+Signed-off-by: Matthew Garrett <mjg59@srcf.ucam.org>
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: linux-acpi@vger.kernel.org
+cc: linux-pm@vger.kernel.org
 ---
 
- drivers/acpi/osl.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ kernel/power/user.c |    3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/acpi/osl.c b/drivers/acpi/osl.c
-index db78d353bab1..d4d4ba348451 100644
---- a/drivers/acpi/osl.c
-+++ b/drivers/acpi/osl.c
-@@ -192,7 +192,7 @@ acpi_physical_address __init acpi_os_get_root_pointer(void)
- 	acpi_physical_address pa = 0;
+diff --git a/kernel/power/user.c b/kernel/power/user.c
+index 22df9f7ff672..e4b926d329b7 100644
+--- a/kernel/power/user.c
++++ b/kernel/power/user.c
+@@ -52,6 +52,9 @@ static int snapshot_open(struct inode *inode, struct file *filp)
+ 	if (!hibernation_available())
+ 		return -EPERM;
  
- #ifdef CONFIG_KEXEC
--	if (acpi_rsdp)
-+	if (acpi_rsdp && !kernel_is_locked_down())
- 		return acpi_rsdp;
- #endif
++	if (kernel_is_locked_down())
++		return -EPERM;
++
+ 	lock_system_sleep();
  
-
+ 	if (!atomic_add_unless(&snapshot_device_available, -1, 0)) {
