@@ -1,53 +1,44 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 18/24] acpi: Disable ACPI table override if the kernel is
- locked down
-Date: Wed, 05 Apr 2017 21:17:08 +0100
-Message-ID: <149142342857.5101.10620312195465803812.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 17/24] acpi: Ignore acpi_rsdp kernel param when the kernel
+ has been locked down
+Date: Wed, 05 Apr 2017 21:16:57 +0100
+Message-ID: <149142341772.5101.12366553346604485034.stgit@warthog.procyon.org.uk>
 References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
+Return-path: <linux-security-module-owner@vger.kernel.org>
 In-Reply-To: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
-Sender: linux-acpi-owner@vger.kernel.org
+Sender: owner-linux-security-module@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, Linn Crosetto <linn@hpe.com>, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, dhowells@redhat.com, linux-acpi@vger.kernel.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org
+Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, Josh Boyer <jwboyer@redhat.com>, gregkh@linuxfoundation.org, dhowells@redhat.com, linux-acpi@vger.kernel.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, matthew.garrett@nebula.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Linn Crosetto <linn@hpe.com>
+From: Josh Boyer <jwboyer@redhat.com>
 
->From the kernel documentation (initrd_table_override.txt):
+This option allows userspace to pass the RSDP address to the kernel, which
+makes it possible for a user to circumvent any restrictions imposed on
+loading modules.  Ignore the option when the kernel is locked down.
 
-  If the ACPI_INITRD_TABLE_OVERRIDE compile option is true, it is possible
-  to override nearly any ACPI table provided by the BIOS with an
-  instrumented, modified one.
-
-When securelevel is set, the kernel should disallow any unauthenticated
-changes to kernel space.  ACPI tables contain code invoked by the kernel,
-so do not allow ACPI tables to be overridden if the kernel is locked down.
-
-Signed-off-by: Linn Crosetto <linn@hpe.com>
+Signed-off-by: Josh Boyer <jwboyer@redhat.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: linux-acpi@vger.kernel.org
 ---
 
- drivers/acpi/tables.c |    5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/acpi/osl.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/acpi/tables.c b/drivers/acpi/tables.c
-index 2604189d6cd1..601096d0d849 100644
---- a/drivers/acpi/tables.c
-+++ b/drivers/acpi/tables.c
-@@ -542,6 +542,11 @@ void __init acpi_table_upgrade(void)
- 	if (table_nr == 0)
- 		return;
+diff --git a/drivers/acpi/osl.c b/drivers/acpi/osl.c
+index db78d353bab1..d4d4ba348451 100644
+--- a/drivers/acpi/osl.c
++++ b/drivers/acpi/osl.c
+@@ -192,7 +192,7 @@ acpi_physical_address __init acpi_os_get_root_pointer(void)
+ 	acpi_physical_address pa = 0;
  
-+	if (kernel_is_locked_down()) {
-+		pr_notice("kernel is locked down, ignoring table override\n");
-+		return;
-+	}
-+
- 	acpi_tables_addr =
- 		memblock_find_in_range(0, ACPI_TABLE_UPGRADE_MAX_PHYS,
- 				       all_tables_size, PAGE_SIZE);
+ #ifdef CONFIG_KEXEC
+-	if (acpi_rsdp)
++	if (acpi_rsdp && !kernel_is_locked_down())
+ 		return acpi_rsdp;
+ #endif
+ 
 
