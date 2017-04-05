@@ -1,78 +1,70 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 2/8] efi/capsule: Remove pr_debug on ENOMEM or EFAULT
-Date: Wed,  5 Apr 2017 10:23:11 +0100
-Message-ID: <20170405092317.27921-3-ard.biesheuvel@linaro.org>
-References: <20170405092317.27921-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170405092317.27921-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org, hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org, jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Subject: Re: [GIT PULL 0/2] EFI fixes for v4.11
+Date: Wed, 05 Apr 2017 12:08:31 +0200
+Message-ID: <5013223.ea6UCckGV3@amdc3058>
+References: <20170404152744.26687-1-ard.biesheuvel@linaro.org>
+ <CGME20170405100833epcas1p4b5076679dc4f8644fa789b421a66f953@epcas1p4.samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <20170404152744.26687-1-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, leif.lindholm@linaro.org, lorenzo.pieralisi@arm.com, linux-kernel@vger.kernel.org, Eugene Cohen <eugene@hp.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 
-Both cases are not worth a debug log message - the error code is telling
-enough.
+Hi,
 
-Signed-off-by: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/capsule-loader.c | 11 ++---------
- 1 file changed, 2 insertions(+), 9 deletions(-)
+On Tuesday, April 04, 2017 04:27:42 PM Ard Biesheuvel wrote:
+> Hello all,
+> 
+> Please pull these fixes for EFI framebuffer support on ARM/arm64 systems.
+> 
+> The following changes since commit 822f5845f710e57d7e2df1fd1ee00d6e19d334fe:
+> 
+>   efi/esrt: Cleanup bad memory map log messages (2017-03-17 18:53:12 +0000)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
+> 
+> for you to fetch changes up to e73c2811538bd36ec1340d01bafdc080af31914e:
+> 
+>   efifb: Avoid reconfiguration of BAR that covers the framebuffer (2017-04-04 15:56:43 +0100)
+> 
+> ----------------------------------------------------------------
+> Two fixes related to the EFI framebuffer driver:
+> - Ignore Graphics Output Protocol (GOP) implementations that are marked as
+>   BLT-only -- the framebuffer base address is invalid in this case, and the
+>   Blt() method is not accessible to the kernel.
+> - If the GOP framebuffer base address coincides with a memory BAR of a PCI
+>   device that has memory decoding enabled, claim the memory resource so that
+>   the PCI core will not attempt to move it later on.
+> 
+> ----------------------------------------------------------------
+> Ard Biesheuvel (1):
+>       efifb: Avoid reconfiguration of BAR that covers the framebuffer
 
-diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-index 91e91f7a8807..7b57dda2417d 100644
---- a/drivers/firmware/efi/capsule-loader.c
-+++ b/drivers/firmware/efi/capsule-loader.c
-@@ -88,10 +88,8 @@ static ssize_t efi_capsule_setup_info(struct capsule_info *cap_info,
- 	temp_page = krealloc(cap_info->pages,
- 			     pages_needed * sizeof(void *),
- 			     GFP_KERNEL | __GFP_ZERO);
--	if (!temp_page) {
--		pr_debug("%s: krealloc() failed\n", __func__);
-+	if (!temp_page)
- 		return -ENOMEM;
--	}
- 
- 	cap_info->pages = temp_page;
- 	cap_info->header_obtained = true;
-@@ -111,10 +109,8 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
- 
- 	cap_hdr_temp = vmap(cap_info->pages, cap_info->index,
- 			VM_MAP, PAGE_KERNEL);
--	if (!cap_hdr_temp) {
--		pr_debug("%s: vmap() failed\n", __func__);
-+	if (!cap_hdr_temp)
- 		return -ENOMEM;
--	}
- 
- 	ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
- 	vunmap(cap_hdr_temp);
-@@ -171,7 +167,6 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
- 	if (!cap_info->page_bytes_remain) {
- 		page = alloc_page(GFP_KERNEL);
- 		if (!page) {
--			pr_debug("%s: alloc_page() failed\n", __func__);
- 			ret = -ENOMEM;
- 			goto failed;
- 		}
-@@ -184,7 +179,6 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
- 
- 	kbuff = kmap(page);
- 	if (!kbuff) {
--		pr_debug("%s: kmap() failed\n", __func__);
- 		ret = -ENOMEM;
- 		goto failed;
- 	}
-@@ -193,7 +187,6 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
- 	/* Copy capsule binary data from user space to kernel space buffer */
- 	write_byte = min_t(size_t, count, cap_info->page_bytes_remain);
- 	if (copy_from_user(kbuff, buff, write_byte)) {
--		pr_debug("%s: copy_from_user() failed\n", __func__);
- 		ret = -EFAULT;
- 		goto fail_unmap;
- 	}
--- 
-2.9.3
+This patch breaks build if PCI support is not enabled:
+
+drivers/video/fbdev/efifb.c: In function ‘claim_efifb_bar’:
+drivers/video/fbdev/efifb.c:386:2: error: implicit declaration of function ‘pci_claim_resource’ [-Werror=implicit-function-declaration]
+
+(x86 ifdefs are not enough, the patch should also check for PCI support)
+
+Also please cc: linux-fbdev mailing list & me on fbdev related patches.
+
+> Cohen, Eugene (1):
+>       efi/libstub: Skip GOP with PIXEL_BLT_ONLY format
+> 
+>  drivers/firmware/efi/libstub/gop.c |  6 ++--
+>  drivers/video/fbdev/efifb.c        | 66 +++++++++++++++++++++++++++++++++++++-
+>  2 files changed, 69 insertions(+), 3 deletions(-)
+
+Best regards,
+--
+Bartlomiej Zolnierkiewicz
+Samsung R&D Institute Poland
+Samsung Electronics
