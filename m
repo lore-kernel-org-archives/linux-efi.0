@@ -1,7 +1,7 @@
 From: David Howells <dhowells@redhat.com>
 Subject: [PATCH 00/24] Kernel lockdown
-Date: Wed, 05 Apr 2017 18:07:00 +0100
-Message-ID: <149141201983.30815.1240162780237131881.stgit@warthog.procyon.org.uk>
+Date: Wed, 05 Apr 2017 18:09:54 +0100
+Message-ID: <149141219387.31282.6648284836568938717.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -48,6 +48,9 @@ They are dependent on the hwparam branch, which I posted separately.
 
 David
 ---
+Chun-Yi Lee (1):
+      kexec_file: Disable at runtime if securelevel has been set
+
 Dave Young (1):
       Copy secure_boot flag in boot params across kexec reboot
 
@@ -68,8 +71,7 @@ Josh Boyer (3):
 Kyle McMartin (1):
       Add a sysrq option to exit secure boot mode
 
-Lee, Chun-Yi (2):
-      kexec_file: Disable at runtime if securelevel has been set
+Lee, Chun-Yi (1):
       bpf: Restrict kernel image access functions when the kernel is locked down
 
 Linn Crosetto (2):
