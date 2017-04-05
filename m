@@ -1,43 +1,57 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 11/24] uswsusp: Disable when the kernel is locked down
-Date: Wed, 05 Apr 2017 21:16:09 +0100
-Message-ID: <149142336965.5101.2946578135980499557.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 14/24] x86: Restrict MSR access when the kernel is locked
+ down
+Date: Wed, 05 Apr 2017 21:16:33 +0100
+Message-ID: <149142339340.5101.1283602261267937893.stgit@warthog.procyon.org.uk>
 References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-security-module-owner@vger.kernel.org>
 In-Reply-To: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: owner-linux-security-module@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, gregkh@linuxfoundation.org, linux-pm@vger.kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, matthew.garrett@nebula.com
+Cc: matthew.garrett@nebula.com, linux-efi@vger.kernel.org, Kees Cook <keescook@chromium.org>, gnomes@lxorguk.ukuu.org.uk, gregkh@linuxfoundation.org, x86@kernel.org, dhowells@redhat.com, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Matthew Garrett <mjg59@srcf.ucam.org>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 
-uswsusp allows a user process to dump and then restore kernel state, which
-makes it possible to modify the running kernel.  Disable this if the kernel
-is locked down.
+Writing to MSRs should not be allowed if the kernel is locked down, since
+it could lead to execution of arbitrary code in kernel mode.  Based on a
+patch by Kees Cook.
 
-Signed-off-by: Matthew Garrett <mjg59@srcf.ucam.org>
+Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: linux-pm@vger.kernel.org
+Acked-by: Kees Cook <keescook@chromium.org>
+cc: x86@kernel.org
 ---
 
- kernel/power/user.c |    3 +++
- 1 file changed, 3 insertions(+)
+ arch/x86/kernel/msr.c |    7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/kernel/power/user.c b/kernel/power/user.c
-index 22df9f7ff672..e4b926d329b7 100644
---- a/kernel/power/user.c
-+++ b/kernel/power/user.c
-@@ -52,6 +52,9 @@ static int snapshot_open(struct inode *inode, struct file *filp)
- 	if (!hibernation_available())
- 		return -EPERM;
+diff --git a/arch/x86/kernel/msr.c b/arch/x86/kernel/msr.c
+index ef688804f80d..fbcce028e502 100644
+--- a/arch/x86/kernel/msr.c
++++ b/arch/x86/kernel/msr.c
+@@ -84,6 +84,9 @@ static ssize_t msr_write(struct file *file, const char __user *buf,
+ 	int err = 0;
+ 	ssize_t bytes = 0;
  
 +	if (kernel_is_locked_down())
 +		return -EPERM;
 +
- 	lock_system_sleep();
+ 	if (count % 8)
+ 		return -EINVAL;	/* Invalid chunk size */
  
- 	if (!atomic_add_unless(&snapshot_device_available, -1, 0)) {
+@@ -131,6 +134,10 @@ static long msr_ioctl(struct file *file, unsigned int ioc, unsigned long arg)
+ 			err = -EBADF;
+ 			break;
+ 		}
++		if (kernel_is_locked_down()) {
++			err = -EPERM;
++			break;
++		}
+ 		if (copy_from_user(&regs, uregs, sizeof regs)) {
+ 			err = -EFAULT;
+ 			break;
+
