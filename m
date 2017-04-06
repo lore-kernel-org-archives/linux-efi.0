@@ -1,87 +1,29 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 58/72] x86/mm/KASLR: Exclude EFI region from KASLR VA space randomization
-Date: Thu,  6 Apr 2017 10:38:45 +0200
-Message-ID: <20170406083622.482730423@linuxfoundation.org>
-References: <20170406083619.775985942@linuxfoundation.org>
+From: David Howells <dhowells@redhat.com>
+Subject: Re: [PATCH 11/24] uswsusp: Disable when the kernel is locked down
+Date: Thu, 06 Apr 2017 09:41:00 +0100
+Message-ID: <14980.1491468060@warthog.procyon.org.uk>
+References: <1491460792.1645.1.camel@suse.com> <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk> <149142336965.5101.2946578135980499557.stgit@warthog.procyon.org.uk> <CAJZ5v0hp=GJtQ+YnNdaMw6rtbBzNyueY+iqjPkHLKp57t822ZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20170406083619.775985942@linuxfoundation.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Baoquan He <bhe@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, Dave Young <dyoung@redhat.com>, Thomas Garnier <thgarnie@google.com>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Kees Cook <keescook@chromium.org>, Linus Torvalds <torvalds@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <1491460792.1645.1.camel@suse.com>
+Content-ID: <14979.1491468060.1@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: Oliver Neukum <oneukum@suse.com>
+Cc: dhowells@redhat.com, "Rafael J. Wysocki" <rafael@kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux PM <linux-pm@vger.kernel.org>, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, matthew.garrett@nebula.com
 List-Id: linux-efi@vger.kernel.org
 
-4.9-stable review patch.  If anyone has any objections, please let me know.
+Oliver Neukum <oneukum@suse.com> wrote:
 
-------------------
+> Your swap partition may be located on an NVDIMM or be encrypted.
 
-From: Baoquan He <bhe@redhat.com>
+An NVDIMM should be considered the same as any other persistent storage.
 
-commit a46f60d76004965e5669dbf3fc21ef3bc3632eb4 upstream.
+It may be encrypted, but where's the key stored, how easy is it to retrieve
+and does the swapout code know this?
 
-Currently KASLR is enabled on three regions: the direct mapping of physical
-memory, vamlloc and vmemmap. However the EFI region is also mistakenly
-included for VA space randomization because of misusing EFI_VA_START macro
-and assuming EFI_VA_START < EFI_VA_END.
+> Isn't this a bit overly drastic?
 
-(This breaks kexec and possibly other things that rely on stable addresses.)
+Perhaps, but if it's on disk and it's not encrypted, then maybe not.
 
-The EFI region is reserved for EFI runtime services virtual mapping which
-should not be included in KASLR ranges. In Documentation/x86/x86_64/mm.txt,
-we can see:
-
-  ffffffef00000000 - fffffffeffffffff (=64 GB) EFI region mapping space
-
-EFI uses the space from -4G to -64G thus EFI_VA_START > EFI_VA_END,
-Here EFI_VA_START = -4G, and EFI_VA_END = -64G.
-
-Changing EFI_VA_START to EFI_VA_END in mm/kaslr.c fixes this problem.
-
-Signed-off-by: Baoquan He <bhe@redhat.com>
-Reviewed-by: Bhupesh Sharma <bhsharma@redhat.com>
-Acked-by: Dave Young <dyoung@redhat.com>
-Acked-by: Thomas Garnier <thgarnie@google.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Brian Gerst <brgerst@gmail.com>
-Cc: Denys Vlasenko <dvlasenk@redhat.com>
-Cc: H. Peter Anvin <hpa@zytor.com>
-Cc: Josh Poimboeuf <jpoimboe@redhat.com>
-Cc: Kees Cook <keescook@chromium.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/1490331592-31860-1-git-send-email-bhe@redhat.com
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
----
- arch/x86/mm/kaslr.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
---- a/arch/x86/mm/kaslr.c
-+++ b/arch/x86/mm/kaslr.c
-@@ -48,7 +48,7 @@ static const unsigned long vaddr_start =
- #if defined(CONFIG_X86_ESPFIX64)
- static const unsigned long vaddr_end = ESPFIX_BASE_ADDR;
- #elif defined(CONFIG_EFI)
--static const unsigned long vaddr_end = EFI_VA_START;
-+static const unsigned long vaddr_end = EFI_VA_END;
- #else
- static const unsigned long vaddr_end = __START_KERNEL_map;
- #endif
-@@ -105,7 +105,7 @@ void __init kernel_randomize_memory(void
- 	 */
- 	BUILD_BUG_ON(vaddr_start >= vaddr_end);
- 	BUILD_BUG_ON(IS_ENABLED(CONFIG_X86_ESPFIX64) &&
--		     vaddr_end >= EFI_VA_START);
-+		     vaddr_end >= EFI_VA_END);
- 	BUILD_BUG_ON((IS_ENABLED(CONFIG_X86_ESPFIX64) ||
- 		      IS_ENABLED(CONFIG_EFI)) &&
- 		     vaddr_end >= __START_KERNEL_map);
+David
