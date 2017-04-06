@@ -1,29 +1,28 @@
 From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 11/24] uswsusp: Disable when the kernel is locked down
-Date: Thu, 06 Apr 2017 09:41:00 +0100
-Message-ID: <14980.1491468060@warthog.procyon.org.uk>
-References: <1491460792.1645.1.camel@suse.com> <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk> <149142336965.5101.2946578135980499557.stgit@warthog.procyon.org.uk> <CAJZ5v0hp=GJtQ+YnNdaMw6rtbBzNyueY+iqjPkHLKp57t822ZQ@mail.gmail.com>
+Subject: Re: [PATCH 02/24] Add the ability to lock down access to the running kernel image
+Date: Thu, 06 Apr 2017 11:43:20 +0100
+Message-ID: <32240.1491475400@warthog.procyon.org.uk>
+References: <alpine.LRH.2.20.1704061840090.12226@namei.org> <149141219387.31282.6648284836568938717.stgit@warthog.procyon.org.uk> <149141221365.31282.16276273075946694481.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <1491460792.1645.1.camel@suse.com>
-Content-ID: <14979.1491468060.1@warthog.procyon.org.uk>
+In-Reply-To: <alpine.LRH.2.20.1704061840090.12226@namei.org>
+Content-ID: <32239.1491475400.1@warthog.procyon.org.uk>
 Sender: owner-linux-security-module@vger.kernel.org
-To: Oliver Neukum <oneukum@suse.com>
-Cc: dhowells@redhat.com, "Rafael J. Wysocki" <rafael@kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux PM <linux-pm@vger.kernel.org>, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, matthew.garrett@nebula.com
+To: James Morris <jmorris@namei.org>
+Cc: dhowells@redhat.com, linux-kernel@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Oliver Neukum <oneukum@suse.com> wrote:
+James Morris <jmorris@namei.org> wrote:
 
-> Your swap partition may be located on an NVDIMM or be encrypted.
+> > +static __read_mostly bool kernel_locked_down;
+> 
+> How about marking this __ro_after_init if ALLOW_LOCKDOWN_LIFT is not 
+> configured?
 
-An NVDIMM should be considered the same as any other persistent storage.
+I guess lock_kernel_down() would need to be __init also in that case.
 
-It may be encrypted, but where's the key stored, how easy is it to retrieve
-and does the swapout code know this?
-
-> Isn't this a bit overly drastic?
-
-Perhaps, but if it's on disk and it's not encrypted, then maybe not.
+Also, the implementation of lift_kernel_lockdown() should be conditional on
+CONFIG_ALLOW_LOCKDOWN_LIFT.
 
 David
