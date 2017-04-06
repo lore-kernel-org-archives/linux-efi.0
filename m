@@ -1,38 +1,69 @@
-From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH V14 00/10] Add UEFI 2.6 and ACPI 6.1 updates for RAS on
- ARM64
-Date: Thu, 6 Apr 2017 18:12:00 +0100
-Message-ID: <20170406171200.GE7705@e104818-lin.cambridge.arm.com>
-References: <1490729440-32591-1-git-send-email-tbaicar@codeaurora.org>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [RFC PATCH v2 14/32] x86: mm: Provide support to use memblock
+ when spliting large pages
+Date: Thu, 6 Apr 2017 19:25:20 +0200
+Message-ID: <20170406172520.iyjjtz56u3jlnjhq@pd.tnic>
+References: <148846752022.2349.13667498174822419498.stgit@brijesh-build-machine>
+ <148846771545.2349.9373586041426414252.stgit@brijesh-build-machine>
+ <20170310110657.hophlog2juw5hpzz@pd.tnic>
+ <cb6a9a56-2c52-d98d-3ff6-3b61d0e5875e@amd.com>
+ <20170316182836.tyvxoeq56thtc4pd@pd.tnic>
+ <ec134379-6a48-905c-26e4-f6f2738814dc@redhat.com>
+ <20170317101737.icdois7sdmtutt6b@pd.tnic>
+ <f46ff1e1-1cc7-1907-74a0-e2709fa1e5fb@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <1490729440-32591-1-git-send-email-tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org
-Cc: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dev
+In-Reply-To: <f46ff1e1-1cc7-1907-74a0-e2709fa1e5fb@amd.com>
+Sender: owner-linux-mm@kvack.org
+To: Brijesh Singh <brijesh.singh@amd.com>
+Cc: Paolo Bonzini <pbonzini@redhat.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas@google.com, tglx@linutronix.de, mchehab@kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Rafael,
+Hi Brijesh,
 
-On Tue, Mar 28, 2017 at 01:30:30PM -0600, Tyler Baicar wrote:
-> Tyler Baicar (9):
->   acpi: apei: read ack upon ghes record consumption
->   ras: acpi/apei: cper: generic error data entry v3 per ACPI 6.1
->   efi: parse ARM processor error
->   arm64: exception: handle Synchronous External Abort
->   acpi: apei: handle SEA notification type for ARMv8
->   efi: print unrecognized CPER section
->   ras: acpi / apei: generate trace event for unrecognized CPER section
->   trace, ras: add ARM processor error trace event
->   arm/arm64: KVM: add guest SEA support
+On Thu, Apr 06, 2017 at 09:05:03AM -0500, Brijesh Singh wrote:
+> I looked into arch/x86/mm/init_{32,64}.c and as you pointed the file contains
+> routines to do basic page splitting. I think it sufficient for our usage.
 
-It looks like the KVM parts are getting acked and the arm64 and efi bits
-have been acked as well. Are you ok to take this series through the ACPI
-tree?
+Good :)
 
-Thanks.
+> I should be able to drop the memblock patch from the series and update the
+> Patch 15 [1] to use the kernel_physical_mapping_init().
+> 
+> The kernel_physical_mapping_init() creates the page table mapping using
+> default KERNEL_PAGE attributes, I tried to extend the function by passing
+> 'bool enc' flags to hint whether to clr or set _PAGE_ENC when splitting the
+> pages. The code did not looked clean hence I dropped that idea.
+
+Or, you could have a
+
+__kernel_physical_mapping_init_prot(..., prot)
+
+helper which gets a protection argument and hands it down. The lower
+levels already hand down prot which is good.
+
+The interface kernel_physical_mapping_init() will then itself call:
+
+	__kernel_physical_mapping_init_prot(..., PAGE_KERNEL);
+
+for the normal cases.
+
+That in a pre-patch of course.
+
+How does that sound?
 
 -- 
-Catalin
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
