@@ -1,29 +1,87 @@
-From: James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
-Subject: Re: [PATCH 02/24] Add the ability to lock down access to the running
- kernel image
-Date: Thu, 6 Apr 2017 18:44:16 +1000 (AEST)
-Message-ID: <alpine.LRH.2.20.1704061840090.12226@namei.org>
-References: <149141219387.31282.6648284836568938717.stgit@warthog.procyon.org.uk> <149141221365.31282.16276273075946694481.stgit@warthog.procyon.org.uk>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.9 58/72] x86/mm/KASLR: Exclude EFI region from KASLR VA space randomization
+Date: Thu,  6 Apr 2017 10:38:45 +0200
+Message-ID: <20170406083622.482730423@linuxfoundation.org>
+References: <20170406083619.775985942@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <149141221365.31282.16276273075946694481.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20170406083619.775985942@linuxfoundation.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Baoquan He <bhe@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, Dave Young <dyoung@redhat.com>, Thomas Garnier <thgarnie@google.com>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Kees Cook <keescook@chromium.org>, Linus Torvalds <torvalds@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 5 Apr 2017, David Howells wrote:
+4.9-stable review patch.  If anyone has any objections, please let me know.
 
-> +#include <linux/security.h>
-> +#include <linux/export.h>
-> +
-> +static __read_mostly bool kernel_locked_down;
+------------------
 
-How about marking this __ro_after_init if ALLOW_LOCKDOWN_LIFT is not 
-configured?
+From: Baoquan He <bhe@redhat.com>
 
+commit a46f60d76004965e5669dbf3fc21ef3bc3632eb4 upstream.
 
--- 
-James Morris
-<jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
+Currently KASLR is enabled on three regions: the direct mapping of physical
+memory, vamlloc and vmemmap. However the EFI region is also mistakenly
+included for VA space randomization because of misusing EFI_VA_START macro
+and assuming EFI_VA_START < EFI_VA_END.
+
+(This breaks kexec and possibly other things that rely on stable addresses.)
+
+The EFI region is reserved for EFI runtime services virtual mapping which
+should not be included in KASLR ranges. In Documentation/x86/x86_64/mm.txt,
+we can see:
+
+  ffffffef00000000 - fffffffeffffffff (=64 GB) EFI region mapping space
+
+EFI uses the space from -4G to -64G thus EFI_VA_START > EFI_VA_END,
+Here EFI_VA_START = -4G, and EFI_VA_END = -64G.
+
+Changing EFI_VA_START to EFI_VA_END in mm/kaslr.c fixes this problem.
+
+Signed-off-by: Baoquan He <bhe@redhat.com>
+Reviewed-by: Bhupesh Sharma <bhsharma@redhat.com>
+Acked-by: Dave Young <dyoung@redhat.com>
+Acked-by: Thomas Garnier <thgarnie@google.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Brian Gerst <brgerst@gmail.com>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Josh Poimboeuf <jpoimboe@redhat.com>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/1490331592-31860-1-git-send-email-bhe@redhat.com
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ arch/x86/mm/kaslr.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+--- a/arch/x86/mm/kaslr.c
++++ b/arch/x86/mm/kaslr.c
+@@ -48,7 +48,7 @@ static const unsigned long vaddr_start =
+ #if defined(CONFIG_X86_ESPFIX64)
+ static const unsigned long vaddr_end = ESPFIX_BASE_ADDR;
+ #elif defined(CONFIG_EFI)
+-static const unsigned long vaddr_end = EFI_VA_START;
++static const unsigned long vaddr_end = EFI_VA_END;
+ #else
+ static const unsigned long vaddr_end = __START_KERNEL_map;
+ #endif
+@@ -105,7 +105,7 @@ void __init kernel_randomize_memory(void
+ 	 */
+ 	BUILD_BUG_ON(vaddr_start >= vaddr_end);
+ 	BUILD_BUG_ON(IS_ENABLED(CONFIG_X86_ESPFIX64) &&
+-		     vaddr_end >= EFI_VA_START);
++		     vaddr_end >= EFI_VA_END);
+ 	BUILD_BUG_ON((IS_ENABLED(CONFIG_X86_ESPFIX64) ||
+ 		      IS_ENABLED(CONFIG_EFI)) &&
+ 		     vaddr_end >= __START_KERNEL_map);
