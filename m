@@ -1,29 +1,29 @@
 From: "Rafael J. Wysocki" <rafael@kernel.org>
-Subject: Re: [PATCH 17/24] acpi: Ignore acpi_rsdp kernel param when the kernel
- has been locked down
-Date: Thu, 6 Apr 2017 21:43:54 +0200
-Message-ID: <CAJZ5v0j580XfGHd+GVQe+7vuSGyxFzfrDOjYfOcGTnKZSvjCoA@mail.gmail.com>
+Subject: Re: [PATCH 11/24] uswsusp: Disable when the kernel is locked down
+Date: Thu, 6 Apr 2017 22:07:50 +0200
+Message-ID: <CAJZ5v0iZ7Wf5pWL9HSzH_0djQfDmCLT14sp0HYbs9h8UuGHPkQ@mail.gmail.com>
 References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
- <149142341772.5101.12366553346604485034.stgit@warthog.procyon.org.uk>
+ <149142336965.5101.2946578135980499557.stgit@warthog.procyon.org.uk>
+ <CAJZ5v0hp=GJtQ+YnNdaMw6rtbBzNyueY+iqjPkHLKp57t822ZQ@mail.gmail.com> <10055.1491461713@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <149142341772.5101.12366553346604485034.stgit@warthog.procyon.org.uk>
-Sender: linux-acpi-owner@vger.kernel.org
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <10055.1491461713@warthog.procyon.org.uk>
+Sender: linux-pm-owner@vger.kernel.org
 To: David Howells <dhowells@redhat.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, Josh Boyer <jwboyer@redhat.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, matthew.garrett@nebula.com
+Cc: "Rafael J. Wysocki" <rafael@kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux PM <linux-pm@vger.kernel.org>, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, matthew.garrett@nebula.com
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 5, 2017 at 10:16 PM, David Howells <dhowells@redhat.com> wrote:
-> From: Josh Boyer <jwboyer@redhat.com>
+On Thu, Apr 6, 2017 at 8:55 AM, David Howells <dhowells@redhat.com> wrote:
+> Rafael J. Wysocki <rafael@kernel.org> wrote:
 >
-> This option allows userspace to pass the RSDP address to the kernel, which
-> makes it possible for a user to circumvent any restrictions imposed on
-> loading modules.  Ignore the option when the kernel is locked down.
+>> You probably want to disable hibernation altogether in this case.
+>
+> See patch 10.  Does that mean patch 11 is superfluous?
 
-I'm not really sure here.
+Yes, it does.
 
-What exactly is the mechanism?
+You can't open /dev/snapshot if hibernation_available() returns false.
 
 Thanks,
 Rafael
