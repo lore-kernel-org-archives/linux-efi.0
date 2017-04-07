@@ -1,90 +1,131 @@
-From: Justin Forbes <jmforbes-a5Mqy2EUIFVAfugRpC6u6w@public.gmane.org>
+From: Justin Forbes <jmforbes@linuxtx.org>
 Subject: Re: [PATCH 00/24] Kernel lockdown
-Date: Fri, 7 Apr 2017 11:29:54 -0500
-Message-ID: <CAFxkdArD3VpvbCDuoQitg1GmBH6euCu7QThd46qZ=qAQHnLDUg@mail.gmail.com>
-References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
- <25acabf2-ac99-3c2b-ee9a-53d71b5c77f2@gmail.com>
+Date: Fri, 7 Apr 2017 11:32:51 -0500
+Message-ID: <CAFxkdAqm+5PF1phOf3G6RiNQvJH_CEOO2AG7hSFJ7s24r0UTfg@mail.gmail.com>
+References: <149141201983.30815.1240162780237131881.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <25acabf2-ac99-3c2b-ee9a-53d71b5c77f2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Austin S. Hemmelgarn" <ahferroin7-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alan Cox <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <149141201983.30815.1240162780237131881.stgit@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: linux-kernel@vger.kernel.org, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Apr 7, 2017 at 10:59 AM, Austin S. Hemmelgarn
-<ahferroin7-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> On 2017-04-05 16:14, David Howells wrote:
->>
->>
->> These patches provide a facility by which a variety of avenues by which
->> userspace can feasibly modify the running kernel image can be locked down.
->> These include:
->>
->>  (*) No unsigned modules and no modules for which can't validate the
->>      signature.
->>
->>  (*) No use of ioperm(), iopl() and no writing to /dev/port.
->>
->>  (*) No writing to /dev/mem or /dev/kmem.
->>
->>  (*) No hibernation.
->>
->>  (*) Restrict PCI BAR access.
->>
->>  (*) Restrict MSR access.
->>
->>  (*) No kexec_load().
->>
->>  (*) Certain ACPI restrictions.
->>
->>  (*) Restrict debugfs interface to ASUS WMI.
->>
->> The lock-down can be configured to be triggered by the EFI secure boot
->> status, provided the shim isn't insecure.  The lock-down can be lifted by
->> typing SysRq+x on a keyboard attached to the system.
+On Wed, Apr 5, 2017 at 12:07 PM, David Howells <dhowells@redhat.com> wrote:
 >
-> This has already been mentioned both in response to previous versions of
-> this patch set, and by at least 2 people in response to a specific patch in
-> this posting, but for any kind of proper security analysis, you need to
-> better clarify your threat model.  'Prevent modification to the running
-> kernel image' is a decent start on this, but at least some of the patches
-> don't explain very well _how_ what you're disabling could be used to modify
-> the running kernel image.  Clarifying how something is a threat will help
-> with verifying that you're correctly blocking the threat.
-
-It is more than just preventing modification to the running kernel
-image.  The idea is that everything is verified, from UEFI through the
-bootloader, and into the kernel.
-
-> Furthermore, why is the only way to enable this to boot in UEFI Secure Boot
-> mode?  Almost all of the hardening done here has general utility in
-> hardening regular systems, and as such I'd suggest adding a command line
-> option to enable kernel lock-down (which would greatly simplify testing),
-> and a kconfig option to enforce it at build-time.
-
-The problem is, if the hand off doesn't happen from a secure firmware,
-there is no guarantee the system has not been compromised. UEFI Secure
-Boot mode attempts to give that promise, and an appropriate hand off.
-That doesn't mean that there is no value in turning some of this on,
-it is just of more limited effectiveness.
-
-> In addition to all that, it would be nice to be able to disable all of the
-> following at build time independent of the kernel lock-down state
-> * The acpi_rsdp kernel parameter (I could easily see many distros building
-> kernels with this disabled, it's insanely use-case specific).
-> * IO port and resource reservation module parameters (this would actually be
-> easier than having runtime blacklisting, and I could also easily see this
-> being turned on by default by a number of distros).
-> * TOICSERIAL (this one is more likely than the above two to break systems).
+> These patches provide a facility by which a variety of avenues by which
+> userspace can feasibly modify the running kernel image can be locked down.
+> These include:
 >
-> And these would probably be useful as lockable sysctls that would be
-> automatically locked disabled when the kernel is locked down:
-> * ioperm/iopl (these can technically be blocked by seccomp or other means,
-> but that is non-trivial to do).
-> * Most of the other ACPI stuff (some of this is useful for troubleshooting,
-> but is not normally used during regular operation).
-> * PCI BAR access.
+>  (*) No unsigned modules and no modules for which can't validate the
+>      signature.
+>
+>  (*) No use of ioperm(), iopl() and no writing to /dev/port.
+>
+>  (*) No writing to /dev/mem or /dev/kmem.
+>
+>  (*) No hibernation.
+>
+>  (*) Restrict PCI BAR access.
+>
+>  (*) Restrict MSR access.
+>
+>  (*) No kexec_load().
+>
+>  (*) Certain ACPI restrictions.
+>
+>  (*) Restrict debugfs interface to ASUS WMI.
+>
+> The lock-down can be configured to be triggered by the EFI secure boot
+> status, provided the shim isn't insecure.  The lock-down can be lifted by
+> typing SysRq+x on a keyboard attached to the system.
+>
+>
+> The patches can be found here also:
+>
+>         http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/log/?h=efi-lockdown
+>
+> They are dependent on the hwparam branch, which I posted separately.
+>
+> David
+> ---
+> Dave Young (1):
+>       Copy secure_boot flag in boot params across kexec reboot
+>
+> David Howells (7):
+>       Add the ability to lock down access to the running kernel image
+>       efi: Lock down the kernel if booted in secure boot mode
+>       Enforce module signatures if the kernel is locked down
+>       scsi: Lock down the eata driver
+>       Prohibit PCMCIA CIS storage when the kernel is locked down
+>       Lock down TIOCSSERIAL
+>       Lock down module params that specify hardware parameters (eg. ioport)
+>
+> Josh Boyer (3):
+>       efi: Add EFI_SECURE_BOOT bit
+>       hibernate: Disable when the kernel is locked down
+>       acpi: Ignore acpi_rsdp kernel param when the kernel has been locked down
+>
+> Kyle McMartin (1):
+>       Add a sysrq option to exit secure boot mode
+>
+> Lee, Chun-Yi (2):
+>       kexec_file: Disable at runtime if securelevel has been set
+>       bpf: Restrict kernel image access functions when the kernel is locked down
+>
+> Linn Crosetto (2):
+>       acpi: Disable ACPI table override if the kernel is locked down
+>       acpi: Disable APEI error injection if the kernel is locked down
+>
+> Matthew Garrett (8):
+>       Restrict /dev/mem and /dev/kmem when the kernel is locked down
+>       kexec: Disable at runtime if the kernel is locked down
+>       uswsusp: Disable when the kernel is locked down
+>       PCI: Lock down BAR access when the kernel is locked down
+>       x86: Lock down IO port access when the kernel is locked down
+>       x86: Restrict MSR access when the kernel is locked down
+>       asus-wmi: Restrict debugfs interface when the kernel is locked down
+>       ACPI: Limit access to custom_method when the kernel is locked down
+>
+>
+>  arch/x86/Kconfig                  |   22 ++++++++++++++++++++
+>  arch/x86/kernel/ioport.c          |    4 ++--
+>  arch/x86/kernel/kexec-bzimage64.c |    1 +
+>  arch/x86/kernel/msr.c             |    7 ++++++
+>  arch/x86/kernel/setup.c           |   40 ++++++++++++++++++++++++++++++++++++-
+>  drivers/acpi/apei/einj.c          |    3 +++
+>  drivers/acpi/custom_method.c      |    3 +++
+>  drivers/acpi/osl.c                |    2 +-
+>  drivers/acpi/tables.c             |    5 +++++
+>  drivers/char/mem.c                |    8 +++++++
+>  drivers/input/misc/uinput.c       |    1 +
+>  drivers/pci/pci-sysfs.c           |    9 ++++++++
+>  drivers/pci/proc.c                |    8 ++++++-
+>  drivers/pci/syscall.c             |    2 +-
+>  drivers/pcmcia/cistpl.c           |    5 +++++
+>  drivers/platform/x86/asus-wmi.c   |    9 ++++++++
+>  drivers/scsi/eata.c               |    7 ++++++
+>  drivers/tty/serial/serial_core.c  |    6 ++++++
+>  drivers/tty/sysrq.c               |   19 ++++++++++++------
+>  include/linux/efi.h               |    1 +
+>  include/linux/input.h             |    5 +++++
+>  include/linux/kernel.h            |    9 ++++++++
+>  include/linux/security.h          |   11 ++++++++++
+>  include/linux/sysrq.h             |    8 ++++++-
+>  kernel/debug/kdb/kdb_main.c       |    2 +-
+>  kernel/kexec.c                    |    7 ++++++
+>  kernel/kexec_file.c               |    6 ++++++
+>  kernel/module.c                   |    2 +-
+>  kernel/params.c                   |   27 ++++++++++++++++++++-----
+>  kernel/power/hibernate.c          |    2 +-
+>  kernel/power/user.c               |    3 +++
+>  kernel/trace/bpf_trace.c          |   11 ++++++++++
+>  security/Kconfig                  |   15 ++++++++++++++
+>  security/Makefile                 |    3 +++
+>  security/lock_down.c              |   40 +++++++++++++++++++++++++++++++++++++
+>  35 files changed, 291 insertions(+), 22 deletions(-)
+>  create mode 100644 security/lock_down.c
+>
 
-There are more patches to do some of these things.   Baby steps.
+Tested-by: Justin Forbes <jforbes@fedoraproject.org>
