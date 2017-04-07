@@ -1,107 +1,126 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 4/4] ef/libstub: arm/arm64: randomize the base of the UEFI
- rt services region
-Date: Fri, 7 Apr 2017 16:51:16 +0100
-Message-ID: <CAKv+Gu9CpCWHT=3KboPTtuZVDundtGheKawS=iV_P756RFbaDg@mail.gmail.com>
-References: <20170324132410.16628-1-ard.biesheuvel@linaro.org>
- <20170324132410.16628-5-ard.biesheuvel@linaro.org> <58E7B478.6010305@arm.com>
+From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 12/12] ef/libstub: arm/arm64: Randomize the base of the
+ UEFI rt services region
+Date: Fri, 7 Apr 2017 16:58:09 +0100
+Message-ID: <CAHkRjk6E-R=7cZMnjwkjOfCdsXqpcUagn7m9cTOS8ArvrxorTQ@mail.gmail.com>
+References: <20170404160245.27812-1-ard.biesheuvel@linaro.org>
+ <20170404160910.28115-1-ard.biesheuvel@linaro.org> <20170404160910.28115-3-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <58E7B478.6010305-5wv7dgnIgG8@public.gmane.org>
+In-Reply-To: <20170404160910.28115-3-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, kernel-hardening-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Roy Franz <rfranz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, roy.franz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, evgeny.kalugin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, eugene-VXdhtT5mjnY@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, james.morse-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 7 April 2017 at 16:47, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org> wrote:
-> Hi Ard,
->
-> On 24/03/17 13:24, Ard Biesheuvel wrote:
->> Update the allocation logic for the virtual mapping of the UEFI runtime
->> services to start from a randomized base address if KASLR is in effect,
->> and if the UEFI firmware exposes an implementation of EFI_RNG_PROTOCOL.
->>
->> This makes it more difficult to predict the location of exploitable
->> data structures in the runtime UEFI firmware, which increases robustness
->> against attacks. Note that these regions are only mapped during the
->> time a runtime service call is in progress, and only on a single CPU
->> at a time, bit give the lack of a downside, let's enable it nonetheless.
->
-> With next-20170407 on Seattle Overdrive, I get an SError[0] on boot:
->
-> The three patches I have on top of 4.11.0-rc5-next-20170407 are:
-> * Revert "efi/libstub/arm*: Set default address and size cells values for an
-> empty dtb"
-> * Revert "ef/libstub/arm/arm64: Randomize the base of the UEFI rt services region"
->
-> At which point the machine start booting to a prompt again, (its noisier than
-> usual but looks like double-printing).
->
-> If I then cherry-pick:
-> * ef/libstub/arm/arm64: Randomize the base of the UEFI rt services region"
->
+Hi Ard,
 
-That is quite interesting, to be honest, because that patch should
-effectively be a NOP on systems that do not implement
-EFI_RNG_PROTOCOL.
+On 4 April 2017 at 17:09, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> Update the allocation logic for the virtual mapping of the UEFI runtime
+> services to start from a randomized base address if KASLR is in effect,
+> and if the UEFI firmware exposes an implementation of EFI_RNG_PROTOCOL.
+>
+> This makes it more difficult to predict the location of exploitable
+> data structures in the runtime UEFI firmware, which increases robustness
+> against attacks. Note that these regions are only mapped during the
+> time a runtime service call is in progress, and only on a single CPU
+> at a time, bit give the lack of a downside, let's enable it nonetheless.
+>
+> Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  drivers/firmware/efi/libstub/arm-stub.c | 49 ++++++++++++++++++++++++---------
+>  1 file changed, 36 insertions(+), 13 deletions(-)
 
-Could you run this from the UEFI shell please?
+This patch causes a boot regression on Juno and Seattle (reported by
+James Morse) with defconfig. On Juno I get a Synchronous Exception
+(translation fault, second level). If I build the kernel with 64K
+pages, it boots ok.
 
-http://people.linaro.org/~ard.biesheuvel/RngTest.efi
+See below, though likely wrapped by gmail:
 
-I would expect it to report that it has no EFI_RNG_PROTOCOL
-implementation. Could you also check whether the working kernel still
-works /after/ having executed that utility?
+EFI stub: Booting Linux Kernel...
+EFI stub: Using DTB from configuration table
+
+Synchronous Exception at 0x00000000F82A045C
+
+ X0 0x0000000000000000 X1 0x00000000FDF01614 X2 0x7BF580F1AD8AE581 X3
+0x0000000000000000
+ X4 0x0000000000000000 X5 0x00000000FDFBFC60 X6 0x42F27CEB1CE1E5BC X7
+0x7BF580F1AD8AE581
+ X8 0x0000000000000000 X9 0x0000000700000000 X10 0x00000000FB5C0000
+X11 0x00000000FB5C5FFF
+ X12 0x0000000000000000 X13 0x000000000000000E X14 0x8000000000000001
+X15 0x0000000000000000
+ X16 0x00000000FEFFF5E0 X17 0x0000000000000000 X18 0x0000000000000000
+X19 0x00000000FDFB0018
+ X20 0x00000000F8390000 X21 0x00000000FB5BDA18 X22 0x00000000FEFFF5D0
+X23 0x00000009FFFF0000
+ X24 0x00000000FEFFF598 X25 0x0000000000000000 X26 0x0000000000000000
+X27 0x0000000000000000
+ X28 0x0000000000000000 FP 0x00000000FEFFF510 LR 0x00000000F82A0454
+
+ V0 0xA4775AF0716632D7 DB7509796C96DACB V1 0xE67211106C932C4D 4F7141B24C78074F
+ V2 0x550C7DC3243185BE 12835B01D807AA98 V3 0xC19BF1749BDC06A7 80DEB1FE72BE5D74
+ V4 0x240CA1CC0FC19DC6 EFBE4786E49B69C1 V5 0x76F988DA5CB0A9DC 4A7484AA2DE92C6F
+ V6 0xBF597FC7B00327C8 A831C66D983E5152 V7 0x1429296706CA6351 D5A79147C6E00BF3
+ V8 0x0000000000000000 2E1B213827B70A85 V9 0x0000000000000000 766A0ABB650A7354
+ V10 0x0000000000000000 A81A664BA2BFE8A1 V11 0x0000000000000000 D6990624D192E819
+ V12 0x0000000000000000 1E376C0819A4C116 V13 0x0000000000000000 4ED8AA4A391C0CB3
+ V14 0x0000000000000000 78A5636F748F82EE V15 0x0000000000000000 A4506CEB90BEFFFA
+ V16 0x3C83709547545153 BC990E9F897D4FA8 V17 0xBEBEF297C5EC0578 E1D99AE8C2B92607
+ V18 0x13242833C5F05BAB 101C24C521387481 V19 0x0A50ABCAD0BDDA12 996865483E880969
+ V20 0x6C4ABAA53A9BE1CB 4416D9F479B08221 V21 0x60952147C3A68574 55B8AE51435C1A1A
+ V22 0x9FEB2A3B4AB8D3BF 88C1883495C7F76F V23 0xD0C224BC8FB77E09 3DB8D233CF470963
+ V24 0x0E72963E02D21C93 C95B757DA62B3A12 V25 0x2A77DBA1E4EE5D5C E08479A1B557DFA8
+ V26 0xB593F86668CA8129 927A0019CDEC1A76 V27 0xFF03D7BC13D5FFF6 BBA1EFEF4B817FFA
+ V28 0xE3FEE1F77F5FF733 5FBC3CE8E54BBB53 V29 0x4E8582114F72CE7E EED3F6BF4B0F5BDC
+ V30 0xFFFA7FFBF72FF9F7 F8F06FDB9FF5EDEA V31 0xDE3785D1AEB3DAB7 12E08FF9AD0F87FF
+
+ SP 0x00000000FEFFF500 ELR 0x00000000F82A045C SPSR 0x60000209 FPSR 0x00000000
+ ESR 0x96000006 FAR 0x0000000000000000
+
+ ESR : EC 0x25 IL 0x1 ISS 0x00000006
+
+Data abort: Translation fault, second level
+
+Stack dump:
+ 00000FEFFF400: 996865483E880969 0A50ABCAD0BDDA12 4416D9F479B08221
+6C4ABAA53A9BE1CB
+ 00000FEFFF420: 55B8AE51435C1A1A 60952147C3A68574 88C1883495C7F76F
+9FEB2A3B4AB8D3BF
+ 00000FEFFF440: 3DB8D233CF470963 D0C224BC8FB77E09 C95B757DA62B3A12
+0E72963E02D21C93
+ 00000FEFFF460: E08479A1B557DFA8 2A77DBA1E4EE5D5C 927A0019CDEC1A76
+B593F86668CA8129
+ 00000FEFFF480: BBA1EFEF4B817FFA FF03D7BC13D5FFF6 5FBC3CE8E54BBB53
+E3FEE1F77F5FF733
+ 00000FEFFF4A0: EED3F6BF4B0F5BDC 4E8582114F72CE7E F8F06FDB9FF5EDEA
+FFFA7FFBF72FF9F7
+ 00000FEFFF4C0: 12E08FF9AD0F87FF DE3785D1AEB3DAB7 00000000F82A045C
+0000000060000209
+ 00000FEFFF4E0: 0000000000000000 0000000096000006 0000000000000000
+7BF580F1AD8AE581
+> 00000FEFFF500: 00000000FEFFF520 00000000FDFE1658 00000000FEFFF5C0 00000000F829D4CC
+ 00000FEFFF520: 00000000FB5C6040 00000000FCA74698 0000000000000000
+0000000000000000
+ 00000FEFFF540: 0000000000000000 0000000000000000 00000000000000B0
+000000F2F865A8B0
+ 00000FEFFF560: 00000000FB5C6040 0000000000000000 0000000000000000
+00000000F86C0000
+ 00000FEFFF580: 000000000000503F 0000000080080000 0000000000F20000
+0000000000000000
+ 00000FEFFF5A0: 11D295625B1B31A1 3B7269C9A0003F8E 4A3823DC9042A9DE
+6A5180D0DE7AFB96
+ 00000FEFFF5C0: 00000000FEFFF5E0 00000000FDFD3AA8 0000000080080000
+00000000FB5D6C18
+ 00000FEFFF5E0: 00000000FEFFF660 00000000F859C830 00000000F865A8B0
+0000000000000000
 
 
-> It again fails, producing the trace below. This is all with next-20170407's
-> defconfig, 4K/48. UEFI identifies itself as:
->> UEFI v2.40 (American Megatrends, 0x0005000B)
->
->
-> Thanks,
->
-> James
->
->
-> [0]
-> Shell> efi\morse\Image console=ttyAMA0,115200 root=PARTUUID=b2edf709-3b28-4cb3-8
-> 809-203f262e2bcc rw earlycon=pl011,0xe1010000 crashkernel=1G stacktrace ignore_l
-> oglevel=1 acpi=on efi=debug resume=/dev/sda3
-> EFI stub: Booting Linux Kernel...
-> EFI stub: Using DTB from configuration table
-> EFI stub: Exiting boot services and installing virtual address map...
-> [    0.000000] Booting Linux on physical CPU 0x0
-> [    0.000000] Linux version 4.11.0-rc5-next-20170407-00003-gbe65d54f8671 (morse
-> @melchizedek) (gcc version 4.9.3 20141031 (prerelease) (Linaro GCC 2014.11) ) #7
-> 401 SMP PREEMPT Fri Apr 7 16:19:28 BST 2017
-> [    0.000000] Boot CPU: AArch64 Processor [411fd072]
-> [    0.000000] earlycon: pl11 at MMIO 0x00000000e1010000 (options '')
-> [    0.000000] bootconsole [pl11] enabled
-> [    0.000000] debug: ignoring loglevel setting.
-> [    0.000000] Bad mode in Error handler detected on CPU0, code 0xbf000000 -- SError
-> [    0.000000] Internal error: Oops - bad mode: 0 [#1] PREEMPT SMP
-> [    0.000000] Modules linked in:
-> [    0.000000] CPU: 0 PID: 0 Comm: swapper Not tainted 4.11.0-rc5-next-20170407-
-> 00003-gbe65d54f8671 #7401
-> [    0.000000] Hardware name: AMD Seattle (Rev.B0) Development Board (Overdrive)
->  (DT)
-> [    0.000000] task: ffff000008e02b80 task.stack: ffff000008df0000
-> [    0.000000] PC is at setup_arch+0xf0/0x504
-> [    0.000000] LR is at setup_arch+0xec/0x504
-> [    0.000000] pc : [<ffff000008ce2844>] lr : [<ffff000008ce2840>] pstate: 000000c5
->
-> [    0.000000] Call trace:
-> [    0.000000] [<ffff000008ce2844>] setup_arch+0xf0/0x504
-> [    0.000000] [<ffff000008ce0838>] start_kernel+0x70/0x398
-> [    0.000000] [<ffff000008ce01e0>] __primary_switched+0x64/0x74
-> [    0.000000] Code: 9111c000 940034d9 97fff7cd d50344ff (90fffce3)
-> [    0.000000] ---[ end trace 0000000000000000 ]---
-> [    0.000000] Kernel panic - not syncing: Attempted to kill the idle task!
-> [    0.000000] ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+
+Catalin
