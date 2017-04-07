@@ -1,126 +1,74 @@
-From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 12/12] ef/libstub: arm/arm64: Randomize the base of the
- UEFI rt services region
-Date: Fri, 7 Apr 2017 16:58:09 +0100
-Message-ID: <CAHkRjk6E-R=7cZMnjwkjOfCdsXqpcUagn7m9cTOS8ArvrxorTQ@mail.gmail.com>
-References: <20170404160245.27812-1-ard.biesheuvel@linaro.org>
- <20170404160910.28115-1-ard.biesheuvel@linaro.org> <20170404160910.28115-3-ard.biesheuvel@linaro.org>
+From: "Austin S. Hemmelgarn" <ahferroin7@gmail.com>
+Subject: Re: [PATCH 00/24] Kernel lockdown
+Date: Fri, 7 Apr 2017 11:59:22 -0400
+Message-ID: <25acabf2-ac99-3c2b-ee9a-53d71b5c77f2@gmail.com>
+References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170404160910.28115-3-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, roy.franz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, evgeny.kalugin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, eugene-VXdhtT5mjnY@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, james.morse-5wv7dgnIgG8@public.gmane.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: David Howells <dhowells@redhat.com>, linux-kernel@vger.kernel.org
+Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Ard,
-
-On 4 April 2017 at 17:09, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> Update the allocation logic for the virtual mapping of the UEFI runtime
-> services to start from a randomized base address if KASLR is in effect,
-> and if the UEFI firmware exposes an implementation of EFI_RNG_PROTOCOL.
+On 2017-04-05 16:14, David Howells wrote:
 >
-> This makes it more difficult to predict the location of exploitable
-> data structures in the runtime UEFI firmware, which increases robustness
-> against attacks. Note that these regions are only mapped during the
-> time a runtime service call is in progress, and only on a single CPU
-> at a time, bit give the lack of a downside, let's enable it nonetheless.
+> These patches provide a facility by which a variety of avenues by which
+> userspace can feasibly modify the running kernel image can be locked down.
+> These include:
 >
-> Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/libstub/arm-stub.c | 49 ++++++++++++++++++++++++---------
->  1 file changed, 36 insertions(+), 13 deletions(-)
+>  (*) No unsigned modules and no modules for which can't validate the
+>      signature.
+>
+>  (*) No use of ioperm(), iopl() and no writing to /dev/port.
+>
+>  (*) No writing to /dev/mem or /dev/kmem.
+>
+>  (*) No hibernation.
+>
+>  (*) Restrict PCI BAR access.
+>
+>  (*) Restrict MSR access.
+>
+>  (*) No kexec_load().
+>
+>  (*) Certain ACPI restrictions.
+>
+>  (*) Restrict debugfs interface to ASUS WMI.
+>
+> The lock-down can be configured to be triggered by the EFI secure boot
+> status, provided the shim isn't insecure.  The lock-down can be lifted by
+> typing SysRq+x on a keyboard attached to the system.
+This has already been mentioned both in response to previous versions of 
+this patch set, and by at least 2 people in response to a specific patch 
+in this posting, but for any kind of proper security analysis, you need 
+to better clarify your threat model.  'Prevent modification to the 
+running kernel image' is a decent start on this, but at least some of 
+the patches don't explain very well _how_ what you're disabling could be 
+used to modify the running kernel image.  Clarifying how something is a 
+threat will help with verifying that you're correctly blocking the threat.
 
-This patch causes a boot regression on Juno and Seattle (reported by
-James Morse) with defconfig. On Juno I get a Synchronous Exception
-(translation fault, second level). If I build the kernel with 64K
-pages, it boots ok.
+Furthermore, why is the only way to enable this to boot in UEFI Secure 
+Boot mode?  Almost all of the hardening done here has general utility in 
+hardening regular systems, and as such I'd suggest adding a command line 
+option to enable kernel lock-down (which would greatly simplify 
+testing), and a kconfig option to enforce it at build-time.
 
-See below, though likely wrapped by gmail:
+In addition to all that, it would be nice to be able to disable all of 
+the following at build time independent of the kernel lock-down state
+* The acpi_rsdp kernel parameter (I could easily see many distros 
+building kernels with this disabled, it's insanely use-case specific).
+* IO port and resource reservation module parameters (this would 
+actually be easier than having runtime blacklisting, and I could also 
+easily see this being turned on by default by a number of distros).
+* TOICSERIAL (this one is more likely than the above two to break systems).
 
-EFI stub: Booting Linux Kernel...
-EFI stub: Using DTB from configuration table
-
-Synchronous Exception at 0x00000000F82A045C
-
- X0 0x0000000000000000 X1 0x00000000FDF01614 X2 0x7BF580F1AD8AE581 X3
-0x0000000000000000
- X4 0x0000000000000000 X5 0x00000000FDFBFC60 X6 0x42F27CEB1CE1E5BC X7
-0x7BF580F1AD8AE581
- X8 0x0000000000000000 X9 0x0000000700000000 X10 0x00000000FB5C0000
-X11 0x00000000FB5C5FFF
- X12 0x0000000000000000 X13 0x000000000000000E X14 0x8000000000000001
-X15 0x0000000000000000
- X16 0x00000000FEFFF5E0 X17 0x0000000000000000 X18 0x0000000000000000
-X19 0x00000000FDFB0018
- X20 0x00000000F8390000 X21 0x00000000FB5BDA18 X22 0x00000000FEFFF5D0
-X23 0x00000009FFFF0000
- X24 0x00000000FEFFF598 X25 0x0000000000000000 X26 0x0000000000000000
-X27 0x0000000000000000
- X28 0x0000000000000000 FP 0x00000000FEFFF510 LR 0x00000000F82A0454
-
- V0 0xA4775AF0716632D7 DB7509796C96DACB V1 0xE67211106C932C4D 4F7141B24C78074F
- V2 0x550C7DC3243185BE 12835B01D807AA98 V3 0xC19BF1749BDC06A7 80DEB1FE72BE5D74
- V4 0x240CA1CC0FC19DC6 EFBE4786E49B69C1 V5 0x76F988DA5CB0A9DC 4A7484AA2DE92C6F
- V6 0xBF597FC7B00327C8 A831C66D983E5152 V7 0x1429296706CA6351 D5A79147C6E00BF3
- V8 0x0000000000000000 2E1B213827B70A85 V9 0x0000000000000000 766A0ABB650A7354
- V10 0x0000000000000000 A81A664BA2BFE8A1 V11 0x0000000000000000 D6990624D192E819
- V12 0x0000000000000000 1E376C0819A4C116 V13 0x0000000000000000 4ED8AA4A391C0CB3
- V14 0x0000000000000000 78A5636F748F82EE V15 0x0000000000000000 A4506CEB90BEFFFA
- V16 0x3C83709547545153 BC990E9F897D4FA8 V17 0xBEBEF297C5EC0578 E1D99AE8C2B92607
- V18 0x13242833C5F05BAB 101C24C521387481 V19 0x0A50ABCAD0BDDA12 996865483E880969
- V20 0x6C4ABAA53A9BE1CB 4416D9F479B08221 V21 0x60952147C3A68574 55B8AE51435C1A1A
- V22 0x9FEB2A3B4AB8D3BF 88C1883495C7F76F V23 0xD0C224BC8FB77E09 3DB8D233CF470963
- V24 0x0E72963E02D21C93 C95B757DA62B3A12 V25 0x2A77DBA1E4EE5D5C E08479A1B557DFA8
- V26 0xB593F86668CA8129 927A0019CDEC1A76 V27 0xFF03D7BC13D5FFF6 BBA1EFEF4B817FFA
- V28 0xE3FEE1F77F5FF733 5FBC3CE8E54BBB53 V29 0x4E8582114F72CE7E EED3F6BF4B0F5BDC
- V30 0xFFFA7FFBF72FF9F7 F8F06FDB9FF5EDEA V31 0xDE3785D1AEB3DAB7 12E08FF9AD0F87FF
-
- SP 0x00000000FEFFF500 ELR 0x00000000F82A045C SPSR 0x60000209 FPSR 0x00000000
- ESR 0x96000006 FAR 0x0000000000000000
-
- ESR : EC 0x25 IL 0x1 ISS 0x00000006
-
-Data abort: Translation fault, second level
-
-Stack dump:
- 00000FEFFF400: 996865483E880969 0A50ABCAD0BDDA12 4416D9F479B08221
-6C4ABAA53A9BE1CB
- 00000FEFFF420: 55B8AE51435C1A1A 60952147C3A68574 88C1883495C7F76F
-9FEB2A3B4AB8D3BF
- 00000FEFFF440: 3DB8D233CF470963 D0C224BC8FB77E09 C95B757DA62B3A12
-0E72963E02D21C93
- 00000FEFFF460: E08479A1B557DFA8 2A77DBA1E4EE5D5C 927A0019CDEC1A76
-B593F86668CA8129
- 00000FEFFF480: BBA1EFEF4B817FFA FF03D7BC13D5FFF6 5FBC3CE8E54BBB53
-E3FEE1F77F5FF733
- 00000FEFFF4A0: EED3F6BF4B0F5BDC 4E8582114F72CE7E F8F06FDB9FF5EDEA
-FFFA7FFBF72FF9F7
- 00000FEFFF4C0: 12E08FF9AD0F87FF DE3785D1AEB3DAB7 00000000F82A045C
-0000000060000209
- 00000FEFFF4E0: 0000000000000000 0000000096000006 0000000000000000
-7BF580F1AD8AE581
-> 00000FEFFF500: 00000000FEFFF520 00000000FDFE1658 00000000FEFFF5C0 00000000F829D4CC
- 00000FEFFF520: 00000000FB5C6040 00000000FCA74698 0000000000000000
-0000000000000000
- 00000FEFFF540: 0000000000000000 0000000000000000 00000000000000B0
-000000F2F865A8B0
- 00000FEFFF560: 00000000FB5C6040 0000000000000000 0000000000000000
-00000000F86C0000
- 00000FEFFF580: 000000000000503F 0000000080080000 0000000000F20000
-0000000000000000
- 00000FEFFF5A0: 11D295625B1B31A1 3B7269C9A0003F8E 4A3823DC9042A9DE
-6A5180D0DE7AFB96
- 00000FEFFF5C0: 00000000FEFFF5E0 00000000FDFD3AA8 0000000080080000
-00000000FB5D6C18
- 00000FEFFF5E0: 00000000FEFFF660 00000000F859C830 00000000F865A8B0
-0000000000000000
-
-
-Thanks,
-
-Catalin
+And these would probably be useful as lockable sysctls that would be 
+automatically locked disabled when the kernel is locked down:
+* ioperm/iopl (these can technically be blocked by seccomp or other 
+means, but that is non-trivial to do).
+* Most of the other ACPI stuff (some of this is useful for 
+troubleshooting, but is not normally used during regular operation).
+* PCI BAR access.
