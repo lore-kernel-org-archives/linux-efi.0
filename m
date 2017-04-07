@@ -1,60 +1,60 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [RFC PATCH v2 14/32] x86: mm: Provide support to use memblock
- when spliting large pages
-Date: Fri, 7 Apr 2017 13:33:25 +0200
-Message-ID: <20170407113325.vykr4g3qdufgt2rd@pd.tnic>
-References: <f46ff1e1-1cc7-1907-74a0-e2709fa1e5fb@amd.com>
- <20170406172520.iyjjtz56u3jlnjhq@pd.tnic>
- <ba739600-d468-1f1b-aff6-89c79fd6030b@amd.com>
+From: Mimi Zohar <zohar@linux.vnet.ibm.com>
+Subject: Re: [PATCH 09/24] kexec_file: Disable at runtime if securelevel has
+ been set
+Date: Fri, 07 Apr 2017 08:36:17 -0400
+Message-ID: <1491568577.4184.97.camel@linux.vnet.ibm.com>
+References: <1491551180.4184.50.camel@linux.vnet.ibm.com>
+         <1491536950.4184.10.camel@linux.vnet.ibm.com>
+         <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
+         <149142335441.5101.2294976563846442575.stgit@warthog.procyon.org.uk>
+         <20170407030545.GA4296@dhcp-128-65.nay.redhat.com>
+         <21572.1491548994@warthog.procyon.org.uk>
+         <27362.1491556638@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <ba739600-d468-1f1b-aff6-89c79fd6030b@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Brijesh Singh <brijesh.singh@amd.com>
-Cc: Paolo Bonzini <pbonzini@redhat.com>, simon.guinot@sequanux.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, linux-pci@vger.kernel.org, linus.walleij@linaro.org, gary.hook@amd.com, linux-mm@kvack.org, paul.gortmaker@windriver.com, hpa@zytor.com, cl@linux.com, dan.j.williams@intel.com, aarcange@redhat.com, sfr@canb.auug.org.au, andriy.shevchenko@linux.intel.com, herbert@gondor.apana.org.au, bhe@redhat.com, xemul@parallels.com, joro@8bytes.org, x86@kernel.org, peterz@infradead.org, piotr.luc@intel.com, mingo@redhat.com, msalter@redhat.com, ross.zwisler@linux.intel.com, dyoung@redhat.com, thomas.lendacky@amd.com, jroedel@suse.de, keescook@chromium.org, arnd@arndb.de, toshi.kani@hpe.com, mathieu.desnoyers@efficios.com, luto@kernel.org, devel@linuxdriverproject.org, bhelgaas@google.com, tglx@linutronix.de, mchehab@kernel.org
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <27362.1491556638@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, Chun-Yi Lee <jlee@suse.com>, gregkh@linuxfoundation.org, kexec@lists.infradead.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, matthew.garrett@nebula.com
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Apr 06, 2017 at 01:37:41PM -0500, Brijesh Singh wrote:
-> I did thought about prot idea but ran into another corner case which may require
-> us changing the signature of phys_pud_init and phys_pmd_init. The paddr_start
-> and paddr_end args into kernel_physical_mapping_init() should be aligned on PMD
-> level down (see comment [1]). So, if we encounter a case where our address range
-> is part of large page but we need to clear only one entry (i.e asked to clear just
-> one page into 2M region). In that case, now we need to pass additional arguments
-> into kernel_physical_mapping, phys_pud_init and phys_pmd_init to hint the splitting
-> code that it should use our prot for specific entries and all other entries will use
-> the old_prot.
+On Fri, 2017-04-07 at 10:17 +0100, David Howells wrote:
+> Mimi Zohar <zohar@linux.vnet.ibm.com> wrote:
+> 
+> > > Okay, fair enough.  I can stick in an OR with an IS_ENABLED on some IMA
+> > > symbol.  CONFIG_IMA_KEXEC maybe?  And also require IMA be enabled?
+> > 
+> > Not quite, since as Dave pointed out, IMA is policy driven.  As a
+> > policy is installed, we could set a flag.
+> 
+> Does such a flag exist as yet?
 
-Ok, but your !4K case:
+Not exactly what is needed.  There's a flag named ima_appraise, which
+is used internally in IMA. A temporary flag is created, while
+validating the rules.
 
-+               /*
-+                * virtual address is part of large page, create the page
-+                * table mapping to use smaller pages (4K). The virtual and
-+                * physical address must be aligned to PMD level.
-+                */
-+               kernel_physical_mapping_init(__pa(vaddr & PMD_MASK),
-+                                            __pa((vaddr_end & PMD_MASK) + PMD_SIZE),
-+                                            0);
+	if (default_appraise_rules[i].func == POLICY_CHECK)
+        	temp_ima_appraise |= IMA_APPRAISE_POLICY;
 
+        if (!result && (entry->action == UNKNOWN))
+                result = -EINVAL;
+        else if (entry->func == MODULE_CHECK)
+                temp_ima_appraise |= IMA_APPRAISE_MODULES;
+        else if (entry->func == FIRMWARE_CHECK)
+                temp_ima_appraise |= IMA_APPRAISE_FIRMWARE;
+        else if (entry->func == POLICY_CHECK)
+                temp_ima_appraise |= IMA_APPRAISE_POLICY;
 
-would map a 2M page as encrypted by default. What if we want to map a 2M page
-frame as ~_PAGE_ENC?
+If the entire policy is valid,   ima_update_policy_flag() sets the ima_appraise flag.
 
-IOW, if you're adding a new interface, it should be generic enough, like
-with prot argument.
+        ima_appraise |= temp_ima_appraise;
 
--- 
-Regards/Gruss,
-    Boris.
+>From an IMA perspective, either a file hash or signature are valid,
+but for this usage it must be a signature.  So in addition to testing
+entry->func, above, entry->flags would need to be tested as well to
+detect if IMA_DIGSIG_REQUIRED is set.
 
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+Mimi
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
