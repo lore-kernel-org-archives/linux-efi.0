@@ -1,53 +1,45 @@
-From: poma <pomidorabelisima@gmail.com>
-Subject: Re: [PATCH 11/24] uswsusp: Disable when the kernel is locked down
-Date: Sat, 8 Apr 2017 05:28:15 +0200
-Message-ID: <83e2dff5-c46b-25b4-253e-cd2650b7db7d@gmail.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH 15/24] asus-wmi: Restrict debugfs interface when the
+ kernel is locked down
+Date: Sun, 9 Apr 2017 14:10:10 +0300
+Message-ID: <CAHp75VfvWmv7SxgwCgR-ZBYPbeQW=+qesDoBNC5JFPtvzsN5gg@mail.gmail.com>
 References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
- <149142336965.5101.2946578135980499557.stgit@warthog.procyon.org.uk>
- <CAJZ5v0hp=GJtQ+YnNdaMw6rtbBzNyueY+iqjPkHLKp57t822ZQ@mail.gmail.com>
- <1491460792.1645.1.camel@suse.com> <14980.1491468060@warthog.procyon.org.uk>
- <CAJZ5v0gFeF3hdr0QzUeaT2dS+HhG7KUdVPPWHKeqHVkX78s+Tw@mail.gmail.com>
- <CAJZ5v0jwQPd3HfwE1Yi6bmyULFVegkU4fNvt0uXGvzAdecLEZA@mail.gmail.com>
- <alpine.LSU.2.20.1704062224220.28004@cbobk.fhfr.pm>
+ <149142340198.5101.8171352010918423590.stgit@warthog.procyon.org.uk>
+ <CAHp75VfpsnCHVqnFnwwh3JHB0ccY66Gj88sMGhrA9W7rDxiY_Q@mail.gmail.com> <31421.1491569449@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <alpine.LSU.2.20.1704062224220.28004@cbobk.fhfr.pm>
-Content-Language: en-MW
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jiri Kosina <jikos@kernel.org>, "Rafael J. Wysocki" <rafael@kernel.org>
-Cc: David Howells <dhowells@redhat.com>, Oliver Neukum <oneukum@suse.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux PM <linux-pm@vger.kernel.org>, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, Joey Lee <JLee@suse.com>, matthew.garrett@nebula.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <platform-driver-x86-owner@vger.kernel.org>
+In-Reply-To: <31421.1491569449@warthog.procyon.org.uk>
+Sender: platform-driver-x86-owner@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, matthew.garrett@nebula.com, linux-efi@vger.kernel.org, One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, acpi4asus-user <acpi4asus-user@lists.sourceforge.net>, Platform Driver <platform-driver-x86@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, keyrings@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 06.04.2017 22:25, Jiri Kosina wrote:
-> On Thu, 6 Apr 2017, Rafael J. Wysocki wrote:
-> 
->>>>> Your swap partition may be located on an NVDIMM or be encrypted.
->>>>
->>>> An NVDIMM should be considered the same as any other persistent storage.
->>>>
->>>> It may be encrypted, but where's the key stored, how easy is it to retrieve
->>>> and does the swapout code know this?
->>>>
->>>>> Isn't this a bit overly drastic?
->>>>
->>>> Perhaps, but if it's on disk and it's not encrypted, then maybe not.
->>>
->>> Right.
->>>
->>> Swap encryption is not mandatory and I'm not sure how the hibernate
->>> code can verify whether or not it is in use.
+On Fri, Apr 7, 2017 at 3:50 PM, David Howells <dhowells@redhat.com> wrote:
+> Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
+>
+>> > From: Matthew Garrett <matthew.garrett@nebula.com>
+>> >
+>> > We have no way of validating what all of the Asus WMI methods do on a given
+>> > machine - and there's a risk that some will allow hardware state to be
+>> > manipulated in such a way that arbitrary code can be executed in the
+>> > kernel, circumventing module loading restrictions.  Prevent that if the
+>> > kernel is locked down.
 >>
->> BTW, SUSE has patches adding secure boot support to the hibernate code
->> and Jiri promised me to post them last year even. :-)
-> 
-> Oh, thanks for a friendly ping :) Adding Joey Lee to CC.
-> 
+>> > +       if (kernel_is_locked_down())
+>> > +               return -EPERM;
+>>
+>> It looks a bit fragile when responsility of whatever reasons kernel
+>> can't serve become a driver burden.
+>> Can we fix this in debugfs framework instead?
+>
+> Fix it with debugfs how?  We can't offload the decision to userspace.
 
-Rafael J., are you talking about HIBERNATE_VERIFICATION ?
+I mean to do at least similar like you have done for module
+parameters. So, instead of putting above code to each attribute in
+question make a special (marked) attribute instead and debugfs
+framework will know how to deal with that.
 
-Ref.
-https://github.com/joeyli/linux-s4sign/commits/s4sign-hmac-v2-v4.2-rc8
-https://lkml.org/lkml/2015/8/11/47
-https://bugzilla.redhat.com/show_bug.cgi?id=1330335
+-- 
+With Best Regards,
+Andy Shevchenko
