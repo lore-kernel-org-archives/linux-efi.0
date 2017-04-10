@@ -1,45 +1,85 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH 15/24] asus-wmi: Restrict debugfs interface when the
- kernel is locked down
-Date: Sun, 9 Apr 2017 14:10:10 +0300
-Message-ID: <CAHp75VfvWmv7SxgwCgR-ZBYPbeQW=+qesDoBNC5JFPtvzsN5gg@mail.gmail.com>
-References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
- <149142340198.5101.8171352010918423590.stgit@warthog.procyon.org.uk>
- <CAHp75VfpsnCHVqnFnwwh3JHB0ccY66Gj88sMGhrA9W7rDxiY_Q@mail.gmail.com> <31421.1491569449@warthog.procyon.org.uk>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 4/4] ef/libstub: arm/arm64: randomize the base of the
+ UEFI rt services region
+Date: Mon, 10 Apr 2017 10:41:42 +0100
+Message-ID: <20170410094124.GA9450@leverpostej>
+References: <20170324132410.16628-1-ard.biesheuvel@linaro.org>
+ <20170324132410.16628-5-ard.biesheuvel@linaro.org>
+ <58E7B478.6010305@arm.com>
+ <CAKv+Gu9CpCWHT=3KboPTtuZVDundtGheKawS=iV_P756RFbaDg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <platform-driver-x86-owner@vger.kernel.org>
-In-Reply-To: <31421.1491569449@warthog.procyon.org.uk>
-Sender: platform-driver-x86-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, matthew.garrett@nebula.com, linux-efi@vger.kernel.org, One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, acpi4asus-user <acpi4asus-user@lists.sourceforge.net>, Platform Driver <platform-driver-x86@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, keyrings@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu9CpCWHT=3KboPTtuZVDundtGheKawS=iV_P756RFbaDg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, kernel-hardening-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Roy Franz <rfranz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Apr 7, 2017 at 3:50 PM, David Howells <dhowells@redhat.com> wrote:
-> Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
->
->> > From: Matthew Garrett <matthew.garrett@nebula.com>
->> >
->> > We have no way of validating what all of the Asus WMI methods do on a given
->> > machine - and there's a risk that some will allow hardware state to be
->> > manipulated in such a way that arbitrary code can be executed in the
->> > kernel, circumventing module loading restrictions.  Prevent that if the
->> > kernel is locked down.
->>
->> > +       if (kernel_is_locked_down())
->> > +               return -EPERM;
->>
->> It looks a bit fragile when responsility of whatever reasons kernel
->> can't serve become a driver burden.
->> Can we fix this in debugfs framework instead?
->
-> Fix it with debugfs how?  We can't offload the decision to userspace.
+On Fri, Apr 07, 2017 at 04:51:16PM +0100, Ard Biesheuvel wrote:
+> On 7 April 2017 at 16:47, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org> wrote:
+> > On 24/03/17 13:24, Ard Biesheuvel wrote:
+> >> Update the allocation logic for the virtual mapping of the UEFI runtime
+> >> services to start from a randomized base address if KASLR is in effect,
+> >> and if the UEFI firmware exposes an implementation of EFI_RNG_PROTOCOL.
+> >>
+> >> This makes it more difficult to predict the location of exploitable
+> >> data structures in the runtime UEFI firmware, which increases robustness
+> >> against attacks. Note that these regions are only mapped during the
+> >> time a runtime service call is in progress, and only on a single CPU
+> >> at a time, bit give the lack of a downside, let's enable it nonetheless.
+> >
+> > With next-20170407 on Seattle Overdrive, I get an SError[0] on boot:
 
-I mean to do at least similar like you have done for module
-parameters. So, instead of putting above code to each attribute in
-question make a special (marked) attribute instead and debugfs
-framework will know how to deal with that.
+> > * Revert "ef/libstub/arm/arm64: Randomize the base of the UEFI rt services region"
+> >
+> > At which point the machine start booting to a prompt again, (its noisier than
+> > usual but looks like double-printing).
 
--- 
-With Best Regards,
-Andy Shevchenko
+> That is quite interesting, to be honest, because that patch should
+> effectively be a NOP on systems that do not implement
+> EFI_RNG_PROTOCOL.
+
+FWIW, I'm also seeing a crash as a result of this patch, on a Juno R1
+with an EFI_RNG_PROTOCOL implementation, with next-20170410 defconfig.
+I'm using the Linaro 15.08 toolchain.
+
+----
+EFI stub: Booting Linux Kernel...
+EFI stub: Using DTB from configuration table
+
+
+WARNING: this system is using an unsafe pseudo-random implementation of
+RngLib!
+
+
+
+Synchronous Exception at 0x00000000F80FC7E8
+----
+
+If I replace the !nokaslr() in efi_entry() with false, my kernel boots.
+
+If I replace !nokaslr() with true, it fails to boot, even with the call
+to efi_get_random_bytes() replaced with status = EFI_ERROR.
+
+The problem appears to be the use of TASK_SIZE, since on arm64 that's:
+
+#define TASK_SIZE               (test_thread_flag(TIF_32BIT) ? \
+                                TASK_SIZE_32 : TASK_SIZE_64)
+
+... which would mean that the stub would be trying to dereference whatever it
+found in sp_el0. Looking at objdump:
+
+0000000000000160 <efi_entry>:
+ ...
+ 4b4:   94000000        bl      0 <nokaslr>
+ 4b8:   35000280        cbnz    w0, 508 <efi_entry+0x3a8>
+ 4bc:   d5384100        mrs     x0, sp_el0
+ 4c0:   f9400004        ldr     x4, [x0]
+...
+
+So I think we should revert this for now.
+
+Thanks,
+Mark.
