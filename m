@@ -1,39 +1,24 @@
 From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 15/24] asus-wmi: Restrict debugfs interface when the kernel is locked down
-Date: Mon, 10 Apr 2017 14:16:48 +0100
-Message-ID: <13615.1491830208@warthog.procyon.org.uk>
-References: <CAHp75VfvWmv7SxgwCgR-ZBYPbeQW=+qesDoBNC5JFPtvzsN5gg@mail.gmail.com> <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk> <149142340198.5101.8171352010918423590.stgit@warthog.procyon.org.uk> <CAHp75VfpsnCHVqnFnwwh3JHB0ccY66Gj88sMGhrA9W7rDxiY_Q@mail.gmail.com> <31421.1491569449@warthog.procyon.org.uk>
+Subject: Re: [PATCH 09/24] kexec_file: Disable at runtime if securelevel has been set
+Date: Mon, 10 Apr 2017 14:19:52 +0100
+Message-ID: <13679.1491830392@warthog.procyon.org.uk>
+References: <1491568577.4184.97.camel@linux.vnet.ibm.com> <1491551180.4184.50.camel@linux.vnet.ibm.com> <1491536950.4184.10.camel@linux.vnet.ibm.com> <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk> <149142335441.5101.2294976563846442575.stgit@warthog.procyon.org.uk> <20170407030545.GA4296@dhcp-128-65.nay.redhat.com> <21572.1491548994@warthog.procyon.org.uk> <27362.1491556638@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <CAHp75VfvWmv7SxgwCgR-ZBYPbeQW=+qesDoBNC5JFPtvzsN5gg@mail.gmail.com>
-Content-ID: <13614.1491830208.1@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: dhowells@redhat.com, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, matthew.garrett@nebula.com, linux-efi@vger.kernel.org, One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, acpi4asus-user <acpi4asus-user@lists.sourceforge.net>, Platform Driver <platform-driver-x86@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, keyrings@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1491568577.4184.97.camel@linux.vnet.ibm.com>
+Content-ID: <13678.1491830392.1@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mimi Zohar <zohar@linux.vnet.ibm.com>
+Cc: dhowells@redhat.com, Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, Chun-Yi Lee <jlee@suse.com>, gregkh@linuxfoundation.org, kexec@lists.infradead.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, matthew.garrett@nebula.com
 List-Id: linux-efi@vger.kernel.org
 
-Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
+Mimi Zohar <zohar@linux.vnet.ibm.com> wrote:
 
-> >> It looks a bit fragile when responsility of whatever reasons kernel
-> >> can't serve become a driver burden.
-> >> Can we fix this in debugfs framework instead?
-> >
-> > Fix it with debugfs how?  We can't offload the decision to userspace.
-> 
-> I mean to do at least similar like you have done for module
-> parameters. So, instead of putting above code to each attribute in
-> question make a special (marked) attribute instead and debugfs
-> framework will know how to deal with that.
+> From an IMA perspective, either a file hash or signature are valid,
+> but for this usage it must be a signature.
 
-Hmmm...  It's tricky in that debugfs doesn't have any of its own structures,
-but is entirely built on standard VFS ones, so finding somewhere to store the
-information is going to be awkward.  One obvious solution is to entirely lock
-down debugfs in secure boot more, but that might be a bit drastic.
-
-Note that it's still going to be a driver burden to some extent anyway.  The
-driver has to tell the core what needs to be restricted.
-
-Further, I guess configfs needs attention also.
+Not necessarily.  If IMA can guarantee that a module is the same based on its
+hash rather than on a key, I would've thought that should be fine.
 
 David
