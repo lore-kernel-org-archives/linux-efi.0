@@ -1,84 +1,79 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 4/4] ef/libstub: arm/arm64: randomize the base of the UEFI
- rt services region
-Date: Mon, 10 Apr 2017 10:44:39 +0100
-Message-ID: <CAKv+Gu9YfALdyL-28X20X=T=XyyjDUxmtHy3_ZDDq-PF8RMxUA@mail.gmail.com>
-References: <20170324132410.16628-1-ard.biesheuvel@linaro.org>
- <20170324132410.16628-5-ard.biesheuvel@linaro.org> <58E7B478.6010305@arm.com>
- <CAKv+Gu9CpCWHT=3KboPTtuZVDundtGheKawS=iV_P756RFbaDg@mail.gmail.com> <20170410094124.GA9450@leverpostej>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH] efi/libstub: arm/arm64: don't use TASK_SIZE when randomising the RT space
+Date: Mon, 10 Apr 2017 11:30:38 +0100
+Message-ID: <20170410103038.20117-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170410094124.GA9450@leverpostej>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, kernel-hardening-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Roy Franz <rfranz-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 10 April 2017 at 10:41, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Fri, Apr 07, 2017 at 04:51:16PM +0100, Ard Biesheuvel wrote:
->> On 7 April 2017 at 16:47, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org> wrote:
->> > On 24/03/17 13:24, Ard Biesheuvel wrote:
->> >> Update the allocation logic for the virtual mapping of the UEFI runtime
->> >> services to start from a randomized base address if KASLR is in effect,
->> >> and if the UEFI firmware exposes an implementation of EFI_RNG_PROTOCOL.
->> >>
->> >> This makes it more difficult to predict the location of exploitable
->> >> data structures in the runtime UEFI firmware, which increases robustness
->> >> against attacks. Note that these regions are only mapped during the
->> >> time a runtime service call is in progress, and only on a single CPU
->> >> at a time, bit give the lack of a downside, let's enable it nonetheless.
->> >
->> > With next-20170407 on Seattle Overdrive, I get an SError[0] on boot:
->
->> > * Revert "ef/libstub/arm/arm64: Randomize the base of the UEFI rt services region"
->> >
->> > At which point the machine start booting to a prompt again, (its noisier than
->> > usual but looks like double-printing).
->
->> That is quite interesting, to be honest, because that patch should
->> effectively be a NOP on systems that do not implement
->> EFI_RNG_PROTOCOL.
->
-> FWIW, I'm also seeing a crash as a result of this patch, on a Juno R1
-> with an EFI_RNG_PROTOCOL implementation, with next-20170410 defconfig.
-> I'm using the Linaro 15.08 toolchain.
->
-> ----
-> EFI stub: Booting Linux Kernel...
-> EFI stub: Using DTB from configuration table
->
->
-> WARNING: this system is using an unsafe pseudo-random implementation of
-> RngLib!
->
->
->
-> Synchronous Exception at 0x00000000F80FC7E8
-> ----
->
-> If I replace the !nokaslr() in efi_entry() with false, my kernel boots.
->
-> If I replace !nokaslr() with true, it fails to boot, even with the call
-> to efi_get_random_bytes() replaced with status = EFI_ERROR.
->
-> The problem appears to be the use of TASK_SIZE, since on arm64 that's:
->
-> #define TASK_SIZE               (test_thread_flag(TIF_32BIT) ? \
->                                 TASK_SIZE_32 : TASK_SIZE_64)
->
-> ... which would mean that the stub would be trying to dereference whatever it
-> found in sp_el0. Looking at objdump:
->
-> 0000000000000160 <efi_entry>:
->  ...
->  4b4:   94000000        bl      0 <nokaslr>
->  4b8:   35000280        cbnz    w0, 508 <efi_entry+0x3a8>
->  4bc:   d5384100        mrs     x0, sp_el0
->  4c0:   f9400004        ldr     x4, [x0]
-> ...
->
-> So I think we should revert this for now.
->
+As reported by James, Catalin and Mark, commit e69176d68d26
+("ef/libstub/arm/arm64: Randomize the base of the UEFI rt services
+region") results in a crash in the firmware regardless of whether KASLR
+is in effect or not, and whether the firmware implements EFI_RNG_PROTOCOL
+or not.
 
-Thanks for debugging this! I will get a fixed version out asap
+Mark has identified the root cause to be the inappropriate use of
+TASK_SIZE in the stub, which arm64 defines as
+
+  #define TASK_SIZE             (test_thread_flag(TIF_32BIT) ? \
+                                TASK_SIZE_32 : TASK_SIZE_64)
+
+and testing thread flags at this point results in the dereference of
+pointers in uninitialized structures.
+
+So instead, introduce a preprocessor symbol EFI_RT_VIRTUAL_LIMIT and
+define it to TASK_SIZE_64 on arm64 and TASK_SIZE on ARM, both of which
+are compile time constants. Also, change the 'headroom' variable to
+static const to force an error if this changes in the future.
+
+Cc: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+
+Apologies for the breakage. On the systems I have tested, sp_el0 apparently
+pointed somewhere sane when I inadvertently dereferenced it, and the
+resulting addresses looked sufficiently random to me.
+
+Ingo, once we have some confirmation that this makes the problem go away,
+could you please take this straight into efi/core? Thanks. 
+
+ drivers/firmware/efi/libstub/arm-stub.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index 1e45ec51b094..34010ff3b77e 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -32,6 +32,12 @@
+ #define EFI_RT_VIRTUAL_BASE	SZ_512M
+ #define EFI_RT_VIRTUAL_SIZE	SZ_512M
+ 
++#ifdef CONFIG_ARM64
++#define EFI_RT_VIRTUAL_LIMIT	TASK_SIZE_64
++#else
++#define EFI_RT_VIRTUAL_LIMIT	TASK_SIZE
++#endif
++
+ static u64 virtmap_base = EFI_RT_VIRTUAL_BASE;
+ 
+ efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg,
+@@ -236,8 +242,9 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 		 * shift of 21 bit positions into account when scaling
+ 		 * the headroom value using a 32-bit random value.
+ 		 */
+-		u64 headroom = TASK_SIZE - EFI_RT_VIRTUAL_BASE -
+-			       EFI_RT_VIRTUAL_SIZE;
++		static const u64 headroom = EFI_RT_VIRTUAL_LIMIT -
++					    EFI_RT_VIRTUAL_BASE -
++					    EFI_RT_VIRTUAL_SIZE;
+ 		u32 rnd;
+ 
+ 		status = efi_get_random_bytes(sys_table, sizeof(rnd),
+-- 
+2.9.3
