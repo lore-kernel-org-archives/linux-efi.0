@@ -1,302 +1,67 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH V14 02/10] ras: acpi/apei: cper: generic error data entry
- v3 per ACPI 6.1
-Date: Wed, 12 Apr 2017 15:34:48 +0200
-Message-ID: <20170412133447.n2yft7v266v6k6gh@pd.tnic>
-References: <1490729440-32591-1-git-send-email-tbaicar@codeaurora.org>
- <1490729440-32591-3-git-send-email-tbaicar@codeaurora.org>
+From: joeyli <jlee@suse.com>
+Subject: Re: [PATCH 11/24] uswsusp: Disable when the kernel is locked down
+Date: Wed, 12 Apr 2017 21:44:57 +0800
+Message-ID: <20170412134457.GE18270@linux-l9pv.suse>
+References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk>
+ <149142336965.5101.2946578135980499557.stgit@warthog.procyon.org.uk>
+ <CAJZ5v0hp=GJtQ+YnNdaMw6rtbBzNyueY+iqjPkHLKp57t822ZQ@mail.gmail.com>
+ <1491460792.1645.1.camel@suse.com>
+ <14980.1491468060@warthog.procyon.org.uk>
+ <CAJZ5v0gFeF3hdr0QzUeaT2dS+HhG7KUdVPPWHKeqHVkX78s+Tw@mail.gmail.com>
+ <CAJZ5v0jwQPd3HfwE1Yi6bmyULFVegkU4fNvt0uXGvzAdecLEZA@mail.gmail.com>
+ <alpine.LSU.2.20.1704062224220.28004@cbobk.fhfr.pm>
+ <83e2dff5-c46b-25b4-253e-cd2650b7db7d@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-pm-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1490729440-32591-3-git-send-email-tbaicar@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org
+In-Reply-To: <83e2dff5-c46b-25b4-253e-cd2650b7db7d@gmail.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: poma <pomidorabelisima@gmail.com>
+Cc: Jiri Kosina <jikos@kernel.org>, "Rafael J. Wysocki" <rafael@kernel.org>, David Howells <dhowells@redhat.com>, Oliver Neukum <oneukum@suse.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux PM <linux-pm@vger.kernel.org>, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org, matthew.garrett@nebula.com
 List-Id: linux-efi@vger.kernel.org
 
-> Subject: [PATCH V14 02/10] ras: acpi/apei: cper: generic error data entry v3 per ACPI 6.1
-
-Use a verb in your patch subjects: "Add support for ..." or so.
-
-On Tue, Mar 28, 2017 at 01:30:32PM -0600, Tyler Baicar wrote:
-> Currently when a RAS error is reported it is not timestamped.
-
-What is a RAS error? You mean a hardware error?
-
-> The ACPI 6.1 spec adds the timestamp field to the generic error
-> data entry v3 structure. The timestamp of when the firmware
-> generated the error is now being reported.
-
-So what this patch does doesn't have a lot to to do with the Subject?
-Please state what the patch does in the Subject.
-
-Also, your commit message talks about adding timestamp but the patch
-does more. You need to state that too and explain what this patch does
-actually.
-
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-> Reviewed-by: James Morse <james.morse@arm.com>
-> Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> ---
->  drivers/acpi/apei/ghes.c    |  9 ++++---
->  drivers/firmware/efi/cper.c | 63 +++++++++++++++++++++++++++++++++++----------
->  include/acpi/ghes.h         | 22 ++++++++++++++++
->  3 files changed, 77 insertions(+), 17 deletions(-)
+On Sat, Apr 08, 2017 at 05:28:15AM +0200, poma wrote:
+> On 06.04.2017 22:25, Jiri Kosina wrote:
+> > On Thu, 6 Apr 2017, Rafael J. Wysocki wrote:
+> > 
+> >>>>> Your swap partition may be located on an NVDIMM or be encrypted.
+> >>>>
+> >>>> An NVDIMM should be considered the same as any other persistent storage.
+> >>>>
+> >>>> It may be encrypted, but where's the key stored, how easy is it to retrieve
+> >>>> and does the swapout code know this?
+> >>>>
+> >>>>> Isn't this a bit overly drastic?
+> >>>>
+> >>>> Perhaps, but if it's on disk and it's not encrypted, then maybe not.
+> >>>
+> >>> Right.
+> >>>
+> >>> Swap encryption is not mandatory and I'm not sure how the hibernate
+> >>> code can verify whether or not it is in use.
+> >>
+> >> BTW, SUSE has patches adding secure boot support to the hibernate code
+> >> and Jiri promised me to post them last year even. :-)
+> > 
+> > Oh, thanks for a friendly ping :) Adding Joey Lee to CC.
+> > 
 > 
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index 0241e36..9ddbb93 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -421,7 +421,8 @@ static void ghes_handle_memory_failure(struct acpi_hest_generic_data *gdata, int
->  	int flags = -1;
->  	int sec_sev = ghes_severity(gdata->error_severity);
->  	struct cper_sec_mem_err *mem_err;
-> -	mem_err = (struct cper_sec_mem_err *)(gdata + 1);
-> +
-> +	mem_err = acpi_hest_generic_data_payload(gdata);
->  
->  	if (!(mem_err->validation_bits & CPER_MEM_VALID_PA))
->  		return;
-> @@ -458,7 +459,8 @@ static void ghes_do_proc(struct ghes *ghes,
->  		if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
->  				 CPER_SEC_PLATFORM_MEM)) {
->  			struct cper_sec_mem_err *mem_err;
-> -			mem_err = (struct cper_sec_mem_err *)(gdata+1);
-> +
-> +			mem_err = acpi_hest_generic_data_payload(gdata);
->  			ghes_edac_report_mem_error(ghes, sev, mem_err);
->  
->  			arch_apei_report_mem_error(sev, mem_err);
-> @@ -468,7 +470,8 @@ static void ghes_do_proc(struct ghes *ghes,
->  		else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
->  				      CPER_SEC_PCIE)) {
->  			struct cper_sec_pcie *pcie_err;
-> -			pcie_err = (struct cper_sec_pcie *)(gdata+1);
-> +
-> +			pcie_err = acpi_hest_generic_data_payload(gdata);
->  			if (sev == GHES_SEV_RECOVERABLE &&
->  			    sec_sev == GHES_SEV_RECOVERABLE &&
->  			    pcie_err->validation_bits & CPER_PCIE_VALID_DEVICE_ID &&
-> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> index d425374..8fa4e23 100644
-> --- a/drivers/firmware/efi/cper.c
-> +++ b/drivers/firmware/efi/cper.c
-> @@ -32,6 +32,9 @@
->  #include <linux/acpi.h>
->  #include <linux/pci.h>
->  #include <linux/aer.h>
-> +#include <linux/printk.h>
-> +#include <linux/bcd.h>
-> +#include <acpi/ghes.h>
->  
->  #define INDENT_SP	" "
->  
-> @@ -386,13 +389,37 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
->  	pfx, pcie->bridge.secondary_status, pcie->bridge.control);
->  }
->  
-> +static void cper_estatus_print_section_v300(const char *pfx,
-> +	const struct acpi_hest_generic_data_v300 *gdata)
+> Rafael J., are you talking about HIBERNATE_VERIFICATION ?
+> 
+> Ref.
+> https://github.com/joeyli/linux-s4sign/commits/s4sign-hmac-v2-v4.2-rc8
+> https://lkml.org/lkml/2015/8/11/47
+> https://bugzilla.redhat.com/show_bug.cgi?id=1330335
+>
 
-Yuck, acpi_hest_generic_data_v300. Can we make those struct names smaller pls?
-And v300 is just silly.
+I am working on switch to HMAC-SHA512. 
 
-And then align args at opening brace.
+On the other hand, some mechanisms keep signing/encryption key in memory.
+e.g. dm-crypt or hibernation verification. Kees Cook suggested that we
+should add kernel memory reads as a thread model of securelevel to
+prevent leaking those keys by /dev/kmem, bpf, kdump or hibernation...
+We still need time to implement it.
 
-> +{
-> +	__u8 hour, min, sec, day, mon, year, century, *timestamp;
-> +
-> +	if (gdata->validation_bits & ACPI_HEST_GEN_VALID_TIMESTAMP) {
-> +		timestamp = (__u8 *)&(gdata->time_stamp);
-> +		sec = bcd2bin(timestamp[0]);
-> +		min = bcd2bin(timestamp[1]);
-> +		hour = bcd2bin(timestamp[2]);
-> +		day = bcd2bin(timestamp[4]);
-> +		mon = bcd2bin(timestamp[5]);
-> +		year = bcd2bin(timestamp[6]);
-> +		century = bcd2bin(timestamp[7]);
-
-Align those vertically on the = sign.
-
-> +		printk("%stime: %7s %02d%02d-%02d-%02d %02d:%02d:%02d\n", pfx,
-> +			0x01 & *(timestamp + 3) ? "precise" : "",
-
-Move that test in a separate if-statement - that printk is unreadable as
-it is. Also, the test bit always comes second.
-
-> 			century,
-> +			year, mon, day, hour, min, sec);
-> +	}
-> +}
-> +
->  static void cper_estatus_print_section(
-> -	const char *pfx, const struct acpi_hest_generic_data *gdata, int sec_no)
-> +	const char *pfx, struct acpi_hest_generic_data *gdata, int sec_no)
-
-static void
-cper_estatus_print_section(const char *pfx, struct acpi_hest_generic_data *gdata,
-			   int sec_no)
-
-looks much better.
-
->  {
->  	uuid_le *sec_type = (uuid_le *)gdata->section_type;
->  	__u16 severity;
->  	char newpfx[64];
->  
-> +	if (acpi_hest_generic_data_version(gdata) >= 3)
-
-Jeez, that macro name is like a one-lined book!
-
-Let's make that "hest_gdata_ver()" or something else shorter.
-
-> +		cper_estatus_print_section_v300(pfx,
-> +			(const struct acpi_hest_generic_data_v300 *)gdata);
-> +
->  	severity = gdata->error_severity;
->  	printk("%s""Error %d, type: %s\n", pfx, sec_no,
->  	       cper_severity_str(severity));
-> @@ -403,14 +430,18 @@ static void cper_estatus_print_section(
->  
->  	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
->  	if (!uuid_le_cmp(*sec_type, CPER_SEC_PROC_GENERIC)) {
-> -		struct cper_sec_proc_generic *proc_err = (void *)(gdata + 1);
-> +		struct cper_sec_proc_generic *proc_err;
-> +
-> +		proc_err = acpi_hest_generic_data_payload(gdata);
-
-This looks like an unrelated change. The payload function addition and the
-conversion of the code to use it should be a separate patch. And shorten that
-function name too pls.
-
->  		printk("%s""section_type: general processor error\n", newpfx);
->  		if (gdata->error_data_length >= sizeof(*proc_err))
->  			cper_print_proc_generic(newpfx, proc_err);
->  		else
->  			goto err_section_too_small;
->  	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PLATFORM_MEM)) {
-> -		struct cper_sec_mem_err *mem_err = (void *)(gdata + 1);
-> +		struct cper_sec_mem_err *mem_err;
-> +
-> +		mem_err = acpi_hest_generic_data_payload(gdata);
->  		printk("%s""section_type: memory error\n", newpfx);
->  		if (gdata->error_data_length >=
->  		    sizeof(struct cper_sec_mem_err_old))
-> @@ -419,7 +450,9 @@ static void cper_estatus_print_section(
->  		else
->  			goto err_section_too_small;
->  	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PCIE)) {
-> -		struct cper_sec_pcie *pcie = (void *)(gdata + 1);
-> +		struct cper_sec_pcie *pcie;
-> +
-> +		pcie = acpi_hest_generic_data_payload(gdata);
->  		printk("%s""section_type: PCIe error\n", newpfx);
->  		if (gdata->error_data_length >= sizeof(*pcie))
->  			cper_print_pcie(newpfx, pcie, gdata);
-> @@ -438,7 +471,7 @@ void cper_estatus_print(const char *pfx,
->  			const struct acpi_hest_generic_status *estatus)
->  {
->  	struct acpi_hest_generic_data *gdata;
-> -	unsigned int data_len, gedata_len;
-> +	unsigned int data_len;
->  	int sec_no = 0;
->  	char newpfx[64];
->  	__u16 severity;
-> @@ -451,12 +484,13 @@ void cper_estatus_print(const char *pfx,
->  	printk("%s""event severity: %s\n", pfx, cper_severity_str(severity));
->  	data_len = estatus->data_length;
->  	gdata = (struct acpi_hest_generic_data *)(estatus + 1);
-> +
->  	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
-> -	while (data_len >= sizeof(*gdata)) {
-> -		gedata_len = gdata->error_data_length;
-> +
-> +	while (data_len >= acpi_hest_generic_data_size(gdata)) {
->  		cper_estatus_print_section(newpfx, gdata, sec_no);
-> -		data_len -= gedata_len + sizeof(*gdata);
-> -		gdata = (void *)(gdata + 1) + gedata_len;
-> +		data_len -= acpi_hest_generic_data_record_size(gdata);
-> +		gdata = acpi_hest_generic_data_next(gdata);
->  		sec_no++;
->  	}
->  }
-> @@ -486,12 +520,13 @@ int cper_estatus_check(const struct acpi_hest_generic_status *estatus)
->  		return rc;
->  	data_len = estatus->data_length;
->  	gdata = (struct acpi_hest_generic_data *)(estatus + 1);
-> -	while (data_len >= sizeof(*gdata)) {
-> -		gedata_len = gdata->error_data_length;
-> -		if (gedata_len > data_len - sizeof(*gdata))
-> +
-> +	while (data_len >= acpi_hest_generic_data_size(gdata)) {
-> +		gedata_len = acpi_hest_generic_data_error_length(gdata);
-> +		if (gedata_len > data_len - acpi_hest_generic_data_size(gdata))
->  			return -EINVAL;
-> -		data_len -= gedata_len + sizeof(*gdata);
-> -		gdata = (void *)(gdata + 1) + gedata_len;
-> +		data_len -= gedata_len + acpi_hest_generic_data_size(gdata);
-> +		gdata = acpi_hest_generic_data_next(gdata);
->  	}
->  	if (data_len)
->  		return -EINVAL;
-> diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
-> index 68f088a..6ae318b 100644
-> --- a/include/acpi/ghes.h
-> +++ b/include/acpi/ghes.h
-> @@ -12,6 +12,18 @@
->  #define GHES_TO_CLEAR		0x0001
->  #define GHES_EXITING		0x0002
->  
-> +#define acpi_hest_generic_data_error_length(gdata)	\
-> +	(((struct acpi_hest_generic_data *)(gdata))->error_data_length)
-> +#define acpi_hest_generic_data_size(gdata)		\
-> +	((acpi_hest_generic_data_version(gdata) >= 3) ?	\
-> +	sizeof(struct acpi_hest_generic_data_v300) :	\
-> +	sizeof(struct acpi_hest_generic_data))
-> +#define acpi_hest_generic_data_record_size(gdata)	\
-> +	(acpi_hest_generic_data_size(gdata) +		\
-> +	acpi_hest_generic_data_error_length(gdata))
-> +#define acpi_hest_generic_data_next(gdata)		\
-> +	((void *)(gdata) + acpi_hest_generic_data_record_size(gdata))
-
-This is one unreadable pile of too long names with a clearly redundant
-and too long prefix. Please shorten it all.
-
-> +
->  struct ghes {
->  	union {
->  		struct acpi_hest_generic *generic;
-> @@ -73,3 +85,13 @@ static inline void ghes_edac_unregister(struct ghes *ghes)
->  {
->  }
->  #endif
-> +
-> +#define acpi_hest_generic_data_version(gdata)			\
-> +	(gdata->revision >> 8)
-> +
-> +static inline void *acpi_hest_generic_data_payload(struct acpi_hest_generic_data *gdata)
-
-Lemme try to shorten it:
-
-static inline void *acpi_hest_get_payload(struct acpi_hest_gdata *d)
-{
-	if (hest_gdata_ver(d) >= 3)
-		return (void *)(((struct acpi_hest_gdata_v3 *)d) + 1);
-	else
-		return d + 1;
-}
-
-Now this is much more readable IMO. You can actually see what's going
-on. And you still know what the struct names are.
-
-So let's drop all that unnecessary too long prefixing and make the
-code readable. That cper thing needs a lot more scrubbing, of course,
-but some other day.
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Thanks a lot!
+Joey Lee 
