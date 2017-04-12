@@ -1,77 +1,91 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: [PATCH V14 02/10] ras: acpi/apei: cper: generic error data
- entry v3 per ACPI 6.1
-Date: Wed, 12 Apr 2017 09:40:03 -0700
-Message-ID: <1492015203.28586.1.camel@perches.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH V14 03/10] efi: parse ARM processor error
+Date: Wed, 12 Apr 2017 18:51:26 +0200
+Message-ID: <20170412165125.xzsovuficgbygkfp@pd.tnic>
 References: <1490729440-32591-1-git-send-email-tbaicar@codeaurora.org>
- <1490729440-32591-3-git-send-email-tbaicar@codeaurora.org>
- <20170412133447.n2yft7v266v6k6gh@pd.tnic>
+ <1490729440-32591-4-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <20170412133447.n2yft7v266v6k6gh@pd.tnic>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Borislav Petkov <bp@alien8.de>, Tyler Baicar <tbaicar@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, gengdongjiu@huawei.com, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawei.com
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1490729440-32591-4-git-send-email-tbaicar@codeaurora.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 2017-04-12 at 15:34 +0200, Borislav Petkov wrote:
-> On Tue, Mar 28, 2017 at 01:30:32PM -0600, Tyler Baicar wrote:
-> > Currently when a RAS error is reported it is not timestamped.
-[]
-> > diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
-[]
-> > +#define acpi_hest_generic_data_error_length(gdata)	\
-> > +	(((struct acpi_hest_generic_data *)(gdata))->error_data_length)
-> > +#define acpi_hest_generic_data_size(gdata)		\
-> > +	((acpi_hest_generic_data_version(gdata) >= 3) ?	\
-> > +	sizeof(struct acpi_hest_generic_data_v300) :	\
-> > +	sizeof(struct acpi_hest_generic_data))
-> > +#define acpi_hest_generic_data_record_size(gdata)	\
-> > +	(acpi_hest_generic_data_size(gdata) +		\
-> > +	acpi_hest_generic_data_error_length(gdata))
-> > +#define acpi_hest_generic_data_next(gdata)		\
-> > +	((void *)(gdata) + acpi_hest_generic_data_record_size(gdata))
+On Tue, Mar 28, 2017 at 01:30:33PM -0600, Tyler Baicar wrote:
+> Add support for ARM Common Platform Error Record (CPER).
+> UEFI 2.6 specification adds support for ARM specific
+> processor error information to be reported as part of the
+> CPER records. This provides more detail on for processor error logs.
 > 
-> This is one unreadable pile of too long names with a clearly redundant
-> and too long prefix. Please shorten it all.
-
-Naming is generally author's choice and internal
-consistency has value too.
-
-acpi_hest_generic<foo> is already used throughout this codebase
-in multiple files and paths.
-
-> > @@ -73,3 +85,13 @@ static inline void ghes_edac_unregister(struct ghes *ghes)
-> >  {
-> >  }
-> >  #endif
-> > +
-> > +#define acpi_hest_generic_data_version(gdata)			\
-> > +	(gdata->revision >> 8)
-> > +
-> > +static inline void *acpi_hest_generic_data_payload(struct acpi_hest_generic_data *gdata)
+> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+> CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+> Reviewed-by: James Morse <james.morse@arm.com>
+> Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> ---
+>  drivers/firmware/efi/cper.c | 133 ++++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/cper.h        |  54 ++++++++++++++++++
+>  2 files changed, 187 insertions(+)
 > 
-> Lemme try to shorten it:
-> 
-> static inline void *acpi_hest_get_payload(struct acpi_hest_gdata *d)
-> {
-> 	if (hest_gdata_ver(d) >= 3)
-> 		return (void *)(((struct acpi_hest_gdata_v3 *)d) + 1);
-> 	else
-> 		return d + 1;
-> }
-> 
-> Now this is much more readable IMO. You can actually see what's going
-> on. And you still know what the struct names are.
+> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+> index 8fa4e23..56aa516 100644
+> --- a/drivers/firmware/efi/cper.c
+> +++ b/drivers/firmware/efi/cper.c
+> @@ -110,12 +110,15 @@ void cper_print_bits(const char *pfx, unsigned int bits,
+>  static const char * const proc_type_strs[] = {
+>  	"IA32/X64",
+>  	"IA64",
+> +	"ARM",
+>  };
+>  
+>  static const char * const proc_isa_strs[] = {
+>  	"IA32",
+>  	"IA64",
+>  	"X64",
+> +	"ARM A32/T32",
+> +	"ARM A64",
+>  };
+>  
+>  static const char * const proc_error_type_strs[] = {
+> @@ -139,6 +142,18 @@ void cper_print_bits(const char *pfx, unsigned int bits,
+>  	"corrected",
+>  };
+>  
+> +static const char * const arm_reg_ctx_strs[] = {
+> +	"AArch32 general purpose registers",
+> +	"AArch32 EL1 context registers",
+> +	"AArch32 EL2 context registers",
+> +	"AArch32 secure context registers",
+> +	"AArch64 general purpose registers",
+> +	"AArch64 EL1 context registers",
+> +	"AArch64 EL2 context registers",
+> +	"AArch64 EL3 context registers",
+> +	"Misc. system register structure",
+> +};
 
-trivial: unnecessary cast to void *
+That...
+
+> +
+>  static void cper_print_proc_generic(const char *pfx,
+>  				    const struct cper_sec_proc_generic *proc)
+>  {
+> @@ -184,6 +199,114 @@ static void cper_print_proc_generic(const char *pfx,
+>  		printk("%s""IP: 0x%016llx\n", pfx, proc->ip);
+>  }
+>  
+> +static void cper_print_proc_arm(const char *pfx,
+> +				const struct cper_sec_proc_arm *proc)
+
+... and that function should go into:
+
+#if defined(CONFIG_ARM64) || defined(CONFIG_ARM)
+
+Just put them close together so that you don't have too much ifdeffery.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
