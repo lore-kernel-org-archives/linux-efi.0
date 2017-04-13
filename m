@@ -1,91 +1,216 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH V14 03/10] efi: parse ARM processor error
-Date: Wed, 12 Apr 2017 18:51:26 +0200
-Message-ID: <20170412165125.xzsovuficgbygkfp@pd.tnic>
-References: <1490729440-32591-1-git-send-email-tbaicar@codeaurora.org>
- <1490729440-32591-4-git-send-email-tbaicar@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1490729440-32591-4-git-send-email-tbaicar@codeaurora.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org
+From: Gary Lin <glin-IBi9RG/b67k@public.gmane.org>
+Subject: [PATCH v2] efi: Config options to assign versions in the PE-COFF header
+Date: Thu, 13 Apr 2017 11:58:27 +0800
+Message-ID: <20170413035827.9820-1-glin@suse.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Gary Lin <glin-IBi9RG/b67k@public.gmane.org>, Joey Lee <jlee-IBi9RG/b67k@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Mar 28, 2017 at 01:30:33PM -0600, Tyler Baicar wrote:
-> Add support for ARM Common Platform Error Record (CPER).
-> UEFI 2.6 specification adds support for ARM specific
-> processor error information to be reported as part of the
-> CPER records. This provides more detail on for processor error logs.
-> 
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-> Reviewed-by: James Morse <james.morse@arm.com>
-> Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> ---
->  drivers/firmware/efi/cper.c | 133 ++++++++++++++++++++++++++++++++++++++++++++
->  include/linux/cper.h        |  54 ++++++++++++++++++
->  2 files changed, 187 insertions(+)
-> 
-> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> index 8fa4e23..56aa516 100644
-> --- a/drivers/firmware/efi/cper.c
-> +++ b/drivers/firmware/efi/cper.c
-> @@ -110,12 +110,15 @@ void cper_print_bits(const char *pfx, unsigned int bits,
->  static const char * const proc_type_strs[] = {
->  	"IA32/X64",
->  	"IA64",
-> +	"ARM",
->  };
->  
->  static const char * const proc_isa_strs[] = {
->  	"IA32",
->  	"IA64",
->  	"X64",
-> +	"ARM A32/T32",
-> +	"ARM A64",
->  };
->  
->  static const char * const proc_error_type_strs[] = {
-> @@ -139,6 +142,18 @@ void cper_print_bits(const char *pfx, unsigned int bits,
->  	"corrected",
->  };
->  
-> +static const char * const arm_reg_ctx_strs[] = {
-> +	"AArch32 general purpose registers",
-> +	"AArch32 EL1 context registers",
-> +	"AArch32 EL2 context registers",
-> +	"AArch32 secure context registers",
-> +	"AArch64 general purpose registers",
-> +	"AArch64 EL1 context registers",
-> +	"AArch64 EL2 context registers",
-> +	"AArch64 EL3 context registers",
-> +	"Misc. system register structure",
-> +};
+This commit adds the new config options to allow the user to modify the
+following fields in the PE-COFF header.
 
-That...
+UINT16 MajorOperatingSystemVersion
+UINT16 MinorOperatingSystemVersion
+UINT16 MajorImageVersion
+UINT16 MinorImageVersion
 
-> +
->  static void cper_print_proc_generic(const char *pfx,
->  				    const struct cper_sec_proc_generic *proc)
->  {
-> @@ -184,6 +199,114 @@ static void cper_print_proc_generic(const char *pfx,
->  		printk("%s""IP: 0x%016llx\n", pfx, proc->ip);
->  }
->  
-> +static void cper_print_proc_arm(const char *pfx,
-> +				const struct cper_sec_proc_arm *proc)
+Those fields are mainly for the executables or libraries in Windows NT
+or higher to specify the minimum supported Windows version and the
+version of the image itself.
 
-... and that function should go into:
+Given the fact that those fields are ignored in UEFI, we can safely reuse
+those fields for other purposes, e.g. Security Version(*).
 
-#if defined(CONFIG_ARM64) || defined(CONFIG_ARM)
+(*) https://github.com/lcp/shim/wiki/Security-Version
 
-Just put them close together so that you don't have too much ifdeffery.
+v2 changes:
+- Modify the header direct instead of using an external script as
+  suggested by Ard Biesheuvel
+- Include arm and arm64
 
+Cc: Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Joey Lee <jlee-IBi9RG/b67k@public.gmane.org>
+Cc: Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>
+Signed-off-by: Gary Lin <glin-IBi9RG/b67k@public.gmane.org>
+---
+ arch/arm/Kconfig                      | 24 ++++++++++++++++++++++++
+ arch/arm/boot/compressed/efi-header.S |  8 ++++----
+ arch/arm64/Kconfig                    | 24 ++++++++++++++++++++++++
+ arch/arm64/kernel/head.S              |  8 ++++----
+ arch/x86/Kconfig                      | 24 ++++++++++++++++++++++++
+ arch/x86/boot/header.S                |  8 ++++----
+ 6 files changed, 84 insertions(+), 12 deletions(-)
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 0d4e71b42c77..4965ad2ccc23 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -2090,6 +2090,30 @@ config EFI
+ 	  is only useful for kernels that may run on systems that have
+ 	  UEFI firmware.
+ 
++config EFI_MAJOR_OS
++	hex "EFI Major OS Version"
++	range 0x0 0xFFFF
++	default "0x0"
++	depends on EFI_STUB
++
++config EFI_MINOR_OS
++	hex "EFI Minor OS Version"
++	range 0x0 0xFFFF
++	default "0x0"
++	depends on EFI_STUB
++
++config EFI_MAJOR_IMAGE
++	hex "EFI Major Image Version"
++	range 0x0 0xFFFF
++	default "0x0"
++	depends on EFI_STUB
++
++config EFI_MINOR_IMAGE
++	hex "EFI Minor Image Version"
++	range 0x0 0xFFFF
++	default "0x0"
++	depends on EFI_STUB
++
+ endmenu
+ 
+ menu "CPU Power Management"
+diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
+index 9d5dc4fda3c1..67715472a76f 100644
+--- a/arch/arm/boot/compressed/efi-header.S
++++ b/arch/arm/boot/compressed/efi-header.S
+@@ -69,10 +69,10 @@ extra_header_fields:
+ 		.long	0			@ ImageBase
+ 		.long	0x200			@ SectionAlignment
+ 		.long	0x200			@ FileAlignment
+-		.short	0			@ MajorOperatingSystemVersion
+-		.short	0			@ MinorOperatingSystemVersion
+-		.short	0			@ MajorImageVersion
+-		.short	0			@ MinorImageVersion
++		.short	CONFIG_EFI_MAJOR_OS	@ MajorOperatingSystemVersion
++		.short	CONFIG_EFI_MINOR_OS	@ MinorOperatingSystemVersion
++		.short	CONFIG_EFI_MAJOR_IMAGE	@ MajorImageVersion
++		.short	CONFIG_EFI_MINOR_IMAGE	@ MinorImageVersion
+ 		.short	0			@ MajorSubsystemVersion
+ 		.short	0			@ MinorSubsystemVersion
+ 		.long	0			@ Win32VersionValue
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 3741859765cf..c782c422e58c 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -1033,6 +1033,30 @@ config EFI
+ 	  allow the kernel to be booted as an EFI application. This
+ 	  is only useful on systems that have UEFI firmware.
+ 
++config EFI_MAJOR_OS
++	hex "EFI Major OS Version"
++	range 0x0 0xFFFF
++	default "0x0"
++	depends on EFI_STUB
++
++config EFI_MINOR_OS
++	hex "EFI Minor OS Version"
++	range 0x0 0xFFFF
++	default "0x0"
++	depends on EFI_STUB
++
++config EFI_MAJOR_IMAGE
++	hex "EFI Major Image Version"
++	range 0x0 0xFFFF
++	default "0x0"
++	depends on EFI_STUB
++
++config EFI_MINOR_IMAGE
++	hex "EFI Minor Image Version"
++	range 0x0 0xFFFF
++	default "0x0"
++	depends on EFI_STUB
++
+ config DMI
+ 	bool "Enable support for SMBIOS (DMI) tables"
+ 	depends on EFI
+diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
+index 4fb6ccd886d1..9faa4b04d0ef 100644
+--- a/arch/arm64/kernel/head.S
++++ b/arch/arm64/kernel/head.S
+@@ -129,10 +129,10 @@ extra_header_fields:
+ 	.quad	0				// ImageBase
+ 	.long	0x1000				// SectionAlignment
+ 	.long	PECOFF_FILE_ALIGNMENT		// FileAlignment
+-	.short	0				// MajorOperatingSystemVersion
+-	.short	0				// MinorOperatingSystemVersion
+-	.short	0				// MajorImageVersion
+-	.short	0				// MinorImageVersion
++	.short	CONFIG_EFI_MAJOR_OS		// MajorOperatingSystemVersion
++	.short	CONFIG_EFI_MINOR_OS		// MinorOperatingSystemVersion
++	.short	CONFIG_EFI_MAJOR_IMAGE		// MajorImageVersion
++	.short	CONFIG_EFI_MINOR_IMAGE		// MinorImageVersion
+ 	.short	0				// MajorSubsystemVersion
+ 	.short	0				// MinorSubsystemVersion
+ 	.long	0				// Win32VersionValue
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index 5bbdef151805..233933fde7dd 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -1803,6 +1803,30 @@ config EFI_STUB
+ 
+ 	  See Documentation/efi-stub.txt for more information.
+ 
++config EFI_MAJOR_OS
++	hex "EFI Major OS Version"
++	range 0x0 0xFFFF
++	default "0x0"
++	depends on EFI_STUB
++
++config EFI_MINOR_OS
++	hex "EFI Minor OS Version"
++	range 0x0 0xFFFF
++	default "0x0"
++	depends on EFI_STUB
++
++config EFI_MAJOR_IMAGE
++	hex "EFI Major Image Version"
++	range 0x0 0xFFFF
++	default "0x0"
++	depends on EFI_STUB
++
++config EFI_MINOR_IMAGE
++	hex "EFI Minor Image Version"
++	range 0x0 0xFFFF
++	default "0x0"
++	depends on EFI_STUB
++
+ config EFI_MIXED
+ 	bool "EFI mixed-mode support"
+ 	depends on EFI_STUB && X86_64
+diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
+index 3dd5be33aaa7..863813007207 100644
+--- a/arch/x86/boot/header.S
++++ b/arch/x86/boot/header.S
+@@ -156,10 +156,10 @@ extra_header_fields:
+ #endif
+ 	.long	0x20				# SectionAlignment
+ 	.long	0x20				# FileAlignment
+-	.word	0				# MajorOperatingSystemVersion
+-	.word	0				# MinorOperatingSystemVersion
+-	.word	0				# MajorImageVersion
+-	.word	0				# MinorImageVersion
++	.word	CONFIG_EFI_MAJOR_OS		# MajorOperatingSystemVersion
++	.word	CONFIG_EFI_MINOR_OS		# MinorOperatingSystemVersion
++	.word	CONFIG_EFI_MAJOR_IMAGE		# MajorImageVersion
++	.word	CONFIG_EFI_MINOR_IMAGE		# MinorImageVersion
+ 	.word	0				# MajorSubsystemVersion
+ 	.word	0				# MinorSubsystemVersion
+ 	.long	0				# Win32VersionValue
 -- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+2.12.0
