@@ -1,24 +1,32 @@
-From: Sarah JOHNSON <sarah.johnson197070-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Greetings.
-Date: Fri, 14 Apr 2017 09:22:50 +0000 (UTC)
-Message-ID: <1940046256.242872.1492161770258__49590.467188$1492161790$gmane$org@mail.yahoo.com>
-References: <1940046256.242872.1492161770258.ref@mail.yahoo.com>
-Reply-To: Sarah JOHNSON <sarah.johnson197070-/E1597aS9LQAvxtiuMwx3w@public.gmane.org>
+From: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Subject: Re: [PATCH 06/24] Add a sysrq option to exit secure boot mode
+Date: Fri, 14 Apr 2017 20:05:07 +0200 (CEST)
+Message-ID: <alpine.DEB.2.20.1704142003570.2327@nanos>
+References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk> <149142332458.5101.14654616837280513947.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <149142332458.5101.14654616837280513947.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kyle McMartin <kyle-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Good Day Dearest.
+On Wed, 5 Apr 2017, David Howells wrote:
 
-My name is Sarah JOHNSON I am 18 years old, the only daughter of late Mr. Raymond JOHNSON from Burkina Faso, I am contacting you to help me relocate to your country to continue my university education in  your country, before my father died he gave me a deposit slip document of ($7,000,000 USD) and made me understand that it was because of his position in the government that his government associates planed and poisoned him on a business trip with them to France and he advised me to look for a faithful and reliable foreigner who will help me to transfer this money to his country and help me to relocate over there to continue my studies.
+> From: Kyle McMartin <kyle-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> 
+> Make sysrq+x exit secure boot mode on x86_64, thereby allowing the running
+> kernel image to be modified.  This lifts the lockdown.
+> 
+> Signed-off-by: Kyle McMartin <kyle-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 
-I hope you will help me with the good faith and trust I have in you, after you have secured the money and settle my education, I will give you 30% of the money for your good and kind assistance to me. Please Contact me e-Mail:sarah.johnson197070-/E1597aS9LQAvxtiuMwx3w@public.gmane.org 
+Matt, Ard?
 
-I am waiting on your reply
+Any opinions on this?
 
-Regards,
+Thanks,
 
-Sarah.
+	tglx
