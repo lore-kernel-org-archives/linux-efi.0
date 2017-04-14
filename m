@@ -1,76 +1,81 @@
-From: hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
-Subject: Re: [RFC PATCH] x86: Config options to assign versions in the PE-COFF header
-Date: Thu, 13 Apr 2017 22:17:40 -0700
-Message-ID: <AB30E497-A973-4303-9C85-C44BB3CDD9A7@zytor.com>
-References: <20170411102041.19771-1-glin@suse.com> <8E544119-66B8-4482-BBE9-68B6C7A3AAE9@zytor.com> <20170414035119.v2kjxcsuauj3bdj2@GaryWorkstation>
+From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Subject: linux-efi archive
+Date: Fri, 14 Apr 2017 10:50:59 +0200
+Message-ID: <20170414085059.GA5508@wunner.de>
+References: <f063d8b0-e6fc-b8db-00c2-8402acefd909@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170414035119.v2kjxcsuauj3bdj2@GaryWorkstation>
+Content-Disposition: inline
+In-Reply-To: <f063d8b0-e6fc-b8db-00c2-8402acefd909-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Gary Lin <glin-IBi9RG/b67k@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>, Michal Marek <mmarek-IBi9RG/b67k@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Joey Lee <jlee-IBi9RG/b67k@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>
+To: Konstantin Ryabitsev <konstantin-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: efi kernel list <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On April 13, 2017 8:51:19 PM PDT, Gary Lin <glin-IBi9RG/b67k@public.gmane.org> wrote:
->On Thu, Apr 13, 2017 at 03:21:20PM -0700, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org wrote:
->> On April 11, 2017 3:20:41 AM PDT, Gary Lin <glin-IBi9RG/b67k@public.gmane.org> wrote:
->> >This commit adds the new config options to allow the user to modify
->the
->> >following fields in the PE-COFF header.
->> >
->> >UINT16 MajorOperatingSystemVersion
->> >UINT16 MinorOperatingSystemVersion
->> >UINT16 MajorImageVersion
->> >UINT16 MinorImageVersion
->> >
->> >Those fields are mainly for the executables or libraries in Windows
->NT
->> >or higher to specify the minimum supported Windows version and the
->> >version of the image itself.
->> >
->> >Given the fact that those fields are ignored in UEFI, we can safely
->> >reuse
->> >those fields for other purposes, e.g. Security Version(*).
->> >
->> >(*) https://github.com/lcp/shim/wiki/Security-Version
->> >
->> >Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
->> >Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->> >Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
->> >Cc: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
->> >Cc: Michal Marek <mmarek-IBi9RG/b67k@public.gmane.org>
->> >Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
->> >Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> >Cc: Joey Lee <jlee-IBi9RG/b67k@public.gmane.org>
->> >Cc: Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>
->> >Signed-off-by: Gary Lin <glin-IBi9RG/b67k@public.gmane.org>
->> >Tested-by: Joey Lee <jlee-IBi9RG/b67k@public.gmane.org>
->> >---
->[snip]
->> 
->> Reusing PECOFF fields seems doubleplusunsafe: we don't own those
->fields, the UEFI forum does.  It would make a lot more sense to add
->these fields to the bzImage header directly or indirectly (via a
->pointer), the latter would be more economical since the bzImage header
->size is bounded.
->> 
->> We could even define it as a pointer to a "security information
->header" with its own size field, so it can be grown in the future as
->needed.
->Reusing PE-COFF simplifies the implementation since shim can parse the
->header directly. I can raise the issue to the UEFI forum to clarify the
->usage of those fields.
->
->Meanwhile, I'll also look into the bzImage header in case the PE-COFF
->header is really a NO-GO.
->
->Thanks,
->
->Gary Lin
+Hi Konstantin,
 
-If we are going to use the PE-COFF hear then you need to write a proposal and get the UEFI forum to sign off on it.
--- 
-Sent from my Android device with K-9 Mail. Please excuse my brevity.
+On Fri, Mar 03, 2017 at 10:50:10AM +0100, Laszlo Ersek wrote:
+> ... and so linux-efi finally has a public archive again (because GMANE
+> has been defunct for a while now):
+> 
+>   https://www.mail-archive.com/linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org/
+> 
+> Whoever administers this list, please consider updating the info box at:
+> 
+>   http://vger.kernel.org/vger-lists.html#linux-efi
+
+The URL above still lists GMANE as archive for linux-efi, which no longer
+works.  Could you replace this with the URL at mail-archive.com which was
+kindly created by Laszlo Ersek?  In addition, there's another archive at:
+
+    http://www.spinics.net/lists/linux-efi/
+
+I've cc'ed Laszlo's e-mail to postmaster-u79uwXL29TY76Z2rM5mHXA@public.gmane.org over a month ago
+to no avail.
+
+Thank you!
+
+Lukas
+
+> 
+> --*--
+> 
+> As a side note, regarding
+> 
+>   http://vger.kernel.org/majordomo-info.html
+>   "As of now, subscription support is not handled at the web!",
+> 
+> I would love to welcome Majordomo @ VGER.KERNEL.ORG to the 21st century,
+> if it only enabled web-based subscription (like practically all
+> pipermail / mailman2 instances do, while at the same time they do remain
+> sane, and resist the "web 2.0" idiocy).
+> 
+> I had to employ some "From:" hackery to subscribe the Mail Archive to
+> linux-efi <https://www.mail-archive.com/faq.html#newlist>, which,
+> combined with the extreme slowness of VGER.KERNEL.ORG, was decidedly
+> un-fun. (I'm lucky that the RH SMTP server didn't reject my "forged"
+> From headers.)
+> 
+> Also, the info box at <http://vger.kernel.org/vger-lists.html#linux-efi>
+> is almost entirely useless, it doesn't even tell me who runs linux-efi,
+> so that I could have contacted them in person, for adding the Mail
+> Archive directly to the subscriber list (a practice recommended by the
+> Mail Archive themselves, see the link above).
+> 
+> Examples:
+> 
+> https://lists.nongnu.org/mailman/listinfo/qemu-devel
+> 
+> "Qemu-devel list run by listhelper-moderate at nongnu.org"
+> 
+> https://lists.01.org/mailman/listinfo/edk2-devel
+> 
+> "edk2-devel list run by michael.d.kinney at intel.com, laurie.jarlstrom
+> at intel.com, jordan.l.justen at intel.com, webmaster at 01.org"
+> 
+> https://www.redhat.com/mailman/listinfo/vfio-users
+> 
+> "vfio-users list run by alwillia at redhat.com"
+> 
+> etc etc etc
