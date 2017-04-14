@@ -1,30 +1,31 @@
-From: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Subject: Re: [PATCH 13/24] x86: Lock down IO port access when the kernel is
- locked down
-Date: Fri, 14 Apr 2017 20:28:39 +0200 (CEST)
-Message-ID: <alpine.DEB.2.20.1704142028170.2327@nanos>
-References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk> <149142338597.5101.14728426552744019377.stgit@warthog.procyon.org.uk>
+From: Thomas Gleixner <tglx@linutronix.de>
+Subject: Re: [PATCH 14/24] x86: Restrict MSR access when the kernel is locked
+ down
+Date: Fri, 14 Apr 2017 20:30:33 +0200 (CEST)
+Message-ID: <alpine.DEB.2.20.1704142028440.2327@nanos>
+References: <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk> <149142339340.5101.1283602261267937893.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <149142338597.5101.14728426552744019377.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <149142339340.5101.1283602261267937893.stgit@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: linux-kernel@vger.kernel.org, matthew.garrett@nebula.com, linux-efi@vger.kernel.org, Kees Cook <keescook@chromium.org>, gnomes@lxorguk.ukuu.org.uk, gregkh@linuxfoundation.org, x86@kernel.org, linux-security-module@vger.kernel.org, keyrings@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
 On Wed, 5 Apr 2017, David Howells wrote:
-> From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-> 
-> IO port access would permit users to gain access to PCI configuration
-> registers, which in turn (on a lot of hardware) give access to MMIO
-> register space. This would potentially permit root to trigger arbitrary
-> DMA, so lock it down by default.
-> 
-> This also implicitly locks down the KDADDIO, KDDELIO, KDENABIO and
-> KDDISABIO console ioctls.
-> 
-> Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-Reviewed-by: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Can you please change the subsys in $subject to 'x86/msr:' ?
+
+> From: Matthew Garrett <matthew.garrett@nebula.com>
+> 
+> Writing to MSRs should not be allowed if the kernel is locked down, since
+> it could lead to execution of arbitrary code in kernel mode.  Based on a
+> patch by Kees Cook.
+> 
+> Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
+> Signed-off-by: David Howells <dhowells@redhat.com>
+> Acked-by: Kees Cook <keescook@chromium.org>
+> cc: x86@kernel.org
+
+Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
