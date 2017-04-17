@@ -1,38 +1,72 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [GIT PULL] EFI fixup for v4.12 queue
-Date: Mon, 17 Apr 2017 10:32:00 +0100
-Message-ID: <20170417093201.10181-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH] efi/libstub/arm: Don't use TASK_SIZE when randomising the RT space
+Date: Mon, 17 Apr 2017 10:32:01 +0100
+Message-ID: <20170417093201.10181-2-ard.biesheuvel@linaro.org>
+References: <20170417093201.10181-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170417093201.10181-1-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-Hi all,
+As reported by James, Catalin and Mark, commit e69176d68d26
+("ef/libstub/arm/arm64: Randomize the base of the UEFI rt services
+region") results in a crash in the firmware regardless of whether KASLR
+is in effect or not, and whether the firmware implements EFI_RNG_PROTOCOL
+or not.
 
-Please merge this onto the v4.12 EFI queue: it fixes an issue reported with
--next where arm64 machines fail to boot due to a premature dereference of the
-'current' pointer.
+Mark has identified the root cause to be the inappropriate use of
+TASK_SIZE in the stub, which arm64 defines as
 
-The following changes since commit efc491b0f06f65ea588f6591f0bc31db779e0594:
+  #define TASK_SIZE             (test_thread_flag(TIF_32BIT) ? \
+                                TASK_SIZE_32 : TASK_SIZE_64)
 
-  ef/libstub: arm/arm64: Randomize the base of the UEFI rt services region (2017-04-02 16:36:29 +0100)
+and testing thread flags at this point results in the dereference of
+pointers in uninitialized structures.
 
-are available in the git repository at:
+So instead, introduce a preprocessor symbol EFI_RT_VIRTUAL_LIMIT and
+define it to TASK_SIZE_64 on arm64 and TASK_SIZE on ARM, both of which
+are compile time constants. Also, change the 'headroom' variable to
+static const to force an error if this might change in the future.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
-
-for you to fetch changes up to d3e759649e1b057da72a8981aaafcd2f34f10681:
-
-  efi/libstub/arm: Don't use TASK_SIZE when randomising the RT space (2017-04-17 08:16:25 +0100)
-
-----------------------------------------------------------------
-A single fix for a regression caused by changes that are queued for v4.12:
-- don't use TASK_SIZE in the stub on arm64, as it depends on thread flags
-
-----------------------------------------------------------------
-Ard Biesheuvel (1):
-      efi/libstub/arm: Don't use TASK_SIZE when randomising the RT space
-
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Tested-by: Mark Rutland <mark.rutland@arm.com>
+Tested-by: James Morse <james.morse@arm.com>
+Tested-by: Catalin Marinas <catalin.marinas@arm.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
  drivers/firmware/efi/libstub/arm-stub.c | 11 +++++++++--
  1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index 1e45ec51b094..34010ff3b77e 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -32,6 +32,12 @@
+ #define EFI_RT_VIRTUAL_BASE	SZ_512M
+ #define EFI_RT_VIRTUAL_SIZE	SZ_512M
+ 
++#ifdef CONFIG_ARM64
++#define EFI_RT_VIRTUAL_LIMIT	TASK_SIZE_64
++#else
++#define EFI_RT_VIRTUAL_LIMIT	TASK_SIZE
++#endif
++
+ static u64 virtmap_base = EFI_RT_VIRTUAL_BASE;
+ 
+ efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg,
+@@ -236,8 +242,9 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 		 * shift of 21 bit positions into account when scaling
+ 		 * the headroom value using a 32-bit random value.
+ 		 */
+-		u64 headroom = TASK_SIZE - EFI_RT_VIRTUAL_BASE -
+-			       EFI_RT_VIRTUAL_SIZE;
++		static const u64 headroom = EFI_RT_VIRTUAL_LIMIT -
++					    EFI_RT_VIRTUAL_BASE -
++					    EFI_RT_VIRTUAL_SIZE;
+ 		u32 rnd;
+ 
+ 		status = efi_get_random_bytes(sys_table, sizeof(rnd),
+-- 
+2.9.3
