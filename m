@@ -1,72 +1,36 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH] efi/libstub/arm: Don't use TASK_SIZE when randomising the RT space
-Date: Mon, 17 Apr 2017 10:32:01 +0100
-Message-ID: <20170417093201.10181-2-ard.biesheuvel@linaro.org>
-References: <20170417093201.10181-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170417093201.10181-1-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
+From: <j.lahoda-aRb0bU7PRFPrBKCeMvbIDA@public.gmane.org>
+Subject: (unknown)
+Date: Mon, 17 Apr 2017 18:00:56 -0000
+Message-ID: <149245205663.5361.12937022418039188437@vnpt.vn>
+Mime-Version: 1.0
+Content-Type: application/zip; name="EMAIL_12394528480_linux-efi.zip"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: attachment
+Subject: 
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-As reported by James, Catalin and Mark, commit e69176d68d26
-("ef/libstub/arm/arm64: Randomize the base of the UEFI rt services
-region") results in a crash in the firmware regardless of whether KASLR
-is in effect or not, and whether the firmware implements EFI_RNG_PROTOCOL
-or not.
-
-Mark has identified the root cause to be the inappropriate use of
-TASK_SIZE in the stub, which arm64 defines as
-
-  #define TASK_SIZE             (test_thread_flag(TIF_32BIT) ? \
-                                TASK_SIZE_32 : TASK_SIZE_64)
-
-and testing thread flags at this point results in the dereference of
-pointers in uninitialized structures.
-
-So instead, introduce a preprocessor symbol EFI_RT_VIRTUAL_LIMIT and
-define it to TASK_SIZE_64 on arm64 and TASK_SIZE on ARM, both of which
-are compile time constants. Also, change the 'headroom' variable to
-static const to force an error if this might change in the future.
-
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Tested-by: Mark Rutland <mark.rutland@arm.com>
-Tested-by: James Morse <james.morse@arm.com>
-Tested-by: Catalin Marinas <catalin.marinas@arm.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/libstub/arm-stub.c | 11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 1e45ec51b094..34010ff3b77e 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -32,6 +32,12 @@
- #define EFI_RT_VIRTUAL_BASE	SZ_512M
- #define EFI_RT_VIRTUAL_SIZE	SZ_512M
- 
-+#ifdef CONFIG_ARM64
-+#define EFI_RT_VIRTUAL_LIMIT	TASK_SIZE_64
-+#else
-+#define EFI_RT_VIRTUAL_LIMIT	TASK_SIZE
-+#endif
-+
- static u64 virtmap_base = EFI_RT_VIRTUAL_BASE;
- 
- efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg,
-@@ -236,8 +242,9 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 		 * shift of 21 bit positions into account when scaling
- 		 * the headroom value using a 32-bit random value.
- 		 */
--		u64 headroom = TASK_SIZE - EFI_RT_VIRTUAL_BASE -
--			       EFI_RT_VIRTUAL_SIZE;
-+		static const u64 headroom = EFI_RT_VIRTUAL_LIMIT -
-+					    EFI_RT_VIRTUAL_BASE -
-+					    EFI_RT_VIRTUAL_SIZE;
- 		u32 rnd;
- 
- 		status = efi_get_random_bytes(sys_table, sizeof(rnd),
--- 
-2.9.3
+UEsDBBQAAAAIAAGNkUrIBua+IgQAACQEAAAJAAAAMTc0MDcuemlwdZN7MBMAHMfHFkaoLHrJ40qN
+1VVkqYWtOmmKtHnfPEY3o1Jr4bKxMbG0CHmWZKhWVIx5JpNlqzaUMkuELSTk1WMjPe66667f7+77
+ve/nvv9+3dBAEAQAAGgB1C6lHZIHsapZQAAAoblIFul2uM02+FYiiYz1PSXdBqEWVC4sc8q9SjDA
+g0c3Yk1QWkBdbWDtEQ+crIUWbtYWvo9Qqpoz7lHz6XKe7PdTUhRB6eFg63MuGWTJzrJL9K5Ek4vh
+6Eeun2IlXl4W+m8iLB/mhVgZy8/ObzPq52U8YIT6N1A3TqoENt6RiqIs8Kc4szymoYkE4RBgwSmY
+FuBnTZ7FrGR9NszxiDb8Ym6lwxC584nEEzMiRCFMFuIXIUp5HllidMB01CzppmaQO6nTtqxc97Ht
+S1vqaL1/VXdqbJ2O2fiop4X0ikwKSRKwUR7BzXri0NcxIY3xm29d7wF631jDvrO8bc1RGELRTMrP
+FcA4TVpftYfsohCKDlIdrk7BpTxv9RRHQ2bAOZ+hrRZccx3n4qXZKJdBCG7QBGbYmWWJleBrhBmr
+W6fGB9IUu5v0mfsdSrFrKbqeYDnd7CH1Cooxb738EXyYTPOJx8F45qjtNqR2YFaq9pPVbd+LmXJw
+kB/J8jytC3sE9F63tDNTWOoo1qMW+w4v471xPeuSwD7OPijc+WVlx5xMlO5kbT+Vr3mdIx5J1cuW
+6NHOfDjIKq+x6mejnqSnY6SKiMIIpAEhnruidkFIooiH+QYGQ330TKy3fI+piFmZoOXc5a12nEt/
+q8KwRGNRJ9cO2jM2REqhbXYdFfay5AgWE5Rrz6uAgHbNBiJbEkePxTlBWeZZW9BT9aHHCuQOe3GW
+h0kmVbD1lmy7TKVWv8ZpGUmwg8ZiPFtWLqQXncxBrGPubUNsiS6ZBzqNzDrL7bpvHugWT6vSlJm7
+5x0jS3JcCfH1CTXXbIvGi5ToC3sgpzD7EZswgpGPZO7AbT400N2pR8Ub59S4KxqeVo5ZVUQbl40P
+E+CE3kNU+Kqmb+phNixzXImOW5g6vX2zjz4yORBqWeVpQZIIMfuP6h7S4MRlujge1JyrI/oGyJqu
+RvFjQtQ3gkILfUHktfRsZ8eSUJ1bfbR4PBJ5N+9DsHnwGKbR8V511MVCsFLn3Xsof+f6tzF8jcbE
+V4LLuw7fVyIqJ5Z2DqWsyPeKolyGrh+bMG3ZokFkkOh4IiUpRqZrD3uH59s8ODFgyPIEWX/EB5Lv
+nz+dKJa9KNU3NvLvq7A2ipzYFO7fwPVNaf6O3B4QB5T2xoY19vamLp8J5NXKVPA+QE57CI9z17/6
+mMe+YQAu1/YpvGkywQiKu5O8UE+dMXJDq6k7AP632g2A32f6S/9uWPsPUQOsAmCnk11l1R1q/7ob
+eonGr87i+yx6JfBn+gFQSwECPwAUAAAACAABjZFKyAbmviIEAAAkBAAACQAkAAAAAAAAACAAAAAA
+AAAAMTc0MDcuemlwCgAgAAAAAAABABgAZ1uMT9y30gFnW4xP3LfSAWdbjE/ct9IBUEsFBgAAAAAB
+AAEAWwAAAEkEAAAAAA==
