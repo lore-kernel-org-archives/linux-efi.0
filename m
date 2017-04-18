@@ -1,163 +1,113 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: [PATCH v5 30/32] x86/boot: Add early cmdline parsing for options
- with arguments
-Date: Tue, 18 Apr 2017 16:22:00 -0500
-Message-ID: <20170418212200.10190.18044.stgit@tlendack-t1.amdoffice.net>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: [PATCH v5 31/32] x86: Add sysfs support for Secure Memory Encryption
+Date: Tue, 18 Apr 2017 16:22:12 -0500
+Message-ID: <20170418212212.10190.73484.stgit@tlendack-t1.amdoffice.net>
 References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
-Cc: Rik van Riel <riel@redhat.com>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dave Young <dyoung@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20170418211612.10190.82788.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter
+	Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Add a cmdline_find_option() function to look for cmdline options that
-take arguments. The argument is returned in a supplied buffer and the
-argument length (regardless of whether it fits in the supplied buffer)
-is returned, with -1 indicating not found.
+Add sysfs support for SME so that user-space utilities (kdump, etc.) can
+determine if SME is active.
 
-Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+A new directory will be created:
+  /sys/kernel/mm/sme/
+
+And two entries within the new directory:
+  /sys/kernel/mm/sme/active
+  /sys/kernel/mm/sme/encryption_mask
+
+Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 ---
- arch/x86/include/asm/cmdline.h |    2 +
- arch/x86/lib/cmdline.c         |  105 ++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 107 insertions(+)
+ arch/x86/mm/mem_encrypt.c |   49 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 49 insertions(+)
 
-diff --git a/arch/x86/include/asm/cmdline.h b/arch/x86/include/asm/cmdline.h
-index e01f7f7..84ae170 100644
---- a/arch/x86/include/asm/cmdline.h
-+++ b/arch/x86/include/asm/cmdline.h
-@@ -2,5 +2,7 @@
- #define _ASM_X86_CMDLINE_H
+diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+index 0ff41a4..7dc4e98 100644
+--- a/arch/x86/mm/mem_encrypt.c
++++ b/arch/x86/mm/mem_encrypt.c
+@@ -18,6 +18,8 @@
+ #include <linux/mm.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/swiotlb.h>
++#include <linux/kobject.h>
++#include <linux/sysfs.h>
  
- int cmdline_find_option_bool(const char *cmdline_ptr, const char *option);
-+int cmdline_find_option(const char *cmdline_ptr, const char *option,
-+			char *buffer, int bufsize);
+ #include <asm/tlbflush.h>
+ #include <asm/fixmap.h>
+@@ -25,6 +27,7 @@
+ #include <asm/bootparam.h>
+ #include <asm/cacheflush.h>
+ #include <asm/sections.h>
++#include <asm/mem_encrypt.h>
  
- #endif /* _ASM_X86_CMDLINE_H */
-diff --git a/arch/x86/lib/cmdline.c b/arch/x86/lib/cmdline.c
-index 5cc78bf..3261abb 100644
---- a/arch/x86/lib/cmdline.c
-+++ b/arch/x86/lib/cmdline.c
-@@ -104,7 +104,112 @@ static inline int myisspace(u8 c)
- 	return 0;	/* Buffer overrun */
- }
+ /*
+  * Since SME related variables are set early in the boot process they must
+@@ -38,6 +41,52 @@
+ static char sme_early_buffer[PAGE_SIZE] __aligned(PAGE_SIZE);
  
-+/*
-+ * Find a non-boolean option (i.e. option=argument). In accordance with
-+ * standard Linux practice, if this option is repeated, this returns the
-+ * last instance on the command line.
-+ *
-+ * @cmdline: the cmdline string
-+ * @max_cmdline_size: the maximum size of cmdline
-+ * @option: option string to look for
-+ * @buffer: memory buffer to return the option argument
-+ * @bufsize: size of the supplied memory buffer
-+ *
-+ * Returns the length of the argument (regardless of if it was
-+ * truncated to fit in the buffer), or -1 on not found.
+ /*
++ * Sysfs support for SME.
++ *   Create an sme directory under /sys/kernel/mm
++ *   Create two sme entries under /sys/kernel/mm/sme:
++ *     active - returns 0 if not active, 1 if active
++ *     encryption_mask - returns the encryption mask in use
 + */
-+static int
-+__cmdline_find_option(const char *cmdline, int max_cmdline_size,
-+		      const char *option, char *buffer, int bufsize)
++static ssize_t active_show(struct kobject *kobj, struct kobj_attribute *attr,
++			   char *buf)
 +{
-+	char c;
-+	int pos = 0, len = -1;
-+	const char *opptr = NULL;
-+	char *bufptr = buffer;
-+	enum {
-+		st_wordstart = 0,	/* Start of word/after whitespace */
-+		st_wordcmp,	/* Comparing this word */
-+		st_wordskip,	/* Miscompare, skip */
-+		st_bufcpy,	/* Copying this to buffer */
-+	} state = st_wordstart;
++	return sprintf(buf, "%u\n", sme_active());
++}
++static struct kobj_attribute active_attr = __ATTR_RO(active);
 +
-+	if (!cmdline)
-+		return -1;      /* No command line */
++static ssize_t encryption_mask_show(struct kobject *kobj,
++				    struct kobj_attribute *attr, char *buf)
++{
++	return sprintf(buf, "0x%016lx\n", sme_me_mask);
++}
++static struct kobj_attribute encryption_mask_attr = __ATTR_RO(encryption_mask);
 +
-+	/*
-+	 * This 'pos' check ensures we do not overrun
-+	 * a non-NULL-terminated 'cmdline'
-+	 */
-+	while (pos++ < max_cmdline_size) {
-+		c = *(char *)cmdline++;
-+		if (!c)
-+			break;
++static struct attribute *sme_attrs[] = {
++	&active_attr.attr,
++	&encryption_mask_attr.attr,
++	NULL
++};
 +
-+		switch (state) {
-+		case st_wordstart:
-+			if (myisspace(c))
-+				break;
++static struct attribute_group sme_attr_group = {
++	.attrs = sme_attrs,
++	.name = "sme",
++};
 +
-+			state = st_wordcmp;
-+			opptr = option;
-+			/* fall through */
++static int __init sme_sysfs_init(void)
++{
++	int ret;
 +
-+		case st_wordcmp:
-+			if ((c == '=') && !*opptr) {
-+				/*
-+				 * We matched all the way to the end of the
-+				 * option we were looking for, prepare to
-+				 * copy the argument.
-+				 */
-+				len = 0;
-+				bufptr = buffer;
-+				state = st_bufcpy;
-+				break;
-+			} else if (c == *opptr++) {
-+				/*
-+				 * We are currently matching, so continue
-+				 * to the next character on the cmdline.
-+				 */
-+				break;
-+			}
-+			state = st_wordskip;
-+			/* fall through */
-+
-+		case st_wordskip:
-+			if (myisspace(c))
-+				state = st_wordstart;
-+			break;
-+
-+		case st_bufcpy:
-+			if (myisspace(c)) {
-+				state = st_wordstart;
-+			} else {
-+				/*
-+				 * Increment len, but don't overrun the
-+				 * supplied buffer and leave room for the
-+				 * NULL terminator.
-+				 */
-+				if (++len < bufsize)
-+					*bufptr++ = c;
-+			}
-+			break;
-+		}
++	ret = sysfs_create_group(mm_kobj, &sme_attr_group);
++	if (ret) {
++		pr_err("SME sysfs initialization failed\n");
++		return ret;
 +	}
 +
-+	if (bufsize)
-+		*bufptr = '\0';
-+
-+	return len;
++	return 0;
 +}
++subsys_initcall(sme_sysfs_init);
 +
- int cmdline_find_option_bool(const char *cmdline, const char *option)
- {
- 	return __cmdline_find_option_bool(cmdline, COMMAND_LINE_SIZE, option);
- }
-+
-+int cmdline_find_option(const char *cmdline, const char *option, char *buffer,
-+			int bufsize)
-+{
-+	return __cmdline_find_option(cmdline, COMMAND_LINE_SIZE, option,
-+				     buffer, bufsize);
-+}
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
++/*
+  * This routine does not change the underlying encryption setting of the
+  * page(s) that map this memory. It assumes that eventually the memory is
+  * meant to be accessed as either encrypted or decrypted but the contents
