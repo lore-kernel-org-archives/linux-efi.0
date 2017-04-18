@@ -1,24 +1,39 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 15/24] asus-wmi: Restrict debugfs interface when the kernel is locked down
-Date: Tue, 18 Apr 2017 16:34:53 +0100
-Message-ID: <16665.1492529693@warthog.procyon.org.uk>
-References: <1492528799.2409.145.camel@decadent.org.uk> <1492526075.2409.140.camel@decadent.org.uk> <149142326734.5101.4596394505987813763.stgit@warthog.procyon.org.uk> <149142340198.5101.8171352010918423590.stgit@warthog.procyon.org.uk> <CAHp75VfpsnCHVqnFnwwh3JHB0ccY66Gj88sMGhrA9W7rDxiY_Q@mail.gmail.com> <31421.1491569449@warthog.procyon.org.uk> <CAHp75VfvWmv7SxgwCgR-ZBYPbeQW=+qesDoBNC5JFPtvzsN5gg@mail.gmail.com> <13615.1491830208@warthog.procyon.org.uk> <CAHp75Vd+-_CmW2MPpK3b6bER8bFmECusnx0BZMwYAizWZys4YA@mail.gmail.com> <14918.1492527352@warthog.procyon.org.uk>
+From: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+Subject: Re: [PATCH 0/8] efi: add support for non-standard capsule headers
+Date: Tue, 18 Apr 2017 17:26:50 +0100
+Message-ID: <f417e914-7b95-9886-fb8f-bca79d5456a3@nexus-software.ie>
+References: <20170405092317.27921-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1492528799.2409.145.camel-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
-Content-ID: <16664.1492529693.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+In-Reply-To: <20170405092317.27921-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, acpi4asus-user <acpi4asus-user-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Platform Driver <platform-driver-x86-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org, jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org> wrote:
 
-> > Shouldn't this now appear under /sys/kernel/tracing/ ?
-> 
-> True, but old tracing scripts didn't go away.
 
-Conversion to a symlink would fix that.
+On 05/04/17 10:23, Ard Biesheuvel wrote:
+> This is a followup to Jan's series [0] to add support for the non-standard
+> and awkward capsule header layout that is used by the Quark platform.
+>
+> While we would prefer to adhere to the standard rigorously, the reality
+> (and common practice) in Linux is that we sometimes have to deal with
+> quirks. So while Jan's aim is to get Quark to work, the reason for my
+> involvement is to try and accommodate this in a flexible way without
+> putting any handling specific to this quirk in the common code.
 
-David
+Hi Ard, Jan.
+
+I've run this series on my Galileo Gen2 and it appears to work well.
+
+Please take my;
+
+Tested-by: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+
+for the series.
+
+---
+bod
