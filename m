@@ -1,8 +1,8 @@
 From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: [PATCH v5 04/32] x86/CPU/AMD: Add the Secure Memory Encryption CPU
- feature
-Date: Tue, 18 Apr 2017 16:17:00 -0500
-Message-ID: <20170418211700.10190.2465.stgit@tlendack-t1.amdoffice.net>
+Subject: [PATCH v5 05/32] x86/CPU/AMD: Handle SME reduction in physical
+ address size
+Date: Tue, 18 Apr 2017 16:17:11 -0500
+Message-ID: <20170418211711.10190.30861.stgit@tlendack-t1.amdoffice.net>
 References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -15,83 +15,48 @@ Cc: Rik van Riel <riel@redhat.com>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar@redh
  Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dave Young <dyoung@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-Update the CPU features to include identifying and reporting on the
-Secure Memory Encryption (SME) feature.  SME is identified by CPUID
-0x8000001f, but requires BIOS support to enable it (set bit 23 of
-MSR_K8_SYSCFG).  Only show the SME feature as available if reported by
-CPUID and enabled by BIOS.
+When System Memory Encryption (SME) is enabled, the physical address
+space is reduced. Adjust the x86_phys_bits value to reflect this
+reduction.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/include/asm/cpufeatures.h |    1 +
- arch/x86/include/asm/msr-index.h   |    2 ++
- arch/x86/kernel/cpu/amd.c          |   15 +++++++++++++++
- arch/x86/kernel/cpu/scattered.c    |    1 +
- 4 files changed, 19 insertions(+)
+ arch/x86/kernel/cpu/amd.c |   14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
 
-diff --git a/arch/x86/include/asm/cpufeatures.h b/arch/x86/include/asm/cpufeatures.h
-index 2701e5f..2b692df 100644
---- a/arch/x86/include/asm/cpufeatures.h
-+++ b/arch/x86/include/asm/cpufeatures.h
-@@ -196,6 +196,7 @@
- 
- #define X86_FEATURE_HW_PSTATE	( 7*32+ 8) /* AMD HW-PState */
- #define X86_FEATURE_PROC_FEEDBACK ( 7*32+ 9) /* AMD ProcFeedbackInterface */
-+#define X86_FEATURE_SME		( 7*32+10) /* AMD Secure Memory Encryption */
- 
- #define X86_FEATURE_INTEL_PPIN	( 7*32+14) /* Intel Processor Inventory Number */
- #define X86_FEATURE_INTEL_PT	( 7*32+15) /* Intel Processor Trace */
-diff --git a/arch/x86/include/asm/msr-index.h b/arch/x86/include/asm/msr-index.h
-index 673f9ac..8ff4aaa 100644
---- a/arch/x86/include/asm/msr-index.h
-+++ b/arch/x86/include/asm/msr-index.h
-@@ -350,6 +350,8 @@
- #define MSR_K8_TOP_MEM1			0xc001001a
- #define MSR_K8_TOP_MEM2			0xc001001d
- #define MSR_K8_SYSCFG			0xc0010010
-+#define MSR_K8_SYSCFG_MEM_ENCRYPT_BIT	23
-+#define MSR_K8_SYSCFG_MEM_ENCRYPT	BIT_ULL(MSR_K8_SYSCFG_MEM_ENCRYPT_BIT)
- #define MSR_K8_INT_PENDING_MSG		0xc0010055
- /* C1E active bits in int pending message */
- #define K8_INTP_C1E_ACTIVE_MASK		0x18000000
 diff --git a/arch/x86/kernel/cpu/amd.c b/arch/x86/kernel/cpu/amd.c
-index c36140d..5fc5232 100644
+index 5fc5232..35eeeb1 100644
 --- a/arch/x86/kernel/cpu/amd.c
 +++ b/arch/x86/kernel/cpu/amd.c
-@@ -611,6 +611,21 @@ static void early_init_amd(struct cpuinfo_x86 *c)
- 	 */
- 	if (cpu_has_amd_erratum(c, amd_erratum_400))
+@@ -613,8 +613,10 @@ static void early_init_amd(struct cpuinfo_x86 *c)
  		set_cpu_bug(c, X86_BUG_AMD_E400);
+ 
+ 	/*
+-	 * BIOS support is required for SME. If BIOS has not enabled SME
+-	 * then don't advertise the feature (set in scattered.c)
++	 * BIOS support is required for SME. If BIOS has enabld SME then
++	 * adjust x86_phys_bits by the SME physical address space reduction
++	 * value. If BIOS has not enabled SME then don't advertise the
++	 * feature (set in scattered.c).
+ 	 */
+ 	if (c->extended_cpuid_level >= 0x8000001f) {
+ 		if (cpu_has(c, X86_FEATURE_SME)) {
+@@ -622,8 +624,14 @@ static void early_init_amd(struct cpuinfo_x86 *c)
+ 
+ 			/* Check if SME is enabled */
+ 			rdmsrl(MSR_K8_SYSCFG, msr);
+-			if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
++			if (msr & MSR_K8_SYSCFG_MEM_ENCRYPT) {
++				unsigned int ebx;
 +
-+	/*
-+	 * BIOS support is required for SME. If BIOS has not enabled SME
-+	 * then don't advertise the feature (set in scattered.c)
-+	 */
-+	if (c->extended_cpuid_level >= 0x8000001f) {
-+		if (cpu_has(c, X86_FEATURE_SME)) {
-+			u64 msr;
-+
-+			/* Check if SME is enabled */
-+			rdmsrl(MSR_K8_SYSCFG, msr);
-+			if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
-+				clear_cpu_cap(c, X86_FEATURE_SME);
-+		}
-+	}
++				ebx = cpuid_ebx(0x8000001f);
++				c->x86_phys_bits -= (ebx >> 6) & 0x3f;
++			} else {
+ 				clear_cpu_cap(c, X86_FEATURE_SME);
++			}
+ 		}
+ 	}
  }
- 
- static void init_amd_k8(struct cpuinfo_x86 *c)
-diff --git a/arch/x86/kernel/cpu/scattered.c b/arch/x86/kernel/cpu/scattered.c
-index 23c2350..05459ad 100644
---- a/arch/x86/kernel/cpu/scattered.c
-+++ b/arch/x86/kernel/cpu/scattered.c
-@@ -31,6 +31,7 @@ struct cpuid_bit {
- 	{ X86_FEATURE_HW_PSTATE,	CPUID_EDX,  7, 0x80000007, 0 },
- 	{ X86_FEATURE_CPB,		CPUID_EDX,  9, 0x80000007, 0 },
- 	{ X86_FEATURE_PROC_FEEDBACK,    CPUID_EDX, 11, 0x80000007, 0 },
-+	{ X86_FEATURE_SME,		CPUID_EAX,  0, 0x8000001f, 0 },
- 	{ 0, 0, 0, 0, 0 }
- };
- 
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
