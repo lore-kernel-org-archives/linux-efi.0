@@ -1,7 +1,7 @@
 From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V15 07/11] acpi: apei: panic OS with fatal error status block
-Date: Tue, 18 Apr 2017 17:05:19 -0600
-Message-ID: <1492556723-9189-8-git-send-email-tbaicar@codeaurora.org>
+Subject: [PATCH V15 08/11] efi: print unrecognized CPER section
+Date: Tue, 18 Apr 2017 17:05:20 -0600
+Message-ID: <1492556723-9189-9-git-send-email-tbaicar@codeaurora.org>
 References: <1492556723-9189-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,84 +21,67 @@ To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrc
 Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+UEFI spec allows for non-standard section in Common Platform Error
+Record. This is defined in section N.2.3 of UEFI version 2.5.
 
-Even if an error status block's severity is fatal, the kernel does not
-honor the severity level and panic.
+Currently if the CPER section's type (UUID) does not match with
+one of the section types that the kernel knows how to parse, the
+section is skipped. Therefore, user is not able to see
+such CPER data, for instance, error record of non-standard section.
 
-With the firmware first model, the platform could inform the OS about a
-fatal hardware error through the non-NMI GHES notification type. The OS
-should panic when a hardware error record is received with this
-severity.
+For above mentioned case, this change prints out the raw data in
+hex in dmesg buffer. Data length is taken from Error Data length
+field of Generic Error Data Entry.
 
-Call panic() after CPER data in error status block is printed if
-severity is fatal, before each error section is handled.
+The following is a sample output from dmesg:
+[  140.739180] {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 2
+[  140.739182] {1}[Hardware Error]: It has been corrected by h/w and requires no further action
+[  140.739191] {1}[Hardware Error]: event severity: corrected
+[  140.739196] {1}[Hardware Error]:  time: precise 2017-03-15 20:37:35
+[  140.739197] {1}[Hardware Error]:  Error 0, type: corrected
+[  140.739203] {1}[Hardware Error]:   section type: unknown, d2e2621c-f936-468d-0d84-15a4ed015c8b
+[  140.739205] {1}[Hardware Error]:   section length: 568 (0x238)
+[  140.739210] {1}[Hardware Error]:   00000000: 4d415201 4d492031 453a4d45 435f4343  .RAM1 IMEM:ECC_C
+[  140.739214] {1}[Hardware Error]:   00000010: 53515f45 44525f42 00000000 00000000  E_QSB_RD........
+[  140.739217] {1}[Hardware Error]:   00000020: 00000000 00000000 00000000 00000000  ................
+[  140.739220] {1}[Hardware Error]:   00000030: 00000000 00000000 01010000 01010000  ................
+[  140.739223] {1}[Hardware Error]:   00000040: 00000000 00000000 00000005 00000000  ................
+[  140.739226] {1}[Hardware Error]:   00000050: 01010000 00000000 00000001 00dddd00  ................
+...
 
-Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+The raw data from the error can then be decoded using vendor
+specific tools.
+
 Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
 Reviewed-by: James Morse <james.morse@arm.com>
 ---
- drivers/acpi/apei/ghes.c | 19 ++++++++++++++-----
- 1 file changed, 14 insertions(+), 5 deletions(-)
+ drivers/firmware/efi/cper.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 2d387f8..b91123f 100644
---- a/drivers/acpi/apei/ghes.c
-+++ b/drivers/acpi/apei/ghes.c
-@@ -134,6 +134,8 @@
- static struct ghes_estatus_cache *ghes_estatus_caches[GHES_ESTATUS_CACHES_SIZE];
- static atomic_t ghes_estatus_cache_alloced;
- 
-+static int ghes_panic_timeout __read_mostly = 30;
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index f959185..610d31a 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -596,8 +596,16 @@ static void cper_estatus_timestamp(const char *pfx,
+ 			cper_print_proc_arm(newpfx, arm_err);
+ 		else
+ 			goto err_section_too_small;
+-	} else
+-		printk("%s""section type: unknown, %pUl\n", newpfx, sec_type);
++	} else {
++		const void *unknown_err;
 +
- static int ghes_ioremap_init(void)
- {
- 	ghes_ioremap_area = __get_vm_area(PAGE_SIZE * GHES_IOREMAP_PAGES,
-@@ -692,6 +694,13 @@ static int ghes_ack_error(struct acpi_hest_generic_v2 *generic_v2)
- 	return apei_write(val, &generic_v2->read_ack_register);
- }
- 
-+static void __ghes_call_panic(void)
-+{
-+	if (panic_timeout == 0)
-+		panic_timeout = ghes_panic_timeout;
-+	panic("Fatal hardware error!");
-+}
-+
- static int ghes_proc(struct ghes *ghes)
- {
- 	int rc;
-@@ -699,6 +708,10 @@ static int ghes_proc(struct ghes *ghes)
- 	rc = ghes_read_estatus(ghes, 0);
- 	if (rc)
- 		goto out;
-+	if (ghes_severity(ghes->estatus->error_severity) >= GHES_SEV_PANIC) {
-+		__ghes_print_estatus(KERN_EMERG, ghes->generic, ghes->estatus);
-+		__ghes_call_panic();
++		unknown_err = acpi_hest_get_payload(gdata);
++		printk("%ssection type: unknown, %pUl\n", newpfx, sec_type);
++		printk("%ssection length: %d (%#x)\n", newpfx,
++		       gdata->error_data_length, gdata->error_data_length);
++		print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4,
++			       unknown_err, gdata->error_data_length, true);
 +	}
- 	if (!ghes_estatus_cached(ghes->estatus)) {
- 		if (ghes_print_estatus(NULL, ghes->generic, ghes->estatus))
- 			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
-@@ -835,8 +848,6 @@ static inline void ghes_sea_remove(struct ghes *ghes)
  
- static LIST_HEAD(ghes_nmi);
+ 	return;
  
--static int ghes_panic_timeout	__read_mostly = 30;
--
- static void ghes_proc_in_irq(struct irq_work *irq_work)
- {
- 	struct llist_node *llnode, *next;
-@@ -929,9 +940,7 @@ static void __ghes_panic(struct ghes *ghes)
- 	__ghes_print_estatus(KERN_EMERG, ghes->generic, ghes->estatus);
- 
- 	/* reboot to log the error! */
--	if (panic_timeout == 0)
--		panic_timeout = ghes_panic_timeout;
--	panic("Fatal hardware error!");
-+	__ghes_call_panic();
- }
- 
- static int ghes_notify_nmi(unsigned int cmd, struct pt_regs *regs)
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
