@@ -1,66 +1,202 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: Re: [PATCH] arm64: xen: Implement EFI reset_system callback
-Date: Wed, 19 Apr 2017 21:43:29 +0200
-Message-ID: <20170419194329.GP16658@olila.local.net-space.pl>
-References: <b8c9c6cd-906a-2360-ca9f-d34a45258567@suse.com>
- <3f6f5853-cd08-8afc-f71a-b0c1545c7564@arm.com>
- <20170406142710.GE4372@olila.local.net-space.pl>
- <ed7f64f4-17db-e2a5-f362-b382666cbc36@suse.com>
- <20170406152040.GH4372@olila.local.net-space.pl>
- <e449f220-8db7-d58c-bdbf-47ccd6dd014b@arm.com>
- <20170406155453.GA3966@leverpostej>
- <20170418134650.GL24360@codeblueprint.co.uk>
- <20170419192906.GO16658@olila.local.net-space.pl>
- <20170419193738.GM24360@codeblueprint.co.uk>
+From: "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH V15 01/11] acpi: apei: read ack upon ghes record
+ consumption
+Date: Wed, 19 Apr 2017 14:31:13 -0600
+Message-ID: <d6111739-69ff-bac7-8000-9af937d0a7bb@codeaurora.org>
+References: <1492556723-9189-1-git-send-email-tbaicar@codeaurora.org>
+ <1492556723-9189-2-git-send-email-tbaicar@codeaurora.org>
+ <20170419183112.x7tmjzpoq7ds64s2@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20170419193738.GM24360@codeblueprint.co.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Mark Rutland <mark.rutland@arm.com>, Juergen Gross <jgross@suse.com>, sstabellini@kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, Julien Grall <julien.grall@arm.com>, linux-efi@vger.kernel.org, Boris Ostrovsky <boris.ostrovsky@oracle.com>, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170419183112.x7tmjzpoq7ds64s2-fF5Pk5pvG8Y@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 19, 2017 at 08:37:38PM +0100, Matt Fleming wrote:
-> On Wed, 19 Apr, at 09:29:06PM, Daniel Kiper wrote:
-> > On Tue, Apr 18, 2017 at 02:46:50PM +0100, Matt Fleming wrote:
-> > > On Thu, 06 Apr, at 04:55:11PM, Mark Rutland wrote:
-> > > >
-> > > > Please, let's keep the Xen knowledge constrained to the Xen EFI wrapper,
-> > > > rather than spreading it further.
-> > > >
-> > > > IMO, given reset_system is a *mandatory* function, the Xen wrapper
-> > > > should provide an implementation.
-> > > >
-> > > > I don't see why you can't implement a wrapper that calls the usual Xen
-> > > > poweroff/reset functions.
-> > >
-> > > I realise I'm making a sweeping generalisation, but adding
-> > > EFI_PARAVIRT is almost always the wrong thing to do.
-> >
-> > Why?
+On 4/19/2017 12:31 PM, Borislav Petkov wrote:
+> On Tue, Apr 18, 2017 at 05:05:13PM -0600, Tyler Baicar wrote:
+>> A RAS (Reliability, Availability, Serviceability) controller
+>> may be a separate processor running in parallel with OS
+>> execution, and may generate error records for consumption by
+>> the OS. If the RAS controller produces multiple error records,
+>> then they may be overwritten before the OS has consumed them.
+>>
+>> The Generic Hardware Error Source (GHES) v2 structure
+>> introduces the capability for the OS to acknowledge the
+>> consumption of the error record generated by the RAS
+>> controller. A RAS controller supporting GHESv2 shall wait for
+>> the acknowledgment before writing a new error record, thus
+>> eliminating the race condition.
+>>
+>> Add support for parsing of GHESv2 sub-tables as well.
+>>
+>> Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>> CC: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>> Reviewed-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+>> ---
+>>   drivers/acpi/apei/ghes.c | 55 +++++++++++++++++++++++++++++++++++++++++++++---
+>>   drivers/acpi/apei/hest.c |  7 ++++--
+>>   include/acpi/ghes.h      |  5 ++++-
+>>   3 files changed, 61 insertions(+), 6 deletions(-)
+>>
+>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+>> index 79b3c9c..6d87ab7 100644
+>> --- a/drivers/acpi/apei/ghes.c
+>> +++ b/drivers/acpi/apei/ghes.c
+>> @@ -46,6 +46,7 @@
+>>   #include <linux/nmi.h>
+>>   #include <linux/sched/clock.h>
+>>   
+>> +#include <acpi/actbl1.h>
+>>   #include <acpi/ghes.h>
+>>   #include <acpi/apei.h>
+>>   #include <asm/tlbflush.h>
+>> @@ -80,6 +81,10 @@
+>>   	((struct acpi_hest_generic_status *)				\
+>>   	 ((struct ghes_estatus_node *)(estatus_node) + 1))
+>>   
+>> +#define IS_HEST_TYPE_GENERIC_V2(ghes)				\
+>> +	((struct acpi_hest_header *)ghes->generic)->type ==	\
+> This is a nasty hack: casting the ghes->generic pointer to a pointer of its
+> first member which is a acpi_hest_header.
 >
-> Because it makes paravirt a special case, and there's usually very
-> little reason to make it special in the EFI code. Special-casing means
-> more branches, more code paths, a bigger testing matrix and more
-> complex code.
+> Why isn't this a nice inline function with proper dereferencing:
 >
-> EFI_PARAVIRT does have its uses, like for those scenarios where we
-> don't have a table of function pointers that can be overidden for
-> paravirt.
+> static inline bool is_hest_type_generic_v2(struct ghes *ghes)
+> {
+>          return ghes->generic->header.type == ACPI_HEST_TYPE_GENERIC_ERROR_V2;
+> }
 >
-> But we do have such a table for ->reset_system().
+> ?
+I'll change it to this.
+> Also, please integrate scripts/checkpatch.pl in your patch creation
+> workflow. Some of the warnings/errors *actually* make sense.
+>
+>>   /*
+>>    * This driver isn't really modular, however for the time being,
+>>    * continuing to use module_param is the easiest way to remain
+>> @@ -240,6 +245,17 @@ static int ghes_estatus_pool_expand(unsigned long len)
+>>   	return 0;
+>>   }
+>>   
+>> +static int map_gen_v2(struct ghes *ghes)
+>> +{
+>> +	return apei_map_generic_address(&ghes->generic_v2->read_ack_register);
+>> +}
+>> +
+>> +static void unmap_gen_v2(struct ghes *ghes)
+>> +{
+>> +	apei_unmap_generic_address(&ghes->generic_v2->read_ack_register);
+>> +	return;
+>> +}
+> Like this one, for example:
+>
+> WARNING: void function return statements are not generally useful
+> #89: FILE: drivers/acpi/apei/ghes.c:257:
+> +       return;
+> +}
+Will remove the return.
+>
+>> +
+>>   static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+>>   {
+>>   	struct ghes *ghes;
+>> @@ -249,10 +265,17 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+>>   	ghes = kzalloc(sizeof(*ghes), GFP_KERNEL);
+>>   	if (!ghes)
+>>   		return ERR_PTR(-ENOMEM);
+>> +
+>>   	ghes->generic = generic;
+>> +	if (IS_HEST_TYPE_GENERIC_V2(ghes)) {
+>> +		rc = map_gen_v2(ghes);
+>> +		if (rc)
+>> +			goto err_free;
+>> +	}
+>> +
+>>   	rc = apei_map_generic_address(&generic->error_status_address);
+>>   	if (rc)
+>> -		goto err_free;
+>> +		goto err_unmap_read_ack_addr;
+>>   	error_block_length = generic->error_block_length;
+>>   	if (error_block_length > GHES_ESTATUS_MAX_SIZE) {
+>>   		pr_warning(FW_WARN GHES_PFX
+>> @@ -264,13 +287,16 @@ static struct ghes *ghes_new(struct acpi_hest_generic *generic)
+>>   	ghes->estatus = kmalloc(error_block_length, GFP_KERNEL);
+>>   	if (!ghes->estatus) {
+>>   		rc = -ENOMEM;
+>> -		goto err_unmap;
+>> +		goto err_unmap_status_addr;
+>>   	}
+>>   
+>>   	return ghes;
+>>   
+>> -err_unmap:
+>> +err_unmap_status_addr:
+>>   	apei_unmap_generic_address(&generic->error_status_address);
+>> +err_unmap_read_ack_addr:
+>> +	if (IS_HEST_TYPE_GENERIC_V2(ghes))
+>> +		unmap_gen_v2(ghes);
+>>   err_free:
+>>   	kfree(ghes);
+>>   	return ERR_PTR(rc);
+>> @@ -280,6 +306,8 @@ static void ghes_fini(struct ghes *ghes)
+>>   {
+>>   	kfree(ghes->estatus);
+>>   	apei_unmap_generic_address(&ghes->generic->error_status_address);
+>> +	if (IS_HEST_TYPE_GENERIC_V2(ghes))
+>> +		unmap_gen_v2(ghes);
+>>   }
+>>   
+>>   static inline int ghes_severity(int severity)
+>> @@ -649,6 +677,21 @@ static void ghes_estatus_cache_add(
+>>   	rcu_read_unlock();
+>>   }
+>>   
+>> +static int ghes_ack_error(struct acpi_hest_generic_v2 *generic_v2)
+> If you name this function parameter to something shorter, say gv2, for
+> example...
+Will do.
+>
+>> +{
+>> +	int rc;
+>> +	u64 val = 0;
+>> +
+>> +	rc = apei_read(&val, &generic_v2->read_ack_register);
+>> +	if (rc)
+>> +		return rc;
+>> +
+>> +	val &= generic_v2->read_ack_preserve << generic_v2->read_ack_register.bit_offset;
+>> +	val |= generic_v2->read_ack_write << generic_v2->read_ack_register.bit_offset;
+> ... you can align those two nicely while remaining within the 80 cols width:
+>
+>          val &= gv2->read_ack_preserve << gv2->read_ack_register.bit_offset;
+>          val |= gv2->read_ack_write    << gv2->read_ack_register.bit_offset;
+>
+> and make them readable at a quick glance.
+Will do.
+>> +
+>> +	return apei_write(val, &generic_v2->read_ack_register);
+>> +}
+>> +
+>>   static int ghes_proc(struct ghes *ghes)
+>>   {
+>>   	int rc;
+>> @@ -661,6 +704,12 @@ static int ghes_proc(struct ghes *ghes)
+>>   			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+>>   	}
+>>   	ghes_do_proc(ghes, ghes->estatus);
+> This needs a comment why v2 needs to ACK the error. The commit message
+> is not necessarily something we'll find quickly in the future.
+Will do.
 
-This is more or less what I expected. Thanks a lot for explanation.
+Thanks,
+Tyler
 
-Daniel
+-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
