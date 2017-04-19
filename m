@@ -1,78 +1,42 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.10 22/69] x86/efi: Dont try to reserve runtime regions
-Date: Wed, 19 Apr 2017 16:36:51 +0200
-Message-ID: <20170419141556.045321931@linuxfoundation.org>
-References: <20170419141555.114738231@linuxfoundation.org>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v5 01/32] x86: Documentation for AMD Secure Memory
+ Encryption (SME)
+Date: Wed, 19 Apr 2017 17:38:19 +0200
+Message-ID: <20170419153818.3pl3gkdpe42lve44@pd.tnic>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+ <20170418211625.10190.52568.stgit@tlendack-t1.amdoffice.net>
+ <20170419090224.frmv2jhwfwoxvdie@pd.tnic>
+ <bbda868c-9b34-4404-f563-98b000124ac5@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20170419141555.114738231@linuxfoundation.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Omar Sandoval <osandov@fb.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dave Young <dyoung@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-arch-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <bbda868c-9b34-4404-f563-98b000124ac5@amd.com>
+Sender: linux-arch-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy
 List-Id: linux-efi@vger.kernel.org
 
-4.10-stable review patch.  If anyone has any objections, please let me know.
+On Wed, Apr 19, 2017 at 09:23:47AM -0500, Tom Lendacky wrote:
+> Btw, I tried to update all the subjects and descriptions to be
+> more descriptive but I'm sure there is still room for improvement
+> so keep the comments on them coming.
 
-------------------
+No worries there :)
 
-From: Omar Sandoval <osandov@fb.com>
+> Note, just because the bit is set in %cr3 doesn't mean the full
+> hierarchy is encrypted. Each level in the hierarchy needs to have the
+> encryption bit set. So, theoretically, you could have the encryption
+> bit set in %cr3 so that the PGD is encrypted, but not set the encryption
+> bit in the PGD entry for a PUD and so the PUD pointed to by that entry
+> would not be encrypted.
 
-commit 6f6266a561306e206e0e31a5038f029b6a7b1d89 upstream.
+Ha, that is a nice detail I didn't realize. You could add it to the text.
 
-Reserving a runtime region results in splitting the EFI memory
-descriptors for the runtime region. This results in runtime region
-descriptors with bogus memory mappings, leading to interesting crashes
-like the following during a kexec:
+Thanks.
 
-  general protection fault: 0000 [#1] SMP
-  Modules linked in:
-  CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.11.0-rc1 #53
-  Hardware name: Wiwynn Leopard-Orv2/Leopard-DDR BW, BIOS LBM05   09/30/2016
-  RIP: 0010:virt_efi_set_variable()
-  ...
-  Call Trace:
-   efi_delete_dummy_variable()
-   efi_enter_virtual_mode()
-   start_kernel()
-   ? set_init_arg()
-   x86_64_start_reservations()
-   x86_64_start_kernel()
-   start_cpu()
-  ...
-  Kernel panic - not syncing: Fatal exception
+-- 
+Regards/Gruss,
+    Boris.
 
-Runtime regions will not be freed and do not need to be reserved, so
-skip the memmap modification in this case.
-
-Signed-off-by: Omar Sandoval <osandov@fb.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Dave Young <dyoung@redhat.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Fixes: 8e80632fb23f ("efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()")
-Link: http://lkml.kernel.org/r/20170412152719.9779-2-matt@codeblueprint.co.uk
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
----
- arch/x86/platform/efi/quirks.c |    4 ++++
- 1 file changed, 4 insertions(+)
-
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -201,6 +201,10 @@ void __init efi_arch_mem_reserve(phys_ad
- 		return;
- 	}
- 
-+	/* No need to reserve regions that will never be freed. */
-+	if (md.attribute & EFI_MEMORY_RUNTIME)
-+		return;
-+
- 	size += addr % EFI_PAGE_SIZE;
- 	size = round_up(size, EFI_PAGE_SIZE);
- 	addr = round_down(addr, EFI_PAGE_SIZE);
+Good mailing practices for 400: avoid top-posting and trim the reply.
