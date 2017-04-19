@@ -1,120 +1,78 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [PATCH v5 01/32] x86: Documentation for AMD Secure Memory
- Encryption (SME)
-Date: Wed, 19 Apr 2017 09:23:47 -0500
-Message-ID: <bbda868c-9b34-4404-f563-98b000124ac5@amd.com>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418211625.10190.52568.stgit@tlendack-t1.amdoffice.net>
- <20170419090224.frmv2jhwfwoxvdie@pd.tnic>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.9 16/69] x86/efi: Dont try to reserve runtime regions
+Date: Wed, 19 Apr 2017 16:42:32 +0200
+Message-ID: <20170419141617.630925177@linuxfoundation.org>
+References: <20170419141616.919951169@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170419090224.frmv2jhwfwoxvdie@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S.
- Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20170419141616.919951169@linuxfoundation.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Omar Sandoval <osandov@fb.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dave Young <dyoung@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 4/19/2017 4:02 AM, Borislav Petkov wrote:
-> Always have a verb in the Subject to form a "do this" or "do that"
-> sentence to better explain what the patch does:
->
-> "Subject: [PATCH v5 01/32] x86: Add documentation for AMD Secure Memory Encryption (SME)"
+4.9-stable review patch.  If anyone has any objections, please let me know.
 
-Will do.
+------------------
 
-Btw, I tried to update all the subjects and descriptions to be
-more descriptive but I'm sure there is still room for improvement
-so keep the comments on them coming.
+From: Omar Sandoval <osandov@fb.com>
 
->
-> On Tue, Apr 18, 2017 at 04:16:25PM -0500, Tom Lendacky wrote:
->> Create a Documentation entry to describe the AMD Secure Memory
->> Encryption (SME) feature and add documentation for the mem_encrypt=
->> kernel parameter.
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->>  Documentation/admin-guide/kernel-parameters.txt |   11 ++++
->>  Documentation/x86/amd-memory-encryption.txt     |   60 +++++++++++++++++++++++
->>  2 files changed, 71 insertions(+)
->>  create mode 100644 Documentation/x86/amd-memory-encryption.txt
->>
->> diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
->> index 3dd6d5d..84c5787 100644
->> --- a/Documentation/admin-guide/kernel-parameters.txt
->> +++ b/Documentation/admin-guide/kernel-parameters.txt
->> @@ -2165,6 +2165,17 @@
->>  			memory contents and reserves bad memory
->>  			regions that are detected.
->>
->> +	mem_encrypt=	[X86-64] AMD Secure Memory Encryption (SME) control
->> +			Valid arguments: on, off
->> +			Default (depends on kernel configuration option):
->> +			  on  (CONFIG_AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT=y)
->> +			  off (CONFIG_AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT=n)
->> +			mem_encrypt=on:		Activate SME
->> +			mem_encrypt=off:	Do not activate SME
->> +
->> +			Refer to Documentation/x86/amd-memory-encryption.txt
->> +			for details on when memory encryption can be activated.
->> +
->>  	mem_sleep_default=	[SUSPEND] Default system suspend mode:
->>  			s2idle  - Suspend-To-Idle
->>  			shallow - Power-On Suspend or equivalent (if supported)
->> diff --git a/Documentation/x86/amd-memory-encryption.txt b/Documentation/x86/amd-memory-encryption.txt
->> new file mode 100644
->> index 0000000..0b72ff2
->> --- /dev/null
->> +++ b/Documentation/x86/amd-memory-encryption.txt
->> @@ -0,0 +1,60 @@
->> +Secure Memory Encryption (SME) is a feature found on AMD processors.
->> +
->> +SME provides the ability to mark individual pages of memory as encrypted using
->> +the standard x86 page tables.  A page that is marked encrypted will be
->> +automatically decrypted when read from DRAM and encrypted when written to
->> +DRAM.  SME can therefore be used to protect the contents of DRAM from physical
->> +attacks on the system.
->> +
->> +A page is encrypted when a page table entry has the encryption bit set (see
->> +below on how to determine its position).  The encryption bit can be specified
->> +in the cr3 register, allowing the PGD table to be encrypted. Each successive
->
-> I missed that the last time: do you mean here, "The encryption bit can
-> be specified in the %cr3 register allowing for the page table hierarchy
-> itself to be encrypted."?
->
->> +level of page tables can also be encrypted.
->
-> Right, judging by the next sentence, it looks like it.
+commit 6f6266a561306e206e0e31a5038f029b6a7b1d89 upstream.
 
-Correct. I like the hierarchy term so I'll add that to the text.
+Reserving a runtime region results in splitting the EFI memory
+descriptors for the runtime region. This results in runtime region
+descriptors with bogus memory mappings, leading to interesting crashes
+like the following during a kexec:
 
-Note, just because the bit is set in %cr3 doesn't mean the full
-hierarchy is encrypted. Each level in the hierarchy needs to have the
-encryption bit set. So, theoretically, you could have the encryption
-bit set in %cr3 so that the PGD is encrypted, but not set the encryption
-bit in the PGD entry for a PUD and so the PUD pointed to by that entry
-would not be encrypted.
+  general protection fault: 0000 [#1] SMP
+  Modules linked in:
+  CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.11.0-rc1 #53
+  Hardware name: Wiwynn Leopard-Orv2/Leopard-DDR BW, BIOS LBM05   09/30/2016
+  RIP: 0010:virt_efi_set_variable()
+  ...
+  Call Trace:
+   efi_delete_dummy_variable()
+   efi_enter_virtual_mode()
+   start_kernel()
+   ? set_init_arg()
+   x86_64_start_reservations()
+   x86_64_start_kernel()
+   start_cpu()
+  ...
+  Kernel panic - not syncing: Fatal exception
 
-Thanks,
-Tom
+Runtime regions will not be freed and do not need to be reserved, so
+skip the memmap modification in this case.
 
->
-> The rest looks and reads really nice to me, so feel free to add:
->
-> Reviewed-by: Borislav Petkov <bp@suse.de>
->
-> after addressing those minor nitpicks on your next submission.
->
-> Thanks.
->
+Signed-off-by: Omar Sandoval <osandov@fb.com>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Dave Young <dyoung@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Jones <pjones@redhat.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Fixes: 8e80632fb23f ("efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()")
+Link: http://lkml.kernel.org/r/20170412152719.9779-2-matt@codeblueprint.co.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+---
+ arch/x86/platform/efi/quirks.c |    4 ++++
+ 1 file changed, 4 insertions(+)
+
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -201,6 +201,10 @@ void __init efi_arch_mem_reserve(phys_ad
+ 		return;
+ 	}
+ 
++	/* No need to reserve regions that will never be freed. */
++	if (md.attribute & EFI_MEMORY_RUNTIME)
++		return;
++
+ 	size += addr % EFI_PAGE_SIZE;
+ 	size = round_up(size, EFI_PAGE_SIZE);
+ 	addr = round_down(addr, EFI_PAGE_SIZE);
