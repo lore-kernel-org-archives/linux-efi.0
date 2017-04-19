@@ -1,7 +1,7 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.10 32/69] efi/fb: Avoid reconfiguration of BAR that covers the framebuffer
-Date: Wed, 19 Apr 2017 16:37:01 +0200
-Message-ID: <20170419141556.453295407@linuxfoundation.org>
+Subject: [PATCH 4.10 31/69] efi/libstub: Skip GOP with PIXEL_BLT_ONLY format
+Date: Wed, 19 Apr 2017 16:37:00 +0200
+Message-ID: <20170419141556.411296026@linuxfoundation.org>
 References: <20170419141555.114738231@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -9,141 +9,67 @@ Return-path: <stable-owner@vger.kernel.org>
 In-Reply-To: <20170419141555.114738231@linuxfoundation.org>
 Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, leif.lindholm@linaro.org, linux-efi@vger.kernel.org, lorenzo.pieralisi@arm.com, Ingo Molnar <mingo@kernel.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Eugene Cohen <eugene@hp.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, leif.lindholm@linaro.org, linux-efi@vger.kernel.org, lorenzo.pieralisi@arm.com, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
 4.10-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Cohen, Eugene <eugene@hp.com>
 
-commit 55d728a40d368ba80443be85c02e641fc9082a3f upstream.
+commit 540f4c0e894f7e46a66dfa424b16424cbdc12c38 upstream.
 
-On UEFI systems, the PCI subsystem is enumerated by the firmware,
-and if a graphical framebuffer is exposed via a PCI device, its base
-address and size are exposed to the OS via the Graphics Output
-Protocol (GOP).
+The UEFI Specification permits Graphics Output Protocol (GOP) instances
+without direct framebuffer access. This is indicated in the Mode structure
+with a PixelFormat enumeration value of PIXEL_BLT_ONLY. Given that the
+kernel does not know how to drive a Blt() only framebuffer (which is only
+permitted before ExitBootServices() anyway), we should disregard such
+framebuffers when looking for a GOP instance that is suitable for use as
+the boot console.
 
-On arm64 PCI systems, the entire PCI hierarchy is reconfigured from
-scratch at boot. This may result in the GOP framebuffer address to
-become stale, if the BAR covering the framebuffer is modified. This
-will cause the framebuffer to become unresponsive, and may in some
-cases result in unpredictable behavior if the range is reassigned to
-another device.
+So modify the EFI GOP initialization to not use a PIXEL_BLT_ONLY instance,
+preventing attempts later in boot to use an invalid screen_info.lfb_base
+address.
 
-So add a non-x86 quirk to the EFI fb driver to find the BAR associated
-with the GOP base address, and claim the BAR resource so that the PCI
-core will not move it.
-
+Signed-off-by: Eugene Cohen <eugene@hp.com>
+[ Moved the Blt() only check into the loop and clarified that Blt() only GOPs are unusable by the kernel. ]
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Peter Jones <pjones@redhat.com>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: leif.lindholm@linaro.org
 Cc: linux-efi@vger.kernel.org
 Cc: lorenzo.pieralisi@arm.com
 Fixes: 9822504c1fa5 ("efifb: Enable the efi-framebuffer platform driver ...")
-Link: http://lkml.kernel.org/r/20170404152744.26687-3-ard.biesheuvel@linaro.org
+Link: http://lkml.kernel.org/r/20170404152744.26687-2-ard.biesheuvel@linaro.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 ---
- drivers/video/fbdev/efifb.c |   66 +++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 65 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/libstub/gop.c |    6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
---- a/drivers/video/fbdev/efifb.c
-+++ b/drivers/video/fbdev/efifb.c
-@@ -10,6 +10,7 @@
- #include <linux/efi.h>
- #include <linux/errno.h>
- #include <linux/fb.h>
-+#include <linux/pci.h>
- #include <linux/platform_device.h>
- #include <linux/screen_info.h>
- #include <video/vga.h>
-@@ -143,6 +144,8 @@ static struct attribute *efifb_attrs[] =
- };
- ATTRIBUTE_GROUPS(efifb);
+--- a/drivers/firmware/efi/libstub/gop.c
++++ b/drivers/firmware/efi/libstub/gop.c
+@@ -149,7 +149,8 @@ setup_gop32(efi_system_table_t *sys_tabl
  
-+static bool pci_dev_disabled;	/* FB base matches BAR of a disabled device */
-+
- static int efifb_probe(struct platform_device *dev)
- {
- 	struct fb_info *info;
-@@ -152,7 +155,7 @@ static int efifb_probe(struct platform_d
- 	unsigned int size_total;
- 	char *option = NULL;
+ 		status = __gop_query32(sys_table_arg, gop32, &info, &size,
+ 				       &current_fb_base);
+-		if (status == EFI_SUCCESS && (!first_gop || conout_found)) {
++		if (status == EFI_SUCCESS && (!first_gop || conout_found) &&
++		    info->pixel_format != PIXEL_BLT_ONLY) {
+ 			/*
+ 			 * Systems that use the UEFI Console Splitter may
+ 			 * provide multiple GOP devices, not all of which are
+@@ -266,7 +267,8 @@ setup_gop64(efi_system_table_t *sys_tabl
  
--	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
-+	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI || pci_dev_disabled)
- 		return -ENODEV;
- 
- 	if (fb_get_options("efifb", &option))
-@@ -360,3 +363,64 @@ static struct platform_driver efifb_driv
- };
- 
- builtin_platform_driver(efifb_driver);
-+
-+#if defined(CONFIG_PCI) && !defined(CONFIG_X86)
-+
-+static bool pci_bar_found;	/* did we find a BAR matching the efifb base? */
-+
-+static void claim_efifb_bar(struct pci_dev *dev, int idx)
-+{
-+	u16 word;
-+
-+	pci_bar_found = true;
-+
-+	pci_read_config_word(dev, PCI_COMMAND, &word);
-+	if (!(word & PCI_COMMAND_MEMORY)) {
-+		pci_dev_disabled = true;
-+		dev_err(&dev->dev,
-+			"BAR %d: assigned to efifb but device is disabled!\n",
-+			idx);
-+		return;
-+	}
-+
-+	if (pci_claim_resource(dev, idx)) {
-+		pci_dev_disabled = true;
-+		dev_err(&dev->dev,
-+			"BAR %d: failed to claim resource for efifb!\n", idx);
-+		return;
-+	}
-+
-+	dev_info(&dev->dev, "BAR %d: assigned to efifb\n", idx);
-+}
-+
-+static void efifb_fixup_resources(struct pci_dev *dev)
-+{
-+	u64 base = screen_info.lfb_base;
-+	u64 size = screen_info.lfb_size;
-+	int i;
-+
-+	if (pci_bar_found || screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
-+		return;
-+
-+	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-+		base |= (u64)screen_info.ext_lfb_base << 32;
-+
-+	if (!base)
-+		return;
-+
-+	for (i = 0; i < PCI_STD_RESOURCE_END; i++) {
-+		struct resource *res = &dev->resource[i];
-+
-+		if (!(res->flags & IORESOURCE_MEM))
-+			continue;
-+
-+		if (res->start <= base && res->end >= base + size - 1) {
-+			claim_efifb_bar(dev, i);
-+			break;
-+		}
-+	}
-+}
-+DECLARE_PCI_FIXUP_CLASS_HEADER(PCI_ANY_ID, PCI_ANY_ID, PCI_BASE_CLASS_DISPLAY,
-+			       16, efifb_fixup_resources);
-+
-+#endif
+ 		status = __gop_query64(sys_table_arg, gop64, &info, &size,
+ 				       &current_fb_base);
+-		if (status == EFI_SUCCESS && (!first_gop || conout_found)) {
++		if (status == EFI_SUCCESS && (!first_gop || conout_found) &&
++		    info->pixel_format != PIXEL_BLT_ONLY) {
+ 			/*
+ 			 * Systems that use the UEFI Console Splitter may
+ 			 * provide multiple GOP devices, not all of which are
