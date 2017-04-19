@@ -1,9 +1,8 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+From: Daniel Kiper <daniel.kiper@oracle.com>
 Subject: Re: [PATCH] arm64: xen: Implement EFI reset_system callback
-Date: Wed, 19 Apr 2017 20:37:38 +0100
-Message-ID: <20170419193738.GM24360@codeblueprint.co.uk>
-References: <e5b548be-2ec3-9b4f-a456-929d5fb881ab@oracle.com>
- <b8c9c6cd-906a-2360-ca9f-d34a45258567@suse.com>
+Date: Wed, 19 Apr 2017 21:43:29 +0200
+Message-ID: <20170419194329.GP16658@olila.local.net-space.pl>
+References: <b8c9c6cd-906a-2360-ca9f-d34a45258567@suse.com>
  <3f6f5853-cd08-8afc-f71a-b0c1545c7564@arm.com>
  <20170406142710.GE4372@olila.local.net-space.pl>
  <ed7f64f4-17db-e2a5-f362-b382666cbc36@suse.com>
@@ -12,41 +11,56 @@ References: <e5b548be-2ec3-9b4f-a456-929d5fb881ab@oracle.com>
  <20170406155453.GA3966@leverpostej>
  <20170418134650.GL24360@codeblueprint.co.uk>
  <20170419192906.GO16658@olila.local.net-space.pl>
+ <20170419193738.GM24360@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <20170419192906.GO16658-fJNZiO034lp9pOct4yEdx/3oZC3j2Omk@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <20170419193738.GM24360@codeblueprint.co.uk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Mark Rutland <mark.rutland@arm.com>, Juergen Gross <jgross@suse.com>, sstabellini@kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, Julien Grall <julien.grall@arm.com>, linux-efi@vger.kernel.org, Boris Ostrovsky <boris.ostrovsky@oracle.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 19 Apr, at 09:29:06PM, Daniel Kiper wrote:
-> On Tue, Apr 18, 2017 at 02:46:50PM +0100, Matt Fleming wrote:
-> > On Thu, 06 Apr, at 04:55:11PM, Mark Rutland wrote:
+On Wed, Apr 19, 2017 at 08:37:38PM +0100, Matt Fleming wrote:
+> On Wed, 19 Apr, at 09:29:06PM, Daniel Kiper wrote:
+> > On Tue, Apr 18, 2017 at 02:46:50PM +0100, Matt Fleming wrote:
+> > > On Thu, 06 Apr, at 04:55:11PM, Mark Rutland wrote:
+> > > >
+> > > > Please, let's keep the Xen knowledge constrained to the Xen EFI wrapper,
+> > > > rather than spreading it further.
+> > > >
+> > > > IMO, given reset_system is a *mandatory* function, the Xen wrapper
+> > > > should provide an implementation.
+> > > >
+> > > > I don't see why you can't implement a wrapper that calls the usual Xen
+> > > > poweroff/reset functions.
 > > >
-> > > Please, let's keep the Xen knowledge constrained to the Xen EFI wrapper,
-> > > rather than spreading it further.
-> > >
-> > > IMO, given reset_system is a *mandatory* function, the Xen wrapper
-> > > should provide an implementation.
-> > >
-> > > I don't see why you can't implement a wrapper that calls the usual Xen
-> > > poweroff/reset functions.
+> > > I realise I'm making a sweeping generalisation, but adding
+> > > EFI_PARAVIRT is almost always the wrong thing to do.
 > >
-> > I realise I'm making a sweeping generalisation, but adding
-> > EFI_PARAVIRT is almost always the wrong thing to do.
-> 
-> Why?
- 
-Because it makes paravirt a special case, and there's usually very
-little reason to make it special in the EFI code. Special-casing means
-more branches, more code paths, a bigger testing matrix and more
-complex code. 
+> > Why?
+>
+> Because it makes paravirt a special case, and there's usually very
+> little reason to make it special in the EFI code. Special-casing means
+> more branches, more code paths, a bigger testing matrix and more
+> complex code.
+>
+> EFI_PARAVIRT does have its uses, like for those scenarios where we
+> don't have a table of function pointers that can be overidden for
+> paravirt.
+>
+> But we do have such a table for ->reset_system().
 
-EFI_PARAVIRT does have its uses, like for those scenarios where we
-don't have a table of function pointers that can be overidden for
-paravirt.
+This is more or less what I expected. Thanks a lot for explanation.
 
-But we do have such a table for ->reset_system().
+Daniel
