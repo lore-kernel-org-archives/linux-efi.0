@@ -1,22 +1,22 @@
-From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Subject: [PATCH 4.9 25/69] efi/fb: Avoid reconfiguration of BAR that covers the framebuffer
-Date: Wed, 19 Apr 2017 16:42:41 +0200
-Message-ID: <20170419141617.990168205@linuxfoundation.org>
-References: <20170419141616.919951169@linuxfoundation.org>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.10 32/69] efi/fb: Avoid reconfiguration of BAR that covers the framebuffer
+Date: Wed, 19 Apr 2017 16:37:01 +0200
+Message-ID: <20170419141556.453295407@linuxfoundation.org>
+References: <20170419141555.114738231@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170419141616.919951169-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20170419141555.114738231@linuxfoundation.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, leif.lindholm@linaro.org, linux-efi@vger.kernel.org, lorenzo.pieralisi@arm.com, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.9-stable review patch.  If anyone has any objections, please let me know.
+4.10-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
 commit 55d728a40d368ba80443be85c02e641fc9082a3f upstream.
 
@@ -36,19 +36,19 @@ So add a non-x86 quirk to the EFI fb driver to find the BAR associated
 with the GOP base address, and claim the BAR resource so that the PCI
 core will not move it.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Jones <pjones@redhat.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: leif.lindholm@linaro.org
+Cc: linux-efi@vger.kernel.org
+Cc: lorenzo.pieralisi@arm.com
 Fixes: 9822504c1fa5 ("efifb: Enable the efi-framebuffer platform driver ...")
-Link: http://lkml.kernel.org/r/20170404152744.26687-3-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Link: http://lkml.kernel.org/r/20170404152744.26687-3-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 ---
  drivers/video/fbdev/efifb.c |   66 +++++++++++++++++++++++++++++++++++++++++++-
@@ -64,16 +64,16 @@ Signed-off-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@publi
  #include <linux/platform_device.h>
  #include <linux/screen_info.h>
  #include <video/vga.h>
-@@ -118,6 +119,8 @@ static inline bool fb_base_is_valid(void
- 	return false;
- }
+@@ -143,6 +144,8 @@ static struct attribute *efifb_attrs[] =
+ };
+ ATTRIBUTE_GROUPS(efifb);
  
 +static bool pci_dev_disabled;	/* FB base matches BAR of a disabled device */
 +
  static int efifb_probe(struct platform_device *dev)
  {
  	struct fb_info *info;
-@@ -127,7 +130,7 @@ static int efifb_probe(struct platform_d
+@@ -152,7 +155,7 @@ static int efifb_probe(struct platform_d
  	unsigned int size_total;
  	char *option = NULL;
  
@@ -82,7 +82,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@publi
  		return -ENODEV;
  
  	if (fb_get_options("efifb", &option))
-@@ -327,3 +330,64 @@ static struct platform_driver efifb_driv
+@@ -360,3 +363,64 @@ static struct platform_driver efifb_driv
  };
  
  builtin_platform_driver(efifb_driver);
