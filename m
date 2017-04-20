@@ -1,61 +1,65 @@
-From: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-Subject: Re: [PATCH v2 0/3] efi: add support for non-standard capsule headers
-Date: Thu, 20 Apr 2017 16:27:06 +0100
-Message-ID: <1a10da6c-9342-c52a-71b7-669d189f17a2@nexus-software.ie>
-References: <cover.1492626781.git.jan.kiszka@siemens.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v5 05/32] x86/CPU/AMD: Handle SME reduction in physical
+ address size
+Date: Thu, 20 Apr 2017 18:59:22 +0200
+Message-ID: <20170420165922.j2inlwbchrs6senw@pd.tnic>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+ <20170418211711.10190.30861.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.1492626781.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hock Leong Kweh <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-arch-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170418211711.10190.30861.stgit@tlendack-t1.amdoffice.net>
+Sender: linux-arch-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy
 List-Id: linux-efi@vger.kernel.org
 
+On Tue, Apr 18, 2017 at 04:17:11PM -0500, Tom Lendacky wrote:
+> When System Memory Encryption (SME) is enabled, the physical address
+> space is reduced. Adjust the x86_phys_bits value to reflect this
+> reduction.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/kernel/cpu/amd.c |   14 +++++++++++---
+>  1 file changed, 11 insertions(+), 3 deletions(-)
 
+...
 
-On 19/04/17 19:32, Jan Kiszka wrote:
-> This picks up the patches Ard send before in [1], including the
-> "left-over" patches 6..8.
->
-> As Ard suggested, I've taken updated patches 6 and 7 of him from [2]
-> which address reviewer comments. Furthermore, I've changed patch 8 to
-> factor out the Quark quirk logic from the overloaded
-> efi_capsule_setup_info as requested by Matt and also applied Andy's
-> suggestion to have a quirk dispatcher table with callbacks.
->
-> Tested successfully on the IOT2040 - still without a working Galileo
-> board.
->
-> Jan
->
-> [1] http://www.spinics.net/lists/linux-efi/msg11194.html
-> [2] https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=quark-capsule
->
-> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
->
-> Ard Biesheuvel (2):
->   efi/capsule-loader: Redirect calls to efi_capsule_setup_info via weak
->     alias
->   efi/capsule-loader: Use page addresses rather than struct page
->     pointers
->
-> Jan Kiszka (1):
->   efi/capsule: Add support for Quark security header
->
->  arch/x86/platform/efi/quirks.c        | 137 ++++++++++++++++++++++++++++++++++
->  drivers/firmware/efi/Kconfig          |   9 +++
->  drivers/firmware/efi/capsule-loader.c |  66 ++++++++--------
->  drivers/firmware/efi/capsule.c        |   7 +-
->  include/linux/efi.h                   |  14 +++-
->  5 files changed, 197 insertions(+), 36 deletions(-)
->
+> @@ -622,8 +624,14 @@ static void early_init_amd(struct cpuinfo_x86 *c)
+>  
+>  			/* Check if SME is enabled */
+>  			rdmsrl(MSR_K8_SYSCFG, msr);
+> -			if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
+> +			if (msr & MSR_K8_SYSCFG_MEM_ENCRYPT) {
+> +				unsigned int ebx;
+> +
+> +				ebx = cpuid_ebx(0x8000001f);
+> +				c->x86_phys_bits -= (ebx >> 6) & 0x3f;
+> +			} else {
+>  				clear_cpu_cap(c, X86_FEATURE_SME);
+> +			}
 
-Still looks good, nothing's broken on Galileo.
+Lemme do some simplifying to save an indent level, get rid of local var
+ebx and kill some { }-brackets for a bit better readability:
 
-Please feel free to add my
+        if (c->extended_cpuid_level >= 0x8000001f) {
+                u64 msr;
 
-Tested-by: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+                if (!cpu_has(c, X86_FEATURE_SME))
+                        return;
 
-To your patches
+                /* Check if SME is enabled */
+                rdmsrl(MSR_K8_SYSCFG, msr);
+                if (msr & MSR_K8_SYSCFG_MEM_ENCRYPT)
+                        c->x86_phys_bits -= (cpuid_ebx(0x8000001f) >> 6) & 0x3f;
+                else
+                        clear_cpu_cap(c, X86_FEATURE_SME);
+        }
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
