@@ -1,83 +1,32 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH] efi/reboot: Fall back to original power-off method if EFI_RESET_SHUTDOWN returns
-Date: Sun, 23 Apr 2017 14:36:55 +0200
-Message-ID: <20170423123655.13015-1-hdegoede@redhat.com>
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-acpi@vger.kernel.org, Peter Jones <pjones@redhat.com>, linux-efi@vger.kernel.org, Mark Salter <msalter@redhat.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH v1 1/8] lib/uuid: Introduce uuid_{be|le}_cmp_p{p}() helpers
+Date: Sun, 23 Apr 2017 15:42:35 +0300
+Message-ID: <CAHp75VeTgdE=OiRNS6JrH3M-rF+jpPVgmd4G+n321=vhVE4XiA@mail.gmail.com>
+References: <20170421144645.45189-1-andriy.shevchenko@linux.intel.com> <5B8DA87D05A7694D9FA63FD143655C1B543E8399@hasmsx108.ger.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-input-owner@vger.kernel.org>
+In-Reply-To: <5B8DA87D05A7694D9FA63FD143655C1B543E8399@hasmsx108.ger.corp.intel.com>
+Sender: linux-input-owner@vger.kernel.org
+To: "Winkler, Tomas" <tomas.winkler@intel.com>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Mika Westerberg <mika.westerberg@linux.intel.com>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, "linux-input@vger.kernel.org" <linux-input@vger.kernel.org>, "kvm@vger.kernel.org" <kvm@vger.kernel.org>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, "Koul, Vinod" <vinod.koul@intel.com>, Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>Benjamin Tissoires <be>
 List-Id: linux-efi@vger.kernel.org
 
-Commit 44be28e9dd98 ("x86/reboot: Add EFI reboot quirk for ACPI Hardware
-Reduced flag") sets pm_power_off to efi_power_off() when the
-acpi_gbl_reduced_hardware flag is set.
+On Sun, Apr 23, 2017 at 1:29 PM, Winkler, Tomas <tomas.winkler@intel.com> wrote:
+>> New helpers take pointers to uuid_{be|le} as parameters.
+>>
+>> When using them on a raw data we don't need to do an ugly dereference and,
+>> in some cases, a type casting.
 
-According to its commit message this is necessary because: "BayTrail-T
-class of hardware requires EFI in order to powerdown and reboot and no
-other reliable method exists"
+> I think this going overboard, the _pp types  are just enough.
+I looked at existing users and there are cases like
+#define XXX_UUID UUID_...(a, b, c, ...)
 
-But I have a Bay Trail CR tablet where the EFI_RESET_SHUTDOWN call does
-not work, it simply returns without doing anything (AFAICT).
+uuid_.*_cmp(value, XXX_UUID)
 
-So it seems that some Bay Trail devices must use EFI for power-off, while
-for others only ACPI works.
+For _pp variant if would be _cmp_pp(value, &XXX_UUID) which is
+slightly worse than for _p variant.
 
-Note that efi_power_off() only gets used if the platform code defines
-efi_poweroff_required() and that returns true, this currently only ever
-happens on x86.
-
-Since on the devices which need ACPI for power-off the EFI_RESET_SHUTDOWN
-call simply returns, this patch makes the efi-reboot code remember the
-old pm_power_off handler and if EFI_RESET_SHUTDOWN returns it falls back
-to calling that.
-
-This seems preferable to dmi-quirking our way out of this, since there
-are likely quite a few devices suffering from this.
-
-Cc: Mark Salter <msalter@redhat.com>
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
- drivers/firmware/efi/reboot.c | 12 +++++++++++-
- 1 file changed, 11 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/reboot.c b/drivers/firmware/efi/reboot.c
-index 62ead9b..7117e2d 100644
---- a/drivers/firmware/efi/reboot.c
-+++ b/drivers/firmware/efi/reboot.c
-@@ -5,6 +5,8 @@
- #include <linux/efi.h>
- #include <linux/reboot.h>
- 
-+void (*orig_pm_power_off)(void);
-+
- int efi_reboot_quirk_mode = -1;
- 
- void efi_reboot(enum reboot_mode reboot_mode, const char *__unused)
-@@ -51,6 +53,12 @@ bool __weak efi_poweroff_required(void)
- static void efi_power_off(void)
- {
- 	efi.reset_system(EFI_RESET_SHUTDOWN, EFI_SUCCESS, 0, NULL);
-+	/*
-+	 * The above call should not return, if it does fall back to
-+	 * the original power off method (typically ACPI poweroff).
-+	 */
-+	if (orig_pm_power_off)
-+		orig_pm_power_off();
- }
- 
- static int __init efi_shutdown_init(void)
-@@ -58,8 +66,10 @@ static int __init efi_shutdown_init(void)
- 	if (!efi_enabled(EFI_RUNTIME_SERVICES))
- 		return -ENODEV;
- 
--	if (efi_poweroff_required())
-+	if (efi_poweroff_required()) {
-+		orig_pm_power_off = pm_power_off;
- 		pm_power_off = efi_power_off;
-+	}
- 
- 	return 0;
- }
 -- 
-2.9.3
-
+With Best Regards,
+Andy Shevchenko
