@@ -1,51 +1,72 @@
-From: Yinghai Lu <yinghai@kernel.org>
-Subject: Re: [PATCH v3] efifb: avoid reconfiguration of BAR that covers the
- framebuffer
-Date: Sat, 22 Apr 2017 18:45:47 -0700
-Message-ID: <20170423014546.GA2704@dhcp-whq-twvpn-1-vpnpool-10-159-153-149.vpn.oracle.com>
-References: <CAKv+Gu-qRg8-YRCairppKrEfeLcW+OwVF8qZHp7vxXJA_AwPOw@mail.gmail.com>
- <20170330100524.GA22801@red-moon>
- <CAKv+Gu-ff98HrPK3f+E8soGJUXaaMxPLs2AuJ+rvXd0HWX-jXw@mail.gmail.com>
- <CAKv+Gu8YjySTDMgsrtGqEPMOtVhHc8gvTHZ4C5Ga8OTYdC9R3A@mail.gmail.com>
- <ae87ae28-f50d-095f-576e-f3fd7f96dea2@codeaurora.org>
- <CAKv+Gu8x0rQUnTUorknW-mW9LFgrxFYsXyy4LU_w9JbA-m_sjA@mail.gmail.com>
- <CAKv+Gu9Su0F9CSRe=sxomuDDH7c2szO6Z8dpqOQ=t_1Vn3JD3g@mail.gmail.com>
- <20170410165328.GA5248@red-moon>
- <CAKv+Gu-AN-OwnAJG5dt0Qg4GU8HxZBowTSA0H3LhNA3nHfrsQg@mail.gmail.com>
- <CAKv+Gu9dS4OhLbBw59yKYQmoJ8SpFexzk9yH=XfXnzn8NJ4mcg@mail.gmail.com>
+From: "Winkler, Tomas" <tomas.winkler@intel.com>
+Subject: RE: [PATCH v1 1/8] lib/uuid: Introduce uuid_{be|le}_cmp_p{p}()
+ helpers
+Date: Sun, 23 Apr 2017 10:29:14 +0000
+Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B543E8399@hasmsx108.ger.corp.intel.com>
+References: <20170421144645.45189-1-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-pci-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu9dS4OhLbBw59yKYQmoJ8SpFexzk9yH=XfXnzn8NJ4mcg@mail.gmail.com>
-Sender: linux-pci-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Sinan Kaya <okaya@codeaurora.org>, Bjorn Helgaas <bhelgaas@google.com>, Lukas Wunner <lukas@wunner.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Hanjun Guo <hanjun.guo@linaro.org>, Heyi Guo <heyi.guo@linaro.org>, linux-pci <linux-pci@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20170421144645.45189-1-andriy.shevchenko@linux.intel.com>
+Content-Language: en-US
+Sender: linux-acpi-owner@vger.kernel.org
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Mika Westerberg <mika.westerberg@linux.intel.com>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, "linux-input@vger.kernel.org" <linux-input@vger.kernel.org>, "kvm@vger.kernel.org" <kvm@vger.kernel.org>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>
+Cc: Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, "Koul, Vinod" <vinod.koul@intel.com>, Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>, Benjamin Tissoires <benjamin.tissoires@redhat.com>, Kirti Wankhede <kwankhede@nvidia.com>, Alex Williamson <alex.williamson@redhat.com>, "K. Y. Srinivasan" <kys@microsoft.com>, Haiyang Zhang <haiyangz@microsoft.com>, Stephen Hemminger <sthemmin@microsoft.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Apr 10, 2017 at 06:29:27PM +0100, Ard Biesheuvel wrote:
->  /*
-> @@ -208,8 +208,8 @@ struct pci_bus *pci_acpi_scan_root(struct
-> acpi_pci_root *root)
->         if (!bus)
->                 return NULL;
+> New helpers take pointers to uuid_{be|le} as parameters.
 > 
-> -       pci_bus_size_bridges(bus);
-> -       pci_bus_assign_resources(bus);
-> +       pci_assign_unassigned_root_bus_resources(bus);
-> +       pci_bus_claim_resources(bus);
+> When using them on a raw data we don't need to do an ugly dereference and,
+> in some cases, a type casting.
 > 
->         list_for_each_entry(child, &bus->children, node)
->                 pcie_bus_configure_settings(child);
->
+> Cc: Andrew Morton <akpm@linux-foundation.org>
+> Cc: Arnd Bergmann <arnd@arndb.de>
+> Cc: Liam Girdwood <lgirdwood@gmail.com>
+> Cc: Mark Brown <broonie@kernel.org>
+> Cc: Vinod Koul <vinod.koul@intel.com>
+> Cc: Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>
+> Cc: Benjamin Tissoires <benjamin.tissoires@redhat.com>
+> Cc: Kirti Wankhede <kwankhede@nvidia.com>
+> Cc: Alex Williamson <alex.williamson@redhat.com>
+> Cc: "K. Y. Srinivasan" <kys@microsoft.com>
+> Cc: Haiyang Zhang <haiyangz@microsoft.com>
+> Cc: Stephen Hemminger <sthemmin@microsoft.com>
+> Cc: Tomas Winkler <tomas.winkler@intel.com>
+> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+> 
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> ---
+>  include/linux/uuid.h | 20 ++++++++++++++++++++
+>  1 file changed, 20 insertions(+)
+> 
+> diff --git a/include/linux/uuid.h b/include/linux/uuid.h index
+> 4dff73a89758..45312cb5ac65 100644
+> --- a/include/linux/uuid.h
+> +++ b/include/linux/uuid.h
+> @@ -58,6 +58,26 @@ static inline int uuid_be_cmp(const uuid_be u1, const
+> uuid_be u2)
+>  	return memcmp(&u1, &u2, sizeof(uuid_be));  }
+> 
+> +static inline int uuid_le_cmp_p(const uuid_le *pu1, const uuid_le u2) {
+> +	return memcmp(pu1, &u2, sizeof(uuid_le)); }
+> +
+> +static inline int uuid_be_cmp_p(const uuid_be *pu1, const uuid_be u2) {
+> +	return memcmp(pu1, &u2, sizeof(uuid_be)); }
+> +
+> +static inline int uuid_le_cmp_pp(const uuid_le *pu1, const uuid_le
+> +*pu2) {
+> +	return memcmp(pu1, pu2, sizeof(uuid_le)); }
+> +
+> +static inline int uuid_be_cmp_pp(const uuid_be *pu1, const uuid_be
+> +*pu2) {
+> +	return memcmp(pu1, pu2, sizeof(uuid_be)); }
+> +
+>  void generate_random_uuid(unsigned char uuid[16]);
+> 
+>  extern void uuid_le_gen(uuid_le *u);
 
-looks like those two lines are reversed. you should use:
-                pcibios_resource_survey_bus(bus);
-                pci_assign_unassigned_root_bus_resources(bus);
-
-please check x86 pcibios_resource_survey_bus() definition in
-	arch/x86/pci/i386.c
-
-but pci_bus_claim_resources() should work too.
-
-Yinghai
+I think this going overboard, the _pp types  are just enough. 
+Tomas
