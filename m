@@ -1,90 +1,61 @@
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v1 1/8] lib/uuid: Introduce uuid_{be|le}_cmp_p{p}()
- helpers
-Date: Mon, 24 Apr 2017 12:44:02 +0200
-Message-ID: <20170424104402.GA9723@wunner.de>
-References: <20170421144645.45189-1-andriy.shevchenko@linux.intel.com>
- <5B8DA87D05A7694D9FA63FD143655C1B543E8399@hasmsx108.ger.corp.intel.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [PATCH v5 09/32] x86/mm: Provide general kernel support for
+ memory encryption
+Date: Mon, 24 Apr 2017 10:53:58 -0500
+Message-ID: <9fc79e28-ad64-1c2f-4c46-a4efcdd550b0@amd.com>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+ <20170418211754.10190.25082.stgit@tlendack-t1.amdoffice.net>
+ <0106e3fc-9780-e872-2274-fecf79c28923@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <5B8DA87D05A7694D9FA63FD143655C1B543E8399-Jy8z56yoSI8MvF1YICWikbfspsVTdybXVpNB7YpNyf8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: "Winkler, Tomas" <tomas.winkler-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org" <alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org>, "linux-input-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-input-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devel-tBiZLqfeLfOHmIFyCCdPziST3g8Odh+X@public.gmane.org" <devel-tBiZLqfeLfOHmIFyCCdPziST3g8Odh+X@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Liam Girdwood <lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Koul, Vinod" <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Srinivas Pandruvada <srinivas.pandruvada-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Benjamin Tissoires <benjamin.ti>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <0106e3fc-9780-e872-2274-fecf79c28923@intel.com>
+Sender: owner-linux-mm@kvack.org
+To: Dave Hansen <dave.hansen@intel.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
+Cc: Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, "H. Peter
+ Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dave Young <dyoung@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-> New helpers take pointers to uuid_{be|le} as parameters.
-> 
-> When using them on a raw data we don't need to do an ugly dereference and,
-> in some cases, a type casting.
-> 
-> Cc: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-> Cc: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-> Cc: Liam Girdwood <lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Cc: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> Cc: Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Srinivas Pandruvada <srinivas.pandruvada-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-> Cc: Benjamin Tissoires <benjamin.tissoires-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: Kirti Wankhede <kwankhede-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-> Cc: Alex Williamson <alex.williamson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: "K. Y. Srinivasan" <kys-0li6OtcxBFHby3iVrkZq2A@public.gmane.org>
-> Cc: Haiyang Zhang <haiyangz-0li6OtcxBFHby3iVrkZq2A@public.gmane.org>
-> Cc: Stephen Hemminger <sthemmin-0li6OtcxBFHby3iVrkZq2A@public.gmane.org>
-> Cc: Tomas Winkler <tomas.winkler-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
-> 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-> ---
->  include/linux/uuid.h | 20 ++++++++++++++++++++
->  1 file changed, 20 insertions(+)
-> 
-> diff --git a/include/linux/uuid.h b/include/linux/uuid.h index
-> 4dff73a89758..45312cb5ac65 100644
-> --- a/include/linux/uuid.h
-> +++ b/include/linux/uuid.h
-> @@ -58,6 +58,26 @@ static inline int uuid_be_cmp(const uuid_be u1, const
-> uuid_be u2)
->  	return memcmp(&u1, &u2, sizeof(uuid_be));  }
-> 
-> +static inline int uuid_le_cmp_p(const uuid_le *pu1, const uuid_le u2) {
-> +	return memcmp(pu1, &u2, sizeof(uuid_le)); }
-> +
-> +static inline int uuid_be_cmp_p(const uuid_be *pu1, const uuid_be u2) {
-> +	return memcmp(pu1, &u2, sizeof(uuid_be)); }
-> +
-> +static inline int uuid_le_cmp_pp(const uuid_le *pu1, const uuid_le
-> +*pu2) {
-> +	return memcmp(pu1, pu2, sizeof(uuid_le)); }
-> +
-> +static inline int uuid_be_cmp_pp(const uuid_be *pu1, const uuid_be
-> +*pu2) {
-> +	return memcmp(pu1, pu2, sizeof(uuid_be)); }
-> +
->  void generate_random_uuid(unsigned char uuid[16]);
-> 
->  extern void uuid_le_gen(uuid_le *u);
+On 4/21/2017 4:52 PM, Dave Hansen wrote:
+> On 04/18/2017 02:17 PM, Tom Lendacky wrote:
+>> @@ -55,7 +57,7 @@ static inline void copy_user_page(void *to, void *from, unsigned long vaddr,
+>>  	__phys_addr_symbol(__phys_reloc_hide((unsigned long)(x)))
+>>
+>>  #ifndef __va
+>> -#define __va(x)			((void *)((unsigned long)(x)+PAGE_OFFSET))
+>> +#define __va(x)			((void *)(__sme_clr(x) + PAGE_OFFSET))
+>>  #endif
+>
+> It seems wrong to be modifying __va().  It currently takes a physical
+> address, and this modifies it to take a physical address plus the SME bits.
 
-There's a bug in gcc wherein constant compound literals are generated
-on the stack at runtime, rather than stored in rodata.  The bug occurs
-if the compound literal is passed by reference.  It does not manifest
-itself when passing by value:
+This actually modifies it to be sure the encryption bit is not part of
+the physical address.
 
-https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68725
+>
+> How does that end up ever happening?  If we are pulling physical
+> addresses out of the page tables, we use p??_phys().  I'd expect *those*
+> to be masking off the SME bits.
+>
+> Is it these cases?
+>
+> 	pgd_t *base = __va(read_cr3());
+>
+> For those, it seems like we really want to create two modes of reading
+> cr3.  One that truly reads CR3 and another that reads the pgd's physical
+> address out of CR3.  Then you only do the SME masking on the one
+> fetching a physical address, and the SME bits never leak into __va().
 
-Hence this patch is unfortunately counterproductive if the UUIDs are
-declared const.
+I'll investigate this and see if I can remove the mod to __va().
 
-FWIW I've posted a series back in January to constify UUIDs as much as
-possible, but I got some objections and lacked the time so far to
-address them.  In fact I'm thinking that gcc needs to be fixed first,
-then we can focus on improving the kernel side of things:
+Thanks,
+Tom
 
-https://www.spinics.net/lists/linux-efi/msg10093.html
+>
 
-Best regards,
-
-Lukas
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
