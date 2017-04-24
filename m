@@ -1,39 +1,66 @@
-From: Boris Ostrovsky <boris.ostrovsky@oracle.com>
-Subject: Re: [PATCH 3/3 v2] xen: Implement EFI reset_system callback
-Date: Mon, 24 Apr 2017 14:23:03 -0400
-Message-ID: <13e9e915-ecd8-0664-6789-d6e7887182e6@oracle.com>
-References: <20170424175839.5262-1-julien.grall@arm.com>
- <20170424175839.5262-4-julien.grall@arm.com>
+From: Stefano Stabellini <sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 2/3 v2] arm/xen: Consolidate calls to shutdown hypercall
+ in a single helper
+Date: Mon, 24 Apr 2017 12:30:50 -0700 (PDT)
+Message-ID: <alpine.DEB.2.10.1704241230090.16723@sstabellini-ThinkPad-X260>
+References: <20170424175839.5262-1-julien.grall@arm.com> <20170424175839.5262-3-julien.grall@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170424175839.5262-4-julien.grall@arm.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Julien Grall <julien.grall@arm.com>, xen-devel@lists.xen.org
-Cc: mark.rutland@arm.com, Juergen Gross <jgross@suse.com>, linux-efi@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, sstabellini@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170424175839.5262-3-julien.grall-5wv7dgnIgG8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>
+Cc: xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 04/24/2017 01:58 PM, Julien Grall wrote:
-> When rebooting DOM0 with ACPI on ARM64, the kernel is crashing with the stack
-> trace [1].
->
-> This is happening because when EFI runtimes are enabled, the reset code
-> (see machine_restart) will first try to use EFI restart method.
->
-> However, the EFI restart code is expecting the reset_system callback to
-> be always set. This is not the case for Xen and will lead to crash.
->
-> The EFI restart helper is used in multiple places and some of them don't
-> not have fallback (see machine_power_off). So implement reset_system
-> callback as a call to xen_reboot when using EFI Xen.
+On Mon, 24 Apr 2017, Julien Grall wrote:
+> Signed-off-by: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>
 
-Reviewed-by: Boris Ostrovsky <boris.ostrovsky@oracle.com>
+Reviewed-by: Stefano Stabellini <sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+
+
+> ---
+>     Changes in v2:
+>         - Patch added
+> ---
+>  arch/arm/xen/enlighten.c | 16 ++++++++++------
+>  1 file changed, 10 insertions(+), 6 deletions(-)
+> 
+> diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
+> index 81e3217b12d3..ba7f4c8f5c3e 100644
+> --- a/arch/arm/xen/enlighten.c
+> +++ b/arch/arm/xen/enlighten.c
+> @@ -191,20 +191,24 @@ static int xen_dying_cpu(unsigned int cpu)
+>  	return 0;
+>  }
+>  
+> -static void xen_restart(enum reboot_mode reboot_mode, const char *cmd)
+> +void xen_reboot(int reason)
+>  {
+> -	struct sched_shutdown r = { .reason = SHUTDOWN_reboot };
+> +	struct sched_shutdown r = { .reason = reason };
+>  	int rc;
+> +
+>  	rc = HYPERVISOR_sched_op(SCHEDOP_shutdown, &r);
+>  	BUG_ON(rc);
+>  }
+>  
+> +static void xen_restart(enum reboot_mode reboot_mode, const char *cmd)
+> +{
+> +	xen_reboot(SHUTDOWN_reboot);
+> +}
+> +
+> +
+>  static void xen_power_off(void)
+>  {
+> -	struct sched_shutdown r = { .reason = SHUTDOWN_poweroff };
+> -	int rc;
+> -	rc = HYPERVISOR_sched_op(SCHEDOP_shutdown, &r);
+> -	BUG_ON(rc);
+> +	xen_reboot(SHUTDOWN_poweroff);
+>  }
+>  
+>  static irqreturn_t xen_arm_callback(int irq, void *arg)
+> -- 
+> 2.11.0
+> 
