@@ -1,14 +1,14 @@
 From: Boris Ostrovsky <boris.ostrovsky@oracle.com>
-Subject: Re: [PATCH 1/3 v2] xen: Export xen_reboot
-Date: Mon, 24 Apr 2017 14:21:54 -0400
-Message-ID: <41fd4caf-7554-7d54-6332-d227228a13ea@oracle.com>
+Subject: Re: [PATCH 3/3 v2] xen: Implement EFI reset_system callback
+Date: Mon, 24 Apr 2017 14:23:03 -0400
+Message-ID: <13e9e915-ecd8-0664-6789-d6e7887182e6@oracle.com>
 References: <20170424175839.5262-1-julien.grall@arm.com>
- <20170424175839.5262-2-julien.grall@arm.com>
+ <20170424175839.5262-4-julien.grall@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170424175839.5262-2-julien.grall@arm.com>
+In-Reply-To: <20170424175839.5262-4-julien.grall@arm.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -23,58 +23,17 @@ Cc: mark.rutland@arm.com, Juergen Gross <jgross@suse.com>, linux-efi@vger.kernel
 List-Id: linux-efi@vger.kernel.org
 
 On 04/24/2017 01:58 PM, Julien Grall wrote:
-> The helper xen_reboot will be called by the EFI code in a later patch.
+> When rebooting DOM0 with ACPI on ARM64, the kernel is crashing with the stack
+> trace [1].
 >
-> Note that the ARM version does not yet exist and will be added in a
-> later patch too.
+> This is happening because when EFI runtimes are enabled, the reset code
+> (see machine_restart) will first try to use EFI restart method.
 >
-> Signed-off-by: Julien Grall <julien.grall@arm.com>
+> However, the EFI restart code is expecting the reset_system callback to
+> be always set. This is not the case for Xen and will lead to crash.
+>
+> The EFI restart helper is used in multiple places and some of them don't
+> not have fallback (see machine_power_off). So implement reset_system
+> callback as a call to xen_reboot when using EFI Xen.
 
-I don't think these changes are worth a whole patch. They can be folded
-into the third patch.
-
--boris
-
->
-> ---
->
-> Cc: Boris Ostrovsky <boris.ostrovsky@oracle.com>
-> Cc: Juergen Gross <jgross@suse.com>
-> Cc: Thomas Gleixner <tglx@linutronix.de>
-> Cc: Ingo Molnar <mingo@redhat.com>
-> Cc: "H. Peter Anvin" <hpa@zytor.com>
-> Cc: x86@kernel.org
->
->     Changes in v2:
->         - Patch added
-> ---
->  arch/x86/xen/enlighten.c | 2 +-
->  include/xen/xen-ops.h    | 2 ++
->  2 files changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/arch/x86/xen/enlighten.c b/arch/x86/xen/enlighten.c
-> index ec1d5c46e58f..563f2d963a04 100644
-> --- a/arch/x86/xen/enlighten.c
-> +++ b/arch/x86/xen/enlighten.c
-> @@ -1294,7 +1294,7 @@ static const struct pv_cpu_ops xen_cpu_ops __initconst = {
->  	.end_context_switch = xen_end_context_switch,
->  };
->  
-> -static void xen_reboot(int reason)
-> +void xen_reboot(int reason)
->  {
->  	struct sched_shutdown r = { .reason = reason };
->  	int cpu;
-> diff --git a/include/xen/xen-ops.h b/include/xen/xen-ops.h
-> index b5486e648607..fc5ddb472f86 100644
-> --- a/include/xen/xen-ops.h
-> +++ b/include/xen/xen-ops.h
-> @@ -22,6 +22,8 @@ void xen_timer_resume(void);
->  void xen_arch_resume(void);
->  void xen_arch_suspend(void);
->  
-> +void xen_reboot(int reason);
-> +
->  void xen_resume_notifier_register(struct notifier_block *nb);
->  void xen_resume_notifier_unregister(struct notifier_block *nb);
->  
+Reviewed-by: Boris Ostrovsky <boris.ostrovsky@oracle.com>
