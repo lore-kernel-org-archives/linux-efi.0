@@ -1,72 +1,36 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH V15 04/11] efi: parse ARM processor error
-Date: Mon, 24 Apr 2017 19:52:40 +0200
-Message-ID: <20170424175240.3nvhbxzwicxnk6og@pd.tnic>
-References: <1492556723-9189-1-git-send-email-tbaicar@codeaurora.org>
- <1492556723-9189-5-git-send-email-tbaicar@codeaurora.org>
- <20170421175527.fjwnqd22jz7br5yu@pd.tnic>
- <e54c9893-446f-9e77-b78b-2548d394719b@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-Content-Disposition: inline
-In-Reply-To: <e54c9893-446f-9e77-b78b-2548d394719b@codeaurora.org>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, rafael@kernel.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, gengdongjiu@huawei.com, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, tony.luck@intel.com, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawe
+From: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>
+Subject: [PATCH 0/3 v2] xen: Implement EFI reset_system callback
+Date: Mon, 24 Apr 2017 18:58:36 +0100
+Message-ID: <20170424175839.5262-1-julien.grall@arm.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org
+Cc: sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Apr 21, 2017 at 12:22:09PM -0600, Baicar, Tyler wrote:
-> I guess it's not really needed. It just may be useful considering there can
-> be numerous error info structures, numerous context info structures, and a
-> variable length vendor information section. I can move this print to only in
-> the length check failure cases.
+Hi all,
 
-And? Why does the user care?
+This small patch series implements EFI reset_system callback when using EFI
+Xen. Without this, it will not be possible to reboot/power off ARM64 DOM0
+when using ACPI.
 
-I mean, it is good for debugging when you wanna see you're parsing the
-error info data properly but otherwise it doesn't improve the error
-reporting one bit.
+Cheers,
 
-> Because these are part of the error information structure. I wouldn't think
-> FW would populate error information structures that are different versions
-> in the same processor error, but it could be possible from the spec (at
-> least once there are different versions of the table).
+Cc: Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Cc: Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>
 
-Same argument as above.
+Julien Grall (3):
+  xen: Export xen_reboot
+  arm/xen: Consolidate calls to shutdown hypercall in a single helper
+  xen: Implement EFI reset_system callback
 
-> There is an error information 64 bit value in the ARM processor error
-> information structure. (UEFI spec 2.6 table 261)
-
-So that's IP-dependent and explained in the following tables. Any plans
-on decoding that too?
-
-> Why's that? Dumping this vendor specific error information is similar to the
-> unrecognized CPER section reporting which is also meant for vendor specific
-> information https://lkml.org/lkml/2017/4/18/751
-
-And how do those naked bytes help the user understand the error happening?
-
-Even in your example you have:
-
-[  140.739210] {1}[Hardware Error]:   00000000: 4d415201 4d492031 453a4d45 435f4343  .RAM1 IMEM:ECC_C
-[  140.739214] {1}[Hardware Error]:   00000010: 53515f45 44525f42 00000000 00000000  E_QSB_RD........
-
-Which looks like some correctable ECC DRAM error and is actually begging
-to be decoded in a human-readable form. So let's do that completely and
-not dump partially decoded information.
+ arch/arm/xen/efi.c       |  2 +-
+ arch/arm/xen/enlighten.c | 16 ++++++++++------
+ arch/x86/xen/efi.c       |  2 +-
+ arch/x86/xen/enlighten.c |  2 +-
+ drivers/xen/efi.c        | 18 ++++++++++++++++++
+ include/xen/xen-ops.h    |  5 +++++
+ 6 files changed, 36 insertions(+), 9 deletions(-)
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+2.11.0
