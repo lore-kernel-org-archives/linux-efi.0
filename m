@@ -1,66 +1,72 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [PATCH v5 09/32] x86/mm: Provide general kernel support for
-	memory encryption
-Date: Mon, 24 Apr 2017 11:10:31 -0500
-Message-ID: <8bb579a0-2855-f311-e087-d97cdd730922@amd.com>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
-	<20170418211754.10190.25082.stgit@tlendack-t1.amdoffice.net>
-	<0106e3fc-9780-e872-2274-fecf79c28923@intel.com>
-	<9fc79e28-ad64-1c2f-4c46-a4efcdd550b0@amd.com>
-	<67926f62-a068-6114-92ee-39bc08488b32@intel.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH V15 04/11] efi: parse ARM processor error
+Date: Mon, 24 Apr 2017 19:52:40 +0200
+Message-ID: <20170424175240.3nvhbxzwicxnk6og@pd.tnic>
+References: <1492556723-9189-1-git-send-email-tbaicar@codeaurora.org>
+ <1492556723-9189-5-git-send-email-tbaicar@codeaurora.org>
+ <20170421175527.fjwnqd22jz7br5yu@pd.tnic>
+ <e54c9893-446f-9e77-b78b-2548d394719b@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <67926f62-a068-6114-92ee-39bc08488b32-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Dave Hansen <dave.hansen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter
-	Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+Content-Disposition: inline
+In-Reply-To: <e54c9893-446f-9e77-b78b-2548d394719b@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, rafael@kernel.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, gengdongjiu@huawei.com, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, tony.luck@intel.com, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com, shiju.jose@huawe
 List-Id: linux-efi@vger.kernel.org
 
-On 4/24/2017 10:57 AM, Dave Hansen wrote:
-> On 04/24/2017 08:53 AM, Tom Lendacky wrote:
->> On 4/21/2017 4:52 PM, Dave Hansen wrote:
->>> On 04/18/2017 02:17 PM, Tom Lendacky wrote:
->>>> @@ -55,7 +57,7 @@ static inline void copy_user_page(void *to, void
->>>> *from, unsigned long vaddr,
->>>>      __phys_addr_symbol(__phys_reloc_hide((unsigned long)(x)))
->>>>
->>>>  #ifndef __va
->>>> -#define __va(x)            ((void *)((unsigned long)(x)+PAGE_OFFSET))
->>>> +#define __va(x)            ((void *)(__sme_clr(x) + PAGE_OFFSET))
->>>>  #endif
->>>
->>> It seems wrong to be modifying __va().  It currently takes a physical
->>> address, and this modifies it to take a physical address plus the SME
->>> bits.
->>
->> This actually modifies it to be sure the encryption bit is not part of
->> the physical address.
->
-> If SME bits make it this far, we have a bug elsewhere.  Right?  Probably
-> best not to paper over it.
+On Fri, Apr 21, 2017 at 12:22:09PM -0600, Baicar, Tyler wrote:
+> I guess it's not really needed. It just may be useful considering there can
+> be numerous error info structures, numerous context info structures, and a
+> variable length vendor information section. I can move this print to only in
+> the length check failure cases.
 
-That all depends on the approach.  Currently that's not the case for
-the one situation that you mentioned with cr3.  But if we do take the
-approach that we should never feed physical addresses to __va() with
-the encryption bit set then, yes, it would imply a bug elsewhere - which
-is probably a good approach.
+And? Why does the user care?
 
-I'll work on that. I could even add a debug config option that would
-issue a warning should __va() encounter the encryption bit if SME is
-enabled or active.
+I mean, it is good for debugging when you wanna see you're parsing the
+error info data properly but otherwise it doesn't improve the error
+reporting one bit.
 
-Thanks,
-Tom
+> Because these are part of the error information structure. I wouldn't think
+> FW would populate error information structures that are different versions
+> in the same processor error, but it could be possible from the spec (at
+> least once there are different versions of the table).
 
->
+Same argument as above.
+
+> There is an error information 64 bit value in the ARM processor error
+> information structure. (UEFI spec 2.6 table 261)
+
+So that's IP-dependent and explained in the following tables. Any plans
+on decoding that too?
+
+> Why's that? Dumping this vendor specific error information is similar to the
+> unrecognized CPER section reporting which is also meant for vendor specific
+> information https://lkml.org/lkml/2017/4/18/751
+
+And how do those naked bytes help the user understand the error happening?
+
+Even in your example you have:
+
+[  140.739210] {1}[Hardware Error]:   00000000: 4d415201 4d492031 453a4d45 435f4343  .RAM1 IMEM:ECC_C
+[  140.739214] {1}[Hardware Error]:   00000010: 53515f45 44525f42 00000000 00000000  E_QSB_RD........
+
+Which looks like some correctable ECC DRAM error and is actually begging
+to be decoded in a human-readable form. So let's do that completely and
+not dump partially decoded information.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
