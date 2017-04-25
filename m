@@ -1,37 +1,55 @@
-From: Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH 1/3 v2] xen: Export xen_reboot
-Date: Tue, 25 Apr 2017 06:02:18 +0200
-Message-ID: <7396d142-98b0-9554-4cbd-477bb9e2f8e5@suse.com>
-References: <20170424175839.5262-1-julien.grall@arm.com>
- <20170424175839.5262-2-julien.grall@arm.com>
- <41fd4caf-7554-7d54-6332-d227228a13ea@oracle.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v2 0/3] efi: add support for non-standard capsule headers
+Date: Tue, 25 Apr 2017 16:00:05 +0100
+Message-ID: <20170425150005.GR24360@codeblueprint.co.uk>
+References: <cover.1492626781.git.jan.kiszka@siemens.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <41fd4caf-7554-7d54-6332-d227228a13ea-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <cover.1492626781.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org
-Cc: sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+To: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Hock Leong Kweh <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 24/04/17 20:21, Boris Ostrovsky wrote:
-> On 04/24/2017 01:58 PM, Julien Grall wrote:
->> The helper xen_reboot will be called by the EFI code in a later patch.
->>
->> Note that the ARM version does not yet exist and will be added in a
->> later patch too.
->>
->> Signed-off-by: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>
+On Wed, 19 Apr, at 08:32:59PM, Jan Kiszka wrote:
+> This picks up the patches Ard send before in [1], including the
+> "left-over" patches 6..8.
 > 
-> I don't think these changes are worth a whole patch. They can be folded
-> into the third patch.
+> As Ard suggested, I've taken updated patches 6 and 7 of him from [2]
+> which address reviewer comments. Furthermore, I've changed patch 8 to
+> factor out the Quark quirk logic from the overloaded
+> efi_capsule_setup_info as requested by Matt and also applied Andy's
+> suggestion to have a quirk dispatcher table with callbacks.
+> 
+> Tested successfully on the IOT2040 - still without a working Galileo
+> board.
+> 
+> Jan
+> 
+> [1] http://www.spinics.net/lists/linux-efi/msg11194.html
+> [2] https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=quark-capsule
+> 
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> 
+> Ard Biesheuvel (2):
+>   efi/capsule-loader: Redirect calls to efi_capsule_setup_info via weak
+>     alias
+>   efi/capsule-loader: Use page addresses rather than struct page
+>     pointers
+> 
+> Jan Kiszka (1):
+>   efi/capsule: Add support for Quark security header
+> 
+>  arch/x86/platform/efi/quirks.c        | 137 ++++++++++++++++++++++++++++++++++
+>  drivers/firmware/efi/Kconfig          |   9 +++
+>  drivers/firmware/efi/capsule-loader.c |  66 ++++++++--------
+>  drivers/firmware/efi/capsule.c        |   7 +-
+>  include/linux/efi.h                   |  14 +++-
+>  5 files changed, 197 insertions(+), 36 deletions(-)
 
-No, the 2nd patch needs this, too.
+OK, this looks like it's in good shape to me.
 
-So:
-
-Reviewed-by: Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>
-
-
-Thanks, Juergen
+Ard, are we waiting for anything else before we queue this up for
+v4.13?
