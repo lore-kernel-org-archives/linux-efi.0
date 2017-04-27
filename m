@@ -1,46 +1,82 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 0/3] efi: add support for non-standard capsule headers
-Date: Thu, 27 Apr 2017 13:42:25 +0100
-Message-ID: <CAKv+Gu8N0tQtg_5kpFYWrNWbH_pYm_DBXG3rXR-_EDPkC6kwyA@mail.gmail.com>
-References: <cover.1492626781.git.jan.kiszka@siemens.com> <20170425150005.GR24360@codeblueprint.co.uk>
- <CAKv+Gu9syA8BNWGOJp+qK_eMNUGS6niB+Ac6KA5aRVLac9NAug@mail.gmail.com>
- <3fe85a2e-c846-5545-7896-c838bec6f251@nexus-software.ie> <CAKv+Gu_WXagYAUoWbgwCNnPBynOHMg81HQ=hfyb_X+YarynUxg@mail.gmail.com>
- <d3885f56-8c36-9b94-b653-c14536022129@nexus-software.ie>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [PATCH v1 8/8] ACPI: Use recently introduced uuid_le_cmp_p{p}()
+ helpers
+Date: Thu, 27 Apr 2017 14:46:31 +0200
+Message-ID: <20170427124631.3fycg2jbs4ffhi45@pd.tnic>
+References: <20170421144645.45189-1-andriy.shevchenko@linux.intel.com>
+ <20170421144645.45189-8-andriy.shevchenko@linux.intel.com>
+ <7721821.2dV0yqi2RQ@aspire.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <d3885f56-8c36-9b94-b653-c14536022129-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <7721821.2dV0yqi2RQ-yvgW3jdyMHm1GS7QM15AGw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hock Leong Kweh <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+To: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
+Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, linux-input-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-tBiZLqfeLfOHmIFyCCdPziST3g8Odh+X@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 27 April 2017 at 13:46, Bryan O'Donoghue
-<pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org> wrote:
-> On 25/04/17 16:08, Ard Biesheuvel wrote:
->>
->> On 25 April 2017 at 16:07, Bryan O'Donoghue
->>>
->>> I'm OOO until Thursday however, I could test this out on a Galileo for
->>> you with the CSH stripped out. As Jan has pointed out Galileo aka Quark
->>> x1000 non-secure (not to be called insecure) will just skips past the
->>> CSH anyway - so - we can give it a conformant capsule by stripping the
->>> CSH junk off the top.
->>>
->>> How about you queue it up and I'll let you know if there's a problem
->>> Thursday?
->>>
->>
->> That would be highly appreciated, thanks.
->>
->
-> Looks good.
->
-> I stripped the header
-> dd skip=1024 bs=1 if=firmware.cap of=firmware-no-csh.cap
->
-> Downloaded the now conformat capsule and update/reflash succeeded.
->
+On Fri, Apr 21, 2017 at 11:22:31PM +0200, Rafael J. Wysocki wrote:
+> >  #ifdef CONFIG_ACPI_APEI_PCIEAER
+> > -		else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
+> > -				      CPER_SEC_PCIE)) {
+> > +		else if (!uuid_le_cmp_p(sec_type, CPER_SEC_PCIE)) {
+> >  			struct cper_sec_pcie *pcie_err;
+> >  			pcie_err = (struct cper_sec_pcie *)(gdata+1);
+> >  			if (sev == GHES_SEV_RECOVERABLE &&
+> > 
+> 
+> But this one is for Boris.
 
-Thanks. I will go ahead and queue these patches for v4.13 with your
-Tested-by added.
+I don't see anything wrong with it upon a brief inspection.
+
+What could be improved here, though, is if the whole uuid_* types
+handling be changed so that gcc doesn't generate yucky code. Because
+here's what it does now, regardless of this patch:
+
+        .file 16 "./include/linux/uuid.h"
+        .loc 16 63 0
+        leaq    16(%rsp), %rsi  #,
+        movl    $16, %edx       #,
+        movq    %r15, %rdi      # gdata,
+        movb    $84, 16(%rsp)   #, MEM[(struct  *)&u2]
+        movb    $-23, 17(%rsp)  #, MEM[(struct  *)&u2 + 1B]
+        movb    $-107, 18(%rsp) #, MEM[(struct  *)&u2 + 2B]
+        movb    $-39, 19(%rsp)  #, MEM[(struct  *)&u2 + 3B]
+        movb    $-63, 20(%rsp)  #, MEM[(struct  *)&u2 + 4B]
+        movb    $-69, 21(%rsp)  #, MEM[(struct  *)&u2 + 5B]
+        movb    $15, 22(%rsp)   #, MEM[(struct  *)&u2 + 6B]
+        movb    $67, 23(%rsp)   #, MEM[(struct  *)&u2 + 7B]
+        movb    $-83, 24(%rsp)  #, MEM[(struct  *)&u2 + 8B]
+        movb    $-111, 25(%rsp) #, MEM[(struct  *)&u2 + 9B]
+        movb    $-76, 26(%rsp)  #, MEM[(struct  *)&u2 + 10B]
+        movb    $77, 27(%rsp)   #, MEM[(struct  *)&u2 + 11B]
+        movb    $-53, 28(%rsp)  #, MEM[(struct  *)&u2 + 12B]
+        movb    $60, 29(%rsp)   #, MEM[(struct  *)&u2 + 13B]
+        movb    $111, 30(%rsp)  #, MEM[(struct  *)&u2 + 14B]
+        movb    $53, 31(%rsp)   #, MEM[(struct  *)&u2 + 15B]
+        call    memcmp  #
+
+So it is basically building that UUID byte by byte before calling
+memcmp.
+
+And I'm wondering if those 16-byte arrays could be replaced with
+
+typedef struct {
+        u64 a, b;
+} u128;
+
+from the crypto code.
+
+And whether the code generated by gcc would look much saner. Because the
+CPU can handle two qwords much better/faster than 16 u8s.
+
+Anyway, in case someone feels bored...
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
