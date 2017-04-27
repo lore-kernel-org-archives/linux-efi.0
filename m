@@ -1,53 +1,59 @@
-From: Dave Hansen <dave.hansen@intel.com>
-Subject: Re: [PATCH v5 31/32] x86: Add sysfs support for Secure Memory
- Encryption
-Date: Thu, 27 Apr 2017 08:52:34 -0700
-Message-ID: <1f034974-20e6-b5e9-e6ff-434b634e1522@intel.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v5 09/32] x86/mm: Provide general kernel support for
+ memory encryption
+Date: Thu, 27 Apr 2017 18:12:27 +0200
+Message-ID: <20170427161227.c57dkvghz63pvmu2@pd.tnic>
 References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418212212.10190.73484.stgit@tlendack-t1.amdoffice.net>
- <1498ec98-b19d-c47d-902b-a68870a3f860@intel.com>
- <20170427072547.GB15297@dhcp-128-65.nay.redhat.com>
+ <20170418211754.10190.25082.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170427072547.GB15297@dhcp-128-65.nay.redhat.com>
-Sender: owner-linux-mm@kvack.org
-To: Dave Young <dyoung@redhat.com>
-Cc: Tom Lendacky <thomas.lendacky@amd.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Thomas Gleixner <tglx@linutronix.de>, Rik van Riel <riel@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Joerg Roedel <joro@8bytes.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Ingo Molnar <mingo@redhat.com>, "Michael S. Tsirkin" <mst@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Borislav
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-arch-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170418211754.10190.25082.stgit@tlendack-t1.amdoffice.net>
+Sender: linux-arch-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy
 List-Id: linux-efi@vger.kernel.org
 
-On 04/27/2017 12:25 AM, Dave Young wrote:
-> On 04/21/17 at 02:55pm, Dave Hansen wrote:
->> On 04/18/2017 02:22 PM, Tom Lendacky wrote:
->>> Add sysfs support for SME so that user-space utilities (kdump, etc.) can
->>> determine if SME is active.
->>>
->>> A new directory will be created:
->>>   /sys/kernel/mm/sme/
->>>
->>> And two entries within the new directory:
->>>   /sys/kernel/mm/sme/active
->>>   /sys/kernel/mm/sme/encryption_mask
->>
->> Why do they care, and what will they be doing with this information?
-> 
-> Since kdump will copy old memory but need this to know if the old memory
-> was encrypted or not. With this sysfs file we can know the previous SME
-> status and pass to kdump kernel as like a kernel param.
-> 
-> Tom, have you got chance to try if it works or not?
+On Tue, Apr 18, 2017 at 04:17:54PM -0500, Tom Lendacky wrote:
+> Changes to the existing page table macros will allow the SME support to
+> be enabled in a simple fashion with minimal changes to files that use these
+> macros.  Since the memory encryption mask will now be part of the regular
+> pagetable macros, we introduce two new macros (_PAGE_TABLE_NOENC and
+> _KERNPG_TABLE_NOENC) to allow for early pagetable creation/initialization
+> without the encryption mask before SME becomes active.  Two new pgprot()
+> macros are defined to allow setting or clearing the page encryption mask.
 
-What will the kdump kernel do with it though?  We kexec() into that
-kernel so the SME keys will all be the same, right?  So, will the kdump
-kernel be just setting the encryption bit in the PTE so it can copy the
-old plaintext out?
+...
 
-Why do we need both 'active' and 'encryption_mask'?  How could it be
-that the hardware-enumerated 'encryption_mask' changes across a kexec()?
+> @@ -55,7 +57,7 @@ static inline void copy_user_page(void *to, void *from, unsigned long vaddr,
+>  	__phys_addr_symbol(__phys_reloc_hide((unsigned long)(x)))
+>  
+>  #ifndef __va
+> -#define __va(x)			((void *)((unsigned long)(x)+PAGE_OFFSET))
+> +#define __va(x)			((void *)(__sme_clr(x) + PAGE_OFFSET))
+>  #endif
+>  
+>  #define __boot_va(x)		__va(x)
+> diff --git a/arch/x86/include/asm/page_types.h b/arch/x86/include/asm/page_types.h
+> index 7bd0099..fead0a5 100644
+> --- a/arch/x86/include/asm/page_types.h
+> +++ b/arch/x86/include/asm/page_types.h
+> @@ -15,7 +15,7 @@
+>  #define PUD_PAGE_SIZE		(_AC(1, UL) << PUD_SHIFT)
+>  #define PUD_PAGE_MASK		(~(PUD_PAGE_SIZE-1))
+>  
+> -#define __PHYSICAL_MASK		((phys_addr_t)((1ULL << __PHYSICAL_MASK_SHIFT) - 1))
+> +#define __PHYSICAL_MASK		((phys_addr_t)(__sme_clr((1ULL << __PHYSICAL_MASK_SHIFT) - 1)))
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+That looks strange: poking SME mask hole into a mask...?
+
+>  #define __VIRTUAL_MASK		((1UL << __VIRTUAL_MASK_SHIFT) - 1)
+>  
+>  /* Cast *PAGE_MASK to a signed type so that it is sign-extended if
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
