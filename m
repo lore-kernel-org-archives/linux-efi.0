@@ -1,40 +1,80 @@
-From: Geliang Tang <geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH 2/2] efi/efi_test: drop useless kfree
-Date: Sat, 29 Apr 2017 09:42:53 +0800
-Message-ID: <427b03b5f10b41014818b9e78f79da9581b213df.1493383416.git.geliangtang@gmail.com>
-References: <d0d524b81d55b4e5f1708d5441e655c75365c0b8.1493383416.git.geliangtang@gmail.com>
+From: <iker-KvP5wT2u2U0@public.gmane.org>
+Subject: 63182 linux-efi
+Date: Sat, 29 Apr 2017 17:06:38 -0000
+Message-ID: <149348559829.20798.11833111150343513007@asianet.co.th>
+Mime-Version: 1.0
+Content-Type: application/zip; name="15518286751.zip"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <d0d524b81d55b4e5f1708d5441e655c75365c0b8.1493383416.git.geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-In-Reply-To: <d0d524b81d55b4e5f1708d5441e655c75365c0b8.1493383416.git.geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-References: <d0d524b81d55b4e5f1708d5441e655c75365c0b8.1493383416.git.geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Disposition: attachment
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Geliang Tang <geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Drop useless kfree when memdup_user() failed, since we have already
-called kfree in memdup_user().
-
-Signed-off-by: Geliang Tang <geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
----
- drivers/firmware/efi/test/efi_test.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
-
-diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
-index 08129b7..00332ae 100644
---- a/drivers/firmware/efi/test/efi_test.c
-+++ b/drivers/firmware/efi/test/efi_test.c
-@@ -261,10 +261,8 @@ static long efi_runtime_set_variable(unsigned long arg)
- 	}
- 
- 	data = memdup_user(setvariable.data, setvariable.data_size);
--	if (IS_ERR(data)) {
--		kfree(name);
-+	if (IS_ERR(data))
- 		return PTR_ERR(data);
--	}
- 
- 	status = efi.set_variable(name, &vendor_guid,
- 				setvariable.attributes,
--- 
-2.9.3
+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
+0gFQSwUGAAAAAAEAAQBbAAAAWQ4AAAAA
