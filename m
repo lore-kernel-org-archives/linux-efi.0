@@ -1,48 +1,58 @@
-From: ivanhu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi/efi_test: drop useless kfree
-Date: Tue, 2 May 2017 15:11:45 +0800
-Message-ID: <a8b99581-70e3-bf9a-bf62-4b13a8cc292c@canonical.com>
-References: <d0d524b81d55b4e5f1708d5441e655c75365c0b8.1493383416.git.geliangtang@gmail.com>
- <427b03b5f10b41014818b9e78f79da9581b213df.1493383416.git.geliangtang@gmail.com>
+From: Julien Grall <julien.grall@arm.com>
+Subject: Re: [PATCH 0/3 v2] xen: Implement EFI reset_system callback
+Date: Tue, 2 May 2017 10:08:24 +0100
+Message-ID: <33472949-4748-f03e-cae9-65bd5f54c2f7@arm.com>
+References: <20170424175839.5262-1-julien.grall@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <427b03b5f10b41014818b9e78f79da9581b213df.1493383416.git.geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Geliang Tang <geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20170424175839.5262-1-julien.grall@arm.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: xen-devel@lists.xen.org, sstabellini@kernel.org, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>
+Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
+Hi all,
 
-
-On 04/29/2017 09:42 AM, Geliang Tang wrote:
-> Drop useless kfree when memdup_user() failed, since we have already
-> called kfree in memdup_user().
->
-> Signed-off-by: Geliang Tang <geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> ---
->   drivers/firmware/efi/test/efi_test.c | 4 +---
->   1 file changed, 1 insertion(+), 3 deletions(-)
->
-> diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
-> index 08129b7..00332ae 100644
-> --- a/drivers/firmware/efi/test/efi_test.c
-> +++ b/drivers/firmware/efi/test/efi_test.c
-> @@ -261,10 +261,8 @@ static long efi_runtime_set_variable(unsigned long arg)
->   	}
->   
->   	data = memdup_user(setvariable.data, setvariable.data_size);
-> -	if (IS_ERR(data)) {
-> -		kfree(name);
-You mean "name" or "data"?
+It looks like the series has fully been acked, can someone merge this 
+into xentip?
 
 Cheers,
-Ivan
 
-> +	if (IS_ERR(data))
->   		return PTR_ERR(data);
-> -	}
->   
->   	status = efi.set_variable(name, &vendor_guid,
->   				setvariable.attributes,
+On 04/24/2017 06:58 PM, Julien Grall wrote:
+> Hi all,
+>
+> This small patch series implements EFI reset_system callback when using EFI
+> Xen. Without this, it will not be possible to reboot/power off ARM64 DOM0
+> when using ACPI.
+>
+> Cheers,
+>
+> Cc: Boris Ostrovsky <boris.ostrovsky@oracle.com>
+> Cc: Juergen Gross <jgross@suse.com>
+>
+> Julien Grall (3):
+>   xen: Export xen_reboot
+>   arm/xen: Consolidate calls to shutdown hypercall in a single helper
+>   xen: Implement EFI reset_system callback
+>
+>  arch/arm/xen/efi.c       |  2 +-
+>  arch/arm/xen/enlighten.c | 16 ++++++++++------
+>  arch/x86/xen/efi.c       |  2 +-
+>  arch/x86/xen/enlighten.c |  2 +-
+>  drivers/xen/efi.c        | 18 ++++++++++++++++++
+>  include/xen/xen-ops.h    |  5 +++++
+>  6 files changed, 36 insertions(+), 9 deletions(-)
+>
+
+-- 
+Julien Grall
