@@ -1,41 +1,88 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v5 09/32] x86/mm: Provide general kernel support for
- memory encryption
-Date: Thu, 4 May 2017 19:01:06 +0200
-Message-ID: <20170504170106.mocn2y6onm7eax3g@pd.tnic>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418211754.10190.25082.stgit@tlendack-t1.amdoffice.net>
- <20170427161227.c57dkvghz63pvmu2@pd.tnic>
- <0b6e4055-8e07-3a71-3d52-12b0395c8f04@amd.com>
+From: gengdongjiu <gengdj.1984@gmail.com>
+Subject: Re: [PATCH v3 1/3] arm64: kvm: support kvmtool to detect RAS
+ extension feature
+Date: Fri, 5 May 2017 01:20:53 +0800
+Message-ID: <CAMj-D2BS7UHLC3DGM5i7fSRsqDKHmLYg79UV7sT6yHGFy5aYfw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <0b6e4055-8e07-3a71-3d52-12b0395c8f04@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: James Morse <james.morse@arm.com>, Tyler Baicar <tbaicar@codeaurora.org>, Christoffer Dall <christoffer.dall@linaro.org>, Marc Zyngier <marc.zyngier@arm.com>, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, Len Brown <lenb@kernel.org>, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, Sandeepa Prabhu <sandeepa.s.prabhu@gmail.com>, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, Fu Wei <fu.wei@linaro.org>, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, May 04, 2017 at 09:34:09AM -0500, Tom Lendacky wrote:
-> I masked it out here based on a previous comment from Dave Hansen:
-> 
->   http://marc.info/?l=linux-kernel&m=148778719826905&w=2
-> 
-> I could move the __sme_clr into the individual defines of:
+Dear James,
 
-Nah, it is fine as it is. I was just wondering...
+>
+>  Hi Dongjiu Geng,
+>
+> On 30/04/17 06:37, Dongjiu Geng wrote:
+>> Handle kvmtool's detection for RAS extension, because sometimes
+>> the APP needs to know the CPU's capacity
+>
+>> diff --git a/arch/arm64/kvm/reset.c b/arch/arm64/kvm/reset.c
+>> index d9e9697..1004039 100644
+>> --- a/arch/arm64/kvm/reset.c
+>> +++ b/arch/arm64/kvm/reset.c
+>> @@ -64,6 +64,14 @@ static bool cpu_has_32bit_el1(void)
+>>   return !!(pfr0 & 0x20);
+>>  }
+>>
+>> +static bool kvm_arm_support_ras_extension(void)
+>> +{
+>> + u64 pfr0;
+>> +
+>> + pfr0 = read_system_reg(SYS_ID_AA64PFR0_EL1);
+>> + return !!(pfr0 & 0x10000000);
+>> +}
+>
+> Why are we telling user-space that the CPU has RAS extensions? EL0 can't do
+> anything with this and the guest EL1 can detect it from the id registers.
+>
+>
+> Are you using this to decide whether or not to generate a HEST for the guest?
 
-Thanks.
+James, yes, it is.  my current user-space qemu EL0 patches indeed will
+check the RAS  extensions.
+if has the RAS extensions. for SEA, userspace qemu will generate the
+CPER and inject the SEA to guest;
+for SEI,  userspace qemu sets the virtual SEI with the specified
+Syndrome(set the HCR_EL2.VSE and vsesr_el2 );
+if not have RAS extensions, Qemu does nothing
 
--- 
-Regards/Gruss,
-    Boris.
 
-Good mailing practices for 400: avoid top-posting and trim the reply.
+>
+> If Qemu/kvmtool supports handling memory-failure notifications from signals you
+> should always generate a HEST. The GHES notification method could be anything
+> Qemu can deliver to the guest using the KVM APIs. Notifications from Qemu to the
+> guest don't depend on the RAS extensions. KVM has APIs for IRQ and SEA (you can
+> use KVM_SET_ONE_REG).
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+I will consider your suggestion to  always generate a CPER instead of
+relying on the RAS extensions, thanks
+For this comments "SEA (you can use KVM_SET_ONE_REG)",  may be it will
+be duplicated with the existed KVM API  as I mentioned in another mail
+thread.I am considering that whether it is necessary to change the
+vcpu registers in the Qemu/KVMTools
+
+>
+>
+> I think we need a new API for injecting SError for SEI from Qemu/kvmtool, but it
+> shouldn't be related to the RAS extensions. All v8.0 CPUs have HCR_EL2.VSE, so
+> we need to know KVM supports this API.
+>
+> Your later patch adds code to set VSESR to make virtual RAS SErrors work, I
+> think we need to expose that to user-space.
+>
+>
+> Thanks,
+>
+> James
