@@ -1,55 +1,129 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v5 13/32] x86/boot/e820: Add support to determine the
-	E820 type of an address
-Date: Fri, 5 May 2017 19:11:55 +0200
-Message-ID: <20170505171155.4fm22ks6m5j7lpjm@pd.tnic>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
-	<20170418211831.10190.80158.stgit@tlendack-t1.amdoffice.net>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH V15 09/11] ras: acpi / apei: generate trace event for
+ unrecognized CPER section
+Date: Fri, 5 May 2017 19:53:33 +0200
+Message-ID: <20170505175333.h7exckpq2gkggkph@pd.tnic>
+References: <1492556723-9189-1-git-send-email-tbaicar@codeaurora.org>
+ <1492556723-9189-10-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
 Content-Disposition: inline
-In-Reply-To: <20170418211831.10190.80158.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst@r>
+In-Reply-To: <1492556723-9189-10-git-send-email-tbaicar@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, rafael@kernel.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, gengdongjiu@huawei.com, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, devel@acpica.org, tony.luck@intel.com, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 18, 2017 at 04:18:31PM -0500, Tom Lendacky wrote:
-> Add a function that will return the E820 type associated with an address
-> range.
+On Tue, Apr 18, 2017 at 05:05:21PM -0600, Tyler Baicar wrote:
+> UEFI spec allows for non-standard section in Common Platform Error
+> Record. This is defined in section N.2.3 of UEFI version 2.5.
 
-...
+If the spec calls it non-standard why are we calling it "unknown
+section"?
 
-> @@ -110,9 +111,28 @@ bool __init e820__mapped_all(u64 start, u64 end, enum e820_type type)
->  		 * coverage of the desired range exists:
->  		 */
->  		if (start >= end)
-> -			return 1;
-> +			return entry;
->  	}
-> -	return 0;
+> Currently if the CPER section's type (UUID) does not match with
+> any section type that the kernel knows how to parse, trace event
+> is not generated for such section. And thus user is not able to know
+> happening of such hardware error, including error record of
+> non-standard section.
+
+That's sentence sounds funny.
+
+> This commit generates a trace event which contains raw error data
+> for unrecognized CPER section.
+
+Never write "This commit" or "This patch" in your commit message -
+that's a given.
+
+> 
+> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+> CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+> Tested-by: Shiju Jose <shiju.jose@huawei.com>
+> ---
+>  drivers/acpi/apei/ghes.c | 27 +++++++++++++++++++++++----
+>  drivers/ras/ras.c        |  1 +
+>  include/ras/ras_event.h  | 45 +++++++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 69 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index b91123f..3d9f63b 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -45,11 +45,13 @@
+>  #include <linux/aer.h>
+>  #include <linux/nmi.h>
+>  #include <linux/sched/clock.h>
+> +#include <linux/uuid.h>
+>  
+>  #include <acpi/actbl1.h>
+>  #include <acpi/ghes.h>
+>  #include <acpi/apei.h>
+>  #include <asm/tlbflush.h>
+> +#include <ras/ras_event.h>
+>  
+>  #include "apei-internal.h"
+>  
+> @@ -461,12 +463,21 @@ static void ghes_do_proc(struct ghes *ghes,
+>  {
+>  	int sev, sec_sev;
+>  	struct acpi_hest_generic_data *gdata;
+> +	uuid_le sec_type;
+> +	uuid_le *fru_id = &NULL_UUID_LE;
+> +	char *fru_text = "";
+>  
+>  	sev = ghes_severity(estatus->error_severity);
+>  	apei_estatus_for_each_section(estatus, gdata) {
+>  		sec_sev = ghes_severity(gdata->error_severity);
+> -		if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
+> -				 CPER_SEC_PLATFORM_MEM)) {
+> +		sec_type = *(uuid_le *)gdata->section_type;
 > +
-> +	return NULL;
-> +}
+> +		if (gdata->validation_bits & CPER_SEC_VALID_FRU_ID)
+> +			fru_id = (uuid_le *)gdata->fru_id;
+> +		if (gdata->validation_bits & CPER_SEC_VALID_FRU_TEXT)
+> +			fru_text = gdata->fru_text;
 > +
-> +/*
-> + * This function checks if the entire range <start,end> is mapped with type.
-> + */
-> +bool __init e820__mapped_all(u64 start, u64 end, enum e820_type type)
-> +{
-> +	return __e820__mapped_all(start, end, type) ? 1 : 0;
+> +		if (!uuid_le_cmp(sec_type, CPER_SEC_PLATFORM_MEM)) {
+>  			struct cper_sec_mem_err *mem_err;
+>  			mem_err = acpi_hest_get_payload(gdata);
+>  			ghes_edac_report_mem_error(ghes, sev, mem_err);
+> @@ -475,8 +486,7 @@ static void ghes_do_proc(struct ghes *ghes,
+>  			ghes_handle_memory_failure(gdata, sev);
+>  		}
+>  #ifdef CONFIG_ACPI_APEI_PCIEAER
+> -		else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
+> -				      CPER_SEC_PCIE)) {
+> +		else if (!uuid_le_cmp(sec_type, CPER_SEC_PCIE)) {
+>  			struct cper_sec_pcie *pcie_err;
+>  			pcie_err = acpi_hest_get_payload(gdata);
+>  			if (sev == GHES_SEV_RECOVERABLE &&
+> @@ -507,6 +517,15 @@ static void ghes_do_proc(struct ghes *ghes,
+>  
+>  		}
+>  #endif
+> +#ifdef CONFIG_RAS
+> +		else if (trace_unknown_sec_event_enabled()) {
+> +			void *unknown_err = acpi_hest_get_payload(gdata);
+> +
+> +			trace_unknown_sec_event(&sec_type,
+> +					fru_id, fru_text, sec_sev,
+> +					unknown_err, gdata->error_data_length);
+> +		}
+> +#endif
 
-	return !!__e820__mapped_all(start, end, type);
+Put that in a function in ras.c along with a prototype for
+include/linux/ras.h for the !CONFIG_RAS case so that you can save
+yourself the ifdeffery in an already not really easy to read function.
 
 -- 
 Regards/Gruss,
