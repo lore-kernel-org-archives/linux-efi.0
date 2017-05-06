@@ -1,28 +1,87 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v2] x86/efi: Correct ident mapping of efi old_map when
- kalsr enabled
-Date: Sat, 6 May 2017 01:36:20 +0200
-Message-ID: <20170505233620.eka5md5mmnp4ituz@pd.tnic>
-References: <1493294823-9315-1-git-send-email-bhe@redhat.com>
- <20170505204214.GB5225@codeblueprint.co.uk>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efi/cper: Fix endianness of PCI class code
+Date: Sat, 6 May 2017 08:46:07 +0100
+Message-ID: <CAKv+Gu9PpmTBbSMKUsx6svm6fodV8x=i4b1j8QGapnEoCFcrNA@mail.gmail.com>
+References: <771bc335fb5856792d086ae7db288dcf244cb4cd.1493964354.git.lukas@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170505204214.GB5225-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <771bc335fb5856792d086ae7db288dcf244cb4cd.1493964354.git.lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>
+To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ashok Raj <ashok.raj-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-pci <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, May 05, 2017 at 09:42:14PM +0100, Matt Fleming wrote:
-> (Including the folks from SGI since this was hit on a UV system)
+On 5 May 2017 at 19:38, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
+> The CPER parser assumes that the class code is big endian, but at least
+> on this edk2-derived Intel Purley platform it's little endian:
+>
+>     efi: EFI v2.50 by EDK II BIOS ID:PLYDCRB1.86B.0119.R05.1701181843
+>     DMI: Intel Corporation PURLEY/PURLEY, BIOS PLYDCRB1.86B.0119.R05.1701181843 01/18/2017
+>
+>     {1}[Hardware Error]:   device_id: 0000:5d:00.0
+>     {1}[Hardware Error]:   slot: 0
+>     {1}[Hardware Error]:   secondary_bus: 0x5e
+>     {1}[Hardware Error]:   vendor_id: 0x8086, device_id: 0x2030
+>     {1}[Hardware Error]:   class_code: 000406
+>                                        ^^^^^^ (should be 060400)
+>
+> Cc: Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Ashok Raj <ashok.raj-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Signed-off-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+> ---
+>
+> @Ashok Raj: Could you test if this patch results in the correct
+> PCI class being logged? Thanks!
+>
+>  drivers/firmware/efi/cper.c | 5 ++---
+>  include/linux/cper.h        | 2 +-
+>  2 files changed, 3 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+> index d42537425438..e360c8b77bd9 100644
+> --- a/drivers/firmware/efi/cper.c
+> +++ b/drivers/firmware/efi/cper.c
+> @@ -364,7 +364,6 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
+>                 printk("%s""command: 0x%04x, status: 0x%04x\n", pfx,
+>                        pcie->command, pcie->status);
+>         if (pcie->validation_bits & CPER_PCIE_VALID_DEVICE_ID) {
+> -               const __u8 *p;
+>                 printk("%s""device_id: %04x:%02x:%02x.%x\n", pfx,
+>                        pcie->device_id.segment, pcie->device_id.bus,
+>                        pcie->device_id.device, pcie->device_id.function);
+> @@ -374,8 +373,8 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
+>                        pcie->device_id.secondary_bus);
+>                 printk("%s""vendor_id: 0x%04x, device_id: 0x%04x\n", pfx,
+>                        pcie->device_id.vendor_id, pcie->device_id.device_id);
+> -               p = pcie->device_id.class_code;
+> -               printk("%s""class_code: %02x%02x%02x\n", pfx, p[0], p[1], p[2]);
+> +               printk("%s""class_code: 0x%06x\n", pfx,
+> +                      pcie->device_id.class_code);
+>         }
+>         if (pcie->validation_bits & CPER_PCIE_VALID_SERIAL_NUMBER)
+>                 printk("%s""serial number: 0x%04x, 0x%04x\n", pfx,
+> diff --git a/include/linux/cper.h b/include/linux/cper.h
+> index dcacb1a72e26..fbfb50f52362 100644
+> --- a/include/linux/cper.h
+> +++ b/include/linux/cper.h
+> @@ -416,7 +416,7 @@ struct cper_sec_pcie {
+>         struct {
+>                 __u16   vendor_id;
+>                 __u16   device_id;
+> -               __u8    class_code[3];
+> +               __u32   class_code:24;
 
-Wasn't there a BIOS fix supplied at some point which obviated the need
-to boot with efi=old_map on SGI boxes?
+I'd like to avoid this change if we can. Couldn't we simply invert the
+order of p[] above?
 
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+>                 __u8    function;
+>                 __u8    device;
+>                 __u16   segment;
+> --
+> 2.11.0
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
