@@ -1,70 +1,32 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [PATCH v5 15/32] efi: Update efi_mem_type() to return an error
- rather than 0
-Date: Mon, 8 May 2017 08:20:14 -0500
-Message-ID: <eb677bb2-ec20-c7a4-cd37-80f3f381981f@amd.com>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418211900.10190.98158.stgit@tlendack-t1.amdoffice.net>
- <20170507171822.x7grrqg2tcvbv6j5@pd.tnic>
+From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [tip:x86/mm] x86/boot/32: Defer resyncing initial_page_table
+ until per-cpu is set up
+Date: Mon, 8 May 2017 17:45:20 +0300
+Message-ID: <CAHp75Ve3nAyy1KxwUGz74Xt3cz-=Mc=7QqWAjwvrLQUrJsEH8Q@mail.gmail.com>
+References: <a553264a5972c6a86f9b5caac237470a0c74a720.1490218061.git.luto@kernel.org>
+ <tip-23b2a4ddebdd17fad265b4bb77256c2e4ec37dee@git.kernel.org>
+ <0c4d6d04-7038-fb82-87b3-343784550d0a@siemens.com> <CAHp75VdX-kUqW0MKOSTz9zByU-eipBMnKpdUbTt2SVOJ8Kvrig@mail.gmail.com>
+ <CALCETrXzzhoyzyqp5s7sSOkAtsR2Cor6j+x16OLv=+G30Y6+WQ@mail.gmail.com> <7f5916b5-01c0-52d5-9f44-dee4bf355212@siemens.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170507171822.x7grrqg2tcvbv6j5@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S.
- Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <7f5916b5-01c0-52d5-9f44-dee4bf355212-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Cc: Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, x86 <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Peter Zijlstra (Intel)" <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 5/7/2017 12:18 PM, Borislav Petkov wrote:
-> On Tue, Apr 18, 2017 at 04:19:00PM -0500, Tom Lendacky wrote:
->> The efi_mem_type() function currently returns a 0, which maps to
->> EFI_RESERVED_TYPE, if the function is unable to find a memmap entry for
->> the supplied physical address. Returning EFI_RESERVED_TYPE implies that
->> a memmap entry exists, when it doesn't.  Instead of returning 0, change
->> the function to return a negative error value when no memmap entry is
->> found.
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->
-> ...
->
->> diff --git a/include/linux/efi.h b/include/linux/efi.h
->> index cd768a1..a27bb3f 100644
->> --- a/include/linux/efi.h
->> +++ b/include/linux/efi.h
->> @@ -973,7 +973,7 @@ static inline void efi_esrt_init(void) { }
->>  extern int efi_config_parse_tables(void *config_tables, int count, int sz,
->>  				   efi_config_table_type_t *arch_tables);
->>  extern u64 efi_get_iobase (void);
->> -extern u32 efi_mem_type (unsigned long phys_addr);
->> +extern int efi_mem_type (unsigned long phys_addr);
->
-> WARNING: space prohibited between function name and open parenthesis '('
-> #101: FILE: include/linux/efi.h:976:
-> +extern int efi_mem_type (unsigned long phys_addr);
->
-> Please integrate scripts/checkpatch.pl in your patch creation workflow.
-> Some of the warnings/errors *actually* make sense.
+On Mon, May 8, 2017 at 3:34 PM, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
+> On 2017-05-08 13:21, Andy Lutomirski wrote:
 
-I do/did run scripts/checkpatch.pl against all my patches. In this case
-I chose to keep the space in order to stay consistent with some of the
-surrounding functions.  No problem though, I can remove the space.
+> Yes, it's an EFI thing. Unfortunately, I didn't make
+> earlycon/earlyprintk work yet.
 
-Thanks,
-Tom
+Quark does use HS UART for the console and we have no support for such
+in x86/earlyprintk. earlycon should work if you add proper parameters
+to the command line (including port base address, no ttySx), though I
+don't remember if it makes really "early".
 
->
-> I know, the other function prototypes have a space too but that's not
-> our coding style. Looks like this trickled in from ia64, from looking at
-> arch/ia64/kernel/efi.c.
->
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+-- 
+With Best Regards,
+Andy Shevchenko
