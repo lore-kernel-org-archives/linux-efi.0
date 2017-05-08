@@ -1,86 +1,89 @@
-From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH] x86/efi: Fix kexec kernel panic when efi=old_map is enabled
-Date: Mon,  8 May 2017 12:25:23 -0700
-Message-ID: <1494271523-17331-1-git-send-email-sai.praneeth.prakhya@intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Borislav Petkov <bp@alien8.de>, Ricardo Neri <ricardo.neri@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Ravi Shankar <ravi.v.shankar@intel.com>
+From: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Subject: Re: [PATCH V15 11/11] arm/arm64: KVM: add guest SEA support
+Date: Mon, 8 May 2017 13:54:44 -0600
+Message-ID: <dade63eb-b231-d7a5-f307-9737d7b088f2@codeaurora.org>
+References: <1492556723-9189-1-git-send-email-tbaicar@codeaurora.org>
+ <1492556723-9189-12-git-send-email-tbaicar@codeaurora.org>
+ <20170508174058.5hbujeblxq5z6iwa@pd.tnic>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20170508174058.5hbujeblxq5z6iwa@pd.tnic>
+Content-Language: en-US
+Sender: linux-acpi-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+On 5/8/2017 11:40 AM, Borislav Petkov wrote:
+> On Tue, Apr 18, 2017 at 05:05:23PM -0600, Tyler Baicar wrote:
+>> Currently external aborts are unsupported by the guest abort
+>> handling. Add handling for SEAs so that the host kernel reports
+>> SEAs which occur in the guest kernel.
+>>
+>> When an SEA occurs in the guest kernel, the guest exits and is
+>> routed to kvm_handle_guest_abort(). Prior to this patch, a print
+>> message of an unsupported FSC would be printed and nothing else
+>> would happen. With this patch, the code gets routed to the APEI
+>> handling of SEAs in the host kernel to report the SEA information.
+>>
+>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+>> Acked-by: Catalin Marinas <catalin.marinas@arm.com>
+>> Acked-by: Marc Zyngier <marc.zyngier@arm.com>
+>> Acked-by: Christoffer Dall <cdall@linaro.org>
+...
+>> +
+>> +	return ret;
+>> +}
+>> +
+>> +/*
+>>    * Dispatch a data abort to the relevant handler.
+>>    */
+>>   asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
+>> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+>> index 612deb3..d286248 100644
+>> --- a/drivers/acpi/apei/ghes.c
+>> +++ b/drivers/acpi/apei/ghes.c
+>> @@ -812,17 +812,18 @@ static int ghes_notify_sci(struct notifier_block *this,
+>>   #ifdef CONFIG_ACPI_APEI_SEA
+>>   static LIST_HEAD(ghes_sea);
+>>   
+>> -void ghes_notify_sea(void)
+>> +int ghes_notify_sea(void)
+>>   {
+>>   	struct ghes *ghes;
+>> +	int ret = -ENOENT;
+>>   
+>> -	/*
+>> -	 * synchronize_rcu() will wait for nmi_exit(), so no need to
+>> -	 * rcu_read_lock().
+>> -	 */
+>> +	rcu_read_lock();
+>>   	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
+>> -		ghes_proc(ghes);
+>> +		if(!ghes_proc(ghes))
+>> +			ret = 0;
+> What is the idea here: the first time ghes_proc() returns 0, ret is set
+> to 0 and all errors after it will be practically ignored. Looks like it
+> needs more love.
+This was discussed in the v12 and v13 patch series. There is existing 
+code in kvm_handle_guest_abort
+for injecting an abort back into the guest. We only want to do that if 
+it was an abort that was not
+handled by the firmware first handling. So here we verify that at least 
+one of the SEA error sources
+successfully reported an error record sent from the firmware. If there 
+were no errors reported by
+firmware, then we want to continue with the current implementation that 
+will inject the virtual
+abort. (kvm_inject_vabt)
 
-Booting kexec kernel with "efi=old_map" in kernel command line hits
-kernel panic as shown below.
+Thanks,
+Tyler
 
-[    0.001000] BUG: unable to handle kernel paging request at ffff88007fe78070
-[    0.001000] IP: virt_efi_set_variable.part.7+0x63/0x1b0
-[    0.001000] PGD 7ea28067
-[    0.001000] PUD 7ea2b067
-[    0.001000] PMD 7ea2d067
-[    0.001000] PTE 0
-[    0.001000]
-[    0.001000] Oops: 0000 [#1] SMP
-[    0.001000] Modules linked in:
-[    0.001000] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.11.0-rc2-yocto-standard+ #229
-[    0.001000] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 0.0.0 02/06/2015
-[    0.001000] task: ffffffff82022500 task.stack: ffffffff82000000
-[    0.001000] RIP: 0010:virt_efi_set_variable.part.7+0x63/0x1b0
-[    0.001000] RSP: 0000:ffffffff82003dc0 EFLAGS: 00010246
-[    0.001000] RAX: ffff88007fe78018 RBX: ffffffff82050300 RCX: 0000000000000007
-[    0.001000] RDX: ffffffff82003e50 RSI: ffffffff82050300 RDI: ffffffff82050300
-[    0.001000] RBP: ffffffff82003e08 R08: 0000000000000000 R09: 0000000000000000
-[    0.001000] R10: 0000000000000000 R11: 0000000000000000 R12: ffffffff82003e50
-[    0.001000] R13: 0000000000000007 R14: 0000000000000246 R15: 0000000000000000
-[    0.001000] FS:  0000000000000000(0000) GS:ffff88007fa00000(0000) knlGS:0000000000000000
-[    0.001000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[    0.001000] CR2: ffff88007fe78070 CR3: 000000007da1d000 CR4: 00000000000006b0
-[    0.001000] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-[    0.001000] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-[    0.001000] Call Trace:
-[    0.001000]  virt_efi_set_variable+0x5d/0x70
-[    0.001000]  efi_delete_dummy_variable+0x7a/0x80
-[    0.001000]  efi_enter_virtual_mode+0x3f6/0x4a7
-[    0.001000]  start_kernel+0x375/0x400
-[    0.001000]  x86_64_start_reservations+0x2a/0x2c
-[    0.001000]  x86_64_start_kernel+0x168/0x176
-[    0.001000]  start_cpu+0x14/0x14
-[    0.001000] Code: 04 b0 84 ff 80 3d c5 56 b3 00 00 4c 8b 44 24 08 75
-6b 9c 41 5e 48 8b 05 9c 78 99 00 4d 89 c1 48 89 de 4d 89 f8 44 89 e9 4c
-89 e2 <48> 8b 40 58 48 8b 78 58 e8 b0 2d 88 ff 48 c7 c6 b6 1d f4 81 4c
-[    0.001000] RIP: virt_efi_set_variable.part.7+0x63/0x1b0 RSP: ffffffff82003dc0
-[    0.001000] CR2: ffff88007fe78070
-[    0.001000] ---[ end trace 0000000000000000 ]---
-[    0.001000] Kernel panic - not syncing: Attempted to kill the idle task!
-[    0.001000] ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
-
-This happens because efi=old_map doesn't use efi_pgd but rather it uses
-kernel's pgd. We don't hit the same panic in a regular kernel because
-it uses old_map_region() and not __map_region().
-
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Ricardo Neri <ricardo.neri@intel.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Ravi Shankar <ravi.v.shankar@intel.com>
----
- arch/x86/platform/efi/efi_64.c | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 4e043a8c8556..76e1cd6b74dd 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -320,6 +320,9 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
- 	unsigned long pfn;
- 	pgd_t *pgd = efi_pgd;
- 
-+	if (efi_enabled(EFI_OLD_MEMMAP))
-+		pgd = swapper_pg_dir;
-+
- 	if (!(md->attribute & EFI_MEMORY_WB))
- 		flags |= _PAGE_PCD;
- 
 -- 
-2.1.4
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
+
