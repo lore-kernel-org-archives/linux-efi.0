@@ -1,33 +1,39 @@
-From: ivanhu <ivan.hu@canonical.com>
-Subject: Re: [PATCH 1/2] efi/efi_test: use memdup_user
-Date: Mon, 8 May 2017 16:18:30 +0800
-Message-ID: <0d6b6b9e-de5c-4eb2-f46a-d26ae058fa42@canonical.com>
-References: <d0d524b81d55b4e5f1708d5441e655c75365c0b8.1493383416.git.geliangtang@gmail.com>
- <20170505205349.GC5225@codeblueprint.co.uk>
+From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [tip:x86/mm] x86/boot/32: Defer resyncing initial_page_table
+ until per-cpu is set up
+Date: Mon, 8 May 2017 12:32:46 +0300
+Message-ID: <CAHp75VdX-kUqW0MKOSTz9zByU-eipBMnKpdUbTt2SVOJ8Kvrig@mail.gmail.com>
+References: <a553264a5972c6a86f9b5caac237470a0c74a720.1490218061.git.luto@kernel.org>
+ <tip-23b2a4ddebdd17fad265b4bb77256c2e4ec37dee@git.kernel.org> <0c4d6d04-7038-fb82-87b3-343784550d0a@siemens.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170505205349.GC5225@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>, Geliang Tang <geliangtang@gmail.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <0c4d6d04-7038-fb82-87b3-343784550d0a-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Cc: Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, x86 <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Peter Zijlstra (Intel)" <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-
-
-On 05/06/2017 04:53 AM, Matt Fleming wrote:
-> On Sat, 29 Apr, at 09:42:52AM, Geliang Tang wrote:
->> Use memdup_user() helper instead of open-coding to simplify the code.
+On Mon, May 8, 2017 at 9:31 AM, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
+> On 2017-03-23 10:14, tip-bot for Andy Lutomirski wrote:
+>> The x86 smpboot trampoline expects initial_page_table to have the
+>> GDT mapped.  If the GDT ends up in a virtually mapped per-cpu page,
+>> then it won't be in the page tables at all until perc-pu areas are
+>> set up.  The result will be a triple fault the first time that the
+>> CPU attempts to access the GDT after LGDT loads the perc-pu GDT.
 >>
->> Signed-off-by: Geliang Tang <geliangtang@gmail.com>
->> ---
->>  drivers/firmware/efi/test/efi_test.c | 11 +++--------
->>  1 file changed, 3 insertions(+), 8 deletions(-)
->
-> This one looks fine. Ivan, do you want to ACK it?
->
+>> This appears to be an old bug, but somehow the GDT fixmap rework
+>> is triggering it.  This seems to have something to do with the
+>> memory layout.
 
-Looks fine to me too, ACK. Thanks!
+> This breaks the boot on our Intel Quark platform (IOT2000, similar to
+> Galileo Gen2). Reverting it over master makes it work again. Any idea
+> what goes wrong? Let me know how I can help debugging this.
 
-Ivan
+JFYI: As of today linux-next when _kexec:ed_ works fine to me
+
+Perhaps I can test this later with direct boot from SD card.
+
+-- 
+With Best Regards,
+Andy Shevchenko
