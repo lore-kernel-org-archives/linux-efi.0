@@ -1,76 +1,84 @@
-From: Christoffer Dall <cdall@linaro.org>
-Subject: Re: [PATCH v3 3/3] arm/arm64: signal SIBGUS and inject SEA Error
-Date: Mon, 8 May 2017 19:54:16 +0200
-Message-ID: <20170508175416.GA32234@cbox>
-References: <CAMj-D2BGTDKpOcMu2ip41_MTTj8VDwvs59Ds7yvLHcD8PeQzhg@mail.gmail.com>
- <5910AAA2.4030304@arm.com>
+From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [tip:x86/mm] x86/boot/32: Defer resyncing initial_page_table
+ until per-cpu is set up
+Date: Mon, 8 May 2017 19:53:53 +0200
+Message-ID: <7ce941e5-5a9b-acd7-c7b6-7be464572de5@siemens.com>
+References: <a553264a5972c6a86f9b5caac237470a0c74a720.1490218061.git.luto@kernel.org>
+ <tip-23b2a4ddebdd17fad265b4bb77256c2e4ec37dee@git.kernel.org>
+ <0c4d6d04-7038-fb82-87b3-343784550d0a@siemens.com>
+ <CAHp75VdX-kUqW0MKOSTz9zByU-eipBMnKpdUbTt2SVOJ8Kvrig@mail.gmail.com>
+ <CALCETrXzzhoyzyqp5s7sSOkAtsR2Cor6j+x16OLv=+G30Y6+WQ@mail.gmail.com>
+ <7f5916b5-01c0-52d5-9f44-dee4bf355212@siemens.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <5910AAA2.4030304@arm.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: James Morse <james.morse@arm.com>
-Cc: gengdongjiu <gengdj.1984@gmail.com>, Tyler Baicar <tbaicar@codeaurora.org>, Christoffer Dall <christoffer.dall@linaro.org>, Marc Zyngier <marc.zyngier@arm.com>, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, Len Brown <lenb@kernel.org>, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, Sandeepa Prabhu <sandeepa.s.prabhu@gmail.com>, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, Fu Wei <fu.wei@linaro.org>, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <7f5916b5-01c0-52d5-9f44-dee4bf355212-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, x86 <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Peter Zijlstra (Intel)" <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, May 08, 2017 at 06:28:02PM +0100, James Morse wrote:
+On 2017-05-08 14:34, Jan Kiszka wrote:
+> On 2017-05-08 13:21, Andy Lutomirski wrote:
+>> On Mon, May 8, 2017 at 2:32 AM, Andy Shevchenko
+>> <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>>> On Mon, May 8, 2017 at 9:31 AM, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
+>>>> On 2017-03-23 10:14, tip-bot for Andy Lutomirski wrote:
+>>>>> The x86 smpboot trampoline expects initial_page_table to have the
+>>>>> GDT mapped.  If the GDT ends up in a virtually mapped per-cpu page,
+>>>>> then it won't be in the page tables at all until perc-pu areas are
+>>>>> set up.  The result will be a triple fault the first time that the
+>>>>> CPU attempts to access the GDT after LGDT loads the perc-pu GDT.
+>>>>>
+>>>>> This appears to be an old bug, but somehow the GDT fixmap rework
+>>>>> is triggering it.  This seems to have something to do with the
+>>>>> memory layout.
+>>>
+>>>> This breaks the boot on our Intel Quark platform (IOT2000, similar to
+>>>> Galileo Gen2). Reverting it over master makes it work again. Any idea
+>>>> what goes wrong? Let me know how I can help debugging this.
+>>>
+>>> JFYI: As of today linux-next when _kexec:ed_ works fine to me
+>>>
+>>> Perhaps I can test this later with direct boot from SD card.
+>>>
+>>
+>> The most likely explanation is that there's some code that needs the
+>> page table synced and runs before setup_per_cpu_areas().  The relevant
+>> init code is:
+>>
+>>     setup_arch(&command_line);
+>>     mm_init_cpumask(&init_mm);
+>>     setup_command_line(command_line);
+>>     setup_nr_cpu_ids();
+>>     setup_per_cpu_areas();
+>>
+>> so I didn't move it very far.  It would be awesome if we could get a
+>> backtrace when the failure happens, but it's likely to be a triple
+>> fault.  Is this an EFI boot?  I bet the failure is in efi_init().
+> 
+> Yes, it's an EFI thing. Unfortunately, I didn't make
+> earlycon/earlyprintk work yet.
+> 
+>>
+>> Could you try reverting just the deletions in the patch?  I.e. try a
+>> kernel with both the old and the new copies of the code I moved.
+> 
+> Let me try that later. I can also move the new code around to nail down
+> the dependency.
+> 
 
-[...]
+I found the reason: your patch is very discriminating! Not the whole
+world is multicore yet. ;)
 
-> 
-> 
-> >>> diff --git a/include/uapi/linux/kvm.h b/include/uapi/linux/kvm.h
-> >>> index bb02909..1d2e2e7 100644
-> >>> --- a/include/uapi/linux/kvm.h
-> >>> +++ b/include/uapi/linux/kvm.h
-> >>> @@ -1306,6 +1306,7 @@ struct kvm_s390_ucas_mapping {
-> >>>  #define KVM_S390_GET_IRQ_STATE  _IOW(KVMIO, 0xb6, struct kvm_s390_irq_state)
-> >>>  /* Available with KVM_CAP_X86_SMM */
-> >>>  #define KVM_SMI                   _IO(KVMIO,   0xb7)
-> >>> +#define KVM_ARM_SEA               _IO(KVMIO,   0xb8)
-> >>>
-> >>>  #define KVM_DEV_ASSIGN_ENABLE_IOMMU (1 << 0)
-> >>>  #define KVM_DEV_ASSIGN_PCI_2_3 (1 << 1)
-> >>>
-> >>
-> >> Why do we need a userspace API for SEA? It can also be done by using
-> >> KVM_{G,S}ET_ONE_REG to change the vcpu registers. The advantage of doing it this
-> >> way is you can choose which ESR value to use.
-> >>
-> >> Adding a new API call to do something you could do with an old one doesn't look
-> >> right.
-> > 
-> > James, I considered your suggestion before that use the
-> > KVM_{G,S}ET_ONE_REG to change the vcpu registers. but I found it does
-> > not have difference to use the alread existed KVM API. 
-> 
-> (Only that is an in-kernel helper, not a published API)
-> 
-> 
-> > so may be
-> > changing the vcpu registers in qemu will duplicate with the KVM APIs.
-> 
-> That is true, but the alternative is a new API that doesn't do anything new, its
-> just more convenient.
-> 
-> Marc and Christoffer are the people to convince.
-> I argue the existing API is sufficient.
-> 
+setup_per_cpu_areas() is taken from mm/percpu.c in case of !CONFIG_SMP.
+So the new home for the resync is not even built.
 
-I must admit I am losing track of exactly what this proposed API was
-supposed to do.
+Any suggestions how to refactor things instead?
 
-However, if it's a question about setting up VCPU registers to a certain
-state and potentially modifying memory, then I think experience has
-shown us (psci) that emulating something in the kernel that userspace
-can have fine-grained control over is a bad idea, and should be left to
-userspace using as generic APIs as possible.
+Jan
 
-Furthermore, if I understand what injecting a SEA requires, it is very
-similar to resetting the CPU and loading data into guest memory, which
-QEMU already does today, and there is no reason to introduce additional
-APIs if it can be done using KVM_GET/SET_ONE_REG ioctls.
-
-Thanks,
--Christoffer
+-- 
+Siemens AG, Corporate Technology, CT RDA ITP SES-DE
+Corporate Competence Center Embedded Linux
