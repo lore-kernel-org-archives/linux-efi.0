@@ -1,32 +1,80 @@
-From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [tip:x86/mm] x86/boot/32: Defer resyncing initial_page_table
- until per-cpu is set up
-Date: Mon, 8 May 2017 17:45:20 +0300
-Message-ID: <CAHp75Ve3nAyy1KxwUGz74Xt3cz-=Mc=7QqWAjwvrLQUrJsEH8Q@mail.gmail.com>
-References: <a553264a5972c6a86f9b5caac237470a0c74a720.1490218061.git.luto@kernel.org>
- <tip-23b2a4ddebdd17fad265b4bb77256c2e4ec37dee@git.kernel.org>
- <0c4d6d04-7038-fb82-87b3-343784550d0a@siemens.com> <CAHp75VdX-kUqW0MKOSTz9zByU-eipBMnKpdUbTt2SVOJ8Kvrig@mail.gmail.com>
- <CALCETrXzzhoyzyqp5s7sSOkAtsR2Cor6j+x16OLv=+G30Y6+WQ@mail.gmail.com> <7f5916b5-01c0-52d5-9f44-dee4bf355212@siemens.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v2] x86/efi: Correct ident mapping of efi old_map when
+ kalsr enabled
+Date: Mon, 8 May 2017 17:25:14 +0200
+Message-ID: <20170508152514.mc5j3lrhntd3qodj@pd.tnic>
+References: <1493294823-9315-1-git-send-email-bhe@redhat.com>
+ <20170505204214.GB5225@codeblueprint.co.uk>
+ <20170505233620.eka5md5mmnp4ituz@pd.tnic>
+ <CACi5LpOJe+dpJBeuZxm80pd0dX9-V=DQv_R3TDzFmn4Q1XA1SA@mail.gmail.com>
+ <20170508013649.GA2315@x1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <7f5916b5-01c0-52d5-9f44-dee4bf355212-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170508013649.GA2315@x1>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Cc: Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, x86 <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Peter Zijlstra (Intel)" <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, May 8, 2017 at 3:34 PM, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
-> On 2017-05-08 13:21, Andy Lutomirski wrote:
+On Mon, May 08, 2017 at 09:36:49AM +0800, Baoquan He wrote:
+> Thanks for explaining, Bhupesh. 
+> 
+> BIOS issue of SGI uv1 is still not fixed. There's a quirk for uv1 to
+> use efi old map:
+> 
+> void __init efi_apply_memmap_quirks(void)
+> {
+> 	...
+> 	...
+>         /* UV2+ BIOS has a fix for this issue.  UV1 still needs the quirk. */
+>         if (dmi_check_system(sgi_uv1_dmi))
+>                 set_bit(EFI_OLD_MEMMAP, &efi.flags);
+> }
+> 
+> And because of some reasons, redhat also need efi old_map now.
+> 
+> Hi Matt,
+> 
+> This v2 patch works on my kvm guest, however there's still problem on
+> SGI system. I will post v3 later after it's handled. So nack this v2
+> patch.
 
-> Yes, it's an EFI thing. Unfortunately, I didn't make
-> earlycon/earlyprintk work yet.
+Please do not top-post, you should know better.
 
-Quark does use HS UART for the console and we have no support for such
-in x86/earlyprintk. earlycon should work if you add proper parameters
-to the command line (including port base address, no ttySx), though I
-don't remember if it makes really "early".
+Can you apply this debug patch and upload full dmesg?
+
+---
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index c488625c9712..ca9df6283040 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -88,9 +88,18 @@ pgd_t * __init efi_call_phys_prolog(void)
+ 	n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
+ 	save_pgd = kmalloc_array(n_pgds, sizeof(*save_pgd), GFP_KERNEL);
+ 
++	pr_info("%s: PAGE_OFFSET: 0x%lx\n", __func__, PAGE_OFFSET);
++
+ 	for (pgd = 0; pgd < n_pgds; pgd++) {
+ 		save_pgd[pgd] = *pgd_offset_k(pgd * PGDIR_SIZE);
+ 		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
++
++		pr_info("%s: pgd: 0x%x: va: 0x%lx, 0x%lx -> 0x%lx\n",
++			__func__, pgd,
++			vaddress,
++			pgd_val(*pgd_offset_k(pgd * PGDIR_SIZE)),
++			pgd_val(*pgd_offset_k(vaddress)));
++
+ 		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
+ 	}
+ out:
+---
+
+Thanks.
 
 -- 
-With Best Regards,
-Andy Shevchenko
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
