@@ -1,84 +1,86 @@
-From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [tip:x86/mm] x86/boot/32: Defer resyncing initial_page_table
- until per-cpu is set up
-Date: Mon, 8 May 2017 19:53:53 +0200
-Message-ID: <7ce941e5-5a9b-acd7-c7b6-7be464572de5@siemens.com>
-References: <a553264a5972c6a86f9b5caac237470a0c74a720.1490218061.git.luto@kernel.org>
- <tip-23b2a4ddebdd17fad265b4bb77256c2e4ec37dee@git.kernel.org>
- <0c4d6d04-7038-fb82-87b3-343784550d0a@siemens.com>
- <CAHp75VdX-kUqW0MKOSTz9zByU-eipBMnKpdUbTt2SVOJ8Kvrig@mail.gmail.com>
- <CALCETrXzzhoyzyqp5s7sSOkAtsR2Cor6j+x16OLv=+G30Y6+WQ@mail.gmail.com>
- <7f5916b5-01c0-52d5-9f44-dee4bf355212@siemens.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <7f5916b5-01c0-52d5-9f44-dee4bf355212-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, x86 <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Peter Zijlstra (Intel)" <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Subject: [PATCH] x86/efi: Fix kexec kernel panic when efi=old_map is enabled
+Date: Mon,  8 May 2017 12:25:23 -0700
+Message-ID: <1494271523-17331-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Borislav Petkov <bp@alien8.de>, Ricardo Neri <ricardo.neri@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Ravi Shankar <ravi.v.shankar@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 2017-05-08 14:34, Jan Kiszka wrote:
-> On 2017-05-08 13:21, Andy Lutomirski wrote:
->> On Mon, May 8, 2017 at 2:32 AM, Andy Shevchenko
->> <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>> On Mon, May 8, 2017 at 9:31 AM, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org> wrote:
->>>> On 2017-03-23 10:14, tip-bot for Andy Lutomirski wrote:
->>>>> The x86 smpboot trampoline expects initial_page_table to have the
->>>>> GDT mapped.  If the GDT ends up in a virtually mapped per-cpu page,
->>>>> then it won't be in the page tables at all until perc-pu areas are
->>>>> set up.  The result will be a triple fault the first time that the
->>>>> CPU attempts to access the GDT after LGDT loads the perc-pu GDT.
->>>>>
->>>>> This appears to be an old bug, but somehow the GDT fixmap rework
->>>>> is triggering it.  This seems to have something to do with the
->>>>> memory layout.
->>>
->>>> This breaks the boot on our Intel Quark platform (IOT2000, similar to
->>>> Galileo Gen2). Reverting it over master makes it work again. Any idea
->>>> what goes wrong? Let me know how I can help debugging this.
->>>
->>> JFYI: As of today linux-next when _kexec:ed_ works fine to me
->>>
->>> Perhaps I can test this later with direct boot from SD card.
->>>
->>
->> The most likely explanation is that there's some code that needs the
->> page table synced and runs before setup_per_cpu_areas().  The relevant
->> init code is:
->>
->>     setup_arch(&command_line);
->>     mm_init_cpumask(&init_mm);
->>     setup_command_line(command_line);
->>     setup_nr_cpu_ids();
->>     setup_per_cpu_areas();
->>
->> so I didn't move it very far.  It would be awesome if we could get a
->> backtrace when the failure happens, but it's likely to be a triple
->> fault.  Is this an EFI boot?  I bet the failure is in efi_init().
-> 
-> Yes, it's an EFI thing. Unfortunately, I didn't make
-> earlycon/earlyprintk work yet.
-> 
->>
->> Could you try reverting just the deletions in the patch?  I.e. try a
->> kernel with both the old and the new copies of the code I moved.
-> 
-> Let me try that later. I can also move the new code around to nail down
-> the dependency.
-> 
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-I found the reason: your patch is very discriminating! Not the whole
-world is multicore yet. ;)
+Booting kexec kernel with "efi=old_map" in kernel command line hits
+kernel panic as shown below.
 
-setup_per_cpu_areas() is taken from mm/percpu.c in case of !CONFIG_SMP.
-So the new home for the resync is not even built.
+[    0.001000] BUG: unable to handle kernel paging request at ffff88007fe78070
+[    0.001000] IP: virt_efi_set_variable.part.7+0x63/0x1b0
+[    0.001000] PGD 7ea28067
+[    0.001000] PUD 7ea2b067
+[    0.001000] PMD 7ea2d067
+[    0.001000] PTE 0
+[    0.001000]
+[    0.001000] Oops: 0000 [#1] SMP
+[    0.001000] Modules linked in:
+[    0.001000] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.11.0-rc2-yocto-standard+ #229
+[    0.001000] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 0.0.0 02/06/2015
+[    0.001000] task: ffffffff82022500 task.stack: ffffffff82000000
+[    0.001000] RIP: 0010:virt_efi_set_variable.part.7+0x63/0x1b0
+[    0.001000] RSP: 0000:ffffffff82003dc0 EFLAGS: 00010246
+[    0.001000] RAX: ffff88007fe78018 RBX: ffffffff82050300 RCX: 0000000000000007
+[    0.001000] RDX: ffffffff82003e50 RSI: ffffffff82050300 RDI: ffffffff82050300
+[    0.001000] RBP: ffffffff82003e08 R08: 0000000000000000 R09: 0000000000000000
+[    0.001000] R10: 0000000000000000 R11: 0000000000000000 R12: ffffffff82003e50
+[    0.001000] R13: 0000000000000007 R14: 0000000000000246 R15: 0000000000000000
+[    0.001000] FS:  0000000000000000(0000) GS:ffff88007fa00000(0000) knlGS:0000000000000000
+[    0.001000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[    0.001000] CR2: ffff88007fe78070 CR3: 000000007da1d000 CR4: 00000000000006b0
+[    0.001000] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+[    0.001000] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+[    0.001000] Call Trace:
+[    0.001000]  virt_efi_set_variable+0x5d/0x70
+[    0.001000]  efi_delete_dummy_variable+0x7a/0x80
+[    0.001000]  efi_enter_virtual_mode+0x3f6/0x4a7
+[    0.001000]  start_kernel+0x375/0x400
+[    0.001000]  x86_64_start_reservations+0x2a/0x2c
+[    0.001000]  x86_64_start_kernel+0x168/0x176
+[    0.001000]  start_cpu+0x14/0x14
+[    0.001000] Code: 04 b0 84 ff 80 3d c5 56 b3 00 00 4c 8b 44 24 08 75
+6b 9c 41 5e 48 8b 05 9c 78 99 00 4d 89 c1 48 89 de 4d 89 f8 44 89 e9 4c
+89 e2 <48> 8b 40 58 48 8b 78 58 e8 b0 2d 88 ff 48 c7 c6 b6 1d f4 81 4c
+[    0.001000] RIP: virt_efi_set_variable.part.7+0x63/0x1b0 RSP: ffffffff82003dc0
+[    0.001000] CR2: ffff88007fe78070
+[    0.001000] ---[ end trace 0000000000000000 ]---
+[    0.001000] Kernel panic - not syncing: Attempted to kill the idle task!
+[    0.001000] ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
 
-Any suggestions how to refactor things instead?
+This happens because efi=old_map doesn't use efi_pgd but rather it uses
+kernel's pgd. We don't hit the same panic in a regular kernel because
+it uses old_map_region() and not __map_region().
 
-Jan
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+---
+ arch/x86/platform/efi/efi_64.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 4e043a8c8556..76e1cd6b74dd 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -320,6 +320,9 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+ 	unsigned long pfn;
+ 	pgd_t *pgd = efi_pgd;
+ 
++	if (efi_enabled(EFI_OLD_MEMMAP))
++		pgd = swapper_pg_dir;
++
+ 	if (!(md->attribute & EFI_MEMORY_WB))
+ 		flags |= _PAGE_PCD;
+ 
 -- 
-Siemens AG, Corporate Technology, CT RDA ITP SES-DE
-Corporate Competence Center Embedded Linux
+2.1.4
