@@ -1,79 +1,133 @@
-From: gengdongjiu <gengdongjiu-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v3 3/3] arm/arm64: signal SIBGUS and inject SEA Error
-Date: Wed, 10 May 2017 20:37:59 +0800
-Message-ID: <10cdbd75-2b89-c816-e688-91f111687819@huawei.com>
-References: <CAMj-D2BGTDKpOcMu2ip41_MTTj8VDwvs59Ds7yvLHcD8PeQzhg@mail.gmail.com>
- <5910AAA2.4030304@arm.com> <20170508175416.GA32234@cbox>
- <5911D204.7020304@arm.com> <e8614b38-9c17-bcfc-2239-307ed0f98c94@huawei.com>
- <20170510122055.GE28721@cbox>
+From: Matthias Kaehlcke <mka@chromium.org>
+Subject: Re: [PATCH] efi/libstub: Indicate clang the relocation mode for arm64
+Date: Wed, 10 May 2017 11:38:48 -0700
+Message-ID: <20170510183848.GI128305@google.com>
+References: <20170509193612.64105-1-mka@chromium.org>
+ <25d94b46-765e-f12f-a287-853c76782143@google.com>
+ <20170509214905.GH128305@google.com>
+ <CAKv+Gu_6my-rCc3E1V1n23dHY5OH97qpZ672ST8AZGLjedquAg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170510122055.GE28721@cbox>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Christoffer Dall <cdall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, gengdongjiu <gengdj.1984-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Christoffer Dall <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, Sandeepa Prabhu <sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, Fu Wei <fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu_6my-rCc3E1V1n23dHY5OH97qpZ672ST8AZGLjedquAg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Greg Hackmann <ghackmann@google.com>, Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Grant Grundler <grundler@chromium.org>, Michael Davidson <md@google.com>, Bernhard =?utf-8?Q?Rosenkr=C3=A4nzer?= <Bernhard.Rosenkranzer@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Christoffer,
+Hoi Ard,
 
-On 2017/5/10 20:20, Christoffer Dall wrote:
-> On Wed, May 10, 2017 at 05:15:04PM +0800, gengdongjiu wrote:
->> Thanks James's explanation.
->>
->> Hi Christoffer,
->>
->> On 2017/5/9 22:28, James Morse wrote:
->>> Hi Christoffer,
->>>
->>> On 08/05/17 18:54, Christoffer Dall wrote:
->>>> On Mon, May 08, 2017 at 06:28:02PM +0100, James Morse wrote:
->>>> I must admit I am losing track of exactly what this proposed API was
->>>> supposed to do.
->>>
->>> There are two, and we keep jumping between them!
->>> This is about two notification methods APEI has for arm64, 'SEA' and 'SEI'.
->>>
->>> SEA is synchronous and looks like a data abort. Qemu/kvmtool can inject these
->>> today using the KVM_GET/SET_ONE_REG API whenever it wants to.
->>>
->>> SEI uses SError, is asynchronous and can be masked. In addition these need to be
->>> consumed/synchronised by the ESB instruction, even when executed by a guest.
->>> Hardware has the necessary bits to drive all this, we need to expose an API to
->>> drive it.
->>>
->>> (I try to spell them out each time so I don't confuse SEI with something
->>> synchronous!)
->>>
->>>
->>> This patch was about SEA. I think you've answered our question:
->>
->> we are talking about the SEA(synchronous data abort) injection two methods:
->>
->> (1)change vcpu registers in the Qemu/kvmtools and using the KVM_GET/SET_ONE_REG API to set.
-> 
-> Yes, if this is possible, why would you want something more?
-  we will use this method.
+El Wed, May 10, 2017 at 08:51:44AM +0100 Ard Biesheuvel ha dit:
 
+> On 9 May 2017 at 22:49, Matthias Kaehlcke <mka@chromium.org> wrote:
+> > El Tue, May 09, 2017 at 01:50:36PM -0700 Greg Hackmann ha dit:
+> >
+> >> On 05/09/2017 12:36 PM, Matthias Kaehlcke wrote:
+> >> >From: Greg Hackmann <ghackmann@google.com>
+> >> >
+> >> >Without any extra guidance, clang will generate libstub with either
+> >> >absolute or relative ELF relocations. Use the right combination of
+> >> >-fpic and -fno-pic on different files to avoid this.
+> >> >
+> >> >Signed-off-by: Greg Hackmann <ghackmann@google.com>
+> >> >Signed-off-by: Bernhard Rosenkränzer <Bernhard.Rosenkranzer@linaro.org>
+> >> >Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
+> >> >---
+> >> > drivers/firmware/efi/libstub/Makefile | 6 ++++++
+> >> > 1 file changed, 6 insertions(+)
+> >> >
+> >> >diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+> >> >index f7425960f6a5..ccbaaf4d8650 100644
+> >> >--- a/drivers/firmware/efi/libstub/Makefile
+> >> >+++ b/drivers/firmware/efi/libstub/Makefile
+> >> >@@ -11,6 +11,9 @@ cflags-$(CONFIG_X86)               += -m$(BITS) -D__KERNEL__ -O2 \
+> >> >                                -mno-mmx -mno-sse
+> >> >
+> >> > cflags-$(CONFIG_ARM64)              := $(subst -pg,,$(KBUILD_CFLAGS))
+> >> >+ifeq ($(cc-name),clang)
+> >> >+cflags-$(CONFIG_ARM64)              += -fpic
+> >> >+endif
+> >> > cflags-$(CONFIG_ARM)                := $(subst -pg,,$(KBUILD_CFLAGS)) \
+> >> >                                -fno-builtin -fpic -mno-single-pic-base
+> >> >
+> >> >@@ -38,6 +41,9 @@ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
+> >> >
+> >> > lib-$(CONFIG_EFI_ARMSTUB)   += arm-stub.o fdt.o string.o random.o \
+> >> >                                $(patsubst %.c,lib-%.o,$(arm-deps))
+> >> >+ifeq ($(cc-name),clang)
+> >> >+CFLAGS_arm64-stub.o            += -fno-pic
+> >> >+endif
+> >> >
+> >> > lib-$(CONFIG_ARM)           += arm32-stub.o
+> >> > lib-$(CONFIG_ARM64)         += arm64-stub.o
+> >> >
+> >>
+> >> NAK.
+> >>
+> >> This patch was labeled "HACK:" in our experimental tree.  There's no
+> >> rhyme or reason to why this combination of -f[no-]pic flags
+> >> generates code without problematic relocations.  It's inherently
+> >> fragile, and was only intended as a temporary workaround until I (or
+> >> someone more familiar with EFI) got a chance to revisit the problem.
+> >>
+> >> Unless the gcc CFLAGS are also an artifact of "mess with -f[no-]pic
+> >> until the compiler generates what you want", this doesn't belong
+> >> upstream.
+> >
+> > Sorry, I didn't realize it is that bad of a hack. Unfortunately I'm
+> > not very familiar with EFI either.
+> >
+> > I saw Ard did some work in this code related with relocation, maybe he
+> > can provide a pointer towards a better solution.
+> >
 > 
->> (2)using existed in-kernel API "kvm_inject_dabt" to inject through IOCTL command from Qemu.
->>
+> This is a known issue. The problem is that generic AArch64 small model
+> code is mostly position independent already, due to its use of
+> adrp/add pairs to generate symbol references with a +/- 4 GB range.
+> Building the same code with -fpic will result in GOT entries to be
+> generated, which carry absolute addresses, so this achieves the exact
+> opposite of what we want.
 > 
-> I'm not really going to consider this, because "use internal API from
-> userspace" doesn't work.
+> The reason for the GOT entries is that GCC (and Clang, apparently)
+> infer from the -fpic flag that you are building objects that will be
+> linked into a shared library, to which ELF symbol preemption rules
+> apply that stipulate that a symbol in the main executable supersedes a
+> symbol under the same name in the shared library, and that the shared
+> library should update all its internal references to the main
+> executable's version of the symbol. The easiest way (but certainly not
+> the only way) to achieve that is to indirect all internal symbol
+> references via GOT entries, which can be made to refer to another
+> symbol by updating a single value.
 > 
-> So this should be:
+> The workaround I used is to use hidden visibility, using a #pragma.
+> (There is a -fvisibility=hidden command line option as well, but this
+> is a weaker form that does not apply to extern declarations, only to
+> definitions). So if you add
 > 
->   (2) Introduce a new API to do X.
-  you can ignore the second method, now we will not use it.
+> #pragma GCC visibility push(hidden)
+> 
+> at the beginning of arm64-stub.c (and perhaps to one or two other
+> files that contain externally visible symbol declarations these days),
+> you should be able to compile the entire EFI stub with -fpic. Note
+> that making those externally visible symbols 'static' where possible
+> would solve the problem as well, but this triggers another issue in
+> the 32-bit ARM stub.
+> 
+> In my opinion, the correct fix would be to make -fpie (as opposed to
+> -fpic) imply hidden visibility, given that PIE executables don't
+> export symbols in the first place, and so the preemption rules do not
+> apply. It is worth a try whether -fpie works as expected in this case
+> on Clang, but the last time I tried it on GCC, it behaved exactly like
+> -fpic.
 
-> 
-> I still think you know what my preference is; use the existing API if at
-> all possible.
-> 
-> Thanks,
-> -Christoffer
-> 
-> .
-> 
+Thanks a lot for the detailed description and your suggestions!
+
+A clang build with -fpie for the EFI stub succeeds without complaints
+about GOT entries. I will send out an updated patch (with -fpie only
+for clang) later.
+
+Cheers
+
+Matthias
