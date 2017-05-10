@@ -1,72 +1,35 @@
-From: gengdongjiu <gengdongjiu@huawei.com>
-Subject: Re: [PATCH v3 3/3] arm/arm64: signal SIBGUS and inject SEA Error
-Date: Wed, 10 May 2017 17:15:04 +0800
-Message-ID: <e8614b38-9c17-bcfc-2239-307ed0f98c94@huawei.com>
-References: <CAMj-D2BGTDKpOcMu2ip41_MTTj8VDwvs59Ds7yvLHcD8PeQzhg@mail.gmail.com>
- <5910AAA2.4030304@arm.com> <20170508175416.GA32234@cbox>
- <5911D204.7020304@arm.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 1/2] efi/efi_test: use memdup_user
+Date: Wed, 10 May 2017 11:35:17 +0100
+Message-ID: <20170510103517.GA6562@codeblueprint.co.uk>
+References: <d0d524b81d55b4e5f1708d5441e655c75365c0b8.1493383416.git.geliangtang@gmail.com>
+ <20170505205349.GC5225@codeblueprint.co.uk>
+ <0d6b6b9e-de5c-4eb2-f46a-d26ae058fa42@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <5911D204.7020304@arm.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: James Morse <james.morse@arm.com>, Christoffer Dall <cdall@linaro.org>
-Cc: gengdongjiu <gengdj.1984@gmail.com>, Tyler Baicar <tbaicar@codeaurora.org>, Christoffer Dall <christoffer.dall@linaro.org>, Marc Zyngier <marc.zyngier@arm.com>, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, Len Brown <lenb@kernel.org>, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, Sandeepa Prabhu <sandeepa.s.prabhu@gmail.com>, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, Fu Wei <fu.wei@linaro.org>, rostedt@goodmis.org, bristot@redhat.
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <0d6b6b9e-de5c-4eb2-f46a-d26ae058fa42-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ivanhu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: Geliang Tang <geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Thanks James's explanation.
+On Mon, 08 May, at 04:18:30PM, Ivan Hu wrote:
+> 
+> 
+> On 05/06/2017 04:53 AM, Matt Fleming wrote:
+> >On Sat, 29 Apr, at 09:42:52AM, Geliang Tang wrote:
+> >>Use memdup_user() helper instead of open-coding to simplify the code.
+> >>
+> >>Signed-off-by: Geliang Tang <geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> >>---
+> >> drivers/firmware/efi/test/efi_test.c | 11 +++--------
+> >> 1 file changed, 3 insertions(+), 8 deletions(-)
+> >
+> >This one looks fine. Ivan, do you want to ACK it?
+> >
+> 
+> Looks fine to me too, ACK. Thanks!
 
-Hi Christoffer,
-
-On 2017/5/9 22:28, James Morse wrote:
-> Hi Christoffer,
-> 
-> On 08/05/17 18:54, Christoffer Dall wrote:
->> On Mon, May 08, 2017 at 06:28:02PM +0100, James Morse wrote:
->> I must admit I am losing track of exactly what this proposed API was
->> supposed to do.
-> 
-> There are two, and we keep jumping between them!
-> This is about two notification methods APEI has for arm64, 'SEA' and 'SEI'.
-> 
-> SEA is synchronous and looks like a data abort. Qemu/kvmtool can inject these
-> today using the KVM_GET/SET_ONE_REG API whenever it wants to.
-> 
-> SEI uses SError, is asynchronous and can be masked. In addition these need to be
-> consumed/synchronised by the ESB instruction, even when executed by a guest.
-> Hardware has the necessary bits to drive all this, we need to expose an API to
-> drive it.
-> 
-> (I try to spell them out each time so I don't confuse SEI with something
-> synchronous!)
-> 
-> 
-> This patch was about SEA. I think you've answered our question:
-
-we are talking about the SEA(synchronous data abort) injection two methods:
-
-(1)change vcpu registers in the Qemu/kvmtools and using the KVM_GET/SET_ONE_REG API to set.
-(2)using existed in-kernel API "kvm_inject_dabt" to inject through IOCTL command from Qemu.
-
-
-> 
->> However, if it's a question about setting up VCPU registers to a certain
->> state and potentially modifying memory, then I think experience has
->> shown us (psci) that emulating something in the kernel that userspace
->> can have fine-grained control over is a bad idea, and should be left to
->> userspace using as generic APIs as possible.
->>
->> Furthermore, if I understand what injecting a SEA requires, it is very
->> similar to resetting the CPU and loading data into guest memory, which
->> QEMU already does today, and there is no reason to introduce additional
->> APIs if it can be done using KVM_GET/SET_ONE_REG ioctls.
-> 
-> 
-> Thanks,
-> 
-> James
-> 
-> .
-> 
-
+Applied, thanks everyone.
