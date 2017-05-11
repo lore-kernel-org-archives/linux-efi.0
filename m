@@ -1,178 +1,83 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi/libstub: Indicate clang the relocation mode for arm64
-Date: Thu, 11 May 2017 14:51:48 +0100
-Message-ID: <CAKv+Gu8H9H=Rax4iiKaZ2z2GikXTjseCAyKrYgQPQWkekjsN8w@mail.gmail.com>
-References: <20170509193612.64105-1-mka@chromium.org> <25d94b46-765e-f12f-a287-853c76782143@google.com>
- <20170509214905.GH128305@google.com> <CAKv+Gu_6my-rCc3E1V1n23dHY5OH97qpZ672ST8AZGLjedquAg@mail.gmail.com>
- <20170510183848.GI128305@google.com> <69A18345-6933-4C6A-8FAC-DBD4D7EF30DE@linaro.org>
- <20170510194734.GJ128305@google.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] efi/cper: Fix endianness of PCI class code
+Date: Thu, 11 May 2017 15:06:42 +0100
+Message-ID: <CAKv+Gu81gvNL1jkb3T35=-5fr_x-BmSg9X2CcQ97xv5JTZ-c1A@mail.gmail.com>
+References: <771bc335fb5856792d086ae7db288dcf244cb4cd.1493964354.git.lukas@wunner.de>
+ <CAKv+Gu9PpmTBbSMKUsx6svm6fodV8x=i4b1j8QGapnEoCFcrNA@mail.gmail.com>
+ <20170506090755.GB19740@wunner.de> <CAKv+Gu_4xHhX8oK847k8=s5S7Mx3sALPTtX8Eo=2+9uZyQoEAQ@mail.gmail.com>
+ <20170510084143.GA16261@wunner.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170510194734.GJ128305-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Grundler <grundler-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Michael Davidson <md-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, =?UTF-8?Q?Bernhard_Rosenkr=C3=A4nzer?= <Bernhard.Rosenkranzer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <20170510084143.GA16261@wunner.de>
+Sender: linux-pci-owner@vger.kernel.org
+To: Lukas Wunner <lukas@wunner.de>
+Cc: Arnd Bergmann <arnd@arndb.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Ashok Raj <ashok.raj@intel.com>, linux-pci <linux-pci@vger.kernel.org>, Huang Ying <ying.huang@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-(adding Arnd and Will to cc, who are likely to have an opinion as to
-which GCC is the oldest we need to support for arm64)
-
-On 10 May 2017 at 20:47, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
-> El Wed, May 10, 2017 at 09:05:28PM +0200 Ard Biesheuvel ha dit:
+On 10 May 2017 at 09:41, Lukas Wunner <lukas@wunner.de> wrote:
+> On Wed, May 10, 2017 at 09:03:11AM +0100, Ard Biesheuvel wrote:
+>> On 6 May 2017 at 10:07, Lukas Wunner <lukas@wunner.de> wrote:
+>> > On Sat, May 06, 2017 at 08:46:07AM +0100, Ard Biesheuvel wrote:
+>> >> On 5 May 2017 at 19:38, Lukas Wunner <lukas@wunner.de> wrote:
+>> >> > The CPER parser assumes that the class code is big endian, but at least
+>> >> > on this edk2-derived Intel Purley platform it's little endian:
+>> > [snip]
+>> >> > --- a/include/linux/cper.h
+>> >> > +++ b/include/linux/cper.h
+>> >> > @@ -416,7 +416,7 @@ struct cper_sec_pcie {
+>> >> >         struct {
+>> >> >                 __u16   vendor_id;
+>> >> >                 __u16   device_id;
+>> >> > -               __u8    class_code[3];
+>> >> > +               __u32   class_code:24;
+>> >>
+>> >> I'd like to avoid this change if we can. Couldn't we simply invert the
+>> >> order of p[] above?
+>> >
+>> > Hm, why would you like to avoid it?
+>>
+>> Because we shouldn't use bitfields in structs in code that should be
+>> portable across archs with different endiannesses.
 >
->>
->>
->> > On 10 May 2017, at 20:38, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
->> >
->> > Hoi Ard,
->> >
->> > El Wed, May 10, 2017 at 08:51:44AM +0100 Ard Biesheuvel ha dit:
->> >
->> >> On 9 May 2017 at 22:49, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
->> >>> El Tue, May 09, 2017 at 01:50:36PM -0700 Greg Hackmann ha dit:
->> >>>
->> >>>> On 05/09/2017 12:36 PM, Matthias Kaehlcke wrote:
->> >>>>> From: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
->> >>>>>
->> >>>>> Without any extra guidance, clang will generate libstub with eithe=
-r
->> >>>>> absolute or relative ELF relocations. Use the right combination of
->> >>>>> -fpic and -fno-pic on different files to avoid this.
->> >>>>>
->> >>>>> Signed-off-by: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
->> >>>>> Signed-off-by: Bernhard Rosenkr=C3=A4nzer <Bernhard.Rosenkranzer@l=
-inaro.org>
->> >>>>> Signed-off-by: Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
->> >>>>> ---
->> >>>>> drivers/firmware/efi/libstub/Makefile | 6 ++++++
->> >>>>> 1 file changed, 6 insertions(+)
->> >>>>>
->> >>>>> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmw=
-are/efi/libstub/Makefile
->> >>>>> index f7425960f6a5..ccbaaf4d8650 100644
->> >>>>> --- a/drivers/firmware/efi/libstub/Makefile
->> >>>>> +++ b/drivers/firmware/efi/libstub/Makefile
->> >>>>> @@ -11,6 +11,9 @@ cflags-$(CONFIG_X86)               +=3D -m$(BITS=
-) -D__KERNEL__ -O2 \
->> >>>>>                               -mno-mmx -mno-sse
->> >>>>>
->> >>>>> cflags-$(CONFIG_ARM64)              :=3D $(subst -pg,,$(KBUILD_CFL=
-AGS))
->> >>>>> +ifeq ($(cc-name),clang)
->> >>>>> +cflags-$(CONFIG_ARM64)              +=3D -fpic
->> >>>>> +endif
->> >>>>> cflags-$(CONFIG_ARM)                :=3D $(subst -pg,,$(KBUILD_CFL=
-AGS)) \
->> >>>>>                               -fno-builtin -fpic -mno-single-pic-b=
-ase
->> >>>>>
->> >>>>> @@ -38,6 +41,9 @@ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
->> >>>>>
->> >>>>> lib-$(CONFIG_EFI_ARMSTUB)   +=3D arm-stub.o fdt.o string.o random.=
-o \
->> >>>>>                               $(patsubst %.c,lib-%.o,$(arm-deps))
->> >>>>> +ifeq ($(cc-name),clang)
->> >>>>> +CFLAGS_arm64-stub.o            +=3D -fno-pic
->> >>>>> +endif
->> >>>>>
->> >>>>> lib-$(CONFIG_ARM)           +=3D arm32-stub.o
->> >>>>> lib-$(CONFIG_ARM64)         +=3D arm64-stub.o
->> >>>>>
->> >>>>
->> >>>> NAK.
->> >>>>
->> >>>> This patch was labeled "HACK:" in our experimental tree.  There's n=
-o
->> >>>> rhyme or reason to why this combination of -f[no-]pic flags
->> >>>> generates code without problematic relocations.  It's inherently
->> >>>> fragile, and was only intended as a temporary workaround until I (o=
-r
->> >>>> someone more familiar with EFI) got a chance to revisit the problem=
-.
->> >>>>
->> >>>> Unless the gcc CFLAGS are also an artifact of "mess with -f[no-]pic
->> >>>> until the compiler generates what you want", this doesn't belong
->> >>>> upstream.
->> >>>
->> >>> Sorry, I didn't realize it is that bad of a hack. Unfortunately I'm
->> >>> not very familiar with EFI either.
->> >>>
->> >>> I saw Ard did some work in this code related with relocation, maybe =
-he
->> >>> can provide a pointer towards a better solution.
->> >>>
->> >>
->> >> This is a known issue. The problem is that generic AArch64 small mode=
-l
->> >> code is mostly position independent already, due to its use of
->> >> adrp/add pairs to generate symbol references with a +/- 4 GB range.
->> >> Building the same code with -fpic will result in GOT entries to be
->> >> generated, which carry absolute addresses, so this achieves the exact
->> >> opposite of what we want.
->> >>
->> >> The reason for the GOT entries is that GCC (and Clang, apparently)
->> >> infer from the -fpic flag that you are building objects that will be
->> >> linked into a shared library, to which ELF symbol preemption rules
->> >> apply that stipulate that a symbol in the main executable supersedes =
-a
->> >> symbol under the same name in the shared library, and that the shared
->> >> library should update all its internal references to the main
->> >> executable's version of the symbol. The easiest way (but certainly no=
-t
->> >> the only way) to achieve that is to indirect all internal symbol
->> >> references via GOT entries, which can be made to refer to another
->> >> symbol by updating a single value.
->> >>
->> >> The workaround I used is to use hidden visibility, using a #pragma.
->> >> (There is a -fvisibility=3Dhidden command line option as well, but th=
-is
->> >> is a weaker form that does not apply to extern declarations, only to
->> >> definitions). So if you add
->> >>
->> >> #pragma GCC visibility push(hidden)
->> >>
->> >> at the beginning of arm64-stub.c (and perhaps to one or two other
->> >> files that contain externally visible symbol declarations these days)=
-,
->> >> you should be able to compile the entire EFI stub with -fpic. Note
->> >> that making those externally visible symbols 'static' where possible
->> >> would solve the problem as well, but this triggers another issue in
->> >> the 32-bit ARM stub.
->> >>
->> >> In my opinion, the correct fix would be to make -fpie (as opposed to
->> >> -fpic) imply hidden visibility, given that PIE executables don't
->> >> export symbols in the first place, and so the preemption rules do not
->> >> apply. It is worth a try whether -fpie works as expected in this case
->> >> on Clang, but the last time I tried it on GCC, it behaved exactly lik=
-e
->> >> -fpic.
->> >
->> > Thanks a lot for the detailed description and your suggestions!
->> >
->> > A clang build with -fpie for the EFI stub succeeds without complaints
->> > about GOT entries. I will send out an updated patch (with -fpie only
->> > for clang) later.
->> >
->>
->> Good! I never liked the visibility hack, which is why I never upstreamed=
- it.
->>
->> Could you please check how recent GCC behaves?
+> The CPER header is defined in the UEFI spec and UEFI mandates that the
+> arch is little endian (UEFI r2.6, sec. 2.3.5, 2.3.6).
 >
-> I tried GCC v4.9.4 and v6.3.1, both build the EFI stub with -fpie
-> without errors.
+
+No it does not mandate that at all. It mandates how the core should be
+configured when running in UEFI, but the OS can do anything it likes.
+
+We are still interested in adding limited UEFI support to big endian
+arm64 in the future (i.e., access to a limited set of firmware tables
+but no runtime services), and I am not going to merge anything that
+moves us away from that goal.
+
+> So your argument seems moot to me.  Am I missing something?  Do you
+> have another argument?
 >
-> Are you suggesting to use -fpie for both clang and GCC? Do you know
-> what the minimum required GCC version is for building an arm64 kernel?
+> Moreover, the vendor_id and device_id fields are little endian as well
+> (PCI r3.0, sec. 6.1), yet there are no provisions in our CPER parser in
+> drivers/firmware/efi/cper.c to convert them to the endianness of the host.
+>
 
-Yes. Up until now, we have been relying on the position independent
-nature of small model code, but it would be better to specify it
-explicitly, so if -fpie gives us mostly identical code and does not
-need visibility hacks, I would prefer to add it for all compilers and
-not have an exception only for Clang. Note that the same applies to
-the entire kernel when built in KASLR mode, so it would also be good
-to know our options here.
+Indeed. I am aware we will need to add various endian-neutral
+accessors in the future.
 
-Arnd, Will, what is the oldest GCC version we claim to support for arm64?
+>> >  The class_code element isn't
+>> > referenced anywhere else in the kernel and this isn't a uapi header,
+>> > so the change would only impact out-of-tree drivers.  Not sure if
+>> > any exist which might be interested in CPER parsing.
+>> >
+>>
+>> The point is that the change in the struct definition is simply not
+>> necessary, given that inverting the order of p[] already achieves
+>> exactly what we want.
+>
+> It seems clumsy and unnecessary to me so I'd prefer the bitfield.
+> Please excuse my stubbornness.
+>
+
+Stubbornness alone is not going to convince me. What *could* convince
+me (although unlikely) is a quote from the C spec which explains why
+it is 100% legal to make assumptions about how bitfields are projected
+onto byte locations in memory.
