@@ -1,80 +1,108 @@
-From: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Fix kexec kernel panic when efi=old_map is
- enabled
-Date: Fri, 12 May 2017 10:51:10 -0700
-Message-ID: <1494611470.8845.26.camel@intel.com>
-References: <1494271523-17331-1-git-send-email-sai.praneeth.prakhya@intel.com>
-         <20170512095603.GB14028@linux-l9pv.suse>
+From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: [PATCH] efi-pstore: Fix read iter after pstore API refactor
+Date: Fri, 12 May 2017 14:58:54 -0700
+Message-ID: <20170512215854.GA85220@beast>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170512095603.GB14028-g7OFGfmEpDh8S/rGE13EwQ@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2017-05-12 at 17:56 +0800, joeyli wrote:
-> On Mon, May 08, 2017 at 12:25:23PM -0700, Sai Praneeth Prakhya wrote:
-> > From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > 
-> > Booting kexec kernel with "efi=old_map" in kernel command line hits
-> > kernel panic as shown below.
-> > 
-> > [    0.001000] BUG: unable to handle kernel paging request at ffff88007fe78070
-> > [    0.001000] IP: virt_efi_set_variable.part.7+0x63/0x1b0
-> > [    0.001000] PGD 7ea28067
-> > [    0.001000] PUD 7ea2b067
-> > [    0.001000] PMD 7ea2d067
-> > [    0.001000] PTE 0
-> > [    0.001000]
-> > [    0.001000] Oops: 0000 [#1] SMP
-> > [    0.001000] Modules linked in:
-> > [    0.001000] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.11.0-rc2-yocto-standard+ #229
-> > [    0.001000] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 0.0.0 02/06/2015
-> > [    0.001000] task: ffffffff82022500 task.stack: ffffffff82000000
-> > [    0.001000] RIP: 0010:virt_efi_set_variable.part.7+0x63/0x1b0
-> > [    0.001000] RSP: 0000:ffffffff82003dc0 EFLAGS: 00010246
-> > [    0.001000] RAX: ffff88007fe78018 RBX: ffffffff82050300 RCX: 0000000000000007
-> > [    0.001000] RDX: ffffffff82003e50 RSI: ffffffff82050300 RDI: ffffffff82050300
-> > [    0.001000] RBP: ffffffff82003e08 R08: 0000000000000000 R09: 0000000000000000
-> > [    0.001000] R10: 0000000000000000 R11: 0000000000000000 R12: ffffffff82003e50
-> > [    0.001000] R13: 0000000000000007 R14: 0000000000000246 R15: 0000000000000000
-> > [    0.001000] FS:  0000000000000000(0000) GS:ffff88007fa00000(0000) knlGS:0000000000000000
-> > [    0.001000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> > [    0.001000] CR2: ffff88007fe78070 CR3: 000000007da1d000 CR4: 00000000000006b0
-> > [    0.001000] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> > [    0.001000] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-> > [    0.001000] Call Trace:
-> > [    0.001000]  virt_efi_set_variable+0x5d/0x70
-> > [    0.001000]  efi_delete_dummy_variable+0x7a/0x80
-> > [    0.001000]  efi_enter_virtual_mode+0x3f6/0x4a7
-> > [    0.001000]  start_kernel+0x375/0x400
-> > [    0.001000]  x86_64_start_reservations+0x2a/0x2c
-> > [    0.001000]  x86_64_start_kernel+0x168/0x176
-> > [    0.001000]  start_cpu+0x14/0x14
-> > [    0.001000] Code: 04 b0 84 ff 80 3d c5 56 b3 00 00 4c 8b 44 24 08 75
-> > 6b 9c 41 5e 48 8b 05 9c 78 99 00 4d 89 c1 48 89 de 4d 89 f8 44 89 e9 4c
-> > 89 e2 <48> 8b 40 58 48 8b 78 58 e8 b0 2d 88 ff 48 c7 c6 b6 1d f4 81 4c
-> > [    0.001000] RIP: virt_efi_set_variable.part.7+0x63/0x1b0 RSP: ffffffff82003dc0
-> > [    0.001000] CR2: ffff88007fe78070
-> > [    0.001000] ---[ end trace 0000000000000000 ]---
-> > [    0.001000] Kernel panic - not syncing: Attempted to kill the idle task!
-> > [    0.001000] ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
-> > 
-> > This happens because efi=old_map doesn't use efi_pgd but rather it uses
-> > kernel's pgd. We don't hit the same panic in a regular kernel because
-> > it uses old_map_region() and not __map_region().
-> >
-> 
-> This issue can be reproduced on OVMF. This patch works to fix
-> problem.
-> 
-> Tested-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-> 
+During the internal pstore API refactoring, the EFI vars read entry was
+accidentally made to update a stack variable instead of the pstore
+private data pointer. This corrects the problem (and removes the now
+needless argument).
 
-Thanks a lot! Joey, for testing the patch.
+Signed-off-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+---
+ drivers/firmware/efi/efi-pstore.c | 26 ++++++++++----------------
+ 1 file changed, 10 insertions(+), 16 deletions(-)
 
-Regards,
-Sai
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+index 93d8cdbe7ef4..9e6f14c354f1 100644
+--- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -155,25 +155,20 @@ static int efi_pstore_scan_sysfs_exit(struct efivar_entry *pos,
+  * efi_pstore_sysfs_entry_iter
+  *
+  * @record: pstore record to pass to callback
+- * @pos: entry to begin iterating from
+  *
+  * You MUST call efivar_enter_iter_begin() before this function, and
+  * efivar_entry_iter_end() afterwards.
+  *
+- * It is possible to begin iteration from an arbitrary entry within
+- * the list by passing @pos. @pos is updated on return to point to
+- * the next entry of the last one passed to efi_pstore_read_func().
+- * To begin iterating from the beginning of the list @pos must be %NULL.
+  */
+-static int efi_pstore_sysfs_entry_iter(struct pstore_record *record,
+-				       struct efivar_entry **pos)
++static int efi_pstore_sysfs_entry_iter(struct pstore_record *record)
+ {
++	struct efivar_entry *pos = (struct efivar_entry *)record->psi->data;
+ 	struct efivar_entry *entry, *n;
+ 	struct list_head *head = &efivar_sysfs_list;
+ 	int size = 0;
+ 	int ret;
+ 
+-	if (!*pos) {
++	if (!pos) {
+ 		list_for_each_entry_safe(entry, n, head, list) {
+ 			efi_pstore_scan_sysfs_enter(entry, n, head);
+ 
+@@ -185,21 +180,21 @@ static int efi_pstore_sysfs_entry_iter(struct pstore_record *record,
+ 			if (size)
+ 				break;
+ 		}
+-		*pos = n;
++		pos = n;
+ 		return size;
+ 	}
+ 
+-	list_for_each_entry_safe_from((*pos), n, head, list) {
+-		efi_pstore_scan_sysfs_enter((*pos), n, head);
++	list_for_each_entry_safe_from(pos, n, head, list) {
++		efi_pstore_scan_sysfs_enter(pos, n, head);
+ 
+-		size = efi_pstore_read_func((*pos), record);
+-		ret = efi_pstore_scan_sysfs_exit((*pos), n, head, size < 0);
++		size = efi_pstore_read_func(pos, record);
++		ret = efi_pstore_scan_sysfs_exit(pos, n, head, size < 0);
+ 		if (ret)
+ 			return ret;
+ 		if (size)
+ 			break;
+ 	}
+-	*pos = n;
++	pos = n;
+ 	return size;
+ }
+ 
+@@ -218,7 +213,6 @@ static int efi_pstore_sysfs_entry_iter(struct pstore_record *record,
+  */
+ static ssize_t efi_pstore_read(struct pstore_record *record)
+ {
+-	struct efivar_entry *entry = (struct efivar_entry *)record->psi->data;
+ 	ssize_t size;
+ 
+ 	record->buf = kzalloc(EFIVARS_DATA_SIZE_MAX, GFP_KERNEL);
+@@ -229,7 +223,7 @@ static ssize_t efi_pstore_read(struct pstore_record *record)
+ 		size = -EINTR;
+ 		goto out;
+ 	}
+-	size = efi_pstore_sysfs_entry_iter(record, &entry);
++	size = efi_pstore_sysfs_entry_iter(record);
+ 	efivar_entry_iter_end();
+ 
+ out:
+-- 
+2.7.4
+
+
+-- 
+Kees Cook
+Pixel Security
