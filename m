@@ -1,98 +1,80 @@
-From: James Morse <james.morse@arm.com>
-Subject: Re: [PATCH v3 3/3] arm/arm64: signal SIBGUS and inject SEA Error
-Date: Fri, 12 May 2017 18:25:13 +0100
-Message-ID: <5915EFF9.1020405@arm.com>
-References: <CAMj-D2BGTDKpOcMu2ip41_MTTj8VDwvs59Ds7yvLHcD8PeQzhg@mail.gmail.com>
- <5910AAA2.4030304@arm.com> <75907fb5-440f-2cbe-762a-d139c4bfdd2d@huawei.com>
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: Fix kexec kernel panic when efi=old_map is
+ enabled
+Date: Fri, 12 May 2017 10:51:10 -0700
+Message-ID: <1494611470.8845.26.camel@intel.com>
+References: <1494271523-17331-1-git-send-email-sai.praneeth.prakhya@intel.com>
+         <20170512095603.GB14028@linux-l9pv.suse>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <75907fb5-440f-2cbe-762a-d139c4bfdd2d@huawei.com>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: gengdongjiu <gengdongjiu@huawei.com>, gengdongjiu <gengdj.1984@gmail.com>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Tyler Baicar <tbaicar@codeaurora.org>, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, Fu Wei <fu.wei@linaro.org>, zjzhang@codeaurora.org, linux@armlinux.org.uk, Xiongfeng Wang <wangxiongfeng2@huawei.com>, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, Len Brown <lenb@kernel.org>, harba@codeaurora.org, John Garry <john.garry@huawei.com>, Marc Zyngier <marc.zyngier@arm.com>, Punit Agrawal <punit.agrawal@arm.com>, rostedt@goodmis.org, nkaje@codeaurora.org, Sandeepa Prabhu <sandeepa.s.prabhu@gmail.com>, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, Han
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170512095603.GB14028-g7OFGfmEpDh8S/rGE13EwQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi gengdongjiu,
-
-On 10/05/17 09:44, gengdongjiu wrote:
-> On 2017/5/9 1:28, James Morse wrote:
->>>> (hwpoison for KVM is a corner case as Qemu's memory effectively has two users,
->>>> Qemu and KVM. This isn't the example of how user-space gets signalled.)
->>
->> KVM creates guests as if they were additional users of Qemu's memory. The code
->> in mm/memory-failure.c may find that Qemu didn't have the affected page mapped
->> to user-space - but it may have been in use by stage2.
->>
->> The KVM+SIGBUS patch hides this difference, meaning Qemu gets a signal when the
->> guest touches the hwpoison page as if Qemu had touched the page itself.
->>
->> Signals from KVM is a corner case, for firmware-first decisions should happen in
->> the APEI code based on CPER records.
-
->>> If so, how the KVM handle the SEA type other than hwpoison?
-
->> To deliver to a guest? It shouldn't have to know, user space should use a KVM
->> API to drive this.
->>
->> When received from hardware? It shouldn't have to care, these things should be
->> passed into the APEI code for handling. KVM just needs to put the host registers
->> back.
-
-> Recently I confirmed with the hardware team. they said almost all the SEA errors have the
-> Poison flag, so may be there is no need to consider other SEA errors other than  hwPoison.
-> only consider SEA hwpoison errors can be enough.
-
-We should be careful here, by hwpoison I meant the Linux feature.
->From Documentation/vm/hwpoison.txt:
-> Upcoming Intel CPUs have support for recovering from some memory errors
-> (``MCA recovery''). This requires the OS to declare a page "poisoned",
-> kill the processes associated with it and avoid using it in the future.
-
-We were talking about KVM's reaction to 'the OS declaring a page poisoned'.
-Lets try to call this one memory-failure, as that is its Kconfig name. (now I
-understand why we've been confusing each other!)
-
-Your hwpoison looks like something the CPU reports in the ERR<n>STATUS registers
-(4.6.10 of DDI0587). This is something firmware should read, then describe to
-the OS via CPER records. Depending on these CPER records linux may invoke its
-memory-failure code.
-
-
->>> injection a SEA is no more than setting some registers: elr_el1, PC,
->>> PSTATE, SPSR_el1, far_el1, esr_el1
->>> I seen this KVM API do the same thing as Qemu.  do you found call this
->>> API will have issue and necessary to choose another ESR value?
->>
->> Should we let user-space pick the ESR to deliver to the guest? Yes, letting
->> user-space specify the ESR gives the most flexibility to do something clever in
->> the future. An obvious choice for SEA is between the external-abort and 'parity
->> or ECC error' codes. If we tell user-space which of these happened (I don't
->> think Linux does today) then Qemu can relay that information to the guest.
-
-> may be the ESR is delivered by the KVM.
-> (1) guest OS EL0 happen SEA due to hwpoison
-> (2) CPU traps to EL3 firmware, and update the ESR_EL3
-> (3) the EL3 firmware copies the ESR_EL3 to ESR_EL2
-> (4) then jump to EL2 hypervisor, hypervisor uses the ESR_EL2 to inject the SEA.
+On Fri, 2017-05-12 at 17:56 +0800, joeyli wrote:
+> On Mon, May 08, 2017 at 12:25:23PM -0700, Sai Praneeth Prakhya wrote:
+> > From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> > 
+> > Booting kexec kernel with "efi=old_map" in kernel command line hits
+> > kernel panic as shown below.
+> > 
+> > [    0.001000] BUG: unable to handle kernel paging request at ffff88007fe78070
+> > [    0.001000] IP: virt_efi_set_variable.part.7+0x63/0x1b0
+> > [    0.001000] PGD 7ea28067
+> > [    0.001000] PUD 7ea2b067
+> > [    0.001000] PMD 7ea2d067
+> > [    0.001000] PTE 0
+> > [    0.001000]
+> > [    0.001000] Oops: 0000 [#1] SMP
+> > [    0.001000] Modules linked in:
+> > [    0.001000] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.11.0-rc2-yocto-standard+ #229
+> > [    0.001000] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 0.0.0 02/06/2015
+> > [    0.001000] task: ffffffff82022500 task.stack: ffffffff82000000
+> > [    0.001000] RIP: 0010:virt_efi_set_variable.part.7+0x63/0x1b0
+> > [    0.001000] RSP: 0000:ffffffff82003dc0 EFLAGS: 00010246
+> > [    0.001000] RAX: ffff88007fe78018 RBX: ffffffff82050300 RCX: 0000000000000007
+> > [    0.001000] RDX: ffffffff82003e50 RSI: ffffffff82050300 RDI: ffffffff82050300
+> > [    0.001000] RBP: ffffffff82003e08 R08: 0000000000000000 R09: 0000000000000000
+> > [    0.001000] R10: 0000000000000000 R11: 0000000000000000 R12: ffffffff82003e50
+> > [    0.001000] R13: 0000000000000007 R14: 0000000000000246 R15: 0000000000000000
+> > [    0.001000] FS:  0000000000000000(0000) GS:ffff88007fa00000(0000) knlGS:0000000000000000
+> > [    0.001000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> > [    0.001000] CR2: ffff88007fe78070 CR3: 000000007da1d000 CR4: 00000000000006b0
+> > [    0.001000] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+> > [    0.001000] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+> > [    0.001000] Call Trace:
+> > [    0.001000]  virt_efi_set_variable+0x5d/0x70
+> > [    0.001000]  efi_delete_dummy_variable+0x7a/0x80
+> > [    0.001000]  efi_enter_virtual_mode+0x3f6/0x4a7
+> > [    0.001000]  start_kernel+0x375/0x400
+> > [    0.001000]  x86_64_start_reservations+0x2a/0x2c
+> > [    0.001000]  x86_64_start_kernel+0x168/0x176
+> > [    0.001000]  start_cpu+0x14/0x14
+> > [    0.001000] Code: 04 b0 84 ff 80 3d c5 56 b3 00 00 4c 8b 44 24 08 75
+> > 6b 9c 41 5e 48 8b 05 9c 78 99 00 4d 89 c1 48 89 de 4d 89 f8 44 89 e9 4c
+> > 89 e2 <48> 8b 40 58 48 8b 78 58 e8 b0 2d 88 ff 48 c7 c6 b6 1d f4 81 4c
+> > [    0.001000] RIP: virt_efi_set_variable.part.7+0x63/0x1b0 RSP: ffffffff82003dc0
+> > [    0.001000] CR2: ffff88007fe78070
+> > [    0.001000] ---[ end trace 0000000000000000 ]---
+> > [    0.001000] Kernel panic - not syncing: Attempted to kill the idle task!
+> > [    0.001000] ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
+> > 
+> > This happens because efi=old_map doesn't use efi_pgd but rather it uses
+> > kernel's pgd. We don't hit the same panic in a regular kernel because
+> > it uses old_map_region() and not __map_region().
+> >
 > 
-> May be the esr_el2 can provide the accurate error information.
-> or do you think user-space specify the ESR instead of esr_el2 is better?
+> This issue can be reproduced on OVMF. This patch works to fix
+> problem.
+> 
+> Tested-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> 
 
-I think the severity needs to be considered as the notification is handled by
-each exception level. There are cases where it will need to be upgraded from
-'contained' to 'uncontained'. (more discussion on another part of the thread).
+Thanks a lot! Joey, for testing the patch.
 
-
-Thanks,
-
-James
+Regards,
+Sai
