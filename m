@@ -1,48 +1,64 @@
 From: James Morse <james.morse@arm.com>
-Subject: Re: [PATCH V15 06/11] acpi: apei: handle SEA notification type for
- ARMv8
-Date: Fri, 12 May 2017 17:45:16 +0100
-Message-ID: <5915E69C.5090201@arm.com>
-References: <1492556723-9189-1-git-send-email-tbaicar@codeaurora.org> <1492556723-9189-7-git-send-email-tbaicar@codeaurora.org> <5910AAB8.8070703@arm.com> <9e26f779-5eae-2558-6045-10c1afde9bf2@codeaurora.org>
+Subject: Re: [PATCH v3 3/3] arm/arm64: signal SIBGUS and inject SEA Error
+Date: Fri, 12 May 2017 18:24:19 +0100
+Message-ID: <5915EFC3.9070507@arm.com>
+References: <CAMj-D2BGTDKpOcMu2ip41_MTTj8VDwvs59Ds7yvLHcD8PeQzhg@mail.gmail.com>
+ <CAMj-D2A-ER8GEN32au774AY682yeMVyJwxhZoO+NkXKYYMwoQw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <9e26f779-5eae-2558-6045-10c1afde9bf2@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Cc: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org, Suzuki.Po
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <CAMj-D2A-ER8GEN32au774AY682yeMVyJwxhZoO+NkXKYYMwoQw@mail.gmail.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: gengdongjiu <gengdj.1984@gmail.com>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Tyler Baicar <tbaicar@codeaurora.org>, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, Fu Wei <fu.wei@linaro.org>, zjzhang@codeaurora.org, linux@armlinux.org.uk, Xiongfeng Wang <wangxiongfeng2@huawei.com>, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, Len Brown <lenb@kernel.org>, harba@codeaurora.org, John Garry <john.garry@huawei.com>, Marc Zyngier <marc.zyngier@arm.com>, Punit Agrawal <punit.agrawal@arm.com>, rostedt@goodmis.org, nkaje@codeaurora.org, Sandeepa Prabhu <sandeepa.s.prabhu@gmail.com>, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, Han
 List-Id: linux-efi@vger.kernel.org
 
-Hi Tyler,
+Hi gengdongjiu,
 
-On 08/05/17 20:59, Baicar, Tyler wrote:
-> On 5/8/2017 11:28 AM, James Morse wrote:
->> I was tidying up the masking/unmasking in entry.S, something I wasn't aware of
->> that leads to a bug:
->> entry.S will unmask interrupts for instruction/data aborts that came from a
->> context with interrupts enabled. This makes sense for get_user() and friends...
->> For do_sea() we pull nmi_enter() as this can interrupt interrupts-masked code,
->> such as APEI, but if we end up in here with interrupts unmasked we can take an
->> IRQ from this 'NMI' context, which will inherit the in_nmi() and could lead to
->> the deadlock we were originally trying to avoid.
->>
->> Teaching entry.S to spot external aborts is messy. I think the two choices are
->> to either mask interrupts when calling nmi_enter() (as these things should be
->> mutually exclusive), or to conditionally call nmi_enter() based on
->> interrupts_enabled(regs). I prefer the second one as it matches the notify_sea()
->> while interruptible that happens when KVM takes one of these.
+On 05/05/17 13:31, gengdongjiu wrote:
+> when guest OS happen an SEA, My current solution is shown below:
+> 
+> (1) host EL3 firmware firstly handle the SEA error and generate the CPER record.
+> (2) EL3 firmware separately copy the esr_el3, elr_el3, SPSR_el3,
+> far_el3 to the esr_el2, elr_el2, SPSR_el2, far_el2.
 
-Thinking about this some more: the KVM case is different as we know it was a
-guest that triggered the external abort. Nothing the host kernel does is likely
-to trigger either the same error or a related one.
+Copying {ELR,SPSR,FAR}_EL3 to the EL2 registers rings some alarm bells: I'm sure
+you exclude values from EL3 or the secure-world, we should never hand those to
+the normal world.
 
-But I can't think of a way this would trip twice on the host... yes your
-suggestion looks fine.
 
-(When we add SError/SEI support too we will need to change it as SEA may
-interrupt SEI, and nmi_enter() has a BUG_ON(in_nmi()), so this nesting will need
-explicitly checking.)
+> (3) then jump the EL2 hypervisor
+
+> so the EL2 hypervisor uses the ESR that come from esr_el3,  here the
+> ESR(esr_el3) value may be different with the exist KVM API's ESR.
+
+The ESR may be different between EL3 and EL2. The ESR contains the severity of
+the event, the CPU will choose this when it takes the SError to EL3. If it had
+taken the SError to EL2, the CPU may have classified the error differently.
+
+Firmware may need to generate a more severe ESR if it receives an error that
+would be propagated by delivering SEI to a lower exception level, for example if
+an EL2 system register is 'infected'.
+
+This is the same for Qemu/kvmtool. A contained error at EL2 may be an
+uncontained error if we hand it to guest EL1. Linux's RAS code will decide this
+with its choice of signal to send, (and possibly which code to set).
+Qemu/kvmtool need to choose an appropriate APEI notification, which may involve
+generating a relevant ESR.
+
+Also relevant is the problem we discussed earlier with trying to deliver fake
+Physical-SError from software at EL3: If the SError is routed to EL2, and EL2
+has PSTATE.A masked, EL3 has to wait and try again later. This is another case
+where firmware may have to upgrade the classification of an error to uncontainable.
 
 
 Thanks,
