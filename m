@@ -1,108 +1,186 @@
-From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: [PATCH] efi-pstore: Fix read iter after pstore API refactor
-Date: Fri, 12 May 2017 14:58:54 -0700
-Message-ID: <20170512215854.GA85220@beast>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v3] x86/efi: Correct ident mapping of efi old_map when kalsr enabled
+Date: Sat, 13 May 2017 11:56:39 +0800
+Message-ID: <1494647799-20600-1-git-send-email-bhe@redhat.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rja-ZPxbGqLxI0U@public.gmane.org, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-During the internal pstore API refactoring, the EFI vars read entry was
-accidentally made to update a stack variable instead of the pstore
-private data pointer. This corrects the problem (and removes the now
-needless argument).
+For EFI with 'efi=old_map' kernel option specified, Kernel will panic
+when kaslr is enabled.
 
-Signed-off-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+The back trace is:
+
+BUG: unable to handle kernel paging request at 000000007febd57e
+IP: 0x7febd57e
+PGD 1025a067
+PUD 0
+
+Oops: 0010 [#1] SMP
+[ ... ]
+Call Trace:
+ ? efi_call+0x58/0x90
+ ? printk+0x58/0x6f
+ efi_enter_virtual_mode+0x3c5/0x50d
+ start_kernel+0x40f/0x4b8
+ ? set_init_arg+0x55/0x55
+ ? early_idt_handler_array+0x120/0x120
+ x86_64_start_reservations+0x24/0x26
+ x86_64_start_kernel+0x14c/0x16f
+ start_cpu+0x14/0x14
+
+The root cause is the ident mapping is not built correctly in old_map case.
+
+For nokaslr kernel, PAGE_OFFSET is 0xffff880000000000 which is PGDIR_SIZE
+aligned. We can borrow the pud table from direct mapping safely. Given a
+physical address X, we have pud_index(X) == pud_index(__va(X)). However,
+for kaslr kernel, PAGE_OFFSET is PUD_SIZE aligned. For a given physical
+address X, pud_index(X) != pud_index(__va(X)). We can't only copy pgd entry
+from direct mapping to build ident mapping, instead need copy pud entry
+one by one from direct mapping.
+
+Fix it.
+
+Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 ---
- drivers/firmware/efi/efi-pstore.c | 26 ++++++++++----------------
- 1 file changed, 10 insertions(+), 16 deletions(-)
+v2->v3:
+    1. Rewrite code to copy pud entry one by one so that code can be understood
+    better. Usually we only have less than 1TB or several TB memory, pud entry
+    copy one by one won't impact efficiency.
 
-diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-index 93d8cdbe7ef4..9e6f14c354f1 100644
---- a/drivers/firmware/efi/efi-pstore.c
-+++ b/drivers/firmware/efi/efi-pstore.c
-@@ -155,25 +155,20 @@ static int efi_pstore_scan_sysfs_exit(struct efivar_entry *pos,
-  * efi_pstore_sysfs_entry_iter
-  *
-  * @record: pstore record to pass to callback
-- * @pos: entry to begin iterating from
-  *
-  * You MUST call efivar_enter_iter_begin() before this function, and
-  * efivar_entry_iter_end() afterwards.
-  *
-- * It is possible to begin iteration from an arbitrary entry within
-- * the list by passing @pos. @pos is updated on return to point to
-- * the next entry of the last one passed to efi_pstore_read_func().
-- * To begin iterating from the beginning of the list @pos must be %NULL.
-  */
--static int efi_pstore_sysfs_entry_iter(struct pstore_record *record,
--				       struct efivar_entry **pos)
-+static int efi_pstore_sysfs_entry_iter(struct pstore_record *record)
+    2. Adding p4d page table handling.
+
+v1->v2:
+    Change code and add description according to Thomas's suggestion as below:
+
+    1. Add checking if pud table is allocated successfully. If not just break
+    the for loop.
+
+    2. Add code comment to explain how the 1:1 mapping is built in efi_call_phys_prolog
+
+    3. Other minor change
+
+ arch/x86/platform/efi/efi_64.c | 69 +++++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 61 insertions(+), 8 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index c488625..c9dffec 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -71,11 +71,13 @@ static void __init early_code_mapping_set_exec(int executable)
+ 
+ pgd_t * __init efi_call_phys_prolog(void)
  {
-+	struct efivar_entry *pos = (struct efivar_entry *)record->psi->data;
- 	struct efivar_entry *entry, *n;
- 	struct list_head *head = &efivar_sysfs_list;
- 	int size = 0;
- 	int ret;
+-	unsigned long vaddress;
+-	pgd_t *save_pgd;
++	unsigned long vaddr, addr_pgd, addr_p4d, addr_pud;
++	pgd_t *save_pgd, *pgd_k, *pgd_efi;
++	p4d_t *p4d, *p4d_k, *p4d_efi;
++	pud_t *pud;
  
--	if (!*pos) {
-+	if (!pos) {
- 		list_for_each_entry_safe(entry, n, head, list) {
- 			efi_pstore_scan_sysfs_enter(entry, n, head);
+ 	int pgd;
+-	int n_pgds;
++	int n_pgds, i, j;
  
-@@ -185,21 +180,21 @@ static int efi_pstore_sysfs_entry_iter(struct pstore_record *record,
- 			if (size)
- 				break;
- 		}
--		*pos = n;
-+		pos = n;
- 		return size;
+ 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
+ 		save_pgd = (pgd_t *)read_cr3();
+@@ -88,10 +90,44 @@ pgd_t * __init efi_call_phys_prolog(void)
+ 	n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
+ 	save_pgd = kmalloc_array(n_pgds, sizeof(*save_pgd), GFP_KERNEL);
+ 
++	/*
++	 * Build 1:1 ident mapping for old_map usage. It needs to be noticed
++	 * that PAGE_OFFSET is PGDIR_SIZE aligned with KASLR disabled, while
++	 * PUD_SIZE ALIGNED with KASLR enabled. So for a given physical
++	 * address X, the pud_index(X) != pud_index(__va(X)), we can only copy
++	 * pud entry of __va(X) to fill in pud entry of X to build 1:1 mapping
++	 * . Means here we can only reuse pmd table of direct mapping.
++	 */
+ 	for (pgd = 0; pgd < n_pgds; pgd++) {
+-		save_pgd[pgd] = *pgd_offset_k(pgd * PGDIR_SIZE);
+-		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
+-		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
++		addr_pgd = (unsigned long)(pgd * PGDIR_SIZE);
++		vaddr = (unsigned long)__va(pgd * PGDIR_SIZE);
++		pgd_efi = pgd_offset_k(addr_pgd);
++		save_pgd[pgd] = *pgd_efi;
++		p4d =  p4d_alloc(&init_mm, pgd_efi, addr_pgd);
++
++		if (!p4d) {
++			pr_err("Failed to allocate p4d table \n");
++			goto out;
++		}
++		for(i=0; i<PTRS_PER_P4D; i++) {
++			addr_p4d = addr_pgd + i * P4D_SIZE;
++			p4d_efi = p4d + p4d_index(addr_p4d);
++			pud = pud_alloc(&init_mm, p4d_efi, addr_p4d);
++			if (!pud) {
++				pr_err("Failed to allocate pud table \n");
++				goto out;
++			}
++			for(j=0; j<PTRS_PER_PUD; j++) {
++				addr_pud = addr_p4d + j * PUD_SIZE;
++				if (addr_pud > (max_pfn << PAGE_SHIFT))
++					break;
++				vaddr = (unsigned long)__va(addr_pud);
++
++				pgd_k = pgd_offset_k(vaddr);
++				p4d_k = p4d_offset(pgd_k, vaddr);
++				pud[j] = *pud_offset(p4d_k, vaddr);
++			}
++		}
  	}
- 
--	list_for_each_entry_safe_from((*pos), n, head, list) {
--		efi_pstore_scan_sysfs_enter((*pos), n, head);
-+	list_for_each_entry_safe_from(pos, n, head, list) {
-+		efi_pstore_scan_sysfs_enter(pos, n, head);
- 
--		size = efi_pstore_read_func((*pos), record);
--		ret = efi_pstore_scan_sysfs_exit((*pos), n, head, size < 0);
-+		size = efi_pstore_read_func(pos, record);
-+		ret = efi_pstore_scan_sysfs_exit(pos, n, head, size < 0);
- 		if (ret)
- 			return ret;
- 		if (size)
- 			break;
- 	}
--	*pos = n;
-+	pos = n;
- 	return size;
- }
- 
-@@ -218,7 +213,6 @@ static int efi_pstore_sysfs_entry_iter(struct pstore_record *record,
-  */
- static ssize_t efi_pstore_read(struct pstore_record *record)
- {
--	struct efivar_entry *entry = (struct efivar_entry *)record->psi->data;
- 	ssize_t size;
- 
- 	record->buf = kzalloc(EFIVARS_DATA_SIZE_MAX, GFP_KERNEL);
-@@ -229,7 +223,7 @@ static ssize_t efi_pstore_read(struct pstore_record *record)
- 		size = -EINTR;
- 		goto out;
- 	}
--	size = efi_pstore_sysfs_entry_iter(record, &entry);
-+	size = efi_pstore_sysfs_entry_iter(record);
- 	efivar_entry_iter_end();
- 
  out:
+ 	__flush_tlb_all();
+@@ -104,8 +140,11 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
+ 	/*
+ 	 * After the lock is released, the original page table is restored.
+ 	 */
+-	int pgd_idx;
++	int pgd_idx, i;
+ 	int nr_pgds;
++	pgd_t *pgd;
++        p4d_t *p4d;
++        pud_t *pud;
+ 
+ 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
+ 		write_cr3((unsigned long)save_pgd);
+@@ -115,9 +154,23 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
+ 
+ 	nr_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
+ 
+-	for (pgd_idx = 0; pgd_idx < nr_pgds; pgd_idx++)
++	for (pgd_idx = 0; pgd_idx < nr_pgds; pgd_idx++) {
++		pgd = pgd_offset_k(pgd_idx * PGDIR_SIZE);
+ 		set_pgd(pgd_offset_k(pgd_idx * PGDIR_SIZE), save_pgd[pgd_idx]);
+ 
++		if (!(pgd_val(*pgd) & _PAGE_PRESENT))
++			continue;
++		for(i=0; i<PTRS_PER_P4D; i++) {
++			p4d = p4d_offset(pgd, pgd_idx * PGDIR_SIZE + i * P4D_SIZE);
++			if (!(p4d_val(*p4d) & _PAGE_PRESENT))
++				continue;
++			pud = (pud_t*)p4d_page_vaddr(*p4d);
++			pud_free(&init_mm, pud);
++                }
++		p4d = (p4d_t*)pgd_page_vaddr(*pgd);
++		p4d_free(&init_mm, p4d);
++	}
++
+ 	kfree(save_pgd);
+ 
+ 	__flush_tlb_all();
 -- 
-2.7.4
-
-
--- 
-Kees Cook
-Pixel Security
+2.5.5
