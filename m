@@ -1,303 +1,257 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v5 17/32] x86/mm: Add support to access boot related data
- in the clear
-Date: Mon, 15 May 2017 20:35:17 +0200
-Message-ID: <20170515183517.mb4k2gp2qobbuvtm@pd.tnic>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418211921.10190.1537.stgit@tlendack-t1.amdoffice.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-arch-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170418211921.10190.1537.stgit@tlendack-t1.amdoffice.net>
-Sender: linux-arch-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy
+From: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: [PATCH V16 00/11] Add UEFI 2.6 and ACPI 6.1 updates for RAS on ARM64
+Date: Mon, 15 May 2017 15:27:49 -0600
+Message-ID: <1494883680-25551-1-git-send-email-tbaicar@codeaurora.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 18, 2017 at 04:19:21PM -0500, Tom Lendacky wrote:
-> Boot data (such as EFI related data) is not encrypted when the system is
-> booted because UEFI/BIOS does not run with SME active. In order to access
-> this data properly it needs to be mapped decrypted.
-> 
-> The early_memremap() support is updated to provide an arch specific
+When a memory error, CPU error, PCIe error, or other type of hardware error
+that's covered by RAS occurs, firmware should populate the shared GHES memory
+location with the proper GHES structures to notify the OS of the error.
+For example, platforms that implement firmware first handling may implement
+separate GHES sources for corrected errors and uncorrected errors. If the
+error is an uncorrectable error, then the firmware will notify the OS
+immediately since the error needs to be handled ASAP. The OS will then be able
+to take the appropriate action needed such as offlining a page. If the error
+is a corrected error, then the firmware will not interrupt the OS immediately.
+Instead, the OS will see and report the error the next time it's GHES timer
+expires. The kernel will first parse the GHES structures and report the errors
+through the kernel logs and then notify the user space through RAS trace
+events. This allows user space applications such as RAS Daemon to see the
+errors and report them however the user desires. This patchset extends the
+kernel functionality for RAS errors based on updates in the UEFI 2.6 and
+ACPI 6.1 specifications.
 
-"Update early_memremap() to provide... "
+An example flow from firmware to user space could be:
 
-> routine to modify the pagetable protection attributes before they are
-> applied to the new mapping. This is used to remove the encryption mask
-> for boot related data.
-> 
-> The memremap() support is updated to provide an arch specific routine
+                 +---------------+
+       +-------->|               |
+       |         |  GHES polling |--+
++-------------+  |    source     |  |   +---------------+   +------------+
+|             |  +---------------+  |   |  Kernel GHES  |   |            |
+|  Firmware   |                     +-->|  CPER AER and |-->|  RAS trace |
+|             |  +---------------+  |   |  EDAC drivers |   |   event    |
++-------------+  |               |  |   +---------------+   +------------+
+       |         |  GHES sci     |--+
+       +-------->|   source      |
+                 +---------------+
 
-Ditto. Passive tone always reads harder than an active tone,
-"doer"-sentence.
+Add support for Generic Hardware Error Source (GHES) v2, which introduces the
+capability for the OS to acknowledge the consumption of the error record
+generated by the Reliability, Availability and Serviceability (RAS) controller.
+This eliminates potential race conditions between the OS and the RAS controller.
 
-> to determine if RAM remapping is allowed.  RAM remapping will cause an
-> encrypted mapping to be generated. By preventing RAM remapping,
-> ioremap_cache() will be used instead, which will provide a decrypted
-> mapping of the boot related data.
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/include/asm/io.h |    4 +
->  arch/x86/mm/ioremap.c     |  182 +++++++++++++++++++++++++++++++++++++++++++++
->  include/linux/io.h        |    2 
->  kernel/memremap.c         |   20 ++++-
->  mm/early_ioremap.c        |   18 ++++
->  5 files changed, 219 insertions(+), 7 deletions(-)
-> 
-> diff --git a/arch/x86/include/asm/io.h b/arch/x86/include/asm/io.h
-> index 7afb0e2..75f2858 100644
-> --- a/arch/x86/include/asm/io.h
-> +++ b/arch/x86/include/asm/io.h
-> @@ -381,4 +381,8 @@ extern int __must_check arch_phys_wc_add(unsigned long base,
->  #define arch_io_reserve_memtype_wc arch_io_reserve_memtype_wc
->  #endif
->  
-> +extern bool arch_memremap_do_ram_remap(resource_size_t offset, size_t size,
-> +				       unsigned long flags);
-> +#define arch_memremap_do_ram_remap arch_memremap_do_ram_remap
-> +
->  #endif /* _ASM_X86_IO_H */
-> diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
-> index 9bfcb1f..bce0604 100644
-> --- a/arch/x86/mm/ioremap.c
-> +++ b/arch/x86/mm/ioremap.c
-> @@ -13,6 +13,7 @@
->  #include <linux/slab.h>
->  #include <linux/vmalloc.h>
->  #include <linux/mmiotrace.h>
-> +#include <linux/efi.h>
->  
->  #include <asm/cacheflush.h>
->  #include <asm/e820/api.h>
-> @@ -21,6 +22,7 @@
->  #include <asm/tlbflush.h>
->  #include <asm/pgalloc.h>
->  #include <asm/pat.h>
-> +#include <asm/setup.h>
->  
->  #include "physaddr.h"
->  
-> @@ -419,6 +421,186 @@ void unxlate_dev_mem_ptr(phys_addr_t phys, void *addr)
->  	iounmap((void __iomem *)((unsigned long)addr & PAGE_MASK));
->  }
->  
-> +/*
-> + * Examine the physical address to determine if it is an area of memory
-> + * that should be mapped decrypted.  If the memory is not part of the
-> + * kernel usable area it was accessed and created decrypted, so these
-> + * areas should be mapped decrypted.
-> + */
-> +static bool memremap_should_map_decrypted(resource_size_t phys_addr,
-> +					  unsigned long size)
-> +{
-> +	/* Check if the address is outside kernel usable area */
-> +	switch (e820__get_entry_type(phys_addr, phys_addr + size - 1)) {
-> +	case E820_TYPE_RESERVED:
-> +	case E820_TYPE_ACPI:
-> +	case E820_TYPE_NVS:
-> +	case E820_TYPE_UNUSABLE:
-> +		return true;
-> +	default:
-> +		break;
-> +	}
-> +
-> +	return false;
-> +}
-> +
-> +/*
-> + * Examine the physical address to determine if it is EFI data. Check
-> + * it against the boot params structure and EFI tables and memory types.
-> + */
-> +static bool memremap_is_efi_data(resource_size_t phys_addr,
-> +				 unsigned long size)
-> +{
-> +	u64 paddr;
-> +
-> +	/* Check if the address is part of EFI boot/runtime data */
-> +	if (efi_enabled(EFI_BOOT)) {
+Add support for the timestamp field added to the Generic Error Data Entry v3,
+allowing the OS to log the time that the error is generated by the firmware,
+rather than the time the error is consumed. This improves the correctness of
+event sequences when analyzing error logs. The timestamp is added in
+ACPI 6.1, reference Table 18-343 Generic Error Data Entry.
 
-Save indentation level:
+Add support for ARMv8 Common Platform Error Record (CPER) per UEFI 2.6
+specification. ARMv8 specific processor error information is reported as part of
+the CPER records.  This provides more detail on for processor error logs. This
+can help describe ARMv8 cache, tlb, and bus errors.
 
-	if (!efi_enabled(EFI_BOOT))
-		return false;
+Synchronous External Abort (SEA) represents a specific processor error condition
+in ARM systems. A handler is added to recognize SEA errors, and a notifier is
+added to parse and report the errors before the process is killed. Refer to
+section N.2.1.1 in the Common Platform Error Record appendix of the UEFI 2.6
+specification.
 
+Currently the kernel ignores CPER records that are unrecognized.
+On the other hand, UEFI spec allows for non-standard (eg. vendor
+proprietary) error section type in CPER (Common Platform Error Record),
+as defined in section N2.3 of UEFI version 2.5. Therefore, user
+is not able to see hardware error data of non-standard section.
 
-> +		paddr = boot_params.efi_info.efi_memmap_hi;
-> +		paddr <<= 32;
-> +		paddr |= boot_params.efi_info.efi_memmap;
-> +		if (phys_addr == paddr)
-> +			return true;
-> +
-> +		paddr = boot_params.efi_info.efi_systab_hi;
-> +		paddr <<= 32;
-> +		paddr |= boot_params.efi_info.efi_systab;
+If section Type field of Generic Error Data Entry is unrecognized,
+prints out the raw data in dmesg buffer, and also adds a tracepoint
+for reporting such hardware errors.
 
-So those two above look like could be two global vars which are
-initialized somewhere in the EFI init path:
+Currently even if an error status block's severity is fatal, the kernel
+does not honor the severity level and panic. With the firmware first
+model, the platform could inform the OS about a fatal hardware error
+through the non-NMI GHES notification type. The OS should panic when a
+hardware error record is received with this severity.
 
-efi_memmap_phys and efi_systab_phys or so.
+Add support to handle SEAs that occur while a KVM guest kernel is
+running. Currently these are unsupported by the guest abort handling.
 
-Matt ?
+V16:Rebase on 4.11
+    Change helper functions from #defines to inline functions
+    Address checkpatch warnings which make sense
+    Various parameter/variable name changes and spacing changes for better code readibility
+    Comment why only GHESv2 needs to acknowledge the error records
+    Define and set error structures on the same line
+    Change timestamp printing function name to cper_print_tstamp
+    Update timestamp to be a single print again and specify when it's precise or imprecise
+    Only print section length when the length check fails in the ARM CPER record parsing
+    Remove version and length print of ARM error info structures
+    Spell out Multiprocessor Affinity Register (MPIDR) and Power State Coordination Interface (PSCI)
+    Combine invalid context prints for ARM context info parsing
+    Only print register context type as a string
+    ifdef around the CPER ARM code to fix x86 compilation failure and remove the enabled check from the if statement
+    Use BIT() for CPER ARM #defines
+    Only call nmi_enter/exit when interrupts are enabled
+    Move GHES panic code into a single function
+    Add trace function prototypes in ras.c/ras.h to avoid ifdefs
+    Change UUID definition to guarantee we don't overflow the u8 array
+    Comment what ghes_notify_sea return means
 
-And then you won't need to create that paddr each time on the fly. I
-mean, it's not a lot of instructions but still...
+V15:Rebase on 4.11-rc7
+    Use wrapper functions for [un]mapping kernel acknowledgment register
+    Spacing and name changes to make code cleaner
+    Break up timestamp print to be more readable
+    Break generic error data v3 structure handling code into separate patch
+     and have timestamp handling in it's own patch
+    Put ARM CPER handling into ifdef for ARM systems
+    Add braces and missing space to KVM patch
 
-> +		if (phys_addr == paddr)
-> +			return true;
-> +
-> +		if (efi_table_address_match(phys_addr))
-> +			return true;
-> +
-> +		switch (efi_mem_type(phys_addr)) {
-> +		case EFI_BOOT_SERVICES_DATA:
-> +		case EFI_RUNTIME_SERVICES_DATA:
-> +			return true;
-> +		default:
-> +			break;
-> +		}
-> +	}
-> +
-> +	return false;
-> +}
-> +
-> +/*
-> + * Examine the physical address to determine if it is boot data by checking
-> + * it against the boot params setup_data chain.
-> + */
-> +static bool memremap_is_setup_data(resource_size_t phys_addr,
-> +				   unsigned long size)
-> +{
-> +	struct setup_data *data;
-> +	u64 paddr, paddr_next;
-> +
-> +	paddr = boot_params.hdr.setup_data;
-> +	while (paddr) {
-> +		bool is_setup_data = false;
+V14:Make sure function prototypes are in the __ASSEMBLY__ block
+    Change is_abort_synchronous to is_abort_sea
+    Use phys_addr_t for SEA address
+    Return after successful SEA handling in handle_guest_abort()
 
-You don't need that bool:
+V13:Rebase on 4.11rc2
+    Print decimal and hex sizes for unknown CPER section errors
+    Use proper CONFIG_* when using IS_ENABLED
+    Move handle_guest_sea call prior to SEI check
+    Add a return value to handle_guest_sea
+    Move RCU locking into ghes_notify_sea
+    Add valid bit checks to ARM trace event
+    Remove GPIO, SEI, and GSIV cases in GHES
+    Add ARCH_HAVE_NMI_SAFE_CMPXCHG since we added NMI usage
 
-static bool memremap_is_setup_data(resource_size_t phys_addr,
-                                   unsigned long size)
-{
-        struct setup_data *data;
-        u64 paddr, paddr_next;
+V12:Remove double quotes from CPER code
+    Add helper function to check all SEA cases in KVM patch
+    Replace nmi_enter/exit with rcu_read_lock/unlock for KVM SEA
+    Change HAVE_ACPI_APEI_SEA to ACPI_APEI_SEA in KVM SEA case
 
-        paddr = boot_params.hdr.setup_data;
-        while (paddr) {
-                if (phys_addr == paddr)
-                        return true;
+V11:Change print_hex_dump calls to include ASCII output
+    Change HAVE_ACPI_APEI_SEA to ACPI_APEI_SEA and make it 'default y'
+    Add unknown print back when printing unknown CPER section
+    Make sure to use "%s"" in CPER code
+    Spacing fix when checking if SEA is enabled
 
-                data = memremap(paddr, sizeof(*data), MEMREMAP_WB | MEMREMAP_DEC);
+V10:Fix spacing of trace event enabled if statement
 
-                paddr_next = data->next;
+V9: Move SEA_FnV_MASK to ESR_ELx_FnV
+    Move HAVE_NMI into alphabetical order
+    Remove duplicate hardirq.h include
+    Only call ghes_notify_sea if HAVE_ACPI_APEI_SEA
+    Make ACPI_APEI_SEA depend on ACPI_APEI_GHES
+    Use phys_addr_t for physical address variable
+    Make ghes_sea_add() return void
+    Add include guard to ghes.h
+    Verify HAVE_RAS before calling ras trace events
+    Call __ghes_print_estatus() before __ghes_call_panic()
+    Add trace_*_event_enabled() checks for both new trace events
 
-                if ((phys_addr > paddr) && (phys_addr < (paddr + data->len))) {
-                        memunmap(data);
-                        return true;
-                }
+V8: Remove SEA notifier
+    Add FAR not valid bit check when populating the SEA error address
+    Move nmi_enter/exit() to architecture specific code
+    Add synchronize_rcu() usage to SEA handling
+    Make GHES_IOREMAP_PAGES always 2
+    Update ghes_ioremap_pfn_nmi() to work like ghes_ioremap_pfn_irq()
+    Remove the SEA print from handle_guest_sea()
 
-                memunmap(data);
+V7: Update a couple prints for ARM processor errors
+    Add Print notifying if overflow occurred for ARM processor errors
+    Check for ARM configuration to allow the compiler to ignore ARM code
+     on non-ARM systems
+    Use SEA acronym instead of spelling it out
+    Update fault_info prints to be more clear
+    Add NMI locking to SEA notification
+    Remove error info structure from ARM trace event since there can be
+     a variable amount of these structures
 
-                paddr = paddr_next;
-        }
-        return false;
-}
+V6: Change HEST_TYPE_GENERIC_V2 to IS_HEST_TYPE_GENERIC_V2 for readability
+    Move APEI helper defines from cper.h to ghes.h
+    Add data_len decrement back into print loop
+    Change references to ARMv8 to just ARM
+    Rewrite ARM processor context info parsing
+    Check valid bit of ARM error info field before printing it
+    Add include of linux/uuid.h in ghes.c
 
-Flow is a bit clearer.
+V5: Fix GHES goto logic for error conditions
+    Change ghes_do_read_ack to ghes_ack_error
+    Make sure data version check is >= 3
+    Use CPER helper functions in print functions
+    Make handle_guest_sea() dummy function static for arm
+    Add arm to subject line for KVM patch
 
-> +/*
-> + * Examine the physical address to determine if it is boot data by checking
-> + * it against the boot params setup_data chain (early boot version).
-> + */
-> +static bool __init early_memremap_is_setup_data(resource_size_t phys_addr,
-> +						unsigned long size)
-> +{
-> +	struct setup_data *data;
-> +	u64 paddr, paddr_next;
-> +
-> +	paddr = boot_params.hdr.setup_data;
-> +	while (paddr) {
-> +		bool is_setup_data = false;
-> +
-> +		if (phys_addr == paddr)
-> +			return true;
-> +
-> +		data = early_memremap_decrypted(paddr, sizeof(*data));
-> +
-> +		paddr_next = data->next;
-> +
-> +		if ((phys_addr > paddr) && (phys_addr < (paddr + data->len)))
-> +			is_setup_data = true;
-> +
-> +		early_memunmap(data, sizeof(*data));
-> +
-> +		if (is_setup_data)
-> +			return true;
-> +
-> +		paddr = paddr_next;
-> +	}
-> +
-> +	return false;
-> +}
+V4: Add bit offset left shift to read_ack_write value
+    Make HEST generic and generic_v2 structures a union in the ghes structure
+    Move gdata v3 helper functions into ghes.h to avoid duplication
+    Reorder the timestamp print and avoid memcpy
+    Add helper functions for gdata size checking
+    Rename the SEA functions
+    Add helper function for GHES panics
+    Set fru_id to NULL UUID at variable declaration
+    Limit ARM trace event parameters to the needed structures
+    Reorder the ARM trace event variables to save space
+    Add comment for why we don't pass SEAs to the guest when it aborts
+    Move ARM trace event call into GHES driver instead of CPER
 
-This one is begging to be unified with memremap_is_setup_data() to both
-call a __ worker function.
+V3: Fix unmapped address to the read_ack_register in ghes.c
+    Add helper function to get the proper payload based on generic data entry
+     version
+    Move timestamp print to avoid changing function calls in cper.c
+    Remove patch "arm64: exception: handle instruction abort at current EL"
+     since the el1_ia handler is already added in 4.8
+    Add EFI and ARM64 dependencies for HAVE_ACPI_APEI_SEA
+    Add a new trace event for ARM type errors
+    Add support to handle KVM guest SEAs
 
-> +
-> +/*
-> + * Architecture function to determine if RAM remap is allowed. By default, a
-> + * RAM remap will map the data as encrypted. Determine if a RAM remap should
-> + * not be done so that the data will be mapped decrypted.
-> + */
-> +bool arch_memremap_do_ram_remap(resource_size_t phys_addr, unsigned long size,
-> +				unsigned long flags)
+V2: Add PSCI state print for the ARMv8 error type.
+    Separate timestamp year into year and century using BCD format.
+    Rebase on top of ACPICA 20160318 release and remove header file changes
+     in include/acpi/actbl1.h.
+    Add panic OS with fatal error status block patch.
+    Add processing of unrecognized CPER error section patches with updates
+     from previous comments. Original patches: https://lkml.org/lkml/2015/9/8/646
 
-So this function doesn't do anything - it replies to a yes/no question.
-So the name should not say "do" but sound like a question. Maybe:
+V1: https://lkml.org/lkml/2016/2/5/544
 
-	if (arch_memremap_can_remap( ... ))
+Jonathan (Zhixiong) Zhang (1):
+  acpi: apei: panic OS with fatal error status block
 
-or so...
+Tyler Baicar (10):
+  acpi: apei: read ack upon ghes record consumption
+  ras: acpi/apei: cper: add support for generic data v3 structure
+  cper: add timestamp print to CPER status printing
+  efi: parse ARM processor error
+  arm64: exception: handle Synchronous External Abort
+  acpi: apei: handle SEA notification type for ARMv8
+  efi: print unrecognized CPER section
+  ras: acpi / apei: generate trace event for unrecognized CPER section
+  trace, ras: add ARM processor error trace event
+  arm/arm64: KVM: add guest SEA support
 
-> +{
-> +	if (!sme_active())
-> +		return true;
-> +
-> +	if (flags & MEMREMAP_ENC)
-> +		return true;
-> +
-> +	if (flags & MEMREMAP_DEC)
-> +		return false;
-
-So this looks strange to me: both flags MEMREMAP_ENC and _DEC override
-setup and efi data checking. But we want to remap setup and EFI  data
-*always* decrypted because that data was not encrypted as, as you say,
-firmware doesn't run with SME active.
-
-So my simple logic says that EFI stuff should *always* be mapped DEC,
-regardless of flags. Ditto for setup data. So that check below should
-actually *override* the flags checks and go before them, no?
-
-> +
-> +	if (memremap_is_setup_data(phys_addr, size) ||
-> +	    memremap_is_efi_data(phys_addr, size) ||
-> +	    memremap_should_map_decrypted(phys_addr, size))
-> +		return false;
-> +
-> +	return true;
-> +}
-> +
-> +/*
-> + * Architecture override of __weak function to adjust the protection attributes
-> + * used when remapping memory. By default, early_memremp() will map the data
-
-early_memremAp() - a is missing.
+ arch/arm/include/asm/kvm_arm.h       |  10 ++
+ arch/arm/include/asm/system_misc.h   |   5 +
+ arch/arm/kvm/mmu.c                   |  36 +++++-
+ arch/arm64/Kconfig                   |   2 +
+ arch/arm64/include/asm/esr.h         |   1 +
+ arch/arm64/include/asm/kvm_arm.h     |  10 ++
+ arch/arm64/include/asm/system_misc.h |   2 +
+ arch/arm64/mm/fault.c                |  80 +++++++++++--
+ drivers/acpi/apei/Kconfig            |  15 +++
+ drivers/acpi/apei/ghes.c             | 212 +++++++++++++++++++++++++++++------
+ drivers/acpi/apei/hest.c             |   7 +-
+ drivers/firmware/efi/cper.c          | 204 ++++++++++++++++++++++++++++++---
+ drivers/ras/ras.c                    |  15 +++
+ include/acpi/ghes.h                  |  48 +++++++-
+ include/linux/cper.h                 |  54 +++++++++
+ include/linux/ras.h                  |  15 +++
+ include/ras/ras_event.h              |  90 +++++++++++++++
+ include/uapi/linux/uuid.h            |   6 +-
+ 18 files changed, 743 insertions(+), 69 deletions(-)
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
