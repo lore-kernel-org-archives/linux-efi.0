@@ -1,31 +1,44 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH] efi: remove duplicate 'const' specifiers
-Date: Mon, 15 May 2017 15:22:24 +0100
-Message-ID: <20170515142224.GD2935@codeblueprint.co.uk>
-References: <20170511114337.2803599-1-arnd@arndb.de>
+Subject: Re: [PATCH V2] x86/efi: Add EFI_PGT_DUMP support for x86_32, kexec
+Date: Mon, 15 May 2017 15:27:29 +0100
+Message-ID: <20170515142729.GE2935@codeblueprint.co.uk>
+References: <1494530433-19503-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20170511114337.2803599-1-arnd@arndb.de>
+In-Reply-To: <1494530433-19503-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Ingo Molnar <mingo@kernel.org>, David Howells <dhowells@redhat.com>, Josh Boyer <jwboyer@fedoraproject.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Ricardo Neri <ricardo.neri@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Ravi Shankar <ravi.v.shankar@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 11 May, at 01:43:17PM, Arnd Bergmann wrote:
-> gcc-7 shows a harmless warning:
+On Thu, 11 May, at 12:20:33PM, Sai Praneeth Prakhya wrote:
+> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 > 
-> drivers/firmware/efi/libstub/secureboot.c:19:27: error: duplicate 'const' declaration specifier [-Werror=duplicate-decl-specifier]
->  static const efi_char16_t const efi_SecureBoot_name[] = {
-> drivers/firmware/efi/libstub/secureboot.c:22:27: error: duplicate 'const' declaration specifier [-Werror=duplicate-decl-specifier]
+> EFI_PGT_DUMP, as the name suggests dumps efi page tables to dmesg during
+> kernel boot. This feature is very useful while debugging page
+> faults/null pointer dereferences to efi related addresses. Presently,
+> this feature is limited only to x86_64, so let's extend it to other efi
+> configurations like kexec kernel, efi=old_map and to x86_32 as well.
+> This doesn't effect normal boot path because this config option should
+> be used only for debug purposes.
 > 
-> Removing one of the specifiers gives us the expected behavior.
+> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+> Cc: Borislav Petkov <bp@alien8.de>
+> Cc: Ricardo Neri <ricardo.neri@intel.com>
+> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Cc: Ravi Shankar <ravi.v.shankar@intel.com>
 > 
-> Fixes: de8cb458625c ("efi: Get and store the secure boot status")
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Changes since v1:
+> 1. Call efi_dump_pagetable() only once from efi_enter_virtual_mode() -
+> as suggested by Boris
+> 
 > ---
->  drivers/firmware/efi/libstub/secureboot.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  arch/x86/platform/efi/efi.c    | 3 ++-
+>  arch/x86/platform/efi/efi_32.c | 9 ++++++++-
+>  arch/x86/platform/efi/efi_64.c | 5 ++++-
+>  3 files changed, 14 insertions(+), 3 deletions(-)
 
-Thanks, applied to the urgent queue.
+Thanks Sai, applied.
