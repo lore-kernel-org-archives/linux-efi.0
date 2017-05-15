@@ -1,44 +1,44 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH V2] x86/efi: Add EFI_PGT_DUMP support for x86_32, kexec
-Date: Mon, 15 May 2017 15:27:29 +0100
-Message-ID: <20170515142729.GE2935@codeblueprint.co.uk>
-References: <1494530433-19503-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: Re: [PATCH 4.11 00/28] 4.11.1-stable review
+Date: Mon, 15 May 2017 15:36:01 +0100
+Message-ID: <20170515143601.GF2935@codeblueprint.co.uk>
+References: <20170511141221.109842231@linuxfoundation.org>
+ <465c70c9-1dbc-7c57-c6aa-b6df740663ed@osg.samsung.com>
+ <efa3b911-93f6-29b4-a9ca-e0d9b480a4ef@osg.samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <stable-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1494530433-19503-1-git-send-email-sai.praneeth.prakhya@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Ricardo Neri <ricardo.neri@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Ravi Shankar <ravi.v.shankar@intel.com>
+In-Reply-To: <efa3b911-93f6-29b4-a9ca-e0d9b480a4ef@osg.samsung.com>
+Sender: stable-owner@vger.kernel.org
+To: Shuah Khan <shuahkh@osg.samsung.com>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, torvalds@linux-foundation.org, akpm@linux-foundation.org, linux@roeck-us.net, patches@kernelci.org, ben.hutchings@codethink.co.uk, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 11 May, at 12:20:33PM, Sai Praneeth Prakhya wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+On Fri, 12 May, at 10:01:41AM, Shuah Khan wrote:
 > 
-> EFI_PGT_DUMP, as the name suggests dumps efi page tables to dmesg during
-> kernel boot. This feature is very useful while debugging page
-> faults/null pointer dereferences to efi related addresses. Presently,
-> this feature is limited only to x86_64, so let's extend it to other efi
-> configurations like kexec kernel, efi=old_map and to x86_32 as well.
-> This doesn't effect normal boot path because this config option should
-> be used only for debug purposes.
+> Greg/Matt,
 > 
-> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-> Cc: Borislav Petkov <bp@alien8.de>
-> Cc: Ricardo Neri <ricardo.neri@intel.com>
-> Cc: Matt Fleming <matt@codeblueprint.co.uk>
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+> I started seeing this maybe since 4.11, so it isn't really a 4.11.1
+> issue, however sounds like this shouldn't be an error message, since
+> it is showing up on an older platform.
 > 
-> Changes since v1:
-> 1. Call efi_dump_pagetable() only once from efi_enter_virtual_mode() -
-> as suggested by Boris
+> efi: EFI_MEMMAP is not enabled.
+> efi: Failed to lookup EFI memory descriptor for 0x00000000d9e0f018
 > 
-> ---
->  arch/x86/platform/efi/efi.c    | 3 ++-
->  arch/x86/platform/efi/efi_32.c | 9 ++++++++-
->  arch/x86/platform/efi/efi_64.c | 5 ++++-
->  3 files changed, 14 insertions(+), 3 deletions(-)
+> 
+> From 816e76129ed5fadd28e526c43397c79775194b5c Mon Sep 17 00:00:00 2001
+> From: Matt Fleming <matt@codeblueprint.co.uk>
+> Date: Mon, 29 Feb 2016 21:22:52 +0000
+> Subject: [PATCH] efi: Allow drivers to reserve boot services forever
+> 
+> This change was introduced in Commit: 816e76129ed5fadd28e526c43397c79775194b5c
+> 
+> Matt!
+> 
+> Shouldn't this be a debug message?? Is this a really an error??
 
-Thanks Sai, applied.
+Yes, it's most likely an error. We shouldn't be trying to reserve
+EFI regions if we can't find them in the memory map.
+
+Can you provide the full dmesg, please?
