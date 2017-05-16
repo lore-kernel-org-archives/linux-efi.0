@@ -1,37 +1,85 @@
-From: "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH V16 08/11] efi: print unrecognized CPER section
-Date: Tue, 16 May 2017 11:16:21 -0600
-Message-ID: <e91cb902-c583-c3bc-b5d8-bd4291581341@codeaurora.org>
-References: <1494883680-25551-1-git-send-email-tbaicar@codeaurora.org>
- <1494883680-25551-9-git-send-email-tbaicar@codeaurora.org>
- <20170516142927.guxwc3gdgpqshpks@pd.tnic>
- <5a4a5b58-3e31-9fa5-091d-bb63437da9ab@codeaurora.org>
- <20170516165540.xnbxdhrqeiorqhc5@pd.tnic>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v5 26/32] x86, drm, fbdev: Do not specify encrypted
+ memory for video mappings
+Date: Tue, 16 May 2017 19:35:41 +0200
+Message-ID: <20170516173541.q2rbh5dhkluzsjae@pd.tnic>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+ <20170418212056.10190.25468.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170516165540.xnbxdhrqeiorqhc5-fF5Pk5pvG8Y@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170418212056.10190.25468.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
 List-Id: linux-efi@vger.kernel.org
 
-On 5/16/2017 10:55 AM, Borislav Petkov wrote:
-> On Tue, May 16, 2017 at 10:44:43AM -0600, Baicar, Tyler wrote:
->> I meant to respond to this comment after I sent the v16 patch series, but
->> you beat me to it :)
->>
->> These prefixes are common to all the GHES/CPER printing to the kernel logs.
-> I don't mean that - I meant to remove them from this particular example
-> in the commit message along with the timestamps. Because they are simply
-> useless there.
->
-> Of course they should stay in the actual printk calls.
-Ah, okay. I'll remove all that from the commit message.
+On Tue, Apr 18, 2017 at 04:20:56PM -0500, Tom Lendacky wrote:
+> Since video memory needs to be accessed decrypted, be sure that the
+> memory encryption mask is not set for the video ranges.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/include/asm/vga.h       |   13 +++++++++++++
+>  arch/x86/mm/pageattr.c           |    2 ++
+>  drivers/gpu/drm/drm_gem.c        |    2 ++
+>  drivers/gpu/drm/drm_vm.c         |    4 ++++
+>  drivers/gpu/drm/ttm/ttm_bo_vm.c  |    7 +++++--
+>  drivers/gpu/drm/udl/udl_fb.c     |    4 ++++
+>  drivers/video/fbdev/core/fbmem.c |   12 ++++++++++++
+>  7 files changed, 42 insertions(+), 2 deletions(-)
+> 
+> diff --git a/arch/x86/include/asm/vga.h b/arch/x86/include/asm/vga.h
+> index c4b9dc2..5c7567a 100644
+> --- a/arch/x86/include/asm/vga.h
+> +++ b/arch/x86/include/asm/vga.h
+> @@ -7,12 +7,25 @@
+>  #ifndef _ASM_X86_VGA_H
+>  #define _ASM_X86_VGA_H
+>  
+> +#include <asm/cacheflush.h>
+> +
+>  /*
+>   *	On the PC, we can just recalculate addresses and then
+>   *	access the videoram directly without any black magic.
+> + *	To support memory encryption however, we need to access
+> + *	the videoram as decrypted memory.
+>   */
+>  
+> +#ifdef CONFIG_AMD_MEM_ENCRYPT
+> +#define VGA_MAP_MEM(x, s)					\
+> +({								\
+> +	unsigned long start = (unsigned long)phys_to_virt(x);	\
+> +	set_memory_decrypted(start, (s) >> PAGE_SHIFT);		\
+> +	start;							\
+> +})
+> +#else
+>  #define VGA_MAP_MEM(x, s) (unsigned long)phys_to_virt(x)
+> +#endif
+
+Can we push the check in and save us the ifdeffery?
+
+#define VGA_MAP_MEM(x, s)                                       \
+({                                                              \
+        unsigned long start = (unsigned long)phys_to_virt(x);   \
+                                                                \
+        if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT))                 \
+                set_memory_decrypted(start, (s) >> PAGE_SHIFT); \
+                                                                \
+        start;                                                  \
+})
+
+It does build here. :)
 
 -- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
