@@ -1,83 +1,95 @@
 From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH V16 10/11] trace, ras: add ARM processor error trace event
-Date: Tue, 16 May 2017 16:44:14 +0200
-Message-ID: <20170516144414.7ym6o4psxw3lu5p2@pd.tnic>
-References: <1494883680-25551-1-git-send-email-tbaicar@codeaurora.org>
- <1494883680-25551-11-git-send-email-tbaicar@codeaurora.org>
+Subject: Re: [PATCH v5 23/32] swiotlb: Add warnings for use of bounce buffers
+ with SME
+Date: Tue, 16 May 2017 16:52:09 +0200
+Message-ID: <20170516145209.ltbmaq3a2teqr2uv@pd.tnic>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+ <20170418212019.10190.24034.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-acpi-owner@vger.kernel.org>
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <1494883680-25551-11-git-send-email-tbaicar@codeaurora.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org
+In-Reply-To: <20170418212019.10190.24034.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, May 15, 2017 at 03:27:59PM -0600, Tyler Baicar wrote:
-> Currently there are trace events for the various RAS
-> errors with the exception of ARM processor type errors.
-> Add a new trace event for such errors so that the user
-> will know when they occur. These trace events are
-> consistent with the ARM processor error section type
-> defined in UEFI 2.6 spec section N.2.4.4.
+On Tue, Apr 18, 2017 at 04:20:19PM -0500, Tom Lendacky wrote:
+> Add warnings to let the user know when bounce buffers are being used for
+> DMA when SME is active.  Since the bounce buffers are not in encrypted
+> memory, these notifications are to allow the user to determine some
+> appropriate action - if necessary.
 > 
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> Acked-by: Steven Rostedt <rostedt@goodmis.org>
-> Reviewed-by: Xie XiuQi <xiexiuqi@huawei.com>
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 > ---
->  drivers/acpi/apei/ghes.c    |  6 +++++-
->  drivers/firmware/efi/cper.c |  1 +
->  drivers/ras/ras.c           |  6 ++++++
->  include/linux/ras.h         |  3 +++
->  include/ras/ras_event.h     | 45 +++++++++++++++++++++++++++++++++++++++++++++
->  5 files changed, 60 insertions(+), 1 deletion(-)
+>  arch/x86/include/asm/mem_encrypt.h |   11 +++++++++++
+>  include/linux/dma-mapping.h        |   11 +++++++++++
+>  include/linux/mem_encrypt.h        |    6 ++++++
+>  lib/swiotlb.c                      |    3 +++
+>  4 files changed, 31 insertions(+)
 > 
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index 1106722..2dddb3b 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -518,7 +518,11 @@ static void ghes_do_proc(struct ghes *ghes,
->  
->  		}
->  #endif
-> -		else {
-> +		else if (!uuid_le_cmp(sec_type, CPER_SEC_PROC_ARM)) {
-> +			struct cper_sec_proc_arm *err = acpi_hest_get_payload(gdata);
-> +
-> +			call_arm_trace_event(err);
-> +		} else {
->  			void *err = acpi_hest_get_payload(gdata);
->  
->  			call_non_standard_trace_event(&sec_type, fru_id,
-> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> index d5a5855..48a8f69 100644
-> --- a/drivers/firmware/efi/cper.c
-> +++ b/drivers/firmware/efi/cper.c
-> @@ -35,6 +35,7 @@
->  #include <linux/printk.h>
->  #include <linux/bcd.h>
->  #include <acpi/ghes.h>
-> +#include <ras/ras_event.h>
->  
->  #define INDENT_SP	" "
->  
-> diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
-> index 57363be..8655ef4 100644
-> --- a/drivers/ras/ras.c
-> +++ b/drivers/ras/ras.c
-> @@ -20,6 +20,11 @@ void call_non_standard_trace_event(const uuid_le *sec_type,
->  	trace_non_standard_event(sec_type, fru_id, fru_text, sev, err, len);
+> diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
+> index 0637b4b..b406df2 100644
+> --- a/arch/x86/include/asm/mem_encrypt.h
+> +++ b/arch/x86/include/asm/mem_encrypt.h
+> @@ -26,6 +26,11 @@ static inline bool sme_active(void)
+>  	return !!sme_me_mask;
 >  }
 >  
-> +void call_arm_trace_event(struct cper_sec_proc_arm *err)
+> +static inline u64 sme_dma_mask(void)
+> +{
+> +	return ((u64)sme_me_mask << 1) - 1;
+> +}
+> +
+>  void __init sme_early_encrypt(resource_size_t paddr,
+>  			      unsigned long size);
+>  void __init sme_early_decrypt(resource_size_t paddr,
+> @@ -50,6 +55,12 @@ static inline bool sme_active(void)
+>  {
+>  	return false;
+>  }
+> +
+> +static inline u64 sme_dma_mask(void)
+> +{
+> +	return 0ULL;
+> +}
+> +
+>  #endif
+>  
+>  static inline void __init sme_early_encrypt(resource_size_t paddr,
+> diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
+> index 0977317..f825870 100644
+> --- a/include/linux/dma-mapping.h
+> +++ b/include/linux/dma-mapping.h
+> @@ -10,6 +10,7 @@
+>  #include <linux/scatterlist.h>
+>  #include <linux/kmemcheck.h>
+>  #include <linux/bug.h>
+> +#include <linux/mem_encrypt.h>
+>  
+>  /**
+>   * List of possible attributes associated with a DMA mapping. The semantics
+> @@ -577,6 +578,11 @@ static inline int dma_set_mask(struct device *dev, u64 mask)
+>  
+>  	if (!dev->dma_mask || !dma_supported(dev, mask))
+>  		return -EIO;
+> +
+> +	if (sme_active() && (mask < sme_dma_mask()))
+> +		dev_warn_ratelimited(dev,
+> +				     "SME is active, device will require DMA bounce buffers\n");
 
-log_arm_hw_error()
-
-because it is exactly that - a hardware error.
+Bah, no need to break that line - just let it stick out. Ditto for the
+others.
 
 -- 
 Regards/Gruss,
     Boris.
 
 Good mailing practices for 400: avoid top-posting and trim the reply.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
