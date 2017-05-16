@@ -1,95 +1,100 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v5 23/32] swiotlb: Add warnings for use of bounce buffers
- with SME
-Date: Tue, 16 May 2017 16:52:09 +0200
-Message-ID: <20170516145209.ltbmaq3a2teqr2uv@pd.tnic>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418212019.10190.24034.stgit@tlendack-t1.amdoffice.net>
+From: "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH V16 08/11] efi: print unrecognized CPER section
+Date: Tue, 16 May 2017 10:44:43 -0600
+Message-ID: <5a4a5b58-3e31-9fa5-091d-bb63437da9ab@codeaurora.org>
+References: <1494883680-25551-1-git-send-email-tbaicar@codeaurora.org>
+ <1494883680-25551-9-git-send-email-tbaicar@codeaurora.org>
+ <20170516142927.guxwc3gdgpqshpks@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170418212019.10190.24034.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170516142927.guxwc3gdgpqshpks-fF5Pk5pvG8Y@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 18, 2017 at 04:20:19PM -0500, Tom Lendacky wrote:
-> Add warnings to let the user know when bounce buffers are being used for
-> DMA when SME is active.  Since the bounce buffers are not in encrypted
-> memory, these notifications are to allow the user to determine some
-> appropriate action - if necessary.
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/include/asm/mem_encrypt.h |   11 +++++++++++
->  include/linux/dma-mapping.h        |   11 +++++++++++
->  include/linux/mem_encrypt.h        |    6 ++++++
->  lib/swiotlb.c                      |    3 +++
->  4 files changed, 31 insertions(+)
-> 
-> diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
-> index 0637b4b..b406df2 100644
-> --- a/arch/x86/include/asm/mem_encrypt.h
-> +++ b/arch/x86/include/asm/mem_encrypt.h
-> @@ -26,6 +26,11 @@ static inline bool sme_active(void)
->  	return !!sme_me_mask;
->  }
->  
-> +static inline u64 sme_dma_mask(void)
-> +{
-> +	return ((u64)sme_me_mask << 1) - 1;
-> +}
-> +
->  void __init sme_early_encrypt(resource_size_t paddr,
->  			      unsigned long size);
->  void __init sme_early_decrypt(resource_size_t paddr,
-> @@ -50,6 +55,12 @@ static inline bool sme_active(void)
->  {
->  	return false;
->  }
-> +
-> +static inline u64 sme_dma_mask(void)
-> +{
-> +	return 0ULL;
-> +}
-> +
->  #endif
->  
->  static inline void __init sme_early_encrypt(resource_size_t paddr,
-> diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
-> index 0977317..f825870 100644
-> --- a/include/linux/dma-mapping.h
-> +++ b/include/linux/dma-mapping.h
-> @@ -10,6 +10,7 @@
->  #include <linux/scatterlist.h>
->  #include <linux/kmemcheck.h>
->  #include <linux/bug.h>
-> +#include <linux/mem_encrypt.h>
->  
->  /**
->   * List of possible attributes associated with a DMA mapping. The semantics
-> @@ -577,6 +578,11 @@ static inline int dma_set_mask(struct device *dev, u64 mask)
->  
->  	if (!dev->dma_mask || !dma_supported(dev, mask))
->  		return -EIO;
-> +
-> +	if (sme_active() && (mask < sme_dma_mask()))
-> +		dev_warn_ratelimited(dev,
-> +				     "SME is active, device will require DMA bounce buffers\n");
+On 5/16/2017 8:29 AM, Borislav Petkov wrote:
+> On Mon, May 15, 2017 at 03:27:57PM -0600, Tyler Baicar wrote:
+>> UEFI spec allows for non-standard section in Common Platform Error
+>> Record. This is defined in section N.2.3 of UEFI version 2.5.
+>>
+>> Currently if the CPER section's type (UUID) does not match with
+>> one of the section types that the kernel knows how to parse, the
+>> section is skipped. Therefore, user is not able to see
+>> such CPER data, for instance, error record of non-standard section.
+>>
+>> This change prints out the raw data in hex in the dmesg buffer so
+>> that non-standard sections are reported to the user. Non-standard
+>> section type errors should be reported to the user because these
+>> can include errors which are vendor specific. The data length is
+>> taken from Error Data length field of Generic Error Data Entry.
+>>
+>> The following is a sample output from dmesg:
+>> [  140.739180] {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 2
+>> [  140.739182] {1}[Hardware Error]: It has been corrected by h/w and requires no further action
+>> [  140.739191] {1}[Hardware Error]: event severity: corrected
+>> [  140.739196] {1}[Hardware Error]:  time: precise 2017-03-15 20:37:35
+>> [  140.739197] {1}[Hardware Error]:  Error 0, type: corrected
+>> [  140.739203] {1}[Hardware Error]:   section type: unknown, d2e2621c-f936-468d-0d84-15a4ed015c8b
+>> [  140.739205] {1}[Hardware Error]:   section length: 0x238
+>> [  140.739210] {1}[Hardware Error]:   00000000: 4d415201 4d492031 453a4d45 435f4343  .RAM1 IMEM:ECC_C
+>> [  140.739214] {1}[Hardware Error]:   00000010: 53515f45 44525f42 00000000 00000000  E_QSB_RD........
+>> [  140.739217] {1}[Hardware Error]:   00000020: 00000000 00000000 00000000 00000000  ................
+>> [  140.739220] {1}[Hardware Error]:   00000030: 00000000 00000000 01010000 01010000  ................
+>> [  140.739223] {1}[Hardware Error]:   00000040: 00000000 00000000 00000005 00000000  ................
+>> [  140.739226] {1}[Hardware Error]:   00000050: 01010000 00000000 00000001 00dddd00  ................
+> Let me repeat myself from the last time:
+>
+> "Kill all those prefixes:
+>
+> " Hardware error from APEI Generic Hardware Error Source: 2
+>    It has been corrected by h/w and requires no further action
+>    event severity: corrected
+>     time: precise 2017-03-15 20:37:35
+>     Error 0, type: corrected
+>      section type: unknown, d2e2621c-f936-468d-0d84-15a4ed015c8b
+>      section length: 568 (0x238)
+>      00000000: 4d415201 4d492031 453a4d45 435f4343  .RAM1 IMEM:ECC_C
+>      00000010: 53515f45 44525f42 00000000 00000000  E_QSB_RD........
+>      00000020: 00000000 00000000 00000000 00000000  ................
+>      00000030: 00000000 00000000 01010000 01010000  ................
+>      00000040: 00000000 00000000 00000005 00000000  ................
+>      00000050: 01010000 00000000 00000001 00dddd00  ................
+> "
+>
+> to the important info only."
+Hello Boris,
 
-Bah, no need to break that line - just let it stick out. Ditto for the
-others.
+I meant to respond to this comment after I sent the v16 patch series, 
+but you beat me to it :)
+
+These prefixes are common to all the GHES/CPER printing to the kernel 
+logs. The first value here '{1}' is an increment based on the number of 
+error records that have been printed during the current boot. This value 
+can be very helpful when trying to parse the log which could have 
+hundreds or thousands of these errors. Just yesterday I saw a log with 
+~250 records printed. It was a lot easier to see that incremented number 
+and know how many were in the log than to actually parse the log to 
+count that information.
+
+The '[Hardware Error]' print I could see doing away with, but it does 
+actually have value when you're looking through the logs. It helps these 
+errors stand out especially to people who aren't looking for them. These 
+hardware errors shouldn't be happening, so it makes sense for them to 
+stand out in the logs. And it also helps to find all these records in a 
+log that could be littered with a lot of other prints. I find myself 
+doing "dmesg | grep 'Hardware error'" all the time.
+
+Hopefully that is enough justification to keep these. If not, then I can 
+add a separate patch in this series to remove them.
+
+Thanks,
+Tyler
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
