@@ -1,128 +1,152 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Fix kexec kernel panic when efi=old_map is
- enabled
-Date: Tue, 16 May 2017 08:59:43 +0800
-Message-ID: <20170516005943.GB3300@dhcp-128-65.nay.redhat.com>
-References: <1494271523-17331-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <20170515132322.GB2935@codeblueprint.co.uk>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v5 18/32] x86, mpparse: Use memremap to map the mpf and
+ mpc data
+Date: Tue, 16 May 2017 10:36:58 +0200
+Message-ID: <20170516083658.fq2h4ysmrbgn23cs@pd.tnic>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+ <20170418211930.10190.62640.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <20170515132322.GB2935-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+In-Reply-To: <20170418211930.10190.62640.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
 List-Id: linux-efi@vger.kernel.org
 
-On 05/15/17 at 02:23pm, Matt Fleming wrote:
-> (Pulling in Dave, Mr. Kexec on EFI)
+On Tue, Apr 18, 2017 at 04:19:30PM -0500, Tom Lendacky wrote:
+> The SMP MP-table is built by UEFI and placed in memory in a decrypted
+> state. These tables are accessed using a mix of early_memremap(),
+> early_memunmap(), phys_to_virt() and virt_to_phys(). Change all accesses
+> to use early_memremap()/early_memunmap(). This allows for proper setting
+> of the encryption mask so that the data can be successfully accessed when
+> SME is active.
 > 
-> On Mon, 08 May, at 12:25:23PM, Sai Praneeth Prakhya wrote:
-> > From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > 
-> > Booting kexec kernel with "efi=old_map" in kernel command line hits
-> > kernel panic as shown below.
-> > 
-> > [    0.001000] BUG: unable to handle kernel paging request at ffff88007fe78070
-> > [    0.001000] IP: virt_efi_set_variable.part.7+0x63/0x1b0
-> > [    0.001000] PGD 7ea28067
-> > [    0.001000] PUD 7ea2b067
-> > [    0.001000] PMD 7ea2d067
-> > [    0.001000] PTE 0
-> > [    0.001000]
-> > [    0.001000] Oops: 0000 [#1] SMP
-> > [    0.001000] Modules linked in:
-> > [    0.001000] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.11.0-rc2-yocto-standard+ #229
-> > [    0.001000] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 0.0.0 02/06/2015
-> > [    0.001000] task: ffffffff82022500 task.stack: ffffffff82000000
-> > [    0.001000] RIP: 0010:virt_efi_set_variable.part.7+0x63/0x1b0
-> > [    0.001000] RSP: 0000:ffffffff82003dc0 EFLAGS: 00010246
-> > [    0.001000] RAX: ffff88007fe78018 RBX: ffffffff82050300 RCX: 0000000000000007
-> > [    0.001000] RDX: ffffffff82003e50 RSI: ffffffff82050300 RDI: ffffffff82050300
-> > [    0.001000] RBP: ffffffff82003e08 R08: 0000000000000000 R09: 0000000000000000
-> > [    0.001000] R10: 0000000000000000 R11: 0000000000000000 R12: ffffffff82003e50
-> > [    0.001000] R13: 0000000000000007 R14: 0000000000000246 R15: 0000000000000000
-> > [    0.001000] FS:  0000000000000000(0000) GS:ffff88007fa00000(0000) knlGS:0000000000000000
-> > [    0.001000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> > [    0.001000] CR2: ffff88007fe78070 CR3: 000000007da1d000 CR4: 00000000000006b0
-> > [    0.001000] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> > [    0.001000] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-> > [    0.001000] Call Trace:
-> > [    0.001000]  virt_efi_set_variable+0x5d/0x70
-> > [    0.001000]  efi_delete_dummy_variable+0x7a/0x80
-> > [    0.001000]  efi_enter_virtual_mode+0x3f6/0x4a7
-> > [    0.001000]  start_kernel+0x375/0x400
-> > [    0.001000]  x86_64_start_reservations+0x2a/0x2c
-> > [    0.001000]  x86_64_start_kernel+0x168/0x176
-> > [    0.001000]  start_cpu+0x14/0x14
-> > [    0.001000] Code: 04 b0 84 ff 80 3d c5 56 b3 00 00 4c 8b 44 24 08 75
-> > 6b 9c 41 5e 48 8b 05 9c 78 99 00 4d 89 c1 48 89 de 4d 89 f8 44 89 e9 4c
-> > 89 e2 <48> 8b 40 58 48 8b 78 58 e8 b0 2d 88 ff 48 c7 c6 b6 1d f4 81 4c
-> > [    0.001000] RIP: virt_efi_set_variable.part.7+0x63/0x1b0 RSP: ffffffff82003dc0
-> > [    0.001000] CR2: ffff88007fe78070
-> > [    0.001000] ---[ end trace 0000000000000000 ]---
-> > [    0.001000] Kernel panic - not syncing: Attempted to kill the idle task!
-> > [    0.001000] ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
-> > 
-> > This happens because efi=old_map doesn't use efi_pgd but rather it uses
-> > kernel's pgd. We don't hit the same panic in a regular kernel because
-> > it uses old_map_region() and not __map_region().
-> > 
-> > Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-> > Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> > Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > ---
-> >  arch/x86/platform/efi/efi_64.c | 3 +++
-> >  1 file changed, 3 insertions(+)
-> > 
-> > diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-> > index 4e043a8c8556..76e1cd6b74dd 100644
-> > --- a/arch/x86/platform/efi/efi_64.c
-> > +++ b/arch/x86/platform/efi/efi_64.c
-> > @@ -320,6 +320,9 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
-> >  	unsigned long pfn;
-> >  	pgd_t *pgd = efi_pgd;
-> >  
-> > +	if (efi_enabled(EFI_OLD_MEMMAP))
-> > +		pgd = swapper_pg_dir;
-> > +
-> >  	if (!(md->attribute & EFI_MEMORY_WB))
-> >  		flags |= _PAGE_PCD;
-> >  
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/kernel/mpparse.c |  102 +++++++++++++++++++++++++++++++--------------
+>  1 file changed, 71 insertions(+), 31 deletions(-)
 > 
-> The thing is, efi=old_map was never intended to work with kexec.
-> 
-> Part of the reason for introducing the new EFI runtime services
-> mapping scheme was so that we could kexec on EFI. See commit
-> d2f7cbe7b26a ("x86/efi: Runtime services virtual mapping").
-> 
-> The problem with using efi=old_map is that the virtual addresses are
-> assigned from the memory region used by other kernel mappings;
-> vmalloc() space.
-> 
-> Potentially there could be collisions when booting kexec if something
-> else is mapped at the virtual address we allocated for runtime service
-> regions in the initial boot.
-> 
-> So, while this patch may work for you and Joey, I don't think it's
-> reliable.
-> 
-> Dave, did I miss anything?
+> diff --git a/arch/x86/kernel/mpparse.c b/arch/x86/kernel/mpparse.c
+> index fd37f39..afbda41d 100644
+> --- a/arch/x86/kernel/mpparse.c
+> +++ b/arch/x86/kernel/mpparse.c
+> @@ -429,7 +429,21 @@ static inline void __init construct_default_ISA_mptable(int mpc_default_type)
+>  	}
+>  }
+>  
+> -static struct mpf_intel *mpf_found;
+> +static unsigned long mpf_base;
+> +
+> +static void __init unmap_mpf(struct mpf_intel *mpf)
+> +{
+> +	early_memunmap(mpf, sizeof(*mpf));
+> +}
+> +
+> +static struct mpf_intel * __init map_mpf(unsigned long paddr)
+> +{
+> +	struct mpf_intel *mpf;
+> +
+> +	mpf = early_memremap(paddr, sizeof(*mpf));
+> +
+> +	return mpf;
 
-Matt, sorry for late reply, I did not notice this patch is kexec related
-and I missed it.
+	return early_memremap(paddr, sizeof(*mpf));
 
-Yes, you are right, efi=old_map is supposed not to work with kexec
-reboot because the runtime va is not persistent. The only way for
-old_map kexec boot is use below kexec-tools option to load kexec kernel:
-kexec --noefi
-and at the same time need pass acpi root pointer in kexec kernel
-cmdline:
-acpi_rsdp=<acpi rsdp addr, see /sys/firmware/efi/systab>
+...
 
-Thanks
-Dave
+> @@ -842,25 +873,26 @@ static int __init update_mp_table(void)
+>  	if (!enable_update_mptable)
+>  		return 0;
+>  
+> -	mpf = mpf_found;
+> -	if (!mpf)
+> +	if (!mpf_base)
+>  		return 0;
+>  
+> +	mpf = map_mpf(mpf_base);
+> +
+>  	/*
+>  	 * Now see if we need to go further.
+>  	 */
+>  	if (mpf->feature1 != 0)
+
+You're kidding, right? map_mpf() *can* return NULL.
+
+Also, simplify that test:
+
+	if (mpf->feature1)
+		...
+
+
+> -		return 0;
+> +		goto do_unmap_mpf;
+>  
+>  	if (!mpf->physptr)
+> -		return 0;
+> +		goto do_unmap_mpf;
+>  
+> -	mpc = phys_to_virt(mpf->physptr);
+> +	mpc = map_mpc(mpf->physptr);
+
+Again: error checking !!!
+
+You have other calls to early_memremap()/map_mpf() in this patch. Please
+add error checking everywhere.
+
+>  
+>  	if (!smp_check_mpc(mpc, oem, str))
+> -		return 0;
+> +		goto do_unmap_mpc;
+>  
+> -	pr_info("mpf: %llx\n", (u64)virt_to_phys(mpf));
+> +	pr_info("mpf: %llx\n", (u64)mpf_base);
+>  	pr_info("physptr: %x\n", mpf->physptr);
+>  
+>  	if (mpc_new_phys && mpc->length > mpc_new_length) {
+> @@ -878,21 +910,23 @@ static int __init update_mp_table(void)
+>  		new = mpf_checksum((unsigned char *)mpc, mpc->length);
+>  		if (old == new) {
+>  			pr_info("mpc is readonly, please try alloc_mptable instead\n");
+> -			return 0;
+> +			goto do_unmap_mpc;
+>  		}
+>  		pr_info("use in-position replacing\n");
+>  	} else {
+>  		mpf->physptr = mpc_new_phys;
+> -		mpc_new = phys_to_virt(mpc_new_phys);
+> +		mpc_new = map_mpc(mpc_new_phys);
+
+Ditto.
+
+>  		memcpy(mpc_new, mpc, mpc->length);
+> +		unmap_mpc(mpc);
+>  		mpc = mpc_new;
+>  		/* check if we can modify that */
+>  		if (mpc_new_phys - mpf->physptr) {
+>  			struct mpf_intel *mpf_new;
+>  			/* steal 16 bytes from [0, 1k) */
+>  			pr_info("mpf new: %x\n", 0x400 - 16);
+> -			mpf_new = phys_to_virt(0x400 - 16);
+> +			mpf_new = map_mpf(0x400 - 16);
+
+Ditto.
+
+>  			memcpy(mpf_new, mpf, 16);
+> +			unmap_mpf(mpf);
+>  			mpf = mpf_new;
+>  			mpf->physptr = mpc_new_phys;
+>  		}
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
