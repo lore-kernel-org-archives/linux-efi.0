@@ -1,170 +1,347 @@
-From: Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH] efi/libstub: Indicate clang the relocation mode for arm64
-Date: Wed, 17 May 2017 09:09:56 -0700
-Message-ID: <20170517160956.GE141096@google.com>
-References: <20170509193612.64105-1-mka@chromium.org>
- <25d94b46-765e-f12f-a287-853c76782143@google.com>
- <20170509214905.GH128305@google.com>
- <CAKv+Gu_6my-rCc3E1V1n23dHY5OH97qpZ672ST8AZGLjedquAg@mail.gmail.com>
- <20170510183848.GI128305@google.com>
- <69A18345-6933-4C6A-8FAC-DBD4D7EF30DE@linaro.org>
- <20170510194734.GJ128305@google.com>
- <CAKv+Gu8H9H=Rax4iiKaZ2z2GikXTjseCAyKrYgQPQWkekjsN8w@mail.gmail.com>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [PATCH v5 17/32] x86/mm: Add support to access boot related data
+	in the clear
+Date: Wed, 17 May 2017 13:54:39 -0500
+Message-ID: <4845df29-bae7-9b78-0428-ff96dbef2128@amd.com>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+	<20170418211921.10190.1537.stgit@tlendack-t1.amdoffice.net>
+	<20170515183517.mb4k2gp2qobbuvtm@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu8H9H=Rax4iiKaZ2z2GikXTjseCAyKrYgQPQWkekjsN8w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Grundler <grundler-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Michael Davidson <md-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Bernhard =?utf-8?Q?Rosenkr=C3=A4nzer?= <Bernhard.Rosenkranzer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20170515183517.mb4k2gp2qobbuvtm-fF5Pk5pvG8Y@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter
+	Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S.
+	Tsirkin" <mst>
 List-Id: linux-efi@vger.kernel.org
 
-El Thu, May 11, 2017 at 02:51:48PM +0100 Ard Biesheuvel ha dit:
+On 5/15/2017 1:35 PM, Borislav Petkov wrote:
+> On Tue, Apr 18, 2017 at 04:19:21PM -0500, Tom Lendacky wrote:
+>> Boot data (such as EFI related data) is not encrypted when the system is
+>> booted because UEFI/BIOS does not run with SME active. In order to access
+>> this data properly it needs to be mapped decrypted.
+>>
+>> The early_memremap() support is updated to provide an arch specific
+>
+> "Update early_memremap() to provide... "
 
-> (adding Arnd and Will to cc, who are likely to have an opinion as to
-> which GCC is the oldest we need to support for arm64)
-> 
-> On 10 May 2017 at 20:47, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
-> > El Wed, May 10, 2017 at 09:05:28PM +0200 Ard Biesheuvel ha dit:
-> >
-> >>
-> >>
-> >> > On 10 May 2017, at 20:38, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
-> >> >
-> >> > Hoi Ard,
-> >> >
-> >> > El Wed, May 10, 2017 at 08:51:44AM +0100 Ard Biesheuvel ha dit:
-> >> >
-> >> >> On 9 May 2017 at 22:49, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
-> >> >>> El Tue, May 09, 2017 at 01:50:36PM -0700 Greg Hackmann ha dit:
-> >> >>>
-> >> >>>> On 05/09/2017 12:36 PM, Matthias Kaehlcke wrote:
-> >> >>>>> From: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-> >> >>>>>
-> >> >>>>> Without any extra guidance, clang will generate libstub with either
-> >> >>>>> absolute or relative ELF relocations. Use the right combination of
-> >> >>>>> -fpic and -fno-pic on different files to avoid this.
-> >> >>>>>
-> >> >>>>> Signed-off-by: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-> >> >>>>> Signed-off-by: Bernhard Rosenkränzer <Bernhard.Rosenkranzer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> >> >>>>> Signed-off-by: Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-> >> >>>>> ---
-> >> >>>>> drivers/firmware/efi/libstub/Makefile | 6 ++++++
-> >> >>>>> 1 file changed, 6 insertions(+)
-> >> >>>>>
-> >> >>>>> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-> >> >>>>> index f7425960f6a5..ccbaaf4d8650 100644
-> >> >>>>> --- a/drivers/firmware/efi/libstub/Makefile
-> >> >>>>> +++ b/drivers/firmware/efi/libstub/Makefile
-> >> >>>>> @@ -11,6 +11,9 @@ cflags-$(CONFIG_X86)               += -m$(BITS) -D__KERNEL__ -O2 \
-> >> >>>>>                               -mno-mmx -mno-sse
-> >> >>>>>
-> >> >>>>> cflags-$(CONFIG_ARM64)              := $(subst -pg,,$(KBUILD_CFLAGS))
-> >> >>>>> +ifeq ($(cc-name),clang)
-> >> >>>>> +cflags-$(CONFIG_ARM64)              += -fpic
-> >> >>>>> +endif
-> >> >>>>> cflags-$(CONFIG_ARM)                := $(subst -pg,,$(KBUILD_CFLAGS)) \
-> >> >>>>>                               -fno-builtin -fpic -mno-single-pic-base
-> >> >>>>>
-> >> >>>>> @@ -38,6 +41,9 @@ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
-> >> >>>>>
-> >> >>>>> lib-$(CONFIG_EFI_ARMSTUB)   += arm-stub.o fdt.o string.o random.o \
-> >> >>>>>                               $(patsubst %.c,lib-%.o,$(arm-deps))
-> >> >>>>> +ifeq ($(cc-name),clang)
-> >> >>>>> +CFLAGS_arm64-stub.o            += -fno-pic
-> >> >>>>> +endif
-> >> >>>>>
-> >> >>>>> lib-$(CONFIG_ARM)           += arm32-stub.o
-> >> >>>>> lib-$(CONFIG_ARM64)         += arm64-stub.o
-> >> >>>>>
-> >> >>>>
-> >> >>>> NAK.
-> >> >>>>
-> >> >>>> This patch was labeled "HACK:" in our experimental tree.  There's no
-> >> >>>> rhyme or reason to why this combination of -f[no-]pic flags
-> >> >>>> generates code without problematic relocations.  It's inherently
-> >> >>>> fragile, and was only intended as a temporary workaround until I (or
-> >> >>>> someone more familiar with EFI) got a chance to revisit the problem.
-> >> >>>>
-> >> >>>> Unless the gcc CFLAGS are also an artifact of "mess with -f[no-]pic
-> >> >>>> until the compiler generates what you want", this doesn't belong
-> >> >>>> upstream.
-> >> >>>
-> >> >>> Sorry, I didn't realize it is that bad of a hack. Unfortunately I'm
-> >> >>> not very familiar with EFI either.
-> >> >>>
-> >> >>> I saw Ard did some work in this code related with relocation, maybe he
-> >> >>> can provide a pointer towards a better solution.
-> >> >>>
-> >> >>
-> >> >> This is a known issue. The problem is that generic AArch64 small model
-> >> >> code is mostly position independent already, due to its use of
-> >> >> adrp/add pairs to generate symbol references with a +/- 4 GB range.
-> >> >> Building the same code with -fpic will result in GOT entries to be
-> >> >> generated, which carry absolute addresses, so this achieves the exact
-> >> >> opposite of what we want.
-> >> >>
-> >> >> The reason for the GOT entries is that GCC (and Clang, apparently)
-> >> >> infer from the -fpic flag that you are building objects that will be
-> >> >> linked into a shared library, to which ELF symbol preemption rules
-> >> >> apply that stipulate that a symbol in the main executable supersedes a
-> >> >> symbol under the same name in the shared library, and that the shared
-> >> >> library should update all its internal references to the main
-> >> >> executable's version of the symbol. The easiest way (but certainly not
-> >> >> the only way) to achieve that is to indirect all internal symbol
-> >> >> references via GOT entries, which can be made to refer to another
-> >> >> symbol by updating a single value.
-> >> >>
-> >> >> The workaround I used is to use hidden visibility, using a #pragma.
-> >> >> (There is a -fvisibility=hidden command line option as well, but this
-> >> >> is a weaker form that does not apply to extern declarations, only to
-> >> >> definitions). So if you add
-> >> >>
-> >> >> #pragma GCC visibility push(hidden)
-> >> >>
-> >> >> at the beginning of arm64-stub.c (and perhaps to one or two other
-> >> >> files that contain externally visible symbol declarations these days),
-> >> >> you should be able to compile the entire EFI stub with -fpic. Note
-> >> >> that making those externally visible symbols 'static' where possible
-> >> >> would solve the problem as well, but this triggers another issue in
-> >> >> the 32-bit ARM stub.
-> >> >>
-> >> >> In my opinion, the correct fix would be to make -fpie (as opposed to
-> >> >> -fpic) imply hidden visibility, given that PIE executables don't
-> >> >> export symbols in the first place, and so the preemption rules do not
-> >> >> apply. It is worth a try whether -fpie works as expected in this case
-> >> >> on Clang, but the last time I tried it on GCC, it behaved exactly like
-> >> >> -fpic.
-> >> >
-> >> > Thanks a lot for the detailed description and your suggestions!
-> >> >
-> >> > A clang build with -fpie for the EFI stub succeeds without complaints
-> >> > about GOT entries. I will send out an updated patch (with -fpie only
-> >> > for clang) later.
-> >> >
-> >>
-> >> Good! I never liked the visibility hack, which is why I never upstreamed it.
-> >>
-> >> Could you please check how recent GCC behaves?
-> >
-> > I tried GCC v4.9.4 and v6.3.1, both build the EFI stub with -fpie
-> > without errors.
-> >
-> > Are you suggesting to use -fpie for both clang and GCC? Do you know
-> > what the minimum required GCC version is for building an arm64 kernel?
-> 
-> Yes. Up until now, we have been relying on the position independent
-> nature of small model code, but it would be better to specify it
-> explicitly, so if -fpie gives us mostly identical code and does not
-> need visibility hacks, I would prefer to add it for all compilers and
-> not have an exception only for Clang. Note that the same applies to
-> the entire kernel when built in KASLR mode, so it would also be good
-> to know our options here.
+Will do.
 
-Thanks, makes perfect sense.
+>
+>> routine to modify the pagetable protection attributes before they are
+>> applied to the new mapping. This is used to remove the encryption mask
+>> for boot related data.
+>>
+>> The memremap() support is updated to provide an arch specific routine
+>
+> Ditto. Passive tone always reads harder than an active tone,
+> "doer"-sentence.
 
-> Arnd, Will, what is the oldest GCC version we claim to support for arm64?
+Ditto.
 
-Any comments on this Arnd/Will?
+>
+>> to determine if RAM remapping is allowed.  RAM remapping will cause an
+>> encrypted mapping to be generated. By preventing RAM remapping,
+>> ioremap_cache() will be used instead, which will provide a decrypted
+>> mapping of the boot related data.
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+>> ---
+>>  arch/x86/include/asm/io.h |    4 +
+>>  arch/x86/mm/ioremap.c     |  182 +++++++++++++++++++++++++++++++++++++++++++++
+>>  include/linux/io.h        |    2
+>>  kernel/memremap.c         |   20 ++++-
+>>  mm/early_ioremap.c        |   18 ++++
+>>  5 files changed, 219 insertions(+), 7 deletions(-)
+>>
+>> diff --git a/arch/x86/include/asm/io.h b/arch/x86/include/asm/io.h
+>> index 7afb0e2..75f2858 100644
+>> --- a/arch/x86/include/asm/io.h
+>> +++ b/arch/x86/include/asm/io.h
+>> @@ -381,4 +381,8 @@ extern int __must_check arch_phys_wc_add(unsigned long base,
+>>  #define arch_io_reserve_memtype_wc arch_io_reserve_memtype_wc
+>>  #endif
+>>
+>> +extern bool arch_memremap_do_ram_remap(resource_size_t offset, size_t size,
+>> +				       unsigned long flags);
+>> +#define arch_memremap_do_ram_remap arch_memremap_do_ram_remap
+>> +
+>>  #endif /* _ASM_X86_IO_H */
+>> diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
+>> index 9bfcb1f..bce0604 100644
+>> --- a/arch/x86/mm/ioremap.c
+>> +++ b/arch/x86/mm/ioremap.c
+>> @@ -13,6 +13,7 @@
+>>  #include <linux/slab.h>
+>>  #include <linux/vmalloc.h>
+>>  #include <linux/mmiotrace.h>
+>> +#include <linux/efi.h>
+>>
+>>  #include <asm/cacheflush.h>
+>>  #include <asm/e820/api.h>
+>> @@ -21,6 +22,7 @@
+>>  #include <asm/tlbflush.h>
+>>  #include <asm/pgalloc.h>
+>>  #include <asm/pat.h>
+>> +#include <asm/setup.h>
+>>
+>>  #include "physaddr.h"
+>>
+>> @@ -419,6 +421,186 @@ void unxlate_dev_mem_ptr(phys_addr_t phys, void *addr)
+>>  	iounmap((void __iomem *)((unsigned long)addr & PAGE_MASK));
+>>  }
+>>
+>> +/*
+>> + * Examine the physical address to determine if it is an area of memory
+>> + * that should be mapped decrypted.  If the memory is not part of the
+>> + * kernel usable area it was accessed and created decrypted, so these
+>> + * areas should be mapped decrypted.
+>> + */
+>> +static bool memremap_should_map_decrypted(resource_size_t phys_addr,
+>> +					  unsigned long size)
+>> +{
+>> +	/* Check if the address is outside kernel usable area */
+>> +	switch (e820__get_entry_type(phys_addr, phys_addr + size - 1)) {
+>> +	case E820_TYPE_RESERVED:
+>> +	case E820_TYPE_ACPI:
+>> +	case E820_TYPE_NVS:
+>> +	case E820_TYPE_UNUSABLE:
+>> +		return true;
+>> +	default:
+>> +		break;
+>> +	}
+>> +
+>> +	return false;
+>> +}
+>> +
+>> +/*
+>> + * Examine the physical address to determine if it is EFI data. Check
+>> + * it against the boot params structure and EFI tables and memory types.
+>> + */
+>> +static bool memremap_is_efi_data(resource_size_t phys_addr,
+>> +				 unsigned long size)
+>> +{
+>> +	u64 paddr;
+>> +
+>> +	/* Check if the address is part of EFI boot/runtime data */
+>> +	if (efi_enabled(EFI_BOOT)) {
+>
+> Save indentation level:
+>
+> 	if (!efi_enabled(EFI_BOOT))
+> 		return false;
+>
+
+I was worried what the compiler might do when CONFIG_EFI is not set,
+but it appears to take care of it. I'll double check though.
+
+>
+>> +		paddr = boot_params.efi_info.efi_memmap_hi;
+>> +		paddr <<= 32;
+>> +		paddr |= boot_params.efi_info.efi_memmap;
+>> +		if (phys_addr == paddr)
+>> +			return true;
+>> +
+>> +		paddr = boot_params.efi_info.efi_systab_hi;
+>> +		paddr <<= 32;
+>> +		paddr |= boot_params.efi_info.efi_systab;
+>
+> So those two above look like could be two global vars which are
+> initialized somewhere in the EFI init path:
+>
+> efi_memmap_phys and efi_systab_phys or so.
+>
+> Matt ?
+>
+> And then you won't need to create that paddr each time on the fly. I
+> mean, it's not a lot of instructions but still...
+>
+>> +		if (phys_addr == paddr)
+>> +			return true;
+>> +
+>> +		if (efi_table_address_match(phys_addr))
+>> +			return true;
+>> +
+>> +		switch (efi_mem_type(phys_addr)) {
+>> +		case EFI_BOOT_SERVICES_DATA:
+>> +		case EFI_RUNTIME_SERVICES_DATA:
+>> +			return true;
+>> +		default:
+>> +			break;
+>> +		}
+>> +	}
+>> +
+>> +	return false;
+>> +}
+>> +
+>> +/*
+>> + * Examine the physical address to determine if it is boot data by checking
+>> + * it against the boot params setup_data chain.
+>> + */
+>> +static bool memremap_is_setup_data(resource_size_t phys_addr,
+>> +				   unsigned long size)
+>> +{
+>> +	struct setup_data *data;
+>> +	u64 paddr, paddr_next;
+>> +
+>> +	paddr = boot_params.hdr.setup_data;
+>> +	while (paddr) {
+>> +		bool is_setup_data = false;
+>
+> You don't need that bool:
+>
+> static bool memremap_is_setup_data(resource_size_t phys_addr,
+>                                    unsigned long size)
+> {
+>         struct setup_data *data;
+>         u64 paddr, paddr_next;
+>
+>         paddr = boot_params.hdr.setup_data;
+>         while (paddr) {
+>                 if (phys_addr == paddr)
+>                         return true;
+>
+>                 data = memremap(paddr, sizeof(*data), MEMREMAP_WB | MEMREMAP_DEC);
+>
+>                 paddr_next = data->next;
+>
+>                 if ((phys_addr > paddr) && (phys_addr < (paddr + data->len))) {
+>                         memunmap(data);
+>                         return true;
+>                 }
+>
+>                 memunmap(data);
+>
+>                 paddr = paddr_next;
+>         }
+>         return false;
+> }
+>
+> Flow is a bit clearer.
+
+I may introduce a length variable to capture data->len right after
+paddr_next is set and then have just a single memunmap() call before
+the if check.
+
+>
+>> +/*
+>> + * Examine the physical address to determine if it is boot data by checking
+>> + * it against the boot params setup_data chain (early boot version).
+>> + */
+>> +static bool __init early_memremap_is_setup_data(resource_size_t phys_addr,
+>> +						unsigned long size)
+>> +{
+>> +	struct setup_data *data;
+>> +	u64 paddr, paddr_next;
+>> +
+>> +	paddr = boot_params.hdr.setup_data;
+>> +	while (paddr) {
+>> +		bool is_setup_data = false;
+>> +
+>> +		if (phys_addr == paddr)
+>> +			return true;
+>> +
+>> +		data = early_memremap_decrypted(paddr, sizeof(*data));
+>> +
+>> +		paddr_next = data->next;
+>> +
+>> +		if ((phys_addr > paddr) && (phys_addr < (paddr + data->len)))
+>> +			is_setup_data = true;
+>> +
+>> +		early_memunmap(data, sizeof(*data));
+>> +
+>> +		if (is_setup_data)
+>> +			return true;
+>> +
+>> +		paddr = paddr_next;
+>> +	}
+>> +
+>> +	return false;
+>> +}
+>
+> This one is begging to be unified with memremap_is_setup_data() to both
+> call a __ worker function.
+
+I tried that, but calling an "__init" function (early_memremap()) from
+a non "__init" function generated warnings. I suppose I can pass in a
+function for the map and unmap but that looks worse to me (also the
+unmap functions take different arguments).
+
+>
+>> +
+>> +/*
+>> + * Architecture function to determine if RAM remap is allowed. By default, a
+>> + * RAM remap will map the data as encrypted. Determine if a RAM remap should
+>> + * not be done so that the data will be mapped decrypted.
+>> + */
+>> +bool arch_memremap_do_ram_remap(resource_size_t phys_addr, unsigned long size,
+>> +				unsigned long flags)
+>
+> So this function doesn't do anything - it replies to a yes/no question.
+> So the name should not say "do" but sound like a question. Maybe:
+>
+> 	if (arch_memremap_can_remap( ... ))
+>
+> or so...
+
+Ok, I'll change that.
+
+>
+>> +{
+>> +	if (!sme_active())
+>> +		return true;
+>> +
+>> +	if (flags & MEMREMAP_ENC)
+>> +		return true;
+>> +
+>> +	if (flags & MEMREMAP_DEC)
+>> +		return false;
+>
+> So this looks strange to me: both flags MEMREMAP_ENC and _DEC override
+> setup and efi data checking. But we want to remap setup and EFI  data
+> *always* decrypted because that data was not encrypted as, as you say,
+> firmware doesn't run with SME active.
+>
+> So my simple logic says that EFI stuff should *always* be mapped DEC,
+> regardless of flags. Ditto for setup data. So that check below should
+> actually *override* the flags checks and go before them, no?
+
+This is like the chicken and the egg scenario. In order to determine if
+an address is setup data I have to explicitly map the setup data chain
+as decrypted. In order to do that I have to supply a flag to explicitly
+map the data decrypted otherwise I wind up back in the
+memremap_is_setup_data() function again and again and again...
+
+>
+>> +
+>> +	if (memremap_is_setup_data(phys_addr, size) ||
+>> +	    memremap_is_efi_data(phys_addr, size) ||
+>> +	    memremap_should_map_decrypted(phys_addr, size))
+>> +		return false;
+>> +
+>> +	return true;
+>> +}
+>> +
+>> +/*
+>> + * Architecture override of __weak function to adjust the protection attributes
+>> + * used when remapping memory. By default, early_memremp() will map the data
+>
+> early_memremAp() - a is missing.
+
+Got it.
+
+Thanks,
+Tom
+
+>
