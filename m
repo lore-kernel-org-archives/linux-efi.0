@@ -1,48 +1,119 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v5 06/32] x86/mm: Add Secure Memory Encryption (SME)
- support
-Date: Wed, 17 May 2017 09:05:56 +0200
-Message-ID: <20170517070556.2lwwnfbre34xqr7s@pd.tnic>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418211727.10190.18774.stgit@tlendack-t1.amdoffice.net>
- <20170427154631.2tsqgax4kqcvydnx@pd.tnic>
- <d9d9f10a-0ce5-53e8-41f5-f8690dbd7362@amd.com>
- <20170504143622.zy2f66e4mkm6xvsq@pd.tnic>
- <6d266f5b-c28d-fe19-24b5-5133532f9eea@amd.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH v2] x86/efi: Disable runtime services on kexec kernel if
+ booted with efi=old_map
+Date: Wed, 17 May 2017 15:29:05 +0800
+Message-ID: <20170517072905.GB29898@linux-l9pv.suse>
+References: <1494983663-29286-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <6d266f5b-c28d-fe19-24b5-5133532f9eea@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
+In-Reply-To: <1494983663-29286-1-git-send-email-sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, May 16, 2017 at 02:28:42PM -0500, Tom Lendacky wrote:
-> It's most problematic when CONFIG_AMD_MEM_ENCRYPT is not defined since
-> we never include an asm/ version from the linux/ path.  I could create
-> a mem_encrypt.h in include/asm-generic/ that contains the info that
-> is in the !CONFIG_AMD_MEM_ENCRYPT path of the linux/ version. Let me
-> look into that.
+On Tue, May 16, 2017 at 06:14:23PM -0700, Sai Praneeth Prakhya wrote:
+> From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> 
+> Booting kexec kernel with "efi=old_map" in kernel command line hits
+> kernel panic as shown below.
+> 
+> [0.001000] BUG: unable to handle kernel paging request at ffff88007fe78070
+> [0.001000] IP: virt_efi_set_variable.part.7+0x63/0x1b0
+> [0.001000] PGD 7ea28067
+> [0.001000] PUD 7ea2b067
+> [0.001000] PMD 7ea2d067
+> [0.001000] PTE 0
+> [0.001000]
+> [0.001000] Oops: 0000 [#1] SMP
+> [0.001000] Modules linked in:
+> [0.001000] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.11.0-rc2-yocto-standard+ #229
+> [0.001000] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 0.0.0 02/06/2015
+> [0.001000] task: ffffffff82022500 task.stack: ffffffff82000000
+> [0.001000] RIP: 0010:virt_efi_set_variable.part.7+0x63/0x1b0
+> [0.001000] RSP: 0000:ffffffff82003dc0 EFLAGS: 00010246
+> [0.001000] RAX: ffff88007fe78018 RBX: ffffffff82050300 RCX: 0000000000000007
+> [0.001000] RDX: ffffffff82003e50 RSI: ffffffff82050300 RDI: ffffffff82050300
+> [0.001000] RBP: ffffffff82003e08 R08: 0000000000000000 R09: 0000000000000000
+> [0.001000] R10: 0000000000000000 R11: 0000000000000000 R12: ffffffff82003e50
+> [0.001000] R13: 0000000000000007 R14: 0000000000000246 R15: 0000000000000000
+> [0.001000] FS:  0000000000000000(0000) GS:ffff88007fa00000(0000) knlGS:0000000000000000
+> [0.001000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [0.001000] CR2: ffff88007fe78070 CR3: 000000007da1d000 CR4: 00000000000006b0
+> [0.001000] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+> [0.001000] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+> [0.001000] Call Trace:
+> [0.001000]  virt_efi_set_variable+0x5d/0x70
+> [0.001000]  efi_delete_dummy_variable+0x7a/0x80
+> [0.001000]  efi_enter_virtual_mode+0x3f6/0x4a7
+> [0.001000]  start_kernel+0x375/0x400
+> [0.001000]  x86_64_start_reservations+0x2a/0x2c
+> [0.001000]  x86_64_start_kernel+0x168/0x176
+> [0.001000]  start_cpu+0x14/0x14
+> [0.001000] Code: 04 b0 84 ff 80 3d c5 56 b3 00 00 4c 8b 44 24 08 75
+> 6b 9c 41 5e 48 8b 05 9c 78 99 00 4d 89 c1 48 89 de 4d 89 f8 44 89 e9 4c
+> 89 e2 <48> 8b 40 58 48 8b 78 58 e8 b0 2d 88 ff 48 c7 c6 b6 1d f4 81 4c
+> [0.001000] RIP: virt_efi_set_variable.part.7+0x63/0x1b0 RSP: ffffffff82003dc0
+> [0.001000] CR2: ffff88007fe78070
+> [0.001000] ---[ end trace 0000000000000000 ]---
+> [0.001000] Kernel panic - not syncing: Attempted to kill the idle task!
+> [0.001000] ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
+> 
+> [efi=old_map was never intended to work with kexec. The problem with
+> using efi=old_map is that the virtual addresses are assigned from the
+> memory region used by other kernel mappings; vmalloc() space.
+> Potentially there could be collisions when booting kexec if something
+> else is mapped at the virtual address we allocated for runtime service
+> regions in the initial boot] - Matt Fleming
+> 
+> Since kexec was never intended to work with efi=old_map, disable
+> runtime services in kexec if booted with efi=old_map, so that we don't
+> panic.
+> 
+> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+> Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Lee Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> 
+> Changes since v1:
+> Don't fix the panic, because this was never intended to work.
 
-So we need to keep asm/ and linux/ apart. The linux/ stuff is generic,
-global, more or less. The asm/ is arch-specific. So they shouldn't be
-overlapping wrt definitions, IMHO.
+I tested this patch on OVMF and Acer UEFI laptop. It works to me
+for efi=old_map with crash kernel.
 
-So asm-generic is the proper approach here because then you won't need
-the ifndef fun.
+Tested-by: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
 
-Thanks.
+> ---
+>  arch/x86/platform/efi/efi.c | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
+> 
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index 87835c97611f..627b7b86f369 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -827,9 +827,11 @@ static void __init kexec_enter_virtual_mode(void)
+>  
+>  	/*
+>  	 * We don't do virtual mode, since we don't do runtime services, on
+> -	 * non-native EFI
+> +	 * non-native EFI. With efi=old_map, we don't do runtime services in
+> +	 * kexec kernel because in the initial boot something else might
+> +	 * have been mapped at these virtual addresses.
+>  	 */
+> -	if (!efi_is_native()) {
+> +	if (!efi_is_native() || efi_enabled(EFI_OLD_MEMMAP)) {
+>  		efi_memmap_unmap();
+>  		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+>  		return;
+> -- 
+> 2.1.4
+>
 
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Thanks a lot!
+Joey Lee
