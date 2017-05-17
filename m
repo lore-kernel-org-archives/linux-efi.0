@@ -1,164 +1,75 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [PATCH v5 18/32] x86, mpparse: Use memremap to map the mpf and
- mpc data
-Date: Wed, 17 May 2017 15:26:58 -0500
-Message-ID: <6e155b8f-b691-2ee0-8977-969aaab6199a@amd.com>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418211930.10190.62640.stgit@tlendack-t1.amdoffice.net>
- <20170516083658.fq2h4ysmrbgn23cs@pd.tnic>
+From: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] efi/libstub: Indicate clang the relocation mode for arm64
+Date: Wed, 17 May 2017 16:24:34 -0700
+Message-ID: <a5692a7a-0140-2e61-497f-6d3bf92b5d11@google.com>
+References: <20170509193612.64105-1-mka@chromium.org>
+ <25d94b46-765e-f12f-a287-853c76782143@google.com>
+ <20170509214905.GH128305@google.com>
+ <CAKv+Gu_6my-rCc3E1V1n23dHY5OH97qpZ672ST8AZGLjedquAg@mail.gmail.com>
+ <20170510183848.GI128305@google.com>
+ <69A18345-6933-4C6A-8FAC-DBD4D7EF30DE@linaro.org>
+ <20170510194734.GJ128305@google.com>
+ <CAKv+Gu8H9H=Rax4iiKaZ2z2GikXTjseCAyKrYgQPQWkekjsN8w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170516083658.fq2h4ysmrbgn23cs@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S.
- Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKv+Gu8H9H=Rax4iiKaZ2z2GikXTjseCAyKrYgQPQWkekjsN8w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Grundler <grundler-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Michael Davidson <md-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, =?UTF-8?Q?Bernhard_Rosenkr=c3=a4nzer?= <Bernhard.Rosenkranzer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 5/16/2017 3:36 AM, Borislav Petkov wrote:
-> On Tue, Apr 18, 2017 at 04:19:30PM -0500, Tom Lendacky wrote:
->> The SMP MP-table is built by UEFI and placed in memory in a decrypted
->> state. These tables are accessed using a mix of early_memremap(),
->> early_memunmap(), phys_to_virt() and virt_to_phys(). Change all accesses
->> to use early_memremap()/early_memunmap(). This allows for proper setting
->> of the encryption mask so that the data can be successfully accessed when
->> SME is active.
+On 05/11/2017 06:51 AM, Ard Biesheuvel wrote:
+[snip]
+>>>>> In my opinion, the correct fix would be to make -fpie (as opposed to
+>>>>> -fpic) imply hidden visibility, given that PIE executables don't
+>>>>> export symbols in the first place, and so the preemption rules do not
+>>>>> apply. It is worth a try whether -fpie works as expected in this case
+>>>>> on Clang, but the last time I tried it on GCC, it behaved exactly like
+>>>>> -fpic.
+>>>>
+>>>> Thanks a lot for the detailed description and your suggestions!
+>>>>
+>>>> A clang build with -fpie for the EFI stub succeeds without complaints
+>>>> about GOT entries. I will send out an updated patch (with -fpie only
+>>>> for clang) later.
+>>>>
+>>>
+>>> Good! I never liked the visibility hack, which is why I never upstreamed it.
+>>>
+>>> Could you please check how recent GCC behaves?
 >>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->>  arch/x86/kernel/mpparse.c |  102 +++++++++++++++++++++++++++++++--------------
->>  1 file changed, 71 insertions(+), 31 deletions(-)
+>> I tried GCC v4.9.4 and v6.3.1, both build the EFI stub with -fpie
+>> without errors.
 >>
->> diff --git a/arch/x86/kernel/mpparse.c b/arch/x86/kernel/mpparse.c
->> index fd37f39..afbda41d 100644
->> --- a/arch/x86/kernel/mpparse.c
->> +++ b/arch/x86/kernel/mpparse.c
->> @@ -429,7 +429,21 @@ static inline void __init construct_default_ISA_mptable(int mpc_default_type)
->>  	}
->>  }
->>
->> -static struct mpf_intel *mpf_found;
->> +static unsigned long mpf_base;
->> +
->> +static void __init unmap_mpf(struct mpf_intel *mpf)
->> +{
->> +	early_memunmap(mpf, sizeof(*mpf));
->> +}
->> +
->> +static struct mpf_intel * __init map_mpf(unsigned long paddr)
->> +{
->> +	struct mpf_intel *mpf;
->> +
->> +	mpf = early_memremap(paddr, sizeof(*mpf));
->> +
->> +	return mpf;
->
-> 	return early_memremap(paddr, sizeof(*mpf));
->
+>> Are you suggesting to use -fpie for both clang and GCC? Do you know
+>> what the minimum required GCC version is for building an arm64 kernel?
+> 
+> Yes. Up until now, we have been relying on the position independent
+> nature of small model code, but it would be better to specify it
+> explicitly, so if -fpie gives us mostly identical code and does not
+> need visibility hacks, I would prefer to add it for all compilers and
+> not have an exception only for Clang. Note that the same applies to
+> the entire kernel when built in KASLR mode, so it would also be good
+> to know our options here.
+> 
+> Arnd, Will, what is the oldest GCC version we claim to support for arm64?
+> 
 
-Ok.
+Unfortunately, after looking into this a bit more, -fpie by itself 
+doesn't force clang to disable symbol preeemption.  For example when 
+building the EFI stub from 4.9 with clang, -fpie gives me a stub that 
+crashes with a synchronous exception inside handle_kernel_image().  The 
+faulting instruction is a read from __nokaslr that still goes through 
+the GOT.
 
-> ...
->
->> @@ -842,25 +873,26 @@ static int __init update_mp_table(void)
->>  	if (!enable_update_mptable)
->>  		return 0;
->>
->> -	mpf = mpf_found;
->> -	if (!mpf)
->> +	if (!mpf_base)
->>  		return 0;
->>
->> +	mpf = map_mpf(mpf_base);
->> +
->>  	/*
->>  	 * Now see if we need to go further.
->>  	 */
->>  	if (mpf->feature1 != 0)
->
-> You're kidding, right? map_mpf() *can* return NULL.
+Right now you'll get a usable EFI stub with -fpie anyway, since 
+60f38de7a8d4 ("efi/libstub: Unify command line param parsing") masked 
+the problem when it moved __nokaslr behind a helper function.  But AIUI 
+there's nothing really preventing a similar problem in the future.
 
-Ugh...  don't know how I forgot about that. Will fix everywhere.
-
->
-> Also, simplify that test:
->
-> 	if (mpf->feature1)
-> 		...
-
-Ok, I can do that but I hope no one says anything about it being
-unrelated to the patch. :)
-
->
->
->> -		return 0;
->> +		goto do_unmap_mpf;
->>
->>  	if (!mpf->physptr)
->> -		return 0;
->> +		goto do_unmap_mpf;
->>
->> -	mpc = phys_to_virt(mpf->physptr);
->> +	mpc = map_mpc(mpf->physptr);
->
-> Again: error checking !!!
->
-> You have other calls to early_memremap()/map_mpf() in this patch. Please
-> add error checking everywhere.
-
-Yup.
-
->
->>
->>  	if (!smp_check_mpc(mpc, oem, str))
->> -		return 0;
->> +		goto do_unmap_mpc;
->>
->> -	pr_info("mpf: %llx\n", (u64)virt_to_phys(mpf));
->> +	pr_info("mpf: %llx\n", (u64)mpf_base);
->>  	pr_info("physptr: %x\n", mpf->physptr);
->>
->>  	if (mpc_new_phys && mpc->length > mpc_new_length) {
->> @@ -878,21 +910,23 @@ static int __init update_mp_table(void)
->>  		new = mpf_checksum((unsigned char *)mpc, mpc->length);
->>  		if (old == new) {
->>  			pr_info("mpc is readonly, please try alloc_mptable instead\n");
->> -			return 0;
->> +			goto do_unmap_mpc;
->>  		}
->>  		pr_info("use in-position replacing\n");
->>  	} else {
->>  		mpf->physptr = mpc_new_phys;
->> -		mpc_new = phys_to_virt(mpc_new_phys);
->> +		mpc_new = map_mpc(mpc_new_phys);
->
-> Ditto.
->
->>  		memcpy(mpc_new, mpc, mpc->length);
->> +		unmap_mpc(mpc);
->>  		mpc = mpc_new;
->>  		/* check if we can modify that */
->>  		if (mpc_new_phys - mpf->physptr) {
->>  			struct mpf_intel *mpf_new;
->>  			/* steal 16 bytes from [0, 1k) */
->>  			pr_info("mpf new: %x\n", 0x400 - 16);
->> -			mpf_new = phys_to_virt(0x400 - 16);
->> +			mpf_new = map_mpf(0x400 - 16);
->
-> Ditto.
->
->>  			memcpy(mpf_new, mpf, 16);
->> +			unmap_mpf(mpf);
->>  			mpf = mpf_new;
->>  			mpf->physptr = mpc_new_phys;
->>  		}
->
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+You *can* force clang to disable symbol preemption using "-fpie 
+-mpie-copy-relocations".  That said, I don't know enough about EFI to 
+say whether this is actually appropriate for building the EFI stub.
