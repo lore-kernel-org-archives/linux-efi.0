@@ -1,119 +1,170 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH v2] x86/efi: Disable runtime services on kexec kernel if
- booted with efi=old_map
-Date: Wed, 17 May 2017 15:29:05 +0800
-Message-ID: <20170517072905.GB29898@linux-l9pv.suse>
-References: <1494983663-29286-1-git-send-email-sai.praneeth.prakhya@intel.com>
+From: Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH] efi/libstub: Indicate clang the relocation mode for arm64
+Date: Wed, 17 May 2017 09:09:56 -0700
+Message-ID: <20170517160956.GE141096@google.com>
+References: <20170509193612.64105-1-mka@chromium.org>
+ <25d94b46-765e-f12f-a287-853c76782143@google.com>
+ <20170509214905.GH128305@google.com>
+ <CAKv+Gu_6my-rCc3E1V1n23dHY5OH97qpZ672ST8AZGLjedquAg@mail.gmail.com>
+ <20170510183848.GI128305@google.com>
+ <69A18345-6933-4C6A-8FAC-DBD4D7EF30DE@linaro.org>
+ <20170510194734.GJ128305@google.com>
+ <CAKv+Gu8H9H=Rax4iiKaZ2z2GikXTjseCAyKrYgQPQWkekjsN8w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1494983663-29286-1-git-send-email-sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <CAKv+Gu8H9H=Rax4iiKaZ2z2GikXTjseCAyKrYgQPQWkekjsN8w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Grundler <grundler-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Michael Davidson <md-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Bernhard =?utf-8?Q?Rosenkr=C3=A4nzer?= <Bernhard.Rosenkranzer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, May 16, 2017 at 06:14:23PM -0700, Sai Praneeth Prakhya wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> 
-> Booting kexec kernel with "efi=old_map" in kernel command line hits
-> kernel panic as shown below.
-> 
-> [0.001000] BUG: unable to handle kernel paging request at ffff88007fe78070
-> [0.001000] IP: virt_efi_set_variable.part.7+0x63/0x1b0
-> [0.001000] PGD 7ea28067
-> [0.001000] PUD 7ea2b067
-> [0.001000] PMD 7ea2d067
-> [0.001000] PTE 0
-> [0.001000]
-> [0.001000] Oops: 0000 [#1] SMP
-> [0.001000] Modules linked in:
-> [0.001000] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.11.0-rc2-yocto-standard+ #229
-> [0.001000] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 0.0.0 02/06/2015
-> [0.001000] task: ffffffff82022500 task.stack: ffffffff82000000
-> [0.001000] RIP: 0010:virt_efi_set_variable.part.7+0x63/0x1b0
-> [0.001000] RSP: 0000:ffffffff82003dc0 EFLAGS: 00010246
-> [0.001000] RAX: ffff88007fe78018 RBX: ffffffff82050300 RCX: 0000000000000007
-> [0.001000] RDX: ffffffff82003e50 RSI: ffffffff82050300 RDI: ffffffff82050300
-> [0.001000] RBP: ffffffff82003e08 R08: 0000000000000000 R09: 0000000000000000
-> [0.001000] R10: 0000000000000000 R11: 0000000000000000 R12: ffffffff82003e50
-> [0.001000] R13: 0000000000000007 R14: 0000000000000246 R15: 0000000000000000
-> [0.001000] FS:  0000000000000000(0000) GS:ffff88007fa00000(0000) knlGS:0000000000000000
-> [0.001000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [0.001000] CR2: ffff88007fe78070 CR3: 000000007da1d000 CR4: 00000000000006b0
-> [0.001000] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> [0.001000] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-> [0.001000] Call Trace:
-> [0.001000]  virt_efi_set_variable+0x5d/0x70
-> [0.001000]  efi_delete_dummy_variable+0x7a/0x80
-> [0.001000]  efi_enter_virtual_mode+0x3f6/0x4a7
-> [0.001000]  start_kernel+0x375/0x400
-> [0.001000]  x86_64_start_reservations+0x2a/0x2c
-> [0.001000]  x86_64_start_kernel+0x168/0x176
-> [0.001000]  start_cpu+0x14/0x14
-> [0.001000] Code: 04 b0 84 ff 80 3d c5 56 b3 00 00 4c 8b 44 24 08 75
-> 6b 9c 41 5e 48 8b 05 9c 78 99 00 4d 89 c1 48 89 de 4d 89 f8 44 89 e9 4c
-> 89 e2 <48> 8b 40 58 48 8b 78 58 e8 b0 2d 88 ff 48 c7 c6 b6 1d f4 81 4c
-> [0.001000] RIP: virt_efi_set_variable.part.7+0x63/0x1b0 RSP: ffffffff82003dc0
-> [0.001000] CR2: ffff88007fe78070
-> [0.001000] ---[ end trace 0000000000000000 ]---
-> [0.001000] Kernel panic - not syncing: Attempted to kill the idle task!
-> [0.001000] ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
-> 
-> [efi=old_map was never intended to work with kexec. The problem with
-> using efi=old_map is that the virtual addresses are assigned from the
-> memory region used by other kernel mappings; vmalloc() space.
-> Potentially there could be collisions when booting kexec if something
-> else is mapped at the virtual address we allocated for runtime service
-> regions in the initial boot] - Matt Fleming
-> 
-> Since kexec was never intended to work with efi=old_map, disable
-> runtime services in kexec if booted with efi=old_map, so that we don't
-> panic.
-> 
-> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-> Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Lee Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-> Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> 
-> Changes since v1:
-> Don't fix the panic, because this was never intended to work.
+El Thu, May 11, 2017 at 02:51:48PM +0100 Ard Biesheuvel ha dit:
 
-I tested this patch on OVMF and Acer UEFI laptop. It works to me
-for efi=old_map with crash kernel.
-
-Tested-by: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
-
-> ---
->  arch/x86/platform/efi/efi.c | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
+> (adding Arnd and Will to cc, who are likely to have an opinion as to
+> which GCC is the oldest we need to support for arm64)
 > 
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 87835c97611f..627b7b86f369 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -827,9 +827,11 @@ static void __init kexec_enter_virtual_mode(void)
->  
->  	/*
->  	 * We don't do virtual mode, since we don't do runtime services, on
-> -	 * non-native EFI
-> +	 * non-native EFI. With efi=old_map, we don't do runtime services in
-> +	 * kexec kernel because in the initial boot something else might
-> +	 * have been mapped at these virtual addresses.
->  	 */
-> -	if (!efi_is_native()) {
-> +	if (!efi_is_native() || efi_enabled(EFI_OLD_MEMMAP)) {
->  		efi_memmap_unmap();
->  		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
->  		return;
-> -- 
-> 2.1.4
->
+> On 10 May 2017 at 20:47, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+> > El Wed, May 10, 2017 at 09:05:28PM +0200 Ard Biesheuvel ha dit:
+> >
+> >>
+> >>
+> >> > On 10 May 2017, at 20:38, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+> >> >
+> >> > Hoi Ard,
+> >> >
+> >> > El Wed, May 10, 2017 at 08:51:44AM +0100 Ard Biesheuvel ha dit:
+> >> >
+> >> >> On 9 May 2017 at 22:49, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+> >> >>> El Tue, May 09, 2017 at 01:50:36PM -0700 Greg Hackmann ha dit:
+> >> >>>
+> >> >>>> On 05/09/2017 12:36 PM, Matthias Kaehlcke wrote:
+> >> >>>>> From: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+> >> >>>>>
+> >> >>>>> Without any extra guidance, clang will generate libstub with either
+> >> >>>>> absolute or relative ELF relocations. Use the right combination of
+> >> >>>>> -fpic and -fno-pic on different files to avoid this.
+> >> >>>>>
+> >> >>>>> Signed-off-by: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+> >> >>>>> Signed-off-by: Bernhard Rosenkränzer <Bernhard.Rosenkranzer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >> >>>>> Signed-off-by: Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> >> >>>>> ---
+> >> >>>>> drivers/firmware/efi/libstub/Makefile | 6 ++++++
+> >> >>>>> 1 file changed, 6 insertions(+)
+> >> >>>>>
+> >> >>>>> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+> >> >>>>> index f7425960f6a5..ccbaaf4d8650 100644
+> >> >>>>> --- a/drivers/firmware/efi/libstub/Makefile
+> >> >>>>> +++ b/drivers/firmware/efi/libstub/Makefile
+> >> >>>>> @@ -11,6 +11,9 @@ cflags-$(CONFIG_X86)               += -m$(BITS) -D__KERNEL__ -O2 \
+> >> >>>>>                               -mno-mmx -mno-sse
+> >> >>>>>
+> >> >>>>> cflags-$(CONFIG_ARM64)              := $(subst -pg,,$(KBUILD_CFLAGS))
+> >> >>>>> +ifeq ($(cc-name),clang)
+> >> >>>>> +cflags-$(CONFIG_ARM64)              += -fpic
+> >> >>>>> +endif
+> >> >>>>> cflags-$(CONFIG_ARM)                := $(subst -pg,,$(KBUILD_CFLAGS)) \
+> >> >>>>>                               -fno-builtin -fpic -mno-single-pic-base
+> >> >>>>>
+> >> >>>>> @@ -38,6 +41,9 @@ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
+> >> >>>>>
+> >> >>>>> lib-$(CONFIG_EFI_ARMSTUB)   += arm-stub.o fdt.o string.o random.o \
+> >> >>>>>                               $(patsubst %.c,lib-%.o,$(arm-deps))
+> >> >>>>> +ifeq ($(cc-name),clang)
+> >> >>>>> +CFLAGS_arm64-stub.o            += -fno-pic
+> >> >>>>> +endif
+> >> >>>>>
+> >> >>>>> lib-$(CONFIG_ARM)           += arm32-stub.o
+> >> >>>>> lib-$(CONFIG_ARM64)         += arm64-stub.o
+> >> >>>>>
+> >> >>>>
+> >> >>>> NAK.
+> >> >>>>
+> >> >>>> This patch was labeled "HACK:" in our experimental tree.  There's no
+> >> >>>> rhyme or reason to why this combination of -f[no-]pic flags
+> >> >>>> generates code without problematic relocations.  It's inherently
+> >> >>>> fragile, and was only intended as a temporary workaround until I (or
+> >> >>>> someone more familiar with EFI) got a chance to revisit the problem.
+> >> >>>>
+> >> >>>> Unless the gcc CFLAGS are also an artifact of "mess with -f[no-]pic
+> >> >>>> until the compiler generates what you want", this doesn't belong
+> >> >>>> upstream.
+> >> >>>
+> >> >>> Sorry, I didn't realize it is that bad of a hack. Unfortunately I'm
+> >> >>> not very familiar with EFI either.
+> >> >>>
+> >> >>> I saw Ard did some work in this code related with relocation, maybe he
+> >> >>> can provide a pointer towards a better solution.
+> >> >>>
+> >> >>
+> >> >> This is a known issue. The problem is that generic AArch64 small model
+> >> >> code is mostly position independent already, due to its use of
+> >> >> adrp/add pairs to generate symbol references with a +/- 4 GB range.
+> >> >> Building the same code with -fpic will result in GOT entries to be
+> >> >> generated, which carry absolute addresses, so this achieves the exact
+> >> >> opposite of what we want.
+> >> >>
+> >> >> The reason for the GOT entries is that GCC (and Clang, apparently)
+> >> >> infer from the -fpic flag that you are building objects that will be
+> >> >> linked into a shared library, to which ELF symbol preemption rules
+> >> >> apply that stipulate that a symbol in the main executable supersedes a
+> >> >> symbol under the same name in the shared library, and that the shared
+> >> >> library should update all its internal references to the main
+> >> >> executable's version of the symbol. The easiest way (but certainly not
+> >> >> the only way) to achieve that is to indirect all internal symbol
+> >> >> references via GOT entries, which can be made to refer to another
+> >> >> symbol by updating a single value.
+> >> >>
+> >> >> The workaround I used is to use hidden visibility, using a #pragma.
+> >> >> (There is a -fvisibility=hidden command line option as well, but this
+> >> >> is a weaker form that does not apply to extern declarations, only to
+> >> >> definitions). So if you add
+> >> >>
+> >> >> #pragma GCC visibility push(hidden)
+> >> >>
+> >> >> at the beginning of arm64-stub.c (and perhaps to one or two other
+> >> >> files that contain externally visible symbol declarations these days),
+> >> >> you should be able to compile the entire EFI stub with -fpic. Note
+> >> >> that making those externally visible symbols 'static' where possible
+> >> >> would solve the problem as well, but this triggers another issue in
+> >> >> the 32-bit ARM stub.
+> >> >>
+> >> >> In my opinion, the correct fix would be to make -fpie (as opposed to
+> >> >> -fpic) imply hidden visibility, given that PIE executables don't
+> >> >> export symbols in the first place, and so the preemption rules do not
+> >> >> apply. It is worth a try whether -fpie works as expected in this case
+> >> >> on Clang, but the last time I tried it on GCC, it behaved exactly like
+> >> >> -fpic.
+> >> >
+> >> > Thanks a lot for the detailed description and your suggestions!
+> >> >
+> >> > A clang build with -fpie for the EFI stub succeeds without complaints
+> >> > about GOT entries. I will send out an updated patch (with -fpie only
+> >> > for clang) later.
+> >> >
+> >>
+> >> Good! I never liked the visibility hack, which is why I never upstreamed it.
+> >>
+> >> Could you please check how recent GCC behaves?
+> >
+> > I tried GCC v4.9.4 and v6.3.1, both build the EFI stub with -fpie
+> > without errors.
+> >
+> > Are you suggesting to use -fpie for both clang and GCC? Do you know
+> > what the minimum required GCC version is for building an arm64 kernel?
+> 
+> Yes. Up until now, we have been relying on the position independent
+> nature of small model code, but it would be better to specify it
+> explicitly, so if -fpie gives us mostly identical code and does not
+> need visibility hacks, I would prefer to add it for all compilers and
+> not have an exception only for Clang. Note that the same applies to
+> the entire kernel when built in KASLR mode, so it would also be good
+> to know our options here.
 
-Thanks a lot!
-Joey Lee
+Thanks, makes perfect sense.
+
+> Arnd, Will, what is the oldest GCC version we claim to support for arm64?
+
+Any comments on this Arnd/Will?
