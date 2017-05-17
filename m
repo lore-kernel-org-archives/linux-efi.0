@@ -1,80 +1,102 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [PATCH v5 14/32] efi: Add an EFI table address match function
-Date: Tue, 16 May 2017 16:53:33 -0500
-Message-ID: <2364b148-5168-1583-51c2-0beaa7230235@amd.com>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418211848.10190.65062.stgit@tlendack-t1.amdoffice.net>
- <20170515180913.lhma7xw52irrdtvr@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170515180913.lhma7xw52irrdtvr@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S.
- Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH v2] x86/efi: Disable runtime services on kexec kernel if booted with efi=old_map
+Date: Tue, 16 May 2017 18:14:23 -0700
+Message-ID: <1494983663-29286-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lee Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 5/15/2017 1:09 PM, Borislav Petkov wrote:
-> On Tue, Apr 18, 2017 at 04:18:48PM -0500, Tom Lendacky wrote:
->> Add a function that will determine if a supplied physical address matches
->> the address of an EFI table.
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->>  drivers/firmware/efi/efi.c |   33 +++++++++++++++++++++++++++++++++
->>  include/linux/efi.h        |    7 +++++++
->>  2 files changed, 40 insertions(+)
->>
->> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
->> index b372aad..8f606a3 100644
->> --- a/drivers/firmware/efi/efi.c
->> +++ b/drivers/firmware/efi/efi.c
->> @@ -55,6 +55,25 @@ struct efi __read_mostly efi = {
->>  };
->>  EXPORT_SYMBOL(efi);
->>
->> +static unsigned long *efi_tables[] = {
->> +	&efi.mps,
->> +	&efi.acpi,
->> +	&efi.acpi20,
->> +	&efi.smbios,
->> +	&efi.smbios3,
->> +	&efi.sal_systab,
->> +	&efi.boot_info,
->> +	&efi.hcdp,
->> +	&efi.uga,
->> +	&efi.uv_systab,
->> +	&efi.fw_vendor,
->> +	&efi.runtime,
->> +	&efi.config_table,
->> +	&efi.esrt,
->> +	&efi.properties_table,
->> +	&efi.mem_attr_table,
->> +};
->> +
->>  static bool disable_runtime;
->>  static int __init setup_noefi(char *arg)
->>  {
->> @@ -854,6 +873,20 @@ int efi_status_to_err(efi_status_t status)
->>  	return err;
->>  }
->>
->> +bool efi_table_address_match(unsigned long phys_addr)
->
-> efi_is_table_address() reads easier/better in the code.
+From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Will do.
+Booting kexec kernel with "efi=old_map" in kernel command line hits
+kernel panic as shown below.
 
-Thanks,
-Tom
+[0.001000] BUG: unable to handle kernel paging request at ffff88007fe78070
+[0.001000] IP: virt_efi_set_variable.part.7+0x63/0x1b0
+[0.001000] PGD 7ea28067
+[0.001000] PUD 7ea2b067
+[0.001000] PMD 7ea2d067
+[0.001000] PTE 0
+[0.001000]
+[0.001000] Oops: 0000 [#1] SMP
+[0.001000] Modules linked in:
+[0.001000] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.11.0-rc2-yocto-standard+ #229
+[0.001000] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 0.0.0 02/06/2015
+[0.001000] task: ffffffff82022500 task.stack: ffffffff82000000
+[0.001000] RIP: 0010:virt_efi_set_variable.part.7+0x63/0x1b0
+[0.001000] RSP: 0000:ffffffff82003dc0 EFLAGS: 00010246
+[0.001000] RAX: ffff88007fe78018 RBX: ffffffff82050300 RCX: 0000000000000007
+[0.001000] RDX: ffffffff82003e50 RSI: ffffffff82050300 RDI: ffffffff82050300
+[0.001000] RBP: ffffffff82003e08 R08: 0000000000000000 R09: 0000000000000000
+[0.001000] R10: 0000000000000000 R11: 0000000000000000 R12: ffffffff82003e50
+[0.001000] R13: 0000000000000007 R14: 0000000000000246 R15: 0000000000000000
+[0.001000] FS:  0000000000000000(0000) GS:ffff88007fa00000(0000) knlGS:0000000000000000
+[0.001000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[0.001000] CR2: ffff88007fe78070 CR3: 000000007da1d000 CR4: 00000000000006b0
+[0.001000] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+[0.001000] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+[0.001000] Call Trace:
+[0.001000]  virt_efi_set_variable+0x5d/0x70
+[0.001000]  efi_delete_dummy_variable+0x7a/0x80
+[0.001000]  efi_enter_virtual_mode+0x3f6/0x4a7
+[0.001000]  start_kernel+0x375/0x400
+[0.001000]  x86_64_start_reservations+0x2a/0x2c
+[0.001000]  x86_64_start_kernel+0x168/0x176
+[0.001000]  start_cpu+0x14/0x14
+[0.001000] Code: 04 b0 84 ff 80 3d c5 56 b3 00 00 4c 8b 44 24 08 75
+6b 9c 41 5e 48 8b 05 9c 78 99 00 4d 89 c1 48 89 de 4d 89 f8 44 89 e9 4c
+89 e2 <48> 8b 40 58 48 8b 78 58 e8 b0 2d 88 ff 48 c7 c6 b6 1d f4 81 4c
+[0.001000] RIP: virt_efi_set_variable.part.7+0x63/0x1b0 RSP: ffffffff82003dc0
+[0.001000] CR2: ffff88007fe78070
+[0.001000] ---[ end trace 0000000000000000 ]---
+[0.001000] Kernel panic - not syncing: Attempted to kill the idle task!
+[0.001000] ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
 
->
+[efi=old_map was never intended to work with kexec. The problem with
+using efi=old_map is that the virtual addresses are assigned from the
+memory region used by other kernel mappings; vmalloc() space.
+Potentially there could be collisions when booting kexec if something
+else is mapped at the virtual address we allocated for runtime service
+regions in the initial boot] - Matt Fleming
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Since kexec was never intended to work with efi=old_map, disable
+runtime services in kexec if booted with efi=old_map, so that we don't
+panic.
+
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Lee Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+
+Changes since v1:
+Don't fix the panic, because this was never intended to work.
+---
+ arch/x86/platform/efi/efi.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 87835c97611f..627b7b86f369 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -827,9 +827,11 @@ static void __init kexec_enter_virtual_mode(void)
+ 
+ 	/*
+ 	 * We don't do virtual mode, since we don't do runtime services, on
+-	 * non-native EFI
++	 * non-native EFI. With efi=old_map, we don't do runtime services in
++	 * kexec kernel because in the initial boot something else might
++	 * have been mapped at these virtual addresses.
+ 	 */
+-	if (!efi_is_native()) {
++	if (!efi_is_native() || efi_enabled(EFI_OLD_MEMMAP)) {
+ 		efi_memmap_unmap();
+ 		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 		return;
+-- 
+2.1.4
