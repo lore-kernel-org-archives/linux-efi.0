@@ -1,87 +1,58 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi/libstub: Indicate clang the relocation mode for arm64
-Date: Thu, 18 May 2017 08:41:26 +0100
-Message-ID: <CAKv+Gu_JE8No4Ob-kL4tubRYiuFWYbptwouw16ezFhkLSizn5w@mail.gmail.com>
-References: <20170509193612.64105-1-mka@chromium.org> <25d94b46-765e-f12f-a287-853c76782143@google.com>
- <20170509214905.GH128305@google.com> <CAKv+Gu_6my-rCc3E1V1n23dHY5OH97qpZ672ST8AZGLjedquAg@mail.gmail.com>
- <20170510183848.GI128305@google.com> <69A18345-6933-4C6A-8FAC-DBD4D7EF30DE@linaro.org>
- <20170510194734.GJ128305@google.com> <CAKv+Gu8H9H=Rax4iiKaZ2z2GikXTjseCAyKrYgQPQWkekjsN8w@mail.gmail.com>
- <a5692a7a-0140-2e61-497f-6d3bf92b5d11@google.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v5 17/32] x86/mm: Add support to access boot related data
+ in the clear
+Date: Thu, 18 May 2017 11:02:12 +0200
+Message-ID: <20170518090212.kebstmnjv4h3cjf2@pd.tnic>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+ <20170418211921.10190.1537.stgit@tlendack-t1.amdoffice.net>
+ <20170515183517.mb4k2gp2qobbuvtm@pd.tnic>
+ <4845df29-bae7-9b78-0428-ff96dbef2128@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <a5692a7a-0140-2e61-497f-6d3bf92b5d11-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Cc: Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Grundler <grundler-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Michael Davidson <md-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, =?UTF-8?Q?Bernhard_Rosenkr=C3=A4nzer?= <Bernhard.Rosenkranzer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <4845df29-bae7-9b78-0428-ff96dbef2128@amd.com>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
 List-Id: linux-efi@vger.kernel.org
 
-On 18 May 2017 at 00:24, Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org> wrote:
-> On 05/11/2017 06:51 AM, Ard Biesheuvel wrote:
-> [snip]
->>>>>>
->>>>>> In my opinion, the correct fix would be to make -fpie (as opposed to
->>>>>> -fpic) imply hidden visibility, given that PIE executables don't
->>>>>> export symbols in the first place, and so the preemption rules do not
->>>>>> apply. It is worth a try whether -fpie works as expected in this case
->>>>>> on Clang, but the last time I tried it on GCC, it behaved exactly like
->>>>>> -fpic.
->>>>>
->>>>>
->>>>> Thanks a lot for the detailed description and your suggestions!
->>>>>
->>>>> A clang build with -fpie for the EFI stub succeeds without complaints
->>>>> about GOT entries. I will send out an updated patch (with -fpie only
->>>>> for clang) later.
->>>>>
->>>>
->>>> Good! I never liked the visibility hack, which is why I never upstreamed
->>>> it.
->>>>
->>>> Could you please check how recent GCC behaves?
->>>
->>>
->>> I tried GCC v4.9.4 and v6.3.1, both build the EFI stub with -fpie
->>> without errors.
->>>
->>> Are you suggesting to use -fpie for both clang and GCC? Do you know
->>> what the minimum required GCC version is for building an arm64 kernel?
->>
->>
->> Yes. Up until now, we have been relying on the position independent
->> nature of small model code, but it would be better to specify it
->> explicitly, so if -fpie gives us mostly identical code and does not
->> need visibility hacks, I would prefer to add it for all compilers and
->> not have an exception only for Clang. Note that the same applies to
->> the entire kernel when built in KASLR mode, so it would also be good
->> to know our options here.
->>
->> Arnd, Will, what is the oldest GCC version we claim to support for arm64?
->>
->
-> Unfortunately, after looking into this a bit more, -fpie by itself doesn't
-> force clang to disable symbol preeemption.  For example when building the
-> EFI stub from 4.9 with clang, -fpie gives me a stub that crashes with a
-> synchronous exception inside handle_kernel_image().  The faulting
-> instruction is a read from __nokaslr that still goes through the GOT.
->
-> Right now you'll get a usable EFI stub with -fpie anyway, since 60f38de7a8d4
-> ("efi/libstub: Unify command line param parsing") masked the problem when it
-> moved __nokaslr behind a helper function.  But AIUI there's nothing really
-> preventing a similar problem in the future.
->
-> You *can* force clang to disable symbol preemption using "-fpie
-> -mpie-copy-relocations".  That said, I don't know enough about EFI to say
-> whether this is actually appropriate for building the EFI stub.
+On Wed, May 17, 2017 at 01:54:39PM -0500, Tom Lendacky wrote:
+> I was worried what the compiler might do when CONFIG_EFI is not set,
+> but it appears to take care of it. I'll double check though.
 
-Thanks for digging into this. It is really quite unfortunate that it
-is so difficult to force Clang (or GCC for that matter) to generate
-relative references without the compiler assuming that you are
-building a shared library. Perhaps we need a stronger version of
--fvisibility=hidden, i.e., one that applies to extern declarations as
-well.
+There's a efi_enabled() !CONFIG_EFI version too, so should be fine.
 
-For the stub, we could simply replace all remaining extern symbol
-references (if any) with accessor functions, such as the one I added
-for __nokaslr (which is actually needed for x86 as well, for different
-reasons). Let me look into this.
+> I may introduce a length variable to capture data->len right after
+> paddr_next is set and then have just a single memunmap() call before
+> the if check.
+
+Yap.
+
+> I tried that, but calling an "__init" function (early_memremap()) from
+> a non "__init" function generated warnings. I suppose I can pass in a
+> function for the map and unmap but that looks worse to me (also the
+> unmap functions take different arguments).
+
+No, the other way around: the __init function should call the non-init
+one and you need the non-init one anyway for memremap_is_setup_data().
+
+> This is like the chicken and the egg scenario. In order to determine if
+> an address is setup data I have to explicitly map the setup data chain
+> as decrypted. In order to do that I have to supply a flag to explicitly
+> map the data decrypted otherwise I wind up back in the
+> memremap_is_setup_data() function again and again and again...
+
+Oh, fun.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
