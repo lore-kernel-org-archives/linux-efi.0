@@ -1,100 +1,50 @@
-From: Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH] efi/libstub: Indicate clang the relocation mode for arm64
-Date: Thu, 18 May 2017 10:00:51 -0700
-Message-ID: <20170518170051.GI141096@google.com>
-References: <20170509193612.64105-1-mka@chromium.org>
- <25d94b46-765e-f12f-a287-853c76782143@google.com>
- <20170509214905.GH128305@google.com>
- <CAKv+Gu_6my-rCc3E1V1n23dHY5OH97qpZ672ST8AZGLjedquAg@mail.gmail.com>
- <20170510183848.GI128305@google.com>
- <69A18345-6933-4C6A-8FAC-DBD4D7EF30DE@linaro.org>
- <20170510194734.GJ128305@google.com>
- <CAKv+Gu8H9H=Rax4iiKaZ2z2GikXTjseCAyKrYgQPQWkekjsN8w@mail.gmail.com>
- <a5692a7a-0140-2e61-497f-6d3bf92b5d11@google.com>
- <CAKv+Gu_JE8No4Ob-kL4tubRYiuFWYbptwouw16ezFhkLSizn5w@mail.gmail.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v5 31/32] x86: Add sysfs support for Secure Memory
+	Encryption
+Date: Thu, 18 May 2017 19:01:53 +0200
+Message-ID: <20170518170153.eqiyat5s6q3yeejl@pd.tnic>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+	<20170418212212.10190.73484.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_JE8No4Ob-kL4tubRYiuFWYbptwouw16ezFhkLSizn5w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Grundler <grundler-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Michael Davidson <md-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Bernhard =?utf-8?Q?Rosenkr=C3=A4nzer?= <Bernhard.Rosenkranzer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <20170418212212.10190.73484.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst@r>
 List-Id: linux-efi@vger.kernel.org
 
-El Thu, May 18, 2017 at 08:41:26AM +0100 Ard Biesheuvel ha dit:
+On Tue, Apr 18, 2017 at 04:22:12PM -0500, Tom Lendacky wrote:
+> Add sysfs support for SME so that user-space utilities (kdump, etc.) can
+> determine if SME is active.
 
-> On 18 May 2017 at 00:24, Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org> wrote:
-> > On 05/11/2017 06:51 AM, Ard Biesheuvel wrote:
-> > [snip]
-> >>>>>>
-> >>>>>> In my opinion, the correct fix would be to make -fpie (as opposed to
-> >>>>>> -fpic) imply hidden visibility, given that PIE executables don't
-> >>>>>> export symbols in the first place, and so the preemption rules do not
-> >>>>>> apply. It is worth a try whether -fpie works as expected in this case
-> >>>>>> on Clang, but the last time I tried it on GCC, it behaved exactly like
-> >>>>>> -fpic.
-> >>>>>
-> >>>>>
-> >>>>> Thanks a lot for the detailed description and your suggestions!
-> >>>>>
-> >>>>> A clang build with -fpie for the EFI stub succeeds without complaints
-> >>>>> about GOT entries. I will send out an updated patch (with -fpie only
-> >>>>> for clang) later.
-> >>>>>
-> >>>>
-> >>>> Good! I never liked the visibility hack, which is why I never upstreamed
-> >>>> it.
-> >>>>
-> >>>> Could you please check how recent GCC behaves?
-> >>>
-> >>>
-> >>> I tried GCC v4.9.4 and v6.3.1, both build the EFI stub with -fpie
-> >>> without errors.
-> >>>
-> >>> Are you suggesting to use -fpie for both clang and GCC? Do you know
-> >>> what the minimum required GCC version is for building an arm64 kernel?
-> >>
-> >>
-> >> Yes. Up until now, we have been relying on the position independent
-> >> nature of small model code, but it would be better to specify it
-> >> explicitly, so if -fpie gives us mostly identical code and does not
-> >> need visibility hacks, I would prefer to add it for all compilers and
-> >> not have an exception only for Clang. Note that the same applies to
-> >> the entire kernel when built in KASLR mode, so it would also be good
-> >> to know our options here.
-> >>
-> >> Arnd, Will, what is the oldest GCC version we claim to support for arm64?
-> >>
-> >
-> > Unfortunately, after looking into this a bit more, -fpie by itself doesn't
-> > force clang to disable symbol preeemption.  For example when building the
-> > EFI stub from 4.9 with clang, -fpie gives me a stub that crashes with a
-> > synchronous exception inside handle_kernel_image().  The faulting
-> > instruction is a read from __nokaslr that still goes through the GOT.
-> >
-> > Right now you'll get a usable EFI stub with -fpie anyway, since 60f38de7a8d4
-> > ("efi/libstub: Unify command line param parsing") masked the problem when it
-> > moved __nokaslr behind a helper function.  But AIUI there's nothing really
-> > preventing a similar problem in the future.
-> >
-> > You *can* force clang to disable symbol preemption using "-fpie
-> > -mpie-copy-relocations".  That said, I don't know enough about EFI to say
-> > whether this is actually appropriate for building the EFI stub.
+But why do user-space tools need to know that?
 
-Thanks for the investigation, Greg.
+I mean, when we load the kdump kernel, we do it with the first kernel,
+with the kexec_load() syscall, AFAICT. And that code does a lot of
+things during that init, like machine_kexec_prepare()->init_pgtable() to
+prepare the ident mapping of the second kernel, for example.
 
-> Thanks for digging into this. It is really quite unfortunate that it
-> is so difficult to force Clang (or GCC for that matter) to generate
-> relative references without the compiler assuming that you are
-> building a shared library. Perhaps we need a stronger version of
-> -fvisibility=hidden, i.e., one that applies to extern declarations as
-> well.
-> 
-> For the stub, we could simply replace all remaining extern symbol
-> references (if any) with accessor functions, such as the one I added
-> for __nokaslr (which is actually needed for x86 as well, for different
-> reasons). Let me look into this.
+What I'm aiming at is that the first kernel knows *exactly* whether SME
+is enabled or not and doesn't need to tell the second one through some
+sysfs entries - it can do that during loading.
 
-I saw you sent out a bunch of patches, thanks, your help is greatly
-appreciated.
+So I don't think we need any userspace things at all...
+
+Or?
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
