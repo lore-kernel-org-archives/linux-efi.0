@@ -1,44 +1,32 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v5 18/32] x86, mpparse: Use memremap to map the mpf and
-	mpc data
-Date: Thu, 18 May 2017 11:03:54 +0200
-Message-ID: <20170518090354.e43erptxx6t767uz@pd.tnic>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
-	<20170418211930.10190.62640.stgit@tlendack-t1.amdoffice.net>
-	<20170516083658.fq2h4ysmrbgn23cs@pd.tnic>
-	<6e155b8f-b691-2ee0-8977-969aaab6199a@amd.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <6e155b8f-b691-2ee0-8977-969aaab6199a-5C7GfCeVMHo@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst@r>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 0/3] efi: arm64: use -fpie for building the stub
+Date: Thu, 18 May 2017 10:09:50 +0100
+Message-ID: <20170518090953.32628-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Bernhard.Rosenkranzer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, grundler-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, md-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, May 17, 2017 at 03:26:58PM -0500, Tom Lendacky wrote:
-> > Also, simplify that test:
-> > 
-> > 	if (mpf->feature1)
-> > 		...
-> 
-> Ok, I can do that but I hope no one says anything about it being
-> unrelated to the patch. :)
+Clang requires the stub to be built with -fpie, or it may emit absolute
+symbol references that trigger the absolute relocation detection code and
+cause the build to fail.
 
-Bah, that's minor.
+The remedy is to set -fpie (#3), but due to stupid ELF symbol preemption
+rules that only apply to shared libraries, this will result in more rather
+than fewer absolute references (i.e., GOT entries), which we have to massage
+away using visibility overrides first. (#1, #2)
+
+Ard Biesheuvel (3):
+  efi/libstub: arm64: use hidden attribute for struct screen_info
+    reference
+  efi/libstub: arm64: force 'hidden' visibility for section markers
+  efi/libstub: arm64: set -fpie when building the EFI stub
+
+ arch/arm64/include/asm/efi.h              |  3 +++
+ drivers/firmware/efi/libstub/Makefile     |  2 +-
+ drivers/firmware/efi/libstub/arm64-stub.c | 10 +++++++++-
+ 3 files changed, 13 insertions(+), 2 deletions(-)
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+2.9.3
