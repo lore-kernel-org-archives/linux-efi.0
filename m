@@ -1,195 +1,87 @@
-From: Baoquan He <bhe@redhat.com>
-Subject: [PATCH v4] x86/efi: Correct ident mapping of efi old_map when kalsr enabled
-Date: Thu, 18 May 2017 14:39:30 +0800
-Message-ID: <1495089570-21005-1-git-send-email-bhe@redhat.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Baoquan He <bhe@redhat.com>, Dave Young <dyoung@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Garnier <thgarnie@google.com>, Kees Cook <keescook@chromium.org>, Russ Anderson <rja@sgi.com>, Frank Ramsay <frank.ramsay@hpe.com>, Borislav Petkov <bp@alien8.de>, Bhupesh Sharma <bhsharma@redhat.com>, x86@kernel.org, linux-efi@vger.kernel.org
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efi/libstub: Indicate clang the relocation mode for arm64
+Date: Thu, 18 May 2017 08:41:26 +0100
+Message-ID: <CAKv+Gu_JE8No4Ob-kL4tubRYiuFWYbptwouw16ezFhkLSizn5w@mail.gmail.com>
+References: <20170509193612.64105-1-mka@chromium.org> <25d94b46-765e-f12f-a287-853c76782143@google.com>
+ <20170509214905.GH128305@google.com> <CAKv+Gu_6my-rCc3E1V1n23dHY5OH97qpZ672ST8AZGLjedquAg@mail.gmail.com>
+ <20170510183848.GI128305@google.com> <69A18345-6933-4C6A-8FAC-DBD4D7EF30DE@linaro.org>
+ <20170510194734.GJ128305@google.com> <CAKv+Gu8H9H=Rax4iiKaZ2z2GikXTjseCAyKrYgQPQWkekjsN8w@mail.gmail.com>
+ <a5692a7a-0140-2e61-497f-6d3bf92b5d11@google.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <a5692a7a-0140-2e61-497f-6d3bf92b5d11-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Cc: Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Grundler <grundler-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Michael Davidson <md-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, =?UTF-8?Q?Bernhard_Rosenkr=C3=A4nzer?= <Bernhard.Rosenkranzer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-For EFI with 'efi=old_map' kernel option specified, Kernel will panic
-when kaslr is enabled.
+On 18 May 2017 at 00:24, Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org> wrote:
+> On 05/11/2017 06:51 AM, Ard Biesheuvel wrote:
+> [snip]
+>>>>>>
+>>>>>> In my opinion, the correct fix would be to make -fpie (as opposed to
+>>>>>> -fpic) imply hidden visibility, given that PIE executables don't
+>>>>>> export symbols in the first place, and so the preemption rules do not
+>>>>>> apply. It is worth a try whether -fpie works as expected in this case
+>>>>>> on Clang, but the last time I tried it on GCC, it behaved exactly like
+>>>>>> -fpic.
+>>>>>
+>>>>>
+>>>>> Thanks a lot for the detailed description and your suggestions!
+>>>>>
+>>>>> A clang build with -fpie for the EFI stub succeeds without complaints
+>>>>> about GOT entries. I will send out an updated patch (with -fpie only
+>>>>> for clang) later.
+>>>>>
+>>>>
+>>>> Good! I never liked the visibility hack, which is why I never upstreamed
+>>>> it.
+>>>>
+>>>> Could you please check how recent GCC behaves?
+>>>
+>>>
+>>> I tried GCC v4.9.4 and v6.3.1, both build the EFI stub with -fpie
+>>> without errors.
+>>>
+>>> Are you suggesting to use -fpie for both clang and GCC? Do you know
+>>> what the minimum required GCC version is for building an arm64 kernel?
+>>
+>>
+>> Yes. Up until now, we have been relying on the position independent
+>> nature of small model code, but it would be better to specify it
+>> explicitly, so if -fpie gives us mostly identical code and does not
+>> need visibility hacks, I would prefer to add it for all compilers and
+>> not have an exception only for Clang. Note that the same applies to
+>> the entire kernel when built in KASLR mode, so it would also be good
+>> to know our options here.
+>>
+>> Arnd, Will, what is the oldest GCC version we claim to support for arm64?
+>>
+>
+> Unfortunately, after looking into this a bit more, -fpie by itself doesn't
+> force clang to disable symbol preeemption.  For example when building the
+> EFI stub from 4.9 with clang, -fpie gives me a stub that crashes with a
+> synchronous exception inside handle_kernel_image().  The faulting
+> instruction is a read from __nokaslr that still goes through the GOT.
+>
+> Right now you'll get a usable EFI stub with -fpie anyway, since 60f38de7a8d4
+> ("efi/libstub: Unify command line param parsing") masked the problem when it
+> moved __nokaslr behind a helper function.  But AIUI there's nothing really
+> preventing a similar problem in the future.
+>
+> You *can* force clang to disable symbol preemption using "-fpie
+> -mpie-copy-relocations".  That said, I don't know enough about EFI to say
+> whether this is actually appropriate for building the EFI stub.
 
-The back trace is:
+Thanks for digging into this. It is really quite unfortunate that it
+is so difficult to force Clang (or GCC for that matter) to generate
+relative references without the compiler assuming that you are
+building a shared library. Perhaps we need a stronger version of
+-fvisibility=hidden, i.e., one that applies to extern declarations as
+well.
 
-BUG: unable to handle kernel paging request at 000000007febd57e
-IP: 0x7febd57e
-PGD 1025a067
-PUD 0
-
-Oops: 0010 [#1] SMP
-[ ... ]
-Call Trace:
- ? efi_call+0x58/0x90
- ? printk+0x58/0x6f
- efi_enter_virtual_mode+0x3c5/0x50d
- start_kernel+0x40f/0x4b8
- ? set_init_arg+0x55/0x55
- ? early_idt_handler_array+0x120/0x120
- x86_64_start_reservations+0x24/0x26
- x86_64_start_kernel+0x14c/0x16f
- start_cpu+0x14/0x14
-
-The root cause is the ident mapping is not built correctly in old_map case.
-
-For nokaslr kernel, PAGE_OFFSET is 0xffff880000000000 which is PGDIR_SIZE
-aligned. We can borrow the pud table from direct mapping safely. Given a
-physical address X, we have pud_index(X) == pud_index(__va(X)). However,
-for kaslr kernel, PAGE_OFFSET is PUD_SIZE aligned. For a given physical
-address X, pud_index(X) != pud_index(__va(X)). We can't only copy pgd entry
-from direct mapping to build ident mapping, instead need copy pud entry
-one by one from direct mapping.
-
-Fix it.
-
-Signed-off-by: Baoquan He <bhe@redhat.com>
-Signed-off-by: Dave Young <dyoung@redhat.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Thomas Garnier <thgarnie@google.com>
-Cc: Kees Cook <keescook@chromium.org>
-Cc: Russ Anderson <rja@sgi.com>
-Cc: Frank Ramsay <frank.ramsay@hpe.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Bhupesh Sharma <bhsharma@redhat.com>
-Cc: x86@kernel.org
-Cc: linux-efi@vger.kernel.org
----
-v3->v4:
-    1. Forget running scripts/checkpatch.pl to check patch, there are several
-    code stype issue. Correct them in this version.
-
-v2->v3:
-    1. Rewrite code to copy pud entry one by one so that code can be understood
-    better. Usually we only have less than 1TB or several TB memory, pud entry
-    copy one by one won't impact efficiency.
-
-    2. Adding p4d page table handling.
-
-v1->v2:
-    Change code and add description according to Thomas's suggestion as below:
-
-    1. Add checking if pud table is allocated successfully. If not just break
-    the for loop.
-
-    2. Add code comment to explain how the 1:1 mapping is built in efi_call_phys_prolog
-
-    3. Other minor change
-
- arch/x86/platform/efi/efi_64.c | 70 +++++++++++++++++++++++++++++++++++++-----
- 1 file changed, 62 insertions(+), 8 deletions(-)
-
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index c488625..087aafc 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -71,11 +71,13 @@ static void __init early_code_mapping_set_exec(int executable)
- 
- pgd_t * __init efi_call_phys_prolog(void)
- {
--	unsigned long vaddress;
--	pgd_t *save_pgd;
-+	unsigned long vaddr, addr_pgd, addr_p4d, addr_pud;
-+	pgd_t *save_pgd, *pgd_k, *pgd_efi;
-+	p4d_t *p4d, *p4d_k, *p4d_efi;
-+	pud_t *pud;
- 
- 	int pgd;
--	int n_pgds;
-+	int n_pgds, i, j;
- 
- 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
- 		save_pgd = (pgd_t *)read_cr3();
-@@ -88,10 +90,44 @@ pgd_t * __init efi_call_phys_prolog(void)
- 	n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
- 	save_pgd = kmalloc_array(n_pgds, sizeof(*save_pgd), GFP_KERNEL);
- 
-+	/*
-+	 * Build 1:1 ident mapping for old_map usage. It needs to be noticed
-+	 * that PAGE_OFFSET is PGDIR_SIZE aligned with KASLR disabled, while
-+	 * PUD_SIZE ALIGNED with KASLR enabled. So for a given physical
-+	 * address X, the pud_index(X) != pud_index(__va(X)), we can only copy
-+	 * pud entry of __va(X) to fill in pud entry of X to build 1:1 mapping
-+	 * . Means here we can only reuse pmd table of direct mapping.
-+	 */
- 	for (pgd = 0; pgd < n_pgds; pgd++) {
--		save_pgd[pgd] = *pgd_offset_k(pgd * PGDIR_SIZE);
--		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
--		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
-+		addr_pgd = (unsigned long)(pgd * PGDIR_SIZE);
-+		vaddr = (unsigned long)__va(pgd * PGDIR_SIZE);
-+		pgd_efi = pgd_offset_k(addr_pgd);
-+		save_pgd[pgd] = *pgd_efi;
-+		p4d =  p4d_alloc(&init_mm, pgd_efi, addr_pgd);
-+
-+		if (!p4d) {
-+			pr_err("Failed to allocate p4d table!\n");
-+			goto out;
-+		}
-+		for (i = 0; i < PTRS_PER_P4D; i++) {
-+			addr_p4d = addr_pgd + i * P4D_SIZE;
-+			p4d_efi = p4d + p4d_index(addr_p4d);
-+			pud = pud_alloc(&init_mm, p4d_efi, addr_p4d);
-+			if (!pud) {
-+				pr_err("Failed to allocate pud table!\n");
-+				goto out;
-+			}
-+			for (j = 0; j < PTRS_PER_PUD; j++) {
-+				addr_pud = addr_p4d + j * PUD_SIZE;
-+				if (addr_pud > (max_pfn << PAGE_SHIFT))
-+					break;
-+				vaddr = (unsigned long)__va(addr_pud);
-+
-+				pgd_k = pgd_offset_k(vaddr);
-+				p4d_k = p4d_offset(pgd_k, vaddr);
-+				pud[j] = *pud_offset(p4d_k, vaddr);
-+			}
-+		}
- 	}
- out:
- 	__flush_tlb_all();
-@@ -104,8 +140,11 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 	/*
- 	 * After the lock is released, the original page table is restored.
- 	 */
--	int pgd_idx;
-+	int pgd_idx, i;
- 	int nr_pgds;
-+	pgd_t *pgd;
-+	p4d_t *p4d;
-+	pud_t *pud;
- 
- 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
- 		write_cr3((unsigned long)save_pgd);
-@@ -115,9 +154,24 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 
- 	nr_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
- 
--	for (pgd_idx = 0; pgd_idx < nr_pgds; pgd_idx++)
-+	for (pgd_idx = 0; pgd_idx < nr_pgds; pgd_idx++) {
-+		pgd = pgd_offset_k(pgd_idx * PGDIR_SIZE);
- 		set_pgd(pgd_offset_k(pgd_idx * PGDIR_SIZE), save_pgd[pgd_idx]);
- 
-+		if (!(pgd_val(*pgd) & _PAGE_PRESENT))
-+			continue;
-+		for (i = 0; i < PTRS_PER_P4D; i++) {
-+			p4d = p4d_offset(pgd,
-+					 pgd_idx * PGDIR_SIZE + i * P4D_SIZE);
-+			if (!(p4d_val(*p4d) & _PAGE_PRESENT))
-+				continue;
-+			pud = (pud_t *)p4d_page_vaddr(*p4d);
-+			pud_free(&init_mm, pud);
-+		}
-+		p4d = (p4d_t *)pgd_page_vaddr(*pgd);
-+		p4d_free(&init_mm, p4d);
-+	}
-+
- 	kfree(save_pgd);
- 
- 	__flush_tlb_all();
--- 
-2.5.5
+For the stub, we could simply replace all remaining extern symbol
+references (if any) with accessor functions, such as the one I added
+for __nokaslr (which is actually needed for x86 as well, for different
+reasons). Let me look into this.
