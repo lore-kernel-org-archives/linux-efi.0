@@ -1,49 +1,113 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 0/3] efi: add support for non-standard capsule headers
-Date: Thu, 18 May 2017 11:31:41 +0100
-Message-ID: <CAKv+Gu8M-5rp4weLrccJUQ+893vYY3ZRBM2P3gpN5LoKPV_yZw@mail.gmail.com>
-References: <cover.1492626781.git.jan.kiszka@siemens.com> <20170425150005.GR24360@codeblueprint.co.uk>
- <CAKv+Gu9syA8BNWGOJp+qK_eMNUGS6niB+Ac6KA5aRVLac9NAug@mail.gmail.com>
- <3fe85a2e-c846-5545-7896-c838bec6f251@nexus-software.ie> <CAKv+Gu_WXagYAUoWbgwCNnPBynOHMg81HQ=hfyb_X+YarynUxg@mail.gmail.com>
- <d3885f56-8c36-9b94-b653-c14536022129@nexus-software.ie> <CAKv+Gu8N0tQtg_5kpFYWrNWbH_pYm_DBXG3rXR-_EDPkC6kwyA@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] efi-pstore: Fix read iter after pstore API refactor
+Date: Thu, 18 May 2017 11:35:09 +0100
+Message-ID: <CAKv+Gu8H7aJd0jjdMav5V+PdfM3oyh=G3hGZPZtaiXcZ2PAtQg@mail.gmail.com>
+References: <20170512215854.GA85220@beast>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu8N0tQtg_5kpFYWrNWbH_pYm_DBXG3rXR-_EDPkC6kwyA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hock Leong Kweh <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sascha Weisenberger <sascha.weisenberger-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170512215854.GA85220@beast>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kees Cook <keescook@chromium.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Seiji Aguchi <seiji.aguchi@hds.com>, Geliang Tang <geliangtang@163.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 27 April 2017 at 13:42, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 27 April 2017 at 13:46, Bryan O'Donoghue
-> <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org> wrote:
->> On 25/04/17 16:08, Ard Biesheuvel wrote:
->>>
->>> On 25 April 2017 at 16:07, Bryan O'Donoghue
->>>>
->>>> I'm OOO until Thursday however, I could test this out on a Galileo for
->>>> you with the CSH stripped out. As Jan has pointed out Galileo aka Quark
->>>> x1000 non-secure (not to be called insecure) will just skips past the
->>>> CSH anyway - so - we can give it a conformant capsule by stripping the
->>>> CSH junk off the top.
->>>>
->>>> How about you queue it up and I'll let you know if there's a problem
->>>> Thursday?
->>>>
->>>
->>> That would be highly appreciated, thanks.
->>>
->>
->> Looks good.
->>
->> I stripped the header
->> dd skip=1024 bs=1 if=firmware.cap of=firmware-no-csh.cap
->>
->> Downloaded the now conformat capsule and update/reflash succeeded.
->>
+On 12 May 2017 at 22:58, Kees Cook <keescook@chromium.org> wrote:
+> During the internal pstore API refactoring, the EFI vars read entry was
+> accidentally made to update a stack variable instead of the pstore
+> private data pointer. This corrects the problem (and removes the now
+> needless argument).
 >
-> Thanks. I will go ahead and queue these patches for v4.13 with your
-> Tested-by added.
+> Signed-off-by: Kees Cook <keescook@chromium.org>
 
-Queued for v4.13 -- thanks all
+Does this need a cc stable?
+
+> ---
+>  drivers/firmware/efi/efi-pstore.c | 26 ++++++++++----------------
+>  1 file changed, 10 insertions(+), 16 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+> index 93d8cdbe7ef4..9e6f14c354f1 100644
+> --- a/drivers/firmware/efi/efi-pstore.c
+> +++ b/drivers/firmware/efi/efi-pstore.c
+> @@ -155,25 +155,20 @@ static int efi_pstore_scan_sysfs_exit(struct efivar_entry *pos,
+>   * efi_pstore_sysfs_entry_iter
+>   *
+>   * @record: pstore record to pass to callback
+> - * @pos: entry to begin iterating from
+>   *
+>   * You MUST call efivar_enter_iter_begin() before this function, and
+>   * efivar_entry_iter_end() afterwards.
+>   *
+> - * It is possible to begin iteration from an arbitrary entry within
+> - * the list by passing @pos. @pos is updated on return to point to
+> - * the next entry of the last one passed to efi_pstore_read_func().
+> - * To begin iterating from the beginning of the list @pos must be %NULL.
+>   */
+> -static int efi_pstore_sysfs_entry_iter(struct pstore_record *record,
+> -                                      struct efivar_entry **pos)
+> +static int efi_pstore_sysfs_entry_iter(struct pstore_record *record)
+>  {
+> +       struct efivar_entry *pos = (struct efivar_entry *)record->psi->data;
+>         struct efivar_entry *entry, *n;
+>         struct list_head *head = &efivar_sysfs_list;
+>         int size = 0;
+>         int ret;
+>
+> -       if (!*pos) {
+> +       if (!pos) {
+>                 list_for_each_entry_safe(entry, n, head, list) {
+>                         efi_pstore_scan_sysfs_enter(entry, n, head);
+>
+> @@ -185,21 +180,21 @@ static int efi_pstore_sysfs_entry_iter(struct pstore_record *record,
+>                         if (size)
+>                                 break;
+>                 }
+> -               *pos = n;
+> +               pos = n;
+>                 return size;
+>         }
+>
+> -       list_for_each_entry_safe_from((*pos), n, head, list) {
+> -               efi_pstore_scan_sysfs_enter((*pos), n, head);
+> +       list_for_each_entry_safe_from(pos, n, head, list) {
+> +               efi_pstore_scan_sysfs_enter(pos, n, head);
+>
+> -               size = efi_pstore_read_func((*pos), record);
+> -               ret = efi_pstore_scan_sysfs_exit((*pos), n, head, size < 0);
+> +               size = efi_pstore_read_func(pos, record);
+> +               ret = efi_pstore_scan_sysfs_exit(pos, n, head, size < 0);
+>                 if (ret)
+>                         return ret;
+>                 if (size)
+>                         break;
+>         }
+> -       *pos = n;
+> +       pos = n;
+>         return size;
+>  }
+>
+> @@ -218,7 +213,6 @@ static int efi_pstore_sysfs_entry_iter(struct pstore_record *record,
+>   */
+>  static ssize_t efi_pstore_read(struct pstore_record *record)
+>  {
+> -       struct efivar_entry *entry = (struct efivar_entry *)record->psi->data;
+>         ssize_t size;
+>
+>         record->buf = kzalloc(EFIVARS_DATA_SIZE_MAX, GFP_KERNEL);
+> @@ -229,7 +223,7 @@ static ssize_t efi_pstore_read(struct pstore_record *record)
+>                 size = -EINTR;
+>                 goto out;
+>         }
+> -       size = efi_pstore_sysfs_entry_iter(record, &entry);
+> +       size = efi_pstore_sysfs_entry_iter(record);
+>         efivar_entry_iter_end();
+>
+>  out:
+> --
+> 2.7.4
+>
+>
+> --
+> Kees Cook
+> Pixel Security
