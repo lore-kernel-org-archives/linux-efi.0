@@ -1,66 +1,41 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v5 32/32] x86/mm: Add support to make use of Secure
- Memory Encryption
-Date: Fri, 19 May 2017 13:30:05 +0200
-Message-ID: <20170519113005.3f5kwzg4pgh7j6a5@pd.tnic>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418212223.10190.85121.stgit@tlendack-t1.amdoffice.net>
- <c29edaff-24f2-ee9b-4142-bdbf8c42083f@amd.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efi-pstore: Fix read iter after pstore API refactor
+Date: Fri, 19 May 2017 14:30:37 +0100
+Message-ID: <CAKv+Gu-5-L98S6KJcGsdiQxM_ZePja1dcaVdaQsfNzGJDLxy2g@mail.gmail.com>
+References: <20170512215854.GA85220@beast> <CAKv+Gu8H7aJd0jjdMav5V+PdfM3oyh=G3hGZPZtaiXcZ2PAtQg@mail.gmail.com>
+ <CAGXu5j+-WJazbLOV2n3VS6SJc8fBUqgC+AzfEVYoxYWRto5=XQ@mail.gmail.com>
+ <CAKv+Gu_Mxfgqww3T-xUmif-A=XaGbVai7nT+L1UvdO_ML3G2XQ@mail.gmail.com> <CAGXu5jJ0aT7-qHexqyFvDhCSJWcxUVb3zZ=-mAT=x8UtHWOVcA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-arch-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <c29edaff-24f2-ee9b-4142-bdbf8c42083f@amd.com>
-Sender: linux-arch-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>, Josh Poimboeuf <jpoimboe@redhat.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAGXu5jJ0aT7-qHexqyFvDhCSJWcxUVb3zZ=-mAT=x8UtHWOVcA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Apr 21, 2017 at 01:56:13PM -0500, Tom Lendacky wrote:
-> On 4/18/2017 4:22 PM, Tom Lendacky wrote:
-> > Add support to check if SME has been enabled and if memory encryption
-> > should be activated (checking of command line option based on the
-> > configuration of the default state).  If memory encryption is to be
-> > activated, then the encryption mask is set and the kernel is encrypted
-> > "in place."
-> > 
-> > Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> > ---
-> >  arch/x86/kernel/head_64.S |    1 +
-> >  arch/x86/mm/mem_encrypt.c |   83 +++++++++++++++++++++++++++++++++++++++++++--
-> >  2 files changed, 80 insertions(+), 4 deletions(-)
-> > 
-> 
-> ...
-> 
-> > 
-> > -unsigned long __init sme_enable(void)
-> > +unsigned long __init sme_enable(struct boot_params *bp)
-> >  {
-> > +	const char *cmdline_ptr, *cmdline_arg, *cmdline_on, *cmdline_off;
-> > +	unsigned int eax, ebx, ecx, edx;
-> > +	unsigned long me_mask;
-> > +	bool active_by_default;
-> > +	char buffer[16];
-> 
-> So it turns out that when KASLR is enabled (CONFIG_RAMDOMIZE_BASE=y)
-> the stack-protector support causes issues with this function because
+On 18 May 2017 at 17:41, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+> On Thu, May 18, 2017 at 9:18 AM, Ard Biesheuvel
+> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> On 18 May 2017 at 14:01, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+>>> On Thu, May 18, 2017 at 3:35 AM, Ard Biesheuvel
+>>> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>>> On 12 May 2017 at 22:58, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+>>>>> During the internal pstore API refactoring, the EFI vars read entry was
+>>>>> accidentally made to update a stack variable instead of the pstore
+>>>>> private data pointer. This corrects the problem (and removes the now
+>>>>> needless argument).
+>>>>>
+>>>>> Signed-off-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+>>>>
+>>>> Does this need a cc stable?
+>>>
+>>> No, the refactor first appeared in 4.12-rc1.
+>>>
+>>
+>> OK. Applied.
+>
+> Err, eek, no, it's already gone into Linus's tree.
+>
 
-What issues?
-
-> it is called so early. I can get past it by adding:
-> 
-> CFLAGS_mem_encrypt.o := $(nostackp)
-> 
-> in the arch/x86/mm/Makefile, but that obviously eliminates the support
-> for the whole file.  Would it be better to split out the sme_enable()
-> and other boot routines into a separate file or just apply the
-> $(nostackp) to the whole file?
-
-Josh might have a better idea here... CCed.
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+OK, I dropped it again :-)
