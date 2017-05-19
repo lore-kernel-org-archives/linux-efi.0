@@ -1,173 +1,89 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/5] efi: Move the x86 secure boot switch to generic code
-Date: Fri, 19 May 2017 15:00:32 +0100
-Message-ID: <CAKv+Gu9e-r+m6TEBPOg+o01m5JmF9CYLfH4dc60a_K41zJoCKg@mail.gmail.com>
-References: <149148299794.3427.549144000807596903.stgit@warthog.procyon.org.uk>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] efi/reboot: Fall back to original power-off method if
+ EFI_RESET_SHUTDOWN returns
+Date: Fri, 19 May 2017 16:45:49 +0100
+Message-ID: <CAKv+Gu-qSMK6YTh5O=w-6mOSdAkMzNn945M+TAC0CAMRfgVhmw@mail.gmail.com>
+References: <20170423123655.13015-1-hdegoede@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <149148299794.3427.549144000807596903.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20170423123655.13015-1-hdegoede@redhat.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Len Brown <lenb@kernel.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, Peter Jones <pjones@redhat.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Mark Salter <msalter@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-First of all, apologies for taking so long to respond.
-
-On 6 April 2017 at 13:49, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> Move the switch-statement in x86's setup_arch() that inteprets the
-> secure_boot boot parameter to generic code.
+On 23 April 2017 at 13:36, Hans de Goede <hdegoede@redhat.com> wrote:
+> Commit 44be28e9dd98 ("x86/reboot: Add EFI reboot quirk for ACPI Hardware
+> Reduced flag") sets pm_power_off to efi_power_off() when the
+> acpi_gbl_reduced_hardware flag is set.
 >
-> Suggested-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> According to its commit message this is necessary because: "BayTrail-T
+> class of hardware requires EFI in order to powerdown and reboot and no
+> other reliable method exists"
+>
+> But I have a Bay Trail CR tablet where the EFI_RESET_SHUTDOWN call does
+> not work, it simply returns without doing anything (AFAICT).
+>
+> So it seems that some Bay Trail devices must use EFI for power-off, while
+> for others only ACPI works.
+>
+> Note that efi_power_off() only gets used if the platform code defines
+> efi_poweroff_required() and that returns true, this currently only ever
+> happens on x86.
+>
+> Since on the devices which need ACPI for power-off the EFI_RESET_SHUTDOWN
+> call simply returns, this patch makes the efi-reboot code remember the
+> old pm_power_off handler and if EFI_RESET_SHUTDOWN returns it falls back
+> to calling that.
+>
+> This seems preferable to dmi-quirking our way out of this, since there
+> are likely quite a few devices suffering from this.
+>
+> Cc: Mark Salter <msalter@redhat.com>
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 > ---
+>  drivers/firmware/efi/reboot.c | 12 +++++++++++-
+>  1 file changed, 11 insertions(+), 1 deletion(-)
 >
->  arch/x86/kernel/setup.c            |   14 +-------------
->  drivers/firmware/efi/Kconfig       |   23 +++++++++++++++++++++++
->  drivers/firmware/efi/Makefile      |    3 ++-
->  drivers/firmware/efi/secure_boot.c |   34 ++++++++++++++++++++++++++++++++++
->  include/linux/efi.h                |    6 ++++++
->  5 files changed, 66 insertions(+), 14 deletions(-)
->  create mode 100644 drivers/firmware/efi/secure_boot.c
+> diff --git a/drivers/firmware/efi/reboot.c b/drivers/firmware/efi/reboot.c
+> index 62ead9b..7117e2d 100644
+> --- a/drivers/firmware/efi/reboot.c
+> +++ b/drivers/firmware/efi/reboot.c
+> @@ -5,6 +5,8 @@
+>  #include <linux/efi.h>
+>  #include <linux/reboot.h>
 >
-> diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-> index 4bf0c8926a1c..b89979ffa6e5 100644
-> --- a/arch/x86/kernel/setup.c
-> +++ b/arch/x86/kernel/setup.c
-> @@ -1178,19 +1178,7 @@ void __init setup_arch(char **cmdline_p)
->         /* Allocate bigger log buffer */
->         setup_log_buf(1);
->
-> -       if (efi_enabled(EFI_BOOT)) {
-> -               switch (boot_params.secure_boot) {
-> -               case efi_secureboot_mode_disabled:
-> -                       pr_info("Secure boot disabled\n");
-> -                       break;
-> -               case efi_secureboot_mode_enabled:
-> -                       pr_info("Secure boot enabled\n");
-> -                       break;
-> -               default:
-> -                       pr_info("Secure boot could not be determined\n");
-> -                       break;
-> -               }
-> -       }
-> +       efi_set_secure_boot(boot_params.secure_boot);
->
->         reserve_initrd();
->
-> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-> index 2e78b0b96d74..4b902ffbfcf4 100644
-> --- a/drivers/firmware/efi/Kconfig
-> +++ b/drivers/firmware/efi/Kconfig
-> @@ -84,6 +84,29 @@ config EFI_PARAMS_FROM_FDT
->  config EFI_RUNTIME_WRAPPERS
->         bool
->
-> +config EFI_SECURE_BOOT
-> +       bool "Support UEFI Secure Boot and lock down the kernel in secure boot mode"
-> +       default n
-> +       help
-> +         UEFI Secure Boot provides a mechanism for ensuring that the firmware
-> +         will only load signed bootloaders and kernels.  Secure boot mode may
-> +         be determined from EFI variables provided by the BIOS if not
-
-Please replace 'the BIOS' with something more generic.
-
-> +         indicated by the boot parameters.
+> +void (*orig_pm_power_off)(void);
 > +
-> +         Enabling this option turns on support for UEFI secure boot in the
-> +         kernel.  This will result in various kernel facilities being locked
-> +         away from userspace if the kernel detects that it has been booted in
-> +         secure boot mode.  If it hasn't been booted in secure boot mode, or
-> +         this cannot be determined, the lock down doesn't occur.
-> +
-> +         The kernel facilities that get locked down include:
-> +         - Viewing or changing the kernel's memory
-> +         - Directly accessing ioports
-> +         - Directly specifying ioports and other hardware parameters to drivers
-> +         - Storing the kernel image unencrypted for hibernation
-> +         - Loading unsigned modules
-> +         - Kexec'ing unsigned images
-> +
->  config EFI_ARMSTUB
->         bool
+>  int efi_reboot_quirk_mode = -1;
 >
-> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-> index ad67342313ed..65969f840685 100644
-> --- a/drivers/firmware/efi/Makefile
-> +++ b/drivers/firmware/efi/Makefile
-> @@ -22,7 +22,8 @@ obj-$(CONFIG_EFI_FAKE_MEMMAP)         += fake_mem.o
->  obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)   += efibc.o
->  obj-$(CONFIG_EFI_TEST)                 += test/
->  obj-$(CONFIG_EFI_DEV_PATH_PARSER)      += dev-path-parser.o
-> -obj-$(CONFIG_APPLE_PROPERTIES)         += apple-properties.o
-> +obj-$(CONFIG_EFI_SECURE_BOOT)          += secure_boot.o
-> +obj-$(CONFIG_APPLE_PROPERTIES)         += apple-properties.oo
-
-Spurious change here
-
+>  void efi_reboot(enum reboot_mode reboot_mode, const char *__unused)
+> @@ -51,6 +53,12 @@ bool __weak efi_poweroff_required(void)
+>  static void efi_power_off(void)
+>  {
+>         efi.reset_system(EFI_RESET_SHUTDOWN, EFI_SUCCESS, 0, NULL);
+> +       /*
+> +        * The above call should not return, if it does fall back to
+> +        * the original power off method (typically ACPI poweroff).
+> +        */
+> +       if (orig_pm_power_off)
+> +               orig_pm_power_off();
+>  }
 >
->  arm-obj-$(CONFIG_EFI)                  := arm-init.o arm-runtime.o
->  obj-$(CONFIG_ARM)                      += $(arm-obj-y)
-> diff --git a/drivers/firmware/efi/secure_boot.c b/drivers/firmware/efi/secure_boot.c
-> new file mode 100644
-> index 000000000000..cf5bccae15e8
-> --- /dev/null
-> +++ b/drivers/firmware/efi/secure_boot.c
-
-We have a file called secureboot.c in libstub/, so for consistency,
-could you please drop the underscore?
-
-> @@ -0,0 +1,34 @@
-> +/* Core kernel secure boot support.
-> + *
-> + * Copyright (C) 2017 Red Hat, Inc. All Rights Reserved.
-> + * Written by David Howells (dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)
-> + *
-> + * This program is free software; you can redistribute it and/or
-> + * modify it under the terms of the GNU General Public Licence
-> + * as published by the Free Software Foundation; either version
-> + * 2 of the Licence, or (at your option) any later version.
-> + */
-> +
-> +#include <linux/efi.h>
-> +#include <linux/kernel.h>
-> +#include <linux/printk.h>
-> +
-> +/*
-> + * Decide what to do when UEFI secure boot mode is enabled.
-> + */
-> +void __init efi_set_secure_boot(enum efi_secureboot_mode mode)
-> +{
-> +       if (efi_enabled(EFI_BOOT)) {
-> +               switch (mode) {
-> +               case efi_secureboot_mode_disabled:
-> +                       pr_info("Secure boot disabled\n");
-> +                       break;
-> +               case efi_secureboot_mode_enabled:
-> +                       pr_info("Secure boot enabled\n");
-> +                       break;
-> +               default:
-> +                       pr_info("Secure boot could not be determined\n");
-> +                       break;
-> +               }
+>  static int __init efi_shutdown_init(void)
+> @@ -58,8 +66,10 @@ static int __init efi_shutdown_init(void)
+>         if (!efi_enabled(EFI_RUNTIME_SERVICES))
+>                 return -ENODEV;
+>
+> -       if (efi_poweroff_required())
+> +       if (efi_poweroff_required()) {
+> +               orig_pm_power_off = pm_power_off;
+>                 pm_power_off = efi_power_off;
 > +       }
-> +}
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index 94d34e0be24f..d8938a780290 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -1488,6 +1488,12 @@ enum efi_secureboot_mode {
->  };
->  enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table);
 >
-> +#ifdef CONFIG_EFI_SECURE_BOOT
-> +void __init efi_set_secure_boot(enum efi_secureboot_mode mode);
-> +#else
-> +static inline void efi_set_secure_boot(enum efi_secureboot_mode mode) {}
-> +#endif
-> +
->  /*
->   * Arch code can implement the following three template macros, avoiding
->   * reptition for the void/non-void return cases of {__,}efi_call_virt():
->
+>         return 0;
+>  }
+
+This does not look unreasonable to me, but this is more Matt's turf so
+I will let him handle this one.
