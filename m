@@ -1,7 +1,7 @@
 From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V17 05/11] arm64: exception: handle Synchronous External Abort
-Date: Fri, 19 May 2017 14:32:07 -0600
-Message-ID: <1495225933-4410-6-git-send-email-tbaicar@codeaurora.org>
+Subject: [PATCH V17 06/11] acpi: apei: handle SEA notification type for ARMv8
+Date: Fri, 19 May 2017 14:32:08 -0600
+Message-ID: <1495225933-4410-7-git-send-email-tbaicar@codeaurora.org>
 References: <1495225933-4410-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,105 +21,249 @@ To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrc
 Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-SEA exceptions are often caused by an uncorrected hardware
-error, and are handled when data abort and instruction abort
-exception classes have specific values for their Fault Status
-Code.
-When SEA occurs, before killing the process, report the error
-in the kernel logs.
-Update fault_info[] with specific SEA faults so that the
-new SEA handler is used.
+ARM APEI extension proposal added SEA (Synchronous External Abort)
+notification type for ARMv8.
+Add a new GHES error source handling function for SEA. If an error
+source's notification type is SEA, then this function can be registered
+into the SEA exception handler. That way GHES will parse and report
+SEA exceptions when they occur.
+An SEA can interrupt code that had interrupts masked and is treated as
+an NMI. To aid this the page of address space for mapping APEI buffers
+while in_nmi() is always reserved, and ghes_ioremap_pfn_nmi() is
+changed to use the helper methods to find the prot_t to map with in
+the same way as ghes_ioremap_pfn_irq().
 
 Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
 CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
 Reviewed-by: James Morse <james.morse@arm.com>
 Acked-by: Catalin Marinas <catalin.marinas@arm.com>
 ---
- arch/arm64/include/asm/esr.h |  1 +
- arch/arm64/mm/fault.c        | 45 ++++++++++++++++++++++++++++++++++----------
- 2 files changed, 36 insertions(+), 10 deletions(-)
+ arch/arm64/Kconfig        |  2 ++
+ arch/arm64/mm/fault.c     | 17 ++++++++++++
+ drivers/acpi/apei/Kconfig | 15 ++++++++++
+ drivers/acpi/apei/ghes.c  | 70 +++++++++++++++++++++++++++++++++++++++++++----
+ include/acpi/ghes.h       |  7 +++++
+ 5 files changed, 105 insertions(+), 6 deletions(-)
 
-diff --git a/arch/arm64/include/asm/esr.h b/arch/arm64/include/asm/esr.h
-index 85997c0..28bf02e 100644
---- a/arch/arm64/include/asm/esr.h
-+++ b/arch/arm64/include/asm/esr.h
-@@ -83,6 +83,7 @@
- #define ESR_ELx_WNR		(UL(1) << 6)
- 
- /* Shared ISS field definitions for Data/Instruction aborts */
-+#define ESR_ELx_FnV		(UL(1) << 10)
- #define ESR_ELx_EA		(UL(1) << 9)
- #define ESR_ELx_S1PTW		(UL(1) << 7)
- 
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 3dcd7ec..8055997 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -19,6 +19,7 @@ config ARM64
+ 	select ARCH_HAS_STRICT_KERNEL_RWX
+ 	select ARCH_HAS_STRICT_MODULE_RWX
+ 	select ARCH_HAS_TICK_BROADCAST if GENERIC_CLOCKEVENTS_BROADCAST
++	select ARCH_HAVE_NMI_SAFE_CMPXCHG if ACPI_APEI_SEA
+ 	select ARCH_USE_CMPXCHG_LOCKREF
+ 	select ARCH_SUPPORTS_ATOMIC_RMW
+ 	select ARCH_SUPPORTS_NUMA_BALANCING
+@@ -92,6 +93,7 @@ config ARM64
+ 	select HAVE_IRQ_TIME_ACCOUNTING
+ 	select HAVE_MEMBLOCK
+ 	select HAVE_MEMBLOCK_NODE_MAP if NUMA
++	select HAVE_NMI if ACPI_APEI_SEA
+ 	select HAVE_PATA_PLATFORM
+ 	select HAVE_PERF_EVENTS
+ 	select HAVE_PERF_REGS
 diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-index 37b95df..6697816 100644
+index 6697816..9b4e26f 100644
 --- a/arch/arm64/mm/fault.c
 +++ b/arch/arm64/mm/fault.c
-@@ -522,6 +522,31 @@ static int do_bad(unsigned long addr, unsigned int esr, struct pt_regs *regs)
- 	return 1;
- }
+@@ -42,6 +42,8 @@
+ #include <asm/pgtable.h>
+ #include <asm/tlbflush.h>
  
-+/*
-+ * This abort handler deals with Synchronous External Abort.
-+ * It calls notifiers, and then returns "fault".
-+ */
-+static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
++#include <acpi/ghes.h>
++
+ struct fault_info {
+ 	int	(*fn)(unsigned long addr, unsigned int esr,
+ 		      struct pt_regs *regs);
+@@ -535,6 +537,21 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
+ 	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
+ 		inf->name, esr, addr);
+ 
++	/*
++	 * Synchronous aborts may interrupt code which had interrupts masked.
++	 * Before calling out into the wider kernel tell the interested
++	 * subsystems.
++	 */
++	if (IS_ENABLED(CONFIG_ACPI_APEI_SEA)) {
++		if (interrupts_enabled(regs))
++			nmi_enter();
++
++		ghes_notify_sea();
++
++		if (interrupts_enabled(regs))
++			nmi_exit();
++	}
++
+ 	info.si_signo = SIGBUS;
+ 	info.si_errno = 0;
+ 	info.si_code  = 0;
+diff --git a/drivers/acpi/apei/Kconfig b/drivers/acpi/apei/Kconfig
+index b0140c8..de14d49 100644
+--- a/drivers/acpi/apei/Kconfig
++++ b/drivers/acpi/apei/Kconfig
+@@ -39,6 +39,21 @@ config ACPI_APEI_PCIEAER
+ 	  PCIe AER errors may be reported via APEI firmware first mode.
+ 	  Turn on this option to enable the corresponding support.
+ 
++config ACPI_APEI_SEA
++	bool "APEI Synchronous External Abort logging/recovering support"
++	depends on ARM64 && ACPI_APEI_GHES
++	default y
++	help
++	  This option should be enabled if the system supports
++	  firmware first handling of SEA (Synchronous External Abort).
++	  SEA happens with certain faults of data abort or instruction
++	  abort synchronous exceptions on ARMv8 systems. If a system
++	  supports firmware first handling of SEA, the platform analyzes
++	  and handles hardware error notifications from SEA, and it may then
++	  form a HW error record for the OS to parse and handle. This
++	  option allows the OS to look for such hardware error record, and
++	  take appropriate action.
++
+ config ACPI_APEI_MEMORY_FAILURE
+ 	bool "APEI memory error recovering support"
+ 	depends on ACPI_APEI && MEMORY_FAILURE
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index 626552e..7e59a73 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -116,11 +116,7 @@ static inline bool is_hest_type_generic_v2(struct ghes *ghes)
+  * Two virtual pages are used, one for IRQ/PROCESS context, the other for
+  * NMI context (optionally).
+  */
+-#ifdef CONFIG_HAVE_ACPI_APEI_NMI
+ #define GHES_IOREMAP_PAGES           2
+-#else
+-#define GHES_IOREMAP_PAGES           1
+-#endif
+ #define GHES_IOREMAP_IRQ_PAGE(base)	(base)
+ #define GHES_IOREMAP_NMI_PAGE(base)	((base) + PAGE_SIZE)
+ 
+@@ -159,10 +155,14 @@ static void ghes_ioremap_exit(void)
+ static void __iomem *ghes_ioremap_pfn_nmi(u64 pfn)
+ {
+ 	unsigned long vaddr;
++	phys_addr_t paddr;
++	pgprot_t prot;
+ 
+ 	vaddr = (unsigned long)GHES_IOREMAP_NMI_PAGE(ghes_ioremap_area->addr);
+-	ioremap_page_range(vaddr, vaddr + PAGE_SIZE,
+-			   pfn << PAGE_SHIFT, PAGE_KERNEL);
++
++	paddr = pfn << PAGE_SHIFT;
++	prot = arch_apei_get_mem_attribute(paddr);
++	ioremap_page_range(vaddr, vaddr + PAGE_SIZE, paddr, prot);
+ 
+ 	return (void __iomem *)vaddr;
+ }
+@@ -774,6 +774,50 @@ static int ghes_notify_sci(struct notifier_block *this,
+ 	.notifier_call = ghes_notify_sci,
+ };
+ 
++#ifdef CONFIG_ACPI_APEI_SEA
++static LIST_HEAD(ghes_sea);
++
++void ghes_notify_sea(void)
 +{
-+	struct siginfo info;
-+	const struct fault_info *inf;
++	struct ghes *ghes;
 +
-+	inf = esr_to_fault_info(esr);
-+	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
-+		inf->name, esr, addr);
-+
-+	info.si_signo = SIGBUS;
-+	info.si_errno = 0;
-+	info.si_code  = 0;
-+	if (esr & ESR_ELx_FnV)
-+		info.si_addr = 0;
-+	else
-+		info.si_addr  = (void __user *)addr;
-+	arm64_notify_die("", regs, &info, esr);
-+
-+	return 0;
++	/*
++	 * synchronize_rcu() will wait for nmi_exit(), so no need to
++	 * rcu_read_lock().
++	 */
++	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
++		ghes_proc(ghes);
++	}
 +}
 +
- static const struct fault_info fault_info[] = {
- 	{ do_bad,		SIGBUS,  0,		"ttbr address size fault"	},
- 	{ do_bad,		SIGBUS,  0,		"level 1 address size fault"	},
-@@ -539,22 +564,22 @@ static int do_bad(unsigned long addr, unsigned int esr, struct pt_regs *regs)
- 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 1 permission fault"	},
- 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
- 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 permission fault"	},
--	{ do_bad,		SIGBUS,  0,		"synchronous external abort"	},
-+	{ do_sea,		SIGBUS,  0,		"synchronous external abort"	},
- 	{ do_bad,		SIGBUS,  0,		"unknown 17"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 18"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 19"			},
--	{ do_bad,		SIGBUS,  0,		"synchronous external abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous external abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous external abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous external abort (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error"	},
-+	{ do_sea,		SIGBUS,  0,		"level 0 (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 1 (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 2 (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 3 (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"synchronous parity or ECC error" },
- 	{ do_bad,		SIGBUS,  0,		"unknown 25"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 26"			},
- 	{ do_bad,		SIGBUS,  0,		"unknown 27"			},
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
--	{ do_bad,		SIGBUS,  0,		"synchronous parity error (translation table walk)" },
-+	{ do_sea,		SIGBUS,  0,		"level 0 synchronous parity error (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 1 synchronous parity error (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 2 synchronous parity error (translation table walk)"	},
-+	{ do_sea,		SIGBUS,  0,		"level 3 synchronous parity error (translation table walk)"	},
- 	{ do_bad,		SIGBUS,  0,		"unknown 32"			},
- 	{ do_alignment_fault,	SIGBUS,  BUS_ADRALN,	"alignment fault"		},
- 	{ do_bad,		SIGBUS,  0,		"unknown 34"			},
++static void ghes_sea_add(struct ghes *ghes)
++{
++	mutex_lock(&ghes_list_mutex);
++	list_add_rcu(&ghes->list, &ghes_sea);
++	mutex_unlock(&ghes_list_mutex);
++}
++
++static void ghes_sea_remove(struct ghes *ghes)
++{
++	mutex_lock(&ghes_list_mutex);
++	list_del_rcu(&ghes->list);
++	mutex_unlock(&ghes_list_mutex);
++	synchronize_rcu();
++}
++#else /* CONFIG_ACPI_APEI_SEA */
++static inline void ghes_sea_add(struct ghes *ghes)
++{
++	pr_err(GHES_PFX "ID: %d, trying to add SEA notification which is not supported\n",
++	       ghes->generic->header.source_id);
++}
++
++static inline void ghes_sea_remove(struct ghes *ghes)
++{
++	pr_err(GHES_PFX "ID: %d, trying to remove SEA notification which is not supported\n",
++	       ghes->generic->header.source_id);
++}
++#endif /* CONFIG_ACPI_APEI_SEA */
++
+ #ifdef CONFIG_HAVE_ACPI_APEI_NMI
+ /*
+  * printk is not safe in NMI context.  So in NMI handler, we allocate
+@@ -1019,6 +1063,14 @@ static int ghes_probe(struct platform_device *ghes_dev)
+ 	case ACPI_HEST_NOTIFY_EXTERNAL:
+ 	case ACPI_HEST_NOTIFY_SCI:
+ 		break;
++	case ACPI_HEST_NOTIFY_SEA:
++		if (!IS_ENABLED(CONFIG_ACPI_APEI_SEA)) {
++			pr_warn(GHES_PFX "Generic hardware error source: %d notified via SEA is not supported\n",
++				generic->header.source_id);
++			rc = -ENOTSUPP;
++			goto err;
++		}
++		break;
+ 	case ACPI_HEST_NOTIFY_NMI:
+ 		if (!IS_ENABLED(CONFIG_HAVE_ACPI_APEI_NMI)) {
+ 			pr_warn(GHES_PFX "Generic hardware error source: %d notified via NMI interrupt is not supported!\n",
+@@ -1083,6 +1135,9 @@ static int ghes_probe(struct platform_device *ghes_dev)
+ 		list_add_rcu(&ghes->list, &ghes_sci);
+ 		mutex_unlock(&ghes_list_mutex);
+ 		break;
++	case ACPI_HEST_NOTIFY_SEA:
++		ghes_sea_add(ghes);
++		break;
+ 	case ACPI_HEST_NOTIFY_NMI:
+ 		ghes_nmi_add(ghes);
+ 		break;
+@@ -1126,6 +1181,9 @@ static int ghes_remove(struct platform_device *ghes_dev)
+ 		mutex_unlock(&ghes_list_mutex);
+ 		synchronize_rcu();
+ 		break;
++	case ACPI_HEST_NOTIFY_SEA:
++		ghes_sea_remove(ghes);
++		break;
+ 	case ACPI_HEST_NOTIFY_NMI:
+ 		ghes_nmi_remove(ghes);
+ 		break;
+diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+index 8f8fea00..95305ae 100644
+--- a/include/acpi/ghes.h
++++ b/include/acpi/ghes.h
+@@ -1,3 +1,6 @@
++#ifndef GHES_H
++#define GHES_H
++
+ #include <acpi/apei.h>
+ #include <acpi/hed.h>
+ 
+@@ -109,3 +112,7 @@ static inline void *acpi_hest_get_next(struct acpi_hest_generic_data *gdata)
+ {
+ 	return (void *)(gdata) + acpi_hest_get_record_size(gdata);
+ }
++
++void ghes_notify_sea(void);
++
++#endif /* GHES_H */
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
