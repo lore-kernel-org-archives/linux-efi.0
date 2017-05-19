@@ -1,231 +1,68 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [PATCH v5 28/32] x86/mm, kexec: Allow kexec to be used with SME
-Date: Fri, 19 May 2017 15:45:28 -0500
-Message-ID: <1b74e0e6-3dda-f638-461b-f73af9904360@amd.com>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [PATCH v5 17/32] x86/mm: Add support to access boot related data
+	in the clear
+Date: Fri, 19 May 2017 15:50:32 -0500
+Message-ID: <c0cb8a50-e860-169b-ee0c-7eb4db7c3fda@amd.com>
 References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418212121.10190.94885.stgit@tlendack-t1.amdoffice.net>
- <20170517191755.h2xluopk2p6suw32@pd.tnic>
+	<20170418211921.10190.1537.stgit@tlendack-t1.amdoffice.net>
+	<20170515183517.mb4k2gp2qobbuvtm@pd.tnic>
+	<4845df29-bae7-9b78-0428-ff96dbef2128@amd.com>
+	<20170518090212.kebstmnjv4h3cjf2@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170517191755.h2xluopk2p6suw32@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S.
- Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
- Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20170518090212.kebstmnjv4h3cjf2-fF5Pk5pvG8Y@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter
+	Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S.
+	Tsirkin" <mst>
 List-Id: linux-efi@vger.kernel.org
 
-On 5/17/2017 2:17 PM, Borislav Petkov wrote:
-> On Tue, Apr 18, 2017 at 04:21:21PM -0500, Tom Lendacky wrote:
->> Provide support so that kexec can be used to boot a kernel when SME is
->> enabled.
->>
->> Support is needed to allocate pages for kexec without encryption.  This
->> is needed in order to be able to reboot in the kernel in the same manner
->> as originally booted.
->>
->> Additionally, when shutting down all of the CPUs we need to be sure to
->> flush the caches and then halt. This is needed when booting from a state
->> where SME was not active into a state where SME is active (or vice-versa).
->> Without these steps, it is possible for cache lines to exist for the same
->> physical location but tagged both with and without the encryption bit. This
->> can cause random memory corruption when caches are flushed depending on
->> which cacheline is written last.
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->>  arch/x86/include/asm/init.h          |    1 +
->>  arch/x86/include/asm/irqflags.h      |    5 +++++
->>  arch/x86/include/asm/kexec.h         |    8 ++++++++
->>  arch/x86/include/asm/pgtable_types.h |    1 +
->>  arch/x86/kernel/machine_kexec_64.c   |   35 +++++++++++++++++++++++++++++++++-
->>  arch/x86/kernel/process.c            |   26 +++++++++++++++++++++++--
->>  arch/x86/mm/ident_map.c              |   11 +++++++----
->>  include/linux/kexec.h                |   14 ++++++++++++++
->>  kernel/kexec_core.c                  |    7 +++++++
->>  9 files changed, 101 insertions(+), 7 deletions(-)
+On 5/18/2017 4:02 AM, Borislav Petkov wrote:
+> On Wed, May 17, 2017 at 01:54:39PM -0500, Tom Lendacky wrote:
+>> I was worried what the compiler might do when CONFIG_EFI is not set,
+>> but it appears to take care of it. I'll double check though.
 >
-> ...
+> There's a efi_enabled() !CONFIG_EFI version too, so should be fine.
 >
->> @@ -86,7 +86,7 @@ static int init_transition_pgtable(struct kimage *image, pgd_t *pgd)
->>  		set_pmd(pmd, __pmd(__pa(pte) | _KERNPG_TABLE));
->>  	}
->>  	pte = pte_offset_kernel(pmd, vaddr);
->> -	set_pte(pte, pfn_pte(paddr >> PAGE_SHIFT, PAGE_KERNEL_EXEC));
->> +	set_pte(pte, pfn_pte(paddr >> PAGE_SHIFT, PAGE_KERNEL_EXEC_NOENC));
->>  	return 0;
->>  err:
->>  	free_transition_pgtable(image);
->> @@ -114,6 +114,7 @@ static int init_pgtable(struct kimage *image, unsigned long start_pgtable)
->>  		.alloc_pgt_page	= alloc_pgt_page,
->>  		.context	= image,
->>  		.pmd_flag	= __PAGE_KERNEL_LARGE_EXEC,
->> +		.kernpg_flag	= _KERNPG_TABLE_NOENC,
->>  	};
->>  	unsigned long mstart, mend;
->>  	pgd_t *level4p;
->> @@ -597,3 +598,35 @@ void arch_kexec_unprotect_crashkres(void)
->>  {
->>  	kexec_mark_crashkres(false);
->>  }
->> +
->> +int arch_kexec_post_alloc_pages(void *vaddr, unsigned int pages, gfp_t gfp)
->> +{
->> +	int ret;
->> +
->> +	if (sme_active()) {
+>> I may introduce a length variable to capture data->len right after
+>> paddr_next is set and then have just a single memunmap() call before
+>> the if check.
 >
-> 	if (!sme_active())
-> 		return 0;
+> Yap.
 >
-> 	/*
-> 	 * If SME...
+>> I tried that, but calling an "__init" function (early_memremap()) from
+>> a non "__init" function generated warnings. I suppose I can pass in a
+>> function for the map and unmap but that looks worse to me (also the
+>> unmap functions take different arguments).
+>
+> No, the other way around: the __init function should call the non-init
+> one and you need the non-init one anyway for memremap_is_setup_data().
 >
 
-Ok.
-
->
->> +		/*
->> +		 * If SME is active we need to be sure that kexec pages are
->> +		 * not encrypted because when we boot to the new kernel the
->> +		 * pages won't be accessed encrypted (initially).
->> +		 */
->> +		ret = set_memory_decrypted((unsigned long)vaddr, pages);
->> +		if (ret)
->> +			return ret;
->> +
->> +		if (gfp & __GFP_ZERO)
->> +			memset(vaddr, 0, pages * PAGE_SIZE);
->
-> This function is called after alloc_pages() which already zeroes memory
-> when __GFP_ZERO is supplied.
->
-> If you need to clear the memory *after* set_memory_encrypted() happens,
-> then you should probably mask out __GFP_ZERO before the alloc_pages()
-> call so as not to do it twice.
-
-I'll look into that.  I could put the memset() at the end of this
-function so that it is done here no matter what.  And update the
-default arch_kexec_post_alloc_pages() to also do the memset(). It
-just hides the clearing of the pages a bit though by doing that.
-
->
->> +	}
->> +
->> +	return 0;
->> +}
->> +
->> +void arch_kexec_pre_free_pages(void *vaddr, unsigned int pages)
->> +{
->> +	if (sme_active()) {
->> +		/*
->> +		 * If SME is active we need to reset the pages back to being
->> +		 * an encrypted mapping before freeing them.
->> +		 */
->> +		set_memory_encrypted((unsigned long)vaddr, pages);
->> +	}
->> +}
->> diff --git a/arch/x86/kernel/process.c b/arch/x86/kernel/process.c
->> index 0bb8842..f4e5de6 100644
->> --- a/arch/x86/kernel/process.c
->> +++ b/arch/x86/kernel/process.c
->> @@ -24,6 +24,7 @@
->>  #include <linux/cpuidle.h>
->>  #include <trace/events/power.h>
->>  #include <linux/hw_breakpoint.h>
->> +#include <linux/kexec.h>
->>  #include <asm/cpu.h>
->>  #include <asm/apic.h>
->>  #include <asm/syscalls.h>
->> @@ -355,8 +356,25 @@ bool xen_set_default_idle(void)
->>  	return ret;
->>  }
->>  #endif
->> +
->>  void stop_this_cpu(void *dummy)
->>  {
->> +	bool do_wbinvd_halt = false;
->> +
->> +	if (kexec_in_progress && boot_cpu_has(X86_FEATURE_SME)) {
->> +		/*
->> +		 * If we are performing a kexec and the processor supports
->> +		 * SME then we need to clear out cache information before
->> +		 * halting. With kexec, going from SME inactive to SME active
->> +		 * requires clearing cache entries so that addresses without
->> +		 * the encryption bit set don't corrupt the same physical
->> +		 * address that has the encryption bit set when caches are
->> +		 * flushed. Perform a wbinvd followed by a halt to achieve
->> +		 * this.
->> +		 */
->> +		do_wbinvd_halt = true;
->> +	}
->> +
->>  	local_irq_disable();
->>  	/*
->>  	 * Remove this CPU:
->> @@ -365,8 +383,12 @@ void stop_this_cpu(void *dummy)
->>  	disable_local_APIC();
->>  	mcheck_cpu_clear(this_cpu_ptr(&cpu_info));
->>
->> -	for (;;)
->> -		halt();
->> +	for (;;) {
->> +		if (do_wbinvd_halt)
->> +			native_wbinvd_halt();
->
-> No need for that native_wbinvd_halt() thing:
->
-> 	for (;;) {
-> 		if (do_wbinvd)
-> 			wbinvd();
->
-> 		halt();
-> 	}
->
-
-Actually there is.  The above will result in data in the cache because
-halt() turns into a function call if CONFIG_PARAVIRT is defined (refer
-to the comment above where do_wbinvd_halt is set to true). I could make
-this a native_wbinvd() and native_halt() as long as those are
-guaranteed to never turn into function calls.  But never say never, so
-that's why I created native_wbinvd_halt().
+The "worker" function would be doing the loop through the setup data,
+but since the setup data is mapped inside the loop I can't do the __init
+calling the non-init function and still hope to consolidate the code.
+Maybe I'm missing something here...
 
 Thanks,
 Tom
 
->>  /*
->> diff --git a/arch/x86/mm/ident_map.c b/arch/x86/mm/ident_map.c
->> index 04210a2..2c9fd3e 100644
->> --- a/arch/x86/mm/ident_map.c
->> +++ b/arch/x86/mm/ident_map.c
->> @@ -20,6 +20,7 @@ static void ident_pmd_init(struct x86_mapping_info *info, pmd_t *pmd_page,
->>  static int ident_pud_init(struct x86_mapping_info *info, pud_t *pud_page,
->>  			  unsigned long addr, unsigned long end)
->>  {
->> +	unsigned long kernpg_flag = info->kernpg_flag ? : _KERNPG_TABLE;
+>> This is like the chicken and the egg scenario. In order to determine if
+>> an address is setup data I have to explicitly map the setup data chain
+>> as decrypted. In order to do that I have to supply a flag to explicitly
+>> map the data decrypted otherwise I wind up back in the
+>> memremap_is_setup_data() function again and again and again...
 >
-> You're already supplying a x86_mapping_info and thus you can init
-> kernpg_flag to default _KERNPG_TABLE and override it in the SME+kexec
-> case, as you already do. And this way you can simply do:
+> Oh, fun.
 >
-> 	set_pud(pud, __pud(__pa(pmd) | info->kernpg_flag));
->
-> here and in the other pagetable functions I've snipped below, and save
-> yourself some lines.
-
-Ok, I'll check into that.
-
-Thanks,
-Tom
-
->
-> ...
->
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
