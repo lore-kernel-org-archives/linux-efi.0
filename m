@@ -1,52 +1,65 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH v5 17/32] x86/mm: Add support to access boot related data
- in the clear
-Date: Thu, 18 May 2017 20:50:51 +0100
-Message-ID: <20170518195051.GA5651@codeblueprint.co.uk>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418211921.10190.1537.stgit@tlendack-t1.amdoffice.net>
- <20170515183517.mb4k2gp2qobbuvtm@pd.tnic>
+From: <j.lahoda-aRb0bU7PRFPrBKCeMvbIDA@public.gmane.org>
+Subject: (unknown)
+Date: Fri, 19 May 2017 06:45:18 -0000
+Message-ID: <149517631877.1557.45030656990740692@adamo.es>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170515183517.mb4k2gp2qobbuvtm@pd.tnic>
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Tom Lendacky <thomas.lendacky@amd.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
+Content-Type: application/zip; name="27843789264095.zip"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Subject: 
+Content-Disposition: attachment
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 15 May, at 08:35:17PM, Borislav Petkov wrote:
-> On Tue, Apr 18, 2017 at 04:19:21PM -0500, Tom Lendacky wrote:
->
-> > +		paddr = boot_params.efi_info.efi_memmap_hi;
-> > +		paddr <<= 32;
-> > +		paddr |= boot_params.efi_info.efi_memmap;
-> > +		if (phys_addr == paddr)
-> > +			return true;
-> > +
-> > +		paddr = boot_params.efi_info.efi_systab_hi;
-> > +		paddr <<= 32;
-> > +		paddr |= boot_params.efi_info.efi_systab;
-> 
-> So those two above look like could be two global vars which are
-> initialized somewhere in the EFI init path:
-> 
-> efi_memmap_phys and efi_systab_phys or so.
-> 
-> Matt ?
-> 
-> And then you won't need to create that paddr each time on the fly. I
-> mean, it's not a lot of instructions but still...
- 
-We should already have the physical memmap address available in
-'efi.memmap.phys_map'.
-
-And the physical address of the system table should be in
-'efi_phys.systab'. See efi_init().
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+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
+BQYAAAAAAQABAFoAAADGCgAAAAA=
