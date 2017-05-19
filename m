@@ -1,8 +1,7 @@
 From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V17 09/11] ras: acpi / apei: generate trace event for
- unrecognized CPER section
-Date: Fri, 19 May 2017 14:32:11 -0600
-Message-ID: <1495225933-4410-10-git-send-email-tbaicar@codeaurora.org>
+Subject: [PATCH V17 10/11] trace, ras: add ARM processor error trace event
+Date: Fri, 19 May 2017 14:32:12 -0600
+Message-ID: <1495225933-4410-11-git-send-email-tbaicar@codeaurora.org>
 References: <1495225933-4410-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,234 +21,159 @@ To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrc
 Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-The UEFI spec includes non-standard section type support in the
-Common Platform Error Record. This is defined in section N.2.3 of
-UEFI version 2.5.
-
-Currently if the CPER section's type (UUID) does not match any
-section type that the kernel knows how to parse, a trace event is
-not generated.
-
-Generate a trace event which contains the raw error data for
-non-standard section type error records.
+Currently there are trace events for the various RAS
+errors with the exception of ARM processor type errors.
+Add a new trace event for such errors so that the user
+will know when they occur. These trace events are
+consistent with the ARM processor error section type
+defined in UEFI 2.6 spec section N.2.4.4.
 
 Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-Tested-by: Shiju Jose <shiju.jose@huawei.com>
+Acked-by: Steven Rostedt <rostedt@goodmis.org>
+Reviewed-by: Xie XiuQi <xiexiuqi@huawei.com>
 ---
- drivers/acpi/apei/ghes.c  | 27 +++++++++++++++++++++++----
- drivers/ras/ras.c         | 10 +++++++++-
- include/linux/ras.h       | 12 ++++++++++++
- include/ras/ras_event.h   | 45 +++++++++++++++++++++++++++++++++++++++++++++
- include/uapi/linux/uuid.h |  6 ++++--
- 5 files changed, 93 insertions(+), 7 deletions(-)
+ drivers/acpi/apei/ghes.c    |  6 +++++-
+ drivers/firmware/efi/cper.c |  1 +
+ drivers/ras/ras.c           |  6 ++++++
+ include/linux/ras.h         |  3 +++
+ include/ras/ras_event.h     | 45 +++++++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 60 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index fadfb43..16adbc8 100644
+index 16adbc8..a0ab5f3 100644
 --- a/drivers/acpi/apei/ghes.c
 +++ b/drivers/acpi/apei/ghes.c
-@@ -45,11 +45,14 @@
- #include <linux/aer.h>
- #include <linux/nmi.h>
- #include <linux/sched/clock.h>
-+#include <linux/uuid.h>
-+#include <linux/ras.h>
- 
- #include <acpi/actbl1.h>
- #include <acpi/ghes.h>
- #include <acpi/apei.h>
- #include <asm/tlbflush.h>
-+#include <ras/ras_event.h>
- 
- #include "apei-internal.h"
- 
-@@ -460,12 +463,22 @@ static void ghes_do_proc(struct ghes *ghes,
- {
- 	int sev, sec_sev;
- 	struct acpi_hest_generic_data *gdata;
-+	uuid_le sec_type;
-+	uuid_le *fru_id = &NULL_UUID_LE;
-+	char *fru_text = "";
- 
- 	sev = ghes_severity(estatus->error_severity);
- 	apei_estatus_for_each_section(estatus, gdata) {
- 		sec_sev = ghes_severity(gdata->error_severity);
--		if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
--				 CPER_SEC_PLATFORM_MEM)) {
-+		sec_type = *(uuid_le *)gdata->section_type;
-+
-+		if (gdata->validation_bits & CPER_SEC_VALID_FRU_ID)
-+			fru_id = (uuid_le *)gdata->fru_id;
-+
-+		if (gdata->validation_bits & CPER_SEC_VALID_FRU_TEXT)
-+			fru_text = gdata->fru_text;
-+
-+		if (!uuid_le_cmp(sec_type, CPER_SEC_PLATFORM_MEM)) {
- 			struct cper_sec_mem_err *mem_err = acpi_hest_get_payload(gdata);
- 
- 			ghes_edac_report_mem_error(ghes, sev, mem_err);
-@@ -474,8 +487,7 @@ static void ghes_do_proc(struct ghes *ghes,
- 			ghes_handle_memory_failure(gdata, sev);
- 		}
- #ifdef CONFIG_ACPI_APEI_PCIEAER
--		else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
--				      CPER_SEC_PCIE)) {
-+		else if (!uuid_le_cmp(sec_type, CPER_SEC_PCIE)) {
- 			struct cper_sec_pcie *pcie_err = acpi_hest_get_payload(gdata);
- 
- 			if (sev == GHES_SEV_RECOVERABLE &&
-@@ -506,6 +518,13 @@ static void ghes_do_proc(struct ghes *ghes,
+@@ -518,7 +518,11 @@ static void ghes_do_proc(struct ghes *ghes,
  
  		}
  #endif
-+		else {
-+			void *err = acpi_hest_get_payload(gdata);
+-		else {
++		else if (!uuid_le_cmp(sec_type, CPER_SEC_PROC_ARM)) {
++			struct cper_sec_proc_arm *err = acpi_hest_get_payload(gdata);
 +
-+			log_non_standard_event(&sec_type, fru_id, fru_text,
-+					       sec_sev, err,
-+					       gdata->error_data_length);
-+		}
- 	}
- }
++			log_arm_hw_error(err);
++		} else {
+ 			void *err = acpi_hest_get_payload(gdata);
+ 
+ 			log_non_standard_event(&sec_type, fru_id, fru_text,
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index d5a5855..48a8f69 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -35,6 +35,7 @@
+ #include <linux/printk.h>
+ #include <linux/bcd.h>
+ #include <acpi/ghes.h>
++#include <ras/ras_event.h>
+ 
+ #define INDENT_SP	" "
  
 diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
-index 94f8038..e87fd9e 100644
+index e87fd9e..39701a5 100644
 --- a/drivers/ras/ras.c
 +++ b/drivers/ras/ras.c
-@@ -7,11 +7,19 @@
+@@ -20,6 +20,11 @@ void log_non_standard_event(const uuid_le *sec_type, const uuid_le *fru_id,
+ 	trace_non_standard_event(sec_type, fru_id, fru_text, sev, err, len);
+ }
  
- #include <linux/init.h>
- #include <linux/ras.h>
-+#include <linux/uuid.h>
- 
- #define CREATE_TRACE_POINTS
- #define TRACE_INCLUDE_PATH ../../include/ras
- #include <ras/ras_event.h>
- 
-+void log_non_standard_event(const uuid_le *sec_type, const uuid_le *fru_id,
-+			    const char *fru_text, const u8 sev, const u8 *err,
-+			    const u32 len)
++void log_arm_hw_error(struct cper_sec_proc_arm *err)
 +{
-+	trace_non_standard_event(sec_type, fru_id, fru_text, sev, err, len);
++	trace_arm_event(err);
 +}
 +
  static int __init ras_init(void)
  {
  	int rc = 0;
-@@ -27,7 +35,7 @@ static int __init ras_init(void)
- EXPORT_TRACEPOINT_SYMBOL_GPL(extlog_mem_event);
+@@ -36,6 +41,7 @@ static int __init ras_init(void)
  #endif
  EXPORT_TRACEPOINT_SYMBOL_GPL(mc_event);
--
-+EXPORT_TRACEPOINT_SYMBOL_GPL(non_standard_event);
+ EXPORT_TRACEPOINT_SYMBOL_GPL(non_standard_event);
++EXPORT_TRACEPOINT_SYMBOL_GPL(arm_event);
  
  int __init parse_ras_param(char *str)
  {
 diff --git a/include/linux/ras.h b/include/linux/ras.h
-index ffb1471..a7f3ed3 100644
+index a7f3ed3..7a14658 100644
 --- a/include/linux/ras.h
 +++ b/include/linux/ras.h
-@@ -2,6 +2,7 @@
- #define __RAS_H__
+@@ -3,6 +3,7 @@
  
  #include <asm/errno.h>
-+#include <linux/uuid.h>
+ #include <linux/uuid.h>
++#include <linux/cper.h>
  
  #ifdef CONFIG_DEBUG_FS
  int ras_userspace_consumers(void);
-@@ -22,4 +23,15 @@ static inline void __init cec_init(void)	{ }
- static inline int cec_add_elem(u64 pfn)		{ return -ENODEV; }
+@@ -27,11 +28,13 @@ static inline void __init cec_init(void)	{ }
+ void log_non_standard_event(const uuid_le *sec_type,
+ 			    const uuid_le *fru_id, const char *fru_text,
+ 			    const u8 sev, const u8 *err, const u32 len);
++void log_arm_hw_error(struct cper_sec_proc_arm *err);
+ #else
+ static void log_non_standard_event(const uuid_le *sec_type,
+ 				   const uuid_le *fru_id, const char *fru_text,
+ 				   const u8 sev, const u8 *err,
+ 				   const u32 len) { return; }
++static void log_arm_hw_error(struct cper_sec_proc_arm *err) { return; }
  #endif
  
-+#ifdef CONFIG_RAS
-+void log_non_standard_event(const uuid_le *sec_type,
-+			    const uuid_le *fru_id, const char *fru_text,
-+			    const u8 sev, const u8 *err, const u32 len);
-+#else
-+static void log_non_standard_event(const uuid_le *sec_type,
-+				   const uuid_le *fru_id, const char *fru_text,
-+				   const u8 sev, const u8 *err,
-+				   const u32 len) { return; }
-+#endif
-+
  #endif /* __RAS_H__ */
 diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
-index 1791a12..4f79ba9 100644
+index 4f79ba9..429f46f 100644
 --- a/include/ras/ras_event.h
 +++ b/include/ras/ras_event.h
 @@ -162,6 +162,51 @@
  );
  
  /*
-+ * Non-Standard Section Report
++ * ARM Processor Events Report
 + *
-+ * This event is generated when hardware detected a hardware
-+ * error event, which may be of non-standard section as defined
-+ * in UEFI spec appendix "Common Platform Error Record", or may
-+ * be of sections for which TRACE_EVENT is not defined.
-+ *
++ * This event is generated when hardware detects an ARM processor error
++ * has occurred. UEFI 2.6 spec section N.2.4.4.
 + */
-+TRACE_EVENT(non_standard_event,
++TRACE_EVENT(arm_event,
 +
-+	TP_PROTO(const uuid_le *sec_type,
-+		 const uuid_le *fru_id,
-+		 const char *fru_text,
-+		 const u8 sev,
-+		 const u8 *err,
-+		 const u32 len),
++	TP_PROTO(const struct cper_sec_proc_arm *proc),
 +
-+	TP_ARGS(sec_type, fru_id, fru_text, sev, err, len),
++	TP_ARGS(proc),
 +
 +	TP_STRUCT__entry(
-+		__array(char, sec_type, UUID_SIZE)
-+		__array(char, fru_id, UUID_SIZE)
-+		__string(fru_text, fru_text)
-+		__field(u8, sev)
-+		__field(u32, len)
-+		__dynamic_array(u8, buf, len)
++		__field(u64, mpidr)
++		__field(u64, midr)
++		__field(u32, running_state)
++		__field(u32, psci_state)
++		__field(u8, affinity)
 +	),
 +
 +	TP_fast_assign(
-+		memcpy(__entry->sec_type, sec_type, UUID_SIZE);
-+		memcpy(__entry->fru_id, fru_id, UUID_SIZE);
-+		__assign_str(fru_text, fru_text);
-+		__entry->sev = sev;
-+		__entry->len = len;
-+		memcpy(__get_dynamic_array(buf), err, len);
++		if (proc->validation_bits & CPER_ARM_VALID_AFFINITY_LEVEL)
++			__entry->affinity = proc->affinity_level;
++		else
++			__entry->affinity = ~0;
++		if (proc->validation_bits & CPER_ARM_VALID_MPIDR)
++			__entry->mpidr = proc->mpidr;
++		else
++			__entry->mpidr = 0ULL;
++		__entry->midr = proc->midr;
++		if (proc->validation_bits & CPER_ARM_VALID_RUNNING_STATE) {
++			__entry->running_state = proc->running_state;
++			__entry->psci_state = proc->psci_state;
++		} else {
++			__entry->running_state = ~0;
++			__entry->psci_state = ~0;
++		}
 +	),
 +
-+	TP_printk("severity: %d; sec type:%pU; FRU: %pU %s; data len:%d; raw data:%s",
-+		  __entry->sev, __entry->sec_type,
-+		  __entry->fru_id, __get_str(fru_text),
-+		  __entry->len,
-+		  __print_hex(__get_dynamic_array(buf), __entry->len))
++	TP_printk("affinity level: %d; MPIDR: %016llx; MIDR: %016llx; "
++		  "running state: %d; PSCI state: %d",
++		  __entry->affinity, __entry->mpidr, __entry->midr,
++		  __entry->running_state, __entry->psci_state)
 +);
 +
 +/*
-  * PCIe AER Trace event
+  * Non-Standard Section Report
   *
-  * These events are generated when hardware detects a corrected or
-diff --git a/include/uapi/linux/uuid.h b/include/uapi/linux/uuid.h
-index 3738e5f..c477464 100644
---- a/include/uapi/linux/uuid.h
-+++ b/include/uapi/linux/uuid.h
-@@ -20,12 +20,14 @@
- #include <linux/types.h>
- #include <linux/string.h>
- 
-+#define UUID_SIZE 16
-+
- typedef struct {
--	__u8 b[16];
-+	__u8 b[UUID_SIZE];
- } uuid_le;
- 
- typedef struct {
--	__u8 b[16];
-+	__u8 b[UUID_SIZE];
- } uuid_be;
- 
- #define UUID_LE(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)		\
+  * This event is generated when hardware detected a hardware
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
