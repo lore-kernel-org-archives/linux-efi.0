@@ -1,207 +1,111 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] efifb: Avoid reconfiguration of BAR that covers the framebuffer
-Date: Fri, 19 May 2017 17:37:30 +0100
-Message-ID: <CAKv+Gu87gNJ-HN6-jgeuvg7vWePLkP0xbqcok554g2cG9aXtfA@mail.gmail.com>
-References: <20170404152744.26687-1-ard.biesheuvel@linaro.org>
- <20170404152744.26687-3-ard.biesheuvel@linaro.org> <20170519162716.GA684@bhelgaas-glaptop.roam.corp.google.com>
+From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: [PATCH] efi-pstore: Fix write/erase id tracking
+Date: Fri, 19 May 2017 11:27:01 -0700
+Message-ID: <20170519182701.GA63464@beast>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170519162716.GA684-1RhO1Y9PlrlHTL0Zs8A6p5iNqAH0jzoTYJqu5kTmcBRl57MIdRCFDg@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bjorn Helgaas <helgaas-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lorenzo Pieralisi <lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-pci <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Marta Lofstedt <marta.lofstedt-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Bjorn,
+Prior to the pstore interface refactoring, the "id" generated during
+a backend pstore_write() was only retained by the internal pstore
+inode tracking list. Additionally the "part" was ignored, so EFI
+would encode this in the id. This corrects the misunderstandings
+and correctly sets "id" during pstore_write(), and uses "part"
+directly during pstore_erase().
 
-On 19 May 2017 at 17:27, Bjorn Helgaas <helgaas-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> [+cc linux-pci]
->
-> On Tue, Apr 04, 2017 at 04:27:44PM +0100, Ard Biesheuvel wrote:
->> On UEFI systems, the PCI subsystem is enumerated by the firmware,
->> and if a graphical framebuffer is exposed by a PCI device, its base
->> address and size are exposed to the OS via the Graphics Output
->> Protocol (GOP).
->>
->> On arm64 PCI systems, the entire PCI hierarchy is reconfigured from
->> scratch at boot. This may result in the GOP framebuffer address to
->> become stale, if the BAR covering the framebuffer is modified. This
->> will cause the framebuffer to become unresponsive, and may in some
->> cases result in unpredictable behavior if the range is reassigned to
->> another device.
->>
->> So add a non-x86 quirk to the EFI fb driver to find the BAR associated
->> with the GOP base address, and claim the BAR resource so that the PCI
->> core will not move it.
->
-> I know this has already been merged as 55d728a40d36 ("efi/fb: Avoid
-> reconfiguration of BAR that covers the framebuffer"), and I'm not
-> suggesting that we revert it, but I have some misgivings.
->
+Reported-by: Marta Lofstedt <marta.lofstedt-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Fixes: 76cc9580e3fb ("pstore: Replace arguments for write() API")
+Fixes: a61072aae693 ("pstore: Replace arguments for erase() API")
+Signed-off-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+---
+Since the pstore refactor broke this, I intend to push this via the
+pstore tree.
+---
+ drivers/firmware/efi/efi-pstore.c | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
 
-Thanks for taking a look. I have been struggling with this issue for a
-while now.
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+index 44148fd4c9f2..dda2e96328c0 100644
+--- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -53,6 +53,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry,
+ 	if (sscanf(name, "dump-type%u-%u-%d-%lu-%c",
+ 		   &record->type, &part, &cnt, &time, &data_type) == 5) {
+ 		record->id = generic_id(time, part, cnt);
++		record->part = part;
+ 		record->count = cnt;
+ 		record->time.tv_sec = time;
+ 		record->time.tv_nsec = 0;
+@@ -64,6 +65,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry,
+ 	} else if (sscanf(name, "dump-type%u-%u-%d-%lu",
+ 		   &record->type, &part, &cnt, &time) == 4) {
+ 		record->id = generic_id(time, part, cnt);
++		record->part = part;
+ 		record->count = cnt;
+ 		record->time.tv_sec = time;
+ 		record->time.tv_nsec = 0;
+@@ -77,6 +79,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry,
+ 		 * multiple logs, remains.
+ 		 */
+ 		record->id = generic_id(time, part, 0);
++		record->part = part;
+ 		record->count = 0;
+ 		record->time.tv_sec = time;
+ 		record->time.tv_nsec = 0;
+@@ -241,9 +244,15 @@ static int efi_pstore_write(struct pstore_record *record)
+ 	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
+ 	int i, ret = 0;
+ 
++	record->time.tv_sec = get_seconds();
++	record->time.tv_nsec = 0;
++
++	record->id = generic_id(record->time.tv_sec, record->part,
++				record->count);
++
+ 	snprintf(name, sizeof(name), "dump-type%u-%u-%d-%lu-%c",
+ 		 record->type, record->part, record->count,
+-		 get_seconds(), record->compressed ? 'C' : 'D');
++		 record->time.tv_sec, record->compressed ? 'C' : 'D');
+ 
+ 	for (i = 0; i < DUMP_NAME_LEN; i++)
+ 		efi_name[i] = name[i];
+@@ -255,7 +264,6 @@ static int efi_pstore_write(struct pstore_record *record)
+ 	if (record->reason == KMSG_DUMP_OOPS)
+ 		efivar_run_worker();
+ 
+-	record->id = record->part;
+ 	return ret;
+ };
+ 
+@@ -287,7 +295,7 @@ static int efi_pstore_erase_func(struct efivar_entry *entry, void *data)
+ 		 * holding multiple logs, remains.
+ 		 */
+ 		snprintf(name_old, sizeof(name_old), "dump-type%u-%u-%lu",
+-			ed->record->type, (unsigned int)ed->record->id,
++			ed->record->type, ed->record->part,
+ 			ed->record->time.tv_sec);
+ 
+ 		for (i = 0; i < DUMP_NAME_LEN; i++)
+@@ -320,10 +328,7 @@ static int efi_pstore_erase(struct pstore_record *record)
+ 	char name[DUMP_NAME_LEN];
+ 	efi_char16_t efi_name[DUMP_NAME_LEN];
+ 	int found, i;
+-	unsigned int part;
+ 
+-	do_div(record->id, 1000);
+-	part = do_div(record->id, 100);
+ 	snprintf(name, sizeof(name), "dump-type%u-%u-%d-%lu",
+ 		 record->type, record->part, record->count,
+ 		 record->time.tv_sec);
+-- 
+2.7.4
 
-> One is the "#ifndef CONFIG_X86".  In principle, there is nothing arch-
-> specific here.  I don't think it's a good idea to build in dependencies on
-> things like "this arch preserves (or reprograms) PCI BARs".  The PCI core
-> may reprogram all, some, or none of the PCI BARs, depending on what (if
-> anything) firmware has done.
->
 
-IIRC this was a late addition. I agree that the issue exists in theory
-on x86 as well. However, I was primarily dealing with the reality of
-arm64 systems that suddenly explode in inexplicable ways after
-upgrading the kernel to one that happens to have EFIFB built in. The
-patch went into -stable as well, so I still think adding #ifndef
-CONFIG_X86 was the right choice here.
-
-> Another is the use of pci_claim_resource() to express the idea that "this
-> BAR can not be moved".  We have IORESOURCE_PCI_FIXED for that purpose, and
-> previous versions of the patch used that.  I understand there was some
-> problem with that, but I wish we could figure out and fix that problem
-> instead of using a different mechanism.
->
-
-OK. The problem was that IORESOURCE_PCI_FIXED does not prevent the PCI
-subsystem from handing out the same range to another device.
-
-> I'm not even completely sold on the idea that we need to prevent the BAR
-> from being moved.  I'm not a UEFI expert, but if this requirement is in the
-> spec, we should reference it.  If not, it should be sufficient to remember
-> the boot-time BAR value, match the GOP base to *that*, and map it to
-> whatever the current BAR value is.
->
-
-There is no such requirement in the spec. The graphics output protocol
-is not described in terms of PCI, BARs etc. The framebuffer is simply
-a memory range with side effects that is left enabled when handing
-over to the OS.
-
-In summary, I am as unhappy with the patch as you are, but it is still
-an improvement over the previous situation, so let's simply
-collaborate to get this into shape going forward.
-
-My preference would be to investigate IORESOURCE_PCI_FIXED again,
-because that still seems like the best way to deal with a live
-framebuffer on a PCI device that has memory decoding enabled. It
-should also address the issue with the current version of the patch,
-i.e., that claiming resources at this point is not possible if the
-device resides behind a bridge.
-
-So is there any guidance you can give as to how to proceed? If we set
-IORESOURCE_PCI_FIXED, how should be prevent the PCI layer from
-assigning this resource elsewhere if we cannot claim it yet?
-
-Regards,
-Ard.
-
-
->> Fixes: 9822504c1fa5 ("efifb: Enable the efi-framebuffer platform driver ...")
->> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org> # v4.7+
->> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
->> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  drivers/video/fbdev/efifb.c | 66 ++++++++++++++++++++++++++++++++++++++++++++-
->>  1 file changed, 65 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
->> index 8c4dc1e1f94f..758960b6aec9 100644
->> --- a/drivers/video/fbdev/efifb.c
->> +++ b/drivers/video/fbdev/efifb.c
->> @@ -10,6 +10,7 @@
->>  #include <linux/efi.h>
->>  #include <linux/errno.h>
->>  #include <linux/fb.h>
->> +#include <linux/pci.h>
->>  #include <linux/platform_device.h>
->>  #include <linux/screen_info.h>
->>  #include <video/vga.h>
->> @@ -143,6 +144,8 @@ static struct attribute *efifb_attrs[] = {
->>  };
->>  ATTRIBUTE_GROUPS(efifb);
->>
->> +static bool pci_dev_disabled;        /* FB base matches BAR of a disabled device */
->> +
->>  static int efifb_probe(struct platform_device *dev)
->>  {
->>       struct fb_info *info;
->> @@ -152,7 +155,7 @@ static int efifb_probe(struct platform_device *dev)
->>       unsigned int size_total;
->>       char *option = NULL;
->>
->> -     if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
->> +     if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI || pci_dev_disabled)
->>               return -ENODEV;
->>
->>       if (fb_get_options("efifb", &option))
->> @@ -360,3 +363,64 @@ static struct platform_driver efifb_driver = {
->>  };
->>
->>  builtin_platform_driver(efifb_driver);
->> +
->> +#ifndef CONFIG_X86
->> +
->> +static bool pci_bar_found;   /* did we find a BAR matching the efifb base? */
->> +
->> +static void claim_efifb_bar(struct pci_dev *dev, int idx)
->> +{
->> +     u16 word;
->> +
->> +     pci_bar_found = true;
->> +
->> +     pci_read_config_word(dev, PCI_COMMAND, &word);
->> +     if (!(word & PCI_COMMAND_MEMORY)) {
->> +             pci_dev_disabled = true;
->> +             dev_err(&dev->dev,
->> +                     "BAR %d: assigned to efifb but device is disabled!\n",
->> +                     idx);
->> +             return;
->> +     }
->> +
->> +     if (pci_claim_resource(dev, idx)) {
->> +             pci_dev_disabled = true;
->> +             dev_err(&dev->dev,
->> +                     "BAR %d: failed to claim resource for efifb!\n", idx);
->> +             return;
->> +     }
->> +
->> +     dev_info(&dev->dev, "BAR %d: assigned to efifb\n", idx);
->> +}
->> +
->> +static void efifb_fixup_resources(struct pci_dev *dev)
->> +{
->> +     u64 base = screen_info.lfb_base;
->> +     u64 size = screen_info.lfb_size;
->> +     int i;
->> +
->> +     if (pci_bar_found || screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
->> +             return;
->> +
->> +     if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
->> +             base |= (u64)screen_info.ext_lfb_base << 32;
->> +
->> +     if (!base)
->> +             return;
->> +
->> +     for (i = 0; i < PCI_STD_RESOURCE_END; i++) {
->> +             struct resource *res = &dev->resource[i];
->> +
->> +             if (!(res->flags & IORESOURCE_MEM))
->> +                     continue;
->> +
->> +             if (res->start <= base && res->end >= base + size - 1) {
->> +                     claim_efifb_bar(dev, i);
->> +                     break;
->> +             }
->> +     }
->> +}
->> +DECLARE_PCI_FIXUP_CLASS_HEADER(PCI_ANY_ID, PCI_ANY_ID, PCI_BASE_CLASS_DISPLAY,
->> +                            16, efifb_fixup_resources);
->> +
->> +#endif
->> --
->> 2.9.3
->>
+-- 
+Kees Cook
+Pixel Security
