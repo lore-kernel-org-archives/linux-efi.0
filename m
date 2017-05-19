@@ -1,7 +1,7 @@
 From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: [PATCH V17 10/11] trace, ras: add ARM processor error trace event
-Date: Fri, 19 May 2017 14:32:12 -0600
-Message-ID: <1495225933-4410-11-git-send-email-tbaicar@codeaurora.org>
+Subject: [PATCH V17 11/11] arm/arm64: KVM: add guest SEA support
+Date: Fri, 19 May 2017 14:32:13 -0600
+Message-ID: <1495225933-4410-12-git-send-email-tbaicar@codeaurora.org>
 References: <1495225933-4410-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,159 +21,272 @@ To: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrc
 Cc: Tyler Baicar <tbaicar@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-Currently there are trace events for the various RAS
-errors with the exception of ARM processor type errors.
-Add a new trace event for such errors so that the user
-will know when they occur. These trace events are
-consistent with the ARM processor error section type
-defined in UEFI 2.6 spec section N.2.4.4.
+Currently external aborts are unsupported by the guest abort
+handling. Add handling for SEAs so that the host kernel reports
+SEAs which occur in the guest kernel.
+
+When an SEA occurs in the guest kernel, the guest exits and is
+routed to kvm_handle_guest_abort(). Prior to this patch, a print
+message of an unsupported FSC would be printed and nothing else
+would happen. With this patch, the code gets routed to the APEI
+handling of SEAs in the host kernel to report the SEA information.
 
 Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-Acked-by: Steven Rostedt <rostedt@goodmis.org>
-Reviewed-by: Xie XiuQi <xiexiuqi@huawei.com>
+Acked-by: Catalin Marinas <catalin.marinas@arm.com>
+Acked-by: Marc Zyngier <marc.zyngier@arm.com>
+Acked-by: Christoffer Dall <cdall@linaro.org>
 ---
- drivers/acpi/apei/ghes.c    |  6 +++++-
- drivers/firmware/efi/cper.c |  1 +
- drivers/ras/ras.c           |  6 ++++++
- include/linux/ras.h         |  3 +++
- include/ras/ras_event.h     | 45 +++++++++++++++++++++++++++++++++++++++++++++
- 5 files changed, 60 insertions(+), 1 deletion(-)
+ arch/arm/include/asm/kvm_arm.h       | 10 ++++++++++
+ arch/arm/include/asm/system_misc.h   |  5 +++++
+ arch/arm64/include/asm/kvm_arm.h     | 10 ++++++++++
+ arch/arm64/include/asm/system_misc.h |  2 ++
+ arch/arm64/mm/fault.c                | 22 ++++++++++++++++++++--
+ drivers/acpi/apei/ghes.c             | 17 +++++++++++------
+ include/acpi/ghes.h                  |  2 +-
+ virt/kvm/arm/mmu.c                   | 36 +++++++++++++++++++++++++++++++++---
+ 8 files changed, 92 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 16adbc8..a0ab5f3 100644
---- a/drivers/acpi/apei/ghes.c
-+++ b/drivers/acpi/apei/ghes.c
-@@ -518,7 +518,11 @@ static void ghes_do_proc(struct ghes *ghes,
+diff --git a/arch/arm/include/asm/kvm_arm.h b/arch/arm/include/asm/kvm_arm.h
+index a3f0b3d..ebf020b 100644
+--- a/arch/arm/include/asm/kvm_arm.h
++++ b/arch/arm/include/asm/kvm_arm.h
+@@ -187,6 +187,16 @@
+ #define FSC_FAULT	(0x04)
+ #define FSC_ACCESS	(0x08)
+ #define FSC_PERM	(0x0c)
++#define FSC_SEA		(0x10)
++#define FSC_SEA_TTW0	(0x14)
++#define FSC_SEA_TTW1	(0x15)
++#define FSC_SEA_TTW2	(0x16)
++#define FSC_SEA_TTW3	(0x17)
++#define FSC_SECC	(0x18)
++#define FSC_SECC_TTW0	(0x1c)
++#define FSC_SECC_TTW1	(0x1d)
++#define FSC_SECC_TTW2	(0x1e)
++#define FSC_SECC_TTW3	(0x1f)
  
- 		}
- #endif
--		else {
-+		else if (!uuid_le_cmp(sec_type, CPER_SEC_PROC_ARM)) {
-+			struct cper_sec_proc_arm *err = acpi_hest_get_payload(gdata);
-+
-+			log_arm_hw_error(err);
-+		} else {
- 			void *err = acpi_hest_get_payload(gdata);
+ /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
+ #define HPFAR_MASK	(~0xf)
+diff --git a/arch/arm/include/asm/system_misc.h b/arch/arm/include/asm/system_misc.h
+index a3d61ad..8c4a89f 100644
+--- a/arch/arm/include/asm/system_misc.h
++++ b/arch/arm/include/asm/system_misc.h
+@@ -22,6 +22,11 @@
  
- 			log_non_standard_event(&sec_type, fru_id, fru_text,
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index d5a5855..48a8f69 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -35,6 +35,7 @@
- #include <linux/printk.h>
- #include <linux/bcd.h>
- #include <acpi/ghes.h>
-+#include <ras/ras_event.h>
+ extern unsigned int user_debug;
  
- #define INDENT_SP	" "
- 
-diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
-index e87fd9e..39701a5 100644
---- a/drivers/ras/ras.c
-+++ b/drivers/ras/ras.c
-@@ -20,6 +20,11 @@ void log_non_standard_event(const uuid_le *sec_type, const uuid_le *fru_id,
- 	trace_non_standard_event(sec_type, fru_id, fru_text, sev, err, len);
- }
- 
-+void log_arm_hw_error(struct cper_sec_proc_arm *err)
++static inline int handle_guest_sea(phys_addr_t addr, unsigned int esr)
 +{
-+	trace_arm_event(err);
++	return -1;
 +}
 +
- static int __init ras_init(void)
+ #endif /* !__ASSEMBLY__ */
+ 
+ #endif /* __ASM_ARM_SYSTEM_MISC_H */
+diff --git a/arch/arm64/include/asm/kvm_arm.h b/arch/arm64/include/asm/kvm_arm.h
+index 6e99978..61d694c 100644
+--- a/arch/arm64/include/asm/kvm_arm.h
++++ b/arch/arm64/include/asm/kvm_arm.h
+@@ -204,6 +204,16 @@
+ #define FSC_FAULT	ESR_ELx_FSC_FAULT
+ #define FSC_ACCESS	ESR_ELx_FSC_ACCESS
+ #define FSC_PERM	ESR_ELx_FSC_PERM
++#define FSC_SEA		ESR_ELx_FSC_EXTABT
++#define FSC_SEA_TTW0	(0x14)
++#define FSC_SEA_TTW1	(0x15)
++#define FSC_SEA_TTW2	(0x16)
++#define FSC_SEA_TTW3	(0x17)
++#define FSC_SECC	(0x18)
++#define FSC_SECC_TTW0	(0x1c)
++#define FSC_SECC_TTW1	(0x1d)
++#define FSC_SECC_TTW2	(0x1e)
++#define FSC_SECC_TTW3	(0x1f)
+ 
+ /* Hyp Prefetch Fault Address Register (HPFAR/HDFAR) */
+ #define HPFAR_MASK	(~UL(0xf))
+diff --git a/arch/arm64/include/asm/system_misc.h b/arch/arm64/include/asm/system_misc.h
+index bc81243..95aa442 100644
+--- a/arch/arm64/include/asm/system_misc.h
++++ b/arch/arm64/include/asm/system_misc.h
+@@ -56,6 +56,8 @@ void hook_debug_fault_code(int nr, int (*fn)(unsigned long, unsigned int,
+ 	__show_ratelimited;						\
+ })
+ 
++int handle_guest_sea(phys_addr_t addr, unsigned int esr);
++
+ #endif	/* __ASSEMBLY__ */
+ 
+ #endif	/* __ASM_SYSTEM_MISC_H */
+diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+index 9b4e26f..1ce62cc 100644
+--- a/arch/arm64/mm/fault.c
++++ b/arch/arm64/mm/fault.c
+@@ -532,6 +532,7 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
  {
- 	int rc = 0;
-@@ -36,6 +41,7 @@ static int __init ras_init(void)
- #endif
- EXPORT_TRACEPOINT_SYMBOL_GPL(mc_event);
- EXPORT_TRACEPOINT_SYMBOL_GPL(non_standard_event);
-+EXPORT_TRACEPOINT_SYMBOL_GPL(arm_event);
+ 	struct siginfo info;
+ 	const struct fault_info *inf;
++	int ret = 0;
  
- int __init parse_ras_param(char *str)
- {
-diff --git a/include/linux/ras.h b/include/linux/ras.h
-index a7f3ed3..7a14658 100644
---- a/include/linux/ras.h
-+++ b/include/linux/ras.h
-@@ -3,6 +3,7 @@
+ 	inf = esr_to_fault_info(esr);
+ 	pr_err("Synchronous External Abort: %s (0x%08x) at 0x%016lx\n",
+@@ -546,7 +547,7 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
+ 		if (interrupts_enabled(regs))
+ 			nmi_enter();
  
- #include <asm/errno.h>
- #include <linux/uuid.h>
-+#include <linux/cper.h>
+-		ghes_notify_sea();
++		ret = ghes_notify_sea();
  
- #ifdef CONFIG_DEBUG_FS
- int ras_userspace_consumers(void);
-@@ -27,11 +28,13 @@ static inline void __init cec_init(void)	{ }
- void log_non_standard_event(const uuid_le *sec_type,
- 			    const uuid_le *fru_id, const char *fru_text,
- 			    const u8 sev, const u8 *err, const u32 len);
-+void log_arm_hw_error(struct cper_sec_proc_arm *err);
- #else
- static void log_non_standard_event(const uuid_le *sec_type,
- 				   const uuid_le *fru_id, const char *fru_text,
- 				   const u8 sev, const u8 *err,
- 				   const u32 len) { return; }
-+static void log_arm_hw_error(struct cper_sec_proc_arm *err) { return; }
- #endif
+ 		if (interrupts_enabled(regs))
+ 			nmi_exit();
+@@ -561,7 +562,7 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
+ 		info.si_addr  = (void __user *)addr;
+ 	arm64_notify_die("", regs, &info, esr);
  
- #endif /* __RAS_H__ */
-diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
-index 4f79ba9..429f46f 100644
---- a/include/ras/ras_event.h
-+++ b/include/ras/ras_event.h
-@@ -162,6 +162,51 @@
- );
+-	return 0;
++	return ret;
+ }
+ 
+ static const struct fault_info fault_info[] = {
+@@ -632,6 +633,23 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
+ };
  
  /*
-+ * ARM Processor Events Report
++ * Handle Synchronous External Aborts that occur in a guest kernel.
 + *
-+ * This event is generated when hardware detects an ARM processor error
-+ * has occurred. UEFI 2.6 spec section N.2.4.4.
++ * The return value will be zero if the SEA was successfully handled
++ * and non-zero if there was an error processing the error or there was
++ * no error to process.
 + */
-+TRACE_EVENT(arm_event,
++int handle_guest_sea(phys_addr_t addr, unsigned int esr)
++{
++	int ret = -ENOENT;
 +
-+	TP_PROTO(const struct cper_sec_proc_arm *proc),
++	if (IS_ENABLED(CONFIG_ACPI_APEI_SEA))
++		ret = ghes_notify_sea();
 +
-+	TP_ARGS(proc),
-+
-+	TP_STRUCT__entry(
-+		__field(u64, mpidr)
-+		__field(u64, midr)
-+		__field(u32, running_state)
-+		__field(u32, psci_state)
-+		__field(u8, affinity)
-+	),
-+
-+	TP_fast_assign(
-+		if (proc->validation_bits & CPER_ARM_VALID_AFFINITY_LEVEL)
-+			__entry->affinity = proc->affinity_level;
-+		else
-+			__entry->affinity = ~0;
-+		if (proc->validation_bits & CPER_ARM_VALID_MPIDR)
-+			__entry->mpidr = proc->mpidr;
-+		else
-+			__entry->mpidr = 0ULL;
-+		__entry->midr = proc->midr;
-+		if (proc->validation_bits & CPER_ARM_VALID_RUNNING_STATE) {
-+			__entry->running_state = proc->running_state;
-+			__entry->psci_state = proc->psci_state;
-+		} else {
-+			__entry->running_state = ~0;
-+			__entry->psci_state = ~0;
-+		}
-+	),
-+
-+	TP_printk("affinity level: %d; MPIDR: %016llx; MIDR: %016llx; "
-+		  "running state: %d; PSCI state: %d",
-+		  __entry->affinity, __entry->mpidr, __entry->midr,
-+		  __entry->running_state, __entry->psci_state)
-+);
++	return ret;
++}
 +
 +/*
-  * Non-Standard Section Report
-  *
-  * This event is generated when hardware detected a hardware
+  * Dispatch a data abort to the relevant handler.
+  */
+ asmlinkage void __exception do_mem_abort(unsigned long addr, unsigned int esr,
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index a0ab5f3..7084c97 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -817,17 +817,22 @@ static int ghes_notify_sci(struct notifier_block *this,
+ #ifdef CONFIG_ACPI_APEI_SEA
+ static LIST_HEAD(ghes_sea);
+ 
+-void ghes_notify_sea(void)
++/*
++ * Return 0 only if one of the SEA error sources successfully reported an error
++ * record sent from the firmware.
++ */
++int ghes_notify_sea(void)
+ {
+ 	struct ghes *ghes;
++	int ret = -ENOENT;
+ 
+-	/*
+-	 * synchronize_rcu() will wait for nmi_exit(), so no need to
+-	 * rcu_read_lock().
+-	 */
++	rcu_read_lock();
+ 	list_for_each_entry_rcu(ghes, &ghes_sea, list) {
+-		ghes_proc(ghes);
++		if (!ghes_proc(ghes))
++			ret = 0;
+ 	}
++	rcu_read_unlock();
++	return ret;
+ }
+ 
+ static void ghes_sea_add(struct ghes *ghes)
+diff --git a/include/acpi/ghes.h b/include/acpi/ghes.h
+index 95305ae..9f26e01 100644
+--- a/include/acpi/ghes.h
++++ b/include/acpi/ghes.h
+@@ -113,6 +113,6 @@ static inline void *acpi_hest_get_next(struct acpi_hest_generic_data *gdata)
+ 	return (void *)(gdata) + acpi_hest_get_record_size(gdata);
+ }
+ 
+-void ghes_notify_sea(void);
++int ghes_notify_sea(void);
+ 
+ #endif /* GHES_H */
+diff --git a/virt/kvm/arm/mmu.c b/virt/kvm/arm/mmu.c
+index 313ee64..521e737 100644
+--- a/virt/kvm/arm/mmu.c
++++ b/virt/kvm/arm/mmu.c
+@@ -29,6 +29,7 @@
+ #include <asm/kvm_asm.h>
+ #include <asm/kvm_emulate.h>
+ #include <asm/virt.h>
++#include <asm/system_misc.h>
+ 
+ #include "trace.h"
+ 
+@@ -1418,6 +1419,25 @@ static void handle_access_fault(struct kvm_vcpu *vcpu, phys_addr_t fault_ipa)
+ 		kvm_set_pfn_accessed(pfn);
+ }
+ 
++static bool is_abort_sea(unsigned long fault_status)
++{
++	switch (fault_status) {
++	case FSC_SEA:
++	case FSC_SEA_TTW0:
++	case FSC_SEA_TTW1:
++	case FSC_SEA_TTW2:
++	case FSC_SEA_TTW3:
++	case FSC_SECC:
++	case FSC_SECC_TTW0:
++	case FSC_SECC_TTW1:
++	case FSC_SECC_TTW2:
++	case FSC_SECC_TTW3:
++		return true;
++	default:
++		return false;
++	}
++}
++
+ /**
+  * kvm_handle_guest_abort - handles all 2nd stage aborts
+  * @vcpu:	the VCPU pointer
+@@ -1440,19 +1460,29 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu, struct kvm_run *run)
+ 	gfn_t gfn;
+ 	int ret, idx;
+ 
++	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
++
++	fault_ipa = kvm_vcpu_get_fault_ipa(vcpu);
++
++	/*
++	 * The host kernel will handle the synchronous external abort. There
++	 * is no need to pass the error into the guest.
++	 */
++	if (is_abort_sea(fault_status)) {
++		if (!handle_guest_sea(fault_ipa, kvm_vcpu_get_hsr(vcpu)))
++			return 1;
++	}
++
+ 	is_iabt = kvm_vcpu_trap_is_iabt(vcpu);
+ 	if (unlikely(!is_iabt && kvm_vcpu_dabt_isextabt(vcpu))) {
+ 		kvm_inject_vabt(vcpu);
+ 		return 1;
+ 	}
+ 
+-	fault_ipa = kvm_vcpu_get_fault_ipa(vcpu);
+-
+ 	trace_kvm_guest_fault(*vcpu_pc(vcpu), kvm_vcpu_get_hsr(vcpu),
+ 			      kvm_vcpu_get_hfar(vcpu), fault_ipa);
+ 
+ 	/* Check the stage-2 fault is trans. fault or write fault */
+-	fault_status = kvm_vcpu_trap_get_fault_type(vcpu);
+ 	if (fault_status != FSC_FAULT && fault_status != FSC_PERM &&
+ 	    fault_status != FSC_ACCESS) {
+ 		kvm_err("Unsupported FSC: EC=%#x xFSC=%#lx ESR_EL2=%#lx\n",
 -- 
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
