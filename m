@@ -1,123 +1,156 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] efifb: Avoid reconfiguration of BAR that covers the framebuffer
-Date: Fri, 19 May 2017 23:04:50 +0100
-Message-ID: <CAKv+Gu92chKZPOKmCrNmLvaQWvtRBtALxSqcSxfyB_VAfTzxEg@mail.gmail.com>
-References: <20170404152744.26687-1-ard.biesheuvel@linaro.org>
- <20170404152744.26687-3-ard.biesheuvel@linaro.org> <20170519162716.GA684@bhelgaas-glaptop.roam.corp.google.com>
- <CAKv+Gu87gNJ-HN6-jgeuvg7vWePLkP0xbqcok554g2cG9aXtfA@mail.gmail.com> <20170519204445.GA25510@bhelgaas-glaptop.roam.corp.google.com>
+From: Heyi Guo <heyi.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3] efifb: avoid reconfiguration of BAR that covers the
+ framebuffer
+Date: Sat, 20 May 2017 16:19:31 +0800
+Message-ID: <76d19384-d915-ef97-9daf-3d3eded2ce47@linaro.org>
+References: <1490196629-28088-1-git-send-email-ard.biesheuvel@linaro.org>
+ <f8773b97-7085-ddb3-5dc4-d65cc1f5bce0@linaro.org>
+ <20170518140154.GA24324@bhelgaas-glaptop.roam.corp.google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170519204445.GA25510-1RhO1Y9PlrlHTL0Zs8A6p5iNqAH0jzoTYJqu5kTmcBRl57MIdRCFDg@public.gmane.org>
+In-Reply-To: <20170518140154.GA24324-1RhO1Y9PlrlHTL0Zs8A6p5iNqAH0jzoTYJqu5kTmcBRl57MIdRCFDg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Bjorn Helgaas <helgaas-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lorenzo Pieralisi <lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-pci <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 19 May 2017 at 21:44, Bjorn Helgaas <helgaas-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> On Fri, May 19, 2017 at 05:37:30PM +0100, Ard Biesheuvel wrote:
->> Hi Bjorn,
->>
->> On 19 May 2017 at 17:27, Bjorn Helgaas <helgaas-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->> > [+cc linux-pci]
->> >
->> > On Tue, Apr 04, 2017 at 04:27:44PM +0100, Ard Biesheuvel wrote:
->> >> On UEFI systems, the PCI subsystem is enumerated by the firmware,
->> >> and if a graphical framebuffer is exposed by a PCI device, its base
->> >> address and size are exposed to the OS via the Graphics Output
->> >> Protocol (GOP).
->> >>
->> >> On arm64 PCI systems, the entire PCI hierarchy is reconfigured from
->> >> scratch at boot. This may result in the GOP framebuffer address to
->> >> become stale, if the BAR covering the framebuffer is modified. This
->> >> will cause the framebuffer to become unresponsive, and may in some
->> >> cases result in unpredictable behavior if the range is reassigned to
->> >> another device.
->> >>
->> >> So add a non-x86 quirk to the EFI fb driver to find the BAR associated
->> >> with the GOP base address, and claim the BAR resource so that the PCI
->> >> core will not move it.
->> >
->> > I know this has already been merged as 55d728a40d36 ("efi/fb: Avoid
->> > reconfiguration of BAR that covers the framebuffer"), and I'm not
->> > suggesting that we revert it, but I have some misgivings.
->> ...
->
->> > Another is the use of pci_claim_resource() to express the idea that "this
->> > BAR can not be moved".  We have IORESOURCE_PCI_FIXED for that purpose, and
->> > previous versions of the patch used that.  I understand there was some
->> > problem with that, but I wish we could figure out and fix that problem
->> > instead of using a different mechanism.
->>
->> OK. The problem was that IORESOURCE_PCI_FIXED does not prevent the PCI
->> subsystem from handing out the same range to another device.
->
-> Yes, this would definitely be a problem.  There must be a path where
-> we start doing the reassignment before we claim the resources that
-> have already been assigned.  That's what seems backwards to me -- it
-> seems like we should claim things that are valid first so we know to
-> avoid them.
->
->> > I'm not even completely sold on the idea that we need to prevent the BAR
->> > from being moved.  I'm not a UEFI expert, but if this requirement is in the
->> > spec, we should reference it.  If not, it should be sufficient to remember
->> > the boot-time BAR value, match the GOP base to *that*, and map it to
->> > whatever the current BAR value is.
->>
->> There is no such requirement in the spec. The graphics output protocol
->> is not described in terms of PCI, BARs etc. The framebuffer is simply
->> a memory range with side effects that is left enabled when handing
->> over to the OS.
->>
->> In summary, I am as unhappy with the patch as you are, but it is still
->> an improvement over the previous situation, so let's simply
->> collaborate to get this into shape going forward.
->>
->> My preference would be to investigate IORESOURCE_PCI_FIXED again,
->> because that still seems like the best way to deal with a live
->> framebuffer on a PCI device that has memory decoding enabled. It
->> should also address the issue with the current version of the patch,
->> i.e., that claiming resources at this point is not possible if the
->> device resides behind a bridge.
->>
->> So is there any guidance you can give as to how to proceed? If we set
->> IORESOURCE_PCI_FIXED, how should be prevent the PCI layer from
->> assigning this resource elsewhere if we cannot claim it yet?
->
-> My preference would actually be to remember the boot BAR values and
-> map to the current values because that avoids the unnecessary
-> restriction.  The IORESOURCE_PCI_FIXED uses that seem legitimate to me
-> are the legacy VGA and IDE things (stuff that's not described by BARs
-> and *can't* be moved) and the new "Enhanced Allocation" stuff
-> (basically a way to describe more non-BAR resources).
->
-> We do something sort of similar with pci_revert_fw_address(), although
-> it's currently only implemented for x86.  I could imagine a more
-> generic solution that could be used for this GOP issue and could also
-> replace pci_revert_fw_address().
->
+Hi Bjorn,
 
-I already proposed something like this a while ago:
-http://marc.info//?l=linux-fbdev&m=149190021316410&w=2
+Many thanks for your clear answer.
 
-> Conceptually it could be as simple as adding 7 u64 boot-time BAR
-> values (6 BARs + the ROM) to struct pci_dev.  We went to a lot of
-> trouble to implement the pcibios_fwaddrmap stuff on x86, and I can't
-> remember why it's x86-specific.  Maybe we thought the extra 56 bytes
-> per dev was too much overhead (it does seem like a lot for such a
-> limited use case).  Maybe there's a clever way to store just the BARs
-> we actually change and keep that long enough for efifb to use it.
+Regards,
+
+Gary (Heyi Guo)
+
+
+在 5/18/2017 10:01 PM, Bjorn Helgaas 写道:
+> Hi Gary,
 >
-> It *would* be nice to fix the problem with IORESOURCE_PCI_FIXED, and I
-> think it would help clean up PCI resource management a lot.  Ideally
-> we would be able to claim host bridge resources even before scanning
-> the bus, then claim BARs immediately when we discover them.  That
-> would allow us to automatically use any setup done by firmware, and
-> reassign anything that we couldn't claim.
+> Thanks for the question.
 >
-> But I think this will end up being difficult because we currently do
-> the PCI bus scan before looking at ACPI resources, and sometimes those
-> ACPI resources overlap with the host bridge windows.  Every time I
-> look at this, I get discouraged.
+> On Wed, May 03, 2017 at 11:09:51AM +0800, Heyi Guo wrote:
+>> Hi Ard,
+>>
+>> I have one comment inclined.
+>>
+>>
+>> 在 3/22/2017 11:30 PM, Ard Biesheuvel 写道:
+>>> On UEFI systems, the PCI subsystem is enumerated by the firmware,
+>>> and if a graphical framebuffer is exposed by a PCI device, its base
+>>> address and size are exposed to the OS via the Graphics Output
+>>> Protocol (GOP).
+>>>
+>>> On arm64 PCI systems, the entire PCI hierarchy is reconfigured from
+>>> scratch at boot. This may result in the GOP framebuffer address to
+>>> become stale, if the BAR covering the framebuffer is modified. This
+>>> will cause the framebuffer to become unresponsive, and may in some
+>>> cases result in unpredictable behavior if the range is reassigned to
+>>> another device.
+>>>
+>>> So add a quirk to the EFI fb driver to find the BAR associated with
+>>> the GOP base address, and set the IORESOURCE_PCI_FIXED attribute so
+>>> that the PCI core will leave it alone.
+>>>
+>>> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+>>> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>> ---
+>>> v3: check device is enabled before attempting to claim the resource
+>>>
+>>>   drivers/video/fbdev/efifb.c | 60 +++++++++++++++++++-
+>>>   1 file changed, 59 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
+>>> index 8c4dc1e1f94f..88f653864a01 100644
+>>> --- a/drivers/video/fbdev/efifb.c
+>>> +++ b/drivers/video/fbdev/efifb.c
+>>> @@ -10,6 +10,7 @@
+>>>   #include <linux/efi.h>
+>>>   #include <linux/errno.h>
+>>>   #include <linux/fb.h>
+>>> +#include <linux/pci.h>
+>>>   #include <linux/platform_device.h>
+>>>   #include <linux/screen_info.h>
+>>>   #include <video/vga.h>
+>>> @@ -143,6 +144,9 @@ static struct attribute *efifb_attrs[] = {
+>>>   };
+>>>   ATTRIBUTE_GROUPS(efifb);
+>>> +static bool pci_bar_found;	/* did we find a BAR matching the efifb base? */
+>>> +static bool pci_dev_disabled;	/* was the device disabled? */
+>>> +
+>>>   static int efifb_probe(struct platform_device *dev)
+>>>   {
+>>>   	struct fb_info *info;
+>>> @@ -152,7 +156,7 @@ static int efifb_probe(struct platform_device *dev)
+>>>   	unsigned int size_total;
+>>>   	char *option = NULL;
+>>> -	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
+>>> +	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI || pci_dev_disabled)
+>>>   		return -ENODEV;
+>>>   	if (fb_get_options("efifb", &option))
+>>> @@ -360,3 +364,57 @@ static struct platform_driver efifb_driver = {
+>>>   };
+>>>   builtin_platform_driver(efifb_driver);
+>>> +
+>>> +static void claim_efifb_bar(struct pci_dev *dev, int idx)
+>>> +{
+>>> +	u16 word;
+>>> +
+>>> +	pci_bar_found = true;
+>>> +
+>>> +	pci_read_config_word(dev, PCI_COMMAND, &word);
+>>> +	if (!(word & PCI_COMMAND_MEMORY)) {
+>>> +		pci_dev_disabled = true;
+>>> +		dev_err(&dev->dev,
+>>> +			"BAR %d: assigned to efifb but device is disabled!\n",
+>>> +			idx);
+>>> +		return;
+>>> +	}
+>>> +
+>>> +	if (pci_claim_resource(dev, idx)) {
+>>> +		pci_dev_disabled = true;
+>>> +		dev_err(&dev->dev,
+>>> +			"BAR %d: failed to claim resource for efifb!\n", idx);
+>>> +		return;
+>>> +	}
+>>> +
+>>> +	dev_info(&dev->dev, "BAR %d: assigned to efifb\n", idx);
+>>> +}
+>>> +
+>>> +static void efifb_fixup_resources(struct pci_dev *dev)
+>>> +{
+>>> +	u64 base = screen_info.lfb_base;
+>>> +	u64 size = screen_info.lfb_size;
+>>> +	int i;
+>>> +
+>>> +	if (pci_bar_found || screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
+>>> +		return;
+>>> +
+>>> +	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
+>>> +		base |= (u64)screen_info.ext_lfb_base << 32;
+>>> +
+>>> +	if (!base)
+>>> +		return;
+>>> +
+>>> +	for (i = 0; i < PCI_STD_RESOURCE_END; i++) {
+>>> +		struct resource *res = &dev->resource[i];
+>>> +
+>>> +		if (!(res->flags & IORESOURCE_MEM))
+>>> +			continue;
+>>> +
+>>> +		if (res->start <= base && res->end >= base + size - 1) {
+>> Have we considered PCI address translation here? I suppose the
+>> address reported by EFI GOP should be the address of CPU domain, not
+>> address of PCI domain. Address read from PCI BAR is PCI address
+>> which should add translation offset before being compared to CPU
+>> domain address.
+> Every address in dev->resource[] is a CPU domain address, so address
+> translation offset should be handled correctly.
+>
+> This is because __pci_read_base() calls pcibios_bus_to_resource() when
+> it fills in dev->resource[], and pcibios_bus_to_resource() applies any
+> host bridge address translation.
 >
 > Bjorn
