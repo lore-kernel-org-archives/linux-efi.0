@@ -1,156 +1,137 @@
-From: Heyi Guo <heyi.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3] efifb: avoid reconfiguration of BAR that covers the
- framebuffer
-Date: Sat, 20 May 2017 16:19:31 +0800
-Message-ID: <76d19384-d915-ef97-9daf-3d3eded2ce47@linaro.org>
-References: <1490196629-28088-1-git-send-email-ard.biesheuvel@linaro.org>
- <f8773b97-7085-ddb3-5dc4-d65cc1f5bce0@linaro.org>
- <20170518140154.GA24324@bhelgaas-glaptop.roam.corp.google.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v5 17/32] x86/mm: Add support to access boot related data
+ in the clear
+Date: Sun, 21 May 2017 09:16:50 +0200
+Message-ID: <20170521071650.pwwmw4agggaazfrh@pd.tnic>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+ <20170418211921.10190.1537.stgit@tlendack-t1.amdoffice.net>
+ <20170515183517.mb4k2gp2qobbuvtm@pd.tnic>
+ <4845df29-bae7-9b78-0428-ff96dbef2128@amd.com>
+ <20170518090212.kebstmnjv4h3cjf2@pd.tnic>
+ <c0cb8a50-e860-169b-ee0c-7eb4db7c3fda@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170518140154.GA24324-1RhO1Y9PlrlHTL0Zs8A6p5iNqAH0jzoTYJqu5kTmcBRl57MIdRCFDg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bjorn Helgaas <helgaas-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <c0cb8a50-e860-169b-ee0c-7eb4db7c3fda@amd.com>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
 List-Id: linux-efi@vger.kernel.org
 
-Hi Bjorn,
+On Fri, May 19, 2017 at 03:50:32PM -0500, Tom Lendacky wrote:
+> The "worker" function would be doing the loop through the setup data,
+> but since the setup data is mapped inside the loop I can't do the __init
+> calling the non-init function and still hope to consolidate the code.
+> Maybe I'm missing something here...
 
-Many thanks for your clear answer.
+Hmm, I see what you mean. But the below change ontop doesn't fire any
+warnings here. Maybe your .config has something set which I don't...
 
-Regards,
+---
+diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
+index 55317ba3b6dc..199c983192ae 100644
+--- a/arch/x86/mm/ioremap.c
++++ b/arch/x86/mm/ioremap.c
+@@ -515,71 +515,50 @@ static bool memremap_is_efi_data(resource_size_t phys_addr,
+  * Examine the physical address to determine if it is boot data by checking
+  * it against the boot params setup_data chain.
+  */
+-static bool memremap_is_setup_data(resource_size_t phys_addr,
+-				   unsigned long size)
++static bool
++__memremap_is_setup_data(resource_size_t phys_addr, unsigned long size, bool early)
+ {
+ 	struct setup_data *data;
+ 	u64 paddr, paddr_next;
++	u32 len;
+ 
+ 	paddr = boot_params.hdr.setup_data;
+ 	while (paddr) {
+-		bool is_setup_data = false;
+ 
+ 		if (phys_addr == paddr)
+ 			return true;
+ 
+-		data = memremap(paddr, sizeof(*data),
+-				MEMREMAP_WB | MEMREMAP_DEC);
++		if (early)
++			data = early_memremap_decrypted(paddr, sizeof(*data));
++		else
++			data = memremap(paddr, sizeof(*data), MEMREMAP_WB | MEMREMAP_DEC);
+ 
+ 		paddr_next = data->next;
++		len = data->len;
+ 
+-		if ((phys_addr > paddr) && (phys_addr < (paddr + data->len)))
+-			is_setup_data = true;
++		if (early)
++			early_memunmap(data, sizeof(*data));
++		else
++			memunmap(data);
+ 
+-		memunmap(data);
+ 
+-		if (is_setup_data)
++		if ((phys_addr > paddr) && (phys_addr < (paddr + data->len)))
+ 			return true;
+ 
+ 		paddr = paddr_next;
+ 	}
+-
+ 	return false;
+ }
+ 
+-/*
+- * Examine the physical address to determine if it is boot data by checking
+- * it against the boot params setup_data chain (early boot version).
+- */
+ static bool __init early_memremap_is_setup_data(resource_size_t phys_addr,
+ 						unsigned long size)
+ {
+-	struct setup_data *data;
+-	u64 paddr, paddr_next;
+-
+-	paddr = boot_params.hdr.setup_data;
+-	while (paddr) {
+-		bool is_setup_data = false;
+-
+-		if (phys_addr == paddr)
+-			return true;
+-
+-		data = early_memremap_decrypted(paddr, sizeof(*data));
+-
+-		paddr_next = data->next;
+-
+-		if ((phys_addr > paddr) && (phys_addr < (paddr + data->len)))
+-			is_setup_data = true;
+-
+-		early_memunmap(data, sizeof(*data));
+-
+-		if (is_setup_data)
+-			return true;
+-
+-		paddr = paddr_next;
+-	}
++	return __memremap_is_setup_data(phys_addr, size, true);
++}
+ 
+-	return false;
++static bool memremap_is_setup_data(resource_size_t phys_addr, unsigned long size)
++{
++	return __memremap_is_setup_data(phys_addr, size, false);
+ }
+ 
+ /*
 
-Gary (Heyi Guo)
+-- 
+Regards/Gruss,
+    Boris.
 
+Good mailing practices for 400: avoid top-posting and trim the reply.
 
-在 5/18/2017 10:01 PM, Bjorn Helgaas 写道:
-> Hi Gary,
->
-> Thanks for the question.
->
-> On Wed, May 03, 2017 at 11:09:51AM +0800, Heyi Guo wrote:
->> Hi Ard,
->>
->> I have one comment inclined.
->>
->>
->> 在 3/22/2017 11:30 PM, Ard Biesheuvel 写道:
->>> On UEFI systems, the PCI subsystem is enumerated by the firmware,
->>> and if a graphical framebuffer is exposed by a PCI device, its base
->>> address and size are exposed to the OS via the Graphics Output
->>> Protocol (GOP).
->>>
->>> On arm64 PCI systems, the entire PCI hierarchy is reconfigured from
->>> scratch at boot. This may result in the GOP framebuffer address to
->>> become stale, if the BAR covering the framebuffer is modified. This
->>> will cause the framebuffer to become unresponsive, and may in some
->>> cases result in unpredictable behavior if the range is reassigned to
->>> another device.
->>>
->>> So add a quirk to the EFI fb driver to find the BAR associated with
->>> the GOP base address, and set the IORESOURCE_PCI_FIXED attribute so
->>> that the PCI core will leave it alone.
->>>
->>> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
->>> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>> ---
->>> v3: check device is enabled before attempting to claim the resource
->>>
->>>   drivers/video/fbdev/efifb.c | 60 +++++++++++++++++++-
->>>   1 file changed, 59 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
->>> index 8c4dc1e1f94f..88f653864a01 100644
->>> --- a/drivers/video/fbdev/efifb.c
->>> +++ b/drivers/video/fbdev/efifb.c
->>> @@ -10,6 +10,7 @@
->>>   #include <linux/efi.h>
->>>   #include <linux/errno.h>
->>>   #include <linux/fb.h>
->>> +#include <linux/pci.h>
->>>   #include <linux/platform_device.h>
->>>   #include <linux/screen_info.h>
->>>   #include <video/vga.h>
->>> @@ -143,6 +144,9 @@ static struct attribute *efifb_attrs[] = {
->>>   };
->>>   ATTRIBUTE_GROUPS(efifb);
->>> +static bool pci_bar_found;	/* did we find a BAR matching the efifb base? */
->>> +static bool pci_dev_disabled;	/* was the device disabled? */
->>> +
->>>   static int efifb_probe(struct platform_device *dev)
->>>   {
->>>   	struct fb_info *info;
->>> @@ -152,7 +156,7 @@ static int efifb_probe(struct platform_device *dev)
->>>   	unsigned int size_total;
->>>   	char *option = NULL;
->>> -	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
->>> +	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI || pci_dev_disabled)
->>>   		return -ENODEV;
->>>   	if (fb_get_options("efifb", &option))
->>> @@ -360,3 +364,57 @@ static struct platform_driver efifb_driver = {
->>>   };
->>>   builtin_platform_driver(efifb_driver);
->>> +
->>> +static void claim_efifb_bar(struct pci_dev *dev, int idx)
->>> +{
->>> +	u16 word;
->>> +
->>> +	pci_bar_found = true;
->>> +
->>> +	pci_read_config_word(dev, PCI_COMMAND, &word);
->>> +	if (!(word & PCI_COMMAND_MEMORY)) {
->>> +		pci_dev_disabled = true;
->>> +		dev_err(&dev->dev,
->>> +			"BAR %d: assigned to efifb but device is disabled!\n",
->>> +			idx);
->>> +		return;
->>> +	}
->>> +
->>> +	if (pci_claim_resource(dev, idx)) {
->>> +		pci_dev_disabled = true;
->>> +		dev_err(&dev->dev,
->>> +			"BAR %d: failed to claim resource for efifb!\n", idx);
->>> +		return;
->>> +	}
->>> +
->>> +	dev_info(&dev->dev, "BAR %d: assigned to efifb\n", idx);
->>> +}
->>> +
->>> +static void efifb_fixup_resources(struct pci_dev *dev)
->>> +{
->>> +	u64 base = screen_info.lfb_base;
->>> +	u64 size = screen_info.lfb_size;
->>> +	int i;
->>> +
->>> +	if (pci_bar_found || screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
->>> +		return;
->>> +
->>> +	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
->>> +		base |= (u64)screen_info.ext_lfb_base << 32;
->>> +
->>> +	if (!base)
->>> +		return;
->>> +
->>> +	for (i = 0; i < PCI_STD_RESOURCE_END; i++) {
->>> +		struct resource *res = &dev->resource[i];
->>> +
->>> +		if (!(res->flags & IORESOURCE_MEM))
->>> +			continue;
->>> +
->>> +		if (res->start <= base && res->end >= base + size - 1) {
->> Have we considered PCI address translation here? I suppose the
->> address reported by EFI GOP should be the address of CPU domain, not
->> address of PCI domain. Address read from PCI BAR is PCI address
->> which should add translation offset before being compared to CPU
->> domain address.
-> Every address in dev->resource[] is a CPU domain address, so address
-> translation offset should be handled correctly.
->
-> This is because __pci_read_base() calls pcibios_bus_to_resource() when
-> it fills in dev->resource[], and pcibios_bus_to_resource() applies any
-> host bridge address translation.
->
-> Bjorn
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
