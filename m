@@ -1,137 +1,91 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v5 17/32] x86/mm: Add support to access boot related data
- in the clear
-Date: Sun, 21 May 2017 09:16:50 +0200
-Message-ID: <20170521071650.pwwmw4agggaazfrh@pd.tnic>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418211921.10190.1537.stgit@tlendack-t1.amdoffice.net>
- <20170515183517.mb4k2gp2qobbuvtm@pd.tnic>
- <4845df29-bae7-9b78-0428-ff96dbef2128@amd.com>
- <20170518090212.kebstmnjv4h3cjf2@pd.tnic>
- <c0cb8a50-e860-169b-ee0c-7eb4db7c3fda@amd.com>
+From: gengdongjiu <gengdj.1984@gmail.com>
+Subject: Re: [PATCH v3 3/3] arm/arm64: signal SIBGUS and inject SEA Error
+Date: Sun, 21 May 2017 16:24:26 +0800
+Message-ID: <CAMj-D2DLW3a1XxWtW0xouBoLEVFqHmX5t-ds=2bCyb8ZbRS9Tg@mail.gmail.com>
+References: <CAMj-D2BGTDKpOcMu2ip41_MTTj8VDwvs59Ds7yvLHcD8PeQzhg@mail.gmail.com>
+ <CAMj-D2A-ER8GEN32au774AY682yeMVyJwxhZoO+NkXKYYMwoQw@mail.gmail.com>
+ <5915EFC3.9070507@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <c0cb8a50-e860-169b-ee0c-7eb4db7c3fda@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <5915EFC3.9070507@arm.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: James Morse <james.morse@arm.com>
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Tyler Baicar <tbaicar@codeaurora.org>, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, Fu Wei <fu.wei@linaro.org>, zjzhang@codeaurora.org, linux@armlinux.org.uk, Xiongfeng Wang <wangxiongfeng2@huawei.com>, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, Len Brown <lenb@kernel.org>, harba@codeaurora.org, John Garry <john.garry@huawei.com>, Marc Zyngier <marc.zyngier@arm.com>, Punit Agrawal <punit.agrawal@arm.com>, rostedt@goodmis.org, nkaje@codeaurora.org, Sandeepa Prabhu <sandeepa.s.prabhu@gmail.com>, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, Han
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, May 19, 2017 at 03:50:32PM -0500, Tom Lendacky wrote:
-> The "worker" function would be doing the loop through the setup data,
-> but since the setup data is mapped inside the loop I can't do the __init
-> calling the non-init function and still hope to consolidate the code.
-> Maybe I'm missing something here...
+Hi James,
+    sorry for the late response due to recently verify and debug the
+RAS solution.
 
-Hmm, I see what you mean. But the below change ontop doesn't fire any
-warnings here. Maybe your .config has something set which I don't...
+2017-05-13 1:24 GMT+08:00, James Morse <james.morse@arm.com>:
+> Hi gengdongjiu,
+>
+> On 05/05/17 13:31, gengdongjiu wrote:
+>> when guest OS happen an SEA, My current solution is shown below:
+>>
+>> (1) host EL3 firmware firstly handle the SEA error and generate the CPER
+>> record.
+>> (2) EL3 firmware separately copy the esr_el3, elr_el3, SPSR_el3,
+>> far_el3 to the esr_el2, elr_el2, SPSR_el2, far_el2.
+>
+> Copying {ELR,SPSR,FAR}_EL3 to the EL2 registers rings some alarm bells: I'm
+> sure
+> you exclude values from EL3 or the secure-world, we should never hand those
+> to
+> the normal world.
 
----
-diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
-index 55317ba3b6dc..199c983192ae 100644
---- a/arch/x86/mm/ioremap.c
-+++ b/arch/x86/mm/ioremap.c
-@@ -515,71 +515,50 @@ static bool memremap_is_efi_data(resource_size_t phys_addr,
-  * Examine the physical address to determine if it is boot data by checking
-  * it against the boot params setup_data chain.
-  */
--static bool memremap_is_setup_data(resource_size_t phys_addr,
--				   unsigned long size)
-+static bool
-+__memremap_is_setup_data(resource_size_t phys_addr, unsigned long size, bool early)
- {
- 	struct setup_data *data;
- 	u64 paddr, paddr_next;
-+	u32 len;
- 
- 	paddr = boot_params.hdr.setup_data;
- 	while (paddr) {
--		bool is_setup_data = false;
- 
- 		if (phys_addr == paddr)
- 			return true;
- 
--		data = memremap(paddr, sizeof(*data),
--				MEMREMAP_WB | MEMREMAP_DEC);
-+		if (early)
-+			data = early_memremap_decrypted(paddr, sizeof(*data));
-+		else
-+			data = memremap(paddr, sizeof(*data), MEMREMAP_WB | MEMREMAP_DEC);
- 
- 		paddr_next = data->next;
-+		len = data->len;
- 
--		if ((phys_addr > paddr) && (phys_addr < (paddr + data->len)))
--			is_setup_data = true;
-+		if (early)
-+			early_memunmap(data, sizeof(*data));
-+		else
-+			memunmap(data);
- 
--		memunmap(data);
- 
--		if (is_setup_data)
-+		if ((phys_addr > paddr) && (phys_addr < (paddr + data->len)))
- 			return true;
- 
- 		paddr = paddr_next;
- 	}
--
- 	return false;
- }
- 
--/*
-- * Examine the physical address to determine if it is boot data by checking
-- * it against the boot params setup_data chain (early boot version).
-- */
- static bool __init early_memremap_is_setup_data(resource_size_t phys_addr,
- 						unsigned long size)
- {
--	struct setup_data *data;
--	u64 paddr, paddr_next;
--
--	paddr = boot_params.hdr.setup_data;
--	while (paddr) {
--		bool is_setup_data = false;
--
--		if (phys_addr == paddr)
--			return true;
--
--		data = early_memremap_decrypted(paddr, sizeof(*data));
--
--		paddr_next = data->next;
--
--		if ((phys_addr > paddr) && (phys_addr < (paddr + data->len)))
--			is_setup_data = true;
--
--		early_memunmap(data, sizeof(*data));
--
--		if (is_setup_data)
--			return true;
--
--		paddr = paddr_next;
--	}
-+	return __memremap_is_setup_data(phys_addr, size, true);
-+}
- 
--	return false;
-+static bool memremap_is_setup_data(resource_size_t phys_addr, unsigned long size)
-+{
-+	return __memremap_is_setup_data(phys_addr, size, false);
- }
- 
- /*
+ it is sure that needs to  exclude the EL3 Error and secure-world.
 
--- 
-Regards/Gruss,
-    Boris.
+>
+>
+>> (3) then jump the EL2 hypervisor
+>
+>> so the EL2 hypervisor uses the ESR that come from esr_el3,  here the
+>> ESR(esr_el3) value may be different with the exist KVM API's ESR.
+>
+> The ESR may be different between EL3 and EL2. The ESR contains the severity
+> of
+> the event, the CPU will choose this when it takes the SError to EL3. If it
+> had
+> taken the SError to EL2, the CPU may have classified the error differently.
+>
+> Firmware may need to generate a more severe ESR if it receives an error
+> that
+> would be propagated by delivering SEI to a lower exception level, for
+> example if
+> an EL2 system register is 'infected'.
+>
+> This is the same for Qemu/kvmtool. A contained error at EL2 may be an
+> uncontained error if we hand it to guest EL1. Linux's RAS code will decide
+> this
+> with its choice of signal to send, (and possibly which code to set).
+> Qemu/kvmtool need to choose an appropriate APEI notification, which may
+> involve
+> generating a relevant ESR.
+>
+> Also relevant is the problem we discussed earlier with trying to deliver
+> fake
+> Physical-SError from software at EL3: If the SError is routed to EL2, and
+> EL2
+> has PSTATE.A masked, EL3 has to wait and try again later. This is another
+> case
+> where firmware may have to upgrade the classification of an error to
+> uncontainable.
+   it makes sense. thanks to James.
 
-Good mailing practices for 400: avoid top-posting and trim the reply.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+>
+>
+> Thanks,
+>
+> James
+>
