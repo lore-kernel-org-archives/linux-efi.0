@@ -1,15 +1,15 @@
 From: gengdongjiu <gengdj.1984@gmail.com>
 Subject: Re: [PATCH v3 3/3] arm/arm64: signal SIBGUS and inject SEA Error
-Date: Sun, 21 May 2017 16:24:26 +0800
-Message-ID: <CAMj-D2DLW3a1XxWtW0xouBoLEVFqHmX5t-ds=2bCyb8ZbRS9Tg@mail.gmail.com>
+Date: Sun, 21 May 2017 17:23:08 +0800
+Message-ID: <CAMj-D2Bsgh8y+UZdp+LZ-rcv3ZCwm5RJFVs6SEP0WzxuV4Zbjw@mail.gmail.com>
 References: <CAMj-D2BGTDKpOcMu2ip41_MTTj8VDwvs59Ds7yvLHcD8PeQzhg@mail.gmail.com>
- <CAMj-D2A-ER8GEN32au774AY682yeMVyJwxhZoO+NkXKYYMwoQw@mail.gmail.com>
- <5915EFC3.9070507@arm.com>
+ <5910AAA2.4030304@arm.com> <75907fb5-440f-2cbe-762a-d139c4bfdd2d@huawei.com>
+ <5915EFF9.1020405@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <5915EFC3.9070507@arm.com>
+In-Reply-To: <5915EFF9.1020405@arm.com>
 List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
 List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
@@ -20,68 +20,106 @@ List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
 Errors-To: kvmarm-bounces@lists.cs.columbia.edu
 Sender: kvmarm-bounces@lists.cs.columbia.edu
 To: James Morse <james.morse@arm.com>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Tyler Baicar <tbaicar@codeaurora.org>, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, Fu Wei <fu.wei@linaro.org>, zjzhang@codeaurora.org, linux@armlinux.org.uk, Xiongfeng Wang <wangxiongfeng2@huawei.com>, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, Len Brown <lenb@kernel.org>, harba@codeaurora.org, John Garry <john.garry@huawei.com>, Marc Zyngier <marc.zyngier@arm.com>, Punit Agrawal <punit.agrawal@arm.com>, rostedt@goodmis.org, nkaje@codeaurora.org, Sandeepa Prabhu <sandeepa.s.prabhu@gmail.com>, linux-arm-kernel@lists.infradead.org, devel@acpica.org, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, Han
+Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Tyler Baicar <tbaicar@codeaurora.org>, will.deacon@arm.com, linux@armlinux.org.uk, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, Fu Wei <fu.wei@linaro.org>, zjzhang@codeaurora.org, robert.moore@intel.com, gengdongjiu <gengdongjiu@huawei.com>, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, Len Brown <lenb@kernel.org>, harba@codeaurora.org, John Garry <john.garry@huawei.com>, Marc Zyngier <marc.zyngier@arm.com>, Punit Agrawal <punit.agrawal@arm.com>, rostedt@goodmis.org, nkaje@codeaurora.org, Sandeepa Prabhu <sandeepa.s.prabhu@gmail.com>, linux-arm-kernel@lists.infradead.org, devel@acpica.org, Xiongfeng Wang <wangxiongfeng2@huawei.com>, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@v
 List-Id: linux-efi@vger.kernel.org
 
-Hi James,
-    sorry for the late response due to recently verify and debug the
-RAS solution.
-
-2017-05-13 1:24 GMT+08:00, James Morse <james.morse@arm.com>:
+2017-05-13 1:25 GMT+08:00, James Morse <james.morse@arm.com>:
 > Hi gengdongjiu,
 >
-> On 05/05/17 13:31, gengdongjiu wrote:
->> when guest OS happen an SEA, My current solution is shown below:
->>
->> (1) host EL3 firmware firstly handle the SEA error and generate the CPER
->> record.
->> (2) EL3 firmware separately copy the esr_el3, elr_el3, SPSR_el3,
->> far_el3 to the esr_el2, elr_el2, SPSR_el2, far_el2.
+> On 10/05/17 09:44, gengdongjiu wrote:
+>> On 2017/5/9 1:28, James Morse wrote:
+>>>>> (hwpoison for KVM is a corner case as Qemu's memory effectively has two
+>>>>> users,
+>>>>> Qemu and KVM. This isn't the example of how user-space gets
+>>>>> signalled.)
+>>>
+>>> KVM creates guests as if they were additional users of Qemu's memory. The
+>>> code
+>>> in mm/memory-failure.c may find that Qemu didn't have the affected page
+>>> mapped
+>>> to user-space - but it may have been in use by stage2.
+>>>
+>>> The KVM+SIGBUS patch hides this difference, meaning Qemu gets a signal
+>>> when the
+>>> guest touches the hwpoison page as if Qemu had touched the page itself.
+>>>
+>>> Signals from KVM is a corner case, for firmware-first decisions should
+>>> happen in
+>>> the APEI code based on CPER records.
 >
-> Copying {ELR,SPSR,FAR}_EL3 to the EL2 registers rings some alarm bells: I'm
-> sure
-> you exclude values from EL3 or the secure-world, we should never hand those
+>>>> If so, how the KVM handle the SEA type other than hwpoison?
+>
+>>> To deliver to a guest? It shouldn't have to know, user space should use a
+>>> KVM
+>>> API to drive this.
+>>>
+>>> When received from hardware? It shouldn't have to care, these things
+>>> should be
+>>> passed into the APEI code for handling. KVM just needs to put the host
+>>> registers
+>>> back.
+>
+>> Recently I confirmed with the hardware team. they said almost all the SEA
+>> errors have the
+>> Poison flag, so may be there is no need to consider other SEA errors other
+>> than  hwPoison.
+>> only consider SEA hwpoison errors can be enough.
+>
+> We should be careful here, by hwpoison I meant the Linux feature.
+> From Documentation/vm/hwpoison.txt:
+>> Upcoming Intel CPUs have support for recovering from some memory errors
+>> (``MCA recovery''). This requires the OS to declare a page "poisoned",
+>> kill the processes associated with it and avoid using it in the future.
+>
+> We were talking about KVM's reaction to 'the OS declaring a page poisoned'.
+> Lets try to call this one memory-failure, as that is its Kconfig name. (now
+> I
+> understand why we've been confusing each other!)
+>
+> Your hwpoison looks like something the CPU reports in the ERR<n>STATUS
+> registers
+> (4.6.10 of DDI0587). This is something firmware should read, then describe
 > to
-> the normal world.
+> the OS via CPER records. Depending on these CPER records linux may invoke
+> its
+> memory-failure code.
+  yes
 
- it is sure that needs to  exclude the EL3 Error and secure-world.
-
 >
 >
->> (3) then jump the EL2 hypervisor
+>>>> injection a SEA is no more than setting some registers: elr_el1, PC,
+>>>> PSTATE, SPSR_el1, far_el1, esr_el1
+>>>> I seen this KVM API do the same thing as Qemu.  do you found call this
+>>>> API will have issue and necessary to choose another ESR value?
+>>>
+>>> Should we let user-space pick the ESR to deliver to the guest? Yes,
+>>> letting
+>>> user-space specify the ESR gives the most flexibility to do something
+>>> clever in
+>>> the future. An obvious choice for SEA is between the external-abort and
+>>> 'parity
+>>> or ECC error' codes. If we tell user-space which of these happened (I
+>>> don't
+>>> think Linux does today) then Qemu can relay that information to the
+>>> guest.
 >
->> so the EL2 hypervisor uses the ESR that come from esr_el3,  here the
->> ESR(esr_el3) value may be different with the exist KVM API's ESR.
+>> may be the ESR is delivered by the KVM.
+>> (1) guest OS EL0 happen SEA due to hwpoison
+>> (2) CPU traps to EL3 firmware, and update the ESR_EL3
+>> (3) the EL3 firmware copies the ESR_EL3 to ESR_EL2
+>> (4) then jump to EL2 hypervisor, hypervisor uses the ESR_EL2 to inject the
+>> SEA.
+>>
+>> May be the esr_el2 can provide the accurate error information.
+>> or do you think user-space specify the ESR instead of esr_el2 is better?
 >
-> The ESR may be different between EL3 and EL2. The ESR contains the severity
-> of
-> the event, the CPU will choose this when it takes the SError to EL3. If it
-> had
-> taken the SError to EL2, the CPU may have classified the error differently.
->
-> Firmware may need to generate a more severe ESR if it receives an error
-> that
-> would be propagated by delivering SEI to a lower exception level, for
-> example if
-> an EL2 system register is 'infected'.
->
-> This is the same for Qemu/kvmtool. A contained error at EL2 may be an
-> uncontained error if we hand it to guest EL1. Linux's RAS code will decide
-> this
-> with its choice of signal to send, (and possibly which code to set).
-> Qemu/kvmtool need to choose an appropriate APEI notification, which may
-> involve
-> generating a relevant ESR.
->
-> Also relevant is the problem we discussed earlier with trying to deliver
-> fake
-> Physical-SError from software at EL3: If the SError is routed to EL2, and
-> EL2
-> has PSTATE.A masked, EL3 has to wait and try again later. This is another
-> case
-> where firmware may have to upgrade the classification of an error to
-> uncontainable.
-   it makes sense. thanks to James.
+> I think the severity needs to be considered as the notification is handled
+> by
+> each exception level. There are cases where it will need to be upgraded
+> from
+> 'contained' to 'uncontained'. (more discussion on another part of the
+> thread).
+  understand it.
 
 >
 >
