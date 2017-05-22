@@ -1,129 +1,144 @@
-From: gengdongjiu <gengdj.1984@gmail.com>
-Subject: Re: [PATCH v3 3/3] arm/arm64: signal SIBGUS and inject SEA Error
-Date: Sun, 21 May 2017 17:23:08 +0800
-Message-ID: <CAMj-D2Bsgh8y+UZdp+LZ-rcv3ZCwm5RJFVs6SEP0WzxuV4Zbjw@mail.gmail.com>
-References: <CAMj-D2BGTDKpOcMu2ip41_MTTj8VDwvs59Ds7yvLHcD8PeQzhg@mail.gmail.com>
- <5910AAA2.4030304@arm.com> <75907fb5-440f-2cbe-762a-d139c4bfdd2d@huawei.com>
- <5915EFF9.1020405@arm.com>
+From: "Lofstedt, Marta" <marta.lofstedt-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH] efi-pstore: Fix write/erase id tracking
+Date: Mon, 22 May 2017 06:51:06 +0000
+Message-ID: <CA5F6A4B62957246A9595641974606435969934A@IRSMSX106.ger.corp.intel.com>
+References: <20170519182701.GA63464@beast>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <5915EFF9.1020405@arm.com>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: James Morse <james.morse@arm.com>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Tyler Baicar <tbaicar@codeaurora.org>, will.deacon@arm.com, linux@armlinux.org.uk, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, Fu Wei <fu.wei@linaro.org>, zjzhang@codeaurora.org, robert.moore@intel.com, gengdongjiu <gengdongjiu@huawei.com>, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, Len Brown <lenb@kernel.org>, harba@codeaurora.org, John Garry <john.garry@huawei.com>, Marc Zyngier <marc.zyngier@arm.com>, Punit Agrawal <punit.agrawal@arm.com>, rostedt@goodmis.org, nkaje@codeaurora.org, Sandeepa Prabhu <sandeepa.s.prabhu@gmail.com>, linux-arm-kernel@lists.infradead.org, devel@acpica.org, Xiongfeng Wang <wangxiongfeng2@huawei.com>, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@v
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170519182701.GA63464@beast>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-2017-05-13 1:25 GMT+08:00, James Morse <james.morse@arm.com>:
-> Hi gengdongjiu,
->
-> On 10/05/17 09:44, gengdongjiu wrote:
->> On 2017/5/9 1:28, James Morse wrote:
->>>>> (hwpoison for KVM is a corner case as Qemu's memory effectively has two
->>>>> users,
->>>>> Qemu and KVM. This isn't the example of how user-space gets
->>>>> signalled.)
->>>
->>> KVM creates guests as if they were additional users of Qemu's memory. The
->>> code
->>> in mm/memory-failure.c may find that Qemu didn't have the affected page
->>> mapped
->>> to user-space - but it may have been in use by stage2.
->>>
->>> The KVM+SIGBUS patch hides this difference, meaning Qemu gets a signal
->>> when the
->>> guest touches the hwpoison page as if Qemu had touched the page itself.
->>>
->>> Signals from KVM is a corner case, for firmware-first decisions should
->>> happen in
->>> the APEI code based on CPER records.
->
->>>> If so, how the KVM handle the SEA type other than hwpoison?
->
->>> To deliver to a guest? It shouldn't have to know, user space should use a
->>> KVM
->>> API to drive this.
->>>
->>> When received from hardware? It shouldn't have to care, these things
->>> should be
->>> passed into the APEI code for handling. KVM just needs to put the host
->>> registers
->>> back.
->
->> Recently I confirmed with the hardware team. they said almost all the SEA
->> errors have the
->> Poison flag, so may be there is no need to consider other SEA errors other
->> than  hwPoison.
->> only consider SEA hwpoison errors can be enough.
->
-> We should be careful here, by hwpoison I meant the Linux feature.
-> From Documentation/vm/hwpoison.txt:
->> Upcoming Intel CPUs have support for recovering from some memory errors
->> (``MCA recovery''). This requires the OS to declare a page "poisoned",
->> kill the processes associated with it and avoid using it in the future.
->
-> We were talking about KVM's reaction to 'the OS declaring a page poisoned'.
-> Lets try to call this one memory-failure, as that is its Kconfig name. (now
-> I
-> understand why we've been confusing each other!)
->
-> Your hwpoison looks like something the CPU reports in the ERR<n>STATUS
-> registers
-> (4.6.10 of DDI0587). This is something firmware should read, then describe
-> to
-> the OS via CPER records. Depending on these CPER records linux may invoke
-> its
-> memory-failure code.
-  yes
+Thanks Kees,
 
->
->
->>>> injection a SEA is no more than setting some registers: elr_el1, PC,
->>>> PSTATE, SPSR_el1, far_el1, esr_el1
->>>> I seen this KVM API do the same thing as Qemu.  do you found call this
->>>> API will have issue and necessary to choose another ESR value?
->>>
->>> Should we let user-space pick the ESR to deliver to the guest? Yes,
->>> letting
->>> user-space specify the ESR gives the most flexibility to do something
->>> clever in
->>> the future. An obvious choice for SEA is between the external-abort and
->>> 'parity
->>> or ECC error' codes. If we tell user-space which of these happened (I
->>> don't
->>> think Linux does today) then Qemu can relay that information to the
->>> guest.
->
->> may be the ESR is delivered by the KVM.
->> (1) guest OS EL0 happen SEA due to hwpoison
->> (2) CPU traps to EL3 firmware, and update the ESR_EL3
->> (3) the EL3 firmware copies the ESR_EL3 to ESR_EL2
->> (4) then jump to EL2 hypervisor, hypervisor uses the ESR_EL2 to inject the
->> SEA.
->>
->> May be the esr_el2 can provide the accurate error information.
->> or do you think user-space specify the ESR instead of esr_el2 is better?
->
-> I think the severity needs to be considered as the notification is handled
-> by
-> each exception level. There are cases where it will need to be upgraded
-> from
-> 'contained' to 'uncontained'. (more discussion on another part of the
-> thread).
-  understand it.
+I confirm that with below patch on top of 4.12.0-rc2 pstore efi vars is now working as expected again.
 
->
->
-> Thanks,
->
-> James
->
+BR,
+Marta
+
+> -----Original Message-----
+> From: Kees Cook [mailto:keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org]
+> Sent: Friday, May 19, 2017 9:27 PM
+> To: Lofstedt, Marta <marta.lofstedt-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>; Colin Cross
+> <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>; Luck, Tony <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>; Matt Fleming
+> <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>; Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>;
+> linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Subject: [PATCH] efi-pstore: Fix write/erase id tracking
+> 
+> Prior to the pstore interface refactoring, the "id" generated during a backend
+> pstore_write() was only retained by the internal pstore inode tracking list.
+> Additionally the "part" was ignored, so EFI would encode this in the id. This
+> corrects the misunderstandings and correctly sets "id" during pstore_write(),
+> and uses "part"
+> directly during pstore_erase().
+> 
+> Reported-by: Marta Lofstedt <marta.lofstedt-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Fixes: 76cc9580e3fb ("pstore: Replace arguments for write() API")
+> Fixes: a61072aae693 ("pstore: Replace arguments for erase() API")
+> Signed-off-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> ---
+> Since the pstore refactor broke this, I intend to push this via the pstore tree.
+> ---
+>  drivers/firmware/efi/efi-pstore.c | 17 +++++++++++------
+>  1 file changed, 11 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-
+> pstore.c
+> index 44148fd4c9f2..dda2e96328c0 100644
+> --- a/drivers/firmware/efi/efi-pstore.c
+> +++ b/drivers/firmware/efi/efi-pstore.c
+> @@ -53,6 +53,7 @@ static int efi_pstore_read_func(struct efivar_entry
+> *entry,
+>  	if (sscanf(name, "dump-type%u-%u-%d-%lu-%c",
+>  		   &record->type, &part, &cnt, &time,
+> &data_type) == 5) {
+>  		record->id = generic_id(time, part, cnt);
+> +		record->part = part;
+>  		record->count = cnt;
+>  		record->time.tv_sec = time;
+>  		record->time.tv_nsec = 0;
+> @@ -64,6 +65,7 @@ static int efi_pstore_read_func(struct efivar_entry
+> *entry,
+>  	} else if (sscanf(name, "dump-type%u-%u-%d-%lu",
+>  		   &record->type, &part, &cnt, &time) == 4) {
+>  		record->id = generic_id(time, part, cnt);
+> +		record->part = part;
+>  		record->count = cnt;
+>  		record->time.tv_sec = time;
+>  		record->time.tv_nsec = 0;
+> @@ -77,6 +79,7 @@ static int efi_pstore_read_func(struct efivar_entry
+> *entry,
+>  		 * multiple logs, remains.
+>  		 */
+>  		record->id = generic_id(time, part, 0);
+> +		record->part = part;
+>  		record->count = 0;
+>  		record->time.tv_sec = time;
+>  		record->time.tv_nsec = 0;
+> @@ -241,9 +244,15 @@ static int efi_pstore_write(struct pstore_record
+> *record)
+>  	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
+>  	int i, ret = 0;
+> 
+> +	record->time.tv_sec = get_seconds();
+> +	record->time.tv_nsec = 0;
+> +
+> +	record->id = generic_id(record->time.tv_sec, record->part,
+> +				record->count);
+> +
+>  	snprintf(name, sizeof(name), "dump-type%u-%u-%d-%lu-
+> %c",
+>  		 record->type, record->part, record->count,
+> -		 get_seconds(), record->compressed ? 'C' : 'D');
+> +		 record->time.tv_sec, record->compressed ? 'C'
+> : 'D');
+> 
+>  	for (i = 0; i < DUMP_NAME_LEN; i++)
+>  		efi_name[i] = name[i];
+> @@ -255,7 +264,6 @@ static int efi_pstore_write(struct pstore_record
+> *record)
+>  	if (record->reason == KMSG_DUMP_OOPS)
+>  		efivar_run_worker();
+> 
+> -	record->id = record->part;
+>  	return ret;
+>  };
+> 
+> @@ -287,7 +295,7 @@ static int efi_pstore_erase_func(struct efivar_entry
+> *entry, void *data)
+>  		 * holding multiple logs, remains.
+>  		 */
+>  		snprintf(name_old, sizeof(name_old), "dump-
+> type%u-%u-%lu",
+> -			ed->record->type, (unsigned
+> int)ed->record->id,
+> +			ed->record->type, ed->record-
+> >part,
+>  			ed->record->time.tv_sec);
+> 
+>  		for (i = 0; i < DUMP_NAME_LEN; i++)
+> @@ -320,10 +328,7 @@ static int efi_pstore_erase(struct pstore_record
+> *record)
+>  	char name[DUMP_NAME_LEN];
+>  	efi_char16_t efi_name[DUMP_NAME_LEN];
+>  	int found, i;
+> -	unsigned int part;
+> 
+> -	do_div(record->id, 1000);
+> -	part = do_div(record->id, 100);
+>  	snprintf(name, sizeof(name), "dump-type%u-%u-%d-%lu",
+>  		 record->type, record->part, record->count,
+>  		 record->time.tv_sec);
+> --
+> 2.7.4
+> 
+> 
+> --
+> Kees Cook
+> Pixel Security
