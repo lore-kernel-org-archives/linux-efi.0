@@ -1,27 +1,28 @@
-From: David Howells <dhowells@redhat.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Subject: Re: [PATCH 1/5] efi: Move the x86 secure boot switch to generic code
-Date: Wed, 24 May 2017 14:54:45 +0100
-Message-ID: <23673.1495634085@warthog.procyon.org.uk>
-References: <CAKv+Gu9e-r+m6TEBPOg+o01m5JmF9CYLfH4dc60a_K41zJoCKg@mail.gmail.com> <149148299794.3427.549144000807596903.stgit@warthog.procyon.org.uk>
+Date: Wed, 24 May 2017 07:04:21 -0700
+Message-ID: <CAKv+Gu8urtv9COMmBdSCFKTMsraepbb-9sAfDXKa5avH3=ufvg@mail.gmail.com>
+References: <149148299794.3427.549144000807596903.stgit@warthog.procyon.org.uk>
+ <CAKv+Gu9e-r+m6TEBPOg+o01m5JmF9CYLfH4dc60a_K41zJoCKg@mail.gmail.com> <23673.1495634085@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu9e-r+m6TEBPOg+o01m5JmF9CYLfH4dc60a_K41zJoCKg@mail.gmail.com>
-Content-ID: <23672.1495634085.1@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: dhowells@redhat.com, Matthew Garrett <matthew.garrett@nebula.com>, linux-security-module <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <23673.1495634085-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+On 24 May 2017 at 06:54, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>
+>> > +         UEFI Secure Boot provides a mechanism for ensuring that the firmware
+>> > +         will only load signed bootloaders and kernels.  Secure boot mode may
+>> > +         be determined from EFI variables provided by the BIOS if not
+>>
+>> Please replace 'the BIOS' with something more generic.
+>
+> "Firmware" or "System firmware" maybe?
+>
 
-> > +         UEFI Secure Boot provides a mechanism for ensuring that the firmware
-> > +         will only load signed bootloaders and kernels.  Secure boot mode may
-> > +         be determined from EFI variables provided by the BIOS if not
-> 
-> Please replace 'the BIOS' with something more generic.
-
-"Firmware" or "System firmware" maybe?
-
-David
+Either is fine by me
