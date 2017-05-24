@@ -1,7 +1,7 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 4/5] efi: Lock down the kernel if booted in secure boot mode
-Date: Wed, 24 May 2017 15:45:56 +0100
-Message-ID: <149563715653.9419.12087391202203924792.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 5/5] Add a sysrq option to exit secure boot mode
+Date: Wed, 24 May 2017 15:46:03 +0100
+Message-ID: <149563716341.9419.12043461651917925181.stgit@warthog.procyon.org.uk>
 References: <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -13,60 +13,268 @@ To: ard.biesheuvel@linaro.org
 Cc: dhowells@redhat.com, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-UEFI Secure Boot provides a mechanism for ensuring that the firmware will
-only load signed bootloaders and kernels.  Certain use cases may also
-require that all kernel modules also be signed.  Add a configuration option
-that to lock down the kernel - which includes requiring validly signed
-modules - if the kernel is secure-booted.
+From: Kyle McMartin <kyle@redhat.com>
 
+Make sysrq+x exit secure boot mode on x86_64, thereby allowing the running
+kernel image to be modified.  This lifts the lockdown.
+
+Signed-off-by: Kyle McMartin <kyle@redhat.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: linux-efi@vger.kernel.org
+cc: x86@kernel.org
 ---
 
- drivers/firmware/efi/Kconfig      |    1 +
- drivers/firmware/efi/secureboot.c |   10 +++++++++-
- 2 files changed, 10 insertions(+), 1 deletion(-)
+ arch/x86/include/asm/efi.h        |    2 ++
+ drivers/firmware/efi/Kconfig      |   10 ++++++++++
+ drivers/firmware/efi/secureboot.c |   37 +++++++++++++++++++++++++++++++++++++
+ drivers/input/misc/uinput.c       |    1 +
+ drivers/tty/sysrq.c               |   19 +++++++++++++------
+ include/linux/input.h             |    5 +++++
+ include/linux/sysrq.h             |    8 +++++++-
+ kernel/debug/kdb/kdb_main.c       |    2 +-
+ 8 files changed, 76 insertions(+), 8 deletions(-)
 
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 6d74cc3802e6..b4e641ace1bd 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -31,6 +31,8 @@
+ 
+ #define ARCH_EFI_IRQ_FLAGS_MASK	X86_EFLAGS_IF
+ 
++#define EFI_SECURE_BOOT_EXIT_KEY 'x'
++
+ #ifdef CONFIG_X86_32
+ 
+ extern unsigned long asmlinkage efi_call_phys(void *, ...);
 diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index c40fdeaf9a45..d03af2d5f52f 100644
+index d03af2d5f52f..bd27f35ba528 100644
 --- a/drivers/firmware/efi/Kconfig
 +++ b/drivers/firmware/efi/Kconfig
-@@ -87,6 +87,7 @@ config EFI_RUNTIME_WRAPPERS
- config EFI_SECURE_BOOT
- 	bool "Support UEFI Secure Boot and lock down the kernel in secure boot mode"
- 	default n
-+	select LOCK_DOWN_KERNEL
- 	help
- 	  UEFI Secure Boot provides a mechanism for ensuring that the firmware
- 	  will only load signed bootloaders and kernels.  Secure boot mode may
+@@ -108,6 +108,16 @@ config EFI_SECURE_BOOT
+ 	  - Loading unsigned modules
+ 	  - Kexec'ing unsigned images
+ 
++config EFI_ALLOW_SECURE_BOOT_EXIT
++	def_bool n
++	depends on EFI_SECURE_BOOT && MAGIC_SYSRQ
++	select ALLOW_LOCKDOWN_LIFT
++	prompt "Allow secure boot mode to be exited with SysRq+x on a keyboard"
++	---help---
++	  Allow secure boot mode to be exited and the kernel lockdown lifted by
++	  typing SysRq+x on a keyboard attached to the system (not permitted
++	  through procfs).
++
+ config EFI_ARMSTUB
+ 	bool
+ 
 diff --git a/drivers/firmware/efi/secureboot.c b/drivers/firmware/efi/secureboot.c
-index 730518061a14..7292a3b832e3 100644
+index 7292a3b832e3..be624a16996e 100644
 --- a/drivers/firmware/efi/secureboot.c
 +++ b/drivers/firmware/efi/secureboot.c
-@@ -12,6 +12,7 @@
- #include <linux/efi.h>
+@@ -13,6 +13,8 @@
  #include <linux/kernel.h>
  #include <linux/printk.h>
-+#include <linux/security.h>
+ #include <linux/security.h>
++#include <linux/sysrq.h>
++#include <asm/efi.h>
  
  /*
   * Decide what to do when UEFI secure boot mode is enabled.
-@@ -23,10 +24,17 @@ void __init efi_set_secure_boot(enum efi_secureboot_mode mode)
- 		case efi_secureboot_mode_disabled:
- 			pr_info("Secure boot disabled\n");
- 			break;
+@@ -41,3 +43,38 @@ void __init efi_set_secure_boot(enum efi_secureboot_mode mode)
+ 		}
+ 	}
+ }
 +
- 		case efi_secureboot_mode_enabled:
- 			set_bit(EFI_SECURE_BOOT, &efi.flags);
--			pr_info("Secure boot enabled\n");
-+			if (IS_ENABLED(CONFIG_LOCK_DOWN_KERNEL)) {
-+				lock_kernel_down();
-+				pr_info("Secure boot enabled and kernel locked down\n");
-+			} else {
-+				pr_info("Secure boot enabled\n");
-+			}
- 			break;
++/*
++ * Allow secure boot to be lifted by pressing something like SysRq+x (and not
++ * by echoing the appropriate letter into the sysrq-trigger file).
++ */
++#ifdef CONFIG_EFI_ALLOW_SECURE_BOOT_EXIT
 +
- 		default:
- 			pr_info("Secure boot could not be determined\n");
- 			break;
++static void sysrq_handle_secure_boot(int key)
++{
++	if (!efi_enabled(EFI_SECURE_BOOT))
++		return;
++
++	pr_info("Secure boot disabled\n");
++	lift_kernel_lockdown();
++}
++
++static struct sysrq_key_op secure_boot_sysrq_op = {
++	.handler	= sysrq_handle_secure_boot,
++	.help_msg	= "unSB(x)",
++	.action_msg	= "Disabling Secure Boot restrictions",
++	.enable_mask	= SYSRQ_DISABLE_USERSPACE,
++};
++
++static int __init efi_secure_boot_sysrq(void)
++{
++	if (efi_enabled(EFI_SECURE_BOOT)) {
++		secure_boot_sysrq_op.help_msg[5] = EFI_SECURE_BOOT_EXIT_KEY;
++		register_sysrq_key(EFI_SECURE_BOOT_EXIT_KEY, &secure_boot_sysrq_op);
++	}
++	return 0;
++}
++
++late_initcall(efi_secure_boot_sysrq);
++
++#endif /* CONFIG_EFI_ALLOW_SECURE_BOOT_EXIT */
+diff --git a/drivers/input/misc/uinput.c b/drivers/input/misc/uinput.c
+index 022be0e22eba..4a054a564636 100644
+--- a/drivers/input/misc/uinput.c
++++ b/drivers/input/misc/uinput.c
+@@ -387,6 +387,7 @@ static int uinput_allocate_device(struct uinput_device *udev)
+ 	if (!udev->dev)
+ 		return -ENOMEM;
+ 
++	udev->dev->flags |= INPUTDEV_FLAGS_SYNTHETIC;
+ 	udev->dev->event = uinput_dev_event;
+ 	input_set_drvdata(udev->dev, udev);
+ 
+diff --git a/drivers/tty/sysrq.c b/drivers/tty/sysrq.c
+index 3ffc1ce29023..8b766dbad6dd 100644
+--- a/drivers/tty/sysrq.c
++++ b/drivers/tty/sysrq.c
+@@ -481,6 +481,7 @@ static struct sysrq_key_op *sysrq_key_table[36] = {
+ 	/* x: May be registered on mips for TLB dump */
+ 	/* x: May be registered on ppc/powerpc for xmon */
+ 	/* x: May be registered on sparc64 for global PMU dump */
++	/* x: May be registered on x86_64 for disabling secure boot */
+ 	NULL,				/* x */
+ 	/* y: May be registered on sparc64 for global register dump */
+ 	NULL,				/* y */
+@@ -524,7 +525,7 @@ static void __sysrq_put_key_op(int key, struct sysrq_key_op *op_p)
+                 sysrq_key_table[i] = op_p;
+ }
+ 
+-void __handle_sysrq(int key, bool check_mask)
++void __handle_sysrq(int key, unsigned int from)
+ {
+ 	struct sysrq_key_op *op_p;
+ 	int orig_log_level;
+@@ -544,11 +545,15 @@ void __handle_sysrq(int key, bool check_mask)
+ 
+         op_p = __sysrq_get_key_op(key);
+         if (op_p) {
++		/* Ban synthetic events from some sysrq functionality */
++		if ((from == SYSRQ_FROM_PROC || from == SYSRQ_FROM_SYNTHETIC) &&
++		    op_p->enable_mask & SYSRQ_DISABLE_USERSPACE)
++			printk("This sysrq operation is disabled from userspace.\n");
+ 		/*
+ 		 * Should we check for enabled operations (/proc/sysrq-trigger
+ 		 * should not) and is the invoked operation enabled?
+ 		 */
+-		if (!check_mask || sysrq_on_mask(op_p->enable_mask)) {
++		if (from == SYSRQ_FROM_KERNEL || sysrq_on_mask(op_p->enable_mask)) {
+ 			pr_cont("%s\n", op_p->action_msg);
+ 			console_loglevel = orig_log_level;
+ 			op_p->handler(key);
+@@ -580,7 +585,7 @@ void __handle_sysrq(int key, bool check_mask)
+ void handle_sysrq(int key)
+ {
+ 	if (sysrq_on())
+-		__handle_sysrq(key, true);
++		__handle_sysrq(key, SYSRQ_FROM_KERNEL);
+ }
+ EXPORT_SYMBOL(handle_sysrq);
+ 
+@@ -661,7 +666,7 @@ static void sysrq_do_reset(unsigned long _state)
+ static void sysrq_handle_reset_request(struct sysrq_state *state)
+ {
+ 	if (state->reset_requested)
+-		__handle_sysrq(sysrq_xlate[KEY_B], false);
++		__handle_sysrq(sysrq_xlate[KEY_B], SYSRQ_FROM_KERNEL);
+ 
+ 	if (sysrq_reset_downtime_ms)
+ 		mod_timer(&state->keyreset_timer,
+@@ -812,8 +817,10 @@ static bool sysrq_handle_keypress(struct sysrq_state *sysrq,
+ 
+ 	default:
+ 		if (sysrq->active && value && value != 2) {
++			int from = sysrq->handle.dev->flags & INPUTDEV_FLAGS_SYNTHETIC ?
++					SYSRQ_FROM_SYNTHETIC : 0;
+ 			sysrq->need_reinject = false;
+-			__handle_sysrq(sysrq_xlate[code], true);
++			__handle_sysrq(sysrq_xlate[code], from);
+ 		}
+ 		break;
+ 	}
+@@ -1097,7 +1104,7 @@ static ssize_t write_sysrq_trigger(struct file *file, const char __user *buf,
+ 
+ 		if (get_user(c, buf))
+ 			return -EFAULT;
+-		__handle_sysrq(c, false);
++		__handle_sysrq(c, SYSRQ_FROM_PROC);
+ 	}
+ 
+ 	return count;
+diff --git a/include/linux/input.h b/include/linux/input.h
+index a65e3b24fb18..8b0357175049 100644
+--- a/include/linux/input.h
++++ b/include/linux/input.h
+@@ -42,6 +42,7 @@ struct input_value {
+  * @phys: physical path to the device in the system hierarchy
+  * @uniq: unique identification code for the device (if device has it)
+  * @id: id of the device (struct input_id)
++ * @flags: input device flags (SYNTHETIC, etc.)
+  * @propbit: bitmap of device properties and quirks
+  * @evbit: bitmap of types of events supported by the device (EV_KEY,
+  *	EV_REL, etc.)
+@@ -124,6 +125,8 @@ struct input_dev {
+ 	const char *uniq;
+ 	struct input_id id;
+ 
++	unsigned int flags;
++
+ 	unsigned long propbit[BITS_TO_LONGS(INPUT_PROP_CNT)];
+ 
+ 	unsigned long evbit[BITS_TO_LONGS(EV_CNT)];
+@@ -190,6 +193,8 @@ struct input_dev {
+ };
+ #define to_input_dev(d) container_of(d, struct input_dev, dev)
+ 
++#define	INPUTDEV_FLAGS_SYNTHETIC	0x000000001
++
+ /*
+  * Verify that we are in sync with input_device_id mod_devicetable.h #defines
+  */
+diff --git a/include/linux/sysrq.h b/include/linux/sysrq.h
+index 387fa7d05c98..f7c52a9ea394 100644
+--- a/include/linux/sysrq.h
++++ b/include/linux/sysrq.h
+@@ -28,6 +28,8 @@
+ #define SYSRQ_ENABLE_BOOT	0x0080
+ #define SYSRQ_ENABLE_RTNICE	0x0100
+ 
++#define SYSRQ_DISABLE_USERSPACE	0x00010000
++
+ struct sysrq_key_op {
+ 	void (*handler)(int);
+ 	char *help_msg;
+@@ -42,8 +44,12 @@ struct sysrq_key_op {
+  * are available -- else NULL's).
+  */
+ 
++#define SYSRQ_FROM_KERNEL	0x0001
++#define SYSRQ_FROM_PROC		0x0002
++#define SYSRQ_FROM_SYNTHETIC	0x0004
++
+ void handle_sysrq(int key);
+-void __handle_sysrq(int key, bool check_mask);
++void __handle_sysrq(int key, unsigned int from);
+ int register_sysrq_key(int key, struct sysrq_key_op *op);
+ int unregister_sysrq_key(int key, struct sysrq_key_op *op);
+ struct sysrq_key_op *__sysrq_get_key_op(int key);
+diff --git a/kernel/debug/kdb/kdb_main.c b/kernel/debug/kdb/kdb_main.c
+index c8146d53ca67..b480cadf9272 100644
+--- a/kernel/debug/kdb/kdb_main.c
++++ b/kernel/debug/kdb/kdb_main.c
+@@ -1970,7 +1970,7 @@ static int kdb_sr(int argc, const char **argv)
+ 		return KDB_ARGCOUNT;
+ 
+ 	kdb_trap_printk++;
+-	__handle_sysrq(*argv[1], check_mask);
++	__handle_sysrq(*argv[1], check_mask ? SYSRQ_FROM_KERNEL : 0);
+ 	kdb_trap_printk--;
+ 
+ 	return 0;
