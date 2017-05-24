@@ -1,280 +1,181 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 5/5] Add a sysrq option to exit secure boot mode
-Date: Wed, 24 May 2017 15:46:03 +0100
-Message-ID: <149563716341.9419.12043461651917925181.stgit@warthog.procyon.org.uk>
+From: Casey Schaufler <casey-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org>
+Subject: Re: [PATCH 3/5] Add the ability to lock down access to the running
+ kernel image
+Date: Wed, 24 May 2017 08:36:49 -0700
+Message-ID: <80bdc6c9-004b-800f-ffd0-4b5ebf8cdeba@schaufler-ca.com>
 References: <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk>
+ <149563714531.9419.16811189348445249219.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ard.biesheuvel@linaro.org
-Cc: dhowells@redhat.com, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <149563714531.9419.16811189348445249219.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Kyle McMartin <kyle@redhat.com>
+On 5/24/2017 7:45 AM, David Howells wrote:
+> Provide a single call to allow kernel code to determine whether the system
+> should be locked down, thereby disallowing various accesses that might
+> allow the running kernel image to be changed including the loading of
+> modules that aren't validly signed with a key we recognise, fiddling with
+> MSR registers and disallowing hibernation,
+>
+> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Acked-by: James Morris <james.l.morris-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+> ---
+>
+>  include/linux/kernel.h   |    9 +++++++++
+>  include/linux/security.h |   11 +++++++++++
+>  security/Kconfig         |   15 +++++++++++++++
+>  security/Makefile        |    3 +++
+>  security/lock_down.c     |   46 ++++++++++++++++++++++++++++++++++++++++++++++
+>  5 files changed, 84 insertions(+)
+>  create mode 100644 security/lock_down.c
+>
+> diff --git a/include/linux/kernel.h b/include/linux/kernel.h
+> index 13bc08aba704..282a1684d6e8 100644
+> --- a/include/linux/kernel.h
+> +++ b/include/linux/kernel.h
+> @@ -276,6 +276,15 @@ extern int oops_may_print(void);
+>  void do_exit(long error_code) __noreturn;
+>  void complete_and_exit(struct completion *, long) __noreturn;
+>  
+> +#ifdef CONFIG_LOCK_DOWN_KERNEL
+> +extern bool kernel_is_locked_down(void);
+> +#else
+> +static inline bool kernel_is_locked_down(void)
 
-Make sysrq+x exit secure boot mode on x86_64, thereby allowing the running
-kernel image to be modified.  This lifts the lockdown.
+Should this be a bool or an int? I can imagine that
+someone is going to want various different degrees
+of lock down for kernels. As an int you could return
+a bitmap indicating which features were locked. This
+would allow additional things to be locked down
+without changing the interface.
 
-Signed-off-by: Kyle McMartin <kyle@redhat.com>
-Signed-off-by: David Howells <dhowells@redhat.com>
-cc: x86@kernel.org
----
-
- arch/x86/include/asm/efi.h        |    2 ++
- drivers/firmware/efi/Kconfig      |   10 ++++++++++
- drivers/firmware/efi/secureboot.c |   37 +++++++++++++++++++++++++++++++++++++
- drivers/input/misc/uinput.c       |    1 +
- drivers/tty/sysrq.c               |   19 +++++++++++++------
- include/linux/input.h             |    5 +++++
- include/linux/sysrq.h             |    8 +++++++-
- kernel/debug/kdb/kdb_main.c       |    2 +-
- 8 files changed, 76 insertions(+), 8 deletions(-)
-
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 6d74cc3802e6..b4e641ace1bd 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -31,6 +31,8 @@
- 
- #define ARCH_EFI_IRQ_FLAGS_MASK	X86_EFLAGS_IF
- 
-+#define EFI_SECURE_BOOT_EXIT_KEY 'x'
-+
- #ifdef CONFIG_X86_32
- 
- extern unsigned long asmlinkage efi_call_phys(void *, ...);
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index d03af2d5f52f..bd27f35ba528 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -108,6 +108,16 @@ config EFI_SECURE_BOOT
- 	  - Loading unsigned modules
- 	  - Kexec'ing unsigned images
- 
-+config EFI_ALLOW_SECURE_BOOT_EXIT
-+	def_bool n
-+	depends on EFI_SECURE_BOOT && MAGIC_SYSRQ
-+	select ALLOW_LOCKDOWN_LIFT
-+	prompt "Allow secure boot mode to be exited with SysRq+x on a keyboard"
-+	---help---
-+	  Allow secure boot mode to be exited and the kernel lockdown lifted by
-+	  typing SysRq+x on a keyboard attached to the system (not permitted
-+	  through procfs).
-+
- config EFI_ARMSTUB
- 	bool
- 
-diff --git a/drivers/firmware/efi/secureboot.c b/drivers/firmware/efi/secureboot.c
-index 7292a3b832e3..be624a16996e 100644
---- a/drivers/firmware/efi/secureboot.c
-+++ b/drivers/firmware/efi/secureboot.c
-@@ -13,6 +13,8 @@
- #include <linux/kernel.h>
- #include <linux/printk.h>
- #include <linux/security.h>
-+#include <linux/sysrq.h>
-+#include <asm/efi.h>
- 
- /*
-  * Decide what to do when UEFI secure boot mode is enabled.
-@@ -41,3 +43,38 @@ void __init efi_set_secure_boot(enum efi_secureboot_mode mode)
- 		}
- 	}
- }
-+
-+/*
-+ * Allow secure boot to be lifted by pressing something like SysRq+x (and not
-+ * by echoing the appropriate letter into the sysrq-trigger file).
-+ */
-+#ifdef CONFIG_EFI_ALLOW_SECURE_BOOT_EXIT
-+
-+static void sysrq_handle_secure_boot(int key)
-+{
-+	if (!efi_enabled(EFI_SECURE_BOOT))
-+		return;
-+
-+	pr_info("Secure boot disabled\n");
-+	lift_kernel_lockdown();
-+}
-+
-+static struct sysrq_key_op secure_boot_sysrq_op = {
-+	.handler	= sysrq_handle_secure_boot,
-+	.help_msg	= "unSB(x)",
-+	.action_msg	= "Disabling Secure Boot restrictions",
-+	.enable_mask	= SYSRQ_DISABLE_USERSPACE,
-+};
-+
-+static int __init efi_secure_boot_sysrq(void)
-+{
-+	if (efi_enabled(EFI_SECURE_BOOT)) {
-+		secure_boot_sysrq_op.help_msg[5] = EFI_SECURE_BOOT_EXIT_KEY;
-+		register_sysrq_key(EFI_SECURE_BOOT_EXIT_KEY, &secure_boot_sysrq_op);
-+	}
-+	return 0;
-+}
-+
-+late_initcall(efi_secure_boot_sysrq);
-+
-+#endif /* CONFIG_EFI_ALLOW_SECURE_BOOT_EXIT */
-diff --git a/drivers/input/misc/uinput.c b/drivers/input/misc/uinput.c
-index 022be0e22eba..4a054a564636 100644
---- a/drivers/input/misc/uinput.c
-+++ b/drivers/input/misc/uinput.c
-@@ -387,6 +387,7 @@ static int uinput_allocate_device(struct uinput_device *udev)
- 	if (!udev->dev)
- 		return -ENOMEM;
- 
-+	udev->dev->flags |= INPUTDEV_FLAGS_SYNTHETIC;
- 	udev->dev->event = uinput_dev_event;
- 	input_set_drvdata(udev->dev, udev);
- 
-diff --git a/drivers/tty/sysrq.c b/drivers/tty/sysrq.c
-index 3ffc1ce29023..8b766dbad6dd 100644
---- a/drivers/tty/sysrq.c
-+++ b/drivers/tty/sysrq.c
-@@ -481,6 +481,7 @@ static struct sysrq_key_op *sysrq_key_table[36] = {
- 	/* x: May be registered on mips for TLB dump */
- 	/* x: May be registered on ppc/powerpc for xmon */
- 	/* x: May be registered on sparc64 for global PMU dump */
-+	/* x: May be registered on x86_64 for disabling secure boot */
- 	NULL,				/* x */
- 	/* y: May be registered on sparc64 for global register dump */
- 	NULL,				/* y */
-@@ -524,7 +525,7 @@ static void __sysrq_put_key_op(int key, struct sysrq_key_op *op_p)
-                 sysrq_key_table[i] = op_p;
- }
- 
--void __handle_sysrq(int key, bool check_mask)
-+void __handle_sysrq(int key, unsigned int from)
- {
- 	struct sysrq_key_op *op_p;
- 	int orig_log_level;
-@@ -544,11 +545,15 @@ void __handle_sysrq(int key, bool check_mask)
- 
-         op_p = __sysrq_get_key_op(key);
-         if (op_p) {
-+		/* Ban synthetic events from some sysrq functionality */
-+		if ((from == SYSRQ_FROM_PROC || from == SYSRQ_FROM_SYNTHETIC) &&
-+		    op_p->enable_mask & SYSRQ_DISABLE_USERSPACE)
-+			printk("This sysrq operation is disabled from userspace.\n");
- 		/*
- 		 * Should we check for enabled operations (/proc/sysrq-trigger
- 		 * should not) and is the invoked operation enabled?
- 		 */
--		if (!check_mask || sysrq_on_mask(op_p->enable_mask)) {
-+		if (from == SYSRQ_FROM_KERNEL || sysrq_on_mask(op_p->enable_mask)) {
- 			pr_cont("%s\n", op_p->action_msg);
- 			console_loglevel = orig_log_level;
- 			op_p->handler(key);
-@@ -580,7 +585,7 @@ void __handle_sysrq(int key, bool check_mask)
- void handle_sysrq(int key)
- {
- 	if (sysrq_on())
--		__handle_sysrq(key, true);
-+		__handle_sysrq(key, SYSRQ_FROM_KERNEL);
- }
- EXPORT_SYMBOL(handle_sysrq);
- 
-@@ -661,7 +666,7 @@ static void sysrq_do_reset(unsigned long _state)
- static void sysrq_handle_reset_request(struct sysrq_state *state)
- {
- 	if (state->reset_requested)
--		__handle_sysrq(sysrq_xlate[KEY_B], false);
-+		__handle_sysrq(sysrq_xlate[KEY_B], SYSRQ_FROM_KERNEL);
- 
- 	if (sysrq_reset_downtime_ms)
- 		mod_timer(&state->keyreset_timer,
-@@ -812,8 +817,10 @@ static bool sysrq_handle_keypress(struct sysrq_state *sysrq,
- 
- 	default:
- 		if (sysrq->active && value && value != 2) {
-+			int from = sysrq->handle.dev->flags & INPUTDEV_FLAGS_SYNTHETIC ?
-+					SYSRQ_FROM_SYNTHETIC : 0;
- 			sysrq->need_reinject = false;
--			__handle_sysrq(sysrq_xlate[code], true);
-+			__handle_sysrq(sysrq_xlate[code], from);
- 		}
- 		break;
- 	}
-@@ -1097,7 +1104,7 @@ static ssize_t write_sysrq_trigger(struct file *file, const char __user *buf,
- 
- 		if (get_user(c, buf))
- 			return -EFAULT;
--		__handle_sysrq(c, false);
-+		__handle_sysrq(c, SYSRQ_FROM_PROC);
- 	}
- 
- 	return count;
-diff --git a/include/linux/input.h b/include/linux/input.h
-index a65e3b24fb18..8b0357175049 100644
---- a/include/linux/input.h
-+++ b/include/linux/input.h
-@@ -42,6 +42,7 @@ struct input_value {
-  * @phys: physical path to the device in the system hierarchy
-  * @uniq: unique identification code for the device (if device has it)
-  * @id: id of the device (struct input_id)
-+ * @flags: input device flags (SYNTHETIC, etc.)
-  * @propbit: bitmap of device properties and quirks
-  * @evbit: bitmap of types of events supported by the device (EV_KEY,
-  *	EV_REL, etc.)
-@@ -124,6 +125,8 @@ struct input_dev {
- 	const char *uniq;
- 	struct input_id id;
- 
-+	unsigned int flags;
-+
- 	unsigned long propbit[BITS_TO_LONGS(INPUT_PROP_CNT)];
- 
- 	unsigned long evbit[BITS_TO_LONGS(EV_CNT)];
-@@ -190,6 +193,8 @@ struct input_dev {
- };
- #define to_input_dev(d) container_of(d, struct input_dev, dev)
- 
-+#define	INPUTDEV_FLAGS_SYNTHETIC	0x000000001
-+
- /*
-  * Verify that we are in sync with input_device_id mod_devicetable.h #defines
-  */
-diff --git a/include/linux/sysrq.h b/include/linux/sysrq.h
-index 387fa7d05c98..f7c52a9ea394 100644
---- a/include/linux/sysrq.h
-+++ b/include/linux/sysrq.h
-@@ -28,6 +28,8 @@
- #define SYSRQ_ENABLE_BOOT	0x0080
- #define SYSRQ_ENABLE_RTNICE	0x0100
- 
-+#define SYSRQ_DISABLE_USERSPACE	0x00010000
-+
- struct sysrq_key_op {
- 	void (*handler)(int);
- 	char *help_msg;
-@@ -42,8 +44,12 @@ struct sysrq_key_op {
-  * are available -- else NULL's).
-  */
- 
-+#define SYSRQ_FROM_KERNEL	0x0001
-+#define SYSRQ_FROM_PROC		0x0002
-+#define SYSRQ_FROM_SYNTHETIC	0x0004
-+
- void handle_sysrq(int key);
--void __handle_sysrq(int key, bool check_mask);
-+void __handle_sysrq(int key, unsigned int from);
- int register_sysrq_key(int key, struct sysrq_key_op *op);
- int unregister_sysrq_key(int key, struct sysrq_key_op *op);
- struct sysrq_key_op *__sysrq_get_key_op(int key);
-diff --git a/kernel/debug/kdb/kdb_main.c b/kernel/debug/kdb/kdb_main.c
-index c8146d53ca67..b480cadf9272 100644
---- a/kernel/debug/kdb/kdb_main.c
-+++ b/kernel/debug/kdb/kdb_main.c
-@@ -1970,7 +1970,7 @@ static int kdb_sr(int argc, const char **argv)
- 		return KDB_ARGCOUNT;
- 
- 	kdb_trap_printk++;
--	__handle_sysrq(*argv[1], check_mask);
-+	__handle_sysrq(*argv[1], check_mask ? SYSRQ_FROM_KERNEL : 0);
- 	kdb_trap_printk--;
- 
- 	return 0;
+> +{
+> +	return false;
+> +}
+> +#endif
+> +
+>  /* Internal, do not use. */
+>  int __must_check _kstrtoul(const char *s, unsigned int base, unsigned long *res);
+>  int __must_check _kstrtol(const char *s, unsigned int base, long *res);
+> diff --git a/include/linux/security.h b/include/linux/security.h
+> index af675b576645..8db2d886aa90 100644
+> --- a/include/linux/security.h
+> +++ b/include/linux/security.h
+> @@ -1698,5 +1698,16 @@ static inline void free_secdata(void *secdata)
+>  { }
+>  #endif /* CONFIG_SECURITY */
+>  
+> +#ifdef CONFIG_LOCK_DOWN_KERNEL
+> +extern void __init lock_kernel_down(void);
+> +#ifdef CONFIG_ALLOW_LOCKDOWN_LIFT
+> +extern void lift_kernel_lockdown(void);
+> +#endif
+> +#else
+> +static inline void lock_kernel_down(void)
+> +{
+> +}
+> +#endif
+> +
+>  #endif /* ! __LINUX_SECURITY_H */
+>  
+> diff --git a/security/Kconfig b/security/Kconfig
+> index 93027fdf47d1..4baac4aab277 100644
+> --- a/security/Kconfig
+> +++ b/security/Kconfig
+> @@ -189,6 +189,21 @@ config STATIC_USERMODEHELPER_PATH
+>  	  If you wish for all usermode helper programs to be disabled,
+>  	  specify an empty string here (i.e. "").
+>  
+> +config LOCK_DOWN_KERNEL
+> +	bool "Allow the kernel to be 'locked down'"
+> +	help
+> +	  Allow the kernel to be locked down under certain circumstances, for
+> +	  instance if UEFI secure boot is enabled.  Locking down the kernel
+> +	  turns off various features that might otherwise allow access to the
+> +	  kernel image (eg. setting MSR registers).
+> +
+> +config ALLOW_LOCKDOWN_LIFT
+> +	bool
+> +	help
+> +	  Allow the lockdown on a kernel to be lifted, thereby restoring the
+> +	  ability of userspace to access the kernel image (eg. by SysRq+x under
+> +	  x86).
+> +
+>  source security/selinux/Kconfig
+>  source security/smack/Kconfig
+>  source security/tomoyo/Kconfig
+> diff --git a/security/Makefile b/security/Makefile
+> index f2d71cdb8e19..8c4a43e3d4e0 100644
+> --- a/security/Makefile
+> +++ b/security/Makefile
+> @@ -29,3 +29,6 @@ obj-$(CONFIG_CGROUP_DEVICE)		+= device_cgroup.o
+>  # Object integrity file lists
+>  subdir-$(CONFIG_INTEGRITY)		+= integrity
+>  obj-$(CONFIG_INTEGRITY)			+= integrity/
+> +
+> +# Allow the kernel to be locked down
+> +obj-$(CONFIG_LOCK_DOWN_KERNEL)		+= lock_down.o
+> diff --git a/security/lock_down.c b/security/lock_down.c
+> new file mode 100644
+> index 000000000000..dd98422fbda7
+> --- /dev/null
+> +++ b/security/lock_down.c
+> @@ -0,0 +1,46 @@
+> +/* Lock down the kernel
+> + *
+> + * Copyright (C) 2016 Red Hat, Inc. All Rights Reserved.
+> + * Written by David Howells (dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)
+> + *
+> + * This program is free software; you can redistribute it and/or
+> + * modify it under the terms of the GNU General Public Licence
+> + * as published by the Free Software Foundation; either version
+> + * 2 of the Licence, or (at your option) any later version.
+> + */
+> +
+> +#include <linux/security.h>
+> +#include <linux/export.h>
+> +
+> +#ifdef CONFIG_ALLOW_LOCKDOWN_LIFT
+> +static __read_mostly bool kernel_locked_down;
+> +#else
+> +static __ro_after_init bool kernel_locked_down;
+> +#endif
+> +
+> +/*
+> + * Put the kernel into lock-down mode.
+> + */
+> +void __init lock_kernel_down(void)
+> +{
+> +	kernel_locked_down = true;
+> +}
+> +
+> +/*
+> + * Take the kernel out of lockdown mode.
+> + */
+> +#ifdef CONFIG_ALLOW_LOCKDOWN_LIFT
+> +void lift_kernel_lockdown(void)
+> +{
+> +	kernel_locked_down = false;
+> +}
+> +#endif
+> +
+> +/**
+> + * kernel_is_locked_down - Find out if the kernel is locked down
+> + */
+> +bool kernel_is_locked_down(void)
+> +{
+> +	return kernel_locked_down;
+> +}
+> +EXPORT_SYMBOL(kernel_is_locked_down);
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-security-module" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
