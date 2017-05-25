@@ -1,142 +1,54 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi/cper: Fix endianness of PCI class code
-Date: Thu, 25 May 2017 06:07:35 -0700
-Message-ID: <CAKv+Gu_==Q5L+w2ihZ6u-=_AKZJun8D=sUWhgx6Pvzt-K99fTA@mail.gmail.com>
-References: <771bc335fb5856792d086ae7db288dcf244cb4cd.1493964354.git.lukas@wunner.de>
- <CAKv+Gu9PpmTBbSMKUsx6svm6fodV8x=i4b1j8QGapnEoCFcrNA@mail.gmail.com>
- <20170506090755.GB19740@wunner.de> <CAKv+Gu_4xHhX8oK847k8=s5S7Mx3sALPTtX8Eo=2+9uZyQoEAQ@mail.gmail.com>
- <20170510084143.GA16261@wunner.de> <CAKv+Gu81gvNL1jkb3T35=-5fr_x-BmSg9X2CcQ97xv5JTZ-c1A@mail.gmail.com>
- <20170525123047.GA4172@wunner.de> <CAKv+Gu_3vYKGOrzC8+Y3QwXOtV8Tbm8HC7nzQCdKVB1Qbdoriw@mail.gmail.com>
- <20170525124445.GA4181@wunner.de> <CAKv+Gu-7dr=upMcs2SsE+7+LRA2q82=exDrtt6CMniiMjZU2YA@mail.gmail.com>
- <20170525125650.GA4196@wunner.de>
+From: Casey Schaufler <casey-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org>
+Subject: Re: [PATCH 3/5] Add the ability to lock down access to the running
+ kernel image
+Date: Thu, 25 May 2017 11:18:22 -0700
+Message-ID: <fa6647c3-baff-d9e9-8ffe-89042b2a553d@schaufler-ca.com>
+References: <80bdc6c9-004b-800f-ffd0-4b5ebf8cdeba@schaufler-ca.com>
+ <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk>
+ <149563714531.9419.16811189348445249219.stgit@warthog.procyon.org.uk>
+ <19783.1495695202@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170525125650.GA4196-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+In-Reply-To: <19783.1495695202-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ashok Raj <ashok.raj-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-pci <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 25 May 2017 at 05:56, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
-> On Thu, May 25, 2017 at 05:47:59AM -0700, Ard Biesheuvel wrote:
->> On 25 May 2017 at 05:44, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
->> > On Thu, May 25, 2017 at 05:36:01AM -0700, Ard Biesheuvel wrote:
->> >> On 25 May 2017 at 05:30, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
->> >> > On Thu, May 11, 2017 at 03:06:42PM +0100, Ard Biesheuvel wrote:
->> >> >> On 10 May 2017 at 09:41, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
->> >> >> > On Wed, May 10, 2017 at 09:03:11AM +0100, Ard Biesheuvel wrote:
->> >> >> >> On 6 May 2017 at 10:07, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
->> >> >> >> > On Sat, May 06, 2017 at 08:46:07AM +0100, Ard Biesheuvel wrote:
->> >> >> >> >> On 5 May 2017 at 19:38, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
->> >> >> >> >> > The CPER parser assumes that the class code is big endian, but at least
->> >> >> >> >> > on this edk2-derived Intel Purley platform it's little endian:
->> >> >> >> > [snip]
->> >> >> >> >> > --- a/include/linux/cper.h
->> >> >> >> >> > +++ b/include/linux/cper.h
->> >> >> >> >> > @@ -416,7 +416,7 @@ struct cper_sec_pcie {
->> >> >> >> >> >         struct {
->> >> >> >> >> >                 __u16   vendor_id;
->> >> >> >> >> >                 __u16   device_id;
->> >> >> >> >> > -               __u8    class_code[3];
->> >> >> >> >> > +               __u32   class_code:24;
->> >> >> >> >>
->> >> >> >> >> I'd like to avoid this change if we can. Couldn't we simply invert the
->> >> >> >> >> order of p[] above?
->> >> >> >> >
->> >> >> >> > Hm, why would you like to avoid it?
->> >> >> >>
->> >> >> >> Because we shouldn't use bitfields in structs in code that should be
->> >> >> >> portable across archs with different endiannesses.
->> >> >> >
->> >> >> > The CPER header is defined in the UEFI spec and UEFI mandates that the
->> >> >> > arch is little endian (UEFI r2.6, sec. 2.3.5, 2.3.6).
->> >> >> >
->> >> >>
->> >> >> No it does not mandate that at all. It mandates how the core should be
->> >> >> configured when running in UEFI, but the OS can do anything it likes.
->> >> >>
->> >> >> We are still interested in adding limited UEFI support to big endian
->> >> >> arm64 in the future (i.e., access to a limited set of firmware tables
->> >> >> but no runtime services), and I am not going to merge anything that
->> >> >> moves us away from that goal.
->> >> >>
->> >> >> > So your argument seems moot to me.  Am I missing something?  Do you
->> >> >> > have another argument?
->> >> >> >
->> >> >> > Moreover, the vendor_id and device_id fields are little endian as well
->> >> >> > (PCI r3.0, sec. 6.1), yet there are no provisions in our CPER parser in
->> >> >> > drivers/firmware/efi/cper.c to convert them to the endianness of the host.
->> >> >> >
->> >> >>
->> >> >> Indeed. I am aware we will need to add various endian-neutral
->> >> >> accessors in the future.
->> >> >>
->> >> >> >> >  The class_code element isn't
->> >> >> >> > referenced anywhere else in the kernel and this isn't a uapi header,
->> >> >> >> > so the change would only impact out-of-tree drivers.  Not sure if
->> >> >> >> > any exist which might be interested in CPER parsing.
->> >> >> >> >
->> >> >> >>
->> >> >> >> The point is that the change in the struct definition is simply not
->> >> >> >> necessary, given that inverting the order of p[] already achieves
->> >> >> >> exactly what we want.
->> >> >> >
->> >> >> > It seems clumsy and unnecessary to me so I'd prefer the bitfield.
->> >> >> > Please excuse my stubbornness.
->> >> >> >
->> >> >>
->> >> >> Stubbornness alone is not going to convince me. What *could* convince
->> >> >> me (although unlikely) is a quote from the C spec which explains why
->> >> >> it is 100% legal to make assumptions about how bitfields are projected
->> >> >> onto byte locations in memory.
->> >> >
->> >> > All structs in cper.h are declared "packed", so what you're asking for
->> >> > isn't defined in the C spec but in the GCC documentation:
->> >> >
->> >> >    "The packed attribute specifies that a variable or structure field
->> >> >     should have the smallest possible alignment -- one byte for a variable,
->> >> >     and one bit for a field, unless you specify a larger value with the
->> >> >     aligned attribute."
->> >> >
->> >> > So I maintain that the patch is fine, but you'll need to use le32_to_cpu(),
->> >> > le16_to_cpu() etc both for the class_code changed by the patch as well as
->> >> > all the other members of the struct not touched by the patch when adding
->> >> > "endianness mixed mode" for aarch64.
->> >>
->> >> I'm not talking about the 'packed' attribute but about the fact that
->> >> the C spec does not guarantee that bitfields are projected onto byte
->> >> locations in memory in the way you expect.
->> >
->> > What relevance does that have as long as the header file uses a pragma
->> > specific to gcc (or other compilers that are compatible to gcc with
->> > respect to that pragma (such as clang)), and gcc guarantees the
->> > correct layout regardless of endianness?
->>
->> The relevance is that we should not add GCC specific code because you
->> think it looks prettier.
+On 5/24/2017 11:53 PM, David Howells wrote:
+> Casey Schaufler <casey-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org> wrote:
 >
-> The code already *is* gcc-specific.
+>>> +#ifdef CONFIG_LOCK_DOWN_KERNEL
+>>> +extern bool kernel_is_locked_down(void);
+>>> +#else
+>>> +static inline bool kernel_is_locked_down(void)
+>> Should this be a bool or an int? I can imagine that someone is going to want
+>> various different degrees of lock down for kernels. As an int you could
+>> return a bitmap indicating which features were locked. This would allow
+>> additional things to be locked down without changing the interface.
+> At the moment it makes no difference, since the return value is only ever
+> passed directly to an if-statement.
 >
+> Also, do you have an idea as to how is should be divided up?
 
-The entire kernel is GCC specific. But that does not justify adding
-more GCC-isms throughout the code.
+You called out five distinct features in 0/5, so how about
+a bit for each of those?
+
+Actually, I don't care which way you go. The current code works
+for me. I am just concerned that the granularity fiends might come
+around later.
+
 
 >
->> And where does GCC guarantee the correct layout? Did you find an
->> unambiguous GCC documentation reference that explains how bitfields
->> are mapped onto byte locations?
+> There aren't so many cases, at least not yet, that they can't be fixed up,
+> perhaps with a coccinelle script.
 >
-> See the excerpt I quoted above.
+> David
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-security-module" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-
-'packed' has nothing to do with it. This is about bitfields in structs.
-
->
->> Or does 'guarantee' mean 'I tested it and it works'?
->
-> I tested it with x86_64 (le) and ppc32 (be) and it works.
-> I don't have an aarch64 machine available here.
->
-
-Good.
