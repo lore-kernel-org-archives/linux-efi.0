@@ -1,181 +1,218 @@
-From: Casey Schaufler <casey-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org>
-Subject: Re: [PATCH 3/5] Add the ability to lock down access to the running
- kernel image
-Date: Wed, 24 May 2017 08:36:49 -0700
-Message-ID: <80bdc6c9-004b-800f-ffd0-4b5ebf8cdeba@schaufler-ca.com>
-References: <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk>
- <149563714531.9419.16811189348445249219.stgit@warthog.procyon.org.uk>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v4] x86/efi: Correct ident mapping of efi old_map when
+ kalsr enabled
+Date: Thu, 25 May 2017 14:17:41 +0800
+Message-ID: <20170525061741.GB4230@dhcp-128-65.nay.redhat.com>
+References: <1495089570-21005-1-git-send-email-bhe@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <149563714531.9419.16811189348445249219.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <1495089570-21005-1-git-send-email-bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Frank Ramsay <frank.ramsay-ZPxbGqLxI0U@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 5/24/2017 7:45 AM, David Howells wrote:
-> Provide a single call to allow kernel code to determine whether the system
-> should be locked down, thereby disallowing various accesses that might
-> allow the running kernel image to be changed including the loading of
-> modules that aren't validly signed with a key we recognise, fiddling with
-> MSR registers and disallowing hibernation,
->
-> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Acked-by: James Morris <james.l.morris-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Hi Baoquan,
+On 05/18/17 at 02:39pm, Baoquan He wrote:
+> For EFI with 'efi=old_map' kernel option specified, Kernel will panic
+> when kaslr is enabled.
+> 
+> The back trace is:
+> 
+> BUG: unable to handle kernel paging request at 000000007febd57e
+> IP: 0x7febd57e
+> PGD 1025a067
+> PUD 0
+> 
+> Oops: 0010 [#1] SMP
+> [ ... ]
+> Call Trace:
+>  ? efi_call+0x58/0x90
+>  ? printk+0x58/0x6f
+>  efi_enter_virtual_mode+0x3c5/0x50d
+>  start_kernel+0x40f/0x4b8
+>  ? set_init_arg+0x55/0x55
+>  ? early_idt_handler_array+0x120/0x120
+>  x86_64_start_reservations+0x24/0x26
+>  x86_64_start_kernel+0x14c/0x16f
+>  start_cpu+0x14/0x14
+> 
+> The root cause is the ident mapping is not built correctly in old_map case.
+> 
+> For nokaslr kernel, PAGE_OFFSET is 0xffff880000000000 which is PGDIR_SIZE
+> aligned. We can borrow the pud table from direct mapping safely. Given a
+> physical address X, we have pud_index(X) == pud_index(__va(X)). However,
+> for kaslr kernel, PAGE_OFFSET is PUD_SIZE aligned. For a given physical
+> address X, pud_index(X) != pud_index(__va(X)). We can't only copy pgd entry
+> from direct mapping to build ident mapping, instead need copy pud entry
+> one by one from direct mapping.
+> 
+> Fix it.
+> 
+> Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+
+Although I put some effort on debugging the problem, the patch should
+be your credit, also I'm not familiar with the pgtable walking code
+especially p4d usage, it should be reviewed by x86/efi/mm maintainer.
+
+It would be better to drop my signed-off-by 
+
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+> Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+> Cc: Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+> Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> Cc: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+> Cc: Frank Ramsay <frank.ramsay-ZPxbGqLxI0U@public.gmane.org>
+> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+> Cc: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 > ---
->
->  include/linux/kernel.h   |    9 +++++++++
->  include/linux/security.h |   11 +++++++++++
->  security/Kconfig         |   15 +++++++++++++++
->  security/Makefile        |    3 +++
->  security/lock_down.c     |   46 ++++++++++++++++++++++++++++++++++++++++++++++
->  5 files changed, 84 insertions(+)
->  create mode 100644 security/lock_down.c
->
-> diff --git a/include/linux/kernel.h b/include/linux/kernel.h
-> index 13bc08aba704..282a1684d6e8 100644
-> --- a/include/linux/kernel.h
-> +++ b/include/linux/kernel.h
-> @@ -276,6 +276,15 @@ extern int oops_may_print(void);
->  void do_exit(long error_code) __noreturn;
->  void complete_and_exit(struct completion *, long) __noreturn;
+> v3->v4:
+>     1. Forget running scripts/checkpatch.pl to check patch, there are several
+>     code stype issue. Correct them in this version.
+> 
+> v2->v3:
+>     1. Rewrite code to copy pud entry one by one so that code can be understood
+>     better. Usually we only have less than 1TB or several TB memory, pud entry
+>     copy one by one won't impact efficiency.
+> 
+>     2. Adding p4d page table handling.
+> 
+> v1->v2:
+>     Change code and add description according to Thomas's suggestion as below:
+> 
+>     1. Add checking if pud table is allocated successfully. If not just break
+>     the for loop.
+> 
+>     2. Add code comment to explain how the 1:1 mapping is built in efi_call_phys_prolog
+> 
+>     3. Other minor change
+> 
+>  arch/x86/platform/efi/efi_64.c | 70 +++++++++++++++++++++++++++++++++++++-----
+>  1 file changed, 62 insertions(+), 8 deletions(-)
+> 
+> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+> index c488625..087aafc 100644
+> --- a/arch/x86/platform/efi/efi_64.c
+> +++ b/arch/x86/platform/efi/efi_64.c
+> @@ -71,11 +71,13 @@ static void __init early_code_mapping_set_exec(int executable)
 >  
-> +#ifdef CONFIG_LOCK_DOWN_KERNEL
-> +extern bool kernel_is_locked_down(void);
-> +#else
-> +static inline bool kernel_is_locked_down(void)
+>  pgd_t * __init efi_call_phys_prolog(void)
+>  {
+> -	unsigned long vaddress;
+> -	pgd_t *save_pgd;
+> +	unsigned long vaddr, addr_pgd, addr_p4d, addr_pud;
+> +	pgd_t *save_pgd, *pgd_k, *pgd_efi;
+> +	p4d_t *p4d, *p4d_k, *p4d_efi;
+> +	pud_t *pud;
+>  
+>  	int pgd;
+> -	int n_pgds;
+> +	int n_pgds, i, j;
+>  
+>  	if (!efi_enabled(EFI_OLD_MEMMAP)) {
+>  		save_pgd = (pgd_t *)read_cr3();
+> @@ -88,10 +90,44 @@ pgd_t * __init efi_call_phys_prolog(void)
+>  	n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
+>  	save_pgd = kmalloc_array(n_pgds, sizeof(*save_pgd), GFP_KERNEL);
+>  
+> +	/*
+> +	 * Build 1:1 ident mapping for old_map usage. It needs to be noticed
+> +	 * that PAGE_OFFSET is PGDIR_SIZE aligned with KASLR disabled, while
+> +	 * PUD_SIZE ALIGNED with KASLR enabled. So for a given physical
+> +	 * address X, the pud_index(X) != pud_index(__va(X)), we can only copy
+> +	 * pud entry of __va(X) to fill in pud entry of X to build 1:1 mapping
+> +	 * . Means here we can only reuse pmd table of direct mapping.
+> +	 */
+>  	for (pgd = 0; pgd < n_pgds; pgd++) {
+> -		save_pgd[pgd] = *pgd_offset_k(pgd * PGDIR_SIZE);
+> -		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
+> -		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
+> +		addr_pgd = (unsigned long)(pgd * PGDIR_SIZE);
+> +		vaddr = (unsigned long)__va(pgd * PGDIR_SIZE);
+> +		pgd_efi = pgd_offset_k(addr_pgd);
+> +		save_pgd[pgd] = *pgd_efi;
+> +		p4d =  p4d_alloc(&init_mm, pgd_efi, addr_pgd);
+> +
+> +		if (!p4d) {
+> +			pr_err("Failed to allocate p4d table!\n");
+> +			goto out;
+> +		}
+> +		for (i = 0; i < PTRS_PER_P4D; i++) {
+> +			addr_p4d = addr_pgd + i * P4D_SIZE;
+> +			p4d_efi = p4d + p4d_index(addr_p4d);
+> +			pud = pud_alloc(&init_mm, p4d_efi, addr_p4d);
+> +			if (!pud) {
+> +				pr_err("Failed to allocate pud table!\n");
+> +				goto out;
+> +			}
+> +			for (j = 0; j < PTRS_PER_PUD; j++) {
+> +				addr_pud = addr_p4d + j * PUD_SIZE;
+> +				if (addr_pud > (max_pfn << PAGE_SHIFT))
+> +					break;
+> +				vaddr = (unsigned long)__va(addr_pud);
+> +
+> +				pgd_k = pgd_offset_k(vaddr);
+> +				p4d_k = p4d_offset(pgd_k, vaddr);
+> +				pud[j] = *pud_offset(p4d_k, vaddr);
+> +			}
+> +		}
 
-Should this be a bool or an int? I can imagine that
-someone is going to want various different degrees
-of lock down for kernels. As an int you could return
-a bitmap indicating which features were locked. This
-would allow additional things to be locked down
-without changing the interface.
+Is it better to add or use some common function for this instead of
+doing these only in efi code?
 
-> +{
-> +	return false;
-> +}
-> +#endif
-> +
->  /* Internal, do not use. */
->  int __must_check _kstrtoul(const char *s, unsigned int base, unsigned long *res);
->  int __must_check _kstrtol(const char *s, unsigned int base, long *res);
-> diff --git a/include/linux/security.h b/include/linux/security.h
-> index af675b576645..8db2d886aa90 100644
-> --- a/include/linux/security.h
-> +++ b/include/linux/security.h
-> @@ -1698,5 +1698,16 @@ static inline void free_secdata(void *secdata)
->  { }
->  #endif /* CONFIG_SECURITY */
+>  	}
+>  out:
+>  	__flush_tlb_all();
+> @@ -104,8 +140,11 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
+>  	/*
+>  	 * After the lock is released, the original page table is restored.
+>  	 */
+> -	int pgd_idx;
+> +	int pgd_idx, i;
+>  	int nr_pgds;
+> +	pgd_t *pgd;
+> +	p4d_t *p4d;
+> +	pud_t *pud;
 >  
-> +#ifdef CONFIG_LOCK_DOWN_KERNEL
-> +extern void __init lock_kernel_down(void);
-> +#ifdef CONFIG_ALLOW_LOCKDOWN_LIFT
-> +extern void lift_kernel_lockdown(void);
-> +#endif
-> +#else
-> +static inline void lock_kernel_down(void)
-> +{
-> +}
-> +#endif
-> +
->  #endif /* ! __LINUX_SECURITY_H */
+>  	if (!efi_enabled(EFI_OLD_MEMMAP)) {
+>  		write_cr3((unsigned long)save_pgd);
+> @@ -115,9 +154,24 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
 >  
-> diff --git a/security/Kconfig b/security/Kconfig
-> index 93027fdf47d1..4baac4aab277 100644
-> --- a/security/Kconfig
-> +++ b/security/Kconfig
-> @@ -189,6 +189,21 @@ config STATIC_USERMODEHELPER_PATH
->  	  If you wish for all usermode helper programs to be disabled,
->  	  specify an empty string here (i.e. "").
+>  	nr_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
 >  
-> +config LOCK_DOWN_KERNEL
-> +	bool "Allow the kernel to be 'locked down'"
-> +	help
-> +	  Allow the kernel to be locked down under certain circumstances, for
-> +	  instance if UEFI secure boot is enabled.  Locking down the kernel
-> +	  turns off various features that might otherwise allow access to the
-> +	  kernel image (eg. setting MSR registers).
+> -	for (pgd_idx = 0; pgd_idx < nr_pgds; pgd_idx++)
+> +	for (pgd_idx = 0; pgd_idx < nr_pgds; pgd_idx++) {
+> +		pgd = pgd_offset_k(pgd_idx * PGDIR_SIZE);
+>  		set_pgd(pgd_offset_k(pgd_idx * PGDIR_SIZE), save_pgd[pgd_idx]);
+>  
+> +		if (!(pgd_val(*pgd) & _PAGE_PRESENT))
+> +			continue;
+> +		for (i = 0; i < PTRS_PER_P4D; i++) {
+> +			p4d = p4d_offset(pgd,
+> +					 pgd_idx * PGDIR_SIZE + i * P4D_SIZE);
+> +			if (!(p4d_val(*p4d) & _PAGE_PRESENT))
+> +				continue;
+> +			pud = (pud_t *)p4d_page_vaddr(*p4d);
+> +			pud_free(&init_mm, pud);
+> +		}
+> +		p4d = (p4d_t *)pgd_page_vaddr(*pgd);
+> +		p4d_free(&init_mm, p4d);
+> +	}
 > +
-> +config ALLOW_LOCKDOWN_LIFT
-> +	bool
-> +	help
-> +	  Allow the lockdown on a kernel to be lifted, thereby restoring the
-> +	  ability of userspace to access the kernel image (eg. by SysRq+x under
-> +	  x86).
-> +
->  source security/selinux/Kconfig
->  source security/smack/Kconfig
->  source security/tomoyo/Kconfig
-> diff --git a/security/Makefile b/security/Makefile
-> index f2d71cdb8e19..8c4a43e3d4e0 100644
-> --- a/security/Makefile
-> +++ b/security/Makefile
-> @@ -29,3 +29,6 @@ obj-$(CONFIG_CGROUP_DEVICE)		+= device_cgroup.o
->  # Object integrity file lists
->  subdir-$(CONFIG_INTEGRITY)		+= integrity
->  obj-$(CONFIG_INTEGRITY)			+= integrity/
-> +
-> +# Allow the kernel to be locked down
-> +obj-$(CONFIG_LOCK_DOWN_KERNEL)		+= lock_down.o
-> diff --git a/security/lock_down.c b/security/lock_down.c
-> new file mode 100644
-> index 000000000000..dd98422fbda7
-> --- /dev/null
-> +++ b/security/lock_down.c
-> @@ -0,0 +1,46 @@
-> +/* Lock down the kernel
-> + *
-> + * Copyright (C) 2016 Red Hat, Inc. All Rights Reserved.
-> + * Written by David Howells (dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)
-> + *
-> + * This program is free software; you can redistribute it and/or
-> + * modify it under the terms of the GNU General Public Licence
-> + * as published by the Free Software Foundation; either version
-> + * 2 of the Licence, or (at your option) any later version.
-> + */
-> +
-> +#include <linux/security.h>
-> +#include <linux/export.h>
-> +
-> +#ifdef CONFIG_ALLOW_LOCKDOWN_LIFT
-> +static __read_mostly bool kernel_locked_down;
-> +#else
-> +static __ro_after_init bool kernel_locked_down;
-> +#endif
-> +
-> +/*
-> + * Put the kernel into lock-down mode.
-> + */
-> +void __init lock_kernel_down(void)
-> +{
-> +	kernel_locked_down = true;
-> +}
-> +
-> +/*
-> + * Take the kernel out of lockdown mode.
-> + */
-> +#ifdef CONFIG_ALLOW_LOCKDOWN_LIFT
-> +void lift_kernel_lockdown(void)
-> +{
-> +	kernel_locked_down = false;
-> +}
-> +#endif
-> +
-> +/**
-> + * kernel_is_locked_down - Find out if the kernel is locked down
-> + */
-> +bool kernel_is_locked_down(void)
-> +{
-> +	return kernel_locked_down;
-> +}
-> +EXPORT_SYMBOL(kernel_is_locked_down);
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-security-module" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+>  	kfree(save_pgd);
+>  
+>  	__flush_tlb_all();
+> -- 
+> 2.5.5
+> 
+
+Thanks
+Dave
