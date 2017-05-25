@@ -1,36 +1,31 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 3/5] Add the ability to lock down access to the running kernel image
-Date: Thu, 25 May 2017 07:53:22 +0100
-Message-ID: <19783.1495695202@warthog.procyon.org.uk>
-References: <80bdc6c9-004b-800f-ffd0-4b5ebf8cdeba@schaufler-ca.com> <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk> <149563714531.9419.16811189348445249219.stgit@warthog.procyon.org.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] efi/reboot: Fall back to original power-off method if
+ EFI_RESET_SHUTDOWN returns
+Date: Thu, 25 May 2017 12:11:26 +0100
+Message-ID: <20170525111126.GB3546@codeblueprint.co.uk>
+References: <20170423123655.13015-1-hdegoede@redhat.com>
+ <CAKv+Gu-qSMK6YTh5O=w-6mOSdAkMzNn945M+TAC0CAMRfgVhmw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <80bdc6c9-004b-800f-ffd0-4b5ebf8cdeba-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org>
-Content-ID: <19782.1495695202.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu-qSMK6YTh5O=w-6mOSdAkMzNn945M+TAC0CAMRfgVhmw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Casey Schaufler <casey-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Casey Schaufler <casey-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org> wrote:
-
-> > +#ifdef CONFIG_LOCK_DOWN_KERNEL
-> > +extern bool kernel_is_locked_down(void);
-> > +#else
-> > +static inline bool kernel_is_locked_down(void)
+On Fri, 19 May, at 04:45:49PM, Ard Biesheuvel wrote:
 > 
-> Should this be a bool or an int? I can imagine that someone is going to want
-> various different degrees of lock down for kernels. As an int you could
-> return a bitmap indicating which features were locked. This would allow
-> additional things to be locked down without changing the interface.
+> This does not look unreasonable to me, but this is more Matt's turf so
+> I will let him handle this one.
 
-At the moment it makes no difference, since the return value is only ever
-passed directly to an if-statement.
+I was hoping that either Len or Rafael would have chimed in by now,
+but they were probably waiting for me...
 
-Also, do you have an idea as to how is should be divided up?
+Doesn't ACPI reduced require that EFI power off be supported? I can't
+find anything in the spec that makes that connection.
 
-There aren't so many cases, at least not yet, that they can't be fixed up,
-perhaps with a coccinelle script.
-
-David
+Unless the ACPI folks provide a reason that falling back to ACPI
+poweroff doesn't make sense for ACPI reduced hardware, I think we
+should apply this patch.
