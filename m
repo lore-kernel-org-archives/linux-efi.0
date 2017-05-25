@@ -1,78 +1,90 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 4.11 00/28] 4.11.1-stable review
-Date: Thu, 25 May 2017 12:39:08 +0100
-Message-ID: <20170525113908.GC3546@codeblueprint.co.uk>
-References: <20170511141221.109842231@linuxfoundation.org>
- <465c70c9-1dbc-7c57-c6aa-b6df740663ed@osg.samsung.com>
- <efa3b911-93f6-29b4-a9ca-e0d9b480a4ef@osg.samsung.com>
- <20170515143601.GF2935@codeblueprint.co.uk>
- <e95d7992-6343-1a36-46e7-630b8874bdfa@osg.samsung.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v2] x86/efi: Disable runtime services on kexec kernel if
+ booted with efi=old_map
+Date: Thu, 25 May 2017 12:58:06 +0100
+Message-ID: <20170525115806.GD3546@codeblueprint.co.uk>
+References: <1494983663-29286-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <e95d7992-6343-1a36-46e7-630b8874bdfa@osg.samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shuah Khan <shuahkh@osg.samsung.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, torvalds@linux-foundation.org, akpm@linux-foundation.org, linux@roeck-us.net, patches@kernelci.org, ben.hutchings@codethink.co.uk, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org
+In-Reply-To: <1494983663-29286-1-git-send-email-sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lee Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 15 May, at 11:28:16AM, Shuah Khan wrote:
-> Hi Matt,
+On Tue, 16 May, at 06:14:23PM, Sai Praneeth Prakhya wrote:
+> From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > 
-> On 05/15/2017 08:36 AM, Matt Fleming wrote:
-> > On Fri, 12 May, at 10:01:41AM, Shuah Khan wrote:
-> >>
-> >> Greg/Matt,
-> >>
-> >> I started seeing this maybe since 4.11, so it isn't really a 4.11.1
-> >> issue, however sounds like this shouldn't be an error message, since
-> >> it is showing up on an older platform.
-> >>
-> >> efi: EFI_MEMMAP is not enabled.
-> >> efi: Failed to lookup EFI memory descriptor for 0x00000000d9e0f018
-> >>
-> >>
-> >> From 816e76129ed5fadd28e526c43397c79775194b5c Mon Sep 17 00:00:00 2001
-> >> From: Matt Fleming <matt@codeblueprint.co.uk>
-> >> Date: Mon, 29 Feb 2016 21:22:52 +0000
-> >> Subject: [PATCH] efi: Allow drivers to reserve boot services forever
-> >>
-> >> This change was introduced in Commit: 816e76129ed5fadd28e526c43397c79775194b5c
-> >>
-> >> Matt!
-> >>
-> >> Shouldn't this be a debug message?? Is this a really an error??
-> > 
-> > Yes, it's most likely an error. We shouldn't be trying to reserve
-> > EFI regions if we can't find them in the memory map.
-> > 
-> > Can you provide the full dmesg, please?
-> > 
+> Booting kexec kernel with "efi=old_map" in kernel command line hits
+> kernel panic as shown below.
 > 
-> Please see attached dmesg and dmidecode output. Please let me know if you need
-> any other information.
- 
-Did you use git bisect to find the above commit that introduced this
-error message? Because while the error message itself was merged in
-the above commit there were no users until commit 8e80632fb23f
-("efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()").
+> [0.001000] BUG: unable to handle kernel paging request at ffff88007fe78070
+> [0.001000] IP: virt_efi_set_variable.part.7+0x63/0x1b0
+> [0.001000] PGD 7ea28067
+> [0.001000] PUD 7ea2b067
+> [0.001000] PMD 7ea2d067
+> [0.001000] PTE 0
+> [0.001000]
+> [0.001000] Oops: 0000 [#1] SMP
+> [0.001000] Modules linked in:
+> [0.001000] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.11.0-rc2-yocto-standard+ #229
+> [0.001000] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 0.0.0 02/06/2015
+> [0.001000] task: ffffffff82022500 task.stack: ffffffff82000000
+> [0.001000] RIP: 0010:virt_efi_set_variable.part.7+0x63/0x1b0
+> [0.001000] RSP: 0000:ffffffff82003dc0 EFLAGS: 00010246
+> [0.001000] RAX: ffff88007fe78018 RBX: ffffffff82050300 RCX: 0000000000000007
+> [0.001000] RDX: ffffffff82003e50 RSI: ffffffff82050300 RDI: ffffffff82050300
+> [0.001000] RBP: ffffffff82003e08 R08: 0000000000000000 R09: 0000000000000000
+> [0.001000] R10: 0000000000000000 R11: 0000000000000000 R12: ffffffff82003e50
+> [0.001000] R13: 0000000000000007 R14: 0000000000000246 R15: 0000000000000000
+> [0.001000] FS:  0000000000000000(0000) GS:ffff88007fa00000(0000) knlGS:0000000000000000
+> [0.001000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [0.001000] CR2: ffff88007fe78070 CR3: 000000007da1d000 CR4: 00000000000006b0
+> [0.001000] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+> [0.001000] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+> [0.001000] Call Trace:
+> [0.001000]  virt_efi_set_variable+0x5d/0x70
+> [0.001000]  efi_delete_dummy_variable+0x7a/0x80
+> [0.001000]  efi_enter_virtual_mode+0x3f6/0x4a7
+> [0.001000]  start_kernel+0x375/0x400
+> [0.001000]  x86_64_start_reservations+0x2a/0x2c
+> [0.001000]  x86_64_start_kernel+0x168/0x176
+> [0.001000]  start_cpu+0x14/0x14
+> [0.001000] Code: 04 b0 84 ff 80 3d c5 56 b3 00 00 4c 8b 44 24 08 75
+> 6b 9c 41 5e 48 8b 05 9c 78 99 00 4d 89 c1 48 89 de 4d 89 f8 44 89 e9 4c
+> 89 e2 <48> 8b 40 58 48 8b 78 58 e8 b0 2d 88 ff 48 c7 c6 b6 1d f4 81 4c
+> [0.001000] RIP: virt_efi_set_variable.part.7+0x63/0x1b0 RSP: ffffffff82003dc0
+> [0.001000] CR2: ffff88007fe78070
+> [0.001000] ---[ end trace 0000000000000000 ]---
+> [0.001000] Kernel panic - not syncing: Attempted to kill the idle task!
+> [0.001000] ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
+> 
+> [efi=old_map was never intended to work with kexec. The problem with
+> using efi=old_map is that the virtual addresses are assigned from the
+> memory region used by other kernel mappings; vmalloc() space.
+> Potentially there could be collisions when booting kexec if something
+> else is mapped at the virtual address we allocated for runtime service
+> regions in the initial boot] - Matt Fleming
+> 
+> Since kexec was never intended to work with efi=old_map, disable
+> runtime services in kexec if booted with efi=old_map, so that we don't
+> panic.
+> 
+> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+> Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Lee Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> 
+> Changes since v1:
+> Don't fix the panic, because this was never intended to work.
+> ---
+>  arch/x86/platform/efi/efi.c | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
 
-Can you apply the attached patch, boot your machine with the efi=debug
-command line option and capture the dmesg output? It doesn't look like
-your machine is booting using EFI.
-
----
-
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 30031d5293c4..7f942df48f42 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -193,6 +193,7 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
- 
- 	if (efi_mem_desc_lookup(addr, &md)) {
- 		pr_err("Failed to lookup EFI memory descriptor for %pa\n", &addr);
-+		WARN_ON(1);
- 		return;
- 	}
- 
+Thanks Sai, applied to the urgent branch.
