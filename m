@@ -1,78 +1,93 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 4.11 00/28] 4.11.1-stable review
-Date: Thu, 25 May 2017 13:06:31 -0700
-Message-ID: <CAKv+Gu-tbAowobZeWvtrdpkKQqH2+sYvOWyAjV5BU4VctRFk9Q@mail.gmail.com>
-References: <20170511141221.109842231@linuxfoundation.org> <465c70c9-1dbc-7c57-c6aa-b6df740663ed@osg.samsung.com>
- <efa3b911-93f6-29b4-a9ca-e0d9b480a4ef@osg.samsung.com> <20170515143601.GF2935@codeblueprint.co.uk>
- <e95d7992-6343-1a36-46e7-630b8874bdfa@osg.samsung.com> <20170525113908.GC3546@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v4] x86/efi: Correct ident mapping of efi old_map when
+ kalsr enabled
+Date: Thu, 25 May 2017 22:14:09 +0100
+Message-ID: <20170525211409.GH3546@codeblueprint.co.uk>
+References: <1495089570-21005-1-git-send-email-bhe@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170525113908.GC3546-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1495089570-21005-1-git-send-email-bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Shuah Khan <shuahkh-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, patches-ssFOTAMYnuFg9hUCZPvPmw@public.gmane.org, ben.hutchings-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org, "stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Frank Ramsay <frank.ramsay-ZPxbGqLxI0U@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 25 May 2017 at 04:39, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Mon, 15 May, at 11:28:16AM, Shuah Khan wrote:
->> Hi Matt,
->>
->> On 05/15/2017 08:36 AM, Matt Fleming wrote:
->> > On Fri, 12 May, at 10:01:41AM, Shuah Khan wrote:
->> >>
->> >> Greg/Matt,
->> >>
->> >> I started seeing this maybe since 4.11, so it isn't really a 4.11.1
->> >> issue, however sounds like this shouldn't be an error message, since
->> >> it is showing up on an older platform.
->> >>
->> >> efi: EFI_MEMMAP is not enabled.
->> >> efi: Failed to lookup EFI memory descriptor for 0x00000000d9e0f018
->> >>
->> >>
->> >> From 816e76129ed5fadd28e526c43397c79775194b5c Mon Sep 17 00:00:00 2001
->> >> From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
->> >> Date: Mon, 29 Feb 2016 21:22:52 +0000
->> >> Subject: [PATCH] efi: Allow drivers to reserve boot services forever
->> >>
->> >> This change was introduced in Commit: 816e76129ed5fadd28e526c43397c79775194b5c
->> >>
->> >> Matt!
->> >>
->> >> Shouldn't this be a debug message?? Is this a really an error??
->> >
->> > Yes, it's most likely an error. We shouldn't be trying to reserve
->> > EFI regions if we can't find them in the memory map.
->> >
->> > Can you provide the full dmesg, please?
->> >
->>
->> Please see attached dmesg and dmidecode output. Please let me know if you need
->> any other information.
->
-> Did you use git bisect to find the above commit that introduced this
-> error message? Because while the error message itself was merged in
-> the above commit there were no users until commit 8e80632fb23f
-> ("efi/esrt: Use efi_mem_reserve() and avoid a kmalloc()").
->
-> Can you apply the attached patch, boot your machine with the efi=debug
-> command line option and capture the dmesg output? It doesn't look like
-> your machine is booting using EFI.
->
+On Thu, 18 May, at 02:39:30PM, Baoquan He wrote:
+> For EFI with 'efi=old_map' kernel option specified, Kernel will panic
+> when kaslr is enabled.
+> 
+> The back trace is:
+> 
+> BUG: unable to handle kernel paging request at 000000007febd57e
+> IP: 0x7febd57e
+> PGD 1025a067
+> PUD 0
+> 
+> Oops: 0010 [#1] SMP
+> [ ... ]
+> Call Trace:
+>  ? efi_call+0x58/0x90
+>  ? printk+0x58/0x6f
+>  efi_enter_virtual_mode+0x3c5/0x50d
+>  start_kernel+0x40f/0x4b8
+>  ? set_init_arg+0x55/0x55
+>  ? early_idt_handler_array+0x120/0x120
+>  x86_64_start_reservations+0x24/0x26
+>  x86_64_start_kernel+0x14c/0x16f
+>  start_cpu+0x14/0x14
+> 
+> The root cause is the ident mapping is not built correctly in old_map case.
+> 
+> For nokaslr kernel, PAGE_OFFSET is 0xffff880000000000 which is PGDIR_SIZE
+> aligned. We can borrow the pud table from direct mapping safely. Given a
+> physical address X, we have pud_index(X) == pud_index(__va(X)). However,
+> for kaslr kernel, PAGE_OFFSET is PUD_SIZE aligned. For a given physical
+> address X, pud_index(X) != pud_index(__va(X)). We can't only copy pgd entry
+> from direct mapping to build ident mapping, instead need copy pud entry
+> one by one from direct mapping.
+> 
+> Fix it.
+> 
+> Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+> Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+> Cc: Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+> Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> Cc: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+> Cc: Frank Ramsay <frank.ramsay-ZPxbGqLxI0U@public.gmane.org>
+> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+> Cc: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 > ---
->
-> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-> index 30031d5293c4..7f942df48f42 100644
-> --- a/arch/x86/platform/efi/quirks.c
-> +++ b/arch/x86/platform/efi/quirks.c
-> @@ -193,6 +193,7 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
->
->         if (efi_mem_desc_lookup(addr, &md)) {
->                 pr_err("Failed to lookup EFI memory descriptor for %pa\n", &addr);
-> +               WARN_ON(1);
->                 return;
->         }
->
+> v3->v4:
+>     1. Forget running scripts/checkpatch.pl to check patch, there are several
+>     code stype issue. Correct them in this version.
+> 
+> v2->v3:
+>     1. Rewrite code to copy pud entry one by one so that code can be understood
+>     better. Usually we only have less than 1TB or several TB memory, pud entry
+>     copy one by one won't impact efficiency.
+> 
+>     2. Adding p4d page table handling.
+> 
+> v1->v2:
+>     Change code and add description according to Thomas's suggestion as below:
+> 
+>     1. Add checking if pud table is allocated successfully. If not just break
+>     the for loop.
+> 
+>     2. Add code comment to explain how the 1:1 mapping is built in efi_call_phys_prolog
+> 
+>     3. Other minor change
+> 
+>  arch/x86/platform/efi/efi_64.c | 70 +++++++++++++++++++++++++++++++++++++-----
+>  1 file changed, 62 insertions(+), 8 deletions(-)
 
-Could this be related to the BGRT patch we have in efi/next?
+Thanks, applied.
