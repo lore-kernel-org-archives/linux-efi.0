@@ -1,35 +1,61 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 3/5] Add the ability to lock down access to the running kernel image
-Date: Fri, 26 May 2017 13:43:12 +0100
-Message-ID: <22659.1495802592@warthog.procyon.org.uk>
-References: <fa6647c3-baff-d9e9-8ffe-89042b2a553d@schaufler-ca.com> <80bdc6c9-004b-800f-ffd0-4b5ebf8cdeba@schaufler-ca.com> <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk> <149563714531.9419.16811189348445249219.stgit@warthog.procyon.org.uk> <19783.1495695202@warthog.procyon.org.uk>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [PATCH v5 31/32] x86: Add sysfs support for Secure Memory
+ Encryption
+Date: Fri, 26 May 2017 10:47:39 -0500
+Message-ID: <d05fa3d2-54d7-f317-b31f-3123f638dd25@amd.com>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+ <20170418212212.10190.73484.stgit@tlendack-t1.amdoffice.net>
+ <20170518170153.eqiyat5s6q3yeejl@pd.tnic>
+ <20170526024933.GA3228@dhcp-128-65.nay.redhat.com>
+ <5927B767.3010701@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <fa6647c3-baff-d9e9-8ffe-89042b2a553d-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org>
-Content-ID: <22658.1495802592.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Casey Schaufler <casey-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <5927B767.3010701@redhat.com>
+Sender: owner-linux-mm@kvack.org
+To: xlpang@redhat.com, Dave Young <dyoung@redhat.com>, Borislav Petkov <bp@alien8.de>
+Cc: linux-efi@vger.kernel.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, x86@kernel.org, linux-mm@kvack.org, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, linux-arch@vger.kernel.org, kvm@vger.kernel.org, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, linux-doc@vger.kernel.org, kasan-dev@googlegroups.com, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Rik van Riel <riel@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Andy Lutomirski <luto@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>, kexec@lists.infradead.org, linux-kernel@vger.kernel.or
 List-Id: linux-efi@vger.kernel.org
 
-Casey Schaufler <casey-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org> wrote:
+On 5/26/2017 12:04 AM, Xunlei Pang wrote:
+> On 05/26/2017 at 10:49 AM, Dave Young wrote:
+>> Ccing Xunlei he is reading the patches see what need to be done for
+>> kdump. There should still be several places to handle to make kdump work.
+>>
+>> On 05/18/17 at 07:01pm, Borislav Petkov wrote:
+>>> On Tue, Apr 18, 2017 at 04:22:12PM -0500, Tom Lendacky wrote:
+>>>> Add sysfs support for SME so that user-space utilities (kdump, etc.) can
+>>>> determine if SME is active.
+>>> But why do user-space tools need to know that?
+>>>
+>>> I mean, when we load the kdump kernel, we do it with the first kernel,
+>>> with the kexec_load() syscall, AFAICT. And that code does a lot of
+>>> things during that init, like machine_kexec_prepare()->init_pgtable() to
+>>> prepare the ident mapping of the second kernel, for example.
+>>>
+>>> What I'm aiming at is that the first kernel knows *exactly* whether SME
+>>> is enabled or not and doesn't need to tell the second one through some
+>>> sysfs entries - it can do that during loading.
+>>>
+>>> So I don't think we need any userspace things at all...
+>> If kdump kernel can get the SME status from hardware register then this
+>> should be not necessary and this patch can be dropped.
+>
+> Yes, I also agree with dropping this one.
 
-> You called out five distinct features in 0/5, so how about
-> a bit for each of those?
+Consensus is to drop, so it will be.
 
-Actually, there are more than five in that list - there are three in the first
-item - and I'm not sure the remaining categories are quite as well defined as
-I made it seem.
+Thanks,
+Tom
 
-Also, that sort of categorisation might not be what we actually need: it might
-end up coming down to a no-write vs no-read-or-write split instead.
+>
+> Regards,
+> Xunlei
+>
 
-> Actually, I don't care which way you go. The current code works
-> for me. I am just concerned that the granularity fiends might come
-> around later.
-
-In that case, I'll leave it as is for the moment.  It doesn't introduce so
-many calls that they're impossible to change.
-
-David
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
