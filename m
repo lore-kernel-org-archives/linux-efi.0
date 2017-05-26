@@ -1,185 +1,96 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 4/5] x86/efi: Correct ident mapping of efi old_map when kalsr enabled
-Date: Fri, 26 May 2017 12:36:50 +0100
-Message-ID: <20170526113652.21339-5-matt@codeblueprint.co.uk>
+Subject: [PATCH 5/5] efi/bgrt: Skip efi_bgrt_init in case of non-efi boot
+Date: Fri, 26 May 2017 12:36:51 +0100
+Message-ID: <20170526113652.21339-6-matt@codeblueprint.co.uk>
 References: <20170526113652.21339-1-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170526113652.21339-1-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Baoquan He <bhe@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Frank Ramsay <frank.ramsay@hpe.com>, Ingo Molnar <mingo@redhat.com>, Kees Cook <keescook@chromium.org>, Russ Anderson <rja@sgi.com>, Thomas Garnier <thgarnie@google.com>
+Cc: Dave Young <dyoung@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Sabrina Dubroca <sd@queasysnail.net>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Baoquan He <bhe@redhat.com>
+From: Dave Young <dyoung@redhat.com>
 
-For EFI with 'efi=old_map' kernel option specified, Kernel will panic
-when kaslr is enabled.
+Sabrina Dubroca reported an early panic below, it was introduced by
+commit 7b0a911478c7 ("efi/x86: Move the EFI BGRT init code to early init
+code"). The cause is on this machine even for legacy boot firmware still
+provide the ACPI BGRT table which should be EFI only. Thus the garbage
+bgrt data caused the efi_bgrt_init panic.
 
-The back trace is:
+Add a checking to skip efi_bgrt_init in case non EFI booting solves this
+problem.
 
-BUG: unable to handle kernel paging request at 000000007febd57e
-IP: 0x7febd57e
-PGD 1025a067
-PUD 0
+BUG: unable to handle kernel paging request at ffffffffff240001
+IP: efi_bgrt_init+0xdc/0x134
+PGD 1ac0c067
+PUD 1ac0e067
+PMD 1aee9067
+PTE 9380701800000163
 
-Oops: 0010 [#1] SMP
-[ ... ]
+Oops: 0009 [#1] SMP
+Modules linked in:
+CPU: 0 PID: 0 Comm: swapper Not tainted 4.10.0-rc5-00116-g7b0a911 #19
+Hardware name: Hewlett-Packard HP Z220 CMT Workstation/1790, BIOS K51 v01.02 05/03/2012
+task: ffffffff9fc10500 task.stack: ffffffff9fc00000
+RIP: 0010:efi_bgrt_init+0xdc/0x134
+RSP: 0000:ffffffff9fc03d58 EFLAGS: 00010082
+RAX: ffffffffff240001 RBX: 0000000000000000 RCX: 1380701800000006
+RDX: 8000000000000163 RSI: 9380701800000163 RDI: 00000000000005be
+RBP: ffffffff9fc03d70 R08: 1380701800001000 R09: 0000000000000002
+R10: 000000000002d000 R11: ffff98a3dedd2fc6 R12: ffffffff9f9f22b6
+R13: ffffffff9ff49480 R14: 0000000000000010 R15: 0000000000000000
+FS:  0000000000000000(0000) GS:ffffffff9fd20000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: ffffffffff240001 CR3: 000000001ac09000 CR4: 00000000000406b0
 Call Trace:
- ? efi_call+0x58/0x90
- ? printk+0x58/0x6f
- efi_enter_virtual_mode+0x3c5/0x50d
- start_kernel+0x40f/0x4b8
- ? set_init_arg+0x55/0x55
+ ? acpi_parse_ioapic+0x98/0x98
+ acpi_parse_bgrt+0x9/0xd
+ acpi_table_parse+0x7a/0xa9
+ acpi_boot_init+0x3c7/0x4f9
+ ? acpi_parse_x2apic+0x74/0x74
+ ? acpi_parse_x2apic_nmi+0x46/0x46
+ setup_arch+0xb4b/0xc6f
+ ? printk+0x52/0x6e
+ start_kernel+0xb2/0x47b
  ? early_idt_handler_array+0x120/0x120
  x86_64_start_reservations+0x24/0x26
- x86_64_start_kernel+0x14c/0x16f
+ x86_64_start_kernel+0xf7/0x11a
  start_cpu+0x14/0x14
+Code: 48 c7 c7 10 16 a0 9f e8 4e 94 40 ff eb 62 be 06 00 00 00 e8 f9 ff 00 00 48 85 c0 75 0e 48
+c7 c7 40 16 a0 9f e8 31 94 40 ff eb 45 <66> 44 8b 20 be 06 00 00 00 48 89 c7 8b 58 02 e8 87 00
+01 00 66
+RIP: efi_bgrt_init+0xdc/0x134 RSP: ffffffff9fc03d58
+CR2: ffffffffff240001
+---[ end trace f68728a0d3053b52 ]---
+Kernel panic - not syncing: Attempted to kill the idle task!
+---[ end Kernel panic - not syncing: Attempted to kill the idle task!
 
-The root cause is the ident mapping is not built correctly in old_map case.
+Fixes: 7b0a911478c7 ("efi/x86: Move the EFI BGRT init code to early init code")
+Signed-off-by: Dave Young <dyoung@redhat.com>
+Tested-by: Sabrina Dubroca <sd@queasysnail.net>
+Cc: <stable@vger.kernel.org> # v4.11+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 
-For nokaslr kernel, PAGE_OFFSET is 0xffff880000000000 which is PGDIR_SIZE
-aligned. We can borrow the pud table from direct mapping safely. Given a
-physical address X, we have pud_index(X) == pud_index(__va(X)). However,
-for kaslr kernel, PAGE_OFFSET is PUD_SIZE aligned. For a given physical
-address X, pud_index(X) != pud_index(__va(X)). We can't only copy pgd entry
-from direct mapping to build ident mapping, instead need copy pud entry
-one by one from direct mapping.
-
-Fix it.
-
-Signed-off-by: Baoquan He <bhe@redhat.com>
-Cc: Dave Young <dyoung@redhat.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Thomas Garnier <thgarnie@google.com>
-Cc: Kees Cook <keescook@chromium.org>
-Cc: Russ Anderson <rja@sgi.com>
-Cc: Frank Ramsay <frank.ramsay@hpe.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Bhupesh Sharma <bhsharma@redhat.com>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/platform/efi/efi_64.c | 79 +++++++++++++++++++++++++++++++++++++-----
- 1 file changed, 71 insertions(+), 8 deletions(-)
+ drivers/firmware/efi/efi-bgrt.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index c488625c9712..548728949324 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -71,11 +71,13 @@ static void __init early_code_mapping_set_exec(int executable)
+diff --git a/drivers/firmware/efi/efi-bgrt.c b/drivers/firmware/efi/efi-bgrt.c
+index 04ca8764f0c0..8bf27323f7a3 100644
+--- a/drivers/firmware/efi/efi-bgrt.c
++++ b/drivers/firmware/efi/efi-bgrt.c
+@@ -36,6 +36,9 @@ void __init efi_bgrt_init(struct acpi_table_header *table)
+ 	if (acpi_disabled)
+ 		return;
  
- pgd_t * __init efi_call_phys_prolog(void)
- {
--	unsigned long vaddress;
--	pgd_t *save_pgd;
-+	unsigned long vaddr, addr_pgd, addr_p4d, addr_pud;
-+	pgd_t *save_pgd, *pgd_k, *pgd_efi;
-+	p4d_t *p4d, *p4d_k, *p4d_efi;
-+	pud_t *pud;
- 
- 	int pgd;
--	int n_pgds;
-+	int n_pgds, i, j;
- 
- 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
- 		save_pgd = (pgd_t *)read_cr3();
-@@ -88,10 +90,49 @@ pgd_t * __init efi_call_phys_prolog(void)
- 	n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
- 	save_pgd = kmalloc_array(n_pgds, sizeof(*save_pgd), GFP_KERNEL);
- 
-+	/*
-+	 * Build 1:1 ident mapping for old_map usage. It needs to be noticed
-+	 * that PAGE_OFFSET is PGDIR_SIZE aligned with KASLR disabled, while
-+	 * PUD_SIZE ALIGNED with KASLR enabled. So for a given physical
-+	 * address X, the pud_index(X) != pud_index(__va(X)), we can only copy
-+	 * pud entry of __va(X) to fill in pud entry of X to build 1:1 mapping
-+	 * . Means here we can only reuse pmd table of direct mapping.
-+	 */
- 	for (pgd = 0; pgd < n_pgds; pgd++) {
--		save_pgd[pgd] = *pgd_offset_k(pgd * PGDIR_SIZE);
--		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
--		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
-+		addr_pgd = (unsigned long)(pgd * PGDIR_SIZE);
-+		vaddr = (unsigned long)__va(pgd * PGDIR_SIZE);
-+		pgd_efi = pgd_offset_k(addr_pgd);
-+		save_pgd[pgd] = *pgd_efi;
++	if (!efi_enabled(EFI_BOOT))
++		return;
 +
-+		p4d = p4d_alloc(&init_mm, pgd_efi, addr_pgd);
-+		if (!p4d) {
-+			pr_err("Failed to allocate p4d table!\n");
-+			goto out;
-+		}
-+
-+		for (i = 0; i < PTRS_PER_P4D; i++) {
-+			addr_p4d = addr_pgd + i * P4D_SIZE;
-+			p4d_efi = p4d + p4d_index(addr_p4d);
-+
-+			pud = pud_alloc(&init_mm, p4d_efi, addr_p4d);
-+			if (!pud) {
-+				pr_err("Failed to allocate pud table!\n");
-+				goto out;
-+			}
-+
-+			for (j = 0; j < PTRS_PER_PUD; j++) {
-+				addr_pud = addr_p4d + j * PUD_SIZE;
-+
-+				if (addr_pud > (max_pfn << PAGE_SHIFT))
-+					break;
-+
-+				vaddr = (unsigned long)__va(addr_pud);
-+
-+				pgd_k = pgd_offset_k(vaddr);
-+				p4d_k = p4d_offset(pgd_k, vaddr);
-+				pud[j] = *pud_offset(p4d_k, vaddr);
-+			}
-+		}
- 	}
- out:
- 	__flush_tlb_all();
-@@ -104,8 +145,11 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 	/*
- 	 * After the lock is released, the original page table is restored.
- 	 */
--	int pgd_idx;
-+	int pgd_idx, i;
- 	int nr_pgds;
-+	pgd_t *pgd;
-+	p4d_t *p4d;
-+	pud_t *pud;
- 
- 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
- 		write_cr3((unsigned long)save_pgd);
-@@ -115,9 +159,28 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 
- 	nr_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
- 
--	for (pgd_idx = 0; pgd_idx < nr_pgds; pgd_idx++)
-+	for (pgd_idx = 0; pgd_idx < nr_pgds; pgd_idx++) {
-+		pgd = pgd_offset_k(pgd_idx * PGDIR_SIZE);
- 		set_pgd(pgd_offset_k(pgd_idx * PGDIR_SIZE), save_pgd[pgd_idx]);
- 
-+		if (!(pgd_val(*pgd) & _PAGE_PRESENT))
-+			continue;
-+
-+		for (i = 0; i < PTRS_PER_P4D; i++) {
-+			p4d = p4d_offset(pgd,
-+					 pgd_idx * PGDIR_SIZE + i * P4D_SIZE);
-+
-+			if (!(p4d_val(*p4d) & _PAGE_PRESENT))
-+				continue;
-+
-+			pud = (pud_t *)p4d_page_vaddr(*p4d);
-+			pud_free(&init_mm, pud);
-+		}
-+
-+		p4d = (p4d_t *)pgd_page_vaddr(*pgd);
-+		p4d_free(&init_mm, p4d);
-+	}
-+
- 	kfree(save_pgd);
- 
- 	__flush_tlb_all();
+ 	if (table->length < sizeof(bgrt_tab)) {
+ 		pr_notice("Ignoring BGRT: invalid length %u (expected %zu)\n",
+ 		       table->length, sizeof(bgrt_tab));
 -- 
 2.12.2
