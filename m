@@ -1,60 +1,99 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v5 28/32] x86/mm, kexec: Allow kexec to be used with SME
-Date: Sat, 27 May 2017 10:17:57 +0800
-Message-ID: <20170527021757.GA3132@dhcp-128-65.nay.redhat.com>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
-	<20170418212121.10190.94885.stgit@tlendack-t1.amdoffice.net>
-	<5927AC6E.8080209@redhat.com>
+From: joeyli <jlee@suse.com>
+Subject: Re: [PATCH 5/5] Add a sysrq option to exit secure boot mode
+Date: Sat, 27 May 2017 12:06:54 +0800
+Message-ID: <20170527040654.GG15587@linux-l9pv.suse>
+References: <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk>
+ <149563716341.9419.12043461651917925181.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-security-module-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <5927AC6E.8080209-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: xlpang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEmw@public.gmane.org
+In-Reply-To: <149563716341.9419.12043461651917925181.stgit@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: ard.biesheuvel@linaro.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 05/26/17 at 12:17pm, Xunlei Pang wrote:
-> On 04/19/2017 at 05:21 AM, Tom Lendacky wrote:
-> > Provide support so that kexec can be used to boot a kernel when SME is
-> > enabled.
-> >
-> > Support is needed to allocate pages for kexec without encryption.  This
-> > is needed in order to be able to reboot in the kernel in the same manner
-> > as originally booted.
-> 
-> Hi Tom,
-> 
-> Looks like kdump will break, I didn't see the similar handling for kdump cases, see kernel:
->     kimage_alloc_crash_control_pages(), kimage_load_crash_segment(), etc.
-> 
-> We need to support kdump with SME, kdump kernel/initramfs/purgatory/elfcorehdr/etc
-> are all loaded into the reserved memory(see crashkernel=X) by userspace kexec-tools.
+Hi,
 
-For kexec_load, it is loaded by kexec-tools, we have in kernel loader
-syscall kexec_file_load, it is handled in kernel.
-
-> I think a straightforward way would be to mark the whole reserved memory range without
-> encryption before loading all the kexec segments for kdump, I guess we can handle this
-> easily in arch_kexec_unprotect_crashkres().
+On Wed, May 24, 2017 at 03:46:03PM +0100, David Howells wrote:
+> From: Kyle McMartin <kyle@redhat.com>
 > 
-> Moreover, now that "elfcorehdr=X" is left as decrypted, it needs to be remapped to the
-> encrypted data.
+> Make sysrq+x exit secure boot mode on x86_64, thereby allowing the running
+> kernel image to be modified.  This lifts the lockdown.
+> 
+> Signed-off-by: Kyle McMartin <kyle@redhat.com>
+> Signed-off-by: David Howells <dhowells@redhat.com>
+> cc: x86@kernel.org
+> ---
+> 
+>  arch/x86/include/asm/efi.h        |    2 ++
+>  drivers/firmware/efi/Kconfig      |   10 ++++++++++
+>  drivers/firmware/efi/secureboot.c |   37 +++++++++++++++++++++++++++++++++++++
+>  drivers/input/misc/uinput.c       |    1 +
+>  drivers/tty/sysrq.c               |   19 +++++++++++++------
+>  include/linux/input.h             |    5 +++++
+>  include/linux/sysrq.h             |    8 +++++++-
+>  kernel/debug/kdb/kdb_main.c       |    2 +-
+>  8 files changed, 76 insertions(+), 8 deletions(-)
+> 
+[...snip]  
+> diff --git a/drivers/tty/sysrq.c b/drivers/tty/sysrq.c
+> index 3ffc1ce29023..8b766dbad6dd 100644
+> --- a/drivers/tty/sysrq.c
+> +++ b/drivers/tty/sysrq.c
+> @@ -481,6 +481,7 @@ static struct sysrq_key_op *sysrq_key_table[36] = {
+>  	/* x: May be registered on mips for TLB dump */
+>  	/* x: May be registered on ppc/powerpc for xmon */
+>  	/* x: May be registered on sparc64 for global PMU dump */
+> +	/* x: May be registered on x86_64 for disabling secure boot */
+>  	NULL,				/* x */
 
-Tom, could you have a try on kdump according to suggestion from Xunlei?
-It is just based on theoretical patch understanding, there could be
-other issues when you work on it. Feel free to ask if we can help on
-anything.
+I suggest that add this key to the "What are the 'command' keys?"
+session in Documentation/admin-guide/sysrq.rst.
 
-Thanks
-Dave
+>  	/* y: May be registered on sparc64 for global register dump */
+>  	NULL,				/* y */
+> @@ -524,7 +525,7 @@ static void __sysrq_put_key_op(int key, struct sysrq_key_op *op_p)
+>                  sysrq_key_table[i] = op_p;
+>  }
+>  
+> -void __handle_sysrq(int key, bool check_mask)
+> +void __handle_sysrq(int key, unsigned int from)
+>  {
+>  	struct sysrq_key_op *op_p;
+>  	int orig_log_level;
+> @@ -544,11 +545,15 @@ void __handle_sysrq(int key, bool check_mask)
+>  
+>          op_p = __sysrq_get_key_op(key);
+>          if (op_p) {
+> +		/* Ban synthetic events from some sysrq functionality */
+> +		if ((from == SYSRQ_FROM_PROC || from == SYSRQ_FROM_SYNTHETIC) &&
+> +		    op_p->enable_mask & SYSRQ_DISABLE_USERSPACE)
+> +			printk("This sysrq operation is disabled from userspace.\n");
+>  		/*
+>  		 * Should we check for enabled operations (/proc/sysrq-trigger
+>  		 * should not) and is the invoked operation enabled?
+>  		 */
+> -		if (!check_mask || sysrq_on_mask(op_p->enable_mask)) {
+> +		if (from == SYSRQ_FROM_KERNEL || sysrq_on_mask(op_p->enable_mask)) {
+>  			pr_cont("%s\n", op_p->action_msg);
+>  			console_loglevel = orig_log_level;
+>  			op_p->handler(key);
+
+Looking at sysrq_on_mask():
+
+static bool sysrq_on_mask(int mask)
+{
+	return sysrq_always_enabled ||
+	       sysrq_enabled == 1 ||
+	       (sysrq_enabled & mask); 
+}
+
+The SYSRQ_DISABLE_USERSPACE can be ignored by sysrq_always_enabled or
+sysrq_enabled (the default value is CONFIG_MAGIC_SYSRQ_DEFAULT_ENABLE=0x1).
+Kernel should checks the locked down flag here when secure boot ON. Will we
+have another lock down patch against this? Or I missed something?
+
+Thanks a lot!
+Joey Lee
