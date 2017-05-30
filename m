@@ -1,160 +1,129 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 5/7] arm: efi: split zImage code and data into separate PE/COFF sections
-Date: Tue, 30 May 2017 18:36:45 +0000
-Message-ID: <20170530183647.28557-6-ard.biesheuvel@linaro.org>
-References: <20170530183647.28557-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170530183647.28557-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 0/5] security, efi: Set lockdown if in secure boot mode
+Date: Tue, 30 May 2017 18:57:35 +0000
+Message-ID: <CAKv+Gu_5gUWwx7Sxgm8d03L4t4nF8dDe+AXqOqto4B7AVSZ9CA@mail.gmail.com>
+References: <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: Matthew Garrett <matthew.garrett@nebula.com>, linux-security-module <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-To prevent unintended modifications to the kernel text (malicious or
-otherwise) while running the EFI stub, describe the kernel image as
-two separate sections: a .text section with read-execute permissions,
-covering .text, .rodata, .piggytext and the GOT sections (which the
-stub does not care about anyway), and a .data section with read-write
-permissions, covering .data and .bss.
+On 24 May 2017 at 14:45, David Howells <dhowells@redhat.com> wrote:
+>
+> Here's a set of patches to institute a "locked-down mode" in the kernel and
+> to set that mode if the kernel is booted in secure-boot mode.  This can be
+> enabled with CONFIG_LOCK_DOWN_KERNEL.  If a kernel is locked down, the
+> lockdown can be lifted by typing SysRq+x on a keyboard attached to the
+> machine if CONFIG_EFI_ALLOW_SECURE_BOOT_EXIT is enabled.  The exact key can
+> be configured as 'x' is already taken on some arches.
+>
+> Inside the kernel, kernel_is_locked_down() is used to check if the kernel
+> is in lockdown mode.  In lock-down mode, at least the following
+> restrictions will need to be emplaced:
+>
+>  (1) No unsigned modules, kexec images or firmware.
+>
+>  (2) No direct read/write access of the kernel image.  (Shouldn't be able
+>      to modify it and shouldn't be able to read out crypto data).
+>
+>  (3) No direct access to devices.  (DMA could be used to access/modify the
+>      kernel image).
+>
+>  (4) No manual setting of device register addresses to cause a driver for
+>      one device to mess around with another device, thereby permitting DMA.
+>
+>  (5) No storage of unencrypted kernel image to disk (no suspend-to-disk
+>      without hardware support).
+>
+> I have patches pending that effect most of the above.  However, the
+> firmware signature checking is being handled by someone else.  Further, it
+> has come to light recently that debugfs needs attention, so that isn't done
+> yet.
+>
+> Note that the secure boot mode entry doesn't currently work if the kernel
+> is booted from current i386/x86_64 Grub as there's a bug in Grub whereby it
+> doesn't initialise the boot_params correctly.  The incorrect initialisation
+> causes sanitize_boot_params() to be triggered, thereby zapping the secure
+> boot flag determined by the EFI boot wrapper.
+>
 
-This relies on the firmware to actually take the section permission
-flags into account, but this is something that is currently being
-implemented in EDK2, which means we will likely start seeing it in
-the wild between one and two years from now.
+Hello David,
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm/boot/compressed/efi-header.S  | 30 ++++++++++++++------
- arch/arm/boot/compressed/vmlinux.lds.S | 30 +++++++++++++++-----
- 2 files changed, 44 insertions(+), 16 deletions(-)
+By itself, this series looks in reasonable shape to me. But I do have
+a few remaining concerns, apologies if it includes issues that I could
+have brought up earlier.
 
-diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
-index 4699c432a2e2..3b1d95f43f2b 100644
---- a/arch/arm/boot/compressed/efi-header.S
-+++ b/arch/arm/boot/compressed/efi-header.S
-@@ -57,16 +57,16 @@ optional_header:
- 	.short	PE_OPT_MAGIC_PE32			@ PE32 format
- 	.byte	0x02					@ MajorLinkerVersion
- 	.byte	0x14					@ MinorLinkerVersion
--	.long	_end - __efi_start			@ SizeOfCode
--	.long	0					@ SizeOfInitializedData
-+	.long	__pecoff_data_start - __efi_start	@ SizeOfCode
-+	.long	__pecoff_data_size			@ SizeOfInitializedData
- 	.long	0					@ SizeOfUninitializedData
- 	.long	efi_stub_entry - start			@ AddressOfEntryPoint
- 	.long	start_offset				@ BaseOfCode
--	.long	0					@ BaseOfData
-+	.long	__pecoff_data_start - start		@ BaseOfData
- 
- extra_header_fields:
- 	.long	0					@ ImageBase
--	.long	SZ_512					@ SectionAlignment
-+	.long	SZ_4K					@ SectionAlignment
- 	.long	SZ_512					@ FileAlignment
- 	.short	0					@ MajorOsVersion
- 	.short	0					@ MinorOsVersion
-@@ -76,7 +76,7 @@ extra_header_fields:
- 	.short	0					@ MinorSubsystemVersion
- 	.long	0					@ Win32VersionValue
- 
--	.long	_end - start				@ SizeOfImage
-+	.long	__pecoff_end - start			@ SizeOfImage
- 	.long	start_offset				@ SizeOfHeaders
- 	.long	0					@ CheckSum
- 	.short	IMAGE_SUBSYSTEM_EFI_APPLICATION		@ Subsystem
-@@ -97,9 +97,9 @@ extra_header_fields:
- 
- section_table:
- 	.ascii	".text\0\0\0"
--	.long	_end - __efi_start			@ VirtualSize
-+	.long	__pecoff_data_start - __efi_start	@ VirtualSize
- 	.long	__efi_start				@ VirtualAddress
--	.long	_edata - __efi_start			@ SizeOfRawData
-+	.long	__pecoff_data_start - __efi_start	@ SizeOfRawData
- 	.long	__efi_start				@ PointerToRawData
- 	.long	0					@ PointerToRelocations
- 	.long	0					@ PointerToLineNumbers
-@@ -107,12 +107,24 @@ section_table:
- 	.short	0					@ NumberOfLineNumbers
- 	.long	IMAGE_SCN_CNT_CODE | \
- 		IMAGE_SCN_MEM_READ | \
--		IMAGE_SCN_MEM_WRITE | \
- 		IMAGE_SCN_MEM_EXECUTE			@ Characteristics
- 
-+	.ascii	".data\0\0\0"
-+	.long	__pecoff_data_size			@ VirtualSize
-+	.long	__pecoff_data_start - start		@ VirtualAddress
-+	.long	__pecoff_data_rawsize			@ SizeOfRawData
-+	.long	__pecoff_data_start - start		@ PointerToRawData
-+	.long	0					@ PointerToRelocations
-+	.long	0					@ PointerToLineNumbers
-+	.short	0					@ NumberOfRelocations
-+	.short	0					@ NumberOfLineNumbers
-+	.long	IMAGE_SCN_CNT_INITIALIZED_DATA | \
-+		IMAGE_SCN_MEM_READ | \
-+		IMAGE_SCN_MEM_WRITE			@ Characteristics
-+
- 	.set	section_count, (. - section_table) / 40
- 
--	.align	9
-+	.align	12
- __efi_start:
- #endif
- 	.endm
-diff --git a/arch/arm/boot/compressed/vmlinux.lds.S b/arch/arm/boot/compressed/vmlinux.lds.S
-index 1fa62432e283..dfcc2baa0077 100644
---- a/arch/arm/boot/compressed/vmlinux.lds.S
-+++ b/arch/arm/boot/compressed/vmlinux.lds.S
-@@ -53,13 +53,6 @@ SECTIONS
-     *(.rodata)
-     *(.rodata.*)
-   }
--  .data : {
--    /*
--     * The EFI stub always executes from RAM, and runs strictly before the
--     * decompressor, so we can make an exception for its r/w data, and keep it
--     */
--    *(.data.efistub)
--  }
-   .piggydata : {
-     *(.piggydata)
-   }
-@@ -75,6 +68,26 @@ SECTIONS
-   /* ensure the zImage file size is always a multiple of 64 bits */
-   /* (without a dummy byte, ld just ignores the empty section) */
-   .pad			: { BYTE(0); . = ALIGN(8); }
-+
-+#ifdef CONFIG_EFI_STUB
-+  .data : ALIGN(4096) {
-+    __pecoff_data_start = .;
-+    /*
-+     * The EFI stub always executes from RAM, and runs strictly before the
-+     * decompressor, so we can make an exception for its r/w data, and keep it
-+     */
-+    *(.data.efistub)
-+    __pecoff_data_end = .;
-+
-+    /*
-+     * PE/COFF mandates a file size which is a multiple of 512 bytes if the
-+     * section size equals or exceeds 4 KB
-+     */
-+    . = ALIGN(512);
-+  }
-+  __pecoff_data_rawsize = . - ADDR(.data);
-+#endif
-+
-   _edata = .;
- 
-   _magic_sig = ZIMAGE_MAGIC(0x016f2818);
-@@ -89,6 +102,9 @@ SECTIONS
-   . = ALIGN(8);		/* the stack must be 64-bit aligned */
-   .stack		: { *(.stack) }
- 
-+  PROVIDE(__pecoff_data_size = ALIGN(512) - ADDR(.data));
-+  PROVIDE(__pecoff_end = ALIGN(512));
-+
-   .stab 0		: { *(.stab) }
-   .stabstr 0		: { *(.stabstr) }
-   .stab.excl 0		: { *(.stab.excl) }
--- 
-2.9.3
+- The series conflates 'UEFI secure boot support' with 'kernel lock
+down support'. I think this has been brought up before, but I really
+think we should have a cleaner separation between the feature (locking
+down various bits of the kernel if lockdown is in effect) from the
+policy 'enable lockdown if UEFI secure boot is enabled'. The latter
+does not need to be configurable at all: on any UEFI system, we could
+detect whether UEFI secure boot is in effect and report it. The only
+tunable we need is in the lockdown context, whether lockdown needs to
+take effect automatically when UEFI secure boot is detected (but there
+could be other ways to enable lockdown, including a kernel cmdline
+param or a sysfs node). Similarly, whether lockdown can be lifted or
+not has *nothing* to do with whether it was enabled due to UEFI secure
+boot, so I don't see the point of having
+CONFIG_EFI_ALLOW_SECURE_BOOT_EXIT at all.
+
+- The current series enables lockdown, but does not lock anything
+down. Even if the code is in good shape otherwise, I am reluctant to
+ack and/or merge anything right now, given that it provides a false
+sense of security. This also ties in to my more general concerns with
+this code (and I am aware I never replied to your email explaining it,
+my apologies [again]): without any sense of how large the attack
+surface is now, and how much we reduced it by implementing the items
+on your list above, we should really not be making claims of security,
+given that we really have no idea how much more secure we are. That
+said, I do subscribe to the effort, in the sense that moving towards
+the goal is strictly better than moving away from it, or not at all.
+
+- Patch 5/5 breaks the build on non-x86. Please build test EFI-related
+patches on arm64 and/or ARM before submitting patches. And if
+possible, could we find a magic SysRq key that works on all
+architectures? I know we discussed this at some point (I think?) but I
+don't remember the conclusion.
+
+Regards,
+Ard.
+
+
+> ---
+> David Howells (3):
+>       efi: Move the x86 secure boot switch to generic code
+>       Add the ability to lock down access to the running kernel image
+>       efi: Lock down the kernel if booted in secure boot mode
+>
+> Josh Boyer (1):
+>       efi: Add EFI_SECURE_BOOT bit
+>
+> Kyle McMartin (1):
+>       Add a sysrq option to exit secure boot mode
+>
+>
+>  arch/x86/include/asm/efi.h        |    2 +
+>  arch/x86/kernel/setup.c           |   14 ------
+>  drivers/firmware/efi/Kconfig      |   34 ++++++++++++++++
+>  drivers/firmware/efi/Makefile     |    1
+>  drivers/firmware/efi/secureboot.c |   80 +++++++++++++++++++++++++++++++++++++
+>  drivers/input/misc/uinput.c       |    1
+>  drivers/tty/sysrq.c               |   19 ++++++---
+>  include/linux/efi.h               |    7 +++
+>  include/linux/input.h             |    5 ++
+>  include/linux/kernel.h            |    9 ++++
+>  include/linux/security.h          |   11 +++++
+>  include/linux/sysrq.h             |    8 +++-
+>  kernel/debug/kdb/kdb_main.c       |    2 -
+>  security/Kconfig                  |   15 +++++++
+>  security/Makefile                 |    3 +
+>  security/lock_down.c              |   46 +++++++++++++++++++++
+>  16 files changed, 236 insertions(+), 21 deletions(-)
+>  create mode 100644 drivers/firmware/efi/secureboot.c
+>  create mode 100644 security/lock_down.c
+>
