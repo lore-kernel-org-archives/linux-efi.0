@@ -1,45 +1,230 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [PATCH v5 17/32] x86/mm: Add support to access boot related data
-	in the clear
-Date: Tue, 30 May 2017 12:47:30 -0500
-Message-ID: <900ee7c4-221a-f4d6-93c6-81dfc0612dbf@amd.com>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
-	<20170418211921.10190.1537.stgit@tlendack-t1.amdoffice.net>
-	<20170515183517.mb4k2gp2qobbuvtm@pd.tnic>
-	<20170518195051.GA5651@codeblueprint.co.uk>
-	<4c2ef3ba-2940-3330-d362-5b2b0d812c6f@amd.com>
-	<20170526163517.nrweesvse24dszkz@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20170526163517.nrweesvse24dszkz-fF5Pk5pvG8Y@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs//PtFMR13I2A@public.gmane.org
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 3/7] arm: efi: replace open coded constants with symbolic ones
+Date: Tue, 30 May 2017 18:36:43 +0000
+Message-ID: <20170530183647.28557-4-ard.biesheuvel@linaro.org>
+References: <20170530183647.28557-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170530183647.28557-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 5/26/2017 11:35 AM, Borislav Petkov wrote:
-> On Fri, May 26, 2017 at 11:22:36AM -0500, Tom Lendacky wrote:
->> In addition to the same issue as efi.memmap.phys_map, efi_phys has
->> the __initdata attribute so it will be released/freed which will cause
->> problems in checks performed afterwards.
-> 
-> Sounds to me like we should drop the __initdata attr and prepare them
-> much earlier for use by the SME code.
+Replace the various open coded constants in the EFI PE/COFF header with
+definitions from pe.h, or expressions based on local symbols.
 
-Probably something we can look at for a follow-on patch.
+Note that this patch also changes the indentation to make room for the
+symbolic constant names.
 
-Thanks,
-Tom
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/arm/boot/compressed/efi-header.S | 172 ++++++++++----------
+ 1 file changed, 89 insertions(+), 83 deletions(-)
 
-> 
+diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
+index 97f595970916..4699c432a2e2 100644
+--- a/arch/arm/boot/compressed/efi-header.S
++++ b/arch/arm/boot/compressed/efi-header.S
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (C) 2013-2015 Linaro Ltd
++ * Copyright (C) 2013-2017 Linaro Ltd
+  * Authors: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+  *          Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+  *
+@@ -8,105 +8,111 @@
+  * published by the Free Software Foundation.
+  */
+ 
+-		.macro	__nop
++#include <linux/pe.h>
++#include <linux/sizes.h>
++
++	.macro	__nop
+ #ifdef CONFIG_EFI_STUB
+-		@ This is almost but not quite a NOP, since it does clobber the
+-		@ condition flags. But it is the best we can do for EFI, since
+-		@ PE/COFF expects the magic string "MZ" at offset 0, while the
+-		@ ARM/Linux boot protocol expects an executable instruction
+-		@ there.
+-		.inst	'M' | ('Z' << 8) | (0x1310 << 16)   @ tstne r0, #0x4d000
++	@ This is almost but not quite a NOP, since it does clobber the
++	@ condition flags. But it is the best we can do for EFI, since
++	@ PE/COFF expects the magic string "MZ" at offset 0, while the
++	@ ARM/Linux boot protocol expects an executable instruction
++	@ there.
++	.inst	MZ_MAGIC | (0x1310 << 16)		@ tstne r0, #0x4d000
+ #else
+-		W(mov)	r0, r0
++	W(mov)	r0, r0
+ #endif
+-		.endm
++	.endm
+ 
+-		.macro	__EFI_HEADER
++	.macro	__EFI_HEADER
+ #ifdef CONFIG_EFI_STUB
+-		.set	start_offset, __efi_start - start
+-		.org	start + 0x3c
+-		@
+-		@ The PE header can be anywhere in the file, but for
+-		@ simplicity we keep it together with the MSDOS header
+-		@ The offset to the PE/COFF header needs to be at offset
+-		@ 0x3C in the MSDOS header.
+-		@ The only 2 fields of the MSDOS header that are used are this
+-		@ PE/COFF offset, and the "MZ" bytes at offset 0x0.
+-		@
+-		.long	pe_header - start	@ Offset to the PE header.
++	.set	start_offset, __efi_start - start
++	.org	start + 0x3c
++	@
++	@ The PE header can be anywhere in the file, but for
++	@ simplicity we keep it together with the MSDOS header
++	@ The offset to the PE/COFF header needs to be at offset
++	@ 0x3C in the MSDOS header.
++	@ The only 2 fields of the MSDOS header that are used are this
++	@ PE/COFF offset, and the "MZ" bytes at offset 0x0.
++	@
++	.long	pe_header - start		@ Offset to the PE header.
+ 
+ pe_header:
+-		.ascii	"PE\0\0"
++	.long	PE_MAGIC
+ 
+ coff_header:
+-		.short	0x01c2			@ ARM or Thumb
+-		.short	1			@ nr_sections
+-		.long	0 			@ TimeDateStamp
+-		.long	0			@ PointerToSymbolTable
+-		.long	0			@ NumberOfSymbols
+-		.short	section_table - optional_header
+-						@ SizeOfOptionalHeader
+-		.short	0x306			@ Characteristics.
+-						@ IMAGE_FILE_32BIT_MACHINE |
+-						@ IMAGE_FILE_DEBUG_STRIPPED |
+-						@ IMAGE_FILE_EXECUTABLE_IMAGE |
+-						@ IMAGE_FILE_LINE_NUMS_STRIPPED
++	.short	IMAGE_FILE_MACHINE_THUMB		@ Machine
++	.short	section_count				@ NumberOfSections
++	.long	0 					@ TimeDateStamp
++	.long	0					@ PointerToSymbolTable
++	.long	0					@ NumberOfSymbols
++	.short	section_table - optional_header		@ SizeOfOptionalHeader
++	.short	IMAGE_FILE_32BIT_MACHINE | \
++		IMAGE_FILE_DEBUG_STRIPPED | \
++		IMAGE_FILE_EXECUTABLE_IMAGE | \
++		IMAGE_FILE_LINE_NUMS_STRIPPED		@ Characteristics
+ 
+ optional_header:
+-		.short	0x10b			@ PE32 format
+-		.byte	0x02			@ MajorLinkerVersion
+-		.byte	0x14			@ MinorLinkerVersion
+-		.long	_end - __efi_start	@ SizeOfCode
+-		.long	0			@ SizeOfInitializedData
+-		.long	0			@ SizeOfUninitializedData
+-		.long	efi_stub_entry - start	@ AddressOfEntryPoint
+-		.long	start_offset		@ BaseOfCode
+-		.long	0			@ data
++	.short	PE_OPT_MAGIC_PE32			@ PE32 format
++	.byte	0x02					@ MajorLinkerVersion
++	.byte	0x14					@ MinorLinkerVersion
++	.long	_end - __efi_start			@ SizeOfCode
++	.long	0					@ SizeOfInitializedData
++	.long	0					@ SizeOfUninitializedData
++	.long	efi_stub_entry - start			@ AddressOfEntryPoint
++	.long	start_offset				@ BaseOfCode
++	.long	0					@ BaseOfData
+ 
+ extra_header_fields:
+-		.long	0			@ ImageBase
+-		.long	0x200			@ SectionAlignment
+-		.long	0x200			@ FileAlignment
+-		.short	0			@ MajorOperatingSystemVersion
+-		.short	0			@ MinorOperatingSystemVersion
+-		.short	0			@ MajorImageVersion
+-		.short	0			@ MinorImageVersion
+-		.short	0			@ MajorSubsystemVersion
+-		.short	0			@ MinorSubsystemVersion
+-		.long	0			@ Win32VersionValue
++	.long	0					@ ImageBase
++	.long	SZ_512					@ SectionAlignment
++	.long	SZ_512					@ FileAlignment
++	.short	0					@ MajorOsVersion
++	.short	0					@ MinorOsVersion
++	.short	0					@ MajorImageVersion
++	.short	0					@ MinorImageVersion
++	.short	0					@ MajorSubsystemVersion
++	.short	0					@ MinorSubsystemVersion
++	.long	0					@ Win32VersionValue
+ 
+-		.long	_end - start		@ SizeOfImage
+-		.long	start_offset		@ SizeOfHeaders
+-		.long	0			@ CheckSum
+-		.short	0xa			@ Subsystem (EFI application)
+-		.short	0			@ DllCharacteristics
+-		.long	0			@ SizeOfStackReserve
+-		.long	0			@ SizeOfStackCommit
+-		.long	0			@ SizeOfHeapReserve
+-		.long	0			@ SizeOfHeapCommit
+-		.long	0			@ LoaderFlags
+-		.long	0x6			@ NumberOfRvaAndSizes
++	.long	_end - start				@ SizeOfImage
++	.long	start_offset				@ SizeOfHeaders
++	.long	0					@ CheckSum
++	.short	IMAGE_SUBSYSTEM_EFI_APPLICATION		@ Subsystem
++	.short	0					@ DllCharacteristics
++	.long	0					@ SizeOfStackReserve
++	.long	0					@ SizeOfStackCommit
++	.long	0					@ SizeOfHeapReserve
++	.long	0					@ SizeOfHeapCommit
++	.long	0					@ LoaderFlags
++	.long	(section_table - .) / 8			@ NumberOfRvaAndSizes
+ 
+-		.quad	0			@ ExportTable
+-		.quad	0			@ ImportTable
+-		.quad	0			@ ResourceTable
+-		.quad	0			@ ExceptionTable
+-		.quad	0			@ CertificationTable
+-		.quad	0			@ BaseRelocationTable
++	.quad	0					@ ExportTable
++	.quad	0					@ ImportTable
++	.quad	0					@ ResourceTable
++	.quad	0					@ ExceptionTable
++	.quad	0					@ CertificationTable
++	.quad	0					@ BaseRelocationTable
+ 
+ section_table:
+-		.ascii	".text\0\0\0"
+-		.long	_end - __efi_start	@ VirtualSize
+-		.long	__efi_start		@ VirtualAddress
+-		.long	_edata - __efi_start	@ SizeOfRawData
+-		.long	__efi_start		@ PointerToRawData
+-		.long	0			@ PointerToRelocations
+-		.long	0			@ PointerToLineNumbers
+-		.short	0			@ NumberOfRelocations
+-		.short	0			@ NumberOfLineNumbers
+-		.long	0xe0000020		@ Characteristics
++	.ascii	".text\0\0\0"
++	.long	_end - __efi_start			@ VirtualSize
++	.long	__efi_start				@ VirtualAddress
++	.long	_edata - __efi_start			@ SizeOfRawData
++	.long	__efi_start				@ PointerToRawData
++	.long	0					@ PointerToRelocations
++	.long	0					@ PointerToLineNumbers
++	.short	0					@ NumberOfRelocations
++	.short	0					@ NumberOfLineNumbers
++	.long	IMAGE_SCN_CNT_CODE | \
++		IMAGE_SCN_MEM_READ | \
++		IMAGE_SCN_MEM_WRITE | \
++		IMAGE_SCN_MEM_EXECUTE			@ Characteristics
++
++	.set	section_count, (. - section_table) / 40
+ 
+-		.align	9
++	.align	9
+ __efi_start:
+ #endif
+-		.endm
++	.endm
+-- 
+2.9.3
