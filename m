@@ -1,32 +1,123 @@
-From: James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
-Subject: Re: [PATCH 5/5] Add a sysrq option to exit secure boot mode
-Date: Tue, 30 May 2017 20:49:03 +1000 (AEST)
-Message-ID: <alpine.LRH.2.20.1705302048370.31018@namei.org>
-References: <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk> <149563716341.9419.12043461651917925181.stgit@warthog.procyon.org.uk>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [PATCH v5 32/32] x86/mm: Add support to make use of Secure Memory
+ Encryption
+Date: Tue, 30 May 2017 09:38:36 -0500
+Message-ID: <7c522f65-c5c8-9362-e1eb-d0765e3ea6c9@amd.com>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+ <20170418212223.10190.85121.stgit@tlendack-t1.amdoffice.net>
+ <20170519112703.voajtn4t7uy6nwa3@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <149563716341.9419.12043461651917925181.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20170519112703.voajtn4t7uy6nwa3@pd.tnic>
+Content-Language: en-US
+Sender: owner-linux-mm@kvack.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S.
+ Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter
+ Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 24 May 2017, David Howells wrote:
-
-> From: Kyle McMartin <kyle-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+On 5/19/2017 6:27 AM, Borislav Petkov wrote:
+> On Tue, Apr 18, 2017 at 04:22:23PM -0500, Tom Lendacky wrote:
+>> Add support to check if SME has been enabled and if memory encryption
+>> should be activated (checking of command line option based on the
+>> configuration of the default state).  If memory encryption is to be
+>> activated, then the encryption mask is set and the kernel is encrypted
+>> "in place."
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>> ---
+>>   arch/x86/kernel/head_64.S |    1 +
+>>   arch/x86/mm/mem_encrypt.c |   83 +++++++++++++++++++++++++++++++++++++++++++--
+>>   2 files changed, 80 insertions(+), 4 deletions(-)
 > 
-> Make sysrq+x exit secure boot mode on x86_64, thereby allowing the running
-> kernel image to be modified.  This lifts the lockdown.
+> ...
 > 
-> Signed-off-by: Kyle McMartin <kyle-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+>> +unsigned long __init sme_enable(struct boot_params *bp)
+>>   {
+>> +	const char *cmdline_ptr, *cmdline_arg, *cmdline_on, *cmdline_off;
+>> +	unsigned int eax, ebx, ecx, edx;
+>> +	unsigned long me_mask;
+>> +	bool active_by_default;
+>> +	char buffer[16];
+>> +	u64 msr;
+>> +
+>> +	/* Check for the SME support leaf */
+>> +	eax = 0x80000000;
+>> +	ecx = 0;
+>> +	native_cpuid(&eax, &ebx, &ecx, &edx);
+>> +	if (eax < 0x8000001f)
+>> +		goto out;
+>> +
+>> +	/*
+>> +	 * Check for the SME feature:
+>> +	 *   CPUID Fn8000_001F[EAX] - Bit 0
+>> +	 *     Secure Memory Encryption support
+>> +	 *   CPUID Fn8000_001F[EBX] - Bits 5:0
+>> +	 *     Pagetable bit position used to indicate encryption
+>> +	 */
+>> +	eax = 0x8000001f;
+>> +	ecx = 0;
+>> +	native_cpuid(&eax, &ebx, &ecx, &edx);
+>> +	if (!(eax & 1))
+>> +		goto out;
+> 
+> <---- newline here.
+> 
+>> +	me_mask = 1UL << (ebx & 0x3f);
+>> +
+>> +	/* Check if SME is enabled */
+>> +	msr = __rdmsr(MSR_K8_SYSCFG);
+>> +	if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
+>> +		goto out;
+>> +
+>> +	/*
+>> +	 * Fixups have not been applied to phys_base yet, so we must obtain
+>> +	 * the address to the SME command line option data in the following
+>> +	 * way.
+>> +	 */
+>> +	asm ("lea sme_cmdline_arg(%%rip), %0"
+>> +	     : "=r" (cmdline_arg)
+>> +	     : "p" (sme_cmdline_arg));
+>> +	asm ("lea sme_cmdline_on(%%rip), %0"
+>> +	     : "=r" (cmdline_on)
+>> +	     : "p" (sme_cmdline_on));
+>> +	asm ("lea sme_cmdline_off(%%rip), %0"
+>> +	     : "=r" (cmdline_off)
+>> +	     : "p" (sme_cmdline_off));
+>> +
+>> +	if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT))
+>> +		active_by_default = true;
+>> +	else
+>> +		active_by_default = false;
+>> +
+>> +	cmdline_ptr = (const char *)((u64)bp->hdr.cmd_line_ptr |
+>> +				     ((u64)bp->ext_cmd_line_ptr << 32));
+>> +
+>> +	cmdline_find_option(cmdline_ptr, cmdline_arg, buffer, sizeof(buffer));
+>> +
+>> +	if (strncmp(buffer, cmdline_on, sizeof(buffer)) == 0)
+>> +		sme_me_mask = me_mask;
+> 
+> Why doesn't simply
+> 
+> 	if (!strncmp(buffer, "on", 2))
+> 		...
+> 
+> work?
 
+In this case we're running identity mapped and the "on" constant ends up
+as kernel address (0xffffffff81...) which results in a segfault.
 
-Reviewed-by: James Morris <james.l.morris-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Thanks,
+Tom
 
+> 
 
--- 
-James Morris
-<jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
