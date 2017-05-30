@@ -1,65 +1,87 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 0/7] ARM: efi: PE/COFF cleanup/hardening
-Date: Tue, 30 May 2017 18:36:40 +0000
-Message-ID: <20170530183647.28557-1-ard.biesheuvel@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-efi@vger.kernel.org, linux@armlinux.org.uk
-Cc: matt@codeblueprint.co.uk, leif.lindholm@linaro.org, linux-arm-kernel@lists.infradead.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 7/7] arm: efi: add PE/COFF debug table to EFI header
+Date: Tue, 30 May 2017 18:36:47 +0000
+Message-ID: <20170530183647.28557-8-ard.biesheuvel@linaro.org>
+References: <20170530183647.28557-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170530183647.28557-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This is the ARM counterpart of the changes now in v4.12 to clean up
-the PE/COFF header that makes the kernel zImage loadable directly from
-UEFI, and to enhance it with hardening and debug features.
+This updates the PE/COFF header to emit the absolute path to the
+decompressor vmlinux ELF file into a so-called NB10 Codeview entry.
+This is hugely helpful when debugging the firmware->stub handover.
 
-First of all, the cleanup consists of making the header comply with the
-PE/COFF spec (#1), removing the .reloc section (#2) and replacing all
-open coded constants with #defines from linux/pe.h
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/arm/boot/compressed/Makefile     |  4 ++
+ arch/arm/boot/compressed/efi-header.S | 40 ++++++++++++++++++++
+ 2 files changed, 44 insertions(+)
 
-Patch #4 is a standalone patch that removes ksymtab/kcrctab sections that
-may get pulled in inadvertently when the decompressor is built with EFI
-support. Note that these sections are tiny and harmless by themselves, but
-the linker may dump them in unexpected places if they are not placed
-explicitly, which may interfere with the image layout. This is especially
-important when signing zImages for UEFI secure boot.
-
-Patch #5 changes the description of the decompressor in memory, so that the
-UEFI firmware can apply strict ro/nx protections, resulting in a more secure
-execution environment for the UEFI stub.
-
-Patch #6 splits the decompressor .start and .text output sections, so that
-the ELF view aligns with the PE/COFF view of the binary. This is useful for
-debugging, but has no other benefits (or downsides, for that matter)
-
-Patch #7 enhances the decompressor binary with a NB10 Codeview debug entry
-referring to the path to arch/arm/boot/compressed/vmlinux on the build host.
-This is another debug feature that allows seamless source level single step
-debugging of the UEFI stub while executing in the context of the firmware.
-
-Ard Biesheuvel (7):
-  arm: efi: remove forbidden values from the PE/COFF header
-  arm: efi: remove pointless dummy .reloc section
-  arm: efi: replace open coded constants with symbolic ones
-  arm: compressed: discard ksymtab/kcrctab sections
-  arm: efi: split zImage code and data into separate PE/COFF sections
-  arm: compressed: put zImage header and EFI header in dedicated section
-  arm: efi: add PE/COFF debug table to EFI header
-
- arch/arm/boot/compressed/Makefile      |   4 +
- arch/arm/boot/compressed/efi-header.S  | 247 ++++++++++++--------
- arch/arm/boot/compressed/vmlinux.lds.S |  39 +++-
- 3 files changed, 180 insertions(+), 110 deletions(-)
-
+diff --git a/arch/arm/boot/compressed/Makefile b/arch/arm/boot/compressed/Makefile
+index d50430c40045..6b978bdbac3e 100644
+--- a/arch/arm/boot/compressed/Makefile
++++ b/arch/arm/boot/compressed/Makefile
+@@ -196,3 +196,7 @@ AFLAGS_hyp-stub.o := -Wa,-march=armv7-a
+ 
+ $(obj)/hyp-stub.S: $(srctree)/arch/$(SRCARCH)/kernel/hyp-stub.S
+ 	$(call cmd,shipped)
++
++ifeq ($(CONFIG_EFI)$(CONFIG_DEBUG_INFO),yy)
++AFLAGS_head.o += -DVMLINUX_PATH="\"$(realpath $(obj)/vmlinux)\""
++endif
+diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
+index a0567ed366c6..3dedaab49cb8 100644
+--- a/arch/arm/boot/compressed/efi-header.S
++++ b/arch/arm/boot/compressed/efi-header.S
+@@ -124,6 +124,46 @@ section_table:
+ 
+ 	.set	section_count, (. - section_table) / 40
+ 
++#ifdef CONFIG_DEBUG_INFO
++	/*
++	 * The debug table is referenced via its Relative Virtual Address (RVA),
++	 * which is only defined for those parts of the image that are covered
++	 * by a section declaration. Since this header is not covered by any
++	 * section, the debug table must be emitted elsewhere. So stick it in
++	 * the .init.rodata section instead.
++	 *
++	 * Note that the EFI debug entry itself may legally have a zero RVA,
++	 * which means we can simply put it right after the section headers.
++	 */
++	.section	".rodata", #alloc
++
++	.align	2
++efi_debug_table:
++	// EFI_IMAGE_DEBUG_DIRECTORY_ENTRY
++	.long	0					@ Characteristics
++	.long	0					@ TimeDateStamp
++	.short	0					@ MajorVersion
++	.short	0					@ MinorVersion
++	.long	IMAGE_DEBUG_TYPE_CODEVIEW		@ Type
++	.long	efi_debug_entry_size			@ SizeOfData
++	.long	0					@ RVA
++	.long	efi_debug_entry - start			@ FileOffset
++
++	.set	efi_debug_table_size, . - efi_debug_table
++	.previous
++
++efi_debug_entry:
++	// EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY
++	.ascii	"NB10"					@ Signature
++	.long	0					@ Unknown
++	.long	0					@ Unknown2
++	.long	0					@ Unknown3
++
++	.asciz	VMLINUX_PATH
++
++	.set	efi_debug_entry_size, . - efi_debug_entry
++#endif
++
+ 	.align	12
+ __efi_start:
+ 	.text
 -- 
 2.9.3
