@@ -1,69 +1,41 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v5 29/32] x86/mm: Add support to encrypt the kernel
- in-place
-Date: Wed, 31 May 2017 11:51:48 +0200
-Message-ID: <20170531095148.pba6ju6im4qxbwfg@pd.tnic>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v5 28/32] x86/mm, kexec: Allow kexec to be used with SME
+Date: Wed, 31 May 2017 12:01:00 +0200
+Message-ID: <20170531100100.jgznzx3o7qklfgbp@pd.tnic>
 References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418212149.10190.70894.stgit@tlendack-t1.amdoffice.net>
- <20170518124626.hqyqqbjpy7hmlpqc@pd.tnic>
- <7e2ae014-525c-76f2-9fce-2124596db2d2@amd.com>
- <20170526162522.p7prrqqalx2ivfxl@pd.tnic>
- <33c075b1-71f6-b5d0-b1fa-d742d0659d38@amd.com>
+	<20170418212121.10190.94885.stgit@tlendack-t1.amdoffice.net>
+	<5927AC6E.8080209@redhat.com>
+	<de4d2efc-6636-4120-98d9-7fdf4707f68d@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-arch-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <33c075b1-71f6-b5d0-b1fa-d742d0659d38@amd.com>
-Sender: linux-arch-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy
+In-Reply-To: <de4d2efc-6636-4120-98d9-7fdf4707f68d-5C7GfCeVMHo@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst@re>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, May 30, 2017 at 11:39:07AM -0500, Tom Lendacky wrote:
-> Yes, it's from objtool:
-> 
-> arch/x86/mm/mem_encrypt_boot.o: warning: objtool: .text+0xd2: return
-> instruction outside of a callable function
+On Tue, May 30, 2017 at 12:46:14PM -0500, Tom Lendacky wrote:
+> This is an area that I'm not familiar with, so I don't completely
+> understand the flow in regards to where/when/how the ELF headers are
+> copied and what needs to be done.
 
-Oh, well, let's make it a global symbol then. Who knows, we might have
-to live-patch it someday :-)
+So my suggestion is still to put kexec/kdump on the backburner for now
+and concentrate on the 30-ish patchset first. Once they're done, we can
+start dealing with it. Ditto with the IOMMU side of things. One thing at
+a time.
 
----
-diff --git a/arch/x86/mm/mem_encrypt_boot.S b/arch/x86/mm/mem_encrypt_boot.S
-index fb58f9f953e3..7720b0050840 100644
---- a/arch/x86/mm/mem_encrypt_boot.S
-+++ b/arch/x86/mm/mem_encrypt_boot.S
-@@ -47,9 +47,9 @@ ENTRY(sme_encrypt_execute)
- 	movq	%rdx, %r12		/* Kernel length */
- 
- 	/* Copy encryption routine into the workarea */
--	movq	%rax, %rdi		/* Workarea encryption routine */
--	leaq	.Lenc_start(%rip), %rsi	/* Encryption routine */
--	movq	$(.Lenc_stop - .Lenc_start), %rcx	/* Encryption routine length */
-+	movq	%rax, %rdi				/* Workarea encryption routine */
-+	leaq	__enc_copy(%rip), %rsi			/* Encryption routine */
-+	movq	$(.L__enc_copy_end - __enc_copy), %rcx	/* Encryption routine length */
- 	rep	movsb
- 
- 	/* Setup registers for call */
-@@ -70,8 +70,7 @@ ENTRY(sme_encrypt_execute)
- 	ret
- ENDPROC(sme_encrypt_execute)
- 
--.Lenc_start:
--ENTRY(sme_enc_routine)
-+ENTRY(__enc_copy)
- /*
-  * Routine used to encrypt kernel.
-  *   This routine must be run outside of the kernel proper since
-@@ -147,5 +146,5 @@ ENTRY(sme_enc_routine)
- 	wrmsr
- 
- 	ret
--ENDPROC(sme_enc_routine)
--.Lenc_stop:
-+.L__enc_copy_end:
-+ENDPROC(__enc_copy)
+Thanks.
 
 -- 
 Regards/Gruss,
