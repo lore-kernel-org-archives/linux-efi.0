@@ -1,81 +1,72 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 0/5] security, efi: Set lockdown if in secure boot mode
-Date: Wed, 31 May 2017 10:23:55 +0100
-Message-ID: <21606.1496222635@warthog.procyon.org.uk>
-References: <CAKv+Gu_5gUWwx7Sxgm8d03L4t4nF8dDe+AXqOqto4B7AVSZ9CA@mail.gmail.com> <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v5 29/32] x86/mm: Add support to encrypt the kernel
+ in-place
+Date: Wed, 31 May 2017 11:51:48 +0200
+Message-ID: <20170531095148.pba6ju6im4qxbwfg@pd.tnic>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+ <20170418212149.10190.70894.stgit@tlendack-t1.amdoffice.net>
+ <20170518124626.hqyqqbjpy7hmlpqc@pd.tnic>
+ <7e2ae014-525c-76f2-9fce-2124596db2d2@amd.com>
+ <20170526162522.p7prrqqalx2ivfxl@pd.tnic>
+ <33c075b1-71f6-b5d0-b1fa-d742d0659d38@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu_5gUWwx7Sxgm8d03L4t4nF8dDe+AXqOqto4B7AVSZ9CA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-ID: <21605.1496222635.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-arch-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <33c075b1-71f6-b5d0-b1fa-d742d0659d38@amd.com>
+Sender: linux-arch-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy
 List-Id: linux-efi@vger.kernel.org
 
-Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+On Tue, May 30, 2017 at 11:39:07AM -0500, Tom Lendacky wrote:
+> Yes, it's from objtool:
+> 
+> arch/x86/mm/mem_encrypt_boot.o: warning: objtool: .text+0xd2: return
+> instruction outside of a callable function
 
-> - The series conflates 'UEFI secure boot support' with 'kernel lock
-> down support'. I think this has been brought up before, but I really
-> think we should have a cleaner separation between the feature (locking
-> down various bits of the kernel if lockdown is in effect) from the
-> policy 'enable lockdown if UEFI secure boot is enabled'.
+Oh, well, let's make it a global symbol then. Who knows, we might have
+to live-patch it someday :-)
 
-I'm not sure what you're actually asking for.  Are you wanting me to push the
-lockdown patches upstream separately from the UEFI patches that trigger the
-lockdown?  Or do you mean something else?
+---
+diff --git a/arch/x86/mm/mem_encrypt_boot.S b/arch/x86/mm/mem_encrypt_boot.S
+index fb58f9f953e3..7720b0050840 100644
+--- a/arch/x86/mm/mem_encrypt_boot.S
++++ b/arch/x86/mm/mem_encrypt_boot.S
+@@ -47,9 +47,9 @@ ENTRY(sme_encrypt_execute)
+ 	movq	%rdx, %r12		/* Kernel length */
+ 
+ 	/* Copy encryption routine into the workarea */
+-	movq	%rax, %rdi		/* Workarea encryption routine */
+-	leaq	.Lenc_start(%rip), %rsi	/* Encryption routine */
+-	movq	$(.Lenc_stop - .Lenc_start), %rcx	/* Encryption routine length */
++	movq	%rax, %rdi				/* Workarea encryption routine */
++	leaq	__enc_copy(%rip), %rsi			/* Encryption routine */
++	movq	$(.L__enc_copy_end - __enc_copy), %rcx	/* Encryption routine length */
+ 	rep	movsb
+ 
+ 	/* Setup registers for call */
+@@ -70,8 +70,7 @@ ENTRY(sme_encrypt_execute)
+ 	ret
+ ENDPROC(sme_encrypt_execute)
+ 
+-.Lenc_start:
+-ENTRY(sme_enc_routine)
++ENTRY(__enc_copy)
+ /*
+  * Routine used to encrypt kernel.
+  *   This routine must be run outside of the kernel proper since
+@@ -147,5 +146,5 @@ ENTRY(sme_enc_routine)
+ 	wrmsr
+ 
+ 	ret
+-ENDPROC(sme_enc_routine)
+-.Lenc_stop:
++.L__enc_copy_end:
++ENDPROC(__enc_copy)
 
-> The only tunable we need is in the lockdown context, whether lockdown needs
-> to take effect automatically when UEFI secure boot is detected
+-- 
+Regards/Gruss,
+    Boris.
 
-So you don't want this change:
-
-	config EFI_SECURE_BOOT
-		bool "Support UEFI Secure Boot and lock down the kernel in secure boot mode"
-		default n
-	+	select LOCK_DOWN_KERNEL
-
-but would rather have a separate option asking whether lockdown should be
-triggered if detect UEFI secure boot mode?
-
-> (but there could be other ways to enable lockdown, including a kernel
-> cmdline param or a sysfs node).
-
-A sysfs node is pretty pointless.  A number of things that are locked down
-need to be locked down during boot.  I could, however, provide a command-line
-option to engage it or a kernel config option to unconditionally enable it.
-
-> - The current series enables lockdown, but does not lock anything
-> down.
-
-Yes.  As I pointed out, and as I'm sure you know, I have a slew of other
-patches that actually *do* lock things down.  I extracted these patches to try
-and get some feedback on this bit without spamming various mailing lists with
-all the other patches each time.
-
-> Even if the code is in good shape otherwise, I am reluctant to
-> ack and/or merge anything right now, given that it provides a false
-> sense of security.
-
-You're a member of the "make it provably 100% secure or nothing" camp?
-
-> This also ties in to my more general concerns with this code (and I am aware
-> I never replied to your email explaining it, my apologies [again]): without
-> any sense of how large the attack surface is now,
-
-I suspect no one knows.  I've been trying to lock down possibilities people
-have pointed me at, even if some of them are very theoretical, and a lot of
-the patches I've gathered together come from other people, but I don't know
-the hardware that a lot of this is dealing with, so I can't answer this
-question.
-
-> and how much we reduced it by implementing the items on your list above, we
-> should really not be making claims of security, given that we really have no
-> idea how much more secure we are. That said, I do subscribe to the effort,
-> in the sense that moving towards the goal is strictly better than moving
-> away from it, or not at all.
-
-Can we at least decide whether or not we want to put a locked-down mode into
-the upstream kernel?  If not, I can drop this effort.
-
-David
+Good mailing practices for 400: avoid top-posting and trim the reply.
