@@ -1,57 +1,81 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v5 32/32] x86/mm: Add support to make use of Secure
-	Memory Encryption
-Date: Wed, 31 May 2017 11:15:53 +0200
-Message-ID: <20170531091553.jwqcwkfivmmhndwv@pd.tnic>
-References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
-	<20170418212223.10190.85121.stgit@tlendack-t1.amdoffice.net>
-	<c29edaff-24f2-ee9b-4142-bdbf8c42083f@amd.com>
-	<20170519113005.3f5kwzg4pgh7j6a5@pd.tnic>
-	<20170519201651.dhayf2pwjlsnouz4@treble>
-	<1ac40d18-a8b2-94eb-35ed-c30768667be8@amd.com>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 0/5] security, efi: Set lockdown if in secure boot mode
+Date: Wed, 31 May 2017 10:23:55 +0100
+Message-ID: <21606.1496222635@warthog.procyon.org.uk>
+References: <CAKv+Gu_5gUWwx7Sxgm8d03L4t4nF8dDe+AXqOqto4B7AVSZ9CA@mail.gmail.com> <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1ac40d18-a8b2-94eb-35ed-c30768667be8-5C7GfCeVMHo@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3ANibfEOA+W@public.gmane.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKv+Gu_5gUWwx7Sxgm8d03L4t4nF8dDe+AXqOqto4B7AVSZ9CA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-ID: <21605.1496222635.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, May 30, 2017 at 10:48:27AM -0500, Tom Lendacky wrote:
-> I'll look at doing that instead of removing the support for the whole
-> file.
+Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
 
-Right, so I don't think the stack protector is even ready that early -
-we do set it up later:
+> - The series conflates 'UEFI secure boot support' with 'kernel lock
+> down support'. I think this has been brought up before, but I really
+> think we should have a cleaner separation between the feature (locking
+> down various bits of the kernel if lockdown is in effect) from the
+> policy 'enable lockdown if UEFI secure boot is enabled'.
 
-        /* Set up %gs.
-         *
-         * The base of %gs always points to the bottom of the irqstack
-         * union.  If the stack protector canary is enabled, it is
-         * located at %gs:40.  Note that, on SMP, the boot cpu uses
-         * init data section till per cpu areas are set up.
-         */
-        movl    $MSR_GS_BASE,%ecx
-        movl    initial_gs(%rip),%eax
-        movl    initial_gs+4(%rip),%edx
-        wrmsr
+I'm not sure what you're actually asking for.  Are you wanting me to push the
+lockdown patches upstream separately from the UEFI patches that trigger the
+lockdown?  Or do you mean something else?
 
-so I think marking the function "no-stack-protector" is the only option
-right now. We can always look at fixing that later.
+> The only tunable we need is in the lockdown context, whether lockdown needs
+> to take effect automatically when UEFI secure boot is detected
 
--- 
-Regards/Gruss,
-    Boris.
+So you don't want this change:
 
-Good mailing practices for 400: avoid top-posting and trim the reply.
+	config EFI_SECURE_BOOT
+		bool "Support UEFI Secure Boot and lock down the kernel in secure boot mode"
+		default n
+	+	select LOCK_DOWN_KERNEL
+
+but would rather have a separate option asking whether lockdown should be
+triggered if detect UEFI secure boot mode?
+
+> (but there could be other ways to enable lockdown, including a kernel
+> cmdline param or a sysfs node).
+
+A sysfs node is pretty pointless.  A number of things that are locked down
+need to be locked down during boot.  I could, however, provide a command-line
+option to engage it or a kernel config option to unconditionally enable it.
+
+> - The current series enables lockdown, but does not lock anything
+> down.
+
+Yes.  As I pointed out, and as I'm sure you know, I have a slew of other
+patches that actually *do* lock things down.  I extracted these patches to try
+and get some feedback on this bit without spamming various mailing lists with
+all the other patches each time.
+
+> Even if the code is in good shape otherwise, I am reluctant to
+> ack and/or merge anything right now, given that it provides a false
+> sense of security.
+
+You're a member of the "make it provably 100% secure or nothing" camp?
+
+> This also ties in to my more general concerns with this code (and I am aware
+> I never replied to your email explaining it, my apologies [again]): without
+> any sense of how large the attack surface is now,
+
+I suspect no one knows.  I've been trying to lock down possibilities people
+have pointed me at, even if some of them are very theoretical, and a lot of
+the patches I've gathered together come from other people, but I don't know
+the hardware that a lot of this is dealing with, so I can't answer this
+question.
+
+> and how much we reduced it by implementing the items on your list above, we
+> should really not be making claims of security, given that we really have no
+> idea how much more secure we are. That said, I do subscribe to the effort,
+> in the sense that moving towards the goal is strictly better than moving
+> away from it, or not at all.
+
+Can we at least decide whether or not we want to put a locked-down mode into
+the upstream kernel?  If not, I can drop this effort.
+
+David
