@@ -1,136 +1,86 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 0/5] security, efi: Set lockdown if in secure boot mode
-Date: Wed, 31 May 2017 11:39:14 +0000
-Message-ID: <CAKv+Gu_vXASr=yDJ3MwT960eApqeWKEd-hqGoEyGsJKip7N+KQ@mail.gmail.com>
-References: <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk>
- <CAKv+Gu_5gUWwx7Sxgm8d03L4t4nF8dDe+AXqOqto4B7AVSZ9CA@mail.gmail.com> <21606.1496222635@warthog.procyon.org.uk>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [PATCH v5 29/32] x86/mm: Add support to encrypt the kernel
+	in-place
+Date: Wed, 31 May 2017 08:12:56 -0500
+Message-ID: <17394b27-d693-4ff9-9dbd-11b5237fcf6a@amd.com>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+	<20170418212149.10190.70894.stgit@tlendack-t1.amdoffice.net>
+	<20170518124626.hqyqqbjpy7hmlpqc@pd.tnic>
+	<7e2ae014-525c-76f2-9fce-2124596db2d2@amd.com>
+	<20170526162522.p7prrqqalx2ivfxl@pd.tnic>
+	<33c075b1-71f6-b5d0-b1fa-d742d0659d38@amd.com>
+	<20170531095148.pba6ju6im4qxbwfg@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <21606.1496222635-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20170531095148.pba6ju6im4qxbwfg-fF5Pk5pvG8Y@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter
+	Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S.
+	Tsirkin" <mst>
 List-Id: linux-efi@vger.kernel.org
 
-On 31 May 2017 at 09:23, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->
->> - The series conflates 'UEFI secure boot support' with 'kernel lock
->> down support'. I think this has been brought up before, but I really
->> think we should have a cleaner separation between the feature (locking
->> down various bits of the kernel if lockdown is in effect) from the
->> policy 'enable lockdown if UEFI secure boot is enabled'.
->
-> I'm not sure what you're actually asking for.  Are you wanting me to push the
-> lockdown patches upstream separately from the UEFI patches that trigger the
-> lockdown?  Or do you mean something else?
->
+On 5/31/2017 4:51 AM, Borislav Petkov wrote:
+> On Tue, May 30, 2017 at 11:39:07AM -0500, Tom Lendacky wrote:
+>> Yes, it's from objtool:
+>>
+>> arch/x86/mm/mem_encrypt_boot.o: warning: objtool: .text+0xd2: return
+>> instruction outside of a callable function
+> 
+> Oh, well, let's make it a global symbol then. Who knows, we might have
+> to live-patch it someday :-)
 
-No, I am fine with keeping this as a single series. I don't want
-anything under drivers/efi to imply policy regarding lockdown. Kernel
-lockdown should be a feature that lives somewhere else, and which
-contains a CONFIG_ option that implies 'lockdown is enabled by default
-when UEFI secure boot is detected.' The code that gets added to
-drivers/efi should only concern itself with establishing whether
-secure boot is in effect or not (and can hence be enabled
-unconditionally)
+Can do.
 
->> The only tunable we need is in the lockdown context, whether lockdown needs
->> to take effect automatically when UEFI secure boot is detected
->
-> So you don't want this change:
->
->         config EFI_SECURE_BOOT
->                 bool "Support UEFI Secure Boot and lock down the kernel in secure boot mode"
->                 default n
->         +       select LOCK_DOWN_KERNEL
->
-> but would rather have a separate option asking whether lockdown should be
-> triggered if detect UEFI secure boot mode?
->
+Thanks,
+Tom
 
-Yes. As I said, supporting UEFI secure boot (whatever that could mean)
-and implementing a lockdown policy when it is enabled are two entirely
-different things.
-
->> (but there could be other ways to enable lockdown, including a kernel
->> cmdline param or a sysfs node).
->
-> A sysfs node is pretty pointless.  A number of things that are locked down
-> need to be locked down during boot.
-
-OK.
-
-> I could, however, provide a command-line
-> option to engage it or a kernel config option to unconditionally enable it.
->
-
-I *think* that could be useful, although it was meant as an
-illustration rather than actual suggestion.
-
->> - The current series enables lockdown, but does not lock anything
->> down.
->
-> Yes.  As I pointed out, and as I'm sure you know, I have a slew of other
-> patches that actually *do* lock things down.  I extracted these patches to try
-> and get some feedback on this bit without spamming various mailing lists with
-> all the other patches each time.
->
->> Even if the code is in good shape otherwise, I am reluctant to
->> ack and/or merge anything right now, given that it provides a false
->> sense of security.
->
-> You're a member of the "make it provably 100% secure or nothing" camp?
->
-
-No, not at all. But patch 4/5 contains this line
-
-pr_info("Secure boot enabled and kernel locked down\n");
-
-which I don't like at all, given that nothing is actually locked down.
-I have been working in this area long enough to know that people will
-interpret 'lockdown' or 'secure' to mean anything they like if it is
-left unqualified.
-
-So what I would prefer is to separate this from the EFI code, and
-perhaps print something like
-
-lockdown: Kernel lockdown policy in effect due to xxx
-
-and print a subsequent line for every lockdown feature that is enabled, e.g.,
-
-lockdown: disabling MSRs
-lockdown: disabling hibernate support
-
-etc etc
-
-These are just examples, of course, but it manages the expectations,
-and as a bonus, it makes differences between architectures much more
-visible.
-
->> This also ties in to my more general concerns with this code (and I am aware
->> I never replied to your email explaining it, my apologies [again]): without
->> any sense of how large the attack surface is now,
->
-> I suspect no one knows.  I've been trying to lock down possibilities people
-> have pointed me at, even if some of them are very theoretical, and a lot of
-> the patches I've gathered together come from other people, but I don't know
-> the hardware that a lot of this is dealing with, so I can't answer this
-> question.
->
-
-OK, and that is fine. I would just like this modest stance to be
-reflected in the code and especially the log messages.
-
->> and how much we reduced it by implementing the items on your list above, we
->> should really not be making claims of security, given that we really have no
->> idea how much more secure we are. That said, I do subscribe to the effort,
->> in the sense that moving towards the goal is strictly better than moving
->> away from it, or not at all.
->
-> Can we at least decide whether or not we want to put a locked-down mode into
-> the upstream kernel?  If not, I can drop this effort.
-
-No, I think this is a very important feature. But it needs to be more
-transparent to avoid a false sense of security.
+> 
+> ---
+> diff --git a/arch/x86/mm/mem_encrypt_boot.S b/arch/x86/mm/mem_encrypt_boot.S
+> index fb58f9f953e3..7720b0050840 100644
+> --- a/arch/x86/mm/mem_encrypt_boot.S
+> +++ b/arch/x86/mm/mem_encrypt_boot.S
+> @@ -47,9 +47,9 @@ ENTRY(sme_encrypt_execute)
+>   	movq	%rdx, %r12		/* Kernel length */
+>   
+>   	/* Copy encryption routine into the workarea */
+> -	movq	%rax, %rdi		/* Workarea encryption routine */
+> -	leaq	.Lenc_start(%rip), %rsi	/* Encryption routine */
+> -	movq	$(.Lenc_stop - .Lenc_start), %rcx	/* Encryption routine length */
+> +	movq	%rax, %rdi				/* Workarea encryption routine */
+> +	leaq	__enc_copy(%rip), %rsi			/* Encryption routine */
+> +	movq	$(.L__enc_copy_end - __enc_copy), %rcx	/* Encryption routine length */
+>   	rep	movsb
+>   
+>   	/* Setup registers for call */
+> @@ -70,8 +70,7 @@ ENTRY(sme_encrypt_execute)
+>   	ret
+>   ENDPROC(sme_encrypt_execute)
+>   
+> -.Lenc_start:
+> -ENTRY(sme_enc_routine)
+> +ENTRY(__enc_copy)
+>   /*
+>    * Routine used to encrypt kernel.
+>    *   This routine must be run outside of the kernel proper since
+> @@ -147,5 +146,5 @@ ENTRY(sme_enc_routine)
+>   	wrmsr
+>   
+>   	ret
+> -ENDPROC(sme_enc_routine)
+> -.Lenc_stop:
+> +.L__enc_copy_end:
+> +ENDPROC(__enc_copy)
+> 
