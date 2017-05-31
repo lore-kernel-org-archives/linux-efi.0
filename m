@@ -1,57 +1,57 @@
-From: Borislav Petkov <bp@alien8.de>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Subject: Re: [PATCH v5 32/32] x86/mm: Add support to make use of Secure
- Memory Encryption
-Date: Wed, 31 May 2017 10:49:23 +0200
-Message-ID: <20170531084923.mmlpefxfx53f3okp@pd.tnic>
+	Memory Encryption
+Date: Wed, 31 May 2017 11:15:53 +0200
+Message-ID: <20170531091553.jwqcwkfivmmhndwv@pd.tnic>
 References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
- <20170418212223.10190.85121.stgit@tlendack-t1.amdoffice.net>
- <20170519112703.voajtn4t7uy6nwa3@pd.tnic>
- <7c522f65-c5c8-9362-e1eb-d0765e3ea6c9@amd.com>
- <20170530145459.tyuy6veqxnrqkhgw@pd.tnic>
- <115ca39d-6ae7-f603-a415-ead7c4e8193d@amd.com>
+	<20170418212223.10190.85121.stgit@tlendack-t1.amdoffice.net>
+	<c29edaff-24f2-ee9b-4142-bdbf8c42083f@amd.com>
+	<20170519113005.3f5kwzg4pgh7j6a5@pd.tnic>
+	<20170519201651.dhayf2pwjlsnouz4@treble>
+	<1ac40d18-a8b2-94eb-35ed-c30768667be8@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <115ca39d-6ae7-f603-a415-ead7c4e8193d@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
+In-Reply-To: <1ac40d18-a8b2-94eb-35ed-c30768667be8-5C7GfCeVMHo@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3ANibfEOA+W@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, May 30, 2017 at 10:37:03AM -0500, Tom Lendacky wrote:
-> I can define the command line option and the "on" and "off" values as
-> character buffers in the function and initialize them on a per character
-> basis (using a static string causes the same issues as referencing a
-> string constant), i.e.:
-> 
-> char cmdline_arg[] = {'m', 'e', 'm', '_', 'e', 'n', 'c', 'r', 'y', 'p', 't', '\0'};
-> char cmdline_off[] = {'o', 'f', 'f', '\0'};
-> char cmdline_on[] = {'o', 'n', '\0'};
-> 
-> It doesn't look the greatest, but it works and removes the need for the
-> rip-relative addressing.
+On Tue, May 30, 2017 at 10:48:27AM -0500, Tom Lendacky wrote:
+> I'll look at doing that instead of removing the support for the whole
+> file.
 
-Well, I'm not thrilled about this one either. It's like being between a
-rock and a hard place. :-\
+Right, so I don't think the stack protector is even ready that early -
+we do set it up later:
 
-On the one hand, we need the encryption mask before we do the fixups and
-OTOH we need to do the fixups in order to access the strings properly.
-Yuck.
+        /* Set up %gs.
+         *
+         * The base of %gs always points to the bottom of the irqstack
+         * union.  If the stack protector canary is enabled, it is
+         * located at %gs:40.  Note that, on SMP, the boot cpu uses
+         * init data section till per cpu areas are set up.
+         */
+        movl    $MSR_GS_BASE,%ecx
+        movl    initial_gs(%rip),%eax
+        movl    initial_gs+4(%rip),%edx
+        wrmsr
 
-Well, the only thing I can think of right now is maybe define
-"mem_encrypt=" at the end of head_64.S and pass it in from asm to
-sme_enable() and then do the "on"/"off" comparsion with local char
-buffers. That could make it less ugly...
+so I think marking the function "no-stack-protector" is the only option
+right now. We can always look at fixing that later.
 
 -- 
 Regards/Gruss,
     Boris.
 
 Good mailing practices for 400: avoid top-posting and trim the reply.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
