@@ -1,54 +1,60 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 0/5] security, efi: Set lockdown if in secure boot mode
-Date: Wed, 31 May 2017 14:33:52 +0100
-Message-ID: <379.1496237632@warthog.procyon.org.uk>
-References: <CAKv+Gu_vXASr=yDJ3MwT960eApqeWKEd-hqGoEyGsJKip7N+KQ@mail.gmail.com> <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk> <CAKv+Gu_5gUWwx7Sxgm8d03L4t4nF8dDe+AXqOqto4B7AVSZ9CA@mail.gmail.com> <21606.1496222635@warthog.procyon.org.uk>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [PATCH v5 32/32] x86/mm: Add support to make use of Secure Memory
+ Encryption
+Date: Wed, 31 May 2017 08:37:50 -0500
+Message-ID: <706d6ae0-bc4c-5ba7-529c-b0fc5e4ad464@amd.com>
+References: <20170418211612.10190.82788.stgit@tlendack-t1.amdoffice.net>
+ <20170418212223.10190.85121.stgit@tlendack-t1.amdoffice.net>
+ <20170519112703.voajtn4t7uy6nwa3@pd.tnic>
+ <7c522f65-c5c8-9362-e1eb-d0765e3ea6c9@amd.com>
+ <20170530145459.tyuy6veqxnrqkhgw@pd.tnic>
+ <115ca39d-6ae7-f603-a415-ead7c4e8193d@amd.com>
+ <20170531084923.mmlpefxfx53f3okp@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu_vXASr=yDJ3MwT960eApqeWKEd-hqGoEyGsJKip7N+KQ@mail.gmail.com>
-Content-ID: <378.1496237632.1@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: dhowells@redhat.com, Matthew Garrett <matthew.garrett@nebula.com>, linux-security-module <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arch-owner@vger.kernel.org>
+In-Reply-To: <20170531084923.mmlpefxfx53f3okp@pd.tnic>
+Content-Language: en-US
+Sender: linux-arch-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@>
 List-Id: linux-efi@vger.kernel.org
 
-Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-
-> No, I am fine with keeping this as a single series. I don't want
-> anything under drivers/efi to imply policy regarding lockdown. Kernel
-> lockdown should be a feature that lives somewhere else, and which
-> contains a CONFIG_ option that implies 'lockdown is enabled by default
-> when UEFI secure boot is detected.' The code that gets added to
-> drivers/efi should only concern itself with establishing whether
-> secure boot is in effect or not (and can hence be enabled
-> unconditionally)
-> ...
-> So what I would prefer is to separate this from the EFI code,
-
-In that case I don't know where to connect the UEFI secure boot with the
-lockdown code.
-
-I was under the impression that you wanted the switch-statement that I had in
-x86 setup.c moved to the efi code (as I've done in patch 1).  Was I wrong in
-that assessment and that you actually wanted it, say, in security?
-
-I don't think that the non-EFI core code should know about UEFI secure boot
-mode.  Either the arch needs to implement the connection or the EFI code needs
-to implement it.  In the former is preferred, I should drop patch 1.
-
-> ... and perhaps print something like
+On 5/31/2017 3:49 AM, Borislav Petkov wrote:
+> On Tue, May 30, 2017 at 10:37:03AM -0500, Tom Lendacky wrote:
+>> I can define the command line option and the "on" and "off" values as
+>> character buffers in the function and initialize them on a per character
+>> basis (using a static string causes the same issues as referencing a
+>> string constant), i.e.:
+>>
+>> char cmdline_arg[] = {'m', 'e', 'm', '_', 'e', 'n', 'c', 'r', 'y', 'p', 't', '\0'};
+>> char cmdline_off[] = {'o', 'f', 'f', '\0'};
+>> char cmdline_on[] = {'o', 'n', '\0'};
+>>
+>> It doesn't look the greatest, but it works and removes the need for the
+>> rip-relative addressing.
 > 
-> lockdown: Kernel lockdown policy in effect due to xxx
-
-I'm okay with printing that instead.
-
-> and print a subsequent line for every lockdown feature that is enabled, e.g.,
+> Well, I'm not thrilled about this one either. It's like being between a
+> rock and a hard place. :-\
 > 
-> lockdown: disabling MSRs
-> lockdown: disabling hibernate support
+> On the one hand, we need the encryption mask before we do the fixups and
+> OTOH we need to do the fixups in order to access the strings properly.
+> Yuck.
+> 
+> Well, the only thing I can think of right now is maybe define
+> "mem_encrypt=" at the end of head_64.S and pass it in from asm to
+> sme_enable() and then do the "on"/"off" comparsion with local char
+> buffers. That could make it less ugly...
 
-That could add a lot of lines to the boot output:-/
+I like keeping the command line option and the values together. It may
+not look the greatest but I like it more than defining the command line
+option in head_64.S and passing it in as an argument.
 
-David
+OTOH, I don't think the rip-relative addressing was that bad, I can
+always go back to that...
+
+Thanks,
+Tom
+
+> 
