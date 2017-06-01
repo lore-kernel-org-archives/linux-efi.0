@@ -1,61 +1,160 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: PROBLEM: Kernel panic on EFI BGRT early init code (kernel
- 4.11/4.12rc2) [regression]
-Date: Thu, 1 Jun 2017 09:57:31 +0800
-Message-ID: <20170601015621.GA4306@dhcp-128-65.nay.redhat.com>
-References: <86c36f9b-f633-3354-d676-7693f35dae0d@gmail.com>
- <20170526012342.GA3096@dhcp-128-65.nay.redhat.com>
- <a32eea98-9576-1ee7-c27a-b165204d825f@gmail.com>
- <20170527051427.GA3492@dhcp-128-65.nay.redhat.com>
- <20170527053457.GB3492@dhcp-128-65.nay.redhat.com>
- <df8e83f9-9362-b5b5-462d-b11980baac01@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <df8e83f9-9362-b5b5-462d-b11980baac01@gmail.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Maniaxx <tripleshiftone@gmail.com>
-Cc: linux-efi@vger.kernel.org, rjw@rjwysocki.net, lenb@kernel.org, linux-acpi@vger.kernel.org
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2] efi: arm: enable DMI/SMBIOS
+Date: Thu,  1 Jun 2017 10:45:54 +0000
+Message-ID: <20170601104554.21267-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, graeme.gregory-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Cc ACPI people for thoughts..
+Wire up the existing support for SMBIOS tables (aka DMI), by moving the
+arm64 init code to drivers/firmware/efi/arm-runtime.c (which is shared
+between ARM and arm64), and adding a asm/dmi.h header to ARM that defines
+the mapping routines for the firmware tables.
 
-On 06/01/17 at 03:17am, Maniaxx wrote:
-> On 27.05.2017 at 07:34 wrote Dave Young:
-> >> Can you double check it works before the commit of below? 
-> linux-git-4.10rc5.r115.gc4c39c70c5fe is fine (1 commit back)
-> linux-git-4.10rc5.r116.g7b0a911478c7 is not (early init BGRT patch)
-> 
-> >> If machine
-> >> boots fine then check /sys/firmware/acpi/bgrt/image see if it exists or
-> >> not. 
-> Not sure. /sys/firmware/acpi/bgrt/ doesn't exist here but i have
-> /sys/firmware/acpi/tables/ that contains all tables. BGRT is 60 bytes
-> and holds the same binary content as pr_info hex_dump (in dmesg log below).
+This allows userspace to access these tables to discover system information
+exposed by the firmware. It also sets the hardware name used in crash
+dumps, e.g.,
 
-This means the efi_bgrt_init failed out originally before the early init BGRT
-patch. Checking the code the only difference is current code we have no
-below code:
+  Unable to handle kernel NULL pointer dereference at virtual address 00000000
+  pgd = ed3c0000
+  [00000000] *pgd=bf1f3835
+  Internal error: Oops: 817 [#1] SMP THUMB2
+  Modules linked in:
+  CPU: 0 PID: 759 Comm: bash Not tainted 4.10.0-09601-g0e8f38792120-dirty #112
+  Hardware name: QEMU KVM Virtual Machine, BIOS 0.0.0 02/06/2015
+  ^^^
 
-        status = acpi_get_table("BGRT", 0,
-                                (struct acpi_table_header **)&bgrt_tab);
-        if (ACPI_FAILURE(status))
-                return;
+NOTE: This does *NOT* enable or encourage the use of DMI quirks, i.e., the
+      the practice of identifying the platform via DMI to decide whether
+      certain workarounds for buggy hardware and/or firmware need to be
+      enabled. This would require the DMI subsystem to be enabled much
+      earlier than we do on ARM, which is non-trivial.
 
-So probably acpi_get_table has some more sanity checking and it failed
-early. Can you add a printk before above return to confirm it? Just test
-the old kernel without early init BGRT patch.
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+v2: add missing include of <linux/dmi.h>
+    rebase onto v4.12-rc3
 
-> 
-> >> if you can manange to save full kernel log it would be also helpful.
-> Here is a log of linux-git-4.10rc5.r115.gc4c39c70c5fe with Sabrina
-> Dubroca's test code applied:
-> https://pastebin.com/ZkBNejrC
-> 
-> This is how i applied the patch. I hope its correct:
-> https://pastebin.com/see6V0Bk
-> 
+ arch/arm/Kconfig                   | 11 +++++++++++
+ arch/arm/include/asm/dmi.h         | 19 +++++++++++++++++++
+ arch/arm64/kernel/efi.c            | 15 ---------------
+ drivers/firmware/efi/arm-runtime.c | 16 ++++++++++++++++
+ 4 files changed, 46 insertions(+), 15 deletions(-)
 
-Thanks
-Dave
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 4c1a35f15838..268f46bfc4d9 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -2061,6 +2061,17 @@ config EFI
+ 	  is only useful for kernels that may run on systems that have
+ 	  UEFI firmware.
+ 
++config DMI
++	bool "Enable support for SMBIOS (DMI) tables"
++	depends on EFI
++	default y
++	help
++	  This enables SMBIOS/DMI feature for systems.
++
++	  This option is only useful on systems that have UEFI firmware.
++	  However, even with this option, the resultant kernel should
++	  continue to boot on existing non-UEFI platforms.
++
+ endmenu
+ 
+ menu "CPU Power Management"
+diff --git a/arch/arm/include/asm/dmi.h b/arch/arm/include/asm/dmi.h
+new file mode 100644
+index 000000000000..df2d2ff06f5b
+--- /dev/null
++++ b/arch/arm/include/asm/dmi.h
+@@ -0,0 +1,19 @@
++/*
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#ifndef __ASM_DMI_H
++#define __ASM_DMI_H
++
++#include <linux/io.h>
++#include <linux/slab.h>
++
++#define dmi_early_remap(x, l)		memremap(x, l, MEMREMAP_WB)
++#define dmi_early_unmap(x, l)		memunmap(x)
++#define dmi_remap(x, l)			memremap(x, l, MEMREMAP_WB)
++#define dmi_unmap(x)			memunmap(x)
++#define dmi_alloc(l)			kzalloc(l, GFP_KERNEL)
++
++#endif
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 5d17f377d905..82cd07592519 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -11,7 +11,6 @@
+  *
+  */
+ 
+-#include <linux/dmi.h>
+ #include <linux/efi.h>
+ #include <linux/init.h>
+ 
+@@ -117,20 +116,6 @@ int __init efi_set_mapping_permissions(struct mm_struct *mm,
+ 				   set_permissions, md);
+ }
+ 
+-static int __init arm64_dmi_init(void)
+-{
+-	/*
+-	 * On arm64, DMI depends on UEFI, and dmi_scan_machine() needs to
+-	 * be called early because dmi_id_init(), which is an arch_initcall
+-	 * itself, depends on dmi_scan_machine() having been called already.
+-	 */
+-	dmi_scan_machine();
+-	if (dmi_available)
+-		dmi_set_dump_stack_arch_desc();
+-	return 0;
+-}
+-core_initcall(arm64_dmi_init);
+-
+ /*
+  * UpdateCapsule() depends on the system being shutdown via
+  * ResetSystem().
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 974c5a31a005..1cc41c3d6315 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -11,6 +11,7 @@
+  *
+  */
+ 
++#include <linux/dmi.h>
+ #include <linux/efi.h>
+ #include <linux/io.h>
+ #include <linux/memblock.h>
+@@ -166,3 +167,18 @@ void efi_virtmap_unload(void)
+ 	efi_set_pgd(current->active_mm);
+ 	preempt_enable();
+ }
++
++
++static int __init arm_dmi_init(void)
++{
++	/*
++	 * On arm64/ARM, DMI depends on UEFI, and dmi_scan_machine() needs to
++	 * be called early because dmi_id_init(), which is an arch_initcall
++	 * itself, depends on dmi_scan_machine() having been called already.
++	 */
++	dmi_scan_machine();
++	if (dmi_available)
++		dmi_set_dump_stack_arch_desc();
++	return 0;
++}
++core_initcall(arm_dmi_init);
+-- 
+2.9.3
