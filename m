@@ -1,53 +1,41 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 11/13] efi/efi_test: Use memdup_user() helper
-Date: Fri,  2 Jun 2017 13:52:05 +0000
-Message-ID: <20170602135207.21708-12-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 05/13] efi/capsule: Adjust return type of efi_capsule_setup_info
+Date: Fri,  2 Jun 2017 13:51:59 +0000
+Message-ID: <20170602135207.21708-6-ard.biesheuvel@linaro.org>
 References: <20170602135207.21708-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170602135207.21708-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Geliang Tang <geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170602135207.21708-1-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Jan Kiszka <jan.kiszka@siemens.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Geliang Tang <geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Jan Kiszka <jan.kiszka@siemens.com>
 
-Use memdup_user() helper instead of open-coding to simplify the code.
+We actually expect int at the caller and never return any size
+information.
 
-Signed-off-by: Geliang Tang <geliangtang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Acked-by: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Jan Kiszka <jan.kiszka@siemens.com>
+Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/test/efi_test.c | 11 +++--------
- 1 file changed, 3 insertions(+), 8 deletions(-)
+ drivers/firmware/efi/capsule-loader.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
-index 8cd578f62059..08129b7b80ab 100644
---- a/drivers/firmware/efi/test/efi_test.c
-+++ b/drivers/firmware/efi/test/efi_test.c
-@@ -71,18 +71,13 @@ copy_ucs2_from_user_len(efi_char16_t **dst, efi_char16_t __user *src,
- 	if (!access_ok(VERIFY_READ, src, 1))
- 		return -EFAULT;
- 
--	buf = kmalloc(len, GFP_KERNEL);
--	if (!buf) {
-+	buf = memdup_user(src, len);
-+	if (IS_ERR(buf)) {
- 		*dst = NULL;
--		return -ENOMEM;
-+		return PTR_ERR(buf);
- 	}
- 	*dst = buf;
- 
--	if (copy_from_user(*dst, src, len)) {
--		kfree(buf);
--		return -EFAULT;
--	}
--
- 	return 0;
- }
- 
+diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+index 3fb91e1597a9..37d3f6ec2d28 100644
+--- a/drivers/firmware/efi/capsule-loader.c
++++ b/drivers/firmware/efi/capsule-loader.c
+@@ -53,8 +53,8 @@ static void efi_free_all_buff_pages(struct capsule_info *cap_info)
+  * @kbuff: a mapped first page buffer pointer
+  * @hdr_bytes: the total received number of bytes for efi header
+  **/
+-static ssize_t efi_capsule_setup_info(struct capsule_info *cap_info,
+-				      void *kbuff, size_t hdr_bytes)
++static int efi_capsule_setup_info(struct capsule_info *cap_info,
++				  void *kbuff, size_t hdr_bytes)
+ {
+ 	efi_capsule_header_t *cap_hdr;
+ 	size_t pages_needed;
 -- 
 2.9.3
