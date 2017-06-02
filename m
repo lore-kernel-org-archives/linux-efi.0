@@ -1,93 +1,214 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 12/13] x86/efi: Add EFI_PGT_DUMP support for x86_32 and kexec
-Date: Fri,  2 Jun 2017 13:52:06 +0000
-Message-ID: <20170602135207.21708-13-ard.biesheuvel@linaro.org>
+Subject: [PATCH 10/13] efi/capsule: Add support for Quark security header
+Date: Fri,  2 Jun 2017 13:52:04 +0000
+Message-ID: <20170602135207.21708-11-ard.biesheuvel@linaro.org>
 References: <20170602135207.21708-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170602135207.21708-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Jan Kiszka <jan.kiszka@siemens.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+From: Jan Kiszka <jan.kiszka@siemens.com>
 
-EFI_PGT_DUMP, as the name suggests dumps efi page tables to dmesg during
-kernel boot. This feature is very useful while debugging page
-faults/null pointer dereferences to efi related addresses. Presently,
-this feature is limited only to x86_64, so let's extend it to other efi
-configurations like kexec kernel, efi=old_map and to x86_32 as well.
-This doesn't effect normal boot path because this config option should
-be used only for debug purposes.
+The firmware for Quark X102x prepends a security header to the capsule
+which is needed to support the mandatory secure boot on this processor.
+The header can be detected by checking for the "_CSH" signature and -
+to avoid any GUID conflict - validating its size field to contain the
+expected value. Then we need to look for the EFI header right after the
+security header and pass the real header to __efi_capsule_setup_info.
 
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Ricardo Neri <ricardo.neri@intel.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+To be minimal invasive and maximal safe, the quirk version of
+efi_capsule_identify_image is only effective on Quark processors.
+
+Signed-off-by: Jan Kiszka <jan.kiszka@siemens.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Tested-by: "Bryan O'Donoghue" <pure.logic@nexus-software.ie>
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/platform/efi/efi.c    | 3 ++-
- arch/x86/platform/efi/efi_32.c | 9 ++++++++-
- arch/x86/platform/efi/efi_64.c | 5 ++++-
- 3 files changed, 14 insertions(+), 3 deletions(-)
+ arch/x86/platform/efi/quirks.c | 137 +++++++++++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/Kconfig   |   9 +++
+ 2 files changed, 146 insertions(+)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index dc2da5e2c7e4..3cf8536e803b 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -1012,7 +1012,6 @@ static void __init __efi_enter_virtual_mode(void)
- 	 * necessary relocation fixups for the new virtual addresses.
- 	 */
- 	efi_runtime_update_mappings();
--	efi_dump_pagetable();
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 26615991d69c..93867ee08eac 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -15,12 +15,66 @@
+ #include <asm/e820/api.h>
+ #include <asm/efi.h>
+ #include <asm/uv/uv.h>
++#include <asm/cpu_device_id.h>
  
- 	/* clean DUMMY object */
- 	efi_delete_dummy_variable();
-@@ -1027,6 +1026,8 @@ void __init efi_enter_virtual_mode(void)
- 		kexec_enter_virtual_mode();
- 	else
- 		__efi_enter_virtual_mode();
+ #define EFI_MIN_RESERVE 5120
+ 
+ #define EFI_DUMMY_GUID \
+ 	EFI_GUID(0x4424ac57, 0xbe4b, 0x47dd, 0x9e, 0x97, 0xed, 0x50, 0xf0, 0x9f, 0x92, 0xa9)
+ 
++#define QUARK_CSH_SIGNATURE		0x5f435348	/* _CSH */
++#define QUARK_SECURITY_HEADER_SIZE	0x400
 +
-+	efi_dump_pagetable();
- }
- 
- /*
-diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
-index 403a987d06c7..fe18c5d32bf0 100644
---- a/arch/x86/platform/efi/efi_32.c
-+++ b/arch/x86/platform/efi/efi_32.c
-@@ -44,7 +44,14 @@ int __init efi_alloc_page_tables(void)
- }
- 
- void efi_sync_low_kernel_mappings(void) {}
--void __init efi_dump_pagetable(void) {}
++/*
++ * Header prepended to the standard EFI capsule on Quark systems the are based
++ * on Intel firmware BSP.
++ * @csh_signature:	Unique identifier to sanity check signed module
++ * 			presence ("_CSH").
++ * @version:		Current version of CSH used. Should be one for Quark A0.
++ * @modulesize:		Size of the entire module including the module header
++ * 			and payload.
++ * @security_version_number_index: Index of SVN to use for validation of signed
++ * 			module.
++ * @security_version_number: Used to prevent against roll back of modules.
++ * @rsvd_module_id:	Currently unused for Clanton (Quark).
++ * @rsvd_module_vendor:	Vendor Identifier. For Intel products value is
++ * 			0x00008086.
++ * @rsvd_date:		BCD representation of build date as yyyymmdd, where
++ * 			yyyy=4 digit year, mm=1-12, dd=1-31.
++ * @headersize:		Total length of the header including including any
++ * 			padding optionally added by the signing tool.
++ * @hash_algo:		What Hash is used in the module signing.
++ * @cryp_algo:		What Crypto is used in the module signing.
++ * @keysize:		Total length of the key data including including any
++ * 			padding optionally added by the signing tool.
++ * @signaturesize:	Total length of the signature including including any
++ * 			padding optionally added by the signing tool.
++ * @rsvd_next_header:	32-bit pointer to the next Secure Boot Module in the
++ * 			chain, if there is a next header.
++ * @rsvd:		Reserved, padding structure to required size.
++ *
++ * See also QuartSecurityHeader_t in
++ * Quark_EDKII_v1.2.1.1/QuarkPlatformPkg/Include/QuarkBootRom.h
++ * from https://downloadcenter.intel.com/download/23197/Intel-Quark-SoC-X1000-Board-Support-Package-BSP
++ */
++struct quark_security_header {
++	u32 csh_signature;
++	u32 version;
++	u32 modulesize;
++	u32 security_version_number_index;
++	u32 security_version_number;
++	u32 rsvd_module_id;
++	u32 rsvd_module_vendor;
++	u32 rsvd_date;
++	u32 headersize;
++	u32 hash_algo;
++	u32 cryp_algo;
++	u32 keysize;
++	u32 signaturesize;
++	u32 rsvd_next_header;
++	u32 rsvd[2];
++};
 +
-+void __init efi_dump_pagetable(void)
+ static efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
+ 
+ static bool efi_no_storage_paranoia;
+@@ -501,3 +555,86 @@ bool efi_poweroff_required(void)
+ {
+ 	return acpi_gbl_reduced_hardware || acpi_no_s5;
+ }
++
++#ifdef CONFIG_EFI_CAPSULE_QUIRK_QUARK_CSH
++
++static int qrk_capsule_setup_info(struct capsule_info *cap_info, void **pkbuff,
++				  size_t hdr_bytes)
 +{
-+#ifdef CONFIG_EFI_PGT_DUMP
-+	ptdump_walk_pgd_level(NULL, swapper_pg_dir);
-+#endif
++	struct quark_security_header *csh = *pkbuff;
++
++	/* Only process data block that is larger than the security header */
++	if (hdr_bytes < sizeof(struct quark_security_header))
++		return 0;
++
++	if (csh->csh_signature != QUARK_CSH_SIGNATURE ||
++	    csh->headersize != QUARK_SECURITY_HEADER_SIZE)
++		return 1;
++
++	/* Only process data block if EFI header is included */
++	if (hdr_bytes < QUARK_SECURITY_HEADER_SIZE +
++			sizeof(efi_capsule_header_t))
++		return 0;
++
++	pr_debug("Quark security header detected\n");
++
++	if (csh->rsvd_next_header != 0) {
++		pr_err("multiple Quark security headers not supported\n");
++		return -EINVAL;
++	}
++
++	*pkbuff += csh->headersize;
++	cap_info->total_size = csh->headersize;
++
++	/*
++	 * Update the first page pointer to skip over the CSH header.
++	 */
++	cap_info->pages[0] += csh->headersize;
++
++	return 1;
 +}
 +
- int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- {
- 	return 0;
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 6fbf6c47e603..0d8180811445 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -528,7 +528,10 @@ void __init efi_runtime_update_mappings(void)
- void __init efi_dump_pagetable(void)
- {
- #ifdef CONFIG_EFI_PGT_DUMP
--	ptdump_walk_pgd_level(NULL, efi_pgd);
-+	if (efi_enabled(EFI_OLD_MEMMAP))
-+		ptdump_walk_pgd_level(NULL, swapper_pg_dir);
-+	else
-+		ptdump_walk_pgd_level(NULL, efi_pgd);
- #endif
- }
++#define ICPU(family, model, quirk_handler) \
++	{ X86_VENDOR_INTEL, family, model, X86_FEATURE_ANY, \
++	  (unsigned long)&quirk_handler }
++
++static const struct x86_cpu_id efi_capsule_quirk_ids[] = {
++	ICPU(5, 9, qrk_capsule_setup_info),	/* Intel Quark X1000 */
++	{ }
++};
++
++int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
++			   size_t hdr_bytes)
++{
++	int (*quirk_handler)(struct capsule_info *, void **, size_t);
++	const struct x86_cpu_id *id;
++	int ret;
++
++	if (hdr_bytes < sizeof(efi_capsule_header_t))
++		return 0;
++
++	cap_info->total_size = 0;
++
++	id = x86_match_cpu(efi_capsule_quirk_ids);
++	if (id) {
++		/*
++		 * The quirk handler is supposed to return
++		 *  - a value > 0 if the setup should continue, after advancing
++		 *    kbuff as needed
++		 *  - 0 if not enough hdr_bytes are available yet
++		 *  - a negative error code otherwise
++		 */
++		quirk_handler = (typeof(quirk_handler))id->driver_data;
++		ret = quirk_handler(cap_info, &kbuff, hdr_bytes);
++		if (ret <= 0)
++			return ret;
++	}
++
++	memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
++
++	cap_info->total_size += cap_info->header.imagesize;
++
++	return __efi_capsule_setup_info(cap_info);
++}
++
++#endif
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 2e78b0b96d74..394db40ed374 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -112,6 +112,15 @@ config EFI_CAPSULE_LOADER
  
+ 	  Most users should say N.
+ 
++config EFI_CAPSULE_QUIRK_QUARK_CSH
++	boolean "Add support for Quark capsules with non-standard headers"
++	depends on X86 && !64BIT
++	select EFI_CAPSULE_LOADER
++	default y
++	help
++	  Add support for processing Quark X1000 EFI capsules, whose header
++	  layout deviates from the layout mandated by the UEFI specification.
++
+ config EFI_TEST
+ 	tristate "EFI Runtime Service Tests Support"
+ 	depends on EFI
 -- 
 2.9.3
