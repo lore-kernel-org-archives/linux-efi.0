@@ -1,120 +1,93 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 09/13] efi/capsule-loader: Use page addresses rather than struct page pointers
-Date: Fri,  2 Jun 2017 13:52:03 +0000
-Message-ID: <20170602135207.21708-10-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 12/13] x86/efi: Add EFI_PGT_DUMP support for x86_32 and kexec
+Date: Fri,  2 Jun 2017 13:52:06 +0000
+Message-ID: <20170602135207.21708-13-ard.biesheuvel@linaro.org>
 References: <20170602135207.21708-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170602135207.21708-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170602135207.21708-1-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-To give some leeway to code that handles non-standard capsule headers,
-let's keep an array of page addresses rather than struct page pointers.
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-This gives special implementations of efi_capsule_setup_info() the
-opportunity to mangle the payload a bit before it is presented to the
-firmware, without putting any knowledge of the nature of such quirks
-into the generic code.
+EFI_PGT_DUMP, as the name suggests dumps efi page tables to dmesg during
+kernel boot. This feature is very useful while debugging page
+faults/null pointer dereferences to efi related addresses. Presently,
+this feature is limited only to x86_64, so let's extend it to other efi
+configurations like kexec kernel, efi=old_map and to x86_32 as well.
+This doesn't effect normal boot path because this config option should
+be used only for debug purposes.
 
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Tested-by: "Bryan O'Donoghue" <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- drivers/firmware/efi/capsule-loader.c | 12 ++++++++----
- drivers/firmware/efi/capsule.c        |  7 ++++---
- include/linux/efi.h                   |  4 ++--
- 3 files changed, 14 insertions(+), 9 deletions(-)
+ arch/x86/platform/efi/efi.c    | 3 ++-
+ arch/x86/platform/efi/efi_32.c | 9 ++++++++-
+ arch/x86/platform/efi/efi_64.c | 5 ++++-
+ 3 files changed, 14 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-index cbc3526953d5..ec8ac5c4dd84 100644
---- a/drivers/firmware/efi/capsule-loader.c
-+++ b/drivers/firmware/efi/capsule-loader.c
-@@ -20,6 +20,10 @@
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index dc2da5e2c7e4..3cf8536e803b 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -1012,7 +1012,6 @@ static void __init __efi_enter_virtual_mode(void)
+ 	 * necessary relocation fixups for the new virtual addresses.
+ 	 */
+ 	efi_runtime_update_mappings();
+-	efi_dump_pagetable();
  
- #define NO_FURTHER_WRITE_ACTION -1
- 
-+#ifndef phys_to_page
-+#define phys_to_page(x)		pfn_to_page((x) >> PAGE_SHIFT)
-+#endif
+ 	/* clean DUMMY object */
+ 	efi_delete_dummy_variable();
+@@ -1027,6 +1026,8 @@ void __init efi_enter_virtual_mode(void)
+ 		kexec_enter_virtual_mode();
+ 	else
+ 		__efi_enter_virtual_mode();
 +
- /**
-  * efi_free_all_buff_pages - free all previous allocated buffer pages
-  * @cap_info: pointer to current instance of capsule_info structure
-@@ -31,7 +35,7 @@
- static void efi_free_all_buff_pages(struct capsule_info *cap_info)
- {
- 	while (cap_info->index > 0)
--		__free_page(cap_info->pages[--cap_info->index]);
-+		__free_page(phys_to_page(cap_info->pages[--cap_info->index]));
- 
- 	cap_info->index = NO_FURTHER_WRITE_ACTION;
++	efi_dump_pagetable();
  }
-@@ -161,12 +165,12 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
- 			goto failed;
- 		}
  
--		cap_info->pages[cap_info->index++] = page;
-+		cap_info->pages[cap_info->index++] = page_to_phys(page);
- 		cap_info->page_bytes_remain = PAGE_SIZE;
-+	} else {
-+		page = phys_to_page(cap_info->pages[cap_info->index - 1]);
- 	}
+ /*
+diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
+index 403a987d06c7..fe18c5d32bf0 100644
+--- a/arch/x86/platform/efi/efi_32.c
++++ b/arch/x86/platform/efi/efi_32.c
+@@ -44,7 +44,14 @@ int __init efi_alloc_page_tables(void)
+ }
  
--	page = cap_info->pages[cap_info->index - 1];
--
- 	kbuff = kmap(page);
- 	kbuff += PAGE_SIZE - cap_info->page_bytes_remain;
- 
-diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
-index e603ccf39d80..901b9306bf94 100644
---- a/drivers/firmware/efi/capsule.c
-+++ b/drivers/firmware/efi/capsule.c
-@@ -214,7 +214,7 @@ efi_capsule_update_locked(efi_capsule_header_t *capsule,
-  *
-  * Return 0 on success, a converted EFI status code on failure.
-  */
--int efi_capsule_update(efi_capsule_header_t *capsule, struct page **pages)
-+int efi_capsule_update(efi_capsule_header_t *capsule, phys_addr_t *pages)
+ void efi_sync_low_kernel_mappings(void) {}
+-void __init efi_dump_pagetable(void) {}
++
++void __init efi_dump_pagetable(void)
++{
++#ifdef CONFIG_EFI_PGT_DUMP
++	ptdump_walk_pgd_level(NULL, swapper_pg_dir);
++#endif
++}
++
+ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
  {
- 	u32 imagesize = capsule->imagesize;
- 	efi_guid_t guid = capsule->guid;
-@@ -249,10 +249,11 @@ int efi_capsule_update(efi_capsule_header_t *capsule, struct page **pages)
- 		sglist = kmap(sg_pages[i]);
+ 	return 0;
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 6fbf6c47e603..0d8180811445 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -528,7 +528,10 @@ void __init efi_runtime_update_mappings(void)
+ void __init efi_dump_pagetable(void)
+ {
+ #ifdef CONFIG_EFI_PGT_DUMP
+-	ptdump_walk_pgd_level(NULL, efi_pgd);
++	if (efi_enabled(EFI_OLD_MEMMAP))
++		ptdump_walk_pgd_level(NULL, swapper_pg_dir);
++	else
++		ptdump_walk_pgd_level(NULL, efi_pgd);
+ #endif
+ }
  
- 		for (j = 0; j < SGLIST_PER_PAGE && count > 0; j++) {
--			u64 sz = min_t(u64, imagesize, PAGE_SIZE);
-+			u64 sz = min_t(u64, imagesize,
-+				       PAGE_SIZE - (u64)*pages % PAGE_SIZE);
- 
- 			sglist[j].length = sz;
--			sglist[j].data = page_to_phys(*pages++);
-+			sglist[j].data = *pages++;
- 
- 			imagesize -= sz;
- 			count--;
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index a7379a2b5680..8269bcb8ccf7 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -143,7 +143,7 @@ struct capsule_info {
- 	long			index;
- 	size_t			count;
- 	size_t			total_size;
--	struct page		**pages;
-+	phys_addr_t		*pages;
- 	size_t			page_bytes_remain;
- };
- 
-@@ -1415,7 +1415,7 @@ extern int efi_capsule_supported(efi_guid_t guid, u32 flags,
- 				 size_t size, int *reset);
- 
- extern int efi_capsule_update(efi_capsule_header_t *capsule,
--			      struct page **pages);
-+			      phys_addr_t *pages);
- 
- #ifdef CONFIG_EFI_RUNTIME_MAP
- int efi_runtime_map_init(struct kobject *);
 -- 
 2.9.3
