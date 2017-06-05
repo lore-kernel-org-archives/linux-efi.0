@@ -1,51 +1,70 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [PATCH 10/13] efi/capsule: Add support for Quark security header
-Date: Mon, 5 Jun 2017 18:11:43 +0200
-Message-ID: <20170605161143.3ftptomo6ynh7wau@gmail.com>
+From: Andy Lutomirski <luto@kernel.org>
+Subject: Re: [PATCH 01/13] x86/efi: Clean up efi CR3 save/restore
+Date: Mon, 5 Jun 2017 09:14:05 -0700
+Message-ID: <CALCETrX=14Mg+ZFdfTOBJh_KEBqk_bRNYvKR5DhUjyci0DqiBA@mail.gmail.com>
 References: <20170602135207.21708-1-ard.biesheuvel@linaro.org>
- <20170602135207.21708-11-ard.biesheuvel@linaro.org>
- <20170605155050.fuhwcjkmmdqc67d2@gmail.com>
- <CAKv+Gu8ByPXuWGNXGhbVrzyBd98r7ib8trGySEsC1FxrqY=38A@mail.gmail.com>
+ <20170602135207.21708-2-ard.biesheuvel@linaro.org> <20170605154058.r5b2eivguzhfrnnr@gmail.com>
+ <CAKv+Gu8HG+hJyYdBLz5eO1QNCgYN4yrxrT+epPmbTGiS4vBi7w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu8ByPXuWGNXGhbVrzyBd98r7ib8trGySEsC1FxrqY=38A@mail.gmail.com>
+In-Reply-To: <CAKv+Gu8HG+hJyYdBLz5eO1QNCgYN4yrxrT+epPmbTGiS4vBi7w@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Jan Kiszka <jan.kiszka@siemens.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@alien8.de>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
+On Mon, Jun 5, 2017 at 9:03 AM, Ard Biesheuvel
+<ard.biesheuvel@linaro.org> wrote:
+> On 5 June 2017 at 15:40, Ingo Molnar <mingo@kernel.org> wrote:
+>>
+>> * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+>>
+>>> From: Andy Lutomirski <luto@kernel.org>
+>>>
+>>> efi_call_phys_prolog() used to return a "pgd_t *" that meant one of
+>>> three different things depending on kernel and system configuration.
+>>> Clean it up so it uses a union and is more explicit about what's
+>>> going on.
+>>>
+>>> Signed-off-by: Andy Lutomirski <luto@kernel.org>
+>>> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>>> Cc: Borislav Petkov <bp@alien8.de>
+>>> Cc: Andy Lutomirski <luto@amacapital.net>
+>>> Cc: Ingo Molnar <mingo@kernel.org>
+>>> Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+>>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>>> ---
+>>>  arch/x86/include/asm/efi.h     | 17 +++++++++++++++--
+>>>  arch/x86/platform/efi/efi.c    |  6 +++---
+>>>  arch/x86/platform/efi/efi_32.c | 12 ++++++------
+>>>  arch/x86/platform/efi/efi_64.c | 22 ++++++++++++----------
+>>>  4 files changed, 36 insertions(+), 21 deletions(-)
+>>
+>> Hm, this patch does not apply cleanly to v4.12-rc4:
+>>
+>>  Applying patch patches/x86efi_Clean_up_efi_CR3_saverestore-1.patch
+>>  patching file arch/x86/include/asm/efi.h
+>>  patching file arch/x86/platform/efi/efi.c
+>>  patching file arch/x86/platform/efi/efi_32.c
+>>  patching file arch/x86/platform/efi/efi_64.c
+>>  Hunk #1 FAILED at 69.
+>>  Hunk #2 FAILED at 86.
+>>  Hunk #3 succeeded at 152 with fuzz 1 (offset 44 lines).
+>>  Hunk #4 FAILED at 116.
+>>  3 out of 4 hunks FAILED -- rejects in file arch/x86/platform/efi/efi_64.c
+>>
+>> what tree is this against?
+>>
+>
+> This is against v4.12-rc3, which lacked the EFI fix Matt sent out in
+> the mean time.
+>
+> Feel free to drop it for now, and we can requeue it later if Andy is
+> willing to rebase it.
 
-* Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+I had hoped this would make it into 4.12-rc1 so I could base PCID on
+top of it.  I'll probably resend it once PCID lands and base it on
+PCID instead.  (It's a trivial one-line conflict, but still...)
 
-> >> +config EFI_CAPSULE_QUIRK_QUARK_CSH
-> >> +     boolean "Add support for Quark capsules with non-standard headers"
-> >> +     depends on X86 && !64BIT
-> >> +     select EFI_CAPSULE_LOADER
-> >> +     default y
-> >> +     help
-> >> +       Add support for processing Quark X1000 EFI capsules, whose header
-> >> +       layout deviates from the layout mandated by the UEFI specification.
-> >
-> > BTW., there's no need to further put this behind a Kconfig option: the quirk seems
-> > targeted enough, and the whole point of runtime quirks is so that can be applied
-> > safely within generic kernels. Turning them off via Kconfig seems wrong.
-> >
-> 
-> Not entirely: enabling this quirk will remove the ability to select
-> EFI_CAPSULE_LOADER as a module. So making it unconditional makes
-> EFI_CAPSULE_LOADER builtin-only for 32-bit x86. This is necessary for
-> the override of __weak symbols in the generic capsule code to work as
-> expected.
-> 
-> This was a compromise between allowing no capsule loader quirks at
-> all, and having an elaborate framework with hooks in various places
-> (which invariably ends up parameterizing the wrong things if you have
-> only one real world quirk to design your framework around).
-
-Ok, I see - fair enough!
-
-Thanks,
-
-	Ingo
+--Andy
