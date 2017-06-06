@@ -1,70 +1,46 @@
-From: Andy Lutomirski <luto@kernel.org>
-Subject: Re: [PATCH 01/13] x86/efi: Clean up efi CR3 save/restore
-Date: Mon, 5 Jun 2017 09:14:05 -0700
-Message-ID: <CALCETrX=14Mg+ZFdfTOBJh_KEBqk_bRNYvKR5DhUjyci0DqiBA@mail.gmail.com>
-References: <20170602135207.21708-1-ard.biesheuvel@linaro.org>
- <20170602135207.21708-2-ard.biesheuvel@linaro.org> <20170605154058.r5b2eivguzhfrnnr@gmail.com>
- <CAKv+Gu8HG+hJyYdBLz5eO1QNCgYN4yrxrT+epPmbTGiS4vBi7w@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH V17 02/11] ras: acpi/apei: cper: add support for generic
+ data v3 structure
+Date: Tue, 6 Jun 2017 09:22:15 +0000
+Message-ID: <CAKv+Gu-JVeR7DJa-tMhNXtfv2tQGB67H+m=raqBj5X48n9oKPw@mail.gmail.com>
+References: <1495225933-4410-1-git-send-email-tbaicar@codeaurora.org>
+ <1495225933-4410-3-git-send-email-tbaicar@codeaurora.org>
+ <20170602141338.GJ6371@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu8HG+hJyYdBLz5eO1QNCgYN4yrxrT+epPmbTGiS4vBi7w@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@alien8.de>, Matt Fleming <matt@codeblueprint.co.uk>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <20170602141338.GJ6371@arm.com>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Will Deacon <will.deacon@arm.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, KVM devel mailing list <kvm@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, Tyler Baicar <tbaicar@codeaurora.org>, Robert Moore <robert.moore@intel.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Lv Zheng <lv.zheng@intel.com>, "kvmarm@lists.cs.columbia.edu" <kvmarm@lists.cs.columbia.edu>, Fu Wei <fu.wei@linaro.org>, "Rafael J. Wysocki" <rafael@kernel.org>, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, Russell King <linux@armlinux.org.uk>, gengdongjiu@huawei.com, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, eun.taik.lee@samsung.com, shijie.huang@arm.com, Laura Abbott <labbott@redhat.com>, Len Brown <lenb@kernel.org>, harba@codeaurora.org, John Garry <john.garry@huawei.com>, Marc Zyngier <marc.zyngier@arm.com>, Punit Agrawal <punit.ag>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jun 5, 2017 at 9:03 AM, Ard Biesheuvel
-<ard.biesheuvel@linaro.org> wrote:
-> On 5 June 2017 at 15:40, Ingo Molnar <mingo@kernel.org> wrote:
+On 2 June 2017 at 14:13, Will Deacon <will.deacon@arm.com> wrote:
+> On Fri, May 19, 2017 at 02:32:04PM -0600, Tyler Baicar wrote:
+>> The ACPI 6.1 spec adds a new revision of the generic error data
+>> entry structure. Add support to handle the new structure as well
+>> as properly verify and iterate through the generic data entries.
 >>
->> * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
->>
->>> From: Andy Lutomirski <luto@kernel.org>
->>>
->>> efi_call_phys_prolog() used to return a "pgd_t *" that meant one of
->>> three different things depending on kernel and system configuration.
->>> Clean it up so it uses a union and is more explicit about what's
->>> going on.
->>>
->>> Signed-off-by: Andy Lutomirski <luto@kernel.org>
->>> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->>> Cc: Borislav Petkov <bp@alien8.de>
->>> Cc: Andy Lutomirski <luto@amacapital.net>
->>> Cc: Ingo Molnar <mingo@kernel.org>
->>> Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
->>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->>> ---
->>>  arch/x86/include/asm/efi.h     | 17 +++++++++++++++--
->>>  arch/x86/platform/efi/efi.c    |  6 +++---
->>>  arch/x86/platform/efi/efi_32.c | 12 ++++++------
->>>  arch/x86/platform/efi/efi_64.c | 22 ++++++++++++----------
->>>  4 files changed, 36 insertions(+), 21 deletions(-)
->>
->> Hm, this patch does not apply cleanly to v4.12-rc4:
->>
->>  Applying patch patches/x86efi_Clean_up_efi_CR3_saverestore-1.patch
->>  patching file arch/x86/include/asm/efi.h
->>  patching file arch/x86/platform/efi/efi.c
->>  patching file arch/x86/platform/efi/efi_32.c
->>  patching file arch/x86/platform/efi/efi_64.c
->>  Hunk #1 FAILED at 69.
->>  Hunk #2 FAILED at 86.
->>  Hunk #3 succeeded at 152 with fuzz 1 (offset 44 lines).
->>  Hunk #4 FAILED at 116.
->>  3 out of 4 hunks FAILED -- rejects in file arch/x86/platform/efi/efi_64.c
->>
->> what tree is this against?
->>
+>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+>> CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+>> ---
+>>  drivers/acpi/apei/ghes.c    | 11 +++++------
+>>  drivers/firmware/efi/cper.c | 37 ++++++++++++++++++++++---------------
+>>  include/acpi/ghes.h         | 36 ++++++++++++++++++++++++++++++++++++
+>>  3 files changed, 63 insertions(+), 21 deletions(-)
 >
-> This is against v4.12-rc3, which lacked the EFI fix Matt sent out in
-> the mean time.
+> Given that Boris and Rafael are ok with this series, it makes sense to
+> take this via arm64, but I need an ack from Ard or Matt on the EFI changes
+> in this patch and the subsequent one.
 >
-> Feel free to drop it for now, and we can requeue it later if Andy is
-> willing to rebase it.
 
-I had hoped this would make it into 4.12-rc1 so I could base PCID on
-top of it.  I'll probably resend it once PCID lands and base it on
-PCID instead.  (It's a trivial one-line conflict, but still...)
-
---Andy
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
