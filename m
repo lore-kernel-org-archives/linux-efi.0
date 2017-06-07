@@ -1,36 +1,63 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 0/5] security, efi: Set lockdown if in secure boot mode
-Date: Tue, 06 Jun 2017 10:34:51 +0100
-Message-ID: <25009.1496741691@warthog.procyon.org.uk>
-References: <CAKv+Gu_vXASr=yDJ3MwT960eApqeWKEd-hqGoEyGsJKip7N+KQ@mail.gmail.com> <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk> <CAKv+Gu_5gUWwx7Sxgm8d03L4t4nF8dDe+AXqOqto4B7AVSZ9CA@mail.gmail.com> <21606.1496222635@warthog.procyon.org.uk>
+From: Dave Young <dyoung@redhat.com>
+Subject: Re: PROBLEM: Kernel panic on EFI BGRT early init code (kernel
+ 4.11/4.12rc2) [regression]
+Date: Wed, 7 Jun 2017 16:57:16 +0800
+Message-ID: <20170607085716.GA24648@dhcp-128-65.nay.redhat.com>
+References: <86c36f9b-f633-3354-d676-7693f35dae0d@gmail.com>
+ <20170526012342.GA3096@dhcp-128-65.nay.redhat.com>
+ <a32eea98-9576-1ee7-c27a-b165204d825f@gmail.com>
+ <20170527051427.GA3492@dhcp-128-65.nay.redhat.com>
+ <20170527053457.GB3492@dhcp-128-65.nay.redhat.com>
+ <df8e83f9-9362-b5b5-462d-b11980baac01@gmail.com>
+ <20170601015621.GA4306@dhcp-128-65.nay.redhat.com>
+ <e6d656c0-c76b-42c3-8413-0198efb8a33a@gmail.com>
+ <20170602025155.GA3637@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu_vXASr=yDJ3MwT960eApqeWKEd-hqGoEyGsJKip7N+KQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-ID: <25008.1496741691.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170602025155.GA3637@dhcp-128-65.nay.redhat.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Maniaxx <tripleshiftone@gmail.com>
+Cc: linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-
-> and print a subsequent line for every lockdown feature that is enabled, e.g.,
+On 06/02/17 at 10:51am, Dave Young wrote:
+> On 06/01/17 at 09:13pm, Maniaxx wrote:
+> > On 01.06.2017 at 03:57 wrote Dave Young:
+> > > This means the efi_bgrt_init failed out originally before the early init BGRT
+> > > patch. Checking the code the only difference is current code we have no
+> > > below code:
+> > > 
+> > >         status = acpi_get_table("BGRT", 0,
+> > >                                 (struct acpi_table_header **)&bgrt_tab);
+> > >         if (ACPI_FAILURE(status))
+> > >                 return;
+> > > 
+> > > So probably acpi_get_table has some more sanity checking and it failed
+> > > early. Can you add a printk before above return to confirm it? Just test
+> > > the old kernel without early init BGRT patch.
+> > 
+> > Doesn't fail early. I can see the printk.
 > 
-> lockdown: disabling MSRs
-> lockdown: disabling hibernate support
+> Since you do not see /sys/firmware/acpi/bgrt, that means there must be
+> somewhere failed early so bgrt image sysfs files are not created.
+> for old kernel arch/x86/platform/efi/efi-bgrt.c copy the bgrt image
+> then drivers/acpi/bgrt.c will populate the image in sysfs.
+> 
+> Can you do more debugging ie. adding more printk see why bgrt image
+> sysfs dir is not created?
+> 
+> If we get the reason then we can start to see what we missed in new
+> code.
 
-There's another problem with this idea: the lockdown facility is passive - it
-doesn't go looking for things to lock down; rather, things that can be locked
-down inquire as to whether lockdown is in effect at the point someone tries to
-use them.
+Please ignore the request, I observed in your old kernel boot log there
+is a ioremap error message about invalid physical address, so that is
+clear since ioremap failed then efi_bgrt_init bails out.
 
-Now, I could reserve a variable for each thing we lock down to make sure that
-we don't emit the message more than once, but I'm loathe to waste memory this
-way.
+In new code we use early_memremap, it seems lacks of checking invalid
+physical address, The firmware provides garbage in efi bgrt image
+addresses, I will work on a fix for this. 
 
-I can't so easily switch the facility to being active either, since a lot of
-the lockdownables are in modules.
-
-David
+Thanks
+Dave
