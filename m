@@ -1,99 +1,43 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH V17 08/11] efi: print unrecognized CPER section
-Date: Wed, 7 Jun 2017 10:08:13 +0000
-Message-ID: <CAKv+Gu8DjAnd5SSPchZnL+ZAK_MckgCveC8K3gVHbQy4zCnhbA@mail.gmail.com>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH V17 00/11] Add UEFI 2.6 and ACPI 6.1 updates for RAS on
+ ARM64
+Date: Wed, 7 Jun 2017 12:50:12 +0100
+Message-ID: <20170607115012.GZ30263@arm.com>
 References: <1495225933-4410-1-git-send-email-tbaicar@codeaurora.org>
- <1495225933-4410-9-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <1495225933-4410-9-git-send-email-tbaicar@codeaurora.org>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1495225933-4410-1-git-send-email-tbaicar@codeaurora.org>
+Sender: linux-acpi-owner@vger.kernel.org
 To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, KVM devel mailing list <kvm@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Robert Moore <robert.moore@intel.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Lv Zheng <lv.zheng@intel.com>, "kvmarm@lists.cs.columbia.edu" <kvmarm@lists.cs.columbia.edu>, Fu Wei <fu.wei@linaro.org>, "Rafael J. Wysocki" <rafael@kernel.org>, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, Russell King <linux@armlinux.org.uk>, gengdongjiu@huawei.com, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, eun.taik.lee@samsung.com, shijie.huang@arm.com, Laura Abbott <labbott@redhat.com>, Len Brown <lenb@kernel.org>, harba@codeaurora.org, John Garry <john.garry@huawei.com>, Marc Zyngier <marc.zyngier@arm.com>, Punit Agrawal <punit.agrawa>
+Cc: christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, Suzuki.Poulose@arm.
 List-Id: linux-efi@vger.kernel.org
 
-On 19 May 2017 at 21:32, Tyler Baicar <tbaicar@codeaurora.org> wrote:
-> UEFI spec allows for non-standard section in Common Platform Error
-> Record. This is defined in section N.2.3 of UEFI version 2.5.
->
-> Currently if the CPER section's type (UUID) does not match with
-> one of the section types that the kernel knows how to parse, the
-> section is skipped. Therefore, user is not able to see
-> such CPER data, for instance, error record of non-standard section.
->
-> This change prints out the raw data in hex in the dmesg buffer so
-> that non-standard sections are reported to the user. Non-standard
-> section type errors should be reported to the user because these
-> can include errors which are vendor specific. The data length is
-> taken from Error Data length field of Generic Error Data Entry.
->
-> The following is a sample output from dmesg:
->  Hardware error from APEI Generic Hardware Error Source: 2
->  It has been corrected by h/w and requires no further action
->  event severity: corrected
->   time: precise 2017-03-15 20:37:35
->   Error 0, type: corrected
->    section type: unknown, d2e2621c-f936-468d-0d84-15a4ed015c8b
->    section length: 0x238
->    00000000: 4d415201 4d492031 453a4d45 435f4343  .RAM1 IMEM:ECC_C
->    00000010: 53515f45 44525f42 00000000 00000000  E_QSB_RD........
->    00000020: 00000000 00000000 00000000 00000000  ................
->    00000030: 00000000 00000000 01010000 01010000  ................
->    00000040: 00000000 00000000 00000005 00000000  ................
->    00000050: 01010000 00000000 00000001 00dddd00  ................
-> ...
->
-> The raw data from the error can then be decoded using vendor
-> specific tools.
->
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-> Reviewed-by: James Morse <james.morse@arm.com>
+On Fri, May 19, 2017 at 02:32:02PM -0600, Tyler Baicar wrote:
+> When a memory error, CPU error, PCIe error, or other type of hardware error
+> that's covered by RAS occurs, firmware should populate the shared GHES memory
+> location with the proper GHES structures to notify the OS of the error.
+> For example, platforms that implement firmware first handling may implement
+> separate GHES sources for corrected errors and uncorrected errors. If the
+> error is an uncorrectable error, then the firmware will notify the OS
+> immediately since the error needs to be handled ASAP. The OS will then be able
+> to take the appropriate action needed such as offlining a page. If the error
+> is a corrected error, then the firmware will not interrupt the OS immediately.
+> Instead, the OS will see and report the error the next time it's GHES timer
+> expires. The kernel will first parse the GHES structures and report the errors
+> through the kernel logs and then notify the user space through RAS trace
+> events. This allows user space applications such as RAS Daemon to see the
+> errors and report them however the user desires. This patchset extends the
+> kernel functionality for RAS errors based on updates in the UEFI 2.6 and
+> ACPI 6.1 specifications.
 
-Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Thanks, I've pushed this out as:
 
-> ---
->  drivers/firmware/efi/cper.c | 11 +++++++++--
->  1 file changed, 9 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> index eac0854..d5a5855 100644
-> --- a/drivers/firmware/efi/cper.c
-> +++ b/drivers/firmware/efi/cper.c
-> @@ -585,8 +585,15 @@ static void cper_print_tstamp(const char *pfx,
->                 else
->                         goto err_section_too_small;
->  #endif
-> -       } else
-> -               printk("%s""section type: unknown, %pUl\n", newpfx, sec_type);
-> +       } else {
-> +               const void *err = acpi_hest_get_payload(gdata);
-> +
-> +               printk("%ssection type: unknown, %pUl\n", newpfx, sec_type);
-> +               printk("%ssection length: %#x\n", newpfx,
-> +                      gdata->error_data_length);
-> +               print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, 4, err,
-> +                              gdata->error_data_length, true);
-> +       }
->
->         return;
->
-> --
-> Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-> Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-> a Linux Foundation Collaborative Project.
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  git://git.kernel.org/pub/scm/linux/kernel/git/arm64/linux.git for-next/ras-apei
+
+which I'll merge into for-next/core (and therefore linux-next) either the
+end of this week or the beginning of next week. Please take a look if you
+get a chance.
+
+Will
