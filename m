@@ -1,25 +1,180 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH v6 25/34] swiotlb: Add warnings for use of bounce buffers
- with SME
-Date: Thu, 8 Jun 2017 00:58:29 -0700
-Message-ID: <20170608075829.GA2446@infradead.org>
-References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
- <20170607191732.28645.42876.stgit@tlendack-t1.amdoffice.net>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] x86/efi: fix boot panic because of invalid bgrt image address
+Date: Thu, 8 Jun 2017 10:02:58 +0000
+Message-ID: <CAKv+Gu_mHpuvC4X_SeY-BLw7AiAnnmTcE0QyPvYiJRtLY4rr_g@mail.gmail.com>
+References: <20170608053239.GA31232@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170607191732.28645.42876.stgit@tlendack-t1.amdoffice.net>
-Sender: linux-doc-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170608053239.GA31232@dhcp-128-65.nay.redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dave Young <dyoung@redhat.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, tripleshiftone@gmail.com
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jun 07, 2017 at 02:17:32PM -0500, Tom Lendacky wrote:
-> Add warnings to let the user know when bounce buffers are being used for
-> DMA when SME is active.  Since the bounce buffers are not in encrypted
-> memory, these notifications are to allow the user to determine some
-> appropriate action - if necessary.
+On 8 June 2017 at 05:32, Dave Young <dyoung@redhat.com> wrote:
+> Maniaxx <tripleshiftone@gmail.com> reported kernel boot panic similar to below:
+> (emulated the panic with using same invalid phys addr in a uefi vm)
+> There are also a bug in bugzilla.kernel.org:
+> https://bugzilla.kernel.org/show_bug.cgi?id=195633
+>
+> This happens after below commit:
+> 7b0a911 efi/x86: Move the EFI BGRT init code to early init code
+>
+> The root cause is the firmware on those machines provides invalid bgrt
+> image addresses.
+>
+> With original efi bgrt code we initialize bgrt late
+> and use ioremap to map the image address. In ioremap code we check the
+> address is a valid physical address or not before really map it.
+>
+> With current new efi bgrt code we moved the initialization to early code
+> so we switch to early_memremap which does not check the phys_addr like
+> ioremap does. This lead to the early kernel panics.
+>
+> Fix this by checking the image physical address, if it is not within
+> any EFI_BOOT_SERVICES_DATA areas then we just bail out. It is stronger
+> then the original ioremap checking, according to spec the BGRT data
+> should fall into EFI_BOOT_SERVICES_DATA.
+>
 
-And what would the action be?  Do we need a boot or other option to
-disallow this fallback for people who care deeply?
+Which spec? The UEFI spec does not mention BGRT, and given that it is
+an ACPI table, I would expect an ACPI reclaim region to be the most
+appropriate. A quick test with QEMU confirms this:
+
+ACPI: BGRT 0x000000013A5E0000 000038 (v01 INTEL  EDK2     00000002
+ 01000013)
+
+and
+
+efi:   0x00013a5e0000-0x00013a5effff [ACPI Reclaim Memory|   |  |  |
+|  |  |  |   |WB|  |  |  ]
+
+So while I agree that we have to fix this, and that checking the BGRT
+address against the UEFI memory map is the most appropriate course of
+action, requiring a certain region type is probably not what we want.
+
+We have a similar check for ESRT, in efi_mem_desc_lookup(), which
+looks a bit dodgy tbh, given that it allows any region type (including
+MMIO), as long as it has the EFI_MEMORY_RUNTIME attribute, which is
+almost certainly incorrect.
+
+So what I would like to see is a function that can tell you whether a
+certain address is covered by a region of a type that is normal
+memory, and is occupied, i.e.,
+
+EFI_RESERVED_TYPE
+EFI_LOADER_CODE
+EFI_LOADER_DATA
+EFI_BOOT_SERVICES_CODE
+EFI_BOOT_SERVICES_DATA
+EFI_RUNTIME_SERVICES_CODE
+EFI_RUNTIME_SERVICES_DATA
+EFI_ACPI_RECLAIM_MEMORY
+EFI_ACPI_MEMORY_NVS
+
+The EFI_MEMORY_RUNTIME attribute is irrelevant: the firmware itself
+does not have to read these tables at runtime, so it doesn't matter
+whether the O/S maps them on its behalf.
+
+If you could please stick that in drivers/firmware/efi/efi.c, and
+rework the patch to use it instead? I will move the ESRT code to it as
+well once this is merged.
+
+
+> [    0.000000] BUG: unable to handle kernel paging request at ffffffffff280001
+> [    0.000000] IP: efi_bgrt_init+0xfb/0x153
+> [    0.000000] PGD 6e00b067
+> [    0.000000] P4D 6e00b067
+> [    0.000000] PUD 6e00d067
+> [    0.000000] PMD 6e221067
+> [    0.000000] PTE 8a08e01800000163
+> [    0.000000]
+> [    0.000000] Oops: 0009 [#1] SMP
+> [    0.000000] Modules linked in:
+> [    0.000000] CPU: 0 PID: 0 Comm: swapper Not tainted 4.12.0-rc4+ #135
+> [    0.000000] Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 0.0.0 02/06/2015
+> [    0.000000] task: ffffffff9840f4c0 task.stack: ffffffff98400000
+> [    0.000000] RIP: 0010:efi_bgrt_init+0xfb/0x153
+> [    0.000000] RSP: 0000:ffffffff98403d50 EFLAGS: 00010082
+> [    0.000000] RAX: ffffffffff280001 RBX: 0000000000000000 RCX: 0000000000000006
+> [    0.000000] RDX: 0a08e01800001000 RSI: 8a08e01800000163 RDI: 000000000000057e
+> [    0.000000] RBP: ffffffff98403d68 R08: 0000000000000041 R09: 0000000000000002
+> [    0.000000] R10: 0000000000000000 R11: ffff8c063cff8fc6 R12: ffffffff981d1fb2
+> [    0.000000] R13: ffffffff986b4fa0 R14: 0000000000000010 R15: 0000000000000000
+> [    0.000000] FS:  0000000000000000(0000) GS:ffffffff984db000(0000) knlGS:0000000000000000
+> [    0.000000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [    0.000000] CR2: ffffffffff280001 CR3: 000000006e00a000 CR4: 00000000000406b0
+> [    0.000000] Call Trace:
+> [    0.000000]  ? bgrt_init+0xbc/0xbc
+> [    0.000000]  acpi_parse_bgrt+0xe/0x12
+> [    0.000000]  acpi_table_parse+0x89/0xb8
+> [    0.000000]  acpi_boot_init+0x445/0x4e2
+> [    0.000000]  ? acpi_parse_x2apic+0x79/0x79
+> [    0.000000]  ? dmi_ignore_irq0_timer_override+0x33/0x33
+> [    0.000000]  setup_arch+0xb63/0xc82
+> [    0.000000]  ? early_idt_handler_array+0x120/0x120
+> [    0.000000]  start_kernel+0xb7/0x443
+> [    0.000000]  ? early_idt_handler_array+0x120/0x120
+> [    0.000000]  x86_64_start_reservations+0x29/0x2b
+> [    0.000000]  x86_64_start_kernel+0x154/0x177
+> [    0.000000]  secondary_startup_64+0x9f/0x9f
+> [    0.000000] Code: 3f ff eb 6c 48 bf 01 00 00 00 18 e0 08 0a be 06 00 00 00 e8 ef 2b fe ff 48 85 c0 75 0e 48 c7 c7 88 09 22 98 e8 e1 31 3f ff eb 45 <66> 44 8b 20 be 06 00 00 00 48 89 c7 8b 58 02 e8 91 2c fe ff 66
+> [    0.000000] RIP: efi_bgrt_init+0xfb/0x153 RSP: ffffffff98403d50
+> [    0.000000] CR2: ffffffffff280001
+> [    0.000000] ---[ end trace 9843d3b7cbcab26a ]---
+> [    0.000000] Kernel panic - not syncing: Attempted to kill the idle task!
+> [    0.000000] ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
+>
+> Fixes: 7b0a911 efi/x86: Move the EFI BGRT init code to early init code
+> Reported-by: Maniaxx <tripleshiftone@gmail.com>
+> Signed-off-by: Dave Young <dyoung@redhat.com>
+> ---
+>  drivers/firmware/efi/efi-bgrt.c |   29 +++++++++++++++++++++++++++++
+>  1 file changed, 29 insertions(+)
+>
+> --- linux.orig/drivers/firmware/efi/efi-bgrt.c
+> +++ linux/drivers/firmware/efi/efi-bgrt.c
+> @@ -27,6 +27,31 @@ struct bmp_header {
+>         u32 size;
+>  } __packed;
+>
+> +static bool efi_bgrt_addr_valid(u64 addr)
+> +{
+> +       efi_memory_desc_t *md;
+> +
+> +       if (!efi_enabled(EFI_MEMMAP)) {
+> +               pr_err("EFI_MEMMAP is not enabled.\n");
+> +               return true;
+> +       }
+> +
+> +       for_each_efi_memory_desc(md) {
+> +               u64 size;
+> +               u64 end;
+> +
+> +               if (md->type != EFI_BOOT_SERVICES_DATA)
+> +                       continue;
+> +
+> +               size = md->num_pages << EFI_PAGE_SHIFT;
+> +               end = md->phys_addr + size;
+> +               if (addr >= md->phys_addr && addr < end)
+> +                       return true;
+> +       }
+> +
+> +       return false;
+> +}
+> +
+>  void __init efi_bgrt_init(struct acpi_table_header *table)
+>  {
+>         void *image;
+> @@ -65,6 +90,10 @@ void __init efi_bgrt_init(struct acpi_ta
+>                 goto out;
+>         }
+>
+> +       if (!efi_bgrt_addr_valid(bgrt->image_address)) {
+> +               pr_notice("Ignoring BGRT: invalid image address\n");
+> +               goto out;
+> +       }
+>         image = early_memremap(bgrt->image_address, sizeof(bmp_header));
+>         if (!image) {
+>                 pr_notice("Ignoring BGRT: failed to map image header memory\n");
