@@ -1,138 +1,115 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [PATCH v6 26/34] iommu/amd: Allow the AMD IOMMU to work with
- memory encryption
-Date: Thu, 8 Jun 2017 09:26:38 -0500
-Message-ID: <9ca73103-f202-b5b0-b449-79a4b8a8fd72@amd.com>
-References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
- <20170607191745.28645.81756.stgit@tlendack-t1.amdoffice.net>
- <CAOcCaLZ5QNx+CdnLn4eHtYOJOezJAsmq2whf8mggOdeMQDWOhw@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: fix boot panic because of invalid bgrt image address
+Date: Thu, 8 Jun 2017 14:27:35 +0000
+Message-ID: <CAKv+Gu8B6N0EukaSw4McsYYbRsfwVYvf7HPZm+PzKQtJLeELsQ@mail.gmail.com>
+References: <20170608053239.GA31232@dhcp-128-65.nay.redhat.com>
+ <CAKv+Gu_mHpuvC4X_SeY-BLw7AiAnnmTcE0QyPvYiJRtLY4rr_g@mail.gmail.com>
+ <20170608142026.GA4205@dhcp-128-65.nay.redhat.com> <CAKv+Gu9vFZ6MFasT-4OtGGpBCDgMWgCRwtn_t5--n0SG2D-h1A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <CAOcCaLZ5QNx+CdnLn4eHtYOJOezJAsmq2whf8mggOdeMQDWOhw@mail.gmail.com>
-Content-Language: en-US
-Sender: owner-linux-mm@kvack.org
-To: Nick Sarnie <commendsarnex@gmail.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Thomas Gleixner <tglx@linutronix.de>, Rik van Riel <riel@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Ingo Molnar <mingo@redhat.com>, "Michael S. Tsirkin" <mst@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Paolo Bonzini <pbonzini@redhat.com>, Alexander Potapenko <glider@google.com>, Dave Young <dyoung@redha>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKv+Gu9vFZ6MFasT-4OtGGpBCDgMWgCRwtn_t5--n0SG2D-h1A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, tripleshiftone-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 6/7/2017 9:38 PM, Nick Sarnie wrote:
-> On Wed, Jun 7, 2017 at 3:17 PM, Tom Lendacky <thomas.lendacky@amd.com> wrote:
->> The IOMMU is programmed with physical addresses for the various tables
->> and buffers that are used to communicate between the device and the
->> driver. When the driver allocates this memory it is encrypted. In order
->> for the IOMMU to access the memory as encrypted the encryption mask needs
->> to be included in these physical addresses during configuration.
+On 8 June 2017 at 14:24, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On 8 June 2017 at 14:20, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>> On 06/08/17 at 10:02am, Ard Biesheuvel wrote:
+>>> On 8 June 2017 at 05:32, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>>> > Maniaxx <tripleshiftone-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> reported kernel boot panic similar to below:
+>>> > (emulated the panic with using same invalid phys addr in a uefi vm)
+>>> > There are also a bug in bugzilla.kernel.org:
+>>> > https://bugzilla.kernel.org/show_bug.cgi?id=195633
+>>> >
+>>> > This happens after below commit:
+>>> > 7b0a911 efi/x86: Move the EFI BGRT init code to early init code
+>>> >
+>>> > The root cause is the firmware on those machines provides invalid bgrt
+>>> > image addresses.
+>>> >
+>>> > With original efi bgrt code we initialize bgrt late
+>>> > and use ioremap to map the image address. In ioremap code we check the
+>>> > address is a valid physical address or not before really map it.
+>>> >
+>>> > With current new efi bgrt code we moved the initialization to early code
+>>> > so we switch to early_memremap which does not check the phys_addr like
+>>> > ioremap does. This lead to the early kernel panics.
+>>> >
+>>> > Fix this by checking the image physical address, if it is not within
+>>> > any EFI_BOOT_SERVICES_DATA areas then we just bail out. It is stronger
+>>> > then the original ioremap checking, according to spec the BGRT data
+>>> > should fall into EFI_BOOT_SERVICES_DATA.
+>>> >
+>>>
+>>> Which spec? The UEFI spec does not mention BGRT, and given that it is
 >>
->> The PTE entries created by the IOMMU should also include the encryption
->> mask so that when the device behind the IOMMU performs a DMA, the DMA
->> will be performed to encrypted memory.
+>> It is mentioned in ACPI spec, see 6.1 spec section 5.2.22.4
+>> http://www.uefi.org/sites/default/files/resources/ACPI_6_1.pdf
 >>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->>   arch/x86/include/asm/mem_encrypt.h |    7 +++++++
->>   arch/x86/mm/mem_encrypt.c          |   30 ++++++++++++++++++++++++++++++
->>   drivers/iommu/amd_iommu.c          |   36 +++++++++++++++++++-----------------
->>   drivers/iommu/amd_iommu_init.c     |   18 ++++++++++++------
->>   drivers/iommu/amd_iommu_proto.h    |   10 ++++++++++
->>   drivers/iommu/amd_iommu_types.h    |    2 +-
->>   include/asm-generic/mem_encrypt.h  |    5 +++++
->>   7 files changed, 84 insertions(+), 24 deletions(-)
+>
+> I understand that. The reason for asking 'which spec' was your claim
+> that 'according to spec the BGRT data should fall into
+> EFI_BOOT_SERVICES_DATA'
+>
+>>> an ACPI table, I would expect an ACPI reclaim region to be the most
+>>> appropriate. A quick test with QEMU confirms this:
+>>>
+>>> ACPI: BGRT 0x000000013A5E0000 000038 (v01 INTEL  EDK2     00000002
+>>>  01000013)
+>>>
+>>> and
+>>>
+>>> efi:   0x00013a5e0000-0x00013a5effff [ACPI Reclaim Memory|   |  |  |
+>>> |  |  |  |   |WB|  |  |  ]
+>>>
+>>> So while I agree that we have to fix this, and that checking the BGRT
+>>> address against the UEFI memory map is the most appropriate course of
+>>> action, requiring a certain region type is probably not what we want.
+>>>
+>>> We have a similar check for ESRT, in efi_mem_desc_lookup(), which
+>>> looks a bit dodgy tbh, given that it allows any region type (including
+>>> MMIO), as long as it has the EFI_MEMORY_RUNTIME attribute, which is
+>>> almost certainly incorrect.
 >>
->> diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
->> index c7a2525..d86e544 100644
->> --- a/arch/x86/include/asm/mem_encrypt.h
->> +++ b/arch/x86/include/asm/mem_encrypt.h
->> @@ -31,6 +31,8 @@ void __init sme_early_decrypt(resource_size_t paddr,
+>> Yes, I had that in mind but it delayed for something else ..
 >>
->>   void __init sme_early_init(void);
+>>>
+>>> So what I would like to see is a function that can tell you whether a
+>>> certain address is covered by a region of a type that is normal
+>>> memory, and is occupied, i.e.,
+>>>
+>>> EFI_RESERVED_TYPE
+>>> EFI_LOADER_CODE
+>>> EFI_LOADER_DATA
+>>> EFI_BOOT_SERVICES_CODE
+>>> EFI_BOOT_SERVICES_DATA
+>>> EFI_RUNTIME_SERVICES_CODE
+>>> EFI_RUNTIME_SERVICES_DATA
+>>> EFI_ACPI_RECLAIM_MEMORY
+>>> EFI_ACPI_MEMORY_NVS
+>>>
+>>> The EFI_MEMORY_RUNTIME attribute is irrelevant: the firmware itself
+>>> does not have to read these tables at runtime, so it doesn't matter
+>>> whether the O/S maps them on its behalf.
+>>>
+>>> If you could please stick that in drivers/firmware/efi/efi.c, and
+>>> rework the patch to use it instead? I will move the ESRT code to it as
+>>> well once this is merged.
 >>
->> +bool sme_iommu_supported(void);
->> +
->>   /* Architecture __weak replacement functions */
->>   void __init mem_encrypt_init(void);
+>> Will think about this, I had some plan to change the desc lookup
+>> function but it was delayed for something else. For this bgrt issue since
+>> acpi spec clearly said it is in boot data, can we just check the boot
+>> data areas?
 >>
->> @@ -62,6 +64,11 @@ static inline void __init sme_early_init(void)
->>   {
->>   }
->>
->> +static inline bool sme_iommu_supported(void)
->> +{
->> +       return true;
->> +}
->> +
->>   #endif /* CONFIG_AMD_MEM_ENCRYPT */
->>
->>   static inline bool sme_active(void)
->> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
->> index 5d7c51d..018b58a 100644
->> --- a/arch/x86/mm/mem_encrypt.c
->> +++ b/arch/x86/mm/mem_encrypt.c
->> @@ -197,6 +197,36 @@ void __init sme_early_init(void)
->>                  protection_map[i] = pgprot_encrypted(protection_map[i]);
->>   }
->>
->> +bool sme_iommu_supported(void)
->> +{
->> +       struct cpuinfo_x86 *c = &boot_cpu_data;
->> +
->> +       if (!sme_me_mask || (c->x86 != 0x17))
->> +               return true;
->> +
->> +       /* For Fam17h, a specific level of support is required */
->> +       switch (c->microcode & 0xf000) {
->> +       case 0x0000:
->> +               return false;
->> +       case 0x1000:
->> +               switch (c->microcode & 0x0f00) {
->> +               case 0x0000:
->> +                       return false;
->> +               case 0x0100:
->> +                       if ((c->microcode & 0xff) < 0x26)
->> +                               return false;
->> +                       break;
->> +               case 0x0200:
->> +                       if ((c->microcode & 0xff) < 0x05)
->> +                               return false;
->> +                       break;
->> +               }
->> +               break;
->> +       }
->> +
->> +       return true;
->> +}
->> +
->>   /* Architecture __weak replacement functions */
->>   void __init mem_encrypt_init(void)
->>   {
-> 
+>
+> The BGRT *table* does not reside in EFI_BOOT_SERVICES_DATA, but
+> usually in ACPI reclaim memory. The BGRT *image* it points to must
+> reside in EFI_BOOT_SERVICES_DATA according to the ACPI spec, but this
+> region is disjoint from the ACPI table.
 
-...
+Oops.
 
-> 
-> Hi Tom,
-> 
-> This sounds like a cool feature. I'm trying to test it on my Ryzen
-> system, but c->microcode & 0xf000 is evaluating as 0, so IOMMU is not
-> being enabled on my system. I'm using the latest microcode for AGESA
-> 1.0.0.6, 0x08001126. Is this work reliant on a future microcode
-> update, or is there some other issue?
-
-This is my mistake. I moved the check and didn't re-test. At this point
-the c->microcode field hasn't been filled in so I'll need to read
-MSR_AMD64_PATCH_LEVEL directly in the sme_iommu_supported() function.
-
-Thanks,
-Tom
-
-> 
-> Thanks,
-> Sarnex
-> 
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+So you are validating the image address not the table address.
+Apologies for taking some time to catch up :-)
