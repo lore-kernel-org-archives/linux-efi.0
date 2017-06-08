@@ -1,149 +1,90 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: fix boot panic because of invalid bgrt image address
-Date: Thu, 8 Jun 2017 15:51:32 +0000
-Message-ID: <CAKv+Gu_Y9AB5805rW8nk_fCtc-vTohEHPune0PTQROxMn5YFPA@mail.gmail.com>
-References: <20170608053239.GA31232@dhcp-128-65.nay.redhat.com>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [PATCH v6 00/34] x86: Secure Memory Encryption (AMD)
+Date: Thu, 8 Jun 2017 11:14:38 -0500
+Message-ID: <2dd424fe-0af1-d82f-b608-271ea5e1f62b@amd.com>
+References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
+	<CAOcCaLYWoOu0c-Fkee-=wegNqkzUp9pLFLmaFrXuhiXRnUZ3Xw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170608053239.GA31232-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, tripleshiftone-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <CAOcCaLYWoOu0c-Fkee-=wegNqkzUp9pLFLmaFrXuhiXRnUZ3Xw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Nick Sarnie <commendsarnex-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel@vger.k
 List-Id: linux-efi@vger.kernel.org
 
- On 8 June 2017 at 05:32, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> Maniaxx <tripleshiftone-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> reported kernel boot panic similar to below:
-> (emulated the panic with using same invalid phys addr in a uefi vm)
-> There are also a bug in bugzilla.kernel.org:
-> https://bugzilla.kernel.org/show_bug.cgi?id=195633
->
-> This happens after below commit:
-> 7b0a911 efi/x86: Move the EFI BGRT init code to early init code
->
-> The root cause is the firmware on those machines provides invalid bgrt
-> image addresses.
->
-> With original efi bgrt code we initialize bgrt late
-> and use ioremap to map the image address. In ioremap code we check the
-> address is a valid physical address or not before really map it.
->
-> With current new efi bgrt code we moved the initialization to early code
-> so we switch to early_memremap which does not check the phys_addr like
-> ioremap does. This lead to the early kernel panics.
->
-> Fix this by checking the image physical address, if it is not within
-> any EFI_BOOT_SERVICES_DATA areas then we just bail out. It is stronger
-> then the original ioremap checking, according to spec the BGRT data
-> should fall into EFI_BOOT_SERVICES_DATA.
->
-> [    0.000000] BUG: unable to handle kernel paging request at ffffffffff280001
-> [    0.000000] IP: efi_bgrt_init+0xfb/0x153
-> [    0.000000] PGD 6e00b067
-> [    0.000000] P4D 6e00b067
-> [    0.000000] PUD 6e00d067
-> [    0.000000] PMD 6e221067
-> [    0.000000] PTE 8a08e01800000163
-> [    0.000000]
-> [    0.000000] Oops: 0009 [#1] SMP
-> [    0.000000] Modules linked in:
-> [    0.000000] CPU: 0 PID: 0 Comm: swapper Not tainted 4.12.0-rc4+ #135
-> [    0.000000] Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 0.0.0 02/06/2015
-> [    0.000000] task: ffffffff9840f4c0 task.stack: ffffffff98400000
-> [    0.000000] RIP: 0010:efi_bgrt_init+0xfb/0x153
-> [    0.000000] RSP: 0000:ffffffff98403d50 EFLAGS: 00010082
-> [    0.000000] RAX: ffffffffff280001 RBX: 0000000000000000 RCX: 0000000000000006
-> [    0.000000] RDX: 0a08e01800001000 RSI: 8a08e01800000163 RDI: 000000000000057e
-> [    0.000000] RBP: ffffffff98403d68 R08: 0000000000000041 R09: 0000000000000002
-> [    0.000000] R10: 0000000000000000 R11: ffff8c063cff8fc6 R12: ffffffff981d1fb2
-> [    0.000000] R13: ffffffff986b4fa0 R14: 0000000000000010 R15: 0000000000000000
-> [    0.000000] FS:  0000000000000000(0000) GS:ffffffff984db000(0000) knlGS:0000000000000000
-> [    0.000000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [    0.000000] CR2: ffffffffff280001 CR3: 000000006e00a000 CR4: 00000000000406b0
-> [    0.000000] Call Trace:
-> [    0.000000]  ? bgrt_init+0xbc/0xbc
-> [    0.000000]  acpi_parse_bgrt+0xe/0x12
-> [    0.000000]  acpi_table_parse+0x89/0xb8
-> [    0.000000]  acpi_boot_init+0x445/0x4e2
-> [    0.000000]  ? acpi_parse_x2apic+0x79/0x79
-> [    0.000000]  ? dmi_ignore_irq0_timer_override+0x33/0x33
-> [    0.000000]  setup_arch+0xb63/0xc82
-> [    0.000000]  ? early_idt_handler_array+0x120/0x120
-> [    0.000000]  start_kernel+0xb7/0x443
-> [    0.000000]  ? early_idt_handler_array+0x120/0x120
-> [    0.000000]  x86_64_start_reservations+0x29/0x2b
-> [    0.000000]  x86_64_start_kernel+0x154/0x177
-> [    0.000000]  secondary_startup_64+0x9f/0x9f
-> [    0.000000] Code: 3f ff eb 6c 48 bf 01 00 00 00 18 e0 08 0a be 06 00 00 00 e8 ef 2b fe ff 48 85 c0 75 0e 48 c7 c7 88 09 22 98 e8 e1 31 3f ff eb 45 <66> 44 8b 20 be 06 00 00 00 48 89 c7 8b 58 02 e8 91 2c fe ff 66
-> [    0.000000] RIP: efi_bgrt_init+0xfb/0x153 RSP: ffffffff98403d50
-> [    0.000000] CR2: ffffffffff280001
-> [    0.000000] ---[ end trace 9843d3b7cbcab26a ]---
-> [    0.000000] Kernel panic - not syncing: Attempted to kill the idle task!
-> [    0.000000] ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
->
-> Fixes: 7b0a911 efi/x86: Move the EFI BGRT init code to early init code
-> Reported-by: Maniaxx <tripleshiftone-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+On 6/7/2017 9:40 PM, Nick Sarnie wrote:
+> On Wed, Jun 7, 2017 at 3:13 PM, Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org> wrote:
+>> This patch series provides support for AMD's new Secure Memory Encryption (SME)
+>> feature.
+>>
+>> SME can be used to mark individual pages of memory as encrypted through the
+>> page tables. A page of memory that is marked encrypted will be automatically
+>> decrypted when read from DRAM and will be automatically encrypted when
+>> written to DRAM. Details on SME can found in the links below.
+>>
+>> The SME feature is identified through a CPUID function and enabled through
+>> the SYSCFG MSR. Once enabled, page table entries will determine how the
+>> memory is accessed. If a page table entry has the memory encryption mask set,
+>> then that memory will be accessed as encrypted memory. The memory encryption
+>> mask (as well as other related information) is determined from settings
+>> returned through the same CPUID function that identifies the presence of the
+>> feature.
+>>
+>> The approach that this patch series takes is to encrypt everything possible
+>> starting early in the boot where the kernel is encrypted. Using the page
+>> table macros the encryption mask can be incorporated into all page table
+>> entries and page allocations. By updating the protection map, userspace
+>> allocations are also marked encrypted. Certain data must be accounted for
+>> as having been placed in memory before SME was enabled (EFI, initrd, etc.)
+>> and accessed accordingly.
+>>
+>> This patch series is a pre-cursor to another AMD processor feature called
+>> Secure Encrypted Virtualization (SEV). The support for SEV will build upon
+>> the SME support and will be submitted later. Details on SEV can be found
+>> in the links below.
+>>
+>> The following links provide additional detail:
+>>
+>> AMD Memory Encryption whitepaper:
+>>     http://amd-dev.wpengine.netdna-cdn.com/wordpress/media/2013/12/AMD_Memory_Encryption_Whitepaper_v7-Public.pdf
+>>
+>> AMD64 Architecture Programmer's Manual:
+>>     http://support.amd.com/TechDocs/24593.pdf
+>>     SME is section 7.10
+>>     SEV is section 15.34
+>>
+>> ---
+>>
 
-Hi Dave,
+...
 
-I'm with the program now :-)
+> 
+> 
+> Hi Tom,
+> 
+> Thanks for your work on this. This may be a stupid question, but is
+> using bounce buffers for the GPU(s) expected to reduce performance in
+> any/a noticeable way? I'm hitting another issue which I've already
+> sent mail about so I can't test it for myself at the moment,
 
-Could you please check your commit log for grammar? And add that the
-spec you refer to is the ACPI spec?
+That all depends on the workload, how much DMA is being performed, etc.
+But it is extra overhead to use bounce buffers.
 
-> ---
->  drivers/firmware/efi/efi-bgrt.c |   29 +++++++++++++++++++++++++++++
->  1 file changed, 29 insertions(+)
->
-> --- linux.orig/drivers/firmware/efi/efi-bgrt.c
-> +++ linux/drivers/firmware/efi/efi-bgrt.c
-> @@ -27,6 +27,31 @@ struct bmp_header {
->         u32 size;
->  } __packed;
->
-> +static bool efi_bgrt_addr_valid(u64 addr)
-> +{
-> +       efi_memory_desc_t *md;
-> +
-> +       if (!efi_enabled(EFI_MEMMAP)) {
-> +               pr_err("EFI_MEMMAP is not enabled.\n");
-> +               return true;
-> +       }
-> +
+Thanks,
+Tom
 
-Given that you already added a check for EFI_BOOT in efi_bgrt_init()
-in commit 5d36982a80248 ("efi/bgrt: Skip efi_bgrt_init in case of
-non-efi boot"), could we drop this check, and replace the EFI_BOOT
-check you added with EFI_MEMMAP?
-
-> +       for_each_efi_memory_desc(md) {
-> +               u64 size;
-> +               u64 end;
-> +
-> +               if (md->type != EFI_BOOT_SERVICES_DATA)
-> +                       continue;
-> +
-> +               size = md->num_pages << EFI_PAGE_SHIFT;
-> +               end = md->phys_addr + size;
-> +               if (addr >= md->phys_addr && addr < end)
-> +                       return true;
-> +       }
-> +
-> +       return false;
-> +}
-> +
->  void __init efi_bgrt_init(struct acpi_table_header *table)
->  {
->         void *image;
-> @@ -65,6 +90,10 @@ void __init efi_bgrt_init(struct acpi_ta
->                 goto out;
->         }
->
-> +       if (!efi_bgrt_addr_valid(bgrt->image_address)) {
-> +               pr_notice("Ignoring BGRT: invalid image address\n");
-> +               goto out;
-> +       }
->         image = early_memremap(bgrt->image_address, sizeof(bmp_header));
->         if (!image) {
->                 pr_notice("Ignoring BGRT: failed to map image header memory\n");
+> 
+> Thanks,
+> Sarnex
+> 
