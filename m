@@ -1,106 +1,101 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [PATCH v6 10/34] x86, x86/mm, x86/xen, olpc: Use __va() against
-	just the physical address in cr3
-Date: Thu, 8 Jun 2017 08:42:51 -0500
-Message-ID: <4a7376fb-abfc-8edd-42b7-38de461ac65e@amd.com>
-References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
-	<20170607191453.28645.92256.stgit@tlendack-t1.amdoffice.net>
-	<b15e8924-4069-b5fa-adb2-86c164b1dd36@oracle.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: fix boot panic because of invalid bgrt image
+ address
+Date: Thu, 8 Jun 2017 22:20:26 +0800
+Message-ID: <20170608142026.GA4205@dhcp-128-65.nay.redhat.com>
+References: <20170608053239.GA31232@dhcp-128-65.nay.redhat.com>
+ <CAKv+Gu_mHpuvC4X_SeY-BLw7AiAnnmTcE0QyPvYiJRtLY4rr_g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <b15e8924-4069-b5fa-adb2-86c164b1dd36-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Cc: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, xen-devel <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu_mHpuvC4X_SeY-BLw7AiAnnmTcE0QyPvYiJRtLY4rr_g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, tripleshiftone-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 6/7/2017 5:06 PM, Boris Ostrovsky wrote:
-> On 06/07/2017 03:14 PM, Tom Lendacky wrote:
->> The cr3 register entry can contain the SME encryption bit that indicates
->> the PGD is encrypted.  The encryption bit should not be used when creating
->> a virtual address for the PGD table.
->>
->> Create a new function, read_cr3_pa(), that will extract the physical
->> address from the cr3 register. This function is then used where a virtual
->> address of the PGD needs to be created/used from the cr3 register.
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
->> ---
->>   arch/x86/include/asm/special_insns.h |    9 +++++++++
->>   arch/x86/kernel/head64.c             |    2 +-
->>   arch/x86/mm/fault.c                  |   10 +++++-----
->>   arch/x86/mm/ioremap.c                |    2 +-
->>   arch/x86/platform/olpc/olpc-xo1-pm.c |    2 +-
->>   arch/x86/power/hibernate_64.c        |    2 +-
->>   arch/x86/xen/mmu_pv.c                |    6 +++---
->>   7 files changed, 21 insertions(+), 12 deletions(-)
->>
-
-...
-
->> diff --git a/arch/x86/xen/mmu_pv.c b/arch/x86/xen/mmu_pv.c
->> index 1f386d7..2dc5243 100644
->> --- a/arch/x86/xen/mmu_pv.c
->> +++ b/arch/x86/xen/mmu_pv.c
->> @@ -2022,7 +2022,7 @@ static phys_addr_t __init xen_early_virt_to_phys(unsigned long vaddr)
->>   	pmd_t pmd;
->>   	pte_t pte;
->>   
->> -	pa = read_cr3();
->> +	pa = read_cr3_pa();
->>   	pgd = native_make_pgd(xen_read_phys_ulong(pa + pgd_index(vaddr) *
->>   						       sizeof(pgd)));
->>   	if (!pgd_present(pgd))
->> @@ -2102,7 +2102,7 @@ void __init xen_relocate_p2m(void)
->>   	pt_phys = pmd_phys + PFN_PHYS(n_pmd);
->>   	p2m_pfn = PFN_DOWN(pt_phys) + n_pt;
->>   
->> -	pgd = __va(read_cr3());
->> +	pgd = __va(read_cr3_pa());
->>   	new_p2m = (unsigned long *)(2 * PGDIR_SIZE);
->>   	idx_p4d = 0;
->>   	save_pud = n_pud;
->> @@ -2209,7 +2209,7 @@ static void __init xen_write_cr3_init(unsigned long cr3)
->>   {
->>   	unsigned long pfn = PFN_DOWN(__pa(swapper_pg_dir));
->>   
->> -	BUG_ON(read_cr3() != __pa(initial_page_table));
->> +	BUG_ON(read_cr3_pa() != __pa(initial_page_table));
->>   	BUG_ON(cr3 != __pa(swapper_pg_dir));
->>   
->>   	/*
+On 06/08/17 at 10:02am, Ard Biesheuvel wrote:
+> On 8 June 2017 at 05:32, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> > Maniaxx <tripleshiftone-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> reported kernel boot panic similar to below:
+> > (emulated the panic with using same invalid phys addr in a uefi vm)
+> > There are also a bug in bugzilla.kernel.org:
+> > https://bugzilla.kernel.org/show_bug.cgi?id=195633
+> >
+> > This happens after below commit:
+> > 7b0a911 efi/x86: Move the EFI BGRT init code to early init code
+> >
+> > The root cause is the firmware on those machines provides invalid bgrt
+> > image addresses.
+> >
+> > With original efi bgrt code we initialize bgrt late
+> > and use ioremap to map the image address. In ioremap code we check the
+> > address is a valid physical address or not before really map it.
+> >
+> > With current new efi bgrt code we moved the initialization to early code
+> > so we switch to early_memremap which does not check the phys_addr like
+> > ioremap does. This lead to the early kernel panics.
+> >
+> > Fix this by checking the image physical address, if it is not within
+> > any EFI_BOOT_SERVICES_DATA areas then we just bail out. It is stronger
+> > then the original ioremap checking, according to spec the BGRT data
+> > should fall into EFI_BOOT_SERVICES_DATA.
+> >
 > 
-> 
-> (Please copy Xen maintainers when modifying xen-related files.)
+> Which spec? The UEFI spec does not mention BGRT, and given that it is
 
-Sorry about that, missed adding the Xen maintainers when I added this
-change.
+It is mentioned in ACPI spec, see 6.1 spec section 5.2.22.4
+http://www.uefi.org/sites/default/files/resources/ACPI_6_1.pdf
+
+> an ACPI table, I would expect an ACPI reclaim region to be the most
+> appropriate. A quick test with QEMU confirms this:
+> 
+> ACPI: BGRT 0x000000013A5E0000 000038 (v01 INTEL  EDK2     00000002
+>  01000013)
+> 
+> and
+> 
+> efi:   0x00013a5e0000-0x00013a5effff [ACPI Reclaim Memory|   |  |  |
+> |  |  |  |   |WB|  |  |  ]
+> 
+> So while I agree that we have to fix this, and that checking the BGRT
+> address against the UEFI memory map is the most appropriate course of
+> action, requiring a certain region type is probably not what we want.
+> 
+> We have a similar check for ESRT, in efi_mem_desc_lookup(), which
+> looks a bit dodgy tbh, given that it allows any region type (including
+> MMIO), as long as it has the EFI_MEMORY_RUNTIME attribute, which is
+> almost certainly incorrect.
+
+Yes, I had that in mind but it delayed for something else ..
 
 > 
-> Given that page tables for Xen PV guests are controlled by the
-> hypervisor I don't think this change (although harmless) is necessary.
-
-I can back this change out if the Xen maintainers think that's best.
-
-> What may be needed is making sure X86_FEATURE_SME is not set for PV guests.
-
-And that may be something that Xen will need to control through either
-CPUID or MSR support for the PV guests.
-
-Thanks,
-Tom
-
+> So what I would like to see is a function that can tell you whether a
+> certain address is covered by a region of a type that is normal
+> memory, and is occupied, i.e.,
 > 
-> -boris
+> EFI_RESERVED_TYPE
+> EFI_LOADER_CODE
+> EFI_LOADER_DATA
+> EFI_BOOT_SERVICES_CODE
+> EFI_BOOT_SERVICES_DATA
+> EFI_RUNTIME_SERVICES_CODE
+> EFI_RUNTIME_SERVICES_DATA
+> EFI_ACPI_RECLAIM_MEMORY
+> EFI_ACPI_MEMORY_NVS
 > 
+> The EFI_MEMORY_RUNTIME attribute is irrelevant: the firmware itself
+> does not have to read these tables at runtime, so it doesn't matter
+> whether the O/S maps them on its behalf.
+> 
+> If you could please stick that in drivers/firmware/efi/efi.c, and
+> rework the patch to use it instead? I will move the ESRT code to it as
+> well once this is merged.
+
+Will think about this, I had some plan to change the desc lookup
+function but it was delayed for something else. For this bgrt issue since
+acpi spec clearly said it is in boot data, can we just check the boot
+data areas?
+
+Thanks
+Dave
