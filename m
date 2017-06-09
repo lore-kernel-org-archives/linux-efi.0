@@ -1,8 +1,8 @@
-From: Andrew Cooper <andrew.cooper3@citrix.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
 Subject: Re: [Xen-devel] [PATCH v6 10/34] x86, x86/mm, x86/xen, olpc: Use
  __va() against just the physical address in cr3
-Date: Fri, 9 Jun 2017 19:54:04 +0100
-Message-ID: <2d507507-8736-89ff-0579-c2eee4b3ac34@citrix.com>
+Date: Fri, 9 Jun 2017 13:59:21 -0500
+Message-ID: <33f20df0-bf71-bd9d-7a7e-4fb5e8793400@amd.com>
 References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
  <20170607191453.28645.92256.stgit@tlendack-t1.amdoffice.net>
  <b15e8924-4069-b5fa-adb2-86c164b1dd36@oracle.com>
@@ -14,33 +14,92 @@ References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
  <9725c503-2e33-2365-87f5-f017e1cbe9b6@amd.com>
  <8e8eac45-95be-f1b5-6f44-f131d275f7bc@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <owner-linux-mm@kvack.org>
 In-Reply-To: <8e8eac45-95be-f1b5-6f44-f131d275f7bc@oracle.com>
+Content-Language: en-US
 Sender: owner-linux-mm@kvack.org
-To: Boris Ostrovsky <boris.ostrovsky@oracle.com>, Tom Lendacky <thomas.lendacky@amd.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
+To: Boris Ostrovsky <boris.ostrovsky@oracle.com>, Andrew Cooper <andrew.cooper3@citrix.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
 Cc: Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dyoung@redhat.com>, Rik van Riel <riel@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>, Juergen Gross <jgross@suse.com>, xen-devel <xen-devel@lists.xen.org>, Paolo Bonzini <pbonzini@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 09/06/17 19:43, Boris Ostrovsky wrote:
+On 6/9/2017 1:43 PM, Boris Ostrovsky wrote:
 > On 06/09/2017 02:36 PM, Tom Lendacky wrote:
+>> On 6/8/2017 5:01 PM, Andrew Cooper wrote:
+>>> On 08/06/2017 22:17, Boris Ostrovsky wrote:
+>>>> On 06/08/2017 05:02 PM, Tom Lendacky wrote:
+>>>>> On 6/8/2017 3:51 PM, Boris Ostrovsky wrote:
+>>>>>>>> What may be needed is making sure X86_FEATURE_SME is not set for PV
+>>>>>>>> guests.
+>>>>>>> And that may be something that Xen will need to control through
+>>>>>>> either
+>>>>>>> CPUID or MSR support for the PV guests.
+>>>>>>
+>>>>>> Only on newer versions of Xen. On earlier versions (2-3 years old)
+>>>>>> leaf
+>>>>>> 0x80000007 is passed to the guest unchanged. And so is MSR_K8_SYSCFG.
+>>>>> The SME feature is in leaf 0x8000001f, is that leaf passed to the
+>>>>> guest
+>>>>> unchanged?
+>>>> Oh, I misread the patch where X86_FEATURE_SME is defined. Then all
+>>>> versions, including the current one, pass it unchanged.
+>>>>
+>>>> All that's needed is setup_clear_cpu_cap(X86_FEATURE_SME) in
+>>>> xen_init_capabilities().
+>>>
+>>> AMD processors still don't support CPUID Faulting (or at least, I
+>>> couldn't find any reference to it in the latest docs), so we cannot
+>>> actually hide SME from a guest which goes looking at native CPUID.
+>>> Furthermore, I'm not aware of any CPUID masking support covering that
+>>> leaf.
+>>>
+>>> However, if Linux is using the paravirtual cpuid hook, things are
+>>> slightly better.
+>>>
+>>> On Xen 4.9 and later, no guests will see the feature.  On earlier
+>>> versions of Xen (before I fixed the logic), plain domUs will not see the
+>>> feature, while dom0 will.
+>>>
+>>> For safely, I'd recommend unilaterally clobbering the feature as Boris
+>>> suggested.  There is no way SME will be supportable on a per-PV guest
+>>
+>> That may be too late. Early boot support in head_64.S will make calls to
+>> check for the feature (through CPUID and MSR), set the sme_me_mask and
+>> encrypt the kernel in place. Is there another way to approach this?
+> 
+> 
+> PV guests don't go through Linux x86 early boot code. They start at
+> xen_start_kernel() (well, xen-head.S:startup_xen(), really) and  merge
+> with baremetal path at x86_64_start_reservations() (for 64-bit).
+> 
+
+Ok, I don't think anything needs to be done then. The sme_me_mask is set
+in sme_enable() which is only called from head_64.S. If the sme_me_mask
+isn't set then SME won't be active. The feature will just report the
+capability of the processor, but that doesn't mean it is active. If you
+still want the feature to be clobbered we can do that, though.
+
+Thanks,
+Tom
+
+> 
+> -boris
+> 
+>>
 >>> basis, although (as far as I am aware) Xen as a whole would be able to
 >>> encompass itself and all of its PV guests inside one single SME
 >>> instance.
+>>
 >> Yes, that is correct.
-
-Thinking more about this, it would only be possible if all the PV guests
-were SME-aware and understood not to choke when it finds a frame with a
-high address bit set.
-
-I expect the only viable way to implement this (should we wish) is to
-have PV guests explicitly signal support (probably via an ELF note),
-after which it needs to know about the existence of SME, the meaning of
-the encrypted bit in PTEs, and to defer all configuration responsibility
-to Xen.
-
-~Andrew
+>>
+>> Thanks,
+>> Tom
+>>
+>>>
+>>> ~Andrew
+>>>
+> 
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
