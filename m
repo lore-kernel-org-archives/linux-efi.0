@@ -1,108 +1,93 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [Xen-devel] [PATCH v6 10/34] x86, x86/mm, x86/xen, olpc: Use
- __va() against just the physical address in cr3
-Date: Fri, 9 Jun 2017 13:59:21 -0500
-Message-ID: <33f20df0-bf71-bd9d-7a7e-4fb5e8793400@amd.com>
-References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
- <20170607191453.28645.92256.stgit@tlendack-t1.amdoffice.net>
- <b15e8924-4069-b5fa-adb2-86c164b1dd36@oracle.com>
- <4a7376fb-abfc-8edd-42b7-38de461ac65e@amd.com>
- <67fe69ac-a213-8de3-db28-0e54bba95127@oracle.com>
- <fcb196c8-f1eb-a38c-336c-7bd3929b029e@amd.com>
- <12c7e511-996d-cf60-3a3b-0be7b41bd85b@oracle.com>
- <d37917b1-8e49-e8a8-b9ac-59491331640f@citrix.com>
- <9725c503-2e33-2365-87f5-f017e1cbe9b6@amd.com>
- <8e8eac45-95be-f1b5-6f44-f131d275f7bc@oracle.com>
+From: Kees Cook <keescook@chromium.org>
+Subject: Re: [PATCH 0/5] security, efi: Set lockdown if in secure boot mode
+Date: Fri, 9 Jun 2017 12:22:13 -0700
+Message-ID: <CAGXu5jJ41ea9G8_2Uj04CN-1F==+wohdXkJTr4REVUOXuUbGUw@mail.gmail.com>
+References: <149563711758.9419.11406612723056598045.stgit@warthog.procyon.org.uk>
+ <CAKv+Gu_5gUWwx7Sxgm8d03L4t4nF8dDe+AXqOqto4B7AVSZ9CA@mail.gmail.com>
+ <21606.1496222635@warthog.procyon.org.uk> <CAKv+Gu_vXASr=yDJ3MwT960eApqeWKEd-hqGoEyGsJKip7N+KQ@mail.gmail.com>
+ <25009.1496741691@warthog.procyon.org.uk> <CAKv+Gu96h=isM7_-niVmw0pojonD5Sr9Z_onqmkb22GVdH4NVA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <8e8eac45-95be-f1b5-6f44-f131d275f7bc@oracle.com>
-Content-Language: en-US
-Sender: owner-linux-mm@kvack.org
-To: Boris Ostrovsky <boris.ostrovsky@oracle.com>, Andrew Cooper <andrew.cooper3@citrix.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org
-Cc: Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dyoung@redhat.com>, Rik van Riel <riel@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>, Juergen Gross <jgross@suse.com>, xen-devel <xen-devel@lists.xen.org>, Paolo Bonzini <pbonzini@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <CAKv+Gu96h=isM7_-niVmw0pojonD5Sr9Z_onqmkb22GVdH4NVA@mail.gmail.com>
+Sender: owner-linux-security-module@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: David Howells <dhowells@redhat.com>, linux-security-module <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Matthew Garrett <mjg59@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 6/9/2017 1:43 PM, Boris Ostrovsky wrote:
-> On 06/09/2017 02:36 PM, Tom Lendacky wrote:
->> On 6/8/2017 5:01 PM, Andrew Cooper wrote:
->>> On 08/06/2017 22:17, Boris Ostrovsky wrote:
->>>> On 06/08/2017 05:02 PM, Tom Lendacky wrote:
->>>>> On 6/8/2017 3:51 PM, Boris Ostrovsky wrote:
->>>>>>>> What may be needed is making sure X86_FEATURE_SME is not set for PV
->>>>>>>> guests.
->>>>>>> And that may be something that Xen will need to control through
->>>>>>> either
->>>>>>> CPUID or MSR support for the PV guests.
->>>>>>
->>>>>> Only on newer versions of Xen. On earlier versions (2-3 years old)
->>>>>> leaf
->>>>>> 0x80000007 is passed to the guest unchanged. And so is MSR_K8_SYSCFG.
->>>>> The SME feature is in leaf 0x8000001f, is that leaf passed to the
->>>>> guest
->>>>> unchanged?
->>>> Oh, I misread the patch where X86_FEATURE_SME is defined. Then all
->>>> versions, including the current one, pass it unchanged.
->>>>
->>>> All that's needed is setup_clear_cpu_cap(X86_FEATURE_SME) in
->>>> xen_init_capabilities().
->>>
->>> AMD processors still don't support CPUID Faulting (or at least, I
->>> couldn't find any reference to it in the latest docs), so we cannot
->>> actually hide SME from a guest which goes looking at native CPUID.
->>> Furthermore, I'm not aware of any CPUID masking support covering that
->>> leaf.
->>>
->>> However, if Linux is using the paravirtual cpuid hook, things are
->>> slightly better.
->>>
->>> On Xen 4.9 and later, no guests will see the feature.  On earlier
->>> versions of Xen (before I fixed the logic), plain domUs will not see the
->>> feature, while dom0 will.
->>>
->>> For safely, I'd recommend unilaterally clobbering the feature as Boris
->>> suggested.  There is no way SME will be supportable on a per-PV guest
+On Fri, Jun 9, 2017 at 10:33 AM, Ard Biesheuvel
+<ard.biesheuvel@linaro.org> wrote:
+> (+ Kees)
+>
+> On 6 June 2017 at 09:34, David Howells <dhowells@redhat.com> wrote:
+>> Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 >>
->> That may be too late. Early boot support in head_64.S will make calls to
->> check for the feature (through CPUID and MSR), set the sme_me_mask and
->> encrypt the kernel in place. Is there another way to approach this?
-> 
-> 
-> PV guests don't go through Linux x86 early boot code. They start at
-> xen_start_kernel() (well, xen-head.S:startup_xen(), really) and  merge
-> with baremetal path at x86_64_start_reservations() (for 64-bit).
-> 
+>>> and print a subsequent line for every lockdown feature that is enabled, e.g.,
+>>>
+>>> lockdown: disabling MSRs
+>>> lockdown: disabling hibernate support
 
-Ok, I don't think anything needs to be done then. The sme_me_mask is set
-in sme_enable() which is only called from head_64.S. If the sme_me_mask
-isn't set then SME won't be active. The feature will just report the
-capability of the processor, but that doesn't mean it is active. If you
-still want the feature to be clobbered we can do that, though.
+If lockdown introspection is desired, perhaps just add a /proc file
+that lists them all? And if memory usage is a concern, it could be
+behind another config, like CONFIG_LOCK_DOWN_KERNEL_PROC ?
 
-Thanks,
-Tom
+>> There's another problem with this idea: the lockdown facility is passive - it
+>> doesn't go looking for things to lock down; rather, things that can be locked
+>> down inquire as to whether lockdown is in effect at the point someone tries to
+>> use them.
+>>
+>> Now, I could reserve a variable for each thing we lock down to make sure that
+>> we don't emit the message more than once, but I'm loathe to waste memory this
+>> way.
+>>
+>> I can't so easily switch the facility to being active either, since a lot of
+>> the lockdownables are in modules.
 
-> 
-> -boris
-> 
->>
->>> basis, although (as far as I am aware) Xen as a whole would be able to
->>> encompass itself and all of its PV guests inside one single SME
->>> instance.
->>
->> Yes, that is correct.
->>
->> Thanks,
->> Tom
->>
->>>
->>> ~Andrew
->>>
-> 
+I personally don't think the introspection is needed, but I see Ard's point.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+> Let me reiterate my concern for Kees's sake: without a threat model
+> nor any notion of how much kernel lockdown reduces the attack surface,
+> we end up with a 'doing something is better than nothing' approach.
+> Fine. But now you are telling me that there is no way we can provide
+> information to the user what that 'something' amounts to for a
+> particular kernel build for a particular architecture. Do you intend
+> to add lockdown features going forward after enabling the initial set?
+> Would any of these lockdown features ever be Kconfigurable? Do you
+> expect all lockdown features to be applicable to all architectures? So
+> how do I know what lockdown actually means for my system?
+
+I'd like the kernel to grow a bright line between userspace and
+physical memory, so I'm a fan of this series. It does look rather
+ad-hoc currently, but I think that's the reality the kernel faces.
+Right now, we're in a position where the kernel APIs don't provide a
+mechanism to distinguish between userspace users and kernel users (in
+that anything can just expose a kernel API to userspace: e.g. all the
+drivers over the years that trip over STRICT_DEVMEM and then create
+their own /dev/mem without restrictions).
+
+So, as we stand, we need to start by adding lockdown checks everywhere
+we find exposures, and I'd expect this list to grow over time (which
+would support the desirability of introspection, but I kind of see
+introspection as overkill). It'd be nice if we could identify classes
+of things that have to keep getting lockdown logic added to so that we
+could collect them into a single place (e.g. module parameters that
+define a phyiscal memory area could use a helper to do it instead of
+being yet another unsigned long, and the helper would do the lockdown
+check, etc). But that work will take time.
+
+> Anyway, I think I have made my concerns clear, and the EFI bits look
+> fine to me as long as the policy lives elsewhere.
+
+Yeah, splitting policy makes sense to me: Chrome OS would use lockdown
+as well, but it doesn't use EFI at all.
+
+> Apologies for letting this drag on a bit. I do agree in principle, but
+> I'd like to get the details right as well.
+
+(And please CC me on future versions.)
+
+-Kees
+
+-- 
+Kees Cook
+Pixel Security
