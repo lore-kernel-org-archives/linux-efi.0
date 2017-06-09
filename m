@@ -1,37 +1,45 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 0/3] efi: arm64: use -fpie for building the stub
-Date: Fri, 9 Jun 2017 09:02:42 +0000
-Message-ID: <CAKv+Gu-K9d-Rsy9i4++3Za45tpidZWO+WFcC_UPwt90DCmAhoA@mail.gmail.com>
-References: <20170518090953.32628-1-ard.biesheuvel@linaro.org>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v6 04/34] x86/CPU/AMD: Add the Secure Memory Encryption
+ CPU feature
+Date: Fri, 9 Jun 2017 12:55:40 +0200
+Message-ID: <20170609105540.jpkle2qja4kyin6i@pd.tnic>
+References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
+ <20170607191353.28645.85058.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170518090953.32628-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, =?UTF-8?Q?Bernhard_Rosenkr=C3=A4nzer?= <Bernhard.Rosenkranzer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Grundler <grundler-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Michael Davidson <md-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170607191353.28645.85058.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
 List-Id: linux-efi@vger.kernel.org
 
-On 18 May 2017 at 10:09, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> Clang requires the stub to be built with -fpie, or it may emit absolute
-> symbol references that trigger the absolute relocation detection code and
-> cause the build to fail.
->
-> The remedy is to set -fpie (#3), but due to stupid ELF symbol preemption
-> rules that only apply to shared libraries, this will result in more rather
-> than fewer absolute references (i.e., GOT entries), which we have to massage
-> away using visibility overrides first. (#1, #2)
->
-> Ard Biesheuvel (3):
->   efi/libstub: arm64: use hidden attribute for struct screen_info
->     reference
->   efi/libstub: arm64: force 'hidden' visibility for section markers
->   efi/libstub: arm64: set -fpie when building the EFI stub
->
->  arch/arm64/include/asm/efi.h              |  3 +++
->  drivers/firmware/efi/libstub/Makefile     |  2 +-
->  drivers/firmware/efi/libstub/arm64-stub.c | 10 +++++++++-
->  3 files changed, 13 insertions(+), 2 deletions(-)
->
+On Wed, Jun 07, 2017 at 02:13:53PM -0500, Tom Lendacky wrote:
+> Update the CPU features to include identifying and reporting on the
+> Secure Memory Encryption (SME) feature.  SME is identified by CPUID
+> 0x8000001f, but requires BIOS support to enable it (set bit 23 of
+> MSR_K8_SYSCFG).  Only show the SME feature as available if reported by
+> CPUID and enabled by BIOS.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/include/asm/cpufeatures.h |    1 +
+>  arch/x86/include/asm/msr-index.h   |    2 ++
+>  arch/x86/kernel/cpu/amd.c          |   13 +++++++++++++
+>  arch/x86/kernel/cpu/scattered.c    |    1 +
+>  4 files changed, 17 insertions(+)
 
-I have queued these in efi/next, with Matthias's Tested-by
+Reviewed-by: Borislav Petkov <bp@suse.de>
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
