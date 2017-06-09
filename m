@@ -1,45 +1,37 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi: arm: Don't mark ACPI reclaim memory as MEMBLOCK_NOMAP
-Date: Fri, 9 Jun 2017 09:01:52 +0000
-Message-ID: <CAKv+Gu8sfKu-3E2kQtni7VuRTE-RFivN_suT+GPz2bnNkfMqaw@mail.gmail.com>
-References: <20170605080435.2498-1-ard.biesheuvel@linaro.org> <20170605090847.GC4650@leverpostej>
+Subject: Re: [PATCH 0/3] efi: arm64: use -fpie for building the stub
+Date: Fri, 9 Jun 2017 09:02:42 +0000
+Message-ID: <CAKv+Gu-K9d-Rsy9i4++3Za45tpidZWO+WFcC_UPwt90DCmAhoA@mail.gmail.com>
+References: <20170518090953.32628-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170605090847.GC4650@leverpostej>
+In-Reply-To: <20170518090953.32628-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Greg Hackmann <ghackmann-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, =?UTF-8?Q?Bernhard_Rosenkr=C3=A4nzer?= <Bernhard.Rosenkranzer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Grundler <grundler-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Michael Davidson <md-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 5 June 2017 at 09:08, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Mon, Jun 05, 2017 at 08:04:35AM +0000, Ard Biesheuvel wrote:
->> On ARM, regions of memory that are described by UEFI as having special
->> significance to the firmware itself are omitted from the linear mapping.
->> This is necessary since we cannot guarantee that alternate mappings of
->> the same physical region will use attributes that are compatible with
->> the ones we use for the linear mapping, and aliases with mismatched
->> attributes are prohibited by the architecture.
->>
->> The above does not apply to ACPI reclaim regions: such regions have no
->> special significance to the firmware, and it is up to the OS to decide
->> whether or not to preserve them after it has consumed their contents,
->> and for how long, after which time the OS can use the memory in any way
->> it likes. In the Linux case, such regions are preserved indefinitely,
->> and are simply treated the same way as other 'reserved' memory types.
->>
->> Punching holes into the linear mapping causes page table fragmentation,
->> which increases TLB pressure, and so we should avoid doing so if we can.
->> So add a special case for regions of type EFI_ACPI_RECLAIM_MEMORY, and
->> memblock_reserve() them instead of marking them MEMBLOCK_NOMAP.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On 18 May 2017 at 10:09, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> Clang requires the stub to be built with -fpie, or it may emit absolute
+> symbol references that trigger the absolute relocation detection code and
+> cause the build to fail.
 >
-> Sounds sane to me. FWIW:
+> The remedy is to set -fpie (#3), but due to stupid ELF symbol preemption
+> rules that only apply to shared libraries, this will result in more rather
+> than fewer absolute references (i.e., GOT entries), which we have to massage
+> away using visibility overrides first. (#1, #2)
 >
-> Acked-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> Ard Biesheuvel (3):
+>   efi/libstub: arm64: use hidden attribute for struct screen_info
+>     reference
+>   efi/libstub: arm64: force 'hidden' visibility for section markers
+>   efi/libstub: arm64: set -fpie when building the EFI stub
+>
+>  arch/arm64/include/asm/efi.h              |  3 +++
+>  drivers/firmware/efi/libstub/Makefile     |  2 +-
+>  drivers/firmware/efi/libstub/arm64-stub.c | 10 +++++++++-
+>  3 files changed, 13 insertions(+), 2 deletions(-)
 >
 
-Thanks.
-
-I have queued this in efi/next
+I have queued these in efi/next, with Matthias's Tested-by
