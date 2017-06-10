@@ -1,102 +1,40 @@
-From: <iker-KvP5wT2u2U0@public.gmane.org>
-Subject: (unknown)
-Date: Sat, 10 Jun 2017 13:33:22 -0000
-Message-ID: <149710160262.19456.2520903089953113362@hinet.net>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v6 13/34] x86/mm: Add support for early encrypt/decrypt
+ of memory
+Date: Sat, 10 Jun 2017 17:56:25 +0200
+Message-ID: <20170610155624.q3jh6q2wpnepxpsw@pd.tnic>
+References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
+ <20170607191527.28645.84593.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: application/zip; name="15583681942264.zip"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: attachment
-Subject: 
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-arch-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170607191527.28645.84593.stgit@tlendack-t1.amdoffice.net>
+Sender: linux-arch-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy
 List-Id: linux-efi@vger.kernel.org
 
-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
-EgAAAAA=
+On Wed, Jun 07, 2017 at 02:15:27PM -0500, Tom Lendacky wrote:
+> Add support to be able to either encrypt or decrypt data in place during
+> the early stages of booting the kernel. This does not change the memory
+> encryption attribute - it is used for ensuring that data present in either
+> an encrypted or decrypted memory area is in the proper state (for example
+> the initrd will have been loaded by the boot loader and will not be
+> encrypted, but the memory that it resides in is marked as encrypted).
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/include/asm/mem_encrypt.h |   15 +++++++
+>  arch/x86/mm/mem_encrypt.c          |   76 ++++++++++++++++++++++++++++++++++++
+>  2 files changed, 91 insertions(+)
+
+Patches 11-13:
+
+Reviewed-by: Borislav Petkov <bp@suse.de>
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
