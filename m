@@ -1,15 +1,73 @@
-From: "Dave Dawes" <dmoore32-oe7qfRrRQff1ikKbInQQOjcbuqLmMDG7h13vi7wywA4@public.gmane.org>
-Subject: I Would love to discuse something with you.
-Date: Mon, 12 Jun 2017 07:51:50 -0700
-Message-ID: <DM2PR0101MB12305643D4463C6FC4E0D97083CD0@DM2PR0101MB1230.prod.exchangelabs.com>
-Reply-To: ddawes231-9uewiaClKEY@public.gmane.org
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.11 049/150] efi/bgrt: Skip efi_bgrt_init() in case of non-EFI boot
+Date: Mon, 12 Jun 2017 17:24:16 +0200
+Message-ID: <20170612152521.552786146@linuxfoundation.org>
+References: <20170612152519.404936272@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Description: Mail message body
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Recipients <dmoore32-oe7qfRrRQff1ikKbInQQOjcbuqLmMDG7h13vi7wywA4@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170612152519.404936272@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Sabrina Dubroca <sd@queasysnail.net>, Dave Young <dyoung@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-=20
+4.11-stable review patch.  If anyone has any objections, please let me know.
+
+------------------
+
+From: Dave Young <dyoung@redhat.com>
+
+commit 7425826f4f7ac60f2538b06a7f0a5d1006405159 upstream.
+
+Sabrina Dubroca reported an early panic:
+
+  BUG: unable to handle kernel paging request at ffffffffff240001
+  IP: efi_bgrt_init+0xdc/0x134
+
+  [...]
+
+  ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
+
+... which was introduced by:
+
+  7b0a911478c7 ("efi/x86: Move the EFI BGRT init code to early init code")
+
+The cause is that on this machine the firmware provides the EFI ACPI BGRT
+table even on legacy non-EFI bootups - which table should be EFI only.
+
+The garbage BGRT data causes the efi_bgrt_init() panic.
+
+Add a check to skip efi_bgrt_init() in case non-EFI bootup to work around
+this firmware bug.
+
+Tested-by: Sabrina Dubroca <sd@queasysnail.net>
+Signed-off-by: Dave Young <dyoung@redhat.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Fixes: 7b0a911478c7 ("efi/x86: Move the EFI BGRT init code to early init code")
+Link: http://lkml.kernel.org/r/20170526113652.21339-6-matt@codeblueprint.co.uk
+[ Rewrote the changelog to be more readable. ]
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ arch/x86/platform/efi/efi-bgrt.c |    3 +++
+ 1 file changed, 3 insertions(+)
+
+--- a/arch/x86/platform/efi/efi-bgrt.c
++++ b/arch/x86/platform/efi/efi-bgrt.c
+@@ -36,6 +36,9 @@ void __init efi_bgrt_init(struct acpi_ta
+ 	if (acpi_disabled)
+ 		return;
+ 
++	if (!efi_enabled(EFI_BOOT))
++		return;
++
+ 	if (table->length < sizeof(bgrt_tab)) {
+ 		pr_notice("Ignoring BGRT: invalid length %u (expected %zu)\n",
+ 		       table->length, sizeof(bgrt_tab));
