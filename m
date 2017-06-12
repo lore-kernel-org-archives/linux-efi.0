@@ -1,73 +1,54 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.11 049/150] efi/bgrt: Skip efi_bgrt_init() in case of non-EFI boot
-Date: Mon, 12 Jun 2017 17:24:16 +0200
-Message-ID: <20170612152521.552786146@linuxfoundation.org>
-References: <20170612152519.404936272@linuxfoundation.org>
+Subject: [PATCH 4.9 034/119] efi: Dont issue error message when booted under Xen
+Date: Mon, 12 Jun 2017 17:24:56 +0200
+Message-ID: <20170612152558.830902210@linuxfoundation.org>
+References: <20170612152556.601664278@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170612152519.404936272@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20170612152556.601664278@linuxfoundation.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Sabrina Dubroca <sd@queasysnail.net>, Dave Young <dyoung@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Juergen Gross <jgross@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.11-stable review patch.  If anyone has any objections, please let me know.
+4.9-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
-From: Dave Young <dyoung@redhat.com>
+From: Juergen Gross <jgross@suse.com>
 
-commit 7425826f4f7ac60f2538b06a7f0a5d1006405159 upstream.
+commit 1ea34adb87c969b89dfd83f1905a79161e9ada26 upstream.
 
-Sabrina Dubroca reported an early panic:
+When booted as Xen dom0 there won't be an EFI memmap allocated. Avoid
+issuing an error message in this case:
 
-  BUG: unable to handle kernel paging request at ffffffffff240001
-  IP: efi_bgrt_init+0xdc/0x134
+  [    0.144079] efi: Failed to allocate new EFI memmap
 
-  [...]
-
-  ---[ end Kernel panic - not syncing: Attempted to kill the idle task!
-
-... which was introduced by:
-
-  7b0a911478c7 ("efi/x86: Move the EFI BGRT init code to early init code")
-
-The cause is that on this machine the firmware provides the EFI ACPI BGRT
-table even on legacy non-EFI bootups - which table should be EFI only.
-
-The garbage BGRT data causes the efi_bgrt_init() panic.
-
-Add a check to skip efi_bgrt_init() in case non-EFI bootup to work around
-this firmware bug.
-
-Tested-by: Sabrina Dubroca <sd@queasysnail.net>
-Signed-off-by: Dave Young <dyoung@redhat.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Juergen Gross <jgross@suse.com>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
-Fixes: 7b0a911478c7 ("efi/x86: Move the EFI BGRT init code to early init code")
-Link: http://lkml.kernel.org/r/20170526113652.21339-6-matt@codeblueprint.co.uk
-[ Rewrote the changelog to be more readable. ]
+Link: http://lkml.kernel.org/r/20170526113652.21339-2-matt@codeblueprint.co.uk
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 ---
- arch/x86/platform/efi/efi-bgrt.c |    3 +++
+ arch/x86/platform/efi/quirks.c |    3 +++
  1 file changed, 3 insertions(+)
 
---- a/arch/x86/platform/efi/efi-bgrt.c
-+++ b/arch/x86/platform/efi/efi-bgrt.c
-@@ -36,6 +36,9 @@ void __init efi_bgrt_init(struct acpi_ta
- 	if (acpi_disabled)
- 		return;
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -358,6 +358,9 @@ void __init efi_free_boot_services(void)
+ 		free_bootmem_late(start, size);
+ 	}
  
-+	if (!efi_enabled(EFI_BOOT))
++	if (!num_entries)
 +		return;
 +
- 	if (table->length < sizeof(bgrt_tab)) {
- 		pr_notice("Ignoring BGRT: invalid length %u (expected %zu)\n",
- 		       table->length, sizeof(bgrt_tab));
+ 	new_size = efi.memmap.desc_size * num_entries;
+ 	new_phys = efi_memmap_alloc(num_entries);
+ 	if (!new_phys) {
