@@ -1,18 +1,18 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 034/119] efi: Dont issue error message when booted under Xen
-Date: Mon, 12 Jun 2017 17:24:56 +0200
-Message-ID: <20170612152558.830902210@linuxfoundation.org>
-References: <20170612152556.601664278@linuxfoundation.org>
+Subject: [PATCH 4.11 048/150] efi: Dont issue error message when booted under Xen
+Date: Mon, 12 Jun 2017 17:24:15 +0200
+Message-ID: <20170612152521.515939674@linuxfoundation.org>
+References: <20170612152519.404936272@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20170612152556.601664278@linuxfoundation.org>
-Sender: stable-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170612152519.404936272@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Juergen Gross <jgross@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.9-stable review patch.  If anyone has any objections, please let me know.
+4.11-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
