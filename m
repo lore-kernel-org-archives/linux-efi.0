@@ -1,105 +1,72 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v6 25/34] swiotlb: Add warnings for use of bounce buffers
- with SME
-Date: Wed, 14 Jun 2017 18:50:52 +0200
-Message-ID: <20170614165052.fyn5t4gkq5leczcc@pd.tnic>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [PATCH v6 20/34] x86, mpparse: Use memremap to map the mpf and
+	mpc data
+Date: Wed, 14 Jun 2017 12:06:54 -0500
+Message-ID: <86f31710-76d0-5fee-f4a7-8cdb4b9b9a8e@amd.com>
 References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
- <20170607191732.28645.42876.stgit@tlendack-t1.amdoffice.net>
+	<20170607191643.28645.91679.stgit@tlendack-t1.amdoffice.net>
+	<20170614160754.c4ywbf5ktqwgc4ij@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170607191732.28645.42876.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20170614160754.c4ywbf5ktqwgc4ij-fF5Pk5pvG8Y@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jun 07, 2017 at 02:17:32PM -0500, Tom Lendacky wrote:
-> Add warnings to let the user know when bounce buffers are being used for
-> DMA when SME is active.  Since the bounce buffers are not in encrypted
-> memory, these notifications are to allow the user to determine some
-> appropriate action - if necessary.
+On 6/14/2017 11:07 AM, Borislav Petkov wrote:
+> On Wed, Jun 07, 2017 at 02:16:43PM -0500, Tom Lendacky wrote:
+>> The SMP MP-table is built by UEFI and placed in memory in a decrypted
+>> state. These tables are accessed using a mix of early_memremap(),
+>> early_memunmap(), phys_to_virt() and virt_to_phys(). Change all accesses
+>> to use early_memremap()/early_memunmap(). This allows for proper setting
+>> of the encryption mask so that the data can be successfully accessed when
+>> SME is active.
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+>> ---
+>>   arch/x86/kernel/mpparse.c |   98 ++++++++++++++++++++++++++++++++-------------
+>>   1 file changed, 70 insertions(+), 28 deletions(-)
 > 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/include/asm/mem_encrypt.h |    8 ++++++++
->  include/asm-generic/mem_encrypt.h  |    5 +++++
->  include/linux/dma-mapping.h        |    9 +++++++++
->  lib/swiotlb.c                      |    3 +++
->  4 files changed, 25 insertions(+)
+> ...
 > 
-> diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
-> index f1215a4..c7a2525 100644
-> --- a/arch/x86/include/asm/mem_encrypt.h
-> +++ b/arch/x86/include/asm/mem_encrypt.h
-> @@ -69,6 +69,14 @@ static inline bool sme_active(void)
->  	return !!sme_me_mask;
->  }
->  
-> +static inline u64 sme_dma_mask(void)
-> +{
-> +	if (!sme_me_mask)
-> +		return 0ULL;
-> +
-> +	return ((u64)sme_me_mask << 1) - 1;
-> +}
-> +
->  /*
->   * The __sme_pa() and __sme_pa_nodebug() macros are meant for use when
->   * writing to or comparing values from the cr3 register.  Having the
-> diff --git a/include/asm-generic/mem_encrypt.h b/include/asm-generic/mem_encrypt.h
-> index b55c3f9..fb02ff0 100644
-> --- a/include/asm-generic/mem_encrypt.h
-> +++ b/include/asm-generic/mem_encrypt.h
-> @@ -22,6 +22,11 @@ static inline bool sme_active(void)
->  	return false;
->  }
->  
-> +static inline u64 sme_dma_mask(void)
-> +{
-> +	return 0ULL;
-> +}
-> +
->  /*
->   * The __sme_set() and __sme_clr() macros are useful for adding or removing
->   * the encryption mask from a value (e.g. when dealing with pagetable
-> diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
-> index 4f3eece..e2c5fda 100644
-> --- a/include/linux/dma-mapping.h
-> +++ b/include/linux/dma-mapping.h
-> @@ -10,6 +10,7 @@
->  #include <linux/scatterlist.h>
->  #include <linux/kmemcheck.h>
->  #include <linux/bug.h>
-> +#include <linux/mem_encrypt.h>
->  
->  /**
->   * List of possible attributes associated with a DMA mapping. The semantics
-> @@ -577,6 +578,10 @@ static inline int dma_set_mask(struct device *dev, u64 mask)
->  
->  	if (!dev->dma_mask || !dma_supported(dev, mask))
->  		return -EIO;
-> +
-> +	if (sme_active() && (mask < sme_dma_mask()))
-> +		dev_warn(dev, "SME is active, device will require DMA bounce buffers\n");
+>> @@ -515,6 +516,12 @@ void __init default_get_smp_config(unsigned int early)
+>>   	if (acpi_lapic && acpi_ioapic)
+>>   		return;
+>>   
+>> +	mpf = early_memremap(mpf_base, sizeof(*mpf));
+>> +	if (!mpf) {
+>> +		pr_err("MPTABLE: mpf early_memremap() failed\n");
+> 
+> If you're going to introduce new prefixes then add:
 
-Something looks strange here:
+This isn't new...  there are a number of messages issued in this file
+with that prefix, so I was just following convention.  Changing the
+prefix could be a follow-on patch.
 
-you're checking sme_active() before calling sme_dma_mask() and yet in
-it, you're checking !sme_me_mask again. What gives?
+> 
+> #undef pr_fmt
+> #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+> 
+> at the beginning of the file so that they all say "mpparse:" instead.
+> 
+> And pls make that message more user-friendly: "Error mapping MP table"
+> or so.
 
-Why not move the sme_active() check into sme_dma_mask() and thus
-simplify callers?
+Can do.
 
--- 
-Regards/Gruss,
-    Boris.
+Thanks,
+Tom
 
-Good mailing practices for 400: avoid top-posting and trim the reply.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+> 
