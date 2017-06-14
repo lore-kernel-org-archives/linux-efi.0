@@ -1,202 +1,107 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v6 26/34] iommu/amd: Allow the AMD IOMMU to work with
- memory encryption
-Date: Wed, 14 Jun 2017 19:42:08 +0200
-Message-ID: <20170614174208.p2yr5exs4b6pjxhf@pd.tnic>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [PATCH v6 24/34] x86, swiotlb: Add memory encryption support
+Date: Wed, 14 Jun 2017 14:38:48 -0500
+Message-ID: <c1a59a06-2850-b215-5c08-27adff6fecde@amd.com>
 References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
- <20170607191745.28645.81756.stgit@tlendack-t1.amdoffice.net>
+	<20170607191721.28645.96519.stgit@tlendack-t1.amdoffice.net>
+	<20170614164553.jwcfgugpizz5pc2e@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170607191745.28645.81756.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20170614164553.jwcfgugpizz5pc2e-fF5Pk5pvG8Y@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jun 07, 2017 at 02:17:45PM -0500, Tom Lendacky wrote:
-> The IOMMU is programmed with physical addresses for the various tables
-> and buffers that are used to communicate between the device and the
-> driver. When the driver allocates this memory it is encrypted. In order
-> for the IOMMU to access the memory as encrypted the encryption mask needs
-> to be included in these physical addresses during configuration.
+On 6/14/2017 11:45 AM, Borislav Petkov wrote:
+> On Wed, Jun 07, 2017 at 02:17:21PM -0500, Tom Lendacky wrote:
+>> Since DMA addresses will effectively look like 48-bit addresses when the
+>> memory encryption mask is set, SWIOTLB is needed if the DMA mask of the
+>> device performing the DMA does not support 48-bits. SWIOTLB will be
+>> initialized to create decrypted bounce buffers for use by these devices.
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+>> ---
 > 
-> The PTE entries created by the IOMMU should also include the encryption
-> mask so that when the device behind the IOMMU performs a DMA, the DMA
-> will be performed to encrypted memory.
+> ...
 > 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/include/asm/mem_encrypt.h |    7 +++++++
->  arch/x86/mm/mem_encrypt.c          |   30 ++++++++++++++++++++++++++++++
->  drivers/iommu/amd_iommu.c          |   36 +++++++++++++++++++-----------------
->  drivers/iommu/amd_iommu_init.c     |   18 ++++++++++++------
->  drivers/iommu/amd_iommu_proto.h    |   10 ++++++++++
->  drivers/iommu/amd_iommu_types.h    |    2 +-
->  include/asm-generic/mem_encrypt.h  |    5 +++++
->  7 files changed, 84 insertions(+), 24 deletions(-)
 > 
-> diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
-> index c7a2525..d86e544 100644
-> --- a/arch/x86/include/asm/mem_encrypt.h
-> +++ b/arch/x86/include/asm/mem_encrypt.h
-> @@ -31,6 +31,8 @@ void __init sme_early_decrypt(resource_size_t paddr,
->  
->  void __init sme_early_init(void);
->  
-> +bool sme_iommu_supported(void);
-> +
->  /* Architecture __weak replacement functions */
->  void __init mem_encrypt_init(void);
->  
-> @@ -62,6 +64,11 @@ static inline void __init sme_early_init(void)
->  {
->  }
->  
-> +static inline bool sme_iommu_supported(void)
-> +{
-> +	return true;
-> +}
+>> diff --git a/init/main.c b/init/main.c
+>> index df58a41..7125b5f 100644
+>> --- a/init/main.c
+>> +++ b/init/main.c
+>> @@ -488,6 +488,10 @@ void __init __weak thread_stack_cache_init(void)
+>>   }
+>>   #endif
+>>   
+>> +void __init __weak mem_encrypt_init(void)
+>> +{
+>> +}
+> 
+> void __init __weak mem_encrypt_init(void) { }
+> 
+> saves some real estate. Please do that for the rest of the stubs you're
+> adding, for the next version.
 
-Some more file real-estate saving:
+Ok, will do.
 
-static inline bool sme_iommu_supported(void) 	{ return true; }
+Thanks,
+Tom
 
-> +
->  #endif	/* CONFIG_AMD_MEM_ENCRYPT */
->  
->  static inline bool sme_active(void)
-> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-> index 5d7c51d..018b58a 100644
-> --- a/arch/x86/mm/mem_encrypt.c
-> +++ b/arch/x86/mm/mem_encrypt.c
-> @@ -197,6 +197,36 @@ void __init sme_early_init(void)
->  		protection_map[i] = pgprot_encrypted(protection_map[i]);
->  }
->  
-> +bool sme_iommu_supported(void)
-
-Why is this one exported with all the header file declarations if it is
-going to be used in the iommu code only? IOW, you can make it a static
-function there and save yourself all the exporting.
-
-> +{
-> +	struct cpuinfo_x86 *c = &boot_cpu_data;
-> +
-> +	if (!sme_me_mask || (c->x86 != 0x17))
-
-me_mask or sme_active()?
-
-Or is the IOMMU "disabled" in a way the moment the BIOS decides that SME
-can be enabled?
-
-Also, family checks are always a bad idea for enablement. Why do we need
-the family check? Because future families will work with the IOMMU? :-)
-
-> +		return true;
-> +
-> +	/* For Fam17h, a specific level of support is required */
-> +	switch (c->microcode & 0xf000) {
-
-Also, you said in another mail on this subthread that c->microcode
-is not yet set. Are you saying, that the iommu init gunk runs before
-init_amd(), where we do set c->microcode?
-
-If so, we can move the setting to early_init_amd() or so.
-
-> +	case 0x0000:
-> +		return false;
-> +	case 0x1000:
-> +		switch (c->microcode & 0x0f00) {
-> +		case 0x0000:
-> +			return false;
-> +		case 0x0100:
-> +			if ((c->microcode & 0xff) < 0x26)
-> +				return false;
-> +			break;
-> +		case 0x0200:
-> +			if ((c->microcode & 0xff) < 0x05)
-> +				return false;
-> +			break;
-> +		}
-
-So this is the microcode revision, why those complex compares? Can't you
-simply check a range of values?
-
-> +		break;
-> +	}
-> +
-> +	return true;
-> +}
-> +
->  /* Architecture __weak replacement functions */
->  void __init mem_encrypt_init(void)
->  {
-> diff --git a/drivers/iommu/amd_iommu.c b/drivers/iommu/amd_iommu.c
-> index 63cacf5..94eb130 100644
-> --- a/drivers/iommu/amd_iommu.c
-> +++ b/drivers/iommu/amd_iommu.c
-> @@ -544,7 +544,7 @@ static void dump_dte_entry(u16 devid)
->  
->  static void dump_command(unsigned long phys_addr)
->  {
-> -	struct iommu_cmd *cmd = phys_to_virt(phys_addr);
-> +	struct iommu_cmd *cmd = iommu_phys_to_virt(phys_addr);
->  	int i;
->  
->  	for (i = 0; i < 4; ++i)
-> @@ -863,13 +863,15 @@ static void copy_cmd_to_buffer(struct amd_iommu *iommu,
->  	writel(tail, iommu->mmio_base + MMIO_CMD_TAIL_OFFSET);
->  }
->  
-> -static void build_completion_wait(struct iommu_cmd *cmd, u64 address)
-> +static void build_completion_wait(struct iommu_cmd *cmd, volatile u64 *sem)
-
-WARNING: Use of volatile is usually wrong: see Documentation/process/volatile-considered-harmful.rst
-#134: FILE: drivers/iommu/amd_iommu.c:866:
-+static void build_completion_wait(struct iommu_cmd *cmd, volatile u64 *sem)
-
->  {
-> +	u64 address = iommu_virt_to_phys((void *)sem);
-> +
->  	WARN_ON(address & 0x7ULL);
->  
->  	memset(cmd, 0, sizeof(*cmd));
-> -	cmd->data[0] = lower_32_bits(__pa(address)) | CMD_COMPL_WAIT_STORE_MASK;
-> -	cmd->data[1] = upper_32_bits(__pa(address));
-> +	cmd->data[0] = lower_32_bits(address) | CMD_COMPL_WAIT_STORE_MASK;
-> +	cmd->data[1] = upper_32_bits(address);
->  	cmd->data[2] = 1;
->  	CMD_SET_TYPE(cmd, CMD_COMPL_WAIT);
-
-<... snip stuff which Joerg needs to review... >
-
-> diff --git a/include/asm-generic/mem_encrypt.h b/include/asm-generic/mem_encrypt.h
-> index fb02ff0..bbc49e1 100644
-> --- a/include/asm-generic/mem_encrypt.h
-> +++ b/include/asm-generic/mem_encrypt.h
-> @@ -27,6 +27,11 @@ static inline u64 sme_dma_mask(void)
->  	return 0ULL;
->  }
->  
-> +static inline bool sme_iommu_supported(void)
-> +{
-> +	return true;
-> +}
-
-Save some more file real-estate... you get the idea by now, I'm sure.
-
-:-)
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+> 
+>> +
+>>   /*
+>>    * Set up kernel memory allocators
+>>    */
+>> @@ -640,6 +644,15 @@ asmlinkage __visible void __init start_kernel(void)
+>>   	 */
+>>   	locking_selftest();
+>>   
+>> +	/*
+>> +	 * This needs to be called before any devices perform DMA
+>> +	 * operations that might use the SWIOTLB bounce buffers.
+>> +	 * This call will mark the bounce buffers as decrypted so
+>> +	 * that their usage will not cause "plain-text" data to be
+>> +	 * decrypted when accessed.
+> 
+> s/This call/It/
+> 
+>> +	 */
+>> +	mem_encrypt_init();
+>> +
+>>   #ifdef CONFIG_BLK_DEV_INITRD
+>>   	if (initrd_start && !initrd_below_start_ok &&
+>>   	    page_to_pfn(virt_to_page((void *)initrd_start)) < min_low_pfn) {
+>> diff --git a/lib/swiotlb.c b/lib/swiotlb.c
+>> index a8d74a7..74d6557 100644
+>> --- a/lib/swiotlb.c
+>> +++ b/lib/swiotlb.c
+>> @@ -30,6 +30,7 @@
+>>   #include <linux/highmem.h>
+>>   #include <linux/gfp.h>
+>>   #include <linux/scatterlist.h>
+>> +#include <linux/mem_encrypt.h>
+>>   
+>>   #include <asm/io.h>
+>>   #include <asm/dma.h>
+>> @@ -155,6 +156,17 @@ unsigned long swiotlb_size_or_default(void)
+>>   	return size ? size : (IO_TLB_DEFAULT_SIZE);
+>>   }
+>>   
+>> +void __weak swiotlb_set_mem_attributes(void *vaddr, unsigned long size)
+>> +{
+>> +}
+> 
+> As above.
+> 
