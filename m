@@ -1,107 +1,111 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [PATCH v6 24/34] x86, swiotlb: Add memory encryption support
-Date: Wed, 14 Jun 2017 14:38:48 -0500
-Message-ID: <c1a59a06-2850-b215-5c08-27adff6fecde@amd.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [PATCH v6 25/34] swiotlb: Add warnings for use of bounce buffers
+ with SME
+Date: Wed, 14 Jun 2017 14:49:02 -0500
+Message-ID: <33d1debc-c684-cba1-7d95-493678f086d0@amd.com>
 References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
-	<20170607191721.28645.96519.stgit@tlendack-t1.amdoffice.net>
-	<20170614164553.jwcfgugpizz5pc2e@pd.tnic>
+ <20170607191732.28645.42876.stgit@tlendack-t1.amdoffice.net>
+ <20170614165052.fyn5t4gkq5leczcc@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20170614164553.jwcfgugpizz5pc2e-fF5Pk5pvG8Y@public.gmane.org>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20170614165052.fyn5t4gkq5leczcc@pd.tnic>
 Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst>
+Sender: owner-linux-mm@kvack.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
 List-Id: linux-efi@vger.kernel.org
 
-On 6/14/2017 11:45 AM, Borislav Petkov wrote:
-> On Wed, Jun 07, 2017 at 02:17:21PM -0500, Tom Lendacky wrote:
->> Since DMA addresses will effectively look like 48-bit addresses when the
->> memory encryption mask is set, SWIOTLB is needed if the DMA mask of the
->> device performing the DMA does not support 48-bits. SWIOTLB will be
->> initialized to create decrypted bounce buffers for use by these devices.
+On 6/14/2017 11:50 AM, Borislav Petkov wrote:
+> On Wed, Jun 07, 2017 at 02:17:32PM -0500, Tom Lendacky wrote:
+>> Add warnings to let the user know when bounce buffers are being used for
+>> DMA when SME is active.  Since the bounce buffers are not in encrypted
+>> memory, these notifications are to allow the user to determine some
+>> appropriate action - if necessary.
 >>
->> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 >> ---
-> 
-> ...
-> 
-> 
->> diff --git a/init/main.c b/init/main.c
->> index df58a41..7125b5f 100644
->> --- a/init/main.c
->> +++ b/init/main.c
->> @@ -488,6 +488,10 @@ void __init __weak thread_stack_cache_init(void)
+>>   arch/x86/include/asm/mem_encrypt.h |    8 ++++++++
+>>   include/asm-generic/mem_encrypt.h  |    5 +++++
+>>   include/linux/dma-mapping.h        |    9 +++++++++
+>>   lib/swiotlb.c                      |    3 +++
+>>   4 files changed, 25 insertions(+)
+>>
+>> diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
+>> index f1215a4..c7a2525 100644
+>> --- a/arch/x86/include/asm/mem_encrypt.h
+>> +++ b/arch/x86/include/asm/mem_encrypt.h
+>> @@ -69,6 +69,14 @@ static inline bool sme_active(void)
+>>   	return !!sme_me_mask;
 >>   }
->>   #endif
 >>   
->> +void __init __weak mem_encrypt_init(void)
+>> +static inline u64 sme_dma_mask(void)
 >> +{
+>> +	if (!sme_me_mask)
+>> +		return 0ULL;
+>> +
+>> +	return ((u64)sme_me_mask << 1) - 1;
 >> +}
+>> +
+>>   /*
+>>    * The __sme_pa() and __sme_pa_nodebug() macros are meant for use when
+>>    * writing to or comparing values from the cr3 register.  Having the
+>> diff --git a/include/asm-generic/mem_encrypt.h b/include/asm-generic/mem_encrypt.h
+>> index b55c3f9..fb02ff0 100644
+>> --- a/include/asm-generic/mem_encrypt.h
+>> +++ b/include/asm-generic/mem_encrypt.h
+>> @@ -22,6 +22,11 @@ static inline bool sme_active(void)
+>>   	return false;
+>>   }
+>>   
+>> +static inline u64 sme_dma_mask(void)
+>> +{
+>> +	return 0ULL;
+>> +}
+>> +
+>>   /*
+>>    * The __sme_set() and __sme_clr() macros are useful for adding or removing
+>>    * the encryption mask from a value (e.g. when dealing with pagetable
+>> diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
+>> index 4f3eece..e2c5fda 100644
+>> --- a/include/linux/dma-mapping.h
+>> +++ b/include/linux/dma-mapping.h
+>> @@ -10,6 +10,7 @@
+>>   #include <linux/scatterlist.h>
+>>   #include <linux/kmemcheck.h>
+>>   #include <linux/bug.h>
+>> +#include <linux/mem_encrypt.h>
+>>   
+>>   /**
+>>    * List of possible attributes associated with a DMA mapping. The semantics
+>> @@ -577,6 +578,10 @@ static inline int dma_set_mask(struct device *dev, u64 mask)
+>>   
+>>   	if (!dev->dma_mask || !dma_supported(dev, mask))
+>>   		return -EIO;
+>> +
+>> +	if (sme_active() && (mask < sme_dma_mask()))
+>> +		dev_warn(dev, "SME is active, device will require DMA bounce buffers\n");
 > 
-> void __init __weak mem_encrypt_init(void) { }
+> Something looks strange here:
 > 
-> saves some real estate. Please do that for the rest of the stubs you're
-> adding, for the next version.
+> you're checking sme_active() before calling sme_dma_mask() and yet in
+> it, you're checking !sme_me_mask again. What gives?
+> 
 
-Ok, will do.
+I guess I don't need the sme_active() check since the second part of the
+if statement can only ever be true if SME is active (since mask is
+unsigned).
 
 Thanks,
 Tom
 
+> Why not move the sme_active() check into sme_dma_mask() and thus
+> simplify callers?
 > 
->> +
->>   /*
->>    * Set up kernel memory allocators
->>    */
->> @@ -640,6 +644,15 @@ asmlinkage __visible void __init start_kernel(void)
->>   	 */
->>   	locking_selftest();
->>   
->> +	/*
->> +	 * This needs to be called before any devices perform DMA
->> +	 * operations that might use the SWIOTLB bounce buffers.
->> +	 * This call will mark the bounce buffers as decrypted so
->> +	 * that their usage will not cause "plain-text" data to be
->> +	 * decrypted when accessed.
-> 
-> s/This call/It/
-> 
->> +	 */
->> +	mem_encrypt_init();
->> +
->>   #ifdef CONFIG_BLK_DEV_INITRD
->>   	if (initrd_start && !initrd_below_start_ok &&
->>   	    page_to_pfn(virt_to_page((void *)initrd_start)) < min_low_pfn) {
->> diff --git a/lib/swiotlb.c b/lib/swiotlb.c
->> index a8d74a7..74d6557 100644
->> --- a/lib/swiotlb.c
->> +++ b/lib/swiotlb.c
->> @@ -30,6 +30,7 @@
->>   #include <linux/highmem.h>
->>   #include <linux/gfp.h>
->>   #include <linux/scatterlist.h>
->> +#include <linux/mem_encrypt.h>
->>   
->>   #include <asm/io.h>
->>   #include <asm/dma.h>
->> @@ -155,6 +156,17 @@ unsigned long swiotlb_size_or_default(void)
->>   	return size ? size : (IO_TLB_DEFAULT_SIZE);
->>   }
->>   
->> +void __weak swiotlb_set_mem_attributes(void *vaddr, unsigned long size)
->> +{
->> +}
-> 
-> As above.
-> 
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
