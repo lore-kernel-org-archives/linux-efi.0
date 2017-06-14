@@ -1,54 +1,61 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.11 048/150] efi: Dont issue error message when booted under Xen
-Date: Mon, 12 Jun 2017 17:24:15 +0200
-Message-ID: <20170612152521.515939674@linuxfoundation.org>
-References: <20170612152519.404936272@linuxfoundation.org>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v6 20/34] x86, mpparse: Use memremap to map the mpf and
+ mpc data
+Date: Wed, 14 Jun 2017 18:07:54 +0200
+Message-ID: <20170614160754.c4ywbf5ktqwgc4ij@pd.tnic>
+References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
+ <20170607191643.28645.91679.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170612152519.404936272@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Juergen Gross <jgross@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170607191643.28645.91679.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
 List-Id: linux-efi@vger.kernel.org
 
-4.11-stable review patch.  If anyone has any objections, please let me know.
+On Wed, Jun 07, 2017 at 02:16:43PM -0500, Tom Lendacky wrote:
+> The SMP MP-table is built by UEFI and placed in memory in a decrypted
+> state. These tables are accessed using a mix of early_memremap(),
+> early_memunmap(), phys_to_virt() and virt_to_phys(). Change all accesses
+> to use early_memremap()/early_memunmap(). This allows for proper setting
+> of the encryption mask so that the data can be successfully accessed when
+> SME is active.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/kernel/mpparse.c |   98 ++++++++++++++++++++++++++++++++-------------
+>  1 file changed, 70 insertions(+), 28 deletions(-)
 
-------------------
+...
 
-From: Juergen Gross <jgross@suse.com>
+> @@ -515,6 +516,12 @@ void __init default_get_smp_config(unsigned int early)
+>  	if (acpi_lapic && acpi_ioapic)
+>  		return;
+>  
+> +	mpf = early_memremap(mpf_base, sizeof(*mpf));
+> +	if (!mpf) {
+> +		pr_err("MPTABLE: mpf early_memremap() failed\n");
 
-commit 1ea34adb87c969b89dfd83f1905a79161e9ada26 upstream.
+If you're going to introduce new prefixes then add:
 
-When booted as Xen dom0 there won't be an EFI memmap allocated. Avoid
-issuing an error message in this case:
+#undef pr_fmt
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
-  [    0.144079] efi: Failed to allocate new EFI memmap
+at the beginning of the file so that they all say "mpparse:" instead.
 
-Signed-off-by: Juergen Gross <jgross@suse.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/20170526113652.21339-2-matt@codeblueprint.co.uk
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+And pls make that message more user-friendly: "Error mapping MP table"
+or so.
 
----
- arch/x86/platform/efi/quirks.c |    3 +++
- 1 file changed, 3 insertions(+)
+-- 
+Regards/Gruss,
+    Boris.
 
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -358,6 +358,9 @@ void __init efi_free_boot_services(void)
- 		free_bootmem_late(start, size);
- 	}
- 
-+	if (!num_entries)
-+		return;
-+
- 	new_size = efi.memmap.desc_size * num_entries;
- 	new_phys = efi_memmap_alloc(num_entries);
- 	if (!new_phys) {
+Good mailing practices for 400: avoid top-posting and trim the reply.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
