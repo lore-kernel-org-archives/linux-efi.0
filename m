@@ -1,85 +1,155 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [PATCH v6 26/34] iommu/amd: Allow the AMD IOMMU to work with
- memory encryption
-Date: Thu, 15 Jun 2017 11:33:41 -0500
-Message-ID: <3db2c52d-5e63-a1df-edd4-975bce7f29c2@amd.com>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [PATCH v6 30/34] x86/mm, kexec: Allow kexec to be used with SME
+Date: Thu, 15 Jun 2017 12:43:13 -0500
+Message-ID: <8973bfc5-9d18-f98e-4c38-6452f5d81ebe@amd.com>
 References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
- <20170607191745.28645.81756.stgit@tlendack-t1.amdoffice.net>
- <20170614174208.p2yr5exs4b6pjxhf@pd.tnic>
- <0611d01a-19f8-d6ae-2682-932789855518@amd.com>
- <20170615094111.wga334kg2bhxqib3@pd.tnic>
- <921153f5-1528-31d8-b815-f0419e819aeb@amd.com>
- <20170615153322.nwylo3dzn4fdx6n6@pd.tnic>
+	<20170607191827.28645.93989.stgit@tlendack-t1.amdoffice.net>
+	<20170615100345.76pn5ruf6cm3ktpe@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170615153322.nwylo3dzn4fdx6n6@pd.tnic>
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20170615100345.76pn5ruf6cm3ktpe-fF5Pk5pvG8Y@public.gmane.org>
 Content-Language: en-US
-Sender: owner-linux-mm@kvack.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst>
 List-Id: linux-efi@vger.kernel.org
 
-On 6/15/2017 10:33 AM, Borislav Petkov wrote:
-> On Thu, Jun 15, 2017 at 09:59:45AM -0500, Tom Lendacky wrote:
->> Actually the detection routine, amd_iommu_detect(), is part of the
->> IOMMU_INIT_FINISH macro support which is called early through mm_init()
->> from start_kernel() and that routine is called before init_amd().
-> 
-> Ah, we do that there too:
-> 
-> 	for (p = __iommu_table; p < __iommu_table_end; p++) {
-> 
-> Can't say that that code with the special section and whatnot is
-> obvious. :-\
-> 
-> Oh, well, early_init_amd() then. That is called in
-> start_kernel->setup_arch->early_cpu_init and thus before mm_init().
-> 
->>> If so, it did work fine until now, without the volatile. Why is it
->>> needed now, all of a sudden?
+On 6/15/2017 5:03 AM, Borislav Petkov wrote:
+> On Wed, Jun 07, 2017 at 02:18:27PM -0500, Tom Lendacky wrote:
+>> Provide support so that kexec can be used to boot a kernel when SME is
+>> enabled.
 >>
->> If you run checkpatch against the whole amd_iommu.c file you'll see that
+>> Support is needed to allocate pages for kexec without encryption.  This
+>> is needed in order to be able to reboot in the kernel in the same manner
+>> as originally booted.
+>>
+>> Additionally, when shutting down all of the CPUs we need to be sure to
+>> flush the caches and then halt. This is needed when booting from a state
+>> where SME was not active into a state where SME is active (or vice-versa).
+>> Without these steps, it is possible for cache lines to exist for the same
+>> physical location but tagged both with and without the encryption bit. This
+>> can cause random memory corruption when caches are flushed depending on
+>> which cacheline is written last.
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+>> ---
+>>   arch/x86/include/asm/init.h          |    1 +
+>>   arch/x86/include/asm/kexec.h         |    8 ++++++++
+>>   arch/x86/include/asm/pgtable_types.h |    1 +
+>>   arch/x86/kernel/machine_kexec_64.c   |   35 +++++++++++++++++++++++++++++++++-
+>>   arch/x86/kernel/process.c            |   17 +++++++++++++++--
+>>   arch/x86/mm/ident_map.c              |   12 ++++++++----
+>>   include/linux/kexec.h                |   14 ++++++++++++++
+>>   kernel/kexec_core.c                  |    6 ++++++
+>>   8 files changed, 87 insertions(+), 7 deletions(-)
+>>
+>> diff --git a/arch/x86/include/asm/init.h b/arch/x86/include/asm/init.h
+>> index 474eb8c..05c4aa0 100644
+>> --- a/arch/x86/include/asm/init.h
+>> +++ b/arch/x86/include/asm/init.h
+>> @@ -7,6 +7,7 @@ struct x86_mapping_info {
+>>   	unsigned long page_flag;	 /* page flag for PMD or PUD entry */
+>>   	unsigned long offset;		 /* ident mapping offset */
+>>   	bool direct_gbpages;		 /* PUD level 1GB page support */
+>> +	unsigned long kernpg_flag;	 /* kernel pagetable flag override */
+>>   };
+>>   
+>>   int kernel_ident_mapping_init(struct x86_mapping_info *info, pgd_t *pgd_page,
+>> diff --git a/arch/x86/include/asm/kexec.h b/arch/x86/include/asm/kexec.h
+>> index 70ef205..e8183ac 100644
+>> --- a/arch/x86/include/asm/kexec.h
+>> +++ b/arch/x86/include/asm/kexec.h
+>> @@ -207,6 +207,14 @@ struct kexec_entry64_regs {
+>>   	uint64_t r15;
+>>   	uint64_t rip;
+>>   };
+>> +
+>> +extern int arch_kexec_post_alloc_pages(void *vaddr, unsigned int pages,
+>> +				       gfp_t gfp);
+>> +#define arch_kexec_post_alloc_pages arch_kexec_post_alloc_pages
+>> +
+>> +extern void arch_kexec_pre_free_pages(void *vaddr, unsigned int pages);
+>> +#define arch_kexec_pre_free_pages arch_kexec_pre_free_pages
+>> +
+>>   #endif
+>>   
+>>   typedef void crash_vmclear_fn(void);
+>> diff --git a/arch/x86/include/asm/pgtable_types.h b/arch/x86/include/asm/pgtable_types.h
+>> index ce8cb1c..0f326f4 100644
+>> --- a/arch/x86/include/asm/pgtable_types.h
+>> +++ b/arch/x86/include/asm/pgtable_types.h
+>> @@ -213,6 +213,7 @@ enum page_cache_mode {
+>>   #define PAGE_KERNEL		__pgprot(__PAGE_KERNEL | _PAGE_ENC)
+>>   #define PAGE_KERNEL_RO		__pgprot(__PAGE_KERNEL_RO | _PAGE_ENC)
+>>   #define PAGE_KERNEL_EXEC	__pgprot(__PAGE_KERNEL_EXEC | _PAGE_ENC)
+>> +#define PAGE_KERNEL_EXEC_NOENC	__pgprot(__PAGE_KERNEL_EXEC)
+>>   #define PAGE_KERNEL_RX		__pgprot(__PAGE_KERNEL_RX | _PAGE_ENC)
+>>   #define PAGE_KERNEL_NOCACHE	__pgprot(__PAGE_KERNEL_NOCACHE | _PAGE_ENC)
+>>   #define PAGE_KERNEL_LARGE	__pgprot(__PAGE_KERNEL_LARGE | _PAGE_ENC)
+>> diff --git a/arch/x86/kernel/machine_kexec_64.c b/arch/x86/kernel/machine_kexec_64.c
+>> index 6f5ca4e..35e069a 100644
+>> --- a/arch/x86/kernel/machine_kexec_64.c
+>> +++ b/arch/x86/kernel/machine_kexec_64.c
+>> @@ -87,7 +87,7 @@ static int init_transition_pgtable(struct kimage *image, pgd_t *pgd)
+>>   		set_pmd(pmd, __pmd(__pa(pte) | _KERNPG_TABLE));
+>>   	}
+>>   	pte = pte_offset_kernel(pmd, vaddr);
+>> -	set_pte(pte, pfn_pte(paddr >> PAGE_SHIFT, PAGE_KERNEL_EXEC));
+>> +	set_pte(pte, pfn_pte(paddr >> PAGE_SHIFT, PAGE_KERNEL_EXEC_NOENC));
+>>   	return 0;
+>>   err:
+>>   	free_transition_pgtable(image);
+>> @@ -115,6 +115,7 @@ static int init_pgtable(struct kimage *image, unsigned long start_pgtable)
+>>   		.alloc_pgt_page	= alloc_pgt_page,
+>>   		.context	= image,
+>>   		.page_flag	= __PAGE_KERNEL_LARGE_EXEC,
+>> +		.kernpg_flag	= _KERNPG_TABLE_NOENC,
+>>   	};
+>>   	unsigned long mstart, mend;
+>>   	pgd_t *level4p;
+>> @@ -602,3 +603,35 @@ void arch_kexec_unprotect_crashkres(void)
+>>   {
+>>   	kexec_mark_crashkres(false);
+>>   }
+>> +
+>> +int arch_kexec_post_alloc_pages(void *vaddr, unsigned int pages, gfp_t gfp)
+>> +{
+>> +	int ret;
+>> +
+>> +	if (sme_active()) {
 > 
-> I'm, of course, not talking about the signature change: I'm *actually*
-> questioning the need to make this argument volatile, all of a sudden.
-
-Understood.
-
+> What happened to flipping the logic and saving an indentation level here?
 > 
-> If there's a need, please explain why. It worked fine until now. If it
-> didn't, we would've seen it.
-
-The original reason for the change was to try and make the use of
-iommu_virt_to_phys() straight forward.  Removing the cast and changing
-build_completion_wait() to take a u64 * (without volatile) resulted in a
-warning because cmd_sem is defined in the amd_iommu struct as volatile,
-which required a cast on the call to iommu_virt_to_phys() anyway. Since
-it worked fine previously and the whole volatile thing is beyond the
-scope of this patchset, I'll change back to the original method of how
-the function was called.
-
+>> +		/*
+>> +		 * If SME is active we need to be sure that kexec pages are
+>> +		 * not encrypted because when we boot to the new kernel the
+>> +		 * pages won't be accessed encrypted (initially).
+>> +		 */
+>> +		ret = set_memory_decrypted((unsigned long)vaddr, pages);
+>> +		if (ret)
+>> +			return ret;
+>> +
+>> +		if (gfp & __GFP_ZERO)
+>> +			memset(vaddr, 0, pages * PAGE_SIZE);
+>> +	}
 > 
-> If it is a bug, then it needs a proper explanation, a *separate* patch
-> and so on. But not like now, a drive-by change in an IOMMU enablement
-> patch.
-> 
-> If it is wrong, then wait_on_sem() needs to be fixed too. AFAICT,
-> wait_on_sem() gets called in both cases with interrupts disabled, while
-> holding a lock so I'd like to pls know why, even in that case, does this
-> variable need to be volatile
+> This is still zeroing the memory a second time. That function has missed
+> all my comments from last time.
 
-Changing the signature back reverts to the original way, so this can be
-looked at separate from this patchset then.
+Hmmm...  not sure what happened, I thought I made changes here.  I'll
+take care of it.
 
 Thanks,
 Tom
 
 > 
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
