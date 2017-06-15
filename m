@@ -1,135 +1,42 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.11 05/13] efi: Fix boot panic because of invalid BGRT image address
-Date: Thu, 15 Jun 2017 19:54:39 +0200
-Message-ID: <20170615175426.331028426@linuxfoundation.org>
-References: <20170615175426.075744317@linuxfoundation.org>
+From: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+Subject: Re: [PATCH v6 26/34] iommu/amd: Allow the AMD IOMMU to work with memory encryption
+Date: Thu, 15 Jun 2017 16:13:29 -0400
+Message-ID: <C1A52990-84AA-4258-B864-0121F5F5C4B5@oracle.com>
+References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net> <20170607191745.28645.81756.stgit@tlendack-t1.amdoffice.net> <20170614174208.p2yr5exs4b6pjxhf@pd.tnic> <0611d01a-19f8-d6ae-2682-932789855518@amd.com> <20170615094111.wga334kg2bhxqib3@pd.tnic> <921153f5-1528-31d8-b815-f0419e819aeb@amd.com> <20170615153322.nwylo3dzn4fdx6n6@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170615175426.075744317@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Maniaxx <tripleshiftone@gmail.com>, Dave Young <dyoung@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+Content-Type: text/plain;
+ charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20170615153322.nwylo3dzn4fdx6n6@pd.tnic>
+Sender: owner-linux-mm@kvack.org
+To: Borislav Petkov <bp@alien8.de>, Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Joerg Roedel <joro@8bytes.org>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey
 List-Id: linux-efi@vger.kernel.org
 
-4.11-stable review patch.  If anyone has any objections, please let me know.
+On June 15, 2017 11:33:22 AM EDT, Borislav Petkov <bp@alien8=2Ede> wrote:
+>On Thu, Jun 15, 2017 at 09:59:45AM -0500, Tom Lendacky wrote:
+>> Actually the detection routine, amd_iommu_detect(), is part of the
+>> IOMMU_INIT_FINISH macro support which is called early through
+>mm_init()
+>> from start_kernel() and that routine is called before init_amd()=2E
+>
+>Ah, we do that there too:
+>
+>	for (p =3D __iommu_table; p < __iommu_table_end; p++) {
+>
+>Can't say that that code with the special section and whatnot is
+>obvious=2E :-\
+>
 
-------------------
+Patches to make it more obvious would be always welcome!
 
-From: Dave Young <dyoung@redhat.com>
 
-commit 792ef14df5c585c19b2831673a077504a09e5203 upstream.
 
-Maniaxx reported a kernel boot crash in the EFI code, which I emulated
-by using same invalid phys addr in code:
+Thanks!
 
-  BUG: unable to handle kernel paging request at ffffffffff280001
-  IP: efi_bgrt_init+0xfb/0x153
-  ...
-  Call Trace:
-   ? bgrt_init+0xbc/0xbc
-   acpi_parse_bgrt+0xe/0x12
-   acpi_table_parse+0x89/0xb8
-   acpi_boot_init+0x445/0x4e2
-   ? acpi_parse_x2apic+0x79/0x79
-   ? dmi_ignore_irq0_timer_override+0x33/0x33
-   setup_arch+0xb63/0xc82
-   ? early_idt_handler_array+0x120/0x120
-   start_kernel+0xb7/0x443
-   ? early_idt_handler_array+0x120/0x120
-   x86_64_start_reservations+0x29/0x2b
-   x86_64_start_kernel+0x154/0x177
-   secondary_startup_64+0x9f/0x9f
-
-There is also a similar bug filed in bugzilla.kernel.org:
-
-  https://bugzilla.kernel.org/show_bug.cgi?id=195633
-
-The crash is caused by this commit:
-
-  7b0a911478c7 efi/x86: Move the EFI BGRT init code to early init code
-
-The root cause is the firmware on those machines provides invalid BGRT
-image addresses.
-
-In a kernel before above commit BGRT initializes late and uses ioremap()
-to map the image address. Ioremap validates the address, if it is not a
-valid physical address ioremap() just fails and returns. However in current
-kernel EFI BGRT initializes early and uses early_memremap() which does not
-validate the image address, and kernel panic happens.
-
-According to ACPI spec the BGRT image address should fall into
-EFI_BOOT_SERVICES_DATA, see the section 5.2.22.4 of below document:
-
-  http://www.uefi.org/sites/default/files/resources/ACPI_6_1.pdf
-
-Fix this issue by validating the image address in efi_bgrt_init(). If the
-image address does not fall into any EFI_BOOT_SERVICES_DATA areas we just
-bail out with a warning message.
-
-Reported-by: Maniaxx <tripleshiftone@gmail.com>
-Signed-off-by: Dave Young <dyoung@redhat.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Fixes: 7b0a911478c7 ("efi/x86: Move the EFI BGRT init code to early init code")
-Link: http://lkml.kernel.org/r/20170609084558.26766-2-ard.biesheuvel@linaro.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
----
- arch/x86/platform/efi/efi-bgrt.c |   26 +++++++++++++++++++++++++-
- 1 file changed, 25 insertions(+), 1 deletion(-)
-
---- a/arch/x86/platform/efi/efi-bgrt.c
-+++ b/arch/x86/platform/efi/efi-bgrt.c
-@@ -27,6 +27,26 @@ struct bmp_header {
- 	u32 size;
- } __packed;
- 
-+static bool efi_bgrt_addr_valid(u64 addr)
-+{
-+	efi_memory_desc_t *md;
-+
-+	for_each_efi_memory_desc(md) {
-+		u64 size;
-+		u64 end;
-+
-+		if (md->type != EFI_BOOT_SERVICES_DATA)
-+			continue;
-+
-+		size = md->num_pages << EFI_PAGE_SHIFT;
-+		end = md->phys_addr + size;
-+		if (addr >= md->phys_addr && addr < end)
-+			return true;
-+	}
-+
-+	return false;
-+}
-+
- void __init efi_bgrt_init(struct acpi_table_header *table)
- {
- 	void *image;
-@@ -36,7 +56,7 @@ void __init efi_bgrt_init(struct acpi_ta
- 	if (acpi_disabled)
- 		return;
- 
--	if (!efi_enabled(EFI_BOOT))
-+	if (!efi_enabled(EFI_MEMMAP))
- 		return;
- 
- 	if (table->length < sizeof(bgrt_tab)) {
-@@ -65,6 +85,10 @@ void __init efi_bgrt_init(struct acpi_ta
- 		goto out;
- 	}
- 
-+	if (!efi_bgrt_addr_valid(bgrt->image_address)) {
-+		pr_notice("Ignoring BGRT: invalid image address\n");
-+		goto out;
-+	}
- 	image = early_memremap(bgrt->image_address, sizeof(bmp_header));
- 	if (!image) {
- 		pr_notice("Ignoring BGRT: failed to map image header memory\n");
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
