@@ -1,155 +1,135 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [PATCH v6 30/34] x86/mm, kexec: Allow kexec to be used with SME
-Date: Thu, 15 Jun 2017 12:43:13 -0500
-Message-ID: <8973bfc5-9d18-f98e-4c38-6452f5d81ebe@amd.com>
-References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
-	<20170607191827.28645.93989.stgit@tlendack-t1.amdoffice.net>
-	<20170615100345.76pn5ruf6cm3ktpe@pd.tnic>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.11 05/13] efi: Fix boot panic because of invalid BGRT image address
+Date: Thu, 15 Jun 2017 19:54:39 +0200
+Message-ID: <20170615175426.331028426@linuxfoundation.org>
+References: <20170615175426.075744317@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20170615100345.76pn5ruf6cm3ktpe-fF5Pk5pvG8Y@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, "Michael S. Tsirkin" <mst>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170615175426.075744317@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Maniaxx <tripleshiftone@gmail.com>, Dave Young <dyoung@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 6/15/2017 5:03 AM, Borislav Petkov wrote:
-> On Wed, Jun 07, 2017 at 02:18:27PM -0500, Tom Lendacky wrote:
->> Provide support so that kexec can be used to boot a kernel when SME is
->> enabled.
->>
->> Support is needed to allocate pages for kexec without encryption.  This
->> is needed in order to be able to reboot in the kernel in the same manner
->> as originally booted.
->>
->> Additionally, when shutting down all of the CPUs we need to be sure to
->> flush the caches and then halt. This is needed when booting from a state
->> where SME was not active into a state where SME is active (or vice-versa).
->> Without these steps, it is possible for cache lines to exist for the same
->> physical location but tagged both with and without the encryption bit. This
->> can cause random memory corruption when caches are flushed depending on
->> which cacheline is written last.
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
->> ---
->>   arch/x86/include/asm/init.h          |    1 +
->>   arch/x86/include/asm/kexec.h         |    8 ++++++++
->>   arch/x86/include/asm/pgtable_types.h |    1 +
->>   arch/x86/kernel/machine_kexec_64.c   |   35 +++++++++++++++++++++++++++++++++-
->>   arch/x86/kernel/process.c            |   17 +++++++++++++++--
->>   arch/x86/mm/ident_map.c              |   12 ++++++++----
->>   include/linux/kexec.h                |   14 ++++++++++++++
->>   kernel/kexec_core.c                  |    6 ++++++
->>   8 files changed, 87 insertions(+), 7 deletions(-)
->>
->> diff --git a/arch/x86/include/asm/init.h b/arch/x86/include/asm/init.h
->> index 474eb8c..05c4aa0 100644
->> --- a/arch/x86/include/asm/init.h
->> +++ b/arch/x86/include/asm/init.h
->> @@ -7,6 +7,7 @@ struct x86_mapping_info {
->>   	unsigned long page_flag;	 /* page flag for PMD or PUD entry */
->>   	unsigned long offset;		 /* ident mapping offset */
->>   	bool direct_gbpages;		 /* PUD level 1GB page support */
->> +	unsigned long kernpg_flag;	 /* kernel pagetable flag override */
->>   };
->>   
->>   int kernel_ident_mapping_init(struct x86_mapping_info *info, pgd_t *pgd_page,
->> diff --git a/arch/x86/include/asm/kexec.h b/arch/x86/include/asm/kexec.h
->> index 70ef205..e8183ac 100644
->> --- a/arch/x86/include/asm/kexec.h
->> +++ b/arch/x86/include/asm/kexec.h
->> @@ -207,6 +207,14 @@ struct kexec_entry64_regs {
->>   	uint64_t r15;
->>   	uint64_t rip;
->>   };
->> +
->> +extern int arch_kexec_post_alloc_pages(void *vaddr, unsigned int pages,
->> +				       gfp_t gfp);
->> +#define arch_kexec_post_alloc_pages arch_kexec_post_alloc_pages
->> +
->> +extern void arch_kexec_pre_free_pages(void *vaddr, unsigned int pages);
->> +#define arch_kexec_pre_free_pages arch_kexec_pre_free_pages
->> +
->>   #endif
->>   
->>   typedef void crash_vmclear_fn(void);
->> diff --git a/arch/x86/include/asm/pgtable_types.h b/arch/x86/include/asm/pgtable_types.h
->> index ce8cb1c..0f326f4 100644
->> --- a/arch/x86/include/asm/pgtable_types.h
->> +++ b/arch/x86/include/asm/pgtable_types.h
->> @@ -213,6 +213,7 @@ enum page_cache_mode {
->>   #define PAGE_KERNEL		__pgprot(__PAGE_KERNEL | _PAGE_ENC)
->>   #define PAGE_KERNEL_RO		__pgprot(__PAGE_KERNEL_RO | _PAGE_ENC)
->>   #define PAGE_KERNEL_EXEC	__pgprot(__PAGE_KERNEL_EXEC | _PAGE_ENC)
->> +#define PAGE_KERNEL_EXEC_NOENC	__pgprot(__PAGE_KERNEL_EXEC)
->>   #define PAGE_KERNEL_RX		__pgprot(__PAGE_KERNEL_RX | _PAGE_ENC)
->>   #define PAGE_KERNEL_NOCACHE	__pgprot(__PAGE_KERNEL_NOCACHE | _PAGE_ENC)
->>   #define PAGE_KERNEL_LARGE	__pgprot(__PAGE_KERNEL_LARGE | _PAGE_ENC)
->> diff --git a/arch/x86/kernel/machine_kexec_64.c b/arch/x86/kernel/machine_kexec_64.c
->> index 6f5ca4e..35e069a 100644
->> --- a/arch/x86/kernel/machine_kexec_64.c
->> +++ b/arch/x86/kernel/machine_kexec_64.c
->> @@ -87,7 +87,7 @@ static int init_transition_pgtable(struct kimage *image, pgd_t *pgd)
->>   		set_pmd(pmd, __pmd(__pa(pte) | _KERNPG_TABLE));
->>   	}
->>   	pte = pte_offset_kernel(pmd, vaddr);
->> -	set_pte(pte, pfn_pte(paddr >> PAGE_SHIFT, PAGE_KERNEL_EXEC));
->> +	set_pte(pte, pfn_pte(paddr >> PAGE_SHIFT, PAGE_KERNEL_EXEC_NOENC));
->>   	return 0;
->>   err:
->>   	free_transition_pgtable(image);
->> @@ -115,6 +115,7 @@ static int init_pgtable(struct kimage *image, unsigned long start_pgtable)
->>   		.alloc_pgt_page	= alloc_pgt_page,
->>   		.context	= image,
->>   		.page_flag	= __PAGE_KERNEL_LARGE_EXEC,
->> +		.kernpg_flag	= _KERNPG_TABLE_NOENC,
->>   	};
->>   	unsigned long mstart, mend;
->>   	pgd_t *level4p;
->> @@ -602,3 +603,35 @@ void arch_kexec_unprotect_crashkres(void)
->>   {
->>   	kexec_mark_crashkres(false);
->>   }
->> +
->> +int arch_kexec_post_alloc_pages(void *vaddr, unsigned int pages, gfp_t gfp)
->> +{
->> +	int ret;
->> +
->> +	if (sme_active()) {
-> 
-> What happened to flipping the logic and saving an indentation level here?
-> 
->> +		/*
->> +		 * If SME is active we need to be sure that kexec pages are
->> +		 * not encrypted because when we boot to the new kernel the
->> +		 * pages won't be accessed encrypted (initially).
->> +		 */
->> +		ret = set_memory_decrypted((unsigned long)vaddr, pages);
->> +		if (ret)
->> +			return ret;
->> +
->> +		if (gfp & __GFP_ZERO)
->> +			memset(vaddr, 0, pages * PAGE_SIZE);
->> +	}
-> 
-> This is still zeroing the memory a second time. That function has missed
-> all my comments from last time.
+4.11-stable review patch.  If anyone has any objections, please let me know.
 
-Hmmm...  not sure what happened, I thought I made changes here.  I'll
-take care of it.
+------------------
 
-Thanks,
-Tom
+From: Dave Young <dyoung@redhat.com>
 
-> 
+commit 792ef14df5c585c19b2831673a077504a09e5203 upstream.
+
+Maniaxx reported a kernel boot crash in the EFI code, which I emulated
+by using same invalid phys addr in code:
+
+  BUG: unable to handle kernel paging request at ffffffffff280001
+  IP: efi_bgrt_init+0xfb/0x153
+  ...
+  Call Trace:
+   ? bgrt_init+0xbc/0xbc
+   acpi_parse_bgrt+0xe/0x12
+   acpi_table_parse+0x89/0xb8
+   acpi_boot_init+0x445/0x4e2
+   ? acpi_parse_x2apic+0x79/0x79
+   ? dmi_ignore_irq0_timer_override+0x33/0x33
+   setup_arch+0xb63/0xc82
+   ? early_idt_handler_array+0x120/0x120
+   start_kernel+0xb7/0x443
+   ? early_idt_handler_array+0x120/0x120
+   x86_64_start_reservations+0x29/0x2b
+   x86_64_start_kernel+0x154/0x177
+   secondary_startup_64+0x9f/0x9f
+
+There is also a similar bug filed in bugzilla.kernel.org:
+
+  https://bugzilla.kernel.org/show_bug.cgi?id=195633
+
+The crash is caused by this commit:
+
+  7b0a911478c7 efi/x86: Move the EFI BGRT init code to early init code
+
+The root cause is the firmware on those machines provides invalid BGRT
+image addresses.
+
+In a kernel before above commit BGRT initializes late and uses ioremap()
+to map the image address. Ioremap validates the address, if it is not a
+valid physical address ioremap() just fails and returns. However in current
+kernel EFI BGRT initializes early and uses early_memremap() which does not
+validate the image address, and kernel panic happens.
+
+According to ACPI spec the BGRT image address should fall into
+EFI_BOOT_SERVICES_DATA, see the section 5.2.22.4 of below document:
+
+  http://www.uefi.org/sites/default/files/resources/ACPI_6_1.pdf
+
+Fix this issue by validating the image address in efi_bgrt_init(). If the
+image address does not fall into any EFI_BOOT_SERVICES_DATA areas we just
+bail out with a warning message.
+
+Reported-by: Maniaxx <tripleshiftone@gmail.com>
+Signed-off-by: Dave Young <dyoung@redhat.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Fixes: 7b0a911478c7 ("efi/x86: Move the EFI BGRT init code to early init code")
+Link: http://lkml.kernel.org/r/20170609084558.26766-2-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ arch/x86/platform/efi/efi-bgrt.c |   26 +++++++++++++++++++++++++-
+ 1 file changed, 25 insertions(+), 1 deletion(-)
+
+--- a/arch/x86/platform/efi/efi-bgrt.c
++++ b/arch/x86/platform/efi/efi-bgrt.c
+@@ -27,6 +27,26 @@ struct bmp_header {
+ 	u32 size;
+ } __packed;
+ 
++static bool efi_bgrt_addr_valid(u64 addr)
++{
++	efi_memory_desc_t *md;
++
++	for_each_efi_memory_desc(md) {
++		u64 size;
++		u64 end;
++
++		if (md->type != EFI_BOOT_SERVICES_DATA)
++			continue;
++
++		size = md->num_pages << EFI_PAGE_SHIFT;
++		end = md->phys_addr + size;
++		if (addr >= md->phys_addr && addr < end)
++			return true;
++	}
++
++	return false;
++}
++
+ void __init efi_bgrt_init(struct acpi_table_header *table)
+ {
+ 	void *image;
+@@ -36,7 +56,7 @@ void __init efi_bgrt_init(struct acpi_ta
+ 	if (acpi_disabled)
+ 		return;
+ 
+-	if (!efi_enabled(EFI_BOOT))
++	if (!efi_enabled(EFI_MEMMAP))
+ 		return;
+ 
+ 	if (table->length < sizeof(bgrt_tab)) {
+@@ -65,6 +85,10 @@ void __init efi_bgrt_init(struct acpi_ta
+ 		goto out;
+ 	}
+ 
++	if (!efi_bgrt_addr_valid(bgrt->image_address)) {
++		pr_notice("Ignoring BGRT: invalid image address\n");
++		goto out;
++	}
+ 	image = early_memremap(bgrt->image_address, sizeof(bmp_header));
+ 	if (!image) {
+ 		pr_notice("Ignoring BGRT: failed to map image header memory\n");
