@@ -1,29 +1,38 @@
 From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: [PATCH 0/2] xen/efi: Fixes
-Date: Tue, 20 Jun 2017 22:14:26 +0200
-Message-ID: <1497989668-6238-1-git-send-email-daniel.kiper@oracle.com>
-Return-path: <stable-owner@vger.kernel.org>
-Sender: stable-owner@vger.kernel.org
+Subject: [PATCH 1/2] efi: Process MEMATTR table only if EFI_MEMMAP
+Date: Tue, 20 Jun 2017 22:14:27 +0200
+Message-ID: <1497989668-6238-2-git-send-email-daniel.kiper@oracle.com>
+References: <1497989668-6238-1-git-send-email-daniel.kiper@oracle.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1497989668-6238-1-git-send-email-daniel.kiper@oracle.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, stable@vger.kernel.org, xen-devel@lists.xenproject.org
 Cc: boris.ostrovsky@oracle.com, jgross@suse.com, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-Hey,
+Otherwise e.g. Xen dom0 on x86_64 EFI platforms crashes.
 
-Two small fixes for Xen dom0 running on x86_64 EFI platforms.
+In theory we can check EFI_PARAVIRT too, however,
+EFI_MEMMAP looks more generic and covers more cases.
 
-I am CC-ing stable maintainers because similar stuff is needed for various
-stable kernels too. Unfortunately, almost every version needs a bit different
-set of fixes. So, please treat this email more as head up than real set of
-patches for your kernel. If you wish to get Xen EFI stuff fixed just drop me
-a line. Then I will prepare set of patches for your kernel (if needed).
-
-Daniel
-
- arch/x86/xen/efi.c         |   45 ++++++++++++---------------------------------
+Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
  drivers/firmware/efi/efi.c |    3 ++-
- 2 files changed, 14 insertions(+), 34 deletions(-)
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Daniel Kiper (2):
-      efi: Process MEMATTR table only if EFI_MEMMAP
-      x86/xen/efi: Init only efi struct members used by Xen
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index b372aad..045d6d3 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -528,7 +528,8 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 		}
+ 	}
+ 
+-	efi_memattr_init();
++	if (efi_enabled(EFI_MEMMAP))
++		efi_memattr_init();
+ 
+ 	/* Parse the EFI Properties table if it exists */
+ 	if (efi.properties_table != EFI_INVALID_TABLE_ADDR) {
+-- 
+1.7.10.4
