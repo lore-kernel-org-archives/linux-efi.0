@@ -1,55 +1,149 @@
-From: Will Deacon <will.deacon@arm.com>
-Subject: Re: [PATCH V17 00/11] Add UEFI 2.6 and ACPI 6.1 updates for RAS on
- ARM64
-Date: Tue, 20 Jun 2017 09:49:32 +0100
-Message-ID: <20170620084931.GB30664@arm.com>
-References: <1495225933-4410-1-git-send-email-tbaicar@codeaurora.org>
- <20170607115012.GZ30263@arm.com>
- <20170620063439.GS658@rric.localdomain>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v7 14/36] x86/mm: Insure that boot memory areas are
+ mapped properly
+Date: Tue, 20 Jun 2017 17:30:56 +0200
+Message-ID: <20170620153056.bz2kvgvshnat6345@pd.tnic>
+References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
+ <20170616185232.18967.61753.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-doc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20170620063439.GS658@rric.localdomain>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Robert Richter <robert.richter@cavium.com>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, Tyler Baicar <tbaicar@codeaurora.org>, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, rafael@kernel.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, gengdongjiu@huawei.com, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, bp@alien8.de, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, tony.luck@intel.com, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bri
+In-Reply-To: <20170616185232.18967.61753.stgit@tlendack-t1.amdoffice.net>
+Sender: linux-doc-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dy>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Robert,
-
-On Tue, Jun 20, 2017 at 08:34:39AM +0200, Robert Richter wrote:
-> On 07.06.17 12:50:12, Will Deacon wrote:
+On Fri, Jun 16, 2017 at 01:52:32PM -0500, Tom Lendacky wrote:
+> The boot data and command line data are present in memory in a decrypted
+> state and are copied early in the boot process.  The early page fault
+> support will map these areas as encrypted, so before attempting to copy
+> them, add decrypted mappings so the data is accessed properly when copied.
 > 
-> > Thanks, I've pushed this out as:
-> >
-> >   git://git.kernel.org/pub/scm/linux/kernel/git/arm64/linux.git for-next/ras-apei
-> >
-> > which I'll merge into for-next/core (and therefore linux-next) either the
-> > end of this week or the beginning of next week. Please take a look if you
-> > get a chance.
+> For the initrd, encrypt this data in place. Since the future mapping of
+> the initrd area will be mapped as encrypted the data will be accessed
+> properly.
 > 
-> any reason why there was a roll back of for-next/core?
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/include/asm/mem_encrypt.h |    6 +++
+>  arch/x86/include/asm/pgtable.h     |    3 ++
+>  arch/x86/kernel/head64.c           |   30 +++++++++++++--
+>  arch/x86/kernel/setup.c            |    9 +++++
+>  arch/x86/mm/kasan_init_64.c        |    2 +
+>  arch/x86/mm/mem_encrypt.c          |   70 ++++++++++++++++++++++++++++++++++++
+>  6 files changed, 115 insertions(+), 5 deletions(-)
+
+...
+
+> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+> index b7671b9..ea5e3a6 100644
+> --- a/arch/x86/mm/mem_encrypt.c
+> +++ b/arch/x86/mm/mem_encrypt.c
+> @@ -19,6 +19,8 @@
+>  
+>  #include <asm/tlbflush.h>
+>  #include <asm/fixmap.h>
+> +#include <asm/setup.h>
+> +#include <asm/bootparam.h>
+>  
+>  /*
+>   * Since SME related variables are set early in the boot process they must
+> @@ -101,6 +103,74 @@ void __init sme_early_decrypt(resource_size_t paddr, unsigned long size)
+>  	__sme_early_enc_dec(paddr, size, false);
+>  }
+>  
+> +static void __init __sme_early_map_unmap_mem(void *vaddr, unsigned long size,
+> +					     bool map)
+> +{
+> +	unsigned long paddr = (unsigned long)vaddr - __PAGE_OFFSET;
+> +	pmdval_t pmd_flags, pmd;
+> +
+> +	/* Use early_pmd_flags but remove the encryption mask */
+> +	pmd_flags = __sme_clr(early_pmd_flags);
+> +
+> +	do {
+> +		pmd = map ? (paddr & PMD_MASK) + pmd_flags : 0;
+> +		__early_make_pgtable((unsigned long)vaddr, pmd);
+> +
+> +		vaddr += PMD_SIZE;
+> +		paddr += PMD_SIZE;
+> +		size = (size <= PMD_SIZE) ? 0 : size - PMD_SIZE;
+> +	} while (size);
+> +
+> +	write_cr3(__read_cr3());
+
+local_flush_tlb() or __native_flush_tlb(). Probably the native variant
+since this is early fun.
+
+> +}
+> +
+> +static void __init __sme_map_unmap_bootdata(char *real_mode_data, bool map)
+> +{
+> +	struct boot_params *boot_data;
+> +	unsigned long cmdline_paddr;
+> +
+> +	/* If SME is not active, the bootdata is in the correct state */
+> +	if (!sme_active())
+> +		return;
+> +
+> +	if (!map) {
+> +		/*
+> +		 * If unmapping, get the command line address before
+> +		 * unmapping the real_mode_data.
+> +		 */
+> +		boot_data = (struct boot_params *)real_mode_data;
+> +		cmdline_paddr = boot_data->hdr.cmd_line_ptr |
+> +				((u64)boot_data->ext_cmd_line_ptr << 32);
+
+Let it stick out:
+
+	cmdline_paddr = bd->hdr.cmd_line_ptr | ((u64)bd->ext_cmd_line_ptr << 32);
+
+> +	}
+> +
+> +	__sme_early_map_unmap_mem(real_mode_data, sizeof(boot_params), map);
+> +
+> +	if (map) {
+> +		/*
+> +		 * If mapping, get the command line address after mapping
+> +		 * the real_mode_data.
+> +		 */
+> +		boot_data = (struct boot_params *)real_mode_data;
+> +		cmdline_paddr = boot_data->hdr.cmd_line_ptr |
+> +				((u64)boot_data->ext_cmd_line_ptr << 32);
+> +	}
+> +
+> +	if (!cmdline_paddr)
+> +		return;
+> +
+> +	__sme_early_map_unmap_mem(__va(cmdline_paddr), COMMAND_LINE_SIZE, map);
+
+Ok, so from looking at this function now - it does different things
+depending on whether we map or not. So it doesn't look like a worker
+function anymore and you can move the stuff back to the original callers
+below. Should make the whole flow more readable.
+
+> +}
+> +
+> +void __init sme_unmap_bootdata(char *real_mode_data)
+> +{
+> +	__sme_map_unmap_bootdata(real_mode_data, false);
+> +}
+> +
+> +void __init sme_map_bootdata(char *real_mode_data)
+> +{
+> +	__sme_map_unmap_bootdata(real_mode_data, true);
+> +}
+> +
+>  void __init sme_early_init(void)
+>  {
+>  	unsigned int i;
 > 
->  + 0870f692c2ed...e27c7fa015d6 for-next/core -> arm64/for-next/core  (forced update)
-> 
-> Is it because for-next/ras-apei goes through tip?
 
-No, it's because the RAS stuff ran into horrible conflicts with the UUID
-tree:
+-- 
+Regards/Gruss,
+    Boris.
 
-https://lkml.org/lkml/2017/6/16/22
-
-Tyler should be rebasing that soon, so hopefully I can requeue that stuff
-this week.
-
-Will
+Good mailing practices for 400: avoid top-posting and trim the reply.
