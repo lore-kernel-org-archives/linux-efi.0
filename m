@@ -1,67 +1,29 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [PATCH v7 11/36] x86/mm: Add SME support for read_cr3_pa()
-Date: Tue, 20 Jun 2017 11:23:03 -0500
-Message-ID: <9a1c0df8-ca12-eebc-5565-ced847989169@amd.com>
-References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
- <20170616185154.18967.71073.stgit@tlendack-t1.amdoffice.net>
- <CALCETrVkyj=wfcgNMVG_BU+xGb3yBNhxrDdSTxJLx7UYraVcUA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <CALCETrVkyj=wfcgNMVG_BU+xGb3yBNhxrDdSTxJLx7UYraVcUA@mail.gmail.com>
-Content-Language: en-US
-Sender: owner-linux-mm@kvack.org
-To: Andy Lutomirski <luto@kernel.org>
-Cc: linux-arch <linux-arch@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, kvm list <kvm@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, X86 ML <x86@kernel.org>, kexec@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kasan-dev <kasan-dev@googlegroups.com>, xen-devel <xen-devel@lists.xen.org>, "linux-mm@kvack.org" <linux-mm@kvack.org>, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andr
+From: Daniel Kiper <daniel.kiper@oracle.com>
+Subject: [PATCH 0/2] xen/efi: Fixes
+Date: Tue, 20 Jun 2017 22:14:26 +0200
+Message-ID: <1497989668-6238-1-git-send-email-daniel.kiper@oracle.com>
+Return-path: <stable-owner@vger.kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, stable@vger.kernel.org, xen-devel@lists.xenproject.org
+Cc: boris.ostrovsky@oracle.com, jgross@suse.com, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-On 6/20/2017 11:17 AM, Andy Lutomirski wrote:
-> On Fri, Jun 16, 2017 at 11:51 AM, Tom Lendacky <thomas.lendacky@amd.com> wrote:
->> The cr3 register entry can contain the SME encryption mask that indicates
->> the PGD is encrypted.  The encryption mask should not be used when
->> creating a virtual address from the cr3 register, so remove the SME
->> encryption mask in the read_cr3_pa() function.
->>
->> During early boot SME will need to use a native version of read_cr3_pa(),
->> so create native_read_cr3_pa().
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->> ---
->>   arch/x86/include/asm/processor-flags.h |    3 ++-
->>   arch/x86/include/asm/processor.h       |    5 +++++
->>   2 files changed, 7 insertions(+), 1 deletion(-)
->>
->> diff --git a/arch/x86/include/asm/processor-flags.h b/arch/x86/include/asm/processor-flags.h
->> index 79aa2f9..cb6999c 100644
->> --- a/arch/x86/include/asm/processor-flags.h
->> +++ b/arch/x86/include/asm/processor-flags.h
->> @@ -2,6 +2,7 @@
->>   #define _ASM_X86_PROCESSOR_FLAGS_H
->>
->>   #include <uapi/asm/processor-flags.h>
->> +#include <linux/mem_encrypt.h>
->>
->>   #ifdef CONFIG_VM86
->>   #define X86_VM_MASK    X86_EFLAGS_VM
->> @@ -33,7 +34,7 @@
->>    */
->>   #ifdef CONFIG_X86_64
->>   /* Mask off the address space ID bits. */
->> -#define CR3_ADDR_MASK 0x7FFFFFFFFFFFF000ull
->> +#define CR3_ADDR_MASK __sme_clr(0x7FFFFFFFFFFFF000ull)
-> 
-> Can you update the comment one line above, too?
+Hey,
 
-Yup, will do.
+Two small fixes for Xen dom0 running on x86_64 EFI platforms.
 
-Thanks,
-Tom
+I am CC-ing stable maintainers because similar stuff is needed for various
+stable kernels too. Unfortunately, almost every version needs a bit different
+set of fixes. So, please treat this email more as head up than real set of
+patches for your kernel. If you wish to get Xen EFI stuff fixed just drop me
+a line. Then I will prepare set of patches for your kernel (if needed).
 
-> 
+Daniel
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+ arch/x86/xen/efi.c         |   45 ++++++++++++---------------------------------
+ drivers/firmware/efi/efi.c |    3 ++-
+ 2 files changed, 14 insertions(+), 34 deletions(-)
+
+Daniel Kiper (2):
+      efi: Process MEMATTR table only if EFI_MEMMAP
+      x86/xen/efi: Init only efi struct members used by Xen
