@@ -1,38 +1,112 @@
-From: Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH V17 00/11] Add UEFI 2.6 and ACPI 6.1 updates for RAS on
- ARM64
-Date: Tue, 20 Jun 2017 08:34:39 +0200
-Message-ID: <20170620063439.GS658@rric.localdomain>
-References: <1495225933-4410-1-git-send-email-tbaicar@codeaurora.org>
- <20170607115012.GZ30263@arm.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v2 18/31] efi-stub.txt: standardize document format
+Date: Tue, 20 Jun 2017 09:02:53 +0200
+Message-ID: <CAKv+Gu8=6pF9uawA92p0fsfC6a6DV4gd9NaLjiqgLQKd7TNwVA@mail.gmail.com>
+References: <f0f77a106d183325dce9eecd3c11214154050e11.1497713142.git.mchehab@s-opensource.com>
+ <66bd3bc59477944b65a010904ff7f812d3f48d7c.1497713142.git.mchehab@s-opensource.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170607115012.GZ30263-5wv7dgnIgG8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi@vger.
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <66bd3bc59477944b65a010904ff7f812d3f48d7c.1497713142.git.mchehab@s-opensource.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Mauro Carvalho Chehab <mchehab@s-opensource.com>, Leif Lindholm <leif.lindholm@linaro.org>
+Cc: Linux Doc Mailing List <linux-doc@vger.kernel.org>, Mauro Carvalho Chehab <mchehab@infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Will,
-
-On 07.06.17 12:50:12, Will Deacon wrote:
-
-> Thanks, I've pushed this out as:
+On 17 June 2017 at 17:25, Mauro Carvalho Chehab
+<mchehab@s-opensource.com> wrote:
+> Each text file under Documentation follows a different
+> format. Some doesn't even have titles!
 >
->   git://git.kernel.org/pub/scm/linux/kernel/git/arm64/linux.git for-next/ras-apei
+> Change its representation to follow the adopted standard,
+> using ReST markups for it to be parseable by Sphinx:
 >
-> which I'll merge into for-next/core (and therefore linux-next) either the
-> end of this week or the beginning of next week. Please take a look if you
-> get a chance.
+> - use proper markups for titles;
+> - identify literal blocks.
+>
+> Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
 
-any reason why there was a roll back of for-next/core?
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
- + 0870f692c2ed...e27c7fa015d6 for-next/core -> arm64/for-next/core  (forced update)
 
-Is it because for-next/ras-apei goes through tip?
-
-Thanks,
-
--Robert
+> ---
+>  Documentation/efi-stub.txt | 25 +++++++++++++++----------
+>  1 file changed, 15 insertions(+), 10 deletions(-)
+>
+> diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+> index e15746988261..41df801f9a50 100644
+> --- a/Documentation/efi-stub.txt
+> +++ b/Documentation/efi-stub.txt
+> @@ -1,5 +1,6 @@
+> -                         The EFI Boot Stub
+> -                    ---------------------------
+> +=================
+> +The EFI Boot Stub
+> +=================
+>
+>  On the x86 and ARM platforms, a kernel zImage/bzImage can masquerade
+>  as a PE/COFF image, thereby convincing EFI firmware loaders to load
+> @@ -25,7 +26,8 @@ a certain sense it *IS* the boot loader.
+>  The EFI boot stub is enabled with the CONFIG_EFI_STUB kernel option.
+>
+>
+> -**** How to install bzImage.efi
+> +How to install bzImage.efi
+> +--------------------------
+>
+>  The bzImage located in arch/x86/boot/bzImage must be copied to the EFI
+>  System Partition (ESP) and renamed with the extension ".efi". Without
+> @@ -37,14 +39,16 @@ may not need to be renamed. Similarly for arm64, arch/arm64/boot/Image
+>  should be copied but not necessarily renamed.
+>
+>
+> -**** Passing kernel parameters from the EFI shell
+> +Passing kernel parameters from the EFI shell
+> +--------------------------------------------
+>
+> -Arguments to the kernel can be passed after bzImage.efi, e.g.
+> +Arguments to the kernel can be passed after bzImage.efi, e.g.::
+>
+>         fs0:> bzImage.efi console=ttyS0 root=/dev/sda4
+>
+>
+> -**** The "initrd=" option
+> +The "initrd=" option
+> +--------------------
+>
+>  Like most boot loaders, the EFI stub allows the user to specify
+>  multiple initrd files using the "initrd=" option. This is the only EFI
+> @@ -54,9 +58,9 @@ kernel when it boots.
+>  The path to the initrd file must be an absolute path from the
+>  beginning of the ESP, relative path names do not work. Also, the path
+>  is an EFI-style path and directory elements must be separated with
+> -backslashes (\). For example, given the following directory layout,
+> +backslashes (\). For example, given the following directory layout::
+>
+> -fs0:>
+> +  fs0:>
+>         Kernels\
+>                         bzImage.efi
+>                         initrd-large.img
+> @@ -66,7 +70,7 @@ fs0:>
+>                         initrd-medium.img
+>
+>  to boot with the initrd-large.img file if the current working
+> -directory is fs0:\Kernels, the following command must be used,
+> +directory is fs0:\Kernels, the following command must be used::
+>
+>         fs0:\Kernels> bzImage.efi initrd=\Kernels\initrd-large.img
+>
+> @@ -76,7 +80,8 @@ which understands relative paths, whereas the rest of the command line
+>  is passed to bzImage.efi.
+>
+>
+> -**** The "dtb=" option
+> +The "dtb=" option
+> +-----------------
+>
+>  For the ARM and arm64 architectures, we also need to be able to provide a
+>  device tree to the kernel. This is done with the "dtb=" command line option,
+> --
+> 2.9.4
+>
