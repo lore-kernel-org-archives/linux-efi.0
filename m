@@ -1,149 +1,91 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v7 14/36] x86/mm: Insure that boot memory areas are
- mapped properly
-Date: Tue, 20 Jun 2017 17:30:56 +0200
-Message-ID: <20170620153056.bz2kvgvshnat6345@pd.tnic>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [PATCH v7 08/36] x86/mm: Add support to enable SME in early boot
+	processing
+Date: Tue, 20 Jun 2017 10:52:48 -0500
+Message-ID: <49c62e8c-c4ae-6d05-e2a4-aa1fc6e2d717@amd.com>
 References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
- <20170616185232.18967.61753.stgit@tlendack-t1.amdoffice.net>
+	<20170616185115.18967.79622.stgit@tlendack-t1.amdoffice.net>
+	<20170620073845.nteivabsgcdy7gv4@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170616185232.18967.61753.stgit@tlendack-t1.amdoffice.net>
-Sender: linux-doc-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dy>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20170620073845.nteivabsgcdy7gv4-fF5Pk5pvG8Y@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ker
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jun 16, 2017 at 01:52:32PM -0500, Tom Lendacky wrote:
-> The boot data and command line data are present in memory in a decrypted
-> state and are copied early in the boot process.  The early page fault
-> support will map these areas as encrypted, so before attempting to copy
-> them, add decrypted mappings so the data is accessed properly when copied.
+On 6/20/2017 2:38 AM, Borislav Petkov wrote:
+> On Fri, Jun 16, 2017 at 01:51:15PM -0500, Tom Lendacky wrote:
+>> Add support to the early boot code to use Secure Memory Encryption (SME).
+>> Since the kernel has been loaded into memory in a decrypted state, encrypt
+>> the kernel in place and update the early pagetables with the memory
+>> encryption mask so that new pagetable entries will use memory encryption.
+>>
+>> The routines to set the encryption mask and perform the encryption are
+>> stub routines for now with functionality to be added in a later patch.
+>>
+>> Because of the need to have the routines available to head_64.S, the
+>> mem_encrypt.c is always built and #ifdefs in mem_encrypt.c will provide
+>> functionality or stub routines depending on CONFIG_AMD_MEM_ENCRYPT.
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+>> ---
+>>   arch/x86/include/asm/mem_encrypt.h |    8 +++++++
+>>   arch/x86/kernel/head64.c           |   33 +++++++++++++++++++++---------
+>>   arch/x86/kernel/head_64.S          |   39 ++++++++++++++++++++++++++++++++++--
+>>   arch/x86/mm/Makefile               |    4 +---
+>>   arch/x86/mm/mem_encrypt.c          |   24 ++++++++++++++++++++++
+>>   5 files changed, 93 insertions(+), 15 deletions(-)
 > 
-> For the initrd, encrypt this data in place. Since the future mapping of
-> the initrd area will be mapped as encrypted the data will be accessed
-> properly.
+> ...
 > 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/include/asm/mem_encrypt.h |    6 +++
->  arch/x86/include/asm/pgtable.h     |    3 ++
->  arch/x86/kernel/head64.c           |   30 +++++++++++++--
->  arch/x86/kernel/setup.c            |    9 +++++
->  arch/x86/mm/kasan_init_64.c        |    2 +
->  arch/x86/mm/mem_encrypt.c          |   70 ++++++++++++++++++++++++++++++++++++
->  6 files changed, 115 insertions(+), 5 deletions(-)
-
-...
-
-> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-> index b7671b9..ea5e3a6 100644
-> --- a/arch/x86/mm/mem_encrypt.c
-> +++ b/arch/x86/mm/mem_encrypt.c
-> @@ -19,6 +19,8 @@
->  
->  #include <asm/tlbflush.h>
->  #include <asm/fixmap.h>
-> +#include <asm/setup.h>
-> +#include <asm/bootparam.h>
->  
->  /*
->   * Since SME related variables are set early in the boot process they must
-> @@ -101,6 +103,74 @@ void __init sme_early_decrypt(resource_size_t paddr, unsigned long size)
->  	__sme_early_enc_dec(paddr, size, false);
->  }
->  
-> +static void __init __sme_early_map_unmap_mem(void *vaddr, unsigned long size,
-> +					     bool map)
-> +{
-> +	unsigned long paddr = (unsigned long)vaddr - __PAGE_OFFSET;
-> +	pmdval_t pmd_flags, pmd;
-> +
-> +	/* Use early_pmd_flags but remove the encryption mask */
-> +	pmd_flags = __sme_clr(early_pmd_flags);
-> +
-> +	do {
-> +		pmd = map ? (paddr & PMD_MASK) + pmd_flags : 0;
-> +		__early_make_pgtable((unsigned long)vaddr, pmd);
-> +
-> +		vaddr += PMD_SIZE;
-> +		paddr += PMD_SIZE;
-> +		size = (size <= PMD_SIZE) ? 0 : size - PMD_SIZE;
-> +	} while (size);
-> +
-> +	write_cr3(__read_cr3());
-
-local_flush_tlb() or __native_flush_tlb(). Probably the native variant
-since this is early fun.
-
-> +}
-> +
-> +static void __init __sme_map_unmap_bootdata(char *real_mode_data, bool map)
-> +{
-> +	struct boot_params *boot_data;
-> +	unsigned long cmdline_paddr;
-> +
-> +	/* If SME is not active, the bootdata is in the correct state */
-> +	if (!sme_active())
-> +		return;
-> +
-> +	if (!map) {
-> +		/*
-> +		 * If unmapping, get the command line address before
-> +		 * unmapping the real_mode_data.
-> +		 */
-> +		boot_data = (struct boot_params *)real_mode_data;
-> +		cmdline_paddr = boot_data->hdr.cmd_line_ptr |
-> +				((u64)boot_data->ext_cmd_line_ptr << 32);
-
-Let it stick out:
-
-	cmdline_paddr = bd->hdr.cmd_line_ptr | ((u64)bd->ext_cmd_line_ptr << 32);
-
-> +	}
-> +
-> +	__sme_early_map_unmap_mem(real_mode_data, sizeof(boot_params), map);
-> +
-> +	if (map) {
-> +		/*
-> +		 * If mapping, get the command line address after mapping
-> +		 * the real_mode_data.
-> +		 */
-> +		boot_data = (struct boot_params *)real_mode_data;
-> +		cmdline_paddr = boot_data->hdr.cmd_line_ptr |
-> +				((u64)boot_data->ext_cmd_line_ptr << 32);
-> +	}
-> +
-> +	if (!cmdline_paddr)
-> +		return;
-> +
-> +	__sme_early_map_unmap_mem(__va(cmdline_paddr), COMMAND_LINE_SIZE, map);
-
-Ok, so from looking at this function now - it does different things
-depending on whether we map or not. So it doesn't look like a worker
-function anymore and you can move the stuff back to the original callers
-below. Should make the whole flow more readable.
-
-> +}
-> +
-> +void __init sme_unmap_bootdata(char *real_mode_data)
-> +{
-> +	__sme_map_unmap_bootdata(real_mode_data, false);
-> +}
-> +
-> +void __init sme_map_bootdata(char *real_mode_data)
-> +{
-> +	__sme_map_unmap_bootdata(real_mode_data, true);
-> +}
-> +
->  void __init sme_early_init(void)
->  {
->  	unsigned int i;
+>> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+>> index b99d469..9a78277 100644
+>> --- a/arch/x86/mm/mem_encrypt.c
+>> +++ b/arch/x86/mm/mem_encrypt.c
+>> @@ -11,6 +11,9 @@
+>>    */
+>>   
+>>   #include <linux/linkage.h>
+>> +#include <linux/init.h>
+>> +
+>> +#ifdef CONFIG_AMD_MEM_ENCRYPT
+>>   
+>>   /*
+>>    * Since SME related variables are set early in the boot process they must
+>> @@ -19,3 +22,24 @@
+>>    */
+>>   unsigned long sme_me_mask __section(.data) = 0;
+>>   EXPORT_SYMBOL_GPL(sme_me_mask);
+>> +
+>> +void __init sme_encrypt_kernel(void)
+>> +{
+>> +}
 > 
+> Just the minor:
+> 
+> void __init sme_encrypt_kernel(void) { }
+> 
+> in case you have to respin.
 
--- 
-Regards/Gruss,
-    Boris.
+I have to re-spin for the kbuild test error.  But given that this
+function will be filled in later it's probably not worth doing the
+space savings here.
 
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Thanks,
+Tom
+
+> 
+> Reviewed-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> 
