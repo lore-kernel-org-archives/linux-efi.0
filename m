@@ -1,84 +1,47 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: [PATCH 2/2] x86/xen/efi: Init only efi struct members
-	used by Xen
-Date: Tue, 20 Jun 2017 22:14:28 +0200
-Message-ID: <1497989668-6238-3-git-send-email-daniel.kiper@oracle.com>
-References: <1497989668-6238-1-git-send-email-daniel.kiper@oracle.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v7 19/36] x86/mm: Add support to access boot related data
+ in the clear
+Date: Tue, 20 Jun 2017 22:39:06 +0200
+Message-ID: <20170620203906.fzkez2f7es6ow4gr@pd.tnic>
+References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
+ <20170616185326.18967.43278.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
-In-Reply-To: <1497989668-6238-1-git-send-email-daniel.kiper@oracle.com>
-List-Unsubscribe: <https://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <https://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
-To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, stable@vger.kernel.org, xen-devel@lists.xenproject.org
-Cc: jgross@suse.com, ard.biesheuvel@linaro.org, matt@codeblueprint.co.uk, mingo@redhat.com, hpa@zytor.com, boris.ostrovsky@oracle.com, tglx@linutronix.de
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170616185326.18967.43278.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dy>
 List-Id: linux-efi@vger.kernel.org
 
-Q3VycmVudCBhcHByb2FjaCwgd2hvbGVzYWxlIGVmaSBzdHJ1Y3QgaW5pdGlhbGl6YXRpb24gZnJv
-bSBlZmlfeGVuLCBpcyBub3QKZ29vZC4gVXN1YWxseSBpZiBuZXcgbWVtYmVyIGlzIGRlZmluZWQg
-dGhlbiBpdCBpcyBwcm9wZXJseSBpbml0aWFsaXplZCBpbgpkcml2ZXJzL2Zpcm13YXJlL2VmaS9l
-ZmkuYyBidXQgbm90IGluIGFyY2gveDg2L3hlbi9lZmkuYy4gQXMgSSBzYXcgaXQgaGFwcGVuZWQK
-YSBmZXcgdGltZXMgdW50aWwgbm93LiBTbywgbGV0J3MgaW5pdGlhbGl6ZSBvbmx5IGVmaSBzdHJ1
-Y3QgbWVtYmVycyB1c2VkIGJ5ClhlbiB0byBhdm9pZCBzdWNoIGlzc3VlcyBpbiB0aGUgZnV0dXJl
-LgoKU2lnbmVkLW9mZi1ieTogRGFuaWVsIEtpcGVyIDxkYW5pZWwua2lwZXJAb3JhY2xlLmNvbT4K
-LS0tCiBhcmNoL3g4Ni94ZW4vZWZpLmMgfCAgIDQ1ICsrKysrKysrKysrKy0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLQogMSBmaWxlIGNoYW5nZWQsIDEyIGluc2VydGlvbnMoKyksIDMz
-IGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL2FyY2gveDg2L3hlbi9lZmkuYyBiL2FyY2gveDg2
-L3hlbi9lZmkuYwppbmRleCAzMGJiMmU4Li4wMWI5ZmFmIDEwMDY0NAotLS0gYS9hcmNoL3g4Ni94
-ZW4vZWZpLmMKKysrIGIvYXJjaC94ODYveGVuL2VmaS5jCkBAIC01NCwzOCArNTQsNiBAQAogCS50
-YWJsZXMJCT0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiAgLyogSW5pdGlhbGl6ZWQgbGF0ZXIuICov
-CiB9OwogCi1zdGF0aWMgY29uc3Qgc3RydWN0IGVmaSBlZmlfeGVuIF9faW5pdGNvbnN0ID0gewot
-CS5zeXN0YWIgICAgICAgICAgICAgICAgICAgPSBOVUxMLCAvKiBJbml0aWFsaXplZCBsYXRlci4g
-Ki8KLQkucnVudGltZV92ZXJzaW9uCSAgPSAwLCAgICAvKiBJbml0aWFsaXplZCBsYXRlci4gKi8K
-LQkubXBzICAgICAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQku
-YWNwaSAgICAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuYWNw
-aTIwICAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuc21iaW9z
-ICAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuc21iaW9zMyAg
-ICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuc2FsX3N5c3RhYiAg
-ICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuYm9vdF9pbmZvICAgICAg
-ICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuaGNkcCAgICAgICAgICAgICAg
-ICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkudWdhICAgICAgICAgICAgICAgICAg
-ICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkudXZfc3lzdGFiICAgICAgICAgICAgICAg
-ID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuZndfdmVuZG9yICAgICAgICAgICAgICAgID0g
-RUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkucnVudGltZSAgICAgICAgICAgICAgICAgID0gRUZJ
-X0lOVkFMSURfVEFCTEVfQUREUiwKLQkuY29uZmlnX3RhYmxlICAgICAgICAgICAgID0gRUZJX0lO
-VkFMSURfVEFCTEVfQUREUiwKLQkuZ2V0X3RpbWUgICAgICAgICAgICAgICAgID0geGVuX2VmaV9n
-ZXRfdGltZSwKLQkuc2V0X3RpbWUgICAgICAgICAgICAgICAgID0geGVuX2VmaV9zZXRfdGltZSwK
-LQkuZ2V0X3dha2V1cF90aW1lICAgICAgICAgID0geGVuX2VmaV9nZXRfd2FrZXVwX3RpbWUsCi0J
-LnNldF93YWtldXBfdGltZSAgICAgICAgICA9IHhlbl9lZmlfc2V0X3dha2V1cF90aW1lLAotCS5n
-ZXRfdmFyaWFibGUgICAgICAgICAgICAgPSB4ZW5fZWZpX2dldF92YXJpYWJsZSwKLQkuZ2V0X25l
-eHRfdmFyaWFibGUgICAgICAgID0geGVuX2VmaV9nZXRfbmV4dF92YXJpYWJsZSwKLQkuc2V0X3Zh
-cmlhYmxlICAgICAgICAgICAgID0geGVuX2VmaV9zZXRfdmFyaWFibGUsCi0JLnF1ZXJ5X3Zhcmlh
-YmxlX2luZm8gICAgICA9IHhlbl9lZmlfcXVlcnlfdmFyaWFibGVfaW5mbywKLQkudXBkYXRlX2Nh
-cHN1bGUgICAgICAgICAgID0geGVuX2VmaV91cGRhdGVfY2Fwc3VsZSwKLQkucXVlcnlfY2Fwc3Vs
-ZV9jYXBzICAgICAgID0geGVuX2VmaV9xdWVyeV9jYXBzdWxlX2NhcHMsCi0JLmdldF9uZXh0X2hp
-Z2hfbW9ub19jb3VudCA9IHhlbl9lZmlfZ2V0X25leHRfaGlnaF9tb25vX2NvdW50LAotCS5yZXNl
-dF9zeXN0ZW0gICAgICAgICAgICAgPSB4ZW5fZWZpX3Jlc2V0X3N5c3RlbSwKLQkuc2V0X3ZpcnR1
-YWxfYWRkcmVzc19tYXAgID0gTlVMTCwgLyogTm90IHVzZWQgdW5kZXIgWGVuLiAqLwotCS5mbGFn
-cwkJCSAgPSAwICAgICAvKiBJbml0aWFsaXplZCBsYXRlci4gKi8KLX07Ci0KIHN0YXRpYyBlZmlf
-c3lzdGVtX3RhYmxlX3QgX19pbml0ICp4ZW5fZWZpX3Byb2JlKHZvaWQpCiB7CiAJc3RydWN0IHhl
-bl9wbGF0Zm9ybV9vcCBvcCA9IHsKQEAgLTEwMiw3ICs3MCwxOCBAQCBzdGF0aWMgZWZpX3N5c3Rl
-bV90YWJsZV90IF9faW5pdCAqeGVuX2VmaV9wcm9iZSh2b2lkKQogCiAJLyogSGVyZSB3ZSBrbm93
-IHRoYXQgWGVuIHJ1bnMgb24gRUZJIHBsYXRmb3JtLiAqLwogCi0JZWZpID0gZWZpX3hlbjsKKwll
-ZmkuZ2V0X3RpbWUgPSB4ZW5fZWZpX2dldF90aW1lOworCWVmaS5zZXRfdGltZSA9IHhlbl9lZmlf
-c2V0X3RpbWU7CisJZWZpLmdldF93YWtldXBfdGltZSA9IHhlbl9lZmlfZ2V0X3dha2V1cF90aW1l
-OworCWVmaS5zZXRfd2FrZXVwX3RpbWUgPSB4ZW5fZWZpX3NldF93YWtldXBfdGltZTsKKwllZmku
-Z2V0X3ZhcmlhYmxlID0geGVuX2VmaV9nZXRfdmFyaWFibGU7CisJZWZpLmdldF9uZXh0X3Zhcmlh
-YmxlID0geGVuX2VmaV9nZXRfbmV4dF92YXJpYWJsZTsKKwllZmkuc2V0X3ZhcmlhYmxlID0geGVu
-X2VmaV9zZXRfdmFyaWFibGU7CisJZWZpLnF1ZXJ5X3ZhcmlhYmxlX2luZm8gPSB4ZW5fZWZpX3F1
-ZXJ5X3ZhcmlhYmxlX2luZm87CisJZWZpLnVwZGF0ZV9jYXBzdWxlID0geGVuX2VmaV91cGRhdGVf
-Y2Fwc3VsZTsKKwllZmkucXVlcnlfY2Fwc3VsZV9jYXBzID0geGVuX2VmaV9xdWVyeV9jYXBzdWxl
-X2NhcHM7CisJZWZpLmdldF9uZXh0X2hpZ2hfbW9ub19jb3VudCA9IHhlbl9lZmlfZ2V0X25leHRf
-aGlnaF9tb25vX2NvdW50OworCWVmaS5yZXNldF9zeXN0ZW0gPSB4ZW5fZWZpX3Jlc2V0X3N5c3Rl
-bTsKIAogCWVmaV9zeXN0YWJfeGVuLnRhYmxlcyA9IGluZm8tPmNmZy5hZGRyOwogCWVmaV9zeXN0
-YWJfeGVuLm5yX3RhYmxlcyA9IGluZm8tPmNmZy5uZW50OwotLSAKMS43LjEwLjQKCgpfX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpYZW4tZGV2ZWwgbWFpbGlu
-ZyBsaXN0Clhlbi1kZXZlbEBsaXN0cy54ZW4ub3JnCmh0dHBzOi8vbGlzdHMueGVuLm9yZy94ZW4t
-ZGV2ZWwK
+On Fri, Jun 16, 2017 at 01:53:26PM -0500, Tom Lendacky wrote:
+> Boot data (such as EFI related data) is not encrypted when the system is
+> booted because UEFI/BIOS does not run with SME active. In order to access
+> this data properly it needs to be mapped decrypted.
+> 
+> Update early_memremap() to provide an arch specific routine to modify the
+> pagetable protection attributes before they are applied to the new
+> mapping. This is used to remove the encryption mask for boot related data.
+> 
+> Update memremap() to provide an arch specific routine to determine if RAM
+> remapping is allowed.  RAM remapping will cause an encrypted mapping to be
+> generated. By preventing RAM remapping, ioremap_cache() will be used
+> instead, which will provide a decrypted mapping of the boot related data.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+> ---
+>  arch/x86/include/asm/io.h |    5 +
+>  arch/x86/mm/ioremap.c     |  179 +++++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/io.h        |    2 +
+>  kernel/memremap.c         |   20 ++++-
+>  mm/early_ioremap.c        |   18 ++++-
+>  5 files changed, 217 insertions(+), 7 deletions(-)
+
+Reviewed-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
