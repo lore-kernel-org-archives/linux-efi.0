@@ -1,36 +1,26 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v7 10/36] x86/mm: Provide general kernel support for
- memory encryption
-Date: Wed, 21 Jun 2017 10:23:01 +0200
-Message-ID: <20170621082301.47lafavh6cstbwfl@pd.tnic>
-References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
- <20170616185140.18967.61905.stgit@tlendack-t1.amdoffice.net>
- <alpine.DEB.2.20.1706210916590.2328@nanos>
+From: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v3 1/2] efi: Add 'nr_config_table' variable in efi
+ structure
+Date: Wed, 21 Jun 2017 08:36:57 +0000
+Message-ID: <E6AF1AFDEA62A94A97508F458CBDD47F6F5A51CC@SHSMSX101.ccr.corp.intel.com>
+References: <20170619175423.70656-1-qiuxu.zhuo@intel.com>
+ <CAGXu5jLuaU2H3y3VHYhR5qndcdD-pAgfC+_x+8PsACKjVjrmPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.20.1706210916590.2328@nanos>
-Sender: owner-linux-mm@kvack.org
-To: Thomas Gleixner <tglx@linutronix.de>
-Cc: Tom Lendacky <thomas.lendacky@amd.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dyoung@redhat.com>, Rik van Riel <riel@redhat.com>, Arnd Bergmann <arnd@arndb.de>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAGXu5jLuaU2H3y3VHYhR5qndcdD-pAgfC+_x+8PsACKjVjrmPw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jun 21, 2017 at 09:18:59AM +0200, Thomas Gleixner wrote:
-> That looks wrong. It's not decrypted it's rather unencrypted, right?
-
-Yeah, it previous versions of the patchset, "decrypted" and
-"unencrypted" were both present so we settled on "decrypted" for the
-nomenclature.
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+PiBGcm9tOiBrZWVzY29va0Bnb29nbGUuY29tIFttYWlsdG86a2Vlc2Nvb2tAZ29vZ2xlLmNvbV0g
+T24gQmVoYWxmIE9mIEtlZXMgQ29vaw0KPiBTZW50OiBXZWRuZXNkYXksIEp1bmUgMjEsIDIwMTcg
+NzoyOCBBTQ0KDQo+PiAgICAgICAgIHVuc2lnbmVkIGxvbmcgY29uZmlnX3RhYmxlOyAgICAgLyog
+Y29uZmlnIHRhYmxlcyAqLw0KPj4gKyAgICAgICB1bnNpZ25lZCBsb25nIG5yX2NvbmZpZ190YWJs
+ZTsNCg0KDQo+IFRoZSBvdGhlciBmaWVsZHMgaGF2ZSAobGltaXRlZCkgY29tbWVudHMuIFRoaXMg
+c2hvdWxkIHByb2JhYmx5IGdldCBvbmUgdG9vLg0KDQoNCk9LLiBJJ2xsIGFkZCBsaW1pdGVkIGNv
+bW1lbnQgZS5nLiAidGhlIG51bWJlciBvZiBjb25maWcgdGFibGVzIiBmb3IgaXQgaW4gbmV4dCB2
+ZXJzaW9uLg0KVGhhbmtzIQ0KDQpCUg0KcWl1eHUNCg0K
