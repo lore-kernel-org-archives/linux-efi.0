@@ -1,32 +1,78 @@
-From: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH v3 2/2] eif/capsule-pstore: Add capsule pstore backend
-Date: Wed, 21 Jun 2017 08:45:52 +0000
-Message-ID: <E6AF1AFDEA62A94A97508F458CBDD47F6F5A51E6@SHSMSX101.ccr.corp.intel.com>
-References: <20170619175445.90281-1-qiuxu.zhuo@intel.com>
- <CAGXu5jKMuiT6CL4L=tUfL_8EgDOMy67UnU5_-rn68BFAEYdg9w@mail.gmail.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH 2/2] x86/xen/efi: Init only efi struct members used by Xen
+Date: Wed, 21 Jun 2017 11:24:06 +0200
+Message-ID: <20170621092406.ak2cord743ded3hf@gmail.com>
+References: <1497989668-6238-1-git-send-email-daniel.kiper@oracle.com>
+ <1497989668-6238-3-git-send-email-daniel.kiper@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAGXu5jKMuiT6CL4L=tUfL_8EgDOMy67UnU5_-rn68BFAEYdg9w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1497989668-6238-3-git-send-email-daniel.kiper@oracle.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Daniel Kiper <daniel.kiper@oracle.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, stable@vger.kernel.org, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, jgross@suse.com, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-PiBGcm9tOiBrZWVzY29va0Bnb29nbGUuY29tIFttYWlsdG86a2Vlc2Nvb2tAZ29vZ2xlLmNvbV0g
-T24gQmVoYWxmIE9mIEtlZXMgQ29vaw0KPiBTZW50OiBXZWRuZXNkYXksIEp1bmUgMjEsIDIwMTcg
-NzoyNyBBTQ0KPg0KPiA+ICsNCj4gPiArc3RhdGljIGJvb2wgZWZpX2NhcHN1bGVfcHN0b3JlX2Rp
-c2FibGUgPQ0KPiA+ICsgICAgICAgSVNfRU5BQkxFRChDT05GSUdfQ0FQU1VMRV9QU1RPUkVfREVG
-QVVMVF9ESVNBQkxFKTsNCj4NCj4gVGhpcyBjYW4gYmUgbWFya2VkIF9fcm9fYWZ0ZXJfaW5pdC4N
-Cg0KICAgT0suIFdpbGwgbWFyayBpdCBfX3JvX2FmdGVyX2luaXQgaW4gbmV4dCB2ZXJzaW9uLg0K
-DQo+ID4gKw0KPiA+ICsgICAgICAgICAgICAgICByZWMtPnR5cGUgPSByZWNvcmQtPnR5cGU7DQo+
-ID4gKyAgICAgICAgICAgICAgIHJlYy0+dGltZXN0YW1wID0gZ2V0X3NlY29uZHMoKTsNCj4NCj4g
-dGltZXN0YW1wIHdpbGwgYWxyZWFkeSBiZSBjb3JyZWN0bHkgcG9wdWxhdGVkIGJ5IHRoZSBwc3Rv
-cmUgQVBJLCBzbyBpdCBzaG91bGQgYmUgY29waWVkIGZyb20gdGhlcmUgcmF0aGVyIHRoYW4gdXNp
-bmcgZ2V0X3NlY29uZHMoKSB3aGljaCBtYXkgbm90IGJlIGZ1bmN0aW9uYWwgZHVyaW5nIHJlc3Vt
-ZSwgZXRjLg0KDQpMb29rcyBsaWtlIHRoYXQgdGhlIHRpbWVzdGFtcCBtZW1iZXIgInRpbWUiIG9m
-IHN0cnVjdCBwc3RvcmVfcmVjb3JkIHBhc3NlZCBmcm9tIHBzdG9yZSAiZnMvcHN0b3JlL3BsYXRm
-b3JtLmMiIC0+IHBzdG9yZV9kdW1wKCkgaXMgbm90IHNldCBmb3IgRE1FU0cgY2FzZS4NCg0KDQpC
-Ug0KcWl1eHUNCg0KDQo=
+
+* Daniel Kiper <daniel.kiper@oracle.com> wrote:
+
+> -static const struct efi efi_xen __initconst = {
+> -	.systab                   = NULL, /* Initialized later. */
+> -	.runtime_version	  = 0,    /* Initialized later. */
+> -	.mps                      = EFI_INVALID_TABLE_ADDR,
+> -	.acpi                     = EFI_INVALID_TABLE_ADDR,
+> -	.acpi20                   = EFI_INVALID_TABLE_ADDR,
+> -	.smbios                   = EFI_INVALID_TABLE_ADDR,
+> -	.smbios3                  = EFI_INVALID_TABLE_ADDR,
+> -	.sal_systab               = EFI_INVALID_TABLE_ADDR,
+> -	.boot_info                = EFI_INVALID_TABLE_ADDR,
+> -	.hcdp                     = EFI_INVALID_TABLE_ADDR,
+> -	.uga                      = EFI_INVALID_TABLE_ADDR,
+> -	.uv_systab                = EFI_INVALID_TABLE_ADDR,
+> -	.fw_vendor                = EFI_INVALID_TABLE_ADDR,
+> -	.runtime                  = EFI_INVALID_TABLE_ADDR,
+> -	.config_table             = EFI_INVALID_TABLE_ADDR,
+> -	.get_time                 = xen_efi_get_time,
+> -	.set_time                 = xen_efi_set_time,
+> -	.get_wakeup_time          = xen_efi_get_wakeup_time,
+> -	.set_wakeup_time          = xen_efi_set_wakeup_time,
+> -	.get_variable             = xen_efi_get_variable,
+> -	.get_next_variable        = xen_efi_get_next_variable,
+> -	.set_variable             = xen_efi_set_variable,
+> -	.query_variable_info      = xen_efi_query_variable_info,
+> -	.update_capsule           = xen_efi_update_capsule,
+> -	.query_capsule_caps       = xen_efi_query_capsule_caps,
+> -	.get_next_high_mono_count = xen_efi_get_next_high_mono_count,
+> -	.reset_system             = xen_efi_reset_system,
+> -	.set_virtual_address_map  = NULL, /* Not used under Xen. */
+> -	.flags			  = 0     /* Initialized later. */
+> -};
+> -
+>  static efi_system_table_t __init *xen_efi_probe(void)
+>  {
+>  	struct xen_platform_op op = {
+> @@ -102,7 +70,18 @@ static efi_system_table_t __init *xen_efi_probe(void)
+>  
+>  	/* Here we know that Xen runs on EFI platform. */
+>  
+> -	efi = efi_xen;
+> +	efi.get_time = xen_efi_get_time;
+> +	efi.set_time = xen_efi_set_time;
+> +	efi.get_wakeup_time = xen_efi_get_wakeup_time;
+> +	efi.set_wakeup_time = xen_efi_set_wakeup_time;
+> +	efi.get_variable = xen_efi_get_variable;
+> +	efi.get_next_variable = xen_efi_get_next_variable;
+> +	efi.set_variable = xen_efi_set_variable;
+> +	efi.query_variable_info = xen_efi_query_variable_info;
+> +	efi.update_capsule = xen_efi_update_capsule;
+> +	efi.query_capsule_caps = xen_efi_query_capsule_caps;
+> +	efi.get_next_high_mono_count = xen_efi_get_next_high_mono_count;
+> +	efi.reset_system = xen_efi_reset_system;
+
+This is a step back stylistically, as you lost the nice vertical tabulation of the 
+original initializer ...
+
+Thanks,
+
+	Ingo
