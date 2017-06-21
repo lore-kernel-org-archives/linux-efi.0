@@ -1,71 +1,60 @@
-From: Thomas Gleixner <tglx@linutronix.de>
-Subject: Re: [PATCH v7 08/36] x86/mm: Add support to enable SME in early boot
- processing
-Date: Wed, 21 Jun 2017 17:38:04 +0200 (CEST)
-Message-ID: <alpine.DEB.2.20.1706211720060.2328@nanos>
-References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net> <20170616185115.18967.79622.stgit@tlendack-t1.amdoffice.net> <alpine.DEB.2.20.1706202259290.2157@nanos> <8d3c215f-cdad-5554-6e9c-5598e1081850@amd.com>
+From: Joerg Roedel <joro@8bytes.org>
+Subject: Re: [PATCH v6 26/34] iommu/amd: Allow the AMD IOMMU to work with
+ memory encryption
+Date: Wed, 21 Jun 2017 17:37:22 +0200
+Message-ID: <20170621153721.GP30388@8bytes.org>
+References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
+ <20170607191745.28645.81756.stgit@tlendack-t1.amdoffice.net>
+ <20170614174208.p2yr5exs4b6pjxhf@pd.tnic>
+ <0611d01a-19f8-d6ae-2682-932789855518@amd.com>
+ <20170615094111.wga334kg2bhxqib3@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <8d3c215f-cdad-5554-6e9c-5598e1081850@amd.com>
+Content-Disposition: inline
+In-Reply-To: <20170615094111.wga334kg2bhxqib3@pd.tnic>
 Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, =?ISO-8859-2?Q?Radim_Kr=E8m=E1=F8?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dyoung@redhat.com>, Rik van Riel <riel@redhat.com>Arnd Bergmann <a>
+To: Borislav Petkov <bp@alien8.de>
+Cc: Tom Lendacky <thomas.lendacky@amd.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexand
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 21 Jun 2017, Tom Lendacky wrote:
-> On 6/21/2017 2:16 AM, Thomas Gleixner wrote:
-> > Why is this an unconditional function? Isn't the mask simply 0 when the MEM
-> > ENCRYPT support is disabled?
-> 
-> I made it unconditional because of the call from head_64.S. I can't make
-> use of the C level static inline function and since the mask is not a
-> variable if CONFIG_AMD_MEM_ENCRYPT is not configured (#defined to 0) I
-> can't reference the variable directly.
-> 
-> I could create a #define in head_64.S that changes this to load rax with
-> the variable if CONFIG_AMD_MEM_ENCRYPT is configured or a zero if it's
-> not or add a #ifdef at that point in the code directly. Thoughts on
-> that?
-
-See below.
-
-> > That does not make any sense. Neither the call to sme_encrypt_kernel() nor
-> > the following call to sme_get_me_mask().
+On Thu, Jun 15, 2017 at 11:41:12AM +0200, Borislav Petkov wrote:
+> On Wed, Jun 14, 2017 at 03:40:28PM -0500, Tom Lendacky wrote:
+> > > WARNING: Use of volatile is usually wrong: see Documentation/process/volatile-considered-harmful.rst
+> > > #134: FILE: drivers/iommu/amd_iommu.c:866:
+> > > +static void build_completion_wait(struct iommu_cmd *cmd, volatile u64 *sem)
+> > > 
 > > 
-> > __startup_64() is already C code, so why can't you simply call that from
-> > __startup_64() in C and return the mask from there?
+> > The semaphore area is written to by the device so the use of volatile is
+> > appropriate in this case.
 > 
-> I was trying to keep it explicit as to what was happening, but I can
-> move those calls into __startup_64().
+> Do you mean this is like the last exception case in that document above:
+> 
+> "
+>   - Pointers to data structures in coherent memory which might be modified
+>     by I/O devices can, sometimes, legitimately be volatile.  A ring buffer
+>     used by a network adapter, where that adapter changes pointers to
+>     indicate which descriptors have been processed, is an example of this
+>     type of situation."
+> 
+> ?
 
-That's much preferred. And the return value wants to be documented in both
-C and ASM code.
+So currently (without this patch) the build_completion_wait function
+does not take a volatile parameter, only wait_on_sem() does.
 
-> I'll still need the call to sme_get_me_mask() in the secondary_startup_64
-> path, though (depending on your thoughts to the above response).
+Wait_on_sem() needs it because its purpose is to poll a memory location
+which is changed by the iommu-hardware when its done with command
+processing.
 
-        call verify_cpu
+But the 'volatile' in build_completion_wait() looks unnecessary, because
+the function does not poll the memory location. It only uses the
+pointer, converts it to a physical address and writes it to the command
+to be queued.
 
-        movq    $(init_top_pgt - __START_KERNEL_map), %rax
 
-So if you make that:
+Regards,
 
-	/*
-	 * Sanitize CPU configuration and retrieve the modifier
-	 * for the initial pgdir entry which will be programmed
-	 * into CR3. Depends on enabled SME encryption, normally 0.
-	 */
-	call __startup_secondary_64
-
-        addq    $(init_top_pgt - __START_KERNEL_map), %rax
-
-You can hide that stuff in C-code nicely without adding any cruft to the
-ASM code.
-
-Thanks,
-
-	tglx
+	Joerg
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
