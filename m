@@ -1,104 +1,80 @@
 From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: Re: [Xen-devel] [PATCH 2/2] x86/xen/efi: Init only efi struct
- members used by Xen
-Date: Wed, 21 Jun 2017 11:29:19 +0200
-Message-ID: <20170621092919.GP4441@olila.local.net-space.pl>
+Subject: Re: [PATCH 2/2] x86/xen/efi: Init only efi struct
+	members used by Xen
+Date: Wed, 21 Jun 2017 11:32:16 +0200
+Message-ID: <20170621093216.GQ4441@olila.local.net-space.pl>
 References: <1497989668-6238-1-git-send-email-daniel.kiper@oracle.com>
  <1497989668-6238-3-git-send-email-daniel.kiper@oracle.com>
- <45df1a82-6d86-2b03-533b-2885e85f034a@citrix.com>
+ <20170621092406.ak2cord743ded3hf@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
 Content-Disposition: inline
-In-Reply-To: <45df1a82-6d86-2b03-533b-2885e85f034a@citrix.com>
-Sender: stable-owner@vger.kernel.org
-To: Andrew Cooper <andrew.cooper3@citrix.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, stable@vger.kernel.org, xen-devel@lists.xenproject.org, jgross@suse.com, ard.biesheuvel@linaro.org, matt@codeblueprint.co.uk, mingo@redhat.com, hpa@zytor.com, boris.ostrovsky@oracle.com, tglx@linutronix.de
+In-Reply-To: <20170621092406.ak2cord743ded3hf@gmail.com>
+List-Unsubscribe: <https://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <https://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
+To: Ingo Molnar <mingo@kernel.org>
+Cc: jgross@suse.com, linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org, matt@codeblueprint.co.uk, x86@kernel.org, linux-kernel@vger.kernel.org, stable@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, tglx@linutronix.de
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jun 21, 2017 at 09:10:51AM +0100, Andrew Cooper wrote:
-> On 20/06/2017 21:14, Daniel Kiper wrote:
-> > Current approach, wholesale efi struct initialization from efi_xen, is not
-> > good. Usually if new member is defined then it is properly initialized in
-> > drivers/firmware/efi/efi.c but not in arch/x86/xen/efi.c. As I saw it happened
-> > a few times until now. So, let's initialize only efi struct members used by
-> > Xen to avoid such issues in the future.
-> >
-> > Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
-> > ---
-> >  arch/x86/xen/efi.c |   45 ++++++++++++---------------------------------
-> >  1 file changed, 12 insertions(+), 33 deletions(-)
-> >
-> > diff --git a/arch/x86/xen/efi.c b/arch/x86/xen/efi.c
-> > index 30bb2e8..01b9faf 100644
-> > --- a/arch/x86/xen/efi.c
-> > +++ b/arch/x86/xen/efi.c
-> > @@ -54,38 +54,6 @@
-> >  	.tables		= EFI_INVALID_TABLE_ADDR  /* Initialized later. */
-> >  };
-> >
-> > -static const struct efi efi_xen __initconst = {
-> > -	.systab                   = NULL, /* Initialized later. */
-> > -	.runtime_version	  = 0,    /* Initialized later. */
-> > -	.mps                      = EFI_INVALID_TABLE_ADDR,
-> > -	.acpi                     = EFI_INVALID_TABLE_ADDR,
-> > -	.acpi20                   = EFI_INVALID_TABLE_ADDR,
-> > -	.smbios                   = EFI_INVALID_TABLE_ADDR,
-> > -	.smbios3                  = EFI_INVALID_TABLE_ADDR,
-> > -	.sal_systab               = EFI_INVALID_TABLE_ADDR,
-> > -	.boot_info                = EFI_INVALID_TABLE_ADDR,
-> > -	.hcdp                     = EFI_INVALID_TABLE_ADDR,
-> > -	.uga                      = EFI_INVALID_TABLE_ADDR,
-> > -	.uv_systab                = EFI_INVALID_TABLE_ADDR,
-> > -	.fw_vendor                = EFI_INVALID_TABLE_ADDR,
-> > -	.runtime                  = EFI_INVALID_TABLE_ADDR,
-> > -	.config_table             = EFI_INVALID_TABLE_ADDR,
-> > -	.get_time                 = xen_efi_get_time,
-> > -	.set_time                 = xen_efi_set_time,
-> > -	.get_wakeup_time          = xen_efi_get_wakeup_time,
-> > -	.set_wakeup_time          = xen_efi_set_wakeup_time,
-> > -	.get_variable             = xen_efi_get_variable,
-> > -	.get_next_variable        = xen_efi_get_next_variable,
-> > -	.set_variable             = xen_efi_set_variable,
-> > -	.query_variable_info      = xen_efi_query_variable_info,
-> > -	.update_capsule           = xen_efi_update_capsule,
-> > -	.query_capsule_caps       = xen_efi_query_capsule_caps,
-> > -	.get_next_high_mono_count = xen_efi_get_next_high_mono_count,
-> > -	.reset_system             = xen_efi_reset_system,
-> > -	.set_virtual_address_map  = NULL, /* Not used under Xen. */
-> > -	.flags			  = 0     /* Initialized later. */
-> > -};
-> > -
-> >  static efi_system_table_t __init *xen_efi_probe(void)
-> >  {
-> >  	struct xen_platform_op op = {
-> > @@ -102,7 +70,18 @@ static efi_system_table_t __init *xen_efi_probe(void)
-> >
-> >  	/* Here we know that Xen runs on EFI platform. */
-> >
-> > -	efi = efi_xen;
-> > +	efi.get_time = xen_efi_get_time;
-> > +	efi.set_time = xen_efi_set_time;
-> > +	efi.get_wakeup_time = xen_efi_get_wakeup_time;
-> > +	efi.set_wakeup_time = xen_efi_set_wakeup_time;
-> > +	efi.get_variable = xen_efi_get_variable;
-> > +	efi.get_next_variable = xen_efi_get_next_variable;
-> > +	efi.set_variable = xen_efi_set_variable;
-> > +	efi.query_variable_info = xen_efi_query_variable_info;
-> > +	efi.update_capsule = xen_efi_update_capsule;
-> > +	efi.query_capsule_caps = xen_efi_query_capsule_caps;
-> > +	efi.get_next_high_mono_count = xen_efi_get_next_high_mono_count;
-> > +	efi.reset_system = xen_efi_reset_system;
->
-> This presumably means that the system default values are already present
-> in efi at the point that we overwrite some Xen specifics?
-
-More or less.
-
-> If so, surely you need to retain the clobbering of set_virtual_address_map ?
-
-Nope, by default efi.set_virtual_address_map is NULL (please take a look
-at efi struct initialization in drivers/firmware/efi/efi.c). And it is
-not touched if efi_enabled(EFI_PARAVIRT).
-
-Daniel
+T24gV2VkLCBKdW4gMjEsIDIwMTcgYXQgMTE6MjQ6MDZBTSArMDIwMCwgSW5nbyBNb2xuYXIgd3Jv
+dGU6Cj4KPiAqIERhbmllbCBLaXBlciA8ZGFuaWVsLmtpcGVyQG9yYWNsZS5jb20+IHdyb3RlOgo+
+Cj4gPiAtc3RhdGljIGNvbnN0IHN0cnVjdCBlZmkgZWZpX3hlbiBfX2luaXRjb25zdCA9IHsKPiA+
+IC0JLnN5c3RhYiAgICAgICAgICAgICAgICAgICA9IE5VTEwsIC8qIEluaXRpYWxpemVkIGxhdGVy
+LiAqLwo+ID4gLQkucnVudGltZV92ZXJzaW9uCSAgPSAwLCAgICAvKiBJbml0aWFsaXplZCBsYXRl
+ci4gKi8KPiA+IC0JLm1wcyAgICAgICAgICAgICAgICAgICAgICA9IEVGSV9JTlZBTElEX1RBQkxF
+X0FERFIsCj4gPiAtCS5hY3BpICAgICAgICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJM
+RV9BRERSLAo+ID4gLQkuYWNwaTIwICAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFC
+TEVfQUREUiwKPiA+IC0JLnNtYmlvcyAgICAgICAgICAgICAgICAgICA9IEVGSV9JTlZBTElEX1RB
+QkxFX0FERFIsCj4gPiAtCS5zbWJpb3MzICAgICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9U
+QUJMRV9BRERSLAo+ID4gLQkuc2FsX3N5c3RhYiAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURf
+VEFCTEVfQUREUiwKPiA+IC0JLmJvb3RfaW5mbyAgICAgICAgICAgICAgICA9IEVGSV9JTlZBTElE
+X1RBQkxFX0FERFIsCj4gPiAtCS5oY2RwICAgICAgICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJ
+RF9UQUJMRV9BRERSLAo+ID4gLQkudWdhICAgICAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFM
+SURfVEFCTEVfQUREUiwKPiA+IC0JLnV2X3N5c3RhYiAgICAgICAgICAgICAgICA9IEVGSV9JTlZB
+TElEX1RBQkxFX0FERFIsCj4gPiAtCS5md192ZW5kb3IgICAgICAgICAgICAgICAgPSBFRklfSU5W
+QUxJRF9UQUJMRV9BRERSLAo+ID4gLQkucnVudGltZSAgICAgICAgICAgICAgICAgID0gRUZJX0lO
+VkFMSURfVEFCTEVfQUREUiwKPiA+IC0JLmNvbmZpZ190YWJsZSAgICAgICAgICAgICA9IEVGSV9J
+TlZBTElEX1RBQkxFX0FERFIsCj4gPiAtCS5nZXRfdGltZSAgICAgICAgICAgICAgICAgPSB4ZW5f
+ZWZpX2dldF90aW1lLAo+ID4gLQkuc2V0X3RpbWUgICAgICAgICAgICAgICAgID0geGVuX2VmaV9z
+ZXRfdGltZSwKPiA+IC0JLmdldF93YWtldXBfdGltZSAgICAgICAgICA9IHhlbl9lZmlfZ2V0X3dh
+a2V1cF90aW1lLAo+ID4gLQkuc2V0X3dha2V1cF90aW1lICAgICAgICAgID0geGVuX2VmaV9zZXRf
+d2FrZXVwX3RpbWUsCj4gPiAtCS5nZXRfdmFyaWFibGUgICAgICAgICAgICAgPSB4ZW5fZWZpX2dl
+dF92YXJpYWJsZSwKPiA+IC0JLmdldF9uZXh0X3ZhcmlhYmxlICAgICAgICA9IHhlbl9lZmlfZ2V0
+X25leHRfdmFyaWFibGUsCj4gPiAtCS5zZXRfdmFyaWFibGUgICAgICAgICAgICAgPSB4ZW5fZWZp
+X3NldF92YXJpYWJsZSwKPiA+IC0JLnF1ZXJ5X3ZhcmlhYmxlX2luZm8gICAgICA9IHhlbl9lZmlf
+cXVlcnlfdmFyaWFibGVfaW5mbywKPiA+IC0JLnVwZGF0ZV9jYXBzdWxlICAgICAgICAgICA9IHhl
+bl9lZmlfdXBkYXRlX2NhcHN1bGUsCj4gPiAtCS5xdWVyeV9jYXBzdWxlX2NhcHMgICAgICAgPSB4
+ZW5fZWZpX3F1ZXJ5X2NhcHN1bGVfY2FwcywKPiA+IC0JLmdldF9uZXh0X2hpZ2hfbW9ub19jb3Vu
+dCA9IHhlbl9lZmlfZ2V0X25leHRfaGlnaF9tb25vX2NvdW50LAo+ID4gLQkucmVzZXRfc3lzdGVt
+ICAgICAgICAgICAgID0geGVuX2VmaV9yZXNldF9zeXN0ZW0sCj4gPiAtCS5zZXRfdmlydHVhbF9h
+ZGRyZXNzX21hcCAgPSBOVUxMLCAvKiBOb3QgdXNlZCB1bmRlciBYZW4uICovCj4gPiAtCS5mbGFn
+cwkJCSAgPSAwICAgICAvKiBJbml0aWFsaXplZCBsYXRlci4gKi8KPiA+IC19Owo+ID4gLQo+ID4g
+IHN0YXRpYyBlZmlfc3lzdGVtX3RhYmxlX3QgX19pbml0ICp4ZW5fZWZpX3Byb2JlKHZvaWQpCj4g
+PiAgewo+ID4gIAlzdHJ1Y3QgeGVuX3BsYXRmb3JtX29wIG9wID0gewo+ID4gQEAgLTEwMiw3ICs3
+MCwxOCBAQCBzdGF0aWMgZWZpX3N5c3RlbV90YWJsZV90IF9faW5pdCAqeGVuX2VmaV9wcm9iZSh2
+b2lkKQo+ID4KPiA+ICAJLyogSGVyZSB3ZSBrbm93IHRoYXQgWGVuIHJ1bnMgb24gRUZJIHBsYXRm
+b3JtLiAqLwo+ID4KPiA+IC0JZWZpID0gZWZpX3hlbjsKPiA+ICsJZWZpLmdldF90aW1lID0geGVu
+X2VmaV9nZXRfdGltZTsKPiA+ICsJZWZpLnNldF90aW1lID0geGVuX2VmaV9zZXRfdGltZTsKPiA+
+ICsJZWZpLmdldF93YWtldXBfdGltZSA9IHhlbl9lZmlfZ2V0X3dha2V1cF90aW1lOwo+ID4gKwll
+Zmkuc2V0X3dha2V1cF90aW1lID0geGVuX2VmaV9zZXRfd2FrZXVwX3RpbWU7Cj4gPiArCWVmaS5n
+ZXRfdmFyaWFibGUgPSB4ZW5fZWZpX2dldF92YXJpYWJsZTsKPiA+ICsJZWZpLmdldF9uZXh0X3Zh
+cmlhYmxlID0geGVuX2VmaV9nZXRfbmV4dF92YXJpYWJsZTsKPiA+ICsJZWZpLnNldF92YXJpYWJs
+ZSA9IHhlbl9lZmlfc2V0X3ZhcmlhYmxlOwo+ID4gKwllZmkucXVlcnlfdmFyaWFibGVfaW5mbyA9
+IHhlbl9lZmlfcXVlcnlfdmFyaWFibGVfaW5mbzsKPiA+ICsJZWZpLnVwZGF0ZV9jYXBzdWxlID0g
+eGVuX2VmaV91cGRhdGVfY2Fwc3VsZTsKPiA+ICsJZWZpLnF1ZXJ5X2NhcHN1bGVfY2FwcyA9IHhl
+bl9lZmlfcXVlcnlfY2Fwc3VsZV9jYXBzOwo+ID4gKwllZmkuZ2V0X25leHRfaGlnaF9tb25vX2Nv
+dW50ID0geGVuX2VmaV9nZXRfbmV4dF9oaWdoX21vbm9fY291bnQ7Cj4gPiArCWVmaS5yZXNldF9z
+eXN0ZW0gPSB4ZW5fZWZpX3Jlc2V0X3N5c3RlbTsKPgo+IFRoaXMgaXMgYSBzdGVwIGJhY2sgc3R5
+bGlzdGljYWxseSwgYXMgeW91IGxvc3QgdGhlIG5pY2UgdmVydGljYWwgdGFidWxhdGlvbiBvZiB0
+aGUKPiBvcmlnaW5hbCBpbml0aWFsaXplciAuLi4KCklmIHlvdSB3aXNoIGFuZCBvdGhlcnMgZG8g
+bm90IG9iamVjdCBJIGNhbiByZWFsaWduIGl0IGJhY2suCgpEYW5pZWwKCl9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fClhlbi1kZXZlbCBtYWlsaW5nIGxpc3QK
+WGVuLWRldmVsQGxpc3RzLnhlbi5vcmcKaHR0cHM6Ly9saXN0cy54ZW4ub3JnL3hlbi1kZXZlbAo=
