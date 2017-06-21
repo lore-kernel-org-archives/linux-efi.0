@@ -1,99 +1,27 @@
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: Re: [PATCH v7 08/36] x86/mm: Add support to enable SME in early boot
- processing
-Date: Wed, 21 Jun 2017 09:16:05 +0200 (CEST)
-Message-ID: <alpine.DEB.2.20.1706202259290.2157@nanos>
-References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net> <20170616185115.18967.79622.stgit@tlendack-t1.amdoffice.net>
+Subject: Re: [PATCH v7 10/36] x86/mm: Provide general kernel support for
+ memory encryption
+Date: Wed, 21 Jun 2017 09:18:59 +0200 (CEST)
+Message-ID: <alpine.DEB.2.20.1706210916590.2328@nanos>
+References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net> <20170616185140.18967.61905.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
-Return-path: <linux-arch-owner@vger.kernel.org>
-In-Reply-To: <20170616185115.18967.79622.stgit@tlendack-t1.amdoffice.net>
-Sender: linux-arch-owner@vger.kernel.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <20170616185140.18967.61905.stgit@tlendack-t1.amdoffice.net>
+Sender: linux-doc-owner@vger.kernel.org
 To: Tom Lendacky <thomas.lendacky@amd.com>
 Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, =?ISO-8859-2?Q?Radim_Kr=E8m=E1=F8?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave
 List-Id: linux-efi@vger.kernel.org
 
 On Fri, 16 Jun 2017, Tom Lendacky wrote:
-> diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
-> index a105796..988b336 100644
-> --- a/arch/x86/include/asm/mem_encrypt.h
-> +++ b/arch/x86/include/asm/mem_encrypt.h
-> @@ -15,16 +15,24 @@
 >  
->  #ifndef __ASSEMBLY__
->  
-> +#include <linux/init.h>
+> +#ifndef pgprot_encrypted
+> +#define pgprot_encrypted(prot)	(prot)
+> +#endif
 > +
->  #ifdef CONFIG_AMD_MEM_ENCRYPT
->  
->  extern unsigned long sme_me_mask;
->  
-> +void __init sme_enable(void);
-> +
->  #else	/* !CONFIG_AMD_MEM_ENCRYPT */
->  
->  #define sme_me_mask	0UL
->  
-> +static inline void __init sme_enable(void) { }
-> +
->  #endif	/* CONFIG_AMD_MEM_ENCRYPT */
->  
-> +unsigned long sme_get_me_mask(void);
+> +#ifndef pgprot_decrypted
 
-Why is this an unconditional function? Isn't the mask simply 0 when the MEM
-ENCRYPT support is disabled?
-
-> diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
-> index 6225550..ef12729 100644
-> --- a/arch/x86/kernel/head_64.S
-> +++ b/arch/x86/kernel/head_64.S
-> @@ -78,7 +78,29 @@ startup_64:
->  	call	__startup_64
->  	popq	%rsi
->  
-> -	movq	$(early_top_pgt - __START_KERNEL_map), %rax
-> +	/*
-> +	 * Encrypt the kernel if SME is active.
-> +	 * The real_mode_data address is in %rsi and that register can be
-> +	 * clobbered by the called function so be sure to save it.
-> +	 */
-> +	push	%rsi
-> +	call	sme_encrypt_kernel
-> +	pop	%rsi
-
-That does not make any sense. Neither the call to sme_encrypt_kernel() nor
-the following call to sme_get_me_mask().
-
-__startup_64() is already C code, so why can't you simply call that from
-__startup_64() in C and return the mask from there?
-
-> @@ -98,7 +120,20 @@ ENTRY(secondary_startup_64)
->  	/* Sanitize CPU configuration */
->  	call verify_cpu
->  
-> -	movq	$(init_top_pgt - __START_KERNEL_map), %rax
-> +	/*
-> +	 * Get the SME encryption mask.
-> +	 *  The encryption mask will be returned in %rax so we do an ADD
-> +	 *  below to be sure that the encryption mask is part of the
-> +	 *  value that will stored in %cr3.
-> +	 *
-> +	 * The real_mode_data address is in %rsi and that register can be
-> +	 * clobbered by the called function so be sure to save it.
-> +	 */
-> +	push	%rsi
-> +	call	sme_get_me_mask
-> +	pop	%rsi
-
-Do we really need a call here? The mask is established at this point, so
-it's either 0 when the encryption stuff is not compiled in or it can be
-retrieved from a variable which is accessible at this point.
-
-> +
-> +	addq	$(init_top_pgt - __START_KERNEL_map), %rax
->  1:
->  
->  	/* Enable PAE mode, PGE and LA57 */
+That looks wrong. It's not decrypted it's rather unencrypted, right?
 
 Thanks,
 
