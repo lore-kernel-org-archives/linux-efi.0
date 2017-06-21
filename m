@@ -1,76 +1,70 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 1/2] efi: Add 'nr_config_table' variable in efi structure
-Date: Wed, 21 Jun 2017 14:07:01 +0200
-Message-ID: <CAKv+Gu8fQmPRoxR67gm1yBvN0Z8ShY++TW07_RUYRsv-BAu_1g@mail.gmail.com>
-References: <20170619175423.70656-1-qiuxu.zhuo@intel.com>
+Subject: Re: [PATCH 0/7] ARM: efi: PE/COFF cleanup/hardening
+Date: Wed, 21 Jun 2017 14:20:13 +0200
+Message-ID: <CAKv+Gu86ceMjb0oVWCSMC8V+BJ0D7nFFiRSSEk6bk4wfJKS2rQ@mail.gmail.com>
+References: <20170530183647.28557-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170619175423.70656-1-qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20170530183647.28557-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 19 June 2017 at 19:54, Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> The 'nr_config_table' and 'config_table' (alreay in efi structure)
-> in efi structure provide a way for some driver(e.g. capsule-pstore
-> goes through the configuration table to extract crash capsules to
-> aid in debugging) iterates over the EFI configuration table array.
+On 30 May 2017 at 20:36, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> This is the ARM counterpart of the changes now in v4.12 to clean up
+> the PE/COFF header that makes the kernel zImage loadable directly from
+> UEFI, and to enhance it with hardening and debug features.
 >
-> Signed-off-by: Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->  arch/x86/platform/efi/efi.c | 1 +
->  drivers/firmware/efi/efi.c  | 1 +
->  include/linux/efi.h         | 1 +
->  3 files changed, 3 insertions(+)
+> First of all, the cleanup consists of making the header comply with the
+> PE/COFF spec (#1), removing the .reloc section (#2) and replacing all
+> open coded constants with #defines from linux/pe.h
 >
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 7e76a4d..bcda1b9 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -498,6 +498,7 @@ void __init efi_init(void)
->                 return;
+> Patch #4 is a standalone patch that removes ksymtab/kcrctab sections that
+> may get pulled in inadvertently when the decompressor is built with EFI
+> support. Note that these sections are tiny and harmless by themselves, but
+> the linker may dump them in unexpected places if they are not placed
+> explicitly, which may interfere with the image layout. This is especially
+> important when signing zImages for UEFI secure boot.
 >
->         efi.config_table = (unsigned long)efi.systab->tables;
-> +       efi.nr_config_table = (unsigned long)efi.systab->nr_tables;
-
-As it turns out, we never assign efi.config_table on ARM/arm64, and
-this needs to be fixed, so I queued a patch in the EFI -next branch.
-Could you rebase your series onto that, and make sure you add a
-similar line as this one to uefi_init() in
-drivers/firmware/efi/arm-init.c?
-
->         efi.fw_vendor    = (unsigned long)efi.systab->fw_vendor;
->         efi.runtime      = (unsigned long)efi.systab->runtime;
+> Patch #5 changes the description of the decompressor in memory, so that the
+> UEFI firmware can apply strict ro/nx protections, resulting in a more secure
+> execution environment for the UEFI stub.
 >
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index b372aad..b511197 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -48,6 +48,7 @@ struct efi __read_mostly efi = {
->         .fw_vendor              = EFI_INVALID_TABLE_ADDR,
->         .runtime                = EFI_INVALID_TABLE_ADDR,
->         .config_table           = EFI_INVALID_TABLE_ADDR,
-> +       .nr_config_table        = EFI_INVALID_TABLE_ADDR,
+> Patch #6 splits the decompressor .start and .text output sections, so that
+> the ELF view aligns with the PE/COFF view of the binary. This is useful for
+> debugging, but has no other benefits (or downsides, for that matter)
+>
+> Patch #7 enhances the decompressor binary with a NB10 Codeview debug entry
+> referring to the path to arch/arm/boot/compressed/vmlinux on the build host.
+> This is another debug feature that allows seamless source level single step
+> debugging of the UEFI stub while executing in the context of the firmware.
+>
+> Ard Biesheuvel (7):
+>   arm: efi: remove forbidden values from the PE/COFF header
+>   arm: efi: remove pointless dummy .reloc section
 
-nr_config_table is not a physical address, so please just initialize it to 0
+If nobody objects, I am going to queue these first 2 for v4.13. The
+remaining ones need acks and/or need to be rebased once v4.13-rc1 is
+out, but I've been sitting on these for a while now, so I'd like to
+have some movement here.
 
->         .esrt                   = EFI_INVALID_TABLE_ADDR,
->         .properties_table       = EFI_INVALID_TABLE_ADDR,
->         .mem_attr_table         = EFI_INVALID_TABLE_ADDR,
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index ec36f42..bd5ff8f 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -892,6 +892,7 @@ extern struct efi {
->         unsigned long fw_vendor;        /* fw_vendor */
->         unsigned long runtime;          /* runtime table */
->         unsigned long config_table;     /* config tables */
-> +       unsigned long nr_config_table;
->         unsigned long esrt;             /* ESRT table */
->         unsigned long properties_table; /* properties table */
->         unsigned long mem_attr_table;   /* memory attributes table */
+-- 
+Ard.
+
+
+>   arm: efi: replace open coded constants with symbolic ones
+>   arm: compressed: discard ksymtab/kcrctab sections
+>   arm: efi: split zImage code and data into separate PE/COFF sections
+>   arm: compressed: put zImage header and EFI header in dedicated section
+>   arm: efi: add PE/COFF debug table to EFI header
+>
+>  arch/arm/boot/compressed/Makefile      |   4 +
+>  arch/arm/boot/compressed/efi-header.S  | 247 ++++++++++++--------
+>  arch/arm/boot/compressed/vmlinux.lds.S |  39 +++-
+>  3 files changed, 180 insertions(+), 110 deletions(-)
+>
 > --
-> 2.9.0.GIT
+> 2.9.3
 >
