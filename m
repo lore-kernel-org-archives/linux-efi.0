@@ -1,63 +1,99 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v6 26/34] iommu/amd: Allow the AMD IOMMU to work with
- memory encryption
-Date: Wed, 21 Jun 2017 18:59:22 +0200
-Message-ID: <20170621165921.tv2jfhf5dz7hsjsy@pd.tnic>
-References: <20170607191309.28645.15241.stgit@tlendack-t1.amdoffice.net>
- <20170607191745.28645.81756.stgit@tlendack-t1.amdoffice.net>
- <20170614174208.p2yr5exs4b6pjxhf@pd.tnic>
- <0611d01a-19f8-d6ae-2682-932789855518@amd.com>
- <20170615094111.wga334kg2bhxqib3@pd.tnic>
- <20170621153721.GP30388@8bytes.org>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [PATCH v7 08/36] x86/mm: Add support to enable SME in early boot
+	processing
+Date: Wed, 21 Jun 2017 13:30:19 -0500
+Message-ID: <fc697503-ec54-f481-36b3-3d5bf63aaaee@amd.com>
+References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
+	<20170616185115.18967.79622.stgit@tlendack-t1.amdoffice.net>
+	<alpine.DEB.2.20.1706202259290.2157@nanos>
+	<8d3c215f-cdad-5554-6e9c-5598e1081850@amd.com>
+	<alpine.DEB.2.20.1706211720060.2328@nanos>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170621153721.GP30388@8bytes.org>
-Sender: owner-linux-mm@kvack.org
-To: Joerg Roedel <joro@8bytes.org>
-Cc: Tom Lendacky <thomas.lendacky@amd.com>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Rik van Riel <riel@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexand
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.20.1706211720060.2328@nanos>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, kexe
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jun 21, 2017 at 05:37:22PM +0200, Joerg Roedel wrote:
-> > Do you mean this is like the last exception case in that document above:
-> > 
-> > "
-> >   - Pointers to data structures in coherent memory which might be modified
-> >     by I/O devices can, sometimes, legitimately be volatile.  A ring buffer
-> >     used by a network adapter, where that adapter changes pointers to
-> >     indicate which descriptors have been processed, is an example of this
-> >     type of situation."
-> > 
-> > ?
+On 6/21/2017 10:38 AM, Thomas Gleixner wrote:
+> On Wed, 21 Jun 2017, Tom Lendacky wrote:
+>> On 6/21/2017 2:16 AM, Thomas Gleixner wrote:
+>>> Why is this an unconditional function? Isn't the mask simply 0 when the MEM
+>>> ENCRYPT support is disabled?
+>>
+>> I made it unconditional because of the call from head_64.S. I can't make
+>> use of the C level static inline function and since the mask is not a
+>> variable if CONFIG_AMD_MEM_ENCRYPT is not configured (#defined to 0) I
+>> can't reference the variable directly.
+>>
+>> I could create a #define in head_64.S that changes this to load rax with
+>> the variable if CONFIG_AMD_MEM_ENCRYPT is configured or a zero if it's
+>> not or add a #ifdef at that point in the code directly. Thoughts on
+>> that?
 > 
-> So currently (without this patch) the build_completion_wait function
-> does not take a volatile parameter, only wait_on_sem() does.
+> See below.
 > 
-> Wait_on_sem() needs it because its purpose is to poll a memory location
-> which is changed by the iommu-hardware when its done with command
-> processing.
+>>> That does not make any sense. Neither the call to sme_encrypt_kernel() nor
+>>> the following call to sme_get_me_mask().
+>>>
+>>> __startup_64() is already C code, so why can't you simply call that from
+>>> __startup_64() in C and return the mask from there?
+>>
+>> I was trying to keep it explicit as to what was happening, but I can
+>> move those calls into __startup_64().
+> 
+> That's much preferred. And the return value wants to be documented in both
+> C and ASM code.
 
-Right, the reason above - memory modifiable by an IO device. You could
-add a comment there explaining the need for the volatile.
+Will do.
 
-> But the 'volatile' in build_completion_wait() looks unnecessary, because
-> the function does not poll the memory location. It only uses the
-> pointer, converts it to a physical address and writes it to the command
-> to be queued.
+> 
+>> I'll still need the call to sme_get_me_mask() in the secondary_startup_64
+>> path, though (depending on your thoughts to the above response).
+> 
+>          call verify_cpu
+> 
+>          movq    $(init_top_pgt - __START_KERNEL_map), %rax
+> 
+> So if you make that:
+> 
+> 	/*
+> 	 * Sanitize CPU configuration and retrieve the modifier
+> 	 * for the initial pgdir entry which will be programmed
+> 	 * into CR3. Depends on enabled SME encryption, normally 0.
+> 	 */
+> 	call __startup_secondary_64
+> 
+>          addq    $(init_top_pgt - __START_KERNEL_map), %rax
+> 
+> You can hide that stuff in C-code nicely without adding any cruft to the
+> ASM code.
+> 
 
-Ok.
+Moving the call to verify_cpu into the C-code might be quite a bit of
+change.  Currently, the verify_cpu code is included code and not a
+global function.  I can still do the __startup_secondary_64() function
+and then look to incorporate verify_cpu into both __startup_64() and
+__startup_secondary_64() as a post-patch to this series. At least the
+secondary path will have a base C routine to which modifications can
+be made in the future if needed.  How does that sound?
 
-Thanks.
+Thanks,
+Tom
 
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+> Thanks,
+> 
+> 	tglx
+> 
