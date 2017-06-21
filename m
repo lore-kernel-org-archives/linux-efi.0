@@ -1,50 +1,50 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: Problem with new X.509 is_hash_blacklisted() interface
-Date: Wed, 21 Jun 2017 13:49:09 +0100
-Message-ID: <8099.1498049349@warthog.procyon.org.uk>
-References: <CAKv+Gu-Lwrd_=g6QNFxk5nKeh=wovstbEoc86M+0QUnwvU6ukA@mail.gmail.com> <1495897525.3458.7.camel@HansenPartnership.com> <26151.1497974983@warthog.procyon.org.uk>
+From: Robert Richter <robert.richter@cavium.com>
+Subject: Re: [PATCH V17 00/11] Add UEFI 2.6 and ACPI 6.1 updates for RAS on
+ ARM64
+Date: Wed, 21 Jun 2017 15:00:25 +0200
+Message-ID: <20170621130025.GD16981@rric.localdomain>
+References: <1495225933-4410-1-git-send-email-tbaicar@codeaurora.org>
+ <20170607115012.GZ30263@arm.com>
+ <20170620063439.GS658@rric.localdomain>
+ <20170620084931.GB30664@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu-Lwrd_=g6QNFxk5nKeh=wovstbEoc86M+0QUnwvU6ukA@mail.gmail.com>
-Content-ID: <8098.1498049349.1@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: dhowells@redhat.com, James Bottomley <James.Bottomley@hansenpartnership.com>, keyrings@vger.kernel.org, linux-security-module <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170620084931.GB30664@arm.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Will Deacon <will.deacon@arm.com>
+Cc: Tyler Baicar <tbaicar@codeaurora.org>, christoffer.dall@linaro.org, marc.zyngier@arm.com, pbonzini@redhat.com, rkrcmar@redhat.com, linux@armlinux.org.uk, catalin.marinas@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, nkaje@codeaurora.org, zjzhang@codeaurora.org, mark.rutland@arm.com, james.morse@arm.com, akpm@linux-foundation.org, eun.taik.lee@samsung.com, sandeepa.s.prabhu@gmail.com, labbott@redhat.com, shijie.huang@arm.com, rruigrok@codeaurora.org, paul.gortmaker@windriver.com, tn@semihalf.com, fu.wei@linaro.org, rostedt@goodmis.org, bristot@redhat.com, linux-arm-kernel@lists.infradead.org, kvmarm@lists.cs.columbia.edu, kvm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.
 List-Id: linux-efi@vger.kernel.org
 
-Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-
-> >      This can be told to skip a particular algorithm for when the caller
-> >      has one precalculated.  The precalculated hash can be passed to
-> >      is_hash_blacklisted().  This would typically be the case for a signed
-> >      X.509 message.
+On 20.06.17 09:49:32, Will Deacon wrote:
+> Hi Robert,
 > 
-> This last part seems a premature optimization to me. Is there a
-> performance concern preventing us from using (4) only?
+> On Tue, Jun 20, 2017 at 08:34:39AM +0200, Robert Richter wrote:
+> > On 07.06.17 12:50:12, Will Deacon wrote:
+> > 
+> > > Thanks, I've pushed this out as:
+> > >
+> > >   git://git.kernel.org/pub/scm/linux/kernel/git/arm64/linux.git for-next/ras-apei
+> > >
+> > > which I'll merge into for-next/core (and therefore linux-next) either the
+> > > end of this week or the beginning of next week. Please take a look if you
+> > > get a chance.
+> > 
+> > any reason why there was a roll back of for-next/core?
+> > 
+> >  + 0870f692c2ed...e27c7fa015d6 for-next/core -> arm64/for-next/core  (forced update)
+> > 
+> > Is it because for-next/ras-apei goes through tip?
+> 
+> No, it's because the RAS stuff ran into horrible conflicts with the UUID
+> tree:
+> 
+> https://lkml.org/lkml/2017/6/16/22
+> 
+> Tyler should be rebasing that soon, so hopefully I can requeue that stuff
+> this week.
 
-Crypto stuff is relatively slow - and in the case of X.509 and PKCS#7 the
-caller will already have calculated a hash.  The most likely situation
-currently, I think, is that we will only have sha256 hashes in the blacklist,
-and whatever we're checking will have a sha256 hash also.
+Note there are also conflicts with tip-ras from Borsis' tree.
 
-Possibly, I could just pass the precalculated hash into is_data_blacklisted()
-and so avoid having to call is_hash_blacklisted() from outside.
-
-> In any case, the approach and the code look sound to me, although I
-> think adding a hash of a type that we don't know how to calculate
-> deserves a warning at least.
-
-There are two issues with that:
-
- (1) We don't know what hashes are available without checking to see what
-     modules are available.  However, to do this would involve loading the
-     hash algorithm module - but we might not be in a position to do this yet
-     (the blacklist is loaded before we start userspace).
-
- (2) A module implementing a hash algorithm might be blacklisted by the hash
-     that we've been given to add to the blacklist.  I think this is a more
-     general problem - and might require us to restrict blacklisting to hash
-     algorithms that are built in.
-
-David
+-Robert
