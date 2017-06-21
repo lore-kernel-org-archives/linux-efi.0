@@ -1,101 +1,65 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: efi/reboot: Fall back to original power-off method if
- EFI_RESET_SHUTDOWN returns
-Date: Wed, 21 Jun 2017 15:15:09 +0200
-Message-ID: <430d6ff2-264a-80f8-24e0-0d9af4377844@redhat.com>
-References: <20170423123655.13015-1-hdegoede@redhat.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [PATCH v7 06/36] x86/mm: Add Secure Memory Encryption (SME)
+ support
+Date: Wed, 21 Jun 2017 08:26:44 -0500
+Message-ID: <efa51470-5d8f-6883-b9da-f2face12ea22@amd.com>
+References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
+ <20170616185054.18967.52228.stgit@tlendack-t1.amdoffice.net>
+ <alpine.DEB.2.20.1706202244480.2157@nanos>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <20170423123655.13015-1-hdegoede@redhat.com>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <alpine.DEB.2.20.1706202244480.2157@nanos>
 Content-Language: en-US
-Sender: linux-acpi-owner@vger.kernel.org
-To: Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-acpi@vger.kernel.org, Peter Jones <pjones@redhat.com>, linux-efi@vger.kernel.org, Mark Salter <msalter@redhat.com>
+Sender: owner-linux-mm@kvack.org
+To: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dyoung@redhat.com>, Rik van Riel <riel@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Konrad Rzeszutek Wilk <konrad.wilk@oracl>
 List-Id: linux-efi@vger.kernel.org
 
-HI,
+On 6/20/2017 3:49 PM, Thomas Gleixner wrote:
+> On Fri, 16 Jun 2017, Tom Lendacky wrote:
+>>   
+>> +config ARCH_HAS_MEM_ENCRYPT
+>> +	def_bool y
+>> +	depends on X86
+> 
+> That one is silly. The config switch is in the x86 KConfig file, so X86 is
+> on. If you intended to move this to some generic place outside of
+> x86/Kconfig then this should be
+> 
+> config ARCH_HAS_MEM_ENCRYPT
+> 	bool
+> 
+> and x86/Kconfig should have
+> 
+>      	select ARCH_HAS_MEM_ENCRYPT
+> 
+> and that should be selected by AMD_MEM_ENCRYPT
 
-On 23-04-17 14:36, Hans de Goede wrote:
-> Commit 44be28e9dd98 ("x86/reboot: Add EFI reboot quirk for ACPI Hardware
-> Reduced flag") sets pm_power_off to efi_power_off() when the
-> acpi_gbl_reduced_hardware flag is set.
-> 
-> According to its commit message this is necessary because: "BayTrail-T
-> class of hardware requires EFI in order to powerdown and reboot and no
-> other reliable method exists"
-> 
-> But I have a Bay Trail CR tablet where the EFI_RESET_SHUTDOWN call does
-> not work, it simply returns without doing anything (AFAICT).
-> 
-> So it seems that some Bay Trail devices must use EFI for power-off, while
-> for others only ACPI works.
-> 
-> Note that efi_power_off() only gets used if the platform code defines
-> efi_poweroff_required() and that returns true, this currently only ever
-> happens on x86.
-> 
-> Since on the devices which need ACPI for power-off the EFI_RESET_SHUTDOWN
-> call simply returns, this patch makes the efi-reboot code remember the
-> old pm_power_off handler and if EFI_RESET_SHUTDOWN returns it falls back
-> to calling that.
-> 
-> This seems preferable to dmi-quirking our way out of this, since there
-> are likely quite a few devices suffering from this.
-> 
-> Cc: Mark Salter <msalter@redhat.com>
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+This is used for deciding whether to include the asm/mem_encrypt.h file
+so it needs to be on whether AMD_MEM_ENCRYPT is configured or not. I'll
+leave it in the x86/Kconfig file and remove the depends on line.
 
-What is the status of this patch ? It has had 2 somewhat favorable
-reviews and then things went silent ?
+Thanks,
+Tom
 
-Regards,
-
-Hans
-
-
-
-> ---
->   drivers/firmware/efi/reboot.c | 12 +++++++++++-
->   1 file changed, 11 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/firmware/efi/reboot.c b/drivers/firmware/efi/reboot.c
-> index 62ead9b..7117e2d 100644
-> --- a/drivers/firmware/efi/reboot.c
-> +++ b/drivers/firmware/efi/reboot.c
-> @@ -5,6 +5,8 @@
->   #include <linux/efi.h>
->   #include <linux/reboot.h>
->   
-> +void (*orig_pm_power_off)(void);
-> +
->   int efi_reboot_quirk_mode = -1;
->   
->   void efi_reboot(enum reboot_mode reboot_mode, const char *__unused)
-> @@ -51,6 +53,12 @@ bool __weak efi_poweroff_required(void)
->   static void efi_power_off(void)
->   {
->   	efi.reset_system(EFI_RESET_SHUTDOWN, EFI_SUCCESS, 0, NULL);
-> +	/*
-> +	 * The above call should not return, if it does fall back to
-> +	 * the original power off method (typically ACPI poweroff).
-> +	 */
-> +	if (orig_pm_power_off)
-> +		orig_pm_power_off();
->   }
->   
->   static int __init efi_shutdown_init(void)
-> @@ -58,8 +66,10 @@ static int __init efi_shutdown_init(void)
->   	if (!efi_enabled(EFI_RUNTIME_SERVICES))
->   		return -ENODEV;
->   
-> -	if (efi_poweroff_required())
-> +	if (efi_poweroff_required()) {
-> +		orig_pm_power_off = pm_power_off;
->   		pm_power_off = efi_power_off;
-> +	}
->   
->   	return 0;
->   }
+>> +config AMD_MEM_ENCRYPT
+>> +	bool "AMD Secure Memory Encryption (SME) support"
+>> +	depends on X86_64 && CPU_SUP_AMD
+>> +	---help---
+>> +	  Say yes to enable support for the encryption of system memory.
+>> +	  This requires an AMD processor that supports Secure Memory
+>> +	  Encryption (SME).
 > 
+> Thanks,
+> 
+> 	tglx
+> 
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
