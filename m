@@ -1,77 +1,100 @@
-From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v3 1/2] efi: Add 'nr_config_table' variable in efi structure
-Date: Tue, 20 Jun 2017 16:28:08 -0700
-Message-ID: <CAGXu5jLuaU2H3y3VHYhR5qndcdD-pAgfC+_x+8PsACKjVjrmPw@mail.gmail.com>
-References: <20170619175423.70656-1-qiuxu.zhuo@intel.com>
+From: Thomas Gleixner <tglx@linutronix.de>
+Subject: Re: [PATCH v7 08/36] x86/mm: Add support to enable SME in early boot
+ processing
+Date: Wed, 21 Jun 2017 09:16:05 +0200 (CEST)
+Message-ID: <alpine.DEB.2.20.1706202259290.2157@nanos>
+References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net> <20170616185115.18967.79622.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170619175423.70656-1-qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=US-ASCII
+Return-path: <linux-arch-owner@vger.kernel.org>
+In-Reply-To: <20170616185115.18967.79622.stgit@tlendack-t1.amdoffice.net>
+Sender: linux-arch-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, =?ISO-8859-2?Q?Radim_Kr=E8m=E1=F8?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jun 19, 2017 at 10:54 AM, Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> The 'nr_config_table' and 'config_table' (alreay in efi structure)
-> in efi structure provide a way for some driver(e.g. capsule-pstore
-> goes through the configuration table to extract crash capsules to
-> aid in debugging) iterates over the EFI configuration table array.
->
-> Signed-off-by: Qiuxu Zhuo <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->  arch/x86/platform/efi/efi.c | 1 +
->  drivers/firmware/efi/efi.c  | 1 +
->  include/linux/efi.h         | 1 +
->  3 files changed, 3 insertions(+)
->
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 7e76a4d..bcda1b9 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -498,6 +498,7 @@ void __init efi_init(void)
->                 return;
->
->         efi.config_table = (unsigned long)efi.systab->tables;
-> +       efi.nr_config_table = (unsigned long)efi.systab->nr_tables;
->         efi.fw_vendor    = (unsigned long)efi.systab->fw_vendor;
->         efi.runtime      = (unsigned long)efi.systab->runtime;
->
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index b372aad..b511197 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -48,6 +48,7 @@ struct efi __read_mostly efi = {
->         .fw_vendor              = EFI_INVALID_TABLE_ADDR,
->         .runtime                = EFI_INVALID_TABLE_ADDR,
->         .config_table           = EFI_INVALID_TABLE_ADDR,
-> +       .nr_config_table        = EFI_INVALID_TABLE_ADDR,
->         .esrt                   = EFI_INVALID_TABLE_ADDR,
->         .properties_table       = EFI_INVALID_TABLE_ADDR,
->         .mem_attr_table         = EFI_INVALID_TABLE_ADDR,
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index ec36f42..bd5ff8f 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -892,6 +892,7 @@ extern struct efi {
->         unsigned long fw_vendor;        /* fw_vendor */
->         unsigned long runtime;          /* runtime table */
->         unsigned long config_table;     /* config tables */
-> +       unsigned long nr_config_table;
+On Fri, 16 Jun 2017, Tom Lendacky wrote:
+> diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
+> index a105796..988b336 100644
+> --- a/arch/x86/include/asm/mem_encrypt.h
+> +++ b/arch/x86/include/asm/mem_encrypt.h
+> @@ -15,16 +15,24 @@
+>  
+>  #ifndef __ASSEMBLY__
+>  
+> +#include <linux/init.h>
+> +
+>  #ifdef CONFIG_AMD_MEM_ENCRYPT
+>  
+>  extern unsigned long sme_me_mask;
+>  
+> +void __init sme_enable(void);
+> +
+>  #else	/* !CONFIG_AMD_MEM_ENCRYPT */
+>  
+>  #define sme_me_mask	0UL
+>  
+> +static inline void __init sme_enable(void) { }
+> +
+>  #endif	/* CONFIG_AMD_MEM_ENCRYPT */
+>  
+> +unsigned long sme_get_me_mask(void);
 
-The other fields have (limited) comments. This should probably get one too.
+Why is this an unconditional function? Isn't the mask simply 0 when the MEM
+ENCRYPT support is disabled?
 
--Kees
+> diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
+> index 6225550..ef12729 100644
+> --- a/arch/x86/kernel/head_64.S
+> +++ b/arch/x86/kernel/head_64.S
+> @@ -78,7 +78,29 @@ startup_64:
+>  	call	__startup_64
+>  	popq	%rsi
+>  
+> -	movq	$(early_top_pgt - __START_KERNEL_map), %rax
+> +	/*
+> +	 * Encrypt the kernel if SME is active.
+> +	 * The real_mode_data address is in %rsi and that register can be
+> +	 * clobbered by the called function so be sure to save it.
+> +	 */
+> +	push	%rsi
+> +	call	sme_encrypt_kernel
+> +	pop	%rsi
 
->         unsigned long esrt;             /* ESRT table */
->         unsigned long properties_table; /* properties table */
->         unsigned long mem_attr_table;   /* memory attributes table */
-> --
-> 2.9.0.GIT
->
+That does not make any sense. Neither the call to sme_encrypt_kernel() nor
+the following call to sme_get_me_mask().
 
+__startup_64() is already C code, so why can't you simply call that from
+__startup_64() in C and return the mask from there?
 
+> @@ -98,7 +120,20 @@ ENTRY(secondary_startup_64)
+>  	/* Sanitize CPU configuration */
+>  	call verify_cpu
+>  
+> -	movq	$(init_top_pgt - __START_KERNEL_map), %rax
+> +	/*
+> +	 * Get the SME encryption mask.
+> +	 *  The encryption mask will be returned in %rax so we do an ADD
+> +	 *  below to be sure that the encryption mask is part of the
+> +	 *  value that will stored in %cr3.
+> +	 *
+> +	 * The real_mode_data address is in %rsi and that register can be
+> +	 * clobbered by the called function so be sure to save it.
+> +	 */
+> +	push	%rsi
+> +	call	sme_get_me_mask
+> +	pop	%rsi
 
--- 
-Kees Cook
-Pixel Security
+Do we really need a call here? The mask is established at this point, so
+it's either 0 when the encryption stuff is not compiled in or it can be
+retrieved from a variable which is accessible at this point.
+
+> +
+> +	addq	$(init_top_pgt - __START_KERNEL_map), %rax
+>  1:
+>  
+>  	/* Enable PAE mode, PGE and LA57 */
+
+Thanks,
+
+	tglx
