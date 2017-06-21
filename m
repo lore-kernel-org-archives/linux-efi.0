@@ -1,80 +1,45 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: Re: [PATCH 2/2] x86/xen/efi: Init only efi struct
-	members used by Xen
-Date: Wed, 21 Jun 2017 11:32:16 +0200
-Message-ID: <20170621093216.GQ4441@olila.local.net-space.pl>
-References: <1497989668-6238-1-git-send-email-daniel.kiper@oracle.com>
- <1497989668-6238-3-git-send-email-daniel.kiper@oracle.com>
- <20170621092406.ak2cord743ded3hf@gmail.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v7 23/36] x86, realmode: Decrypt trampoline area if
+ memory encryption is active
+Date: Wed, 21 Jun 2017 11:43:24 +0200
+Message-ID: <20170621094324.n3dukli4gq6g5ftn@pd.tnic>
+References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
+ <20170616185412.18967.91559.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <20170621092406.ak2cord743ded3hf@gmail.com>
-List-Unsubscribe: <https://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <https://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
-To: Ingo Molnar <mingo@kernel.org>
-Cc: jgross@suse.com, linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org, matt@codeblueprint.co.uk, x86@kernel.org, linux-kernel@vger.kernel.org, stable@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, tglx@linutronix.de
+In-Reply-To: <20170616185412.18967.91559.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dyoung@redhat.com>, Rik van Riel <riel@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Konrad Rzeszutek Wilk <konrad.wilk@or>
 List-Id: linux-efi@vger.kernel.org
 
-T24gV2VkLCBKdW4gMjEsIDIwMTcgYXQgMTE6MjQ6MDZBTSArMDIwMCwgSW5nbyBNb2xuYXIgd3Jv
-dGU6Cj4KPiAqIERhbmllbCBLaXBlciA8ZGFuaWVsLmtpcGVyQG9yYWNsZS5jb20+IHdyb3RlOgo+
-Cj4gPiAtc3RhdGljIGNvbnN0IHN0cnVjdCBlZmkgZWZpX3hlbiBfX2luaXRjb25zdCA9IHsKPiA+
-IC0JLnN5c3RhYiAgICAgICAgICAgICAgICAgICA9IE5VTEwsIC8qIEluaXRpYWxpemVkIGxhdGVy
-LiAqLwo+ID4gLQkucnVudGltZV92ZXJzaW9uCSAgPSAwLCAgICAvKiBJbml0aWFsaXplZCBsYXRl
-ci4gKi8KPiA+IC0JLm1wcyAgICAgICAgICAgICAgICAgICAgICA9IEVGSV9JTlZBTElEX1RBQkxF
-X0FERFIsCj4gPiAtCS5hY3BpICAgICAgICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJM
-RV9BRERSLAo+ID4gLQkuYWNwaTIwICAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFC
-TEVfQUREUiwKPiA+IC0JLnNtYmlvcyAgICAgICAgICAgICAgICAgICA9IEVGSV9JTlZBTElEX1RB
-QkxFX0FERFIsCj4gPiAtCS5zbWJpb3MzICAgICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9U
-QUJMRV9BRERSLAo+ID4gLQkuc2FsX3N5c3RhYiAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURf
-VEFCTEVfQUREUiwKPiA+IC0JLmJvb3RfaW5mbyAgICAgICAgICAgICAgICA9IEVGSV9JTlZBTElE
-X1RBQkxFX0FERFIsCj4gPiAtCS5oY2RwICAgICAgICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJ
-RF9UQUJMRV9BRERSLAo+ID4gLQkudWdhICAgICAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFM
-SURfVEFCTEVfQUREUiwKPiA+IC0JLnV2X3N5c3RhYiAgICAgICAgICAgICAgICA9IEVGSV9JTlZB
-TElEX1RBQkxFX0FERFIsCj4gPiAtCS5md192ZW5kb3IgICAgICAgICAgICAgICAgPSBFRklfSU5W
-QUxJRF9UQUJMRV9BRERSLAo+ID4gLQkucnVudGltZSAgICAgICAgICAgICAgICAgID0gRUZJX0lO
-VkFMSURfVEFCTEVfQUREUiwKPiA+IC0JLmNvbmZpZ190YWJsZSAgICAgICAgICAgICA9IEVGSV9J
-TlZBTElEX1RBQkxFX0FERFIsCj4gPiAtCS5nZXRfdGltZSAgICAgICAgICAgICAgICAgPSB4ZW5f
-ZWZpX2dldF90aW1lLAo+ID4gLQkuc2V0X3RpbWUgICAgICAgICAgICAgICAgID0geGVuX2VmaV9z
-ZXRfdGltZSwKPiA+IC0JLmdldF93YWtldXBfdGltZSAgICAgICAgICA9IHhlbl9lZmlfZ2V0X3dh
-a2V1cF90aW1lLAo+ID4gLQkuc2V0X3dha2V1cF90aW1lICAgICAgICAgID0geGVuX2VmaV9zZXRf
-d2FrZXVwX3RpbWUsCj4gPiAtCS5nZXRfdmFyaWFibGUgICAgICAgICAgICAgPSB4ZW5fZWZpX2dl
-dF92YXJpYWJsZSwKPiA+IC0JLmdldF9uZXh0X3ZhcmlhYmxlICAgICAgICA9IHhlbl9lZmlfZ2V0
-X25leHRfdmFyaWFibGUsCj4gPiAtCS5zZXRfdmFyaWFibGUgICAgICAgICAgICAgPSB4ZW5fZWZp
-X3NldF92YXJpYWJsZSwKPiA+IC0JLnF1ZXJ5X3ZhcmlhYmxlX2luZm8gICAgICA9IHhlbl9lZmlf
-cXVlcnlfdmFyaWFibGVfaW5mbywKPiA+IC0JLnVwZGF0ZV9jYXBzdWxlICAgICAgICAgICA9IHhl
-bl9lZmlfdXBkYXRlX2NhcHN1bGUsCj4gPiAtCS5xdWVyeV9jYXBzdWxlX2NhcHMgICAgICAgPSB4
-ZW5fZWZpX3F1ZXJ5X2NhcHN1bGVfY2FwcywKPiA+IC0JLmdldF9uZXh0X2hpZ2hfbW9ub19jb3Vu
-dCA9IHhlbl9lZmlfZ2V0X25leHRfaGlnaF9tb25vX2NvdW50LAo+ID4gLQkucmVzZXRfc3lzdGVt
-ICAgICAgICAgICAgID0geGVuX2VmaV9yZXNldF9zeXN0ZW0sCj4gPiAtCS5zZXRfdmlydHVhbF9h
-ZGRyZXNzX21hcCAgPSBOVUxMLCAvKiBOb3QgdXNlZCB1bmRlciBYZW4uICovCj4gPiAtCS5mbGFn
-cwkJCSAgPSAwICAgICAvKiBJbml0aWFsaXplZCBsYXRlci4gKi8KPiA+IC19Owo+ID4gLQo+ID4g
-IHN0YXRpYyBlZmlfc3lzdGVtX3RhYmxlX3QgX19pbml0ICp4ZW5fZWZpX3Byb2JlKHZvaWQpCj4g
-PiAgewo+ID4gIAlzdHJ1Y3QgeGVuX3BsYXRmb3JtX29wIG9wID0gewo+ID4gQEAgLTEwMiw3ICs3
-MCwxOCBAQCBzdGF0aWMgZWZpX3N5c3RlbV90YWJsZV90IF9faW5pdCAqeGVuX2VmaV9wcm9iZSh2
-b2lkKQo+ID4KPiA+ICAJLyogSGVyZSB3ZSBrbm93IHRoYXQgWGVuIHJ1bnMgb24gRUZJIHBsYXRm
-b3JtLiAqLwo+ID4KPiA+IC0JZWZpID0gZWZpX3hlbjsKPiA+ICsJZWZpLmdldF90aW1lID0geGVu
-X2VmaV9nZXRfdGltZTsKPiA+ICsJZWZpLnNldF90aW1lID0geGVuX2VmaV9zZXRfdGltZTsKPiA+
-ICsJZWZpLmdldF93YWtldXBfdGltZSA9IHhlbl9lZmlfZ2V0X3dha2V1cF90aW1lOwo+ID4gKwll
-Zmkuc2V0X3dha2V1cF90aW1lID0geGVuX2VmaV9zZXRfd2FrZXVwX3RpbWU7Cj4gPiArCWVmaS5n
-ZXRfdmFyaWFibGUgPSB4ZW5fZWZpX2dldF92YXJpYWJsZTsKPiA+ICsJZWZpLmdldF9uZXh0X3Zh
-cmlhYmxlID0geGVuX2VmaV9nZXRfbmV4dF92YXJpYWJsZTsKPiA+ICsJZWZpLnNldF92YXJpYWJs
-ZSA9IHhlbl9lZmlfc2V0X3ZhcmlhYmxlOwo+ID4gKwllZmkucXVlcnlfdmFyaWFibGVfaW5mbyA9
-IHhlbl9lZmlfcXVlcnlfdmFyaWFibGVfaW5mbzsKPiA+ICsJZWZpLnVwZGF0ZV9jYXBzdWxlID0g
-eGVuX2VmaV91cGRhdGVfY2Fwc3VsZTsKPiA+ICsJZWZpLnF1ZXJ5X2NhcHN1bGVfY2FwcyA9IHhl
-bl9lZmlfcXVlcnlfY2Fwc3VsZV9jYXBzOwo+ID4gKwllZmkuZ2V0X25leHRfaGlnaF9tb25vX2Nv
-dW50ID0geGVuX2VmaV9nZXRfbmV4dF9oaWdoX21vbm9fY291bnQ7Cj4gPiArCWVmaS5yZXNldF9z
-eXN0ZW0gPSB4ZW5fZWZpX3Jlc2V0X3N5c3RlbTsKPgo+IFRoaXMgaXMgYSBzdGVwIGJhY2sgc3R5
-bGlzdGljYWxseSwgYXMgeW91IGxvc3QgdGhlIG5pY2UgdmVydGljYWwgdGFidWxhdGlvbiBvZiB0
-aGUKPiBvcmlnaW5hbCBpbml0aWFsaXplciAuLi4KCklmIHlvdSB3aXNoIGFuZCBvdGhlcnMgZG8g
-bm90IG9iamVjdCBJIGNhbiByZWFsaWduIGl0IGJhY2suCgpEYW5pZWwKCl9fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fClhlbi1kZXZlbCBtYWlsaW5nIGxpc3QK
-WGVuLWRldmVsQGxpc3RzLnhlbi5vcmcKaHR0cHM6Ly9saXN0cy54ZW4ub3JnL3hlbi1kZXZlbAo=
+On Fri, Jun 16, 2017 at 01:54:12PM -0500, Tom Lendacky wrote:
+> When Secure Memory Encryption is enabled, the trampoline area must not
+> be encrypted. A CPU running in real mode will not be able to decrypt
+> memory that has been encrypted because it will not be able to use addresses
+> with the memory encryption mask.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/realmode/init.c |    8 ++++++++
+>  1 file changed, 8 insertions(+)
+
+Subject: x86/realmode: ...
+
+other than that:
+
+Reviewed-by: Borislav Petkov <bp@suse.de>
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
