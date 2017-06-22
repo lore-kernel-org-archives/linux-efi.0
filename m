@@ -1,88 +1,57 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: [PATCH v2 2/2] x86/xen/efi: Init only efi struct
-	members used by Xen
-Date: Thu, 22 Jun 2017 12:51:37 +0200
-Message-ID: <1498128697-12943-3-git-send-email-daniel.kiper@oracle.com>
-References: <1498128697-12943-1-git-send-email-daniel.kiper@oracle.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v7 27/36] iommu/amd: Allow the AMD IOMMU to work with
+	memory encryption
+Date: Thu, 22 Jun 2017 12:56:37 +0200
+Message-ID: <20170622105637.g7twdaae2v5eaown@pd.tnic>
+References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
+	<20170616185459.18967.72790.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
-In-Reply-To: <1498128697-12943-1-git-send-email-daniel.kiper@oracle.com>
-List-Unsubscribe: <https://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <https://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
-To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, stable@vger.kernel.org, xen-devel@lists.xenproject.org
-Cc: jgross@suse.com, ard.biesheuvel@linaro.org, matt@codeblueprint.co.uk, andrew.cooper3@citrix.com, mingo@redhat.com, hpa@zytor.com, boris.ostrovsky@oracle.com, tglx@linutronix.de
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170616185459.18967.72790.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kerne
 List-Id: linux-efi@vger.kernel.org
 
-Q3VycmVudCBhcHByb2FjaCwgd2hvbGVzYWxlIGVmaSBzdHJ1Y3QgaW5pdGlhbGl6YXRpb24gZnJv
-bSBlZmlfeGVuLCBpcyBub3QKZ29vZC4gVXN1YWxseSBpZiBuZXcgbWVtYmVyIGlzIGRlZmluZWQg
-dGhlbiBpdCBpcyBwcm9wZXJseSBpbml0aWFsaXplZCBpbgpkcml2ZXJzL2Zpcm13YXJlL2VmaS9l
-ZmkuYyBidXQgbm90IGluIGFyY2gveDg2L3hlbi9lZmkuYy4gQXMgSSBzYXcgaXQgaGFwcGVuZWQK
-YSBmZXcgdGltZXMgdW50aWwgbm93LiBTbywgbGV0J3MgaW5pdGlhbGl6ZSBvbmx5IGVmaSBzdHJ1
-Y3QgbWVtYmVycyB1c2VkIGJ5ClhlbiB0byBhdm9pZCBzdWNoIGlzc3VlcyBpbiB0aGUgZnV0dXJl
-LgoKU2lnbmVkLW9mZi1ieTogRGFuaWVsIEtpcGVyIDxkYW5pZWwua2lwZXJAb3JhY2xlLmNvbT4K
-QWNrZWQtYnk6IEFyZCBCaWVzaGV1dmVsIDxhcmQuYmllc2hldXZlbEBsaW5hcm8ub3JnPgotLQpB
-bGlnbiBhc3NpZ25tZW50cyB0byBpbmNyZWFzZSByZWFkYWJpbGl0eS4gU3VnZ2VzdGVkIGJ5IElu
-Z28gTW9sbmFyLgotLS0KIGFyY2gveDg2L3hlbi9lZmkuYyB8ICAgNDUgKysrKysrKysrKysrLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiAxIGZpbGUgY2hhbmdlZCwgMTIgaW5zZXJ0
-aW9ucygrKSwgMzMgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvYXJjaC94ODYveGVuL2VmaS5j
-IGIvYXJjaC94ODYveGVuL2VmaS5jCmluZGV4IDMwYmIyZTguLmExODcwM2IgMTAwNjQ0Ci0tLSBh
-L2FyY2gveDg2L3hlbi9lZmkuYworKysgYi9hcmNoL3g4Ni94ZW4vZWZpLmMKQEAgLTU0LDM4ICs1
-NCw2IEBACiAJLnRhYmxlcwkJPSBFRklfSU5WQUxJRF9UQUJMRV9BRERSICAvKiBJbml0aWFsaXpl
-ZCBsYXRlci4gKi8KIH07CiAKLXN0YXRpYyBjb25zdCBzdHJ1Y3QgZWZpIGVmaV94ZW4gX19pbml0
-Y29uc3QgPSB7Ci0JLnN5c3RhYiAgICAgICAgICAgICAgICAgICA9IE5VTEwsIC8qIEluaXRpYWxp
-emVkIGxhdGVyLiAqLwotCS5ydW50aW1lX3ZlcnNpb24JICA9IDAsICAgIC8qIEluaXRpYWxpemVk
-IGxhdGVyLiAqLwotCS5tcHMgICAgICAgICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJM
-RV9BRERSLAotCS5hY3BpICAgICAgICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJMRV9B
-RERSLAotCS5hY3BpMjAgICAgICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJMRV9BRERS
-LAotCS5zbWJpb3MgICAgICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJMRV9BRERSLAot
-CS5zbWJpb3MzICAgICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJMRV9BRERSLAotCS5z
-YWxfc3lzdGFiICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJMRV9BRERSLAotCS5ib290
-X2luZm8gICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJMRV9BRERSLAotCS5oY2RwICAg
-ICAgICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJMRV9BRERSLAotCS51Z2EgICAgICAg
-ICAgICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJMRV9BRERSLAotCS51dl9zeXN0YWIgICAg
-ICAgICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJMRV9BRERSLAotCS5md192ZW5kb3IgICAgICAg
-ICAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJMRV9BRERSLAotCS5ydW50aW1lICAgICAgICAgICAg
-ICAgICAgPSBFRklfSU5WQUxJRF9UQUJMRV9BRERSLAotCS5jb25maWdfdGFibGUgICAgICAgICAg
-ICAgPSBFRklfSU5WQUxJRF9UQUJMRV9BRERSLAotCS5nZXRfdGltZSAgICAgICAgICAgICAgICAg
-PSB4ZW5fZWZpX2dldF90aW1lLAotCS5zZXRfdGltZSAgICAgICAgICAgICAgICAgPSB4ZW5fZWZp
-X3NldF90aW1lLAotCS5nZXRfd2FrZXVwX3RpbWUgICAgICAgICAgPSB4ZW5fZWZpX2dldF93YWtl
-dXBfdGltZSwKLQkuc2V0X3dha2V1cF90aW1lICAgICAgICAgID0geGVuX2VmaV9zZXRfd2FrZXVw
-X3RpbWUsCi0JLmdldF92YXJpYWJsZSAgICAgICAgICAgICA9IHhlbl9lZmlfZ2V0X3ZhcmlhYmxl
-LAotCS5nZXRfbmV4dF92YXJpYWJsZSAgICAgICAgPSB4ZW5fZWZpX2dldF9uZXh0X3ZhcmlhYmxl
-LAotCS5zZXRfdmFyaWFibGUgICAgICAgICAgICAgPSB4ZW5fZWZpX3NldF92YXJpYWJsZSwKLQku
-cXVlcnlfdmFyaWFibGVfaW5mbyAgICAgID0geGVuX2VmaV9xdWVyeV92YXJpYWJsZV9pbmZvLAot
-CS51cGRhdGVfY2Fwc3VsZSAgICAgICAgICAgPSB4ZW5fZWZpX3VwZGF0ZV9jYXBzdWxlLAotCS5x
-dWVyeV9jYXBzdWxlX2NhcHMgICAgICAgPSB4ZW5fZWZpX3F1ZXJ5X2NhcHN1bGVfY2FwcywKLQku
-Z2V0X25leHRfaGlnaF9tb25vX2NvdW50ID0geGVuX2VmaV9nZXRfbmV4dF9oaWdoX21vbm9fY291
-bnQsCi0JLnJlc2V0X3N5c3RlbSAgICAgICAgICAgICA9IHhlbl9lZmlfcmVzZXRfc3lzdGVtLAot
-CS5zZXRfdmlydHVhbF9hZGRyZXNzX21hcCAgPSBOVUxMLCAvKiBOb3QgdXNlZCB1bmRlciBYZW4u
-ICovCi0JLmZsYWdzCQkJICA9IDAgICAgIC8qIEluaXRpYWxpemVkIGxhdGVyLiAqLwotfTsKLQog
-c3RhdGljIGVmaV9zeXN0ZW1fdGFibGVfdCBfX2luaXQgKnhlbl9lZmlfcHJvYmUodm9pZCkKIHsK
-IAlzdHJ1Y3QgeGVuX3BsYXRmb3JtX29wIG9wID0gewpAQCAtMTAyLDcgKzcwLDE4IEBAIHN0YXRp
-YyBlZmlfc3lzdGVtX3RhYmxlX3QgX19pbml0ICp4ZW5fZWZpX3Byb2JlKHZvaWQpCiAKIAkvKiBI
-ZXJlIHdlIGtub3cgdGhhdCBYZW4gcnVucyBvbiBFRkkgcGxhdGZvcm0uICovCiAKLQllZmkgPSBl
-ZmlfeGVuOworCWVmaS5nZXRfdGltZSAgICAgICAgICAgICAgICAgPSB4ZW5fZWZpX2dldF90aW1l
-OworCWVmaS5zZXRfdGltZSAgICAgICAgICAgICAgICAgPSB4ZW5fZWZpX3NldF90aW1lOworCWVm
-aS5nZXRfd2FrZXVwX3RpbWUgICAgICAgICAgPSB4ZW5fZWZpX2dldF93YWtldXBfdGltZTsKKwll
-Zmkuc2V0X3dha2V1cF90aW1lICAgICAgICAgID0geGVuX2VmaV9zZXRfd2FrZXVwX3RpbWU7CisJ
-ZWZpLmdldF92YXJpYWJsZSAgICAgICAgICAgICA9IHhlbl9lZmlfZ2V0X3ZhcmlhYmxlOworCWVm
-aS5nZXRfbmV4dF92YXJpYWJsZSAgICAgICAgPSB4ZW5fZWZpX2dldF9uZXh0X3ZhcmlhYmxlOwor
-CWVmaS5zZXRfdmFyaWFibGUgICAgICAgICAgICAgPSB4ZW5fZWZpX3NldF92YXJpYWJsZTsKKwll
-ZmkucXVlcnlfdmFyaWFibGVfaW5mbyAgICAgID0geGVuX2VmaV9xdWVyeV92YXJpYWJsZV9pbmZv
-OworCWVmaS51cGRhdGVfY2Fwc3VsZSAgICAgICAgICAgPSB4ZW5fZWZpX3VwZGF0ZV9jYXBzdWxl
-OworCWVmaS5xdWVyeV9jYXBzdWxlX2NhcHMgICAgICAgPSB4ZW5fZWZpX3F1ZXJ5X2NhcHN1bGVf
-Y2FwczsKKwllZmkuZ2V0X25leHRfaGlnaF9tb25vX2NvdW50ID0geGVuX2VmaV9nZXRfbmV4dF9o
-aWdoX21vbm9fY291bnQ7CisJZWZpLnJlc2V0X3N5c3RlbSAgICAgICAgICAgICA9IHhlbl9lZmlf
-cmVzZXRfc3lzdGVtOwogCiAJZWZpX3N5c3RhYl94ZW4udGFibGVzID0gaW5mby0+Y2ZnLmFkZHI7
-CiAJZWZpX3N5c3RhYl94ZW4ubnJfdGFibGVzID0gaW5mby0+Y2ZnLm5lbnQ7Ci0tIAoxLjcuMTAu
-NAoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fClhlbi1k
-ZXZlbCBtYWlsaW5nIGxpc3QKWGVuLWRldmVsQGxpc3RzLnhlbi5vcmcKaHR0cHM6Ly9saXN0cy54
-ZW4ub3JnL3hlbi1kZXZlbAo=
+On Fri, Jun 16, 2017 at 01:54:59PM -0500, Tom Lendacky wrote:
+> The IOMMU is programmed with physical addresses for the various tables
+> and buffers that are used to communicate between the device and the
+> driver. When the driver allocates this memory it is encrypted. In order
+> for the IOMMU to access the memory as encrypted the encryption mask needs
+> to be included in these physical addresses during configuration.
+> 
+> The PTE entries created by the IOMMU should also include the encryption
+> mask so that when the device behind the IOMMU performs a DMA, the DMA
+> will be performed to encrypted memory.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+> ---
+>  drivers/iommu/amd_iommu.c       |   30 ++++++++++++++++--------------
+>  drivers/iommu/amd_iommu_init.c  |   34 ++++++++++++++++++++++++++++------
+>  drivers/iommu/amd_iommu_proto.h |   10 ++++++++++
+>  drivers/iommu/amd_iommu_types.h |    2 +-
+>  4 files changed, 55 insertions(+), 21 deletions(-)
+
+Reviewed-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+
+Btw, I'm assuming the virt_to_phys() difference on SME systems is only
+needed in a handful of places. Otherwise, I'd suggest changing the
+virt_to_phys() function/macro directly. But I guess most of the places
+need the real physical address without the enc bit.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
