@@ -1,34 +1,34 @@
-From: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH v3 2/2] eif/capsule-pstore: Add capsule pstore backend
-Date: Thu, 22 Jun 2017 08:47:29 +0000
-Message-ID: <E6AF1AFDEA62A94A97508F458CBDD47F6F5A5406@SHSMSX101.ccr.corp.intel.com>
-References: <20170619175445.90281-1-qiuxu.zhuo@intel.com>
- <CAGXu5jKMuiT6CL4L=tUfL_8EgDOMy67UnU5_-rn68BFAEYdg9w@mail.gmail.com>
- <E6AF1AFDEA62A94A97508F458CBDD47F6F5A51E6@SHSMSX101.ccr.corp.intel.com>
- <CAGXu5jLnnuVBOdsEjNMb35oJb=nVNnU3Dc0XxpVp5gq5nUht1w@mail.gmail.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v7 26/36] x86/CPU/AMD: Make the microcode level available
+ earlier in the boot
+Date: Thu, 22 Jun 2017 11:40:33 +0200
+Message-ID: <20170622094033.gaqsujzi7ocpemko@pd.tnic>
+References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
+ <20170616185447.18967.8792.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAGXu5jLnnuVBOdsEjNMb35oJb=nVNnU3Dc0XxpVp5gq5nUht1w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-arch-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170616185447.18967.8792.stgit@tlendack-t1.amdoffice.net>
+Sender: linux-arch-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dy>
 List-Id: linux-efi@vger.kernel.org
 
-PiBGcm9tOiBsaW51eC1lZmktb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtZWZp
-LW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEtlZXMgQ29vaw0KPg0KPj4+ID4g
-KyAgICAgICAgICAgICAgIHJlYy0+dGltZXN0YW1wID0gZ2V0X3NlY29uZHMoKTsNCj4+DQo+Pj4g
-dGltZXN0YW1wIHdpbGwgYWxyZWFkeSBiZSBjb3JyZWN0bHkgcG9wdWxhdGVkIGJ5IHRoZSBwc3Rv
-cmUgQVBJLCBzbyBpdCBzaG91bGQgYmUgY29waWVkIGZyb20gdGhlcmUgcmF0aGVyIHRoYW4gdXNp
-bmcgZ2V0X3NlY29uZHMoKSB3aGljaCBtYXkgbm90IGJlIGZ1bmN0aW9uYWwgZHVyaW5nIHJlc3Vt
-ZSwgZXRjLg0KPj4NCj4+IExvb2tzIGxpa2UgdGhhdCB0aGUgdGltZXN0YW1wIG1lbWJlciAidGlt
-ZSIgb2Ygc3RydWN0IHBzdG9yZV9yZWNvcmQgcGFzc2VkIGZyb20gcHN0b3JlICJmcy9wc3RvcmUv
-cGxhdGZvcm0uYyIgLT4gcHN0b3JlX2R1bXAoKSBpcyBub3Qgc2V0IGZvciBETUVTRyBjYXNlLg0K
-Pg0KPlRoZSBjaGFuZ2UgZm9yIHRoZSB0aW1lc3RhbXAgaGFzIGJlZW4gaW4gdGhlIC1uZXh0IHRy
-ZWUgKCJwc3RvcmU6DQo+UG9wdWxhdGUgcHN0b3JlIHJlY29yZC0+dGltZSBmaWVsZCIpLiBJZiB0
-aGF0IGRvZXNuJ3Qgd29yayBob3cgeW91IHdhbnQgaXQsIHBsZWFzZSBsZXQgbWUga25vdyBhbmQg
-SSBjYW4gYWRqdXN0IGl0Lg0KDQpPSywgd2lsbCBjb3B5IHRoZSB0aW1lc3RhbXAgdmFsdWUgKHJh
-dGhlciB0aGFuIHVzaW5nIGdldF9zZWNvbmRzKSBwYXNzZWQgZnJvbSBwc3RvcmUgQVBJIGluIHY0
-Lg0KDQpUaGFua3MhDQpCUg0KcWl1eHUNCg==
+On Fri, Jun 16, 2017 at 01:54:47PM -0500, Tom Lendacky wrote:
+> Move the setting of the cpuinfo_x86.microcode field from amd_init() to
+> early_amd_init() so that it is available earlier in the boot process. This
+> avoids having to read MSR_AMD64_PATCH_LEVEL directly during early boot.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> ---
+>  arch/x86/kernel/cpu/amd.c |    8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
+
+Reviewed-by: Borislav Petkov <bp@suse.de>
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
