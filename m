@@ -1,47 +1,60 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH v7 19/36] x86/mm: Add support to access boot related data
- in the clear
-Date: Thu, 22 Jun 2017 12:04:05 +0100
-Message-ID: <20170622110405.GC3129@codeblueprint.co.uk>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [PATCH v7 27/36] iommu/amd: Allow the AMD IOMMU to work with
+	memory encryption
+Date: Thu, 22 Jun 2017 11:48:46 -0500
+Message-ID: <379702e6-31f1-2df1-8889-3498241aea49@amd.com>
 References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
- <20170616185326.18967.43278.stgit@tlendack-t1.amdoffice.net>
+	<20170616185459.18967.72790.stgit@tlendack-t1.amdoffice.net>
+	<20170622105637.g7twdaae2v5eaown@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170616185326.18967.43278.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dyoung@redhat.com>, Rik van Riel <riel@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Borislav Petkov <bp@alien8.de>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20170622105637.g7twdaae2v5eaown-fF5Pk5pvG8Y@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ker
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 16 Jun, at 01:53:26PM, Tom Lendacky wrote:
-> Boot data (such as EFI related data) is not encrypted when the system is
-> booted because UEFI/BIOS does not run with SME active. In order to access
-> this data properly it needs to be mapped decrypted.
+On 6/22/2017 5:56 AM, Borislav Petkov wrote:
+> On Fri, Jun 16, 2017 at 01:54:59PM -0500, Tom Lendacky wrote:
+>> The IOMMU is programmed with physical addresses for the various tables
+>> and buffers that are used to communicate between the device and the
+>> driver. When the driver allocates this memory it is encrypted. In order
+>> for the IOMMU to access the memory as encrypted the encryption mask needs
+>> to be included in these physical addresses during configuration.
+>>
+>> The PTE entries created by the IOMMU should also include the encryption
+>> mask so that when the device behind the IOMMU performs a DMA, the DMA
+>> will be performed to encrypted memory.
+>>
+>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+>> ---
+>>   drivers/iommu/amd_iommu.c       |   30 ++++++++++++++++--------------
+>>   drivers/iommu/amd_iommu_init.c  |   34 ++++++++++++++++++++++++++++------
+>>   drivers/iommu/amd_iommu_proto.h |   10 ++++++++++
+>>   drivers/iommu/amd_iommu_types.h |    2 +-
+>>   4 files changed, 55 insertions(+), 21 deletions(-)
 > 
-> Update early_memremap() to provide an arch specific routine to modify the
-> pagetable protection attributes before they are applied to the new
-> mapping. This is used to remove the encryption mask for boot related data.
+> Reviewed-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 > 
-> Update memremap() to provide an arch specific routine to determine if RAM
-> remapping is allowed.  RAM remapping will cause an encrypted mapping to be
-> generated. By preventing RAM remapping, ioremap_cache() will be used
-> instead, which will provide a decrypted mapping of the boot related data.
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/include/asm/io.h |    5 +
->  arch/x86/mm/ioremap.c     |  179 +++++++++++++++++++++++++++++++++++++++++++++
->  include/linux/io.h        |    2 +
->  kernel/memremap.c         |   20 ++++-
->  mm/early_ioremap.c        |   18 ++++-
->  5 files changed, 217 insertions(+), 7 deletions(-)
+> Btw, I'm assuming the virt_to_phys() difference on SME systems is only
+> needed in a handful of places. Otherwise, I'd suggest changing the
+> virt_to_phys() function/macro directly. But I guess most of the places
+> need the real physical address without the enc bit.
 
-Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+Correct.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Thanks,
+Tom
+
+> 
