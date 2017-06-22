@@ -1,43 +1,70 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v7 17/36] efi: Update efi_mem_type() to return an error
-	rather than 0
-Date: Thu, 22 Jun 2017 11:03:13 +0100
-Message-ID: <20170622100313.GB3238@codeblueprint.co.uk>
-References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
-	<20170616185306.18967.8964.stgit@tlendack-t1.amdoffice.net>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: efi/reboot: Fall back to original power-off method if
+ EFI_RESET_SHUTDOWN returns
+Date: Thu, 22 Jun 2017 12:04:30 +0200
+Message-ID: <099b3f68-46b1-201c-065f-cf5c4bdcc528@redhat.com>
+References: <20170423123655.13015-1-hdegoede@redhat.com>
+ <430d6ff2-264a-80f8-24e0-0d9af4377844@redhat.com>
+ <20170622095517.GA3238@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170616185306.18967.8964.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel@vger.k
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20170622095517.GA3238@codeblueprint.co.uk>
+Content-Language: en-US
+Sender: linux-acpi-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Len Brown <lenb@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-acpi@vger.kernel.org, Peter Jones <pjones@redhat.com>, linux-efi@vger.kernel.org, Mark Salter <msalter@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 16 Jun, at 01:53:06PM, Tom Lendacky wrote:
-> The efi_mem_type() function currently returns a 0, which maps to
-> EFI_RESERVED_TYPE, if the function is unable to find a memmap entry for
-> the supplied physical address. Returning EFI_RESERVED_TYPE implies that
-> a memmap entry exists, when it doesn't.  Instead of returning 0, change
-> the function to return a negative error value when no memmap entry is
-> found.
-> 
-> Reviewed-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-> ---
->  arch/ia64/kernel/efi.c      |    4 ++--
->  arch/x86/platform/efi/efi.c |    6 +++---
->  include/linux/efi.h         |    2 +-
->  3 files changed, 6 insertions(+), 6 deletions(-)
+Hi,
 
-Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+On 22-06-17 11:55, Matt Fleming wrote:
+> On Wed, 21 Jun, at 03:15:09PM, Hans de Goede wrote:
+>> HI,
+>>
+>> On 23-04-17 14:36, Hans de Goede wrote:
+>>> Commit 44be28e9dd98 ("x86/reboot: Add EFI reboot quirk for ACPI Hardware
+>>> Reduced flag") sets pm_power_off to efi_power_off() when the
+>>> acpi_gbl_reduced_hardware flag is set.
+>>>
+>>> According to its commit message this is necessary because: "BayTrail-T
+>>> class of hardware requires EFI in order to powerdown and reboot and no
+>>> other reliable method exists"
+>>>
+>>> But I have a Bay Trail CR tablet where the EFI_RESET_SHUTDOWN call does
+>>> not work, it simply returns without doing anything (AFAICT).
+>>>
+>>> So it seems that some Bay Trail devices must use EFI for power-off, while
+>>> for others only ACPI works.
+>>>
+>>> Note that efi_power_off() only gets used if the platform code defines
+>>> efi_poweroff_required() and that returns true, this currently only ever
+>>> happens on x86.
+>>>
+>>> Since on the devices which need ACPI for power-off the EFI_RESET_SHUTDOWN
+>>> call simply returns, this patch makes the efi-reboot code remember the
+>>> old pm_power_off handler and if EFI_RESET_SHUTDOWN returns it falls back
+>>> to calling that.
+>>>
+>>> This seems preferable to dmi-quirking our way out of this, since there
+>>> are likely quite a few devices suffering from this.
+>>>
+>>> Cc: Mark Salter <msalter@redhat.com>
+>>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+>>
+>> What is the status of this patch ? It has had 2 somewhat favorable
+>> reviews and then things went silent ?
+> 
+> Sorry about the delay. I've picked this up for the efi-next branch
+> since we're at -rc6 and it doesn't look like an -rc6-urgent bug.
+
+Ack, putting this in -next is the right thing to do, you never know
+what weird firmware quirks this patch may trigger. E.g. EFI_RESET_SHUTDOWN
+could return on some models with the PMIC turned off leaving the device
+running for XX ms on its power-supply capacitors, and then calling into
+the ACPI method may cause weirdness.
+
+Regards,
+
+Hans
