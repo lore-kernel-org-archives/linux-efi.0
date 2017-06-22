@@ -1,31 +1,39 @@
-From: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v2 0/2] xen/efi: Fixes
-Date: Thu, 22 Jun 2017 12:51:35 +0200
-Message-ID: <1498128697-12943-1-git-send-email-daniel.kiper@oracle.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org
-Cc: boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, jgross-IBi9RG/b67k@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, andrew.cooper3-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+From: Daniel Kiper <daniel.kiper@oracle.com>
+Subject: [PATCH v2 1/2] efi: Process MEMATTR table only if EFI_MEMMAP
+Date: Thu, 22 Jun 2017 12:51:36 +0200
+Message-ID: <1498128697-12943-2-git-send-email-daniel.kiper@oracle.com>
+References: <1498128697-12943-1-git-send-email-daniel.kiper@oracle.com>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1498128697-12943-1-git-send-email-daniel.kiper@oracle.com>
+Sender: stable-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, stable@vger.kernel.org, xen-devel@lists.xenproject.org
+Cc: boris.ostrovsky@oracle.com, jgross@suse.com, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org, andrew.cooper3@citrix.com
 List-Id: linux-efi@vger.kernel.org
 
-Hey,
+Otherwise e.g. Xen dom0 on x86_64 EFI platforms crashes.
 
-Two small fixes (v2, minor cleanup) for Xen dom0 running on x86_64 EFI platforms.
+In theory we can check EFI_PARAVIRT too, however,
+EFI_MEMMAP looks more generic and covers more cases.
 
-I am CC-ing stable maintainers because similar stuff is needed for various
-stable kernels too. Unfortunately, almost every version needs a bit different
-set of fixes. So, please treat this email more as head up than real set of
-patches for your kernel. If you wish to get Xen EFI stuff fixed just drop me
-a line. Then I will prepare set of patches for your kernel (if needed).
-
-Ard, Andrew, Ingo, thank you for looking at the patches.
-
-Daniel
-
- arch/x86/xen/efi.c         |   45 ++++++++++++---------------------------------
+Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
  drivers/firmware/efi/efi.c |    3 ++-
- 2 files changed, 14 insertions(+), 34 deletions(-)
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Daniel Kiper (2):
-      efi: Process MEMATTR table only if EFI_MEMMAP
-      x86/xen/efi: Init only efi struct members used by Xen
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index b372aad..045d6d3 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -528,7 +528,8 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 		}
+ 	}
+ 
+-	efi_memattr_init();
++	if (efi_enabled(EFI_MEMMAP))
++		efi_memattr_init();
+ 
+ 	/* Parse the EFI Properties table if it exists */
+ 	if (efi.properties_table != EFI_INVALID_TABLE_ADDR) {
+-- 
+1.7.10.4
