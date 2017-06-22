@@ -1,60 +1,28 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [PATCH v7 27/36] iommu/amd: Allow the AMD IOMMU to work with
-	memory encryption
-Date: Thu, 22 Jun 2017 11:48:46 -0500
-Message-ID: <379702e6-31f1-2df1-8889-3498241aea49@amd.com>
-References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
-	<20170616185459.18967.72790.stgit@tlendack-t1.amdoffice.net>
-	<20170622105637.g7twdaae2v5eaown@pd.tnic>
+From: Boris Ostrovsky <boris.ostrovsky@oracle.com>
+Subject: Re: [PATCH v2 2/2] x86/xen/efi: Init only efi struct members used by
+ Xen
+Date: Thu, 22 Jun 2017 15:25:28 -0400
+Message-ID: <54b02bd1-b3a7-9154-f007-32bf4c27f553@oracle.com>
+References: <1498128697-12943-1-git-send-email-daniel.kiper@oracle.com>
+ <1498128697-12943-3-git-send-email-daniel.kiper@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <20170622105637.g7twdaae2v5eaown-fF5Pk5pvG8Y@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ker
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1498128697-12943-3-git-send-email-daniel.kiper@oracle.com>
+Sender: stable-owner@vger.kernel.org
+To: Daniel Kiper <daniel.kiper@oracle.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, stable@vger.kernel.org, xen-devel@lists.xenproject.org
+Cc: jgross@suse.com, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org, andrew.cooper3@citrix.com
 List-Id: linux-efi@vger.kernel.org
 
-On 6/22/2017 5:56 AM, Borislav Petkov wrote:
-> On Fri, Jun 16, 2017 at 01:54:59PM -0500, Tom Lendacky wrote:
->> The IOMMU is programmed with physical addresses for the various tables
->> and buffers that are used to communicate between the device and the
->> driver. When the driver allocates this memory it is encrypted. In order
->> for the IOMMU to access the memory as encrypted the encryption mask needs
->> to be included in these physical addresses during configuration.
->>
->> The PTE entries created by the IOMMU should also include the encryption
->> mask so that when the device behind the IOMMU performs a DMA, the DMA
->> will be performed to encrypted memory.
->>
->> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
->> ---
->>   drivers/iommu/amd_iommu.c       |   30 ++++++++++++++++--------------
->>   drivers/iommu/amd_iommu_init.c  |   34 ++++++++++++++++++++++++++++------
->>   drivers/iommu/amd_iommu_proto.h |   10 ++++++++++
->>   drivers/iommu/amd_iommu_types.h |    2 +-
->>   4 files changed, 55 insertions(+), 21 deletions(-)
-> 
-> Reviewed-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> 
-> Btw, I'm assuming the virt_to_phys() difference on SME systems is only
-> needed in a handful of places. Otherwise, I'd suggest changing the
-> virt_to_phys() function/macro directly. But I guess most of the places
-> need the real physical address without the enc bit.
+On 06/22/2017 06:51 AM, Daniel Kiper wrote:
+> Current approach, wholesale efi struct initialization from efi_xen, is not
+> good. Usually if new member is defined then it is properly initialized in
+> drivers/firmware/efi/efi.c but not in arch/x86/xen/efi.c. As I saw it happened
+> a few times until now. So, let's initialize only efi struct members used by
+> Xen to avoid such issues in the future.
+>
+> Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
+> Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Correct.
-
-Thanks,
-Tom
-
-> 
+Reviewed-by: Boris Ostrovsky <boris.ostrovsky@oracle.com>
