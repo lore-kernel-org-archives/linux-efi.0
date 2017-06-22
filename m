@@ -1,34 +1,57 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v7 26/36] x86/CPU/AMD: Make the microcode level available
- earlier in the boot
-Date: Thu, 22 Jun 2017 11:40:33 +0200
-Message-ID: <20170622094033.gaqsujzi7ocpemko@pd.tnic>
-References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
- <20170616185447.18967.8792.stgit@tlendack-t1.amdoffice.net>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: efi/reboot: Fall back to original power-off method if
+ EFI_RESET_SHUTDOWN returns
+Date: Thu, 22 Jun 2017 10:55:17 +0100
+Message-ID: <20170622095517.GA3238@codeblueprint.co.uk>
+References: <20170423123655.13015-1-hdegoede@redhat.com>
+ <430d6ff2-264a-80f8-24e0-0d9af4377844@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-arch-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-acpi-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20170616185447.18967.8792.stgit@tlendack-t1.amdoffice.net>
-Sender: linux-arch-owner@vger.kernel.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dy>
+In-Reply-To: <430d6ff2-264a-80f8-24e0-0d9af4377844@redhat.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Len Brown <lenb@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-acpi@vger.kernel.org, Peter Jones <pjones@redhat.com>, linux-efi@vger.kernel.org, Mark Salter <msalter@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jun 16, 2017 at 01:54:47PM -0500, Tom Lendacky wrote:
-> Move the setting of the cpuinfo_x86.microcode field from amd_init() to
-> early_amd_init() so that it is available earlier in the boot process. This
-> avoids having to read MSR_AMD64_PATCH_LEVEL directly during early boot.
+On Wed, 21 Jun, at 03:15:09PM, Hans de Goede wrote:
+> HI,
 > 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/kernel/cpu/amd.c |    8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
+> On 23-04-17 14:36, Hans de Goede wrote:
+> >Commit 44be28e9dd98 ("x86/reboot: Add EFI reboot quirk for ACPI Hardware
+> >Reduced flag") sets pm_power_off to efi_power_off() when the
+> >acpi_gbl_reduced_hardware flag is set.
+> >
+> >According to its commit message this is necessary because: "BayTrail-T
+> >class of hardware requires EFI in order to powerdown and reboot and no
+> >other reliable method exists"
+> >
+> >But I have a Bay Trail CR tablet where the EFI_RESET_SHUTDOWN call does
+> >not work, it simply returns without doing anything (AFAICT).
+> >
+> >So it seems that some Bay Trail devices must use EFI for power-off, while
+> >for others only ACPI works.
+> >
+> >Note that efi_power_off() only gets used if the platform code defines
+> >efi_poweroff_required() and that returns true, this currently only ever
+> >happens on x86.
+> >
+> >Since on the devices which need ACPI for power-off the EFI_RESET_SHUTDOWN
+> >call simply returns, this patch makes the efi-reboot code remember the
+> >old pm_power_off handler and if EFI_RESET_SHUTDOWN returns it falls back
+> >to calling that.
+> >
+> >This seems preferable to dmi-quirking our way out of this, since there
+> >are likely quite a few devices suffering from this.
+> >
+> >Cc: Mark Salter <msalter@redhat.com>
+> >Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> 
+> What is the status of this patch ? It has had 2 somewhat favorable
+> reviews and then things went silent ?
 
-Reviewed-by: Borislav Petkov <bp@suse.de>
+Sorry about the delay. I've picked this up for the efi-next branch
+since we're at -rc6 and it doesn't look like an -rc6-urgent bug.
 
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Thanks!
