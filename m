@@ -1,44 +1,34 @@
-From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v3 2/2] eif/capsule-pstore: Add capsule pstore backend
-Date: Wed, 21 Jun 2017 13:02:11 -0700
-Message-ID: <CAGXu5jLnnuVBOdsEjNMb35oJb=nVNnU3Dc0XxpVp5gq5nUht1w@mail.gmail.com>
-References: <20170619175445.90281-1-qiuxu.zhuo@intel.com> <CAGXu5jKMuiT6CL4L=tUfL_8EgDOMy67UnU5_-rn68BFAEYdg9w@mail.gmail.com>
- <E6AF1AFDEA62A94A97508F458CBDD47F6F5A51E6@SHSMSX101.ccr.corp.intel.com>
+From: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v3 1/2] efi: Add 'nr_config_table' variable in efi
+ structure
+Date: Thu, 22 Jun 2017 08:42:52 +0000
+Message-ID: <E6AF1AFDEA62A94A97508F458CBDD47F6F5A53F1@SHSMSX101.ccr.corp.intel.com>
+References: <20170619175423.70656-1-qiuxu.zhuo@intel.com>
+ <CAKv+Gu8fQmPRoxR67gm1yBvN0Z8ShY++TW07_RUYRsv-BAu_1g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <E6AF1AFDEA62A94A97508F458CBDD47F6F5A51E6-0J0gbvR4kThpB2pF5aRoyrfspsVTdybXVpNB7YpNyf8@public.gmane.org>
+In-Reply-To: <CAKv+Gu8fQmPRoxR67gm1yBvN0Z8ShY++TW07_RUYRsv-BAu_1g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jun 21, 2017 at 1:45 AM, Zhuo, Qiuxu <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
->> From: keescook-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org [mailto:keescook-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org] On Behalf Of Kees Cook
->> Sent: Wednesday, June 21, 2017 7:27 AM
->>
->> > +
->> > +static bool efi_capsule_pstore_disable =
->> > +       IS_ENABLED(CONFIG_CAPSULE_PSTORE_DEFAULT_DISABLE);
->>
->> This can be marked __ro_after_init.
->
->    OK. Will mark it __ro_after_init in next version.
->
->> > +
->> > +               rec->type = record->type;
->> > +               rec->timestamp = get_seconds();
->>
->> timestamp will already be correctly populated by the pstore API, so it should be copied from there rather than using get_seconds() which may not be functional during resume, etc.
->
-> Looks like that the timestamp member "time" of struct pstore_record passed from pstore "fs/pstore/platform.c" -> pstore_dump() is not set for DMESG case.
-
-The change for the timestamp has been in the -next tree ("pstore:
-Populate pstore record->time field"). If that doesn't work how you
-want it, please let me know and I can adjust it.
-
--Kees
-
--- 
-Kees Cook
-Pixel Security
+PiBGcm9tOiBsaW51eC1lZmktb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtZWZp
+LW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEFyZCBCaWVzaGV1dmVsDQo+PiAg
+ICAgICAgIGVmaS5jb25maWdfdGFibGUgPSAodW5zaWduZWQgbG9uZyllZmkuc3lzdGFiLT50YWJs
+ZXM7DQo+PiArICAgICAgIGVmaS5ucl9jb25maWdfdGFibGUgPSAodW5zaWduZWQgbG9uZyllZmku
+c3lzdGFiLT5ucl90YWJsZXM7DQo+DQo+QXMgaXQgdHVybnMgb3V0LCB3ZSBuZXZlciBhc3NpZ24g
+ZWZpLmNvbmZpZ190YWJsZSBvbiBBUk0vYXJtNjQsIGFuZCB0aGlzIG5lZWRzIHRvIGJlIGZpeGVk
+LCBzbyBJIHF1ZXVlZCBhIHBhdGNoIGluIHRoZSBFRkkgLW5leHQgYnJhbmNoLg0KPkNvdWxkIHlv
+dSByZWJhc2UgeW91ciBzZXJpZXMgb250byB0aGF0LCBhbmQgbWFrZSBzdXJlIHlvdSBhZGQgYSBz
+aW1pbGFyIGxpbmUgYXMgdGhpcyBvbmUgdG8gdWVmaV9pbml0KCkgaW4gZHJpdmVycy9maXJtd2Fy
+ZS9lZmkvYXJtLWluaXQuYz8NCiAgIA0KT0ssICB3aWxsIGFkZCBpdCB0byAgdWVmaV9pbml0KCkg
+aW4gZHJpdmVycy9maXJtd2FyZS9lZmkvYXJtLWluaXQuYyBpbiB2NC4NCg0KDQo+PiAgICAgICAg
+IC5jb25maWdfdGFibGUgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwNCj4+ICsg
+ICAgICAgLm5yX2NvbmZpZ190YWJsZSAgICAgICAgPSBFRklfSU5WQUxJRF9UQUJMRV9BRERSLA0K
+Pg0KPm5yX2NvbmZpZ190YWJsZSBpcyBub3QgYSBwaHlzaWNhbCBhZGRyZXNzLCBzbyBwbGVhc2Ug
+anVzdCBpbml0aWFsaXplIGl0IHRvIDANCg0KT0ssIHdpbGwgY29ycmVjdCBpdCBpbiB2NC4NCg0K
+VGhhbmtzIQ0KDQpCUg0KcWl1eHUNCg0KDQo=
