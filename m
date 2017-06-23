@@ -1,45 +1,145 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v7 35/36] x86/boot: Add early cmdline parsing for options
-	with arguments
-Date: Fri, 23 Jun 2017 13:57:41 +0200
-Message-ID: <20170623115741.o4ejclshoy6yjogl@pd.tnic>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v7 36/36] x86/mm: Add support to make use of Secure
+ Memory Encryption
+Date: Fri, 23 Jun 2017 19:39:37 +0200
+Message-ID: <20170623173937.erotfiemyidyvarn@pd.tnic>
 References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
-	<20170616185630.18967.80046.stgit@tlendack-t1.amdoffice.net>
+ <20170616185639.18967.41488.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <20170616185630.18967.80046.stgit-qCXWGYdRb2BnqfbPTmsdiZQ+2ll4COg0XqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kerne
+In-Reply-To: <20170616185639.18967.41488.stgit@tlendack-t1.amdoffice.net>
+Sender: owner-linux-mm@kvack.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dyoung@redhat.com>, Rik van Riel <riel@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Konrad Rzeszutek Wilk <konrad.wilk@or>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jun 16, 2017 at 01:56:30PM -0500, Tom Lendacky wrote:
-> Add a cmdline_find_option() function to look for cmdline options that
-> take arguments. The argument is returned in a supplied buffer and the
-> argument length (regardless of whether it fits in the supplied buffer)
-> is returned, with -1 indicating not found.
+On Fri, Jun 16, 2017 at 01:56:39PM -0500, Tom Lendacky wrote:
+> Add support to check if SME has been enabled and if memory encryption
+> should be activated (checking of command line option based on the
+> configuration of the default state).  If memory encryption is to be
+> activated, then the encryption mask is set and the kernel is encrypted
+> "in place."
 > 
-> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 > ---
->  arch/x86/include/asm/cmdline.h |    2 +
->  arch/x86/lib/cmdline.c         |  105 ++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 107 insertions(+)
+>  arch/x86/include/asm/mem_encrypt.h |    6 ++-
+>  arch/x86/kernel/head64.c           |    4 +-
+>  arch/x86/mm/mem_encrypt.c          |   86 +++++++++++++++++++++++++++++++++++-
+>  3 files changed, 90 insertions(+), 6 deletions(-)
 
-Reviewed-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+...
+
+> +/*
+> + * Some SME functions run very early causing issues with the stack-protector
+> + * support. Provide a way to turn off this support on a per-function basis.
+> + */
+> +#define SME_NOSTACKP __attribute__((__optimize__("no-stack-protector")))
+
+__nostackp
+
+just like the others in include/linux/compiler-gcc.h.
+
+> +
+> +static char sme_cmdline_arg[] __initdata = "mem_encrypt";
+> +static char sme_cmdline_on[]  __initdata = "on";
+> +static char sme_cmdline_off[] __initdata = "off";
+>  
+>  /*
+>   * Since SME related variables are set early in the boot process they must
+> @@ -200,6 +215,8 @@ void __init mem_encrypt_init(void)
+>  
+>  	/* Call into SWIOTLB to update the SWIOTLB DMA buffers */
+>  	swiotlb_update_mem_attributes();
+> +
+> +	pr_info("AMD Secure Memory Encryption (SME) active\n");
+>  }
+>  
+>  void swiotlb_set_mem_attributes(void *vaddr, unsigned long size)
+> @@ -527,8 +544,73 @@ void __init sme_encrypt_kernel(void)
+>  	native_write_cr3(__native_read_cr3());
+>  }
+>  
+> -void __init sme_enable(void)
+> +void __init SME_NOSTACKP sme_enable(struct boot_params *bp)
+>  {
+> +	const char *cmdline_ptr, *cmdline_arg, *cmdline_on, *cmdline_off;
+> +	unsigned int eax, ebx, ecx, edx;
+> +	bool active_by_default;
+> +	unsigned long me_mask;
+> +	char buffer[16];
+> +	u64 msr;
+> +
+> +	/* Check for the SME support leaf */
+> +	eax = 0x80000000;
+> +	ecx = 0;
+> +	native_cpuid(&eax, &ebx, &ecx, &edx);
+> +	if (eax < 0x8000001f)
+> +		return;
+> +
+> +	/*
+> +	 * Check for the SME feature:
+> +	 *   CPUID Fn8000_001F[EAX] - Bit 0
+> +	 *     Secure Memory Encryption support
+> +	 *   CPUID Fn8000_001F[EBX] - Bits 5:0
+> +	 *     Pagetable bit position used to indicate encryption
+> +	 */
+> +	eax = 0x8000001f;
+> +	ecx = 0;
+> +	native_cpuid(&eax, &ebx, &ecx, &edx);
+> +	if (!(eax & 1))
+> +		return;
+> +
+> +	me_mask = 1UL << (ebx & 0x3f);
+> +
+> +	/* Check if SME is enabled */
+> +	msr = __rdmsr(MSR_K8_SYSCFG);
+> +	if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
+> +		return;
+> +
+> +	/*
+> +	 * Fixups have not been applied to phys_base yet and we're running
+> +	 * identity mapped, so we must obtain the address to the SME command
+> +	 * line argument data using rip-relative addressing.
+> +	 */
+> +	asm ("lea sme_cmdline_arg(%%rip), %0"
+> +	     : "=r" (cmdline_arg)
+> +	     : "p" (sme_cmdline_arg));
+> +	asm ("lea sme_cmdline_on(%%rip), %0"
+> +	     : "=r" (cmdline_on)
+> +	     : "p" (sme_cmdline_on));
+> +	asm ("lea sme_cmdline_off(%%rip), %0"
+> +	     : "=r" (cmdline_off)
+> +	     : "p" (sme_cmdline_off));
+> +
+> +	if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT))
+> +		active_by_default = true;
+> +	else
+> +		active_by_default = false;
+> +
+> +	cmdline_ptr = (const char *)((u64)bp->hdr.cmd_line_ptr |
+> +				     ((u64)bp->ext_cmd_line_ptr << 32));
+> +
+> +	cmdline_find_option(cmdline_ptr, cmdline_arg, buffer, sizeof(buffer));
+> +
+> +	if (strncmp(buffer, cmdline_on, sizeof(buffer)) == 0)
+
+	if (!strncmp(...
+
+> +		sme_me_mask = me_mask;
+> +	else if (strncmp(buffer, cmdline_off, sizeof(buffer)) == 0)
+
+	else if (!strncmp(...
 
 -- 
 Regards/Gruss,
     Boris.
 
 Good mailing practices for 400: avoid top-posting and trim the reply.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
