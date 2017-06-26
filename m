@@ -1,74 +1,108 @@
-From: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH v4 0/2] Add EFI capsule pstore backend support
-Date: Mon, 26 Jun 2017 04:09:08 +0000
-Message-ID: <E6AF1AFDEA62A94A97508F458CBDD47F6F5A5C24@SHSMSX101.ccr.corp.intel.com>
-References: <20170622163434.95704-1-qiuxu.zhuo@intel.com>
- <CAGXu5jLzd8PdH3mGS_+kYA3-nZwmJCYkeQXH2crJr5LqYGoHaQ@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v4 0/2] Add EFI capsule pstore backend support
+Date: Mon, 26 Jun 2017 15:07:22 +0000
+Message-ID: <CAKv+Gu-tEYgK3zPYKf_ekwcfpnGFoYFF6om9PBjWgp0wp=KAuw@mail.gmail.com>
+References: <20170622163434.95704-1-qiuxu.zhuo@intel.com> <CAGXu5jLzd8PdH3mGS_+kYA3-nZwmJCYkeQXH2crJr5LqYGoHaQ@mail.gmail.com>
  <CAKv+Gu_HDjfRUCrJfmuvqD6t=+=a_QjBdj4FyGpH3Q5cMyfGwA@mail.gmail.com>
- <CAKv+Gu-j0hc6o6LLPPESbpmhpGY5=qX=fsD6B15on=VGx51qog@mail.gmail.com>
+ <CAKv+Gu-j0hc6o6LLPPESbpmhpGY5=qX=fsD6B15on=VGx51qog@mail.gmail.com> <E6AF1AFDEA62A94A97508F458CBDD47F6F5A5C24@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu-j0hc6o6LLPPESbpmhpGY5=qX=fsD6B15on=VGx51qog-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <E6AF1AFDEA62A94A97508F458CBDD47F6F5A5C24-0J0gbvR4kThpB2pF5aRoyrfspsVTdybXVpNB7YpNyf8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiBGcm9tOiBBcmQgQmllc2hldXZlbCBbbWFpbHRvOmFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmdd
-IA0KPg0KPiBBY3R1YWxseSwgbm8sIFRoZSBpc3N1ZSBJIHJhaXNlZCB0aGUgbGFzdCB0aW1lIGFy
-b3VuZCB3YXMgbm90IGFkZHJlc3NlZCBhbnl3aGVyZSwgYW5kIGlzIG5vdCBldmVuIG1lbnRpb25l
-ZCBpbiB0aGUgY29tbWl0IGxvZy4NCj4NCj4gVGhlIHByb2JsZW0gaXMgdGhhdCB0aGVyZSBpcyBh
-biBhbWJpZ3VpdHkgaW4gdGhlIGltcGxlbWVudGF0aW9uIG9mIHRoZSBjb25maWd1cmF0aW9uIHRh
-YmxlIGVudHJpZXMgdGhhdCByZXByZXNlbnQgY2Fwc3VsZSB3aXRoIHRoZSBFRklfQ0FQU1VMRV9Q
-RVJTSVNUX0FDUk9TU19SRVNFVCBhbmQgRUZJX0NBUFNVTEVfUE9QVUxBVEVfU1lTVEVNX1RBQkxF
-IGZsYWdzIHNldC4NCj4NCj4gRmlyc3Qgb2YgYWxsLCB0aGVyZSBpcyB0aGUgcGFkZGluZyBpc3N1
-ZToNCj4NCj4gdHlwZWRlZiBzdHJ1Y3Qgew0KPiAgICAgICB1MzIgY2Fwc3VsZV9hcnJheV9udW1i
-ZXI7DQo+ICAgICAgIHZvaWQgKmNhcHN1bGVfYWRkcltdOw0KPiB9IF9fcGFja2VkIGVmaV9jYXBz
-dWxlX3RhYmxlX3Q7DQo+IA0KPiBUaGlzIGRldmlhdGVzIGZyb20gdGhlIGltcGxlbWVudGF0aW9u
-IHVzZWQgYnkgRURLMiAod2hpY2ggZG9lcyBub3QgcGFjayB0aGUgYXJyYXkpLCB3aGljaCBtZWFu
-cyB0aGlzIGNvZGUgaXMgY3VycmVudGx5IGJyb2tlbiBvbiA2NC1iaXQgaW1wbGVtZW50YXRpb25z
-Lg0KPiBUaGVuLCB0aGVyZSBpcyB0aGUgaXNzdWUgb2YgdGhlIGNhcHN1bGVfYWRkciBtZW1iZXIs
-ID4gd2hpY2ggaXMgZGVzY3JpYmVkIGJ5IHRoZSBzcGVjIGFzIGZvbGxvd3M6DQo+IA0KPiAiIiIN
-Cj4gVGhlIEVGSSBTeXN0ZW0gVGFibGUgZW50cnkgbXVzdCBwb2ludCB0byBhbiBhcnJheSBvZiBj
-YXBzdWxlcyB0aGF0IGNvbnRhaW4gdGhlIHNhbWUgQ2Fwc3VsZUd1aWQgdmFsdWUuDQo+ICIiIg0K
-PiANCj4gVGhpcyBpcyBvcGVuIHRvIGludGVycHJldGF0aW9uLCBidXQgYW4gJ2FycmF5IG9mIGNh
-cHN1bGVzJyBpcyBub3QgdGhlIHNhbWUgYXMgYW4gJ2FycmF5IG9mIHBvaW50ZXJzIHRvIGNhcHN1
-bGVzJy4NCj4gDQo+IEkgaGF2ZSByZW1pbmRlZCB0aGUgVVNXRyBhZ2FpbiB0aGF0IHRoaXMgbmVl
-ZHMgdG8gYmUgY2xhcmlmaWVkLg0KPiANCg0KSXQgbG9va3MgbGlrZSB0aGF0IG15IHRlc3QgQklP
-UyBvbiBJbnRlbCBLYWJ5bGFrZSBib2FyZCBpbnRlcnByZXRzIGl0ICpwb2ludGVyIiBhbmQgcGFj
-ayB0aGUgYXJyYXksIHNvIG15IHBhdGNoIGNhbiB3b3JrIG9uIHRoYXQgYm9hcmQuICAgDQpZZXMs
-IHRoZSBzcGVjIGlzIGFtYmlndW91cyB0aGF0ICB0aGUgZGVzY3JpcHRpb25bMV0gaW4gc3BlYyB0
-cmVhdHMgaXQgYXMgKnBvaW50ZXIiLCBhbmQgZGVzY3JpcHRpb25bMl0gdHJlYXRzIGl0IGFzICpj
-YXBzdWxlKiAoaGVhZGVyICsgZGF0YSA/Pz8pDQpbMV0gIkZpcm13YXJlIHRoYXQgcHJvY2Vzc2Vz
-IGEgY2Fwc3VsZSB0aGF0IGhhcyB0aGUgQ0FQU1VMRV9GTEFHU19QT1BVTEFURV9TWVNURU1fVEFC
-TEUgRmxhZyBzZXQgaW4NCml0cyBoZWFkZXIgd2lsbCBjb2FsZXNjZSB0aGUgY29udGVudHMgb2Yg
-dGhlIGNhcHN1bGUgZnJvbSB0aGUgU2NhdHRlckdhdGhlckxpc3QgaW50byBhIGNvbnRpZ3VvdXMN
-CmJ1ZmZlciBhbmQgbXVzdCB0aGVuIHBsYWNlIGEgKnBvaW50ZXIqIHRvIHRoaXMgY29hbGVzY2Vk
-IGNhcHN1bGUgaW4gdGhlIEVGSSBTeXN0ZW0gVGFibGUgYWZ0ZXIgdGhlDQpzeXN0ZW0gaGFzIGJl
-ZW4gcmVzZXQuIEFnZW50cyBzZWFyY2hpbmcgZm9yIHRoaXMgY2Fwc3VsZSB3aWxsIGxvb2sgaW4g
-dGhlIEVGSV9DT05GSUdVUkFUSU9OX1RBQkxFDQphbmQgc2VhcmNoIGZvciB0aGUgY2Fwc3VsZeKA
-mXMgR1VJRCBhbmQgYXNzb2NpYXRlZCAqcG9pbnRlciogdG8gcmV0cmlldmUgdGhlIGRhdGEgYWZ0
-ZXIgdGhlIHJlc2V0LiINClsyXSAiIFRoZSBFRkkgU3lzdGVtIFRhYmxlIGVudHJ5IG11c3QgcG9p
-bnQgdG8gYW4gYXJyYXkgb2YgKmNhcHN1bGVzKiB0aGF0IGNvbnRhaW4gdGhlIHNhbWUgQ2Fwc3Vs
-ZUd1aWQgdmFsdWUuIg0KDQpJIHRlbmQgdG8gWzFdIDotKSwgYW5kIGl0IHNlZW1zIHRvIG1lIHRo
-YXQgWzJdIGhhcyBhIGRpc2FkdmFudGFnZSB0aGF0IGl0IG11c3QgaGF2ZSBhIGNvbnRpZ3VvdXMg
-cGh5c2ljYWwgbWVtb3J5IGxhcmdlIGVub3VnaCBmb3IgYWxsIGNhcHN1bGVzLiAgDQoNCj4gRm9y
-IG1vcmUgaW5mbywgcGxlYXNlIHJlZmVyIHRvDQo+IGh0dHBzOi8vbGlzdHMuMDEub3JnL3BpcGVy
-bWFpbC9lZGsyLWRldmVsLzIwMTctTWFyY2gvMDA4MTQxLmh0bWwNCj4gKyAgICAgIENhcHN1bGVU
-YWJsZS0+Q2Fwc3VsZUFycmF5U2l6ZSA9IFNpemUgLSBzaXplb2YoRUZJX0NBUFNVTEVfVEFCTEUp
-Ow0KICAgSSB0aGluayAnQ2Fwc3VsZVRhYmxlLT5DYXBzdWxlQXJyYXlTaXplID0gU2l6ZSAtIHNp
-emVvZiAoVTMyKScgcHJlc2VudHMgdGhlIHNpemUgb2YgY2Fwc3VsZSBhcnJheS4NCg0KPiArICAg
-ICAgZm9yIChJbmRleCA9IDA7IEluZGV4IDwgQ2Fwc3VsZU51bWJlcjsgSW5kZXgrKykgew0KPiAr
-ICAgICAgICBDb3B5TWVtKCZDYXBzdWxlVGFibGUtPkNhcHN1bGVbSW5kZXhdLCBDYXBzdWxlUHRy
-Q2FjaGVbSW5kZXhdLCBzaXplb2YoRUZJX0NBUFNVTEVfVEFCTEUpKTsNCj4gKyAgICAgIH0NCiBI
-ZXJlIGl0IG9ubHkgY29waWVzIHRoZSBjYXBzdWxlIGhlYWRlcnMgKEVGSV9DQVBTVUxFX1RBQkxF
-KSB0byAnIENhcHN1bGVUYWJsZS0+Q2Fwc3VsZVtJbmRleF0nLg0KIFNob3VsZCBpdCBhbHNvIGNv
-cHkgY2Fwc3VsZSBkYXRhIGZvciBlYWNoIGNhcHN1bGUgaGVyZT8gIE90aGVyd2lzZSBPUyBjYW4g
-b25seSBnZXQgdGhlIGNhcHN1bGUgaGVhZGVyIEkgdGhpbmsuDQoNCkFyZCBpZiB5b3UgZ2V0IGNs
-YXJpZmljYXRpb24gKGNhcHN1bGUgcG9pbnRlciBvciBjYXBzdWxlIGhlYWRlcitkYXRhIGluIEVG
-SSBTeXN0ZW0gVGFibGUgZW50cnkpIGZyb20gVVNXRywgd291bGQgeW91IHBsZWFzZSBub3RpZnkg
-bWUgYW5kIEkgY2FuIHVwZGF0ZSBteSBwYXRjaCBhY2NvcmRpbmdseS4NClRoYW5rcyENCg0KQlIN
-CnFpdXh1DQoNCg0KDQoNCg==
+On 26 June 2017 at 04:09, Zhuo, Qiuxu <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+>> From: Ard Biesheuvel [mailto:ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org]
+>>
+>> Actually, no, The issue I raised the last time around was not addressed =
+anywhere, and is not even mentioned in the commit log.
+>>
+>> The problem is that there is an ambiguity in the implementation of the c=
+onfiguration table entries that represent capsule with the EFI_CAPSULE_PERS=
+IST_ACROSS_RESET and EFI_CAPSULE_POPULATE_SYSTEM_TABLE flags set.
+>>
+>> First of all, there is the padding issue:
+>>
+>> typedef struct {
+>>       u32 capsule_array_number;
+>>       void *capsule_addr[];
+>> } __packed efi_capsule_table_t;
+>>
+>> This deviates from the implementation used by EDK2 (which does not pack =
+the array), which means this code is currently broken on 64-bit implementat=
+ions.
+>> Then, there is the issue of the capsule_addr member, > which is describe=
+d by the spec as follows:
+>>
+>> """
+>> The EFI System Table entry must point to an array of capsules that conta=
+in the same CapsuleGuid value.
+>> """
+>>
+>> This is open to interpretation, but an 'array of capsules' is not the sa=
+me as an 'array of pointers to capsules'.
+>>
+>> I have reminded the USWG again that this needs to be clarified.
+>>
+>
+> It looks like that my test BIOS on Intel Kabylake board interprets it *po=
+inter" and pack the array, so my patch can work on that board.
+
+Are you running 64-bit firmware on this board? Because the EDK2 side
+lacks the 'packed' attribute, which means there is 4 bytes of padding
+after the first member of EFI_CAPSULE_TABLE.
+
+> Yes, the spec is ambiguous that  the description[1] in spec treats it as =
+*pointer", and description[2] treats it as *capsule* (header + data ???)
+> [1] "Firmware that processes a capsule that has the CAPSULE_FLAGS_POPULAT=
+E_SYSTEM_TABLE Flag set in
+> its header will coalesce the contents of the capsule from the ScatterGath=
+erList into a contiguous
+> buffer and must then place a *pointer* to this coalesced capsule in the E=
+FI System Table after the
+> system has been reset. Agents searching for this capsule will look in the=
+ EFI_CONFIGURATION_TABLE
+> and search for the capsule=E2=80=99s GUID and associated *pointer* to ret=
+rieve the data after the reset."
+> [2] " The EFI System Table entry must point to an array of *capsules* tha=
+t contain the same CapsuleGuid value."
+>
+> I tend to [1] :-), and it seems to me that [2] has a disadvantage that it=
+ must have a contiguous physical memory large enough for all capsules.
+>
+
+Ah yes, I missed that bit before. So yes, it probably makes most sense
+to keep your definition, and update the EDK2 side so it works on
+64-bit as well.
+
+>> https://lists.01.org/pipermail/edk2-devel/2017-March/008141.html
+>> +      CapsuleTable->CapsuleArraySize =3D Size - sizeof(EFI_CAPSULE_TABL=
+E);
+>    I think 'CapsuleTable->CapsuleArraySize =3D Size - sizeof (U32)' prese=
+nts the size of capsule array.
+>
+>> +      for (Index =3D 0; Index < CapsuleNumber; Index++) {
+>> +        CopyMem(&CapsuleTable->Capsule[Index], CapsulePtrCache[Index], =
+sizeof(EFI_CAPSULE_TABLE));
+>> +      }
+>  Here it only copies the capsule headers (EFI_CAPSULE_TABLE) to ' Capsule=
+Table->Capsule[Index]'.
+>  Should it also copy capsule data for each capsule here?  Otherwise OS ca=
+n only get the capsule header I think.
+>
+> Ard if you get clarification (capsule pointer or capsule header+data in E=
+FI System Table entry) from USWG, would you please notify me and I can upda=
+te my patch accordingly.
+> Thanks!
+>
+
+I hope we can settle this by the end of this week, and if the
+clarification aligns with your definition, I will queue the patches as
+they are.
+
+Thanks,
+Ard.
