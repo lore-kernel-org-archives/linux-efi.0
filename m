@@ -1,108 +1,61 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v4 0/2] Add EFI capsule pstore backend support
-Date: Mon, 26 Jun 2017 15:07:22 +0000
-Message-ID: <CAKv+Gu-tEYgK3zPYKf_ekwcfpnGFoYFF6om9PBjWgp0wp=KAuw@mail.gmail.com>
-References: <20170622163434.95704-1-qiuxu.zhuo@intel.com> <CAGXu5jLzd8PdH3mGS_+kYA3-nZwmJCYkeQXH2crJr5LqYGoHaQ@mail.gmail.com>
- <CAKv+Gu_HDjfRUCrJfmuvqD6t=+=a_QjBdj4FyGpH3Q5cMyfGwA@mail.gmail.com>
- <CAKv+Gu-j0hc6o6LLPPESbpmhpGY5=qX=fsD6B15on=VGx51qog@mail.gmail.com> <E6AF1AFDEA62A94A97508F458CBDD47F6F5A5C24@SHSMSX101.ccr.corp.intel.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v7 34/36] x86/mm: Add support to encrypt the kernel
+ in-place
+Date: Mon, 26 Jun 2017 17:45:43 +0200
+Message-ID: <20170626154543.fsuxfhxidytgo2ia@pd.tnic>
+References: <20170616184947.18967.84890.stgit@tlendack-t1.amdoffice.net>
+ <20170616185619.18967.38945.stgit@tlendack-t1.amdoffice.net>
+ <20170623100013.upd4or6esjvulmvg@pd.tnic>
+ <af9a50f7-17ea-a840-6456-b6479e5d7e82@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <E6AF1AFDEA62A94A97508F458CBDD47F6F5A5C24-0J0gbvR4kThpB2pF5aRoyrfspsVTdybXVpNB7YpNyf8@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <af9a50f7-17ea-a840-6456-b6479e5d7e82-5C7GfCeVMHo@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dy>
 List-Id: linux-efi@vger.kernel.org
 
-On 26 June 2017 at 04:09, Zhuo, Qiuxu <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
->> From: Ard Biesheuvel [mailto:ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org]
->>
->> Actually, no, The issue I raised the last time around was not addressed =
-anywhere, and is not even mentioned in the commit log.
->>
->> The problem is that there is an ambiguity in the implementation of the c=
-onfiguration table entries that represent capsule with the EFI_CAPSULE_PERS=
-IST_ACROSS_RESET and EFI_CAPSULE_POPULATE_SYSTEM_TABLE flags set.
->>
->> First of all, there is the padding issue:
->>
->> typedef struct {
->>       u32 capsule_array_number;
->>       void *capsule_addr[];
->> } __packed efi_capsule_table_t;
->>
->> This deviates from the implementation used by EDK2 (which does not pack =
-the array), which means this code is currently broken on 64-bit implementat=
-ions.
->> Then, there is the issue of the capsule_addr member, > which is describe=
-d by the spec as follows:
->>
->> """
->> The EFI System Table entry must point to an array of capsules that conta=
-in the same CapsuleGuid value.
->> """
->>
->> This is open to interpretation, but an 'array of capsules' is not the sa=
-me as an 'array of pointers to capsules'.
->>
->> I have reminded the USWG again that this needs to be clarified.
->>
->
-> It looks like that my test BIOS on Intel Kabylake board interprets it *po=
-inter" and pack the array, so my patch can work on that board.
+On Fri, Jun 23, 2017 at 12:44:46PM -0500, Tom Lendacky wrote:
+> Normally the __p4d() macro would be used and that would be ok whether
+> CONFIG_X86_5LEVEL is defined or not. But since __p4d() is part of the
+> paravirt ops path I have to use native_make_p4d().
 
-Are you running 64-bit firmware on this board? Because the EDK2 side
-lacks the 'packed' attribute, which means there is 4 bytes of padding
-after the first member of EFI_CAPSULE_TABLE.
+So __p4d is in !CONFIG_PARAVIRT path.
 
-> Yes, the spec is ambiguous that  the description[1] in spec treats it as =
-*pointer", and description[2] treats it as *capsule* (header + data ???)
-> [1] "Firmware that processes a capsule that has the CAPSULE_FLAGS_POPULAT=
-E_SYSTEM_TABLE Flag set in
-> its header will coalesce the contents of the capsule from the ScatterGath=
-erList into a contiguous
-> buffer and must then place a *pointer* to this coalesced capsule in the E=
-FI System Table after the
-> system has been reset. Agents searching for this capsule will look in the=
- EFI_CONFIGURATION_TABLE
-> and search for the capsule=E2=80=99s GUID and associated *pointer* to ret=
-rieve the data after the reset."
-> [2] " The EFI System Table entry must point to an array of *capsules* tha=
-t contain the same CapsuleGuid value."
->
-> I tend to [1] :-), and it seems to me that [2] has a disadvantage that it=
- must have a contiguous physical memory large enough for all capsules.
->
+Regardless, we use the native_* variants in generic code to mean, not
+paravirt. Just define it in a separate patch like the rest of the p4*
+machinery and use it in your code. Sooner or later someone else will
+need it.
 
-Ah yes, I missed that bit before. So yes, it probably makes most sense
-to keep your definition, and update the EDK2 side so it works on
-64-bit as well.
+> True, 5-level will only be turned on for specific hardware which is why
+> I originally had this as only 4-level pagetables. But in a comment from
+> you back on the v5 version you said it needed to support 5-level. I
+> guess we should have discussed this more,
 
->> https://lists.01.org/pipermail/edk2-devel/2017-March/008141.html
->> +      CapsuleTable->CapsuleArraySize =3D Size - sizeof(EFI_CAPSULE_TABL=
-E);
->    I think 'CapsuleTable->CapsuleArraySize =3D Size - sizeof (U32)' prese=
-nts the size of capsule array.
->
->> +      for (Index =3D 0; Index < CapsuleNumber; Index++) {
->> +        CopyMem(&CapsuleTable->Capsule[Index], CapsulePtrCache[Index], =
-sizeof(EFI_CAPSULE_TABLE));
->> +      }
->  Here it only copies the capsule headers (EFI_CAPSULE_TABLE) to ' Capsule=
-Table->Capsule[Index]'.
->  Should it also copy capsule data for each capsule here?  Otherwise OS ca=
-n only get the capsule header I think.
->
-> Ard if you get clarification (capsule pointer or capsule header+data in E=
-FI System Table entry) from USWG, would you please notify me and I can upda=
-te my patch accordingly.
-> Thanks!
->
+AFAIR, I said something along the lines of "what about 5-level page
+tables?" and whether we care.
 
-I hope we can settle this by the end of this week, and if the
-clarification aligns with your definition, I will queue the patches as
-they are.
+> but I also thought that should our hardware ever support 5-level
+> paging in the future then this would be good to go.
 
-Thanks,
-Ard.
+There it is :-)
+
+> The macros work great if you are not running identity mapped. You could
+> use p*d_offset() to move easily through the tables, but those functions
+> use __va() to generate table virtual addresses. I've seen where
+> boot/compressed/pagetable.c #defines __va() to work with identity mapped
+> pages but that would only work if I create a separate file just for this
+> function.
+> 
+> Given when this occurs it's very similar to what __startup_64() does in
+> regards to the IS_ENABLED(CONFIG_X86_5LEVEL) checks.
+
+Ok.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
