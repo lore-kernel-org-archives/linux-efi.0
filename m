@@ -1,62 +1,74 @@
-From: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Subject: Re: [RFC] memory corruption caused by efi driver?
-Date: Sun, 25 Jun 2017 15:31:49 +0200
-Message-ID: <20170625133149.GA5611@kroah.com>
-References: <9372b781-62ed-fcad-6306-42a0da1a37ca@huawei.com>
- <20170624111205.GA16218@kroah.com>
- <594FB572.4000506@huawei.com>
+From: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v4 0/2] Add EFI capsule pstore backend support
+Date: Mon, 26 Jun 2017 04:09:08 +0000
+Message-ID: <E6AF1AFDEA62A94A97508F458CBDD47F6F5A5C24@SHSMSX101.ccr.corp.intel.com>
+References: <20170622163434.95704-1-qiuxu.zhuo@intel.com>
+ <CAGXu5jLzd8PdH3mGS_+kYA3-nZwmJCYkeQXH2crJr5LqYGoHaQ@mail.gmail.com>
+ <CAKv+Gu_HDjfRUCrJfmuvqD6t=+=a_QjBdj4FyGpH3Q5cMyfGwA@mail.gmail.com>
+ <CAKv+Gu-j0hc6o6LLPPESbpmhpGY5=qX=fsD6B15on=VGx51qog@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <594FB572.4000506-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <CAKv+Gu-j0hc6o6LLPPESbpmhpGY5=qX=fsD6B15on=VGx51qog-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Cc: Yisheng Xie <xieyisheng1-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Hanjun Guo <guohanjun-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Jun 25, 2017 at 09:06:58PM +0800, Xishi Qiu wrote:
-> On 2017/6/24 19:12, Greg KH wrote:
-> 
-> > On Sat, Jun 24, 2017 at 05:52:23PM +0800, Yisheng Xie wrote:
-> >> hi all,
-> >>
-> >> I met an Oops problem with linux-3.10. The RIP is sysfs_open_file+0x46/0x2b0 (I will and the full
-> >> crash log in the end of this mail).
-> > 
-> > 3.10 is _very_ old and obsolete, can you duplicate this on a modern
-> > kernel, like 4.11?
-> > 
-> > thanks,
-> > 
-> > greg k-h
-> > 
-> > .
-> > 
-> 
-> Hi, if I disable CONFIG_EFI_VARS, it seems OK now.
-> 
-> And I cann't reproduce the problem on mainline(v4.12).
-> 
-> Here is my test, run some stress test, then
-> cat /sys/firmware/efi/efivars/*
-> or
-> cat /sys/firmware/efi/vars/*/*
-> 
-> 1) 3.10, get warning
-> CONFIG_EFI_VARS=y
-> CONFIG_EFIVAR_FS=y
-> 
-> 2) 3.10, get warning
-> CONFIG_EFI_VARS=y
-> CONFIG_EFIVAR_FS=n
-> 
-> 3) 3.10, ok
-> CONFIG_EFI_VARS=n
-> CONFIG_EFIVAR_FS=y
-> 
-> 4) mainline, ok
-> CONFIG_EFI_VARS=y
-> CONFIG_EFIVAR_FS=y
-
-Then use mainline :)
+PiBGcm9tOiBBcmQgQmllc2hldXZlbCBbbWFpbHRvOmFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmdd
+IA0KPg0KPiBBY3R1YWxseSwgbm8sIFRoZSBpc3N1ZSBJIHJhaXNlZCB0aGUgbGFzdCB0aW1lIGFy
+b3VuZCB3YXMgbm90IGFkZHJlc3NlZCBhbnl3aGVyZSwgYW5kIGlzIG5vdCBldmVuIG1lbnRpb25l
+ZCBpbiB0aGUgY29tbWl0IGxvZy4NCj4NCj4gVGhlIHByb2JsZW0gaXMgdGhhdCB0aGVyZSBpcyBh
+biBhbWJpZ3VpdHkgaW4gdGhlIGltcGxlbWVudGF0aW9uIG9mIHRoZSBjb25maWd1cmF0aW9uIHRh
+YmxlIGVudHJpZXMgdGhhdCByZXByZXNlbnQgY2Fwc3VsZSB3aXRoIHRoZSBFRklfQ0FQU1VMRV9Q
+RVJTSVNUX0FDUk9TU19SRVNFVCBhbmQgRUZJX0NBUFNVTEVfUE9QVUxBVEVfU1lTVEVNX1RBQkxF
+IGZsYWdzIHNldC4NCj4NCj4gRmlyc3Qgb2YgYWxsLCB0aGVyZSBpcyB0aGUgcGFkZGluZyBpc3N1
+ZToNCj4NCj4gdHlwZWRlZiBzdHJ1Y3Qgew0KPiAgICAgICB1MzIgY2Fwc3VsZV9hcnJheV9udW1i
+ZXI7DQo+ICAgICAgIHZvaWQgKmNhcHN1bGVfYWRkcltdOw0KPiB9IF9fcGFja2VkIGVmaV9jYXBz
+dWxlX3RhYmxlX3Q7DQo+IA0KPiBUaGlzIGRldmlhdGVzIGZyb20gdGhlIGltcGxlbWVudGF0aW9u
+IHVzZWQgYnkgRURLMiAod2hpY2ggZG9lcyBub3QgcGFjayB0aGUgYXJyYXkpLCB3aGljaCBtZWFu
+cyB0aGlzIGNvZGUgaXMgY3VycmVudGx5IGJyb2tlbiBvbiA2NC1iaXQgaW1wbGVtZW50YXRpb25z
+Lg0KPiBUaGVuLCB0aGVyZSBpcyB0aGUgaXNzdWUgb2YgdGhlIGNhcHN1bGVfYWRkciBtZW1iZXIs
+ID4gd2hpY2ggaXMgZGVzY3JpYmVkIGJ5IHRoZSBzcGVjIGFzIGZvbGxvd3M6DQo+IA0KPiAiIiIN
+Cj4gVGhlIEVGSSBTeXN0ZW0gVGFibGUgZW50cnkgbXVzdCBwb2ludCB0byBhbiBhcnJheSBvZiBj
+YXBzdWxlcyB0aGF0IGNvbnRhaW4gdGhlIHNhbWUgQ2Fwc3VsZUd1aWQgdmFsdWUuDQo+ICIiIg0K
+PiANCj4gVGhpcyBpcyBvcGVuIHRvIGludGVycHJldGF0aW9uLCBidXQgYW4gJ2FycmF5IG9mIGNh
+cHN1bGVzJyBpcyBub3QgdGhlIHNhbWUgYXMgYW4gJ2FycmF5IG9mIHBvaW50ZXJzIHRvIGNhcHN1
+bGVzJy4NCj4gDQo+IEkgaGF2ZSByZW1pbmRlZCB0aGUgVVNXRyBhZ2FpbiB0aGF0IHRoaXMgbmVl
+ZHMgdG8gYmUgY2xhcmlmaWVkLg0KPiANCg0KSXQgbG9va3MgbGlrZSB0aGF0IG15IHRlc3QgQklP
+UyBvbiBJbnRlbCBLYWJ5bGFrZSBib2FyZCBpbnRlcnByZXRzIGl0ICpwb2ludGVyIiBhbmQgcGFj
+ayB0aGUgYXJyYXksIHNvIG15IHBhdGNoIGNhbiB3b3JrIG9uIHRoYXQgYm9hcmQuICAgDQpZZXMs
+IHRoZSBzcGVjIGlzIGFtYmlndW91cyB0aGF0ICB0aGUgZGVzY3JpcHRpb25bMV0gaW4gc3BlYyB0
+cmVhdHMgaXQgYXMgKnBvaW50ZXIiLCBhbmQgZGVzY3JpcHRpb25bMl0gdHJlYXRzIGl0IGFzICpj
+YXBzdWxlKiAoaGVhZGVyICsgZGF0YSA/Pz8pDQpbMV0gIkZpcm13YXJlIHRoYXQgcHJvY2Vzc2Vz
+IGEgY2Fwc3VsZSB0aGF0IGhhcyB0aGUgQ0FQU1VMRV9GTEFHU19QT1BVTEFURV9TWVNURU1fVEFC
+TEUgRmxhZyBzZXQgaW4NCml0cyBoZWFkZXIgd2lsbCBjb2FsZXNjZSB0aGUgY29udGVudHMgb2Yg
+dGhlIGNhcHN1bGUgZnJvbSB0aGUgU2NhdHRlckdhdGhlckxpc3QgaW50byBhIGNvbnRpZ3VvdXMN
+CmJ1ZmZlciBhbmQgbXVzdCB0aGVuIHBsYWNlIGEgKnBvaW50ZXIqIHRvIHRoaXMgY29hbGVzY2Vk
+IGNhcHN1bGUgaW4gdGhlIEVGSSBTeXN0ZW0gVGFibGUgYWZ0ZXIgdGhlDQpzeXN0ZW0gaGFzIGJl
+ZW4gcmVzZXQuIEFnZW50cyBzZWFyY2hpbmcgZm9yIHRoaXMgY2Fwc3VsZSB3aWxsIGxvb2sgaW4g
+dGhlIEVGSV9DT05GSUdVUkFUSU9OX1RBQkxFDQphbmQgc2VhcmNoIGZvciB0aGUgY2Fwc3VsZeKA
+mXMgR1VJRCBhbmQgYXNzb2NpYXRlZCAqcG9pbnRlciogdG8gcmV0cmlldmUgdGhlIGRhdGEgYWZ0
+ZXIgdGhlIHJlc2V0LiINClsyXSAiIFRoZSBFRkkgU3lzdGVtIFRhYmxlIGVudHJ5IG11c3QgcG9p
+bnQgdG8gYW4gYXJyYXkgb2YgKmNhcHN1bGVzKiB0aGF0IGNvbnRhaW4gdGhlIHNhbWUgQ2Fwc3Vs
+ZUd1aWQgdmFsdWUuIg0KDQpJIHRlbmQgdG8gWzFdIDotKSwgYW5kIGl0IHNlZW1zIHRvIG1lIHRo
+YXQgWzJdIGhhcyBhIGRpc2FkdmFudGFnZSB0aGF0IGl0IG11c3QgaGF2ZSBhIGNvbnRpZ3VvdXMg
+cGh5c2ljYWwgbWVtb3J5IGxhcmdlIGVub3VnaCBmb3IgYWxsIGNhcHN1bGVzLiAgDQoNCj4gRm9y
+IG1vcmUgaW5mbywgcGxlYXNlIHJlZmVyIHRvDQo+IGh0dHBzOi8vbGlzdHMuMDEub3JnL3BpcGVy
+bWFpbC9lZGsyLWRldmVsLzIwMTctTWFyY2gvMDA4MTQxLmh0bWwNCj4gKyAgICAgIENhcHN1bGVU
+YWJsZS0+Q2Fwc3VsZUFycmF5U2l6ZSA9IFNpemUgLSBzaXplb2YoRUZJX0NBUFNVTEVfVEFCTEUp
+Ow0KICAgSSB0aGluayAnQ2Fwc3VsZVRhYmxlLT5DYXBzdWxlQXJyYXlTaXplID0gU2l6ZSAtIHNp
+emVvZiAoVTMyKScgcHJlc2VudHMgdGhlIHNpemUgb2YgY2Fwc3VsZSBhcnJheS4NCg0KPiArICAg
+ICAgZm9yIChJbmRleCA9IDA7IEluZGV4IDwgQ2Fwc3VsZU51bWJlcjsgSW5kZXgrKykgew0KPiAr
+ICAgICAgICBDb3B5TWVtKCZDYXBzdWxlVGFibGUtPkNhcHN1bGVbSW5kZXhdLCBDYXBzdWxlUHRy
+Q2FjaGVbSW5kZXhdLCBzaXplb2YoRUZJX0NBUFNVTEVfVEFCTEUpKTsNCj4gKyAgICAgIH0NCiBI
+ZXJlIGl0IG9ubHkgY29waWVzIHRoZSBjYXBzdWxlIGhlYWRlcnMgKEVGSV9DQVBTVUxFX1RBQkxF
+KSB0byAnIENhcHN1bGVUYWJsZS0+Q2Fwc3VsZVtJbmRleF0nLg0KIFNob3VsZCBpdCBhbHNvIGNv
+cHkgY2Fwc3VsZSBkYXRhIGZvciBlYWNoIGNhcHN1bGUgaGVyZT8gIE90aGVyd2lzZSBPUyBjYW4g
+b25seSBnZXQgdGhlIGNhcHN1bGUgaGVhZGVyIEkgdGhpbmsuDQoNCkFyZCBpZiB5b3UgZ2V0IGNs
+YXJpZmljYXRpb24gKGNhcHN1bGUgcG9pbnRlciBvciBjYXBzdWxlIGhlYWRlcitkYXRhIGluIEVG
+SSBTeXN0ZW0gVGFibGUgZW50cnkpIGZyb20gVVNXRywgd291bGQgeW91IHBsZWFzZSBub3RpZnkg
+bWUgYW5kIEkgY2FuIHVwZGF0ZSBteSBwYXRjaCBhY2NvcmRpbmdseS4NClRoYW5rcyENCg0KQlIN
+CnFpdXh1DQoNCg0KDQoNCg==
