@@ -1,197 +1,110 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: [PATCH v8 RESEND 38/38] x86/mm: Add support to make use of Secure
- Memory Encryption
-Date: Tue, 27 Jun 2017 10:14:48 -0500
-Message-ID: <20170627151447.17428.56826.stgit@tlendack-t1.amdoffice.net>
-References: <20170627150718.17428.81813.stgit@tlendack-t1.amdoffice.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170627150718.17428.81813.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org
-Cc: Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dyoung@redhat.com>, Rik van Riel <riel@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Dmitry Vyukov <dvyukov@google.com>, Juergen Gross <jgross@suse.com>, Thomas Gleixner <tglx@linutronix.de>, Paolo Bonzini <pbonzini@redhat.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] drivers/fbdev: efifb: allow BAR to be moved instead of claiming it
+Date: Tue, 27 Jun 2017 16:19:36 +0000
+Message-ID: <20170627161936.2301-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org, bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Add support to check if SME has been enabled and if memory encryption
-should be activated (checking of command line option based on the
-configuration of the default state).  If memory encryption is to be
-activated, then the encryption mask is set and the kernel is encrypted
-"in place."
+On UEFI systems, the firmware may expose a Graphics Output Protocol (GOP)
+instance to which the efifb driver attempts to attach in order to provide
+a minimal, unaccelerated framebuffer. The GOP protocol itself is not very
+sophisticated, and only describes the offset and size of the framebuffer
+in memory, and the pixel format.
 
-Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+If the GOP framebuffer is provided by a PCI device, it will have been
+configured and enabled by the UEFI firmware, and the GOP protocol will
+simply point into a live BAR region. However, the GOP protocol itself does
+not describe this relation, and so we have to take care not to reconfigure
+the BAR without taking efifb's dependency on it into account.
+
+Commit 55d728a40d36 ("efi/fb: Avoid reconfiguration of BAR that covers
+the framebuffer") attempted to do so by claiming the BAR resource early
+on, which prevents the PCI resource allocation routines from changing it.
+However, it turns out that this only works if the PCI device is not
+behind any bridges, since the bridge resources need to be claimed first.
+
+So instead, allow the BAR to be moved, but make the efifb driver deal
+with that gracefully. So record the resource that covers the BAR early
+on, and if it turns out the have moved by the time we probe the efifb
+driver, update the framebuffer address accordingly.
+
+While this is less likely to occur on x86, given that the firmware's
+PCI resource allocation is more likely to be preserved, this is a
+worthwhile sanity check to have in place, and so let's remove the
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/x86/include/asm/mem_encrypt.h |    6 ++-
- arch/x86/kernel/head64.c           |    5 +-
- arch/x86/mm/mem_encrypt.c          |   77 ++++++++++++++++++++++++++++++++++++
- 3 files changed, 83 insertions(+), 5 deletions(-)
+ drivers/video/fbdev/efifb.c | 24 ++++++++++++--------
+ 1 file changed, 15 insertions(+), 9 deletions(-)
 
-diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
-index 7122c36..8e618fc 100644
---- a/arch/x86/include/asm/mem_encrypt.h
-+++ b/arch/x86/include/asm/mem_encrypt.h
-@@ -17,6 +17,8 @@
+diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
+index b827a8113e26..6220de3e25d3 100644
+--- a/drivers/video/fbdev/efifb.c
++++ b/drivers/video/fbdev/efifb.c
+@@ -146,6 +146,9 @@ ATTRIBUTE_GROUPS(efifb);
  
- #include <linux/init.h>
+ static bool pci_dev_disabled;	/* FB base matches BAR of a disabled device */
  
-+#include <asm/bootparam.h>
++static struct resource *bar_resource;
++static u64 bar_offset;
 +
- #ifdef CONFIG_AMD_MEM_ENCRYPT
- 
- extern unsigned long sme_me_mask;
-@@ -38,7 +40,7 @@ void __init sme_early_decrypt(resource_size_t paddr,
- void __init sme_early_init(void);
- 
- void __init sme_encrypt_kernel(void);
--void __init sme_enable(void);
-+void __init sme_enable(struct boot_params *bp);
- 
- /* Architecture __weak replacement functions */
- void __init mem_encrypt_init(void);
-@@ -60,7 +62,7 @@ static inline void __init sme_unmap_bootdata(char *real_mode_data) { }
- static inline void __init sme_early_init(void) { }
- 
- static inline void __init sme_encrypt_kernel(void) { }
--static inline void __init sme_enable(void) { }
-+static inline void __init sme_enable(struct boot_params *bp) { }
- 
- #endif	/* CONFIG_AMD_MEM_ENCRYPT */
- 
-diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
-index 0cdb53b..925b292 100644
---- a/arch/x86/kernel/head64.c
-+++ b/arch/x86/kernel/head64.c
-@@ -45,7 +45,8 @@ static void __head *fixup_pointer(void *ptr, unsigned long physaddr)
- 	return ptr - (void *)_text + (void *)physaddr;
- }
- 
--unsigned long __head __startup_64(unsigned long physaddr)
-+unsigned long __head __startup_64(unsigned long physaddr,
-+				  struct boot_params *bp)
+ static int efifb_probe(struct platform_device *dev)
  {
- 	unsigned long load_delta, *p;
- 	unsigned long pgtable_flags;
-@@ -70,7 +71,7 @@ unsigned long __head __startup_64(unsigned long physaddr)
- 		for (;;);
+ 	struct fb_info *info;
+@@ -200,6 +203,13 @@ static int efifb_probe(struct platform_device *dev)
+ 		efifb_fix.smem_start |= ext_lfb_base;
+ 	}
  
- 	/* Activate Secure Memory Encryption (SME) if supported and enabled */
--	sme_enable();
-+	sme_enable(bp);
- 
- 	/* Include the SME encryption mask in the fixup value */
- 	load_delta += sme_get_me_mask();
-diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-index e5d5439..053d540 100644
---- a/arch/x86/mm/mem_encrypt.c
-+++ b/arch/x86/mm/mem_encrypt.c
-@@ -15,6 +15,7 @@
- #include <linux/mm.h>
- #include <linux/dma-mapping.h>
- #include <linux/swiotlb.h>
-+#include <linux/mem_encrypt.h>
- 
- #include <asm/tlbflush.h>
- #include <asm/fixmap.h>
-@@ -23,6 +24,13 @@
- #include <asm/set_memory.h>
- #include <asm/cacheflush.h>
- #include <asm/sections.h>
-+#include <asm/processor-flags.h>
-+#include <asm/msr.h>
-+#include <asm/cmdline.h>
++	if (bar_resource &&
++	    bar_resource->start + bar_offset != efifb_fix.smem_start) {
 +
-+static char sme_cmdline_arg[] __initdata = "mem_encrypt";
-+static char sme_cmdline_on[]  __initdata = "on";
-+static char sme_cmdline_off[] __initdata = "off";
- 
- /*
-  * Since SME related variables are set early in the boot process they must
-@@ -190,6 +198,8 @@ void __init mem_encrypt_init(void)
- 
- 	/* Call into SWIOTLB to update the SWIOTLB DMA buffers */
- 	swiotlb_update_mem_attributes();
++		pr_warn("efifb: PCI BAR has moved, updating fb address\n");
++		efifb_fix.smem_start = bar_resource->start + bar_offset;
++	}
 +
-+	pr_info("AMD Secure Memory Encryption (SME) active\n");
- }
+ 	efifb_defined.bits_per_pixel = screen_info.lfb_depth;
+ 	efifb_defined.xres = screen_info.lfb_width;
+ 	efifb_defined.yres = screen_info.lfb_height;
+@@ -364,11 +374,11 @@ static struct platform_driver efifb_driver = {
  
- void swiotlb_set_mem_attributes(void *vaddr, unsigned long size)
-@@ -513,6 +523,71 @@ void __init sme_encrypt_kernel(void)
- 	native_write_cr3(__native_read_cr3());
- }
+ builtin_platform_driver(efifb_driver);
  
--void __init sme_enable(void)
-+void __init __nostackp sme_enable(struct boot_params *bp)
+-#if defined(CONFIG_PCI) && !defined(CONFIG_X86)
++#if defined(CONFIG_PCI)
+ 
+ static bool pci_bar_found;	/* did we find a BAR matching the efifb base? */
+ 
+-static void claim_efifb_bar(struct pci_dev *dev, int idx)
++static void record_efifb_bar_resource(struct pci_dev *dev, int idx, u64 offset)
  {
-+	const char *cmdline_ptr, *cmdline_arg, *cmdline_on, *cmdline_off;
-+	unsigned int eax, ebx, ecx, edx;
-+	bool active_by_default;
-+	unsigned long me_mask;
-+	char buffer[16];
-+	u64 msr;
-+
-+	/* Check for the SME support leaf */
-+	eax = 0x80000000;
-+	ecx = 0;
-+	native_cpuid(&eax, &ebx, &ecx, &edx);
-+	if (eax < 0x8000001f)
-+		return;
-+
-+	/*
-+	 * Check for the SME feature:
-+	 *   CPUID Fn8000_001F[EAX] - Bit 0
-+	 *     Secure Memory Encryption support
-+	 *   CPUID Fn8000_001F[EBX] - Bits 5:0
-+	 *     Pagetable bit position used to indicate encryption
-+	 */
-+	eax = 0x8000001f;
-+	ecx = 0;
-+	native_cpuid(&eax, &ebx, &ecx, &edx);
-+	if (!(eax & 1))
-+		return;
-+
-+	me_mask = 1UL << (ebx & 0x3f);
-+
-+	/* Check if SME is enabled */
-+	msr = __rdmsr(MSR_K8_SYSCFG);
-+	if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
-+		return;
-+
-+	/*
-+	 * Fixups have not been applied to phys_base yet and we're running
-+	 * identity mapped, so we must obtain the address to the SME command
-+	 * line argument data using rip-relative addressing.
-+	 */
-+	asm ("lea sme_cmdline_arg(%%rip), %0"
-+	     : "=r" (cmdline_arg)
-+	     : "p" (sme_cmdline_arg));
-+	asm ("lea sme_cmdline_on(%%rip), %0"
-+	     : "=r" (cmdline_on)
-+	     : "p" (sme_cmdline_on));
-+	asm ("lea sme_cmdline_off(%%rip), %0"
-+	     : "=r" (cmdline_off)
-+	     : "p" (sme_cmdline_off));
-+
-+	if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT))
-+		active_by_default = true;
-+	else
-+		active_by_default = false;
-+
-+	cmdline_ptr = (const char *)((u64)bp->hdr.cmd_line_ptr |
-+				     ((u64)bp->ext_cmd_line_ptr << 32));
-+
-+	cmdline_find_option(cmdline_ptr, cmdline_arg, buffer, sizeof(buffer));
-+
-+	if (!strncmp(buffer, cmdline_on, sizeof(buffer)))
-+		sme_me_mask = me_mask;
-+	else if (!strncmp(buffer, cmdline_off, sizeof(buffer)))
-+		sme_me_mask = 0;
-+	else
-+		sme_me_mask = active_by_default ? me_mask : 0;
+ 	u16 word;
+ 
+@@ -383,12 +393,8 @@ static void claim_efifb_bar(struct pci_dev *dev, int idx)
+ 		return;
+ 	}
+ 
+-	if (pci_claim_resource(dev, idx)) {
+-		pci_dev_disabled = true;
+-		dev_err(&dev->dev,
+-			"BAR %d: failed to claim resource for efifb!\n", idx);
+-		return;
+-	}
++	bar_resource = &dev->resource[idx];
++	bar_offset = offset;
+ 
+ 	dev_info(&dev->dev, "BAR %d: assigned to efifb\n", idx);
  }
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+@@ -415,7 +421,7 @@ static void efifb_fixup_resources(struct pci_dev *dev)
+ 			continue;
+ 
+ 		if (res->start <= base && res->end >= base + size - 1) {
+-			claim_efifb_bar(dev, i);
++			record_efifb_bar_resource(dev, i, base - res->start);
+ 			break;
+ 		}
+ 	}
+-- 
+2.9.3
