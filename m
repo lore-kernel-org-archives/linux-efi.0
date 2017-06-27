@@ -1,7 +1,8 @@
 From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: [PATCH v8 06/38] x86/mm: Add Secure Memory Encryption (SME) support
-Date: Tue, 27 Jun 2017 09:57:13 -0500
-Message-ID: <20170627145713.15908.42762.stgit@tlendack-t1.amdoffice.net>
+Subject: [PATCH v8 08/38] x86/mm: Add support to enable SME in early boot
+	processing
+Date: Tue, 27 Jun 2017 09:57:39 -0500
+Message-ID: <20170627145738.15908.16582.stgit@tlendack-t1.amdoffice.net>
 References: <20170627145607.15908.26571.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,170 +22,239 @@ To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z
 Cc: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Add support for Secure Memory Encryption (SME). This initial support
-provides a Kconfig entry to build the SME support into the kernel and
-defines the memory encryption mask that will be used in subsequent
-patches to mark pages as encrypted.
+Add support to the early boot code to use Secure Memory Encryption (SME).
+Since the kernel has been loaded into memory in a decrypted state, encrypt
+the kernel in place and update the early pagetables with the memory
+encryption mask so that new pagetable entries will use memory encryption.
 
-Reviewed-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+The routines to set the encryption mask and perform the encryption are
+stub routines for now with functionality to be added in a later patch.
+
 Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 ---
- arch/x86/Kconfig                   |   25 +++++++++++++++++++++++++
- arch/x86/include/asm/mem_encrypt.h |   30 ++++++++++++++++++++++++++++++
- arch/x86/mm/Makefile               |    1 +
- arch/x86/mm/mem_encrypt.c          |   21 +++++++++++++++++++++
- include/linux/mem_encrypt.h        |   35 +++++++++++++++++++++++++++++++++++
- 5 files changed, 112 insertions(+)
- create mode 100644 arch/x86/include/asm/mem_encrypt.h
- create mode 100644 arch/x86/mm/mem_encrypt.c
- create mode 100644 include/linux/mem_encrypt.h
+ arch/x86/include/asm/mem_encrypt.h |    8 +++++
+ arch/x86/kernel/head64.c           |   53 +++++++++++++++++++++++++++++-------
+ arch/x86/kernel/head_64.S          |   20 ++++++++++++--
+ arch/x86/mm/mem_encrypt.c          |    9 ++++++
+ include/linux/mem_encrypt.h        |    5 +++
+ 5 files changed, 82 insertions(+), 13 deletions(-)
 
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 72028a1..3a59e9c 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -1409,6 +1409,31 @@ config X86_DIRECT_GBPAGES
- 	  supports them), so don't confuse the user by printing
- 	  that we have them enabled.
- 
-+config ARCH_HAS_MEM_ENCRYPT
-+	def_bool y
-+
-+config AMD_MEM_ENCRYPT
-+	bool "AMD Secure Memory Encryption (SME) support"
-+	depends on X86_64 && CPU_SUP_AMD
-+	---help---
-+	  Say yes to enable support for the encryption of system memory.
-+	  This requires an AMD processor that supports Secure Memory
-+	  Encryption (SME).
-+
-+config AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT
-+	bool "Activate AMD Secure Memory Encryption (SME) by default"
-+	default y
-+	depends on AMD_MEM_ENCRYPT
-+	---help---
-+	  Say yes to have system memory encrypted by default if running on
-+	  an AMD processor that supports Secure Memory Encryption (SME).
-+
-+	  If set to Y, then the encryption of system memory can be
-+	  deactivated with the mem_encrypt=off command line option.
-+
-+	  If set to N, then the encryption of system memory can be
-+	  activated with the mem_encrypt=on command line option.
-+
- # Common NUMA Features
- config NUMA
- 	bool "Numa Memory Allocation and Scheduler Support"
 diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
-new file mode 100644
-index 0000000..a105796
---- /dev/null
+index a105796..475e34f 100644
+--- a/arch/x86/include/asm/mem_encrypt.h
 +++ b/arch/x86/include/asm/mem_encrypt.h
-@@ -0,0 +1,30 @@
-+/*
-+ * AMD Memory Encryption Support
-+ *
-+ * Copyright (C) 2016 Advanced Micro Devices, Inc.
-+ *
-+ * Author: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
-+
-+#ifndef __X86_MEM_ENCRYPT_H__
-+#define __X86_MEM_ENCRYPT_H__
-+
-+#ifndef __ASSEMBLY__
-+
-+#ifdef CONFIG_AMD_MEM_ENCRYPT
-+
-+extern unsigned long sme_me_mask;
-+
-+#else	/* !CONFIG_AMD_MEM_ENCRYPT */
-+
-+#define sme_me_mask	0UL
-+
-+#endif	/* CONFIG_AMD_MEM_ENCRYPT */
-+
-+#endif	/* __ASSEMBLY__ */
-+
-+#endif	/* __X86_MEM_ENCRYPT_H__ */
-diff --git a/arch/x86/mm/Makefile b/arch/x86/mm/Makefile
-index 0fbdcb6..a94a7b6 100644
---- a/arch/x86/mm/Makefile
-+++ b/arch/x86/mm/Makefile
-@@ -39,3 +39,4 @@ obj-$(CONFIG_X86_INTEL_MPX)	+= mpx.o
- obj-$(CONFIG_X86_INTEL_MEMORY_PROTECTION_KEYS) += pkeys.o
- obj-$(CONFIG_RANDOMIZE_MEMORY) += kaslr.o
+@@ -15,14 +15,22 @@
  
-+obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt.o
-diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-new file mode 100644
-index 0000000..b99d469
---- /dev/null
-+++ b/arch/x86/mm/mem_encrypt.c
-@@ -0,0 +1,21 @@
-+/*
-+ * AMD Memory Encryption Support
-+ *
-+ * Copyright (C) 2016 Advanced Micro Devices, Inc.
-+ *
-+ * Author: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
+ #ifndef __ASSEMBLY__
+ 
++#include <linux/init.h>
 +
-+#include <linux/linkage.h>
+ #ifdef CONFIG_AMD_MEM_ENCRYPT
+ 
+ extern unsigned long sme_me_mask;
+ 
++void __init sme_encrypt_kernel(void);
++void __init sme_enable(void);
 +
-+/*
-+ * Since SME related variables are set early in the boot process they must
-+ * reside in the .data section so as not to be zeroed out when the .bss
-+ * section is later cleared.
-+ */
-+unsigned long sme_me_mask __section(.data) = 0;
-+EXPORT_SYMBOL_GPL(sme_me_mask);
-diff --git a/include/linux/mem_encrypt.h b/include/linux/mem_encrypt.h
-new file mode 100644
-index 0000000..59769f7
---- /dev/null
-+++ b/include/linux/mem_encrypt.h
-@@ -0,0 +1,35 @@
-+/*
-+ * AMD Memory Encryption Support
-+ *
-+ * Copyright (C) 2016 Advanced Micro Devices, Inc.
-+ *
-+ * Author: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
+ #else	/* !CONFIG_AMD_MEM_ENCRYPT */
+ 
+ #define sme_me_mask	0UL
+ 
++static inline void __init sme_encrypt_kernel(void) { }
++static inline void __init sme_enable(void) { }
 +
-+#ifndef __MEM_ENCRYPT_H__
-+#define __MEM_ENCRYPT_H__
+ #endif	/* CONFIG_AMD_MEM_ENCRYPT */
+ 
+ #endif	/* __ASSEMBLY__ */
+diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
+index 46c3c73..1f0ddcc 100644
+--- a/arch/x86/kernel/head64.c
++++ b/arch/x86/kernel/head64.c
+@@ -14,6 +14,7 @@
+ #include <linux/start_kernel.h>
+ #include <linux/io.h>
+ #include <linux/memblock.h>
++#include <linux/mem_encrypt.h>
+ 
+ #include <asm/processor.h>
+ #include <asm/proto.h>
+@@ -45,9 +46,10 @@ static void __head *fixup_pointer(void *ptr, unsigned long physaddr)
+ 	return ptr - (void *)_text + (void *)physaddr;
+ }
+ 
+-void __head __startup_64(unsigned long physaddr)
++unsigned long __head __startup_64(unsigned long physaddr)
+ {
+ 	unsigned long load_delta, *p;
++	unsigned long pgtable_flags;
+ 	pgdval_t *pgd;
+ 	p4dval_t *p4d;
+ 	pudval_t *pud;
+@@ -68,6 +70,12 @@ void __head __startup_64(unsigned long physaddr)
+ 	if (load_delta & ~PMD_PAGE_MASK)
+ 		for (;;);
+ 
++	/* Activate Secure Memory Encryption (SME) if supported and enabled */
++	sme_enable();
 +
-+#ifndef __ASSEMBLY__
++	/* Include the SME encryption mask in the fixup value */
++	load_delta += sme_get_me_mask();
 +
-+#ifdef CONFIG_ARCH_HAS_MEM_ENCRYPT
+ 	/* Fixup the physical addresses in the page table */
+ 
+ 	pgd = fixup_pointer(&early_top_pgt, physaddr);
+@@ -94,28 +102,30 @@ void __head __startup_64(unsigned long physaddr)
+ 
+ 	pud = fixup_pointer(early_dynamic_pgts[next_early_pgt++], physaddr);
+ 	pmd = fixup_pointer(early_dynamic_pgts[next_early_pgt++], physaddr);
++	pgtable_flags = _KERNPG_TABLE + sme_get_me_mask();
+ 
+ 	if (IS_ENABLED(CONFIG_X86_5LEVEL)) {
+ 		p4d = fixup_pointer(early_dynamic_pgts[next_early_pgt++], physaddr);
+ 
+ 		i = (physaddr >> PGDIR_SHIFT) % PTRS_PER_PGD;
+-		pgd[i + 0] = (pgdval_t)p4d + _KERNPG_TABLE;
+-		pgd[i + 1] = (pgdval_t)p4d + _KERNPG_TABLE;
++		pgd[i + 0] = (pgdval_t)p4d + pgtable_flags;
++		pgd[i + 1] = (pgdval_t)p4d + pgtable_flags;
+ 
+ 		i = (physaddr >> P4D_SHIFT) % PTRS_PER_P4D;
+-		p4d[i + 0] = (pgdval_t)pud + _KERNPG_TABLE;
+-		p4d[i + 1] = (pgdval_t)pud + _KERNPG_TABLE;
++		p4d[i + 0] = (pgdval_t)pud + pgtable_flags;
++		p4d[i + 1] = (pgdval_t)pud + pgtable_flags;
+ 	} else {
+ 		i = (physaddr >> PGDIR_SHIFT) % PTRS_PER_PGD;
+-		pgd[i + 0] = (pgdval_t)pud + _KERNPG_TABLE;
+-		pgd[i + 1] = (pgdval_t)pud + _KERNPG_TABLE;
++		pgd[i + 0] = (pgdval_t)pud + pgtable_flags;
++		pgd[i + 1] = (pgdval_t)pud + pgtable_flags;
+ 	}
+ 
+ 	i = (physaddr >> PUD_SHIFT) % PTRS_PER_PUD;
+-	pud[i + 0] = (pudval_t)pmd + _KERNPG_TABLE;
+-	pud[i + 1] = (pudval_t)pmd + _KERNPG_TABLE;
++	pud[i + 0] = (pudval_t)pmd + pgtable_flags;
++	pud[i + 1] = (pudval_t)pmd + pgtable_flags;
+ 
+ 	pmd_entry = __PAGE_KERNEL_LARGE_EXEC & ~_PAGE_GLOBAL;
++	pmd_entry += sme_get_me_mask();
+ 	pmd_entry +=  physaddr;
+ 
+ 	for (i = 0; i < DIV_ROUND_UP(_end - _text, PMD_SIZE); i++) {
+@@ -136,9 +146,30 @@ void __head __startup_64(unsigned long physaddr)
+ 			pmd[i] += load_delta;
+ 	}
+ 
+-	/* Fixup phys_base */
++	/*
++	 * Fixup phys_base - remove the memory encryption mask to obtain
++	 * the true physical address.
++	 */
+ 	p = fixup_pointer(&phys_base, physaddr);
+-	*p += load_delta;
++	*p += load_delta - sme_get_me_mask();
 +
-+#include <asm/mem_encrypt.h>
++	/* Encrypt the kernel (if SME is active) */
++	sme_encrypt_kernel();
 +
-+#else	/* !CONFIG_ARCH_HAS_MEM_ENCRYPT */
-+
-+#define sme_me_mask	0UL
-+
-+#endif	/* CONFIG_ARCH_HAS_MEM_ENCRYPT */
-+
-+static inline bool sme_active(void)
-+{
-+	return !!sme_me_mask;
++	/*
++	 * Return the SME encryption mask (if SME is active) to be used as a
++	 * modifier for the initial pgdir entry programmed into CR3.
++	 */
++	return sme_get_me_mask();
 +}
 +
-+#endif	/* __ASSEMBLY__ */
++unsigned long __startup_secondary_64(void)
++{
++	/*
++	 * Return the SME encryption mask (if SME is active) to be used as a
++	 * modifier for the initial pgdir entry programmed into CR3.
++	 */
++	return sme_get_me_mask();
+ }
+ 
+ /* Wipe all early page tables except for the kernel symbol map */
+diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
+index 6225550..ec5d5e9 100644
+--- a/arch/x86/kernel/head_64.S
++++ b/arch/x86/kernel/head_64.S
+@@ -73,12 +73,19 @@ startup_64:
+ 	/* Sanitize CPU configuration */
+ 	call verify_cpu
+ 
++	/*
++	 * Perform pagetable fixups. Additionally, if SME is active, encrypt
++	 * the kernel and retrieve the modifier (SME encryption mask if SME
++	 * is active) to be added to the initial pgdir entry that will be
++	 * programmed into CR3.
++	 */
+ 	leaq	_text(%rip), %rdi
+ 	pushq	%rsi
+ 	call	__startup_64
+ 	popq	%rsi
+ 
+-	movq	$(early_top_pgt - __START_KERNEL_map), %rax
++	/* Form the CR3 value being sure to include the CR3 modifier */
++	addq	$(early_top_pgt - __START_KERNEL_map), %rax
+ 	jmp 1f
+ ENTRY(secondary_startup_64)
+ 	/*
+@@ -98,7 +105,16 @@ ENTRY(secondary_startup_64)
+ 	/* Sanitize CPU configuration */
+ 	call verify_cpu
+ 
+-	movq	$(init_top_pgt - __START_KERNEL_map), %rax
++	/*
++	 * Retrieve the modifier (SME encryption mask if SME is active) to be
++	 * added to the initial pgdir entry that will be programmed into CR3.
++	 */
++	pushq	%rsi
++	call	__startup_secondary_64
++	popq	%rsi
 +
-+#endif	/* __MEM_ENCRYPT_H__ */
++	/* Form the CR3 value being sure to include the CR3 modifier */
++	addq	$(init_top_pgt - __START_KERNEL_map), %rax
+ 1:
+ 
+ 	/* Enable PAE mode, PGE and LA57 */
+diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+index b99d469..3ac6f99 100644
+--- a/arch/x86/mm/mem_encrypt.c
++++ b/arch/x86/mm/mem_encrypt.c
+@@ -11,6 +11,7 @@
+  */
+ 
+ #include <linux/linkage.h>
++#include <linux/init.h>
+ 
+ /*
+  * Since SME related variables are set early in the boot process they must
+@@ -19,3 +20,11 @@
+  */
+ unsigned long sme_me_mask __section(.data) = 0;
+ EXPORT_SYMBOL_GPL(sme_me_mask);
++
++void __init sme_encrypt_kernel(void)
++{
++}
++
++void __init sme_enable(void)
++{
++}
+diff --git a/include/linux/mem_encrypt.h b/include/linux/mem_encrypt.h
+index 59769f7..570f4fc 100644
+--- a/include/linux/mem_encrypt.h
++++ b/include/linux/mem_encrypt.h
+@@ -30,6 +30,11 @@ static inline bool sme_active(void)
+ 	return !!sme_me_mask;
+ }
+ 
++static inline unsigned long sme_get_me_mask(void)
++{
++	return sme_me_mask;
++}
++
+ #endif	/* __ASSEMBLY__ */
+ 
+ #endif	/* __MEM_ENCRYPT_H__ */
