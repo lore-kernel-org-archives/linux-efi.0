@@ -1,8 +1,8 @@
 From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: [PATCH v8 RESEND 27/38] iommu/amd: Allow the AMD IOMMU to work with
-	memory encryption
-Date: Tue, 27 Jun 2017 10:12:30 -0500
-Message-ID: <20170627151230.17428.75281.stgit@tlendack-t1.amdoffice.net>
+Subject: [PATCH v8 RESEND 29/38] x86, drm,
+	fbdev: Do not specify encrypted memory for video mappings
+Date: Tue, 27 Jun 2017 10:12:53 -0500
+Message-ID: <20170627151253.17428.76893.stgit@tlendack-t1.amdoffice.net>
 References: <20170627150718.17428.81813.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,268 +22,193 @@ To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z
 Cc: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The IOMMU is programmed with physical addresses for the various tables
-and buffers that are used to communicate between the device and the
-driver. When the driver allocates this memory it is encrypted. In order
-for the IOMMU to access the memory as encrypted the encryption mask needs
-to be included in these physical addresses during configuration.
-
-The PTE entries created by the IOMMU should also include the encryption
-mask so that when the device behind the IOMMU performs a DMA, the DMA
-will be performed to encrypted memory.
+Since video memory needs to be accessed decrypted, be sure that the
+memory encryption mask is not set for the video ranges.
 
 Reviewed-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 ---
- drivers/iommu/amd_iommu.c       |   30 ++++++++++++++++--------------
- drivers/iommu/amd_iommu_init.c  |   34 ++++++++++++++++++++++++++++------
- drivers/iommu/amd_iommu_proto.h |   10 ++++++++++
- drivers/iommu/amd_iommu_types.h |    2 +-
- 4 files changed, 55 insertions(+), 21 deletions(-)
+ arch/x86/include/asm/vga.h       |   14 +++++++++++++-
+ arch/x86/mm/pageattr.c           |    2 ++
+ drivers/gpu/drm/drm_gem.c        |    2 ++
+ drivers/gpu/drm/drm_vm.c         |    4 ++++
+ drivers/gpu/drm/ttm/ttm_bo_vm.c  |    7 +++++--
+ drivers/gpu/drm/udl/udl_fb.c     |    4 ++++
+ drivers/video/fbdev/core/fbmem.c |   12 ++++++++++++
+ 7 files changed, 42 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/iommu/amd_iommu.c b/drivers/iommu/amd_iommu.c
-index 503849d..16cc54b 100644
---- a/drivers/iommu/amd_iommu.c
-+++ b/drivers/iommu/amd_iommu.c
-@@ -544,7 +544,7 @@ static void dump_dte_entry(u16 devid)
+diff --git a/arch/x86/include/asm/vga.h b/arch/x86/include/asm/vga.h
+index c4b9dc2..9f42bee 100644
+--- a/arch/x86/include/asm/vga.h
++++ b/arch/x86/include/asm/vga.h
+@@ -7,12 +7,24 @@
+ #ifndef _ASM_X86_VGA_H
+ #define _ASM_X86_VGA_H
  
- static void dump_command(unsigned long phys_addr)
- {
--	struct iommu_cmd *cmd = phys_to_virt(phys_addr);
-+	struct iommu_cmd *cmd = iommu_phys_to_virt(phys_addr);
- 	int i;
- 
- 	for (i = 0; i < 4; ++i)
-@@ -865,11 +865,13 @@ static void copy_cmd_to_buffer(struct amd_iommu *iommu,
- 
- static void build_completion_wait(struct iommu_cmd *cmd, u64 address)
- {
-+	u64 paddr = iommu_virt_to_phys((void *)address);
++#include <asm/set_memory.h>
 +
- 	WARN_ON(address & 0x7ULL);
+ /*
+  *	On the PC, we can just recalculate addresses and then
+  *	access the videoram directly without any black magic.
++ *	To support memory encryption however, we need to access
++ *	the videoram as decrypted memory.
+  */
  
- 	memset(cmd, 0, sizeof(*cmd));
--	cmd->data[0] = lower_32_bits(__pa(address)) | CMD_COMPL_WAIT_STORE_MASK;
--	cmd->data[1] = upper_32_bits(__pa(address));
-+	cmd->data[0] = lower_32_bits(paddr) | CMD_COMPL_WAIT_STORE_MASK;
-+	cmd->data[1] = upper_32_bits(paddr);
- 	cmd->data[2] = 1;
- 	CMD_SET_TYPE(cmd, CMD_COMPL_WAIT);
+-#define VGA_MAP_MEM(x, s) (unsigned long)phys_to_virt(x)
++#define VGA_MAP_MEM(x, s)					\
++({								\
++	unsigned long start = (unsigned long)phys_to_virt(x);	\
++								\
++	if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT))			\
++		set_memory_decrypted(start, (s) >> PAGE_SHIFT);	\
++								\
++	start;							\
++})
+ 
+ #define vga_readb(x) (*(x))
+ #define vga_writeb(x, y) (*(y) = (x))
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index d9e09fb..13fc5db 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -1825,11 +1825,13 @@ int set_memory_encrypted(unsigned long addr, int numpages)
+ {
+ 	return __set_memory_enc_dec(addr, numpages, true);
  }
-@@ -1328,7 +1330,7 @@ static bool increase_address_space(struct protection_domain *domain,
- 		return false;
++EXPORT_SYMBOL_GPL(set_memory_encrypted);
  
- 	*pte             = PM_LEVEL_PDE(domain->mode,
--					virt_to_phys(domain->pt_root));
-+					iommu_virt_to_phys(domain->pt_root));
- 	domain->pt_root  = pte;
- 	domain->mode    += 1;
- 	domain->updated  = true;
-@@ -1365,7 +1367,7 @@ static u64 *alloc_pte(struct protection_domain *domain,
- 			if (!page)
- 				return NULL;
+ int set_memory_decrypted(unsigned long addr, int numpages)
+ {
+ 	return __set_memory_enc_dec(addr, numpages, false);
+ }
++EXPORT_SYMBOL_GPL(set_memory_decrypted);
  
--			__npte = PM_LEVEL_PDE(level, virt_to_phys(page));
-+			__npte = PM_LEVEL_PDE(level, iommu_virt_to_phys(page));
- 
- 			/* pte could have been changed somewhere. */
- 			if (cmpxchg64(pte, __pte, __npte) != __pte) {
-@@ -1481,10 +1483,10 @@ static int iommu_map_page(struct protection_domain *dom,
- 			return -EBUSY;
- 
- 	if (count > 1) {
--		__pte = PAGE_SIZE_PTE(phys_addr, page_size);
-+		__pte = PAGE_SIZE_PTE(__sme_set(phys_addr), page_size);
- 		__pte |= PM_LEVEL_ENC(7) | IOMMU_PTE_P | IOMMU_PTE_FC;
- 	} else
--		__pte = phys_addr | IOMMU_PTE_P | IOMMU_PTE_FC;
-+		__pte = __sme_set(phys_addr) | IOMMU_PTE_P | IOMMU_PTE_FC;
- 
- 	if (prot & IOMMU_PROT_IR)
- 		__pte |= IOMMU_PTE_IR;
-@@ -1700,7 +1702,7 @@ static void free_gcr3_tbl_level1(u64 *tbl)
- 		if (!(tbl[i] & GCR3_VALID))
- 			continue;
- 
--		ptr = __va(tbl[i] & PAGE_MASK);
-+		ptr = iommu_phys_to_virt(tbl[i] & PAGE_MASK);
- 
- 		free_page((unsigned long)ptr);
- 	}
-@@ -1715,7 +1717,7 @@ static void free_gcr3_tbl_level2(u64 *tbl)
- 		if (!(tbl[i] & GCR3_VALID))
- 			continue;
- 
--		ptr = __va(tbl[i] & PAGE_MASK);
-+		ptr = iommu_phys_to_virt(tbl[i] & PAGE_MASK);
- 
- 		free_gcr3_tbl_level1(ptr);
- 	}
-@@ -1807,7 +1809,7 @@ static void set_dte_entry(u16 devid, struct protection_domain *domain, bool ats)
- 	u64 flags = 0;
- 
- 	if (domain->mode != PAGE_MODE_NONE)
--		pte_root = virt_to_phys(domain->pt_root);
-+		pte_root = iommu_virt_to_phys(domain->pt_root);
- 
- 	pte_root |= (domain->mode & DEV_ENTRY_MODE_MASK)
- 		    << DEV_ENTRY_MODE_SHIFT;
-@@ -1819,7 +1821,7 @@ static void set_dte_entry(u16 devid, struct protection_domain *domain, bool ats)
- 		flags |= DTE_FLAG_IOTLB;
- 
- 	if (domain->flags & PD_IOMMUV2_MASK) {
--		u64 gcr3 = __pa(domain->gcr3_tbl);
-+		u64 gcr3 = iommu_virt_to_phys(domain->gcr3_tbl);
- 		u64 glx  = domain->glx;
- 		u64 tmp;
- 
-@@ -3470,10 +3472,10 @@ static u64 *__get_gcr3_pte(u64 *root, int level, int pasid, bool alloc)
- 			if (root == NULL)
- 				return NULL;
- 
--			*pte = __pa(root) | GCR3_VALID;
-+			*pte = iommu_virt_to_phys(root) | GCR3_VALID;
- 		}
- 
--		root = __va(*pte & PAGE_MASK);
-+		root = iommu_phys_to_virt(*pte & PAGE_MASK);
- 
- 		level -= 1;
- 	}
-@@ -3652,7 +3654,7 @@ static void set_dte_irq_entry(u16 devid, struct irq_remap_table *table)
- 
- 	dte	= amd_iommu_dev_table[devid].data[2];
- 	dte	&= ~DTE_IRQ_PHYS_ADDR_MASK;
--	dte	|= virt_to_phys(table->table);
-+	dte	|= iommu_virt_to_phys(table->table);
- 	dte	|= DTE_IRQ_REMAP_INTCTL;
- 	dte	|= DTE_IRQ_TABLE_LEN;
- 	dte	|= DTE_IRQ_REMAP_ENABLE;
-diff --git a/drivers/iommu/amd_iommu_init.c b/drivers/iommu/amd_iommu_init.c
-index 5a11328..26862f1 100644
---- a/drivers/iommu/amd_iommu_init.c
-+++ b/drivers/iommu/amd_iommu_init.c
-@@ -29,6 +29,7 @@
- #include <linux/export.h>
- #include <linux/iommu.h>
- #include <linux/kmemleak.h>
+ int set_pages_uc(struct page *page, int numpages)
+ {
+diff --git a/drivers/gpu/drm/drm_gem.c b/drivers/gpu/drm/drm_gem.c
+index b1e28c9..019f48c 100644
+--- a/drivers/gpu/drm/drm_gem.c
++++ b/drivers/gpu/drm/drm_gem.c
+@@ -36,6 +36,7 @@
+ #include <linux/pagemap.h>
+ #include <linux/shmem_fs.h>
+ #include <linux/dma-buf.h>
 +#include <linux/mem_encrypt.h>
- #include <asm/pci-direct.h>
- #include <asm/iommu.h>
- #include <asm/gart.h>
-@@ -346,7 +347,7 @@ static void iommu_set_device_table(struct amd_iommu *iommu)
+ #include <drm/drmP.h>
+ #include <drm/drm_vma_manager.h>
+ #include <drm/drm_gem.h>
+@@ -928,6 +929,7 @@ int drm_gem_mmap_obj(struct drm_gem_object *obj, unsigned long obj_size,
+ 	vma->vm_ops = dev->driver->gem_vm_ops;
+ 	vma->vm_private_data = obj;
+ 	vma->vm_page_prot = pgprot_writecombine(vm_get_page_prot(vma->vm_flags));
++	vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
  
- 	BUG_ON(iommu->mmio_base == NULL);
+ 	/* Take a ref for this mapping of the object, so that the fault
+ 	 * handler can dereference the mmap offset's pointer to the object.
+diff --git a/drivers/gpu/drm/drm_vm.c b/drivers/gpu/drm/drm_vm.c
+index 1170b32..ed4bcbf 100644
+--- a/drivers/gpu/drm/drm_vm.c
++++ b/drivers/gpu/drm/drm_vm.c
+@@ -40,6 +40,7 @@
+ #include <linux/efi.h>
+ #include <linux/slab.h>
+ #endif
++#include <linux/mem_encrypt.h>
+ #include <asm/pgtable.h>
+ #include "drm_internal.h"
+ #include "drm_legacy.h"
+@@ -58,6 +59,9 @@ static pgprot_t drm_io_prot(struct drm_local_map *map,
+ {
+ 	pgprot_t tmp = vm_get_page_prot(vma->vm_flags);
  
--	entry = virt_to_phys(amd_iommu_dev_table);
-+	entry = iommu_virt_to_phys(amd_iommu_dev_table);
- 	entry |= (dev_table_size >> 12) - 1;
- 	memcpy_toio(iommu->mmio_base + MMIO_DEV_TABLE_OFFSET,
- 			&entry, sizeof(entry));
-@@ -602,7 +603,7 @@ static void iommu_enable_command_buffer(struct amd_iommu *iommu)
- 
- 	BUG_ON(iommu->cmd_buf == NULL);
- 
--	entry = (u64)virt_to_phys(iommu->cmd_buf);
-+	entry = iommu_virt_to_phys(iommu->cmd_buf);
- 	entry |= MMIO_CMD_SIZE_512;
- 
- 	memcpy_toio(iommu->mmio_base + MMIO_CMD_BUF_OFFSET,
-@@ -631,7 +632,7 @@ static void iommu_enable_event_buffer(struct amd_iommu *iommu)
- 
- 	BUG_ON(iommu->evt_buf == NULL);
- 
--	entry = (u64)virt_to_phys(iommu->evt_buf) | EVT_LEN_MASK;
-+	entry = iommu_virt_to_phys(iommu->evt_buf) | EVT_LEN_MASK;
- 
- 	memcpy_toio(iommu->mmio_base + MMIO_EVT_BUF_OFFSET,
- 		    &entry, sizeof(entry));
-@@ -664,7 +665,7 @@ static void iommu_enable_ppr_log(struct amd_iommu *iommu)
- 	if (iommu->ppr_log == NULL)
- 		return;
- 
--	entry = (u64)virt_to_phys(iommu->ppr_log) | PPR_LOG_SIZE_512;
-+	entry = iommu_virt_to_phys(iommu->ppr_log) | PPR_LOG_SIZE_512;
- 
- 	memcpy_toio(iommu->mmio_base + MMIO_PPR_LOG_OFFSET,
- 		    &entry, sizeof(entry));
-@@ -744,10 +745,10 @@ static int iommu_init_ga_log(struct amd_iommu *iommu)
- 	if (!iommu->ga_log_tail)
- 		goto err_out;
- 
--	entry = (u64)virt_to_phys(iommu->ga_log) | GA_LOG_SIZE_512;
-+	entry = iommu_virt_to_phys(iommu->ga_log) | GA_LOG_SIZE_512;
- 	memcpy_toio(iommu->mmio_base + MMIO_GA_LOG_BASE_OFFSET,
- 		    &entry, sizeof(entry));
--	entry = ((u64)virt_to_phys(iommu->ga_log) & 0xFFFFFFFFFFFFFULL) & ~7ULL;
-+	entry = (iommu_virt_to_phys(iommu->ga_log) & 0xFFFFFFFFFFFFFULL) & ~7ULL;
- 	memcpy_toio(iommu->mmio_base + MMIO_GA_LOG_TAIL_OFFSET,
- 		    &entry, sizeof(entry));
- 	writel(0x00, iommu->mmio_base + MMIO_GA_HEAD_OFFSET);
-@@ -2535,6 +2536,24 @@ static int __init amd_iommu_init(void)
- 	return ret;
- }
- 
-+static bool amd_iommu_supports_sme(void)
-+{
-+	if (!sme_active() || (boot_cpu_data.x86 != 0x17))
-+		return true;
++	/* We don't want graphics memory to be mapped encrypted */
++	tmp = pgprot_decrypted(tmp);
 +
-+	/* For Fam17h, a specific level of support is required */
-+	if (boot_cpu_data.microcode >= 0x08001205)
-+		return true;
-+
-+	if ((boot_cpu_data.microcode >= 0x08001126) &&
-+	    (boot_cpu_data.microcode <= 0x080011ff))
-+		return true;
-+
-+	pr_notice("AMD-Vi: IOMMU not currently supported when SME is active\n");
-+
-+	return false;
-+}
-+
- /****************************************************************************
-  *
-  * Early detect code. This code runs at IOMMU detection time in the DMA
-@@ -2552,6 +2571,9 @@ int __init amd_iommu_detect(void)
- 	if (amd_iommu_disabled)
- 		return -ENODEV;
+ #if defined(__i386__) || defined(__x86_64__) || defined(__powerpc__)
+ 	if (map->type == _DRM_REGISTERS && !(map->flags & _DRM_WRITE_COMBINING))
+ 		tmp = pgprot_noncached(tmp);
+diff --git a/drivers/gpu/drm/ttm/ttm_bo_vm.c b/drivers/gpu/drm/ttm/ttm_bo_vm.c
+index 9f53df9..622dab6 100644
+--- a/drivers/gpu/drm/ttm/ttm_bo_vm.c
++++ b/drivers/gpu/drm/ttm/ttm_bo_vm.c
+@@ -39,6 +39,7 @@
+ #include <linux/rbtree.h>
+ #include <linux/module.h>
+ #include <linux/uaccess.h>
++#include <linux/mem_encrypt.h>
  
-+	if (!amd_iommu_supports_sme())
-+		return -ENODEV;
-+
- 	ret = iommu_go_to_state(IOMMU_IVRS_DETECTED);
- 	if (ret)
- 		return ret;
-diff --git a/drivers/iommu/amd_iommu_proto.h b/drivers/iommu/amd_iommu_proto.h
-index 466260f..3f12fb2 100644
---- a/drivers/iommu/amd_iommu_proto.h
-+++ b/drivers/iommu/amd_iommu_proto.h
-@@ -87,4 +87,14 @@ static inline bool iommu_feature(struct amd_iommu *iommu, u64 f)
- 	return !!(iommu->features & f);
- }
+ #define TTM_BO_VM_NUM_PREFAULT 16
  
-+static inline u64 iommu_virt_to_phys(void *vaddr)
-+{
-+	return (u64)__sme_set(virt_to_phys(vaddr));
-+}
-+
-+static inline void *iommu_phys_to_virt(unsigned long paddr)
-+{
-+	return phys_to_virt(__sme_clr(paddr));
-+}
-+
- #endif /* _ASM_X86_AMD_IOMMU_PROTO_H  */
-diff --git a/drivers/iommu/amd_iommu_types.h b/drivers/iommu/amd_iommu_types.h
-index 4de8f41..3ce587d 100644
---- a/drivers/iommu/amd_iommu_types.h
-+++ b/drivers/iommu/amd_iommu_types.h
-@@ -343,7 +343,7 @@
+@@ -230,9 +231,11 @@ static int ttm_bo_vm_fault(struct vm_fault *vmf)
+ 	 * first page.
+ 	 */
+ 	for (i = 0; i < TTM_BO_VM_NUM_PREFAULT; ++i) {
+-		if (bo->mem.bus.is_iomem)
++		if (bo->mem.bus.is_iomem) {
++			/* Iomem should not be marked encrypted */
++			cvma.vm_page_prot = pgprot_decrypted(cvma.vm_page_prot);
+ 			pfn = bdev->driver->io_mem_pfn(bo, page_offset);
+-		else {
++		} else {
+ 			page = ttm->pages[page_offset];
+ 			if (unlikely(!page && i == 0)) {
+ 				retval = VM_FAULT_OOM;
+diff --git a/drivers/gpu/drm/udl/udl_fb.c b/drivers/gpu/drm/udl/udl_fb.c
+index 4a65003..92e1690 100644
+--- a/drivers/gpu/drm/udl/udl_fb.c
++++ b/drivers/gpu/drm/udl/udl_fb.c
+@@ -14,6 +14,7 @@
+ #include <linux/slab.h>
+ #include <linux/fb.h>
+ #include <linux/dma-buf.h>
++#include <linux/mem_encrypt.h>
  
- #define IOMMU_PAGE_MASK (((1ULL << 52) - 1) & ~0xfffULL)
- #define IOMMU_PTE_PRESENT(pte) ((pte) & IOMMU_PTE_P)
--#define IOMMU_PTE_PAGE(pte) (phys_to_virt((pte) & IOMMU_PAGE_MASK))
-+#define IOMMU_PTE_PAGE(pte) (iommu_phys_to_virt((pte) & IOMMU_PAGE_MASK))
- #define IOMMU_PTE_MODE(pte) (((pte) >> 9) & 0x07)
+ #include <drm/drmP.h>
+ #include <drm/drm_crtc.h>
+@@ -169,6 +170,9 @@ static int udl_fb_mmap(struct fb_info *info, struct vm_area_struct *vma)
+ 	pr_notice("mmap() framebuffer addr:%lu size:%lu\n",
+ 		  pos, size);
  
- #define IOMMU_PROT_MASK 0x03
++	/* We don't want the framebuffer to be mapped encrypted */
++	vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
++
+ 	while (size > 0) {
+ 		page = vmalloc_to_pfn((void *)pos);
+ 		if (remap_pfn_range(vma, start, page, PAGE_SIZE, PAGE_SHARED))
+diff --git a/drivers/video/fbdev/core/fbmem.c b/drivers/video/fbdev/core/fbmem.c
+index 069fe79..b5e7c33 100644
+--- a/drivers/video/fbdev/core/fbmem.c
++++ b/drivers/video/fbdev/core/fbmem.c
+@@ -32,6 +32,7 @@
+ #include <linux/device.h>
+ #include <linux/efi.h>
+ #include <linux/fb.h>
++#include <linux/mem_encrypt.h>
+ 
+ #include <asm/fb.h>
+ 
+@@ -1405,6 +1406,12 @@ static long fb_compat_ioctl(struct file *file, unsigned int cmd,
+ 	mutex_lock(&info->mm_lock);
+ 	if (fb->fb_mmap) {
+ 		int res;
++
++		/*
++		 * The framebuffer needs to be accessed decrypted, be sure
++		 * SME protection is removed ahead of the call
++		 */
++		vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
+ 		res = fb->fb_mmap(info, vma);
+ 		mutex_unlock(&info->mm_lock);
+ 		return res;
+@@ -1430,6 +1437,11 @@ static long fb_compat_ioctl(struct file *file, unsigned int cmd,
+ 	mutex_unlock(&info->mm_lock);
+ 
+ 	vma->vm_page_prot = vm_get_page_prot(vma->vm_flags);
++	/*
++	 * The framebuffer needs to be accessed decrypted, be sure
++	 * SME protection is removed
++	 */
++	vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
+ 	fb_pgprotect(file, vma, start);
+ 
+ 	return vm_iomap_memory(vma, start, len);
