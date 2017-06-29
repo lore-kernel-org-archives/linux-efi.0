@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 7/7] arm: efi: add PE/COFF debug table to EFI header
-Date: Thu, 29 Jun 2017 08:18:49 +0000
-Message-ID: <20170629081849.15081-8-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 5/7] arm: efi: split zImage code and data into separate PE/COFF sections
+Date: Thu, 29 Jun 2017 08:18:47 +0000
+Message-ID: <20170629081849.15081-6-ard.biesheuvel@linaro.org>
 References: <20170629081849.15081-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20170629081849.15081-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,93 +10,158 @@ To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCv
 Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This updates the PE/COFF header to emit the absolute path to the
-decompressor vmlinux ELF file into a so-called NB10 Codeview entry.
-This is hugely helpful when debugging the firmware->stub handover.
+To prevent unintended modifications to the kernel text (malicious or
+otherwise) while running the EFI stub, describe the kernel image as
+two separate sections: a .text section with read-execute permissions,
+covering .text, .rodata, .piggytext and the GOT sections (which the
+stub does not care about anyway), and a .data section with read-write
+permissions, covering .data and .bss.
+
+This relies on the firmware to actually take the section permission
+flags into account, but this is something that is currently being
+implemented in EDK2, which means we will likely start seeing it in
+the wild between one and two years from now.
 
 Cc: Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm/boot/compressed/Makefile     |  4 ++
- arch/arm/boot/compressed/efi-header.S | 47 ++++++++++++++++++++
- 2 files changed, 51 insertions(+)
+ arch/arm/boot/compressed/efi-header.S  | 32 ++++++++++++++------
+ arch/arm/boot/compressed/vmlinux.lds.S | 30 +++++++++++++-----
+ 2 files changed, 46 insertions(+), 16 deletions(-)
 
-diff --git a/arch/arm/boot/compressed/Makefile b/arch/arm/boot/compressed/Makefile
-index d50430c40045..6b978bdbac3e 100644
---- a/arch/arm/boot/compressed/Makefile
-+++ b/arch/arm/boot/compressed/Makefile
-@@ -196,3 +196,7 @@ AFLAGS_hyp-stub.o := -Wa,-march=armv7-a
- 
- $(obj)/hyp-stub.S: $(srctree)/arch/$(SRCARCH)/kernel/hyp-stub.S
- 	$(call cmd,shipped)
-+
-+ifeq ($(CONFIG_EFI)$(CONFIG_DEBUG_INFO),yy)
-+AFLAGS_head.o += -DVMLINUX_PATH="\"$(realpath $(obj)/vmlinux)\""
-+endif
 diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
-index a14516f7a27e..e902414e90b6 100644
+index 542e1ad432ae..c94a88ae834d 100644
 --- a/arch/arm/boot/compressed/efi-header.S
 +++ b/arch/arm/boot/compressed/efi-header.S
-@@ -98,6 +98,11 @@ extra_header_fields:
- 		.quad	0				@ CertificationTable
- 		.quad	0				@ BaseRelocationTable
+@@ -54,20 +54,22 @@ coff_header:
+ 			IMAGE_FILE_EXECUTABLE_IMAGE | \
+ 			IMAGE_FILE_LINE_NUMS_STRIPPED	@ Characteristics
  
-+#ifdef CONFIG_DEBUG_INFO
-+		.long	efi_debug_table - start		@ DebugTable
-+		.long	efi_debug_table_size
-+#endif
++#define __pecoff_code_size (__pecoff_data_start - __efi_start)
 +
+ optional_header:
+ 		.short	PE_OPT_MAGIC_PE32		@ PE32 format
+ 		.byte	0x02				@ MajorLinkerVersion
+ 		.byte	0x14				@ MinorLinkerVersion
+-		.long	_end - __efi_start		@ SizeOfCode
+-		.long	0				@ SizeOfInitializedData
++		.long	__pecoff_code_size		@ SizeOfCode
++		.long	__pecoff_data_size		@ SizeOfInitializedData
+ 		.long	0				@ SizeOfUninitializedData
+ 		.long	efi_stub_entry - start		@ AddressOfEntryPoint
+ 		.long	start_offset			@ BaseOfCode
+-		.long	0				@ BaseOfData
++		.long	__pecoff_data_start - start	@ BaseOfData
+ 
+ extra_header_fields:
+ 		.long	0				@ ImageBase
+-		.long	SZ_512				@ SectionAlignment
++		.long	SZ_4K				@ SectionAlignment
+ 		.long	SZ_512				@ FileAlignment
+ 		.short	0				@ MajorOsVersion
+ 		.short	0				@ MinorOsVersion
+@@ -77,7 +79,7 @@ extra_header_fields:
+ 		.short	0				@ MinorSubsystemVersion
+ 		.long	0				@ Win32VersionValue
+ 
+-		.long	_end - start			@ SizeOfImage
++		.long	__pecoff_end - start		@ SizeOfImage
+ 		.long	start_offset			@ SizeOfHeaders
+ 		.long	0				@ CheckSum
+ 		.short	IMAGE_SUBSYSTEM_EFI_APPLICATION	@ Subsystem
+@@ -98,9 +100,9 @@ extra_header_fields:
+ 
  section_table:
  		.ascii	".text\0\0\0"
- 		.long	__pecoff_code_size		@ VirtualSize
-@@ -127,6 +132,48 @@ section_table:
+-		.long	_end - __efi_start		@ VirtualSize
++		.long	__pecoff_code_size		@ VirtualSize
+ 		.long	__efi_start			@ VirtualAddress
+-		.long	_edata - __efi_start		@ SizeOfRawData
++		.long	__pecoff_code_size		@ SizeOfRawData
+ 		.long	__efi_start			@ PointerToRawData
+ 		.long	0				@ PointerToRelocations
+ 		.long	0				@ PointerToLineNumbers
+@@ -108,12 +110,24 @@ section_table:
+ 		.short	0				@ NumberOfLineNumbers
+ 		.long	IMAGE_SCN_CNT_CODE | \
+ 			IMAGE_SCN_MEM_READ | \
+-			IMAGE_SCN_MEM_WRITE | \
+ 			IMAGE_SCN_MEM_EXECUTE		@ Characteristics
  
++		.ascii	".data\0\0\0"
++		.long	__pecoff_data_size		@ VirtualSize
++		.long	__pecoff_data_start - start	@ VirtualAddress
++		.long	__pecoff_data_rawsize		@ SizeOfRawData
++		.long	__pecoff_data_start - start	@ PointerToRawData
++		.long	0				@ PointerToRelocations
++		.long	0				@ PointerToLineNumbers
++		.short	0				@ NumberOfRelocations
++		.short	0				@ NumberOfLineNumbers
++		.long	IMAGE_SCN_CNT_INITIALIZED_DATA | \
++			IMAGE_SCN_MEM_READ | \
++			IMAGE_SCN_MEM_WRITE		@ Characteristics
++
  		.set	section_count, (. - section_table) / 40
  
-+#ifdef CONFIG_DEBUG_INFO
-+		/*
-+		 * The debug table is referenced via its Relative Virtual
-+		 * Address (RVA), which is only defined for those parts of
-+		 * the image that are covered by a section declaration. Since
-+		 * this header is not covered by any section, the debug table
-+		 * must be emitted elsewhere. So stick it in the .rodata
-+		 * section instead.
-+		 *
-+		 * Note that the EFI debug entry itself may legally have a
-+		 * zero RVA, which means we can simply put it right after the
-+		 * section headers.
-+		 */
-+		.section	".rodata", #alloc
+-		.align	9
++		.align	12
+ __efi_start:
+ #endif
+ 		.endm
+diff --git a/arch/arm/boot/compressed/vmlinux.lds.S b/arch/arm/boot/compressed/vmlinux.lds.S
+index 1fa62432e283..dfcc2baa0077 100644
+--- a/arch/arm/boot/compressed/vmlinux.lds.S
++++ b/arch/arm/boot/compressed/vmlinux.lds.S
+@@ -53,13 +53,6 @@ SECTIONS
+     *(.rodata)
+     *(.rodata.*)
+   }
+-  .data : {
+-    /*
+-     * The EFI stub always executes from RAM, and runs strictly before the
+-     * decompressor, so we can make an exception for its r/w data, and keep it
+-     */
+-    *(.data.efistub)
+-  }
+   .piggydata : {
+     *(.piggydata)
+   }
+@@ -75,6 +68,26 @@ SECTIONS
+   /* ensure the zImage file size is always a multiple of 64 bits */
+   /* (without a dummy byte, ld just ignores the empty section) */
+   .pad			: { BYTE(0); . = ALIGN(8); }
 +
-+		.align	2
-+efi_debug_table:
-+		// EFI_IMAGE_DEBUG_DIRECTORY_ENTRY
-+		.long	0				@ Characteristics
-+		.long	0				@ TimeDateStamp
-+		.short	0				@ MajorVersion
-+		.short	0				@ MinorVersion
-+		.long	IMAGE_DEBUG_TYPE_CODEVIEW	@ Type
-+		.long	efi_debug_entry_size		@ SizeOfData
-+		.long	0				@ RVA
-+		.long	efi_debug_entry - start		@ FileOffset
++#ifdef CONFIG_EFI_STUB
++  .data : ALIGN(4096) {
++    __pecoff_data_start = .;
++    /*
++     * The EFI stub always executes from RAM, and runs strictly before the
++     * decompressor, so we can make an exception for its r/w data, and keep it
++     */
++    *(.data.efistub)
++    __pecoff_data_end = .;
 +
-+		.set	efi_debug_table_size, . - efi_debug_table
-+		.previous
-+
-+efi_debug_entry:
-+		// EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY
-+		.ascii	"NB10"				@ Signature
-+		.long	0				@ Unknown
-+		.long	0				@ Unknown2
-+		.long	0				@ Unknown3
-+
-+		.asciz	VMLINUX_PATH
-+
-+		.set	efi_debug_entry_size, . - efi_debug_entry
++    /*
++     * PE/COFF mandates a file size which is a multiple of 512 bytes if the
++     * section size equals or exceeds 4 KB
++     */
++    . = ALIGN(512);
++  }
++  __pecoff_data_rawsize = . - ADDR(.data);
 +#endif
 +
- 		.align	12
- __efi_start:
- 		.text
+   _edata = .;
+ 
+   _magic_sig = ZIMAGE_MAGIC(0x016f2818);
+@@ -89,6 +102,9 @@ SECTIONS
+   . = ALIGN(8);		/* the stack must be 64-bit aligned */
+   .stack		: { *(.stack) }
+ 
++  PROVIDE(__pecoff_data_size = ALIGN(512) - ADDR(.data));
++  PROVIDE(__pecoff_end = ALIGN(512));
++
+   .stab 0		: { *(.stab) }
+   .stabstr 0		: { *(.stabstr) }
+   .stab.excl 0		: { *(.stab.excl) }
 -- 
 2.9.3
