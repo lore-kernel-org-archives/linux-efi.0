@@ -1,75 +1,63 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [PATCH v8 RESEND 27/38] iommu/amd: Allow the AMD IOMMU to work
- with memory encryption
-Date: Wed, 28 Jun 2017 09:05:44 -0500
-Message-ID: <03a9d0f5-1f0e-ca0c-78a4-c3a7242f6935@amd.com>
-References: <20170627150718.17428.81813.stgit@tlendack-t1.amdoffice.net>
- <20170627151230.17428.75281.stgit@tlendack-t1.amdoffice.net>
- <20170628093627.GD14532@8bytes.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170628093627.GD14532@8bytes.org>
-Content-Language: en-US
-Sender: owner-linux-mm@kvack.org
-To: Joerg Roedel <joro@8bytes.org>
-Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, x86@kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, linux-mm@kvack.org, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dyoung@redhat.com>, Rik van Riel <riel@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Borislav Petkov <bp@alie>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2 0/7] ARM: efi: PE/COFF cleanup/hardening
+Date: Thu, 29 Jun 2017 08:18:42 +0000
+Message-ID: <20170629081849.15081-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org
+Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 6/28/2017 4:36 AM, Joerg Roedel wrote:
-> Hi Tom,
+This is the ARM counterpart of the changes now in v4.12 to clean up
+the PE/COFF header (which makes the kernel zImage loadable directly from
+UEFI), and to enhance it with hardening and debug features.
 
-Hi Joerg,
+Russell: patches #4 - #7 need your ack before I can take them via the EFI
+tree. Please let me know if you have any objections, either to the patches
+themselves, or to them going via another tree. Thanks.
 
-> 
-> On Tue, Jun 27, 2017 at 10:12:30AM -0500, Tom Lendacky wrote:
->> ---
->>   drivers/iommu/amd_iommu.c       |   30 ++++++++++++++++--------------
->>   drivers/iommu/amd_iommu_init.c  |   34 ++++++++++++++++++++++++++++------
->>   drivers/iommu/amd_iommu_proto.h |   10 ++++++++++
->>   drivers/iommu/amd_iommu_types.h |    2 +-
->>   4 files changed, 55 insertions(+), 21 deletions(-)
-> 
-> Looks like a straightforward change. Just one nit below.
-> 
->> +static bool amd_iommu_supports_sme(void)
->> +{
->> +	if (!sme_active() || (boot_cpu_data.x86 != 0x17))
->> +		return true;
->> +
->> +	/* For Fam17h, a specific level of support is required */
->> +	if (boot_cpu_data.microcode >= 0x08001205)
->> +		return true;
->> +
->> +	if ((boot_cpu_data.microcode >= 0x08001126) &&
->> +	    (boot_cpu_data.microcode <= 0x080011ff))
->> +		return true;
->> +
->> +	pr_notice("AMD-Vi: IOMMU not currently supported when SME is active\n");
->> +
->> +	return false;
->> +}
-> 
-> The name of the function is misleading. It checks whether the IOMMU can
-> be enabled when SME is active. But the name suggests that it checks
-> whether the iommu hardware supports SME.
-> 
-> How about renaming it to amd_iommu_sme_check()?
+v1 blurb:
 
-Can do.
+First of all, the cleanup consists of making the header comply with the
+PE/COFF spec (#1), removing the .reloc section (#2) and replacing all
+open coded constants with #defines from linux/pe.h (#3)
 
-Thanks,
-Tom
+Patch #4 is a standalone patch that removes ksymtab/kcrctab sections that
+may get pulled in inadvertently when the decompressor is built with EFI
+support. Note that these sections are tiny and harmless by themselves, but
+the linker may dump them in unexpected places if they are not placed
+explicitly, which may interfere with the image layout. This is especially
+important when signing zImages for UEFI secure boot.
 
-> 
-> With that change the patch is:
-> 
-> 	Acked-by: Joerg Roedel <jroedel@suse.de>
-> 
+Patch #5 changes the description of the decompressor in memory, so that the
+UEFI firmware can apply strict ro/nx protections, resulting in a more secure
+execution environment for the UEFI stub.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Patch #6 splits the decompressor .start and .text output sections, so that
+the ELF view aligns with the PE/COFF view of the binary. This is necessary
+for patch #7 to work as expected.
+
+Patch #7 enhances the decompressor binary with a NB10 Codeview debug entry
+referring to the path to arch/arm/boot/compressed/vmlinux on the build host.
+This is a debug feature that allows seamless source level single step debugging
+of the UEFI stub while executing in the context of the firmware.
+
+v2: - rebase onto v4.12-rc7+
+    - simplify #3
+
+Ard Biesheuvel (7):
+  arm: efi: remove forbidden values from the PE/COFF header
+  arm: efi: remove pointless dummy .reloc section
+  arm: efi: replace open coded constants with symbolic ones
+  arm: compressed: discard ksymtab/kcrctab sections
+  arm: efi: split zImage code and data into separate PE/COFF sections
+  arm: compressed: put zImage header and EFI header in dedicated section
+  arm: efi: add PE/COFF debug table to EFI header
+
+ arch/arm/boot/compressed/Makefile      |   4 +
+ arch/arm/boot/compressed/efi-header.S  | 214 ++++++++++++--------
+ arch/arm/boot/compressed/vmlinux.lds.S |  39 +++-
+ 3 files changed, 168 insertions(+), 89 deletions(-)
+
+-- 
+2.9.3
