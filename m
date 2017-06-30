@@ -1,82 +1,86 @@
-From: Robert Richter <robert.richter@cavium.com>
+From: "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Subject: Re: [PATCH V17 01/11] acpi: apei: read ack upon ghes record
  consumption
-Date: Fri, 30 Jun 2017 12:10:43 +0200
-Message-ID: <20170630101043.GZ658@rric.localdomain>
+Date: Fri, 30 Jun 2017 10:47:17 -0600
+Message-ID: <fc05bd05-274d-3491-bbf8-f38dc0a16e49@codeaurora.org>
 References: <1495225933-4410-1-git-send-email-tbaicar@codeaurora.org>
  <1495225933-4410-2-git-send-email-tbaicar@codeaurora.org>
+ <20170630101043.GZ658@rric.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-Content-Disposition: inline
-In-Reply-To: <1495225933-4410-2-git-send-email-tbaicar@codeaurora.org>
-List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
-List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
-List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
-List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
-List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
- <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
-Errors-To: kvmarm-bounces@lists.cs.columbia.edu
-Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: linux-efi@vger.kernel.org, kvm@vger.kernel.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, robert.moore@intel.com, paul.gortmaker@windriver.com, lv.zheng@intel.com, kvmarm@lists.cs.columbia.edu, fu.wei@linaro.org, rafael@kernel.org, zjzhang@codeaurora.org, linux@armlinux.org.uk, gengdongjiu@huawei.com, linux-acpi@vger.kernel.org, eun.taik.lee@samsung.com, shijie.huang@arm.com, labbott@redhat.com, lenb@kernel.org, harba@codeaurora.org, john.garry@huawei.com, marc.zyngier@arm.com, punit.agrawal@arm.com, rostedt@goodmis.org, nkaje@codeaurora.org, bp@alien8.de, sandeepa.s.prabhu@gmail.com, linux-arm-kernel@lists.infradead.org, tony.luck@intel.com, rjw@rjwysocki.net, rruigrok@codeaurora.org, linux-kernel@vger.kernel.org, astone@redhat.com, hanjun.guo@linaro.org, joe@perches.com, pbonzini@redhat.com, akpm@linux-foundation.org, bristot@redhat.comsh
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170630101043.GZ658-vWBEXY7mpu582hYKe6nXyg@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Robert Richter <robert.richter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Cc: christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, james.morse-5wv7dgnIgG8@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, eun.taik.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, sandeepa.s.prabhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, shijie.huang-5wv7dgnIgG8@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org, tn-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, bristot-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Tyler,
+On 6/30/2017 4:10 AM, Robert Richter wrote:
+> Tyler,
+>
+> On 19.05.17 14:32:03, Tyler Baicar wrote:
+>> A RAS (Reliability, Availability, Serviceability) controller
+>> may be a separate processor running in parallel with OS
+>> execution, and may generate error records for consumption by
+>> the OS. If the RAS controller produces multiple error records,
+>> then they may be overwritten before the OS has consumed them.
+>>
+>> The Generic Hardware Error Source (GHES) v2 structure
+>> introduces the capability for the OS to acknowledge the
+>> consumption of the error record generated by the RAS
+>> controller. A RAS controller supporting GHESv2 shall wait for
+>> the acknowledgment before writing a new error record, thus
+>> eliminating the race condition.
+>>
+>> Add support for parsing of GHESv2 sub-tables as well.
+>>
+>> Signed-off-by: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>> CC: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>> Reviewed-by: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+>> ---
+>>   drivers/acpi/apei/ghes.c | 59 +++++++++++++++++++++++++++++++++++++++++++++---
+>>   drivers/acpi/apei/hest.c |  7 ++++--
+>>   include/acpi/ghes.h      |  5 +++-
+>>   3 files changed, 65 insertions(+), 6 deletions(-)
+>>   static int ghes_proc(struct ghes *ghes)
+>>   {
+>>   	int rc;
+>> @@ -661,6 +704,16 @@ static int ghes_proc(struct ghes *ghes)
+>>   			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
+>>   	}
+>>   	ghes_do_proc(ghes, ghes->estatus);
+>> +
+>> +	/*
+>> +	 * GHESv2 type HEST entries introduce support for error acknowledgment,
+>> +	 * so only acknowledge the error if this support is present.
+>> +	 */
+>> +	if (is_hest_type_generic_v2(ghes)) {
+>> +		rc = ghes_ack_error(ghes->generic_v2);
+>> +		if (rc)
+>> +			return rc;
+>> +	}
+>>   out:
+>>   	ghes_clear_estatus(ghes);
+>>   	return rc;
+> was there any specific reason why the ack is sent before clearing the
+> block status? Spec says the ack should be sent at last.
+>
+> Also, the block is never cleared if ghes_ack_error() returns an error.
+> IMO we should fall through and clear the block status (this will
+> change anyway if the bloc status is cleared first).
+Hello Robert,
 
-On 19.05.17 14:32:03, Tyler Baicar wrote:
-> A RAS (Reliability, Availability, Serviceability) controller
-> may be a separate processor running in parallel with OS
-> execution, and may generate error records for consumption by
-> the OS. If the RAS controller produces multiple error records,
-> then they may be overwritten before the OS has consumed them.
-> 
-> The Generic Hardware Error Source (GHES) v2 structure
-> introduces the capability for the OS to acknowledge the
-> consumption of the error record generated by the RAS
-> controller. A RAS controller supporting GHESv2 shall wait for
-> the acknowledgment before writing a new error record, thus
-> eliminating the race condition.
-> 
-> Add support for parsing of GHESv2 sub-tables as well.
-> 
-> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
-> CC: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-> Reviewed-by: James Morse <james.morse@arm.com>
-> ---
->  drivers/acpi/apei/ghes.c | 59 +++++++++++++++++++++++++++++++++++++++++++++---
->  drivers/acpi/apei/hest.c |  7 ++++--
->  include/acpi/ghes.h      |  5 +++-
->  3 files changed, 65 insertions(+), 6 deletions(-)
+Thank you for pointing this out. I will send a patch to move the ack 
+after the ghes_clear_estatus. This is probably the right thing to do 
+since right now if the FW populates an invalid estatus, we will fail to 
+read the estatus, jump to 'out:', and never send the ack.
 
->  static int ghes_proc(struct ghes *ghes)
->  {
->  	int rc;
-> @@ -661,6 +704,16 @@ static int ghes_proc(struct ghes *ghes)
->  			ghes_estatus_cache_add(ghes->generic, ghes->estatus);
->  	}
->  	ghes_do_proc(ghes, ghes->estatus);
-> +
-> +	/*
-> +	 * GHESv2 type HEST entries introduce support for error acknowledgment,
-> +	 * so only acknowledge the error if this support is present.
-> +	 */
-> +	if (is_hest_type_generic_v2(ghes)) {
-> +		rc = ghes_ack_error(ghes->generic_v2);
-> +		if (rc)
-> +			return rc;
-> +	}
->  out:
->  	ghes_clear_estatus(ghes);
->  	return rc;
+Thanks,
+Tyler
 
-was there any specific reason why the ack is sent before clearing the
-block status? Spec says the ack should be sent at last.
-
-Also, the block is never cleared if ghes_ack_error() returns an error.
-IMO we should fall through and clear the block status (this will
-change anyway if the bloc status is cleared first).
-
--Robert
+-- 
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
