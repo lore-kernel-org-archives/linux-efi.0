@@ -1,43 +1,90 @@
-From: Joe Perches <joe@perches.com>
-Subject: [PATCH 11/18] x86/efi: Move asmlinkage before return type
-Date: Wed,  5 Jul 2017 13:02:20 -0700
-Message-ID: <1cd3d401626e51ea0e2333a860e76e80bc560a4c.1499284835.git.joe@perches.com>
-References: <cover.1499284835.git.joe@perches.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1499284835.git.joe@perches.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Mimi Zohar <zohar@linux.vnet.ibm.com>
+Subject: [RFC PATCH] efivarfs: define integrity_read method
+Date: Thu, 06 Jul 2017 08:14:01 -0400
+Message-ID: <1499343241.5500.15.camel@linux.vnet.ibm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Matthew Garrett <mjg59@srcf.ucam.org>, Christoph Hellwig <hch@lst.de>
+Cc: linux-fsdevel@vger.kernel.org, linux-ima-devel@lists.sourceforge.net, linux-security-module <linux-security-module@vger.kernel.org>, linux-ima-user <linux-ima-user@lists.sourceforge.net>, linux-efi <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Make the code like the rest of the kernel.
+This patch defines an ->integrity_read file operation method to read data for
+integrity hash collection.
 
-Signed-off-by: Joe Perches <joe@perches.com>
+(Posting separately for review, before being squashed with the others.) 
+
+Signed-off-by: Mimi Zohar <zohar@linux.vnet.ibm.com>
 ---
- arch/x86/include/asm/efi.h | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ fs/efivarfs/file.c | 29 +++++++++++++++++++++++++----
+ 1 file changed, 25 insertions(+), 4 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index d2ff779f347e..796ff6c1aa53 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -33,7 +33,7 @@
+diff --git a/fs/efivarfs/file.c b/fs/efivarfs/file.c
+index 5f22e74bbade..b687c982e0a1 100644
+--- a/fs/efivarfs/file.c
++++ b/fs/efivarfs/file.c
+@@ -10,6 +10,7 @@
+ #include <linux/efi.h>
+ #include <linux/fs.h>
+ #include <linux/slab.h>
++#include <linux/uio.h>
+ #include <linux/mount.h>
  
- #ifdef CONFIG_X86_32
+ #include "internal.h"
+@@ -64,8 +65,9 @@ static ssize_t efivarfs_file_write(struct file *file,
+ 	return bytes;
+ }
  
--extern unsigned long asmlinkage efi_call_phys(void *, ...);
-+extern asmlinkage unsigned long efi_call_phys(void *, ...);
+-static ssize_t efivarfs_file_read(struct file *file, char __user *userbuf,
+-		size_t count, loff_t *ppos)
++static ssize_t __efivarfs_file_read(struct file *file, char __user *userbuf,
++				    size_t count, loff_t *ppos,
++				    struct iov_iter *iter)
+ {
+ 	struct efivar_entry *var = file->private_data;
+ 	unsigned long datasize = 0;
+@@ -96,14 +98,32 @@ static ssize_t efivarfs_file_read(struct file *file, char __user *userbuf,
+ 		goto out_free;
  
- #define arch_efi_call_virt_setup()	kernel_fpu_begin()
- #define arch_efi_call_virt_teardown()	kernel_fpu_end()
-@@ -52,7 +52,7 @@ extern unsigned long asmlinkage efi_call_phys(void *, ...);
+ 	memcpy(data, &attributes, sizeof(attributes));
+-	size = simple_read_from_buffer(userbuf, count, ppos,
+-				       data, datasize + sizeof(attributes));
++
++	if (!iter)
++		size = simple_read_from_buffer(userbuf, count, ppos, data,
++					       datasize + sizeof(attributes));
++	else
++		size = copy_to_iter(data, datasize + sizeof(attributes), iter);
+ out_free:
+ 	kfree(data);
  
- #define EFI_LOADER_SIGNATURE	"EL64"
+ 	return size;
+ }
  
--extern u64 asmlinkage efi_call(void *fp, ...);
-+extern asmlinkage u64 efi_call(void *fp, ...);
- 
- #define efi_call_phys(f, args...)		efi_call((f), args)
- 
++static ssize_t efivarfs_file_read(struct file *file, char __user *userbuf,
++				  size_t count, loff_t *ppos)
++{
++	return __efivarfs_file_read(file, userbuf, count, ppos, NULL);
++}
++
++static ssize_t efivarfs_file_read_iter(struct kiocb *iocb,
++				       struct iov_iter *iter)
++{
++	struct file *file = iocb->ki_filp;
++
++	return __efivarfs_file_read(file, NULL, 0, NULL, iter);
++}
++
+ static int
+ efivarfs_ioc_getxflags(struct file *file, void __user *arg)
+ {
+@@ -178,4 +198,5 @@ const struct file_operations efivarfs_file_operations = {
+ 	.write	= efivarfs_file_write,
+ 	.llseek	= no_llseek,
+ 	.unlocked_ioctl = efivarfs_file_ioctl,
++	.integrity_read	= efivarfs_file_read_iter,
+ };
 -- 
-2.10.0.rc2.1.g053435c
+2.7.4
