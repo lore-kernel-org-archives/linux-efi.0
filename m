@@ -1,7 +1,7 @@
 From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: [PATCH v9 06/38] x86/mm: Add Secure Memory Encryption (SME) support
-Date: Fri, 07 Jul 2017 08:39:13 -0500
-Message-ID: <20170707133913.29711.72455.stgit@tlendack-t1.amdoffice.net>
+Subject: [PATCH v9 07/38] x86/mm: Remove phys_to_virt() usage in ioremap()
+Date: Fri, 07 Jul 2017 08:39:26 -0500
+Message-ID: <20170707133925.29711.39301.stgit@tlendack-t1.amdoffice.net>
 References: <20170707133804.29711.1616.stgit@tlendack-t1.amdoffice.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,170 +21,46 @@ To: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z
 Cc: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Boris Ostrovsky <boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Radim =?utf-8?b?S3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rik van Riel <riel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Juergen Gross <jgross-IBi9RG/b67k@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Add support for Secure Memory Encryption (SME). This initial support
-provides a Kconfig entry to build the SME support into the kernel and
-defines the memory encryption mask that will be used in subsequent
-patches to mark pages as encrypted.
+Currently there is a check if the address being mapped is in the ISA
+range (is_ISA_range()), and if it is, then phys_to_virt() is used to
+perform the mapping. When SME is active, the default is to add pagetable
+mappings with the encryption bit set unless specifically overridden. The
+resulting pagetable mapping from phys_to_virt() will result in a mapping
+that has the encryption bit set. With SME, the use of ioremap() is
+intended to generate pagetable mappings that do not have the encryption
+bit set through the use of the PAGE_KERNEL_IO protection value.
 
-Reviewed-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Rather than special case the SME scenario, remove the ISA range check and
+usage of phys_to_virt() and have ISA range mappings continue through the
+remaining ioremap() path.
+
 Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 ---
- arch/x86/Kconfig                   |   25 +++++++++++++++++++++++++
- arch/x86/include/asm/mem_encrypt.h |   30 ++++++++++++++++++++++++++++++
- arch/x86/mm/Makefile               |    1 +
- arch/x86/mm/mem_encrypt.c          |   21 +++++++++++++++++++++
- include/linux/mem_encrypt.h        |   35 +++++++++++++++++++++++++++++++++++
- 5 files changed, 112 insertions(+)
- create mode 100644 arch/x86/include/asm/mem_encrypt.h
- create mode 100644 arch/x86/mm/mem_encrypt.c
- create mode 100644 include/linux/mem_encrypt.h
+ arch/x86/mm/ioremap.c |    7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
 
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index e767ed2..0f2f8b3 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -1410,6 +1410,31 @@ config X86_DIRECT_GBPAGES
- 	  supports them), so don't confuse the user by printing
- 	  that we have them enabled.
+diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
+index 4c1b5fd..bfc3e2d 100644
+--- a/arch/x86/mm/ioremap.c
++++ b/arch/x86/mm/ioremap.c
+@@ -13,6 +13,7 @@
+ #include <linux/slab.h>
+ #include <linux/vmalloc.h>
+ #include <linux/mmiotrace.h>
++#include <linux/mem_encrypt.h>
  
-+config ARCH_HAS_MEM_ENCRYPT
-+	def_bool y
-+
-+config AMD_MEM_ENCRYPT
-+	bool "AMD Secure Memory Encryption (SME) support"
-+	depends on X86_64 && CPU_SUP_AMD
-+	---help---
-+	  Say yes to enable support for the encryption of system memory.
-+	  This requires an AMD processor that supports Secure Memory
-+	  Encryption (SME).
-+
-+config AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT
-+	bool "Activate AMD Secure Memory Encryption (SME) by default"
-+	default y
-+	depends on AMD_MEM_ENCRYPT
-+	---help---
-+	  Say yes to have system memory encrypted by default if running on
-+	  an AMD processor that supports Secure Memory Encryption (SME).
-+
-+	  If set to Y, then the encryption of system memory can be
-+	  deactivated with the mem_encrypt=off command line option.
-+
-+	  If set to N, then the encryption of system memory can be
-+	  activated with the mem_encrypt=on command line option.
-+
- # Common NUMA Features
- config NUMA
- 	bool "Numa Memory Allocation and Scheduler Support"
-diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
-new file mode 100644
-index 0000000..a105796
---- /dev/null
-+++ b/arch/x86/include/asm/mem_encrypt.h
-@@ -0,0 +1,30 @@
-+/*
-+ * AMD Memory Encryption Support
-+ *
-+ * Copyright (C) 2016 Advanced Micro Devices, Inc.
-+ *
-+ * Author: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
-+
-+#ifndef __X86_MEM_ENCRYPT_H__
-+#define __X86_MEM_ENCRYPT_H__
-+
-+#ifndef __ASSEMBLY__
-+
-+#ifdef CONFIG_AMD_MEM_ENCRYPT
-+
-+extern unsigned long sme_me_mask;
-+
-+#else	/* !CONFIG_AMD_MEM_ENCRYPT */
-+
-+#define sme_me_mask	0UL
-+
-+#endif	/* CONFIG_AMD_MEM_ENCRYPT */
-+
-+#endif	/* __ASSEMBLY__ */
-+
-+#endif	/* __X86_MEM_ENCRYPT_H__ */
-diff --git a/arch/x86/mm/Makefile b/arch/x86/mm/Makefile
-index 0fbdcb6..a94a7b6 100644
---- a/arch/x86/mm/Makefile
-+++ b/arch/x86/mm/Makefile
-@@ -39,3 +39,4 @@ obj-$(CONFIG_X86_INTEL_MPX)	+= mpx.o
- obj-$(CONFIG_X86_INTEL_MEMORY_PROTECTION_KEYS) += pkeys.o
- obj-$(CONFIG_RANDOMIZE_MEMORY) += kaslr.o
+ #include <asm/set_memory.h>
+ #include <asm/e820/api.h>
+@@ -106,12 +107,6 @@ static void __iomem *__ioremap_caller(resource_size_t phys_addr,
+ 	}
  
-+obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt.o
-diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-new file mode 100644
-index 0000000..b99d469
---- /dev/null
-+++ b/arch/x86/mm/mem_encrypt.c
-@@ -0,0 +1,21 @@
-+/*
-+ * AMD Memory Encryption Support
-+ *
-+ * Copyright (C) 2016 Advanced Micro Devices, Inc.
-+ *
-+ * Author: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
-+
-+#include <linux/linkage.h>
-+
-+/*
-+ * Since SME related variables are set early in the boot process they must
-+ * reside in the .data section so as not to be zeroed out when the .bss
-+ * section is later cleared.
-+ */
-+unsigned long sme_me_mask __section(.data) = 0;
-+EXPORT_SYMBOL_GPL(sme_me_mask);
-diff --git a/include/linux/mem_encrypt.h b/include/linux/mem_encrypt.h
-new file mode 100644
-index 0000000..59769f7
---- /dev/null
-+++ b/include/linux/mem_encrypt.h
-@@ -0,0 +1,35 @@
-+/*
-+ * AMD Memory Encryption Support
-+ *
-+ * Copyright (C) 2016 Advanced Micro Devices, Inc.
-+ *
-+ * Author: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
-+
-+#ifndef __MEM_ENCRYPT_H__
-+#define __MEM_ENCRYPT_H__
-+
-+#ifndef __ASSEMBLY__
-+
-+#ifdef CONFIG_ARCH_HAS_MEM_ENCRYPT
-+
-+#include <asm/mem_encrypt.h>
-+
-+#else	/* !CONFIG_ARCH_HAS_MEM_ENCRYPT */
-+
-+#define sme_me_mask	0UL
-+
-+#endif	/* CONFIG_ARCH_HAS_MEM_ENCRYPT */
-+
-+static inline bool sme_active(void)
-+{
-+	return !!sme_me_mask;
-+}
-+
-+#endif	/* __ASSEMBLY__ */
-+
-+#endif	/* __MEM_ENCRYPT_H__ */
+ 	/*
+-	 * Don't remap the low PCI/ISA area, it's always mapped..
+-	 */
+-	if (is_ISA_range(phys_addr, last_addr))
+-		return (__force void __iomem *)phys_to_virt(phys_addr);
+-
+-	/*
+ 	 * Don't allow anybody to remap normal RAM that we're using..
+ 	 */
+ 	pfn      = phys_addr >> PAGE_SHIFT;
