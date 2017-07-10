@@ -1,112 +1,59 @@
-From: <iker-KvP5wT2u2U0@public.gmane.org>
-Subject: (unknown)
-Date: Sun, 09 Jul 2017 20:52:43 -0000
-Message-ID: <149963356307.5362.4147576465474473910@vnpt.vn>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Subject: Re: [PATCH v9 00/38] x86: Secure Memory Encryption (AMD)
+Date: Mon, 10 Jul 2017 13:04:11 -0500
+Message-ID: <fce185d2-4420-7255-6331-6231c643c8c7@amd.com>
+References: <20170707133804.29711.1616.stgit@tlendack-t1.amdoffice.net>
+ <20170708092426.prf7xmmnv6xvdqx4@gmail.com>
 Mime-Version: 1.0
-Content-Type: application/zip; name="540211.zip"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Subject: 
-Content-Disposition: attachment
+In-Reply-To: <20170708092426.prf7xmmnv6xvdqx4-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrey Ryabinin <aryabinin-5HdwGun5lf+gSpxsJD1C4w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-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
+
+
+On 7/8/2017 4:24 AM, Ingo Molnar wrote:
+> 
+> * Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org> wrote:
+> 
+>> This patch series provides support for AMD's new Secure Memory Encryption (SME)
+>> feature.
+> 
+> I'm wondering, what's the typical performance hit to DRAM access latency when SME
+> is enabled?
+
+It's about an extra 10 cycles of DRAM latency when performing an
+encryption or decryption operation.
+
+> 
+> On that same note, if the performance hit is noticeable I'd expect SME to not be
+> enabled in native kernels typically - but still it looks like a useful hardware
+
+In some internal testing we've seen about 1.5% or less reduction in
+performance. Of course it all depends on the workload: the number of
+memory accesses, cache friendliness, etc.
+
+> feature. Since it's controlled at the page table level, have you considered
+> allowing SME-activated vmas via mmap(), even on kernels that are otherwise not
+> using encrypted DRAM?
+
+That is definitely something to consider as an additional SME-related
+feature and something I can look into after this.
+
+Thanks,
+Tom
+
+> 
+> One would think that putting encryption keys into such encrypted RAM regions would
+> generally improve robustness against various physical space attacks that want to
+> extract keys but don't have full control of the CPU.
+> 
+> Thanks,
+> 
+> 	Ingo
+> 
