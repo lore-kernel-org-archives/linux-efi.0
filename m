@@ -1,58 +1,111 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [PATCH v9 04/38] x86/CPU/AMD: Add the Secure Memory Encryption
- CPU feature
-Date: Tue, 11 Jul 2017 10:14:34 -0500
-Message-ID: <df089d57-3785-c669-6c3b-6f90f77c3658@amd.com>
+From: Brian Gerst <brgerst@gmail.com>
+Subject: Re: [PATCH v9 07/38] x86/mm: Remove phys_to_virt() usage in ioremap()
+Date: Tue, 11 Jul 2017 11:38:59 -0400
+Message-ID: <CAMzpN2i+sqqarshuYJBBNxwP25q_ERezOxRZ-d8+8Ztt=Qm_iw@mail.gmail.com>
 References: <20170707133804.29711.1616.stgit@tlendack-t1.amdoffice.net>
- <20170707133850.29711.29549.stgit@tlendack-t1.amdoffice.net>
- <CAMzpN2j-gXvx2wAp3EvQB70Mr_oz0MSUzG=c-mhu-bnRiQGaFQ@mail.gmail.com>
- <f5657d4a-aa15-9602-bb36-1a3cfe7fbcc1@amd.com>
- <CAMzpN2hqYMVwhDRTGEhcUxqN2+6ToMmy6NBUutYJgPoOJEH4uQ@mail.gmail.com>
- <20170711055659.GA4554@nazgul.tnic>
+ <20170707133925.29711.39301.stgit@tlendack-t1.amdoffice.net>
+ <CAMzpN2h=AAF6OVfeGJnf5va2Msmd_BPU5BrVENvs0zGQtRMdzQ@mail.gmail.com>
+ <ca43df91-163e-82ce-1d40-c17cfc90e957@amd.com> <CAMzpN2gq0TZbgy-3PUixwvL+6ECX5bOdE0XZsLtGFXA+-Embeg@mail.gmail.com>
+ <81fbf5db-c42f-cfe6-5d31-d60adbd18f26@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170711055659.GA4554-K5JNixvcfoxupOikMc4+xw@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-arch <linux-arch-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, the arch/x86 maintainers <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, kasan-dev-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, Linux-MM <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, Toshimitsu Kani <toshi.kani-ZPxbGqLxI0U@public.gmane.org>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Larry Woodman <lwoodman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-arch-owner@vger.kernel.org>
+In-Reply-To: <81fbf5db-c42f-cfe6-5d31-d60adbd18f26@amd.com>
+Sender: linux-arch-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-arch <linux-arch@vger.kernel.org>, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, the arch/x86 maintainers <x86@kernel.org>, kexec@lists.infradead.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, kasan-dev <kasan-dev@googlegroups.com>, xen-devel@lists.xen.org, Linux-MM <linux-mm@kvack.org>, "open list:IOMMU DRIVERS" <iommu@lists.linux-foundation.org>, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, Mich
 List-Id: linux-efi@vger.kernel.org
 
-On 7/11/2017 12:56 AM, Borislav Petkov wrote:
-> On Tue, Jul 11, 2017 at 01:07:46AM -0400, Brian Gerst wrote:
->>> If I make the scattered feature support conditional on CONFIG_X86_64
->>> (based on comment below) then cpu_has() will always be false unless
->>> CONFIG_X86_64 is enabled. So this won't need to be wrapped by the
->>> #ifdef.
+On Tue, Jul 11, 2017 at 11:02 AM, Tom Lendacky <thomas.lendacky@amd.com> wrote:
+> On 7/10/2017 11:58 PM, Brian Gerst wrote:
 >>
->> If you change it to use cpu_feature_enabled(), gcc will see that it is
->> disabled and eliminate the dead code at compile time.
-> 
-> Just do this:
-> 
->         if (cpu_has(c, X86_FEATURE_SME)) {
-> 	       if (IS_ENABLED(CONFIG_X86_32)) {
->                         clear_cpu_cap(c, X86_FEATURE_SME);
-> 	       } else {
-> 		       u64 msr;
-> 
-> 		       /* Check if SME is enabled */
-> 	              rdmsrl(MSR_K8_SYSCFG, msr);
-> 	              if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
-> 	                      clear_cpu_cap(c, X86_FEATURE_SME);
-> 	       }
->         }
-> 
-> so that it is explicit that we disable it on 32-bit and we can save us
-> the ifdeffery elsewhere.
+>> On Mon, Jul 10, 2017 at 3:50 PM, Tom Lendacky <thomas.lendacky@amd.com>
+>> wrote:
+>>>
+>>> On 7/8/2017 7:57 AM, Brian Gerst wrote:
+>>>>
+>>>>
+>>>> On Fri, Jul 7, 2017 at 9:39 AM, Tom Lendacky <thomas.lendacky@amd.com>
+>>>> wrote:
+>>>>>
+>>>>>
+>>>>> Currently there is a check if the address being mapped is in the ISA
+>>>>> range (is_ISA_range()), and if it is, then phys_to_virt() is used to
+>>>>> perform the mapping. When SME is active, the default is to add
+>>>>> pagetable
+>>>>> mappings with the encryption bit set unless specifically overridden.
+>>>>> The
+>>>>> resulting pagetable mapping from phys_to_virt() will result in a
+>>>>> mapping
+>>>>> that has the encryption bit set. With SME, the use of ioremap() is
+>>>>> intended to generate pagetable mappings that do not have the encryption
+>>>>> bit set through the use of the PAGE_KERNEL_IO protection value.
+>>>>>
+>>>>> Rather than special case the SME scenario, remove the ISA range check
+>>>>> and
+>>>>> usage of phys_to_virt() and have ISA range mappings continue through
+>>>>> the
+>>>>> remaining ioremap() path.
+>>>>>
+>>>>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>>>>> ---
+>>>>>    arch/x86/mm/ioremap.c |    7 +------
+>>>>>    1 file changed, 1 insertion(+), 6 deletions(-)
+>>>>>
+>>>>> diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
+>>>>> index 4c1b5fd..bfc3e2d 100644
+>>>>> --- a/arch/x86/mm/ioremap.c
+>>>>> +++ b/arch/x86/mm/ioremap.c
+>>>>> @@ -13,6 +13,7 @@
+>>>>>    #include <linux/slab.h>
+>>>>>    #include <linux/vmalloc.h>
+>>>>>    #include <linux/mmiotrace.h>
+>>>>> +#include <linux/mem_encrypt.h>
+>>>>>
+>>>>>    #include <asm/set_memory.h>
+>>>>>    #include <asm/e820/api.h>
+>>>>> @@ -106,12 +107,6 @@ static void __iomem
+>>>>> *__ioremap_caller(resource_size_t phys_addr,
+>>>>>           }
+>>>>>
+>>>>>           /*
+>>>>> -        * Don't remap the low PCI/ISA area, it's always mapped..
+>>>>> -        */
+>>>>> -       if (is_ISA_range(phys_addr, last_addr))
+>>>>> -               return (__force void __iomem *)phys_to_virt(phys_addr);
+>>>>> -
+>>>>> -       /*
+>>>>>            * Don't allow anybody to remap normal RAM that we're using..
+>>>>>            */
+>>>>>           pfn      = phys_addr >> PAGE_SHIFT;
+>>>>>
+>>>>
+>>>> Removing this also affects 32-bit, which is more likely to access
+>>>> legacy devices in this range.  Put in a check for SME instead
+>>>
+>>>
+>>>
+>>> I originally had a check for SME here in a previous version of the
+>>> patch.  Thomas Gleixner recommended removing the check so that the code
+>>> path was always exercised regardless of the state of SME in order to
+>>> better detect issues:
+>>>
+>>> http://marc.info/?l=linux-kernel&m=149803067811436&w=2
+>>>
+>>> Thanks,
+>>> Tom
+>>
+>>
+>> Looking a bit closer, this shortcut doesn't set the caching
+>> attributes.  So it's probably best to get rid of it anyways.  Also
+>> note, there is a corresponding check in iounmap().
+>
+>
+> Good catch.  I'll update the patch to include the removal of the ISA
+> checks in the iounmap() path as well.
 
-I'll use this method for the change and avoid the #ifdefs.
-
-Thanks,
-Tom
-
-> 
-> Thanks.
-> 
+I now think it should be kept but also emit a warning, at least for
+the short term.  There is bad code out there (vga16fb for example)
+that calls iounmap() blindly without calling ioremap() first.  We
+don't want to actually follow through with the unmap on the linear
+mapping.
