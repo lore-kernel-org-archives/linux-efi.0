@@ -1,134 +1,57 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [PATCH v9 07/38] x86/mm: Remove phys_to_virt() usage in ioremap()
-Date: Tue, 11 Jul 2017 10:44:34 -0500
-Message-ID: <4404cf23-3b9c-e712-f883-fa6dc4318214@amd.com>
-References: <20170707133804.29711.1616.stgit@tlendack-t1.amdoffice.net>
- <20170707133925.29711.39301.stgit@tlendack-t1.amdoffice.net>
- <CAMzpN2h=AAF6OVfeGJnf5va2Msmd_BPU5BrVENvs0zGQtRMdzQ@mail.gmail.com>
- <ca43df91-163e-82ce-1d40-c17cfc90e957@amd.com>
- <CAMzpN2gq0TZbgy-3PUixwvL+6ECX5bOdE0XZsLtGFXA+-Embeg@mail.gmail.com>
- <81fbf5db-c42f-cfe6-5d31-d60adbd18f26@amd.com>
- <CAMzpN2i+sqqarshuYJBBNxwP25q_ERezOxRZ-d8+8Ztt=Qm_iw@mail.gmail.com>
+From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Subject: Re: [PATCH v2] drivers/fbdev: efifb: allow BAR to be moved instead
+ of claiming it
+Date: Wed, 12 Jul 2017 12:00:46 +0200
+Message-ID: <1886933.1k4ytioEMD@amdc3058>
+References: <CGME20170710211327epcas1p4443f6f9df236e76fd4afd91dccf45cd0@epcas1p4.samsung.com>
+        <20170710211305.6475-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <CAMzpN2i+sqqarshuYJBBNxwP25q_ERezOxRZ-d8+8Ztt=Qm_iw@mail.gmail.com>
-Content-Language: en-US
-Sender: owner-linux-mm@kvack.org
-To: Brian Gerst <brgerst@gmail.com>
-Cc: linux-arch <linux-arch@vger.kernel.org>, linux-efi@vger.kernel.org, kvm@vger.kernel.org, linux-doc@vger.kernel.org, the arch/x86 maintainers <x86@kernel.org>, kexec@lists.infradead.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, kasan-dev <kasan-dev@googlegroups.com>, xen-devel@lists.xen.org, Linux-MM <linux-mm@kvack.org>, "open list:IOMMU DRIVERS" <iommu@lists.linux-foundation.org>, Brijesh Singh <brijesh.singh@amd.com>, Toshimitsu Kani <toshi.kani@hpe.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Alexander Potapenko <glider@google.com>, "H. Peter Anvin" <hpa@zytor.com>, Larry Woodman <lwoodman@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Joerg Roedel <joro@8bytes.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ingo Molnar <mingo@redhat.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Young <dyo>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-reply-to: <20170710211305.6475-1-ard.biesheuvel@linaro.org>
+Sender: linux-pci-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-pci@vger.kernel.org, bhelgaas@google.com, pjones@redhat.com, linux-fbdev@vger.kernel.org, linux-efi@vger.kernel.org, matt@codeblueprint.co.uk, lorenzo.pieralisi@arm.com
 List-Id: linux-efi@vger.kernel.org
 
-On 7/11/2017 10:38 AM, Brian Gerst wrote:
-> On Tue, Jul 11, 2017 at 11:02 AM, Tom Lendacky <thomas.lendacky@amd.com> wrote:
->> On 7/10/2017 11:58 PM, Brian Gerst wrote:
->>>
->>> On Mon, Jul 10, 2017 at 3:50 PM, Tom Lendacky <thomas.lendacky@amd.com>
->>> wrote:
->>>>
->>>> On 7/8/2017 7:57 AM, Brian Gerst wrote:
->>>>>
->>>>>
->>>>> On Fri, Jul 7, 2017 at 9:39 AM, Tom Lendacky <thomas.lendacky@amd.com>
->>>>> wrote:
->>>>>>
->>>>>>
->>>>>> Currently there is a check if the address being mapped is in the ISA
->>>>>> range (is_ISA_range()), and if it is, then phys_to_virt() is used to
->>>>>> perform the mapping. When SME is active, the default is to add
->>>>>> pagetable
->>>>>> mappings with the encryption bit set unless specifically overridden.
->>>>>> The
->>>>>> resulting pagetable mapping from phys_to_virt() will result in a
->>>>>> mapping
->>>>>> that has the encryption bit set. With SME, the use of ioremap() is
->>>>>> intended to generate pagetable mappings that do not have the encryption
->>>>>> bit set through the use of the PAGE_KERNEL_IO protection value.
->>>>>>
->>>>>> Rather than special case the SME scenario, remove the ISA range check
->>>>>> and
->>>>>> usage of phys_to_virt() and have ISA range mappings continue through
->>>>>> the
->>>>>> remaining ioremap() path.
->>>>>>
->>>>>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->>>>>> ---
->>>>>>     arch/x86/mm/ioremap.c |    7 +------
->>>>>>     1 file changed, 1 insertion(+), 6 deletions(-)
->>>>>>
->>>>>> diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
->>>>>> index 4c1b5fd..bfc3e2d 100644
->>>>>> --- a/arch/x86/mm/ioremap.c
->>>>>> +++ b/arch/x86/mm/ioremap.c
->>>>>> @@ -13,6 +13,7 @@
->>>>>>     #include <linux/slab.h>
->>>>>>     #include <linux/vmalloc.h>
->>>>>>     #include <linux/mmiotrace.h>
->>>>>> +#include <linux/mem_encrypt.h>
->>>>>>
->>>>>>     #include <asm/set_memory.h>
->>>>>>     #include <asm/e820/api.h>
->>>>>> @@ -106,12 +107,6 @@ static void __iomem
->>>>>> *__ioremap_caller(resource_size_t phys_addr,
->>>>>>            }
->>>>>>
->>>>>>            /*
->>>>>> -        * Don't remap the low PCI/ISA area, it's always mapped..
->>>>>> -        */
->>>>>> -       if (is_ISA_range(phys_addr, last_addr))
->>>>>> -               return (__force void __iomem *)phys_to_virt(phys_addr);
->>>>>> -
->>>>>> -       /*
->>>>>>             * Don't allow anybody to remap normal RAM that we're using..
->>>>>>             */
->>>>>>            pfn      = phys_addr >> PAGE_SHIFT;
->>>>>>
->>>>>
->>>>> Removing this also affects 32-bit, which is more likely to access
->>>>> legacy devices in this range.  Put in a check for SME instead
->>>>
->>>>
->>>>
->>>> I originally had a check for SME here in a previous version of the
->>>> patch.  Thomas Gleixner recommended removing the check so that the code
->>>> path was always exercised regardless of the state of SME in order to
->>>> better detect issues:
->>>>
->>>> http://marc.info/?l=linux-kernel&m=149803067811436&w=2
->>>>
->>>> Thanks,
->>>> Tom
->>>
->>>
->>> Looking a bit closer, this shortcut doesn't set the caching
->>> attributes.  So it's probably best to get rid of it anyways.  Also
->>> note, there is a corresponding check in iounmap().
->>
->>
->> Good catch.  I'll update the patch to include the removal of the ISA
->> checks in the iounmap() path as well.
+On Monday, July 10, 2017 10:13:05 PM Ard Biesheuvel wrote:
+> On UEFI systems, the firmware may expose a Graphics Output Protocol (GOP)
+> instance to which the efifb driver attempts to attach in order to provide
+> a minimal, unaccelerated framebuffer. The GOP protocol itself is not very
+> sophisticated, and only describes the offset and size of the framebuffer
+> in memory, and the pixel format.
 > 
-> I now think it should be kept but also emit a warning, at least for
-> the short term.  There is bad code out there (vga16fb for example)
-> that calls iounmap() blindly without calling ioremap() first.  We
-> don't want to actually follow through with the unmap on the linear
-> mapping.
-
-Yup, was just about to reply to the other email on this. That makes
-sense, keep the check but add a warning to it so that it will catch
-any misuses of iounmap() and those can then be addressed.
-
-Thanks,
-Tom
-
+> If the GOP framebuffer is provided by a PCI device, it will have been
+> configured and enabled by the UEFI firmware, and the GOP protocol will
+> simply point into a live BAR region. However, the GOP protocol itself does
+> not describe this relation, and so we have to take care not to reconfigure
+> the BAR without taking efifb's dependency on it into account.
 > 
-> --
-> Brian Gerst
+> Commit 55d728a40d36 ("efi/fb: Avoid reconfiguration of BAR that covers
+> the framebuffer") attempted to do so by claiming the BAR resource early
+> on, which prevents the PCI resource allocation routines from changing it.
+> However, it turns out that this only works if the PCI device is not
+> behind any bridges, since the bridge resources need to be claimed first.
 > 
+> So instead, allow the BAR to be moved, but make the efifb driver deal
+> with that gracefully. So record the resource that covers the BAR early
+> on, and if it turns out to have moved by the time we probe the efifb
+> driver, update the framebuffer address accordingly.
+> 
+> While this is less likely to occur on x86, given that the firmware's
+> PCI resource allocation is more likely to be preserved, this is a
+> worthwhile sanity check to have in place, and so let's remove the
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+It still cuts the patch description early..
+
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+
+>From fbdev's side:
+
+Acked-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+
+> ---
+> v2: - use pr_info() not pr_warn() for non-error condition
+
+Best regards,
