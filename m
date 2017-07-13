@@ -1,132 +1,62 @@
-From: Bjorn Helgaas <helgaas-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] drivers/fbdev: efifb: allow BAR to be moved instead
- of claiming it
-Date: Wed, 12 Jul 2017 14:54:57 -0500
-Message-ID: <20170712195457.GG14614@bhelgaas-glaptop.roam.corp.google.com>
-References: <20170710211305.6475-1-ard.biesheuvel@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Mark Salyzyn <salyzyn-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>
+Subject: [PATCH] efi: add gpt_overprovisioned kernel command line parameter
+Date: Thu, 13 Jul 2017 15:21:04 -0700
+Message-ID: <20170713222137.11529-1-salyzyn@android.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170710211305.6475-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, lorenzo.pieralisi-5wv7dgnIgG8@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Mark Salyzyn <salyzyn-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Davidlohr Bueso <dave-h16yJtLeMjHk1uMJSBkQmQ@public.gmane.org>, Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jul 10, 2017 at 10:13:05PM +0100, Ard Biesheuvel wrote:
-> On UEFI systems, the firmware may expose a Graphics Output Protocol (GOP)
-> instance to which the efifb driver attempts to attach in order to provide
-> a minimal, unaccelerated framebuffer. The GOP protocol itself is not very
-> sophisticated, and only describes the offset and size of the framebuffer
-> in memory, and the pixel format.
-> 
-> If the GOP framebuffer is provided by a PCI device, it will have been
-> configured and enabled by the UEFI firmware, and the GOP protocol will
-> simply point into a live BAR region. However, the GOP protocol itself does
-> not describe this relation, and so we have to take care not to reconfigure
-> the BAR without taking efifb's dependency on it into account.
-> 
-> Commit 55d728a40d36 ("efi/fb: Avoid reconfiguration of BAR that covers
-> the framebuffer") attempted to do so by claiming the BAR resource early
-> on, which prevents the PCI resource allocation routines from changing it.
-> However, it turns out that this only works if the PCI device is not
-> behind any bridges, since the bridge resources need to be claimed first.
-> 
-> So instead, allow the BAR to be moved, but make the efifb driver deal
-> with that gracefully. So record the resource that covers the BAR early
-> on, and if it turns out to have moved by the time we probe the efifb
-> driver, update the framebuffer address accordingly.
-> 
-> While this is less likely to occur on x86, given that the firmware's
-> PCI resource allocation is more likely to be preserved, this is a
-> worthwhile sanity check to have in place, and so let's remove the
-> 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Allow a gpt partition table to be used if it is overprovisioned, the
+last usable lba in the GPT headers is beyond the device boundaries.
+This feature is enabled if gpt_overprovisioned is added to the kernel
+command line.  It will not expose any individual partitions that go
+beyond the device boundaries, just the ones that are under that limit.
 
-I like this a lot!
+Default off, one can perform an exploratory boot of the kernel and
+triage or backup the properly provisioned partitions.  This would
+allow the system to at least partially boot. For example if the boot,
+root or system filesystems reside on properly provisioned partitions.
 
-Acked-by: Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Examples, helpful should a RAID array be resized downwards, or
+during embedded development should an overprovisioned partition
+table update be flashed to a device by accident.
 
-Would you be willing to save the pci_dev as well, so the pr_info() could be
-made a dev_info()?
+Signed-off-by: Mark Salyzyn <salyzyn-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>
+---
+ block/partitions/efi.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
 
-Or maybe, since I notice everything else from efifb_probe() is a pr_info()
-(although we do get a platform_device), it would be better to use a
-pr_info() but just include the related PCI device by using pci_name()?
-
-> ---
-> v2: - use pr_info() not pr_warn() for non-error condition
-> 
->  drivers/video/fbdev/efifb.c | 24 ++++++++++++--------
->  1 file changed, 15 insertions(+), 9 deletions(-)
-> 
-> diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
-> index ff01bed7112f..0dd7e5eb051f 100644
-> --- a/drivers/video/fbdev/efifb.c
-> +++ b/drivers/video/fbdev/efifb.c
-> @@ -146,6 +146,9 @@ ATTRIBUTE_GROUPS(efifb);
->  
->  static bool pci_dev_disabled;	/* FB base matches BAR of a disabled device */
->  
-> +static struct resource *bar_resource;
-> +static u64 bar_offset;
-> +
->  static int efifb_probe(struct platform_device *dev)
->  {
->  	struct fb_info *info;
-> @@ -200,6 +203,13 @@ static int efifb_probe(struct platform_device *dev)
->  		efifb_fix.smem_start |= ext_lfb_base;
->  	}
->  
-> +	if (bar_resource &&
-> +	    bar_resource->start + bar_offset != efifb_fix.smem_start) {
-> +
-> +		pr_info("efifb: PCI BAR has moved, updating fb address\n");
-> +		efifb_fix.smem_start = bar_resource->start + bar_offset;
-> +	}
-> +
->  	efifb_defined.bits_per_pixel = screen_info.lfb_depth;
->  	efifb_defined.xres = screen_info.lfb_width;
->  	efifb_defined.yres = screen_info.lfb_height;
-> @@ -364,11 +374,11 @@ static struct platform_driver efifb_driver = {
->  
->  builtin_platform_driver(efifb_driver);
->  
-> -#if defined(CONFIG_PCI) && !defined(CONFIG_X86)
-> +#if defined(CONFIG_PCI)
->  
->  static bool pci_bar_found;	/* did we find a BAR matching the efifb base? */
->  
-> -static void claim_efifb_bar(struct pci_dev *dev, int idx)
-> +static void record_efifb_bar_resource(struct pci_dev *dev, int idx, u64 offset)
->  {
->  	u16 word;
->  
-> @@ -383,12 +393,8 @@ static void claim_efifb_bar(struct pci_dev *dev, int idx)
->  		return;
->  	}
->  
-> -	if (pci_claim_resource(dev, idx)) {
-> -		pci_dev_disabled = true;
-> -		dev_err(&dev->dev,
-> -			"BAR %d: failed to claim resource for efifb!\n", idx);
-> -		return;
-> -	}
-> +	bar_resource = &dev->resource[idx];
-> +	bar_offset = offset;
->  
->  	dev_info(&dev->dev, "BAR %d: assigned to efifb\n", idx);
->  }
-> @@ -415,7 +421,7 @@ static void efifb_fixup_resources(struct pci_dev *dev)
->  			continue;
->  
->  		if (res->start <= base && res->end >= base + size - 1) {
-> -			claim_efifb_bar(dev, i);
-> +			record_efifb_bar_resource(dev, i, base - res->start);
->  			break;
->  		}
->  	}
-> -- 
-> 2.11.0
-> 
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index 39f70d968754..e18ee5cf138c 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -117,6 +117,15 @@ force_gpt_fn(char *str)
+ }
+ __setup("gpt", force_gpt_fn);
+ 
++static int overprovisioned_gpt;
++static int __init
++overprovisioned_gpt_fn(char *str)
++{
++	overprovisioned_gpt = 1;
++	return 1;
++}
++__setup("gpt_overprovisioned", overprovisioned_gpt_fn);
++
+ 
+ /**
+  * efi_crc32() - EFI version of crc32 function
+@@ -420,7 +429,8 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
+ 		pr_debug("GPT: last_usable_lba incorrect: %lld > %lld\n",
+ 			 (unsigned long long)le64_to_cpu((*gpt)->last_usable_lba),
+ 			 (unsigned long long)lastlba);
+-		goto fail;
++		if (!overprovisioned_gpt)
++			goto fail;
+ 	}
+ 	if (le64_to_cpu((*gpt)->last_usable_lba) < le64_to_cpu((*gpt)->first_usable_lba)) {
+ 		pr_debug("GPT: last_usable_lba incorrect: %lld > %lld\n",
+-- 
+2.13.2.932.g7449e964c-goog
