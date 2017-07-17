@@ -1,7 +1,7 @@
 From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: [PATCH v10 07/38] x86/mm: Remove phys_to_virt() usage in ioremap()
-Date: Mon, 17 Jul 2017 16:10:04 -0500
-Message-ID: <88ada7b09c6568c61cd696351eb59fb15a82ce1a.1500319216.git.thomas.lendacky@amd.com>
+Subject: [PATCH v10 11/38] x86/mm: Add SME support for read_cr3_pa()
+Date: Mon, 17 Jul 2017 16:10:08 -0500
+Message-ID: <767b085c384a46f67f451f8589903a462c7ff68a.1500319216.git.thomas.lendacky@amd.com>
 References: <cover.1500319216.git.thomas.lendacky@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,63 +12,60 @@ To: x86@kernel.org, linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, li
 Cc: =?UTF-8?q?Radim=20Kr=C4=8Dm=C3=A1=C5=99?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Paolo Bonzini <pbonzini@redhat.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>, Rik van Riel <riel@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Dave Young <dyoung@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, "Michael S. Tsirkin" <mst@redhat.com>, Brijesh Singh <brijesh.singh@amd.com>
 List-Id: linux-efi@vger.kernel.org
 
-Currently there is a check if the address being mapped is in the ISA
-range (is_ISA_range()), and if it is, then phys_to_virt() is used to
-perform the mapping. When SME is active, the default is to add pagetable
-mappings with the encryption bit set unless specifically overridden. The
-resulting pagetable mapping from phys_to_virt() will result in a mapping
-that has the encryption bit set. With SME, the use of ioremap() is
-intended to generate pagetable mappings that do not have the encryption
-bit set through the use of the PAGE_KERNEL_IO protection value.
+The cr3 register entry can contain the SME encryption mask that indicates
+the PGD is encrypted.  The encryption mask should not be used when
+creating a virtual address from the cr3 register, so remove the SME
+encryption mask in the read_cr3_pa() function.
 
-Rather than special case the SME scenario, remove the ISA range check and
-usage of phys_to_virt() and have ISA range mappings continue through the
-remaining ioremap() path.
+During early boot SME will need to use a native version of read_cr3_pa(),
+so create native_read_cr3_pa().
 
+Reviewed-by: Borislav Petkov <bp@suse.de>
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/mm/ioremap.c | 18 ++++++++----------
- 1 file changed, 8 insertions(+), 10 deletions(-)
+ arch/x86/include/asm/processor-flags.h | 5 +++--
+ arch/x86/include/asm/processor.h       | 5 +++++
+ 2 files changed, 8 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
-index 4c1b5fd..66ddf5e 100644
---- a/arch/x86/mm/ioremap.c
-+++ b/arch/x86/mm/ioremap.c
-@@ -106,12 +106,6 @@ static void __iomem *__ioremap_caller(resource_size_t phys_addr,
- 	}
+diff --git a/arch/x86/include/asm/processor-flags.h b/arch/x86/include/asm/processor-flags.h
+index 79aa2f9..f5d3e50 100644
+--- a/arch/x86/include/asm/processor-flags.h
++++ b/arch/x86/include/asm/processor-flags.h
+@@ -2,6 +2,7 @@
+ #define _ASM_X86_PROCESSOR_FLAGS_H
  
- 	/*
--	 * Don't remap the low PCI/ISA area, it's always mapped..
--	 */
--	if (is_ISA_range(phys_addr, last_addr))
--		return (__force void __iomem *)phys_to_virt(phys_addr);
--
--	/*
- 	 * Don't allow anybody to remap normal RAM that we're using..
- 	 */
- 	pfn      = phys_addr >> PAGE_SHIFT;
-@@ -340,13 +334,17 @@ void iounmap(volatile void __iomem *addr)
- 		return;
+ #include <uapi/asm/processor-flags.h>
++#include <linux/mem_encrypt.h>
  
- 	/*
--	 * __ioremap special-cases the PCI/ISA range by not instantiating a
--	 * vm_area and by simply returning an address into the kernel mapping
--	 * of ISA space.   So handle that here.
-+	 * The PCI/ISA range special-casing was removed from __ioremap()
-+	 * so this check, in theory, can be removed. However, there are
-+	 * cases where iounmap() is called for addresses not obtained via
-+	 * ioremap() (vga16fb for example). Add a warning so that these
-+	 * cases can be caught and fixed.
- 	 */
- 	if ((void __force *)addr >= phys_to_virt(ISA_START_ADDRESS) &&
--	    (void __force *)addr < phys_to_virt(ISA_END_ADDRESS))
-+	    (void __force *)addr < phys_to_virt(ISA_END_ADDRESS)) {
-+		WARN(1, "iounmap() called for ISA range not obtained using ioremap()\n");
- 		return;
-+	}
+ #ifdef CONFIG_VM86
+ #define X86_VM_MASK	X86_EFLAGS_VM
+@@ -32,8 +33,8 @@
+  * CR3_ADDR_MASK is the mask used by read_cr3_pa().
+  */
+ #ifdef CONFIG_X86_64
+-/* Mask off the address space ID bits. */
+-#define CR3_ADDR_MASK 0x7FFFFFFFFFFFF000ull
++/* Mask off the address space ID and SME encryption bits. */
++#define CR3_ADDR_MASK __sme_clr(0x7FFFFFFFFFFFF000ull)
+ #define CR3_PCID_MASK 0xFFFull
+ #else
+ /*
+diff --git a/arch/x86/include/asm/processor.h b/arch/x86/include/asm/processor.h
+index a68f70c..973709d 100644
+--- a/arch/x86/include/asm/processor.h
++++ b/arch/x86/include/asm/processor.h
+@@ -240,6 +240,11 @@ static inline unsigned long read_cr3_pa(void)
+ 	return __read_cr3() & CR3_ADDR_MASK;
+ }
  
- 	addr = (volatile void __iomem *)
- 		(PAGE_MASK & (unsigned long __force)addr);
++static inline unsigned long native_read_cr3_pa(void)
++{
++	return __native_read_cr3() & CR3_ADDR_MASK;
++}
++
+ static inline void load_cr3(pgd_t *pgdir)
+ {
+ 	write_cr3(__sme_pa(pgdir));
 -- 
 1.9.1
 
