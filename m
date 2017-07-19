@@ -1,58 +1,102 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.12 27/84] efi: Process the MEMATTR table only if EFI_MEMMAP is enabled
-Date: Wed, 19 Jul 2017 11:43:33 +0200
-Message-ID: <20170719092323.437018318@linuxfoundation.org>
+Subject: [PATCH 4.12 26/84] x86/xen/efi: Initialize only the EFI
+	struct members used by Xen
+Date: Wed, 19 Jul 2017 11:43:32 +0200
+Message-ID: <20170719092323.396710042@linuxfoundation.org>
 References: <20170719092322.362625377@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
 In-Reply-To: <20170719092322.362625377@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <https://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <https://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Daniel Kiper <daniel.kiper@oracle.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, andrew.cooper3@citrix.com, boris.ostrovsky@oracle.com, jgross@suse.com, linux-efi@vger.kernel.org, matt@codeblueprint.co.uk, xen-devel@lists.xenproject.org, Ingo Molnar <mingo@kernel.org>
+Cc: jgross@suse.com, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Peter Zijlstra <peterz@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Daniel Kiper <daniel.kiper@oracle.com>, stable@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, matt@codeblueprint.co.uk, andrew.cooper3@citrix.com, xen-devel@lists.xenproject.org, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Linus Torvalds <torvalds@linux-foundation.org>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
-4.12-stable review patch.  If anyone has any objections, please let me know.
-
-------------------
-
-From: Daniel Kiper <daniel.kiper@oracle.com>
-
-commit 457ea3f7e97881f937136ce0ba1f29f82b9abdb0 upstream.
-
-Otherwise e.g. Xen dom0 on x86_64 EFI platforms crashes.
-
-In theory we can check EFI_PARAVIRT too, however,
-EFI_MEMMAP looks more targeted and covers more cases.
-
-Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
-Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: andrew.cooper3@citrix.com
-Cc: boris.ostrovsky@oracle.com
-Cc: jgross@suse.com
-Cc: linux-efi@vger.kernel.org
-Cc: matt@codeblueprint.co.uk
-Cc: xen-devel@lists.xenproject.org
-Link: http://lkml.kernel.org/r/1498128697-12943-2-git-send-email-daniel.kiper@oracle.com
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
----
- drivers/firmware/efi/efi.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -528,7 +528,8 @@ int __init efi_config_parse_tables(void
- 		}
- 	}
- 
--	efi_memattr_init();
-+	if (efi_enabled(EFI_MEMMAP))
-+		efi_memattr_init();
- 
- 	/* Parse the EFI Properties table if it exists */
- 	if (efi.properties_table != EFI_INVALID_TABLE_ADDR) {
+NC4xMi1zdGFibGUgcmV2aWV3IHBhdGNoLiAgSWYgYW55b25lIGhhcyBhbnkgb2JqZWN0aW9ucywg
+cGxlYXNlIGxldCBtZSBrbm93LgoKLS0tLS0tLS0tLS0tLS0tLS0tCgpGcm9tOiBEYW5pZWwgS2lw
+ZXIgPGRhbmllbC5raXBlckBvcmFjbGUuY29tPgoKY29tbWl0IDZjNjQ0NDdlYzU4YjBiYWM2MTI3
+MzIzMDNmN2FiMDQ1NjIxMjQ1ODcgdXBzdHJlYW0uCgpUaGUgY3VycmVudCBhcHByb2FjaCwgd2hp
+Y2ggaXMgdGhlIHdob2xlc2FsZSBlZmkgc3RydWN0IGluaXRpYWxpemF0aW9uIGZyb20KYSAnZWZp
+X3hlbicgbG9jYWwgdGVtcGxhdGUgaXMgbm90IHJvYnVzdC4gVXN1YWxseSBpZiBuZXcgbWVtYmVy
+IGlzIGRlZmluZWQKdGhlbiBpdCBpcyBwcm9wZXJseSBpbml0aWFsaXplZCBpbiBkcml2ZXJzL2Zp
+cm13YXJlL2VmaS9lZmkuYywgYnV0IG5vdCBpbgphcmNoL3g4Ni94ZW4vZWZpLmMuCgpUaGUgZWZm
+ZWN0IGlzIHRoYXQgdGhlIFhlbiBpbml0aWFsaXphdGlvbiBjbGVhcnMgYW55IGZpZWxkcyB0aGUg
+Z2VuZXJpYyBjb2RlCm1pZ2h0IGhhdmUgc2V0IGFuZCB0aGUgWGVuIGNvZGUgZG9lcyBub3Qga25v
+dyBhYm91dCB5ZXQuCgpJIHNhdyB0aGlzIGhhcHBlbiBhIGZldyB0aW1lcywgc28gbGV0J3MgaW5p
+dGlhbGl6ZSBvbmx5IHRoZSBFRkkgc3RydWN0IG1lbWJlcnMKdXNlZCBieSBYZW4gYW5kIG1haW50
+YWluIG5vIGxvY2FsIGR1cGxpY2F0ZSwgdG8gYXZvaWQgc3VjaCBpc3N1ZXMgaW4gdGhlIGZ1dHVy
+ZS4KClNpZ25lZC1vZmYtYnk6IERhbmllbCBLaXBlciA8ZGFuaWVsLmtpcGVyQG9yYWNsZS5jb20+
+ClJldmlld2VkLWJ5OiBCb3JpcyBPc3Ryb3Zza3kgPGJvcmlzLm9zdHJvdnNreUBvcmFjbGUuY29t
+PgpBY2tlZC1ieTogQXJkIEJpZXNoZXV2ZWwgPGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc+CkNj
+OiBMaW51cyBUb3J2YWxkcyA8dG9ydmFsZHNAbGludXgtZm91bmRhdGlvbi5vcmc+CkNjOiBQZXRl
+ciBaaWpsc3RyYSA8cGV0ZXJ6QGluZnJhZGVhZC5vcmc+CkNjOiBUaG9tYXMgR2xlaXhuZXIgPHRn
+bHhAbGludXRyb25peC5kZT4KQ2M6IGFuZHJldy5jb29wZXIzQGNpdHJpeC5jb20KQ2M6IGpncm9z
+c0BzdXNlLmNvbQpDYzogbGludXgtZWZpQHZnZXIua2VybmVsLm9yZwpDYzogbWF0dEBjb2RlYmx1
+ZXByaW50LmNvLnVrCkNjOiB4ZW4tZGV2ZWxAbGlzdHMueGVucHJvamVjdC5vcmcKTGluazogaHR0
+cDovL2xrbWwua2VybmVsLm9yZy9yLzE0OTgxMjg2OTctMTI5NDMtMy1naXQtc2VuZC1lbWFpbC1k
+YW5pZWwua2lwZXJAb3JhY2xlLmNvbQpbIENsYXJpZmllZCB0aGUgY2hhbmdlbG9nLiBdClNpZ25l
+ZC1vZmYtYnk6IEluZ28gTW9sbmFyIDxtaW5nb0BrZXJuZWwub3JnPgpTaWduZWQtb2ZmLWJ5OiBH
+cmVnIEtyb2FoLUhhcnRtYW4gPGdyZWdraEBsaW51eGZvdW5kYXRpb24ub3JnPgoKLS0tCiBhcmNo
+L3g4Ni94ZW4vZWZpLmMgfCAgIDQ1ICsrKysrKysrKysrKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLQogMSBmaWxlIGNoYW5nZWQsIDEyIGluc2VydGlvbnMoKyksIDMzIGRlbGV0aW9u
+cygtKQoKLS0tIGEvYXJjaC94ODYveGVuL2VmaS5jCisrKyBiL2FyY2gveDg2L3hlbi9lZmkuYwpA
+QCAtNTQsMzggKzU0LDYgQEAgc3RhdGljIGVmaV9zeXN0ZW1fdGFibGVfdCBlZmlfc3lzdGFiX3hl
+bgogCS50YWJsZXMJCT0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiAgLyogSW5pdGlhbGl6ZWQgbGF0
+ZXIuICovCiB9OwogCi1zdGF0aWMgY29uc3Qgc3RydWN0IGVmaSBlZmlfeGVuIF9faW5pdGNvbnN0
+ID0gewotCS5zeXN0YWIgICAgICAgICAgICAgICAgICAgPSBOVUxMLCAvKiBJbml0aWFsaXplZCBs
+YXRlci4gKi8KLQkucnVudGltZV92ZXJzaW9uCSAgPSAwLCAgICAvKiBJbml0aWFsaXplZCBsYXRl
+ci4gKi8KLQkubXBzICAgICAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQURE
+UiwKLQkuYWNwaSAgICAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwK
+LQkuYWNwaTIwICAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQku
+c21iaW9zICAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuc21i
+aW9zMyAgICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuc2FsX3N5
+c3RhYiAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuYm9vdF9pbmZv
+ICAgICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuaGNkcCAgICAgICAg
+ICAgICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkudWdhICAgICAgICAgICAg
+ICAgICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkudXZfc3lzdGFiICAgICAgICAg
+ICAgICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuZndfdmVuZG9yICAgICAgICAgICAg
+ICAgID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkucnVudGltZSAgICAgICAgICAgICAgICAg
+ID0gRUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuY29uZmlnX3RhYmxlICAgICAgICAgICAgID0g
+RUZJX0lOVkFMSURfVEFCTEVfQUREUiwKLQkuZ2V0X3RpbWUgICAgICAgICAgICAgICAgID0geGVu
+X2VmaV9nZXRfdGltZSwKLQkuc2V0X3RpbWUgICAgICAgICAgICAgICAgID0geGVuX2VmaV9zZXRf
+dGltZSwKLQkuZ2V0X3dha2V1cF90aW1lICAgICAgICAgID0geGVuX2VmaV9nZXRfd2FrZXVwX3Rp
+bWUsCi0JLnNldF93YWtldXBfdGltZSAgICAgICAgICA9IHhlbl9lZmlfc2V0X3dha2V1cF90aW1l
+LAotCS5nZXRfdmFyaWFibGUgICAgICAgICAgICAgPSB4ZW5fZWZpX2dldF92YXJpYWJsZSwKLQku
+Z2V0X25leHRfdmFyaWFibGUgICAgICAgID0geGVuX2VmaV9nZXRfbmV4dF92YXJpYWJsZSwKLQku
+c2V0X3ZhcmlhYmxlICAgICAgICAgICAgID0geGVuX2VmaV9zZXRfdmFyaWFibGUsCi0JLnF1ZXJ5
+X3ZhcmlhYmxlX2luZm8gICAgICA9IHhlbl9lZmlfcXVlcnlfdmFyaWFibGVfaW5mbywKLQkudXBk
+YXRlX2NhcHN1bGUgICAgICAgICAgID0geGVuX2VmaV91cGRhdGVfY2Fwc3VsZSwKLQkucXVlcnlf
+Y2Fwc3VsZV9jYXBzICAgICAgID0geGVuX2VmaV9xdWVyeV9jYXBzdWxlX2NhcHMsCi0JLmdldF9u
+ZXh0X2hpZ2hfbW9ub19jb3VudCA9IHhlbl9lZmlfZ2V0X25leHRfaGlnaF9tb25vX2NvdW50LAot
+CS5yZXNldF9zeXN0ZW0gICAgICAgICAgICAgPSB4ZW5fZWZpX3Jlc2V0X3N5c3RlbSwKLQkuc2V0
+X3ZpcnR1YWxfYWRkcmVzc19tYXAgID0gTlVMTCwgLyogTm90IHVzZWQgdW5kZXIgWGVuLiAqLwot
+CS5mbGFncwkJCSAgPSAwICAgICAvKiBJbml0aWFsaXplZCBsYXRlci4gKi8KLX07Ci0KIHN0YXRp
+YyBlZmlfc3lzdGVtX3RhYmxlX3QgX19pbml0ICp4ZW5fZWZpX3Byb2JlKHZvaWQpCiB7CiAJc3Ry
+dWN0IHhlbl9wbGF0Zm9ybV9vcCBvcCA9IHsKQEAgLTEwMiw3ICs3MCwxOCBAQCBzdGF0aWMgZWZp
+X3N5c3RlbV90YWJsZV90IF9faW5pdCAqeGVuX2VmCiAKIAkvKiBIZXJlIHdlIGtub3cgdGhhdCBY
+ZW4gcnVucyBvbiBFRkkgcGxhdGZvcm0uICovCiAKLQllZmkgPSBlZmlfeGVuOworCWVmaS5nZXRf
+dGltZSAgICAgICAgICAgICAgICAgPSB4ZW5fZWZpX2dldF90aW1lOworCWVmaS5zZXRfdGltZSAg
+ICAgICAgICAgICAgICAgPSB4ZW5fZWZpX3NldF90aW1lOworCWVmaS5nZXRfd2FrZXVwX3RpbWUg
+ICAgICAgICAgPSB4ZW5fZWZpX2dldF93YWtldXBfdGltZTsKKwllZmkuc2V0X3dha2V1cF90aW1l
+ICAgICAgICAgID0geGVuX2VmaV9zZXRfd2FrZXVwX3RpbWU7CisJZWZpLmdldF92YXJpYWJsZSAg
+ICAgICAgICAgICA9IHhlbl9lZmlfZ2V0X3ZhcmlhYmxlOworCWVmaS5nZXRfbmV4dF92YXJpYWJs
+ZSAgICAgICAgPSB4ZW5fZWZpX2dldF9uZXh0X3ZhcmlhYmxlOworCWVmaS5zZXRfdmFyaWFibGUg
+ICAgICAgICAgICAgPSB4ZW5fZWZpX3NldF92YXJpYWJsZTsKKwllZmkucXVlcnlfdmFyaWFibGVf
+aW5mbyAgICAgID0geGVuX2VmaV9xdWVyeV92YXJpYWJsZV9pbmZvOworCWVmaS51cGRhdGVfY2Fw
+c3VsZSAgICAgICAgICAgPSB4ZW5fZWZpX3VwZGF0ZV9jYXBzdWxlOworCWVmaS5xdWVyeV9jYXBz
+dWxlX2NhcHMgICAgICAgPSB4ZW5fZWZpX3F1ZXJ5X2NhcHN1bGVfY2FwczsKKwllZmkuZ2V0X25l
+eHRfaGlnaF9tb25vX2NvdW50ID0geGVuX2VmaV9nZXRfbmV4dF9oaWdoX21vbm9fY291bnQ7CisJ
+ZWZpLnJlc2V0X3N5c3RlbSAgICAgICAgICAgICA9IHhlbl9lZmlfcmVzZXRfc3lzdGVtOwogCiAJ
+ZWZpX3N5c3RhYl94ZW4udGFibGVzID0gaW5mby0+Y2ZnLmFkZHI7CiAJZWZpX3N5c3RhYl94ZW4u
+bnJfdGFibGVzID0gaW5mby0+Y2ZnLm5lbnQ7CgoKCl9fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fClhlbi1kZXZlbCBtYWlsaW5nIGxpc3QKWGVuLWRldmVsQGxp
+c3RzLnhlbi5vcmcKaHR0cHM6Ly9saXN0cy54ZW4ub3JnL3hlbi1kZXZlbAo=
