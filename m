@@ -1,151 +1,123 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH v1 5/6] uuid: Kill uapi/uuid.h
-Date: Wed, 19 Jul 2017 21:28:56 +0300
-Message-ID: <20170719182857.73693-6-andriy.shevchenko@linux.intel.com>
+From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: [PATCH v1 6/6] device property: Switch to use new generic UUID API
+Date: Wed, 19 Jul 2017 21:28:57 +0300
+Message-ID: <20170719182857.73693-7-andriy.shevchenko@linux.intel.com>
 References: <20170719182857.73693-1-andriy.shevchenko@linux.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20170719182857.73693-1-andriy.shevchenko@linux.intel.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: linux-acpi@vger.kernel.org, devel@linuxdriverproject.org, sparmaintainer@unisys.com, devel@driverdev.osuosl.org, linux-wireless@vger.kernel.org, linux-watchdog@vger.kernel.org, linux-efi@vger.kernel.org, Christoph Hellwig <hch@lst.de>, linux-kernel@vger.kernel.org, Lukas Wunner <lukas@wunner.de>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170719182857.73693-1-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-tBiZLqfeLfOHmIFyCCdPziST3g8Odh+X@public.gmane.org, sparmaintainer-GLv8BlqOqDDQT0dZR+AlfA@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-watchdog-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-There is no more users for uapi/uuid.h. Remove it for good.
+There are new types and helpers that are supposed to be used in new code.
 
-Anyone needs it in user space better to use libuuid.
+As a preparation to get rid of legacy types and API functions do
+the conversion here.
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
+Cc: Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 ---
- include/linux/uuid.h      | 20 +++++++++++++++++++-
- include/uapi/linux/uuid.h | 42 ------------------------------------------
- scripts/mod/file2alias.c  |  4 ++--
- 3 files changed, 21 insertions(+), 45 deletions(-)
- delete mode 100644 include/uapi/linux/uuid.h
+ drivers/acpi/property.c | 50 ++++++++++++++++++++++++-------------------------
+ 1 file changed, 25 insertions(+), 25 deletions(-)
 
-diff --git a/include/linux/uuid.h b/include/linux/uuid.h
-index 2251e1925ea4..3bc3e88c9fbd 100644
---- a/include/linux/uuid.h
-+++ b/include/linux/uuid.h
-@@ -16,7 +16,19 @@
- #ifndef _LINUX_UUID_H_
- #define _LINUX_UUID_H_
+diff --git a/drivers/acpi/property.c b/drivers/acpi/property.c
+index 917c789f953d..a7fdbe083a7e 100644
+--- a/drivers/acpi/property.c
++++ b/drivers/acpi/property.c
+@@ -24,16 +24,14 @@ static int acpi_data_get_property_array(struct acpi_device_data *data,
+ 					acpi_object_type type,
+ 					const union acpi_object **obj);
  
--#include <uapi/linux/uuid.h>
-+#include <linux/types.h>
-+#include <linux/string.h>
-+
-+typedef struct {
-+	__u8 b[16];
-+} guid_t;
-+
-+#define GUID_INIT(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)			\
-+((guid_t)								\
-+{{ (a) & 0xff, ((a) >> 8) & 0xff, ((a) >> 16) & 0xff, ((a) >> 24) & 0xff, \
-+   (b) & 0xff, ((b) >> 8) & 0xff,					\
-+   (c) & 0xff, ((c) >> 8) & 0xff,					\
-+   (d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7) }})
+-/* ACPI _DSD device properties UUID: daffd814-6eba-4d8c-8a91-bc9bbf4aa301 */
+-static const u8 prp_uuid[16] = {
+-	0x14, 0xd8, 0xff, 0xda, 0xba, 0x6e, 0x8c, 0x4d,
+-	0x8a, 0x91, 0xbc, 0x9b, 0xbf, 0x4a, 0xa3, 0x01
+-};
+-/* ACPI _DSD data subnodes UUID: dbb8e3e6-5886-4ba6-8795-1319f52a966b */
+-static const u8 ads_uuid[16] = {
+-	0xe6, 0xe3, 0xb8, 0xdb, 0x86, 0x58, 0xa6, 0x4b,
+-	0x87, 0x95, 0x13, 0x19, 0xf5, 0x2a, 0x96, 0x6b
+-};
++/* ACPI _DSD device properties GUID: daffd814-6eba-4d8c-8a91-bc9bbf4aa301 */
++static const guid_t prp_guid =
++	GUID_INIT(0xdaffd814, 0x6eba, 0x4d8c,
++		  0x8a, 0x91, 0xbc, 0x9b, 0xbf, 0x4a, 0xa3, 0x01);
++/* ACPI _DSD data subnodes GUID: dbb8e3e6-5886-4ba6-8795-1319f52a966b */
++static const guid_t ads_guid =
++	GUID_INIT(0xdbb8e3e6, 0x5886, 0x4ba6,
++		  0x87, 0x95, 0x13, 0x19, 0xf5, 0x2a, 0x96, 0x6b);
  
- #define UUID_SIZE 16
- 
-@@ -84,12 +96,18 @@ int guid_parse(const char *uuid, guid_t *u);
- int uuid_parse(const char *uuid, uuid_t *u);
- 
- /* backwards compatibility, don't use in new code */
-+typedef guid_t uuid_le;
- typedef uuid_t uuid_be;
- #define UUID_BE(a, _b, c, d0, d1, d2, d3, d4, d5, d6, d7) \
- 	UUID_INIT(a, _b, c, d0, d1, d2, d3, d4, d5, d6, d7)
-+#define UUID_LE(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)		\
-+	GUID_INIT(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)
- #define NULL_UUID_BE 							\
- 	UUID_BE(0x00000000, 0x0000, 0x0000, 0x00, 0x00, 0x00, 0x00,	\
- 	     0x00, 0x00, 0x00, 0x00)
-+#define NULL_UUID_LE							\
-+	UUID_LE(0x00000000, 0x0000, 0x0000, 0x00, 0x00, 0x00, 0x00,	\
-+	     0x00, 0x00, 0x00, 0x00)
- 
- #define uuid_le_gen(u)		guid_gen(u)
- #define uuid_be_gen(u)		uuid_gen(u)
-diff --git a/include/uapi/linux/uuid.h b/include/uapi/linux/uuid.h
-deleted file mode 100644
-index 8ef82f433877..000000000000
---- a/include/uapi/linux/uuid.h
-+++ /dev/null
-@@ -1,42 +0,0 @@
--/*
-- * UUID/GUID definition
-- *
-- * Copyright (C) 2010, Intel Corp.
-- *	Huang Ying <ying.huang@intel.com>
-- *
-- * This program is free software; you can redistribute it and/or
-- * modify it under the terms of the GNU General Public License version
-- * 2 as published by the Free Software Foundation;
-- *
-- * This program is distributed in the hope that it will be useful,
-- * but WITHOUT ANY WARRANTY; without even the implied warranty of
-- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-- * GNU General Public License for more details.
-- */
--
--#ifndef _UAPI_LINUX_UUID_H_
--#define _UAPI_LINUX_UUID_H_
--
--#include <linux/types.h>
--#include <linux/string.h>
--
--typedef struct {
--	__u8 b[16];
--} guid_t;
--
--#define GUID_INIT(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)			\
--((guid_t)								\
--{{ (a) & 0xff, ((a) >> 8) & 0xff, ((a) >> 16) & 0xff, ((a) >> 24) & 0xff, \
--   (b) & 0xff, ((b) >> 8) & 0xff,					\
--   (c) & 0xff, ((c) >> 8) & 0xff,					\
--   (d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7) }})
--
--/* backwards compatibility, don't use in new code */
--typedef guid_t uuid_le;
--#define UUID_LE(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)		\
--	GUID_INIT(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)
--#define NULL_UUID_LE							\
--	UUID_LE(0x00000000, 0x0000, 0x0000, 0x00, 0x00, 0x00, 0x00,	\
--	     0x00, 0x00, 0x00, 0x00)
--
--#endif /* _UAPI_LINUX_UUID_H_ */
-diff --git a/scripts/mod/file2alias.c b/scripts/mod/file2alias.c
-index 29d6699d5a06..1c68709123aa 100644
---- a/scripts/mod/file2alias.c
-+++ b/scripts/mod/file2alias.c
-@@ -36,7 +36,7 @@ typedef uint16_t	__u16;
- typedef unsigned char	__u8;
- typedef struct {
- 	__u8 b[16];
--} uuid_le;
-+} guid_t;
- 
- /* Big exception to the "don't include kernel headers into userspace, which
-  * even potentially has different endianness and word sizes, since
-@@ -134,7 +134,7 @@ static inline void add_wildcard(char *str)
- 		strcat(str + len, "*");
- }
- 
--static inline void add_uuid(char *str, uuid_le uuid)
-+static inline void add_uuid(char *str, guid_t uuid)
+ static bool acpi_enumerate_nondev_subnodes(acpi_handle scope,
+ 					   const union acpi_object *desc,
+@@ -190,22 +188,23 @@ static bool acpi_enumerate_nondev_subnodes(acpi_handle scope,
  {
- 	int len = strlen(str);
+ 	int i;
  
+-	/* Look for the ACPI data subnodes UUID. */
++	/* Look for the ACPI data subnodes GUID. */
+ 	for (i = 0; i < desc->package.count; i += 2) {
+-		const union acpi_object *uuid, *links;
++		const union acpi_object *guid, *links;
+ 
+-		uuid = &desc->package.elements[i];
++		guid = &desc->package.elements[i];
+ 		links = &desc->package.elements[i + 1];
+ 
+ 		/*
+-		 * The first element must be a UUID and the second one must be
++		 * The first element must be a GUID and the second one must be
+ 		 * a package.
+ 		 */
+-		if (uuid->type != ACPI_TYPE_BUFFER || uuid->buffer.length != 16
+-		    || links->type != ACPI_TYPE_PACKAGE)
++		if (guid->type != ACPI_TYPE_BUFFER ||
++		    guid->buffer.length != 16 ||
++		    links->type != ACPI_TYPE_PACKAGE)
+ 			break;
+ 
+-		if (memcmp(uuid->buffer.pointer, ads_uuid, sizeof(ads_uuid)))
++		if (!guid_equal((guid_t *)guid->buffer.pointer, &ads_guid))
+ 			continue;
+ 
+ 		return acpi_add_nondev_subnodes(scope, links, &data->subnodes,
+@@ -298,26 +297,27 @@ static bool acpi_extract_properties(const union acpi_object *desc,
+ 	if (desc->package.count % 2)
+ 		return false;
+ 
+-	/* Look for the device properties UUID. */
++	/* Look for the device properties GUID. */
+ 	for (i = 0; i < desc->package.count; i += 2) {
+-		const union acpi_object *uuid, *properties;
++		const union acpi_object *guid, *properties;
+ 
+-		uuid = &desc->package.elements[i];
++		guid = &desc->package.elements[i];
+ 		properties = &desc->package.elements[i + 1];
+ 
+ 		/*
+-		 * The first element must be a UUID and the second one must be
++		 * The first element must be a GUID and the second one must be
+ 		 * a package.
+ 		 */
+-		if (uuid->type != ACPI_TYPE_BUFFER || uuid->buffer.length != 16
+-		    || properties->type != ACPI_TYPE_PACKAGE)
++		if (guid->type != ACPI_TYPE_BUFFER ||
++		    guid->buffer.length != 16 ||
++		    properties->type != ACPI_TYPE_PACKAGE)
+ 			break;
+ 
+-		if (memcmp(uuid->buffer.pointer, prp_uuid, sizeof(prp_uuid)))
++		if (!guid_equal((guid_t *)guid->buffer.pointer, &prp_guid))
+ 			continue;
+ 
+ 		/*
+-		 * We found the matching UUID. Now validate the format of the
++		 * We found the matching GUID. Now validate the format of the
+ 		 * package immediately following it.
+ 		 */
+ 		if (!acpi_properties_format_valid(properties))
 -- 
 2.11.0
