@@ -1,13 +1,24 @@
-From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: [PATCH v1 6/6] device property: Switch to use new generic UUID API
-Date: Wed, 19 Jul 2017 21:28:57 +0300
-Message-ID: <20170719182857.73693-7-andriy.shevchenko@linux.intel.com>
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v1 1/6] efi: Switch to use new generic UUID API
+Date: Wed, 19 Jul 2017 21:28:52 +0300
+Message-ID: <20170719182857.73693-2-andriy.shevchenko@linux.intel.com>
 References: <20170719182857.73693-1-andriy.shevchenko@linux.intel.com>
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170719182857.73693-1-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-tBiZLqfeLfOHmIFyCCdPziST3g8Odh+X@public.gmane.org, sparmaintainer-GLv8BlqOqDDQT0dZR+AlfA@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-watchdog-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20170719182857.73693-1-andriy.shevchenko@linux.intel.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: linux-acpi@vger.kernel.org, devel@linuxdriverproject.org, sparmaintainer@unisys.com, devel@driverdev.osuosl.org, linux-wireless@vger.kernel.org, linux-watchdog@vger.kernel.org, linux-efi@vger.kernel.org, Christoph Hellwig <hch@lst.de>, linux-kernel@vger.kernel.org, Lukas Wunner <lukas@wunner.de>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
 There are new types and helpers that are supposed to be used in new code.
@@ -15,109 +26,244 @@ There are new types and helpers that are supposed to be used in new code.
 As a preparation to get rid of legacy types and API functions do
 the conversion here.
 
-Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
-Cc: Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 ---
- drivers/acpi/property.c | 50 ++++++++++++++++++++++++-------------------------
- 1 file changed, 25 insertions(+), 25 deletions(-)
+ drivers/firmware/efi/cper.c | 10 ++---
+ include/linux/cper.h        | 94 ++++++++++++++++++++++-----------------------
+ include/linux/efi.h         |  4 +-
+ 3 files changed, 54 insertions(+), 54 deletions(-)
 
-diff --git a/drivers/acpi/property.c b/drivers/acpi/property.c
-index 917c789f953d..a7fdbe083a7e 100644
---- a/drivers/acpi/property.c
-+++ b/drivers/acpi/property.c
-@@ -24,16 +24,14 @@ static int acpi_data_get_property_array(struct acpi_device_data *data,
- 					acpi_object_type type,
- 					const union acpi_object **obj);
- 
--/* ACPI _DSD device properties UUID: daffd814-6eba-4d8c-8a91-bc9bbf4aa301 */
--static const u8 prp_uuid[16] = {
--	0x14, 0xd8, 0xff, 0xda, 0xba, 0x6e, 0x8c, 0x4d,
--	0x8a, 0x91, 0xbc, 0x9b, 0xbf, 0x4a, 0xa3, 0x01
--};
--/* ACPI _DSD data subnodes UUID: dbb8e3e6-5886-4ba6-8795-1319f52a966b */
--static const u8 ads_uuid[16] = {
--	0xe6, 0xe3, 0xb8, 0xdb, 0x86, 0x58, 0xa6, 0x4b,
--	0x87, 0x95, 0x13, 0x19, 0xf5, 0x2a, 0x96, 0x6b
--};
-+/* ACPI _DSD device properties GUID: daffd814-6eba-4d8c-8a91-bc9bbf4aa301 */
-+static const guid_t prp_guid =
-+	GUID_INIT(0xdaffd814, 0x6eba, 0x4d8c,
-+		  0x8a, 0x91, 0xbc, 0x9b, 0xbf, 0x4a, 0xa3, 0x01);
-+/* ACPI _DSD data subnodes GUID: dbb8e3e6-5886-4ba6-8795-1319f52a966b */
-+static const guid_t ads_guid =
-+	GUID_INIT(0xdbb8e3e6, 0x5886, 0x4ba6,
-+		  0x87, 0x95, 0x13, 0x19, 0xf5, 0x2a, 0x96, 0x6b);
- 
- static bool acpi_enumerate_nondev_subnodes(acpi_handle scope,
- 					   const union acpi_object *desc,
-@@ -190,22 +188,23 @@ static bool acpi_enumerate_nondev_subnodes(acpi_handle scope,
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index 48a8f69da42a..684e65c11dde 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -534,7 +534,7 @@ static void
+ cper_estatus_print_section(const char *pfx, struct acpi_hest_generic_data *gdata,
+ 			   int sec_no)
  {
- 	int i;
+-	uuid_le *sec_type = (uuid_le *)gdata->section_type;
++	guid_t *sec_type = (guid_t *)gdata->section_type;
+ 	__u16 severity;
+ 	char newpfx[64];
  
--	/* Look for the ACPI data subnodes UUID. */
-+	/* Look for the ACPI data subnodes GUID. */
- 	for (i = 0; i < desc->package.count; i += 2) {
--		const union acpi_object *uuid, *links;
-+		const union acpi_object *guid, *links;
+@@ -545,12 +545,12 @@ cper_estatus_print_section(const char *pfx, struct acpi_hest_generic_data *gdata
+ 	printk("%s""Error %d, type: %s\n", pfx, sec_no,
+ 	       cper_severity_str(severity));
+ 	if (gdata->validation_bits & CPER_SEC_VALID_FRU_ID)
+-		printk("%s""fru_id: %pUl\n", pfx, (uuid_le *)gdata->fru_id);
++		printk("%s""fru_id: %pUl\n", pfx, gdata->fru_id);
+ 	if (gdata->validation_bits & CPER_SEC_VALID_FRU_TEXT)
+ 		printk("%s""fru_text: %.20s\n", pfx, gdata->fru_text);
  
--		uuid = &desc->package.elements[i];
-+		guid = &desc->package.elements[i];
- 		links = &desc->package.elements[i + 1];
+ 	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
+-	if (!uuid_le_cmp(*sec_type, CPER_SEC_PROC_GENERIC)) {
++	if (guid_equal(sec_type, &CPER_SEC_PROC_GENERIC)) {
+ 		struct cper_sec_proc_generic *proc_err = acpi_hest_get_payload(gdata);
  
- 		/*
--		 * The first element must be a UUID and the second one must be
-+		 * The first element must be a GUID and the second one must be
- 		 * a package.
- 		 */
--		if (uuid->type != ACPI_TYPE_BUFFER || uuid->buffer.length != 16
--		    || links->type != ACPI_TYPE_PACKAGE)
-+		if (guid->type != ACPI_TYPE_BUFFER ||
-+		    guid->buffer.length != 16 ||
-+		    links->type != ACPI_TYPE_PACKAGE)
- 			break;
+ 		printk("%s""section_type: general processor error\n", newpfx);
+@@ -558,7 +558,7 @@ cper_estatus_print_section(const char *pfx, struct acpi_hest_generic_data *gdata
+ 			cper_print_proc_generic(newpfx, proc_err);
+ 		else
+ 			goto err_section_too_small;
+-	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PLATFORM_MEM)) {
++	} else if (guid_equal(sec_type, &CPER_SEC_PLATFORM_MEM)) {
+ 		struct cper_sec_mem_err *mem_err = acpi_hest_get_payload(gdata);
  
--		if (memcmp(uuid->buffer.pointer, ads_uuid, sizeof(ads_uuid)))
-+		if (!guid_equal((guid_t *)guid->buffer.pointer, &ads_guid))
- 			continue;
+ 		printk("%s""section_type: memory error\n", newpfx);
+@@ -568,7 +568,7 @@ cper_estatus_print_section(const char *pfx, struct acpi_hest_generic_data *gdata
+ 				       gdata->error_data_length);
+ 		else
+ 			goto err_section_too_small;
+-	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PCIE)) {
++	} else if (guid_equal(sec_type, &CPER_SEC_PCIE)) {
+ 		struct cper_sec_pcie *pcie = acpi_hest_get_payload(gdata);
  
- 		return acpi_add_nondev_subnodes(scope, links, &data->subnodes,
-@@ -298,26 +297,27 @@ static bool acpi_extract_properties(const union acpi_object *desc,
- 	if (desc->package.count % 2)
- 		return false;
+ 		printk("%s""section_type: PCIe error\n", newpfx);
+diff --git a/include/linux/cper.h b/include/linux/cper.h
+index 4c671fc2081e..723e952fde0d 100644
+--- a/include/linux/cper.h
++++ b/include/linux/cper.h
+@@ -74,36 +74,36 @@ enum {
+  * Corrected Machine Check
+  */
+ #define CPER_NOTIFY_CMC							\
+-	UUID_LE(0x2DCE8BB1, 0xBDD7, 0x450e, 0xB9, 0xAD, 0x9C, 0xF4,	\
+-		0xEB, 0xD4, 0xF8, 0x90)
++	GUID_INIT(0x2DCE8BB1, 0xBDD7, 0x450e, 0xB9, 0xAD, 0x9C, 0xF4,	\
++		  0xEB, 0xD4, 0xF8, 0x90)
+ /* Corrected Platform Error */
+ #define CPER_NOTIFY_CPE							\
+-	UUID_LE(0x4E292F96, 0xD843, 0x4a55, 0xA8, 0xC2, 0xD4, 0x81,	\
+-		0xF2, 0x7E, 0xBE, 0xEE)
++	GUID_INIT(0x4E292F96, 0xD843, 0x4a55, 0xA8, 0xC2, 0xD4, 0x81,	\
++		  0xF2, 0x7E, 0xBE, 0xEE)
+ /* Machine Check Exception */
+ #define CPER_NOTIFY_MCE							\
+-	UUID_LE(0xE8F56FFE, 0x919C, 0x4cc5, 0xBA, 0x88, 0x65, 0xAB,	\
+-		0xE1, 0x49, 0x13, 0xBB)
++	GUID_INIT(0xE8F56FFE, 0x919C, 0x4cc5, 0xBA, 0x88, 0x65, 0xAB,	\
++		  0xE1, 0x49, 0x13, 0xBB)
+ /* PCI Express Error */
+ #define CPER_NOTIFY_PCIE						\
+-	UUID_LE(0xCF93C01F, 0x1A16, 0x4dfc, 0xB8, 0xBC, 0x9C, 0x4D,	\
+-		0xAF, 0x67, 0xC1, 0x04)
++	GUID_INIT(0xCF93C01F, 0x1A16, 0x4dfc, 0xB8, 0xBC, 0x9C, 0x4D,	\
++		  0xAF, 0x67, 0xC1, 0x04)
+ /* INIT Record (for IPF) */
+ #define CPER_NOTIFY_INIT						\
+-	UUID_LE(0xCC5263E8, 0x9308, 0x454a, 0x89, 0xD0, 0x34, 0x0B,	\
+-		0xD3, 0x9B, 0xC9, 0x8E)
++	GUID_INIT(0xCC5263E8, 0x9308, 0x454a, 0x89, 0xD0, 0x34, 0x0B,	\
++		  0xD3, 0x9B, 0xC9, 0x8E)
+ /* Non-Maskable Interrupt */
+ #define CPER_NOTIFY_NMI							\
+-	UUID_LE(0x5BAD89FF, 0xB7E6, 0x42c9, 0x81, 0x4A, 0xCF, 0x24,	\
+-		0x85, 0xD6, 0xE9, 0x8A)
++	GUID_INIT(0x5BAD89FF, 0xB7E6, 0x42c9, 0x81, 0x4A, 0xCF, 0x24,	\
++		  0x85, 0xD6, 0xE9, 0x8A)
+ /* BOOT Error Record */
+ #define CPER_NOTIFY_BOOT						\
+-	UUID_LE(0x3D61A466, 0xAB40, 0x409a, 0xA6, 0x98, 0xF3, 0x62,	\
+-		0xD4, 0x64, 0xB3, 0x8F)
++	GUID_INIT(0x3D61A466, 0xAB40, 0x409a, 0xA6, 0x98, 0xF3, 0x62,	\
++		  0xD4, 0x64, 0xB3, 0x8F)
+ /* DMA Remapping Error */
+ #define CPER_NOTIFY_DMAR						\
+-	UUID_LE(0x667DD791, 0xC6B3, 0x4c27, 0x8A, 0x6B, 0x0F, 0x8E,	\
+-		0x72, 0x2D, 0xEB, 0x41)
++	GUID_INIT(0x667DD791, 0xC6B3, 0x4c27, 0x8A, 0x6B, 0x0F, 0x8E,	\
++		  0x72, 0x2D, 0xEB, 0x41)
  
--	/* Look for the device properties UUID. */
-+	/* Look for the device properties GUID. */
- 	for (i = 0; i < desc->package.count; i += 2) {
--		const union acpi_object *uuid, *properties;
-+		const union acpi_object *guid, *properties;
+ /*
+  * Flags bits definitions for flags in struct cper_record_header
+@@ -170,50 +170,50 @@ enum {
+  * Processor Generic
+  */
+ #define CPER_SEC_PROC_GENERIC						\
+-	UUID_LE(0x9876CCAD, 0x47B4, 0x4bdb, 0xB6, 0x5E, 0x16, 0xF1,	\
+-		0x93, 0xC4, 0xF3, 0xDB)
++	GUID_INIT(0x9876CCAD, 0x47B4, 0x4bdb, 0xB6, 0x5E, 0x16, 0xF1,	\
++		  0x93, 0xC4, 0xF3, 0xDB)
+ /* Processor Specific: X86/X86_64 */
+ #define CPER_SEC_PROC_IA						\
+-	UUID_LE(0xDC3EA0B0, 0xA144, 0x4797, 0xB9, 0x5B, 0x53, 0xFA,	\
+-		0x24, 0x2B, 0x6E, 0x1D)
++	GUID_INIT(0xDC3EA0B0, 0xA144, 0x4797, 0xB9, 0x5B, 0x53, 0xFA,	\
++		  0x24, 0x2B, 0x6E, 0x1D)
+ /* Processor Specific: IA64 */
+ #define CPER_SEC_PROC_IPF						\
+-	UUID_LE(0xE429FAF1, 0x3CB7, 0x11D4, 0x0B, 0xCA, 0x07, 0x00,	\
+-		0x80, 0xC7, 0x3C, 0x88, 0x81)
++	GUID_INIT(0xE429FAF1, 0x3CB7, 0x11D4, 0x0B, 0xCA, 0x07, 0x00,	\
++		  0x80, 0xC7, 0x3C, 0x88, 0x81)
+ /* Processor Specific: ARM */
+ #define CPER_SEC_PROC_ARM						\
+-	UUID_LE(0xE19E3D16, 0xBC11, 0x11E4, 0x9C, 0xAA, 0xC2, 0x05,	\
+-		0x1D, 0x5D, 0x46, 0xB0)
++	GUID_INIT(0xE19E3D16, 0xBC11, 0x11E4, 0x9C, 0xAA, 0xC2, 0x05,	\
++		  0x1D, 0x5D, 0x46, 0xB0)
+ /* Platform Memory */
+ #define CPER_SEC_PLATFORM_MEM						\
+-	UUID_LE(0xA5BC1114, 0x6F64, 0x4EDE, 0xB8, 0x63, 0x3E, 0x83,	\
+-		0xED, 0x7C, 0x83, 0xB1)
++	GUID_INIT(0xA5BC1114, 0x6F64, 0x4EDE, 0xB8, 0x63, 0x3E, 0x83,	\
++		  0xED, 0x7C, 0x83, 0xB1)
+ #define CPER_SEC_PCIE							\
+-	UUID_LE(0xD995E954, 0xBBC1, 0x430F, 0xAD, 0x91, 0xB4, 0x4D,	\
+-		0xCB, 0x3C, 0x6F, 0x35)
++	GUID_INIT(0xD995E954, 0xBBC1, 0x430F, 0xAD, 0x91, 0xB4, 0x4D,	\
++		  0xCB, 0x3C, 0x6F, 0x35)
+ /* Firmware Error Record Reference */
+ #define CPER_SEC_FW_ERR_REC_REF						\
+-	UUID_LE(0x81212A96, 0x09ED, 0x4996, 0x94, 0x71, 0x8D, 0x72,	\
+-		0x9C, 0x8E, 0x69, 0xED)
++	GUID_INIT(0x81212A96, 0x09ED, 0x4996, 0x94, 0x71, 0x8D, 0x72,	\
++		  0x9C, 0x8E, 0x69, 0xED)
+ /* PCI/PCI-X Bus */
+ #define CPER_SEC_PCI_X_BUS						\
+-	UUID_LE(0xC5753963, 0x3B84, 0x4095, 0xBF, 0x78, 0xED, 0xDA,	\
+-		0xD3, 0xF9, 0xC9, 0xDD)
++	GUID_INIT(0xC5753963, 0x3B84, 0x4095, 0xBF, 0x78, 0xED, 0xDA,	\
++		  0xD3, 0xF9, 0xC9, 0xDD)
+ /* PCI Component/Device */
+ #define CPER_SEC_PCI_DEV						\
+-	UUID_LE(0xEB5E4685, 0xCA66, 0x4769, 0xB6, 0xA2, 0x26, 0x06,	\
+-		0x8B, 0x00, 0x13, 0x26)
++	GUID_INIT(0xEB5E4685, 0xCA66, 0x4769, 0xB6, 0xA2, 0x26, 0x06,	\
++		  0x8B, 0x00, 0x13, 0x26)
+ #define CPER_SEC_DMAR_GENERIC						\
+-	UUID_LE(0x5B51FEF7, 0xC79D, 0x4434, 0x8F, 0x1B, 0xAA, 0x62,	\
+-		0xDE, 0x3E, 0x2C, 0x64)
++	GUID_INIT(0x5B51FEF7, 0xC79D, 0x4434, 0x8F, 0x1B, 0xAA, 0x62,	\
++		  0xDE, 0x3E, 0x2C, 0x64)
+ /* Intel VT for Directed I/O specific DMAr */
+ #define CPER_SEC_DMAR_VT						\
+-	UUID_LE(0x71761D37, 0x32B2, 0x45cd, 0xA7, 0xD0, 0xB0, 0xFE,	\
+-		0xDD, 0x93, 0xE8, 0xCF)
++	GUID_INIT(0x71761D37, 0x32B2, 0x45cd, 0xA7, 0xD0, 0xB0, 0xFE,	\
++		  0xDD, 0x93, 0xE8, 0xCF)
+ /* IOMMU specific DMAr */
+ #define CPER_SEC_DMAR_IOMMU						\
+-	UUID_LE(0x036F84E1, 0x7F37, 0x428c, 0xA7, 0x9E, 0x57, 0x5F,	\
+-		0xDF, 0xAA, 0x84, 0xEC)
++	GUID_INIT(0x036F84E1, 0x7F37, 0x428c, 0xA7, 0x9E, 0x57, 0x5F,	\
++		  0xDF, 0xAA, 0x84, 0xEC)
  
--		uuid = &desc->package.elements[i];
-+		guid = &desc->package.elements[i];
- 		properties = &desc->package.elements[i + 1];
+ #define CPER_PROC_VALID_TYPE			0x0001
+ #define CPER_PROC_VALID_ISA			0x0002
+@@ -290,10 +290,10 @@ struct cper_record_header {
+ 	__u32	validation_bits;
+ 	__u32	record_length;
+ 	__u64	timestamp;
+-	uuid_le	platform_id;
+-	uuid_le	partition_id;
+-	uuid_le	creator_id;
+-	uuid_le	notification_type;
++	guid_t	platform_id;
++	guid_t	partition_id;
++	guid_t	creator_id;
++	guid_t	notification_type;
+ 	__u64	record_id;
+ 	__u32	flags;
+ 	__u64	persistence_information;
+@@ -309,8 +309,8 @@ struct cper_section_descriptor {
+ 	__u8	validation_bits;
+ 	__u8	reserved;		/* must be zero */
+ 	__u32	flags;
+-	uuid_le	section_type;
+-	uuid_le	fru_id;
++	guid_t	section_type;
++	guid_t	fru_id;
+ 	__u32	section_severity;
+ 	__u8	fru_text[20];
+ };
+@@ -343,7 +343,7 @@ struct cper_sec_proc_ia {
  
- 		/*
--		 * The first element must be a UUID and the second one must be
-+		 * The first element must be a GUID and the second one must be
- 		 * a package.
- 		 */
--		if (uuid->type != ACPI_TYPE_BUFFER || uuid->buffer.length != 16
--		    || properties->type != ACPI_TYPE_PACKAGE)
-+		if (guid->type != ACPI_TYPE_BUFFER ||
-+		    guid->buffer.length != 16 ||
-+		    properties->type != ACPI_TYPE_PACKAGE)
- 			break;
+ /* IA32/X64 Processor Error Information Structure */
+ struct cper_ia_err_info {
+-	uuid_le	err_type;
++	guid_t	err_type;
+ 	__u64	validation_bits;
+ 	__u64	check_info;
+ 	__u64	target_id;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 8269bcb8ccf7..7a322aed979f 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -47,10 +47,10 @@ typedef u16 efi_char16_t;		/* UNICODE character */
+ typedef u64 efi_physical_addr_t;
+ typedef void *efi_handle_t;
  
--		if (memcmp(uuid->buffer.pointer, prp_uuid, sizeof(prp_uuid)))
-+		if (!guid_equal((guid_t *)guid->buffer.pointer, &prp_guid))
- 			continue;
+-typedef uuid_le efi_guid_t;
++typedef guid_t efi_guid_t;
  
- 		/*
--		 * We found the matching UUID. Now validate the format of the
-+		 * We found the matching GUID. Now validate the format of the
- 		 * package immediately following it.
- 		 */
- 		if (!acpi_properties_format_valid(properties))
+ #define EFI_GUID(a,b,c,d0,d1,d2,d3,d4,d5,d6,d7) \
+-	UUID_LE(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)
++	GUID_INIT(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)
+ 
+ /*
+  * Generic EFI table header
 -- 
 2.11.0
