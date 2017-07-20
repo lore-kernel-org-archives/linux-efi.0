@@ -1,44 +1,38 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH v1 4/6] vmbus: Switch to use new generic UUID API
-Date: Thu, 20 Jul 2017 00:54:42 +0300
-Message-ID: <CAHp75VdYnKGdyy=OwHoWw5Sch9t+E7gd1tqg0YfZjiicR-Q3Jw@mail.gmail.com>
-References: <20170719182857.73693-1-andriy.shevchenko@linux.intel.com>
- <20170719182857.73693-5-andriy.shevchenko@linux.intel.com> <MWHPR21MB04791ED8A0F0F935176AE9B3CAA60@MWHPR21MB0479.namprd21.prod.outlook.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH 4.12 26/84] x86/xen/efi: Initialize only the
+ EFI struct members used by Xen
+Date: Thu, 20 Jul 2017 10:39:10 +0200
+Message-ID: <20170720083910.aygobq7t7g7laszt@gmail.com>
+References: <20170719092322.362625377@linuxfoundation.org>
+ <20170719092323.396710042@linuxfoundation.org>
+ <20170719103747.GZ4448@olila.local.net-space.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <MWHPR21MB04791ED8A0F0F935176AE9B3CAA60@MWHPR21MB0479.namprd21.prod.outlook.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Haiyang Zhang <haiyangz@microsoft.com>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "sparmaintainer@unisys.com" <sparmaintainer@unisys.com>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-watchdog@vger.kernel.org" <linux-watchdog@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Lukas Wunner <lukas@wunner.de>, KY Srinivasan <kys@microsoft.com>, Stephen Hemminger <sthemmin@microsoft.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
+Content-Disposition: inline
+In-Reply-To: <20170719103747.GZ4448@olila.local.net-space.pl>
+List-Unsubscribe: <https://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <https://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
+To: Daniel Kiper <daniel.kiper@oracle.com>
+Cc: jgross@suse.com, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Peter Zijlstra <peterz@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, stable@vger.kernel.org, matt@codeblueprint.co.uk, andrew.cooper3@citrix.com, xen-devel@lists.xenproject.org, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Linus Torvalds <torvalds@linux-foundation.org>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jul 19, 2017 at 11:18 PM, Haiyang Zhang <haiyangz@microsoft.com> wrote:
-
->>  struct hv_fcopy_hdr {
->>       __u32 operation;
->> -     uuid_le service_id0; /* currently unused */
->> -     uuid_le service_id1; /* currently unused */
->> +     __u8 service_id0[16]; /* currently unused */
->> +     __u8 service_id1[16]; /* currently unused */
->>  } __attribute__((packed));
->
-> Even user space may not have all guid_t operations, could you still
-> put guid_t here for consistency?
-
-I'm not sure how this code has been designed, though uuid_le followed
-by guid_t are kernel internal types mistakenly put to UAPI in the
-first place.
-
-Consistency here is how we treat those types in user space, starting
-from v4.13 uuid_be gone from that header. uuid_le is luckily will be
-gone soon.
-
-> This file is also used by our kernel
-> mode code.
-
-It will work still the same after this change.
-
--- 
-With Best Regards,
-Andy Shevchenko
+CiogRGFuaWVsIEtpcGVyIDxkYW5pZWwua2lwZXJAb3JhY2xlLmNvbT4gd3JvdGU6Cgo+IEhleSBH
+cmVnLAo+IAo+IE9uIFdlZCwgSnVsIDE5LCAyMDE3IGF0IDExOjQzOjMyQU0gKzAyMDAsIEdyZWcg
+S3JvYWgtSGFydG1hbiB3cm90ZToKPiA+IDQuMTItc3RhYmxlIHJldmlldyBwYXRjaC4gIElmIGFu
+eW9uZSBoYXMgYW55IG9iamVjdGlvbnMsIHBsZWFzZSBsZXQgbWUga25vdy4KPiAKPiBXaHkgZGlk
+IHlvdSBza2lwIHRoaXMgcGF0Y2ggZm9yIDQuMTE/IElNTyBpdCBzaG91bGQgYmUgYXBwbGllZCB0
+aGVyZSB0b28uCgpUaGUgdGhpbmcgaXMsIHRoaXMgcGF0Y2ggc2hvdWxkIHByb2JhbHkgbm90IGV2
+ZW4gYmUgaW4gdjQuMTIsIGFzIGl0IHNob3VsZCBvbmx5IAptYWtlIGFueSBkaWZmZXJlbmNlIGlm
+IHRoZXJlJ3MgYSBzZXBhcmF0ZSBfYnVnXyBpbiB0aGUga2VybmVsLgoKVGhpcyBwYXRjaCBtYWtl
+cyB0aGluZ3MgbW9yZSByb2J1c3QgZ29pbmcgZm9yd2FyZCwgYnV0IEkgcXVlc3Rpb24gdGhhdCBp
+dCBuZWVkcyB0byAKYmUgaW4gLXN0YWJsZS4KClRoYW5rcywKCglJbmdvCgpfX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpYZW4tZGV2ZWwgbWFpbGluZyBsaXN0
+Clhlbi1kZXZlbEBsaXN0cy54ZW4ub3JnCmh0dHBzOi8vbGlzdHMueGVuLm9yZy94ZW4tZGV2ZWwK
