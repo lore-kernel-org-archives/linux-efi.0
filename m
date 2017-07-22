@@ -1,26 +1,26 @@
-From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH v1 4/6] vmbus: Switch to use new generic UUID API
-Date: Sun, 23 Jul 2017 02:46:04 +0800
-Message-ID: <201707230246.gWX5xeQF%fengguang.wu@intel.com>
-References: <20170719182857.73693-5-andriy.shevchenko@linux.intel.com>
+From: kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v1 5/6] uuid: Kill uapi/uuid.h
+Date: Sun, 23 Jul 2017 02:48:56 +0800
+Message-ID: <201707230241.h74C2UQf%fengguang.wu@intel.com>
+References: <20170719182857.73693-6-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="1yeeQ81UyVL57Vl7"
-Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="KsGdsel6WgEHnImy"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20170719182857.73693-5-andriy.shevchenko@linux.intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
-Cc: kbuild-all@01.org, linux-acpi@vger.kernel.org, devel@linuxdriverproject.org, sparmaintainer@unisys.com, devel@driverdev.osuosl.org, linux-wireless@vger.kernel.org, linux-watchdog@vger.kernel.org, linux-efi@vger.kernel.org, Christoph Hellwig <hch@lst.de>, linux-kernel@vger.kernel.org, Lukas Wunner <lukas@wunner.de>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "K. Y. Srinivasan" <kys@microsoft.com>, Haiyang Zhang <haiyangz@microsoft.com>, Stephen Hemminger <sthemmin@microsoft.com>
+In-Reply-To: <20170719182857.73693-6-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: kbuild-all-JC7UmRfGjtg@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-tBiZLqfeLfOHmIFyCCdPziST3g8Odh+X@public.gmane.org, sparmaintainer-GLv8BlqOqDDQT0dZR+AlfA@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-watchdog-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
 
---1yeeQ81UyVL57Vl7
+--KsGdsel6WgEHnImy
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
 Hi Andy,
 
-[auto build test ERROR on linus/master]
-[also build test ERROR on v4.13-rc1]
+[auto build test WARNING on linus/master]
+[also build test WARNING on v4.13-rc1]
 [cannot apply to next-20170721]
 [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
 
@@ -31,77 +31,21 @@ reproduce:
         # save the attached .config to linux build tree
         make ARCH=i386 
 
-Note: the linux-review/Andy-Shevchenko/uuid-Convert-rest-users-to-new-API/20170723-022330 HEAD f8d40b52dfac11e78d56509455812bcfe9962ce0 builds fine.
-      It only hurts bisectibility.
+All warnings (new ones prefixed by >>):
 
-All errors (new ones prefixed by >>):
-
-   In file included from scripts//mod/file2alias.c:44:0:
-   scripts//mod/../../include/linux/mod_devicetable.h:408:2: error: unknown type name 'guid_t'
-     guid_t guid;
-     ^~~~~~
-   scripts//mod/../../include/linux/mod_devicetable.h:638:2: error: unknown type name 'guid_t'
-     guid_t uuid;
-     ^~~~~~
-   In file included from scripts//mod/file2alias.c:13:0:
-   scripts//mod/file2alias.c: In function 'do_vmbus_entry':
->> scripts//mod/file2alias.c:938:49: error: request for member 'b' in something not a structure or union
-      sprintf(&guid_name[i], "%02x", TO_NATIVE((guid->b)[i/2]));
-                                                    ^
-   scripts//mod/modpost.h:92:23: note: in definition of macro 'TO_NATIVE'
-    #define TO_NATIVE(x) (x)
-                          ^
-   scripts//mod/file2alias.c: In function 'do_mei_entry':
-   scripts//mod/file2alias.c:1233:18: error: incompatible type for argument 2 of 'add_uuid'
-     add_uuid(alias, *uuid);
-                     ^
-   scripts//mod/file2alias.c:137:20: note: expected 'uuid_le {aka struct <anonymous>}' but argument is of type 'int'
-    static inline void add_uuid(char *str, uuid_le uuid)
-                       ^~~~~~~~
-
-vim +/b +938 scripts//mod/file2alias.c
-
-b01d9f28 Rusty Russell    2007-10-22  923  
-d2ee52aa K. Y. Srinivasan 2011-08-25  924  /*
-d2ee52aa K. Y. Srinivasan 2011-08-25  925   * Looks like: vmbus:guid
-d2ee52aa K. Y. Srinivasan 2011-08-25  926   * Each byte of the guid will be represented by two hex characters
-d2ee52aa K. Y. Srinivasan 2011-08-25  927   * in the name.
-d2ee52aa K. Y. Srinivasan 2011-08-25  928   */
-d2ee52aa K. Y. Srinivasan 2011-08-25  929  
-6543becf Andreas Schwab   2013-01-20  930  static int do_vmbus_entry(const char *filename, void *symval,
-d2ee52aa K. Y. Srinivasan 2011-08-25  931  			  char *alias)
-d2ee52aa K. Y. Srinivasan 2011-08-25  932  {
-d2ee52aa K. Y. Srinivasan 2011-08-25  933  	int i;
-6543becf Andreas Schwab   2013-01-20  934  	DEF_FIELD_ADDR(symval, hv_vmbus_device_id, guid);
-6543becf Andreas Schwab   2013-01-20  935  	char guid_name[(sizeof(*guid) + 1) * 2];
-d2ee52aa K. Y. Srinivasan 2011-08-25  936  
-6543becf Andreas Schwab   2013-01-20  937  	for (i = 0; i < (sizeof(*guid) * 2); i += 2)
-af3ff643 K. Y. Srinivasan 2015-12-14 @938  		sprintf(&guid_name[i], "%02x", TO_NATIVE((guid->b)[i/2]));
-d2ee52aa K. Y. Srinivasan 2011-08-25  939  
-d2ee52aa K. Y. Srinivasan 2011-08-25  940  	strcpy(alias, "vmbus:");
-d2ee52aa K. Y. Srinivasan 2011-08-25  941  	strcat(alias, guid_name);
-d2ee52aa K. Y. Srinivasan 2011-08-25  942  
-d2ee52aa K. Y. Srinivasan 2011-08-25  943  	return 1;
-d2ee52aa K. Y. Srinivasan 2011-08-25  944  }
-6543becf Andreas Schwab   2013-01-20  945  ADD_TO_DEVTABLE("vmbus", hv_vmbus_device_id, do_vmbus_entry);
-d2ee52aa K. Y. Srinivasan 2011-08-25  946  
-
-:::::: The code at line 938 was first introduced by commit
-:::::: af3ff643ea91ba64dd8d0b1cbed54d44512f96cd Drivers: hv: vmbus: Use uuid_le type consistently
-
-:::::: TO: K. Y. Srinivasan <kys@microsoft.com>
-:::::: CC: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+>> ./usr/include/linux/hyperv.h:71: found __[us]{8,16,32,64} type without #include <linux/types.h>
+>> ./usr/include/linux/mei.h:93: found __[us]{8,16,32,64} type without #include <linux/types.h>
 
 ---
 0-DAY kernel test infrastructure                Open Source Technology Center
 https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
 
---1yeeQ81UyVL57Vl7
+--KsGdsel6WgEHnImy
 Content-Type: application/gzip
 Content-Disposition: attachment; filename=".config.gz"
 Content-Transfer-Encoding: base64
 
-H4sICFSZc1kAAy5jb25maWcAjFxbc+M2sn7fX8FKzkPykBnfxnHqlB8gEBQREyRDgJLsF5Yi
+H4sICPCYc1kAAy5jb25maWcAjFxbc+M2sn7fX8FKzkPykBnfxnHqlB8gEBQREyRDgJLsF5Yi
 a2ZUY0teSU4y//50A6R4ayhnq3Z3jG7c+/J1o6kf//NjwN6Pu9flcbNavrx8D76st+v98rh+
 Dj5vXtb/G4RZkGYmEKE0H4A52Wzf//m4ub67DW4+XF5/uPhlv7oMHtb77fol4Lvt582Xd+i+
 2W3/8yOw8yyN5LS6vZlIE2wOwXZ3DA7r43/q9sXdbXV9df+983f7h0y1KUpuZJZWoeBZKIqW
@@ -226,4 +170,4 @@ AdILGdyK17UX5ysrn7Yoti0EuJr0Uq5OgUQmBwCB3M60tTndTuOhLWSSAGKO9XysjCAQkO0h
 ZqJvpcvP6WDn4RFZ2hOiPi9uROttcDmnEEz+CT12DJdsPEn5LLBwZVmpRRJUoBYItRcYYlvl
 xVcrOUdCLLoqIaKHXGrCGDwYm2uDzQyZdYIl44E20ob+Byne95S7XwAA
 
---1yeeQ81UyVL57Vl7--
+--KsGdsel6WgEHnImy--
