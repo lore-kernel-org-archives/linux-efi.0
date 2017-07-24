@@ -1,7 +1,7 @@
 From: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
-Subject: [RFC Part1 PATCH v3 05/17] x86, realmode: Don't decrypt trampoline area under SEV
-Date: Mon, 24 Jul 2017 14:07:45 -0500
-Message-ID: <20170724190757.11278-6-brijesh.singh@amd.com>
+Subject: [RFC Part1 PATCH v3 09/17] resource: Consolidate resource walking code
+Date: Mon, 24 Jul 2017 14:07:49 -0500
+Message-ID: <20170724190757.11278-10-brijesh.singh@amd.com>
 References: <20170724190757.11278-1-brijesh.singh@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,32 +14,113 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 
-When SEV is active the trampoline area will need to be in encrypted
-memory so only mark the area decrypted if SME is active.
+The walk_iomem_res_desc(), walk_system_ram_res() and walk_system_ram_range()
+functions each have much of the same code.  Create a new function that
+consolidates the common code from these functions in one place to reduce
+the amount of duplicated code.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 Signed-off-by: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
 ---
- arch/x86/realmode/init.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ kernel/resource.c | 53 ++++++++++++++++++++++++++---------------------------
+ 1 file changed, 26 insertions(+), 27 deletions(-)
 
-diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
-index 1f71980..c7eeca7 100644
---- a/arch/x86/realmode/init.c
-+++ b/arch/x86/realmode/init.c
-@@ -63,9 +63,11 @@ static void __init setup_real_mode(void)
- 	/*
- 	 * If SME is active, the trampoline area will need to be in
- 	 * decrypted memory in order to bring up other processors
--	 * successfully.
-+	 * successfully. For SEV the trampoline area needs to be in
-+	 * encrypted memory, so only do this for SME.
- 	 */
--	set_memory_decrypted((unsigned long)base, size >> PAGE_SHIFT);
-+	if (sme_active())
-+		set_memory_decrypted((unsigned long)base, size >> PAGE_SHIFT);
+diff --git a/kernel/resource.c b/kernel/resource.c
+index 9b5f044..7b20b3e 100644
+--- a/kernel/resource.c
++++ b/kernel/resource.c
+@@ -397,9 +397,30 @@ static int find_next_iomem_res(struct resource *res, unsigned long desc,
+ 		res->start = p->start;
+ 	if (res->end > p->end)
+ 		res->end = p->end;
++	res->desc = p->desc;
+ 	return 0;
+ }
  
- 	memcpy(base, real_mode_blob, size);
++static int __walk_iomem_res_desc(struct resource *res, unsigned long desc,
++				 bool first_level_children_only,
++				 void *arg, int (*func)(u64, u64, void *))
++{
++	u64 orig_end = res->end;
++	int ret = -1;
++
++	while ((res->start < res->end) &&
++	       !find_next_iomem_res(res, desc, first_level_children_only)) {
++		ret = (*func)(res->start, res->end, arg);
++		if (ret)
++			break;
++
++		res->start = res->end + 1;
++		res->end = orig_end;
++	}
++
++	return ret;
++}
++
+ /*
+  * Walks through iomem resources and calls func() with matching resource
+  * ranges. This walks through whole tree and not just first level children.
+@@ -418,26 +439,12 @@ int walk_iomem_res_desc(unsigned long desc, unsigned long flags, u64 start,
+ 		u64 end, void *arg, int (*func)(u64, u64, void *))
+ {
+ 	struct resource res;
+-	u64 orig_end;
+-	int ret = -1;
  
+ 	res.start = start;
+ 	res.end = end;
+ 	res.flags = flags;
+-	orig_end = res.end;
+-
+-	while ((res.start < res.end) &&
+-		(!find_next_iomem_res(&res, desc, false))) {
+-
+-		ret = (*func)(res.start, res.end, arg);
+-		if (ret)
+-			break;
+-
+-		res.start = res.end + 1;
+-		res.end = orig_end;
+-	}
+ 
+-	return ret;
++	return __walk_iomem_res_desc(&res, desc, false, arg, func);
+ }
+ 
+ /*
+@@ -451,22 +458,13 @@ int walk_system_ram_res(u64 start, u64 end, void *arg,
+ 				int (*func)(u64, u64, void *))
+ {
+ 	struct resource res;
+-	u64 orig_end;
+-	int ret = -1;
+ 
+ 	res.start = start;
+ 	res.end = end;
+ 	res.flags = IORESOURCE_SYSTEM_RAM | IORESOURCE_BUSY;
+-	orig_end = res.end;
+-	while ((res.start < res.end) &&
+-		(!find_next_iomem_res(&res, IORES_DESC_NONE, true))) {
+-		ret = (*func)(res.start, res.end, arg);
+-		if (ret)
+-			break;
+-		res.start = res.end + 1;
+-		res.end = orig_end;
+-	}
+-	return ret;
++
++	return __walk_iomem_res_desc(&res, IORES_DESC_NONE, true,
++				     arg, func);
+ }
+ 
+ #if !defined(CONFIG_ARCH_HAS_WALK_MEMORY)
+@@ -508,6 +506,7 @@ static int __is_ram(unsigned long pfn, unsigned long nr_pages, void *arg)
+ {
+ 	return 1;
+ }
++
+ /*
+  * This generic page_is_ram() returns true if specified address is
+  * registered as System RAM in iomem_resource list.
 -- 
 2.9.4
