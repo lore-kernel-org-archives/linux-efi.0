@@ -1,250 +1,152 @@
-From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [RFC Part1 PATCH v3 10/17] resource: Provide resource struct in resource walk callback
-Date: Mon, 24 Jul 2017 14:07:50 -0500
-Message-ID: <20170724190757.11278-11-brijesh.singh@amd.com>
+From: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
+Subject: [RFC Part1 PATCH v3 12/17] x86/mm: DMA support for SEV memory encryption
+Date: Mon, 24 Jul 2017 14:07:52 -0500
+Message-ID: <20170724190757.11278-13-brijesh.singh@amd.com>
 References: <20170724190757.11278-1-brijesh.singh@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <20170724190757.11278-1-brijesh.singh@amd.com>
-Sender: kvm-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org
-Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@suse.de>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Tom Lendacky <thomas.lendacky@amd.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric Biederman <ebiederm@xmission.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>Paul Mackerras <p>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170724190757.11278-1-brijesh.singh-5C7GfCeVMHo@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Piotr Luc <piotr.luc-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lu Baolu <baolu.lu-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Reza Arbab <arbab-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Kirill A . Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Eric Biederman <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>, Benjamin Herrenschmidt <benh-XVmvHMARGAS8U2dJNN8I7kB+6BGkLq7r@public.gmane.org>Paul Mackerras <p>
 List-Id: linux-efi@vger.kernel.org
 
-From: Tom Lendacky <thomas.lendacky@amd.com>
+From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
 
-In prep for a new function that will need additional resource information
-during the resource walk, update the resource walk callback to pass the
-resource structure.  Since the current callback start and end arguments
-are pulled from the resource structure, the callback functions can obtain
-them from the resource structure directly.
+DMA access to memory mapped as encrypted while SEV is active can not be
+encrypted during device write or decrypted during device read. In order
+for DMA to properly work when SEV is active, the SWIOTLB bounce buffers
+must be used.
 
-Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+Signed-off-by: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
 ---
- arch/powerpc/kernel/machine_kexec_file_64.c | 12 +++++++++---
- arch/x86/kernel/crash.c                     | 18 +++++++++---------
- arch/x86/kernel/pmem.c                      |  2 +-
- include/linux/ioport.h                      |  4 ++--
- include/linux/kexec.h                       |  2 +-
- kernel/kexec_file.c                         |  5 +++--
- kernel/resource.c                           |  9 +++++----
- 7 files changed, 30 insertions(+), 22 deletions(-)
+ arch/x86/mm/mem_encrypt.c | 86 +++++++++++++++++++++++++++++++++++++++++++++++
+ lib/swiotlb.c             |  5 +--
+ 2 files changed, 89 insertions(+), 2 deletions(-)
 
-diff --git a/arch/powerpc/kernel/machine_kexec_file_64.c b/arch/powerpc/kernel/machine_kexec_file_64.c
-index 992c0d2..e4395f9 100644
---- a/arch/powerpc/kernel/machine_kexec_file_64.c
-+++ b/arch/powerpc/kernel/machine_kexec_file_64.c
-@@ -91,11 +91,13 @@ int arch_kimage_file_post_load_cleanup(struct kimage *image)
-  * and that value will be returned. If all free regions are visited without
-  * func returning non-zero, then zero will be returned.
-  */
--int arch_kexec_walk_mem(struct kexec_buf *kbuf, int (*func)(u64, u64, void *))
-+int arch_kexec_walk_mem(struct kexec_buf *kbuf,
-+			int (*func)(struct resource *, void *))
- {
- 	int ret = 0;
- 	u64 i;
- 	phys_addr_t mstart, mend;
-+	struct resource res = { };
- 
- 	if (kbuf->top_down) {
- 		for_each_free_mem_range_reverse(i, NUMA_NO_NODE, 0,
-@@ -105,7 +107,9 @@ int arch_kexec_walk_mem(struct kexec_buf *kbuf, int (*func)(u64, u64, void *))
- 			 * range while in kexec, end points to the last byte
- 			 * in the range.
- 			 */
--			ret = func(mstart, mend - 1, kbuf);
-+			res.start = mstart;
-+			res.end = mend - 1;
-+			ret = func(&res, kbuf);
- 			if (ret)
- 				break;
- 		}
-@@ -117,7 +121,9 @@ int arch_kexec_walk_mem(struct kexec_buf *kbuf, int (*func)(u64, u64, void *))
- 			 * range while in kexec, end points to the last byte
- 			 * in the range.
- 			 */
--			ret = func(mstart, mend - 1, kbuf);
-+			res.start = mstart;
-+			res.end = mend - 1;
-+			ret = func(&res, kbuf);
- 			if (ret)
- 				break;
- 		}
-diff --git a/arch/x86/kernel/crash.c b/arch/x86/kernel/crash.c
-index 44404e2..815008c 100644
---- a/arch/x86/kernel/crash.c
-+++ b/arch/x86/kernel/crash.c
-@@ -209,7 +209,7 @@ void native_machine_crash_shutdown(struct pt_regs *regs)
+diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+index 1e4643e..5e5d460 100644
+--- a/arch/x86/mm/mem_encrypt.c
++++ b/arch/x86/mm/mem_encrypt.c
+@@ -191,8 +191,86 @@ void __init sme_early_init(void)
+ 	/* Update the protection map with memory encryption mask */
+ 	for (i = 0; i < ARRAY_SIZE(protection_map); i++)
+ 		protection_map[i] = pgprot_encrypted(protection_map[i]);
++
++	if (sev_active())
++		swiotlb_force = SWIOTLB_FORCE;
++}
++
++static void *sme_alloc(struct device *dev, size_t size, dma_addr_t *dma_handle,
++		       gfp_t gfp, unsigned long attrs)
++{
++	unsigned long dma_mask;
++	unsigned int order;
++	struct page *page;
++	void *vaddr = NULL;
++
++	dma_mask = dma_alloc_coherent_mask(dev, gfp);
++	order = get_order(size);
++
++	/*
++	 * Memory will be memset to zero after marking decrypted, so don't
++	 * bother clearing it before.
++	 */
++	gfp &= ~__GFP_ZERO;
++
++	page = alloc_pages_node(dev_to_node(dev), gfp, order);
++	if (page) {
++		dma_addr_t addr;
++
++		/*
++		 * Since we will be clearing the encryption bit, check the
++		 * mask with it already cleared.
++		 */
++		addr = __sme_clr(phys_to_dma(dev, page_to_phys(page)));
++		if ((addr + size) > dma_mask) {
++			__free_pages(page, get_order(size));
++		} else {
++			vaddr = page_address(page);
++			*dma_handle = addr;
++		}
++	}
++
++	if (!vaddr)
++		vaddr = swiotlb_alloc_coherent(dev, size, dma_handle, gfp);
++
++	if (!vaddr)
++		return NULL;
++
++	/* Clear the SME encryption bit for DMA use if not swiotlb area */
++	if (!is_swiotlb_buffer(dma_to_phys(dev, *dma_handle))) {
++		set_memory_decrypted((unsigned long)vaddr, 1 << order);
++		memset(vaddr, 0, PAGE_SIZE << order);
++		*dma_handle = __sme_clr(*dma_handle);
++	}
++
++	return vaddr;
++}
++
++static void sme_free(struct device *dev, size_t size, void *vaddr,
++		     dma_addr_t dma_handle, unsigned long attrs)
++{
++	/* Set the SME encryption bit for re-use if not swiotlb area */
++	if (!is_swiotlb_buffer(dma_to_phys(dev, dma_handle)))
++		set_memory_encrypted((unsigned long)vaddr,
++				     1 << get_order(size));
++
++	swiotlb_free_coherent(dev, size, vaddr, dma_handle);
  }
  
- #ifdef CONFIG_KEXEC_FILE
--static int get_nr_ram_ranges_callback(u64 start, u64 end, void *arg)
-+static int get_nr_ram_ranges_callback(struct resource *res, void *arg)
++static const struct dma_map_ops sme_dma_ops = {
++	.alloc                  = sme_alloc,
++	.free                   = sme_free,
++	.map_page               = swiotlb_map_page,
++	.unmap_page             = swiotlb_unmap_page,
++	.map_sg                 = swiotlb_map_sg_attrs,
++	.unmap_sg               = swiotlb_unmap_sg_attrs,
++	.sync_single_for_cpu    = swiotlb_sync_single_for_cpu,
++	.sync_single_for_device = swiotlb_sync_single_for_device,
++	.sync_sg_for_cpu        = swiotlb_sync_sg_for_cpu,
++	.sync_sg_for_device     = swiotlb_sync_sg_for_device,
++	.mapping_error          = swiotlb_dma_mapping_error,
++};
++
+ /* Architecture __weak replacement functions */
+ void __init mem_encrypt_init(void)
  {
- 	unsigned int *nr_ranges = arg;
+@@ -202,6 +280,14 @@ void __init mem_encrypt_init(void)
+ 	/* Call into SWIOTLB to update the SWIOTLB DMA buffers */
+ 	swiotlb_update_mem_attributes();
  
-@@ -342,7 +342,7 @@ static int elf_header_exclude_ranges(struct crash_elf_data *ced,
- 	return ret;
++	/*
++	 * With SEV, DMA operations cannot use encryption. New DMA ops
++	 * are required in order to mark the DMA areas as decrypted or
++	 * to use bounce buffers.
++	 */
++	if (sev_active())
++		dma_ops = &sme_dma_ops;
++
+ 	pr_info("AMD Secure Memory Encryption (SME) active\n");
  }
  
--static int prepare_elf64_ram_headers_callback(u64 start, u64 end, void *arg)
-+static int prepare_elf64_ram_headers_callback(struct resource *res, void *arg)
- {
- 	struct crash_elf_data *ced = arg;
- 	Elf64_Ehdr *ehdr;
-@@ -355,7 +355,7 @@ static int prepare_elf64_ram_headers_callback(u64 start, u64 end, void *arg)
- 	ehdr = ced->ehdr;
+diff --git a/lib/swiotlb.c b/lib/swiotlb.c
+index 8c6c83e..85fed2f 100644
+--- a/lib/swiotlb.c
++++ b/lib/swiotlb.c
+@@ -507,8 +507,9 @@ phys_addr_t swiotlb_tbl_map_single(struct device *hwdev,
+ 	if (no_iotlb_memory)
+ 		panic("Can not allocate SWIOTLB buffer earlier and can't now provide you with the DMA bounce buffer");
  
- 	/* Exclude unwanted mem ranges */
--	ret = elf_header_exclude_ranges(ced, start, end);
-+	ret = elf_header_exclude_ranges(ced, res->start, res->end);
- 	if (ret)
- 		return ret;
+-	if (sme_active())
+-		pr_warn_once("SME is active and system is using DMA bounce buffers\n");
++	if (sme_active() || sev_active())
++		pr_warn_once("%s is active and system is using DMA bounce buffers\n",
++			     sme_active() ? "SME" : "SEV");
  
-@@ -518,14 +518,14 @@ static int add_e820_entry(struct boot_params *params, struct e820_entry *entry)
- 	return 0;
- }
- 
--static int memmap_entry_callback(u64 start, u64 end, void *arg)
-+static int memmap_entry_callback(struct resource *res, void *arg)
- {
- 	struct crash_memmap_data *cmd = arg;
- 	struct boot_params *params = cmd->params;
- 	struct e820_entry ei;
- 
--	ei.addr = start;
--	ei.size = end - start + 1;
-+	ei.addr = res->start;
-+	ei.size = res->end - res->start + 1;
- 	ei.type = cmd->type;
- 	add_e820_entry(params, &ei);
- 
-@@ -619,12 +619,12 @@ int crash_setup_memmap_entries(struct kimage *image, struct boot_params *params)
- 	return ret;
- }
- 
--static int determine_backup_region(u64 start, u64 end, void *arg)
-+static int determine_backup_region(struct resource *res, void *arg)
- {
- 	struct kimage *image = arg;
- 
--	image->arch.backup_src_start = start;
--	image->arch.backup_src_sz = end - start + 1;
-+	image->arch.backup_src_start = res->start;
-+	image->arch.backup_src_sz = res->end - res->start + 1;
- 
- 	/* Expecting only one range for backup region */
- 	return 1;
-diff --git a/arch/x86/kernel/pmem.c b/arch/x86/kernel/pmem.c
-index 0c5315d..297bb71 100644
---- a/arch/x86/kernel/pmem.c
-+++ b/arch/x86/kernel/pmem.c
-@@ -6,7 +6,7 @@
- #include <linux/init.h>
- #include <linux/ioport.h>
- 
--static int found(u64 start, u64 end, void *data)
-+static int found(struct resource *res, void *data)
- {
- 	return 1;
- }
-diff --git a/include/linux/ioport.h b/include/linux/ioport.h
-index 6230064..1c66b9c 100644
---- a/include/linux/ioport.h
-+++ b/include/linux/ioport.h
-@@ -269,10 +269,10 @@ walk_system_ram_range(unsigned long start_pfn, unsigned long nr_pages,
- 		void *arg, int (*func)(unsigned long, unsigned long, void *));
- extern int
- walk_system_ram_res(u64 start, u64 end, void *arg,
--		    int (*func)(u64, u64, void *));
-+		    int (*func)(struct resource *, void *));
- extern int
- walk_iomem_res_desc(unsigned long desc, unsigned long flags, u64 start, u64 end,
--		    void *arg, int (*func)(u64, u64, void *));
-+		    void *arg, int (*func)(struct resource *, void *));
- 
- /* True if any part of r1 overlaps r2 */
- static inline bool resource_overlaps(struct resource *r1, struct resource *r2)
-diff --git a/include/linux/kexec.h b/include/linux/kexec.h
-index 2b7590f..d672f95 100644
---- a/include/linux/kexec.h
-+++ b/include/linux/kexec.h
-@@ -159,7 +159,7 @@ struct kexec_buf {
- };
- 
- int __weak arch_kexec_walk_mem(struct kexec_buf *kbuf,
--			       int (*func)(u64, u64, void *));
-+			       int (*func)(struct resource *, void *));
- extern int kexec_add_buffer(struct kexec_buf *kbuf);
- int kexec_locate_mem_hole(struct kexec_buf *kbuf);
- #endif /* CONFIG_KEXEC_FILE */
-diff --git a/kernel/kexec_file.c b/kernel/kexec_file.c
-index 9f48f44..e5bcd94 100644
---- a/kernel/kexec_file.c
-+++ b/kernel/kexec_file.c
-@@ -406,9 +406,10 @@ static int locate_mem_hole_bottom_up(unsigned long start, unsigned long end,
- 	return 1;
- }
- 
--static int locate_mem_hole_callback(u64 start, u64 end, void *arg)
-+static int locate_mem_hole_callback(struct resource *res, void *arg)
- {
- 	struct kexec_buf *kbuf = (struct kexec_buf *)arg;
-+	u64 start = res->start, end = res->end;
- 	unsigned long sz = end - start + 1;
- 
- 	/* Returning 0 will take to next memory range */
-@@ -437,7 +438,7 @@ static int locate_mem_hole_callback(u64 start, u64 end, void *arg)
-  * func returning non-zero, then zero will be returned.
-  */
- int __weak arch_kexec_walk_mem(struct kexec_buf *kbuf,
--			       int (*func)(u64, u64, void *))
-+			       int (*func)(struct resource *, void *))
- {
- 	if (kbuf->image->type == KEXEC_TYPE_CRASH)
- 		return walk_iomem_res_desc(crashk_res.desc,
-diff --git a/kernel/resource.c b/kernel/resource.c
-index 7b20b3e..5f9ee7bb0 100644
---- a/kernel/resource.c
-+++ b/kernel/resource.c
-@@ -403,14 +403,15 @@ static int find_next_iomem_res(struct resource *res, unsigned long desc,
- 
- static int __walk_iomem_res_desc(struct resource *res, unsigned long desc,
- 				 bool first_level_children_only,
--				 void *arg, int (*func)(u64, u64, void *))
-+				 void *arg,
-+				 int (*func)(struct resource *, void *))
- {
- 	u64 orig_end = res->end;
- 	int ret = -1;
- 
- 	while ((res->start < res->end) &&
- 	       !find_next_iomem_res(res, desc, first_level_children_only)) {
--		ret = (*func)(res->start, res->end, arg);
-+		ret = (*func)(res, arg);
- 		if (ret)
- 			break;
- 
-@@ -436,7 +437,7 @@ static int __walk_iomem_res_desc(struct resource *res, unsigned long desc,
-  * <linux/ioport.h> and set it in 'desc' of a target resource entry.
-  */
- int walk_iomem_res_desc(unsigned long desc, unsigned long flags, u64 start,
--		u64 end, void *arg, int (*func)(u64, u64, void *))
-+		u64 end, void *arg, int (*func)(struct resource *, void *))
- {
- 	struct resource res;
- 
-@@ -455,7 +456,7 @@ int walk_iomem_res_desc(unsigned long desc, unsigned long flags, u64 start,
-  * ranges.
-  */
- int walk_system_ram_res(u64 start, u64 end, void *arg,
--				int (*func)(u64, u64, void *))
-+				int (*func)(struct resource *, void *))
- {
- 	struct resource res;
+ 	mask = dma_get_seg_boundary(hwdev);
  
 -- 
 2.9.4
