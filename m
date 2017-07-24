@@ -1,120 +1,164 @@
-From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [RFC Part1 PATCH v3 11/17] x86/mm, resource: Use PAGE_KERNEL protection for ioremap of memory pages
-Date: Mon, 24 Jul 2017 14:07:51 -0500
-Message-ID: <20170724190757.11278-12-brijesh.singh@amd.com>
+From: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
+Subject: [RFC Part1 PATCH v3 17/17] X86/KVM: Clear encryption attribute when SEV is active
+Date: Mon, 24 Jul 2017 14:07:57 -0500
+Message-ID: <20170724190757.11278-18-brijesh.singh@amd.com>
 References: <20170724190757.11278-1-brijesh.singh@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <20170724190757.11278-1-brijesh.singh@amd.com>
-Sender: kvm-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org
-Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@suse.de>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Tom Lendacky <thomas.lendacky@amd.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric Biederman <ebiederm@xmission.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>Paul Mackerras <p>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170724190757.11278-1-brijesh.singh-5C7GfCeVMHo@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Piotr Luc <piotr.luc-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lu Baolu <baolu.lu-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Reza Arbab <arbab-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Kirill A . Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Eric Biederman <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>, Benjamin Herrenschmidt <benh-XVmvHMARGAS8U2dJNN8I7kB+6BGkLq7r@public.gmane.org>Paul Mackerras <p>
 List-Id: linux-efi@vger.kernel.org
 
-From: Tom Lendacky <thomas.lendacky@amd.com>
+The guest physical memory area holding the struct pvclock_wall_clock and
+struct pvclock_vcpu_time_info are shared with the hypervisor. Hypervisor
+periodically updates the contents of the memory. When SEV is active, we
+must clear the encryption attributes from the shared memory pages so that
+both hypervisor and guest can access the data.
 
-In order for memory pages to be properly mapped when SEV is active, we
-need to use the PAGE_KERNEL protection attribute as the base protection.
-This will insure that memory mapping of, e.g. ACPI tables, receives the
-proper mapping attributes.
-
-Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+Signed-off-by: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
 ---
- arch/x86/mm/ioremap.c  | 28 ++++++++++++++++++++++++++++
- include/linux/ioport.h |  3 +++
- kernel/resource.c      | 17 +++++++++++++++++
- 3 files changed, 48 insertions(+)
+ arch/x86/entry/vdso/vma.c  |  5 ++--
+ arch/x86/kernel/kvmclock.c | 64 +++++++++++++++++++++++++++++++++++++++-------
+ 2 files changed, 58 insertions(+), 11 deletions(-)
 
-diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
-index c0be7cf..7b27332 100644
---- a/arch/x86/mm/ioremap.c
-+++ b/arch/x86/mm/ioremap.c
-@@ -69,6 +69,26 @@ static int __ioremap_check_ram(unsigned long start_pfn, unsigned long nr_pages,
- 	return 0;
+diff --git a/arch/x86/entry/vdso/vma.c b/arch/x86/entry/vdso/vma.c
+index 726355c..ff50251 100644
+--- a/arch/x86/entry/vdso/vma.c
++++ b/arch/x86/entry/vdso/vma.c
+@@ -114,10 +114,11 @@ static int vvar_fault(const struct vm_special_mapping *sm,
+ 		struct pvclock_vsyscall_time_info *pvti =
+ 			pvclock_pvti_cpu0_va();
+ 		if (pvti && vclock_was_used(VCLOCK_PVCLOCK)) {
+-			ret = vm_insert_pfn(
++			ret = vm_insert_pfn_prot(
+ 				vma,
+ 				vmf->address,
+-				__pa(pvti) >> PAGE_SHIFT);
++				__pa(pvti) >> PAGE_SHIFT,
++				pgprot_decrypted(vma->vm_page_prot));
+ 		}
+ 	} else if (sym_offset == image->sym_hvclock_page) {
+ 		struct ms_hyperv_tsc_page *tsc_pg = hv_get_tsc_page();
+diff --git a/arch/x86/kernel/kvmclock.c b/arch/x86/kernel/kvmclock.c
+index d889676..f3a8101 100644
+--- a/arch/x86/kernel/kvmclock.c
++++ b/arch/x86/kernel/kvmclock.c
+@@ -27,6 +27,7 @@
+ #include <linux/sched.h>
+ #include <linux/sched/clock.h>
+ 
++#include <asm/mem_encrypt.h>
+ #include <asm/x86_init.h>
+ #include <asm/reboot.h>
+ #include <asm/kvmclock.h>
+@@ -45,7 +46,7 @@ early_param("no-kvmclock", parse_no_kvmclock);
+ 
+ /* The hypervisor will put information about time periodically here */
+ static struct pvclock_vsyscall_time_info *hv_clock;
+-static struct pvclock_wall_clock wall_clock;
++static struct pvclock_wall_clock *wall_clock;
+ 
+ struct pvclock_vsyscall_time_info *pvclock_pvti_cpu0_va(void)
+ {
+@@ -64,15 +65,18 @@ static void kvm_get_wallclock(struct timespec *now)
+ 	int low, high;
+ 	int cpu;
+ 
+-	low = (int)__pa_symbol(&wall_clock);
+-	high = ((u64)__pa_symbol(&wall_clock) >> 32);
++	if (!wall_clock)
++		return;
++
++	low = (int)slow_virt_to_phys(wall_clock);
++	high = ((u64)slow_virt_to_phys(wall_clock) >> 32);
+ 
+ 	native_write_msr(msr_kvm_wall_clock, low, high);
+ 
+ 	cpu = get_cpu();
+ 
+ 	vcpu_time = &hv_clock[cpu].pvti;
+-	pvclock_read_wallclock(&wall_clock, vcpu_time, now);
++	pvclock_read_wallclock(wall_clock, vcpu_time, now);
+ 
+ 	put_cpu();
+ }
+@@ -249,11 +253,39 @@ static void kvm_shutdown(void)
+ 	native_machine_shutdown();
  }
  
-+static int __ioremap_res_desc_other(struct resource *res, void *arg)
++static phys_addr_t __init kvm_memblock_alloc(phys_addr_t size,
++					     phys_addr_t align)
 +{
-+	return (res->desc != IORES_DESC_NONE);
++	phys_addr_t mem;
++
++	mem = memblock_alloc(size, align);
++	if (!mem)
++		return 0;
++
++	if (sev_active()) {
++		if (early_set_memory_decrypted(mem, size))
++			goto e_free;
++	}
++
++	return mem;
++e_free:
++	memblock_free(mem, size);
++	return 0;
 +}
 +
-+/*
-+ * This function returns true if the target memory is marked as
-+ * IORESOURCE_MEM and IORESOURCE_BUSY and described as other than
-+ * IORES_DESC_NONE (e.g. IORES_DESC_ACPI_TABLES).
-+ */
-+static bool __ioremap_check_if_mem(resource_size_t addr, unsigned long size)
++static void __init kvm_memblock_free(phys_addr_t addr, phys_addr_t size)
 +{
-+	u64 start, end;
++	if (sev_active())
++		early_set_memory_encrypted(addr, size);
 +
-+	start = (u64)addr;
-+	end = start + size - 1;
-+
-+	return (walk_mem_res(start, end, NULL, __ioremap_res_desc_other) == 1);
++	memblock_free(addr, size);
 +}
 +
- /*
-  * Remap an arbitrary physical address space into the kernel virtual
-  * address space. It transparently creates kernel huge I/O mapping when
-@@ -146,7 +166,15 @@ static void __iomem *__ioremap_caller(resource_size_t phys_addr,
- 		pcm = new_pcm;
+ void __init kvmclock_init(void)
+ {
+ 	struct pvclock_vcpu_time_info *vcpu_time;
+-	unsigned long mem;
+-	int size, cpu;
++	unsigned long mem, mem_wall_clock;
++	int size, cpu, wall_clock_size;
+ 	u8 flags;
+ 
+ 	size = PAGE_ALIGN(sizeof(struct pvclock_vsyscall_time_info)*NR_CPUS);
+@@ -270,15 +302,29 @@ void __init kvmclock_init(void)
+ 	printk(KERN_INFO "kvm-clock: Using msrs %x and %x",
+ 		msr_kvm_system_time, msr_kvm_wall_clock);
+ 
+-	mem = memblock_alloc(size, PAGE_SIZE);
+-	if (!mem)
++	wall_clock_size = PAGE_ALIGN(sizeof(struct pvclock_wall_clock));
++	mem_wall_clock = kvm_memblock_alloc(wall_clock_size, PAGE_SIZE);
++	if (!mem_wall_clock)
+ 		return;
++
++	wall_clock = __va(mem_wall_clock);
++	memset(wall_clock, 0, wall_clock_size);
++
++	mem = kvm_memblock_alloc(size, PAGE_SIZE);
++	if (!mem) {
++		kvm_memblock_free(mem_wall_clock, wall_clock_size);
++		wall_clock = NULL;
++		return;
++	}
++
+ 	hv_clock = __va(mem);
+ 	memset(hv_clock, 0, size);
+ 
+ 	if (kvm_register_clock("primary cpu clock")) {
+ 		hv_clock = NULL;
+-		memblock_free(mem, size);
++		kvm_memblock_free(mem, size);
++		kvm_memblock_free(mem_wall_clock, wall_clock_size);
++		wall_clock = NULL;
+ 		return;
  	}
  
-+	/*
-+	 * If the page being mapped is in memory and SEV is active then
-+	 * make sure the memory encryption attribute is enabled in the
-+	 * resulting mapping.
-+	 */
- 	prot = PAGE_KERNEL_IO;
-+	if (sev_active() && __ioremap_check_if_mem(phys_addr, size))
-+		prot = pgprot_encrypted(prot);
-+
- 	switch (pcm) {
- 	case _PAGE_CACHE_MODE_UC:
- 	default:
-diff --git a/include/linux/ioport.h b/include/linux/ioport.h
-index 1c66b9c..297f5b8 100644
---- a/include/linux/ioport.h
-+++ b/include/linux/ioport.h
-@@ -268,6 +268,9 @@ extern int
- walk_system_ram_range(unsigned long start_pfn, unsigned long nr_pages,
- 		void *arg, int (*func)(unsigned long, unsigned long, void *));
- extern int
-+walk_mem_res(u64 start, u64 end, void *arg,
-+	     int (*func)(struct resource *, void *));
-+extern int
- walk_system_ram_res(u64 start, u64 end, void *arg,
- 		    int (*func)(struct resource *, void *));
- extern int
-diff --git a/kernel/resource.c b/kernel/resource.c
-index 5f9ee7bb0..ec3fa0c 100644
---- a/kernel/resource.c
-+++ b/kernel/resource.c
-@@ -468,6 +468,23 @@ int walk_system_ram_res(u64 start, u64 end, void *arg,
- 				     arg, func);
- }
- 
-+/*
-+ * This function calls the @func callback against all memory ranges, which
-+ * are ranges marked as IORESOURCE_MEM and IORESOUCE_BUSY.
-+ */
-+int walk_mem_res(u64 start, u64 end, void *arg,
-+		 int (*func)(struct resource *, void *))
-+{
-+	struct resource res;
-+
-+	res.start = start;
-+	res.end = end;
-+	res.flags = IORESOURCE_MEM | IORESOURCE_BUSY;
-+
-+	return __walk_iomem_res_desc(&res, IORES_DESC_NONE, true,
-+				     arg, func);
-+}
-+
- #if !defined(CONFIG_ARCH_HAS_WALK_MEMORY)
- 
- /*
 -- 
 2.9.4
