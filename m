@@ -1,7 +1,7 @@
 From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [RFC Part1 PATCH v3 08/17] x86/efi: Access EFI data as encrypted when SEV is active
-Date: Mon, 24 Jul 2017 14:07:48 -0500
-Message-ID: <20170724190757.11278-9-brijesh.singh@amd.com>
+Subject: [RFC Part1 PATCH v3 07/17] x86/mm: Include SEV for encryption memory attribute changes
+Date: Mon, 24 Jul 2017 14:07:47 -0500
+Message-ID: <20170724190757.11278-8-brijesh.singh@amd.com>
 References: <20170724190757.11278-1-brijesh.singh@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,69 +14,30 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Tom Lendacky <thomas.lendacky@amd.com>
 
-EFI data is encrypted when the kernel is run under SEV. Update the
-page table references to be sure the EFI memory areas are accessed
-encrypted.
+The current code checks only for sme_active() when determining whether
+to perform the encryption attribute change.  Include sev_active() in this
+check so that memory attribute changes can occur under SME and SEV.
 
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/platform/efi/efi_64.c | 15 ++++++++++++++-
- 1 file changed, 14 insertions(+), 1 deletion(-)
+ arch/x86/mm/pageattr.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 12e8388..1ecb3f6 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -32,6 +32,7 @@
- #include <linux/reboot.h>
- #include <linux/slab.h>
- #include <linux/ucs2_string.h>
-+#include <linux/mem_encrypt.h>
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index dfb7d65..b726b23 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -1781,8 +1781,8 @@ static int __set_memory_enc_dec(unsigned long addr, int numpages, bool enc)
+ 	unsigned long start;
+ 	int ret;
  
- #include <asm/setup.h>
- #include <asm/page.h>
-@@ -369,7 +370,10 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	 * as trim_bios_range() will reserve the first page and isolate it away
- 	 * from memory allocators anyway.
- 	 */
--	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, _PAGE_RW)) {
-+	pf = _PAGE_RW;
-+	if (sev_active())
-+		pf |= _PAGE_ENC;
-+	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, pf)) {
- 		pr_err("Failed to create 1:1 mapping for the first page!\n");
- 		return 1;
- 	}
-@@ -412,6 +416,9 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
- 	if (!(md->attribute & EFI_MEMORY_WB))
- 		flags |= _PAGE_PCD;
+-	/* Nothing to do if the SME is not active */
+-	if (!sme_active())
++	/* Nothing to do if SME and SEV are not active */
++	if (!sme_active() && !sev_active())
+ 		return 0;
  
-+	if (sev_active())
-+		flags |= _PAGE_ENC;
-+
- 	pfn = md->phys_addr >> PAGE_SHIFT;
- 	if (kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags))
- 		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
-@@ -511,6 +518,9 @@ static int __init efi_update_mappings(efi_memory_desc_t *md, unsigned long pf)
- 	pgd_t *pgd = efi_pgd;
- 	int err1, err2;
- 
-+	if (sev_active())
-+		pf |= _PAGE_ENC;
-+
- 	/* Update the 1:1 mapping */
- 	pfn = md->phys_addr >> PAGE_SHIFT;
- 	err1 = kernel_map_pages_in_pgd(pgd, pfn, md->phys_addr, md->num_pages, pf);
-@@ -589,6 +599,9 @@ void __init efi_runtime_update_mappings(void)
- 			(md->type != EFI_RUNTIME_SERVICES_CODE))
- 			pf |= _PAGE_RW;
- 
-+		if (sev_active())
-+			pf |= _PAGE_ENC;
-+
- 		efi_update_mappings(md, pf);
- 	}
- }
+ 	/* Should not be working on unaligned addresses */
 -- 
 2.9.4
