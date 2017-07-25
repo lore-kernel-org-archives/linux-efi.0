@@ -1,69 +1,130 @@
-From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [RFC Part1 PATCH v3 13/17] x86/io: Unroll string I/O when SEV is active
-Date: Mon, 24 Jul 2017 14:07:53 -0500
-Message-ID: <20170724190757.11278-14-brijesh.singh@amd.com>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [RFC Part1 PATCH v3 01/17] Documentation/x86: Add AMD Secure
+ Encrypted Virtualization (SEV) descrption
+Date: Tue, 25 Jul 2017 07:45:22 +0200
+Message-ID: <20170725054522.GA21822@nazgul.tnic>
 References: <20170724190757.11278-1-brijesh.singh@amd.com>
+ <20170724190757.11278-2-brijesh.singh@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <20170724190757.11278-1-brijesh.singh@amd.com>
-Sender: kvm-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org
-Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@suse.de>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Tom Lendacky <thomas.lendacky@amd.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric Biederman <ebiederm@xmission.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>Paul Mackerras <p>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170724190757.11278-2-brijesh.singh-5C7GfCeVMHo@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Piotr Luc <piotr.luc-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lu Baolu <baolu.lu-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Reza Arbab <arbab-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Kirill A . Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Eric
 List-Id: linux-efi@vger.kernel.org
 
-From: Tom Lendacky <thomas.lendacky@amd.com>
+On Mon, Jul 24, 2017 at 02:07:41PM -0500, Brijesh Singh wrote:
 
-Secure Encrypted Virtualization (SEV) does not support string I/O, so
-unroll the string I/O operation into a loop operating on one element at
-a time.
+Subject: Re: [RFC Part1 PATCH v3 01/17] Documentation/x86: Add AMD Secure Encrypted Virtualization (SEV) descrption
+													 ^^^^^^^^^^
 
-Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
----
- arch/x86/include/asm/io.h | 26 ++++++++++++++++++++++----
- 1 file changed, 22 insertions(+), 4 deletions(-)
+Please introduce a spellchecker into your workflow.
 
-diff --git a/arch/x86/include/asm/io.h b/arch/x86/include/asm/io.h
-index e080a39..2f3c002 100644
---- a/arch/x86/include/asm/io.h
-+++ b/arch/x86/include/asm/io.h
-@@ -327,14 +327,32 @@ static inline unsigned type in##bwl##_p(int port)			\
- 									\
- static inline void outs##bwl(int port, const void *addr, unsigned long count) \
- {									\
--	asm volatile("rep; outs" #bwl					\
--		     : "+S"(addr), "+c"(count) : "d"(port));		\
-+	if (sev_active()) {						\
-+		unsigned type *value = (unsigned type *)addr;		\
-+		while (count) {						\
-+			out##bwl(*value, port);				\
-+			value++;					\
-+			count--;					\
-+		}							\
-+	} else {							\
-+		asm volatile("rep; outs" #bwl				\
-+			     : "+S"(addr), "+c"(count) : "d"(port));	\
-+	}								\
- }									\
- 									\
- static inline void ins##bwl(int port, void *addr, unsigned long count)	\
- {									\
--	asm volatile("rep; ins" #bwl					\
--		     : "+D"(addr), "+c"(count) : "d"(port));		\
-+	if (sev_active()) {						\
-+		unsigned type *value = (unsigned type *)addr;		\
-+		while (count) {						\
-+			*value = in##bwl(port);				\
-+			value++;					\
-+			count--;					\
-+		}							\
-+	} else {							\
-+		asm volatile("rep; ins" #bwl				\
-+			     : "+D"(addr), "+c"(count) : "d"(port));	\
-+	}								\
- }
- 
- BUILDIO(b, b, char)
+> Update amd-memory-encryption document describing the AMD Secure Encrypted
+
+"Update the AMD memory encryption document...
+
+The patch has the proper URL already.
+
+> Virtualization (SEV) feature.
+> 
+> Signed-off-by: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
+> ---
+>  Documentation/x86/amd-memory-encryption.txt | 29 ++++++++++++++++++++++++++---
+>  1 file changed, 26 insertions(+), 3 deletions(-)
+> 
+> diff --git a/Documentation/x86/amd-memory-encryption.txt b/Documentation/x86/amd-memory-encryption.txt
+> index f512ab7..747df07 100644
+> --- a/Documentation/x86/amd-memory-encryption.txt
+> +++ b/Documentation/x86/amd-memory-encryption.txt
+> @@ -1,4 +1,5 @@
+> -Secure Memory Encryption (SME) is a feature found on AMD processors.
+> +Secure Memory Encryption (SME) and Secure Encrypted Virtualization (SEV) are
+> +features found on AMD processors.
+>  
+>  SME provides the ability to mark individual pages of memory as encrypted using
+>  the standard x86 page tables.  A page that is marked encrypted will be
+> @@ -6,6 +7,12 @@ automatically decrypted when read from DRAM and encrypted when written to
+>  DRAM.  SME can therefore be used to protect the contents of DRAM from physical
+>  attacks on the system.
+>  
+> +SEV enables running encrypted virtual machine (VMs) in which the code and data
+
+					 machines
+
+> +of the virtual machine are secured so that decrypted version is available only
+
+... of the guest VM ...		  ... so that a decrypted ...
+
+> +within the VM itself. SEV guest VMs have concept of private and shared memory.
+
+				 	have *the* concept - you need to use
+					definite and indefinite articles in your
+					text.
+
+> +Private memory is encrypted with the guest-specific key, while shared memory
+> +may be encrypted with hypervisor key.
+
+And here you explain that the hypervisor key is the same key which we
+use in SME. So that people can make the connection.
+
+> +
+>  A page is encrypted when a page table entry has the encryption bit set (see
+>  below on how to determine its position).  The encryption bit can also be
+>  specified in the cr3 register, allowing the PGD table to be encrypted. Each
+> @@ -19,11 +26,20 @@ so that the PGD is encrypted, but not set the encryption bit in the PGD entry
+>  for a PUD which results in the PUD pointed to by that entry to not be
+>  encrypted.
+>  
+> -Support for SME can be determined through the CPUID instruction. The CPUID
+> -function 0x8000001f reports information related to SME:
+> +When SEV is enabled, certain type of memory (namely insruction pages and guest
+
+When SEV is enabled, instruction pages and guest page tables are ...
+
+> +page tables) are always treated as private. Due to security reasons all DMA
+
+security reasons??
+
+> +operations inside the guest must be performed on shared memory. Since the
+> +memory encryption bit is only controllable by the guest OS when it is operating
+
+		     ... is controlled ...
+
+> +in 64-bit or 32-bit PAE mode, in all other modes the SEV hardware forces memory
+
+								... forces the memory ...
+
+> +encryption bit to 1.
+> +
+> +Support for SME and SEV can be determined through the CPUID instruction. The
+> +CPUID function 0x8000001f reports information related to SME:
+>  
+>  	0x8000001f[eax]:
+>  		Bit[0] indicates support for SME
+> +	0x800001f[eax]:
+
+There's a 0 missing and you don't really need it as it is already above.
+
+> +		Bit[1] indicates support for SEV
+>  	0x8000001f[ebx]:
+>  		Bits[5:0]  pagetable bit number used to activate memory
+>  			   encryption
+> @@ -39,6 +55,13 @@ determine if SME is enabled and/or to enable memory encryption:
+>  		Bit[23]   0 = memory encryption features are disabled
+>  			  1 = memory encryption features are enabled
+>  
+> +If SEV is supported, MSR 0xc0010131 (MSR_F17H_SEV) can be used to determine if
+
+If this MSR is going to be part of the architecture - and I really think
+it is - then call it MSR_AMD64_SEV.
+
 -- 
-2.9.4
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
