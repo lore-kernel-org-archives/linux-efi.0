@@ -1,32 +1,111 @@
-From: David Laight <David.Laight@ACULAB.COM>
-Subject: RE: [RFC Part1 PATCH v3 13/17] x86/io: Unroll string I/O when SEV
- is active
-Date: Thu, 27 Jul 2017 07:45:25 +0000
-Message-ID: <063D6719AE5E284EB5DD2968C1650D6DD00436A7@AcuExch.aculab.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [RFC Part1 PATCH v3 06/17] x86/mm: Use encrypted access of boot
+ related data with SEV
+Date: Thu, 27 Jul 2017 15:31:25 +0200
+Message-ID: <20170727133125.GB28553@nazgul.tnic>
 References: <20170724190757.11278-1-brijesh.singh@amd.com>
- <20170724190757.11278-14-brijesh.singh@amd.com>
- <063D6719AE5E284EB5DD2968C1650D6DD003FB85@AcuExch.aculab.com>
- <CAK8P3a3h7JpmkW7W=HwqAuWWmro=ngj6HSeiiML_=T82x-FtZQ@mail.gmail.com>
- <ed6d4ce7-97a6-f664-d7d7-4ff48bc6f06a@amd.com>
- <201707261927.v6QJR228008075@mail.zytor.com>
- <589d65a4-eb09-bae9-e8b4-a2d78ca6b509@amd.com>
+ <20170724190757.11278-7-brijesh.singh@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <589d65a4-eb09-bae9-e8b4-a2d78ca6b509@amd.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20170724190757.11278-7-brijesh.singh@amd.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: 'Brijesh Singh' <brijesh.singh@amd.com>, "H. Peter Anvin" <hpa@zytor.com>, Arnd Bergmann <arnd@arndb.de>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "kvm@vger.kernel.org" <kvm@vger.kernel.org>, Fenghua Yu <fenghua.yu@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Paul Mackerras <paulus@samba.org>, Christoph Lameter <cl@linux.com>, Jonathan Corbet <corbet@lwn.net>, =?utf-8?B?UmFkaW0gS3JjbcOhcg==?= <rkrcmar@redhat.com>, Piotr Luc <piotr.luc@intel.com>, Ingo Molnar <mingo@redhat.com>, Dave Airlie <airlied@redhat.com>, Borislav Petkov <bp@suse.de>, Tom Lendacky <thomas.lendacky@amd.com>, Kees Cook <keescook@chromium.org>, Konrad Rzeszutek Wi
+To: Brijesh Singh <brijesh.singh@amd.com>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Tom Lendacky <thomas.lendacky@amd.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric
 List-Id: linux-efi@vger.kernel.org
 
-RnJvbTogQnJpamVzaCBTaW5naA0KPiBTZW50OiAyNiBKdWx5IDIwMTcgMjE6MDcNCi4uLg0KPiBJ
-IGFtIG5vdCBzdXJlIGlmIEkgdW5kZXJzdGFuZCB5b3VyIGNvbmNlcm4uDQo+IA0KPiBBcmUgeW91
-IGNvbW1lbnRpbmcgb24gYW1vdW50IG9mIGNvZGUgZHVwbGljYXRpb24gPyBJZiBzbywgSSBjYW4g
-Y2VydGFpbmx5IGltcHJvdmUNCj4gYW5kIHVzZSB0aGUgc2ltaWxhciBtYWNybyB1c2VkIGludG8g
-aGVhZGVyIGZpbGUgdG8gZ2VuZXJhdGUgdGhlIGZ1bmN0aW9ucyBib2R5Lg0KDQpJZiB5b3UgYXJl
-IGNhcmVmdWwgdGhlIHJlYWwgZnVuY3Rpb25zIGNvdWxkIGV4cGFuZCB0aGUgaW5saW5lIGZ1bmN0
-aW9ucw0KdGhhdCBnZXQgdXNlZCB3aGVuIFNFViBpcyBjb21waWxlZCBvdXQuDQoNCk9oLCBpZiB5
-b3UgYXJlIGxvb2tpbmcgYXQgdGhpcywgY2FuIHlvdSBmaXggbWVtY3B5X3RvX2lvKCkNCnNvIHRo
-YXQgaXQgaXMgbmV2ZXIgJ3JlcCBtb3ZzYic/DQoNCglEYXZpZA0KDQo=
+On Mon, Jul 24, 2017 at 02:07:46PM -0500, Brijesh Singh wrote:
+> From: Tom Lendacky <thomas.lendacky@amd.com>
+> 
+> When Secure Encrypted Virtualization (SEV) is active, boot data (such as
+> EFI related data, setup data) is encrypted and needs to be accessed as
+> such when mapped. Update the architecture override in early_memremap to
+> keep the encryption attribute when mapping this data.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+> ---
+>  arch/x86/mm/ioremap.c | 44 ++++++++++++++++++++++++++++++++------------
+>  1 file changed, 32 insertions(+), 12 deletions(-)
+
+...
+
+> @@ -590,10 +598,15 @@ bool arch_memremap_can_ram_remap(resource_size_t phys_addr, unsigned long size,
+>  	if (flags & MEMREMAP_DEC)
+>  		return false;
+>  
+> -	if (memremap_is_setup_data(phys_addr, size) ||
+> -	    memremap_is_efi_data(phys_addr, size) ||
+> -	    memremap_should_map_decrypted(phys_addr, size))
+> -		return false;
+> +	if (sme_active()) {
+> +		if (memremap_is_setup_data(phys_addr, size) ||
+> +		    memremap_is_efi_data(phys_addr, size) ||
+> +		    memremap_should_map_decrypted(phys_addr, size))
+> +			return false;
+> +	} else if (sev_active()) {
+> +		if (memremap_should_map_decrypted(phys_addr, size))
+> +			return false;
+> +	}
+>  
+>  	return true;
+>  }
+
+I guess this function's hind part can be simplified to:
+
+        if (sme_active()) {
+                if (memremap_is_setup_data(phys_addr, size) ||
+                    memremap_is_efi_data(phys_addr, size))
+                        return false;
+        }
+
+        return ! memremap_should_map_decrypted(phys_addr, size);
+}
+
+> @@ -608,15 +621,22 @@ pgprot_t __init early_memremap_pgprot_adjust(resource_size_t phys_addr,
+>  					     unsigned long size,
+>  					     pgprot_t prot)
+
+And this one in a similar manner...
+
+>  {
+> -	if (!sme_active())
+> +	if (!sme_active() && !sev_active())
+>  		return prot;
+
+... and you don't need that check...
+
+> -	if (early_memremap_is_setup_data(phys_addr, size) ||
+> -	    memremap_is_efi_data(phys_addr, size) ||
+> -	    memremap_should_map_decrypted(phys_addr, size))
+> -		prot = pgprot_decrypted(prot);
+> -	else
+> -		prot = pgprot_encrypted(prot);
+> +	if (sme_active()) {
+
+... if you're going to do it here too.
+
+> +		if (early_memremap_is_setup_data(phys_addr, size) ||
+> +		    memremap_is_efi_data(phys_addr, size) ||
+> +		    memremap_should_map_decrypted(phys_addr, size))
+> +			prot = pgprot_decrypted(prot);
+> +		else
+> +			prot = pgprot_encrypted(prot);
+> +	} else if (sev_active()) {
+
+And here.
+
+> +		if (memremap_should_map_decrypted(phys_addr, size))
+> +			prot = pgprot_decrypted(prot);
+> +		else
+> +			prot = pgprot_encrypted(prot);
+> +	}
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
