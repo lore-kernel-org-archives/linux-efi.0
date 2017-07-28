@@ -1,47 +1,103 @@
-From: David Laight <David.Laight@ACULAB.COM>
-Subject: RE: [RFC Part1 PATCH v3 07/17] x86/mm: Include SEV for encryption
- memory attribute changes
-Date: Fri, 28 Jul 2017 08:47:30 +0000
-Message-ID: <063D6719AE5E284EB5DD2968C1650D6DD0045508@AcuExch.aculab.com>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [RFC Part1 PATCH v3 08/17] x86/efi: Access EFI data as encrypted
+ when SEV is active
+Date: Fri, 28 Jul 2017 12:31:52 +0200
+Message-ID: <20170728103152.GE1889@nazgul.tnic>
 References: <20170724190757.11278-1-brijesh.singh@amd.com>
- <20170724190757.11278-8-brijesh.singh@amd.com>
- <20170727145841.GG28553@nazgul.tnic>
+ <20170724190757.11278-9-brijesh.singh@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <20170727145841.GG28553@nazgul.tnic>
-Content-Language: en-US
-Sender: kvm-owner@vger.kernel.org
-To: 'Borislav Petkov' <bp@suse.de>, Brijesh Singh <brijesh.singh@amd.com>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, =?utf-8?B?UmFkaW0gS3JjbcOhcg==?= <rkrcmar@redhat.com>, "kvm@vger.kernel.org" <kvm@vger.kernel.org>, Fenghua Yu <fenghua.yu@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Paul Mackerras <paulus@samba.org>, "H . Peter Anvin" <hpa@zytor.com>, Christoph Lameter <cl@linux.com>, Jonathan Corbet <corbet@lwn.net>, "x86@kernel.org" <x86@kernel.org>, Piotr Luc <piotr.luc@intel.com>, Ingo Molnar <mingo@redhat.com>, Dave Airlie <airlied@redhat.com>, Laura Abbott <labbott@redhat.com>, Tom Lendacky <thomas.lendacky@amd.com>, Kees Cook <keescook@chromium.org>, Arnd Bergmann <arnd@arndb.de>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Reza Arbab <arbab>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170724190757.11278-9-brijesh.singh-5C7GfCeVMHo@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Piotr Luc <piotr.luc-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lu Baolu <baolu.lu-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Reza Arbab <arbab-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Kirill A . Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Eric
 List-Id: linux-efi@vger.kernel.org
 
-RnJvbTogQm9yaXNsYXYgUGV0a292DQo+IFNlbnQ6IDI3IEp1bHkgMjAxNyAxNTo1OQ0KPiBPbiBN
-b24sIEp1bCAyNCwgMjAxNyBhdCAwMjowNzo0N1BNIC0wNTAwLCBCcmlqZXNoIFNpbmdoIHdyb3Rl
-Og0KPiA+IEZyb206IFRvbSBMZW5kYWNreSA8dGhvbWFzLmxlbmRhY2t5QGFtZC5jb20+DQo+ID4N
-Cj4gPiBUaGUgY3VycmVudCBjb2RlIGNoZWNrcyBvbmx5IGZvciBzbWVfYWN0aXZlKCkgd2hlbiBk
-ZXRlcm1pbmluZyB3aGV0aGVyDQo+ID4gdG8gcGVyZm9ybSB0aGUgZW5jcnlwdGlvbiBhdHRyaWJ1
-dGUgY2hhbmdlLiAgSW5jbHVkZSBzZXZfYWN0aXZlKCkgaW4gdGhpcw0KPiA+IGNoZWNrIHNvIHRo
-YXQgbWVtb3J5IGF0dHJpYnV0ZSBjaGFuZ2VzIGNhbiBvY2N1ciB1bmRlciBTTUUgYW5kIFNFVi4N
-Cj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IFRvbSBMZW5kYWNreSA8dGhvbWFzLmxlbmRhY2t5QGFt
-ZC5jb20+DQo+ID4gU2lnbmVkLW9mZi1ieTogQnJpamVzaCBTaW5naCA8YnJpamVzaC5zaW5naEBh
-bWQuY29tPg0KPiA+IC0tLQ0KPiA+ICBhcmNoL3g4Ni9tbS9wYWdlYXR0ci5jIHwgNCArKy0tDQo+
-ID4gIDEgZmlsZSBjaGFuZ2VkLCAyIGluc2VydGlvbnMoKyksIDIgZGVsZXRpb25zKC0pDQo+ID4N
-Cj4gPiBkaWZmIC0tZ2l0IGEvYXJjaC94ODYvbW0vcGFnZWF0dHIuYyBiL2FyY2gveDg2L21tL3Bh
-Z2VhdHRyLmMNCj4gPiBpbmRleCBkZmI3ZDY1Li5iNzI2YjIzIDEwMDY0NA0KPiA+IC0tLSBhL2Fy
-Y2gveDg2L21tL3BhZ2VhdHRyLmMNCj4gPiArKysgYi9hcmNoL3g4Ni9tbS9wYWdlYXR0ci5jDQo+
-ID4gQEAgLTE3ODEsOCArMTc4MSw4IEBAIHN0YXRpYyBpbnQgX19zZXRfbWVtb3J5X2VuY19kZWMo
-dW5zaWduZWQgbG9uZyBhZGRyLCBpbnQgbnVtcGFnZXMsIGJvb2wgZW5jKQ0KPiA+ICAJdW5zaWdu
-ZWQgbG9uZyBzdGFydDsNCj4gPiAgCWludCByZXQ7DQo+ID4NCj4gPiAtCS8qIE5vdGhpbmcgdG8g
-ZG8gaWYgdGhlIFNNRSBpcyBub3QgYWN0aXZlICovDQo+ID4gLQlpZiAoIXNtZV9hY3RpdmUoKSkN
-Cj4gPiArCS8qIE5vdGhpbmcgdG8gZG8gaWYgU01FIGFuZCBTRVYgYXJlIG5vdCBhY3RpdmUgKi8N
-Cj4gPiArCWlmICghc21lX2FjdGl2ZSgpICYmICFzZXZfYWN0aXZlKCkpDQo+IA0KPiBUaGlzIGlz
-IHRoZSBzZWNvbmQgcGxhY2Ugd2hpY2ggZG9lcw0KPiANCj4gCWlmICghU01FICYmICFTRVYpDQo+
-IA0KPiBJIHdvbmRlciBpZiwgaW5zdGVhZCBvZiBzcHJpbmtpbmcgdGhvc2UsIHdlIHNob3VsZCBo
-YXZlIGENCj4gDQo+IAlpZiAobWVtX2VuY19hY3RpdmUoKSkNCj4gDQo+IG9yIHNvIHdoaWNoIHVu
-aWZpZXMgYWxsIHRob3NlIG1lbW9yeSBlbmNyeXB0aW9uIGxvZ2ljIHRlc3RzIGFuZCBtYWtlcw0K
-PiB0aGUgY29kZSBtb3JlIHN0cmFpZ2h0Zm9yd2FyZCBmb3IgcmVhZGVycyB3aG8gZG9uJ3QgaGF2
-ZSB0byBwYXkNCj4gYXR0ZW50aW9uIHRvIFNNRSB2cyBTRVYgLi4uDQoNCklmIGFueSBvZiB0aGUg
-Y29kZSBwYXRocyBhcmUgJ2hvdCcgaXQgd291bGQgbWFrZSBzZW5zZSB0byBiZSBjaGVja2luZw0K
-YSBzaW5nbGUgbWVtb3J5IGxvY2F0aW9uLg0KDQoJRGF2aWQNCg0K
+On Mon, Jul 24, 2017 at 02:07:48PM -0500, Brijesh Singh wrote:
+> From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+> 
+> EFI data is encrypted when the kernel is run under SEV. Update the
+> page table references to be sure the EFI memory areas are accessed
+> encrypted.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
+> Signed-off-by: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
+> ---
+>  arch/x86/platform/efi/efi_64.c | 15 ++++++++++++++-
+>  1 file changed, 14 insertions(+), 1 deletion(-)
+> 
+> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+> index 12e8388..1ecb3f6 100644
+> --- a/arch/x86/platform/efi/efi_64.c
+> +++ b/arch/x86/platform/efi/efi_64.c
+> @@ -32,6 +32,7 @@
+>  #include <linux/reboot.h>
+>  #include <linux/slab.h>
+>  #include <linux/ucs2_string.h>
+> +#include <linux/mem_encrypt.h>
+>  
+>  #include <asm/setup.h>
+>  #include <asm/page.h>
+> @@ -369,7 +370,10 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+>  	 * as trim_bios_range() will reserve the first page and isolate it away
+>  	 * from memory allocators anyway.
+>  	 */
+> -	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, _PAGE_RW)) {
+> +	pf = _PAGE_RW;
+> +	if (sev_active())
+> +		pf |= _PAGE_ENC;
+
+\n here
+
+> +	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, pf)) {
+>  		pr_err("Failed to create 1:1 mapping for the first page!\n");
+>  		return 1;
+>  	}
+> @@ -412,6 +416,9 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+>  	if (!(md->attribute & EFI_MEMORY_WB))
+>  		flags |= _PAGE_PCD;
+>  
+> +	if (sev_active())
+> +		flags |= _PAGE_ENC;
+> +
+>  	pfn = md->phys_addr >> PAGE_SHIFT;
+>  	if (kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags))
+>  		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
+> @@ -511,6 +518,9 @@ static int __init efi_update_mappings(efi_memory_desc_t *md, unsigned long pf)
+>  	pgd_t *pgd = efi_pgd;
+>  	int err1, err2;
+>  
+> +	if (sev_active())
+> +		pf |= _PAGE_ENC;
+
+Move this assignment to the caller efi_update_mem_attr() where pf is being
+set...
+
+> +
+>  	/* Update the 1:1 mapping */
+>  	pfn = md->phys_addr >> PAGE_SHIFT;
+>  	err1 = kernel_map_pages_in_pgd(pgd, pfn, md->phys_addr, md->num_pages, pf);
+> @@ -589,6 +599,9 @@ void __init efi_runtime_update_mappings(void)
+>  			(md->type != EFI_RUNTIME_SERVICES_CODE))
+>  			pf |= _PAGE_RW;
+>  
+> +		if (sev_active())
+> +			pf |= _PAGE_ENC;
+
+... just like here.
+
+> +
+>  		efi_update_mappings(md, pf);
+
+In general, I'm not totally excited about that sprinkling of if
+(sev_active())... :-\
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
