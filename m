@@ -1,91 +1,76 @@
-From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Subject: Re: [RFC Part1 PATCH v3 11/17] x86/mm, resource: Use PAGE_KERNEL
- protection for ioremap of memory pages
-Date: Wed, 2 Aug 2017 06:02:56 +0200
-Message-ID: <20170802040255.GA4336@nazgul.tnic>
-References: <20170724190757.11278-1-brijesh.singh@amd.com>
- <20170724190757.11278-12-brijesh.singh@amd.com>
+From: Stuart Hayes <stuart.w.hayes@gmail.com>
+Subject: [PATCH] x86/efi: page align EFI ROM image ranges
+Date: Wed, 2 Aug 2017 11:28:49 -0500
+Message-ID: <c9cbe39f-8ad6-790e-5ce2-6363b034b2ef@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170724190757.11278-12-brijesh.singh-5C7GfCeVMHo@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Piotr Luc <piotr.luc-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lu Baolu <baolu.lu-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Reza Arbab <arbab-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Kirill A . Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Eric
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.u>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jul 24, 2017 at 02:07:51PM -0500, Brijesh Singh wrote:
-> From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-> 
-> In order for memory pages to be properly mapped when SEV is active, we
-> need to use the PAGE_KERNEL protection attribute as the base protection.
-> This will insure that memory mapping of, e.g. ACPI tables, receives the
-> proper mapping attributes.
-> 
-> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-> Signed-off-by: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
-> ---
->  arch/x86/mm/ioremap.c  | 28 ++++++++++++++++++++++++++++
->  include/linux/ioport.h |  3 +++
->  kernel/resource.c      | 17 +++++++++++++++++
->  3 files changed, 48 insertions(+)
-> 
-> diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
-> index c0be7cf..7b27332 100644
-> --- a/arch/x86/mm/ioremap.c
-> +++ b/arch/x86/mm/ioremap.c
-> @@ -69,6 +69,26 @@ static int __ioremap_check_ram(unsigned long start_pfn, unsigned long nr_pages,
->  	return 0;
->  }
->  
-> +static int __ioremap_res_desc_other(struct resource *res, void *arg)
-> +{
-> +	return (res->desc != IORES_DESC_NONE);
-> +}
-> +
-> +/*
-> + * This function returns true if the target memory is marked as
-> + * IORESOURCE_MEM and IORESOURCE_BUSY and described as other than
-> + * IORES_DESC_NONE (e.g. IORES_DESC_ACPI_TABLES).
-> + */
-> +static bool __ioremap_check_if_mem(resource_size_t addr, unsigned long size)
-> +{
-> +	u64 start, end;
-> +
-> +	start = (u64)addr;
-> +	end = start + size - 1;
-> +
-> +	return (walk_mem_res(start, end, NULL, __ioremap_res_desc_other) == 1);
-> +}
-> +
->  /*
->   * Remap an arbitrary physical address space into the kernel virtual
->   * address space. It transparently creates kernel huge I/O mapping when
-> @@ -146,7 +166,15 @@ static void __iomem *__ioremap_caller(resource_size_t phys_addr,
->  		pcm = new_pcm;
->  	}
->  
-> +	/*
-> +	 * If the page being mapped is in memory and SEV is active then
-> +	 * make sure the memory encryption attribute is enabled in the
-> +	 * resulting mapping.
-> +	 */
->  	prot = PAGE_KERNEL_IO;
-> +	if (sev_active() && __ioremap_check_if_mem(phys_addr, size))
-> +		prot = pgprot_encrypted(prot);
+The kernel's EFI stub locates and copies EFI ROM images into memory, which it allocates using the byte-granular EFI allocate_pool function.  These memory ranges are then added to setup_data, and later to e820 (in e820__reserve_setup_data()).  The e820 ranges are parsed to create nosave regions (in e820__register_nosave_regions()), but when non-page-aligned e820 regions are parsed, a nosave page is added at the beginning and end of each non-page-aligned region, which results in data not getting saved or restored during a hibernate/resume.  This can result in random failures after a hibernate/resume.
+ 
+Round up the allocation size to a whole number of pages, and use EFI allocate_pages to ensure that the EFI ROM copy regions are page-aligned.
 
-Hmm, so this function already does walk_system_ram_range() a bit
-earlier and now on SEV systems we're going to do it again. Can we make
-walk_system_ram_range() return a distinct value for SEV systems and act
-accordingly in __ioremap_caller() instead of repeating the operation?
+On a system with six EFI ROM images, before the patch:
 
-It looks to me like we could...
+e820: update [mem 0x64866020-0x6486e05f] usable ==> usable
+e820: update [mem 0x6147a020-0x61499c5f] usable ==> usable
+e820: update [mem 0x60fff020-0x6105785f] usable ==> usable
+e820: update [mem 0x60fa6020-0x60ffe85f] usable ==> usable
+e820: update [mem 0x60f4d020-0x60fa585f] usable ==> usable
+e820: update [mem 0x60ef4020-0x60f4c85f] usable ==> usable
+...
+PM: Registered nosave memory: [mem 0x00000000-0x00000fff]
+PM: Registered nosave memory: [mem 0x000a0000-0x000fffff]
+PM: Registered nosave memory: [mem 0x60ef4000-0x60ef4fff]
+PM: Registered nosave memory: [mem 0x60f4c000-0x60f4cfff]
+PM: Registered nosave memory: [mem 0x60f4d000-0x60f4dfff]
+PM: Registered nosave memory: [mem 0x60fa5000-0x60fa5fff]
+PM: Registered nosave memory: [mem 0x60fa6000-0x60fa6fff]
+PM: Registered nosave memory: [mem 0x60ffe000-0x60ffefff]
+PM: Registered nosave memory: [mem 0x60fff000-0x60ffffff]
+PM: Registered nosave memory: [mem 0x61057000-0x61057fff]
+PM: Registered nosave memory: [mem 0x6147a000-0x6147afff]
+PM: Registered nosave memory: [mem 0x61499000-0x61499fff]
+PM: Registered nosave memory: [mem 0x64866000-0x64866fff]
+PM: Registered nosave memory: [mem 0x6486e000-0x6486efff]
+PM: Registered nosave memory: [mem 0x6cf6e000-0x6f3ccfff]
 
--- 
-Regards/Gruss,
-    Boris.
+After the patch:
 
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+e820: update [mem 0x64866000-0x6486efff] usable ==> usable
+e820: update [mem 0x6147a000-0x61499fff] usable ==> usable
+e820: update [mem 0x60fff000-0x61057fff] usable ==> usable
+e820: update [mem 0x60fa6000-0x60ffefff] usable ==> usable
+e820: update [mem 0x60f4d000-0x60fa5fff] usable ==> usable
+e820: update [mem 0x60ef4000-0x60f4cfff] usable ==> usable
+...
+PM: Registered nosave memory: [mem 0x00000000-0x00000fff]
+PM: Registered nosave memory: [mem 0x000a0000-0x000fffff]
+PM: Registered nosave memory: [mem 0x6cf6e000-0x6f3ccfff]
+
+Signed-off-by: Stuart Hayes <stuart.w.hayes@gmail.com>
+---
+
+--- linux-4.13-rc2/arch/x86/boot/compressed/eboot.c.orig	2017-08-01 12:12:04.696049106 -0400
++++ linux-4.13-rc2/arch/x86/boot/compressed/eboot.c	2017-08-01 12:11:33.120182236 -0400
+@@ -235,7 +235,12 @@ __setup_efi_pci64(efi_pci_io_protocol_64
+ 
+ 	size = pci->romsize + sizeof(*rom);
+ 
+-	status = efi_call_early(allocate_pool, EFI_LOADER_DATA, size, &rom);
++	/*
++	 * Get whole pages because this will be added to e820.
++	 */
++	size = PAGE_ALIGN(size);
++	status = efi_call_early(allocate_pages, EFI_ALLOCATE_ANY_PAGES,
++				EFI_LOADER_DATA, (size >> PAGE_SHIFT), &rom);
+ 	if (status != EFI_SUCCESS) {
+ 		efi_printk(sys_table, "Failed to alloc mem for rom\n");
+ 		return status;
+ 
