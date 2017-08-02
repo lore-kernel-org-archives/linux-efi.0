@@ -1,16 +1,18 @@
-From: Stuart Hayes <stuart.w.hayes@gmail.com>
+From: Stuart Hayes <stuart.w.hayes-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: [PATCH] x86/efi: page align EFI ROM image ranges
-Date: Wed, 2 Aug 2017 11:28:49 -0500
-Message-ID: <c9cbe39f-8ad6-790e-5ce2-6363b034b2ef@gmail.com>
+Date: Wed, 2 Aug 2017 11:41:38 -0500
+Message-ID: <4a28637c-d5ff-95ed-5bee-2b1e465f2d79@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.u>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
+
+(Resend because I mistyped the maintainer's email address the first time.)
 
 The kernel's EFI stub locates and copies EFI ROM images into memory, which it allocates using the byte-granular EFI allocate_pool function.  These memory ranges are then added to setup_data, and later to e820 (in e820__reserve_setup_data()).  The e820 ranges are parsed to create nosave regions (in e820__register_nosave_regions()), but when non-page-aligned e820 regions are parsed, a nosave page is added at the beginning and end of each non-page-aligned region, which results in data not getting saved or restored during a hibernate/resume.  This can result in random failures after a hibernate/resume.
  
@@ -54,7 +56,7 @@ PM: Registered nosave memory: [mem 0x00000000-0x00000fff]
 PM: Registered nosave memory: [mem 0x000a0000-0x000fffff]
 PM: Registered nosave memory: [mem 0x6cf6e000-0x6f3ccfff]
 
-Signed-off-by: Stuart Hayes <stuart.w.hayes@gmail.com>
+Signed-off-by: Stuart Hayes <stuart.w.hayes-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 ---
 
 --- linux-4.13-rc2/arch/x86/boot/compressed/eboot.c.orig	2017-08-01 12:12:04.696049106 -0400
