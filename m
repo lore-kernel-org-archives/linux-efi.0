@@ -1,7 +1,7 @@
 From: Arvind Yadav <arvind.yadav.cs@gmail.com>
-Subject: [PATCH 2/3] firmware: efi: constify attribute_group structures.
-Date: Thu,  3 Aug 2017 19:07:23 +0530
-Message-ID: <1501767444-27873-3-git-send-email-arvind.yadav.cs@gmail.com>
+Subject: [PATCH 3/3] firmware: efi: esrt: constify attribute_group structures.
+Date: Thu,  3 Aug 2017 19:07:24 +0530
+Message-ID: <1501767444-27873-4-git-send-email-arvind.yadav.cs@gmail.com>
 References: <1501767444-27873-1-git-send-email-arvind.yadav.cs@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1501767444-27873-1-git-send-email-arvind.yadav.cs@gmail.com>
@@ -16,21 +16,21 @@ const attribute_group. So mark the non-const structs as const.
 
 Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
 ---
- drivers/firmware/efi/efi.c | 2 +-
+ drivers/firmware/efi/esrt.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 045d6d3..6519be44 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -179,7 +179,7 @@ static umode_t efi_attr_is_visible(struct kobject *kobj,
+diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+index 8554d7a..bd7ed3c 100644
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -230,7 +230,7 @@ static umode_t esrt_attr_is_visible(struct kobject *kobj,
  	return attr->mode;
  }
  
--static struct attribute_group efi_subsys_attr_group = {
-+static const struct attribute_group efi_subsys_attr_group = {
- 	.attrs = efi_subsys_attrs,
- 	.is_visible = efi_attr_is_visible,
+-static struct attribute_group esrt_attr_group = {
++static const struct attribute_group esrt_attr_group = {
+ 	.attrs = esrt_attrs,
+ 	.is_visible = esrt_attr_is_visible,
  };
 -- 
 1.9.1
