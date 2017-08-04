@@ -1,76 +1,97 @@
-From: Baoquan He <bhe@redhat.com>
-Subject: Re: [PATCH v6 RESEND] x86/boot/KASLR: Restrict kernel to be
- randomized in mirror regions
-Date: Fri, 4 Aug 2017 20:02:46 +0800
-Message-ID: <20170804120246.GI1874@x1>
-References: <1500542189-15779-1-git-send-email-bhe@redhat.com>
- <20170721103757.hc74czr3mfunrv6c@gmail.com>
- <20170721131956.GK2344@x1>
- <20170724133410.GC11076@codeblueprint.co.uk>
- <20170728095525.y4tuv6aavzfs4ekb@gmail.com>
- <20170728112603.GS24304@x1>
- <20170804112325.GB8187@codeblueprint.co.uk>
- <20170804114005.GC29975@x1>
- <20170804115513.GD8187@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH] x86/efi: page align EFI ROM image ranges
+Date: Fri, 4 Aug 2017 13:06:50 +0100
+Message-ID: <20170804120650.GE8187@codeblueprint.co.uk>
+References: <4a28637c-d5ff-95ed-5bee-2b1e465f2d79@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20170804115513.GD8187@codeblueprint.co.uk>
+In-Reply-To: <4a28637c-d5ff-95ed-5bee-2b1e465f2d79@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Ingo Molnar <mingo@kernel.org>, linux-kernel@vger.kernel.org, x86@kernel.org, keescook@chromium.org, tglx@linutronix.de, hpa@zytor.com, izumi.taku@jp.fujitsu.com, fanc.fnst@cn.fujitsu.com, thgarnie@google.com, n-horiguchi@ah.jp.nec.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org
+To: Stuart Hayes <stuart.w.hayes@gmail.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 08/04/17 at 12:55pm, Matt Fleming wrote:
-> On Fri, 04 Aug, at 07:40:05PM, Baoquan He wrote:
-> > On 08/04/17 at 12:23pm, Matt Fleming wrote:
-> > > On Fri, 28 Jul, at 07:26:03PM, Baoquan He wrote:
-> > > > Hi Matt,
-> > > > 
-> > > > On 07/28/17 at 11:55am, Ingo Molnar wrote:
-> > > > > 
-> > > > > * Matt Fleming <matt@codeblueprint.co.uk> wrote:
-> > > > > 
-> > > > > > On Fri, 21 Jul, at 09:19:56PM, Baoquan He wrote:
-> > > > > > >
-> > > > > > > There are places where the efi map is getting and used like this. E.g
-> > > > > > > in efi_high_alloc() of drivers/firmware/efi/libstub/efi-stub-helper.c.
-> > > > > > > EFI developers worry the size of efi_memory_desc_t could not be the same
-> > > > > > > as e->efi_memdesc_size?
-> > > > > > > 
-> > > > > > > Hi Matt,
-> > > > > > > 
-> > > > > > > Could you help have a look at this?
-> > > > > > 
-> > > > > > You're exactly right. The code guards against the size of the
-> > > > > > efi_memory_desc_t struct changing. The UEFI spec says to traverse the
-> > > > > > memory map this way.
-> > > > > 
-> > > > > This is not obvious and looks pretty ugly as well, and open coded in several 
-> > > > > places.
-> > > > > 
-> > > > > At minimum we should have an efi_memdesc_ptr(efi, i) wrapper inline (or so) that 
-> > > > > gives us the entry pointer, plus a comment that points out that ->memdesc_size 
-> > > > > might not be equal to sizeof(efi_memory_memdesc_t).
-> > > > 
-> > > > I can make a efi_memdesc_ptr(efi, i) wrapper as Ingo suggested and use
-> > > > it here if you agree. Seems it might be not good to add another
-> > > > for_each_efi_memory_desc_xxxx wrapper since there are different memmap
-> > > > data structures in x86 boot and in general efi libstub. Or any other
-> > > > idea?
-> > > 
-> > > I think adding a wrapper is fine, but I'd suggest including the word
-> > > "early" (or something similar) to explain that it should only be used
-> > > during bootup -- we want everyone else to use the
-> > > for_each_efi_memory_*() API.
-> > 
-> > Thanks, Matt. I can do that. Do you think if below helper definition is OK
-> > to you? If yes, I can update with it and post v9.
-> > 
-> > #define efi_early_memdesc_ptr(map, desc_size, n)				\
-> > 	(efi_memory_desc_t *)((void *)(map) + ((n) * (desc_size)))
+On Wed, 02 Aug, at 11:41:38AM, Stuart Hayes wrote:
+> (Resend because I mistyped the maintainer's email address the first time.)
+> 
+> The kernel's EFI stub locates and copies EFI ROM images into memory,
+> which it allocates using the byte-granular EFI allocate_pool
+> function.  These memory ranges are then added to setup_data, and
+> later to e820 (in e820__reserve_setup_data()).  The e820 ranges are
+> parsed to create nosave regions (in
+> e820__register_nosave_regions()), but when non-page-aligned e820
+> regions are parsed, a nosave page is added at the beginning and end
+> of each non-page-aligned region, which results in data not getting
+> saved or restored during a hibernate/resume.  This can result in
+> random failures after a hibernate/resume.
 >  
-> Looks fine to me, but I'd wait for Ingo's OK before resending.
+> Round up the allocation size to a whole number of pages, and use EFI
+> allocate_pages to ensure that the EFI ROM copy regions are
+> page-aligned.
+> 
+> On a system with six EFI ROM images, before the patch:
+> 
+> e820: update [mem 0x64866020-0x6486e05f] usable ==> usable
+> e820: update [mem 0x6147a020-0x61499c5f] usable ==> usable
+> e820: update [mem 0x60fff020-0x6105785f] usable ==> usable
+> e820: update [mem 0x60fa6020-0x60ffe85f] usable ==> usable
+> e820: update [mem 0x60f4d020-0x60fa585f] usable ==> usable
+> e820: update [mem 0x60ef4020-0x60f4c85f] usable ==> usable
+> ...
+> PM: Registered nosave memory: [mem 0x00000000-0x00000fff]
+> PM: Registered nosave memory: [mem 0x000a0000-0x000fffff]
+> PM: Registered nosave memory: [mem 0x60ef4000-0x60ef4fff]
+> PM: Registered nosave memory: [mem 0x60f4c000-0x60f4cfff]
+> PM: Registered nosave memory: [mem 0x60f4d000-0x60f4dfff]
+> PM: Registered nosave memory: [mem 0x60fa5000-0x60fa5fff]
+> PM: Registered nosave memory: [mem 0x60fa6000-0x60fa6fff]
+> PM: Registered nosave memory: [mem 0x60ffe000-0x60ffefff]
+> PM: Registered nosave memory: [mem 0x60fff000-0x60ffffff]
+> PM: Registered nosave memory: [mem 0x61057000-0x61057fff]
+> PM: Registered nosave memory: [mem 0x6147a000-0x6147afff]
+> PM: Registered nosave memory: [mem 0x61499000-0x61499fff]
+> PM: Registered nosave memory: [mem 0x64866000-0x64866fff]
+> PM: Registered nosave memory: [mem 0x6486e000-0x6486efff]
+> PM: Registered nosave memory: [mem 0x6cf6e000-0x6f3ccfff]
+> 
+> After the patch:
+> 
+> e820: update [mem 0x64866000-0x6486efff] usable ==> usable
+> e820: update [mem 0x6147a000-0x61499fff] usable ==> usable
+> e820: update [mem 0x60fff000-0x61057fff] usable ==> usable
+> e820: update [mem 0x60fa6000-0x60ffefff] usable ==> usable
+> e820: update [mem 0x60f4d000-0x60fa5fff] usable ==> usable
+> e820: update [mem 0x60ef4000-0x60f4cfff] usable ==> usable
+> ...
+> PM: Registered nosave memory: [mem 0x00000000-0x00000fff]
+> PM: Registered nosave memory: [mem 0x000a0000-0x000fffff]
+> PM: Registered nosave memory: [mem 0x6cf6e000-0x6f3ccfff]
+> 
+> Signed-off-by: Stuart Hayes <stuart.w.hayes@gmail.com>
+> ---
+> 
+> --- linux-4.13-rc2/arch/x86/boot/compressed/eboot.c.orig	2017-08-01 12:12:04.696049106 -0400
+> +++ linux-4.13-rc2/arch/x86/boot/compressed/eboot.c	2017-08-01 12:11:33.120182236 -0400
+> @@ -235,7 +235,12 @@ __setup_efi_pci64(efi_pci_io_protocol_64
+>  
+>  	size = pci->romsize + sizeof(*rom);
+>  
+> -	status = efi_call_early(allocate_pool, EFI_LOADER_DATA, size, &rom);
+> +	/*
+> +	 * Get whole pages because this will be added to e820.
+> +	 */
+> +	size = PAGE_ALIGN(size);
+> +	status = efi_call_early(allocate_pages, EFI_ALLOCATE_ANY_PAGES,
+> +				EFI_LOADER_DATA, (size >> PAGE_SHIFT), &rom);
+>  	if (status != EFI_SUCCESS) {
+>  		efi_printk(sys_table, "Failed to alloc mem for rom\n");
+>  		return status;
+>  
+ 
+Nice catch. The comment could do with a little more information,
+including the fact that it's the e820 nosave code that expects
+page-aligned ROM regions.
 
-Sure, thanks!
+Also, you'll need the same fix for __setup_efi_pci32().
