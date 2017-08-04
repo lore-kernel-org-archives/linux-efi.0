@@ -1,7 +1,7 @@
 From: Baoquan He <bhe@redhat.com>
-Subject: [PATCH v8 1/2] efi: Introduce efi_memdesc_ptr to get pointer to memmap descriptor
-Date: Fri,  4 Aug 2017 15:26:46 +0800
-Message-ID: <1501831607-6776-2-git-send-email-bhe@redhat.com>
+Subject: [PATCH v8 2/2] x86/boot/KASLR: Restrict kernel to be randomized in mirror regions
+Date: Fri,  4 Aug 2017 15:26:47 +0800
+Message-ID: <1501831607-6776-3-git-send-email-bhe@redhat.com>
 References: <1501831607-6776-1-git-send-email-bhe@redhat.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1501831607-6776-1-git-send-email-bhe@redhat.com>
@@ -10,87 +10,139 @@ To: linux-kernel@vger.kernel.org
 Cc: mingo@kernel.org, matt@codeblueprint.co.uk, keescook@chromium.org, tglx@linutronix.de, hpa@zytor.com, izumi.taku@jp.fujitsu.com, fanc.fnst@cn.fujitsu.com, thgarnie@google.com, n-horiguchi@ah.jp.nec.com, ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, x86@kernel.org, Baoquan He <bhe@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-The existing map iteration helper for_each_efi_memory_desc_in_map can
-only be used after OS initializes EFI to fill data of struct efi_memory_map.
-Before that we also need iterate map descriptors which are stored in several
-intermediate structures, like struct efi_boot_memmap for arch independent
-usage and struct efi_info for x86 ARCH only.
+Currently KASLR will parse all e820 entries of RAM type and add all
+candidate position into slots array. Then we will choose one slot
+randomly as the new position which kernel will be decompressed into
+and run at.
 
-Introduce efi_memdesc_ptr to get pointer to a map descriptor, and replace
-several places of open code with it.
+On system with EFI enabled, e820 memory regions are coming from EFI
+memory regions by combining adjacent regions. While these EFI memory
+regions have more attributes to mark their different use. Mirror
+attribute is such kind. The physical memory region whose descriptors
+in EFI memory map has EFI_MEMORY_MORE_RELIABLE attribute (bit: 16) are
+mirrored. The address range mirroring feature of kernel arranges such
+mirror region into normal zone and other region into movable zone. And
+with mirroring feature enabled, the code and date of kernel can only be
+located in more reliable mirror region. However, the current KASLR code
+doesn't check EFI memory entries, and could choose new position in
+non-mirrored region. This will break the functionality of the address
+range mirroring feature.
 
-Suggested-by: Ingo Molnar <mingo@kernel.org>
+So if EFI is detected, iterate EFI memory map and pick the mirror region
+to process for adding candidate of randomization slot. If EFI is disabled
+or no mirror region found, still process e820 memory map.
+
 Signed-off-by: Baoquan He <bhe@redhat.com>
 ---
- arch/x86/boot/compressed/eboot.c               |  2 +-
- drivers/firmware/efi/libstub/efi-stub-helper.c |  4 ++--
- include/linux/efi.h                            | 19 +++++++++++++++++++
- 3 files changed, 22 insertions(+), 3 deletions(-)
+ arch/x86/boot/compressed/kaslr.c | 68 ++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 66 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index c3e869eaef0c..31e12b43be77 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -767,7 +767,7 @@ static efi_status_t setup_e820(struct boot_params *params,
- 		m |= (u64)efi->efi_memmap_hi << 32;
- #endif
+diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
+index 99c7194f7ea6..3d3ce762dc98 100644
+--- a/arch/x86/boot/compressed/kaslr.c
++++ b/arch/x86/boot/compressed/kaslr.c
+@@ -37,7 +37,9 @@
+ #include <linux/uts.h>
+ #include <linux/utsname.h>
+ #include <linux/ctype.h>
++#include <linux/efi.h>
+ #include <generated/utsrelease.h>
++#include <asm/efi.h>
  
--		d = (efi_memory_desc_t *)(m + (i * efi->efi_memdesc_size));
-+		d = efi_memdesc_ptr(m, efi->efi_memdesc_size, i);
- 		switch (d->type) {
- 		case EFI_RESERVED_TYPE:
- 		case EFI_RUNTIME_SERVICES_CODE:
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index b0184360efc6..2db55c32e7ed 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -205,7 +205,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
- 		unsigned long m = (unsigned long)map;
- 		u64 start, end;
+ /* Macros used by the included decompressor code below. */
+ #define STATIC
+@@ -558,6 +560,65 @@ static void process_mem_region(struct mem_vector *entry,
+ 	}
+ }
  
--		desc = (efi_memory_desc_t *)(m + (i * desc_size));
-+		desc = efi_memdesc_ptr(m, desc_size, i);
- 		if (desc->type != EFI_CONVENTIONAL_MEMORY)
- 			continue;
- 
-@@ -298,7 +298,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
- 		unsigned long m = (unsigned long)map;
- 		u64 start, end;
- 
--		desc = (efi_memory_desc_t *)(m + (i * desc_size));
-+		desc = efi_memdesc_ptr(m, desc_size, i);
- 
- 		if (desc->type != EFI_CONVENTIONAL_MEMORY)
- 			continue;
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 8269bcb8ccf7..9a6ea328705f 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1020,6 +1020,25 @@ extern int efi_memattr_init(void);
- extern int efi_memattr_apply_permissions(struct mm_struct *mm,
- 					 efi_memattr_perm_setter fn);
- 
++#ifdef CONFIG_EFI
 +/*
-+ * efi_memdesc_ptr - get the n-th efi memmap descriptor
-+ * @map: the start of efi memmap
-+ * @desc_size: the size of space for each efi memmap descriptor
-+ * @n: the index of efi memmap descriptor
-+ *
-+ * EFI boot service provides function GetMemoryMap() to get a copy of the
-+ * current memory map which is an array of memory descriptors, each of
-+ * which describes a contiguous block of memory. And also get the size of
-+ * map, and the size of each descriptor, etc. Note that per section 6.2 of
-+ * UEFI Spec 2.6 Errata A, the returned size of each descriptor might not
-+ * be equal to sizeof(efi_memory_memdesc_t) since efi_memory_memdesc_t may
-+ * be extended in the future in response to hardware innovation. Thus OS
-+ * MUST use the returned size of descriptor to find the start of each
-+ * efi_memory_memdesc_t in the memory map array.
++ * Returns true if mirror region found (and must have been processed
++ * for slots adding)
 + */
-+#define efi_memdesc_ptr(map, desc_size, n)				\
-+	(efi_memory_desc_t *)((void *)(map) + ((n) * (desc_size)))
++static bool
++process_efi_entries(unsigned long minimum, unsigned long image_size)
++{
++	struct efi_info *e = &boot_params->efi_info;
++	bool efi_mirror_found = false;
++	struct mem_vector region;
++	efi_memory_desc_t *md;
++	unsigned long pmap;
++	char *signature;
++	u32 nr_desc;
++	int i;
 +
- /* Iterate through an efi_memory_map */
- #define for_each_efi_memory_desc_in_map(m, md)				   \
- 	for ((md) = (m)->map;						   \
++	signature = (char *)&e->efi_loader_signature;
++	if (strncmp(signature, EFI32_LOADER_SIGNATURE, 4) &&
++	    strncmp(signature, EFI64_LOADER_SIGNATURE, 4))
++		return false;
++
++#ifdef CONFIG_X86_32
++	/* Can't handle data above 4GB at this time */
++	if (e->efi_memmap_hi) {
++		warn("EFI memmap is above 4GB, can't be handled now on x86_32. EFI should be disabled.\n");
++		return false;
++	}
++	pmap =  e->efi_memmap;
++#else
++	pmap = (e->efi_memmap | ((__u64)e->efi_memmap_hi << 32));
++#endif
++
++	nr_desc = e->efi_memmap_size / e->efi_memdesc_size;
++	for (i = 0; i < nr_desc; i++) {
++		md = efi_memdesc_ptr(pmap, e->efi_memdesc_size, i);
++		if (md->attribute & EFI_MEMORY_MORE_RELIABLE) {
++			region.start = md->phys_addr;
++			region.size = md->num_pages << EFI_PAGE_SHIFT;
++			process_mem_region(&region, minimum, image_size);
++			efi_mirror_found = true;
++
++			if (slot_area_index == MAX_SLOT_AREA) {
++				debug_putstr("Aborted EFI scan (slot_areas full)!\n");
++				break;
++			}
++		}
++	}
++
++	return efi_mirror_found;
++}
++#else
++static inline bool
++process_efi_entries(unsigned long minimum, unsigned long image_size)
++{
++	return false;
++}
++#endif
++
+ static void process_e820_entries(unsigned long minimum,
+ 				 unsigned long image_size)
+ {
+@@ -586,13 +647,16 @@ static unsigned long find_random_phys_addr(unsigned long minimum,
+ {
+ 	/* Check if we had too many memmaps. */
+ 	if (memmap_too_large) {
+-		debug_putstr("Aborted e820 scan (more than 4 memmap= args)!\n");
++		debug_putstr("Aborted memory entries scan (more than 4 memmap= args)!\n");
+ 		return 0;
+ 	}
+ 
+ 	/* Make sure minimum is aligned. */
+ 	minimum = ALIGN(minimum, CONFIG_PHYSICAL_ALIGN);
+ 
++	if (process_efi_entries(minimum, image_size))
++		return slots_fetch_random();
++
+ 	process_e820_entries(minimum, image_size);
+ 	return slots_fetch_random();
+ }
+@@ -652,7 +716,7 @@ void choose_random_location(unsigned long input,
+ 	 */
+ 	min_addr = min(*output, 512UL << 20);
+ 
+-	/* Walk e820 and find a random address. */
++	/* Walk available memory entries to find a random address. */
+ 	random_addr = find_random_phys_addr(min_addr, output_size);
+ 	if (!random_addr) {
+ 		warn("Physical KASLR disabled: no suitable memory region!");
 -- 
 2.5.5
