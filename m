@@ -1,8 +1,8 @@
 From: Chao Fan <fanc.fnst-BthXqXjhjHXQFUHtdCDX3A@public.gmane.org>
 Subject: Re: [PATCH v8 0/2] x86/boot/KASLR: Restrict kernel to be randomized
  in mirror regions
-Date: Fri, 4 Aug 2017 17:45:04 +0800
-Message-ID: <20170804094503.GC32462@localhost.localdomain>
+Date: Fri, 4 Aug 2017 17:59:11 +0800
+Message-ID: <20170804095911.GD32462@localhost.localdomain>
 References: <1501831607-6776-1-git-send-email-bhe@redhat.com>
  <20170804075228.GA29975@x1>
  <20170804092241.GH1874@x1>
@@ -26,14 +26,16 @@ On Fri, Aug 04, 2017 at 05:22:41PM +0800, Baoquan He wrote:
 >seen again. Not sure if I copied the wrong kernel or any other mistakes.
 >Have got a hardware system with efi enabled to try again, see if
 >anything wrong will happen. It's really weird. And Chao also is helping
+>to try on his side.
 
-Maybe a little later, cause from tommorow, I will be on vacation for 9
-days.
+Hi Bao,
+
+After testing for 10 times, no problem happened.
+Maybe you did something wrong in the first time.
 
 Thanks,
 Chao Fan
 
->to try on his side.
 >
 >> 
 >> On 08/04/17 at 03:26pm, Baoquan He wrote:
