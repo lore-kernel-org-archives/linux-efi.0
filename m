@@ -1,148 +1,66 @@
-From: Baoquan He <bhe@redhat.com>
-Subject: [PATCH v8 2/2] x86/boot/KASLR: Restrict kernel to be randomized in mirror regions
-Date: Fri,  4 Aug 2017 15:26:47 +0800
-Message-ID: <1501831607-6776-3-git-send-email-bhe@redhat.com>
+From: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v8 0/2] x86/boot/KASLR: Restrict kernel to be randomized
+ in mirror regions
+Date: Fri, 4 Aug 2017 15:52:28 +0800
+Message-ID: <20170804075228.GA29975@x1>
 References: <1501831607-6776-1-git-send-email-bhe@redhat.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1501831607-6776-1-git-send-email-bhe@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: mingo@kernel.org, matt@codeblueprint.co.uk, keescook@chromium.org, tglx@linutronix.de, hpa@zytor.com, izumi.taku@jp.fujitsu.com, fanc.fnst@cn.fujitsu.com, thgarnie@google.com, n-horiguchi@ah.jp.nec.com, ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, x86@kernel.org, Baoquan He <bhe@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1501831607-6776-1-git-send-email-bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org, fanc.fnst-BthXqXjhjHXQFUHtdCDX3A@public.gmane.org, thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, n-horiguchi-PaJj6Psr51x8UrSeD/g0lQ@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Currently KASLR will parse all e820 entries of RAM type and add all
-candidate position into slots array. Then we will choose one slot
-randomly as the new position which kernel will be decompressed into
-and run at.
+Sorry, NACK this series, there's error to hang system. Before I just
+halt system intentionally with error() to check the efi memmap printing,
+didn't notice this. Checking the cause.
 
-On system with EFI enabled, e820 memory regions are coming from EFI
-memory regions by combining adjacent regions. While these EFI memory
-regions have more attributes to mark their different use. Mirror
-attribute is such kind. The physical memory region whose descriptors
-in EFI memory map has EFI_MEMORY_MORE_RELIABLE attribute (bit: 16) are
-mirrored. The address range mirroring feature of kernel arranges such
-mirror region into normal zone and other region into movable zone. And
-with mirroring feature enabled, the code and date of kernel can only be
-located in more reliable mirror region. However, the current KASLR code
-doesn't check EFI memory entries, and could choose new position in
-non-mirrored region. This will break the functionality of the address
-range mirroring feature.
-
-So if EFI is detected, iterate EFI memory map and pick the mirror region
-to process for adding candidate of randomization slot. If EFI is disabled
-or no mirror region found, still process e820 memory map.
-
-Signed-off-by: Baoquan He <bhe@redhat.com>
----
- arch/x86/boot/compressed/kaslr.c | 68 ++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 66 insertions(+), 2 deletions(-)
-
-diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
-index 99c7194f7ea6..3d3ce762dc98 100644
---- a/arch/x86/boot/compressed/kaslr.c
-+++ b/arch/x86/boot/compressed/kaslr.c
-@@ -37,7 +37,9 @@
- #include <linux/uts.h>
- #include <linux/utsname.h>
- #include <linux/ctype.h>
-+#include <linux/efi.h>
- #include <generated/utsrelease.h>
-+#include <asm/efi.h>
- 
- /* Macros used by the included decompressor code below. */
- #define STATIC
-@@ -558,6 +560,65 @@ static void process_mem_region(struct mem_vector *entry,
- 	}
- }
- 
-+#ifdef CONFIG_EFI
-+/*
-+ * Returns true if mirror region found (and must have been processed
-+ * for slots adding)
-+ */
-+static bool
-+process_efi_entries(unsigned long minimum, unsigned long image_size)
-+{
-+	struct efi_info *e = &boot_params->efi_info;
-+	bool efi_mirror_found = false;
-+	struct mem_vector region;
-+	efi_memory_desc_t *md;
-+	unsigned long pmap;
-+	char *signature;
-+	u32 nr_desc;
-+	int i;
-+
-+	signature = (char *)&e->efi_loader_signature;
-+	if (strncmp(signature, EFI32_LOADER_SIGNATURE, 4) &&
-+	    strncmp(signature, EFI64_LOADER_SIGNATURE, 4))
-+		return false;
-+
-+#ifdef CONFIG_X86_32
-+	/* Can't handle data above 4GB at this time */
-+	if (e->efi_memmap_hi) {
-+		warn("EFI memmap is above 4GB, can't be handled now on x86_32. EFI should be disabled.\n");
-+		return false;
-+	}
-+	pmap =  e->efi_memmap;
-+#else
-+	pmap = (e->efi_memmap | ((__u64)e->efi_memmap_hi << 32));
-+#endif
-+
-+	nr_desc = e->efi_memmap_size / e->efi_memdesc_size;
-+	for (i = 0; i < nr_desc; i++) {
-+		md = efi_memdesc_ptr(pmap, e->efi_memdesc_size, i);
-+		if (md->attribute & EFI_MEMORY_MORE_RELIABLE) {
-+			region.start = md->phys_addr;
-+			region.size = md->num_pages << EFI_PAGE_SHIFT;
-+			process_mem_region(&region, minimum, image_size);
-+			efi_mirror_found = true;
-+
-+			if (slot_area_index == MAX_SLOT_AREA) {
-+				debug_putstr("Aborted EFI scan (slot_areas full)!\n");
-+				break;
-+			}
-+		}
-+	}
-+
-+	return efi_mirror_found;
-+}
-+#else
-+static inline bool
-+process_efi_entries(unsigned long minimum, unsigned long image_size)
-+{
-+	return false;
-+}
-+#endif
-+
- static void process_e820_entries(unsigned long minimum,
- 				 unsigned long image_size)
- {
-@@ -586,13 +647,16 @@ static unsigned long find_random_phys_addr(unsigned long minimum,
- {
- 	/* Check if we had too many memmaps. */
- 	if (memmap_too_large) {
--		debug_putstr("Aborted e820 scan (more than 4 memmap= args)!\n");
-+		debug_putstr("Aborted memory entries scan (more than 4 memmap= args)!\n");
- 		return 0;
- 	}
- 
- 	/* Make sure minimum is aligned. */
- 	minimum = ALIGN(minimum, CONFIG_PHYSICAL_ALIGN);
- 
-+	if (process_efi_entries(minimum, image_size))
-+		return slots_fetch_random();
-+
- 	process_e820_entries(minimum, image_size);
- 	return slots_fetch_random();
- }
-@@ -652,7 +716,7 @@ void choose_random_location(unsigned long input,
- 	 */
- 	min_addr = min(*output, 512UL << 20);
- 
--	/* Walk e820 and find a random address. */
-+	/* Walk available memory entries to find a random address. */
- 	random_addr = find_random_phys_addr(min_addr, output_size);
- 	if (!random_addr) {
- 		warn("Physical KASLR disabled: no suitable memory region!");
--- 
-2.5.5
+On 08/04/17 at 03:26pm, Baoquan He wrote:
+> Patch 1/2 is newly added to add efi_memdesc_ptr helper to wrap the
+> open code which gets the start of efi memmap descriptor and also
+> explain why it need be done like that, Ingo suggested it. 
+> 
+> And also replace several places of the open code with efi_memdesc_ptr
+> helper.
+> 
+> And also use efi_memdesc_ptr in process_efi_entries() which handle efi
+> mirror issue during KASLR.
+> 
+> 
+> Change:
+> v7->v8:
+>     Add efi_memdesc_ptr helper to wrap the open code which gets the
+>     start of map descriptor according to Ingo's suggestion.
+> 
+> v6->v7:
+>   Ingo pointed out several incorrect line break issues and unclear
+>   description of patch log. Correct them and rewrite patch log.
+> 
+>   And also rewrite the EFI warning message that if EFI memmap is above
+>   4G in 32bit system since 32bit system can not handle data above 4G at
+>   kernel decompression stage. This is suggested by Ingo too.
+> 
+> v5->v6:
+>   Code style issue fix according to Kees's comment.
+> 
+>   This is based on tip/x86/boot, patch 1,2,3/4 in v5 post has
+>   been put into tip/x86/boot now.
+> 
+> 
+> 
+> Baoquan He (2):
+>   efi: Introduce efi_memdesc_ptr to get pointer to memmap descriptor
+>   x86/boot/KASLR: Restrict kernel to be randomized in mirror regions
+> 
+>  arch/x86/boot/compressed/eboot.c               |  2 +-
+>  arch/x86/boot/compressed/kaslr.c               | 68 +++++++++++++++++++++++++-
+>  drivers/firmware/efi/libstub/efi-stub-helper.c |  4 +-
+>  include/linux/efi.h                            | 19 +++++++
+>  4 files changed, 88 insertions(+), 5 deletions(-)
+> 
+> -- 
+> 2.5.5
+> 
