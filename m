@@ -1,94 +1,60 @@
-From: Baoquan He <bhe@redhat.com>
-Subject: Re: [PATCH v8 0/2] x86/boot/KASLR: Restrict kernel to be randomized
- in mirror regions
-Date: Fri, 4 Aug 2017 18:43:33 +0800
-Message-ID: <20170804104333.GB29975@x1>
-References: <1501831607-6776-1-git-send-email-bhe@redhat.com>
- <20170804075228.GA29975@x1>
- <20170804092241.GH1874@x1>
- <20170804095911.GD32462@localhost.localdomain>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v6 RESEND] x86/boot/KASLR: Restrict kernel to be
+ randomized in mirror regions
+Date: Fri, 4 Aug 2017 12:23:25 +0100
+Message-ID: <20170804112325.GB8187@codeblueprint.co.uk>
+References: <1500542189-15779-1-git-send-email-bhe@redhat.com>
+ <20170721103757.hc74czr3mfunrv6c@gmail.com>
+ <20170721131956.GK2344@x1>
+ <20170724133410.GC11076@codeblueprint.co.uk>
+ <20170728095525.y4tuv6aavzfs4ekb@gmail.com>
+ <20170728112603.GS24304@x1>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20170804095911.GD32462@localhost.localdomain>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Cc: linux-kernel@vger.kernel.org, mingo@kernel.org, matt@codeblueprint.co.uk, keescook@chromium.org, tglx@linutronix.de, hpa@zytor.com, izumi.taku@jp.fujitsu.com, thgarnie@google.com, n-horiguchi@ah.jp.nec.com, ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, x86@kernel.org
+In-Reply-To: <20170728112603.GS24304@x1>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org, fanc.fnst-BthXqXjhjHXQFUHtdCDX3A@public.gmane.org, thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, n-horiguchi-PaJj6Psr51x8UrSeD/g0lQ@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 08/04/17 at 05:59pm, Chao Fan wrote:
-> On Fri, Aug 04, 2017 at 05:22:41PM +0800, Baoquan He wrote:
-> >On 08/04/17 at 03:52pm, Baoquan He wrote:
-> >> Sorry, NACK this series, there's error to hang system. Before I just
-> >> halt system intentionally with error() to check the efi memmap printing,
-> >> didn't notice this. Checking the cause.
-> >
-> >I rebuilt the code or change the one of the replacement back, hang never
-> >seen again. Not sure if I copied the wrong kernel or any other mistakes.
-> >Have got a hardware system with efi enabled to try again, see if
-> >anything wrong will happen. It's really weird. And Chao also is helping
-> >to try on his side.
+On Fri, 28 Jul, at 07:26:03PM, Baoquan He wrote:
+> Hi Matt,
 > 
-> Hi Bao,
+> On 07/28/17 at 11:55am, Ingo Molnar wrote:
+> > 
+> > * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> > 
+> > > On Fri, 21 Jul, at 09:19:56PM, Baoquan He wrote:
+> > > >
+> > > > There are places where the efi map is getting and used like this. E.g
+> > > > in efi_high_alloc() of drivers/firmware/efi/libstub/efi-stub-helper.c.
+> > > > EFI developers worry the size of efi_memory_desc_t could not be the same
+> > > > as e->efi_memdesc_size?
+> > > > 
+> > > > Hi Matt,
+> > > > 
+> > > > Could you help have a look at this?
+> > > 
+> > > You're exactly right. The code guards against the size of the
+> > > efi_memory_desc_t struct changing. The UEFI spec says to traverse the
+> > > memory map this way.
+> > 
+> > This is not obvious and looks pretty ugly as well, and open coded in several 
+> > places.
+> > 
+> > At minimum we should have an efi_memdesc_ptr(efi, i) wrapper inline (or so) that 
+> > gives us the entry pointer, plus a comment that points out that ->memdesc_size 
+> > might not be equal to sizeof(efi_memory_memdesc_t).
 > 
-> After testing for 10 times, no problem happened.
-> Maybe you did something wrong in the first time.
+> I can make a efi_memdesc_ptr(efi, i) wrapper as Ingo suggested and use
+> it here if you agree. Seems it might be not good to add another
+> for_each_efi_memory_desc_xxxx wrapper since there are different memmap
+> data structures in x86 boot and in general efi libstub. Or any other
+> idea?
 
-Thanks, Chao. I tried several times on a machine with efi enabled, no
-problem found.
-
-Sorry, guys, so it's a false alarm.
-
-> >
-> >> 
-> >> On 08/04/17 at 03:26pm, Baoquan He wrote:
-> >> > Patch 1/2 is newly added to add efi_memdesc_ptr helper to wrap the
-> >> > open code which gets the start of efi memmap descriptor and also
-> >> > explain why it need be done like that, Ingo suggested it. 
-> >> > 
-> >> > And also replace several places of the open code with efi_memdesc_ptr
-> >> > helper.
-> >> > 
-> >> > And also use efi_memdesc_ptr in process_efi_entries() which handle efi
-> >> > mirror issue during KASLR.
-> >> > 
-> >> > 
-> >> > Change:
-> >> > v7->v8:
-> >> >     Add efi_memdesc_ptr helper to wrap the open code which gets the
-> >> >     start of map descriptor according to Ingo's suggestion.
-> >> > 
-> >> > v6->v7:
-> >> >   Ingo pointed out several incorrect line break issues and unclear
-> >> >   description of patch log. Correct them and rewrite patch log.
-> >> > 
-> >> >   And also rewrite the EFI warning message that if EFI memmap is above
-> >> >   4G in 32bit system since 32bit system can not handle data above 4G at
-> >> >   kernel decompression stage. This is suggested by Ingo too.
-> >> > 
-> >> > v5->v6:
-> >> >   Code style issue fix according to Kees's comment.
-> >> > 
-> >> >   This is based on tip/x86/boot, patch 1,2,3/4 in v5 post has
-> >> >   been put into tip/x86/boot now.
-> >> > 
-> >> > 
-> >> > 
-> >> > Baoquan He (2):
-> >> >   efi: Introduce efi_memdesc_ptr to get pointer to memmap descriptor
-> >> >   x86/boot/KASLR: Restrict kernel to be randomized in mirror regions
-> >> > 
-> >> >  arch/x86/boot/compressed/eboot.c               |  2 +-
-> >> >  arch/x86/boot/compressed/kaslr.c               | 68 +++++++++++++++++++++++++-
-> >> >  drivers/firmware/efi/libstub/efi-stub-helper.c |  4 +-
-> >> >  include/linux/efi.h                            | 19 +++++++
-> >> >  4 files changed, 88 insertions(+), 5 deletions(-)
-> >> > 
-> >> > -- 
-> >> > 2.5.5
-> >> > 
-> >
-> >
-> 
-> 
+I think adding a wrapper is fine, but I'd suggest including the word
+"early" (or something similar) to explain that it should only be used
+during bootup -- we want everyone else to use the
+for_each_efi_memory_*() API.
