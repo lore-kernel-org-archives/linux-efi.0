@@ -1,97 +1,177 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH] x86/efi: page align EFI ROM image ranges
-Date: Fri, 4 Aug 2017 13:06:50 +0100
-Message-ID: <20170804120650.GE8187@codeblueprint.co.uk>
-References: <4a28637c-d5ff-95ed-5bee-2b1e465f2d79@gmail.com>
+From: Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] Enable reset attack mitigation
+Date: Fri,  4 Aug 2017 14:20:10 -0700
+Message-ID: <20170804212010.15064-1-mjg59@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4a28637c-d5ff-95ed-5bee-2b1e465f2d79@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stuart Hayes <stuart.w.hayes@gmail.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 02 Aug, at 11:41:38AM, Stuart Hayes wrote:
-> (Resend because I mistyped the maintainer's email address the first time.)
-> 
-> The kernel's EFI stub locates and copies EFI ROM images into memory,
-> which it allocates using the byte-granular EFI allocate_pool
-> function.  These memory ranges are then added to setup_data, and
-> later to e820 (in e820__reserve_setup_data()).  The e820 ranges are
-> parsed to create nosave regions (in
-> e820__register_nosave_regions()), but when non-page-aligned e820
-> regions are parsed, a nosave page is added at the beginning and end
-> of each non-page-aligned region, which results in data not getting
-> saved or restored during a hibernate/resume.  This can result in
-> random failures after a hibernate/resume.
->  
-> Round up the allocation size to a whole number of pages, and use EFI
-> allocate_pages to ensure that the EFI ROM copy regions are
-> page-aligned.
-> 
-> On a system with six EFI ROM images, before the patch:
-> 
-> e820: update [mem 0x64866020-0x6486e05f] usable ==> usable
-> e820: update [mem 0x6147a020-0x61499c5f] usable ==> usable
-> e820: update [mem 0x60fff020-0x6105785f] usable ==> usable
-> e820: update [mem 0x60fa6020-0x60ffe85f] usable ==> usable
-> e820: update [mem 0x60f4d020-0x60fa585f] usable ==> usable
-> e820: update [mem 0x60ef4020-0x60f4c85f] usable ==> usable
-> ...
-> PM: Registered nosave memory: [mem 0x00000000-0x00000fff]
-> PM: Registered nosave memory: [mem 0x000a0000-0x000fffff]
-> PM: Registered nosave memory: [mem 0x60ef4000-0x60ef4fff]
-> PM: Registered nosave memory: [mem 0x60f4c000-0x60f4cfff]
-> PM: Registered nosave memory: [mem 0x60f4d000-0x60f4dfff]
-> PM: Registered nosave memory: [mem 0x60fa5000-0x60fa5fff]
-> PM: Registered nosave memory: [mem 0x60fa6000-0x60fa6fff]
-> PM: Registered nosave memory: [mem 0x60ffe000-0x60ffefff]
-> PM: Registered nosave memory: [mem 0x60fff000-0x60ffffff]
-> PM: Registered nosave memory: [mem 0x61057000-0x61057fff]
-> PM: Registered nosave memory: [mem 0x6147a000-0x6147afff]
-> PM: Registered nosave memory: [mem 0x61499000-0x61499fff]
-> PM: Registered nosave memory: [mem 0x64866000-0x64866fff]
-> PM: Registered nosave memory: [mem 0x6486e000-0x6486efff]
-> PM: Registered nosave memory: [mem 0x6cf6e000-0x6f3ccfff]
-> 
-> After the patch:
-> 
-> e820: update [mem 0x64866000-0x6486efff] usable ==> usable
-> e820: update [mem 0x6147a000-0x61499fff] usable ==> usable
-> e820: update [mem 0x60fff000-0x61057fff] usable ==> usable
-> e820: update [mem 0x60fa6000-0x60ffefff] usable ==> usable
-> e820: update [mem 0x60f4d000-0x60fa5fff] usable ==> usable
-> e820: update [mem 0x60ef4000-0x60f4cfff] usable ==> usable
-> ...
-> PM: Registered nosave memory: [mem 0x00000000-0x00000fff]
-> PM: Registered nosave memory: [mem 0x000a0000-0x000fffff]
-> PM: Registered nosave memory: [mem 0x6cf6e000-0x6f3ccfff]
-> 
-> Signed-off-by: Stuart Hayes <stuart.w.hayes@gmail.com>
-> ---
-> 
-> --- linux-4.13-rc2/arch/x86/boot/compressed/eboot.c.orig	2017-08-01 12:12:04.696049106 -0400
-> +++ linux-4.13-rc2/arch/x86/boot/compressed/eboot.c	2017-08-01 12:11:33.120182236 -0400
-> @@ -235,7 +235,12 @@ __setup_efi_pci64(efi_pci_io_protocol_64
->  
->  	size = pci->romsize + sizeof(*rom);
->  
-> -	status = efi_call_early(allocate_pool, EFI_LOADER_DATA, size, &rom);
-> +	/*
-> +	 * Get whole pages because this will be added to e820.
-> +	 */
-> +	size = PAGE_ALIGN(size);
-> +	status = efi_call_early(allocate_pages, EFI_ALLOCATE_ANY_PAGES,
-> +				EFI_LOADER_DATA, (size >> PAGE_SHIFT), &rom);
->  	if (status != EFI_SUCCESS) {
->  		efi_printk(sys_table, "Failed to alloc mem for rom\n");
->  		return status;
->  
- 
-Nice catch. The comment could do with a little more information,
-including the fact that it's the e820 nosave code that expects
-page-aligned ROM regions.
+If a machine is reset while secrets are present in RAM, it may be
+possible for code executed after the reboot to extract those secrets
+from untouched memory. The Trusted Computing Group specified a mechanism
+for requesting that the firmware clear all RAM on reset before booting
+another OS. This is done by setting the MemoryOverwriteRequestControl
+variable at startup. If userspace can ensure that all secrets are
+removed as part of a controlled shutdown, it can reset this variable to
+0 before triggering a hardware reboot.
 
-Also, you'll need the same fix for __setup_efi_pci32().
+Signed-off-by: Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/boot/compressed/eboot.c        |  3 ++
+ drivers/firmware/efi/Kconfig            | 10 ++++++
+ drivers/firmware/efi/libstub/Makefile   |  1 +
+ drivers/firmware/efi/libstub/arm-stub.c |  3 ++
+ drivers/firmware/efi/libstub/tpm.c      | 58 +++++++++++++++++++++++++++++++++
+ include/linux/efi.h                     |  7 ++++
+ 6 files changed, 82 insertions(+)
+ create mode 100644 drivers/firmware/efi/libstub/tpm.c
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index c3e869eaef0c..a1686f3dc295 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -997,6 +997,9 @@ struct boot_params *efi_main(struct efi_config *c,
+ 	if (boot_params->secure_boot == efi_secureboot_mode_unset)
+ 		boot_params->secure_boot = efi_get_secureboot(sys_table);
+ 
++	/* Ask the firmware to clear memory on unclean shutdown */
++	efi_enable_reset_attack_mitigation(sys_table);
++
+ 	setup_graphics(boot_params);
+ 
+ 	setup_efi_pci(boot_params);
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 394db40ed374..2b4c39fdfa91 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -151,6 +151,16 @@ config APPLE_PROPERTIES
+ 
+ 	  If unsure, say Y if you have a Mac.  Otherwise N.
+ 
++config RESET_ATTACK_MITIGATION
++	bool "Reset memory attack mitigation"
++	depends on EFI_STUB
++	help
++	  Request that the firmware clear the contents of RAM after a reboot
++	  using the TCG Platform Reset Attack Mitigation specification. This
++	  protects against an attacker forcibly rebooting the system while it
++	  still contains secrets in RAM, booting another OS and extracting the
++	  secrets.
++
+ endmenu
+ 
+ config UEFI_CPER
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index 37e24f525162..4b20a5516929 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -30,6 +30,7 @@ OBJECT_FILES_NON_STANDARD	:= y
+ KCOV_INSTRUMENT			:= n
+ 
+ lib-y				:= efi-stub-helper.o gop.o secureboot.o
++lib-$(CONFIG_RESET_ATTACK_MITIGATION) += tpm.o
+ 
+ # include the stub's generic dependencies from lib/ when building for ARM/arm64
+ arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index 8181ac179d14..1cb2d1c070c3 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -192,6 +192,9 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 		goto fail_free_cmdline;
+ 	}
+ 
++	/* Ask the firmware to clear memory on unclean shutdown */
++	efi_enable_reset_attack_mitigation(sys_table);
++
+ 	secure_boot = efi_get_secureboot(sys_table);
+ 
+ 	/*
+diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
+new file mode 100644
+index 000000000000..45a12311adc3
+--- /dev/null
++++ b/drivers/firmware/efi/libstub/tpm.c
+@@ -0,0 +1,58 @@
++/*
++ * TPM handling.
++ *
++ * Copyright (C) 2016 CoreOS, Inc
++ * Copyright (C) 2017 Google, Inc.
++ *     Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
++ *
++ * This file is part of the Linux kernel, and is made available under the
++ * terms of the GNU General Public License version 2.
++ */
++#include <linux/efi.h>
++#include <asm/efi.h>
++
++#include "efistub.h"
++
++static const efi_char16_t efi_MemoryOverWriteRequest_name[] = {
++	'M', 'e', 'm', 'o', 'r', 'y', 'O', 'v', 'e', 'r', 'w', 'r', 'i', 't',
++	'e', 'R', 'e', 'q', 'u', 'e', 's', 't', 'C', 'o', 'n', 't', 'r', 'o',
++	'l', 0
++};
++
++#define MEMORY_ONLY_RESET_CONTROL_GUID \
++	EFI_GUID(0xe20939be, 0x32d4, 0x41be, 0xa1, 0x50, 0x89, 0x7f, 0x85, 0xd4, 0x98, 0x29)
++
++#define get_efi_var(name, vendor, ...) \
++	efi_call_runtime(get_variable, \
++			 (efi_char16_t *)(name), (efi_guid_t *)(vendor), \
++			 __VA_ARGS__)
++
++#define set_efi_var(name, vendor, ...) \
++	efi_call_runtime(set_variable, \
++			 (efi_char16_t *)(name), (efi_guid_t *)(vendor), \
++			 __VA_ARGS__)
++
++/*
++ * Enable reboot attack mitigation. This requests that the firmware clear the
++ * RAM on next reboot before proceeding with boot, ensuring that any secrets
++ * are cleared. If userland has ensured that all secrets have bene removed
++ * from RAM before reboot it can simply reset this variable.
++ */
++void efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg)
++{
++	u8 val = 1;
++	efi_guid_t var_guid = MEMORY_ONLY_RESET_CONTROL_GUID;
++	efi_status_t status;
++	unsigned long datasize = 0;
++
++	status = get_efi_var(efi_MemoryOverWriteRequest_name, &var_guid,
++			     NULL, &datasize, NULL);
++
++	if (status == EFI_NOT_FOUND)
++		return;
++
++	set_efi_var(efi_MemoryOverWriteRequest_name, &var_guid,
++		    EFI_VARIABLE_NON_VOLATILE |
++		    EFI_VARIABLE_BOOTSERVICE_ACCESS |
++		    EFI_VARIABLE_RUNTIME_ACCESS, sizeof(val), val);
++}
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 8269bcb8ccf7..12e05118657c 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1497,6 +1497,13 @@ enum efi_secureboot_mode {
+ };
+ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table);
+ 
++#ifdef CONFIG_RESET_ATTACK_MITIGATION
++void efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg);
++#else
++static inline void
++efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg) { }
++#endif
++
+ /*
+  * Arch code can implement the following three template macros, avoiding
+  * reptition for the void/non-void return cases of {__,}efi_call_virt():
+-- 
+2.14.0.rc1.383.gd1ce394fe2-goog
