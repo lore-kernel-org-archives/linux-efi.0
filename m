@@ -1,31 +1,61 @@
-From: Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] Enable reset attack mitigation
-Date: Sat, 5 Aug 2017 14:41:21 -0700
-Message-ID: <CACdnJuuT-LYsOcuiKUisMomicej-3Hk4-cgXziksj9B9V0xDMg@mail.gmail.com>
-References: <20170804212010.15064-1-mjg59@google.com> <CAKv+Gu-fe-dw-UXZxen4909b=QOF=_RP-V6GHZ8A4u=iVaaqpw@mail.gmail.com>
- <CACdnJuvCjWLxGfXY-6tytyTr-v8s0TZb_48J5Pju9p5OUuREuQ@mail.gmail.com> <20170805173410.GB8872@wunner.de>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [RFC Part1 PATCH v3 12/17] x86/mm: DMA support for SEV memory
+ encryption
+Date: Mon, 7 Aug 2017 05:48:20 +0200
+Message-ID: <20170807034820.GA7521@nazgul.tnic>
+References: <20170724190757.11278-1-brijesh.singh@amd.com>
+ <20170724190757.11278-13-brijesh.singh@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170805173410.GB8872-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170724190757.11278-13-brijesh.singh@amd.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Brijesh Singh <brijesh.singh@amd.com>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Tom Lendacky <thomas.lendacky@amd.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Aug 5, 2017 at 10:34 AM, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
-> Just an innocent question from a bystander, what's the downside of
-> unconditionally requesting that memory be overwritten?  Does it
-> prolong reboot noticeably?
+On Mon, Jul 24, 2017 at 02:07:52PM -0500, Brijesh Singh wrote:
+> From: Tom Lendacky <thomas.lendacky@amd.com>
+> 
+> DMA access to memory mapped as encrypted while SEV is active can not be
+> encrypted during device write or decrypted during device read.
 
-Yes, it's just to avoid stalling reboot for as long as it takes to clear RAM.
+Yeah, definitely rewrite that sentence.
 
-> I've also wondered why you've chosen to put this in a separate file
-> rather than the existing secureboot.c, my naive understanding is that
-> TPM and SecureBoot is related but I'm not an expert on this.  It would
-> allow you to reuse the existing get_efi_var() macro.
+> In order
+> for DMA to properly work when SEV is active, the SWIOTLB bounce buffers
+> must be used.
+> 
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+> ---
+>  arch/x86/mm/mem_encrypt.c | 86 +++++++++++++++++++++++++++++++++++++++++++++++
+>  lib/swiotlb.c             |  5 +--
+>  2 files changed, 89 insertions(+), 2 deletions
 
-It's not related to Secure Boot (systems can have TPMs but not Secure
-Boot, and vice versa), the spec is managed by a different body (TCG
-rather than UEFI), and there'll be more TPM-related code for the boot
-stub in future.
+...
+
+> @@ -202,6 +280,14 @@ void __init mem_encrypt_init(void)
+>  	/* Call into SWIOTLB to update the SWIOTLB DMA buffers */
+>  	swiotlb_update_mem_attributes();
+>  
+> +	/*
+> +	 * With SEV, DMA operations cannot use encryption. New DMA ops
+> +	 * are required in order to mark the DMA areas as decrypted or
+> +	 * to use bounce buffers.
+> +	 */
+> +	if (sev_active())
+> +		dma_ops = &sme_dma_ops;
+
+Well, we do differentiate between SME and SEV and the check is
+sev_active but the ops are called sme_dma_ops. Call them sev_dma_ops
+instead for less confusion.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
