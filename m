@@ -1,61 +1,56 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [RFC Part1 PATCH v3 12/17] x86/mm: DMA support for SEV memory
- encryption
-Date: Mon, 7 Aug 2017 05:48:20 +0200
-Message-ID: <20170807034820.GA7521@nazgul.tnic>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC Part1 PATCH v3 02/17] x86/CPU/AMD: Add the Secure Encrypted
+ Virtualization CPU feature
+Date: Wed, 9 Aug 2017 13:17:54 -0500
+Message-ID: <b2aedd44-ebbc-b196-31d0-0b423f4fa632@amd.com>
 References: <20170724190757.11278-1-brijesh.singh@amd.com>
- <20170724190757.11278-13-brijesh.singh@amd.com>
+ <20170724190757.11278-3-brijesh.singh@amd.com>
+ <20170725102657.GD21822@nazgul.tnic>
+ <7236d267-ebcb-8b45-b8d3-5955903e395f@amd.com>
+ <20170725143615.GA26029@nazgul.tnic>
+ <47ccc32e-e113-48e0-d2e0-2f23b37cc452@amd.com>
+ <20170725151301.GC26029@nazgul.tnic>
+ <d6fdba78-034b-d9e2-15ae-00547821a855@amd.com>
+ <20170725153329.GE26029@nazgul.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170724190757.11278-13-brijesh.singh@amd.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Brijesh Singh <brijesh.singh@amd.com>
-Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Tom Lendacky <thomas.lendacky@amd.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <20170725153329.GE26029@nazgul.tnic>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Borislav Petkov <bp@suse.de>
+Cc: linux-efi@vger.kernel.org, Brijesh Singh <brijesh.singh@amd.com>, kvm@vger.kernel.org, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Paul Mackerras <paulus@samba.org>, "H . Peter Anvin" <hpa@zytor.com>, Christoph Lameter <cl@linux.com>, Jonathan Corbet <corbet@lwn.net>, x86@kernel.org, Piotr Luc <piotr.luc@intel.com>, Ingo Molnar <mingo@redhat.com>, Dave Airlie <airlied@redhat.com>, Laura Abbott <labbott@redhat.com>, Fenghua Yu <fenghua.yu@intel.com>, Kees Cook <keescook@chromium.org>, Arnd Bergmann <arnd@arndb.de>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, Andy Lutomirski <luto@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Tony Luck <tony.luck@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Eric
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jul 24, 2017 at 02:07:52PM -0500, Brijesh Singh wrote:
-> From: Tom Lendacky <thomas.lendacky@amd.com>
+On 7/25/2017 10:33 AM, Borislav Petkov wrote:
+> On Tue, Jul 25, 2017 at 10:29:40AM -0500, Tom Lendacky wrote:
+>> But early_identify_cpu() calls get_cpu_cap() which will check for cpuid
+>> leaf 0x80000008 support and set x86_phys_bits.
 > 
-> DMA access to memory mapped as encrypted while SEV is active can not be
-> encrypted during device write or decrypted during device read.
-
-Yeah, definitely rewrite that sentence.
-
-> In order
-> for DMA to properly work when SEV is active, the SWIOTLB bounce buffers
-> must be used.
+> Right, but it can't be less than 32, can it? And if it is more than 32
+> bits, then it probably doesn't really matter on 32-bit. Unless it is
+> less than 36 bits and you do PAE...
 > 
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
-> ---
->  arch/x86/mm/mem_encrypt.c | 86 +++++++++++++++++++++++++++++++++++++++++++++++
->  lib/swiotlb.c             |  5 +--
->  2 files changed, 89 insertions(+), 2 deletions
+>> I'll try to build and run a 32-bit kernel and see how this all flows.
+> 
+> Yeah, that would be good.
 
-...
+Ok, finally got around to running a 32-bit kernel and it reports
+x86_phys_bits as 48.
 
-> @@ -202,6 +280,14 @@ void __init mem_encrypt_init(void)
->  	/* Call into SWIOTLB to update the SWIOTLB DMA buffers */
->  	swiotlb_update_mem_attributes();
->  
-> +	/*
-> +	 * With SEV, DMA operations cannot use encryption. New DMA ops
-> +	 * are required in order to mark the DMA areas as decrypted or
-> +	 * to use bounce buffers.
-> +	 */
-> +	if (sev_active())
-> +		dma_ops = &sme_dma_ops;
+Thanks,
+Tom
 
-Well, we do differentiate between SME and SEV and the check is
-sev_active but the ops are called sme_dma_ops. Call them sev_dma_ops
-instead for less confusion.
-
--- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+> 
+> Thanks.
+> 
