@@ -1,105 +1,111 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH 3/3] x86/efi: Use efi_switch_mm() rather than manually
- twiddling with cr3
-Date: Wed, 16 Aug 2017 12:03:22 +0100
-Message-ID: <20170816110321.GC17270@leverpostej>
-References: <1502824706-30762-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1502824706-30762-4-git-send-email-sai.praneeth.prakhya@intel.com>
- <CALCETrUnT0YL_F3mXyJzi=NE5jvFUUQbwjdK5224zDKkTts-UQ@mail.gmail.com>
- <CAKv+Gu8AySQSXtRWfHA4y5DbH-DQ7jpqkp=tS+snSTar_sKBJw@mail.gmail.com>
- <20170816095338.GB17270@leverpostej>
- <20170816100709.GG12845@arm.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v9 1/2] efi: Introduce efi_early_memdesc_ptr to get
+ pointer to memmap descriptor
+Date: Wed, 16 Aug 2017 12:37:26 +0100
+Message-ID: <20170816113726.GA3384@codeblueprint.co.uk>
+References: <1502722464-20614-1-git-send-email-bhe@redhat.com>
+ <1502722464-20614-2-git-send-email-bhe@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20170816100709.GG12845@arm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Will Deacon <will.deacon@arm.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirski <luto@kernel.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Peter Zijlstra <peterz@infradead.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, joeyli <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Michael S. Tsirkin" <mst@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Ravi V. Shankar" <ravi.v.shankar@intel.com>
+In-Reply-To: <1502722464-20614-2-git-send-email-bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org, fanc.fnst-BthXqXjhjHXQFUHtdCDX3A@public.gmane.org, thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, n-horiguchi-PaJj6Psr51x8UrSeD/g0lQ@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 16, 2017 at 11:07:10AM +0100, Will Deacon wrote:
-> On Wed, Aug 16, 2017 at 10:53:38AM +0100, Mark Rutland wrote:
-> > On Wed, Aug 16, 2017 at 10:31:12AM +0100, Ard Biesheuvel wrote:
-> > > (+ Mark, Will)
-> > > 
-> > > On 15 August 2017 at 22:46, Andy Lutomirski <luto@kernel.org> wrote:
-> > > > On Tue, Aug 15, 2017 at 12:18 PM, Sai Praneeth Prakhya
-> > > > <sai.praneeth.prakhya@intel.com> wrote:
-> > > >> +/*
-> > > >> + * Makes the calling kernel thread switch to/from efi_mm context
-> > > >> + * Can be used from SetVirtualAddressMap() or during efi runtime calls
-> > > >> + * (Note: This routine is heavily inspired from use_mm)
-> > > >> + */
-> > > >> +void efi_switch_mm(struct mm_struct *mm)
-> > > >> +{
-> > > >> +       struct task_struct *tsk = current;
-> > > >> +
-> > > >> +       task_lock(tsk);
-> > > >> +       efi_scratch.prev_mm = tsk->active_mm;
-> > > >> +       if (efi_scratch.prev_mm != mm) {
-> > > >> +               mmgrab(mm);
-> > > >> +               tsk->active_mm = mm;
-> > > >> +       }
-> > > >> +       switch_mm(efi_scratch.prev_mm, mm, NULL);
-> > > >> +       task_unlock(tsk);
-> > > >> +
-> > > >> +       if (efi_scratch.prev_mm != mm)
-> > > >> +               mmdrop(efi_scratch.prev_mm);
-> > > >
-> > > > I'm confused.  You're mmdropping an mm that you are still keeping a
-> > > > pointer to.  This is also a bit confusing in the case where you do
-> > > > efi_switch_mm(efi_scratch.prev_mm).
-> > > >
-> > > > This whole manipulation seems fairly dangerous to me for another
-> > > > reason -- you're taking a user thread (I think) and swapping out its
-> > > > mm to something that the user in question should *not* have access to.
-> > > > What if a perf interrupt happens while you're in the alternate mm?
-> > > > What if you segfault and dump core?  Should we maybe just have a flag
-> > > > that says "this cpu is using a funny mm", assert that the flag is
-> > > > clear when scheduling, and teach perf, coredumps, etc not to touch
-> > > > user memory when the flag is set?
-> > > 
-> > > It appears we may have introduced this exact issue on arm64 and ARM by
-> > > starting to run the UEFI runtime services with interrupts enabled.
-> > > (perf does not use NMI on ARM, so the issue did not exist beforehand)
-> > > 
-> > > Mark, Will, any thoughts?
-> > 
-> > Yup, I can cause perf to take samples from the EFI FW code, so that's
-> > less than ideal.
+On Mon, 14 Aug, at 10:54:23PM, Baoquan He wrote:
+> The existing map iteration helper for_each_efi_memory_desc_in_map can
+> only be used after OS initializes EFI to fill data of struct efi_memory_map.
+
+Should this say "EFI subsystem"? The firmware doesn't care about the
+kernel's internal data structures.
+
+> Before that we also need iterate map descriptors which are stored in several
+> intermediate structures, like struct efi_boot_memmap for arch independent
+> usage and struct efi_info for x86 arch only.
 > 
-> But that should only happen if you're profiling EL1, right, which needs
-> root privileges? (assuming the skid issue is solved -- not sure what
-> happened to those patches after they broke criu).
-
-I *think* that only needs perf_event_paranoid < 1, rather than root.
-
-It's certianly not accessible by default to most users (e.g. my Ubuntu
-fs sets this to 2, and IIRC Debian go to a much more stringent
-non-upstream paranoid level).
- 
-> > The "funny mm" flag sounds like a good idea to me, though given recent
-> > pain with sampling in the case of skid, I don't know exactly what we
-> > should do if/when we take an overflow interrupt while in EFI.
+> Introduce efi_early_memdesc_ptr to get pointer to a map descriptor, and
+> replace several places of open code with it.
 > 
-> I don't think special-casing perf interrupts is the right thing to do here.
-> If we're concerned about user-accesses being made off the back of interrupts
-> taken whilst in EFI, then we should probably either swizzle back in the
-> user page table on the IRQ path or postpone handling it until we're done
-> with the firmware.
+> Suggested-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  arch/x86/boot/compressed/eboot.c               |  2 +-
+>  drivers/firmware/efi/libstub/efi-stub-helper.c |  4 ++--
+>  include/linux/efi.h                            | 21 +++++++++++++++++++++
+>  3 files changed, 24 insertions(+), 3 deletions(-)
+> 
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> index c3e869eaef0c..e007887a33b0 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -767,7 +767,7 @@ static efi_status_t setup_e820(struct boot_params *params,
+>  		m |= (u64)efi->efi_memmap_hi << 32;
+>  #endif
+>  
+> -		d = (efi_memory_desc_t *)(m + (i * efi->efi_memdesc_size));
+> +		d = efi_early_memdesc_ptr(m, efi->efi_memdesc_size, i);
+>  		switch (d->type) {
+>  		case EFI_RESERVED_TYPE:
+>  		case EFI_RUNTIME_SERVICES_CODE:
+> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> index b0184360efc6..50a9cab5a834 100644
+> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
+> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> @@ -205,7 +205,7 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+>  		unsigned long m = (unsigned long)map;
+>  		u64 start, end;
+>  
+> -		desc = (efi_memory_desc_t *)(m + (i * desc_size));
+> +		desc = efi_early_memdesc_ptr(m, desc_size, i);
+>  		if (desc->type != EFI_CONVENTIONAL_MEMORY)
+>  			continue;
+>  
+> @@ -298,7 +298,7 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+>  		unsigned long m = (unsigned long)map;
+>  		u64 start, end;
+>  
+> -		desc = (efi_memory_desc_t *)(m + (i * desc_size));
+> +		desc = efi_early_memdesc_ptr(m, desc_size, i);
+>  
+>  		if (desc->type != EFI_CONVENTIONAL_MEMORY)
+>  			continue;
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 8269bcb8ccf7..9783d9e4a4b2 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -1020,6 +1020,27 @@ extern int efi_memattr_init(void);
+>  extern int efi_memattr_apply_permissions(struct mm_struct *mm,
+>  					 efi_memattr_perm_setter fn);
+>  
+> +/*
+> + * efi_early_memdesc_ptr - get the n-th efi memmap descriptor
+> + * @map: the start of efi memmap
+> + * @desc_size: the size of space for each efi memmap descriptor
+> + * @n: the index of efi memmap descriptor
+> + *
+> + * EFI boot service provides function GetMemoryMap() to get a copy of the
+> + * current memory map which is an array of memory descriptors, each of
+> + * which describes a contiguous block of memory. And also get the size of
+> + * map, and the size of each descriptor, etc. Note that per section 6.2 of
+> + * UEFI Spec 2.6 Errata A, the returned size of each descriptor might not
+> + * be equal to sizeof(efi_memory_memdesc_t) since efi_memory_memdesc_t may
+> + * be extended in the future in response to hardware innovation. Thus OS
+> + * MUST use the returned size of descriptor to find the start of each
+> + * efi_memory_memdesc_t in the memory map array. This should only be used
+> + * during bootup since for_each_efi_memory_desc_xxx is suggested after OS
+> + * initializes EFI to fill data of struct efi_memory_map.
+> + */
 
-Doing that for every IRQ feels odd, especially as the result would be
-sampling something that wasn't executed, potentially repeatedly, giveing
-bogus info.
+Again, please use "EFI subsystem" here.
 
-> Having a flag feels a bit weird: would the uaccess routines return
-> -EFAULT if it's set?
+> +#define efi_early_memdesc_ptr(map, desc_size, n)			\
+> +	(efi_memory_desc_t *)((void *)(map) + ((n) * (desc_size)))
+> +
+>  /* Iterate through an efi_memory_map */
+>  #define for_each_efi_memory_desc_in_map(m, md)				   \
+>  	for ((md) = (m)->map;						   \
 
-I'd expect we'd abort at a higher level, not taking any sample. i.e.
-we'd have the core overflow handler check in_funny_mm(), and if so, skip
-the sample, as with the skid case.
-
-Thanks,
-Mark.
+Otherwise, this looks OK to me.
