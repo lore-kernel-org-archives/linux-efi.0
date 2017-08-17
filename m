@@ -1,57 +1,38 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH 3/3] x86/efi: Use efi_switch_mm() rather than manually
- twiddling with cr3
-Date: Tue, 15 Aug 2017 23:35:41 +0100
-Message-ID: <20170815223541.GA25778@remoulade>
-References: <1502824706-30762-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1502824706-30762-4-git-send-email-sai.praneeth.prakhya@intel.com>
- <CALCETrUnT0YL_F3mXyJzi=NE5jvFUUQbwjdK5224zDKkTts-UQ@mail.gmail.com>
- <CAKv+Gu8AySQSXtRWfHA4y5DbH-DQ7jpqkp=tS+snSTar_sKBJw@mail.gmail.com>
- <20170816095338.GB17270@leverpostej>
- <20170816100709.GG12845@arm.com>
- <20170816110321.GC17270@leverpostej>
- <20170816125715.GB3384@codeblueprint.co.uk>
- <CALCETrVSHuz=hcAgGxYHBmpiNcP4ECrJh885cR4X17QsJVj8+w@mail.gmail.com>
+From: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v5 0/2] Add EFI capsule pstore backend support
+Date: Thu, 17 Aug 2017 02:29:55 +0000
+Message-ID: <E6AF1AFDEA62A94A97508F458CBDD47F6F5B7613@SHSMSX101.ccr.corp.intel.com>
+References: <20170626153859.36880-1-qiuxu.zhuo@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CALCETrVSHuz=hcAgGxYHBmpiNcP4ECrJh885cR4X17QsJVj8+w@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Lutomirski <luto@kernel.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Will Deacon <will.deacon@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Peter Zijlstra <peterz@infradead.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, joeyli <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Michael S. Tsirkin" <mst@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Ravi V. Shankar" <ravi.v.shankar@intel.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170626153859.36880-1-qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org" <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 16, 2017 at 09:14:41AM -0700, Andy Lutomirski wrote:
-> On Wed, Aug 16, 2017 at 5:57 AM, Matt Fleming <matt@codeblueprint.co.uk> wrote:
-> > On Wed, 16 Aug, at 12:03:22PM, Mark Rutland wrote:
-> >>
-> >> I'd expect we'd abort at a higher level, not taking any sample. i.e.
-> >> we'd have the core overflow handler check in_funny_mm(), and if so, skip
-> >> the sample, as with the skid case.
-> >
-> > FYI, this is my preferred solution for x86 too.
-> 
-> One option for the "funny mm" flag would be literally the condition
-> current->mm != current->active_mm.  I *think* this gets all the cases
-> right as long as efi_switch_mm is careful with its ordering and that
-> the arch switch_mm() code can handle the resulting ordering.  (x86's
-> can now, I think, or at least will be able to in 4.14 -- not sure
-> about other arches).
-
-For arm64 we'd have to rework things a bit to get the ordering right
-(especially when we flip to/from the idmap), but otherwise this sounds sane to
-me.
-
-> That being said, there's a totally different solution: run EFI
-> callbacks in a kernel thread.  This has other benefits: we could run
-> those callbacks in user mode some day, and doing *that* in a user
-> thread seems like a mistake.
-
-I think that wouldn't work for CPU-bound perf events (which are not
-ctx-switched with the task).
-
-It might be desireable to do that anyway, though.
-
-Thanks,
-Mark.
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBaaHVvLCBRaXV4dQ0KPiBTZW50
+OiBNb25kYXksIEp1bmUgMjYsIDIwMTcgMTE6MzkgUE0NCj4gVG86IG1hdHRAY29kZWJsdWVwcmlu
+dC5jby51azsgYXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZzsNCj4ga2Vlc2Nvb2tAY2hyb21pdW0u
+b3JnDQo+IENjOiBMdWNrLCBUb255IDx0b255Lmx1Y2tAaW50ZWwuY29tPjsgbGludXgtZWZpQHZn
+ZXIua2VybmVsLm9yZzsgWmh1bywgUWl1eHUNCj4gPHFpdXh1LnpodW9AaW50ZWwuY29tPg0KPiBT
+dWJqZWN0OiBbUEFUQ0ggdjUgMC8yXSBBZGQgRUZJIGNhcHN1bGUgcHN0b3JlIGJhY2tlbmQgc3Vw
+cG9ydA0KPiANCj4gQ2hhbmdlIExvZyB2NC0+djU6DQo+ICAtIDAwMDEgcGF0Y2g6IE5vIGNoYW5n
+ZS4NCj4gIC0gMDAwMiBwYXRjaDogRml4IHVwIGFsbCAibGluZSBvdmVyIDgwIGNoYXJhY3RlcnMi
+IHdhcm5pbmdzIHJlcG9ydGVkIGJ5DQo+IGNoZWNrcGF0Y2gucGwgdG9vbC4NCj4gDQo+IFFpdXh1
+IFpodW8gKDIpOg0KPiAgIGVmaTogQWRkICducl9jb25maWdfdGFibGUnIHZhcmlhYmxlIGluIGVm
+aSBzdHJ1Y3R1cmUNCj4gICBlaWYvY2Fwc3VsZS1wc3RvcmU6IEFkZCBjYXBzdWxlIHBzdG9yZSBi
+YWNrZW5kDQo+IA0KPiAgYXJjaC94ODYvcGxhdGZvcm0vZWZpL2VmaS5jICAgICAgICAgICB8ICAg
+MSArDQo+ICBkcml2ZXJzL2Zpcm13YXJlL2VmaS9LY29uZmlnICAgICAgICAgIHwgIDIxICsNCj4g
+IGRyaXZlcnMvZmlybXdhcmUvZWZpL01ha2VmaWxlICAgICAgICAgfCAgIDEgKw0KPiAgZHJpdmVy
+cy9maXJtd2FyZS9lZmkvYXJtLWluaXQuYyAgICAgICB8ICAgNCArLQ0KPiAgZHJpdmVycy9maXJt
+d2FyZS9lZmkvY2Fwc3VsZS1wc3RvcmUuYyB8IDY5OA0KPiArKysrKysrKysrKysrKysrKysrKysr
+KysrKysrKysrKysrDQo+ICBkcml2ZXJzL2Zpcm13YXJlL2VmaS9lZmkuYyAgICAgICAgICAgIHwg
+ICAxICsNCj4gIGluY2x1ZGUvbGludXgvZWZpLmggICAgICAgICAgICAgICAgICAgfCAgIDEgKw0K
+PiAgNyBmaWxlcyBjaGFuZ2VkLCA3MjYgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbigtKSAgY3Jl
+YXRlIG1vZGUgMTAwNjQ0DQo+IGRyaXZlcnMvZmlybXdhcmUvZWZpL2NhcHN1bGUtcHN0b3JlLmMN
+Cj4gDQoNCkhpIEFyZCwNCiAgICBEbyB5b3UgaGF2ZSBzb21lIHVwZGF0ZXM/IElmIGFueSBxdWVz
+dGlvbiBwbGVhc2UgbGV0IG1lIGtub3cuDQogICAgVGhhbmtzIQ0KDQpRaXV4dQ0KDQo=
