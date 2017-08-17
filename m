@@ -1,73 +1,108 @@
-From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: [RFC Part1 PATCH v3 07/17] x86/mm: Include SEV for encryption
- memory attribute changes
-Date: Thu, 17 Aug 2017 13:21:39 -0500
-Message-ID: <786b615a-941c-ae83-e02b-01ece58af5b3@amd.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC Part1 PATCH v3 08/17] x86/efi: Access EFI data as encrypted
+ when SEV is active
+Date: Thu, 17 Aug 2017 13:42:04 -0500
+Message-ID: <9b56cea1-3338-8d75-e7ff-ecfa06046630@amd.com>
 References: <20170724190757.11278-1-brijesh.singh@amd.com>
- <20170724190757.11278-8-brijesh.singh@amd.com>
- <20170727145841.GG28553@nazgul.tnic>
- <063D6719AE5E284EB5DD2968C1650D6DD0045508@AcuExch.aculab.com>
+ <20170724190757.11278-9-brijesh.singh@amd.com>
+ <20170728103152.GE1889@nazgul.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <063D6719AE5E284EB5DD2968C1650D6DD0045508-VkEWCZq2GCInGFn1LkZF6NBPR1lH4CV8@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170728103152.GE1889@nazgul.tnic>
 Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Laight <David.Laight-ZS65k/vG3HxXrIkS9f7CXA@public.gmane.org>, 'Borislav Petkov' <bp-l3A5Bk7waGM@public.gmane.org>, Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, =?UTF-8?Q?Radim_Krcm=c3=a1r?= <rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Paul Mackerras <paulus-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Christoph Lameter <cl-vYTEC60ixJUAvxtiuMwx3w@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Piotr Luc <piotr.luc-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Airlie <airlied-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Reza Arbab <arbab-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, Andy Lutomirski <luto@ker>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Borislav Petkov <bp@suse.de>, Brijesh Singh <brijesh.singh@amd.com>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric Biederman <ebiederm@xmission.com>, Benjamin
 List-Id: linux-efi@vger.kernel.org
 
-On 7/28/2017 3:47 AM, David Laight wrote:
-> From: Borislav Petkov
->> Sent: 27 July 2017 15:59
->> On Mon, Jul 24, 2017 at 02:07:47PM -0500, Brijesh Singh wrote:
->>> From: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
->>>
->>> The current code checks only for sme_active() when determining whether
->>> to perform the encryption attribute change.  Include sev_active() in this
->>> check so that memory attribute changes can occur under SME and SEV.
->>>
->>> Signed-off-by: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
->>> Signed-off-by: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
->>> ---
->>>   arch/x86/mm/pageattr.c | 4 ++--
->>>   1 file changed, 2 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
->>> index dfb7d65..b726b23 100644
->>> --- a/arch/x86/mm/pageattr.c
->>> +++ b/arch/x86/mm/pageattr.c
->>> @@ -1781,8 +1781,8 @@ static int __set_memory_enc_dec(unsigned long addr, int numpages, bool enc)
->>>   	unsigned long start;
->>>   	int ret;
->>>
->>> -	/* Nothing to do if the SME is not active */
->>> -	if (!sme_active())
->>> +	/* Nothing to do if SME and SEV are not active */
->>> +	if (!sme_active() && !sev_active())
+On 7/28/2017 5:31 AM, Borislav Petkov wrote:
+> On Mon, Jul 24, 2017 at 02:07:48PM -0500, Brijesh Singh wrote:
+>> From: Tom Lendacky <thomas.lendacky@amd.com>
 >>
->> This is the second place which does
+>> EFI data is encrypted when the kernel is run under SEV. Update the
+>> page table references to be sure the EFI memory areas are accessed
+>> encrypted.
 >>
->> 	if (!SME && !SEV)
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+>> ---
+>>   arch/x86/platform/efi/efi_64.c | 15 ++++++++++++++-
+>>   1 file changed, 14 insertions(+), 1 deletion(-)
 >>
->> I wonder if, instead of sprinking those, we should have a
->>
->> 	if (mem_enc_active())
->>
->> or so which unifies all those memory encryption logic tests and makes
->> the code more straightforward for readers who don't have to pay
->> attention to SME vs SEV ...
+>> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+>> index 12e8388..1ecb3f6 100644
+>> --- a/arch/x86/platform/efi/efi_64.c
+>> +++ b/arch/x86/platform/efi/efi_64.c
+>> @@ -32,6 +32,7 @@
+>>   #include <linux/reboot.h>
+>>   #include <linux/slab.h>
+>>   #include <linux/ucs2_string.h>
+>> +#include <linux/mem_encrypt.h>
+>>   
+>>   #include <asm/setup.h>
+>>   #include <asm/page.h>
+>> @@ -369,7 +370,10 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+>>   	 * as trim_bios_range() will reserve the first page and isolate it away
+>>   	 * from memory allocators anyway.
+>>   	 */
+>> -	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, _PAGE_RW)) {
+>> +	pf = _PAGE_RW;
+>> +	if (sev_active())
+>> +		pf |= _PAGE_ENC;
 > 
-> If any of the code paths are 'hot' it would make sense to be checking
-> a single memory location.
+> \n here
+> 
+>> +	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, pf)) {
+>>   		pr_err("Failed to create 1:1 mapping for the first page!\n");
+>>   		return 1;
+>>   	}
+>> @@ -412,6 +416,9 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+>>   	if (!(md->attribute & EFI_MEMORY_WB))
+>>   		flags |= _PAGE_PCD;
+>>   
+>> +	if (sev_active())
+>> +		flags |= _PAGE_ENC;
+>> +
+>>   	pfn = md->phys_addr >> PAGE_SHIFT;
+>>   	if (kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags))
+>>   		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
+>> @@ -511,6 +518,9 @@ static int __init efi_update_mappings(efi_memory_desc_t *md, unsigned long pf)
+>>   	pgd_t *pgd = efi_pgd;
+>>   	int err1, err2;
+>>   
+>> +	if (sev_active())
+>> +		pf |= _PAGE_ENC;
+> 
+> Move this assignment to the caller efi_update_mem_attr() where pf is being
+> set...
 
-The function would check a single variable/memory location and making it
-an inline function would accomplish that.
+Will do.
+
+> 
+>> +
+>>   	/* Update the 1:1 mapping */
+>>   	pfn = md->phys_addr >> PAGE_SHIFT;
+>>   	err1 = kernel_map_pages_in_pgd(pgd, pfn, md->phys_addr, md->num_pages, pf);
+>> @@ -589,6 +599,9 @@ void __init efi_runtime_update_mappings(void)
+>>   			(md->type != EFI_RUNTIME_SERVICES_CODE))
+>>   			pf |= _PAGE_RW;
+>>   
+>> +		if (sev_active())
+>> +			pf |= _PAGE_ENC;
+> 
+> ... just like here.
+
+Yup.
 
 Thanks,
 Tom
 
 > 
-> 	David
+>> +
+>>   		efi_update_mappings(md, pf);
+> 
+> In general, I'm not totally excited about that sprinkling of if
+> (sev_active())... :-\
 > 
