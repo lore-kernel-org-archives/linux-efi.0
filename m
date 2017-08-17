@@ -1,116 +1,66 @@
 From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [RFC Part1 PATCH v3 06/17] x86/mm: Use encrypted access of boot
- related data with SEV
-Date: Thu, 17 Aug 2017 13:05:38 -0500
-Message-ID: <8b2c75e2-6ed9-ed7d-ff62-39df8aedc12c@amd.com>
+Subject: Re: [RFC Part1 PATCH v3 07/17] x86/mm: Include SEV for encryption
+ memory attribute changes
+Date: Thu, 17 Aug 2017 13:10:45 -0500
+Message-ID: <a1daf0f5-57cb-d9c3-79f7-3d4852c35974@amd.com>
 References: <20170724190757.11278-1-brijesh.singh@amd.com>
- <20170724190757.11278-7-brijesh.singh@amd.com>
- <20170727133125.GB28553@nazgul.tnic>
+ <20170724190757.11278-8-brijesh.singh@amd.com>
+ <20170727145841.GG28553@nazgul.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170727133125.GB28553@nazgul.tnic>
+In-Reply-To: <20170727145841.GG28553@nazgul.tnic>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Borislav Petkov <bp@suse.de>, Brijesh Singh <brijesh.singh@amd.com>
 Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric Biederman <ebiederm@xmission.com>, Benjamin
 List-Id: linux-efi@vger.kernel.org
 
-On 7/27/2017 8:31 AM, Borislav Petkov wrote:
-> On Mon, Jul 24, 2017 at 02:07:46PM -0500, Brijesh Singh wrote:
+On 7/27/2017 9:58 AM, Borislav Petkov wrote:
+> On Mon, Jul 24, 2017 at 02:07:47PM -0500, Brijesh Singh wrote:
 >> From: Tom Lendacky <thomas.lendacky@amd.com>
 >>
->> When Secure Encrypted Virtualization (SEV) is active, boot data (such as
->> EFI related data, setup data) is encrypted and needs to be accessed as
->> such when mapped. Update the architecture override in early_memremap to
->> keep the encryption attribute when mapping this data.
+>> The current code checks only for sme_active() when determining whether
+>> to perform the encryption attribute change.  Include sev_active() in this
+>> check so that memory attribute changes can occur under SME and SEV.
 >>
 >> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 >> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 >> ---
->>   arch/x86/mm/ioremap.c | 44 ++++++++++++++++++++++++++++++++------------
->>   1 file changed, 32 insertions(+), 12 deletions(-)
-> 
-> ...
-> 
->> @@ -590,10 +598,15 @@ bool arch_memremap_can_ram_remap(resource_size_t phys_addr, unsigned long size,
->>   	if (flags & MEMREMAP_DEC)
->>   		return false;
+>>   arch/x86/mm/pageattr.c | 4 ++--
+>>   1 file changed, 2 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+>> index dfb7d65..b726b23 100644
+>> --- a/arch/x86/mm/pageattr.c
+>> +++ b/arch/x86/mm/pageattr.c
+>> @@ -1781,8 +1781,8 @@ static int __set_memory_enc_dec(unsigned long addr, int numpages, bool enc)
+>>   	unsigned long start;
+>>   	int ret;
 >>   
->> -	if (memremap_is_setup_data(phys_addr, size) ||
->> -	    memremap_is_efi_data(phys_addr, size) ||
->> -	    memremap_should_map_decrypted(phys_addr, size))
->> -		return false;
->> +	if (sme_active()) {
->> +		if (memremap_is_setup_data(phys_addr, size) ||
->> +		    memremap_is_efi_data(phys_addr, size) ||
->> +		    memremap_should_map_decrypted(phys_addr, size))
->> +			return false;
->> +	} else if (sev_active()) {
->> +		if (memremap_should_map_decrypted(phys_addr, size))
->> +			return false;
->> +	}
->>   
->>   	return true;
->>   }
-> 
-> I guess this function's hind part can be simplified to:
-> 
->          if (sme_active()) {
->                  if (memremap_is_setup_data(phys_addr, size) ||
->                      memremap_is_efi_data(phys_addr, size))
->                          return false;
->          }
-> 
->          return ! memremap_should_map_decrypted(phys_addr, size);
-> }
-> 
-
-Ok, definitely cleaner.
-
->> @@ -608,15 +621,22 @@ pgprot_t __init early_memremap_pgprot_adjust(resource_size_t phys_addr,
->>   					     unsigned long size,
->>   					     pgprot_t prot)
-> 
-> And this one in a similar manner...
-> 
->>   {
+>> -	/* Nothing to do if the SME is not active */
 >> -	if (!sme_active())
+>> +	/* Nothing to do if SME and SEV are not active */
 >> +	if (!sme_active() && !sev_active())
->>   		return prot;
 > 
-> ... and you don't need that check...
+> This is the second place which does
 > 
->> -	if (early_memremap_is_setup_data(phys_addr, size) ||
->> -	    memremap_is_efi_data(phys_addr, size) ||
->> -	    memremap_should_map_decrypted(phys_addr, size))
->> -		prot = pgprot_decrypted(prot);
->> -	else
->> -		prot = pgprot_encrypted(prot);
->> +	if (sme_active()) {
+> 	if (!SME && !SEV)
 > 
-> ... if you're going to do it here too.
+> I wonder if, instead of sprinking those, we should have a
 > 
->> +		if (early_memremap_is_setup_data(phys_addr, size) ||
->> +		    memremap_is_efi_data(phys_addr, size) ||
->> +		    memremap_should_map_decrypted(phys_addr, size))
->> +			prot = pgprot_decrypted(prot);
->> +		else
->> +			prot = pgprot_encrypted(prot);
->> +	} else if (sev_active()) {
+> 	if (mem_enc_active())
 > 
-> And here.
+> or so which unifies all those memory encryption logic tests and makes
+> the code more straightforward for readers who don't have to pay
+> attention to SME vs SEV ...
 
-Will do.
+Yup, that will make things look cleaner and easier to understand.
 
 Thanks,
 Tom
 
 > 
->> +		if (memremap_should_map_decrypted(phys_addr, size))
->> +			prot = pgprot_decrypted(prot);
->> +		else
->> +			prot = pgprot_encrypted(prot);
->> +	}
+> Just a thought.
 > 
