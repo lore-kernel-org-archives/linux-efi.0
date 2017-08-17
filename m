@@ -1,55 +1,116 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v5 0/2] Add EFI capsule pstore backend support
-Date: Thu, 17 Aug 2017 17:20:52 +0100
-Message-ID: <CAKv+Gu8CEgCYpAf6v31Bwhgycg4KKo7d6NtKtE5vxYzcjj1SJA@mail.gmail.com>
-References: <20170626153859.36880-1-qiuxu.zhuo@intel.com> <E6AF1AFDEA62A94A97508F458CBDD47F6F5B7613@SHSMSX101.ccr.corp.intel.com>
+From: Tom Lendacky <thomas.lendacky@amd.com>
+Subject: Re: [RFC Part1 PATCH v3 06/17] x86/mm: Use encrypted access of boot
+ related data with SEV
+Date: Thu, 17 Aug 2017 13:05:38 -0500
+Message-ID: <8b2c75e2-6ed9-ed7d-ff62-39df8aedc12c@amd.com>
+References: <20170724190757.11278-1-brijesh.singh@amd.com>
+ <20170724190757.11278-7-brijesh.singh@amd.com>
+ <20170727133125.GB28553@nazgul.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <E6AF1AFDEA62A94A97508F458CBDD47F6F5B7613-0J0gbvR4kThpB2pF5aRoyrfspsVTdybXVpNB7YpNyf8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org" <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170727133125.GB28553@nazgul.tnic>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Borislav Petkov <bp@suse.de>, Brijesh Singh <brijesh.singh@amd.com>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric Biederman <ebiederm@xmission.com>, Benjamin
 List-Id: linux-efi@vger.kernel.org
 
-On 17 August 2017 at 03:29, Zhuo, Qiuxu <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
->> -----Original Message-----
->> From: Zhuo, Qiuxu
->> Sent: Monday, June 26, 2017 11:39 PM
->> To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org; ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org;
->> keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
->> Cc: Luck, Tony <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>; linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Zhuo, Qiuxu
->> <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->> Subject: [PATCH v5 0/2] Add EFI capsule pstore backend support
+On 7/27/2017 8:31 AM, Borislav Petkov wrote:
+> On Mon, Jul 24, 2017 at 02:07:46PM -0500, Brijesh Singh wrote:
+>> From: Tom Lendacky <thomas.lendacky@amd.com>
 >>
->> Change Log v4->v5:
->>  - 0001 patch: No change.
->>  - 0002 patch: Fix up all "line over 80 characters" warnings reported by
->> checkpatch.pl tool.
+>> When Secure Encrypted Virtualization (SEV) is active, boot data (such as
+>> EFI related data, setup data) is encrypted and needs to be accessed as
+>> such when mapped. Update the architecture override in early_memremap to
+>> keep the encryption attribute when mapping this data.
 >>
->> Qiuxu Zhuo (2):
->>   efi: Add 'nr_config_table' variable in efi structure
->>   eif/capsule-pstore: Add capsule pstore backend
->>
->>  arch/x86/platform/efi/efi.c           |   1 +
->>  drivers/firmware/efi/Kconfig          |  21 +
->>  drivers/firmware/efi/Makefile         |   1 +
->>  drivers/firmware/efi/arm-init.c       |   4 +-
->>  drivers/firmware/efi/capsule-pstore.c | 698
->> ++++++++++++++++++++++++++++++++++
->>  drivers/firmware/efi/efi.c            |   1 +
->>  include/linux/efi.h                   |   1 +
->>  7 files changed, 726 insertions(+), 1 deletion(-)  create mode 100644
->> drivers/firmware/efi/capsule-pstore.c
->>
->
-> Hi Ard,
->     Do you have some updates? If any question please let me know.
->     Thanks!
->
+>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+>> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+>> ---
+>>   arch/x86/mm/ioremap.c | 44 ++++++++++++++++++++++++++++++++------------
+>>   1 file changed, 32 insertions(+), 12 deletions(-)
+> 
+> ...
+> 
+>> @@ -590,10 +598,15 @@ bool arch_memremap_can_ram_remap(resource_size_t phys_addr, unsigned long size,
+>>   	if (flags & MEMREMAP_DEC)
+>>   		return false;
+>>   
+>> -	if (memremap_is_setup_data(phys_addr, size) ||
+>> -	    memremap_is_efi_data(phys_addr, size) ||
+>> -	    memremap_should_map_decrypted(phys_addr, size))
+>> -		return false;
+>> +	if (sme_active()) {
+>> +		if (memremap_is_setup_data(phys_addr, size) ||
+>> +		    memremap_is_efi_data(phys_addr, size) ||
+>> +		    memremap_should_map_decrypted(phys_addr, size))
+>> +			return false;
+>> +	} else if (sev_active()) {
+>> +		if (memremap_should_map_decrypted(phys_addr, size))
+>> +			return false;
+>> +	}
+>>   
+>>   	return true;
+>>   }
+> 
+> I guess this function's hind part can be simplified to:
+> 
+>          if (sme_active()) {
+>                  if (memremap_is_setup_data(phys_addr, size) ||
+>                      memremap_is_efi_data(phys_addr, size))
+>                          return false;
+>          }
+> 
+>          return ! memremap_should_map_decrypted(phys_addr, size);
+> }
+> 
 
-Hi,
+Ok, definitely cleaner.
 
-Please check with Michael Rothman inside your own organization. I have
-tried to get clarification a couple of times, but I am getting no
-response.
+>> @@ -608,15 +621,22 @@ pgprot_t __init early_memremap_pgprot_adjust(resource_size_t phys_addr,
+>>   					     unsigned long size,
+>>   					     pgprot_t prot)
+> 
+> And this one in a similar manner...
+> 
+>>   {
+>> -	if (!sme_active())
+>> +	if (!sme_active() && !sev_active())
+>>   		return prot;
+> 
+> ... and you don't need that check...
+> 
+>> -	if (early_memremap_is_setup_data(phys_addr, size) ||
+>> -	    memremap_is_efi_data(phys_addr, size) ||
+>> -	    memremap_should_map_decrypted(phys_addr, size))
+>> -		prot = pgprot_decrypted(prot);
+>> -	else
+>> -		prot = pgprot_encrypted(prot);
+>> +	if (sme_active()) {
+> 
+> ... if you're going to do it here too.
+> 
+>> +		if (early_memremap_is_setup_data(phys_addr, size) ||
+>> +		    memremap_is_efi_data(phys_addr, size) ||
+>> +		    memremap_should_map_decrypted(phys_addr, size))
+>> +			prot = pgprot_decrypted(prot);
+>> +		else
+>> +			prot = pgprot_encrypted(prot);
+>> +	} else if (sev_active()) {
+> 
+> And here.
+
+Will do.
+
+Thanks,
+Tom
+
+> 
+>> +		if (memremap_should_map_decrypted(phys_addr, size))
+>> +			prot = pgprot_decrypted(prot);
+>> +		else
+>> +			prot = pgprot_encrypted(prot);
+>> +	}
+> 
