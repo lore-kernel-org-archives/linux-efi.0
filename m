@@ -1,38 +1,41 @@
-From: "Zhuo, Qiuxu" <qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH v5 0/2] Add EFI capsule pstore backend support
-Date: Thu, 17 Aug 2017 02:29:55 +0000
-Message-ID: <E6AF1AFDEA62A94A97508F458CBDD47F6F5B7613@SHSMSX101.ccr.corp.intel.com>
-References: <20170626153859.36880-1-qiuxu.zhuo@intel.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [RFC Part1 PATCH v3 02/17] x86/CPU/AMD: Add the Secure Encrypted
+ Virtualization CPU feature
+Date: Thu, 17 Aug 2017 10:12:08 +0200
+Message-ID: <20170817081208.lmoh2dh3loupay54@pd.tnic>
+References: <20170724190757.11278-1-brijesh.singh@amd.com>
+ <20170724190757.11278-3-brijesh.singh@amd.com>
+ <20170725102657.GD21822@nazgul.tnic>
+ <7236d267-ebcb-8b45-b8d3-5955903e395f@amd.com>
+ <20170725143615.GA26029@nazgul.tnic>
+ <47ccc32e-e113-48e0-d2e0-2f23b37cc452@amd.com>
+ <20170725151301.GC26029@nazgul.tnic>
+ <d6fdba78-034b-d9e2-15ae-00547821a855@amd.com>
+ <20170725153329.GE26029@nazgul.tnic>
+ <b2aedd44-ebbc-b196-31d0-0b423f4fa632@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170626153859.36880-1-qiuxu.zhuo-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org" <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <kvm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <b2aedd44-ebbc-b196-31d0-0b423f4fa632@amd.com>
+Sender: kvm-owner@vger.kernel.org
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: Brijesh Singh <brijesh.singh@amd.com>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBaaHVvLCBRaXV4dQ0KPiBTZW50
-OiBNb25kYXksIEp1bmUgMjYsIDIwMTcgMTE6MzkgUE0NCj4gVG86IG1hdHRAY29kZWJsdWVwcmlu
-dC5jby51azsgYXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZzsNCj4ga2Vlc2Nvb2tAY2hyb21pdW0u
-b3JnDQo+IENjOiBMdWNrLCBUb255IDx0b255Lmx1Y2tAaW50ZWwuY29tPjsgbGludXgtZWZpQHZn
-ZXIua2VybmVsLm9yZzsgWmh1bywgUWl1eHUNCj4gPHFpdXh1LnpodW9AaW50ZWwuY29tPg0KPiBT
-dWJqZWN0OiBbUEFUQ0ggdjUgMC8yXSBBZGQgRUZJIGNhcHN1bGUgcHN0b3JlIGJhY2tlbmQgc3Vw
-cG9ydA0KPiANCj4gQ2hhbmdlIExvZyB2NC0+djU6DQo+ICAtIDAwMDEgcGF0Y2g6IE5vIGNoYW5n
-ZS4NCj4gIC0gMDAwMiBwYXRjaDogRml4IHVwIGFsbCAibGluZSBvdmVyIDgwIGNoYXJhY3RlcnMi
-IHdhcm5pbmdzIHJlcG9ydGVkIGJ5DQo+IGNoZWNrcGF0Y2gucGwgdG9vbC4NCj4gDQo+IFFpdXh1
-IFpodW8gKDIpOg0KPiAgIGVmaTogQWRkICducl9jb25maWdfdGFibGUnIHZhcmlhYmxlIGluIGVm
-aSBzdHJ1Y3R1cmUNCj4gICBlaWYvY2Fwc3VsZS1wc3RvcmU6IEFkZCBjYXBzdWxlIHBzdG9yZSBi
-YWNrZW5kDQo+IA0KPiAgYXJjaC94ODYvcGxhdGZvcm0vZWZpL2VmaS5jICAgICAgICAgICB8ICAg
-MSArDQo+ICBkcml2ZXJzL2Zpcm13YXJlL2VmaS9LY29uZmlnICAgICAgICAgIHwgIDIxICsNCj4g
-IGRyaXZlcnMvZmlybXdhcmUvZWZpL01ha2VmaWxlICAgICAgICAgfCAgIDEgKw0KPiAgZHJpdmVy
-cy9maXJtd2FyZS9lZmkvYXJtLWluaXQuYyAgICAgICB8ICAgNCArLQ0KPiAgZHJpdmVycy9maXJt
-d2FyZS9lZmkvY2Fwc3VsZS1wc3RvcmUuYyB8IDY5OA0KPiArKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKysrDQo+ICBkcml2ZXJzL2Zpcm13YXJlL2VmaS9lZmkuYyAgICAgICAgICAgIHwg
-ICAxICsNCj4gIGluY2x1ZGUvbGludXgvZWZpLmggICAgICAgICAgICAgICAgICAgfCAgIDEgKw0K
-PiAgNyBmaWxlcyBjaGFuZ2VkLCA3MjYgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbigtKSAgY3Jl
-YXRlIG1vZGUgMTAwNjQ0DQo+IGRyaXZlcnMvZmlybXdhcmUvZWZpL2NhcHN1bGUtcHN0b3JlLmMN
-Cj4gDQoNCkhpIEFyZCwNCiAgICBEbyB5b3UgaGF2ZSBzb21lIHVwZGF0ZXM/IElmIGFueSBxdWVz
-dGlvbiBwbGVhc2UgbGV0IG1lIGtub3cuDQogICAgVGhhbmtzIQ0KDQpRaXV4dQ0KDQo=
+On Wed, Aug 09, 2017 at 01:17:54PM -0500, Tom Lendacky wrote:
+> Ok, finally got around to running a 32-bit kernel and it reports
+> x86_phys_bits as 48.
+
+So it doesn't really matter on 32-bit. I guess you could add a comment
+saying why we don't care.
+
+Thanks.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
