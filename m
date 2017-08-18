@@ -1,48 +1,42 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 03/14] efi/libstub: arm64: force 'hidden' visibility for section markers
-Date: Fri, 18 Aug 2017 20:49:36 +0100
-Message-ID: <20170818194947.19347-4-ard.biesheuvel@linaro.org>
-References: <20170818194947.19347-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170818194947.19347-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+From: Matthew Garrett <mjg59@google.com>
+Subject: Re: [PATCH] Enable reset attack mitigation
+Date: Fri, 18 Aug 2017 12:57:32 -0700
+Message-ID: <CACdnJusFXcJVM+w2JPamjDP2MxRyu1mMVF73V-LusmNGUEmbpg@mail.gmail.com>
+References: <20170804212010.15064-1-mjg59@google.com> <CAKv+Gu89bW5CrddxFan095NK_ZmcCpeG_vzx1BuxJ+z-yj3VGQ@mail.gmail.com>
+ <CACdnJuty5W0EPLQvBsM=1ySRwCz5Kh4Ht_brZ5pn9ueyF9fT5A@mail.gmail.com> <CAKv+Gu9v5Tv8U3uinMJ=ok2uDM+kTozDNuvsQtsDBZcPBcVXQQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAKv+Gu9v5Tv8U3uinMJ=ok2uDM+kTozDNuvsQtsDBZcPBcVXQQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-To prevent the compiler from emitting absolute references to the section
-markers when running in PIC mode, override the visibility to 'hidden' for
-all contents of asm/sections.h
+On Fri, Aug 18, 2017 at 12:29 PM, Ard Biesheuvel
+<ard.biesheuvel@linaro.org> wrote:
+> On 18 August 2017 at 20:08, Matthew Garrett <mjg59@google.com> wrote:
+>> If the kernel doesn't synchronously zero the key when dm-crypt is torn
+>> down, that feels like a bug?
+>
+> Of course it should. But that is not the point. The point is that
+> userland is in no position to decide whether or not memory has been
+> sufficiently cleaned so that the firmware can omit wiping all of it
+> (in case you care enough about your secrets to enable that feature in
+> the first place).
 
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Tested-by: Matthias Kaehlcke <mka-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/libstub/arm64-stub.c | 10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
+The kernel is in no position to decide whether or not userland has
+disposed of secrets either - at some point you need to trust a
+component, and I have more faith that the kernel will do the right
+thing. The only other option here seems to be a double opt-in (ie,
+have userland assert that it's cleaned up, have the kernel set the
+flag at reset time) but we're still assuming that the kernel is
+behaving correctly, and if we assume that the kernel is behaving
+correctly then we can just let userland set the flag anyway.
 
-diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
-index b4c2589d7c91..f7a6970e9abc 100644
---- a/drivers/firmware/efi/libstub/arm64-stub.c
-+++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -9,9 +9,17 @@
-  * published by the Free Software Foundation.
-  *
-  */
-+
-+/*
-+ * To prevent the compiler from emitting GOT-indirected (and thus absolute)
-+ * references to the section markers, override their visibility as 'hidden'
-+ */
-+#pragma GCC visibility push(hidden)
-+#include <asm/sections.h>
-+#pragma GCC visibility pop
-+
- #include <linux/efi.h>
- #include <asm/efi.h>
--#include <asm/sections.h>
- #include <asm/sysreg.h>
- 
- #include "efistub.h"
--- 
-2.11.0
+> Given that the string 'MemoryOverWriteRequest' does not appear in
+> today's EDK2, I don't suppose there is any urgency wrt getting this
+> queued for v4.14?
+
+It's not implemented in EDK2, but it's in pretty much every vendor
+implementation. All the machines I have here support this already.
