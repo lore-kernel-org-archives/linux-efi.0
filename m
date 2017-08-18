@@ -1,77 +1,41 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 09/14] arm: efi: remove pointless dummy .reloc section
-Date: Fri, 18 Aug 2017 20:49:42 +0100
-Message-ID: <20170818194947.19347-10-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 12/14] firmware: dcdbas: constify attribute_group structures.
+Date: Fri, 18 Aug 2017 20:49:45 +0100
+Message-ID: <20170818194947.19347-13-ard.biesheuvel@linaro.org>
 References: <20170818194947.19347-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170818194947.19347-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170818194947.19347-1-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Arvind Yadav <arvind.yadav.cs@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Douglas_Warzecha <douglas_warzecha@dell.com>
 List-Id: linux-efi@vger.kernel.org
 
-The kernel's EFI PE/COFF header contains a dummy .reloc section, and
-an explanatory comment that claims that this is required for the EFI
-application loader to accept the Image as a relocatable image (i.e.,
-one that can be loaded at any offset and fixed up in place)
+From: Arvind Yadav <arvind.yadav.cs@gmail.com>
 
-This was inherited from the x86 implementation, which has elaborate host
-tooling to mangle the PE/COFF header post-link time, and which populates
-the .reloc section with a single dummy base relocation. On ARM, no such
-tooling exists, and the .reloc section remains empty, and is never even
-exposed via the BaseRelocationTable directory entry, which is where the
-PE/COFF loader looks for it.
+attribute_group are not supposed to change at runtime. All functions
+working with attribute_group provided by <linux/sysfs.h> work with
+const attribute_group. So mark the non-const structs as const.
 
-The PE/COFF spec is unclear about relocatable images that do not require
-any fixups, but the EDK2 implementation, which is the de facto reference
-for PE/COFF in the UEFI space, clearly does not care, and explicitly
-mentions (in a comment) that relocatable images with no base relocations
-are perfectly fine, as long as they don't have the RELOCS_STRIPPED
-attribute set (which is not the case for our PE/COFF image)
-
-So simply remove the .reloc section altogether.
-
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Douglas_Warzecha <douglas_warzecha@dell.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/arm/boot/compressed/efi-header.S | 18 +-----------------
- 1 file changed, 1 insertion(+), 17 deletions(-)
+ drivers/firmware/dcdbas.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
-index 4169b900d9d4..309d6198d335 100644
---- a/arch/arm/boot/compressed/efi-header.S
-+++ b/arch/arm/boot/compressed/efi-header.S
-@@ -41,7 +41,7 @@ pe_header:
+diff --git a/drivers/firmware/dcdbas.c b/drivers/firmware/dcdbas.c
+index 2fe1a130189f..c16600f30611 100644
+--- a/drivers/firmware/dcdbas.c
++++ b/drivers/firmware/dcdbas.c
+@@ -534,7 +534,7 @@ static struct attribute *dcdbas_dev_attrs[] = {
+ 	NULL
+ };
  
- coff_header:
- 		.short	0x01c2			@ ARM or Thumb
--		.short	2			@ nr_sections
-+		.short	1			@ nr_sections
- 		.long	0 			@ TimeDateStamp
- 		.long	0			@ PointerToSymbolTable
- 		.long	0			@ NumberOfSymbols
-@@ -96,22 +96,6 @@ extra_header_fields:
- 		.quad	0			@ BaseRelocationTable
- 
- section_table:
--		@
--		@ The EFI application loader requires a relocation section
--		@ because EFI applications must be relocatable. This is a
--		@ dummy section as far as we are concerned.
--		@
--		.ascii	".reloc\0\0"
--		.long	0			@ VirtualSize
--		.long	0			@ VirtualAddress
--		.long	0			@ SizeOfRawData
--		.long	0			@ PointerToRawData
--		.long	0			@ PointerToRelocations
--		.long	0			@ PointerToLineNumbers
--		.short	0			@ NumberOfRelocations
--		.short	0			@ NumberOfLineNumbers
--		.long	0x42000040		@ Characteristics
--
- 		.ascii	".text\0\0\0"
- 		.long	_end - __efi_start	@ VirtualSize
- 		.long	__efi_start		@ VirtualAddress
+-static struct attribute_group dcdbas_attr_group = {
++static const struct attribute_group dcdbas_attr_group = {
+ 	.attrs = dcdbas_dev_attrs,
+ 	.bin_attrs = dcdbas_bin_attrs,
+ };
 -- 
 2.11.0
