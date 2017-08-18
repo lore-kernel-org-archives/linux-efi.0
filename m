@@ -1,132 +1,77 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 07/14] drivers/fbdev: efifb: allow BAR to be moved instead of claiming it
-Date: Fri, 18 Aug 2017 20:49:40 +0100
-Message-ID: <20170818194947.19347-8-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 09/14] arm: efi: remove pointless dummy .reloc section
+Date: Fri, 18 Aug 2017 20:49:42 +0100
+Message-ID: <20170818194947.19347-10-ard.biesheuvel@linaro.org>
 References: <20170818194947.19347-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170818194947.19347-1-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170818194947.19347-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On UEFI systems, the firmware may expose a Graphics Output Protocol (GOP)
-instance to which the efifb driver attempts to attach in order to provide
-a minimal, unaccelerated framebuffer. The GOP protocol itself is not very
-sophisticated, and only describes the offset and size of the framebuffer
-in memory, and the pixel format.
+The kernel's EFI PE/COFF header contains a dummy .reloc section, and
+an explanatory comment that claims that this is required for the EFI
+application loader to accept the Image as a relocatable image (i.e.,
+one that can be loaded at any offset and fixed up in place)
 
-If the GOP framebuffer is provided by a PCI device, it will have been
-configured and enabled by the UEFI firmware, and the GOP protocol will
-simply point into a live BAR region. However, the GOP protocol itself does
-not describe this relation, and so we have to take care not to reconfigure
-the BAR without taking efifb's dependency on it into account.
+This was inherited from the x86 implementation, which has elaborate host
+tooling to mangle the PE/COFF header post-link time, and which populates
+the .reloc section with a single dummy base relocation. On ARM, no such
+tooling exists, and the .reloc section remains empty, and is never even
+exposed via the BaseRelocationTable directory entry, which is where the
+PE/COFF loader looks for it.
 
-Commit 55d728a40d36 ("efi/fb: Avoid reconfiguration of BAR that covers
-the framebuffer") attempted to do so by claiming the BAR resource early
-on, which prevents the PCI resource allocation routines from changing it.
-However, it turns out that this only works if the PCI device is not
-behind any bridges, since the bridge resources need to be claimed first.
+The PE/COFF spec is unclear about relocatable images that do not require
+any fixups, but the EDK2 implementation, which is the de facto reference
+for PE/COFF in the UEFI space, clearly does not care, and explicitly
+mentions (in a comment) that relocatable images with no base relocations
+are perfectly fine, as long as they don't have the RELOCS_STRIPPED
+attribute set (which is not the case for our PE/COFF image)
 
-So instead, allow the BAR to be moved, but make the efifb driver deal
-with that gracefully. So record the resource that covers the BAR early
-on, and if it turns out to have moved by the time we probe the efifb
-driver, update the framebuffer address accordingly.
+So simply remove the .reloc section altogether.
 
-While this is less likely to occur on x86, given that the firmware's
-PCI resource allocation is more likely to be preserved, this is a
-worthwhile sanity check to have in place, and so let's remove the
-preprocessor conditional that makes it !X86 only.
-
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Reviewed-by: Peter Jones <pjones@redhat.com>
-Acked-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Acked-by: Bjorn Helgaas <bhelgaas@google.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/video/fbdev/efifb.c | 31 ++++++++++++++++++-------------
- 1 file changed, 18 insertions(+), 13 deletions(-)
+ arch/arm/boot/compressed/efi-header.S | 18 +-----------------
+ 1 file changed, 1 insertion(+), 17 deletions(-)
 
-diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
-index ff01bed7112f..994b5f3a4d73 100644
---- a/drivers/video/fbdev/efifb.c
-+++ b/drivers/video/fbdev/efifb.c
-@@ -146,6 +146,10 @@ ATTRIBUTE_GROUPS(efifb);
+diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
+index 4169b900d9d4..309d6198d335 100644
+--- a/arch/arm/boot/compressed/efi-header.S
++++ b/arch/arm/boot/compressed/efi-header.S
+@@ -41,7 +41,7 @@ pe_header:
  
- static bool pci_dev_disabled;	/* FB base matches BAR of a disabled device */
+ coff_header:
+ 		.short	0x01c2			@ ARM or Thumb
+-		.short	2			@ nr_sections
++		.short	1			@ nr_sections
+ 		.long	0 			@ TimeDateStamp
+ 		.long	0			@ PointerToSymbolTable
+ 		.long	0			@ NumberOfSymbols
+@@ -96,22 +96,6 @@ extra_header_fields:
+ 		.quad	0			@ BaseRelocationTable
  
-+static struct pci_dev *efifb_pci_dev;	/* dev with BAR covering the efifb */
-+static struct resource *bar_resource;
-+static u64 bar_offset;
-+
- static int efifb_probe(struct platform_device *dev)
- {
- 	struct fb_info *info;
-@@ -200,6 +204,13 @@ static int efifb_probe(struct platform_device *dev)
- 		efifb_fix.smem_start |= ext_lfb_base;
- 	}
- 
-+	if (bar_resource &&
-+	    bar_resource->start + bar_offset != efifb_fix.smem_start) {
-+		dev_info(&efifb_pci_dev->dev,
-+			 "BAR has moved, updating efifb address\n");
-+		efifb_fix.smem_start = bar_resource->start + bar_offset;
-+	}
-+
- 	efifb_defined.bits_per_pixel = screen_info.lfb_depth;
- 	efifb_defined.xres = screen_info.lfb_width;
- 	efifb_defined.yres = screen_info.lfb_height;
-@@ -364,15 +375,13 @@ static struct platform_driver efifb_driver = {
- 
- builtin_platform_driver(efifb_driver);
- 
--#if defined(CONFIG_PCI) && !defined(CONFIG_X86)
+ section_table:
+-		@
+-		@ The EFI application loader requires a relocation section
+-		@ because EFI applications must be relocatable. This is a
+-		@ dummy section as far as we are concerned.
+-		@
+-		.ascii	".reloc\0\0"
+-		.long	0			@ VirtualSize
+-		.long	0			@ VirtualAddress
+-		.long	0			@ SizeOfRawData
+-		.long	0			@ PointerToRawData
+-		.long	0			@ PointerToRelocations
+-		.long	0			@ PointerToLineNumbers
+-		.short	0			@ NumberOfRelocations
+-		.short	0			@ NumberOfLineNumbers
+-		.long	0x42000040		@ Characteristics
 -
--static bool pci_bar_found;	/* did we find a BAR matching the efifb base? */
-+#if defined(CONFIG_PCI)
- 
--static void claim_efifb_bar(struct pci_dev *dev, int idx)
-+static void record_efifb_bar_resource(struct pci_dev *dev, int idx, u64 offset)
- {
- 	u16 word;
- 
--	pci_bar_found = true;
-+	efifb_pci_dev = dev;
- 
- 	pci_read_config_word(dev, PCI_COMMAND, &word);
- 	if (!(word & PCI_COMMAND_MEMORY)) {
-@@ -383,12 +392,8 @@ static void claim_efifb_bar(struct pci_dev *dev, int idx)
- 		return;
- 	}
- 
--	if (pci_claim_resource(dev, idx)) {
--		pci_dev_disabled = true;
--		dev_err(&dev->dev,
--			"BAR %d: failed to claim resource for efifb!\n", idx);
--		return;
--	}
-+	bar_resource = &dev->resource[idx];
-+	bar_offset = offset;
- 
- 	dev_info(&dev->dev, "BAR %d: assigned to efifb\n", idx);
- }
-@@ -399,7 +404,7 @@ static void efifb_fixup_resources(struct pci_dev *dev)
- 	u64 size = screen_info.lfb_size;
- 	int i;
- 
--	if (pci_bar_found || screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
-+	if (efifb_pci_dev || screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
- 		return;
- 
- 	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-@@ -415,7 +420,7 @@ static void efifb_fixup_resources(struct pci_dev *dev)
- 			continue;
- 
- 		if (res->start <= base && res->end >= base + size - 1) {
--			claim_efifb_bar(dev, i);
-+			record_efifb_bar_resource(dev, i, base - res->start);
- 			break;
- 		}
- 	}
+ 		.ascii	".text\0\0\0"
+ 		.long	_end - __efi_start	@ VirtualSize
+ 		.long	__efi_start		@ VirtualAddress
 -- 
 2.11.0
