@@ -1,166 +1,212 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v9 2/2] x86/boot/KASLR: Restrict kernel to be randomized
- in mirror regions
-Date: Fri, 18 Aug 2017 16:10:40 +0100
-Message-ID: <CAKv+Gu-dXN4m1TFjKZ1DKvMG4snR=0WPt98wj2X=gDv4dd4qAw@mail.gmail.com>
-References: <1502722464-20614-1-git-send-email-bhe@redhat.com>
- <1502722464-20614-3-git-send-email-bhe@redhat.com> <20170817130405.GE20203@x1>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] Enable reset attack mitigation
+Date: Fri, 18 Aug 2017 19:52:27 +0100
+Message-ID: <CAKv+Gu89bW5CrddxFan095NK_ZmcCpeG_vzx1BuxJ+z-yj3VGQ@mail.gmail.com>
+References: <20170804212010.15064-1-mjg59@google.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170817130405.GE20203@x1>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org" <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>, fanc.fnst-BthXqXjhjHXQFUHtdCDX3A@public.gmane.org, Thomas Garnier <thgarnie-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, n-horiguchi-PaJj6Psr51x8UrSeD/g0lQ@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170804212010.15064-1-mjg59@google.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <mjg59@google.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-On 17 August 2017 at 14:04, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On 08/14/17 at 10:54pm, Baoquan He wrote:
->> Currently KASLR will parse all e820 entries of RAM type and add all
->> candidate position into slots array. Then we will choose one slot
->> randomly as the new position which kernel will be decompressed into
->> and run at.
->>
->> On system with EFI enabled, e820 memory regions are coming from EFI
->> memory regions by combining adjacent regions. While these EFI memory
->> regions have more attributes to mark their different use. Mirror
->> attribute is such kind. The physical memory region whose descriptors
->> in EFI memory map has EFI_MEMORY_MORE_RELIABLE attribute (bit: 16) are
->> mirrored. The address range mirroring feature of kernel arranges such
->> mirror region into normal zone and other region into movable zone. And
->> with mirroring feature enabled, the code and date of kernel can only be
->> located in more reliable mirror region. However, the current KASLR code
->> doesn't check EFI memory entries, and could choose new position in
->> non-mirrored region. This will break the functionality of the address
->> range mirroring feature.
+On 4 August 2017 at 22:20, Matthew Garrett <mjg59@google.com> wrote:
+> If a machine is reset while secrets are present in RAM, it may be
+> possible for code executed after the reboot to extract those secrets
+> from untouched memory. The Trusted Computing Group specified a mechanism
+> for requesting that the firmware clear all RAM on reset before booting
+> another OS. This is done by setting the MemoryOverwriteRequestControl
+> variable at startup. If userspace can ensure that all secrets are
+> removed as part of a controlled shutdown, it can reset this variable to
+> 0 before triggering a hardware reboot.
 >
-> Thanks a lot for helping improving the patch log, Ingo! Will pay more
-> attention to the description in words and paragraph partition of log.
+> Signed-off-by: Matthew Garrett <mjg59@google.com>
+> ---
+>  arch/x86/boot/compressed/eboot.c        |  3 ++
+>  drivers/firmware/efi/Kconfig            | 10 ++++++
+>  drivers/firmware/efi/libstub/Makefile   |  1 +
+>  drivers/firmware/efi/libstub/arm-stub.c |  3 ++
+>  drivers/firmware/efi/libstub/tpm.c      | 58 +++++++++++++++++++++++++++++++++
+>  include/linux/efi.h                     |  7 ++++
+>  6 files changed, 82 insertions(+)
+>  create mode 100644 drivers/firmware/efi/libstub/tpm.c
 >
->>
->> So if EFI is detected, iterate EFI memory map and pick the mirror region
->> to process for adding candidate of randomization slot. If EFI is disabled
->> or no mirror region found, still process e820 memory map.
->>
->> Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> index c3e869eaef0c..a1686f3dc295 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -997,6 +997,9 @@ struct boot_params *efi_main(struct efi_config *c,
+>         if (boot_params->secure_boot == efi_secureboot_mode_unset)
+>                 boot_params->secure_boot = efi_get_secureboot(sys_table);
+>
+> +       /* Ask the firmware to clear memory on unclean shutdown */
+> +       efi_enable_reset_attack_mitigation(sys_table);
+> +
+>         setup_graphics(boot_params);
+>
+>         setup_efi_pci(boot_params);
+> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+> index 394db40ed374..2b4c39fdfa91 100644
+> --- a/drivers/firmware/efi/Kconfig
+> +++ b/drivers/firmware/efi/Kconfig
+> @@ -151,6 +151,16 @@ config APPLE_PROPERTIES
+>
+>           If unsure, say Y if you have a Mac.  Otherwise N.
+>
+> +config RESET_ATTACK_MITIGATION
+> +       bool "Reset memory attack mitigation"
+> +       depends on EFI_STUB
+> +       help
+> +         Request that the firmware clear the contents of RAM after a reboot
+> +         using the TCG Platform Reset Attack Mitigation specification. This
+> +         protects against an attacker forcibly rebooting the system while it
+> +         still contains secrets in RAM, booting another OS and extracting the
+> +         secrets.
+> +
+>  endmenu
+>
+>  config UEFI_CPER
+> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+> index 37e24f525162..4b20a5516929 100644
+> --- a/drivers/firmware/efi/libstub/Makefile
+> +++ b/drivers/firmware/efi/libstub/Makefile
+> @@ -30,6 +30,7 @@ OBJECT_FILES_NON_STANDARD     := y
+>  KCOV_INSTRUMENT                        := n
+>
+>  lib-y                          := efi-stub-helper.o gop.o secureboot.o
+> +lib-$(CONFIG_RESET_ATTACK_MITIGATION) += tpm.o
+>
+>  # include the stub's generic dependencies from lib/ when building for ARM/arm64
+>  arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
+> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+> index 8181ac179d14..1cb2d1c070c3 100644
+> --- a/drivers/firmware/efi/libstub/arm-stub.c
+> +++ b/drivers/firmware/efi/libstub/arm-stub.c
+> @@ -192,6 +192,9 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+>                 goto fail_free_cmdline;
+>         }
+>
+> +       /* Ask the firmware to clear memory on unclean shutdown */
+> +       efi_enable_reset_attack_mitigation(sys_table);
+> +
+>         secure_boot = efi_get_secureboot(sys_table);
+>
+>         /*
+> diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
+> new file mode 100644
+> index 000000000000..45a12311adc3
+> --- /dev/null
+> +++ b/drivers/firmware/efi/libstub/tpm.c
+> @@ -0,0 +1,58 @@
+> +/*
+> + * TPM handling.
+> + *
+> + * Copyright (C) 2016 CoreOS, Inc
+> + * Copyright (C) 2017 Google, Inc.
+> + *     Matthew Garrett <mjg59@google.com>
+> + *
+> + * This file is part of the Linux kernel, and is made available under the
+> + * terms of the GNU General Public License version 2.
+> + */
+> +#include <linux/efi.h>
+> +#include <asm/efi.h>
+> +
+> +#include "efistub.h"
+> +
+> +static const efi_char16_t efi_MemoryOverWriteRequest_name[] = {
+> +       'M', 'e', 'm', 'o', 'r', 'y', 'O', 'v', 'e', 'r', 'w', 'r', 'i', 't',
+> +       'e', 'R', 'e', 'q', 'u', 'e', 's', 't', 'C', 'o', 'n', 't', 'r', 'o',
+> +       'l', 0
+> +};
+> +
+> +#define MEMORY_ONLY_RESET_CONTROL_GUID \
+> +       EFI_GUID(0xe20939be, 0x32d4, 0x41be, 0xa1, 0x50, 0x89, 0x7f, 0x85, 0xd4, 0x98, 0x29)
+> +
+> +#define get_efi_var(name, vendor, ...) \
+> +       efi_call_runtime(get_variable, \
+> +                        (efi_char16_t *)(name), (efi_guid_t *)(vendor), \
+> +                        __VA_ARGS__)
+> +
+> +#define set_efi_var(name, vendor, ...) \
+> +       efi_call_runtime(set_variable, \
+> +                        (efi_char16_t *)(name), (efi_guid_t *)(vendor), \
+> +                        __VA_ARGS__)
+> +
+> +/*
+> + * Enable reboot attack mitigation. This requests that the firmware clear the
+> + * RAM on next reboot before proceeding with boot, ensuring that any secrets
+> + * are cleared. If userland has ensured that all secrets have bene removed
 
+s/bene/been/
 
-Could the x86 people on cc either take these directly, or indicate
-whether they are ok with this going in via the EFI tree?
+> + * from RAM before reboot it can simply reset this variable.
+> + */
+> +void efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg)
+> +{
+> +       u8 val = 1;
+> +       efi_guid_t var_guid = MEMORY_ONLY_RESET_CONTROL_GUID;
+> +       efi_status_t status;
+> +       unsigned long datasize = 0;
+> +
+> +       status = get_efi_var(efi_MemoryOverWriteRequest_name, &var_guid,
+> +                            NULL, &datasize, NULL);
+> +
+> +       if (status == EFI_NOT_FOUND)
+> +               return;
+> +
+> +       set_efi_var(efi_MemoryOverWriteRequest_name, &var_guid,
+> +                   EFI_VARIABLE_NON_VOLATILE |
+> +                   EFI_VARIABLE_BOOTSERVICE_ACCESS |
+> +                   EFI_VARIABLE_RUNTIME_ACCESS, sizeof(val), val);
 
-Thanks.
+Shouldn't this be &val?
 
->> ---
->>  arch/x86/boot/compressed/kaslr.c | 68 ++++++++++++++++++++++++++++++++++++++--
->>  1 file changed, 66 insertions(+), 2 deletions(-)
->>
->> diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
->> index 99c7194f7ea6..7de23bb279ce 100644
->> --- a/arch/x86/boot/compressed/kaslr.c
->> +++ b/arch/x86/boot/compressed/kaslr.c
->> @@ -37,7 +37,9 @@
->>  #include <linux/uts.h>
->>  #include <linux/utsname.h>
->>  #include <linux/ctype.h>
->> +#include <linux/efi.h>
->>  #include <generated/utsrelease.h>
->> +#include <asm/efi.h>
->>
->>  /* Macros used by the included decompressor code below. */
->>  #define STATIC
->> @@ -558,6 +560,65 @@ static void process_mem_region(struct mem_vector *entry,
->>       }
->>  }
->>
->> +#ifdef CONFIG_EFI
->> +/*
->> + * Returns true if mirror region found (and must have been processed
->> + * for slots adding)
->> + */
->> +static bool
->> +process_efi_entries(unsigned long minimum, unsigned long image_size)
->> +{
->> +     struct efi_info *e = &boot_params->efi_info;
->> +     bool efi_mirror_found = false;
->> +     struct mem_vector region;
->> +     efi_memory_desc_t *md;
->> +     unsigned long pmap;
->> +     char *signature;
->> +     u32 nr_desc;
->> +     int i;
->> +
->> +     signature = (char *)&e->efi_loader_signature;
->> +     if (strncmp(signature, EFI32_LOADER_SIGNATURE, 4) &&
->> +         strncmp(signature, EFI64_LOADER_SIGNATURE, 4))
->> +             return false;
->> +
->> +#ifdef CONFIG_X86_32
->> +     /* Can't handle data above 4GB at this time */
->> +     if (e->efi_memmap_hi) {
->> +             warn("EFI memmap is above 4GB, can't be handled now on x86_32. EFI should be disabled.\n");
->> +             return false;
->> +     }
->> +     pmap =  e->efi_memmap;
->> +#else
->> +     pmap = (e->efi_memmap | ((__u64)e->efi_memmap_hi << 32));
->> +#endif
->> +
->> +     nr_desc = e->efi_memmap_size / e->efi_memdesc_size;
->> +     for (i = 0; i < nr_desc; i++) {
->> +             md = efi_early_memdesc_ptr(pmap, e->efi_memdesc_size, i);
->> +             if (md->attribute & EFI_MEMORY_MORE_RELIABLE) {
->> +                     region.start = md->phys_addr;
->> +                     region.size = md->num_pages << EFI_PAGE_SHIFT;
->> +                     process_mem_region(&region, minimum, image_size);
->> +                     efi_mirror_found = true;
->> +
->> +                     if (slot_area_index == MAX_SLOT_AREA) {
->> +                             debug_putstr("Aborted EFI scan (slot_areas full)!\n");
->> +                             break;
->> +                     }
->> +             }
->> +     }
->> +
->> +     return efi_mirror_found;
->> +}
->> +#else
->> +static inline bool
->> +process_efi_entries(unsigned long minimum, unsigned long image_size)
->> +{
->> +     return false;
->> +}
->> +#endif
->> +
->>  static void process_e820_entries(unsigned long minimum,
->>                                unsigned long image_size)
->>  {
->> @@ -586,13 +647,16 @@ static unsigned long find_random_phys_addr(unsigned long minimum,
->>  {
->>       /* Check if we had too many memmaps. */
->>       if (memmap_too_large) {
->> -             debug_putstr("Aborted e820 scan (more than 4 memmap= args)!\n");
->> +             debug_putstr("Aborted memory entries scan (more than 4 memmap= args)!\n");
->>               return 0;
->>       }
->>
->>       /* Make sure minimum is aligned. */
->>       minimum = ALIGN(minimum, CONFIG_PHYSICAL_ALIGN);
->>
->> +     if (process_efi_entries(minimum, image_size))
->> +             return slots_fetch_random();
->> +
->>       process_e820_entries(minimum, image_size);
->>       return slots_fetch_random();
->>  }
->> @@ -652,7 +716,7 @@ void choose_random_location(unsigned long input,
->>        */
->>       min_addr = min(*output, 512UL << 20);
->>
->> -     /* Walk e820 and find a random address. */
->> +     /* Walk available memory entries to find a random address. */
->>       random_addr = find_random_phys_addr(min_addr, output_size);
->>       if (!random_addr) {
->>               warn("Physical KASLR disabled: no suitable memory region!");
->> --
->> 2.5.5
->>
+> +}
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 8269bcb8ccf7..12e05118657c 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -1497,6 +1497,13 @@ enum efi_secureboot_mode {
+>  };
+>  enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table);
+>
+> +#ifdef CONFIG_RESET_ATTACK_MITIGATION
+> +void efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg);
+> +#else
+> +static inline void
+> +efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg) { }
+> +#endif
+> +
+>  /*
+>   * Arch code can implement the following three template macros, avoiding
+>   * reptition for the void/non-void return cases of {__,}efi_call_virt():
+
+>> Shouldn't it be up to the kernel to decide whether this flag should be
+>> cleared after userspace has indicated to it that it thinks it has
+>> wiped all secrets from memory? The kernel itself may keep secrets as
+>> well, and we may still crash in the time window between userspace
+>> invoking shutdown and the kernel actually calling ResetSystem() in the
+>> firmware.
+>
+> What's the threat model? If there's no way for userland to ask the
+> kernel to drop any secrets it still holds, that seems like a problem
+> in any case. If the concern is that someone may be able to clear the
+> flag and then reboot in order to deliberately attempt to obtain kernel
+> secrets then there's no hugely easy way around this without special
+> casing the variable and preventing userland from being able to modify
+> it. There's a MemoryOverwriteRequestLock spec from Microsoft that
+> provides a mechanism for this (the firmware and the OS configure a
+> shared secret that controls access to MemoryOverwriteRequestControl,
+> so we'd keep that in the kernel and clear it on reboot), but that's
+> not implemented everywhere and we'd still want to base on top of this.
+
+So how would that work with, e.g., the keys for your encrypted file
+system? Surely, you can't expect the kernel to drop that secret when
+userland asks it to, so there will always be a window where userland
+has set the variable but the kernel is not ready to drop its secrets
+yet.
+
+Thanks,
+Ard.
