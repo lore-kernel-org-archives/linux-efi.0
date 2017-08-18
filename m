@@ -1,63 +1,77 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 01/14] efi: arm: Don't mark ACPI reclaim memory as MEMBLOCK_NOMAP
-Date: Fri, 18 Aug 2017 20:49:34 +0100
-Message-ID: <20170818194947.19347-2-ard.biesheuvel@linaro.org>
-References: <20170818194947.19347-1-ard.biesheuvel@linaro.org>
+Subject: [GIT PULL 00/14] EFI changes for v4.14
+Date: Fri, 18 Aug 2017 20:49:33 +0100
+Message-ID: <20170818194947.19347-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170818194947.19347-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Arvind Yadav <arvind.yadav.cs@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Bjorn Helgaas <bhelgaas@google.com>, Douglas_Warzecha <douglas_warzecha@dell.com>, Hans de Goede <hdegoede@redhat.com>, Len Brown <lenb@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Mark Salter <msalter@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Matthias Kaehlcke <mka@chromium.org>, Peter Jones <pjones@redhat.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Russell King <linux@armlinux.org.uk>
 List-Id: linux-efi@vger.kernel.org
 
-On ARM, regions of memory that are described by UEFI as having special
-significance to the firmware itself are omitted from the linear mapping.
-This is necessary since we cannot guarantee that alternate mappings of
-the same physical region will use attributes that are compatible with
-the ones we use for the linear mapping, and aliases with mismatched
-attributes are prohibited by the architecture.
+Hi all,
 
-The above does not apply to ACPI reclaim regions: such regions have no
-special significance to the firmware, and it is up to the OS to decide
-whether or not to preserve them after it has consumed their contents,
-and for how long, after which time the OS can use the memory in any way
-it likes. In the Linux case, such regions are preserved indefinitely,
-and are simply treated the same way as other 'reserved' memory types.
+These are the changes we have queued up in the EFI tree for v4.14. Please
+pull.
 
-Punching holes into the linear mapping causes page table fragmentation,
-which increases TLB pressure, and so we should avoid doing so if we can.
-So add a special case for regions of type EFI_ACPI_RECLAIM_MEMORY, and
-memblock_reserve() them instead of marking them MEMBLOCK_NOMAP.
+Russell has been cc'ed twice on the patches that touch the linker script
+of the ARM decompressor, and has elected not to respond, so I assume he
+has no objections.
 
-Acked-by: Mark Rutland <mark.rutland@arm.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/arm-init.c | 5 +++++
- 1 file changed, 5 insertions(+)
+The following changes since commit 5771a8c08880cdca3bfb4a3fc6d309d6bba20877:
 
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 1027d7b44358..0aa4ce7b4fbb 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -159,6 +159,7 @@ static __init int is_usable_memory(efi_memory_desc_t *md)
- 	switch (md->type) {
- 	case EFI_LOADER_CODE:
- 	case EFI_LOADER_DATA:
-+	case EFI_ACPI_RECLAIM_MEMORY:
- 	case EFI_BOOT_SERVICES_CODE:
- 	case EFI_BOOT_SERVICES_DATA:
- 	case EFI_CONVENTIONAL_MEMORY:
-@@ -211,6 +212,10 @@ static __init void reserve_regions(void)
- 
- 			if (!is_usable_memory(md))
- 				memblock_mark_nomap(paddr, size);
-+
-+			/* keep ACPI reclaim memory intact for kexec etc. */
-+			if (md->type == EFI_ACPI_RECLAIM_MEMORY)
-+				memblock_reserve(paddr, size);
- 		}
- 	}
- }
--- 
-2.11.0
+  Linux v4.13-rc1 (2017-07-15 15:22:10 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+
+for you to fetch changes up to f6a3116a8881cff8543e1cf028dea6955831ec30:
+
+  firmware: efi: esrt: constify attribute_group structures. (2017-08-18 19:55:50 +0100)
+
+----------------------------------------------------------------
+EFI changes for v4.14:
+- don't mark ACPI reclaim regions as NOMAP on ARM
+- update the compiler flags for the arm64 version of the EFI stub so that
+  we can be confident that no absolute relocations are emitted, even when
+  using clang
+- update the EFI framebuffer address if points to a BAR that gets moved
+  by the PCI resource allocation code
+- fallback to other poweroff method if EFI poweroff fails (and returns)
+- use separate PE/COFF section headers for the RX and RW parts of the ARM
+  stub loader so that the firmware can use strict mapping permissions
+- constify some struct attribute_group instances
+
+----------------------------------------------------------------
+Ard Biesheuvel (10):
+      efi: arm: Don't mark ACPI reclaim memory as MEMBLOCK_NOMAP
+      efi/libstub: arm64: use hidden attribute for struct screen_info reference
+      efi/libstub: arm64: force 'hidden' visibility for section markers
+      efi/libstub: arm64: set -fpie when building the EFI stub
+      efi: arm/arm64: Add missing assignment of efi.config_table
+      drivers/fbdev: efifb: allow BAR to be moved instead of claiming it
+      arm: efi: remove forbidden values from the PE/COFF header
+      arm: efi: remove pointless dummy .reloc section
+      arm: efi: replace open coded constants with symbolic ones
+      arm: efi: split zImage code and data into separate PE/COFF sections
+
+Arvind Yadav (3):
+      firmware: dcdbas: constify attribute_group structures.
+      firmware: efi: constify attribute_group structures.
+      firmware: efi: esrt: constify attribute_group structures.
+
+Hans de Goede (1):
+      efi/reboot: Fall back to original power-off method if EFI_RESET_SHUTDOWN returns
+
+ arch/arm/boot/compressed/efi-header.S     | 160 +++++++++++++++---------------
+ arch/arm/boot/compressed/vmlinux.lds.S    |  30 ++++--
+ arch/arm64/include/asm/efi.h              |   3 +
+ drivers/firmware/dcdbas.c                 |   2 +-
+ drivers/firmware/efi/arm-init.c           |   8 ++
+ drivers/firmware/efi/efi.c                |   2 +-
+ drivers/firmware/efi/esrt.c               |   2 +-
+ drivers/firmware/efi/libstub/Makefile     |   2 +-
+ drivers/firmware/efi/libstub/arm64-stub.c |  10 +-
+ drivers/firmware/efi/reboot.c             |  12 ++-
+ drivers/video/fbdev/efifb.c               |  31 +++---
+ 11 files changed, 158 insertions(+), 104 deletions(-)
