@@ -1,154 +1,110 @@
-From: Baoquan He <bhe@redhat.com>
-Subject: Re: [PATCH v9 2/2] x86/boot/KASLR: Restrict kernel to be randomized
- in mirror regions
-Date: Sat, 19 Aug 2017 09:22:28 +0800
-Message-ID: <20170819012228.GD20615@x1>
-References: <1502722464-20614-1-git-send-email-bhe@redhat.com>
- <1502722464-20614-3-git-send-email-bhe@redhat.com>
- <20170817130405.GE20203@x1>
- <CAKv+Gu-dXN4m1TFjKZ1DKvMG4snR=0WPt98wj2X=gDv4dd4qAw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-dXN4m1TFjKZ1DKvMG4snR=0WPt98wj2X=gDv4dd4qAw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Ingo Molnar <mingo@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>, "tglx@linutronix.de" <tglx@linutronix.de>, "hpa@zytor.com" <hpa@zytor.com>, Taku Izumi <izumi.taku@jp.fujitsu.com>, fanc.fnst@cn.fujitsu.com, Thomas Garnier <thgarnie@google.com>, n-horiguchi@ah.jp.nec.com, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [RFC PATCH 1/2] efi: import USB I/O related declarations from the UEFI spec
+Date: Sat, 19 Aug 2017 16:17:39 +0100
+Message-ID: <20170819151740.625-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-hardened-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 08/18/17 at 04:10pm, Ard Biesheuvel wrote:
-> On 17 August 2017 at 14:04, Baoquan He <bhe@redhat.com> wrote:
+In preparation of adding support for the Chaoskey USB stick to the
+UEFI stub, import the USB I/O protocol declarations and related types
+to linux/efi.h.
 
-> > Thanks a lot for helping improving the patch log, Ingo! Will pay more
-> > attention to the description in words and paragraph partition of log.
-> >
-> >>
-> >> So if EFI is detected, iterate EFI memory map and pick the mirror region
-> >> to process for adding candidate of randomization slot. If EFI is disabled
-> >> or no mirror region found, still process e820 memory map.
-> >>
-> >> Signed-off-by: Baoquan He <bhe@redhat.com>
-> 
-> 
-> Could the x86 people on cc either take these directly, or indicate
-> whether they are ok with this going in via the EFI tree?
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ include/linux/efi.h | 66 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 66 insertions(+)
 
-Thanks for looking into this, Ard. I saw Ingo has put these into
-tip/x86/boot.
-
-> 
-> >> ---
-> >>  arch/x86/boot/compressed/kaslr.c | 68 ++++++++++++++++++++++++++++++++++++++--
-> >>  1 file changed, 66 insertions(+), 2 deletions(-)
-> >>
-> >> diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
-> >> index 99c7194f7ea6..7de23bb279ce 100644
-> >> --- a/arch/x86/boot/compressed/kaslr.c
-> >> +++ b/arch/x86/boot/compressed/kaslr.c
-> >> @@ -37,7 +37,9 @@
-> >>  #include <linux/uts.h>
-> >>  #include <linux/utsname.h>
-> >>  #include <linux/ctype.h>
-> >> +#include <linux/efi.h>
-> >>  #include <generated/utsrelease.h>
-> >> +#include <asm/efi.h>
-> >>
-> >>  /* Macros used by the included decompressor code below. */
-> >>  #define STATIC
-> >> @@ -558,6 +560,65 @@ static void process_mem_region(struct mem_vector *entry,
-> >>       }
-> >>  }
-> >>
-> >> +#ifdef CONFIG_EFI
-> >> +/*
-> >> + * Returns true if mirror region found (and must have been processed
-> >> + * for slots adding)
-> >> + */
-> >> +static bool
-> >> +process_efi_entries(unsigned long minimum, unsigned long image_size)
-> >> +{
-> >> +     struct efi_info *e = &boot_params->efi_info;
-> >> +     bool efi_mirror_found = false;
-> >> +     struct mem_vector region;
-> >> +     efi_memory_desc_t *md;
-> >> +     unsigned long pmap;
-> >> +     char *signature;
-> >> +     u32 nr_desc;
-> >> +     int i;
-> >> +
-> >> +     signature = (char *)&e->efi_loader_signature;
-> >> +     if (strncmp(signature, EFI32_LOADER_SIGNATURE, 4) &&
-> >> +         strncmp(signature, EFI64_LOADER_SIGNATURE, 4))
-> >> +             return false;
-> >> +
-> >> +#ifdef CONFIG_X86_32
-> >> +     /* Can't handle data above 4GB at this time */
-> >> +     if (e->efi_memmap_hi) {
-> >> +             warn("EFI memmap is above 4GB, can't be handled now on x86_32. EFI should be disabled.\n");
-> >> +             return false;
-> >> +     }
-> >> +     pmap =  e->efi_memmap;
-> >> +#else
-> >> +     pmap = (e->efi_memmap | ((__u64)e->efi_memmap_hi << 32));
-> >> +#endif
-> >> +
-> >> +     nr_desc = e->efi_memmap_size / e->efi_memdesc_size;
-> >> +     for (i = 0; i < nr_desc; i++) {
-> >> +             md = efi_early_memdesc_ptr(pmap, e->efi_memdesc_size, i);
-> >> +             if (md->attribute & EFI_MEMORY_MORE_RELIABLE) {
-> >> +                     region.start = md->phys_addr;
-> >> +                     region.size = md->num_pages << EFI_PAGE_SHIFT;
-> >> +                     process_mem_region(&region, minimum, image_size);
-> >> +                     efi_mirror_found = true;
-> >> +
-> >> +                     if (slot_area_index == MAX_SLOT_AREA) {
-> >> +                             debug_putstr("Aborted EFI scan (slot_areas full)!\n");
-> >> +                             break;
-> >> +                     }
-> >> +             }
-> >> +     }
-> >> +
-> >> +     return efi_mirror_found;
-> >> +}
-> >> +#else
-> >> +static inline bool
-> >> +process_efi_entries(unsigned long minimum, unsigned long image_size)
-> >> +{
-> >> +     return false;
-> >> +}
-> >> +#endif
-> >> +
-> >>  static void process_e820_entries(unsigned long minimum,
-> >>                                unsigned long image_size)
-> >>  {
-> >> @@ -586,13 +647,16 @@ static unsigned long find_random_phys_addr(unsigned long minimum,
-> >>  {
-> >>       /* Check if we had too many memmaps. */
-> >>       if (memmap_too_large) {
-> >> -             debug_putstr("Aborted e820 scan (more than 4 memmap= args)!\n");
-> >> +             debug_putstr("Aborted memory entries scan (more than 4 memmap= args)!\n");
-> >>               return 0;
-> >>       }
-> >>
-> >>       /* Make sure minimum is aligned. */
-> >>       minimum = ALIGN(minimum, CONFIG_PHYSICAL_ALIGN);
-> >>
-> >> +     if (process_efi_entries(minimum, image_size))
-> >> +             return slots_fetch_random();
-> >> +
-> >>       process_e820_entries(minimum, image_size);
-> >>       return slots_fetch_random();
-> >>  }
-> >> @@ -652,7 +716,7 @@ void choose_random_location(unsigned long input,
-> >>        */
-> >>       min_addr = min(*output, 512UL << 20);
-> >>
-> >> -     /* Walk e820 and find a random address. */
-> >> +     /* Walk available memory entries to find a random address. */
-> >>       random_addr = find_random_phys_addr(min_addr, output_size);
-> >>       if (!random_addr) {
-> >>               warn("Physical KASLR disabled: no suitable memory region!");
-> >> --
-> >> 2.5.5
-> >>
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 12e05118657c..253749cd9b62 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -22,6 +22,7 @@
+ #include <linux/pstore.h>
+ #include <linux/range.h>
+ #include <linux/reboot.h>
++#include <linux/usb/ch9.h>
+ #include <linux/uuid.h>
+ #include <linux/screen_info.h>
+ 
+@@ -622,6 +623,7 @@ void efi_native_runtime_setup(void);
+ #define EFI_MEMORY_ATTRIBUTES_TABLE_GUID	EFI_GUID(0xdcfa911d, 0x26eb, 0x469f,  0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
+ #define EFI_CONSOLE_OUT_DEVICE_GUID		EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+ #define APPLE_PROPERTIES_PROTOCOL_GUID		EFI_GUID(0x91bd12fe, 0xf6c3, 0x44fb,  0xa5, 0xb7, 0x51, 0x22, 0xab, 0x30, 0x3a, 0xe0)
++#define EFI_USB_IO_PROTOCOL_GUID		EFI_GUID(0x2b2f68d6, 0x0cd2, 0x44cf,  0x8e, 0x8b, 0xbb, 0xa2, 0x0b, 0x1b, 0x5b, 0x75)
+ 
+ #define EFI_IMAGE_SECURITY_DATABASE_GUID	EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596,  0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
+ #define EFI_SHIM_LOCK_GUID			EFI_GUID(0x605dab50, 0xe046, 0x4300,  0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
+@@ -1569,4 +1571,68 @@ struct linux_efi_random_seed {
+ 	u8	bits[];
+ };
+ 
++typedef enum {
++	EfiUsbDataIn,
++	EfiUsbDataOut,
++	EfiUsbNoData
++} efi_usb_data_direction_t;
++
++#define EFI_USB_NOERROR			0x0000
++#define EFI_USB_ERR_NOTEXECUTE		0x0001
++#define EFI_USB_ERR_STALL		0x0002
++#define EFI_USB_ERR_BUFFER		0x0004
++#define EFI_USB_ERR_BABBLE		0x0008
++#define EFI_USB_ERR_NAK			0x0010
++#define EFI_USB_ERR_CRC			0x0020
++#define EFI_USB_ERR_TIMEOUT		0x0040
++#define EFI_USB_ERR_BITSTUFF		0x0080
++#define EFI_USB_ERR_SYSTEM		0x0100
++
++typedef struct {
++	u8	request_type;
++	u8	request;
++	u16	value;
++	u16	index;
++	u16	length;
++} efi_usb_device_request_t;
++
++typedef efi_status_t (*efi_async_usb_transfer_callback_t)(void *, unsigned long,
++							  void *, u32);
++
++typedef struct efi_usb_io_protocol {
++	efi_status_t (*control_transfer)(struct efi_usb_io_protocol *,
++					 efi_usb_device_request_t *,
++					 efi_usb_data_direction_t,
++					 u32, void *, unsigned long, u32 *);
++	efi_status_t (*bulk_transfer)(struct efi_usb_io_protocol *, u8, void *,
++				      unsigned long *, unsigned long, u32 *);
++	efi_status_t (*async_int_transfer)(struct efi_usb_io_protocol *, u8,
++					  efi_bool_t, unsigned long,
++					  unsigned long,
++					  efi_async_usb_transfer_callback_t,
++					  void *);
++	efi_status_t (*sync_int_transfer)(struct efi_usb_io_protocol *, u8,
++					  void *, unsigned long *,
++					  unsigned long, u32 *);
++	efi_status_t (*isoc_transfer)(struct efi_usb_io_protocol *, u8, void *,
++				      unsigned long, u32 *);
++	efi_status_t (*async_isoc_transfer)(struct efi_usb_io_protocol *, u8 *,
++					    void *, unsigned long,
++					    efi_async_usb_transfer_callback_t,
++					    void *);
++	efi_status_t (*get_device_descriptor)(struct efi_usb_io_protocol *,
++					      struct usb_device_descriptor *);
++	efi_status_t (*get_config_descriptor)(struct efi_usb_io_protocol *,
++					      struct usb_config_descriptor *);
++	efi_status_t (*get_iface_descriptor)(struct efi_usb_io_protocol *,
++					     struct usb_interface_descriptor *);
++	efi_status_t (*get_ep_descriptor)(struct efi_usb_io_protocol *, u8,
++					  struct usb_endpoint_descriptor *);
++	efi_status_t (*get_string_descriptor)(struct efi_usb_io_protocol *,
++					       u16, u8, efi_char16_t **);
++	efi_status_t (*get_supported_languages)(struct efi_usb_io_protocol *,
++						u16 **, u16 *);
++	efi_status_t (*port_reset)(struct efi_usb_io_protocol *);
++} efi_usb_io_protocol_t;
++
+ #endif /* _LINUX_EFI_H */
+-- 
+2.11.0
