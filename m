@@ -1,40 +1,41 @@
-From: Peter Zijlstra <peterz@infradead.org>
-Subject: Re: [PATCH 3/3] x86/efi: Use efi_switch_mm() rather than manually
- twiddling with cr3
-Date: Mon, 21 Aug 2017 19:24:25 +0200
-Message-ID: <20170821172425.5axqiwnef5gkaz23@hirez.programming.kicks-ass.net>
-References: <20170816095338.GB17270@leverpostej>
- <20170816100709.GG12845@arm.com>
- <20170816110321.GC17270@leverpostej>
- <20170816125715.GB3384@codeblueprint.co.uk>
- <CALCETrVSHuz=hcAgGxYHBmpiNcP4ECrJh885cR4X17QsJVj8+w@mail.gmail.com>
- <20170815223541.GA25778@remoulade>
- <20170817103514.GC27872@arm.com>
- <CALCETrVhLmntPArQiuOcQeNf9Y2kDxa+mUY=v1P8rVOkeCZn4Q@mail.gmail.com>
- <20170821103359.jt2xf2cx5wxjldau@hirez.programming.kicks-ass.net>
- <E5C753C8-1B92-4B4F-B95D-32DCC5C0AF5F@amacapital.net>
+From: Colin King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Subject: [PATCH][next] efi/reboot: make function pointer orig_pm_power_off static
+Date: Tue, 22 Aug 2017 16:50:40 +0100
+Message-ID: <20170822155040.32058-1-colin.king@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <E5C753C8-1B92-4B4F-B95D-32DCC5C0AF5F@amacapital.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Lutomirski <luto@amacapital.net>
-Cc: Andy Lutomirski <luto@kernel.org>, Will Deacon <will.deacon@arm.com>, Mark Rutland <mark.rutland@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, joeyli <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Michael S. Tsirkin" <mst@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Ravi V. Shankar" <ravi.v.shankar@intel.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 21, 2017 at 06:56:01AM -0700, Andy Lutomirski wrote:
-> There are two ways this could be a problem.  One is that u privileged
-> user apps shouldn't be able to read from EFI memory.  The other is
-> that, if EFI were to have IO memory mapped at a "user" address, perf
-> could end up reading it.
+From: Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 
-So assuming the efi_switch_mm() case from the calling thread context, I
-don't see how we can avoid it at all.
+The function pointer orig_pm_power_off is local to the source and does
+not need to be in global scope, so make it static.
 
-Suppose we have a free running PEBS counter (PEBS puts samples in DS
-buffer and only raises PMI when 'full'). This can easily cover the
-entire efi_switch_mm() and back swizzle, and then we have 'userspace'
-samples that don't correspond to actual userspace.
+Cleans up sparse warning:
+symbol 'orig_pm_power_off' was not declared. Should it be static?
 
-EFI (pretending to be userspace) is a giant trainwreck.
+Signed-off-by: Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+---
+ drivers/firmware/efi/reboot.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/reboot.c b/drivers/firmware/efi/reboot.c
+index 7117e2d0c7f9..22874544d301 100644
+--- a/drivers/firmware/efi/reboot.c
++++ b/drivers/firmware/efi/reboot.c
+@@ -5,7 +5,7 @@
+ #include <linux/efi.h>
+ #include <linux/reboot.h>
+ 
+-void (*orig_pm_power_off)(void);
++static void (*orig_pm_power_off)(void);
+ 
+ int efi_reboot_quirk_mode = -1;
+ 
+-- 
+2.14.1
