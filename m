@@ -1,135 +1,126 @@
-From: Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>
-Subject: [PATCH 1/2] x86_32: boot, extract efi_pe_entry from startup_32
-Date: Thu, 24 Aug 2017 09:33:26 +0200
-Message-ID: <20170824073327.4129-1-jslaby@suse.cz>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Cc: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: [PATCH 2/2] x86_64: boot, extract efi_pe_entry from startup_64
+Date: Thu, 24 Aug 2017 09:33:27 +0200
+Message-ID: <20170824073327.4129-2-jslaby@suse.cz>
+References: <20170824073327.4129-1-jslaby@suse.cz>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170824073327.4129-1-jslaby@suse.cz>
+Sender: linux-kernel-owner@vger.kernel.org
+To: matt@codeblueprint.co.uk
+Cc: ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Jiri Slaby <jslaby@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86@kernel.org, David Woodhouse <dwmw2@infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-efi_pe_entry body is somehow squashed into startup_32. In the old days,
-we forced startup_32 to start at offset 0x00 and efi_pe_entry to start
-at 0x10. But this requirement was removed in 99f857db8857 ("x86, build:
+efi_pe_entry body is somehow squashed into startup_64. In the old days,
+we forced startup_64 to start at offset 0x200 and efi_pe_entry to start
+at 0x210. But this requirement was removed in 99f857db8857 ("x86, build:
 Dynamically find entry points in compressed startup code") long time
 ago.
 
 The way it is now makes the code less readable and illogical. And given
 we can now safely extract the inlined efi_pe_entry body from
-startup_32 into a separate function, we do so and we separate it to two
-functions as they are marked already: efi_pe_entry + efi32_stub_entry.
+startup_64 into a separate function, we do so.
 
-We also annotate the functions appropriatelly by ENTRY+ENDPROC.
+We also annotate the function appropriatelly by ENTRY+ENDPROC.
 
-ABI offset is preserved:
-  0000   128 FUNC    GLOBAL DEFAULT    6 startup_32
-  0080    60 FUNC    GLOBAL DEFAULT    6 efi_pe_entry
-  00bc    68 FUNC    GLOBAL DEFAULT    6 efi32_stub_entry
+ABI offsets are preserved:
+0000000000000000 T startup_32
+0000000000000200 T startup_64
+0000000000000390 T efi64_stub_entry
 
 On the top-level, it looked like:
-	ENTRY(startup_32)
+	.org 0x200
+	ENTRY(startup_64)
 	#ifdef CONFIG_EFI_STUB		; start of inlined
 		jmp     preferred_addr
-	ENTRY(efi_pe_entry)
+	GLOBAL(efi_pe_entry)
 		... ; a lot of assembly (efi_pe_entry)
-	ENTRY(efi32_stub_entry)
-		... ; a lot of assembly (efi32_stub_entry)
-		leal    preferred_addr(%eax), %eax
-		jmp     *%eax
+		leaq    preferred_addr(%rax), %rax
+		jmp     *%rax
 	preferred_addr:
 	#endif				; end of inlined
-		... ; a lot of assembly (startup_32)
-	ENDPROC(startup_32)
+		... ; a lot of assembly (startup_64)
+	ENDPROC(startup_64)
 
 And it is converted into:
-	ENTRY(startup_32)
-		... ; a lot of assembly (startup_32)
-	ENDPROC(startup_32)
+	.org 0x200
+	ENTRY(startup_64)
+		... ; a lot of assembly (startup_64)
+	ENDPROC(startup_64)
 
 	#ifdef CONFIG_EFI_STUB
 	ENTRY(efi_pe_entry)
 		... ; a lot of assembly (efi_pe_entry)
+		leaq    startup_64(%rax), %rax
+		jmp     *%rax
 	ENDPROC(efi_pe_entry)
-
-	ENTRY(efi32_stub_entry)
-		... ; a lot of assembly (efi32_stub_entry)
-		leal    startup_32(%eax), %eax
-		jmp     *%eax
-	ENDPROC(efi32_stub_entry)
 	#endif
 
-Signed-off-by: Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: <x86@kernel.org>
+Cc: David Woodhouse <dwmw2@infradead.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/boot/compressed/head_32.S | 129 ++++++++++++++++++-------------------
- 1 file changed, 64 insertions(+), 65 deletions(-)
+ arch/x86/boot/compressed/head_64.S | 112 ++++++++++++++++++-------------------
+ 1 file changed, 53 insertions(+), 59 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index d85b9625e836..11c68cf53d4e 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -61,71 +61,6 @@
- 
- 	__HEAD
- ENTRY(startup_32)
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index fbf4c32d0b62..b4a5d284391c 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -243,65 +243,6 @@ ENTRY(startup_64)
+ 	 * that maps our entire kernel(text+data+bss+brk), zero page
+ 	 * and command line.
+ 	 */
 -#ifdef CONFIG_EFI_STUB
+-	/*
+-	 * The entry point for the PE/COFF executable is efi_pe_entry, so
+-	 * only legacy boot loaders will execute this jmp.
+-	 */
 -	jmp	preferred_addr
 -
--	/*
--	 * We don't need the return address, so set up the stack so
--	 * efi_main() can find its arguments.
--	 */
 -ENTRY(efi_pe_entry)
--	add	$0x4, %esp
+-	movq	%rcx, efi64_config(%rip)	/* Handle */
+-	movq	%rdx, efi64_config+8(%rip) /* EFI System table pointer */
+-
+-	leaq	efi64_config(%rip), %rax
+-	movq	%rax, efi_config(%rip)
 -
 -	call	1f
--1:	popl	%esi
--	subl	$1b, %esi
+-1:	popq	%rbp
+-	subq	$1b, %rbp
 -
--	popl	%ecx
--	movl	%ecx, efi32_config(%esi)	/* Handle */
--	popl	%ecx
--	movl	%ecx, efi32_config+8(%esi)	/* EFI System table pointer */
+-	/*
+-	 * Relocate efi_config->call().
+-	 */
+-	addq	%rbp, efi64_config+40(%rip)
 -
--	/* Relocate efi_config->call() */
--	leal	efi32_config(%esi), %eax
--	add	%esi, 40(%eax)
--	pushl	%eax
--
+-	movq	%rax, %rdi
 -	call	make_boot_params
--	cmpl	$0, %eax
+-	cmpq	$0,%rax
 -	je	fail
--	movl	%esi, BP_code32_start(%eax)
--	popl	%ecx
--	pushl	%eax
--	pushl	%ecx
--	jmp	2f		/* Skip efi_config initialization */
+-	mov	%rax, %rsi
+-	leaq	startup_32(%rip), %rax
+-	movl	%eax, BP_code32_start(%rsi)
+-	jmp	2f		/* Skip the relocation */
 -
--ENTRY(efi32_stub_entry)
--	add	$0x4, %esp
--	popl	%ecx
--	popl	%edx
--
+-handover_entry:
 -	call	1f
--1:	popl	%esi
--	subl	$1b, %esi
+-1:	popq	%rbp
+-	subq	$1b, %rbp
 -
--	movl	%ecx, efi32_config(%esi)	/* Handle */
--	movl	%edx, efi32_config+8(%esi)	/* EFI System table pointer */
--
--	/* Relocate efi_config->call() */
--	leal	efi32_config(%esi), %eax
--	add	%esi, 40(%eax)
--	pushl	%eax
+-	/*
+-	 * Relocate efi_config->call().
+-	 */
+-	movq	efi_config(%rip), %rax
+-	addq	%rbp, 40(%rax)
 -2:
+-	movq	efi_config(%rip), %rdi
 -	call	efi_main
--	cmpl	$0, %eax
--	movl	%eax, %esi
+-	movq	%rax,%rsi
+-	cmpq	$0,%rax
 -	jne	2f
 -fail:
 -	/* EFI init failed, so hang. */
@@ -137,70 +128,60 @@ index d85b9625e836..11c68cf53d4e 100644
 -	jmp	fail
 -2:
 -	movl	BP_code32_start(%esi), %eax
--	leal	preferred_addr(%eax), %eax
--	jmp	*%eax
+-	leaq	preferred_addr(%rax), %rax
+-	jmp	*%rax
 -
 -preferred_addr:
 -#endif
- 	cld
- 	/*
- 	 * Test KEEP_SEGMENTS flag to see if the bootloader is asking
-@@ -208,6 +143,70 @@ preferred_addr:
- 	jmp	*%eax
- ENDPROC(startup_32)
  
-+#ifdef CONFIG_EFI_STUB
-+/*
-+ * We don't need the return address, so set up the stack so efi_main() can find
-+ * its arguments.
-+ */
+ 	/* Setup data segments. */
+ 	xorl	%eax, %eax
+@@ -413,6 +354,59 @@ lvl5:
+ 	jmp	*%rax
+ 
+ #ifdef CONFIG_EFI_STUB
++
++/* The entry point for the PE/COFF executable is efi_pe_entry. */
 +ENTRY(efi_pe_entry)
-+	add	$0x4, %esp
++	movq	%rcx, efi64_config(%rip)	/* Handle */
++	movq	%rdx, efi64_config+8(%rip) /* EFI System table pointer */
++
++	leaq	efi64_config(%rip), %rax
++	movq	%rax, efi_config(%rip)
 +
 +	call	1f
-+1:	popl	%esi
-+	subl	$1b, %esi
++1:	popq	%rbp
++	subq	$1b, %rbp
 +
-+	popl	%ecx
-+	movl	%ecx, efi32_config(%esi)	/* Handle */
-+	popl	%ecx
-+	movl	%ecx, efi32_config+8(%esi)	/* EFI System table pointer */
++	/*
++	 * Relocate efi_config->call().
++	 */
++	addq	%rbp, efi64_config+40(%rip)
 +
-+	/* Relocate efi_config->call() */
-+	leal	efi32_config(%esi), %eax
-+	add	%esi, 40(%eax)
-+	pushl	%eax
-+
++	movq	%rax, %rdi
 +	call	make_boot_params
-+	cmpl	$0, %eax
++	cmpq	$0,%rax
 +	je	fail
-+	movl	%esi, BP_code32_start(%eax)
-+	popl	%ecx
-+	pushl	%eax
-+	pushl	%ecx
-+	jmp	2f		/* Skip efi_config initialization */
-+ENDPROC(efi_pe_entry)
++	mov	%rax, %rsi
++	leaq	startup_32(%rip), %rax
++	movl	%eax, BP_code32_start(%rsi)
++	jmp	2f		/* Skip the relocation */
 +
-+ENTRY(efi32_stub_entry)
-+	add	$0x4, %esp
-+	popl	%ecx
-+	popl	%edx
-+
++handover_entry:
 +	call	1f
-+1:	popl	%esi
-+	subl	$1b, %esi
++1:	popq	%rbp
++	subq	$1b, %rbp
 +
-+	movl	%ecx, efi32_config(%esi)	/* Handle */
-+	movl	%edx, efi32_config+8(%esi)	/* EFI System table pointer */
-+
-+	/* Relocate efi_config->call() */
-+	leal	efi32_config(%esi), %eax
-+	add	%esi, 40(%eax)
-+	pushl	%eax
++	/*
++	 * Relocate efi_config->call().
++	 */
++	movq	efi_config(%rip), %rax
++	addq	%rbp, 40(%rax)
 +2:
++	movq	efi_config(%rip), %rdi
 +	call	efi_main
-+	cmpl	$0, %eax
-+	movl	%eax, %esi
++	movq	%rax,%rsi
++	cmpq	$0,%rax
 +	jne	2f
 +fail:
 +	/* EFI init failed, so hang. */
@@ -208,13 +189,12 @@ index d85b9625e836..11c68cf53d4e 100644
 +	jmp	fail
 +2:
 +	movl	BP_code32_start(%esi), %eax
-+	leal	startup_32(%eax), %eax
-+	jmp	*%eax
-+ENDPROC(efi32_stub_entry)
-+#endif
++	leaq	startup_64(%rax), %rax
++	jmp	*%rax
++ENDPROC(efi_pe_entry)
 +
- 	.text
- relocated:
- 
+ 	.org 0x390
+ ENTRY(efi64_stub_entry)
+ 	movq	%rdi, efi64_config(%rip)	/* Handle */
 -- 
 2.14.1
