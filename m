@@ -1,42 +1,108 @@
-From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Subject: Re: [RFC Part1 PATCH v3 14/17] x86/boot: Add early boot support when
- running with SEV active
-Date: Fri, 25 Aug 2017 14:54:31 +0200
-Message-ID: <20170825125431.sjeiwkthrgsk5tke@pd.tnic>
-References: <20170724190757.11278-1-brijesh.singh@amd.com>
- <20170724190757.11278-15-brijesh.singh@amd.com>
- <20170823153058.yli5qogrmjl74wkl@pd.tnic>
- <42cf82fc-03be-c4c7-eaab-b2306a049d20@amd.com>
+From: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Subject: Re: [PATCH 3/3] x86/efi: Use efi_switch_mm() rather than manually
+ twiddling with cr3
+Date: Fri, 25 Aug 2017 08:13:29 -0700
+Message-ID: <CALCETrXy5V6QBLx31R6L0rD5Apx-yox6H=tUyuVwqeTSgxJ_1A@mail.gmail.com>
+References: <20170816095338.GB17270@leverpostej> <20170816100709.GG12845@arm.com>
+ <20170816110321.GC17270@leverpostej> <20170816125715.GB3384@codeblueprint.co.uk>
+ <CALCETrVSHuz=hcAgGxYHBmpiNcP4ECrJh885cR4X17QsJVj8+w@mail.gmail.com>
+ <20170815223541.GA25778@remoulade> <20170817103514.GC27872@arm.com>
+ <CALCETrVhLmntPArQiuOcQeNf9Y2kDxa+mUY=v1P8rVOkeCZn4Q@mail.gmail.com>
+ <20170821103359.jt2xf2cx5wxjldau@hirez.programming.kicks-ass.net>
+ <E5C753C8-1B92-4B4F-B95D-32DCC5C0AF5F@amacapital.net> <20170821140813.idloyrk4lowann3j@hirez.programming.kicks-ass.net>
+ <6E0248C9-19AB-474E-A901-2A0422337DD0@amacapital.net> <1503528742.30475.17.camel@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <42cf82fc-03be-c4c7-eaab-b2306a049d20-5C7GfCeVMHo@public.gmane.org>
+In-Reply-To: <1503528742.30475.17.camel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>
-Cc: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Piotr Luc <piotr.luc-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lu Baolu <baolu.lu-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Reza Arbab <arbab-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Kirill A . Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Eric
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Neri, Ricardo" <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Shankar, Ravi V" <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Btw,
+On Wed, Aug 23, 2017 at 3:52 PM, Sai Praneeth Prakhya
+<sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> On Mon, 2017-08-21 at 08:23 -0700, Andy Lutomirski wrote:
+>>
+>> > On Aug 21, 2017, at 7:08 AM, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org> wro=
+te:
+>> >
+>> >> On Mon, Aug 21, 2017 at 06:56:01AM -0700, Andy Lutomirski wrote:
+>> >>
+>> >>
+>> >>> On Aug 21, 2017, at 3:33 AM, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org> w=
+rote:
+>> >
+>> >>>>
+>> >>>> Using a kernel thread solves the problem for real.  Anything that
+>> >>>> blindly accesses user memory in kernel thread context is terminally
+>> >>>> broken no matter what.
+>> >>>
+>> >>> So perf-callchain doesn't do it 'blindly', it wants either:
+>> >>>
+>> >>> - user_mode(regs) true, or
+>> >>> - task_pt_regs() set.
+>> >>>
+>> >>> However I'm thinking that if the kernel thread has ->mm =3D=3D &efi_=
+mm, the
+>> >>> EFI code running could very well have user_mode(regs) being true.
+>> >>>
+>> >>> intel_pmu_pebs_fixup() OTOH 'blindly' assumes that the LBR addresses=
+ are
+>> >>> accessible. It bails on error though. So while its careful, it does
+>> >>> attempt to access the 'user' mapping directly. Which should also tri=
+gger
+>> >>> with the EFI code.
+>> >>>
+>> >>> And I'm not seeing anything particularly broken with either. The PEB=
+S
+>> >>> fixup relies on the CPU having just executed the code, and if it cou=
+ld
+>> >>> fetch and execute the code, why shouldn't it be able to fetch and re=
+ad?
+>> >>
+>> >> There are two ways this could be a problem.  One is that u privileged
+>> >> user apps shouldn't be able to read from EFI memory.
+>> >
+>> > Ah, but only root can create per-cpu events or attach events to kernel
+>> > threads (with sensible paranoia levels).
+>>
+>> But this may not need to be percpu.  If a non root user can trigger, say=
+, an EFI variable read in their own thread context, boom.
+>>
+> + Tony
+>
+> Hi Andi,
+>
+> I am trying to reproduce the issue that we are discussing and hence
+> tried an experiment like this:
+> A user process continuously reads efi variable by
+> "cat /sys/firmware/efi/efivars/Boot0000-8be4df61-93ca-11d2-aa0d-00e098032=
+b8c" for specified time (Eg: 100 seconds) and simultaneously I ran "perf to=
+p" as root (which I suppose should trigger NMI's). I see that everything is=
+ fine, no lockups, no kernel crash, no warnings/errors in dmesg.
+>
+> I see that perf top reports 50% of time is spent in efi function
+> (probably efi_get_variable()).
+> Overhead        Shared Object   Symbol
+> 50%             [unknown]       [k] 0xfffffffeea967416
+>
+> 50% is max, on avg it's 35%.
+>
+> I have tested this on two kernels v4.12 and v3.19. My machine has 8
+> cores and to stress test, I further offlined all cpus except cpu0.
+>
+> Could you please let me know a way to reproduce the issue that we are
+> discussing here.
+> I think the issue we are concerned here is, when kernel is in efi
+> context and an NMI happens and if the NMI handler tries to access user
+> space, boom! we don't have user space in efi context. Am I right in
+> understanding the issue or is it something else?
 
-I don't see our SEV-specific chicken bit which disables SEV only.
+The boom isn't a crash, though -- it'll be (potentially) sensitive
+information that shows up in the perf record.
 
-Do we need it? If so, maybe something like
-
-mem_encrypt=sme_only
-
-or so.
-
-Or is the mem_encrypt=off chicken bit enough?
-
-What about the use case where you want SME but no encrypted guests?
-
-A bunch of hmmm.
-
--- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+As long as EFI isn't using low addresses, there may not be an issue.
+But EFI should (maybe) use low addresses, and this'll be more
+important.
