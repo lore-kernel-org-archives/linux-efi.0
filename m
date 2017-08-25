@@ -1,58 +1,181 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [GIT PULL 0/5] more EFI changes for v4.14
-Date: Fri, 25 Aug 2017 16:50:14 +0100
-Message-ID: <20170825155019.6740-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/5] efi/libstub: Enable reset attack mitigation
+Date: Fri, 25 Aug 2017 16:50:15 +0100
+Message-ID: <20170825155019.6740-2-ard.biesheuvel@linaro.org>
+References: <20170825155019.6740-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170825155019.6740-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Colin Ian King <colin.king@canonical.com>, Jan Beulich <jbeulich@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, Matthew Garrett <mjg59@google.com>
+Cc: Matthew Garrett <mjg59@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-The following changes since commit f1a5b53570001b1bcbf890ac6c4be1db99f8cc28:
+From: Matthew Garrett <mjg59@google.com>
 
-  firmware/efi/esrt: Constify attribute_group structures (2017-08-21 09:43:51 +0200)
+If a machine is reset while secrets are present in RAM, it may be
+possible for code executed after the reboot to extract those secrets
+from untouched memory. The Trusted Computing Group specified a mechanism
+for requesting that the firmware clear all RAM on reset before booting
+another OS. This is done by setting the MemoryOverwriteRequestControl
+variable at startup. If userspace can ensure that all secrets are
+removed as part of a controlled shutdown, it can reset this variable to
+0 before triggering a hardware reboot.
 
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
-
-for you to fetch changes up to c4d2793e5a07d5e63d91715a4393fe47c8345112:
-
-  efi: bgrt: use efi_mem_type() (2017-08-25 10:35:23 +0100)
-
-----------------------------------------------------------------
-More EFI changes for v4.14:
-- add support for requesting the firmware to wipe RAM at warm reboot
-- increase the size of the random seed obtained from UEFI so crng
-  fast init can complete earlier
-- add 'static' to local function pointer
-- move efi_mem_type() to common code and replace an open coded instance
-  with it in the BGRT driver
-
-----------------------------------------------------------------
-Ard Biesheuvel (1):
-      efi/random: Increase size of firmware supplied randomness
-
-Colin Ian King (1):
-      efi/reboot: Make function pointer orig_pm_power_off static
-
-Jan Beulich (2):
-      efi: move efi_mem_type() to common code
-      efi: bgrt: use efi_mem_type()
-
-Matthew Garrett (1):
-      efi/libstub: Enable reset attack mitigation
-
+Signed-off-by: Matthew Garrett <mjg59@google.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
  arch/x86/boot/compressed/eboot.c        |  3 ++
- arch/x86/platform/efi/efi.c             | 19 -----------
  drivers/firmware/efi/Kconfig            | 10 ++++++
- drivers/firmware/efi/efi-bgrt.c         | 22 +------------
- drivers/firmware/efi/efi.c              | 40 +++++++++++++++++++----
  drivers/firmware/efi/libstub/Makefile   |  1 +
  drivers/firmware/efi/libstub/arm-stub.c |  3 ++
- drivers/firmware/efi/libstub/random.c   | 10 +++---
  drivers/firmware/efi/libstub/tpm.c      | 58 +++++++++++++++++++++++++++++++++
- drivers/firmware/efi/reboot.c           |  2 +-
- include/linux/efi.h                     |  9 +++++
- 11 files changed, 123 insertions(+), 54 deletions(-)
+ include/linux/efi.h                     |  7 ++++
+ 6 files changed, 82 insertions(+)
  create mode 100644 drivers/firmware/efi/libstub/tpm.c
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index c3e869eaef0c..a1686f3dc295 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -997,6 +997,9 @@ struct boot_params *efi_main(struct efi_config *c,
+ 	if (boot_params->secure_boot == efi_secureboot_mode_unset)
+ 		boot_params->secure_boot = efi_get_secureboot(sys_table);
+ 
++	/* Ask the firmware to clear memory on unclean shutdown */
++	efi_enable_reset_attack_mitigation(sys_table);
++
+ 	setup_graphics(boot_params);
+ 
+ 	setup_efi_pci(boot_params);
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 394db40ed374..2b4c39fdfa91 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -151,6 +151,16 @@ config APPLE_PROPERTIES
+ 
+ 	  If unsure, say Y if you have a Mac.  Otherwise N.
+ 
++config RESET_ATTACK_MITIGATION
++	bool "Reset memory attack mitigation"
++	depends on EFI_STUB
++	help
++	  Request that the firmware clear the contents of RAM after a reboot
++	  using the TCG Platform Reset Attack Mitigation specification. This
++	  protects against an attacker forcibly rebooting the system while it
++	  still contains secrets in RAM, booting another OS and extracting the
++	  secrets.
++
+ endmenu
+ 
+ config UEFI_CPER
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index cf81e6cf5ae8..dedf9bde44db 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -30,6 +30,7 @@ OBJECT_FILES_NON_STANDARD	:= y
+ KCOV_INSTRUMENT			:= n
+ 
+ lib-y				:= efi-stub-helper.o gop.o secureboot.o
++lib-$(CONFIG_RESET_ATTACK_MITIGATION) += tpm.o
+ 
+ # include the stub's generic dependencies from lib/ when building for ARM/arm64
+ arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index 8181ac179d14..1cb2d1c070c3 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -192,6 +192,9 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 		goto fail_free_cmdline;
+ 	}
+ 
++	/* Ask the firmware to clear memory on unclean shutdown */
++	efi_enable_reset_attack_mitigation(sys_table);
++
+ 	secure_boot = efi_get_secureboot(sys_table);
+ 
+ 	/*
+diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
+new file mode 100644
+index 000000000000..6224cdbc9669
+--- /dev/null
++++ b/drivers/firmware/efi/libstub/tpm.c
+@@ -0,0 +1,58 @@
++/*
++ * TPM handling.
++ *
++ * Copyright (C) 2016 CoreOS, Inc
++ * Copyright (C) 2017 Google, Inc.
++ *     Matthew Garrett <mjg59@google.com>
++ *
++ * This file is part of the Linux kernel, and is made available under the
++ * terms of the GNU General Public License version 2.
++ */
++#include <linux/efi.h>
++#include <asm/efi.h>
++
++#include "efistub.h"
++
++static const efi_char16_t efi_MemoryOverWriteRequest_name[] = {
++	'M', 'e', 'm', 'o', 'r', 'y', 'O', 'v', 'e', 'r', 'w', 'r', 'i', 't',
++	'e', 'R', 'e', 'q', 'u', 'e', 's', 't', 'C', 'o', 'n', 't', 'r', 'o',
++	'l', 0
++};
++
++#define MEMORY_ONLY_RESET_CONTROL_GUID \
++	EFI_GUID(0xe20939be, 0x32d4, 0x41be, 0xa1, 0x50, 0x89, 0x7f, 0x85, 0xd4, 0x98, 0x29)
++
++#define get_efi_var(name, vendor, ...) \
++	efi_call_runtime(get_variable, \
++			 (efi_char16_t *)(name), (efi_guid_t *)(vendor), \
++			 __VA_ARGS__)
++
++#define set_efi_var(name, vendor, ...) \
++	efi_call_runtime(set_variable, \
++			 (efi_char16_t *)(name), (efi_guid_t *)(vendor), \
++			 __VA_ARGS__)
++
++/*
++ * Enable reboot attack mitigation. This requests that the firmware clear the
++ * RAM on next reboot before proceeding with boot, ensuring that any secrets
++ * are cleared. If userland has ensured that all secrets have been removed
++ * from RAM before reboot it can simply reset this variable.
++ */
++void efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg)
++{
++	u8 val = 1;
++	efi_guid_t var_guid = MEMORY_ONLY_RESET_CONTROL_GUID;
++	efi_status_t status;
++	unsigned long datasize = 0;
++
++	status = get_efi_var(efi_MemoryOverWriteRequest_name, &var_guid,
++			     NULL, &datasize, NULL);
++
++	if (status == EFI_NOT_FOUND)
++		return;
++
++	set_efi_var(efi_MemoryOverWriteRequest_name, &var_guid,
++		    EFI_VARIABLE_NON_VOLATILE |
++		    EFI_VARIABLE_BOOTSERVICE_ACCESS |
++		    EFI_VARIABLE_RUNTIME_ACCESS, sizeof(val), &val);
++}
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 8269bcb8ccf7..12e05118657c 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1497,6 +1497,13 @@ enum efi_secureboot_mode {
+ };
+ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table);
+ 
++#ifdef CONFIG_RESET_ATTACK_MITIGATION
++void efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg);
++#else
++static inline void
++efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg) { }
++#endif
++
+ /*
+  * Arch code can implement the following three template macros, avoiding
+  * reptition for the void/non-void return cases of {__,}efi_call_virt():
+-- 
+2.11.0
