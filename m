@@ -1,121 +1,105 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 4/5] efi: move efi_mem_type() to common code
-Date: Fri, 25 Aug 2017 16:50:18 +0100
-Message-ID: <20170825155019.6740-5-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/5] efi/random: Increase size of firmware supplied randomness
+Date: Fri, 25 Aug 2017 16:50:16 +0100
+Message-ID: <20170825155019.6740-3-ard.biesheuvel@linaro.org>
 References: <20170825155019.6740-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170825155019.6740-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170825155019.6740-1-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-From: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>
+The crng code requires at least 64 bytes (2 * CHACHA20_BLOCK_SIZE)
+to complete the fast boot-time init, so provide that many bytes
+when invoking UEFI protocols to seed the entropy pool. Also, add
+a notice so we can tell from the boot log when the seeding actually
+took place.
 
-This follows efi_mem_attributes(), as it's similarly generic. Drop
-__weak from that one though (and don't introduce it for efi_mem_type()
-in the first place) to make clear that other overrides to these
-functions are really not intended.
-
-Signed-off-by: Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/platform/efi/efi.c | 19 -------------------
- drivers/firmware/efi/efi.c  | 37 +++++++++++++++++++++++++++++++------
- 2 files changed, 31 insertions(+), 25 deletions(-)
+ drivers/firmware/efi/efi.c            |  3 ++-
+ drivers/firmware/efi/libstub/random.c | 10 ++++------
+ include/linux/efi.h                   |  2 ++
+ 3 files changed, 8 insertions(+), 7 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index f084d8718ac4..928b6dceeca0 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -1032,25 +1032,6 @@ void __init efi_enter_virtual_mode(void)
- 	efi_dump_pagetable();
- }
- 
--/*
-- * Convenience functions to obtain memory types and attributes
-- */
--u32 efi_mem_type(unsigned long phys_addr)
--{
--	efi_memory_desc_t *md;
--
--	if (!efi_enabled(EFI_MEMMAP))
--		return 0;
--
--	for_each_efi_memory_desc(md) {
--		if ((md->phys_addr <= phys_addr) &&
--		    (phys_addr < (md->phys_addr +
--				  (md->num_pages << EFI_PAGE_SHIFT))))
--			return md->type;
--	}
--	return 0;
--}
--
- static int __init arch_parse_efi_cmdline(char *str)
- {
- 	if (!str) {
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 9e822906adcb..f97f272e16ee 100644
+index 6519be44387c..9e822906adcb 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
-@@ -792,19 +792,19 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
+@@ -522,6 +522,7 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 			if (seed != NULL) {
+ 				add_device_randomness(seed->bits, seed->size);
+ 				early_memunmap(seed, sizeof(*seed) + size);
++				pr_notice("seeding entropy pool\n");
+ 			} else {
+ 				pr_err("Could not map UEFI random seed!\n");
+ 			}
+@@ -867,7 +868,7 @@ static int update_efi_random_seed(struct notifier_block *nb,
+ 
+ 	seed = memremap(efi.rng_seed, sizeof(*seed), MEMREMAP_WB);
+ 	if (seed != NULL) {
+-		size = min(seed->size, 32U);
++		size = min(seed->size, EFI_RANDOM_SEED_SIZE);
+ 		memunmap(seed);
+ 	} else {
+ 		pr_err("Could not map UEFI random seed!\n");
+diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
+index 7e72954d5860..e0e603a89aa9 100644
+--- a/drivers/firmware/efi/libstub/random.c
++++ b/drivers/firmware/efi/libstub/random.c
+@@ -145,8 +145,6 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
+ 	return status;
  }
  
- /*
-+ * IA64 has a funky EFI memory map that doesn't work the same way as
-+ * other architectures.
-+ */
-+#ifndef CONFIG_IA64
-+/*
-  * efi_mem_attributes - lookup memmap attributes for physical address
-  * @phys_addr: the physical address to lookup
-  *
-  * Search in the EFI memory map for the region covering
-  * @phys_addr. Returns the EFI memory attributes if the region
-  * was found in the memory map, 0 otherwise.
-- *
-- * Despite being marked __weak, most architectures should *not*
-- * override this function. It is __weak solely for the benefit
-- * of ia64 which has a funky EFI memory map that doesn't work
-- * the same way as other architectures.
-  */
--u64 __weak efi_mem_attributes(unsigned long phys_addr)
-+u64 efi_mem_attributes(unsigned long phys_addr)
+-#define RANDOM_SEED_SIZE	32
+-
+ efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg)
  {
- 	efi_memory_desc_t *md;
+ 	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
+@@ -162,25 +160,25 @@ efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg)
+ 		return status;
  
-@@ -820,6 +820,31 @@ u64 __weak efi_mem_attributes(unsigned long phys_addr)
- 	return 0;
- }
+ 	status = efi_call_early(allocate_pool, EFI_RUNTIME_SERVICES_DATA,
+-				sizeof(*seed) + RANDOM_SEED_SIZE,
++				sizeof(*seed) + EFI_RANDOM_SEED_SIZE,
+ 				(void **)&seed);
+ 	if (status != EFI_SUCCESS)
+ 		return status;
  
-+/*
-+ * efi_mem_type - lookup memmap type for physical address
-+ * @phys_addr: the physical address to lookup
-+ *
-+ * Search in the EFI memory map for the region covering @phys_addr.
-+ * Returns the EFI memory type if the region was found in the memory
-+ * map, EFI_RESERVED_TYPE (zero) otherwise.
-+ */
-+u32 efi_mem_type(unsigned long phys_addr)
-+{
-+	const efi_memory_desc_t *md;
+-	status = rng->get_rng(rng, &rng_algo_raw, RANDOM_SEED_SIZE,
++	status = rng->get_rng(rng, &rng_algo_raw, EFI_RANDOM_SEED_SIZE,
+ 			      seed->bits);
+ 	if (status == EFI_UNSUPPORTED)
+ 		/*
+ 		 * Use whatever algorithm we have available if the raw algorithm
+ 		 * is not implemented.
+ 		 */
+-		status = rng->get_rng(rng, NULL, RANDOM_SEED_SIZE,
++		status = rng->get_rng(rng, NULL, EFI_RANDOM_SEED_SIZE,
+ 				      seed->bits);
+ 
+ 	if (status != EFI_SUCCESS)
+ 		goto err_freepool;
+ 
+-	seed->size = RANDOM_SEED_SIZE;
++	seed->size = EFI_RANDOM_SEED_SIZE;
+ 	status = efi_call_early(install_configuration_table, &rng_table_guid,
+ 				seed);
+ 	if (status != EFI_SUCCESS)
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 12e05118657c..8dc3d94a3e3c 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1564,6 +1564,8 @@ efi_status_t efi_exit_boot_services(efi_system_table_t *sys_table,
+ 				    void *priv,
+ 				    efi_exit_boot_map_processing priv_func);
+ 
++#define EFI_RANDOM_SEED_SIZE		64U
 +
-+	if (!efi_enabled(EFI_MEMMAP))
-+		return 0;
-+
-+	for_each_efi_memory_desc(md) {
-+		if ((md->phys_addr <= phys_addr) &&
-+		    (phys_addr < (md->phys_addr +
-+				  (md->num_pages << EFI_PAGE_SHIFT))))
-+			return md->type;
-+	}
-+	return EFI_RESERVED_TYPE;
-+}
-+#endif
-+
- int efi_status_to_err(efi_status_t status)
- {
- 	int err;
+ struct linux_efi_random_seed {
+ 	u32	size;
+ 	u8	bits[];
 -- 
 2.11.0
