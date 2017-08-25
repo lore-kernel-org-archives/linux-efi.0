@@ -1,79 +1,117 @@
-From: Florent Revest <florent.revest@arm.com>
-Subject: [RFC 06/11] KVM, arm64: Expose a VCPU initialization function
-Date: Fri, 25 Aug 2017 09:31:36 +0100
-Message-ID: <1503649901-5834-7-git-send-email-florent.revest@arm.com>
-References: <1503649901-5834-1-git-send-email-florent.revest@arm.com>
+From: "Jan Beulich" <JBeulich-IBi9RG/b67k@public.gmane.org>
+Subject: [PATCH v2 1/2] EFI: move efi_mem_type() to common code
+Date: Fri, 25 Aug 2017 03:24:17 -0600
+Message-ID: <59A008E102000078001739F1@prv-mh.provo.novell.com>
+References: <599EB46E02000078001730B1@prv-mh.provo.novell.com>
+ <59A008E102000078001739F1@prv-mh.provo.novell.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1503649901-5834-1-git-send-email-florent.revest@arm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org, pbonzini@redhat.com, rkrcmar@redhat.com, christoffer.dall@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, mark.rutland@arm.com, marc.zyngier@arm.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org, kvmarm@lists.cs.columbia.edu, leif.lindholm@arm.com, revestflo@gmail.com, Florent Revest <florent.revest@arm.com>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-KVM's core now offers internal virtual machine capabilities, however on ARM
-the KVM_ARM_VCPU_INIT ioctl also has to be used to initialize a virtual CPU
+This follows efi_mem_attributes(), as it's similarly generic. Drop
+__weak from that one though (and don't introduce it for efi_mem_type()
+in the first place) to make clear that other overrides to these
+functions are really not intended.
 
-This patch exposes a kvm_arm_vcpu_init() function to the rest of the kernel
-on arm64 so that it can be used for arm64 internal VM initialization.
-
-This function actually used to be named kvm_arch_vcpu_ioctl_vcpu_init() but
-the "ioctl" part of the name wasn't consistent with the rest of the KVM arm
-ioctl handlers. Moreover, it wasn't relevant to the usage of internal VMs.
-Therefore it has been decided to rename the function to make it less
-misleading.
-
-Signed-off-by: Florent Revest <florent.revest@arm.com>
+Signed-off-by: Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>
 ---
- arch/arm64/include/asm/kvm_host.h | 2 ++
- virt/kvm/arm/arm.c                | 5 ++---
- 2 files changed, 4 insertions(+), 3 deletions(-)
+v2: Drop __weak as requested.
+---
+ arch/x86/platform/efi/efi.c |   19 -------------------
+ drivers/firmware/efi/efi.c  |   29 +++++++++++++++++++++++++++++
+ 2 files changed, 29 insertions(+), 19 deletions(-)
 
-diff --git a/arch/arm64/include/asm/kvm_host.h b/arch/arm64/include/asm/kvm=
-_host.h
-index 65aab35..07b7460 100644
---- a/arch/arm64/include/asm/kvm_host.h
-+++ b/arch/arm64/include/asm/kvm_host.h
-@@ -372,6 +372,8 @@ static inline void kvm_arch_vcpu_uninit(struct kvm_vcpu=
- *vcpu) {}
- static inline void kvm_arch_sched_in(struct kvm_vcpu *vcpu, int cpu) {}
- static inline void kvm_arch_vcpu_block_finish(struct kvm_vcpu *vcpu) {}
-
-+int kvm_arm_vcpu_init(struct kvm_vcpu *vcpu, struct kvm_vcpu_init *init);
-+
- void kvm_arm_init_debug(void);
- void kvm_arm_setup_debug(struct kvm_vcpu *vcpu);
- void kvm_arm_clear_debug(struct kvm_vcpu *vcpu);
-diff --git a/virt/kvm/arm/arm.c b/virt/kvm/arm/arm.c
-index a39a1e1..aa29a5d 100644
---- a/virt/kvm/arm/arm.c
-+++ b/virt/kvm/arm/arm.c
-@@ -888,8 +888,7 @@ static int kvm_vcpu_set_target(struct kvm_vcpu *vcpu,
+--- 4.13-rc6-EFI.orig/arch/x86/platform/efi/efi.c	2017-08-23 08:25:56.360254268 +0200
++++ 4.13-rc6-EFI/arch/x86/platform/efi/efi.c	2017-08-24 10:46:34.580986480 +0200
+@@ -1032,25 +1032,6 @@ void __init efi_enter_virtual_mode(void)
+ 	efi_dump_pagetable();
  }
-
-
--static int kvm_arch_vcpu_ioctl_vcpu_init(struct kvm_vcpu *vcpu,
--                                        struct kvm_vcpu_init *init)
-+int kvm_arm_vcpu_init(struct kvm_vcpu *vcpu, struct kvm_vcpu_init *init)
+ 
+-/*
+- * Convenience functions to obtain memory types and attributes
+- */
+-u32 efi_mem_type(unsigned long phys_addr)
+-{
+-	efi_memory_desc_t *md;
+-
+-	if (!efi_enabled(EFI_MEMMAP))
+-		return 0;
+-
+-	for_each_efi_memory_desc(md) {
+-		if ((md->phys_addr <= phys_addr) &&
+-		    (phys_addr < (md->phys_addr +
+-				  (md->num_pages << EFI_PAGE_SHIFT))))
+-			return md->type;
+-	}
+-	return 0;
+-}
+-
+ static int __init arch_parse_efi_cmdline(char *str)
  {
-        int ret;
-
-@@ -973,7 +972,7 @@ long kvm_arch_vcpu_ioctl(struct file *filp,
-                if (copy_from_user(&init, argp, sizeof(init)))
-                        return -EFAULT;
-
--               return kvm_arch_vcpu_ioctl_vcpu_init(vcpu, &init);
-+               return kvm_arm_vcpu_init(vcpu, &init);
-        }
-        case KVM_SET_ONE_REG:
-        case KVM_GET_ONE_REG: {
---
-1.9.1
-
-IMPORTANT NOTICE: The contents of this email and any attachments are confid=
-ential and may also be privileged. If you are not the intended recipient, p=
-lease notify the sender immediately and do not disclose the contents to any=
- other person, use it for any purpose, or store or copy the information in =
-any medium. Thank you.
+ 	if (!str) {
+--- 4.13-rc6-EFI.orig/drivers/firmware/efi/efi.c	2017-08-23 08:25:59.792278686 +0200
++++ 4.13-rc6-EFI/drivers/firmware/efi/efi.c	2017-08-25 10:10:34.950714797 +0200
+@@ -791,19 +791,19 @@ char * __init efi_md_typeattr_format(cha
+ }
+ 
+ /*
++ * IA64 has a funky EFI memory map that doesn't work the same way as
++ * other architectures.
++ */
++#ifndef CONFIG_IA64
++/*
+  * efi_mem_attributes - lookup memmap attributes for physical address
+  * @phys_addr: the physical address to lookup
+  *
+  * Search in the EFI memory map for the region covering
+  * @phys_addr. Returns the EFI memory attributes if the region
+  * was found in the memory map, 0 otherwise.
+- *
+- * Despite being marked __weak, most architectures should *not*
+- * override this function. It is __weak solely for the benefit
+- * of ia64 which has a funky EFI memory map that doesn't work
+- * the same way as other architectures.
+  */
+-u64 __weak efi_mem_attributes(unsigned long phys_addr)
++u64 efi_mem_attributes(unsigned long phys_addr)
+ {
+ 	efi_memory_desc_t *md;
+ 
+@@ -819,6 +819,31 @@ u64 __weak efi_mem_attributes(unsigned l
+ 	return 0;
+ }
+ 
++/*
++ * efi_mem_type - lookup memmap type for physical address
++ * @phys_addr: the physical address to lookup
++ *
++ * Search in the EFI memory map for the region covering @phys_addr.
++ * Returns the EFI memory type if the region was found in the memory
++ * map, EFI_RESERVED_TYPE (zero) otherwise.
++ */
++u32 efi_mem_type(unsigned long phys_addr)
++{
++	const efi_memory_desc_t *md;
++
++	if (!efi_enabled(EFI_MEMMAP))
++		return 0;
++
++	for_each_efi_memory_desc(md) {
++		if ((md->phys_addr <= phys_addr) &&
++		    (phys_addr < (md->phys_addr +
++				  (md->num_pages << EFI_PAGE_SHIFT))))
++			return md->type;
++	}
++	return EFI_RESERVED_TYPE;
++}
++#endif
++
+ int efi_status_to_err(efi_status_t status)
+ {
+ 	int err;
