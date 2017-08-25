@@ -1,65 +1,121 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 5/5] efi: bgrt: use efi_mem_type()
-Date: Fri, 25 Aug 2017 16:50:19 +0100
-Message-ID: <20170825155019.6740-6-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 4/5] efi: move efi_mem_type() to common code
+Date: Fri, 25 Aug 2017 16:50:18 +0100
+Message-ID: <20170825155019.6740-5-ard.biesheuvel@linaro.org>
 References: <20170825155019.6740-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170825155019.6740-1-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Jan Beulich <JBeulich@suse.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Jan Beulich <jbeulich@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170825155019.6740-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Jan Beulich <JBeulich@suse.com>
+From: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>
 
-Avoid effectively open-coding the function.
+This follows efi_mem_attributes(), as it's similarly generic. Drop
+__weak from that one though (and don't introduce it for efi_mem_type()
+in the first place) to make clear that other overrides to these
+functions are really not intended.
 
-Signed-off-by: Jan Beulich <jbeulich@suse.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/efi-bgrt.c | 22 +---------------------
- 1 file changed, 1 insertion(+), 21 deletions(-)
+ arch/x86/platform/efi/efi.c | 19 -------------------
+ drivers/firmware/efi/efi.c  | 37 +++++++++++++++++++++++++++++++------
+ 2 files changed, 31 insertions(+), 25 deletions(-)
 
-diff --git a/drivers/firmware/efi/efi-bgrt.c b/drivers/firmware/efi/efi-bgrt.c
-index b58233e4ed71..50793fda7819 100644
---- a/drivers/firmware/efi/efi-bgrt.c
-+++ b/drivers/firmware/efi/efi-bgrt.c
-@@ -27,26 +27,6 @@ struct bmp_header {
- 	u32 size;
- } __packed;
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index f084d8718ac4..928b6dceeca0 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -1032,25 +1032,6 @@ void __init efi_enter_virtual_mode(void)
+ 	efi_dump_pagetable();
+ }
  
--static bool efi_bgrt_addr_valid(u64 addr)
+-/*
+- * Convenience functions to obtain memory types and attributes
+- */
+-u32 efi_mem_type(unsigned long phys_addr)
 -{
 -	efi_memory_desc_t *md;
 -
+-	if (!efi_enabled(EFI_MEMMAP))
+-		return 0;
+-
 -	for_each_efi_memory_desc(md) {
--		u64 size;
--		u64 end;
--
--		if (md->type != EFI_BOOT_SERVICES_DATA)
--			continue;
--
--		size = md->num_pages << EFI_PAGE_SHIFT;
--		end = md->phys_addr + size;
--		if (addr >= md->phys_addr && addr < end)
--			return true;
+-		if ((md->phys_addr <= phys_addr) &&
+-		    (phys_addr < (md->phys_addr +
+-				  (md->num_pages << EFI_PAGE_SHIFT))))
+-			return md->type;
 -	}
--
--	return false;
+-	return 0;
 -}
 -
- void __init efi_bgrt_init(struct acpi_table_header *table)
+ static int __init arch_parse_efi_cmdline(char *str)
  {
- 	void *image;
-@@ -85,7 +65,7 @@ void __init efi_bgrt_init(struct acpi_table_header *table)
- 		goto out;
- 	}
+ 	if (!str) {
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 9e822906adcb..f97f272e16ee 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -792,19 +792,19 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
+ }
  
--	if (!efi_bgrt_addr_valid(bgrt->image_address)) {
-+	if (efi_mem_type(bgrt->image_address) != EFI_BOOT_SERVICES_DATA) {
- 		pr_notice("Ignoring BGRT: invalid image address\n");
- 		goto out;
- 	}
+ /*
++ * IA64 has a funky EFI memory map that doesn't work the same way as
++ * other architectures.
++ */
++#ifndef CONFIG_IA64
++/*
+  * efi_mem_attributes - lookup memmap attributes for physical address
+  * @phys_addr: the physical address to lookup
+  *
+  * Search in the EFI memory map for the region covering
+  * @phys_addr. Returns the EFI memory attributes if the region
+  * was found in the memory map, 0 otherwise.
+- *
+- * Despite being marked __weak, most architectures should *not*
+- * override this function. It is __weak solely for the benefit
+- * of ia64 which has a funky EFI memory map that doesn't work
+- * the same way as other architectures.
+  */
+-u64 __weak efi_mem_attributes(unsigned long phys_addr)
++u64 efi_mem_attributes(unsigned long phys_addr)
+ {
+ 	efi_memory_desc_t *md;
+ 
+@@ -820,6 +820,31 @@ u64 __weak efi_mem_attributes(unsigned long phys_addr)
+ 	return 0;
+ }
+ 
++/*
++ * efi_mem_type - lookup memmap type for physical address
++ * @phys_addr: the physical address to lookup
++ *
++ * Search in the EFI memory map for the region covering @phys_addr.
++ * Returns the EFI memory type if the region was found in the memory
++ * map, EFI_RESERVED_TYPE (zero) otherwise.
++ */
++u32 efi_mem_type(unsigned long phys_addr)
++{
++	const efi_memory_desc_t *md;
++
++	if (!efi_enabled(EFI_MEMMAP))
++		return 0;
++
++	for_each_efi_memory_desc(md) {
++		if ((md->phys_addr <= phys_addr) &&
++		    (phys_addr < (md->phys_addr +
++				  (md->num_pages << EFI_PAGE_SHIFT))))
++			return md->type;
++	}
++	return EFI_RESERVED_TYPE;
++}
++#endif
++
+ int efi_status_to_err(efi_status_t status)
+ {
+ 	int err;
 -- 
 2.11.0
