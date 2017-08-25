@@ -1,7 +1,7 @@
 From: Florent Revest <florent.revest@arm.com>
-Subject: [RFC 01/11] arm64: Add an SMCCC function IDs header
-Date: Fri, 25 Aug 2017 09:31:31 +0100
-Message-ID: <1503649901-5834-2-git-send-email-florent.revest@arm.com>
+Subject: [RFC 07/11] KVM: Allow initialization before the module target
+Date: Fri, 25 Aug 2017 09:31:37 +0100
+Message-ID: <1503649901-5834-8-git-send-email-florent.revest@arm.com>
 References: <1503649901-5834-1-git-send-email-florent.revest@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,86 +21,86 @@ To: linux-arm-kernel@lists.infradead.org
 Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, kvm@vger.kernel.org, rkrcmar@redhat.com, matt@codeblueprint.co.uk, catalin.marinas@arm.com, ard.biesheuvel@linaro.org, will.deacon@arm.com, linux-kernel@vger.kernel.org, leif.lindholm@arm.com, marc.zyngier@arm.com, revestflo@gmail.com, pbonzini@redhat.com, Florent Revest <florent.revest@arm.com>, kvmarm@lists.cs.columbia.edu, christoffer.dall@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-The ARM SMC Calling Convention (DEN 0028B) introduces function IDs for
-hypercalls, given in the x0 register during an SMC or HVC from a guest.
+The kvm_init function has been designed to be executed during the
+module_init target. It requires a struct module pointer to be used as
+the owner of the /dev/* files and also tries to register /dev/kvm with a
+function (misc_register) that can only be used late in the boot process.
 
-The document defines ranges of function IDs targeting different kinds of
-hypervisors or supervisors.
+This patch modifies kvm_init to execute this late initialization code
+conditionally, only in the context of a module_init. It also offers a
+kvm_set_module function to be used for /dev/kvm registration and device
+files owning once the module target is reached.
 
-Two ID ranges are of particular interest for the kernel:
-    - Standard hypervisor service calls
-    - Vendor specific hypervisor service calls
-
-This patch introduces a couple of useful macros when working with SMCCC.
-They provide defines of those ID ranges to be used by HVC handling (KVM)
-or calling. (e.g: to leverage paravirtualized services)
-
-The document also defines standard return values to be written into x0
-after a hypercall handling. Once again, those macros can potentially be
-used from both the hypervisor or the guest.
+As is, this patch does not change anything. However it could be used by
+certain architectures to initialize the core of kvm earlier in the boot
+(e.g: in a subsys_initcall) and then initialize the userspace facing files
+in a module_init target. This can be useful to create internal VMs before
+being able to offer the userspace APIs.
 
 Signed-off-by: Florent Revest <florent.revest@arm.com>
 ---
- include/linux/smccc_fn.h | 50 ++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 50 insertions(+)
- create mode 100644 include/linux/smccc_fn.h
+ include/linux/kvm_host.h |  1 +
+ virt/kvm/kvm_main.c      | 28 ++++++++++++++++++++--------
+ 2 files changed, 21 insertions(+), 8 deletions(-)
 
-diff --git a/include/linux/smccc_fn.h b/include/linux/smccc_fn.h
-new file mode 100644
-index 0000000..f08145d
---- /dev/null
-+++ b/include/linux/smccc_fn.h
-@@ -0,0 +1,50 @@
-+/*
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * Copyright (C) 2017 ARM Limited
-+ */
+diff --git a/include/linux/kvm_host.h b/include/linux/kvm_host.h
+index dd10d3b..15a0a8d 100644
+--- a/include/linux/kvm_host.h
++++ b/include/linux/kvm_host.h
+@@ -563,6 +563,7 @@ static inline void kvm_irqfd_exit(void)
+ #endif
+ int kvm_init(void *opaque, unsigned vcpu_size, unsigned vcpu_align,
+                  struct module *module);
++int kvm_set_module(struct module *module);
+ void kvm_exit(void);
+
+ struct kvm *kvm_create_internal_vm(unsigned long type);
+diff --git a/virt/kvm/kvm_main.c b/virt/kvm/kvm_main.c
+index c1c8bb6..3c9cb00 100644
+--- a/virt/kvm/kvm_main.c
++++ b/virt/kvm/kvm_main.c
+@@ -4086,14 +4086,10 @@ int kvm_init(void *opaque, unsigned vcpu_size, unsigned vcpu_align,
+        if (r)
+                goto out_free;
+
+-       kvm_chardev_ops.owner = module;
+-       kvm_vm_fops.owner = module;
+-       kvm_vcpu_fops.owner = module;
+-
+-       r = misc_register(&kvm_dev);
+-       if (r) {
+-               pr_err("kvm: misc device register failed\n");
+-               goto out_unreg;
++       if (module) {
++               r = kvm_set_module(module);
++               if (r)
++                       goto out_unreg;
+        }
+
+        register_syscore_ops(&kvm_syscore_ops);
+@@ -4136,6 +4132,22 @@ int kvm_init(void *opaque, unsigned vcpu_size, unsigned vcpu_align,
+ }
+ EXPORT_SYMBOL_GPL(kvm_init);
+
++int kvm_set_module(struct module *module)
++{
++       int r;
 +
-+#ifndef __LINUX_SMCCC_FN_H
-+#define __LINUX_SMCCC_FN_H
++       kvm_chardev_ops.owner = module;
++       kvm_vm_fops.owner = module;
++       kvm_vcpu_fops.owner = module;
 +
-+/*
-+ * Standard return values
-+ */
++       r = misc_register(&kvm_dev);
++       if (r)
++               pr_err("kvm: misc device register failed\n");
 +
-+#define SMCCC_STD_RET_SUCCESS          0
-+#define SMCCC_STD_RET_UNKNOWN_ID       -1
++       return r;
++}
++EXPORT_SYMBOL_GPL(kvm_set_module);
 +
-+
-+/*
-+ * SMC32
-+ */
-+
-+/* Standard hypervisor services interface */
-+#define SMCCC32_STD_HYP_FN_BASE                0x85000000
-+#define SMCCC32_STD_HYP_FN(n)          (SMCCC32_STD_HYP_FN_BASE + (n))
-+
-+/* Vendor specific hypervisor services interface */
-+#define SMCCC32_VDR_HYP_FN_BASE                0x86000000
-+#define SMCCC32_VDR_HYP_FN(n)          (SMCCC32_VDR_HYP_FN_BASE + (n))
-+
-+
-+/*
-+ * SMC64
-+ */
-+
-+/* Standard hypervisor services interface */
-+#define SMCCC64_STD_HYP_FN_BASE                0xc5000000
-+#define SMCCC64_STD_HYP_FN(n)          (SMCCC64_STD_HYP_FN_BASE + (n))
-+
-+/* Vendor specific hypervisor services interface */
-+#define SMCCC64_VDR_HYP_FN_BASE                0xc6000000
-+#define SMCCC64_VDR_HYP_FN(n)          (SMCCC64_VDR_HYP_FN_BASE + (n))
-+
-+#endif /* __LINUX_SMCCC_FN_H */
+ void kvm_exit(void)
+ {
+        debugfs_remove_recursive(kvm_debugfs_dir);
 --
 1.9.1
 
