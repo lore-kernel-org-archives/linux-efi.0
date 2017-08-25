@@ -1,88 +1,167 @@
-From: Florent Revest <florent.revest-5wv7dgnIgG8@public.gmane.org>
-Subject: [RFC 00/11] KVM, EFI, arm64: EFI Runtime Services Sandboxing
-Date: Fri, 25 Aug 2017 09:31:30 +0100
-Message-ID: <1503649901-5834-1-git-send-email-florent.revest@arm.com>
+From: Florent Revest <florent.revest@arm.com>
+Subject: [RFC 02/11] KVM: arm64: Return an Unknown ID on unhandled HVC
+Date: Fri, 25 Aug 2017 09:31:32 +0100
+Message-ID: <1503649901-5834-3-git-send-email-florent.revest@arm.com>
+References: <1503649901-5834-1-git-send-email-florent.revest@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, rkrcmar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, leif.lindholm-5wv7dgnIgG8@public.gmane.org, revestflo-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Florent Revest <florent.revest-5wv7dgnIgG8@public.gmane.org>
+Return-path: <kvm-owner@vger.kernel.org>
+In-Reply-To: <1503649901-5834-1-git-send-email-florent.revest@arm.com>
+Sender: kvm-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org, pbonzini@redhat.com, rkrcmar@redhat.com, christoffer.dall@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, mark.rutland@arm.com, marc.zyngier@arm.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org, kvmarm@lists.cs.columbia.edu, leif.lindholm@arm.com, revestflo@gmail.com, Florent Revest <florent.revest@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+So far, when the KVM hypervisor received an hvc from a guest, it only
+routed the hypercall to the PSCI calls handler. If the function ID of the
+hypercall wouldn't be supported by the PSCI code, a PSCI_RET_NOT_SUPPORTED
+error code would be returned in x0.
 
-This series implements a mechanism to sandbox EFI Runtime Services on arm64=
-.
-It can be enabled with CONFIG_EFI_SANDBOX. At boot it spawns an internal KV=
-M
-virtual machine that is ran everytime an EFI Runtime Service is called. Thi=
-s
-limits the possible security and stability impact of EFI runtime on the ker=
-nel.
+This patch introduces a kvm_psci_is_call() check which is verified before
+entering the PSCI calls handling code. The HVC is now only routed to the
+PSCI code if its function ID is in the ranges of PSCI functions defined by
+SMCCC (0x84000000-0x8400001f and 0xc4000000-0xc400001f).
 
-The patch set is split as follow:
- - Patches 1 and 2: Give more control over HVC handling to KVM
- - Patches 3 to 6: Introduce the concept of KVM "internal VMs"
- - Patches 7 to 9: Reorder KVM and EFI initialization on ARM
- - Patch 10: Introduces the EFI sandboxing VM and wrappers
- - Patch 11: Workarounds some EFI Runtime Services relying on EL3
+If the function ID is not in those ranges, an Unknown Function Identifier
+is returned in x0. This implements the behavior defined by SMCCC and paves
+the way for other hvc handlers.
 
-The sandboxing has been tested to work reliably (rtc and efivars) on a
-SoftIron OverDrive 1000 box and on a ARMv8.3 model with VHE enabled. Normal
-userspace KVM instance have also been tested to still work correctly.
+Signed-off-by: Florent Revest <florent.revest@arm.com>
+---
+ arch/arm/include/asm/kvm_psci.h   |  1 +
+ arch/arm64/include/asm/kvm_psci.h |  1 +
+ arch/arm64/kvm/handle_exit.c      | 24 ++++++++++++++++++------
+ include/uapi/linux/psci.h         |  2 ++
+ virt/kvm/arm/psci.c               | 21 +++++++++++++++++++++
+ 5 files changed, 43 insertions(+), 6 deletions(-)
 
-Those patches apply cleanly on the Linus' v4.13-rc6 tag and have no other
-dependencies.
+diff --git a/arch/arm/include/asm/kvm_psci.h b/arch/arm/include/asm/kvm_psc=
+i.h
+index 6bda945..8dcd642 100644
+--- a/arch/arm/include/asm/kvm_psci.h
++++ b/arch/arm/include/asm/kvm_psci.h
+@@ -22,6 +22,7 @@
+ #define KVM_ARM_PSCI_0_2       2
 
-Florent Revest (11):
-  arm64: Add an SMCCC function IDs header
-  KVM: arm64: Return an Unknown ID on unhandled HVC
-  KVM: Allow VM lifecycle management without userspace
-  KVM, arm, arm64: Offer PAs to IPAs idmapping to internal VMs
-  KVM: Expose VM/VCPU creation functions
-  KVM, arm64: Expose a VCPU initialization function
-  KVM: Allow initialization before the module target
-  KVM, arm, arm64: Initialize KVM's core earlier
-  EFI, arm, arm64: Enable EFI Runtime Services later
-  efi, arm64: Sandbox Runtime Services in a VM
-  KVM, arm64: Don't trap internal VMs SMC calls
+ int kvm_psci_version(struct kvm_vcpu *vcpu);
++bool kvm_psci_is_call(struct kvm_vcpu *vcpu);
+ int kvm_psci_call(struct kvm_vcpu *vcpu);
 
- arch/arm/include/asm/efi.h                 |   7 +
- arch/arm/include/asm/kvm_coproc.h          |   3 +
- arch/arm/include/asm/kvm_host.h            |   1 +
- arch/arm/include/asm/kvm_psci.h            |   1 +
- arch/arm/kvm/coproc.c                      |   6 +
- arch/arm/kvm/coproc_a15.c                  |   3 +-
- arch/arm/kvm/coproc_a7.c                   |   3 +-
- arch/arm64/include/asm/efi.h               |  71 ++++
- arch/arm64/include/asm/kvm_emulate.h       |   3 +
- arch/arm64/include/asm/kvm_host.h          |   4 +
- arch/arm64/include/asm/kvm_psci.h          |   1 +
- arch/arm64/kernel/asm-offsets.c            |   3 +
- arch/arm64/kvm/handle_exit.c               |  27 +-
- arch/arm64/kvm/sys_regs_generic_v8.c       |   8 +-
- arch/x86/include/asm/efi.h                 |   2 +
- drivers/firmware/efi/Kconfig               |  10 +
- drivers/firmware/efi/Makefile              |   1 +
- drivers/firmware/efi/arm-runtime.c         |   5 +-
- drivers/firmware/efi/arm-sandbox-payload.S |  96 +++++
- drivers/firmware/efi/arm-sandbox.c         | 569 +++++++++++++++++++++++++=
-++++
- drivers/firmware/efi/efi.c                 |   3 +
- include/linux/kvm_host.h                   |   4 +
- include/linux/smccc_fn.h                   |  53 +++
- include/uapi/linux/psci.h                  |   2 +
- virt/kvm/arm/arm.c                         |  18 +-
- virt/kvm/arm/mmu.c                         |  76 +++-
- virt/kvm/arm/psci.c                        |  21 ++
- virt/kvm/kvm_main.c                        | 102 ++++--
- 28 files changed, 1050 insertions(+), 53 deletions(-)
- create mode 100644 drivers/firmware/efi/arm-sandbox-payload.S
- create mode 100644 drivers/firmware/efi/arm-sandbox.c
- create mode 100644 include/linux/smccc_fn.h
+ #endif /* __ARM_KVM_PSCI_H__ */
+diff --git a/arch/arm64/include/asm/kvm_psci.h b/arch/arm64/include/asm/kvm=
+_psci.h
+index bc39e55..1a28809 100644
+--- a/arch/arm64/include/asm/kvm_psci.h
++++ b/arch/arm64/include/asm/kvm_psci.h
+@@ -22,6 +22,7 @@
+ #define KVM_ARM_PSCI_0_2       2
 
+ int kvm_psci_version(struct kvm_vcpu *vcpu);
++bool kvm_psci_is_call(struct kvm_vcpu *vcpu);
+ int kvm_psci_call(struct kvm_vcpu *vcpu);
+
+ #endif /* __ARM64_KVM_PSCI_H__ */
+diff --git a/arch/arm64/kvm/handle_exit.c b/arch/arm64/kvm/handle_exit.c
+index 17d8a16..bc7ade5 100644
+--- a/arch/arm64/kvm/handle_exit.c
++++ b/arch/arm64/kvm/handle_exit.c
+@@ -21,6 +21,7 @@
+
+ #include <linux/kvm.h>
+ #include <linux/kvm_host.h>
++#include <linux/smccc_fn.h>
+
+ #include <asm/esr.h>
+ #include <asm/kvm_asm.h>
+@@ -34,19 +35,30 @@
+
+ typedef int (*exit_handle_fn)(struct kvm_vcpu *, struct kvm_run *);
+
++/*
++ * handle_hvc - handle a guest hypercall
++ *
++ * @vcpu:      the vcpu pointer
++ * @run:       access to the kvm_run structure for results
++ *
++ * Route a given hypercall to its right HVC handler thanks to its function=
+ ID.
++ * If no corresponding handler is found, write an Unknown ID in x0 (cf. SM=
+CCC).
++ *
++ * This function returns: > 0 (success), 0 (success but exit to user
++ * space), and < 0 (errors)
++ */
+ static int handle_hvc(struct kvm_vcpu *vcpu, struct kvm_run *run)
+ {
+-       int ret;
++       int ret =3D 1;
+
+        trace_kvm_hvc_arm64(*vcpu_pc(vcpu), vcpu_get_reg(vcpu, 0),
+                            kvm_vcpu_hvc_get_imm(vcpu));
+        vcpu->stat.hvc_exit_stat++;
+
+-       ret =3D kvm_psci_call(vcpu);
+-       if (ret < 0) {
+-               kvm_inject_undefined(vcpu);
+-               return 1;
+-       }
++       if (kvm_psci_is_call(vcpu))
++               ret =3D kvm_psci_call(vcpu);
++       else
++               vcpu_set_reg(vcpu, 0, SMCCC_STD_RET_UNKNOWN_ID);
+
+        return ret;
+ }
+diff --git a/include/uapi/linux/psci.h b/include/uapi/linux/psci.h
+index 3d7a0fc..79704fe 100644
+--- a/include/uapi/linux/psci.h
++++ b/include/uapi/linux/psci.h
+@@ -24,10 +24,12 @@
+ /* PSCI v0.2 interface */
+ #define PSCI_0_2_FN_BASE                       0x84000000
+ #define PSCI_0_2_FN(n)                         (PSCI_0_2_FN_BASE + (n))
++#define PSCI_0_2_FN_END                                PSCI_0_2_FN(0x1F)
+ #define PSCI_0_2_64BIT                         0x40000000
+ #define PSCI_0_2_FN64_BASE                     \
+                                        (PSCI_0_2_FN_BASE + PSCI_0_2_64BIT)
+ #define PSCI_0_2_FN64(n)                       (PSCI_0_2_FN64_BASE + (n))
++#define PSCI_0_2_FN64_END                      PSCI_0_2_FN64(0x1F)
+
+ #define PSCI_0_2_FN_PSCI_VERSION               PSCI_0_2_FN(0)
+ #define PSCI_0_2_FN_CPU_SUSPEND                        PSCI_0_2_FN(1)
+diff --git a/virt/kvm/arm/psci.c b/virt/kvm/arm/psci.c
+index f1e363b..9602894 100644
+--- a/virt/kvm/arm/psci.c
++++ b/virt/kvm/arm/psci.c
+@@ -332,3 +332,24 @@ int kvm_psci_call(struct kvm_vcpu *vcpu)
+                return -EINVAL;
+        };
+ }
++
++/**
++ * kvm_psci_is_call - checks if a HVC function ID is in a PSCI range
++ * @vcpu: Pointer to the VCPU struct
++ *
++ * When a hypercall is received from a guest. The SMCCC defines a function=
+ ID
++ * as a value to be put in x0 to identify the destination of the call. The=
+ same
++ * document defines ranges of function IDs to be used by PSCI. This functi=
+on
++ * checks whether a given vcpu is requesting a PSCI related handler.
++ *
++ * This function returns:
++ *  - true if this HVC should be handled by kvm_psci_call
++ *  - false if it shouldn't
++ */
++inline bool kvm_psci_is_call(struct kvm_vcpu *vcpu)
++{
++       unsigned long fn =3D vcpu_get_reg(vcpu, 0) & ~((u32) 0);
++
++       return ((fn >=3D PSCI_0_2_FN_BASE   && fn <=3D PSCI_0_2_FN_END) ||
++               (fn >=3D PSCI_0_2_FN64_BASE && fn <=3D PSCI_0_2_FN64_END));
++}
 --
 1.9.1
 
