@@ -1,7 +1,7 @@
 From: Florent Revest <florent.revest@arm.com>
-Subject: [RFC 04/11] KVM, arm, arm64: Offer PAs to IPAs idmapping to internal VMs
-Date: Fri, 25 Aug 2017 09:31:34 +0100
-Message-ID: <1503649901-5834-5-git-send-email-florent.revest@arm.com>
+Subject: [RFC 09/11] EFI, arm, arm64: Enable EFI Runtime Services later
+Date: Fri, 25 Aug 2017 09:31:39 +0100
+Message-ID: <1503649901-5834-10-git-send-email-florent.revest@arm.com>
 References: <1503649901-5834-1-git-send-email-florent.revest@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -13,201 +13,107 @@ To: linux-arm-kernel@lists.infradead.org
 Cc: matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org, pbonzini@redhat.com, rkrcmar@redhat.com, christoffer.dall@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, mark.rutland@arm.com, marc.zyngier@arm.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org, kvmarm@lists.cs.columbia.edu, leif.lindholm@arm.com, revestflo@gmail.com, Florent Revest <florent.revest@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
-Usual KVM virtual machines map guest's physical addresses from a process
-userspace memory. However, with the new concept of internal VMs, a virtual
-machine can be created from the kernel, without any link to a userspace
-context. Hence, some of the KVM's architecture-specific code needs to be
-modified to take this kind of VMs into account.
+EFI Runtime Services on ARM are enabled very early in the boot process
+although they aren't used until substantially later. This patch modifies
+the efi initialization sequence on ARM to enable runtime services just
+before they are effectively needed (in a subsys target instead of early).
 
-The approach chosen with this patch is to let internal VMs idmap physical
-addresses into intermediary physical addresses by calling
-kvm_set_memory_region with a kvm_userspace_memory_region where the
-guest_phys_addr field points both to the original PAs and to the IPAs. The
-userspace_addr field of this struct is therefore ignored with internal VMs.
-
-This patch extends the capabilities of the arm and arm64 stage2 MMU code
-to handle internal VMs. Three things are changed:
-
-- Various parts of the MMU code which are related to a userspace context
-are now only executed if kvm->mm is present.
-
-- When this pointer is NULL, struct kvm_userspace_memory_regions are
-treated by internal_vm_prep_mem as idmaps of physical memory.
-
-- A set of 256 additional private memslots is now reserved on arm64 for the
-usage of internal VMs memory idmapping.
-
-Note: this patch should have pretty much no performance impact on the
-critical path of traditional VMs since only one unlikely branch had to be
-added to the page fault handler.
+The reason behind this change is that eventually, a late Runtime Services
+initialization could take advantage of KVM's internal virtual machines to
+sandbox firmware code execution. Since KVM's core is only available
+starting from the subsys target, this reordering would be compulsory.
 
 Signed-off-by: Florent Revest <florent.revest@arm.com>
 ---
- arch/arm64/include/asm/kvm_host.h |  1 +
- virt/kvm/arm/mmu.c                | 76 +++++++++++++++++++++++++++++++++++=
-++--
- 2 files changed, 74 insertions(+), 3 deletions(-)
+ arch/arm/include/asm/efi.h         | 2 ++
+ arch/arm64/include/asm/efi.h       | 2 ++
+ arch/x86/include/asm/efi.h         | 2 ++
+ drivers/firmware/efi/arm-runtime.c | 3 +--
+ drivers/firmware/efi/efi.c         | 3 +++
+ 5 files changed, 10 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm64/include/asm/kvm_host.h b/arch/arm64/include/asm/kvm=
-_host.h
-index d686300..65aab35 100644
---- a/arch/arm64/include/asm/kvm_host.h
-+++ b/arch/arm64/include/asm/kvm_host.h
-@@ -32,6 +32,7 @@
- #define __KVM_HAVE_ARCH_INTC_INITIALIZED
+diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
+index 17f1f1a..ed575ae 100644
+--- a/arch/arm/include/asm/efi.h
++++ b/arch/arm/include/asm/efi.h
+@@ -35,6 +35,8 @@
+        __f(args);                                                      \
+ })
 
- #define KVM_USER_MEM_SLOTS 512
-+#define KVM_PRIVATE_MEM_SLOTS 256
- #define KVM_HALT_POLL_NS_DEFAULT 500000
-
- #include <kvm/arm_vgic.h>
-diff --git a/virt/kvm/arm/mmu.c b/virt/kvm/arm/mmu.c
-index 2ea21da..1d2d3df 100644
---- a/virt/kvm/arm/mmu.c
-+++ b/virt/kvm/arm/mmu.c
-@@ -772,6 +772,11 @@ static void stage2_unmap_memslot(struct kvm *kvm,
-        phys_addr_t size =3D PAGE_SIZE * memslot->npages;
-        hva_t reg_end =3D hva + size;
-
-+       if (unlikely(!kvm->mm)) {
-+               unmap_stage2_range(kvm, addr, size);
-+               return;
-+       }
++int efi_arch_late_enable_runtime_services(void);
 +
-        /*
-         * A memory region could potentially cover multiple VMAs, and any h=
-oles
-         * between them, so iterate over all of them to find out if we shou=
-ld
-@@ -819,7 +824,8 @@ void stage2_unmap_vm(struct kvm *kvm)
-        int idx;
+ #define ARCH_EFI_IRQ_FLAGS_MASK \
+        (PSR_J_BIT | PSR_E_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT | \
+         PSR_T_BIT | MODE_MASK)
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index 8f3043a..373d94d 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -37,6 +37,8 @@
+        kernel_neon_end();                                              \
+ })
 
-        idx =3D srcu_read_lock(&kvm->srcu);
--       down_read(&current->mm->mmap_sem);
-+       if (likely(kvm->mm))
-+               down_read(&current->mm->mmap_sem);
-        spin_lock(&kvm->mmu_lock);
++int efi_arch_late_enable_runtime_services(void);
++
+ #define ARCH_EFI_IRQ_FLAGS_MASK (PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F=
+_BIT)
 
-        slots =3D kvm_memslots(kvm);
-@@ -827,7 +833,8 @@ void stage2_unmap_vm(struct kvm *kvm)
-                stage2_unmap_memslot(kvm, memslot);
+ /* arch specific definitions used by the stub code */
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 796ff6c..869efbb 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -233,6 +233,8 @@ static inline bool efi_is_64bit(void)
 
-        spin_unlock(&kvm->mmu_lock);
--       up_read(&current->mm->mmap_sem);
-+       if (likely(kvm->mm))
-+               up_read(&current->mm->mmap_sem);
-        srcu_read_unlock(&kvm->srcu, idx);
+ extern bool efi_reboot_required(void);
+
++int __init efi_arch_late_enable_runtime_services(void) {}
++
+ #else
+ static inline void parse_efi_setup(u64 phys_addr, u32 data_len) {}
+ static inline bool efi_reboot_required(void)
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-=
+runtime.c
+index 1cc41c3..d94d240 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -115,7 +115,7 @@ static bool __init efi_virtmap_init(void)
+  * non-early mapping of the UEFI system table and virtual mappings for all
+  * EFI_MEMORY_RUNTIME regions.
+  */
+-static int __init arm_enable_runtime_services(void)
++int __init efi_arch_late_enable_runtime_services(void)
+ {
+        u64 mapsize;
+
+@@ -154,7 +154,6 @@ static int __init arm_enable_runtime_services(void)
+
+        return 0;
  }
+-early_initcall(arm_enable_runtime_services);
 
-@@ -1303,6 +1310,12 @@ static int user_mem_abort(struct kvm_vcpu *vcpu, phy=
-s_addr_t fault_ipa,
-                return -EFAULT;
-        }
+ void efi_virtmap_load(void)
+ {
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 045d6d3..2b447b4 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -33,6 +33,7 @@
+ #include <linux/memblock.h>
 
-+       if (unlikely(!kvm->mm)) {
-+               kvm_err("Unexpected internal VM page fault\n");
-+               kvm_inject_vabt(vcpu);
-+               return 0;
-+       }
-+
-        /* Let's check if we will get back a huge page backed by hugetlbfs =
-*/
-        down_read(&current->mm->mmap_sem);
-        vma =3D find_vma_intersection(current->mm, hva, hva + 1);
-@@ -1850,6 +1863,54 @@ void kvm_arch_commit_memory_region(struct kvm *kvm,
-                kvm_mmu_wp_memory_region(kvm, mem->slot);
- }
+ #include <asm/early_ioremap.h>
++#include <asm/efi.h>
 
-+/*
-+ * internal_vm_prep_mem - maps a range of hpa to gpa at stage2
-+ *
-+ * While userspace VMs manage gpas using hvas, internal virtual machines n=
-eed a
-+ * way to map physical addresses to a guest. In order to avoid code duplic=
-ation,
-+ * the kvm_set_memory_region call is kept for internal VMs, however it usu=
-ally
-+ * expects a struct kvm_userspace_memory_region with a userspace_addr fiel=
-d.
-+ * With internal VMs, this field is ignored and physical memory memory poi=
-nted
-+ * by guest_phys_addr can only be idmapped.
-+ */
-+static int internal_vm_prep_mem(struct kvm *kvm,
-+                               const struct kvm_userspace_memory_region *m=
-em)
-+{
-+       phys_addr_t addr, end;
-+       unsigned long pfn;
-+       int ret;
-+       struct kvm_mmu_memory_cache cache =3D { 0 };
-+
-+       end =3D mem->guest_phys_addr + mem->memory_size;
-+       pfn =3D __phys_to_pfn(mem->guest_phys_addr);
-+       addr =3D mem->guest_phys_addr;
-+
-+       for (; addr < end; addr +=3D PAGE_SIZE) {
-+               pte_t pte =3D pfn_pte(pfn, PAGE_S2);
-+
-+               pte =3D kvm_s2pte_mkwrite(pte);
-+
-+               ret =3D mmu_topup_memory_cache(&cache,
-+                                            KVM_MMU_CACHE_MIN_PAGES,
-+                                            KVM_NR_MEM_OBJS);
-+               if (ret) {
-+                       mmu_free_memory_cache(&cache);
-+                       return ret;
-+               }
-+               spin_lock(&kvm->mmu_lock);
-+               ret =3D stage2_set_pte(kvm, &cache, addr, &pte, 0);
-+               spin_unlock(&kvm->mmu_lock);
-+               if (ret) {
-+                       mmu_free_memory_cache(&cache);
-+                       return ret;
-+               }
-+
-+               pfn++;
-+       }
-+
-+       return ret;
-+}
-+
- int kvm_arch_prepare_memory_region(struct kvm *kvm,
-                                   struct kvm_memory_slot *memslot,
-                                   const struct kvm_userspace_memory_region=
- *mem,
-@@ -1872,6 +1933,13 @@ int kvm_arch_prepare_memory_region(struct kvm *kvm,
-            (KVM_PHYS_SIZE >> PAGE_SHIFT))
-                return -EFAULT;
+ struct efi __read_mostly efi =3D {
+        .mps                    =3D EFI_INVALID_TABLE_ADDR,
+@@ -304,6 +305,8 @@ static int __init efisubsys_init(void)
+ {
+        int error;
 
-+       if (unlikely(!kvm->mm)) {
-+               ret =3D internal_vm_prep_mem(kvm, mem);
-+               if (ret)
-+                       goto out;
-+               goto out_internal_vm;
-+       }
++       efi_arch_late_enable_runtime_services();
 +
-        down_read(&current->mm->mmap_sem);
-        /*
-         * A memory region could potentially cover multiple VMAs, and any h=
-oles
-@@ -1930,6 +1998,7 @@ int kvm_arch_prepare_memory_region(struct kvm *kvm,
-                hva =3D vm_end;
-        } while (hva < reg_end);
-
-+out_internal_vm:
-        if (change =3D=3D KVM_MR_FLAGS_ONLY)
-                goto out;
-
-@@ -1940,7 +2009,8 @@ int kvm_arch_prepare_memory_region(struct kvm *kvm,
-                stage2_flush_memslot(kvm, memslot);
-        spin_unlock(&kvm->mmu_lock);
- out:
--       up_read(&current->mm->mmap_sem);
-+       if (kvm->mm)
-+               up_read(&current->mm->mmap_sem);
-        return ret;
- }
+        if (!efi_enabled(EFI_BOOT))
+                return 0;
 
 --
 1.9.1
