@@ -1,105 +1,84 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 2/5] efi/random: Increase size of firmware supplied randomness
-Date: Fri, 25 Aug 2017 16:50:16 +0100
-Message-ID: <20170825155019.6740-3-ard.biesheuvel@linaro.org>
-References: <20170825155019.6740-1-ard.biesheuvel@linaro.org>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [RFC Part1 PATCH v3 15/17] x86: Add support for changing memory
+ encryption attribute in early boot
+Date: Mon, 28 Aug 2017 12:51:19 +0200
+Message-ID: <20170828105119.xs73tinknqcmrgvk@pd.tnic>
+References: <20170724190757.11278-1-brijesh.singh@amd.com>
+ <20170724190757.11278-16-brijesh.singh@amd.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170825155019.6740-1-ard.biesheuvel@linaro.org>
+Content-Disposition: inline
+In-Reply-To: <20170724190757.11278-16-brijesh.singh@amd.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
+To: Brijesh Singh <brijesh.singh@amd.com>, Tom Lendacky <thomas.lendacky@amd.com>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric Biederman <ebiederm@xmission.com>, Benjamin
 List-Id: linux-efi@vger.kernel.org
 
-The crng code requires at least 64 bytes (2 * CHACHA20_BLOCK_SIZE)
-to complete the fast boot-time init, so provide that many bytes
-when invoking UEFI protocols to seed the entropy pool. Also, add
-a notice so we can tell from the boot log when the seeding actually
-took place.
+On Mon, Jul 24, 2017 at 02:07:55PM -0500, Brijesh Singh wrote:
+> Some KVM-specific custom MSRs shares the guest physical address with
 
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/efi.c            |  3 ++-
- drivers/firmware/efi/libstub/random.c | 10 ++++------
- include/linux/efi.h                   |  2 ++
- 3 files changed, 8 insertions(+), 7 deletions(-)
+s/shares/share/
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 6519be44387c..9e822906adcb 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -522,6 +522,7 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
- 			if (seed != NULL) {
- 				add_device_randomness(seed->bits, seed->size);
- 				early_memunmap(seed, sizeof(*seed) + size);
-+				pr_notice("seeding entropy pool\n");
- 			} else {
- 				pr_err("Could not map UEFI random seed!\n");
- 			}
-@@ -867,7 +868,7 @@ static int update_efi_random_seed(struct notifier_block *nb,
- 
- 	seed = memremap(efi.rng_seed, sizeof(*seed), MEMREMAP_WB);
- 	if (seed != NULL) {
--		size = min(seed->size, 32U);
-+		size = min(seed->size, EFI_RANDOM_SEED_SIZE);
- 		memunmap(seed);
- 	} else {
- 		pr_err("Could not map UEFI random seed!\n");
-diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index 7e72954d5860..e0e603a89aa9 100644
---- a/drivers/firmware/efi/libstub/random.c
-+++ b/drivers/firmware/efi/libstub/random.c
-@@ -145,8 +145,6 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
- 	return status;
- }
- 
--#define RANDOM_SEED_SIZE	32
--
- efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg)
- {
- 	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
-@@ -162,25 +160,25 @@ efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg)
- 		return status;
- 
- 	status = efi_call_early(allocate_pool, EFI_RUNTIME_SERVICES_DATA,
--				sizeof(*seed) + RANDOM_SEED_SIZE,
-+				sizeof(*seed) + EFI_RANDOM_SEED_SIZE,
- 				(void **)&seed);
- 	if (status != EFI_SUCCESS)
- 		return status;
- 
--	status = rng->get_rng(rng, &rng_algo_raw, RANDOM_SEED_SIZE,
-+	status = rng->get_rng(rng, &rng_algo_raw, EFI_RANDOM_SEED_SIZE,
- 			      seed->bits);
- 	if (status == EFI_UNSUPPORTED)
- 		/*
- 		 * Use whatever algorithm we have available if the raw algorithm
- 		 * is not implemented.
- 		 */
--		status = rng->get_rng(rng, NULL, RANDOM_SEED_SIZE,
-+		status = rng->get_rng(rng, NULL, EFI_RANDOM_SEED_SIZE,
- 				      seed->bits);
- 
- 	if (status != EFI_SUCCESS)
- 		goto err_freepool;
- 
--	seed->size = RANDOM_SEED_SIZE;
-+	seed->size = EFI_RANDOM_SEED_SIZE;
- 	status = efi_call_early(install_configuration_table, &rng_table_guid,
- 				seed);
- 	if (status != EFI_SUCCESS)
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 12e05118657c..8dc3d94a3e3c 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1564,6 +1564,8 @@ efi_status_t efi_exit_boot_services(efi_system_table_t *sys_table,
- 				    void *priv,
- 				    efi_exit_boot_map_processing priv_func);
- 
-+#define EFI_RANDOM_SEED_SIZE		64U
-+
- struct linux_efi_random_seed {
- 	u32	size;
- 	u8	bits[];
+> hypervisor.
+
+"the hypervisor."
+
+> When SEV is active, the shared physical address must be mapped
+> with encryption attribute cleared so that both hypervsior and guest can
+> access the data.
+> 
+> Add APIs to change memory encryption attribute in early boot code.
+> 
+> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+> ---
+>  arch/x86/include/asm/mem_encrypt.h |  17 ++++++
+>  arch/x86/mm/mem_encrypt.c          | 117 +++++++++++++++++++++++++++++++++++++
+>  2 files changed, 134 insertions(+)
+
+...
+
+> +static int __init early_set_memory_enc_dec(resource_size_t paddr,
+> +					   unsigned long size, bool enc)
+> +{
+> +	unsigned long vaddr, vaddr_end, vaddr_next;
+> +	unsigned long psize, pmask;
+> +	int split_page_size_mask;
+> +	pte_t *kpte;
+> +	int level;
+> +
+> +	vaddr = (unsigned long)__va(paddr);
+> +	vaddr_next = vaddr;
+> +	vaddr_end = vaddr + size;
+> +
+> +	/*
+> +	 * We are going to change the physical page attribute from C=1 to C=0
+> +	 * or vice versa. Flush the caches to ensure that data is written into
+> +	 * memory with correct C-bit before we change attribute.
+> +	 */
+> +	clflush_cache_range(__va(paddr), size);
+> +
+> +	for (; vaddr < vaddr_end; vaddr = vaddr_next) {
+> +		kpte = lookup_address(vaddr, &level);
+> +		if (!kpte || pte_none(*kpte))
+> +			return 1;
+
+Return before flushing TLBs? Perhaps you mean
+
+			ret = 1;
+			goto out;
+
+here and out does
+
+	__flush_tlb_all();
+	return ret;
+
+?
+
 -- 
-2.11.0
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
