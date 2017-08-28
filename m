@@ -1,7 +1,7 @@
 From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH V2 2/3] x86/efi: Replace efi_pgd with efi_mm.pgd
-Date: Mon, 28 Aug 2017 16:37:11 -0700
-Message-ID: <1503963432-32055-3-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH V2 1/3] efi: Use efi_mm in x86 as well as ARM
+Date: Mon, 28 Aug 2017 16:37:10 -0700
+Message-ID: <1503963432-32055-2-git-send-email-sai.praneeth.prakhya@intel.com>
 References: <1503963432-32055-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1503963432-32055-1-git-send-email-sai.praneeth.prakhya@intel.com>
@@ -12,8 +12,11 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-Since the previous patch added support for efi_mm, let's handle efi_pgd
-through efi_mm and remove global variable efi_pgd.
+Presently, only ARM uses mm_struct to manage efi page tables and efi
+runtime region mappings. As this is the preferred approach, let's make
+this data structure common across architectures. Specially, for
+x86, using this data structure improves code maintainability and
+readability.
 
 Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 Cc: Lee, Chun-Yi <jlee@suse.com>
@@ -26,90 +29,63 @@ Cc: Matt Fleming <matt@codeblueprint.co.uk>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: Ravi Shankar <ravi.v.shankar@intel.com>
 ---
- arch/x86/platform/efi/efi_64.c | 18 +++++++++---------
- 1 file changed, 9 insertions(+), 9 deletions(-)
+ drivers/firmware/efi/arm-runtime.c | 9 ---------
+ drivers/firmware/efi/efi.c         | 9 +++++++++
+ include/linux/efi.h                | 2 ++
+ 3 files changed, 11 insertions(+), 9 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 8ff1f95627f9..0bb98c35e178 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -187,8 +187,6 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 	early_code_mapping_set_exec(0);
- }
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 1cc41c3d6315..d6b26534812b 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -31,15 +31,6 @@
  
--static pgd_t *efi_pgd;
+ extern u64 efi_system_table;
+ 
+-static struct mm_struct efi_mm = {
+-	.mm_rb			= RB_ROOT,
+-	.mm_users		= ATOMIC_INIT(2),
+-	.mm_count		= ATOMIC_INIT(1),
+-	.mmap_sem		= __RWSEM_INITIALIZER(efi_mm.mmap_sem),
+-	.page_table_lock	= __SPIN_LOCK_UNLOCKED(efi_mm.page_table_lock),
+-	.mmlist			= LIST_HEAD_INIT(efi_mm.mmlist),
+-};
 -
- /*
-  * We need our own copy of the higher levels of the page tables
-  * because we want to avoid inserting EFI region mappings (EFI_VA_END
-@@ -197,7 +195,7 @@ static pgd_t *efi_pgd;
-  */
- int __init efi_alloc_page_tables(void)
- {
--	pgd_t *pgd;
-+	pgd_t *pgd, *efi_pgd;
- 	p4d_t *p4d;
- 	pud_t *pud;
- 	gfp_t gfp_mask;
-@@ -225,6 +223,8 @@ int __init efi_alloc_page_tables(void)
- 		return -ENOMEM;
- 	}
+ #ifdef CONFIG_ARM64_PTDUMP_DEBUGFS
+ #include <asm/ptdump.h>
  
-+	efi_mm.pgd = efi_pgd;
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index b372aad3b449..3abbb25602bc 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -55,6 +55,15 @@ struct efi __read_mostly efi = {
+ };
+ EXPORT_SYMBOL(efi);
+ 
++struct mm_struct efi_mm = {
++	.mm_rb			= RB_ROOT,
++	.mm_users		= ATOMIC_INIT(2),
++	.mm_count		= ATOMIC_INIT(1),
++	.mmap_sem		= __RWSEM_INITIALIZER(efi_mm.mmap_sem),
++	.page_table_lock	= __SPIN_LOCK_UNLOCKED(efi_mm.page_table_lock),
++	.mmlist			= LIST_HEAD_INIT(efi_mm.mmlist),
++};
 +
- 	return 0;
- }
- 
-@@ -237,6 +237,7 @@ void efi_sync_low_kernel_mappings(void)
- 	pgd_t *pgd_k, *pgd_efi;
- 	p4d_t *p4d_k, *p4d_efi;
- 	pud_t *pud_k, *pud_efi;
-+	pgd_t *efi_pgd = efi_mm.pgd;
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		return;
-@@ -330,13 +331,12 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	unsigned long pfn, text;
- 	struct page *page;
- 	unsigned npages;
--	pgd_t *pgd;
-+	pgd_t *pgd = efi_mm.pgd;
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		return 0;
- 
--	efi_scratch.efi_pgt = (pgd_t *)__pa(efi_pgd);
--	pgd = efi_pgd;
-+	efi_scratch.efi_pgt = (pgd_t *)__pa(pgd);
- 
- 	/*
- 	 * It can happen that the physical address of new_memmap lands in memory
-@@ -400,7 +400,7 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+ static bool disable_runtime;
+ static int __init setup_noefi(char *arg)
  {
- 	unsigned long flags = _PAGE_RW;
- 	unsigned long pfn;
--	pgd_t *pgd = efi_pgd;
-+	pgd_t *pgd = efi_mm.pgd;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 8269bcb8ccf7..d1f261d2ce69 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -927,6 +927,8 @@ extern struct efi {
+ 	unsigned long flags;
+ } efi;
  
- 	if (!(md->attribute & EFI_MEMORY_WB))
- 		flags |= _PAGE_PCD;
-@@ -501,7 +501,7 @@ void __init parse_efi_setup(u64 phys_addr, u32 data_len)
- static int __init efi_update_mappings(efi_memory_desc_t *md, unsigned long pf)
++extern struct mm_struct efi_mm;
++
+ static inline int
+ efi_guidcmp (efi_guid_t left, efi_guid_t right)
  {
- 	unsigned long pfn;
--	pgd_t *pgd = efi_pgd;
-+	pgd_t *pgd = efi_mm.pgd;
- 	int err1, err2;
- 
- 	/* Update the 1:1 mapping */
-@@ -592,7 +592,7 @@ void __init efi_dump_pagetable(void)
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		ptdump_walk_pgd_level(NULL, swapper_pg_dir);
- 	else
--		ptdump_walk_pgd_level(NULL, efi_pgd);
-+		ptdump_walk_pgd_level(NULL, efi_mm.pgd);
- #endif
- }
- 
 -- 
 2.1.4
