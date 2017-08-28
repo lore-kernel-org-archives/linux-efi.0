@@ -1,63 +1,51 @@
-From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: Re: [RFC Part1 PATCH v3 15/17] x86: Add support for changing memory
- encryption attribute in early boot
-Date: Mon, 28 Aug 2017 06:49:19 -0500
-Message-ID: <4b3cec09-ab6a-0400-00fe-328b36564942@amd.com>
-References: <20170724190757.11278-1-brijesh.singh@amd.com>
- <20170724190757.11278-16-brijesh.singh@amd.com>
- <20170828105119.xs73tinknqcmrgvk@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <20170828105119.xs73tinknqcmrgvk@pd.tnic>
-Content-Language: en-US
-Sender: kvm-owner@vger.kernel.org
-To: Borislav Petkov <bp@suse.de>, Tom Lendacky <thomas.lendacky@amd.com>
-Cc: brijesh.singh@amd.com, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric Biederman <ebiederm@xmiss>
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Subject: [PATCH V2 0/3] Use mm_struct and switch_mm() instead of manually
+Date: Mon, 28 Aug 2017 16:37:09 -0700
+Message-ID: <1503963432-32055-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org
+Cc: jlee@suse.com, bp@alien8.de, tony.luck@intel.com, luto@kernel.org, mst@redhat.com, ricardo.neri@intel.com, ravi.v.shankar@intel.com, Sai Praneeth <sai.praneeth.prakhya@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Boris,
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
+Presently, in x86, to invoke any efi function like
+efi_set_virtual_address_map() or any efi_runtime_service() the code path
+typically involves read_cr3() (save previous pgd), write_cr3()
+(write efi_pgd) and calling efi function. Likewise after returning from
+efi function the code path typically involves read_cr3() (save efi_pgd),
+write_cr3() (write previous pgd). We do this couple of times in efi
+subsystem of Linux kernel, instead we can use helper function
+efi_switch_mm() to do this. This improves readability and maintainability.
+Also, instead of maintaining a separate struct "efi_scratch" to store/restore
+efi_pgd, we can use mm_struct to do this.
 
-On 8/28/17 5:51 AM, Borislav Petkov wrote:
+I have tested this patch set against LUV (Linux UEFI Validation), so I
+think I didn't break any existing configurations. I have tested this
+patch set for
+1. x86_64,
+2. x86_32,
+3. Mixed mode
+with efi=old_map and for kexec kernel. Please let me know if I have
+missed any other configurations.
 
-[..]
+Changes in V2:
+1. Resolve mm_dropping() issue by not mm_dropping()/mm_grabbing() any mm,
+as we are not losing/creating any references.
 
-> +static int __init early_set_memory_enc_dec(resource_size_t paddr,
->> +					   unsigned long size, bool enc)
->> +{
->> +	unsigned long vaddr, vaddr_end, vaddr_next;
->> +	unsigned long psize, pmask;
->> +	int split_page_size_mask;
->> +	pte_t *kpte;
->> +	int level;
->> +
->> +	vaddr = (unsigned long)__va(paddr);
->> +	vaddr_next = vaddr;
->> +	vaddr_end = vaddr + size;
->> +
->> +	/*
->> +	 * We are going to change the physical page attribute from C=1 to C=0
->> +	 * or vice versa. Flush the caches to ensure that data is written into
->> +	 * memory with correct C-bit before we change attribute.
->> +	 */
->> +	clflush_cache_range(__va(paddr), size);
->> +
->> +	for (; vaddr < vaddr_end; vaddr = vaddr_next) {
->> +		kpte = lookup_address(vaddr, &level);
->> +		if (!kpte || pte_none(*kpte))
->> +			return 1;
-> Return before flushing TLBs? Perhaps you mean
->
-> 			ret = 1;
-> 			goto out;
->
-> here and out does
->
-> 	__flush_tlb_all();
-> 	return ret;
+Sai Praneeth (3):
+  efi: Use efi_mm in x86 as well as ARM
+  x86/efi: Replace efi_pgd with efi_mm.pgd
+  x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
 
-thanks, good catch. I will fix in next rev.
+ arch/x86/include/asm/efi.h           | 29 ++++++++++----------
+ arch/x86/platform/efi/efi_64.c       | 52 ++++++++++++++++++++----------------
+ arch/x86/platform/efi/efi_thunk_64.S |  2 +-
+ drivers/firmware/efi/arm-runtime.c   |  9 -------
+ drivers/firmware/efi/efi.c           |  9 +++++++
+ include/linux/efi.h                  |  2 ++
+ 6 files changed, 55 insertions(+), 48 deletions(-)
 
--Brijesh
+-- 
+2.1.4
