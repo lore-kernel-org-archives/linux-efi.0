@@ -1,29 +1,44 @@
 From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH v1 3/6] staging: unisys: Switch to use new generic UUID
- API
-Date: Wed, 30 Aug 2017 14:38:45 +0200
-Message-ID: <20170830123845.lw4vkjbcvivi5hpi@infradead.org>
+Subject: Re: [PATCH v1 6/6] device property: Switch to use new generic UUID API
+Date: Wed, 30 Aug 2017 14:41:41 +0200
+Message-ID: <20170830124141.oa32gzbgnafarkrh@infradead.org>
 References: <20170719182857.73693-1-andriy.shevchenko@linux.intel.com>
- <20170719182857.73693-4-andriy.shevchenko@linux.intel.com>
- <1501063301.29303.247.camel@linux.intel.com>
- <20170730153224.GA31755@kroah.com>
- <CAHp75Vf+Us5n2_u94sVGs7xuvfF-qoaG4tvmixvqRARo68TT7w@mail.gmail.com>
- <20170730173725.GA20606@kroah.com>
- <1501521625.29303.308.camel@linux.intel.com>
+ <2908341.aERReitNcd@aspire.rjw.lan>
+ <CAHp75Vd6KenS3vQBgTJL=iE790Rrtzj11gvPK=KLE98bjcPm6w@mail.gmail.com>
+ <6349641.0fe8FCM51k@aspire.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
 Content-Disposition: inline
-In-Reply-To: <1501521625.29303.308.camel@linux.intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, devel@driverdev.osuosl.org, linux-efi <linux-efi@vger.kernel.org>, linux-watchdog@vger.kernel.org, sparmaintainer@unisys.com, "open list:TI WILINK WIRELES..." <linux-wireless@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, Lukas Wunner <lukas@wunner.de>, devel@linuxdriverproject.org, Christoph Hellwig <hch@lst.de>
+In-Reply-To: <6349641.0fe8FCM51k@aspire.rjw.lan>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: devel@driverdev.osuosl.org, linux-efi <linux-efi@vger.kernel.org>, linux-watchdog@vger.kernel.org, sparmaintainer@unisys.com, "open list:TI WILINK WIRELES..." <linux-wireless@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, Lukas Wunner <lukas@wunner.de>, devel@linuxdriverproject.org, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jul 31, 2017 at 08:20:25PM +0300, Andy Shevchenko wrote:
-> Yep! There are so many conflicts that would be better just to push
-> through your tree.
+On Wed, Jul 26, 2017 at 02:27:44AM +0200, Rafael J. Wysocki wrote:
+> > >> > Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+> > >> > Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
+> > >>
+> > >> Acked-by: Mika Westerberg <mika.westerberg@linux.intel.com>
+> > >
+> > > OK
+> > >
+> > > Andy, do you want me to apply this?
+> > 
+> > If you would like to.
+> > 
+> > The patch is now pretty independent since necessary stuff made v4.13-rc1.
 > 
-> I have just sent a v2 of this patch separately.
+> OK
 
-Greg, did you pick that patch up?
+This didn't seem to make it into linux-next so far, though.
