@@ -1,138 +1,94 @@
-From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH 01/14] efi: Move efi_status_to_err() to drivers/firmware/efi/
-Date: Wed, 30 Aug 2017 21:13:43 +0200
-Message-ID: <da99d306c14f65a0092415fc581b57b2446c642c.1504120436.git.jan.kiszka@siemens.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 00/14] EFI capsule update support for IOT2000 devices
+Date: Wed, 30 Aug 2017 20:24:00 +0100
+Message-ID: <CAKv+Gu9k94FZbakSZz3VtXPr+e921q=m6OkeYiJ-4y0OhT2-Pw@mail.gmail.com>
 References: <cover.1504120436.git.jan.kiszka@siemens.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.1504120436.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-In-Reply-To: <cover.1504120436.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-References: <cover.1504120436.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ben Hutchings <ben.hutchings-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
-Cc: cip-dev-Y7OTERR3vatcpJa9FCkz6gFcV7zePqp5@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <cover.1504120436.git.jan.kiszka@siemens.com>
+Sender: stable-owner@vger.kernel.org
+To: Jan Kiszka <jan.kiszka@siemens.com>
+Cc: Ben Hutchings <ben.hutchings@codethink.co.uk>, cip-dev@lists.cip-project.org, Andy Lutomirski <luto@amacapital.net>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Bryan O'Donoghue <pure.logic@nexus-software.ie>, Denys Vlasenko <dvlasenk@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, joeyli <jlee@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Kweh Hock Leong <hock.leong.kweh@intel.com>, Linus Torvalds <torvalds@linux-foundation.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Mark Salter <msalter@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Sam Protsenko <semen.protsenko@linaro.org>, stable@
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Hello Jan,
 
-commit 806b0351c9ff9890c1ef0ba2c46237baef49ac79 upstream.
+On 30 August 2017 at 20:13, Jan Kiszka <jan.kiszka@siemens.com> wrote:
+> Last chunk: This backports EFI capsule updates, primarily for the use
+> with the IOT2020 and IOT2040, the latter with Quark-proprietary security
+> header format. The feature should also work for the Galileo Gen 2 and,
+> at least conceptually, for any EFI capsule update compatible firmware.
+>
 
-Move efi_status_to_err() to the architecture independent code as it's
-generally useful in all bits of EFI code where there is a need to
-convert an efi_status_t to a kernel error value.
+What is the purpose of this series? I hope you are not expecting this
+to be considered for -stable?
+Please check Documentation/process/stable-kernel-rules.rst for
+guidelines on what is appropriate for -stable.
 
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Link: http://lkml.kernel.org/r/1461614832-17633-27-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/efi.c  | 33 +++++++++++++++++++++++++++++++++
- drivers/firmware/efi/vars.c | 33 ---------------------------------
- include/linux/efi.h         |  2 ++
- 3 files changed, 35 insertions(+), 33 deletions(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 3b52677f459a..33d60992a580 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -663,3 +663,36 @@ u64 __weak efi_mem_attributes(unsigned long phys_addr)
- 	}
- 	return 0;
- }
-+
-+int efi_status_to_err(efi_status_t status)
-+{
-+	int err;
-+
-+	switch (status) {
-+	case EFI_SUCCESS:
-+		err = 0;
-+		break;
-+	case EFI_INVALID_PARAMETER:
-+		err = -EINVAL;
-+		break;
-+	case EFI_OUT_OF_RESOURCES:
-+		err = -ENOSPC;
-+		break;
-+	case EFI_DEVICE_ERROR:
-+		err = -EIO;
-+		break;
-+	case EFI_WRITE_PROTECTED:
-+		err = -EROFS;
-+		break;
-+	case EFI_SECURITY_VIOLATION:
-+		err = -EACCES;
-+		break;
-+	case EFI_NOT_FOUND:
-+		err = -ENOENT;
-+		break;
-+	default:
-+		err = -EINVAL;
-+	}
-+
-+	return err;
-+}
-diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-index 6f182fd91a6d..38e36526ba02 100644
---- a/drivers/firmware/efi/vars.c
-+++ b/drivers/firmware/efi/vars.c
-@@ -318,39 +318,6 @@ check_var_size(u32 attributes, unsigned long size)
- 	return fops->query_variable_store(attributes, size);
- }
- 
--static int efi_status_to_err(efi_status_t status)
--{
--	int err;
--
--	switch (status) {
--	case EFI_SUCCESS:
--		err = 0;
--		break;
--	case EFI_INVALID_PARAMETER:
--		err = -EINVAL;
--		break;
--	case EFI_OUT_OF_RESOURCES:
--		err = -ENOSPC;
--		break;
--	case EFI_DEVICE_ERROR:
--		err = -EIO;
--		break;
--	case EFI_WRITE_PROTECTED:
--		err = -EROFS;
--		break;
--	case EFI_SECURITY_VIOLATION:
--		err = -EACCES;
--		break;
--	case EFI_NOT_FOUND:
--		err = -ENOENT;
--		break;
--	default:
--		err = -EINVAL;
--	}
--
--	return err;
--}
--
- static bool variable_is_present(efi_char16_t *variable_name, efi_guid_t *vendor,
- 				struct list_head *head)
- {
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 47be3ad7d3e5..774e9a0d49f1 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -999,6 +999,8 @@ static inline void
- efi_reboot(enum reboot_mode reboot_mode, const char *__unused) {}
- #endif
- 
-+extern int efi_status_to_err(efi_status_t status);
-+
- /*
-  * Variable Attributes
-  */
--- 
-2.12.3
+> Cc: Andy Lutomirski <luto@amacapital.net>
+> Cc: Andy Lutomirski <luto@kernel.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Cc: Borislav Petkov <bp@alien8.de>
+> Cc: Brian Gerst <brgerst@gmail.com>
+> Cc: Bryan O'Donoghue <pure.logic@nexus-software.ie>
+> Cc: Denys Vlasenko <dvlasenk@redhat.com>
+> Cc: H. Peter Anvin <hpa@zytor.com>
+> Cc: joeyli <jlee@suse.com>
+> Cc: Josh Poimboeuf <jpoimboe@redhat.com>
+> Cc: Kweh Hock Leong <hock.leong.kweh@intel.com>
+> Cc: Linus Torvalds <torvalds@linux-foundation.org>
+> Cc: linux-efi@vger.kernel.org
+> Cc: Mark Salter <msalter@redhat.com>
+> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+> Cc: Peter Jones <pjones@redhat.com>
+> Cc: Peter Zijlstra <peterz@infradead.org>
+> Cc: Sam Protsenko <semen.protsenko@linaro.org>
+> Cc: <stable@vger.kernel.org> # v4.7
+> Cc: Thomas Gleixner <tglx@linutronix.de>
+>
+> Ard Biesheuvel (3):
+>   efi/capsule-loader: Use a cached copy of the capsule header
+>   efi/capsule-loader: Redirect calls to efi_capsule_setup_info() via
+>     weak alias
+>   efi/capsule-loader: Use page addresses rather than struct page
+>     pointers
+>
+> Austin Christ (1):
+>   efi/capsule: Allocate whole capsule into virtual memory
+>
+> Jan Kiszka (5):
+>   efi/capsule: Fix return code on failing kmap/vmap
+>   efi/capsule: Remove pr_debug() on ENOMEM or EFAULT
+>   efi/capsule: Clean up pr_err/_info() messages
+>   efi/capsule: Adjust return type of efi_capsule_setup_info()
+>   efi/capsule: Add support for Quark security header
+>
+> Kweh, Hock Leong (1):
+>   efi: Add misc char driver interface to update EFI firmware
+>
+> Matt Fleming (4):
+>   efi: Move efi_status_to_err() to drivers/firmware/efi/
+>   efi: Add 'capsule' update support
+>   x86/efi: Force EFI reboot to process pending capsules
+>   efi/capsule: Move 'capsule' to the stack in efi_capsule_supported()
+>
+>  arch/x86/k
+ernel/reboot.c              |   9 +
+>  arch/x86/platform/efi/quirks.c        | 137 ++++++++++++++
+>  drivers/firmware/efi/Kconfig          |  19 ++
+>  drivers/firmware/efi/Makefile         |   2 +
+>  drivers/firmware/efi/capsule-loader.c | 330 ++++++++++++++++++++++++++++++++++
+>  drivers/firmware/efi/capsule.c        | 294 ++++++++++++++++++++++++++++++
+>  drivers/firmware/efi/efi.c            |  33 ++++
+>  drivers/firmware/efi/reboot.c         |  12 +-
+>  drivers/firmware/efi/vars.c           |  33 ----
+>  include/linux/efi.h                   |  34 ++++
+>  10 files changed, 869 insertions(+), 34 deletions(-)
+>  create mode 100644 drivers/firmware/efi/capsule-loader.c
+>  create mode 100644 drivers/firmware/efi/capsule.c
+>
+> --
+> 2.12.3
+>
