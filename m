@@ -1,7 +1,7 @@
 From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH 07/14] efi/capsule: Fix return code on failing kmap/vmap
-Date: Wed, 30 Aug 2017 21:13:49 +0200
-Message-ID: <d3f806f040566cc76aa6220a009214c3bcf65636.1504120436.git.jan.kiszka@siemens.com>
+Subject: [PATCH 12/14] efi/capsule-loader: Redirect calls to efi_capsule_setup_info() via weak alias
+Date: Wed, 30 Aug 2017 21:13:54 +0200
+Message-ID: <643351f334592960d2fa1a2d2eecf9c8df25745f.1504120436.git.jan.kiszka@siemens.com>
 References: <cover.1504120436.git.jan.kiszka@siemens.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <cover.1504120436.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
@@ -9,50 +9,154 @@ In-Reply-To: <cover.1504120436.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gman
 References: <cover.1504120436.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ben Hutchings <ben.hutchings-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
-Cc: cip-dev-Y7OTERR3vatcpJa9FCkz6gFcV7zePqp5@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: cip-dev-Y7OTERR3vatcpJa9FCkz6gFcV7zePqp5@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-commit fb153dc53f0eb8e8ad6a69f773e44c2d12daa5d0 upstream.
+commit 3fabd628d5ea24b02ddb1230ffca1df0f779f84e upstream.
 
-If kmap or vmap fail, it means we ran out of memory. There are no
-user-provided addressed involved that would justify EFAULT.
+To allow platform specific code to hook into the capsule loading
+routines, indirect calls to efi_capsule_setup_info() via a weak alias
+of __efi_capsule_setup_info(), allowing platforms to redefine the former
+but still use the latter.
 
-Signed-off-by: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Tested-by: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
 Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
 Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Link: http://lkml.kernel.org/r/20170602135207.21708-3-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Link: http://lkml.kernel.org/r/20170602135207.21708-9-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/capsule-loader.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/capsule-loader.c | 56 +++++++++++++++++------------------
+ include/linux/efi.h                   | 12 ++++++++
+ 2 files changed, 39 insertions(+), 29 deletions(-)
 
 diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-index 9ae6c116c474..91e91f7a8807 100644
+index 5b012a467d7d..f7fdeab0bc37 100644
 --- a/drivers/firmware/efi/capsule-loader.c
 +++ b/drivers/firmware/efi/capsule-loader.c
-@@ -113,7 +113,7 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
- 			VM_MAP, PAGE_KERNEL);
- 	if (!cap_hdr_temp) {
- 		pr_debug("%s: vmap() failed\n", __func__);
--		return -EFAULT;
-+		return -ENOMEM;
+@@ -20,16 +20,6 @@
+ 
+ #define NO_FURTHER_WRITE_ACTION -1
+ 
+-struct capsule_info {
+-	efi_capsule_header_t	header;
+-	int			reset_type;
+-	long			index;
+-	size_t			count;
+-	size_t			total_size;
+-	struct page		**pages;
+-	size_t			page_bytes_remain;
+-};
+-
+ /**
+  * efi_free_all_buff_pages - free all previous allocated buffer pages
+  * @cap_info: pointer to current instance of capsule_info structure
+@@ -46,28 +36,13 @@ static void efi_free_all_buff_pages(struct capsule_info *cap_info)
+ 	cap_info->index = NO_FURTHER_WRITE_ACTION;
+ }
+ 
+-/**
+- * efi_capsule_setup_info - obtain the efi capsule header in the binary and
+- *			    setup capsule_info structure
+- * @cap_info: pointer to current instance of capsule_info structure
+- * @kbuff: a mapped first page buffer pointer
+- * @hdr_bytes: the total received number of bytes for efi header
+- **/
+-static int efi_capsule_setup_info(struct capsule_info *cap_info,
+-				  void *kbuff, size_t hdr_bytes)
++int __efi_capsule_setup_info(struct capsule_info *cap_info)
+ {
+ 	size_t pages_needed;
+ 	int ret;
+ 	void *temp_page;
+ 
+-	/* Only process data block that is larger than efi header size */
+-	if (hdr_bytes < sizeof(efi_capsule_header_t))
+-		return 0;
+-
+-	/* Reset back to the correct offset of header */
+-	kbuff -= cap_info->count;
+-	memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
+-	pages_needed = ALIGN(cap_info->header.imagesize, PAGE_SIZE) / PAGE_SIZE;
++	pages_needed = ALIGN(cap_info->total_size, PAGE_SIZE) / PAGE_SIZE;
+ 
+ 	if (pages_needed == 0) {
+ 		pr_err("invalid capsule size");
+@@ -84,7 +59,6 @@ static int efi_capsule_setup_info(struct capsule_info *cap_info,
+ 		return ret;
  	}
  
- 	ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
-@@ -185,7 +185,7 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
- 	kbuff = kmap(page);
- 	if (!kbuff) {
- 		pr_debug("%s: kmap() failed\n", __func__);
--		ret = -EFAULT;
-+		ret = -ENOMEM;
- 		goto failed;
- 	}
- 	kbuff += PAGE_SIZE - cap_info->page_bytes_remain;
+-	cap_info->total_size = cap_info->header.imagesize;
+ 	temp_page = krealloc(cap_info->pages,
+ 			     pages_needed * sizeof(void *),
+ 			     GFP_KERNEL | __GFP_ZERO);
+@@ -97,6 +71,30 @@ static int efi_capsule_setup_info(struct capsule_info *cap_info,
+ }
+ 
+ /**
++ * efi_capsule_setup_info - obtain the efi capsule header in the binary and
++ *			    setup capsule_info structure
++ * @cap_info: pointer to current instance of capsule_info structure
++ * @kbuff: a mapped first page buffer pointer
++ * @hdr_bytes: the total received number of bytes for efi header
++ *
++ * Platforms with non-standard capsule update mechanisms can override
++ * this __weak function so they can perform any required capsule
++ * image munging. See quark_quirk_function() for an example.
++ **/
++int __weak efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
++				  size_t hdr_bytes)
++{
++	/* Only process data block that is larger than efi header size */
++	if (hdr_bytes < sizeof(efi_capsule_header_t))
++		return 0;
++
++	memcpy(&cap_info->header, kbuff, sizeof(cap_info->header));
++	cap_info->total_size = cap_info->header.imagesize;
++
++	return __efi_capsule_setup_info(cap_info);
++}
++
++/**
+  * efi_capsule_submit_update - invoke the efi_capsule_update API once binary
+  *			       upload done
+  * @cap_info: pointer to current instance of capsule_info structure
+@@ -186,7 +184,7 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
+ 
+ 	/* Setup capsule binary info structure */
+ 	if (cap_info->header.headersize == 0) {
+-		ret = efi_capsule_setup_info(cap_info, kbuff,
++		ret = efi_capsule_setup_info(cap_info, kbuff - cap_info->count,
+ 					     cap_info->count + write_byte);
+ 		if (ret)
+ 			goto fail_unmap;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 5a0b8f7a54c8..b386097e45bc 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -129,6 +129,18 @@ typedef struct {
+ #define EFI_CAPSULE_POPULATE_SYSTEM_TABLE	0x00020000
+ #define EFI_CAPSULE_INITIATE_RESET		0x00040000
+ 
++struct capsule_info {
++	efi_capsule_header_t	header;
++	int			reset_type;
++	long			index;
++	size_t			count;
++	size_t			total_size;
++	struct page		**pages;
++	size_t			page_bytes_remain;
++};
++
++int __efi_capsule_setup_info(struct capsule_info *cap_info);
++
+ /*
+  * Allocation types for calls to boottime->allocate_pages.
+  */
 -- 
 2.12.3
