@@ -1,39 +1,58 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [RFC Part1 PATCH v3 16/17] X86/KVM: Provide support to create
- Guest and HV shared per-CPU variables
-Date: Wed, 30 Aug 2017 19:46:55 +0200
-Message-ID: <20170830174655.ehrnmynotmp7laka@pd.tnic>
-References: <20170724190757.11278-1-brijesh.singh@amd.com>
- <20170724190757.11278-17-brijesh.singh@amd.com>
- <20170829102258.gxk227js4yw47qi3@pd.tnic>
- <0810a732-9c77-a543-ffeb-7fd2d8f46266@amd.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <0810a732-9c77-a543-ffeb-7fd2d8f46266@amd.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Brijesh Singh <brijesh.singh@amd.com>
-Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kvm@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Tony Luck <tony.luck@intel.com>, Piotr Luc <piotr.luc@intel.com>, Tom Lendacky <thomas.lendacky@amd.com>, Fenghua Yu <fenghua.yu@intel.com>, Lu Baolu <baolu.lu@linux.intel.com>, Reza Arbab <arbab@linux.vnet.ibm.com>, David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Laura Abbott <labbott@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Eric
+From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Subject: [PATCH 07/14] efi/capsule: Fix return code on failing kmap/vmap
+Date: Wed, 30 Aug 2017 21:13:49 +0200
+Message-ID: <d3f806f040566cc76aa6220a009214c3bcf65636.1504120436.git.jan.kiszka@siemens.com>
+References: <cover.1504120436.git.jan.kiszka@siemens.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <cover.1504120436.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+In-Reply-To: <cover.1504120436.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+References: <cover.1504120436.git.jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ben Hutchings <ben.hutchings-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
+Cc: cip-dev-Y7OTERR3vatcpJa9FCkz6gFcV7zePqp5@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 30, 2017 at 11:18:42AM -0500, Brijesh Singh wrote:
-> I was trying to avoid mixing early and no-early set_memory_decrypted() but if
-> feedback is: use early_set_memory_decrypted() only if its required otherwise
-> use set_memory_decrypted() then I can improve the logic in next rev. thanks
+From: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
 
-Yes, I think you should use the early versions when you're, well,
-*early* :-) But get rid of that for_each_possible_cpu() and do it only
-on the current CPU, as this is a per-CPU path anyway. If you need to
-do it on *every* CPU and very early, then you need a separate function
-which is called in kvm_smp_prepare_boot_cpu() as there you're pre-SMP.
+commit fb153dc53f0eb8e8ad6a69f773e44c2d12daa5d0 upstream.
 
-Thx.
+If kmap or vmap fail, it means we ran out of memory. There are no
+user-provided addressed involved that would justify EFAULT.
 
+Signed-off-by: Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Link: http://lkml.kernel.org/r/20170602135207.21708-3-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+---
+ drivers/firmware/efi/capsule-loader.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+index 9ae6c116c474..91e91f7a8807 100644
+--- a/drivers/firmware/efi/capsule-loader.c
++++ b/drivers/firmware/efi/capsule-loader.c
+@@ -113,7 +113,7 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
+ 			VM_MAP, PAGE_KERNEL);
+ 	if (!cap_hdr_temp) {
+ 		pr_debug("%s: vmap() failed\n", __func__);
+-		return -EFAULT;
++		return -ENOMEM;
+ 	}
+ 
+ 	ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
+@@ -185,7 +185,7 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
+ 	kbuff = kmap(page);
+ 	if (!kbuff) {
+ 		pr_debug("%s: kmap() failed\n", __func__);
+-		ret = -EFAULT;
++		ret = -ENOMEM;
+ 		goto failed;
+ 	}
+ 	kbuff += PAGE_SIZE - cap_info->page_bytes_remain;
 -- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+2.12.3
