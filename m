@@ -1,237 +1,114 @@
 From: Christoffer Dall <cdall@linaro.org>
-Subject: Re: [RFC 04/11] KVM, arm, arm64: Offer PAs to IPAs idmapping to
- internal VMs
-Date: Thu, 31 Aug 2017 11:23:05 +0200
-Message-ID: <20170831092305.GA13572@cbox>
+Subject: Re: [RFC 00/11] KVM, EFI, arm64: EFI Runtime Services Sandboxing
+Date: Thu, 31 Aug 2017 11:26:15 +0200
+Message-ID: <20170831092615.GB13572@cbox>
 References: <1503649901-5834-1-git-send-email-florent.revest@arm.com>
- <1503649901-5834-5-git-send-email-florent.revest@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <kvm-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1503649901-5834-5-git-send-email-florent.revest@arm.com>
-Sender: kvm-owner@vger.kernel.org
+In-Reply-To: <1503649901-5834-1-git-send-email-florent.revest@arm.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Florent Revest <florent.revest@arm.com>
 Cc: linux-arm-kernel@lists.infradead.org, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org, pbonzini@redhat.com, rkrcmar@redhat.com, christoffer.dall@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, mark.rutland@arm.com, marc.zyngier@arm.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org, kvmarm@lists.cs.columbia.edu, leif.lindholm@arm.com, revestflo@gmail.com
 List-Id: linux-efi@vger.kernel.org
 
 Hi Florent,
 
-I'd like for the UEFI folks and arm64 kernel maintainers to express
-their views on this overall approach before I do an in-depth review, but
-I have some random comments based on reading this patch:
+On Fri, Aug 25, 2017 at 09:31:30AM +0100, Florent Revest wrote:
+> Hi,
+> 
+> This series implements a mechanism to sandbox EFI Runtime Services on arm64.
+> It can be enabled with CONFIG_EFI_SANDBOX. At boot it spawns an internal KVM
+> virtual machine that is ran everytime an EFI Runtime Service is called. This
+> limits the possible security and stability impact of EFI runtime on the kernel.
 
-On Fri, Aug 25, 2017 at 09:31:34AM +0100, Florent Revest wrote:
-> Usual KVM virtual machines map guest's physical addresses from a process
-> userspace memory. However, with the new concept of internal VMs, a virtual
-> machine can be created from the kernel, without any link to a userspace
-> context. Hence, some of the KVM's architecture-specific code needs to be
-> modified to take this kind of VMs into account.
-> 
-> The approach chosen with this patch is to let internal VMs idmap physical
-> addresses into intermediary physical addresses by calling
-> kvm_set_memory_region with a kvm_userspace_memory_region where the
-> guest_phys_addr field points both to the original PAs and to the IPAs. The
-> userspace_addr field of this struct is therefore ignored with internal VMs.
-> 
-> This patch extends the capabilities of the arm and arm64 stage2 MMU code
-> to handle internal VMs. Three things are changed:
-> 
-> - Various parts of the MMU code which are related to a userspace context
-> are now only executed if kvm->mm is present.
-> 
-> - When this pointer is NULL, struct kvm_userspace_memory_regions are
-> treated by internal_vm_prep_mem as idmaps of physical memory.
-> 
-> - A set of 256 additional private memslots is now reserved on arm64 for the
-> usage of internal VMs memory idmapping.
-> 
-> Note: this patch should have pretty much no performance impact on the
-> critical path of traditional VMs since only one unlikely branch had to be
-> added to the page fault handler.
-> 
-> Signed-off-by: Florent Revest <florent.revest@arm.com>
-> ---
->  arch/arm64/include/asm/kvm_host.h |  1 +
->  virt/kvm/arm/mmu.c                | 76 +++++++++++++++++++++++++++++++++++++--
->  2 files changed, 74 insertions(+), 3 deletions(-)
-> 
-> diff --git a/arch/arm64/include/asm/kvm_host.h b/arch/arm64/include/asm/kvm_host.h
-> index d686300..65aab35 100644
-> --- a/arch/arm64/include/asm/kvm_host.h
-> +++ b/arch/arm64/include/asm/kvm_host.h
-> @@ -32,6 +32,7 @@
->  #define __KVM_HAVE_ARCH_INTC_INITIALIZED
-> 
->  #define KVM_USER_MEM_SLOTS 512
-> +#define KVM_PRIVATE_MEM_SLOTS 256
->  #define KVM_HALT_POLL_NS_DEFAULT 500000
-> 
->  #include <kvm/arm_vgic.h>
-> diff --git a/virt/kvm/arm/mmu.c b/virt/kvm/arm/mmu.c
-> index 2ea21da..1d2d3df 100644
-> --- a/virt/kvm/arm/mmu.c
-> +++ b/virt/kvm/arm/mmu.c
-> @@ -772,6 +772,11 @@ static void stage2_unmap_memslot(struct kvm *kvm,
->         phys_addr_t size = PAGE_SIZE * memslot->npages;
->         hva_t reg_end = hva + size;
-> 
-> +       if (unlikely(!kvm->mm)) {
+I wonder if this should be split into two series; one that sets up
+anything you may need from KVM, and another one that uses that for UEFI.
 
-I think you should consider using a predicate so that it's clear that
-this is for in-kernel VMs and not just some random situation where mm
-can be NULL.
+There's a lot KVM and UEFI intertwined logic and assumptions in patch
+10, which makes this series a bit hard to read.
 
-> +               unmap_stage2_range(kvm, addr, size);
-> +               return;
-> +       }
-> +
->         /*
->          * A memory region could potentially cover multiple VMAs, and any holes
->          * between them, so iterate over all of them to find out if we should
-> @@ -819,7 +824,8 @@ void stage2_unmap_vm(struct kvm *kvm)
->         int idx;
-> 
->         idx = srcu_read_lock(&kvm->srcu);
-> -       down_read(&current->mm->mmap_sem);
-> +       if (likely(kvm->mm))
-> +               down_read(&current->mm->mmap_sem);
->         spin_lock(&kvm->mmu_lock);
-> 
->         slots = kvm_memslots(kvm);
-> @@ -827,7 +833,8 @@ void stage2_unmap_vm(struct kvm *kvm)
->                 stage2_unmap_memslot(kvm, memslot);
-> 
->         spin_unlock(&kvm->mmu_lock);
-> -       up_read(&current->mm->mmap_sem);
-> +       if (likely(kvm->mm))
-> +               up_read(&current->mm->mmap_sem);
->         srcu_read_unlock(&kvm->srcu, idx);
->  }
-> 
-> @@ -1303,6 +1310,12 @@ static int user_mem_abort(struct kvm_vcpu *vcpu, phys_addr_t fault_ipa,
->                 return -EFAULT;
->         }
-> 
-> +       if (unlikely(!kvm->mm)) {
-> +               kvm_err("Unexpected internal VM page fault\n");
-> +               kvm_inject_vabt(vcpu);
-> +               return 0;
-> +       }
-> +
+I'd like some documentation (in the series and in
+Documentation/virtual/kvm) of how this works, and which hidden
+assumptions there are.  For example, how do you ensure you never attempt
+to return to userspace?  How many VCPUs do you support?  Do you support
+any form of virtual interrupts?  How about timers?  Can a VM access
+physical devices?  How do you debug and trace something like this?  Can
+the VM be monitored from userspace?
 
-So it's unclear to me why we don't need any special casing in
-kvm_handle_guest_abort, related to MMIO exits etc.  You probably assume
-that we will never do emulation, but that should be described and
-addressed somewhere before I can critically review this patch.
+These feel like fundamental questions to me that needs addressing before
+I can competently review the code.
 
->         /* Let's check if we will get back a huge page backed by hugetlbfs */
->         down_read(&current->mm->mmap_sem);
->         vma = find_vma_intersection(current->mm, hva, hva + 1);
-> @@ -1850,6 +1863,54 @@ void kvm_arch_commit_memory_region(struct kvm *kvm,
->                 kvm_mmu_wp_memory_region(kvm, mem->slot);
->  }
+I think a slightly more concrete motivation and outlining the example of
+the broken UEFI on Seattle would help paving the way for these patches.
+
+
+Thanks,
+-Christoffer
+
 > 
-> +/*
-> + * internal_vm_prep_mem - maps a range of hpa to gpa at stage2
-> + *
-> + * While userspace VMs manage gpas using hvas, internal virtual machines need a
-> + * way to map physical addresses to a guest. In order to avoid code duplication,
-> + * the kvm_set_memory_region call is kept for internal VMs, however it usually
-> + * expects a struct kvm_userspace_memory_region with a userspace_addr field.
-> + * With internal VMs, this field is ignored and physical memory memory pointed
-> + * by guest_phys_addr can only be idmapped.
-> + */
-> +static int internal_vm_prep_mem(struct kvm *kvm,
-> +                               const struct kvm_userspace_memory_region *mem)
-> +{
-> +       phys_addr_t addr, end;
-> +       unsigned long pfn;
-> +       int ret;
-> +       struct kvm_mmu_memory_cache cache = { 0 };
-> +
-> +       end = mem->guest_phys_addr + mem->memory_size;
-> +       pfn = __phys_to_pfn(mem->guest_phys_addr);
-> +       addr = mem->guest_phys_addr;
-
-My main concern here is that we don't do any checks on this region and
-we could be mapping device memory here as well.  Are we intending that
-to be ok, and are we then relying on the guest to use proper memory
-attributes ?
-
-> +
-> +       for (; addr < end; addr += PAGE_SIZE) {
-> +               pte_t pte = pfn_pte(pfn, PAGE_S2);
-> +
-> +               pte = kvm_s2pte_mkwrite(pte);
-> +
-> +               ret = mmu_topup_memory_cache(&cache,
-> +                                            KVM_MMU_CACHE_MIN_PAGES,
-> +                                            KVM_NR_MEM_OBJS);
-
-You should be able to allocate all you need up front instead of doing it
-in sequences.
-
-> +               if (ret) {
-> +                       mmu_free_memory_cache(&cache);
-> +                       return ret;
-> +               }
-> +               spin_lock(&kvm->mmu_lock);
-> +               ret = stage2_set_pte(kvm, &cache, addr, &pte, 0);
-> +               spin_unlock(&kvm->mmu_lock);
-
-Since you're likely to allocate some large contiguous chunks here, can
-you have a look at using section mappings?
-
-> +               if (ret) {
-> +                       mmu_free_memory_cache(&cache);
-> +                       return ret;
-> +               }
-> +
-> +               pfn++;
-> +       }
-> +
-> +       return ret;
-> +}
-> +
->  int kvm_arch_prepare_memory_region(struct kvm *kvm,
->                                    struct kvm_memory_slot *memslot,
->                                    const struct kvm_userspace_memory_region *mem,
-> @@ -1872,6 +1933,13 @@ int kvm_arch_prepare_memory_region(struct kvm *kvm,
->             (KVM_PHYS_SIZE >> PAGE_SHIFT))
->                 return -EFAULT;
+> The patch set is split as follow:
+>  - Patches 1 and 2: Give more control over HVC handling to KVM
+>  - Patches 3 to 6: Introduce the concept of KVM "internal VMs"
+>  - Patches 7 to 9: Reorder KVM and EFI initialization on ARM
+>  - Patch 10: Introduces the EFI sandboxing VM and wrappers
+>  - Patch 11: Workarounds some EFI Runtime Services relying on EL3
 > 
-> +       if (unlikely(!kvm->mm)) {
-> +               ret = internal_vm_prep_mem(kvm, mem);
-> +               if (ret)
-> +                       goto out;
-> +               goto out_internal_vm;
-> +       }
-> +
->         down_read(&current->mm->mmap_sem);
->         /*
->          * A memory region could potentially cover multiple VMAs, and any holes
-> @@ -1930,6 +1998,7 @@ int kvm_arch_prepare_memory_region(struct kvm *kvm,
->                 hva = vm_end;
->         } while (hva < reg_end);
+> The sandboxing has been tested to work reliably (rtc and efivars) on a
+> SoftIron OverDrive 1000 box and on a ARMv8.3 model with VHE enabled. Normal
+> userspace KVM instance have also been tested to still work correctly.
 > 
-> +out_internal_vm:
->         if (change == KVM_MR_FLAGS_ONLY)
->                 goto out;
+> Those patches apply cleanly on the Linus' v4.13-rc6 tag and have no other
+> dependencies.
 > 
-> @@ -1940,7 +2009,8 @@ int kvm_arch_prepare_memory_region(struct kvm *kvm,
->                 stage2_flush_memslot(kvm, memslot);
->         spin_unlock(&kvm->mmu_lock);
->  out:
-> -       up_read(&current->mm->mmap_sem);
-> +       if (kvm->mm)
-> +               up_read(&current->mm->mmap_sem);
->         return ret;
->  }
+> Florent Revest (11):
+>   arm64: Add an SMCCC function IDs header
+>   KVM: arm64: Return an Unknown ID on unhandled HVC
+>   KVM: Allow VM lifecycle management without userspace
+>   KVM, arm, arm64: Offer PAs to IPAs idmapping to internal VMs
+>   KVM: Expose VM/VCPU creation functions
+>   KVM, arm64: Expose a VCPU initialization function
+>   KVM: Allow initialization before the module target
+>   KVM, arm, arm64: Initialize KVM's core earlier
+>   EFI, arm, arm64: Enable EFI Runtime Services later
+>   efi, arm64: Sandbox Runtime Services in a VM
+>   KVM, arm64: Don't trap internal VMs SMC calls
+> 
+>  arch/arm/include/asm/efi.h                 |   7 +
+>  arch/arm/include/asm/kvm_coproc.h          |   3 +
+>  arch/arm/include/asm/kvm_host.h            |   1 +
+>  arch/arm/include/asm/kvm_psci.h            |   1 +
+>  arch/arm/kvm/coproc.c                      |   6 +
+>  arch/arm/kvm/coproc_a15.c                  |   3 +-
+>  arch/arm/kvm/coproc_a7.c                   |   3 +-
+>  arch/arm64/include/asm/efi.h               |  71 ++++
+>  arch/arm64/include/asm/kvm_emulate.h       |   3 +
+>  arch/arm64/include/asm/kvm_host.h          |   4 +
+>  arch/arm64/include/asm/kvm_psci.h          |   1 +
+>  arch/arm64/kernel/asm-offsets.c            |   3 +
+>  arch/arm64/kvm/handle_exit.c               |  27 +-
+>  arch/arm64/kvm/sys_regs_generic_v8.c       |   8 +-
+>  arch/x86/include/asm/efi.h                 |   2 +
+>  drivers/firmware/efi/Kconfig               |  10 +
+>  drivers/firmware/efi/Makefile              |   1 +
+>  drivers/firmware/efi/arm-runtime.c         |   5 +-
+>  drivers/firmware/efi/arm-sandbox-payload.S |  96 +++++
+>  drivers/firmware/efi/arm-sandbox.c         | 569 +++++++++++++++++++++++++++++
+>  drivers/firmware/efi/efi.c                 |   3 +
+>  include/linux/kvm_host.h                   |   4 +
+>  include/linux/smccc_fn.h                   |  53 +++
+>  include/uapi/linux/psci.h                  |   2 +
+>  virt/kvm/arm/arm.c                         |  18 +-
+>  virt/kvm/arm/mmu.c                         |  76 +++-
+>  virt/kvm/arm/psci.c                        |  21 ++
+>  virt/kvm/kvm_main.c                        | 102 ++++--
+>  28 files changed, 1050 insertions(+), 53 deletions(-)
+>  create mode 100644 drivers/firmware/efi/arm-sandbox-payload.S
+>  create mode 100644 drivers/firmware/efi/arm-sandbox.c
+>  create mode 100644 include/linux/smccc_fn.h
 > 
 > --
 > 1.9.1
 > 
-
-Thanks,
--Christoffer
+> IMPORTANT NOTICE: The contents of this email and any attachments are confidential and may also be privileged. If you are not the intended recipient, please notify the sender immediately and do not disclose the contents to any other person, use it for any purpose, or store or copy the information in any medium. Thank you.
