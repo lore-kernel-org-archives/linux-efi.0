@@ -1,87 +1,176 @@
 From: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Subject: Re: [RFC PATCH 1/2] efi: import USB I/O related declarations from
- the UEFI spec
-Date: Sat, 2 Sep 2017 08:41:42 +0200
-Message-ID: <20170902064142.GA26383@kroah.com>
+Subject: Re: [RFC PATCH 2/2] efi: libstub: add support for the Chaoskey RNG
+ USB stick to the stub
+Date: Sat, 2 Sep 2017 08:45:01 +0200
+Message-ID: <20170902064501.GB26383@kroah.com>
 References: <20170819151740.625-1-ard.biesheuvel@linaro.org>
+ <20170819151740.625-2-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20170819151740.625-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <20170819151740.625-2-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-hardened-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Aug 19, 2017 at 04:17:39PM +0100, Ard Biesheuvel wrote:
-> In preparation of adding support for the Chaoskey USB stick to the
-> UEFI stub, import the USB I/O protocol declarations and related types
-> to linux/efi.h.
+On Sat, Aug 19, 2017 at 04:17:40PM +0100, Ard Biesheuvel wrote:
+> Early entropy is hard to come by, especially on non-x86 systems that
+> lack an architected instruction and are not as uniform as PCs.
+> Fortunately, on UEFI systems, we can invoke the EFI_RNG_PROTOCOL,
+> which exposes the platform specific entropy source in a generic way.
+> We use this protocol to fill the RNG UEFI config table (which is used
+> during early boot to seed the kernel's entropy pool), and on ARM and
+> arm64, we invoke it to seed KASLR as well.
+> 
+> Sadly, EFI_RNG_PROTOCOL is not widely implemented, and so it would be
+> nice to have a fallback for UEFI systems that lack it. So implement
+> this fallback based on the Chaoskey RNG USB stick, which should be
+> exposed using the standard UEFI USB I/O protocol if the firmware has
+> USB support.
 > 
 > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
->  include/linux/efi.h | 66 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 66 insertions(+)
+>  drivers/firmware/efi/Kconfig                   |   7 ++
+>  drivers/firmware/efi/libstub/Makefile          |   2 +-
+>  drivers/firmware/efi/libstub/efistub.h         |   3 +
+>  drivers/firmware/efi/libstub/random-chaoskey.c | 126 +++++++++++++++++++++++++
+>  4 files changed, 137 insertions(+), 1 deletion(-)
+>  create mode 100644 drivers/firmware/efi/libstub/random-chaoskey.c
 > 
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index 12e05118657c..253749cd9b62 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -22,6 +22,7 @@
->  #include <linux/pstore.h>
->  #include <linux/range.h>
->  #include <linux/reboot.h>
-> +#include <linux/usb/ch9.h>
->  #include <linux/uuid.h>
->  #include <linux/screen_info.h>
+> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+> index 2b4c39fdfa91..448a6186d9fb 100644
+> --- a/drivers/firmware/efi/Kconfig
+> +++ b/drivers/firmware/efi/Kconfig
+> @@ -87,6 +87,13 @@ config EFI_RUNTIME_WRAPPERS
+>  config EFI_ARMSTUB
+>  	bool
 >  
-> @@ -622,6 +623,7 @@ void efi_native_runtime_setup(void);
->  #define EFI_MEMORY_ATTRIBUTES_TABLE_GUID	EFI_GUID(0xdcfa911d, 0x26eb, 0x469f,  0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
->  #define EFI_CONSOLE_OUT_DEVICE_GUID		EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
->  #define APPLE_PROPERTIES_PROTOCOL_GUID		EFI_GUID(0x91bd12fe, 0xf6c3, 0x44fb,  0xa5, 0xb7, 0x51, 0x22, 0xab, 0x30, 0x3a, 0xe0)
-> +#define EFI_USB_IO_PROTOCOL_GUID		EFI_GUID(0x2b2f68d6, 0x0cd2, 0x44cf,  0x8e, 0x8b, 0xbb, 0xa2, 0x0b, 0x1b, 0x5b, 0x75)
->  
->  #define EFI_IMAGE_SECURITY_DATABASE_GUID	EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596,  0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
->  #define EFI_SHIM_LOCK_GUID			EFI_GUID(0x605dab50, 0xe046, 0x4300,  0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
-> @@ -1569,4 +1571,68 @@ struct linux_efi_random_seed {
->  	u8	bits[];
->  };
->  
-> +typedef enum {
-> +	EfiUsbDataIn,
-> +	EfiUsbDataOut,
-> +	EfiUsbNoData
-> +} efi_usb_data_direction_t;
+> +config EFI_RNG_CHAOSKEY
+> +	bool "Chaoskey USB RNG support in the UEFI stub"
+> +	help
+> +	  Fall back to a Chaoskey RNG USB stick in case EFI_RNG_PROTOCOL
+> +	  is not implemented by the firmware. This is used for early
+> +	  seeding of the entropy pool, and for KASLR on ARM and arm64.
 > +
-> +#define EFI_USB_NOERROR			0x0000
-> +#define EFI_USB_ERR_NOTEXECUTE		0x0001
-> +#define EFI_USB_ERR_STALL		0x0002
-> +#define EFI_USB_ERR_BUFFER		0x0004
-> +#define EFI_USB_ERR_BABBLE		0x0008
-> +#define EFI_USB_ERR_NAK			0x0010
-> +#define EFI_USB_ERR_CRC			0x0020
-> +#define EFI_USB_ERR_TIMEOUT		0x0040
-> +#define EFI_USB_ERR_BITSTUFF		0x0080
-> +#define EFI_USB_ERR_SYSTEM		0x0100
+>  config EFI_BOOTLOADER_CONTROL
+>  	tristate "EFI Bootloader Control"
+>  	depends on EFI_VARS
+> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+> index dedf9bde44db..fad6bc1d0e2a 100644
+> --- a/drivers/firmware/efi/libstub/Makefile
+> +++ b/drivers/firmware/efi/libstub/Makefile
+> @@ -40,7 +40,7 @@ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
+>  
+>  lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o random.o \
+>  				   $(patsubst %.c,lib-%.o,$(arm-deps))
+> -
+> +lib-$(CONFIG_EFI_RNG_CHAOSKEY)	+= random-chaoskey.o
+>  lib-$(CONFIG_ARM)		+= arm32-stub.o
+>  lib-$(CONFIG_ARM64)		+= arm64-stub.o
+>  CFLAGS_arm64-stub.o 		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+> diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+> index 3afff5facd3b..9579ddb5937d 100644
+> --- a/drivers/firmware/efi/libstub/efistub.h
+> +++ b/drivers/firmware/efi/libstub/efistub.h
+> @@ -62,6 +62,9 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
+>  			      unsigned long size, unsigned long align,
+>  			      unsigned long *addr, unsigned long random_seed);
+>  
+> +efi_status_t efi_get_random_chaoskey(efi_system_table_t *sys_table_arg,
+> +				     unsigned long size, u8 *out);
 > +
-> +typedef struct {
-> +	u8	request_type;
-> +	u8	request;
-> +	u16	value;
-> +	u16	index;
-> +	u16	length;
-> +} efi_usb_device_request_t;
+>  efi_status_t check_platform_features(efi_system_table_t *sys_table_arg);
+>  
+>  efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg);
+> diff --git a/drivers/firmware/efi/libstub/random-chaoskey.c b/drivers/firmware/efi/libstub/random-chaoskey.c
+> new file mode 100644
+> index 000000000000..3f94ec3df9ff
+> --- /dev/null
+> +++ b/drivers/firmware/efi/libstub/random-chaoskey.c
+> @@ -0,0 +1,126 @@
+> +/*
+> + * Copyright (C) 2017 Linaro Ltd;  <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + *
+> + */
+> +
+> +#include <linux/efi.h>
+> +#include <asm/efi.h>
+> +
+> +#include "efistub.h"
+> +
+> +#define CHAOSKEY_VENDOR_ID		0x1d50	/* OpenMoko */
+> +#define CHAOSKEY_PRODUCT_ID		0x60c6	/* ChaosKey */
+> +
+> +static efi_usb_io_protocol_t *chaoskey_usb_io;
+> +static unsigned long chaoskey_usb_ep_addr, chaoskey_usb_ep_size;
+> +
+> +static void locate_chaoskey(efi_system_table_t *sys_table_arg)
+> +{
+> +	efi_guid_t usb_io_guid = EFI_USB_IO_PROTOCOL_GUID;
+> +	unsigned long bufsize = 0, i, j;
+> +	efi_handle_t *handles;
+> +	efi_status_t status;
+> +
+> +	chaoskey_usb_io = (void *)-1;
+> +
+> +	/* find all USB devices that UEFI knows about */
+> +	status = efi_call_early(locate_handle, EFI_LOCATE_BY_PROTOCOL,
+> +				&usb_io_guid, NULL, &bufsize, NULL);
+> +	if (status != EFI_BUFFER_TOO_SMALL)
+> +		return;
+> +
+> +	status = efi_call_early(allocate_pool, EFI_LOADER_DATA, bufsize,
+> +				(void **)&handles);
+> +	if (status != EFI_SUCCESS)
+> +		return;
+> +
+> +	status = efi_call_early(locate_handle, EFI_LOCATE_BY_PROTOCOL,
+> +				&usb_io_guid, NULL, &bufsize, handles);
+> +	if (status != EFI_SUCCESS)
+> +		goto out;
+> +
+> +	for (i = 0; i < bufsize / sizeof(efi_handle_t); i++) {
+> +		struct usb_device_descriptor dev;
+> +		struct usb_interface_descriptor iface;
+> +		efi_usb_io_protocol_t *p;
+> +
+> +		status = efi_call_early(handle_protocol, handles[i],
+> +					&usb_io_guid, (void **)&p);
+> +		if (status != EFI_SUCCESS)
+> +			continue; /* shouldn't happen */
+> +
+> +		/* get the device descriptor so we can check the vid/pid */
+> +		status = p->get_device_descriptor(p, &dev);
+> +		if (status != EFI_SUCCESS)
+> +			continue; /* shouldn't happen either */
+> +
+> +		if (dev.idVendor != CHAOSKEY_VENDOR_ID ||
+> +		    dev.idProduct != CHAOSKEY_PRODUCT_ID)
 
-A typedef?
+idVendor and idProduct are little endian types.
 
-Also, those values are little-endian, right?  And finally, they are
-crossing the user/kernel boundry, so they should be using the __ variant
-of the variable type, right?
+You have run sparse on this code, right?
 
-And finally, why does efi.h care about device specific stuff like this?
-Are you going to want to add all different types of efi devices here in
-the future?  That does not seem wise from a maintaince point-of-view...
+
+> +			continue;
+> +
+> +		/* get the number of endpoints from the interface descriptor */
+> +		status = p->get_iface_descriptor(p, &iface);
+> +		if (status != EFI_SUCCESS)
+> +			continue;
+> +
+> +		/* locate the first BULK IN endpoint */
+> +		for (j = 0; j < iface.bNumEndpoints; j++) {
+> +			struct usb_endpoint_descriptor ep;
+
+Don't we have built-in usb functions for this now?  Why not use them
+instead of hand-rolling your own logic?
 
 thanks,
 
