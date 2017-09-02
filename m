@@ -1,209 +1,128 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC PATCH 2/2] efi: libstub: add support for the Chaoskey RNG
- USB stick to the stub
-Date: Sat, 2 Sep 2017 10:13:00 +0100
-Message-ID: <CAKv+Gu_R0voAk1+rN70VCm+2ixKUrhKpeXeQFNHOP0We_z11pg@mail.gmail.com>
-References: <20170819151740.625-1-ard.biesheuvel@linaro.org>
- <20170819151740.625-2-ard.biesheuvel@linaro.org> <20170902064501.GB26383@kroah.com>
- <CAKv+Gu-T4mUkcA-bj9Cw0GkxDQ21ayKLn7_LCbvy6ZbrNEbo1w@mail.gmail.com> <20170902082645.GB1620@kroah.com>
+From: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH V2 0/3] Use mm_struct and switch_mm() instead of manually
+Date: Sat, 2 Sep 2017 19:38:15 +0530
+Message-ID: <CACi5LpMAKotBYeHpFHZKFCbZ5UST3pqFef6ALwH46JJhdhkkQw@mail.gmail.com>
+References: <1503963432-32055-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170902082645.GB1620-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1503963432-32055-1-git-send-email-sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-hardened-ZwoEplunGu1jrUoiu81ncdBPR1lH4CV8@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, jlee-IBi9RG/b67k@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 2 September 2017 at 09:26, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
-> On Sat, Sep 02, 2017 at 09:18:34AM +0100, Ard Biesheuvel wrote:
->> On 2 September 2017 at 07:45, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
->> > On Sat, Aug 19, 2017 at 04:17:40PM +0100, Ard Biesheuvel wrote:
->> >> Early entropy is hard to come by, especially on non-x86 systems that
->> >> lack an architected instruction and are not as uniform as PCs.
->> >> Fortunately, on UEFI systems, we can invoke the EFI_RNG_PROTOCOL,
->> >> which exposes the platform specific entropy source in a generic way.
->> >> We use this protocol to fill the RNG UEFI config table (which is used
->> >> during early boot to seed the kernel's entropy pool), and on ARM and
->> >> arm64, we invoke it to seed KASLR as well.
->> >>
->> >> Sadly, EFI_RNG_PROTOCOL is not widely implemented, and so it would be
->> >> nice to have a fallback for UEFI systems that lack it. So implement
->> >> this fallback based on the Chaoskey RNG USB stick, which should be
->> >> exposed using the standard UEFI USB I/O protocol if the firmware has
->> >> USB support.
->> >>
->> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> >> ---
->> >>  drivers/firmware/efi/Kconfig                   |   7 ++
->> >>  drivers/firmware/efi/libstub/Makefile          |   2 +-
->> >>  drivers/firmware/efi/libstub/efistub.h         |   3 +
->> >>  drivers/firmware/efi/libstub/random-chaoskey.c | 126 +++++++++++++++++++++++++
->> >>  4 files changed, 137 insertions(+), 1 deletion(-)
->> >>  create mode 100644 drivers/firmware/efi/libstub/random-chaoskey.c
->> >>
->> >> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
->> >> index 2b4c39fdfa91..448a6186d9fb 100644
->> >> --- a/drivers/firmware/efi/Kconfig
->> >> +++ b/drivers/firmware/efi/Kconfig
->> >> @@ -87,6 +87,13 @@ config EFI_RUNTIME_WRAPPERS
->> >>  config EFI_ARMSTUB
->> >>       bool
->> >>
->> >> +config EFI_RNG_CHAOSKEY
->> >> +     bool "Chaoskey USB RNG support in the UEFI stub"
->> >> +     help
->> >> +       Fall back to a Chaoskey RNG USB stick in case EFI_RNG_PROTOCOL
->> >> +       is not implemented by the firmware. This is used for early
->> >> +       seeding of the entropy pool, and for KASLR on ARM and arm64.
->> >> +
->> >>  config EFI_BOOTLOADER_CONTROL
->> >>       tristate "EFI Bootloader Control"
->> >>       depends on EFI_VARS
->> >> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
->> >> index dedf9bde44db..fad6bc1d0e2a 100644
->> >> --- a/drivers/firmware/efi/libstub/Makefile
->> >> +++ b/drivers/firmware/efi/libstub/Makefile
->> >> @@ -40,7 +40,7 @@ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
->> >>
->> >>  lib-$(CONFIG_EFI_ARMSTUB)    += arm-stub.o fdt.o string.o random.o \
->> >>                                  $(patsubst %.c,lib-%.o,$(arm-deps))
->> >> -
->> >> +lib-$(CONFIG_EFI_RNG_CHAOSKEY)       += random-chaoskey.o
->> >>  lib-$(CONFIG_ARM)            += arm32-stub.o
->> >>  lib-$(CONFIG_ARM64)          += arm64-stub.o
->> >>  CFLAGS_arm64-stub.o          := -DTEXT_OFFSET=$(TEXT_OFFSET)
->> >> diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
->> >> index 3afff5facd3b..9579ddb5937d 100644
->> >> --- a/drivers/firmware/efi/libstub/efistub.h
->> >> +++ b/drivers/firmware/efi/libstub/efistub.h
->> >> @@ -62,6 +62,9 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
->> >>                             unsigned long size, unsigned long align,
->> >>                             unsigned long *addr, unsigned long random_seed);
->> >>
->> >> +efi_status_t efi_get_random_chaoskey(efi_system_table_t *sys_table_arg,
->> >> +                                  unsigned long size, u8 *out);
->> >> +
->> >>  efi_status_t check_platform_features(efi_system_table_t *sys_table_arg);
->> >>
->> >>  efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg);
->> >> diff --git a/drivers/firmware/efi/libstub/random-chaoskey.c b/drivers/firmware/efi/libstub/random-chaoskey.c
->> >> new file mode 100644
->> >> index 000000000000..3f94ec3df9ff
->> >> --- /dev/null
->> >> +++ b/drivers/firmware/efi/libstub/random-chaoskey.c
->> >> @@ -0,0 +1,126 @@
->> >> +/*
->> >> + * Copyright (C) 2017 Linaro Ltd;  <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> >> + *
->> >> + * This program is free software; you can redistribute it and/or modify
->> >> + * it under the terms of the GNU General Public License version 2 as
->> >> + * published by the Free Software Foundation.
->> >> + *
->> >> + */
->> >> +
->> >> +#include <linux/efi.h>
->> >> +#include <asm/efi.h>
->> >> +
->> >> +#include "efistub.h"
->> >> +
->> >> +#define CHAOSKEY_VENDOR_ID           0x1d50  /* OpenMoko */
->> >> +#define CHAOSKEY_PRODUCT_ID          0x60c6  /* ChaosKey */
->> >> +
->> >> +static efi_usb_io_protocol_t *chaoskey_usb_io;
->> >> +static unsigned long chaoskey_usb_ep_addr, chaoskey_usb_ep_size;
->> >> +
->> >> +static void locate_chaoskey(efi_system_table_t *sys_table_arg)
->> >> +{
->> >> +     efi_guid_t usb_io_guid = EFI_USB_IO_PROTOCOL_GUID;
->> >> +     unsigned long bufsize = 0, i, j;
->> >> +     efi_handle_t *handles;
->> >> +     efi_status_t status;
->> >> +
->> >> +     chaoskey_usb_io = (void *)-1;
->> >> +
->> >> +     /* find all USB devices that UEFI knows about */
->> >> +     status = efi_call_early(locate_handle, EFI_LOCATE_BY_PROTOCOL,
->> >> +                             &usb_io_guid, NULL, &bufsize, NULL);
->> >> +     if (status != EFI_BUFFER_TOO_SMALL)
->> >> +             return;
->> >> +
->> >> +     status = efi_call_early(allocate_pool, EFI_LOADER_DATA, bufsize,
->> >> +                             (void **)&handles);
->> >> +     if (status != EFI_SUCCESS)
->> >> +             return;
->> >> +
->> >> +     status = efi_call_early(locate_handle, EFI_LOCATE_BY_PROTOCOL,
->> >> +                             &usb_io_guid, NULL, &bufsize, handles);
->> >> +     if (status != EFI_SUCCESS)
->> >> +             goto out;
->> >> +
->> >> +     for (i = 0; i < bufsize / sizeof(efi_handle_t); i++) {
->> >> +             struct usb_device_descriptor dev;
->> >> +             struct usb_interface_descriptor iface;
->> >> +             efi_usb_io_protocol_t *p;
->> >> +
->> >> +             status = efi_call_early(handle_protocol, handles[i],
->> >> +                                     &usb_io_guid, (void **)&p);
->> >> +             if (status != EFI_SUCCESS)
->> >> +                     continue; /* shouldn't happen */
->> >> +
->> >> +             /* get the device descriptor so we can check the vid/pid */
->> >> +             status = p->get_device_descriptor(p, &dev);
->> >> +             if (status != EFI_SUCCESS)
->> >> +                     continue; /* shouldn't happen either */
->> >> +
->> >> +             if (dev.idVendor != CHAOSKEY_VENDOR_ID ||
->> >> +                 dev.idProduct != CHAOSKEY_PRODUCT_ID)
->> >
->> > idVendor and idProduct are little endian types.
->> >
->> > You have run sparse on this code, right?
->> >
->> >
->> >> +                     continue;
->> >> +
->> >> +             /* get the number of endpoints from the interface descriptor */
->> >> +             status = p->get_iface_descriptor(p, &iface);
->> >> +             if (status != EFI_SUCCESS)
->> >> +                     continue;
->> >> +
->> >> +             /* locate the first BULK IN endpoint */
->> >> +             for (j = 0; j < iface.bNumEndpoints; j++) {
->> >> +                     struct usb_endpoint_descriptor ep;
->> >
->> > Don't we have built-in usb functions for this now?  Why not use them
->> > instead of hand-rolling your own logic?
->> >
->>
->> This is UEFI stub code, which is executed with the kernel image or
->> decompressor loaded at a completely different address than it was
->> linked at. Reusing inline functions is usually fine, but anything that
->> requires linking kernel objects into the decompressor is a bit
->> cumbersome.
+Hi Sai,
+
+On Tue, Aug 29, 2017 at 5:07 AM, Sai Praneeth Prakhya
+<sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 >
-> So this is not Linux kernel code?  Or is it?  I'm totally confused now.
+> Presently, in x86, to invoke any efi function like
+> efi_set_virtual_address_map() or any efi_runtime_service() the code path
+> typically involves read_cr3() (save previous pgd), write_cr3()
+> (write efi_pgd) and calling efi function. Likewise after returning from
+> efi function the code path typically involves read_cr3() (save efi_pgd),
+> write_cr3() (write previous pgd). We do this couple of times in efi
+> subsystem of Linux kernel, instead we can use helper function
+> efi_switch_mm() to do this. This improves readability and maintainability.
+> Also, instead of maintaining a separate struct "efi_scratch" to store/restore
+> efi_pgd, we can use mm_struct to do this.
+>
+> I have tested this patch set against LUV (Linux UEFI Validation), so I
+> think I didn't break any existing configurations. I have tested this
+> patch set for
+> 1. x86_64,
+> 2. x86_32,
+> 3. Mixed mode
+> with efi=old_map and for kexec kernel. Please let me know if I have
+> missed any other configurations.
+>
+> Changes in V2:
+> 1. Resolve mm_dropping() issue by not mm_dropping()/mm_grabbing() any mm,
+> as we are not losing/creating any references.
+>
+> Sai Praneeth (3):
+>   efi: Use efi_mm in x86 as well as ARM
+>   x86/efi: Replace efi_pgd with efi_mm.pgd
+>   x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
+>
+>  arch/x86/include/asm/efi.h           | 29 ++++++++++----------
+>  arch/x86/platform/efi/efi_64.c       | 52 ++++++++++++++++++++----------------
+>  arch/x86/platform/efi/efi_thunk_64.S |  2 +-
+>  drivers/firmware/efi/arm-runtime.c   |  9 -------
+>  drivers/firmware/efi/efi.c           |  9 +++++++
+>  include/linux/efi.h                  |  2 ++
+>  6 files changed, 55 insertions(+), 48 deletions(-)
+>
+> --
+> 2.1.4
 >
 
-All code that lives under drivers/firmware/efi/libstub is linked into
-a PE/COFF binary that is either embedded into the decompressor (x86,
-ARM) or the kernel proper (arm64) but with a separate __efistub_
-namespace. It implements the so-called OS loader (in UEFI speak) that
-loads the images and interfaces with the boot environment in other
-ways to prepare for OS boot. At this point, we are still running in
-the 1:1 mapping set up by UEFI, and the PE/COFF image (which contains
-the entire kernel image as a payload, in one way or another) is loaded
-at an arbitrary offset by the firmware, and invoked from there.
+Thanks for this v2.
+Introducing the 'efi_switch_mm() ' helper instead of manually
+twiddling with %cr3 seems more cleaner.
 
->> In any case, these patches are RFC only, and it is quite obvious that
->> having a Chaoskey USB driver in the firmware that produces the
->> EFI_RNG_PROTOCOL is much better, and the UEFI stub code can just call
->> into the protocol to get entropy.
->
-> Ok, why not write that and not have to deal with any Linux code at all?
->
+I have tested this patchset on a x86_64 machine with the following
+configurations:
 
-Oh, we did write it. And we are leaning towards withdrawing these
-patches, but only because adding support for individual devices is a
-bit icky. The way these patches interface with the firmware is no
-different from all the other Linux code that does so.
+1. Primary kernel boot with efi=old_map
+2. Primary kernel boot with new efi map
+
+While it seems that efi=old_map passes, the new efi map boot fails for
+me on both the two x86 machine (Dell 3050MT and a SGI - UV300 machine.
+
+It seems we are hitting a NULL pointer deference in
+'efi_call_phys_prolog' while accessing '&efi_mm'.
+
+Please see the log below for details:
+
+[    0.020006] BUG: unable to handle kernel NULL pointer dereference
+at           (null)
+[    0.021000] IP: switch_mm_irqs_off+0x44/0x270
+[    0.021000] PGD 0
+[    0.021000] P4D 0
+[    0.021000]
+[    0.021000] Oops: 0002 [#1] SMP
+[    0.021000] Modules linked in:
+[    0.021000] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.12.0-rc7+ #8
+[    0.021000] Hardware name: SGI UV300/UV300, BIOS SGI UV 300 series
+BIOS 05/25/2016
+[    0.021000] task: ffffffffb0e104c0 task.stack: ffffffffb0e00000
+[    0.021000] RIP: 0010:switch_mm_irqs_off+0x44/0x270
+[    0.021000] RSP: 0000:ffffffffb0e035d0 EFLAGS: 00010083
+[    0.021000] RAX: 0000000000000000 RBX: ffffffffb0fbe620 RCX: ffffffffb0e61348
+[    0.021000] RDX: ffffffffb0e104c0 RSI: ffffffffb0fbe620 RDI: ffffffffb0f14660
+[    0.021000] RBP: ffffffffb0e035f0 R08: 65202c3120676f6c R09: 0000000000000189
+[    0.021000] R10: 30313d6d6d5f6966 R11: 3432303331363936 R12: ffffffffb0f14660
+[    0.021000] R13: 0000000000000000 R14: 0000000000000bb0 R15: 0000000000000450
+[    0.021000] FS:  0000000000000000(0000) GS:ffff8bf2c3600000(0000)
+knlGS:0000000000000000
+[    0.021000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[    0.021000] CR2: 0000000000000000 CR3: 0000005b43e09000 CR4: 00000000000406b0
+[    0.021000] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+[    0.021000] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+[    0.021000] Call Trace:
+[    0.021000]  switch_mm+0x20/0x30
+[    0.021000]  efi_switch_mm+0x49/0x60
+[    0.021000]  efi_call_phys_prolog+0x56/0x1b3
+[    0.021000]  efi_enter_virtual_mode+0x3a9/0x520
+[    0.021000]  start_kernel+0x424/0x4c8
+[    0.021000]  ? set_init_arg+0x5a/0x5a
+[    0.021000]  ? early_idt_handler_array+0x120/0x120
+[    0.021000]  x86_64_start_reservations+0x29/0x2b
+[    0.021000]  x86_64_start_kernel+0x151/0x174
+[    0.021000]  secondary_startup_64+0x9f/0x9f
+[    0.021000] Code: 2d 82 51 d9 4f 65 c7 05 0f 65 da 4f 01 00 00 00
+48 39 f7 0f 84 14 01 00 00 65 48 89 35 f6 64 da 4f 48 8b 86 e8 02 00
+00 45 89 ed <f0> 4c 0f ab 28 bf 00 00 00 80 48 03 7e 50 48 8b 05 27 b0
+b9 00
+[    0.021000] RIP: switch_mm_irqs_off+0x44/0x270 RSP: ffffffffb0e035d0
+[    0.021000] CR2: 0000000000000000
+[    0.021000] ---[ end trace fb94349305e1cb8b ]---
+[    0.021000] Kernel panic - not syncing: Fatal exception
+[    0.021000] ---[ end Kernel panic - not syncing: Fatal exception
+
+
+Regards,
+Bhupesh
