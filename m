@@ -1,63 +1,54 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH V2 0/3] Use mm_struct and switch_mm() instead of manually
-Date: Sun, 3 Sep 2017 07:46:16 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F1859E218@ORSMSX114.amr.corp.intel.com>
-References: <1503963432-32055-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <CACi5LpMAKotBYeHpFHZKFCbZ5UST3pqFef6ALwH46JJhdhkkQw@mail.gmail.com>
- <CACi5LpOTjBbT7ngiQykTbhUbVoODvxQRj5Ub-fm7yMP8VySkpA@mail.gmail.com>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [RFC Part1 PATCH v3 16/17] X86/KVM: Provide support to create
+ Guest and HV shared per-CPU variables
+Date: Mon, 4 Sep 2017 19:05:25 +0200
+Message-ID: <20170904170525.toyulxwaevef42qe@pd.tnic>
+References: <20170724190757.11278-1-brijesh.singh@amd.com>
+ <20170724190757.11278-17-brijesh.singh@amd.com>
+ <20170829102258.gxk227js4yw47qi3@pd.tnic>
+ <0810a732-9c77-a543-ffeb-7fd2d8f46266@amd.com>
+ <20170830174655.ehrnmynotmp7laka@pd.tnic>
+ <8155b5b2-b2b3-bc8f-33ae-b81b661a2e38@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CACi5LpOTjBbT7ngiQykTbhUbVoODvxQRj5Ub-fm7yMP8VySkpA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <8155b5b2-b2b3-bc8f-33ae-b81b661a2e38-5C7GfCeVMHo@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "jlee-IBi9RG/b67k@public.gmane.org" <jlee-IBi9RG/b67k@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Neri, Ricardo" <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Shankar, Ravi V" <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Brijesh Singh <brijesh.singh-5C7GfCeVMHo@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Piotr Luc <piotr.luc-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Reza Arbab <arbab-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Kirill A . Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Laura Abbott <labbott-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Eric Biederman <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>, Benjamin
 List-Id: linux-efi@vger.kernel.org
 
-PiA+DQo+ID4gVGhhbmtzIGZvciB0aGlzIHYyLg0KPiA+IEludHJvZHVjaW5nIHRoZSAnZWZpX3N3
-aXRjaF9tbSgpICcgaGVscGVyIGluc3RlYWQgb2YgbWFudWFsbHkNCj4gPiB0d2lkZGxpbmcgd2l0
-aCAlY3IzIHNlZW1zIG1vcmUgY2xlYW5lci4NCj4gPg0KPiA+IEkgaGF2ZSB0ZXN0ZWQgdGhpcyBw
-YXRjaHNldCBvbiBhIHg4Nl82NCBtYWNoaW5lIHdpdGggdGhlIGZvbGxvd2luZw0KPiA+IGNvbmZp
-Z3VyYXRpb25zOg0KPiA+DQo+ID4gMS4gUHJpbWFyeSBrZXJuZWwgYm9vdCB3aXRoIGVmaT1vbGRf
-bWFwIDIuIFByaW1hcnkga2VybmVsIGJvb3Qgd2l0aA0KPiA+IG5ldyBlZmkgbWFwDQo+ID4NCj4g
-PiBXaGlsZSBpdCBzZWVtcyB0aGF0IGVmaT1vbGRfbWFwIHBhc3NlcywgdGhlIG5ldyBlZmkgbWFw
-IGJvb3QgZmFpbHMgZm9yDQo+ID4gbWUgb24gYm90aCB0aGUgdHdvIHg4NiBtYWNoaW5lIChEZWxs
-IDMwNTBNVCBhbmQgYSBTR0kgLSBVVjMwMCBtYWNoaW5lLg0KPiA+DQo+ID4gSXQgc2VlbXMgd2Ug
-YXJlIGhpdHRpbmcgYSBOVUxMIHBvaW50ZXIgZGVmZXJlbmNlIGluDQo+ID4gJ2VmaV9jYWxsX3Bo
-eXNfcHJvbG9nJyB3aGlsZSBhY2Nlc3NpbmcgJyZlZmlfbW0nLg0KPiA+DQo+ID4gUGxlYXNlIHNl
-ZSB0aGUgbG9nIGJlbG93IGZvciBkZXRhaWxzOg0KPiA+DQo+ID4gWyAgICAwLjAyMDAwNl0gQlVH
-OiB1bmFibGUgdG8gaGFuZGxlIGtlcm5lbCBOVUxMIHBvaW50ZXIgZGVyZWZlcmVuY2UNCj4gPiBh
-dCAgICAgICAgICAgKG51bGwpDQo+ID4gWyAgICAwLjAyMTAwMF0gSVA6IHN3aXRjaF9tbV9pcnFz
-X29mZisweDQ0LzB4MjcwDQo+ID4gWyAgICAwLjAyMTAwMF0gQ2FsbCBUcmFjZToNCj4gPiBbICAg
-IDAuMDIxMDAwXSAgc3dpdGNoX21tKzB4MjAvMHgzMA0KPiA+IFsgICAgMC4wMjEwMDBdICBlZmlf
-c3dpdGNoX21tKzB4NDkvMHg2MA0KPiA+IFsgICAgMC4wMjEwMDBdICBlZmlfY2FsbF9waHlzX3By
-b2xvZysweDU2LzB4MWIzDQo+ID4gWyAgICAwLjAyMTAwMF0gIGVmaV9lbnRlcl92aXJ0dWFsX21v
-ZGUrMHgzYTkvMHg1MjANCj4gPiBbICAgIDAuMDIxMDAwXSAgc3RhcnRfa2VybmVsKzB4NDI0LzB4
-NGM4DQo+ID4gWyAgICAwLjAyMTAwMF0gID8gc2V0X2luaXRfYXJnKzB4NWEvMHg1YQ0KPiA+IFsg
-ICAgMC4wMjEwMDBdICA/IGVhcmx5X2lkdF9oYW5kbGVyX2FycmF5KzB4MTIwLzB4MTIwDQo+ID4g
-WyAgICAwLjAyMTAwMF0gIHg4Nl82NF9zdGFydF9yZXNlcnZhdGlvbnMrMHgyOS8weDJiDQo+ID4g
-WyAgICAwLjAyMTAwMF0gIHg4Nl82NF9zdGFydF9rZXJuZWwrMHgxNTEvMHgxNzQNCj4gPiBbICAg
-IDAuMDIxMDAwXSAgc2Vjb25kYXJ5X3N0YXJ0dXBfNjQrMHg5Zi8weDlmDQo+ID4gWyAgICAwLjAy
-MTAwMF0gQ29kZTogMmQgODIgNTEgZDkgNGYgNjUgYzcgMDUgMGYgNjUgZGEgNGYgMDEgMDAgMDAg
-MDANCj4gPiA0OCAzOSBmNyAwZiA4NCAxNCAwMSAwMCAwMCA2NSA0OCA4OSAzNSBmNiA2NCBkYSA0
-ZiA0OCA4YiA4NiBlOCAwMiAwMA0KPiA+IDAwIDQ1IDg5IGVkIDxmMD4gNGMgMGYgYWIgMjggYmYg
-MDAgMDAgMDAgODAgNDggMDMgN2UgNTAgNDggOGIgMDUgMjcgYjANCj4gPiBiOSAwMA0KPiA+IFsg
-ICAgMC4wMjEwMDBdIFJJUDogc3dpdGNoX21tX2lycXNfb2ZmKzB4NDQvMHgyNzAgUlNQOiBmZmZm
-ZmZmZmIwZTAzNWQwDQo+ID4gWyAgICAwLjAyMTAwMF0gQ1IyOiAwMDAwMDAwMDAwMDAwMDAwDQo+
-ID4gWyAgICAwLjAyMTAwMF0gLS0tWyBlbmQgdHJhY2UgZmI5NDM0OTMwNWUxY2I4YiBdLS0tDQo+
-ID4gWyAgICAwLjAyMTAwMF0gS2VybmVsIHBhbmljIC0gbm90IHN5bmNpbmc6IEZhdGFsIGV4Y2Vw
-dGlvbg0KPiA+IFsgICAgMC4wMjEwMDBdIC0tLVsgZW5kIEtlcm5lbCBwYW5pYyAtIG5vdCBzeW5j
-aW5nOiBGYXRhbCBleGNlcHRpb24NCj4gPg0KPiANCj4gQW5kIEkgZm9yZ290IHRvIG1lbnRpb24g
-dGhhdCBJIHRyaWVkIHRoZSBwYXRjaHNldCBib3RoIHdpdGggdGhlIGVmaS9uZXh0IGFuZA0KPiBs
-aW51cydzIHRyZWVzIGFuZCBzYXcgdGhlIHNhbWUgcmVzdWx0Lg0KPiANCj4gSSB3b3VsZCBiZSBo
-YXBweSB0byBoZWxwIGluIGNhc2UgeW91IG5lZWQgZnVydGhlciBkZXRhaWxzIG9mIHRoZSB0ZXN0
-IGVudmlyb25tZW50DQo+IG9yIG5lZWQgaGVscCBpbiB0ZXN0aW5nIHRoaXMgY3Jhc2ggZnVydGhl
-ci4NCj4gDQo+IFJlZ2FyZHMsDQo+IEJodXBlc2gNCg0KSGkgQmh1cGVzaCwNCg0KVGhhbmtzIGZv
-ciB0cnlpbmcgdGhlIHBhdGNoZXMgYW5kIHJhaXNpbmcgdGhlIGNvbmNlcm4uDQpDb3VsZCB5b3Ug
-YWxzbyBwbGVhc2UgYWxzbyBnaXZlIGEgdHJ5IG9uIHFlbXU/IChpZiByZXByb2R1Y2libGUsIHdl
-IHdpbGwgYmUgaGF2aW5nIGEgY29tbW9uIHBsYXRmb3JtIHRvIHN0YXJ0IGRlYnVnZ2luZykNCkkg
-aGF2ZSB0ZXN0ZWQgdGhpcyBwYXRjaCBzZXQgb24gcWVtdSBhbmQgcmVhbCBtYWNoaW5lcyAoZGlm
-ZmVyZW50IGZyb20gb25lJ3MgeW91IHRyaWVkKSBpbiBvdXIgbGFiIGFuZCBkaWRu4oCZdCBub3Rp
-Y2UgdGhpcyBpc3N1ZS4NCg0KUmVnYXJkcywNClNhaQ0K
+On Fri, Sep 01, 2017 at 05:52:13PM -0500, Brijesh Singh wrote:
+>  So far, we have not seen the need for having such functions except
+> this cases. The approach we have right now works just fine and not
+> sure if its worth adding new functions.
+
+Then put the call to kvm_map_hv_shared_decrypted() into
+kvm_smp_prepare_boot_cpu() to denote that you're executing this whole
+stuff only once during guest init.
+
+Now you're doing additional jumping-through-hoops with that once static
+var just so you can force something which needs to execute only once but
+gets called in a per-CPU path.
+
+See what I mean?
+
+> Thoughts ?
+> 
+> [1] Commit :7f8b7e7 x86/mm: Add support for early encryption/decryption of memory
+
+Add
+
+[core]
+        abbrev = 12
+
+to the core section of your .gitconfig.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
