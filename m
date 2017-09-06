@@ -1,148 +1,324 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V2 0/3] Use mm_struct and switch_mm() instead of manually
-Date: Wed, 6 Sep 2017 09:00:09 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F185ACB0E@ORSMSX114.amr.corp.intel.com>
-References: <1503963432-32055-1-git-send-email-sai.praneeth.prakhya@intel.com>
-         <CACi5LpMAKotBYeHpFHZKFCbZ5UST3pqFef6ALwH46JJhdhkkQw@mail.gmail.com>
-         <CACi5LpOTjBbT7ngiQykTbhUbVoODvxQRj5Ub-fm7yMP8VySkpA@mail.gmail.com>
-         <FFF73D592F13FD46B8700F0A279B802F1859E218@ORSMSX114.amr.corp.intel.com>
-         <CACi5LpOMD=xAJz+WkHGi7D-d4xjc20Xx6E-YU1MC0UvHpEx1NA@mail.gmail.com>
-         <1504664466.4482.25.camel@intel.com> <1504665789.4482.31.camel@intel.com>
+From: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 1/2] efi: call get_event_log before ExitBootServices
+Date: Wed,  6 Sep 2017 16:25:01 +0200
+Message-ID: <20170906142502.11783-1-tweek@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1504665789.4482.31.camel@intel.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "jlee@suse.com" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, "luto@kernel.org" <luto@kernel.org>, "mst@redhat.com" <mst@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, peterhuewe-Mmb7MZpHnFY@public.gmane.org, Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogU2FpIFByYW5lZXRoIFBy
-YWtoeWEgW21haWx0bzpzYWkucHJhbmVldGgucHJha2h5YUBpbnRlbC5jb21dDQo+IFNlbnQ6IFR1
-ZXNkYXksIFNlcHRlbWJlciA1LCAyMDE3IDc6NDMgUE0NCj4gVG86IEJodXBlc2ggU2hhcm1hIDxi
-aHNoYXJtYUByZWRoYXQuY29tPg0KPiBDYzogbGludXgtZWZpQHZnZXIua2VybmVsLm9yZzsgbGlu
-dXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsgTWF0dCBGbGVtaW5nDQo+IDxtYXR0QGNvZGVibHVl
-cHJpbnQuY28udWs+OyBBcmQgQmllc2hldXZlbCA8YXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZz47
-DQo+IGpsZWVAc3VzZS5jb207IEJvcmlzbGF2IFBldGtvdiA8YnBAYWxpZW44LmRlPjsgTHVjaywg
-VG9ueQ0KPiA8dG9ueS5sdWNrQGludGVsLmNvbT47IGx1dG9Aa2VybmVsLm9yZzsgbXN0QHJlZGhh
-dC5jb207IE5lcmksIFJpY2FyZG8NCj4gPHJpY2FyZG8ubmVyaUBpbnRlbC5jb20+OyBTaGFua2Fy
-LCBSYXZpIFYgPHJhdmkudi5zaGFua2FyQGludGVsLmNvbT4NCj4gU3ViamVjdDogUmU6IFtQQVRD
-SCBWMiAwLzNdIFVzZSBtbV9zdHJ1Y3QgYW5kIHN3aXRjaF9tbSgpIGluc3RlYWQgb2YNCj4gbWFu
-dWFsbHkNCj4gDQo+IE9uIFR1ZSwgMjAxNy0wOS0wNSBhdCAxOToyMSAtMDcwMCwgU2FpIFByYW5l
-ZXRoIFByYWtoeWEgd3JvdGU6DQo+ID4gPiBJIGdldCBhIHNpbWlsYXIgY3Jhc2ggb24gUWVtdSB3
-aXRoIGxpbnVzJ3MgbWFzdGVyIGJyYW5jaCBhbmQgdGhlIFYyDQo+ID4gPiBhcHBsaWVkIG9uIHRv
-cCBvZiBpdC4gSGVyZSBhcmUgdGhlIGRldGFpbHMgb2YgbXkgdGVzdCBlbnZpcm9ubWVudDoNCj4g
-PiA+DQo+ID4gPiAxLiBJIHVzZSB0aGUgT1ZNRiAoRURLMikgRUZJIGZpcm13YXJlIHRvIGxhdW5j
-aCB0aGUga2VybmVsOg0KPiA+ID4gZWRrMi5naXQvb3ZtZi14NjQNCj4gPiA+DQo+ID4gPiAyLiBJ
-IHVzZWQgbGludXMncyBtYXN0ZXIgYnJhbmNoIChIRUFEIC0gY29tbWl0Og0KPiA+ID4gYjFiNmY4
-M2FjOTM4ZDE3Njc0MmM4NTc1Nzk2MGRlYzJjZjEwZTQ2OCkgYW5kIGFwcGxpZWQgeW91ciB2MiBv
-biB0b3ANCj4gPiA+IG9mIHRoZSBzYW1lLg0KPiA+ID4NCj4gPiA+IDMuIEkgdXNlIHRoZSBmb2xs
-b3dpbmcgcWVtdSBjb21tYW5kIGxpbmUgdG8gbGF1bmNoIHRoZSB0ZXN0Og0KPiA+ID4NCj4gPiA+
-ICMgL3Vzci9sb2NhbC9iaW4vcWVtdS1zeXN0ZW0teDg2XzY0IC0tdmVyc2lvbiBRRU1VIGVtdWxh
-dG9yIHZlcnNpb24NCj4gPiA+IDIuOS41MCAodjIuOS4wLTUyNi1nNzZkMjBlYSkgQ29weXJpZ2h0
-IChjKSAyMDAzLTIwMTcgRmFicmljZSBCZWxsYXJkDQo+ID4gPiBhbmQgdGhlIFFFTVUgUHJvamVj
-dCBkZXZlbG9wZXJzDQo+ID4gPg0KPiA+ID4gIyAvdXNyL2xvY2FsL2Jpbi9xZW11LXN5c3RlbS14
-ODZfNjQgLWVuYWJsZS1rdm0gIC1uZXQgbmljIC1uZXQgdGFwDQo+ID4gPiAtbSAkTUVNU0laRSAt
-bm9ncmFwaGljIC1kcml2ZQ0KPiA+ID4gZmlsZT0kRElTS19JTUFHRSxpZj12aXJ0aW8sZm9ybWF0
-PXFjb3cyDQo+ID4gPiAtdmdhIHN0ZCAtYm9vdCBjIC1jcHUgaG9zdCAta2VybmVsICRLRVJORUwg
-LWFwcGVuZA0KPiA+ID4gImNyYXNoa2VybmVsPSRDUkFTSF9NRU1TSVpFIGNvbnNvbGU9dHR5UzAs
-MTE1MjAwbjgxIiAgLWluaXRyZA0KPiA+ID4gJElOSVRSQU1GUyAtYmlvcyAkT1ZNRl9GV19QQVRI
-DQo+ID4gPg0KPiA+ID4gQW5kIGhlcmUgaXMgdGhlIGNyYXNoIGxvZzoNCj4gPiA+DQo+ID4gPiBb
-ICAgIDAuMDA2MDU0XSBnZW5lcmFsIHByb3RlY3Rpb24gZmF1bHQ6IDAwMDAgWyMxXSBTTVANCj4g
-PiA+IFsgICAgMC4wMDY0NTldIE1vZHVsZXMgbGlua2VkIGluOg0KPiA+ID4gWyAgICAwLjAwNjcx
-MV0gQ1BVOiAwIFBJRDogMCBDb21tOiBzd2FwcGVyLzAgTm90IHRhaW50ZWQgNC4xMy4wKyAjMw0K
-PiA+ID4gWyAgICAwLjAwNzAwMF0gSGFyZHdhcmUgbmFtZTogUUVNVSBTdGFuZGFyZCBQQyAoaTQ0
-MEZYICsgUElJWCwgMTk5NiksDQo+ID4gPiBCSU9TIDAuMC4wIDAyLzA2LzIwMTUNCj4gPiA+IFsg
-ICAgMC4wMDcwMDBdIHRhc2s6IGZmZmZmZmZmODFlMGY0ODAgdGFzay5zdGFjazogZmZmZmZmZmY4
-MWUwMDAwMA0KPiA+ID4gWyAgICAwLjAwNzAwMF0gUklQOiAwMDEwOnN3aXRjaF9tbV9pcnFzX29m
-ZisweDFiYy8weDQ0MA0KPiA+ID4gWyAgICAwLjAwNzAwMF0gUlNQOiAwMDAwOmZmZmZmZmZmODFl
-MDNkODAgRUZMQUdTOiAwMDAxMDA4Ng0KPiA+ID4gWyAgICAwLjAwNzAwMF0gUkFYOiA4MDAwMDAw
-MDdkMDg0MDAwIFJCWDogMDAwMDAwMDAwMDAwMDAwMCBSQ1g6DQo+IDAwMDA3N2ZmODAwMDAwMDAN
-Cj4gPiA+IFsgICAgMC4wMDcwMDBdIFJEWDogMDAwMDAwMDA3ZDA4NDAwMCBSU0k6IDgwMDAwMDAw
-MDAwMDAwMDAgUkRJOg0KPiAwMDAwMDAwMDAwMDE5YTAwDQo+ID4gPiBbICAgIDAuMDA3MDAwXSBS
-QlA6IGZmZmZmZmZmODFlMDNkYzAgUjA4OiAwMDAwMDAwMDAwMDAwMDAwIFIwOToNCj4gZmZmZjg4
-MDA3ZDA4NTAwMA0KPiA+ID4gWyAgICAwLjAwNzAwMF0gUjEwOiBmZmZmZmZmZjgxZTAzZGQ4IFIx
-MTogMDAwMDAwMDA3ZDA5NTA2MyBSMTI6DQo+IGZmZmZmZmZmODFlNWM2YTANCj4gPiA+IFsgICAg
-MC4wMDcwMDBdIFIxMzogZmZmZmZmZmY4MWVkNGY0MCBSMTQ6IDAwMDAwMDAwMDAwMDAwMzAgUjE1
-Og0KPiAwMDAwMDAwMDAwMDAwMDAxDQo+ID4gPiBbICAgIDAuMDA3MDAwXSBGUzogIDAwMDAwMDAw
-MDAwMDAwMDAoMDAwMCkgR1M6ZmZmZjg4MDA3ZDQwMDAwMCgwMDAwKQ0KPiA+ID4ga25sR1M6MDAw
-MDAwMDAwMDAwMDAwMA0KPiA+ID4gWyAgICAwLjAwNzAwMF0gQ1M6ICAwMDEwIERTOiAwMDAwIEVT
-OiAwMDAwIENSMDogMDAwMDAwMDA4MDA1MDAzMw0KPiA+ID4gWyAgICAwLjAwNzAwMF0gQ1IyOiBm
-ZmZmODgwMDdkNzU0MDAwIENSMzogMDAwMDAwMDAwMjIwYTAwMCBDUjQ6DQo+IDAwMDAwMDAwMDAw
-NDA2YjANCj4gPiA+IFsgICAgMC4wMDcwMDBdIENhbGwgVHJhY2U6DQo+ID4gPiBbICAgIDAuMDA3
-MDAwXSAgc3dpdGNoX21tKzB4ZC8weDIwDQo+ID4gPiBbICAgIDAuMDA3MDAwXSAgPyBzd2l0Y2hf
-bW0rMHhkLzB4MjANCj4gPiA+IFsgICAgMC4wMDcwMDBdICBlZmlfc3dpdGNoX21tKzB4M2UvMHg0
-YQ0KPiA+ID4gWyAgICAwLjAwNzAwMF0gIGVmaV9jYWxsX3BoeXNfcHJvbG9nKzB4MjgvMHgxYWMN
-Cj4gPiA+IFsgICAgMC4wMDcwMDBdICBlZmlfZW50ZXJfdmlydHVhbF9tb2RlKzB4MzVhLzB4NDhm
-DQo+ID4gPiBbICAgIDAuMDA3MDAwXSAgc3RhcnRfa2VybmVsKzB4MzMyLzB4M2I4DQo+ID4gPiBb
-ICAgIDAuMDA3MDAwXSAgeDg2XzY0X3N0YXJ0X3Jlc2VydmF0aW9ucysweDJhLzB4MmMNCj4gPiA+
-IFsgICAgMC4wMDcwMDBdICB4ODZfNjRfc3RhcnRfa2VybmVsKzB4MTc4LzB4MThiDQo+ID4gPiBb
-ICAgIDAuMDA3MDAwXSAgc2Vjb25kYXJ5X3N0YXJ0dXBfNjQrMHhhNS8weGE1DQo+ID4gPiBbICAg
-IDAuMDA3MDAwXSAgPyBzZWNvbmRhcnlfc3RhcnR1cF82NCsweGE1LzB4YTUNCj4gPiA+IFsgICAg
-MC4wMDcwMDBdIENvZGU6IDAwIDAwIDAwIDgwIDQ5IDAzIDU1IDUwIDBmIDgyIDdmIDAyIDAwIDAw
-IDQ4IGI5DQo+ID4gPiAwMCAwMCAwMCA4MCBmZiA3NyAwMCAwMCA0OCBiZSAwMCAwMCAwMCAwMCAw
-MCAwMCAwMCA4MCA0OCAwMSBjYSA0OCAwOQ0KPiA+ID4gZjAgNDggMDkgZDAgPDBmPiAyMiBkOCAw
-ZiAxZiA0NCAwMCAwMCBlOSA0NyBmZiBmZiBmZiA2NSA4YiAwNSBiOCA4Nw0KPiA+ID4gZmIgN2Ug
-ODkNCj4gPiA+IFsgICAgMC4wMDcwMDBdIFJJUDogc3dpdGNoX21tX2lycXNfb2ZmKzB4MWJjLzB4
-NDQwIFJTUDogZmZmZmZmZmY4MWUwM2Q4MA0KPiA+ID4gWyAgICAwLjAwNzAwMF0gLS0tWyBlbmQg
-dHJhY2UgYmZhNTViZjRlNDc2NTI1NSBdLS0tDQo+ID4gPiBbICAgIDAuMDA3MDAwXSBLZXJuZWwg
-cGFuaWMgLSBub3Qgc3luY2luZzogQXR0ZW1wdGVkIHRvIGtpbGwgdGhlIGlkbGUgdGFzayENCj4g
-PiA+IFsgICAgMC4wMDcwMDBdIC0tLVsgZW5kIEtlcm5lbCBwYW5pYyAtIG5vdCBzeW5jaW5nOiBB
-dHRlbXB0ZWQgdG8ga2lsbA0KPiA+ID4gdGhlIGlkbGUgdGFzayENCj4gPiA+DQo+ID4gPiA0LiBO
-b3RlIHRob3VnaCB0aGF0IGlmIEkgdXNlIHRoZSBFRklfTUlYRUQgbW9kZSAoaS5lLiAzMi1iaXQg
-b3ZtZg0KPiA+ID4gZmlybXdhcmUgYW5kIDY0LWJpdCB4ODYga2VybmVsKSB3aXRoIHlvdXIgcGF0
-Y2hlcywgdGhlIHByaW1hcnkNCj4gPiA+IGtlcm5lbCBib290cyBmaW5lIG9uIFFlbXU6DQo+ID4g
-Pg0KPiA+ID4gb3ZtZiBmaXJtd2FyZSB1c2VkIGluIHRoaXMgY2FzZSAtIGVkazIuZ2l0L292bWYt
-aWEzMg0KPiA+ID4NCj4gPiA+IDUuIEFsc28sIGlmIEkgYXBwZW5kICdlZmk9b2xkX21hcCcgdG8g
-dGhlIGJvb3RhcmdzIChmb3IgdGhlIGZhaWxpbmcNCj4gPiA+IGNhc2UgaW4gcG9pbnQgMyBhYm92
-ZSksIEkgc2VlIHRoZSBwcmltYXJ5IGtlcm5lbCBib290cyBmaW5lIG9uIFFlbXUNCj4gPiA+IGFz
-IHdlbGwuDQo+ID4gPg0KPiA+ID4gUmVnYXJkcywNCj4gPiA+IEJodXBlc2gNCj4gPg0KPiA+IEhp
-IEJodXBlc2gsDQo+ID4NCj4gPiBUaGFua3MgYSBsb3QgZm9yIHRoZSBkZXRhaWxlZCBleHBsYW5h
-dGlvbi4gVGhleSBhcmUgaGVscGZ1bCB0bw0KPiA+IHJlcHJvZHVjZSB0aGUgaXNzdWUgcXVpY2ts
-eS4gRnJvbSBteSBpbml0aWFsIGRlYnVnLCBJIHRoaW5rIHRoYXQgQU1EDQo+ID4gU01FICsgZWZp
-X21tX3N0cnVjdCBwYXRjaGVzICsgLWNwdSBob3N0IChpbiBxZW11KSBhcmUgcmVxdWlyZWQgdG8N
-Cj4gPiByZXByb2R1Y2UgdGhlIGlzc3VlIG9uIHFlbXUuDQo+ID4NCj4gPiBJIGhhdmUgdHJpZWQg
-dGhlIGZvbGxvd2luZyBjb21iaW5hdGlvbnMgKGFsbCB0ZXN0cyBhcmUgb24gcWVtdSk6DQo+ID4g
-T24gTGludXMncyB0cmVlOg0KPiA+IDEuIFdpdGggIFNNRSBhbmQgIGVmaV9tbSBhbmQgIC1jcHUg
-aG9zdCAtPiBwYW5pY3MgMi4gV2l0aCAgU01FIGFuZA0KPiA+IGVmaV9tbSBhbmQgIS1jcHUgaG9z
-dCAtPiBib290cyAzLiBXaXRoICBTTUUgYW5kICFlZmlfbW0gYW5kICAtY3B1IGhvc3QNCj4gPiAt
-PiBib290cyA0LiBXaXRoICBTTUUgYW5kICFlZmlfbW0gYW5kICEtY3B1IGhvc3QgLT4gYm9vdHMg
-NS4gV2l0aCAhU01FDQo+ID4gYW5kICBlZmlfbW0gYW5kICAtY3B1IGhvc3QgLT4gYm9vdHMgNi4g
-V2l0aCAhU01FIGFuZCAgZWZpX21tIGFuZCAhLWNwdQ0KPiA+IGhvc3QgLT4gYm9vdHMgNy4gV2l0
-aCAhU01FIGFuZCAhZWZpX21tIGFuZCAgLWNwdSBob3N0IC0+IGJvb3RzIDguIFdpdGgNCj4gPiAh
-U01FIGFuZCAhZWZpX21tIGFuZCAhLWNwdSBob3N0IC0+IGJvb3RzDQo+ID4NCj4gPiBPbiBNYXR0
-J3MgdHJlZSAobm8gU01FKToNCj4gPiAxLiBXaXRoICBlZmlfbW0gYW5kICAtY3B1IGhvc3QgLT4g
-Ym9vdHMgMi4gV2l0aCAgZWZpX21tIGFuZCAhLWNwdSBob3N0DQo+ID4gLT4gYm9vdHMgMy4gV2l0
-aCAhZWZpX21tIGFuZCAgLWNwdSBob3N0IC0+IGJvb3RzIDQuIFdpdGggIWVmaV9tbSBhbmQNCj4g
-PiAhLWNwdSBob3N0IC0+IGJvb3RzDQo+ID4NCj4gPiBTdW1tYXJ5Og0KPiA+IE9uIE1hdHQncyB0
-cmVlIChuZXh0IGJyYW5jaCksIEkgYW0gdW5hYmxlIHRvIHJlcHJvZHVjZSB0aGUgaXNzdWUNCj4g
-PiBiZWNhdXNlIHRoZXkgZG9uJ3QgaGF2ZSBTTUUgcGF0Y2hlcy4NCj4gPg0KPiA+IE9uIExpbnVz
-J3MgdHJlZSwgd2l0aCBTTUUgcGF0Y2hlcw0KPiA+IChiMWI2ZjgzYWM5MzhkMTc2NzQyYzg1NzU3
-OTYwZGVjMmNmMTBlNDY4KSBhbmQgbXkgcGF0Y2hlcyBhbmQgLWNwdQ0KPiA+IGhvc3Qgc3dpdGNo
-IGVuYWJsZWQgaW4gcWVtdSwgSSB3YXMgYWJsZSB0byByZXByb2R1Y2UgdGhlIGlzc3VlLg0KPiA+
-DQo+ID4gQ291bGQgeW91IHBsZWFzZSBjb25maXJtIGlmIHlvdSBhcmUgc2VlaW5nIHRoZSBzYW1l
-IGJlaGF2aW9yPw0KPiA+IFNwZWNpYWxseSBvbiByZWFsIG1hY2hpbmVzIChJIHRoaW5rLCB0aGlz
-IGlzIGVxdWl2YWxlbnQgdG8gLWNwdSBob3N0DQo+ID4gb24NCj4gPiBxZW11KSBiZWNhdXNlIGlu
-IGVhcmxpZXIgbWFpbHMgeW91IGhhdmUgbWVudGlvbmVkIHRoYXQgeW91IHdlcmUgYWJsZQ0KPiA+
-IHRvIHJlcHJvZHVjZSB0aGlzIG9uIE1hdHQncyB0cmVlLCBidXQgYWNjb3JkaW5nIHRvIG15IHRo
-ZW9yeSBpdA0KPiA+IHNob3VsZG4ndCBiZSB0aGUgY2FzZSBiZWNhdXNlIE1hdHQncyB0aHJlZSBk
-b2Vzbid0IGhhdmUgU01FIHBhdGNoZXMuDQo+ID4gRGlkIHlvdSBiYWNrIHBvcnQgKGIxYjZmODNh
-YzkzOGQxNzY3NDJjODU3NTc5NjBkZWMyY2YxMGU0NjgpIHRoaXMNCj4gPiBjb21taXQgdG8gTWF0
-dCdzIHRyZWUgYW5kIHRoZW4gYXBwbGllZCBteSBwYXRjaGVzPw0KPiA+DQo+ID4gWW91ciBjb25m
-aXJtYXRpb24gd2lsbCBoZWxwIHVzIGluIGRlYnVnZ2luZyB0aGUgcmlnaHQgaXNzdWUuDQo+ID4N
-Cj4gPiBSZWdhcmRzLA0KPiA+IFNhaQ0KPiANCj4gU29ycnkhIEkgYW0gbm90IHN1cmUgaWYgaXQn
-cyB0aGUgU01FIHBhdGNoZXMgb3IgdGhlIFBDSUQgYmFzZWQgVExCIGZsdXNoIHBhdGNoZXMNCj4g
-KG1vc3QgbGlrZWx5IHRoZSBsYXRlciBiZWNhdXNlIHRoZXkgY2hhbmdlIHN3aXRjaF9tbSgpIGNv
-ZGUpLg0KPiBCb3RoIHRoZSBwYXRjaGVzIGFsb25nIHdpdGggNS1sZXZlbCBwYWdpbmcgd2VyZSBp
-biB0aGUgc2FtZSBwdWxsIHJlcXVlc3Qgc2VudA0KPiBmcm9tIEluZ28gdG8gTGludXMuIFNvLCBT
-TUUgcGF0Y2hlcyBhYm92ZSByZWFsbHkgbWVhbnMgdGhpcyBjb21taXQgaWQNCj4gKGIxYjZmODNh
-YzkzOGQxNzY3NDJjODU3NTc5NjBkZWMyY2YxMGU0NjgpIGluIExpbnVzJ3MgdHJlZS4gSSB3aWxs
-IGRlYnVnIHRoaXMNCj4gaXNzdWUgZnVydGhlciBhbmQgd2lsbCBzZW5kIGEgVjMgYnV0IHRvIGJl
-IHN1cmUgdGhhdCBJIGFtIGRlYnVnZ2luZyB0aGUgcmlnaHQNCj4gaXNzdWUsIEJodXBlc2gsIENv
-dWxkIHlvdSBwbGVhc2UgdXBkYXRlIG1lIGFzIHJlcXVlc3RlZCBpbiBlYXJsaWVyIG1haWw/DQo+
-IA0KPiBSZWdhcmRzLA0KPiBTYWkNCg0KSGkgQmh1cGVzaCwNCg0KQ291bGQgeW91IHBsZWFzZSBh
-cHBlbmQgIm5vcGNpZCIgdG8ga2VybmVsIGNvbW1hbmQgbGluZSBwYXJhbWV0ZXJzIGFuZCBzZWUg
-aWYgdGhlIGlzc3VlIGdvZXMgYXdheSAob24gYm90aCBxZW11IGFuZCByZWFsIG1hY2hpbmVzKT8N
-Cg0KUmVnYXJkcywNClNhaQ0K
+With TPM 2.0, access to the event log is only possible by using the
+EFI TPM2 Boot Service. Modify the EFI stub to copy the log area to a new
+Linux-specific EFI table so it remains accessible for future use.
+
+Signed-off-by: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/boot/compressed/eboot.c      |  1 +
+ drivers/char/tpm/tpm.h                | 29 ++++++++++---
+ drivers/char/tpm/tpm_eventlog.h       | 26 +++---------
+ drivers/firmware/efi/libstub/Makefile |  3 +-
+ drivers/firmware/efi/libstub/tpm.c    | 80 +++++++++++++++++++++++++++++++++++
+ include/linux/efi.h                   | 35 +++++++++++++++
+ 6 files changed, 146 insertions(+), 28 deletions(-)
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index a1686f3dc295..97bec8df36ff 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -999,6 +999,7 @@ struct boot_params *efi_main(struct efi_config *c,
+ 
+ 	/* Ask the firmware to clear memory on unclean shutdown */
+ 	efi_enable_reset_attack_mitigation(sys_table);
++	efi_retrieve_tpm2_eventlog(boot_params, sys_table);
+ 
+ 	setup_graphics(boot_params);
+ 
+diff --git a/drivers/char/tpm/tpm.h b/drivers/char/tpm/tpm.h
+index 04fbff2edbf3..efede7dc9340 100644
+--- a/drivers/char/tpm/tpm.h
++++ b/drivers/char/tpm/tpm.h
+@@ -40,6 +40,8 @@
+ #include <asm/intel-family.h>
+ #endif
+ 
++#include "tpm_eventlog.h"
++
+ enum tpm_const {
+ 	TPM_MINOR = 224,	/* officially assigned */
+ 	TPM_BUFSIZE = 4096,
+@@ -397,11 +399,6 @@ struct tpm_cmd_t {
+ 	tpm_cmd_params	params;
+ } __packed;
+ 
+-struct tpm2_digest {
+-	u16 alg_id;
+-	u8 digest[SHA512_DIGEST_SIZE];
+-} __packed;
+-
+ /* A string buffer type for constructing TPM commands. This is based on the
+  * ideas of string buffer code in security/keys/trusted.h but is heap based
+  * in order to keep the stack usage minimal.
+@@ -581,4 +578,26 @@ int tpm2_prepare_space(struct tpm_chip *chip, struct tpm_space *space, u32 cc,
+ 		       u8 *cmd);
+ int tpm2_commit_space(struct tpm_chip *chip, struct tpm_space *space,
+ 		      u32 cc, u8 *buf, size_t *bufsiz);
++
++extern const struct seq_operations tpm2_binary_b_measurements_seqops;
++
++#if defined(CONFIG_ACPI)
++int tpm_read_log_acpi(struct tpm_chip *chip);
++#else
++static inline int tpm_read_log_acpi(struct tpm_chip *chip)
++{
++	return -ENODEV;
++}
++#endif
++#if defined(CONFIG_OF)
++int tpm_read_log_of(struct tpm_chip *chip);
++#else
++static inline int tpm_read_log_of(struct tpm_chip *chip)
++{
++	return -ENODEV;
++}
++#endif
++
++int tpm_bios_log_setup(struct tpm_chip *chip);
++void tpm_bios_log_teardown(struct tpm_chip *chip);
+ #endif
+diff --git a/drivers/char/tpm/tpm_eventlog.h b/drivers/char/tpm/tpm_eventlog.h
+index b4b549559203..1009a2503985 100644
+--- a/drivers/char/tpm/tpm_eventlog.h
++++ b/drivers/char/tpm/tpm_eventlog.h
+@@ -104,6 +104,11 @@ struct tcg_event_field {
+ 	u8 event[0];
+ } __packed;
+ 
++struct tpm2_digest {
++	u16 alg_id;
++	u8 digest[SHA512_DIGEST_SIZE];
++} __packed;
++
+ struct tcg_pcr_event2 {
+ 	u32 pcr_idx;
+ 	u32 event_type;
+@@ -112,26 +117,5 @@ struct tcg_pcr_event2 {
+ 	struct tcg_event_field event;
+ } __packed;
+ 
+-extern const struct seq_operations tpm2_binary_b_measurements_seqops;
+-
+-#if defined(CONFIG_ACPI)
+-int tpm_read_log_acpi(struct tpm_chip *chip);
+-#else
+-static inline int tpm_read_log_acpi(struct tpm_chip *chip)
+-{
+-	return -ENODEV;
+-}
+-#endif
+-#if defined(CONFIG_OF)
+-int tpm_read_log_of(struct tpm_chip *chip);
+-#else
+-static inline int tpm_read_log_of(struct tpm_chip *chip)
+-{
+-	return -ENODEV;
+-}
+-#endif
+-
+-int tpm_bios_log_setup(struct tpm_chip *chip);
+-void tpm_bios_log_teardown(struct tpm_chip *chip);
+ 
+ #endif
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index dedf9bde44db..2abe6d22dc5f 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -29,8 +29,7 @@ OBJECT_FILES_NON_STANDARD	:= y
+ # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
+ KCOV_INSTRUMENT			:= n
+ 
+-lib-y				:= efi-stub-helper.o gop.o secureboot.o
+-lib-$(CONFIG_RESET_ATTACK_MITIGATION) += tpm.o
++lib-y				:= efi-stub-helper.o gop.o secureboot.o tpm.o
+ 
+ # include the stub's generic dependencies from lib/ when building for ARM/arm64
+ arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
+diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
+index 6224cdbc9669..ba2cb68833fb 100644
+--- a/drivers/firmware/efi/libstub/tpm.c
++++ b/drivers/firmware/efi/libstub/tpm.c
+@@ -4,6 +4,7 @@
+  * Copyright (C) 2016 CoreOS, Inc
+  * Copyright (C) 2017 Google, Inc.
+  *     Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
++ *     Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+  *
+  * This file is part of the Linux kernel, and is made available under the
+  * terms of the GNU General Public License version 2.
+@@ -12,7 +13,9 @@
+ #include <asm/efi.h>
+ 
+ #include "efistub.h"
++#include "../../../char/tpm/tpm_eventlog.h"
+ 
++#if IS_ENABLED(CONFIG_RESET_ATTACK_MITIGATION)
+ static const efi_char16_t efi_MemoryOverWriteRequest_name[] = {
+ 	'M', 'e', 'm', 'o', 'r', 'y', 'O', 'v', 'e', 'r', 'w', 'r', 'i', 't',
+ 	'e', 'R', 'e', 'q', 'u', 'e', 's', 't', 'C', 'o', 'n', 't', 'r', 'o',
+@@ -56,3 +59,80 @@ void efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg)
+ 		    EFI_VARIABLE_BOOTSERVICE_ACCESS |
+ 		    EFI_VARIABLE_RUNTIME_ACCESS, sizeof(val), &val);
+ }
++
++#endif
++
++void efi_retrieve_tpm2_eventlog_1_2(struct boot_params *boot_params,
++				    efi_system_table_t *sys_table_arg)
++{
++	efi_guid_t tcg2_guid = EFI_TCG2_PROTOCOL_GUID;
++	efi_guid_t linux_eventlog_guid = LINUX_EFI_TPM_EVENT_LOG_GUID;
++	efi_status_t status;
++	efi_physical_addr_t log_location, log_last_entry;
++	struct linux_efi_tpm_eventlog *log_tbl;
++	size_t log_size, last_entry_size;
++	efi_bool_t truncated;
++	void *tcg2_protocol;
++
++	status = efi_call_early(locate_protocol, &tcg2_guid, NULL,
++			&tcg2_protocol);
++	if (status != EFI_SUCCESS)
++		return;
++
++	status = efi_call_proto(efi_tcg2_protocol, get_event_log, tcg2_protocol,
++				EFI_TCG2_EVENT_LOG_FORMAT_TCG_1_2,
++				&log_location, &log_last_entry, &truncated);
++	if (status != EFI_SUCCESS)
++		return;
++
++	if (!log_location)
++		return;
++
++	/*
++	 * If the logs are empty, we still populate the EFI table to surface
++	 * this information to userland.
++	 */
++	if (!log_last_entry) {
++		log_size = 0;
++	} else {
++		/*
++		 * get_event_log only returns the address of the last entry.
++		 * We need to calculate its size to deduce the full size of
++		 * the logs.
++		 */
++		last_entry_size = sizeof(struct tcpa_event) +
++			((struct tcpa_event *)log_last_entry)->event_size;
++		log_size = log_last_entry - log_location + last_entry_size;
++	}
++
++	/* Allocate space for the logs and copy them. */
++	status = efi_call_early(allocate_pool, EFI_RUNTIME_SERVICES_DATA,
++				sizeof(*log_tbl) + log_size, &log_tbl);
++
++	if (status != EFI_SUCCESS) {
++		efi_printk(sys_table_arg,
++			   "Unable to allocate memory for event log\n");
++		return;
++	}
++
++	memset(log_tbl, 0, sizeof(*log_tbl) + log_size);
++	log_tbl->size = log_size;
++	log_tbl->version = EFI_TCG2_EVENT_LOG_FORMAT_TCG_1_2;
++	memcpy(log_tbl->log, (void *)log_location, log_size);
++
++	status = efi_call_early(install_configuration_table,
++			&linux_eventlog_guid, log_tbl);
++	if (status != EFI_SUCCESS)
++		goto err_free;
++	return;
++
++err_free:
++	efi_call_early(free_pool, log_tbl);
++}
++
++void efi_retrieve_tpm2_eventlog(struct boot_params *boot_params,
++				efi_system_table_t *sys_table_arg)
++{
++	/* Only try to retrieve the logs in 1.2 format. */
++	efi_retrieve_tpm2_eventlog_1_2(boot_params, sys_table_arg);
++}
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 8dc3d94a3e3c..5eaaa68ac58a 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -472,6 +472,26 @@ typedef struct {
+ 	u64 get_all;
+ } apple_properties_protocol_64_t;
+ 
++typedef struct {
++	u32 get_capability;
++	u32 get_event_log;
++	u32 hash_log_extend_event;
++	u32 submit_command;
++	u32 get_active_pcr_banks;
++	u32 set_active_pcr_banks;
++	u32 get_result_of_set_active_pcr_banks;
++} efi_tcg2_protocol_32_t;
++
++typedef struct {
++	u64 get_capability;
++	u64 get_event_log;
++	u64 hash_log_extend_event;
++	u64 submit_command;
++	u64 get_active_pcr_banks;
++	u64 set_active_pcr_banks;
++	u64 get_result_of_set_active_pcr_banks;
++} efi_tcg2_protocol_64_t;
++
+ /*
+  * Types and defines for EFI ResetSystem
+  */
+@@ -622,6 +642,7 @@ void efi_native_runtime_setup(void);
+ #define EFI_MEMORY_ATTRIBUTES_TABLE_GUID	EFI_GUID(0xdcfa911d, 0x26eb, 0x469f,  0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
+ #define EFI_CONSOLE_OUT_DEVICE_GUID		EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+ #define APPLE_PROPERTIES_PROTOCOL_GUID		EFI_GUID(0x91bd12fe, 0xf6c3, 0x44fb,  0xa5, 0xb7, 0x51, 0x22, 0xab, 0x30, 0x3a, 0xe0)
++#define EFI_TCG2_PROTOCOL_GUID			EFI_GUID(0x607f766c, 0x7455, 0x42be,  0x93, 0x0b, 0xe4, 0xd7, 0x6d, 0xb2, 0x72, 0x0f)
+ 
+ #define EFI_IMAGE_SECURITY_DATABASE_GUID	EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596,  0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
+ #define EFI_SHIM_LOCK_GUID			EFI_GUID(0x605dab50, 0xe046, 0x4300,  0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
+@@ -634,6 +655,7 @@ void efi_native_runtime_setup(void);
+ #define LINUX_EFI_ARM_SCREEN_INFO_TABLE_GUID	EFI_GUID(0xe03fc20a, 0x85dc, 0x406e,  0xb9, 0x0e, 0x4a, 0xb5, 0x02, 0x37, 0x1d, 0x95)
+ #define LINUX_EFI_LOADER_ENTRY_GUID		EFI_GUID(0x4a67b082, 0x0a4c, 0x41cf,  0xb6, 0xc7, 0x44, 0x0b, 0x29, 0xbb, 0x8c, 0x4f)
+ #define LINUX_EFI_RANDOM_SEED_TABLE_GUID	EFI_GUID(0x1ce1e5bc, 0x7ceb, 0x42f2,  0x81, 0xe5, 0x8a, 0xad, 0xf1, 0x80, 0xf5, 0x7b)
++#define LINUX_EFI_TPM_EVENT_LOG_GUID		EFI_GUID(0xb7799cb0, 0xeca2, 0x4943,  0x96, 0x67, 0x1f, 0xae, 0x07, 0xb7, 0x47, 0xfa)
+ 
+ typedef struct {
+ 	efi_guid_t guid;
+@@ -1504,6 +1526,9 @@ static inline void
+ efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg) { }
+ #endif
+ 
++void efi_retrieve_tpm2_eventlog(struct boot_params *boot_params,
++				efi_system_table_t *sys_table);
++
+ /*
+  * Arch code can implement the following three template macros, avoiding
+  * reptition for the void/non-void return cases of {__,}efi_call_virt():
+@@ -1571,4 +1596,14 @@ struct linux_efi_random_seed {
+ 	u8	bits[];
+ };
+ 
++
++#define EFI_TCG2_EVENT_LOG_FORMAT_TCG_1_2 0x1
++#define EFI_TCG2_EVENT_LOG_FORMAT_TCG_2   0x2
++
++struct linux_efi_tpm_eventlog {
++	u32	size;
++	u8	version;
++	u8	log[];
++};
++
+ #endif /* _LINUX_EFI_H */
+-- 
+2.14.1.581.gf28d330327-goog
