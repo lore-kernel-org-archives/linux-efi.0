@@ -1,130 +1,149 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 5/7] arm: efi: split zImage code and data into separate
- PE/COFF sections
-Date: Fri, 8 Sep 2017 16:11:53 +0100
-Message-ID: <CAKv+Gu8hcT=_1iF4gaS==uGQWAb9-i0Y=XJ-MqgfQQyn1RmGtQ@mail.gmail.com>
+From: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH v2 5/7] arm: efi: split zImage code and data into separate PE/COFF sections
+Date: Fri, 08 Sep 2017 17:17:03 +0200
+Message-ID: <87a825rzio.fsf@free-electrons.com>
 References: <20170629081849.15081-1-ard.biesheuvel@linaro.org>
- <20170629081849.15081-6-ard.biesheuvel@linaro.org> <87r2vhs3il.fsf@free-electrons.com>
- <CAKv+Gu9DVRE6jGEvdkfWwaJDhmTeaF2-CMi=JdFx3GS2Qqdy3A@mail.gmail.com>
- <CAKv+Gu9UF7-Dyjijvbc97yEF6zehQMyjOcV=RxFEJkNEebakUw@mail.gmail.com>
- <87mv65s1iu.fsf@free-electrons.com> <CAKv+Gu8e49ZmB6X=H2vE_dw1HA3CyOq0GN7cZOYJ+JpkTftGWA@mail.gmail.com>
- <87efrhs0gj.fsf@free-electrons.com> <CAKv+Gu8Aa7Y8SK2nJM2DXZzHbzZT6aq2Rt1wsgaLwz7_C3otJA@mail.gmail.com>
+        <20170629081849.15081-6-ard.biesheuvel@linaro.org>
+        <87r2vhs3il.fsf@free-electrons.com>
+        <CAKv+Gu9DVRE6jGEvdkfWwaJDhmTeaF2-CMi=JdFx3GS2Qqdy3A@mail.gmail.com>
+        <CAKv+Gu9UF7-Dyjijvbc97yEF6zehQMyjOcV=RxFEJkNEebakUw@mail.gmail.com>
+        <87mv65s1iu.fsf@free-electrons.com>
+        <CAKv+Gu8e49ZmB6X=H2vE_dw1HA3CyOq0GN7cZOYJ+JpkTftGWA@mail.gmail.com>
+        <87efrhs0gj.fsf@free-electrons.com>
+        <CAKv+Gu8Aa7Y8SK2nJM2DXZzHbzZT6aq2Rt1wsgaLwz7_C3otJA@mail.gmail.com>
+        <CAKv+Gu8hcT=_1iF4gaS==uGQWAb9-i0Y=XJ-MqgfQQyn1RmGtQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu8Aa7Y8SK2nJM2DXZzHbzZT6aq2Rt1wsgaLwz7_C3otJA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <CAKv+Gu8hcT=_1iF4gaS==uGQWAb9-i0Y=XJ-MqgfQQyn1RmGtQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+        (Ard Biesheuvel's message of "Fri, 8 Sep 2017 16:11:53 +0100")
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, =?UTF-8?Q?Antoine_T=C3=A9nart?= <antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Miquel RAYNAL <miquel.raynal-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, "linux-efi@vger.kernel.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Antoine =?utf-8?Q?T=C3=A9nart?= <antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Miquel RAYNAL <miquel.raynal-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 8 September 2017 at 15:57, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 8 September 2017 at 15:56, Gregory CLEMENT
-> <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
->> Hi Ard,
->>
->>  On ven., sept. 08 2017, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>
->>> On 8 September 2017 at 15:33, Gregory CLEMENT
->>> <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
->>>> Hi Ard,
->>>>
->>>>  On ven., sept. 08 2017, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>>>
->>>>> On 8 September 2017 at 14:54, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>>>>> On 8 September 2017 at 14:50, Gregory CLEMENT
->>>>>> <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
->>>>>>> Hi Ard,
->>>>>>>
->>>>>>>  On jeu., juin 29 2017, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>>>>>>
->>>>>>>> To prevent unintended modifications to the kernel text (malicious or
->>>>>>>> otherwise) while running the EFI stub, describe the kernel image as
->>>>>>>> two separate sections: a .text section with read-execute permissions,
->>>>>>>> covering .text, .rodata, .piggytext and the GOT sections (which the
->>>>>>>> stub does not care about anyway), and a .data section with read-write
->>>>>>>> permissions, covering .data and .bss.
+Hi Ard,
+ 
+ On ven., sept. 08 2017, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+
+> On 8 September 2017 at 15:57, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> On 8 September 2017 at 15:56, Gregory CLEMENT
+>> <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
+>>> Hi Ard,
+>>>
+>>>  On ven., sept. 08 2017, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>>
+>>>> On 8 September 2017 at 15:33, Gregory CLEMENT
+>>>> <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
+>>>>> Hi Ard,
+>>>>>
+>>>>>  On ven., sept. 08 2017, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>>>>
+>>>>>> On 8 September 2017 at 14:54, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>>>>>> On 8 September 2017 at 14:50, Gregory CLEMENT
+>>>>>>> <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
+>>>>>>>> Hi Ard,
 >>>>>>>>
->>>>>>>> This relies on the firmware to actually take the section permission
->>>>>>>> flags into account, but this is something that is currently being
->>>>>>>> implemented in EDK2, which means we will likely start seeing it in
->>>>>>>> the wild between one and two years from now.
+>>>>>>>>  On jeu., juin 29 2017, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>>>>>>>
+>>>>>>>>> To prevent unintended modifications to the kernel text (malicious or
+>>>>>>>>> otherwise) while running the EFI stub, describe the kernel image as
+>>>>>>>>> two separate sections: a .text section with read-execute permissions,
+>>>>>>>>> covering .text, .rodata, .piggytext and the GOT sections (which the
+>>>>>>>>> stub does not care about anyway), and a .data section with read-write
+>>>>>>>>> permissions, covering .data and .bss.
+>>>>>>>>>
+>>>>>>>>> This relies on the firmware to actually take the section permission
+>>>>>>>>> flags into account, but this is something that is currently being
+>>>>>>>>> implemented in EDK2, which means we will likely start seeing it in
+>>>>>>>>> the wild between one and two years from now.
+>>>>>>>>
+>>>>>>>> This patch had been merged in mainline yesterday and now prevent the
+>>>>>>>> Marvell Armada 370 and the Armada XP based SoC to boot. I also suspect
+>>>>>>>> that more Socs are impacted because the number of boot fail exploded
+>>>>>>>> according to kci:
+>>>>>>>> https://kernelci.org/boot/all/job/mainline/branch/master/kernel/v4.13-8899-g8dc5b3a6cb2f/
+>>>>>>>>
 >>>>>>>
->>>>>>> This patch had been merged in mainline yesterday and now prevent the
->>>>>>> Marvell Armada 370 and the Armada XP based SoC to boot. I also suspect
->>>>>>> that more Socs are impacted because the number of boot fail exploded
->>>>>>> according to kci:
->>>>>>> https://kernelci.org/boot/all/job/mainline/branch/master/kernel/v4.13-8899-g8dc5b3a6cb2f/
+>>>>>>> Ouch.
 >>>>>>>
+>>>>>>>> I found this patch after bisecting (I can provide the bisect log if
+>>>>>>>> needed).
+>>>>>>>>
+>>>>>>>> The kernel failed to boot only if CONFIG_EFI is enabled so it occurs in
+>>>>>>>> multi_v7_defconfig but not with mvebu_v7_defconfig.
+>>>>>>>>
+>>>>>>>> Currently the solution is to revert this patch.
+>>>>>>>>
+>>>>>>>> Have you a better option?
+>>>>>>>>
+>>>>>>>
+>>>>>>> I will investigate.
 >>>>>>
->>>>>> Ouch.
+>>>>>> I cannot reproduce this on QEMU or my Beaglebone white. I have tried a
+>>>>>> locally built zImage as well as the one built by kernelci.
 >>>>>>
->>>>>>> I found this patch after bisecting (I can provide the bisect log if
->>>>>>> needed).
->>>>>>>
->>>>>>> The kernel failed to boot only if CONFIG_EFI is enabled so it occurs in
->>>>>>> multi_v7_defconfig but not with mvebu_v7_defconfig.
->>>>>>>
->>>>>>> Currently the solution is to revert this patch.
->>>>>>>
->>>>>>> Have you a better option?
->>>>>>>
+>>>>>> Could you please try whether this fixes things? It does not explain
+>>>>>> anything but it will help me figure out what is going on (hopefully)
+>>>>>
+>>>>> I've just tested this change and it didn't fix anything.
+>>>>>
+>>>>> Gregory
+>>>>>
 >>>>>>
->>>>>> I will investigate.
+>>>>>>
+>>>>>> diff --git a/arch/arm/boot/compressed/efi-header.S
+>>>>>> b/arch/arm/boot/compressed/efi-header.S
+>>>>>> index c94a88ae834d..671a6e5b7b99 100644
+>>>>>> --- a/arch/arm/boot/compressed/efi-header.S
+>>>>>> +++ b/arch/arm/boot/compressed/efi-header.S
+>>>>>> @@ -127,7 +127,7 @@ section_table:
+>>>>>>
+>>>>>>                 .set    section_count, (. - section_table) / 40
+>>>>>>
+>>>>>> -               .align  12
+>>>>>> +               .align  9
+>>>>>>  __efi_start:
+>>>>>>  #endif
+>>>>>>                 .endm
 >>>>>
->>>>> I cannot reproduce this on QEMU or my Beaglebone white. I have tried a
->>>>> locally built zImage as well as the one built by kernelci.
->>>>>
->>>>> Could you please try whether this fixes things? It does not explain
->>>>> anything but it will help me figure out what is going on (hopefully)
 >>>>
->>>> I've just tested this change and it didn't fix anything.
 >>>>
->>>> Gregory
->>>>
->>>>>
->>>>>
->>>>> diff --git a/arch/arm/boot/compressed/efi-header.S
->>>>> b/arch/arm/boot/compressed/efi-header.S
->>>>> index c94a88ae834d..671a6e5b7b99 100644
->>>>> --- a/arch/arm/boot/compressed/efi-header.S
->>>>> +++ b/arch/arm/boot/compressed/efi-header.S
->>>>> @@ -127,7 +127,7 @@ section_table:
->>>>>
->>>>>                 .set    section_count, (. - section_table) / 40
->>>>>
->>>>> -               .align  12
->>>>> +               .align  9
->>>>>  __efi_start:
->>>>>  #endif
->>>>>                 .endm
->>>>
+>>>> How about this?
 >>>
+>>> It fixed the bug! (I tested with and without your previous patch and it
+>>> worked in both case)
 >>>
->>> How about this?
->>
->> It fixed the bug! (I tested with and without your previous patch and it
->> worked in both case)
->>
->> When you will send your patch, you can add my:
->> Tested-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
->>
+>>> When you will send your patch, you can add my:
+>>> Tested-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+>>>
+>
+> Would you mind checking whether this fixes the issue as well?
+>
+> diff --git a/arch/arm/boot/compressed/piggy.S b/arch/arm/boot/compressed/piggy.S
+> index f72088495f43..5d52c556dd32 100644
+> --- a/arch/arm/boot/compressed/piggy.S
+> +++ b/arch/arm/boot/compressed/piggy.S
+> @@ -1,5 +1,6 @@
+>         .section .piggydata,#alloc
+>         .globl  input_data
+> +       .align  2
+>  input_data:
+>         .incbin "arch/arm/boot/compressed/piggy_data"
+>         .globl  input_data_end
+>
+> There may be other reasons than ksymtab entries that could result in
+> piggydata ending up unaligned in the decompressor (which is what
+> caused the issue before)
+> This is a better fix, because it addresses the root cause.
 
-Would you mind checking whether this fixes the issue as well?
+I've tested this single patch and it does not fix the boot issue :(
 
-diff --git a/arch/arm/boot/compressed/piggy.S b/arch/arm/boot/compressed/piggy.S
-index f72088495f43..5d52c556dd32 100644
---- a/arch/arm/boot/compressed/piggy.S
-+++ b/arch/arm/boot/compressed/piggy.S
-@@ -1,5 +1,6 @@
-        .section .piggydata,#alloc
-        .globl  input_data
-+       .align  2
- input_data:
-        .incbin "arch/arm/boot/compressed/piggy_data"
-        .globl  input_data_end
+Gregory
 
-There may be other reasons than ksymtab entries that could result in
-piggydata ending up unaligned in the decompressor (which is what
-caused the issue before)
-This is a better fix, because it addresses the root cause.
+
+-- 
+Gregory Clement, Free Electrons
+Kernel, drivers, real-time and embedded Linux
+development, consulting, training and support.
+http://free-electrons.com
