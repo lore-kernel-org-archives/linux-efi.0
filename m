@@ -1,433 +1,210 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/2] efi: call get_event_log before
- ExitBootServices
-Date: Thu, 7 Sep 2017 16:31:08 +0100
-Message-ID: <CAKv+Gu8fqHyv0VOHyvoc3WGSPR+iUQBeF-1gRzYxgpVehK981A@mail.gmail.com>
-References: <20170906142502.11783-1-tweek@google.com>
- <CAKv+Gu-HcjfcryRZsdigXG4-=9eFykHmS9Fw-ZgSeVt-d=mxxg@mail.gmail.com>
- <20170907152450.eelrfyoipmtfr3x3@google.com>
+From: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH V2 0/3] Use mm_struct and switch_mm() instead of manually
+Date: Fri, 8 Sep 2017 17:25:35 +0530
+Message-ID: <CACi5LpPTD3xXy0hxQHNJVdh4km0Vu5rg4BhNW78G=EEu0SjSyg@mail.gmail.com>
+References: <1503963432-32055-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <CACi5LpMAKotBYeHpFHZKFCbZ5UST3pqFef6ALwH46JJhdhkkQw@mail.gmail.com>
+ <CACi5LpOTjBbT7ngiQykTbhUbVoODvxQRj5Ub-fm7yMP8VySkpA@mail.gmail.com>
+ <FFF73D592F13FD46B8700F0A279B802F1859E218@ORSMSX114.amr.corp.intel.com>
+ <CACi5LpOMD=xAJz+WkHGi7D-d4xjc20Xx6E-YU1MC0UvHpEx1NA@mail.gmail.com>
+ <1504664466.4482.25.camel@intel.com> <1504665789.4482.31.camel@intel.com> <FFF73D592F13FD46B8700F0A279B802F185ACB0E@ORSMSX114.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <tpmdd-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <20170907152450.eelrfyoipmtfr3x3-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/options/tpmdd-devel>,
- <mailto:tpmdd-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=tpmdd-devel>
-List-Post: <mailto:tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:tpmdd-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/tpmdd-devel>,
- <mailto:tpmdd-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: tpmdd-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F185ACB0E-8oqHQFITsIE64kNsxIetb7fspsVTdybXVpNB7YpNyf8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "jlee-IBi9RG/b67k@public.gmane.org" <jlee-IBi9RG/b67k@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Neri, Ricardo" <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Shankar, Ravi V" <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 7 September 2017 at 16:24, Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org> wrote:
-> Hi Ard,
->
-> Thanks for reviewing the patch. (Non-addressed comments are fixed in the
-> next patch set).
->
-> On Wed, Sep 06, 2017 at 03:53:33PM +0100, Ard Biesheuvel wrote:
->> Hi Thiebaud,
->>
->> On 6 September 2017 at 15:25, Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org> wrote:
->> > With TPM 2.0, access to the event log is only possible by using the
->> > EFI TPM2 Boot Service. Modify the EFI stub to copy the log area to a new
->> > Linux-specific EFI table so it remains accessible for future use.
->> >
->> > Signed-off-by: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
->> > ---
->> >  arch/x86/boot/compressed/eboot.c      |  1 +
->> >  drivers/char/tpm/tpm.h                | 29 ++++++++++---
->> >  drivers/char/tpm/tpm_eventlog.h       | 26 +++---------
->> >  drivers/firmware/efi/libstub/Makefile |  3 +-
->> >  drivers/firmware/efi/libstub/tpm.c    | 80 +++++++++++++++++++++++++++++++++++
->> >  include/linux/efi.h                   | 35 +++++++++++++++
->> >  6 files changed, 146 insertions(+), 28 deletions(-)
->> >
->>
->> Why is this x86 only?
->
-> I haven't had a chance to test on ARM/ARM64 yet.
->
->>
->>
->> > diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
->> > index a1686f3dc295..97bec8df36ff 100644
->> > --- a/arch/x86/boot/compressed/eboot.c
->> > +++ b/arch/x86/boot/compressed/eboot.c
->> > @@ -999,6 +999,7 @@ struct boot_params *efi_main(struct efi_config *c,
->> >
->> >         /* Ask the firmware to clear memory on unclean shutdown */
->> >         efi_enable_reset_attack_mitigation(sys_table);
->> > +       efi_retrieve_tpm2_eventlog(boot_params, sys_table);
->> >
->> >         setup_graphics(boot_params);
->> >
->> > diff --git a/drivers/char/tpm/tpm.h b/drivers/char/tpm/tpm.h
->> > index 04fbff2edbf3..efede7dc9340 100644
->> > --- a/drivers/char/tpm/tpm.h
->> > +++ b/drivers/char/tpm/tpm.h
->> > @@ -40,6 +40,8 @@
->> >  #include <asm/intel-family.h>
->> >  #endif
->> >
->> > +#include "tpm_eventlog.h"
->> > +
->> >  enum tpm_const {
->> >         TPM_MINOR = 224,        /* officially assigned */
->> >         TPM_BUFSIZE = 4096,
->> > @@ -397,11 +399,6 @@ struct tpm_cmd_t {
->> >         tpm_cmd_params  params;
->> >  } __packed;
->> >
->> > -struct tpm2_digest {
->> > -       u16 alg_id;
->> > -       u8 digest[SHA512_DIGEST_SIZE];
->> > -} __packed;
->> > -
->> >  /* A string buffer type for constructing TPM commands. This is based on the
->> >   * ideas of string buffer code in security/keys/trusted.h but is heap based
->> >   * in order to keep the stack usage minimal.
->> > @@ -581,4 +578,26 @@ int tpm2_prepare_space(struct tpm_chip *chip, struct tpm_space *space, u32 cc,
->> >                        u8 *cmd);
->> >  int tpm2_commit_space(struct tpm_chip *chip, struct tpm_space *space,
->> >                       u32 cc, u8 *buf, size_t *bufsiz);
->> > +
->> > +extern const struct seq_operations tpm2_binary_b_measurements_seqops;
->> > +
->> > +#if defined(CONFIG_ACPI)
->> > +int tpm_read_log_acpi(struct tpm_chip *chip);
->> > +#else
->> > +static inline int tpm_read_log_acpi(struct tpm_chip *chip)
->> > +{
->> > +       return -ENODEV;
->> > +}
->> > +#endif
->> > +#if defined(CONFIG_OF)
->> > +int tpm_read_log_of(struct tpm_chip *chip);
->> > +#else
->> > +static inline int tpm_read_log_of(struct tpm_chip *chip)
->> > +{
->> > +       return -ENODEV;
->> > +}
->> > +#endif
->> > +
->> > +int tpm_bios_log_setup(struct tpm_chip *chip);
->> > +void tpm_bios_log_teardown(struct tpm_chip *chip);
->> >  #endif
->> > diff --git a/drivers/char/tpm/tpm_eventlog.h b/drivers/char/tpm/tpm_eventlog.h
->> > index b4b549559203..1009a2503985 100644
->> > --- a/drivers/char/tpm/tpm_eventlog.h
->> > +++ b/drivers/char/tpm/tpm_eventlog.h
->> > @@ -104,6 +104,11 @@ struct tcg_event_field {
->> >         u8 event[0];
->> >  } __packed;
->> >
->> > +struct tpm2_digest {
->> > +       u16 alg_id;
->> > +       u8 digest[SHA512_DIGEST_SIZE];
->> > +} __packed;
->> > +
->> >  struct tcg_pcr_event2 {
->> >         u32 pcr_idx;
->> >         u32 event_type;
->> > @@ -112,26 +117,5 @@ struct tcg_pcr_event2 {
->> >         struct tcg_event_field event;
->> >  } __packed;
->> >
->> > -extern const struct seq_operations tpm2_binary_b_measurements_seqops;
->> > -
->> > -#if defined(CONFIG_ACPI)
->> > -int tpm_read_log_acpi(struct tpm_chip *chip);
->> > -#else
->> > -static inline int tpm_read_log_acpi(struct tpm_chip *chip)
->> > -{
->> > -       return -ENODEV;
->> > -}
->> > -#endif
->> > -#if defined(CONFIG_OF)
->> > -int tpm_read_log_of(struct tpm_chip *chip);
->> > -#else
->> > -static inline int tpm_read_log_of(struct tpm_chip *chip)
->> > -{
->> > -       return -ENODEV;
->> > -}
->> > -#endif
->> > -
->> > -int tpm_bios_log_setup(struct tpm_chip *chip);
->> > -void tpm_bios_log_teardown(struct tpm_chip *chip);
->> >
->> >  #endif
->> > diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
->> > index dedf9bde44db..2abe6d22dc5f 100644
->> > --- a/drivers/firmware/efi/libstub/Makefile
->> > +++ b/drivers/firmware/efi/libstub/Makefile
->> > @@ -29,8 +29,7 @@ OBJECT_FILES_NON_STANDARD     := y
->> >  # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
->> >  KCOV_INSTRUMENT                        := n
->> >
->> > -lib-y                          := efi-stub-helper.o gop.o secureboot.o
->> > -lib-$(CONFIG_RESET_ATTACK_MITIGATION) += tpm.o
->> > +lib-y                          := efi-stub-helper.o gop.o secureboot.o tpm.o
->> >
->>
->> Did you build test on ARM/arm64 as well?
->
-> I did not, but the next patch version build fine for both.
->
+Hi Sai,
 
-OK.
+There were several combinations suggested in your threads, so it took
+me some time to try them out and document the different behaviours.
+Please see them inline:
 
->>
->> >  # include the stub's generic dependencies from lib/ when building for ARM/arm64
->> >  arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
->> > diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
->> > index 6224cdbc9669..ba2cb68833fb 100644
->> > --- a/drivers/firmware/efi/libstub/tpm.c
->> > +++ b/drivers/firmware/efi/libstub/tpm.c
->> > @@ -4,6 +4,7 @@
->> >   * Copyright (C) 2016 CoreOS, Inc
->> >   * Copyright (C) 2017 Google, Inc.
->> >   *     Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
->> > + *     Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
->> >   *
->> >   * This file is part of the Linux kernel, and is made available under the
->> >   * terms of the GNU General Public License version 2.
->> > @@ -12,7 +13,9 @@
->> >  #include <asm/efi.h>
->> >
->> >  #include "efistub.h"
->> > +#include "../../../char/tpm/tpm_eventlog.h"
->> >
->> > +#if IS_ENABLED(CONFIG_RESET_ATTACK_MITIGATION)
->>
->> IS_ENABLED() is intended for C style if()s rather than preprocessor
->> conditionals. Please replace with #ifdef
->>
->> >  static const efi_char16_t efi_MemoryOverWriteRequest_name[] = {
->> >         'M', 'e', 'm', 'o', 'r', 'y', 'O', 'v', 'e', 'r', 'w', 'r', 'i', 't',
->> >         'e', 'R', 'e', 'q', 'u', 'e', 's', 't', 'C', 'o', 'n', 't', 'r', 'o',
->> > @@ -56,3 +59,80 @@ void efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg)
->> >                     EFI_VARIABLE_BOOTSERVICE_ACCESS |
->> >                     EFI_VARIABLE_RUNTIME_ACCESS, sizeof(val), &val);
->> >  }
->> > +
->> > +#endif
->> > +
->> > +void efi_retrieve_tpm2_eventlog_1_2(struct boot_params *boot_params,
->>
->> Does this function actually use struct boot_params?
->>
->> > +                                   efi_system_table_t *sys_table_arg)
->> > +{
->> > +       efi_guid_t tcg2_guid = EFI_TCG2_PROTOCOL_GUID;
->> > +       efi_guid_t linux_eventlog_guid = LINUX_EFI_TPM_EVENT_LOG_GUID;
->> > +       efi_status_t status;
->> > +       efi_physical_addr_t log_location, log_last_entry;
->> > +       struct linux_efi_tpm_eventlog *log_tbl;
->> > +       size_t log_size, last_entry_size;
->> > +       efi_bool_t truncated;
->> > +       void *tcg2_protocol;
->> > +
->> > +       status = efi_call_early(locate_protocol, &tcg2_guid, NULL,
->> > +                       &tcg2_protocol);
->>
->> Please indent appropriately.
->>
->> > +       if (status != EFI_SUCCESS)
->> > +               return;
->> > +
->> > +       status = efi_call_proto(efi_tcg2_protocol, get_event_log, tcg2_protocol,
->> > +                               EFI_TCG2_EVENT_LOG_FORMAT_TCG_1_2,
->> > +                               &log_location, &log_last_entry, &truncated);
->> > +       if (status != EFI_SUCCESS)
->> > +               return;
->> > +
->> > +       if (!log_location)
->> > +               return;
->> > +
->> > +       /*
->> > +        * If the logs are empty, we still populate the EFI table to surface
->>
->> I am not a native English speaker, but 'to surface' sounds a bit awkward here.
->>
->> > +        * this information to userland.
->> > +        */
->> > +       if (!log_last_entry) {
->> > +               log_size = 0;
->> > +       } else {
->> > +               /*
->> > +                * get_event_log only returns the address of the last entry.
->> > +                * We need to calculate its size to deduce the full size of
->> > +                * the logs.
->> > +                */
->> > +               last_entry_size = sizeof(struct tcpa_event) +
->> > +                       ((struct tcpa_event *)log_last_entry)->event_size;
->> > +               log_size = log_last_entry - log_location + last_entry_size;
->> > +       }
->> > +
->> > +       /* Allocate space for the logs and copy them. */
->> > +       status = efi_call_early(allocate_pool, EFI_RUNTIME_SERVICES_DATA,
->>
->> Why is this runtime services data? You are passing your own data
->> across the UEFI / kernel handover, and so if you parse your config
->> table early enough, you can just reserve this memory.
->>
+On Wed, Sep 6, 2017 at 2:30 PM, Prakhya, Sai Praneeth
+<sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
 >
-> I am simply following the specifications here: "In general, UEFI Configuration
-> Tables loaded at boot time (e.g., SMBIOS table) can be contained in memory of
-> type EfiRuntimeServicesData (recommended and the system firmware must not
-> request a virtual mapping), EfiBootServicesData, EfiACPIReclaimMemory or
-> EfiACPIMemoryNVS." [UEFI 2.6].
 >
+>> -----Original Message-----
+>> From: Sai Praneeth Prakhya [mailto:sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org]
+>> Sent: Tuesday, September 5, 2017 7:43 PM
+>> To: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Matt Fleming
+>> <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>; Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>;
+>> jlee-IBi9RG/b67k@public.gmane.org; Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>; Luck, Tony
+>> <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>; luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org; mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org; Neri, Ricardo
+>> <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>; Shankar, Ravi V <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>> Subject: Re: [PATCH V2 0/3] Use mm_struct and switch_mm() instead of
+>> manually
+>>
+>> On Tue, 2017-09-05 at 19:21 -0700, Sai Praneeth Prakhya wrote:
+>> > > I get a similar crash on Qemu with linus's master branch and the V2
+>> > > applied on top of it. Here are the details of my test environment:
+>> > >
+>> > > 1. I use the OVMF (EDK2) EFI firmware to launch the kernel:
+>> > > edk2.git/ovmf-x64
+>> > >
+>> > > 2. I used linus's master branch (HEAD - commit:
+>> > > b1b6f83ac938d176742c85757960dec2cf10e468) and applied your v2 on top
+>> > > of the same.
+>> > >
+>> > > 3. I use the following qemu command line to launch the test:
+>> > >
+>> > > # /usr/local/bin/qemu-system-x86_64 --version QEMU emulator version
+>> > > 2.9.50 (v2.9.0-526-g76d20ea) Copyright (c) 2003-2017 Fabrice Bellard
+>> > > and the QEMU Project developers
+>> > >
+>> > > # /usr/local/bin/qemu-system-x86_64 -enable-kvm  -net nic -net tap
+>> > > -m $MEMSIZE -nographic -drive
+>> > > file=$DISK_IMAGE,if=virtio,format=qcow2
+>> > > -vga std -boot c -cpu host -kernel $KERNEL -append
+>> > > "crashkernel=$CRASH_MEMSIZE console=ttyS0,115200n81"  -initrd
+>> > > $INITRAMFS -bios $OVMF_FW_PATH
+>> > >
+>> > > And here is the crash log:
+>> > >
+>> > > [    0.006054] general protection fault: 0000 [#1] SMP
+>> > > [    0.006459] Modules linked in:
+>> > > [    0.006711] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.13.0+ #3
+>> > > [    0.007000] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996),
+>> > > BIOS 0.0.0 02/06/2015
+>> > > [    0.007000] task: ffffffff81e0f480 task.stack: ffffffff81e00000
+>> > > [    0.007000] RIP: 0010:switch_mm_irqs_off+0x1bc/0x440
+>> > > [    0.007000] RSP: 0000:ffffffff81e03d80 EFLAGS: 00010086
+>> > > [    0.007000] RAX: 800000007d084000 RBX: 0000000000000000 RCX:
+>> 000077ff80000000
+>> > > [    0.007000] RDX: 000000007d084000 RSI: 8000000000000000 RDI:
+>> 0000000000019a00
+>> > > [    0.007000] RBP: ffffffff81e03dc0 R08: 0000000000000000 R09:
+>> ffff88007d085000
+>> > > [    0.007000] R10: ffffffff81e03dd8 R11: 000000007d095063 R12:
+>> ffffffff81e5c6a0
+>> > > [    0.007000] R13: ffffffff81ed4f40 R14: 0000000000000030 R15:
+>> 0000000000000001
+>> > > [    0.007000] FS:  0000000000000000(0000) GS:ffff88007d400000(0000)
+>> > > knlGS:0000000000000000
+>> > > [    0.007000] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+>> > > [    0.007000] CR2: ffff88007d754000 CR3: 000000000220a000 CR4:
+>> 00000000000406b0
+>> > > [    0.007000] Call Trace:
+>> > > [    0.007000]  switch_mm+0xd/0x20
+>> > > [    0.007000]  ? switch_mm+0xd/0x20
+>> > > [    0.007000]  efi_switch_mm+0x3e/0x4a
+>> > > [    0.007000]  efi_call_phys_prolog+0x28/0x1ac
+>> > > [    0.007000]  efi_enter_virtual_mode+0x35a/0x48f
+>> > > [    0.007000]  start_kernel+0x332/0x3b8
+>> > > [    0.007000]  x86_64_start_reservations+0x2a/0x2c
+>> > > [    0.007000]  x86_64_start_kernel+0x178/0x18b
+>> > > [    0.007000]  secondary_startup_64+0xa5/0xa5
+>> > > [    0.007000]  ? secondary_startup_64+0xa5/0xa5
+>> > > [    0.007000] Code: 00 00 00 80 49 03 55 50 0f 82 7f 02 00 00 48 b9
+>> > > 00 00 00 80 ff 77 00 00 48 be 00 00 00 00 00 00 00 80 48 01 ca 48 09
+>> > > f0 48 09 d0 <0f> 22 d8 0f 1f 44 00 00 e9 47 ff ff ff 65 8b 05 b8 87
+>> > > fb 7e 89
+>> > > [    0.007000] RIP: switch_mm_irqs_off+0x1bc/0x440 RSP: ffffffff81e03d80
+>> > > [    0.007000] ---[ end trace bfa55bf4e4765255 ]---
+>> > > [    0.007000] Kernel panic - not syncing: Attempted to kill the idle task!
+>> > > [    0.007000] ---[ end Kernel panic - not syncing: Attempted to kill
+>> > > the idle task!
+>> > >
+>> > > 4. Note though that if I use the EFI_MIXED mode (i.e. 32-bit ovmf
+>> > > firmware and 64-bit x86 kernel) with your patches, the primary
+>> > > kernel boots fine on Qemu:
+>> > >
+>> > > ovmf firmware used in this case - edk2.git/ovmf-ia32
+>> > >
+>> > > 5. Also, if I append 'efi=old_map' to the bootargs (for the failing
+>> > > case in point 3 above), I see the primary kernel boots fine on Qemu
+>> > > as well.
+>> > >
+>> > > Regards,
+>> > > Bhupesh
+>> >
+>> > Hi Bhupesh,
+>> >
+>> > Thanks a lot for the detailed explanation. They are helpful to
+>> > reproduce the issue quickly. From my initial debug, I think that AMD
+>> > SME + efi_mm_struct patches + -cpu host (in qemu) are required to
+>> > reproduce the issue on qemu.
+>> >
+>> > I have tried the following combinations (all tests are on qemu):
+>> > On Linus's tree:
+>> > 1. With  SME and  efi_mm and  -cpu host -> panics 2. With  SME and
+>> > efi_mm and !-cpu host -> boots 3. With  SME and !efi_mm and  -cpu host
+>> > -> boots 4. With  SME and !efi_mm and !-cpu host -> boots 5. With !SME
+>> > and  efi_mm and  -cpu host -> boots 6. With !SME and  efi_mm and !-cpu
+>> > host -> boots 7. With !SME and !efi_mm and  -cpu host -> boots 8. With
+>> > !SME and !efi_mm and !-cpu host -> boots
+>> >
+>> > On Matt's tree (no SME):
+>> > 1. With  efi_mm and  -cpu host -> boots 2. With  efi_mm and !-cpu host
+>> > -> boots 3. With !efi_mm and  -cpu host -> boots 4. With !efi_mm and
+>> > !-cpu host -> boots
+>> >
+>> > Summary:
+>> > On Matt's tree (next branch), I am unable to reproduce the issue
+>> > because they don't have SME patches.
+>> >
+>> > On Linus's tree, with SME patches
+>> > (b1b6f83ac938d176742c85757960dec2cf10e468) and my patches and -cpu
+>> > host switch enabled in qemu, I was able to reproduce the issue.
+>> >
+>> > Could you please confirm if you are seeing the same behavior?
+>> > Specially on real machines (I think, this is equivalent to -cpu host
+>> > on
+>> > qemu) because in earlier mails you have mentioned that you were able
+>> > to reproduce this on Matt's tree, but according to my theory it
+>> > shouldn't be the case because Matt's three doesn't have SME patches.
+>> > Did you back port (b1b6f83ac938d176742c85757960dec2cf10e468) this
+>> > commit to Matt's tree and then applied my patches?
 
-Actually, the use of EfiRuntimeServicesData without a good reason is
-also frowned upon in USWG circles, and this recommendation is a bit
-out of place, tbh. Not requesting a virtual mapping is impossible: the
-APIs don't allow you to specify whether a RTservicesdata allocation
-requires a virtual mapping or not, so this does not make any sense.
+[snip..]
 
-If you need memory that is reserved automatically, use
-EfiACPIReclaimMemory, otherwise, please use EfiBootServicesData
-instead.
-
-> Although it is my own data, this is still an EFI configuration table
-> and as such must remain available once booted. If you have another
-> solution in mind, could you please be more explicit about how this would
-> look like?
+> Hi Bhupesh,
 >
+> Could you please append "nopcid" to kernel command line parameters and see if the issue goes away (on both qemu and real machines)?
 
-This is not true. EFI configuration tables should not be stored in
-EfiRuntimeServicesData, because that will cause the memory to be
-reserved for all OSes, even ones that have no use for the data.
+(1) On Linus's tree, with SME + 5-level page table + PCID based tlb
+flush patches (i.e. b1b6f83ac938d176742c85757960dec2cf10e468) and your
+v2 patchset applied:
 
-For example, the new memory attributes table is also stored in boot
-services data, for precisely the same reason.
+a) when 'nopcid' is specified in bootargs:
 
->> Runtime services data will be given a virtual mapping by the firmware
->> so it is accessible to the firmware itself during runtime services
->> invocations, and on ARM/arm64, we actually have to omit if from the
->> ordinary direct mapping of memory, which may lead to page table
->> fragmentation and increased TLB pressure.
->>
->> In summary, don't use it as a convenience so you don'y have to think
->> about when/how to reserve it from normal allocation by the kernel.
->>
->> > +                               sizeof(*log_tbl) + log_size, &log_tbl);
->> > +
->> > +       if (status != EFI_SUCCESS) {
->> > +               efi_printk(sys_table_arg,
->> > +                          "Unable to allocate memory for event log\n");
->> > +               return;
->> > +       }
->> > +
->> > +       memset(log_tbl, 0, sizeof(*log_tbl) + log_size);
->> > +       log_tbl->size = log_size;
->> > +       log_tbl->version = EFI_TCG2_EVENT_LOG_FORMAT_TCG_1_2;
->> > +       memcpy(log_tbl->log, (void *)log_location, log_size);
->> > +
->> > +       status = efi_call_early(install_configuration_table,
->> > +                       &linux_eventlog_guid, log_tbl);
->>
->> Indentation please.
->>
->> > +       if (status != EFI_SUCCESS)
->> > +               goto err_free;
->> > +       return;
->> > +
->> > +err_free:
->> > +       efi_call_early(free_pool, log_tbl);
->> > +}
->> > +
->> > +void efi_retrieve_tpm2_eventlog(struct boot_params *boot_params,
->> > +                               efi_system_table_t *sys_table_arg)
->> > +{
->> > +       /* Only try to retrieve the logs in 1.2 format. */
->> > +       efi_retrieve_tpm2_eventlog_1_2(boot_params, sys_table_arg);
->> > +}
->> > diff --git a/include/linux/efi.h b/include/linux/efi.h
->> > index 8dc3d94a3e3c..5eaaa68ac58a 100644
->> > --- a/include/linux/efi.h
->> > +++ b/include/linux/efi.h
->> > @@ -472,6 +472,26 @@ typedef struct {
->> >         u64 get_all;
->> >  } apple_properties_protocol_64_t;
->> >
->> > +typedef struct {
->> > +       u32 get_capability;
->> > +       u32 get_event_log;
->> > +       u32 hash_log_extend_event;
->> > +       u32 submit_command;
->> > +       u32 get_active_pcr_banks;
->> > +       u32 set_active_pcr_banks;
->> > +       u32 get_result_of_set_active_pcr_banks;
->> > +} efi_tcg2_protocol_32_t;
->> > +
->> > +typedef struct {
->> > +       u64 get_capability;
->> > +       u64 get_event_log;
->> > +       u64 hash_log_extend_event;
->> > +       u64 submit_command;
->> > +       u64 get_active_pcr_banks;
->> > +       u64 set_active_pcr_banks;
->> > +       u64 get_result_of_set_active_pcr_banks;
->> > +} efi_tcg2_protocol_64_t;
->> > +
->> >  /*
->> >   * Types and defines for EFI ResetSystem
->> >   */
->> > @@ -622,6 +642,7 @@ void efi_native_runtime_setup(void);
->> >  #define EFI_MEMORY_ATTRIBUTES_TABLE_GUID       EFI_GUID(0xdcfa911d, 0x26eb, 0x469f,  0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
->> >  #define EFI_CONSOLE_OUT_DEVICE_GUID            EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4,  0x9a, 0x46, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
->> >  #define APPLE_PROPERTIES_PROTOCOL_GUID         EFI_GUID(0x91bd12fe, 0xf6c3, 0x44fb,  0xa5, 0xb7, 0x51, 0x22, 0xab, 0x30, 0x3a, 0xe0)
->> > +#define EFI_TCG2_PROTOCOL_GUID                 EFI_GUID(0x607f766c, 0x7455, 0x42be,  0x93, 0x0b, 0xe4, 0xd7, 0x6d, 0xb2, 0x72, 0x0f)
->> >
->> >  #define EFI_IMAGE_SECURITY_DATABASE_GUID       EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596,  0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
->> >  #define EFI_SHIM_LOCK_GUID                     EFI_GUID(0x605dab50, 0xe046, 0x4300,  0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
->> > @@ -634,6 +655,7 @@ void efi_native_runtime_setup(void);
->> >  #define LINUX_EFI_ARM_SCREEN_INFO_TABLE_GUID   EFI_GUID(0xe03fc20a, 0x85dc, 0x406e,  0xb9, 0x0e, 0x4a, 0xb5, 0x02, 0x37, 0x1d, 0x95)
->> >  #define LINUX_EFI_LOADER_ENTRY_GUID            EFI_GUID(0x4a67b082, 0x0a4c, 0x41cf,  0xb6, 0xc7, 0x44, 0x0b, 0x29, 0xbb, 0x8c, 0x4f)
->> >  #define LINUX_EFI_RANDOM_SEED_TABLE_GUID       EFI_GUID(0x1ce1e5bc, 0x7ceb, 0x42f2,  0x81, 0xe5, 0x8a, 0xad, 0xf1, 0x80, 0xf5, 0x7b)
->> > +#define LINUX_EFI_TPM_EVENT_LOG_GUID           EFI_GUID(0xb7799cb0, 0xeca2, 0x4943,  0x96, 0x67, 0x1f, 0xae, 0x07, 0xb7, 0x47, 0xfa)
->> >
->> >  typedef struct {
->> >         efi_guid_t guid;
->> > @@ -1504,6 +1526,9 @@ static inline void
->> >  efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg) { }
->> >  #endif
->> >
->> > +void efi_retrieve_tpm2_eventlog(struct boot_params *boot_params,
->> > +                               efi_system_table_t *sys_table);
->> > +
->> >  /*
->> >   * Arch code can implement the following three template macros, avoiding
->> >   * reptition for the void/non-void return cases of {__,}efi_call_virt():
->> > @@ -1571,4 +1596,14 @@ struct linux_efi_random_seed {
->> >         u8      bits[];
->> >  };
->> >
->> > +
->> > +#define EFI_TCG2_EVENT_LOG_FORMAT_TCG_1_2 0x1
->> > +#define EFI_TCG2_EVENT_LOG_FORMAT_TCG_2   0x2
->> > +
->> > +struct linux_efi_tpm_eventlog {
->> > +       u32     size;
->> > +       u8      version;
->> > +       u8      log[];
->> > +};
->> > +
->> >  #endif /* _LINUX_EFI_H */
->> > --
->> > 2.14.1.581.gf28d330327-goog
->> >
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe linux-efi" in
->> > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+- qemu: primary kernel boots fine.
+- Real efi test hardware (SGI UV 300 machine): primary boots _fails_
 
-------------------------------------------------------------------------------
-Check out the vibrant tech community on one of the world's most
-engaging tech sites, Slashdot.org! http://sdm.link/slashdot
+b) when 'nopcid' is _not_ specified in bootargs:
+
+- qemu: primary kernel boot _fails_.
+- Real efi test hardware (SGI UV 300 machine): primary boot _fails_.
+
+(2) On Matt's tree, with c4d2793e5a07d5e63d91715a4393fe47c8345112 as
+head and your v2 patchset applied:
+
+a) when 'nopcid' is specified in bootargs:
+
+- qemu: primary kernel boots fine.
+- Real efi test hardware (SGI UV 300 machine): primary boot _fails_
+
+b) when 'nopcid' is _not_ specified in bootargs:
+
+- qemu: primary kernel boots fine.
+- Real efi test hardware (SGI UV 300 machine): primary boot _fails_
+
+So, in summary it seems that the primary kernel boot _fails_ with your
+v2 patchset on the real hardware for me irrespective of whether I use
+Matt's tree or Linus's tree:
+
+a) I would suggest that you perform some more checks on real hardware
+as qemu boot tests sometimes do not expose the problems we might see
+when booting a kernel on efi capable hardware.
+
+b) Also do note that both Matt's tree and Linus's tree work fine on
+this hardware for me (with the 'nopcid' added to the bootargs)
+
+Please let me know if I can help further in debugging the same.
+
+Regards,
+Bhupesh
