@@ -1,7 +1,7 @@
 From: mackenzie <antoine.touze-lF7OH95ntldU02mba5UQdQ@public.gmane.org>
-Subject: [SUSPECTED SPAM] Can you be our Supplier
-Date: Sun, 10 Sep 2017 11:40:21 +0200 (CEST)
-Message-ID: <1093485825.45464970.1505036421295.JavaMail.zimbra__47366.7647027925$1505037040$gmane$org@univ-tours.fr>
+Subject: [SUSPECTED SPAM] I am a Buyer
+Date: Sun, 10 Sep 2017 13:19:09 +0200 (CEST)
+Message-ID: <407965311.45474009.1505042349493.JavaMail.zimbra__9599.12501643903$1505042377$gmane$org@univ-tours.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
@@ -17,7 +17,7 @@ I am Becca MacKenzie, We are interested in your products and want to make you an
 
 We will be ordering in large quantity so we are looking forward in making a good relationship with you and your company.
 
-My contact email: becca.mackenzie100-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org
+For my quick response write only to my contact email: becca.mackenzie100-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org
 
 Regards
 Becca MacKenzie
