@@ -1,51 +1,66 @@
-From: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v2 3/3] tpm: parse TPM event logs based on EFI table
-Date: Wed, 13 Sep 2017 18:43:49 +0200
-Message-ID: <CA+zpnLfEscJDi3Yd3LiWH5v7iNuzV6gRk6Cmdkrme3f1ivLbLg@mail.gmail.com>
-References: <20170911100022.7251-4-tweek@google.com> <201709140034.ESdZA8H8%fengguang.wu@intel.com>
+From: Jarkko Sakkinen <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: Re: [PATCH v2 0/3] Call GetEventLog before ExitBootServices
+Date: Wed, 13 Sep 2017 11:59:30 -0700
+Message-ID: <20170913185930.ntquiechi44l35ht@linux.intel.com>
+References: <20170911100022.7251-1-tweek@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <201709140034.ESdZA8H8%fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170911100022.7251-1-tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: kbuild-all-JC7UmRfGjtg@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, peterhuewe-Mmb7MZpHnFY@public.gmane.org, jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, Jason Gunthorpe <jgunthorpe-ePGOBjL8dl3ta4EC/59zMFaTQe2KTcn/@public.gmane.org>, tpmdd-yWjUBOtONefk1uMJSBkQmQ@public.gmane.org
+To: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, peterhuewe-Mmb7MZpHnFY@public.gmane.org, jgunthorpe-ePGOBjL8dl3ta4EC/59zMFaTQe2KTcn/@public.gmane.org, tpmdd-yWjUBOtONefk1uMJSBkQmQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Fixed in next patch set
+On Mon, Sep 11, 2017 at 12:00:19PM +0200, Thiebaud Weksteen wrote:
+> With TPM 1.2, the ACPI table ("TCPA") has two fields to recover the Event Log
+> Area (LAML and LASA). These logs are useful to understand and rebuild the
+> final values of PCRs.
+> 
+> With TPM 2.0, the ACPI table ("TPM2") does not contain these fields anymore.
+> The recommended method is now to call the GetEventLog EFI protocol before
+> ExitBootServices.
+> 
+> Implement this method within the EFI stub and create copy of the logs for the
+> TPM device. This will create /sys/kernel/security/tpm0/binary_bios_measurements
+> for TPM 2.0 devices (similarly to the current behaviour for TPM 1.2 devices).
+> 
+> -------------------------------------------------------------------------------
+> 
+> Patchset Changelog:
+> 
+> Version 2:
+> - Move tpm_eventlog.h to top include directory, add commit for this.
+> - Use EFI_LOADER_DATA to store the configuration table
+> - Whitespace and new lines fixes
+> 
+> 
+> Thiebaud Weksteen (3):
+>   tpm: move tpm_eventlog.h outside of drivers folder
+>   efi: call get_event_log before ExitBootServices
+>   tpm: parse TPM event logs based on EFI table
+> 
+>  arch/x86/boot/compressed/eboot.c                   |  1 +
+>  drivers/char/tpm/Makefile                          |  2 +-
+>  drivers/char/tpm/tpm-chip.c                        |  3 +-
+>  drivers/char/tpm/tpm-interface.c                   |  2 +-
+>  drivers/char/tpm/tpm.h                             | 35 ++++++++--
+>  drivers/char/tpm/tpm1_eventlog.c                   | 17 +++--
+>  drivers/char/tpm/tpm2_eventlog.c                   |  2 +-
+>  drivers/char/tpm/tpm_acpi.c                        |  2 +-
+>  drivers/char/tpm/tpm_efi.c                         | 66 ++++++++++++++++++
+>  drivers/char/tpm/tpm_of.c                          |  2 +-
 
-On Wed, Sep 13, 2017 at 6:27 PM, kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> Hi Thiebaud,
->
-> [auto build test ERROR on efi/next]
-> [also build test ERROR on next-20170913]
-> [cannot apply to char-misc/char-misc-testing linus/master v4.13]
-> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
->
-> url:    https://github.com/0day-ci/linux/commits/Thiebaud-Weksteen/Call-GetEventLog-before-ExitBootServices/20170913-221312
-> base:   https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
-> config: i386-randconfig-x076-201737 (attached as .config)
-> compiler: gcc-6 (Debian 6.2.0-3) 6.2.0 20160901
-> reproduce:
->         # save the attached .config to linux build tree
->         make ARCH=i386
->
-> All errors (new ones prefixed by >>):
->
->>> drivers/char/tpm/tpm_efi.c:20:5: error: redefinition of 'tpm_read_log_efi'
->     int tpm_read_log_efi(struct tpm_chip *chip)
->         ^~~~~~~~~~~~~~~~
->    In file included from drivers/char/tpm/tpm_efi.c:17:0:
->    drivers/char/tpm/tpm.h:603:19: note: previous definition of 'tpm_read_log_efi' was here
->     static inline int tpm_read_log_efi(struct tpm_chip *chip)
->                       ^~~~~~~~~~~~~~~~
->
-> vim +/tpm_read_log_efi +20 drivers/char/tpm/tpm_efi.c
->
->     18
->     19  /* read binary bios log from EFI configuration table */
->   > 20  int tpm_read_log_efi(struct tpm_chip *chip)
->
-> ---
-> 0-DAY kernel test infrastructure                Open Source Technology Center
-> https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
+I think these filenames are just awful. Now that you are introducing
+completely a new file, it would make sense rename these as
+
+* tpm_eventlog_acpi.c
+* tpm_eventlog_efi.c
+* tpm_eventlog_of.c
+
+Please wait for further review comments before sending a refined patch
+set. Please have renames for tpm_acpi.c and tpm_of.c in its own commit
+before introducing other changes.
+
+/Jarkko
