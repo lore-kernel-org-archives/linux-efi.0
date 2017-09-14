@@ -1,19 +1,23 @@
-From: Jarkko Sakkinen <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: Re: [PATCH v2 0/3] Call GetEventLog before ExitBootServices
-Date: Wed, 13 Sep 2017 11:59:30 -0700
-Message-ID: <20170913185930.ntquiechi44l35ht@linux.intel.com>
+From: Javier Martinez Canillas <javierm@redhat.com>
+Subject: Re: [tpmdd-devel] [PATCH v2 0/3] Call GetEventLog before
+ ExitBootServices
+Date: Thu, 14 Sep 2017 12:21:59 +0200
+Message-ID: <5d530df3-7a7a-4cd7-bde6-92f733c7ae75@redhat.com>
 References: <20170911100022.7251-1-tweek@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170911100022.7251-1-tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, peterhuewe-Mmb7MZpHnFY@public.gmane.org, jgunthorpe-ePGOBjL8dl3ta4EC/59zMFaTQe2KTcn/@public.gmane.org, tpmdd-yWjUBOtONefk1uMJSBkQmQ@public.gmane.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170911100022.7251-1-tweek@google.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Thiebaud Weksteen <tweek@google.com>, linux-efi@vger.kernel.org
+Cc: ard.biesheuvel@linaro.org, matt@codeblueprint.co.uk, linux-kernel@vger.kernel.org, mjg59@google.com, jgunthorpe@obsidianresearch.com, tpmdd-devel@lists.sourceforge.net, jarkko.sakkinen@linux.intel.com, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Sep 11, 2017 at 12:00:19PM +0200, Thiebaud Weksteen wrote:
+Hello Thiebaud,
+
+On 09/11/2017 12:00 PM, Thiebaud Weksteen via tpmdd-devel wrote:
 > With TPM 1.2, the ACPI table ("TCPA") has two fields to recover the Event Log
 > Area (LAML and LASA). These logs are useful to understand and rebuild the
 > final values of PCRs.
@@ -26,41 +30,26 @@ On Mon, Sep 11, 2017 at 12:00:19PM +0200, Thiebaud Weksteen wrote:
 > TPM device. This will create /sys/kernel/security/tpm0/binary_bios_measurements
 > for TPM 2.0 devices (similarly to the current behaviour for TPM 1.2 devices).
 > 
-> -------------------------------------------------------------------------------
-> 
-> Patchset Changelog:
-> 
-> Version 2:
-> - Move tpm_eventlog.h to top include directory, add commit for this.
-> - Use EFI_LOADER_DATA to store the configuration table
-> - Whitespace and new lines fixes
-> 
-> 
-> Thiebaud Weksteen (3):
->   tpm: move tpm_eventlog.h outside of drivers folder
->   efi: call get_event_log before ExitBootServices
->   tpm: parse TPM event logs based on EFI table
-> 
->  arch/x86/boot/compressed/eboot.c                   |  1 +
->  drivers/char/tpm/Makefile                          |  2 +-
->  drivers/char/tpm/tpm-chip.c                        |  3 +-
->  drivers/char/tpm/tpm-interface.c                   |  2 +-
->  drivers/char/tpm/tpm.h                             | 35 ++++++++--
->  drivers/char/tpm/tpm1_eventlog.c                   | 17 +++--
->  drivers/char/tpm/tpm2_eventlog.c                   |  2 +-
->  drivers/char/tpm/tpm_acpi.c                        |  2 +-
->  drivers/char/tpm/tpm_efi.c                         | 66 ++++++++++++++++++
->  drivers/char/tpm/tpm_of.c                          |  2 +-
 
-I think these filenames are just awful. Now that you are introducing
-completely a new file, it would make sense rename these as
+I've tested your patches on a system with an Intel PTT firmware based TPM2.0 and
+the measurements securityfs entry was correctly created and was able to read it:
 
-* tpm_eventlog_acpi.c
-* tpm_eventlog_efi.c
-* tpm_eventlog_of.c
+$ cat /sys/class/tpm/tpm0/device/description
+TPM 2.0 Device
 
-Please wait for further review comments before sending a refined patch
-set. Please have renames for tpm_acpi.c and tpm_of.c in its own commit
-before introducing other changes.
+$ hexdump /sys/kernel/security/tpm0/binary_bios_measurements | head -n2
+0000000 0000 0000 0008 0000 f504 15a0 1810 bf44
+0000010 63d0 4fdb b8a4 f278 8dc7 c8aa 0014 0000
 
-/Jarkko
+So please feel free to add:
+
+Tested-by: Javier Martinez Canillas <javierm@redhat.com>
+
+I also reviewed the patches and look good to me, I have just one question for
+patch #2, but I'll comment there.
+
+Best regards,
+-- 
+Javier Martinez Canillas
+Software Engineer - Desktop Hardware Enablement
+Red Hat
