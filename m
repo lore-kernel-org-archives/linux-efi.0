@@ -1,55 +1,45 @@
-From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-Subject: Re: [PATCH v2 2/3] efi: call get_event_log before ExitBootServices
-Date: Thu, 14 Sep 2017 12:02:47 -0700
-Message-ID: <20170914190247.rrbdzdexjjywxipf@linux.intel.com>
-References: <20170911100022.7251-1-tweek@google.com>
- <20170911100022.7251-3-tweek@google.com>
- <20170914184126.eevnstwq3i6fiq4j@linux.intel.com>
- <CACdnJuu2Aq1mvdvooBgC3-1jfi3CPnZ6WGysOGc2Xizm-mbU0w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CACdnJuu2Aq1mvdvooBgC3-1jfi3CPnZ6WGysOGc2Xizm-mbU0w@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <mjg59@google.com>
-Cc: Thiebaud Weksteen <tweek@google.com>, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, peterhuewe@gmx.de, jgunthorpe@obsidianresearch.com, tpmdd@selhorst.net
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or WP are set
+Date: Thu, 14 Sep 2017 12:31:53 -0700
+Message-ID: <20170914193153.18520-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Sep 14, 2017 at 11:48:54AM -0700, Matthew Garrett wrote:
-> On Thu, Sep 14, 2017 at 11:43 AM, Jarkko Sakkinen
-> <jarkko.sakkinen@linux.intel.com> wrote:
-> > On Mon, Sep 11, 2017 at 12:00:21PM +0200, Thiebaud Weksteen wrote:
-> >> With TPM 2.0 specification, the event logs may only be accessible by
-> >> calling an EFI Boot Service. Modify the EFI stub to copy the log area to
-> >> a new Linux-specific EFI configuration table so it remains accessible
-> >> once booted.
-> >>
-> >> When calling this service, it is possible to specify the expected format
-> >> of the logs: TPM 1.2 (SHA1) or TPM 2.0 ("Crypto Agile"). For now, only the
-> >> first format is retrieved.
-> >>
-> >> Signed-off-by: Thiebaud Weksteen <tweek@google.com>
-> >
-> > With a quick skim the code change looks good but I remember from
-> > Matthew's talk that there was this issue that ExitBootServices() would
-> > cause a yet another event?
-> >
-> > I guess you could manually synthetize that event by reading the PCR
-> > values right after ExitBootServices()?
-> 
-> I think that would involve breaking SHA1… the information should be
+The UEFI memory map is a bit vague about how to interpret the
+EFI_MEMORY_XP attribute when it is combined with EFI_MEMORY_RP and/or
+EFI_MEMORY_WP, which have retroactively been redefined as cacheability
+attributes rather than permission attributes.
 
-You are absolutely right, was not thinking clearly :-)
+So let's ignore EFI_MEMORY_XP if _RP and/or _WP are also set. In this
+case, it is likely that they are being used to describe the capability
+of the region (i.e., whether it has the controls to reconfigure it as
+non-executable) rather than the nature of the contents of the region
+(i.e., whether it contains data that we will never attempt to execute)
 
-> available in the TCG_TREE_FINAL_EVENTS configuration table, so it
-> /should/ just be a matter of merging the events from that into the
-> event log.
+Cc: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/arm64/kernel/efi.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Right, it is available through runtime services. Why this isn't part
-of the patch set?
-
-/Jrakko
-
-/Jarkko
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 82cd07592519..f85ac58d08a3 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -48,7 +48,9 @@ static __init pteval_t create_mapping_protection(efi_memory_desc_t *md)
+ 		return pgprot_val(PAGE_KERNEL_ROX);
+ 
+ 	/* RW- */
+-	if (attr & EFI_MEMORY_XP || type != EFI_RUNTIME_SERVICES_CODE)
++	if (((attr & (EFI_MEMORY_RP | EFI_MEMORY_WP | EFI_MEMORY_XP)) ==
++	     EFI_MEMORY_XP) ||
++	    type != EFI_RUNTIME_SERVICES_CODE)
+ 		return pgprot_val(PAGE_KERNEL);
+ 
+ 	/* RWX */
+-- 
+2.11.0
