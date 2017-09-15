@@ -1,94 +1,59 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH v2 RESEND 1/2] x86/UV: Introduce a helper function to
- check UV system at earlier stage
-Date: Fri, 15 Sep 2017 08:55:32 +0800
-Message-ID: <20170915005532.GA2322@dhcp-128-65.nay.redhat.com>
-References: <1504770150-25456-1-git-send-email-bhe@redhat.com>
- <1504770150-25456-2-git-send-email-bhe@redhat.com>
- <20170914072952.GN12824@x1>
- <20170914074901.GA5182@dhcp-128-65.nay.redhat.com>
- <20170914080814.GO12824@x1>
+From: Jarkko Sakkinen <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: Re: [PATCH v2 2/3] efi: call get_event_log before ExitBootServices
+Date: Thu, 14 Sep 2017 21:06:11 -0700
+Message-ID: <20170915040611.274w2ak6krjvwg6e@linux.intel.com>
+References: <20170911100022.7251-1-tweek@google.com>
+ <20170911100022.7251-3-tweek@google.com>
+ <20170914184126.eevnstwq3i6fiq4j@linux.intel.com>
+ <CACdnJuu2Aq1mvdvooBgC3-1jfi3CPnZ6WGysOGc2Xizm-mbU0w@mail.gmail.com>
+ <20170914190247.rrbdzdexjjywxipf@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20170914080814.GO12824@x1>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Baoquan He <bhe@redhat.com>
-Cc: linux-kernel@vger.kernel.org, x86@kernel.org, mingo@redhat.com, tglx@linutronix.de, hpa@zytor.com, thgarnie@google.com, keescook@chromium.org, akpm@linux-foundation.org, yamada.masahiro@socionext.com, rja@hpe.com, frank.ramsay@hpe.com, linux-efi@vger.kernel.org
+In-Reply-To: <20170914190247.rrbdzdexjjywxipf-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Cc: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, peterhuewe-Mmb7MZpHnFY@public.gmane.org, jgunthorpe-ePGOBjL8dl3ta4EC/59zMFaTQe2KTcn/@public.gmane.org, tpmdd-yWjUBOtONefk1uMJSBkQmQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Missed a comma in cc list in last reply, readd linux-efi list in cc.
-On 09/14/17 at 04:08pm, Baoquan He wrote:
-> On 09/14/17 at 03:49pm, Dave Young wrote:
-> > > > diff --git a/arch/x86/include/asm/uv/uv.h b/arch/x86/include/asm/uv/uv.h
-> > > > index b5a32231abd8..93d7ad8763ba 100644
-> > > > --- a/arch/x86/include/asm/uv/uv.h
-> > > > +++ b/arch/x86/include/asm/uv/uv.h
-> > > > @@ -18,6 +18,11 @@ extern void uv_nmi_init(void);
-> > > >  extern void uv_system_init(void);
-> > > >  extern const struct cpumask *uv_flush_tlb_others(const struct cpumask *cpumask,
-> > > >  						 const struct flush_tlb_info *info);
-> > > > +#include <linux/efi.h>
-> > > > +static inline int is_early_uv_system(void)
-> > > > +{
-> > > > +	return !((efi.uv_systab == EFI_INVALID_TABLE_ADDR) || !efi.uv_systab);
-> > > > +}
+On Thu, Sep 14, 2017 at 12:02:47PM -0700, Jarkko Sakkinen wrote:
+> On Thu, Sep 14, 2017 at 11:48:54AM -0700, Matthew Garrett wrote:
+> > On Thu, Sep 14, 2017 at 11:43 AM, Jarkko Sakkinen
+> > <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
+> > > On Mon, Sep 11, 2017 at 12:00:21PM +0200, Thiebaud Weksteen wrote:
+> > >> With TPM 2.0 specification, the event logs may only be accessible by
+> > >> calling an EFI Boot Service. Modify the EFI stub to copy the log area to
+> > >> a new Linux-specific EFI configuration table so it remains accessible
+> > >> once booted.
+> > >>
+> > >> When calling this service, it is possible to specify the expected format
+> > >> of the logs: TPM 1.2 (SHA1) or TPM 2.0 ("Crypto Agile"). For now, only the
+> > >> first format is retrieved.
+> > >>
+> > >> Signed-off-by: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+> > >
+> > > With a quick skim the code change looks good but I remember from
+> > > Matthew's talk that there was this issue that ExitBootServices() would
+> > > cause a yet another event?
+> > >
+> > > I guess you could manually synthetize that event by reading the PCR
+> > > values right after ExitBootServices()?
 > > 
+> > I think that would involve breaking SHA1… the information should be
 > 
-> Thanks for looking into this, Dave!
+> You are absolutely right, was not thinking clearly :-)
 > 
-> > 
-> > Sorry for jumping in late, I have two questions about the patch:
-> > 
-> > 1) For efi tables, the only invalid value is EFI_INVALID_TABLE_ADDR, and
-> > efi struct is initialized as EFI_INVALID_TABLE_ADDR by default so no
-> > need to check "|| !efi.uv_systab". Do we have any UV firmware specific
-> > assumption that "0" is also possible to be assigned?
+> > available in the TCG_TREE_FINAL_EVENTS configuration table, so it
+> > /should/ just be a matter of merging the events from that into the
+> > event log.
 > 
-> Hmm, in uv_bios_init() it also checks the !efi.uv_systab case. And
-> EFI_INVALID_TABLE_ADDR checking is earlier, it won't affect the result
-> if it's EFI_INVALID_TABLE_ADDR. And !efi.uv_systab can make it safer
-> since it doesn't work either if efi.uv_systab is 0. Mainly it's not
-> harmful.
-> 
-> Mike, what's your thought? Should I only check the (efi.uv_systab ==
-> EFI_INVALID_TABLE_ADDR) case?
-> 
-> > 
-> > 2) It seems adding this function in uv.h for separating this for uv
-> > system only purpose. But I feel it is better to put it in efi.h instead.
-> 
-> At the beginning I put it in efi.c, later Mike suggested putting it in
-> asm/uv/uv.h. You can also find the discussion in below link.
-> https://patchwork.kernel.org/patch/9732787/
-> 
-> Thanks
-> Baoquan
-> 
-> > 
-> > uv_systab is already a member of struct efi, it is in efi.h so it is
-> > natural to check the table exist or not. Then just include efi.h in
-> > kaslr.c and use the function.
-> > 
-> > something like drivers/firmware/efi/esrt.c: esrt_table_exists()
-> > 
-> > Anyway I have no strong opinon, it looks more natural to me though.
-> > 
-> > > >  
-> > > >  #else	/* X86_UV */
-> > > >  
-> > > > @@ -30,6 +35,7 @@ static inline const struct cpumask *
-> > > >  uv_flush_tlb_others(const struct cpumask *cpumask,
-> > > >  		    const struct flush_tlb_info *info)
-> > > >  { return cpumask; }
-> > > > +static inline int is_early_uv_system(void)	{ return 0; }
-> > > >  
-> > > >  #endif	/* X86_UV */
-> > > >  
-> > > > -- 
-> > > > 2.5.5
-> > > > 
-> > 
-> > Thanks
-> > Dave
+> Right, it is available through runtime services. Why this isn't part
+> of the patch set?
+
+Anyway, I'll try this out out when I get back to Finland. Still before
+landing this to mainline I think it would make sense to make it complete
+wouldn't it?
+
+/Jarkko
