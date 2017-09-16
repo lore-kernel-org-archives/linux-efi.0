@@ -1,36 +1,93 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or
- WP are set
-Date: Fri, 15 Sep 2017 15:50:29 -0700
-Message-ID: <CAKv+Gu_YEZAZL7X5oE9nPnoYi31xsrktLoik8_Gt442AsaLhWQ@mail.gmail.com>
-References: <20170914193153.18520-1-ard.biesheuvel@linaro.org> <20170915185355.GC3349@codeaurora.org>
+From: Brijesh Singh <brijesh.singh@amd.com>
+Subject: [Part1 PATCH v4 07/17] x86/efi: Access EFI data as encrypted when SEV is active
+Date: Sat, 16 Sep 2017 07:34:08 -0500
+Message-ID: <20170916123418.37807-8-brijesh.singh@amd.com>
+References: <20170916123418.37807-1-brijesh.singh@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170915185355.GC3349-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Type: text/plain
+Return-path: <kvm-owner@vger.kernel.org>
+In-Reply-To: <20170916123418.37807-1-brijesh.singh@amd.com>
+Sender: kvm-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, x86@kernel.org, kvm@vger.kernel.org
+Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@suse.de>, Andy Lutomirski <luto@kernel.org>, Tom Lendacky <thomas.lendacky@amd.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Brijesh Singh <brijesh.singh@amd.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 15 September 2017 at 11:53, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
-> On 09/14, Ard Biesheuvel wrote:
->> The UEFI memory map is a bit vague about how to interpret the
->> EFI_MEMORY_XP attribute when it is combined with EFI_MEMORY_RP and/or
->> EFI_MEMORY_WP, which have retroactively been redefined as cacheability
->> attributes rather than permission attributes.
->>
->> So let's ignore EFI_MEMORY_XP if _RP and/or _WP are also set. In this
->> case, it is likely that they are being used to describe the capability
->> of the region (i.e., whether it has the controls to reconfigure it as
->> non-executable) rather than the nature of the contents of the region
->> (i.e., whether it contains data that we will never attempt to execute)
->>
->> Cc: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
->
-> Reported-by: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
->
-> I will test early next week and provide a tested-by. Thanks.
->
+From: Tom Lendacky <thomas.lendacky@amd.com>
 
-Great, thanks.
+EFI data is encrypted when the kernel is run under SEV. Update the
+page table references to be sure the EFI memory areas are accessed
+encrypted.
+
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Borislav Petkov <bp@suse.de>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+Cc: x86@kernel.org
+Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+---
+ arch/x86/platform/efi/efi_64.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 12e83888e5b9..5469c9319f43 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -32,6 +32,7 @@
+ #include <linux/reboot.h>
+ #include <linux/slab.h>
+ #include <linux/ucs2_string.h>
++#include <linux/mem_encrypt.h>
+ 
+ #include <asm/setup.h>
+ #include <asm/page.h>
+@@ -369,7 +370,11 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	 * as trim_bios_range() will reserve the first page and isolate it away
+ 	 * from memory allocators anyway.
+ 	 */
+-	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, _PAGE_RW)) {
++	pf = _PAGE_RW;
++	if (sev_active())
++		pf |= _PAGE_ENC;
++
++	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, pf)) {
+ 		pr_err("Failed to create 1:1 mapping for the first page!\n");
+ 		return 1;
+ 	}
+@@ -412,6 +417,9 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+ 	if (!(md->attribute & EFI_MEMORY_WB))
+ 		flags |= _PAGE_PCD;
+ 
++	if (sev_active())
++		flags |= _PAGE_ENC;
++
+ 	pfn = md->phys_addr >> PAGE_SHIFT;
+ 	if (kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags))
+ 		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
+@@ -538,6 +546,9 @@ static int __init efi_update_mem_attr(struct mm_struct *mm, efi_memory_desc_t *m
+ 	if (!(md->attribute & EFI_MEMORY_RO))
+ 		pf |= _PAGE_RW;
+ 
++	if (sev_active())
++		pf |= _PAGE_ENC;
++
+ 	return efi_update_mappings(md, pf);
+ }
+ 
+@@ -589,6 +600,9 @@ void __init efi_runtime_update_mappings(void)
+ 			(md->type != EFI_RUNTIME_SERVICES_CODE))
+ 			pf |= _PAGE_RW;
+ 
++		if (sev_active())
++			pf |= _PAGE_ENC;
++
+ 		efi_update_mappings(md, pf);
+ 	}
+ }
+-- 
+2.9.5
