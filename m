@@ -1,47 +1,33 @@
-From: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH] arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or
- WP are set
-Date: Fri, 22 Sep 2017 14:57:23 -0700
-Message-ID: <20170922215723.GE457@codeaurora.org>
-References: <20170914193153.18520-1-ard.biesheuvel@linaro.org>
- <20170915185355.GC3349@codeaurora.org>
- <CAKv+Gu_YEZAZL7X5oE9nPnoYi31xsrktLoik8_Gt442AsaLhWQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Arvind Yadav <arvind.yadav.cs-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH] efi/capsule-loader: pr_err() strings should end with newlines
+Date: Mon, 25 Sep 2017 16:17:23 +0530
+Message-ID: <34e9e4c3647f1d1abd051e1d493d8a19c6259a64.1506336366.git.arvind.yadav.cs@gmail.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_YEZAZL7X5oE9nPnoYi31xsrktLoik8_Gt442AsaLhWQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 09/15, Ard Biesheuvel wrote:
-> On 15 September 2017 at 11:53, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
-> > On 09/14, Ard Biesheuvel wrote:
-> >> The UEFI memory map is a bit vague about how to interpret the
-> >> EFI_MEMORY_XP attribute when it is combined with EFI_MEMORY_RP and/or
-> >> EFI_MEMORY_WP, which have retroactively been redefined as cacheability
-> >> attributes rather than permission attributes.
-> >>
-> >> So let's ignore EFI_MEMORY_XP if _RP and/or _WP are also set. In this
-> >> case, it is likely that they are being used to describe the capability
-> >> of the region (i.e., whether it has the controls to reconfigure it as
-> >> non-executable) rather than the nature of the contents of the region
-> >> (i.e., whether it contains data that we will never attempt to execute)
-> >>
-> >> Cc: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> >
-> > Reported-by: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> >
-> > I will test early next week and provide a tested-by. Thanks.
-> >
-> 
-> Great, thanks.
->
+pr_err() messages should terminated with a new-line to avoid
+other messages being concatenated onto the end.
 
-Tested-by: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Signed-off-by: Arvind Yadav <arvind.yadav.cs-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+---
+ drivers/firmware/efi/capsule-loader.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+index ec8ac5c..51d2874 100644
+--- a/drivers/firmware/efi/capsule-loader.c
++++ b/drivers/firmware/efi/capsule-loader.c
+@@ -49,7 +49,7 @@ int __efi_capsule_setup_info(struct capsule_info *cap_info)
+ 	pages_needed = ALIGN(cap_info->total_size, PAGE_SIZE) / PAGE_SIZE;
+ 
+ 	if (pages_needed == 0) {
+-		pr_err("invalid capsule size");
++		pr_err("invalid capsule size\n");
+ 		return -EINVAL;
+ 	}
+ 
 -- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+1.9.1
