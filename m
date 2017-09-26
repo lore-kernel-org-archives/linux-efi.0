@@ -1,33 +1,32 @@
-From: Arvind Yadav <arvind.yadav.cs-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH] efi/capsule-loader: pr_err() strings should end with newlines
-Date: Mon, 25 Sep 2017 16:17:23 +0530
-Message-ID: <34e9e4c3647f1d1abd051e1d493d8a19c6259a64.1506336366.git.arvind.yadav.cs@gmail.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Subject: Re: [PATCH v3 2/5] tpm: rename event log provider files
+Date: Tue, 26 Sep 2017 14:10:43 +0300
+Message-ID: <20170926111043.fbcxd5ke4nsrsyir@linux.intel.com>
+References: <20170920081340.7413-1-tweek@google.com>
+ <20170920081340.7413-3-tweek@google.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170920081340.7413-3-tweek@google.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Thiebaud Weksteen <tweek@google.com>
+Cc: linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, ard.biesheuvel@linaro.org, matt@codeblueprint.co.uk, linux-kernel@vger.kernel.org, mjg59@google.com, peterhuewe@gmx.de, jgunthorpe@obsidianresearch.com, tpmdd@selhorst.net
 List-Id: linux-efi@vger.kernel.org
 
-pr_err() messages should terminated with a new-line to avoid
-other messages being concatenated onto the end.
+On Wed, Sep 20, 2017 at 10:13:37AM +0200, Thiebaud Weksteen wrote:
+> Rename the current TPM Event Log provider files (ACPI and OF)
+> for clarity.
+> 
+> Signed-off-by: Thiebaud Weksteen <tweek@google.com>
+> ---
+>  drivers/char/tpm/Makefile                            | 4 ++--
+>  drivers/char/tpm/{tpm_acpi.c => tpm_eventlog_acpi.c} | 0
+>  drivers/char/tpm/{tpm_of.c => tpm_eventlog_of.c}     | 0
+>  3 files changed, 2 insertions(+), 2 deletions(-)
+>  rename drivers/char/tpm/{tpm_acpi.c => tpm_eventlog_acpi.c} (100%)
+>  rename drivers/char/tpm/{tpm_of.c => tpm_eventlog_of.c} (100%)
 
-Signed-off-by: Arvind Yadav <arvind.yadav.cs-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
----
- drivers/firmware/efi/capsule-loader.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Reviewed-by: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
 
-diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-index ec8ac5c..51d2874 100644
---- a/drivers/firmware/efi/capsule-loader.c
-+++ b/drivers/firmware/efi/capsule-loader.c
-@@ -49,7 +49,7 @@ int __efi_capsule_setup_info(struct capsule_info *cap_info)
- 	pages_needed = ALIGN(cap_info->total_size, PAGE_SIZE) / PAGE_SIZE;
- 
- 	if (pages_needed == 0) {
--		pr_err("invalid capsule size");
-+		pr_err("invalid capsule size\n");
- 		return -EINVAL;
- 	}
- 
--- 
-1.9.1
+/Jarkko
