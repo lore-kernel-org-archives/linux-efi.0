@@ -1,70 +1,43 @@
 From: Florent Revest <revestflo@gmail.com>
 Subject: Re: [RFC 00/11] KVM, EFI, arm64: EFI Runtime Services Sandboxing
-Date: Tue, 26 Sep 2017 23:14:52 +0200
-Message-ID: <1506460492.5507.58.camel@gmail.com>
+Date: Tue, 26 Sep 2017 23:14:58 +0200
+Message-ID: <1506460498.5507.59.camel@gmail.com>
 References: <1503649901-5834-1-git-send-email-florent.revest@arm.com>
-         <20170831092615.GB13572@cbox>
+         <CAKv+Gu-d89kPavCNJmHe3q0t-WUzyZpUn=B30b=Z5a=mqzSGkQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170831092615.GB13572@cbox>
+In-Reply-To: <CAKv+Gu-d89kPavCNJmHe3q0t-WUzyZpUn=B30b=Z5a=mqzSGkQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christoffer Dall <cdall@linaro.org>, Florent Revest <florent.revest@arm.com>
-Cc: linux-arm-kernel@lists.infradead.org, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org, pbonzini@redhat.com, rkrcmar@redhat.com, christoffer.dall@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, mark.rutland@arm.com, marc.zyngier@arm.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org, kvmarm@lists.cs.columbia.edu, leif.lindholm@arm.com
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Matt Fleming <matt@codeblueprint.co.uk>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?UTF-8?Q?Kr=C4=8Dm=C3=A1=C5=99?= <rkrcmar@redhat.com>, Christoffer Dall <christoffer.dall@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Mark Rutland <mark.rutland@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, KVM devel mailing list <kvm@vger.kernel.org>, "kvmarm@lists.cs.columbia.edu" <kvmarm@lists.cs.columbia.edu>, Leif Lindholm <leif.lindholm@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2017-08-31 at 11:26 +0200, Christoffer Dall wrote:
-> I wonder if this should be split into two series; one that sets up
-> anything you may need from KVM, and another one that uses that for
-> UEFI.
-> 
-> There's a lot KVM and UEFI intertwined logic and assumptions in patch
-> 10, which makes this series a bit hard to read.
+On Fri, 2017-09-22 at 14:44 -0700, Ard Biesheuvel wrote:
+> From the EFI side, there are some minor concerns on my part regarding
+> the calling convention, and the fact that we can no longer invoke
+> runtime services from a kernel running at EL1, but those all seem
+> fixable. I will respond to the patches in question in greater detail
+> at a later time.
 
-The way hypercalls are currently handled in handle_hvc required this
-mixed patch. Would some kind of HVC subscription mechanism be suitable
-to have in KVM? (e.g: a function allowing to register a callback on a
-certain HVC function ID) This would allow the 10/11 patch to keep the
-kvm code intact.
+Indeed, this RFC currently breaks EFI Runtime Services at EL1. This
+would need to be fixed in a new patchset.
 
-> I'd like some documentation (in the series and in
-> Documentation/virtual/kvm) of how this works, and which hidden
-> assumptions there are. For example, how do you ensure you never
-> attempt to return to userspace?
+The patch 10/11 also underlines that the current argument passing
+method does not respect alignment. The way arguments are currently
+pushed and pulled makes it quite hard to fix the issue. Any suggestion
+would be welcome.
 
-I don't think my code ensured this. I'd need to give it a second look.
+> In the mean time, Christoffer has raised a number for valid concerns,
+> and those need to be addressed first before it makes sense to talk
+> about EFI specifics. I hope you will find more time to invest in
+> this: I would really love to have this feature upstream.
 
->  How many VCPUs do you support?
+Unfortunately, I'm no longer working at ARM and my other projects keep
+me very busy. I would also love to invest more time in this patchset to
+have it upstream but I'm really unsure when I will be able to find the
+time for this.
 
-You can create as many VCPUs as you would in a "normal VM". Also, each
-VCPU can be ran in a kthread.
-
->  Do you support any form of virtual interrupts? How about timers?
-
-No support for virtual interrupts or timers indeed. The EFI Runtime
-Services sandboxing wouldn't require that.
-
-> Can a VM access physical devices?
-
-The very idea of Runtime Services sandboxing requires Internal VMs to
-have access to some of the physical devices.
-
->  How do you debug and trace something like this? Can the VM be
-> monitored from userspace?
-
-There is nothing ready for that.
-
-> These feel like fundamental questions to me that needs addressing
-> before I can competently review the code.
-> 
-> I think a slightly more concrete motivation and outlining the example
-> of the broken UEFI on Seattle would help paving the way for these
-> patches.
-
-As far as I can remember, EFI Runtime Services on this platform have
-already been reported to sometimes disable or enable interrupts. Maybe
-someone at ARM has more details about the problem ?
-
-Thanks a lot for your review,
+Best,
     Florent
