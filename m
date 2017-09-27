@@ -1,43 +1,94 @@
-From: Florent Revest <revestflo@gmail.com>
-Subject: Re: [RFC 00/11] KVM, EFI, arm64: EFI Runtime Services Sandboxing
-Date: Tue, 26 Sep 2017 23:14:58 +0200
-Message-ID: <1506460498.5507.59.camel@gmail.com>
-References: <1503649901-5834-1-git-send-email-florent.revest@arm.com>
-         <CAKv+Gu-d89kPavCNJmHe3q0t-WUzyZpUn=B30b=Z5a=mqzSGkQ@mail.gmail.com>
+From: Brijesh Singh <brijesh.singh@amd.com>
+Subject: [Part1 PATCH v5 07/17] x86/efi: Access EFI data as encrypted when SEV is active
+Date: Wed, 27 Sep 2017 10:13:19 -0500
+Message-ID: <20170927151329.70011-8-brijesh.singh@amd.com>
+References: <20170927151329.70011-1-brijesh.singh@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu-d89kPavCNJmHe3q0t-WUzyZpUn=B30b=Z5a=mqzSGkQ@mail.gmail.com>
+In-Reply-To: <20170927151329.70011-1-brijesh.singh@amd.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Matt Fleming <matt@codeblueprint.co.uk>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?UTF-8?Q?Kr=C4=8Dm=C3=A1=C5=99?= <rkrcmar@redhat.com>, Christoffer Dall <christoffer.dall@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Mark Rutland <mark.rutland@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, KVM devel mailing list <kvm@vger.kernel.org>, "kvmarm@lists.cs.columbia.edu" <kvmarm@lists.cs.columbia.edu>, Leif Lindholm <leif.lindholm@arm.com>
+To: kvm@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org
+Cc: Tom Lendacky <thomas.lendacky@amd.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@suse.de>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Brijesh Singh <brijesh.singh@amd.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2017-09-22 at 14:44 -0700, Ard Biesheuvel wrote:
-> From the EFI side, there are some minor concerns on my part regarding
-> the calling convention, and the fact that we can no longer invoke
-> runtime services from a kernel running at EL1, but those all seem
-> fixable. I will respond to the patches in question in greater detail
-> at a later time.
+From: Tom Lendacky <thomas.lendacky@amd.com>
 
-Indeed, this RFC currently breaks EFI Runtime Services at EL1. This
-would need to be fixed in a new patchset.
+EFI data is encrypted when the kernel is run under SEV. Update the
+page table references to be sure the EFI memory areas are accessed
+encrypted.
 
-The patch 10/11 also underlines that the current argument passing
-method does not respect alignment. The way arguments are currently
-pushed and pulled makes it quite hard to fix the issue. Any suggestion
-would be welcome.
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Borislav Petkov <bp@suse.de>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+Cc: x86@kernel.org
+Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+Reviewed-by: Borislav Petkov <bp@suse.de>
+---
+ arch/x86/platform/efi/efi_64.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
 
-> In the mean time, Christoffer has raised a number for valid concerns,
-> and those need to be addressed first before it makes sense to talk
-> about EFI specifics. I hope you will find more time to invest in
-> this: I would really love to have this feature upstream.
-
-Unfortunately, I'm no longer working at ARM and my other projects keep
-me very busy. I would also love to invest more time in this patchset to
-have it upstream but I'm really unsure when I will be able to find the
-time for this.
-
-Best,
-    Florent
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 12e83888e5b9..5469c9319f43 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -32,6 +32,7 @@
+ #include <linux/reboot.h>
+ #include <linux/slab.h>
+ #include <linux/ucs2_string.h>
++#include <linux/mem_encrypt.h>
+ 
+ #include <asm/setup.h>
+ #include <asm/page.h>
+@@ -369,7 +370,11 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	 * as trim_bios_range() will reserve the first page and isolate it away
+ 	 * from memory allocators anyway.
+ 	 */
+-	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, _PAGE_RW)) {
++	pf = _PAGE_RW;
++	if (sev_active())
++		pf |= _PAGE_ENC;
++
++	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, pf)) {
+ 		pr_err("Failed to create 1:1 mapping for the first page!\n");
+ 		return 1;
+ 	}
+@@ -412,6 +417,9 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+ 	if (!(md->attribute & EFI_MEMORY_WB))
+ 		flags |= _PAGE_PCD;
+ 
++	if (sev_active())
++		flags |= _PAGE_ENC;
++
+ 	pfn = md->phys_addr >> PAGE_SHIFT;
+ 	if (kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags))
+ 		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
+@@ -538,6 +546,9 @@ static int __init efi_update_mem_attr(struct mm_struct *mm, efi_memory_desc_t *m
+ 	if (!(md->attribute & EFI_MEMORY_RO))
+ 		pf |= _PAGE_RW;
+ 
++	if (sev_active())
++		pf |= _PAGE_ENC;
++
+ 	return efi_update_mappings(md, pf);
+ }
+ 
+@@ -589,6 +600,9 @@ void __init efi_runtime_update_mappings(void)
+ 			(md->type != EFI_RUNTIME_SERVICES_CODE))
+ 			pf |= _PAGE_RW;
+ 
++		if (sev_active())
++			pf |= _PAGE_ENC;
++
+ 		efi_update_mappings(md, pf);
+ 	}
+ }
+-- 
+2.9.5
