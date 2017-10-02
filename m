@@ -1,187 +1,118 @@
-From: Jiri Slaby <jslaby@suse.cz>
-Subject: [PATCH v4 19/27] x86: assembly,
-	make some functions local
-Date: Mon,  2 Oct 2017 11:12:38 +0200
-Message-ID: <20171002091246.28432-19-jslaby@suse.cz>
-References: <20171002091246.28432-1-jslaby@suse.cz>
+From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Subject: Re: [PATCH v4 23/27] x86_64: assembly, change all ENTRY+ENDPROC to SYM_FUNC_*
+Date: Mon, 02 Oct 2017 14:30:44 +0200
+Message-ID: <2385272.r5rgpIyQDx@aspire.rjw.lan>
+References: <20171002091246.28432-1-jslaby@suse.cz> <20171002091246.28432-23-jslaby@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
-In-Reply-To: <20171002091246.28432-1-jslaby@suse.cz>
-List-Unsubscribe: <https://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <https://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
-To: mingo@redhat.com
-Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, x86@kernel.org, linux-kernel@vger.kernel.org, hpa@zytor.com, xen-devel@lists.xenproject.org, tglx@linutronix.de, Jiri Slaby <jslaby@suse.cz>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171002091246.28432-23-jslaby@suse.cz>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jiri Slaby <jslaby@suse.cz>
+Cc: mingo@redhat.com, tglx@linutronix.de, hpa@zytor.com, x86@kernel.org, linux-kernel@vger.kernel.org, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, linux-crypto@vger.kernel.org, linux-pm@vger.kernel.org, linux-efi@vger.kernel.org, xen-devel@lists.xenproject.org
 List-Id: linux-efi@vger.kernel.org
 
-VGhlcmUgaXMgYSBjb3VwbGUgb2YgYXNzZW1ibHkgZnVuY3Rpb25zLCB3aGljaCBhcmUgaW52b2tl
-ZCBvbmx5IGxvY2FsbHkKaW4gdGhlIGZpbGUgdGhleSBhcmUgZGVmaW5lZC4gSW4gQywgd2UgbWFy
-ayB0aGVtICJzdGF0aWMiLiBJbiBhc3NlbWJseSwKYW5ub3RhdGUgdGhlbSB1c2luZyBTWU1fe0ZV
-TkMsQ09ERX1fU1RBUlRfTE9DQUwgKGFuZCBzd2l0Y2ggdGhlaXIKRU5EUFJPQyB0byBTWU1fe0ZV
-TkMsQ09ERX1fRU5EIHRvbykuIFdoZXRoZXIgRlVOQyBvciBDT0RFIGRlcGVuZHMgb24KRU5EUFJP
-Qy9FTkQgZm9yIGEgcGFydGljdWxhciBmdW5jdGlvbiAoQyBvciBub24tQykuCgpTaWduZWQtb2Zm
-LWJ5OiBKaXJpIFNsYWJ5IDxqc2xhYnlAc3VzZS5jej4KQ2M6ICJILiBQZXRlciBBbnZpbiIgPGhw
-YUB6eXRvci5jb20+CkNjOiBUaG9tYXMgR2xlaXhuZXIgPHRnbHhAbGludXRyb25peC5kZT4KQ2M6
-IEluZ28gTW9sbmFyIDxtaW5nb0ByZWRoYXQuY29tPgpDYzogeDg2QGtlcm5lbC5vcmcKQ2M6IE1h
-dHQgRmxlbWluZyA8bWF0dEBjb2RlYmx1ZXByaW50LmNvLnVrPgpDYzogQXJkIEJpZXNoZXV2ZWwg
-PGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc+CkNjOiBsaW51eC1lZmlAdmdlci5rZXJuZWwub3Jn
-CkNjOiB4ZW4tZGV2ZWxAbGlzdHMueGVucHJvamVjdC5vcmcKLS0tCiBhcmNoL3g4Ni9ib290L2Nv
-bXByZXNzZWQvZWZpX3RodW5rXzY0LlMgfCAgOCArKysrLS0tLQogYXJjaC94ODYvZW50cnkvZW50
-cnlfNjQuUyAgICAgICAgICAgICAgIHwgMjUgKysrKysrKysrKysrKy0tLS0tLS0tLS0tLQogYXJj
-aC94ODYvbGliL2NvcHlfcGFnZV82NC5TICAgICAgICAgICAgIHwgIDQgKystLQogYXJjaC94ODYv
-bGliL21lbWNweV82NC5TICAgICAgICAgICAgICAgIHwgMTIgKysrKysrLS0tLS0tCiBhcmNoL3g4
-Ni9saWIvbWVtc2V0XzY0LlMgICAgICAgICAgICAgICAgfCAgOCArKysrLS0tLQogYXJjaC94ODYv
-cGxhdGZvcm0vZWZpL2VmaV90aHVua182NC5TICAgIHwgMTIgKysrKysrLS0tLS0tCiBhcmNoL3g4
-Ni94ZW4veGVuLXB2aC5TICAgICAgICAgICAgICAgICAgfCAgNCArKy0tCiA3IGZpbGVzIGNoYW5n
-ZWQsIDM3IGluc2VydGlvbnMoKyksIDM2IGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL2FyY2gv
-eDg2L2Jvb3QvY29tcHJlc3NlZC9lZmlfdGh1bmtfNjQuUyBiL2FyY2gveDg2L2Jvb3QvY29tcHJl
-c3NlZC9lZmlfdGh1bmtfNjQuUwppbmRleCA4NjUyOGYxMjA5NjIuLmMwNzI3MTFkOGQ2MiAxMDA2
-NDQKLS0tIGEvYXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL2VmaV90aHVua182NC5TCisrKyBiL2Fy
-Y2gveDg2L2Jvb3QvY29tcHJlc3NlZC9lZmlfdGh1bmtfNjQuUwpAQCAtOTgsMTIgKzk4LDEyIEBA
-IEVOVFJZKGVmaTY0X3RodW5rKQogCXJldAogRU5EUFJPQyhlZmk2NF90aHVuaykKIAotRU5UUlko
-ZWZpX2V4aXQzMikKK1NZTV9GVU5DX1NUQVJUX0xPQ0FMKGVmaV9leGl0MzIpCiAJbW92cQlmdW5j
-X3J0X3B0ciglcmlwKSwgJXJheAogCXB1c2gJJXJheAogCW1vdgklcmRpLCAlcmF4CiAJcmV0Ci1F
-TkRQUk9DKGVmaV9leGl0MzIpCitTWU1fRlVOQ19FTkQoZWZpX2V4aXQzMikKIAogCS5jb2RlMzIK
-IC8qCkBAIC0xMTEsNyArMTExLDcgQEAgRU5EUFJPQyhlZmlfZXhpdDMyKQogICoKICAqIFRoZSBz
-dGFjayBzaG91bGQgcmVwcmVzZW50IHRoZSAzMi1iaXQgY2FsbGluZyBjb252ZW50aW9uLgogICov
-Ci1FTlRSWShlZmlfZW50ZXIzMikKK1NZTV9GVU5DX1NUQVJUX0xPQ0FMKGVmaV9lbnRlcjMyKQog
-CW1vdmwJJF9fS0VSTkVMX0RTLCAlZWF4CiAJbW92bAklZWF4LCAlZHMKIAltb3ZsCSVlYXgsICVl
-cwpAQCAtMTcxLDcgKzE3MSw3IEBAIEVOVFJZKGVmaV9lbnRlcjMyKQogCWJ0c2wJJFg4Nl9DUjBf
-UEdfQklULCAlZWF4CiAJbW92bAklZWF4LCAlY3IwCiAJbHJldAotRU5EUFJPQyhlZmlfZW50ZXIz
-MikKK1NZTV9GVU5DX0VORChlZmlfZW50ZXIzMikKIAogCS5kYXRhCiAJLmJhbGlnbgk4CmRpZmYg
-LS1naXQgYS9hcmNoL3g4Ni9lbnRyeS9lbnRyeV82NC5TIGIvYXJjaC94ODYvZW50cnkvZW50cnlf
-NjQuUwppbmRleCA1MDk1MDRkYjBlMmEuLmZmNDk2NGRhYzJkYyAxMDA2NDQKLS0tIGEvYXJjaC94
-ODYvZW50cnkvZW50cnlfNjQuUworKysgYi9hcmNoL3g4Ni9lbnRyeS9lbnRyeV82NC5TCkBAIC0z
-MjQsNyArMzI0LDcgQEAgb3Bwb3J0dW5pc3RpY19zeXNyZXRfZmFpbGVkOgogCWptcAlyZXN0b3Jl
-X2NfcmVnc19hbmRfaXJldAogRU5EKGVudHJ5X1NZU0NBTExfNjQpCiAKLUVOVFJZKHN0dWJfcHRy
-ZWdzXzY0KQorU1lNX0NPREVfU1RBUlRfTE9DQUwoc3R1Yl9wdHJlZ3NfNjQpCiAJLyoKIAkgKiBT
-eXNjYWxscyBtYXJrZWQgYXMgbmVlZGluZyBwdHJlZ3MgbGFuZCBoZXJlLgogCSAqIElmIHdlIGFy
-ZSBvbiB0aGUgZmFzdCBwYXRoLCB3ZSBuZWVkIHRvIHNhdmUgdGhlIGV4dHJhIHJlZ3MsCkBAIC0z
-NDksNyArMzQ5LDcgQEAgRU5UUlkoc3R1Yl9wdHJlZ3NfNjQpCiAKIDE6CiAJam1wCSolcmF4CQkJ
-CS8qIENhbGxlZCBmcm9tIEMgKi8KLUVORChzdHViX3B0cmVnc182NCkKK1NZTV9DT0RFX0VORChz
-dHViX3B0cmVnc182NCkKIAogLm1hY3JvIHB0cmVnc19zdHViIGZ1bmMKIEVOVFJZKHB0cmVnc19c
-ZnVuYykKQEAgLTk3Niw3ICs5NzYsOCBAQCBpZHRlbnRyeSBoeXBlcnZpc29yX2NhbGxiYWNrIHhl
-bl9kb19oeXBlcnZpc29yX2NhbGxiYWNrIGhhc19lcnJvcl9jb2RlPTAKICAqIGV4aXN0aW5nIGFj
-dGl2YXRpb24gaW4gaXRzIGNyaXRpY2FsIHJlZ2lvbiAtLSBpZiBzbywgd2UgcG9wIHRoZSBjdXJy
-ZW50CiAgKiBhY3RpdmF0aW9uIGFuZCByZXN0YXJ0IHRoZSBoYW5kbGVyIHVzaW5nIHRoZSBwcmV2
-aW91cyBvbmUuCiAgKi8KLUVOVFJZKHhlbl9kb19oeXBlcnZpc29yX2NhbGxiYWNrKQkJLyogZG9f
-aHlwZXJ2aXNvcl9jYWxsYmFjayhzdHJ1Y3QgKnB0X3JlZ3MpICovCisvKiBkb19oeXBlcnZpc29y
-X2NhbGxiYWNrKHN0cnVjdCAqcHRfcmVncykgKi8KK1NZTV9DT0RFX1NUQVJUX0xPQ0FMKHhlbl9k
-b19oeXBlcnZpc29yX2NhbGxiYWNrKQogCiAvKgogICogU2luY2Ugd2UgZG9uJ3QgbW9kaWZ5ICVy
-ZGksIGV2dGNobl9kb191cGFsbChzdHJ1Y3QgKnB0X3JlZ3MpIHdpbGwKQEAgLTk5NCw3ICs5OTUs
-NyBAQCBFTlRSWSh4ZW5fZG9faHlwZXJ2aXNvcl9jYWxsYmFjaykJCS8qIGRvX2h5cGVydmlzb3Jf
-Y2FsbGJhY2soc3RydWN0ICpwdF9yZWdzKSAqLwogCWNhbGwJeGVuX21heWJlX3ByZWVtcHRfaGNh
-bGwKICNlbmRpZgogCWptcAllcnJvcl9leGl0Ci1FTkQoeGVuX2RvX2h5cGVydmlzb3JfY2FsbGJh
-Y2spCitTWU1fQ09ERV9FTkQoeGVuX2RvX2h5cGVydmlzb3JfY2FsbGJhY2spCiAKIC8qCiAgKiBI
-eXBlcnZpc29yIHVzZXMgdGhpcyBmb3IgYXBwbGljYXRpb24gZmF1bHRzIHdoaWxlIGl0IGV4ZWN1
-dGVzLgpAQCAtMTA3OCw3ICsxMDc5LDcgQEAgaWR0ZW50cnkgbWFjaGluZV9jaGVjawkJCQkJaGFz
-X2Vycm9yX2NvZGU9MAlwYXJhbm9pZD0xIGRvX3N5bT0qbWFjaGluZV9jaGVja192ZWMKICAqIFVz
-ZSBzbG93LCBidXQgc3VyZWZpcmUgImFyZSB3ZSBpbiBrZXJuZWw/IiBjaGVjay4KICAqIFJldHVy
-bjogZWJ4PTA6IG5lZWQgc3dhcGdzIG9uIGV4aXQsIGVieD0xOiBvdGhlcndpc2UKICAqLwotRU5U
-UlkocGFyYW5vaWRfZW50cnkpCitTWU1fQ09ERV9TVEFSVF9MT0NBTChwYXJhbm9pZF9lbnRyeSkK
-IAlVTldJTkRfSElOVF9GVU5DCiAJY2xkCiAJU0FWRV9DX1JFR1MgOApAQCAtMTA5Miw3ICsxMDkz
-LDcgQEAgRU5UUlkocGFyYW5vaWRfZW50cnkpCiAJU1dBUEdTCiAJeG9ybAklZWJ4LCAlZWJ4CiAx
-OglyZXQKLUVORChwYXJhbm9pZF9lbnRyeSkKK1NZTV9DT0RFX0VORChwYXJhbm9pZF9lbnRyeSkK
-IAogLyoKICAqICJQYXJhbm9pZCIgZXhpdCBwYXRoIGZyb20gZXhjZXB0aW9uIHN0YWNrLiAgVGhp
-cyBpcyBpbnZva2VkCkBAIC0xMTA2LDcgKzExMDcsNyBAQCBFTkQocGFyYW5vaWRfZW50cnkpCiAg
-KgogICogT24gZW50cnksIGVieCBpcyAibm8gc3dhcGdzIiBmbGFnICgxOiBkb24ndCBuZWVkIHN3
-YXBncywgMDogbmVlZCBpdCkKICAqLwotRU5UUlkocGFyYW5vaWRfZXhpdCkKK1NZTV9DT0RFX1NU
-QVJUX0xPQ0FMKHBhcmFub2lkX2V4aXQpCiAJVU5XSU5EX0hJTlRfUkVHUwogCURJU0FCTEVfSU5U
-RVJSVVBUUyhDTEJSX0FOWSkKIAlUUkFDRV9JUlFTX09GRl9ERUJVRwpAQCAtMTEyMiwxMyArMTEy
-MywxMyBAQCBwYXJhbm9pZF9leGl0X3Jlc3RvcmU6CiAJUkVTVE9SRV9DX1JFR1MKIAlSRU1PVkVf
-UFRfR1BSRUdTX0ZST01fU1RBQ0sgOAogCUlOVEVSUlVQVF9SRVRVUk4KLUVORChwYXJhbm9pZF9l
-eGl0KQorU1lNX0NPREVfRU5EKHBhcmFub2lkX2V4aXQpCiAKIC8qCiAgKiBTYXZlIGFsbCByZWdp
-c3RlcnMgaW4gcHRfcmVncywgYW5kIHN3aXRjaCBncyBpZiBuZWVkZWQuCiAgKiBSZXR1cm46IEVC
-WD0wOiBjYW1lIGZyb20gdXNlciBtb2RlOyBFQlg9MTogb3RoZXJ3aXNlCiAgKi8KLUVOVFJZKGVy
-cm9yX2VudHJ5KQorU1lNX0NPREVfU1RBUlRfTE9DQUwoZXJyb3JfZW50cnkpCiAJVU5XSU5EX0hJ
-TlRfRlVOQwogCWNsZAogCVNBVkVfQ19SRUdTIDgKQEAgLTEyMDUsNyArMTIwNiw3IEBAIEVOVFJZ
-KGVycm9yX2VudHJ5KQogCW1vdgklcmF4LCAlcnNwCiAJZGVjbAklZWJ4CiAJam1wCS5MZXJyb3Jf
-ZW50cnlfZnJvbV91c2VybW9kZV9hZnRlcl9zd2FwZ3MKLUVORChlcnJvcl9lbnRyeSkKK1NZTV9D
-T0RFX0VORChlcnJvcl9lbnRyeSkKIAogCiAvKgpAQCAtMTIxMywxNCArMTIxNCwxNCBAQCBFTkQo
-ZXJyb3JfZW50cnkpCiAgKiAgIDE6IGFscmVhZHkgaW4ga2VybmVsIG1vZGUsIGRvbid0IG5lZWQg
-U1dBUEdTCiAgKiAgIDA6IHVzZXIgZ3NiYXNlIGlzIGxvYWRlZCwgd2UgbmVlZCBTV0FQR1MgYW5k
-IHN0YW5kYXJkIHByZXBhcmF0aW9uIGZvciByZXR1cm4gdG8gdXNlcm1vZGUKICAqLwotRU5UUlko
-ZXJyb3JfZXhpdCkKK1NZTV9DT0RFX1NUQVJUX0xPQ0FMKGVycm9yX2V4aXQpCiAJVU5XSU5EX0hJ
-TlRfUkVHUwogCURJU0FCTEVfSU5URVJSVVBUUyhDTEJSX0FOWSkKIAlUUkFDRV9JUlFTX09GRgog
-CXRlc3RsCSVlYngsICVlYngKIAlqbnoJcmV0aW50X2tlcm5lbAogCWptcAlyZXRpbnRfdXNlcgot
-RU5EKGVycm9yX2V4aXQpCitTWU1fQ09ERV9FTkQoZXJyb3JfZXhpdCkKIAogLyogUnVucyBvbiBl
-eGNlcHRpb24gc3RhY2sgKi8KIC8qIFhYWDogYnJva2VuIG9uIFhlbiBQViAqLwpkaWZmIC0tZ2l0
-IGEvYXJjaC94ODYvbGliL2NvcHlfcGFnZV82NC5TIGIvYXJjaC94ODYvbGliL2NvcHlfcGFnZV82
-NC5TCmluZGV4IGU4NTA4MTU2Yzk5ZC4uZTFlZTUwYmMxNjFhIDEwMDY0NAotLS0gYS9hcmNoL3g4
-Ni9saWIvY29weV9wYWdlXzY0LlMKKysrIGIvYXJjaC94ODYvbGliL2NvcHlfcGFnZV82NC5TCkBA
-IC0yMCw3ICsyMCw3IEBAIEVOVFJZKGNvcHlfcGFnZSkKIEVORFBST0MoY29weV9wYWdlKQogRVhQ
-T1JUX1NZTUJPTChjb3B5X3BhZ2UpCiAKLUVOVFJZKGNvcHlfcGFnZV9yZWdzKQorU1lNX0ZVTkNf
-U1RBUlRfTE9DQUwoY29weV9wYWdlX3JlZ3MpCiAJc3VicQkkMio4LAklcnNwCiAJbW92cQklcmJ4
-LAkoJXJzcCkKIAltb3ZxCSVyMTIsCTEqOCglcnNwKQpAQCAtODUsNCArODUsNCBAQCBFTlRSWShj
-b3B5X3BhZ2VfcmVncykKIAltb3ZxCTEqOCglcnNwKSwgJXIxMgogCWFkZHEJJDIqOCwgJXJzcAog
-CXJldAotRU5EUFJPQyhjb3B5X3BhZ2VfcmVncykKK1NZTV9GVU5DX0VORChjb3B5X3BhZ2VfcmVn
-cykKZGlmZiAtLWdpdCBhL2FyY2gveDg2L2xpYi9tZW1jcHlfNjQuUyBiL2FyY2gveDg2L2xpYi9t
-ZW1jcHlfNjQuUwppbmRleCA0OTExYjFjNjFhYTguLjcyODcwM2M0N2Q1OCAxMDA2NDQKLS0tIGEv
-YXJjaC94ODYvbGliL21lbWNweV82NC5TCisrKyBiL2FyY2gveDg2L2xpYi9tZW1jcHlfNjQuUwpA
-QCAtMjcsNyArMjcsNyBAQAogICogcmF4IG9yaWdpbmFsIGRlc3RpbmF0aW9uCiAgKi8KIFNZTV9G
-VU5DX1NUQVJUX0FMSUFTKF9fbWVtY3B5KQotRU5UUlkobWVtY3B5KQorU1lNX0ZVTkNfU1RBUlRf
-TE9DQUwobWVtY3B5KQogCUFMVEVSTkFUSVZFXzIgImptcCBtZW1jcHlfb3JpZyIsICIiLCBYODZf
-RkVBVFVSRV9SRVBfR09PRCwgXAogCQkgICAgICAiam1wIG1lbWNweV9lcm1zIiwgWDg2X0ZFQVRV
-UkVfRVJNUwogCkBAIC0zOSw3ICszOSw3IEBAIEVOVFJZKG1lbWNweSkKIAltb3ZsICVlZHgsICVl
-Y3gKIAlyZXAgbW92c2IKIAlyZXQKLUVORFBST0MobWVtY3B5KQorU1lNX0ZVTkNfRU5EKG1lbWNw
-eSkKIFNZTV9GVU5DX0VORF9BTElBUyhfX21lbWNweSkKIEVYUE9SVF9TWU1CT0wobWVtY3B5KQog
-RVhQT1JUX1NZTUJPTChfX21lbWNweSkKQEAgLTQ4LDE0ICs0OCwxNCBAQCBFWFBPUlRfU1lNQk9M
-KF9fbWVtY3B5KQogICogbWVtY3B5X2VybXMoKSAtIGVuaGFuY2VkIGZhc3Qgc3RyaW5nIG1lbWNw
-eS4gVGhpcyBpcyBmYXN0ZXIgYW5kCiAgKiBzaW1wbGVyIHRoYW4gbWVtY3B5LiBVc2UgbWVtY3B5
-X2VybXMgd2hlbiBwb3NzaWJsZS4KICAqLwotRU5UUlkobWVtY3B5X2VybXMpCitTWU1fRlVOQ19T
-VEFSVF9MT0NBTChtZW1jcHlfZXJtcykKIAltb3ZxICVyZGksICVyYXgKIAltb3ZxICVyZHgsICVy
-Y3gKIAlyZXAgbW92c2IKIAlyZXQKLUVORFBST0MobWVtY3B5X2VybXMpCitTWU1fRlVOQ19FTkQo
-bWVtY3B5X2VybXMpCiAKLUVOVFJZKG1lbWNweV9vcmlnKQorU1lNX0ZVTkNfU1RBUlRfTE9DQUwo
-bWVtY3B5X29yaWcpCiAJbW92cSAlcmRpLCAlcmF4CiAKIAljbXBxICQweDIwLCAlcmR4CkBAIC0x
-ODAsNyArMTgwLDcgQEAgRU5UUlkobWVtY3B5X29yaWcpCiAKIC5MZW5kOgogCXJldHEKLUVORFBS
-T0MobWVtY3B5X29yaWcpCitTWU1fRlVOQ19FTkQobWVtY3B5X29yaWcpCiAKICNpZm5kZWYgQ09O
-RklHX1VNTAogLyoKZGlmZiAtLWdpdCBhL2FyY2gveDg2L2xpYi9tZW1zZXRfNjQuUyBiL2FyY2gv
-eDg2L2xpYi9tZW1zZXRfNjQuUwppbmRleCAwZDNhMWQzNDFlNjAuLmM2M2FlOTk4NzYxMiAxMDA2
-NDQKLS0tIGEvYXJjaC94ODYvbGliL21lbXNldF82NC5TCisrKyBiL2FyY2gveDg2L2xpYi9tZW1z
-ZXRfNjQuUwpAQCAtNTgsMTYgKzU4LDE2IEBAIEVYUE9SVF9TWU1CT0woX19tZW1zZXQpCiAgKgog
-ICogcmF4ICAgb3JpZ2luYWwgZGVzdGluYXRpb24KICAqLwotRU5UUlkobWVtc2V0X2VybXMpCitT
-WU1fRlVOQ19TVEFSVF9MT0NBTChtZW1zZXRfZXJtcykKIAltb3ZxICVyZGksJXI5CiAJbW92YiAl
-c2lsLCVhbAogCW1vdnEgJXJkeCwlcmN4CiAJcmVwIHN0b3NiCiAJbW92cSAlcjksJXJheAogCXJl
-dAotRU5EUFJPQyhtZW1zZXRfZXJtcykKK1NZTV9GVU5DX0VORChtZW1zZXRfZXJtcykKIAotRU5U
-UlkobWVtc2V0X29yaWcpCitTWU1fRlVOQ19TVEFSVF9MT0NBTChtZW1zZXRfb3JpZykKIAltb3Zx
-ICVyZGksJXIxMAogCiAJLyogZXhwYW5kIGJ5dGUgdmFsdWUgICovCkBAIC0xMzgsNCArMTM4LDQg
-QEAgRU5UUlkobWVtc2V0X29yaWcpCiAJc3VicSAlcjgsJXJkeAogCWptcCAuTGFmdGVyX2JhZF9h
-bGlnbm1lbnQKIC5MZmluYWw6Ci1FTkRQUk9DKG1lbXNldF9vcmlnKQorU1lNX0ZVTkNfRU5EKG1l
-bXNldF9vcmlnKQpkaWZmIC0tZ2l0IGEvYXJjaC94ODYvcGxhdGZvcm0vZWZpL2VmaV90aHVua182
-NC5TIGIvYXJjaC94ODYvcGxhdGZvcm0vZWZpL2VmaV90aHVua182NC5TCmluZGV4IGZmODVkMjhj
-NTBmMi4uZDE4Njk3ZGYxZmU5IDEwMDY0NAotLS0gYS9hcmNoL3g4Ni9wbGF0Zm9ybS9lZmkvZWZp
-X3RodW5rXzY0LlMKKysrIGIvYXJjaC94ODYvcGxhdGZvcm0vZWZpL2VmaV90aHVua182NC5TCkBA
-IC02Niw3ICs2Niw3IEBAIEVORFBST0MoZWZpNjRfdGh1bmspCiAgKgogICogVGhpcyBmdW5jdGlv
-biBtdXN0IGJlIGludm9rZWQgd2l0aCBhIDE6MSBtYXBwZWQgc3RhY2suCiAgKi8KLUVOVFJZKF9f
-ZWZpNjRfdGh1bmspCitTWU1fRlVOQ19TVEFSVF9MT0NBTChfX2VmaTY0X3RodW5rKQogCW1vdmwJ
-JWRzLCAlZWF4CiAJcHVzaAklcmF4CiAJbW92bAklZXMsICVlYXgKQEAgLTExMywxNCArMTEzLDE0
-IEBAIEVOVFJZKF9fZWZpNjRfdGh1bmspCiAJb3IJJXJjeCwgJXJheAogMToKIAlyZXQKLUVORFBS
-T0MoX19lZmk2NF90aHVuaykKK1NZTV9GVU5DX0VORChfX2VmaTY0X3RodW5rKQogCi1FTlRSWShl
-ZmlfZXhpdDMyKQorU1lNX0ZVTkNfU1RBUlRfTE9DQUwoZWZpX2V4aXQzMikKIAltb3ZxCWZ1bmNf
-cnRfcHRyKCVyaXApLCAlcmF4CiAJcHVzaAklcmF4CiAJbW92CSVyZGksICVyYXgKIAlyZXQKLUVO
-RFBST0MoZWZpX2V4aXQzMikKK1NZTV9GVU5DX0VORChlZmlfZXhpdDMyKQogCiAJLmNvZGUzMgog
-LyoKQEAgLTEyOCw3ICsxMjgsNyBAQCBFTkRQUk9DKGVmaV9leGl0MzIpCiAgKgogICogVGhlIHN0
-YWNrIHNob3VsZCByZXByZXNlbnQgdGhlIDMyLWJpdCBjYWxsaW5nIGNvbnZlbnRpb24uCiAgKi8K
-LUVOVFJZKGVmaV9lbnRlcjMyKQorU1lNX0ZVTkNfU1RBUlRfTE9DQUwoZWZpX2VudGVyMzIpCiAJ
-bW92bAkkX19LRVJORUxfRFMsICVlYXgKIAltb3ZsCSVlYXgsICVkcwogCW1vdmwJJWVheCwgJWVz
-CkBAIC0xNDQsNyArMTQ0LDcgQEAgRU5UUlkoZWZpX2VudGVyMzIpCiAJcHVzaGwJJWVheAogCiAJ
-bHJldAotRU5EUFJPQyhlZmlfZW50ZXIzMikKK1NZTV9GVU5DX0VORChlZmlfZW50ZXIzMikKIAog
-CS5kYXRhCiAJLmJhbGlnbgk4CmRpZmYgLS1naXQgYS9hcmNoL3g4Ni94ZW4veGVuLXB2aC5TIGIv
-YXJjaC94ODYveGVuL3hlbi1wdmguUwppbmRleCAxYjc4ODM3YmFkMDYuLmJhNWFhZDNiM2Q2YSAx
-MDA2NDQKLS0tIGEvYXJjaC94ODYveGVuL3hlbi1wdmguUworKysgYi9hcmNoL3g4Ni94ZW4veGVu
-LXB2aC5TCkBAIC01NCw3ICs1NCw3IEBACiAgKiBjaGFyZ2Ugb2Ygc2V0dGluZyB1cCBpdCdzIG93
-biBzdGFjaywgR0RUIGFuZCBJRFQuCiAgKi8KIAotRU5UUlkocHZoX3N0YXJ0X3hlbikKK1NZTV9D
-T0RFX1NUQVJUX0xPQ0FMKHB2aF9zdGFydF94ZW4pCiAJY2xkCiAKIAlsZ2R0IChfcGEoZ2R0KSkK
-QEAgLTEzMyw3ICsxMzMsNyBAQCBFTlRSWShwdmhfc3RhcnRfeGVuKQogCiAJbGptcCAkX19CT09U
-X0NTLCAkX3BhKHN0YXJ0dXBfMzIpCiAjZW5kaWYKLUVORChwdmhfc3RhcnRfeGVuKQorU1lNX0NP
-REVfRU5EKHB2aF9zdGFydF94ZW4pCiAKIAkuc2VjdGlvbiAiLmluaXQuZGF0YSIsImF3IgogCS5i
-YWxpZ24gOAotLSAKMi4xNC4yCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX18KWGVuLWRldmVsIG1haWxpbmcgbGlzdApYZW4tZGV2ZWxAbGlzdHMueGVuLm9y
-ZwpodHRwczovL2xpc3RzLnhlbi5vcmcveGVuLWRldmVsCg==
+On Monday, October 2, 2017 11:12:42 AM CEST Jiri Slaby wrote:
+> These are all functions which are invoked from elsewhere, so we annotate
+> them as global using the new SYM_FUNC_START. And their ENDPROC's by
+> SYM_FUNC_END.
+> 
+> And make sure ENTRY/ENDPROC is not defined on X86_64, given these were
+> the last users.
+> 
+> Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+> Cc: "H. Peter Anvin" <hpa@zytor.com>
+> Cc: Thomas Gleixner <tglx@linutronix.de>
+> Cc: Ingo Molnar <mingo@redhat.com>
+> Cc: x86@kernel.org
+> Cc: Herbert Xu <herbert@gondor.apana.org.au>
+> Cc: "David S. Miller" <davem@davemloft.net>
+> Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+> Cc: Len Brown <len.brown@intel.com>
+> Cc: Pavel Machek <pavel@ucw.cz>
+> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Cc: Boris Ostrovsky <boris.ostrovsky@oracle.com>
+> Cc: Juergen Gross <jgross@suse.com>
+> Cc: linux-crypto@vger.kernel.org
+> Cc: linux-pm@vger.kernel.org
+> Cc: linux-efi@vger.kernel.org
+> Cc: xen-devel@lists.xenproject.org
+> ---
+>  arch/x86/boot/compressed/efi_thunk_64.S            |  4 +-
+>  arch/x86/boot/compressed/head_64.S                 | 16 ++++----
+>  arch/x86/crypto/aes-i586-asm_32.S                  |  8 ++--
+>  arch/x86/crypto/aes-x86_64-asm_64.S                |  4 +-
+>  arch/x86/crypto/aes_ctrby8_avx-x86_64.S            | 12 +++---
+>  arch/x86/crypto/aesni-intel_asm.S                  | 44 +++++++++++-----------
+>  arch/x86/crypto/aesni-intel_avx-x86_64.S           | 24 ++++++------
+>  arch/x86/crypto/blowfish-x86_64-asm_64.S           | 16 ++++----
+>  arch/x86/crypto/camellia-aesni-avx-asm_64.S        | 24 ++++++------
+>  arch/x86/crypto/camellia-aesni-avx2-asm_64.S       | 24 ++++++------
+>  arch/x86/crypto/camellia-x86_64-asm_64.S           | 16 ++++----
+>  arch/x86/crypto/cast5-avx-x86_64-asm_64.S          | 16 ++++----
+>  arch/x86/crypto/cast6-avx-x86_64-asm_64.S          | 24 ++++++------
+>  arch/x86/crypto/chacha20-avx2-x86_64.S             |  4 +-
+>  arch/x86/crypto/chacha20-ssse3-x86_64.S            |  8 ++--
+>  arch/x86/crypto/crc32-pclmul_asm.S                 |  4 +-
+>  arch/x86/crypto/crc32c-pcl-intel-asm_64.S          |  4 +-
+>  arch/x86/crypto/crct10dif-pcl-asm_64.S             |  4 +-
+>  arch/x86/crypto/des3_ede-asm_64.S                  |  8 ++--
+>  arch/x86/crypto/ghash-clmulni-intel_asm.S          |  8 ++--
+>  arch/x86/crypto/poly1305-avx2-x86_64.S             |  4 +-
+>  arch/x86/crypto/poly1305-sse2-x86_64.S             |  8 ++--
+>  arch/x86/crypto/salsa20-x86_64-asm_64.S            | 12 +++---
+>  arch/x86/crypto/serpent-avx-x86_64-asm_64.S        | 24 ++++++------
+>  arch/x86/crypto/serpent-avx2-asm_64.S              | 24 ++++++------
+>  arch/x86/crypto/serpent-sse2-x86_64-asm_64.S       |  8 ++--
+>  arch/x86/crypto/sha1-mb/sha1_mb_mgr_flush_avx2.S   |  8 ++--
+>  arch/x86/crypto/sha1-mb/sha1_mb_mgr_submit_avx2.S  |  4 +-
+>  arch/x86/crypto/sha1-mb/sha1_x8_avx2.S             |  4 +-
+>  arch/x86/crypto/sha1_avx2_x86_64_asm.S             |  4 +-
+>  arch/x86/crypto/sha1_ni_asm.S                      |  4 +-
+>  arch/x86/crypto/sha1_ssse3_asm.S                   |  4 +-
+>  arch/x86/crypto/sha256-avx-asm.S                   |  4 +-
+>  arch/x86/crypto/sha256-avx2-asm.S                  |  4 +-
+>  .../crypto/sha256-mb/sha256_mb_mgr_flush_avx2.S    |  8 ++--
+>  .../crypto/sha256-mb/sha256_mb_mgr_submit_avx2.S   |  4 +-
+>  arch/x86/crypto/sha256-mb/sha256_x8_avx2.S         |  4 +-
+>  arch/x86/crypto/sha256-ssse3-asm.S                 |  4 +-
+>  arch/x86/crypto/sha256_ni_asm.S                    |  4 +-
+>  arch/x86/crypto/sha512-avx-asm.S                   |  4 +-
+>  arch/x86/crypto/sha512-avx2-asm.S                  |  4 +-
+>  .../crypto/sha512-mb/sha512_mb_mgr_flush_avx2.S    |  8 ++--
+>  .../crypto/sha512-mb/sha512_mb_mgr_submit_avx2.S   |  4 +-
+>  arch/x86/crypto/sha512-mb/sha512_x4_avx2.S         |  4 +-
+>  arch/x86/crypto/sha512-ssse3-asm.S                 |  4 +-
+>  arch/x86/crypto/twofish-avx-x86_64-asm_64.S        | 24 ++++++------
+>  arch/x86/crypto/twofish-x86_64-asm_64-3way.S       |  8 ++--
+>  arch/x86/crypto/twofish-x86_64-asm_64.S            |  8 ++--
+>  arch/x86/entry/entry_64.S                          | 10 ++---
+>  arch/x86/entry/entry_64_compat.S                   |  8 ++--
+>  arch/x86/kernel/acpi/wakeup_64.S                   |  8 ++--
+>  arch/x86/kernel/head_64.S                          | 12 +++---
+>  arch/x86/lib/checksum_32.S                         |  8 ++--
+>  arch/x86/lib/clear_page_64.S                       | 12 +++---
+>  arch/x86/lib/cmpxchg16b_emu.S                      |  4 +-
+>  arch/x86/lib/cmpxchg8b_emu.S                       |  4 +-
+>  arch/x86/lib/copy_page_64.S                        |  4 +-
+>  arch/x86/lib/copy_user_64.S                        | 16 ++++----
+>  arch/x86/lib/csum-copy_64.S                        |  4 +-
+>  arch/x86/lib/getuser.S                             | 16 ++++----
+>  arch/x86/lib/hweight.S                             |  8 ++--
+>  arch/x86/lib/iomap_copy_64.S                       |  4 +-
+>  arch/x86/lib/memcpy_64.S                           |  4 +-
+>  arch/x86/lib/memmove_64.S                          |  4 +-
+>  arch/x86/lib/memset_64.S                           |  4 +-
+>  arch/x86/lib/msr-reg.S                             |  8 ++--
+>  arch/x86/lib/putuser.S                             | 16 ++++----
+>  arch/x86/lib/rwsem.S                               | 20 +++++-----
+>  arch/x86/mm/mem_encrypt_boot.S                     |  8 ++--
+>  arch/x86/platform/efi/efi_stub_64.S                |  4 +-
+>  arch/x86/platform/efi/efi_thunk_64.S               |  4 +-
+>  arch/x86/power/hibernate_asm_64.S                  |  8 ++--
+
+For the hibernate changes:
+
+Reviewed-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
