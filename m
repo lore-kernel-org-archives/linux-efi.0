@@ -1,118 +1,80 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v4 19/27] x86: assembly, make some functions local
-Date: Wed, 4 Oct 2017 08:33:27 +0100
-Message-ID: <CAKv+Gu-7q_Pr5SoUY_kUstaVusUxvXt9e8xeChQySGZ6h+jdAg@mail.gmail.com>
-References: <20171002091246.28432-1-jslaby@suse.cz> <20171002091246.28432-19-jslaby@suse.cz>
- <CAKv+Gu9C88ToAx+8KcGacUECo7ExnTTBmibEjpB2WkfFvjoZvw@mail.gmail.com> <5a3785ea-d2d8-dd51-4b02-12f4ca5507d7@suse.cz>
+From: Jarkko Sakkinen <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: Re: [PATCH v3 4/5] efi: call get_event_log before ExitBootServices
+Date: Wed, 4 Oct 2017 13:51:13 +0300
+Message-ID: <20171004105113.mcho3rlytaxfruyf@linux.intel.com>
+References: <20170920081340.7413-1-tweek@google.com>
+ <20170920081340.7413-5-tweek@google.com>
+ <20170926114538.r5hsyc5osodpaals@linux.intel.com>
+ <CA+zpnLcYWcO8Gf6b8rAHgcLkAndC0uyPH+Kxa01giVsochP3Ug@mail.gmail.com>
+ <20170929171617.yq4dvn66czvnebns@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5a3785ea-d2d8-dd51-4b02-12f4ca5507d7@suse.cz>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jiri Slaby <jslaby@suse.cz>, Mark Rutland <mark.rutland@arm.com>
-Cc: "mingo@redhat.com" <mingo@redhat.com>, "tglx@linutronix.de" <tglx@linutronix.de>, "hpa@zytor.com" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, xen-devel <xen-devel@lists.xenproject.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170929171617.yq4dvn66czvnebns-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-integrity-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, peterhuewe-Mmb7MZpHnFY@public.gmane.org, Jason Gunthorpe <jgunthorpe-ePGOBjL8dl3ta4EC/59zMFaTQe2KTcn/@public.gmane.org>, tpmdd-yWjUBOtONefk1uMJSBkQmQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hello Jiri,
+On Fri, Sep 29, 2017 at 08:16:17PM +0300, Jarkko Sakkinen wrote:
+> On Tue, Sep 26, 2017 at 02:49:31PM +0200, Thiebaud Weksteen wrote:
+> > On Tue, Sep 26, 2017 at 1:45 PM, Jarkko Sakkinen
+> > <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
+> > > On Wed, Sep 20, 2017 at 10:13:39AM +0200, Thiebaud Weksteen wrote:
+> > >> With TPM 2.0 specification, the event logs may only be accessible by
+> > >> calling an EFI Boot Service. Modify the EFI stub to copy the log area to
+> > >> a new Linux-specific EFI configuration table so it remains accessible
+> > >> once booted.
+> > >>
+> > >> When calling this service, it is possible to specify the expected format
+> > >> of the logs: TPM 1.2 (SHA1) or TPM 2.0 ("Crypto Agile"). For now, only the
+> > >> first format is retrieved.
+> > >>
+> > >> Signed-off-by: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+> > >
+> > > Does not apply:
+> > >
+> > > Applying: tpm: move tpm_eventlog.h outside of drivers folder
+> > > Applying: tpm: rename event log provider files
+> > > Applying: tpm: add event log format version
+> > > Applying: efi: call get_event_log before ExitBootServices
+> > > error: sha1 information is lacking or useless (drivers/firmware/efi/efi.c).
+> > > error: could not build fake ancestor
+> > > Patch failed at 0004 efi: call get_event_log before ExitBootServices
+> > > The copy of the patch that failed is found in: .git/rebase-apply/patch
+> > > When you have resolved this problem, run "git am --continue".
+> > > If you prefer to skip this patch, run "git am --skip" instead.
+> > > To restore the original branch and stop patching, run "git am --abort".
+> > >
+> > > Just rebased my tree to the latest security-next.
+> > 
+> > It applies fine on security/next-general which is more up-to-date.
+> > (security/next does not include
+> > ccc829ba3624beb9a703fc995d016b836d9eead8 on which this patch set is
+> > based)
+> 
+> Thanks, my bad, I though that I had it updated.
+> 
+> I'll update my tree and retry.
+> 
+> /Jarkko
 
-On 4 October 2017 at 08:22, Jiri Slaby <jslaby@suse.cz> wrote:
-> On 10/02/2017, 02:48 PM, Ard Biesheuvel wrote:
->> On 2 October 2017 at 10:12, Jiri Slaby <jslaby@suse.cz> wrote:
->>> There is a couple of assembly functions, which are invoked only locally
->>> in the file they are defined. In C, we mark them "static". In assembly,
->>> annotate them using SYM_{FUNC,CODE}_START_LOCAL (and switch their
->>> ENDPROC to SYM_{FUNC,CODE}_END too). Whether FUNC or CODE depends on
->>> ENDPROC/END for a particular function (C or non-C).
->>>
->>
->> I wasn't cc'ed on the cover letter, so I am missing the rationale of
->> replacing ENTRY/ENDPROC with other macros.
->
-> There was no cover letter. I am attaching what is in PATCH 1/27 instead:
-> Introduce new C macros for annotations of functions and data in
-> assembly. There is a long-standing mess in macros like ENTRY, END,
-> ENDPROC and similar. They are used in different manners and sometimes
-> incorrectly.
->
+My master is up to date with security/next.
 
-I must say, I don't share this sentiment.
+Still get the same result:
 
-In arm64, we use ENTRY/ENDPROC for functions with external linkage,
-and the bare symbol name/ENDPROC for functions with local linkage. I
-guess we could add ENDOBJECT if we wanted to, but we never really felt
-the need.
+$ git am -3 ~/Downloads/v3-4-5-efi-call-get_event_log-before-ExitBootServices.patch
+Applying: efi: call get_event_log before ExitBootServices
+error: sha1 information is lacking or useless (drivers/firmware/efi/efi.c).
+error: could not build fake ancestor
+Patch failed at 0001 efi: call get_event_log before ExitBootServices
+The copy of the patch that failed is found in: .git/rebase-apply/patch
+When you have resolved this problem, run "git am --continue".
+If you prefer to skip this patch, run "git am --skip" instead.
+To restore the original branch and stop patching, run "git am --abort".
 
-> So introduce macros with clear use to annotate assembly as follows:
->
-> a) Support macros for the ones below
->    SYM_T_FUNC -- type used by assembler to mark functions
->    SYM_T_OBJECT -- type used by assembler to mark data
->    SYM_T_NONE -- type used by assembler to mark entries of unknown type
->
+Maybe you have some other trees fetched in your local GIT so that it
+finds the ancestors? Anyway, cannot test this at this point.
 
-Is is necessary to mark an entry as having no type? What is the
-default type for an unmarked entry?
-
->    They are defined as STT_FUNC, STT_OBJECT, and STT_NOTYPE
->    respectively. According to the gas manual, this is the most portable
->    way. I am not sure about other assemblers, so we can switch this back
->    to %function and %object if this turns into a problem. Architectures
->    can also override them by something like ", @function" if they need.
->
->    SYM_A_ALIGN, SYM_A_NONE -- align the symbol?
->    SYM_V_GLOBAL, SYM_V_WEAK, SYM_V_LOCAL -- visibility of symbols
->
-
-Linkage != visibility
-
-> b) Mostly internal annotations, used by the ones below
->    SYM_ENTRY -- use only if you have to (for non-paired symbols)
->    SYM_START -- use only if you have to (for paired symbols)
->    SYM_END -- use only if you have to (for paired symbols)
->
-> c) Annotations for code
->    SYM_FUNC_START_LOCAL_ALIAS -- use where there are two local names for
->         one function
->    SYM_FUNC_START_ALIAS -- use where there are two global names for one
->         function
->    SYM_FUNC_END_ALIAS -- the end of LOCAL_ALIASed or ALIASed function
->
->    SYM_FUNC_START -- use for global functions
->    SYM_FUNC_START_NOALIGN -- use for global functions, w/o alignment
->    SYM_FUNC_START_LOCAL -- use for local functions
->    SYM_FUNC_START_LOCAL_NOALIGN -- use for local functions, w/o
->         alignment
->    SYM_FUNC_START_WEAK -- use for weak functions
->    SYM_FUNC_START_WEAK_NOALIGN -- use for weak functions, w/o alignment
->    SYM_FUNC_END -- the end of SYM_FUNC_START_LOCAL, SYM_FUNC_START,
->         SYM_FUNC_START_WEAK, ...
->
->    SYM_FUNC_INNER_LABEL -- only for labels in the middle of functions
->    SYM_FUNC_INNER_LABEL_NOALIGN -- only for labels in the middle of
->         functions, w/o alignment
->
->    For functions with special (non-C) calling conventions:
->    SYM_CODE_START -- use for non-C (special) functions
->    SYM_CODE_START_NOALIGN -- use for non-C (special) functions, w/o
->         alignment
->    SYM_CODE_START_LOCAL -- use for local non-C (special) functions
->    SYM_CODE_START_LOCAL_NOALIGN -- use for local non-C (special)
->         functions, w/o alignment
->    SYM_CODE_END -- the end of SYM_CODE_START_LOCAL or SYM_CODE_START
->
->    SYM_CODE_INNER_LABEL -- only for labels in the middle of code
->    SYM_CODE_INNER_LABEL_NOALIGN -- only for labels in the middle of code
->
-> d) For data
->    SYM_DATA_START -- global data symbol
->    SYM_DATA_END -- the end of the SYM_DATA_START symbol
->    SYM_DATA_END_LABEL -- the labeled end of SYM_DATA_START symbol
->    SYM_DATA_SIMPLE -- start+end wrapper around simple global data
->    SYM_DATA_SIMPLE_LOCAL -- start+end wrapper around simple local data
->
-
-I am sorry but I think this is terrible. Do we really need 20+ new
-macros to wrap every single assembler directive involved in defining
-symbols and setting their attributes?
-
-Is this issue you are solving widely perceived as a problem?
+/Jarkko
