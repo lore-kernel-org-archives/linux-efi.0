@@ -1,87 +1,132 @@
-From: Jarkko Sakkinen <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: Re: [PATCH v3 4/5] efi: call get_event_log before ExitBootServices
-Date: Wed, 4 Oct 2017 14:20:52 +0300
-Message-ID: <20171004112052.7fiwkpun62zphawi@linux.intel.com>
-References: <20170920081340.7413-1-tweek@google.com>
- <20170920081340.7413-5-tweek@google.com>
- <20170926114538.r5hsyc5osodpaals@linux.intel.com>
- <CA+zpnLcYWcO8Gf6b8rAHgcLkAndC0uyPH+Kxa01giVsochP3Ug@mail.gmail.com>
- <20170929171617.yq4dvn66czvnebns@linux.intel.com>
- <20171004105113.mcho3rlytaxfruyf@linux.intel.com>
+From: David Howells <dhowells@redhat.com>
+Subject: Draft manpage explaining kernel lockdown
+Date: Thu, 05 Oct 2017 12:00:24 +0100
+Message-ID: <7969.1507201224@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20171004105113.mcho3rlytaxfruyf-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-integrity-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, peterhuewe-Mmb7MZpHnFY@public.gmane.org, Jason Gunthorpe <jgunthorpe-ePGOBjL8dl3ta4EC/59zMFaTQe2KTcn/@public.gmane.org>, tpmdd-yWjUBOtONefk1uMJSBkQmQ@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-security-module-owner@vger.kernel.org>
+Content-ID: <7968.1507201224.1@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, mtk.manpages@gmail.com
+Cc: dhowells@redhat.com, mcgrof@kernel.org, johannes@sipsolutions.net, linux-man@vger.kernel.org, keyrings@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Oct 04, 2017 at 01:51:13PM +0300, Jarkko Sakkinen wrote:
-> On Fri, Sep 29, 2017 at 08:16:17PM +0300, Jarkko Sakkinen wrote:
-> > On Tue, Sep 26, 2017 at 02:49:31PM +0200, Thiebaud Weksteen wrote:
-> > > On Tue, Sep 26, 2017 at 1:45 PM, Jarkko Sakkinen
-> > > <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
-> > > > On Wed, Sep 20, 2017 at 10:13:39AM +0200, Thiebaud Weksteen wrote:
-> > > >> With TPM 2.0 specification, the event logs may only be accessible by
-> > > >> calling an EFI Boot Service. Modify the EFI stub to copy the log area to
-> > > >> a new Linux-specific EFI configuration table so it remains accessible
-> > > >> once booted.
-> > > >>
-> > > >> When calling this service, it is possible to specify the expected format
-> > > >> of the logs: TPM 1.2 (SHA1) or TPM 2.0 ("Crypto Agile"). For now, only the
-> > > >> first format is retrieved.
-> > > >>
-> > > >> Signed-off-by: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-> > > >
-> > > > Does not apply:
-> > > >
-> > > > Applying: tpm: move tpm_eventlog.h outside of drivers folder
-> > > > Applying: tpm: rename event log provider files
-> > > > Applying: tpm: add event log format version
-> > > > Applying: efi: call get_event_log before ExitBootServices
-> > > > error: sha1 information is lacking or useless (drivers/firmware/efi/efi.c).
-> > > > error: could not build fake ancestor
-> > > > Patch failed at 0004 efi: call get_event_log before ExitBootServices
-> > > > The copy of the patch that failed is found in: .git/rebase-apply/patch
-> > > > When you have resolved this problem, run "git am --continue".
-> > > > If you prefer to skip this patch, run "git am --skip" instead.
-> > > > To restore the original branch and stop patching, run "git am --abort".
-> > > >
-> > > > Just rebased my tree to the latest security-next.
-> > > 
-> > > It applies fine on security/next-general which is more up-to-date.
-> > > (security/next does not include
-> > > ccc829ba3624beb9a703fc995d016b836d9eead8 on which this patch set is
-> > > based)
-> > 
-> > Thanks, my bad, I though that I had it updated.
-> > 
-> > I'll update my tree and retry.
-> > 
-> > /Jarkko
-> 
-> My master is up to date with security/next.
-> 
-> Still get the same result:
-> 
-> $ git am -3 ~/Downloads/v3-4-5-efi-call-get_event_log-before-ExitBootServices.patch
-> Applying: efi: call get_event_log before ExitBootServices
-> error: sha1 information is lacking or useless (drivers/firmware/efi/efi.c).
-> error: could not build fake ancestor
-> Patch failed at 0001 efi: call get_event_log before ExitBootServices
-> The copy of the patch that failed is found in: .git/rebase-apply/patch
-> When you have resolved this problem, run "git am --continue".
-> If you prefer to skip this patch, run "git am --skip" instead.
-> To restore the original branch and stop patching, run "git am --abort".
-> 
-> Maybe you have some other trees fetched in your local GIT so that it
-> finds the ancestors? Anyway, cannot test this at this point.
-> 
-> /Jarkko
+Hi Ard, Michael,
 
-I pushed the first three patches to my master as they looked OK. You
-should still consider them unreviewed.
+Attached is a draft for a manual page (kernel_lockdown.7) that I intend to
+point at from messages emitted when the kernel prohibits something because the
+kernel is in 'lockdown' mode, typically triggered by EFI secure boot.
 
-/Jarkko
+Let me know what you think.
+
+David
+---
+.\"
+.\" Copyright (C) 2017 Red Hat, Inc. All Rights Reserved.
+.\" Written by David Howells (dhowells@redhat.com)
+.\"
+.\" %%%LICENSE_START(GPLv2+_SW_ONEPARA)
+.\" This program is free software; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License
+.\" as published by the Free Software Foundation; either version
+.\" 2 of the License, or (at your option) any later version.
+.\" %%%LICENSE_END
+.\"
+.TH "KERNEL LOCKDOWN" 7 2017-10-05 Linux "Linux Programmer's Manual"
+.SH NAME
+Kernel Lockdown \- Kernel image access prevention feature
+.SH DESCRIPTION
+The Kernel Lockdown feature is designed to prevent both direct and indirect
+access to a running kernel image, attempting to protect against unauthorised
+modification of the kernel image and to prevent access to security and
+cryptographic data located in kernel memory, whilst still permitting driver
+modules to be loaded.
+.P
+Lockdown is typically enabled during boot and may be terminated, if configured,
+by typing a special key combination on a directly attached physical keyboard.
+.P
+If a prohibited or restricted feature is accessed or used, the kernel will emit
+a message that looks like:
+.P
+.RS
+	Lockdown: X is restricted, see man kernel_lockdown(7)
+.RE
+.P
+where X indicates what is restricted.
+.P
+On an EFI-enabled x86 or arm64 machine, lockdown will be automatically enabled
+if the system boots in EFI Secure Boot mode.
+.P
+If the kernel is appropriately configured, lockdown may be lifted by typing the
+appropriate sequence on a directly attached physical keyboard.  For x86
+machines, this is
+.IR SysRq+x .
+.\"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.SH COVERAGE
+When lockdown is in effect, a number of things are disabled or restricted in
+use.  This includes special device files and kernel services that allow direct
+access of the kernel image:
+.P
+.RS
+/dev/mem
+.br
+/dev/kmem
+.br
+/dev/kcore
+.br
+/dev/ioports
+.br
+BPF memory access functions
+.RE
+.P
+and the ability to directly configure and control devices, so as to prevent the
+use of a device to access or modify a kernel image:
+.P
+.RS
+The use of module parameters that directly specify hardware parameters to
+drivers through the kernel command line or when loading a module.
+.P
+The use of direct PCI BAR access.
+.P
+The use of the ioperm and iopl instructions on x86.
+.P
+The use of the KD*IO console ioctls.
+.P
+The use of the TIOCSSERIAL serial ioctl.
+.P
+The alteration of MSR registers on x86.
+.P
+The replacement of the PCMCIA CIS.
+.P
+The overriding of ACPI tables.
+.P
+The use of ACPI error injection.
+.P
+The specification of the ACPI RDSP address.
+.P
+The use of ACPI custom methods.
+.RE
+.P
+The following facilities are restricted:
+.P
+.RS
+Only validly signed modules may be loaded.
+.P
+Only validly signed binaries may be kexec'd.
+.P
+Only validly signed device firmware may be loaded.
+.P
+Only validly signed wifi databases may be use.
+.P
+Unencrypted hibernation/suspend to swap are disallowed as the kernel image is
+saved to a medium that can then be accessed.
+.P
+Use of debugfs is not permitted as this allows a whole range of actions
+including direct configuration of, access to and driving of hardware.
+.RE
+.\"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.SH SEE ALSO
+.ad l
+.nh
+
