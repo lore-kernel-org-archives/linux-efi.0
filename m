@@ -1,132 +1,116 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v4 19/27] x86: assembly, make some functions local
-Date: Fri, 6 Oct 2017 15:01:03 +0100
-Message-ID: <CAKv+Gu9S0w0EUvruDjruR+hJ0B2QU_do1GknV83C8CgLTp8T2Q@mail.gmail.com>
-References: <20171002091246.28432-1-jslaby@suse.cz> <20171002091246.28432-19-jslaby@suse.cz>
- <CAKv+Gu9C88ToAx+8KcGacUECo7ExnTTBmibEjpB2WkfFvjoZvw@mail.gmail.com>
- <5a3785ea-d2d8-dd51-4b02-12f4ca5507d7@suse.cz> <CAKv+Gu-7q_Pr5SoUY_kUstaVusUxvXt9e8xeChQySGZ6h+jdAg@mail.gmail.com>
- <9dfcee94-2058-8986-526c-f7ef9ebada66@suse.cz>
+From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Subject: Re: [PATCH v3 4/5] efi: call get_event_log before ExitBootServices
+Date: Tue, 10 Oct 2017 17:14:19 +0300
+Message-ID: <20171010141419.e4uv4fkmcmpc7sdc@linux.intel.com>
+References: <20170920081340.7413-1-tweek@google.com>
+ <20170920081340.7413-5-tweek@google.com>
+ <20170926114538.r5hsyc5osodpaals@linux.intel.com>
+ <CA+zpnLcYWcO8Gf6b8rAHgcLkAndC0uyPH+Kxa01giVsochP3Ug@mail.gmail.com>
+ <20170929171617.yq4dvn66czvnebns@linux.intel.com>
+ <20171004105113.mcho3rlytaxfruyf@linux.intel.com>
+ <CA+zpnLdg4km1vMUUZaYfRg6M68+nSdC+vASULmH-aKu4vYyy4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <9dfcee94-2058-8986-526c-f7ef9ebada66-AlSwsSmVLrQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org" <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, xen-devel <xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CA+zpnLdg4km1vMUUZaYfRg6M68+nSdC+vASULmH-aKu4vYyy4Q@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Thiebaud Weksteen <tweek@google.com>, jmorris@namei.org
+Cc: linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, Matthew Garrett <mjg59@google.com>, peterhuewe@gmx.de, Jason Gunthorpe <jgunthorpe@obsidianresearch.com>, tpmdd@selhorst.net
 List-Id: linux-efi@vger.kernel.org
 
-On 6 October 2017 at 13:53, Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org> wrote:
-> Hi,
->
-> On 10/04/2017, 09:33 AM, Ard Biesheuvel wrote:
->> On 4 October 2017 at 08:22, Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org> wrote:
->>> On 10/02/2017, 02:48 PM, Ard Biesheuvel wrote:
->>>> On 2 October 2017 at 10:12, Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org> wrote:
->>>>> There is a couple of assembly functions, which are invoked only locally
->>>>> in the file they are defined. In C, we mark them "static". In assembly,
->>>>> annotate them using SYM_{FUNC,CODE}_START_LOCAL (and switch their
->>>>> ENDPROC to SYM_{FUNC,CODE}_END too). Whether FUNC or CODE depends on
->>>>> ENDPROC/END for a particular function (C or non-C).
->>>>>
->>>>
->>>> I wasn't cc'ed on the cover letter, so I am missing the rationale of
->>>> replacing ENTRY/ENDPROC with other macros.
->>>
->>> There was no cover letter. I am attaching what is in PATCH 1/27 instead:
->>> Introduce new C macros for annotations of functions and data in
->>> assembly. There is a long-standing mess in macros like ENTRY, END,
->>> ENDPROC and similar. They are used in different manners and sometimes
->>> incorrectly.
->>>
->>
->> I must say, I don't share this sentiment.
->>
->> In arm64, we use ENTRY/ENDPROC for functions with external linkage,
->> and the bare symbol name/ENDPROC for functions with local linkage. I
->> guess we could add ENDOBJECT if we wanted to, but we never really felt
->> the need.
->
-> Yes and this is exactly the reason for the new macros. Now, it's a
-> complete mess. One arch does this, another does that. And we are in a
-> state to have reliable stacktraces, let objtool check functions, let
-> objtool generate annotations (e.g. for ORC unwinder), etc.
->
+On Wed, Oct 04, 2017 at 01:12:27PM +0200, Thiebaud Weksteen wrote:
+> On Wed, Oct 4, 2017 at 12:51 PM, Jarkko Sakkinen
+> <jarkko.sakkinen@linux.intel.com> wrote:
+> > On Fri, Sep 29, 2017 at 08:16:17PM +0300, Jarkko Sakkinen wrote:
+> >> On Tue, Sep 26, 2017 at 02:49:31PM +0200, Thiebaud Weksteen wrote:
+> >> > On Tue, Sep 26, 2017 at 1:45 PM, Jarkko Sakkinen
+> >> > <jarkko.sakkinen@linux.intel.com> wrote:
+> >> > > On Wed, Sep 20, 2017 at 10:13:39AM +0200, Thiebaud Weksteen wrote:
+> >> > >> With TPM 2.0 specification, the event logs may only be accessible by
+> >> > >> calling an EFI Boot Service. Modify the EFI stub to copy the log area to
+> >> > >> a new Linux-specific EFI configuration table so it remains accessible
+> >> > >> once booted.
+> >> > >>
+> >> > >> When calling this service, it is possible to specify the expected format
+> >> > >> of the logs: TPM 1.2 (SHA1) or TPM 2.0 ("Crypto Agile"). For now, only the
+> >> > >> first format is retrieved.
+> >> > >>
+> >> > >> Signed-off-by: Thiebaud Weksteen <tweek@google.com>
+> >> > >
+> >> > > Does not apply:
+> >> > >
+> >> > > Applying: tpm: move tpm_eventlog.h outside of drivers folder
+> >> > > Applying: tpm: rename event log provider files
+> >> > > Applying: tpm: add event log format version
+> >> > > Applying: efi: call get_event_log before ExitBootServices
+> >> > > error: sha1 information is lacking or useless (drivers/firmware/efi/efi.c).
+> >> > > error: could not build fake ancestor
+> >> > > Patch failed at 0004 efi: call get_event_log before ExitBootServices
+> >> > > The copy of the patch that failed is found in: .git/rebase-apply/patch
+> >> > > When you have resolved this problem, run "git am --continue".
+> >> > > If you prefer to skip this patch, run "git am --skip" instead.
+> >> > > To restore the original branch and stop patching, run "git am --abort".
+> >> > >
+> >> > > Just rebased my tree to the latest security-next.
+> >> >
+> >> > It applies fine on security/next-general which is more up-to-date.
+> >> > (security/next does not include
+> >> > ccc829ba3624beb9a703fc995d016b836d9eead8 on which this patch set is
+> >> > based)
+> >>
+> >> Thanks, my bad, I though that I had it updated.
+> >>
+> >> I'll update my tree and retry.
+> >>
+> >> /Jarkko
+> >
+> > My master is up to date with security/next.
+> >
+> > Still get the same result:
+> >
+> > $ git am -3 ~/Downloads/v3-4-5-efi-call-get_event_log-before-ExitBootServices.patch
+> > Applying: efi: call get_event_log before ExitBootServices
+> > error: sha1 information is lacking or useless (drivers/firmware/efi/efi.c).
+> > error: could not build fake ancestor
+> > Patch failed at 0001 efi: call get_event_log before ExitBootServices
+> > The copy of the patch that failed is found in: .git/rebase-apply/patch
+> > When you have resolved this problem, run "git am --continue".
+> > If you prefer to skip this patch, run "git am --skip" instead.
+> > To restore the original branch and stop patching, run "git am --abort".
+> >
+> > Maybe you have some other trees fetched in your local GIT so that it
+> > finds the ancestors? Anyway, cannot test this at this point.
+> >
+> > /Jarkko
+> 
+> The security/next branch still does not contain the commit I mentioned
+> (ccc829ba3624beb9a703fc995d016b836d9eead8), which is already part of
+> torvalds/master now.
+> 
+>  $ git branch -a --contains ccc829ba3624beb9a703fc995d016b836d9eead8
+>   efi_tpm2_eventlog
+>   master
+>   remotes/linux-next/akpm
+>   remotes/linux-next/akpm-base
+>   remotes/linux-next/master
+>   remotes/linux-next/stable
+>   remotes/security/fixes-v4.14-rc3
+>   remotes/security/fixes-v4.14-rc4
+>   remotes/security/next-general
+>   remotes/security/next-testing
+>   remotes/torvalds/master
+> 
+> Is there any reason why you are trying to merge on that specific
+> branch and not next-general or next-testing? Would you know the
+> purpose of all these next-* branches?
+> 
+> Thanks,
+> Thiebaud
 
-You are implying that ENTRY/ENDPROC and 'bare symbol name'/ENDPROC
-prevent you from doing any of this, but this is simply not true.
+The way I've agreed with James Morris to have my tree is to be rooted to
+security trees next branch.
 
-> Without knowing what is start, where is its end, what is function, what
-> is object (data) etc., it can barely check or even generate anything
-> automatically. Not speaking about impaired macros like your name/ENDPROC
-> above.
->
+James, what actions should we take?
 
-What is the problem with impaired macros?
-
-> There was a cleanup in x86 done by Josh and others that we have at least
-> correct ENTRY+END and ENTRY+ENDPROC annotations in most cases now. Even
-> though it was concluded the names are weird (leftover from the past). So
-> yes, there was a discussion about the cleanup, naming and such. And I
-> came up with the names in this e-mail.
->
-> http://lkml.kernel.org/r/%3C20170217104757.28588-1-jslaby-AlSwsSmVLrQ@public.gmane.org%3E
->
-
-OK, but wrapping asm directives in macros will not suddenly make the
-assembler care about whether you use them or, whether they are paired,
-etc.
-
->>> So introduce macros with clear use to annotate assembly as follows:
->>>
->>> a) Support macros for the ones below
->>>    SYM_T_FUNC -- type used by assembler to mark functions
->>>    SYM_T_OBJECT -- type used by assembler to mark data
->>>    SYM_T_NONE -- type used by assembler to mark entries of unknown type
->>>
->>
->> Is is necessary to mark an entry as having no type? What is the
->> default type for an unmarked entry?
->
-> The default is indeed T_NONE. The thing is that most macros use
-> SYM_START and SYM_END which requires the type as argument. So for
-> convenience, we define also SYM_T_NONE used e.g. to define SYM_CODE_END:
-> #define SYM_CODE_END(name)                              \
->         SYM_END(CODE, name, SYM_T_NONE)
->
-> Despite it needs not be there. But users of the macros should not care.
->
->>>    They are defined as STT_FUNC, STT_OBJECT, and STT_NOTYPE
->>>    respectively. According to the gas manual, this is the most portable
->>>    way. I am not sure about other assemblers, so we can switch this back
->>>    to %function and %object if this turns into a problem. Architectures
->>>    can also override them by something like ", @function" if they need.
->>>
->>>    SYM_A_ALIGN, SYM_A_NONE -- align the symbol?
->>>    SYM_V_GLOBAL, SYM_V_WEAK, SYM_V_LOCAL -- visibility of symbols
->>>
->>
->> Linkage != visibility
->
-> OK, I can fix this.
->
->>> d) For data
->>>    SYM_DATA_START -- global data symbol
->>>    SYM_DATA_END -- the end of the SYM_DATA_START symbol
->>>    SYM_DATA_END_LABEL -- the labeled end of SYM_DATA_START symbol
->>>    SYM_DATA_SIMPLE -- start+end wrapper around simple global data
->>>    SYM_DATA_SIMPLE_LOCAL -- start+end wrapper around simple local data
->>>
->>
->> I am sorry but I think this is terrible. Do we really need 20+ new
->> macros to wrap every single assembler directive involved in defining
->> symbols and setting their attributes?
->
-> Basically, most code uses SYM_FUNC_START/END and SYM_DATA_START/END (or
-> SYM_DATA_SIMPLE). The rest is special cases that _have_ to be annotated
-> as such anyway (by e.g. SYM_CODE_START/END). Objtool cannot check the
-> code without this reliably and it is exactly the same as using either
-> END or ENDPROC for a particular function except people use these in a
-> wrong way as they are undocumented.
->
-
-So what is preventing people from using these new macros in the wrong way?
+/Jarkko
