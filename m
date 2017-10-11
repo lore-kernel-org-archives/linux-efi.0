@@ -1,55 +1,49 @@
-From: James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
-Subject: Re: [PATCH v3 4/5] efi: call get_event_log before
- ExitBootServices
-Date: Wed, 11 Oct 2017 12:54:26 +1100 (AEDT)
-Message-ID: <alpine.LRH.2.21.1710111250260.22885@namei.org>
-References: <20170920081340.7413-1-tweek@google.com>
- <20170920081340.7413-5-tweek@google.com>
- <20170926114538.r5hsyc5osodpaals@linux.intel.com>
- <CA+zpnLcYWcO8Gf6b8rAHgcLkAndC0uyPH+Kxa01giVsochP3Ug@mail.gmail.com>
- <20170929171617.yq4dvn66czvnebns@linux.intel.com>
- <20171004105113.mcho3rlytaxfruyf@linux.intel.com>
- <CA+zpnLdg4km1vMUUZaYfRg6M68+nSdC+vASULmH-aKu4vYyy4Q@mail.gmail.com>
- <20171010141419.e4uv4fkmcmpc7sdc@linux.intel.com>
+From: ivanhu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Subject: ACK: [PATCH] efi/efi_test: Prevent an Oops in
+ efi_runtime_query_capsulecaps()
+Date: Wed, 11 Oct 2017 14:26:57 +0800
+Message-ID: <449b17c1-2c97-fd7c-3073-5cb20e1c3672@canonical.com>
+References: <20170930081732.x6g4b2mwxwt5xzql@mwanda>
+ <20171006121939.GC3314@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <tpmdd-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <20171010141419.e4uv4fkmcmpc7sdc-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/options/tpmdd-devel>,
- <mailto:tpmdd-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=tpmdd-devel>
-List-Post: <mailto:tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:tpmdd-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/tpmdd-devel>,
- <mailto:tpmdd-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: tpmdd-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Jarkko Sakkinen <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Jason Gunthorpe <jgunthorpe-ePGOBjL8dl3ta4EC/59zMFaTQe2KTcn/@public.gmane.org>, tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-integrity-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20171006121939.GC3314-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Language: en-GB
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 10 Oct 2017, Jarkko Sakkinen wrote:
 
-> The way I've agreed with James Morris to have my tree is to be rooted to
-> security trees next branch.
+
+On 10/06/2017 08:19 PM, Matt Fleming wrote:
+> On Sat, 30 Sep, at 11:17:32AM, Dan Carpenter wrote:
+>> If "qcaps.capsule_count" is ULONG_MAX then "qcaps.capsule_count + 1"
+>> will overflow to zero and kcalloc() will return the ZERO_SIZE_PTR.  We
+>> try to dereference it inside the loop and crash.
+>>
+>> Fixes: ff6301dabc3c ("efi: Add efi_test driver for exporting UEFI runtime service interfaces")
+>> Signed-off-by: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+>>
+>> diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
+>> index 08129b7b80ab..41c48a1e8baa 100644
+>> --- a/drivers/firmware/efi/test/efi_test.c
+>> +++ b/drivers/firmware/efi/test/efi_test.c
+>> @@ -593,6 +593,9 @@ static long efi_runtime_query_capsulecaps(unsigned long arg)
+>>   	if (copy_from_user(&qcaps, qcaps_user, sizeof(qcaps)))
+>>   		return -EFAULT;
+>>   
+>> +	if (qcaps.capsule_count == ULONG_MAX)
+>> +		return -EINVAL;
+>> +
+>>   	capsules = kcalloc(qcaps.capsule_count + 1,
+>>   			   sizeof(efi_capsule_header_t), GFP_KERNEL);
+>>   	if (!capsules)
 > 
-> James, what actions should we take?
-
-This process has changed recently -- I posted to lsm but forgot to post to 
-linux-integrity.
-
-http://kernsec.org/pipermail/linux-security-module-archive/2017-September/003356.html
-
-Summary: please track the next-general branch in my tree for your 
-development, it replaces 'next'.
+> This looks OK to me. Ivan?
+> 
 
 
-- James
--- 
-James Morris
-<jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
-
-
-------------------------------------------------------------------------------
-Check out the vibrant tech community on one of the world's most
-engaging tech sites, Slashdot.org! http://sdm.link/slashdot
+Acked-by: Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
