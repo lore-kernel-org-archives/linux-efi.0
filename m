@@ -1,51 +1,52 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: ACK: [PATCH] efi/efi_test: Prevent an Oops in
- efi_runtime_query_capsulecaps()
-Date: Wed, 11 Oct 2017 10:34:39 +0100
-Message-ID: <20171011093439.GA3062@codeblueprint.co.uk>
-References: <20170930081732.x6g4b2mwxwt5xzql@mwanda>
- <20171006121939.GC3314@codeblueprint.co.uk>
- <449b17c1-2c97-fd7c-3073-5cb20e1c3672@canonical.com>
+From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Subject: Re: [PATCH v3 4/5] efi: call get_event_log before ExitBootServices
+Date: Wed, 11 Oct 2017 14:52:54 +0300
+Message-ID: <20171011115254.2n4zs77ixyl2mdgm@linux.intel.com>
+References: <20170920081340.7413-1-tweek@google.com>
+ <20170920081340.7413-5-tweek@google.com>
+ <20170926114538.r5hsyc5osodpaals@linux.intel.com>
+ <CA+zpnLcYWcO8Gf6b8rAHgcLkAndC0uyPH+Kxa01giVsochP3Ug@mail.gmail.com>
+ <20170929171617.yq4dvn66czvnebns@linux.intel.com>
+ <20171004105113.mcho3rlytaxfruyf@linux.intel.com>
+ <CA+zpnLdg4km1vMUUZaYfRg6M68+nSdC+vASULmH-aKu4vYyy4Q@mail.gmail.com>
+ <20171010141419.e4uv4fkmcmpc7sdc@linux.intel.com>
+ <alpine.LRH.2.21.1710111250260.22885@namei.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <kernel-janitors-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <449b17c1-2c97-fd7c-3073-5cb20e1c3672@canonical.com>
-Sender: kernel-janitors-owner@vger.kernel.org
-To: ivanhu <ivan.hu@canonical.com>
-Cc: Dan Carpenter <dan.carpenter@oracle.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, kernel-janitors@vger.kernel.org
+In-Reply-To: <alpine.LRH.2.21.1710111250260.22885@namei.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: James Morris <jmorris@namei.org>
+Cc: Thiebaud Weksteen <tweek@google.com>, linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, Matthew Garrett <mjg59@google.com>, peterhuewe@gmx.de, Jason Gunthorpe <jgunthorpe@obsidianresearch.com>, tpmdd@selhorst.net
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 11 Oct, at 02:26:57PM, Ivan Hu wrote:
+On Wed, Oct 11, 2017 at 12:54:26PM +1100, James Morris wrote:
+> On Tue, 10 Oct 2017, Jarkko Sakkinen wrote:
+> 
+> > The way I've agreed with James Morris to have my tree is to be rooted to
+> > security trees next branch.
+> > 
+> > James, what actions should we take?
+> 
+> This process has changed recently -- I posted to lsm but forgot to post to 
+> linux-integrity.
+> 
+> http://kernsec.org/pipermail/linux-security-module-archive/2017-September/003356.html
+> 
+> Summary: please track the next-general branch in my tree for your 
+> development, it replaces 'next'.
 > 
 > 
-> On 10/06/2017 08:19 PM, Matt Fleming wrote:
-> >On Sat, 30 Sep, at 11:17:32AM, Dan Carpenter wrote:
-> >>If "qcaps.capsule_count" is ULONG_MAX then "qcaps.capsule_count + 1"
-> >>will overflow to zero and kcalloc() will return the ZERO_SIZE_PTR.  We
-> >>try to dereference it inside the loop and crash.
-> >>
-> >>Fixes: ff6301dabc3c ("efi: Add efi_test driver for exporting UEFI runtime service interfaces")
-> >>Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-> >>
-> >>diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
-> >>index 08129b7b80ab..41c48a1e8baa 100644
-> >>--- a/drivers/firmware/efi/test/efi_test.c
-> >>+++ b/drivers/firmware/efi/test/efi_test.c
-> >>@@ -593,6 +593,9 @@ static long efi_runtime_query_capsulecaps(unsigned long arg)
-> >>  	if (copy_from_user(&qcaps, qcaps_user, sizeof(qcaps)))
-> >>  		return -EFAULT;
-> >>+	if (qcaps.capsule_count == ULONG_MAX)
-> >>+		return -EINVAL;
-> >>+
-> >>  	capsules = kcalloc(qcaps.capsule_count + 1,
-> >>  			   sizeof(efi_capsule_header_t), GFP_KERNEL);
-> >>  	if (!capsules)
-> >
-> >This looks OK to me. Ivan?
-> >
-> 
-> 
-> Acked-by: Ivan Hu <ivan.hu@canonical.com>
+> - James
+> -- 
+> James Morris
+> <jmorris@namei.org>
 
-Thanks, applied.
+Ah I'm subscribed to that list but lately been busy getting a huge patch
+set to platform-driver-x86 [1] for review, which has prioritized out
+reading much else than linux-integrity.
+
+Thank you. I'll retry the patches tomorrow.
+
+/Jarkko
