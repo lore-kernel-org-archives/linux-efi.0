@@ -1,64 +1,67 @@
-From: <iker-KvP5wT2u2U0@public.gmane.org>
-Subject: (unknown)
-Date: Thu, 12 Oct 2017 03:08:36 -0000
-Message-ID: <150777771674.31213.3987643990352191223@pipenetworks.com>
+From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Subject: Re: [PATCH v3 4/5] efi: call get_event_log before ExitBootServices
+Date: Thu, 12 Oct 2017 14:38:44 +0300
+Message-ID: <20171012113844.ptfynppgx3tkwe7g@linux.intel.com>
+References: <20170920081340.7413-5-tweek@google.com>
+ <20170926114538.r5hsyc5osodpaals@linux.intel.com>
+ <CA+zpnLcYWcO8Gf6b8rAHgcLkAndC0uyPH+Kxa01giVsochP3Ug@mail.gmail.com>
+ <20170929171617.yq4dvn66czvnebns@linux.intel.com>
+ <20171004105113.mcho3rlytaxfruyf@linux.intel.com>
+ <CA+zpnLdg4km1vMUUZaYfRg6M68+nSdC+vASULmH-aKu4vYyy4Q@mail.gmail.com>
+ <20171010141419.e4uv4fkmcmpc7sdc@linux.intel.com>
+ <alpine.LRH.2.21.1710111250260.22885@namei.org>
+ <20171011115254.2n4zs77ixyl2mdgm@linux.intel.com>
+ <20171011115318.i342rzq3akqbrovv@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: application/zip; name="97369885.zip"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: attachment
-Subject: 
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20171011115318.i342rzq3akqbrovv@linux.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: James Morris <jmorris@namei.org>
+Cc: Thiebaud Weksteen <tweek@google.com>, linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, Matthew Garrett <mjg59@google.com>, peterhuewe@gmx.de, Jason Gunthorpe <jgunthorpe@obsidianresearch.com>, tpmdd@selhorst.net
 List-Id: linux-efi@vger.kernel.org
 
-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
+On Wed, Oct 11, 2017 at 02:53:18PM +0300, Jarkko Sakkinen wrote:
+> On Wed, Oct 11, 2017 at 02:52:54PM +0300, Jarkko Sakkinen wrote:
+> > On Wed, Oct 11, 2017 at 12:54:26PM +1100, James Morris wrote:
+> > > On Tue, 10 Oct 2017, Jarkko Sakkinen wrote:
+> > > 
+> > > > The way I've agreed with James Morris to have my tree is to be rooted to
+> > > > security trees next branch.
+> > > > 
+> > > > James, what actions should we take?
+> > > 
+> > > This process has changed recently -- I posted to lsm but forgot to post to 
+> > > linux-integrity.
+> > > 
+> > > http://kernsec.org/pipermail/linux-security-module-archive/2017-September/003356.html
+> > > 
+> > > Summary: please track the next-general branch in my tree for your 
+> > > development, it replaces 'next'.
+> > > 
+> > > 
+> > > - James
+> > > -- 
+> > > James Morris
+> > > <jmorris@namei.org>
+> > 
+> > Ah I'm subscribed to that list but lately been busy getting a huge patch
+> > set to platform-driver-x86 [1] for review, which has prioritized out
+> > reading much else than linux-integrity.
+> > 
+> > Thank you. I'll retry the patches tomorrow.
+> > 
+> > /Jarkko
+> 
+> [1] http://www.spinics.net/lists/platform-driver-x86/msg13260.html
+> 
+> /Jarkko
+
+Now all Thiebaud's patches have been applied to the master of
+
+  git://git.infradead.org/users/jjs/linux-tpmdd.git
+
+Testing is still pending.
+
+/Jarkko
