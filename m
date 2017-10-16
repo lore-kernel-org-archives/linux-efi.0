@@ -1,70 +1,94 @@
-From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-Subject: Re: [PATCH v3 4/5] efi: call get_event_log before ExitBootServices
-Date: Mon, 16 Oct 2017 14:49:46 +0300
-Message-ID: <20171016114946.phj3n6vyjdbpj2sj@linux.intel.com>
-References: <20170920081340.7413-5-tweek@google.com>
- <20170926114538.r5hsyc5osodpaals@linux.intel.com>
- <CA+zpnLcYWcO8Gf6b8rAHgcLkAndC0uyPH+Kxa01giVsochP3Ug@mail.gmail.com>
- <20170929171617.yq4dvn66czvnebns@linux.intel.com>
- <20171004105113.mcho3rlytaxfruyf@linux.intel.com>
- <CA+zpnLdg4km1vMUUZaYfRg6M68+nSdC+vASULmH-aKu4vYyy4Q@mail.gmail.com>
- <20171010141419.e4uv4fkmcmpc7sdc@linux.intel.com>
- <alpine.LRH.2.21.1710111250260.22885@namei.org>
- <20171011115254.2n4zs77ixyl2mdgm@linux.intel.com>
- <20171016112833.txbg2sm5tjocp6qh@linux.intel.com>
+From: Brijesh Singh <brijesh.singh@amd.com>
+Subject: [Part1 PATCH v6 07/17] x86/efi: Access EFI data as encrypted when SEV is active
+Date: Mon, 16 Oct 2017 10:34:13 -0500
+Message-ID: <20171016153423.2980-8-brijesh.singh@amd.com>
+References: <20171016153423.2980-1-brijesh.singh@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20171016112833.txbg2sm5tjocp6qh@linux.intel.com>
+In-Reply-To: <20171016153423.2980-1-brijesh.singh@amd.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Thiebaud Weksteen <tweek@google.com>
-Cc: linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, Matthew Garrett <mjg59@google.com>, peterhuewe@gmx.de, Jason Gunthorpe <jgunthorpe@obsidianresearch.com>, tpmdd@selhorst.net
+To: x86@kernel.org
+Cc: bp@alien8.de, Tom Lendacky <thomas.lendacky@amd.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@suse.de>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Brijesh Singh <brijesh.singh@amd.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Oct 16, 2017 at 02:28:33PM +0300, Jarkko Sakkinen wrote:
-> On Wed, Oct 11, 2017 at 02:52:54PM +0300, Jarkko Sakkinen wrote:
-> > On Wed, Oct 11, 2017 at 12:54:26PM +1100, James Morris wrote:
-> > > On Tue, 10 Oct 2017, Jarkko Sakkinen wrote:
-> > > 
-> > > > The way I've agreed with James Morris to have my tree is to be rooted to
-> > > > security trees next branch.
-> > > > 
-> > > > James, what actions should we take?
-> > > 
-> > > This process has changed recently -- I posted to lsm but forgot to post to 
-> > > linux-integrity.
-> > > 
-> > > http://kernsec.org/pipermail/linux-security-module-archive/2017-September/003356.html
-> > > 
-> > > Summary: please track the next-general branch in my tree for your 
-> > > development, it replaces 'next'.
-> > > 
-> > > 
-> > > - James
-> > > -- 
-> > > James Morris
-> > > <jmorris@namei.org>
-> > 
-> > Ah I'm subscribed to that list but lately been busy getting a huge patch
-> > set to platform-driver-x86 [1] for review, which has prioritized out
-> > reading much else than linux-integrity.
-> > 
-> > Thank you. I'll retry the patches tomorrow.
-> > 
-> > /Jarkko
-> 
-> Cannot observer binary_bios_measuremens file.
-> 
-> What kind of hardware was used to develop/test this?
-> 
-> I tried it with Kabylake and PTT (firmware TPM).
-> 
-> /Jarkko
+From: Tom Lendacky <thomas.lendacky@amd.com>
 
-My guess would be wrong event log format.
+EFI data is encrypted when the kernel is run under SEV. Update the
+page table references to be sure the EFI memory areas are accessed
+encrypted.
 
-At minimum this patch set should add a klog (info level) message to tell
-that unsupported event log format is being used.
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Borislav Petkov <bp@suse.de>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+Cc: x86@kernel.org
+Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+Reviewed-by: Borislav Petkov <bp@suse.de>
+---
+ arch/x86/platform/efi/efi_64.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
 
-/Jarkko
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 12e83888e5b9..5469c9319f43 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -32,6 +32,7 @@
+ #include <linux/reboot.h>
+ #include <linux/slab.h>
+ #include <linux/ucs2_string.h>
++#include <linux/mem_encrypt.h>
+ 
+ #include <asm/setup.h>
+ #include <asm/page.h>
+@@ -369,7 +370,11 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	 * as trim_bios_range() will reserve the first page and isolate it away
+ 	 * from memory allocators anyway.
+ 	 */
+-	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, _PAGE_RW)) {
++	pf = _PAGE_RW;
++	if (sev_active())
++		pf |= _PAGE_ENC;
++
++	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, pf)) {
+ 		pr_err("Failed to create 1:1 mapping for the first page!\n");
+ 		return 1;
+ 	}
+@@ -412,6 +417,9 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+ 	if (!(md->attribute & EFI_MEMORY_WB))
+ 		flags |= _PAGE_PCD;
+ 
++	if (sev_active())
++		flags |= _PAGE_ENC;
++
+ 	pfn = md->phys_addr >> PAGE_SHIFT;
+ 	if (kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags))
+ 		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
+@@ -538,6 +546,9 @@ static int __init efi_update_mem_attr(struct mm_struct *mm, efi_memory_desc_t *m
+ 	if (!(md->attribute & EFI_MEMORY_RO))
+ 		pf |= _PAGE_RW;
+ 
++	if (sev_active())
++		pf |= _PAGE_ENC;
++
+ 	return efi_update_mappings(md, pf);
+ }
+ 
+@@ -589,6 +600,9 @@ void __init efi_runtime_update_mappings(void)
+ 			(md->type != EFI_RUNTIME_SERVICES_CODE))
+ 			pf |= _PAGE_RW;
+ 
++		if (sev_active())
++			pf |= _PAGE_ENC;
++
+ 		efi_update_mappings(md, pf);
+ 	}
+ }
+-- 
+2.9.5
