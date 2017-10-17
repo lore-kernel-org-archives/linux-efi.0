@@ -1,82 +1,86 @@
-From: Christoffer Dall <cdall@linaro.org>
-Subject: Re: [RFC 00/11] KVM, EFI, arm64: EFI Runtime Services Sandboxing
-Date: Mon, 16 Oct 2017 22:47:34 +0200
-Message-ID: <20171016204734.GO1845@lvm>
-References: <1503649901-5834-1-git-send-email-florent.revest@arm.com>
- <20170831092615.GB13572@cbox>
- <1506460492.5507.58.camel@gmail.com>
+From: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v3 4/5] efi: call get_event_log before ExitBootServices
+Date: Tue, 17 Oct 2017 10:00:15 +0200
+Message-ID: <CA+zpnLc038dv-WAE7fdD8i6DpGV3zCLEieg-KPTAvaW7yt-tLA@mail.gmail.com>
+References: <20170920081340.7413-5-tweek@google.com> <20170926114538.r5hsyc5osodpaals@linux.intel.com>
+ <CA+zpnLcYWcO8Gf6b8rAHgcLkAndC0uyPH+Kxa01giVsochP3Ug@mail.gmail.com>
+ <20170929171617.yq4dvn66czvnebns@linux.intel.com> <20171004105113.mcho3rlytaxfruyf@linux.intel.com>
+ <CA+zpnLdg4km1vMUUZaYfRg6M68+nSdC+vASULmH-aKu4vYyy4Q@mail.gmail.com>
+ <20171010141419.e4uv4fkmcmpc7sdc@linux.intel.com> <alpine.LRH.2.21.1710111250260.22885@namei.org>
+ <20171011115254.2n4zs77ixyl2mdgm@linux.intel.com> <20171016112833.txbg2sm5tjocp6qh@linux.intel.com>
+ <20171016114946.phj3n6vyjdbpj2sj@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1506460492.5507.58.camel@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Florent Revest <revestflo@gmail.com>
-Cc: Florent Revest <florent.revest@arm.com>, linux-arm-kernel@lists.infradead.org, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org, pbonzini@redhat.com, rkrcmar@redhat.com, christoffer.dall@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, mark.rutland@arm.com, marc.zyngier@arm.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org, kvmarm@lists.cs.columbia.edu, leif.lindholm@arm.com
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20171016114946.phj3n6vyjdbpj2sj-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jarkko Sakkinen <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-integrity-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, peterhuewe-Mmb7MZpHnFY@public.gmane.org, Jason Gunthorpe <jgunthorpe-ePGOBjL8dl3ta4EC/59zMFaTQe2KTcn/@public.gmane.org>, tpmdd-yWjUBOtONefk1uMJSBkQmQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Sep 26, 2017 at 11:14:52PM +0200, Florent Revest wrote:
-> On Thu, 2017-08-31 at 11:26 +0200, Christoffer Dall wrote:
-> > I wonder if this should be split into two series; one that sets up
-> > anything you may need from KVM, and another one that uses that for
-> > UEFI.
-> > 
-> > There's a lot KVM and UEFI intertwined logic and assumptions in patch
-> > 10, which makes this series a bit hard to read.
-> 
-> The way hypercalls are currently handled in handle_hvc required this
-> mixed patch. Would some kind of HVC subscription mechanism be suitable
-> to have in KVM? (e.g: a function allowing to register a callback on a
-> certain HVC function ID) This would allow the 10/11 patch to keep the
-> kvm code intact.
+On Mon, Oct 16, 2017 at 1:49 PM, Jarkko Sakkinen
+<jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
+> On Mon, Oct 16, 2017 at 02:28:33PM +0300, Jarkko Sakkinen wrote:
+>> On Wed, Oct 11, 2017 at 02:52:54PM +0300, Jarkko Sakkinen wrote:
+>> > On Wed, Oct 11, 2017 at 12:54:26PM +1100, James Morris wrote:
+>> > > On Tue, 10 Oct 2017, Jarkko Sakkinen wrote:
+>> > >
+>> > > > The way I've agreed with James Morris to have my tree is to be rooted to
+>> > > > security trees next branch.
+>> > > >
+>> > > > James, what actions should we take?
+>> > >
+>> > > This process has changed recently -- I posted to lsm but forgot to post to
+>> > > linux-integrity.
+>> > >
+>> > > http://kernsec.org/pipermail/linux-security-module-archive/2017-September/003356.html
+>> > >
+>> > > Summary: please track the next-general branch in my tree for your
+>> > > development, it replaces 'next'.
+>> > >
+>> > >
+>> > > - James
+>> > > --
+>> > > James Morris
+>> > > <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
+>> >
+>> > Ah I'm subscribed to that list but lately been busy getting a huge patch
+>> > set to platform-driver-x86 [1] for review, which has prioritized out
+>> > reading much else than linux-integrity.
+>> >
+>> > Thank you. I'll retry the patches tomorrow.
+>> >
+>> > /Jarkko
+>>
+>> Cannot observer binary_bios_measuremens file.
+>>
+>> What kind of hardware was used to develop/test this?
+>>
+>> I tried it with Kabylake and PTT (firmware TPM).
+>>
+>> /Jarkko
+>
+> My guess would be wrong event log format.
+>
+> At minimum this patch set should add a klog (info level) message to tell
+> that unsupported event log format is being used.
+>
+> /Jarkko
 
-Yes, I would have no objections to that if it were relatively
-non-invasive at runtime for normal VMs.
+This patch was mainly developed and tested on Kabylake with PTT as well.
 
-> 
-> > I'd like some documentation (in the series and in
-> > Documentation/virtual/kvm) of how this works, and which hidden
-> > assumptions there are. For example, how do you ensure you never
-> > attempt to return to userspace?
-> 
-> I don't think my code ensured this. I'd need to give it a second look.
-> 
-> >  How many VCPUs do you support?
-> 
-> You can create as many VCPUs as you would in a "normal VM". Also, each
-> VCPU can be ran in a kthread.
-> 
-> >  Do you support any form of virtual interrupts? How about timers?
-> 
-> No support for virtual interrupts or timers indeed. The EFI Runtime
-> Services sandboxing wouldn't require that.
-> 
-> > Can a VM access physical devices?
-> 
-> The very idea of Runtime Services sandboxing requires Internal VMs to
-> have access to some of the physical devices.
-> 
-> >  How do you debug and trace something like this? Can the VM be
-> > monitored from userspace?
-> 
-> There is nothing ready for that.
-> 
-> > These feel like fundamental questions to me that needs addressing
-> > before I can competently review the code.
-> > 
-> > I think a slightly more concrete motivation and outlining the example
-> > of the broken UEFI on Seattle would help paving the way for these
-> > patches.
-> 
-> As far as I can remember, EFI Runtime Services on this platform have
-> already been reported to sometimes disable or enable interrupts. Maybe
-> someone at ARM has more details about the problem ?
-> 
+It could be a few things. Are you booting with the EFI stub? Is the
+TPM enabled within the BIOS? Does tpm_tis get loaded? Does it produce
+any log?
+If the logs are recovered (but not parsed), you should already see an
+entry in the logs like:
 
-Thanks for answering these questions.  If you or anyone else picks up
-this work, we can gather some of the stuff in the thread for
-documentation and todo items.
+efi:  SMBIOS=0x7fed6000  ACPI=0x7ff00000  TPMEventLog=0x.....
 
-Thanks,
--Christoffer
+Can you see the TPMEventLog part?
+
+The issue with extra logging is that the log recovery happens within
+the EFI stub phase where limited logging is available (which I think
+has been limited to error and fatal message only).
+For now, it cannot be a version mismatch as the stub will only request
+the version 1.2 format.
