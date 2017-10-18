@@ -1,67 +1,95 @@
-From: Tyler Baicar <tbaicar@codeaurora.org>
-Subject: Re: [PATCH] efi: parse ARM error information value
-Date: Wed, 18 Oct 2017 09:54:26 -0400
-Message-ID: <2542de99-0f09-19f5-f81d-d5c4f359d593@codeaurora.org>
-References: <1508260992-18014-1-git-send-email-tbaicar@codeaurora.org>
- <1508268613.16112.487.camel@linux.intel.com>
+From: Jarkko Sakkinen <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: Re: [PATCH v3 4/5] efi: call get_event_log before ExitBootServices
+Date: Wed, 18 Oct 2017 18:11:28 +0300
+Message-ID: <20171018151128.reuteqhzleztchvr@linux.intel.com>
+References: <CA+zpnLcYWcO8Gf6b8rAHgcLkAndC0uyPH+Kxa01giVsochP3Ug@mail.gmail.com>
+ <20170929171617.yq4dvn66czvnebns@linux.intel.com>
+ <20171004105113.mcho3rlytaxfruyf@linux.intel.com>
+ <CA+zpnLdg4km1vMUUZaYfRg6M68+nSdC+vASULmH-aKu4vYyy4Q@mail.gmail.com>
+ <20171010141419.e4uv4fkmcmpc7sdc@linux.intel.com>
+ <alpine.LRH.2.21.1710111250260.22885@namei.org>
+ <20171011115254.2n4zs77ixyl2mdgm@linux.intel.com>
+ <20171016112833.txbg2sm5tjocp6qh@linux.intel.com>
+ <20171016114946.phj3n6vyjdbpj2sj@linux.intel.com>
+ <CA+zpnLc038dv-WAE7fdD8i6DpGV3zCLEieg-KPTAvaW7yt-tLA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1508268613.16112.487.camel@linux.intel.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, matt@codeblueprint.co.uk, ard.biesheuvel@linaro.org, will.deacon@arm.com, james.morse@arm.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CA+zpnLc038dv-WAE7fdD8i6DpGV3zCLEieg-KPTAvaW7yt-tLA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Thiebaud Weksteen <tweek-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-integrity-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, tpmdd-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, peterhuewe-Mmb7MZpHnFY@public.gmane.org, Jason Gunthorpe <jgunthorpe-ePGOBjL8dl3ta4EC/59zMFaTQe2KTcn/@public.gmane.org>, tpmdd-yWjUBOtONefk1uMJSBkQmQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 10/17/2017 3:30 PM, Andy Shevchenko wrote:
-> On Tue, 2017-10-17 at 11:23 -0600, Tyler Baicar wrote:
->> ARM errors just print out the error information value, then the
->> value needs to be manually decoded as per the UEFI spec. Add
->> decoding of the ARM error information value so that the kernel
->> logs capture all of the valid information at first glance.
->>
->> ARM error information value decoding is captured in UEFI 2.7
->> spec tables 263-265.
-> Could it be located in separate file?
-Hello Andy,
+On Tue, Oct 17, 2017 at 10:00:15AM +0200, Thiebaud Weksteen wrote:
+> On Mon, Oct 16, 2017 at 1:49 PM, Jarkko Sakkinen
+> <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
+> > On Mon, Oct 16, 2017 at 02:28:33PM +0300, Jarkko Sakkinen wrote:
+> >> On Wed, Oct 11, 2017 at 02:52:54PM +0300, Jarkko Sakkinen wrote:
+> >> > On Wed, Oct 11, 2017 at 12:54:26PM +1100, James Morris wrote:
+> >> > > On Tue, 10 Oct 2017, Jarkko Sakkinen wrote:
+> >> > >
+> >> > > > The way I've agreed with James Morris to have my tree is to be rooted to
+> >> > > > security trees next branch.
+> >> > > >
+> >> > > > James, what actions should we take?
+> >> > >
+> >> > > This process has changed recently -- I posted to lsm but forgot to post to
+> >> > > linux-integrity.
+> >> > >
+> >> > > http://kernsec.org/pipermail/linux-security-module-archive/2017-September/003356.html
+> >> > >
+> >> > > Summary: please track the next-general branch in my tree for your
+> >> > > development, it replaces 'next'.
+> >> > >
+> >> > >
+> >> > > - James
+> >> > > --
+> >> > > James Morris
+> >> > > <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
+> >> >
+> >> > Ah I'm subscribed to that list but lately been busy getting a huge patch
+> >> > set to platform-driver-x86 [1] for review, which has prioritized out
+> >> > reading much else than linux-integrity.
+> >> >
+> >> > Thank you. I'll retry the patches tomorrow.
+> >> >
+> >> > /Jarkko
+> >>
+> >> Cannot observer binary_bios_measuremens file.
+> >>
+> >> What kind of hardware was used to develop/test this?
+> >>
+> >> I tried it with Kabylake and PTT (firmware TPM).
+> >>
+> >> /Jarkko
+> >
+> > My guess would be wrong event log format.
+> >
+> > At minimum this patch set should add a klog (info level) message to tell
+> > that unsupported event log format is being used.
+> >
+> > /Jarkko
+> 
+> This patch was mainly developed and tested on Kabylake with PTT as well.
+> 
+> It could be a few things. Are you booting with the EFI stub? Is the
+> TPM enabled within the BIOS? Does tpm_tis get loaded? Does it produce
+> any log?
+> If the logs are recovered (but not parsed), you should already see an
+> entry in the logs like:
+> 
+> efi:  SMBIOS=0x7fed6000  ACPI=0x7ff00000  TPMEventLog=0x.....
+> 
+> Can you see the TPMEventLog part?
+> 
+> The issue with extra logging is that the log recovery happens within
+> the EFI stub phase where limited logging is available (which I think
+> has been limited to error and fatal message only).
+> For now, it cannot be a version mismatch as the stub will only request
+> the version 1.2 format.
 
-Thank you for the feedback.
+Thank you for the great tips. I'll retry tomorrow.
 
-Yes, I can break this out into a different file...we may want to break out all 
-of the
-ARM error parsing to that file then though.
->
->> +			printk("%stransaction type: %s\n", pfx,
->> +			       arm_err_trans_type_strs[trans_type]);
-> Plain printk():s?
-This is consistent with the other prints in this CPER code.
->
->> +#define CPER_ARM_ERR_VALID_TRANSACTION_TYPE	0x0001
->> +#define CPER_ARM_ERR_VALID_OPERATION_TYPE	0x0002
->> +#define CPER_ARM_ERR_VALID_LEVEL		0x0004
->> +#define CPER_ARM_ERR_VALID_PROC_CONTEXT_CORRUPT	0x0008
->> +#define CPER_ARM_ERR_VALID_CORRECTED		0x0010
->> +#define CPER_ARM_ERR_VALID_PRECISE_PC		0x0020
->> +#define CPER_ARM_ERR_VALID_RESTARTABLE_PC	0x0040
->> +#define CPER_ARM_ERR_VALID_PARTICIPATION_TYPE	0x0080
->> +#define CPER_ARM_ERR_VALID_TIME_OUT		0x0100
->> +#define CPER_ARM_ERR_VALID_ADDRESS_SPACE	0x0200
->> +#define CPER_ARM_ERR_VALID_MEM_ATTRIBUTES	0x0400
->> +#define CPER_ARM_ERR_VALID_ACCESS_MODE		0x0800
-> BIT() is already being used in this file.
-I'll convert these to use BIT().
->
->> +
->> +#define CPER_ARM_ERR_TRANSACTION_SHIFT		16
->> +#define CPER_ARM_ERR_TRANSACTION_MASK		0x3
-> Mask is mask, so GENMASK()
-I'll convert the masks to use GENMASK()
-
-Thanks,
-Tyler
-
--- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+/Jarkko
