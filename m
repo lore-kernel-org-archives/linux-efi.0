@@ -1,38 +1,53 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 02/27] Add a SysRq option to lift kernel lockdown
-Date: Thu, 19 Oct 2017 23:12:30 +0100
-Message-ID: <10671.1508451150@warthog.procyon.org.uk>
-References: <97659d0c-6992-3025-0f85-819d23e954cc@infradead.org> <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk> <150842464774.7923.7951986297563109339.stgit@warthog.procyon.org.uk>
+From: Alexei Starovoitov <alexei.starovoitov@gmail.com>
+Subject: Re: [PATCH 18/27] bpf: Restrict kernel image access functions when
+ the kernel is locked down
+Date: Thu, 19 Oct 2017 15:18:30 -0700
+Message-ID: <20171019221829.7m5nczg3ltqmhzom@ast-mbp>
+References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
+ <150842476953.7923.18174368926573855810.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <97659d0c-6992-3025-0f85-819d23e954cc-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Content-ID: <10670.1508451150.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-security-module-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <150842476953.7923.18174368926573855810.stgit@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com, Daniel Borkmann <daniel@iogearbox.net>, "David S. Miller" <davem@davemloft.net>, netdev@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org> wrote:
-
-> > +config ALLOW_LOCKDOWN_LIFT
-> > +	bool
-> > +	help
-> > +	  Allow the lockdown on a kernel to be lifted, thereby restoring the
-> > +	  ability of userspace to access the kernel image (eg. by SysRq+x under
+On Thu, Oct 19, 2017 at 03:52:49PM +0100, David Howells wrote:
+> From: Chun-Yi Lee <jlee@suse.com>
 > 
-> how about:                                                                on
+> There are some bpf functions can be used to read kernel memory:
+> bpf_probe_read, bpf_probe_write_user and bpf_trace_printk.  These allow
+> private keys in kernel memory (e.g. the hibernation image signing key) to
+> be read by an eBPF program.  Prohibit those functions when the kernel is
+> locked down.
 > 
-> > +	  x86).
-
-I'll just get rid of this config option, I think - it doesn't make anything
-available outside of lock_down.c.
-
-> > +#ifdef CONFIG_ALLOW_LOCKDOWN_LIFT_BY_KEY
+> Signed-off-by: Chun-Yi Lee <jlee@suse.com>
+> Signed-off-by: David Howells <dhowells@redhat.com>
+> cc: netdev@vger.kernel.org
+> ---
 > 
-> is that the same as: CONFIG_ALLOW_LOCKDOWN_LIFT_BY_SYSRQ ?
-> tested?
+>  kernel/trace/bpf_trace.c |   11 +++++++++++
+>  1 file changed, 11 insertions(+)
+> 
+> diff --git a/kernel/trace/bpf_trace.c b/kernel/trace/bpf_trace.c
+> index dc498b605d5d..35e85a3fdb37 100644
+> --- a/kernel/trace/bpf_trace.c
+> +++ b/kernel/trace/bpf_trace.c
+> @@ -65,6 +65,11 @@ BPF_CALL_3(bpf_probe_read, void *, dst, u32, size, const void *, unsafe_ptr)
+>  {
+>  	int ret;
+>  
+> +	if (kernel_is_locked_down("BPF")) {
+> +		memset(dst, 0, size);
+> +		return -EPERM;
+> +	}
 
-My test machine doesn't have a physical keyboard attached, but you're right.
+That doesn't help the lockdown purpose.
+If you don't trust the root the only way to prevent bpf read
+memory is to disable the whole thing.
+Have a single check in sys_bpf() to disallow everything if kernel_is_locked_down()
+and don't add overhead to critical path like bpf_probe_read().
 
-David
