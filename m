@@ -1,7 +1,8 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 09/27] uswsusp: Disable when the kernel is locked down
-Date: Thu, 19 Oct 2017 15:51:42 +0100
-Message-ID: <150842470227.7923.15293760935442172683.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 12/27] x86/msr: Restrict MSR access when the kernel is
+ locked down
+Date: Thu, 19 Oct 2017 15:52:04 +0100
+Message-ID: <150842472452.7923.2592278090192179002.stgit@warthog.procyon.org.uk>
 References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -13,31 +14,44 @@ To: linux-security-module@vger.kernel.org
 Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Matthew Garrett <mjg59@srcf.ucam.org>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 
-uswsusp allows a user process to dump and then restore kernel state, which
-makes it possible to modify the running kernel.  Disable this if the kernel
-is locked down.
+Writing to MSRs should not be allowed if the kernel is locked down, since
+it could lead to execution of arbitrary code in kernel mode.  Based on a
+patch by Kees Cook.
 
-Signed-off-by: Matthew Garrett <mjg59@srcf.ucam.org>
+Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: linux-pm@vger.kernel.org
+Acked-by: Kees Cook <keescook@chromium.org>
+Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
+cc: x86@kernel.org
 ---
 
- kernel/power/user.c |    3 +++
- 1 file changed, 3 insertions(+)
+ arch/x86/kernel/msr.c |    7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/kernel/power/user.c b/kernel/power/user.c
-index 22df9f7ff672..678ade9decfe 100644
---- a/kernel/power/user.c
-+++ b/kernel/power/user.c
-@@ -52,6 +52,9 @@ static int snapshot_open(struct inode *inode, struct file *filp)
- 	if (!hibernation_available())
- 		return -EPERM;
+diff --git a/arch/x86/kernel/msr.c b/arch/x86/kernel/msr.c
+index ef688804f80d..a05a97863286 100644
+--- a/arch/x86/kernel/msr.c
++++ b/arch/x86/kernel/msr.c
+@@ -84,6 +84,9 @@ static ssize_t msr_write(struct file *file, const char __user *buf,
+ 	int err = 0;
+ 	ssize_t bytes = 0;
  
-+	if (kernel_is_locked_down("/dev/snapshot"))
++	if (kernel_is_locked_down("Direct MSR access"))
 +		return -EPERM;
 +
- 	lock_system_sleep();
+ 	if (count % 8)
+ 		return -EINVAL;	/* Invalid chunk size */
  
- 	if (!atomic_add_unless(&snapshot_device_available, -1, 0)) {
+@@ -131,6 +134,10 @@ static long msr_ioctl(struct file *file, unsigned int ioc, unsigned long arg)
+ 			err = -EBADF;
+ 			break;
+ 		}
++		if (kernel_is_locked_down("Direct MSR access")) {
++			err = -EPERM;
++			break;
++		}
+ 		if (copy_from_user(&regs, uregs, sizeof regs)) {
+ 			err = -EFAULT;
+ 			break;
