@@ -1,8 +1,8 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 07/27] kexec_file: Disable at runtime if securelevel has
- been set
-Date: Thu, 19 Oct 2017 15:51:27 +0100
-Message-ID: <150842468754.7923.10037578333644594134.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 10/27] PCI: Lock down BAR access when the kernel is locked
+ down
+Date: Thu, 19 Oct 2017 15:51:49 +0100
+Message-ID: <150842470945.7923.134066103094708461.stgit@warthog.procyon.org.uk>
 References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -14,38 +14,104 @@ To: linux-security-module@vger.kernel.org
 Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Chun-Yi Lee <joeyli.kernel@gmail.com>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 
-When KEXEC_VERIFY_SIG is not enabled, kernel should not loads image
-through kexec_file systemcall if securelevel has been set.
+Any hardware that can potentially generate DMA has to be locked down in
+order to avoid it being possible for an attacker to modify kernel code,
+allowing them to circumvent disabled module loading or module signing.
+Default to paranoid - in future we can potentially relax this for
+sufficiently IOMMU-isolated devices.
 
-This code was showed in Matthew's patch but not in git:
-https://lkml.org/lkml/2015/3/13/778
-
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>
-Signed-off-by: Chun-Yi Lee <jlee@suse.com>
+Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: kexec@lists.infradead.org
+Acked-by: Bjorn Helgaas <bhelgaas@google.com>
+cc: linux-pci@vger.kernel.org
 ---
 
- kernel/kexec_file.c |    7 +++++++
- 1 file changed, 7 insertions(+)
+ drivers/pci/pci-sysfs.c |    9 +++++++++
+ drivers/pci/proc.c      |    9 ++++++++-
+ drivers/pci/syscall.c   |    3 ++-
+ 3 files changed, 19 insertions(+), 2 deletions(-)
 
-diff --git a/kernel/kexec_file.c b/kernel/kexec_file.c
-index 9f48f4412297..ff6523f2dcc2 100644
---- a/kernel/kexec_file.c
-+++ b/kernel/kexec_file.c
-@@ -255,6 +255,13 @@ SYSCALL_DEFINE5(kexec_file_load, int, kernel_fd, int, initrd_fd,
- 	if (!capable(CAP_SYS_BOOT) || kexec_load_disabled)
- 		return -EPERM;
+diff --git a/drivers/pci/pci-sysfs.c b/drivers/pci/pci-sysfs.c
+index 1eecfa301f7f..e1a3b0e765c2 100644
+--- a/drivers/pci/pci-sysfs.c
++++ b/drivers/pci/pci-sysfs.c
+@@ -881,6 +881,9 @@ static ssize_t pci_write_config(struct file *filp, struct kobject *kobj,
+ 	loff_t init_off = off;
+ 	u8 *data = (u8 *) buf;
  
-+	/* Don't permit images to be loaded into trusted kernels if we're not
-+	 * going to verify the signature on them
-+	 */
-+	if (!IS_ENABLED(CONFIG_KEXEC_VERIFY_SIG) &&
-+	    kernel_is_locked_down("kexec of unsigned images"))
++	if (kernel_is_locked_down("Direct PCI access"))
 +		return -EPERM;
 +
- 	/* Make sure we have a legal set of flags */
- 	if (flags != (flags & KEXEC_FILE_FLAGS))
+ 	if (off > dev->cfg_size)
+ 		return 0;
+ 	if (off + count > dev->cfg_size) {
+@@ -1175,6 +1178,9 @@ static int pci_mmap_resource(struct kobject *kobj, struct bin_attribute *attr,
+ 	enum pci_mmap_state mmap_type;
+ 	struct resource *res = &pdev->resource[bar];
+ 
++	if (kernel_is_locked_down("Direct PCI access"))
++		return -EPERM;
++
+ 	if (res->flags & IORESOURCE_MEM && iomem_is_exclusive(res->start))
  		return -EINVAL;
+ 
+@@ -1255,6 +1261,9 @@ static ssize_t pci_write_resource_io(struct file *filp, struct kobject *kobj,
+ 				     struct bin_attribute *attr, char *buf,
+ 				     loff_t off, size_t count)
+ {
++	if (kernel_is_locked_down("Direct PCI access"))
++		return -EPERM;
++
+ 	return pci_resource_io(filp, kobj, attr, buf, off, count, true);
+ }
+ 
+diff --git a/drivers/pci/proc.c b/drivers/pci/proc.c
+index 098360d7ff81..a6c53d855daa 100644
+--- a/drivers/pci/proc.c
++++ b/drivers/pci/proc.c
+@@ -116,6 +116,9 @@ static ssize_t proc_bus_pci_write(struct file *file, const char __user *buf,
+ 	int size = dev->cfg_size;
+ 	int cnt;
+ 
++	if (kernel_is_locked_down("Direct PCI access"))
++		return -EPERM;
++
+ 	if (pos >= size)
+ 		return 0;
+ 	if (nbytes >= size)
+@@ -195,6 +198,9 @@ static long proc_bus_pci_ioctl(struct file *file, unsigned int cmd,
+ #endif /* HAVE_PCI_MMAP */
+ 	int ret = 0;
+ 
++	if (kernel_is_locked_down("Direct PCI access"))
++		return -EPERM;
++
+ 	switch (cmd) {
+ 	case PCIIOC_CONTROLLER:
+ 		ret = pci_domain_nr(dev->bus);
+@@ -236,7 +242,8 @@ static int proc_bus_pci_mmap(struct file *file, struct vm_area_struct *vma)
+ 	struct pci_filp_private *fpriv = file->private_data;
+ 	int i, ret, write_combine = 0, res_bit = IORESOURCE_MEM;
+ 
+-	if (!capable(CAP_SYS_RAWIO))
++	if (!capable(CAP_SYS_RAWIO) ||
++	    kernel_is_locked_down("Direct PCI access"))
+ 		return -EPERM;
+ 
+ 	if (fpriv->mmap_state == pci_mmap_io) {
+diff --git a/drivers/pci/syscall.c b/drivers/pci/syscall.c
+index 9bf993e1f71e..afa01cc3ceec 100644
+--- a/drivers/pci/syscall.c
++++ b/drivers/pci/syscall.c
+@@ -92,7 +92,8 @@ SYSCALL_DEFINE5(pciconfig_write, unsigned long, bus, unsigned long, dfn,
+ 	u32 dword;
+ 	int err = 0;
+ 
+-	if (!capable(CAP_SYS_ADMIN))
++	if (!capable(CAP_SYS_ADMIN) ||
++	    kernel_is_locked_down("Direct PCI access"))
+ 		return -EPERM;
+ 
+ 	dev = pci_get_bus_and_slot(bus, dfn);
