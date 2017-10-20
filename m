@@ -1,75 +1,58 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH 18/27] bpf: Restrict kernel image access functions when
- the kernel is locked down
-Date: Fri, 20 Oct 2017 10:47:32 +0800
-Message-ID: <20171020024732.GJ3285@linux-l9pv.suse>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH 03/27] Enforce module signatures if the kernel is locked
+ down
+Date: Fri, 20 Oct 2017 14:33:20 +0800
+Message-ID: <20171020063320.GL3285@linux-l9pv.suse>
 References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
- <150842476953.7923.18174368926573855810.stgit@warthog.procyon.org.uk>
- <20171019221829.7m5nczg3ltqmhzom@ast-mbp>
+ <150842465546.7923.6762214527898273559.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <netdev-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20171019221829.7m5nczg3ltqmhzom@ast-mbp>
-Sender: netdev-owner@vger.kernel.org
-To: Alexei Starovoitov <alexei.starovoitov@gmail.com>
-Cc: David Howells <dhowells@redhat.com>, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com, Daniel Borkmann <daniel@iogearbox.net>, "David S. Miller" <davem@davemloft.net>, netdev@vger.kernel.org, Gary Lin <GLin@suse.com>
+In-Reply-To: <150842465546.7923.6762214527898273559.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Alexei,
+Hi David,
 
-Thanks for your review! 
+Thanks for you send our this series.
 
-On Thu, Oct 19, 2017 at 03:18:30PM -0700, Alexei Starovoitov wrote:
-> On Thu, Oct 19, 2017 at 03:52:49PM +0100, David Howells wrote:
-> > From: Chun-Yi Lee <jlee@suse.com>
-> > 
-> > There are some bpf functions can be used to read kernel memory:
-> > bpf_probe_read, bpf_probe_write_user and bpf_trace_printk.  These allow
-> > private keys in kernel memory (e.g. the hibernation image signing key) to
-> > be read by an eBPF program.  Prohibit those functions when the kernel is
-> > locked down.
-> > 
-> > Signed-off-by: Chun-Yi Lee <jlee@suse.com>
-> > Signed-off-by: David Howells <dhowells@redhat.com>
-> > cc: netdev@vger.kernel.org
-> > ---
-> > 
-> >  kernel/trace/bpf_trace.c |   11 +++++++++++
-> >  1 file changed, 11 insertions(+)
-> > 
-> > diff --git a/kernel/trace/bpf_trace.c b/kernel/trace/bpf_trace.c
-> > index dc498b605d5d..35e85a3fdb37 100644
-> > --- a/kernel/trace/bpf_trace.c
-> > +++ b/kernel/trace/bpf_trace.c
-> > @@ -65,6 +65,11 @@ BPF_CALL_3(bpf_probe_read, void *, dst, u32, size, const void *, unsafe_ptr)
-> >  {
-> >  	int ret;
-> >  
-> > +	if (kernel_is_locked_down("BPF")) {
-> > +		memset(dst, 0, size);
-> > +		return -EPERM;
-> > +	}
+On Thu, Oct 19, 2017 at 03:50:55PM +0100, David Howells wrote:
+> If the kernel is locked down, require that all modules have valid
+> signatures that we can verify.
 > 
-> That doesn't help the lockdown purpose.
-> If you don't trust the root the only way to prevent bpf read
-> memory is to disable the whole thing.
+> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-Not totally untrust root, I don't want that root reads
-arbitrary memory address through bpf.
+I have reviewed and tested this patch. Please feel free to add:
 
-Is it not enough to lock down bpf_probe_read, bpf_probe_write_user
-and bpf_trace_printk?
-
-> Have a single check in sys_bpf() to disallow everything if kernel_is_locked_down()
-> and don't add overhead to critical path like bpf_probe_read().
->
-
-Yes, it give overhead to bpf_probe_read but it prevents arbitrary
-memory read.
-
-Another idea is signing bpf bytecode then verifying signture when
-loading to kernel. 
+Reviewed-by: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
 
 Thanks a lot!
-Joey Lee 
+Joey Lee
+
+> ---
+> 
+>  kernel/module.c |    3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/kernel/module.c b/kernel/module.c
+> index de66ec825992..3d9a3270c179 100644
+> --- a/kernel/module.c
+> +++ b/kernel/module.c
+> @@ -2781,7 +2781,8 @@ static int module_sig_check(struct load_info *info, int flags)
+>  	}
+>  
+>  	/* Not having a signature is only an error if we're strict. */
+> -	if (err == -ENOKEY && !sig_enforce)
+> +	if (err == -ENOKEY && !sig_enforce &&
+> +	    !kernel_is_locked_down("Loading of unsigned modules"))
+>  		err = 0;
+>  
+>  	return err;
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
