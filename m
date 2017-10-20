@@ -1,67 +1,64 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH 05/27] kexec: Disable at runtime if the kernel is locked
- down
-Date: Fri, 20 Oct 2017 14:38:37 +0800
-Message-ID: <20171020063837.GN3285@linux-l9pv.suse>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH 06/27] Copy secure_boot flag in boot params across kexec
+ reboot
+Date: Fri, 20 Oct 2017 14:40:00 +0800
+Message-ID: <20171020064000.GO3285@linux-l9pv.suse>
 References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
- <150842466996.7923.17995994984545441369.stgit@warthog.procyon.org.uk>
+ <150842468009.7923.5512653689857540199.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-security-module-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <150842466996.7923.17995994984545441369.stgit@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com
+In-Reply-To: <150842468009.7923.5512653689857540199.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Oct 19, 2017 at 03:51:09PM +0100, David Howells wrote:
-> From: Matthew Garrett <matthew.garrett@nebula.com>
+On Thu, Oct 19, 2017 at 03:51:20PM +0100, David Howells wrote:
+> From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 > 
-> kexec permits the loading and execution of arbitrary code in ring 0, which
-> is something that lock-down is meant to prevent. It makes sense to disable
-> kexec in this situation.
+> Kexec reboot in case secure boot being enabled does not keep the secure
+> boot mode in new kernel, so later one can load unsigned kernel via legacy
+> kexec_load.  In this state, the system is missing the protections provided
+> by secure boot.
 > 
-> This does not affect kexec_file_load() which can check for a signature on the
-> image to be booted.
+> Adding a patch to fix this by retain the secure_boot flag in original
+> kernel.
 > 
-> Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
-> Signed-off-by: David Howells <dhowells@redhat.com>
-> Acked-by: Dave Young <dyoung@redhat.com>
+> secure_boot flag in boot_params is set in EFI stub, but kexec bypasses the
+> stub.  Fixing this issue by copying secure_boot flag across kexec reboot.
+> 
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> cc: kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 
 I have reviewed and tested this patch. Please feel free to add:
 
-Reviewed-by: "Lee, Chun-Yi" <jlee@suse.com>
+Reviewed-by: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
 
 Thanks a lot!
 Joey Lee
 
-> cc: kexec@lists.infradead.org
 > ---
 > 
->  kernel/kexec.c |    7 +++++++
->  1 file changed, 7 insertions(+)
+>  arch/x86/kernel/kexec-bzimage64.c |    1 +
+>  1 file changed, 1 insertion(+)
 > 
-> diff --git a/kernel/kexec.c b/kernel/kexec.c
-> index e62ec4dc6620..7dadfed9b676 100644
-> --- a/kernel/kexec.c
-> +++ b/kernel/kexec.c
-> @@ -202,6 +202,13 @@ SYSCALL_DEFINE4(kexec_load, unsigned long, entry, unsigned long, nr_segments,
->  		return -EPERM;
+> diff --git a/arch/x86/kernel/kexec-bzimage64.c b/arch/x86/kernel/kexec-bzimage64.c
+> index fb095ba0c02f..7d0fac5bcbbe 100644
+> --- a/arch/x86/kernel/kexec-bzimage64.c
+> +++ b/arch/x86/kernel/kexec-bzimage64.c
+> @@ -179,6 +179,7 @@ setup_efi_state(struct boot_params *params, unsigned long params_load_addr,
+>  	if (efi_enabled(EFI_OLD_MEMMAP))
+>  		return 0;
 >  
->  	/*
-> +	 * kexec can be used to circumvent module loading restrictions, so
-> +	 * prevent loading in that case
-> +	 */
-> +	if (kernel_is_locked_down("kexec of unsigned images"))
-> +		return -EPERM;
-> +
-> +	/*
->  	 * Verify we have a legal set of flags
->  	 * This leaves us room for future extensions.
->  	 */
+> +	params->secure_boot = boot_params.secure_boot;
+>  	ei->efi_loader_signature = current_ei->efi_loader_signature;
+>  	ei->efi_systab = current_ei->efi_systab;
+>  	ei->efi_systab_hi = current_ei->efi_systab_hi;
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo@vger.kernel.org
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
