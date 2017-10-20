@@ -1,45 +1,75 @@
-From: Alexei Starovoitov <alexei.starovoitov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: joeyli <jlee@suse.com>
 Subject: Re: [PATCH 18/27] bpf: Restrict kernel image access functions when
  the kernel is locked down
-Date: Thu, 19 Oct 2017 16:31:08 -0700
-Message-ID: <20171019233105.5ladqpdf2me36j7q@ast-mbp>
-References: <20171019221829.7m5nczg3ltqmhzom@ast-mbp>
- <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
+Date: Fri, 20 Oct 2017 10:47:32 +0800
+Message-ID: <20171020024732.GJ3285@linux-l9pv.suse>
+References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
  <150842476953.7923.18174368926573855810.stgit@warthog.procyon.org.uk>
- <482.1508453314@warthog.procyon.org.uk>
+ <20171019221829.7m5nczg3ltqmhzom@ast-mbp>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <netdev-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <482.1508453314-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: jlee-IBi9RG/b67k@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Daniel Borkmann <daniel-FeC+5ew28dpmcu3hnIyYJQ@public.gmane.org>, "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <20171019221829.7m5nczg3ltqmhzom@ast-mbp>
+Sender: netdev-owner@vger.kernel.org
+To: Alexei Starovoitov <alexei.starovoitov@gmail.com>
+Cc: David Howells <dhowells@redhat.com>, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com, Daniel Borkmann <daniel@iogearbox.net>, "David S. Miller" <davem@davemloft.net>, netdev@vger.kernel.org, Gary Lin <GLin@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Oct 19, 2017 at 11:48:34PM +0100, David Howells wrote:
-> Alexei Starovoitov <alexei.starovoitov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> 
-> > > @@ -65,6 +65,11 @@ BPF_CALL_3(bpf_probe_read, void *, dst, u32, size, const void *, unsafe_ptr)
-> > >  {
-> > >  	int ret;
-> > >  
-> > > +	if (kernel_is_locked_down("BPF")) {
-> > > +		memset(dst, 0, size);
-> > > +		return -EPERM;
-> > > +	}
-> >
-> > That doesn't help the lockdown purpose.
-> > If you don't trust the root the only way to prevent bpf read
-> > memory is to disable the whole thing.
-> > Have a single check in sys_bpf() to disallow everything if kernel_is_locked_down()
-> > and don't add overhead to critical path like bpf_probe_read().
-> 
-> TBH, I've no idea how bpf does anything, so I can't say whether this is
-> better, overkill or insufficient.
+Hi Alexei,
 
-ok. To make it clear:
-Nacked-by: Alexei Starovoitov <ast-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-For the current patch.
-Unnecessary checks for no good reason in performance critical
-functions are not acceptable.
+Thanks for your review! 
+
+On Thu, Oct 19, 2017 at 03:18:30PM -0700, Alexei Starovoitov wrote:
+> On Thu, Oct 19, 2017 at 03:52:49PM +0100, David Howells wrote:
+> > From: Chun-Yi Lee <jlee@suse.com>
+> > 
+> > There are some bpf functions can be used to read kernel memory:
+> > bpf_probe_read, bpf_probe_write_user and bpf_trace_printk.  These allow
+> > private keys in kernel memory (e.g. the hibernation image signing key) to
+> > be read by an eBPF program.  Prohibit those functions when the kernel is
+> > locked down.
+> > 
+> > Signed-off-by: Chun-Yi Lee <jlee@suse.com>
+> > Signed-off-by: David Howells <dhowells@redhat.com>
+> > cc: netdev@vger.kernel.org
+> > ---
+> > 
+> >  kernel/trace/bpf_trace.c |   11 +++++++++++
+> >  1 file changed, 11 insertions(+)
+> > 
+> > diff --git a/kernel/trace/bpf_trace.c b/kernel/trace/bpf_trace.c
+> > index dc498b605d5d..35e85a3fdb37 100644
+> > --- a/kernel/trace/bpf_trace.c
+> > +++ b/kernel/trace/bpf_trace.c
+> > @@ -65,6 +65,11 @@ BPF_CALL_3(bpf_probe_read, void *, dst, u32, size, const void *, unsafe_ptr)
+> >  {
+> >  	int ret;
+> >  
+> > +	if (kernel_is_locked_down("BPF")) {
+> > +		memset(dst, 0, size);
+> > +		return -EPERM;
+> > +	}
+> 
+> That doesn't help the lockdown purpose.
+> If you don't trust the root the only way to prevent bpf read
+> memory is to disable the whole thing.
+
+Not totally untrust root, I don't want that root reads
+arbitrary memory address through bpf.
+
+Is it not enough to lock down bpf_probe_read, bpf_probe_write_user
+and bpf_trace_printk?
+
+> Have a single check in sys_bpf() to disallow everything if kernel_is_locked_down()
+> and don't add overhead to critical path like bpf_probe_read().
+>
+
+Yes, it give overhead to bpf_probe_read but it prevents arbitrary
+memory read.
+
+Another idea is signing bpf bytecode then verifying signture when
+loading to kernel. 
+
+Thanks a lot!
+Joey Lee 
