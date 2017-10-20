@@ -1,37 +1,30 @@
 From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH 06/27] Copy secure_boot flag in boot params across kexec
- reboot
-Date: Fri, 20 Oct 2017 14:40:00 +0800
-Message-ID: <20171020064000.GO3285@linux-l9pv.suse>
+Subject: Re: [PATCH 08/27] hibernate: Disable when the kernel is locked down
+Date: Fri, 20 Oct 2017 14:40:33 +0800
+Message-ID: <20171020064033.GP3285@linux-l9pv.suse>
 References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
- <150842468009.7923.5512653689857540199.stgit@warthog.procyon.org.uk>
+ <150842469486.7923.10376463083069013490.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <150842468009.7923.5512653689857540199.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+In-Reply-To: <150842469486.7923.10376463083069013490.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Cc: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Oct 19, 2017 at 03:51:20PM +0100, David Howells wrote:
-> From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+On Thu, Oct 19, 2017 at 03:51:34PM +0100, David Howells wrote:
+> From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
 > 
-> Kexec reboot in case secure boot being enabled does not keep the secure
-> boot mode in new kernel, so later one can load unsigned kernel via legacy
-> kexec_load.  In this state, the system is missing the protections provided
-> by secure boot.
+> There is currently no way to verify the resume image when returning
+> from hibernate.  This might compromise the signed modules trust model,
+> so until we can work with signed hibernate images we disable it when the
+> kernel is locked down.
 > 
-> Adding a patch to fix this by retain the secure_boot flag in original
-> kernel.
-> 
-> secure_boot flag in boot_params is set in EFI stub, but kexec bypasses the
-> stub.  Fixing this issue by copying secure_boot flag across kexec reboot.
-> 
-> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
 > Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> cc: kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> cc: linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
 I have reviewed and tested this patch. Please feel free to add:
 
@@ -42,21 +35,22 @@ Joey Lee
 
 > ---
 > 
->  arch/x86/kernel/kexec-bzimage64.c |    1 +
->  1 file changed, 1 insertion(+)
+>  kernel/power/hibernate.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/arch/x86/kernel/kexec-bzimage64.c b/arch/x86/kernel/kexec-bzimage64.c
-> index fb095ba0c02f..7d0fac5bcbbe 100644
-> --- a/arch/x86/kernel/kexec-bzimage64.c
-> +++ b/arch/x86/kernel/kexec-bzimage64.c
-> @@ -179,6 +179,7 @@ setup_efi_state(struct boot_params *params, unsigned long params_load_addr,
->  	if (efi_enabled(EFI_OLD_MEMMAP))
->  		return 0;
+> diff --git a/kernel/power/hibernate.c b/kernel/power/hibernate.c
+> index a5c36e9c56a6..f2eafefeec50 100644
+> --- a/kernel/power/hibernate.c
+> +++ b/kernel/power/hibernate.c
+> @@ -70,7 +70,7 @@ static const struct platform_hibernation_ops *hibernation_ops;
 >  
-> +	params->secure_boot = boot_params.secure_boot;
->  	ei->efi_loader_signature = current_ei->efi_loader_signature;
->  	ei->efi_systab = current_ei->efi_systab;
->  	ei->efi_systab_hi = current_ei->efi_systab_hi;
+>  bool hibernation_available(void)
+>  {
+> -	return (nohibernate == 0);
+> +	return nohibernate == 0 && !kernel_is_locked_down("Hibernation");
+>  }
+>  
+>  /**
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-efi" in
