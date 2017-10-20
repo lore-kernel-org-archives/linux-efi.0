@@ -1,38 +1,31 @@
-From: jlee@suse.com
-Subject: Re: [PATCH 18/27] bpf: Restrict kernel image access functions when
- the kernel is locked down
-Date: Sat, 21 Oct 2017 00:43:43 +0800
-Message-ID: <20171020164343.e5mlq7ukskfjmlpp@linux-rasp2>
-References: <20171020155748.kzrvg6565oxh6gmb@linux-rasp2>
- <20171020024732.GJ3285@linux-l9pv.suse>
- <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
- <150842476953.7923.18174368926573855810.stgit@warthog.procyon.org.uk>
- <20171019221829.7m5nczg3ltqmhzom@ast-mbp>
- <2582.1508486928@warthog.procyon.org.uk>
- <19424.1508515402@warthog.procyon.org.uk>
+From: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
+Subject: Re: [PATCH 12/27] x86/msr: Restrict MSR access when the kernel is
+ locked down
+Date: Fri, 20 Oct 2017 19:09:39 +0100
+Message-ID: <20171020190939.569cedd2@alans-desktop>
+References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
+        <150842472452.7923.2592278090192179002.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <19424.1508515402@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <150842472452.7923.2592278090192179002.stgit@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
 To: David Howells <dhowells@redhat.com>
-Cc: Alexei Starovoitov <alexei.starovoitov@gmail.com>, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com, Daniel Borkmann <daniel@iogearbox.net>, "David S. Miller" <davem@davemloft.net>, netdev@vger.kernel.org, Gary Lin <GLin@suse.com>
+Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Oct 20, 2017 at 05:03:22PM +0100, David Howells wrote:
-> jlee@suse.com wrote:
-> 
-> > I think that we don't need to lock down sys_bpf() now because
-> > we didn't lock down other interfaces for reading arbitrary
-> > address like /dev/mem and /dev/kmem.
-> 
-> Ummm...  See patch 4.  You even gave me a Reviewed-by for it ;-)
-> 
-> David
+On Thu, 19 Oct 2017 15:52:04 +0100
+David Howells <dhowells@redhat.com> wrote:
 
-hm... patch 4 only prevents write_mem() but not read_mem().
-Or I missed anything?
+> From: Matthew Garrett <matthew.garrett@nebula.com>
+> 
+> Writing to MSRs should not be allowed if the kernel is locked down, since
+> it could lead to execution of arbitrary code in kernel mode.  Based on a
+> patch by Kees Cook.
 
-Thanks
-Joey Lee
+There are a load of standard tools that use this so I think you are going
+to need a whitelist. Can you at least log *which* MSR in the failing case
+so a whitelist can be built over time ?
+
+Alan
