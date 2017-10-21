@@ -1,34 +1,51 @@
-From: James Morris <james.l.morris-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 26/27] efi: Add an EFI_SECURE_BOOT flag to indicate secure
- boot mode
-Date: Sat, 21 Oct 2017 06:19:19 +0400 (+04)
-Message-ID: <alpine.LFD.2.20.1710210618180.22771@t440>
-References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk> <150842483172.7923.2791223614506312745.stgit@warthog.procyon.org.uk>
+From: joeyli <jlee@suse.com>
+Subject: Re: [PATCH 12/27] x86/msr: Restrict MSR access when the kernel is
+ locked down
+Date: Sat, 21 Oct 2017 12:39:19 +0800
+Message-ID: <20171021043919.GF3285@linux-l9pv.suse>
+References: <20171020190939.569cedd2@alans-desktop>
+ <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
+ <150842472452.7923.2592278090192179002.stgit@warthog.procyon.org.uk>
+ <18499.1508532496@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <150842483172.7923.2791223614506312745.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <18499.1508532496@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: Alan Cox <gnomes@lxorguk.ukuu.org.uk>, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 19 Oct 2017, David Howells wrote:
+On Fri, Oct 20, 2017 at 09:48:16PM +0100, David Howells wrote:
+> Alan Cox <gnomes@lxorguk.ukuu.org.uk> wrote:
+> 
+> > There are a load of standard tools that use this so I think you are going
+> > to need a whitelist. Can you at least log *which* MSR in the failing case
+> > so a whitelist can be built over time ?
+> 
+[...snip]
+> 
+> And do you know where wrmsr_safe_regs() might be found?  I can see things
+> using it and exporting it, but no implementation, so I'm guessing it's
+> macroised somewhere.
 
-> +	if (efi_enabled(EFI_BOOT)) {
-> +		switch (mode) {
-> +		case efi_secureboot_mode_disabled:
-> +			pr_info("Secure boot disabled\n");
-> +			break;
-> +		case efi_secureboot_mode_enabled:
-> +			set_bit(EFI_SECURE_BOOT, &efi.flags);
-> +			pr_info("Secure boot enabled\n");
-> +			break;
-> +		default:
-> +			pr_info("Secure boot could not be determined\n");
+Looks the definition is in 
 
-Perhaps make this pr_warning and include the unknown mode value?
+arch/x86/lib/msr-reg.S
 
--- 
-James Morris
-<james.l.morris-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+#ifdef CONFIG_X86_64
+/*
+ * int {rdmsr,wrmsr}_safe_regs(u32 gprs[8]);
+ *
+ * reg layout: u32 gprs[eax, ecx, edx, ebx, esp, ebp, esi, edi]
+ *
+ */
+.macro op_safe_regs op
+ENTRY(\op\()_safe_regs)
+        pushq %rbx
+        pushq %r12
+...
+
+Regards
+Joey Lee
