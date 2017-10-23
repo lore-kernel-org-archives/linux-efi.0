@@ -1,25 +1,25 @@
 From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 18/27] bpf: Restrict kernel image access functions when the kernel is locked down
-Date: Mon, 23 Oct 2017 15:53:00 +0100
-Message-ID: <21530.1508770380@warthog.procyon.org.uk>
-References: <20171020164343.e5mlq7ukskfjmlpp@linux-rasp2> <20171020155748.kzrvg6565oxh6gmb@linux-rasp2> <20171020024732.GJ3285@linux-l9pv.suse> <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk> <150842476953.7923.18174368926573855810.stgit@warthog.procyon.org.uk> <20171019221829.7m5nczg3ltqmhzom@ast-mbp> <2582.1508486928@warthog.procyon.org.uk> <19424.1508515402@warthog.procyon.org.uk>
+Subject: Re: [PATCH 25/27] Lock down /proc/kcore
+Date: Mon, 23 Oct 2017 15:56:57 +0100
+Message-ID: <22790.1508770617@warthog.procyon.org.uk>
+References: <alpine.LFD.2.20.1710210609270.22771@t440> <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk> <150842482228.7923.9630520914833154257.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171020164343.e5mlq7ukskfjmlpp@linux-rasp2>
-Content-ID: <21529.1508770380.1@warthog.procyon.org.uk>
+In-Reply-To: <alpine.LFD.2.20.1710210609270.22771@t440>
+Content-ID: <22789.1508770617.1@warthog.procyon.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: jlee@suse.com
-Cc: dhowells@redhat.com, Alexei Starovoitov <alexei.starovoitov@gmail.com>, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com, Daniel Borkmann <daniel@iogearbox.net>, "David S. Miller" <davem@davemloft.net>, netdev@vger.kernel.org, Gary Lin <GLin@suse.com>
+To: James Morris <james.l.morris@oracle.com>
+Cc: dhowells@redhat.com, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-jlee@suse.com wrote:
+James Morris <james.l.morris@oracle.com> wrote:
 
-> hm... patch 4 only prevents write_mem() but not read_mem().
-> Or I missed anything?
+> I have to wonder, though, after everything is locked down, how easy will 
+> it be for new things to slip in which need to be included in the lockdown, 
+> but are not.
 
-Actually, yes, as it happens, patch 11 prevents you from even opening /dev/mem
-and /dev/kmem by locking down open of /dev/port.  So I've moved this bit to
-patch 4, simplified and posted a new variant for patch 4.
+That's always a possibility, and short of reviewing every change, particularly
+in the drivers, I'm not sure how to prevent it.
 
 David
