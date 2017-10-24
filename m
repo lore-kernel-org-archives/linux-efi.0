@@ -1,65 +1,50 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH] efi/libstub: arm: omit sorting of the UEFI memory map
-Date: Tue, 24 Oct 2017 12:21:07 +0100
-Message-ID: <20171024112107.GB31064@arm.com>
-References: <20171022141457.28769-1-ard.biesheuvel@linaro.org>
- <20171024110519.GE20805@n2100.armlinux.org.uk>
- <CAKv+Gu8gPHj1jV1ZyW8u1qSb5F=L6HDrmCcVueo0szy+2USsXA@mail.gmail.com>
+From: David Howells <dhowells@redhat.com>
+Subject: Re: [PATCH 04/27] Restrict /dev/mem and /dev/kmem when the kernel is locked down
+Date: Tue, 24 Oct 2017 15:56:41 +0100
+Message-ID: <21927.1508857001@warthog.procyon.org.uk>
+References: <CABawtvMWhHJHtog9BWNVJ3Xk-ipOhPp+TGSVNjjZD27QAfB+Nw@mail.gmail.com> <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk> <150842466261.7923.14359746674406637357.stgit@warthog.procyon.org.uk> <18778.1508769258@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu8gPHj1jV1ZyW8u1qSb5F=L6HDrmCcVueo0szy+2USsXA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Russell King - ARM Linux <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Jeffy Chen <jeffy.chen-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Matthias Brugger <mbrugger-IBi9RG/b67k@public.gmane.org>, Chris Zhong <zyw-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <CABawtvMWhHJHtog9BWNVJ3Xk-ipOhPp+TGSVNjjZD27QAfB+Nw@mail.gmail.com>
+Content-ID: <21926.1508857001.1@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: Ethan Zhao <ethan.kernel@gmail.com>
+Cc: dhowells@redhat.com, joeyli <jlee@suse.com>, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, Greg KH <gregkh@linuxfoundation.org>, LKML <linux-kernel@vger.kernel.org>, jforbes@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Oct 24, 2017 at 12:09:59PM +0100, Ard Biesheuvel wrote:
-> On 24 October 2017 at 12:05, Russell King - ARM Linux
-> <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org> wrote:
-> > On Sun, Oct 22, 2017 at 03:14:57PM +0100, Ard Biesheuvel wrote:
-> >> ARM shares its EFI stub implementation with arm64, which has some
-> >> special handling in the virtual remapping code to
-> >> a) make sure that we can map everything even if the OS executes
-> >>    with 64k page size, and
-> >> b) make sure that adjacent regions with the same attributes are not
-> >>    reordered or moved apart in memory.
-> >>
-> >> The latter is a workaround for a 'feature' that was shortly recommended
-> >> by UEFI spec v2.5, but deprecated shortly after, due to the fact that
-> >> it broke many OS installers, including non-Linux ones, and it was never
-> >> widely implemented for ARM systems. Before implementing b), the arm64
-> >> code simply rounded up all regions to 64 KB granularity, but given that
-> >> that results in moving adjacent regions apart, it had to be refined when
-> >> b) was implemented.
-> >>
-> >> The adjacency check requires a sort() pass, due to the fact that the
-> >> UEFI spec does not mandate any ordering, and the inclusion of the
-> >> lib/sort.c code into the ARM EFI stub is causing some trouble with
-> >> the decompressor build due to the fact that its EXPORT_SYMBOL() call
-> >> triggers the creation of ksymtab/kcrctab sections.
-> >>
-> >> So let's simply do away with the adjacency check for ARM, and simply put
-> >> all UEFI runtime regions together if they have the same memory attributes.
-> >> This is guaranteed to work, given that ARM only supports 4 KB pages,
-> >> and allows us to remove the sort() call entirely.
-> >>
-> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> >
-> > I guess as this is shared between ARM and ARM64, ARM64 folk should ack
-> > this before I merge it - can I have an ack from that side please?
-> >
-> 
-> Note that the patch does not touch arch/arm64, nor does it affect
-> arm64, given that the change is a no-op if CONFIG_ARM64=y. That said,
-> I welcome any acks from the arm64 maintainers, but I don't think they
-> are actually required here.
+Ethan Zhao <ethan.kernel@gmail.com> wrote:
 
-Looks fine to me:
+>     May I ask a question here -- Is it intentionally enabling the
+> read-only mode, so userspace
+> tools like dmidecode could work with kernel_is_locked_down ?  while it
+> was impossible to work
+> with the attached patch applied. Is it a security policy change with
+> secure boot ?
 
-Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+I removed readability on /dev/mem, /dev/kmem and /proc/kcore so that userspace
+can't use this to gain access to cryptographic material in use by the kernel.
 
-Thanks,
+Readability was removed on /dev/port because reading from an I/O port register
+might have a side effect or might allow you to snoop h/w interactions, such as
+keyboard input.
 
-Will
+I can provide an additional config option to allow /dev/mem and similar to
+remain readable - but it needs to be a temporary affair.
+
+I can also log accesses to these interfaces so that we can find out what
+breaks and fix it.
+
+Note that dmidecode doesn't necessarily use /dev/mem:
+
+	[root@andromeda ~]# strace -f -eopen dmidecode  >/dev/null
+	open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+	open("/lib64/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+	open("/sys/firmware/dmi/tables/smbios_entry_point", O_RDONLY) = 3
+	open("/sys/firmware/dmi/tables/DMI", O_RDONLY) = 3
+	+++ exited with 0 +++
+
+Indeed, my Fedora 24 test system boots without a /dev/mem file being present
+(I'm not sure *why* /dev/mem isn't present, but I hadn't noticed till now).
+
+David
