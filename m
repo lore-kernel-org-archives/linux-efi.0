@@ -1,21 +1,17 @@
-From: ekatmazurova44-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Subject: =?UTF-8?B?0J/RgNC+0LTQstC40LbQtdC90LjQtSDQktCw0YjQuNGFINCy0LXQsS3RgdCw0LnRgtC+?=
-        =?UTF-8?B?0LIg0YHRgtCw0YLRjNGP0LzQuA==?=
-Date: Tue, 24 Oct 2017 07:07:43 +0000
-Message-ID: <001a113ef2046cad86055c45986c@google.com>
+From: Roy Cockrum <finn.johansen-ti3pZAEQCXJuMpJDpNschA@public.gmane.org>
+Subject: Betr.: Spende
+Date: Tue, 24 Oct 2017 10:15:05 +0200 (CEST)
+Message-ID: <782201566.8292936.1508832905801.JavaMail.zimbra@getmail.no>
+Reply-To: Roy Cockrum <info-4DBc6jxSlp8ExvDGGxo+JQ@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"; format=flowed; delsp=yes
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-0JrQvtC70LvQtdCz0LgsINC30LTRgNCw0LLRgdGC0LLRg9C50YLQtSENCg0K0J7QutCw0LbRgyDR
-g9GB0LvRg9Cz0Lgg0L/RgNC+0YTQtdGB0YHQuNC+0L3QsNC70YzQvdC+0LPQviBTRU8t0LrQvtC/
-0LjRgNCw0LnRgtC10YDQsCAvINGA0LXRgNCw0LnRgtC10YDQsC4g0J3QsNC/0LjRgdCw0L3QvdGL
-0LUg0LzQvdC+0LkgIA0K0YLQtdC60YHRgtGLINC/0YDQuNC30LLQsNC90Ysg0L/QvtC80L7Rh9GM
-INCyINC/0YDQvtC00LLQuNC20LXQvdC40Lgg0LLQtdCxLdGB0LDQudGC0LAg0LIg0LLRi9C00LDR
-h9C1IEdvb2dsZSDQuCBZYW5kZXguDQoNCtCm0LXQvdGLINC4INC/0YDQuNC80LXRgNGLINCS0LDQ
-vCDQvdCw0L/RgNCw0LLQuNGC0Yw/DQrQoSDRg9Cy0LDQttC10L3QuNC10Lwg0Log0JLQsNC8INC4
-INCS0LDRiNC10LzRgyDQtNC10LvRgywg0JzQsNC30YPRgNC+0LLQsCDQlS4NCg==
+
+
+Gr=C3=BC=C3=9Fe,Sie erhielten eine Spende von 1.259.000,00 EUR von Herrn Ro=
+y Cockrum. Bitte kontaktieren Sie ihn bei info-4DBc6jxSlp8ExvDGGxo+JQ@public.gmane.org f=C3=BCr weit=
+ere Informationen =C3=BCber die Spende.
