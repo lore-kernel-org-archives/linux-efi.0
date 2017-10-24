@@ -1,76 +1,114 @@
-From: Ethan Zhao <ethan.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 04/27] Restrict /dev/mem and /dev/kmem when the kernel is
- locked down
-Date: Tue, 24 Oct 2017 18:48:44 +0800
-Message-ID: <CABawtvMWhHJHtog9BWNVJ3Xk-ipOhPp+TGSVNjjZD27QAfB+Nw@mail.gmail.com>
-References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
- <150842466261.7923.14359746674406637357.stgit@warthog.procyon.org.uk> <18778.1508769258@warthog.procyon.org.uk>
+From: Russell King - ARM Linux <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>
+Subject: Re: [PATCH] efi/libstub: arm: omit sorting of the UEFI memory map
+Date: Tue, 24 Oct 2017 12:05:19 +0100
+Message-ID: <20171024110519.GE20805@n2100.armlinux.org.uk>
+References: <20171022141457.28769-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <18778.1508769258-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20171022141457.28769-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: joeyli <jlee-IBi9RG/b67k@public.gmane.org>, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, zyw-TNX95d0MmH7DzftRWevZcw@public.gmane.org, jeffy.chen-TNX95d0MmH7DzftRWevZcw@public.gmane.org, gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org, mbrugger-IBi9RG/b67k@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-David=EF=BC=8C
+On Sun, Oct 22, 2017 at 03:14:57PM +0100, Ard Biesheuvel wrote:
+> ARM shares its EFI stub implementation with arm64, which has some
+> special handling in the virtual remapping code to
+> a) make sure that we can map everything even if the OS executes
+>    with 64k page size, and
+> b) make sure that adjacent regions with the same attributes are not
+>    reordered or moved apart in memory.
+> 
+> The latter is a workaround for a 'feature' that was shortly recommended
+> by UEFI spec v2.5, but deprecated shortly after, due to the fact that
+> it broke many OS installers, including non-Linux ones, and it was never
+> widely implemented for ARM systems. Before implementing b), the arm64
+> code simply rounded up all regions to 64 KB granularity, but given that
+> that results in moving adjacent regions apart, it had to be refined when
+> b) was implemented.
+> 
+> The adjacency check requires a sort() pass, due to the fact that the
+> UEFI spec does not mandate any ordering, and the inclusion of the
+> lib/sort.c code into the ARM EFI stub is causing some trouble with
+> the decompressor build due to the fact that its EXPORT_SYMBOL() call
+> triggers the creation of ksymtab/kcrctab sections.
+> 
+> So let's simply do away with the adjacency check for ARM, and simply put
+> all UEFI runtime regions together if they have the same memory attributes.
+> This is guaranteed to work, given that ARM only supports 4 KB pages,
+> and allows us to remove the sort() call entirely.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-    May I ask a question here -- Is it intentionally enabling the
-read-only mode, so userspace
-tools like dmidecode could work with kernel_is_locked_down ?  while it
-was impossible to work
-with the attached patch applied. Is it a security policy change with
-secure boot ?
+I guess as this is shared between ARM and ARM64, ARM64 folk should ack
+this before I merge it - can I have an ack from that side please?
 
-Thanks,
-Ethan
+Thanks.
 
-On Mon, Oct 23, 2017 at 10:34 PM, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote=
-:
-> I think I should replace this patch with the attached.  This will prevent
-> /dev/mem, /dev/kmem and /dev/port from being *opened*, and thereby preven=
-ting
-> read, write and ioctl.
->
-> David
 > ---
-> commit e68daa2256986932b9a7d6709cf9e24b30d93583
-> Author: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-> Date:   Wed May 24 14:56:02 2017 +0100
->
->     Restrict /dev/{mem,kmem,port} when the kernel is locked down
->
->     Allowing users to read and write to core kernel memory makes it possi=
-ble
->     for the kernel to be subverted, avoiding module loading restrictions,=
- and
->     also to steal cryptographic information.
->
->     Disallow /dev/mem and /dev/kmem from being opened this when the kerne=
-l has
->     been locked down to prevent this.
->
->     Also disallow /dev/port from being opened to prevent raw ioport acces=
-s and
->     thus DMA from being used to accomplish the same thing.
->
->     Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
->     Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->     Reviewed-by: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
->
-> diff --git a/drivers/char/mem.c b/drivers/char/mem.c
-> index 593a8818aca9..0ce5ac0a5c6b 100644
-> --- a/drivers/char/mem.c
-> +++ b/drivers/char/mem.c
-> @@ -762,6 +762,8 @@ static loff_t memory_lseek(struct file *file, loff_t =
-offset, int orig)
->
->  static int open_port(struct inode *inode, struct file *filp)
->  {
-> +       if (kernel_is_locked_down("/dev/mem,kmem,port"))
-> +               return -EPERM;
->         return capable(CAP_SYS_RAWIO) ? 0 : -EPERM;
->  }
->
+>  drivers/firmware/efi/libstub/Makefile   | 6 +++---
+>  drivers/firmware/efi/libstub/arm-stub.c | 7 +++++--
+>  2 files changed, 8 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+> index dedf9bde44db..f3e8431565ea 100644
+> --- a/drivers/firmware/efi/libstub/Makefile
+> +++ b/drivers/firmware/efi/libstub/Makefile
+> @@ -33,13 +33,14 @@ lib-y				:= efi-stub-helper.o gop.o secureboot.o
+>  lib-$(CONFIG_RESET_ATTACK_MITIGATION) += tpm.o
+>  
+>  # include the stub's generic dependencies from lib/ when building for ARM/arm64
+> -arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
+> +arm-deps-y := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c
+> +arm-deps-$(CONFIG_ARM64) += sort.c
+>  
+>  $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
+>  	$(call if_changed_rule,cc_o_c)
+>  
+>  lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o random.o \
+> -				   $(patsubst %.c,lib-%.o,$(arm-deps))
+> +				   $(patsubst %.c,lib-%.o,$(arm-deps-y))
+>  
+>  lib-$(CONFIG_ARM)		+= arm32-stub.o
+>  lib-$(CONFIG_ARM64)		+= arm64-stub.o
+> @@ -90,5 +91,4 @@ quiet_cmd_stubcopy = STUBCPY $@
+>  # explicitly by the decompressor linker script.
+>  #
+>  STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub
+> -STUBCOPY_RM-$(CONFIG_ARM)	+= -R ___ksymtab+sort -R ___kcrctab+sort
+>  STUBCOPY_RELOC-$(CONFIG_ARM)	:= R_ARM_ABS
+> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+> index 1cb2d1c070c3..3061e4057483 100644
+> --- a/drivers/firmware/efi/libstub/arm-stub.c
+> +++ b/drivers/firmware/efi/libstub/arm-stub.c
+> @@ -349,7 +349,9 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
+>  	 * The easiest way to find adjacent regions is to sort the memory map
+>  	 * before traversing it.
+>  	 */
+> -	sort(memory_map, map_size / desc_size, desc_size, cmp_mem_desc, NULL);
+> +	if (IS_ENABLED(CONFIG_ARM64))
+> +		sort(memory_map, map_size / desc_size, desc_size, cmp_mem_desc,
+> +		     NULL);
+>  
+>  	for (l = 0; l < map_size; l += desc_size, prev = in) {
+>  		u64 paddr, size;
+> @@ -366,7 +368,8 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
+>  		 * a 4k page size kernel to kexec a 64k page size kernel and
+>  		 * vice versa.
+>  		 */
+> -		if (!regions_are_adjacent(prev, in) ||
+> +		if ((IS_ENABLED(CONFIG_ARM64) &&
+> +		     !regions_are_adjacent(prev, in)) ||
+>  		    !regions_have_compatible_memory_type_attrs(prev, in)) {
+>  
+>  			paddr = round_down(in->phys_addr, SZ_64K);
+> -- 
+> 2.11.0
+> 
+
+-- 
+RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line in suburbia: sync at 8.8Mbps down 630kbps up
+According to speedtest.net: 8.21Mbps down 510kbps up
