@@ -1,50 +1,38 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 04/27] Restrict /dev/mem and /dev/kmem when the kernel is locked down
-Date: Tue, 24 Oct 2017 15:56:41 +0100
-Message-ID: <21927.1508857001@warthog.procyon.org.uk>
-References: <CABawtvMWhHJHtog9BWNVJ3Xk-ipOhPp+TGSVNjjZD27QAfB+Nw@mail.gmail.com> <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk> <150842466261.7923.14359746674406637357.stgit@warthog.procyon.org.uk> <18778.1508769258@warthog.procyon.org.uk>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH 18/27] bpf: Restrict kernel image access functions when
+ the kernel is locked down
+Date: Wed, 25 Oct 2017 15:07:30 +0800
+Message-ID: <20171025070730.GH8550@linux-l9pv.suse>
+References: <20171020164343.e5mlq7ukskfjmlpp@linux-rasp2>
+ <20171020155748.kzrvg6565oxh6gmb@linux-rasp2>
+ <20171020024732.GJ3285@linux-l9pv.suse>
+ <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
+ <150842476953.7923.18174368926573855810.stgit@warthog.procyon.org.uk>
+ <20171019221829.7m5nczg3ltqmhzom@ast-mbp>
+ <2582.1508486928@warthog.procyon.org.uk>
+ <19424.1508515402@warthog.procyon.org.uk>
+ <21530.1508770380@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <CABawtvMWhHJHtog9BWNVJ3Xk-ipOhPp+TGSVNjjZD27QAfB+Nw@mail.gmail.com>
-Content-ID: <21926.1508857001.1@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-To: Ethan Zhao <ethan.kernel@gmail.com>
-Cc: dhowells@redhat.com, joeyli <jlee@suse.com>, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, Greg KH <gregkh@linuxfoundation.org>, LKML <linux-kernel@vger.kernel.org>, jforbes@redhat.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <21530.1508770380-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Alexei Starovoitov <alexei.starovoitov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Daniel Borkmann <daniel-FeC+5ew28dpmcu3hnIyYJQ@public.gmane.org>, "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Gary Lin <GLin-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Ethan Zhao <ethan.kernel@gmail.com> wrote:
+On Mon, Oct 23, 2017 at 03:53:00PM +0100, David Howells wrote:
+> jlee-IBi9RG/b67k@public.gmane.org wrote:
+> 
+> > hm... patch 4 only prevents write_mem() but not read_mem().
+> > Or I missed anything?
+> 
+> Actually, yes, as it happens, patch 11 prevents you from even opening /dev/mem
+> and /dev/kmem by locking down open of /dev/port.  So I've moved this bit to
+> patch 4, simplified and posted a new variant for patch 4.
+>
 
->     May I ask a question here -- Is it intentionally enabling the
-> read-only mode, so userspace
-> tools like dmidecode could work with kernel_is_locked_down ?  while it
-> was impossible to work
-> with the attached patch applied. Is it a security policy change with
-> secure boot ?
+Thank you for pointing out!
 
-I removed readability on /dev/mem, /dev/kmem and /proc/kcore so that userspace
-can't use this to gain access to cryptographic material in use by the kernel.
-
-Readability was removed on /dev/port because reading from an I/O port register
-might have a side effect or might allow you to snoop h/w interactions, such as
-keyboard input.
-
-I can provide an additional config option to allow /dev/mem and similar to
-remain readable - but it needs to be a temporary affair.
-
-I can also log accesses to these interfaces so that we can find out what
-breaks and fix it.
-
-Note that dmidecode doesn't necessarily use /dev/mem:
-
-	[root@andromeda ~]# strace -f -eopen dmidecode  >/dev/null
-	open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
-	open("/lib64/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
-	open("/sys/firmware/dmi/tables/smbios_entry_point", O_RDONLY) = 3
-	open("/sys/firmware/dmi/tables/DMI", O_RDONLY) = 3
-	+++ exited with 0 +++
-
-Indeed, my Fedora 24 test system boots without a /dev/mem file being present
-(I'm not sure *why* /dev/mem isn't present, but I hadn't noticed till now).
-
-David
+Joey Lee
