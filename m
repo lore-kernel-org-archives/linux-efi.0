@@ -1,60 +1,80 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH 12/27] x86/msr: Restrict MSR access when the kernel is
- locked down
-Date: Wed, 25 Oct 2017 22:03:29 +0800
-Message-ID: <20171025140329.GI8550@linux-l9pv.suse>
-References: <20171020190939.569cedd2@alans-desktop>
- <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
- <150842472452.7923.2592278090192179002.stgit@warthog.procyon.org.uk>
- <21023.1508770184@warthog.procyon.org.uk>
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: Re: [PATCH v4 19/27] x86: assembly, make some functions local
+Date: Wed, 25 Oct 2017 16:18:31 +0200
+Message-ID: <f70a8042-463d-09c8-65f9-9d07f71b84a2@suse.cz>
+References: <20171002091246.28432-1-jslaby@suse.cz>
+ <20171002091246.28432-19-jslaby@suse.cz>
+ <CAKv+Gu9C88ToAx+8KcGacUECo7ExnTTBmibEjpB2WkfFvjoZvw@mail.gmail.com>
+ <5a3785ea-d2d8-dd51-4b02-12f4ca5507d7@suse.cz>
+ <CAKv+Gu-7q_Pr5SoUY_kUstaVusUxvXt9e8xeChQySGZ6h+jdAg@mail.gmail.com>
+ <9dfcee94-2058-8986-526c-f7ef9ebada66@suse.cz>
+ <CAKv+Gu9S0w0EUvruDjruR+hJ0B2QU_do1GknV83C8CgLTp8T2Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <21023.1508770184@warthog.procyon.org.uk>
+In-Reply-To: <CAKv+Gu9S0w0EUvruDjruR+hJ0B2QU_do1GknV83C8CgLTp8T2Q@mail.gmail.com>
+Content-Language: en-GB
 Sender: linux-kernel-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: Alan Cox <gnomes@lxorguk.ukuu.org.uk>, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, "mingo@redhat.com" <mingo@redhat.com>, "tglx@linutronix.de" <tglx@linutronix.de>, "hpa@zytor.com" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, xen-devel <xen-devel@lists.xenproject.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi David, 
-
-On Mon, Oct 23, 2017 at 03:49:44PM +0100, David Howells wrote:
-> Alan Cox <gnomes@lxorguk.ukuu.org.uk> wrote:
+On 10/06/2017, 04:01 PM, Ard Biesheuvel wrote:
+> On 6 October 2017 at 13:53, Jiri Slaby <jslaby@suse.cz> wrote:
+>> On 10/04/2017, 09:33 AM, Ard Biesheuvel wrote:
+>>> In arm64, we use ENTRY/ENDPROC for functions with external linkage,
+>>> and the bare symbol name/ENDPROC for functions with local linkage. I
+>>> guess we could add ENDOBJECT if we wanted to, but we never really felt
+>>> the need.
+>>
+>> Yes and this is exactly the reason for the new macros. Now, it's a
+>> complete mess. One arch does this, another does that. And we are in a
+>> state to have reliable stacktraces, let objtool check functions, let
+>> objtool generate annotations (e.g. for ORC unwinder), etc.
+>>
 > 
-> > There are a load of standard tools that use this so I think you are going
-> > to need a whitelist. Can you at least log *which* MSR in the failing case
-> > so a whitelist can be built over time ?
+> You are implying that ENTRY/ENDPROC and 'bare symbol name'/ENDPROC
+> prevent you from doing any of this, but this is simply not true.
+
+If I understand correctly, you have not read the discussion behind the
+link I sent you... So in sum:
+Initially, I only used the current ENTRY/ENDPROC approach and augmented
+it to fix up the mess in x86. But it was concluded that these old macros
+are terrible and we rather want to avoid them. It was especially the bad
+naming of these old macros. So we discussed what the new naming scheme
+could be and this is what we ended up with.
+
+>> Without knowing what is start, where is its end, what is function, what
+>> is object (data) etc., it can barely check or even generate anything
+>> automatically. Not speaking about impaired macros like your name/ENDPROC
+>> above.
+>>
 > 
-> Will the attached change work for you?
-> 
+> What is the problem with impaired macros?
 
-It's good to me.
+Obviously that they are impaired. That is the tools do not know where to
+stop with reading of code or data.
 
-Joey Lee
+This is quite usual:
 
-> ---
-> diff --git a/arch/x86/kernel/msr.c b/arch/x86/kernel/msr.c
-> index a05a97863286..f18cadbc31ce 100644
-> --- a/arch/x86/kernel/msr.c
-> +++ b/arch/x86/kernel/msr.c
-> @@ -84,8 +84,10 @@ static ssize_t msr_write(struct file *file, const char __user *buf,
->  	int err = 0;
->  	ssize_t bytes = 0;
->  
-> -	if (kernel_is_locked_down("Direct MSR access"))
-> +	if (kernel_is_locked_down("Direct MSR access")) {
-> +		pr_info("Direct access to MSR %x\n", reg);
->  		return -EPERM;
-> +	}
->  
->  	if (count % 8)
->  		return -EINVAL;	/* Invalid chunk size */
-> @@ -135,6 +137,7 @@ static long msr_ioctl(struct file *file, unsigned int ioc, unsigned long arg)
->  			break;
->  		}
->  		if (kernel_is_locked_down("Direct MSR access")) {
-> +			pr_info("Direct access to MSR %x\n", reg[1]); /* Display %ecx */
->  			err = -EPERM;
->  			break;
->  		}
+foo:
+  mov data,a
+  call bar
+  ret
+
+data: .string "hello"
+
+This makes the tools to choke on the data while thinking it is still code.
+
+> So what is preventing people from using these new macros in the wrong way?
+
+The tools. It is quite easy to check this during build by a linker and I
+have such a patch here. It was not yet concluded (I think) whether we
+are going to check this via objtool or by something like my patch.
+Noteworthy, objtool can check much more in this respect, obviously.
+
+thanks,
+-- 
+js
+suse labs
