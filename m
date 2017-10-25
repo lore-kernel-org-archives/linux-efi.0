@@ -1,42 +1,37 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 1/2] efi/capsule-loader: pr_err() strings should end with newlines
-Date: Wed, 25 Oct 2017 11:14:18 +0100
-Message-ID: <20171025101419.26369-2-ard.biesheuvel@linaro.org>
-References: <20171025101419.26369-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171025101419.26369-1-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Arvind Yadav <arvind.yadav.cs@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Jan Kiszka <jan.kiszka@siemens.com>, Kweh Hock Leong <hock.leong.kweh@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [GIT PULL 0/2] EFI updates for v4.15
+Date: Wed, 25 Oct 2017 11:14:17 +0100
+Message-ID: <20171025101419.26369-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Arvind Yadav <arvind.yadav.cs-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Arvind Yadav <arvind.yadav.cs@gmail.com>
+The following changes since commit 8a5776a5f49812d29fe4b2d0a2d71675c3facf3f:
 
-pr_err() messages should terminated with a new-line to avoid
-other messages being concatenated onto the end.
+  Linux 4.14-rc4 (2017-10-08 20:53:29 -0700)
 
-Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Jan Kiszka <jan.kiszka@siemens.com>
-Cc: Kweh Hock Leong <hock.leong.kweh@intel.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git efi-next
+
+for you to fetch changes up to c19611def8fd3f524bc945f0e8f9becace8fdf06:
+
+  arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or WP are set (2017-10-16 16:21:26 +0100)
+
+----------------------------------------------------------------
+EFI changes for v4.15:
+- ignore EFI_MEMORY_XP attributes on ARM if _RP/_WP are set as well
+- a cosmetic pr_err() format string fix
+
+----------------------------------------------------------------
+Ard Biesheuvel (1):
+      arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or WP are set
+
+Arvind Yadav (1):
+      efi/capsule-loader: pr_err() strings should end with newlines
+
+ arch/arm64/kernel/efi.c               | 4 +++-
  drivers/firmware/efi/capsule-loader.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-index ec8ac5c4dd84..51d2874942a2 100644
---- a/drivers/firmware/efi/capsule-loader.c
-+++ b/drivers/firmware/efi/capsule-loader.c
-@@ -49,7 +49,7 @@ int __efi_capsule_setup_info(struct capsule_info *cap_info)
- 	pages_needed = ALIGN(cap_info->total_size, PAGE_SIZE) / PAGE_SIZE;
- 
- 	if (pages_needed == 0) {
--		pr_err("invalid capsule size");
-+		pr_err("invalid capsule size\n");
- 		return -EINVAL;
- 	}
- 
--- 
-2.11.0
+ 2 files changed, 4 insertions(+), 2 deletions(-)
