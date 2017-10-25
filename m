@@ -1,78 +1,34 @@
-From: Jiri Slaby <jslaby@suse.cz>
+From: Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>
 Subject: Re: [PATCH v4 19/27] x86: assembly, make some functions local
-Date: Wed, 25 Oct 2017 16:18:31 +0200
-Message-ID: <f70a8042-463d-09c8-65f9-9d07f71b84a2@suse.cz>
+Date: Wed, 25 Oct 2017 16:21:48 +0200
+Message-ID: <a506fc39-80d3-56da-a87f-b5e4bef8bad5@suse.cz>
 References: <20171002091246.28432-1-jslaby@suse.cz>
  <20171002091246.28432-19-jslaby@suse.cz>
  <CAKv+Gu9C88ToAx+8KcGacUECo7ExnTTBmibEjpB2WkfFvjoZvw@mail.gmail.com>
  <5a3785ea-d2d8-dd51-4b02-12f4ca5507d7@suse.cz>
  <CAKv+Gu-7q_Pr5SoUY_kUstaVusUxvXt9e8xeChQySGZ6h+jdAg@mail.gmail.com>
  <9dfcee94-2058-8986-526c-f7ef9ebada66@suse.cz>
- <CAKv+Gu9S0w0EUvruDjruR+hJ0B2QU_do1GknV83C8CgLTp8T2Q@mail.gmail.com>
+ <20171006132121.GC14023@leverpostej>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=iso-8859-2
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu9S0w0EUvruDjruR+hJ0B2QU_do1GknV83C8CgLTp8T2Q@mail.gmail.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20171006132121.GC14023@leverpostej>
 Content-Language: en-GB
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, "mingo@redhat.com" <mingo@redhat.com>, "tglx@linutronix.de" <tglx@linutronix.de>, "hpa@zytor.com" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, xen-devel <xen-devel@lists.xenproject.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org" <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, xen-devel <xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 10/06/2017, 04:01 PM, Ard Biesheuvel wrote:
-> On 6 October 2017 at 13:53, Jiri Slaby <jslaby@suse.cz> wrote:
->> On 10/04/2017, 09:33 AM, Ard Biesheuvel wrote:
->>> In arm64, we use ENTRY/ENDPROC for functions with external linkage,
->>> and the bare symbol name/ENDPROC for functions with local linkage. I
->>> guess we could add ENDOBJECT if we wanted to, but we never really felt
->>> the need.
->>
->> Yes and this is exactly the reason for the new macros. Now, it's a
->> complete mess. One arch does this, another does that. And we are in a
->> state to have reliable stacktraces, let objtool check functions, let
->> objtool generate annotations (e.g. for ORC unwinder), etc.
->>
-> 
-> You are implying that ENTRY/ENDPROC and 'bare symbol name'/ENDPROC
-> prevent you from doing any of this, but this is simply not true.
+Hi,
 
-If I understand correctly, you have not read the discussion behind the
-link I sent you... So in sum:
-Initially, I only used the current ENTRY/ENDPROC approach and augmented
-it to fix up the mess in x86. But it was concluded that these old macros
-are terrible and we rather want to avoid them. It was especially the bad
-naming of these old macros. So we discussed what the new naming scheme
-could be and this is what we ended up with.
+On 10/06/2017, 03:21 PM, Mark Rutland wrote:
+> If the aim of this series is to introduce something that architectures
+> use consistently, then can we please actually poke other architectures
+> about it? e.g. send this to linux-arch, with a cover letter explaining
+> the idea and asking maintainers to take a look.
 
->> Without knowing what is start, where is its end, what is function, what
->> is object (data) etc., it can barely check or even generate anything
->> automatically. Not speaking about impaired macros like your name/ENDPROC
->> above.
->>
-> 
-> What is the problem with impaired macros?
-
-Obviously that they are impaired. That is the tools do not know where to
-stop with reading of code or data.
-
-This is quite usual:
-
-foo:
-  mov data,a
-  call bar
-  ret
-
-data: .string "hello"
-
-This makes the tools to choke on the data while thinking it is still code.
-
-> So what is preventing people from using these new macros in the wrong way?
-
-The tools. It is quite easy to check this during build by a linker and I
-have such a patch here. It was not yet concluded (I think) whether we
-are going to check this via objtool or by something like my patch.
-Noteworthy, objtool can check much more in this respect, obviously.
+Sure, with v5, I will.
 
 thanks,
 -- 
