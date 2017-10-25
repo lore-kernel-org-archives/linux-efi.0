@@ -1,37 +1,48 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [GIT PULL 0/2] EFI updates for v4.15
-Date: Wed, 25 Oct 2017 11:14:17 +0100
-Message-ID: <20171025101419.26369-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Arvind Yadav <arvind.yadav.cs-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/2] arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or WP are set
+Date: Wed, 25 Oct 2017 11:14:19 +0100
+Message-ID: <20171025101419.26369-3-ard.biesheuvel@linaro.org>
+References: <20171025101419.26369-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171025101419.26369-1-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-The following changes since commit 8a5776a5f49812d29fe4b2d0a2d71675c3facf3f:
+The UEFI memory map is a bit vague about how to interpret the
+EFI_MEMORY_XP attribute when it is combined with EFI_MEMORY_RP and/or
+EFI_MEMORY_WP, which have retroactively been redefined as cacheability
+attributes rather than permission attributes.
 
-  Linux 4.14-rc4 (2017-10-08 20:53:29 -0700)
+So let's ignore EFI_MEMORY_XP if _RP and/or _WP are also set. In this
+case, it is likely that they are being used to describe the capability
+of the region (i.e., whether it has the controls to reconfigure it as
+non-executable) rather than the nature of the contents of the region
+(i.e., whether it contains data that we will never attempt to execute)
 
-are available in the git repository at:
+Reported-by: Stephen Boyd <sboyd@codeaurora.org>
+Tested-by: Stephen Boyd <sboyd@codeaurora.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/arm64/kernel/efi.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git efi-next
-
-for you to fetch changes up to c19611def8fd3f524bc945f0e8f9becace8fdf06:
-
-  arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or WP are set (2017-10-16 16:21:26 +0100)
-
-----------------------------------------------------------------
-EFI changes for v4.15:
-- ignore EFI_MEMORY_XP attributes on ARM if _RP/_WP are set as well
-- a cosmetic pr_err() format string fix
-
-----------------------------------------------------------------
-Ard Biesheuvel (1):
-      arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or WP are set
-
-Arvind Yadav (1):
-      efi/capsule-loader: pr_err() strings should end with newlines
-
- arch/arm64/kernel/efi.c               | 4 +++-
- drivers/firmware/efi/capsule-loader.c | 2 +-
- 2 files changed, 4 insertions(+), 2 deletions(-)
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 82cd07592519..f85ac58d08a3 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -48,7 +48,9 @@ static __init pteval_t create_mapping_protection(efi_memory_desc_t *md)
+ 		return pgprot_val(PAGE_KERNEL_ROX);
+ 
+ 	/* RW- */
+-	if (attr & EFI_MEMORY_XP || type != EFI_RUNTIME_SERVICES_CODE)
++	if (((attr & (EFI_MEMORY_RP | EFI_MEMORY_WP | EFI_MEMORY_XP)) ==
++	     EFI_MEMORY_XP) ||
++	    type != EFI_RUNTIME_SERVICES_CODE)
+ 		return pgprot_val(PAGE_KERNEL);
+ 
+ 	/* RWX */
+-- 
+2.11.0
