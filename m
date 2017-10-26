@@ -1,31 +1,29 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: David Howells <dhowells@redhat.com>
 Subject: Re: [PATCH 07/27] kexec_file: Disable at runtime if securelevel has been set
-Date: Thu, 26 Oct 2017 15:51:44 +0100
-Message-ID: <25997.1509029504@warthog.procyon.org.uk>
-References: <1508774083.3639.124.camel@linux.vnet.ibm.com> <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk> <150842468754.7923.10037578333644594134.stgit@warthog.procyon.org.uk>
+Date: Thu, 26 Oct 2017 16:02:24 +0100
+Message-ID: <26694.1509030144@warthog.procyon.org.uk>
+References: <20171026074243.GM8550@linux-l9pv.suse> <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk> <150842468754.7923.10037578333644594134.stgit@warthog.procyon.org.uk> <1508774083.3639.124.camel@linux.vnet.ibm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1508774083.3639.124.camel-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
-Content-ID: <25996.1509029504.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <20171026074243.GM8550@linux-l9pv.suse>
+Content-ID: <26693.1509030144.1@warthog.procyon.org.uk>
+Sender: owner-linux-security-module@vger.kernel.org
+To: joeyli <jlee@suse.com>
+Cc: dhowells@redhat.com, Mimi Zohar <zohar@linux.vnet.ibm.com>, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org> wrote:
+joeyli <jlee@suse.com> wrote:
 
-> The patch title and description needs to be updated to refer to
-> lockdown, not securelevel.
+> +	if (!IS_ENABLED(CONFIG_KEXEC_VERIFY_SIG) &&
+> +	    !is_ima_appraise_enabled() &&
+> +	    kernel_is_locked_down("kexec of unsigned images"))
 
-Fixed, thanks.
+This doesn't seem right.  It seems that you can then kexec unsigned images
+into a locked-down kernel if IMA appraise is enabled.
 
-> An additional patch could force these rules to be added to the custom
-> policy, if lockdown is enabled.
-
-I'll have a look at your patch, though at this point I'm leaning towards
-passing the current series to James for security/next and then passing your
-patch along afterwards, if that's okay with you.  It should still get in the
-next merge window if that's the case.
+I think the commit message needs expansion as to why it's okay.  Can you also
+do it as an additional patch rather than altering the original IMA-less patch
+7?
 
 David
