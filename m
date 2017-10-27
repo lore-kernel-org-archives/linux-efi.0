@@ -1,54 +1,123 @@
-From: Daniel Drake <drake@endlessm.com>
-Subject: Re: Multiple Acer laptops hang on ACPI poweroff
-Date: Fri, 27 Oct 2017 16:40:30 +0800
-Message-ID: <CAD8Lp47xEBPQVVDf0SQyAQHb1kXO4YpBq8DUz2u3Qnqj7RDDuQ@mail.gmail.com>
-References: <20170303201524.8150-1-drake@endlessm.com> <CAD8Lp44G_1R4gP9AFpEm34Y+DBmnWGgpBZbuTjimhi9uCQEKdg@mail.gmail.com>
- <CAJZ5v0hXDHU4f5dXD3DrUszgiJWr0tzjM04bC66-qsEdRf6gUg@mail.gmail.com>
+From: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH] efi/libstub: arm: omit sorting of the UEFI memory map
+Date: Fri, 27 Oct 2017 16:41:56 +0200
+Message-ID: <871slo4pqj.fsf@free-electrons.com>
+References: <20171022141457.28769-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <CAJZ5v0hXDHU4f5dXD3DrUszgiJWr0tzjM04bC66-qsEdRf6gUg@mail.gmail.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rafael@kernel.org>
-Cc: linux-efi@vger.kernel.org, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, "Wysocki, Rafael J" <rafael.j.wysocki@intel.com>, Linux PM <linux-pm@vger.kernel.org>, Linux Upstreaming Team <linux@endlessm.com>, Chris Chiu <chiu@endlessm.com>
+Content-Type: text/plain
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20171022141457.28769-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> (Ard
+        Biesheuvel's message of "Sun, 22 Oct 2017 15:14:57 +0100")
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, zyw-TNX95d0MmH7DzftRWevZcw@public.gmane.org, jeffy.chen-TNX95d0MmH7DzftRWevZcw@public.gmane.org, mbrugger-IBi9RG/b67k@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Oct 27, 2017 at 3:57 PM, Rafael J. Wysocki <rafael@kernel.org> wrote:
->> Testing shutdown on Acer Aspire ES1-732 (Intel Apollo Lake N4200) on
->> Linux 4.14-rc6, this issue is still present.
->>
->> The FADT has:
->>
->> [0ACh 0172  12]           PM1A Control Block : [Generic Address Structure]
->> [0ACh 0172   1]                     Space ID : 01 [SystemIO]
->> [0ADh 0173   1]                    Bit Width : 10
->> [0AEh 0174   1]                   Bit Offset : 00
->> [0AFh 0175   1]         Encoded Access Width : 02 [Word Access:16]
->> [0B0h 0176   8]                      Address : 0000000000000404
->>
->> Full ACPI tables dump:
->> https://gist.github.com/dsd/ed80d9fdd32f99e310002b2492cd6e1b
->>
->> We have tested that writing bit 13 of port 0404 under Windows 10
->> (using an app called RW everything) results in an immediate and
->> successful power down. However, writing the same bit under Linux just
->> makes the system hang.
->>
->> I am not really familiar with the guts of x86 systems. When the OS
->> writes to this port, which component of the system receives that
->> request and acts accordingly? Is it handled by the BIOS? Or an EC, or
->> ...? With more background here we may be able to approach the relevant
->> component vendor and ask for help.
+Hi Ard,
+ 
+ On dim., oct. 22 2017, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+
+> ARM shares its EFI stub implementation with arm64, which has some
+> special handling in the virtual remapping code to
+> a) make sure that we can map everything even if the OS executes
+>    with 64k page size, and
+> b) make sure that adjacent regions with the same attributes are not
+>    reordered or moved apart in memory.
 >
-> Writes to the PM1A register may go straight to the PMC or trigger an
-> SMM trap.  In both cases the platform takes over.
+> The latter is a workaround for a 'feature' that was shortly recommended
+> by UEFI spec v2.5, but deprecated shortly after, due to the fact that
+> it broke many OS installers, including non-Linux ones, and it was never
+> widely implemented for ARM systems. Before implementing b), the arm64
+> code simply rounded up all regions to 64 KB granularity, but given that
+> that results in moving adjacent regions apart, it had to be refined when
+> b) was implemented.
+>
+> The adjacency check requires a sort() pass, due to the fact that the
+> UEFI spec does not mandate any ordering, and the inclusion of the
+> lib/sort.c code into the ARM EFI stub is causing some trouble with
+> the decompressor build due to the fact that its EXPORT_SYMBOL() call
+> triggers the creation of ksymtab/kcrctab sections.
+>
+> So let's simply do away with the adjacency check for ARM, and simply put
+> all UEFI runtime regions together if they have the same memory attributes.
+> This is guaranteed to work, given that ARM only supports 4 KB pages,
+> and allows us to remove the sort() call entirely.
+>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Platform means BIOS/firmware? (i.e. Insyde in this case)
-Or you are referring to the Intel SoC?
+I finally managed to test this patch and it fixed my booting issue. It
+was just this single patch onto v4.14-rc6.
 
-> Is Apollo Lake the only platform affected or are there any other?
+Tested-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 
-All 3 affected product families are Apollo Lake
+Thanks,
 
-Thanks
-Daniel
+Gregory
+
+
+> ---
+>  drivers/firmware/efi/libstub/Makefile   | 6 +++---
+>  drivers/firmware/efi/libstub/arm-stub.c | 7 +++++--
+>  2 files changed, 8 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+> index dedf9bde44db..f3e8431565ea 100644
+> --- a/drivers/firmware/efi/libstub/Makefile
+> +++ b/drivers/firmware/efi/libstub/Makefile
+> @@ -33,13 +33,14 @@ lib-y				:= efi-stub-helper.o gop.o secureboot.o
+>  lib-$(CONFIG_RESET_ATTACK_MITIGATION) += tpm.o
+>  
+>  # include the stub's generic dependencies from lib/ when building for ARM/arm64
+> -arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
+> +arm-deps-y := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c
+> +arm-deps-$(CONFIG_ARM64) += sort.c
+>  
+>  $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
+>  	$(call if_changed_rule,cc_o_c)
+>  
+>  lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o random.o \
+> -				   $(patsubst %.c,lib-%.o,$(arm-deps))
+> +				   $(patsubst %.c,lib-%.o,$(arm-deps-y))
+>  
+>  lib-$(CONFIG_ARM)		+= arm32-stub.o
+>  lib-$(CONFIG_ARM64)		+= arm64-stub.o
+> @@ -90,5 +91,4 @@ quiet_cmd_stubcopy = STUBCPY $@
+>  # explicitly by the decompressor linker script.
+>  #
+>  STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub
+> -STUBCOPY_RM-$(CONFIG_ARM)	+= -R ___ksymtab+sort -R ___kcrctab+sort
+>  STUBCOPY_RELOC-$(CONFIG_ARM)	:= R_ARM_ABS
+> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+> index 1cb2d1c070c3..3061e4057483 100644
+> --- a/drivers/firmware/efi/libstub/arm-stub.c
+> +++ b/drivers/firmware/efi/libstub/arm-stub.c
+> @@ -349,7 +349,9 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
+>  	 * The easiest way to find adjacent regions is to sort the memory map
+>  	 * before traversing it.
+>  	 */
+> -	sort(memory_map, map_size / desc_size, desc_size, cmp_mem_desc, NULL);
+> +	if (IS_ENABLED(CONFIG_ARM64))
+> +		sort(memory_map, map_size / desc_size, desc_size, cmp_mem_desc,
+> +		     NULL);
+>  
+>  	for (l = 0; l < map_size; l += desc_size, prev = in) {
+>  		u64 paddr, size;
+> @@ -366,7 +368,8 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
+>  		 * a 4k page size kernel to kexec a 64k page size kernel and
+>  		 * vice versa.
+>  		 */
+> -		if (!regions_are_adjacent(prev, in) ||
+> +		if ((IS_ENABLED(CONFIG_ARM64) &&
+> +		     !regions_are_adjacent(prev, in)) ||
+>  		    !regions_have_compatible_memory_type_attrs(prev, in)) {
+>  
+>  			paddr = round_down(in->phys_addr, SZ_64K);
+> -- 
+> 2.11.0
+>
+
+-- 
+Gregory Clement, Free Electrons
+Kernel, drivers, real-time and embedded Linux
+development, consulting, training and support.
+http://free-electrons.com
