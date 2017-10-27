@@ -1,72 +1,75 @@
-From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Subject: [PATCH] efi: setting secure boot flag in EFI stub when the sentinel is tainted.
-Date: Sat, 28 Oct 2017 20:34:19 +0800
-Message-ID: <20171028123419.5696-1-jlee@suse.com>
+From: Mimi Zohar <zohar@linux.vnet.ibm.com>
+Subject: Re: [PATCH 07/27] kexec_file: Disable at runtime if securelevel
+ has been set
+Date: Fri, 27 Oct 2017 15:30:30 -0400
+Message-ID: <1509132630.3729.8.camel@linux.vnet.ibm.com>
+References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
+         <150842468754.7923.10037578333644594134.stgit@warthog.procyon.org.uk>
+         <1508774083.3639.124.camel@linux.vnet.ibm.com>
+         <20171026074243.GM8550@linux-l9pv.suse>
+         <1509027463.5886.26.camel@linux.vnet.ibm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1509027463.5886.26.camel@linux.vnet.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>
+To: joeyli <jlee@suse.com>
+Cc: David Howells <dhowells@redhat.com>, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com, Matthew Garrett <mjg59@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-We knew that old grub2 doesn't initialize the boot_params correctly
-(reference to brc#1418360). It causes sanitize_boot_params() to be
-triggered so that the secure_boot entry in boot_params be cleared.
+On Thu, 2017-10-26 at 10:17 -0400, Mimi Zohar wrote:
+> On Thu, 2017-10-26 at 15:42 +0800, joeyli wrote:
+> > Hi Mimi,
+> > 
+> > Thank you for reviewing.
+> > 
+> > On Mon, Oct 23, 2017 at 11:54:43AM -0400, Mimi Zohar wrote:
+> > > On Thu, 2017-10-19 at 15:51 +0100, David Howells wrote:
+> > > > From: Chun-Yi Lee <joeyli.kernel@gmail.com>
+> > > > 
+> > > > When KEXEC_VERIFY_SIG is not enabled, kernel should not loads image
+> > > > through kexec_file systemcall if securelevel has been set.
+> > > 
+> > > The patch title and description needs to be updated to refer to
+> > > lockdown, not securelevel.
+> > > 
+> > > As previously mentioned the last time these patches were posted, this
+> > > leaves out testing to see if the integrity subsystem is enabled.
+> > > 
+> > > Commit 503ceaef8e2e "ima: define a set of appraisal rules requiring
+> > > file signatures" was upstreamed.  An additional patch could force
+> > > these rules to be added to the custom policy, if lockdown is enabled.
+> > >  This and other patches in this series could then check to see if
+> > > is_ima_appraise_enabled() is true.
+> > > 
+> > > Mimi
+> > >
+> > 
+> > I have updated the patch title and description, and I also added
+> > is_ima_appraise_enabled() as the following. Is it good to you?
+> 
+> Yes, that works.  Thanks!  Remember is_ima_appraise_enabled() is
+> dependent on the "ima: require secure_boot rules in lockdown mode"
+> patch - http://kernsec.org/pipermail/linux-security-module-archive/201
+> 7-October/003910.html.
+> 
+> The IMA "secure_boot" policy can be specified on the boot command line
+> as ima_policy="secure_boot".  It requires kernel modules, firmware,
+> kexec kernel image and the IMA custom policy to be signed.  In
+> lockdown mode, these rules are enabled by default and added to the
+> custom policy.
+> 
+> > On the other hand, I am not good on IMA. I have traced the code path
+> > in kimage_file_prepare_segments(). Looks that the READING_KEXEC_IMAGE
+> > doesn't show in selinux_kernel_read_file(). Where is the exact code
+> > in IMA for checking the signature when loading crash kernel file?
+> 
+> kernel_read_file_from_fd() calls the security_kernel_read_file() and
+> security_kernel_post_read_file() hooks, which call ima_read_file() and
+> ima_post_read_file() respectively.
 
-This is a bootloader problem. When the issue occurred, it doesn't have
-any symptom. The EFI secure boot flag in kernel just invalid at runtime.
-
-This patch adds logic to EFI stub for checking the value of sentinel.
-When sentinel was tainted, the secure_boot flag from boot loader should
-be discarded then EFI stub gets secure boot flag again.
-
-In later sanitize_boot_params(), the secure boot flag can be kept when
-the secure mode is not _unset_. Therefore the flag value from EFI stub
-can also be kept.
-
-Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1418360
-Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: David Howells <dhowells@redhat.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- arch/x86/boot/compressed/eboot.c       | 3 ++-
- arch/x86/include/asm/bootparam_utils.h | 3 +++
- 2 files changed, 5 insertions(+), 1 deletion(-)
-
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index e56dbc6..40c6570 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -994,7 +994,8 @@ struct boot_params *efi_main(struct efi_config *c,
- 	 * If the boot loader gave us a value for secure_boot then we use that,
- 	 * otherwise we ask the BIOS.
- 	 */
--	if (boot_params->secure_boot == efi_secureboot_mode_unset)
-+	if (boot_params->secure_boot == efi_secureboot_mode_unset ||
-+	    boot_params->sentinel)
- 		boot_params->secure_boot = efi_get_secureboot(sys_table);
- 
- 	/* Ask the firmware to clear memory on unclean shutdown */
-diff --git a/arch/x86/include/asm/bootparam_utils.h b/arch/x86/include/asm/bootparam_utils.h
-index 4a8cb8d..42e1b09 100644
---- a/arch/x86/include/asm/bootparam_utils.h
-+++ b/arch/x86/include/asm/bootparam_utils.h
-@@ -34,6 +34,7 @@ static void sanitize_boot_params(struct boot_params *boot_params)
- 	 * problems again.
- 	 */
- 	if (boot_params->sentinel) {
-+		__u8 secure_boot = boot_params->secure_boot;
- 		/* fields in boot_params are left uninitialized, clear them */
- 		memset(&boot_params->ext_ramdisk_image, 0,
- 		       (char *)&boot_params->efi_info -
-@@ -48,6 +49,8 @@ static void sanitize_boot_params(struct boot_params *boot_params)
- 		       (char *)&boot_params->eddbuf[0] -
- 			(char *)&boot_params->_pad8[0]);
- 		memset(&boot_params->_pad9[0], 0, sizeof(boot_params->_pad9));
-+		if (secure_boot)
-+			boot_params->secure_boot = secure_boot;
- 	}
- }
- 
--- 
-2.10.2
+Hm, with "lockdown" enabled on the boot command line, I'm now able to
+do the kexec load, but not the unload.  :/   After the kexec load with
+the "--reuse-cmdline" option, the system reboots, but isn't in
+"lockdown" mode.
