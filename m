@@ -1,7 +1,7 @@
 From: Matthias Brugger <mbrugger-IBi9RG/b67k@public.gmane.org>
 Subject: Re: [PATCH] efi/libstub: arm: omit sorting of the UEFI memory map
-Date: Fri, 27 Oct 2017 18:29:32 +0200
-Message-ID: <11f81ea5-4f75-28ca-9204-b4a893ad4b63@suse.com>
+Date: Fri, 27 Oct 2017 18:30:00 +0200
+Message-ID: <6f9788e9-a0a4-0678-1dcc-4c99d2b0a52a@suse.com>
 References: <20171022141457.28769-1-ard.biesheuvel@linaro.org>
  <fe35c87c-8fd0-b33f-3a6f-2bd759726667@suse.com>
  <20171027152850.GK20805@n2100.armlinux.org.uk>
