@@ -1,51 +1,68 @@
-From: Mimi Zohar <zohar@linux.vnet.ibm.com>
-Subject: Re: [PATCH 03/27] Enforce module signatures if the kernel is locked
- down
-Date: Fri, 27 Oct 2017 14:48:15 -0400
-Message-ID: <1509130095.3716.13.camel@linux.vnet.ibm.com>
-References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
-         <150842465546.7923.6762214527898273559.stgit@warthog.procyon.org.uk>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: [GIT PULL] EFI fixes
+Date: Fri, 27 Oct 2017 21:10:47 +0200
+Message-ID: <20171027191047.v6hqm7plm5uxf6xd@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <150842465546.7923.6762214527898273559.stgit@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-To: David Howells <dhowells@redhat.com>, linux-security-module@vger.kernel.org
-Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2017-10-19 at 15:50 +0100, David Howells wrote:
-> If the kernel is locked down, require that all modules have valid
-> signatures that we can verify.
-> 
-> Signed-off-by: David Howells <dhowells@redhat.com>
-> ---
-> 
->  kernel/module.c |    3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/kernel/module.c b/kernel/module.c
-> index de66ec825992..3d9a3270c179 100644
-> --- a/kernel/module.c
-> +++ b/kernel/module.c
-> @@ -2781,7 +2781,8 @@ static int module_sig_check(struct load_info *info, int flags)
->  	}
-> 
->  	/* Not having a signature is only an error if we're strict. */
-> -	if (err == -ENOKEY && !sig_enforce)
-> +	if (err == -ENOKEY && !sig_enforce &&
-> +	    !kernel_is_locked_down("Loading of unsigned modules"))
- 
-This kernel_is_locked_down() check is being called for both the
-original and new module_load syscalls.  We need to be able
-differentiate them.  This is fine for the original syscall, but for
-the new syscall we would need an additional IMA check -
-!is_ima_appraise_enabled().
+Linus,
 
-Mimi
- 
->  		err = 0;
-> 
->  	return err;
+Please pull the latest efi-urgent-for-linus git tree from:
 
+   git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-urgent-for-linus
+
+   # HEAD: 38fb6652229c2149e8694d57db442878fdf8a1bd efi/libstub/arm: Don't randomize runtime regions when CONFIG_HIBERNATION=y
+
+Two fixes: an ARM fix for KASLR interaction with hibernation, plus an efi_test 
+crash fix.
+
+ Thanks,
+
+	Ingo
+
+------------------>
+Ard Biesheuvel (1):
+      efi/libstub/arm: Don't randomize runtime regions when CONFIG_HIBERNATION=y
+
+Dan Carpenter (1):
+      efi/efi_test: Prevent an Oops in efi_runtime_query_capsulecaps()
+
+
+ drivers/firmware/efi/libstub/arm-stub.c | 3 ++-
+ drivers/firmware/efi/test/efi_test.c    | 3 +++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index 1cb2d1c070c3..a94601d5939e 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -238,7 +238,8 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 
+ 	efi_random_get_seed(sys_table);
+ 
+-	if (!nokaslr()) {
++	/* hibernation expects the runtime regions to stay in the same place */
++	if (!IS_ENABLED(CONFIG_HIBERNATION) && !nokaslr()) {
+ 		/*
+ 		 * Randomize the base of the UEFI runtime services region.
+ 		 * Preserve the 2 MB alignment of the region by taking a
+diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
+index 08129b7b80ab..41c48a1e8baa 100644
+--- a/drivers/firmware/efi/test/efi_test.c
++++ b/drivers/firmware/efi/test/efi_test.c
+@@ -593,6 +593,9 @@ static long efi_runtime_query_capsulecaps(unsigned long arg)
+ 	if (copy_from_user(&qcaps, qcaps_user, sizeof(qcaps)))
+ 		return -EFAULT;
+ 
++	if (qcaps.capsule_count == ULONG_MAX)
++		return -EINVAL;
++
+ 	capsules = kcalloc(qcaps.capsule_count + 1,
+ 			   sizeof(efi_capsule_header_t), GFP_KERNEL);
+ 	if (!capsules)
