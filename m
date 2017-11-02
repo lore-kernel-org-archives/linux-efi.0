@@ -1,34 +1,24 @@
-From: "Mr David Williams" <57156921-JVqo/v6+17SELdXlOq2cAlZq95QhYFEm@public.gmane.org>
-Subject: Darlehensangebot
-Date: Thu, 02 Nov 2017 17:24:05 +0530
-Message-ID: <VI1PR0101MB2511D6DA143830058F6EBE80B55C0@VI1PR0101MB2511.eurprd01.prod.exchangelabs.com>
-Reply-To: david.loanfirm09-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+From: David Howells <dhowells@redhat.com>
+Subject: Re: [PATCH 07/27] kexec_file: Disable at runtime if securelevel has been set
+Date: Thu, 02 Nov 2017 17:00:08 +0000
+Message-ID: <11096.1509642008@warthog.procyon.org.uk>
+References: <1509381838.3583.134.camel@linux.vnet.ibm.com> <1509032805.5886.52.camel@linux.vnet.ibm.com> <20171026074243.GM8550@linux-l9pv.suse> <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk> <150842468754.7923.10037578333644594134.stgit@warthog.procyon.org.uk> <1508774083.3639.124.camel@linux.vnet.ibm.com> <26694.1509030144@warthog.procyon.org.uk> <32764.1509378584@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Description: Mail message body
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Recipients <57156921-JVqo/v6+17SELdXlOq2cAlZq95QhYFEm@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1509381838.3583.134.camel@linux.vnet.ibm.com>
+Content-ID: <11095.1509642008.1@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mimi Zohar <zohar@linux.vnet.ibm.com>
+Cc: dhowells@redhat.com, joeyli <jlee@suse.com>, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com, Matthew Garrett <mjg59@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-Sch=C3=B6nen Tag,
- =
+Mimi Zohar <zohar@linux.vnet.ibm.com> wrote:
 
-Sie ben=C3=B6tigen einen echten Kredit online Ihre Rechnungen zu sichern?
-Startet ein neues Unternehmen? Sie ben=C3=B6tigen einen pers=C3=B6nlichen K=
-redit
-oder Business-Darlehen? Wir bieten ein Darlehen von =E2=82=AC 10.000 bis =
-=E2=82=AC
-500,000.000.00 mit 2% Zinsen pro Jahr und auch mit einem
-erschwinglichen R=C3=BCckzahlungsbedingungen und Zustand. Ich suche f=C3=BCr
-Darlehen und Projektinvestmentfonds ? Wir halten professionelle
-Exzellenz, unsere Definition von Exzellenz liegt in hervorragenden
-Kundenservice, erschwingliche Zahlung und R=C3=BCckzahlung Pl=C3=A4ne, schn=
-ell
-und einfach-Prozess.
-Hochachtungsvoll....
- =
+> At some point, we'll want to also require the initramfs be signed as well.
 
-Freundliche Gr=C3=BC=C3=9Fe,
-Herr David Williams
+That could be tricky.  In Fedora, at least, that's assembled on the fly to
+include just the drivers you need to be able to mount your root fs and find
+the rest of your modules.  (Unless you mean just for the installer)
+
+David
