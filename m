@@ -1,55 +1,58 @@
-From: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: [PATCH 0/3] Implement a software workaround for Falkor erratum 1041
-Date: Thu,  2 Nov 2017 22:27:41 -0500
-Message-ID: <1509679664-3749-1-git-send-email-shankerd@codeaurora.org>
+From: Shanker Donthineni <shankerd@codeaurora.org>
+Subject: [PATCH 1/3] arm64: Define cputype macros for Falkor CPU
+Date: Thu,  2 Nov 2017 22:27:42 -0500
+Message-ID: <1509679664-3749-2-git-send-email-shankerd@codeaurora.org>
+References: <1509679664-3749-1-git-send-email-shankerd@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Christoffer Dall <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <1509679664-3749-1-git-send-email-shankerd@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Will Deacon <will.deacon@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, linux-arm-kernel@lists.infradead.org
+Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, Neil Leeder <nleeder@codeaurora.org>, linux-kernel@vger.kernel.org, kvmarm@lists.cs.columbia.edu
 List-Id: linux-efi@vger.kernel.org
 
-On Falkor CPU, we’ve discovered a hardware issue which might lead to a
-kernel crash or the unexpected behavior. The Falkor core may errantly
-access memory locations on speculative instruction fetches. This may
-happen whenever MMU translation state, SCTLR_ELn[M] bit is being changed
-from enabled to disabled for the currently running exception level. To
-prevent the errant hardware behavior, software must execute an ISB
-immediately prior to executing the MSR that changes SCTLR_ELn[M] from a
-value of 1 to 0. To simplify the complexity of a workaround, this patch
-series issues an ISB whenever SCTLR_ELn[M] is changed to 0 to fix the
-Falkor erratum 1041.
+Add cputype definition macros for Qualcomm Datacenter Technologies
+Falkor CPU in cputype.h. It's unfortunate that the first revision
+of the Falkor CPU used the wrong part number 0x800, got fixed in v2
+chip with part number 0xC00, and would be used the same value for
+future revisions.
 
-Patch1:
-  - CPUTYPE definitions for Falkor CPU.
+Signed-off-by: Shanker Donthineni <shankerd@codeaurora.org>
+Signed-off-by: Neil Leeder <nleeder@codeaurora.org>
+---
+ arch/arm64/include/asm/cputype.h | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Patch2:
-  - Define two ASM helper macros to read/write SCTLR_ELn register.
-
-Patch3:
-  - Actual workaround changes for erratum E1041.
-
-Shanker Donthineni (3):
-  arm64: Define cputype macros for Falkor CPU
-  arm64: Prepare SCTLR_ELn accesses to handle Falkor erratum 1041
-  arm64: Add software workaround for Falkor erratum 1041
-
- Documentation/arm64/silicon-errata.txt |  1 +
- arch/arm64/Kconfig                     | 10 ++++++++++
- arch/arm64/include/asm/assembler.h     | 35 ++++++++++++++++++++++++++++++++++
- arch/arm64/include/asm/cpucaps.h       |  3 ++-
- arch/arm64/include/asm/cputype.h       |  2 ++
- arch/arm64/kernel/cpu-reset.S          |  4 ++--
- arch/arm64/kernel/cpu_errata.c         | 16 ++++++++++++++++
- arch/arm64/kernel/efi-entry.S          |  8 ++++----
- arch/arm64/kernel/head.S               | 18 ++++++++---------
- arch/arm64/kernel/relocate_kernel.S    |  4 ++--
- arch/arm64/kvm/hyp-init.S              |  6 +++---
- arch/arm64/mm/proc.S                   |  6 +++---
- 12 files changed, 89 insertions(+), 24 deletions(-)
-
+diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h
+index 235e77d..cbf08d7 100644
+--- a/arch/arm64/include/asm/cputype.h
++++ b/arch/arm64/include/asm/cputype.h
+@@ -91,6 +91,7 @@
+ #define BRCM_CPU_PART_VULCAN		0x516
+ 
+ #define QCOM_CPU_PART_FALKOR_V1		0x800
++#define QCOM_CPU_PART_FALKOR		0xC00
+ 
+ #define MIDR_CORTEX_A53 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A53)
+ #define MIDR_CORTEX_A57 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A57)
+@@ -99,6 +100,7 @@
+ #define MIDR_THUNDERX_81XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_81XX)
+ #define MIDR_THUNDERX_83XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_83XX)
+ #define MIDR_QCOM_FALKOR_V1 MIDR_CPU_MODEL(ARM_CPU_IMP_QCOM, QCOM_CPU_PART_FALKOR_V1)
++#define MIDR_QCOM_FALKOR MIDR_CPU_MODEL(ARM_CPU_IMP_QCOM, QCOM_CPU_PART_FALKOR)
+ 
+ #ifndef __ASSEMBLY__
+ 
 -- 
 Qualcomm Datacenter Technologies, Inc. on behalf of the Qualcomm Technologies, Inc.
 Qualcomm Technologies, Inc. is a member of the Code Aurora Forum, a Linux Foundation Collaborative Project.
