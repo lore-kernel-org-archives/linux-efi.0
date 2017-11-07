@@ -1,30 +1,67 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 02/27] Add a SysRq option to lift kernel lockdown
-Date: Tue, 07 Nov 2017 22:56:51 +0000
-Message-ID: <32418.1510095411@warthog.procyon.org.uk>
-References: <877ev2rnt1.fsf@linux.vnet.ibm.com> <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk> <150842464774.7923.7951986297563109339.stgit@warthog.procyon.org.uk>
+From: "Luis R. Rodriguez" <mcgrof-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: Firmware signing -- Re: [PATCH 00/27] security, efi: Add kernel
+ lockdown
+Date: Wed, 8 Nov 2017 00:07:00 +0100
+Message-ID: <20171107230700.GJ22894@wotan.suse.de>
+References: <1509660086.3416.15.camel@linux.vnet.ibm.com>
+ <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
+ <14219.1509660259@warthog.procyon.org.uk>
+ <1509660641.3416.24.camel@linux.vnet.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <877ev2rnt1.fsf@linux.vnet.ibm.com>
-Sender: owner-linux-security-module@vger.kernel.org
-To: Thiago Jung Bauermann <bauerman@linux.vnet.ibm.com>
-Cc: dhowells@redhat.com, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1509660641.3416.24.camel-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+Cc: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, mcgrof-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "AKASHI, Takahiro" <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On Thu, Nov 02, 2017 at 06:10:41PM -0400, Mimi Zohar wrote:
+> On Thu, 2017-11-02 at 22:04 +0000, David Howells wrote:
+> > Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org> wrote:
+> > 
+> > > > Only validly signed device firmware may be loaded.
+> > > 
+> > > fw_get_filesystem_firmware() calls kernel_read_file_from_path() to
+> > > read the firmware, which calls into the security hooks. Is there
+> > > another place that validates the firmware signatures. �I'm not seeing
+> > > which patch requires firmware to be signed?
+> > 
+> > Luis has a set of patches for this.  However, I'm not sure if that's going
+> > anywhere at the moment.  Possibly I should remove this from the manpage for
+> > the moment.
 
-Thiago Jung Bauermann <bauerman@linux.vnet.ibm.com> wrote:
+Remove it for now. The state of of affairs for firmware signing is complex given
+that we first wanted to address how to properly grow the API without making
+the API worse. This in and of itself was an effort, and that effort also
+evaluated two different development paradigms:
 
-> On non-x86 platforms (tested on powerpc) this fails to build with:
-> 
-> security/lock_down.c: In function ‘lockdown_lift_sysrq’:
-> security/lock_down.c:100:40: error: ‘LOCKDOWN_LIFT_KEY’ undeclared (first use in this function)
->    lockdown_lift_sysrq_op.help_msg[5] = LOCKDOWN_LIFT_KEY;
->                                         ^~~~~~~~~~~~~~~~~
-> security/lock_down.c:100:40: note: each undeclared identifier is reported only once for each function it appears in
+	o functional API
+	o data driven API
 
-I've added an arch dependency in the Kconfig file in my local branch.  I'll
-try to get it pushed again.
+I only recently was convinced that functional API should be used, even for
+commonly used exported symbols, and as such I've been going back and slowly
+grooming the firmware API with small atomic changes to first clean up the
+complex flag mess we have.
 
-David
+Since I'm busy with that Takahiro AKASHI has taken up firmware singing effort
+but this will depend on the above small cleanup to be done first. I was busy
+with addressing existing bugs on the firmware API for a while, then company
+travel / conferences so was not able to address this, but I'm back now and
+I believe I should be able to tackle the cleanup now.
+
+Only after this is merged can we expect a final respin of the firmware signing
+effort.
+
+> Or reflect that IMA-appraisal, if enabled, will enforce firmware being
+> validly signed.
+
+But FWICT lockdown is a built-in kernel thingy, unless lockdown implies IMA
+it would not be the place to refer to it.
+
+It seems the documentation was proposed to help users if an error was caught.
+That error should cover only what is being addressed in code on the kernel.
+
+  Luis
