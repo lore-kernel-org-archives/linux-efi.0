@@ -1,62 +1,50 @@
-From: Tomeu Vizoso <tomeu@tomeuvizoso.net>
-Subject: Re: [PATCH v10 20/38] x86, mpparse: Use memremap to map the mpf and
- mpc data
-Date: Mon, 6 Nov 2017 08:13:02 +0100
-Message-ID: <CAAObsKAn5JZyOQiXgJcTyeDQMBr1xCCsPMQ27J0VbdD7vy9opQ@mail.gmail.com>
-References: <cover.1500319216.git.thomas.lendacky@amd.com> <d9464b0d7c861021ed8f494e4a40d6cd10f1eddd.1500319216.git.thomas.lendacky@amd.com>
- <CAAObsKDNwxevQVjob9zNwBWR+PjL8VVvCuxRwdGmgNgZ0uhEYw@mail.gmail.com> <ea487555-0f56-d3f5-863d-7007e9631235@amd.com>
+From: Thiago Jung Bauermann <bauerman@linux.vnet.ibm.com>
+Subject: Re: [PATCH 02/27] Add a SysRq option to lift kernel lockdown
+Date: Tue, 07 Nov 2017 15:39:06 -0200
+Message-ID: <877ev2rnt1.fsf@linux.vnet.ibm.com>
+References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk> <150842464774.7923.7951986297563109339.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <ea487555-0f56-d3f5-863d-7007e9631235@amd.com>
-Sender: owner-linux-mm@kvack.org
-To: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: x86@kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, linux-mm@kvack.org, kvm@vger.kernel.org, kasan-dev@googlegroups.com, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt@codeblueprint.co.uk>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Paolo Bonzini <pbonzini@redhat.com>, Alexander Potapenko <glider@google.com>, Thomas Gleixner <tglx@linutronix.de>, Dmitry Vyukov <dvyukov@google.com>, Rik van Riel <riel@redhat.com>, Larry Woodman <lwoodman@redhat.com>, Dave
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <150842464774.7923.7951986297563109339.stgit@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, matthew.garrett@nebula.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, jforbes@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On 3 November 2017 at 16:31, Tom Lendacky <thomas.lendacky@amd.com> wrote:
-> On 11/3/2017 10:12 AM, Tomeu Vizoso wrote:
->>
->> On 17 July 2017 at 23:10, Tom Lendacky <thomas.lendacky@amd.com> wrote:
->>>
->>> The SMP MP-table is built by UEFI and placed in memory in a decrypted
->>> state. These tables are accessed using a mix of early_memremap(),
->>> early_memunmap(), phys_to_virt() and virt_to_phys(). Change all accesses
->>> to use early_memremap()/early_memunmap(). This allows for proper setting
->>> of the encryption mask so that the data can be successfully accessed when
->>> SME is active.
->>>
->>> Reviewed-by: Borislav Petkov <bp@suse.de>
->>> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
->>> ---
->>>   arch/x86/kernel/mpparse.c | 98
->>> +++++++++++++++++++++++++++++++++--------------
->>>   1 file changed, 70 insertions(+), 28 deletions(-)
->>
->>
->> Hi there,
->>
->> today I played a bit with crosvm [0] and noticed that 4.14-rc7 doesn't
->> boot. git-bisect pointed to this patch, and reverting it indeed gets
->> things working again.
->>
->> Anybody has an idea of why this could be?
->
->
-> If you send me your kernel config I'll see if I can reproduce the issue
-> and debug it.
 
-x86_64_defconfig should be enough. I have pasted my dev env
-instructions here in case they help:
+Hello David,
 
-http://blog.tomeuvizoso.net/2017/11/experiments-with-crosvm_6.html
+David Howells <dhowells@redhat.com> writes:
+> +static struct sysrq_key_op lockdown_lift_sysrq_op = {
+> +	.handler	= sysrq_handle_lockdown_lift,
+> +	.help_msg	= "unSB(x)",
+> +	.action_msg	= "Disabling Secure Boot restrictions",
+> +	.enable_mask	= SYSRQ_DISABLE_USERSPACE,
+> +};
+> +
+> +static int __init lockdown_lift_sysrq(void)
+> +{
+> +	if (kernel_locked_down) {
+> +		lockdown_lift_sysrq_op.help_msg[5] = LOCKDOWN_LIFT_KEY;
+> +		register_sysrq_key(LOCKDOWN_LIFT_KEY, &lockdown_lift_sysrq_op);
+> +	}
+> +	return 0;
+> +}
+> +
+> +late_initcall(lockdown_lift_sysrq);
+> +
+> +#endif /* CONFIG_ALLOW_LOCKDOWN_LIFT_BY_KEY */
 
-Thanks,
+On non-x86 platforms (tested on powerpc) this fails to build with:
 
-Tomeu
+security/lock_down.c: In function ‘lockdown_lift_sysrq’:
+security/lock_down.c:100:40: error: ‘LOCKDOWN_LIFT_KEY’ undeclared (first use in this function)
+   lockdown_lift_sysrq_op.help_msg[5] = LOCKDOWN_LIFT_KEY;
+                                        ^~~~~~~~~~~~~~~~~
+security/lock_down.c:100:40: note: each undeclared identifier is reported only once for each function it appears in
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+-- 
+Thiago Jung Bauermann
+IBM Linux Technology Center
