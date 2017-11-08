@@ -1,224 +1,128 @@
-From: Manoj Iyer <manoj.iyer-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: Re: [3/3] arm64: Add software workaround for Falkor erratum 1041
-Date: Wed, 8 Nov 2017 13:05:55 -0600 (CST)
-Message-ID: <alpine.DEB.2.20.1711081305310.26324@lazy>
-References: <1509679664-3749-4-git-send-email-shankerd@codeaurora.org>
+From: "Luis R. Rodriguez" <mcgrof-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: Firmware signing -- Re: [PATCH 00/27] security, efi: Add kernel
+ lockdown
+Date: Wed, 8 Nov 2017 20:46:26 +0100
+Message-ID: <20171108194626.GQ22894@wotan.suse.de>
+References: <1509660086.3416.15.camel@linux.vnet.ibm.com>
+ <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
+ <14219.1509660259@warthog.procyon.org.uk>
+ <1509660641.3416.24.camel@linux.vnet.ibm.com>
+ <20171107230700.GJ22894@wotan.suse.de>
+ <20171108061551.GD7859@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1509679664-3749-4-git-send-email-shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20171108061551.GD7859-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Christoffer Dall <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org
+To: "AKASHI, Takahiro" <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "Luis R. Rodriguez" <mcgrof-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, Jan Blunck <jblunck-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Marcus Meissner <meissner-l3A5Bk7waGM@public.gmane.org>, Gary Lin <GLin-IBi9RG/b67k@public.gmane.org>, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2 Nov 2017, Shanker Donthineni wrote:
+On Wed, Nov 08, 2017 at 03:15:54PM +0900, AKASHI, Takahiro wrote:
+> Luis,
+> 
+> Thank you for this heads-up.
+> 
+> On Wed, Nov 08, 2017 at 12:07:00AM +0100, Luis R. Rodriguez wrote:
+> > On Thu, Nov 02, 2017 at 06:10:41PM -0400, Mimi Zohar wrote:
+> > > On Thu, 2017-11-02 at 22:04 +0000, David Howells wrote:
+> > > > Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org> wrote:
+> > > > 
+> > > > > > Only validly signed device firmware may be loaded.
+> > > > > 
+> > > > > fw_get_filesystem_firmware() calls kernel_read_file_from_path() to
+> > > > > read the firmware, which calls into the security hooks. Is there
+> > > > > another place that validates the firmware signatures.  I'm not seeing
+> > > > > which patch requires firmware to be signed?
+> > > > 
+> > > > Luis has a set of patches for this.  However, I'm not sure if that's going
+> > > > anywhere at the moment.  Possibly I should remove this from the manpage for
+> > > > the moment.
+> > 
+> > Remove it for now. The state of of affairs for firmware signing is complex given
+> > that we first wanted to address how to properly grow the API without making
+> > the API worse. This in and of itself was an effort, and that effort also
+> > evaluated two different development paradigms:
+> > 
+> > 	o functional API
+> > 	o data driven API
+> > 
+> > I only recently was convinced that functional API should be used, even for
+> > commonly used exported symbols,
+> 
+> Are you?
 
-> The ARM architecture defines the memory locations that are permitted
-> to be accessed as the result of a speculative instruction fetch from
-> an exception level for which all stages of translation are disabled.
-> Specifically, the core is permitted to speculatively fetch from the
-> 4KB region containing the current program counter and next 4KB.
->
-> When translation is changed from enabled to disabled for the running
-> exception level (SCTLR_ELn[M] changed from a value of 1 to 0), the
-> Falkor core may errantly speculatively access memory locations outside
-> of the 4KB region permitted by the architecture. The errant memory
-> access may lead to one of the following unexpected behaviors.
->
-> 1) A System Error Interrupt (SEI) being raised by the Falkor core due
->   to the errant memory access attempting to access a region of memory
->   that is protected by a slave-side memory protection unit.
-> 2) Unpredictable device behavior due to a speculative read from device
->   memory. This behavior may only occur if the instruction cache is
->   disabled prior to or coincident with translation being changed from
->   enabled to disabled.
->
-> To avoid the errant behavior, software must execute an ISB immediately
-> prior to executing the MSR that will change SCTLR_ELn[M] from 1 to 0.
->
-> Signed-off-by: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> ---
-> Documentation/arm64/silicon-errata.txt |  1 +
-> arch/arm64/Kconfig                     | 10 ++++++++++
-> arch/arm64/include/asm/assembler.h     | 17 +++++++++++++++++
-> arch/arm64/include/asm/cpucaps.h       |  3 ++-
-> arch/arm64/kernel/cpu_errata.c         | 16 ++++++++++++++++
-> arch/arm64/kernel/efi-entry.S          |  4 ++--
-> arch/arm64/kernel/head.S               |  4 ++--
-> 7 files changed, 50 insertions(+), 5 deletions(-)
->
-> diff --git a/Documentation/arm64/silicon-errata.txt b/Documentation/arm64/silicon-errata.txt
-> index 66e8ce1..704770c0 100644
-> --- a/Documentation/arm64/silicon-errata.txt
-> +++ b/Documentation/arm64/silicon-errata.txt
-> @@ -74,3 +74,4 @@ stable kernels.
-> | Qualcomm Tech. | Falkor v1       | E1003           | QCOM_FALKOR_ERRATUM_1003    |
-> | Qualcomm Tech. | Falkor v1       | E1009           | QCOM_FALKOR_ERRATUM_1009    |
-> | Qualcomm Tech. | QDF2400 ITS     | E0065           | QCOM_QDF2400_ERRATUM_0065   |
-> +| Qualcomm Tech. | Falkor v{1,2}   | E1041           | QCOM_FALKOR_ERRATUM_1041    |
-> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-> index 0df64a6..7e933fb 100644
-> --- a/arch/arm64/Kconfig
-> +++ b/arch/arm64/Kconfig
-> @@ -539,6 +539,16 @@ config QCOM_QDF2400_ERRATUM_0065
->
-> 	  If unsure, say Y.
->
-> +config QCOM_FALKOR_ERRATUM_1041
-> +	bool "Falkor E1041: Speculative instruction fetches might cause errant memory access"
-> +	default y
-> +	help
-> +	  Falkor CPU may speculatively fetch instructions from an improper
-> +	  memory location when MMU translation is changed from SCTLR_ELn[M]=1
-> +	  to SCTLR_ELn[M]=0. Prefix an ISB instruction to fix the problem.
-> +
-> +	  If unsure, say Y.
-> +
-> endmenu
->
->
-> diff --git a/arch/arm64/include/asm/assembler.h b/arch/arm64/include/asm/assembler.h
-> index b6dfb4f..4c91efb 100644
-> --- a/arch/arm64/include/asm/assembler.h
-> +++ b/arch/arm64/include/asm/assembler.h
-> @@ -30,6 +30,7 @@
-> #include <asm/pgtable-hwdef.h>
-> #include <asm/ptrace.h>
-> #include <asm/thread_info.h>
-> +#include <asm/alternative.h>
->
-> /*
->  * Enable and disable interrupts.
-> @@ -514,6 +515,22 @@
->  *   reg: the value to be written.
->  */
-> 	.macro	write_sctlr, eln, reg
-> +#ifdef CONFIG_QCOM_FALKOR_ERRATUM_1041
-> +alternative_if ARM64_WORKAROUND_QCOM_FALKOR_E1041
-> +	tbnz    \reg, #0, 8000f          // enable MMU?
-> +	isb
-> +8000:
-> +alternative_else_nop_endif
-> +#endif
-> +	msr	sctlr_\eln, \reg
-> +	.endm
-> +
-> +	.macro	early_write_sctlr, eln, reg
-> +#ifdef CONFIG_QCOM_FALKOR_ERRATUM_1041
-> +	tbnz    \reg, #0, 8000f          // enable MMU?
-> +	isb
-> +8000:
-> +#endif
-> 	msr	sctlr_\eln, \reg
-> 	.endm
->
-> diff --git a/arch/arm64/include/asm/cpucaps.h b/arch/arm64/include/asm/cpucaps.h
-> index 8da6216..7f7a59d 100644
-> --- a/arch/arm64/include/asm/cpucaps.h
-> +++ b/arch/arm64/include/asm/cpucaps.h
-> @@ -40,7 +40,8 @@
-> #define ARM64_WORKAROUND_858921			19
-> #define ARM64_WORKAROUND_CAVIUM_30115		20
-> #define ARM64_HAS_DCPOP				21
-> +#define ARM64_WORKAROUND_QCOM_FALKOR_E1041	22
->
-> -#define ARM64_NCAPS				22
-> +#define ARM64_NCAPS				23
->
-> #endif /* __ASM_CPUCAPS_H */
-> diff --git a/arch/arm64/kernel/cpu_errata.c b/arch/arm64/kernel/cpu_errata.c
-> index 0e27f86..27f9a45 100644
-> --- a/arch/arm64/kernel/cpu_errata.c
-> +++ b/arch/arm64/kernel/cpu_errata.c
-> @@ -179,6 +179,22 @@ static int cpu_enable_trap_ctr_access(void *__unused)
-> 			   MIDR_CPU_VAR_REV(0, 0)),
-> 	},
-> #endif
-> +#ifdef CONFIG_QCOM_FALKOR_ERRATUM_1041
-> +	{
-> +		.desc = "Qualcomm Technologies Falkor erratum 1041",
-> +		.capability = ARM64_WORKAROUND_QCOM_FALKOR_E1041,
-> +		MIDR_RANGE(MIDR_QCOM_FALKOR_V1,
-> +			MIDR_CPU_VAR_REV(0, 0),
-> +			MIDR_CPU_VAR_REV(0, 0)),
-> +	},
-> +	{
-> +		.desc = "Qualcomm Technologies Falkor erratum 1041",
-> +		.capability = ARM64_WORKAROUND_QCOM_FALKOR_E1041,
-> +		MIDR_RANGE(MIDR_QCOM_FALKOR,
-> +			MIDR_CPU_VAR_REV(0, 1),
-> +			MIDR_CPU_VAR_REV(0, 2)),
-> +	},
-> +#endif
-> #ifdef CONFIG_ARM64_ERRATUM_858921
-> 	{
-> 	/* Cortex-A73 all versions */
-> diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
-> index acae627..c31be1b 100644
-> --- a/arch/arm64/kernel/efi-entry.S
-> +++ b/arch/arm64/kernel/efi-entry.S
-> @@ -96,14 +96,14 @@ ENTRY(entry)
-> 	read_sctlr el2, x0
-> 	bic	x0, x0, #1 << 0	// clear SCTLR.M
-> 	bic	x0, x0, #1 << 2	// clear SCTLR.C
-> -	write_sctlr el2, x0
-> +	early_write_sctlr el2, x0
-> 	isb
-> 	b	2f
-> 1:
-> 	read_sctlr el1, x0
-> 	bic	x0, x0, #1 << 0	// clear SCTLR.M
-> 	bic	x0, x0, #1 << 2	// clear SCTLR.C
-> -	write_sctlr el1, x0
-> +	early_write_sctlr el1, x0
-> 	isb
-> 2:
-> 	/* Jump to kernel entry point */
-> diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-> index b8d5b73..9512ce7 100644
-> --- a/arch/arm64/kernel/head.S
-> +++ b/arch/arm64/kernel/head.S
-> @@ -511,7 +511,7 @@ install_el2_stub:
-> 	mov	x0, #0x0800			// Set/clear RES{1,0} bits
-> CPU_BE(	movk	x0, #0x33d0, lsl #16	)	// Set EE and E0E on BE systems
-> CPU_LE(	movk	x0, #0x30d0, lsl #16	)	// Clear EE and E0E on LE systems
-> -	write_sctlr el1, x0
-> +	early_write_sctlr el1, x0
->
-> 	/* Coprocessor traps. */
-> 	mov	x0, #0x33ff
-> @@ -732,7 +732,7 @@ __primary_switch:
-> 	 * to take into account by discarding the current kernel mapping and
-> 	 * creating a new one.
-> 	 */
-> -	write_sctlr el1, x20			// disable the MMU
-> +	early_write_sctlr el1, x20		// disable the MMU
-> 	isb
-> 	bl	__create_page_tables		// recreate kernel mapping
->
->
+Yes, this stemmed from the fact that even system calls can be abused through
+data driven APIs, and that long term a functional API at least can make
+evolutions much easier to review and bisect.
 
-I applied the 3 patches to Ubuntu 4.13.0-16-generic (Artful) kernel and
-ran stress-ng cpu tests on QDF2400 server as follows:
+That said this is all based on *empirical hearsay*, and no formal observations.
+But the ease to more easily bisect long term is enough for me to consider this 
+for the firmware API given subtle regressions have been a long standing pain
+on the firmware API and I would not want to make the process of bisecting
+any harder.
 
-sudo ./stress-ng --pathological -v --cpu 100 --cpu-load 80 --cpu-method
-all --cpu-online 500 --matrix  100 --matrix-method  all --matrix-size 8192
---vm 10 --vm-hang 10 --vm-method  all --switch 100 --numa 100
+If anyone *does* have actual efforts which compares and contrasts both, I'd
+love to get them, to further back my current position, but as-is I'm already
+sold on functional API driven interface.
 
-Where stress-ng would spawn N workers and test cpu offline/online, perform
-matrix operations, do rapid context switchs, and anonymous mmaps. Although
-I was not able to reproduce the erratum on the stock 4.13 kernel using the
-same test case, the patched kernel did not seem to introduce any
-regressions either. I ran the stress-ng tests for over 8hrs found the
-system to be stable.
+> I haven't answered Linus' question, but my concern about functional APIs,
+> as far as firmware signing goes, is that we have no way to _enforce_
+> firmware signing to existing (i.e. verification-unaware) drivers if we need
+> an explicit call of a function, say, verify_firmware().
 
-Tested-by: Manoj Iyer <manoj.iyer-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Your concern seems to be that a functional driven API for firmware signing would
+implicate having to support verify_firmware() for drivers which *cannot* get
+signed firmware verified, is that correct?
 
-Regards
---
-============================
-Manoj Iyer
-Ubuntu/Canonical
-ARM Servers - Cloud
-============================
+IMHO that should just fail then, ie, a "locked down" kernel should not want to
+*pass* a firmware signature if such thing could not be done.
+
+Its no different than trying to verify a signed module on a "locked down" for
+which it has no signature.
+
+But perhaps I'm not understanding the issue well, let me know.
+
+> > and as such I've been going back and slowly
+> > grooming the firmware API with small atomic changes to first clean up the
+> > complex flag mess we have.
+> > 
+> > Since I'm busy with that Takahiro AKASHI has taken up firmware singing effort
+> > but this will depend on the above small cleanup to be done first. I was busy
+> > with addressing existing bugs on the firmware API for a while, then company
+> > travel / conferences so was not able to address this, but I'm back now and
+> > I believe I should be able to tackle the cleanup now.
+> 
+> Good to hear.
+> 
+> > Only after this is merged can we expect a final respin of the firmware signing
+> > effort.
+> > 
+> > > Or reflect that IMA-appraisal, if enabled, will enforce firmware being
+> > > validly signed.
+> > 
+> > But FWICT lockdown is a built-in kernel thingy, unless lockdown implies IMA
+> > it would not be the place to refer to it.
+> 
+> I think that the situation is the same as in module signing.
+
+But by definition a "locked down" kernel will enforce module signing, and it
+would seem logical that if modules signing is enforced, eventually a statement
+about firmware signing can be added, as it relates to a kernel enforcement
+effort, not a kernel-userpace framework such as IMA.
+
+  Luis
+
+> -Takahiro AKASHI
+> 
+> > It seems the documentation was proposed to help users if an error was caught.
+> > That error should cover only what is being addressed in code on the kernel.
+> > 
+> >   Luis
+> 
+
+-- 
+Luis Rodriguez, SUSE LINUX GmbH
+Maxfeldstrasse 5; D-90409 Nuernberg
