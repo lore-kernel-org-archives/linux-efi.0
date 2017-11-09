@@ -1,7 +1,7 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 10/30] uswsusp: Disable when the kernel is locked down
-Date: Thu,  9 Nov 2017 17:31:53 +0000
-Message-ID: <151024871307.28329.2297969294278072085.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 11/30] PCI: Lock down BAR access when the kernel is locked down
+Date: Thu,  9 Nov 2017 17:32:00 +0000
+Message-ID: <151024872053.28329.15076691827478138652.stgit@warthog.procyon.org.uk>
 References: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -13,33 +13,105 @@ To: linux-security-module@vger.kernel.org
 Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, dhowells@redhat.com, linux-kernel@vger.kernel.org, jforbes@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Matthew Garrett <mjg59@srcf.ucam.org>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 
-uswsusp allows a user process to dump and then restore kernel state, which
-makes it possible to modify the running kernel.  Disable this if the kernel
-is locked down.
+Any hardware that can potentially generate DMA has to be locked down in
+order to avoid it being possible for an attacker to modify kernel code,
+allowing them to circumvent disabled module loading or module signing.
+Default to paranoid - in future we can potentially relax this for
+sufficiently IOMMU-isolated devices.
 
-Signed-off-by: Matthew Garrett <mjg59@srcf.ucam.org>
+Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
+Acked-by: Bjorn Helgaas <bhelgaas@google.com>
 Reviewed-by: "Lee, Chun-Yi" <jlee@suse.com>
-Reviewed-by: James Morris <james.l.morris@oracle.com>
-cc: linux-pm@vger.kernel.org
+cc: linux-pci@vger.kernel.org
 ---
 
- kernel/power/user.c |    3 +++
- 1 file changed, 3 insertions(+)
+ drivers/pci/pci-sysfs.c |    9 +++++++++
+ drivers/pci/proc.c      |    9 ++++++++-
+ drivers/pci/syscall.c   |    3 ++-
+ 3 files changed, 19 insertions(+), 2 deletions(-)
 
-diff --git a/kernel/power/user.c b/kernel/power/user.c
-index 22df9f7ff672..678ade9decfe 100644
---- a/kernel/power/user.c
-+++ b/kernel/power/user.c
-@@ -52,6 +52,9 @@ static int snapshot_open(struct inode *inode, struct file *filp)
- 	if (!hibernation_available())
- 		return -EPERM;
+diff --git a/drivers/pci/pci-sysfs.c b/drivers/pci/pci-sysfs.c
+index 1eecfa301f7f..e1a3b0e765c2 100644
+--- a/drivers/pci/pci-sysfs.c
++++ b/drivers/pci/pci-sysfs.c
+@@ -881,6 +881,9 @@ static ssize_t pci_write_config(struct file *filp, struct kobject *kobj,
+ 	loff_t init_off = off;
+ 	u8 *data = (u8 *) buf;
  
-+	if (kernel_is_locked_down("/dev/snapshot"))
++	if (kernel_is_locked_down("Direct PCI access"))
 +		return -EPERM;
 +
- 	lock_system_sleep();
+ 	if (off > dev->cfg_size)
+ 		return 0;
+ 	if (off + count > dev->cfg_size) {
+@@ -1175,6 +1178,9 @@ static int pci_mmap_resource(struct kobject *kobj, struct bin_attribute *attr,
+ 	enum pci_mmap_state mmap_type;
+ 	struct resource *res = &pdev->resource[bar];
  
- 	if (!atomic_add_unless(&snapshot_device_available, -1, 0)) {
++	if (kernel_is_locked_down("Direct PCI access"))
++		return -EPERM;
++
+ 	if (res->flags & IORESOURCE_MEM && iomem_is_exclusive(res->start))
+ 		return -EINVAL;
+ 
+@@ -1255,6 +1261,9 @@ static ssize_t pci_write_resource_io(struct file *filp, struct kobject *kobj,
+ 				     struct bin_attribute *attr, char *buf,
+ 				     loff_t off, size_t count)
+ {
++	if (kernel_is_locked_down("Direct PCI access"))
++		return -EPERM;
++
+ 	return pci_resource_io(filp, kobj, attr, buf, off, count, true);
+ }
+ 
+diff --git a/drivers/pci/proc.c b/drivers/pci/proc.c
+index 098360d7ff81..a6c53d855daa 100644
+--- a/drivers/pci/proc.c
++++ b/drivers/pci/proc.c
+@@ -116,6 +116,9 @@ static ssize_t proc_bus_pci_write(struct file *file, const char __user *buf,
+ 	int size = dev->cfg_size;
+ 	int cnt;
+ 
++	if (kernel_is_locked_down("Direct PCI access"))
++		return -EPERM;
++
+ 	if (pos >= size)
+ 		return 0;
+ 	if (nbytes >= size)
+@@ -195,6 +198,9 @@ static long proc_bus_pci_ioctl(struct file *file, unsigned int cmd,
+ #endif /* HAVE_PCI_MMAP */
+ 	int ret = 0;
+ 
++	if (kernel_is_locked_down("Direct PCI access"))
++		return -EPERM;
++
+ 	switch (cmd) {
+ 	case PCIIOC_CONTROLLER:
+ 		ret = pci_domain_nr(dev->bus);
+@@ -236,7 +242,8 @@ static int proc_bus_pci_mmap(struct file *file, struct vm_area_struct *vma)
+ 	struct pci_filp_private *fpriv = file->private_data;
+ 	int i, ret, write_combine = 0, res_bit = IORESOURCE_MEM;
+ 
+-	if (!capable(CAP_SYS_RAWIO))
++	if (!capable(CAP_SYS_RAWIO) ||
++	    kernel_is_locked_down("Direct PCI access"))
+ 		return -EPERM;
+ 
+ 	if (fpriv->mmap_state == pci_mmap_io) {
+diff --git a/drivers/pci/syscall.c b/drivers/pci/syscall.c
+index 9bf993e1f71e..afa01cc3ceec 100644
+--- a/drivers/pci/syscall.c
++++ b/drivers/pci/syscall.c
+@@ -92,7 +92,8 @@ SYSCALL_DEFINE5(pciconfig_write, unsigned long, bus, unsigned long, dfn,
+ 	u32 dword;
+ 	int err = 0;
+ 
+-	if (!capable(CAP_SYS_ADMIN))
++	if (!capable(CAP_SYS_ADMIN) ||
++	    kernel_is_locked_down("Direct PCI access"))
+ 		return -EPERM;
+ 
+ 	dev = pci_get_bus_and_slot(bus, dfn);
