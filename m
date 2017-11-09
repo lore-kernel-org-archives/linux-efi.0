@@ -1,88 +1,101 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 03/30] ima: require secure_boot rules in lockdown mode
-Date: Thu,  9 Nov 2017 17:31:00 +0000
-Message-ID: <151024866049.28329.8108404132951119266.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 04/30] Enforce module signatures if the kernel is locked down
+Date: Thu,  9 Nov 2017 17:31:08 +0000
+Message-ID: <151024866805.28329.10437019941463042267.stgit@warthog.procyon.org.uk>
 References: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-security-module@vger.kernel.org
-Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, dhowells@redhat.com, linux-kernel@vger.kernel.org, jforbes@redhat.com
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <151024863544.28329.2436580122759221600.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Mimi Zohar <zohar@linux.vnet.ibm.com>
+If the kernel is locked down, require that all modules have valid
+signatures that we can verify or that IMA can validate the file.
 
-Require the "secure_boot" rules, whether or not it is specified
-on the boot command line, for both the builtin and custom policies
-in secure boot lockdown mode.
-
-Signed-off-by: Mimi Zohar <zohar@linux.vnet.ibm.com>
-Signed-off-by: David Howells <dhowells@redhat.com>
+Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Reviewed-by: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
+Reviewed-by: James Morris <james.l.morris-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
 ---
 
- security/integrity/ima/ima_policy.c |   39 ++++++++++++++++++++++++++---------
- 1 file changed, 29 insertions(+), 10 deletions(-)
+ kernel/module.c |   19 ++++++++++++-------
+ 1 file changed, 12 insertions(+), 7 deletions(-)
 
-diff --git a/security/integrity/ima/ima_policy.c b/security/integrity/ima/ima_policy.c
-index 95209a5f8595..49c75e2a1ec5 100644
---- a/security/integrity/ima/ima_policy.c
-+++ b/security/integrity/ima/ima_policy.c
-@@ -427,14 +427,21 @@ void ima_update_policy_flag(void)
-  */
- void __init ima_init_policy(void)
+diff --git a/kernel/module.c b/kernel/module.c
+index de66ec825992..0ce29c8aa75a 100644
+--- a/kernel/module.c
++++ b/kernel/module.c
+@@ -64,6 +64,7 @@
+ #include <linux/bsearch.h>
+ #include <linux/dynamic_debug.h>
+ #include <linux/audit.h>
++#include <linux/ima.h>
+ #include <uapi/linux/module.h>
+ #include "module-internal.h"
+ 
+@@ -2757,7 +2758,8 @@ static inline void kmemleak_load_module(const struct module *mod,
+ #endif
+ 
+ #ifdef CONFIG_MODULE_SIG
+-static int module_sig_check(struct load_info *info, int flags)
++static int module_sig_check(struct load_info *info, int flags,
++			    bool can_do_ima_check)
  {
--	int i, measure_entries, appraise_entries, secure_boot_entries;
-+	int i;
-+	int measure_entries = 0;
-+	int appraise_entries = 0;
-+	int secure_boot_entries = 0;
-+	bool kernel_locked_down = __kernel_is_locked_down(NULL, false);
+ 	int err = -ENOKEY;
+ 	const unsigned long markerlen = sizeof(MODULE_SIG_STRING) - 1;
+@@ -2781,13 +2783,16 @@ static int module_sig_check(struct load_info *info, int flags)
+ 	}
  
- 	/* if !ima_policy set entries = 0 so we load NO default rules */
--	measure_entries = ima_policy ? ARRAY_SIZE(dont_measure_rules) : 0;
--	appraise_entries = ima_use_appraise_tcb ?
--			 ARRAY_SIZE(default_appraise_rules) : 0;
--	secure_boot_entries = ima_use_secure_boot ?
--			ARRAY_SIZE(secure_boot_rules) : 0;
-+	if (ima_policy)
-+		measure_entries = ARRAY_SIZE(dont_measure_rules);
-+
-+	if (ima_use_appraise_tcb)
-+		appraise_entries = ARRAY_SIZE(default_appraise_rules);
-+
-+	if (ima_use_secure_boot || kernel_locked_down)
-+		secure_boot_entries = ARRAY_SIZE(secure_boot_rules);
+ 	/* Not having a signature is only an error if we're strict. */
+-	if (err == -ENOKEY && !sig_enforce)
++	if (err == -ENOKEY && !sig_enforce &&
++	    (!can_do_ima_check || !is_ima_appraise_enabled()) &&
++	    !kernel_is_locked_down("Loading of unsigned modules"))
+ 		err = 0;
  
- 	for (i = 0; i < measure_entries; i++)
- 		list_add_tail(&dont_measure_rules[i].list, &ima_default_rules);
-@@ -455,11 +462,23 @@ void __init ima_init_policy(void)
+ 	return err;
+ }
+ #else /* !CONFIG_MODULE_SIG */
+-static int module_sig_check(struct load_info *info, int flags)
++static int module_sig_check(struct load_info *info, int flags,
++			    bool can_do_ima_check)
+ {
+ 	return 0;
+ }
+@@ -3630,13 +3635,13 @@ static int unknown_module_param_cb(char *param, char *val, const char *modname,
+ /* Allocate and load the module: note that size of section 0 is always
+    zero, and we rely on this for optional sections. */
+ static int load_module(struct load_info *info, const char __user *uargs,
+-		       int flags)
++		       int flags, bool can_do_ima_check)
+ {
+ 	struct module *mod;
+ 	long err;
+ 	char *after_dashes;
  
- 	/*
- 	 * Insert the appraise rules requiring file signatures, prior to
--	 * any other appraise rules.
-+	 * any other appraise rules.  In secure boot lock-down mode, also
-+	 * require these appraise rules for custom policies.
- 	 */
--	for (i = 0; i < secure_boot_entries; i++)
--		list_add_tail(&secure_boot_rules[i].list,
--			      &ima_default_rules);
-+	for (i = 0; i < secure_boot_entries; i++) {
-+		struct ima_rule_entry *entry;
-+
-+		/* Include for builtin policies */
-+		list_add_tail(&secure_boot_rules[i].list, &ima_default_rules);
-+
-+		/* Include for custom policies */
-+		if (kernel_locked_down) {
-+			entry = kmemdup(&secure_boot_rules[i], sizeof(*entry),
-+					GFP_KERNEL);
-+			if (entry)
-+				list_add_tail(&entry->list, &ima_policy_rules);
-+		}
-+	}
+-	err = module_sig_check(info, flags);
++	err = module_sig_check(info, flags, can_do_ima_check);
+ 	if (err)
+ 		goto free_copy;
  
- 	for (i = 0; i < appraise_entries; i++) {
- 		list_add_tail(&default_appraise_rules[i].list,
+@@ -3830,7 +3835,7 @@ SYSCALL_DEFINE3(init_module, void __user *, umod,
+ 	if (err)
+ 		return err;
+ 
+-	return load_module(&info, uargs, 0);
++	return load_module(&info, uargs, 0, false);
+ }
+ 
+ SYSCALL_DEFINE3(finit_module, int, fd, const char __user *, uargs, int, flags)
+@@ -3857,7 +3862,7 @@ SYSCALL_DEFINE3(finit_module, int, fd, const char __user *, uargs, int, flags)
+ 	info.hdr = hdr;
+ 	info.len = size;
+ 
+-	return load_module(&info, uargs, flags);
++	return load_module(&info, uargs, flags, true);
+ }
+ 
+ static inline int within(unsigned long addr, void *start, unsigned long size)
