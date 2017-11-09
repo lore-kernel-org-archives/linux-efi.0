@@ -1,44 +1,45 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 09/30] hibernate: Disable when the kernel is locked down
-Date: Thu,  9 Nov 2017 17:31:45 +0000
-Message-ID: <151024870561.28329.11610590477023950288.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells@redhat.com>
+Subject: [PATCH 10/30] uswsusp: Disable when the kernel is locked down
+Date: Thu,  9 Nov 2017 17:31:53 +0000
+Message-ID: <151024871307.28329.2297969294278072085.stgit@warthog.procyon.org.uk>
 References: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <151024863544.28329.2436580122759221600.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-security-module@vger.kernel.org
+Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, dhowells@redhat.com, linux-kernel@vger.kernel.org, jforbes@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+From: Matthew Garrett <mjg59@srcf.ucam.org>
 
-There is currently no way to verify the resume image when returning
-from hibernate.  This might compromise the signed modules trust model,
-so until we can work with signed hibernate images we disable it when the
-kernel is locked down.
+uswsusp allows a user process to dump and then restore kernel state, which
+makes it possible to modify the running kernel.  Disable this if the kernel
+is locked down.
 
-Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Reviewed-by: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
-cc: linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Signed-off-by: Matthew Garrett <mjg59@srcf.ucam.org>
+Signed-off-by: David Howells <dhowells@redhat.com>
+Reviewed-by: "Lee, Chun-Yi" <jlee@suse.com>
+Reviewed-by: James Morris <james.l.morris@oracle.com>
+cc: linux-pm@vger.kernel.org
 ---
 
- kernel/power/hibernate.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ kernel/power/user.c |    3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/kernel/power/hibernate.c b/kernel/power/hibernate.c
-index a5c36e9c56a6..f2eafefeec50 100644
---- a/kernel/power/hibernate.c
-+++ b/kernel/power/hibernate.c
-@@ -70,7 +70,7 @@ static const struct platform_hibernation_ops *hibernation_ops;
+diff --git a/kernel/power/user.c b/kernel/power/user.c
+index 22df9f7ff672..678ade9decfe 100644
+--- a/kernel/power/user.c
++++ b/kernel/power/user.c
+@@ -52,6 +52,9 @@ static int snapshot_open(struct inode *inode, struct file *filp)
+ 	if (!hibernation_available())
+ 		return -EPERM;
  
- bool hibernation_available(void)
- {
--	return (nohibernate == 0);
-+	return nohibernate == 0 && !kernel_is_locked_down("Hibernation");
- }
++	if (kernel_is_locked_down("/dev/snapshot"))
++		return -EPERM;
++
+ 	lock_system_sleep();
  
- /**
+ 	if (!atomic_add_unless(&snapshot_device_available, -1, 0)) {
