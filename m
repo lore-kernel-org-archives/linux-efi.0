@@ -1,297 +1,88 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 02/30] Add a SysRq option to lift kernel lockdown
-Date: Thu,  9 Nov 2017 17:30:53 +0000
-Message-ID: <151024865310.28329.3030926961130452532.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells@redhat.com>
+Subject: [PATCH 03/30] ima: require secure_boot rules in lockdown mode
+Date: Thu,  9 Nov 2017 17:31:00 +0000
+Message-ID: <151024866049.28329.8108404132951119266.stgit@warthog.procyon.org.uk>
 References: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <151024863544.28329.2436580122759221600.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-security-module@vger.kernel.org
+Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, dhowells@redhat.com, linux-kernel@vger.kernel.org, jforbes@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Kyle McMartin <kyle-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Mimi Zohar <zohar@linux.vnet.ibm.com>
 
-Make an option to provide a sysrq key that will lift the kernel lockdown,
-thereby allowing the running kernel image to be accessed and modified.
+Require the "secure_boot" rules, whether or not it is specified
+on the boot command line, for both the builtin and custom policies
+in secure boot lockdown mode.
 
-On x86 this is triggered with SysRq+x, but this key may not be available on
-all arches, so it is set by setting LOCKDOWN_LIFT_KEY in asm/setup.h.
-Since this macro must be defined in an arch to be able to use this facility
-for that arch, the Kconfig option is restricted to arches that support it.
-
-Signed-off-by: Kyle McMartin <kyle-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Signed-off-by: Mimi Zohar <zohar@linux.vnet.ibm.com>
+Signed-off-by: David Howells <dhowells@redhat.com>
 ---
 
- arch/x86/include/asm/setup.h |    2 ++
- drivers/input/misc/uinput.c  |    1 +
- drivers/tty/sysrq.c          |   19 ++++++++++++-----
- include/linux/input.h        |    5 ++++
- include/linux/sysrq.h        |    8 ++++++-
- kernel/debug/kdb/kdb_main.c  |    2 +-
- security/Kconfig             |   10 +++++++++
- security/lock_down.c         |   47 ++++++++++++++++++++++++++++++++++++++++++
- 8 files changed, 86 insertions(+), 8 deletions(-)
+ security/integrity/ima/ima_policy.c |   39 ++++++++++++++++++++++++++---------
+ 1 file changed, 29 insertions(+), 10 deletions(-)
 
-diff --git a/arch/x86/include/asm/setup.h b/arch/x86/include/asm/setup.h
-index a65cf544686a..863f77582c09 100644
---- a/arch/x86/include/asm/setup.h
-+++ b/arch/x86/include/asm/setup.h
-@@ -8,6 +8,8 @@
- #include <linux/linkage.h>
- #include <asm/page_types.h>
- 
-+#define LOCKDOWN_LIFT_KEY 'x'
-+
- #ifdef __i386__
- 
- #include <linux/pfn.h>
-diff --git a/drivers/input/misc/uinput.c b/drivers/input/misc/uinput.c
-index 443151de90c6..45a1f5460805 100644
---- a/drivers/input/misc/uinput.c
-+++ b/drivers/input/misc/uinput.c
-@@ -408,6 +408,7 @@ static int uinput_allocate_device(struct uinput_device *udev)
- 	if (!udev->dev)
- 		return -ENOMEM;
- 
-+	udev->dev->flags |= INPUTDEV_FLAGS_SYNTHETIC;
- 	udev->dev->event = uinput_dev_event;
- 	input_set_drvdata(udev->dev, udev);
- 
-diff --git a/drivers/tty/sysrq.c b/drivers/tty/sysrq.c
-index 3ffc1ce29023..8b766dbad6dd 100644
---- a/drivers/tty/sysrq.c
-+++ b/drivers/tty/sysrq.c
-@@ -481,6 +481,7 @@ static struct sysrq_key_op *sysrq_key_table[36] = {
- 	/* x: May be registered on mips for TLB dump */
- 	/* x: May be registered on ppc/powerpc for xmon */
- 	/* x: May be registered on sparc64 for global PMU dump */
-+	/* x: May be registered on x86_64 for disabling secure boot */
- 	NULL,				/* x */
- 	/* y: May be registered on sparc64 for global register dump */
- 	NULL,				/* y */
-@@ -524,7 +525,7 @@ static void __sysrq_put_key_op(int key, struct sysrq_key_op *op_p)
-                 sysrq_key_table[i] = op_p;
- }
- 
--void __handle_sysrq(int key, bool check_mask)
-+void __handle_sysrq(int key, unsigned int from)
- {
- 	struct sysrq_key_op *op_p;
- 	int orig_log_level;
-@@ -544,11 +545,15 @@ void __handle_sysrq(int key, bool check_mask)
- 
-         op_p = __sysrq_get_key_op(key);
-         if (op_p) {
-+		/* Ban synthetic events from some sysrq functionality */
-+		if ((from == SYSRQ_FROM_PROC || from == SYSRQ_FROM_SYNTHETIC) &&
-+		    op_p->enable_mask & SYSRQ_DISABLE_USERSPACE)
-+			printk("This sysrq operation is disabled from userspace.\n");
- 		/*
- 		 * Should we check for enabled operations (/proc/sysrq-trigger
- 		 * should not) and is the invoked operation enabled?
- 		 */
--		if (!check_mask || sysrq_on_mask(op_p->enable_mask)) {
-+		if (from == SYSRQ_FROM_KERNEL || sysrq_on_mask(op_p->enable_mask)) {
- 			pr_cont("%s\n", op_p->action_msg);
- 			console_loglevel = orig_log_level;
- 			op_p->handler(key);
-@@ -580,7 +585,7 @@ void __handle_sysrq(int key, bool check_mask)
- void handle_sysrq(int key)
- {
- 	if (sysrq_on())
--		__handle_sysrq(key, true);
-+		__handle_sysrq(key, SYSRQ_FROM_KERNEL);
- }
- EXPORT_SYMBOL(handle_sysrq);
- 
-@@ -661,7 +666,7 @@ static void sysrq_do_reset(unsigned long _state)
- static void sysrq_handle_reset_request(struct sysrq_state *state)
- {
- 	if (state->reset_requested)
--		__handle_sysrq(sysrq_xlate[KEY_B], false);
-+		__handle_sysrq(sysrq_xlate[KEY_B], SYSRQ_FROM_KERNEL);
- 
- 	if (sysrq_reset_downtime_ms)
- 		mod_timer(&state->keyreset_timer,
-@@ -812,8 +817,10 @@ static bool sysrq_handle_keypress(struct sysrq_state *sysrq,
- 
- 	default:
- 		if (sysrq->active && value && value != 2) {
-+			int from = sysrq->handle.dev->flags & INPUTDEV_FLAGS_SYNTHETIC ?
-+					SYSRQ_FROM_SYNTHETIC : 0;
- 			sysrq->need_reinject = false;
--			__handle_sysrq(sysrq_xlate[code], true);
-+			__handle_sysrq(sysrq_xlate[code], from);
- 		}
- 		break;
- 	}
-@@ -1097,7 +1104,7 @@ static ssize_t write_sysrq_trigger(struct file *file, const char __user *buf,
- 
- 		if (get_user(c, buf))
- 			return -EFAULT;
--		__handle_sysrq(c, false);
-+		__handle_sysrq(c, SYSRQ_FROM_PROC);
- 	}
- 
- 	return count;
-diff --git a/include/linux/input.h b/include/linux/input.h
-index fb5e23c7ed98..9d2b45a21ade 100644
---- a/include/linux/input.h
-+++ b/include/linux/input.h
-@@ -42,6 +42,7 @@ struct input_value {
-  * @phys: physical path to the device in the system hierarchy
-  * @uniq: unique identification code for the device (if device has it)
-  * @id: id of the device (struct input_id)
-+ * @flags: input device flags (SYNTHETIC, etc.)
-  * @propbit: bitmap of device properties and quirks
-  * @evbit: bitmap of types of events supported by the device (EV_KEY,
-  *	EV_REL, etc.)
-@@ -124,6 +125,8 @@ struct input_dev {
- 	const char *uniq;
- 	struct input_id id;
- 
-+	unsigned int flags;
-+
- 	unsigned long propbit[BITS_TO_LONGS(INPUT_PROP_CNT)];
- 
- 	unsigned long evbit[BITS_TO_LONGS(EV_CNT)];
-@@ -190,6 +193,8 @@ struct input_dev {
- };
- #define to_input_dev(d) container_of(d, struct input_dev, dev)
- 
-+#define	INPUTDEV_FLAGS_SYNTHETIC	0x000000001
-+
- /*
-  * Verify that we are in sync with input_device_id mod_devicetable.h #defines
+diff --git a/security/integrity/ima/ima_policy.c b/security/integrity/ima/ima_policy.c
+index 95209a5f8595..49c75e2a1ec5 100644
+--- a/security/integrity/ima/ima_policy.c
++++ b/security/integrity/ima/ima_policy.c
+@@ -427,14 +427,21 @@ void ima_update_policy_flag(void)
   */
-diff --git a/include/linux/sysrq.h b/include/linux/sysrq.h
-index 387fa7d05c98..f7c52a9ea394 100644
---- a/include/linux/sysrq.h
-+++ b/include/linux/sysrq.h
-@@ -28,6 +28,8 @@
- #define SYSRQ_ENABLE_BOOT	0x0080
- #define SYSRQ_ENABLE_RTNICE	0x0100
+ void __init ima_init_policy(void)
+ {
+-	int i, measure_entries, appraise_entries, secure_boot_entries;
++	int i;
++	int measure_entries = 0;
++	int appraise_entries = 0;
++	int secure_boot_entries = 0;
++	bool kernel_locked_down = __kernel_is_locked_down(NULL, false);
  
-+#define SYSRQ_DISABLE_USERSPACE	0x00010000
+ 	/* if !ima_policy set entries = 0 so we load NO default rules */
+-	measure_entries = ima_policy ? ARRAY_SIZE(dont_measure_rules) : 0;
+-	appraise_entries = ima_use_appraise_tcb ?
+-			 ARRAY_SIZE(default_appraise_rules) : 0;
+-	secure_boot_entries = ima_use_secure_boot ?
+-			ARRAY_SIZE(secure_boot_rules) : 0;
++	if (ima_policy)
++		measure_entries = ARRAY_SIZE(dont_measure_rules);
 +
- struct sysrq_key_op {
- 	void (*handler)(int);
- 	char *help_msg;
-@@ -42,8 +44,12 @@ struct sysrq_key_op {
-  * are available -- else NULL's).
-  */
++	if (ima_use_appraise_tcb)
++		appraise_entries = ARRAY_SIZE(default_appraise_rules);
++
++	if (ima_use_secure_boot || kernel_locked_down)
++		secure_boot_entries = ARRAY_SIZE(secure_boot_rules);
  
-+#define SYSRQ_FROM_KERNEL	0x0001
-+#define SYSRQ_FROM_PROC		0x0002
-+#define SYSRQ_FROM_SYNTHETIC	0x0004
-+
- void handle_sysrq(int key);
--void __handle_sysrq(int key, bool check_mask);
-+void __handle_sysrq(int key, unsigned int from);
- int register_sysrq_key(int key, struct sysrq_key_op *op);
- int unregister_sysrq_key(int key, struct sysrq_key_op *op);
- struct sysrq_key_op *__sysrq_get_key_op(int key);
-diff --git a/kernel/debug/kdb/kdb_main.c b/kernel/debug/kdb/kdb_main.c
-index c8146d53ca67..b480cadf9272 100644
---- a/kernel/debug/kdb/kdb_main.c
-+++ b/kernel/debug/kdb/kdb_main.c
-@@ -1970,7 +1970,7 @@ static int kdb_sr(int argc, const char **argv)
- 		return KDB_ARGCOUNT;
+ 	for (i = 0; i < measure_entries; i++)
+ 		list_add_tail(&dont_measure_rules[i].list, &ima_default_rules);
+@@ -455,11 +462,23 @@ void __init ima_init_policy(void)
  
- 	kdb_trap_printk++;
--	__handle_sysrq(*argv[1], check_mask);
-+	__handle_sysrq(*argv[1], check_mask ? SYSRQ_FROM_KERNEL : 0);
- 	kdb_trap_printk--;
- 
- 	return 0;
-diff --git a/security/Kconfig b/security/Kconfig
-index 8e01fd59ae7e..1e997be94ba2 100644
---- a/security/Kconfig
-+++ b/security/Kconfig
-@@ -213,6 +213,16 @@ config LOCK_DOWN_KERNEL
- 	  turns off various features that might otherwise allow access to the
- 	  kernel image (eg. setting MSR registers).
- 
-+config ALLOW_LOCKDOWN_LIFT_BY_SYSRQ
-+	bool "Allow the kernel lockdown to be lifted by SysRq"
-+	depends on LOCK_DOWN_KERNEL
-+	depends on MAGIC_SYSRQ
-+	depends on X86
-+	help
-+	  Allow the lockdown on a kernel to be lifted, by pressing a SysRq key
-+	  combination on a wired keyboard.
+ 	/*
+ 	 * Insert the appraise rules requiring file signatures, prior to
+-	 * any other appraise rules.
++	 * any other appraise rules.  In secure boot lock-down mode, also
++	 * require these appraise rules for custom policies.
+ 	 */
+-	for (i = 0; i < secure_boot_entries; i++)
+-		list_add_tail(&secure_boot_rules[i].list,
+-			      &ima_default_rules);
++	for (i = 0; i < secure_boot_entries; i++) {
++		struct ima_rule_entry *entry;
 +
++		/* Include for builtin policies */
++		list_add_tail(&secure_boot_rules[i].list, &ima_default_rules);
 +
- source security/selinux/Kconfig
- source security/smack/Kconfig
- source security/tomoyo/Kconfig
-diff --git a/security/lock_down.c b/security/lock_down.c
-index d8595c0e6673..2c6b00f0c229 100644
---- a/security/lock_down.c
-+++ b/security/lock_down.c
-@@ -11,8 +11,14 @@
- 
- #include <linux/security.h>
- #include <linux/export.h>
-+#include <linux/sysrq.h>
-+#include <asm/setup.h>
- 
-+#ifdef CONFIG_ALLOW_LOCKDOWN_LIFT_BY_SYSRQ
-+static __read_mostly bool kernel_locked_down;
-+#else
- static __ro_after_init bool kernel_locked_down;
-+#endif
- 
- /*
-  * Put the kernel into lock-down mode.
-@@ -58,3 +64,44 @@ bool __kernel_is_locked_down(const char *what, bool first)
- 	return kernel_locked_down;
- }
- EXPORT_SYMBOL(__kernel_is_locked_down);
-+
-+#ifdef CONFIG_ALLOW_LOCKDOWN_LIFT_BY_SYSRQ
-+
-+/*
-+ * Take the kernel out of lockdown mode.
-+ */
-+static void lift_kernel_lockdown(void)
-+{
-+	pr_notice("Lifting lockdown\n");
-+	kernel_locked_down = false;
-+}
-+
-+/*
-+ * Allow lockdown to be lifted by pressing something like SysRq+x (and not by
-+ * echoing the appropriate letter into the sysrq-trigger file).
-+ */
-+static void sysrq_handle_lockdown_lift(int key)
-+{
-+	if (kernel_locked_down)
-+		lift_kernel_lockdown();
-+}
-+
-+static struct sysrq_key_op lockdown_lift_sysrq_op = {
-+	.handler	= sysrq_handle_lockdown_lift,
-+	.help_msg	= "unSB(x)",
-+	.action_msg	= "Disabling Secure Boot restrictions",
-+	.enable_mask	= SYSRQ_DISABLE_USERSPACE,
-+};
-+
-+static int __init lockdown_lift_sysrq(void)
-+{
-+	if (kernel_locked_down) {
-+		lockdown_lift_sysrq_op.help_msg[5] = LOCKDOWN_LIFT_KEY;
-+		register_sysrq_key(LOCKDOWN_LIFT_KEY, &lockdown_lift_sysrq_op);
++		/* Include for custom policies */
++		if (kernel_locked_down) {
++			entry = kmemdup(&secure_boot_rules[i], sizeof(*entry),
++					GFP_KERNEL);
++			if (entry)
++				list_add_tail(&entry->list, &ima_policy_rules);
++		}
 +	}
-+	return 0;
-+}
-+
-+late_initcall(lockdown_lift_sysrq);
-+
-+#endif /* CONFIG_ALLOW_LOCKDOWN_LIFT_BY_SYSRQ */
+ 
+ 	for (i = 0; i < appraise_entries; i++) {
+ 		list_add_tail(&default_appraise_rules[i].list,
