@@ -1,53 +1,44 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 08/30] kexec_file: Restrict at runtime if the kernel is locked down
-Date: Thu,  9 Nov 2017 17:31:38 +0000
-Message-ID: <151024869793.28329.4817577607302613028.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 09/30] hibernate: Disable when the kernel is locked down
+Date: Thu,  9 Nov 2017 17:31:45 +0000
+Message-ID: <151024870561.28329.11610590477023950288.stgit@warthog.procyon.org.uk>
 References: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-security-module@vger.kernel.org
-Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, dhowells@redhat.com, linux-kernel@vger.kernel.org, jforbes@redhat.com
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <151024863544.28329.2436580122759221600.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Chun-Yi Lee <joeyli.kernel@gmail.com>
+From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
 
-When KEXEC_VERIFY_SIG is not enabled, kernel should not load images through
-kexec_file systemcall if the kernel is locked down unless IMA can be used
-to validate the image.
+There is currently no way to verify the resume image when returning
+from hibernate.  This might compromise the signed modules trust model,
+so until we can work with signed hibernate images we disable it when the
+kernel is locked down.
 
-This code was showed in Matthew's patch but not in git:
-https://lkml.org/lkml/2015/3/13/778
-
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>
-Signed-off-by: Chun-Yi Lee <jlee@suse.com>
-Signed-off-by: David Howells <dhowells@redhat.com>
-Reviewed-by: James Morris <james.l.morris@oracle.com>
-cc: kexec@lists.infradead.org
+Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Reviewed-by: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
+cc: linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 ---
 
- kernel/kexec_file.c |    8 ++++++++
- 1 file changed, 8 insertions(+)
+ kernel/power/hibernate.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/kernel/kexec_file.c b/kernel/kexec_file.c
-index 9f48f4412297..3ba28fc3fab0 100644
---- a/kernel/kexec_file.c
-+++ b/kernel/kexec_file.c
-@@ -255,6 +255,14 @@ SYSCALL_DEFINE5(kexec_file_load, int, kernel_fd, int, initrd_fd,
- 	if (!capable(CAP_SYS_BOOT) || kexec_load_disabled)
- 		return -EPERM;
+diff --git a/kernel/power/hibernate.c b/kernel/power/hibernate.c
+index a5c36e9c56a6..f2eafefeec50 100644
+--- a/kernel/power/hibernate.c
++++ b/kernel/power/hibernate.c
+@@ -70,7 +70,7 @@ static const struct platform_hibernation_ops *hibernation_ops;
  
-+	/* Don't permit images to be loaded into trusted kernels if we're not
-+	 * going to verify the signature on them
-+	 */
-+	if (!IS_ENABLED(CONFIG_KEXEC_VERIFY_SIG) &&
-+	    !is_ima_appraise_enabled() &&
-+	    kernel_is_locked_down("kexec of unsigned images"))
-+		return -EPERM;
-+
- 	/* Make sure we have a legal set of flags */
- 	if (flags != (flags & KEXEC_FILE_FLAGS))
- 		return -EINVAL;
+ bool hibernation_available(void)
+ {
+-	return (nohibernate == 0);
++	return nohibernate == 0 && !kernel_is_locked_down("Hibernation");
+ }
+ 
+ /**
