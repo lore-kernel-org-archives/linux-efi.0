@@ -1,91 +1,61 @@
-From: "AKASHI, Takahiro" <takahiro.akashi@linaro.org>
-Subject: Re: Firmware signing -- Re: [PATCH 00/27] security, efi: Add kernel
- lockdown
-Date: Thu, 9 Nov 2017 13:46:21 +0900
-Message-ID: <20171109044619.GG7859@linaro.org>
-References: <1509660086.3416.15.camel@linux.vnet.ibm.com>
- <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
- <14219.1509660259@warthog.procyon.org.uk>
- <1509660641.3416.24.camel@linux.vnet.ibm.com>
- <20171107230700.GJ22894@wotan.suse.de>
- <20171108061551.GD7859@linaro.org>
- <20171108194626.GQ22894@wotan.suse.de>
- <20171109014841.GF7859@linaro.org>
- <1510193857.4484.95.camel@linux.vnet.ibm.com>
+From: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [3/3] arm64: Add software workaround for Falkor erratum 1041
+Date: Thu, 09 Nov 2017 11:06:02 +0000
+Message-ID: <5A04369A.2020405@arm.com>
+References: <1509679664-3749-4-git-send-email-shankerd@codeaurora.org> <alpine.DEB.2.20.1711081305310.26324@lazy>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1510193857.4484.95.camel@linux.vnet.ibm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mimi Zohar <zohar@linux.vnet.ibm.com>
-Cc: "Luis R. Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Torvalds <torvalds@linux-foundation.org>, Jan Blunck <jblunck@infradead.org>, Julia Lawall <julia.lawall@lip6.fr>, David Howells <dhowells@redhat.com>, Marcus Meissner <meissner@suse.de>, Gary Lin <GLin@suse.com>, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi <linux-efi@vger.kernel.org>, linux-kernel@vger.kernel.org, Matthew Garrett <mjg59@google.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.20.1711081305310.26324@lazy>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Manoj Iyer <manoj.iyer-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Christoffer Dall <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Mimi,
+Hi Manoj,
 
-On Wed, Nov 08, 2017 at 09:17:37PM -0500, Mimi Zohar wrote:
-> > > IMHO that should just fail then, ie, a "locked down" kernel should not want to
-> > > *pass* a firmware signature if such thing could not be done.
-> > > 
-> > > Its no different than trying to verify a signed module on a "locked down" for
-> > > which it has no signature.
-> > > 
-> > > But perhaps I'm not understanding the issue well, let me know.
-> > 
-> > My point is quite simple:
-> > my_deviceA_init() {
-> >         err = request_firmware(&fw, "deviceA"); <--- (a)
-> >         if (err)
-> >                 goto err_request;
-> > 
-> >         err = verify_firmware(fw);  <--- (b)
-> >         if (err)
-> >                 goto err_verify;
-> > 
-> >         load_fw_to_deviceA(fw);     <--- (c)
-> >         ...
-> > }
-> > 
-> > As legacy device drivers does not have (b), there is no chance to
-> > prevent loading a firmware at (c) for locked-down kernel.
-> > 
-> > If you allow me to bring in yet another function, say
-> > request_firmware_signable(), which should be used in place of (a)
-> > for all verification-aware drivers, that would be fine.
-> 
-> I really don't understand why you need a new function.  The
-> request_firmware() eventually calls kernel_read_file_from_path(),
-> which already calls the pre and post LSM hooks.
+On 08/11/17 19:05, Manoj Iyer wrote:
+> On Thu, 2 Nov 2017, Shanker Donthineni wrote:
+>> The ARM architecture defines the memory locations that are permitted
+>> to be accessed as the result of a speculative instruction fetch from
+>> an exception level for which all stages of translation are disabled.
+>> Specifically, the core is permitted to speculatively fetch from the
+>> 4KB region containing the current program counter and next 4KB.
+>>
+>> When translation is changed from enabled to disabled for the running
+>> exception level (SCTLR_ELn[M] changed from a value of 1 to 0), the
+>> Falkor core may errantly speculatively access memory locations outside
+>> of the 4KB region permitted by the architecture. The errant memory
+>> access may lead to one of the following unexpected behaviors.
 
-My assumption here is:
-1) there are some less important and so security-insensitive firmwares,
-   by which I mean that such firmwares won't be expected to be signed in
-   terms of vulnerability or integrity.
-   (I can't give you examples though.)
-2) firmware's signature will be presented separately from the firmware
-   blob itself. Say, "firmware.bin.p7s" for "firmware.bin"
+> I applied the 3 patches to Ubuntu 4.13.0-16-generic (Artful) kernel and
+> ran stress-ng cpu tests on QDF2400 server
 
-I don't think that the current security_kernel(_post)_read_file() scheme
-fit with this assumption very well.
+[...]
+
+> Where stress-ng would spawn N workers and test cpu offline/online, perform
+> matrix operations, do rapid context switchs, and anonymous mmaps. Although
+> I was not able to reproduce the erratum on the stock 4.13 kernel using the
+> same test case, the patched kernel did not seem to introduce any
+> regressions either. I ran the stress-ng tests for over 8hrs found the
+> system to be stable.
+
+
+Could you throw kexec and KVM into the mix? This issue only shows up when we
+disable the MMU, which we almost never do.
+
+For CPU offline/online we make the PSCI 'offline' call with the MMU enabled.
+When the CPU comes back firmware has reset the EL2/EL1 SCTLR from a higher
+exception level, so it won't hit this issue.
+
+One place we do this is kexec, where we drop into purgatory with the MMU disabled.
+
+The other is KVM unloading itself to return to the hyp stub. You can stress this
+by starting and stopping a VM. When the number of VMs reaches 0 KVM should
+unload via 'kvm_arch_hardware_disable()'.
+
 
 Thanks,
--Takahiro AKASHI
 
-
-> IMA-appraisal is already on these hooks verifying the requested
-> firmware's signature.  For systems with "lockdown" enabled, but
-> without IMA-appraisal enabled, define a small, builtin LSM that sits
-> on these LSM hooks and denies the unsigned firmware requests.
-> 
-> Mimi
-> 
-> > In this case, all the invocation of request_firmware() in legacy code
-> > could be forced to fail in locked-down kernel.
-> > 
-> > But I think that "signable" should be allowed to be combined with other
-> > features of request_firmware variants like _(no)wait or _direct.
-> > 
-> > -Takahiro AKASHI
-> 
+James
