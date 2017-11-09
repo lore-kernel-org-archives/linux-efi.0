@@ -1,7 +1,7 @@
 From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 28/30] bpf: Restrict kernel image access functions when the kernel is locked down
-Date: Thu,  9 Nov 2017 17:34:11 +0000
-Message-ID: <151024885109.28329.17425439521329322621.stgit@warthog.procyon.org.uk>
+Subject: [PATCH 29/30] efi: Add an EFI_SECURE_BOOT flag to indicate secure boot mode
+Date: Thu,  9 Nov 2017 17:34:19 +0000
+Message-ID: <151024885943.28329.3425234586250919375.stgit@warthog.procyon.org.uk>
 References: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -13,35 +13,152 @@ To: linux-security-module@vger.kernel.org
 Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, dhowells@redhat.com, linux-kernel@vger.kernel.org, jforbes@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-There are some bpf functions can be used to read kernel memory:
-bpf_probe_read, bpf_probe_write_user and bpf_trace_printk.  These allow
-private keys in kernel memory (e.g. the hibernation image signing key) to
-be read by an eBPF program and kernel memory to be altered without
-restriction.
+UEFI machines can be booted in Secure Boot mode.  Add an EFI_SECURE_BOOT
+flag that can be passed to efi_enabled() to find out whether secure boot is
+enabled.
 
-Completely prohibit the use of BPF when the kernel is locked down.
+Move the switch-statement in x86's setup_arch() that inteprets the
+secure_boot boot parameter to generic code and set the bit there.
 
-Suggested-by: Alexei Starovoitov <alexei.starovoitov@gmail.com>
+Suggested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: netdev@vger.kernel.org
-cc: Chun-Yi Lee <jlee@suse.com>
-cc: Alexei Starovoitov <alexei.starovoitov@gmail.com>
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+cc: linux-efi@vger.kernel.org
 ---
 
- kernel/bpf/syscall.c |    3 +++
- 1 file changed, 3 insertions(+)
+ arch/x86/kernel/setup.c           |   14 +-------------
+ drivers/firmware/efi/Makefile     |    1 +
+ drivers/firmware/efi/secureboot.c |   38 +++++++++++++++++++++++++++++++++++++
+ include/linux/efi.h               |   16 ++++++++++------
+ 4 files changed, 50 insertions(+), 19 deletions(-)
+ create mode 100644 drivers/firmware/efi/secureboot.c
 
-diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 25d074920a00..fa58ad74cde6 100644
---- a/kernel/bpf/syscall.c
-+++ b/kernel/bpf/syscall.c
-@@ -1458,6 +1458,9 @@ SYSCALL_DEFINE3(bpf, int, cmd, union bpf_attr __user *, uattr, unsigned int, siz
- 	if (!capable(CAP_SYS_ADMIN) && sysctl_unprivileged_bpf_disabled)
- 		return -EPERM;
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 0957dd73d127..7c2162f9e769 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -1197,19 +1197,7 @@ void __init setup_arch(char **cmdline_p)
+ 	/* Allocate bigger log buffer */
+ 	setup_log_buf(1);
  
-+	if (kernel_is_locked_down("BPF"))
-+		return -EPERM;
+-	if (efi_enabled(EFI_BOOT)) {
+-		switch (boot_params.secure_boot) {
+-		case efi_secureboot_mode_disabled:
+-			pr_info("Secure boot disabled\n");
+-			break;
+-		case efi_secureboot_mode_enabled:
+-			pr_info("Secure boot enabled\n");
+-			break;
+-		default:
+-			pr_info("Secure boot could not be determined\n");
+-			break;
+-		}
+-	}
++	efi_set_secure_boot(boot_params.secure_boot);
+ 
+ 	reserve_initrd();
+ 
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index 0329d319d89a..883f9f7eefc6 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -23,6 +23,7 @@ obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
+ obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
+ obj-$(CONFIG_EFI_TEST)			+= test/
+ obj-$(CONFIG_EFI_DEV_PATH_PARSER)	+= dev-path-parser.o
++obj-$(CONFIG_EFI)			+= secureboot.o
+ obj-$(CONFIG_APPLE_PROPERTIES)		+= apple-properties.o
+ 
+ arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
+diff --git a/drivers/firmware/efi/secureboot.c b/drivers/firmware/efi/secureboot.c
+new file mode 100644
+index 000000000000..9070055de0a1
+--- /dev/null
++++ b/drivers/firmware/efi/secureboot.c
+@@ -0,0 +1,38 @@
++/* Core kernel secure boot support.
++ *
++ * Copyright (C) 2017 Red Hat, Inc. All Rights Reserved.
++ * Written by David Howells (dhowells@redhat.com)
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public Licence
++ * as published by the Free Software Foundation; either version
++ * 2 of the Licence, or (at your option) any later version.
++ */
 +
- 	err = check_uarg_tail_zero(uattr, sizeof(attr), size);
- 	if (err)
- 		return err;
++#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
++
++#include <linux/efi.h>
++#include <linux/kernel.h>
++#include <linux/printk.h>
++
++/*
++ * Decide what to do when UEFI secure boot mode is enabled.
++ */
++void __init efi_set_secure_boot(enum efi_secureboot_mode mode)
++{
++	if (efi_enabled(EFI_BOOT)) {
++		switch (mode) {
++		case efi_secureboot_mode_disabled:
++			pr_info("Secure boot disabled\n");
++			break;
++		case efi_secureboot_mode_enabled:
++			set_bit(EFI_SECURE_BOOT, &efi.flags);
++			pr_info("Secure boot enabled\n");
++			break;
++		default:
++			pr_warning("Secure boot could not be determined (mode %u)\n",
++				   mode);
++			break;
++		}
++	}
++}
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 66f4a4e79f4b..7c7a7e33e4d1 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1103,6 +1103,14 @@ extern int __init efi_setup_pcdp_console(char *);
+ #define EFI_DBG			8	/* Print additional debug info at runtime */
+ #define EFI_NX_PE_DATA		9	/* Can runtime data regions be mapped non-executable? */
+ #define EFI_MEM_ATTR		10	/* Did firmware publish an EFI_MEMORY_ATTRIBUTES table? */
++#define EFI_SECURE_BOOT		11	/* Are we in Secure Boot mode? */
++
++enum efi_secureboot_mode {
++	efi_secureboot_mode_unset,
++	efi_secureboot_mode_unknown,
++	efi_secureboot_mode_disabled,
++	efi_secureboot_mode_enabled,
++};
+ 
+ #ifdef CONFIG_EFI
+ /*
+@@ -1115,6 +1123,7 @@ static inline bool efi_enabled(int feature)
+ extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
+ 
+ extern bool efi_is_table_address(unsigned long phys_addr);
++extern void __init efi_set_secure_boot(enum efi_secureboot_mode mode);
+ #else
+ static inline bool efi_enabled(int feature)
+ {
+@@ -1133,6 +1142,7 @@ static inline bool efi_is_table_address(unsigned long phys_addr)
+ {
+ 	return false;
+ }
++static inline void efi_set_secure_boot(enum efi_secureboot_mode mode) {}
+ #endif
+ 
+ extern int efi_status_to_err(efi_status_t status);
+@@ -1518,12 +1528,6 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
+ bool efi_runtime_disabled(void);
+ extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
+ 
+-enum efi_secureboot_mode {
+-	efi_secureboot_mode_unset,
+-	efi_secureboot_mode_unknown,
+-	efi_secureboot_mode_disabled,
+-	efi_secureboot_mode_enabled,
+-};
+ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table);
+ 
+ #ifdef CONFIG_RESET_ATTACK_MITIGATION
