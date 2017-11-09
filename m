@@ -1,164 +1,99 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 29/30] efi: Add an EFI_SECURE_BOOT flag to indicate secure boot mode
-Date: Thu,  9 Nov 2017 17:34:19 +0000
-Message-ID: <151024885943.28329.3425234586250919375.stgit@warthog.procyon.org.uk>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 30/30] efi: Lock down the kernel if booted in secure boot mode
+Date: Thu,  9 Nov 2017 17:34:27 +0000
+Message-ID: <151024886689.28329.1546645765141944290.stgit@warthog.procyon.org.uk>
 References: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-security-module@vger.kernel.org
-Cc: gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, dhowells@redhat.com, linux-kernel@vger.kernel.org, jforbes@redhat.com
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <151024863544.28329.2436580122759221600.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-UEFI machines can be booted in Secure Boot mode.  Add an EFI_SECURE_BOOT
-flag that can be passed to efi_enabled() to find out whether secure boot is
-enabled.
+UEFI Secure Boot provides a mechanism for ensuring that the firmware will
+only load signed bootloaders and kernels.  Certain use cases may also
+require that all kernel modules also be signed.  Add a configuration option
+that to lock down the kernel - which includes requiring validly signed
+modules - if the kernel is secure-booted.
 
-Move the switch-statement in x86's setup_arch() that inteprets the
-secure_boot boot parameter to generic code and set the bit there.
-
-Suggested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Signed-off-by: David Howells <dhowells@redhat.com>
-Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-cc: linux-efi@vger.kernel.org
+Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 ---
 
- arch/x86/kernel/setup.c           |   14 +-------------
- drivers/firmware/efi/Makefile     |    1 +
- drivers/firmware/efi/secureboot.c |   38 +++++++++++++++++++++++++++++++++++++
- include/linux/efi.h               |   16 ++++++++++------
- 4 files changed, 50 insertions(+), 19 deletions(-)
- create mode 100644 drivers/firmware/efi/secureboot.c
+ arch/x86/kernel/setup.c |    6 ++++--
+ security/Kconfig        |   14 ++++++++++++++
+ security/lock_down.c    |    1 +
+ 3 files changed, 19 insertions(+), 2 deletions(-)
 
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 0957dd73d127..7c2162f9e769 100644
+index 7c2162f9e769..4e38327efb2e 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
-@@ -1197,19 +1197,7 @@ void __init setup_arch(char **cmdline_p)
+@@ -64,6 +64,7 @@
+ #include <linux/dma-mapping.h>
+ #include <linux/ctype.h>
+ #include <linux/uaccess.h>
++#include <linux/security.h>
+ 
+ #include <linux/percpu.h>
+ #include <linux/crash_dump.h>
+@@ -1039,6 +1040,9 @@ void __init setup_arch(char **cmdline_p)
+ 	if (efi_enabled(EFI_BOOT))
+ 		efi_init();
+ 
++	efi_set_secure_boot(boot_params.secure_boot);
++	init_lockdown();
++
+ 	dmi_scan_machine();
+ 	dmi_memdev_walk();
+ 	dmi_set_dump_stack_arch_desc();
+@@ -1197,8 +1201,6 @@ void __init setup_arch(char **cmdline_p)
  	/* Allocate bigger log buffer */
  	setup_log_buf(1);
  
--	if (efi_enabled(EFI_BOOT)) {
--		switch (boot_params.secure_boot) {
--		case efi_secureboot_mode_disabled:
--			pr_info("Secure boot disabled\n");
--			break;
--		case efi_secureboot_mode_enabled:
--			pr_info("Secure boot enabled\n");
--			break;
--		default:
--			pr_info("Secure boot could not be determined\n");
--			break;
--		}
--	}
-+	efi_set_secure_boot(boot_params.secure_boot);
- 
+-	efi_set_secure_boot(boot_params.secure_boot);
+-
  	reserve_initrd();
  
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 0329d319d89a..883f9f7eefc6 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -23,6 +23,7 @@ obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
- obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
- obj-$(CONFIG_EFI_TEST)			+= test/
- obj-$(CONFIG_EFI_DEV_PATH_PARSER)	+= dev-path-parser.o
-+obj-$(CONFIG_EFI)			+= secureboot.o
- obj-$(CONFIG_APPLE_PROPERTIES)		+= apple-properties.o
+ 	acpi_table_upgrade();
+diff --git a/security/Kconfig b/security/Kconfig
+index 1e997be94ba2..a4fa8b826039 100644
+--- a/security/Kconfig
++++ b/security/Kconfig
+@@ -222,6 +222,20 @@ config ALLOW_LOCKDOWN_LIFT_BY_SYSRQ
+ 	  Allow the lockdown on a kernel to be lifted, by pressing a SysRq key
+ 	  combination on a wired keyboard.
  
- arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
-diff --git a/drivers/firmware/efi/secureboot.c b/drivers/firmware/efi/secureboot.c
-new file mode 100644
-index 000000000000..9070055de0a1
---- /dev/null
-+++ b/drivers/firmware/efi/secureboot.c
-@@ -0,0 +1,38 @@
-+/* Core kernel secure boot support.
-+ *
-+ * Copyright (C) 2017 Red Hat, Inc. All Rights Reserved.
-+ * Written by David Howells (dhowells@redhat.com)
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public Licence
-+ * as published by the Free Software Foundation; either version
-+ * 2 of the Licence, or (at your option) any later version.
-+ */
++config LOCK_DOWN_IN_EFI_SECURE_BOOT
++	bool "Lock down the kernel in EFI Secure Boot mode"
++	default n
++	select LOCK_DOWN_KERNEL
++	depends on EFI
++	help
++	  UEFI Secure Boot provides a mechanism for ensuring that the firmware
++	  will only load signed bootloaders and kernels.  Secure boot mode may
++	  be determined from EFI variables provided by the system firmware if
++	  not indicated by the boot parameters.
 +
-+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
++	  Enabling this option turns on results in kernel lockdown being
++	  triggered if EFI Secure Boot is set.
 +
+ 
+ source security/selinux/Kconfig
+ source security/smack/Kconfig
+diff --git a/security/lock_down.c b/security/lock_down.c
+index 2c6b00f0c229..527f7e51dc8d 100644
+--- a/security/lock_down.c
++++ b/security/lock_down.c
+@@ -12,6 +12,7 @@
+ #include <linux/security.h>
+ #include <linux/export.h>
+ #include <linux/sysrq.h>
 +#include <linux/efi.h>
-+#include <linux/kernel.h>
-+#include <linux/printk.h>
-+
-+/*
-+ * Decide what to do when UEFI secure boot mode is enabled.
-+ */
-+void __init efi_set_secure_boot(enum efi_secureboot_mode mode)
-+{
-+	if (efi_enabled(EFI_BOOT)) {
-+		switch (mode) {
-+		case efi_secureboot_mode_disabled:
-+			pr_info("Secure boot disabled\n");
-+			break;
-+		case efi_secureboot_mode_enabled:
-+			set_bit(EFI_SECURE_BOOT, &efi.flags);
-+			pr_info("Secure boot enabled\n");
-+			break;
-+		default:
-+			pr_warning("Secure boot could not be determined (mode %u)\n",
-+				   mode);
-+			break;
-+		}
-+	}
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 66f4a4e79f4b..7c7a7e33e4d1 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1103,6 +1103,14 @@ extern int __init efi_setup_pcdp_console(char *);
- #define EFI_DBG			8	/* Print additional debug info at runtime */
- #define EFI_NX_PE_DATA		9	/* Can runtime data regions be mapped non-executable? */
- #define EFI_MEM_ATTR		10	/* Did firmware publish an EFI_MEMORY_ATTRIBUTES table? */
-+#define EFI_SECURE_BOOT		11	/* Are we in Secure Boot mode? */
-+
-+enum efi_secureboot_mode {
-+	efi_secureboot_mode_unset,
-+	efi_secureboot_mode_unknown,
-+	efi_secureboot_mode_disabled,
-+	efi_secureboot_mode_enabled,
-+};
+ #include <asm/setup.h>
  
- #ifdef CONFIG_EFI
- /*
-@@ -1115,6 +1123,7 @@ static inline bool efi_enabled(int feature)
- extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
- 
- extern bool efi_is_table_address(unsigned long phys_addr);
-+extern void __init efi_set_secure_boot(enum efi_secureboot_mode mode);
- #else
- static inline bool efi_enabled(int feature)
- {
-@@ -1133,6 +1142,7 @@ static inline bool efi_is_table_address(unsigned long phys_addr)
- {
- 	return false;
- }
-+static inline void efi_set_secure_boot(enum efi_secureboot_mode mode) {}
- #endif
- 
- extern int efi_status_to_err(efi_status_t status);
-@@ -1518,12 +1528,6 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
- bool efi_runtime_disabled(void);
- extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
- 
--enum efi_secureboot_mode {
--	efi_secureboot_mode_unset,
--	efi_secureboot_mode_unknown,
--	efi_secureboot_mode_disabled,
--	efi_secureboot_mode_enabled,
--};
- enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table);
- 
- #ifdef CONFIG_RESET_ATTACK_MITIGATION
+ #ifdef CONFIG_ALLOW_LOCKDOWN_LIFT_BY_SYSRQ
