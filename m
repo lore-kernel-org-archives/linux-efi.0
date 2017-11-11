@@ -1,220 +1,50 @@
-From: Manoj Iyer <manoj.iyer-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: Re: [3/3] arm64: Add software workaround for Falkor erratum 1041
-Date: Fri, 10 Nov 2017 11:49:22 -0600 (CST)
-Message-ID: <alpine.DEB.2.20.1711101146400.4353@lazy>
-References: <1509679664-3749-4-git-send-email-shankerd@codeaurora.org> <alpine.DEB.2.20.1711081305310.26324@lazy> <5A04369A.2020405@arm.com> <alpine.DEB.2.20.1711090949110.15101@lazy> <alpine.DEB.2.20.1711091010570.15101@lazy>
- <alpine.DEB.2.20.1711091041180.15101@lazy>
+From: Alan Cox <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+Subject: Re: Firmware signing -- Re: [PATCH 00/27] security, efi: Add kernel
+ lockdown
+Date: Sat, 11 Nov 2017 02:32:40 +0000
+Message-ID: <20171111023240.2398ca55@alans-desktop>
+References: <1509660086.3416.15.camel@linux.vnet.ibm.com>
+        <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
+        <14219.1509660259@warthog.procyon.org.uk>
+        <1509660641.3416.24.camel@linux.vnet.ibm.com>
+        <20171107230700.GJ22894@wotan.suse.de>
+        <20171108061551.GD7859@linaro.org>
+        <20171108194626.GQ22894@wotan.suse.de>
+        <20171109014841.GF7859@linaro.org>
+        <1510193857.4484.95.camel@linux.vnet.ibm.com>
+        <20171109044619.GG7859@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.20.1711091041180.15101@lazy>
+In-Reply-To: <20171109044619.GG7859-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
-Cc: Manoj Iyer <manoj.iyer-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Christoffer Dall <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org
+To: "AKASHI, Takahiro" <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, "Luis R. Rodriguez" <mcgrof-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Jan Blunck <jblunck-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Marcus Meissner <meissner-l3A5Bk7waGM@public.gmane.org>, Gary Lin <GLin-IBi9RG/b67k@public.gmane.org>, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 9 Nov 2017, Manoj Iyer wrote:
+> My assumption here is:
+> 1) there are some less important and so security-insensitive firmwares,
+>    by which I mean that such firmwares won't be expected to be signed in
+>    terms of vulnerability or integrity.
+>    (I can't give you examples though.)
+> 2) firmware's signature will be presented separately from the firmware
+>    blob itself. Say, "firmware.bin.p7s" for "firmware.bin"
 
->
-> James,
->
-> Looks like my VM test raised a false alarm. I retested stock Artful 4.13 
-> kernel (No erratum 1041 patches applied).
->
+For x86 at least any firmware on any system modern enough to support
+'secure' boot should already be signed. The only major exception is
+likely to be for things like random USB widgets.
 
-James, an update on the crash (false alarm). We suspect this is a firmware 
-crash due to a possible fw bug. Once this is addressed I will be able to 
-send you the test results you requested on VM start/stop with the erratum 
-1041 patches applied.
+Even things like input controller firmware loaded over i2c or spi
+is usually signed because you could do fun things with input faking
+otherwise.
 
+The other usual exception is FPGAs, but since the point of an FPGA is
+usually the fact it *can* be reprogrammed it's not clear that signing
+FPGA firmware makes sense unless it is designed to be fixed function.
 
-> Host: Ubuntu Artful 4.13 kernel with *no* erratum 1041 patches applied.
-> Guest: Ubuntu Zesty (4.10) kernel.
->
-> - Created 20 VMs one at a time
->
-> In a loop:
-> - Stop (virsh destroy) 20 VMs one at a time
-> - Start (virsh start) 20 VMs one at a time.
->
-> And, I am able to reproduce the system reset issue I previously reported. I 
-> think the problem I reported with VMs might have nothing to do with the 
-> erratum 1041 patches, and probably needs to be root caused seperately.
->
-> With stock 4.13 kernel (no erratum 1041 patches applied):
->
-> awrep6 login: [  461.881379] ACPI CPPC: PCC check channel failed. Status=0
-> [  462.051194] ACPI CPPC: PCC check channel failed. Status=0
-> [  462.223137] ACPI CPPC: PCC check channel failed. Status=0
-> [  462.633790] ACPI CPPC: PCC check channel failed. Status=0
-> [  463.231971] ACPI CPPC: PCC check channel failed. Status=0
-> [  463.403163] ACPI CPPC: PCC check channel failed. Status=0
-> [  463.822936] ACPI CPPC: PCC check channel failed. Status=0
-> [  463.995222] ACPI CPPC: PCC check channel failed. Status=0
-> [  464.130962] ACPI CPPC: PCC check channel failed. Status=0
-> [  464.258973] ACPI CPPC: PCC check channel failed. Status=0
-> [  465.283028] ACPI CPPC: PCC check channel failed. Status=0
->
->
-> SYS_DBG: Running SDI image (immediate mode)
-> SYS_DBG: Ram Dump Init
-> SYS_DBG: Failed to init SD card
-> SYS_DBG: Resetting system!
->
->
-> On Thu, 9 Nov 2017, Manoj Iyer wrote:
->
->> 
->> 
->> 
->> On Thu, 9 Nov 2017, Manoj Iyer wrote:
->> 
->>> 
->>> James,
->>> 
->>> (sorry for top-posting)
->>> 
->>> Applied patch 3 patches to Ubuntu Artful Kernel ( 4.13.0-16-generic )
->>> 
->>> - Start 20 VMs one at a time
->>> 
->>> In a loop:
->>> - Stop (virsh destroy) 20 VMs one at a time
->>> - Start (virsh start) 20 VMs one at a time.
->> 
->> Fixing some confusion I might have introduced in my prev email.
->> 
->> - Applied all 3 patches to Ubuntu Artful Kernel ( 4.13.0-16-generic )
->> 
->> - Created 20 VMs one at a time
->> 
->> In a loop:
->> - Stop (virsh destroy) 20 VMs one at a time
->> - Start (virsh start) 20 VMs one at a time.
->> 
->>> 
->>> The system reset's itself after starting the last VM on the 1st loop 
->>> displaying the following:
->>> 
->>> awrep6 login: [ 603.349141] ACPI CPPC: PCC check channel failed. Status=0
->>> [ 603.765101] ACPI CPPC: PCC check channel failed. Status=0
->>> [ 603.937389] ACPI CPPC: PCC check channel failed. Status=0
->>> [ 608.285495] ACPI CPPC: PCC check channel failed. Status=0
->>> [ 608.289481] ACPI CPPC: PCC check channel failed. Status=0
->>> 
->>> SYS_DBG: Running SDI image (immediate mode)
->>> SYS_DBG: Ram Dump Init
->>> SYS_DBG: Failed to init SD card
->>> SYS_DBG: Resetting system!
->>> 
->>> Followed by the following messages on system reboot:
->>> [ 6.616891] BERT: Error records from previous boot:
->>> [ 6.621655] [Hardware Error]: event severity: fatal
->>> [ 6.626516] [Hardware Error]: imprecise tstamp: 0000-00-00 00:00:00
->>> [ 6.632851] [Hardware Error]: Error 0, type: fatal
->>> [ 6.637713] [Hardware Error]: section type: unknown, 
->>> d2e2621c-f936-468d-0d84-15a4ed015c8b
->>> [ 6.646045] [Hardware Error]: section length: 0x238
->>> [ 6.651082] [Hardware Error]: 00000000: 72724502 5220726f 6f736165 
->>> 6e55206e .Error Reason Un
->>> [ 6.659761] [Hardware Error]: 00000010: 776f6e6b 0000006e 00000000 
->>> 00000000 known...........
->>> [ 6.668442] [Hardware Error]: 00000020: 00000000 00000000 00000000 
->>> 00000000 ................
->>> [ 6.677122] [Hardware Error]: 00000030: 00000000 00000000 00000000 
->>> 00000000 ................
->>> 
->>> 
->>> On Thu, 9 Nov 2017, James Morse wrote:
->>> 
->>>> Hi Manoj,
->>>> 
->>>> On 08/11/17 19:05, Manoj Iyer wrote:
->>>>> On Thu, 2 Nov 2017, Shanker Donthineni wrote:
->>>>>> The ARM architecture defines the memory locations that are permitted
->>>>>> to be accessed as the result of a speculative instruction fetch from
->>>>>> an exception level for which all stages of translation are disabled.
->>>>>> Specifically, the core is permitted to speculatively fetch from the
->>>>>> 4KB region containing the current program counter and next 4KB.
->>>>>> 
->>>>>> When translation is changed from enabled to disabled for the running
->>>>>> exception level (SCTLR_ELn[M] changed from a value of 1 to 0), the
->>>>>> Falkor core may errantly speculatively access memory locations outside
->>>>>> of the 4KB region permitted by the architecture. The errant memory
->>>>>> access may lead to one of the following unexpected behaviors.
->>>> 
->>>>> I applied the 3 patches to Ubuntu 4.13.0-16-generic (Artful) kernel and
->>>>> ran stress-ng cpu tests on QDF2400 server
->>>> 
->>>> [...]
->>>> 
->>>>> Where stress-ng would spawn N workers and test cpu offline/online, 
->>>>> perform
->>>>> matrix operations, do rapid context switchs, and anonymous mmaps. 
->>>>> Although
->>>>> I was not able to reproduce the erratum on the stock 4.13 kernel using 
->>>>> the
->>>>> same test case, the patched kernel did not seem to introduce any
->>>>> regressions either. I ran the stress-ng tests for over 8hrs found the
->>>>> system to be stable.
->>>> 
->>>> 
->>>> Could you throw kexec and KVM into the mix? This issue only shows up when 
->>>> we
->>>> disable the MMU, which we almost never do.
->>>> 
->>>> For CPU offline/online we make the PSCI 'offline' call with the MMU 
->>>> enabled.
->>>> When the CPU comes back firmware has reset the EL2/EL1 SCTLR from a 
->>>> higher
->>>> exception level, so it won't hit this issue.
->>>> 
->>>> One place we do this is kexec, where we drop into purgatory with the MMU 
->>>> disabled.
->>>> 
->>>> The other is KVM unloading itself to return to the hyp stub. You can 
->>>> stress this
->>>> by starting and stopping a VM. When the number of VMs reaches 0 KVM 
->>>> should
->>>> unload via 'kvm_arch_hardware_disable()'.
->>>> 
->>>> 
->>>> Thanks,
->>>> 
->>>> James
->>>> 
->>>> 
->>> 
->>> --
->>> ============================
->>> Manoj Iyer
->>> Ubuntu/Canonical
->>> ARM Servers - Cloud
->>> ============================
->>> 
->>> 
->> 
->> --
->> ============================
->> Manoj Iyer
->> Ubuntu/Canonical
->> ARM Servers - Cloud
->> ============================
->> 
->> 
->
-> --
-> ============================
-> Manoj Iyer
-> Ubuntu/Canonical
-> ARM Servers - Cloud
-> ============================
->
->
+You can't subvert the bus protocols on the x86 FPGA I am aware of as
+those bits are signed (or hard IP), but without IOMMU I am not sure FPGA
+and 'secure' boot is completely compatible.
 
---
-============================
-Manoj Iyer
-Ubuntu/Canonical
-ARM Servers - Cloud
-============================
+Alan
