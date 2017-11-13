@@ -1,38 +1,55 @@
-From: "Luis R. Rodriguez" <mcgrof-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+From: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
 Subject: Re: Firmware signing -- Re: [PATCH 00/27] security, efi: Add kernel
  lockdown
-Date: Mon, 13 Nov 2017 20:08:48 +0100
-Message-ID: <20171113190848.GD22894@wotan.suse.de>
+Date: Mon, 13 Nov 2017 21:08:48 +0000
+Message-ID: <20171113210848.4dc344bd@alans-desktop>
 References: <150842463163.7923.11081723749106843698.stgit@warthog.procyon.org.uk>
- <14219.1509660259@warthog.procyon.org.uk>
- <1509660641.3416.24.camel@linux.vnet.ibm.com>
- <20171107230700.GJ22894@wotan.suse.de>
- <20171108061551.GD7859@linaro.org>
- <20171108194626.GQ22894@wotan.suse.de>
- <20171109014841.GF7859@linaro.org>
- <20171110014641.GO22894@wotan.suse.de>
- <1510321506.3359.42.camel@linux.vnet.ibm.com>
- <20171113185035.GB22894@wotan.suse.de>
+        <14219.1509660259@warthog.procyon.org.uk>
+        <1509660641.3416.24.camel@linux.vnet.ibm.com>
+        <20171107230700.GJ22894@wotan.suse.de>
+        <20171108061551.GD7859@linaro.org>
+        <20171108194626.GQ22894@wotan.suse.de>
+        <20171109014841.GF7859@linaro.org>
+        <1510193857.4484.95.camel@linux.vnet.ibm.com>
+        <20171109044619.GG7859@linaro.org>
+        <20171111023240.2398ca55@alans-desktop>
+        <20171113174250.GA22894@wotan.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20171113185035.GB22894-B4tOwbsTzaBolqkO4TVVkw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Luis R. Rodriguez" <mcgrof-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, "AKASHI, Takahiro" <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Jan Blunck <jblunck-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Marcus Meissner <meissner-l3A5Bk7waGM@public.gmane.org>, Gary Lin <GLin-IBi9RG/b67k@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>, Kyle McMartin <kyle-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel-u79uwXL29TZUIDd8j+nm9g@public.gmane.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <20171113174250.GA22894@wotan.suse.de>
+Sender: owner-linux-security-module@vger.kernel.org
+To: "Luis R. Rodriguez" <mcgrof@kernel.org>
+Cc: "AKASHI, Takahiro" <takahiro.akashi@linaro.org>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Torvalds <torvalds@linux-foundation.org>, Jan Blunck <jblunck@infradead.org>, Julia Lawall <julia.lawall@lip6.fr>, David Howells <dhowells@redhat.com>, Marcus Meissner <meissner@suse.de>, Gary Lin <GLin@suse.com>, linux-security-module@vger.kernel.org, linux-efi <linux-efi@vger.kernel.org>, linux-kernel@vger.kernel.org, Matthew Garrett <mjg59@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 13, 2017 at 07:50:35PM +0100, Luis R. Rodriguez wrote:
-> On Fri, Nov 10, 2017 at 08:45:06AM -0500, Mimi Zohar wrote:
-> It does not mean we don't have to support hashes from the start, we can,
-> however that could require a driver change where its hash is specified or
-> preferred, for instance.
+On Mon, 13 Nov 2017 18:42:50 +0100
+"Luis R. Rodriguez" <mcgrof@kernel.org> wrote:
 
-Actually the pseudo code I just demo'd on your RFC proposal shows how we
-could support the hashes for firmware an optional first policy and if that
-fails check the fw signature if present. So no driver changes would be
-needed other than key'ing a respective hash for the firmware, which can
-just be a macro driver addition, not an API call change.
+> On Sat, Nov 11, 2017 at 02:32:40AM +0000, Alan Cox wrote:
+> > > My assumption here is:
+> > > 1) there are some less important and so security-insensitive firmwares,
+> > >    by which I mean that such firmwares won't be expected to be signed in
+> > >    terms of vulnerability or integrity.
+> > >    (I can't give you examples though.)
+> > > 2) firmware's signature will be presented separately from the firmware
+> > >    blob itself. Say, "firmware.bin.p7s" for "firmware.bin"  
+> > 
+> > For x86 at least any firmware on any system modern enough to support
+> > 'secure' boot should already be signed. The only major exception is
+> > likely to be for things like random USB widgets.  
+> 
+> Alan, the firmware being considered here is /lib/firmware firmware, which
+> is not signed today. Its unclear to me how you mean that /lib/firmware files
+> are already signed or verified today
 
-  Luis
+By the hardware they get loaded onto. Pretty much all of the hardware on
+PC class systems at least is signed and checked by the platform or the
+device itself. For a 'secure' boot era PC that's pretty much everything
+except USB toys and FPGA.
+
+So you don't actually need to sign a lot of PC class firmware because
+it's already signed.
+
+Alan
