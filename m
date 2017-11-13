@@ -1,11 +1,13 @@
 From: Shanker Donthineni <shankerd@codeaurora.org>
-Subject: [PATCH v2 0/2] Implement a software workaround for Falkor erratum 1041
-Date: Sun, 12 Nov 2017 19:16:40 -0600
-Message-ID: <1510535802-2799-1-git-send-email-shankerd@codeaurora.org>
+Subject: [PATCH v2 1/2] arm64: Define cputype macros for Falkor CPU
+Date: Sun, 12 Nov 2017 19:16:41 -0600
+Message-ID: <1510535802-2799-2-git-send-email-shankerd@codeaurora.org>
+References: <1510535802-2799-1-git-send-email-shankerd@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <1510535802-2799-1-git-send-email-shankerd@codeaurora.org>
 List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
 List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
@@ -19,38 +21,37 @@ To: Will Deacon <will.deacon@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, linu
 Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, linux-kernel@vger.kernel.org, kvmarm@lists.cs.columbia.edu
 List-Id: linux-efi@vger.kernel.org
 
-T24gRmFsa29yIENQVSwgd2XigJl2ZSBkaXNjb3ZlcmVkIGEgaGFyZHdhcmUgaXNzdWUgd2hpY2gg
-bWlnaHQgbGVhZCB0byBhCmtlcm5lbCBjcmFzaCBvciB0aGUgdW5leHBlY3RlZCBiZWhhdmlvci4g
-VGhlIEZhbGtvciBjb3JlIG1heSBlcnJhbnRseQphY2Nlc3MgbWVtb3J5IGxvY2F0aW9ucyBvbiBz
-cGVjdWxhdGl2ZSBpbnN0cnVjdGlvbiBmZXRjaGVzLiBUaGlzIG1heQpoYXBwZW4gd2hlbmV2ZXIg
-TU1VIHRyYW5zbGF0aW9uIHN0YXRlLCBTQ1RMUl9FTG5bTV0gYml0IGlzIGJlaW5nIGNoYW5nZWQK
-ZnJvbSBlbmFibGVkIHRvIGRpc2FibGVkIGZvciB0aGUgY3VycmVudGx5IHJ1bm5pbmcgZXhjZXB0
-aW9uIGxldmVsLiBUbwpwcmV2ZW50IHRoZSBlcnJhbnQgaGFyZHdhcmUgYmVoYXZpb3IsIHNvZnR3
-YXJlIG11c3QgZXhlY3V0ZSBhbiBJU0IKaW1tZWRpYXRlbHkgcHJpb3IgdG8gZXhlY3V0aW5nIHRo
-ZSBNU1IgdGhhdCBjaGFuZ2VzIFNDVExSX0VMbltNXSBmcm9tIGEKdmFsdWUgb2YgMSB0byAwLiBU
-byBzaW1wbGlmeSB0aGUgY29tcGxleGl0eSBvZiBhIHdvcmthcm91bmQsIHRoaXMgcGF0Y2gKc2Vy
-aWVzIGlzc3VlcyBhbiBJU0Igd2hlbmV2ZXIgU0NUTFJfRUxuW01dIGlzIGNoYW5nZWQgdG8gMCB0
-byBmaXggdGhlCkZhbGtvciBlcnJhdHVtIDEwNDEuCgpQYXRjaDIgZnJvbSBWMSBzZXJpZXMgZ290
-IGRyb3BwZWQgdG8gYWNjb21tb2RhdGUgcmV2aWV3IGNvbW1lbnRzLiBBcHBseQp0aGUgd29ya2Fy
-b3VuZCB3aGVyZSBpdCdzIHJlcXVpcmVkLgoKUGF0Y2gxOgogIC0gQ1BVVFlQRSBkZWZpbml0aW9u
-cyBmb3IgRmFsa29yIENQVS4KClBhdGNoMjoKICAtIEFjdHVhbCB3b3JrYXJvdW5kIGNoYW5nZXMg
-Zm9yIGVycmF0dW0gRTEwNDEuCgpTaGFua2VyIERvbnRoaW5lbmkgKDIpOgogIGFybTY0OiBEZWZp
-bmUgY3B1dHlwZSBtYWNyb3MgZm9yIEZhbGtvciBDUFUKICBhcm02NDogQWRkIHNvZnR3YXJlIHdv
-cmthcm91bmQgZm9yIEZhbGtvciBlcnJhdHVtIDEwNDEKCiBEb2N1bWVudGF0aW9uL2FybTY0L3Np
-bGljb24tZXJyYXRhLnR4dCB8ICAxICsKIGFyY2gvYXJtNjQvS2NvbmZpZyAgICAgICAgICAgICAg
-ICAgICAgIHwgMTAgKysrKysrKysrKwogYXJjaC9hcm02NC9pbmNsdWRlL2FzbS9hc3NlbWJsZXIu
-aCAgICAgfCAxOCArKysrKysrKysrKysrKysrKysKIGFyY2gvYXJtNjQvaW5jbHVkZS9hc20vY3B1
-Y2Fwcy5oICAgICAgIHwgIDMgKystCiBhcmNoL2FybTY0L2luY2x1ZGUvYXNtL2NwdXR5cGUuaCAg
-ICAgICB8ICAyICsrCiBhcmNoL2FybTY0L2tlcm5lbC9jcHUtcmVzZXQuUyAgICAgICAgICB8ICAx
-ICsKIGFyY2gvYXJtNjQva2VybmVsL2NwdV9lcnJhdGEuYyAgICAgICAgIHwgMTYgKysrKysrKysr
-KysrKysrKwogYXJjaC9hcm02NC9rZXJuZWwvZWZpLWVudHJ5LlMgICAgICAgICAgfCAgMiArKwog
-YXJjaC9hcm02NC9rZXJuZWwvaGVhZC5TICAgICAgICAgICAgICAgfCAgMSArCiBhcmNoL2FybTY0
-L2tlcm5lbC9yZWxvY2F0ZV9rZXJuZWwuUyAgICB8ICAxICsKIGFyY2gvYXJtNjQva3ZtL2h5cC1p
-bml0LlMgICAgICAgICAgICAgIHwgIDEgKwogMTEgZmlsZXMgY2hhbmdlZCwgNTUgaW5zZXJ0aW9u
-cygrKSwgMSBkZWxldGlvbigtKQoKLS0gClF1YWxjb21tIERhdGFjZW50ZXIgVGVjaG5vbG9naWVz
-LCBJbmMuIG9uIGJlaGFsZiBvZiB0aGUgUXVhbGNvbW0gVGVjaG5vbG9naWVzLCBJbmMuClF1YWxj
-b21tIFRlY2hub2xvZ2llcywgSW5jLiBpcyBhIG1lbWJlciBvZiB0aGUgQ29kZSBBdXJvcmEgRm9y
-dW0sIGEgTGludXggRm91bmRhdGlvbiBDb2xsYWJvcmF0aXZlIFByb2plY3QuCgpfX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwprdm1hcm0gbWFpbGluZyBsaXN0
-Cmt2bWFybUBsaXN0cy5jcy5jb2x1bWJpYS5lZHUKaHR0cHM6Ly9saXN0cy5jcy5jb2x1bWJpYS5l
-ZHUvbWFpbG1hbi9saXN0aW5mby9rdm1hcm0K
+Add cputype definition macros for Qualcomm Datacenter Technologies
+Falkor CPU in cputype.h. It's unfortunate that the first revision
+of the Falkor CPU used the wrong part number 0x800, got fixed in v2
+chip with part number 0xC00, and would be used the same value for
+future revisions.
+
+Signed-off-by: Shanker Donthineni <shankerd@codeaurora.org>
+---
+ arch/arm64/include/asm/cputype.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h
+index 235e77d..cbf08d7 100644
+--- a/arch/arm64/include/asm/cputype.h
++++ b/arch/arm64/include/asm/cputype.h
+@@ -91,6 +91,7 @@
+ #define BRCM_CPU_PART_VULCAN		0x516
+ 
+ #define QCOM_CPU_PART_FALKOR_V1		0x800
++#define QCOM_CPU_PART_FALKOR		0xC00
+ 
+ #define MIDR_CORTEX_A53 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A53)
+ #define MIDR_CORTEX_A57 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A57)
+@@ -99,6 +100,7 @@
+ #define MIDR_THUNDERX_81XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_81XX)
+ #define MIDR_THUNDERX_83XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_83XX)
+ #define MIDR_QCOM_FALKOR_V1 MIDR_CPU_MODEL(ARM_CPU_IMP_QCOM, QCOM_CPU_PART_FALKOR_V1)
++#define MIDR_QCOM_FALKOR MIDR_CPU_MODEL(ARM_CPU_IMP_QCOM, QCOM_CPU_PART_FALKOR)
+ 
+ #ifndef __ASSEMBLY__
+ 
+-- 
+Qualcomm Datacenter Technologies, Inc. on behalf of the Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum, a Linux Foundation Collaborative Project.
