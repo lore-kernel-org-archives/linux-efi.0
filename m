@@ -1,241 +1,256 @@
 From: Manoj Iyer <manoj.iyer-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: Re: [3/3] arm64: Add software workaround for Falkor erratum 1041
-Date: Wed, 15 Nov 2017 09:12:33 -0600 (CST)
-Message-ID: <alpine.DEB.2.20.1711150905001.7346@hungry>
-References: <1509679664-3749-4-git-send-email-shankerd@codeaurora.org> <alpine.DEB.2.20.1711081305310.26324@lazy> <5A04369A.2020405@arm.com> <alpine.DEB.2.20.1711090949110.15101@lazy> <alpine.DEB.2.20.1711091010570.15101@lazy> <alpine.DEB.2.20.1711091041180.15101@lazy>
- <alpine.DEB.2.20.1711101146400.4353@lazy>
+Subject: Re: [v3,2/2] arm64: Add software workaround for Falkor erratum
+ 1041
+Date: Wed, 15 Nov 2017 11:40:31 -0600 (CST)
+Message-ID: <alpine.DEB.2.20.1711151134200.22395@lazy>
+References: <1510537359-9978-3-git-send-email-shankerd@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII; format=flowed
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.20.1711101146400.4353@lazy>
+In-Reply-To: <1510537359-9978-3-git-send-email-shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
-Cc: Manoj Iyer <manoj.iyer-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Christoffer Dall <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org
+To: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Christoffer Dall <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 10 Nov 2017, Manoj Iyer wrote:
+On Sun, 12 Nov 2017, Shanker Donthineni wrote:
 
-> On Thu, 9 Nov 2017, Manoj Iyer wrote:
+> The ARM architecture defines the memory locations that are permitted
+> to be accessed as the result of a speculative instruction fetch from
+> an exception level for which all stages of translation are disabled.
+> Specifically, the core is permitted to speculatively fetch from the
+> 4KB region containing the current program counter 4K and next 4K.
 >
->> 
->> James,
->> 
->> Looks like my VM test raised a false alarm. I retested stock Artful 4.13 
->> kernel (No erratum 1041 patches applied).
->> 
+> When translation is changed from enabled to disabled for the running
+> exception level (SCTLR_ELn[M] changed from a value of 1 to 0), the
+> Falkor core may errantly speculatively access memory locations outside
+> of the 4KB region permitted by the architecture. The errant memory
+> access may lead to one of the following unexpected behaviors.
 >
-> James, an update on the crash (false alarm). We suspect this is a firmware 
-> crash due to a possible fw bug. Once this is addressed I will be able to send 
-> you the test results you requested on VM start/stop with the erratum 1041 
-> patches applied.
+> 1) A System Error Interrupt (SEI) being raised by the Falkor core due
+>   to the errant memory access attempting to access a region of memory
+>   that is protected by a slave-side memory protection unit.
+> 2) Unpredictable device behavior due to a speculative read from device
+>   memory. This behavior may only occur if the instruction cache is
+>   disabled prior to or coincident with translation being changed from
+>   enabled to disabled.
+>
+> The conditions leading to this erratum will not occur when either of the
+> following occur:
+> 1) A higher exception level disables translation of a lower exception level
+>   (e.g. EL2 changing SCTLR_EL1[M] from a value of 1 to 0).
+> 2) An exception level disabling its stage-1 translation if its stage-2
+>    translation is enabled (e.g. EL1 changing SCTLR_EL1[M] from a value of 1
+>    to 0 when HCR_EL2[VM] has a value of 1).
+>
+> To avoid the errant behavior, software must execute an ISB immediately
+> prior to executing the MSR that will change SCTLR_ELn[M] from 1 to 0.
+>
+> Signed-off-by: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> ---
+> Changes since v1:
+>  Apply the workaround where it's required.
+> Changes since v2:
+>  Repost the corrected patches.
+>
+> Documentation/arm64/silicon-errata.txt |  1 +
+> arch/arm64/Kconfig                     | 10 ++++++++++
+> arch/arm64/include/asm/assembler.h     | 19 +++++++++++++++++++
+> arch/arm64/include/asm/cpucaps.h       |  3 ++-
+> arch/arm64/kernel/cpu-reset.S          |  1 +
+> arch/arm64/kernel/cpu_errata.c         | 16 ++++++++++++++++
+> arch/arm64/kernel/efi-entry.S          |  2 ++
+> arch/arm64/kernel/head.S               |  1 +
+> arch/arm64/kernel/relocate_kernel.S    |  1 +
+> arch/arm64/kvm/hyp-init.S              |  1 +
+> 10 files changed, 54 insertions(+), 1 deletion(-)
+>
+> diff --git a/Documentation/arm64/silicon-errata.txt b/Documentation/arm64/silicon-errata.txt
+> index 66e8ce1..704770c0 100644
+> --- a/Documentation/arm64/silicon-errata.txt
+> +++ b/Documentation/arm64/silicon-errata.txt
+> @@ -74,3 +74,4 @@ stable kernels.
+> | Qualcomm Tech. | Falkor v1       | E1003           | QCOM_FALKOR_ERRATUM_1003    |
+> | Qualcomm Tech. | Falkor v1       | E1009           | QCOM_FALKOR_ERRATUM_1009    |
+> | Qualcomm Tech. | QDF2400 ITS     | E0065           | QCOM_QDF2400_ERRATUM_0065   |
+> +| Qualcomm Tech. | Falkor v{1,2}   | E1041           | QCOM_FALKOR_ERRATUM_1041    |
+> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+> index 0df64a6..8f73eac 100644
+> --- a/arch/arm64/Kconfig
+> +++ b/arch/arm64/Kconfig
+> @@ -539,6 +539,16 @@ config QCOM_QDF2400_ERRATUM_0065
+>
+> 	  If unsure, say Y.
+>
+> +config QCOM_FALKOR_ERRATUM_E1041
+> +	bool "Falkor E1041: Speculative instruction fetches might cause errant memory access"
+> +	default y
+> +	help
+> +	  Falkor CPU may speculatively fetch instructions from an improper
+> +	  memory location when MMU translation is changed from SCTLR_ELn[M]=1
+> +	  to SCTLR_ELn[M]=0. Prefix an ISB instruction to fix the problem.
+> +
+> +	  If unsure, say Y.
+> +
+> endmenu
+>
+>
+> diff --git a/arch/arm64/include/asm/assembler.h b/arch/arm64/include/asm/assembler.h
+> index d58a625..dd9cec5 100644
+> --- a/arch/arm64/include/asm/assembler.h
+> +++ b/arch/arm64/include/asm/assembler.h
+> @@ -30,6 +30,7 @@
+> #include <asm/pgtable-hwdef.h>
+> #include <asm/ptrace.h>
+> #include <asm/thread_info.h>
+> +#include <asm/alternative.h>
+>
+> /*
+>  * Enable and disable interrupts.
+> @@ -499,4 +500,22 @@
+> #endif
+> 	.endm
+>
+> +/**
+> + * Errata workaround prior to disable MMU. Insert an ISB immediately prior
+> + * to executing the MSR that will change SCTLR_ELn[M] from a value of 1 to 0.
+> + */
+> +	.macro pre_disable_mmu_workaround
+> +#ifdef CONFIG_QCOM_FALKOR_ERRATUM_E1041
+> +alternative_if ARM64_WORKAROUND_QCOM_FALKOR_E1041
+> +	isb
+> +alternative_else_nop_endif
+> +#endif
+> +	.endm
+> +
+> +	.macro pre_disable_mmu_early_workaround
+> +#ifdef CONFIG_QCOM_FALKOR_ERRATUM_E1041
+> +	isb
+> +#endif
+> +	.endm
+> +
+> #endif	/* __ASM_ASSEMBLER_H */
+> diff --git a/arch/arm64/include/asm/cpucaps.h b/arch/arm64/include/asm/cpucaps.h
+> index 8da6216..7f7a59d 100644
+> --- a/arch/arm64/include/asm/cpucaps.h
+> +++ b/arch/arm64/include/asm/cpucaps.h
+> @@ -40,7 +40,8 @@
+> #define ARM64_WORKAROUND_858921			19
+> #define ARM64_WORKAROUND_CAVIUM_30115		20
+> #define ARM64_HAS_DCPOP				21
+> +#define ARM64_WORKAROUND_QCOM_FALKOR_E1041	22
+>
+> -#define ARM64_NCAPS				22
+> +#define ARM64_NCAPS				23
+>
+> #endif /* __ASM_CPUCAPS_H */
+> diff --git a/arch/arm64/kernel/cpu-reset.S b/arch/arm64/kernel/cpu-reset.S
+> index 65f42d2..2a752cb 100644
+> --- a/arch/arm64/kernel/cpu-reset.S
+> +++ b/arch/arm64/kernel/cpu-reset.S
+> @@ -37,6 +37,7 @@ ENTRY(__cpu_soft_restart)
+> 	mrs	x12, sctlr_el1
+> 	ldr	x13, =SCTLR_ELx_FLAGS
+> 	bic	x12, x12, x13
+> +	pre_disable_mmu_workaround
+> 	msr	sctlr_el1, x12
+> 	isb
+>
+> diff --git a/arch/arm64/kernel/cpu_errata.c b/arch/arm64/kernel/cpu_errata.c
+> index 0e27f86..2fd1938 100644
+> --- a/arch/arm64/kernel/cpu_errata.c
+> +++ b/arch/arm64/kernel/cpu_errata.c
+> @@ -179,6 +179,22 @@ static int cpu_enable_trap_ctr_access(void *__unused)
+> 			   MIDR_CPU_VAR_REV(0, 0)),
+> 	},
+> #endif
+> +#ifdef CONFIG_QCOM_FALKOR_ERRATUM_E1041
+> +	{
+> +		.desc = "Qualcomm Technologies Falkor erratum 1041",
+> +		.capability = ARM64_WORKAROUND_QCOM_FALKOR_E1041,
+> +		MIDR_RANGE(MIDR_QCOM_FALKOR_V1,
+> +			MIDR_CPU_VAR_REV(0, 0),
+> +			MIDR_CPU_VAR_REV(0, 0)),
+> +	},
+> +	{
+> +		.desc = "Qualcomm Technologies Falkor erratum 1041",
+> +		.capability = ARM64_WORKAROUND_QCOM_FALKOR_E1041,
+> +		MIDR_RANGE(MIDR_QCOM_FALKOR,
+> +			MIDR_CPU_VAR_REV(0, 1),
+> +			MIDR_CPU_VAR_REV(0, 2)),
+> +	},
+> +#endif
+> #ifdef CONFIG_ARM64_ERRATUM_858921
+> 	{
+> 	/* Cortex-A73 all versions */
+> diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
+> index 4e6ad35..dc675ba 100644
+> --- a/arch/arm64/kernel/efi-entry.S
+> +++ b/arch/arm64/kernel/efi-entry.S
+> @@ -96,6 +96,7 @@ ENTRY(entry)
+> 	mrs	x0, sctlr_el2
+> 	bic	x0, x0, #1 << 0	// clear SCTLR.M
+> 	bic	x0, x0, #1 << 2	// clear SCTLR.C
+> +	pre_disable_mmu_early_workaround
+> 	msr	sctlr_el2, x0
+> 	isb
+> 	b	2f
+> @@ -103,6 +104,7 @@ ENTRY(entry)
+> 	mrs	x0, sctlr_el1
+> 	bic	x0, x0, #1 << 0	// clear SCTLR.M
+> 	bic	x0, x0, #1 << 2	// clear SCTLR.C
+> +	pre_disable_mmu_early_workaround
+> 	msr	sctlr_el1, x0
+> 	isb
+> 2:
+> diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
+> index 0b243ec..a807fca 100644
+> --- a/arch/arm64/kernel/head.S
+> +++ b/arch/arm64/kernel/head.S
+> @@ -732,6 +732,7 @@ __primary_switch:
+> 	 * to take into account by discarding the current kernel mapping and
+> 	 * creating a new one.
+> 	 */
+> +	pre_disable_mmu_early_workaround
+> 	msr	sctlr_el1, x20			// disable the MMU
+> 	isb
+> 	bl	__create_page_tables		// recreate kernel mapping
+> diff --git a/arch/arm64/kernel/relocate_kernel.S b/arch/arm64/kernel/relocate_kernel.S
+> index ce704a4..f407e42 100644
+> --- a/arch/arm64/kernel/relocate_kernel.S
+> +++ b/arch/arm64/kernel/relocate_kernel.S
+> @@ -45,6 +45,7 @@ ENTRY(arm64_relocate_new_kernel)
+> 	mrs	x0, sctlr_el2
+> 	ldr	x1, =SCTLR_ELx_FLAGS
+> 	bic	x0, x0, x1
+> +	pre_disable_mmu_workaround
+> 	msr	sctlr_el2, x0
+> 	isb
+> 1:
+> diff --git a/arch/arm64/kvm/hyp-init.S b/arch/arm64/kvm/hyp-init.S
+> index 3f96155..870828c 100644
+> --- a/arch/arm64/kvm/hyp-init.S
+> +++ b/arch/arm64/kvm/hyp-init.S
+> @@ -151,6 +151,7 @@ reset:
+> 	mrs	x5, sctlr_el2
+> 	ldr	x6, =SCTLR_ELx_FLAGS
+> 	bic	x5, x5, x6		// Clear SCTL_M and etc
+> +	pre_disable_mmu_workaround
+> 	msr	sctlr_el2, x5
+> 	isb
+>
 >
 
-James/Shanker,
-
-I can report that VM start/stop/restart tests worked with the patches 
-applied to Ubuntu 4.13 (Artful) kernel on the qdf2400 hardware.
-
-Host: Ubuntu 4.13 with Erratum 1041 patches applied
-Guest: Stock Ubuntu 4.13 kernel
-
-- create 20 vms one at a time
-
-10 iteration of:
-- Stop (virsh destroy) 20 VMs one at a time
-- Start (virsh start) 20 VMs one at a time.
+I applied the V3 of errtum 1041 patches to Ubuntu Artful 4.13 kernel and 
+ran the stress-ng and VM create/stop/restart testing like I did on the 
+previous version of this patch series. Tests successfully ran on qdf2400 
+platform, I did not observe any regressions on the Artful 4.13 kernel.
 
 Tested-by: Manoj Iyer <manoj.iyer-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 
->
->> Host: Ubuntu Artful 4.13 kernel with *no* erratum 1041 patches applied.
->> Guest: Ubuntu Zesty (4.10) kernel.
->> 
->> - Created 20 VMs one at a time
->> 
->> In a loop:
->> - Stop (virsh destroy) 20 VMs one at a time
->> - Start (virsh start) 20 VMs one at a time.
->> 
->> And, I am able to reproduce the system reset issue I previously reported. I 
->> think the problem I reported with VMs might have nothing to do with the 
->> erratum 1041 patches, and probably needs to be root caused seperately.
->> 
->> With stock 4.13 kernel (no erratum 1041 patches applied):
->> 
->> awrep6 login: [  461.881379] ACPI CPPC: PCC check channel failed. Status=0
->> [  462.051194] ACPI CPPC: PCC check channel failed. Status=0
->> [  462.223137] ACPI CPPC: PCC check channel failed. Status=0
->> [  462.633790] ACPI CPPC: PCC check channel failed. Status=0
->> [  463.231971] ACPI CPPC: PCC check channel failed. Status=0
->> [  463.403163] ACPI CPPC: PCC check channel failed. Status=0
->> [  463.822936] ACPI CPPC: PCC check channel failed. Status=0
->> [  463.995222] ACPI CPPC: PCC check channel failed. Status=0
->> [  464.130962] ACPI CPPC: PCC check channel failed. Status=0
->> [  464.258973] ACPI CPPC: PCC check channel failed. Status=0
->> [  465.283028] ACPI CPPC: PCC check channel failed. Status=0
->> 
->> 
->> SYS_DBG: Running SDI image (immediate mode)
->> SYS_DBG: Ram Dump Init
->> SYS_DBG: Failed to init SD card
->> SYS_DBG: Resetting system!
->> 
->> 
->> On Thu, 9 Nov 2017, Manoj Iyer wrote:
->> 
->>> 
->>> 
->>> 
->>> On Thu, 9 Nov 2017, Manoj Iyer wrote:
->>> 
->>>> 
->>>> James,
->>>> 
->>>> (sorry for top-posting)
->>>> 
->>>> Applied patch 3 patches to Ubuntu Artful Kernel ( 4.13.0-16-generic )
->>>> 
->>>> - Start 20 VMs one at a time
->>>> 
->>>> In a loop:
->>>> - Stop (virsh destroy) 20 VMs one at a time
->>>> - Start (virsh start) 20 VMs one at a time.
->>> 
->>> Fixing some confusion I might have introduced in my prev email.
->>> 
->>> - Applied all 3 patches to Ubuntu Artful Kernel ( 4.13.0-16-generic )
->>> 
->>> - Created 20 VMs one at a time
->>> 
->>> In a loop:
->>> - Stop (virsh destroy) 20 VMs one at a time
->>> - Start (virsh start) 20 VMs one at a time.
->>> 
->>>> 
->>>> The system reset's itself after starting the last VM on the 1st loop 
->>>> displaying the following:
->>>> 
->>>> awrep6 login: [ 603.349141] ACPI CPPC: PCC check channel failed. Status=0
->>>> [ 603.765101] ACPI CPPC: PCC check channel failed. Status=0
->>>> [ 603.937389] ACPI CPPC: PCC check channel failed. Status=0
->>>> [ 608.285495] ACPI CPPC: PCC check channel failed. Status=0
->>>> [ 608.289481] ACPI CPPC: PCC check channel failed. Status=0
->>>> 
->>>> SYS_DBG: Running SDI image (immediate mode)
->>>> SYS_DBG: Ram Dump Init
->>>> SYS_DBG: Failed to init SD card
->>>> SYS_DBG: Resetting system!
->>>> 
->>>> Followed by the following messages on system reboot:
->>>> [ 6.616891] BERT: Error records from previous boot:
->>>> [ 6.621655] [Hardware Error]: event severity: fatal
->>>> [ 6.626516] [Hardware Error]: imprecise tstamp: 0000-00-00 00:00:00
->>>> [ 6.632851] [Hardware Error]: Error 0, type: fatal
->>>> [ 6.637713] [Hardware Error]: section type: unknown, 
->>>> d2e2621c-f936-468d-0d84-15a4ed015c8b
->>>> [ 6.646045] [Hardware Error]: section length: 0x238
->>>> [ 6.651082] [Hardware Error]: 00000000: 72724502 5220726f 6f736165 
->>>> 6e55206e .Error Reason Un
->>>> [ 6.659761] [Hardware Error]: 00000010: 776f6e6b 0000006e 00000000 
->>>> 00000000 known...........
->>>> [ 6.668442] [Hardware Error]: 00000020: 00000000 00000000 00000000 
->>>> 00000000 ................
->>>> [ 6.677122] [Hardware Error]: 00000030: 00000000 00000000 00000000 
->>>> 00000000 ................
->>>> 
->>>> 
->>>> On Thu, 9 Nov 2017, James Morse wrote:
->>>> 
->>>>> Hi Manoj,
->>>>> 
->>>>> On 08/11/17 19:05, Manoj Iyer wrote:
->>>>>> On Thu, 2 Nov 2017, Shanker Donthineni wrote:
->>>>>>> The ARM architecture defines the memory locations that are permitted
->>>>>>> to be accessed as the result of a speculative instruction fetch from
->>>>>>> an exception level for which all stages of translation are disabled.
->>>>>>> Specifically, the core is permitted to speculatively fetch from the
->>>>>>> 4KB region containing the current program counter and next 4KB.
->>>>>>> 
->>>>>>> When translation is changed from enabled to disabled for the running
->>>>>>> exception level (SCTLR_ELn[M] changed from a value of 1 to 0), the
->>>>>>> Falkor core may errantly speculatively access memory locations outside
->>>>>>> of the 4KB region permitted by the architecture. The errant memory
->>>>>>> access may lead to one of the following unexpected behaviors.
->>>>> 
->>>>>> I applied the 3 patches to Ubuntu 4.13.0-16-generic (Artful) kernel and
->>>>>> ran stress-ng cpu tests on QDF2400 server
->>>>> 
->>>>> [...]
->>>>> 
->>>>>> Where stress-ng would spawn N workers and test cpu offline/online, 
->>>>>> perform
->>>>>> matrix operations, do rapid context switchs, and anonymous mmaps. 
->>>>>> Although
->>>>>> I was not able to reproduce the erratum on the stock 4.13 kernel using 
->>>>>> the
->>>>>> same test case, the patched kernel did not seem to introduce any
->>>>>> regressions either. I ran the stress-ng tests for over 8hrs found the
->>>>>> system to be stable.
->>>>> 
->>>>> 
->>>>> Could you throw kexec and KVM into the mix? This issue only shows up 
->>>>> when we
->>>>> disable the MMU, which we almost never do.
->>>>> 
->>>>> For CPU offline/online we make the PSCI 'offline' call with the MMU 
->>>>> enabled.
->>>>> When the CPU comes back firmware has reset the EL2/EL1 SCTLR from a 
->>>>> higher
->>>>> exception level, so it won't hit this issue.
->>>>> 
->>>>> One place we do this is kexec, where we drop into purgatory with the MMU 
->>>>> disabled.
->>>>> 
->>>>> The other is KVM unloading itself to return to the hyp stub. You can 
->>>>> stress this
->>>>> by starting and stopping a VM. When the number of VMs reaches 0 KVM 
->>>>> should
->>>>> unload via 'kvm_arch_hardware_disable()'.
->>>>> 
->>>>> 
->>>>> Thanks,
->>>>> 
->>>>> James
->>>>> 
->>>>> 
->>>> 
->>>> --
->>>> ============================
->>>> Manoj Iyer
->>>> Ubuntu/Canonical
->>>> ARM Servers - Cloud
->>>> ============================
->>>> 
->>>> 
->>> 
->>> --
->>> ============================
->>> Manoj Iyer
->>> Ubuntu/Canonical
->>> ARM Servers - Cloud
->>> ============================
->>> 
->>> 
->> 
->> --
->> ============================
->> Manoj Iyer
->> Ubuntu/Canonical
->> ARM Servers - Cloud
->> ============================
->> 
->> 
->
-> --
-> ============================
-> Manoj Iyer
-> Ubuntu/Canonical
-> ARM Servers - Cloud
-> ============================
->
->
+--
+============================
+Manoj Iyer
+Ubuntu/Canonical
+ARM Servers - Cloud
+============================
