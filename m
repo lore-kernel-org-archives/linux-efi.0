@@ -1,119 +1,261 @@
-From: Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: arm64 crashkernel fails to boot on acpi-only machines due to ACPI
- regions being no longer mapped as NOMAP
-Date: Sun, 26 Nov 2017 13:59:08 +0530
-Message-ID: <CAFTCetQHmpprAVu6uYO+rc5Xi4EUVhmovbmSaU6nM1n1mAH62w@mail.gmail.com>
-References: <CACi5LpM_95ebYFguPTyjWk+qHT5rDJVXiYDkNWbszo6Zw41zRA@mail.gmail.com>
- <CACi5LpNV_E9pvhTwLcy6vtEj9qbL1ZEHe-5sv=iiW0k9JxPD1Q@mail.gmail.com>
- <20171113092730.GA29552@linaro.org> <CAKv+Gu_eQ-s0J22tKeHKJme4qXcvxvDkS7vKrNW+o_XtMTkMhQ@mail.gmail.com>
- <3df4c6c5-0abe-01ee-730d-2edaa5f497d2@redhat.com> <20171116070005.GI29552@linaro.org>
+From: Shanker Donthineni <shankerd@codeaurora.org>
+Subject: [PATCH v4 2/2] arm64: Add software workaround for Falkor erratum 1041
+Date: Mon, 27 Nov 2017 17:18:00 -0600
+Message-ID: <1511824680-16397-3-git-send-email-shankerd@codeaurora.org>
+References: <1511824680-16397-1-git-send-email-shankerd@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20171116070005.GI29552-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
+In-Reply-To: <1511824680-16397-1-git-send-email-shankerd@codeaurora.org>
+List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
+List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
+List-Post: <mailto:kvmarm@lists.cs.columbia.edu>
+List-Help: <mailto:kvmarm-request@lists.cs.columbia.edu?subject=help>
+List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
+ <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
+Errors-To: kvmarm-bounces@lists.cs.columbia.edu
+Sender: kvmarm-bounces@lists.cs.columbia.edu
+To: Will Deacon <will.deacon@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, linux-arm-kernel@lists.infradead.org
+Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, linux-kernel@vger.kernel.org, Robin Murphy <robin.murphy@arm.com>, kvmarm@lists.cs.columbia.edu
 List-Id: linux-efi@vger.kernel.org
 
-Hi Akashi,
+The ARM architecture defines the memory locations that are permitted
+to be accessed as the result of a speculative instruction fetch from
+an exception level for which all stages of translation are disabled.
+Specifically, the core is permitted to speculatively fetch from the
+4KB region containing the current program counter 4K and next 4K.
 
-On Thu, Nov 16, 2017 at 12:30 PM, AKASHI Takahiro
-<takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> Bhupesh,
->
-> On Wed, Nov 15, 2017 at 04:28:55PM +0530, Bhupesh Sharma wrote:
->>
->   (snip)
->
->> # dmesg | grep -B 2 -i "ACPI reclaim"
->> [    0.000000] efi:   0x000039670000-0x0000396bffff [Runtime Code |RUN|  |
->> |  |  |  |  |   |WB|WT|WC|UC]
->> [    0.000000] efi:   0x0000396c0000-0x00003970ffff [Boot Code |   |  |  |
->> |  |  |  |   |WB|WT|WC|UC]
->> [    0.000000] efi:   0x000039710000-0x00003975ffff [ACPI Reclaim Memory|
->> |  |  |  |  |  |  |   |WB|WT|WC|UC]
->>
->> 2. Now, I am not sure which kernel layer does the following changes (I am
->> still trying to dig it out more), but I see that the 'Boot Code' and ACPI
->> DSDT table regions are somehow merged into one memblock_region and appear as
->> range '396c0000-3975ffff' in the '/proc/iomem' interface:
->>
->> # cat /proc/iomem | grep -A 2 -B 2 39
->> 00000000-3961ffff : System RAM
->>   00080000-00b6ffff : Kernel code
->>   00cb0000-0167ffff : Kernel data
->>   0e800000-2e7fffff : Crash kernel
->> 39620000-396bffff : reserved
->> 396c0000-3975ffff : System RAM
->> 39760000-3976ffff : reserved
->> 39770000-397affff : reserved
->> 397b0000-3989ffff : reserved
->> 398a0000-398bffff : reserved
->> 398c0000-39d3ffff : reserved
->> 39d40000-3ed2ffff : System RAM
->>
->   (snip)
->>
->> So, I am looking at what could be causing the 'Boot Code' and 'ACPI DSDT
->> table' ranges to be merged into a single region at
->> '0x0000396c0000-0x00003970ffff' which cannot be marked as RESERVED using
->> 'memblock_is_reserved'.
->
-> Simple:) The short answer is that memblock_add() does.
->
-> The long answer:
-> First, please note that memblock maintains two type of regions list,
-> "memory" and "reserved".
->
-> efi_init()
->     reserve_regions()
->         early_init_dt_add_memory_arch()
->             memblock_add()
->                 memblock_add_range(memblock.memory)
->
-> The memory regions described in efi.memmap are added to "memory" list
-> with all the neighboring regions being merged into ones,
-> in this case, "Runtime Code", "Boot Code", "ACPI Reclaim Memory" and others.
->
-> The secret here is that "Runtime Code" is also marked with "NOMAP" flag in
-> reserve_regions(), which creates an isolated region since it now has
-> a different attribute.
-> Consequently only "Boot Code" and "ACPI Reclaim Memory" are
-> unified.
->
-> Look at request_standard_resources(). It handles only "memory" list,
-> and doesn't care about whether any arbitrary part of memory is in
-> "reserved" list or not.
+When translation is changed from enabled to disabled for the running
+exception level (SCTLR_ELn[M] changed from a value of 1 to 0), the
+Falkor core may errantly speculatively access memory locations outside
+of the 4KB region permitted by the architecture. The errant memory
+access may lead to one of the following unexpected behaviors.
 
-Thanks for the pointers. Now I did some experiments and traversed the
-whole memblock path and I see
-how these two regions get merged into a single region which is later
-on recognized by
-'request_standard_resources()' as a System RAM region rather than a
-RESERVED region.
+1) A System Error Interrupt (SEI) being raised by the Falkor core due
+   to the errant memory access attempting to access a region of memory
+   that is protected by a slave-side memory protection unit.
+2) Unpredictable device behavior due to a speculative read from device
+   memory. This behavior may only occur if the instruction cache is
+   disabled prior to or coincident with translation being changed from
+   enabled to disabled.
 
-I recently reproduced this on a APM mustang with latest kernel as well
-when acpi is used to boot the machine, which makes me believe that
-this is a generic issue for arm64 machines with the 4.14 kernel and if
-they use acpi=force as the boot method.
+The conditions leading to this erratum will not occur when either of the
+following occur:
+ 1) A higher exception level disables translation of a lower exception level
+   (e.g. EL2 changing SCTLR_EL1[M] from a value of 1 to 0).
+ 2) An exception level disabling its stage-1 translation if its stage-2
+    translation is enabled (e.g. EL1 changing SCTLR_EL1[M] from a value of 1
+    to 0 when HCR_EL2[VM] has a value of 1).
 
-I am not sure, if a fix/or hack would be suitable for all underlying
-arm64 machines, but I am trying one on the arm64 machines I have to
-see if it fixes the issue.
+To avoid the errant behavior, software must execute an ISB immediately
+prior to executing the MSR that will change SCTLR_ELn[M] from 1 to 0.
 
-@Ard:
+Signed-off-by: Shanker Donthineni <shankerd@codeaurora.org>
+---
+Changes since v3:
+  Rebased to kernel v4.15-rc1.
+Changes since v2:
+  Repost the corrected patches.
+Changes since v1:
+  Apply the workaround where it's required.
 
-Hi Ard,
+ Documentation/arm64/silicon-errata.txt |  1 +
+ arch/arm64/Kconfig                     | 12 +++++++++++-
+ arch/arm64/include/asm/assembler.h     | 19 +++++++++++++++++++
+ arch/arm64/include/asm/cpucaps.h       |  3 ++-
+ arch/arm64/kernel/cpu-reset.S          |  1 +
+ arch/arm64/kernel/cpu_errata.c         | 16 ++++++++++++++++
+ arch/arm64/kernel/efi-entry.S          |  2 ++
+ arch/arm64/kernel/head.S               |  1 +
+ arch/arm64/kernel/relocate_kernel.S    |  1 +
+ arch/arm64/kvm/hyp-init.S              |  1 +
+ 10 files changed, 55 insertions(+), 2 deletions(-)
 
-I think to create and test a clean solution for all arm64 boards it
-will take some time, in the meantime should we consider reverting the
-commit [1] to make sure that acpi enabled arm64 machines can boot with
-4.14?
-
-Please let me know your opinion.
-
-[1] f56ab9a5b73ca2aee777ccdf2d355ae2dd31db5a (efi/arm: Don't mark
-ACPI reclaim memory as MEMBLOCK_NOMAP)
-
-Thanks,
-Bhupesh
+diff --git a/Documentation/arm64/silicon-errata.txt b/Documentation/arm64/silicon-errata.txt
+index 304bf22..fc1c884 100644
+--- a/Documentation/arm64/silicon-errata.txt
++++ b/Documentation/arm64/silicon-errata.txt
+@@ -75,3 +75,4 @@ stable kernels.
+ | Qualcomm Tech. | Falkor v1       | E1003           | QCOM_FALKOR_ERRATUM_1003    |
+ | Qualcomm Tech. | Falkor v1       | E1009           | QCOM_FALKOR_ERRATUM_1009    |
+ | Qualcomm Tech. | QDF2400 ITS     | E0065           | QCOM_QDF2400_ERRATUM_0065   |
++| Qualcomm Tech. | Falkor v{1,2}   | E1041           | QCOM_FALKOR_ERRATUM_1041    |
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index a93339f..c9a7e9e 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -557,7 +557,6 @@ config QCOM_QDF2400_ERRATUM_0065
+ 
+ 	  If unsure, say Y.
+ 
+-
+ config SOCIONEXT_SYNQUACER_PREITS
+ 	bool "Socionext Synquacer: Workaround for GICv3 pre-ITS"
+ 	default y
+@@ -576,6 +575,17 @@ config HISILICON_ERRATUM_161600802
+ 	  a 128kB offset to be applied to the target address in this commands.
+ 
+ 	  If unsure, say Y.
++
++config QCOM_FALKOR_ERRATUM_E1041
++	bool "Falkor E1041: Speculative instruction fetches might cause errant memory access"
++	default y
++	help
++	  Falkor CPU may speculatively fetch instructions from an improper
++	  memory location when MMU translation is changed from SCTLR_ELn[M]=1
++	  to SCTLR_ELn[M]=0. Prefix an ISB instruction to fix the problem.
++
++	  If unsure, say Y.
++
+ endmenu
+ 
+ 
+diff --git a/arch/arm64/include/asm/assembler.h b/arch/arm64/include/asm/assembler.h
+index aef72d8..c77742a 100644
+--- a/arch/arm64/include/asm/assembler.h
++++ b/arch/arm64/include/asm/assembler.h
+@@ -31,6 +31,7 @@
+ #include <asm/pgtable-hwdef.h>
+ #include <asm/ptrace.h>
+ #include <asm/thread_info.h>
++#include <asm/alternative.h>
+ 
+ 	.macro save_and_disable_daif, flags
+ 	mrs	\flags, daif
+@@ -512,4 +513,22 @@
+ #endif
+ 	.endm
+ 
++/**
++ * Errata workaround prior to disable MMU. Insert an ISB immediately prior
++ * to executing the MSR that will change SCTLR_ELn[M] from a value of 1 to 0.
++ */
++	.macro pre_disable_mmu_workaround
++#ifdef CONFIG_QCOM_FALKOR_ERRATUM_E1041
++alternative_if ARM64_WORKAROUND_QCOM_FALKOR_E1041
++	isb
++alternative_else_nop_endif
++#endif
++	.endm
++
++	.macro pre_disable_mmu_early_workaround
++#ifdef CONFIG_QCOM_FALKOR_ERRATUM_E1041
++	isb
++#endif
++	.endm
++
+ #endif	/* __ASM_ASSEMBLER_H */
+diff --git a/arch/arm64/include/asm/cpucaps.h b/arch/arm64/include/asm/cpucaps.h
+index 2ff7c5e..b884268 100644
+--- a/arch/arm64/include/asm/cpucaps.h
++++ b/arch/arm64/include/asm/cpucaps.h
+@@ -41,7 +41,8 @@
+ #define ARM64_WORKAROUND_CAVIUM_30115		20
+ #define ARM64_HAS_DCPOP				21
+ #define ARM64_SVE				22
++#define ARM64_WORKAROUND_QCOM_FALKOR_E1041	23
+ 
+-#define ARM64_NCAPS				23
++#define ARM64_NCAPS				24
+ 
+ #endif /* __ASM_CPUCAPS_H */
+diff --git a/arch/arm64/kernel/cpu-reset.S b/arch/arm64/kernel/cpu-reset.S
+index 65f42d2..2a752cb 100644
+--- a/arch/arm64/kernel/cpu-reset.S
++++ b/arch/arm64/kernel/cpu-reset.S
+@@ -37,6 +37,7 @@ ENTRY(__cpu_soft_restart)
+ 	mrs	x12, sctlr_el1
+ 	ldr	x13, =SCTLR_ELx_FLAGS
+ 	bic	x12, x12, x13
++	pre_disable_mmu_workaround
+ 	msr	sctlr_el1, x12
+ 	isb
+ 
+diff --git a/arch/arm64/kernel/cpu_errata.c b/arch/arm64/kernel/cpu_errata.c
+index 0e27f86..2fd1938 100644
+--- a/arch/arm64/kernel/cpu_errata.c
++++ b/arch/arm64/kernel/cpu_errata.c
+@@ -179,6 +179,22 @@ static int cpu_enable_trap_ctr_access(void *__unused)
+ 			   MIDR_CPU_VAR_REV(0, 0)),
+ 	},
+ #endif
++#ifdef CONFIG_QCOM_FALKOR_ERRATUM_E1041
++	{
++		.desc = "Qualcomm Technologies Falkor erratum 1041",
++		.capability = ARM64_WORKAROUND_QCOM_FALKOR_E1041,
++		MIDR_RANGE(MIDR_QCOM_FALKOR_V1,
++			MIDR_CPU_VAR_REV(0, 0),
++			MIDR_CPU_VAR_REV(0, 0)),
++	},
++	{
++		.desc = "Qualcomm Technologies Falkor erratum 1041",
++		.capability = ARM64_WORKAROUND_QCOM_FALKOR_E1041,
++		MIDR_RANGE(MIDR_QCOM_FALKOR,
++			MIDR_CPU_VAR_REV(0, 1),
++			MIDR_CPU_VAR_REV(0, 2)),
++	},
++#endif
+ #ifdef CONFIG_ARM64_ERRATUM_858921
+ 	{
+ 	/* Cortex-A73 all versions */
+diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
+index 4e6ad35..dc675ba 100644
+--- a/arch/arm64/kernel/efi-entry.S
++++ b/arch/arm64/kernel/efi-entry.S
+@@ -96,6 +96,7 @@ ENTRY(entry)
+ 	mrs	x0, sctlr_el2
+ 	bic	x0, x0, #1 << 0	// clear SCTLR.M
+ 	bic	x0, x0, #1 << 2	// clear SCTLR.C
++	pre_disable_mmu_early_workaround
+ 	msr	sctlr_el2, x0
+ 	isb
+ 	b	2f
+@@ -103,6 +104,7 @@ ENTRY(entry)
+ 	mrs	x0, sctlr_el1
+ 	bic	x0, x0, #1 << 0	// clear SCTLR.M
+ 	bic	x0, x0, #1 << 2	// clear SCTLR.C
++	pre_disable_mmu_early_workaround
+ 	msr	sctlr_el1, x0
+ 	isb
+ 2:
+diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
+index 67e86a0..a0d737d 100644
+--- a/arch/arm64/kernel/head.S
++++ b/arch/arm64/kernel/head.S
+@@ -750,6 +750,7 @@ __primary_switch:
+ 	 * to take into account by discarding the current kernel mapping and
+ 	 * creating a new one.
+ 	 */
++	pre_disable_mmu_early_workaround
+ 	msr	sctlr_el1, x20			// disable the MMU
+ 	isb
+ 	bl	__create_page_tables		// recreate kernel mapping
+diff --git a/arch/arm64/kernel/relocate_kernel.S b/arch/arm64/kernel/relocate_kernel.S
+index ce704a4..f407e42 100644
+--- a/arch/arm64/kernel/relocate_kernel.S
++++ b/arch/arm64/kernel/relocate_kernel.S
+@@ -45,6 +45,7 @@ ENTRY(arm64_relocate_new_kernel)
+ 	mrs	x0, sctlr_el2
+ 	ldr	x1, =SCTLR_ELx_FLAGS
+ 	bic	x0, x0, x1
++	pre_disable_mmu_workaround
+ 	msr	sctlr_el2, x0
+ 	isb
+ 1:
+diff --git a/arch/arm64/kvm/hyp-init.S b/arch/arm64/kvm/hyp-init.S
+index 3f96155..870828c 100644
+--- a/arch/arm64/kvm/hyp-init.S
++++ b/arch/arm64/kvm/hyp-init.S
+@@ -151,6 +151,7 @@ reset:
+ 	mrs	x5, sctlr_el2
+ 	ldr	x6, =SCTLR_ELx_FLAGS
+ 	bic	x5, x5, x6		// Clear SCTL_M and etc
++	pre_disable_mmu_workaround
+ 	msr	sctlr_el2, x5
+ 	isb
+ 
+-- 
+Qualcomm Datacenter Technologies, Inc. on behalf of the Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum, a Linux Foundation Collaborative Project.
