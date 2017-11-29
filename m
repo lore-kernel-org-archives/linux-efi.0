@@ -1,11 +1,11 @@
-From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
+From: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: [PATCH 0/4] Using the hash in MOKx to blacklist kernel module
-Date: Wed, 29 Nov 2017 22:00:57 +0800
-Message-ID: <20171129140101.19682-1-jlee@suse.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: linux-fs@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>
+Date: Wed, 29 Nov 2017 22:11:35 +0800
+Message-ID: <20171129141139.20088-1-jlee@suse.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-fs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
 This patch set is base on the efi-lock-down and keys-uefi branchs in
@@ -17,6 +17,9 @@ is maintained by shim boot loader. We can enroll the hash of blacklisted
 kernel module (with or without signature) to MOKx by mokutil. Kernel loads
 the hash from MOKx to blacklist keyring when booting. Kernel will prevent
 to load the kernel module when its hash be found in blacklist.
+
+This function is useful to revoke a kernel module that it has exploit. Or
+revoking a kernel module that it was signed by a unsecure key.
 
 Except MOKx, this patch set fixs another two issues: The MOK/MOKx should
 not be loaded when secure boot is disabled. And, modified error message
