@@ -1,42 +1,98 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [GIT PULL] hash addresses printed with %p
-Date: Wed, 29 Nov 2017 13:36:25 -0800
-Message-ID: <CA+55aFwPXV0sXb+edcQc4epz0pWustZgJsoq95=a3OEDxynq7g@mail.gmail.com>
-References: <20171129045927.GA6217@eros> <CA+55aFzVy-SE9w1puPjgE1BxGje8oR3Ks9BDU7GXmvBYJfkCxw@mail.gmail.com>
- <20171129210848.GF6217@eros> <CA+55aFwjhjGZC9U68mo4hnnJXLWYxG3UYoz-=SwNfO-3N-Untg@mail.gmail.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] x86: move parse_early_param to earlier code for
+ add_efi_memmap
+Date: Thu, 30 Nov 2017 13:23:27 +0800
+Message-ID: <20171130052327.GA3500@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CA+55aFwjhjGZC9U68mo4hnnJXLWYxG3UYoz-=SwNfO-3N-Untg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Tobin C. Harding" <me@tobin.cc>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Nov 29, 2017 at 1:14 PM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
->
-> Not because %pK itself changed, but because the semantics of %p did.
-> The baseline moved, and the "safe" version did not.
+'add_efi_memmap' is an early param, but do_add_efi_memmap() has no
+chance to run because the code path is before parse_early_param().
+I believe it worked when the param was introduced but probably later
+some other changes caused the wrong order and nobody noticed it.
 
-Btw, that baseline for me is now that I can do
+Move parse_early_param before efi_memblock_x86_reserve_range to fix
+this.
 
-  ./scripts/leaking_addresses.pl | wc -l
-  18
+Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/kernel/setup.c |   55 ++++++++++++++++++++++++------------------------
+ 1 file changed, 28 insertions(+), 27 deletions(-)
 
-and of those 18 hits, six are false positives (looks like bitmaps in
-the uevent keys).
-
-The remaining 12 are from the EFI runtime map files
-(/sys/firmware/efi/runtime-map/*). They should presumably not be
-world-readable, but sadly the kset_create_and_add() helper seems to do
-that by default.
-
-I think the sysfs code makes it insanely too easy to make things
-world-readable. You try to be careful, and mark things read-only etc,
-but __ATTR_RO() jkust means S_IRUGO, which means world-readable.
-
-There seems to be no convenient model for kobjects having better
-permissions. Greg?
-
-              Linus
+--- linux-x86.orig/arch/x86/kernel/setup.c
++++ linux-x86/arch/x86/kernel/setup.c
+@@ -897,6 +897,34 @@ void __init setup_arch(char **cmdline_p)
+ 	rd_prompt = ((boot_params.hdr.ram_size & RAMDISK_PROMPT_FLAG) != 0);
+ 	rd_doload = ((boot_params.hdr.ram_size & RAMDISK_LOAD_FLAG) != 0);
+ #endif
++
++#ifdef CONFIG_CMDLINE_BOOL
++#ifdef CONFIG_CMDLINE_OVERRIDE
++	strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
++#else
++	if (builtin_cmdline[0]) {
++		/* append boot loader cmdline to builtin */
++		strlcat(builtin_cmdline, " ", COMMAND_LINE_SIZE);
++		strlcat(builtin_cmdline, boot_command_line, COMMAND_LINE_SIZE);
++		strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
++	}
++#endif
++#endif
++
++	strlcpy(command_line, boot_command_line, COMMAND_LINE_SIZE);
++	*cmdline_p = command_line;
++
++	/*
++	 * x86_configure_nx() is called before parse_early_param() to detect
++	 * whether hardware doesn't support NX (so that the early EHCI debug
++	 * console setup can safely call set_fixmap()). It may then be called
++	 * again from within noexec_setup() during parsing early parameters
++	 * to honor the respective command line option.
++	 */
++	x86_configure_nx();
++
++	parse_early_param();
++
+ #ifdef CONFIG_EFI
+ 	if (!strncmp((char *)&boot_params.efi_info.efi_loader_signature,
+ 		     EFI32_LOADER_SIGNATURE, 4)) {
+@@ -935,33 +963,6 @@ void __init setup_arch(char **cmdline_p)
+ 	bss_resource.start = __pa_symbol(__bss_start);
+ 	bss_resource.end = __pa_symbol(__bss_stop)-1;
+ 
+-#ifdef CONFIG_CMDLINE_BOOL
+-#ifdef CONFIG_CMDLINE_OVERRIDE
+-	strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
+-#else
+-	if (builtin_cmdline[0]) {
+-		/* append boot loader cmdline to builtin */
+-		strlcat(builtin_cmdline, " ", COMMAND_LINE_SIZE);
+-		strlcat(builtin_cmdline, boot_command_line, COMMAND_LINE_SIZE);
+-		strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
+-	}
+-#endif
+-#endif
+-
+-	strlcpy(command_line, boot_command_line, COMMAND_LINE_SIZE);
+-	*cmdline_p = command_line;
+-
+-	/*
+-	 * x86_configure_nx() is called before parse_early_param() to detect
+-	 * whether hardware doesn't support NX (so that the early EHCI debug
+-	 * console setup can safely call set_fixmap()). It may then be called
+-	 * again from within noexec_setup() during parsing early parameters
+-	 * to honor the respective command line option.
+-	 */
+-	x86_configure_nx();
+-
+-	parse_early_param();
+-
+ #ifdef CONFIG_MEMORY_HOTPLUG
+ 	/*
+ 	 * Memory used by the kernel cannot be hot-removed because Linux
