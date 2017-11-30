@@ -1,75 +1,80 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Subject: Re: [PATCH 1/4] MODSIGN: do not load mok when secure boot disabled
-Date: Thu, 30 Nov 2017 07:51:03 -0800
-Message-ID: <1512057063.3020.11.camel@HansenPartnership.com>
-References: <20171129141139.20088-1-jlee@suse.com>
-         <20171129141139.20088-2-jlee@suse.com>
+From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: Re: [GIT PULL] hash addresses printed with %p
+Date: Thu, 30 Nov 2017 16:32:35 +0000
+Message-ID: <20171130163235.GA27849@kroah.com>
+References: <20171129045927.GA6217@eros>
+ <CA+55aFzVy-SE9w1puPjgE1BxGje8oR3Ks9BDU7GXmvBYJfkCxw@mail.gmail.com>
+ <20171129210848.GF6217@eros>
+ <CA+55aFwjhjGZC9U68mo4hnnJXLWYxG3UYoz-=SwNfO-3N-Untg@mail.gmail.com>
+ <CA+55aFwPXV0sXb+edcQc4epz0pWustZgJsoq95=a3OEDxynq7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20171129141139.20088-2-jlee-IBi9RG/b67k@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CA+55aFwPXV0sXb+edcQc4epz0pWustZgJsoq95=a3OEDxynq7g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-fs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+To: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: "Tobin C. Harding" <me-xzjC0nNlxno@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 2017-11-29 at 22:11 +0800, Lee, Chun-Yi wrote:
-> The mok can not be trusted when the secure boot is disabled. Which
-> means that the kernel embedded certificate is the only trusted key.
+On Wed, Nov 29, 2017 at 01:36:25PM -0800, Linus Torvalds wrote:
+> On Wed, Nov 29, 2017 at 1:14 PM, Linus Torvalds
+> <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org> wrote:
+> >
+> > Not because %pK itself changed, but because the semantics of %p did.
+> > The baseline moved, and the "safe" version did not.
 > 
-> Due to db/dbx are authenticated variables, they needs manufacturer's
-> KEK for update. So db/dbx are secure when secureboot disabled.
+> Btw, that baseline for me is now that I can do
 > 
-> Cc: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> 
-> Cc: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-> Signed-off-by: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
-> ---
->  certs/load_uefi.c | 26 +++++++++++++++-----------
->  1 file changed, 15 insertions(+), 11 deletions(-)
+>   ./scripts/leaking_addresses.pl | wc -l
+>   18
 > 
-> diff --git a/certs/load_uefi.c b/certs/load_uefi.c
-> index 3d88459..d6de4d0 100644
-> --- a/certs/load_uefi.c
-> +++ b/certs/load_uefi.c
-> @@ -164,17 +164,6 @@ static int __init load_uefi_certs(void)
->  		}
->  	}
->  
-> -	mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
-> -	if (!mok) {
-> -		pr_info("MODSIGN: Couldn't get UEFI MokListRT\n");
-> -	} else {
-> -		rc = parse_efi_signature_list("UEFI:MokListRT",
-> -					      mok, moksize,
-> get_handler_for_db);
-> -		if (rc)
-> -			pr_err("Couldn't parse MokListRT signatures:
-> %d\n", rc);
-> -		kfree(mok);
-> -	}
-> -
->  	dbx = get_cert_list(L"dbx", &secure_var, &dbxsize);
->  	if (!dbx) {
->  		pr_info("MODSIGN: Couldn't get UEFI dbx list\n");
-> @@ -187,6 +176,21 @@ static int __init load_uefi_certs(void)
->  		kfree(dbx);
->  	}
->  
-> +	/* the MOK can not be trusted when secure boot is disabled
-> */
-> +	if (!efi_enabled(EFI_SECURE_BOOT))
-> +		return 0;
-> +
-> +	mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
+> and of those 18 hits, six are false positives (looks like bitmaps in
+> the uevent keys).
+> 
+> The remaining 12 are from the EFI runtime map files
+> (/sys/firmware/efi/runtime-map/*). They should presumably not be
+> world-readable, but sadly the kset_create_and_add() helper seems to do
+> that by default.
+> 
+> I think the sysfs code makes it insanely too easy to make things
+> world-readable. You try to be careful, and mark things read-only etc,
+> but __ATTR_RO() jkust means S_IRUGO, which means world-readable.
+> 
+> There seems to be no convenient model for kobjects having better
+> permissions. Greg?
 
-This isn't really a criticism of your patch but the underlying: all of
-the *RT variables, like MokListRT are insecure runtime variables and
-can be tampered with.  I can agree that I can't see a tamper attack
-between exit boot services and pulling this in to the key list, but I'd
-feel a lot happier if the values were obtained directly from the BS
-variable before exit boot services because that's means the path for
-getting the values is directly within the secure envelope and doesn't
-rely on passing via an insecure element.
+They can just use __ATTR() which lets you set the exact mode settings
+that are wanted.
 
-James
+Something like the patch below, which breaks the build as the
+map_attributes are "odd", but you get the idea.  The EFI developers can
+fix this up properly :)
+
+Note, this only accounts for 5 attributes, what is the whole list?
+
+thanks,
+
+greg k-h
+
+diff --git a/drivers/firmware/efi/runtime-map.c b/drivers/firmware/efi/runtime-map.c
+index 8e64b77aeac9..09444964c8d7 100644
+--- a/drivers/firmware/efi/runtime-map.c
++++ b/drivers/firmware/efi/runtime-map.c
+@@ -63,11 +63,11 @@ static ssize_t map_attr_show(struct kobject *kobj, struct attribute *attr,
+ 	return map_attr->show(entry, buf);
+ }
+ 
+-static struct map_attribute map_type_attr = __ATTR_RO(type);
+-static struct map_attribute map_phys_addr_attr   = __ATTR_RO(phys_addr);
+-static struct map_attribute map_virt_addr_attr  = __ATTR_RO(virt_addr);
+-static struct map_attribute map_num_pages_attr  = __ATTR_RO(num_pages);
+-static struct map_attribute map_attribute_attr  = __ATTR_RO(attribute);
++static struct map_attribute map_type_attr = __ATTR(type, 0400, type_show, NULL);
++static struct map_attribute map_phys_addr_attr  = __ATTR(phys_addr, 0400, phys_addr_show, NULL);
++static struct map_attribute map_virt_addr_attr  = __ATTR(virt_addr, 0400, virt_addr_show, NULL);
++static struct map_attribute map_num_pages_attr  = __ATTR(num_pages, 0400, num_pages_show, NULL);
++static struct map_attribute map_attribute_attr  = __ATTR(attribute, 0400, attribute_show, NULL);
+ 
+ /*
+  * These are default attributes that are added for every memmap entry.
