@@ -1,112 +1,74 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [GIT PULL] hash addresses printed with %p
-Date: Fri, 1 Dec 2017 09:54:43 +0000
-Message-ID: <CAKv+Gu-YyuE-Hs4MVPWfS8Exx0S6qo5sgV2VdO0MP5wEXSrM1Q@mail.gmail.com>
-References: <20171129045927.GA6217@eros> <CA+55aFzVy-SE9w1puPjgE1BxGje8oR3Ks9BDU7GXmvBYJfkCxw@mail.gmail.com>
- <20171129210848.GF6217@eros> <CA+55aFwjhjGZC9U68mo4hnnJXLWYxG3UYoz-=SwNfO-3N-Untg@mail.gmail.com>
- <CA+55aFwPXV0sXb+edcQc4epz0pWustZgJsoq95=a3OEDxynq7g@mail.gmail.com>
- <20171130163235.GA27849@kroah.com> <20171130171036.GB31817@kroah.com>
- <CAKv+Gu_KF+BzFGaqYo1ZZAj9j+HkUogAksDFAkBDELU7m1XcPw@mail.gmail.com> <20171201094846.GE9353@kroah.com>
+From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v4 2/2] arm64: Add software workaround for Falkor erratum
+ 1041
+Date: Fri, 1 Dec 2017 11:24:58 +0000
+Message-ID: <20171201112457.GE18083@arm.com>
+References: <1511824680-16397-1-git-send-email-shankerd@codeaurora.org>
+ <1511824680-16397-3-git-send-email-shankerd@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171201094846.GE9353@kroah.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, "Tobin C. Harding" <me@tobin.cc>, Matt Fleming <matt@codeblueprint.co.uk>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1511824680-16397-3-git-send-email-shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Cc: Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Christoffer Dall <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 1 December 2017 at 09:48, Greg Kroah-Hartman
-<gregkh@linuxfoundation.org> wrote:
-> On Thu, Nov 30, 2017 at 05:18:42PM +0000, Ard Biesheuvel wrote:
->> On 30 November 2017 at 17:10, Greg Kroah-Hartman
->> <gregkh@linuxfoundation.org> wrote:
->> > On Thu, Nov 30, 2017 at 04:32:35PM +0000, Greg Kroah-Hartman wrote:
->> >> On Wed, Nov 29, 2017 at 01:36:25PM -0800, Linus Torvalds wrote:
->> >> > On Wed, Nov 29, 2017 at 1:14 PM, Linus Torvalds
->> >> > <torvalds@linux-foundation.org> wrote:
->> >> > >
->> >> > > Not because %pK itself changed, but because the semantics of %p did.
->> >> > > The baseline moved, and the "safe" version did not.
->> >> >
->> >> > Btw, that baseline for me is now that I can do
->> >> >
->> >> >   ./scripts/leaking_addresses.pl | wc -l
->> >> >   18
->> >> >
->> >> > and of those 18 hits, six are false positives (looks like bitmaps in
->> >> > the uevent keys).
->> >> >
->> >> > The remaining 12 are from the EFI runtime map files
->> >> > (/sys/firmware/efi/runtime-map/*). They should presumably not be
->> >> > world-readable, but sadly the kset_create_and_add() helper seems to do
->> >> > that by default.
->> >> >
->> >> > I think the sysfs code makes it insanely too easy to make things
->> >> > world-readable. You try to be careful, and mark things read-only etc,
->> >> > but __ATTR_RO() jkust means S_IRUGO, which means world-readable.
->> >> >
->> >> > There seems to be no convenient model for kobjects having better
->> >> > permissions. Greg?
->> >>
->> >> They can just use __ATTR() which lets you set the exact mode settings
->> >> that are wanted.
->> >>
->> >> Something like the patch below, which breaks the build as the
->> >> map_attributes are "odd", but you get the idea.  The EFI developers can
->> >> fix this up properly :)
->> >>
->> >> Note, this only accounts for 5 attributes, what is the whole list?
->> >
->> > Ah, it's the virt_addr file 12 times, I just ran it on my laptop:
->> >
->> > /sys/firmware/efi/runtime-map/7/virt_addr: 0xfffffffeea6ea000
->> > /sys/firmware/efi/runtime-map/5/virt_addr: 0xfffffffeee88b000
->> > /sys/firmware/efi/runtime-map/3/virt_addr: 0xfffffffefea00000
->> > /sys/firmware/efi/runtime-map/11/virt_addr: 0xfffffffed9c00000
->> > /sys/firmware/efi/runtime-map/1/virt_addr: 0xfffffffefee00000
->> > /sys/firmware/efi/runtime-map/8/virt_addr: 0xfffffffedba4e000
->> > /sys/firmware/efi/runtime-map/6/virt_addr: 0xfffffffeee2de000
->> > /sys/firmware/efi/runtime-map/4/virt_addr: 0xfffffffeeea00000
->> > /sys/firmware/efi/runtime-map/2/virt_addr: 0xfffffffefec00000
->> > /sys/firmware/efi/runtime-map/10/virt_addr: 0xfffffffed9c60000
->> > /sys/firmware/efi/runtime-map/0/virt_addr: 0xfffffffeff000000
->> > /sys/firmware/efi/runtime-map/9/virt_addr: 0xfffffffedb9c9000
->> >
->> > So changing it to use __ATTR() should fix this remaning leakage up.
->> > That is if we even really need to export these values at all.  What does
->> > userspace do with them?  Shouldn't they just be in debugfs instead?
->> >
->>
->> These are the virtual mappings UEFI firmware regions, which must
->> remain in the same place across kexec reboots. So kexec tooling
->> consumes this information and passes it on to the incoming kernel in
->> some way.
->>
->> Note that these are not kernel addresses, so while I agree they should
->> not be world readable, they won't give you any clue as to where the
->> kernel itself is mapped.
->>
->> So the recommendation is to switch to __ATTR( ... 0400 ... ) instead?
->> If so, I'll code up a patch.
->
-> If these pointers are not "real", I recommend just leaving them as-is.
+On Mon, Nov 27, 2017 at 05:18:00PM -0600, Shanker Donthineni wrote:
+> The ARM architecture defines the memory locations that are permitted
+> to be accessed as the result of a speculative instruction fetch from
+> an exception level for which all stages of translation are disabled.
+> Specifically, the core is permitted to speculatively fetch from the
+> 4KB region containing the current program counter 4K and next 4K.
+> 
+> When translation is changed from enabled to disabled for the running
+> exception level (SCTLR_ELn[M] changed from a value of 1 to 0), the
+> Falkor core may errantly speculatively access memory locations outside
+> of the 4KB region permitted by the architecture. The errant memory
+> access may lead to one of the following unexpected behaviors.
+> 
+> 1) A System Error Interrupt (SEI) being raised by the Falkor core due
+>    to the errant memory access attempting to access a region of memory
+>    that is protected by a slave-side memory protection unit.
+> 2) Unpredictable device behavior due to a speculative read from device
+>    memory. This behavior may only occur if the instruction cache is
+>    disabled prior to or coincident with translation being changed from
+>    enabled to disabled.
+> 
+> The conditions leading to this erratum will not occur when either of the
+> following occur:
+>  1) A higher exception level disables translation of a lower exception level
+>    (e.g. EL2 changing SCTLR_EL1[M] from a value of 1 to 0).
+>  2) An exception level disabling its stage-1 translation if its stage-2
+>     translation is enabled (e.g. EL1 changing SCTLR_EL1[M] from a value of 1
+>     to 0 when HCR_EL2[VM] has a value of 1).
+> 
+> To avoid the errant behavior, software must execute an ISB immediately
+> prior to executing the MSR that will change SCTLR_ELn[M] from 1 to 0.
+> 
+> Signed-off-by: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> ---
+> Changes since v3:
+>   Rebased to kernel v4.15-rc1.
+> Changes since v2:
+>   Repost the corrected patches.
+> Changes since v1:
+>   Apply the workaround where it's required.
+> 
+>  Documentation/arm64/silicon-errata.txt |  1 +
+>  arch/arm64/Kconfig                     | 12 +++++++++++-
+>  arch/arm64/include/asm/assembler.h     | 19 +++++++++++++++++++
+>  arch/arm64/include/asm/cpucaps.h       |  3 ++-
+>  arch/arm64/kernel/cpu-reset.S          |  1 +
+>  arch/arm64/kernel/cpu_errata.c         | 16 ++++++++++++++++
+>  arch/arm64/kernel/efi-entry.S          |  2 ++
+>  arch/arm64/kernel/head.S               |  1 +
+>  arch/arm64/kernel/relocate_kernel.S    |  1 +
+>  arch/arm64/kvm/hyp-init.S              |  1 +
 
-That's not what I said :-)
+This is an awful lot of code just to add an ISB instruction prior to
+disabling the MMU. Why do you need to go through the alternatives framework
+for this? Just do it with an #ifdef; this isn't a fastpath.
 
-These are real pointers, and stuff will actually be mapped there
-(although I am not intimately familiar with the way x86 does this, but
-on ARM [which does not have these sysfs nodes in the first place],
-these mappings are only live during the time a UEFI runtime service
-call is in progress, and IIRC, work was underway to do the same for
-x86). So while these values don't correlate with the placement of
-kernel data structures, they could still be useful for an attacker to
-figure out where exploitable firmware memory regions are located,
-especially given that some of these may be mapped RWX.
-
-> But perhaps put a comment in the file saying that, so the next time we
-> run across them in a few years, we don't freak out and worry :)
->
-> thanks,
->
-> greg k-h
+Will
