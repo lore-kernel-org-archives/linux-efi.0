@@ -1,69 +1,112 @@
-From: "Luis R. Rodriguez" <mcgrof-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: Firmware signing -- Re: [PATCH 00/27] security, efi: Add kernel
- lockdown
-Date: Mon, 4 Dec 2017 20:51:55 +0100
-Message-ID: <20171204195155.GU729@wotan.suse.de>
-References: <1509660641.3416.24.camel@linux.vnet.ibm.com>
- <20171107230700.GJ22894@wotan.suse.de>
- <20171108061551.GD7859@linaro.org>
- <20171108194626.GQ22894@wotan.suse.de>
- <20171109014841.GF7859@linaro.org>
- <1510193857.4484.95.camel@linux.vnet.ibm.com>
- <20171109044619.GG7859@linaro.org>
- <20171111023240.2398ca55@alans-desktop>
- <20171113174250.GA22894@wotan.suse.de>
- <20171113210848.4dc344bd@alans-desktop>
+From: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH v4 2/2] arm64: Add software workaround for Falkor erratum
+ 1041
+Date: Mon, 4 Dec 2017 14:09:50 -0600
+Message-ID: <07aa6edb-9634-a6b4-589e-8d58cf982f6d@codeaurora.org>
+References: <1511824680-16397-1-git-send-email-shankerd@codeaurora.org>
+ <1511824680-16397-3-git-send-email-shankerd@codeaurora.org>
+ <20171201112457.GE18083@arm.com>
+ <12cb0f4a-577b-ffd5-21b7-26ce0e46505a@codeaurora.org>
+Reply-To: shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20171113210848.4dc344bd@alans-desktop>
+In-Reply-To: <12cb0f4a-577b-ffd5-21b7-26ce0e46505a-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alan Cox <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
-Cc: "Luis R. Rodriguez" <mcgrof-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "AKASHI, Takahiro" <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Jan Blunck <jblunck-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Marcus Meissner <meissner-l3A5Bk7waGM@public.gmane.org>, Gary Lin <GLin-IBi9RG/b67k@public.gmane.org>, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 13, 2017 at 09:08:48PM +0000, Alan Cox wrote:
-> On Mon, 13 Nov 2017 18:42:50 +0100
-> "Luis R. Rodriguez" <mcgrof-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+Hi Will,
+
+On 12/03/2017 07:35 AM, Shanker Donthineni wrote:
+> Hi Will, thanks for your review comments.
 > 
-> > On Sat, Nov 11, 2017 at 02:32:40AM +0000, Alan Cox wrote:
-> > > > My assumption here is:
-> > > > 1) there are some less important and so security-insensitive firmwares,
-> > > >    by which I mean that such firmwares won't be expected to be signed in
-> > > >    terms of vulnerability or integrity.
-> > > >    (I can't give you examples though.)
-> > > > 2) firmware's signature will be presented separately from the firmware
-> > > >    blob itself. Say, "firmware.bin.p7s" for "firmware.bin"  
-> > > 
-> > > For x86 at least any firmware on any system modern enough to support
-> > > 'secure' boot should already be signed. The only major exception is
-> > > likely to be for things like random USB widgets.  
-> > 
-> > Alan, the firmware being considered here is /lib/firmware firmware, which
-> > is not signed today. Its unclear to me how you mean that /lib/firmware files
-> > are already signed or verified today
+> On 12/01/2017 05:24 AM, Will Deacon wrote:
+>> On Mon, Nov 27, 2017 at 05:18:00PM -0600, Shanker Donthineni wrote:
+>>> The ARM architecture defines the memory locations that are permitted
+>>> to be accessed as the result of a speculative instruction fetch from
+>>> an exception level for which all stages of translation are disabled.
+>>> Specifically, the core is permitted to speculatively fetch from the
+>>> 4KB region containing the current program counter 4K and next 4K.
+>>>
+>>> When translation is changed from enabled to disabled for the running
+>>> exception level (SCTLR_ELn[M] changed from a value of 1 to 0), the
+>>> Falkor core may errantly speculatively access memory locations outside
+>>> of the 4KB region permitted by the architecture. The errant memory
+>>> access may lead to one of the following unexpected behaviors.
+>>>
+>>> 1) A System Error Interrupt (SEI) being raised by the Falkor core due
+>>>    to the errant memory access attempting to access a region of memory
+>>>    that is protected by a slave-side memory protection unit.
+>>> 2) Unpredictable device behavior due to a speculative read from device
+>>>    memory. This behavior may only occur if the instruction cache is
+>>>    disabled prior to or coincident with translation being changed from
+>>>    enabled to disabled.
+>>>
+>>> The conditions leading to this erratum will not occur when either of the
+>>> following occur:
+>>>  1) A higher exception level disables translation of a lower exception level
+>>>    (e.g. EL2 changing SCTLR_EL1[M] from a value of 1 to 0).
+>>>  2) An exception level disabling its stage-1 translation if its stage-2
+>>>     translation is enabled (e.g. EL1 changing SCTLR_EL1[M] from a value of 1
+>>>     to 0 when HCR_EL2[VM] has a value of 1).
+>>>
+>>> To avoid the errant behavior, software must execute an ISB immediately
+>>> prior to executing the MSR that will change SCTLR_ELn[M] from 1 to 0.
+>>>
+>>> Signed-off-by: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>>> ---
+>>> Changes since v3:
+>>>   Rebased to kernel v4.15-rc1.
+>>> Changes since v2:
+>>>   Repost the corrected patches.
+>>> Changes since v1:
+>>>   Apply the workaround where it's required.
+>>>
+>>>  Documentation/arm64/silicon-errata.txt |  1 +
+>>>  arch/arm64/Kconfig                     | 12 +++++++++++-
+>>>  arch/arm64/include/asm/assembler.h     | 19 +++++++++++++++++++
+>>>  arch/arm64/include/asm/cpucaps.h       |  3 ++-
+>>>  arch/arm64/kernel/cpu-reset.S          |  1 +
+>>>  arch/arm64/kernel/cpu_errata.c         | 16 ++++++++++++++++
+>>>  arch/arm64/kernel/efi-entry.S          |  2 ++
+>>>  arch/arm64/kernel/head.S               |  1 +
+>>>  arch/arm64/kernel/relocate_kernel.S    |  1 +
+>>>  arch/arm64/kvm/hyp-init.S              |  1 +
+>>
+>> This is an awful lot of code just to add an ISB instruction prior to
+>> disabling the MMU. Why do you need to go through the alternatives framework
+>> for this? Just do it with an #ifdef; this isn't a fastpath.
+>>
 > 
-> By the hardware they get loaded onto. Pretty much all of the hardware on
-> PC class systems at least is signed and checked by the platform or the
-> device itself. For a 'secure' boot era PC that's pretty much everything
-> except USB toys and FPGA.
+> We can avoid changes to only two files cpu_errata.c and cpucaps.h without using
+> the alternatives framework. Even though it's in slow path, cpu-errata.c changes 
+> provides a nice debug message which indicates the erratum E1041 is applied. 
 > 
-> So you don't actually need to sign a lot of PC class firmware because
-> it's already signed.
+> Erratum log information would be very useful to conform our customers using the
+> right kernel with E1014 patch by looking at dmesg. Other than that I don't have
+> any other strong opinion to avoid alternatives and handle using #idef.
+> 
+> Should I go ahead and post v5 patch without alternatives?
+> 
 
-It would seem that this logic can trump the need for /lib/firmware signing. And
-for users where this is *not done* they can open code it, just as is being done
-for cfg80211 to help a new kernel config replace CRDA. Additionally for non-UEFI
-platforms which *also* need firmware signing, one viable option is to rely
-on IMA.
 
-If we have enough open-coded uses similar to cfg80211 we can revisit this
-question  later.
+Please provide your thoughts on next step. We would like to merge this erratum
+to v4.15 kernel.
 
-I am curious though, is the above notion of having hardware require signed
-firmware an implication brought down by UEFI? If so do you have any pointers
-to where this is stipulated? Or is it just a best practice we assume some
-manufacturers are implementing?
+>> Will
+>>
+>> _______________________________________________
+>> linux-arm-kernel mailing list
+>> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+>> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+>>
+> 
 
-  Luis
+-- 
+Shanker Donthineni
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum, a Linux Foundation Collaborative Project.
