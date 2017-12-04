@@ -1,7 +1,7 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.4 05/27] x86/efi: Build our own page table structures
-Date: Mon,  4 Dec 2017 16:59:30 +0100
-Message-ID: <20171204155942.482436478@linuxfoundation.org>
+Subject: [PATCH 4.4 03/27] x86/mm/pat: Ensure cpa->pfn only contains page frame numbers
+Date: Mon,  4 Dec 2017 16:59:28 +0100
+Message-ID: <20171204155942.406528511@linuxfoundation.org>
 References: <20171204155942.271814507@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -9,7 +9,7 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20171204155942.271814507@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@amacapital.net>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Dave Jones <davej@codemonkey.org.uk>, Denys Vlasenko <dvlasenk@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Stephen Smalley <sds@tycho.nsa.gov>, Thomas Gleixner <tglx@linutronix.de>, Toshi Kani <toshi.kani@hp.com>, linux-efi@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Andy Lutomirski <luto@amacapital.net>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Dave Hansen <dave.hansen@intel.com>, Denys Vlasenko <dvlasenk@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Toshi Kani <toshi.kani@hp.com>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
 List-Id: linux-efi@vger.kernel.org
 
 4.4-stable review patch.  If anyone has any objections, please let me know.
@@ -18,314 +18,143 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Matt Fleming <matt@codeblueprint.co.uk>
 
-commit 67a9108ed4313b85a9c53406d80dc1ae3f8c3e36 upstream.
+commit edc3b9129cecd0f0857112136f5b8b1bc1d45918 upstream.
 
-With commit e1a58320a38d ("x86/mm: Warn on W^X mappings") all
-users booting on 64-bit UEFI machines see the following warning,
+The x86 pageattr code is confused about the data that is stored
+in cpa->pfn, sometimes it's treated as a page frame number,
+sometimes it's treated as an unshifted physical address, and in
+one place it's treated as a pte.
 
-  ------------[ cut here ]------------
-  WARNING: CPU: 7 PID: 1 at arch/x86/mm/dump_pagetables.c:225 note_page+0x5dc/0x780()
-  x86/mm: Found insecure W+X mapping at address ffff88000005f000/0xffff88000005f000
-  ...
-  x86/mm: Checked W+X mappings: FAILED, 165660 W+X pages found.
-  ...
+The result of this is that the mapping functions do not map the
+intended physical address.
 
-This is caused by mapping EFI regions with RWX permissions.
-There isn't much we can do to restrict the permissions for these
-regions due to the way the firmware toolchains mix code and
-data, but we can at least isolate these mappings so that they do
-not appear in the regular kernel page tables.
-
-In commit d2f7cbe7b26a ("x86/efi: Runtime services virtual
-mapping") we started using 'trampoline_pgd' to map the EFI
-regions because there was an existing identity mapping there
-which we use during the SetVirtualAddressMap() call and for
-broken firmware that accesses those addresses.
-
-But 'trampoline_pgd' shares some PGD entries with
-'swapper_pg_dir' and does not provide the isolation we require.
-Notably the virtual address for __START_KERNEL_map and
-MODULES_START are mapped by the same PGD entry so we need to be
-more careful when copying changes over in
-efi_sync_low_kernel_mappings().
-
-This patch doesn't go the full mile, we still want to share some
-PGD entries with 'swapper_pg_dir'. Having completely separate
-page tables brings its own issues such as synchronising new
-mappings after memory hotplug and module loading. Sharing also
-keeps memory usage down.
+This isn't a problem in practice because most of the addresses
+we're mapping in the EFI code paths are already mapped in
+'trampoline_pgd' and so the pageattr mapping functions don't
+actually do anything in this case. But when we move to using a
+separate page table for the EFI runtime this will be an issue.
 
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 Reviewed-by: Borislav Petkov <bp@suse.de>
 Acked-by: Borislav Petkov <bp@suse.de>
-Cc: Andrew Morton <akpm@linux-foundation.org>
 Cc: Andy Lutomirski <luto@amacapital.net>
-Cc: Andy Lutomirski <luto@kernel.org>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: Borislav Petkov <bp@alien8.de>
 Cc: Brian Gerst <brgerst@gmail.com>
-Cc: Dave Jones <davej@codemonkey.org.uk>
+Cc: Dave Hansen <dave.hansen@intel.com>
 Cc: Denys Vlasenko <dvlasenk@redhat.com>
 Cc: H. Peter Anvin <hpa@zytor.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: Stephen Smalley <sds@tycho.nsa.gov>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: Toshi Kani <toshi.kani@hp.com>
 Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/1448658575-17029-6-git-send-email-matt@codeblueprint.co.uk
+Link: http://lkml.kernel.org/r/1448658575-17029-3-git-send-email-matt@codeblueprint.co.uk
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Cc: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 ---
- arch/x86/include/asm/efi.h     |    1 
- arch/x86/platform/efi/efi.c    |   39 +++++-----------
- arch/x86/platform/efi/efi_32.c |    5 ++
- arch/x86/platform/efi/efi_64.c |   97 ++++++++++++++++++++++++++++++++++-------
- 4 files changed, 102 insertions(+), 40 deletions(-)
+ arch/x86/mm/pageattr.c         |   17 ++++++-----------
+ arch/x86/platform/efi/efi_64.c |   16 ++++++++++------
+ 2 files changed, 16 insertions(+), 17 deletions(-)
 
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -136,6 +136,7 @@ extern void __init efi_memory_uc(u64 add
- extern void __init efi_map_region(efi_memory_desc_t *md);
- extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
- extern void efi_sync_low_kernel_mappings(void);
-+extern int __init efi_alloc_page_tables(void);
- extern int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages);
- extern void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages);
- extern void __init old_map_region(efi_memory_desc_t *md);
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -869,7 +869,7 @@ static void __init kexec_enter_virtual_m
-  * This function will switch the EFI runtime services to virtual mode.
-  * Essentially, we look through the EFI memmap and map every region that
-  * has the runtime attribute bit set in its memory descriptor into the
-- * ->trampoline_pgd page table using a top-down VA allocation scheme.
-+ * efi_pgd page table.
-  *
-  * The old method which used to update that memory descriptor with the
-  * virtual address obtained from ioremap() is still supported when the
-@@ -879,8 +879,8 @@ static void __init kexec_enter_virtual_m
-  *
-  * The new method does a pagetable switch in a preemption-safe manner
-  * so that we're in a different address space when calling a runtime
-- * function. For function arguments passing we do copy the PGDs of the
-- * kernel page table into ->trampoline_pgd prior to each call.
-+ * function. For function arguments passing we do copy the PUDs of the
-+ * kernel page table into efi_pgd prior to each call.
-  *
-  * Specially for kexec boot, efi runtime maps in previous kernel should
-  * be passed in via setup_data. In that case runtime ranges will be mapped
-@@ -895,6 +895,12 @@ static void __init __efi_enter_virtual_m
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -911,15 +911,10 @@ static void populate_pte(struct cpa_data
+ 	pte = pte_offset_kernel(pmd, start);
  
- 	efi.systab = NULL;
+ 	while (num_pages-- && start < end) {
+-
+-		/* deal with the NX bit */
+-		if (!(pgprot_val(pgprot) & _PAGE_NX))
+-			cpa->pfn &= ~_PAGE_NX;
+-
+-		set_pte(pte, pfn_pte(cpa->pfn >> PAGE_SHIFT, pgprot));
++		set_pte(pte, pfn_pte(cpa->pfn, pgprot));
  
-+	if (efi_alloc_page_tables()) {
-+		pr_err("Failed to allocate EFI page tables\n");
-+		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
-+		return;
-+	}
-+
- 	efi_merge_regions();
- 	new_memmap = efi_map_regions(&count, &pg_shift);
- 	if (!new_memmap) {
-@@ -954,28 +960,11 @@ static void __init __efi_enter_virtual_m
- 	efi_runtime_mkexec();
+ 		start	 += PAGE_SIZE;
+-		cpa->pfn += PAGE_SIZE;
++		cpa->pfn++;
+ 		pte++;
+ 	}
+ }
+@@ -975,11 +970,11 @@ static int populate_pmd(struct cpa_data
  
- 	/*
--	 * We mapped the descriptor array into the EFI pagetable above but we're
--	 * not unmapping it here. Here's why:
--	 *
--	 * We're copying select PGDs from the kernel page table to the EFI page
--	 * table and when we do so and make changes to those PGDs like unmapping
--	 * stuff from them, those changes appear in the kernel page table and we
--	 * go boom.
--	 *
--	 * From setup_real_mode():
--	 *
--	 * ...
--	 * trampoline_pgd[0] = init_level4_pgt[pgd_index(__PAGE_OFFSET)].pgd;
--	 *
--	 * In this particular case, our allocation is in PGD 0 of the EFI page
--	 * table but we've copied that PGD from PGD[272] of the EFI page table:
--	 *
--	 *	pgd_index(__PAGE_OFFSET = 0xffff880000000000) = 272
--	 *
--	 * where the direct memory mapping in kernel space is.
--	 *
--	 * new_memmap's VA comes from that direct mapping and thus clearing it,
--	 * it would get cleared in the kernel page table too.
-+	 * We mapped the descriptor array into the EFI pagetable above
-+	 * but we're not unmapping it here because if we're running in
-+	 * EFI mixed mode we need all of memory to be accessible when
-+	 * we pass parameters to the EFI runtime services in the
-+	 * thunking code.
- 	 *
- 	 * efi_cleanup_page_tables(__pa(new_memmap), 1 << pg_shift);
+ 		pmd = pmd_offset(pud, start);
+ 
+-		set_pmd(pmd, __pmd(cpa->pfn | _PAGE_PSE |
++		set_pmd(pmd, __pmd(cpa->pfn << PAGE_SHIFT | _PAGE_PSE |
+ 				   massage_pgprot(pmd_pgprot)));
+ 
+ 		start	  += PMD_SIZE;
+-		cpa->pfn  += PMD_SIZE;
++		cpa->pfn  += PMD_SIZE >> PAGE_SHIFT;
+ 		cur_pages += PMD_SIZE >> PAGE_SHIFT;
+ 	}
+ 
+@@ -1048,11 +1043,11 @@ static int populate_pud(struct cpa_data
+ 	 * Map everything starting from the Gb boundary, possibly with 1G pages
  	 */
---- a/arch/x86/platform/efi/efi_32.c
-+++ b/arch/x86/platform/efi/efi_32.c
-@@ -38,6 +38,11 @@
-  * say 0 - 3G.
-  */
+ 	while (end - start >= PUD_SIZE) {
+-		set_pud(pud, __pud(cpa->pfn | _PAGE_PSE |
++		set_pud(pud, __pud(cpa->pfn << PAGE_SHIFT | _PAGE_PSE |
+ 				   massage_pgprot(pud_pgprot)));
  
-+int __init efi_alloc_page_tables(void)
-+{
-+	return 0;
-+}
-+
- void efi_sync_low_kernel_mappings(void) {}
- void __init efi_dump_pagetable(void) {}
- int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 		start	  += PUD_SIZE;
+-		cpa->pfn  += PUD_SIZE;
++		cpa->pfn  += PUD_SIZE >> PAGE_SHIFT;
+ 		cur_pages += PUD_SIZE >> PAGE_SHIFT;
+ 		pud++;
+ 	}
 --- a/arch/x86/platform/efi/efi_64.c
 +++ b/arch/x86/platform/efi/efi_64.c
-@@ -40,6 +40,7 @@
- #include <asm/fixmap.h>
- #include <asm/realmode.h>
- #include <asm/time.h>
-+#include <asm/pgalloc.h>
- 
- /*
-  * We allocate runtime services regions bottom-up, starting from -4G, i.e.
-@@ -121,22 +122,92 @@ void __init efi_call_phys_epilog(pgd_t *
- 	early_code_mapping_set_exec(0);
- }
- 
-+static pgd_t *efi_pgd;
-+
-+/*
-+ * We need our own copy of the higher levels of the page tables
-+ * because we want to avoid inserting EFI region mappings (EFI_VA_END
-+ * to EFI_VA_START) into the standard kernel page tables. Everything
-+ * else can be shared, see efi_sync_low_kernel_mappings().
-+ */
-+int __init efi_alloc_page_tables(void)
-+{
-+	pgd_t *pgd;
-+	pud_t *pud;
-+	gfp_t gfp_mask;
-+
-+	if (efi_enabled(EFI_OLD_MEMMAP))
-+		return 0;
-+
-+	gfp_mask = GFP_KERNEL | __GFP_NOTRACK | __GFP_REPEAT | __GFP_ZERO;
-+	efi_pgd = (pgd_t *)__get_free_page(gfp_mask);
-+	if (!efi_pgd)
-+		return -ENOMEM;
-+
-+	pgd = efi_pgd + pgd_index(EFI_VA_END);
-+
-+	pud = pud_alloc_one(NULL, 0);
-+	if (!pud) {
-+		free_page((unsigned long)efi_pgd);
-+		return -ENOMEM;
-+	}
-+
-+	pgd_populate(NULL, pgd, pud);
-+
-+	return 0;
-+}
-+
- /*
-  * Add low kernel mappings for passing arguments to EFI functions.
-  */
- void efi_sync_low_kernel_mappings(void)
- {
--	unsigned num_pgds;
--	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
-+	unsigned num_entries;
-+	pgd_t *pgd_k, *pgd_efi;
-+	pud_t *pud_k, *pud_efi;
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		return;
- 
--	num_pgds = pgd_index(MODULES_END - 1) - pgd_index(PAGE_OFFSET);
-+	/*
-+	 * We can share all PGD entries apart from the one entry that
-+	 * covers the EFI runtime mapping space.
-+	 *
-+	 * Make sure the EFI runtime region mappings are guaranteed to
-+	 * only span a single PGD entry and that the entry also maps
-+	 * other important kernel regions.
-+	 */
-+	BUILD_BUG_ON(pgd_index(EFI_VA_END) != pgd_index(MODULES_END));
-+	BUILD_BUG_ON((EFI_VA_START & PGDIR_MASK) !=
-+			(EFI_VA_END & PGDIR_MASK));
-+
-+	pgd_efi = efi_pgd + pgd_index(PAGE_OFFSET);
-+	pgd_k = pgd_offset_k(PAGE_OFFSET);
-+
-+	num_entries = pgd_index(EFI_VA_END) - pgd_index(PAGE_OFFSET);
-+	memcpy(pgd_efi, pgd_k, sizeof(pgd_t) * num_entries);
-+
-+	/*
-+	 * We share all the PUD entries apart from those that map the
-+	 * EFI regions. Copy around them.
-+	 */
-+	BUILD_BUG_ON((EFI_VA_START & ~PUD_MASK) != 0);
-+	BUILD_BUG_ON((EFI_VA_END & ~PUD_MASK) != 0);
-+
-+	pgd_efi = efi_pgd + pgd_index(EFI_VA_END);
-+	pud_efi = pud_offset(pgd_efi, 0);
-+
-+	pgd_k = pgd_offset_k(EFI_VA_END);
-+	pud_k = pud_offset(pgd_k, 0);
-+
-+	num_entries = pud_index(EFI_VA_END);
-+	memcpy(pud_efi, pud_k, sizeof(pud_t) * num_entries);
- 
--	memcpy(pgd + pgd_index(PAGE_OFFSET),
--		init_mm.pgd + pgd_index(PAGE_OFFSET),
--		sizeof(pgd_t) * num_pgds);
-+	pud_efi = pud_offset(pgd_efi, EFI_VA_START);
-+	pud_k = pud_offset(pgd_k, EFI_VA_START);
-+
-+	num_entries = PTRS_PER_PUD - pud_index(EFI_VA_START);
-+	memcpy(pud_efi, pud_k, sizeof(pud_t) * num_entries);
- }
+@@ -143,7 +143,7 @@ void efi_sync_low_kernel_mappings(void)
  
  int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
-@@ -149,8 +220,8 @@ int __init efi_setup_page_tables(unsigne
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		return 0;
- 
--	efi_scratch.efi_pgt = (pgd_t *)(unsigned long)real_mode_header->trampoline_pgd;
--	pgd = __va(efi_scratch.efi_pgt);
-+	efi_scratch.efi_pgt = (pgd_t *)__pa(efi_pgd);
-+	pgd = efi_pgd;
- 
- 	/*
- 	 * It can happen that the physical address of new_memmap lands in memory
-@@ -196,16 +267,14 @@ int __init efi_setup_page_tables(unsigne
- 
- void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
  {
--	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
--
--	kernel_unmap_pages_in_pgd(pgd, pa_memmap, num_pages);
-+	kernel_unmap_pages_in_pgd(efi_pgd, pa_memmap, num_pages);
- }
+-	unsigned long text;
++	unsigned long pfn, text;
+ 	struct page *page;
+ 	unsigned npages;
+ 	pgd_t *pgd;
+@@ -160,7 +160,8 @@ int __init efi_setup_page_tables(unsigne
+ 	 * and ident-map those pages containing the map before calling
+ 	 * phys_efi_set_virtual_address_map().
+ 	 */
+-	if (kernel_map_pages_in_pgd(pgd, pa_memmap, pa_memmap, num_pages, _PAGE_NX)) {
++	pfn = pa_memmap >> PAGE_SHIFT;
++	if (kernel_map_pages_in_pgd(pgd, pfn, pa_memmap, num_pages, _PAGE_NX)) {
+ 		pr_err("Error ident-mapping new memmap (0x%lx)!\n", pa_memmap);
+ 		return 1;
+ 	}
+@@ -185,8 +186,9 @@ int __init efi_setup_page_tables(unsigne
  
+ 	npages = (_end - _text) >> PAGE_SHIFT;
+ 	text = __pa(_text);
++	pfn = text >> PAGE_SHIFT;
+ 
+-	if (kernel_map_pages_in_pgd(pgd, text >> PAGE_SHIFT, text, npages, 0)) {
++	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, 0)) {
+ 		pr_err("Failed to map kernel text 1:1\n");
+ 		return 1;
+ 	}
+@@ -204,12 +206,14 @@ void __init efi_cleanup_page_tables(unsi
  static void __init __map_region(efi_memory_desc_t *md, u64 va)
  {
--	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
- 	unsigned long flags = 0;
- 	unsigned long pfn;
-+	pgd_t *pgd = efi_pgd;
+ 	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
+-	unsigned long pf = 0;
++	unsigned long flags = 0;
++	unsigned long pfn;
  
  	if (!(md->attribute & EFI_MEMORY_WB))
- 		flags |= _PAGE_PCD;
-@@ -314,9 +383,7 @@ void __init efi_runtime_mkexec(void)
- void __init efi_dump_pagetable(void)
- {
- #ifdef CONFIG_EFI_PGT_DUMP
--	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
--
--	ptdump_walk_pgd_level(NULL, pgd);
-+	ptdump_walk_pgd_level(NULL, efi_pgd);
- #endif
- }
+-		pf |= _PAGE_PCD;
++		flags |= _PAGE_PCD;
  
+-	if (kernel_map_pages_in_pgd(pgd, md->phys_addr, va, md->num_pages, pf))
++	pfn = md->phys_addr >> PAGE_SHIFT;
++	if (kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags))
+ 		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
+ 			   md->phys_addr, va);
+ }
