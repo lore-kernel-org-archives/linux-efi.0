@@ -1,49 +1,131 @@
-From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Subject: Re: [GIT PULL] hash addresses printed with %p
-Date: Mon, 4 Dec 2017 15:00:12 +0100
-Message-ID: <20171204140012.GA8744@kroah.com>
-References: <CAKv+Gu-YyuE-Hs4MVPWfS8Exx0S6qo5sgV2VdO0MP5wEXSrM1Q@mail.gmail.com>
- <20171202222244.GA3799@codeblueprint.co.uk>
- <20171204020216.GA2436@dhcp-128-65.nay.redhat.com>
- <20171204073642.GC19596@kroah.com>
- <20171204092928.GA4421@dhcp-128-65.nay.redhat.com>
- <20171204093430.GA6463@kroah.com>
- <CAKv+Gu8iOF1BCpZEVRwT=_6FbXsK0ve7fiWKA5R0D5x2P5MavA@mail.gmail.com>
- <20171204095936.GA10547@kroah.com>
- <CAKv+Gu9_BC=rHPRWBJXtg=Sn2TmPL21wYCS50a_ff_eav3nSOA@mail.gmail.com>
- <d455baafa3d44669a774c7d555c01416@AcuMS.aculab.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: arm64 crashkernel fails to boot on acpi-only machines due to ACPI
+ regions being no longer mapped as NOMAP
+Date: Mon, 4 Dec 2017 14:02:31 +0000
+Message-ID: <CAKv+Gu9oda1Ee8AoXsCEw+Bjn-XF3wZA_CsxvqhjtT6_bmJ7uA@mail.gmail.com>
+References: <CACi5LpM_95ebYFguPTyjWk+qHT5rDJVXiYDkNWbszo6Zw41zRA@mail.gmail.com>
+ <CACi5LpNV_E9pvhTwLcy6vtEj9qbL1ZEHe-5sv=iiW0k9JxPD1Q@mail.gmail.com>
+ <20171113092730.GA29552@linaro.org> <CAKv+Gu_eQ-s0J22tKeHKJme4qXcvxvDkS7vKrNW+o_XtMTkMhQ@mail.gmail.com>
+ <3df4c6c5-0abe-01ee-730d-2edaa5f497d2@redhat.com> <20171116070005.GI29552@linaro.org>
+ <CAFTCetQHmpprAVu6uYO+rc5Xi4EUVhmovbmSaU6nM1n1mAH62w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <d455baafa3d44669a774c7d555c01416-1XygrNkDbNvwg4NCKwmqgw@public.gmane.org>
+In-Reply-To: <CAFTCetQHmpprAVu6uYO+rc5Xi4EUVhmovbmSaU6nM1n1mAH62w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Laight <David.Laight-ZS65k/vG3HxXrIkS9f7CXA@public.gmane.org>
-Cc: 'Ard Biesheuvel' <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "Tobin C. Harding" <me-xzjC0nNlxno@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Dec 04, 2017 at 12:51:13PM +0000, David Laight wrote:
-> From: Ard Biesheuvel
-> > Sent: 04 December 2017 10:03
-> ...
-> > and uses __ATTR_RO() to emit initializers for it. __ATTR() initializes
-> > the .store member as well, which does not exists, and so it cannot be
-> > used directly.
-> > 
-> > So we should either add a .store member that is always NULL, or we
-> > should add our own
-> > 
-> > #define __ATTR_0400(_name) { \
-> > .attr = { .name = __stringify(_name), .mode = 0400 }, \
-> > .show = _name##_show, \
-> > }
-> 
-> What about an __ATTR_RO_MODE(name, mode) that doesn't set the .store member.
-> Even if the mode allowed write, writes wouldn't happen.
+On 26 November 2017 at 08:29, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Hi Akashi,
+>
+> On Thu, Nov 16, 2017 at 12:30 PM, AKASHI Takahiro
+> <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> Bhupesh,
+>>
+>> On Wed, Nov 15, 2017 at 04:28:55PM +0530, Bhupesh Sharma wrote:
+>>>
+>>   (snip)
+>>
+>>> # dmesg | grep -B 2 -i "ACPI reclaim"
+>>> [    0.000000] efi:   0x000039670000-0x0000396bffff [Runtime Code |RUN|  |
+>>> |  |  |  |  |   |WB|WT|WC|UC]
+>>> [    0.000000] efi:   0x0000396c0000-0x00003970ffff [Boot Code |   |  |  |
+>>> |  |  |  |   |WB|WT|WC|UC]
+>>> [    0.000000] efi:   0x000039710000-0x00003975ffff [ACPI Reclaim Memory|
+>>> |  |  |  |  |  |  |   |WB|WT|WC|UC]
+>>>
+>>> 2. Now, I am not sure which kernel layer does the following changes (I am
+>>> still trying to dig it out more), but I see that the 'Boot Code' and ACPI
+>>> DSDT table regions are somehow merged into one memblock_region and appear as
+>>> range '396c0000-3975ffff' in the '/proc/iomem' interface:
+>>>
+>>> # cat /proc/iomem | grep -A 2 -B 2 39
+>>> 00000000-3961ffff : System RAM
+>>>   00080000-00b6ffff : Kernel code
+>>>   00cb0000-0167ffff : Kernel data
+>>>   0e800000-2e7fffff : Crash kernel
+>>> 39620000-396bffff : reserved
+>>> 396c0000-3975ffff : System RAM
+>>> 39760000-3976ffff : reserved
+>>> 39770000-397affff : reserved
+>>> 397b0000-3989ffff : reserved
+>>> 398a0000-398bffff : reserved
+>>> 398c0000-39d3ffff : reserved
+>>> 39d40000-3ed2ffff : System RAM
+>>>
+>>   (snip)
+>>>
+>>> So, I am looking at what could be causing the 'Boot Code' and 'ACPI DSDT
+>>> table' ranges to be merged into a single region at
+>>> '0x0000396c0000-0x00003970ffff' which cannot be marked as RESERVED using
+>>> 'memblock_is_reserved'.
+>>
+>> Simple:) The short answer is that memblock_add() does.
+>>
+>> The long answer:
+>> First, please note that memblock maintains two type of regions list,
+>> "memory" and "reserved".
+>>
+>> efi_init()
+>>     reserve_regions()
+>>         early_init_dt_add_memory_arch()
+>>             memblock_add()
+>>                 memblock_add_range(memblock.memory)
+>>
+>> The memory regions described in efi.memmap are added to "memory" list
+>> with all the neighboring regions being merged into ones,
+>> in this case, "Runtime Code", "Boot Code", "ACPI Reclaim Memory" and others.
+>>
+>> The secret here is that "Runtime Code" is also marked with "NOMAP" flag in
+>> reserve_regions(), which creates an isolated region since it now has
+>> a different attribute.
+>> Consequently only "Boot Code" and "ACPI Reclaim Memory" are
+>> unified.
+>>
+>> Look at request_standard_resources(). It handles only "memory" list,
+>> and doesn't care about whether any arbitrary part of memory is in
+>> "reserved" list or not.
+>
+> Thanks for the pointers. Now I did some experiments and traversed the
+> whole memblock path and I see
+> how these two regions get merged into a single region which is later
+> on recognized by
+> 'request_standard_resources()' as a System RAM region rather than a
+> RESERVED region.
+>
+> I recently reproduced this on a APM mustang with latest kernel as well
+> when acpi is used to boot the machine, which makes me believe that
+> this is a generic issue for arm64 machines with the 4.14 kernel and if
+> they use acpi=force as the boot method.
+>
+> I am not sure, if a fix/or hack would be suitable for all underlying
+> arm64 machines, but I am trying one on the arm64 machines I have to
+> see if it fixes the issue.
+>
+> @Ard:
+>
+> Hi Ard,
+>
+> I think to create and test a clean solution for all arm64 boards it
+> will take some time, in the meantime should we consider reverting the
+> commit [1] to make sure that acpi enabled arm64 machines can boot with
+> 4.14?
+>
+> Please let me know your opinion.
+>
+> [1] f56ab9a5b73ca2aee777ccdf2d355ae2dd31db5a (efi/arm: Don't mark
+> ACPI reclaim memory as MEMBLOCK_NOMAP)
+>
 
-Ah, that might work, could you convert the other users of __ATTR() in
-the efi code to use it as well?
+I don't think that is really going to help tbh.
 
-thanks,
+ACPI reclaim regions are not the only regions that are
+memblock_reserve()d and need to be reserved by the incoming kernel as
+well. So as far as I can tell, this is a symptom of an underlying
+issue that we will need to solve, and reverting the code that exposed
+it will not make the bug go away.
 
-greg k-h
+-- 
+Ard.
