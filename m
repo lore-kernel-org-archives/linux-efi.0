@@ -1,131 +1,229 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: arm64 crashkernel fails to boot on acpi-only machines due to ACPI
- regions being no longer mapped as NOMAP
-Date: Mon, 4 Dec 2017 14:02:31 +0000
-Message-ID: <CAKv+Gu9oda1Ee8AoXsCEw+Bjn-XF3wZA_CsxvqhjtT6_bmJ7uA@mail.gmail.com>
-References: <CACi5LpM_95ebYFguPTyjWk+qHT5rDJVXiYDkNWbszo6Zw41zRA@mail.gmail.com>
- <CACi5LpNV_E9pvhTwLcy6vtEj9qbL1ZEHe-5sv=iiW0k9JxPD1Q@mail.gmail.com>
- <20171113092730.GA29552@linaro.org> <CAKv+Gu_eQ-s0J22tKeHKJme4qXcvxvDkS7vKrNW+o_XtMTkMhQ@mail.gmail.com>
- <3df4c6c5-0abe-01ee-730d-2edaa5f497d2@redhat.com> <20171116070005.GI29552@linaro.org>
- <CAFTCetQHmpprAVu6uYO+rc5Xi4EUVhmovbmSaU6nM1n1mAH62w@mail.gmail.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.4 04/27] x86/efi: Hoist page table switching code into efi_call_virt()
+Date: Mon,  4 Dec 2017 16:59:29 +0100
+Message-ID: <20171204155942.445834937@linuxfoundation.org>
+References: <20171204155942.271814507@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAFTCetQHmpprAVu6uYO+rc5Xi4EUVhmovbmSaU6nM1n1mAH62w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171204155942.271814507@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@amacapital.net>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Dave Jones <davej@codemonkey.org.uk>, Denys Vlasenko <dvlasenk@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Stephen Smalley <sds@tycho.nsa.gov>, Thomas Gleixner <tglx@linutronix.de>, Toshi Kani <toshi.kani@hp.com>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 26 November 2017 at 08:29, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hi Akashi,
->
-> On Thu, Nov 16, 2017 at 12:30 PM, AKASHI Takahiro
-> <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> Bhupesh,
->>
->> On Wed, Nov 15, 2017 at 04:28:55PM +0530, Bhupesh Sharma wrote:
->>>
->>   (snip)
->>
->>> # dmesg | grep -B 2 -i "ACPI reclaim"
->>> [    0.000000] efi:   0x000039670000-0x0000396bffff [Runtime Code |RUN|  |
->>> |  |  |  |  |   |WB|WT|WC|UC]
->>> [    0.000000] efi:   0x0000396c0000-0x00003970ffff [Boot Code |   |  |  |
->>> |  |  |  |   |WB|WT|WC|UC]
->>> [    0.000000] efi:   0x000039710000-0x00003975ffff [ACPI Reclaim Memory|
->>> |  |  |  |  |  |  |   |WB|WT|WC|UC]
->>>
->>> 2. Now, I am not sure which kernel layer does the following changes (I am
->>> still trying to dig it out more), but I see that the 'Boot Code' and ACPI
->>> DSDT table regions are somehow merged into one memblock_region and appear as
->>> range '396c0000-3975ffff' in the '/proc/iomem' interface:
->>>
->>> # cat /proc/iomem | grep -A 2 -B 2 39
->>> 00000000-3961ffff : System RAM
->>>   00080000-00b6ffff : Kernel code
->>>   00cb0000-0167ffff : Kernel data
->>>   0e800000-2e7fffff : Crash kernel
->>> 39620000-396bffff : reserved
->>> 396c0000-3975ffff : System RAM
->>> 39760000-3976ffff : reserved
->>> 39770000-397affff : reserved
->>> 397b0000-3989ffff : reserved
->>> 398a0000-398bffff : reserved
->>> 398c0000-39d3ffff : reserved
->>> 39d40000-3ed2ffff : System RAM
->>>
->>   (snip)
->>>
->>> So, I am looking at what could be causing the 'Boot Code' and 'ACPI DSDT
->>> table' ranges to be merged into a single region at
->>> '0x0000396c0000-0x00003970ffff' which cannot be marked as RESERVED using
->>> 'memblock_is_reserved'.
->>
->> Simple:) The short answer is that memblock_add() does.
->>
->> The long answer:
->> First, please note that memblock maintains two type of regions list,
->> "memory" and "reserved".
->>
->> efi_init()
->>     reserve_regions()
->>         early_init_dt_add_memory_arch()
->>             memblock_add()
->>                 memblock_add_range(memblock.memory)
->>
->> The memory regions described in efi.memmap are added to "memory" list
->> with all the neighboring regions being merged into ones,
->> in this case, "Runtime Code", "Boot Code", "ACPI Reclaim Memory" and others.
->>
->> The secret here is that "Runtime Code" is also marked with "NOMAP" flag in
->> reserve_regions(), which creates an isolated region since it now has
->> a different attribute.
->> Consequently only "Boot Code" and "ACPI Reclaim Memory" are
->> unified.
->>
->> Look at request_standard_resources(). It handles only "memory" list,
->> and doesn't care about whether any arbitrary part of memory is in
->> "reserved" list or not.
->
-> Thanks for the pointers. Now I did some experiments and traversed the
-> whole memblock path and I see
-> how these two regions get merged into a single region which is later
-> on recognized by
-> 'request_standard_resources()' as a System RAM region rather than a
-> RESERVED region.
->
-> I recently reproduced this on a APM mustang with latest kernel as well
-> when acpi is used to boot the machine, which makes me believe that
-> this is a generic issue for arm64 machines with the 4.14 kernel and if
-> they use acpi=force as the boot method.
->
-> I am not sure, if a fix/or hack would be suitable for all underlying
-> arm64 machines, but I am trying one on the arm64 machines I have to
-> see if it fixes the issue.
->
-> @Ard:
->
-> Hi Ard,
->
-> I think to create and test a clean solution for all arm64 boards it
-> will take some time, in the meantime should we consider reverting the
-> commit [1] to make sure that acpi enabled arm64 machines can boot with
-> 4.14?
->
-> Please let me know your opinion.
->
-> [1] f56ab9a5b73ca2aee777ccdf2d355ae2dd31db5a (efi/arm: Don't mark
-> ACPI reclaim memory as MEMBLOCK_NOMAP)
->
+4.4-stable review patch.  If anyone has any objections, please let me know.
 
-I don't think that is really going to help tbh.
+------------------
 
-ACPI reclaim regions are not the only regions that are
-memblock_reserve()d and need to be reserved by the incoming kernel as
-well. So as far as I can tell, this is a symptom of an underlying
-issue that we will need to solve, and reverting the code that exposed
-it will not make the bug go away.
+From: Matt Fleming <matt@codeblueprint.co.uk>
 
--- 
-Ard.
+commit c9f2a9a65e4855b74d92cdad688f6ee4a1a323ff upstream.
+
+This change is a prerequisite for pending patches that switch to
+a dedicated EFI page table, instead of using 'trampoline_pgd'
+which shares PGD entries with 'swapper_pg_dir'. The pending
+patches make it impossible to dereference the runtime service
+function pointer without first switching %cr3.
+
+It's true that we now have duplicated switching code in
+efi_call_virt() and efi_call_phys_{prolog,epilog}() but we are
+sacrificing code duplication for a little more clarity and the
+ease of writing the page table switching code in C instead of
+asm.
+
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Reviewed-by: Borislav Petkov <bp@suse.de>
+Acked-by: Borislav Petkov <bp@suse.de>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Andy Lutomirski <luto@amacapital.net>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Brian Gerst <brgerst@gmail.com>
+Cc: Dave Jones <davej@codemonkey.org.uk>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Stephen Smalley <sds@tycho.nsa.gov>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Toshi Kani <toshi.kani@hp.com>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/1448658575-17029-5-git-send-email-matt@codeblueprint.co.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Cc: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ arch/x86/include/asm/efi.h          |   25 ++++++++++++++++++++
+ arch/x86/platform/efi/efi_64.c      |   24 +++++++++-----------
+ arch/x86/platform/efi/efi_stub_64.S |   43 ------------------------------------
+ 3 files changed, 36 insertions(+), 56 deletions(-)
+
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -3,6 +3,7 @@
+ 
+ #include <asm/fpu/api.h>
+ #include <asm/pgtable.h>
++#include <asm/tlb.h>
+ 
+ /*
+  * We map the EFI regions needed for runtime services non-contiguously,
+@@ -64,6 +65,17 @@ extern u64 asmlinkage efi_call(void *fp,
+ 
+ #define efi_call_phys(f, args...)		efi_call((f), args)
+ 
++/*
++ * Scratch space used for switching the pagetable in the EFI stub
++ */
++struct efi_scratch {
++	u64	r15;
++	u64	prev_cr3;
++	pgd_t	*efi_pgt;
++	bool	use_pgd;
++	u64	phys_stack;
++} __packed;
++
+ #define efi_call_virt(f, ...)						\
+ ({									\
+ 	efi_status_t __s;						\
+@@ -71,7 +83,20 @@ extern u64 asmlinkage efi_call(void *fp,
+ 	efi_sync_low_kernel_mappings();					\
+ 	preempt_disable();						\
+ 	__kernel_fpu_begin();						\
++									\
++	if (efi_scratch.use_pgd) {					\
++		efi_scratch.prev_cr3 = read_cr3();			\
++		write_cr3((unsigned long)efi_scratch.efi_pgt);		\
++		__flush_tlb_all();					\
++	}								\
++									\
+ 	__s = efi_call((void *)efi.systab->runtime->f, __VA_ARGS__);	\
++									\
++	if (efi_scratch.use_pgd) {					\
++		write_cr3(efi_scratch.prev_cr3);			\
++		__flush_tlb_all();					\
++	}								\
++									\
+ 	__kernel_fpu_end();						\
+ 	preempt_enable();						\
+ 	__s;								\
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -47,16 +47,7 @@
+  */
+ static u64 efi_va = EFI_VA_START;
+ 
+-/*
+- * Scratch space used for switching the pagetable in the EFI stub
+- */
+-struct efi_scratch {
+-	u64 r15;
+-	u64 prev_cr3;
+-	pgd_t *efi_pgt;
+-	bool use_pgd;
+-	u64 phys_stack;
+-} __packed;
++struct efi_scratch efi_scratch;
+ 
+ static void __init early_code_mapping_set_exec(int executable)
+ {
+@@ -83,8 +74,11 @@ pgd_t * __init efi_call_phys_prolog(void
+ 	int pgd;
+ 	int n_pgds;
+ 
+-	if (!efi_enabled(EFI_OLD_MEMMAP))
+-		return NULL;
++	if (!efi_enabled(EFI_OLD_MEMMAP)) {
++		save_pgd = (pgd_t *)read_cr3();
++		write_cr3((unsigned long)efi_scratch.efi_pgt);
++		goto out;
++	}
+ 
+ 	early_code_mapping_set_exec(1);
+ 
+@@ -96,6 +90,7 @@ pgd_t * __init efi_call_phys_prolog(void
+ 		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
+ 		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
+ 	}
++out:
+ 	__flush_tlb_all();
+ 
+ 	return save_pgd;
+@@ -109,8 +104,11 @@ void __init efi_call_phys_epilog(pgd_t *
+ 	int pgd_idx;
+ 	int nr_pgds;
+ 
+-	if (!save_pgd)
++	if (!efi_enabled(EFI_OLD_MEMMAP)) {
++		write_cr3((unsigned long)save_pgd);
++		__flush_tlb_all();
+ 		return;
++	}
+ 
+ 	nr_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
+ 
+--- a/arch/x86/platform/efi/efi_stub_64.S
++++ b/arch/x86/platform/efi/efi_stub_64.S
+@@ -38,41 +38,6 @@
+ 	mov %rsi, %cr0;			\
+ 	mov (%rsp), %rsp
+ 
+-	/* stolen from gcc */
+-	.macro FLUSH_TLB_ALL
+-	movq %r15, efi_scratch(%rip)
+-	movq %r14, efi_scratch+8(%rip)
+-	movq %cr4, %r15
+-	movq %r15, %r14
+-	andb $0x7f, %r14b
+-	movq %r14, %cr4
+-	movq %r15, %cr4
+-	movq efi_scratch+8(%rip), %r14
+-	movq efi_scratch(%rip), %r15
+-	.endm
+-
+-	.macro SWITCH_PGT
+-	cmpb $0, efi_scratch+24(%rip)
+-	je 1f
+-	movq %r15, efi_scratch(%rip)		# r15
+-	# save previous CR3
+-	movq %cr3, %r15
+-	movq %r15, efi_scratch+8(%rip)		# prev_cr3
+-	movq efi_scratch+16(%rip), %r15		# EFI pgt
+-	movq %r15, %cr3
+-	1:
+-	.endm
+-
+-	.macro RESTORE_PGT
+-	cmpb $0, efi_scratch+24(%rip)
+-	je 2f
+-	movq efi_scratch+8(%rip), %r15
+-	movq %r15, %cr3
+-	movq efi_scratch(%rip), %r15
+-	FLUSH_TLB_ALL
+-	2:
+-	.endm
+-
+ ENTRY(efi_call)
+ 	SAVE_XMM
+ 	mov (%rsp), %rax
+@@ -83,16 +48,8 @@ ENTRY(efi_call)
+ 	mov %r8, %r9
+ 	mov %rcx, %r8
+ 	mov %rsi, %rcx
+-	SWITCH_PGT
+ 	call *%rdi
+-	RESTORE_PGT
+ 	addq $48, %rsp
+ 	RESTORE_XMM
+ 	ret
+ ENDPROC(efi_call)
+-
+-	.data
+-ENTRY(efi_scratch)
+-	.fill 3,8,0
+-	.byte 0
+-	.quad 0
