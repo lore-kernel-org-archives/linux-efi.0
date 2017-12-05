@@ -1,153 +1,128 @@
-From: Gary Lin <glin@suse.com>
-Subject: [RFC v3 PATCH 2/2] arm64/efi: Introduce Security Version to ARM64
-Date: Tue,  5 Dec 2017 18:01:48 +0800
-Message-ID: <20171205100148.5757-3-glin@suse.com>
-References: <20171205100148.5757-1-glin@suse.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH] efi: move some sysfs files to be read-only by root
+Date: Tue, 5 Dec 2017 11:13:43 +0100
+Message-ID: <20171205101343.GA5416@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20171205100148.5757-1-glin@suse.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: x86@kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Joey Lee <jlee@suse.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Dave Young <dyoung@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, "Tobin C. Harding" <me@tobin.cc>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-This commit introduces Security Version for ARM64. As in x86, it
-utilizes the resource section defined in the PE/COFF format(*) to locate
-the struct of Security Version.
+Thanks to the scripts/leaking_addresses.pl script, it was found that
+some EFI values should not be readable by non-root users.
 
-Similar to the debug table, the resource table is stored in .init.rodata
-section while the struct of Security Version is in the 4K padding area of
-the EFI header.
+So make them root-only, and to do that, add a __ATTR_RO_MODE() macro to
+make this easier, and use it in other places at the same time.
 
-(*) PE Format: The .rsrc Section
-    https://msdn.microsoft.com/zh-tw/library/windows/desktop/ms680547(v=vs.85).aspx#the_.rsrc_section
-
-Cc: Catalin Marinas <catalin.marinas@arm.com>
-Cc: Will Deacon <will.deacon@arm.com>
+Reported-by: Linus Torvalds <torvalds@linux-foundation.org>
+Tested-by: Dave Young <dyoung@redhat.com>
 Cc: Matt Fleming <matt@codeblueprint.co.uk>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Joey Lee <jlee@suse.com>
-Signed-off-by: Gary Lin <glin@suse.com>
----
- arch/arm64/kernel/efi-header.S | 57 ++++++++++++++++++++++++++++++++++++++++++
- drivers/firmware/efi/Kconfig   |  6 ++---
- 2 files changed, 60 insertions(+), 3 deletions(-)
+Cc: stable <stable@vger.kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-diff --git a/arch/arm64/kernel/efi-header.S b/arch/arm64/kernel/efi-header.S
-index 613fc3000677..f4404db6ca5c 100644
---- a/arch/arm64/kernel/efi-header.S
-+++ b/arch/arm64/kernel/efi-header.S
-@@ -61,7 +61,12 @@ extra_header_fields:
+---
+ drivers/firmware/efi/efi.c         |    3 +--
+ drivers/firmware/efi/esrt.c        |   15 ++++++---------
+ drivers/firmware/efi/runtime-map.c |   10 +++++-----
+ include/linux/sysfs.h              |    5 +++++
+ 4 files changed, 17 insertions(+), 16 deletions(-)
+
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -143,8 +143,7 @@ static ssize_t systab_show(struct kobjec
+ 	return str - buf;
+ }
  
- 	.quad	0					// ExportTable
- 	.quad	0					// ImportTable
-+#ifdef CONFIG_SECURITY_VERSION_SUPPORT
-+	.long	rsrc_table - _head			// ResourceTable
-+	.long	rsrc_table_size
-+#else
- 	.quad	0					// ResourceTable
-+#endif
- 	.quad	0					// ExceptionTable
- 	.quad	0					// CertificationTable
- 	.quad	0					// BaseRelocationTable
-@@ -103,6 +108,58 @@ section_table:
+-static struct kobj_attribute efi_attr_systab =
+-			__ATTR(systab, 0400, systab_show, NULL);
++static struct kobj_attribute efi_attr_systab = __ATTR_RO_MODE(systab, 0400);
  
- 	.set	section_count, (. - section_table) / 40
+ #define EFI_FIELD(var) efi.var
  
-+#ifdef CONFIG_SECURITY_VERSION_SUPPORT
-+	/*
-+	 * Resource Table
-+	 */
-+	__INITRODATA
-+
-+	.align	2
-+rsrc_table:
-+	// Resource Directory
-+	.long	0					// Characteristics
-+	.long	0					// TimeDateStamp
-+	.short	0					// MajorVersion
-+	.short	0					// MinorVersion
-+	.short	1					// NumberOfNamedEntries
-+	.short	0					// NumberOfIdEntries
-+
-+	// Resource Directory Entry
-+	.long	name_offset | 0x80000000		// NameOffset:31
-+							// NameIsString:1
-+	.long	rsrc_data_entry - rsrc_table		// OffsetToData
-+
-+	.set	name_offset, . - rsrc_table
-+	// Resource Directory String
-+	.short	7					// Length
-+	.short	0x4C00					// 'L'
-+	.short	0x6900					// 'i'
-+	.short	0x6E00					// 'n'
-+	.short	0x7500					// 'u'
-+	.short	0x7800					// 'x'
-+	.short	0x5300					// 'S'
-+	.short	0x5600					// 'V'
-+
-+	// Resource Data Entry
-+rsrc_data_entry:
-+	.long	svdata_begin - _head			// OffsetToData
-+	.long	svdata_end - svdata_begin		// Size
-+	.long	0					// CodePage
-+	.long	0					// Reserved
-+
-+	.set	rsrc_table_size, . - rsrc_table
-+	.previous
-+
-+	// Security Version
-+svdata_begin:
-+	.short	sv_signer - svdata_begin
-+	.short	CONFIG_SECURITY_VERSION
-+	.long	CONFIG_DISTRO_VERSION
-+sv_signer:
-+	.string	CONFIG_SIGNER_NAME
-+svdata_end:
-+#endif
-+
- #ifdef CONFIG_DEBUG_EFI
- 	/*
- 	 * The debug table is referenced via its Relative Virtual Address (RVA),
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 1dd82f1dd094..3cad8d63897e 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -179,14 +179,14 @@ menuconfig SECURITY_VERSION_SUPPORT
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -106,7 +106,7 @@ static const struct sysfs_ops esre_attr_
+ };
  
- config SIGNER_NAME
- 	string "Signer Name" if SECURITY_VERSION_SUPPORT
--	depends on EFI && X86
-+	depends on EFI && (X86 || ARM64)
- 	default ""
- 	help
- 	   This option specifies who signs or releases this kernel.
+ /* Generic ESRT Entry ("ESRE") support. */
+-static ssize_t esre_fw_class_show(struct esre_entry *entry, char *buf)
++static ssize_t fw_class_show(struct esre_entry *entry, char *buf)
+ {
+ 	char *str = buf;
  
- config DISTRO_VERSION
- 	int "Distribution Version" if SECURITY_VERSION_SUPPORT
--	depends on EFI && X86
-+	depends on EFI && (X86 || ARM64)
- 	default 0
- 	range 0 4294967295
- 	help
-@@ -195,7 +195,7 @@ config DISTRO_VERSION
+@@ -117,18 +117,16 @@ static ssize_t esre_fw_class_show(struct
+ 	return str - buf;
+ }
  
- config SECURITY_VERSION
- 	int "Security Version" if SECURITY_VERSION_SUPPORT
--	depends on EFI && X86
-+	depends on EFI && (X86 || ARM64)
- 	default 0
- 	range 0 65535
- 	help
--- 
-2.15.0
+-static struct esre_attribute esre_fw_class = __ATTR(fw_class, 0400,
+-	esre_fw_class_show, NULL);
++static struct esre_attribute esre_fw_class = __ATTR_RO_MODE(fw_class, 0400);
+ 
+ #define esre_attr_decl(name, size, fmt) \
+-static ssize_t esre_##name##_show(struct esre_entry *entry, char *buf) \
++static ssize_t name##_show(struct esre_entry *entry, char *buf) \
+ { \
+ 	return sprintf(buf, fmt "\n", \
+ 		       le##size##_to_cpu(entry->esre.esre1->name)); \
+ } \
+ \
+-static struct esre_attribute esre_##name = __ATTR(name, 0400, \
+-	esre_##name##_show, NULL)
++static struct esre_attribute esre_##name = __ATTR_RO_MODE(name, 0400)
+ 
+ esre_attr_decl(fw_type, 32, "%u");
+ esre_attr_decl(fw_version, 32, "%u");
+@@ -193,14 +191,13 @@ static int esre_create_sysfs_entry(void
+ 
+ /* support for displaying ESRT fields at the top level */
+ #define esrt_attr_decl(name, size, fmt) \
+-static ssize_t esrt_##name##_show(struct kobject *kobj, \
++static ssize_t name##_show(struct kobject *kobj, \
+ 				  struct kobj_attribute *attr, char *buf)\
+ { \
+ 	return sprintf(buf, fmt "\n", le##size##_to_cpu(esrt->name)); \
+ } \
+ \
+-static struct kobj_attribute esrt_##name = __ATTR(name, 0400, \
+-	esrt_##name##_show, NULL)
++static struct kobj_attribute esrt_##name = __ATTR_RO_MODE(name, 0400)
+ 
+ esrt_attr_decl(fw_resource_count, 32, "%u");
+ esrt_attr_decl(fw_resource_count_max, 32, "%u");
+--- a/drivers/firmware/efi/runtime-map.c
++++ b/drivers/firmware/efi/runtime-map.c
+@@ -63,11 +63,11 @@ static ssize_t map_attr_show(struct kobj
+ 	return map_attr->show(entry, buf);
+ }
+ 
+-static struct map_attribute map_type_attr = __ATTR_RO(type);
+-static struct map_attribute map_phys_addr_attr   = __ATTR_RO(phys_addr);
+-static struct map_attribute map_virt_addr_attr  = __ATTR_RO(virt_addr);
+-static struct map_attribute map_num_pages_attr  = __ATTR_RO(num_pages);
+-static struct map_attribute map_attribute_attr  = __ATTR_RO(attribute);
++static struct map_attribute map_type_attr = __ATTR_RO_MODE(type, 0400);
++static struct map_attribute map_phys_addr_attr = __ATTR_RO_MODE(phys_addr, 0400);
++static struct map_attribute map_virt_addr_attr = __ATTR_RO_MODE(virt_addr, 0400);
++static struct map_attribute map_num_pages_attr = __ATTR_RO_MODE(num_pages, 0400);
++static struct map_attribute map_attribute_attr = __ATTR_RO_MODE(attribute, 0400);
+ 
+ /*
+  * These are default attributes that are added for every memmap entry.
+--- a/include/linux/sysfs.h
++++ b/include/linux/sysfs.h
+@@ -117,6 +117,11 @@ struct attribute_group {
+ 	.show	= _name##_show,						\
+ }
+ 
++#define __ATTR_RO_MODE(_name, _mode) {					\
++	.attr	= { .name = __stringify(_name), .mode = _mode },	\
++	.show	= _name##_show,						\
++}
++
+ #define __ATTR_WO(_name) {						\
+ 	.attr	= { .name = __stringify(_name), .mode = S_IWUSR },	\
+ 	.store	= _name##_store,					\
