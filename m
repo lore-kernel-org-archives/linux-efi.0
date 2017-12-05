@@ -1,112 +1,73 @@
-From: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH v4 2/2] arm64: Add software workaround for Falkor erratum
- 1041
-Date: Mon, 4 Dec 2017 14:09:50 -0600
-Message-ID: <07aa6edb-9634-a6b4-589e-8d58cf982f6d@codeaurora.org>
-References: <1511824680-16397-1-git-send-email-shankerd@codeaurora.org>
- <1511824680-16397-3-git-send-email-shankerd@codeaurora.org>
- <20171201112457.GE18083@arm.com>
- <12cb0f4a-577b-ffd5-21b7-26ce0e46505a@codeaurora.org>
-Reply-To: shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [GIT PULL] hash addresses printed with %p
+Date: Tue, 5 Dec 2017 13:14:34 +0800
+Message-ID: <20171205051434.GA6086@dhcp-128-65.nay.redhat.com>
+References: <20171202222244.GA3799@codeblueprint.co.uk>
+ <20171204020216.GA2436@dhcp-128-65.nay.redhat.com>
+ <20171204073642.GC19596@kroah.com>
+ <20171204092928.GA4421@dhcp-128-65.nay.redhat.com>
+ <20171204093430.GA6463@kroah.com>
+ <CAKv+Gu8iOF1BCpZEVRwT=_6FbXsK0ve7fiWKA5R0D5x2P5MavA@mail.gmail.com>
+ <20171204095936.GA10547@kroah.com>
+ <CAKv+Gu9_BC=rHPRWBJXtg=Sn2TmPL21wYCS50a_ff_eav3nSOA@mail.gmail.com>
+ <d455baafa3d44669a774c7d555c01416@AcuMS.aculab.com>
+ <20171204140012.GA8744@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <12cb0f4a-577b-ffd5-21b7-26ce0e46505a-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20171204140012.GA8744-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org
+To: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: David Laight <David.Laight-ZS65k/vG3HxXrIkS9f7CXA@public.gmane.org>, 'Ard Biesheuvel' <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "Tobin C. Harding" <me-xzjC0nNlxno@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Will,
+On 12/04/17 at 03:00pm, Greg Kroah-Hartman wrote:
+> On Mon, Dec 04, 2017 at 12:51:13PM +0000, David Laight wrote:
+> > From: Ard Biesheuvel
+> > > Sent: 04 December 2017 10:03
+> > ...
+> > > and uses __ATTR_RO() to emit initializers for it. __ATTR() initializes
+> > > the .store member as well, which does not exists, and so it cannot be
+> > > used directly.
+> > > 
+> > > So we should either add a .store member that is always NULL, or we
+> > > should add our own
+> > > 
+> > > #define __ATTR_0400(_name) { \
+> > > .attr = { .name = __stringify(_name), .mode = 0400 }, \
+> > > .show = _name##_show, \
+> > > }
+> > 
+> > What about an __ATTR_RO_MODE(name, mode) that doesn't set the .store member.
+> > Even if the mode allowed write, writes wouldn't happen.
+> 
+> Ah, that might work, could you convert the other users of __ATTR() in
+> the efi code to use it as well?
 
-On 12/03/2017 07:35 AM, Shanker Donthineni wrote:
-> Hi Will, thanks for your review comments.
-> 
-> On 12/01/2017 05:24 AM, Will Deacon wrote:
->> On Mon, Nov 27, 2017 at 05:18:00PM -0600, Shanker Donthineni wrote:
->>> The ARM architecture defines the memory locations that are permitted
->>> to be accessed as the result of a speculative instruction fetch from
->>> an exception level for which all stages of translation are disabled.
->>> Specifically, the core is permitted to speculatively fetch from the
->>> 4KB region containing the current program counter 4K and next 4K.
->>>
->>> When translation is changed from enabled to disabled for the running
->>> exception level (SCTLR_ELn[M] changed from a value of 1 to 0), the
->>> Falkor core may errantly speculatively access memory locations outside
->>> of the 4KB region permitted by the architecture. The errant memory
->>> access may lead to one of the following unexpected behaviors.
->>>
->>> 1) A System Error Interrupt (SEI) being raised by the Falkor core due
->>>    to the errant memory access attempting to access a region of memory
->>>    that is protected by a slave-side memory protection unit.
->>> 2) Unpredictable device behavior due to a speculative read from device
->>>    memory. This behavior may only occur if the instruction cache is
->>>    disabled prior to or coincident with translation being changed from
->>>    enabled to disabled.
->>>
->>> The conditions leading to this erratum will not occur when either of the
->>> following occur:
->>>  1) A higher exception level disables translation of a lower exception level
->>>    (e.g. EL2 changing SCTLR_EL1[M] from a value of 1 to 0).
->>>  2) An exception level disabling its stage-1 translation if its stage-2
->>>     translation is enabled (e.g. EL1 changing SCTLR_EL1[M] from a value of 1
->>>     to 0 when HCR_EL2[VM] has a value of 1).
->>>
->>> To avoid the errant behavior, software must execute an ISB immediately
->>> prior to executing the MSR that will change SCTLR_ELn[M] from 1 to 0.
->>>
->>> Signed-off-by: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
->>> ---
->>> Changes since v3:
->>>   Rebased to kernel v4.15-rc1.
->>> Changes since v2:
->>>   Repost the corrected patches.
->>> Changes since v1:
->>>   Apply the workaround where it's required.
->>>
->>>  Documentation/arm64/silicon-errata.txt |  1 +
->>>  arch/arm64/Kconfig                     | 12 +++++++++++-
->>>  arch/arm64/include/asm/assembler.h     | 19 +++++++++++++++++++
->>>  arch/arm64/include/asm/cpucaps.h       |  3 ++-
->>>  arch/arm64/kernel/cpu-reset.S          |  1 +
->>>  arch/arm64/kernel/cpu_errata.c         | 16 ++++++++++++++++
->>>  arch/arm64/kernel/efi-entry.S          |  2 ++
->>>  arch/arm64/kernel/head.S               |  1 +
->>>  arch/arm64/kernel/relocate_kernel.S    |  1 +
->>>  arch/arm64/kvm/hyp-init.S              |  1 +
->>
->> This is an awful lot of code just to add an ISB instruction prior to
->> disabling the MMU. Why do you need to go through the alternatives framework
->> for this? Just do it with an #ifdef; this isn't a fastpath.
->>
-> 
-> We can avoid changes to only two files cpu_errata.c and cpucaps.h without using
-> the alternatives framework. Even though it's in slow path, cpu-errata.c changes 
-> provides a nice debug message which indicates the erratum E1041 is applied. 
-> 
-> Erratum log information would be very useful to conform our customers using the
-> right kernel with E1014 patch by looking at dmesg. Other than that I don't have
-> any other strong opinion to avoid alternatives and handle using #idef.
-> 
-> Should I go ahead and post v5 patch without alternatives?
-> 
+$ grep __ATTR * -RI
+efi.c:			__ATTR(systab, 0400, systab_show, NULL);
+efi.c:static struct kobj_attribute efi_attr_fw_vendor = __ATTR_RO(fw_vendor);
+efi.c:static struct kobj_attribute efi_attr_runtime = __ATTR_RO(runtime);
+efi.c:static struct kobj_attribute efi_attr_config_table = __ATTR_RO(config_table);
+efi.c:	__ATTR_RO(fw_platform_size);
+esrt.c:static struct esre_attribute esre_fw_class = __ATTR(fw_class, 0400,
+esrt.c:static struct esre_attribute esre_##name = __ATTR(name, 0400, \
+esrt.c:static struct kobj_attribute esrt_##name = __ATTR(name, 0400, \
+runtime-map.c:static struct map_attribute map_type_attr = __ATTR_RO(type);
+runtime-map.c:static struct map_attribute map_phys_addr_attr   = __ATTR_RO(phys_addr);
+runtime-map.c:static struct map_attribute map_virt_addr_attr  = __ATTR_RO(virt_addr);
+runtime-map.c:static struct map_attribute map_num_pages_attr  = __ATTR_RO(num_pages);
+runtime-map.c:static struct map_attribute map_attribute_attr  = __ATTR_RO(attribute);
 
+Above is all the __ATTR users for drivers/firmware/efi/*, it makes sense
+to update all __ATTR_RO to __ATTR_RO_MODE, so efi.c, runtime-map.c, and
+drivers/firmware/dmi-sysfs.c can be updated.  But esrt.c __ATTR seems
+not necessary.
 
-Please provide your thoughts on next step. We would like to merge this erratum
-to v4.15 kernel.
+And if so __ATTR_RO_MODE(name, mode) still needs go to sysfs.h.
 
->> Will
->>
->> _______________________________________________
->> linux-arm-kernel mailing list
->> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
->> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
->>
-> 
+I can do it but need confirm, Is this what you prefer?
 
--- 
-Shanker Donthineni
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum, a Linux Foundation Collaborative Project.
+Thanks
+Dave
