@@ -1,57 +1,53 @@
 From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL 0/3] EFI fixes for v4.15
-Date: Wed, 6 Dec 2017 18:20:19 +0100
-Message-ID: <20171206172019.j7rfcw32oloigul5@gmail.com>
-References: <20171206095010.24170-1-ard.biesheuvel@linaro.org>
+Subject: Re: [RFC v3 PATCH 0/2] Introduce Security Version to EFI Stub
+Date: Wed, 6 Dec 2017 19:37:34 +0100
+Message-ID: <20171206183734.xmgecyrd5suiurm6@gmail.com>
+References: <20171205100148.5757-1-glin@suse.com>
+ <CA+5PVA4k9RN22i2d=4GCPnm9bwi5KUgp8PiV=9X1pBZxN1xPmg@mail.gmail.com>
+ <20171206032437.pifxxcewgozlghfs@GaryWorkstation>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20171206095010.24170-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <20171206032437.pifxxcewgozlghfs@GaryWorkstation>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Pan Bian <bianpan2016-9Onoh4P/yGk@public.gmane.org>
+To: Gary Lin <glin-IBi9RG/b67k@public.gmane.org>
+Cc: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, x86 <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Linux-Kernel@Vger. Kernel. Org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Joey Lee <jlee-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
 
-* Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+* Gary Lin <glin-IBi9RG/b67k@public.gmane.org> wrote:
 
-> The following changes since commit ae64f9bd1d3621b5e60d7363bc20afb46aede215:
-> 
->   Linux 4.15-rc2 (2017-12-03 11:01:47 -0500)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git efi-urgent
-> 
-> for you to fetch changes up to bfe89df500c99e29fbd0fd6f18e396f1625efcee:
-> 
->   efi: add comment to avoid future expanding of sysfs systab (2017-12-05 18:11:36 +0000)
-> 
-> ----------------------------------------------------------------
-> A couple of fixes for v4.15:
-> - limit the permissions of EFI related sysfs nodes to 0400
-> - use memunmap not kfree for a mapping created with memremap
-> - add a comment to the code that produces the contents of
->   /sys/firmware/efi/systab that it already violates policy, and
->   no new entries should be added to it
-> 
-> ----------------------------------------------------------------
-> Dave Young (1):
->       efi: add comment to avoid future expanding of sysfs systab
-> 
-> Greg Kroah-Hartman (1):
->       efi: move some sysfs files to be read-only by root
-> 
-> Pan Bian (1):
->       efi/esrt: use memunmap rather kfree to free the remapping
-> 
->  drivers/firmware/efi/efi.c         |  5 +++--
->  drivers/firmware/efi/esrt.c        | 17 +++++++----------
->  drivers/firmware/efi/runtime-map.c | 10 +++++-----
->  include/linux/sysfs.h              |  6 ++++++
->  4 files changed, 21 insertions(+), 17 deletions(-)
+> On Tue, Dec 05, 2017 at 04:14:26PM -0500, Josh Boyer wrote:
+> > On Tue, Dec 5, 2017 at 5:01 AM, Gary Lin <glin-IBi9RG/b67k@public.gmane.org> wrote:
+> > > The series of patches introduce Security Version to EFI stub.
+> > >
+> > > Security Version is a monotonically increasing number and designed to
+> > > prevent the user from loading an insecure kernel accidentally. The
+> > > bootloader maintains a list of security versions corresponding to
+> > > different distributions. After fixing a critical vulnerability, the
+> > > distribution kernel maintainer bumps the "version", and the bootloader
+> > > updates the list automatically. When the user tries to load a kernel
+> > > with a lower security version, the bootloader shows a warning prompt
+> > > to notify the user the potential risk.
+> > 
+> > If a distribution releases a kernel with a higher security version and
+> > that it automatically updated on boot, what happens if that kernel
+> > contains a different bug that causes it to fail to boot or break
+> > critical functionality?  At that point, the user's machine would be in
+> > a state where the higher security version is enforced but the only
+> > kernel that provides that is broken.  Wouldn't that make a bad
+> > situation even worse by now requiring manual acceptance of the older
+> > SV kernel boot physically at the machine?
+> > 
+> > I feel like I'm missing a detail here or something.
+> > 
+> If the new kernel fails to boot, then the user has to choose the kernel
+> manually anyway, and there will be an option in the warning prompt to
+> lower SV.
 
-Applied, thanks Ard!
+And what if the firmware does not support a lowering of the SV?
+
+Thanks,
 
 	Ingo
