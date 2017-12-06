@@ -1,40 +1,57 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 2/3] efi/esrt: use memunmap rather kfree to free the remapping
-Date: Wed,  6 Dec 2017 09:50:09 +0000
-Message-ID: <20171206095010.24170-3-ard.biesheuvel@linaro.org>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [GIT PULL 0/3] EFI fixes for v4.15
+Date: Wed, 6 Dec 2017 18:20:19 +0100
+Message-ID: <20171206172019.j7rfcw32oloigul5@gmail.com>
 References: <20171206095010.24170-1-ard.biesheuvel@linaro.org>
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20171206095010.24170-1-ard.biesheuvel@linaro.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Pan Bian <bianpan2016@163.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, stable@vger.kernel.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20171206095010.24170-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Pan Bian <bianpan2016-9Onoh4P/yGk@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Pan Bian <bianpan2016@163.com>
 
-The remapping result of memremap should be freed with memunmap, not
-kfree.
+* Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
 
-Signed-off-by: Pan Bian <bianpan2016@163.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: <stable@vger.kernel.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/esrt.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> The following changes since commit ae64f9bd1d3621b5e60d7363bc20afb46aede215:
+> 
+>   Linux 4.15-rc2 (2017-12-03 11:01:47 -0500)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git efi-urgent
+> 
+> for you to fetch changes up to bfe89df500c99e29fbd0fd6f18e396f1625efcee:
+> 
+>   efi: add comment to avoid future expanding of sysfs systab (2017-12-05 18:11:36 +0000)
+> 
+> ----------------------------------------------------------------
+> A couple of fixes for v4.15:
+> - limit the permissions of EFI related sysfs nodes to 0400
+> - use memunmap not kfree for a mapping created with memremap
+> - add a comment to the code that produces the contents of
+>   /sys/firmware/efi/systab that it already violates policy, and
+>   no new entries should be added to it
+> 
+> ----------------------------------------------------------------
+> Dave Young (1):
+>       efi: add comment to avoid future expanding of sysfs systab
+> 
+> Greg Kroah-Hartman (1):
+>       efi: move some sysfs files to be read-only by root
+> 
+> Pan Bian (1):
+>       efi/esrt: use memunmap rather kfree to free the remapping
+> 
+>  drivers/firmware/efi/efi.c         |  5 +++--
+>  drivers/firmware/efi/esrt.c        | 17 +++++++----------
+>  drivers/firmware/efi/runtime-map.c | 10 +++++-----
+>  include/linux/sysfs.h              |  6 ++++++
+>  4 files changed, 21 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
-index 7aae2483fcb9..c47e0c6ec00f 100644
---- a/drivers/firmware/efi/esrt.c
-+++ b/drivers/firmware/efi/esrt.c
-@@ -428,7 +428,7 @@ static int __init esrt_sysfs_init(void)
- err_remove_esrt:
- 	kobject_put(esrt_kobj);
- err:
--	kfree(esrt);
-+	memunmap(esrt);
- 	esrt = NULL;
- 	return error;
- }
--- 
-2.11.0
+Applied, thanks Ard!
+
+	Ingo
