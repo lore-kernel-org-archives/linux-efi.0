@@ -1,42 +1,40 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 3/3] efi: add comment to avoid future expanding of sysfs systab
-Date: Wed,  6 Dec 2017 09:50:10 +0000
-Message-ID: <20171206095010.24170-4-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/3] efi/esrt: use memunmap rather kfree to free the remapping
+Date: Wed,  6 Dec 2017 09:50:09 +0000
+Message-ID: <20171206095010.24170-3-ard.biesheuvel@linaro.org>
 References: <20171206095010.24170-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20171206095010.24170-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20171206095010.24170-1-ard.biesheuvel@linaro.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Pan Bian <bianpan2016@163.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Pan Bian <bianpan2016@163.com>
 
-/sys/firmware/efi/systab shows several different values, it breaks sysfs
-one file one value design.  But since there are already userspace tools
-depend on it eg. kexec-tools so add code comment to alert future expanding
-of this file.
+The remapping result of memremap should be freed with memunmap, not
+kfree.
 
-Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Reviewed-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Pan Bian <bianpan2016@163.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: <stable@vger.kernel.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/efi.c | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/firmware/efi/esrt.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index c3eefa126e3b..557a47829d03 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -109,6 +109,8 @@ struct kobject *efi_kobj;
- /*
-  * Let's not leave out systab information that snuck into
-  * the efivars driver
-+ * Note, do not add more fields in systab sysfs file as it breaks sysfs
-+ * one value per file rule!
-  */
- static ssize_t systab_show(struct kobject *kobj,
- 			   struct kobj_attribute *attr, char *buf)
+diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+index 7aae2483fcb9..c47e0c6ec00f 100644
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -428,7 +428,7 @@ static int __init esrt_sysfs_init(void)
+ err_remove_esrt:
+ 	kobject_put(esrt_kobj);
+ err:
+-	kfree(esrt);
++	memunmap(esrt);
+ 	esrt = NULL;
+ 	return error;
+ }
 -- 
 2.11.0
