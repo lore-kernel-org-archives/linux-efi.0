@@ -1,99 +1,140 @@
-From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-Subject: Re: [RFC v3 PATCH 0/2] Introduce Security Version to EFI Stub
-Date: Tue, 5 Dec 2017 16:14:26 -0500
-Message-ID: <CA+5PVA4k9RN22i2d=4GCPnm9bwi5KUgp8PiV=9X1pBZxN1xPmg@mail.gmail.com>
-References: <20171205100148.5757-1-glin@suse.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20171205100148.5757-1-glin-IBi9RG/b67k@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Gary Lin <glin-IBi9RG/b67k@public.gmane.org>
-Cc: x86 <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Linux-Kernel@Vger. Kernel. Org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Joey Lee <jlee-IBi9RG/b67k@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/3] efi: move some sysfs files to be read-only by root
+Date: Wed,  6 Dec 2017 09:50:08 +0000
+Message-ID: <20171206095010.24170-2-ard.biesheuvel@linaro.org>
+References: <20171206095010.24170-1-ard.biesheuvel@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171206095010.24170-1-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, stable <stable@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Dec 5, 2017 at 5:01 AM, Gary Lin <glin-IBi9RG/b67k@public.gmane.org> wrote:
-> The series of patches introduce Security Version to EFI stub.
->
-> Security Version is a monotonically increasing number and designed to
-> prevent the user from loading an insecure kernel accidentally. The
-> bootloader maintains a list of security versions corresponding to
-> different distributions. After fixing a critical vulnerability, the
-> distribution kernel maintainer bumps the "version", and the bootloader
-> updates the list automatically. When the user tries to load a kernel
-> with a lower security version, the bootloader shows a warning prompt
-> to notify the user the potential risk.
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-If a distribution releases a kernel with a higher security version and
-that it automatically updated on boot, what happens if that kernel
-contains a different bug that causes it to fail to boot or break
-critical functionality?  At that point, the user's machine would be in
-a state where the higher security version is enforced but the only
-kernel that provides that is broken.  Wouldn't that make a bad
-situation even worse by now requiring manual acceptance of the older
-SV kernel boot physically at the machine?
+Thanks to the scripts/leaking_addresses.pl script, it was found that
+some EFI values should not be readable by non-root users.
 
-I feel like I'm missing a detail here or something.
+So make them root-only, and to do that, add a __ATTR_RO_MODE() macro to
+make this easier, and use it in other places at the same time.
 
-josh
+Reported-by: Linus Torvalds <torvalds@linux-foundation.org>
+Tested-by: Dave Young <dyoung@redhat.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: stable <stable@vger.kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/efi.c         |  3 +--
+ drivers/firmware/efi/esrt.c        | 15 ++++++---------
+ drivers/firmware/efi/runtime-map.c | 10 +++++-----
+ include/linux/sysfs.h              |  6 ++++++
+ 4 files changed, 18 insertions(+), 16 deletions(-)
 
-> For more details: https://github.com/lcp/shim/wiki/Security-Version
->
-> The original idea is to add a new PE/COFF section to store the data.
-> However, there are some restrictions.
->
-> 1. For x86, the size limit of the EFI header is 0x200, and a section entry
->    in the section table takes 40 bytes. Currently, the EFI header already
->    occupies the first 0x1da bytes, so there is no room for a new section
->    entry.
->
-> 2. The MemoryAttributes table sets the attributes of memory pages according
->    to the section flags. For ARM64, the minimal granularity is 4KB, but
->    Security Version only needs a few bytes, and it's pointless to allocate
->    4KB for it.
->
-> Fortunately, there is a special section defined in PE/COFF: resource
-> section. The only known user of the resource section in UEFI is the HII
-> protocol which fetches data from "HII" directory. For Security Version, a
-> new directory called "LinuxSV" is created and it contains the file offset
-> to the struct of Security Version. The bootloader just follows the
-> resource table to fetch the "version" from the image file.
->
-> v3:
->     - Move everything to the resource section to be compatible with both
->       x86 and ARM64
-> v2:
->     - Decrease the size of secdata_offset to 2 bytes since the setup header
->       is limited to around 32KB.
->     - Restructure the secdata section. The signer is now a null-terminated
->       string. The type of distro_version changes to u32 in case the distro
->       uses a long version.
->     - Modify the Kconfig names and add help.
->     - Remove the signer name hack in build.c.
->
-> Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-> Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-> Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-> Cc: Joey Lee <jlee-IBi9RG/b67k@public.gmane.org>
-> Signed-off-by: Gary Lin <glin-IBi9RG/b67k@public.gmane.org>
->
-> Gary Lin (2):
->   x86/efi: Introduce Security Version to x86
->   arm64/efi: Introduce Security Version to ARM64
->
->  arch/arm64/kernel/efi-header.S | 57 ++++++++++++++++++++++++++++++++++++++++++
->  arch/x86/boot/header.S         | 55 ++++++++++++++++++++++++++++++++++++++++
->  drivers/firmware/efi/Kconfig   | 40 +++++++++++++++++++++++++++++
->  3 files changed, 152 insertions(+)
->
-> --
-> 2.15.0
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index f70febf680c3..c3eefa126e3b 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -143,8 +143,7 @@ static ssize_t systab_show(struct kobject *kobj,
+ 	return str - buf;
+ }
+ 
+-static struct kobj_attribute efi_attr_systab =
+-			__ATTR(systab, 0400, systab_show, NULL);
++static struct kobj_attribute efi_attr_systab = __ATTR_RO_MODE(systab, 0400);
+ 
+ #define EFI_FIELD(var) efi.var
+ 
+diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+index bd7ed3c1148a..7aae2483fcb9 100644
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -106,7 +106,7 @@ static const struct sysfs_ops esre_attr_ops = {
+ };
+ 
+ /* Generic ESRT Entry ("ESRE") support. */
+-static ssize_t esre_fw_class_show(struct esre_entry *entry, char *buf)
++static ssize_t fw_class_show(struct esre_entry *entry, char *buf)
+ {
+ 	char *str = buf;
+ 
+@@ -117,18 +117,16 @@ static ssize_t esre_fw_class_show(struct esre_entry *entry, char *buf)
+ 	return str - buf;
+ }
+ 
+-static struct esre_attribute esre_fw_class = __ATTR(fw_class, 0400,
+-	esre_fw_class_show, NULL);
++static struct esre_attribute esre_fw_class = __ATTR_RO_MODE(fw_class, 0400);
+ 
+ #define esre_attr_decl(name, size, fmt) \
+-static ssize_t esre_##name##_show(struct esre_entry *entry, char *buf) \
++static ssize_t name##_show(struct esre_entry *entry, char *buf) \
+ { \
+ 	return sprintf(buf, fmt "\n", \
+ 		       le##size##_to_cpu(entry->esre.esre1->name)); \
+ } \
+ \
+-static struct esre_attribute esre_##name = __ATTR(name, 0400, \
+-	esre_##name##_show, NULL)
++static struct esre_attribute esre_##name = __ATTR_RO_MODE(name, 0400)
+ 
+ esre_attr_decl(fw_type, 32, "%u");
+ esre_attr_decl(fw_version, 32, "%u");
+@@ -193,14 +191,13 @@ static int esre_create_sysfs_entry(void *esre, int entry_num)
+ 
+ /* support for displaying ESRT fields at the top level */
+ #define esrt_attr_decl(name, size, fmt) \
+-static ssize_t esrt_##name##_show(struct kobject *kobj, \
++static ssize_t name##_show(struct kobject *kobj, \
+ 				  struct kobj_attribute *attr, char *buf)\
+ { \
+ 	return sprintf(buf, fmt "\n", le##size##_to_cpu(esrt->name)); \
+ } \
+ \
+-static struct kobj_attribute esrt_##name = __ATTR(name, 0400, \
+-	esrt_##name##_show, NULL)
++static struct kobj_attribute esrt_##name = __ATTR_RO_MODE(name, 0400)
+ 
+ esrt_attr_decl(fw_resource_count, 32, "%u");
+ esrt_attr_decl(fw_resource_count_max, 32, "%u");
+diff --git a/drivers/firmware/efi/runtime-map.c b/drivers/firmware/efi/runtime-map.c
+index 8e64b77aeac9..f377609ff141 100644
+--- a/drivers/firmware/efi/runtime-map.c
++++ b/drivers/firmware/efi/runtime-map.c
+@@ -63,11 +63,11 @@ static ssize_t map_attr_show(struct kobject *kobj, struct attribute *attr,
+ 	return map_attr->show(entry, buf);
+ }
+ 
+-static struct map_attribute map_type_attr = __ATTR_RO(type);
+-static struct map_attribute map_phys_addr_attr   = __ATTR_RO(phys_addr);
+-static struct map_attribute map_virt_addr_attr  = __ATTR_RO(virt_addr);
+-static struct map_attribute map_num_pages_attr  = __ATTR_RO(num_pages);
+-static struct map_attribute map_attribute_attr  = __ATTR_RO(attribute);
++static struct map_attribute map_type_attr = __ATTR_RO_MODE(type, 0400);
++static struct map_attribute map_phys_addr_attr = __ATTR_RO_MODE(phys_addr, 0400);
++static struct map_attribute map_virt_addr_attr = __ATTR_RO_MODE(virt_addr, 0400);
++static struct map_attribute map_num_pages_attr = __ATTR_RO_MODE(num_pages, 0400);
++static struct map_attribute map_attribute_attr = __ATTR_RO_MODE(attribute, 0400);
+ 
+ /*
+  * These are default attributes that are added for every memmap entry.
+diff --git a/include/linux/sysfs.h b/include/linux/sysfs.h
+index e32dfe098e82..40839c02d28c 100644
+--- a/include/linux/sysfs.h
++++ b/include/linux/sysfs.h
+@@ -117,6 +117,12 @@ struct attribute_group {
+ 	.show	= _name##_show,						\
+ }
+ 
++#define __ATTR_RO_MODE(_name, _mode) {					\
++	.attr	= { .name = __stringify(_name),				\
++		    .mode = VERIFY_OCTAL_PERMISSIONS(_mode) },		\
++	.show	= _name##_show,						\
++}
++
+ #define __ATTR_WO(_name) {						\
+ 	.attr	= { .name = __stringify(_name), .mode = S_IWUSR },	\
+ 	.store	= _name##_store,					\
+-- 
+2.11.0
