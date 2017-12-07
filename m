@@ -1,52 +1,44 @@
-From: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH V2 1/2] efi: move ARM CPER code to new file
-Date: Thu, 7 Dec 2017 15:07:35 -0500
-Message-ID: <972fe421-696b-cd26-9145-20081fb733c9@codeaurora.org>
-References: <1512674727-25770-1-git-send-email-tbaicar@codeaurora.org>
- <1512674727-25770-2-git-send-email-tbaicar@codeaurora.org>
- <CAKv+Gu_kM1NLWcOtQSEwEVnncBbrgJ5MP4VrYQVHBoCwSf_FRQ@mail.gmail.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: Re: [PATCH 4.4 05/27] x86/efi: Build our own page table structures
+Date: Thu, 07 Dec 2017 22:43:49 +0000
+Message-ID: <1512686629.18523.217.camel@codethink.co.uk>
+References: <20171204155942.271814507@linuxfoundation.org>
+         <20171204155942.482436478@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu_kM1NLWcOtQSEwEVnncBbrgJ5MP4VrYQVHBoCwSf_FRQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171204155942.482436478@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org
+Cc: stable@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@amacapital.net>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Dave Jones <davej@codemonkey.org.uk>, Denys Vlasenko <dvlasenk@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Stephen Smalley <sds@tycho.nsa.gov>, Thomas Gleixner <tglx@linutronix.de>, Toshi Kani <toshi.kani@hp.com>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Ghannam, Yaz
 List-Id: linux-efi@vger.kernel.org
 
-On 12/7/2017 2:38 PM, Ard Biesheuvel wrote:
->> diff --git a/include/linux/cper.h b/include/linux/cper.h
->> index 723e952..0a2d5c5 100644
->> --- a/include/linux/cper.h
->> +++ b/include/linux/cper.h
->> @@ -494,6 +494,13 @@ struct cper_sec_pcie {
->>   /* Reset to default packing */
->>   #pragma pack()
->>
->> +static const char * const proc_error_type_strs[] = {
->> +       "cache error",
->> +       "TLB error",
->> +       "bus error",
->> +       "micro-architectural error",
->> +};
->> +
-> Could we keep this in cper.c, and replace this with
->
-> extern const char * const cper_proc_error_type_strs[];
->
-> instead? I'm not too keen on putting definitions (other than static
-> inline functions) in header files.
->
-Hello Ard,
+On Mon, 2017-12-04 at 16:59 +0100, Greg Kroah-Hartman wrote:
+> 4.4-stable review patch.  If anyone has any objections, please let me know.
+> 
+> ------------------
+> 
+> From: Matt Fleming <matt@codeblueprint.co.uk>
+> 
+> commit 67a9108ed4313b85a9c53406d80dc1ae3f8c3e36 upstream.
+[...]
 
-Yes, I will make this change.
+It looks like this will cause regressions unless you also apply:
 
-Thanks,
-Tyler
+21cdb6b56843 x86/mm: Page align the '_end' symbol to avoid pfn conversion bugs
+b61a76f8850d x86/efi: Map RAM into the identity page table for mixed mode
+753b11ef8e92 x86/efi: Setup separate EFI page tables in kexec paths
+
+and possibly also:
+
+08914f436bdd x86/platform/UV: Bring back the call to map_low_mmrs in uv_system_init
+683ad8092cd2 x86/efi: Fix 7-parameter efi_call()s
+80e75596079f efi: Convert efi_call_virt() to efi_call_virt_pointer()
+d1be84a232e3 x86/uv: Update uv_bios_call() to use efi_call_virt_pointer()
+
+Ben.
 
 -- 
-Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+Ben Hutchings
+Software Developer, Codethink Ltd.
