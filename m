@@ -1,51 +1,40 @@
-From: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
-Subject: Re: [RFC v3 PATCH 0/2] Introduce Security Version to EFI Stub
-Date: Thu, 7 Dec 2017 14:26:57 +0000
-Message-ID: <20171207142657.52e1363a@alans-desktop>
-References: <20171205100148.5757-1-glin@suse.com>
+From: Alan Cox <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+Subject: Re: Firmware signing -- Re: [PATCH 00/27] security, efi: Add kernel
+ lockdown
+Date: Thu, 7 Dec 2017 15:32:09 +0000
+Message-ID: <20171207153209.5da771a9@alans-desktop>
+References: <1509660641.3416.24.camel@linux.vnet.ibm.com>
+        <20171107230700.GJ22894@wotan.suse.de>
+        <20171108061551.GD7859@linaro.org>
+        <20171108194626.GQ22894@wotan.suse.de>
+        <20171109014841.GF7859@linaro.org>
+        <1510193857.4484.95.camel@linux.vnet.ibm.com>
+        <20171109044619.GG7859@linaro.org>
+        <20171111023240.2398ca55@alans-desktop>
+        <20171113174250.GA22894@wotan.suse.de>
+        <20171113210848.4dc344bd@alans-desktop>
+        <20171204195155.GU729@wotan.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20171205100148.5757-1-glin@suse.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Gary Lin <glin@suse.com>
-Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, x86@kernel.org, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, Joey Lee <jlee@suse.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20171204195155.GU729-B4tOwbsTzaBolqkO4TVVkw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Luis R. Rodriguez" <mcgrof-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: "AKASHI, Takahiro" <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Jan Blunck <jblunck-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Marcus Meissner <meissner-l3A5Bk7waGM@public.gmane.org>, Gary Lin <GLin-IBi9RG/b67k@public.gmane.org>, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue,  5 Dec 2017 18:01:46 +0800
-Gary Lin <glin@suse.com> wrote:
+> I am curious though, is the above notion of having hardware require signed
+> firmware an implication brought down by UEFI? If so do you have any pointers
+> to where this is stipulated? Or is it just a best practice we assume some
+> manufacturers are implementing?
 
-> The series of patches introduce Security Version to EFI stub.
-> 
-> Security Version is a monotonically increasing number and designed to
-> prevent the user from loading an insecure kernel accidentally. The
-> bootloader maintains a list of security versions corresponding to
-> different distributions. After fixing a critical vulnerability, the
-> distribution kernel maintainer bumps the "version", and the bootloader
-> updates the list automatically. 
+It's a mix of best practice and meeting the so called 'secure boot'
+requirements. In the non Linux space exactly the same problems exist in
+terms of trusting devices and firmware, building a root of trust and even
+more so when producing 'hardened' platforms.
 
-This seems a mindbogglingly complicated way to implement something you
-could do with a trivial script in the package that updates the list of
-iffy kernels and when generating the new grub.conf puts them in a menu
-of 'old insecure' kernels.
-
-Why do you even need this in the EFI stub ?
-
-What happens if you want to invalidate an old kernel but not push a new
-one ? Today if you've got a package that maintains the list of 'iffy'
-kernels you can push a tiny package, under your scheme you've got to push
-new kernels which is an un-necessary and high risk OS change.
-
-It just feels like an attempt to solve the problem in completely the
-wrong place.
+Some stuff isn't - USB devices for example don't get to pee on random
+memory so often isn't signed.
 
 Alan
