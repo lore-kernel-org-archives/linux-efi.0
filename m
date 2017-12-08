@@ -1,82 +1,40 @@
-From: Gary Lin <glin@suse.com>
-Subject: Re: [RFC v3 PATCH 0/2] Introduce Security Version to EFI Stub
-Date: Fri, 8 Dec 2017 18:03:02 +0800
-Message-ID: <20171208100302.an3bi3baewifcakc@GaryWorkstation>
-References: <20171205100148.5757-1-glin@suse.com>
- <20171207142657.52e1363a@alans-desktop>
+From: Alan Cox <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+Subject: Re: Firmware signing -- Re: [PATCH 00/27] security, efi: Add kernel
+ lockdown
+Date: Fri, 8 Dec 2017 17:11:53 +0000
+Message-ID: <20171208171153.0a1bbadf@alans-desktop>
+References: <20171111023240.2398ca55@alans-desktop>
+        <20171113174250.GA22894@wotan.suse.de>
+        <20171113210848.4dc344bd@alans-desktop>
+        <454.1510609487@warthog.procyon.org.uk>
+        <CA+55aFzrK29hbxoKs3GsvVUY4_uR7aBgZv2eeVyVq7MzfATY3w@mail.gmail.com>
+        <1510662098.3711.139.camel@linux.vnet.ibm.com>
+        <CA+55aFzvuvqOfsJ9arzcc1QbTGs+U-TsNmsyem9UAVVQC8YkZQ@mail.gmail.com>
+        <CACdnJuvP=0AHGtfGJ5+cT+kHRy3fU4BLjwkvzP0rLO6q5ejAQQ@mail.gmail.com>
+        <CA+55aFxeLwgwxh2iJTf6Dz0T_a_TZfTdhBw5TkcSsCmjt2N5pw@mail.gmail.com>
+        <20171205102757.GA12982@amd>
+        <20171207230238.GW729@wotan.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20171207142657.52e1363a@alans-desktop>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
-Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, x86@kernel.org, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, Joey Lee <jlee@suse.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20171207230238.GW729-B4tOwbsTzaBolqkO4TVVkw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Luis R. Rodriguez" <mcgrof-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "AKASHI, Takahiro" <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Jan Blunck <jblunck-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Julia Lawall <julia.lawall-L2FTfq7BK8M@public.gmane.org>, Marcus Meissner <meissner-l3A5Bk7waGM@public.gmane.org>, Gary Lin <GLin-IBi9RG/b67k@public.gmane.org>, LSM List <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Dec 07, 2017 at 02:26:57PM +0000, Alan Cox wrote:
-> On Tue,  5 Dec 2017 18:01:46 +0800
-> Gary Lin <glin@suse.com> wrote:
-> 
-> > The series of patches introduce Security Version to EFI stub.
-> > 
-> > Security Version is a monotonically increasing number and designed to
-> > prevent the user from loading an insecure kernel accidentally. The
-> > bootloader maintains a list of security versions corresponding to
-> > different distributions. After fixing a critical vulnerability, the
-> > distribution kernel maintainer bumps the "version", and the bootloader
-> > updates the list automatically. 
-> 
-> This seems a mindbogglingly complicated way to implement something you
-> could do with a trivial script in the package that updates the list of
-> iffy kernels and when generating the new grub.conf puts them in a menu
-> of 'old insecure' kernels.
-> 
-Ya, a menu for those kernels is also a kind of warning to the users.
-Thanks for pointing the direction.
+> One is to get more and more folks reverse engineer firmware. This won't help
+> if you can't deploy unsigned firmware though. But you have to also look at it
 
-> Why do you even need this in the EFI stub ?
-> 
-For 2 reasons.
+Oh I think it will. From the experience with things like games consoles
+most firmware is such a complete pile of s**t that you'll be able to
+exploit it to load your own firmware through the bugs, and at the very
+least after the 200th CVE against their firmware the vendor's direct
+customers may be a bit fed up and demand proper process and visibility 8)
 
-1. We want the version number being unalterable. In a system with UEFI
-   Secure Boot, the signature appended to the kernel guarantees that the
-   version number is genuine.
+It's always going to be in tension though - because there is firmware you
+really don't want people replacing maliciously, such as battery control,
+or thermal protection.
 
-2. For the cross-architecture support. Since the version number could be
-   anywhere in the image file, we need at least a offset to point to the
-   version number. That's why I choose the resource section/table in the
-   EFI header. It exists as long as the EFI stub exists. The design of
-   the directory allows different data stored separately.
-
-If there is a better place for the version number, I'd be glad to adopt
-it.
-
-> What happens if you want to invalidate an old kernel but not push a new
-> one ? Today if you've got a package that maintains the list of 'iffy'
-> kernels you can push a tiny package, under your scheme you've got to push
-> new kernels which is an un-necessary and high risk OS change.
-> 
-The idea is that the security version only bumps only when it's really
-necessary. For example, the new kernel fixes a severe bug that invalidates
-the signature check of the modules. Or, the distro makes an official
-release and would like to obsolete the alpha/beta/RC kernel. Anyway, it
-depends on the distro policy.
-
-Actually, our main target is only for the enterprise server, and the
-kernel update path is relatively simple. Since it may bring some
-confusion in a multi-boot system, we are currently not planning to
-enable SV for the community distro, i.e. openSUSE.
-
-Thanks,
-
-Gary Lin
+Alan
