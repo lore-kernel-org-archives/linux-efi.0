@@ -1,40 +1,64 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH resend] fix boot hang with earlyprintk=efi,keep
-Date: Sat, 9 Dec 2017 12:16:10 +0800
-Message-ID: <20171209041610.GA3249@dhcp-128-65.nay.redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Vincent Legoll <vincent.legoll-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH] efi: make EFI a menuconfig to ease disabling it all
+Date: Sat,  9 Dec 2017 16:52:52 +0100
+Message-ID: <20171209155252.6403-1-vincent.legoll@gmail.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, bp-l3A5Bk7waGM@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Vincent Legoll <vincent.legoll-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-earlyprintk=efi,keep does not work any more with a warning
-in mm/early_ioremap.c: WARN_ON(system_state != SYSTEM_BOOTING):
-Boot just hangs because of the earlyprintk within earlyprintk
-implementation code.
+No need to get into the submenu to disable all related
+config entries.
 
-This is caused by a new introduced middle state in below commit:
-commit 69a78ff226fe ("init: Introduce SYSTEM_SCHEDULING state")
-early_ioremap is fine in both SYSTEM_BOOTING and SYSTEM_SCHEDULING
-states, original condition should be updated accordingly.
+This makes it easier to disable all EFI config options
+without entering the submenu. It will also enable one
+to see that en/dis-abled state from the outside menu.
 
-Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+This is only intended to change menuconfig UI, not change
+the config dependencies.
+
+Signed-off-by: Vincent Legoll <vincent.legoll-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 ---
-v1->v2: update patch log correct some typos
- mm/early_ioremap.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/firmware/efi/Kconfig | 13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
 
---- linux-x86.orig/mm/early_ioremap.c
-+++ linux-x86/mm/early_ioremap.c
-@@ -111,7 +111,7 @@ __early_ioremap(resource_size_t phys_add
- 	enum fixed_addresses idx;
- 	int i, slot;
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 2b4c39fdfa91..8727b1aa8ef6 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -1,6 +1,9 @@
+-menu "EFI (Extensible Firmware Interface) Support"
++menuconfig EFI_MENU
++	bool "EFI (Extensible Firmware Interface) Support"
+ 	depends on EFI
  
--	WARN_ON(system_state != SYSTEM_BOOTING);
-+	WARN_ON(system_state >= SYSTEM_RUNNING);
++if EFI_MENU
++
+ config EFI_VARS
+ 	tristate "EFI Variable Support via sysfs"
+ 	depends on EFI
+@@ -81,9 +84,6 @@ config EFI_PARAMS_FROM_FDT
+ 	  the EFI runtime support gets system table address, memory
+           map address, and other parameters from the device tree.
  
- 	slot = -1;
- 	for (i = 0; i < FIX_BTMAPS_SLOTS; i++) {
+-config EFI_RUNTIME_WRAPPERS
+-	bool
+-
+ config EFI_ARMSTUB
+ 	bool
+ 
+@@ -161,7 +161,10 @@ config RESET_ATTACK_MITIGATION
+ 	  still contains secrets in RAM, booting another OS and extracting the
+ 	  secrets.
+ 
+-endmenu
++endif # EFI_MENU
++
++config EFI_RUNTIME_WRAPPERS
++	bool
+ 
+ config UEFI_CPER
+ 	bool
+-- 
+2.14.1
