@@ -1,74 +1,85 @@
-From: Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH V2 1/2] efi: move ARM CPER code to new file
-Date: Mon, 11 Dec 2017 16:29:43 -0500
-Message-ID: <6c9da127-f210-3f14-32b7-c38ad5e0e1d6@codeaurora.org>
-References: <1512674727-25770-1-git-send-email-tbaicar@codeaurora.org>
- <1512674727-25770-2-git-send-email-tbaicar@codeaurora.org>
- <CAKv+Gu_kM1NLWcOtQSEwEVnncBbrgJ5MP4VrYQVHBoCwSf_FRQ@mail.gmail.com>
- <972fe421-696b-cd26-9145-20081fb733c9@codeaurora.org>
- <1bcd0462-5df9-fd90-c487-4e8958a9e27d@codeaurora.org>
- <CAKv+Gu_VWjw6E0GHc1edLAc-NVjy6CtDU2fSR5o7-Q+W40Fbug@mail.gmail.com>
+From: Shanker Donthineni <shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [RESEND PATCH v4 2/2] arm64: Add software workaround for Falkor
+ erratum 1041
+Date: Mon, 11 Dec 2017 16:26:04 -0600
+Message-ID: <39cc5f8d-be16-c437-28f8-1bc8601757af@codeaurora.org>
+References: <1512957823-18064-1-git-send-email-shankerd@codeaurora.org>
+ <1512957823-18064-2-git-send-email-shankerd@codeaurora.org>
+ <20171211104558.pm3lijsdfg2xhj7h@lakrids.cambridge.arm.com>
+Reply-To: shankerd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu_VWjw6E0GHc1edLAc-NVjy6CtDU2fSR5o7-Q+W40Fbug-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20171211104558.pm3lijsdfg2xhj7h-agMKViyK24J5pKCnmE3YQBJ8xKzm50AiAL8bYrjMMd8@public.gmane.org>
 Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Robin Murphy <robin.murphy-5wv7dgnIgG8@public.gmane.org>, kvmarm-FPEHb7Xf0XXUo1n7N8X6UoWGPAHP3yOg@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 12/11/2017 4:09 PM, Ard Biesheuvel wrote:
-> On 11 December 2017 at 21:06, Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
->> On 12/7/2017 3:07 PM, Tyler Baicar wrote:
->>> On 12/7/2017 2:38 PM, Ard Biesheuvel wrote:
->>>>> diff --git a/include/linux/cper.h b/include/linux/cper.h
->>>>> index 723e952..0a2d5c5 100644
->>>>> --- a/include/linux/cper.h
->>>>> +++ b/include/linux/cper.h
->>>>> @@ -494,6 +494,13 @@ struct cper_sec_pcie {
->>>>>    /* Reset to default packing */
->>>>>    #pragma pack()
->>>>>
->>>>> +static const char * const proc_error_type_strs[] = {
->>>>> +       "cache error",
->>>>> +       "TLB error",
->>>>> +       "bus error",
->>>>> +       "micro-architectural error",
->>>>> +};
->>>>> +
->>>> Could we keep this in cper.c, and replace this with
->>>>
->>>> extern const char * const cper_proc_error_type_strs[];
->>>>
->>>> instead? I'm not too keen on putting definitions (other than static
->>>> inline functions) in header files.
->>>>
->>> Yes, I will make this change.
->> Hello Ard,
->>
->> This actually won't work because of the ARRAY_SIZE use. If this definition
->> is in cper.c, then cper-arm.c won't be able to use ARRAY_SIZE even with the
->> extern statement in cper.h.
->>
->> drivers/firmware/efi/cper-arm.c: In function ‘cper_print_proc_arm’:
->> ./include/linux/kernel.h:71:32: error: invalid application of ‘sizeof’ to
->> incomplete type ‘const char * const[]’
->>   #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]) +
->> __must_be_array(arr))
->>                                  ^
->> drivers/firmware/efi/cper-arm.c:103:21: note: in expansion of macro
->> ‘ARRAY_SIZE’
->>      err_info->type < ARRAY_SIZE(cper_proc_error_type_strs) ?
->>                       ^~~~~~~~~~
->>
->> Any other suggestions?
->>
-> Add '4' between the square brackets?
-That works if you'd prefer it that way.
+Thanks Mark, I'll post v5 patch without alternatives. 
+
+
+On 12/11/2017 04:45 AM, Mark Rutland wrote:
+> Hi,
+> 
+> On Sun, Dec 10, 2017 at 08:03:43PM -0600, Shanker Donthineni wrote:
+>> +/**
+>> + * Errata workaround prior to disable MMU. Insert an ISB immediately prior
+>> + * to executing the MSR that will change SCTLR_ELn[M] from a value of 1 to 0.
+>> + */
+>> +	.macro pre_disable_mmu_workaround
+>> +#ifdef CONFIG_QCOM_FALKOR_ERRATUM_E1041
+>> +alternative_if ARM64_WORKAROUND_QCOM_FALKOR_E1041
+>> +	isb
+>> +alternative_else_nop_endif
+>> +#endif
+>> +	.endm
+> 
+> There's really no need for this to be an alternative. It makes the
+> kernel larger and more complex due to all the altinstr data and probing
+> code.
+> 
+> As Will suggested last time [1], please just use the ifdef, and always
+> compile-in the extra ISB if CONFIG_QCOM_FALKOR_ERRATUM_E1041 is
+> selected. Get rid of the alternatives and probing code.
+> 
+> All you need here is:
+> 
+> 	/*
+> 	 * Some Falkor parts make errant speculative instruction fetches
+> 	 * when SCTLR_ELx.M is cleared. An ISB before the write to
+> 	 * SCTLR_ELx prevents this.
+> 	 */
+> 	.macro pre_disable_mmu_workaround
+> #ifdef
+> 	isb
+> #endif
+> 	.endm
+> 
+>> +
+>> +	.macro pre_disable_mmu_early_workaround
+>> +#ifdef CONFIG_QCOM_FALKOR_ERRATUM_E1041
+>> +	isb
+>> +#endif
+>> +	.endm
+>> +
+> 
+> ... and we don't need a special early variant.
+> 
+> Thanks,
+> Mark.
+> 
+> [1] https://lkml.kernel.org/r/20171201112457.GE18083-5wv7dgnIgG8@public.gmane.org
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> 
 
 -- 
+Shanker Donthineni
 Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum, a Linux Foundation Collaborative Project.
