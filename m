@@ -1,51 +1,144 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 017/148] efi/esrt: Use memunmap() instead of kfree() to free the remapping
-Date: Tue, 12 Dec 2017 13:43:47 +0100
-Message-ID: <20171212124431.920202312@linuxfoundation.org>
-References: <20171212124431.207182779@linuxfoundation.org>
+Subject: [PATCH 4.14 038/164] efi: Move some sysfs files to be read-only by root
+Date: Tue, 12 Dec 2017 13:43:38 +0100
+Message-ID: <20171212123445.663354299@linuxfoundation.org>
+References: <20171212123443.785979602@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171212124431.207182779@linuxfoundation.org>
+In-Reply-To: <20171212123443.785979602@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Pan Bian <bianpan2016@163.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, Dave Young <dyoung@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.9-stable review patch.  If anyone has any objections, please let me know.
+4.14-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
-From: Pan Bian <bianpan2016@163.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-commit 89c5a2d34bda58319e3075e8e7dd727ea25a435c upstream.
+commit af97a77bc01ce49a466f9d4c0125479e2e2230b6 upstream.
 
-The remapping result of memremap() should be freed with memunmap(), not kfree().
+Thanks to the scripts/leaking_addresses.pl script, it was found that
+some EFI values should not be readable by non-root users.
 
-Signed-off-by: Pan Bian <bianpan2016@163.com>
+So make them root-only, and to do that, add a __ATTR_RO_MODE() macro to
+make this easier, and use it in other places at the same time.
+
+Reported-by: Linus Torvalds <torvalds@linux-foundation.org>
+Tested-by: Dave Young <dyoung@redhat.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: H. Peter Anvin <hpa@zytor.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Matt Fleming <matt@codeblueprint.co.uk>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/20171206095010.24170-3-ard.biesheuvel@linaro.org
+Link: http://lkml.kernel.org/r/20171206095010.24170-2-ard.biesheuvel@linaro.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 ---
- drivers/firmware/efi/esrt.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/firmware/efi/efi.c         |    3 +--
+ drivers/firmware/efi/esrt.c        |   15 ++++++---------
+ drivers/firmware/efi/runtime-map.c |   10 +++++-----
+ include/linux/sysfs.h              |    6 ++++++
+ 4 files changed, 18 insertions(+), 16 deletions(-)
 
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -143,8 +143,7 @@ static ssize_t systab_show(struct kobjec
+ 	return str - buf;
+ }
+ 
+-static struct kobj_attribute efi_attr_systab =
+-			__ATTR(systab, 0400, systab_show, NULL);
++static struct kobj_attribute efi_attr_systab = __ATTR_RO_MODE(systab, 0400);
+ 
+ #define EFI_FIELD(var) efi.var
+ 
 --- a/drivers/firmware/efi/esrt.c
 +++ b/drivers/firmware/efi/esrt.c
-@@ -428,7 +428,7 @@ err_remove_group:
- err_remove_esrt:
- 	kobject_put(esrt_kobj);
- err:
--	kfree(esrt);
-+	memunmap(esrt);
- 	esrt = NULL;
- 	return error;
+@@ -106,7 +106,7 @@ static const struct sysfs_ops esre_attr_
+ };
+ 
+ /* Generic ESRT Entry ("ESRE") support. */
+-static ssize_t esre_fw_class_show(struct esre_entry *entry, char *buf)
++static ssize_t fw_class_show(struct esre_entry *entry, char *buf)
+ {
+ 	char *str = buf;
+ 
+@@ -117,18 +117,16 @@ static ssize_t esre_fw_class_show(struct
+ 	return str - buf;
  }
+ 
+-static struct esre_attribute esre_fw_class = __ATTR(fw_class, 0400,
+-	esre_fw_class_show, NULL);
++static struct esre_attribute esre_fw_class = __ATTR_RO_MODE(fw_class, 0400);
+ 
+ #define esre_attr_decl(name, size, fmt) \
+-static ssize_t esre_##name##_show(struct esre_entry *entry, char *buf) \
++static ssize_t name##_show(struct esre_entry *entry, char *buf) \
+ { \
+ 	return sprintf(buf, fmt "\n", \
+ 		       le##size##_to_cpu(entry->esre.esre1->name)); \
+ } \
+ \
+-static struct esre_attribute esre_##name = __ATTR(name, 0400, \
+-	esre_##name##_show, NULL)
++static struct esre_attribute esre_##name = __ATTR_RO_MODE(name, 0400)
+ 
+ esre_attr_decl(fw_type, 32, "%u");
+ esre_attr_decl(fw_version, 32, "%u");
+@@ -193,14 +191,13 @@ static int esre_create_sysfs_entry(void
+ 
+ /* support for displaying ESRT fields at the top level */
+ #define esrt_attr_decl(name, size, fmt) \
+-static ssize_t esrt_##name##_show(struct kobject *kobj, \
++static ssize_t name##_show(struct kobject *kobj, \
+ 				  struct kobj_attribute *attr, char *buf)\
+ { \
+ 	return sprintf(buf, fmt "\n", le##size##_to_cpu(esrt->name)); \
+ } \
+ \
+-static struct kobj_attribute esrt_##name = __ATTR(name, 0400, \
+-	esrt_##name##_show, NULL)
++static struct kobj_attribute esrt_##name = __ATTR_RO_MODE(name, 0400)
+ 
+ esrt_attr_decl(fw_resource_count, 32, "%u");
+ esrt_attr_decl(fw_resource_count_max, 32, "%u");
+--- a/drivers/firmware/efi/runtime-map.c
++++ b/drivers/firmware/efi/runtime-map.c
+@@ -63,11 +63,11 @@ static ssize_t map_attr_show(struct kobj
+ 	return map_attr->show(entry, buf);
+ }
+ 
+-static struct map_attribute map_type_attr = __ATTR_RO(type);
+-static struct map_attribute map_phys_addr_attr   = __ATTR_RO(phys_addr);
+-static struct map_attribute map_virt_addr_attr  = __ATTR_RO(virt_addr);
+-static struct map_attribute map_num_pages_attr  = __ATTR_RO(num_pages);
+-static struct map_attribute map_attribute_attr  = __ATTR_RO(attribute);
++static struct map_attribute map_type_attr = __ATTR_RO_MODE(type, 0400);
++static struct map_attribute map_phys_addr_attr = __ATTR_RO_MODE(phys_addr, 0400);
++static struct map_attribute map_virt_addr_attr = __ATTR_RO_MODE(virt_addr, 0400);
++static struct map_attribute map_num_pages_attr = __ATTR_RO_MODE(num_pages, 0400);
++static struct map_attribute map_attribute_attr = __ATTR_RO_MODE(attribute, 0400);
+ 
+ /*
+  * These are default attributes that are added for every memmap entry.
+--- a/include/linux/sysfs.h
++++ b/include/linux/sysfs.h
+@@ -117,6 +117,12 @@ struct attribute_group {
+ 	.show	= _name##_show,						\
+ }
+ 
++#define __ATTR_RO_MODE(_name, _mode) {					\
++	.attr	= { .name = __stringify(_name),				\
++		    .mode = VERIFY_OCTAL_PERMISSIONS(_mode) },		\
++	.show	= _name##_show,						\
++}
++
+ #define __ATTR_WO(_name) {						\
+ 	.attr	= { .name = __stringify(_name), .mode = S_IWUSR },	\
+ 	.store	= _name##_store,					\
