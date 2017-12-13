@@ -1,286 +1,199 @@
-From: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: arm64 crashkernel fails to boot on acpi-only machines due to ACPI
- regions being no longer mapped as NOMAP
-Date: Wed, 13 Dec 2017 03:21:59 +0530
-Message-ID: <CACi5LpOZ=WOx14gTwH5jfLozepT2Jw8JSY5x+bfEZ_YaiQvFpw@mail.gmail.com>
+From: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: arm64 crashkernel fails to boot on acpi-only machines due to
+ ACPI regions being no longer mapped as NOMAP
+Date: Wed, 13 Dec 2017 19:26:26 +0900
+Message-ID: <20171213102624.GC28046@linaro.org>
 References: <CACi5LpM_95ebYFguPTyjWk+qHT5rDJVXiYDkNWbszo6Zw41zRA@mail.gmail.com>
  <CACi5LpNV_E9pvhTwLcy6vtEj9qbL1ZEHe-5sv=iiW0k9JxPD1Q@mail.gmail.com>
- <20171113092730.GA29552@linaro.org> <CAKv+Gu_eQ-s0J22tKeHKJme4qXcvxvDkS7vKrNW+o_XtMTkMhQ@mail.gmail.com>
- <3df4c6c5-0abe-01ee-730d-2edaa5f497d2@redhat.com> <20171116070005.GI29552@linaro.org>
- <CAFTCetQHmpprAVu6uYO+rc5Xi4EUVhmovbmSaU6nM1n1mAH62w@mail.gmail.com> <CAKv+Gu9oda1Ee8AoXsCEw+Bjn-XF3wZA_CsxvqhjtT6_bmJ7uA@mail.gmail.com>
+ <20171113092730.GA29552@linaro.org>
+ <CAKv+Gu_eQ-s0J22tKeHKJme4qXcvxvDkS7vKrNW+o_XtMTkMhQ@mail.gmail.com>
+ <3df4c6c5-0abe-01ee-730d-2edaa5f497d2@redhat.com>
+ <20171116070005.GI29552@linaro.org>
+ <CAFTCetQHmpprAVu6uYO+rc5Xi4EUVhmovbmSaU6nM1n1mAH62w@mail.gmail.com>
+ <CAKv+Gu9oda1Ee8AoXsCEw+Bjn-XF3wZA_CsxvqhjtT6_bmJ7uA@mail.gmail.com>
+ <CACi5LpOZ=WOx14gTwH5jfLozepT2Jw8JSY5x+bfEZ_YaiQvFpw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu9oda1Ee8AoXsCEw+Bjn-XF3wZA_CsxvqhjtT6_bmJ7uA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CACi5LpOZ=WOx14gTwH5jfLozepT2Jw8JSY5x+bfEZ_YaiQvFpw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org
+To: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Ard, Akashi
+Bhupesh, Ard,
 
-On Mon, Dec 4, 2017 at 7:32 PM, Ard Biesheuvel
-<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 26 November 2017 at 08:29, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> Hi Akashi,
->>
->> On Thu, Nov 16, 2017 at 12:30 PM, AKASHI Takahiro
->> <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>> Bhupesh,
->>>
->>> On Wed, Nov 15, 2017 at 04:28:55PM +0530, Bhupesh Sharma wrote:
->>>>
->>>   (snip)
->>>
->>>> # dmesg | grep -B 2 -i "ACPI reclaim"
->>>> [    0.000000] efi:   0x000039670000-0x0000396bffff [Runtime Code |RUN|  |
->>>> |  |  |  |  |   |WB|WT|WC|UC]
->>>> [    0.000000] efi:   0x0000396c0000-0x00003970ffff [Boot Code |   |  |  |
->>>> |  |  |  |   |WB|WT|WC|UC]
->>>> [    0.000000] efi:   0x000039710000-0x00003975ffff [ACPI Reclaim Memory|
->>>> |  |  |  |  |  |  |   |WB|WT|WC|UC]
->>>>
->>>> 2. Now, I am not sure which kernel layer does the following changes (I am
->>>> still trying to dig it out more), but I see that the 'Boot Code' and ACPI
->>>> DSDT table regions are somehow merged into one memblock_region and appear as
->>>> range '396c0000-3975ffff' in the '/proc/iomem' interface:
->>>>
->>>> # cat /proc/iomem | grep -A 2 -B 2 39
->>>> 00000000-3961ffff : System RAM
->>>>   00080000-00b6ffff : Kernel code
->>>>   00cb0000-0167ffff : Kernel data
->>>>   0e800000-2e7fffff : Crash kernel
->>>> 39620000-396bffff : reserved
->>>> 396c0000-3975ffff : System RAM
->>>> 39760000-3976ffff : reserved
->>>> 39770000-397affff : reserved
->>>> 397b0000-3989ffff : reserved
->>>> 398a0000-398bffff : reserved
->>>> 398c0000-39d3ffff : reserved
->>>> 39d40000-3ed2ffff : System RAM
->>>>
->>>   (snip)
->>>>
->>>> So, I am looking at what could be causing the 'Boot Code' and 'ACPI DSDT
->>>> table' ranges to be merged into a single region at
->>>> '0x0000396c0000-0x00003970ffff' which cannot be marked as RESERVED using
->>>> 'memblock_is_reserved'.
->>>
->>> Simple:) The short answer is that memblock_add() does.
->>>
->>> The long answer:
->>> First, please note that memblock maintains two type of regions list,
->>> "memory" and "reserved".
->>>
->>> efi_init()
->>>     reserve_regions()
->>>         early_init_dt_add_memory_arch()
->>>             memblock_add()
->>>                 memblock_add_range(memblock.memory)
->>>
->>> The memory regions described in efi.memmap are added to "memory" list
->>> with all the neighboring regions being merged into ones,
->>> in this case, "Runtime Code", "Boot Code", "ACPI Reclaim Memory" and others.
->>>
->>> The secret here is that "Runtime Code" is also marked with "NOMAP" flag in
->>> reserve_regions(), which creates an isolated region since it now has
->>> a different attribute.
->>> Consequently only "Boot Code" and "ACPI Reclaim Memory" are
->>> unified.
->>>
->>> Look at request_standard_resources(). It handles only "memory" list,
->>> and doesn't care about whether any arbitrary part of memory is in
->>> "reserved" list or not.
->>
->> Thanks for the pointers. Now I did some experiments and traversed the
->> whole memblock path and I see
->> how these two regions get merged into a single region which is later
->> on recognized by
->> 'request_standard_resources()' as a System RAM region rather than a
->> RESERVED region.
->>
->> I recently reproduced this on a APM mustang with latest kernel as well
->> when acpi is used to boot the machine, which makes me believe that
->> this is a generic issue for arm64 machines with the 4.14 kernel and if
->> they use acpi=force as the boot method.
->>
->> I am not sure, if a fix/or hack would be suitable for all underlying
->> arm64 machines, but I am trying one on the arm64 machines I have to
->> see if it fixes the issue.
->>
->> @Ard:
->>
->> Hi Ard,
->>
->> I think to create and test a clean solution for all arm64 boards it
->> will take some time, in the meantime should we consider reverting the
->> commit [1] to make sure that acpi enabled arm64 machines can boot with
->> 4.14?
->>
->> Please let me know your opinion.
->>
->> [1] f56ab9a5b73ca2aee777ccdf2d355ae2dd31db5a (efi/arm: Don't mark
->> ACPI reclaim memory as MEMBLOCK_NOMAP)
->>
->
-> I don't think that is really going to help tbh.
->
-> ACPI reclaim regions are not the only regions that are
-> memblock_reserve()d and need to be reserved by the incoming kernel as
-> well. So as far as I can tell, this is a symptom of an underlying
-> issue that we will need to solve, and reverting the code that exposed
-> it will not make the bug go away.
->
+On Wed, Dec 13, 2017 at 03:21:59AM +0530, Bhupesh Sharma wrote:
+> Hi Ard, Akashi
+> 
+(snip)
 
-Looking deeper into the issue, since the arm64 kexec-tools uses the
-'linux,usable-memory-range' dt property to allow crash dump kernel to
-identify its own usable memory and exclude, at its boot time, any
-other memory areas that are part of the panicked kernel's memory.
-(see https://www.kernel.org/doc/Documentation/devicetree/bindings/chosen.txt
-, for details)
+> Looking deeper into the issue, since the arm64 kexec-tools uses the
+> 'linux,usable-memory-range' dt property to allow crash dump kernel to
+> identify its own usable memory and exclude, at its boot time, any
+> other memory areas that are part of the panicked kernel's memory.
+> (see https://www.kernel.org/doc/Documentation/devicetree/bindings/chosen.txt
+> , for details)
 
-1). Now when 'kexec -p' is executed, this node is patched up only
-with the crashkernel memory range:
+Right.
 
-                /* add linux,usable-memory-range */
-                nodeoffset = fdt_path_offset(new_buf, "/chosen");
-                result = fdt_setprop_range(new_buf, nodeoffset,
-                                PROP_USABLE_MEM_RANGE, &crash_reserved_mem,
-                                address_cells, size_cells);
+> 1). Now when 'kexec -p' is executed, this node is patched up only
+> with the crashkernel memory range:
+> 
+>                 /* add linux,usable-memory-range */
+>                 nodeoffset = fdt_path_offset(new_buf, "/chosen");
+>                 result = fdt_setprop_range(new_buf, nodeoffset,
+>                                 PROP_USABLE_MEM_RANGE, &crash_reserved_mem,
+>                                 address_cells, size_cells);
+> 
+> (see https://git.kernel.org/pub/scm/utils/kernel/kexec/kexec-tools.git/tree/kexec/arch/arm64/kexec-arm64.c#n465
+> , for details)
+> 
+> 2). This excludes the ACPI reclaim regions irrespective of whether
+> they are marked as System RAM or as RESERVED. As,
+> 'linux,usable-memory-range' dt node is patched up only with
+> 'crash_reserved_mem' and not 'system_memory_ranges'
+> 
+> 3). As a result when the crashkernel boots up it doesn't find this
+> ACPI memory and crashes while trying to access the same:
+> 
+> # kexec -p /boot/vmlinuz-`uname -r` --initrd=/boot/initramfs-`uname
+> -r`.img --reuse-cmdline -d
+> 
+> [snip..]
+> 
+> Reserved memory range
+> 000000000e800000-000000002e7fffff (0)
+> 
+> Coredump memory ranges
+> 0000000000000000-000000000e7fffff (0)
+> 000000002e800000-000000003961ffff (0)
+> 0000000039d40000-000000003ed2ffff (0)
+> 000000003ed60000-000000003fbfffff (0)
+> 0000001040000000-0000001ffbffffff (0)
+> 0000002000000000-0000002ffbffffff (0)
+> 0000009000000000-0000009ffbffffff (0)
+> 000000a000000000-000000affbffffff (0)
+> 
+> 4). So if we revert Ard's patch or just comment the fixing up of the
+> memory cap'ing passed to the crash kernel inside
+> 'arch/arm64/mm/init.c' (see below):
+> 
+> static void __init fdt_enforce_memory_region(void)
+> {
+>         struct memblock_region reg = {
+>                 .size = 0,
+>         };
+> 
+>         of_scan_flat_dt(early_init_dt_scan_usablemem, &reg);
+> 
+>         if (reg.size)
+>                 //memblock_cap_memory_range(reg.base, reg.size); /*
+> comment this out */
+> }
 
-(see https://git.kernel.org/pub/scm/utils/kernel/kexec/kexec-tools.git/tree/kexec/arch/arm64/kexec-arm64.c#n465
-, for details)
+Please just don't do that. It can cause a fatal damage on
+memory contents of the *crashed* kernel.
 
-2). This excludes the ACPI reclaim regions irrespective of whether
-they are marked as System RAM or as RESERVED. As,
-'linux,usable-memory-range' dt node is patched up only with
-'crash_reserved_mem' and not 'system_memory_ranges'
+> 5). Both the above temporary solutions fix the problem.
+> 
+> 6). However exposing all System RAM regions to the crashkernel is not
+> advisable and may cause the crashkernel or some crashkernel drivers to
+> fail.
+> 
+> 6a). I am trying an approach now, where the ACPI reclaim regions are
+> added to '/proc/iomem' separately as ACPI reclaim regions by the
+> kernel code and on the other hand the user-space 'kexec-tools' will
+> pick up the ACPI reclaim regions from '/proc/iomem' and add it to the
+> dt node 'linux,usable-memory-range'
 
-3). As a result when the crashkernel boots up it doesn't find this
-ACPI memory and crashes while trying to access the same:
+I still don't understand why we need to carry over the information
+about "ACPI Reclaim memory" to crash dump kernel. In my understandings,
+such regions are free to be reused by the kernel after some point of
+initialization. Why does crash dump kernel need to know about them?
 
-# kexec -p /boot/vmlinuz-`uname -r` --initrd=/boot/initramfs-`uname
--r`.img --reuse-cmdline -d
-
-[snip..]
-
-Reserved memory range
-000000000e800000-000000002e7fffff (0)
-
-Coredump memory ranges
-0000000000000000-000000000e7fffff (0)
-000000002e800000-000000003961ffff (0)
-0000000039d40000-000000003ed2ffff (0)
-000000003ed60000-000000003fbfffff (0)
-0000001040000000-0000001ffbffffff (0)
-0000002000000000-0000002ffbffffff (0)
-0000009000000000-0000009ffbffffff (0)
-000000a000000000-000000affbffffff (0)
-
-4). So if we revert Ard's patch or just comment the fixing up of the
-memory cap'ing passed to the crash kernel inside
-'arch/arm64/mm/init.c' (see below):
-
-static void __init fdt_enforce_memory_region(void)
-{
-        struct memblock_region reg = {
-                .size = 0,
-        };
-
-        of_scan_flat_dt(early_init_dt_scan_usablemem, &reg);
-
-        if (reg.size)
-                //memblock_cap_memory_range(reg.base, reg.size); /*
-comment this out */
-}
-
-5). Both the above temporary solutions fix the problem.
-
-6). However exposing all System RAM regions to the crashkernel is not
-advisable and may cause the crashkernel or some crashkernel drivers to
-fail.
-
-6a). I am trying an approach now, where the ACPI reclaim regions are
-added to '/proc/iomem' separately as ACPI reclaim regions by the
-kernel code and on the other hand the user-space 'kexec-tools' will
-pick up the ACPI reclaim regions from '/proc/iomem' and add it to the
-dt node 'linux,usable-memory-range'
-
-6b). The kernel code currently looks like the following:
-
-diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index 30ad2f085d1f..867bdec7c692 100644
---- a/arch/arm64/kernel/setup.c
-+++ b/arch/arm64/kernel/setup.c
-@@ -206,6 +206,7 @@ static void __init request_standard_resources(void)
- {
-     struct memblock_region *region;
-     struct resource *res;
-+    phys_addr_t addr_start, addr_end;
-
-     kernel_code.start   = __pa_symbol(_text);
-     kernel_code.end     = __pa_symbol(__init_begin - 1);
-@@ -218,9 +219,17 @@ static void __init request_standard_resources(void)
-             res->name  = "reserved";
-             res->flags = IORESOURCE_MEM;
-         } else {
--            res->name  = "System RAM";
--            res->flags = IORESOURCE_SYSTEM_RAM | IORESOURCE_BUSY;
-+            addr_start =
-__pfn_to_phys(memblock_region_reserved_base_pfn(region));
-+            addr_end =
-__pfn_to_phys(memblock_region_reserved_end_pfn(region)) - 1;
-+            if ((efi_mem_type(addr_start) == EFI_ACPI_RECLAIM_MEMORY)
-|| (efi_mem_type(addr_end) == EFI_ACPI_RECLAIM_MEMORY)) {
-+                res->name  = "ACPI reclaim region";
-+                res->flags = IORESOURCE_MEM;
-+            } else {
-+                res->name  = "System RAM";
-+                res->flags = IORESOURCE_SYSTEM_RAM | IORESOURCE_BUSY;
-+            }
-         }
-+
-         res->start = __pfn_to_phys(memblock_region_memory_base_pfn(region));
-         res->end = __pfn_to_phys(memblock_region_memory_end_pfn(region)) - 1;
-
-@@ -292,6 +301,7 @@ void __init setup_arch(char **cmdline_p)
-
-     request_standard_resources();
-
-+    efi_memmap_unmap();
-     early_ioremap_reset();
-
-     if (acpi_disabled)
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 80d1a885def5..a7c522eac640 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -259,7 +259,6 @@ void __init efi_init(void)
-
-     reserve_regions();
-     efi_esrt_init();
--    efi_memmap_unmap();
-
-     memblock_reserve(params.mmap & PAGE_MASK,
-              PAGE_ALIGN(params.mmap_size +
-
-
-After this change the ACPI reclaim regions are properly recognized in
-'/proc/iomem':
-
-# cat /proc/iomem | grep -i ACPI
-396c0000-3975ffff : ACPI reclaim region
-39770000-397affff : ACPI reclaim region
-398a0000-398bffff : ACPI reclaim region
-
-6c). I am currently changing the 'kexec-tools' and will finish the
-testing over the next few days.
-
-I just wanted to know your opinion on this issue, so that I will be
-able to propose a fix on the above lines.
-
-Also Cc'ing kexec mailing list for more inputs on changes proposed to
-kexec-tools.
+(In other words, can or should we skip some part of ACPI-related init code
+on crash dump kernel?)
 
 Thanks,
-Bhupesh
+-Takahiro AKASHI
+
+> 6b). The kernel code currently looks like the following:
+> 
+> diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+> index 30ad2f085d1f..867bdec7c692 100644
+> --- a/arch/arm64/kernel/setup.c
+> +++ b/arch/arm64/kernel/setup.c
+> @@ -206,6 +206,7 @@ static void __init request_standard_resources(void)
+>  {
+>      struct memblock_region *region;
+>      struct resource *res;
+> +    phys_addr_t addr_start, addr_end;
+> 
+>      kernel_code.start   = __pa_symbol(_text);
+>      kernel_code.end     = __pa_symbol(__init_begin - 1);
+> @@ -218,9 +219,17 @@ static void __init request_standard_resources(void)
+>              res->name  = "reserved";
+>              res->flags = IORESOURCE_MEM;
+>          } else {
+> -            res->name  = "System RAM";
+> -            res->flags = IORESOURCE_SYSTEM_RAM | IORESOURCE_BUSY;
+> +            addr_start =
+> __pfn_to_phys(memblock_region_reserved_base_pfn(region));
+> +            addr_end =
+> __pfn_to_phys(memblock_region_reserved_end_pfn(region)) - 1;
+> +            if ((efi_mem_type(addr_start) == EFI_ACPI_RECLAIM_MEMORY)
+> || (efi_mem_type(addr_end) == EFI_ACPI_RECLAIM_MEMORY)) {
+> +                res->name  = "ACPI reclaim region";
+> +                res->flags = IORESOURCE_MEM;
+> +            } else {
+> +                res->name  = "System RAM";
+> +                res->flags = IORESOURCE_SYSTEM_RAM | IORESOURCE_BUSY;
+> +            }
+>          }
+> +
+>          res->start = __pfn_to_phys(memblock_region_memory_base_pfn(region));
+>          res->end = __pfn_to_phys(memblock_region_memory_end_pfn(region)) - 1;
+> 
+> @@ -292,6 +301,7 @@ void __init setup_arch(char **cmdline_p)
+> 
+>      request_standard_resources();
+> 
+> +    efi_memmap_unmap();
+>      early_ioremap_reset();
+> 
+>      if (acpi_disabled)
+> diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+> index 80d1a885def5..a7c522eac640 100644
+> --- a/drivers/firmware/efi/arm-init.c
+> +++ b/drivers/firmware/efi/arm-init.c
+> @@ -259,7 +259,6 @@ void __init efi_init(void)
+> 
+>      reserve_regions();
+>      efi_esrt_init();
+> -    efi_memmap_unmap();
+> 
+>      memblock_reserve(params.mmap & PAGE_MASK,
+>               PAGE_ALIGN(params.mmap_size +
+> 
+> 
+> After this change the ACPI reclaim regions are properly recognized in
+> '/proc/iomem':
+> 
+> # cat /proc/iomem | grep -i ACPI
+> 396c0000-3975ffff : ACPI reclaim region
+> 39770000-397affff : ACPI reclaim region
+> 398a0000-398bffff : ACPI reclaim region
+> 
+> 6c). I am currently changing the 'kexec-tools' and will finish the
+> testing over the next few days.
+> 
+> I just wanted to know your opinion on this issue, so that I will be
+> able to propose a fix on the above lines.
+> 
+> Also Cc'ing kexec mailing list for more inputs on changes proposed to
+> kexec-tools.
+> 
+> Thanks,
+> Bhupesh
