@@ -1,139 +1,83 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] x86: move parse_early_param to earlier code for
- add_efi_memmap
-Date: Thu, 14 Dec 2017 18:41:19 +0800
-Message-ID: <20171214104119.GA2437@dhcp-128-65.nay.redhat.com>
-References: <20171130052327.GA3500@dhcp-128-65.nay.redhat.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: Re: [PATCH 4.4 05/27] x86/efi: Build our own page table structures
+Date: Thu, 14 Dec 2017 21:27:26 +0100
+Message-ID: <20171214202726.GA32443@kroah.com>
+References: <20171204155942.271814507@linuxfoundation.org>
+ <20171204155942.482436478@linuxfoundation.org>
+ <1512686629.18523.217.camel@codethink.co.uk>
+ <20171210212651.GA18497@kroah.com>
+ <BN6PR1201MB013116597F8BD048AD3080FDF8340@BN6PR1201MB0131.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20171130052327.GA3500-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+In-Reply-To: <BN6PR1201MB013116597F8BD048AD3080FDF8340@BN6PR1201MB0131.namprd12.prod.outlook.com>
+Sender: stable-owner@vger.kernel.org
+To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Cc: Ben Hutchings <ben.hutchings@codethink.co.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@amacapital.net>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Dave Jones <davej@codemonkey.org.uk>, Denys Vlasenko <dvlasenk@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Stephen Smalley <sds@tycho.nsa.gov>, Thoma
 List-Id: linux-efi@vger.kernel.org
 
-On 11/30/17 at 01:23pm, Dave Young wrote:
-> 'add_efi_memmap' is an early param, but do_add_efi_memmap() has no
-> chance to run because the code path is before parse_early_param().
-> I believe it worked when the param was introduced but probably later
-> some other changes caused the wrong order and nobody noticed it.
+On Tue, Dec 12, 2017 at 05:24:32PM +0000, Ghannam, Yazen wrote:
+> > -----Original Message-----
+> > From: Greg Kroah-Hartman [mailto:gregkh@linuxfoundation.org]
+> > Sent: Sunday, December 10, 2017 4:27 PM
+> > To: Ben Hutchings <ben.hutchings@codethink.co.uk>; Ghannam, Yazen
+> > <Yazen.Ghannam@amd.com>
+> > Cc: linux-kernel@vger.kernel.org; stable@vger.kernel.org; Matt Fleming
+> > <matt@codeblueprint.co.uk>; Borislav Petkov <bp@suse.de>; Andrew
+> > Morton <akpm@linux-foundation.org>; Andy Lutomirski
+> > <luto@amacapital.net>; Andy Lutomirski <luto@kernel.org>; Ard Biesheuvel
+> > <ard.biesheuvel@linaro.org>; Borislav Petkov <bp@alien8.de>; Brian Gerst
+> > <brgerst@gmail.com>; Dave Jones <davej@codemonkey.org.uk>; Denys
+> > Vlasenko <dvlasenk@redhat.com>; H. Peter Anvin <hpa@zytor.com>; Linus
+> > Torvalds <torvalds@linux-foundation.org>; Peter Zijlstra
+> > <peterz@infradead.org>; Sai Praneeth Prakhya
+> > <sai.praneeth.prakhya@intel.com>; Stephen Smalley <sds@tycho.nsa.gov>;
+> > Thomas Gleixner <tglx@linutronix.de>; Toshi Kani <toshi.kani@hp.com>;
+> > linux-efi@vger.kernel.org; Ingo Molnar <mingo@kernel.org>; Ghannam,
+> > Yazen <Yazen.Ghannam@amd.com>; Alex Thorlton <athorlton@sgi.com>
+> > Subject: Re: [PATCH 4.4 05/27] x86/efi: Build our own page table structures
+> > 
+> > On Thu, Dec 07, 2017 at 10:43:49PM +0000, Ben Hutchings wrote:
+> > > On Mon, 2017-12-04 at 16:59 +0100, Greg Kroah-Hartman wrote:
+> > > > 4.4-stable review patch.  If anyone has any objections, please let me
+> > know.
+> > > >
+> > > > ------------------
+> > > >
+> > > > From: Matt Fleming <matt@codeblueprint.co.uk>
+> > > >
+> > > > commit 67a9108ed4313b85a9c53406d80dc1ae3f8c3e36 upstream.
+> > > [...]
+> > >
+> > > It looks like this will cause regressions unless you also apply:
+> > >
+> > > 21cdb6b56843 x86/mm: Page align the '_end' symbol to avoid pfn
+> > conversion bugs
+> > > b61a76f8850d x86/efi: Map RAM into the identity page table for mixed
+> > mode
+> > > 753b11ef8e92 x86/efi: Setup separate EFI page tables in kexec paths
+> > >
+> > > and possibly also:
+> > >
+> > > 08914f436bdd x86/platform/UV: Bring back the call to map_low_mmrs in
+> > uv_system_init
+> > > 683ad8092cd2 x86/efi: Fix 7-parameter efi_call()s
+> > > 80e75596079f efi: Convert efi_call_virt() to efi_call_virt_pointer()
+> > > d1be84a232e3 x86/uv: Update uv_bios_call() to use efi_call_virt_pointer()
+> > 
+> > Ugh, that's a mess.  Yazen is the one who reported this patch, and 2
+> > others, were needed to resolve an issue on their hardware.
+> > 
+> > Yazen, any thoughts here?  Should I just revert the 3 patches, or do you
+> > also feel I need all 7 of these to ensure everything works properly?
+> > 
 > 
-> Move parse_early_param before efi_memblock_x86_reserve_range to fix
-> this.
-> 
-> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  arch/x86/kernel/setup.c |   55 ++++++++++++++++++++++++------------------------
->  1 file changed, 28 insertions(+), 27 deletions(-)
-> 
-> --- linux-x86.orig/arch/x86/kernel/setup.c
-> +++ linux-x86/arch/x86/kernel/setup.c
-> @@ -897,6 +897,34 @@ void __init setup_arch(char **cmdline_p)
->  	rd_prompt = ((boot_params.hdr.ram_size & RAMDISK_PROMPT_FLAG) != 0);
->  	rd_doload = ((boot_params.hdr.ram_size & RAMDISK_LOAD_FLAG) != 0);
->  #endif
-> +
-> +#ifdef CONFIG_CMDLINE_BOOL
-> +#ifdef CONFIG_CMDLINE_OVERRIDE
-> +	strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
-> +#else
-> +	if (builtin_cmdline[0]) {
-> +		/* append boot loader cmdline to builtin */
-> +		strlcat(builtin_cmdline, " ", COMMAND_LINE_SIZE);
-> +		strlcat(builtin_cmdline, boot_command_line, COMMAND_LINE_SIZE);
-> +		strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
-> +	}
-> +#endif
-> +#endif
-> +
-> +	strlcpy(command_line, boot_command_line, COMMAND_LINE_SIZE);
-> +	*cmdline_p = command_line;
-> +
-> +	/*
-> +	 * x86_configure_nx() is called before parse_early_param() to detect
-> +	 * whether hardware doesn't support NX (so that the early EHCI debug
-> +	 * console setup can safely call set_fixmap()). It may then be called
-> +	 * again from within noexec_setup() during parsing early parameters
-> +	 * to honor the respective command line option.
-> +	 */
-> +	x86_configure_nx();
-> +
-> +	parse_early_param();
-> +
->  #ifdef CONFIG_EFI
->  	if (!strncmp((char *)&boot_params.efi_info.efi_loader_signature,
->  		     EFI32_LOADER_SIGNATURE, 4)) {
-> @@ -935,33 +963,6 @@ void __init setup_arch(char **cmdline_p)
->  	bss_resource.start = __pa_symbol(__bss_start);
->  	bss_resource.end = __pa_symbol(__bss_stop)-1;
->  
-> -#ifdef CONFIG_CMDLINE_BOOL
-> -#ifdef CONFIG_CMDLINE_OVERRIDE
-> -	strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
-> -#else
-> -	if (builtin_cmdline[0]) {
-> -		/* append boot loader cmdline to builtin */
-> -		strlcat(builtin_cmdline, " ", COMMAND_LINE_SIZE);
-> -		strlcat(builtin_cmdline, boot_command_line, COMMAND_LINE_SIZE);
-> -		strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
-> -	}
-> -#endif
-> -#endif
-> -
-> -	strlcpy(command_line, boot_command_line, COMMAND_LINE_SIZE);
-> -	*cmdline_p = command_line;
-> -
-> -	/*
-> -	 * x86_configure_nx() is called before parse_early_param() to detect
-> -	 * whether hardware doesn't support NX (so that the early EHCI debug
-> -	 * console setup can safely call set_fixmap()). It may then be called
-> -	 * again from within noexec_setup() during parsing early parameters
-> -	 * to honor the respective command line option.
-> -	 */
-> -	x86_configure_nx();
-> -
-> -	parse_early_param();
-> -
->  #ifdef CONFIG_MEMORY_HOTPLUG
->  	/*
->  	 * Memory used by the kernel cannot be hot-removed because Linux
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I think it's okay to revert the 3 patches.
 
-Ping for review..
+Ugh, messy.  Ok, all now reverted.
 
-Another way is move "efi_memblock_x86_reserve_range" to later code
-Maybe below is better?
+Thanks Ben for the review, much appreciated.
 
----
- arch/x86/kernel/setup.c |    5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
-
---- linux-x86.orig/arch/x86/kernel/setup.c
-+++ linux-x86/arch/x86/kernel/setup.c
-@@ -906,9 +906,6 @@ void __init setup_arch(char **cmdline_p)
- 		set_bit(EFI_BOOT, &efi.flags);
- 		set_bit(EFI_64BIT, &efi.flags);
- 	}
--
--	if (efi_enabled(EFI_BOOT))
--		efi_memblock_x86_reserve_range();
- #endif
- 
- 	x86_init.oem.arch_setup();
-@@ -962,6 +959,8 @@ void __init setup_arch(char **cmdline_p)
- 
- 	parse_early_param();
- 
-+	if (efi_enabled(EFI_BOOT))
-+		efi_memblock_x86_reserve_range();
- #ifdef CONFIG_MEMORY_HOTPLUG
- 	/*
- 	 * Memory used by the kernel cannot be hot-removed because Linux
-
-Thanks
-Dave
+greg k-h
