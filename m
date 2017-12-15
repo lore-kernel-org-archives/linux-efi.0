@@ -1,54 +1,34 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH 1/2] kconfig: use bool instead of boolean for type definition attributes, again
-Date: Sat, 16 Dec 2017 00:38:01 +0900
-Message-ID: <1513352282-4437-1-git-send-email-yamada.masahiro@socionext.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] efi: make EFI a menuconfig to ease disabling it all
+Date: Fri, 15 Dec 2017 17:50:49 +0100
+Message-ID: <CAKv+Gu8Jd8Z78_1SrcLvX7DKSxf9BjkJtJ+UXYi7ak_zpA3fKQ@mail.gmail.com>
+References: <20171209155252.6403-1-vincent.legoll@gmail.com> <20171215151910.GC3204@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171215151910.GC3204@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kbuild@vger.kernel.org
-Cc: Nicolas Pitre <nicolas.pitre@linaro.org>, "Luis R . Rodriguez" <mcgrof@suse.com>, Randy Dunlap <rdunlap@infradead.org>, Michal Marek <michal.lkml@markovi.net>, Sam Ravnborg <sam@ravnborg.org>, Ulf Magnusson <ulfalizer@gmail.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, devel@driverdev.osuosl.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Vincent Legoll <vincent.legoll@gmail.com>, Kees Cook <keescook@chromium.org>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Commit 6341e62b212a ("kconfig: use bool instead of boolean for type
-definition attributes") did treewide replacement of 'boolean', and
-also mentioned the keyword 'boolean' would be dropped later on.
+On 15 December 2017 at 16:19, Matt Fleming <matt@codeblueprint.co.uk> wrote:
+> On Sat, 09 Dec, at 04:52:52PM, Vincent Legoll wrote:
+>> No need to get into the submenu to disable all related
+>> config entries.
+>>
+>> This makes it easier to disable all EFI config options
+>> without entering the submenu. It will also enable one
+>> to see that en/dis-abled state from the outside menu.
+>>
+>> This is only intended to change menuconfig UI, not change
+>> the config dependencies.
+>>
+>> Signed-off-by: Vincent Legoll <vincent.legoll@gmail.com>
+>> ---
+>>  drivers/firmware/efi/Kconfig | 13 ++++++++-----
+>>  1 file changed, 8 insertions(+), 5 deletions(-)
+>
+> This looks fine to me. Ard?
 
-Some years have passed, but it has not happened yet.  Meanwhile, some
-new instances have come up.
-
-I am really going to drop this keyword.  I need to do the replacement
-once again.
-
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
-
- drivers/firmware/efi/Kconfig    | 2 +-
- drivers/staging/rtlwifi/Kconfig | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 2b4c39f..3abdda1 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -113,7 +113,7 @@ config EFI_CAPSULE_LOADER
- 	  Most users should say N.
- 
- config EFI_CAPSULE_QUIRK_QUARK_CSH
--	boolean "Add support for Quark capsules with non-standard headers"
-+	bool "Add support for Quark capsules with non-standard headers"
- 	depends on X86 && !64BIT
- 	select EFI_CAPSULE_LOADER
- 	default y
-diff --git a/drivers/staging/rtlwifi/Kconfig b/drivers/staging/rtlwifi/Kconfig
-index cb3a29a..12cf467 100644
---- a/drivers/staging/rtlwifi/Kconfig
-+++ b/drivers/staging/rtlwifi/Kconfig
-@@ -17,6 +17,6 @@ config RTLPHYDM_ST
- 	default m
- 
- config RTLWIFI_DEBUG_ST
--	boolean
-+	bool
- 	depends on R8822BE
- 	default y
--- 
-2.7.4
+Doesn't this break existing configs?
