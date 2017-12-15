@@ -1,93 +1,219 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 3.18 11/64] efi: Move some sysfs files to be read-only by root
-Date: Fri, 15 Dec 2017 10:21:35 +0100
-Message-ID: <20171215092212.466685545@linuxfoundation.org>
-References: <20171215092212.018372669@linuxfoundation.org>
+Subject: [PATCH 4.4 102/105] Revert "x86/efi: Hoist page table switching code into efi_call_virt()"
+Date: Fri, 15 Dec 2017 10:45:40 +0100
+Message-ID: <20171215092311.298959898@linuxfoundation.org>
+References: <20171215092305.994559179@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20171215092212.018372669@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20171215092305.994559179@linuxfoundation.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, Dave Young <dyoung@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@amacapital.net>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Dave Jones <davej@codemonkey.org.uk>, Denys Vlasenko <dvlasenk@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Stephen Smalley <sds@tycho.nsa.gov>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
-3.18-stable review patch.  If anyone has any objections, please let me know.
+4.4-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-commit af97a77bc01ce49a466f9d4c0125479e2e2230b6 upstream.
+This reverts commit b73adb60852034d84092d123b323196ca42529cd which is
+commit c9f2a9a65e4855b74d92cdad688f6ee4a1a323ff upstream.
 
-Thanks to the scripts/leaking_addresses.pl script, it was found that
-some EFI values should not be readable by non-root users.
+Turns there was too many other issues with this patch to make it viable
+for the stable tree.
 
-So make them root-only, and to do that, add a __ATTR_RO_MODE() macro to
-make this easier, and use it in other places at the same time.
-
-Reported-by: Linus Torvalds <torvalds@linux-foundation.org>
-Tested-by: Dave Young <dyoung@redhat.com>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: H. Peter Anvin <hpa@zytor.com>
+Reported-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Borislav Petkov <bp@suse.de>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Andy Lutomirski <luto@amacapital.net>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Brian Gerst <brgerst@gmail.com>
+Cc: Dave Jones <davej@codemonkey.org.uk>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Stephen Smalley <sds@tycho.nsa.gov>
 Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Toshi Kani <toshi.kani@hp.com>
 Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/20171206095010.24170-2-ard.biesheuvel@linaro.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
 ---
- drivers/firmware/efi/efi.c         |    3 +--
- drivers/firmware/efi/runtime-map.c |   10 +++++-----
- include/linux/sysfs.h              |    6 ++++++
- 3 files changed, 12 insertions(+), 7 deletions(-)
+ arch/x86/include/asm/efi.h          |   25 --------------------
+ arch/x86/platform/efi/efi_64.c      |   24 ++++++++++----------
+ arch/x86/platform/efi/efi_stub_64.S |   43 ++++++++++++++++++++++++++++++++++++
+ 3 files changed, 56 insertions(+), 36 deletions(-)
 
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -96,8 +96,7 @@ static ssize_t systab_show(struct kobjec
- 	return str - buf;
- }
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -3,7 +3,6 @@
  
--static struct kobj_attribute efi_attr_systab =
--			__ATTR(systab, 0400, systab_show, NULL);
-+static struct kobj_attribute efi_attr_systab = __ATTR_RO_MODE(systab, 0400);
- 
- #define EFI_FIELD(var) efi.var
- 
---- a/drivers/firmware/efi/runtime-map.c
-+++ b/drivers/firmware/efi/runtime-map.c
-@@ -67,11 +67,11 @@ static ssize_t map_attr_show(struct kobj
- 	return map_attr->show(entry, buf);
- }
- 
--static struct map_attribute map_type_attr = __ATTR_RO(type);
--static struct map_attribute map_phys_addr_attr   = __ATTR_RO(phys_addr);
--static struct map_attribute map_virt_addr_attr  = __ATTR_RO(virt_addr);
--static struct map_attribute map_num_pages_attr  = __ATTR_RO(num_pages);
--static struct map_attribute map_attribute_attr  = __ATTR_RO(attribute);
-+static struct map_attribute map_type_attr = __ATTR_RO_MODE(type, 0400);
-+static struct map_attribute map_phys_addr_attr = __ATTR_RO_MODE(phys_addr, 0400);
-+static struct map_attribute map_virt_addr_attr = __ATTR_RO_MODE(virt_addr, 0400);
-+static struct map_attribute map_num_pages_attr = __ATTR_RO_MODE(num_pages, 0400);
-+static struct map_attribute map_attribute_attr = __ATTR_RO_MODE(attribute, 0400);
+ #include <asm/fpu/api.h>
+ #include <asm/pgtable.h>
+-#include <asm/tlb.h>
  
  /*
-  * These are default attributes that are added for every memmap entry.
---- a/include/linux/sysfs.h
-+++ b/include/linux/sysfs.h
-@@ -82,6 +82,12 @@ struct attribute_group {
- 	.show	= _name##_show,						\
- }
+  * We map the EFI regions needed for runtime services non-contiguously,
+@@ -65,17 +64,6 @@ extern u64 asmlinkage efi_call(void *fp,
  
-+#define __ATTR_RO_MODE(_name, _mode) {					\
-+	.attr	= { .name = __stringify(_name),				\
-+		    .mode = VERIFY_OCTAL_PERMISSIONS(_mode) },		\
-+	.show	= _name##_show,						\
-+}
+ #define efi_call_phys(f, args...)		efi_call((f), args)
+ 
+-/*
+- * Scratch space used for switching the pagetable in the EFI stub
+- */
+-struct efi_scratch {
+-	u64	r15;
+-	u64	prev_cr3;
+-	pgd_t	*efi_pgt;
+-	bool	use_pgd;
+-	u64	phys_stack;
+-} __packed;
+-
+ #define efi_call_virt(f, ...)						\
+ ({									\
+ 	efi_status_t __s;						\
+@@ -83,20 +71,7 @@ struct efi_scratch {
+ 	efi_sync_low_kernel_mappings();					\
+ 	preempt_disable();						\
+ 	__kernel_fpu_begin();						\
+-									\
+-	if (efi_scratch.use_pgd) {					\
+-		efi_scratch.prev_cr3 = read_cr3();			\
+-		write_cr3((unsigned long)efi_scratch.efi_pgt);		\
+-		__flush_tlb_all();					\
+-	}								\
+-									\
+ 	__s = efi_call((void *)efi.systab->runtime->f, __VA_ARGS__);	\
+-									\
+-	if (efi_scratch.use_pgd) {					\
+-		write_cr3(efi_scratch.prev_cr3);			\
+-		__flush_tlb_all();					\
+-	}								\
+-									\
+ 	__kernel_fpu_end();						\
+ 	preempt_enable();						\
+ 	__s;								\
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -47,7 +47,16 @@
+  */
+ static u64 efi_va = EFI_VA_START;
+ 
+-struct efi_scratch efi_scratch;
++/*
++ * Scratch space used for switching the pagetable in the EFI stub
++ */
++struct efi_scratch {
++	u64 r15;
++	u64 prev_cr3;
++	pgd_t *efi_pgt;
++	bool use_pgd;
++	u64 phys_stack;
++} __packed;
+ 
+ static void __init early_code_mapping_set_exec(int executable)
+ {
+@@ -74,11 +83,8 @@ pgd_t * __init efi_call_phys_prolog(void
+ 	int pgd;
+ 	int n_pgds;
+ 
+-	if (!efi_enabled(EFI_OLD_MEMMAP)) {
+-		save_pgd = (pgd_t *)read_cr3();
+-		write_cr3((unsigned long)efi_scratch.efi_pgt);
+-		goto out;
+-	}
++	if (!efi_enabled(EFI_OLD_MEMMAP))
++		return NULL;
+ 
+ 	early_code_mapping_set_exec(1);
+ 
+@@ -90,7 +96,6 @@ pgd_t * __init efi_call_phys_prolog(void
+ 		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
+ 		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
+ 	}
+-out:
+ 	__flush_tlb_all();
+ 
+ 	return save_pgd;
+@@ -104,11 +109,8 @@ void __init efi_call_phys_epilog(pgd_t *
+ 	int pgd_idx;
+ 	int nr_pgds;
+ 
+-	if (!efi_enabled(EFI_OLD_MEMMAP)) {
+-		write_cr3((unsigned long)save_pgd);
+-		__flush_tlb_all();
++	if (!save_pgd)
+ 		return;
+-	}
+ 
+ 	nr_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
+ 
+--- a/arch/x86/platform/efi/efi_stub_64.S
++++ b/arch/x86/platform/efi/efi_stub_64.S
+@@ -38,6 +38,41 @@
+ 	mov %rsi, %cr0;			\
+ 	mov (%rsp), %rsp
+ 
++	/* stolen from gcc */
++	.macro FLUSH_TLB_ALL
++	movq %r15, efi_scratch(%rip)
++	movq %r14, efi_scratch+8(%rip)
++	movq %cr4, %r15
++	movq %r15, %r14
++	andb $0x7f, %r14b
++	movq %r14, %cr4
++	movq %r15, %cr4
++	movq efi_scratch+8(%rip), %r14
++	movq efi_scratch(%rip), %r15
++	.endm
 +
- #define __ATTR_WO(_name) {						\
- 	.attr	= { .name = __stringify(_name), .mode = S_IWUSR },	\
- 	.store	= _name##_store,					\
++	.macro SWITCH_PGT
++	cmpb $0, efi_scratch+24(%rip)
++	je 1f
++	movq %r15, efi_scratch(%rip)		# r15
++	# save previous CR3
++	movq %cr3, %r15
++	movq %r15, efi_scratch+8(%rip)		# prev_cr3
++	movq efi_scratch+16(%rip), %r15		# EFI pgt
++	movq %r15, %cr3
++	1:
++	.endm
++
++	.macro RESTORE_PGT
++	cmpb $0, efi_scratch+24(%rip)
++	je 2f
++	movq efi_scratch+8(%rip), %r15
++	movq %r15, %cr3
++	movq efi_scratch(%rip), %r15
++	FLUSH_TLB_ALL
++	2:
++	.endm
++
+ ENTRY(efi_call)
+ 	SAVE_XMM
+ 	mov (%rsp), %rax
+@@ -48,8 +83,16 @@ ENTRY(efi_call)
+ 	mov %r8, %r9
+ 	mov %rcx, %r8
+ 	mov %rsi, %rcx
++	SWITCH_PGT
+ 	call *%rdi
++	RESTORE_PGT
+ 	addq $48, %rsp
+ 	RESTORE_XMM
+ 	ret
+ ENDPROC(efi_call)
++
++	.data
++ENTRY(efi_scratch)
++	.fill 3,8,0
++	.byte 0
++	.quad 0
