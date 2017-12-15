@@ -1,7 +1,7 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.4 103/105] Revert "x86/mm/pat: Ensure cpa->pfn only contains page frame numbers"
-Date: Fri, 15 Dec 2017 10:45:41 +0100
-Message-ID: <20171215092311.347628971@linuxfoundation.org>
+Subject: [PATCH 4.4 013/105] efi: Move some sysfs files to be read-only by root
+Date: Fri, 15 Dec 2017 10:44:11 +0100
+Message-ID: <20171215092306.608813303@linuxfoundation.org>
 References: <20171215092305.994559179@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -9,7 +9,7 @@ Return-path: <stable-owner@vger.kernel.org>
 In-Reply-To: <20171215092305.994559179@linuxfoundation.org>
 Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@suse.de>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@amacapital.net>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Dave Jones <davej@codemonkey.org.uk>, Denys Vlasenko <dvlasenk@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Stephen Smalley <sds@tycho.nsa.gov>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, Dave Young <dyoung@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
 4.4-stable review patch.  If anyone has any objections, please let me know.
@@ -18,134 +18,127 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-This reverts commit 87e2bd898d3a79a8c609f183180adac47879a2a4 which is
-commit edc3b9129cecd0f0857112136f5b8b1bc1d45918 upstream.
+commit af97a77bc01ce49a466f9d4c0125479e2e2230b6 upstream.
 
-Turns there was too many other issues with this patch to make it viable
-for the stable tree.
+Thanks to the scripts/leaking_addresses.pl script, it was found that
+some EFI values should not be readable by non-root users.
 
-Reported-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Borislav Petkov <bp@suse.de>
-Cc: Andrew Morton <akpm@linux-foundation.org>
-Cc: Andy Lutomirski <luto@amacapital.net>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Brian Gerst <brgerst@gmail.com>
-Cc: Dave Jones <davej@codemonkey.org.uk>
-Cc: Denys Vlasenko <dvlasenk@redhat.com>
-Cc: H. Peter Anvin <hpa@zytor.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: Stephen Smalley <sds@tycho.nsa.gov>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Toshi Kani <toshi.kani@hp.com>
-Cc: linux-efi@vger.kernel.org
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+So make them root-only, and to do that, add a __ATTR_RO_MODE() macro to
+make this easier, and use it in other places at the same time.
+
+Reported-by: Linus Torvalds <torvalds@linux-foundation.org>
+Tested-by: Dave Young <dyoung@redhat.com>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
----
- arch/x86/mm/pageattr.c         |   17 +++++++++++------
- arch/x86/platform/efi/efi_64.c |   16 ++++++----------
- 2 files changed, 17 insertions(+), 16 deletions(-)
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20171206095010.24170-2-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
---- a/arch/x86/mm/pageattr.c
-+++ b/arch/x86/mm/pageattr.c
-@@ -911,10 +911,15 @@ static void populate_pte(struct cpa_data
- 	pte = pte_offset_kernel(pmd, start);
- 
- 	while (num_pages-- && start < end) {
--		set_pte(pte, pfn_pte(cpa->pfn, pgprot));
-+
-+		/* deal with the NX bit */
-+		if (!(pgprot_val(pgprot) & _PAGE_NX))
-+			cpa->pfn &= ~_PAGE_NX;
-+
-+		set_pte(pte, pfn_pte(cpa->pfn >> PAGE_SHIFT, pgprot));
- 
- 		start	 += PAGE_SIZE;
--		cpa->pfn++;
-+		cpa->pfn += PAGE_SIZE;
- 		pte++;
- 	}
+---
+ drivers/firmware/efi/efi.c         |    3 +--
+ drivers/firmware/efi/esrt.c        |   15 ++++++---------
+ drivers/firmware/efi/runtime-map.c |   10 +++++-----
+ include/linux/sysfs.h              |    6 ++++++
+ 4 files changed, 18 insertions(+), 16 deletions(-)
+
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -113,8 +113,7 @@ static ssize_t systab_show(struct kobjec
+ 	return str - buf;
  }
-@@ -970,11 +975,11 @@ static int populate_pmd(struct cpa_data
  
- 		pmd = pmd_offset(pud, start);
+-static struct kobj_attribute efi_attr_systab =
+-			__ATTR(systab, 0400, systab_show, NULL);
++static struct kobj_attribute efi_attr_systab = __ATTR_RO_MODE(systab, 0400);
  
--		set_pmd(pmd, __pmd(cpa->pfn << PAGE_SHIFT | _PAGE_PSE |
-+		set_pmd(pmd, __pmd(cpa->pfn | _PAGE_PSE |
- 				   massage_pgprot(pmd_pgprot)));
+ #define EFI_FIELD(var) efi.var
  
- 		start	  += PMD_SIZE;
--		cpa->pfn  += PMD_SIZE >> PAGE_SHIFT;
-+		cpa->pfn  += PMD_SIZE;
- 		cur_pages += PMD_SIZE >> PAGE_SHIFT;
- 	}
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -105,7 +105,7 @@ static const struct sysfs_ops esre_attr_
+ };
  
-@@ -1043,11 +1048,11 @@ static int populate_pud(struct cpa_data
- 	 * Map everything starting from the Gb boundary, possibly with 1G pages
- 	 */
- 	while (end - start >= PUD_SIZE) {
--		set_pud(pud, __pud(cpa->pfn << PAGE_SHIFT | _PAGE_PSE |
-+		set_pud(pud, __pud(cpa->pfn | _PAGE_PSE |
- 				   massage_pgprot(pud_pgprot)));
- 
- 		start	  += PUD_SIZE;
--		cpa->pfn  += PUD_SIZE >> PAGE_SHIFT;
-+		cpa->pfn  += PUD_SIZE;
- 		cur_pages += PUD_SIZE >> PAGE_SHIFT;
- 		pud++;
- 	}
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -143,7 +143,7 @@ void efi_sync_low_kernel_mappings(void)
- 
- int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ /* Generic ESRT Entry ("ESRE") support. */
+-static ssize_t esre_fw_class_show(struct esre_entry *entry, char *buf)
++static ssize_t fw_class_show(struct esre_entry *entry, char *buf)
  {
--	unsigned long pfn, text;
-+	unsigned long text;
- 	struct page *page;
- 	unsigned npages;
- 	pgd_t *pgd;
-@@ -160,8 +160,7 @@ int __init efi_setup_page_tables(unsigne
- 	 * and ident-map those pages containing the map before calling
- 	 * phys_efi_set_virtual_address_map().
- 	 */
--	pfn = pa_memmap >> PAGE_SHIFT;
--	if (kernel_map_pages_in_pgd(pgd, pfn, pa_memmap, num_pages, _PAGE_NX)) {
-+	if (kernel_map_pages_in_pgd(pgd, pa_memmap, pa_memmap, num_pages, _PAGE_NX)) {
- 		pr_err("Error ident-mapping new memmap (0x%lx)!\n", pa_memmap);
- 		return 1;
- 	}
-@@ -186,9 +185,8 @@ int __init efi_setup_page_tables(unsigne
+ 	char *str = buf;
  
- 	npages = (_end - _text) >> PAGE_SHIFT;
- 	text = __pa(_text);
--	pfn = text >> PAGE_SHIFT;
- 
--	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, 0)) {
-+	if (kernel_map_pages_in_pgd(pgd, text >> PAGE_SHIFT, text, npages, 0)) {
- 		pr_err("Failed to map kernel text 1:1\n");
- 		return 1;
- 	}
-@@ -206,14 +204,12 @@ void __init efi_cleanup_page_tables(unsi
- static void __init __map_region(efi_memory_desc_t *md, u64 va)
- {
- 	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
--	unsigned long flags = 0;
--	unsigned long pfn;
-+	unsigned long pf = 0;
- 
- 	if (!(md->attribute & EFI_MEMORY_WB))
--		flags |= _PAGE_PCD;
-+		pf |= _PAGE_PCD;
- 
--	pfn = md->phys_addr >> PAGE_SHIFT;
--	if (kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags))
-+	if (kernel_map_pages_in_pgd(pgd, md->phys_addr, va, md->num_pages, pf))
- 		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
- 			   md->phys_addr, va);
+@@ -116,18 +116,16 @@ static ssize_t esre_fw_class_show(struct
+ 	return str - buf;
  }
+ 
+-static struct esre_attribute esre_fw_class = __ATTR(fw_class, 0400,
+-	esre_fw_class_show, NULL);
++static struct esre_attribute esre_fw_class = __ATTR_RO_MODE(fw_class, 0400);
+ 
+ #define esre_attr_decl(name, size, fmt) \
+-static ssize_t esre_##name##_show(struct esre_entry *entry, char *buf) \
++static ssize_t name##_show(struct esre_entry *entry, char *buf) \
+ { \
+ 	return sprintf(buf, fmt "\n", \
+ 		       le##size##_to_cpu(entry->esre.esre1->name)); \
+ } \
+ \
+-static struct esre_attribute esre_##name = __ATTR(name, 0400, \
+-	esre_##name##_show, NULL)
++static struct esre_attribute esre_##name = __ATTR_RO_MODE(name, 0400)
+ 
+ esre_attr_decl(fw_type, 32, "%u");
+ esre_attr_decl(fw_version, 32, "%u");
+@@ -195,14 +193,13 @@ static int esre_create_sysfs_entry(void
+ 
+ /* support for displaying ESRT fields at the top level */
+ #define esrt_attr_decl(name, size, fmt) \
+-static ssize_t esrt_##name##_show(struct kobject *kobj, \
++static ssize_t name##_show(struct kobject *kobj, \
+ 				  struct kobj_attribute *attr, char *buf)\
+ { \
+ 	return sprintf(buf, fmt "\n", le##size##_to_cpu(esrt->name)); \
+ } \
+ \
+-static struct kobj_attribute esrt_##name = __ATTR(name, 0400, \
+-	esrt_##name##_show, NULL)
++static struct kobj_attribute esrt_##name = __ATTR_RO_MODE(name, 0400)
+ 
+ esrt_attr_decl(fw_resource_count, 32, "%u");
+ esrt_attr_decl(fw_resource_count_max, 32, "%u");
+--- a/drivers/firmware/efi/runtime-map.c
++++ b/drivers/firmware/efi/runtime-map.c
+@@ -67,11 +67,11 @@ static ssize_t map_attr_show(struct kobj
+ 	return map_attr->show(entry, buf);
+ }
+ 
+-static struct map_attribute map_type_attr = __ATTR_RO(type);
+-static struct map_attribute map_phys_addr_attr   = __ATTR_RO(phys_addr);
+-static struct map_attribute map_virt_addr_attr  = __ATTR_RO(virt_addr);
+-static struct map_attribute map_num_pages_attr  = __ATTR_RO(num_pages);
+-static struct map_attribute map_attribute_attr  = __ATTR_RO(attribute);
++static struct map_attribute map_type_attr = __ATTR_RO_MODE(type, 0400);
++static struct map_attribute map_phys_addr_attr = __ATTR_RO_MODE(phys_addr, 0400);
++static struct map_attribute map_virt_addr_attr = __ATTR_RO_MODE(virt_addr, 0400);
++static struct map_attribute map_num_pages_attr = __ATTR_RO_MODE(num_pages, 0400);
++static struct map_attribute map_attribute_attr = __ATTR_RO_MODE(attribute, 0400);
+ 
+ /*
+  * These are default attributes that are added for every memmap entry.
+--- a/include/linux/sysfs.h
++++ b/include/linux/sysfs.h
+@@ -116,6 +116,12 @@ struct attribute_group {
+ 	.show	= _name##_show,						\
+ }
+ 
++#define __ATTR_RO_MODE(_name, _mode) {					\
++	.attr	= { .name = __stringify(_name),				\
++		    .mode = VERIFY_OCTAL_PERMISSIONS(_mode) },		\
++	.show	= _name##_show,						\
++}
++
+ #define __ATTR_WO(_name) {						\
+ 	.attr	= { .name = __stringify(_name), .mode = S_IWUSR },	\
+ 	.store	= _name##_store,					\
