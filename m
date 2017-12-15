@@ -1,40 +1,35 @@
-From: "Austin S. Hemmelgarn" <ahferroin7@gmail.com>
-Subject: Re: [PATCH] efi: make EFI a menuconfig to ease disabling it all
-Date: Fri, 15 Dec 2017 13:23:37 -0500
-Message-ID: <f1007c70-caa4-8ca9-3d52-532e4302cc6e@gmail.com>
-References: <20171209155252.6403-1-vincent.legoll@gmail.com>
- <20171215151910.GC3204@codeblueprint.co.uk>
- <CAKv+Gu8Jd8Z78_1SrcLvX7DKSxf9BjkJtJ+UXYi7ak_zpA3fKQ@mail.gmail.com>
- <CAEwRq=qeVDDCY+TFcbF0aeYWLzx0f-256=kwXTZbyEAkNRgUHA@mail.gmail.com>
+From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: Re: [PATCH 1/2] kconfig: use bool instead of boolean for type
+ definition attributes, again
+Date: Fri, 15 Dec 2017 20:06:28 +0100
+Message-ID: <20171215190628.GA16565@kroah.com>
+References: <1513352282-4437-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAEwRq=qeVDDCY+TFcbF0aeYWLzx0f-256=kwXTZbyEAkNRgUHA@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Vincent Legoll <vincent.legoll@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Kees Cook <keescook@chromium.org>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1513352282-4437-1-git-send-email-yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
+Cc: linux-kbuild-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Nicolas Pitre <nicolas.pitre-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Luis R . Rodriguez" <mcgrof-IBi9RG/b67k@public.gmane.org>, Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Michal Marek <michal.lkml-yyZNWGI4GtDR7s880joybQ@public.gmane.org>, Sam Ravnborg <sam-uyr5N9Q2VtJg9hUCZPvPmw@public.gmane.org>, Ulf Magnusson <ulfalizer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 2017-12-15 12:24, Vincent Legoll wrote:
-> Hello,
+On Sat, Dec 16, 2017 at 12:38:01AM +0900, Masahiro Yamada wrote:
+> Commit 6341e62b212a ("kconfig: use bool instead of boolean for type
+> definition attributes") did treewide replacement of 'boolean', and
+> also mentioned the keyword 'boolean' would be dropped later on.
 > 
->>> This looks fine to me. Ard?
->>
->> Doesn't this break existing configs?
+> Some years have passed, but it has not happened yet.  Meanwhile, some
+> new instances have come up.
 > 
-> Would adding a "default yes" on the new menuconfig be OK.
+> I am really going to drop this keyword.  I need to do the replacement
+> once again.
 > 
-> If yes, I'd respin it for a v2
+> Signed-off-by: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
+> ---
 > 
-Alternatively, would it not make some degree of sense to just turn the 
-CONFIG_EFI symbol into the menuconfig?  It already controls all the EFI 
-related stuff except GPT support (which should not be dependent on EFI 
-support), so anyone who wants EFI support already has it enabled, and it 
-would be a bit nicer to work with when actually configuring a kernel (It 
-is rather annoying to have to effectively enable something twice).
+>  drivers/firmware/efi/Kconfig    | 2 +-
+>  drivers/staging/rtlwifi/Kconfig | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
 
-The same (in theory) goes for pretty much any other patch like this 
-where there's already a config option controlling it all that just isn't 
-a menuconfig.
+Acked-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
