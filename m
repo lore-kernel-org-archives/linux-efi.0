@@ -1,205 +1,93 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: arm64 crashkernel fails to boot on acpi-only machines due to ACPI
- regions being no longer mapped as NOMAP
-Date: Fri, 15 Dec 2017 10:35:10 +0100
-Message-ID: <CAKv+Gu-W5VpVrgA=FVZCCevksaRGOVvPdE+B8WkpZc6AE1jOPw@mail.gmail.com>
-References: <CAKv+Gu_eQ-s0J22tKeHKJme4qXcvxvDkS7vKrNW+o_XtMTkMhQ@mail.gmail.com>
- <3df4c6c5-0abe-01ee-730d-2edaa5f497d2@redhat.com> <20171116070005.GI29552@linaro.org>
- <CAFTCetQHmpprAVu6uYO+rc5Xi4EUVhmovbmSaU6nM1n1mAH62w@mail.gmail.com>
- <CAKv+Gu9oda1Ee8AoXsCEw+Bjn-XF3wZA_CsxvqhjtT6_bmJ7uA@mail.gmail.com>
- <CACi5LpOZ=WOx14gTwH5jfLozepT2Jw8JSY5x+bfEZ_YaiQvFpw@mail.gmail.com>
- <20171213102624.GC28046@linaro.org> <CAKv+Gu_BmFN9Zg861SCS+R=V4khFykjuOzkmfEknsL=NvWW3Eg@mail.gmail.com>
- <20171213121605.GE28046@linaro.org> <CAKv+Gu_G8kBEAdAznVauZVAdJOFkr1vmu0Gf6tOwJfH2CgdufA@mail.gmail.com>
- <20171215085924.sqlcwm4copzba5ag@fireball>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 3.18 11/64] efi: Move some sysfs files to be read-only by root
+Date: Fri, 15 Dec 2017 10:21:35 +0100
+Message-ID: <20171215092212.466685545@linuxfoundation.org>
+References: <20171215092212.018372669@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20171215085924.sqlcwm4copzba5ag@fireball>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171215092212.018372669@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, Dave Young <dyoung@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 15 December 2017 at 09:59, AKASHI Takahiro
-<takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On Wed, Dec 13, 2017 at 12:17:22PM +0000, Ard Biesheuvel wrote:
->> On 13 December 2017 at 12:16, AKASHI Takahiro
->> <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> > On Wed, Dec 13, 2017 at 10:49:27AM +0000, Ard Biesheuvel wrote:
->> >> On 13 December 2017 at 10:26, AKASHI Takahiro
->> >> <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> >> > Bhupesh, Ard,
->> >> >
->> >> > On Wed, Dec 13, 2017 at 03:21:59AM +0530, Bhupesh Sharma wrote:
->> >> >> Hi Ard, Akashi
->> >> >>
->> >> > (snip)
->> >> >
->> >> >> Looking deeper into the issue, since the arm64 kexec-tools uses the
->> >> >> 'linux,usable-memory-range' dt property to allow crash dump kernel to
->> >> >> identify its own usable memory and exclude, at its boot time, any
->> >> >> other memory areas that are part of the panicked kernel's memory.
->> >> >> (see https://www.kernel.org/doc/Documentation/devicetree/bindings/chosen.txt
->> >> >> , for details)
->> >> >
->> >> > Right.
->> >> >
->> >> >> 1). Now when 'kexec -p' is executed, this node is patched up only
->> >> >> with the crashkernel memory range:
->> >> >>
->> >> >>                 /* add linux,usable-memory-range */
->> >> >>                 nodeoffset = fdt_path_offset(new_buf, "/chosen");
->> >> >>                 result = fdt_setprop_range(new_buf, nodeoffset,
->> >> >>                                 PROP_USABLE_MEM_RANGE, &crash_reserved_mem,
->> >> >>                                 address_cells, size_cells);
->> >> >>
->> >> >> (see https://git.kernel.org/pub/scm/utils/kernel/kexec/kexec-tools.git/tree/kexec/arch/arm64/kexec-arm64.c#n465
->> >> >> , for details)
->> >> >>
->> >> >> 2). This excludes the ACPI reclaim regions irrespective of whether
->> >> >> they are marked as System RAM or as RESERVED. As,
->> >> >> 'linux,usable-memory-range' dt node is patched up only with
->> >> >> 'crash_reserved_mem' and not 'system_memory_ranges'
->> >> >>
->> >> >> 3). As a result when the crashkernel boots up it doesn't find this
->> >> >> ACPI memory and crashes while trying to access the same:
->> >> >>
->> >> >> # kexec -p /boot/vmlinuz-`uname -r` --initrd=/boot/initramfs-`uname
->> >> >> -r`.img --reuse-cmdline -d
->> >> >>
->> >> >> [snip..]
->> >> >>
->> >> >> Reserved memory range
->> >> >> 000000000e800000-000000002e7fffff (0)
->> >> >>
->> >> >> Coredump memory ranges
->> >> >> 0000000000000000-000000000e7fffff (0)
->> >> >> 000000002e800000-000000003961ffff (0)
->> >> >> 0000000039d40000-000000003ed2ffff (0)
->> >> >> 000000003ed60000-000000003fbfffff (0)
->> >> >> 0000001040000000-0000001ffbffffff (0)
->> >> >> 0000002000000000-0000002ffbffffff (0)
->> >> >> 0000009000000000-0000009ffbffffff (0)
->> >> >> 000000a000000000-000000affbffffff (0)
->> >> >>
->> >> >> 4). So if we revert Ard's patch or just comment the fixing up of the
->> >> >> memory cap'ing passed to the crash kernel inside
->> >> >> 'arch/arm64/mm/init.c' (see below):
->> >> >>
->> >> >> static void __init fdt_enforce_memory_region(void)
->> >> >> {
->> >> >>         struct memblock_region reg = {
->> >> >>                 .size = 0,
->> >> >>         };
->> >> >>
->> >> >>         of_scan_flat_dt(early_init_dt_scan_usablemem, &reg);
->> >> >>
->> >> >>         if (reg.size)
->> >> >>                 //memblock_cap_memory_range(reg.base, reg.size); /*
->> >> >> comment this out */
->> >> >> }
->> >> >
->> >> > Please just don't do that. It can cause a fatal damage on
->> >> > memory contents of the *crashed* kernel.
->> >> >
->> >> >> 5). Both the above temporary solutions fix the problem.
->> >> >>
->> >> >> 6). However exposing all System RAM regions to the crashkernel is not
->> >> >> advisable and may cause the crashkernel or some crashkernel drivers to
->> >> >> fail.
->> >> >>
->> >> >> 6a). I am trying an approach now, where the ACPI reclaim regions are
->> >> >> added to '/proc/iomem' separately as ACPI reclaim regions by the
->> >> >> kernel code and on the other hand the user-space 'kexec-tools' will
->> >> >> pick up the ACPI reclaim regions from '/proc/iomem' and add it to the
->> >> >> dt node 'linux,usable-memory-range'
->> >> >
->> >> > I still don't understand why we need to carry over the information
->> >> > about "ACPI Reclaim memory" to crash dump kernel. In my understandings,
->> >> > such regions are free to be reused by the kernel after some point of
->> >> > initialization. Why does crash dump kernel need to know about them?
->> >> >
->> >>
->> >> Not really. According to the UEFI spec, they can be reclaimed after
->> >> the OS has initialized, i.e., when it has consumed the ACPI tables and
->> >> no longer needs them. Of course, in order to be able to boot a kexec
->> >> kernel, those regions needs to be preserved, which is why they are
->> >> memblock_reserve()'d now.
->> >
->> > For my better understandings, who is actually accessing such regions
->> > during boot time, uefi itself or efistub?
->> >
->>
->> No, only the kernel. This is where the ACPI tables are stored. For
->> instance, on QEMU we have
->>
->>  ACPI: RSDP 0x0000000078980000 000024 (v02 BOCHS )
->>  ACPI: XSDT 0x0000000078970000 000054 (v01 BOCHS  BXPCFACP 00000001
->>   01000013)
->>  ACPI: FACP 0x0000000078930000 00010C (v05 BOCHS  BXPCFACP 00000001
->> BXPC 00000001)
->>  ACPI: DSDT 0x0000000078940000 0011DA (v02 BOCHS  BXPCDSDT 00000001
->> BXPC 00000001)
->>  ACPI: APIC 0x0000000078920000 000140 (v03 BOCHS  BXPCAPIC 00000001
->> BXPC 00000001)
->>  ACPI: GTDT 0x0000000078910000 000060 (v02 BOCHS  BXPCGTDT 00000001
->> BXPC 00000001)
->>  ACPI: MCFG 0x0000000078900000 00003C (v01 BOCHS  BXPCMCFG 00000001
->> BXPC 00000001)
->>  ACPI: SPCR 0x00000000788F0000 000050 (v02 BOCHS  BXPCSPCR 00000001
->> BXPC 00000001)
->>  ACPI: IORT 0x00000000788E0000 00007C (v00 BOCHS  BXPCIORT 00000001
->> BXPC 00000001)
->>
->> covered by
->>
->>  efi:   0x0000788e0000-0x00007894ffff [ACPI Reclaim Memory ...]
->>  ...
->>  efi:   0x000078970000-0x00007898ffff [ACPI Reclaim Memory ...]
->
-> OK. I mistakenly understood those regions could be freed after exiting
-> UEFI boot services.
->
->>
->> >> So it seems that kexec does not honour the memblock_reserve() table
->> >> when booting the next kernel.
->> >
->> > not really.
->> >
->> >> > (In other words, can or should we skip some part of ACPI-related init code
->> >> > on crash dump kernel?)
->> >> >
->> >>
->> >> I don't think so. And the change to the handling of ACPI reclaim
->> >> regions only revealed the bug, not created it (given that other
->> >> memblock_reserve regions may be affected as well)
->> >
->> > As whether we should honor such reserved regions over kexec'ing
->> > depends on each one's specific nature, we will have to take care one-by-one.
->> > As a matter of fact, no information about "reserved" memblocks is
->> > exposed to user space (via proc/iomem).
->> >
->>
->> That is why I suggested (somewhere in this thread?) to not expose them
->> as 'System RAM'. Do you think that could solve this?
->
-> Memblock-reserv'ing them is necessary to prevent their corruption and
-> marking them under another name in /proc/iomem would also be good in order
-> not to allocate them as part of crash kernel's memory.
->
+3.18-stable review patch.  If anyone has any objections, please let me know.
 
-I agree. However, this may not be entirely trivial, since iterating
-over the memblock_reserved table and creating iomem entries may result
-in collisions.
+------------------
 
-> But I'm not still convinced that we should export them in useable-
-> memory-range to crash dump kernel. They will be accessed through
-> acpi_os_map_memory() and so won't be required to be part of system ram
-> (or memblocks), I guess.
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-Agreed. They will be covered by the linear mapping in the boot kernel,
-and be mapped explicitly via ioremap_cache() in the kexec kernel,
-which is exactly what we want in this case.
+commit af97a77bc01ce49a466f9d4c0125479e2e2230b6 upstream.
 
-> Just FYI, on x86, ACPI tables seems to be exposed to crash dump kernel
-> via a kernel command line parameter, "memmap=".
->
+Thanks to the scripts/leaking_addresses.pl script, it was found that
+some EFI values should not be readable by non-root users.
+
+So make them root-only, and to do that, add a __ATTR_RO_MODE() macro to
+make this easier, and use it in other places at the same time.
+
+Reported-by: Linus Torvalds <torvalds@linux-foundation.org>
+Tested-by: Dave Young <dyoung@redhat.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20171206095010.24170-2-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ drivers/firmware/efi/efi.c         |    3 +--
+ drivers/firmware/efi/runtime-map.c |   10 +++++-----
+ include/linux/sysfs.h              |    6 ++++++
+ 3 files changed, 12 insertions(+), 7 deletions(-)
+
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -96,8 +96,7 @@ static ssize_t systab_show(struct kobjec
+ 	return str - buf;
+ }
+ 
+-static struct kobj_attribute efi_attr_systab =
+-			__ATTR(systab, 0400, systab_show, NULL);
++static struct kobj_attribute efi_attr_systab = __ATTR_RO_MODE(systab, 0400);
+ 
+ #define EFI_FIELD(var) efi.var
+ 
+--- a/drivers/firmware/efi/runtime-map.c
++++ b/drivers/firmware/efi/runtime-map.c
+@@ -67,11 +67,11 @@ static ssize_t map_attr_show(struct kobj
+ 	return map_attr->show(entry, buf);
+ }
+ 
+-static struct map_attribute map_type_attr = __ATTR_RO(type);
+-static struct map_attribute map_phys_addr_attr   = __ATTR_RO(phys_addr);
+-static struct map_attribute map_virt_addr_attr  = __ATTR_RO(virt_addr);
+-static struct map_attribute map_num_pages_attr  = __ATTR_RO(num_pages);
+-static struct map_attribute map_attribute_attr  = __ATTR_RO(attribute);
++static struct map_attribute map_type_attr = __ATTR_RO_MODE(type, 0400);
++static struct map_attribute map_phys_addr_attr = __ATTR_RO_MODE(phys_addr, 0400);
++static struct map_attribute map_virt_addr_attr = __ATTR_RO_MODE(virt_addr, 0400);
++static struct map_attribute map_num_pages_attr = __ATTR_RO_MODE(num_pages, 0400);
++static struct map_attribute map_attribute_attr = __ATTR_RO_MODE(attribute, 0400);
+ 
+ /*
+  * These are default attributes that are added for every memmap entry.
+--- a/include/linux/sysfs.h
++++ b/include/linux/sysfs.h
+@@ -82,6 +82,12 @@ struct attribute_group {
+ 	.show	= _name##_show,						\
+ }
+ 
++#define __ATTR_RO_MODE(_name, _mode) {					\
++	.attr	= { .name = __stringify(_name),				\
++		    .mode = VERIFY_OCTAL_PERMISSIONS(_mode) },		\
++	.show	= _name##_show,						\
++}
++
+ #define __ATTR_WO(_name) {						\
+ 	.attr	= { .name = __stringify(_name), .mode = S_IWUSR },	\
+ 	.store	= _name##_store,					\
