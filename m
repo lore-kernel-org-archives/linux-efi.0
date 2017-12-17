@@ -1,7 +1,7 @@
 From: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH 2/3] x86/efi: Replace efi_pgd with efi_mm.pgd
-Date: Sat, 16 Dec 2017 16:06:27 -0800
-Message-ID: <1513469187-5727-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH 3/3] x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
+Date: Sat, 16 Dec 2017 16:06:42 -0800
+Message-ID: <1513469202-5771-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
@@ -10,8 +10,16 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Since the previous patch added support for efi_mm, let's handle efi_pgd
-through efi_mm and remove global variable efi_pgd.
+Use helper function (efi_switch_mm()) to switch to/from efi_mm. We
+switch to efi_mm before calling
+1. efi_set_virtual_address_map() and
+2. Invoking any efi_runtime_service()
+
+Likewise, we need to switch back to previous mm (mm context stolen by
+efi_mm) after the above calls return successfully. We can use
+efi_switch_mm() helper function only with x86_64 kernel and
+"efi=old_map" disabled because, x86_32 and efi=old_map doesn't use
+efi_pgd, rather they use swapper_pg_dir.
 
 Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
@@ -26,92 +34,174 @@ Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Tested-by: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/x86/platform/efi/efi_64.c | 17 ++++++++---------
- 1 file changed, 8 insertions(+), 9 deletions(-)
+ arch/x86/include/asm/efi.h           | 25 +++++++++-------------
+ arch/x86/platform/efi/efi_64.c       | 41 ++++++++++++++++++------------------
+ arch/x86/platform/efi/efi_thunk_64.S |  2 +-
+ 3 files changed, 32 insertions(+), 36 deletions(-)
 
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 00f977ddd718..cda9940bed7a 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -62,14 +62,13 @@ extern asmlinkage u64 efi_call(void *fp, ...);
+ #define efi_call_phys(f, args...)		efi_call((f), args)
+ 
+ /*
+- * Scratch space used for switching the pagetable in the EFI stub
++ * struct efi_scratch - Scratch space used while switching to/from efi_mm
++ * @phys_stack: stack used during EFI Mixed Mode
++ * @prev_mm:    store/restore stolen mm_struct while switching to/from efi_mm
+  */
+ struct efi_scratch {
+-	u64	r15;
+-	u64	prev_cr3;
+-	pgd_t	*efi_pgt;
+-	bool	use_pgd;
+-	u64	phys_stack;
++	u64			phys_stack;
++	struct mm_struct	*prev_mm;
+ } __packed;
+ 
+ #define arch_efi_call_virt_setup()					\
+@@ -78,11 +77,8 @@ struct efi_scratch {
+ 	preempt_disable();						\
+ 	__kernel_fpu_begin();						\
+ 									\
+-	if (efi_scratch.use_pgd) {					\
+-		efi_scratch.prev_cr3 = __read_cr3();			\
+-		write_cr3((unsigned long)efi_scratch.efi_pgt);		\
+-		__flush_tlb_all();					\
+-	}								\
++	if (!efi_enabled(EFI_OLD_MEMMAP))				\
++		efi_switch_mm(&efi_mm);					\
+ })
+ 
+ #define arch_efi_call_virt(p, f, args...)				\
+@@ -90,10 +86,8 @@ struct efi_scratch {
+ 
+ #define arch_efi_call_virt_teardown()					\
+ ({									\
+-	if (efi_scratch.use_pgd) {					\
+-		write_cr3(efi_scratch.prev_cr3);			\
+-		__flush_tlb_all();					\
+-	}								\
++	if (!efi_enabled(EFI_OLD_MEMMAP))				\
++		efi_switch_mm(efi_scratch.prev_mm);			\
+ 									\
+ 	__kernel_fpu_end();						\
+ 	preempt_enable();						\
+@@ -135,6 +129,7 @@ extern void __init efi_dump_pagetable(void);
+ extern void __init efi_apply_memmap_quirks(void);
+ extern int __init efi_reuse_config(u64 tables, int nr_tables);
+ extern void efi_delete_dummy_variable(void);
++extern void efi_switch_mm(struct mm_struct *mm);
+ 
+ struct efi_setup_data {
+ 	u64 fw_vendor;
 diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index ccf5239923e8..6b541bdbda5f 100644
+index 6b541bdbda5f..c325b1cc4d1a 100644
 --- a/arch/x86/platform/efi/efi_64.c
 +++ b/arch/x86/platform/efi/efi_64.c
-@@ -189,8 +189,6 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 	early_code_mapping_set_exec(0);
- }
+@@ -82,9 +82,8 @@ pgd_t * __init efi_call_phys_prolog(void)
+ 	int n_pgds, i, j;
  
--static pgd_t *efi_pgd;
--
- /*
-  * We need our own copy of the higher levels of the page tables
-  * because we want to avoid inserting EFI region mappings (EFI_VA_END
-@@ -199,7 +197,7 @@ static pgd_t *efi_pgd;
-  */
- int __init efi_alloc_page_tables(void)
- {
--	pgd_t *pgd;
-+	pgd_t *pgd, *efi_pgd;
- 	p4d_t *p4d;
- 	pud_t *pud;
- 	gfp_t gfp_mask;
-@@ -227,6 +225,7 @@ int __init efi_alloc_page_tables(void)
- 		return -ENOMEM;
+ 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
+-		save_pgd = (pgd_t *)__read_cr3();
+-		write_cr3((unsigned long)efi_scratch.efi_pgt);
+-		goto out;
++		efi_switch_mm(&efi_mm);
++		return NULL;
  	}
  
-+	efi_mm.pgd = efi_pgd;
- 	mm_init_cpumask(&efi_mm);
- 	init_new_context(NULL, &efi_mm);
+ 	early_code_mapping_set_exec(1);
+@@ -154,8 +153,7 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
+ 	pud_t *pud;
  
-@@ -242,6 +241,7 @@ void efi_sync_low_kernel_mappings(void)
- 	pgd_t *pgd_k, *pgd_efi;
- 	p4d_t *p4d_k, *p4d_efi;
- 	pud_t *pud_k, *pud_efi;
-+	pgd_t *efi_pgd = efi_mm.pgd;
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP))
+ 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
+-		write_cr3((unsigned long)save_pgd);
+-		__flush_tlb_all();
++		efi_switch_mm(efi_scratch.prev_mm);
  		return;
-@@ -335,7 +335,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	unsigned long pfn, text, pf;
- 	struct page *page;
- 	unsigned npages;
--	pgd_t *pgd;
-+	pgd_t *pgd = efi_mm.pgd;
+ 	}
  
- 	if (efi_enabled(EFI_OLD_MEMMAP))
+@@ -341,13 +339,6 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
  		return 0;
-@@ -345,8 +345,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	 * this value is loaded into cr3 the PGD will be decrypted during
- 	 * the pagetable walk.
- 	 */
--	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(efi_pgd);
--	pgd = efi_pgd;
-+	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(pgd);
  
  	/*
+-	 * Since the PGD is encrypted, set the encryption mask so that when
+-	 * this value is loaded into cr3 the PGD will be decrypted during
+-	 * the pagetable walk.
+-	 */
+-	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(pgd);
+-
+-	/*
  	 * It can happen that the physical address of new_memmap lands in memory
-@@ -416,7 +415,7 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
- {
- 	unsigned long flags = _PAGE_RW;
- 	unsigned long pfn;
--	pgd_t *pgd = efi_pgd;
-+	pgd_t *pgd = efi_mm.pgd;
+ 	 * which is not mapped in the EFI page table. Therefore we need to go
+ 	 * and ident-map those pages containing the map before calling
+@@ -360,8 +351,6 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 		return 1;
+ 	}
  
- 	if (!(md->attribute & EFI_MEMORY_WB))
- 		flags |= _PAGE_PCD;
-@@ -520,7 +519,7 @@ void __init parse_efi_setup(u64 phys_addr, u32 data_len)
- static int __init efi_update_mappings(efi_memory_desc_t *md, unsigned long pf)
- {
- 	unsigned long pfn;
--	pgd_t *pgd = efi_pgd;
-+	pgd_t *pgd = efi_mm.pgd;
- 	int err1, err2;
- 
- 	/* Update the 1:1 mapping */
-@@ -617,7 +616,7 @@ void __init efi_dump_pagetable(void)
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		ptdump_walk_pgd_level(NULL, swapper_pg_dir);
- 	else
--		ptdump_walk_pgd_level(NULL, efi_pgd);
-+		ptdump_walk_pgd_level(NULL, efi_mm.pgd);
+-	efi_scratch.use_pgd = true;
+-
+ 	/*
+ 	 * Certain firmware versions are way too sentimential and still believe
+ 	 * they are exclusive and unquestionable owners of the first physical page,
+@@ -620,6 +609,22 @@ void __init efi_dump_pagetable(void)
  #endif
  }
  
++/*
++ * Makes the calling thread switch to/from efi_mm context. Can be used
++ * for SetVirtualAddressMap() i.e. current->active_mm == init_mm as well
++ * as during efi runtime calls i.e current->active_mm == current_mm.
++ * We are not mm_dropping()/mm_grabbing() any mm, because we are not
++ * losing/creating any references.
++ */
++void efi_switch_mm(struct mm_struct *mm)
++{
++	task_lock(current);
++	efi_scratch.prev_mm = current->active_mm;
++	current->active_mm = mm;
++	switch_mm(efi_scratch.prev_mm, mm, NULL);
++	task_unlock(current);
++}
++
+ #ifdef CONFIG_EFI_MIXED
+ extern efi_status_t efi64_thunk(u32, ...);
+ 
+@@ -673,17 +678,13 @@ efi_status_t efi_thunk_set_virtual_address_map(
+ 	efi_sync_low_kernel_mappings();
+ 	local_irq_save(flags);
+ 
+-	efi_scratch.prev_cr3 = __read_cr3();
+-	write_cr3((unsigned long)efi_scratch.efi_pgt);
+-	__flush_tlb_all();
++	efi_switch_mm(&efi_mm);
+ 
+ 	func = (u32)(unsigned long)phys_set_virtual_address_map;
+ 	status = efi64_thunk(func, memory_map_size, descriptor_size,
+ 			     descriptor_version, virtual_map);
+ 
+-	write_cr3(efi_scratch.prev_cr3);
+-	__flush_tlb_all();
+-	local_irq_restore(flags);
++	efi_switch_mm(efi_scratch.prev_mm);
+ 
+ 	return status;
+ }
+diff --git a/arch/x86/platform/efi/efi_thunk_64.S b/arch/x86/platform/efi/efi_thunk_64.S
+index 189b218da87c..46c58b08739c 100644
+--- a/arch/x86/platform/efi/efi_thunk_64.S
++++ b/arch/x86/platform/efi/efi_thunk_64.S
+@@ -33,7 +33,7 @@ ENTRY(efi64_thunk)
+ 	 * Switch to 1:1 mapped 32-bit stack pointer.
+ 	 */
+ 	movq	%rsp, efi_saved_sp(%rip)
+-	movq	efi_scratch+25(%rip), %rsp
++	movq	efi_scratch(%rip), %rsp
+ 
+ 	/*
+ 	 * Calculate the physical address of the kernel text.
 -- 
 2.1.4
