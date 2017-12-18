@@ -1,45 +1,30 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH] x86: move parse_early_param to earlier code for
- add_efi_memmap
-Date: Mon, 18 Dec 2017 13:11:19 +0000
-Message-ID: <20171218131119.GA3891@codeblueprint.co.uk>
-References: <20171130052327.GA3500@dhcp-128-65.nay.redhat.com>
- <20171214104119.GA2437@dhcp-128-65.nay.redhat.com>
- <20171215151822.GB3204@codeblueprint.co.uk>
- <20171216140632.462yk7pmlvpmz6if@gmail.com>
+Subject: Re: [PATCH V2] x86/efi: fix kernel param add_efi_memmap regression
+Date: Mon, 18 Dec 2017 14:23:50 +0000
+Message-ID: <20171218142350.GC3891@codeblueprint.co.uk>
+References: <20171216041953.GA1690@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20171216140632.462yk7pmlvpmz6if@gmail.com>
+In-Reply-To: <20171216041953.GA1690@dhcp-128-65.nay.redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org
+To: Dave Young <dyoung@redhat.com>
+Cc: mingo@kernel.org, ard.biesheuvel@linaro.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 16 Dec, at 03:06:32PM, Ingo Molnar wrote:
+On Sat, 16 Dec, at 12:19:53PM, Dave Young wrote:
+> 'add_efi_memmap' is an early param, but do_add_efi_memmap() has no
+> chance to run because the code path is before parse_early_param().
+> I believe it worked when the param was introduced but probably later
+> some other changes caused the wrong order and nobody noticed it.
 > 
-> * Matt Fleming <matt@codeblueprint.co.uk> wrote:
+> Move efi_memblock_x86_reserve_range() after parse_early_param()
+> to fix it.
 > 
-> > >  	x86_init.oem.arch_setup();
-> > > @@ -962,6 +959,8 @@ void __init setup_arch(char **cmdline_p)
-> > >  
-> > >  	parse_early_param();
-> > >  
-> > > +	if (efi_enabled(EFI_BOOT))
-> > > +		efi_memblock_x86_reserve_range();
-> > >  #ifdef CONFIG_MEMORY_HOTPLUG
-> > >  	/*
-> > >  	 * Memory used by the kernel cannot be hot-removed because Linux
-> > > 
-> > 
-> > I prefer this version. Please re-send a full patch and update the
-> > subject line to include the "fix" somewhere; it wasn't obvious to me
-> > from the start that this is a bug fix.
-> 
-> Agreed.
-> 
-> I dropped the commit I just applied to tip:efi/core, since you are handling this, 
-> so this patch should come through the regular EFI channels, right?
+> Signed-off-by: Dave Young <dyoung@redhat.com>
+> ---
+>  arch/x86/kernel/setup.c |    5 ++---
+>  1 file changed, 2 insertions(+), 3 deletions(-)
 
-Yep, that's right. Me or Ard will take care of it.
+Thanks Dave, applied to 'urgent'.
