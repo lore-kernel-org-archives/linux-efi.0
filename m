@@ -1,72 +1,50 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: arm64 crashkernel fails to boot on acpi-only machines due to
- ACPI regions being no longer mapped as NOMAP
-Date: Tue, 26 Dec 2017 14:58:45 +0800
-Message-ID: <20171226065845.GB5354@dhcp-128-65.nay.redhat.com>
-References: <20171221103440.GJ28046@linaro.org>
- <CACi5LpMUnUKxiALAHW9_PE2RYC8GNWLPGpdJ5ca53g=v3rNkfg@mail.gmail.com>
- <20171222083308.cy3vwlyhig22q5ee@fireball>
- <CACi5LpNF5i3Eo7nMLr_z9r4VVbXhDwSJCQoiOh-A_jB6hV0_2Q@mail.gmail.com>
- <20171225032500.GA8877@linaro.org>
- <CACi5LpMzYidDaC0_yfwgVOisH-FqcNViYj+Z54uKfUtHkJKKXA@mail.gmail.com>
- <20171226013217.GA2119@dhcp-128-65.nay.redhat.com>
- <20171226013517.GA2186@dhcp-128-65.nay.redhat.com>
- <20171226022807.GB8877@linaro.org>
- <CACi5LpNRtXh-j9Y9HwRatDZwRMr++-ZeaSnk62vD3btpxsVv7w@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [GIT PULL 0/2] EFI updates for v4.15
+Date: Tue, 26 Dec 2017 10:40:38 +0000
+Message-ID: <CAKv+Gu9UniZugun1LAJCUc0_NsMWDP3RLn4sLxRbvbTN0ocycA@mail.gmail.com>
+References: <20171025101419.26369-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CACi5LpNRtXh-j9Y9HwRatDZwRMr++-ZeaSnk62vD3btpxsVv7w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20171025101419.26369-1-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Arvind Yadav <arvind.yadav.cs@gmail.com>, Jan Kiszka <jan.kiszka@siemens.com>, Kweh Hock Leong <hock.leong.kweh@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Stephen Boyd <sboyd@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 12/26/17 at 08:26am, Bhupesh Sharma wrote:
-> On Tue, Dec 26, 2017 at 7:58 AM, AKASHI Takahiro
-> <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> > On Tue, Dec 26, 2017 at 09:35:17AM +0800, Dave Young wrote:
-> >> [snip]
-> >> > > > Well, we may be able to change pr_warn() to pr_warn_once() here, but
-> >> > > > I hope that adding "numa=off" to kernel command line should also work.
-> >> > >
-> >> > > Hmm, adding "numa=off" to crashkernel bootargs works, and TBH it was
-> >> > > my initial thought process as well, but I am not sure if this will
-> >> > > cause any regressions on aarch64 systems which use crashdump feature.
-> >> >
-> >> > It should be fine since we use numa=off by default for all other arches
-> >> > ie. x86, ppc64 and s390. Actually disabling numa in kdump kernel can save
-> >> > mm component memory usage.
-> >> >
-> >>
-> >> Forgot to say I means in RHEL and Fedora we use numa=off for kdump..
-> >
-> > Thank you for the clarification.
-> > (It might be better to make numa off automatically if maxcpus == 0 (and 1?).)
-> >
-> 
-> Not sure if we can leave this to the distribution-specific kdump
-> scripts (as the crashkernel boot can be held up for sufficient time
-> and may appear stuck). The distribution scripts may be different (for
-> e.g. ubuntu and RHEL/fedora) across distributions and may have
-> different bootarg options.
+On 25 October 2017 at 11:14, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+> The following changes since commit 8a5776a5f49812d29fe4b2d0a2d71675c3facf3f:
+>
+>   Linux 4.14-rc4 (2017-10-08 20:53:29 -0700)
+>
+> are available in the git repository at:
+>
+>   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git efi-next
+>
+> for you to fetch changes up to c19611def8fd3f524bc945f0e8f9becace8fdf06:
+>
+>   arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or WP are set (2017-10-16 16:21:26 +0100)
+>
+> ----------------------------------------------------------------
+> EFI changes for v4.15:
+> - ignore EFI_MEMORY_XP attributes on ARM if _RP/_WP are set as well
+> - a cosmetic pr_err() format string fix
+>
+> ----------------------------------------------------------------
+> Ard Biesheuvel (1):
+>       arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or WP are set
+>
+> Arvind Yadav (1):
+>       efi/capsule-loader: pr_err() strings should end with newlines
+>
+>  arch/arm64/kernel/efi.c               | 4 +++-
+>  drivers/firmware/efi/capsule-loader.c | 2 +-
+>  2 files changed, 4 insertions(+), 2 deletions(-)
 
-Personally I think distribution should take care of this param as for
-kdump.  But as AKASHI said it could be a issue for 1st kernel with
-nr_cpus=1 booting.  Problem is why we do not see this issue on other
-machines.
+Ingo,
 
-> 
-> So how about considering a kernel fix only which doesn't require
-> relying on changing the distribution-specific kdump scripts, as we
-> should avoid introducing a regression while trying to fix a regression
-> :)
-> 
-> Just my 2 cents.
-> 
-> Thanks,
-> Bhupesh
+It appears these patches have never made it into the TIP tree. Shall I
+just resend them as part of the pull request for v4.16?
 
-Thanks
-Dave
+Thanks,
+Ard.
