@@ -1,59 +1,35 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL 0/2] EFI updates for v4.15
-Date: Thu, 28 Dec 2017 22:20:08 +0000
-Message-ID: <CAKv+Gu_tSauwS1h6waBkYYo2F7pXOngKyg1hG0_nLLKfFnh7kQ@mail.gmail.com>
-References: <20171025101419.26369-1-ard.biesheuvel@linaro.org>
- <CAKv+Gu9UniZugun1LAJCUc0_NsMWDP3RLn4sLxRbvbTN0ocycA@mail.gmail.com> <20171227184651.ma4dsoi3a77arjxu@gmail.com>
+From: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+Subject: Re: [RFT PATCH] efi: capsule-loader: reinstate virtual capsule
+ mapping
+Date: Fri, 29 Dec 2017 03:09:52 +0000
+Message-ID: <35d1f2df-88e1-cb43-9488-e3cad896869a@nexus-software.ie>
+References: <20171226132142.3254-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20171227184651.ma4dsoi3a77arjxu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20171226132142.3254-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Arvind Yadav <arvind.yadav.cs-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Richard Ruigrok <rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Ge Song <ge.song-PT9Dzx9SjPiXmMXjJBpWqg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 27 December 2017 at 18:46, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->
-> * Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->
->> On 25 October 2017 at 11:14, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> > The following changes since commit 8a5776a5f49812d29fe4b2d0a2d71675c3facf3f:
->> >
->> >   Linux 4.14-rc4 (2017-10-08 20:53:29 -0700)
->> >
->> > are available in the git repository at:
->> >
->> >   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git efi-next
->> >
->> > for you to fetch changes up to c19611def8fd3f524bc945f0e8f9becace8fdf06:
->> >
->> >   arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or WP are set (2017-10-16 16:21:26 +0100)
->> >
->> > ----------------------------------------------------------------
->> > EFI changes for v4.15:
->> > - ignore EFI_MEMORY_XP attributes on ARM if _RP/_WP are set as well
->> > - a cosmetic pr_err() format string fix
->> >
->> > ----------------------------------------------------------------
->> > Ard Biesheuvel (1):
->> >       arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or WP are set
->> >
->> > Arvind Yadav (1):
->> >       efi/capsule-loader: pr_err() strings should end with newlines
->> >
->> >  arch/arm64/kernel/efi.c               | 4 +++-
->> >  drivers/firmware/efi/capsule-loader.c | 2 +-
->> >  2 files changed, 4 insertions(+), 2 deletions(-)
->>
->> Ingo,
->>
->> It appears these patches have never made it into the TIP tree. Shall I
->> just resend them as part of the pull request for v4.16?
->
-> Indeed - my mistake ...
->
-> Feel free to send them as efi/urgent material, or as v4.16 bits.
->
 
-Thanks - I will just add them to the v4.16 queue.
+> So we need to fix this without breaking Quark. Fortunately, Quark does
+> not appear to care about the virtual mapping, and so we can simply
+> do a partial revert of commit 2a457fb31df6 ("efi/capsule-loader: Use
+> page addresses rather than struct page pointers"), and create a vmap()
+> mapping of the entire capsule (including header) based on the reinstated
+> struct page array, unless running on Quark, in which case we pass the
+> capsule header copy as before.
+
+
+Working on the Galileo (Quark x1000 non-secure) Ard. I've tested a 
+capsule with and without the quirk header so it should work on the 
+secure part too.
+
+Tested-by: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+
+---
+bod
