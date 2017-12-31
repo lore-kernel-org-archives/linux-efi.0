@@ -1,36 +1,15 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFT PATCH] efi: capsule-loader: reinstate virtual capsule mapping
-Date: Fri, 29 Dec 2017 16:35:03 +0000
-Message-ID: <CAKv+Gu9o445bLK9crJX3ZomWLG+oOFDrp48EKvvp6OQwh=FMgw@mail.gmail.com>
-References: <20171226132142.3254-1-ard.biesheuvel@linaro.org> <35d1f2df-88e1-cb43-9488-e3cad896869a@nexus-software.ie>
+From: foundation-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Subject: =?utf-8?q?Spende_von_=E2=82=AC_3=2E400=2E000=2C00_EUR?=
+Date: Sun, 31 Dec 2017 13:46:50 +0200
+Message-ID: <20171231120734.3C41327060E0@wsbmail01.wsb.wroclaw.pl>
+Reply-To: roycockrumpovertyfoundation-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <35d1f2df-88e1-cb43-9488-e3cad896869a-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+Content-Description: Mail message body
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Jan Kiszka <jan.kiszka-kv7WeFo6aLtBDgjK7y7TUQ@public.gmane.org>, Richard Ruigrok <rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Ge Song <ge.song-PT9Dzx9SjPiXmMXjJBpWqg@public.gmane.org>
+To: Recipients <foundation-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 29 December 2017 at 03:09, Bryan O'Donoghue
-<pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org> wrote:
->
->> So we need to fix this without breaking Quark. Fortunately, Quark does
->> not appear to care about the virtual mapping, and so we can simply
->> do a partial revert of commit 2a457fb31df6 ("efi/capsule-loader: Use
->> page addresses rather than struct page pointers"), and create a vmap()
->> mapping of the entire capsule (including header) based on the reinstated
->> struct page array, unless running on Quark, in which case we pass the
->> capsule header copy as before.
->
->
->
-> Working on the Galileo (Quark x1000 non-secure) Ard. I've tested a capsule
-> with and without the quirk header so it should work on the secure part too.
->
-> Tested-by: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
->
-
-Thanks Bryan
-
-Ge, Richard, any feedback? Thanks.
+Hallo, ich Roy Cockrum, 58, aus Knoxville, Tennessee Vereinigte Staaten von Amerika, du hast eine Wohltätigkeitsspende von € 3.400.000,00 EUR, ich gewann die America Lotterie in Amerika im Wert von $ 259,9 Millionen, und ich gebe einen Teil davon Zu fünf glücklichen Leuten und Wohltätigkeitshäusern in Gelübde, um die Armut vor dieser Welt zu beseitigen, ich kämpfe gegen die Armut. Kontaktieren Sie mich für weitere Details: roycockrumpovertyfoundation-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
