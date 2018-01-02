@@ -1,41 +1,55 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [GIT PULL 0/2] EFI fixes for v4.15
-Date: Tue,  2 Jan 2018 17:21:08 +0000
-Message-ID: <20180102172110.17018-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/2] x86/efi: Fix kernel param add_efi_memmap regression
+Date: Tue,  2 Jan 2018 17:21:09 +0000
+Message-ID: <20180102172110.17018-2-ard.biesheuvel@linaro.org>
+References: <20180102172110.17018-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20180102172110.17018-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ge Song <ge.song-PT9Dzx9SjPiXmMXjJBpWqg@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The following changes since commit 30a7acd573899fd8b8ac39236eff6468b195ac7d:
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-  Linux 4.15-rc6 (2017-12-31 14:47:43 -0800)
+'add_efi_memmap' is an early param, but do_add_efi_memmap() has no
+chance to run because the code path is before parse_early_param().
+I believe it worked when the param was introduced but probably later
+some other changes caused the wrong order and nobody noticed it.
 
-are available in the git repository at:
+Move efi_memblock_x86_reserve_range() after parse_early_param()
+to fix it.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
+Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/x86/kernel/setup.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-for you to fetch changes up to 33f7b2e57a70ad58a59edc9c707724c5719d5168:
-
-  efi: capsule-loader: reinstate virtual capsule mapping (2018-01-02 16:50:34 +0000)
-
-----------------------------------------------------------------
-Another pair of EFI fixes for v4.15:
-- fix 'add_efi_memmap' early param handling, which inadvertently gets called
-  before early params have been parsed
-- reinstate vmapping of capsule images, so that the firmware can process
-  them immediately (this got broken in v4.13)
-
-----------------------------------------------------------------
-Ard Biesheuvel (1):
-      efi: capsule-loader: reinstate virtual capsule mapping
-
-Dave Young (1):
-      x86/efi: Fix kernel param add_efi_memmap regression
-
- arch/x86/kernel/setup.c               |  5 ++--
- arch/x86/platform/efi/quirks.c        | 13 +++++++++-
- drivers/firmware/efi/capsule-loader.c | 45 ++++++++++++++++++++++++++++-------
- include/linux/efi.h                   |  4 +++-
- 4 files changed, 54 insertions(+), 13 deletions(-)
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 8af2e8d0c0a1..145810b0edf6 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -906,9 +906,6 @@ void __init setup_arch(char **cmdline_p)
+ 		set_bit(EFI_BOOT, &efi.flags);
+ 		set_bit(EFI_64BIT, &efi.flags);
+ 	}
+-
+-	if (efi_enabled(EFI_BOOT))
+-		efi_memblock_x86_reserve_range();
+ #endif
+ 
+ 	x86_init.oem.arch_setup();
+@@ -962,6 +959,8 @@ void __init setup_arch(char **cmdline_p)
+ 
+ 	parse_early_param();
+ 
++	if (efi_enabled(EFI_BOOT))
++		efi_memblock_x86_reserve_range();
+ #ifdef CONFIG_MEMORY_HOTPLUG
+ 	/*
+ 	 * Memory used by the kernel cannot be hot-removed because Linux
+-- 
+2.11.0
