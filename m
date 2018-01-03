@@ -1,48 +1,52 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 2/5] arm64: efi: ignore EFI_MEMORY_XP attribute if RP and/or WP are set
-Date: Tue,  2 Jan 2018 18:10:39 +0000
-Message-ID: <20180102181042.19074-3-ard.biesheuvel@linaro.org>
-References: <20180102181042.19074-1-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH] MAINTAINERS: Remove Matt Fleming as EFI co-maintainer
+Date: Wed,  3 Jan 2018 09:44:17 +0000
+Message-ID: <20180103094417.6353-1-matt@codeblueprint.co.uk>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20180102181042.19074-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Arvind Yadav <arvind.yadav.cs-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Tyler Baicar <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Vasyl Gomonovych <gomonovych-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The UEFI memory map is a bit vague about how to interpret the
-EFI_MEMORY_XP attribute when it is combined with EFI_MEMORY_RP and/or
-EFI_MEMORY_WP, which have retroactively been redefined as cacheability
-attributes rather than permission attributes.
+Instate Ard Biesheuvel as the sole EFI maintainer and leave other folks
+as maintainers for the EFI test driver and efivarfs file system.
 
-So let's ignore EFI_MEMORY_XP if _RP and/or _WP are also set. In this
-case, it is likely that they are being used to describe the capability
-of the region (i.e., whether it has the controls to reconfigure it as
-non-executable) rather than the nature of the contents of the region
-(i.e., whether it contains data that we will never attempt to execute)
-
-Reported-by: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Tested-by: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- arch/arm64/kernel/efi.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ MAINTAINERS | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index 82cd07592519..f85ac58d08a3 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -48,7 +48,9 @@ static __init pteval_t create_mapping_protection(efi_memory_desc_t *md)
- 		return pgprot_val(PAGE_KERNEL_ROX);
+Ard, if you want to add yourself as co-maintainer of the EFI test
+driver or efivarfs, please go ahead. I'm sure no one would object.
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index d4fdcb12616c..9a41aa072e6a 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -5150,15 +5150,13 @@ F:	sound/usb/misc/ua101.c
+ EFI TEST DRIVER
+ L:	linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+ M:	Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+-M:	Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+ S:	Maintained
+ F:	drivers/firmware/efi/test/
  
- 	/* RW- */
--	if (attr & EFI_MEMORY_XP || type != EFI_RUNTIME_SERVICES_CODE)
-+	if (((attr & (EFI_MEMORY_RP | EFI_MEMORY_WP | EFI_MEMORY_XP)) ==
-+	     EFI_MEMORY_XP) ||
-+	    type != EFI_RUNTIME_SERVICES_CODE)
- 		return pgprot_val(PAGE_KERNEL);
+ EFI VARIABLE FILESYSTEM
+ M:	Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+ M:	Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
+-M:	Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+-T:	git git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
++T:	git git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
+ L:	linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+ S:	Maintained
+ F:	fs/efivarfs/
+@@ -5319,7 +5317,6 @@ S:	Supported
+ F:	security/integrity/evm/
  
- 	/* RWX */
+ EXTENSIBLE FIRMWARE INTERFACE (EFI)
+-M:	Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+ M:	Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+ L:	linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
 -- 
-2.11.0
+2.14.2
