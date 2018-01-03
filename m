@@ -1,18 +1,18 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.4 01/37] x86/boot: Add early cmdline parsing for options with arguments
-Date: Wed,  3 Jan 2018 21:11:07 +0100
-Message-ID: <20180103195056.919290887@linuxfoundation.org>
-References: <20180103195056.837404126@linuxfoundation.org>
+Subject: [PATCH 4.9 03/39] x86/boot: Add early cmdline parsing for options with arguments
+Date: Wed,  3 Jan 2018 21:11:17 +0100
+Message-ID: <20180103195104.204429981@linuxfoundation.org>
+References: <20180103195104.066528044@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20180103195056.837404126@linuxfoundation.org>
+In-Reply-To: <20180103195104.066528044@linuxfoundation.org>
 Sender: owner-linux-mm@kvack.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Tom Lendacky <thomas.lendacky@amd.com>, Thomas Gleixner <tglx@linutronix.de>, Alexander Potapenko <glider@google.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Andy Lutomirski <luto@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Borislav Petkov <bp@alien8.de>, Brijesh Singh <brijesh.singh@amd.com>, Dave Young <dyoung@redhat.com>, Dmitry Vyukov <dvyukov@google.com>, Jonathan Corbet <corbet@lwn.net>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Larry Woodman <lwoodman@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Paolo Bonzini <pbonzini@redhat.com>, Peter Zijlstra <peterz@infradead.org>, =?UTF-8?q?Radim=20Kr=C4=8Dm=C3=A1=C5=99?= <rkrcmar@redhat.com>, Rik van Riel <riel@redhat.com>, Toshimitsu
 List-Id: linux-efi@vger.kernel.org
 
-4.4-stable review patch.  If anyone has any objections, please let me know.
+4.9-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -73,11 +73,10 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  #endif /* _ASM_X86_CMDLINE_H */
 --- a/arch/x86/lib/cmdline.c
 +++ b/arch/x86/lib/cmdline.c
-@@ -82,3 +82,108 @@ int cmdline_find_option_bool(const char
- 
+@@ -104,7 +104,112 @@ __cmdline_find_option_bool(const char *c
  	return 0;	/* Buffer overrun */
  }
-+
+ 
 +/*
 + * Find a non-boolean option (i.e. option=argument). In accordance with
 + * standard Linux practice, if this option is repeated, this returns the
@@ -175,6 +174,11 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 +
 +	return len;
 +}
++
+ int cmdline_find_option_bool(const char *cmdline, const char *option)
+ {
+ 	return __cmdline_find_option_bool(cmdline, COMMAND_LINE_SIZE, option);
+ }
 +
 +int cmdline_find_option(const char *cmdline, const char *option, char *buffer,
 +			int bufsize)
