@@ -1,36 +1,52 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] MAINTAINERS: Add Ard Biesheuvel to EFI test driver and efivarfs
-Date: Wed,  3 Jan 2018 12:54:48 +0000
-Message-ID: <20180103125448.21205-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] MAINTAINERS: Remove Matt Fleming as EFI co-maintainer
+Date: Wed, 3 Jan 2018 12:55:11 +0000
+Message-ID: <CAKv+Gu-Yv3J62jLsECodNJ2F2N2TFXpUbAkc8-O+FogoTYHTLw@mail.gmail.com>
+References: <20180103094417.6353-1-matt@codeblueprint.co.uk>
+ <CAKv+Gu88QfuAQbLFbijHk9yG6TnYtkKPUYQfwpcQMX9z-cXcdQ@mail.gmail.com>
+ <20180103124304.GC3067@codeblueprint.co.uk> <20180103125010.clwc2eyhqmk3b5v2@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180103125010.clwc2eyhqmk3b5v2@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, "H . Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Ivan Hu <ivan.hu@canonical.com>, Jeremy Kerr <jk@ozlabs.org>, Matthew Garrett <mjg59@srcf.ucam.org>
 List-Id: linux-efi@vger.kernel.org
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- MAINTAINERS | 2 ++
- 1 file changed, 2 insertions(+)
+On 3 January 2018 at 12:50, Ingo Molnar <mingo@kernel.org> wrote:
+>
+> * Matt Fleming <matt@codeblueprint.co.uk> wrote:
+>
+>> On Wed, 03 Jan, at 10:13:55AM, Ard Biesheuvel wrote:
+>> > On 3 January 2018 at 09:44, Matt Fleming <matt@codeblueprint.co.uk> wrote:
+>> > > Instate Ard Biesheuvel as the sole EFI maintainer and leave other folks
+>> > > as maintainers for the EFI test driver and efivarfs file system.
+>> > >
+>> > > Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+>> >
+>> > Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>> >
+>> > Thanks Matt
+>> >
+>> > > ---
+>> > >  MAINTAINERS | 5 +----
+>> > >  1 file changed, 1 insertion(+), 4 deletions(-)
+>> > >
+>> > > Ard, if you want to add yourself as co-maintainer of the EFI test
+>> > > driver or efivarfs, please go ahead. I'm sure no one would object.
+>> > >
+>> >
+>> > I guess that makes sense. Should we just fold that in?
+>>
+>> Sounds good to me.
+>
+> If any of you sends me a delta patch or an updated patch I'll apply the folded
+> version.
+>
+> Thanks,
+>
+>         Ingo
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index ae9132f77be6..95c3fa1f520f 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -5149,12 +5149,14 @@ F:	sound/usb/misc/ua101.c
- EFI TEST DRIVER
- L:	linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
- M:	Ivan Hu <ivan.hu-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-+M:	Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
- S:	Maintained
- F:	drivers/firmware/efi/test/
- 
- EFI VARIABLE FILESYSTEM
- M:	Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
- M:	Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
-+M:	Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
- T:	git git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
- L:	linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
- S:	Maintained
--- 
-2.11.0
+
+Done.
