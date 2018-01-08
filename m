@@ -1,50 +1,210 @@
-From: Jiri Kosina <jikos-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] PTI: unbreak EFI old_memmap
-Date: Fri, 5 Jan 2018 22:35:41 +0100 (CET)
-Message-ID: <nycvar.YFH.7.76.1801052215460.11852@cbobk.fhfr.pm>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.14 13/38] efi/capsule-loader: Reinstate virtual capsule mapping
+Date: Mon,  8 Jan 2018 13:59:06 +0100
+Message-ID: <20180108125916.794224986@linuxfoundation.org>
+References: <20180108125915.951963528@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andrea Arcangeli <aarcange-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Hansen <dave.hansen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Dimitri Sivanich <sivanich-ZPxbGqLxI0U@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180108125915.951963528@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ge Song <ge.song@hxt-semitech.com>, Bryan ODonoghue <pure.logic@nexus-software.ie>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dave Young <dyoung@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
+4.14-stable review patch.  If anyone has any objections, please let me know.
 
-old_memmap's efi_call_phys_prolog() calls set_pgd() with swapper PGD that 
-has PAGE_USER set, which makes PTI set NX on it, and therefore EFI can't 
-execute it's code.
+------------------
 
-Fix that by forcefully clearing _PAGE_NX from the PGD (this can't be done 
-by the pgprot API).
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-_PAGE_NX will be automatically reintroduced in efi_call_phys_epilog(), as 
-_set_pgd() will again notice that this is _PAGE_USER, and set _PAGE_NX on 
-it.
+commit f24c4d478013d82bd1b943df566fff3561d52864 upstream.
 
-Signed-off-by: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
-Tested-by: Dimitri Sivanich <sivanich-ZPxbGqLxI0U@public.gmane.org>
-Acked-by: Dave Hansen <dave.hansen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
---- 
- arch/x86/platform/efi/efi_64.c | 2 ++
- 1 file changed, 2 insertions(+)
+Commit:
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index d87ac96e37ed..2dd15e967c3f 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -135,7 +135,9 @@ pgd_t * __init efi_call_phys_prolog(void)
- 				pud[j] = *pud_offset(p4d_k, vaddr);
- 			}
+  82c3768b8d68 ("efi/capsule-loader: Use a cached copy of the capsule header")
+
+... refactored the capsule loading code that maps the capsule header,
+to avoid having to map it several times.
+
+However, as it turns out, the vmap() call we ended up removing did not
+just map the header, but the entire capsule image, and dropping this
+virtual mapping breaks capsules that are processed by the firmware
+immediately (i.e., without a reboot).
+
+Unfortunately, that change was part of a larger refactor that allowed
+a quirk to be implemented for Quark, which has a non-standard memory
+layout for capsules, and we have slightly painted ourselves into a
+corner by allowing quirk code to mangle the capsule header and memory
+layout.
+
+So we need to fix this without breaking Quark. Fortunately, Quark does
+not appear to care about the virtual mapping, and so we can simply
+do a partial revert of commit:
+
+  2a457fb31df6 ("efi/capsule-loader: Use page addresses rather than struct page pointers")
+
+... and create a vmap() mapping of the entire capsule (including header)
+based on the reinstated struct page array, unless running on Quark, in
+which case we pass the capsule header copy as before.
+
+Reported-by: Ge Song <ge.song@hxt-semitech.com>
+Tested-by: Bryan O'Donoghue <pure.logic@nexus-software.ie>
+Tested-by: Ge Song <ge.song@hxt-semitech.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Dave Young <dyoung@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Fixes: 82c3768b8d68 ("efi/capsule-loader: Use a cached copy of the capsule header")
+Link: http://lkml.kernel.org/r/20180102172110.17018-3-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ arch/x86/platform/efi/quirks.c        |   13 +++++++++
+ drivers/firmware/efi/capsule-loader.c |   45 +++++++++++++++++++++++++++-------
+ include/linux/efi.h                   |    4 ++-
+ 3 files changed, 52 insertions(+), 10 deletions(-)
+
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -592,7 +592,18 @@ static int qrk_capsule_setup_info(struct
+ 	/*
+ 	 * Update the first page pointer to skip over the CSH header.
+ 	 */
+-	cap_info->pages[0] += csh->headersize;
++	cap_info->phys[0] += csh->headersize;
++
++	/*
++	 * cap_info->capsule should point at a virtual mapping of the entire
++	 * capsule, starting at the capsule header. Our image has the Quark
++	 * security header prepended, so we cannot rely on the default vmap()
++	 * mapping created by the generic capsule code.
++	 * Given that the Quark firmware does not appear to care about the
++	 * virtual mapping, let's just point cap_info->capsule at our copy
++	 * of the capsule header.
++	 */
++	cap_info->capsule = &cap_info->header;
+ 
+ 	return 1;
+ }
+--- a/drivers/firmware/efi/capsule-loader.c
++++ b/drivers/firmware/efi/capsule-loader.c
+@@ -20,10 +20,6 @@
+ 
+ #define NO_FURTHER_WRITE_ACTION -1
+ 
+-#ifndef phys_to_page
+-#define phys_to_page(x)		pfn_to_page((x) >> PAGE_SHIFT)
+-#endif
+-
+ /**
+  * efi_free_all_buff_pages - free all previous allocated buffer pages
+  * @cap_info: pointer to current instance of capsule_info structure
+@@ -35,7 +31,7 @@
+ static void efi_free_all_buff_pages(struct capsule_info *cap_info)
+ {
+ 	while (cap_info->index > 0)
+-		__free_page(phys_to_page(cap_info->pages[--cap_info->index]));
++		__free_page(cap_info->pages[--cap_info->index]);
+ 
+ 	cap_info->index = NO_FURTHER_WRITE_ACTION;
+ }
+@@ -71,6 +67,14 @@ int __efi_capsule_setup_info(struct caps
+ 
+ 	cap_info->pages = temp_page;
+ 
++	temp_page = krealloc(cap_info->phys,
++			     pages_needed * sizeof(phys_addr_t *),
++			     GFP_KERNEL | __GFP_ZERO);
++	if (!temp_page)
++		return -ENOMEM;
++
++	cap_info->phys = temp_page;
++
+ 	return 0;
+ }
+ 
+@@ -105,9 +109,24 @@ int __weak efi_capsule_setup_info(struct
+  **/
+ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
+ {
++	bool do_vunmap = false;
+ 	int ret;
+ 
+-	ret = efi_capsule_update(&cap_info->header, cap_info->pages);
++	/*
++	 * cap_info->capsule may have been assigned already by a quirk
++	 * handler, so only overwrite it if it is NULL
++	 */
++	if (!cap_info->capsule) {
++		cap_info->capsule = vmap(cap_info->pages, cap_info->index,
++					 VM_MAP, PAGE_KERNEL);
++		if (!cap_info->capsule)
++			return -ENOMEM;
++		do_vunmap = true;
++	}
++
++	ret = efi_capsule_update(cap_info->capsule, cap_info->phys);
++	if (do_vunmap)
++		vunmap(cap_info->capsule);
+ 	if (ret) {
+ 		pr_err("capsule update failed\n");
+ 		return ret;
+@@ -165,10 +184,12 @@ static ssize_t efi_capsule_write(struct
+ 			goto failed;
  		}
-+		pgd_offset_k(pgd * PGDIR_SIZE)->pgd &= ~_PAGE_NX;
+ 
+-		cap_info->pages[cap_info->index++] = page_to_phys(page);
++		cap_info->pages[cap_info->index] = page;
++		cap_info->phys[cap_info->index] = page_to_phys(page);
+ 		cap_info->page_bytes_remain = PAGE_SIZE;
++		cap_info->index++;
+ 	} else {
+-		page = phys_to_page(cap_info->pages[cap_info->index - 1]);
++		page = cap_info->pages[cap_info->index - 1];
+ 	}
+ 
+ 	kbuff = kmap(page);
+@@ -252,6 +273,7 @@ static int efi_capsule_release(struct in
+ 	struct capsule_info *cap_info = file->private_data;
+ 
+ 	kfree(cap_info->pages);
++	kfree(cap_info->phys);
+ 	kfree(file->private_data);
+ 	file->private_data = NULL;
+ 	return 0;
+@@ -280,6 +302,13 @@ static int efi_capsule_open(struct inode
+ 		kfree(cap_info);
+ 		return -ENOMEM;
  	}
 +
- out:
- 	__flush_tlb_all();
++	cap_info->phys = kzalloc(sizeof(void *), GFP_KERNEL);
++	if (!cap_info->phys) {
++		kfree(cap_info->pages);
++		kfree(cap_info);
++		return -ENOMEM;
++	}
  
-
--- 
-Jiri Kosina
-SUSE Labs
+ 	file->private_data = cap_info;
+ 
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -140,11 +140,13 @@ struct efi_boot_memmap {
+ 
+ struct capsule_info {
+ 	efi_capsule_header_t	header;
++	efi_capsule_header_t	*capsule;
+ 	int			reset_type;
+ 	long			index;
+ 	size_t			count;
+ 	size_t			total_size;
+-	phys_addr_t		*pages;
++	struct page		**pages;
++	phys_addr_t		*phys;
+ 	size_t			page_bytes_remain;
+ };
+ 
