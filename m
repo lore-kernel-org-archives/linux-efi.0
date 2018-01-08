@@ -1,210 +1,71 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.14 13/38] efi/capsule-loader: Reinstate virtual capsule mapping
-Date: Mon,  8 Jan 2018 13:59:06 +0100
-Message-ID: <20180108125916.794224986@linuxfoundation.org>
-References: <20180108125915.951963528@linuxfoundation.org>
+From: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: arm64 crashkernel fails to boot on acpi-only machines due to ACPI
+ regions being no longer mapped as NOMAP
+Date: Tue, 9 Jan 2018 01:30:07 +0530
+Message-ID: <CACi5LpNeSNHoUcM9xOq0bjN_okaEUDbaz1qyuqAct7BSNLQqKQ@mail.gmail.com>
+References: <CAKv+Gu-gmbWdZ7rxp5qGrtSBQ7dM=3FqF-Pw=J0LaL=oKTMg4w@mail.gmail.com>
+ <CACi5LpOscbcBecWaC3Q9P22kheRYc+M2Ynfusszk14fPY-cJ5A@mail.gmail.com>
+ <20171221103440.GJ28046@linaro.org> <CACi5LpMUnUKxiALAHW9_PE2RYC8GNWLPGpdJ5ca53g=v3rNkfg@mail.gmail.com>
+ <20171222083308.cy3vwlyhig22q5ee@fireball> <CACi5LpNF5i3Eo7nMLr_z9r4VVbXhDwSJCQoiOh-A_jB6hV0_2Q@mail.gmail.com>
+ <20171225032500.GA8877@linaro.org> <CACi5LpMzYidDaC0_yfwgVOisH-FqcNViYj+Z54uKfUtHkJKKXA@mail.gmail.com>
+ <20171226013217.GA2119@dhcp-128-65.nay.redhat.com> <20171226013517.GA2186@dhcp-128-65.nay.redhat.com>
+ <20171226022807.GB8877@linaro.org> <CACi5LpNRtXh-j9Y9HwRatDZwRMr++-ZeaSnk62vD3btpxsVv7w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180108125915.951963528@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ge Song <ge.song@hxt-semitech.com>, Bryan ODonoghue <pure.logic@nexus-software.ie>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dave Young <dyoung@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CACi5LpNRtXh-j9Y9HwRatDZwRMr++-ZeaSnk62vD3btpxsVv7w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-4.14-stable review patch.  If anyone has any objections, please let me know.
+Hello Akashi,
 
-------------------
+On Tue, Dec 26, 2017 at 8:26 AM, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> On Tue, Dec 26, 2017 at 7:58 AM, AKASHI Takahiro
+> <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> On Tue, Dec 26, 2017 at 09:35:17AM +0800, Dave Young wrote:
+>>> [snip]
+>>> > > > Well, we may be able to change pr_warn() to pr_warn_once() here, but
+>>> > > > I hope that adding "numa=off" to kernel command line should also work.
+>>> > >
+>>> > > Hmm, adding "numa=off" to crashkernel bootargs works, and TBH it was
+>>> > > my initial thought process as well, but I am not sure if this will
+>>> > > cause any regressions on aarch64 systems which use crashdump feature.
+>>> >
+>>> > It should be fine since we use numa=off by default for all other arches
+>>> > ie. x86, ppc64 and s390. Actually disabling numa in kdump kernel can save
+>>> > mm component memory usage.
+>>> >
+>>>
+>>> Forgot to say I means in RHEL and Fedora we use numa=off for kdump..
+>>
+>> Thank you for the clarification.
+>> (It might be better to make numa off automatically if maxcpus == 0 (and 1?).)
+>>
+>
+> Not sure if we can leave this to the distribution-specific kdump
+> scripts (as the crashkernel boot can be held up for sufficient time
+> and may appear stuck). The distribution scripts may be different (for
+> e.g. ubuntu and RHEL/fedora) across distributions and may have
+> different bootarg options.
+>
+> So how about considering a kernel fix only which doesn't require
+> relying on changing the distribution-specific kdump scripts, as we
+> should avoid introducing a regression while trying to fix a regression
+> :)
+>
+> Just my 2 cents.
+>
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Sorry for the delay but I was on holidays in the last week.
 
-commit f24c4d478013d82bd1b943df566fff3561d52864 upstream.
+Are you planning to send a patch to fix this issue or do you want me
+to send a RFC version instead?
 
-Commit:
+i think this is a blocking issue for aarch64 kdump support on newer
+kernels (v4.14) and we are already hearing about this issue from other
+users as well, so it would be great to get this fixed now that we have
+root-caused the issue and found a possible way around.
 
-  82c3768b8d68 ("efi/capsule-loader: Use a cached copy of the capsule header")
-
-... refactored the capsule loading code that maps the capsule header,
-to avoid having to map it several times.
-
-However, as it turns out, the vmap() call we ended up removing did not
-just map the header, but the entire capsule image, and dropping this
-virtual mapping breaks capsules that are processed by the firmware
-immediately (i.e., without a reboot).
-
-Unfortunately, that change was part of a larger refactor that allowed
-a quirk to be implemented for Quark, which has a non-standard memory
-layout for capsules, and we have slightly painted ourselves into a
-corner by allowing quirk code to mangle the capsule header and memory
-layout.
-
-So we need to fix this without breaking Quark. Fortunately, Quark does
-not appear to care about the virtual mapping, and so we can simply
-do a partial revert of commit:
-
-  2a457fb31df6 ("efi/capsule-loader: Use page addresses rather than struct page pointers")
-
-... and create a vmap() mapping of the entire capsule (including header)
-based on the reinstated struct page array, unless running on Quark, in
-which case we pass the capsule header copy as before.
-
-Reported-by: Ge Song <ge.song@hxt-semitech.com>
-Tested-by: Bryan O'Donoghue <pure.logic@nexus-software.ie>
-Tested-by: Ge Song <ge.song@hxt-semitech.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Dave Young <dyoung@redhat.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Fixes: 82c3768b8d68 ("efi/capsule-loader: Use a cached copy of the capsule header")
-Link: http://lkml.kernel.org/r/20180102172110.17018-3-ard.biesheuvel@linaro.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
----
- arch/x86/platform/efi/quirks.c        |   13 +++++++++
- drivers/firmware/efi/capsule-loader.c |   45 +++++++++++++++++++++++++++-------
- include/linux/efi.h                   |    4 ++-
- 3 files changed, 52 insertions(+), 10 deletions(-)
-
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -592,7 +592,18 @@ static int qrk_capsule_setup_info(struct
- 	/*
- 	 * Update the first page pointer to skip over the CSH header.
- 	 */
--	cap_info->pages[0] += csh->headersize;
-+	cap_info->phys[0] += csh->headersize;
-+
-+	/*
-+	 * cap_info->capsule should point at a virtual mapping of the entire
-+	 * capsule, starting at the capsule header. Our image has the Quark
-+	 * security header prepended, so we cannot rely on the default vmap()
-+	 * mapping created by the generic capsule code.
-+	 * Given that the Quark firmware does not appear to care about the
-+	 * virtual mapping, let's just point cap_info->capsule at our copy
-+	 * of the capsule header.
-+	 */
-+	cap_info->capsule = &cap_info->header;
- 
- 	return 1;
- }
---- a/drivers/firmware/efi/capsule-loader.c
-+++ b/drivers/firmware/efi/capsule-loader.c
-@@ -20,10 +20,6 @@
- 
- #define NO_FURTHER_WRITE_ACTION -1
- 
--#ifndef phys_to_page
--#define phys_to_page(x)		pfn_to_page((x) >> PAGE_SHIFT)
--#endif
--
- /**
-  * efi_free_all_buff_pages - free all previous allocated buffer pages
-  * @cap_info: pointer to current instance of capsule_info structure
-@@ -35,7 +31,7 @@
- static void efi_free_all_buff_pages(struct capsule_info *cap_info)
- {
- 	while (cap_info->index > 0)
--		__free_page(phys_to_page(cap_info->pages[--cap_info->index]));
-+		__free_page(cap_info->pages[--cap_info->index]);
- 
- 	cap_info->index = NO_FURTHER_WRITE_ACTION;
- }
-@@ -71,6 +67,14 @@ int __efi_capsule_setup_info(struct caps
- 
- 	cap_info->pages = temp_page;
- 
-+	temp_page = krealloc(cap_info->phys,
-+			     pages_needed * sizeof(phys_addr_t *),
-+			     GFP_KERNEL | __GFP_ZERO);
-+	if (!temp_page)
-+		return -ENOMEM;
-+
-+	cap_info->phys = temp_page;
-+
- 	return 0;
- }
- 
-@@ -105,9 +109,24 @@ int __weak efi_capsule_setup_info(struct
-  **/
- static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
- {
-+	bool do_vunmap = false;
- 	int ret;
- 
--	ret = efi_capsule_update(&cap_info->header, cap_info->pages);
-+	/*
-+	 * cap_info->capsule may have been assigned already by a quirk
-+	 * handler, so only overwrite it if it is NULL
-+	 */
-+	if (!cap_info->capsule) {
-+		cap_info->capsule = vmap(cap_info->pages, cap_info->index,
-+					 VM_MAP, PAGE_KERNEL);
-+		if (!cap_info->capsule)
-+			return -ENOMEM;
-+		do_vunmap = true;
-+	}
-+
-+	ret = efi_capsule_update(cap_info->capsule, cap_info->phys);
-+	if (do_vunmap)
-+		vunmap(cap_info->capsule);
- 	if (ret) {
- 		pr_err("capsule update failed\n");
- 		return ret;
-@@ -165,10 +184,12 @@ static ssize_t efi_capsule_write(struct
- 			goto failed;
- 		}
- 
--		cap_info->pages[cap_info->index++] = page_to_phys(page);
-+		cap_info->pages[cap_info->index] = page;
-+		cap_info->phys[cap_info->index] = page_to_phys(page);
- 		cap_info->page_bytes_remain = PAGE_SIZE;
-+		cap_info->index++;
- 	} else {
--		page = phys_to_page(cap_info->pages[cap_info->index - 1]);
-+		page = cap_info->pages[cap_info->index - 1];
- 	}
- 
- 	kbuff = kmap(page);
-@@ -252,6 +273,7 @@ static int efi_capsule_release(struct in
- 	struct capsule_info *cap_info = file->private_data;
- 
- 	kfree(cap_info->pages);
-+	kfree(cap_info->phys);
- 	kfree(file->private_data);
- 	file->private_data = NULL;
- 	return 0;
-@@ -280,6 +302,13 @@ static int efi_capsule_open(struct inode
- 		kfree(cap_info);
- 		return -ENOMEM;
- 	}
-+
-+	cap_info->phys = kzalloc(sizeof(void *), GFP_KERNEL);
-+	if (!cap_info->phys) {
-+		kfree(cap_info->pages);
-+		kfree(cap_info);
-+		return -ENOMEM;
-+	}
- 
- 	file->private_data = cap_info;
- 
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -140,11 +140,13 @@ struct efi_boot_memmap {
- 
- struct capsule_info {
- 	efi_capsule_header_t	header;
-+	efi_capsule_header_t	*capsule;
- 	int			reset_type;
- 	long			index;
- 	size_t			count;
- 	size_t			total_size;
--	phys_addr_t		*pages;
-+	struct page		**pages;
-+	phys_addr_t		*phys;
- 	size_t			page_bytes_remain;
- };
- 
+Regards,
+Bhupesh
