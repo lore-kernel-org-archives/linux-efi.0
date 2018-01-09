@@ -1,86 +1,191 @@
-From: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: arm64 crashkernel fails to boot on acpi-only machines due to ACPI
- regions being no longer mapped as NOMAP
-Date: Tue, 9 Jan 2018 17:16:12 +0530
-Message-ID: <CACi5LpNq0USxDDJ-c=zYdFpR6fQx59aHJN9Z1SRCsXG89OQsZg@mail.gmail.com>
-References: <CACi5LpMUnUKxiALAHW9_PE2RYC8GNWLPGpdJ5ca53g=v3rNkfg@mail.gmail.com>
- <20171222083308.cy3vwlyhig22q5ee@fireball> <CACi5LpNF5i3Eo7nMLr_z9r4VVbXhDwSJCQoiOh-A_jB6hV0_2Q@mail.gmail.com>
- <20171225032500.GA8877@linaro.org> <CACi5LpMzYidDaC0_yfwgVOisH-FqcNViYj+Z54uKfUtHkJKKXA@mail.gmail.com>
- <20171226013217.GA2119@dhcp-128-65.nay.redhat.com> <20171226013517.GA2186@dhcp-128-65.nay.redhat.com>
- <20171226022807.GB8877@linaro.org> <CACi5LpNRtXh-j9Y9HwRatDZwRMr++-ZeaSnk62vD3btpxsVv7w@mail.gmail.com>
- <CACi5LpNeSNHoUcM9xOq0bjN_okaEUDbaz1qyuqAct7BSNLQqKQ@mail.gmail.com> <20180109030717.GA18820@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20180109030717.GA18820-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+From: Daniel Kiper <daniel.kiper@oracle.com>
+Subject: [PATCH 1/4] efi/stub: Extract efi_get_secureboot() to separate file
+Date: Tue,  9 Jan 2018 15:22:22 +0100
+Message-ID: <1515507745-17391-2-git-send-email-daniel.kiper@oracle.com>
+References: <1515507745-17391-1-git-send-email-daniel.kiper@oracle.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1515507745-17391-1-git-send-email-daniel.kiper@oracle.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org
+Cc: ard.biesheuvel@linaro.org, boris.ostrovsky@oracle.com, hpa@zytor.com, jgross@suse.com, konrad.wilk@oracle.com, mingo@redhat.com, tglx@linutronix.de
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jan 9, 2018 at 10:12 AM, AKASHI Takahiro
-<takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> Bhupesh,
->
-> On Tue, Jan 09, 2018 at 01:30:07AM +0530, Bhupesh Sharma wrote:
->> Hello Akashi,
->>
->> On Tue, Dec 26, 2017 at 8:26 AM, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> > On Tue, Dec 26, 2017 at 7:58 AM, AKASHI Takahiro
->> > <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> >> On Tue, Dec 26, 2017 at 09:35:17AM +0800, Dave Young wrote:
->> >>> [snip]
->> >>> > > > Well, we may be able to change pr_warn() to pr_warn_once() here, but
->> >>> > > > I hope that adding "numa=off" to kernel command line should also work.
->> >>> > >
->> >>> > > Hmm, adding "numa=off" to crashkernel bootargs works, and TBH it was
->> >>> > > my initial thought process as well, but I am not sure if this will
->> >>> > > cause any regressions on aarch64 systems which use crashdump feature.
->> >>> >
->> >>> > It should be fine since we use numa=off by default for all other arches
->> >>> > ie. x86, ppc64 and s390. Actually disabling numa in kdump kernel can save
->> >>> > mm component memory usage.
->> >>> >
->> >>>
->> >>> Forgot to say I means in RHEL and Fedora we use numa=off for kdump..
->> >>
->> >> Thank you for the clarification.
->> >> (It might be better to make numa off automatically if maxcpus == 0 (and 1?).)
->> >>
->> >
->> > Not sure if we can leave this to the distribution-specific kdump
->> > scripts (as the crashkernel boot can be held up for sufficient time
->> > and may appear stuck). The distribution scripts may be different (for
->> > e.g. ubuntu and RHEL/fedora) across distributions and may have
->> > different bootarg options.
->> >
->> > So how about considering a kernel fix only which doesn't require
->> > relying on changing the distribution-specific kdump scripts, as we
->> > should avoid introducing a regression while trying to fix a regression
->> > :)
->> >
->> > Just my 2 cents.
->> >
->>
->> Sorry for the delay but I was on holidays in the last week.
->>
->> Are you planning to send a patch to fix this issue or do you want me
->> to send a RFC version instead?
->
-> I should have submitted my own patch before my new year holidays,
-> but I will do so as soon as possible.
+We have to call efi_get_secureboot() from early Xen dom0 boot code to properly
+initialize boot_params.secure_boot. Sadly it lives in the EFI stub. Hence, it is
+not readily reachable from the kernel proper. So, move efi_get_secureboot() to
+separate file which can be included from the core kernel code. Subsequent patch
+will add efi_get_secureboot() call from Xen dom0 boot code.
 
-Thanks for the confirmation.
-I will look forward to the patches and give them a go on the arm64
-boards available with me.
+There is no functional change.
 
-Regards,
-Bhupesh
+Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ drivers/firmware/efi/libstub/secureboot-core.c |   77 ++++++++++++++++++++++++
+ drivers/firmware/efi/libstub/secureboot.c      |   66 +-------------------
+ 2 files changed, 78 insertions(+), 65 deletions(-)
+ create mode 100644 drivers/firmware/efi/libstub/secureboot-core.c
 
->
->> i think this is a blocking issue for aarch64 kdump support on newer
->> kernels (v4.14) and we are already hearing about this issue from other
->> users as well, so it would be great to get this fixed now that we have
->> root-caused the issue and found a possible way around.
->>
->> Regards,
->> Bhupesh
+diff --git a/drivers/firmware/efi/libstub/secureboot-core.c b/drivers/firmware/efi/libstub/secureboot-core.c
+new file mode 100644
+index 0000000..11a4feb
+--- /dev/null
++++ b/drivers/firmware/efi/libstub/secureboot-core.c
+@@ -0,0 +1,77 @@
++/*
++ * Secure boot handling.
++ *
++ * Copyright (C) 2013,2014 Linaro Limited
++ *     Roy Franz <roy.franz@linaro.org>
++ * Copyright (C) 2013 Red Hat, Inc.
++ *     Mark Salter <msalter@redhat.com>
++ *
++ * This file is part of the Linux kernel, and is made available under the
++ * terms of the GNU General Public License version 2.
++ */
++
++/* BIOS variables */
++static const efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
++static const efi_char16_t efi_SecureBoot_name[] = {
++	'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0
++};
++static const efi_char16_t efi_SetupMode_name[] = {
++	'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0
++};
++
++/* SHIM variables */
++static const efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
++static const efi_char16_t shim_MokSBState_name[] = {
++	'M', 'o', 'k', 'S', 'B', 'S', 't', 'a', 't', 'e', 0
++};
++
++/*
++ * Determine whether we're in secure boot mode.
++ */
++enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
++{
++	u32 attr;
++	u8 secboot, setupmode, moksbstate;
++	unsigned long size;
++	efi_status_t status;
++
++	size = sizeof(secboot);
++	status = get_efi_var(efi_SecureBoot_name, &efi_variable_guid,
++			     NULL, &size, &secboot);
++	if (status == EFI_NOT_FOUND)
++		return efi_secureboot_mode_disabled;
++	if (status != EFI_SUCCESS)
++		goto out_efi_err;
++
++	size = sizeof(setupmode);
++	status = get_efi_var(efi_SetupMode_name, &efi_variable_guid,
++			     NULL, &size, &setupmode);
++	if (status != EFI_SUCCESS)
++		goto out_efi_err;
++
++	if (secboot == 0 || setupmode == 1)
++		return efi_secureboot_mode_disabled;
++
++	/*
++	 * See if a user has put the shim into insecure mode. If so, and if the
++	 * variable doesn't have the runtime attribute set, we might as well
++	 * honor that.
++	 */
++	size = sizeof(moksbstate);
++	status = get_efi_var(shim_MokSBState_name, &shim_guid,
++			     &attr, &size, &moksbstate);
++
++	/* If it fails, we don't care why. Default to secure */
++	if (status != EFI_SUCCESS)
++		goto secure_boot_enabled;
++	if (!(attr & EFI_VARIABLE_RUNTIME_ACCESS) && moksbstate == 1)
++		return efi_secureboot_mode_disabled;
++
++secure_boot_enabled:
++	pr_efi(sys_table_arg, "UEFI Secure Boot is enabled.\n");
++	return efi_secureboot_mode_enabled;
++
++out_efi_err:
++	pr_efi_err(sys_table_arg, "Could not determine UEFI Secure Boot status.\n");
++	return efi_secureboot_mode_unknown;
++}
+diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
+index 959777e..4a6159f 100644
+--- a/drivers/firmware/efi/libstub/secureboot.c
++++ b/drivers/firmware/efi/libstub/secureboot.c
+@@ -14,73 +14,9 @@
+ 
+ #include "efistub.h"
+ 
+-/* BIOS variables */
+-static const efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
+-static const efi_char16_t efi_SecureBoot_name[] = {
+-	'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0
+-};
+-static const efi_char16_t efi_SetupMode_name[] = {
+-	'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0
+-};
+-
+-/* SHIM variables */
+-static const efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
+-static efi_char16_t const shim_MokSBState_name[] = {
+-	'M', 'o', 'k', 'S', 'B', 'S', 't', 'a', 't', 'e', 0
+-};
+-
+ #define get_efi_var(name, vendor, ...) \
+ 	efi_call_runtime(get_variable, \
+ 			 (efi_char16_t *)(name), (efi_guid_t *)(vendor), \
+ 			 __VA_ARGS__);
+ 
+-/*
+- * Determine whether we're in secure boot mode.
+- */
+-enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
+-{
+-	u32 attr;
+-	u8 secboot, setupmode, moksbstate;
+-	unsigned long size;
+-	efi_status_t status;
+-
+-	size = sizeof(secboot);
+-	status = get_efi_var(efi_SecureBoot_name, &efi_variable_guid,
+-			     NULL, &size, &secboot);
+-	if (status == EFI_NOT_FOUND)
+-		return efi_secureboot_mode_disabled;
+-	if (status != EFI_SUCCESS)
+-		goto out_efi_err;
+-
+-	size = sizeof(setupmode);
+-	status = get_efi_var(efi_SetupMode_name, &efi_variable_guid,
+-			     NULL, &size, &setupmode);
+-	if (status != EFI_SUCCESS)
+-		goto out_efi_err;
+-
+-	if (secboot == 0 || setupmode == 1)
+-		return efi_secureboot_mode_disabled;
+-
+-	/*
+-	 * See if a user has put the shim into insecure mode. If so, and if the
+-	 * variable doesn't have the runtime attribute set, we might as well
+-	 * honor that.
+-	 */
+-	size = sizeof(moksbstate);
+-	status = get_efi_var(shim_MokSBState_name, &shim_guid,
+-			     &attr, &size, &moksbstate);
+-
+-	/* If it fails, we don't care why. Default to secure */
+-	if (status != EFI_SUCCESS)
+-		goto secure_boot_enabled;
+-	if (!(attr & EFI_VARIABLE_RUNTIME_ACCESS) && moksbstate == 1)
+-		return efi_secureboot_mode_disabled;
+-
+-secure_boot_enabled:
+-	pr_efi(sys_table_arg, "UEFI Secure Boot is enabled.\n");
+-	return efi_secureboot_mode_enabled;
+-
+-out_efi_err:
+-	pr_efi_err(sys_table_arg, "Could not determine UEFI Secure Boot status.\n");
+-	return efi_secureboot_mode_unknown;
+-}
++#include "secureboot-core.c"
+-- 
+1.7.10.4
