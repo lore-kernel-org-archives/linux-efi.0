@@ -1,86 +1,58 @@
 From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: [PATCH 3/4] efi: Tweak efi_get_secureboot() and its data section assignment
-Date: Tue,  9 Jan 2018 15:22:24 +0100
-Message-ID: <1515507745-17391-4-git-send-email-daniel.kiper@oracle.com>
+Subject: [PATCH 2/4] x86/xen/efi: Initialize
+	boot_params.secure_boot in xen_efi_init()
+Date: Tue,  9 Jan 2018 15:22:23 +0100
+Message-ID: <1515507745-17391-3-git-send-email-daniel.kiper@oracle.com>
 References: <1515507745-17391-1-git-send-email-daniel.kiper@oracle.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xenproject.org>
 In-Reply-To: <1515507745-17391-1-git-send-email-daniel.kiper@oracle.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <https://lists.xenproject.org/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xenproject.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xenproject.org>
+List-Help: <mailto:xen-devel-request@lists.xenproject.org?subject=help>
+List-Subscribe: <https://lists.xenproject.org/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xenproject.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xenproject.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xenproject.org>
 To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org
-Cc: ard.biesheuvel@linaro.org, boris.ostrovsky@oracle.com, hpa@zytor.com, jgross@suse.com, konrad.wilk@oracle.com, mingo@redhat.com, tglx@linutronix.de
+Cc: jgross@suse.com, ard.biesheuvel@linaro.org, mingo@redhat.com, hpa@zytor.com, boris.ostrovsky@oracle.com, tglx@linutronix.de
 List-Id: linux-efi@vger.kernel.org
 
-Otherwise they are not freed after the kernel proper init.
-
-Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
----
- arch/x86/xen/efi.c                             |    3 +++
- drivers/firmware/efi/libstub/secureboot-core.c |   12 ++++++------
- drivers/firmware/efi/libstub/secureboot.c      |    3 +++
- 3 files changed, 12 insertions(+), 6 deletions(-)
-
-diff --git a/arch/x86/xen/efi.c b/arch/x86/xen/efi.c
-index e089fa7..5ad2b8f 100644
---- a/arch/x86/xen/efi.c
-+++ b/arch/x86/xen/efi.c
-@@ -28,6 +28,9 @@
- #include <asm/setup.h>
- #include <asm/xen/hypercall.h>
- 
-+#define __sb_init	__init
-+#define __sb_initconst	__initconst
-+
- #define pr_efi(sys_table, msg)
- #define pr_efi_err(sys_table, msg)
- 
-diff --git a/drivers/firmware/efi/libstub/secureboot-core.c b/drivers/firmware/efi/libstub/secureboot-core.c
-index 11a4feb..d503ee4 100644
---- a/drivers/firmware/efi/libstub/secureboot-core.c
-+++ b/drivers/firmware/efi/libstub/secureboot-core.c
-@@ -11,24 +11,24 @@
-  */
- 
- /* BIOS variables */
--static const efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
--static const efi_char16_t efi_SecureBoot_name[] = {
-+static const efi_guid_t efi_variable_guid __sb_initconst = EFI_GLOBAL_VARIABLE_GUID;
-+static const efi_char16_t efi_SecureBoot_name[] __sb_initconst = {
- 	'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0
- };
--static const efi_char16_t efi_SetupMode_name[] = {
-+static const efi_char16_t efi_SetupMode_name[] __sb_initconst = {
- 	'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0
- };
- 
- /* SHIM variables */
--static const efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
--static const efi_char16_t shim_MokSBState_name[] = {
-+static const efi_guid_t shim_guid __sb_initconst = EFI_SHIM_LOCK_GUID;
-+static const efi_char16_t shim_MokSBState_name[] __sb_initconst = {
- 	'M', 'o', 'k', 'S', 'B', 'S', 't', 'a', 't', 'e', 0
- };
- 
- /*
-  * Determine whether we're in secure boot mode.
-  */
--enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
-+enum __sb_init efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
- {
- 	u32 attr;
- 	u8 secboot, setupmode, moksbstate;
-diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-index 4a6159f..1142170 100644
---- a/drivers/firmware/efi/libstub/secureboot.c
-+++ b/drivers/firmware/efi/libstub/secureboot.c
-@@ -14,6 +14,9 @@
- 
- #include "efistub.h"
- 
-+#define __sb_init
-+#define __sb_initconst
-+
- #define get_efi_var(name, vendor, ...) \
- 	efi_call_runtime(get_variable, \
- 			 (efi_char16_t *)(name), (efi_guid_t *)(vendor), \
--- 
-1.7.10.4
+T3RoZXJ3aXNlIHRoZSBrZXJuZWwgcmVwb3J0cyBpbmNvcnJlY3QgVUVGSSBzZWN1cmUgYm9vdCBz
+dGF0ZSBpbiB0aGUgWGVuIGRvbTAuCgpCeSB0aGUgd2F5IGZpeCBDRkxBR1NfbW11X3B2Lm8gYXNz
+aWdubWVudCBhbGlnbm1lbnQuCgpTaWduZWQtb2ZmLWJ5OiBEYW5pZWwgS2lwZXIgPGRhbmllbC5r
+aXBlckBvcmFjbGUuY29tPgotLS0KIGFyY2gveDg2L3hlbi9NYWtlZmlsZSB8ICAgIDQgKysrLQog
+YXJjaC94ODYveGVuL2VmaS5jICAgIHwgICAxMSArKysrKysrKysrKwogMiBmaWxlcyBjaGFuZ2Vk
+LCAxNCBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pCgpkaWZmIC0tZ2l0IGEvYXJjaC94ODYv
+eGVuL01ha2VmaWxlIGIvYXJjaC94ODYveGVuL01ha2VmaWxlCmluZGV4IGQ4M2NiNTQuLjFiMDc2
+NjQgMTAwNjQ0Ci0tLSBhL2FyY2gveDg2L3hlbi9NYWtlZmlsZQorKysgYi9hcmNoL3g4Ni94ZW4v
+TWFrZWZpbGUKQEAgLTEyLDcgKzEyLDkgQEAgZW5kaWYKICMgTWFrZSBzdXJlIGVhcmx5IGJvb3Qg
+aGFzIG5vIHN0YWNrcHJvdGVjdG9yCiBub3N0YWNrcCA6PSAkKGNhbGwgY2Mtb3B0aW9uLCAtZm5v
+LXN0YWNrLXByb3RlY3RvcikKIENGTEFHU19lbmxpZ2h0ZW5fcHYubwkJOj0gJChub3N0YWNrcCkK
+LUNGTEFHU19tbXVfcHYubwkJOj0gJChub3N0YWNrcCkKK0NGTEFHU19tbXVfcHYubwkJCTo9ICQo
+bm9zdGFja3ApCisKK0NGTEFHU19lZmkubwkJCSs9IC1JJChzcmN0cmVlKS9kcml2ZXJzL2Zpcm13
+YXJlCiAKIG9iai15CQk6PSBlbmxpZ2h0ZW4ubyBtdWx0aWNhbGxzLm8gbW11Lm8gaXJxLm8gXAog
+CQkJdGltZS5vIHhlbi1hc20ubyB4ZW4tYXNtXyQoQklUUykubyBcCmRpZmYgLS1naXQgYS9hcmNo
+L3g4Ni94ZW4vZWZpLmMgYi9hcmNoL3g4Ni94ZW4vZWZpLmMKaW5kZXggYTE4NzAzYi4uZTA4OWZh
+NyAxMDA2NDQKLS0tIGEvYXJjaC94ODYveGVuL2VmaS5jCisrKyBiL2FyY2gveDg2L3hlbi9lZmku
+YwpAQCAtMjgsNiArMjgsMTUgQEAKICNpbmNsdWRlIDxhc20vc2V0dXAuaD4KICNpbmNsdWRlIDxh
+c20veGVuL2h5cGVyY2FsbC5oPgogCisjZGVmaW5lIHByX2VmaShzeXNfdGFibGUsIG1zZykKKyNk
+ZWZpbmUgcHJfZWZpX2VycihzeXNfdGFibGUsIG1zZykKKworI2RlZmluZSBnZXRfZWZpX3Zhcihu
+YW1lLCB2ZW5kb3IsIGF0dHIsIGRhdGFfc2l6ZSwgZGF0YSkgXAorCQl4ZW5fZWZpX2dldF92YXJp
+YWJsZSgoZWZpX2NoYXIxNl90ICopbmFtZSwgKGVmaV9ndWlkX3QgKil2ZW5kb3IsIFwKKwkJCQkg
+ICAgIGF0dHIsIGRhdGFfc2l6ZSwgZGF0YSkKKworI2luY2x1ZGUgPGVmaS9saWJzdHViL3NlY3Vy
+ZWJvb3QtY29yZS5jPgorCiBzdGF0aWMgZWZpX2NoYXIxNl90IHZlbmRvclsxMDBdIF9faW5pdGRh
+dGE7CiAKIHN0YXRpYyBlZmlfc3lzdGVtX3RhYmxlX3QgZWZpX3N5c3RhYl94ZW4gX19pbml0ZGF0
+YSA9IHsKQEAgLTEyOSw2ICsxMzgsOCBAQCB2b2lkIF9faW5pdCB4ZW5fZWZpX2luaXQodm9pZCkK
+IAlib290X3BhcmFtcy5lZmlfaW5mby5lZmlfc3lzdGFiID0gKF9fdTMyKV9fcGEoZWZpX3N5c3Rh
+Yl94ZW4pOwogCWJvb3RfcGFyYW1zLmVmaV9pbmZvLmVmaV9zeXN0YWJfaGkgPSAoX191MzIpKF9f
+cGEoZWZpX3N5c3RhYl94ZW4pID4+IDMyKTsKIAorCWJvb3RfcGFyYW1zLnNlY3VyZV9ib290ID0g
+ZWZpX2dldF9zZWN1cmVib290KGVmaV9zeXN0YWJfeGVuKTsKKwogCXNldF9iaXQoRUZJX0JPT1Qs
+ICZlZmkuZmxhZ3MpOwogCXNldF9iaXQoRUZJX1BBUkFWSVJULCAmZWZpLmZsYWdzKTsKIAlzZXRf
+Yml0KEVGSV82NEJJVCwgJmVmaS5mbGFncyk7Ci0tIAoxLjcuMTAuNAoKCl9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fClhlbi1kZXZlbCBtYWlsaW5nIGxpc3QK
+WGVuLWRldmVsQGxpc3RzLnhlbnByb2plY3Qub3JnCmh0dHBzOi8vbGlzdHMueGVucHJvamVjdC5v
+cmcvbWFpbG1hbi9saXN0aW5mby94ZW4tZGV2ZWw=
