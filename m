@@ -1,58 +1,50 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: [PATCH 2/4] x86/xen/efi: Initialize
-	boot_params.secure_boot in xen_efi_init()
-Date: Tue,  9 Jan 2018 15:22:23 +0100
-Message-ID: <1515507745-17391-3-git-send-email-daniel.kiper@oracle.com>
-References: <1515507745-17391-1-git-send-email-daniel.kiper@oracle.com>
+From: Jiri Bohac <jbohac-AlSwsSmVLrQ@public.gmane.org>
+Subject: Re: [PATCH 08/30] kexec_file: Restrict at runtime if the kernel is
+ locked down
+Date: Thu, 11 Jan 2018 12:59:15 +0100
+Message-ID: <20180111115915.dejachty3l7fwpmf@dwarf.suse.cz>
+References: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
+ <151024869793.28329.4817577607302613028.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xenproject.org>
-In-Reply-To: <1515507745-17391-1-git-send-email-daniel.kiper@oracle.com>
-List-Unsubscribe: <https://lists.xenproject.org/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xenproject.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xenproject.org>
-List-Help: <mailto:xen-devel-request@lists.xenproject.org?subject=help>
-List-Subscribe: <https://lists.xenproject.org/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xenproject.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xenproject.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xenproject.org>
-To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org
-Cc: jgross@suse.com, ard.biesheuvel@linaro.org, mingo@redhat.com, hpa@zytor.com, boris.ostrovsky@oracle.com, tglx@linutronix.de
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <151024869793.28329.4817577607302613028.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-T3RoZXJ3aXNlIHRoZSBrZXJuZWwgcmVwb3J0cyBpbmNvcnJlY3QgVUVGSSBzZWN1cmUgYm9vdCBz
-dGF0ZSBpbiB0aGUgWGVuIGRvbTAuCgpCeSB0aGUgd2F5IGZpeCBDRkxBR1NfbW11X3B2Lm8gYXNz
-aWdubWVudCBhbGlnbm1lbnQuCgpTaWduZWQtb2ZmLWJ5OiBEYW5pZWwgS2lwZXIgPGRhbmllbC5r
-aXBlckBvcmFjbGUuY29tPgotLS0KIGFyY2gveDg2L3hlbi9NYWtlZmlsZSB8ICAgIDQgKysrLQog
-YXJjaC94ODYveGVuL2VmaS5jICAgIHwgICAxMSArKysrKysrKysrKwogMiBmaWxlcyBjaGFuZ2Vk
-LCAxNCBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pCgpkaWZmIC0tZ2l0IGEvYXJjaC94ODYv
-eGVuL01ha2VmaWxlIGIvYXJjaC94ODYveGVuL01ha2VmaWxlCmluZGV4IGQ4M2NiNTQuLjFiMDc2
-NjQgMTAwNjQ0Ci0tLSBhL2FyY2gveDg2L3hlbi9NYWtlZmlsZQorKysgYi9hcmNoL3g4Ni94ZW4v
-TWFrZWZpbGUKQEAgLTEyLDcgKzEyLDkgQEAgZW5kaWYKICMgTWFrZSBzdXJlIGVhcmx5IGJvb3Qg
-aGFzIG5vIHN0YWNrcHJvdGVjdG9yCiBub3N0YWNrcCA6PSAkKGNhbGwgY2Mtb3B0aW9uLCAtZm5v
-LXN0YWNrLXByb3RlY3RvcikKIENGTEFHU19lbmxpZ2h0ZW5fcHYubwkJOj0gJChub3N0YWNrcCkK
-LUNGTEFHU19tbXVfcHYubwkJOj0gJChub3N0YWNrcCkKK0NGTEFHU19tbXVfcHYubwkJCTo9ICQo
-bm9zdGFja3ApCisKK0NGTEFHU19lZmkubwkJCSs9IC1JJChzcmN0cmVlKS9kcml2ZXJzL2Zpcm13
-YXJlCiAKIG9iai15CQk6PSBlbmxpZ2h0ZW4ubyBtdWx0aWNhbGxzLm8gbW11Lm8gaXJxLm8gXAog
-CQkJdGltZS5vIHhlbi1hc20ubyB4ZW4tYXNtXyQoQklUUykubyBcCmRpZmYgLS1naXQgYS9hcmNo
-L3g4Ni94ZW4vZWZpLmMgYi9hcmNoL3g4Ni94ZW4vZWZpLmMKaW5kZXggYTE4NzAzYi4uZTA4OWZh
-NyAxMDA2NDQKLS0tIGEvYXJjaC94ODYveGVuL2VmaS5jCisrKyBiL2FyY2gveDg2L3hlbi9lZmku
-YwpAQCAtMjgsNiArMjgsMTUgQEAKICNpbmNsdWRlIDxhc20vc2V0dXAuaD4KICNpbmNsdWRlIDxh
-c20veGVuL2h5cGVyY2FsbC5oPgogCisjZGVmaW5lIHByX2VmaShzeXNfdGFibGUsIG1zZykKKyNk
-ZWZpbmUgcHJfZWZpX2VycihzeXNfdGFibGUsIG1zZykKKworI2RlZmluZSBnZXRfZWZpX3Zhcihu
-YW1lLCB2ZW5kb3IsIGF0dHIsIGRhdGFfc2l6ZSwgZGF0YSkgXAorCQl4ZW5fZWZpX2dldF92YXJp
-YWJsZSgoZWZpX2NoYXIxNl90ICopbmFtZSwgKGVmaV9ndWlkX3QgKil2ZW5kb3IsIFwKKwkJCQkg
-ICAgIGF0dHIsIGRhdGFfc2l6ZSwgZGF0YSkKKworI2luY2x1ZGUgPGVmaS9saWJzdHViL3NlY3Vy
-ZWJvb3QtY29yZS5jPgorCiBzdGF0aWMgZWZpX2NoYXIxNl90IHZlbmRvclsxMDBdIF9faW5pdGRh
-dGE7CiAKIHN0YXRpYyBlZmlfc3lzdGVtX3RhYmxlX3QgZWZpX3N5c3RhYl94ZW4gX19pbml0ZGF0
-YSA9IHsKQEAgLTEyOSw2ICsxMzgsOCBAQCB2b2lkIF9faW5pdCB4ZW5fZWZpX2luaXQodm9pZCkK
-IAlib290X3BhcmFtcy5lZmlfaW5mby5lZmlfc3lzdGFiID0gKF9fdTMyKV9fcGEoZWZpX3N5c3Rh
-Yl94ZW4pOwogCWJvb3RfcGFyYW1zLmVmaV9pbmZvLmVmaV9zeXN0YWJfaGkgPSAoX191MzIpKF9f
-cGEoZWZpX3N5c3RhYl94ZW4pID4+IDMyKTsKIAorCWJvb3RfcGFyYW1zLnNlY3VyZV9ib290ID0g
-ZWZpX2dldF9zZWN1cmVib290KGVmaV9zeXN0YWJfeGVuKTsKKwogCXNldF9iaXQoRUZJX0JPT1Qs
-ICZlZmkuZmxhZ3MpOwogCXNldF9iaXQoRUZJX1BBUkFWSVJULCAmZWZpLmZsYWdzKTsKIAlzZXRf
-Yml0KEVGSV82NEJJVCwgJmVmaS5mbGFncyk7Ci0tIAoxLjcuMTAuNAoKCl9fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fClhlbi1kZXZlbCBtYWlsaW5nIGxpc3QK
-WGVuLWRldmVsQGxpc3RzLnhlbnByb2plY3Qub3JnCmh0dHBzOi8vbGlzdHMueGVucHJvamVjdC5v
-cmcvbWFpbG1hbi9saXN0aW5mby94ZW4tZGV2ZWw=
+Hi,
+
+sorry for replying to such an old thread.
+
+On Thu, Nov 09, 2017 at 05:31:38PM +0000, David Howells wrote:
+> When KEXEC_VERIFY_SIG is not enabled, kernel should not load images through
+> kexec_file systemcall if the kernel is locked down unless IMA can be used
+> to validate the image.
+
+I don't like the idea that the lockdown (which is a runtime
+thing) requires a compile time option (KEXEC_VERIFY_SIG) that
+forces the verification even when the kernel is then not locked
+down at runtime.
+
+Distribution kernels will then have KEXEC_VERIFY_SIG on and
+everyone will need signed kexec images even when totally
+uninterested in secureboot.
+
+So instead of this patch, I propose the two followup patches that
+split KEXEC_VERIFY_SIG into KEXEC_SIG and KEXEC_SIG_FORCE just as
+we have with modules:
+
+[PATCH 08a/30] kexec_file: split KEXEC_VERIFY_SIG into KEXEC_SIG and KEXEC_SIG_FORCE
+[PATCH 08b/30] kexec_file: Restrict at runtime if the kernel is locked down
+
+Lockdown would not require KEXEC_SIG_FORCE but when enabled it
+would check the signature.
+
+Thanks,
+
+-- 
+Jiri Bohac <jbohac-AlSwsSmVLrQ@public.gmane.org>
+SUSE Labs, Prague, Czechia
