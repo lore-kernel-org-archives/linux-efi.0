@@ -1,39 +1,53 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH 08/30] kexec_file: Restrict at runtime if the kernel is locked down
-Date: Thu, 11 Jan 2018 12:47:57 +0000
-Message-ID: <13005.1515674877@warthog.procyon.org.uk>
-References: <12880.1515674600@warthog.procyon.org.uk> <20180111115915.dejachty3l7fwpmf@dwarf.suse.cz> <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk> <151024869793.28329.4817577607302613028.stgit@warthog.procyon.org.uk>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 0/4] x86/xen/efi: Initialize UEFI secure boot state during
+ dom0 boot
+Date: Thu, 11 Jan 2018 12:51:07 +0000
+Message-ID: <CAKv+Gu-_SHXCkfX5d3R08nW6rc4giR1d4VhDjF8J5miaTfSDow@mail.gmail.com>
+References: <1515507745-17391-1-git-send-email-daniel.kiper@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <12880.1515674600@warthog.procyon.org.uk>
-Content-ID: <13004.1515674877.1@warthog.procyon.org.uk>
-Sender: owner-linux-security-module@vger.kernel.org
-To: Jiri Bohac <jbohac@suse.cz>
-Cc: dhowells@redhat.com, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, jforbes@redhat.com, Chun-Yi Lee <joeyli.kernel@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1515507745-17391-1-git-send-email-daniel.kiper@oracle.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Daniel Kiper <daniel.kiper@oracle.com>, Ingo Molnar <mingo@redhat.com>
+Cc: linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, xen-devel <xen-devel@lists.xenproject.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, "H. Peter Anvin" <hpa@zytor.com>, Juergen Gross <jgross@suse.com>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
-David Howells <dhowells@redhat.com> wrote:
+On 9 January 2018 at 14:22, Daniel Kiper <daniel.kiper@oracle.com> wrote:
+> Hi,
+>
+> Initialize UEFI secure boot state during dom0 boot. Otherwise the kernel
+> may not even know that it runs on secure boot enabled platform.
+>
 
-> > I don't like the idea that the lockdown (which is a runtime
-> > thing) requires a compile time option (KEXEC_VERIFY_SIG) that
-> > forces the verification even when the kernel is then not locked
-> > down at runtime.
-> 
-> It doesn't.  The EPERM only triggers if:
-> 
->  (1) File signatures aren't mandatory (ie. CONFIG_KEXEC_VERIFY_SIG) is not
->      set, and
-> 
->  (2) you're not using IMA appraisal to validate the file contents, and
-> 
->  (3) lockdown mode is enabled.
-> 
-> If file signatures are mandatory or IMA appraisal is in use, then the lockdown
-> state doesn't need to be checked.
+Hi Daniel,
 
-Having said that, I do see your point, I think.  We should still let through
-validly signed images, even if signatures aren't mandatory in lockdown mode.
+I must say, I am not too thrilled with the approach you have chosen
+here. #including .c files in other .c files, and using #defines to
+override C functions or other stub functionality is rather fragile. In
+particular, it means we have to start caring about not breaking
+Xen/x86 code when making modifications to the EFI stub, and that code
+is already difficult enough to maintain, given that it is shared
+between ARM, arm64 and x86, and runs either from the decompressor or
+the kernel proper (arm64) but in the context of the UEFI firmware.
+None of the stub code currently runs in ordinary kernel context.
 
-David
+So please, could you try to find another way to do this?
+
+Thanks,
+Ard.
+
+
+>
+>  arch/x86/xen/Makefile                          |    4 +++-
+>  arch/x86/xen/efi.c                             |   14 +++++++++++++
+>  drivers/firmware/efi/libstub/secureboot-core.c |   77 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  drivers/firmware/efi/libstub/secureboot.c      |   66 +++++------------------------------------------------------
+>  4 files changed, 99 insertions(+), 62 deletions(-)
+>
+> Daniel Kiper (4):
+>       efi/stub: Extract efi_get_secureboot() to separate file
+>       x86/xen/efi: Initialize boot_params.secure_boot in xen_efi_init()
+>       efi: Tweak efi_get_secureboot() and its data section assignment
+>       efi: Rename efi_get_secureboot() to __efi_get_secureboot() and make it static
+>
