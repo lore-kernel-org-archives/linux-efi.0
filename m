@@ -1,58 +1,60 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: Re: [PATCH 0/4] x86/xen/efi: Initialize UEFI secure boot state
- during dom0 boot
-Date: Fri, 12 Jan 2018 12:24:50 +0100
-Message-ID: <20180112112450.GD21705@olila.local.net-space.pl>
-References: <1515507745-17391-1-git-send-email-daniel.kiper@oracle.com>
- <CAKv+Gu-_SHXCkfX5d3R08nW6rc4giR1d4VhDjF8J5miaTfSDow@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efi: Clarify that reset attack mitigation needs
+ appropriate userspace
+Date: Mon, 15 Jan 2018 09:15:00 +0000
+Message-ID: <CAKv+Gu8f1c7QDcgL7d5DifLaosRA6GzmsY6RJDrHtrduYh9k7g@mail.gmail.com>
+References: <20180108225000.197906-1-mjg59@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-_SHXCkfX5d3R08nW6rc4giR1d4VhDjF8J5miaTfSDow@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Ingo Molnar <mingo@redhat.com>, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, xen-devel <xen-devel@lists.xenproject.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, "H. Peter Anvin" <hpa@zytor.com>, Juergen Gross <jgross@suse.com>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Thomas Gleixner <tglx@linutronix.de>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20180108225000.197906-1-mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Ard,
-
-On Thu, Jan 11, 2018 at 12:51:07PM +0000, Ard Biesheuvel wrote:
-> On 9 January 2018 at 14:22, Daniel Kiper <daniel.kiper@oracle.com> wrote:
-> > Hi,
-> >
-> > Initialize UEFI secure boot state during dom0 boot. Otherwise the kernel
-> > may not even know that it runs on secure boot enabled platform.
+On 8 January 2018 at 22:50, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org> wrote:
+> Some distributions have turned on the reset attack mitigation feature,
+> which is designed to force the platform to clear the contents of RAM if
+> the machine is shut down uncleanly. However, in order for the platform
+> to be able to determine whether the shutdown was clean or not, userspace
+> has to be configured to clear the MemoryOverwriteRequest flag on
+> shutdown - otherwise the firmware will end up clearing RAM on every
+> reboot, which is unnecessarily time consuming. Add some additional
+> clarity to the kconfig text to reduce the risk of systems being
+> configured this way.
 >
-> Hi Daniel,
+> Signed-off-by: Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Cc: stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+
+Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+
+Ingo, do you mind picking this up directly?
+
+https://marc.info/?l=linux-efi&m=151545181706115
+
+> ---
+>  drivers/firmware/efi/Kconfig | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
 >
-> I must say, I am not too thrilled with the approach you have chosen
-> here. #including .c files in other .c files, and using #defines to
-> override C functions or other stub functionality is rather fragile. In
-
-TBH I do not like it too. Sadly I have not find a better solution for
-that. I wish to avoid code duplication as much as possible because
-otherwise it will fall out of sync sooner or later (usually sooner).
-Similar thing happened in different part of Xen EFI code a few months ago.
-
-> particular, it means we have to start caring about not breaking
-> Xen/x86 code when making modifications to the EFI stub, and that code
-> is already difficult enough to maintain, given that it is shared
-> between ARM, arm64 and x86, and runs either from the decompressor or
-> the kernel proper (arm64) but in the context of the UEFI firmware.
-
-I understand that.
-
-> None of the stub code currently runs in ordinary kernel context.
-
-Yep.
-
-> So please, could you try to find another way to do this?
-
-I am happy to improve the situation, however, I am afraid that it is
-difficult here. Stub and kernel proper are separate entities and simple
-linking does not work. So, It seems to me that only play with includes
-will allow us to not duplicate the code. However, if you have a better
-idea I am happy to implement it.
-
-Daniel
+> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+> index 2b4c39fdfa91..86210f75d233 100644
+> --- a/drivers/firmware/efi/Kconfig
+> +++ b/drivers/firmware/efi/Kconfig
+> @@ -159,7 +159,10 @@ config RESET_ATTACK_MITIGATION
+>           using the TCG Platform Reset Attack Mitigation specification. This
+>           protects against an attacker forcibly rebooting the system while it
+>           still contains secrets in RAM, booting another OS and extracting the
+> -         secrets.
+> +         secrets. This should only be enabled when userland is configured to
+> +         clear the MemoryOverwriteRequest flag on clean shutdown after secrets
+> +         have been evicted, since otherwise it will trigger even on clean
+> +         reboots.
+>
+>  endmenu
+>
+> --
+> 2.16.0.rc0.223.g4a4ac83678-goog
+>
