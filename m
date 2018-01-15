@@ -1,60 +1,64 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi: Clarify that reset attack mitigation needs
- appropriate userspace
-Date: Mon, 15 Jan 2018 09:15:00 +0000
-Message-ID: <CAKv+Gu8f1c7QDcgL7d5DifLaosRA6GzmsY6RJDrHtrduYh9k7g@mail.gmail.com>
-References: <20180108225000.197906-1-mjg59@google.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.14 090/118] x86/pti: Unbreak EFI old_memmap
+Date: Mon, 15 Jan 2018 13:35:17 +0100
+Message-ID: <20180115123420.778955978@linuxfoundation.org>
+References: <20180115123415.325497625@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20180108225000.197906-1-mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180115123415.325497625@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Dimitri Sivanich <sivanich@hpe.com>, Jiri Kosina <jkosina@suse.cz>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Dave Hansen <dave.hansen@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 8 January 2018 at 22:50, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org> wrote:
-> Some distributions have turned on the reset attack mitigation feature,
-> which is designed to force the platform to clear the contents of RAM if
-> the machine is shut down uncleanly. However, in order for the platform
-> to be able to determine whether the shutdown was clean or not, userspace
-> has to be configured to clear the MemoryOverwriteRequest flag on
-> shutdown - otherwise the firmware will end up clearing RAM on every
-> reboot, which is unnecessarily time consuming. Add some additional
-> clarity to the kconfig text to reduce the risk of systems being
-> configured this way.
->
-> Signed-off-by: Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> Cc: stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+4.14-stable review patch.  If anyone has any objections, please let me know.
 
-Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+------------------
 
-Ingo, do you mind picking this up directly?
+From: Jiri Kosina <jkosina@suse.cz>
 
-https://marc.info/?l=linux-efi&m=151545181706115
+commit de53c3786a3ce162a1c815d0c04c766c23ec9c0a upstream.
 
-> ---
->  drivers/firmware/efi/Kconfig | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-> index 2b4c39fdfa91..86210f75d233 100644
-> --- a/drivers/firmware/efi/Kconfig
-> +++ b/drivers/firmware/efi/Kconfig
-> @@ -159,7 +159,10 @@ config RESET_ATTACK_MITIGATION
->           using the TCG Platform Reset Attack Mitigation specification. This
->           protects against an attacker forcibly rebooting the system while it
->           still contains secrets in RAM, booting another OS and extracting the
-> -         secrets.
-> +         secrets. This should only be enabled when userland is configured to
-> +         clear the MemoryOverwriteRequest flag on clean shutdown after secrets
-> +         have been evicted, since otherwise it will trigger even on clean
-> +         reboots.
->
->  endmenu
->
-> --
-> 2.16.0.rc0.223.g4a4ac83678-goog
->
+EFI_OLD_MEMMAP's efi_call_phys_prolog() calls set_pgd() with swapper PGD that
+has PAGE_USER set, which makes PTI set NX on it, and therefore EFI can't
+execute it's code.
+
+Fix that by forcefully clearing _PAGE_NX from the PGD (this can't be done
+by the pgprot API).
+
+_PAGE_NX will be automatically reintroduced in efi_call_phys_epilog(), as
+_set_pgd() will again notice that this is _PAGE_USER, and set _PAGE_NX on
+it.
+
+Tested-by: Dimitri Sivanich <sivanich@hpe.com>
+Signed-off-by: Jiri Kosina <jkosina@suse.cz>
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+Acked-by: Dave Hansen <dave.hansen@linux.intel.com>
+Cc: Andrea Arcangeli <aarcange@redhat.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/nycvar.YFH.7.76.1801052215460.11852@cbobk.fhfr.pm
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ arch/x86/platform/efi/efi_64.c |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -134,7 +134,9 @@ pgd_t * __init efi_call_phys_prolog(void
+ 				pud[j] = *pud_offset(p4d_k, vaddr);
+ 			}
+ 		}
++		pgd_offset_k(pgd * PGDIR_SIZE)->pgd &= ~_PAGE_NX;
+ 	}
++
+ out:
+ 	__flush_tlb_all();
+ 
