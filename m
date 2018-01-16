@@ -1,96 +1,38 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: [PATCH] efi/arm*: Only register page tables when they exist
-Date: Tue, 16 Jan 2018 14:08:32 +0000
-Message-ID: <20180116140832.26731-1-mark.rutland@arm.com>
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 08a/30] kexec_file: split KEXEC_VERIFY_SIG into KEXEC_SIG and KEXEC_SIG_FORCE
+Date: Tue, 16 Jan 2018 16:31:51 +0000
+Message-ID: <4582.1516120311@warthog.procyon.org.uk>
+References: <20180111120157.23qceywzi6omvvkb@dwarf.suse.cz> <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk> <151024869793.28329.4817577607302613028.stgit@warthog.procyon.org.uk> <20180111115915.dejachty3l7fwpmf@dwarf.suse.cz>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20180111120157.23qceywzi6omvvkb-Q+Z4OdfSLAKN3ZZ/Hiejyg@public.gmane.org>
+Content-ID: <4581.1516120311.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jiri Bohac <jbohac-AlSwsSmVLrQ@public.gmane.org>
+Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Currently the arm/arm64 runtime code registers the runtime servies
-pagetables with ptdump regardless of whether runtime services page
-tables have been created.
+I think that your code isn't quite right.  Looking at the patched code:
 
-As efi_mm.pgd is NULL in these cases, attempting to dump the efi page
-tables results in a NULL pointer dereference in the ptdump code:
+    #ifdef CONFIG_KEXEC_SIG
+	sig_err = arch_kexec_kernel_verify_sig(image, image->kernel_buf,
+					   image->kernel_buf_len);
+	if (sig_err)
+		pr_debug("kernel signature verification failed.\n");
+	else
+		pr_debug("kernel signature verification successful.\n");
+    #endif
 
-/sys/kernel/debug# cat efi_page_tables
-[  479.522600] Unable to handle kernel NULL pointer dereference at virtual address 00000000
-[  479.522715] Mem abort info:
-[  479.522764]   ESR = 0x96000006
-[  479.522850]   Exception class = DABT (current EL), IL = 32 bits
-[  479.522899]   SET = 0, FnV = 0
-[  479.522937]   EA = 0, S1PTW = 0
-[  479.528200] Data abort info:
-[  479.528230]   ISV = 0, ISS = 0x00000006
-[  479.528317]   CM = 0, WnR = 0
-[  479.528317] user pgtable: 4k pages, 48-bit VAs, pgd = 0000000064ab0cb0
-[  479.528449] [0000000000000000] *pgd=00000000fbbe4003, *pud=00000000fb66e003, *pmd=0000000000000000
-[  479.528600] Internal error: Oops: 96000006 [#1] PREEMPT SMP
-[  479.528664] Modules linked in:
-[  479.528699] CPU: 0 PID: 2457 Comm: cat Not tainted 4.15.0-rc3-00065-g2ad2ee7ecb5c-dirty #7
-[  479.528799] Hardware name: FVP Base (DT)
-[  479.528899] pstate: 00400009 (nzcv daif +PAN -UAO)
-[  479.528941] pc : walk_pgd.isra.1+0x20/0x1d0
-[  479.529011] lr : ptdump_walk_pgd+0x30/0x50
-[  479.529105] sp : ffff00000bf4bc20
-[  479.529185] x29: ffff00000bf4bc20 x28: 0000ffff9d22e000
-[  479.529271] x27: 0000000000020000 x26: ffff80007b4c63c0
-[  479.529358] x25: 00000000014000c0 x24: ffff80007c098900
-[  479.529445] x23: ffff00000bf4beb8 x22: 0000000000000000
-[  479.529532] x21: ffff00000bf4bd70 x20: 0000000000000001
-[  479.529618] x19: ffff00000bf4bcb0 x18: 0000000000000000
-[  479.529760] x17: 000000000041a1c8 x16: ffff0000082139d8
-[  479.529800] x15: 0000ffff9d3c6030 x14: 0000ffff9d2527f4
-[  479.529924] x13: 00000000000003f3 x12: 0000000000000038
-[  479.530000] x11: 0000000000000003 x10: 0101010101010101
-[  479.530099] x9 : 0000000017e94050 x8 : 000000000000003f
-[  479.530226] x7 : 0000000000000000 x6 : 0000000000000000
-[  479.530313] x5 : 0000000000000001 x4 : 0000000000000000
-[  479.530416] x3 : ffff000009069fd8 x2 : 0000000000000000
-[  479.530500] x1 : 0000000000000000 x0 : 0000000000000000
-[  479.530599] Process cat (pid: 2457, stack limit = 0x000000005d1b0e6f)
-[  479.530660] Call trace:
-[  479.530746]  walk_pgd.isra.1+0x20/0x1d0
-[  479.530833]  ptdump_walk_pgd+0x30/0x50
-[  479.530907]  ptdump_show+0x10/0x20
-[  479.530920]  seq_read+0xc8/0x470
-[  479.531023]  full_proxy_read+0x60/0x90
-[  479.531100]  __vfs_read+0x18/0x100
-[  479.531180]  vfs_read+0x88/0x160
-[  479.531267]  SyS_read+0x48/0xb0
-[  479.531299]  el0_svc_naked+0x20/0x24
-[  479.531400] Code: 91400420 f90033a0 a90707a2 f9403fa0 (f9400000)
-[  479.531499] ---[ end trace bfe8e28d8acb2b67 ]---
-Segmentation fault
+	if (sig_err && IS_ENABLED(CONFIG_KEXEC_SIG_FORCE)) {
+		ret = sig_err;
+		goto out;
+	}
 
-Let's avoid this problem by only registering the tables after their
-successful creation, which is also less confusing when EFI runtime
-services are not in use.
+If the signature check fails because the signature is bad, but
+CONFIG_KEXEC_SIG_FORCE=n then it now won't fail when it should.
 
-Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Reported-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
----
- drivers/firmware/efi/arm-runtime.c | 3 +++
- 1 file changed, 3 insertions(+)
+If sig_err is -EKEYREJECTED, -EKEYEXPIRED or -EKEYREVOKED then it must fail,
+even if the signature check isn't forced.
 
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 1cc41c3d6315..86a1ad17a32e 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -54,6 +54,9 @@ static struct ptdump_info efi_ptdump_info = {
- 
- static int __init ptdump_init(void)
- {
-+	if (!efi_enabled(EFI_RUNTIME_SERVICES))
-+		return 0;
-+
- 	return ptdump_debugfs_register(&efi_ptdump_info, "efi_page_tables");
- }
- device_initcall(ptdump_init);
--- 
-2.11.0
+David
