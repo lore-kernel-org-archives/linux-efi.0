@@ -1,51 +1,38 @@
-From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 08/30] kexec_file: Restrict at runtime if the kernel is locked down
-Date: Wed, 17 Jan 2018 16:16:56 +0000
-Message-ID: <24245.1516205816@warthog.procyon.org.uk>
-References: <20180111154445.duootisvanetnr24@dwarf.suse.cz> <12880.1515674600@warthog.procyon.org.uk> <20180111115915.dejachty3l7fwpmf@dwarf.suse.cz> <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk> <151024869793.28329.4817577607302613028.stgit@warthog.procyon.org.uk> <13005.1515674877@warthog.procyon.org.uk>
+From: David Howells <dhowells@redhat.com>
+Subject: Re: [PATCH 08a/30] kexec_file: split KEXEC_VERIFY_SIG into KEXEC_SIG and KEXEC_SIG_FORCE
+Date: Wed, 17 Jan 2018 16:34:24 +0000
+Message-ID: <24618.1516206864@warthog.procyon.org.uk>
+References: <20180116193936.oiycvwlk5xy3gm77@dwarf.suse.cz> <20180111120157.23qceywzi6omvvkb@dwarf.suse.cz> <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk> <151024869793.28329.4817577607302613028.stgit@warthog.procyon.org.uk> <20180111115915.dejachty3l7fwpmf@dwarf.suse.cz> <4582.1516120311@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20180111154445.duootisvanetnr24-Q+Z4OdfSLAKN3ZZ/Hiejyg@public.gmane.org>
-Content-ID: <24244.1516205816.1-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jiri Bohac <jbohac-AlSwsSmVLrQ@public.gmane.org>
-Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180116193936.oiycvwlk5xy3gm77@dwarf.suse.cz>
+Content-ID: <24617.1516206864.1@warthog.procyon.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jiri Bohac <jbohac@suse.cz>
+Cc: dhowells@redhat.com, linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, jforbes@redhat.com, Chun-Yi Lee <joeyli.kernel@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-Jiri Bohac <jbohac-AlSwsSmVLrQ@public.gmane.org> wrote:
+Jiri Bohac <jbohac@suse.cz> wrote:
 
-> > Having said that, I do see your point, I think.  We should still let through
-> > validly signed images, even if signatures aren't mandatory in lockdown mode.
+> > If sig_err is -EKEYREJECTED, -EKEYEXPIRED or -EKEYREVOKED then it must fail,
+> > even if the signature check isn't forced.
 > 
-> yes, to be clear, the problem I'm trying to fix is:
-> - without CONFIG_KEXEC_VERIFY_SIG kexec in a locked down kernel
->   will not work at all -> every distro that wants to support
->   secureboot will need to enable CONFIG_KEXEC_VERIFY_SIG;
-> 
-> - once CONFIG_KEXEC_VERIFY_SIG is enabled, kexec images need to
->   be signed even if secureboot is not used
->
-> The problem is that CONFIG_KEXEC_VERIFY_SIG enables both the
-> implementation and the enforcement of the signature checking.
+> It wasn't my intention to fail in these cases. What additional
+> security does this bring? If simply stripping an invalid
+> signature from the image before loading will make it pass, why
+> should the image with an invalid signature be rejected?
 
-Yep.  I understand that.
+If there is a signature, then if we're checking signatures, in my opinion we
+should check it - and fail if the signature can't be parsed, is revoked, we
+have a key and the signature doesn't match - or even if we run out of memory.
 
-> What I'm proposing are new config options that allow a kernel to
-> be compiled in such a way that:
-> - kexec works even without signatures if secureboot is off
-> - kexec works with secureboot but requires signed images
+The cases for which enforcement is required are when (a) there is no
+signature, (b) we don't support the algorithms used, or (c) we don't have a
+key.
 
-Agreed to both of those.  I also agree with making it possible to
-configurationally require signatures, which your first patch does.
-
-> The semantics should be the same as with signed modules, because
-> requiring kexec signatures when you can load unsigned modules is
-> futile. But with your original patchset, that's exactly what
-> distro kernels will be doing when booted with secureboot off,
-> MODULE_SIG_FORCE=n and KEXEC_VERIFY_SIG=y.
-
-I should fix that.
+If we're going to completely discard the result, why do your patches even
+bother to check the signature at all?
 
 David
