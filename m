@@ -1,135 +1,75 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] efi: arm64: Check whether x18 is preserved by runtime services calls
-Date: Thu, 18 Jan 2018 16:37:36 +0000
-Message-ID: <20180118163736.1253-1-ard.biesheuvel@linaro.org>
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH V4 0/3] Use mm_struct and switch_mm() instead of manually
+Date: Thu, 18 Jan 2018 13:01:04 -0800
+Message-ID: <1516309264-23926-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Whether or not we will ever decide to start using x18 as a platform
-register in Linux is uncertain, but by that time, we will need to
-ensure that UEFI runtime services calls don't corrupt it. So let's
-start issuing warnings now for this, and increase the likelihood that
-these firmware images have all been replaced by that time.
+From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-This has been fixed on the EDK2 side in commit 6d73863b5464
-("BaseTools/tools_def AARCH64: mark register x18 as reserved").,
-dated July 13, 2017.
+Presently, in x86, to invoke any efi function like
+efi_set_virtual_address_map() or any efi_runtime_service() the code path
+typically involves read_cr3() (save previous pgd), write_cr3()
+(write efi_pgd) and calling efi function. Likewise after returning from
+efi function the code path typically involves read_cr3() (save efi_pgd),
+write_cr3() (write previous pgd). We do this couple of times in efi
+subsystem of Linux kernel, instead we can use helper function
+efi_switch_mm() to do this. This improves readability and maintainability.
+Also, instead of maintaining a separate struct "efi_scratch" to store/restore
+efi_pgd, we can use mm_struct to do this.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm64/include/asm/efi.h            |  4 +++-
- drivers/firmware/efi/Makefile           |  2 +-
- drivers/firmware/efi/arm-runtime.c      | 10 +++++++++
- drivers/firmware/efi/arm64-rt-wrapper.S | 40 +++++++++++++++++++++++++++++++++
- 4 files changed, 54 insertions(+), 2 deletions(-)
- create mode 100644 drivers/firmware/efi/arm64-rt-wrapper.S
+I have tested this patch set against LUV (Linux UEFI Validation), so I
+think I didn't break any existing configurations. I have tested this
+patch set for
+1. x86_64,
+2. x86_32,
+3. Mixed mode
+with efi=old_map and for kexec kernel. Please let me know if I have
+missed any other configurations.
 
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index 8389050328bb..2278e4bf270a 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -31,7 +31,7 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
- ({									\
- 	efi_##f##_t *__f;						\
- 	__f = p->f;							\
--	__f(args);							\
-+	__efi_rt_asm_wrapper(__f, args);				\
- })
- 
- #define arch_efi_call_virt_teardown()					\
-@@ -40,6 +40,8 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
- 	efi_virtmap_unload();						\
- })
- 
-+efi_status_t __efi_rt_asm_wrapper(void *, ...);
-+
- #define ARCH_EFI_IRQ_FLAGS_MASK (PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT)
- 
- /* arch specific definitions used by the stub code */
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 269501dfba53..eb8be0a00931 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -28,5 +28,5 @@ obj-$(CONFIG_APPLE_PROPERTIES)		+= apple-properties.o
- 
- arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
- obj-$(CONFIG_ARM)			+= $(arm-obj-y)
--obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
-+obj-$(CONFIG_ARM64)			+= $(arm-obj-y) arm64-rt-wrapper.o
- obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 1cc41c3d6315..de84b490a844 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -11,6 +11,8 @@
-  *
-  */
- 
-+#define pr_fmt(fmt)	"efi: " fmt
-+
- #include <linux/dmi.h>
- #include <linux/efi.h>
- #include <linux/io.h>
-@@ -182,3 +184,11 @@ static int __init arm_dmi_init(void)
- 	return 0;
- }
- core_initcall(arm_dmi_init);
-+
-+#ifdef CONFIG_ARM64
-+efi_status_t efi_handle_corrupted_x18(efi_status_t s)
-+{
-+	pr_warn_ratelimited(FW_BUG "x18 corrupted by EFI firmware!");
-+	return s;
-+}
-+#endif
-diff --git a/drivers/firmware/efi/arm64-rt-wrapper.S b/drivers/firmware/efi/arm64-rt-wrapper.S
-new file mode 100644
-index 000000000000..a6a2b64134c9
---- /dev/null
-+++ b/drivers/firmware/efi/arm64-rt-wrapper.S
-@@ -0,0 +1,40 @@
-+/*
-+ * Copyright (C) 2018 Linaro Ltd <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
-+
-+#include <linux/linkage.h>
-+
-+ENTRY(__efi_rt_asm_wrapper)
-+	stp	x29, x30, [sp, #-32]!
-+	mov	x29, sp
-+
-+	/*
-+	 * Register x18 is designated as the 'platform' register by the AAPCS,
-+	 * which means firmware running at the same exception level as the OS
-+	 * (such as UEFI) should never touch it.
-+	 */
-+	str	x18, [sp, #16]
-+
-+	/*
-+	 * We are lucky enough that no EFI runtime services take more than
-+	 * 5 arguments, so all are passed in registers rather than via the
-+	 * stack.
-+	 */
-+	mov	x8, x0
-+	mov	x0, x1
-+	mov	x1, x2
-+	mov	x2, x3
-+	mov	x3, x4
-+	mov	x4, x5
-+	blr	x8
-+
-+	ldr	x1, [sp, #16]
-+	cmp	x1, x18
-+	ldp	x29, x30, [sp], #32
-+	b.ne	efi_handle_corrupted_x18	// tail call
-+	ret
-+ENDPROC(__efi_rt_asm_wrapper)
+Changes in V2:
+1. Resolve mm_dropping() issue by not mm_dropping()/mm_grabbing() any mm,
+as we are not losing/creating any references.
+
+Changes in V3:
+1. When CPUMASK_OFFSTACK is enabled, switch_mm_irqs_off() sets cpumask
+by calling cpumask_set_cpu(). This panics kernel as efi_mm is not
+initialized, therefore initialize efi_mm in efi_alloc_page_tables().
+
+Changes in V4:
+1. Remove the unintended removal of local_irq_restore(flags) (in 3rd patch).
+IRQ flags should be restored after switching to orginal mm.
+
+Note:
+This patch set is based on Linus's tree v4.15-rc8
+
+Sai Praneeth (3):
+  efi: Use efi_mm in x86 as well as ARM
+  x86/efi: Replace efi_pgd with efi_mm.pgd
+  x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
+
+ arch/x86/include/asm/efi.h           | 29 +++++++++---------
+ arch/x86/platform/efi/efi_64.c       | 58 +++++++++++++++++++-----------------
+ arch/x86/platform/efi/efi_thunk_64.S |  2 +-
+ drivers/firmware/efi/arm-runtime.c   |  9 ------
+ drivers/firmware/efi/efi.c           |  9 ++++++
+ include/linux/efi.h                  |  2 ++
+ 6 files changed, 57 insertions(+), 52 deletions(-)
+
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Michael S. Tsirkin <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Tested-by: Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+
 -- 
-2.11.0
+2.1.4
