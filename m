@@ -1,56 +1,51 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi: arm: stop printing addresses of virtual mappings
-Date: Fri, 19 Jan 2018 14:38:37 +0000
-Message-ID: <20180119143836.uxcv4smmu2gewasj@bivouac.eciton.net>
-References: <20180119122619.16023-1-ard.biesheuvel@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: [PATCH v1] efi/apple-properties: Device core takes care of empty properties
+Date: Mon, 22 Jan 2018 16:17:09 +0200
+Message-ID: <20180122141709.41898-1-andriy.shevchenko@linux.intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20180119122619.16023-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jan 19, 2018 at 12:26:19PM +0000, Ard Biesheuvel wrote:
-> With the recent %p -> %px changes, we now get something like this in
-> the kernel boot log on ARM/arm64 EFI systems:
-> 
->      Remapping and enabling EFI services.
->        EFI remap 0x00000087fb830000 =>         (ptrval)
->        EFI remap 0x00000087fbdb0000 =>         (ptrval)
->        EFI remap 0x00000087fffc0000 =>         (ptrval)
-> 
-> The physical addresses of the UEFI runtime regions will also be
-> printed when booting with the efi=debug command line option, and the
-> virtual addresses can be inspected via /sys/kernel/debug/efi_page_tables
-> (if enabled). So let's just remove the lines above.
+There is no need to artificially supply a property length and fake data
+if property has type of boolean.
 
-As long as the efi=debug functionality is kept, I have no issue with this.
-Acked-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Remove redundant piece of data and code.
 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/arm-runtime.c | 5 +----
->  1 file changed, 1 insertion(+), 4 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-> index 1cc41c3d6315..5d4c8b661548 100644
-> --- a/drivers/firmware/efi/arm-runtime.c
-> +++ b/drivers/firmware/efi/arm-runtime.c
-> @@ -80,10 +80,7 @@ static bool __init efi_virtmap_init(void)
->  			return false;
->  
->  		ret = efi_create_mapping(&efi_mm, md);
-> -		if  (!ret) {
-> -			pr_info("  EFI remap %pa => %p\n",
-> -				&phys, (void *)(unsigned long)md->virt_addr);
-> -		} else {
-> +		if (ret) {
->  			pr_warn("  EFI remap %pa: failed to create mapping (%d)\n",
->  				&phys, ret);
->  			return false;
-> -- 
-> 2.11.0
-> 
+Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+---
+ drivers/firmware/efi/apple-properties.c | 9 +--------
+ 1 file changed, 1 insertion(+), 8 deletions(-)
+
+diff --git a/drivers/firmware/efi/apple-properties.c b/drivers/firmware/efi/apple-properties.c
+index 9f6bcf173b0e..b9602e0d7b50 100644
+--- a/drivers/firmware/efi/apple-properties.c
++++ b/drivers/firmware/efi/apple-properties.c
+@@ -52,8 +52,6 @@ struct properties_header {
+ 	struct dev_header dev_header[0];
+ };
+ 
+-static u8 one __initdata = 1;
+-
+ static void __init unmarshal_key_value_pairs(struct dev_header *dev_header,
+ 					     struct device *dev, void *ptr,
+ 					     struct property_entry entry[])
+@@ -95,14 +93,9 @@ static void __init unmarshal_key_value_pairs(struct dev_header *dev_header,
+ 			     key_len - sizeof(key_len));
+ 
+ 		entry[i].name = key;
+-		entry[i].is_array = true;
+ 		entry[i].length = val_len - sizeof(val_len);
++		entry[i].is_array = !!entry[i].length;
+ 		entry[i].pointer.raw_data = ptr + key_len + sizeof(val_len);
+-		if (!entry[i].length) {
+-			/* driver core doesn't accept empty properties */
+-			entry[i].length = 1;
+-			entry[i].pointer.raw_data = &one;
+-		}
+ 
+ 		if (dump_properties) {
+ 			dev_info(dev, "property: %s\n", entry[i].name);
+-- 
+2.15.1
