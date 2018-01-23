@@ -1,34 +1,55 @@
-From: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v1] efi/apple-properties: Device core takes care of empty
- properties
-Date: Mon, 22 Jan 2018 22:46:09 +0100
-Message-ID: <20180122214609.GA18579@wunner.de>
-References: <20180122141709.41898-1-andriy.shevchenko@linux.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20180122141709.41898-1-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Luis de Bethencourt <luisbg@kernel.org>
+Subject: [PATCH] x86/efi: Fix trailing semicolons
+Date: Tue, 23 Jan 2018 13:20:34 +0000
+Message-ID: <20180123132034.21744-1-luisbg@kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Joe Perches <joe@perches.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H . Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86@kernel.org, linux-efi@vger.kernel.org, Luis de Bethencourt <luisbg@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jan 22, 2018 at 04:17:09PM +0200, Andy Shevchenko wrote:
-> There is no need to artificially supply a property length and fake data
-> if property has type of boolean.
+The trailing semicolon is an empty statement that does no operation.
+Removing them since they don't do anything.
 
-You're right, I just didn't know better.
+Signed-off-by: Luis de Bethencourt <luisbg@kernel.org>
+---
 
-I've verified that with this patch applied, boolean properties are
-still listed with the "dump_apple_properties" command line option
-and I've also tested that it's still possible to test presence of
-boolean properties with device_property_present(), so FWIW:
+Hi,
 
-Reviewed-and-tested-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+After fixing the same thing in drivers/staging/rtl8723bs/, Joe Perches
+suggested I fix it treewide [0].
 
-Thanks Andy!  Ard, could you pick this up please?
+Best regards 
+Luis
 
-Kind regards,
 
-Lukas
+[0] http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/2018-January/115410.html
+[1] http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/2018-January/115390.html
+
+ arch/x86/boot/compressed/eboot.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 353e20c3f114..886a9115af62 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -439,7 +439,7 @@ setup_uga32(void **uga_handle, unsigned long size, u32 *width, u32 *height)
+ 	struct efi_uga_draw_protocol *uga = NULL, *first_uga;
+ 	efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
+ 	unsigned long nr_ugas;
+-	u32 *handles = (u32 *)uga_handle;;
++	u32 *handles = (u32 *)uga_handle;
+ 	efi_status_t status = EFI_INVALID_PARAMETER;
+ 	int i;
+ 
+@@ -484,7 +484,7 @@ setup_uga64(void **uga_handle, unsigned long size, u32 *width, u32 *height)
+ 	struct efi_uga_draw_protocol *uga = NULL, *first_uga;
+ 	efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
+ 	unsigned long nr_ugas;
+-	u64 *handles = (u64 *)uga_handle;;
++	u64 *handles = (u64 *)uga_handle;
+ 	efi_status_t status = EFI_INVALID_PARAMETER;
+ 	int i;
+ 
+-- 
+2.15.1
