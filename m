@@ -1,65 +1,32 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] x86/efi: Fix trailing semicolons
-Date: Tue, 23 Jan 2018 18:49:41 +0000
-Message-ID: <CAKv+Gu-63xkBbeGY-DfiuNJdYTrAZodzqgHhW9TK=vi=Pa7Cmg@mail.gmail.com>
-References: <20180123132034.21744-1-luisbg@kernel.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v1] efi/apple-properties: Device core takes care of empty properties
+Date: Tue, 23 Jan 2018 18:50:07 +0000
+Message-ID: <CAKv+Gu_iBRFFuDJATLfwK5Fq8=DU=mV3g56y+YCWKEwi91_zjQ@mail.gmail.com>
+References: <20180122141709.41898-1-andriy.shevchenko@linux.intel.com> <20180122214609.GA18579@wunner.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180123132034.21744-1-luisbg@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis de Bethencourt <luisbg@kernel.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Joe Perches <joe@perches.com>, "H . Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, the arch/x86 maintainers <x86@kernel.org>, linux-efi@vger.kernel.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20180122214609.GA18579-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 23 January 2018 at 13:20, Luis de Bethencourt <luisbg@kernel.org> wrote:
-> The trailing semicolon is an empty statement that does no operation.
-> Removing them since they don't do anything.
+On 22 January 2018 at 21:46, Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org> wrote:
+> On Mon, Jan 22, 2018 at 04:17:09PM +0200, Andy Shevchenko wrote:
+>> There is no need to artificially supply a property length and fake data
+>> if property has type of boolean.
 >
-> Signed-off-by: Luis de Bethencourt <luisbg@kernel.org>
-> ---
+> You're right, I just didn't know better.
 >
-> Hi,
+> I've verified that with this patch applied, boolean properties are
+> still listed with the "dump_apple_properties" command line option
+> and I've also tested that it's still possible to test presence of
+> boolean properties with device_property_present(), so FWIW:
 >
-> After fixing the same thing in drivers/staging/rtl8723bs/, Joe Perches
-> suggested I fix it treewide [0].
+> Reviewed-and-tested-by: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
 >
-> Best regards
-> Luis
+> Thanks Andy!  Ard, could you pick this up please?
 >
 
 Applied, thanks.
-
-
->
-> [0] http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/2018-January/115410.html
-> [1] http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/2018-January/115390.html
->
->  arch/x86/boot/compressed/eboot.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> index 353e20c3f114..886a9115af62 100644
-> --- a/arch/x86/boot/compressed/eboot.c
-> +++ b/arch/x86/boot/compressed/eboot.c
-> @@ -439,7 +439,7 @@ setup_uga32(void **uga_handle, unsigned long size, u32 *width, u32 *height)
->         struct efi_uga_draw_protocol *uga = NULL, *first_uga;
->         efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
->         unsigned long nr_ugas;
-> -       u32 *handles = (u32 *)uga_handle;;
-> +       u32 *handles = (u32 *)uga_handle;
->         efi_status_t status = EFI_INVALID_PARAMETER;
->         int i;
->
-> @@ -484,7 +484,7 @@ setup_uga64(void **uga_handle, unsigned long size, u32 *width, u32 *height)
->         struct efi_uga_draw_protocol *uga = NULL, *first_uga;
->         efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
->         unsigned long nr_ugas;
-> -       u64 *handles = (u64 *)uga_handle;;
-> +       u64 *handles = (u64 *)uga_handle;
->         efi_status_t status = EFI_INVALID_PARAMETER;
->         int i;
->
-> --
-> 2.15.1
->
