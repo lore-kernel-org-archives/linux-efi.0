@@ -1,44 +1,32 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 4/4] efi/arm64: unmap the kernel while executing UEFI
- services
-Date: Fri, 26 Jan 2018 17:10:36 +0000
-Message-ID: <20180126171035.GG16008@arm.com>
-References: <20180125103131.19168-1-ard.biesheuvel@linaro.org>
- <20180125103131.19168-5-ard.biesheuvel@linaro.org>
- <20180126170505.GE16008@arm.com>
- <CAKv+Gu84Dk1ZRicHNWr2SLn1GEpaj1YmekzgjvK4aC5t05TgSw@mail.gmail.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH V4 0/3] Use mm_struct and switch_mm() instead of manually
+Date: Fri, 26 Jan 2018 21:16:43 +0000
+Message-ID: <20180126211643.GB6520@codeblueprint.co.uk>
+References: <1516309264-23926-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu84Dk1ZRicHNWr2SLn1GEpaj1YmekzgjvK4aC5t05TgSw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, Joakim Bech <joakim.bech-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Graeme Gregory <graeme.gregory-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1516309264-23926-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Ravi Shankar <ravi.v.shankar@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jan 26, 2018 at 05:06:42PM +0000, Ard Biesheuvel wrote:
-> On 26 January 2018 at 17:05, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
-> > On Thu, Jan 25, 2018 at 10:31:31AM +0000, Ard Biesheuvel wrote:
-> >> Now that all UEFI runtime service wrappers ensure that byref
-> >> arguments are moved into the UEFI marshalling buffer (which
-> >> is not part of the kernel mapping), we can proceed and unmap
-> >> the kernel while UEFI runtime service calls are in progress.
-> >>
-> >> This is done by setting the EPD1 bit and flushing the TLB of
-> >> the local CPU. This makes it independent of KPTI or whether
-> >> non-global mappings are being used.
-> >
-> > One snag with this is that it will break SPE, so I'd prefer this behaviour
-> > to be predicated on kpti so that the arm64_kernel_unmapped_at_el0() check
-> > in drivers/perf/arm_spe_pmu.c remains valid.
-> >
+On Thu, 18 Jan, at 01:01:04PM, Sai Praneeth Prakhya wrote:
+> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 > 
-> The problem with that is that they serve two different purposes: kpti
-> protects against meltdown, this protects against Spectre variant 1.
+> Presently, in x86, to invoke any efi function like
+> efi_set_virtual_address_map() or any efi_runtime_service() the code path
+> typically involves read_cr3() (save previous pgd), write_cr3()
+> (write efi_pgd) and calling efi function. Likewise after returning from
+> efi function the code path typically involves read_cr3() (save efi_pgd),
+> write_cr3() (write previous pgd). We do this couple of times in efi
+> subsystem of Linux kernel, instead we can use helper function
+> efi_switch_mm() to do this. This improves readability and maintainability.
+> Also, instead of maintaining a separate struct "efi_scratch" to store/restore
+> efi_pgd, we can use mm_struct to do this.
+ 
+FWIW this series looks OK to me.
 
-Fair enough, but we should do something because it renders SPE unusable
-and it can be a really handy profiling feature. Having the new EFI behaviour
-optional in some way would be my preference.
-
-Will
+Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
