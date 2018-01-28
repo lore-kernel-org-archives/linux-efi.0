@@ -1,14 +1,14 @@
 From: Sasha Levin <Alexander.Levin@microsoft.com>
-Subject: [PATCH AUTOSEL for 4.14 094/100] mm/early_ioremap: Fix boot hang with
+Subject: [PATCH AUTOSEL for 4.9 45/49] mm/early_ioremap: Fix boot hang with
  earlyprintk=efi,keep
-Date: Sun, 28 Jan 2018 22:27:01 +0000
-Message-ID: <20180128222547.7398-94-alexander.levin@microsoft.com>
-References: <20180128222547.7398-1-alexander.levin@microsoft.com>
+Date: Sun, 28 Jan 2018 22:28:06 +0000
+Message-ID: <20180128222727.22404-45-alexander.levin@microsoft.com>
+References: <20180128222727.22404-1-alexander.levin@microsoft.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="iso-8859-1"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20180128222547.7398-1-alexander.levin@microsoft.com>
+In-Reply-To: <20180128222727.22404-1-alexander.levin@microsoft.com>
 Content-Language: en-US
 Sender: owner-linux-mm@kvack.org
 To: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>
@@ -48,10 +48,10 @@ Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/mm/early_ioremap.c b/mm/early_ioremap.c
-index d04ac1ec0559..1826f191e72c 100644
+index 6d5717bd7197..57540de2b44c 100644
 --- a/mm/early_ioremap.c
 +++ b/mm/early_ioremap.c
-@@ -111,7 +111,7 @@ __early_ioremap(resource_size_t phys_addr, unsigned lon=
+@@ -103,7 +103,7 @@ __early_ioremap(resource_size_t phys_addr, unsigned lon=
 g size, pgprot_t prot)
  	enum fixed_addresses idx;
  	int i, slot;
