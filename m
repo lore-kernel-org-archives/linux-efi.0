@@ -1,14 +1,14 @@
 From: Sasha Levin <Alexander.Levin@microsoft.com>
-Subject: [PATCH AUTOSEL for 4.9 45/49] mm/early_ioremap: Fix boot hang with
+Subject: [PATCH AUTOSEL for 4.4 33/36] mm/early_ioremap: Fix boot hang with
  earlyprintk=efi,keep
-Date: Sun, 28 Jan 2018 22:28:06 +0000
-Message-ID: <20180128222727.22404-45-alexander.levin@microsoft.com>
-References: <20180128222727.22404-1-alexander.levin@microsoft.com>
+Date: Sun, 28 Jan 2018 22:28:48 +0000
+Message-ID: <20180128222815.29479-33-alexander.levin@microsoft.com>
+References: <20180128222815.29479-1-alexander.levin@microsoft.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="iso-8859-1"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20180128222727.22404-1-alexander.levin@microsoft.com>
+In-Reply-To: <20180128222815.29479-1-alexander.levin@microsoft.com>
 Content-Language: en-US
 Sender: owner-linux-mm@kvack.org
 To: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>
