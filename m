@@ -1,32 +1,71 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH V4 0/3] Use mm_struct and switch_mm() instead of manually
-Date: Fri, 26 Jan 2018 21:16:43 +0000
-Message-ID: <20180126211643.GB6520@codeblueprint.co.uk>
-References: <1516309264-23926-1-git-send-email-sai.praneeth.prakhya@intel.com>
+From: Sasha Levin <Alexander.Levin@microsoft.com>
+Subject: [PATCH AUTOSEL for 4.14 094/100] mm/early_ioremap: Fix boot hang with
+ earlyprintk=efi,keep
+Date: Sun, 28 Jan 2018 22:27:01 +0000
+Message-ID: <20180128222547.7398-94-alexander.levin@microsoft.com>
+References: <20180128222547.7398-1-alexander.levin@microsoft.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1516309264-23926-1-git-send-email-sai.praneeth.prakhya@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Ravi Shankar <ravi.v.shankar@intel.com>
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20180128222547.7398-1-alexander.levin@microsoft.com>
+Content-Language: en-US
+Sender: owner-linux-mm@kvack.org
+To: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>
+Cc: Dave Young <dyoung@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, "bp@suse.de" <bp@suse.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Ingo
+ Molnar <mingo@kernel.org>, Sasha Levin <Alexander.Levin@microsoft.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 18 Jan, at 01:01:04PM, Sai Praneeth Prakhya wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
-> 
-> Presently, in x86, to invoke any efi function like
-> efi_set_virtual_address_map() or any efi_runtime_service() the code path
-> typically involves read_cr3() (save previous pgd), write_cr3()
-> (write efi_pgd) and calling efi function. Likewise after returning from
-> efi function the code path typically involves read_cr3() (save efi_pgd),
-> write_cr3() (write previous pgd). We do this couple of times in efi
-> subsystem of Linux kernel, instead we can use helper function
-> efi_switch_mm() to do this. This improves readability and maintainability.
-> Also, instead of maintaining a separate struct "efi_scratch" to store/restore
-> efi_pgd, we can use mm_struct to do this.
- 
-FWIW this series looks OK to me.
+From: Dave Young <dyoung@redhat.com>
 
-Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+[ Upstream commit 7f6f60a1ba52538c16f26930bfbcfe193d9d746a ]
+
+earlyprintk=3Defi,keep does not work any more with a warning
+in mm/early_ioremap.c: WARN_ON(system_state !=3D SYSTEM_BOOTING):
+Boot just hangs because of the earlyprintk within the earlyprintk
+implementation code itself.
+
+This is caused by a new introduced middle state in:
+
+  69a78ff226fe ("init: Introduce SYSTEM_SCHEDULING state")
+
+early_ioremap() is fine in both SYSTEM_BOOTING and SYSTEM_SCHEDULING
+states, original condition should be updated accordingly.
+
+Signed-off-by: Dave Young <dyoung@redhat.com>
+Acked-by: Thomas Gleixner <tglx@linutronix.de>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: bp@suse.de
+Cc: linux-efi@vger.kernel.org
+Cc: linux-mm@kvack.org
+Link: http://lkml.kernel.org/r/20171209041610.GA3249@dhcp-128-65.nay.redhat=
+.com
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
+---
+ mm/early_ioremap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mm/early_ioremap.c b/mm/early_ioremap.c
+index d04ac1ec0559..1826f191e72c 100644
+--- a/mm/early_ioremap.c
++++ b/mm/early_ioremap.c
+@@ -111,7 +111,7 @@ __early_ioremap(resource_size_t phys_addr, unsigned lon=
+g size, pgprot_t prot)
+ 	enum fixed_addresses idx;
+ 	int i, slot;
+=20
+-	WARN_ON(system_state !=3D SYSTEM_BOOTING);
++	WARN_ON(system_state >=3D SYSTEM_RUNNING);
+=20
+ 	slot =3D -1;
+ 	for (i =3D 0; i < FIX_BTMAPS_SLOTS; i++) {
+--=20
+2.11.0
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
