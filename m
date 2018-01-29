@@ -1,38 +1,40 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH V4 0/3] Use mm_struct and switch_mm() instead of manually
-Date: Mon, 29 Jan 2018 10:51:26 +0000
-Message-ID: <CAKv+Gu-mrMpgFVssUH1RXP6GAKuPNtQwwsCNTqv2Oa48FrU+Bg@mail.gmail.com>
-References: <1516309264-23926-1-git-send-email-sai.praneeth.prakhya@intel.com> <20180126211643.GB6520@codeblueprint.co.uk>
+From: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH 0/4] efi/arm64: unmap the kernel during runtime service
+ calls
+Date: Mon, 29 Jan 2018 07:51:41 -0700
+Message-ID: <bdba264b-6619-6e9f-2849-d9d82a820ab0@codeaurora.org>
+References: <20180125103131.19168-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20180126211643.GB6520-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <20180125103131.19168-1-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Michael S. Tsirkin" <mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, marc.zyngier-5wv7dgnIgG8@public.gmane.org
+Cc: joakim.bech-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, graeme.gregory-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 26 January 2018 at 21:16, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Thu, 18 Jan, at 01:01:04PM, Sai Praneeth Prakhya wrote:
->> From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->>
->> Presently, in x86, to invoke any efi function like
->> efi_set_virtual_address_map() or any efi_runtime_service() the code path
->> typically involves read_cr3() (save previous pgd), write_cr3()
->> (write efi_pgd) and calling efi function. Likewise after returning from
->> efi function the code path typically involves read_cr3() (save efi_pgd),
->> write_cr3() (write previous pgd). We do this couple of times in efi
->> subsystem of Linux kernel, instead we can use helper function
->> efi_switch_mm() to do this. This improves readability and maintainability.
->> Also, instead of maintaining a separate struct "efi_scratch" to store/restore
->> efi_pgd, we can use mm_struct to do this.
->
-> FWIW this series looks OK to me.
->
-> Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+On 1/25/2018 3:31 AM, Ard Biesheuvel wrote:
 
-Thanks Matt
+> Note that capsule update has been omitted. This is a bit involved, and
+> I'd rather get some feedback before burning too many cycles on that. All
+> other services should be functional, with the caveat that EFI variable
+> names are now limited to 1024 [wide] characters, and UEFI variables
+> themselves to 64 KB.
+> 
 
-I know the x86 guys have been rather busy lately, so I will give them
-some more time to respond. If there are no objections raised, I will
-queue it for v4.17 in a couple of weeks.
+I'm curious, why these limitations?
+
+We don't have any concern about the name length limitation at this time, 
+but the variable size one is concerning.
+
+We have a feature which creates a variable greater than 64KB that we 
+want to utilize from Linux.  The size limitation would seem to prevent that.
+
+-- 
+Jeffrey Hugo
+Qualcomm Datacenter Technologies as an affiliate of Qualcomm 
+Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the
+Code Aurora Forum, a Linux Foundation Collaborative Project.
