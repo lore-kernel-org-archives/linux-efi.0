@@ -1,43 +1,88 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 0/4] efi/arm64: unmap the kernel during runtime service calls
-Date: Mon, 29 Jan 2018 14:55:48 +0000
-Message-ID: <CAKv+Gu-KEXJet4TdRcGBAtOH-ty79_izHcH4mu7Y7xF5UtOWsw@mail.gmail.com>
-References: <20180125103131.19168-1-ard.biesheuvel@linaro.org> <bdba264b-6619-6e9f-2849-d9d82a820ab0@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] x86/debugfs: Add the EFI pagetable to the debugfs 'page_tables' directory
+Date: Wed, 31 Jan 2018 07:56:22 -0800
+Message-ID: <ba158a93f3250e6fca752cff2cfb1fcdd9f2b50c.1517414050.git.luto@kernel.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <bdba264b-6619-6e9f-2849-d9d82a820ab0-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Marc Zyngier <marc.zyngier-5wv7dgnIgG8@public.gmane.org>, Joakim Bech <joakim.bech-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Graeme Gregory <graeme.gregory-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 29 January 2018 at 14:51, Jeffrey Hugo <jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
-> On 1/25/2018 3:31 AM, Ard Biesheuvel wrote:
->
->> Note that capsule update has been omitted. This is a bit involved, and
->> I'd rather get some feedback before burning too many cycles on that. All
->> other services should be functional, with the caveat that EFI variable
->> names are now limited to 1024 [wide] characters, and UEFI variables
->> themselves to 64 KB.
->>
->
-> I'm curious, why these limitations?
->
+EFI is complicated enough that being able to view its pagetables is
+quite helpful.  Rather than requiring users to fish it out of dmesg
+on an appropriately configured kernel, let users view it in debugfs
+as well.
 
-Because mapping and unmapping things on the fly in the UEFI page
-tables is a bit complicated, although I need to do something of the
-kind for capsules anyway, so once I solve that, we can use the same
-approach for variables.
+Signed-off-by: Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+---
+ arch/x86/mm/debug_pagetables.c | 32 ++++++++++++++++++++++++++++++++
+ arch/x86/platform/efi/efi_64.c |  2 +-
+ 2 files changed, 33 insertions(+), 1 deletion(-)
 
-> We don't have any concern about the name length limitation at this time, but
-> the variable size one is concerning.
->
-> We have a feature which creates a variable greater than 64KB that we want to
-> utilize from Linux.  The size limitation would seem to prevent that.
->
-
-Well, the limit itself is rather arbitrary, and putting >64 KB into
-the fault tolerant, write ahead logging NOR flash seems mildly
-inappropriate to me. But you are right, the spec currently has no such
-limitations, so ideally, nor should the OS.
+diff --git a/arch/x86/mm/debug_pagetables.c b/arch/x86/mm/debug_pagetables.c
+index 421f2664ffa0..9861797b1fd5 100644
+--- a/arch/x86/mm/debug_pagetables.c
++++ b/arch/x86/mm/debug_pagetables.c
+@@ -72,6 +72,31 @@ static const struct file_operations ptdump_curusr_fops = {
+ };
+ #endif
+ 
++#if defined(CONFIG_EFI) && defined(CONFIG_X86_64)
++extern pgd_t *efi_pgd;
++static struct dentry *pe_efi;
++
++static int ptdump_show_efi(struct seq_file *m, void *v)
++{
++	if (efi_pgd)
++		ptdump_walk_pgd_level_debugfs(m, efi_pgd, false);
++	return 0;
++}
++
++static int ptdump_open_efi(struct inode *inode, struct file *filp)
++{
++	return single_open(filp, ptdump_show_efi, NULL);
++}
++
++static const struct file_operations ptdump_efi_fops = {
++	.owner		= THIS_MODULE,
++	.open		= ptdump_open_efi,
++	.read		= seq_read,
++	.llseek		= seq_lseek,
++	.release	= single_release,
++};
++#endif
++
+ static struct dentry *dir, *pe_knl, *pe_curknl;
+ 
+ static int __init pt_dump_debug_init(void)
+@@ -94,8 +119,15 @@ static int __init pt_dump_debug_init(void)
+ 	pe_curusr = debugfs_create_file("current_user", 0400,
+ 					dir, NULL, &ptdump_curusr_fops);
+ 	if (!pe_curusr)
++                goto err;
++#endif
++
++#if defined(CONFIG_EFI) && defined(CONFIG_X86_64)
++	pe_efi = debugfs_create_file("efi", 0400, dir, NULL, &ptdump_efi_fops);
++	if (!pe_efi)
+ 		goto err;
+ #endif
++
+ 	return 0;
+ err:
+ 	debugfs_remove_recursive(dir);
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 2dd15e967c3f..a9734df2c1b7 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -191,7 +191,7 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
+ 	early_code_mapping_set_exec(0);
+ }
+ 
+-static pgd_t *efi_pgd;
++pgd_t *efi_pgd;
+ 
+ /*
+  * We need our own copy of the higher levels of the page tables
+-- 
+2.14.3
