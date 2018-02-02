@@ -1,60 +1,43 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.14 156/156] x86/efi: Clarify that reset attack mitigation needs appropriate userspace
-Date: Fri,  2 Feb 2018 17:58:57 +0100
-Message-ID: <20180202140847.458165935@linuxfoundation.org>
-References: <20180202140840.242829545@linuxfoundation.org>
+From: "Rev:Tony  HARRIES" <"ww."@royal.ocn.ne.jp>
+Subject: CONTACT DHL OFFICE IMMEDIATELY FOR DELIVERY OF YOUR ATM MASTERCARD
+Date: Sat, 3 Feb 2018 06:49:56 +0900 (JST)
+Message-ID: <113226293.117010583.1517608196953.JavaMail.root@royal.ocn.ne.jp>
+Reply-To: "UNITED NATION " <united.nation.registration-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20180202140840.242829545@linuxfoundation.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Matthew Garrett <mjg59@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+Content-Type: text/plain; charset=ISO-2022-JP
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-4.14-stable review patch.  If anyone has any objections, please let me know.
+Attention; Beneficiary,
 
-------------------
+This is to official inform you that we have been having meetings for the past three (3) weeks which ended two days ago with MR. JIM YONG KIM the Former world bank president and other seven continent presidents on the congress we treated on solution to scam victim problems.
 
-From: Matthew Garrett <mjg59@google.com>
+Note: we have decided to contact you following the reports we received from anti-fraud international monitoring group your name/email has been submitted to us therefore the united nations have agreed to compensate you with the sum of (USD$1.5 Million) this compensation is also including international business that failed you in past due to government problems etc.
 
-commit a5c03c31af2291f13689d11760c0b59fb70c9a5a upstream.
+We have arranged your payment through our ATM MasterCard and deposited it in DHL Office to deliver it to you which is the latest instruction from the Former World Bank president MR. JIM YONG KIM, For your information’s, the delivery charges already paid by U.N treasury, the only money you will send to DHL office Benin Republic is $165 dollars for security keeping fee, U.N coordinator already paid for others charges fees for delivery except the security keeping fee, the director of DHL refused to collect the security keeping fee from U.N treasury because Direct of DHL office said they don’t know exactly time you will contact them to reconfirm your details to avoid counting demur rage.
 
-Some distributions have turned on the reset attack mitigation feature,
-which is designed to force the platform to clear the contents of RAM if
-the machine is shut down uncleanly. However, in order for the platform
-to be able to determine whether the shutdown was clean or not, userspace
-has to be configured to clear the MemoryOverwriteRequest flag on
-shutdown - otherwise the firmware will end up clearing RAM on every
-reboot, which is unnecessarily time consuming. Add some additional
-clarity to the kconfig text to reduce the risk of systems being
-configured this way.
+Therefore be advice to contact DHL Office agent Benin. Rev: Tony harries who is in position to post your ATM MasterCard, contact DHL Office  immediately with the bellow email & phone number  as listed below.
 
-Signed-off-by: Matthew Garrett <mjg59@google.com>
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Contact name: Rev:Tony  HARRIES
+Email:(post.dhlbenin.service-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org )
+Tell: +229-98787436
 
----
- drivers/firmware/efi/Kconfig |    5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+Make sure you reconfirmed DHL Office your details ASAP as stated below to avoid wrong delivery.
 
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -159,7 +159,10 @@ config RESET_ATTACK_MITIGATION
- 	  using the TCG Platform Reset Attack Mitigation specification. This
- 	  protects against an attacker forcibly rebooting the system while it
- 	  still contains secrets in RAM, booting another OS and extracting the
--	  secrets.
-+	  secrets. This should only be enabled when userland is configured to
-+	  clear the MemoryOverwriteRequest flag on clean shutdown after secrets
-+	  have been evicted, since otherwise it will trigger even on clean
-+	  reboots.
- 
- endmenu
- 
+Your full name..........
+Home address:.........
+Your country...........
+Your city..............
+Telephone......
+Occupation:.......
+Age:………………..
+
+
+Let us know as soon as possible you receive your ATM MasterCard for proper verifications.
+
+Regards,
+MR Paul Ogie.
+DEPUTY SECRETARY-GENERAL (U.N)
+Benin Republic.
