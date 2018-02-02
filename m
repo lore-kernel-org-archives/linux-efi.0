@@ -1,111 +1,60 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] x86/debugfs: Add the EFI pagetable to the debugfs
- 'page_tables' directory
-Date: Wed, 31 Jan 2018 16:03:30 +0000
-Message-ID: <CAKv+Gu_Gxb62zhWQgWxHbfekJGB2rry_U1PWuBd6Jf5cWsJycw@mail.gmail.com>
-References: <ba158a93f3250e6fca752cff2cfb1fcdd9f2b50c.1517414050.git.luto@kernel.org>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.15 55/55] x86/efi: Clarify that reset attack mitigation needs appropriate userspace
+Date: Fri,  2 Feb 2018 17:59:13 +0100
+Message-ID: <20180202140831.336212129@linuxfoundation.org>
+References: <20180202140826.117602411@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <ba158a93f3250e6fca752cff2cfb1fcdd9f2b50c.1517414050.git.luto@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: Andy Lutomirski <luto@kernel.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, linux-mm@kvack.org, Borislav Petkov <bp@alien8.de>, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180202140826.117602411@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Matthew Garrett <mjg59@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Andy,
+4.15-stable review patch.  If anyone has any objections, please let me know.
 
-On 31 January 2018 at 15:56, Andy Lutomirski <luto@kernel.org> wrote:
-> EFI is complicated enough that being able to view its pagetables is
-> quite helpful.  Rather than requiring users to fish it out of dmesg
-> on an appropriately configured kernel, let users view it in debugfs
-> as well.
->
-> Signed-off-by: Andy Lutomirski <luto@kernel.org>
+------------------
 
-This is more x86 code than EFI code, but from my side, this looks fine
-(and even though we already have a similar facility on ARM/arm64,
-there doesn't seem to be much point in attempting to reuse any of its
-code for this)
+From: Matthew Garrett <mjg59@google.com>
 
+commit a5c03c31af2291f13689d11760c0b59fb70c9a5a upstream.
+
+Some distributions have turned on the reset attack mitigation feature,
+which is designed to force the platform to clear the contents of RAM if
+the machine is shut down uncleanly. However, in order for the platform
+to be able to determine whether the shutdown was clean or not, userspace
+has to be configured to clear the MemoryOverwriteRequest flag on
+shutdown - otherwise the firmware will end up clearing RAM on every
+reboot, which is unnecessarily time consuming. Add some additional
+clarity to the kconfig text to reduce the risk of systems being
+configured this way.
+
+Signed-off-by: Matthew Garrett <mjg59@google.com>
 Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-> ---
->  arch/x86/mm/debug_pagetables.c | 32 ++++++++++++++++++++++++++++++++
->  arch/x86/platform/efi/efi_64.c |  2 +-
->  2 files changed, 33 insertions(+), 1 deletion(-)
->
-> diff --git a/arch/x86/mm/debug_pagetables.c b/arch/x86/mm/debug_pagetables.c
-> index 421f2664ffa0..9861797b1fd5 100644
-> --- a/arch/x86/mm/debug_pagetables.c
-> +++ b/arch/x86/mm/debug_pagetables.c
-> @@ -72,6 +72,31 @@ static const struct file_operations ptdump_curusr_fops = {
->  };
->  #endif
->
-> +#if defined(CONFIG_EFI) && defined(CONFIG_X86_64)
-> +extern pgd_t *efi_pgd;
-> +static struct dentry *pe_efi;
-> +
-> +static int ptdump_show_efi(struct seq_file *m, void *v)
-> +{
-> +       if (efi_pgd)
-> +               ptdump_walk_pgd_level_debugfs(m, efi_pgd, false);
-> +       return 0;
-> +}
-> +
-> +static int ptdump_open_efi(struct inode *inode, struct file *filp)
-> +{
-> +       return single_open(filp, ptdump_show_efi, NULL);
-> +}
-> +
-> +static const struct file_operations ptdump_efi_fops = {
-> +       .owner          = THIS_MODULE,
-> +       .open           = ptdump_open_efi,
-> +       .read           = seq_read,
-> +       .llseek         = seq_lseek,
-> +       .release        = single_release,
-> +};
-> +#endif
-> +
->  static struct dentry *dir, *pe_knl, *pe_curknl;
->
->  static int __init pt_dump_debug_init(void)
-> @@ -94,8 +119,15 @@ static int __init pt_dump_debug_init(void)
->         pe_curusr = debugfs_create_file("current_user", 0400,
->                                         dir, NULL, &ptdump_curusr_fops);
->         if (!pe_curusr)
-> +                goto err;
-> +#endif
-> +
-> +#if defined(CONFIG_EFI) && defined(CONFIG_X86_64)
-> +       pe_efi = debugfs_create_file("efi", 0400, dir, NULL, &ptdump_efi_fops);
-> +       if (!pe_efi)
->                 goto err;
->  #endif
-> +
->         return 0;
->  err:
->         debugfs_remove_recursive(dir);
-> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-> index 2dd15e967c3f..a9734df2c1b7 100644
-> --- a/arch/x86/platform/efi/efi_64.c
-> +++ b/arch/x86/platform/efi/efi_64.c
-> @@ -191,7 +191,7 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
->         early_code_mapping_set_exec(0);
->  }
->
-> -static pgd_t *efi_pgd;
-> +pgd_t *efi_pgd;
->
->  /*
->   * We need our own copy of the higher levels of the page tables
-> --
-> 2.14.3
->
+---
+ drivers/firmware/efi/Kconfig |    5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -159,7 +159,10 @@ config RESET_ATTACK_MITIGATION
+ 	  using the TCG Platform Reset Attack Mitigation specification. This
+ 	  protects against an attacker forcibly rebooting the system while it
+ 	  still contains secrets in RAM, booting another OS and extracting the
+-	  secrets.
++	  secrets. This should only be enabled when userland is configured to
++	  clear the MemoryOverwriteRequest flag on clean shutdown after secrets
++	  have been evicted, since otherwise it will trigger even on clean
++	  reboots.
+ 
+ endmenu
+ 
