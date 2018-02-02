@@ -1,18 +1,18 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.15 55/55] x86/efi: Clarify that reset attack mitigation needs appropriate userspace
-Date: Fri,  2 Feb 2018 17:59:13 +0100
-Message-ID: <20180202140831.336212129@linuxfoundation.org>
-References: <20180202140826.117602411@linuxfoundation.org>
+Subject: [PATCH 4.14 156/156] x86/efi: Clarify that reset attack mitigation needs appropriate userspace
+Date: Fri,  2 Feb 2018 17:58:57 +0100
+Message-ID: <20180202140847.458165935@linuxfoundation.org>
+References: <20180202140840.242829545@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180202140826.117602411@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20180202140840.242829545@linuxfoundation.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Matthew Garrett <mjg59@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.15-stable review patch.  If anyone has any objections, please let me know.
+4.14-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
