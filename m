@@ -1,48 +1,33 @@
-From: Lukas Wunner <lukas@wunner.de>
+From: Joe Perches <joe@perches.com>
 Subject: Re: [PATCH] efi/apple-properties: Delete an error message for a
  failed memory allocation in unmarshal_devices()
-Date: Tue, 13 Feb 2018 19:40:33 +0100
-Message-ID: <20180213184033.GA24299@wunner.de>
+Date: Tue, 13 Feb 2018 10:50:48 -0800
+Message-ID: <1518547848.22190.50.camel@perches.com>
 References: <145f8fac-9297-b362-d89f-886632e2507f@users.sourceforge.net>
+         <20180213184033.GA24299@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <145f8fac-9297-b362-d89f-886632e2507f@users.sourceforge.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: SF Markus Elfring <elfring@users.sourceforge.net>
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+In-Reply-To: <20180213184033.GA24299@wunner.de>
+Sender: kernel-janitors-owner@vger.kernel.org
+To: Lukas Wunner <lukas@wunner.de>, SF Markus Elfring <elfring@users.sourceforge.net>
 Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 13, 2018 at 06:00:26PM +0100, SF Markus Elfring wrote:
-> Omit an extra message for a memory allocation failure in this function.
-[snip]
-> --- a/drivers/firmware/efi/apple-properties.c
-> +++ b/drivers/firmware/efi/apple-properties.c
-> @@ -158,10 +158,8 @@ static int __init unmarshal_devices(struct properties_header *properties)
->  
->  		entry = kcalloc(dev_header->prop_count + 1, sizeof(*entry),
->  				GFP_KERNEL);
-> -		if (!entry) {
-> -			dev_err(dev, "cannot allocate properties\n");
-> +		if (!entry)
->  			goto skip_device;
-> -		}
->  
->  		unmarshal_key_value_pairs(dev_header, dev, ptr, entry);
->  		if (!entry[0].name)
+On Tue, 2018-02-13 at 19:40 +0100, Lukas Wunner wrote:
+> On Tue, Feb 13, 2018 at 06:00:26PM +0100, SF Markus Elfring wrote:
+> > --- a/drivers/firmware/efi/apple-properties.c
+> You didn't cc me on your submission even though I'm the author of
+> 99% of this file.  Please make an effort prior to submission to
+> identify interested parties.
 
-While the allocator does print an error when allocations fail,
-it may not be immediately apparent to the user what the
-*consequences* are.  In this case, the consequence is that the
-device properties will not be available for consumption by
-drivers and they may fail to probe or behave in entirely
-unexpected ways.  Hence I deliberately printed an error message
-here so that the user can make the connection between erratic
-behavior of drivers later on and the memory allocation error here.
+If you want to receive patches for this file, even
+if you are not a maintainer or an upstream path,
+you should add yourself as a reviewer to the
+MAINTAINERS file like:
 
-You didn't cc me on your submission even though I'm the author of
-99% of this file.  Please make an effort prior to submission to
-identify interested parties.
+APPLE EFI PROPERTIES
+R:	Lukas Wunner <lukas@wunner.de>
+F:	drivers/firmware/efi/apple-properties.c
 
-Lukas
