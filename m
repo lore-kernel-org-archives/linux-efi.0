@@ -1,50 +1,48 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] x86: efi: Replace GFP_ATOMIC with GFP_KERNEL in efi_query_variable_store
-Date: Tue, 13 Feb 2018 18:40:48 +0000
-Message-ID: <CAKv+Gu-XAOETMCtmePeBKJYbf1EoB2K9BeN0ja0UPXa9ho175A@mail.gmail.com>
-References: <1516847386-5291-1-git-send-email-baijiaju1990@gmail.com> <20180213180707.einsznaoghtctkqn@gmail.com>
+From: Lukas Wunner <lukas@wunner.de>
+Subject: Re: [PATCH] efi/apple-properties: Delete an error message for a
+ failed memory allocation in unmarshal_devices()
+Date: Tue, 13 Feb 2018 19:40:33 +0100
+Message-ID: <20180213184033.GA24299@wunner.de>
+References: <145f8fac-9297-b362-d89f-886632e2507f@users.sourceforge.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20180213180707.einsznaoghtctkqn-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Jia-Ju Bai <baijiaju1990-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, the arch/x86 maintainers <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <145f8fac-9297-b362-d89f-886632e2507f@users.sourceforge.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: SF Markus Elfring <elfring@users.sourceforge.net>
+Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 13 February 2018 at 18:07, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->
-> * Jia-Ju Bai <baijiaju1990-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->
->> The function kzalloc here is not called in atomic context.
->> If nonblocking in efi_query_variable_store is true,
->> namely it is in atomic context, efi_query_variable_store will return before
->> this kzalloc is called.
->> Thus GFP_ATOMIC is not necessary, and it can be replaced with GFP_KERNEL.
->>
->> This is found by a static analysis tool named DCNS written by myself.
->>
->> Signed-off-by: Jia-Ju Bai <baijiaju1990-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->> ---
->>  arch/x86/platform/efi/quirks.c |    2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
->> index 8a99a2e..b6dcb52 100644
->> --- a/arch/x86/platform/efi/quirks.c
->> +++ b/arch/x86/platform/efi/quirks.c
->> @@ -177,7 +177,7 @@ efi_status_t efi_query_variable_store(u32 attributes, unsigned long size,
->>                * that by attempting to use more space than is available.
->>                */
->>               unsigned long dummy_size = remaining_size + 1024;
->> -             void *dummy = kzalloc(dummy_size, GFP_ATOMIC);
->> +             void *dummy = kzalloc(dummy_size, GFP_KERNEL);
->
-> Looks good to me!
->
-> Reviewed-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
->
+On Tue, Feb 13, 2018 at 06:00:26PM +0100, SF Markus Elfring wrote:
+> Omit an extra message for a memory allocation failure in this function.
+[snip]
+> --- a/drivers/firmware/efi/apple-properties.c
+> +++ b/drivers/firmware/efi/apple-properties.c
+> @@ -158,10 +158,8 @@ static int __init unmarshal_devices(struct properties_header *properties)
+>  
+>  		entry = kcalloc(dev_header->prop_count + 1, sizeof(*entry),
+>  				GFP_KERNEL);
+> -		if (!entry) {
+> -			dev_err(dev, "cannot allocate properties\n");
+> +		if (!entry)
+>  			goto skip_device;
+> -		}
+>  
+>  		unmarshal_key_value_pairs(dev_header, dev, ptr, entry);
+>  		if (!entry[0].name)
 
-Queued in linux-efi/next
+While the allocator does print an error when allocations fail,
+it may not be immediately apparent to the user what the
+*consequences* are.  In this case, the consequence is that the
+device properties will not be available for consumption by
+drivers and they may fail to probe or behave in entirely
+unexpected ways.  Hence I deliberately printed an error message
+here so that the user can make the connection between erratic
+behavior of drivers later on and the memory allocation error here.
 
-Thanks all.
+You didn't cc me on your submission even though I'm the author of
+99% of this file.  Please make an effort prior to submission to
+identify interested parties.
+
+Lukas
