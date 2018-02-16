@@ -1,30 +1,54 @@
-From: Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+From: Peter Jones <pjones@redhat.com>
 Subject: Re: [PATCH 0/2] efivars: reading variables can generate SMIs
-Date: Fri, 16 Feb 2018 22:03:37 +0000
-Message-ID: <CACdnJuvR4NTdCwp=jT3AoW898EXuq6zakfo5hm6dd9mP-SWoGQ@mail.gmail.com>
+Date: Fri, 16 Feb 2018 17:05:37 -0500
+Message-ID: <20180216220536.liew4p4kqmaxwmfh@redhat.com>
 References: <20180215182208.35003-1-joe.konno@linux.intel.com>
  <CAKv+Gu80pJ5tbGoJqBm8CCKrEZXdkE83c944383KbQ5jREUC0Q@mail.gmail.com>
- <1518814319.4419.10.camel@HansenPartnership.com> <3908561D78D1C84285E8C5FCA982C28F7B37942B@ORSMSX110.amr.corp.intel.com>
- <CALCETrXD4qCwgnDcwnybUXzVk7zyJtzHC2xzLfcZvzrXvAB8PQ@mail.gmail.com>
- <CACdnJutPvMPUTWWjS3oRadQAqn+HpRpY+fhO0pXBj6OsQkAAag@mail.gmail.com> <3908561D78D1C84285E8C5FCA982C28F7B3795A3@ORSMSX110.amr.corp.intel.com>
+ <1518814319.4419.10.camel@HansenPartnership.com>
+ <3908561D78D1C84285E8C5FCA982C28F7B37942B@ORSMSX110.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <3908561D78D1C84285E8C5FCA982C28F7B3795A3-8oqHQFITsIHTXloPLtfHfbfspsVTdybXVpNB7YpNyf8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, joe.konno-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org, ak-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, benjamin.drung-EIkl63zCoXaH+58JC4qpiA@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <3908561D78D1C84285E8C5FCA982C28F7B37942B@ORSMSX110.amr.corp.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Luck, Tony" <tony.luck@intel.com>
+Cc: James Bottomley <James.Bottomley@HansenPartnership.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Joe Konno <joe.konno@linux.intel.com>, Matthew Garrett <mjg59@google.com>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jeremy Kerr <jk@ozlabs.org>, Andi Kleen <ak@linux.intel.com>, Benjamin Drung <benjamin.drung@profitbricks.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Feb 16, 2018 at 2:02 PM Luck, Tony <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+On Fri, Feb 16, 2018 at 09:09:30PM +0000, Luck, Tony wrote:
+> > That said, I'm not sure how many non-root users run the toolkit to
+> > extract their EFI certificates or check on the secure boot status of
+> > the system, but I suspect it might be non-zero: I can see the tinfoil
+> > hat people wanting at least to check the secure boot status when they
+> > log in.
+> 
+> Another fix option might be to rate limit EFI calls for non-root users (on X86
+> since only we have the SMI problem). That would:
+> 
+> 1) Avoid using memory to cache all the variables
+> 2) Catch any other places where non-root users can call EFI
 
-> > If the default is 600 then it makes sense to allow a privileged service
-to
-> > selectively make certain variables world readable at runtime.
+I could get behind that as well.  Currently the things I maintain do
+approximately this many normal accesses with invocations you can do as a
+user:
 
-> As soon as you make one variable world readable you are vulnerable to
-> a local user launching a DoS attack by reading that variable over and over
-> generating a flood of SMIs.
+"efibootmgr -v" - six files we always try to read, plus one per Boot####
+		  entry.
+"fwupdate --info" - one file it always tries to read, one file for each
+                    ESRT entry.
+"dbxtool -l" - one file it always reads.
+"mokutil --sb-state" - reads the same file twice.  I don't maintain
+                       this, but I'll send a patch to Gary to make it
+		       only read it once.  AFAICS all of the other
+		       invocations you can currently do as a user
+		       /legitimately/ read two files, though.
 
-I'm not terribly worried about untrusted users on my laptop, but I would
-prefer to run as little code as root as possible.
+Some systems seem to *love* making a pile of Boot#### entries; I think
+the most I've seen is something like 16.  So on that machine, one
+"efibootmgr -v" invocation is ~22 efivars files read.  I've never seen a
+machine that advertised more than 2 ESRT entries, but maybe we'll get
+there some day.
+
+-- 
+  Peter
