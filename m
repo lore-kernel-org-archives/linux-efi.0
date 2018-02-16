@@ -1,71 +1,66 @@
-From: Peter Jones <pjones@redhat.com>
+From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
 Subject: Re: [PATCH 0/2] efivars: reading variables can generate SMIs
-Date: Fri, 16 Feb 2018 14:54:51 -0500
-Message-ID: <20180216195450.apea25yhxzrfhkjm@redhat.com>
+Date: Fri, 16 Feb 2018 12:51:59 -0800
+Message-ID: <1518814319.4419.10.camel@HansenPartnership.com>
 References: <20180215182208.35003-1-joe.konno@linux.intel.com>
- <CAKv+Gu80pJ5tbGoJqBm8CCKrEZXdkE83c944383KbQ5jREUC0Q@mail.gmail.com>
- <20180216105548.GA29042@pd.tnic>
- <CAKv+Gu8qm2wFxY56-eRLkLZB6fRUCmZbZo=4cvo5e4JDFh01Gg@mail.gmail.com>
- <20180216110821.GB29042@pd.tnic>
- <CAKv+Gu_SD6yWJMGbTwGUWXtrgZKPkpANNaGe1PUruTG9j0yhcg@mail.gmail.com>
- <20180216184832.sqreq5zhar3jqdae@jbkonno-saint14>
- <20180216192220.wljl23g533sc3oxg@redhat.com>
- <3908561D78D1C84285E8C5FCA982C28F7B37917B@ORSMSX110.amr.corp.intel.com>
+         <CAKv+Gu80pJ5tbGoJqBm8CCKrEZXdkE83c944383KbQ5jREUC0Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <3908561D78D1C84285E8C5FCA982C28F7B37917B@ORSMSX110.amr.corp.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Luck, Tony" <tony.luck@intel.com>
-Cc: Joe Konno <joe.konno@linux.intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Matthew Garrett <mjg59@google.com>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jeremy Kerr <jk@ozlabs.org>, Andi Kleen <ak@linux.intel.com>, Benjamin Drung <benjamin.drung@profitbricks.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKv+Gu80pJ5tbGoJqBm8CCKrEZXdkE83c944383KbQ5jREUC0Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Joe Konno <joe.konno-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, Andi Kleen <ak-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Benjamin Drung <benjamin.drung-EIkl63zCoXaH+58JC4qpiA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Feb 16, 2018 at 07:32:17PM +0000, Luck, Tony wrote:
-> > tl;dr: I think changing everything to 0600 is probably completely fine,
-> > and whitelisting is probably pointless.  
+On Fri, 2018-02-16 at 10:41 +0000, Ard Biesheuvel wrote:
+> On 15 February 2018 at 18:22, Joe Konno <joe.konno-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+> wrote:
+> > 
+> > From: Joe Konno <joe.konno-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> > 
+> > It was pointed out that normal, unprivileged users reading certain
+> > EFI
+> > variables (through efivarfs) can generate SMIs. Given these nodes
+> > are created
+> > with 0644 permissions, normal users could generate a lot of SMIs.
+> > By
+> > restricting permissions a bit (patch 1), we can make it harder for
+> > normal users
+> > to generate spurious SMIs.
+> > 
+> > A normal user could generate lots of SMIs by reading the efivarfs
+> > in a trivial
+> > loop:
+> > 
+> > ```
+> > while true; do
+> >     cat /sys/firmware/efi/evivars/* > /dev/null
+> > done
+> > ```
+> > 
+> > Patch 1 in this series limits read and write permissions on
+> > efivarfs to the
+> > owner/superuser. Group and world cannot access.
+> > 
+> > Patch 2 is for consistency and hygiene. If we restrict permissions
+> > for either
+> > efivarfs or efi/vars, the other interface should get the same
+> > treatment.
+> > 
 > 
-> But do you speak for all users?
+> I am inclined to apply this as a fix, but I will give the x86 guys a
+> chance to respond as well.
 
-No, I just write their tools :)
+It would break my current efi certificate tools because right at the
+moment you can read the EFI secure boot variables as an unprivileged
+user.
 
-> It will just take one person complaining that efibootmgr no longer
-> shows them what it used to show to bring down the wrath of Linus on
-> our (specifically Joe's) head for breaking user space.
+That said, I'm not sure how many non-root users run the toolkit to
+extract their EFI certificates or check on the secure boot status of
+the system, but I suspect it might be non-zero: I can see the tinfoil
+hat people wanting at least to check the secure boot status when they
+log in.
 
-The userland use case is gazing idly at the values without intending to
-do anything about them.  And most of this is firmware config and
-firmware/OS interaction.  Honestly it should never have been user
-readable to begin with.
-
-But also, we had a bug for quite some time where efibootmgr created
-everything as 0600, and as a result non-root users couldn't do e.g.
-"efibootmgr -v" and see the paths of new entries until a reboot
-occurred.  Nobody ever reported it in bugzilla.redhat.com or efibootmgr
-or efivar's github issues pages.  One person noticed it while commenting
-about another issue, but didn't see it as related to his actual issue or
-being a bug so much as "weird" that listing worked as non-root before
-changing something but not after.
-
-Another user asked about getting permission denied while setting the
-boot order on askubuntu here:
-https://askubuntu.com/questions/688317/getting-permission-denied-errors-from-efibootmgr
-The response was exactly that you have to run it as root.  I think it's
-telling that nobody said anything about reading vs writing.
-
-> I've got someone about to start looking at making efivarfs read and save
-> the values during mount, so all the read-only options can continue to work
-> without making EFI calls.
-> 
-> This will cost some memory (say 20-30 variables at up to 1K each).
-
-71 variables on my laptop, and the 1K restriction went away a *loooong*
-time ago.  It was fully excised from the userland tools in 2013.  On my
-laptop, 4 of those 71 variables are >5000 bytes.  The total storage of
-all of the data in the variables is 38kB.
-
-I still think changing it to 0600 and calling this done is the right
-thing to do.
-
--- 
-  Peter
+James
