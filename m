@@ -1,28 +1,36 @@
-From: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH 0/2] efivars: reading variables can generate SMIs
-Date: Fri, 16 Feb 2018 21:09:30 +0000
-Message-ID: <3908561D78D1C84285E8C5FCA982C28F7B37942B@ORSMSX110.amr.corp.intel.com>
+From: Andy Lutomirski <luto@kernel.org>
+Subject: Re: [PATCH 0/2] efivars: reading variables can generate SMIs
+Date: Fri, 16 Feb 2018 21:45:19 +0000
+Message-ID: <CALCETrXD4qCwgnDcwnybUXzVk7zyJtzHC2xzLfcZvzrXvAB8PQ@mail.gmail.com>
 References: <20180215182208.35003-1-joe.konno@linux.intel.com>
-         <CAKv+Gu80pJ5tbGoJqBm8CCKrEZXdkE83c944383KbQ5jREUC0Q@mail.gmail.com>
- <1518814319.4419.10.camel@HansenPartnership.com>
+ <CAKv+Gu80pJ5tbGoJqBm8CCKrEZXdkE83c944383KbQ5jREUC0Q@mail.gmail.com>
+ <1518814319.4419.10.camel@HansenPartnership.com> <3908561D78D1C84285E8C5FCA982C28F7B37942B@ORSMSX110.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1518814319.4419.10.camel-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Joe Konno <joe.konno-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matthew Garrett <mjg59-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, Andi Kleen <ak-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Benjamin Drung <benjamin.drung-EIkl63zCoXaH+58JC4qpiA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <3908561D78D1C84285E8C5FCA982C28F7B37942B@ORSMSX110.amr.corp.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Luck, Tony" <tony.luck@intel.com>
+Cc: James Bottomley <James.Bottomley@hansenpartnership.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Joe Konno <joe.konno@linux.intel.com>, Matthew Garrett <mjg59@google.com>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jeremy Kerr <jk@ozlabs.org>, Andi Kleen <ak@linux.intel.com>, Benjamin Drung <benjamin.drung@profitbricks.com>, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-PiBUaGF0IHNhaWQsIEknbSBub3Qgc3VyZSBob3cgbWFueSBub24tcm9vdCB1c2VycyBydW4gdGhl
-IHRvb2xraXQgdG8NCj4gZXh0cmFjdCB0aGVpciBFRkkgY2VydGlmaWNhdGVzIG9yIGNoZWNrIG9u
-IHRoZSBzZWN1cmUgYm9vdCBzdGF0dXMgb2YNCj4gdGhlIHN5c3RlbSwgYnV0IEkgc3VzcGVjdCBp
-dCBtaWdodCBiZSBub24temVybzogSSBjYW4gc2VlIHRoZSB0aW5mb2lsDQo+IGhhdCBwZW9wbGUg
-d2FudGluZyBhdCBsZWFzdCB0byBjaGVjayB0aGUgc2VjdXJlIGJvb3Qgc3RhdHVzIHdoZW4gdGhl
-eQ0KPiBsb2cgaW4uDQoNCkFub3RoZXIgZml4IG9wdGlvbiBtaWdodCBiZSB0byByYXRlIGxpbWl0
-IEVGSSBjYWxscyBmb3Igbm9uLXJvb3QgdXNlcnMgKG9uIFg4Ng0Kc2luY2Ugb25seSB3ZSBoYXZl
-IHRoZSBTTUkgcHJvYmxlbSkuIFRoYXQgd291bGQ6DQoNCjEpIEF2b2lkIHVzaW5nIG1lbW9yeSB0
-byBjYWNoZSBhbGwgdGhlIHZhcmlhYmxlcw0KMikgQ2F0Y2ggYW55IG90aGVyIHBsYWNlcyB3aGVy
-ZSBub24tcm9vdCB1c2VycyBjYW4gY2FsbCBFRkkNCg0KLVRvbnkNCg==
+On Fri, Feb 16, 2018 at 9:09 PM, Luck, Tony <tony.luck@intel.com> wrote:
+>> That said, I'm not sure how many non-root users run the toolkit to
+>> extract their EFI certificates or check on the secure boot status of
+>> the system, but I suspect it might be non-zero: I can see the tinfoil
+>> hat people wanting at least to check the secure boot status when they
+>> log in.
+>
+> Another fix option might be to rate limit EFI calls for non-root users (on X86
+> since only we have the SMI problem). That would:
+>
+> 1) Avoid using memory to cache all the variables
+> 2) Catch any other places where non-root users can call EFI
+
+I'm going to go out on a limb and suggest that the fact that
+unprivileged users can read efi variables at all is a mistake
+regardless of SMI issues.
+
+Also, chmod() just shouldn't work on efi variables, and the mode
+passed to creat() should be ignored.  After all, there's no backing
+store for the mode.
