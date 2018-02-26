@@ -1,12 +1,10 @@
 From: Yazen Ghannam <Yazen.Ghannam@amd.com>
-Subject: [PATCH v2 3/8] efi: Decode IA32/X64 Processor Error Info Structure
-Date: Mon, 26 Feb 2018 13:38:59 -0600
-Message-ID: <20180226193904.20532-4-Yazen.Ghannam@amd.com>
-References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
+Subject: [PATCH v2 0/8] Decode IA32/X64 CPER
+Date: Mon, 26 Feb 2018 13:38:56 -0600
+Message-ID: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org
 Cc: Yazen Ghannam <Yazen.Ghannam@amd.com>, linux-kernel@vger.kernel.org, ard.biesheuvel@linaro.org, bp@suse.de, x86@kernel.org
@@ -14,100 +12,48 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Yazen Ghannam <yazen.ghannam@amd.com>
 
-Print the fields in the IA32/X64 Processor Error Info Structure.
+This series adds decoding for the IA32/X64 Common Platform Error Record.
 
-Based on UEFI 2.7 Table 256. IA32/X64 Processor Error Information
-Structure.
+Patch 1 fixes the IA32/X64 Processor Error Section definition to match
+the UEFI spec.
 
-Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
----
+Patches 2-8 add the new decoding. The patches incrementally add the
+decoding starting from the top-level "Error Section". Hopefully, this
+will make reviewing a bit easier compared to one large patch.
+
+The formatting of the field names and options is taken from the UEFI
+spec. I tried to keep everything the same to make searching easier.
+
+The patches were written to the UEFI 2.7 spec though the definition of
+the IA32/X64 CPER seems to be the same as when it was introduced in
+the UEFI 2.1 spec.
+
 Link:
-https://lkml.kernel.org/r/20180223200333.6410-4-Yazen.Ghannam@amd.com
+https://lkml.kernel.org/r/20180223200333.6410-1-Yazen.Ghannam@amd.com
 
-v1->v2:
-* Add parantheses around "bits" expression in macro.
-* Fix indentation on multi-line statements.
+Changes V1 to V2:
+* Remove stable request for all patches.
+* Address Ard's comments on formatting and other issues.
+* In Patch 8, always print context info even if the type is not
+  recognized.
 
- drivers/firmware/efi/cper-x86.c | 53 +++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 53 insertions(+)
+Yazen Ghannam (8):
+  efi: Fix IA32/X64 Processor Error Record definition
+  efi: Decode IA32/X64 Processor Error Section
+  efi: Decode IA32/X64 Processor Error Info Structure
+  efi: Decode UEFI-defined IA32/X64 Error Structure GUIDs
+  efi: Decode IA32/X64 Cache, TLB, and Bus Check structures
+  efi: Decode additional IA32/X64 Bus Check fields
+  efi: Decode IA32/X64 MS Check structure
+  efi: Decode IA32/X64 Context Info structure
 
-diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-x86.c
-index 9da0d981178f..417bd4e500a7 100644
---- a/drivers/firmware/efi/cper-x86.c
-+++ b/drivers/firmware/efi/cper-x86.c
-@@ -3,15 +3,28 @@
- 
- #include <linux/cper.h>
- 
-+#define INDENT_SP	" "
-+
- /*
-  * We don't need a "CPER_IA" prefix since these are all locally defined.
-  * This will save us a lot of line space.
-  */
- #define VALID_LAPIC_ID			BIT_ULL(0)
- #define VALID_CPUID_INFO		BIT_ULL(1)
-+#define VALID_PROC_ERR_INFO_NUM(bits)	(((bits) & GENMASK_ULL(7, 2)) >> 2)
-+
-+#define INFO_VALID_CHECK_INFO		BIT_ULL(0)
-+#define INFO_VALID_TARGET_ID		BIT_ULL(1)
-+#define INFO_VALID_REQUESTOR_ID		BIT_ULL(2)
-+#define INFO_VALID_RESPONDER_ID		BIT_ULL(3)
-+#define INFO_VALID_IP			BIT_ULL(4)
- 
- void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
- {
-+	int i;
-+	struct cper_ia_err_info *err_info;
-+	char newpfx[64];
-+
- 	printk("%sValidation Bits: 0x%016llx\n", pfx, proc->validation_bits);
- 
- 	if (proc->validation_bits & VALID_LAPIC_ID)
-@@ -22,4 +35,44 @@ void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
- 		print_hex_dump(pfx, "", DUMP_PREFIX_OFFSET, 16, 4, proc->cpuid,
- 			       sizeof(proc->cpuid), 0);
- 	}
-+
-+	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
-+
-+	err_info = (struct cper_ia_err_info *)(proc + 1);
-+	for (i = 0; i < VALID_PROC_ERR_INFO_NUM(proc->validation_bits); i++) {
-+		printk("%sError Information Structure %d:\n", pfx, i);
-+
-+		printk("%sError Structure Type: %pUl\n", newpfx,
-+		       &err_info->err_type);
-+
-+		printk("%sValidation Bits: 0x%016llx\n",
-+		       newpfx, err_info->validation_bits);
-+
-+		if (err_info->validation_bits & INFO_VALID_CHECK_INFO) {
-+			printk("%sCheck Information: 0x%016llx\n", newpfx,
-+			       err_info->check_info);
-+		}
-+
-+		if (err_info->validation_bits & INFO_VALID_TARGET_ID) {
-+			printk("%sTarget Identifier: 0x%016llx\n",
-+			       newpfx, err_info->target_id);
-+		}
-+
-+		if (err_info->validation_bits & INFO_VALID_REQUESTOR_ID) {
-+			printk("%sRequestor Identifier: 0x%016llx\n",
-+			       newpfx, err_info->requestor_id);
-+		}
-+
-+		if (err_info->validation_bits & INFO_VALID_RESPONDER_ID) {
-+			printk("%sResponder Identifier: 0x%016llx\n",
-+			       newpfx, err_info->responder_id);
-+		}
-+
-+		if (err_info->validation_bits & INFO_VALID_IP) {
-+			printk("%sInstruction Pointer: 0x%016llx\n",
-+			       newpfx, err_info->ip);
-+		}
-+
-+		err_info++;
-+	}
- }
+ drivers/firmware/efi/Kconfig    |   5 +
+ drivers/firmware/efi/Makefile   |   1 +
+ drivers/firmware/efi/cper-x86.c | 363 ++++++++++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/cper.c     |  10 ++
+ include/linux/cper.h            |   4 +-
+ 5 files changed, 382 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/firmware/efi/cper-x86.c
+
 -- 
 2.14.1
