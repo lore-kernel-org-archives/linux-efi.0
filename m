@@ -1,138 +1,52 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 3/8] efi: Decode IA32/X64 Processor Error Info Structure
-Date: Mon, 26 Feb 2018 16:04:33 +0000
-Message-ID: <CAKv+Gu9zFXBtRMh8c5Jy-V=K+FTj2Z6n41QfO1PExjrWYs=8Hw@mail.gmail.com>
-References: <20180223200333.6410-1-Yazen.Ghannam@amd.com> <20180223200333.6410-4-Yazen.Ghannam@amd.com>
- <CAKv+Gu_18==LT3eGPJh9Lveq_CWXwveBD4EYnTWvT7FbTtM_jg@mail.gmail.com> <DM5PR12MB191622BDE62D8C4F1031C015F8C10@DM5PR12MB1916.namprd12.prod.outlook.com>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH 8/8] efi: Decode IA32/X64 Context Info structure
+Date: Mon, 26 Feb 2018 16:05:00 +0000
+Message-ID: <DM5PR12MB1916F87127E0C2EF6F042247F8C10@DM5PR12MB1916.namprd12.prod.outlook.com>
+References: <20180223200333.6410-1-Yazen.Ghannam@amd.com>
+ <20180223200333.6410-9-Yazen.Ghannam@amd.com>
+ <CAKv+Gu_kwJTxsmmQSAMKgSmK6w_-BhqBTnv3Sqv-K1TCYq4X-Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <DM5PR12MB191622BDE62D8C4F1031C015F8C10@DM5PR12MB1916.namprd12.prod.outlook.com>
+In-Reply-To: <CAKv+Gu_kwJTxsmmQSAMKgSmK6w_-BhqBTnv3Sqv-K1TCYq4X-Q@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, the arch/x86 maintainers <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 26 February 2018 at 16:00, Ghannam, Yazen <Yazen.Ghannam@amd.com> wrote:
->> -----Original Message-----
->> From: Ard Biesheuvel [mailto:ard.biesheuvel@linaro.org]
->> Sent: Saturday, February 24, 2018 11:40 AM
->> To: Ghannam, Yazen <Yazen.Ghannam@amd.com>
->> Cc: linux-efi@vger.kernel.org; Linux Kernel Mailing List <linux-
->> kernel@vger.kernel.org>; Borislav Petkov <bp@suse.de>; the arch/x86
->> maintainers <x86@kernel.org>
->> Subject: Re: [PATCH 3/8] efi: Decode IA32/X64 Processor Error Info Structure
->>
-> ...
->> >
->> > diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-
->> x86.c
->> > index b50ee3cdf637..9d608f742c98 100644
->> > --- a/drivers/firmware/efi/cper-x86.c
->> > +++ b/drivers/firmware/efi/cper-x86.c
->> > @@ -4,15 +4,28 @@
->> >
->> >  #include <linux/cper.h>
->> >
->> > +#define INDENT_SP      " "
->> > +
->> >  /*
->> >   * We don't need a "CPER_IA" prefix since these are all locally defined.
->> >   * This will save us a lot of line space.
->> >   */
->> >  #define VALID_LAPIC_ID                 BIT_ULL(0)
->> >  #define VALID_CPUID_INFO               BIT_ULL(1)
->> > +#define VALID_PROC_ERR_INFO_NUM(bits)  ((bits & GENMASK_ULL(7, 2))
->> >> 2)
->> > +
->>
->> Parens around 'bits' please
->>
->
-> Like this?
->
-> #define VALID_PROC_ERR_INFO_NUM(bits)  (((bits) & GENMASK_ULL(7, 2)) >> 2)
->
-
-Yes. Your code currently does not pass expressions into these, but it
-is good form to use parens here to make them future proof
-
-> I'll do the same for the others.
->
-
-Cheers
-
->> > +#define INFO_VALID_CHECK_INFO          BIT_ULL(0)
->> > +#define INFO_VALID_TARGET_ID           BIT_ULL(1)
->> > +#define INFO_VALID_REQUESTOR_ID                BIT_ULL(2)
->> > +#define INFO_VALID_RESPONDER_ID                BIT_ULL(3)
->> > +#define INFO_VALID_IP                  BIT_ULL(4)
->> >
->> >  void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia
->> *proc)
->> >  {
->> > +       int i;
->> > +       struct cper_ia_err_info *err_info;
->> > +       char newpfx[64];
->> > +
->> >         printk("%sValidation Bits: 0x%016llx\n", pfx, proc->validation_bits);
->> >
->> >         if (proc->validation_bits & VALID_LAPIC_ID)
->> > @@ -23,4 +36,44 @@ void cper_print_proc_ia(const char *pfx, const struct
->> cper_sec_proc_ia *proc)
->> >                 print_hex_dump(pfx, "", DUMP_PREFIX_OFFSET, 16, 4, proc-
->> >cpuid,
->> >                                sizeof(proc->cpuid), 0);
->> >         }
->> > +
->> > +       snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
->> > +
->> > +       err_info = (struct cper_ia_err_info *)(proc + 1);
->> > +       for (i = 0; i < VALID_PROC_ERR_INFO_NUM(proc->validation_bits); i++)
->> {
->> > +               printk("%sError Information Structure %d:\n", pfx, i);
->> > +
->> > +               printk("%sError Structure Type: %pUl\n", newpfx,
->> > +                        &err_info->err_type);
->> > +
->>
->> The indentation is a bit awkward here. Could you please align followup
->> lines with the character following the ( on the first line?
->>
->
-> Yes, will do.
->
->> > +               printk("%sValidation Bits: 0x%016llx\n",
->> > +                        newpfx, err_info->validation_bits);
->> > +
->> > +               if (err_info->validation_bits & INFO_VALID_CHECK_INFO) {
->> > +                       printk("%sCheck Information: 0x%016llx\n", newpfx,
->> > +                                err_info->check_info);
->> > +               }
->> > +
->> > +               if (err_info->validation_bits & INFO_VALID_TARGET_ID) {
->> > +                       printk("%sTarget Identifier: 0x%016llx\n",
->> > +                                newpfx, err_info->target_id);
->> > +               }
->> > +
->> > +               if (err_info->validation_bits & INFO_VALID_REQUESTOR_ID) {
->> > +                       printk("%sRequestor Identifier: 0x%016llx\n",
->> > +                                newpfx, err_info->requestor_id);
->> > +               }
->> > +
->> > +               if (err_info->validation_bits & INFO_VALID_RESPONDER_ID) {
->> > +                       printk("%sResponder Identifier: 0x%016llx\n",
->> > +                                newpfx, err_info->responder_id);
->> > +               }
->> > +
->> > +               if (err_info->validation_bits & INFO_VALID_IP) {
->> > +                       printk("%sInstruction Pointer: 0x%016llx\n",
->> > +                                newpfx, err_info->ip);
->> > +               }
->> > +
->> > +               err_info++;
->> > +       }
->> >  }
->> > --
->> > 2.14.1
->> >
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBcmQgQmllc2hldXZlbCBbbWFp
+bHRvOmFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmddDQo+IFNlbnQ6IFNhdHVyZGF5LCBGZWJydWFy
+eSAyNCwgMjAxOCAxMTo0NiBBTQ0KPiBUbzogR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5uYW1A
+YW1kLmNvbT4NCj4gQ2M6IGxpbnV4LWVmaUB2Z2VyLmtlcm5lbC5vcmc7IExpbnV4IEtlcm5lbCBN
+YWlsaW5nIExpc3QgPGxpbnV4LQ0KPiBrZXJuZWxAdmdlci5rZXJuZWwub3JnPjsgQm9yaXNsYXYg
+UGV0a292IDxicEBzdXNlLmRlPjsgdGhlIGFyY2gveDg2DQo+IG1haW50YWluZXJzIDx4ODZAa2Vy
+bmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IFtQQVRDSCA4LzhdIGVmaTogRGVjb2RlIElBMzIvWDY0
+IENvbnRleHQgSW5mbyBzdHJ1Y3R1cmUNCj4gDQo+IE9uIDIzIEZlYnJ1YXJ5IDIwMTggYXQgMjA6
+MDMsIFlhemVuIEdoYW5uYW0NCj4gPFlhemVuLkdoYW5uYW1AYW1kLmNvbT4gd3JvdGU6DQo+ID4g
+RnJvbTogWWF6ZW4gR2hhbm5hbSA8eWF6ZW4uZ2hhbm5hbUBhbWQuY29tPg0KPiA+DQo+ID4gUHJp
+bnQgdGhlIGZpZWxkcyBvZiB0aGUgSUEzMi9YNjQgQ29udGV4dCBJbmZvcm1hdGlvbiBzdHJ1Y3R1
+cmUuDQo+ID4NCj4gPiBQcmludCB0aGUgIlJlZ2lzdGVyIEFycmF5IiBhcyByYXcgdmFsdWVzLiBT
+b21lIGNvbnRleHQgdHlwZXMgYXJlIGRlZmluZWQNCj4gPiBpbiB0aGUgVUVGSSBzcGVjLCBzbyBt
+b3JlIGRldGFpbGVkIGRlY29kZWQgbWF5IGJlIGFkZGVkIGluIHRoZSBmdXR1cmUuDQo+ID4NCj4g
+PiBCYXNlZCBvbiBVRUZJIDIuNyBzZWN0aW9uIE4uMi40LjIuMiBJQTMyL1g2NCBQcm9jZXNzb3Ig
+Q29udGV4dA0KPiA+IEluZm9ybWF0aW9uIFN0cnVjdHVyZS4NCj4gPg0KPiA+IENjOiA8c3RhYmxl
+QHZnZXIua2VybmVsLm9yZz4gIyA0LjE2LngNCj4gPiBTaWduZWQtb2ZmLWJ5OiBZYXplbiBHaGFu
+bmFtIDx5YXplbi5naGFubmFtQGFtZC5jb20+DQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvZmlybXdh
+cmUvZWZpL2NwZXIteDg2LmMgfCA1NQ0KPiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrKysrKw0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgNTUgaW5zZXJ0aW9ucygrKQ0KPiA+DQo+
+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL2NwZXIteDg2LmMgYi9kcml2ZXJz
+L2Zpcm13YXJlL2VmaS9jcGVyLQ0KPiB4ODYuYw0KPiA+IGluZGV4IDAyYjFiNDI0ZjUzNy4uYmI2
+Y2VmMGI1ZTUzIDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL2NwZXIteDg2
+LmMNCj4gPiArKysgYi9kcml2ZXJzL2Zpcm13YXJlL2VmaS9jcGVyLXg4Ni5jDQo+ID4gQEAgLTEz
+LDYgKzEzLDcgQEANCj4gPiAgI2RlZmluZSBWQUxJRF9MQVBJQ19JRCAgICAgICAgICAgICAgICAg
+QklUX1VMTCgwKQ0KPiA+ICAjZGVmaW5lIFZBTElEX0NQVUlEX0lORk8gICAgICAgICAgICAgICBC
+SVRfVUxMKDEpDQo+ID4gICNkZWZpbmUgVkFMSURfUFJPQ19FUlJfSU5GT19OVU0oYml0cykgICgo
+Yml0cyAmIEdFTk1BU0tfVUxMKDcsIDIpKQ0KPiA+PiAyKQ0KPiA+ICsjZGVmaW5lIFZBTElEX1BS
+T0NfQ05YVF9JTkZPX05VTShiaXRzKSAoKGJpdHMgJiBHRU5NQVNLX1VMTCgxMywNCj4gOCkpID4+
+IDgpDQo+IA0KPiBQYXJlbnMNCj4gDQo+IEFsc28sIENOWFQgaXNuJ3QgcmVhbGx5IGlkaW9tYXRp
+YyB3aGVuIGFiYnJldmlhdGluZyAnY29udGV4dCcgKGFuZCB5b3UNCj4gdXNlIENUWCBiZWxvdyBh
+cyB3ZWxsKQ0KPiANCg0KVGhlIFVFRkkgc3BlYyB1c2VzIFBST0NfQ09OVEVYVF9JTkZPX05VTS4g
+DQoNCldvdWxkIHlvdSBwcmVmZXIgMSBvciAyIGJlbG93Pw0KMSkgVkFMSURfUFJPQ19DT05URVhU
+X0lORk9fTlVNDQoyKSBWQUxJRF9QUk9DX0NUWF9JTkZPX05VTQ0KDQpUaGFua3MsDQpZYXplbg0K
