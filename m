@@ -1,52 +1,71 @@
-From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Subject: RE: [PATCH 8/8] efi: Decode IA32/X64 Context Info structure
-Date: Mon, 26 Feb 2018 16:05:00 +0000
-Message-ID: <DM5PR12MB1916F87127E0C2EF6F042247F8C10@DM5PR12MB1916.namprd12.prod.outlook.com>
-References: <20180223200333.6410-1-Yazen.Ghannam@amd.com>
- <20180223200333.6410-9-Yazen.Ghannam@amd.com>
- <CAKv+Gu_kwJTxsmmQSAMKgSmK6w_-BhqBTnv3Sqv-K1TCYq4X-Q@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 8/8] efi: Decode IA32/X64 Context Info structure
+Date: Mon, 26 Feb 2018 16:06:00 +0000
+Message-ID: <CAKv+Gu9yHZEd5JjrmYVqb6ESCR5rP0kYZCNeAcy1kuYpjxJ7jQ@mail.gmail.com>
+References: <20180223200333.6410-1-Yazen.Ghannam@amd.com> <20180223200333.6410-9-Yazen.Ghannam@amd.com>
+ <CAKv+Gu_kwJTxsmmQSAMKgSmK6w_-BhqBTnv3Sqv-K1TCYq4X-Q@mail.gmail.com> <DM5PR12MB1916F87127E0C2EF6F042247F8C10@DM5PR12MB1916.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu_kwJTxsmmQSAMKgSmK6w_-BhqBTnv3Sqv-K1TCYq4X-Q@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <DM5PR12MB1916F87127E0C2EF6F042247F8C10@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, the arch/x86 maintainers <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBcmQgQmllc2hldXZlbCBbbWFp
-bHRvOmFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmddDQo+IFNlbnQ6IFNhdHVyZGF5LCBGZWJydWFy
-eSAyNCwgMjAxOCAxMTo0NiBBTQ0KPiBUbzogR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5uYW1A
-YW1kLmNvbT4NCj4gQ2M6IGxpbnV4LWVmaUB2Z2VyLmtlcm5lbC5vcmc7IExpbnV4IEtlcm5lbCBN
-YWlsaW5nIExpc3QgPGxpbnV4LQ0KPiBrZXJuZWxAdmdlci5rZXJuZWwub3JnPjsgQm9yaXNsYXYg
-UGV0a292IDxicEBzdXNlLmRlPjsgdGhlIGFyY2gveDg2DQo+IG1haW50YWluZXJzIDx4ODZAa2Vy
-bmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IFtQQVRDSCA4LzhdIGVmaTogRGVjb2RlIElBMzIvWDY0
-IENvbnRleHQgSW5mbyBzdHJ1Y3R1cmUNCj4gDQo+IE9uIDIzIEZlYnJ1YXJ5IDIwMTggYXQgMjA6
-MDMsIFlhemVuIEdoYW5uYW0NCj4gPFlhemVuLkdoYW5uYW1AYW1kLmNvbT4gd3JvdGU6DQo+ID4g
-RnJvbTogWWF6ZW4gR2hhbm5hbSA8eWF6ZW4uZ2hhbm5hbUBhbWQuY29tPg0KPiA+DQo+ID4gUHJp
-bnQgdGhlIGZpZWxkcyBvZiB0aGUgSUEzMi9YNjQgQ29udGV4dCBJbmZvcm1hdGlvbiBzdHJ1Y3R1
-cmUuDQo+ID4NCj4gPiBQcmludCB0aGUgIlJlZ2lzdGVyIEFycmF5IiBhcyByYXcgdmFsdWVzLiBT
-b21lIGNvbnRleHQgdHlwZXMgYXJlIGRlZmluZWQNCj4gPiBpbiB0aGUgVUVGSSBzcGVjLCBzbyBt
-b3JlIGRldGFpbGVkIGRlY29kZWQgbWF5IGJlIGFkZGVkIGluIHRoZSBmdXR1cmUuDQo+ID4NCj4g
-PiBCYXNlZCBvbiBVRUZJIDIuNyBzZWN0aW9uIE4uMi40LjIuMiBJQTMyL1g2NCBQcm9jZXNzb3Ig
-Q29udGV4dA0KPiA+IEluZm9ybWF0aW9uIFN0cnVjdHVyZS4NCj4gPg0KPiA+IENjOiA8c3RhYmxl
-QHZnZXIua2VybmVsLm9yZz4gIyA0LjE2LngNCj4gPiBTaWduZWQtb2ZmLWJ5OiBZYXplbiBHaGFu
-bmFtIDx5YXplbi5naGFubmFtQGFtZC5jb20+DQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvZmlybXdh
-cmUvZWZpL2NwZXIteDg2LmMgfCA1NQ0KPiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKw0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgNTUgaW5zZXJ0aW9ucygrKQ0KPiA+DQo+
-ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL2NwZXIteDg2LmMgYi9kcml2ZXJz
-L2Zpcm13YXJlL2VmaS9jcGVyLQ0KPiB4ODYuYw0KPiA+IGluZGV4IDAyYjFiNDI0ZjUzNy4uYmI2
-Y2VmMGI1ZTUzIDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL2NwZXIteDg2
-LmMNCj4gPiArKysgYi9kcml2ZXJzL2Zpcm13YXJlL2VmaS9jcGVyLXg4Ni5jDQo+ID4gQEAgLTEz
-LDYgKzEzLDcgQEANCj4gPiAgI2RlZmluZSBWQUxJRF9MQVBJQ19JRCAgICAgICAgICAgICAgICAg
-QklUX1VMTCgwKQ0KPiA+ICAjZGVmaW5lIFZBTElEX0NQVUlEX0lORk8gICAgICAgICAgICAgICBC
-SVRfVUxMKDEpDQo+ID4gICNkZWZpbmUgVkFMSURfUFJPQ19FUlJfSU5GT19OVU0oYml0cykgICgo
-Yml0cyAmIEdFTk1BU0tfVUxMKDcsIDIpKQ0KPiA+PiAyKQ0KPiA+ICsjZGVmaW5lIFZBTElEX1BS
-T0NfQ05YVF9JTkZPX05VTShiaXRzKSAoKGJpdHMgJiBHRU5NQVNLX1VMTCgxMywNCj4gOCkpID4+
-IDgpDQo+IA0KPiBQYXJlbnMNCj4gDQo+IEFsc28sIENOWFQgaXNuJ3QgcmVhbGx5IGlkaW9tYXRp
-YyB3aGVuIGFiYnJldmlhdGluZyAnY29udGV4dCcgKGFuZCB5b3UNCj4gdXNlIENUWCBiZWxvdyBh
-cyB3ZWxsKQ0KPiANCg0KVGhlIFVFRkkgc3BlYyB1c2VzIFBST0NfQ09OVEVYVF9JTkZPX05VTS4g
-DQoNCldvdWxkIHlvdSBwcmVmZXIgMSBvciAyIGJlbG93Pw0KMSkgVkFMSURfUFJPQ19DT05URVhU
-X0lORk9fTlVNDQoyKSBWQUxJRF9QUk9DX0NUWF9JTkZPX05VTQ0KDQpUaGFua3MsDQpZYXplbg0K
+On 26 February 2018 at 16:05, Ghannam, Yazen <Yazen.Ghannam@amd.com> wrote:
+>> -----Original Message-----
+>> From: Ard Biesheuvel [mailto:ard.biesheuvel@linaro.org]
+>> Sent: Saturday, February 24, 2018 11:46 AM
+>> To: Ghannam, Yazen <Yazen.Ghannam@amd.com>
+>> Cc: linux-efi@vger.kernel.org; Linux Kernel Mailing List <linux-
+>> kernel@vger.kernel.org>; Borislav Petkov <bp@suse.de>; the arch/x86
+>> maintainers <x86@kernel.org>
+>> Subject: Re: [PATCH 8/8] efi: Decode IA32/X64 Context Info structure
+>>
+>> On 23 February 2018 at 20:03, Yazen Ghannam
+>> <Yazen.Ghannam@amd.com> wrote:
+>> > From: Yazen Ghannam <yazen.ghannam@amd.com>
+>> >
+>> > Print the fields of the IA32/X64 Context Information structure.
+>> >
+>> > Print the "Register Array" as raw values. Some context types are defined
+>> > in the UEFI spec, so more detailed decoded may be added in the future.
+>> >
+>> > Based on UEFI 2.7 section N.2.4.2.2 IA32/X64 Processor Context
+>> > Information Structure.
+>> >
+>> > Cc: <stable@vger.kernel.org> # 4.16.x
+>> > Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
+>> > ---
+>> >  drivers/firmware/efi/cper-x86.c | 55
+>> +++++++++++++++++++++++++++++++++++++++++
+>> >  1 file changed, 55 insertions(+)
+>> >
+>> > diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-
+>> x86.c
+>> > index 02b1b424f537..bb6cef0b5e53 100644
+>> > --- a/drivers/firmware/efi/cper-x86.c
+>> > +++ b/drivers/firmware/efi/cper-x86.c
+>> > @@ -13,6 +13,7 @@
+>> >  #define VALID_LAPIC_ID                 BIT_ULL(0)
+>> >  #define VALID_CPUID_INFO               BIT_ULL(1)
+>> >  #define VALID_PROC_ERR_INFO_NUM(bits)  ((bits & GENMASK_ULL(7, 2))
+>> >> 2)
+>> > +#define VALID_PROC_CNXT_INFO_NUM(bits) ((bits & GENMASK_ULL(13,
+>> 8)) >> 8)
+>>
+>> Parens
+>>
+>> Also, CNXT isn't really idiomatic when abbreviating 'context' (and you
+>> use CTX below as well)
+>>
+>
+> The UEFI spec uses PROC_CONTEXT_INFO_NUM.
+>
+> Would you prefer 1 or 2 below?
+> 1) VALID_PROC_CONTEXT_INFO_NUM
+> 2) VALID_PROC_CTX_INFO_NUM
+>
+
+Let's go with 2) since you're already using CTX in numerous places.
