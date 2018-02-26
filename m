@@ -1,50 +1,138 @@
-From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Subject: RE: [PATCH 4/8] efi: Decode UEFI-defined IA32/X64 Error Structure
- GUIDs
-Date: Mon, 26 Feb 2018 16:01:35 +0000
-Message-ID: <DM5PR12MB1916D6F66B70E73013D1DA60F8C10@DM5PR12MB1916.namprd12.prod.outlook.com>
-References: <20180223200333.6410-1-Yazen.Ghannam@amd.com>
- <20180223200333.6410-5-Yazen.Ghannam@amd.com>
- <CAKv+Gu_xQseJg3ABoD74hJt6ZbMZF7zE75Gc9ZNN4SsftnNN4g@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 3/8] efi: Decode IA32/X64 Processor Error Info Structure
+Date: Mon, 26 Feb 2018 16:04:33 +0000
+Message-ID: <CAKv+Gu9zFXBtRMh8c5Jy-V=K+FTj2Z6n41QfO1PExjrWYs=8Hw@mail.gmail.com>
+References: <20180223200333.6410-1-Yazen.Ghannam@amd.com> <20180223200333.6410-4-Yazen.Ghannam@amd.com>
+ <CAKv+Gu_18==LT3eGPJh9Lveq_CWXwveBD4EYnTWvT7FbTtM_jg@mail.gmail.com> <DM5PR12MB191622BDE62D8C4F1031C015F8C10@DM5PR12MB1916.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu_xQseJg3ABoD74hJt6ZbMZF7zE75Gc9ZNN4SsftnNN4g@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <DM5PR12MB191622BDE62D8C4F1031C015F8C10@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, the arch/x86 maintainers <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBcmQgQmllc2hldXZlbCBbbWFp
-bHRvOmFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmddDQo+IFNlbnQ6IFNhdHVyZGF5LCBGZWJydWFy
-eSAyNCwgMjAxOCAxMTo0MSBBTQ0KPiBUbzogR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5uYW1A
-YW1kLmNvbT4NCj4gQ2M6IGxpbnV4LWVmaUB2Z2VyLmtlcm5lbC5vcmc7IExpbnV4IEtlcm5lbCBN
-YWlsaW5nIExpc3QgPGxpbnV4LQ0KPiBrZXJuZWxAdmdlci5rZXJuZWwub3JnPjsgQm9yaXNsYXYg
-UGV0a292IDxicEBzdXNlLmRlPjsgdGhlIGFyY2gveDg2DQo+IG1haW50YWluZXJzIDx4ODZAa2Vy
-bmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IFtQQVRDSCA0LzhdIGVmaTogRGVjb2RlIFVFRkktZGVm
-aW5lZCBJQTMyL1g2NCBFcnJvciBTdHJ1Y3R1cmUNCj4gR1VJRHMNCj4gDQo+IE9uIDIzIEZlYnJ1
-YXJ5IDIwMTggYXQgMjA6MDMsIFlhemVuIEdoYW5uYW0NCj4gPFlhemVuLkdoYW5uYW1AYW1kLmNv
-bT4gd3JvdGU6DQo+ID4gRnJvbTogWWF6ZW4gR2hhbm5hbSA8eWF6ZW4uZ2hhbm5hbUBhbWQuY29t
-Pg0KPiA+DQo+ID4gRm9yIGVhc2llciBoYW5kbGluZywgbWF0Y2ggdGhlIGtub3duIElBMzIvWDY0
-IGVycm9yIHN0cnVjdHVyZSBHVUlEcyB0bw0KPiA+IGVudW1zLg0KPiA+DQo+ID4gQWxzbywgcHJp
-bnQgb3V0IHRoZSBuYW1lIG9mIHRoZSBtYXRjaGluZyBFcnJvciBTdHJ1Y3R1cmUgVHlwZS4NCj4g
-Pg0KPiA+IEdVSURzIHRha2VuIGZyb20gVUVGSSAyLjcgc2VjdGlvbiBOLjIuNC4yLjEgSUEzMi9Y
-NjQgUHJvY2Vzc29yIEVycm9yDQo+ID4gSW5mb3JtYXRpb24gU3RydWN0dXJlLg0KPiA+DQo+ID4g
-Q2M6IDxzdGFibGVAdmdlci5rZXJuZWwub3JnPiAjIDQuMTYueA0KPiA+IFNpZ25lZC1vZmYtYnk6
-IFlhemVuIEdoYW5uYW0gPHlhemVuLmdoYW5uYW1AYW1kLmNvbT4NCj4gPiAtLS0NCj4gPiAgZHJp
-dmVycy9maXJtd2FyZS9lZmkvY3Blci14ODYuYyB8IDQxDQo+ICsrKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCA0MSBpbnNlcnRpb25z
-KCspDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9maXJtd2FyZS9lZmkvY3Blci14ODYu
-YyBiL2RyaXZlcnMvZmlybXdhcmUvZWZpL2NwZXItDQo+IHg4Ni5jDQo+ID4gaW5kZXggOWQ2MDhm
-NzQyYzk4Li4zYjg2MjIzYmRiNjcgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9maXJtd2FyZS9l
-ZmkvY3Blci14ODYuYw0KPiA+ICsrKyBiL2RyaXZlcnMvZmlybXdhcmUvZWZpL2NwZXIteDg2LmMN
-Cj4gPiBAQCAtMTQsMTcgKzE0LDUzIEBADQouLi4NCj4gPiAgdm9pZCBjcGVyX3ByaW50X3Byb2Nf
-aWEoY29uc3QgY2hhciAqcGZ4LCBjb25zdCBzdHJ1Y3QgY3Blcl9zZWNfcHJvY19pYQ0KPiAqcHJv
-YykNCj4gPiAgew0KPiA+ICAgICAgICAgaW50IGk7DQo+ID4gICAgICAgICBzdHJ1Y3QgY3Blcl9p
-YV9lcnJfaW5mbyAqZXJyX2luZm87DQo+ID4gICAgICAgICBjaGFyIG5ld3BmeFs2NF07DQo+ID4g
-KyAgICAgICBlbnVtIGVycl90eXBlcyBlcnJfdHlwZTsNCj4gPg0KPiANCj4gQ2FuIHlvdSBtYWtl
-IHRoaXMgYW4gdTggcGxlYXNlPyBUaGUgc2lnbmVkbmVzcyBvZiBhbiBlbnVtIGlzIG5vdCB3ZWxs
-DQo+IGRlZmluZWQsIGFuZCB5b3Ugb25seSBjaGVjayB0aGUgdXBwZXIgYm91bmQgYmVsb3cuDQo+
-IA0KDQpZZXMsIHdpbGwgZG8uDQoNClRoYW5rcywNCllhemVuDQo=
+On 26 February 2018 at 16:00, Ghannam, Yazen <Yazen.Ghannam@amd.com> wrote:
+>> -----Original Message-----
+>> From: Ard Biesheuvel [mailto:ard.biesheuvel@linaro.org]
+>> Sent: Saturday, February 24, 2018 11:40 AM
+>> To: Ghannam, Yazen <Yazen.Ghannam@amd.com>
+>> Cc: linux-efi@vger.kernel.org; Linux Kernel Mailing List <linux-
+>> kernel@vger.kernel.org>; Borislav Petkov <bp@suse.de>; the arch/x86
+>> maintainers <x86@kernel.org>
+>> Subject: Re: [PATCH 3/8] efi: Decode IA32/X64 Processor Error Info Structure
+>>
+> ...
+>> >
+>> > diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-
+>> x86.c
+>> > index b50ee3cdf637..9d608f742c98 100644
+>> > --- a/drivers/firmware/efi/cper-x86.c
+>> > +++ b/drivers/firmware/efi/cper-x86.c
+>> > @@ -4,15 +4,28 @@
+>> >
+>> >  #include <linux/cper.h>
+>> >
+>> > +#define INDENT_SP      " "
+>> > +
+>> >  /*
+>> >   * We don't need a "CPER_IA" prefix since these are all locally defined.
+>> >   * This will save us a lot of line space.
+>> >   */
+>> >  #define VALID_LAPIC_ID                 BIT_ULL(0)
+>> >  #define VALID_CPUID_INFO               BIT_ULL(1)
+>> > +#define VALID_PROC_ERR_INFO_NUM(bits)  ((bits & GENMASK_ULL(7, 2))
+>> >> 2)
+>> > +
+>>
+>> Parens around 'bits' please
+>>
+>
+> Like this?
+>
+> #define VALID_PROC_ERR_INFO_NUM(bits)  (((bits) & GENMASK_ULL(7, 2)) >> 2)
+>
+
+Yes. Your code currently does not pass expressions into these, but it
+is good form to use parens here to make them future proof
+
+> I'll do the same for the others.
+>
+
+Cheers
+
+>> > +#define INFO_VALID_CHECK_INFO          BIT_ULL(0)
+>> > +#define INFO_VALID_TARGET_ID           BIT_ULL(1)
+>> > +#define INFO_VALID_REQUESTOR_ID                BIT_ULL(2)
+>> > +#define INFO_VALID_RESPONDER_ID                BIT_ULL(3)
+>> > +#define INFO_VALID_IP                  BIT_ULL(4)
+>> >
+>> >  void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia
+>> *proc)
+>> >  {
+>> > +       int i;
+>> > +       struct cper_ia_err_info *err_info;
+>> > +       char newpfx[64];
+>> > +
+>> >         printk("%sValidation Bits: 0x%016llx\n", pfx, proc->validation_bits);
+>> >
+>> >         if (proc->validation_bits & VALID_LAPIC_ID)
+>> > @@ -23,4 +36,44 @@ void cper_print_proc_ia(const char *pfx, const struct
+>> cper_sec_proc_ia *proc)
+>> >                 print_hex_dump(pfx, "", DUMP_PREFIX_OFFSET, 16, 4, proc-
+>> >cpuid,
+>> >                                sizeof(proc->cpuid), 0);
+>> >         }
+>> > +
+>> > +       snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
+>> > +
+>> > +       err_info = (struct cper_ia_err_info *)(proc + 1);
+>> > +       for (i = 0; i < VALID_PROC_ERR_INFO_NUM(proc->validation_bits); i++)
+>> {
+>> > +               printk("%sError Information Structure %d:\n", pfx, i);
+>> > +
+>> > +               printk("%sError Structure Type: %pUl\n", newpfx,
+>> > +                        &err_info->err_type);
+>> > +
+>>
+>> The indentation is a bit awkward here. Could you please align followup
+>> lines with the character following the ( on the first line?
+>>
+>
+> Yes, will do.
+>
+>> > +               printk("%sValidation Bits: 0x%016llx\n",
+>> > +                        newpfx, err_info->validation_bits);
+>> > +
+>> > +               if (err_info->validation_bits & INFO_VALID_CHECK_INFO) {
+>> > +                       printk("%sCheck Information: 0x%016llx\n", newpfx,
+>> > +                                err_info->check_info);
+>> > +               }
+>> > +
+>> > +               if (err_info->validation_bits & INFO_VALID_TARGET_ID) {
+>> > +                       printk("%sTarget Identifier: 0x%016llx\n",
+>> > +                                newpfx, err_info->target_id);
+>> > +               }
+>> > +
+>> > +               if (err_info->validation_bits & INFO_VALID_REQUESTOR_ID) {
+>> > +                       printk("%sRequestor Identifier: 0x%016llx\n",
+>> > +                                newpfx, err_info->requestor_id);
+>> > +               }
+>> > +
+>> > +               if (err_info->validation_bits & INFO_VALID_RESPONDER_ID) {
+>> > +                       printk("%sResponder Identifier: 0x%016llx\n",
+>> > +                                newpfx, err_info->responder_id);
+>> > +               }
+>> > +
+>> > +               if (err_info->validation_bits & INFO_VALID_IP) {
+>> > +                       printk("%sInstruction Pointer: 0x%016llx\n",
+>> > +                                newpfx, err_info->ip);
+>> > +               }
+>> > +
+>> > +               err_info++;
+>> > +       }
+>> >  }
+>> > --
+>> > 2.14.1
+>> >
