@@ -1,7 +1,7 @@
 From: Yazen Ghannam <Yazen.Ghannam@amd.com>
-Subject: [PATCH v2 8/8] efi: Decode IA32/X64 Context Info structure
-Date: Mon, 26 Feb 2018 13:39:04 -0600
-Message-ID: <20180226193904.20532-9-Yazen.Ghannam@amd.com>
+Subject: [PATCH v2 5/8] efi: Decode IA32/X64 Cache, TLB, and Bus Check structures
+Date: Mon, 26 Feb 2018 13:39:01 -0600
+Message-ID: <20180226193904.20532-6-Yazen.Ghannam@amd.com>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,114 +14,158 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Yazen Ghannam <yazen.ghannam@amd.com>
 
-Print the fields of the IA32/X64 Context Information structure.
+Print the common fields of the Cache, TLB, and Bus check structures.The
+fields of these three check types are the same except for a few more
+fields in the Bus check structure. The remaining Bus check structure
+fields will be decoded in a following patch.
 
-Print the "Register Array" as raw values. Some context types are defined
-in the UEFI spec, so more detailed decoded may be added in the future.
-
-Based on UEFI 2.7 section N.2.4.2.2 IA32/X64 Processor Context
-Information Structure.
+Based on UEFI 2.7,
+Table 257. IA32/X64 Cache Check Structure
+Table 258. IA32/X64 TLB Check Structure
+Table 259. IA32/X64 Bus Check Structure
 
 Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
 ---
 Link:
-https://lkml.kernel.org/r/20180223200333.6410-9-Yazen.Ghannam@amd.com
+https://lkml.kernel.org/r/20180223200333.6410-6-Yazen.Ghannam@amd.com
 
 v1->v2:
-* Add parantheses around "bits" expression in macro.
-* Change VALID_PROC_CNTXT_INFO_NUM to VALID_PROC_CTX_INFO_NUM.
+* Add parantheses around "check" expression in macro.
+* Change use of enum type to u8.
 * Fix indentation on multi-line statements.
-* Remove conditional to skip unknown context types. The context info
-  should be printed even if the type is unkown. This is just like what
-  we do for the error information. 
 
- drivers/firmware/efi/cper-x86.c | 48 +++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 48 insertions(+)
+ drivers/firmware/efi/cper-x86.c | 101 +++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 100 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-x86.c
-index 4c79401aace0..0407671ad7e6 100644
+index 037986ca82dd..24f62e78b6c7 100644
 --- a/drivers/firmware/efi/cper-x86.c
 +++ b/drivers/firmware/efi/cper-x86.c
-@@ -12,6 +12,7 @@
- #define VALID_LAPIC_ID			BIT_ULL(0)
- #define VALID_CPUID_INFO		BIT_ULL(1)
- #define VALID_PROC_ERR_INFO_NUM(bits)	(((bits) & GENMASK_ULL(7, 2)) >> 2)
-+#define VALID_PROC_CXT_INFO_NUM(bits)	(((bits) & GENMASK_ULL(13, 8)) >> 8)
+@@ -32,6 +32,25 @@
+ #define INFO_VALID_RESPONDER_ID		BIT_ULL(3)
+ #define INFO_VALID_IP			BIT_ULL(4)
  
- #define INFO_ERR_STRUCT_TYPE_CACHE					\
- 	GUID_INIT(0xA55701F5, 0xE3EF, 0x43DE, 0xAC, 0x72, 0x24, 0x9B,	\
-@@ -73,6 +74,9 @@
- #define CHECK_MS_RESTARTABLE_IP		BIT_ULL(22)
- #define CHECK_MS_OVERFLOW		BIT_ULL(23)
- 
-+#define CTX_TYPE_MSR			1
-+#define CTX_TYPE_MMREG			7
++#define CHECK_VALID_TRANS_TYPE		BIT_ULL(0)
++#define CHECK_VALID_OPERATION		BIT_ULL(1)
++#define CHECK_VALID_LEVEL		BIT_ULL(2)
++#define CHECK_VALID_PCC			BIT_ULL(3)
++#define CHECK_VALID_UNCORRECTED		BIT_ULL(4)
++#define CHECK_VALID_PRECISE_IP		BIT_ULL(5)
++#define CHECK_VALID_RESTARTABLE_IP	BIT_ULL(6)
++#define CHECK_VALID_OVERFLOW		BIT_ULL(7)
++
++#define CHECK_VALID_BITS(check)		(((check) & GENMASK_ULL(15, 0)))
++#define CHECK_TRANS_TYPE(check)		(((check) & GENMASK_ULL(17, 16)) >> 16)
++#define CHECK_OPERATION(check)		(((check) & GENMASK_ULL(21, 18)) >> 18)
++#define CHECK_LEVEL(check)		(((check) & GENMASK_ULL(24, 22)) >> 22)
++#define CHECK_PCC			BIT_ULL(25)
++#define CHECK_UNCORRECTED		BIT_ULL(26)
++#define CHECK_PRECISE_IP		BIT_ULL(27)
++#define CHECK_RESTARTABLE_IP		BIT_ULL(28)
++#define CHECK_OVERFLOW			BIT_ULL(29)
 +
  enum err_types {
  	ERR_TYPE_CACHE = 0,
  	ERR_TYPE_TLB,
-@@ -136,6 +140,17 @@ static const char * const ia_check_ms_error_type_strs[] = {
- 	"Internal Unclassified",
- };
+@@ -54,11 +73,83 @@ static enum err_types cper_get_err_type(const guid_t *err_type)
+ 		return N_ERR_TYPES;
+ }
  
-+static const char * const ia_reg_ctx_strs[] = {
-+	"Unclassified Data",
-+	"MSR Registers (Machine Check and other MSRs)",
-+	"32-bit Mode Execution Context",
-+	"64-bit Mode Execution Context",
-+	"FXSAVE Context",
-+	"32-bit Mode Debug Registers (DR0-DR7)",
-+	"64-bit Mode Debug Registers (DR0-DR7)",
-+	"Memory Mapped Registers",
++static const char * const ia_check_trans_type_strs[] = {
++	"Instruction",
++	"Data Access",
++	"Generic",
 +};
 +
- static inline void print_bool(char *str, const char *pfx, u64 check, u64 bit)
- {
- 	printk("%s%s: %s\n", pfx, str, (check & bit) ? "true" : "false");
-@@ -246,6 +261,7 @@ void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
++static const char * const ia_check_op_strs[] = {
++	"generic error",
++	"generic read",
++	"generic write",
++	"data read",
++	"data write",
++	"instruction fetch",
++	"prefetch",
++	"eviction",
++	"snoop",
++};
++
++static inline void print_bool(char *str, const char *pfx, u64 check, u64 bit)
++{
++	printk("%s%s: %s\n", pfx, str, (check & bit) ? "true" : "false");
++}
++
++static void print_err_info(const char *pfx, u8 err_type, u64 check)
++{
++	u16 validation_bits = CHECK_VALID_BITS(check);
++
++	printk("%sValidation Bits: 0x%04x\n", pfx, validation_bits);
++
++	if (err_type == ERR_TYPE_MS)
++		return;
++
++	if (validation_bits & CHECK_VALID_TRANS_TYPE) {
++		u8 trans_type = CHECK_TRANS_TYPE(check);
++
++		printk("%sTransaction Type: %u, %s\n", pfx, trans_type,
++		       trans_type < ARRAY_SIZE(ia_check_trans_type_strs) ?
++		       ia_check_trans_type_strs[trans_type] : "unknown");
++	}
++
++	if (validation_bits & CHECK_VALID_OPERATION) {
++		u8 op = CHECK_OPERATION(check);
++
++		/*
++		 * CACHE has more operation types than TLB or BUS, though the
++		 * name and the order are the same.
++		 */
++		u8 max_ops = (err_type == ERR_TYPE_CACHE) ? 9 : 7;
++
++		printk("%sOperation: %u, %s\n", pfx, op,
++		       op < max_ops ? ia_check_op_strs[op] : "unknown");
++	}
++
++	if (validation_bits & CHECK_VALID_LEVEL)
++		printk("%sLevel: %llu\n", pfx, CHECK_LEVEL(check));
++
++	if (validation_bits & CHECK_VALID_PCC)
++		print_bool("Processor Context Corrupt", pfx, check, CHECK_PCC);
++
++	if (validation_bits & CHECK_VALID_UNCORRECTED)
++		print_bool("Uncorrected", pfx, check, CHECK_UNCORRECTED);
++
++	if (validation_bits & CHECK_VALID_PRECISE_IP)
++		print_bool("Precise IP", pfx, check, CHECK_PRECISE_IP);
++
++	if (validation_bits & CHECK_VALID_RESTARTABLE_IP)
++		print_bool("Restartable IP", pfx, check, CHECK_RESTARTABLE_IP);
++
++	if (validation_bits & CHECK_VALID_OVERFLOW)
++		print_bool("Overflow", pfx, check, CHECK_OVERFLOW);
++}
++
+ void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
  {
  	int i;
  	struct cper_ia_err_info *err_info;
-+	struct cper_ia_proc_ctx *ctx_info;
- 	char newpfx[64], infopfx[64];
+-	char newpfx[64];
++	char newpfx[64], infopfx[64];
  	u8 err_type;
  
-@@ -312,4 +328,36 @@ void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
+ 	printk("%sValidation Bits: 0x%016llx\n", pfx, proc->validation_bits);
+@@ -92,6 +183,14 @@ void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
+ 		if (err_info->validation_bits & INFO_VALID_CHECK_INFO) {
+ 			printk("%sCheck Information: 0x%016llx\n", newpfx,
+ 			       err_info->check_info);
++
++			if (err_type < N_ERR_TYPES) {
++				snprintf(infopfx, sizeof(infopfx), "%s%s",
++					 newpfx, INDENT_SP);
++
++				print_err_info(infopfx, err_type,
++					       err_info->check_info);
++			}
+ 		}
  
- 		err_info++;
- 	}
-+
-+	ctx_info = (struct cper_ia_proc_ctx *)err_info;
-+	for (i = 0; i < VALID_PROC_CXT_INFO_NUM(proc->validation_bits); i++) {
-+		int size = sizeof(*ctx_info) + ctx_info->reg_arr_size;
-+		int groupsize = 4;
-+
-+		printk("%sContext Information Structure %d:\n", pfx, i);
-+
-+		printk("%sRegister Context Type: %s\n", newpfx,
-+		       ctx_info->reg_ctx_type < ARRAY_SIZE(ia_reg_ctx_strs) ?
-+		       ia_reg_ctx_strs[ctx_info->reg_ctx_type] : "unknown");
-+
-+		printk("%sRegister Array Size: 0x%04x\n", newpfx,
-+		       ctx_info->reg_arr_size);
-+
-+		if (ctx_info->reg_ctx_type == CTX_TYPE_MSR) {
-+			groupsize = 8; /* MSRs are 8 bytes wide. */
-+			printk("%sMSR Address: 0x%08x\n", newpfx,
-+			       ctx_info->msr_addr);
-+		}
-+
-+		if (ctx_info->reg_ctx_type == CTX_TYPE_MMREG) {
-+			printk("%sMM Register Address: 0x%016llx\n", newpfx,
-+			       ctx_info->mm_reg_addr);
-+		}
-+
-+		printk("%sRegister Array:\n", newpfx);
-+		print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, groupsize,
-+			       (ctx_info + 1), ctx_info->reg_arr_size, 0);
-+
-+		ctx_info = (struct cper_ia_proc_ctx *)((long)ctx_info + size);
-+	}
- }
+ 		if (err_info->validation_bits & INFO_VALID_TARGET_ID) {
 -- 
 2.14.1
