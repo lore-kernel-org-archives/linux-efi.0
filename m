@@ -1,125 +1,96 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [PATCH v2 2/8] efi: Decode IA32/X64 Processor Error Section
-Date: Tue, 27 Feb 2018 19:34:17 +0100
-Message-ID: <20180227183417.GP26382@pd.tnic>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH v2 3/8] efi: Decode IA32/X64 Processor Error Info
+ Structure
+Date: Tue, 27 Feb 2018 18:40:13 +0000
+Message-ID: <DM5PR12MB1916230ED7225CE0EB00EDF1F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
- <20180226193904.20532-3-Yazen.Ghannam@amd.com>
- <20180227112234.GE26382@pd.tnic>
- <DM5PR12MB1916B6AEE434A345E78BE234F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
- <20180227170034.GJ26382@pd.tnic>
- <DM5PR12MB1916F8C7DF93C1C9402AE3ECF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
- <20180227174446.GN26382@pd.tnic>
- <DM5PR12MB1916C280DA5B51FE9666EE21F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180226193904.20532-4-Yazen.Ghannam@amd.com>
+ <20180227142531.GF26382@pd.tnic>
+ <DM5PR12MB191637C1857C5D9499D08D66F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180227170423.GK26382@pd.tnic>
+ <DM5PR12MB1916D78FE4EEF146EE1D8612F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180227180231.GO26382@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <DM5PR12MB1916C280DA5B51FE9666EE21F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+In-Reply-To: <20180227180231.GO26382@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+To: Borislav Petkov <bp@suse.de>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 27, 2018 at 06:06:21PM +0000, Ghannam, Yazen wrote:
-> It's not just about arches but record types. A single platform can report
-> using arch-specific records, memory records, PCIe records, etc.
-> 
-> So all the other record types only show fields with a valid bit set and this
-> has always been the case. There may be users or tools who expect that
-> same behavior.
-
-You know we have this thing called tracepoints for that, don't you?
-
-You define one tracepoint which regurgitates an error record and then
-all arches which have the same table, share them.
-
-> Please see the other patches where these are decoded further. As I
-> mentioned the cover letter, the decoding is applied incrementally rather
-> than having one large patch.
-
-Here's what needs to go:
-
-All the validation bits crap:
-
-	printk("%sValidation Bits: 0x%04x\n", pfx, validation_bits);
-
-Instead, you simply dump all entries unconditionally and say whether
-they're valid or not. This way you have the same format for each error
-record - much easier to work with.
-
-	printk("%sCPUID Info:\n", pfx);
-        print_hex_dump(pfx, "", DUMP_PREFIX_OFFSET, 16, 4, proc->cpuid,
-                       sizeof(proc->cpuid), 0);
-
-Frankly, I have no clue why we should even dump CPUID for *every* error.
-It is completely sufficient to dump family/model/stepping like we do in
-mce_amd.c. Besides, when debugging, you collect much more info from the
-system - CPUID only is not enough.
-
-	printk("%sError Structure Type: %pUl\n", newpfx,
-               &err_info->err_type);
-
-Unreadable GUIDs.
-
-What are those even:
-
-                if (err_info->validation_bits & INFO_VALID_TARGET_ID) {
-                        printk("%sTarget Identifier: 0x%016llx\n",
-                               newpfx, err_info->target_id);
-                }
-
-                if (err_info->validation_bits & INFO_VALID_REQUESTOR_ID) {
-                        printk("%sRequestor Identifier: 0x%016llx\n",
-                               newpfx, err_info->requestor_id);
-                }
-
-                if (err_info->validation_bits & INFO_VALID_RESPONDER_ID) {
-                        printk("%sResponder Identifier: 0x%016llx\n",
-                               newpfx, err_info->responder_id);
-                }
-
-some 8-byte ids? Who knows... Either remove them or make them
-human-readable, *explaining* what the requestor is and the target is and
-so on.
-
-                printk("%sRegister Array Size: 0x%04x\n", newpfx,
-                       ctx_info->reg_arr_size);
-
-I have no clue what that is for.
-
-                if (ctx_info->reg_ctx_type == CTX_TYPE_MSR) {
-                        groupsize = 8; /* MSRs are 8 bytes wide. */
-                        printk("%sMSR Address: 0x%08x\n", newpfx,
-                               ctx_info->msr_addr);
-                }
-
-What do I need the MSR *addresses* for?
-
-                if (ctx_info->reg_ctx_type == CTX_TYPE_MMREG) {
-                        printk("%sMM Register Address: 0x%016llx\n", newpfx,
-                               ctx_info->mm_reg_addr);
-                }
-
-memory mapped registers?!?!
-
-> Also, like I said in another thread, we should always print the raw value
-> followed by the decoding. That way the raw info is there in case a user
-> wants to send the data to the vendor or other expert party.
-
-By that logic we shouldn't be decoding at all - we should be dumping a
-fat hex blob.
-
-Again, there's this thing called tracepoints which have exactly that,
-you know. You can dump human readable info to dmesg and dump a whole raw
-record into the tracepoint.
-
-When the error is critical and we're about to die, the tracepoint
-contents goes to dmesg too.
-
--- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBUdWVzZGF5LCBGZWJydWFyeSAyNywgMjAxOCAxOjAz
+IFBNDQo+IFRvOiBHaGFubmFtLCBZYXplbiA8WWF6ZW4uR2hhbm5hbUBhbWQuY29tPg0KPiBDYzog
+bGludXgtZWZpQHZnZXIua2VybmVsLm9yZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsN
+Cj4gYXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZzsgeDg2QGtlcm5lbC5vcmcNCj4gU3ViamVjdDog
+UmU6IFtQQVRDSCB2MiAzLzhdIGVmaTogRGVjb2RlIElBMzIvWDY0IFByb2Nlc3NvciBFcnJvciBJ
+bmZvDQo+IFN0cnVjdHVyZQ0KPiANCj4gT24gVHVlLCBGZWIgMjcsIDIwMTggYXQgMDU6NDY6NTRQ
+TSArMDAwMCwgR2hhbm5hbSwgWWF6ZW4gd3JvdGU6DQo+ID4gSSB0aGluayB0aGVyZSdzIHZhbHVl
+IGluIGZvbGxvd2luZyB0aGUgY29udmVudGlvbnMgaW4gYSBzdWJzeXN0ZW0uDQo+IA0KPiAiY29u
+dmVudGlvbnMgaW4gYSBzdWJzeXN0ZW0iIG15IGFzcy4gVGhhdCdzIGJyYWlubGVzcyBjb3B5LXBh
+c3RpbmcuDQo+IA0KPiBJdCB3YXMgYWRkZWQgYnkNCj4gDQo+IGY2ZWRlYTc3YzhjOCAoIkFDUEks
+IEFQRUksIENQRVI6IENsZWFudXAgQ1BFUiBtZW1vcnkgZXJyb3Igb3V0cHV0DQo+IGZvcm1hdCIp
+DQo+IA0KPiBhbmQgdGhlbiByZXBsaWNhdGVkIGV2ZXJ5d2hlcmUuDQo+IA0KPiBJdCBpcyBzaW1w
+bHkgYSBkdW1iIHdheSBvZiB3cml0aW5nOg0KPiANCj4gCXNucHJpbnRmKG5ld3BmeCwgc2l6ZW9m
+KG5ld3BmeCksICIlcyAiLCBwZngpOw0KPiANCg0KVGhlcmUncyBhIHNwYWNlIGFmdGVyIHRoZSAl
+cywgcmlnaHQ/IEkgbWlzc2VkIGl0IGF0IGZpcnN0IGdsYW5jZSwgdGhvdWdoIG1heWJlDQpteSBM
+QVNJSyBkaWRuJ3QgdGFrZSB2ZXJ5IHdlbGwuDQoNCj4gDQo+ID4gSSBjYW4gY2hhbmdlIHRoaXMg
+aWYgeW91IGdpdmUgYSByZWFzb24gYmVzaWRlcyAiaXQncyBkdW1iIi4NCj4gDQo+IFR3byBjYW4g
+cGxheSB0aGF0IGdhbWU6IHlvdSBnZXQgdG8ga2VlcCBpdCBpZiB5b3UgZ2l2ZSBhIGdvb2QgcmVh
+c29uDQo+IHdoeS4NCj4gDQoNCkNvZGUgcmVhZGFiaWxpdHkuDQoNCi4uLg0KPiA+IEFuZCB0aGUg
+cmF3IHZhbHVlIHNob3VsZCBzdGlsbCBiZSBwcmludGVkIGJlY2F1c2UNCj4gPiAxKSBJdCBtYXkg
+cmVwcmVzZW50IGEgdHlwZSB0aGF0IHdlIGNhbid0IGRlY29kZS4gTWF5YmUgYSB0eXBlIHRoYXQn
+cyBub3QNCj4gcGFydCBvZg0KPiA+IHRoZSBzcGVjLg0KPiANCj4gSWYgd2UgY2FuJ3QgZGVjb2Rl
+IGl0LCAqdGhlbiogeW91IGR1bXAgaXQ6DQo+IA0KPiAJIlVucmVjb2duaXplZCB0eXBlOiAweCVs
+bHggLi4uIg0KPiANCj4gPiAyKSBJdCdzIGdvb2QgdG8gaGF2ZSB0aGUgcmF3IHZhbHVlIGZvciBy
+ZWZlcmVuY2UuIFdlIGRvIHRoaXMgd2l0aA0KPiBNQ0FfU1RBVFVTDQo+ID4gd2hlcmUgd2UgcHJp
+bnQgdGhlIHJhdyB2YWx1ZSBmb2xsb3dlZCBieSB0aGUgZGVjb2RpbmcuDQo+IA0KPiAxLiBObyBv
+bmUgc3RhcmVzIGF0IHRoZSByYXcgdmFsdWUgaWYgdGhlIGJpdHMgYXJlIGRlY29kZWQNCj4gMi4g
+TUNBX1NUQVRVUyBpcyBvbmUgcmVnaXN0ZXIgLSB0aGlzIGVycm9yIHJlY29yZCBpcyBodWdlLg0K
+PiANCg0KMSkgTm8gb25lIGV4Y2VwdCBkZWJ1ZyBhbmQgSFcgZGVzaWduIGZvbGtzLCB3aG8gd2ls
+bCBldmVudHVhbGx5IGdldCBhDQpyZXBvcnQgZnJvbSBhIHVzZXIuDQoyKSBZb3UncmUgcmlnaHQs
+IHRoZSByZWNvcmQgaXMgaHVnZS4gUHJpbnRpbmcgb3V0IHRoZSBWYWxpZGF0aW9uIEJpdHMsIEdV
+SUQsDQphbmQgcmF3IENoZWNrIEluZm8gd2lsbCBiZSBhbiBleHRyYSA1IGxpbmVzLg0KDQpJIHBv
+c3RlZCBhbiBleGFtcGxlIGF0IHRoZSBlbmQuDQoNCldlIGNvdWxkIGdldCByaWQgb2YgdGhlIEdV
+SUQgZm9yIGtub3duIHR5cGVzIGxpa2UgeW91IHN1Z2dlc3QuIEFsc28sIHdlDQpjYW4gZHJvcCB0
+aGUgVmFsaWRhdGlvbiBCaXRzIGZvciB0aGUgQ2hlY2sgSW5mbyBzaW5jZSB0aGF0J3MgYWxyZWFk
+eSBwYXJ0IG9mDQppdC4NCg0KVGhhbmtzLA0KWWF6ZW4NCg0KWyAgICAxLjk5MDk0OF0gW0hhcmR3
+YXJlIEVycm9yXTogIEVycm9yIDEsIHR5cGU6IGNvcnJlY3RlZCANClsgICAgMS45OTU3ODldIFtI
+YXJkd2FyZSBFcnJvcl06ICBmcnVfdGV4dDogUHJvY2Vzc29yRXJyb3IgDQpbICAgIDIuMDAwNjMy
+XSBbSGFyZHdhcmUgRXJyb3JdOiAgIHNlY3Rpb25fdHlwZTogSUEzMi9YNjQgcHJvY2Vzc29yIGVy
+cm9yIA0KWyAgICAyLjAwNTc5Nl0gW0hhcmR3YXJlIEVycm9yXTogICBWYWxpZGF0aW9uIEJpdHM6
+IDB4MDAwMDAwMDAwMDAwMDIwNyANClsgICAgMi4wMTA5NTNdIFtIYXJkd2FyZSBFcnJvcl06ICAg
+TG9jYWwgQVBJQ19JRDogMHgwIA0KWyAgICAyLjAxNTk5MV0gW0hhcmR3YXJlIEVycm9yXTogICBD
+UFVJRCBJbmZvOiANClsgICAgMi4wMjA3NDddIFtIYXJkd2FyZSBFcnJvcl06ICAgMDAwMDAwMDA6
+IDAwODAwZjEyIDAwMDAwMDAwIDAwNDAwODAwIDAwMDAwMDAwIA0KWyAgICAyLjAyNTU5NV0gW0hh
+cmR3YXJlIEVycm9yXTogICAwMDAwMDAxMDogNzZkODMyMGIgMDAwMDAwMDAgMTc4YmZiZmYgMDAw
+MDAwMDAgDQpbICAgIDIuMDMwNDIzXSBbSGFyZHdhcmUgRXJyb3JdOiAgIDAwMDAwMDIwOiAwMDAw
+MDAwMCAwMDAwMDAwMCAwMDAwMDAwMCAwMDAwMDAwMCANClsgICAgMi4wMzUxOThdIFtIYXJkd2Fy
+ZSBFcnJvcl06ICAgRXJyb3IgSW5mb3JtYXRpb24gU3RydWN0dXJlIDA6DQpbICAgIDIuMDM5OTYx
+XSBbSGFyZHdhcmUgRXJyb3JdOiAgICBFcnJvciBTdHJ1Y3R1cmUgVHlwZTogYTU1NzAxZjUtZTNl
+Zi00M2RlLWFjNzItMjQ5YjU3M2ZhZDJjDQpbICAgIDIuMDQ5NjA4XSBbSGFyZHdhcmUgRXJyb3Jd
+OiAgICBFcnJvciBTdHJ1Y3R1cmUgVHlwZTogY2FjaGUgZXJyb3INClsgICAgMi4wNTQzNDRdIFtI
+YXJkd2FyZSBFcnJvcl06ICAgIFZhbGlkYXRpb24gQml0czogMHgwMDAwMDAwMDAwMDAwMDAxDQpb
+ICAgIDIuMDU5MDQ2XSBbSGFyZHdhcmUgRXJyb3JdOiAgICBDaGVjayBJbmZvcm1hdGlvbjogMHgw
+MDAwMDAwMDIwNTQwMDg3DQpbICAgIDIuMDYzNjI1XSBbSGFyZHdhcmUgRXJyb3JdOiAgICAgVmFs
+aWRhdGlvbiBCaXRzOiAweDAwODcNClsgICAgMi4wNjgwMzJdIFtIYXJkd2FyZSBFcnJvcl06ICAg
+ICBUcmFuc2FjdGlvbiBUeXBlOiAwLCBJbnN0cnVjdGlvbg0KWyAgICAyLjA3MjQyM10gW0hhcmR3
+YXJlIEVycm9yXTogICAgIE9wZXJhdGlvbjogNSwgaW5zdHJ1Y3Rpb24gZmV0Y2gNClsgICAgMi4w
+NzY3NzZdIFtIYXJkd2FyZSBFcnJvcl06ICAgICBMZXZlbDogMQ0KWyAgICAyLjA4MTA3M10gW0hh
+cmR3YXJlIEVycm9yXTogICAgIE92ZXJmbG93OiB0cnVlDQpbICAgIDIuMDg1MzYwXSBbSGFyZHdh
+cmUgRXJyb3JdOiAgIENvbnRleHQgSW5mb3JtYXRpb24gU3RydWN0dXJlIDA6DQpbICAgIDIuMDg5
+NjYxXSBbSGFyZHdhcmUgRXJyb3JdOiAgICBSZWdpc3RlciBDb250ZXh0IFR5cGU6IE1TUiBSZWdp
+c3RlcnMgKE1hY2hpbmUgQ2hlY2sgYW5kIG90aGVyIE1TUnMpDQpbICAgIDIuMDk4NDg3XSBbSGFy
+ZHdhcmUgRXJyb3JdOiAgICBSZWdpc3RlciBBcnJheSBTaXplOiAweDAwNTANClsgICAgMi4xMDMx
+MTNdIFtIYXJkd2FyZSBFcnJvcl06ICAgIE1TUiBBZGRyZXNzOiAweGMwMDAyMDExDQpbICAgIDIu
+MTA3NzQyXSBbSGFyZHdhcmUgRXJyb3JdOiAgICBSZWdpc3RlciBBcnJheToNClsgICAgMi4xMTIy
+NzBdIFtIYXJkd2FyZSBFcnJvcl06ICAgIDAwMDAwMDAwOiBkODIwMDAwMDAwMGEwMTUxIDAwMDAw
+MDAwMDAwMDAwMDANClsgICAgMi4xMTY4NDVdIFtIYXJkd2FyZSBFcnJvcl06ICAgIDAwMDAwMDEw
+OiBkMDEwMDAwMDAwMDAwMDAwIDAwMDAwMDAzMDAwMDAwMzENClsgICAgMi4xMjEyMjhdIFtIYXJk
+d2FyZSBFcnJvcl06ICAgIDAwMDAwMDIwOiAwMDAxMDBiMDAwMDAwMDAwIDAwMDAwMDAwNGEwMDAw
+MDANClsgICAgMi4xMjU1MTRdIFtIYXJkd2FyZSBFcnJvcl06ICAgIDAwMDAwMDMwOiAwMDAwMDAw
+MDAwMDAwMDAwIDAwMDAwMDAwMDAwMDAwMDANClsgICAgMi4xMjk3NDddIFtIYXJkd2FyZSBFcnJv
+cl06ICAgIDAwMDAwMDQwOiAwMDAwMDAwMDAwMDAwMDAwIDAwMDAwMDAwMDAwMDAwMDANCg==
