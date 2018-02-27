@@ -1,75 +1,68 @@
-From: "Kirill A. Shutemov" <kirill@shutemov.name>
-Subject: Re: 91f606a8fa ("x86/mm: Replace compile-time checks for 5-level
- .."): BUG: kernel reboot-without-warning in boot stage
-Date: Tue, 27 Feb 2018 11:21:42 +0300
-Message-ID: <20180227082142.7qxtlcx3hkb22abn@node.shutemov.name>
-References: <5a94243e.XdjEw/cR1zAcoW8q%fengguang.wu@intel.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [PATCH v2 1/8] efi: Fix IA32/X64 Processor Error Record
+ definition
+Date: Tue, 27 Feb 2018 11:47:08 +0100
+Message-ID: <20180227104708.GC26382@pd.tnic>
+References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
+ <20180226193904.20532-2-Yazen.Ghannam@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <5a94243e.XdjEw/cR1zAcoW8q%fengguang.wu@intel.com>
+In-Reply-To: <20180226193904.20532-2-Yazen.Ghannam@amd.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: kernel test robot <fengguang.wu@intel.com>
-Cc: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, LKP <lkp@01.org>, linux-pm@vger.kernel.org, linux-efi@vger.kernel.org, kasan-dev@googlegroups.com, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, wfg@linux.intel.com
+To: Yazen Ghannam <Yazen.Ghannam@amd.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ard.biesheuvel@linaro.org, x86@kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Feb 26, 2018 at 11:14:06PM +0800, kernel test robot wrote:
-> Greetings,
+On Mon, Feb 26, 2018 at 01:38:57PM -0600, Yazen Ghannam wrote:
+> From: Yazen Ghannam <yazen.ghannam@amd.com>
 > 
-> 0day kernel testing robot got the below dmesg and the first bad commit is
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git x86/mm
-> 
-> commit 91f606a8fa68264224cbc76888fa8649cdbe9990
-> Author:     Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-> AuthorDate: Wed Feb 14 21:25:41 2018 +0300
-> Commit:     Ingo Molnar <mingo@kernel.org>
-> CommitDate: Fri Feb 16 10:48:49 2018 +0100
-> 
->     x86/mm: Replace compile-time checks for 5-level paging with runtime-time checks
->     
->     This patch converts the of CONFIG_X86_5LEVEL check to runtime checks for
->     p4d folding.
->     
->     Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
->     Cc: Andy Lutomirski <luto@kernel.org>
->     Cc: Arjan van de Ven <arjan@linux.intel.com>
->     Cc: Borislav Petkov <bp@suse.de>
->     Cc: Dan Williams <dan.j.williams@intel.com>
->     Cc: Dave Hansen <dave.hansen@linux.intel.com>
->     Cc: David Woodhouse <dwmw2@infradead.org>
->     Cc: Josh Poimboeuf <jpoimboe@redhat.com>
->     Cc: Linus Torvalds <torvalds@linux-foundation.org>
->     Cc: Peter Zijlstra <peterz@infradead.org>
->     Cc: Thomas Gleixner <tglx@linutronix.de>
->     Cc: linux-mm@kvack.org
->     Link: http://lkml.kernel.org/r/20180214182542.69302-9-kirill.shutemov@linux.intel.com
->     Signed-off-by: Ingo Molnar <mingo@kernel.org>
-> 
-> 98219dda2a  x86/mm: Fold p4d page table layer at runtime
-> 91f606a8fa  x86/mm: Replace compile-time checks for 5-level paging with runtime-time checks
-> 1ea4fe8497  Merge branch 'x86/boot' into x86/mm, to unify branches
-> 94991480c2  Merge branch 'x86/pti'
-> f1753f6424  Add linux-next specific files for 20180226
+> Based on UEFI 2.7 Table 255. Processor Error Record, the "Local APIC_ID"
 
-Patch below should help. Please check.
+My pdf says this is table 252.
 
-diff --git a/arch/x86/include/asm/pgtable_64.h b/arch/x86/include/asm/pgtable_64.h
-index 81dda8d1d0bd..163e01a0631d 100644
---- a/arch/x86/include/asm/pgtable_64.h
-+++ b/arch/x86/include/asm/pgtable_64.h
-@@ -224,9 +224,9 @@ static inline void native_set_p4d(p4d_t *p4dp, p4d_t p4d)
- 		return;
- 	}
- 
--	pgd = native_make_pgd(p4d_val(p4d));
-+	pgd = native_make_pgd(native_p4d_val(p4d));
- 	pgd = pti_set_user_pgd((pgd_t *)p4dp, pgd);
--	*p4dp = native_make_p4d(pgd_val(pgd));
-+	*p4dp = native_make_p4d(native_pgd_val(pgd));
- }
- 
- static inline void native_p4d_clear(p4d_t *p4d)
+> field is 8 bytes but Linux defines this field as 1 byte.
+> 
+> Fix this in the struct cper_sec_proc_ia definition.
+> 
+> Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
+> ---
+> Link:
+> https://lkml.kernel.org/r/20180223200333.6410-2-Yazen.Ghannam@amd.com
+> 
+> v1->v2:
+> * No changes.
+> 
+>  include/linux/cper.h | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/include/linux/cper.h b/include/linux/cper.h
+> index d14ef4e77c8a..4b5f8459b403 100644
+> --- a/include/linux/cper.h
+> +++ b/include/linux/cper.h
+> @@ -381,7 +381,7 @@ struct cper_sec_proc_generic {
+>  /* IA32/X64 Processor Error Section */
+>  struct cper_sec_proc_ia {
+>  	__u64	validation_bits;
+> -	__u8	lapic_id;
+> +	__u64	lapic_id;
+>  	__u8	cpuid[48];
+
+Ok, that processor error record has a variable length structure at byte
+offset 64 and we don't have it in this struct.
+
+I guess I'll see it in the following patches but right now it looks
+like that "Processor Error Info" thing is simply situated after that
+Processor Error Record so we are supposed to simply find the info at
+offset 64...
+
+/me continues reading...
+
 -- 
- Kirill A. Shutemov
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
