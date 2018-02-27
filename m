@@ -1,46 +1,49 @@
 From: Borislav Petkov <bp@suse.de>
-Subject: Re: [PATCH v2 2/8] efi: Decode IA32/X64 Processor Error Section
-Date: Tue, 27 Feb 2018 18:00:35 +0100
-Message-ID: <20180227170034.GJ26382@pd.tnic>
+Subject: Re: [PATCH v2 3/8] efi: Decode IA32/X64 Processor Error Info
+ Structure
+Date: Tue, 27 Feb 2018 18:04:23 +0100
+Message-ID: <20180227170423.GK26382@pd.tnic>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
- <20180226193904.20532-3-Yazen.Ghannam@amd.com>
- <20180227112234.GE26382@pd.tnic>
- <DM5PR12MB1916B6AEE434A345E78BE234F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180226193904.20532-4-Yazen.Ghannam@amd.com>
+ <20180227142531.GF26382@pd.tnic>
+ <DM5PR12MB191637C1857C5D9499D08D66F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <DM5PR12MB1916B6AEE434A345E78BE234F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+In-Reply-To: <DM5PR12MB191637C1857C5D9499D08D66F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 27, 2018 at 03:13:11PM +0000, Ghannam, Yazen wrote:
-> I decided to print the Validation Bits as a sanity check for whomever is looking
-> at this. Since we only print fields with a valid bit, it may be confusing for users
-> who don't know why fields are missing.
+On Tue, Feb 27, 2018 at 03:25:06PM +0000, Ghannam, Yazen wrote:
+> This is the same as the other CPER code.
 
-I suggested what to do about that already: print the fields unconditionally.
+Dude, turn on brain!
 
-> Also, I don't think we should be interpreting the spec for the user. We should
-> print the fields as they and users can refer back to the spec for more information.
+So if it is in the other CPER code, we should copy it, no matter how
+dumb it is?!?
 
-This is a very very bad idea.
+> Also, the spec allows platform-defined GUIDs. So we should always print this
+> even if the GUID is not defined by the spec.
 
-You can just as well dump binary blobs and then add a user script which
-deciphers that. Oh wait, we had that, it is called mcelog and it is a
-huge pain trying to decode an error properly.
+We need to have a way to map the GUID to a hw part. Dumb numbers mean shit
+because the error record is worthless.
 
-By that same logic, we could simply dump 64-bit MCA MSR values.
+> The Check Information will be decoded further in another patch.
+> 
+> I don't think there's much else to decode for the ID fields.
 
-And everytime we get an error, we have to go dig out the spec. Hell no!
-We had that, we know it is awful, we won't have it again.
+Again, those numbers can't help decoding the error, no need to dump
+them. Or we find a way to make sense out of that info.
 
-You want to decode everything and fully in the kernel so that you can
-have a ready error record which people can simply *read* from dmesg and
-know what the error is.
+> Other tables may have the same fields but the offsets are usually different.
+> So it may be more trouble than it's worth trying to unify the different tables.
+
+If the structs are the same, you can use generic functions for dumping -
+the offsets are meaningless then.
 
 -- 
 Regards/Gruss,
