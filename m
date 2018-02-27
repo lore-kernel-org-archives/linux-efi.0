@@ -1,37 +1,60 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [PATCH v2 5/8] efi: Decode IA32/X64 Cache, TLB, and Bus Check
- structures
-Date: Tue, 27 Feb 2018 18:06:54 +0100
-Message-ID: <20180227170654.GL26382@pd.tnic>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH v2 2/8] efi: Decode IA32/X64 Processor Error Section
+Date: Tue, 27 Feb 2018 17:27:39 +0000
+Message-ID: <DM5PR12MB1916F8C7DF93C1C9402AE3ECF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
- <20180226193904.20532-6-Yazen.Ghannam@amd.com>
- <20180227150356.GH26382@pd.tnic>
- <DM5PR12MB1916C11E8B578EBA43CE2B82F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180226193904.20532-3-Yazen.Ghannam@amd.com>
+ <20180227112234.GE26382@pd.tnic>
+ <DM5PR12MB1916B6AEE434A345E78BE234F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180227170034.GJ26382@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <DM5PR12MB1916C11E8B578EBA43CE2B82F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+In-Reply-To: <20180227170034.GJ26382@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+To: Borislav Petkov <bp@suse.de>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 27, 2018 at 03:33:44PM +0000, Ghannam, Yazen wrote:
-> I agree which is why I've included the Validation Bits. A user can then
-> check the Validation Bits for any field that is of interest but missing.
-
-No, no half-baked fields.
-
-So you know drivers/edac/mce_amd.c, right? And you know the lengths we
-go to make an error record as readable as possible?
-
-So please apply the same logic and intent here too.
-
--- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBUdWVzZGF5LCBGZWJydWFyeSAyNywgMjAxOCAxMjow
+MSBQTQ0KPiBUbzogR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5uYW1AYW1kLmNvbT4NCj4gQ2M6
+IGxpbnV4LWVmaUB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7
+DQo+IGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc7IHg4NkBrZXJuZWwub3JnDQo+IFN1YmplY3Q6
+IFJlOiBbUEFUQ0ggdjIgMi84XSBlZmk6IERlY29kZSBJQTMyL1g2NCBQcm9jZXNzb3IgRXJyb3Ig
+U2VjdGlvbg0KPiANCj4gT24gVHVlLCBGZWIgMjcsIDIwMTggYXQgMDM6MTM6MTFQTSArMDAwMCwg
+R2hhbm5hbSwgWWF6ZW4gd3JvdGU6DQo+ID4gSSBkZWNpZGVkIHRvIHByaW50IHRoZSBWYWxpZGF0
+aW9uIEJpdHMgYXMgYSBzYW5pdHkgY2hlY2sgZm9yIHdob21ldmVyIGlzDQo+IGxvb2tpbmcNCj4g
+PiBhdCB0aGlzLiBTaW5jZSB3ZSBvbmx5IHByaW50IGZpZWxkcyB3aXRoIGEgdmFsaWQgYml0LCBp
+dCBtYXkgYmUgY29uZnVzaW5nIGZvcg0KPiB1c2Vycw0KPiA+IHdobyBkb24ndCBrbm93IHdoeSBm
+aWVsZHMgYXJlIG1pc3NpbmcuDQo+IA0KPiBJIHN1Z2dlc3RlZCB3aGF0IHRvIGRvIGFib3V0IHRo
+YXQgYWxyZWFkeTogcHJpbnQgdGhlIGZpZWxkcyB1bmNvbmRpdGlvbmFsbHkuDQo+IA0KDQpTdXJl
+LCB3ZSBjYW4gcHJpbnQgdGhlIGZpZWxkcyB1bmNvbmRpdGlvbmFsbHkgaWYgQXJkIGlzIG9rYXkg
+d2l0aCB0aGF0Lg0KDQpUaGUgaXNzdWUgaXMgdGhhdCB0aGUgeDg2IGJlaGF2aW9yIHdpbGwgYmUg
+ZGlmZmVyZW50IGZyb20gYWxsIHRoZSBvdGhlcnMsIHNvIHRoYXQNCm1pZ2h0IGJlIGNvbmZ1c2lu
+Zy4NCg0KPiA+IEFsc28sIEkgZG9uJ3QgdGhpbmsgd2Ugc2hvdWxkIGJlIGludGVycHJldGluZyB0
+aGUgc3BlYyBmb3IgdGhlIHVzZXIuIFdlDQo+IHNob3VsZA0KPiA+IHByaW50IHRoZSBmaWVsZHMg
+YXMgdGhleSBhbmQgdXNlcnMgY2FuIHJlZmVyIGJhY2sgdG8gdGhlIHNwZWMgZm9yIG1vcmUNCj4g
+aW5mb3JtYXRpb24uDQo+IA0KPiBUaGlzIGlzIGEgdmVyeSB2ZXJ5IGJhZCBpZGVhLg0KPiANCj4g
+WW91IGNhbiBqdXN0IGFzIHdlbGwgZHVtcCBiaW5hcnkgYmxvYnMgYW5kIHRoZW4gYWRkIGEgdXNl
+ciBzY3JpcHQgd2hpY2gNCj4gZGVjaXBoZXJzIHRoYXQuIE9oIHdhaXQsIHdlIGhhZCB0aGF0LCBp
+dCBpcyBjYWxsZWQgbWNlbG9nIGFuZCBpdCBpcyBhDQo+IGh1Z2UgcGFpbiB0cnlpbmcgdG8gZGVj
+b2RlIGFuIGVycm9yIHByb3Blcmx5Lg0KPiANCj4gQnkgdGhhdCBzYW1lIGxvZ2ljLCB3ZSBjb3Vs
+ZCBzaW1wbHkgZHVtcCA2NC1iaXQgTUNBIE1TUiB2YWx1ZXMuDQo+IA0KPiBBbmQgZXZlcnl0aW1l
+IHdlIGdldCBhbiBlcnJvciwgd2UgaGF2ZSB0byBnbyBkaWcgb3V0IHRoZSBzcGVjLiBIZWxsIG5v
+IQ0KPiBXZSBoYWQgdGhhdCwgd2Uga25vdyBpdCBpcyBhd2Z1bCwgd2Ugd29uJ3QgaGF2ZSBpdCBh
+Z2Fpbi4NCj4gDQo+IFlvdSB3YW50IHRvIGRlY29kZSBldmVyeXRoaW5nIGFuZCBmdWxseSBpbiB0
+aGUga2VybmVsIHNvIHRoYXQgeW91IGNhbg0KPiBoYXZlIGEgcmVhZHkgZXJyb3IgcmVjb3JkIHdo
+aWNoIHBlb3BsZSBjYW4gc2ltcGx5ICpyZWFkKiBmcm9tIGRtZXNnIGFuZA0KPiBrbm93IHdoYXQg
+dGhlIGVycm9yIGlzLg0KPiANCg0KVGhpcyBzZXQgZG9lcyBkZWNvZGUgZXZlcnl0aGluZyBmdWxs
+eSBzbyB0aGF0IHBlb3BsZSBjYW4gcmVhZCB0aGUgZXJyb3IuIFRoZSBvbmx5DQp0d28gcGxhY2Vz
+IHRoZXJlIGFyZSBiaW5hcnkgZHVtcHMgYXJlIHdpdGggdGhlIENQVUlEIGZpZWxkIGFuZCB0aGUg
+Q29udGV4dCBpbmZvLg0KDQpNYXliZSB3ZSBjYW4gcnVuIHRoZSBDUFVJRCBmaWVsZCB0aHJvdWdo
+IHNvbWUgZGVjb2RlciBpbiBhcmNoL3g4Ni4NCg0KSSBhbHJlYWR5IG1lbnRpb25lZCBpbiB0aGUg
+Q29udGV4dCBpbmZvIHBhdGNoIHRoYXQgdGhlcmUgY291bGQgYmUgZnVydGhlcg0KZGVjb2Rpbmcg
+d2hpY2ggd2UgY2FuIGRvIGluIHRoZSBmdXR1cmUuIFRoZSB0d28gb3B0aW9ucyB0aGF0IG1pZ2h0
+IGJlIGEgcGFpbg0Kd2lsbCBiZSB0aGUgTVNSIGFuZCBNTSByZWdpc3RlciB0eXBlcywgc2luY2Ug
+dGhlc2Ugd2lsbCBiZSBtb2RlbCBhbmQvb3INCnBsYXRmb3JtIHNwZWNpZmljLg0KDQpUaGFua3Ms
+DQpZYXplbg0KDQoNCg==
