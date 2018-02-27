@@ -1,41 +1,50 @@
-From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Subject: RE: [PATCH v2 4/8] efi: Decode UEFI-defined IA32/X64 Error Structure
- GUIDs
-Date: Tue, 27 Feb 2018 15:28:37 +0000
-Message-ID: <DM5PR12MB191643165F74F3BDB469C5BCF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
-References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
- <20180226193904.20532-5-Yazen.Ghannam@amd.com>
- <20180227143020.GG26382@pd.tnic>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v2 4/8] efi: Decode UEFI-defined IA32/X64 Error Structure GUIDs
+Date: Tue, 27 Feb 2018 15:31:50 +0000
+Message-ID: <CAKv+Gu_yyshaM5XQ+SRAaFAA+CDVOxfZQAsE_1TZsyKYjTi3_Q@mail.gmail.com>
+References: <20180226193904.20532-1-Yazen.Ghannam@amd.com> <20180226193904.20532-5-Yazen.Ghannam@amd.com>
+ <20180227143020.GG26382@pd.tnic> <DM5PR12MB191643165F74F3BDB469C5BCF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180227143020.GG26382@pd.tnic>
-Content-Language: en-US
+In-Reply-To: <DM5PR12MB191643165F74F3BDB469C5BCF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@suse.de>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
+To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Cc: Borislav Petkov <bp@suse.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
-aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBUdWVzZGF5LCBGZWJydWFyeSAyNywgMjAxOCA5OjMw
-IEFNDQo+IFRvOiBHaGFubmFtLCBZYXplbiA8WWF6ZW4uR2hhbm5hbUBhbWQuY29tPg0KPiBDYzog
-bGludXgtZWZpQHZnZXIua2VybmVsLm9yZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsN
-Cj4gYXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZzsgeDg2QGtlcm5lbC5vcmcNCj4gU3ViamVjdDog
-UmU6IFtQQVRDSCB2MiA0LzhdIGVmaTogRGVjb2RlIFVFRkktZGVmaW5lZCBJQTMyL1g2NCBFcnJv
-cg0KPiBTdHJ1Y3R1cmUgR1VJRHMNCj4gDQo+IE9uIE1vbiwgRmViIDI2LCAyMDE4IGF0IDAxOjM5
-OjAwUE0gLTA2MDAsIFlhemVuIEdoYW5uYW0gd3JvdGU6DQo+ID4gQEAgLTQ1LDYgKzgxLDExIEBA
-IHZvaWQgY3Blcl9wcmludF9wcm9jX2lhKGNvbnN0IGNoYXIgKnBmeCwgY29uc3Qgc3RydWN0DQo+
-IGNwZXJfc2VjX3Byb2NfaWEgKnByb2MpDQo+ID4gIAkJcHJpbnRrKCIlc0Vycm9yIFN0cnVjdHVy
-ZSBUeXBlOiAlcFVsXG4iLCBuZXdwZngsDQo+ID4gIAkJICAgICAgICZlcnJfaW5mby0+ZXJyX3R5
-cGUpOw0KPiA+DQo+ID4gKwkJZXJyX3R5cGUgPSBjcGVyX2dldF9lcnJfdHlwZSgmZXJyX2luZm8t
-PmVycl90eXBlKTsNCj4gPiArCQlwcmludGsoIiVzRXJyb3IgU3RydWN0dXJlIFR5cGU6ICVzXG4i
-LCBuZXdwZngsDQo+ID4gKwkJICAgICAgIGVycl90eXBlIDwgQVJSQVlfU0laRShjcGVyX3Byb2Nf
-ZXJyb3JfdHlwZV9zdHJzKSA/DQo+ID4gKwkJICAgICAgIGNwZXJfcHJvY19lcnJvcl90eXBlX3N0
-cnNbZXJyX3R5cGVdIDogInVua25vd24iKTsNCj4gDQo+IEFoLCB0aGVyZSBpdCBpcywgbXVjaCBi
-ZXR0ZXIuIE5vdyB0aGlzIHRlbGxzIHVzIHdoYXQgY29tcG9uZW50IGl0IGlzLg0KPiANCj4gU28g
-Y3Blci1hcm0uYyBkb2VzIHRoZSBzYW1lIHRoaW5nIGFuZCB0aGVyZSdzIGEgc2ltaWxhciB0aGlu
-ZyBpbiBjcGVyLmMgLQ0KPiBjcGVyX3ByaW50X3Byb2NfZ2VuZXJpYygpLg0KPiANCj4gTGV0J3Mg
-bm90IHRyaS1wbGljYXRlIHRoYXQgY29kZSBwbHMgYW5kIGhhdmUgYSBnZW5lcmljIGZ1bmN0aW9u
-IGluc3RlYWQuDQo+IA0KDQpTdXJlLCBJIGNhbiBkbyB0aGF0Lg0KDQpBcmQsIGlzIHRoaXMgb2th
-eT8NCg0KVGhhbmtzLA0KWWF6ZW4NCg==
+On 27 February 2018 at 15:28, Ghannam, Yazen <Yazen.Ghannam@amd.com> wrote:
+>> -----Original Message-----
+>> From: Borislav Petkov [mailto:bp@suse.de]
+>> Sent: Tuesday, February 27, 2018 9:30 AM
+>> To: Ghannam, Yazen <Yazen.Ghannam@amd.com>
+>> Cc: linux-efi@vger.kernel.org; linux-kernel@vger.kernel.org;
+>> ard.biesheuvel@linaro.org; x86@kernel.org
+>> Subject: Re: [PATCH v2 4/8] efi: Decode UEFI-defined IA32/X64 Error
+>> Structure GUIDs
+>>
+>> On Mon, Feb 26, 2018 at 01:39:00PM -0600, Yazen Ghannam wrote:
+>> > @@ -45,6 +81,11 @@ void cper_print_proc_ia(const char *pfx, const struct
+>> cper_sec_proc_ia *proc)
+>> >             printk("%sError Structure Type: %pUl\n", newpfx,
+>> >                    &err_info->err_type);
+>> >
+>> > +           err_type = cper_get_err_type(&err_info->err_type);
+>> > +           printk("%sError Structure Type: %s\n", newpfx,
+>> > +                  err_type < ARRAY_SIZE(cper_proc_error_type_strs) ?
+>> > +                  cper_proc_error_type_strs[err_type] : "unknown");
+>>
+>> Ah, there it is, much better. Now this tells us what component it is.
+>>
+>> So cper-arm.c does the same thing and there's a similar thing in cper.c -
+>> cper_print_proc_generic().
+>>
+>> Let's not tri-plicate that code pls and have a generic function instead.
+>>
+>
+> Sure, I can do that.
+>
+> Ard, is this okay?
+>
+
+Yes, please, but only if there's something to gain by it.
