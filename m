@@ -1,61 +1,72 @@
-From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Subject: RE: [PATCH v2 3/8] efi: Decode IA32/X64 Processor Error Info
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [PATCH v2 3/8] efi: Decode IA32/X64 Processor Error Info
  Structure
-Date: Tue, 27 Feb 2018 17:46:54 +0000
-Message-ID: <DM5PR12MB1916D78FE4EEF146EE1D8612F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+Date: Tue, 27 Feb 2018 19:02:31 +0100
+Message-ID: <20180227180231.GO26382@pd.tnic>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
  <20180226193904.20532-4-Yazen.Ghannam@amd.com>
  <20180227142531.GF26382@pd.tnic>
  <DM5PR12MB191637C1857C5D9499D08D66F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
  <20180227170423.GK26382@pd.tnic>
+ <DM5PR12MB1916D78FE4EEF146EE1D8612F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180227170423.GK26382@pd.tnic>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <DM5PR12MB1916D78FE4EEF146EE1D8612F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@suse.de>
+To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
-aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBUdWVzZGF5LCBGZWJydWFyeSAyNywgMjAxOCAxMjow
-NCBQTQ0KPiBUbzogR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5uYW1AYW1kLmNvbT4NCj4gQ2M6
-IGxpbnV4LWVmaUB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7
-DQo+IGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc7IHg4NkBrZXJuZWwub3JnDQo+IFN1YmplY3Q6
-IFJlOiBbUEFUQ0ggdjIgMy84XSBlZmk6IERlY29kZSBJQTMyL1g2NCBQcm9jZXNzb3IgRXJyb3Ig
-SW5mbw0KPiBTdHJ1Y3R1cmUNCj4gDQo+IE9uIFR1ZSwgRmViIDI3LCAyMDE4IGF0IDAzOjI1OjA2
-UE0gKzAwMDAsIEdoYW5uYW0sIFlhemVuIHdyb3RlOg0KPiA+IFRoaXMgaXMgdGhlIHNhbWUgYXMg
-dGhlIG90aGVyIENQRVIgY29kZS4NCj4gDQo+IER1ZGUsIHR1cm4gb24gYnJhaW4hDQo+IA0KPiBT
-byBpZiBpdCBpcyBpbiB0aGUgb3RoZXIgQ1BFUiBjb2RlLCB3ZSBzaG91bGQgY29weSBpdCwgbm8g
-bWF0dGVyIGhvdw0KPiBkdW1iIGl0IGlzPyE/DQo+IA0KDQpJIHRoaW5rIHRoZXJlJ3MgdmFsdWUg
-aW4gZm9sbG93aW5nIHRoZSBjb252ZW50aW9ucyBpbiBhIHN1YnN5c3RlbS4NCg0KSSBjYW4gY2hh
-bmdlIHRoaXMgaWYgeW91IGdpdmUgYSByZWFzb24gYmVzaWRlcyAiaXQncyBkdW1iIi4gVGhpcyBj
-b3VsZCBhcHBseQ0KdG8gdGhlIG90aGVyIENQRVIgY29kZSBhbHNvLg0KDQo+ID4gQWxzbywgdGhl
-IHNwZWMgYWxsb3dzIHBsYXRmb3JtLWRlZmluZWQgR1VJRHMuIFNvIHdlIHNob3VsZCBhbHdheXMg
-cHJpbnQNCj4gdGhpcw0KPiA+IGV2ZW4gaWYgdGhlIEdVSUQgaXMgbm90IGRlZmluZWQgYnkgdGhl
-IHNwZWMuDQo+IA0KPiBXZSBuZWVkIHRvIGhhdmUgYSB3YXkgdG8gbWFwIHRoZSBHVUlEIHRvIGEg
-aHcgcGFydC4gRHVtYiBudW1iZXJzIG1lYW4NCj4gc2hpdA0KPiBiZWNhdXNlIHRoZSBlcnJvciBy
-ZWNvcmQgaXMgd29ydGhsZXNzLg0KPiANCg0KV2UgZG8gbWFwIHRoZSBzcGVjLWRlZmluZWQgR1VJ
-RHMgaW4gcGF0Y2ggNCBvZiB0aGlzIHNldC4gSSBkb24ndCBrbm93IGlmIHRoZXJlJ3MNCmEgY2Vu
-dHJhbCBwbGFjZSB3aGVyZSBhbGwgdmVuZG9yLWRlZmluZWQgR1VJRHMgYXJlIGxpc3RlZC4gSSBj
-YW4gbG9vayBpbnRvIHRoaXMuDQoNCj4gPiBUaGUgQ2hlY2sgSW5mb3JtYXRpb24gd2lsbCBiZSBk
-ZWNvZGVkIGZ1cnRoZXIgaW4gYW5vdGhlciBwYXRjaC4NCj4gPg0KPiA+IEkgZG9uJ3QgdGhpbmsg
-dGhlcmUncyBtdWNoIGVsc2UgdG8gZGVjb2RlIGZvciB0aGUgSUQgZmllbGRzLg0KPiANCj4gQWdh
-aW4sIHRob3NlIG51bWJlcnMgY2FuJ3QgaGVscCBkZWNvZGluZyB0aGUgZXJyb3IsIG5vIG5lZWQg
-dG8gZHVtcA0KPiB0aGVtLiBPciB3ZSBmaW5kIGEgd2F5IHRvIG1ha2Ugc2Vuc2Ugb3V0IG9mIHRo
-YXQgaW5mby4NCj4gDQoNCldoaWNoIG51bWJlcnM/IFRoZSBDaGVjayBJbmZvcm1hdGlvbj8gTGlr
-ZSBJIHNhaWQsIHRoYXQncyBkZWNvZGVkIGluIGFub3RoZXINCnBhdGNoLCBwYXRjaGVzIDUsIDYs
-IGFuZCA3Lg0KDQpBbmQgdGhlIHJhdyB2YWx1ZSBzaG91bGQgc3RpbGwgYmUgcHJpbnRlZCBiZWNh
-dXNlDQoxKSBJdCBtYXkgcmVwcmVzZW50IGEgdHlwZSB0aGF0IHdlIGNhbid0IGRlY29kZS4gTWF5
-YmUgYSB0eXBlIHRoYXQncyBub3QgcGFydCBvZg0KdGhlIHNwZWMuDQoyKSBJdCdzIGdvb2QgdG8g
-aGF2ZSB0aGUgcmF3IHZhbHVlIGZvciByZWZlcmVuY2UuIFdlIGRvIHRoaXMgd2l0aCBNQ0FfU1RB
-VFVTDQp3aGVyZSB3ZSBwcmludCB0aGUgcmF3IHZhbHVlIGZvbGxvd2VkIGJ5IHRoZSBkZWNvZGlu
-Zy4NCg0KPiA+IE90aGVyIHRhYmxlcyBtYXkgaGF2ZSB0aGUgc2FtZSBmaWVsZHMgYnV0IHRoZSBv
-ZmZzZXRzIGFyZSB1c3VhbGx5IGRpZmZlcmVudC4NCj4gPiBTbyBpdCBtYXkgYmUgbW9yZSB0cm91
-YmxlIHRoYW4gaXQncyB3b3J0aCB0cnlpbmcgdG8gdW5pZnkgdGhlIGRpZmZlcmVudA0KPiB0YWJs
-ZXMuDQo+IA0KPiBJZiB0aGUgc3RydWN0cyBhcmUgdGhlIHNhbWUsIHlvdSBjYW4gdXNlIGdlbmVy
-aWMgZnVuY3Rpb25zIGZvciBkdW1waW5nIC0NCj4gdGhlIG9mZnNldHMgYXJlIG1lYW5pbmdsZXNz
-IHRoZW4uDQo+IA0KDQpUaGUgc3RydWN0cyBhcmUgYWxsIGRpZmZlcmVudCBldmVuIHRob3VnaCBz
-b21lIGZpZWxkcyBtYXkgYmUgdGhlIHNhbWUuDQoNClRoYW5rcywNCllhemVuDQo=
+On Tue, Feb 27, 2018 at 05:46:54PM +0000, Ghannam, Yazen wrote:
+> I think there's value in following the conventions in a subsystem.
+
+"conventions in a subsystem" my ass. That's brainless copy-pasting.
+
+It was added by
+
+f6edea77c8c8 ("ACPI, APEI, CPER: Cleanup CPER memory error output format")
+
+and then replicated everywhere.
+
+It is simply a dumb way of writing:
+
+	snprintf(newpfx, sizeof(newpfx), "%s ", pfx);
+
+
+> I can change this if you give a reason besides "it's dumb".
+
+Two can play that game: you get to keep it if you give a good reason
+why.
+
+> We do map the spec-defined GUIDs in patch 4 of this set. I don't know if there's
+> a central place where all vendor-defined GUIDs are listed. I can look into this.
+
+Yes, at least for the most prominent ones.
+
+> And the raw value should still be printed because
+> 1) It may represent a type that we can't decode. Maybe a type that's not part of
+> the spec.
+
+If we can't decode it, *then* you dump it:
+
+	"Unrecognized type: 0x%llx ..."
+
+> 2) It's good to have the raw value for reference. We do this with MCA_STATUS
+> where we print the raw value followed by the decoding.
+
+1. No one stares at the raw value if the bits are decoded
+2. MCA_STATUS is one register - this error record is huge.
+
+> The structs are all different even though some fields may be the same.
+
+Fair enough. Only if it makes sense.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
