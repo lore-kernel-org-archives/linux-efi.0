@@ -1,137 +1,75 @@
-From: Yazen Ghannam <Yazen.Ghannam@amd.com>
-Subject: [PATCH v2 2/8] efi: Decode IA32/X64 Processor Error Section
-Date: Mon, 26 Feb 2018 13:38:58 -0600
-Message-ID: <20180226193904.20532-3-Yazen.Ghannam@amd.com>
-References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
+From: "Kirill A. Shutemov" <kirill@shutemov.name>
+Subject: Re: 91f606a8fa ("x86/mm: Replace compile-time checks for 5-level
+ .."): BUG: kernel reboot-without-warning in boot stage
+Date: Tue, 27 Feb 2018 11:21:42 +0300
+Message-ID: <20180227082142.7qxtlcx3hkb22abn@node.shutemov.name>
+References: <5a94243e.XdjEw/cR1zAcoW8q%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
+Content-Disposition: inline
+In-Reply-To: <5a94243e.XdjEw/cR1zAcoW8q%fengguang.wu@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org
-Cc: Yazen Ghannam <Yazen.Ghannam@amd.com>, linux-kernel@vger.kernel.org, ard.biesheuvel@linaro.org, bp@suse.de, x86@kernel.org
+To: kernel test robot <fengguang.wu@intel.com>
+Cc: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, LKP <lkp@01.org>, linux-pm@vger.kernel.org, linux-efi@vger.kernel.org, kasan-dev@googlegroups.com, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, wfg@linux.intel.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Yazen Ghannam <yazen.ghannam@amd.com>
+On Mon, Feb 26, 2018 at 11:14:06PM +0800, kernel test robot wrote:
+> Greetings,
+> 
+> 0day kernel testing robot got the below dmesg and the first bad commit is
+> 
+> https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git x86/mm
+> 
+> commit 91f606a8fa68264224cbc76888fa8649cdbe9990
+> Author:     Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+> AuthorDate: Wed Feb 14 21:25:41 2018 +0300
+> Commit:     Ingo Molnar <mingo@kernel.org>
+> CommitDate: Fri Feb 16 10:48:49 2018 +0100
+> 
+>     x86/mm: Replace compile-time checks for 5-level paging with runtime-time checks
+>     
+>     This patch converts the of CONFIG_X86_5LEVEL check to runtime checks for
+>     p4d folding.
+>     
+>     Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+>     Cc: Andy Lutomirski <luto@kernel.org>
+>     Cc: Arjan van de Ven <arjan@linux.intel.com>
+>     Cc: Borislav Petkov <bp@suse.de>
+>     Cc: Dan Williams <dan.j.williams@intel.com>
+>     Cc: Dave Hansen <dave.hansen@linux.intel.com>
+>     Cc: David Woodhouse <dwmw2@infradead.org>
+>     Cc: Josh Poimboeuf <jpoimboe@redhat.com>
+>     Cc: Linus Torvalds <torvalds@linux-foundation.org>
+>     Cc: Peter Zijlstra <peterz@infradead.org>
+>     Cc: Thomas Gleixner <tglx@linutronix.de>
+>     Cc: linux-mm@kvack.org
+>     Link: http://lkml.kernel.org/r/20180214182542.69302-9-kirill.shutemov@linux.intel.com
+>     Signed-off-by: Ingo Molnar <mingo@kernel.org>
+> 
+> 98219dda2a  x86/mm: Fold p4d page table layer at runtime
+> 91f606a8fa  x86/mm: Replace compile-time checks for 5-level paging with runtime-time checks
+> 1ea4fe8497  Merge branch 'x86/boot' into x86/mm, to unify branches
+> 94991480c2  Merge branch 'x86/pti'
+> f1753f6424  Add linux-next specific files for 20180226
 
-Recognize the IA32/X64 Processor Error Section.
+Patch below should help. Please check.
 
-Do the section decoding in a new "cper-x86.c" file and add this to the
-Makefile depending on a new "UEFI_CPER_X86" config option.
-
-Print the Local APIC ID and CPUID info from the Processor Error Record.
-
-The "Processor Error Info" and "Processor Context" fields will be
-decoded in following patches.
-
-Based on UEFI 2.7 Table 255. Processor Error Record.
-
-Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
----
-Link:
-https://lkml.kernel.org/r/20180223200333.6410-3-Yazen.Ghannam@amd.com
-
-v1->v2:
-* Change config option depends to "X86" instead of "X86_32 || X64_64".
-* Remove extra newline in Makefile changes.
-* Drop author copyright line.
-
- drivers/firmware/efi/Kconfig    |  5 +++++
- drivers/firmware/efi/Makefile   |  1 +
- drivers/firmware/efi/cper-x86.c | 25 +++++++++++++++++++++++++
- drivers/firmware/efi/cper.c     | 10 ++++++++++
- include/linux/cper.h            |  2 ++
- 5 files changed, 43 insertions(+)
- create mode 100644 drivers/firmware/efi/cper-x86.c
-
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 3098410abad8..781a4a337557 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -174,6 +174,11 @@ config UEFI_CPER_ARM
- 	depends on UEFI_CPER && ( ARM || ARM64 )
- 	default y
+diff --git a/arch/x86/include/asm/pgtable_64.h b/arch/x86/include/asm/pgtable_64.h
+index 81dda8d1d0bd..163e01a0631d 100644
+--- a/arch/x86/include/asm/pgtable_64.h
++++ b/arch/x86/include/asm/pgtable_64.h
+@@ -224,9 +224,9 @@ static inline void native_set_p4d(p4d_t *p4dp, p4d_t p4d)
+ 		return;
+ 	}
  
-+config UEFI_CPER_X86
-+	bool
-+	depends on UEFI_CPER && X86
-+	default y
-+
- config EFI_DEV_PATH_PARSER
- 	bool
- 	depends on ACPI
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index cb805374f4bc..5f9f5039de50 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -31,3 +31,4 @@ obj-$(CONFIG_ARM)			+= $(arm-obj-y)
- obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
- obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
- obj-$(CONFIG_UEFI_CPER_ARM)		+= cper-arm.o
-+obj-$(CONFIG_UEFI_CPER_X86)		+= cper-x86.o
-diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-x86.c
-new file mode 100644
-index 000000000000..9da0d981178f
---- /dev/null
-+++ b/drivers/firmware/efi/cper-x86.c
-@@ -0,0 +1,25 @@
-+// SPDX-License-Identifier: GPL-2.0
-+// Copyright (C) 2018, Advanced Micro Devices, Inc.
-+
-+#include <linux/cper.h>
-+
-+/*
-+ * We don't need a "CPER_IA" prefix since these are all locally defined.
-+ * This will save us a lot of line space.
-+ */
-+#define VALID_LAPIC_ID			BIT_ULL(0)
-+#define VALID_CPUID_INFO		BIT_ULL(1)
-+
-+void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
-+{
-+	printk("%sValidation Bits: 0x%016llx\n", pfx, proc->validation_bits);
-+
-+	if (proc->validation_bits & VALID_LAPIC_ID)
-+		printk("%sLocal APIC_ID: 0x%llx\n", pfx, proc->lapic_id);
-+
-+	if (proc->validation_bits & VALID_CPUID_INFO) {
-+		printk("%sCPUID Info:\n", pfx);
-+		print_hex_dump(pfx, "", DUMP_PREFIX_OFFSET, 16, 4, proc->cpuid,
-+			       sizeof(proc->cpuid), 0);
-+	}
-+}
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index c165933ebf38..5a59b582c9aa 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -469,6 +469,16 @@ cper_estatus_print_section(const char *pfx, struct acpi_hest_generic_data *gdata
- 			cper_print_proc_arm(newpfx, arm_err);
- 		else
- 			goto err_section_too_small;
-+#endif
-+#if defined(CONFIG_UEFI_CPER_X86)
-+	} else if (guid_equal(sec_type, &CPER_SEC_PROC_IA)) {
-+		struct cper_sec_proc_ia *ia_err = acpi_hest_get_payload(gdata);
-+
-+		printk("%ssection_type: IA32/X64 processor error\n", newpfx);
-+		if (gdata->error_data_length >= sizeof(*ia_err))
-+			cper_print_proc_ia(newpfx, ia_err);
-+		else
-+			goto err_section_too_small;
- #endif
- 	} else {
- 		const void *err = acpi_hest_get_payload(gdata);
-diff --git a/include/linux/cper.h b/include/linux/cper.h
-index 4b5f8459b403..9c703a0abe6e 100644
---- a/include/linux/cper.h
-+++ b/include/linux/cper.h
-@@ -551,5 +551,7 @@ const char *cper_mem_err_unpack(struct trace_seq *,
- 				struct cper_mem_err_compact *);
- void cper_print_proc_arm(const char *pfx,
- 			 const struct cper_sec_proc_arm *proc);
-+void cper_print_proc_ia(const char *pfx,
-+			const struct cper_sec_proc_ia *proc);
+-	pgd = native_make_pgd(p4d_val(p4d));
++	pgd = native_make_pgd(native_p4d_val(p4d));
+ 	pgd = pti_set_user_pgd((pgd_t *)p4dp, pgd);
+-	*p4dp = native_make_p4d(pgd_val(pgd));
++	*p4dp = native_make_p4d(native_pgd_val(pgd));
+ }
  
- #endif
+ static inline void native_p4d_clear(p4d_t *p4d)
 -- 
-2.14.1
+ Kirill A. Shutemov
