@@ -1,71 +1,57 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [PATCH v2 5/8] efi: Decode IA32/X64 Cache, TLB, and Bus Check
- structures
-Date: Tue, 27 Feb 2018 16:03:56 +0100
-Message-ID: <20180227150356.GH26382@pd.tnic>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH v2 1/8] efi: Fix IA32/X64 Processor Error Record
+ definition
+Date: Tue, 27 Feb 2018 15:05:54 +0000
+Message-ID: <DM5PR12MB1916AC482BB3282CCDEA93ACF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
- <20180226193904.20532-6-Yazen.Ghannam@amd.com>
+ <20180226193904.20532-2-Yazen.Ghannam@amd.com>
+ <20180227104708.GC26382@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180226193904.20532-6-Yazen.Ghannam@amd.com>
+In-Reply-To: <20180227104708.GC26382@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Yazen Ghannam <Yazen.Ghannam@amd.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ard.biesheuvel@linaro.org, x86@kernel.org
+To: Borislav Petkov <bp@suse.de>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Feb 26, 2018 at 01:39:01PM -0600, Yazen Ghannam wrote:
-> +static void print_err_info(const char *pfx, u8 err_type, u64 check)
-> +{
-> +	u16 validation_bits = CHECK_VALID_BITS(check);
-> +
-> +	printk("%sValidation Bits: 0x%04x\n", pfx, validation_bits);
-> +
-> +	if (err_type == ERR_TYPE_MS)
-> +		return;
-> +
-> +	if (validation_bits & CHECK_VALID_TRANS_TYPE) {
-> +		u8 trans_type = CHECK_TRANS_TYPE(check);
-> +
-> +		printk("%sTransaction Type: %u, %s\n", pfx, trans_type,
-> +		       trans_type < ARRAY_SIZE(ia_check_trans_type_strs) ?
-> +		       ia_check_trans_type_strs[trans_type] : "unknown");
-> +	}
-> +
-> +	if (validation_bits & CHECK_VALID_OPERATION) {
-> +		u8 op = CHECK_OPERATION(check);
-> +
-> +		/*
-> +		 * CACHE has more operation types than TLB or BUS, though the
-> +		 * name and the order are the same.
-> +		 */
-> +		u8 max_ops = (err_type == ERR_TYPE_CACHE) ? 9 : 7;
-> +
-> +		printk("%sOperation: %u, %s\n", pfx, op,
-> +		       op < max_ops ? ia_check_op_strs[op] : "unknown");
-> +	}
-> +
-> +	if (validation_bits & CHECK_VALID_LEVEL)
-> +		printk("%sLevel: %llu\n", pfx, CHECK_LEVEL(check));
-> +
-> +	if (validation_bits & CHECK_VALID_PCC)
-> +		print_bool("Processor Context Corrupt", pfx, check, CHECK_PCC);
-
-I think we want to print PCC here unconditionally and say:
-
-	PCC: (yes|no|invalid)
-
-I don't think the absence of PCC in the error record is a good enough
-hint that the PCC field is invalid.
-
-Ditto for the rest and transaction type above too. I think it would be
-much easier if we have fixed fields error record.
-
--- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBUdWVzZGF5LCBGZWJydWFyeSAyNywgMjAxOCA1OjQ3
+IEFNDQo+IFRvOiBHaGFubmFtLCBZYXplbiA8WWF6ZW4uR2hhbm5hbUBhbWQuY29tPg0KPiBDYzog
+bGludXgtZWZpQHZnZXIua2VybmVsLm9yZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsN
+Cj4gYXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZzsgeDg2QGtlcm5lbC5vcmcNCj4gU3ViamVjdDog
+UmU6IFtQQVRDSCB2MiAxLzhdIGVmaTogRml4IElBMzIvWDY0IFByb2Nlc3NvciBFcnJvciBSZWNv
+cmQNCj4gZGVmaW5pdGlvbg0KPiANCj4gT24gTW9uLCBGZWIgMjYsIDIwMTggYXQgMDE6Mzg6NTdQ
+TSAtMDYwMCwgWWF6ZW4gR2hhbm5hbSB3cm90ZToNCj4gPiBGcm9tOiBZYXplbiBHaGFubmFtIDx5
+YXplbi5naGFubmFtQGFtZC5jb20+DQo+ID4NCj4gPiBCYXNlZCBvbiBVRUZJIDIuNyBUYWJsZSAy
+NTUuIFByb2Nlc3NvciBFcnJvciBSZWNvcmQsIHRoZSAiTG9jYWwgQVBJQ19JRCINCj4gDQo+IE15
+IHBkZiBzYXlzIHRoaXMgaXMgdGFibGUgMjUyLg0KPiANCg0KUmlnaHQuIEknbSB1c2luZyB0aGUg
+bGF0ZXN0IHdoaWNoIGlzIFVFRkkgMi43IEVycmF0YSBBLiBJdCB0dXJucyBvdXQgdGhhdCB0aGUg
+dGFibGUNCm51bWJlcmluZyBpcyBkaWZmZXJlbnQgYmV0d2VlbiB0aGUgYmFzZSBhbmQgdGhlIGVy
+cmF0YSBzcGVjcy4gSSBjYW4gY2hhbmdlIHRoaXMuDQoNCj4gPiBmaWVsZCBpcyA4IGJ5dGVzIGJ1
+dCBMaW51eCBkZWZpbmVzIHRoaXMgZmllbGQgYXMgMSBieXRlLg0KPiA+DQo+ID4gRml4IHRoaXMg
+aW4gdGhlIHN0cnVjdCBjcGVyX3NlY19wcm9jX2lhIGRlZmluaXRpb24uDQo+ID4NCj4gPiBTaWdu
+ZWQtb2ZmLWJ5OiBZYXplbiBHaGFubmFtIDx5YXplbi5naGFubmFtQGFtZC5jb20+DQo+ID4gLS0t
+DQo+ID4gTGluazoNCj4gPiBodHRwczovL2xrbWwua2VybmVsLm9yZy9yLzIwMTgwMjIzMjAwMzMz
+LjY0MTAtMi0NCj4gWWF6ZW4uR2hhbm5hbUBhbWQuY29tDQo+ID4NCj4gPiB2MS0+djI6DQo+ID4g
+KiBObyBjaGFuZ2VzLg0KPiA+DQo+ID4gIGluY2x1ZGUvbGludXgvY3Blci5oIHwgMiArLQ0KPiA+
+ICAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRpb24oKyksIDEgZGVsZXRpb24oLSkNCj4gPg0KPiA+
+IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L2NwZXIuaCBiL2luY2x1ZGUvbGludXgvY3Blci5o
+DQo+ID4gaW5kZXggZDE0ZWY0ZTc3YzhhLi40YjVmODQ1OWI0MDMgMTAwNjQ0DQo+ID4gLS0tIGEv
+aW5jbHVkZS9saW51eC9jcGVyLmgNCj4gPiArKysgYi9pbmNsdWRlL2xpbnV4L2NwZXIuaA0KPiA+
+IEBAIC0zODEsNyArMzgxLDcgQEAgc3RydWN0IGNwZXJfc2VjX3Byb2NfZ2VuZXJpYyB7DQo+ID4g
+IC8qIElBMzIvWDY0IFByb2Nlc3NvciBFcnJvciBTZWN0aW9uICovDQo+ID4gIHN0cnVjdCBjcGVy
+X3NlY19wcm9jX2lhIHsNCj4gPiAgCV9fdTY0CXZhbGlkYXRpb25fYml0czsNCj4gPiAtCV9fdTgJ
+bGFwaWNfaWQ7DQo+ID4gKwlfX3U2NAlsYXBpY19pZDsNCj4gPiAgCV9fdTgJY3B1aWRbNDhdOw0K
+PiANCj4gT2ssIHRoYXQgcHJvY2Vzc29yIGVycm9yIHJlY29yZCBoYXMgYSB2YXJpYWJsZSBsZW5n
+dGggc3RydWN0dXJlIGF0IGJ5dGUNCj4gb2Zmc2V0IDY0IGFuZCB3ZSBkb24ndCBoYXZlIGl0IGlu
+IHRoaXMgc3RydWN0Lg0KPiANCj4gSSBndWVzcyBJJ2xsIHNlZSBpdCBpbiB0aGUgZm9sbG93aW5n
+IHBhdGNoZXMgYnV0IHJpZ2h0IG5vdyBpdCBsb29rcw0KPiBsaWtlIHRoYXQgIlByb2Nlc3NvciBF
+cnJvciBJbmZvIiB0aGluZyBpcyBzaW1wbHkgc2l0dWF0ZWQgYWZ0ZXIgdGhhdA0KPiBQcm9jZXNz
+b3IgRXJyb3IgUmVjb3JkIHNvIHdlIGFyZSBzdXBwb3NlZCB0byBzaW1wbHkgZmluZCB0aGUgaW5m
+byBhdA0KPiBvZmZzZXQgNjQuLi4NCj4gDQo+IC9tZSBjb250aW51ZXMgcmVhZGluZy4uLg0KDQpU
+aGUgZXJyb3IgYW5kIGNvbnRleHQgaW5mbyB0YWJsZXMgYXJlIGRlZmluZWQgaW4gb3RoZXIgc3Ry
+dWN0cyBhbmQgd2UNCmFjY2VzcyB0aGVtIGJ5IG9mZnNldHRpbmcgZnJvbSB0aGUgcHJldmlvdXMg
+dGFibGUuDQoNClRoYW5rcywNCllhemVuDQo=
