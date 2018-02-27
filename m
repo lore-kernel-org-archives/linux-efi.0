@@ -1,79 +1,61 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [PATCH v2 2/8] efi: Decode IA32/X64 Processor Error Section
-Date: Tue, 27 Feb 2018 18:44:46 +0100
-Message-ID: <20180227174446.GN26382@pd.tnic>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH v2 3/8] efi: Decode IA32/X64 Processor Error Info
+ Structure
+Date: Tue, 27 Feb 2018 17:46:54 +0000
+Message-ID: <DM5PR12MB1916D78FE4EEF146EE1D8612F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
- <20180226193904.20532-3-Yazen.Ghannam@amd.com>
- <20180227112234.GE26382@pd.tnic>
- <DM5PR12MB1916B6AEE434A345E78BE234F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
- <20180227170034.GJ26382@pd.tnic>
- <DM5PR12MB1916F8C7DF93C1C9402AE3ECF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180226193904.20532-4-Yazen.Ghannam@amd.com>
+ <20180227142531.GF26382@pd.tnic>
+ <DM5PR12MB191637C1857C5D9499D08D66F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180227170423.GK26382@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <DM5PR12MB1916F8C7DF93C1C9402AE3ECF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+In-Reply-To: <20180227170423.GK26382@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+To: Borislav Petkov <bp@suse.de>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 27, 2018 at 05:27:39PM +0000, Ghannam, Yazen wrote:
-> Sure, we can print the fields unconditionally if Ard is okay with that.
-> 
-> The issue is that the x86 behavior will be different from all the others, so that
-> might be confusing.
-
-Confusing for whom?
-
-Are we sharing tools with other arches or what am I missing?
-
-> This set does decode everything fully so that people can read the error.
-
-No, it doesn't. It dumps
-
-        printk("%sValidation Bits: 0x%016llx\n", pfx, proc->validation_bits);
-
-        printk("%sError Structure Type: %pUl\n", newpfx,
-                &err_info->err_type);
-
-        printk("%sCheck Information: 0x%016llx\n", newpfx,
-                 err_info->check_info);
-
-and so on which are half-baked.
-
-Think of it this way: if you look at the error record and you still need
-to look at the spec to decode it, then it is still not good enough.
-
-Users don't care about validation bits, or unreadable GUIDs or WTF is
-"Check Information" even?
-
-"This section details the layout of the Processor Error Information
-Structure and the detailed check information which is contained within."
-
-And that "Check Information" thing is mentioned only twice in the whole
-spec.
-
-StructureErrorType only there in the table.
-
-Very informative that.
-
-So no, users don't care about any of that internal crap - they wanna
-know what is wrong with their box and that should be written in plain
-english.
-
-> I already mentioned in the Context info patch that there could be
-> further decoding which we can do in the future.
-
-Then decode only those pieces fully now which you can do now and when
-you add something in the future, add it then with the full decoding
-functionality. No fields which need additional decoding with the spec
-opened on one side.
-
--- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBUdWVzZGF5LCBGZWJydWFyeSAyNywgMjAxOCAxMjow
+NCBQTQ0KPiBUbzogR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5uYW1AYW1kLmNvbT4NCj4gQ2M6
+IGxpbnV4LWVmaUB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7
+DQo+IGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc7IHg4NkBrZXJuZWwub3JnDQo+IFN1YmplY3Q6
+IFJlOiBbUEFUQ0ggdjIgMy84XSBlZmk6IERlY29kZSBJQTMyL1g2NCBQcm9jZXNzb3IgRXJyb3Ig
+SW5mbw0KPiBTdHJ1Y3R1cmUNCj4gDQo+IE9uIFR1ZSwgRmViIDI3LCAyMDE4IGF0IDAzOjI1OjA2
+UE0gKzAwMDAsIEdoYW5uYW0sIFlhemVuIHdyb3RlOg0KPiA+IFRoaXMgaXMgdGhlIHNhbWUgYXMg
+dGhlIG90aGVyIENQRVIgY29kZS4NCj4gDQo+IER1ZGUsIHR1cm4gb24gYnJhaW4hDQo+IA0KPiBT
+byBpZiBpdCBpcyBpbiB0aGUgb3RoZXIgQ1BFUiBjb2RlLCB3ZSBzaG91bGQgY29weSBpdCwgbm8g
+bWF0dGVyIGhvdw0KPiBkdW1iIGl0IGlzPyE/DQo+IA0KDQpJIHRoaW5rIHRoZXJlJ3MgdmFsdWUg
+aW4gZm9sbG93aW5nIHRoZSBjb252ZW50aW9ucyBpbiBhIHN1YnN5c3RlbS4NCg0KSSBjYW4gY2hh
+bmdlIHRoaXMgaWYgeW91IGdpdmUgYSByZWFzb24gYmVzaWRlcyAiaXQncyBkdW1iIi4gVGhpcyBj
+b3VsZCBhcHBseQ0KdG8gdGhlIG90aGVyIENQRVIgY29kZSBhbHNvLg0KDQo+ID4gQWxzbywgdGhl
+IHNwZWMgYWxsb3dzIHBsYXRmb3JtLWRlZmluZWQgR1VJRHMuIFNvIHdlIHNob3VsZCBhbHdheXMg
+cHJpbnQNCj4gdGhpcw0KPiA+IGV2ZW4gaWYgdGhlIEdVSUQgaXMgbm90IGRlZmluZWQgYnkgdGhl
+IHNwZWMuDQo+IA0KPiBXZSBuZWVkIHRvIGhhdmUgYSB3YXkgdG8gbWFwIHRoZSBHVUlEIHRvIGEg
+aHcgcGFydC4gRHVtYiBudW1iZXJzIG1lYW4NCj4gc2hpdA0KPiBiZWNhdXNlIHRoZSBlcnJvciBy
+ZWNvcmQgaXMgd29ydGhsZXNzLg0KPiANCg0KV2UgZG8gbWFwIHRoZSBzcGVjLWRlZmluZWQgR1VJ
+RHMgaW4gcGF0Y2ggNCBvZiB0aGlzIHNldC4gSSBkb24ndCBrbm93IGlmIHRoZXJlJ3MNCmEgY2Vu
+dHJhbCBwbGFjZSB3aGVyZSBhbGwgdmVuZG9yLWRlZmluZWQgR1VJRHMgYXJlIGxpc3RlZC4gSSBj
+YW4gbG9vayBpbnRvIHRoaXMuDQoNCj4gPiBUaGUgQ2hlY2sgSW5mb3JtYXRpb24gd2lsbCBiZSBk
+ZWNvZGVkIGZ1cnRoZXIgaW4gYW5vdGhlciBwYXRjaC4NCj4gPg0KPiA+IEkgZG9uJ3QgdGhpbmsg
+dGhlcmUncyBtdWNoIGVsc2UgdG8gZGVjb2RlIGZvciB0aGUgSUQgZmllbGRzLg0KPiANCj4gQWdh
+aW4sIHRob3NlIG51bWJlcnMgY2FuJ3QgaGVscCBkZWNvZGluZyB0aGUgZXJyb3IsIG5vIG5lZWQg
+dG8gZHVtcA0KPiB0aGVtLiBPciB3ZSBmaW5kIGEgd2F5IHRvIG1ha2Ugc2Vuc2Ugb3V0IG9mIHRo
+YXQgaW5mby4NCj4gDQoNCldoaWNoIG51bWJlcnM/IFRoZSBDaGVjayBJbmZvcm1hdGlvbj8gTGlr
+ZSBJIHNhaWQsIHRoYXQncyBkZWNvZGVkIGluIGFub3RoZXINCnBhdGNoLCBwYXRjaGVzIDUsIDYs
+IGFuZCA3Lg0KDQpBbmQgdGhlIHJhdyB2YWx1ZSBzaG91bGQgc3RpbGwgYmUgcHJpbnRlZCBiZWNh
+dXNlDQoxKSBJdCBtYXkgcmVwcmVzZW50IGEgdHlwZSB0aGF0IHdlIGNhbid0IGRlY29kZS4gTWF5
+YmUgYSB0eXBlIHRoYXQncyBub3QgcGFydCBvZg0KdGhlIHNwZWMuDQoyKSBJdCdzIGdvb2QgdG8g
+aGF2ZSB0aGUgcmF3IHZhbHVlIGZvciByZWZlcmVuY2UuIFdlIGRvIHRoaXMgd2l0aCBNQ0FfU1RB
+VFVTDQp3aGVyZSB3ZSBwcmludCB0aGUgcmF3IHZhbHVlIGZvbGxvd2VkIGJ5IHRoZSBkZWNvZGlu
+Zy4NCg0KPiA+IE90aGVyIHRhYmxlcyBtYXkgaGF2ZSB0aGUgc2FtZSBmaWVsZHMgYnV0IHRoZSBv
+ZmZzZXRzIGFyZSB1c3VhbGx5IGRpZmZlcmVudC4NCj4gPiBTbyBpdCBtYXkgYmUgbW9yZSB0cm91
+YmxlIHRoYW4gaXQncyB3b3J0aCB0cnlpbmcgdG8gdW5pZnkgdGhlIGRpZmZlcmVudA0KPiB0YWJs
+ZXMuDQo+IA0KPiBJZiB0aGUgc3RydWN0cyBhcmUgdGhlIHNhbWUsIHlvdSBjYW4gdXNlIGdlbmVy
+aWMgZnVuY3Rpb25zIGZvciBkdW1waW5nIC0NCj4gdGhlIG9mZnNldHMgYXJlIG1lYW5pbmdsZXNz
+IHRoZW4uDQo+IA0KDQpUaGUgc3RydWN0cyBhcmUgYWxsIGRpZmZlcmVudCBldmVuIHRob3VnaCBz
+b21lIGZpZWxkcyBtYXkgYmUgdGhlIHNhbWUuDQoNClRoYW5rcywNCllhemVuDQo=
