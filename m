@@ -1,8 +1,8 @@
-From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Subject: RE: [PATCH v2 3/8] efi: Decode IA32/X64 Processor Error Info
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [PATCH v2 3/8] efi: Decode IA32/X64 Processor Error Info
  Structure
-Date: Tue, 27 Feb 2018 21:32:18 +0000
-Message-ID: <DM5PR12MB191691E786778FE380388B74F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+Date: Tue, 27 Feb 2018 23:10:39 +0100
+Message-ID: <20180227221039.GR26382@pd.tnic>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
  <20180226193904.20532-4-Yazen.Ghannam@amd.com>
  <20180227142531.GF26382@pd.tnic>
@@ -12,152 +12,119 @@ References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
  <20180227180231.GO26382@pd.tnic>
  <DM5PR12MB1916230ED7225CE0EB00EDF1F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
  <20180227190943.GQ26382@pd.tnic>
+ <DM5PR12MB191691E786778FE380388B74F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180227190943.GQ26382@pd.tnic>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <DM5PR12MB191691E786778FE380388B74F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@suse.de>
+To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>, Tony Luck <tony.luck@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
-aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBUdWVzZGF5LCBGZWJydWFyeSAyNywgMjAxOCAyOjEw
-IFBNDQo+IFRvOiBHaGFubmFtLCBZYXplbiA8WWF6ZW4uR2hhbm5hbUBhbWQuY29tPg0KPiBDYzog
-bGludXgtZWZpQHZnZXIua2VybmVsLm9yZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsN
-Cj4gYXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZzsgeDg2QGtlcm5lbC5vcmc7IFRvbnkgTHVjaw0K
-PiA8dG9ueS5sdWNrQGludGVsLmNvbT4NCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2MiAzLzhdIGVm
-aTogRGVjb2RlIElBMzIvWDY0IFByb2Nlc3NvciBFcnJvciBJbmZvDQo+IFN0cnVjdHVyZQ0KPiAN
-Ci4uLg0KPiA+IDEpIE5vIG9uZSBleGNlcHQgZGVidWcgYW5kIEhXIGRlc2lnbiBmb2xrcywgd2hv
-IHdpbGwgZXZlbnR1YWxseSBnZXQgYQ0KPiA+IHJlcG9ydCBmcm9tIGEgdXNlci4NCj4gDQo+IEhh
-aGFoaGEsIHllYWggcmlnaHQuDQo+IA0KPiBUaGUgb25seSBwZW9wbGUgd2hvIGdldCB0aG9zZSBy
-ZXBvcnRzIGFyZSB0aGUgbWFpbnRhaW5lcnMgb2YgdGhlIGNvZGUgaW4NCj4gdGhlIGtlcm5lbCBh
-bmQgdGhlIGRpc3RybyBwZW9wbGUgd2hvIGdldCBhbGwgdGhlIGJ1Z3MgYXNzaWduZWQgdG8gdGhl
-bS4NCj4gDQo+IEFuZCBpZiB0aGV5IGNhbid0IGRlY29kZSB0aGUgZXJyb3IgLSBpdCBpcyBUb255
-IGFuZCBtZS4NCj4gDQo+IEhXIGZvbGtzIGhlYXIgYWJvdXQgaXQgZnJvbSB1cy4gQW5kIHdlIGdv
-IGFuZCBkZWNvZGUgdGhlIGRhbW4gY3JhcA0KPiAqZXZlcnkqIHRpbWUuIERvIHlvdSBjYXRjaCBt
-eSBkcmlmdCBub3c/DQo+IA0KDQpUaGF0J3Mgbm90IHRydWUuIFlvdSBtYXkgZ2V0IHJlcG9ydHMg
-YnV0IHNvIGRvIHBsYXRmb3JtIGFuZCBzaWxpY29uIHZlbmRvcnMNCmRpcmVjdGx5Lg0KDQo+ID4g
-WyAgICAxLjk5MDk0OF0gW0hhcmR3YXJlIEVycm9yXTogIEVycm9yIDEsIHR5cGU6IGNvcnJlY3Rl
-ZA0KPiA+IFsgICAgMS45OTU3ODldIFtIYXJkd2FyZSBFcnJvcl06ICBmcnVfdGV4dDogUHJvY2Vz
-c29yRXJyb3INCj4gPiBbICAgIDIuMDAwNjMyXSBbSGFyZHdhcmUgRXJyb3JdOiAgIHNlY3Rpb25f
-dHlwZTogSUEzMi9YNjQgcHJvY2Vzc29yIGVycm9yDQo+ID4gWyAgICAyLjAwNTc5Nl0gW0hhcmR3
-YXJlIEVycm9yXTogICBWYWxpZGF0aW9uIEJpdHM6IDB4MDAwMDAwMDAwMDAwMDIwNw0KPiA+IFsg
-ICAgMi4wMTA5NTNdIFtIYXJkd2FyZSBFcnJvcl06ICAgTG9jYWwgQVBJQ19JRDogMHgwDQo+ID4g
-WyAgICAyLjAxNTk5MV0gW0hhcmR3YXJlIEVycm9yXTogICBDUFVJRCBJbmZvOg0KPiA+IFsgICAg
-Mi4wMjA3NDddIFtIYXJkd2FyZSBFcnJvcl06ICAgMDAwMDAwMDA6IDAwODAwZjEyIDAwMDAwMDAw
-IDAwNDAwODAwDQo+IDAwMDAwMDAwDQo+ID4gWyAgICAyLjAyNTU5NV0gW0hhcmR3YXJlIEVycm9y
-XTogICAwMDAwMDAxMDogNzZkODMyMGIgMDAwMDAwMDAgMTc4YmZiZmYNCj4gMDAwMDAwMDANCj4g
-PiBbICAgIDIuMDMwNDIzXSBbSGFyZHdhcmUgRXJyb3JdOiAgIDAwMDAwMDIwOiAwMDAwMDAwMCAw
-MDAwMDAwMCAwMDAwMDAwMA0KPiAwMDAwMDAwMA0KPiA+IFsgICAgMi4wMzUxOThdIFtIYXJkd2Fy
-ZSBFcnJvcl06ICAgRXJyb3IgSW5mb3JtYXRpb24gU3RydWN0dXJlIDA6DQo+ID4gWyAgICAyLjAz
-OTk2MV0gW0hhcmR3YXJlIEVycm9yXTogICAgRXJyb3IgU3RydWN0dXJlIFR5cGU6IGE1NTcwMWY1
-LWUzZWYtDQo+IDQzZGUtYWM3Mi0yNDliNTczZmFkMmMNCj4gPiBbICAgIDIuMDQ5NjA4XSBbSGFy
-ZHdhcmUgRXJyb3JdOiAgICBFcnJvciBTdHJ1Y3R1cmUgVHlwZTogY2FjaGUgZXJyb3INCj4gPiBb
-ICAgIDIuMDU0MzQ0XSBbSGFyZHdhcmUgRXJyb3JdOiAgICBWYWxpZGF0aW9uIEJpdHM6IDB4MDAw
-MDAwMDAwMDAwMDAwMQ0KPiA+IFsgICAgMi4wNTkwNDZdIFtIYXJkd2FyZSBFcnJvcl06ICAgIENo
-ZWNrIEluZm9ybWF0aW9uOiAweDAwMDAwMDAwMjA1NDAwODcNCj4gPiBbICAgIDIuMDYzNjI1XSBb
-SGFyZHdhcmUgRXJyb3JdOiAgICAgVmFsaWRhdGlvbiBCaXRzOiAweDAwODcNCj4gPiBbICAgIDIu
-MDY4MDMyXSBbSGFyZHdhcmUgRXJyb3JdOiAgICAgVHJhbnNhY3Rpb24gVHlwZTogMCwgSW5zdHJ1
-Y3Rpb24NCj4gPiBbICAgIDIuMDcyNDIzXSBbSGFyZHdhcmUgRXJyb3JdOiAgICAgT3BlcmF0aW9u
-OiA1LCBpbnN0cnVjdGlvbiBmZXRjaA0KPiA+IFsgICAgMi4wNzY3NzZdIFtIYXJkd2FyZSBFcnJv
-cl06ICAgICBMZXZlbDogMQ0KPiA+IFsgICAgMi4wODEwNzNdIFtIYXJkd2FyZSBFcnJvcl06ICAg
-ICBPdmVyZmxvdzogdHJ1ZQ0KPiA+IFsgICAgMi4wODUzNjBdIFtIYXJkd2FyZSBFcnJvcl06ICAg
-Q29udGV4dCBJbmZvcm1hdGlvbiBTdHJ1Y3R1cmUgMDoNCj4gPiBbICAgIDIuMDg5NjYxXSBbSGFy
-ZHdhcmUgRXJyb3JdOiAgICBSZWdpc3RlciBDb250ZXh0IFR5cGU6IE1TUiBSZWdpc3RlcnMNCj4g
-KE1hY2hpbmUgQ2hlY2sgYW5kIG90aGVyIE1TUnMpDQo+ID4gWyAgICAyLjA5ODQ4N10gW0hhcmR3
-YXJlIEVycm9yXTogICAgUmVnaXN0ZXIgQXJyYXkgU2l6ZTogMHgwMDUwDQo+ID4gWyAgICAyLjEw
-MzExM10gW0hhcmR3YXJlIEVycm9yXTogICAgTVNSIEFkZHJlc3M6IDB4YzAwMDIwMTENCj4gPiBb
-ICAgIDIuMTA3NzQyXSBbSGFyZHdhcmUgRXJyb3JdOiAgICBSZWdpc3RlciBBcnJheToNCj4gPiBb
-ICAgIDIuMTEyMjcwXSBbSGFyZHdhcmUgRXJyb3JdOiAgICAwMDAwMDAwMDogZDgyMDAwMDAwMDBh
-MDE1MQ0KPiAwMDAwMDAwMDAwMDAwMDAwDQo+ID4gWyAgICAyLjExNjg0NV0gW0hhcmR3YXJlIEVy
-cm9yXTogICAgMDAwMDAwMTA6IGQwMTAwMDAwMDAwMDAwMDANCj4gMDAwMDAwMDMwMDAwMDAzMQ0K
-PiA+IFsgICAgMi4xMjEyMjhdIFtIYXJkd2FyZSBFcnJvcl06ICAgIDAwMDAwMDIwOiAwMDAxMDBi
-MDAwMDAwMDAwDQo+IDAwMDAwMDAwNGEwMDAwMDANCj4gPiBbICAgIDIuMTI1NTE0XSBbSGFyZHdh
-cmUgRXJyb3JdOiAgICAwMDAwMDAzMDogMDAwMDAwMDAwMDAwMDAwMA0KPiAwMDAwMDAwMDAwMDAw
-MDAwDQo+ID4gWyAgICAyLjEyOTc0N10gW0hhcmR3YXJlIEVycm9yXTogICAgMDAwMDAwNDA6IDAw
-MDAwMDAwMDAwMDAwMDANCj4gMDAwMDAwMDAwMDAwMDAwMA0KPiANCj4gTGVtbWUgc2ltcGxpZnkg
-dGhhdCBlcnJvciByZWNvcmQ6DQo+IA0KPiBbSGFyZHdhcmUgRXJyb3JdOiAgQ29ycmVjdGVkIFBy
-b2Nlc3NvciBFcnJvcg0KPiBbSGFyZHdhcmUgRXJyb3JdOiAgIEFQSUNfSUQ6IDB4MCB8IENQVUlE
-OiAweDE3fDB4MXwweDINCj4gW0hhcmR3YXJlIEVycm9yXTogICAgVHlwZTogY2FjaGUgZXJyb3Ig
-ZHVyaW5nIGluc3RydWN0aW9uIGZldGNoDQo+IFtIYXJkd2FyZSBFcnJvcl06ICAgIGNhY2hlIGxl
-dmVsIDENCj4gW0hhcmR3YXJlIEVycm9yXTogICAgT3ZlcmZsb3c6IHRydWUNCj4gDQo+IFNlZSBo
-b3cgbXVjaCBtb3JlIHJlYWRhYmxlIGl0IGdvdCEgQW5kIGl0IGlzIG9ubHkgNSBsaW5lcy4gSSBj
-YW4gbWFrZSBpdA0KPiBldmVuIHNtYWxsZXIuDQo+IA0KDQpOb3QgbXVjaCBtb3JlIHJlYWRhYmxl
-LiBJdCdzIHN0aWxsIHZhZ3VlIGFuZCBjb25mdXNpbmcgdG8gYSB1c2VyIGFuZCBkZXZvaWQNCm9m
-IGFueSByZWFsIGluZm8gc28gYW4gZXhwZXJ0IGNhbid0IGhlbHAuIEFuZCBub3cgdGhlIGluZm9y
-bWF0aW9uIGlzIHByaW50ZWQNCmFyYml0cmFyaWx5LCBzbyBzb21lb25lIG5lZWRzIHRvIHJlYWQg
-dGhlIHNvdXJjZSB0byBmaWd1cmUgb3V0IHdoYXQgaXQgcmVhbGx5DQptZWFucy4NCg0KPiBJZiBp
-dCB3ZXJlIGEgY3JpdGljYWwsIHVuY29ycmVjdGFibGUgZXJyb3IsIGV2ZXJ5IGxpbmUgY291bnRz
-OiBpbWFnaW5lDQo+IHlvdSBkbyB0aGUgYWJvdmUgZmF0IHJlY29yZCBhbmQgdGhlIG1hY2hpbmUg
-ZnJlZXplcyBhdCBsaW5lIDUuDQo+IA0KDQpNYXliZS4gQnV0IHRoZXNlIHJlY29yZHMgYXJlIGdl
-bmVyYXRlZCBieSBQbGF0Zm9ybSBGaXJtd2FyZS4gV2h5IHdvdWxkDQpGVyByZXBvcnQgdGhlIGVy
-cm9yIGtub3dpbmcgdGhlIHN5c3RlbSBpcyBhYm91dCB0byBkaWU/IE1vc3QgbGlrZWx5IHdlJ2xs
-DQpvbmx5IHNlZSBDUEVScyBpbiBIRVNUIGlmIHRoZSBPUyBjYW4gZG8gc29tZXRoaW5nLCBvciB3
-ZSdsbCBzZWUgdGhlbSBpbg0KQkVSVCBhZnRlciByZWNvdmVyaW5nIGZyb20gYSBoYW5nL3Jlc2V0
-Lg0KDQo+IE5vdywgSSBhZG1pdCB0aGF0IG15IHZlc2lvbiBvZiB0aGUgcmVjb3JkIGlzIG5vdCBl
-bm91Z2ggdG8gZGVidWcgaXQNCj4gYnV0IGl0IG5lZWRzIHRvIGNvbnRhaW4gb25seSBpbmZvcm1h
-dGlvbiB3aGljaCBpcyBjbGVhciBhbmQgaHVtYW5seQ0KPiByZWFkYWJsZSB0byBkZWJ1Zy4gWW91
-IGNhbiBhbHdheXMgZHVtcCB0aGUgcmF3IGRhdGEgdW5kZXJuZWF0aCBmcm9tIHRoZQ0KPiB0cmFj
-ZXBvaW50IGJ1dCBtYWtlIHRoZSBiZWdpbm5pbmcgaHVtYW4gcmVhZGFibGUuDQo+IA0KPiBEbyB5
-b3Uga25vdyB3aGF0IHVzZXJzIHNheSBhYm91dCB5b3VyIGVycm9yIHJlY29yZD8NCj4gDQo+ICJF
-cnIsIGl0IHNheXMgaGFyZHdhcmUgZXJyb3IsIGlzIG15IG1hY2hpbmUgYnJva2VuPyBJIG5lZWQg
-dG8gcmVwbGFjZSBteQ0KPiBDUFUuIg0KPiANCg0KWW91ciBleGFtcGxlIHN0aWxsIHNheXMgIkhh
-cmR3YXJlIEVycm9yIiBhbmQgb2RkcyBhcmUgZ2VuZXJhbCB1c2VycyB3b24ndA0KdW5kZXJzdGFu
-ZCB3aGF0IHRoZSBlcnJvciB0eXBlIG1lYW5zIG9yIHdoYXQgYSBjb3JyZWN0ZWQgZXJyb3IgaXMu
-IFNvIGl0J3MNCm5vdCBtdWNoIGJldHRlci4NCg0KPiBJIHJlYWQgdGhhdCBvbiBhIHdlZWtseSBi
-YXNpcy4NCj4gDQo+IERvIHlvdSBrbm93IGhvdyBleHBlbnNpdmUgc3VwcG9ydCBjYWxscyBhcmUg
-YWJvdXQgc3VjaCBlcnJvcnMgd2hpY2ggYXJlDQo+IGNvbXBsZXRlbHkgdW5yZWFkYWJsZSB0byBw
-ZW9wbGU/IDIwIGVuZ2luZWVycyBuZWVkIHRvIGdldCBvbiBhIGNhbGwgdG8NCj4gcmVhbGl6ZSBp
-dCB3YXMgYSBkdW1iIGNvcnJlY3RhYmxlIGVycm9yPyBCdHcsIHRoaXMgaXMgb25lIG9mIHRoZSBy
-ZWFzb25zDQo+IHdoeSB3ZSBkaWQgdGhlIGVycm9yIGNvbGxlY3Rvci4NCj4gDQoNCkV4YWN0bHkh
-IFRoZSBtb3JlIGluZm8gYXZhaWxhYmxlICh1c3VhbGx5KSB0aGUgbW9yZSBxdWlja2x5IGl0IGNh
-biBiZQ0KZGlhZ25vc2VkLg0KDQpIYXJkd2FyZSBlcnJvcnMgYXJlIGdlbmVyYWxseSByYXJlIGFu
-ZCBoYXJkIHRvIHJlcHJvZHVjZS4gU28gd2hlbiBvbmUNCmRvZXMgb2NjdXIgd2Ugc2hvdWxkIGNh
-cHR1cmUgdGhlIGRhdGEgYW5kIHByb3ZpZGUgaXQuDQoNCkhlcmUgYXJlIGEgY291cGxlIG9mIHNj
-ZW5hcmlvcyBiYXNlZCBvbiBzaW1pbGFyIGV4cGVyaWVuY2VzIEkndmUgaGFkOg0KDQpTY2VuYXJp
-byAxICh3aXRoIG1pbmltYWwgaW5mbykNClVzZXI6ICJJIGhhdmUgYSBoYXJkd2FyZSBlcnJvci4g
-V2hhdCBkb2VzIGl0IG1lYW4/Ig0KDQpEZWJ1Z2dlcjogIkRvIHlvdSBoYXZlIGFueSBtb3JlIGlu
-Zm8/Ig0KDQpVc2VyOiAiQ29ycmVjdGVkIFByb2Nlc3NvciBFcnJvcjsgY2FjaGUgZXJyb3IgZHVy
-aW5nIGluc3RydWN0aW9uIGZldGNoIg0KDQpEZWJ1Z2dlcjogIidDb3JyZWN0ZWQnIHNvdW5kcyBv
-a2F5LCBidXQgbm90IHN1cmUgYWJvdXQgJ2NhY2hlIGVycm9yIGR1cmluZw0KZmV0Y2gnLiBMaW51
-eCBkZXYsIHdoYXQgZG9lcyB0aGF0IG1lYW4/Ig0KDQpMaW51eCBkZXY6ICJJdCBtZWFucyB0aGlz
-IGZpZWxkIGFuZCB0aGF0IGZpZWxkIGVxdWFsIHRoaXMuIg0KDQpEZWJ1Z2dlcjogIldoYXQgYWJv
-dXQgdGhlIHJlc3Qgb2YgdGhlIGRhdGE/Ig0KDQpMaW51eCBkZXY6ICJJdCdzIGluIGEgdHJhY2Ug
-YnVmZmVyLiBQbGVhc2UgdXNlIHRoaXMgdG9vbCBvciBzZXQgdGhpcyBzeXNmcyBmaWxlIHRvDQp0
-aGlzIGFuZCB0aGF0IHRvIGNvbGxlY3QgdGhlIGRhdGEuIg0KDQpEZWJ1Z2dlcjogIlRoZXJlIGFy
-ZW4ndCBhbnkgZXJyb3JzIGluIHRoZSB0cmFjZSBidWZmZXIuIFVzZXIsIHdoZW4gZGlkDQp0aGlz
-IG9jY3VyPyINCg0KVXNlcjogIlRoaXMgZXJyb3Igb2NjdXJyZWQgbGFzdCB3ZWVrLiBXZSd2ZSBy
-ZXNldCB0aGUgbWFjaGluZSBhIGZldyB0aW1lcw0Kc2luY2UgdGhlbi4gVGhlIGVycm9yIHNlZW1z
-IHRvIGhhcHBlbiBldmVyeSBmZXcgZGF5cyB1bmRlciBhIHZlcnkNCnNwZWNpZmljIHdvcmtsb2Fk
-LiINCg0KRGVidWdnZXI6ICJPa2F5LCBsZXQncyB0cnkgdG8gcmVwcm9kdWNlIHRoaXMuIg0KKndh
-aXQgYSBmZXcgZGF5cywgcnVuIGEgbG90IG9mIHN5c3RlbXMgdG8gdXAgdGhlIG9kZHMqDQoNCkRl
-YnVnZ2VyOiAiV2UgZmluYWxseSBoYXZlIGRhdGEgYW5kIGNhbiBub3cgaGVscCB5b3UiDQoNClNj
-ZW5hcmlvIDIgKHdpdGggYWxsIHBsYXRmb3JtIHByb3ZpZGVkIGRhdGEpDQpVc2VyOiAiSSBoYXZl
-IGEgaGFyZHdhcmUgZXJyb3IuIFdoYXQgZG9lcyBpdCBtZWFuPyINCg0KRGVidWdnZXI6ICJEbyB5
-b3UgaGF2ZSBhbnkgbW9yZSBpbmZvPyINCg0KVXNlcjogKnByb3ZpZGVzIGNvbXBsZXRlIGVycm9y
-IHJlY29yZCoNCg0KRGVidWdnZXI6ICJUaGFuayB5b3UsIHdlIGhhdmUgZXZlcnl0aGluZyB3ZSBu
-ZWVkIHRvIGhlbHAgeW91LiINCg0KDQpJJ2xsIHNlbmQgYSBWMyBzZXQgd2l0aCB0aGUgZm9sbG93
-aW5nIGNoYW5nZXM6DQoxKSBGaXggdGFibGUgbnVtYmVyaW5nIGluIGNvbW1pdCBtZXNzYWdlcy4N
-CjIpIFJlbW92ZSAiVmFsaWRhdGlvbiBCaXRzIiBsaW5lcy4NCjMpIE9ubHkgcHJpbnQgZXJyb3Ig
-dHlwZSBHVUlEIGZvciB1bmtub3duIHR5cGVzLg0KDQpJIHRoaW5rIHRoaXMgc2V0IHNob3VsZCBm
-b2N1cyBvbiBwcmludGluZyB0aGUgeDg2IENQRVIgYmFzZWQgb24gdGhlIFVFRkkNCnNwZWMgYW5k
-IHRoZSBjb252ZW50aW9uIG9mIHRoZSBvdGhlciBDUEVSIGNvZGUuIENQRVJzIGFyZSBnZW5lcmF0
-ZWQNCmJ5IFBsYXRmb3JtIEZpcm13YXJlLiBTbyBlcnJvcnMgYXJlIGV4cGxpY2l0bHkgaW50ZW5k
-ZWQgdG8gYmUgdmlld2VkIGJ5DQp0aGUgdXNlciBhbmQgYWxsIGluZm8gc2hvdWxkIGJlIGRpc3Bs
-YXllZC4gT3RoZXIgZXJyb3JzIG5vdCBpbnRlbmRlZCB0bw0KYmUgc2VlbiBieSB0aGUgdXNlciBt
-YXkgYmUgdGhyZXNob2xkZWQgb3IgbWFza2VkIGJ5IHRoZSBQbGF0Zm9ybS4NCg0KSSAqaGF2ZSog
-YmVlbiB0aGlua2luZyB0aGF0IGl0IHdvdWxkIGJlIG5pY2UgdG8gdGFrZSB0aGUgQ1BFUiBhbmQg
-cGlwZSBpdA0KdGhyb3VnaCB0aGUgTUNBIGRlY29kaW5nIGluIGFyY2gveDg2IGFuZCBFREFDLiBU
-aGlzIHdvdWxkIGJlIHJlYWxseQ0KbmljZSBmb3Igd2hlbiB0aGUgQ1BFUiBpbmNsdWRlcyB0aGUg
-TUNBIHJlZ2lzdGVycyBpbiB0aGUgQ29udGV4dCBpbmZvLg0KU28gd2UnZCBnZXQgb3VyIHVzdWFs
-IE1DQSBkZWNvZGluZyBpbnN0ZWFkIG9mIGEgYmluYXJ5IGJsb2Igb2YgcmVnaXN0ZXJzLg0KDQpJ
-IHdhcyB0aGlua2luZyB0aGF0IHRoZSBNQ0EgZGVjb2Rpbmcgd291bGQgYmUgaW4gYWRkaXRpb24g
-dG8gdGhpcy4gQnV0DQpiYXNlZCBvbiBCb3JpcydzIGNvbW1lbnRzLCBtYXliZSB3ZSBjYW4gbWFr
-ZSBpdCBhIGRlZmF1bHQgc2VsZWN0aW9uLg0KRm9yIGV4YW1wbGUsIGlmIE1DQS9FREFDIGRlY29k
-aW5nIGlzIGF2YWlsYWJsZSwgdXNlIGl0LiBPdGhlcndpc2UsIHByaW50DQp0aGUgQ1BFUiBmaWVs
-ZHMgaW4gYSBnZW5lcmljIHdheSBsaWtlIHdlIGRvIGZvciB0aGUgb3RoZXIgQ1BFUiB0eXBlcy4N
-Cg0KVGhhdCB3b3VsZCBiZSBhIHNlcGFyYXRlIHNldCB0aG91Z2guDQoNClRoYW5rcywNCllhemVu
-DQo=
+On Tue, Feb 27, 2018 at 09:32:18PM +0000, Ghannam, Yazen wrote:
+> Not much more readable. It's still vague and confusing to a user and devoid
+> of any real info so an expert can't help. And now the information is printed
+> arbitrarily, so someone needs to read the source to figure out what it really
+> means.
+
+WTF? You need to read the source to figure out what the error is? So
+"Corrected Processor Error" is confusing? I think you've been clearly
+staring at the spec for waaay too long.
+
+Also, read my mail again:
+
+"Now, I admit that my vesion of the record is not enough to debug it
+but it needs to contain only information which is clear and humanly
+readable to debug. You can always dump the raw data underneath from the
+tracepoint but make the beginning human readable."
+
+> Maybe. But these records are generated by Platform Firmware. Why would
+> FW report the error knowing the system is about to die?
+
+WTF more! Dude, are you kidding me?
+
+So the firmware should not report the error if it knows the system is
+about to die?!?!
+
+Now you're just making up insane counterarguments, just because.
+
+> Your example still says "Hardware Error"
+
+Oh my, that's the *prefix*.
+
+> and odds are general users won't understand what the error type means
+> or what a corrected error is. So it's not much better.
+
+Yeah, and the next thing you'll say is that users won't understand what
+"error" means, right?
+
+Geez.
+
+> Exactly! The more info available (usually) the more quickly it can be
+> diagnosed.
+
+You still don't understand what I'm trying to explain to you.
+
+It is *not* about diagnosing it - in order to do that you need to
+involve people to diagnose it. It is about making the error record as
+human readable as possible so that you don't *have* to involve people to
+diagnose it in the first place and the user can say, ah ok, corrected
+error, no need to do anything.
+
+Or "System Fatal error" - I better replace that part.
+
+> Hardware errors are generally rare and hard to reproduce.
+
+Except when they're not like DRAM ECC floods which are pretty easy to
+reproduce.
+
+> So when one does occur we should capture the data and provide it.
+
+Did I say you should not do that?!
+
+I said: make it as human readable as possible and dump the gory hex crap
+after it.
+
+> Here are a couple of scenarios based on similar experiences I've had:
+
+Now play that same scenario with the following record format:
+
+[ human readable error record ]
+[ full raw error dump ]
+
+> I'll send a V3 set with the following changes:
+> 1) Fix table numbering in commit messages.
+> 2) Remove "Validation Bits" lines.
+> 3) Only print error type GUID for unknown types.
+> 
+> I think this set should focus on printing the x86 CPER based on the UEFI
+> spec and the convention of the other CPER code. CPERs are generated
+> by Platform Firmware. So errors are explicitly intended to be viewed by
+> the user and all info should be displayed.
+
+You should look up from the spec and realize that real life is much
+different.
+
+> I *have* been thinking that it would be nice to take the CPER and pipe it
+> through the MCA decoding in arch/x86 and EDAC. This would be really
+> nice for when the CPER includes the MCA registers in the Context info.
+> So we'd get our usual MCA decoding instead of a binary blob of registers.
+
+That would definitely be a step in the right direction.
+
+> I was thinking that the MCA decoding would be in addition to this. But
+> based on Boris's comments, maybe we can make it a default selection.
+> For example, if MCA/EDAC decoding is available, use it. Otherwise, print
+> the CPER fields in a generic way like we do for the other CPER types.
+
+Yes.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
