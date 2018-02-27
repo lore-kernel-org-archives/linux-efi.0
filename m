@@ -1,60 +1,79 @@
-From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Subject: RE: [PATCH v2 2/8] efi: Decode IA32/X64 Processor Error Section
-Date: Tue, 27 Feb 2018 17:27:39 +0000
-Message-ID: <DM5PR12MB1916F8C7DF93C1C9402AE3ECF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [PATCH v2 2/8] efi: Decode IA32/X64 Processor Error Section
+Date: Tue, 27 Feb 2018 18:44:46 +0100
+Message-ID: <20180227174446.GN26382@pd.tnic>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
  <20180226193904.20532-3-Yazen.Ghannam@amd.com>
  <20180227112234.GE26382@pd.tnic>
  <DM5PR12MB1916B6AEE434A345E78BE234F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
  <20180227170034.GJ26382@pd.tnic>
+ <DM5PR12MB1916F8C7DF93C1C9402AE3ECF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180227170034.GJ26382@pd.tnic>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <DM5PR12MB1916F8C7DF93C1C9402AE3ECF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@suse.de>
+To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
-aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBUdWVzZGF5LCBGZWJydWFyeSAyNywgMjAxOCAxMjow
-MSBQTQ0KPiBUbzogR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5uYW1AYW1kLmNvbT4NCj4gQ2M6
-IGxpbnV4LWVmaUB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7
-DQo+IGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc7IHg4NkBrZXJuZWwub3JnDQo+IFN1YmplY3Q6
-IFJlOiBbUEFUQ0ggdjIgMi84XSBlZmk6IERlY29kZSBJQTMyL1g2NCBQcm9jZXNzb3IgRXJyb3Ig
-U2VjdGlvbg0KPiANCj4gT24gVHVlLCBGZWIgMjcsIDIwMTggYXQgMDM6MTM6MTFQTSArMDAwMCwg
-R2hhbm5hbSwgWWF6ZW4gd3JvdGU6DQo+ID4gSSBkZWNpZGVkIHRvIHByaW50IHRoZSBWYWxpZGF0
-aW9uIEJpdHMgYXMgYSBzYW5pdHkgY2hlY2sgZm9yIHdob21ldmVyIGlzDQo+IGxvb2tpbmcNCj4g
-PiBhdCB0aGlzLiBTaW5jZSB3ZSBvbmx5IHByaW50IGZpZWxkcyB3aXRoIGEgdmFsaWQgYml0LCBp
-dCBtYXkgYmUgY29uZnVzaW5nIGZvcg0KPiB1c2Vycw0KPiA+IHdobyBkb24ndCBrbm93IHdoeSBm
-aWVsZHMgYXJlIG1pc3NpbmcuDQo+IA0KPiBJIHN1Z2dlc3RlZCB3aGF0IHRvIGRvIGFib3V0IHRo
-YXQgYWxyZWFkeTogcHJpbnQgdGhlIGZpZWxkcyB1bmNvbmRpdGlvbmFsbHkuDQo+IA0KDQpTdXJl
-LCB3ZSBjYW4gcHJpbnQgdGhlIGZpZWxkcyB1bmNvbmRpdGlvbmFsbHkgaWYgQXJkIGlzIG9rYXkg
-d2l0aCB0aGF0Lg0KDQpUaGUgaXNzdWUgaXMgdGhhdCB0aGUgeDg2IGJlaGF2aW9yIHdpbGwgYmUg
-ZGlmZmVyZW50IGZyb20gYWxsIHRoZSBvdGhlcnMsIHNvIHRoYXQNCm1pZ2h0IGJlIGNvbmZ1c2lu
-Zy4NCg0KPiA+IEFsc28sIEkgZG9uJ3QgdGhpbmsgd2Ugc2hvdWxkIGJlIGludGVycHJldGluZyB0
-aGUgc3BlYyBmb3IgdGhlIHVzZXIuIFdlDQo+IHNob3VsZA0KPiA+IHByaW50IHRoZSBmaWVsZHMg
-YXMgdGhleSBhbmQgdXNlcnMgY2FuIHJlZmVyIGJhY2sgdG8gdGhlIHNwZWMgZm9yIG1vcmUNCj4g
-aW5mb3JtYXRpb24uDQo+IA0KPiBUaGlzIGlzIGEgdmVyeSB2ZXJ5IGJhZCBpZGVhLg0KPiANCj4g
-WW91IGNhbiBqdXN0IGFzIHdlbGwgZHVtcCBiaW5hcnkgYmxvYnMgYW5kIHRoZW4gYWRkIGEgdXNl
-ciBzY3JpcHQgd2hpY2gNCj4gZGVjaXBoZXJzIHRoYXQuIE9oIHdhaXQsIHdlIGhhZCB0aGF0LCBp
-dCBpcyBjYWxsZWQgbWNlbG9nIGFuZCBpdCBpcyBhDQo+IGh1Z2UgcGFpbiB0cnlpbmcgdG8gZGVj
-b2RlIGFuIGVycm9yIHByb3Blcmx5Lg0KPiANCj4gQnkgdGhhdCBzYW1lIGxvZ2ljLCB3ZSBjb3Vs
-ZCBzaW1wbHkgZHVtcCA2NC1iaXQgTUNBIE1TUiB2YWx1ZXMuDQo+IA0KPiBBbmQgZXZlcnl0aW1l
-IHdlIGdldCBhbiBlcnJvciwgd2UgaGF2ZSB0byBnbyBkaWcgb3V0IHRoZSBzcGVjLiBIZWxsIG5v
-IQ0KPiBXZSBoYWQgdGhhdCwgd2Uga25vdyBpdCBpcyBhd2Z1bCwgd2Ugd29uJ3QgaGF2ZSBpdCBh
-Z2Fpbi4NCj4gDQo+IFlvdSB3YW50IHRvIGRlY29kZSBldmVyeXRoaW5nIGFuZCBmdWxseSBpbiB0
-aGUga2VybmVsIHNvIHRoYXQgeW91IGNhbg0KPiBoYXZlIGEgcmVhZHkgZXJyb3IgcmVjb3JkIHdo
-aWNoIHBlb3BsZSBjYW4gc2ltcGx5ICpyZWFkKiBmcm9tIGRtZXNnIGFuZA0KPiBrbm93IHdoYXQg
-dGhlIGVycm9yIGlzLg0KPiANCg0KVGhpcyBzZXQgZG9lcyBkZWNvZGUgZXZlcnl0aGluZyBmdWxs
-eSBzbyB0aGF0IHBlb3BsZSBjYW4gcmVhZCB0aGUgZXJyb3IuIFRoZSBvbmx5DQp0d28gcGxhY2Vz
-IHRoZXJlIGFyZSBiaW5hcnkgZHVtcHMgYXJlIHdpdGggdGhlIENQVUlEIGZpZWxkIGFuZCB0aGUg
-Q29udGV4dCBpbmZvLg0KDQpNYXliZSB3ZSBjYW4gcnVuIHRoZSBDUFVJRCBmaWVsZCB0aHJvdWdo
-IHNvbWUgZGVjb2RlciBpbiBhcmNoL3g4Ni4NCg0KSSBhbHJlYWR5IG1lbnRpb25lZCBpbiB0aGUg
-Q29udGV4dCBpbmZvIHBhdGNoIHRoYXQgdGhlcmUgY291bGQgYmUgZnVydGhlcg0KZGVjb2Rpbmcg
-d2hpY2ggd2UgY2FuIGRvIGluIHRoZSBmdXR1cmUuIFRoZSB0d28gb3B0aW9ucyB0aGF0IG1pZ2h0
-IGJlIGEgcGFpbg0Kd2lsbCBiZSB0aGUgTVNSIGFuZCBNTSByZWdpc3RlciB0eXBlcywgc2luY2Ug
-dGhlc2Ugd2lsbCBiZSBtb2RlbCBhbmQvb3INCnBsYXRmb3JtIHNwZWNpZmljLg0KDQpUaGFua3Ms
-DQpZYXplbg0KDQoNCg==
+On Tue, Feb 27, 2018 at 05:27:39PM +0000, Ghannam, Yazen wrote:
+> Sure, we can print the fields unconditionally if Ard is okay with that.
+> 
+> The issue is that the x86 behavior will be different from all the others, so that
+> might be confusing.
+
+Confusing for whom?
+
+Are we sharing tools with other arches or what am I missing?
+
+> This set does decode everything fully so that people can read the error.
+
+No, it doesn't. It dumps
+
+        printk("%sValidation Bits: 0x%016llx\n", pfx, proc->validation_bits);
+
+        printk("%sError Structure Type: %pUl\n", newpfx,
+                &err_info->err_type);
+
+        printk("%sCheck Information: 0x%016llx\n", newpfx,
+                 err_info->check_info);
+
+and so on which are half-baked.
+
+Think of it this way: if you look at the error record and you still need
+to look at the spec to decode it, then it is still not good enough.
+
+Users don't care about validation bits, or unreadable GUIDs or WTF is
+"Check Information" even?
+
+"This section details the layout of the Processor Error Information
+Structure and the detailed check information which is contained within."
+
+And that "Check Information" thing is mentioned only twice in the whole
+spec.
+
+StructureErrorType only there in the table.
+
+Very informative that.
+
+So no, users don't care about any of that internal crap - they wanna
+know what is wrong with their box and that should be written in plain
+english.
+
+> I already mentioned in the Context info patch that there could be
+> further decoding which we can do in the future.
+
+Then decode only those pieces fully now which you can do now and when
+you add something in the future, add it then with the full decoding
+functionality. No fields which need additional decoding with the spec
+opened on one side.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
