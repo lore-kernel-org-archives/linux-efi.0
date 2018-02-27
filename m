@@ -1,50 +1,59 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v2 4/8] efi: Decode UEFI-defined IA32/X64 Error Structure GUIDs
-Date: Tue, 27 Feb 2018 15:31:50 +0000
-Message-ID: <CAKv+Gu_yyshaM5XQ+SRAaFAA+CDVOxfZQAsE_1TZsyKYjTi3_Q@mail.gmail.com>
-References: <20180226193904.20532-1-Yazen.Ghannam@amd.com> <20180226193904.20532-5-Yazen.Ghannam@amd.com>
- <20180227143020.GG26382@pd.tnic> <DM5PR12MB191643165F74F3BDB469C5BCF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH v2 5/8] efi: Decode IA32/X64 Cache, TLB, and Bus Check
+ structures
+Date: Tue, 27 Feb 2018 15:33:44 +0000
+Message-ID: <DM5PR12MB1916C11E8B578EBA43CE2B82F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
+ <20180226193904.20532-6-Yazen.Ghannam@amd.com>
+ <20180227150356.GH26382@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <DM5PR12MB191643165F74F3BDB469C5BCF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+In-Reply-To: <20180227150356.GH26382@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Cc: Borislav Petkov <bp@suse.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>
+To: Borislav Petkov <bp@suse.de>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 27 February 2018 at 15:28, Ghannam, Yazen <Yazen.Ghannam@amd.com> wrote:
->> -----Original Message-----
->> From: Borislav Petkov [mailto:bp@suse.de]
->> Sent: Tuesday, February 27, 2018 9:30 AM
->> To: Ghannam, Yazen <Yazen.Ghannam@amd.com>
->> Cc: linux-efi@vger.kernel.org; linux-kernel@vger.kernel.org;
->> ard.biesheuvel@linaro.org; x86@kernel.org
->> Subject: Re: [PATCH v2 4/8] efi: Decode UEFI-defined IA32/X64 Error
->> Structure GUIDs
->>
->> On Mon, Feb 26, 2018 at 01:39:00PM -0600, Yazen Ghannam wrote:
->> > @@ -45,6 +81,11 @@ void cper_print_proc_ia(const char *pfx, const struct
->> cper_sec_proc_ia *proc)
->> >             printk("%sError Structure Type: %pUl\n", newpfx,
->> >                    &err_info->err_type);
->> >
->> > +           err_type = cper_get_err_type(&err_info->err_type);
->> > +           printk("%sError Structure Type: %s\n", newpfx,
->> > +                  err_type < ARRAY_SIZE(cper_proc_error_type_strs) ?
->> > +                  cper_proc_error_type_strs[err_type] : "unknown");
->>
->> Ah, there it is, much better. Now this tells us what component it is.
->>
->> So cper-arm.c does the same thing and there's a similar thing in cper.c -
->> cper_print_proc_generic().
->>
->> Let's not tri-plicate that code pls and have a generic function instead.
->>
->
-> Sure, I can do that.
->
-> Ard, is this okay?
->
-
-Yes, please, but only if there's something to gain by it.
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBUdWVzZGF5LCBGZWJydWFyeSAyNywgMjAxOCAxMDow
+NCBBTQ0KPiBUbzogR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5uYW1AYW1kLmNvbT4NCj4gQ2M6
+IGxpbnV4LWVmaUB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7
+DQo+IGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc7IHg4NkBrZXJuZWwub3JnDQo+IFN1YmplY3Q6
+IFJlOiBbUEFUQ0ggdjIgNS84XSBlZmk6IERlY29kZSBJQTMyL1g2NCBDYWNoZSwgVExCLCBhbmQg
+QnVzIENoZWNrDQo+IHN0cnVjdHVyZXMNCj4gDQo+IE9uIE1vbiwgRmViIDI2LCAyMDE4IGF0IDAx
+OjM5OjAxUE0gLTA2MDAsIFlhemVuIEdoYW5uYW0gd3JvdGU6DQo+ID4gK3N0YXRpYyB2b2lkIHBy
+aW50X2Vycl9pbmZvKGNvbnN0IGNoYXIgKnBmeCwgdTggZXJyX3R5cGUsIHU2NCBjaGVjaykNCj4g
+PiArew0KPiA+ICsJdTE2IHZhbGlkYXRpb25fYml0cyA9IENIRUNLX1ZBTElEX0JJVFMoY2hlY2sp
+Ow0KPiA+ICsNCj4gPiArCXByaW50aygiJXNWYWxpZGF0aW9uIEJpdHM6IDB4JTA0eFxuIiwgcGZ4
+LCB2YWxpZGF0aW9uX2JpdHMpOw0KPiA+ICsNCj4gPiArCWlmIChlcnJfdHlwZSA9PSBFUlJfVFlQ
+RV9NUykNCj4gPiArCQlyZXR1cm47DQo+ID4gKw0KPiA+ICsJaWYgKHZhbGlkYXRpb25fYml0cyAm
+IENIRUNLX1ZBTElEX1RSQU5TX1RZUEUpIHsNCj4gPiArCQl1OCB0cmFuc190eXBlID0gQ0hFQ0tf
+VFJBTlNfVFlQRShjaGVjayk7DQo+ID4gKw0KPiA+ICsJCXByaW50aygiJXNUcmFuc2FjdGlvbiBU
+eXBlOiAldSwgJXNcbiIsIHBmeCwgdHJhbnNfdHlwZSwNCj4gPiArCQkgICAgICAgdHJhbnNfdHlw
+ZSA8IEFSUkFZX1NJWkUoaWFfY2hlY2tfdHJhbnNfdHlwZV9zdHJzKSA/DQo+ID4gKwkJICAgICAg
+IGlhX2NoZWNrX3RyYW5zX3R5cGVfc3Ryc1t0cmFuc190eXBlXSA6ICJ1bmtub3duIik7DQo+ID4g
+Kwl9DQo+ID4gKw0KPiA+ICsJaWYgKHZhbGlkYXRpb25fYml0cyAmIENIRUNLX1ZBTElEX09QRVJB
+VElPTikgew0KPiA+ICsJCXU4IG9wID0gQ0hFQ0tfT1BFUkFUSU9OKGNoZWNrKTsNCj4gPiArDQo+
+ID4gKwkJLyoNCj4gPiArCQkgKiBDQUNIRSBoYXMgbW9yZSBvcGVyYXRpb24gdHlwZXMgdGhhbiBU
+TEIgb3IgQlVTLCB0aG91Z2gNCj4gdGhlDQo+ID4gKwkJICogbmFtZSBhbmQgdGhlIG9yZGVyIGFy
+ZSB0aGUgc2FtZS4NCj4gPiArCQkgKi8NCj4gPiArCQl1OCBtYXhfb3BzID0gKGVycl90eXBlID09
+IEVSUl9UWVBFX0NBQ0hFKSA/IDkgOiA3Ow0KPiA+ICsNCj4gPiArCQlwcmludGsoIiVzT3BlcmF0
+aW9uOiAldSwgJXNcbiIsIHBmeCwgb3AsDQo+ID4gKwkJICAgICAgIG9wIDwgbWF4X29wcyA/IGlh
+X2NoZWNrX29wX3N0cnNbb3BdIDogInVua25vd24iKTsNCj4gPiArCX0NCj4gPiArDQo+ID4gKwlp
+ZiAodmFsaWRhdGlvbl9iaXRzICYgQ0hFQ0tfVkFMSURfTEVWRUwpDQo+ID4gKwkJcHJpbnRrKCIl
+c0xldmVsOiAlbGx1XG4iLCBwZngsIENIRUNLX0xFVkVMKGNoZWNrKSk7DQo+ID4gKw0KPiA+ICsJ
+aWYgKHZhbGlkYXRpb25fYml0cyAmIENIRUNLX1ZBTElEX1BDQykNCj4gPiArCQlwcmludF9ib29s
+KCJQcm9jZXNzb3IgQ29udGV4dCBDb3JydXB0IiwgcGZ4LCBjaGVjaywNCj4gQ0hFQ0tfUENDKTsN
+Cj4gDQo+IEkgdGhpbmsgd2Ugd2FudCB0byBwcmludCBQQ0MgaGVyZSB1bmNvbmRpdGlvbmFsbHkg
+YW5kIHNheToNCj4gDQo+IAlQQ0M6ICh5ZXN8bm98aW52YWxpZCkNCj4gDQo+IEkgZG9uJ3QgdGhp
+bmsgdGhlIGFic2VuY2Ugb2YgUENDIGluIHRoZSBlcnJvciByZWNvcmQgaXMgYSBnb29kIGVub3Vn
+aA0KPiBoaW50IHRoYXQgdGhlIFBDQyBmaWVsZCBpcyBpbnZhbGlkLg0KPiANCj4gRGl0dG8gZm9y
+IHRoZSByZXN0IGFuZCB0cmFuc2FjdGlvbiB0eXBlIGFib3ZlIHRvby4gSSB0aGluayBpdCB3b3Vs
+ZCBiZQ0KPiBtdWNoIGVhc2llciBpZiB3ZSBoYXZlIGZpeGVkIGZpZWxkcyBlcnJvciByZWNvcmQu
+DQo+IA0KDQpJIGFncmVlIHdoaWNoIGlzIHdoeSBJJ3ZlIGluY2x1ZGVkIHRoZSBWYWxpZGF0aW9u
+IEJpdHMuIEEgdXNlciBjYW4gdGhlbg0KY2hlY2sgdGhlIFZhbGlkYXRpb24gQml0cyBmb3IgYW55
+IGZpZWxkIHRoYXQgaXMgb2YgaW50ZXJlc3QgYnV0IG1pc3NpbmcuDQoNClRoYW5rcywNCllhemVu
+DQo=
