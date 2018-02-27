@@ -1,7 +1,7 @@
-From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Subject: RE: [PATCH v2 2/8] efi: Decode IA32/X64 Processor Error Section
-Date: Tue, 27 Feb 2018 18:06:21 +0000
-Message-ID: <DM5PR12MB1916C280DA5B51FE9666EE21F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [PATCH v2 2/8] efi: Decode IA32/X64 Processor Error Section
+Date: Tue, 27 Feb 2018 19:34:17 +0100
+Message-ID: <20180227183417.GP26382@pd.tnic>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
  <20180226193904.20532-3-Yazen.Ghannam@amd.com>
  <20180227112234.GE26382@pd.tnic>
@@ -9,67 +9,117 @@ References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
  <20180227170034.GJ26382@pd.tnic>
  <DM5PR12MB1916F8C7DF93C1C9402AE3ECF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
  <20180227174446.GN26382@pd.tnic>
+ <DM5PR12MB1916C280DA5B51FE9666EE21F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180227174446.GN26382@pd.tnic>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <DM5PR12MB1916C280DA5B51FE9666EE21F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@suse.de>
+To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
-aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBUdWVzZGF5LCBGZWJydWFyeSAyNywgMjAxOCAxMjo0
-NSBQTQ0KPiBUbzogR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5uYW1AYW1kLmNvbT4NCj4gQ2M6
-IGxpbnV4LWVmaUB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7
-DQo+IGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc7IHg4NkBrZXJuZWwub3JnDQo+IFN1YmplY3Q6
-IFJlOiBbUEFUQ0ggdjIgMi84XSBlZmk6IERlY29kZSBJQTMyL1g2NCBQcm9jZXNzb3IgRXJyb3Ig
-U2VjdGlvbg0KPiANCj4gT24gVHVlLCBGZWIgMjcsIDIwMTggYXQgMDU6Mjc6MzlQTSArMDAwMCwg
-R2hhbm5hbSwgWWF6ZW4gd3JvdGU6DQo+ID4gU3VyZSwgd2UgY2FuIHByaW50IHRoZSBmaWVsZHMg
-dW5jb25kaXRpb25hbGx5IGlmIEFyZCBpcyBva2F5IHdpdGggdGhhdC4NCj4gPg0KPiA+IFRoZSBp
-c3N1ZSBpcyB0aGF0IHRoZSB4ODYgYmVoYXZpb3Igd2lsbCBiZSBkaWZmZXJlbnQgZnJvbSBhbGwg
-dGhlIG90aGVycywgc28NCj4gdGhhdA0KPiA+IG1pZ2h0IGJlIGNvbmZ1c2luZy4NCj4gDQo+IENv
-bmZ1c2luZyBmb3Igd2hvbT8NCj4gDQo+IEFyZSB3ZSBzaGFyaW5nIHRvb2xzIHdpdGggb3RoZXIg
-YXJjaGVzIG9yIHdoYXQgYW0gSSBtaXNzaW5nPw0KPiANCg0KSXQncyBub3QganVzdCBhYm91dCBh
-cmNoZXMgYnV0IHJlY29yZCB0eXBlcy4gQSBzaW5nbGUgcGxhdGZvcm0gY2FuIHJlcG9ydA0KdXNp
-bmcgYXJjaC1zcGVjaWZpYyByZWNvcmRzLCBtZW1vcnkgcmVjb3JkcywgUENJZSByZWNvcmRzLCBl
-dGMuDQoNClNvIGFsbCB0aGUgb3RoZXIgcmVjb3JkIHR5cGVzIG9ubHkgc2hvdyBmaWVsZHMgd2l0
-aCBhIHZhbGlkIGJpdCBzZXQgYW5kIHRoaXMNCmhhcyBhbHdheXMgYmVlbiB0aGUgY2FzZS4gVGhl
-cmUgbWF5IGJlIHVzZXJzIG9yIHRvb2xzIHdobyBleHBlY3QgdGhhdA0Kc2FtZSBiZWhhdmlvci4N
-Cg0KPiA+IFRoaXMgc2V0IGRvZXMgZGVjb2RlIGV2ZXJ5dGhpbmcgZnVsbHkgc28gdGhhdCBwZW9w
-bGUgY2FuIHJlYWQgdGhlIGVycm9yLg0KPiANCj4gTm8sIGl0IGRvZXNuJ3QuIEl0IGR1bXBzDQo+
-IA0KPiAgICAgICAgIHByaW50aygiJXNWYWxpZGF0aW9uIEJpdHM6IDB4JTAxNmxseFxuIiwgcGZ4
-LCBwcm9jLT52YWxpZGF0aW9uX2JpdHMpOw0KPiANCj4gICAgICAgICBwcmludGsoIiVzRXJyb3Ig
-U3RydWN0dXJlIFR5cGU6ICVwVWxcbiIsIG5ld3BmeCwNCj4gICAgICAgICAgICAgICAgICZlcnJf
-aW5mby0+ZXJyX3R5cGUpOw0KPiANCj4gICAgICAgICBwcmludGsoIiVzQ2hlY2sgSW5mb3JtYXRp
-b246IDB4JTAxNmxseFxuIiwgbmV3cGZ4LA0KPiAgICAgICAgICAgICAgICAgIGVycl9pbmZvLT5j
-aGVja19pbmZvKTsNCj4gDQo+IGFuZCBzbyBvbiB3aGljaCBhcmUgaGFsZi1iYWtlZC4NCj4gDQo+
-IFRoaW5rIG9mIGl0IHRoaXMgd2F5OiBpZiB5b3UgbG9vayBhdCB0aGUgZXJyb3IgcmVjb3JkIGFu
-ZCB5b3Ugc3RpbGwgbmVlZA0KPiB0byBsb29rIGF0IHRoZSBzcGVjIHRvIGRlY29kZSBpdCwgdGhl
-biBpdCBpcyBzdGlsbCBub3QgZ29vZCBlbm91Z2guDQo+IA0KPiBVc2VycyBkb24ndCBjYXJlIGFi
-b3V0IHZhbGlkYXRpb24gYml0cywgb3IgdW5yZWFkYWJsZSBHVUlEcyBvciBXVEYgaXMNCj4gIkNo
-ZWNrIEluZm9ybWF0aW9uIiBldmVuPw0KPiANCj4gIlRoaXMgc2VjdGlvbiBkZXRhaWxzIHRoZSBs
-YXlvdXQgb2YgdGhlIFByb2Nlc3NvciBFcnJvciBJbmZvcm1hdGlvbg0KPiBTdHJ1Y3R1cmUgYW5k
-IHRoZSBkZXRhaWxlZCBjaGVjayBpbmZvcm1hdGlvbiB3aGljaCBpcyBjb250YWluZWQgd2l0aGlu
-LiINCj4gDQo+IEFuZCB0aGF0ICJDaGVjayBJbmZvcm1hdGlvbiIgdGhpbmcgaXMgbWVudGlvbmVk
-IG9ubHkgdHdpY2UgaW4gdGhlIHdob2xlDQo+IHNwZWMuDQo+IA0KPiBTdHJ1Y3R1cmVFcnJvclR5
-cGUgb25seSB0aGVyZSBpbiB0aGUgdGFibGUuDQo+IA0KPiBWZXJ5IGluZm9ybWF0aXZlIHRoYXQu
-DQo+IA0KPiBTbyBubywgdXNlcnMgZG9uJ3QgY2FyZSBhYm91dCBhbnkgb2YgdGhhdCBpbnRlcm5h
-bCBjcmFwIC0gdGhleSB3YW5uYQ0KPiBrbm93IHdoYXQgaXMgd3Jvbmcgd2l0aCB0aGVpciBib3gg
-YW5kIHRoYXQgc2hvdWxkIGJlIHdyaXR0ZW4gaW4gcGxhaW4NCj4gZW5nbGlzaC4NCj4gDQoNClBs
-ZWFzZSBzZWUgdGhlIG90aGVyIHBhdGNoZXMgd2hlcmUgdGhlc2UgYXJlIGRlY29kZWQgZnVydGhl
-ci4gQXMgSQ0KbWVudGlvbmVkIHRoZSBjb3ZlciBsZXR0ZXIsIHRoZSBkZWNvZGluZyBpcyBhcHBs
-aWVkIGluY3JlbWVudGFsbHkgcmF0aGVyDQp0aGFuIGhhdmluZyBvbmUgbGFyZ2UgcGF0Y2guDQoN
-CkFsc28sIGxpa2UgSSBzYWlkIGluIGFub3RoZXIgdGhyZWFkLCB3ZSBzaG91bGQgYWx3YXlzIHBy
-aW50IHRoZSByYXcgdmFsdWUNCmZvbGxvd2VkIGJ5IHRoZSBkZWNvZGluZy4gVGhhdCB3YXkgdGhl
-IHJhdyBpbmZvIGlzIHRoZXJlIGluIGNhc2UgYSB1c2VyDQp3YW50cyB0byBzZW5kIHRoZSBkYXRh
-IHRvIHRoZSB2ZW5kb3Igb3Igb3RoZXIgZXhwZXJ0IHBhcnR5LiANCg0KPiA+IEkgYWxyZWFkeSBt
-ZW50aW9uZWQgaW4gdGhlIENvbnRleHQgaW5mbyBwYXRjaCB0aGF0IHRoZXJlIGNvdWxkIGJlDQo+
-ID4gZnVydGhlciBkZWNvZGluZyB3aGljaCB3ZSBjYW4gZG8gaW4gdGhlIGZ1dHVyZS4NCj4gDQo+
-IFRoZW4gZGVjb2RlIG9ubHkgdGhvc2UgcGllY2VzIGZ1bGx5IG5vdyB3aGljaCB5b3UgY2FuIGRv
-IG5vdyBhbmQgd2hlbg0KPiB5b3UgYWRkIHNvbWV0aGluZyBpbiB0aGUgZnV0dXJlLCBhZGQgaXQg
-dGhlbiB3aXRoIHRoZSBmdWxsIGRlY29kaW5nDQo+IGZ1bmN0aW9uYWxpdHkuIE5vIGZpZWxkcyB3
-aGljaCBuZWVkIGFkZGl0aW9uYWwgZGVjb2Rpbmcgd2l0aCB0aGUgc3BlYw0KPiBvcGVuZWQgb24g
-b25lIHNpZGUuDQo+IA0KDQpPa2F5Lg0KDQpUaGFua3MsDQpZYXplbg0K
+On Tue, Feb 27, 2018 at 06:06:21PM +0000, Ghannam, Yazen wrote:
+> It's not just about arches but record types. A single platform can report
+> using arch-specific records, memory records, PCIe records, etc.
+> 
+> So all the other record types only show fields with a valid bit set and this
+> has always been the case. There may be users or tools who expect that
+> same behavior.
+
+You know we have this thing called tracepoints for that, don't you?
+
+You define one tracepoint which regurgitates an error record and then
+all arches which have the same table, share them.
+
+> Please see the other patches where these are decoded further. As I
+> mentioned the cover letter, the decoding is applied incrementally rather
+> than having one large patch.
+
+Here's what needs to go:
+
+All the validation bits crap:
+
+	printk("%sValidation Bits: 0x%04x\n", pfx, validation_bits);
+
+Instead, you simply dump all entries unconditionally and say whether
+they're valid or not. This way you have the same format for each error
+record - much easier to work with.
+
+	printk("%sCPUID Info:\n", pfx);
+        print_hex_dump(pfx, "", DUMP_PREFIX_OFFSET, 16, 4, proc->cpuid,
+                       sizeof(proc->cpuid), 0);
+
+Frankly, I have no clue why we should even dump CPUID for *every* error.
+It is completely sufficient to dump family/model/stepping like we do in
+mce_amd.c. Besides, when debugging, you collect much more info from the
+system - CPUID only is not enough.
+
+	printk("%sError Structure Type: %pUl\n", newpfx,
+               &err_info->err_type);
+
+Unreadable GUIDs.
+
+What are those even:
+
+                if (err_info->validation_bits & INFO_VALID_TARGET_ID) {
+                        printk("%sTarget Identifier: 0x%016llx\n",
+                               newpfx, err_info->target_id);
+                }
+
+                if (err_info->validation_bits & INFO_VALID_REQUESTOR_ID) {
+                        printk("%sRequestor Identifier: 0x%016llx\n",
+                               newpfx, err_info->requestor_id);
+                }
+
+                if (err_info->validation_bits & INFO_VALID_RESPONDER_ID) {
+                        printk("%sResponder Identifier: 0x%016llx\n",
+                               newpfx, err_info->responder_id);
+                }
+
+some 8-byte ids? Who knows... Either remove them or make them
+human-readable, *explaining* what the requestor is and the target is and
+so on.
+
+                printk("%sRegister Array Size: 0x%04x\n", newpfx,
+                       ctx_info->reg_arr_size);
+
+I have no clue what that is for.
+
+                if (ctx_info->reg_ctx_type == CTX_TYPE_MSR) {
+                        groupsize = 8; /* MSRs are 8 bytes wide. */
+                        printk("%sMSR Address: 0x%08x\n", newpfx,
+                               ctx_info->msr_addr);
+                }
+
+What do I need the MSR *addresses* for?
+
+                if (ctx_info->reg_ctx_type == CTX_TYPE_MMREG) {
+                        printk("%sMM Register Address: 0x%016llx\n", newpfx,
+                               ctx_info->mm_reg_addr);
+                }
+
+memory mapped registers?!?!
+
+> Also, like I said in another thread, we should always print the raw value
+> followed by the decoding. That way the raw info is there in case a user
+> wants to send the data to the vendor or other expert party.
+
+By that logic we shouldn't be decoding at all - we should be dumping a
+fat hex blob.
+
+Again, there's this thing called tracepoints which have exactly that,
+you know. You can dump human readable info to dmesg and dump a whole raw
+record into the tracepoint.
+
+When the error is critical and we're about to die, the tracepoint
+contents goes to dmesg too.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
