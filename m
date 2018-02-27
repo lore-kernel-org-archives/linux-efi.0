@@ -1,72 +1,75 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [PATCH v2 3/8] efi: Decode IA32/X64 Processor Error Info
- Structure
-Date: Tue, 27 Feb 2018 19:02:31 +0100
-Message-ID: <20180227180231.GO26382@pd.tnic>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH v2 2/8] efi: Decode IA32/X64 Processor Error Section
+Date: Tue, 27 Feb 2018 18:06:21 +0000
+Message-ID: <DM5PR12MB1916C280DA5B51FE9666EE21F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
- <20180226193904.20532-4-Yazen.Ghannam@amd.com>
- <20180227142531.GF26382@pd.tnic>
- <DM5PR12MB191637C1857C5D9499D08D66F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
- <20180227170423.GK26382@pd.tnic>
- <DM5PR12MB1916D78FE4EEF146EE1D8612F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180226193904.20532-3-Yazen.Ghannam@amd.com>
+ <20180227112234.GE26382@pd.tnic>
+ <DM5PR12MB1916B6AEE434A345E78BE234F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180227170034.GJ26382@pd.tnic>
+ <DM5PR12MB1916F8C7DF93C1C9402AE3ECF8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180227174446.GN26382@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <DM5PR12MB1916D78FE4EEF146EE1D8612F8C00@DM5PR12MB1916.namprd12.prod.outlook.com>
+In-Reply-To: <20180227174446.GN26382@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+To: Borislav Petkov <bp@suse.de>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 27, 2018 at 05:46:54PM +0000, Ghannam, Yazen wrote:
-> I think there's value in following the conventions in a subsystem.
-
-"conventions in a subsystem" my ass. That's brainless copy-pasting.
-
-It was added by
-
-f6edea77c8c8 ("ACPI, APEI, CPER: Cleanup CPER memory error output format")
-
-and then replicated everywhere.
-
-It is simply a dumb way of writing:
-
-	snprintf(newpfx, sizeof(newpfx), "%s ", pfx);
-
-
-> I can change this if you give a reason besides "it's dumb".
-
-Two can play that game: you get to keep it if you give a good reason
-why.
-
-> We do map the spec-defined GUIDs in patch 4 of this set. I don't know if there's
-> a central place where all vendor-defined GUIDs are listed. I can look into this.
-
-Yes, at least for the most prominent ones.
-
-> And the raw value should still be printed because
-> 1) It may represent a type that we can't decode. Maybe a type that's not part of
-> the spec.
-
-If we can't decode it, *then* you dump it:
-
-	"Unrecognized type: 0x%llx ..."
-
-> 2) It's good to have the raw value for reference. We do this with MCA_STATUS
-> where we print the raw value followed by the decoding.
-
-1. No one stares at the raw value if the bits are decoded
-2. MCA_STATUS is one register - this error record is huge.
-
-> The structs are all different even though some fields may be the same.
-
-Fair enough. Only if it makes sense.
-
--- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBUdWVzZGF5LCBGZWJydWFyeSAyNywgMjAxOCAxMjo0
+NSBQTQ0KPiBUbzogR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5uYW1AYW1kLmNvbT4NCj4gQ2M6
+IGxpbnV4LWVmaUB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7
+DQo+IGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc7IHg4NkBrZXJuZWwub3JnDQo+IFN1YmplY3Q6
+IFJlOiBbUEFUQ0ggdjIgMi84XSBlZmk6IERlY29kZSBJQTMyL1g2NCBQcm9jZXNzb3IgRXJyb3Ig
+U2VjdGlvbg0KPiANCj4gT24gVHVlLCBGZWIgMjcsIDIwMTggYXQgMDU6Mjc6MzlQTSArMDAwMCwg
+R2hhbm5hbSwgWWF6ZW4gd3JvdGU6DQo+ID4gU3VyZSwgd2UgY2FuIHByaW50IHRoZSBmaWVsZHMg
+dW5jb25kaXRpb25hbGx5IGlmIEFyZCBpcyBva2F5IHdpdGggdGhhdC4NCj4gPg0KPiA+IFRoZSBp
+c3N1ZSBpcyB0aGF0IHRoZSB4ODYgYmVoYXZpb3Igd2lsbCBiZSBkaWZmZXJlbnQgZnJvbSBhbGwg
+dGhlIG90aGVycywgc28NCj4gdGhhdA0KPiA+IG1pZ2h0IGJlIGNvbmZ1c2luZy4NCj4gDQo+IENv
+bmZ1c2luZyBmb3Igd2hvbT8NCj4gDQo+IEFyZSB3ZSBzaGFyaW5nIHRvb2xzIHdpdGggb3RoZXIg
+YXJjaGVzIG9yIHdoYXQgYW0gSSBtaXNzaW5nPw0KPiANCg0KSXQncyBub3QganVzdCBhYm91dCBh
+cmNoZXMgYnV0IHJlY29yZCB0eXBlcy4gQSBzaW5nbGUgcGxhdGZvcm0gY2FuIHJlcG9ydA0KdXNp
+bmcgYXJjaC1zcGVjaWZpYyByZWNvcmRzLCBtZW1vcnkgcmVjb3JkcywgUENJZSByZWNvcmRzLCBl
+dGMuDQoNClNvIGFsbCB0aGUgb3RoZXIgcmVjb3JkIHR5cGVzIG9ubHkgc2hvdyBmaWVsZHMgd2l0
+aCBhIHZhbGlkIGJpdCBzZXQgYW5kIHRoaXMNCmhhcyBhbHdheXMgYmVlbiB0aGUgY2FzZS4gVGhl
+cmUgbWF5IGJlIHVzZXJzIG9yIHRvb2xzIHdobyBleHBlY3QgdGhhdA0Kc2FtZSBiZWhhdmlvci4N
+Cg0KPiA+IFRoaXMgc2V0IGRvZXMgZGVjb2RlIGV2ZXJ5dGhpbmcgZnVsbHkgc28gdGhhdCBwZW9w
+bGUgY2FuIHJlYWQgdGhlIGVycm9yLg0KPiANCj4gTm8sIGl0IGRvZXNuJ3QuIEl0IGR1bXBzDQo+
+IA0KPiAgICAgICAgIHByaW50aygiJXNWYWxpZGF0aW9uIEJpdHM6IDB4JTAxNmxseFxuIiwgcGZ4
+LCBwcm9jLT52YWxpZGF0aW9uX2JpdHMpOw0KPiANCj4gICAgICAgICBwcmludGsoIiVzRXJyb3Ig
+U3RydWN0dXJlIFR5cGU6ICVwVWxcbiIsIG5ld3BmeCwNCj4gICAgICAgICAgICAgICAgICZlcnJf
+aW5mby0+ZXJyX3R5cGUpOw0KPiANCj4gICAgICAgICBwcmludGsoIiVzQ2hlY2sgSW5mb3JtYXRp
+b246IDB4JTAxNmxseFxuIiwgbmV3cGZ4LA0KPiAgICAgICAgICAgICAgICAgIGVycl9pbmZvLT5j
+aGVja19pbmZvKTsNCj4gDQo+IGFuZCBzbyBvbiB3aGljaCBhcmUgaGFsZi1iYWtlZC4NCj4gDQo+
+IFRoaW5rIG9mIGl0IHRoaXMgd2F5OiBpZiB5b3UgbG9vayBhdCB0aGUgZXJyb3IgcmVjb3JkIGFu
+ZCB5b3Ugc3RpbGwgbmVlZA0KPiB0byBsb29rIGF0IHRoZSBzcGVjIHRvIGRlY29kZSBpdCwgdGhl
+biBpdCBpcyBzdGlsbCBub3QgZ29vZCBlbm91Z2guDQo+IA0KPiBVc2VycyBkb24ndCBjYXJlIGFi
+b3V0IHZhbGlkYXRpb24gYml0cywgb3IgdW5yZWFkYWJsZSBHVUlEcyBvciBXVEYgaXMNCj4gIkNo
+ZWNrIEluZm9ybWF0aW9uIiBldmVuPw0KPiANCj4gIlRoaXMgc2VjdGlvbiBkZXRhaWxzIHRoZSBs
+YXlvdXQgb2YgdGhlIFByb2Nlc3NvciBFcnJvciBJbmZvcm1hdGlvbg0KPiBTdHJ1Y3R1cmUgYW5k
+IHRoZSBkZXRhaWxlZCBjaGVjayBpbmZvcm1hdGlvbiB3aGljaCBpcyBjb250YWluZWQgd2l0aGlu
+LiINCj4gDQo+IEFuZCB0aGF0ICJDaGVjayBJbmZvcm1hdGlvbiIgdGhpbmcgaXMgbWVudGlvbmVk
+IG9ubHkgdHdpY2UgaW4gdGhlIHdob2xlDQo+IHNwZWMuDQo+IA0KPiBTdHJ1Y3R1cmVFcnJvclR5
+cGUgb25seSB0aGVyZSBpbiB0aGUgdGFibGUuDQo+IA0KPiBWZXJ5IGluZm9ybWF0aXZlIHRoYXQu
+DQo+IA0KPiBTbyBubywgdXNlcnMgZG9uJ3QgY2FyZSBhYm91dCBhbnkgb2YgdGhhdCBpbnRlcm5h
+bCBjcmFwIC0gdGhleSB3YW5uYQ0KPiBrbm93IHdoYXQgaXMgd3Jvbmcgd2l0aCB0aGVpciBib3gg
+YW5kIHRoYXQgc2hvdWxkIGJlIHdyaXR0ZW4gaW4gcGxhaW4NCj4gZW5nbGlzaC4NCj4gDQoNClBs
+ZWFzZSBzZWUgdGhlIG90aGVyIHBhdGNoZXMgd2hlcmUgdGhlc2UgYXJlIGRlY29kZWQgZnVydGhl
+ci4gQXMgSQ0KbWVudGlvbmVkIHRoZSBjb3ZlciBsZXR0ZXIsIHRoZSBkZWNvZGluZyBpcyBhcHBs
+aWVkIGluY3JlbWVudGFsbHkgcmF0aGVyDQp0aGFuIGhhdmluZyBvbmUgbGFyZ2UgcGF0Y2guDQoN
+CkFsc28sIGxpa2UgSSBzYWlkIGluIGFub3RoZXIgdGhyZWFkLCB3ZSBzaG91bGQgYWx3YXlzIHBy
+aW50IHRoZSByYXcgdmFsdWUNCmZvbGxvd2VkIGJ5IHRoZSBkZWNvZGluZy4gVGhhdCB3YXkgdGhl
+IHJhdyBpbmZvIGlzIHRoZXJlIGluIGNhc2UgYSB1c2VyDQp3YW50cyB0byBzZW5kIHRoZSBkYXRh
+IHRvIHRoZSB2ZW5kb3Igb3Igb3RoZXIgZXhwZXJ0IHBhcnR5LiANCg0KPiA+IEkgYWxyZWFkeSBt
+ZW50aW9uZWQgaW4gdGhlIENvbnRleHQgaW5mbyBwYXRjaCB0aGF0IHRoZXJlIGNvdWxkIGJlDQo+
+ID4gZnVydGhlciBkZWNvZGluZyB3aGljaCB3ZSBjYW4gZG8gaW4gdGhlIGZ1dHVyZS4NCj4gDQo+
+IFRoZW4gZGVjb2RlIG9ubHkgdGhvc2UgcGllY2VzIGZ1bGx5IG5vdyB3aGljaCB5b3UgY2FuIGRv
+IG5vdyBhbmQgd2hlbg0KPiB5b3UgYWRkIHNvbWV0aGluZyBpbiB0aGUgZnV0dXJlLCBhZGQgaXQg
+dGhlbiB3aXRoIHRoZSBmdWxsIGRlY29kaW5nDQo+IGZ1bmN0aW9uYWxpdHkuIE5vIGZpZWxkcyB3
+aGljaCBuZWVkIGFkZGl0aW9uYWwgZGVjb2Rpbmcgd2l0aCB0aGUgc3BlYw0KPiBvcGVuZWQgb24g
+b25lIHNpZGUuDQo+IA0KDQpPa2F5Lg0KDQpUaGFua3MsDQpZYXplbg0K
