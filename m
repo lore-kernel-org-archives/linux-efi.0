@@ -1,76 +1,44 @@
-From: AKASHI Takahiro <takahiro.akashi@linaro.org>
-Subject: Re: [PATCH 0/2] ESRT fixes for relocatable kexec'd kernel
-Date: Wed, 28 Feb 2018 15:19:03 +0900
-Message-ID: <20180228061901.GJ6019@linaro.org>
-References: <1519414953-5478-1-git-send-email-tbaicar@codeaurora.org>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [PATCH v2 0/8] Decode IA32/X64 CPER
+Date: Wed, 28 Feb 2018 09:43:21 +0100
+Message-ID: <20180228084321.GA2969@pd.tnic>
+References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1519414953-5478-1-git-send-email-tbaicar@codeaurora.org>
+In-Reply-To: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, jhugo@codeaurora.org, sgoel@codeaurora.org, timur@codeaurora.org
+To: Yazen Ghannam <Yazen.Ghannam@amd.com>, Tony Luck <tony.luck@intel.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ard.biesheuvel@linaro.org, x86@kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Tyler,
+On Mon, Feb 26, 2018 at 01:38:56PM -0600, Yazen Ghannam wrote:
+> From: Yazen Ghannam <yazen.ghannam@amd.com>
+> 
+> This series adds decoding for the IA32/X64 Common Platform Error Record.
 
-# I missed catching your patch as its subject doesn't contain arm64.
+One much more important thing I forgot about yesterday: how is
+this thing playing into our RAS reporting, x86 decoding chain, etc
+infrastructure?
 
-On Fri, Feb 23, 2018 at 12:42:31PM -0700, Tyler Baicar wrote:
-> Currently on arm64 ESRT memory does not appear to be properly blocked off.
-> Upon successful initialization, ESRT prints out the memory region that it
-> exists in like:
-> 
-> esrt: Reserving ESRT space from 0x000000000a4c1c18 to 0x000000000a4c1cf0.
-> 
-> But then by dumping /proc/iomem this region appears as part of System RAM
-> rather than being reserved:
-> 
-> 08f10000-0deeffff : System RAM
-> 
-> This causes issues when trying to kexec if the kernel is relocatable. When
-> kexec tries to execute, this memory can be selected to relocate the kernel to
-> which then overwrites all the ESRT information. Then when the kexec'd kernel
-> tries to initialize ESRT, it doesn't recognize the ESRT version number and
-> just returns from efi_esrt_init().
+Is CPER bypassing it completely and the firmware is doing everything
+now? I sure hope not.
 
-I'm not sure what is the root cause of your problem.
-Do you have good confidence that the kernel (2nd kernel image in this case?)
-really overwrite ESRT region?
-To my best knowledge, kexec is carefully designed not to do such a thing
-as it allocates a temporary buffer for kernel image and copies it to the
-final destination at the very end of the 1st kernel.
+If not, it needs to tie into our infrastructure and the errors need
+to go into the decoding chain where different things look at them and
+filter them.
 
-My guess is that kexec, or rather kexec-tools, tries to load the kernel image
-at 0x8f80000 (or 0x9080000?, not sure) in your case. It may or may not be
-overlapped with ESRT.
-(Try "-d" option when executing kexec command for confirmation.)
+Tony, what are your plans here?
 
-Are you using initrd with kexec?
+Perhaps we can finally get MCE decoding on Intel too :-)
 
-Thanks,
--Takahiro AKASHI
+Thx.
 
+-- 
+Regards/Gruss,
+    Boris.
 
-> This causes an early ioremap leak because
-> the memory allocated for 'va' is never unmapped. So first fix that error
-> case to properly unmap 'va' before returning.
-> 
-> This still leaves ESRT unable to initialize in the kexec'd kernel, so now
-> mark the ESRT memory block as nomap so that this memory is not treated as
-> System RAM. With this change I'm able to see that the ESRT data is not
-> overwritten when running a kexec'd kernel.
-> 
-> Tyler Baicar (2):
->   efi/esrt: fix unsupported version initialization failure
->   efi/esrt: mark ESRT memory region as nomap
-> 
->  drivers/firmware/efi/esrt.c | 10 +++++++++-
->  1 file changed, 9 insertions(+), 1 deletion(-)
-> 
-> -- 
-> Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
-> Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
-> a Linux Foundation Collaborative Project.
-> 
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
