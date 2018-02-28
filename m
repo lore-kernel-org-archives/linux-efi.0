@@ -1,50 +1,48 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [PATCH v2 0/8] Decode IA32/X64 CPER
-Date: Wed, 28 Feb 2018 17:35:39 +0100
-Message-ID: <20180228163539.GC2969@pd.tnic>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH v2 0/8] Decode IA32/X64 CPER
+Date: Wed, 28 Feb 2018 20:58:15 +0000
+Message-ID: <DM5PR12MB19169CD3BC3BAE3230C1DCA3F8C70@DM5PR12MB1916.namprd12.prod.outlook.com>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
  <20180228084321.GA2969@pd.tnic>
  <DM5PR12MB1916B6CA08F0D423B3635EDDF8C70@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180228163539.GC2969@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <DM5PR12MB1916B6CA08F0D423B3635EDDF8C70@DM5PR12MB1916.namprd12.prod.outlook.com>
+In-Reply-To: <20180228163539.GC2969@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+To: Borislav Petkov <bp@suse.de>
 Cc: Tony Luck <tony.luck@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Feb 28, 2018 at 03:12:09PM +0000, Ghannam, Yazen wrote:
-> CPER is the format used for BERT, etc. We'll only ever see a CPER if the
-> firmware creates it. And it's up to firmware policy what is shared with
-> the OS.
-
-Yap, but we should still tie it into our infra.
-
-> My main reason for printing all the info is that it may be too difficult or too
-> late to gather that info after the fact. I think this is especially true for boot
-> errors, though maybe there's another way that I don't know about
-> (re-reading BERT later?).
-
-So that BERT thing is a table, AFAIR. I don't see why it would be a
-problem if we read it later, at our leisure and free the record only
-when we're done.
-
-Looking at bert.c is entered with a late_initcall() which is nicely late
-and we have everything up and ready to process errors then.
-
-> Right. I want to work on getting this more integrated with our existing
-> x86 infrastructure. But I don't want to wait until we figure all that out
-> before we have some sort of CPER decoding.
-
-Just keep in mind that whenever you expose stuff and userspace starts
-using it, it is much harder to change it. So let's do it right pls.
-
--- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBXZWRuZXNkYXksIEZlYnJ1YXJ5IDI4LCAyMDE4IDEx
+OjM2IEFNDQo+IFRvOiBHaGFubmFtLCBZYXplbiA8WWF6ZW4uR2hhbm5hbUBhbWQuY29tPg0KPiBD
+YzogVG9ueSBMdWNrIDx0b255Lmx1Y2tAaW50ZWwuY29tPjsgbGludXgtZWZpQHZnZXIua2VybmVs
+Lm9yZzsgbGludXgtDQo+IGtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IGFyZC5iaWVzaGV1dmVsQGxp
+bmFyby5vcmc7IHg4NkBrZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggdjIgMC84XSBE
+ZWNvZGUgSUEzMi9YNjQgQ1BFUg0KPiANCj4gT24gV2VkLCBGZWIgMjgsIDIwMTggYXQgMDM6MTI6
+MDlQTSArMDAwMCwgR2hhbm5hbSwgWWF6ZW4gd3JvdGU6DQo+ID4gQ1BFUiBpcyB0aGUgZm9ybWF0
+IHVzZWQgZm9yIEJFUlQsIGV0Yy4gV2UnbGwgb25seSBldmVyIHNlZSBhIENQRVIgaWYgdGhlDQo+
+ID4gZmlybXdhcmUgY3JlYXRlcyBpdC4gQW5kIGl0J3MgdXAgdG8gZmlybXdhcmUgcG9saWN5IHdo
+YXQgaXMgc2hhcmVkIHdpdGgNCj4gPiB0aGUgT1MuDQo+IA0KPiBZYXAsIGJ1dCB3ZSBzaG91bGQg
+c3RpbGwgdGllIGl0IGludG8gb3VyIGluZnJhLg0KPiANCg0KT2theSwgc28gaG93IGFib3V0IHRo
+aXM/DQoNCjEpIFdlIGtlZXAgdGhpcyBzZXQgbW9zdGx5IGFzLWlzLiBUaGlzIHdvdWxkIGJlIG91
+ciBmYWxsYmFjayBpZiB3ZSBkb24ndCBoYXZlDQphbnl0aGluZyBiZXR0ZXIuDQoNCjIpIEkgYWRk
+IHRoZSBNQ0EgZGVjb2RpbmcgdG8gdGhpcyBzZXQuIEkgd2FzIHRoaW5raW5nIHRvIGRvIHRoaXMg
+aW4gYSBzZXBhcmF0ZQ0Kc2V0IGJ1dCBtYXliZSBpdCdzIGJldHRlciB0byBkbyBpdCBhbGwgdG9n
+ZXRoZXIuDQoNCk51bWJlciAyIHdvdWxkIG1lYW4gd2UgZG8gYSBxdWljayBjaGVjayBvbiB0aGUg
+Q1BFUiB0byBzZWUgaWYgaXQgY29udGFpbnMNCk1DQSBpbmZvLiBUaGVyZSdzIG5vIHNwZWMtZGVm
+aW5lZCB3YXkgdG8gZG8gdGhpcywgYnV0IHdlIGNhbiBtYWtlIGEgZ29vZA0KZ3Vlc3MgYnkgc2Vl
+aW5nIGlmIHdlIGhhdmUgYW4gIk1TUiByZWdpc3RlciIgY29udGV4dCBhbmQgdGhhdCBjb250ZXh0
+IGhhcw0KYW4gIk1TUiBhZGRyZXNzIiB0aGF0IGlzIGFuIE1DQSByZWdpc3Rlci4NCg0KSWYgd2Ug
+dGhpbmsgd2UgaGF2ZSBNQ0EgaW5mbywgdGhlbiB3ZSBwdWxsIGFzIG11Y2ggb3V0IG9mIHRoZSBD
+UEVSIGFzIHdlDQpjYW4gYW5kIHB1dCBpdCBpbiBhIHN0cnVjdCBtY2Ugd2hpY2ggd2UgdGhlbiBw
+YXNzIHRvIHRoZSBub3RpZmllciBjaGFpbi4NCg0KSWYgd2UgZG9uJ3QgdGhpbmsgd2UgaGF2ZSBN
+Q0EgaW5mbywgdGhlbiB3ZSBmYWxsYmFjayB0byBudW1iZXIgMS4NCg0KQXQgdGhlIG1vbWVudCwg
+aXQgc2VlbXMgd2UnbGwgYmUgdXNpbmcgeDg2IENQRVIgdG8gcmVwcmVzZW50IE1DQSBlcnJvcnMN
+CmluIEJFUlQgc2luY2UgdGhlcmUncyBubyBvdGhlciBvcHRpb24gaW4gQkVSVC4gU28gSSB0aGlu
+ayBoYXZpbmcgbnVtYmVyIDINCndvdWxkIGNhdGNoIG1vc3QsIGlmIG5vdCBhbGwsIGVycm9ycyBy
+ZXBvcnRlZCB3aXRoIHg4NiBDUEVSLg0KDQpUaGFua3MsDQpZYXplbg0K
