@@ -1,63 +1,110 @@
-From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Subject: RE: [PATCH v2 0/8] Decode IA32/X64 CPER
-Date: Wed, 28 Feb 2018 15:12:09 +0000
-Message-ID: <DM5PR12MB1916B6CA08F0D423B3635EDDF8C70@DM5PR12MB1916.namprd12.prod.outlook.com>
-References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
- <20180228084321.GA2969@pd.tnic>
+From: Jeffrey Hugo <jhugo@codeaurora.org>
+Subject: Re: [PATCH 0/2] ESRT fixes for relocatable kexec'd kernel
+Date: Wed, 28 Feb 2018 08:39:42 -0700
+Message-ID: <1f03865f-2d22-8ba1-a276-a6b49d7c14de@codeaurora.org>
+References: <1519414953-5478-1-git-send-email-tbaicar@codeaurora.org>
+ <20180228061901.GJ6019@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180228084321.GA2969@pd.tnic>
+In-Reply-To: <20180228061901.GJ6019@linaro.org>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@suse.de>, Tony Luck <tony.luck@intel.com>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
+To: AKASHI Takahiro <takahiro.akashi@linaro.org>, Tyler Baicar <tbaicar@codeaurora.org>, ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, sgoel@codeaurora.org, timur@codeaurora.org
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
-aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBXZWRuZXNkYXksIEZlYnJ1YXJ5IDI4LCAyMDE4IDM6
-NDMgQU0NCj4gVG86IEdoYW5uYW0sIFlhemVuIDxZYXplbi5HaGFubmFtQGFtZC5jb20+OyBUb255
-IEx1Y2sNCj4gPHRvbnkubHVja0BpbnRlbC5jb20+DQo+IENjOiBsaW51eC1lZmlAdmdlci5rZXJu
-ZWwub3JnOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOw0KPiBhcmQuYmllc2hldXZlbEBs
-aW5hcm8ub3JnOyB4ODZAa2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHYyIDAvOF0g
-RGVjb2RlIElBMzIvWDY0IENQRVINCj4gDQo+IE9uIE1vbiwgRmViIDI2LCAyMDE4IGF0IDAxOjM4
-OjU2UE0gLTA2MDAsIFlhemVuIEdoYW5uYW0gd3JvdGU6DQo+ID4gRnJvbTogWWF6ZW4gR2hhbm5h
-bSA8eWF6ZW4uZ2hhbm5hbUBhbWQuY29tPg0KPiA+DQo+ID4gVGhpcyBzZXJpZXMgYWRkcyBkZWNv
-ZGluZyBmb3IgdGhlIElBMzIvWDY0IENvbW1vbiBQbGF0Zm9ybSBFcnJvciBSZWNvcmQuDQo+IA0K
-PiBPbmUgbXVjaCBtb3JlIGltcG9ydGFudCB0aGluZyBJIGZvcmdvdCBhYm91dCB5ZXN0ZXJkYXk6
-IGhvdyBpcw0KPiB0aGlzIHRoaW5nIHBsYXlpbmcgaW50byBvdXIgUkFTIHJlcG9ydGluZywgeDg2
-IGRlY29kaW5nIGNoYWluLCBldGMNCj4gaW5mcmFzdHJ1Y3R1cmU/DQo+IA0KDQpJdCBkb2Vzbid0
-IHJpZ2h0IG5vdy4NCg0KPiBJcyBDUEVSIGJ5cGFzc2luZyBpdCBjb21wbGV0ZWx5IGFuZCB0aGUg
-ZmlybXdhcmUgaXMgZG9pbmcgZXZlcnl0aGluZw0KPiBub3c/IEkgc3VyZSBob3BlIG5vdC4NCj4g
-DQoNCkNQRVIgaXMgdGhlIGZvcm1hdCB1c2VkIGZvciBCRVJULCBldGMuIFdlJ2xsIG9ubHkgZXZl
-ciBzZWUgYSBDUEVSIGlmIHRoZQ0KZmlybXdhcmUgY3JlYXRlcyBpdC4gQW5kIGl0J3MgdXAgdG8g
-ZmlybXdhcmUgcG9saWN5IHdoYXQgaXMgc2hhcmVkIHdpdGgNCnRoZSBPUy4NCg0KVGhpcyBzZXQg
-YWRkcyBkZWNvZGluZyBmb3IgdGhlIHg4NiBDUEVSIGZvcm1hdCB3aGljaCB3aWxsIG1vc3RseSBt
-YXAgdG8NCmNvcmUgTUNBIGVycm9ycy4gVGhlcmUncyBhIG1lbW9yeSBDUEVSIGZvcm1hdCB0aGF0
-IERSQU0gRUNDLCBldGMuIHdpbGwNCnVzZSwgc28gdGhhdCdzIG5vdCBjb3ZlcmVkIGhlcmUuIElu
-IG90aGVyIHdvcmRzLCBjb21tb24gZXJyb3JzIGxpa2UNCmNvcnJlY3RlZCBEUkFNIEVDQyB3b24n
-dCBiZSByZXBvcnRlZCB3aXRoIHRoaXMgcGF0Y2ggc2V0Lg0KDQpNb3N0IGxpa2VseSwgd2UnbGwg
-b25seSBzZWUgQ1BFUnMgaW4gQkVSVCBiZWNhdXNlIEJFUlQgb25seSB1c2VzIENQRVJzLg0KSEVT
-VCBoYXMgTUNBIHN0cnVjdHVyZXMgdGhhdCBjYW4gYmUgdXNlZC4gTWVhbmluZyB3ZSB3b24ndCBz
-ZWUgTUNBDQplcnJvcnMgcmVwb3J0ZWQgdGhyb3VnaCBDUEVScyBkdXJpbmcgcnVudGltZS4NCg0K
-U28gdGhlIG1vc3QgY29tbW9uIHNjZW5hcmlvIHdpbGwgcHJvYmFibHkgYmUgdGhhdCB0aGUgc3lz
-dGVtIHJlc2V0cywNCmZpcm13YXJlIGZvdW5kIGFuIE1DQSBlcnJvciBkdXJpbmcgYm9vdCwgYW5k
-IGZpcm13YXJlIHBvcHVsYXRlcyBCRVJUDQp3aXRoIGEgQ1BFUi4gVGhlIGVycm9yIGdldHMgcHJp
-bnRlZCBkdXJpbmcgT1MgYm9vdC4gQnkgdGhlIHRpbWUgdXNlcnNwYWNlDQppcyB1cCB0aGUgZXJy
-b3IgaGFzIGFscmVhZHkgYmUgcHJpbnRlZC4gVGhlIGVycm9yIGlzIHByaW50ZWQgYXMgaW5mb3Jt
-YXRpb25hbA0Kc2luY2UgdGhlcmUgaXNuJ3QgYW55IGFjdGlvbiBmb3IgdGhlIE9TIG9yIHVzZXIg
-dG8gdGFrZS4NCg0KTXkgbWFpbiByZWFzb24gZm9yIHByaW50aW5nIGFsbCB0aGUgaW5mbyBpcyB0
-aGF0IGl0IG1heSBiZSB0b28gZGlmZmljdWx0IG9yIHRvbw0KbGF0ZSB0byBnYXRoZXIgdGhhdCBp
-bmZvIGFmdGVyIHRoZSBmYWN0LiBJIHRoaW5rIHRoaXMgaXMgZXNwZWNpYWxseSB0cnVlIGZvciBi
-b290DQplcnJvcnMsIHRob3VnaCBtYXliZSB0aGVyZSdzIGFub3RoZXIgd2F5IHRoYXQgSSBkb24n
-dCBrbm93IGFib3V0DQoocmUtcmVhZGluZyBCRVJUIGxhdGVyPykuDQoNCj4gSWYgbm90LCBpdCBu
-ZWVkcyB0byB0aWUgaW50byBvdXIgaW5mcmFzdHJ1Y3R1cmUgYW5kIHRoZSBlcnJvcnMgbmVlZA0K
-PiB0byBnbyBpbnRvIHRoZSBkZWNvZGluZyBjaGFpbiB3aGVyZSBkaWZmZXJlbnQgdGhpbmdzIGxv
-b2sgYXQgdGhlbSBhbmQNCj4gZmlsdGVyIHRoZW0uDQo+IA0KDQpSaWdodC4gSSB3YW50IHRvIHdv
-cmsgb24gZ2V0dGluZyB0aGlzIG1vcmUgaW50ZWdyYXRlZCB3aXRoIG91ciBleGlzdGluZw0KeDg2
-IGluZnJhc3RydWN0dXJlLiBCdXQgSSBkb24ndCB3YW50IHRvIHdhaXQgdW50aWwgd2UgZmlndXJl
-IGFsbCB0aGF0IG91dA0KYmVmb3JlIHdlIGhhdmUgc29tZSBzb3J0IG9mIENQRVIgZGVjb2Rpbmcu
-DQoNCj4gVG9ueSwgd2hhdCBhcmUgeW91ciBwbGFucyBoZXJlPw0KPiANCj4gUGVyaGFwcyB3ZSBj
-YW4gZmluYWxseSBnZXQgTUNFIGRlY29kaW5nIG9uIEludGVsIHRvbyA6LSkNCj4gDQoNClRoYW5r
-cywNCllhemVuDQo=
+On 2/27/2018 11:19 PM, AKASHI Takahiro wrote:
+> Tyler,
+> 
+> # I missed catching your patch as its subject doesn't contain arm64.
+> 
+> On Fri, Feb 23, 2018 at 12:42:31PM -0700, Tyler Baicar wrote:
+>> Currently on arm64 ESRT memory does not appear to be properly blocked off.
+>> Upon successful initialization, ESRT prints out the memory region that it
+>> exists in like:
+>>
+>> esrt: Reserving ESRT space from 0x000000000a4c1c18 to 0x000000000a4c1cf0.
+>>
+>> But then by dumping /proc/iomem this region appears as part of System RAM
+>> rather than being reserved:
+>>
+>> 08f10000-0deeffff : System RAM
+>>
+>> This causes issues when trying to kexec if the kernel is relocatable. When
+>> kexec tries to execute, this memory can be selected to relocate the kernel to
+>> which then overwrites all the ESRT information. Then when the kexec'd kernel
+>> tries to initialize ESRT, it doesn't recognize the ESRT version number and
+>> just returns from efi_esrt_init().
+> 
+> I'm not sure what is the root cause of your problem.
+> Do you have good confidence that the kernel (2nd kernel image in this case?)
+> really overwrite ESRT region?
+
+According to my debug, yes.
+Using JTAG, I was able to determine that the ESRT memory region was 
+getting overwritten by the secondary kernel in 
+kernel/arch/arm64/kernel/relocate_kernel.S - specifically the 
+"copy_page" line of arm64_relocate_new_kernel()
+
+> To my best knowledge, kexec is carefully designed not to do such a thing
+> as it allocates a temporary buffer for kernel image and copies it to the
+> final destination at the very end of the 1st kernel.
+> 
+> My guess is that kexec, or rather kexec-tools, tries to load the kernel image
+> at 0x8f80000 (or 0x9080000?, not sure) in your case. It may or may not be
+> overlapped with ESRT.
+> (Try "-d" option when executing kexec command for confirmation.)
+
+With -d, I see
+
+get_memory_ranges_iomem_cb: 0000000009611000 - 000000000e5fffff : System RAM
+
+That overlaps the ESRT reservation -
+[ 0.000000] esrt: Reserving ESRT space from 0x000000000b708718 to 
+0x000000000b7087f0
+
+> 
+> Are you using initrd with kexec?
+
+Yes
+
+> 
+> Thanks,
+> -Takahiro AKASHI
+> 
+> 
+>> This causes an early ioremap leak because
+>> the memory allocated for 'va' is never unmapped. So first fix that error
+>> case to properly unmap 'va' before returning.
+>>
+>> This still leaves ESRT unable to initialize in the kexec'd kernel, so now
+>> mark the ESRT memory block as nomap so that this memory is not treated as
+>> System RAM. With this change I'm able to see that the ESRT data is not
+>> overwritten when running a kexec'd kernel.
+>>
+>> Tyler Baicar (2):
+>>    efi/esrt: fix unsupported version initialization failure
+>>    efi/esrt: mark ESRT memory region as nomap
+>>
+>>   drivers/firmware/efi/esrt.c | 10 +++++++++-
+>>   1 file changed, 9 insertions(+), 1 deletion(-)
+>>
+>> -- 
+>> Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+>> Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+>> a Linux Foundation Collaborative Project.
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+
+-- 
+Jeffrey Hugo
+Qualcomm Datacenter Technologies as an affiliate of Qualcomm 
+Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the
+Code Aurora Forum, a Linux Foundation Collaborative Project.
