@@ -1,110 +1,91 @@
-From: Jeffrey Hugo <jhugo@codeaurora.org>
-Subject: Re: [PATCH 0/2] ESRT fixes for relocatable kexec'd kernel
-Date: Wed, 28 Feb 2018 08:39:42 -0700
-Message-ID: <1f03865f-2d22-8ba1-a276-a6b49d7c14de@codeaurora.org>
-References: <1519414953-5478-1-git-send-email-tbaicar@codeaurora.org>
- <20180228061901.GJ6019@linaro.org>
+From: Ben Hutchings <ben@decadent.org.uk>
+Subject: [PATCH 3.16 061/254] efi: Move some sysfs files to be read-only
+ by root
+Date: Wed, 28 Feb 2018 15:20:18 +0000
+Message-ID: <lsq.1519831218.738032988@decadent.org.uk>
+References: <lsq.1519831217.271785318@decadent.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180228061901.GJ6019@linaro.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <lsq.1519831217.271785318@decadent.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: AKASHI Takahiro <takahiro.akashi@linaro.org>, Tyler Baicar <tbaicar@codeaurora.org>, ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, sgoel@codeaurora.org, timur@codeaurora.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: akpm@linux-foundation.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Dave Young <dyoung@redhat.com>, Peter Zijlstra <peterz@infradead.org>, linux-efi@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 2/27/2018 11:19 PM, AKASHI Takahiro wrote:
-> Tyler,
-> 
-> # I missed catching your patch as its subject doesn't contain arm64.
-> 
-> On Fri, Feb 23, 2018 at 12:42:31PM -0700, Tyler Baicar wrote:
->> Currently on arm64 ESRT memory does not appear to be properly blocked off.
->> Upon successful initialization, ESRT prints out the memory region that it
->> exists in like:
->>
->> esrt: Reserving ESRT space from 0x000000000a4c1c18 to 0x000000000a4c1cf0.
->>
->> But then by dumping /proc/iomem this region appears as part of System RAM
->> rather than being reserved:
->>
->> 08f10000-0deeffff : System RAM
->>
->> This causes issues when trying to kexec if the kernel is relocatable. When
->> kexec tries to execute, this memory can be selected to relocate the kernel to
->> which then overwrites all the ESRT information. Then when the kexec'd kernel
->> tries to initialize ESRT, it doesn't recognize the ESRT version number and
->> just returns from efi_esrt_init().
-> 
-> I'm not sure what is the root cause of your problem.
-> Do you have good confidence that the kernel (2nd kernel image in this case?)
-> really overwrite ESRT region?
+3.16.55-rc1 review patch.  If anyone has any objections, please let me know.
 
-According to my debug, yes.
-Using JTAG, I was able to determine that the ESRT memory region was 
-getting overwritten by the secondary kernel in 
-kernel/arch/arm64/kernel/relocate_kernel.S - specifically the 
-"copy_page" line of arm64_relocate_new_kernel()
+------------------
 
-> To my best knowledge, kexec is carefully designed not to do such a thing
-> as it allocates a temporary buffer for kernel image and copies it to the
-> final destination at the very end of the 1st kernel.
-> 
-> My guess is that kexec, or rather kexec-tools, tries to load the kernel image
-> at 0x8f80000 (or 0x9080000?, not sure) in your case. It may or may not be
-> overlapped with ESRT.
-> (Try "-d" option when executing kexec command for confirmation.)
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-With -d, I see
+commit af97a77bc01ce49a466f9d4c0125479e2e2230b6 upstream.
 
-get_memory_ranges_iomem_cb: 0000000009611000 - 000000000e5fffff : System RAM
+Thanks to the scripts/leaking_addresses.pl script, it was found that
+some EFI values should not be readable by non-root users.
 
-That overlaps the ESRT reservation -
-[ 0.000000] esrt: Reserving ESRT space from 0x000000000b708718 to 
-0x000000000b7087f0
+So make them root-only, and to do that, add a __ATTR_RO_MODE() macro to
+make this easier, and use it in other places at the same time.
 
-> 
-> Are you using initrd with kexec?
-
-Yes
-
-> 
-> Thanks,
-> -Takahiro AKASHI
-> 
-> 
->> This causes an early ioremap leak because
->> the memory allocated for 'va' is never unmapped. So first fix that error
->> case to properly unmap 'va' before returning.
->>
->> This still leaves ESRT unable to initialize in the kexec'd kernel, so now
->> mark the ESRT memory block as nomap so that this memory is not treated as
->> System RAM. With this change I'm able to see that the ESRT data is not
->> overwritten when running a kexec'd kernel.
->>
->> Tyler Baicar (2):
->>    efi/esrt: fix unsupported version initialization failure
->>    efi/esrt: mark ESRT memory region as nomap
->>
->>   drivers/firmware/efi/esrt.c | 10 +++++++++-
->>   1 file changed, 9 insertions(+), 1 deletion(-)
->>
->> -- 
->> Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
->> Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
->> a Linux Foundation Collaborative Project.
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
-
--- 
-Jeffrey Hugo
-Qualcomm Datacenter Technologies as an affiliate of Qualcomm 
-Technologies, Inc.
-Qualcomm Technologies, Inc. is a member of the
-Code Aurora Forum, a Linux Foundation Collaborative Project.
+Reported-by: Linus Torvalds <torvalds@linux-foundation.org>
+Tested-by: Dave Young <dyoung@redhat.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20171206095010.24170-2-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+[bwh: Backported to 3.16: drop changes in esrt.c]
+Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
+---
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -72,8 +72,7 @@ static ssize_t systab_show(struct kobjec
+ 	return str - buf;
+ }
+ 
+-static struct kobj_attribute efi_attr_systab =
+-			__ATTR(systab, 0400, systab_show, NULL);
++static struct kobj_attribute efi_attr_systab = __ATTR_RO_MODE(systab, 0400);
+ 
+ #define EFI_FIELD(var) efi.var
+ 
+--- a/drivers/firmware/efi/runtime-map.c
++++ b/drivers/firmware/efi/runtime-map.c
+@@ -67,11 +67,11 @@ static ssize_t map_attr_show(struct kobj
+ 	return map_attr->show(entry, buf);
+ }
+ 
+-static struct map_attribute map_type_attr = __ATTR_RO(type);
+-static struct map_attribute map_phys_addr_attr   = __ATTR_RO(phys_addr);
+-static struct map_attribute map_virt_addr_attr  = __ATTR_RO(virt_addr);
+-static struct map_attribute map_num_pages_attr  = __ATTR_RO(num_pages);
+-static struct map_attribute map_attribute_attr  = __ATTR_RO(attribute);
++static struct map_attribute map_type_attr = __ATTR_RO_MODE(type, 0400);
++static struct map_attribute map_phys_addr_attr = __ATTR_RO_MODE(phys_addr, 0400);
++static struct map_attribute map_virt_addr_attr = __ATTR_RO_MODE(virt_addr, 0400);
++static struct map_attribute map_num_pages_attr = __ATTR_RO_MODE(num_pages, 0400);
++static struct map_attribute map_attribute_attr = __ATTR_RO_MODE(attribute, 0400);
+ 
+ /*
+  * These are default attributes that are added for every memmap entry.
+--- a/include/linux/sysfs.h
++++ b/include/linux/sysfs.h
+@@ -82,6 +82,12 @@ struct attribute_group {
+ 	.show	= _name##_show,						\
+ }
+ 
++#define __ATTR_RO_MODE(_name, _mode) {					\
++	.attr	= { .name = __stringify(_name),				\
++		    .mode = VERIFY_OCTAL_PERMISSIONS(_mode) },		\
++	.show	= _name##_show,						\
++}
++
+ #define __ATTR_WO(_name) {						\
+ 	.attr	= { .name = __stringify(_name), .mode = S_IWUSR },	\
+ 	.store	= _name##_store,					\
