@@ -1,44 +1,63 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [PATCH v2 0/8] Decode IA32/X64 CPER
-Date: Wed, 28 Feb 2018 09:43:21 +0100
-Message-ID: <20180228084321.GA2969@pd.tnic>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH v2 0/8] Decode IA32/X64 CPER
+Date: Wed, 28 Feb 2018 15:12:09 +0000
+Message-ID: <DM5PR12MB1916B6CA08F0D423B3635EDDF8C70@DM5PR12MB1916.namprd12.prod.outlook.com>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
+ <20180228084321.GA2969@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
+In-Reply-To: <20180228084321.GA2969@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Yazen Ghannam <Yazen.Ghannam@amd.com>, Tony Luck <tony.luck@intel.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ard.biesheuvel@linaro.org, x86@kernel.org
+To: Borislav Petkov <bp@suse.de>, Tony Luck <tony.luck@intel.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Feb 26, 2018 at 01:38:56PM -0600, Yazen Ghannam wrote:
-> From: Yazen Ghannam <yazen.ghannam@amd.com>
-> 
-> This series adds decoding for the IA32/X64 Common Platform Error Record.
-
-One much more important thing I forgot about yesterday: how is
-this thing playing into our RAS reporting, x86 decoding chain, etc
-infrastructure?
-
-Is CPER bypassing it completely and the firmware is doing everything
-now? I sure hope not.
-
-If not, it needs to tie into our infrastructure and the errors need
-to go into the decoding chain where different things look at them and
-filter them.
-
-Tony, what are your plans here?
-
-Perhaps we can finally get MCE decoding on Intel too :-)
-
-Thx.
-
--- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBzdXNlLmRlXQ0KPiBTZW50OiBXZWRuZXNkYXksIEZlYnJ1YXJ5IDI4LCAyMDE4IDM6
+NDMgQU0NCj4gVG86IEdoYW5uYW0sIFlhemVuIDxZYXplbi5HaGFubmFtQGFtZC5jb20+OyBUb255
+IEx1Y2sNCj4gPHRvbnkubHVja0BpbnRlbC5jb20+DQo+IENjOiBsaW51eC1lZmlAdmdlci5rZXJu
+ZWwub3JnOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOw0KPiBhcmQuYmllc2hldXZlbEBs
+aW5hcm8ub3JnOyB4ODZAa2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHYyIDAvOF0g
+RGVjb2RlIElBMzIvWDY0IENQRVINCj4gDQo+IE9uIE1vbiwgRmViIDI2LCAyMDE4IGF0IDAxOjM4
+OjU2UE0gLTA2MDAsIFlhemVuIEdoYW5uYW0gd3JvdGU6DQo+ID4gRnJvbTogWWF6ZW4gR2hhbm5h
+bSA8eWF6ZW4uZ2hhbm5hbUBhbWQuY29tPg0KPiA+DQo+ID4gVGhpcyBzZXJpZXMgYWRkcyBkZWNv
+ZGluZyBmb3IgdGhlIElBMzIvWDY0IENvbW1vbiBQbGF0Zm9ybSBFcnJvciBSZWNvcmQuDQo+IA0K
+PiBPbmUgbXVjaCBtb3JlIGltcG9ydGFudCB0aGluZyBJIGZvcmdvdCBhYm91dCB5ZXN0ZXJkYXk6
+IGhvdyBpcw0KPiB0aGlzIHRoaW5nIHBsYXlpbmcgaW50byBvdXIgUkFTIHJlcG9ydGluZywgeDg2
+IGRlY29kaW5nIGNoYWluLCBldGMNCj4gaW5mcmFzdHJ1Y3R1cmU/DQo+IA0KDQpJdCBkb2Vzbid0
+IHJpZ2h0IG5vdy4NCg0KPiBJcyBDUEVSIGJ5cGFzc2luZyBpdCBjb21wbGV0ZWx5IGFuZCB0aGUg
+ZmlybXdhcmUgaXMgZG9pbmcgZXZlcnl0aGluZw0KPiBub3c/IEkgc3VyZSBob3BlIG5vdC4NCj4g
+DQoNCkNQRVIgaXMgdGhlIGZvcm1hdCB1c2VkIGZvciBCRVJULCBldGMuIFdlJ2xsIG9ubHkgZXZl
+ciBzZWUgYSBDUEVSIGlmIHRoZQ0KZmlybXdhcmUgY3JlYXRlcyBpdC4gQW5kIGl0J3MgdXAgdG8g
+ZmlybXdhcmUgcG9saWN5IHdoYXQgaXMgc2hhcmVkIHdpdGgNCnRoZSBPUy4NCg0KVGhpcyBzZXQg
+YWRkcyBkZWNvZGluZyBmb3IgdGhlIHg4NiBDUEVSIGZvcm1hdCB3aGljaCB3aWxsIG1vc3RseSBt
+YXAgdG8NCmNvcmUgTUNBIGVycm9ycy4gVGhlcmUncyBhIG1lbW9yeSBDUEVSIGZvcm1hdCB0aGF0
+IERSQU0gRUNDLCBldGMuIHdpbGwNCnVzZSwgc28gdGhhdCdzIG5vdCBjb3ZlcmVkIGhlcmUuIElu
+IG90aGVyIHdvcmRzLCBjb21tb24gZXJyb3JzIGxpa2UNCmNvcnJlY3RlZCBEUkFNIEVDQyB3b24n
+dCBiZSByZXBvcnRlZCB3aXRoIHRoaXMgcGF0Y2ggc2V0Lg0KDQpNb3N0IGxpa2VseSwgd2UnbGwg
+b25seSBzZWUgQ1BFUnMgaW4gQkVSVCBiZWNhdXNlIEJFUlQgb25seSB1c2VzIENQRVJzLg0KSEVT
+VCBoYXMgTUNBIHN0cnVjdHVyZXMgdGhhdCBjYW4gYmUgdXNlZC4gTWVhbmluZyB3ZSB3b24ndCBz
+ZWUgTUNBDQplcnJvcnMgcmVwb3J0ZWQgdGhyb3VnaCBDUEVScyBkdXJpbmcgcnVudGltZS4NCg0K
+U28gdGhlIG1vc3QgY29tbW9uIHNjZW5hcmlvIHdpbGwgcHJvYmFibHkgYmUgdGhhdCB0aGUgc3lz
+dGVtIHJlc2V0cywNCmZpcm13YXJlIGZvdW5kIGFuIE1DQSBlcnJvciBkdXJpbmcgYm9vdCwgYW5k
+IGZpcm13YXJlIHBvcHVsYXRlcyBCRVJUDQp3aXRoIGEgQ1BFUi4gVGhlIGVycm9yIGdldHMgcHJp
+bnRlZCBkdXJpbmcgT1MgYm9vdC4gQnkgdGhlIHRpbWUgdXNlcnNwYWNlDQppcyB1cCB0aGUgZXJy
+b3IgaGFzIGFscmVhZHkgYmUgcHJpbnRlZC4gVGhlIGVycm9yIGlzIHByaW50ZWQgYXMgaW5mb3Jt
+YXRpb25hbA0Kc2luY2UgdGhlcmUgaXNuJ3QgYW55IGFjdGlvbiBmb3IgdGhlIE9TIG9yIHVzZXIg
+dG8gdGFrZS4NCg0KTXkgbWFpbiByZWFzb24gZm9yIHByaW50aW5nIGFsbCB0aGUgaW5mbyBpcyB0
+aGF0IGl0IG1heSBiZSB0b28gZGlmZmljdWx0IG9yIHRvbw0KbGF0ZSB0byBnYXRoZXIgdGhhdCBp
+bmZvIGFmdGVyIHRoZSBmYWN0LiBJIHRoaW5rIHRoaXMgaXMgZXNwZWNpYWxseSB0cnVlIGZvciBi
+b290DQplcnJvcnMsIHRob3VnaCBtYXliZSB0aGVyZSdzIGFub3RoZXIgd2F5IHRoYXQgSSBkb24n
+dCBrbm93IGFib3V0DQoocmUtcmVhZGluZyBCRVJUIGxhdGVyPykuDQoNCj4gSWYgbm90LCBpdCBu
+ZWVkcyB0byB0aWUgaW50byBvdXIgaW5mcmFzdHJ1Y3R1cmUgYW5kIHRoZSBlcnJvcnMgbmVlZA0K
+PiB0byBnbyBpbnRvIHRoZSBkZWNvZGluZyBjaGFpbiB3aGVyZSBkaWZmZXJlbnQgdGhpbmdzIGxv
+b2sgYXQgdGhlbSBhbmQNCj4gZmlsdGVyIHRoZW0uDQo+IA0KDQpSaWdodC4gSSB3YW50IHRvIHdv
+cmsgb24gZ2V0dGluZyB0aGlzIG1vcmUgaW50ZWdyYXRlZCB3aXRoIG91ciBleGlzdGluZw0KeDg2
+IGluZnJhc3RydWN0dXJlLiBCdXQgSSBkb24ndCB3YW50IHRvIHdhaXQgdW50aWwgd2UgZmlndXJl
+IGFsbCB0aGF0IG91dA0KYmVmb3JlIHdlIGhhdmUgc29tZSBzb3J0IG9mIENQRVIgZGVjb2Rpbmcu
+DQoNCj4gVG9ueSwgd2hhdCBhcmUgeW91ciBwbGFucyBoZXJlPw0KPiANCj4gUGVyaGFwcyB3ZSBj
+YW4gZmluYWxseSBnZXQgTUNFIGRlY29kaW5nIG9uIEludGVsIHRvbyA6LSkNCj4gDQoNClRoYW5r
+cywNCllhemVuDQo=
