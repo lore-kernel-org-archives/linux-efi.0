@@ -1,173 +1,76 @@
-From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH V1 1/3] x86/efi: Call efi_delete_dummy_variable() during
- efi subsystem initialization
-Date: Wed, 28 Feb 2018 08:06:59 +0800
-Message-ID: <201802280751.KB5Dfc0i%fengguang.wu@intel.com>
-References: <1519510249-31447-2-git-send-email-sai.praneeth.prakhya@intel.com>
+From: AKASHI Takahiro <takahiro.akashi@linaro.org>
+Subject: Re: [PATCH 0/2] ESRT fixes for relocatable kexec'd kernel
+Date: Wed, 28 Feb 2018 15:19:03 +0900
+Message-ID: <20180228061901.GJ6019@linaro.org>
+References: <1519414953-5478-1-git-send-email-tbaicar@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="huq684BweRXVnRxX"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1519510249-31447-2-git-send-email-sai.praneeth.prakhya@intel.com>
+In-Reply-To: <1519414953-5478-1-git-send-email-tbaicar@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: kbuild-all@01.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Sai Praneeth <sai.praneeth.prakhya@intel.com>, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, Dave Hansen <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dan Williams <dan.j.williams@intel.com>
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, jhugo@codeaurora.org, sgoel@codeaurora.org, timur@codeaurora.org
 List-Id: linux-efi@vger.kernel.org
 
+Tyler,
 
---huq684BweRXVnRxX
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+# I missed catching your patch as its subject doesn't contain arm64.
 
-Hi Sai,
+On Fri, Feb 23, 2018 at 12:42:31PM -0700, Tyler Baicar wrote:
+> Currently on arm64 ESRT memory does not appear to be properly blocked off.
+> Upon successful initialization, ESRT prints out the memory region that it
+> exists in like:
+> 
+> esrt: Reserving ESRT space from 0x000000000a4c1c18 to 0x000000000a4c1cf0.
+> 
+> But then by dumping /proc/iomem this region appears as part of System RAM
+> rather than being reserved:
+> 
+> 08f10000-0deeffff : System RAM
+> 
+> This causes issues when trying to kexec if the kernel is relocatable. When
+> kexec tries to execute, this memory can be selected to relocate the kernel to
+> which then overwrites all the ESRT information. Then when the kexec'd kernel
+> tries to initialize ESRT, it doesn't recognize the ESRT version number and
+> just returns from efi_esrt_init().
 
-Thank you for the patch! Yet something to improve:
+I'm not sure what is the root cause of your problem.
+Do you have good confidence that the kernel (2nd kernel image in this case?)
+really overwrite ESRT region?
+To my best knowledge, kexec is carefully designed not to do such a thing
+as it allocates a temporary buffer for kernel image and copies it to the
+final destination at the very end of the 1st kernel.
 
-[auto build test ERROR on linus/master]
-[also build test ERROR on v4.16-rc3 next-20180227]
-[if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
+My guess is that kexec, or rather kexec-tools, tries to load the kernel image
+at 0x8f80000 (or 0x9080000?, not sure) in your case. It may or may not be
+overlapped with ESRT.
+(Try "-d" option when executing kexec command for confirmation.)
 
-url:    https://github.com/0day-ci/linux/commits/Sai-Praneeth-Prakhya/Use-efi_rts_workqueue-to-invoke-EFI-Runtime-Services/20180227-075905
-config: ia64-allnoconfig (attached as .config)
-compiler: ia64-linux-gcc (GCC) 7.2.0
-reproduce:
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # save the attached .config to linux build tree
-        make.cross ARCH=ia64 
+Are you using initrd with kexec?
 
-All errors (new ones prefixed by >>):
+Thanks,
+-Takahiro AKASHI
 
->> drivers/firmware/efi/efi.c:36:10: fatal error: asm/efi.h: No such file or directory
-    #include <asm/efi.h>
-             ^~~~~~~~~~~
-   compilation terminated.
 
-vim +36 drivers/firmware/efi/efi.c
-
-    34	
-    35	#include <asm/early_ioremap.h>
-  > 36	#include <asm/efi.h>
-    37	
-
----
-0-DAY kernel test infrastructure                Open Source Technology Center
-https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
-
---huq684BweRXVnRxX
-Content-Type: application/gzip
-Content-Disposition: attachment; filename=".config.gz"
-Content-Transfer-Encoding: base64
-
-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
-
---huq684BweRXVnRxX--
+> This causes an early ioremap leak because
+> the memory allocated for 'va' is never unmapped. So first fix that error
+> case to properly unmap 'va' before returning.
+> 
+> This still leaves ESRT unable to initialize in the kexec'd kernel, so now
+> mark the ESRT memory block as nomap so that this memory is not treated as
+> System RAM. With this change I'm able to see that the ESRT data is not
+> overwritten when running a kexec'd kernel.
+> 
+> Tyler Baicar (2):
+>   efi/esrt: fix unsupported version initialization failure
+>   efi/esrt: mark ESRT memory region as nomap
+> 
+>  drivers/firmware/efi/esrt.c | 10 +++++++++-
+>  1 file changed, 9 insertions(+), 1 deletion(-)
+> 
+> -- 
+> Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+> Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+> a Linux Foundation Collaborative Project.
+> 
