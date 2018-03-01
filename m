@@ -1,113 +1,36 @@
-From: Stephen Rothwell <sfr@canb.auug.org.au>
-Subject: Re: linux-next: UEFI Secure boot lockdown patchset
-Date: Thu, 1 Mar 2018 23:15:11 +1100
-Message-ID: <20180301231511.4dd1e79f@canb.auug.org.au>
-References: <26787.1519902415@warthog.procyon.org.uk>
+From: "Luck, Tony" <tony.luck@intel.com>
+Subject: RE: [PATCH v2 0/8] Decode IA32/X64 CPER
+Date: Thu, 1 Mar 2018 16:38:24 +0000
+Message-ID: <3908561D78D1C84285E8C5FCA982C28F7B388473@ORSMSX110.amr.corp.intel.com>
+References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
+ <20180228084321.GA2969@pd.tnic>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
- boundary="Sig_/4==S0+IHk4B=DVeUSOUGCCI"; protocol="application/pgp-signature"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <26787.1519902415@warthog.procyon.org.uk>
+In-Reply-To: <20180228084321.GA2969@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: jmorris@namei.org, jforbes@redhat.com, mjg59@google.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, mtk.manpages@gmail.com
+To: Borislav Petkov <bp@suse.de>, Yazen Ghannam <Yazen.Ghannam@amd.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
---Sig_/4==S0+IHk4B=DVeUSOUGCCI
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
-
-Hi David,
-
-On Thu, 01 Mar 2018 11:06:55 +0000 David Howells <dhowells@redhat.com> wrot=
-e:
->
-> Can you pull the following branch into linux-next please?  It does three
-> things:
->=20
->  (1) It restricts various accesses userspace may make upon the kernel whe=
-n the
->      kernel is locked down.
->=20
->  (2) It engages the lockdown if UEFI Secure Boot mode is detected.
->=20
->  (3) It passes the UEFI Secure Boot mode indication across kexec.
->=20
-> The restrictions include:
->=20
->  - Enforcing the use of module signatures
->  - Enforcing the use of kexec image signatures
->  - Requring IMA to use secure boot rules
->  - Disabling:
->    - The kexec_load() syscall
->    - Use of /dev/{mem,kmem,port,kcore}
->    - Hibernation
->    - PCI BAR access
->    - Direct I/O port access
->  - Preventing direct port specification in drivers:
->    - SCSI EATA
->    - TIOCSSERIAL
->    - Module parameters
->  - Restricting:
->    - MSR access
->    - Certain ACPI features
->    - kprobes
->    - BPF
->    - Perf
->    - Debugfs
->=20
-> The aim of the restrictions is twofold:
->=20
->   (1) Prevent userspace from altering the kernel image directly (eg. by
->       /dev/mem) or indirectly (eg. by manipulating a device to do DMA);
->=20
->   (2) Prevent userspace from accessing crypto data stored in the kernel
->       (eg. filesystem keys).
->=20
-> A warning is logged if a restriction is triggered for which I've written a
-> manpage that is referenced in the message (see attached).
-
-Added from tomorrow.  I actually used this url:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git#efi-l=
-ock-down
-
-Thanks for adding your subsystem tree as a participant of linux-next.  As
-you may know, this is not a judgement of your code.  The purpose of
-linux-next is for integration testing and to lower the impact of
-conflicts between subsystems in the next merge window.=20
-
-You will need to ensure that the patches/commits in your tree/series have
-been:
-     * submitted under GPL v2 (or later) and include the Contributor's
-        Signed-off-by,
-     * posted to the relevant mailing list,
-     * reviewed by you (or another maintainer of your subsystem tree),
-     * successfully unit tested, and=20
-     * destined for the current or next Linux merge window.
-
-Basically, this should be just what you would send to Linus (or ask him
-to fetch).  It is allowed to be rebased if you deem it necessary.
-
---=20
-Cheers,
-Stephen Rothwell=20
-sfr@canb.auug.org.au
-
---Sig_/4==S0+IHk4B=DVeUSOUGCCI
-Content-Type: application/pgp-signature
-Content-Description: OpenPGP digital signature
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEENIC96giZ81tWdLgKAVBC80lX0GwFAlqX7s8ACgkQAVBC80lX
-0GxxiAf/fVZB9wRNZSPSOiTYZ7yUkUKgnGzIoKURgobYx+FmY8UIvKIMoq75km5T
-aeeG0HKenRwxAWSxPvVb0fsGtPOLTCAaltB1kWXLHZbAKL8LDAgA8Nz69D7oh+dw
-1YtBQkjAz7uyZjUGvQTSeH2jaSCw5tgvdn/hZoI1c9+X68Ululdacw/VKc4T/i46
-H7qpgn3SalPcfz1UHqeFYbt2lDKZPnYuqxZ2Tcmb3gBlc71O64VCLndds2IwDZ1p
-3xP7zv58Z54LHx69tbdI8LzwTItbL4DF66CGP5eYhUdZNlww1TZvOF7fG4+BbSqR
-jl+SWSAVV99QPh7KEPX74slCfyPj1w==
-=vg3S
------END PGP SIGNATURE-----
-
---Sig_/4==S0+IHk4B=DVeUSOUGCCI--
+PiBPbmUgbXVjaCBtb3JlIGltcG9ydGFudCB0aGluZyBJIGZvcmdvdCBhYm91dCB5ZXN0ZXJkYXk6
+IGhvdyBpcw0KPiB0aGlzIHRoaW5nIHBsYXlpbmcgaW50byBvdXIgUkFTIHJlcG9ydGluZywgeDg2
+IGRlY29kaW5nIGNoYWluLCBldGMNCj4gaW5mcmFzdHJ1Y3R1cmU/DQo+DQo+IElzIENQRVIgYnlw
+YXNzaW5nIGl0IGNvbXBsZXRlbHkgYW5kIHRoZSBmaXJtd2FyZSBpcyBkb2luZyBldmVyeXRoaW5n
+DQo+IG5vdz8gSSBzdXJlIGhvcGUgbm90Lg0KDQpJbnRlbCBnaXZlcyBPRU1zIGxvdHMgb2Ygb3B0
+aW9ucyB0byBjYXRjaCBhbmQgdHdlYWsgdGhlIGVycm9yIHBhdGggaW4NCkJJT1MgU01NIGNvZGUu
+ICBTbyBpdCBpcyBwb3NzaWJsZSB0aGF0IHNvbWUgc3lzdGVtcyBtYXkgZ28gaW50bw0KQklPUyB3
+aGljaCB3b3VsZCBkbyBwbGF0Zm9ybSBsZXZlbCBhbmFseXNpcyBhbmQgY3JlYXRlIGEgQ1BFUiB0
+bw0KZmVlZCB0byB0aGUgT1MuIEhvcGVmdWxseSBhbnlvbmUgZG9pbmcgdGhhdCB3b3VsZCBjbGVh
+ciB0aGUgbWFjaGluZQ0KY2hlY2sgYmFuayBhbmQgc3VwcHJlc3MgQ01DSSB0byBhdm9pZCBkb3Vi
+bGUgcmVwb3J0aW5nIHRoZSBzYW1lDQplcnJvci4NCg0KPiBJZiBub3QsIGl0IG5lZWRzIHRvIHRp
+ZSBpbnRvIG91ciBpbmZyYXN0cnVjdHVyZSBhbmQgdGhlIGVycm9ycyBuZWVkDQo+IHRvIGdvIGlu
+dG8gdGhlIGRlY29kaW5nIGNoYWluIHdoZXJlIGRpZmZlcmVudCB0aGluZ3MgbG9vayBhdCB0aGVt
+IGFuZA0KPiBmaWx0ZXIgdGhlbS4NCg0KR29vZCBwb2ludC4NCg0KPiBUb255LCB3aGF0IGFyZSB5
+b3VyIHBsYW5zIGhlcmU/DQoNCk5vdGhpbmcgc29saWQgeWV0Lg0KDQo+IFBlcmhhcHMgd2UgY2Fu
+IGZpbmFsbHkgZ2V0IE1DRSBkZWNvZGluZyBvbiBJbnRlbCB0b28gOi0pDQoNCkl0J3Mgb24gYSBt
+ZW50YWwgbGlzdCAuLi4gSSBzaG91bGQgcHJvYmFibHkgYWRkIGl0IHRvIG91ciBpbnRlcm5hbA0K
+dHJhY2tlcnMgc28gdGhhdCB3ZSBhY3R1YWxseSBkbyBpdCBzb29uZXIgcmF0aGVyIHRoYW4gaW4g
+c29tZQ0KZGlzdGFudCBmdXR1cmUuDQoNCi1Ub255IA0K
