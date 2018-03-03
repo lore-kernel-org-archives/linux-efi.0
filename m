@@ -1,44 +1,114 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH V4 0/3] Use mm_struct and switch_mm() instead of manually
-Date: Sat, 3 Mar 2018 20:40:01 +0000
-Message-ID: <CAKv+Gu_eWymAuFqXiHiVk=Ys_w0UZvpVob6-vZ8yCGahsPNVqA@mail.gmail.com>
-References: <1516309264-23926-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <20180126211643.GB6520@codeblueprint.co.uk> <CAKv+Gu-mrMpgFVssUH1RXP6GAKuPNtQwwsCNTqv2Oa48FrU+Bg@mail.gmail.com>
+From: Sasha Levin <Alexander.Levin@microsoft.com>
+Subject: [PATCH AUTOSEL for 4.9 054/219] x86/boot/32: Defer resyncing
+ initial_page_table until per-cpu is set up
+Date: Sat, 3 Mar 2018 22:28:27 +0000
+Message-ID: <20180303222716.26640-54-alexander.levin@microsoft.com>
+References: <20180303222716.26640-1-alexander.levin@microsoft.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu-mrMpgFVssUH1RXP6GAKuPNtQwwsCNTqv2Oa48FrU+Bg@mail.gmail.com>
+In-Reply-To: <20180303222716.26640-1-alexander.levin@microsoft.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>
+To: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>
+Cc: Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Garnier <thgarnie@google.com>, Thomas Gleixner <tglx@linutronix.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Ingo Molnar <mingo@kernel.org>, Sasha Levin <Alexander.Levin@microsoft.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 29 January 2018 at 10:51, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> On 26 January 2018 at 21:16, Matt Fleming <matt@codeblueprint.co.uk> wrote:
->> On Thu, 18 Jan, at 01:01:04PM, Sai Praneeth Prakhya wrote:
->>> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
->>>
->>> Presently, in x86, to invoke any efi function like
->>> efi_set_virtual_address_map() or any efi_runtime_service() the code path
->>> typically involves read_cr3() (save previous pgd), write_cr3()
->>> (write efi_pgd) and calling efi function. Likewise after returning from
->>> efi function the code path typically involves read_cr3() (save efi_pgd),
->>> write_cr3() (write previous pgd). We do this couple of times in efi
->>> subsystem of Linux kernel, instead we can use helper function
->>> efi_switch_mm() to do this. This improves readability and maintainability.
->>> Also, instead of maintaining a separate struct "efi_scratch" to store/restore
->>> efi_pgd, we can use mm_struct to do this.
->>
->> FWIW this series looks OK to me.
->>
->> Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
->
-> Thanks Matt
->
-> I know the x86 guys have been rather busy lately, so I will give them
-> some more time to respond. If there are no objections raised, I will
-> queue it for v4.17 in a couple of weeks.
+From: Andy Lutomirski <luto@kernel.org>
 
-Queued in linux-efi/next
+[ Upstream commit 23b2a4ddebdd17fad265b4bb77256c2e4ec37dee ]
 
-Thanks all.
+The x86 smpboot trampoline expects initial_page_table to have the
+GDT mapped.  If the GDT ends up in a virtually mapped per-cpu page,
+then it won't be in the page tables at all until perc-pu areas are
+set up.  The result will be a triple fault the first time that the
+CPU attempts to access the GDT after LGDT loads the perc-pu GDT.
+
+This appears to be an old bug, but somehow the GDT fixmap rework
+is triggering it.  This seems to have something to do with the
+memory layout.
+
+Signed-off-by: Andy Lutomirski <luto@kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Boris Ostrovsky <boris.ostrovsky@oracle.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Brian Gerst <brgerst@gmail.com>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Josh Poimboeuf <jpoimboe@redhat.com>
+Cc: Juergen Gross <jgross@suse.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Garnier <thgarnie@google.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/a553264a5972c6a86f9b5caac237470a0c74a720.149=
+0218061.git.luto@kernel.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
+---
+ arch/x86/kernel/setup.c        | 15 ---------------
+ arch/x86/kernel/setup_percpu.c | 21 +++++++++++++++++++++
+ 2 files changed, 21 insertions(+), 15 deletions(-)
+
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 6b55012d02a3..d1a214287fe3 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -1200,21 +1200,6 @@ void __init setup_arch(char **cmdline_p)
+=20
+ 	kasan_init();
+=20
+-#ifdef CONFIG_X86_32
+-	/* sync back kernel address range */
+-	clone_pgd_range(initial_page_table + KERNEL_PGD_BOUNDARY,
+-			swapper_pg_dir     + KERNEL_PGD_BOUNDARY,
+-			KERNEL_PGD_PTRS);
+-
+-	/*
+-	 * sync back low identity map too.  It is used for example
+-	 * in the 32-bit EFI stub.
+-	 */
+-	clone_pgd_range(initial_page_table,
+-			swapper_pg_dir     + KERNEL_PGD_BOUNDARY,
+-			min(KERNEL_PGD_PTRS, KERNEL_PGD_BOUNDARY));
+-#endif
+-
+ 	tboot_probe();
+=20
+ 	map_vsyscall();
+diff --git a/arch/x86/kernel/setup_percpu.c b/arch/x86/kernel/setup_percpu.=
+c
+index 2bbd27f89802..bbba27269fdd 100644
+--- a/arch/x86/kernel/setup_percpu.c
++++ b/arch/x86/kernel/setup_percpu.c
+@@ -287,4 +287,25 @@ void __init setup_per_cpu_areas(void)
+=20
+ 	/* Setup cpu initialized, callin, callout masks */
+ 	setup_cpu_local_masks();
++
++#ifdef CONFIG_X86_32
++	/*
++	 * Sync back kernel address range.  We want to make sure that
++	 * all kernel mappings, including percpu mappings, are available
++	 * in the smpboot asm.  We can't reliably pick up percpu
++	 * mappings using vmalloc_fault(), because exception dispatch
++	 * needs percpu data.
++	 */
++	clone_pgd_range(initial_page_table + KERNEL_PGD_BOUNDARY,
++			swapper_pg_dir     + KERNEL_PGD_BOUNDARY,
++			KERNEL_PGD_PTRS);
++
++	/*
++	 * sync back low identity map too.  It is used for example
++	 * in the 32-bit EFI stub.
++	 */
++	clone_pgd_range(initial_page_table,
++			swapper_pg_dir     + KERNEL_PGD_BOUNDARY,
++			min(KERNEL_PGD_PTRS, KERNEL_PGD_BOUNDARY));
++#endif
+ }
+--=20
+2.14.1
