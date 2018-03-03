@@ -1,58 +1,44 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH 00/30] security, efi: Add kernel lockdown
-Date: Fri, 2 Mar 2018 17:18:01 -0800
-Message-ID: <20180302171801.6ed00ef19e0b970d90094556@linux-foundation.org>
-References: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH V4 0/3] Use mm_struct and switch_mm() instead of manually
+Date: Sat, 3 Mar 2018 20:40:01 +0000
+Message-ID: <CAKv+Gu_eWymAuFqXiHiVk=Ys_w0UZvpVob6-vZ8yCGahsPNVqA@mail.gmail.com>
+References: <1516309264-23926-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <20180126211643.GB6520@codeblueprint.co.uk> <CAKv+Gu-mrMpgFVssUH1RXP6GAKuPNtQwwsCNTqv2Oa48FrU+Bg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <151024863544.28329.2436580122759221600.stgit@warthog.procyon.org.uk>
+In-Reply-To: <CAKv+Gu-mrMpgFVssUH1RXP6GAKuPNtQwwsCNTqv2Oa48FrU+Bg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: linux-security-module@vger.kernel.org, gnomes@lxorguk.ukuu.org.uk, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, jforbes@redhat.com
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S. Tsirkin" <mst@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu,  9 Nov 2017 17:30:36 +0000 David Howells <dhowells@redhat.com> wrote:
+On 29 January 2018 at 10:51, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+> On 26 January 2018 at 21:16, Matt Fleming <matt@codeblueprint.co.uk> wrote:
+>> On Thu, 18 Jan, at 01:01:04PM, Sai Praneeth Prakhya wrote:
+>>> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+>>>
+>>> Presently, in x86, to invoke any efi function like
+>>> efi_set_virtual_address_map() or any efi_runtime_service() the code path
+>>> typically involves read_cr3() (save previous pgd), write_cr3()
+>>> (write efi_pgd) and calling efi function. Likewise after returning from
+>>> efi function the code path typically involves read_cr3() (save efi_pgd),
+>>> write_cr3() (write previous pgd). We do this couple of times in efi
+>>> subsystem of Linux kernel, instead we can use helper function
+>>> efi_switch_mm() to do this. This improves readability and maintainability.
+>>> Also, instead of maintaining a separate struct "efi_scratch" to store/restore
+>>> efi_pgd, we can use mm_struct to do this.
+>>
+>> FWIW this series looks OK to me.
+>>
+>> Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+>
+> Thanks Matt
+>
+> I know the x86 guys have been rather busy lately, so I will give them
+> some more time to respond. If there are no objections raised, I will
+> queue it for v4.17 in a couple of weeks.
 
-> Here's a set of patches to institute a "locked-down mode" in the kernel and
-> to trigger that mode if the kernel is booted in secure-boot mode or through
-> the command line.
-> 
-> Enabling CONFIG_LOCK_DOWN_KERNEL makes lockdown mode available.
-> 
-> Enabling CONFIG_ALLOW_LOCKDOWN_LIFT_BY_SYSRQ will allow a SysRq combination
-> to lift the lockdown.  On x86 this is SysRq+x.  The keys must be pressed on
-> an attached keyboard.
-> 
-> Enabling CONFIG_LOCK_DOWN_IN_EFI_SECURE_BOOT will cause EFI secure boot to
-> trigger kernel lockdown.
-> 
-> Inside the kernel, kernel_is_locked_down() is used to check if the kernel
-> is in lockdown mode.
-> 
-> Note that the secure boot mode entry doesn't work if the kernel is booted
-> from older versions of i386/x86_64 Grub as there's a bug in Grub whereby it
-> doesn't initialise the boot_params correctly.  The incorrect initialisation
-> causes sanitize_boot_params() to be triggered, thereby zapping the secure
-> boot flag determined by the EFI boot wrapper.
-> 
-> A manual page, kernel_lockdown.7, is proposed, to which people will be
-> directed by messages in dmesg.  This lists the features that are restricted
-> amongst other things.  [Note: I need to update this to mention IMA, so I'll
-> reply with that later].
+Queued in linux-efi/next
 
-I saw all this pop up in linux-next and got curious.
-
-This changelog didn't uncurious me at all.  The
-LOCK_DOWN_IN_EFI_SECURE_BOOT Kconfig help is unilluminating.  A bit of
-googling led me to kernel_lockdown.7 (https://lwn.net/Articles/735564/)
-which kinda helped.
-
-But still.  This is a big, straggly feature and presumably is still
-missing things and presumably will require ongoing maintenance as we
-add new kernel capabilities.  What do we get in return for all of this?
-What are the usecases for this feature and why would anyone want one? 
-What's the value to our users?
-
-Thanks.
+Thanks all.
