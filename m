@@ -1,86 +1,264 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V2 3/3] efi: Use efi_rts_workqueue to invoke EFI Runtime
- Services
-Date: Tue, 6 Mar 2018 00:56:27 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F2E580926@ORSMSX114.amr.corp.intel.com>
-References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1520292190-5027-4-git-send-email-sai.praneeth.prakhya@intel.com>
- <CAPcyv4ihj+5z8GS13MsRDOKiwhBDqA=YW3MiTh+OXS4x3Kf38Q@mail.gmail.com>
+From: AKASHI Takahiro <takahiro.akashi@linaro.org>
+Subject: Re: [PATCH 0/2] ESRT fixes for relocatable kexec'd kernel
+Date: Tue, 6 Mar 2018 18:00:17 +0900
+Message-ID: <20180306090015.GA25863@linaro.org>
+References: <1519414953-5478-1-git-send-email-tbaicar@codeaurora.org>
+ <20180228061901.GJ6019@linaro.org>
+ <1f03865f-2d22-8ba1-a276-a6b49d7c14de@codeaurora.org>
+ <20180301025026.GK6019@linaro.org>
+ <7cd3f462-c619-9d82-73a0-2f3bc9de095e@codeaurora.org>
+ <20180302055325.GQ6019@linaro.org>
+ <4d21342c-a81e-c3ef-8c5f-9d952c7d8fac@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPcyv4ihj+5z8GS13MsRDOKiwhBDqA=YW3MiTh+OXS4x3Kf38Q@mail.gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <4d21342c-a81e-c3ef-8c5f-9d952c7d8fac@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Williams, Dan J" <dan.j.williams@intel.com>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: Tyler Baicar <tbaicar@codeaurora.org>
+Cc: Jeffrey Hugo <jhugo@codeaurora.org>, ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, sgoel@codeaurora.org, timur@codeaurora.org
 List-Id: linux-efi@vger.kernel.org
 
-PiA+IFByZXNlbnRseSwgZWZpX3J1bnRpbWVfc2VydmljZXMoKSBhcmUgZXhlY3V0ZWQgYnkgZmly
-bXdhcmUgaW4gcHJvY2Vzcw0KPiA+IGNvbnRleHQuIFRvIGV4ZWN1dGUgZWZpX3J1bnRpbWVfc2Vy
-dmljZSgpLCBrZXJuZWwgc3dpdGNoZXMgdGhlIHBhZ2UNCj4gPiBkaXJlY3RvcnkgZnJvbSBzd2Fw
-cGVyX3BnZCB0byBlZmlfcGdkLiBIb3dldmVyLCBlZmlfcGdkIGRvZXNuJ3QgaGF2ZQ0KPiA+IGFu
-eSB1c2VyIHNwYWNlIG1hcHBpbmdzLiBBIHBvdGVudGlhbCBpc3N1ZSBjb3VsZCBiZSwgZm9yIGlu
-c3RhbmNlLCBhbg0KPiA+IE5NSSBpbnRlcnJ1cHQgKGxpa2UgcGVyZikgdHJ5aW5nIHRvIHByb2Zp
-bGUgc29tZSB1c2VyIGRhdGEgd2hpbGUgaW4gZWZpX3BnZC4NCj4gPg0KPiA+IEEgc29sdXRpb24g
-Zm9yIHRoaXMgaXNzdWUgY291bGQgYmUgdG8gdXNlIGt0aHJlYWQgdG8gcnVuDQo+ID4gZWZpX3J1
-bnRpbWVfc2VydmljZSgpLiBXaGVuIGEgdXNlci9rZXJuZWwgdGhyZWFkIHJlcXVlc3RzIHRvIGV4
-ZWN1dGUNCj4gPiBlZmlfcnVudGltZV9zZXJ2aWNlKCksIGtlcm5lbCBvZmYtbG9hZHMgdGhpcyB3
-b3JrIHRvIGt0aHJlYWQgd2hpY2ggaW4NCj4gPiB0dXJuIHVzZXMgZWZpX3BnZC4gQW55dGhpbmcg
-dGhhdCB0cmllcyB0byB0b3VjaCB1c2VyIHNwYWNlIGFkZHJlc3Nlcw0KPiA+IHdoaWxlIGluIGt0
-aHJlYWQgaXMgdGVybWluYWxseSBicm9rZW4uIFRoaXMgcGF0Y2ggYWRkcyBzdXBwb3J0IHRvIGVm
-aQ0KPiA+IHN1YnN5c3RlbSB0byBoYW5kbGUgYWxsIGNhbGxzIHRvIGVmaV9ydW50aW1lX3NlcnZp
-Y2VzKCkgdXNpbmcgYSB3b3JrDQo+ID4gcXVldWUgKHdoaWNoIGluIHR1cm4gdXNlcyBrdGhyZWFk
-KS4NCj4gPg0KPiA+IEltcGxlbWVudGF0aW9uIHN1bW1hcnk6DQo+ID4gLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0NCj4gPiAxLiBXaGVuIHVzZXIva2VybmVsIHRocmVhZCByZXF1ZXN0cyB0byBleGVj
-dXRlIGVmaV9ydW50aW1lX3NlcnZpY2UoKSwNCj4gPiBlbnF1ZXVlIHdvcmsgdG8gZWZpX3J0c193
-b3JrcXVldWUuDQo+ID4gMi4gQ2FsbGVyIHRocmVhZCB3YWl0cyB1bnRpbCB0aGUgd29yayBpcyBm
-aW5pc2hlZCBiZWNhdXNlIGl0J3MNCj4gPiBkZXBlbmRlbnQgb24gdGhlIHJldHVybiBzdGF0dXMg
-b2YgZWZpX3J1bnRpbWVfc2VydmljZSgpLg0KPiA+DQo+ID4gU2VtYW50aWNzIHRvIHBhY2sgYXJn
-dW1lbnRzIGluIGVmaV9ydW50aW1lX3dvcmsgKGhhcyB2b2lkIHBvaW50ZXJzKToNCj4gPiAxLiBJ
-ZiBhcmd1bWVudCBpcyBhIHBvaW50ZXIgKG9mIGFueSB0eXBlKSwgcGFzcyBpdCBhcyBpcy4NCj4g
-PiAyLiBJZiBhcmd1bWVudCBpcyBhIHZhbHVlIChvZiBhbnkgdHlwZSksIGFkZHJlc3Mgb2YgdGhl
-IHZhbHVlIGlzDQo+ID4gcGFzc2VkLg0KPiA+DQo+ID4gSW50cm9kdWNlIGEgaGFuZGxlciBmdW5j
-dGlvbiAoY2FsbGVkIGVmaV9jYWxsX3J0cygpKSB0aGF0DQo+ID4gICAgICAgICBhLiB1bmRlcnN0
-YW5kcyBlZmlfcnVudGltZV93b3JrIGFuZA0KPiA+ICAgICAgICAgYi4gaW52b2tlcyB0aGUgYXBw
-cm9wcmlhdGUgZWZpX3J1bnRpbWVfc2VydmljZSgpIHdpdGggdGhlDQo+ID4gICAgICAgICBhcHBy
-b3ByaWF0ZSBhcmd1bWVudHMNCj4gPg0KPiA+IFNlbWFudGljcyBmb2xsb3dlZCBieSBlZmlfY2Fs
-bF9ydHMoKSB0byB1bmRlcnN0YW5kIGVmaV9ydW50aW1lX3dvcms6DQo+ID4gMS4gSWYgYXJndW1l
-bnQgd2FzIGEgcG9pbnRlciwgcmVjYXN0IGl0IGZyb20gdm9pZCBwb2ludGVyIHRvIG9yaWdpbmFs
-DQo+ID4gcG9pbnRlciB0eXBlLg0KPiA+IDIuIElmIGFyZ3VtZW50IHdhcyBhIHZhbHVlLCByZWNh
-c3QgaXQgZnJvbSB2b2lkIHBvaW50ZXIgdG8gb3JpZ2luYWwNCj4gPiBwb2ludGVyIHR5cGUgYW5k
-IGRlcmVmZXJlbmNlIGl0Lg0KPiA+DQo+ID4gcHN0b3JlIHdyaXRlcyBjb3VsZCBwb3RlbnRpYWxs
-eSBiZSBpbnZva2VkIGluIGludGVycnVwdCBjb250ZXh0IGFuZCBpdA0KPiA+IHVzZXMgc2V0X3Zh
-cmlhYmxlPD4oKSBhbmQgcXVlcnlfdmFyaWFibGVfaW5mbzw+KCkgdG8gc3RvcmUgbG9ncy4gSWYg
-d2UNCj4gPiBpbnZva2UgZWZpX3J1bnRpbWVfc2VydmljZXMoKSB0aHJvdWdoIGVmaV9ydHNfd3Eg
-d2hpbGUgaW4gYXRvbWljKCkNCj4gPiBrZXJuZWwgaXNzdWVzIGEgd2FybmluZyAoInNjaGVkdWxp
-bmcgd2lsZSBpbiBhdG9taWMiKSBhbmQgcHJpbnRzIHN0YWNrDQo+ID4gdHJhY2UuIE9uZSB3YXkg
-dG8gb3ZlcmNvbWUgdGhpcyBpcyB0byBub3QgbWFrZSB0aGUgY2FsbGVyIHByb2Nlc3Mgd2FpdA0K
-PiA+IGZvciB0aGUgd29ya2VyIHRocmVhZCB0byBmaW5pc2guIFRoaXMgYXBwcm9hY2ggYnJlYWtz
-IHBzdG9yZSBpLmUuIHRoZQ0KPiA+IGxvZyBtZXNzYWdlcyBhcmVuJ3Qgd3JpdHRlbiB0byBlZmkg
-dmFyaWFibGVzLiBIZW5jZSwgcHN0b3JlIGNhbGxzDQo+ID4gZWZpX3J1bnRpbWVfc2VydmljZXMo
-KSB3aXRob3V0IHVzaW5nIGVmaV9ydHNfd3Egb3IgaW4gb3RoZXIgd29yZHMNCj4gPiBlZmlfcnRz
-X3dxIHdpbGwgYmUgdXNlZCB1bmNvbmRpdGlvbmFsbHkgZm9yIGFsbCB0aGUNCj4gPiBlZmlfcnVu
-dGltZV9zZXJ2aWNlcygpIGV4Y2VwdCBzZXRfdmFyaWFibGU8PigpIGFuZA0KPiA+IHF1ZXJ5X3Zh
-cmlhYmxlX2luZm88PigpDQo+IA0KPiANCj4gSXMgdGhlcmUgYSBwbGFjZSBpbiB0aGUgc3lzdGVt
-IHJlYm9vdCBwYXRoIHdoZXJlIHdlIGNhbiB0cnkgdG8gZmx1c2ggdGhlc2UNCj4gYXN5bmNocm9u
-b3VzIHBzdG9yZSB3cml0ZXMgZnJvbSBpbnRlcnJ1cHQgY29udGV4dD8NCg0KSSBkb24ndCB0aGlu
-ayBzbyBiZWNhdXNlLCB0aGUgaXNzdWUgaXMgbm90IHdpdGggdGhlIHBzdG9yZSB3cml0ZXMgYnV0
-IHdpdGggcHN0b3JlDQp1c2luZyBlZmkgYXMgYmFja2luZyBzdG9yZS4gQW55dGhpbmcgY291bGQg
-cmVnaXN0ZXIgYXMgcHN0b3JlIGJhY2tlbmQsIGVnOiBSQU0sDQpBQ1BJLUVSU1QgZXRjLi4gYW5k
-IEFGQUlLLCB0aGV5IGRvbuKAmXQgdXNlIHdvcmsgcXVldWVzIHRvIHN0b3JlIGxvZ3MuIE5vdyB0
-aGF0DQplZmlfcnVudGltZV9zZXJ2aWNlcygpIHVzZXMgd29yayBxdWV1ZXMsIHdlIHVuZm9ydHVu
-YXRlbHkgaGF2ZSB0byBoYXZlIHRoaXMgaGFjay4NCg0KPiBJdCBzZWVtcyB1bmZvcnR1bmF0ZSB0
-aGF0DQo+IHdlIG5lZWQgdG8gaGF2ZSB0aGlzIHdpZGUgZXhjZXB0aW9uIGZvciBhbGwNCj4gc2V0
-X3ZhcmlhYmxlKCkgY2FsbHMuDQoNClRydWUsIGJhc2ljYWxseSBhbnkgZWZpX3J1bnRpbWVfc2Vy
-dmljZSgpIHRoYXQgbWlnaHQgZ2V0IGNhbGxlZCBpbiBpbnRlcnJ1cHQgY29udGV4dC4NCkkgYW0g
-bm90IHZlcnkgaGFwcHkgdG8gaGF2ZSB0aGUgaGFjayB0b28sIGJ1dCBkaWRu4oCZdCBmaW5kIG90
-aGVyIHdheS4NCg0KRWl0aGVyIHRoYXQgb3Igc3dpdGNoIHRvIGFuIGV4cGxpY2l0ICJlbWVyZ2Vu
-Y3kgbW9kZSIgd2hlcmUNCj4gd2Ugc3RvcCBjYXJpbmcgYWJvdXQgcHJvdGVjdGluZyB0aGUgc3lz
-dGVtIGZyb20gRUZJIHJ1bnRpbWUgY29kZSBiZWNhdXNlDQo+IHdlJ3JlIGFscmVhZHkgY3Jhc2hp
-bmcuDQoNClNob3VsZCB3ZSBjYXJlIGFib3V0IGV4dHJhIHdhcm5pbmcgKHNjaGVkdWxpbmcgd2hp
-bGUgaW4gYXRvbWljKSB3aGVuIHdlIGFyZSBhbHJlYWR5DQpjcmFzaGluZz8gVGhpcyBzb3VuZHMg
-a2luZCBvZiBkZWJhdGFibGUuIEkgd2lsbCB3YWl0IGZvciBmZWVkYmFjayBmcm9tIGNvbW11bml0
-eSBpdCB0aGV5DQp0aGluayBpdCdzIE9LIG9yIG1heWJlIGEgYmV0dGVyIHNvbHV0aW9uLg0KDQpS
-ZWdhcmRzLA0KU2FpDQo=
+Tyler, Jeffrey,
+
+On Fri, Mar 02, 2018 at 08:27:11AM -0500, Tyler Baicar wrote:
+> On 3/2/2018 12:53 AM, AKASHI Takahiro wrote:
+> >Tyler, Jeffrey,
+> >
+> >[Note: This issue takes place in kexec, not kdump. So to be precise,
+> >it is not the same phenomenon as what I addressed in [1],[2]:
+> >   [1] http://lists.infradead.org/pipermail/linux-arm-kernel/2018-February/557254.html
+> >   [2] http://lists.infradead.org/pipermail/linux-arm-kernel/2018-January/553098.html
+> >]
+> >
+> >On Thu, Mar 01, 2018 at 12:56:38PM -0500, Tyler Baicar wrote:
+> >>Hello,
+> >>
+> >>On 2/28/2018 9:50 PM, AKASHI Takahiro wrote:
+> >>>Hi,
+> >>>
+> >>>On Wed, Feb 28, 2018 at 08:39:42AM -0700, Jeffrey Hugo wrote:
+> >>>>On 2/27/2018 11:19 PM, AKASHI Takahiro wrote:
+> >>>>>Tyler,
+> >>>>>
+> >>>>># I missed catching your patch as its subject doesn't contain arm64.
+> >>>>>
+> >>>>>On Fri, Feb 23, 2018 at 12:42:31PM -0700, Tyler Baicar wrote:
+> >>>>>>Currently on arm64 ESRT memory does not appear to be properly blocked off.
+> >>>>>>Upon successful initialization, ESRT prints out the memory region that it
+> >>>>>>exists in like:
+> >>>>>>
+> >>>>>>esrt: Reserving ESRT space from 0x000000000a4c1c18 to 0x000000000a4c1cf0.
+> >>>>>>
+> >>>>>>But then by dumping /proc/iomem this region appears as part of System RAM
+> >>>>>>rather than being reserved:
+> >>>>>>
+> >>>>>>08f10000-0deeffff : System RAM
+> >>>>>>
+> >>>>>>This causes issues when trying to kexec if the kernel is relocatable. When
+> >>>>>>kexec tries to execute, this memory can be selected to relocate the kernel to
+> >>>>>>which then overwrites all the ESRT information. Then when the kexec'd kernel
+> >>>>>>tries to initialize ESRT, it doesn't recognize the ESRT version number and
+> >>>>>>just returns from efi_esrt_init().
+> >>>>>I'm not sure what is the root cause of your problem.
+> >>>>>Do you have good confidence that the kernel (2nd kernel image in this case?)
+> >>>>>really overwrite ESRT region?
+> >>>>According to my debug, yes.
+> >>>>Using JTAG, I was able to determine that the ESRT memory region was getting
+> >>>>overwritten by the secondary kernel in
+> >>>>kernel/arch/arm64/kernel/relocate_kernel.S - specifically the "copy_page"
+> >>>>line of arm64_relocate_new_kernel()
+> >>>>
+> >>>>>To my best knowledge, kexec is carefully designed not to do such a thing
+> >>>>>as it allocates a temporary buffer for kernel image and copies it to the
+> >>>>>final destination at the very end of the 1st kernel.
+> >>>>>
+> >>>>>My guess is that kexec, or rather kexec-tools, tries to load the kernel image
+> >>>>>at 0x8f80000 (or 0x9080000?, not sure) in your case. It may or may not be
+> >>>>>overlapped with ESRT.
+> >>>>>(Try "-d" option when executing kexec command for confirmation.)
+> >>>>With -d, I see
+> >>>>
+> >>>>get_memory_ranges_iomem_cb: 0000000009611000 - 000000000e5fffff : System RAM
+> >>>>
+> >>>>That overlaps the ESRT reservation -
+> >>>>[ 0.000000] esrt: Reserving ESRT space from 0x000000000b708718 to
+> >>>>0x000000000b7087f0
+> >>>>
+> >>>>>Are you using initrd with kexec?
+> >>>>Yes
+> >>>To make the things clear, can you show me, if possible, the followings:
+> >>I have attached all of these:
+> >Many thanks.
+> >According to the data, ESRT was overwritten by initrd, not the kernel image.
+> >It doesn't matter to you though :)
+> >
+> >The solution would be, as Ard suggested, that more information be
+> >added to /proc/iomem.
+> >I'm going to fix the issue as quickly as possible.
+> Great, thank you!! Please add us to the fix and we will gladly test it out.
+
+I have created a workaround patch, attached below, as a kind of PoC.
+Can you give it a go, please?
+You need another patch for kexec-tools, too. See
+https:/git.linaro.org/people/takahiro.akashi/kexecl-tools.git arm64/resv_mem
+
+With this patch, extra entries for firmware-reserved memory resources,
+which means any regions that are already reserved before arm64_memblock_init(),
+or specifically efi/acpi tables in this case, are added to /proc/iomem.
+
+ $ cat /proc/iomem (on my qemu+edk2 execution)
+        ...
+        40000000-5871ffff : System RAM
+          40080000-40f1ffff : Kernel code
+          41040000-411e9fff : Kernel data
+          54400000-583fffff : Crash kernel
+          58590000-585effff : reserved
+          58700000-5871ffff : reserved
+        58720000-58b5ffff : reserved
+        58b60000-5be3ffff : System RAM
+          58b61000-58b61fff : reserved
+          59a7b118-59a7b667 : reserved
+        5be40000-5becffff : reserved
+        5bed0000-5bedffff : System RAM
+          5bee0000-5bffffff : reserved
+        5c000000-5fffffff : System RAM
+          5ec00000-5edfffff : reserved
+        8000000000-ffffffffff : PCI Bus 0000:00
+          8000000000-8000003fff : 0000:00:01.0
+            8000000000-8000003fff : virtio-pci-modern
+
+While all the entries are currently marked as just "reserved," we'd better
+give them more specific names for general/extensive use.
+(Then it will require modifying respective fw/drivers.)
+
+Kexec-tools will allocate spaces for kernel, initrd and dtb so that
+they will not be overlapped with "reserved" memory.
+
+As I haven't run extensive tests, please let me know if you find
+any problems.
+
+Thanks,
+-Takahiro AKASHI
+
+> 
+> Thanks,
+> Tyler
+> 
+> -- 
+> Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+> Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+> a Linux Foundation Collaborative Project.
+> 
+===8<===
+>From 57d93b89d16b967c913f3949601a5559ddf4aa57 Mon Sep 17 00:00:00 2001
+From: AKASHI Takahiro <takahiro.akashi@linaro.org>
+Date: Fri, 2 Mar 2018 16:39:18 +0900
+Subject: [PATCH] arm64: kexec: set asdie firmware-reserved memory regions
+
+Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+---
+ arch/arm64/kernel/setup.c | 24 ++++++++++++++++++++----
+ arch/arm64/mm/init.c      | 21 +++++++++++++++++++++
+ 2 files changed, 41 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+index 30ad2f085d1f..997f07e86243 100644
+--- a/arch/arm64/kernel/setup.c
++++ b/arch/arm64/kernel/setup.c
+@@ -87,6 +87,9 @@ static struct resource mem_res[] = {
+ #define kernel_code mem_res[0]
+ #define kernel_data mem_res[1]
+ 
++/* TODO: Firmware-reserved memory resources */
++extern struct memblock_type fw_mem;
++
+ /*
+  * The recorded values of x0 .. x3 upon kernel entry.
+  */
+@@ -206,7 +209,20 @@ static void __init request_standard_resources(void)
+ {
+ 	struct memblock_region *region;
+ 	struct resource *res;
++	int i;
++
++	/* add firmware-reserved memory first */
++	for (i = 1; i < fw_mem.cnt; i++) {
++		res = alloc_bootmem_low(sizeof(*res));
++		res->name  = "reserved";
++		res->flags = IORESOURCE_MEM;
++		res->start = fw_mem.regions[i].base;
++		res->end = fw_mem.regions[i].base + fw_mem.regions[i].size - 1;
+ 
++		request_resource(&iomem_resource, res);
++	}
++
++	/* add standard resources */
+ 	kernel_code.start   = __pa_symbol(_text);
+ 	kernel_code.end     = __pa_symbol(__init_begin - 1);
+ 	kernel_data.start   = __pa_symbol(_sdata);
+@@ -224,19 +240,19 @@ static void __init request_standard_resources(void)
+ 		res->start = __pfn_to_phys(memblock_region_memory_base_pfn(region));
+ 		res->end = __pfn_to_phys(memblock_region_memory_end_pfn(region)) - 1;
+ 
+-		request_resource(&iomem_resource, res);
++		insert_resource(&iomem_resource, res);
+ 
+ 		if (kernel_code.start >= res->start &&
+ 		    kernel_code.end <= res->end)
+-			request_resource(res, &kernel_code);
++			insert_resource(res, &kernel_code);
+ 		if (kernel_data.start >= res->start &&
+ 		    kernel_data.end <= res->end)
+-			request_resource(res, &kernel_data);
++			insert_resource(res, &kernel_data);
+ #ifdef CONFIG_KEXEC_CORE
+ 		/* Userspace will find "Crash kernel" region in /proc/iomem. */
+ 		if (crashk_res.end && crashk_res.start >= res->start &&
+ 		    crashk_res.end <= res->end)
+-			request_resource(res, &crashk_res);
++			insert_resource(res, &crashk_res);
+ #endif
+ 	}
+ }
+diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
+index 9f3c47acf8ff..b6f86a7bbfb7 100644
+--- a/arch/arm64/mm/init.c
++++ b/arch/arm64/mm/init.c
+@@ -62,6 +62,14 @@
+ s64 memstart_addr __ro_after_init = -1;
+ phys_addr_t arm64_dma_phys_limit __ro_after_init;
+ 
++static struct memblock_region fw_mem_regions[INIT_MEMBLOCK_REGIONS];
++struct memblock_type fw_mem = {
++	.regions	= fw_mem_regions,
++	.cnt		= 1,    /* empty dummy entry */
++	.max		= INIT_MEMBLOCK_REGIONS,
++	.name		= "firmware-reserved memory",
++};
++
+ #ifdef CONFIG_BLK_DEV_INITRD
+ static int __init early_initrd(char *p)
+ {
+@@ -362,6 +370,19 @@ static void __init fdt_enforce_memory_region(void)
+ void __init arm64_memblock_init(void)
+ {
+ 	const s64 linear_region_size = -(s64)PAGE_OFFSET;
++	struct memblock_region *region;
++
++	/*
++	 * Export firmware-reserved memory regions
++	 * TODO: via more generic interface
++	 */
++	for_each_memblock(reserved, region) {
++		if (WARN_ON(fw_mem.cnt >= fw_mem.max))
++			break;
++		fw_mem.regions[fw_mem.cnt].base = region->base;
++		fw_mem.regions[fw_mem.cnt].size = region->size;
++		fw_mem.cnt++;
++	}
+ 
+ 	/* Handle linux,usable-memory-range property */
+ 	fdt_enforce_memory_region();
+-- 
+2.16.2
