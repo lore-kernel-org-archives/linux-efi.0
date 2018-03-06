@@ -1,59 +1,49 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH V2 3/3] efi: Use efi_rts_workqueue to invoke EFI Runtime
- Services
-Date: Tue, 6 Mar 2018 11:26:11 +0000
-Message-ID: <20180306112610.7izxtuy33bt7ivfs@lakrids.cambridge.arm.com>
-References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1520292190-5027-4-git-send-email-sai.praneeth.prakhya@intel.com>
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: Re: [PATCH 0/9] KEYS: Blacklisting & UEFI database load
+Date: Tue, 6 Mar 2018 15:05:50 +0100
+Message-ID: <6eabbb43-295e-9ba0-c0d9-120f48aa0e1d@suse.cz>
+References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1520292190-5027-4-git-send-email-sai.praneeth.prakhya@intel.com>
+In-Reply-To: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
+Content-Language: en-GB
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Lee@lakrids.cambridge.arm.com, Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, Dave Hansen <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dan Williams <dan.j.williams@intel.com>
+To: David Howells <dhowells@redhat.com>, keyrings@vger.kernel.org
+Cc: matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Mar 05, 2018 at 03:23:10PM -0800, Sai Praneeth Prakhya wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+On 11/16/2016, 07:10 PM, David Howells wrote:
+> Here are two sets of patches.  Firstly, the first three patches provide a
+> blacklist, making the following changes:
+...
+> Secondly, the remaining patches allow the UEFI database to be used to load
+> the system keyrings:
+...
+> Dave Howells (2):
+>       efi: Add EFI signature data types
+>       efi: Add an EFI signature blob parser
 > 
-> Presently, efi_runtime_services() are executed by firmware in process
-> context. To execute efi_runtime_service(), kernel switches the page
-> directory from swapper_pgd to efi_pgd. However, efi_pgd doesn't have any
-> user space mappings. A potential issue could be, for instance, an NMI
-> interrupt (like perf) trying to profile some user data while in efi_pgd.
+> David Howells (5):
+>       KEYS: Add a system blacklist keyring
+>       X.509: Allow X.509 certs to be blacklisted
+>       PKCS#7: Handle blacklisted certificates
+>       KEYS: Allow unrestricted boot-time addition of keys to secondary keyring
+>       efi: Add SHIM and image security database GUID definitions
+> 
+> Josh Boyer (2):
+>       MODSIGN: Import certificates from UEFI Secure Boot
+>       MODSIGN: Allow the "db" UEFI variable to be suppressed
 
-It might be worth pointing out that this could result in disaster (e.g.
-if the frame pointer happens to point at MMIO in the EFI runtime
-services mappings).
+Hi,
 
-[...]
+what's the status of this please? Distributors (I checked SUSE, RedHat
+and Ubuntu) have to carry these patches and every of them have to
+forward-port the patches to new kernels. So are you going to resend the
+PR to have this merged?
 
-> pstore writes could potentially be invoked in interrupt context and it
-> uses set_variable<>() and query_variable_info<>() to store logs. If we
-> invoke efi_runtime_services() through efi_rts_wq while in atomic()
-> kernel issues a warning ("scheduling wile in atomic") and prints stack
-> trace. One way to overcome this is to not make the caller process wait
-> for the worker thread to finish. This approach breaks pstore i.e. the
-> log messages aren't written to efi variables. Hence, pstore calls
-> efi_runtime_services() without using efi_rts_wq or in other words
-> efi_rts_wq will be used unconditionally for all the
-> efi_runtime_services() except set_variable<>() and
-> query_variable_info<>()
-
-Can't NMIs still come in during this?
-
-... or do we assume that since something has already gone wrong, this
-doesn't matter?
-
-Otherwise, this doesn't seem to break basic stuff on arm64 platforms. I
-can boot up, read the EFI RTC, and reboot. I ahd lockdep and KASAN
-enabled, I received no splats from either.
-
-FWIW:
-
-Tested-by: Mark Rutland <mark.rutland@arm.com [arm64]
-
-Thanks,
-Mark.
+thanks,
+-- 
+js
+suse labs
