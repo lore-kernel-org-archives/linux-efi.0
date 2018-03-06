@@ -1,74 +1,86 @@
-From: Dan Williams <dan.j.williams@intel.com>
-Subject: Re: [PATCH V2 3/3] efi: Use efi_rts_workqueue to invoke EFI Runtime Services
-Date: Mon, 5 Mar 2018 16:05:33 -0800
-Message-ID: <CAPcyv4ihj+5z8GS13MsRDOKiwhBDqA=YW3MiTh+OXS4x3Kf38Q@mail.gmail.com>
-References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com> <1520292190-5027-4-git-send-email-sai.praneeth.prakhya@intel.com>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH V2 3/3] efi: Use efi_rts_workqueue to invoke EFI Runtime
+ Services
+Date: Tue, 6 Mar 2018 00:56:27 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F2E580926@ORSMSX114.amr.corp.intel.com>
+References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1520292190-5027-4-git-send-email-sai.praneeth.prakhya@intel.com>
+ <CAPcyv4ihj+5z8GS13MsRDOKiwhBDqA=YW3MiTh+OXS4x3Kf38Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1520292190-5027-4-git-send-email-sai.praneeth.prakhya@intel.com>
+In-Reply-To: <CAPcyv4ihj+5z8GS13MsRDOKiwhBDqA=YW3MiTh+OXS4x3Kf38Q@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, Dave Hansen <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: "Williams, Dan J" <dan.j.williams@intel.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Mar 5, 2018 at 3:23 PM, Sai Praneeth Prakhya
-<sai.praneeth.prakhya@intel.com> wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
->
-> Presently, efi_runtime_services() are executed by firmware in process
-> context. To execute efi_runtime_service(), kernel switches the page
-> directory from swapper_pgd to efi_pgd. However, efi_pgd doesn't have any
-> user space mappings. A potential issue could be, for instance, an NMI
-> interrupt (like perf) trying to profile some user data while in efi_pgd.
->
-> A solution for this issue could be to use kthread to run
-> efi_runtime_service(). When a user/kernel thread requests to execute
-> efi_runtime_service(), kernel off-loads this work to kthread which in
-> turn uses efi_pgd. Anything that tries to touch user space addresses
-> while in kthread is terminally broken. This patch adds support to efi
-> subsystem to handle all calls to efi_runtime_services() using a work
-> queue (which in turn uses kthread).
->
-> Implementation summary:
-> -----------------------
-> 1. When user/kernel thread requests to execute efi_runtime_service(),
-> enqueue work to efi_rts_workqueue.
-> 2. Caller thread waits until the work is finished because it's dependent
-> on the return status of efi_runtime_service().
->
-> Semantics to pack arguments in efi_runtime_work (has void pointers):
-> 1. If argument is a pointer (of any type), pass it as is.
-> 2. If argument is a value (of any type), address of the value is
-> passed.
->
-> Introduce a handler function (called efi_call_rts()) that
->         a. understands efi_runtime_work and
->         b. invokes the appropriate efi_runtime_service() with the
->         appropriate arguments
->
-> Semantics followed by efi_call_rts() to understand efi_runtime_work:
-> 1. If argument was a pointer, recast it from void pointer to original
-> pointer type.
-> 2. If argument was a value, recast it from void pointer to original
-> pointer type and dereference it.
->
-> pstore writes could potentially be invoked in interrupt context and it
-> uses set_variable<>() and query_variable_info<>() to store logs. If we
-> invoke efi_runtime_services() through efi_rts_wq while in atomic()
-> kernel issues a warning ("scheduling wile in atomic") and prints stack
-> trace. One way to overcome this is to not make the caller process wait
-> for the worker thread to finish. This approach breaks pstore i.e. the
-> log messages aren't written to efi variables. Hence, pstore calls
-> efi_runtime_services() without using efi_rts_wq or in other words
-> efi_rts_wq will be used unconditionally for all the
-> efi_runtime_services() except set_variable<>() and
-> query_variable_info<>()
-
-
-Is there a place in the system reboot path where we can try to flush
-these asynchronous pstore writes from interrupt context? It seems
-unfortunate that we need to have this wide exception for all
-set_variable() calls. Either that or switch to an explicit "emergency
-mode" where we stop caring about protecting the system from EFI
-runtime code because we're already crashing.
+PiA+IFByZXNlbnRseSwgZWZpX3J1bnRpbWVfc2VydmljZXMoKSBhcmUgZXhlY3V0ZWQgYnkgZmly
+bXdhcmUgaW4gcHJvY2Vzcw0KPiA+IGNvbnRleHQuIFRvIGV4ZWN1dGUgZWZpX3J1bnRpbWVfc2Vy
+dmljZSgpLCBrZXJuZWwgc3dpdGNoZXMgdGhlIHBhZ2UNCj4gPiBkaXJlY3RvcnkgZnJvbSBzd2Fw
+cGVyX3BnZCB0byBlZmlfcGdkLiBIb3dldmVyLCBlZmlfcGdkIGRvZXNuJ3QgaGF2ZQ0KPiA+IGFu
+eSB1c2VyIHNwYWNlIG1hcHBpbmdzLiBBIHBvdGVudGlhbCBpc3N1ZSBjb3VsZCBiZSwgZm9yIGlu
+c3RhbmNlLCBhbg0KPiA+IE5NSSBpbnRlcnJ1cHQgKGxpa2UgcGVyZikgdHJ5aW5nIHRvIHByb2Zp
+bGUgc29tZSB1c2VyIGRhdGEgd2hpbGUgaW4gZWZpX3BnZC4NCj4gPg0KPiA+IEEgc29sdXRpb24g
+Zm9yIHRoaXMgaXNzdWUgY291bGQgYmUgdG8gdXNlIGt0aHJlYWQgdG8gcnVuDQo+ID4gZWZpX3J1
+bnRpbWVfc2VydmljZSgpLiBXaGVuIGEgdXNlci9rZXJuZWwgdGhyZWFkIHJlcXVlc3RzIHRvIGV4
+ZWN1dGUNCj4gPiBlZmlfcnVudGltZV9zZXJ2aWNlKCksIGtlcm5lbCBvZmYtbG9hZHMgdGhpcyB3
+b3JrIHRvIGt0aHJlYWQgd2hpY2ggaW4NCj4gPiB0dXJuIHVzZXMgZWZpX3BnZC4gQW55dGhpbmcg
+dGhhdCB0cmllcyB0byB0b3VjaCB1c2VyIHNwYWNlIGFkZHJlc3Nlcw0KPiA+IHdoaWxlIGluIGt0
+aHJlYWQgaXMgdGVybWluYWxseSBicm9rZW4uIFRoaXMgcGF0Y2ggYWRkcyBzdXBwb3J0IHRvIGVm
+aQ0KPiA+IHN1YnN5c3RlbSB0byBoYW5kbGUgYWxsIGNhbGxzIHRvIGVmaV9ydW50aW1lX3NlcnZp
+Y2VzKCkgdXNpbmcgYSB3b3JrDQo+ID4gcXVldWUgKHdoaWNoIGluIHR1cm4gdXNlcyBrdGhyZWFk
+KS4NCj4gPg0KPiA+IEltcGxlbWVudGF0aW9uIHN1bW1hcnk6DQo+ID4gLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0NCj4gPiAxLiBXaGVuIHVzZXIva2VybmVsIHRocmVhZCByZXF1ZXN0cyB0byBleGVj
+dXRlIGVmaV9ydW50aW1lX3NlcnZpY2UoKSwNCj4gPiBlbnF1ZXVlIHdvcmsgdG8gZWZpX3J0c193
+b3JrcXVldWUuDQo+ID4gMi4gQ2FsbGVyIHRocmVhZCB3YWl0cyB1bnRpbCB0aGUgd29yayBpcyBm
+aW5pc2hlZCBiZWNhdXNlIGl0J3MNCj4gPiBkZXBlbmRlbnQgb24gdGhlIHJldHVybiBzdGF0dXMg
+b2YgZWZpX3J1bnRpbWVfc2VydmljZSgpLg0KPiA+DQo+ID4gU2VtYW50aWNzIHRvIHBhY2sgYXJn
+dW1lbnRzIGluIGVmaV9ydW50aW1lX3dvcmsgKGhhcyB2b2lkIHBvaW50ZXJzKToNCj4gPiAxLiBJ
+ZiBhcmd1bWVudCBpcyBhIHBvaW50ZXIgKG9mIGFueSB0eXBlKSwgcGFzcyBpdCBhcyBpcy4NCj4g
+PiAyLiBJZiBhcmd1bWVudCBpcyBhIHZhbHVlIChvZiBhbnkgdHlwZSksIGFkZHJlc3Mgb2YgdGhl
+IHZhbHVlIGlzDQo+ID4gcGFzc2VkLg0KPiA+DQo+ID4gSW50cm9kdWNlIGEgaGFuZGxlciBmdW5j
+dGlvbiAoY2FsbGVkIGVmaV9jYWxsX3J0cygpKSB0aGF0DQo+ID4gICAgICAgICBhLiB1bmRlcnN0
+YW5kcyBlZmlfcnVudGltZV93b3JrIGFuZA0KPiA+ICAgICAgICAgYi4gaW52b2tlcyB0aGUgYXBw
+cm9wcmlhdGUgZWZpX3J1bnRpbWVfc2VydmljZSgpIHdpdGggdGhlDQo+ID4gICAgICAgICBhcHBy
+b3ByaWF0ZSBhcmd1bWVudHMNCj4gPg0KPiA+IFNlbWFudGljcyBmb2xsb3dlZCBieSBlZmlfY2Fs
+bF9ydHMoKSB0byB1bmRlcnN0YW5kIGVmaV9ydW50aW1lX3dvcms6DQo+ID4gMS4gSWYgYXJndW1l
+bnQgd2FzIGEgcG9pbnRlciwgcmVjYXN0IGl0IGZyb20gdm9pZCBwb2ludGVyIHRvIG9yaWdpbmFs
+DQo+ID4gcG9pbnRlciB0eXBlLg0KPiA+IDIuIElmIGFyZ3VtZW50IHdhcyBhIHZhbHVlLCByZWNh
+c3QgaXQgZnJvbSB2b2lkIHBvaW50ZXIgdG8gb3JpZ2luYWwNCj4gPiBwb2ludGVyIHR5cGUgYW5k
+IGRlcmVmZXJlbmNlIGl0Lg0KPiA+DQo+ID4gcHN0b3JlIHdyaXRlcyBjb3VsZCBwb3RlbnRpYWxs
+eSBiZSBpbnZva2VkIGluIGludGVycnVwdCBjb250ZXh0IGFuZCBpdA0KPiA+IHVzZXMgc2V0X3Zh
+cmlhYmxlPD4oKSBhbmQgcXVlcnlfdmFyaWFibGVfaW5mbzw+KCkgdG8gc3RvcmUgbG9ncy4gSWYg
+d2UNCj4gPiBpbnZva2UgZWZpX3J1bnRpbWVfc2VydmljZXMoKSB0aHJvdWdoIGVmaV9ydHNfd3Eg
+d2hpbGUgaW4gYXRvbWljKCkNCj4gPiBrZXJuZWwgaXNzdWVzIGEgd2FybmluZyAoInNjaGVkdWxp
+bmcgd2lsZSBpbiBhdG9taWMiKSBhbmQgcHJpbnRzIHN0YWNrDQo+ID4gdHJhY2UuIE9uZSB3YXkg
+dG8gb3ZlcmNvbWUgdGhpcyBpcyB0byBub3QgbWFrZSB0aGUgY2FsbGVyIHByb2Nlc3Mgd2FpdA0K
+PiA+IGZvciB0aGUgd29ya2VyIHRocmVhZCB0byBmaW5pc2guIFRoaXMgYXBwcm9hY2ggYnJlYWtz
+IHBzdG9yZSBpLmUuIHRoZQ0KPiA+IGxvZyBtZXNzYWdlcyBhcmVuJ3Qgd3JpdHRlbiB0byBlZmkg
+dmFyaWFibGVzLiBIZW5jZSwgcHN0b3JlIGNhbGxzDQo+ID4gZWZpX3J1bnRpbWVfc2VydmljZXMo
+KSB3aXRob3V0IHVzaW5nIGVmaV9ydHNfd3Egb3IgaW4gb3RoZXIgd29yZHMNCj4gPiBlZmlfcnRz
+X3dxIHdpbGwgYmUgdXNlZCB1bmNvbmRpdGlvbmFsbHkgZm9yIGFsbCB0aGUNCj4gPiBlZmlfcnVu
+dGltZV9zZXJ2aWNlcygpIGV4Y2VwdCBzZXRfdmFyaWFibGU8PigpIGFuZA0KPiA+IHF1ZXJ5X3Zh
+cmlhYmxlX2luZm88PigpDQo+IA0KPiANCj4gSXMgdGhlcmUgYSBwbGFjZSBpbiB0aGUgc3lzdGVt
+IHJlYm9vdCBwYXRoIHdoZXJlIHdlIGNhbiB0cnkgdG8gZmx1c2ggdGhlc2UNCj4gYXN5bmNocm9u
+b3VzIHBzdG9yZSB3cml0ZXMgZnJvbSBpbnRlcnJ1cHQgY29udGV4dD8NCg0KSSBkb24ndCB0aGlu
+ayBzbyBiZWNhdXNlLCB0aGUgaXNzdWUgaXMgbm90IHdpdGggdGhlIHBzdG9yZSB3cml0ZXMgYnV0
+IHdpdGggcHN0b3JlDQp1c2luZyBlZmkgYXMgYmFja2luZyBzdG9yZS4gQW55dGhpbmcgY291bGQg
+cmVnaXN0ZXIgYXMgcHN0b3JlIGJhY2tlbmQsIGVnOiBSQU0sDQpBQ1BJLUVSU1QgZXRjLi4gYW5k
+IEFGQUlLLCB0aGV5IGRvbuKAmXQgdXNlIHdvcmsgcXVldWVzIHRvIHN0b3JlIGxvZ3MuIE5vdyB0
+aGF0DQplZmlfcnVudGltZV9zZXJ2aWNlcygpIHVzZXMgd29yayBxdWV1ZXMsIHdlIHVuZm9ydHVu
+YXRlbHkgaGF2ZSB0byBoYXZlIHRoaXMgaGFjay4NCg0KPiBJdCBzZWVtcyB1bmZvcnR1bmF0ZSB0
+aGF0DQo+IHdlIG5lZWQgdG8gaGF2ZSB0aGlzIHdpZGUgZXhjZXB0aW9uIGZvciBhbGwNCj4gc2V0
+X3ZhcmlhYmxlKCkgY2FsbHMuDQoNClRydWUsIGJhc2ljYWxseSBhbnkgZWZpX3J1bnRpbWVfc2Vy
+dmljZSgpIHRoYXQgbWlnaHQgZ2V0IGNhbGxlZCBpbiBpbnRlcnJ1cHQgY29udGV4dC4NCkkgYW0g
+bm90IHZlcnkgaGFwcHkgdG8gaGF2ZSB0aGUgaGFjayB0b28sIGJ1dCBkaWRu4oCZdCBmaW5kIG90
+aGVyIHdheS4NCg0KRWl0aGVyIHRoYXQgb3Igc3dpdGNoIHRvIGFuIGV4cGxpY2l0ICJlbWVyZ2Vu
+Y3kgbW9kZSIgd2hlcmUNCj4gd2Ugc3RvcCBjYXJpbmcgYWJvdXQgcHJvdGVjdGluZyB0aGUgc3lz
+dGVtIGZyb20gRUZJIHJ1bnRpbWUgY29kZSBiZWNhdXNlDQo+IHdlJ3JlIGFscmVhZHkgY3Jhc2hp
+bmcuDQoNClNob3VsZCB3ZSBjYXJlIGFib3V0IGV4dHJhIHdhcm5pbmcgKHNjaGVkdWxpbmcgd2hp
+bGUgaW4gYXRvbWljKSB3aGVuIHdlIGFyZSBhbHJlYWR5DQpjcmFzaGluZz8gVGhpcyBzb3VuZHMg
+a2luZCBvZiBkZWJhdGFibGUuIEkgd2lsbCB3YWl0IGZvciBmZWVkYmFjayBmcm9tIGNvbW11bml0
+eSBpdCB0aGV5DQp0aGluayBpdCdzIE9LIG9yIG1heWJlIGEgYmV0dGVyIHNvbHV0aW9uLg0KDQpS
+ZWdhcmRzLA0KU2FpDQo=
