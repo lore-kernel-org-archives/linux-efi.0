@@ -1,99 +1,74 @@
-From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH V2 0/3] Use efi_rts_workqueue to invoke EFI Runtime Services
-Date: Mon,  5 Mar 2018 15:23:07 -0800
-Message-ID: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
+From: Dan Williams <dan.j.williams@intel.com>
+Subject: Re: [PATCH V2 3/3] efi: Use efi_rts_workqueue to invoke EFI Runtime Services
+Date: Mon, 5 Mar 2018 16:05:33 -0800
+Message-ID: <CAPcyv4ihj+5z8GS13MsRDOKiwhBDqA=YW3MiTh+OXS4x3Kf38Q@mail.gmail.com>
+References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com> <1520292190-5027-4-git-send-email-sai.praneeth.prakhya@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1520292190-5027-4-git-send-email-sai.praneeth.prakhya@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Lee@vger.kernel.org, Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, Dave Hansen <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dan Williams <dan.j.williams@intel.com>
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, Dave Hansen <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+On Mon, Mar 5, 2018 at 3:23 PM, Sai Praneeth Prakhya
+<sai.praneeth.prakhya@intel.com> wrote:
+> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+>
+> Presently, efi_runtime_services() are executed by firmware in process
+> context. To execute efi_runtime_service(), kernel switches the page
+> directory from swapper_pgd to efi_pgd. However, efi_pgd doesn't have any
+> user space mappings. A potential issue could be, for instance, an NMI
+> interrupt (like perf) trying to profile some user data while in efi_pgd.
+>
+> A solution for this issue could be to use kthread to run
+> efi_runtime_service(). When a user/kernel thread requests to execute
+> efi_runtime_service(), kernel off-loads this work to kthread which in
+> turn uses efi_pgd. Anything that tries to touch user space addresses
+> while in kthread is terminally broken. This patch adds support to efi
+> subsystem to handle all calls to efi_runtime_services() using a work
+> queue (which in turn uses kthread).
+>
+> Implementation summary:
+> -----------------------
+> 1. When user/kernel thread requests to execute efi_runtime_service(),
+> enqueue work to efi_rts_workqueue.
+> 2. Caller thread waits until the work is finished because it's dependent
+> on the return status of efi_runtime_service().
+>
+> Semantics to pack arguments in efi_runtime_work (has void pointers):
+> 1. If argument is a pointer (of any type), pass it as is.
+> 2. If argument is a value (of any type), address of the value is
+> passed.
+>
+> Introduce a handler function (called efi_call_rts()) that
+>         a. understands efi_runtime_work and
+>         b. invokes the appropriate efi_runtime_service() with the
+>         appropriate arguments
+>
+> Semantics followed by efi_call_rts() to understand efi_runtime_work:
+> 1. If argument was a pointer, recast it from void pointer to original
+> pointer type.
+> 2. If argument was a value, recast it from void pointer to original
+> pointer type and dereference it.
+>
+> pstore writes could potentially be invoked in interrupt context and it
+> uses set_variable<>() and query_variable_info<>() to store logs. If we
+> invoke efi_runtime_services() through efi_rts_wq while in atomic()
+> kernel issues a warning ("scheduling wile in atomic") and prints stack
+> trace. One way to overcome this is to not make the caller process wait
+> for the worker thread to finish. This approach breaks pstore i.e. the
+> log messages aren't written to efi variables. Hence, pstore calls
+> efi_runtime_services() without using efi_rts_wq or in other words
+> efi_rts_wq will be used unconditionally for all the
+> efi_runtime_services() except set_variable<>() and
+> query_variable_info<>()
 
-This patch set is an outcome of the discussion at
-https://lkml.org/lkml/2017/8/21/607
 
-Presently, efi_runtime_services() are executed by firmware in process
-context. To execute efi_runtime_service(), kernel switches the page
-directory from swapper_pgd to efi_pgd. However, efi_pgd doesn't have any
-user space mappings. A potential issue could be, for instance, an NMI
-interrupt (like perf) trying to profile some user data while in efi_pgd.
-
-A solution for this issue could be to use kthread to run
-efi_runtime_service(). When a user/kernel thread requests to execute
-efi_runtime_service(), kernel off-loads this work to kthread which in
-turn uses efi_pgd. Anything that tries to touch user space addresses
-while in kthread is terminally broken. This patch set adds support to
-the efi subsystem to handle all calls to efi_runtime_services() using a
-work queue (which in turn uses kthread).
-
-Implementation summary:
------------------------
-1. When a user/kernel thread requests to execute efi_runtime_service(),
-enqueue work to a work queue, efi_rts_workqueue.
-2. The caller thread waits until the work is finished because it's
-dependent on the return status of efi_runtime_service() and, in specific
-cases, the arguments populated by efi_runtime_service(). Some
-efi_runtime_services() takes a pointer to buffer as an argument and
-fills up the buffer with requested data. For instance, efi_get_variable()
-and efi_get_next_variable(). Hence, the caller process cannot just post
-the work and get going, it has to wait for results from firmware.
-
-Caveat: efi_rts_workqueue to run efi_runtime_services() shouldn't be used
-while in atomic, because caller thread might sleep. Presently, pstore
-code doesn't use efi_rts_workqueue.
-
-Tested using LUV (Linux UEFI Validation) for x86_64 and x86_32. Builds
-fine for arm and arm64. Will appreciate the effort if someone could test
-the patches on real ARM/ARM64 machines.
-LUV: https://01.org/linux-uefi-validation
-
-Thanks to Ricardo and Dan for initial reviews and suggestions. Please
-feel free to pour in your comments and concerns.
-Note: Patches are based on Linus's kernel v4.16-rc4
-
-Changes from V1 to V2:
-----------------------
-1. Remove unnecessary include of asm/efi.h file - Fixes build error on
-ia64, reported by 0-day
-2. Use enum to identify efi_runtime_services()
-3. Use alloc_ordered_workqueue() to create efi_rts_wq as
-create_workqueue() is scheduled for depreciation.
-4. Make efi_call_rts() static, as it has no callers outside
-runtime-wrappers.c
-5. Use BUG(), when we are unable to queue work or unable to identify
-requested efi_runtime_service() - Because these two situations should
-*never* happen.
-
-Sai Praneeth (3):
-  x86/efi: Call efi_delete_dummy_variable() during efi subsystem    
-    initialization
-  efi: Introduce efi_rts_workqueue and some infrastructure to invoke all
-        efi_runtime_services()
-  efi: Use efi_rts_workqueue to invoke EFI Runtime Services
-
- arch/x86/include/asm/efi.h              |   1 -
- arch/x86/platform/efi/efi.c             |   6 -
- drivers/firmware/efi/efi.c              |  21 +++
- drivers/firmware/efi/runtime-wrappers.c | 229 +++++++++++++++++++++++++++++---
- include/linux/efi.h                     |  23 ++++
- 5 files changed, 253 insertions(+), 27 deletions(-)
-
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Suggested-by: Andy Lutomirski <luto@kernel.org>
-Cc: Lee, Chun-Yi <jlee@suse.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Tony Luck <tony.luck@intel.com>
-Cc: Will Deacon <will.deacon@arm.com>
-Cc: Dave Hansen <dave.hansen@intel.com>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Bhupesh Sharma <bhsharma@redhat.com>
-Cc: Ricardo Neri <ricardo.neri@intel.com>
-Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Peter Zijlstra <peter.zijlstra@intel.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Dan Williams <dan.j.williams@intel.com>
-
--- 
-2.7.4
+Is there a place in the system reboot path where we can try to flush
+these asynchronous pstore writes from interrupt context? It seems
+unfortunate that we need to have this wide exception for all
+set_variable() calls. Either that or switch to an explicit "emergency
+mode" where we stop caring about protecting the system from EFI
+runtime code because we're already crashing.
