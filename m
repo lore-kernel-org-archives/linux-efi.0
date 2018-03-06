@@ -1,49 +1,27 @@
-From: Jiri Slaby <jslaby@suse.cz>
-Subject: Re: [PATCH 0/9] KEYS: Blacklisting & UEFI database load
-Date: Tue, 6 Mar 2018 15:05:50 +0100
-Message-ID: <6eabbb43-295e-9ba0-c0d9-120f48aa0e1d@suse.cz>
-References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
+From: Jeremy Cline <jeremy@jcline.org>
+Subject: Regression from efi: call get_event_log before ExitBootServices
+Date: Tue, 6 Mar 2018 16:00:53 +0000
+Message-ID: <01000161fc0b4755-df0621f4-ab5d-479a-b425-adf98427a308-000000@email.amazonses.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
-Content-Language: en-GB
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>, keyrings@vger.kernel.org
-Cc: matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Thiebaud Weksteen <tweek@google.com>, Javier Martinez Canillas <javierm@redhat.com>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Cc: Hans de Goede <hdegoede@redhat.com>, linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 11/16/2016, 07:10 PM, David Howells wrote:
-> Here are two sets of patches.  Firstly, the first three patches provide a
-> blacklist, making the following changes:
-...
-> Secondly, the remaining patches allow the UEFI database to be used to load
-> the system keyrings:
-...
-> Dave Howells (2):
->       efi: Add EFI signature data types
->       efi: Add an EFI signature blob parser
-> 
-> David Howells (5):
->       KEYS: Add a system blacklist keyring
->       X.509: Allow X.509 certs to be blacklisted
->       PKCS#7: Handle blacklisted certificates
->       KEYS: Allow unrestricted boot-time addition of keys to secondary keyring
->       efi: Add SHIM and image security database GUID definitions
-> 
-> Josh Boyer (2):
->       MODSIGN: Import certificates from UEFI Secure Boot
->       MODSIGN: Allow the "db" UEFI variable to be suppressed
+Hi folks,
 
-Hi,
+Commit 33b6d03469b2 ("efi: call get_event_log before ExitBootServices")
+causes my GP-electronic T701 tablet to hang when booting. Reverting the
+patch series or hiding the TPM in the BIOS fixes the problem.
 
-what's the status of this please? Distributors (I checked SUSE, RedHat
-and Ubuntu) have to carry these patches and every of them have to
-forward-port the patches to new kernels. So are you going to resend the
-PR to have this merged?
+I've never fiddled with TPMs before so I'm not sure what what debugging
+information to provide. It's got an Atom Z3735G and the UEFI firmware is
+InsydeH20 version BYT70A.YNCHENG.WIN.007.
 
-thanks,
--- 
-js
-suse labs
+
+Regards,
+Jeremy
