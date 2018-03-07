@@ -1,67 +1,71 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH V2 2/3] efi: Introduce efi_rts_workqueue and some
- infrastructure to invoke all efi_runtime_services()
-Date: Wed, 7 Mar 2018 13:11:20 +0100
-Message-ID: <20180307121047.GG23662@pd.tnic>
-References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1520292190-5027-3-git-send-email-sai.praneeth.prakhya@intel.com>
+From: Mimi Zohar <zohar@linux.vnet.ibm.com>
+Subject: Re: [PATCH 0/9] KEYS: Blacklisting & UEFI database load
+Date: Wed, 07 Mar 2018 08:18:02 -0500
+Message-ID: <1520428682.10396.445.camel@linux.vnet.ibm.com>
+References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
+         <6eabbb43-295e-9ba0-c0d9-120f48aa0e1d@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1520292190-5027-3-git-send-email-sai.praneeth.prakhya@intel.com>
+In-Reply-To: <6eabbb43-295e-9ba0-c0d9-120f48aa0e1d@suse.cz>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Chun-Yi Lee <jlee@suse.com>, Tony Luck <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, Dave Hansen <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dan Williams <dan.j.williams@intel.com>
+To: Jiri Slaby <jslaby@suse.cz>, David Howells <dhowells@redhat.com>, keyrings@vger.kernel.org
+Cc: matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Mar 05, 2018 at 03:23:09PM -0800, Sai Praneeth Prakhya wrote:
-> +#define efi_queue_work(_rts, _arg1, _arg2, _arg3, _arg4, _arg5)		\
-> +({									\
-> +	struct efi_runtime_work efi_rts_work;				\
-> +									\
-> +	INIT_WORK_ONSTACK(&efi_rts_work.work, efi_call_rts);		\
-> +	efi_rts_work.func = _rts;					\
-> +	efi_rts_work.arg1 = _arg1;					\
-> +	efi_rts_work.arg2 = _arg2;					\
-> +	efi_rts_work.arg3 = _arg3;					\
-> +	efi_rts_work.arg4 = _arg4;					\
-> +	efi_rts_work.arg5 = _arg5;					\
-> +	/*								\
-> +	 * queue_work() returns 0 if work was already on queue,		\
-> +	 * _ideally_ this should never happen.				\
-> +	 */								\
-> +	if (queue_work(efi_rts_wq, &efi_rts_work.work))			\
-> +		flush_work(&efi_rts_work.work);				\
-> +	else								\
-> +		BUG();							\
+On Tue, 2018-03-06 at 15:05 +0100, Jiri Slaby wrote:
+> On 11/16/2016, 07:10 PM, David Howells wrote:
+> > Here are two sets of patches.  Firstly, the first three patches provide a
+> > blacklist, making the following changes:
+> ...
+> > Secondly, the remaining patches allow the UEFI database to be used to load
+> > the system keyrings:
+> ...
+> > Dave Howells (2):
+> >       efi: Add EFI signature data types
+> >       efi: Add an EFI signature blob parser
+> > 
+> > David Howells (5):
+> >       KEYS: Add a system blacklist keyring
+> >       X.509: Allow X.509 certs to be blacklisted
+> >       PKCS#7: Handle blacklisted certificates
+> >       KEYS: Allow unrestricted boot-time addition of keys to secondary keyring
+> >       efi: Add SHIM and image security database GUID definitions
+> > 
+> > Josh Boyer (2):
+> >       MODSIGN: Import certificates from UEFI Secure Boot
+> >       MODSIGN: Allow the "db" UEFI variable to be suppressed
+> 
+> Hi,
+> 
+> what's the status of this please? Distributors (I checked SUSE, RedHat
+> and Ubuntu) have to carry these patches and every of them have to
+> forward-port the patches to new kernels. So are you going to resend the
+> PR to have this merged?
 
-So failure to queue that work is such a critical problem that we need
-to BUG() and can't possibly continue and shoult not attempt recovery at
-all?
+With secure boot enabled, we establish a signature chain of trust,
+rooted in HW, up to the kernel and then transition from those keys to
+a new set of keys builtin the kernel and loaded onto the
+builtin_trusted_keys (builtin).
 
-IOW, we should always strive to fail gracefully and not shit in pants at
-the first sign of trouble.
+Enabling the secondary_builtin_keys (secondary) allows keys signed by
+a key on the builtin keyring to be added to the secondary keyring.
+ Any key, signed by a key on either the builtin or secondary keyring,
+can be added to the IMA trusted keyring.
 
-Even checkpatch warns here:
+The "KEYS: Allow unrestricted boot-time addition of keys to secondary
+keyring" patch loads the platform keys directly onto the secondary
+keyring, without requiring them to be signed by a key on the builtin
+or secondary keyring.  With this change, any key signed by a platfrom
+key on the secondary, can be loaded onto the .ima trusted keyring.
 
-WARNING: Avoid crashing the kernel - try using WARN_ON & recovery code rather than BUG() or BUG_ON()
-#184: FILE: drivers/firmware/efi/runtime-wrappers.c:92:
-+               BUG();                                                  \
+Just because I trust the platform keys prior to booting the kernel,
+doesn't mean that I *want* to trust those keys once booted.  There
+are, however, places where we need access to those keys to verify a
+signature (eg. kexec kernel image).
 
+Nayna Jain's "certs: define a trusted platform keyring" patch set
+introduces a new, separate keyring for these platform keys.
 
-and by looking at the other output, you should run your patches through
-checkpatch. Some of the things make sense like:
-
-WARNING: quoted string split across lines
-#97: FILE: drivers/firmware/efi/efi.c:341:
-+               pr_err("Failed to create efi_rts_workqueue, EFI runtime services "
-+                      "disabled.\n");
-
-for example.
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Mimi
