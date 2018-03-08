@@ -1,100 +1,58 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V2 2/3] efi: Introduce efi_rts_workqueue and some
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH V2 2/3] efi: Introduce efi_rts_workqueue and some
  infrastructure to invoke all efi_runtime_services()
-Date: Thu, 8 Mar 2018 04:00:22 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F2E5817B3@ORSMSX114.amr.corp.intel.com>
+Date: Thu, 8 Mar 2018 15:08:31 +0100
+Message-ID: <20180308140830.GE21166@pd.tnic>
 References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
  <1520292190-5027-3-git-send-email-sai.praneeth.prakhya@intel.com>
- <20180306111339.xjrugce553f2egzh@lakrids.cambridge.arm.com>
+ <20180307121047.GG23662@pd.tnic>
+ <FFF73D592F13FD46B8700F0A279B802F2E5818E4@ORSMSX114.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180306111339.xjrugce553f2egzh@lakrids.cambridge.arm.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F2E5818E4@ORSMSX114.amr.corp.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Lee@lakrids.cambridge.arm.com" <Lee@lakrids.cambridge.arm.com>, Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Williams, Dan J" <dan.j.williams@intel.com>
+To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chun-Yi Lee <jlee@suse.com>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Williams, Dan J" <dan.j.williams@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
--0800, Sai Praneeth Prakhya wrote:
-> > @@ -329,6 +331,19 @@ static int __init efisubsys_init(void)
-> >  		return 0;
-> >
-> >  	/*
-> > +	 * Since we process only one efi_runtime_service() at a time, an
-> > +	 * ordered workqueue (which creates only one execution context)
-> > +	 * should suffice all our needs.
-> > +	 */
-> > +	efi_rts_wq = alloc_ordered_workqueue("efi_rts_workqueue", 0);
-> > +	if (!efi_rts_wq) {
-> > +		pr_err("Failed to create efi_rts_workqueue, EFI runtime services
-> "
-> > +		       "disabled.\n");
-> > +		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
-> > +		return 0;
-> > +	}
-> 
-> I'm a little worried that something might sample this flag between it being set in
-> an early_initcall (arm_enable_runtime_services), and cleared in a subsys_initcall
-> here.
-> 
-> However, nothing seems to do that so far, so maybe that's ok...
-> 
+On Thu, Mar 08, 2018 at 05:31:03AM +0000, Prakhya, Sai Praneeth wrote:
+> Another warning by checkpatch is "use of in_atomic() in drivers code"
 
-Thanks for raising this. I will take a look at initcalls.
+I'm assuming it warns because you're touching files in drivers/ but the
+efi fun is not really a driver...
 
-> [...]
-> 
-> > +/* efi_runtime_service() function identifiers */ enum {
-> > +	GET_TIME,
-> > +	SET_TIME,
-> > +	GET_WAKEUP_TIME,
-> > +	SET_WAKEUP_TIME,
-> > +	GET_VARIABLE,
-> > +	GET_NEXT_VARIABLE,
-> > +	SET_VARIABLE,
-> > +	SET_VARIABLE_NONBLOCKING,
-> > +	QUERY_VARIABLE_INFO,
-> > +	QUERY_VARIABLE_INFO_NONBLOCKING,
-> > +	GET_NEXT_HIGH_MONO_COUNT,
-> > +	RESET_SYSTEM,
-> > +	UPDATE_CAPSULE,
-> > +	QUERY_CAPSULE_CAPS,
-> > +};
-> 
-> Can we please give this enum a name....
+But looking at patch 3, that thing looks like a real mess. Some of the
+things - pstore, it seems - do stuff in atomic context and yet you want
+to do efi stuff in a workqueue which doesn't stomach atomic context to
+begin with.
 
-Sure! Added in V3.
+So if you wanna do workqueue, you should make sure all efi stuff gets
+delayed to process context and queued properly. For example, we log
+MCEs from atomic context by putting them on a lockless buffer and then
+kicking irq_work to queue the work when we return to process context.
+Can you do something like that?
 
-> 
-> [...]
-> 
-> > +/*
-> > + * efi_runtime_work:	Details of EFI Runtime Service work
-> > + * @func:		EFI Runtime Service function identifier
-> > + * @arg<1-5>:		EFI Runtime Service function arguments
-> > + * @status:		Status of executing EFI Runtime Service
-> > + */
-> > +struct efi_runtime_work {
-> > +	u8 func;
-> 
-> ... and use it here rather than an opaque u8? I realise that means placing the
-> enum in <linux/efi.h>.
-> 
+"Hence, pstore calls efi_runtime_services() without using efi_rts_wq" -
+that doesn't sound like optimal design to me. I would try to shove them
+all through the workqueue - not have exceptions.
 
-Actually, with Miguel comments, I am considering making this struct static and moving
-it to runtime-wrappers.c, since "struct efi_runtime_work" isn't really being used anywhere
-except runtime-wrappers.c. Please see in V3.
+Then this:
 
-> > +	void *arg1;
-> > +	void *arg2;
-> > +	void *arg3;
-> > +	void *arg4;
-> > +	void *arg5;
-> > +	efi_status_t status;
-> > +	struct work_struct work;
-> > +};
-> 
-> Thanks,
-> Mark.
+> A potential issue could be, for instance, an NMI interrupt (like perf)
+> trying to profile some user data while in efi_pgd.
+
+I can't understand.
+
+How did we handle this until now and why is it a problem all of a
+sudden?
+
+Because I don't recall being unable to run perf while efi runtime
+services are happening.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
