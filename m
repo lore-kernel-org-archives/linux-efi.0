@@ -1,58 +1,57 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: [PATCH 12/12] efi: make const array 'apple' static
-Date: Thu, 08 Mar 2018 03:05:05 -0800
-Message-ID: <1520507105.11634.5.camel@perches.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 02/12] efi/apple-properties: Device core takes care of empty properties
+Date: Thu,  8 Mar 2018 08:00:10 +0000
+Message-ID: <20180308080020.22828-3-ard.biesheuvel@linaro.org>
 References: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
-         <20180308080020.22828-13-ard.biesheuvel@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180308080020.22828-13-ard.biesheuvel@linaro.org>
+In-Reply-To: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Colin Ian King <colin.king@canonical.com>, linux-kernel@vger.kernel.org
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2018-03-08 at 08:00 +0000, Ard Biesheuvel wrote:
-> From: Colin Ian King <colin.king@canonical.com>
-> 
-> Don't populate the const read-only array 'buf' on the stack but instead
-> make it static. Makes the object code smaller by 64 bytes:
-> 
-> Before:
->    text	   data	    bss	    dec	    hex	filename
->    9264	      1	     16	   9281	   2441	arch/x86/boot/compressed/eboot.o
-> 
-> After:
->    text	   data	    bss	    dec	    hex	filename
->    9200	      1	     16	   9217	   2401	arch/x86/boot/compressed/eboot.o
-> 
-> (gcc version 7.2.0 x86_64)
-> 
-> Signed-off-by: Colin Ian King <colin.king@canonical.com>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> ---
->  arch/x86/boot/compressed/eboot.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> index 886a9115af62..f2251c1c9853 100644
-> --- a/arch/x86/boot/compressed/eboot.c
-> +++ b/arch/x86/boot/compressed/eboot.c
-> @@ -423,7 +423,7 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
->  
->  static void setup_quirks(struct boot_params *boot_params)
->  {
-> -	efi_char16_t const apple[] = { 'A', 'p', 'p', 'l', 'e', 0 };
-> +	static efi_char16_t const apple[] = { 'A', 'p', 'p', 'l', 'e', 0 };
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-Perhaps 
+There is no need to artificially supply a property length and fake data
+if property has type of boolean.
 
-static const efi_char16_t apple[] ...
+Remove redundant piece of data and code.
 
-is better.
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Reviewed-and-tested-by: Lukas Wunner <lukas@wunner.de>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/apple-properties.c | 9 +--------
+ 1 file changed, 1 insertion(+), 8 deletions(-)
 
->  	efi_char16_t *fw_vendor = (efi_char16_t *)(unsigned long)
->  		efi_table_attr(efi_system_table, fw_vendor, sys_table);
->  
+diff --git a/drivers/firmware/efi/apple-properties.c b/drivers/firmware/efi/apple-properties.c
+index 9f6bcf173b0e..b9602e0d7b50 100644
+--- a/drivers/firmware/efi/apple-properties.c
++++ b/drivers/firmware/efi/apple-properties.c
+@@ -52,8 +52,6 @@ struct properties_header {
+ 	struct dev_header dev_header[0];
+ };
+ 
+-static u8 one __initdata = 1;
+-
+ static void __init unmarshal_key_value_pairs(struct dev_header *dev_header,
+ 					     struct device *dev, void *ptr,
+ 					     struct property_entry entry[])
+@@ -95,14 +93,9 @@ static void __init unmarshal_key_value_pairs(struct dev_header *dev_header,
+ 			     key_len - sizeof(key_len));
+ 
+ 		entry[i].name = key;
+-		entry[i].is_array = true;
+ 		entry[i].length = val_len - sizeof(val_len);
++		entry[i].is_array = !!entry[i].length;
+ 		entry[i].pointer.raw_data = ptr + key_len + sizeof(val_len);
+-		if (!entry[i].length) {
+-			/* driver core doesn't accept empty properties */
+-			entry[i].length = 1;
+-			entry[i].pointer.raw_data = &one;
+-		}
+ 
+ 		if (dump_properties) {
+ 			dev_info(dev, "property: %s\n", entry[i].name);
+-- 
+2.15.1
