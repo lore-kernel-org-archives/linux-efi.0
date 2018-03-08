@@ -1,88 +1,67 @@
 From: Thiebaud Weksteen <tweek@google.com>
 Subject: Re: Regression from efi: call get_event_log before ExitBootServices
-Date: Thu,  8 Mar 2018 11:03:19 +0100
-Message-ID: <20180308100319.131536-1-tweek@google.com>
+Date: Thu, 08 Mar 2018 08:45:22 +0000
+Message-ID: <CA+zpnLf1WNxYY-FaoFbas480GmkUW6kw_L7zi5mES3EPhL7egA@mail.gmail.com>
+References: <01000161fc0b4755-df0621f4-ab5d-479a-b425-adf98427a308-000000@email.amazonses.com>
+ <CA+zpnLdSyuyKjJEH3Oowmha2mF0B-j5b4A7CLuXXY7RH47SiFQ@mail.gmail.com> <0100016201863c0f-70600bd6-12d3-461d-9173-e4d61e8d09d5-000000@email.amazonses.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <0100016201863c0f-70600bd6-12d3-461d-9173-e4d61e8d09d5-000000@email.amazonses.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Jeremy Cline <jeremy@jcline.org>
-Cc: Javier Martinez Canillas <javierm@redhat.com>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, hdegoede@redhat.com, linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, linux-kernel@vger.kernel.org, Thiebaud Weksteen <tweek@google.com>
+Cc: Javier Martinez Canillas <javierm@redhat.com>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, hdegoede@redhat.com, linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
----
- drivers/firmware/efi/libstub/tpm.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+On Wed, Mar 7, 2018 at 6:33 PM Jeremy Cline <jeremy@jcline.org> wrote:
 
-diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
-index da661bf8cb96..773afcd6a37c 100644
---- a/drivers/firmware/efi/libstub/tpm.c
-+++ b/drivers/firmware/efi/libstub/tpm.c
-@@ -74,19 +74,23 @@ void efi_retrieve_tpm2_eventlog_1_2(efi_system_table_t *sys_table_arg)
- 	efi_bool_t truncated;
- 	void *tcg2_protocol;
- 
-+	efi_printk(sys_table_arg, "Locating the TCG2Protocol\n");
- 	status = efi_call_early(locate_protocol, &tcg2_guid, NULL,
- 				&tcg2_protocol);
- 	if (status != EFI_SUCCESS)
- 		return;
- 
-+	efi_printk(sys_table_arg, "Calling GetEventLog on TCG2Protocol\n");
- 	status = efi_call_proto(efi_tcg2_protocol, get_event_log, tcg2_protocol,
- 				EFI_TCG2_EVENT_LOG_FORMAT_TCG_1_2,
- 				&log_location, &log_last_entry, &truncated);
- 	if (status != EFI_SUCCESS)
- 		return;
-+	efi_printk(sys_table_arg, "Log returned\n");
- 
- 	if (!log_location)
- 		return;
-+	efi_printk(sys_table_arg, "log_location is not empty\n");
- 	first_entry_addr = (unsigned long) log_location;
- 
- 	/*
-@@ -94,7 +98,9 @@ void efi_retrieve_tpm2_eventlog_1_2(efi_system_table_t *sys_table_arg)
- 	 */
- 	if (!log_last_entry) {
- 		log_size = 0;
-+		efi_printk(sys_table_arg, "log_size = 0\n");
- 	} else {
-+		efi_printk(sys_table_arg, "log_size != 0\n");
- 		last_entry_addr = (unsigned long) log_last_entry;
- 		/*
- 		 * get_event_log only returns the address of the last entry.
-@@ -106,26 +112,31 @@ void efi_retrieve_tpm2_eventlog_1_2(efi_system_table_t *sys_table_arg)
- 		log_size = log_last_entry - log_location + last_entry_size;
- 	}
- 
-+	efi_printk(sys_table_arg, "Allocating memory for storing the logs\n");
- 	/* Allocate space for the logs and copy them. */
- 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
- 				sizeof(*log_tbl) + log_size,
- 				(void **) &log_tbl);
- 
-+	efi_printk(sys_table_arg, "Returned from memory allocation\n");
- 	if (status != EFI_SUCCESS) {
- 		efi_printk(sys_table_arg,
- 			   "Unable to allocate memory for event log\n");
- 		return;
- 	}
-+	efi_printk(sys_table_arg, "Copying log to new location\n");
- 
- 	memset(log_tbl, 0, sizeof(*log_tbl) + log_size);
- 	log_tbl->size = log_size;
- 	log_tbl->version = EFI_TCG2_EVENT_LOG_FORMAT_TCG_1_2;
- 	memcpy(log_tbl->log, (void *) first_entry_addr, log_size);
- 
-+	efi_printk(sys_table_arg, "Installing the log into the configuration table\n");
- 	status = efi_call_early(install_configuration_table,
- 				&linux_eventlog_guid, log_tbl);
- 	if (status != EFI_SUCCESS)
- 		goto err_free;
-+	efi_printk(sys_table_arg, "Done\n");
- 	return;
- 
- err_free:
--- 
-2.16.2.395.g2e18187dfd-goog
+> On 03/07/2018 03:41 AM, Thiebaud Weksteen wrote:
+> > Hi,
+> >
+> > Thanks for testing and sending this report! This patch relies heavily on
+> > the functions exposed by the firmware. My first guess would be that
+some of
+> > these may not be implemented correctly by the manufacturer.
+> >
+> > Could you share more information on this specific device?
+> > Do you have any link to the manufacturer website (I found [1] but it is
+> > based on an ARM CPU)?
+> > Do you have the option to update your firmware? Is a copy of the
+firmware
+> > available from the manufacturer?
+
+> I couldn't find a copy of the firmware, unfortunately.
+
+No worries, thanks for looking that up.
+
+
+> > On your side, I assume no error message got displayed on the screen when
+> > booting. Would you be able to try to boot in an UEFI shell [2] and
+execute
+> > the command "dh -v"?
+
+> Yup, no errors on the screen. I've attached the output of dh -v from the
+> UEFI shell.
+
+Great, thanks for that. There is a module that exposes the EfiTcg2Protocol
+(TrEEDxe). So I'm going to assume this is properly located and then called.
+Unfortunately, this is so early in the boot that we can only rely on the
+EFI functions for logging/debugging.
+
+Jeremy, Hans, could you both describe precisely how your boot is
+configured? This feature is only triggered when booting the EFI stub of the
+kernel so this may be not executed if you are using something else in
+between.
+
+Jeremy, would you be able to modify the efi_retrieve_tpm2_eventlog_1_2
+function to add multiple efi_printk(sys_table_arg,  "message\n"); to test:
+if you get the output on your screen; and isolate which call might be the
+cause of the hang?
+I can forward a debug patch if that helps.
+
+Thanks
+
+
+
+> Regards,
+> Jeremy
