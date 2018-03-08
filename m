@@ -1,99 +1,73 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 01/12] efi/arm*: Only register page tables when they exist
-Date: Thu,  8 Mar 2018 08:00:09 +0000
-Message-ID: <20180308080020.22828-2-ard.biesheuvel@linaro.org>
-References: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH V2 3/3] efi: Use efi_rts_workqueue to invoke EFI Runtime
+ Services
+Date: Thu, 8 Mar 2018 05:06:54 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F2E581824@ORSMSX114.amr.corp.intel.com>
+References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1520292190-5027-4-git-send-email-sai.praneeth.prakhya@intel.com>
+ <20180306112610.7izxtuy33bt7ivfs@lakrids.cambridge.arm.com>
+ <FFF73D592F13FD46B8700F0A279B802F2E5817CE@ORSMSX114.amr.corp.intel.com>
+ <CAPcyv4jL-Js14GEWe26E4wQSYnQtk_oXCv_RQwr6DvC2wFVNPQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
+In-Reply-To: <CAPcyv4jL-Js14GEWe26E4wQSYnQtk_oXCv_RQwr6DvC2wFVNPQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+To: "Williams, Dan J" <dan.j.williams@intel.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Lee@lakrids.cambridge.arm.com" <Lee@lakrids.cambridge.arm.com>, Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Mark Rutland <mark.rutland@arm.com>
-
-Currently the arm/arm64 runtime code registers the runtime servies
-pagetables with ptdump regardless of whether runtime services page
-tables have been created.
-
-As efi_mm.pgd is NULL in these cases, attempting to dump the efi page
-tables results in a NULL pointer dereference in the ptdump code:
-
-/sys/kernel/debug# cat efi_page_tables
-[  479.522600] Unable to handle kernel NULL pointer dereference at virtual address 00000000
-[  479.522715] Mem abort info:
-[  479.522764]   ESR = 0x96000006
-[  479.522850]   Exception class = DABT (current EL), IL = 32 bits
-[  479.522899]   SET = 0, FnV = 0
-[  479.522937]   EA = 0, S1PTW = 0
-[  479.528200] Data abort info:
-[  479.528230]   ISV = 0, ISS = 0x00000006
-[  479.528317]   CM = 0, WnR = 0
-[  479.528317] user pgtable: 4k pages, 48-bit VAs, pgd = 0000000064ab0cb0
-[  479.528449] [0000000000000000] *pgd=00000000fbbe4003, *pud=00000000fb66e003, *pmd=0000000000000000
-[  479.528600] Internal error: Oops: 96000006 [#1] PREEMPT SMP
-[  479.528664] Modules linked in:
-[  479.528699] CPU: 0 PID: 2457 Comm: cat Not tainted 4.15.0-rc3-00065-g2ad2ee7ecb5c-dirty #7
-[  479.528799] Hardware name: FVP Base (DT)
-[  479.528899] pstate: 00400009 (nzcv daif +PAN -UAO)
-[  479.528941] pc : walk_pgd.isra.1+0x20/0x1d0
-[  479.529011] lr : ptdump_walk_pgd+0x30/0x50
-[  479.529105] sp : ffff00000bf4bc20
-[  479.529185] x29: ffff00000bf4bc20 x28: 0000ffff9d22e000
-[  479.529271] x27: 0000000000020000 x26: ffff80007b4c63c0
-[  479.529358] x25: 00000000014000c0 x24: ffff80007c098900
-[  479.529445] x23: ffff00000bf4beb8 x22: 0000000000000000
-[  479.529532] x21: ffff00000bf4bd70 x20: 0000000000000001
-[  479.529618] x19: ffff00000bf4bcb0 x18: 0000000000000000
-[  479.529760] x17: 000000000041a1c8 x16: ffff0000082139d8
-[  479.529800] x15: 0000ffff9d3c6030 x14: 0000ffff9d2527f4
-[  479.529924] x13: 00000000000003f3 x12: 0000000000000038
-[  479.530000] x11: 0000000000000003 x10: 0101010101010101
-[  479.530099] x9 : 0000000017e94050 x8 : 000000000000003f
-[  479.530226] x7 : 0000000000000000 x6 : 0000000000000000
-[  479.530313] x5 : 0000000000000001 x4 : 0000000000000000
-[  479.530416] x3 : ffff000009069fd8 x2 : 0000000000000000
-[  479.530500] x1 : 0000000000000000 x0 : 0000000000000000
-[  479.530599] Process cat (pid: 2457, stack limit = 0x000000005d1b0e6f)
-[  479.530660] Call trace:
-[  479.530746]  walk_pgd.isra.1+0x20/0x1d0
-[  479.530833]  ptdump_walk_pgd+0x30/0x50
-[  479.530907]  ptdump_show+0x10/0x20
-[  479.530920]  seq_read+0xc8/0x470
-[  479.531023]  full_proxy_read+0x60/0x90
-[  479.531100]  __vfs_read+0x18/0x100
-[  479.531180]  vfs_read+0x88/0x160
-[  479.531267]  SyS_read+0x48/0xb0
-[  479.531299]  el0_svc_naked+0x20/0x24
-[  479.531400] Code: 91400420 f90033a0 a90707a2 f9403fa0 (f9400000)
-[  479.531499] ---[ end trace bfe8e28d8acb2b67 ]---
-Segmentation fault
-
-Let's avoid this problem by only registering the tables after their
-successful creation, which is also less confusing when EFI runtime
-services are not in use.
-
-Reported-by: Will Deacon <will.deacon@arm.com>
-Signed-off-by: Mark Rutland <mark.rutland@arm.com>
-Acked-by: Will Deacon <will.deacon@arm.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/arm-runtime.c | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 1cc41c3d6315..86a1ad17a32e 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -54,6 +54,9 @@ static struct ptdump_info efi_ptdump_info = {
- 
- static int __init ptdump_init(void)
- {
-+	if (!efi_enabled(EFI_RUNTIME_SERVICES))
-+		return 0;
-+
- 	return ptdump_debugfs_register(&efi_ptdump_info, "efi_page_tables");
- }
- device_initcall(ptdump_init);
--- 
-2.15.1
+PiA+PiA+IHBzdG9yZSB3cml0ZXMgY291bGQgcG90ZW50aWFsbHkgYmUgaW52b2tlZCBpbiBpbnRl
+cnJ1cHQgY29udGV4dCBhbmQNCj4gPj4gPiBpdCB1c2VzIHNldF92YXJpYWJsZTw+KCkgYW5kIHF1
+ZXJ5X3ZhcmlhYmxlX2luZm88PigpIHRvIHN0b3JlIGxvZ3MuDQo+ID4+ID4gSWYgd2UgaW52b2tl
+IGVmaV9ydW50aW1lX3NlcnZpY2VzKCkgdGhyb3VnaCBlZmlfcnRzX3dxIHdoaWxlIGluDQo+ID4+
+ID4gYXRvbWljKCkga2VybmVsIGlzc3VlcyBhIHdhcm5pbmcgKCJzY2hlZHVsaW5nIHdpbGUgaW4g
+YXRvbWljIikgYW5kDQo+ID4+ID4gcHJpbnRzIHN0YWNrIHRyYWNlLiBPbmUgd2F5IHRvIG92ZXJj
+b21lIHRoaXMgaXMgdG8gbm90IG1ha2UgdGhlDQo+ID4+ID4gY2FsbGVyIHByb2Nlc3Mgd2FpdCBm
+b3IgdGhlIHdvcmtlciB0aHJlYWQgdG8gZmluaXNoLiBUaGlzIGFwcHJvYWNoDQo+ID4+ID4gYnJl
+YWtzIHBzdG9yZSBpLmUuIHRoZSBsb2cgbWVzc2FnZXMgYXJlbid0IHdyaXR0ZW4gdG8gZWZpDQo+
+ID4+ID4gdmFyaWFibGVzLiBIZW5jZSwgcHN0b3JlIGNhbGxzDQo+ID4+ID4gZWZpX3J1bnRpbWVf
+c2VydmljZXMoKSB3aXRob3V0IHVzaW5nIGVmaV9ydHNfd3Egb3IgaW4gb3RoZXIgd29yZHMNCj4g
+Pj4gPiBlZmlfcnRzX3dxIHdpbGwgYmUgdXNlZCB1bmNvbmRpdGlvbmFsbHkgZm9yIGFsbCB0aGUN
+Cj4gPj4gPiBlZmlfcnVudGltZV9zZXJ2aWNlcygpIGV4Y2VwdCBzZXRfdmFyaWFibGU8PigpIGFu
+ZA0KPiA+PiA+IHF1ZXJ5X3ZhcmlhYmxlX2luZm88PigpDQo+ID4+DQo+ID4+IENhbid0IE5NSXMg
+c3RpbGwgY29tZSBpbiBkdXJpbmcgdGhpcz8NCj4gPj4NCj4gPj4gLi4uIG9yIGRvIHdlIGFzc3Vt
+ZSB0aGF0IHNpbmNlIHNvbWV0aGluZyBoYXMgYWxyZWFkeSBnb25lIHdyb25nLCB0aGlzDQo+ID4+
+IGRvZXNuJ3QgbWF0dGVyPw0KPiA+Pg0KPiA+DQo+ID4gSSB0aGluayB0aGV5IGNhbiBjb21lLiBB
+RkFJSywgcHN0b3JlIChpZiBlbmFibGVkKSBydW5zIG9ubHkgd2hlbiB3ZSBjcmFzaGVkLg0KPiA+
+IFNpbmNlLCB3ZSBhcmUgc3RpbGwgZXhlY3V0aW5nIHN0dWZmIHRvIGxvZyBtZXNzYWdlcyBhbmQg
+Tk1JJ3MgY2FuJ3QgYmUNCj4gPiBtYXNrZWQsIHRoZXJlIGlzIHN0aWxsIGEgcG9zc2liaWxpdHkg
+Zm9yIE5NSSdzIHRvIG9jY3VyIChwbGVhc2UgY29ycmVjdCBtZSBpZiBJIGFtDQo+IHdyb25nKS4N
+Cj4gPiBCdXQsIGFzIHlvdSBzYWlkIGVhcmxpZXIsIEkgZ3Vlc3MgaXQgZG9lc24ndCBtYXR0ZXIg
+YmVjYXVzZSBhbnl3YXlzIHdlIGFyZQ0KPiBnb2luZyBkb3duLg0KPiANCj4gVGhlIHByb2JsZW0g
+aXMgdGhhdCB3ZSBhcmUgbm90IGFsd2F5cyBpbiBhICJhbHJlYWR5IGdvaW5nIGRvd24iDQo+IGNv
+bmRpdGlvbiBmb3IgdHlwaWNhbCBzZXRfdmFyaWFibGUgYW5kIHF1ZXJ5X3ZhcmlhYmxlX2luZm8g
+Y2FsbHMuDQoNClRoYXQncyBjb3JyZWN0Lg0KDQo+IFNvIGFyZSB3ZSBhY3R1YWxseSBmaXhpbmcg
+YW55dGhpbmcgd2l0aCB0aGlzIHBhdGNoc2V0Pw0KDQpXaGVuIHdlIGFyZSBfbm90XyBpbiBpbnRl
+cnJ1cHQgY29udGV4dCAoZWc6IHByb2Nlc3MgY29udGV4dCkNCndlIHN0aWxsIHVzZSBlZmlfcnRz
+X3dxIHRvIGludm9rZSAqYWxsKiBlZmlfcnVudGltZV9zZXJ2aWNlcygpLg0KVGhpcyBzb2x2ZXMg
+KnNvbWVvbmUgdHJ5aW5nIHRvIGFjY2VzcyB1c2VyIHNwYWNlKiB3aGlsZSBpbiBFRkkgcnVudGlt
+ZSBzZXJ2aWNlcw0KbWFwcGluZyBwcm9ibGVtLiBBIGluc3RhbmNlIGNvdWxkIGJlLCBzb21lIHVz
+ZXIgc3BhY2UgcHJvY2VzcyByZXF1ZXN0cyB1cyB0bw0KZXhlY3V0ZSBlZmlfcnVudGltZV9zZXJ2
+aWNlKCksIHNvLCBrZXJuZWwgc3dpdGNoZXMgdG8gZWZpX3BnZCAod2hpY2ggZG9lc27igJl0IGhh
+dmUNCnVzZXIgc3BhY2UgcGFydCBvZiBwcm9jZXNzIGFkZHJlc3Mgc3BhY2UpIGFuZCB3aGlsZSBl
+eGVjdXRpbmcgZWZpX3J1bnRpbWVfc2VydmljZSgpDQpwZXJmIE5NSSBjb21lcyBhbG9uZyB0byBw
+cm9maWxlIHVzZXIgZGF0YS4NCg0KPiBJbiBvdGhlciB3b3JkcyBpZiB0aGUgTk1JIHZzIEVGSQ0K
+PiBtYXBwaW5nIHByb2JsZW0gcmVxdWlyZXMgdGhlIHdvcmtxdWV1ZSBjb250ZXh0IHRoZW4gd2Ug
+Y2FuJ3QgaGF2ZSBhbnkgRUZJDQo+IGNhbGxzIG91dHNpZGUgb2YgdGhhdCBjb250ZXh0LiAgQW0g
+SSBtaXNzaW5nIGhvdyB0aGlzIHNjaGVtZSBhZGRyZXNzZXMgdGhhdA0KPiBwcm9ibGVtPw0KDQpJ
+IHRoaW5rIHNvLCBiZWNhdXNlLCB3ZSBhcmUgbm90IHRyeWluZyB0byBzb2x2ZSBOTUkgdnMgRUZJ
+IFJ1bnRpbWUgU2VydmljZSBtYXBwaW5ncy4NCkFGQUlLLCB0aGV5IGJvdGggd29yayB0b2dldGhl
+ciAoZm9yIHg4Nl82NCkuIFRoZSBwcm9ibGVtIGlzLCBhcyBzdGF0ZWQgYWJvdmUsDQoic29tZW9u
+ZSB0cnlpbmcgdG8gYWNjZXNzIHVzZXIgc3BhY2Ugd2hpbGUgZXhlY3V0aW5nIEVGSSBydW50aW1l
+IHNlcnZpY2VzIi4NClRoZSBwcm9ibGVtIGV4aXN0cyBiZWNhdXNlIEVGSSBydW50aW1lIHNlcnZp
+Y2VzIG1hcHBpbmdzIGRvbuKAmXQgaGF2ZSB1c2VyIHNwYWNlDQpwYXJ0IG9mIHByb2Nlc3MgYWRk
+cmVzcyBzcGFjZS4NCg0KSSB0aGluayB0aGUgcHJvYmxlbSBzdGlsbCBwZXJzaXN0cyB3aGVuIHdl
+IGFyZSBhbHJlYWR5IGluIGludGVycnVwdCBjb250ZXh0IGFuZCB0aGVuDQp3ZSB3ZXJlIHJlcXVl
+c3RlZCB0byBleGVjdXRlIHNvbWUgZWZpX3J1bnRpbWVfc2VydmljZSgpIGFuZCB0aGVuIE5NSSBo
+YXBwZW5zDQphbmQgdGhhdCBOTUkgaGFuZGxlciB0b3VjaGVzIHVzZXIgc3BhY2UuDQoNClBsZWFz
+ZSBsZXQgbWUga25vdyBpZiBteSBleHBsYW5hdGlvbiBkaWRu4oCZdCBtYWtlIHNlbnNlIG9yIGlm
+IEkgbWlzdW5kZXJzdG9vZA0KeW91ciBxdWVzdGlvbi4NCg0KQXJkIGFuZCBNYXR0LCBwbGVhc2Ug
+Y29ycmVjdCBtZSBpZiBJIHN0YXRlZCBzb21ldGhpbmcgdGhhdCBpcyBpbmNvcnJlY3QuDQo=
