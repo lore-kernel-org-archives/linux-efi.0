@@ -1,66 +1,119 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V2 2/3] efi: Introduce efi_rts_workqueue and some
- infrastructure to invoke all efi_runtime_services()
-Date: Thu, 8 Mar 2018 05:31:03 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F2E5818E4@ORSMSX114.amr.corp.intel.com>
-References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1520292190-5027-3-git-send-email-sai.praneeth.prakhya@intel.com>
- <20180307121047.GG23662@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 08/12] x86/efi: Replace efi_pgd with efi_mm.pgd
+Date: Thu,  8 Mar 2018 08:00:16 +0000
+Message-ID: <20180308080020.22828-9-ard.biesheuvel@linaro.org>
+References: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180307121047.GG23662@pd.tnic>
-Content-Language: en-US
+In-Reply-To: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chun-Yi Lee <jlee@suse.com>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Williams, Dan J" <dan.j.williams@intel.com>
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S . Tsirkin" <mst@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-PiA+ICsoewkJCQkJCQkJCVwNCj4gPiArCXN0cnVjdCBlZmlfcnVudGltZV93b3JrIGVmaV9ydHNf
-d29yazsJCQkJXA0KPiA+ICsJCQkJCQkJCQlcDQo+ID4gKwlJTklUX1dPUktfT05TVEFDSygmZWZp
-X3J0c193b3JrLndvcmssIGVmaV9jYWxsX3J0cyk7CQlcDQo+ID4gKwllZmlfcnRzX3dvcmsuZnVu
-YyA9IF9ydHM7CQkJCQlcDQo+ID4gKwllZmlfcnRzX3dvcmsuYXJnMSA9IF9hcmcxOwkJCQkJXA0K
-PiA+ICsJZWZpX3J0c193b3JrLmFyZzIgPSBfYXJnMjsJCQkJCVwNCj4gPiArCWVmaV9ydHNfd29y
-ay5hcmczID0gX2FyZzM7CQkJCQlcDQo+ID4gKwllZmlfcnRzX3dvcmsuYXJnNCA9IF9hcmc0OwkJ
-CQkJXA0KPiA+ICsJZWZpX3J0c193b3JrLmFyZzUgPSBfYXJnNTsJCQkJCVwNCj4gPiArCS8qCQkJ
-CQkJCQlcDQo+ID4gKwkgKiBxdWV1ZV93b3JrKCkgcmV0dXJucyAwIGlmIHdvcmsgd2FzIGFscmVh
-ZHkgb24gcXVldWUsCQlcDQo+ID4gKwkgKiBfaWRlYWxseV8gdGhpcyBzaG91bGQgbmV2ZXIgaGFw
-cGVuLgkJCQlcDQo+ID4gKwkgKi8JCQkJCQkJCVwNCj4gPiArCWlmIChxdWV1ZV93b3JrKGVmaV9y
-dHNfd3EsICZlZmlfcnRzX3dvcmsud29yaykpDQo+IAlcDQo+ID4gKwkJZmx1c2hfd29yaygmZWZp
-X3J0c193b3JrLndvcmspOw0KPiAJXA0KPiA+ICsJZWxzZQkJCQkJCQkJXA0KPiA+ICsJCUJVRygp
-OwkJCQkJCQlcDQo+IA0KPiBTbyBmYWlsdXJlIHRvIHF1ZXVlIHRoYXQgd29yayBpcyBzdWNoIGEg
-Y3JpdGljYWwgcHJvYmxlbSB0aGF0IHdlIG5lZWQgdG8gQlVHKCkNCj4gYW5kIGNhbid0IHBvc3Np
-Ymx5IGNvbnRpbnVlIGFuZCBzaG91bHQgbm90IGF0dGVtcHQgcmVjb3ZlcnkgYXQgYWxsPw0KPiAN
-Cg0KSSB0aGluayBpdCdzIG5vdCBjcml0aWNhbCwgd2UgY2FuIGp1c3QgcmV0dXJuIGVycm9yIHN0
-YXR1cy4NCkkgdGhpbmsgdGhlIHByb2JsZW0gaW4gaXRzZWxmIGlzIG5vdCBhdCBhbGwgY3JpdGlj
-YWwgYnV0IHdoZW4gSSBpbml0aWFsbHkgdGhvdWdodCBhYm91dA0Kd2h5IHRoZSBwcm9ibGVtIGNv
-dWxkIGhhdmUgb2NjdXJyZWQsIGl0IHNvdW5kZWQgbGlrZSBvbmUgaS5lLiBpZGVhbGx5IChpZiB0
-aGUgc3lzdGVtDQppcyBydW5uaW5nIGZpbmUpIHdlIHNob3VsZCBhbHdheXMgYmUgYWJsZSB0byBx
-dWV1ZSB3b3JrLiBGYWlsdXJlIHRvIHF1ZXVlIG1lYW5zDQp0aGF0IHRoZSBwcmV2aW91cyB3b3Jr
-IGlzIGFscmVhZHkgb24gcXVldWUgYW5kIHRoYXQgc2hvdWxkbid0IGJlIHRoZSBjYXNlLg0KU28s
-IHRob3VnaHQsIG1heWJlIHNvbWV0aGluZyBiYWQgaGFkIGhhcHBlbmVkIGFscmVhZHkgKGp1c3Qg
-ZG91YnRmdWwpLg0KIA0KQnV0LCBJIHNlZSB5b3VyIHBvaW50LiBCVUcoKSBzb3VuZHMgbW9yZSBs
-aWtlIGFuIG92ZXIga2lsbC4gSW5zdGVhZCBvZiBmaXhpbmcgYW4gZXhpc3RpbmcNCnByb2JsZW0s
-IHRoaXMgcGF0Y2ggY291bGQgY29tcGxldGVseSB0YWtlIGRvd24gdGhlIHN5c3RlbS4NCg0KPiBJ
-T1csIHdlIHNob3VsZCBhbHdheXMgc3RyaXZlIHRvIGZhaWwgZ3JhY2VmdWxseSBhbmQgbm90IHNo
-aXQgaW4gcGFudHMgYXQgdGhlIGZpcnN0DQo+IHNpZ24gb2YgdHJvdWJsZS4NCj4NCg0KWWVzLCB0
-aGF0IG1ha2VzIHNlbnNlLiBJIHdpbGwgcmVtb3ZlIEJVRygpIGluIFYzIChpbiB0aGUgdHdvIHBs
-YWNlcyB0aGF0IEkgaW50cm9kdWNlZCkuDQoNCj4gRXZlbiBjaGVja3BhdGNoIHdhcm5zIGhlcmU6
-DQo+IA0KPiBXQVJOSU5HOiBBdm9pZCBjcmFzaGluZyB0aGUga2VybmVsIC0gdHJ5IHVzaW5nIFdB
-Uk5fT04gJiByZWNvdmVyeSBjb2RlDQo+IHJhdGhlciB0aGFuIEJVRygpIG9yIEJVR19PTigpDQo+
-ICMxODQ6IEZJTEU6IGRyaXZlcnMvZmlybXdhcmUvZWZpL3J1bnRpbWUtd3JhcHBlcnMuYzo5MjoN
-Cj4gKyAgICAgICAgICAgICAgIEJVRygpOyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgXA0KPg0KDQpTdXJlISBJIHdpbGwgZml4IHRoaXMNCiANCj4gDQo+
-IGFuZCBieSBsb29raW5nIGF0IHRoZSBvdGhlciBvdXRwdXQsIHlvdSBzaG91bGQgcnVuIHlvdXIg
-cGF0Y2hlcyB0aHJvdWdoDQo+IGNoZWNrcGF0Y2guIFNvbWUgb2YgdGhlIHRoaW5ncyBtYWtlIHNl
-bnNlIGxpa2U6DQo+IA0KPiBXQVJOSU5HOiBxdW90ZWQgc3RyaW5nIHNwbGl0IGFjcm9zcyBsaW5l
-cw0KPiAjOTc6IEZJTEU6IGRyaXZlcnMvZmlybXdhcmUvZWZpL2VmaS5jOjM0MToNCj4gKyAgICAg
-ICAgICAgICAgIHByX2VycigiRmFpbGVkIHRvIGNyZWF0ZSBlZmlfcnRzX3dvcmtxdWV1ZSwgRUZJ
-IHJ1bnRpbWUgc2VydmljZXMgIg0KPiArICAgICAgICAgICAgICAgICAgICAgICJkaXNhYmxlZC5c
-biIpOw0KPiANCj4gZm9yIGV4YW1wbGUuDQo+IA0KDQpJIHdpbGwgZml4IHRoaXMgb25lIHRvby4N
-Cg0KQW5vdGhlciB3YXJuaW5nIGJ5IGNoZWNrcGF0Y2ggaXMgInVzZSBvZiBpbl9hdG9taWMoKSBp
-biBkcml2ZXJzIGNvZGUiDQpEbyB5b3UgdGhpbmsgaXQncyBPSyB0byBjaGVjayBpZiB3ZXJlIGFy
-ZSAiaW5fYXRvbWljKCkiIGluIGRyaXZlcnMgY29kZS4NCkkgd2Fzbid0IGFibGUgdG8gZGVjaWRl
-IG9uIG90aGVyIGFsdGVybmF0aXZlLCBpZiBwb3NzaWJsZSwgY291bGQgeW91IHBsZWFzZSBzdWdn
-ZXN0IG9uZT8NCg0KUmVnYXJkcywNClNhaQ0K
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+
+Since the previous patch added support for efi_mm, let's handle efi_pgd
+through efi_mm and remove global variable efi_pgd.
+
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: "Lee, Chun-Yi" <jlee@suse.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Tony Luck <tony.luck@intel.com>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Michael S. Tsirkin <mst@redhat.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+Tested-by: Bhupesh Sharma <bhsharma@redhat.com>
+Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/x86/platform/efi/efi_64.c | 17 ++++++++---------
+ 1 file changed, 8 insertions(+), 9 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 0045efe9947b..8881e601c32d 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -190,8 +190,6 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
+ 	early_code_mapping_set_exec(0);
+ }
+ 
+-static pgd_t *efi_pgd;
+-
+ /*
+  * We need our own copy of the higher levels of the page tables
+  * because we want to avoid inserting EFI region mappings (EFI_VA_END
+@@ -203,7 +201,7 @@ static pgd_t *efi_pgd;
+  */
+ int __init efi_alloc_page_tables(void)
+ {
+-	pgd_t *pgd;
++	pgd_t *pgd, *efi_pgd;
+ 	p4d_t *p4d;
+ 	pud_t *pud;
+ 	gfp_t gfp_mask;
+@@ -231,6 +229,7 @@ int __init efi_alloc_page_tables(void)
+ 		return -ENOMEM;
+ 	}
+ 
++	efi_mm.pgd = efi_pgd;
+ 	mm_init_cpumask(&efi_mm);
+ 	init_new_context(NULL, &efi_mm);
+ 
+@@ -246,6 +245,7 @@ void efi_sync_low_kernel_mappings(void)
+ 	pgd_t *pgd_k, *pgd_efi;
+ 	p4d_t *p4d_k, *p4d_efi;
+ 	pud_t *pud_k, *pud_efi;
++	pgd_t *efi_pgd = efi_mm.pgd;
+ 
+ 	if (efi_enabled(EFI_OLD_MEMMAP))
+ 		return;
+@@ -339,7 +339,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	unsigned long pfn, text, pf;
+ 	struct page *page;
+ 	unsigned npages;
+-	pgd_t *pgd;
++	pgd_t *pgd = efi_mm.pgd;
+ 
+ 	if (efi_enabled(EFI_OLD_MEMMAP))
+ 		return 0;
+@@ -349,8 +349,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	 * this value is loaded into cr3 the PGD will be decrypted during
+ 	 * the pagetable walk.
+ 	 */
+-	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(efi_pgd);
+-	pgd = efi_pgd;
++	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(pgd);
+ 
+ 	/*
+ 	 * It can happen that the physical address of new_memmap lands in memory
+@@ -420,7 +419,7 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+ {
+ 	unsigned long flags = _PAGE_RW;
+ 	unsigned long pfn;
+-	pgd_t *pgd = efi_pgd;
++	pgd_t *pgd = efi_mm.pgd;
+ 
+ 	if (!(md->attribute & EFI_MEMORY_WB))
+ 		flags |= _PAGE_PCD;
+@@ -524,7 +523,7 @@ void __init parse_efi_setup(u64 phys_addr, u32 data_len)
+ static int __init efi_update_mappings(efi_memory_desc_t *md, unsigned long pf)
+ {
+ 	unsigned long pfn;
+-	pgd_t *pgd = efi_pgd;
++	pgd_t *pgd = efi_mm.pgd;
+ 	int err1, err2;
+ 
+ 	/* Update the 1:1 mapping */
+@@ -621,7 +620,7 @@ void __init efi_dump_pagetable(void)
+ 	if (efi_enabled(EFI_OLD_MEMMAP))
+ 		ptdump_walk_pgd_level(NULL, swapper_pg_dir);
+ 	else
+-		ptdump_walk_pgd_level(NULL, efi_pgd);
++		ptdump_walk_pgd_level(NULL, efi_mm.pgd);
+ #endif
+ }
+ 
+-- 
+2.15.1
