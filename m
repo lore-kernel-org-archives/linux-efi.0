@@ -1,73 +1,48 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V2 3/3] efi: Use efi_rts_workqueue to invoke EFI Runtime
- Services
-Date: Thu, 8 Mar 2018 05:06:54 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F2E581824@ORSMSX114.amr.corp.intel.com>
-References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1520292190-5027-4-git-send-email-sai.praneeth.prakhya@intel.com>
- <20180306112610.7izxtuy33bt7ivfs@lakrids.cambridge.arm.com>
- <FFF73D592F13FD46B8700F0A279B802F2E5817CE@ORSMSX114.amr.corp.intel.com>
- <CAPcyv4jL-Js14GEWe26E4wQSYnQtk_oXCv_RQwr6DvC2wFVNPQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 12/12] efi: make const array 'apple' static
+Date: Thu,  8 Mar 2018 08:00:20 +0000
+Message-ID: <20180308080020.22828-13-ard.biesheuvel@linaro.org>
+References: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPcyv4jL-Js14GEWe26E4wQSYnQtk_oXCv_RQwr6DvC2wFVNPQ@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Williams, Dan J" <dan.j.williams@intel.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Lee@lakrids.cambridge.arm.com" <Lee@lakrids.cambridge.arm.com>, Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Colin Ian King <colin.king@canonical.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-PiA+PiA+IHBzdG9yZSB3cml0ZXMgY291bGQgcG90ZW50aWFsbHkgYmUgaW52b2tlZCBpbiBpbnRl
-cnJ1cHQgY29udGV4dCBhbmQNCj4gPj4gPiBpdCB1c2VzIHNldF92YXJpYWJsZTw+KCkgYW5kIHF1
-ZXJ5X3ZhcmlhYmxlX2luZm88PigpIHRvIHN0b3JlIGxvZ3MuDQo+ID4+ID4gSWYgd2UgaW52b2tl
-IGVmaV9ydW50aW1lX3NlcnZpY2VzKCkgdGhyb3VnaCBlZmlfcnRzX3dxIHdoaWxlIGluDQo+ID4+
-ID4gYXRvbWljKCkga2VybmVsIGlzc3VlcyBhIHdhcm5pbmcgKCJzY2hlZHVsaW5nIHdpbGUgaW4g
-YXRvbWljIikgYW5kDQo+ID4+ID4gcHJpbnRzIHN0YWNrIHRyYWNlLiBPbmUgd2F5IHRvIG92ZXJj
-b21lIHRoaXMgaXMgdG8gbm90IG1ha2UgdGhlDQo+ID4+ID4gY2FsbGVyIHByb2Nlc3Mgd2FpdCBm
-b3IgdGhlIHdvcmtlciB0aHJlYWQgdG8gZmluaXNoLiBUaGlzIGFwcHJvYWNoDQo+ID4+ID4gYnJl
-YWtzIHBzdG9yZSBpLmUuIHRoZSBsb2cgbWVzc2FnZXMgYXJlbid0IHdyaXR0ZW4gdG8gZWZpDQo+
-ID4+ID4gdmFyaWFibGVzLiBIZW5jZSwgcHN0b3JlIGNhbGxzDQo+ID4+ID4gZWZpX3J1bnRpbWVf
-c2VydmljZXMoKSB3aXRob3V0IHVzaW5nIGVmaV9ydHNfd3Egb3IgaW4gb3RoZXIgd29yZHMNCj4g
-Pj4gPiBlZmlfcnRzX3dxIHdpbGwgYmUgdXNlZCB1bmNvbmRpdGlvbmFsbHkgZm9yIGFsbCB0aGUN
-Cj4gPj4gPiBlZmlfcnVudGltZV9zZXJ2aWNlcygpIGV4Y2VwdCBzZXRfdmFyaWFibGU8PigpIGFu
-ZA0KPiA+PiA+IHF1ZXJ5X3ZhcmlhYmxlX2luZm88PigpDQo+ID4+DQo+ID4+IENhbid0IE5NSXMg
-c3RpbGwgY29tZSBpbiBkdXJpbmcgdGhpcz8NCj4gPj4NCj4gPj4gLi4uIG9yIGRvIHdlIGFzc3Vt
-ZSB0aGF0IHNpbmNlIHNvbWV0aGluZyBoYXMgYWxyZWFkeSBnb25lIHdyb25nLCB0aGlzDQo+ID4+
-IGRvZXNuJ3QgbWF0dGVyPw0KPiA+Pg0KPiA+DQo+ID4gSSB0aGluayB0aGV5IGNhbiBjb21lLiBB
-RkFJSywgcHN0b3JlIChpZiBlbmFibGVkKSBydW5zIG9ubHkgd2hlbiB3ZSBjcmFzaGVkLg0KPiA+
-IFNpbmNlLCB3ZSBhcmUgc3RpbGwgZXhlY3V0aW5nIHN0dWZmIHRvIGxvZyBtZXNzYWdlcyBhbmQg
-Tk1JJ3MgY2FuJ3QgYmUNCj4gPiBtYXNrZWQsIHRoZXJlIGlzIHN0aWxsIGEgcG9zc2liaWxpdHkg
-Zm9yIE5NSSdzIHRvIG9jY3VyIChwbGVhc2UgY29ycmVjdCBtZSBpZiBJIGFtDQo+IHdyb25nKS4N
-Cj4gPiBCdXQsIGFzIHlvdSBzYWlkIGVhcmxpZXIsIEkgZ3Vlc3MgaXQgZG9lc24ndCBtYXR0ZXIg
-YmVjYXVzZSBhbnl3YXlzIHdlIGFyZQ0KPiBnb2luZyBkb3duLg0KPiANCj4gVGhlIHByb2JsZW0g
-aXMgdGhhdCB3ZSBhcmUgbm90IGFsd2F5cyBpbiBhICJhbHJlYWR5IGdvaW5nIGRvd24iDQo+IGNv
-bmRpdGlvbiBmb3IgdHlwaWNhbCBzZXRfdmFyaWFibGUgYW5kIHF1ZXJ5X3ZhcmlhYmxlX2luZm8g
-Y2FsbHMuDQoNClRoYXQncyBjb3JyZWN0Lg0KDQo+IFNvIGFyZSB3ZSBhY3R1YWxseSBmaXhpbmcg
-YW55dGhpbmcgd2l0aCB0aGlzIHBhdGNoc2V0Pw0KDQpXaGVuIHdlIGFyZSBfbm90XyBpbiBpbnRl
-cnJ1cHQgY29udGV4dCAoZWc6IHByb2Nlc3MgY29udGV4dCkNCndlIHN0aWxsIHVzZSBlZmlfcnRz
-X3dxIHRvIGludm9rZSAqYWxsKiBlZmlfcnVudGltZV9zZXJ2aWNlcygpLg0KVGhpcyBzb2x2ZXMg
-KnNvbWVvbmUgdHJ5aW5nIHRvIGFjY2VzcyB1c2VyIHNwYWNlKiB3aGlsZSBpbiBFRkkgcnVudGlt
-ZSBzZXJ2aWNlcw0KbWFwcGluZyBwcm9ibGVtLiBBIGluc3RhbmNlIGNvdWxkIGJlLCBzb21lIHVz
-ZXIgc3BhY2UgcHJvY2VzcyByZXF1ZXN0cyB1cyB0bw0KZXhlY3V0ZSBlZmlfcnVudGltZV9zZXJ2
-aWNlKCksIHNvLCBrZXJuZWwgc3dpdGNoZXMgdG8gZWZpX3BnZCAod2hpY2ggZG9lc27igJl0IGhh
-dmUNCnVzZXIgc3BhY2UgcGFydCBvZiBwcm9jZXNzIGFkZHJlc3Mgc3BhY2UpIGFuZCB3aGlsZSBl
-eGVjdXRpbmcgZWZpX3J1bnRpbWVfc2VydmljZSgpDQpwZXJmIE5NSSBjb21lcyBhbG9uZyB0byBw
-cm9maWxlIHVzZXIgZGF0YS4NCg0KPiBJbiBvdGhlciB3b3JkcyBpZiB0aGUgTk1JIHZzIEVGSQ0K
-PiBtYXBwaW5nIHByb2JsZW0gcmVxdWlyZXMgdGhlIHdvcmtxdWV1ZSBjb250ZXh0IHRoZW4gd2Ug
-Y2FuJ3QgaGF2ZSBhbnkgRUZJDQo+IGNhbGxzIG91dHNpZGUgb2YgdGhhdCBjb250ZXh0LiAgQW0g
-SSBtaXNzaW5nIGhvdyB0aGlzIHNjaGVtZSBhZGRyZXNzZXMgdGhhdA0KPiBwcm9ibGVtPw0KDQpJ
-IHRoaW5rIHNvLCBiZWNhdXNlLCB3ZSBhcmUgbm90IHRyeWluZyB0byBzb2x2ZSBOTUkgdnMgRUZJ
-IFJ1bnRpbWUgU2VydmljZSBtYXBwaW5ncy4NCkFGQUlLLCB0aGV5IGJvdGggd29yayB0b2dldGhl
-ciAoZm9yIHg4Nl82NCkuIFRoZSBwcm9ibGVtIGlzLCBhcyBzdGF0ZWQgYWJvdmUsDQoic29tZW9u
-ZSB0cnlpbmcgdG8gYWNjZXNzIHVzZXIgc3BhY2Ugd2hpbGUgZXhlY3V0aW5nIEVGSSBydW50aW1l
-IHNlcnZpY2VzIi4NClRoZSBwcm9ibGVtIGV4aXN0cyBiZWNhdXNlIEVGSSBydW50aW1lIHNlcnZp
-Y2VzIG1hcHBpbmdzIGRvbuKAmXQgaGF2ZSB1c2VyIHNwYWNlDQpwYXJ0IG9mIHByb2Nlc3MgYWRk
-cmVzcyBzcGFjZS4NCg0KSSB0aGluayB0aGUgcHJvYmxlbSBzdGlsbCBwZXJzaXN0cyB3aGVuIHdl
-IGFyZSBhbHJlYWR5IGluIGludGVycnVwdCBjb250ZXh0IGFuZCB0aGVuDQp3ZSB3ZXJlIHJlcXVl
-c3RlZCB0byBleGVjdXRlIHNvbWUgZWZpX3J1bnRpbWVfc2VydmljZSgpIGFuZCB0aGVuIE5NSSBo
-YXBwZW5zDQphbmQgdGhhdCBOTUkgaGFuZGxlciB0b3VjaGVzIHVzZXIgc3BhY2UuDQoNClBsZWFz
-ZSBsZXQgbWUga25vdyBpZiBteSBleHBsYW5hdGlvbiBkaWRu4oCZdCBtYWtlIHNlbnNlIG9yIGlm
-IEkgbWlzdW5kZXJzdG9vZA0KeW91ciBxdWVzdGlvbi4NCg0KQXJkIGFuZCBNYXR0LCBwbGVhc2Ug
-Y29ycmVjdCBtZSBpZiBJIHN0YXRlZCBzb21ldGhpbmcgdGhhdCBpcyBpbmNvcnJlY3QuDQo=
+From: Colin Ian King <colin.king@canonical.com>
+
+Don't populate the const read-only array 'buf' on the stack but instead
+make it static. Makes the object code smaller by 64 bytes:
+
+Before:
+   text	   data	    bss	    dec	    hex	filename
+   9264	      1	     16	   9281	   2441	arch/x86/boot/compressed/eboot.o
+
+After:
+   text	   data	    bss	    dec	    hex	filename
+   9200	      1	     16	   9217	   2401	arch/x86/boot/compressed/eboot.o
+
+(gcc version 7.2.0 x86_64)
+
+Signed-off-by: Colin Ian King <colin.king@canonical.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/x86/boot/compressed/eboot.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 886a9115af62..f2251c1c9853 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -423,7 +423,7 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
+ 
+ static void setup_quirks(struct boot_params *boot_params)
+ {
+-	efi_char16_t const apple[] = { 'A', 'p', 'p', 'l', 'e', 0 };
++	static efi_char16_t const apple[] = { 'A', 'p', 'p', 'l', 'e', 0 };
+ 	efi_char16_t *fw_vendor = (efi_char16_t *)(unsigned long)
+ 		efi_table_attr(efi_system_table, fw_vendor, sys_table);
+ 
+-- 
+2.15.1
