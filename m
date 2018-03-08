@@ -1,68 +1,99 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V2 2/3] efi: Introduce efi_rts_workqueue and some
- infrastructure to invoke all efi_runtime_services()
-Date: Thu, 8 Mar 2018 05:38:50 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F2E5818F1@ORSMSX114.amr.corp.intel.com>
-References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1520292190-5027-3-git-send-email-sai.praneeth.prakhya@intel.com>
- <20180307121047.GG23662@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 01/12] efi/arm*: Only register page tables when they exist
+Date: Thu,  8 Mar 2018 08:00:09 +0000
+Message-ID: <20180308080020.22828-2-ard.biesheuvel@linaro.org>
+References: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: en-US
+In-Reply-To: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chun-Yi Lee <jlee@suse.com>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Williams, Dan J" <dan.j.williams@intel.com>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-K0NjIE1pZ3VlbCBPamVkYQ0KDQo+ID4gPiArKHsJCQkJCQkJCQlcDQo+ID4gPiArCXN0cnVjdCBl
-ZmlfcnVudGltZV93b3JrIGVmaV9ydHNfd29yazsJCQkJXA0KPiA+ID4gKwkJCQkJCQkJCVwNCj4g
-PiA+ICsJSU5JVF9XT1JLX09OU1RBQ0soJmVmaV9ydHNfd29yay53b3JrLCBlZmlfY2FsbF9ydHMp
-OwkJXA0KPiA+ID4gKwllZmlfcnRzX3dvcmsuZnVuYyA9IF9ydHM7CQkJCQlcDQo+ID4gPiArCWVm
-aV9ydHNfd29yay5hcmcxID0gX2FyZzE7CQkJCQlcDQo+ID4gPiArCWVmaV9ydHNfd29yay5hcmcy
-ID0gX2FyZzI7CQkJCQlcDQo+ID4gPiArCWVmaV9ydHNfd29yay5hcmczID0gX2FyZzM7CQkJCQlc
-DQo+ID4gPiArCWVmaV9ydHNfd29yay5hcmc0ID0gX2FyZzQ7CQkJCQlcDQo+ID4gPiArCWVmaV9y
-dHNfd29yay5hcmc1ID0gX2FyZzU7CQkJCQlcDQo+ID4gPiArCS8qCQkJCQkJCQlcDQo+ID4gPiAr
-CSAqIHF1ZXVlX3dvcmsoKSByZXR1cm5zIDAgaWYgd29yayB3YXMgYWxyZWFkeSBvbiBxdWV1ZSwJ
-CVwNCj4gPiA+ICsJICogX2lkZWFsbHlfIHRoaXMgc2hvdWxkIG5ldmVyIGhhcHBlbi4JCQkJXA0K
-PiA+ID4gKwkgKi8JCQkJCQkJCVwNCj4gPiA+ICsJaWYgKHF1ZXVlX3dvcmsoZWZpX3J0c193cSwg
-JmVmaV9ydHNfd29yay53b3JrKSkNCj4gPiAJXA0KPiA+ID4gKwkJZmx1c2hfd29yaygmZWZpX3J0
-c193b3JrLndvcmspOw0KPiA+IAlcDQo+ID4gPiArCWVsc2UJCQkJCQkJCVwNCj4gPiA+ICsJCUJV
-RygpOwkJCQkJCQlcDQo+ID4NCj4gPiBTbyBmYWlsdXJlIHRvIHF1ZXVlIHRoYXQgd29yayBpcyBz
-dWNoIGEgY3JpdGljYWwgcHJvYmxlbSB0aGF0IHdlIG5lZWQNCj4gPiB0byBCVUcoKSBhbmQgY2Fu
-J3QgcG9zc2libHkgY29udGludWUgYW5kIHNob3VsdCBub3QgYXR0ZW1wdCByZWNvdmVyeSBhdCBh
-bGw/DQo+ID4NCj4gDQo+IEkgdGhpbmsgaXQncyBub3QgY3JpdGljYWwsIHdlIGNhbiBqdXN0IHJl
-dHVybiBlcnJvciBzdGF0dXMuDQo+IEkgdGhpbmsgdGhlIHByb2JsZW0gaW4gaXRzZWxmIGlzIG5v
-dCBhdCBhbGwgY3JpdGljYWwgYnV0IHdoZW4gSSBpbml0aWFsbHkgdGhvdWdodCBhYm91dA0KPiB3
-aHkgdGhlIHByb2JsZW0gY291bGQgaGF2ZSBvY2N1cnJlZCwgaXQgc291bmRlZCBsaWtlIG9uZSBp
-LmUuIGlkZWFsbHkgKGlmIHRoZQ0KPiBzeXN0ZW0gaXMgcnVubmluZyBmaW5lKSB3ZSBzaG91bGQg
-YWx3YXlzIGJlIGFibGUgdG8gcXVldWUgd29yay4gRmFpbHVyZSB0byBxdWV1ZQ0KPiBtZWFucyB0
-aGF0IHRoZSBwcmV2aW91cyB3b3JrIGlzIGFscmVhZHkgb24gcXVldWUgYW5kIHRoYXQgc2hvdWxk
-bid0IGJlIHRoZQ0KPiBjYXNlLg0KPiBTbywgdGhvdWdodCwgbWF5YmUgc29tZXRoaW5nIGJhZCBo
-YWQgaGFwcGVuZWQgYWxyZWFkeSAoanVzdCBkb3VidGZ1bCkuDQo+IA0KPiBCdXQsIEkgc2VlIHlv
-dXIgcG9pbnQuIEJVRygpIHNvdW5kcyBtb3JlIGxpa2UgYW4gb3ZlciBraWxsLiBJbnN0ZWFkIG9m
-IGZpeGluZyBhbg0KPiBleGlzdGluZyBwcm9ibGVtLCB0aGlzIHBhdGNoIGNvdWxkIGNvbXBsZXRl
-bHkgdGFrZSBkb3duIHRoZSBzeXN0ZW0uDQo+IA0KPiA+IElPVywgd2Ugc2hvdWxkIGFsd2F5cyBz
-dHJpdmUgdG8gZmFpbCBncmFjZWZ1bGx5IGFuZCBub3Qgc2hpdCBpbiBwYW50cw0KPiA+IGF0IHRo
-ZSBmaXJzdCBzaWduIG9mIHRyb3VibGUuDQo+ID4NCj4gDQo+IFllcywgdGhhdCBtYWtlcyBzZW5z
-ZS4gSSB3aWxsIHJlbW92ZSBCVUcoKSBpbiBWMyAoaW4gdGhlIHR3byBwbGFjZXMgdGhhdCBJDQo+
-IGludHJvZHVjZWQpLg0KPiANCj4gPiBFdmVuIGNoZWNrcGF0Y2ggd2FybnMgaGVyZToNCj4gPg0K
-PiA+IFdBUk5JTkc6IEF2b2lkIGNyYXNoaW5nIHRoZSBrZXJuZWwgLSB0cnkgdXNpbmcgV0FSTl9P
-TiAmIHJlY292ZXJ5IGNvZGUNCj4gPiByYXRoZXIgdGhhbiBCVUcoKSBvciBCVUdfT04oKQ0KPiA+
-ICMxODQ6IEZJTEU6IGRyaXZlcnMvZmlybXdhcmUvZWZpL3J1bnRpbWUtd3JhcHBlcnMuYzo5MjoN
-Cj4gPiArICAgICAgICAgICAgICAgQlVHKCk7ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICBcDQo+ID4NCj4gDQo+IFN1cmUhIEkgd2lsbCBmaXggdGhpcw0K
-PiANCj4gPg0KPiA+IGFuZCBieSBsb29raW5nIGF0IHRoZSBvdGhlciBvdXRwdXQsIHlvdSBzaG91
-bGQgcnVuIHlvdXIgcGF0Y2hlcw0KPiA+IHRocm91Z2ggY2hlY2twYXRjaC4gU29tZSBvZiB0aGUg
-dGhpbmdzIG1ha2Ugc2Vuc2UgbGlrZToNCj4gPg0KPiA+IFdBUk5JTkc6IHF1b3RlZCBzdHJpbmcg
-c3BsaXQgYWNyb3NzIGxpbmVzDQo+ID4gIzk3OiBGSUxFOiBkcml2ZXJzL2Zpcm13YXJlL2VmaS9l
-ZmkuYzozNDE6DQo+ID4gKyAgICAgICAgICAgICAgIHByX2VycigiRmFpbGVkIHRvIGNyZWF0ZSBl
-ZmlfcnRzX3dvcmtxdWV1ZSwgRUZJIHJ1bnRpbWUgc2VydmljZXMgIg0KPiA+ICsgICAgICAgICAg
-ICAgICAgICAgICAgImRpc2FibGVkLlxuIik7DQo+ID4NCj4gPiBmb3IgZXhhbXBsZS4NCj4gPg0K
-PiANCj4gSSB3aWxsIGZpeCB0aGlzIG9uZSB0b28uDQo+IA0KPiBBbm90aGVyIHdhcm5pbmcgYnkg
-Y2hlY2twYXRjaCBpcyAidXNlIG9mIGluX2F0b21pYygpIGluIGRyaXZlcnMgY29kZSINCj4gRG8g
-eW91IHRoaW5rIGl0J3MgT0sgdG8gY2hlY2sgaWYgd2VyZSBhcmUgImluX2F0b21pYygpIiBpbiBk
-cml2ZXJzIGNvZGUuDQo+IEkgd2Fzbid0IGFibGUgdG8gZGVjaWRlIG9uIG90aGVyIGFsdGVybmF0
-aXZlLCBpZiBwb3NzaWJsZSwgY291bGQgeW91IHBsZWFzZSBzdWdnZXN0DQo+IG9uZT8NCj4gDQo+
-IFJlZ2FyZHMsDQo+IFNhaQ0K
+From: Mark Rutland <mark.rutland@arm.com>
+
+Currently the arm/arm64 runtime code registers the runtime servies
+pagetables with ptdump regardless of whether runtime services page
+tables have been created.
+
+As efi_mm.pgd is NULL in these cases, attempting to dump the efi page
+tables results in a NULL pointer dereference in the ptdump code:
+
+/sys/kernel/debug# cat efi_page_tables
+[  479.522600] Unable to handle kernel NULL pointer dereference at virtual address 00000000
+[  479.522715] Mem abort info:
+[  479.522764]   ESR = 0x96000006
+[  479.522850]   Exception class = DABT (current EL), IL = 32 bits
+[  479.522899]   SET = 0, FnV = 0
+[  479.522937]   EA = 0, S1PTW = 0
+[  479.528200] Data abort info:
+[  479.528230]   ISV = 0, ISS = 0x00000006
+[  479.528317]   CM = 0, WnR = 0
+[  479.528317] user pgtable: 4k pages, 48-bit VAs, pgd = 0000000064ab0cb0
+[  479.528449] [0000000000000000] *pgd=00000000fbbe4003, *pud=00000000fb66e003, *pmd=0000000000000000
+[  479.528600] Internal error: Oops: 96000006 [#1] PREEMPT SMP
+[  479.528664] Modules linked in:
+[  479.528699] CPU: 0 PID: 2457 Comm: cat Not tainted 4.15.0-rc3-00065-g2ad2ee7ecb5c-dirty #7
+[  479.528799] Hardware name: FVP Base (DT)
+[  479.528899] pstate: 00400009 (nzcv daif +PAN -UAO)
+[  479.528941] pc : walk_pgd.isra.1+0x20/0x1d0
+[  479.529011] lr : ptdump_walk_pgd+0x30/0x50
+[  479.529105] sp : ffff00000bf4bc20
+[  479.529185] x29: ffff00000bf4bc20 x28: 0000ffff9d22e000
+[  479.529271] x27: 0000000000020000 x26: ffff80007b4c63c0
+[  479.529358] x25: 00000000014000c0 x24: ffff80007c098900
+[  479.529445] x23: ffff00000bf4beb8 x22: 0000000000000000
+[  479.529532] x21: ffff00000bf4bd70 x20: 0000000000000001
+[  479.529618] x19: ffff00000bf4bcb0 x18: 0000000000000000
+[  479.529760] x17: 000000000041a1c8 x16: ffff0000082139d8
+[  479.529800] x15: 0000ffff9d3c6030 x14: 0000ffff9d2527f4
+[  479.529924] x13: 00000000000003f3 x12: 0000000000000038
+[  479.530000] x11: 0000000000000003 x10: 0101010101010101
+[  479.530099] x9 : 0000000017e94050 x8 : 000000000000003f
+[  479.530226] x7 : 0000000000000000 x6 : 0000000000000000
+[  479.530313] x5 : 0000000000000001 x4 : 0000000000000000
+[  479.530416] x3 : ffff000009069fd8 x2 : 0000000000000000
+[  479.530500] x1 : 0000000000000000 x0 : 0000000000000000
+[  479.530599] Process cat (pid: 2457, stack limit = 0x000000005d1b0e6f)
+[  479.530660] Call trace:
+[  479.530746]  walk_pgd.isra.1+0x20/0x1d0
+[  479.530833]  ptdump_walk_pgd+0x30/0x50
+[  479.530907]  ptdump_show+0x10/0x20
+[  479.530920]  seq_read+0xc8/0x470
+[  479.531023]  full_proxy_read+0x60/0x90
+[  479.531100]  __vfs_read+0x18/0x100
+[  479.531180]  vfs_read+0x88/0x160
+[  479.531267]  SyS_read+0x48/0xb0
+[  479.531299]  el0_svc_naked+0x20/0x24
+[  479.531400] Code: 91400420 f90033a0 a90707a2 f9403fa0 (f9400000)
+[  479.531499] ---[ end trace bfe8e28d8acb2b67 ]---
+Segmentation fault
+
+Let's avoid this problem by only registering the tables after their
+successful creation, which is also less confusing when EFI runtime
+services are not in use.
+
+Reported-by: Will Deacon <will.deacon@arm.com>
+Signed-off-by: Mark Rutland <mark.rutland@arm.com>
+Acked-by: Will Deacon <will.deacon@arm.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/arm-runtime.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 1cc41c3d6315..86a1ad17a32e 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -54,6 +54,9 @@ static struct ptdump_info efi_ptdump_info = {
+ 
+ static int __init ptdump_init(void)
+ {
++	if (!efi_enabled(EFI_RUNTIME_SERVICES))
++		return 0;
++
+ 	return ptdump_debugfs_register(&efi_ptdump_info, "efi_page_tables");
+ }
+ device_initcall(ptdump_init);
+-- 
+2.15.1
