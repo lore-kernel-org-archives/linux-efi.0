@@ -1,58 +1,61 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH V2 2/3] efi: Introduce efi_rts_workqueue and some
- infrastructure to invoke all efi_runtime_services()
-Date: Thu, 8 Mar 2018 15:08:31 +0100
-Message-ID: <20180308140830.GE21166@pd.tnic>
-References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1520292190-5027-3-git-send-email-sai.praneeth.prakhya@intel.com>
- <20180307121047.GG23662@pd.tnic>
- <FFF73D592F13FD46B8700F0A279B802F2E5818E4@ORSMSX114.amr.corp.intel.com>
+From: Tyler Baicar <tbaicar@codeaurora.org>
+Subject: Re: [PATCH 1/2] efi/esrt: fix unsupported version initialization
+ failure
+Date: Thu, 8 Mar 2018 11:11:18 -0500
+Message-ID: <f24bcd25-9d3d-12d6-a42c-ebe0c623dba6@codeaurora.org>
+References: <1519414953-5478-1-git-send-email-tbaicar@codeaurora.org>
+ <1519414953-5478-2-git-send-email-tbaicar@codeaurora.org>
+ <20180224072054.GA3264@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F2E5818E4@ORSMSX114.amr.corp.intel.com>
+In-Reply-To: <20180224072054.GA3264@dhcp-128-65.nay.redhat.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chun-Yi Lee <jlee@suse.com>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Williams, Dan J" <dan.j.williams@intel.com>
+To: Dave Young <dyoung@redhat.com>
+Cc: ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, jhugo@codeaurora.org, sgoel@codeaurora.org, takahiro.akashi@linaro.org, timur@codeaurora.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Mar 08, 2018 at 05:31:03AM +0000, Prakhya, Sai Praneeth wrote:
-> Another warning by checkpatch is "use of in_atomic() in drivers code"
+On 2/24/2018 2:20 AM, Dave Young wrote:
+> On 02/23/18 at 12:42pm, Tyler Baicar wrote:
+>> If ESRT initialization fails due to an unsupported version, the
+>> early_memremap allocation is never unmapped. This will cause an
+>> early ioremap leak. So, make sure to unmap the memory allocation
+>> before returning from efi_esrt_init().
+>>
+>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+>> ---
+>>   drivers/firmware/efi/esrt.c | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+>> index c47e0c6..504f3c3 100644
+>> --- a/drivers/firmware/efi/esrt.c
+>> +++ b/drivers/firmware/efi/esrt.c
+>> @@ -285,7 +285,7 @@ void __init efi_esrt_init(void)
+>>   	} else {
+>>   		pr_err("Unsupported ESRT version %lld.\n",
+>>   		       tmpesrt.fw_resource_version);
+>> -		return;
+>> +		goto err_memunmap;
+>>   	}
+>>   
+>>   	if (tmpesrt.fw_resource_count > 0 && max - size < entry_size) {
+>> -- 
+> Reviewed-by: Dave Young <dyoung@redhat.com>
+Thank you Dave for your review here and input on the other patch.
 
-I'm assuming it warns because you're touching files in drivers/ but the
-efi fun is not really a driver...
+Ard,
 
-But looking at patch 3, that thing looks like a real mess. Some of the
-things - pstore, it seems - do stuff in atomic context and yet you want
-to do efi stuff in a workqueue which doesn't stomach atomic context to
-begin with.
+Can this patch be picked up? I understand patch 2 is not acceptable, but this 
+one should
+be good to go I think.
 
-So if you wanna do workqueue, you should make sure all efi stuff gets
-delayed to process context and queued properly. For example, we log
-MCEs from atomic context by putting them on a lockless buffer and then
-kicking irq_work to queue the work when we return to process context.
-Can you do something like that?
-
-"Hence, pstore calls efi_runtime_services() without using efi_rts_wq" -
-that doesn't sound like optimal design to me. I would try to shove them
-all through the workqueue - not have exceptions.
-
-Then this:
-
-> A potential issue could be, for instance, an NMI interrupt (like perf)
-> trying to profile some user data while in efi_pgd.
-
-I can't understand.
-
-How did we handle this until now and why is it a problem all of a
-sudden?
-
-Because I don't recall being unable to run perf while efi runtime
-services are happening.
+Thanks,
+Tyler
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Qualcomm Datacenter Technologies, Inc. as an affiliate of Qualcomm Technologies, Inc.
+Qualcomm Technologies, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project.
