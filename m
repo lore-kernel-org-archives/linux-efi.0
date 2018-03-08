@@ -1,136 +1,131 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH V2 1/3] x86/efi: Call efi_delete_dummy_variable() during
- efi subsystem initialization
-Date: Thu, 8 Mar 2018 07:43:23 +0000
-Message-ID: <CAKv+Gu_ZYGwgORet4ruL8=GUy75LMAuLeYD987FA3UVYuw8GMg@mail.gmail.com>
-References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com> <1520292190-5027-2-git-send-email-sai.praneeth.prakhya@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH 05/12] efi: arm64: Check whether x18 is preserved by runtime services calls
+Date: Thu,  8 Mar 2018 08:00:13 +0000
+Message-ID: <20180308080020.22828-6-ard.biesheuvel@linaro.org>
+References: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1520292190-5027-2-git-send-email-sai.praneeth.prakhya@intel.com>
+In-Reply-To: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, Dave Hansen <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peter.zijlstra@intel.com>, Dan Williams <dan.j.williams@intel.com>
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Hello Sai,
+Whether or not we will ever decide to start using x18 as a platform
+register in Linux is uncertain, but by that time, we will need to
+ensure that UEFI runtime services calls don't corrupt it. So let's
+start issuing warnings now for this, and increase the likelihood that
+these firmware images have all been replaced by that time.
 
-On 5 March 2018 at 23:23, Sai Praneeth Prakhya
-<sai.praneeth.prakhya@intel.com> wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
->
-> Invoking efi_runtime_services() through efi_workqueue means all accesses
-> to efi_runtime_services() should be done after efi_rts_wq has been
-> created. efi_delete_dummy_variable() calls set_variable(), hence
-> efi_delete_dummy_variable() should be called after efi_rts_wq has been
-> created.
->
-> efi_delete_dummy_variable() is called from efi_enter_virtual_mode()
-> which is early in the boot phase (efi_rts_wq isn't created yet), so call
-> efi_delete_dummy_variable() later in the boot phase i.e. while
-> initializing efi subsystem. In the next patch, this is the place where
-> we create efi_rts_wq and all the efi_runtime_services() will be called
-> using efi_rts_wq.
->
-> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-> Suggested-by: Andy Lutomirski <luto@kernel.org>
-> Cc: Lee, Chun-Yi <jlee@suse.com>
-> Cc: Borislav Petkov <bp@alien8.de>
-> Cc: Tony Luck <tony.luck@intel.com>
-> Cc: Will Deacon <will.deacon@arm.com>
-> Cc: Dave Hansen <dave.hansen@intel.com>
-> Cc: Mark Rutland <mark.rutland@arm.com>
-> Cc: Bhupesh Sharma <bhsharma@redhat.com>
-> Cc: Ricardo Neri <ricardo.neri@intel.com>
-> Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-> Cc: Matt Fleming <matt@codeblueprint.co.uk>
-> Cc: Peter Zijlstra <peter.zijlstra@intel.com>
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> Cc: Dan Williams <dan.j.williams@intel.com>
-> ---
->  arch/x86/include/asm/efi.h  | 1 -
->  arch/x86/platform/efi/efi.c | 6 ------
->  drivers/firmware/efi/efi.c  | 6 ++++++
->  include/linux/efi.h         | 3 +++
->  4 files changed, 9 insertions(+), 7 deletions(-)
->
-> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-> index a399c1ebf6f0..43009e3f821b 100644
-> --- a/arch/x86/include/asm/efi.h
-> +++ b/arch/x86/include/asm/efi.h
-> @@ -143,7 +143,6 @@ extern void __init efi_runtime_update_mappings(void);
->  extern void __init efi_dump_pagetable(void);
->  extern void __init efi_apply_memmap_quirks(void);
->  extern int __init efi_reuse_config(u64 tables, int nr_tables);
-> -extern void efi_delete_dummy_variable(void);
->
->  struct efi_setup_data {
->         u64 fw_vendor;
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 9061babfbc83..a3169d14583f 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -893,9 +893,6 @@ static void __init kexec_enter_virtual_mode(void)
->
->         if (efi_enabled(EFI_OLD_MEMMAP) && (__supported_pte_mask & _PAGE_NX))
->                 runtime_code_page_mkexec();
-> -
-> -       /* clean DUMMY object */
-> -       efi_delete_dummy_variable();
->  #endif
->  }
->
-> @@ -1015,9 +1012,6 @@ static void __init __efi_enter_virtual_mode(void)
->          * necessary relocation fixups for the new virtual addresses.
->          */
->         efi_runtime_update_mappings();
-> -
-> -       /* clean DUMMY object */
-> -       efi_delete_dummy_variable();
->  }
->
->  void __init efi_enter_virtual_mode(void)
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index cd42f66a7c85..838b8efe639c 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -328,6 +328,12 @@ static int __init efisubsys_init(void)
->         if (!efi_enabled(EFI_BOOT))
->                 return 0;
->
-> +       /*
-> +        * Clean DUMMY object calls EFI Runtime Service, set_variable(), so
-> +        * it should be invoked only after efi_rts_workqueue is ready.
-> +        */
-> +       efi_delete_dummy_variable();
-> +
+This has been fixed on the EDK2 side in commit 6d73863b5464
+("BaseTools/tools_def AARCH64: mark register x18 as reserved").,
+dated July 13, 2017.
 
-Is there any way to keep this local to arch/x86?
+Acked-by: Will Deacon <will.deacon@arm.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/arm64/include/asm/efi.h       |  4 +++-
+ arch/arm64/kernel/Makefile         |  3 ++-
+ arch/arm64/kernel/efi-rt-wrapper.S | 41 ++++++++++++++++++++++++++++++++++++++
+ arch/arm64/kernel/efi.c            |  6 ++++++
+ 4 files changed, 52 insertions(+), 2 deletions(-)
+ create mode 100644 arch/arm64/kernel/efi-rt-wrapper.S
 
->         /* We register the efi directory at /sys/firmware/efi */
->         efi_kobj = kobject_create_and_add("efi", firmware_kobj);
->         if (!efi_kobj) {
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index f5083aa72eae..c4efb3ef0dfa 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -992,6 +992,7 @@ extern efi_status_t efi_query_variable_store(u32 attributes,
->                                              unsigned long size,
->                                              bool nonblocking);
->  extern void efi_find_mirror(void);
-> +extern void efi_delete_dummy_variable(void);
->  #else
->  static inline void efi_late_init(void) {}
->  static inline void efi_free_boot_services(void) {}
-> @@ -1002,6 +1003,8 @@ static inline efi_status_t efi_query_variable_store(u32 attributes,
->  {
->         return EFI_SUCCESS;
->  }
-> +
-> +static inline void efi_delete_dummy_variable(void) {}
->  #endif
->  extern void __iomem *efi_lookup_mapped_addr(u64 phys_addr);
->
-> --
-> 2.7.4
->
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index 8389050328bb..192d791f1103 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -31,7 +31,7 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
+ ({									\
+ 	efi_##f##_t *__f;						\
+ 	__f = p->f;							\
+-	__f(args);							\
++	__efi_rt_asm_wrapper(__f, #f, args);				\
+ })
+ 
+ #define arch_efi_call_virt_teardown()					\
+@@ -40,6 +40,8 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
+ 	efi_virtmap_unload();						\
+ })
+ 
++efi_status_t __efi_rt_asm_wrapper(void *, const char *, ...);
++
+ #define ARCH_EFI_IRQ_FLAGS_MASK (PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT)
+ 
+ /* arch specific definitions used by the stub code */
+diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
+index b87541360f43..6a4bd80c75bd 100644
+--- a/arch/arm64/kernel/Makefile
++++ b/arch/arm64/kernel/Makefile
+@@ -38,7 +38,8 @@ arm64-obj-$(CONFIG_CPU_PM)		+= sleep.o suspend.o
+ arm64-obj-$(CONFIG_CPU_IDLE)		+= cpuidle.o
+ arm64-obj-$(CONFIG_JUMP_LABEL)		+= jump_label.o
+ arm64-obj-$(CONFIG_KGDB)		+= kgdb.o
+-arm64-obj-$(CONFIG_EFI)			+= efi.o efi-entry.stub.o
++arm64-obj-$(CONFIG_EFI)			+= efi.o efi-entry.stub.o		\
++					   efi-rt-wrapper.o
+ arm64-obj-$(CONFIG_PCI)			+= pci.o
+ arm64-obj-$(CONFIG_ARMV8_DEPRECATED)	+= armv8_deprecated.o
+ arm64-obj-$(CONFIG_ACPI)		+= acpi.o
+diff --git a/arch/arm64/kernel/efi-rt-wrapper.S b/arch/arm64/kernel/efi-rt-wrapper.S
+new file mode 100644
+index 000000000000..05235ebb336d
+--- /dev/null
++++ b/arch/arm64/kernel/efi-rt-wrapper.S
+@@ -0,0 +1,41 @@
++/*
++ * Copyright (C) 2018 Linaro Ltd <ard.biesheuvel@linaro.org>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#include <linux/linkage.h>
++
++ENTRY(__efi_rt_asm_wrapper)
++	stp	x29, x30, [sp, #-32]!
++	mov	x29, sp
++
++	/*
++	 * Register x18 is designated as the 'platform' register by the AAPCS,
++	 * which means firmware running at the same exception level as the OS
++	 * (such as UEFI) should never touch it.
++	 */
++	stp	x1, x18, [sp, #16]
++
++	/*
++	 * We are lucky enough that no EFI runtime services take more than
++	 * 5 arguments, so all are passed in registers rather than via the
++	 * stack.
++	 */
++	mov	x8, x0
++	mov	x0, x2
++	mov	x1, x3
++	mov	x2, x4
++	mov	x3, x5
++	mov	x4, x6
++	blr	x8
++
++	ldp	x1, x2, [sp, #16]
++	cmp	x2, x18
++	ldp	x29, x30, [sp], #32
++	b.ne	0f
++	ret
++0:	b	efi_handle_corrupted_x18	// tail call
++ENDPROC(__efi_rt_asm_wrapper)
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index f85ac58d08a3..fb5b3cd3a1c7 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -126,3 +126,9 @@ bool efi_poweroff_required(void)
+ {
+ 	return efi_enabled(EFI_RUNTIME_SERVICES);
+ }
++
++asmlinkage efi_status_t efi_handle_corrupted_x18(efi_status_t s, const char *f)
++{
++	pr_err_ratelimited(FW_BUG "register x18 corrupted by EFI %s\n", f);
++	return s;
++}
+-- 
+2.15.1
