@@ -1,79 +1,49 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V2 2/3] efi: Introduce efi_rts_workqueue and some
- infrastructure to invoke all efi_runtime_services()
-Date: Thu, 8 Mar 2018 04:22:40 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F2E5817F2@ORSMSX114.amr.corp.intel.com>
-References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1520292190-5027-3-git-send-email-sai.praneeth.prakhya@intel.com>
- <CANiq72m6_WCXSrBPesgvO1rsF1_AT5Jod_rY-y1f4JjO-SMCDg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 03/12] efi/arm*: Stop printing addresses of virtual mappings
+Date: Thu,  8 Mar 2018 08:00:11 +0000
+Message-ID: <20180308080020.22828-4-ard.biesheuvel@linaro.org>
+References: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CANiq72m6_WCXSrBPesgvO1rsF1_AT5Jod_rY-y1f4JjO-SMCDg@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, "Lee@vger.kernel.org" <Lee@vger.kernel.org>, Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Williams, Dan J" <dan.j.williams@intel.com>
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-PiA+ICtzdHJ1Y3Qgd29ya3F1ZXVlX3N0cnVjdCAqZWZpX3J0c193cTsNCj4gPiArDQo+ID4gIHN0
-YXRpYyBib29sIGRpc2FibGVfcnVudGltZTsNCj4gPiAgc3RhdGljIGludCBfX2luaXQgc2V0dXBf
-bm9lZmkoY2hhciAqYXJnKSAgeyBAQCAtMzI5LDYgKzMzMSwxOSBAQA0KPiA+IHN0YXRpYyBpbnQg
-X19pbml0IGVmaXN1YnN5c19pbml0KHZvaWQpDQo+ID4gICAgICAgICAgICAgICAgIHJldHVybiAw
-Ow0KPiA+DQo+ID4gICAgICAgICAvKg0KPiA+ICsgICAgICAgICogU2luY2Ugd2UgcHJvY2VzcyBv
-bmx5IG9uZSBlZmlfcnVudGltZV9zZXJ2aWNlKCkgYXQgYSB0aW1lLCBhbg0KPiA+ICsgICAgICAg
-ICogb3JkZXJlZCB3b3JrcXVldWUgKHdoaWNoIGNyZWF0ZXMgb25seSBvbmUgZXhlY3V0aW9uIGNv
-bnRleHQpDQo+ID4gKyAgICAgICAgKiBzaG91bGQgc3VmZmljZSBhbGwgb3VyIG5lZWRzLg0KPiA+
-ICsgICAgICAgICovDQo+ID4gKyAgICAgICBlZmlfcnRzX3dxID0gYWxsb2Nfb3JkZXJlZF93b3Jr
-cXVldWUoImVmaV9ydHNfd29ya3F1ZXVlIiwgMCk7DQo+IA0KPiBlZmlfcnRzX3dxIG9yIGVmaV9y
-dHNfd29ya3F1ZXVlPw0KPiANCj4gPiArICAgICAgIGlmICghZWZpX3J0c193cSkgew0KPiA+ICsg
-ICAgICAgICAgICAgICBwcl9lcnIoIkZhaWxlZCB0byBjcmVhdGUgZWZpX3J0c193b3JrcXVldWUs
-IEVGSSBydW50aW1lIHNlcnZpY2VzICINCj4gDQo+IFNhbWUgaGVyZS4NCg0KU3VyZSEgSSB3aWxs
-IG1ha2UgaXQgY29uc2lzdGVudCB3aXRoICJlZmlfcnRzX3dxIi4gSnVzdCB0cmllZCB0byBiZSBt
-b3JlIHZlcmJvc2UNCndpdGggbmFtZXMgOikNCg0KWy4uLl0NCg0KPiA+ICsjZGVmaW5lIGVmaV9x
-dWV1ZV93b3JrKF9ydHMsIF9hcmcxLCBfYXJnMiwgX2FyZzMsIF9hcmc0LCBfYXJnNSkgICAgICAg
-ICAgICAgICAgXA0KPiA+ICsoeyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwNCj4gPiArICAgICAgIHN0cnVjdCBlZmlf
-cnVudGltZV93b3JrIGVmaV9ydHNfd29yazsgICAgICAgICAgICAgICAgICAgICAgICAgICBcDQo+
-ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgXA0KPiA+ICsgICAgICAgSU5JVF9XT1JLX09OU1RBQ0soJmVmaV9y
-dHNfd29yay53b3JrLCBlZmlfY2FsbF9ydHMpOyAgICAgICAgICAgIFwNCj4gPiArICAgICAgIGVm
-aV9ydHNfd29yay5mdW5jID0gX3J0czsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICBcDQo+ID4gKyAgICAgICBlZmlfcnRzX3dvcmsuYXJnMSA9IF9hcmcxOyAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgXA0KPiA+ICsgICAgICAgZWZpX3J0c193b3JrLmFy
-ZzIgPSBfYXJnMjsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwNCj4gPiAr
-ICAgICAgIGVmaV9ydHNfd29yay5hcmczID0gX2FyZzM7ICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICBcDQo+ID4gKyAgICAgICBlZmlfcnRzX3dvcmsuYXJnNCA9IF9hcmc0OyAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXA0KPiA+ICsgICAgICAgZWZpX3J0
-c193b3JrLmFyZzUgPSBfYXJnNTsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-IFwNCj4gPiArICAgICAgIC8qICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICBcDQo+ID4gKyAgICAgICAgKiBxdWV1ZV93b3JrKCkgcmV0
-dXJucyAwIGlmIHdvcmsgd2FzIGFscmVhZHkgb24gcXVldWUsICAgICAgICAgXA0KPiA+ICsgICAg
-ICAgICogX2lkZWFsbHlfIHRoaXMgc2hvdWxkIG5ldmVyIGhhcHBlbi4gICAgICAgICAgICAgICAg
-ICAgICAgICAgIFwNCj4gPiArICAgICAgICAqLyAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcDQo+ID4gKyAgICAgICBpZiAocXVldWVf
-d29yayhlZmlfcnRzX3dxLCAmZWZpX3J0c193b3JrLndvcmspKSAgICAgICAgICAgICAgICAgXA0K
-PiA+ICsgICAgICAgICAgICAgICBmbHVzaF93b3JrKCZlZmlfcnRzX3dvcmsud29yayk7ICAgICAg
-ICAgICAgICAgICAgICAgICAgIFwNCj4gPiArICAgICAgIGVsc2UgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcDQo+ID4gKyAgICAgICAg
-ICAgICAgIEJVRygpOyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgXA0KPiANCj4gVGhhbmtzIGZvciB0aGUgY2hhbmdlISBPbmUgcmVtYXJrLCBJIHdvdWxk
-IGp1c3QgZG86DQoNClNvcnJ5ISBidXQgSSBhbSBwbGFubmluZyB0byByZW1vdmUgQlVHKCkuIExv
-b2tzIGxpa2UgaXQgY291bGQgZGVmZWF0IHRoZSBwdXJwb3NlDQpvZiBwYXRjaC4gUGxlYXNlIHNl
-ZSBCb3JpcyBjb21tZW50cyBvbiB0aGUgb3RoZXIgdGhyZWFkLg0KDQpbLi4uXQ0KDQo+ID4gKy8q
-DQo+ID4gKyAqIGVmaV9ydW50aW1lX3dvcms6ICAgRGV0YWlscyBvZiBFRkkgUnVudGltZSBTZXJ2
-aWNlIHdvcmsNCj4gPiArICogQGZ1bmM6ICAgICAgICAgICAgICBFRkkgUnVudGltZSBTZXJ2aWNl
-IGZ1bmN0aW9uIGlkZW50aWZpZXINCj4gPiArICogQGFyZzwxLTU+OiAgICAgICAgICBFRkkgUnVu
-dGltZSBTZXJ2aWNlIGZ1bmN0aW9uIGFyZ3VtZW50cw0KPiA+ICsgKiBAc3RhdHVzOiAgICAgICAg
-ICAgIFN0YXR1cyBvZiBleGVjdXRpbmcgRUZJIFJ1bnRpbWUgU2VydmljZQ0KPiA+ICsgKi8NCj4g
-PiArc3RydWN0IGVmaV9ydW50aW1lX3dvcmsgew0KPiA+ICsgICAgICAgdTggZnVuYzsNCj4gPiAr
-ICAgICAgIHZvaWQgKmFyZzE7DQo+ID4gKyAgICAgICB2b2lkICphcmcyOw0KPiA+ICsgICAgICAg
-dm9pZCAqYXJnMzsNCj4gPiArICAgICAgIHZvaWQgKmFyZzQ7DQo+ID4gKyAgICAgICB2b2lkICph
-cmc1Ow0KPiA+ICsgICAgICAgZWZpX3N0YXR1c190IHN0YXR1czsNCj4gPiArICAgICAgIHN0cnVj
-dCB3b3JrX3N0cnVjdCB3b3JrOw0KPiA+ICt9Ow0KPiANCj4gV2h5IGlzIGVmaV9ydW50aW1lX3dv
-cmsgaW4gdGhlIC5oIGF0IGFsbD8NCj4gDQoNClRoYW5rcyBmb3IgdGhlIGNhdGNoLiBJIHdpbGwg
-bW92ZSBpdCB0byBydW50aW1lLXdyYXBwZXJzLmMgZmlsZSBhbmQgd2lsbCBtYWtlIGl0DQpzdGF0
-aWMgdG9vLiBJdCBpc24ndCBiZWluZyB1c2VkIGluIGFueSBvdGhlciBwbGFjZS4NCg0KPiBQbGVh
-c2UgQ0MgbWUgZm9yIHRoZSBuZXh0IHZlcnNpb24hIDotKQ0KDQpTdXJlISBTb3JyeSBmb3IgdGhh
-dC4gSSBzaG91bGQgaGF2ZSBkb25lIGluIFYyLg0KDQpSZWdhcmRzLA0KU2FpDQo=
+With the recent %p -> %px changes, we now get something like this in
+the kernel boot log on ARM/arm64 EFI systems:
+
+     Remapping and enabling EFI services.
+       EFI remap 0x00000087fb830000 =>         (ptrval)
+       EFI remap 0x00000087fbdb0000 =>         (ptrval)
+       EFI remap 0x00000087fffc0000 =>         (ptrval)
+
+The physical addresses of the UEFI runtime regions will also be
+printed when booting with the efi=debug command line option, and the
+virtual addresses can be inspected via /sys/kernel/debug/efi_page_tables
+(if enabled). So let's just remove the lines above.
+
+Acked-by: Leif Lindholm <leif.lindholm@linaro.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/arm-runtime.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 86a1ad17a32e..13561aeb7396 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -83,10 +83,7 @@ static bool __init efi_virtmap_init(void)
+ 			return false;
+ 
+ 		ret = efi_create_mapping(&efi_mm, md);
+-		if  (!ret) {
+-			pr_info("  EFI remap %pa => %p\n",
+-				&phys, (void *)(unsigned long)md->virt_addr);
+-		} else {
++		if (ret) {
+ 			pr_warn("  EFI remap %pa: failed to create mapping (%d)\n",
+ 				&phys, ret);
+ 			return false;
+-- 
+2.15.1
