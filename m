@@ -1,119 +1,47 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 08/12] x86/efi: Replace efi_pgd with efi_mm.pgd
-Date: Thu,  8 Mar 2018 08:00:16 +0000
-Message-ID: <20180308080020.22828-9-ard.biesheuvel@linaro.org>
+Subject: [PATCH 04/12] efi/x86: Fix trailing semicolons
+Date: Thu,  8 Mar 2018 08:00:12 +0000
+Message-ID: <20180308080020.22828-5-ard.biesheuvel@linaro.org>
 References: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S . Tsirkin" <mst@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>
+Cc: Luis de Bethencourt <luisbg@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+From: Luis de Bethencourt <luisbg@kernel.org>
 
-Since the previous patch added support for efi_mm, let's handle efi_pgd
-through efi_mm and remove global variable efi_pgd.
+The trailing semicolon is an empty statement that does no operation.
+Removing them since they don't do anything.
 
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: "Lee, Chun-Yi" <jlee@suse.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Tony Luck <tony.luck@intel.com>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Michael S. Tsirkin <mst@redhat.com>
-Cc: Bhupesh Sharma <bhsharma@redhat.com>
-Cc: Ricardo Neri <ricardo.neri@intel.com>
-Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-Tested-by: Bhupesh Sharma <bhsharma@redhat.com>
-Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Luis de Bethencourt <luisbg@kernel.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/platform/efi/efi_64.c | 17 ++++++++---------
- 1 file changed, 8 insertions(+), 9 deletions(-)
+ arch/x86/boot/compressed/eboot.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 0045efe9947b..8881e601c32d 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -190,8 +190,6 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 	early_code_mapping_set_exec(0);
- }
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 353e20c3f114..886a9115af62 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -439,7 +439,7 @@ setup_uga32(void **uga_handle, unsigned long size, u32 *width, u32 *height)
+ 	struct efi_uga_draw_protocol *uga = NULL, *first_uga;
+ 	efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
+ 	unsigned long nr_ugas;
+-	u32 *handles = (u32 *)uga_handle;;
++	u32 *handles = (u32 *)uga_handle;
+ 	efi_status_t status = EFI_INVALID_PARAMETER;
+ 	int i;
  
--static pgd_t *efi_pgd;
--
- /*
-  * We need our own copy of the higher levels of the page tables
-  * because we want to avoid inserting EFI region mappings (EFI_VA_END
-@@ -203,7 +201,7 @@ static pgd_t *efi_pgd;
-  */
- int __init efi_alloc_page_tables(void)
- {
--	pgd_t *pgd;
-+	pgd_t *pgd, *efi_pgd;
- 	p4d_t *p4d;
- 	pud_t *pud;
- 	gfp_t gfp_mask;
-@@ -231,6 +229,7 @@ int __init efi_alloc_page_tables(void)
- 		return -ENOMEM;
- 	}
- 
-+	efi_mm.pgd = efi_pgd;
- 	mm_init_cpumask(&efi_mm);
- 	init_new_context(NULL, &efi_mm);
- 
-@@ -246,6 +245,7 @@ void efi_sync_low_kernel_mappings(void)
- 	pgd_t *pgd_k, *pgd_efi;
- 	p4d_t *p4d_k, *p4d_efi;
- 	pud_t *pud_k, *pud_efi;
-+	pgd_t *efi_pgd = efi_mm.pgd;
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		return;
-@@ -339,7 +339,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	unsigned long pfn, text, pf;
- 	struct page *page;
- 	unsigned npages;
--	pgd_t *pgd;
-+	pgd_t *pgd = efi_mm.pgd;
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		return 0;
-@@ -349,8 +349,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	 * this value is loaded into cr3 the PGD will be decrypted during
- 	 * the pagetable walk.
- 	 */
--	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(efi_pgd);
--	pgd = efi_pgd;
-+	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(pgd);
- 
- 	/*
- 	 * It can happen that the physical address of new_memmap lands in memory
-@@ -420,7 +419,7 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
- {
- 	unsigned long flags = _PAGE_RW;
- 	unsigned long pfn;
--	pgd_t *pgd = efi_pgd;
-+	pgd_t *pgd = efi_mm.pgd;
- 
- 	if (!(md->attribute & EFI_MEMORY_WB))
- 		flags |= _PAGE_PCD;
-@@ -524,7 +523,7 @@ void __init parse_efi_setup(u64 phys_addr, u32 data_len)
- static int __init efi_update_mappings(efi_memory_desc_t *md, unsigned long pf)
- {
- 	unsigned long pfn;
--	pgd_t *pgd = efi_pgd;
-+	pgd_t *pgd = efi_mm.pgd;
- 	int err1, err2;
- 
- 	/* Update the 1:1 mapping */
-@@ -621,7 +620,7 @@ void __init efi_dump_pagetable(void)
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		ptdump_walk_pgd_level(NULL, swapper_pg_dir);
- 	else
--		ptdump_walk_pgd_level(NULL, efi_pgd);
-+		ptdump_walk_pgd_level(NULL, efi_mm.pgd);
- #endif
- }
+@@ -484,7 +484,7 @@ setup_uga64(void **uga_handle, unsigned long size, u32 *width, u32 *height)
+ 	struct efi_uga_draw_protocol *uga = NULL, *first_uga;
+ 	efi_guid_t uga_proto = EFI_UGA_PROTOCOL_GUID;
+ 	unsigned long nr_ugas;
+-	u64 *handles = (u64 *)uga_handle;;
++	u64 *handles = (u64 *)uga_handle;
+ 	efi_status_t status = EFI_INVALID_PARAMETER;
+ 	int i;
  
 -- 
 2.15.1
