@@ -1,66 +1,72 @@
-From: Dan Williams <dan.j.williams@intel.com>
-Subject: Re: [PATCH V2 3/3] efi: Use efi_rts_workqueue to invoke EFI Runtime Services
-Date: Wed, 7 Mar 2018 20:33:03 -0800
-Message-ID: <CAPcyv4jL-Js14GEWe26E4wQSYnQtk_oXCv_RQwr6DvC2wFVNPQ@mail.gmail.com>
-References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1520292190-5027-4-git-send-email-sai.praneeth.prakhya@intel.com>
- <20180306112610.7izxtuy33bt7ivfs@lakrids.cambridge.arm.com> <FFF73D592F13FD46B8700F0A279B802F2E5817CE@ORSMSX114.amr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [GIT PULL 00/12] first batch of EFI changes for v4.17
+Date: Thu,  8 Mar 2018 08:00:08 +0000
+Message-ID: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F2E5817CE@ORSMSX114.amr.corp.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Lee@lakrids.cambridge.arm.com" <Lee@lakrids.cambridge.arm.com>, Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Andy Lutomirski <luto@kernel.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Colin Ian King <colin.king@canonical.com>, Jia-Ju Bai <baijiaju1990@gmail.com>, "Lee, Chun-Yi" <jlee@suse.com>, Leif Lindholm <leif.lindholm@linaro.org>, Luis de Bethencourt <luisbg@kernel.org>, Lukas Wunner <lukas@wunner.de>, Mark Rutland <mark.rutland@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S . Tsirkin" <mst@redhat.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Ricardo Neri <ricardo.neri@intel.com>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Tony Luck <tony.luck@intel.com>, Will
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Mar 7, 2018 at 8:11 PM, Prakhya, Sai Praneeth
-<sai.praneeth.prakhya@intel.com> wrote:
-> 05, 2018 at 03:23:10PM -0800, Sai Praneeth Prakhya wrote:
->> > From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
->> >
->> > Presently, efi_runtime_services() are executed by firmware in process
->> > context. To execute efi_runtime_service(), kernel switches the page
->> > directory from swapper_pgd to efi_pgd. However, efi_pgd doesn't have
->> > any user space mappings. A potential issue could be, for instance, an
->> > NMI interrupt (like perf) trying to profile some user data while in efi_pgd.
->>
->> It might be worth pointing out that this could result in disaster (e.g.
->> if the frame pointer happens to point at MMIO in the EFI runtime services
->> mappings).
->>
->
-> Sorry! I didn't get it. I would like to add this point, so could you please
-> explain it more?
->
->> [...]
->>
->> > pstore writes could potentially be invoked in interrupt context and it
->> > uses set_variable<>() and query_variable_info<>() to store logs. If we
->> > invoke efi_runtime_services() through efi_rts_wq while in atomic()
->> > kernel issues a warning ("scheduling wile in atomic") and prints stack
->> > trace. One way to overcome this is to not make the caller process wait
->> > for the worker thread to finish. This approach breaks pstore i.e. the
->> > log messages aren't written to efi variables. Hence, pstore calls
->> > efi_runtime_services() without using efi_rts_wq or in other words
->> > efi_rts_wq will be used unconditionally for all the
->> > efi_runtime_services() except set_variable<>() and
->> > query_variable_info<>()
->>
->> Can't NMIs still come in during this?
->>
->> ... or do we assume that since something has already gone wrong, this doesn't
->> matter?
->>
->
-> I think they can come. AFAIK, pstore (if enabled) runs only when we crashed.
-> Since, we are still executing stuff to log messages and NMI's can't be masked,
-> there is still a possibility for NMI's to occur (please correct me if I am wrong).
-> But, as you said earlier, I guess it doesn't matter because anyways we are going down.
+The following changes since commit 7928b2cbe55b2a410a0f5c1f154610059c57b1b2:
 
-The problem is that we are not always in a "already going down"
-condition for typical set_variable and query_variable_info calls. So
-are we actually fixing anything with this patchset? In other words if
-the NMI vs EFI mapping problem requires the workqueue context then we
-can't have any EFI calls outside of that context.  Am I missing how
-this scheme addresses that problem?
+  Linux 4.16-rc1 (2018-02-11 15:04:29 -0800)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git efi-next
+
+for you to fetch changes up to 67a2152c7362bd9ee3ba6d218e435a04c27c32aa:
+
+  efi: make const array 'apple' static (2018-03-08 07:54:10 +0000)
+
+----------------------------------------------------------------
+First batch of EFI changes for v4.17:
+- use efi_switch_mm() on x86 instead of manipulating %cr3 directly (Sai)
+- some fixes for the apple-properties code (Andy)
+- add WARN() on arm64 if UEFI Runtime Services corrupt the reserved x18
+  register (Ard)
+- other minor cleanups and bugfixes
+
+----------------------------------------------------------------
+Andy Shevchenko (2):
+      efi/apple-properties: Device core takes care of empty properties
+      efi/apple-properties: Use memremap() instead of ioremap()
+
+Ard Biesheuvel (3):
+      efi/arm*: Stop printing addresses of virtual mappings
+      efi: arm64: Check whether x18 is preserved by runtime services calls
+      efi: reorder pr_notice() with add_device_randomness() call
+
+Colin Ian King (1):
+      efi: make const array 'apple' static
+
+Jia-Ju Bai (1):
+      x86: efi: Replace GFP_ATOMIC with GFP_KERNEL in efi_query_variable_store
+
+Luis de Bethencourt (1):
+      efi/x86: Fix trailing semicolons
+
+Mark Rutland (1):
+      efi/arm*: Only register page tables when they exist
+
+Sai Praneeth (3):
+      efi: Use efi_mm in x86 as well as ARM
+      x86/efi: Replace efi_pgd with efi_mm.pgd
+      x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
+
+ arch/arm64/include/asm/efi.h            |  4 ++-
+ arch/arm64/kernel/Makefile              |  3 +-
+ arch/arm64/kernel/efi-rt-wrapper.S      | 41 +++++++++++++++++++++++
+ arch/arm64/kernel/efi.c                 |  6 ++++
+ arch/x86/boot/compressed/eboot.c        |  6 ++--
+ arch/x86/include/asm/efi.h              | 29 ++++++++---------
+ arch/x86/platform/efi/efi_64.c          | 58 ++++++++++++++++++---------------
+ arch/x86/platform/efi/efi_thunk_64.S    |  2 +-
+ arch/x86/platform/efi/quirks.c          |  2 +-
+ drivers/firmware/efi/apple-properties.c | 20 ++++--------
+ drivers/firmware/efi/arm-runtime.c      | 17 +++-------
+ drivers/firmware/efi/efi.c              | 11 ++++++-
+ include/linux/efi.h                     |  2 ++
+ 13 files changed, 125 insertions(+), 76 deletions(-)
+ create mode 100644 arch/arm64/kernel/efi-rt-wrapper.S
