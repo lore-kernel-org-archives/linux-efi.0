@@ -1,65 +1,48 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 1/2] efi/esrt: fix unsupported version initialization failure
-Date: Thu, 8 Mar 2018 18:15:57 +0000
-Message-ID: <CAKv+Gu_=YSXTMR3eeCXKpz2WfmMJjT2oF6KoUzWB1HDXy5sQCg@mail.gmail.com>
-References: <1519414953-5478-1-git-send-email-tbaicar@codeaurora.org>
- <1519414953-5478-2-git-send-email-tbaicar@codeaurora.org> <20180224072054.GA3264@dhcp-128-65.nay.redhat.com>
- <f24bcd25-9d3d-12d6-a42c-ebe0c623dba6@codeaurora.org> <CAKv+Gu8U67_6Fpj+REUc5rgThuAXac=p0U_EOdU8_=K_xj1KSQ@mail.gmail.com>
+From: Jeremy Cline <jeremy@jcline.org>
+Subject: Re: Regression from efi: call get_event_log before ExitBootServices
+Date: Thu, 8 Mar 2018 18:20:05 +0000
+Message-ID: <0100016206d770c7-11c5bffc-70e7-41bf-a62a-d8aad8209f7e-000000@email.amazonses.com>
+References: <01000161fc0b4755-df0621f4-ab5d-479a-b425-adf98427a308-000000@email.amazonses.com>
+ <CA+zpnLdSyuyKjJEH3Oowmha2mF0B-j5b4A7CLuXXY7RH47SiFQ@mail.gmail.com>
+ <0100016201863c0f-70600bd6-12d3-461d-9173-e4d61e8d09d5-000000@email.amazonses.com>
+ <CA+zpnLf1WNxYY-FaoFbas480GmkUW6kw_L7zi5mES3EPhL7egA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu8U67_6Fpj+REUc5rgThuAXac=p0U_EOdU8_=K_xj1KSQ@mail.gmail.com>
+In-Reply-To: <CA+zpnLf1WNxYY-FaoFbas480GmkUW6kw_L7zi5mES3EPhL7egA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Tyler Baicar <tbaicar@codeaurora.org>
-Cc: Dave Young <dyoung@redhat.com>, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jeff Hugo <jhugo@codeaurora.org>, Sameer Goel <sgoel@codeaurora.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Timur Tabi <timur@codeaurora.org>
+To: Thiebaud Weksteen <tweek@google.com>
+Cc: Javier Martinez Canillas <javierm@redhat.com>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, hdegoede@redhat.com, linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 8 March 2018 at 18:00, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> On 8 March 2018 at 16:11, Tyler Baicar <tbaicar@codeaurora.org> wrote:
->> On 2/24/2018 2:20 AM, Dave Young wrote:
->>>
->>> On 02/23/18 at 12:42pm, Tyler Baicar wrote:
->>>>
->>>> If ESRT initialization fails due to an unsupported version, the
->>>> early_memremap allocation is never unmapped. This will cause an
->>>> early ioremap leak. So, make sure to unmap the memory allocation
->>>> before returning from efi_esrt_init().
->>>>
->>>> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
->>>> ---
->>>>   drivers/firmware/efi/esrt.c | 2 +-
->>>>   1 file changed, 1 insertion(+), 1 deletion(-)
->>>>
->>>> diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
->>>> index c47e0c6..504f3c3 100644
->>>> --- a/drivers/firmware/efi/esrt.c
->>>> +++ b/drivers/firmware/efi/esrt.c
->>>> @@ -285,7 +285,7 @@ void __init efi_esrt_init(void)
->>>>         } else {
->>>>                 pr_err("Unsupported ESRT version %lld.\n",
->>>>                        tmpesrt.fw_resource_version);
->>>> -               return;
->>>> +               goto err_memunmap;
->>>>         }
->>>>         if (tmpesrt.fw_resource_count > 0 && max - size < entry_size) {
->>>> --
->>>
->>> Reviewed-by: Dave Young <dyoung@redhat.com>
->>
->> Thank you Dave for your review here and input on the other patch.
->>
->> Ard,
->>
->> Can this patch be picked up? I understand patch 2 is not acceptable, but
->> this one should
->> be good to go I think.
->>
->
-> Yeah you're right. I'll pick it up as a bugfix.
+On 03/08/2018 03:45 AM, Thiebaud Weksteen wrote:
+> Jeremy, Hans, could you both describe precisely how your boot is
+> configured? This feature is only triggered when booting the EFI stub of the
+> kernel so this may be not executed if you are using something else in
+> between.
 
-Actually, on second thought, could you respin this patch, and just
-move the memunamp() to right after the memcpy()? That way, we can get
-rid of all the 'goto err_memunmap's afaict
+I put everything I know in the other sub-thread.
+> Jeremy, would you be able to modify the efi_retrieve_tpm2_eventlog_1_2
+> function to add multiple efi_printk(sys_table_arg,  "message\n"); to test:
+> if you get the output on your screen; and isolate which call might be the
+> cause of the hang?
+> I can forward a debug patch if that helps.
 
-Thanks,
-Ard.
+Thanks for the patch, here's the output:
+
+Locating the TCG2Protocol
+Calling GetEventLog on TCG2Protocol
+Log returned
+log_location is not empty
+log_size != 0
+Allocating memory for storing the logs
+Returned from memory allocation
+Copying log to new location
+
+At this point it hangs.
+
+
+Regards,
+Jeremy
