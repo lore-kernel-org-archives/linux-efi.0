@@ -1,77 +1,66 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 11/12] efi/apple-properties: Use memremap() instead of ioremap()
-Date: Thu,  8 Mar 2018 08:00:19 +0000
-Message-ID: <20180308080020.22828-12-ard.biesheuvel@linaro.org>
-References: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH V2 2/3] efi: Introduce efi_rts_workqueue and some
+ infrastructure to invoke all efi_runtime_services()
+Date: Thu, 8 Mar 2018 05:31:03 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F2E5818E4@ORSMSX114.amr.corp.intel.com>
+References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1520292190-5027-3-git-send-email-sai.praneeth.prakhya@intel.com>
+ <20180307121047.GG23662@pd.tnic>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
+In-Reply-To: <20180307121047.GG23662@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chun-Yi Lee <jlee@suse.com>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Williams, Dan J" <dan.j.williams@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-
-The memory we are accessing through virtual address has no IO side
-effects. Moreover, for IO memory we have to use special accessors,
-which we don't use.
-
-Due to above, convert the driver to use memremap() instead of ioremap().
-
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Tested-by: Lukas Wunner <lukas@wunner.de>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/apple-properties.c | 11 ++++++-----
- 1 file changed, 6 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/firmware/efi/apple-properties.c b/drivers/firmware/efi/apple-properties.c
-index b9602e0d7b50..adaa9a3714b9 100644
---- a/drivers/firmware/efi/apple-properties.c
-+++ b/drivers/firmware/efi/apple-properties.c
-@@ -19,6 +19,7 @@
- 
- #include <linux/bootmem.h>
- #include <linux/efi.h>
-+#include <linux/io.h>
- #include <linux/platform_data/x86/apple.h>
- #include <linux/property.h>
- #include <linux/slab.h>
-@@ -189,7 +190,7 @@ static int __init map_properties(void)
- 
- 	pa_data = boot_params.hdr.setup_data;
- 	while (pa_data) {
--		data = ioremap(pa_data, sizeof(*data));
-+		data = memremap(pa_data, sizeof(*data), MEMREMAP_WB);
- 		if (!data) {
- 			pr_err("cannot map setup_data header\n");
- 			return -ENOMEM;
-@@ -197,14 +198,14 @@ static int __init map_properties(void)
- 
- 		if (data->type != SETUP_APPLE_PROPERTIES) {
- 			pa_data = data->next;
--			iounmap(data);
-+			memunmap(data);
- 			continue;
- 		}
- 
- 		data_len = data->len;
--		iounmap(data);
-+		memunmap(data);
- 
--		data = ioremap(pa_data, sizeof(*data) + data_len);
-+		data = memremap(pa_data, sizeof(*data) + data_len, MEMREMAP_WB);
- 		if (!data) {
- 			pr_err("cannot map setup_data payload\n");
- 			return -ENOMEM;
-@@ -229,7 +230,7 @@ static int __init map_properties(void)
- 		 * to avoid breaking the chain of ->next pointers.
- 		 */
- 		data->len = 0;
--		iounmap(data);
-+		memunmap(data);
- 		free_bootmem_late(pa_data + sizeof(*data), data_len);
- 
- 		return ret;
--- 
-2.15.1
+PiA+ICsoewkJCQkJCQkJCVwNCj4gPiArCXN0cnVjdCBlZmlfcnVudGltZV93b3JrIGVmaV9ydHNf
+d29yazsJCQkJXA0KPiA+ICsJCQkJCQkJCQlcDQo+ID4gKwlJTklUX1dPUktfT05TVEFDSygmZWZp
+X3J0c193b3JrLndvcmssIGVmaV9jYWxsX3J0cyk7CQlcDQo+ID4gKwllZmlfcnRzX3dvcmsuZnVu
+YyA9IF9ydHM7CQkJCQlcDQo+ID4gKwllZmlfcnRzX3dvcmsuYXJnMSA9IF9hcmcxOwkJCQkJXA0K
+PiA+ICsJZWZpX3J0c193b3JrLmFyZzIgPSBfYXJnMjsJCQkJCVwNCj4gPiArCWVmaV9ydHNfd29y
+ay5hcmczID0gX2FyZzM7CQkJCQlcDQo+ID4gKwllZmlfcnRzX3dvcmsuYXJnNCA9IF9hcmc0OwkJ
+CQkJXA0KPiA+ICsJZWZpX3J0c193b3JrLmFyZzUgPSBfYXJnNTsJCQkJCVwNCj4gPiArCS8qCQkJ
+CQkJCQlcDQo+ID4gKwkgKiBxdWV1ZV93b3JrKCkgcmV0dXJucyAwIGlmIHdvcmsgd2FzIGFscmVh
+ZHkgb24gcXVldWUsCQlcDQo+ID4gKwkgKiBfaWRlYWxseV8gdGhpcyBzaG91bGQgbmV2ZXIgaGFw
+cGVuLgkJCQlcDQo+ID4gKwkgKi8JCQkJCQkJCVwNCj4gPiArCWlmIChxdWV1ZV93b3JrKGVmaV9y
+dHNfd3EsICZlZmlfcnRzX3dvcmsud29yaykpDQo+IAlcDQo+ID4gKwkJZmx1c2hfd29yaygmZWZp
+X3J0c193b3JrLndvcmspOw0KPiAJXA0KPiA+ICsJZWxzZQkJCQkJCQkJXA0KPiA+ICsJCUJVRygp
+OwkJCQkJCQlcDQo+IA0KPiBTbyBmYWlsdXJlIHRvIHF1ZXVlIHRoYXQgd29yayBpcyBzdWNoIGEg
+Y3JpdGljYWwgcHJvYmxlbSB0aGF0IHdlIG5lZWQgdG8gQlVHKCkNCj4gYW5kIGNhbid0IHBvc3Np
+Ymx5IGNvbnRpbnVlIGFuZCBzaG91bHQgbm90IGF0dGVtcHQgcmVjb3ZlcnkgYXQgYWxsPw0KPiAN
+Cg0KSSB0aGluayBpdCdzIG5vdCBjcml0aWNhbCwgd2UgY2FuIGp1c3QgcmV0dXJuIGVycm9yIHN0
+YXR1cy4NCkkgdGhpbmsgdGhlIHByb2JsZW0gaW4gaXRzZWxmIGlzIG5vdCBhdCBhbGwgY3JpdGlj
+YWwgYnV0IHdoZW4gSSBpbml0aWFsbHkgdGhvdWdodCBhYm91dA0Kd2h5IHRoZSBwcm9ibGVtIGNv
+dWxkIGhhdmUgb2NjdXJyZWQsIGl0IHNvdW5kZWQgbGlrZSBvbmUgaS5lLiBpZGVhbGx5IChpZiB0
+aGUgc3lzdGVtDQppcyBydW5uaW5nIGZpbmUpIHdlIHNob3VsZCBhbHdheXMgYmUgYWJsZSB0byBx
+dWV1ZSB3b3JrLiBGYWlsdXJlIHRvIHF1ZXVlIG1lYW5zDQp0aGF0IHRoZSBwcmV2aW91cyB3b3Jr
+IGlzIGFscmVhZHkgb24gcXVldWUgYW5kIHRoYXQgc2hvdWxkbid0IGJlIHRoZSBjYXNlLg0KU28s
+IHRob3VnaHQsIG1heWJlIHNvbWV0aGluZyBiYWQgaGFkIGhhcHBlbmVkIGFscmVhZHkgKGp1c3Qg
+ZG91YnRmdWwpLg0KIA0KQnV0LCBJIHNlZSB5b3VyIHBvaW50LiBCVUcoKSBzb3VuZHMgbW9yZSBs
+aWtlIGFuIG92ZXIga2lsbC4gSW5zdGVhZCBvZiBmaXhpbmcgYW4gZXhpc3RpbmcNCnByb2JsZW0s
+IHRoaXMgcGF0Y2ggY291bGQgY29tcGxldGVseSB0YWtlIGRvd24gdGhlIHN5c3RlbS4NCg0KPiBJ
+T1csIHdlIHNob3VsZCBhbHdheXMgc3RyaXZlIHRvIGZhaWwgZ3JhY2VmdWxseSBhbmQgbm90IHNo
+aXQgaW4gcGFudHMgYXQgdGhlIGZpcnN0DQo+IHNpZ24gb2YgdHJvdWJsZS4NCj4NCg0KWWVzLCB0
+aGF0IG1ha2VzIHNlbnNlLiBJIHdpbGwgcmVtb3ZlIEJVRygpIGluIFYzIChpbiB0aGUgdHdvIHBs
+YWNlcyB0aGF0IEkgaW50cm9kdWNlZCkuDQoNCj4gRXZlbiBjaGVja3BhdGNoIHdhcm5zIGhlcmU6
+DQo+IA0KPiBXQVJOSU5HOiBBdm9pZCBjcmFzaGluZyB0aGUga2VybmVsIC0gdHJ5IHVzaW5nIFdB
+Uk5fT04gJiByZWNvdmVyeSBjb2RlDQo+IHJhdGhlciB0aGFuIEJVRygpIG9yIEJVR19PTigpDQo+
+ICMxODQ6IEZJTEU6IGRyaXZlcnMvZmlybXdhcmUvZWZpL3J1bnRpbWUtd3JhcHBlcnMuYzo5MjoN
+Cj4gKyAgICAgICAgICAgICAgIEJVRygpOyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgXA0KPg0KDQpTdXJlISBJIHdpbGwgZml4IHRoaXMNCiANCj4gDQo+
+IGFuZCBieSBsb29raW5nIGF0IHRoZSBvdGhlciBvdXRwdXQsIHlvdSBzaG91bGQgcnVuIHlvdXIg
+cGF0Y2hlcyB0aHJvdWdoDQo+IGNoZWNrcGF0Y2guIFNvbWUgb2YgdGhlIHRoaW5ncyBtYWtlIHNl
+bnNlIGxpa2U6DQo+IA0KPiBXQVJOSU5HOiBxdW90ZWQgc3RyaW5nIHNwbGl0IGFjcm9zcyBsaW5l
+cw0KPiAjOTc6IEZJTEU6IGRyaXZlcnMvZmlybXdhcmUvZWZpL2VmaS5jOjM0MToNCj4gKyAgICAg
+ICAgICAgICAgIHByX2VycigiRmFpbGVkIHRvIGNyZWF0ZSBlZmlfcnRzX3dvcmtxdWV1ZSwgRUZJ
+IHJ1bnRpbWUgc2VydmljZXMgIg0KPiArICAgICAgICAgICAgICAgICAgICAgICJkaXNhYmxlZC5c
+biIpOw0KPiANCj4gZm9yIGV4YW1wbGUuDQo+IA0KDQpJIHdpbGwgZml4IHRoaXMgb25lIHRvby4N
+Cg0KQW5vdGhlciB3YXJuaW5nIGJ5IGNoZWNrcGF0Y2ggaXMgInVzZSBvZiBpbl9hdG9taWMoKSBp
+biBkcml2ZXJzIGNvZGUiDQpEbyB5b3UgdGhpbmsgaXQncyBPSyB0byBjaGVjayBpZiB3ZXJlIGFy
+ZSAiaW5fYXRvbWljKCkiIGluIGRyaXZlcnMgY29kZS4NCkkgd2Fzbid0IGFibGUgdG8gZGVjaWRl
+IG9uIG90aGVyIGFsdGVybmF0aXZlLCBpZiBwb3NzaWJsZSwgY291bGQgeW91IHBsZWFzZSBzdWdn
+ZXN0IG9uZT8NCg0KUmVnYXJkcywNClNhaQ0K
