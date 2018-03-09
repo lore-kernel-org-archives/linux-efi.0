@@ -1,78 +1,82 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V2 2/3] efi: Introduce efi_rts_workqueue and some
- infrastructure to invoke all efi_runtime_services()
-Date: Fri, 9 Mar 2018 02:37:59 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F2E581D28@ORSMSX114.amr.corp.intel.com>
-References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1520292190-5027-3-git-send-email-sai.praneeth.prakhya@intel.com>
- <20180307121047.GG23662@pd.tnic>
- <FFF73D592F13FD46B8700F0A279B802F2E5818E4@ORSMSX114.amr.corp.intel.com>
- <20180308140830.GE21166@pd.tnic>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH 07/12] efi: Use efi_mm in x86 as well as ARM
+Date: Fri, 9 Mar 2018 08:40:34 +0100
+Message-ID: <20180309074034.put3ko6zxmaoizzr@gmail.com>
+References: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
+ <20180308080020.22828-8-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180308140830.GE21166@pd.tnic>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20180308080020.22828-8-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chun-Yi Lee <jlee@suse.com>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Williams, Dan J" <dan.j.williams@intel.com>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Sai Praneeth <sai.praneeth.prakhya@intel.com>, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S . Tsirkin" <mst@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-PiA+IEFub3RoZXIgd2FybmluZyBieSBjaGVja3BhdGNoIGlzICJ1c2Ugb2YgaW5fYXRvbWljKCkg
-aW4gZHJpdmVycyBjb2RlIg0KPiANCj4gSSdtIGFzc3VtaW5nIGl0IHdhcm5zIGJlY2F1c2UgeW91
-J3JlIHRvdWNoaW5nIGZpbGVzIGluIGRyaXZlcnMvIGJ1dCB0aGUgZWZpIGZ1biBpcw0KPiBub3Qg
-cmVhbGx5IGEgZHJpdmVyLi4uDQoNClRydWUhIFRoYXQgbWFrZXMgc2Vuc2UgOikNCg0KPiANCj4g
-QnV0IGxvb2tpbmcgYXQgcGF0Y2ggMywgdGhhdCB0aGluZyBsb29rcyBsaWtlIGEgcmVhbCBtZXNz
-LiBTb21lIG9mIHRoZSB0aGluZ3MgLQ0KPiBwc3RvcmUsIGl0IHNlZW1zIC0gZG8gc3R1ZmYgaW4g
-YXRvbWljIGNvbnRleHQgYW5kIHlldCB5b3Ugd2FudCB0byBkbyBlZmkgc3R1ZmYgaW4gYQ0KPiB3
-b3JrcXVldWUgd2hpY2ggZG9lc24ndCBzdG9tYWNoIGF0b21pYyBjb250ZXh0IHRvIGJlZ2luIHdp
-dGguDQo+IA0KPiBTbyBpZiB5b3Ugd2FubmEgZG8gd29ya3F1ZXVlLCB5b3Ugc2hvdWxkIG1ha2Ug
-c3VyZSBhbGwgZWZpIHN0dWZmIGdldHMgZGVsYXllZA0KPiB0byBwcm9jZXNzIGNvbnRleHQgYW5k
-IHF1ZXVlZCBwcm9wZXJseS4gRm9yIGV4YW1wbGUsIHdlIGxvZyBNQ0VzIGZyb20gYXRvbWljDQo+
-IGNvbnRleHQgYnkgcHV0dGluZyB0aGVtIG9uIGEgbG9ja2xlc3MgYnVmZmVyIGFuZCB0aGVuIGtp
-Y2tpbmcgaXJxX3dvcmsgdG8gcXVldWUNCj4gdGhlIHdvcmsgd2hlbiB3ZSByZXR1cm4gdG8gcHJv
-Y2VzcyBjb250ZXh0Lg0KPiBDYW4geW91IGRvIHNvbWV0aGluZyBsaWtlIHRoYXQ/DQo+IA0KDQpJ
-IHRoaW5rIHdlIGNhbiBkbyB0aGlzLCBpdCdzIGlzIGEgZ29vZCBpZGVhLiBJIGxvb2tlZCBhdCB0
-aGlzIGFwcHJvYWNoIGFuZCBzYXcgdGhhdA0KaW4gb29wc19lbmQoKSBmdW5jdGlvbiwgcGFydCBv
-ZiBhcmNoL3g4Ni9rZXJuZWwvZHVtcHN0YWNrLCBiZXR3ZWVuIG9vcHNfZXhpdCgpDQphbmQgcGFu
-aWMoKSAoaGVyZSB3ZSBhcmUgbm90IGluIGF0b21pYyBjb250ZXh0LCBzbywgSSB0aGluayB3ZSBj
-YW4gdXNlIHdvcmsgcXVldWVzKQ0Kd2UgY291bGQgaGF2ZSBzb21ldGhpbmcgbGlrZSBlZmlfZmx1
-c2hfYnVmZmVyKCkgd2hpY2ggd2lsbCBmbHVzaCB0aGUgYnVmZmVyIGFuZA0KcXVldWUgdGhlIHdv
-cmsgdG8gZWZpX3J0c193cS4NCg0KQnV0LCBJIGd1ZXNzLCB3ZSBoYXZlIHNvbWUgZG93bnNpZGVz
-IHdpdGggdGhpcyBkZXNpZ246DQoxLiBXZSBhcmUgZG9pbmcgdGhpcyB0byBoYXZlICJubyBleGNl
-cHRpb25zIHRvIHVzZSBlZmlfcnRzX3dxIiwgYnV0IHdlIHdpbGwgYmUgbWFraW5nDQp0aGUgY29t
-bW9uIGNhc2UgY29tcGxpY2F0ZWQuIGkuZS4gV2hlbiBhIHVzZXIgcmVxdWVzdHMgdG8gd3JpdGUg
-c29tZSBlZmkgdmFyaWFibGUsDQp3ZSB3aWxsIGZpcnN0IHdyaXRlIGl0IHRvIGEgYnVmZmVyIGFu
-ZCB0aGVuIGZsdXNoIHRoZSBidWZmZXIgdXNpbmcgZWZpX3J0c193cS4gSW5zdGVhZCwgd2UNCmNv
-dWxkIGhhdmUgd3JpdHRlbiB0aGUgdmFyaWFibGUgZGlyZWN0bHkuDQpNYXliZSwgeW91IG1lYW50
-LCB3ZSBzaG91bGQgdXNlIHRoaXMgYnVmZmVyIG9ubHkgd2hpbGUgcHN0b3JlIGFuZCBub3QgZHVy
-aW5nIG5vcm1hbA0KY2FzZSAod2hpY2ggc291bmRzIHJlYXNvbmFibHkgT0spLg0KMi4gSXQgZG9l
-c24ndCBsb29rIHJhdGlvbmFsIHRoYXQsIHdoZW4gd2UgYXJlIGFscmVhZHkgZ29pbmcgZG93biwg
-d2Ugc2NoZWR1bGUgKGJlY2F1c2UNCndlIHdpbGwgYmUgaW52b2tpbmcgZWZpX3J1bnRpbWVfc2Vy
-dmljZXMoKSB0aHJvdWdoIHdvcmsgcXVldWUpIHRvIGxvZyBzb21lIHN0dWZmLg0KTm90LCBzdXJl
-IGlmIHRoYXQncyBoYXBwZW5pbmcgaW4gb3RoZXIgcGFydHMgb2Yga2VybmVsIG9yIGlmIGl0J3Mg
-T0sgdG8gZG8gdGhhdC4NCg0KSSB3aWxsIHRyeSB0aGUgc3VnZ2VzdGVkIGFwcHJvYWNoIGFuZCB3
-aWxsIGtlZXAgdGhpcyB0aHJlYWQgcG9zdGVkLg0KDQo+ICJIZW5jZSwgcHN0b3JlIGNhbGxzIGVm
-aV9ydW50aW1lX3NlcnZpY2VzKCkgd2l0aG91dCB1c2luZyBlZmlfcnRzX3dxIiAtIHRoYXQNCj4g
-ZG9lc24ndCBzb3VuZCBsaWtlIG9wdGltYWwgZGVzaWduIHRvIG1lLiBJIHdvdWxkIHRyeSB0byBz
-aG92ZSB0aGVtIGFsbCB0aHJvdWdoDQo+IHRoZSB3b3JrcXVldWUgLSBub3QgaGF2ZSBleGNlcHRp
-b25zLg0KPiANCg0KQWx0ZXJuYXRpdmVseSwgaW5zdGVhZCBvZiBwbGF5aW5nIGFyb3VuZCB3aXRo
-IGluX2F0b21pYygpLCB3ZSBjb3VsZCBoYXZlIHdyYXBwZXINCmZ1bmN0aW9ucyBsaWtlIGVmaV93
-cml0ZV92YXJfbm9uX3dxKCkgd2hpY2ggd2lsbCBvbmx5IGJlIHVzZWQgYnkgcHN0b3JlLiBUaGlz
-IGZ1bmN0aW9uDQp3aWxsIG5vdCB1c2UgZWZpX3J0c193cSBhbmQgZGlyZWN0bHkgaW52b2tlIGVm
-aV9ydW50aW1lX3NlcnZpY2UuIEp1c3QgYW4gYXR0ZW1wdCB0bw0KbWFrZSB0aGUgY29kZSBub3Qg
-bG9vayBtZXNzeS4NCg0KPiBUaGVuIHRoaXM6DQo+IA0KPiA+IEEgcG90ZW50aWFsIGlzc3VlIGNv
-dWxkIGJlLCBmb3IgaW5zdGFuY2UsIGFuIE5NSSBpbnRlcnJ1cHQgKGxpa2UgcGVyZikNCj4gPiB0
-cnlpbmcgdG8gcHJvZmlsZSBzb21lIHVzZXIgZGF0YSB3aGlsZSBpbiBlZmlfcGdkLg0KPiANCj4g
-SSBjYW4ndCB1bmRlcnN0YW5kLg0KPiANCj4gSG93IGRpZCB3ZSBoYW5kbGUgdGhpcyB1bnRpbCBu
-b3cgYW5kIHdoeSBpcyBpdCBhIHByb2JsZW0gYWxsIG9mIGEgc3VkZGVuPw0KPiANCj4gQmVjYXVz
-ZSBJIGRvbid0IHJlY2FsbCBiZWluZyB1bmFibGUgdG8gcnVuIHBlcmYgd2hpbGUgZWZpIHJ1bnRp
-bWUgc2VydmljZXMgYXJlDQo+IGhhcHBlbmluZy4NCj4gDQoNClRoYXQncyB0cnVlISBBRkFJSywg
-d2UgZG9uJ3QgaGF2ZSBhbnkgaXNzdWVzIGhhbmRsaW5nIE5NSSB3aGlsZSBpbiBlZmlfcGdkLg0K
-V2UgbWlnaHQgaGF2ZSBpc3N1ZXMgb25seSB3aGVuLCB3ZSBhcmUgYWxyZWFkeSBpbiBlZmlfcGdk
-LCBOTUkgY29tZXMgYWxvbmcNCmFuZCBOTUkgaGFuZGxlciB0cmllcyB0byB0b3VjaCB0aGUgcmVn
-aW9ucyB0aGF0IGFyZSBub3QgbWFwcGVkIGluIGVmaV9wZ2QNCihFZzogVXNlciBzcGFjZSBwYXJ0
-IG9mIHByb2Nlc3MgYWRkcmVzcyBzcGFjZSkgYW5kIHVzaW5nIGt0aHJlYWQgaW5oZXJlbnRseQ0K
-bWVhbnMgdGhhdCB3ZSB3aWxsIG5vdCBoYXZlIGFueSB1c2VyIHNwYWNlLg0KDQpSZWdhcmRzLA0K
-U2FpDQo=
+
+* Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+
+> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+> 
+> Presently, only ARM uses mm_struct to manage efi page tables and efi
+> runtime region mappings. As this is the preferred approach, let's make
+> this data structure common across architectures. Specially, for x86,
+> using this data structure improves code maintainability and readability.
+
+> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+> index 85f6ccb80b91..00f977ddd718 100644
+> --- a/arch/x86/include/asm/efi.h
+> +++ b/arch/x86/include/asm/efi.h
+> @@ -2,10 +2,14 @@
+>  #ifndef _ASM_X86_EFI_H
+>  #define _ASM_X86_EFI_H
+>  
+> +#include <linux/sched/mm.h>
+> +#include <linux/sched/task.h>
+> +
+>  #include <asm/fpu/api.h>
+>  #include <asm/pgtable.h>
+>  #include <asm/processor-flags.h>
+>  #include <asm/tlb.h>
+> +#include <asm/mmu_context.h>
+>  
+>  /*
+>   * We map the EFI regions needed for runtime services non-contiguously,
+
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index f5083aa72eae..f1b7d68ac460 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -966,6 +966,8 @@ extern struct efi {
+>  	unsigned long flags;
+>  } efi;
+>  
+> +extern struct mm_struct efi_mm;
+> +
+>  static inline int
+>  efi_guidcmp (efi_guid_t left, efi_guid_t right)
+>  {
+
+Ugh, I can see three problems with this patch:
+
+1)
+
+Why is the low level asm/efi.h header polluted with two of the biggest header 
+files in existence, to add a type to _another_ header (efi.h)?
+
+2)
+
+Why is <linux/sched/task.h> included if what is being relied on is mm_struct?
+
+3)
+
+But even <linux/sched/mm.h> looks unnecessary in efi.h, a simple forward 
+declaration of mm_struct would do ...
+
+The high level MM and sched headers should be added to the actual .c files that 
+make use of them.
+
+Thanks,
+
+	Ingo
