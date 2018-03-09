@@ -1,66 +1,57 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: [PATCH 12/12] efi: make const array 'apple' static
-Date: Fri, 09 Mar 2018 01:37:01 -0800
-Message-ID: <1520588221.11634.26.camel@perches.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 07/12] efi: Use efi_mm in x86 as well as ARM
+Date: Fri, 9 Mar 2018 09:56:05 +0000
+Message-ID: <CAKv+Gu_Yk1KHbKp940WufNLWU_WnRnThn+=rOJ=Lo6C7j3gqPw@mail.gmail.com>
 References: <20180308080020.22828-1-ard.biesheuvel@linaro.org>
-         <20180308080020.22828-13-ard.biesheuvel@linaro.org>
-         <1520507105.11634.5.camel@perches.com>
-         <CAKv+Gu8iMvzvSP9-YPe+ms4qVMjcQqNQ25Wa16JW_tEG7P+jtQ@mail.gmail.com>
-         <CAKv+Gu-h9pZLxf6tp++UDy4LCjSu-3uUQDRFS3=HcTjnBdZ2Vg@mail.gmail.com>
+ <20180308080020.22828-8-ard.biesheuvel@linaro.org> <20180309074034.put3ko6zxmaoizzr@gmail.com>
+ <FFF73D592F13FD46B8700F0A279B802F2E581F50@ORSMSX114.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu-h9pZLxf6tp++UDy4LCjSu-3uUQDRFS3=HcTjnBdZ2Vg@mail.gmail.com>
+In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F2E581F50@ORSMSX114.amr.corp.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Colin Ian King <colin.king@canonical.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Cc: Ingo Molnar <mingo@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S . Tsirkin" <mst@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2018-03-09 at 07:44 +0000, Ard Biesheuvel wrote:
-> On 9 March 2018 at 07:43, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> > On 8 March 2018 at 11:05, Joe Perches <joe@perches.com> wrote:
-> > > On Thu, 2018-03-08 at 08:00 +0000, Ard Biesheuvel wrote:
-> > > > From: Colin Ian King <colin.king@canonical.com>
-> > > > 
-> > > > Don't populate the const read-only array 'buf' on the stack but instead
-> > > > make it static. Makes the object code smaller by 64 bytes:
-> > > > 
-> > > > Before:
-> > > >    text          data     bss     dec     hex filename
-> > > >    9264             1      16    9281    2441 arch/x86/boot/compressed/eboot.o
-> > > > 
-> > > > After:
-> > > >    text          data     bss     dec     hex filename
-> > > >    9200             1      16    9217    2401 arch/x86/boot/compressed/eboot.o
-> > > > 
-> > > > (gcc version 7.2.0 x86_64)
-> > > > 
-> > > > Signed-off-by: Colin Ian King <colin.king@canonical.com>
-> > > > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> > > > ---
-> > > >  arch/x86/boot/compressed/eboot.c | 2 +-
-> > > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > > 
-> > > > diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> > > > index 886a9115af62..f2251c1c9853 100644
-> > > > --- a/arch/x86/boot/compressed/eboot.c
-> > > > +++ b/arch/x86/boot/compressed/eboot.c
-> > > > @@ -423,7 +423,7 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
-> > > > 
-> > > >  static void setup_quirks(struct boot_params *boot_params)
-> > > >  {
-> > > > -     efi_char16_t const apple[] = { 'A', 'p', 'p', 'l', 'e', 0 };
-> > > > +     static efi_char16_t const apple[] = { 'A', 'p', 'p', 'l', 'e', 0 };
-> > > 
-> > > Perhaps
-> > > 
-> > > static const efi_char16_t apple[] ...
-> > > 
-> > > is better.
-> > > 
-> > 
-> > Why would that be any better?
+On 9 March 2018 at 08:37, Prakhya, Sai Praneeth
+<sai.praneeth.prakhya@intel.com> wrote:
+>> > diff --git a/include/linux/efi.h b/include/linux/efi.h index
+>> > f5083aa72eae..f1b7d68ac460 100644
+>> > --- a/include/linux/efi.h
+>> > +++ b/include/linux/efi.h
+>> > @@ -966,6 +966,8 @@ extern struct efi {
+>> >     unsigned long flags;
+>> >  } efi;
+>> >
+>> > +extern struct mm_struct efi_mm;
+>> > +
+>> >  static inline int
+>> >  efi_guidcmp (efi_guid_t left, efi_guid_t right)  {
+>>
+>> Ugh, I can see three problems with this patch:
+>>
+>> 1)
+>>
+>> Why is the low level asm/efi.h header polluted with two of the biggest header
+>> files in existence, to add a type to _another_ header (efi.h)?
+>>
+>> 2)
+>>
+>> Why is <linux/sched/task.h> included if what is being relied on is mm_struct?
+>>
+>> 3)
+>>
+>> But even <linux/sched/mm.h> looks unnecessary in efi.h, a simple forward
+>> declaration of mm_struct would do ...
+>>
+>> The high level MM and sched headers should be added to the actual .c files that
+>> make use of them.
+>
+> Ok, makes sense.
+> Sorry! for that. I will fix the issues.
+>
 
-It'd be more like the the style used
-in the rest of the kernel.
+I have some other fixups to do, so if this is as easy as it seems
+(remove the #includes and add the forward declaration), I can fix it
+up and resend it for you.
