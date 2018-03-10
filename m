@@ -1,51 +1,62 @@
-From: James Bottomley <James.Bottomley@HansenPartnership.com>
-Subject: Re: Regression from efi: call get_event_log before ExitBootServices
-Date: Fri, 09 Mar 2018 09:03:13 -0800
-Message-ID: <1520614993.12216.3.camel@HansenPartnership.com>
-References: <01000161fc0b4755-df0621f4-ab5d-479a-b425-adf98427a308-000000@email.amazonses.com>
-         <e7c2be5c-cf21-fc2d-efda-d9222d93ffad@redhat.com>
-         <b32f335c-0d77-1749-f7fe-65f512280255@redhat.com>
-         <ade378f6-c997-1d48-a30d-cceee6435fc8@redhat.com>
-         <a3b5f822-f8f4-e2f5-46da-e23e13174f28@redhat.com>
-         <cec36124-0950-6ad9-58a8-9bd69e63aa04@redhat.com>
-         <0100016206a68850-bd5c96b3-f275-46ea-98b1-1317e02a5d6e-000000@email.amazonses.com>
-         <29c1640a-cf19-ca19-7de9-96f202edfb5a@redhat.com>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH V2 2/3] efi: Introduce efi_rts_workqueue and some
+ infrastructure to invoke all efi_runtime_services()
+Date: Sat, 10 Mar 2018 00:33:35 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F2E5821F9@ORSMSX114.amr.corp.intel.com>
+References: <1520292190-5027-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1520292190-5027-3-git-send-email-sai.praneeth.prakhya@intel.com>
+ <20180307121047.GG23662@pd.tnic>
+ <FFF73D592F13FD46B8700F0A279B802F2E5818E4@ORSMSX114.amr.corp.intel.com>
+ <20180308140830.GE21166@pd.tnic>
+ <FFF73D592F13FD46B8700F0A279B802F2E581D28@ORSMSX114.amr.corp.intel.com>
+ <20180309111157.GC10753@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <29c1640a-cf19-ca19-7de9-96f202edfb5a@redhat.com>
+In-Reply-To: <20180309111157.GC10753@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>, Jeremy Cline <jeremy@jcline.org>, Javier Martinez Canillas <javierm@redhat.com>, Thiebaud Weksteen <tweek@google.com>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Borislav Petkov <bp@alien8.de>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chun-Yi Lee <jlee@suse.com>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Zijlstra, Peter" <peter.zijlstra@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Williams, Dan J" <dan.j.williams@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2018-03-09 at 10:29 +0100, Hans de Goede wrote:
-> Hi,
-> 
-> On 08-03-18 18:26, Jeremy Cline wrote:
-> > 
-> > On 03/08/2018 11:50 AM, Hans de Goede wrote:
-[...]
-> > > > The UEFI firmware does some measurements and so does shim. So
-> > > > you should have some event logs. What version of shim are you
-> > > > using? And also would be good to know if it's the same shim
-> > > > version that Jeremy is using.
-> > > 
-> > > That is a very good question, I'm using: shim-ia32-13-0.7.x86_64, 
-> > > which is the last version for F27 AFAICT.
-> > 
-> > All my tablet has installed is shim-0.8-10.x86_64, no shim-ia32.
-> 
-> Yes my bad, although if the kernel changes break booting on systems
-> without the shim that is still good to know and something which
-> we probably ought to fix.
-
-My laptop is set up with secure boot but without shim using a shim
-protocol thin layer to check the kernel signature against db variables:
-
-https://git.kernel.org/pub/scm/linux/kernel/git/jejb/efitools.git/tree/ShimReplace.c
-
-and I haven't seen any breakage, so not having a shim that does
-measurements works for me all the way up to -rc4.
-
-James
+PiA+IFRoYXQncyB0cnVlISBBRkFJSywgd2UgZG9uJ3QgaGF2ZSBhbnkgaXNzdWVzIGhhbmRsaW5n
+IE5NSSB3aGlsZSBpbiBlZmlfcGdkLg0KPiA+IFdlIG1pZ2h0IGhhdmUgaXNzdWVzIG9ubHkgd2hl
+biwgd2UgYXJlIGFscmVhZHkgaW4gZWZpX3BnZCwgTk1JIGNvbWVzDQo+ID4gYWxvbmcNCj4gDQo+
+IENhbiB5b3UgdHJpZ2dlciB0aGlzPyBPciBpcyBpdCBzb21ldGhpbmcgaHlwb3RoZXRpY2FsPw0K
+PiANCg0KQUZBSUssIGl0J3MgaHlwb3RoZXRpY2FsLiBJIGRpZCB0cnkgdG8gdHJpZ2dlciB0aGUg
+aXNzdWUsIGJ1dCBmYWlsZWQgWzFdLg0KTWF5YmUsIEkgbmVlZCB0byBoYXZlIHNvbWUgbW9yZSBj
+b25zdHJhaW50cyBbMl0uDQoNClsxXSBodHRwczovL2xrbWwub3JnL2xrbWwvMjAxNy84LzIzLzcx
+NQ0KWzJdIGh0dHBzOi8vbGttbC5vcmcvbGttbC8yMDE3LzgvMjUvNDY5DQoNCj4gPiBhbmQgTk1J
+IGhhbmRsZXIgdHJpZXMgdG8gdG91Y2ggdGhlIHJlZ2lvbnMgdGhhdCBhcmUgbm90IG1hcHBlZCBp
+bg0KPiA+IGVmaV9wZ2QNCj4gDQo+IElmIGl0IGlzIG5vdCBoeXBvdGhldGljYWwsIHRoZSBOTUkg
+aGFuZGxlciBzaG91bGQgbGVhcm4gdG8gbG9vayBhdCBDUjMgZmlyc3QgYW5kDQo+IHJldHVybiBp
+ZiBDUjMgaGFzIHRoZSBlZmkgcGdkLg0KDQpUaGlzIHNvbHV0aW9uIGFuZCBpdCdzIHZhcmlhbnRz
+IHdlcmUgZGlzY3Vzc2VkIGhlcmUgWzFdLCBbMl0gYW5kIGZvciB2YXJpZWQgcmVhc29ucyANCnRo
+ZSBjb21tdW5pdHkgaGFkIGRlY2lkZWQgdG8gZ28gd2l0aCAiRXZlcnl0aGluZyBFRkkgYXMga3Ro
+cmVhZCIgYXBwcm9hY2ggWzNdIFs0XS4NCg0KQWx0aG91Z2ggdGhlIGRpc2N1c3Npb25zIHdlcmUg
+b2ZmIG15IHVuZGVyc3RhbmRpbmcsIHRoZSBwcmVzZW50IGlzc3VlIEkgc2VlIGlzLCANCihhbmQg
+YWxzbyB0aGUgbW90aXZhdGlvbiBmb3IgbWUgdG8gZG8gdGhlIHBhdGNoIGlzKQ0Kd2hlbiBhIHRo
+cmVhZCB0cmllcyB0byBleGVjdXRlIGFueSAgZWZpX3J1bnRpbWVfc2VydmljZSgpIHdlIHN3aXRj
+aCB0byBlZmlfcGdkIA0KKHdoaWNoIGRvZXNuJ3QgaGF2ZSB1c2VyIHNwYWNlIG1hcHBpbmdzKSBh
+bmQgYWxsIG90aGVyIHN1YnN5c3RlbXMgaW4ga2VybmVsIA0KYXJlbid0IGF3YXJlIG9mIHRoaXMg
+c3dpdGNoLiBUaGlzIGxvb2tzIGxpa2UgYSBwZXJmZWN0IGNhc2UgZm9yIGt0aHJlYWQuDQoNCkt0
+aHJlYWQgYnkgZGVmaW5pdGlvbiBkb2VzbuKAmXQgaGF2ZSB1c2VyIHNwYWNlIG1hcHBpbmdzIGFu
+ZCBpZiB3ZSBydW4gZWZpX3J1bnRpbWVfc2VydmljZXMoKQ0KaW4gYSBrdGhyZWFkIGNvbnRleHQg
+YW5kIGlmIGFueSBvdGhlciBzdWJzeXN0ZW0gdHJpZXMgdG8gYWNjZXNzIHVzZXIgc3BhY2UgbWFw
+cGluZ3MgDQp3aGlsZSBpbiBlZmlfa3RocmVhZCwgaXQncyB0ZXJtaW5hbGx5IGJyb2tlbiBbNV0u
+DQoNClRoZXJlIHdlcmUgc2V2ZXJhbCBpc3N1ZXMgQW5keSwgUGV0ZXIgYW5kIE1hcmsgcmFpc2Vk
+Lg0KT25lIHN1Y2ggKGh5cG90aGV0aWNhbCkgY2FzZSBpcyBhY2Nlc3NpbmcgdXNlciBzcGFjZSBm
+cm9tIHRoZSBiYWNrIG9mIGFuIGludGVycnVwdCAoTk1JKS4NCk90aGVycyBpbmNsdWRlDQoxLiBJ
+c3N1ZSBzcGVjaWZpYyB0byBBUk0gYmVjYXVzZSBpdCBydW5zIGVmaV9ydW50aW1lX3NlcnZpY2Vz
+KCkgd2l0aCBpbnRlcnJ1cHRzIGVuYWJsZWQgWzZdDQoyLiBJbnRlcnJ1cHQgdGFrZW4gd2hpbGUg
+bW1hcF9zZW0oKSBpcyBoZWxkIGZvciB3cml0ZSB0aGF0IHRyaWVzIHRvIGFjY2VzcyB1c2VyIG1l
+bW9yeSBbN10NCjMuIElmIEVGSSB3ZXJlIHRvIGhhdmUgSU8gbWVtb3J5IG1hcHBlZCBhdCBhICJ1
+c2VyIiBhZGRyZXNzLCBwZXJmIGNvdWxkIGVuZCB1cCByZWFkaW5nIGl0IFs4XQ0KDQpbMV0gaHR0
+cHM6Ly9sa21sLm9yZy9sa21sLzIwMTcvOC8xNS83NTcNClsyXSBodHRwczovL2xrbWwub3JnL2xr
+bWwvMjAxNy84LzE2LzQ4Nw0KWzNdIGh0dHBzOi8vbGttbC5vcmcvbGttbC8yMDE3LzgvMjEvNTcz
+DQpbNF0gaHR0cHM6Ly9sa21sLm9yZy9sa21sLzIwMTcvOC8xNi81NDANCg0KWzVdIGh0dHBzOi8v
+bGttbC5vcmcvbGttbC8yMDE3LzgvMTcvNjY3DQpbNl0gaHR0cHM6Ly9sa21sLm9yZy9sa21sLzIw
+MTcvOC8xNi8xNzYNCls3XSBodHRwczovL2xrbWwub3JnL2xrbWwvMjAxNy84LzE3LzY2Nw0KWzhd
+IGh0dHBzOi8vbGttbC5vcmcvbGttbC8yMDE3LzgvMjEvNDI3DQoNClJlZ2FyZHMsDQpTYWkNCg==
