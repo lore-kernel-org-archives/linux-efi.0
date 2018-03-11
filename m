@@ -1,86 +1,79 @@
-From: Thiebaud Weksteen <tweek@google.com>
-Subject: Re: Regression from efi: call get_event_log before ExitBootServices
-Date: Sat, 10 Mar 2018 10:45:20 +0000
-Message-ID: <CA+zpnLdmg30Beg+uUJNgBQ5gbjXuJ0uVhyzCgf6m7xbx2yARBg@mail.gmail.com>
-References: <01000161fc0b4755-df0621f4-ab5d-479a-b425-adf98427a308-000000@email.amazonses.com>
- <e7c2be5c-cf21-fc2d-efda-d9222d93ffad@redhat.com> <b32f335c-0d77-1749-f7fe-65f512280255@redhat.com>
- <ade378f6-c997-1d48-a30d-cceee6435fc8@redhat.com> <a3b5f822-f8f4-e2f5-46da-e23e13174f28@redhat.com>
- <cec36124-0950-6ad9-58a8-9bd69e63aa04@redhat.com> <0100016206a68850-bd5c96b3-f275-46ea-98b1-1317e02a5d6e-000000@email.amazonses.com>
- <29c1640a-cf19-ca19-7de9-96f202edfb5a@redhat.com> <CA+zpnLebtbjbA-Jg+RvMOqwDE5R--9V3hTwMk95Br4vM1LgBjQ@mail.gmail.com>
- <010001620bafa06b-41525407-603e-40a9-ba11-6033b2f5dcc7-000000@email.amazonses.com>
+From: joeyli <jlee@suse.com>
+Subject: Re: [PATCH 0/9] KEYS: Blacklisting & UEFI database load
+Date: Sun, 11 Mar 2018 11:20:22 +0800
+Message-ID: <20180311032022.GA31059@linux-l9pv.suse>
+References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
+ <6eabbb43-295e-9ba0-c0d9-120f48aa0e1d@suse.cz>
+ <1520428682.10396.445.camel@linux.vnet.ibm.com>
+ <1520436517.5558.2.camel@HansenPartnership.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <010001620bafa06b-41525407-603e-40a9-ba11-6033b2f5dcc7-000000@email.amazonses.com>
+Content-Disposition: inline
+In-Reply-To: <1520436517.5558.2.camel@HansenPartnership.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jeremy Cline <jeremy@jcline.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: hdegoede@redhat.com, Javier Martinez Canillas <javierm@redhat.com>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org
+To: James Bottomley <James.Bottomley@HansenPartnership.com>
+Cc: Mimi Zohar <zohar@linux.vnet.ibm.com>, Jiri Slaby <jslaby@suse.cz>, David Howells <dhowells@redhat.com>, keyrings@vger.kernel.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Mar 9, 2018 at 5:54 PM Jeremy Cline <jeremy@jcline.org> wrote:
+On Wed, Mar 07, 2018 at 07:28:37AM -0800, James Bottomley wrote:
+> On Wed, 2018-03-07 at 08:18 -0500, Mimi Zohar wrote:
+> > On Tue, 2018-03-06 at 15:05 +0100, Jiri Slaby wrote:
+> > > what's the status of this please? Distributors (I checked SUSE,
+> > > RedHat and Ubuntu) have to carry these patches and every of them
+> > > have to forward-port the patches to new kernels. So are you going
+> > > to resend the PR to have this merged?
+> [...]
+> > Just because I trust the platform keys prior to booting the kernel,
+> > doesn't mean that I *want* to trust those keys once booted.  There
+> > are, however, places where we need access to those keys to verify a
+> > signature (eg. kexec kernel image).
+> 
+> Which is essentially the reason I always give when these patches come
+> back
+>
 
-> On Fri, Mar 09, 2018 at 10:43:50AM +0000, Thiebaud Weksteen wrote:
-> > Thanks a lot for trying out the patch!
-> >
-> > Please don't modify your install at this stage, I think we are hitting a
-> > firmware bug and that would be awesome if we can fix how we are
-handling it.
-> > So, if we reach that stage in the function it could either be that:
-> > * The allocation did not succeed, somehow, but the firmware still
-returned
-> > EFI_SUCCEED.
-> > * The size requested is incorrect (I'm thinking something like a 1G of
-> > log). This would be due to either a miscalculation of log_size
-(possible)
-> > or; the returned values of GetEventLog are not correct.
-> > I'm sending a patch to add checks for these. Could you please apply and
-> > retest?
-> > Again, thanks for helping debugging this.
+Josh Boyer's "MODSIGN: Allow the "db" UEFI variable to be suppressed"
+patch checks MokIgnoreDB variable to ignore db:
 
-> No problem, thanks for the help :)
+https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/commit/?h=keys-uefi&id=7c395b30a33a617c5cc2cdd419300af71277b79a
 
-> With the new patch:
+I think that we can consider to use MokAllowDB. Which means that kernel
+ignores DB by default.
 
-> Locating the TCG2Protocol
-> Calling GetEventLog on TCG2Protocol
-> Log returned
-> log_location is not empty
-> log_size != 0
-> log_size < 1M
-> Allocating memory for storing the logs
-> Returned from memory allocation
-> Copying log to new location
+> > Nayna Jain's "certs: define a trusted platform keyring" patch set
+> > introduces a new, separate keyring for these platform keys.
+> 
+> Perhaps, to break the deadlock, we should ask Jiří what the reason is
+> the distros want these keys to be trusted.  Apart from the Microsoft
+> key, it will also give you an OEM key in your trusted keyring.  Is it
+> something to do with OEM supplied modules?
+>
 
-> And then it hangs. I added a couple more print statements:
+As I remember that some manufacturers uses certificate in db to
+sign their kernel module. We need to discuss with them for switching
+to mok. Currently I do not know all use cases for using db.
 
-> diff --git a/drivers/firmware/efi/libstub/tpm.c
-b/drivers/firmware/efi/libstub/tpm.c
-> index ee3fac109078..1ab5638bc50e 100644
-> --- a/drivers/firmware/efi/libstub/tpm.c
-> +++ b/drivers/firmware/efi/libstub/tpm.c
-> @@ -148,8 +148,11 @@ void
-efi_retrieve_tpm2_eventlog_1_2(efi_system_table_t *sys_table_arg)
->          efi_printk(sys_table_arg, "Copying log to new location\n");
+There have some benefits for using db:
 
->          memset(log_tbl, 0, sizeof(*log_tbl) + log_size);
-> +       efi_printk(sys_table_arg, "Successfully memset log_tbl to 0\n");
->          log_tbl->size = log_size;
-> +       efi_printk(sys_table_arg, "Set log_tbl->size\n");
->          log_tbl->version = EFI_TCG2_EVENT_LOG_FORMAT_TCG_1_2;
-> +       efi_printk(sys_table_arg, "Set log_tbl-version\n");
->          memcpy(log_tbl->log, (void *) first_entry_addr, log_size);
+ - User does not need to deal with shim-mokmanager to enroll mok.
+   Target machine doesn't need to reboot and user doesn't need to
+   face to mokmanager UI.  
 
->          efi_printk(sys_table_arg, "Installing the log into the
-configuration table\n");
+ - The db is a authenticated variable, it's still secure when secure
+   boot is disabled.
+   The db is a authenticated variable that it can only be modified
+   by manufacturer's key. Kernel can trust it when secure boot
+   is disabled. It's useful for we do not need to taint kernel
+   for loading a manufacturer's kernel module even secure boot is
+   disabled.
 
-> and it's hanging at "memset(log_tbl, 0, sizeof(*log_tbl) + log_size);"
+ - Do not need to worry about the space of NVRAM and the EFI firmware
+   implementation for writing a boot time variable.
+  
+But I also agree that we should not trust all keys (like Microsoft key)
+in db by default.
 
-Thanks. Well, it looks like the memory that is supposedly allocated is not
-usable. I'm thinking this is a firmware bug.
-Ard, would you agree on this assumption? Thoughts on how to proceed?
-
-Thanks
-
-
-> Regards,
-> Jeremy
+Thanks a lot!
+Joey Lee
