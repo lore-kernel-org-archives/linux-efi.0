@@ -1,51 +1,120 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [GIT PULL 0/5] more EFI changes for v4.17
-Date: Mon, 12 Mar 2018 08:44:55 +0000
-Message-ID: <20180312084500.10764-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/5] efi: Use efi_mm in x86 as well as ARM
+Date: Mon, 12 Mar 2018 08:44:56 +0000
+Message-ID: <20180312084500.10764-2-ard.biesheuvel@linaro.org>
+References: <20180312084500.10764-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180312084500.10764-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Andy Lutomirski <luto@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, "Lee, Chun-Yi" <jlee@suse.com>, Lukas Wunner <lukas@wunner.de>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S . Tsirkin" <mst@redhat.com>, Peter Jones <pjones@redhat.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Ricardo Neri <ricardo.neri@intel.com>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Tony Luck <tony.luck@intel.com>, Tyler Baicar <tbaicar@codeaurora.org>
+Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S . Tsirkin" <mst@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-The following changes since commit f779ca740f25c8a6a72d951334f9efc3158a318b:
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-  efi: Make const array 'apple' static (2018-03-09 09:30:35 +0100)
+Presently, only ARM uses mm_struct to manage efi page tables and efi
+runtime region mappings. As this is the preferred approach, let's make
+this data structure common across architectures. Specially, for x86,
+using this data structure improves code maintainability and readability.
 
-are available in the Git repository at:
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: "Lee, Chun-Yi" <jlee@suse.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Tony Luck <tony.luck@intel.com>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Michael S. Tsirkin <mst@redhat.com>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+Tested-by: Bhupesh Sharma <bhsharma@redhat.com>
+Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+[ardb: don't #include the world to get a declaration of struct mm_struct]
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/x86/include/asm/efi.h         | 1 +
+ arch/x86/platform/efi/efi_64.c     | 3 +++
+ drivers/firmware/efi/arm-runtime.c | 9 ---------
+ drivers/firmware/efi/efi.c         | 9 +++++++++
+ include/linux/efi.h                | 2 ++
+ 5 files changed, 15 insertions(+), 9 deletions(-)
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
-
-for you to fetch changes up to a6072c0ecf3a39e9eadfaea1477533fd24261b05:
-
-  efi: use string literals for efi_char16_t variable initializers (2018-03-10 11:05:19 +0000)
-
-----------------------------------------------------------------
-Second batch of EFI changes for v4.17:
-- take 2 of 'use efi_switch_mm() on x86 instead of manipulating %cr3 directly'
-- fix early memremap leak in ESRT code
-- switch to L"xxx" notation for wide string literals
-
-----------------------------------------------------------------
-Ard Biesheuvel (2):
-      efi/esrt: fix handling of early ESRT table mapping
-      efi: use string literals for efi_char16_t variable initializers
-
-Sai Praneeth (3):
-      efi: Use efi_mm in x86 as well as ARM
-      x86/efi: Replace efi_pgd with efi_mm.pgd
-      x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
-
- arch/x86/boot/compressed/eboot.c          |  3 +-
- arch/x86/include/asm/efi.h                | 26 ++++++--------
- arch/x86/platform/efi/efi_64.c            | 59 +++++++++++++++++--------------
- arch/x86/platform/efi/efi_thunk_64.S      |  2 +-
- arch/x86/platform/efi/quirks.c            |  8 +++--
- drivers/firmware/efi/arm-runtime.c        |  9 -----
- drivers/firmware/efi/efi.c                |  9 +++++
- drivers/firmware/efi/esrt.c               | 17 +++------
- drivers/firmware/efi/libstub/Makefile     |  2 +-
- drivers/firmware/efi/libstub/secureboot.c | 12 ++-----
- drivers/firmware/efi/libstub/tpm.c        |  7 ++--
- include/linux/efi.h                       |  2 ++
- 12 files changed, 72 insertions(+), 84 deletions(-)
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index a399c1ebf6f0..c62443fa7d0a 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -7,6 +7,7 @@
+ #include <asm/processor-flags.h>
+ #include <asm/tlb.h>
+ #include <asm/nospec-branch.h>
++#include <asm/mmu_context.h>
+ 
+ /*
+  * We map the EFI regions needed for runtime services non-contiguously,
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index c310a8284358..0045efe9947b 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -231,6 +231,9 @@ int __init efi_alloc_page_tables(void)
+ 		return -ENOMEM;
+ 	}
+ 
++	mm_init_cpumask(&efi_mm);
++	init_new_context(NULL, &efi_mm);
++
+ 	return 0;
+ }
+ 
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 13561aeb7396..5889cbea60b8 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -31,15 +31,6 @@
+ 
+ extern u64 efi_system_table;
+ 
+-static struct mm_struct efi_mm = {
+-	.mm_rb			= RB_ROOT,
+-	.mm_users		= ATOMIC_INIT(2),
+-	.mm_count		= ATOMIC_INIT(1),
+-	.mmap_sem		= __RWSEM_INITIALIZER(efi_mm.mmap_sem),
+-	.page_table_lock	= __SPIN_LOCK_UNLOCKED(efi_mm.page_table_lock),
+-	.mmlist			= LIST_HEAD_INIT(efi_mm.mmlist),
+-};
+-
+ #ifdef CONFIG_ARM64_PTDUMP_DEBUGFS
+ #include <asm/ptdump.h>
+ 
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 92b9e79e5da9..232f4915223b 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -75,6 +75,15 @@ static unsigned long *efi_tables[] = {
+ 	&efi.mem_attr_table,
+ };
+ 
++struct mm_struct efi_mm = {
++	.mm_rb			= RB_ROOT,
++	.mm_users		= ATOMIC_INIT(2),
++	.mm_count		= ATOMIC_INIT(1),
++	.mmap_sem		= __RWSEM_INITIALIZER(efi_mm.mmap_sem),
++	.page_table_lock	= __SPIN_LOCK_UNLOCKED(efi_mm.page_table_lock),
++	.mmlist			= LIST_HEAD_INIT(efi_mm.mmlist),
++};
++
+ static bool disable_runtime;
+ static int __init setup_noefi(char *arg)
+ {
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index f5083aa72eae..f1b7d68ac460 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -966,6 +966,8 @@ extern struct efi {
+ 	unsigned long flags;
+ } efi;
+ 
++extern struct mm_struct efi_mm;
++
+ static inline int
+ efi_guidcmp (efi_guid_t left, efi_guid_t right)
+ {
+-- 
+2.15.1
