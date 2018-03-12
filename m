@@ -1,135 +1,119 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 5/5] efi: use string literals for efi_char16_t variable initializers
-Date: Mon, 12 Mar 2018 08:45:00 +0000
-Message-ID: <20180312084500.10764-6-ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/5] x86/efi: Replace efi_pgd with efi_mm.pgd
+Date: Mon, 12 Mar 2018 08:44:57 +0000
+Message-ID: <20180312084500.10764-3-ard.biesheuvel@linaro.org>
 References: <20180312084500.10764-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180312084500.10764-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Lukas Wunner <lukas@wunner.de>
+Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S . Tsirkin" <mst@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Now that we unambiguously build the entire kernel with -fshort-wchar,
-it is no longer necessary to open code efi_char16_t[] initializers as
-arrays of characters, and we can move to the L"xxx" notation instead.
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-Cc: Arnd Bergmann <arnd@arndb.de>
-Cc: Lukas Wunner <lukas@wunner.de>
+Since the previous patch added support for efi_mm, let's handle efi_pgd
+through efi_mm and remove global variable efi_pgd.
+
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: "Lee, Chun-Yi" <jlee@suse.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Tony Luck <tony.luck@intel.com>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Michael S. Tsirkin <mst@redhat.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+Tested-by: Bhupesh Sharma <bhsharma@redhat.com>
+Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/boot/compressed/eboot.c          |  3 ++-
- arch/x86/platform/efi/quirks.c            |  8 +++++---
- drivers/firmware/efi/libstub/Makefile     |  2 +-
- drivers/firmware/efi/libstub/secureboot.c | 12 +++---------
- drivers/firmware/efi/libstub/tpm.c        |  7 ++-----
- 5 files changed, 13 insertions(+), 19 deletions(-)
+ arch/x86/platform/efi/efi_64.c | 17 ++++++++---------
+ 1 file changed, 8 insertions(+), 9 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index f2251c1c9853..47d3efff6805 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -421,9 +421,10 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
- 	}
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 0045efe9947b..8881e601c32d 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -190,8 +190,6 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
+ 	early_code_mapping_set_exec(0);
  }
  
-+static const efi_char16_t apple[] = L"Apple";
-+
- static void setup_quirks(struct boot_params *boot_params)
+-static pgd_t *efi_pgd;
+-
+ /*
+  * We need our own copy of the higher levels of the page tables
+  * because we want to avoid inserting EFI region mappings (EFI_VA_END
+@@ -203,7 +201,7 @@ static pgd_t *efi_pgd;
+  */
+ int __init efi_alloc_page_tables(void)
  {
--	static efi_char16_t const apple[] = { 'A', 'p', 'p', 'l', 'e', 0 };
- 	efi_char16_t *fw_vendor = (efi_char16_t *)(unsigned long)
- 		efi_table_attr(efi_system_table, fw_vendor, sys_table);
+-	pgd_t *pgd;
++	pgd_t *pgd, *efi_pgd;
+ 	p4d_t *p4d;
+ 	pud_t *pud;
+ 	gfp_t gfp_mask;
+@@ -231,6 +229,7 @@ int __init efi_alloc_page_tables(void)
+ 		return -ENOMEM;
+ 	}
  
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 1ef11c26f79b..36c1f8b9f7e0 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -75,7 +75,7 @@ struct quark_security_header {
- 	u32 rsvd[2];
- };
++	efi_mm.pgd = efi_pgd;
+ 	mm_init_cpumask(&efi_mm);
+ 	init_new_context(NULL, &efi_mm);
  
--static efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
-+static const efi_char16_t efi_dummy_name[] = L"DUMMY";
+@@ -246,6 +245,7 @@ void efi_sync_low_kernel_mappings(void)
+ 	pgd_t *pgd_k, *pgd_efi;
+ 	p4d_t *p4d_k, *p4d_efi;
+ 	pud_t *pud_k, *pud_efi;
++	pgd_t *efi_pgd = efi_mm.pgd;
  
- static bool efi_no_storage_paranoia;
+ 	if (efi_enabled(EFI_OLD_MEMMAP))
+ 		return;
+@@ -339,7 +339,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	unsigned long pfn, text, pf;
+ 	struct page *page;
+ 	unsigned npages;
+-	pgd_t *pgd;
++	pgd_t *pgd = efi_mm.pgd;
  
-@@ -105,7 +105,8 @@ early_param("efi_no_storage_paranoia", setup_storage_paranoia);
- */
- void efi_delete_dummy_variable(void)
+ 	if (efi_enabled(EFI_OLD_MEMMAP))
+ 		return 0;
+@@ -349,8 +349,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	 * this value is loaded into cr3 the PGD will be decrypted during
+ 	 * the pagetable walk.
+ 	 */
+-	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(efi_pgd);
+-	pgd = efi_pgd;
++	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(pgd);
+ 
+ 	/*
+ 	 * It can happen that the physical address of new_memmap lands in memory
+@@ -420,7 +419,7 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
  {
--	efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
-+	efi.set_variable((efi_char16_t *)efi_dummy_name,
-+			 &EFI_DUMMY_GUID,
- 			 EFI_VARIABLE_NON_VOLATILE |
- 			 EFI_VARIABLE_BOOTSERVICE_ACCESS |
- 			 EFI_VARIABLE_RUNTIME_ACCESS,
-@@ -182,7 +183,8 @@ efi_status_t efi_query_variable_store(u32 attributes, unsigned long size,
- 		if (!dummy)
- 			return EFI_OUT_OF_RESOURCES;
+ 	unsigned long flags = _PAGE_RW;
+ 	unsigned long pfn;
+-	pgd_t *pgd = efi_pgd;
++	pgd_t *pgd = efi_mm.pgd;
  
--		status = efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
-+		status = efi.set_variable((efi_char16_t *)efi_dummy_name,
-+					  &EFI_DUMMY_GUID,
- 					  EFI_VARIABLE_NON_VOLATILE |
- 					  EFI_VARIABLE_BOOTSERVICE_ACCESS |
- 					  EFI_VARIABLE_RUNTIME_ACCESS,
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 7b3ba40f0745..a34e9290a699 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -9,7 +9,7 @@ cflags-$(CONFIG_X86_32)		:= -march=i386
- cflags-$(CONFIG_X86_64)		:= -mcmodel=small
- cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ -O2 \
- 				   -fPIC -fno-strict-aliasing -mno-red-zone \
--				   -mno-mmx -mno-sse
-+				   -mno-mmx -mno-sse -fshort-wchar
+ 	if (!(md->attribute & EFI_MEMORY_WB))
+ 		flags |= _PAGE_PCD;
+@@ -524,7 +523,7 @@ void __init parse_efi_setup(u64 phys_addr, u32 data_len)
+ static int __init efi_update_mappings(efi_memory_desc_t *md, unsigned long pf)
+ {
+ 	unsigned long pfn;
+-	pgd_t *pgd = efi_pgd;
++	pgd_t *pgd = efi_mm.pgd;
+ 	int err1, err2;
  
- cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS)) -fpie
- cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) \
-diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-index 959777ec8a77..8f07eb414c00 100644
---- a/drivers/firmware/efi/libstub/secureboot.c
-+++ b/drivers/firmware/efi/libstub/secureboot.c
-@@ -16,18 +16,12 @@
+ 	/* Update the 1:1 mapping */
+@@ -621,7 +620,7 @@ void __init efi_dump_pagetable(void)
+ 	if (efi_enabled(EFI_OLD_MEMMAP))
+ 		ptdump_walk_pgd_level(NULL, swapper_pg_dir);
+ 	else
+-		ptdump_walk_pgd_level(NULL, efi_pgd);
++		ptdump_walk_pgd_level(NULL, efi_mm.pgd);
+ #endif
+ }
  
- /* BIOS variables */
- static const efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
--static const efi_char16_t efi_SecureBoot_name[] = {
--	'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0
--};
--static const efi_char16_t efi_SetupMode_name[] = {
--	'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0
--};
-+static const efi_char16_t efi_SecureBoot_name[] = L"SecureBoot";
-+static const efi_char16_t efi_SetupMode_name[] = L"SetupMode";
- 
- /* SHIM variables */
- static const efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
--static efi_char16_t const shim_MokSBState_name[] = {
--	'M', 'o', 'k', 'S', 'B', 'S', 't', 'a', 't', 'e', 0
--};
-+static const efi_char16_t shim_MokSBState_name[] = L"MokSBState";
- 
- #define get_efi_var(name, vendor, ...) \
- 	efi_call_runtime(get_variable, \
-diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
-index da661bf8cb96..2298560cea72 100644
---- a/drivers/firmware/efi/libstub/tpm.c
-+++ b/drivers/firmware/efi/libstub/tpm.c
-@@ -16,11 +16,8 @@
- #include "efistub.h"
- 
- #ifdef CONFIG_RESET_ATTACK_MITIGATION
--static const efi_char16_t efi_MemoryOverWriteRequest_name[] = {
--	'M', 'e', 'm', 'o', 'r', 'y', 'O', 'v', 'e', 'r', 'w', 'r', 'i', 't',
--	'e', 'R', 'e', 'q', 'u', 'e', 's', 't', 'C', 'o', 'n', 't', 'r', 'o',
--	'l', 0
--};
-+static const efi_char16_t efi_MemoryOverWriteRequest_name[] =
-+	L"MemoryOverwriteRequestControl";
- 
- #define MEMORY_ONLY_RESET_CONTROL_GUID \
- 	EFI_GUID(0xe20939be, 0x32d4, 0x41be, 0xa1, 0x50, 0x89, 0x7f, 0x85, 0xd4, 0x98, 0x29)
 -- 
 2.15.1
