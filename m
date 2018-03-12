@@ -1,120 +1,135 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 1/5] efi: Use efi_mm in x86 as well as ARM
-Date: Mon, 12 Mar 2018 08:44:56 +0000
-Message-ID: <20180312084500.10764-2-ard.biesheuvel@linaro.org>
+Subject: [PATCH 5/5] efi: use string literals for efi_char16_t variable initializers
+Date: Mon, 12 Mar 2018 08:45:00 +0000
+Message-ID: <20180312084500.10764-6-ard.biesheuvel@linaro.org>
 References: <20180312084500.10764-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180312084500.10764-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S . Tsirkin" <mst@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Lukas Wunner <lukas@wunner.de>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+Now that we unambiguously build the entire kernel with -fshort-wchar,
+it is no longer necessary to open code efi_char16_t[] initializers as
+arrays of characters, and we can move to the L"xxx" notation instead.
 
-Presently, only ARM uses mm_struct to manage efi page tables and efi
-runtime region mappings. As this is the preferred approach, let's make
-this data structure common across architectures. Specially, for x86,
-using this data structure improves code maintainability and readability.
-
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: "Lee, Chun-Yi" <jlee@suse.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Tony Luck <tony.luck@intel.com>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Michael S. Tsirkin <mst@redhat.com>
-Cc: Ricardo Neri <ricardo.neri@intel.com>
-Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-Tested-by: Bhupesh Sharma <bhsharma@redhat.com>
-Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
-[ardb: don't #include the world to get a declaration of struct mm_struct]
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Lukas Wunner <lukas@wunner.de>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/include/asm/efi.h         | 1 +
- arch/x86/platform/efi/efi_64.c     | 3 +++
- drivers/firmware/efi/arm-runtime.c | 9 ---------
- drivers/firmware/efi/efi.c         | 9 +++++++++
- include/linux/efi.h                | 2 ++
- 5 files changed, 15 insertions(+), 9 deletions(-)
+ arch/x86/boot/compressed/eboot.c          |  3 ++-
+ arch/x86/platform/efi/quirks.c            |  8 +++++---
+ drivers/firmware/efi/libstub/Makefile     |  2 +-
+ drivers/firmware/efi/libstub/secureboot.c | 12 +++---------
+ drivers/firmware/efi/libstub/tpm.c        |  7 ++-----
+ 5 files changed, 13 insertions(+), 19 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index a399c1ebf6f0..c62443fa7d0a 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -7,6 +7,7 @@
- #include <asm/processor-flags.h>
- #include <asm/tlb.h>
- #include <asm/nospec-branch.h>
-+#include <asm/mmu_context.h>
- 
- /*
-  * We map the EFI regions needed for runtime services non-contiguously,
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index c310a8284358..0045efe9947b 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -231,6 +231,9 @@ int __init efi_alloc_page_tables(void)
- 		return -ENOMEM;
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index f2251c1c9853..47d3efff6805 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -421,9 +421,10 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
  	}
- 
-+	mm_init_cpumask(&efi_mm);
-+	init_new_context(NULL, &efi_mm);
-+
- 	return 0;
  }
  
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 13561aeb7396..5889cbea60b8 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -31,15 +31,6 @@
++static const efi_char16_t apple[] = L"Apple";
++
+ static void setup_quirks(struct boot_params *boot_params)
+ {
+-	static efi_char16_t const apple[] = { 'A', 'p', 'p', 'l', 'e', 0 };
+ 	efi_char16_t *fw_vendor = (efi_char16_t *)(unsigned long)
+ 		efi_table_attr(efi_system_table, fw_vendor, sys_table);
  
- extern u64 efi_system_table;
- 
--static struct mm_struct efi_mm = {
--	.mm_rb			= RB_ROOT,
--	.mm_users		= ATOMIC_INIT(2),
--	.mm_count		= ATOMIC_INIT(1),
--	.mmap_sem		= __RWSEM_INITIALIZER(efi_mm.mmap_sem),
--	.page_table_lock	= __SPIN_LOCK_UNLOCKED(efi_mm.page_table_lock),
--	.mmlist			= LIST_HEAD_INIT(efi_mm.mmlist),
--};
--
- #ifdef CONFIG_ARM64_PTDUMP_DEBUGFS
- #include <asm/ptdump.h>
- 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 92b9e79e5da9..232f4915223b 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -75,6 +75,15 @@ static unsigned long *efi_tables[] = {
- 	&efi.mem_attr_table,
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 1ef11c26f79b..36c1f8b9f7e0 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -75,7 +75,7 @@ struct quark_security_header {
+ 	u32 rsvd[2];
  };
  
-+struct mm_struct efi_mm = {
-+	.mm_rb			= RB_ROOT,
-+	.mm_users		= ATOMIC_INIT(2),
-+	.mm_count		= ATOMIC_INIT(1),
-+	.mmap_sem		= __RWSEM_INITIALIZER(efi_mm.mmap_sem),
-+	.page_table_lock	= __SPIN_LOCK_UNLOCKED(efi_mm.page_table_lock),
-+	.mmlist			= LIST_HEAD_INIT(efi_mm.mmlist),
-+};
-+
- static bool disable_runtime;
- static int __init setup_noefi(char *arg)
- {
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index f5083aa72eae..f1b7d68ac460 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -966,6 +966,8 @@ extern struct efi {
- 	unsigned long flags;
- } efi;
+-static efi_char16_t efi_dummy_name[6] = { 'D', 'U', 'M', 'M', 'Y', 0 };
++static const efi_char16_t efi_dummy_name[] = L"DUMMY";
  
-+extern struct mm_struct efi_mm;
-+
- static inline int
- efi_guidcmp (efi_guid_t left, efi_guid_t right)
+ static bool efi_no_storage_paranoia;
+ 
+@@ -105,7 +105,8 @@ early_param("efi_no_storage_paranoia", setup_storage_paranoia);
+ */
+ void efi_delete_dummy_variable(void)
  {
+-	efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
++	efi.set_variable((efi_char16_t *)efi_dummy_name,
++			 &EFI_DUMMY_GUID,
+ 			 EFI_VARIABLE_NON_VOLATILE |
+ 			 EFI_VARIABLE_BOOTSERVICE_ACCESS |
+ 			 EFI_VARIABLE_RUNTIME_ACCESS,
+@@ -182,7 +183,8 @@ efi_status_t efi_query_variable_store(u32 attributes, unsigned long size,
+ 		if (!dummy)
+ 			return EFI_OUT_OF_RESOURCES;
+ 
+-		status = efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
++		status = efi.set_variable((efi_char16_t *)efi_dummy_name,
++					  &EFI_DUMMY_GUID,
+ 					  EFI_VARIABLE_NON_VOLATILE |
+ 					  EFI_VARIABLE_BOOTSERVICE_ACCESS |
+ 					  EFI_VARIABLE_RUNTIME_ACCESS,
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index 7b3ba40f0745..a34e9290a699 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -9,7 +9,7 @@ cflags-$(CONFIG_X86_32)		:= -march=i386
+ cflags-$(CONFIG_X86_64)		:= -mcmodel=small
+ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ -O2 \
+ 				   -fPIC -fno-strict-aliasing -mno-red-zone \
+-				   -mno-mmx -mno-sse
++				   -mno-mmx -mno-sse -fshort-wchar
+ 
+ cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS)) -fpie
+ cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) \
+diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
+index 959777ec8a77..8f07eb414c00 100644
+--- a/drivers/firmware/efi/libstub/secureboot.c
++++ b/drivers/firmware/efi/libstub/secureboot.c
+@@ -16,18 +16,12 @@
+ 
+ /* BIOS variables */
+ static const efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
+-static const efi_char16_t efi_SecureBoot_name[] = {
+-	'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0
+-};
+-static const efi_char16_t efi_SetupMode_name[] = {
+-	'S', 'e', 't', 'u', 'p', 'M', 'o', 'd', 'e', 0
+-};
++static const efi_char16_t efi_SecureBoot_name[] = L"SecureBoot";
++static const efi_char16_t efi_SetupMode_name[] = L"SetupMode";
+ 
+ /* SHIM variables */
+ static const efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
+-static efi_char16_t const shim_MokSBState_name[] = {
+-	'M', 'o', 'k', 'S', 'B', 'S', 't', 'a', 't', 'e', 0
+-};
++static const efi_char16_t shim_MokSBState_name[] = L"MokSBState";
+ 
+ #define get_efi_var(name, vendor, ...) \
+ 	efi_call_runtime(get_variable, \
+diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
+index da661bf8cb96..2298560cea72 100644
+--- a/drivers/firmware/efi/libstub/tpm.c
++++ b/drivers/firmware/efi/libstub/tpm.c
+@@ -16,11 +16,8 @@
+ #include "efistub.h"
+ 
+ #ifdef CONFIG_RESET_ATTACK_MITIGATION
+-static const efi_char16_t efi_MemoryOverWriteRequest_name[] = {
+-	'M', 'e', 'm', 'o', 'r', 'y', 'O', 'v', 'e', 'r', 'w', 'r', 'i', 't',
+-	'e', 'R', 'e', 'q', 'u', 'e', 's', 't', 'C', 'o', 'n', 't', 'r', 'o',
+-	'l', 0
+-};
++static const efi_char16_t efi_MemoryOverWriteRequest_name[] =
++	L"MemoryOverwriteRequestControl";
+ 
+ #define MEMORY_ONLY_RESET_CONTROL_GUID \
+ 	EFI_GUID(0xe20939be, 0x32d4, 0x41be, 0xa1, 0x50, 0x89, 0x7f, 0x85, 0xd4, 0x98, 0x29)
 -- 
 2.15.1
