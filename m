@@ -1,93 +1,215 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 4/5] efi/esrt: fix handling of early ESRT table mapping
-Date: Mon, 12 Mar 2018 08:44:59 +0000
-Message-ID: <20180312084500.10764-5-ard.biesheuvel@linaro.org>
+Subject: [PATCH 3/5] x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
+Date: Mon, 12 Mar 2018 08:44:58 +0000
+Message-ID: <20180312084500.10764-4-ard.biesheuvel@linaro.org>
 References: <20180312084500.10764-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180312084500.10764-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>
+Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S . Tsirkin" <mst@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-As reported by Tyler, efi_esrt_init() will return without releasing the
-ESRT table header mapping if it encounters a table with an unexpected
-version. Replacing the 'return' with 'goto err_memunmap' would fix this
-particular occurrence, but, as it turns out, the code is rather peculiar
-to begin with:
-- it never uses the header mapping after memcpy()'ing out its contents,
-- it maps and unmaps the entire table without ever looking at the
-  contents.
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-So let's refactor this code to unmap the table header right after the
-memcpy() so we can get rid of the error handling path altogether, and
-drop the second mapping entirely.
+Use helper function efi_switch_mm() to switch to/from efi_mm when
+invoking any UEFI runtime services.
 
-Cc: Peter Jones <pjones@redhat.com>
-Reported-by: Tyler Baicar <tbaicar@codeaurora.org>
+Likewise, we need to switch back to previous mm (mm context stolen
+by efi_mm) after the above calls return successfully. We can use
+efi_switch_mm() helper function only with x86_64 kernel and
+"efi=old_map" disabled because, x86_32 and efi=old_map do not use
+efi_pgd, rather they use swapper_pg_dir.
+
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: "Lee, Chun-Yi" <jlee@suse.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Tony Luck <tony.luck@intel.com>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Michael S. Tsirkin <mst@redhat.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+Tested-by: Bhupesh Sharma <bhsharma@redhat.com>
+Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+[ardb: add #include of sched/task.h for task_lock/_unlock]
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/esrt.c | 17 ++++-------------
- 1 file changed, 4 insertions(+), 13 deletions(-)
+ arch/x86/include/asm/efi.h           | 25 +++++++++-------------
+ arch/x86/platform/efi/efi_64.c       | 41 +++++++++++++++++++-----------------
+ arch/x86/platform/efi/efi_thunk_64.S |  2 +-
+ 3 files changed, 33 insertions(+), 35 deletions(-)
 
-diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
-index c47e0c6ec00f..1ab80e06e7c5 100644
---- a/drivers/firmware/efi/esrt.c
-+++ b/drivers/firmware/efi/esrt.c
-@@ -279,6 +279,7 @@ void __init efi_esrt_init(void)
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index c62443fa7d0a..cec5fae23eb3 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -70,14 +70,13 @@ extern asmlinkage u64 efi_call(void *fp, ...);
+ #define efi_call_phys(f, args...)		efi_call((f), args)
+ 
+ /*
+- * Scratch space used for switching the pagetable in the EFI stub
++ * struct efi_scratch - Scratch space used while switching to/from efi_mm
++ * @phys_stack: stack used during EFI Mixed Mode
++ * @prev_mm:    store/restore stolen mm_struct while switching to/from efi_mm
+  */
+ struct efi_scratch {
+-	u64	r15;
+-	u64	prev_cr3;
+-	pgd_t	*efi_pgt;
+-	bool	use_pgd;
+-	u64	phys_stack;
++	u64			phys_stack;
++	struct mm_struct	*prev_mm;
+ } __packed;
+ 
+ #define arch_efi_call_virt_setup()					\
+@@ -87,11 +86,8 @@ struct efi_scratch {
+ 	__kernel_fpu_begin();						\
+ 	firmware_restrict_branch_speculation_start();			\
+ 									\
+-	if (efi_scratch.use_pgd) {					\
+-		efi_scratch.prev_cr3 = __read_cr3();			\
+-		write_cr3((unsigned long)efi_scratch.efi_pgt);		\
+-		__flush_tlb_all();					\
+-	}								\
++	if (!efi_enabled(EFI_OLD_MEMMAP))				\
++		efi_switch_mm(&efi_mm);					\
+ })
+ 
+ #define arch_efi_call_virt(p, f, args...)				\
+@@ -99,10 +95,8 @@ struct efi_scratch {
+ 
+ #define arch_efi_call_virt_teardown()					\
+ ({									\
+-	if (efi_scratch.use_pgd) {					\
+-		write_cr3(efi_scratch.prev_cr3);			\
+-		__flush_tlb_all();					\
+-	}								\
++	if (!efi_enabled(EFI_OLD_MEMMAP))				\
++		efi_switch_mm(efi_scratch.prev_mm);			\
+ 									\
+ 	firmware_restrict_branch_speculation_end();			\
+ 	__kernel_fpu_end();						\
+@@ -145,6 +139,7 @@ extern void __init efi_dump_pagetable(void);
+ extern void __init efi_apply_memmap_quirks(void);
+ extern int __init efi_reuse_config(u64 tables, int nr_tables);
+ extern void efi_delete_dummy_variable(void);
++extern void efi_switch_mm(struct mm_struct *mm);
+ 
+ struct efi_setup_data {
+ 	u64 fw_vendor;
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 8881e601c32d..229af5bbecb8 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -33,6 +33,7 @@
+ #include <linux/slab.h>
+ #include <linux/ucs2_string.h>
+ #include <linux/mem_encrypt.h>
++#include <linux/sched/task.h>
+ 
+ #include <asm/setup.h>
+ #include <asm/page.h>
+@@ -81,9 +82,8 @@ pgd_t * __init efi_call_phys_prolog(void)
+ 	int n_pgds, i, j;
+ 
+ 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
+-		save_pgd = (pgd_t *)__read_cr3();
+-		write_cr3((unsigned long)efi_scratch.efi_pgt);
+-		goto out;
++		efi_switch_mm(&efi_mm);
++		return NULL;
  	}
  
- 	memcpy(&tmpesrt, va, sizeof(tmpesrt));
-+	early_memunmap(va, size);
+ 	early_code_mapping_set_exec(1);
+@@ -155,8 +155,7 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
+ 	pud_t *pud;
  
- 	if (tmpesrt.fw_resource_version == 1) {
- 		entry_size = sizeof (*v1_entries);
-@@ -291,7 +292,7 @@ void __init efi_esrt_init(void)
- 	if (tmpesrt.fw_resource_count > 0 && max - size < entry_size) {
- 		pr_err("ESRT memory map entry can only hold the header. (max: %zu size: %zu)\n",
- 		       max - size, entry_size);
--		goto err_memunmap;
-+		return;
+ 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
+-		write_cr3((unsigned long)save_pgd);
+-		__flush_tlb_all();
++		efi_switch_mm(efi_scratch.prev_mm);
+ 		return;
  	}
  
+@@ -344,13 +343,6 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	if (efi_enabled(EFI_OLD_MEMMAP))
+ 		return 0;
+ 
+-	/*
+-	 * Since the PGD is encrypted, set the encryption mask so that when
+-	 * this value is loaded into cr3 the PGD will be decrypted during
+-	 * the pagetable walk.
+-	 */
+-	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(pgd);
+-
  	/*
-@@ -304,7 +305,7 @@ void __init efi_esrt_init(void)
- 	if (tmpesrt.fw_resource_count > 128) {
- 		pr_err("ESRT says fw_resource_count has very large value %d.\n",
- 		       tmpesrt.fw_resource_count);
--		goto err_memunmap;
-+		return;
+ 	 * It can happen that the physical address of new_memmap lands in memory
+ 	 * which is not mapped in the EFI page table. Therefore we need to go
+@@ -364,8 +356,6 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 		return 1;
  	}
  
+-	efi_scratch.use_pgd = true;
+-
  	/*
-@@ -315,18 +316,10 @@ void __init efi_esrt_init(void)
- 	if (max < size + entries_size) {
- 		pr_err("ESRT does not fit on single memory map entry (size: %zu max: %zu)\n",
- 		       size, max);
--		goto err_memunmap;
-+		return;
- 	}
- 
--	/* remap it with our (plausible) new pages */
--	early_memunmap(va, size);
- 	size += entries_size;
--	va = early_memremap(efi.esrt, size);
--	if (!va) {
--		pr_err("early_memremap(%p, %zu) failed.\n", (void *)efi.esrt,
--		       size);
--		return;
--	}
- 
- 	esrt_data = (phys_addr_t)efi.esrt;
- 	esrt_data_size = size;
-@@ -336,8 +329,6 @@ void __init efi_esrt_init(void)
- 	efi_mem_reserve(esrt_data, esrt_data_size);
- 
- 	pr_debug("esrt-init: loaded.\n");
--err_memunmap:
--	early_memunmap(va, size);
+ 	 * Certain firmware versions are way too sentimential and still believe
+ 	 * they are exclusive and unquestionable owners of the first physical page,
+@@ -624,6 +614,22 @@ void __init efi_dump_pagetable(void)
+ #endif
  }
  
- static int __init register_entries(void)
++/*
++ * Makes the calling thread switch to/from efi_mm context. Can be used
++ * for SetVirtualAddressMap() i.e. current->active_mm == init_mm as well
++ * as during efi runtime calls i.e current->active_mm == current_mm.
++ * We are not mm_dropping()/mm_grabbing() any mm, because we are not
++ * losing/creating any references.
++ */
++void efi_switch_mm(struct mm_struct *mm)
++{
++	task_lock(current);
++	efi_scratch.prev_mm = current->active_mm;
++	current->active_mm = mm;
++	switch_mm(efi_scratch.prev_mm, mm, NULL);
++	task_unlock(current);
++}
++
+ #ifdef CONFIG_EFI_MIXED
+ extern efi_status_t efi64_thunk(u32, ...);
+ 
+@@ -677,16 +683,13 @@ efi_status_t efi_thunk_set_virtual_address_map(
+ 	efi_sync_low_kernel_mappings();
+ 	local_irq_save(flags);
+ 
+-	efi_scratch.prev_cr3 = __read_cr3();
+-	write_cr3((unsigned long)efi_scratch.efi_pgt);
+-	__flush_tlb_all();
++	efi_switch_mm(&efi_mm);
+ 
+ 	func = (u32)(unsigned long)phys_set_virtual_address_map;
+ 	status = efi64_thunk(func, memory_map_size, descriptor_size,
+ 			     descriptor_version, virtual_map);
+ 
+-	write_cr3(efi_scratch.prev_cr3);
+-	__flush_tlb_all();
++	efi_switch_mm(efi_scratch.prev_mm);
+ 	local_irq_restore(flags);
+ 
+ 	return status;
+diff --git a/arch/x86/platform/efi/efi_thunk_64.S b/arch/x86/platform/efi/efi_thunk_64.S
+index 189b218da87c..46c58b08739c 100644
+--- a/arch/x86/platform/efi/efi_thunk_64.S
++++ b/arch/x86/platform/efi/efi_thunk_64.S
+@@ -33,7 +33,7 @@ ENTRY(efi64_thunk)
+ 	 * Switch to 1:1 mapped 32-bit stack pointer.
+ 	 */
+ 	movq	%rsp, efi_saved_sp(%rip)
+-	movq	efi_scratch+25(%rip), %rsp
++	movq	efi_scratch(%rip), %rsp
+ 
+ 	/*
+ 	 * Calculate the physical address of the kernel text.
 -- 
 2.15.1
