@@ -1,119 +1,93 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 2/5] x86/efi: Replace efi_pgd with efi_mm.pgd
-Date: Mon, 12 Mar 2018 08:44:57 +0000
-Message-ID: <20180312084500.10764-3-ard.biesheuvel@linaro.org>
+Subject: [PATCH 4/5] efi/esrt: fix handling of early ESRT table mapping
+Date: Mon, 12 Mar 2018 08:44:59 +0000
+Message-ID: <20180312084500.10764-5-ard.biesheuvel@linaro.org>
 References: <20180312084500.10764-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180312084500.10764-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Andy Lutomirski <luto@kernel.org>, "Michael S . Tsirkin" <mst@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+As reported by Tyler, efi_esrt_init() will return without releasing the
+ESRT table header mapping if it encounters a table with an unexpected
+version. Replacing the 'return' with 'goto err_memunmap' would fix this
+particular occurrence, but, as it turns out, the code is rather peculiar
+to begin with:
+- it never uses the header mapping after memcpy()'ing out its contents,
+- it maps and unmaps the entire table without ever looking at the
+  contents.
 
-Since the previous patch added support for efi_mm, let's handle efi_pgd
-through efi_mm and remove global variable efi_pgd.
+So let's refactor this code to unmap the table header right after the
+memcpy() so we can get rid of the error handling path altogether, and
+drop the second mapping entirely.
 
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: "Lee, Chun-Yi" <jlee@suse.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Tony Luck <tony.luck@intel.com>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Michael S. Tsirkin <mst@redhat.com>
-Cc: Bhupesh Sharma <bhsharma@redhat.com>
-Cc: Ricardo Neri <ricardo.neri@intel.com>
-Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-Tested-by: Bhupesh Sharma <bhsharma@redhat.com>
-Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Jones <pjones@redhat.com>
+Reported-by: Tyler Baicar <tbaicar@codeaurora.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/platform/efi/efi_64.c | 17 ++++++++---------
- 1 file changed, 8 insertions(+), 9 deletions(-)
+ drivers/firmware/efi/esrt.c | 17 ++++-------------
+ 1 file changed, 4 insertions(+), 13 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 0045efe9947b..8881e601c32d 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -190,8 +190,6 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 	early_code_mapping_set_exec(0);
- }
- 
--static pgd_t *efi_pgd;
--
- /*
-  * We need our own copy of the higher levels of the page tables
-  * because we want to avoid inserting EFI region mappings (EFI_VA_END
-@@ -203,7 +201,7 @@ static pgd_t *efi_pgd;
-  */
- int __init efi_alloc_page_tables(void)
- {
--	pgd_t *pgd;
-+	pgd_t *pgd, *efi_pgd;
- 	p4d_t *p4d;
- 	pud_t *pud;
- 	gfp_t gfp_mask;
-@@ -231,6 +229,7 @@ int __init efi_alloc_page_tables(void)
- 		return -ENOMEM;
+diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+index c47e0c6ec00f..1ab80e06e7c5 100644
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -279,6 +279,7 @@ void __init efi_esrt_init(void)
  	}
  
-+	efi_mm.pgd = efi_pgd;
- 	mm_init_cpumask(&efi_mm);
- 	init_new_context(NULL, &efi_mm);
+ 	memcpy(&tmpesrt, va, sizeof(tmpesrt));
++	early_memunmap(va, size);
  
-@@ -246,6 +245,7 @@ void efi_sync_low_kernel_mappings(void)
- 	pgd_t *pgd_k, *pgd_efi;
- 	p4d_t *p4d_k, *p4d_efi;
- 	pud_t *pud_k, *pud_efi;
-+	pgd_t *efi_pgd = efi_mm.pgd;
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		return;
-@@ -339,7 +339,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	unsigned long pfn, text, pf;
- 	struct page *page;
- 	unsigned npages;
--	pgd_t *pgd;
-+	pgd_t *pgd = efi_mm.pgd;
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		return 0;
-@@ -349,8 +349,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	 * this value is loaded into cr3 the PGD will be decrypted during
- 	 * the pagetable walk.
- 	 */
--	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(efi_pgd);
--	pgd = efi_pgd;
-+	efi_scratch.efi_pgt = (pgd_t *)__sme_pa(pgd);
+ 	if (tmpesrt.fw_resource_version == 1) {
+ 		entry_size = sizeof (*v1_entries);
+@@ -291,7 +292,7 @@ void __init efi_esrt_init(void)
+ 	if (tmpesrt.fw_resource_count > 0 && max - size < entry_size) {
+ 		pr_err("ESRT memory map entry can only hold the header. (max: %zu size: %zu)\n",
+ 		       max - size, entry_size);
+-		goto err_memunmap;
++		return;
+ 	}
  
  	/*
- 	 * It can happen that the physical address of new_memmap lands in memory
-@@ -420,7 +419,7 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
- {
- 	unsigned long flags = _PAGE_RW;
- 	unsigned long pfn;
--	pgd_t *pgd = efi_pgd;
-+	pgd_t *pgd = efi_mm.pgd;
+@@ -304,7 +305,7 @@ void __init efi_esrt_init(void)
+ 	if (tmpesrt.fw_resource_count > 128) {
+ 		pr_err("ESRT says fw_resource_count has very large value %d.\n",
+ 		       tmpesrt.fw_resource_count);
+-		goto err_memunmap;
++		return;
+ 	}
  
- 	if (!(md->attribute & EFI_MEMORY_WB))
- 		flags |= _PAGE_PCD;
-@@ -524,7 +523,7 @@ void __init parse_efi_setup(u64 phys_addr, u32 data_len)
- static int __init efi_update_mappings(efi_memory_desc_t *md, unsigned long pf)
- {
- 	unsigned long pfn;
--	pgd_t *pgd = efi_pgd;
-+	pgd_t *pgd = efi_mm.pgd;
- 	int err1, err2;
+ 	/*
+@@ -315,18 +316,10 @@ void __init efi_esrt_init(void)
+ 	if (max < size + entries_size) {
+ 		pr_err("ESRT does not fit on single memory map entry (size: %zu max: %zu)\n",
+ 		       size, max);
+-		goto err_memunmap;
++		return;
+ 	}
  
- 	/* Update the 1:1 mapping */
-@@ -621,7 +620,7 @@ void __init efi_dump_pagetable(void)
- 	if (efi_enabled(EFI_OLD_MEMMAP))
- 		ptdump_walk_pgd_level(NULL, swapper_pg_dir);
- 	else
--		ptdump_walk_pgd_level(NULL, efi_pgd);
-+		ptdump_walk_pgd_level(NULL, efi_mm.pgd);
- #endif
+-	/* remap it with our (plausible) new pages */
+-	early_memunmap(va, size);
+ 	size += entries_size;
+-	va = early_memremap(efi.esrt, size);
+-	if (!va) {
+-		pr_err("early_memremap(%p, %zu) failed.\n", (void *)efi.esrt,
+-		       size);
+-		return;
+-	}
+ 
+ 	esrt_data = (phys_addr_t)efi.esrt;
+ 	esrt_data_size = size;
+@@ -336,8 +329,6 @@ void __init efi_esrt_init(void)
+ 	efi_mem_reserve(esrt_data, esrt_data_size);
+ 
+ 	pr_debug("esrt-init: loaded.\n");
+-err_memunmap:
+-	early_memunmap(va, size);
  }
  
+ static int __init register_entries(void)
 -- 
 2.15.1
