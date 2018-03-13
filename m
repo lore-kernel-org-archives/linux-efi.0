@@ -1,171 +1,47 @@
 From: "Lee, Chun-Yi" <jlee@suse.com>
-Subject: [PATCH 2/5] MODSIGN: print appropriate status message when getting UEFI certificates list
-Date: Tue, 13 Mar 2018 18:35:56 +0800
-Message-ID: <20180313103559.13032-3-jlee@suse.com>
-References: <20180313103559.13032-1-jlee@suse.com>
+Subject: [PATCH 0/5 v2] Using the hash in MOKx to blacklist kernel module
+Date: Tue, 13 Mar 2018 18:35:54 +0800
+Message-ID: <20180313103559.13032-1-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180313103559.13032-1-jlee@suse.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: David Howells <dhowells@redhat.com>
 Cc: linux-fs@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-When getting certificates list from UEFI variable, the original error
-message shows the state number from UEFI firmware. It's hard to be read
-by human. This patch changed the error message to show the appropriate
-string.
+This patch set is base on the efi-lock-down and keys-uefi branchs in
+David Howells's linux-fs git tree.
+    https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=keys-uefi
 
-The message will be showed as:
+The main purpose is using the MOKx to blacklist kernel module.
 
-[    0.788529] MODSIGN: Couldn't get UEFI MokListRT: EFI_NOT_FOUND
-[    0.788537] MODSIGN: Couldn't get UEFI MokListXRT: EFI_NOT_FOUND
+As the MOK (Machine Owner Key), MOKx is a EFI boot time variable which
+is maintained by shim boot loader. We can enroll the hash of blacklisted
+kernel module (with or without signature) to MOKx by mokutil. Kernel loads
+the hash from MOKx to blacklist keyring when booting. Kernel will prevent
+to load the kernel module when its hash be found in blacklist.
 
-Cc: David Howells <dhowells@redhat.com>
-Cc: Josh Boyer <jwboyer@fedoraproject.org>
-Cc: James Bottomley <James.Bottomley@HansenPartnership.com>
-Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
----
- certs/load_uefi.c   | 43 ++++++++++++++++++++++++++++++-------------
- include/linux/efi.h | 25 +++++++++++++++++++++++++
- 2 files changed, 55 insertions(+), 13 deletions(-)
+This function is useful to revoke a kernel module that it has exploit. Or
+revoking a kernel module that it was signed by a unsecure key.
 
-diff --git a/certs/load_uefi.c b/certs/load_uefi.c
-index d6de4d0..f2f372b 100644
---- a/certs/load_uefi.c
-+++ b/certs/load_uefi.c
-@@ -4,6 +4,7 @@
- #include <linux/err.h>
- #include <linux/efi.h>
- #include <linux/slab.h>
-+#include <linux/ucs2_string.h>
- #include <keys/asymmetric-type.h>
- #include <keys/system_keyring.h>
- #include "internal.h"
-@@ -32,6 +33,24 @@ static __init bool uefi_check_ignore_db(void)
- 	return status == EFI_SUCCESS;
- }
- 
-+static __init void print_get_fail(efi_char16_t *char16_str, efi_status_t status)
-+{
-+	char *utf8_str;
-+	unsigned long utf8_size;
-+
-+	if (!char16_str)
-+		return;
-+	utf8_size = ucs2_utf8size(char16_str) + 1;
-+	utf8_str = kmalloc(utf8_size, GFP_KERNEL);
-+	if (!utf8_str)
-+		return;
-+	ucs2_as_utf8(utf8_str, char16_str, utf8_size);
-+
-+	pr_info("MODSIGN: Couldn't get UEFI %s: %s\n",
-+		utf8_str, efi_status_to_str(status));
-+	kfree(utf8_str);
-+}
-+
- /*
-  * Get a certificate list blob from the named EFI variable.
-  */
-@@ -45,25 +64,29 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
- 
- 	status = efi.get_variable(name, guid, NULL, &lsize, &tmpdb);
- 	if (status != EFI_BUFFER_TOO_SMALL) {
--		pr_err("Couldn't get size: 0x%lx\n", status);
--		return NULL;
-+		if (status != EFI_NOT_FOUND)
-+			pr_err("Couldn't get size: 0x%lx\n", status);
-+		goto err;
- 	}
- 
- 	db = kmalloc(lsize, GFP_KERNEL);
- 	if (!db) {
- 		pr_err("Couldn't allocate memory for uefi cert list\n");
--		return NULL;
-+		goto err;
- 	}
- 
- 	status = efi.get_variable(name, guid, NULL, &lsize, db);
- 	if (status != EFI_SUCCESS) {
- 		kfree(db);
- 		pr_err("Error reading db var: 0x%lx\n", status);
--		return NULL;
-+		goto err;
- 	}
- 
- 	*size = lsize;
- 	return db;
-+err:
-+	print_get_fail(name, status);
-+	return NULL;
- }
- 
- /*
-@@ -153,9 +176,7 @@ static int __init load_uefi_certs(void)
- 	 */
- 	if (!uefi_check_ignore_db()) {
- 		db = get_cert_list(L"db", &secure_var, &dbsize);
--		if (!db) {
--			pr_err("MODSIGN: Couldn't get UEFI db list\n");
--		} else {
-+		if (db) {
- 			rc = parse_efi_signature_list("UEFI:db",
- 						      db, dbsize, get_handler_for_db);
- 			if (rc)
-@@ -165,9 +186,7 @@ static int __init load_uefi_certs(void)
- 	}
- 
- 	dbx = get_cert_list(L"dbx", &secure_var, &dbxsize);
--	if (!dbx) {
--		pr_info("MODSIGN: Couldn't get UEFI dbx list\n");
--	} else {
-+	if (dbx) {
- 		rc = parse_efi_signature_list("UEFI:dbx",
- 					      dbx, dbxsize,
- 					      get_handler_for_dbx);
-@@ -181,9 +200,7 @@ static int __init load_uefi_certs(void)
- 		return 0;
- 
- 	mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
--	if (!mok) {
--		pr_info("MODSIGN: Couldn't get UEFI MokListRT\n");
--	} else {
-+	if (mok) {
- 		rc = parse_efi_signature_list("UEFI:MokListRT",
- 					      mok, moksize, get_handler_for_db);
- 		if (rc)
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 2729d6f..c44946c 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1600,4 +1600,29 @@ struct linux_efi_random_seed {
- 	u8	bits[];
- };
- 
-+#define EFI_STATUS_STR(_status)				\
-+	case EFI_##_status:				\
-+		return "EFI_" __stringify(_status);	\
-+
-+static inline char *
-+efi_status_to_str(efi_status_t status)
-+{
-+	switch (status) {
-+	EFI_STATUS_STR(SUCCESS)
-+	EFI_STATUS_STR(LOAD_ERROR)
-+	EFI_STATUS_STR(INVALID_PARAMETER)
-+	EFI_STATUS_STR(UNSUPPORTED)
-+	EFI_STATUS_STR(BAD_BUFFER_SIZE)
-+	EFI_STATUS_STR(BUFFER_TOO_SMALL)
-+	EFI_STATUS_STR(NOT_READY)
-+	EFI_STATUS_STR(DEVICE_ERROR)
-+	EFI_STATUS_STR(WRITE_PROTECTED)
-+	EFI_STATUS_STR(OUT_OF_RESOURCES)
-+	EFI_STATUS_STR(NOT_FOUND)
-+	EFI_STATUS_STR(ABORTED)
-+	EFI_STATUS_STR(SECURITY_VIOLATION)
-+	}
-+
-+	return "";
-+}
- #endif /* _LINUX_EFI_H */
+Except MOKx, this patch set fixs another two issues: The MOK/MOKx should
+not be loaded when secure boot is disabled. And, modified error message
+prints out appropriate status string for reading by human being.
+
+v2:
+Chekcikng the attributes of db and mok before loading certificates.
+
+Lee, Chun-Yi (5):
+  MODSIGN: do not load mok when secure boot disabled
+  MODSIGN: print appropriate status message when getting UEFI
+    certificates list
+  MODSIGN: load blacklist from MOKx
+  MODSIGN: checking the blacklisted hash before loading a kernel module
+  MODSIGN: check the attributes of db and mok
+
+ certs/load_uefi.c       | 92 +++++++++++++++++++++++++++++++++++--------------
+ include/linux/efi.h     | 25 ++++++++++++++
+ kernel/module_signing.c | 62 +++++++++++++++++++++++++++++++--
+ 3 files changed, 152 insertions(+), 27 deletions(-)
+
 -- 
 2.10.2
