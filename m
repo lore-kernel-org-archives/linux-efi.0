@@ -1,47 +1,72 @@
 From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Subject: [PATCH 0/5 v2] Using the hash in MOKx to blacklist kernel module
-Date: Tue, 13 Mar 2018 18:37:58 +0800
-Message-ID: <20180313103803.13388-1-jlee@suse.com>
+Subject: [PATCH 1/5] MODSIGN: do not load mok when secure boot disabled
+Date: Tue, 13 Mar 2018 18:37:59 +0800
+Message-ID: <20180313103803.13388-2-jlee@suse.com>
+References: <20180313103803.13388-1-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180313103803.13388-1-jlee@suse.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: David Howells <dhowells@redhat.com>
-Cc: linux-fs@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>
+Cc: linux-fs@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Josh Boyer <jwboyer@fedoraproject.org>, James Bottomley <James.Bottomley@HansenPartnership.com>
 List-Id: linux-efi@vger.kernel.org
 
-This patch set is base on the efi-lock-down and keys-uefi branchs in
-David Howells's linux-fs git tree.
-    https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=keys-uefi
+The mok can not be trusted when the secure boot is disabled. Which
+means that the kernel embedded certificate is the only trusted key.
 
-The main purpose is using the MOKx to blacklist kernel module.
+Due to db/dbx are authenticated variables, they needs manufacturer's
+KEK for update. So db/dbx are secure when secureboot disabled.
 
-As the MOK (Machine Owner Key), MOKx is a EFI boot time variable which
-is maintained by shim boot loader. We can enroll the hash of blacklisted
-kernel module (with or without signature) to MOKx by mokutil. Kernel loads
-the hash from MOKx to blacklist keyring when booting. Kernel will prevent
-to load the kernel module when its hash be found in blacklist.
+Cc: David Howells <dhowells@redhat.com>
+Cc: Josh Boyer <jwboyer@fedoraproject.org>
+Cc: James Bottomley <James.Bottomley@HansenPartnership.com>
+Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
+---
+ certs/load_uefi.c | 26 +++++++++++++++-----------
+ 1 file changed, 15 insertions(+), 11 deletions(-)
 
-This function is useful to revoke a kernel module that it has exploit. Or
-revoking a kernel module that it was signed by a unsecure key.
-
-Except MOKx, this patch set fixs another two issues: The MOK/MOKx should
-not be loaded when secure boot is disabled. And, modified error message
-prints out appropriate status string for reading by human being.
-
-v2:
-Chekcikng the attributes of db and mok before loading certificates.
-
-Lee, Chun-Yi (5):
-  MODSIGN: do not load mok when secure boot disabled
-  MODSIGN: print appropriate status message when getting UEFI
-    certificates list
-  MODSIGN: load blacklist from MOKx
-  MODSIGN: checking the blacklisted hash before loading a kernel module
-  MODSIGN: check the attributes of db and mok
-
- certs/load_uefi.c       | 92 +++++++++++++++++++++++++++++++++++--------------
- include/linux/efi.h     | 25 ++++++++++++++
- kernel/module_signing.c | 62 +++++++++++++++++++++++++++++++--
- 3 files changed, 152 insertions(+), 27 deletions(-)
-
+diff --git a/certs/load_uefi.c b/certs/load_uefi.c
+index 3d88459..d6de4d0 100644
+--- a/certs/load_uefi.c
++++ b/certs/load_uefi.c
+@@ -164,17 +164,6 @@ static int __init load_uefi_certs(void)
+ 		}
+ 	}
+ 
+-	mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
+-	if (!mok) {
+-		pr_info("MODSIGN: Couldn't get UEFI MokListRT\n");
+-	} else {
+-		rc = parse_efi_signature_list("UEFI:MokListRT",
+-					      mok, moksize, get_handler_for_db);
+-		if (rc)
+-			pr_err("Couldn't parse MokListRT signatures: %d\n", rc);
+-		kfree(mok);
+-	}
+-
+ 	dbx = get_cert_list(L"dbx", &secure_var, &dbxsize);
+ 	if (!dbx) {
+ 		pr_info("MODSIGN: Couldn't get UEFI dbx list\n");
+@@ -187,6 +176,21 @@ static int __init load_uefi_certs(void)
+ 		kfree(dbx);
+ 	}
+ 
++	/* the MOK can not be trusted when secure boot is disabled */
++	if (!efi_enabled(EFI_SECURE_BOOT))
++		return 0;
++
++	mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
++	if (!mok) {
++		pr_info("MODSIGN: Couldn't get UEFI MokListRT\n");
++	} else {
++		rc = parse_efi_signature_list("UEFI:MokListRT",
++					      mok, moksize, get_handler_for_db);
++		if (rc)
++			pr_err("Couldn't parse MokListRT signatures: %d\n", rc);
++		kfree(mok);
++	}
++
+ 	return rc;
+ }
+ late_initcall(load_uefi_certs);
 -- 
 2.10.2
