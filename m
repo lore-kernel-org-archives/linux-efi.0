@@ -1,59 +1,171 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: Regression from efi: call get_event_log before ExitBootServices
-Date: Tue, 13 Mar 2018 10:30:47 +0000
-Message-ID: <CAKv+Gu_EN2djoJQQ_QAxUQenD5=kKtyS8TFKg7cZaz+6xsbDRg@mail.gmail.com>
-References: <01000161fc0b4755-df0621f4-ab5d-479a-b425-adf98427a308-000000@email.amazonses.com>
- <29c1640a-cf19-ca19-7de9-96f202edfb5a@redhat.com> <CA+zpnLebtbjbA-Jg+RvMOqwDE5R--9V3hTwMk95Br4vM1LgBjQ@mail.gmail.com>
- <010001620bafa06b-41525407-603e-40a9-ba11-6033b2f5dcc7-000000@email.amazonses.com>
- <CA+zpnLdmg30Beg+uUJNgBQ5gbjXuJ0uVhyzCgf6m7xbx2yARBg@mail.gmail.com>
- <CAKv+Gu-KPU+kQ0z3jJ+CcgNPq3PuqjF_CCB_2LR_5VoYaynTJw@mail.gmail.com>
- <010001621a9e5069-0b1a6328-97e4-4396-9438-b90f5b8c82a4-000000@email.amazonses.com>
- <CAKv+Gu8+x=5nU9MmYQKKc=3fhMXoUYjGSjYYfhjaFtdGG2NkaA@mail.gmail.com>
- <010001621b287e42-58955302-cc14-4212-b7b0-e6e358633dab-000000@email.amazonses.com>
- <CAKv+Gu_hLR3YNZF=taLM++LdfqmPpGG+vR1O8NfKNP00PNeiYA@mail.gmail.com>
- <CA+zpnLdxGT08citakzZwZsSQAFeTJw-j6S7udHk6-sEJ9R3xpA@mail.gmail.com>
- <010001621b7ce5a3-b80c55b8-be68-4b44-ab52-4949e8ddb8d0-000000@email.amazonses.com>
- <CA+zpnLf=JDUxyorH7yP=08FD_u=+UoQ6ubsKyVLD+4w9raYAKQ@mail.gmail.com>
- <bf12c497-db2a-f1f0-efc3-07e6a6ee9daa@redhat.com> <CAKv+Gu9_rYv_XocRwTLdH+P7dVq+3=CQRJ9O9kKyry_=Ekz0aQ@mail.gmail.com>
- <CA+zpnLeyu4MQA2mgdLkEscTx9cfUp4Qcw-0cgfRa4cdLCRVwkg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: "Lee, Chun-Yi" <jlee@suse.com>
+Subject: [PATCH 2/5] MODSIGN: print appropriate status message when getting UEFI certificates list
+Date: Tue, 13 Mar 2018 18:35:56 +0800
+Message-ID: <20180313103559.13032-3-jlee@suse.com>
+References: <20180313103559.13032-1-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CA+zpnLeyu4MQA2mgdLkEscTx9cfUp4Qcw-0cgfRa4cdLCRVwkg@mail.gmail.com>
+In-Reply-To: <20180313103559.13032-1-jlee@suse.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Thiebaud Weksteen <tweek@google.com>
-Cc: Hans de Goede <hdegoede@redhat.com>, Jeremy Cline <jeremy@jcline.org>, Javier Martinez Canillas <javierm@redhat.com>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: David Howells <dhowells@redhat.com>
+Cc: linux-fs@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 13 March 2018 at 10:23, Thiebaud Weksteen <tweek@google.com> wrote:
-> On Tue, Mar 13, 2018 at 8:59 AM Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> wrote:
->
->> On 13 March 2018 at 07:47, Hans de Goede <hdegoede@redhat.com> wrote:
-...
->> > Could the problem perhaps be that the new code for the TPM event-log is
->> > missing some handling to deal with running on a 32 bit firmware? I know
-> the
->> > rest of the kernel has special code to deal with this.
->> >
->
-> Yes, that was my guess as well.
->
->> That is a very good point, and I missed that this is a 64-bit kernel
->> running on 32-bit UEFI.
->
->> The TPM code does use efi_call_proto() directly, and now I am thinking
->> it is perhaps the allocate_pages() call that simply only initializes
->> the low 32-bits of log_tbl.
->
-> That make sense. Would you know what happens to the arguments of the
-> function in this case? (I'm thinking &log_location ?)
+When getting certificates list from UEFI variable, the original error
+message shows the state number from UEFI firmware. It's hard to be read
+by human. This patch changed the error message to show the appropriate
+string.
 
-log_location and log_last_entry are always 64-bit quantities, and
-efi_bool_t is always u8, so that shouldn't matter.
+The message will be showed as:
 
-> Would it be safer to skip the code completely on EFI_MIXED systems?
->
+[    0.788529] MODSIGN: Couldn't get UEFI MokListRT: EFI_NOT_FOUND
+[    0.788537] MODSIGN: Couldn't get UEFI MokListXRT: EFI_NOT_FOUND
 
-Obviously, but I would like to avoid that if possible. Let's see first
-if we've pinpointed it now.
+Cc: David Howells <dhowells@redhat.com>
+Cc: Josh Boyer <jwboyer@fedoraproject.org>
+Cc: James Bottomley <James.Bottomley@HansenPartnership.com>
+Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
+---
+ certs/load_uefi.c   | 43 ++++++++++++++++++++++++++++++-------------
+ include/linux/efi.h | 25 +++++++++++++++++++++++++
+ 2 files changed, 55 insertions(+), 13 deletions(-)
+
+diff --git a/certs/load_uefi.c b/certs/load_uefi.c
+index d6de4d0..f2f372b 100644
+--- a/certs/load_uefi.c
++++ b/certs/load_uefi.c
+@@ -4,6 +4,7 @@
+ #include <linux/err.h>
+ #include <linux/efi.h>
+ #include <linux/slab.h>
++#include <linux/ucs2_string.h>
+ #include <keys/asymmetric-type.h>
+ #include <keys/system_keyring.h>
+ #include "internal.h"
+@@ -32,6 +33,24 @@ static __init bool uefi_check_ignore_db(void)
+ 	return status == EFI_SUCCESS;
+ }
+ 
++static __init void print_get_fail(efi_char16_t *char16_str, efi_status_t status)
++{
++	char *utf8_str;
++	unsigned long utf8_size;
++
++	if (!char16_str)
++		return;
++	utf8_size = ucs2_utf8size(char16_str) + 1;
++	utf8_str = kmalloc(utf8_size, GFP_KERNEL);
++	if (!utf8_str)
++		return;
++	ucs2_as_utf8(utf8_str, char16_str, utf8_size);
++
++	pr_info("MODSIGN: Couldn't get UEFI %s: %s\n",
++		utf8_str, efi_status_to_str(status));
++	kfree(utf8_str);
++}
++
+ /*
+  * Get a certificate list blob from the named EFI variable.
+  */
+@@ -45,25 +64,29 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
+ 
+ 	status = efi.get_variable(name, guid, NULL, &lsize, &tmpdb);
+ 	if (status != EFI_BUFFER_TOO_SMALL) {
+-		pr_err("Couldn't get size: 0x%lx\n", status);
+-		return NULL;
++		if (status != EFI_NOT_FOUND)
++			pr_err("Couldn't get size: 0x%lx\n", status);
++		goto err;
+ 	}
+ 
+ 	db = kmalloc(lsize, GFP_KERNEL);
+ 	if (!db) {
+ 		pr_err("Couldn't allocate memory for uefi cert list\n");
+-		return NULL;
++		goto err;
+ 	}
+ 
+ 	status = efi.get_variable(name, guid, NULL, &lsize, db);
+ 	if (status != EFI_SUCCESS) {
+ 		kfree(db);
+ 		pr_err("Error reading db var: 0x%lx\n", status);
+-		return NULL;
++		goto err;
+ 	}
+ 
+ 	*size = lsize;
+ 	return db;
++err:
++	print_get_fail(name, status);
++	return NULL;
+ }
+ 
+ /*
+@@ -153,9 +176,7 @@ static int __init load_uefi_certs(void)
+ 	 */
+ 	if (!uefi_check_ignore_db()) {
+ 		db = get_cert_list(L"db", &secure_var, &dbsize);
+-		if (!db) {
+-			pr_err("MODSIGN: Couldn't get UEFI db list\n");
+-		} else {
++		if (db) {
+ 			rc = parse_efi_signature_list("UEFI:db",
+ 						      db, dbsize, get_handler_for_db);
+ 			if (rc)
+@@ -165,9 +186,7 @@ static int __init load_uefi_certs(void)
+ 	}
+ 
+ 	dbx = get_cert_list(L"dbx", &secure_var, &dbxsize);
+-	if (!dbx) {
+-		pr_info("MODSIGN: Couldn't get UEFI dbx list\n");
+-	} else {
++	if (dbx) {
+ 		rc = parse_efi_signature_list("UEFI:dbx",
+ 					      dbx, dbxsize,
+ 					      get_handler_for_dbx);
+@@ -181,9 +200,7 @@ static int __init load_uefi_certs(void)
+ 		return 0;
+ 
+ 	mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
+-	if (!mok) {
+-		pr_info("MODSIGN: Couldn't get UEFI MokListRT\n");
+-	} else {
++	if (mok) {
+ 		rc = parse_efi_signature_list("UEFI:MokListRT",
+ 					      mok, moksize, get_handler_for_db);
+ 		if (rc)
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 2729d6f..c44946c 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1600,4 +1600,29 @@ struct linux_efi_random_seed {
+ 	u8	bits[];
+ };
+ 
++#define EFI_STATUS_STR(_status)				\
++	case EFI_##_status:				\
++		return "EFI_" __stringify(_status);	\
++
++static inline char *
++efi_status_to_str(efi_status_t status)
++{
++	switch (status) {
++	EFI_STATUS_STR(SUCCESS)
++	EFI_STATUS_STR(LOAD_ERROR)
++	EFI_STATUS_STR(INVALID_PARAMETER)
++	EFI_STATUS_STR(UNSUPPORTED)
++	EFI_STATUS_STR(BAD_BUFFER_SIZE)
++	EFI_STATUS_STR(BUFFER_TOO_SMALL)
++	EFI_STATUS_STR(NOT_READY)
++	EFI_STATUS_STR(DEVICE_ERROR)
++	EFI_STATUS_STR(WRITE_PROTECTED)
++	EFI_STATUS_STR(OUT_OF_RESOURCES)
++	EFI_STATUS_STR(NOT_FOUND)
++	EFI_STATUS_STR(ABORTED)
++	EFI_STATUS_STR(SECURITY_VIOLATION)
++	}
++
++	return "";
++}
+ #endif /* _LINUX_EFI_H */
+-- 
+2.10.2
