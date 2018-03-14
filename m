@@ -1,89 +1,44 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 1/5] MODSIGN: do not load mok when secure boot disabled
-Date: Tue, 13 Mar 2018 17:25:30 +0000
-Message-ID: <CAKv+Gu_1+8AOy4Fj_yD6iEJQvjw3hA4KW11agU+ozujxMNQHVA@mail.gmail.com>
-References: <20180313103803.13388-1-jlee@suse.com> <20180313103803.13388-2-jlee@suse.com>
+From: joeyli <jlee@suse.com>
+Subject: Re: [PATCH 2/5] MODSIGN: print appropriate status message when
+ getting UEFI certificates list
+Date: Wed, 14 Mar 2018 12:40:45 +0800
+Message-ID: <20180314044045.GC19718@linux-l9pv.suse>
+References: <20180313103559.13032-1-jlee@suse.com>
+ <20180313103559.13032-3-jlee@suse.com>
+ <1520961470.5360.18.camel@HansenPartnership.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180313103803.13388-2-jlee@suse.com>
+Content-Disposition: inline
+In-Reply-To: <1520961470.5360.18.camel@HansenPartnership.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Cc: David Howells <dhowells@redhat.com>, linux-fs@vger.kernel.org, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Lee, Chun-Yi" <jlee@suse.com>, Josh Boyer <jwboyer@fedoraproject.org>, James Bottomley <James.Bottomley@hansenpartnership.com>
+To: James Bottomley <James.Bottomley@HansenPartnership.com>
+Cc: David Howells <dhowells@redhat.com>, linux-fs@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 13 March 2018 at 10:37, Lee, Chun-Yi <joeyli.kernel@gmail.com> wrote:
-> The mok can not be trusted when the secure boot is disabled. Which
-> means that the kernel embedded certificate is the only trusted key.
->
-> Due to db/dbx are authenticated variables, they needs manufacturer's
-> KEK for update. So db/dbx are secure when secureboot disabled.
->
+Hi James,
 
-Did you consider the case where secure boot is not implemented? I
-don't think db/dbx are secure in that case, although perhaps it may
-not matter (a bit more information on the purpose of these patches and
-all the shim lingo etc would be appreciated)
+Thanks for your review.
 
-> Cc: David Howells <dhowells@redhat.com>
-> Cc: Josh Boyer <jwboyer@fedoraproject.org>
-> Cc: James Bottomley <James.Bottomley@HansenPartnership.com>
-> Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
-> ---
->  certs/load_uefi.c | 26 +++++++++++++++-----------
->  1 file changed, 15 insertions(+), 11 deletions(-)
->
-> diff --git a/certs/load_uefi.c b/certs/load_uefi.c
-> index 3d88459..d6de4d0 100644
-> --- a/certs/load_uefi.c
-> +++ b/certs/load_uefi.c
-> @@ -164,17 +164,6 @@ static int __init load_uefi_certs(void)
->                 }
->         }
->
-> -       mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
+On Tue, Mar 13, 2018 at 10:17:50AM -0700, James Bottomley wrote:
+> On Tue, 2018-03-13 at 18:35 +0800, Lee, Chun-Yi wrote:
+> > When getting certificates list from UEFI variable, the original error
+> > message shows the state number from UEFI firmware. It's hard to be
+> > read by human. This patch changed the error message to show the
+> > appropriate string.
+> > 
+> > The message will be showed as:
+> > 
+> > [    0.788529] MODSIGN: Couldn't get UEFI MokListRT: EFI_NOT_FOUND
+> > [    0.788537] MODSIGN: Couldn't get UEFI MokListXRT: EFI_NOT_FOUND
+> 
+> I keep saying this, but these error messages need to be gated on the
+> presence of shim for the non-shim secure boot case.  You can't assume
+> the shim variables are there because they won't be in the case of a
+> fully owned system.
 
-Which tree does this apply to? My tree doesn't have get_cert_list()
+I will change the message to pr_debug.
 
-> -       if (!mok) {
-> -               pr_info("MODSIGN: Couldn't get UEFI MokListRT\n");
-> -       } else {
-> -               rc = parse_efi_signature_list("UEFI:MokListRT",
-> -                                             mok, moksize, get_handler_for_db);
-> -               if (rc)
-> -                       pr_err("Couldn't parse MokListRT signatures: %d\n", rc);
-> -               kfree(mok);
-> -       }
-> -
->         dbx = get_cert_list(L"dbx", &secure_var, &dbxsize);
->         if (!dbx) {
->                 pr_info("MODSIGN: Couldn't get UEFI dbx list\n");
-> @@ -187,6 +176,21 @@ static int __init load_uefi_certs(void)
->                 kfree(dbx);
->         }
->
-> +       /* the MOK can not be trusted when secure boot is disabled */
-> +       if (!efi_enabled(EFI_SECURE_BOOT))
-> +               return 0;
-> +
-> +       mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
-> +       if (!mok) {
-> +               pr_info("MODSIGN: Couldn't get UEFI MokListRT\n");
-> +       } else {
-> +               rc = parse_efi_signature_list("UEFI:MokListRT",
-> +                                             mok, moksize, get_handler_for_db);
-> +               if (rc)
-> +                       pr_err("Couldn't parse MokListRT signatures: %d\n", rc);
-> +               kfree(mok);
-> +       }
-> +
->         return rc;
->  }
->  late_initcall(load_uefi_certs);
-> --
-> 2.10.2
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks a lot!
+Joey Lee 
