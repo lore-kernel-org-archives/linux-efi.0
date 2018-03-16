@@ -1,46 +1,33 @@
 From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-Subject: Re: Regression from efi: call get_event_log before ExitBootServices
-Date: Fri, 16 Mar 2018 15:01:56 +0200
-Message-ID: <20180316130156.GC5035@linux.intel.com>
-References: <ade378f6-c997-1d48-a30d-cceee6435fc8@redhat.com>
- <a3b5f822-f8f4-e2f5-46da-e23e13174f28@redhat.com>
- <cec36124-0950-6ad9-58a8-9bd69e63aa04@redhat.com>
- <0100016206a68850-bd5c96b3-f275-46ea-98b1-1317e02a5d6e-000000@email.amazonses.com>
- <29c1640a-cf19-ca19-7de9-96f202edfb5a@redhat.com>
- <CA+zpnLebtbjbA-Jg+RvMOqwDE5R--9V3hTwMk95Br4vM1LgBjQ@mail.gmail.com>
- <010001620bafa06b-41525407-603e-40a9-ba11-6033b2f5dcc7-000000@email.amazonses.com>
- <CA+zpnLdmg30Beg+uUJNgBQ5gbjXuJ0uVhyzCgf6m7xbx2yARBg@mail.gmail.com>
- <f9098c326ab3070c3215901e3383a3a2d208b2ae.camel@linux.intel.com>
- <f57f77fb-9637-e9f9-2f9c-3244ef652948@molgen.mpg.de>
+Subject: Re: [PATCH 1/1] efi/libstub: tpm: zero initialize pointer variables
+ for mixed mode
+Date: Fri, 16 Mar 2018 15:02:50 +0200
+Message-ID: <20180316130250.GD5035@linux.intel.com>
+References: <20180313140922.17266-1-ard.biesheuvel@linaro.org>
+ <20180313140922.17266-2-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <f57f77fb-9637-e9f9-2f9c-3244ef652948@molgen.mpg.de>
+In-Reply-To: <20180313140922.17266-2-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Paul Menzel <pmenzel@molgen.mpg.de>
-Cc: Thiebaud Weksteen <tweek@google.com>, Jeremy Cline <jeremy@jcline.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, hdegoede@redhat.com, Javier Martinez Canillas <javierm@redhat.com>, linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, hdegoede@redhat.com, tweek@google.com, javierm@redhat.com, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Mar 12, 2018 at 11:41:25AM +0100, Paul Menzel wrote:
-> Dear Jarkko,
+On Tue, Mar 13, 2018 at 02:09:21PM +0000, Ard Biesheuvel wrote:
+> As reported by Jeremy, running the new TPM libstub code in mixed mode
+> (i.e., 64-bit kernel on 32-bit UEFI) results in hangs when invoking
+> the TCG2 protocol, or when accessing the log_tbl pool allocation.
 > 
+> The reason turns out to be that in both cases, the 64-bit pointer
+> variables are not fully initialized by the 32-bit EFI code, and so
+> we should take care to zero initialize these variables beforehand,
+> or we'll end up dereferencing bogus pointers.
 > 
-> On 03/12/18 11:17, Jarkko Sakkinen wrote:
-> > On Sat, 2018-03-10 at 10:45 +0000, Thiebaud Weksteen wrote:
-> > > On Fri, Mar 9, 2018 at 5:54 PM Jeremy Cline <jeremy@jcline.org> wrote:
-> > > > and it's hanging at "memset(log_tbl, 0, sizeof(*log_tbl) + log_size);"
-> > > 
-> > > Thanks. Well, it looks like the memory that is supposedly allocated is not
-> > > usable. I'm thinking this is a firmware bug.
-> > > Ard, would you agree on this assumption? Thoughts on how to proceed?
-> > 
-> > Check if the BIOS is up to date?
-> 
-> How would that help? The no regression policy demands, that Linux continues
-> working on systems, where it worked before. So upgrading the firmware is no
-> solution, is it? Until a solution is found, the commits should be reverted.
+> Reported-by: Jeremy Cline <jeremy@jcline.org>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Nope. You are right.
+Reviewed-by: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
 
 /Jarkko
