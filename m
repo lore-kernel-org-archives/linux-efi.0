@@ -1,92 +1,91 @@
-From: Mimi Zohar <zohar@linux.vnet.ibm.com>
-Subject: Re: [PATCH 0/9] KEYS: Blacklisting & UEFI database load
-Date: Mon, 19 Mar 2018 10:12:03 -0400
-Message-ID: <1521468723.3503.171.camel@linux.vnet.ibm.com>
-References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
-         <6eabbb43-295e-9ba0-c0d9-120f48aa0e1d@suse.cz>
-         <1520428682.10396.445.camel@linux.vnet.ibm.com>
-         <1520436517.5558.2.camel@HansenPartnership.com>
-         <20180311032022.GA31059@linux-l9pv.suse>
+From: Sasha Levin <Alexander.Levin@microsoft.com>
+Subject: [PATCH AUTOSEL for 4.9 153/281] x86/efi: Disable runtime services on
+ kexec kernel if booted with efi=old_map
+Date: Mon, 19 Mar 2018 16:00:54 +0000
+Message-ID: <20180319155742.13731-153-alexander.levin@microsoft.com>
+References: <20180319155742.13731-1-alexander.levin@microsoft.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180311032022.GA31059@linux-l9pv.suse>
-Sender: linux-kernel-owner@vger.kernel.org
-To: joeyli <jlee@suse.com>, James Bottomley <James.Bottomley@HansenPartnership.com>
-Cc: Jiri Slaby <jslaby@suse.cz>, David Howells <dhowells@redhat.com>, keyrings@vger.kernel.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20180319155742.13731-1-alexander.levin@microsoft.com>
+Content-Language: en-US
+Sender: stable-owner@vger.kernel.org
+To: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>
+Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Ravi Shankar <ravi.v.shankar@intel.com>, Ricardo Neri <ricardo.neri@intel.com>, Thomas Gleixner <tglx@linutronix.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Ingo Molnar <mingo@kernel.org>, Sasha Levin <Alexander.Levin@microsoft.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 2018-03-11 at 11:20 +0800, joeyli wrote:
-> On Wed, Mar 07, 2018 at 07:28:37AM -0800, James Bottomley wrote:
-> > On Wed, 2018-03-07 at 08:18 -0500, Mimi Zohar wrote:
-> > > On Tue, 2018-03-06 at 15:05 +0100, Jiri Slaby wrote:
-> > > > what's the status of this please? Distributors (I checked SUSE,
-> > > > RedHat and Ubuntu) have to carry these patches and every of them
-> > > > have to forward-port the patches to new kernels. So are you going
-> > > > to resend the PR to have this merged?
-> > [...]
-> > > Just because I trust the platform keys prior to booting the kernel,
-> > > doesn't mean that I *want* to trust those keys once booted.  There
-> > > are, however, places where we need access to those keys to verify a
-> > > signature (eg. kexec kernel image).
-> > 
-> > Which is essentially the reason I always give when these patches come
-> > back
-> >
-> 
-> Josh Boyer's "MODSIGN: Allow the "db" UEFI variable to be suppressed"
-> patch checks MokIgnoreDB variable to ignore db:
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/commit/?h=keys-uefi&id=7c395b30a33a617c5cc2cdd419300af71277b79a
-> 
-> I think that we can consider to use MokAllowDB. Which means that kernel
-> ignores DB by default.
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-Not all systems have a shim layer.  This design is really x86
-specific.  Allowing shim keys, but ignoring DB, does not address those
-systems.
+[ Upstream commit 4e52797d2efefac3271abdc54439a3435abd77b9 ]
 
-> > > Nayna Jain's "certs: define a trusted platform keyring" patch set
-> > > introduces a new, separate keyring for these platform keys.
-> > 
-> > Perhaps, to break the deadlock, we should ask Jiří what the reason is
-> > the distros want these keys to be trusted.  Apart from the Microsoft
-> > key, it will also give you an OEM key in your trusted keyring.  Is it
-> > something to do with OEM supplied modules?
-> >
-> 
-> As I remember that some manufacturers uses certificate in db to
-> sign their kernel module. We need to discuss with them for switching
-> to mok. Currently I do not know all use cases for using db.
-> 
-> There have some benefits for using db:
-> 
->  - User does not need to deal with shim-mokmanager to enroll mok.
->    Target machine doesn't need to reboot and user doesn't need to
->    face to mokmanager UI.  
+Booting kexec kernel with "efi=3Dold_map" in kernel command line hits
+kernel panic as shown below.
 
-The reason for trusting enrolled shim keys is because it requires
-physical presence.  (I kind of remember hearing that this changed.
- There is some method of accepting enrolled keys that does not require
-physical presence.)
+ BUG: unable to handle kernel paging request at ffff88007fe78070
+ IP: virt_efi_set_variable.part.7+0x63/0x1b0
+ PGD 7ea28067
+ PUD 7ea2b067
+ PMD 7ea2d067
+ PTE 0
+ [...]
+ Call Trace:
+  virt_efi_set_variable()
+  efi_delete_dummy_variable()
+  efi_enter_virtual_mode()
+  start_kernel()
+  x86_64_start_reservations()
+  x86_64_start_kernel()
+  start_cpu()
 
->  - The db is a authenticated variable, it's still secure when secure
->    boot is disabled.
->    The db is a authenticated variable that it can only be modified
->    by manufacturer's key. Kernel can trust it when secure boot
->    is disabled. It's useful for we do not need to taint kernel
->    for loading a manufacturer's kernel module even secure boot is
->    disabled.
-> 
->  - Do not need to worry about the space of NVRAM and the EFI firmware
->    implementation for writing a boot time variable.
->   
-> But I also agree that we should not trust all keys (like Microsoft key)
-> in db by default.
+[ efi=3Dold_map was never intended to work with kexec. The problem with
+  using efi=3Dold_map is that the virtual addresses are assigned from the
+  memory region used by other kernel mappings; vmalloc() space.
+  Potentially there could be collisions when booting kexec if something
+  else is mapped at the virtual address we allocated for runtime service
+  regions in the initial boot - Matt Fleming ]
 
-Between requiring a shim layer and relying on physical presence, I'm
-not convinced this is the best solution.  Do we really want to support
-different methods for different architectures?
+Since kexec was never intended to work with efi=3Dold_map, disable
+runtime services in kexec if booted with efi=3Dold_map, so that we don't
+panic.
 
-Mimi
+Tested-by: Lee Chun-Yi <jlee@suse.com>
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Acked-by: Dave Young <dyoung@redhat.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20170526113652.21339-4-matt@codeblueprint.co=
+.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
+---
+ arch/x86/platform/efi/efi.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 274dfc481849..a0e85f2aff7d 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -832,9 +832,11 @@ static void __init kexec_enter_virtual_mode(void)
+=20
+ 	/*
+ 	 * We don't do virtual mode, since we don't do runtime services, on
+-	 * non-native EFI
++	 * non-native EFI. With efi=3Dold_map, we don't do runtime services in
++	 * kexec kernel because in the initial boot something else might
++	 * have been mapped at these virtual addresses.
+ 	 */
+-	if (!efi_is_native()) {
++	if (!efi_is_native() || efi_enabled(EFI_OLD_MEMMAP)) {
+ 		efi_memmap_unmap();
+ 		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 		return;
+--=20
+2.14.1
