@@ -1,44 +1,35 @@
-From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Subject: RE: [PATCH v2 0/8] Decode IA32/X64 CPER
-Date: Fri, 23 Mar 2018 00:19:20 +0000
-Message-ID: <DM5PR12MB1916C801C1340FB36B01DFF4F8A80@DM5PR12MB1916.namprd12.prod.outlook.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [PATCH v2 0/8] Decode IA32/X64 CPER
+Date: Fri, 23 Mar 2018 16:29:51 +0100
+Message-ID: <20180323152951.GB2487@cz.tnic>
 References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
  <20180228084321.GA2969@pd.tnic>
  <DM5PR12MB1916B6CA08F0D423B3635EDDF8C70@DM5PR12MB1916.namprd12.prod.outlook.com>
  <20180228163539.GC2969@pd.tnic>
  <DM5PR12MB19169CD3BC3BAE3230C1DCA3F8C70@DM5PR12MB1916.namprd12.prod.outlook.com>
  <20180301115953.GA5040@pd.tnic>
+ <DM5PR12MB1916C801C1340FB36B01DFF4F8A80@DM5PR12MB1916.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180301115953.GA5040@pd.tnic>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <DM5PR12MB1916C801C1340FB36B01DFF4F8A80@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@suse.de>
+To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
 Cc: Tony Luck <tony.luck@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgPGJw
-QHN1c2UuZGU+DQo+IFNlbnQ6IFRodXJzZGF5LCBNYXJjaCAxLCAyMDE4IDc6MDAgQU0NCj4gVG86
-IEdoYW5uYW0sIFlhemVuIDxZYXplbi5HaGFubmFtQGFtZC5jb20+DQo+IENjOiBUb255IEx1Y2sg
-PHRvbnkubHVja0BpbnRlbC5jb20+OyBsaW51eC1lZmlAdmdlci5rZXJuZWwub3JnOyBsaW51eC0N
-Cj4ga2VybmVsQHZnZXIua2VybmVsLm9yZzsgYXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZzsgeDg2
-QGtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2MiAwLzhdIERlY29kZSBJQTMyL1g2
-NCBDUEVSDQo+IA0KPiBPbiBXZWQsIEZlYiAyOCwgMjAxOCBhdCAwODo1ODoxNVBNICswMDAwLCBH
-aGFubmFtLCBZYXplbiB3cm90ZToNCj4gPiAxKSBXZSBrZWVwIHRoaXMgc2V0IG1vc3RseSBhcy1p
-cy4gVGhpcyB3b3VsZCBiZSBvdXIgZmFsbGJhY2sgaWYgd2UgZG9uJ3QgaGF2ZQ0KPiA+IGFueXRo
-aW5nIGJldHRlci4NCj4gDQo+IFllcywgc291bmRzIGdvb2QuIFdlIHRyeSB0byBkZWNvZGUgaXQg
-YXMgTUNFIGFuZCBpZiB3ZSBjYW5ub3QsIHdlIGR1bXANCj4gdGhlIHJhdyBDUEVSIHJlY29yZC4N
-Cj4gDQo+ID4gMikgSSBhZGQgdGhlIE1DQSBkZWNvZGluZyB0byB0aGlzIHNldC4gSSB3YXMgdGhp
-bmtpbmcgdG8gZG8gdGhpcyBpbiBhIHNlcGFyYXRlDQo+ID4gc2V0IGJ1dCBtYXliZSBpdCdzIGJl
-dHRlciB0byBkbyBpdCBhbGwgdG9nZXRoZXIuDQo+IA0KPiBJJ20gZmluZSBpZiB5b3UgZG8gaXQg
-c2VwYXJhdGVseSwgYXMgbG9uZyBhcyB5b3UgZG8gaXQgc28gdGhhdCB3ZSBoYXZlDQo+IHVzZXIt
-ZnJpZW5kbHkgZGVjb2RpbmcgaW4gdGhlIGVuZC4NCj4gDQoNCkkgd2FudGVkIHRvIGFkZCB0aGUg
-TUNBIGRlY29kaW5nIHRvIHRoaXMgc2V0IGJ1dCBJIGdvdCBjYXVnaHQgdXAgd2l0aCBzb21ldGhp
-bmcNCmVsc2UgYW5kIGhhdmVuJ3QgaGFkIHRpbWUgdG8gZG8gaXQuDQoNCklzIGl0IGFscmlnaHQg
-aWYgSSBnbyBhaGVhZCBhbmQganVzdCBzZW5kIHRoZSB2MyBvZiB0aGlzIHNldCB3aXRob3V0IHRo
-ZSBNQ0EgZGVjb2Rpbmc/DQpJIHdhcyBob3BpbmcgdGhpcyBjb3VsZCBiZSBhY2NlcHRlZCBpbiB0
-aGUgbmV4dCBtZXJnZSB3aW5kb3cuIEFuZCBpZiB0aGF0J3Mgc3RpbGwNCnBvc3NpYmxlIEknZCBs
-aWtlIHRvIGhhdmUgc29tZSBDUEVSIGRlY29kaW5nIHNvb25lciByYXRoZXIgdGhhbiBub3RoaW5n
-Lg0KDQpUaGFua3MsDQpZYXplbg0K
+On Fri, Mar 23, 2018 at 12:19:20AM +0000, Ghannam, Yazen wrote:
+> Is it alright if I go ahead and just send the v3 of this set without the MCA decoding?
+
+Sure, but let's not drop the MCA decoding from the todo list. :)
+
+Thx.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+-- 
