@@ -1,34 +1,44 @@
-From: Waiman Long <longman@redhat.com>
-Subject: [PATCH] x86/efi: Free efi_pgd with free_pages()
-Date: Thu, 22 Mar 2018 15:18:53 -0400
-Message-ID: <1521746333-19593-1-git-send-email-longman@redhat.com>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH v2 0/8] Decode IA32/X64 CPER
+Date: Fri, 23 Mar 2018 00:19:20 +0000
+Message-ID: <DM5PR12MB1916C801C1340FB36B01DFF4F8A80@DM5PR12MB1916.namprd12.prod.outlook.com>
+References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
+ <20180228084321.GA2969@pd.tnic>
+ <DM5PR12MB1916B6CA08F0D423B3635EDDF8C70@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180228163539.GC2969@pd.tnic>
+ <DM5PR12MB19169CD3BC3BAE3230C1DCA3F8C70@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <20180301115953.GA5040@pd.tnic>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180301115953.GA5040@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, Waiman Long <longman@redhat.com>
+To: Borislav Petkov <bp@suse.de>
+Cc: Tony Luck <tony.luck@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-The efi_pgd is allocated as PGD_ALLOCATION_ORDER pages and so should
-also be freed as PGD_ALLOCATION_ORDER pages with free_pages().
-
-Fixes: d9e9a6418065 ("x86/mm/pti: Allocate a separate user PGD")
-Signed-off-by: Waiman Long <longman@redhat.com>
----
- arch/x86/platform/efi/efi_64.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index c310a82..f9cfbc0 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -227,7 +227,7 @@ int __init efi_alloc_page_tables(void)
- 	if (!pud) {
- 		if (CONFIG_PGTABLE_LEVELS > 4)
- 			free_page((unsigned long) pgd_page_vaddr(*pgd));
--		free_page((unsigned long)efi_pgd);
-+		free_pages((unsigned long)efi_pgd, PGD_ALLOCATION_ORDER);
- 		return -ENOMEM;
- 	}
- 
--- 
-1.8.3.1
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgPGJw
+QHN1c2UuZGU+DQo+IFNlbnQ6IFRodXJzZGF5LCBNYXJjaCAxLCAyMDE4IDc6MDAgQU0NCj4gVG86
+IEdoYW5uYW0sIFlhemVuIDxZYXplbi5HaGFubmFtQGFtZC5jb20+DQo+IENjOiBUb255IEx1Y2sg
+PHRvbnkubHVja0BpbnRlbC5jb20+OyBsaW51eC1lZmlAdmdlci5rZXJuZWwub3JnOyBsaW51eC0N
+Cj4ga2VybmVsQHZnZXIua2VybmVsLm9yZzsgYXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZzsgeDg2
+QGtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2MiAwLzhdIERlY29kZSBJQTMyL1g2
+NCBDUEVSDQo+IA0KPiBPbiBXZWQsIEZlYiAyOCwgMjAxOCBhdCAwODo1ODoxNVBNICswMDAwLCBH
+aGFubmFtLCBZYXplbiB3cm90ZToNCj4gPiAxKSBXZSBrZWVwIHRoaXMgc2V0IG1vc3RseSBhcy1p
+cy4gVGhpcyB3b3VsZCBiZSBvdXIgZmFsbGJhY2sgaWYgd2UgZG9uJ3QgaGF2ZQ0KPiA+IGFueXRo
+aW5nIGJldHRlci4NCj4gDQo+IFllcywgc291bmRzIGdvb2QuIFdlIHRyeSB0byBkZWNvZGUgaXQg
+YXMgTUNFIGFuZCBpZiB3ZSBjYW5ub3QsIHdlIGR1bXANCj4gdGhlIHJhdyBDUEVSIHJlY29yZC4N
+Cj4gDQo+ID4gMikgSSBhZGQgdGhlIE1DQSBkZWNvZGluZyB0byB0aGlzIHNldC4gSSB3YXMgdGhp
+bmtpbmcgdG8gZG8gdGhpcyBpbiBhIHNlcGFyYXRlDQo+ID4gc2V0IGJ1dCBtYXliZSBpdCdzIGJl
+dHRlciB0byBkbyBpdCBhbGwgdG9nZXRoZXIuDQo+IA0KPiBJJ20gZmluZSBpZiB5b3UgZG8gaXQg
+c2VwYXJhdGVseSwgYXMgbG9uZyBhcyB5b3UgZG8gaXQgc28gdGhhdCB3ZSBoYXZlDQo+IHVzZXIt
+ZnJpZW5kbHkgZGVjb2RpbmcgaW4gdGhlIGVuZC4NCj4gDQoNCkkgd2FudGVkIHRvIGFkZCB0aGUg
+TUNBIGRlY29kaW5nIHRvIHRoaXMgc2V0IGJ1dCBJIGdvdCBjYXVnaHQgdXAgd2l0aCBzb21ldGhp
+bmcNCmVsc2UgYW5kIGhhdmVuJ3QgaGFkIHRpbWUgdG8gZG8gaXQuDQoNCklzIGl0IGFscmlnaHQg
+aWYgSSBnbyBhaGVhZCBhbmQganVzdCBzZW5kIHRoZSB2MyBvZiB0aGlzIHNldCB3aXRob3V0IHRo
+ZSBNQ0EgZGVjb2Rpbmc/DQpJIHdhcyBob3BpbmcgdGhpcyBjb3VsZCBiZSBhY2NlcHRlZCBpbiB0
+aGUgbmV4dCBtZXJnZSB3aW5kb3cuIEFuZCBpZiB0aGF0J3Mgc3RpbGwNCnBvc3NpYmxlIEknZCBs
+aWtlIHRvIGhhdmUgc29tZSBDUEVSIGRlY29kaW5nIHNvb25lciByYXRoZXIgdGhhbiBub3RoaW5n
+Lg0KDQpUaGFua3MsDQpZYXplbg0K
