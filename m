@@ -1,35 +1,64 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [PATCH v2 0/8] Decode IA32/X64 CPER
-Date: Fri, 23 Mar 2018 16:29:51 +0100
-Message-ID: <20180323152951.GB2487@cz.tnic>
-References: <20180226193904.20532-1-Yazen.Ghannam@amd.com>
- <20180228084321.GA2969@pd.tnic>
- <DM5PR12MB1916B6CA08F0D423B3635EDDF8C70@DM5PR12MB1916.namprd12.prod.outlook.com>
- <20180228163539.GC2969@pd.tnic>
- <DM5PR12MB19169CD3BC3BAE3230C1DCA3F8C70@DM5PR12MB1916.namprd12.prod.outlook.com>
- <20180301115953.GA5040@pd.tnic>
- <DM5PR12MB1916C801C1340FB36B01DFF4F8A80@DM5PR12MB1916.namprd12.prod.outlook.com>
+From: Yazen Ghannam <Yazen.Ghannam@amd.com>
+Subject: [PATCH v3 0/8] Decode IA32/X64 CPER
+Date: Sat, 24 Mar 2018 13:49:32 -0500
+Message-ID: <20180324184940.19762-1-Yazen.Ghannam@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <DM5PR12MB1916C801C1340FB36B01DFF4F8A80@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Cc: Tony Luck <tony.luck@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>
+To: linux-efi@vger.kernel.org
+Cc: Yazen Ghannam <Yazen.Ghannam@amd.com>, linux-kernel@vger.kernel.org, ard.biesheuvel@linaro.org, x86@kernel.org, bp@suse.de, tony.luck@intel.com
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Mar 23, 2018 at 12:19:20AM +0000, Ghannam, Yazen wrote:
-> Is it alright if I go ahead and just send the v3 of this set without the MCA decoding?
+From: Yazen Ghannam <yazen.ghannam@amd.com>
 
-Sure, but let's not drop the MCA decoding from the todo list. :)
+This series adds decoding for the IA32/X64 Common Platform Error Record.
 
-Thx.
+Patch 1 fixes the IA32/X64 Processor Error Section definition to match
+the UEFI spec.
+
+Patches 2-8 add the new decoding. The patches incrementally add the
+decoding starting from the top-level "Error Section". Hopefully, this
+will make reviewing a bit easier compared to one large patch.
+
+The formatting of the field names and options is taken from the UEFI
+spec. I tried to keep everything the same to make searching easier.
+
+The patches were written to the UEFI 2.7 spec though the definition of
+the IA32/X64 CPER seems to be the same as when it was introduced in
+the UEFI 2.1 spec.
+
+Link:
+https://lkml.kernel.org/r/20180226193904.20532-1-Yazen.Ghannam@amd.com
+
+Changes V2 to V3:
+* Fix table numbers in commit messages.
+* Don't print raw validation bits.
+* Only print GUID for unknown error types.
+
+Changes V1 to V2:
+* Remove stable request for all patches.
+* Address Ard's comments on formatting and other issues.
+* In Patch 8, always print context info even if the type is not
+  recognized.
+
+Yazen Ghannam (8):
+  efi: Fix IA32/X64 Processor Error Record definition
+  efi: Decode IA32/X64 Processor Error Section
+  efi: Decode IA32/X64 Processor Error Info Structure
+  efi: Decode UEFI-defined IA32/X64 Error Structure GUIDs
+  efi: Decode IA32/X64 Cache, TLB, and Bus Check structures
+  efi: Decode additional IA32/X64 Bus Check fields
+  efi: Decode IA32/X64 MS Check structure
+  efi: Decode IA32/X64 Context Info structure
+
+ drivers/firmware/efi/Kconfig    |   5 +
+ drivers/firmware/efi/Makefile   |   1 +
+ drivers/firmware/efi/cper-x86.c | 358 ++++++++++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/cper.c     |  10 ++
+ include/linux/cper.h            |   4 +-
+ 5 files changed, 377 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/firmware/efi/cper-x86.c
 
 -- 
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
--- 
+2.14.1
