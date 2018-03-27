@@ -1,18 +1,18 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.15 086/105] x86/efi: Free efi_pgd with free_pages()
-Date: Tue, 27 Mar 2018 18:28:06 +0200
-Message-ID: <20180327162803.520307492@linuxfoundation.org>
-References: <20180327162757.813009222@linuxfoundation.org>
+Subject: [PATCH 4.14 081/101] x86/efi: Free efi_pgd with free_pages()
+Date: Tue, 27 Mar 2018 18:27:53 +0200
+Message-ID: <20180327162755.041436623@linuxfoundation.org>
+References: <20180327162749.993880276@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180327162757.813009222@linuxfoundation.org>
+In-Reply-To: <20180327162749.993880276@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Waiman Long <longman@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.15-stable review patch.  If anyone has any objections, please let me know.
+4.14-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -39,7 +39,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 --- a/arch/x86/platform/efi/efi_64.c
 +++ b/arch/x86/platform/efi/efi_64.c
-@@ -228,7 +228,7 @@ int __init efi_alloc_page_tables(void)
+@@ -227,7 +227,7 @@ int __init efi_alloc_page_tables(void)
  	if (!pud) {
  		if (CONFIG_PGTABLE_LEVELS > 4)
  			free_page((unsigned long) pgd_page_vaddr(*pgd));
