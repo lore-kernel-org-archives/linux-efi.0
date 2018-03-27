@@ -1,115 +1,69 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH 0/9] KEYS: Blacklisting & UEFI database load
-Date: Tue, 27 Mar 2018 19:08:14 +0800
-Message-ID: <20180327110814.GC5669@linux-l9pv.suse>
-References: <147931984418.16460.6639993676886095760.stgit@warthog.procyon.org.uk>
- <6eabbb43-295e-9ba0-c0d9-120f48aa0e1d@suse.cz>
- <1520428682.10396.445.camel@linux.vnet.ibm.com>
- <1520436517.5558.2.camel@HansenPartnership.com>
- <20180311032022.GA31059@linux-l9pv.suse>
- <1521468723.3503.171.camel@linux.vnet.ibm.com>
+From: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [RFC] arm64: extra entries in /proc/iomem for kexec
+Date: Tue, 27 Mar 2018 14:32:49 +0100
+Message-ID: <da2989ec-7fa5-b044-3237-4e75f2fe6d98@arm.com>
+References: <20180314082941.GM25863@linaro.org>
+ <2d2e1be6-b925-1595-9b6e-76dd270d396d@redhat.com>
+ <20180327101654.GB14737@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1521468723.3503.171.camel@linux.vnet.ibm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mimi Zohar <zohar@linux.vnet.ibm.com>
-Cc: James Bottomley <James.Bottomley@HansenPartnership.com>, Jiri Slaby <jslaby@suse.cz>, David Howells <dhowells@redhat.com>, keyrings@vger.kernel.org, matthew.garrett@nebula.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20180327101654.GB14737-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Mimi,
+Hi Akashi,
 
-On Mon, Mar 19, 2018 at 10:12:03AM -0400, Mimi Zohar wrote:
-> On Sun, 2018-03-11 at 11:20 +0800, joeyli wrote:
-> > On Wed, Mar 07, 2018 at 07:28:37AM -0800, James Bottomley wrote:
-> > > On Wed, 2018-03-07 at 08:18 -0500, Mimi Zohar wrote:
-> > > > On Tue, 2018-03-06 at 15:05 +0100, Jiri Slaby wrote:
-> > > > > what's the status of this please? Distributors (I checked SUSE,
-> > > > > RedHat and Ubuntu) have to carry these patches and every of them
-> > > > > have to forward-port the patches to new kernels. So are you going
-> > > > > to resend the PR to have this merged?
-> > > [...]
-> > > > Just because I trust the platform keys prior to booting the kernel,
-> > > > doesn't mean that I *want* to trust those keys once booted.  There
-> > > > are, however, places where we need access to those keys to verify a
-> > > > signature (eg. kexec kernel image).
-> > > 
-> > > Which is essentially the reason I always give when these patches come
-> > > back
-> > >
-> > 
-> > Josh Boyer's "MODSIGN: Allow the "db" UEFI variable to be suppressed"
-> > patch checks MokIgnoreDB variable to ignore db:
-> > 
-> > https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/commit/?h=keys-uefi&id=7c395b30a33a617c5cc2cdd419300af71277b79a
-> > 
-> > I think that we can consider to use MokAllowDB. Which means that kernel
-> > ignores DB by default.
+On 27/03/18 11:16, AKASHI Takahiro wrote:
+> On Tue, Mar 20, 2018 at 01:18:34AM +0530, Bhupesh Sharma wrote:
+>> On 03/14/2018 01:59 PM, AKASHI Takahiro wrote:
+>>> Currently, there is a inconsistent view between (A) and the mainline's:
+>>> see (A-1) and (B-1). If this is really a matter, I can fix it.
+>>> Kexec-tools can be easily modified to accept both formats, though.
+
+Ooer, what needs changing in kexec-tools? What happens if someone doesn't update
+userspace at the same time?
+
+Is there a format which doesn't require a user-space change, (and shouldn't we
+pick that one?)
+
+
+>>> 2. How should we determine which regions be exported in /proc/iomem?
+>>>
+>>>  a. Trust all the memblock_reserve'd regions as my previous patch [3] does.
+>>>
+>>>     As I said, it's a kind of "overkill." Some of regions, say fdt, are
+>>>     not required to be preserved across kexec.
+>>
+>>
+>> I think we should preserve all the memblock_reserve'd regions. So +1 on this
+>> approach from my side. I believe it might help avoid issues we have seen in
+>> the past with 'kexec-tools' _incorrectly_ determining which regions to pick
+>> from the '/proc/iomem'.
 > 
-> Not all systems have a shim layer.  This design is really x86
-> specific.  Allowing shim keys, but ignoring DB, does not address those
-> systems.
->
+> As I said in my reply to Ard's comment, I now know *overkill* is not a big
+> issue and I will go for this approach.
 
-Actually shim is EFI specific but not x86 specific. I agree with you that
-not all system has shim. But at least shim provides a way to interact with
-user to detect the physical accessing.
+/sys/kernel/debug/memblock/reserved has all kinds of weird stuff in it,
+including some smaller-than-a-page reservations that appear to come from the
+percpu allocator.
 
-For the system doesn't have shim, kernel can provide a boot option for user
-to trust the keys in DB. But it also means that the boot option can be
-enabled without physical accessing.
- 
-> > > > Nayna Jain's "certs: define a trusted platform keyring" patch set
-> > > > introduces a new, separate keyring for these platform keys.
-> > > 
-> > > Perhaps, to break the deadlock, we should ask Jiří what the reason is
-> > > the distros want these keys to be trusted.  Apart from the Microsoft
-> > > key, it will also give you an OEM key in your trusted keyring.  Is it
-> > > something to do with OEM supplied modules?
-> > >
-> > 
-> > As I remember that some manufacturers uses certificate in db to
-> > sign their kernel module. We need to discuss with them for switching
-> > to mok. Currently I do not know all use cases for using db.
-> > 
-> > There have some benefits for using db:
-> > 
-> >  - User does not need to deal with shim-mokmanager to enroll mok.
-> >    Target machine doesn't need to reboot and user doesn't need to
-> >    face to mokmanager UI.  
-> 
-> The reason for trusting enrolled shim keys is because it requires
-> physical presence.  (I kind of remember hearing that this changed.
->  There is some method of accepting enrolled keys that does not require
-> physical presence.)
->
+I agree it will make the implementation simpler, and reserving 'too much' isn't
+an issue.
 
-Could you please provide more detail for those methods? Thanks!
- 
-> >  - The db is a authenticated variable, it's still secure when secure
-> >    boot is disabled.
-> >    The db is a authenticated variable that it can only be modified
-> >    by manufacturer's key. Kernel can trust it when secure boot
-> >    is disabled. It's useful for we do not need to taint kernel
-> >    for loading a manufacturer's kernel module even secure boot is
-> >    disabled.
-> > 
-> >  - Do not need to worry about the space of NVRAM and the EFI firmware
-> >    implementation for writing a boot time variable.
-> >   
-> > But I also agree that we should not trust all keys (like Microsoft key)
-> > in db by default.
-> 
-> Between requiring a shim layer and relying on physical presence, I'm
-> not convinced this is the best solution.  Do we really want to support
-> different methods for different architectures?
->
 
-It's not the best solution because it relies on other layers. But it's
-currently the only solution for general EFI firmware. Or you have other
-solution can be used for all architectures?
+Thanks,
 
-Thanks a lot!
-Joey Lee 
+James
