@@ -1,50 +1,122 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.14 081/101] x86/efi: Free efi_pgd with free_pages()
-Date: Tue, 27 Mar 2018 18:27:53 +0200
-Message-ID: <20180327162755.041436623@linuxfoundation.org>
-References: <20180327162749.993880276@linuxfoundation.org>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v3 2/8] efi: Decode IA32/X64 Processor Error Section
+Date: Thu, 29 Mar 2018 11:46:13 +0200
+Message-ID: <20180329094613.GA29198@pd.tnic>
+References: <20180324184940.19762-1-Yazen.Ghannam@amd.com>
+ <20180324184940.19762-3-Yazen.Ghannam@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180327162749.993880276@linuxfoundation.org>
+Content-Disposition: inline
+In-Reply-To: <20180324184940.19762-3-Yazen.Ghannam@amd.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Waiman Long <longman@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Dave Hansen <dave.hansen@linux.intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: Yazen Ghannam <Yazen.Ghannam@amd.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ard.biesheuvel@linaro.org, x86@kernel.org, tony.luck@intel.com
 List-Id: linux-efi@vger.kernel.org
 
-4.14-stable review patch.  If anyone has any objections, please let me know.
+On Sat, Mar 24, 2018 at 01:49:34PM -0500, Yazen Ghannam wrote:
+> From: Yazen Ghannam <yazen.ghannam@amd.com>
+> 
+> Recognize the IA32/X64 Processor Error Section.
+> 
+> Do the section decoding in a new "cper-x86.c" file and add this to the
+> Makefile depending on a new "UEFI_CPER_X86" config option.
+> 
+> Print the Local APIC ID and CPUID info from the Processor Error Record.
+> 
+> The "Processor Error Info" and "Processor Context" fields will be
+> decoded in following patches.
+> 
+> Based on UEFI 2.7 Table 252. Processor Error Record.
+> 
+> Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
+> ---
+> Link:
+> https://lkml.kernel.org/r/20180226193904.20532-3-Yazen.Ghannam@amd.com
+> 
+> v2->v3:
+> * Fix table number in commit message.
+> * Don't print raw validation bits.
+> 
+> v1->v2:
+> * Change config option depends to "X86" instead of "X86_32 || X64_64".
+> * Remove extra newline in Makefile changes.
+> * Drop author copyright line.
+> 
+>  drivers/firmware/efi/Kconfig    |  5 +++++
+>  drivers/firmware/efi/Makefile   |  1 +
+>  drivers/firmware/efi/cper-x86.c | 23 +++++++++++++++++++++++
 
-------------------
+I'd prefer if that were:
 
-From: Waiman Long <longman@redhat.com>
+drivers/firmware/efi/cper/x86.c
+drivers/firmware/efi/cper/arm.c
 
-commit 06ace26f4e6fcf747e890a39193be811777a048a upstream.
+but that's Ard's call.
 
-The efi_pgd is allocated as PGD_ALLOCATION_ORDER pages and therefore must
-also be freed as PGD_ALLOCATION_ORDER pages with free_pages().
+>  drivers/firmware/efi/cper.c     | 10 ++++++++++
+>  include/linux/cper.h            |  2 ++
+>  5 files changed, 41 insertions(+)
+>  create mode 100644 drivers/firmware/efi/cper-x86.c
+> 
+> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+> index 3098410abad8..781a4a337557 100644
+> --- a/drivers/firmware/efi/Kconfig
+> +++ b/drivers/firmware/efi/Kconfig
+> @@ -174,6 +174,11 @@ config UEFI_CPER_ARM
+>  	depends on UEFI_CPER && ( ARM || ARM64 )
+>  	default y
+>  
+> +config UEFI_CPER_X86
+> +	bool
+> +	depends on UEFI_CPER && X86
+> +	default y
+> +
+>  config EFI_DEV_PATH_PARSER
+>  	bool
+>  	depends on ACPI
+> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+> index cb805374f4bc..5f9f5039de50 100644
+> --- a/drivers/firmware/efi/Makefile
+> +++ b/drivers/firmware/efi/Makefile
+> @@ -31,3 +31,4 @@ obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+>  obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
+>  obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
+>  obj-$(CONFIG_UEFI_CPER_ARM)		+= cper-arm.o
+> +obj-$(CONFIG_UEFI_CPER_X86)		+= cper-x86.o
+> diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-x86.c
+> new file mode 100644
+> index 000000000000..863f0cd2a0ff
+> --- /dev/null
+> +++ b/drivers/firmware/efi/cper-x86.c
+> @@ -0,0 +1,23 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +// Copyright (C) 2018, Advanced Micro Devices, Inc.
+> +
+> +#include <linux/cper.h>
+> +
+> +/*
+> + * We don't need a "CPER_IA" prefix since these are all locally defined.
+> + * This will save us a lot of line space.
+> + */
+> +#define VALID_LAPIC_ID			BIT_ULL(0)
+> +#define VALID_CPUID_INFO		BIT_ULL(1)
+> +
+> +void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
+> +{
+> +	if (proc->validation_bits & VALID_LAPIC_ID)
+> +		printk("%sLocal APIC_ID: 0x%llx\n", pfx, proc->lapic_id);
+> +
+> +	if (proc->validation_bits & VALID_CPUID_INFO) {
+> +		printk("%sCPUID Info:\n", pfx);
+> +		print_hex_dump(pfx, "", DUMP_PREFIX_OFFSET, 16, 4, proc->cpuid,
+> +			       sizeof(proc->cpuid), 0);
 
-Fixes: d9e9a6418065 ("x86/mm/pti: Allocate a separate user PGD")
-Signed-off-by: Waiman Long <longman@redhat.com>
-Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Cc: Dave Hansen <dave.hansen@linux.intel.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: stable@vger.kernel.org
-Link: https://lkml.kernel.org/r/1521746333-19593-1-git-send-email-longman@redhat.com
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+That's dumping 48 bytes of static information for every error!
+Information which can be dumped only once when collecting system info.
 
----
- arch/x86/platform/efi/efi_64.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+-- 
+Regards/Gruss,
+    Boris.
 
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -227,7 +227,7 @@ int __init efi_alloc_page_tables(void)
- 	if (!pud) {
- 		if (CONFIG_PGTABLE_LEVELS > 4)
- 			free_page((unsigned long) pgd_page_vaddr(*pgd));
--		free_page((unsigned long)efi_pgd);
-+		free_pages((unsigned long)efi_pgd, PGD_ALLOCATION_ORDER);
- 		return -ENOMEM;
- 	}
- 
+Good mailing practices for 400: avoid top-posting and trim the reply.
