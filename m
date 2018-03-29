@@ -1,61 +1,93 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v3 3/8] efi: Decode IA32/X64 Processor Error Info
- Structure
-Date: Thu, 29 Mar 2018 12:54:49 +0200
-Message-ID: <20180329105448.GB29198@pd.tnic>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH v3 2/8] efi: Decode IA32/X64 Processor Error Section
+Date: Thu, 29 Mar 2018 13:47:03 +0000
+Message-ID: <DM5PR12MB1916DEB138196D26B89CB227F8A20@DM5PR12MB1916.namprd12.prod.outlook.com>
 References: <20180324184940.19762-1-Yazen.Ghannam@amd.com>
- <20180324184940.19762-4-Yazen.Ghannam@amd.com>
+ <20180324184940.19762-3-Yazen.Ghannam@amd.com>
+ <20180329094613.GA29198@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180324184940.19762-4-Yazen.Ghannam@amd.com>
+In-Reply-To: <20180329094613.GA29198@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Yazen Ghannam <Yazen.Ghannam@amd.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ard.biesheuvel@linaro.org, x86@kernel.org, tony.luck@intel.com
+To: Borislav Petkov <bp@alien8.de>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>, "tony.luck@intel.com" <tony.luck@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Mar 24, 2018 at 01:49:35PM -0500, Yazen Ghannam wrote:
-> From: Yazen Ghannam <yazen.ghannam@amd.com>
-> 
-> Print the fields in the IA32/X64 Processor Error Info Structure.
-> 
-> Based on UEFI 2.7 Table 253. IA32/X64 Processor Error Information
-> Structure.
-> 
-> Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
-> ---
-> Link:
-> https://lkml.kernel.org/r/20180226193904.20532-4-Yazen.Ghannam@amd.com
-> 
-> v2->v3:
-> * Fix table number in commit message.
-> * Don't print raw validation bits.
-> 
-> v1->v2:
-> * Add parantheses around "bits" expression in macro.
-> * Fix indentation on multi-line statements.
-> 
->  drivers/firmware/efi/cper-x86.c | 50 +++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 50 insertions(+)
-> 
-> diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-x86.c
-> index 863f0cd2a0ff..a9ab3bbf7986 100644
-> --- a/drivers/firmware/efi/cper-x86.c
-> +++ b/drivers/firmware/efi/cper-x86.c
-> @@ -3,15 +3,28 @@
->  
->  #include <linux/cper.h>
->  
-> +#define INDENT_SP	" "
-
-There's that thing again. So it was a total waste of time discussing
-this last time. So let me save my time this time:
-
-NAKed-by: Borislav Petkov <bp@suse.de>
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgPGJw
+QGFsaWVuOC5kZT4NCj4gU2VudDogVGh1cnNkYXksIE1hcmNoIDI5LCAyMDE4IDU6NDYgQU0NCj4g
+VG86IEdoYW5uYW0sIFlhemVuIDxZYXplbi5HaGFubmFtQGFtZC5jb20+DQo+IENjOiBsaW51eC1l
+ZmlAdmdlci5rZXJuZWwub3JnOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOw0KPiBhcmQu
+Ymllc2hldXZlbEBsaW5hcm8ub3JnOyB4ODZAa2VybmVsLm9yZzsgdG9ueS5sdWNrQGludGVsLmNv
+bQ0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHYzIDIvOF0gZWZpOiBEZWNvZGUgSUEzMi9YNjQgUHJv
+Y2Vzc29yIEVycm9yIFNlY3Rpb24NCj4gDQo+IE9uIFNhdCwgTWFyIDI0LCAyMDE4IGF0IDAxOjQ5
+OjM0UE0gLTA1MDAsIFlhemVuIEdoYW5uYW0gd3JvdGU6DQo+ID4gRnJvbTogWWF6ZW4gR2hhbm5h
+bSA8eWF6ZW4uZ2hhbm5hbUBhbWQuY29tPg0KPiA+DQo+ID4gUmVjb2duaXplIHRoZSBJQTMyL1g2
+NCBQcm9jZXNzb3IgRXJyb3IgU2VjdGlvbi4NCj4gPg0KPiA+IERvIHRoZSBzZWN0aW9uIGRlY29k
+aW5nIGluIGEgbmV3ICJjcGVyLXg4Ni5jIiBmaWxlIGFuZCBhZGQgdGhpcyB0byB0aGUNCj4gPiBN
+YWtlZmlsZSBkZXBlbmRpbmcgb24gYSBuZXcgIlVFRklfQ1BFUl9YODYiIGNvbmZpZyBvcHRpb24u
+DQo+ID4NCj4gPiBQcmludCB0aGUgTG9jYWwgQVBJQyBJRCBhbmQgQ1BVSUQgaW5mbyBmcm9tIHRo
+ZSBQcm9jZXNzb3IgRXJyb3IgUmVjb3JkLg0KPiA+DQo+ID4gVGhlICJQcm9jZXNzb3IgRXJyb3Ig
+SW5mbyIgYW5kICJQcm9jZXNzb3IgQ29udGV4dCIgZmllbGRzIHdpbGwgYmUNCj4gPiBkZWNvZGVk
+IGluIGZvbGxvd2luZyBwYXRjaGVzLg0KPiA+DQo+ID4gQmFzZWQgb24gVUVGSSAyLjcgVGFibGUg
+MjUyLiBQcm9jZXNzb3IgRXJyb3IgUmVjb3JkLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogWWF6
+ZW4gR2hhbm5hbSA8eWF6ZW4uZ2hhbm5hbUBhbWQuY29tPg0KPiA+IC0tLQ0KPiA+IExpbms6DQo+
+ID4gaHR0cHM6Ly9sa21sLmtlcm5lbC5vcmcvci8yMDE4MDIyNjE5MzkwNC4yMDUzMi0zLQ0KPiBZ
+YXplbi5HaGFubmFtQGFtZC5jb20NCj4gPg0KPiA+IHYyLT52MzoNCj4gPiAqIEZpeCB0YWJsZSBu
+dW1iZXIgaW4gY29tbWl0IG1lc3NhZ2UuDQo+ID4gKiBEb24ndCBwcmludCByYXcgdmFsaWRhdGlv
+biBiaXRzLg0KPiA+DQo+ID4gdjEtPnYyOg0KPiA+ICogQ2hhbmdlIGNvbmZpZyBvcHRpb24gZGVw
+ZW5kcyB0byAiWDg2IiBpbnN0ZWFkIG9mICJYODZfMzIgfHwgWDY0XzY0Ii4NCj4gPiAqIFJlbW92
+ZSBleHRyYSBuZXdsaW5lIGluIE1ha2VmaWxlIGNoYW5nZXMuDQo+ID4gKiBEcm9wIGF1dGhvciBj
+b3B5cmlnaHQgbGluZS4NCj4gPg0KPiA+ICBkcml2ZXJzL2Zpcm13YXJlL2VmaS9LY29uZmlnICAg
+IHwgIDUgKysrKysNCj4gPiAgZHJpdmVycy9maXJtd2FyZS9lZmkvTWFrZWZpbGUgICB8ICAxICsN
+Cj4gPiAgZHJpdmVycy9maXJtd2FyZS9lZmkvY3Blci14ODYuYyB8IDIzICsrKysrKysrKysrKysr
+KysrKysrKysrDQo+IA0KPiBJJ2QgcHJlZmVyIGlmIHRoYXQgd2VyZToNCj4gDQo+IGRyaXZlcnMv
+ZmlybXdhcmUvZWZpL2NwZXIveDg2LmMNCj4gZHJpdmVycy9maXJtd2FyZS9lZmkvY3Blci9hcm0u
+Yw0KPiANCj4gYnV0IHRoYXQncyBBcmQncyBjYWxsLg0KPiANCj4gPiAgZHJpdmVycy9maXJtd2Fy
+ZS9lZmkvY3Blci5jICAgICB8IDEwICsrKysrKysrKysNCj4gPiAgaW5jbHVkZS9saW51eC9jcGVy
+LmggICAgICAgICAgICB8ICAyICsrDQo+ID4gIDUgZmlsZXMgY2hhbmdlZCwgNDEgaW5zZXJ0aW9u
+cygrKQ0KPiA+ICBjcmVhdGUgbW9kZSAxMDA2NDQgZHJpdmVycy9maXJtd2FyZS9lZmkvY3Blci14
+ODYuYw0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL0tjb25maWcg
+Yi9kcml2ZXJzL2Zpcm13YXJlL2VmaS9LY29uZmlnDQo+ID4gaW5kZXggMzA5ODQxMGFiYWQ4Li43
+ODFhNGEzMzc1NTcgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9maXJtd2FyZS9lZmkvS2NvbmZp
+Zw0KPiA+ICsrKyBiL2RyaXZlcnMvZmlybXdhcmUvZWZpL0tjb25maWcNCj4gPiBAQCAtMTc0LDYg
+KzE3NCwxMSBAQCBjb25maWcgVUVGSV9DUEVSX0FSTQ0KPiA+ICAJZGVwZW5kcyBvbiBVRUZJX0NQ
+RVIgJiYgKCBBUk0gfHwgQVJNNjQgKQ0KPiA+ICAJZGVmYXVsdCB5DQo+ID4NCj4gPiArY29uZmln
+IFVFRklfQ1BFUl9YODYNCj4gPiArCWJvb2wNCj4gPiArCWRlcGVuZHMgb24gVUVGSV9DUEVSICYm
+IFg4Ng0KPiA+ICsJZGVmYXVsdCB5DQo+ID4gKw0KPiA+ICBjb25maWcgRUZJX0RFVl9QQVRIX1BB
+UlNFUg0KPiA+ICAJYm9vbA0KPiA+ICAJZGVwZW5kcyBvbiBBQ1BJDQo+ID4gZGlmZiAtLWdpdCBh
+L2RyaXZlcnMvZmlybXdhcmUvZWZpL01ha2VmaWxlIGIvZHJpdmVycy9maXJtd2FyZS9lZmkvTWFr
+ZWZpbGUNCj4gPiBpbmRleCBjYjgwNTM3NGY0YmMuLjVmOWY1MDM5ZGU1MCAxMDA2NDQNCj4gPiAt
+LS0gYS9kcml2ZXJzL2Zpcm13YXJlL2VmaS9NYWtlZmlsZQ0KPiA+ICsrKyBiL2RyaXZlcnMvZmly
+bXdhcmUvZWZpL01ha2VmaWxlDQo+ID4gQEAgLTMxLDMgKzMxLDQgQEAgb2JqLSQoQ09ORklHX0FS
+TSkJCQkrPSAkKGFybS1vYmotDQo+IHkpDQo+ID4gIG9iai0kKENPTkZJR19BUk02NCkJCQkrPSAk
+KGFybS1vYmoteSkNCj4gPiAgb2JqLSQoQ09ORklHX0VGSV9DQVBTVUxFX0xPQURFUikJKz0gY2Fw
+c3VsZS1sb2FkZXIubw0KPiA+ICBvYmotJChDT05GSUdfVUVGSV9DUEVSX0FSTSkJCSs9IGNwZXIt
+YXJtLm8NCj4gPiArb2JqLSQoQ09ORklHX1VFRklfQ1BFUl9YODYpCQkrPSBjcGVyLXg4Ni5vDQo+
+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL2NwZXIteDg2LmMgYi9kcml2ZXJz
+L2Zpcm13YXJlL2VmaS9jcGVyLQ0KPiB4ODYuYw0KPiA+IG5ldyBmaWxlIG1vZGUgMTAwNjQ0DQo+
+ID4gaW5kZXggMDAwMDAwMDAwMDAwLi44NjNmMGNkMmEwZmYNCj4gPiAtLS0gL2Rldi9udWxsDQo+
+ID4gKysrIGIvZHJpdmVycy9maXJtd2FyZS9lZmkvY3Blci14ODYuYw0KPiA+IEBAIC0wLDAgKzEs
+MjMgQEANCj4gPiArLy8gU1BEWC1MaWNlbnNlLUlkZW50aWZpZXI6IEdQTC0yLjANCj4gPiArLy8g
+Q29weXJpZ2h0IChDKSAyMDE4LCBBZHZhbmNlZCBNaWNybyBEZXZpY2VzLCBJbmMuDQo+ID4gKw0K
+PiA+ICsjaW5jbHVkZSA8bGludXgvY3Blci5oPg0KPiA+ICsNCj4gPiArLyoNCj4gPiArICogV2Ug
+ZG9uJ3QgbmVlZCBhICJDUEVSX0lBIiBwcmVmaXggc2luY2UgdGhlc2UgYXJlIGFsbCBsb2NhbGx5
+IGRlZmluZWQuDQo+ID4gKyAqIFRoaXMgd2lsbCBzYXZlIHVzIGEgbG90IG9mIGxpbmUgc3BhY2Uu
+DQo+ID4gKyAqLw0KPiA+ICsjZGVmaW5lIFZBTElEX0xBUElDX0lECQkJQklUX1VMTCgwKQ0KPiA+
+ICsjZGVmaW5lIFZBTElEX0NQVUlEX0lORk8JCUJJVF9VTEwoMSkNCj4gPiArDQo+ID4gK3ZvaWQg
+Y3Blcl9wcmludF9wcm9jX2lhKGNvbnN0IGNoYXIgKnBmeCwgY29uc3Qgc3RydWN0IGNwZXJfc2Vj
+X3Byb2NfaWENCj4gKnByb2MpDQo+ID4gK3sNCj4gPiArCWlmIChwcm9jLT52YWxpZGF0aW9uX2Jp
+dHMgJiBWQUxJRF9MQVBJQ19JRCkNCj4gPiArCQlwcmludGsoIiVzTG9jYWwgQVBJQ19JRDogMHgl
+bGx4XG4iLCBwZngsIHByb2MtPmxhcGljX2lkKTsNCj4gPiArDQo+ID4gKwlpZiAocHJvYy0+dmFs
+aWRhdGlvbl9iaXRzICYgVkFMSURfQ1BVSURfSU5GTykgew0KPiA+ICsJCXByaW50aygiJXNDUFVJ
+RCBJbmZvOlxuIiwgcGZ4KTsNCj4gPiArCQlwcmludF9oZXhfZHVtcChwZngsICIiLCBEVU1QX1BS
+RUZJWF9PRkZTRVQsIDE2LCA0LCBwcm9jLQ0KPiA+Y3B1aWQsDQo+ID4gKwkJCSAgICAgICBzaXpl
+b2YocHJvYy0+Y3B1aWQpLCAwKTsNCj4gDQo+IFRoYXQncyBkdW1waW5nIDQ4IGJ5dGVzIG9mIHN0
+YXRpYyBpbmZvcm1hdGlvbiBmb3IgZXZlcnkgZXJyb3IhDQo+IEluZm9ybWF0aW9uIHdoaWNoIGNh
+biBiZSBkdW1wZWQgb25seSBvbmNlIHdoZW4gY29sbGVjdGluZyBzeXN0ZW0gaW5mby4NCj4gDQoN
+ClJpZ2h0LCBidXQgaGVyZSB3ZSBqdXN0IHByaW50IHRoZSByZWNvcmQgYXMtaXMuIFdlIGNhbiBk
+byBpdCBkaWZmZXJlbnQgd2hlbg0KdGhpcyBob29rcyBpbnRvIHRoZSBNQ0EgZGVjb2RpbmcuIEFu
+ZCB0aGUgdXNlLWNhc2UgYXQgdGhlIG1vbWVudCBpcyBmb3INCkJFUlQgd2hpY2ggc2hvdWxkbid0
+IGhhdmUgdmVyeSBtYW55IGVycm9ycy4NCg0KVGhhbmtzLA0KWWF6ZW4NCg==
