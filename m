@@ -1,53 +1,87 @@
-From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Subject: RE: [PATCH v3 3/8] efi: Decode IA32/X64 Processor Error Info
- Structure
-Date: Thu, 29 Mar 2018 13:53:44 +0000
-Message-ID: <DM5PR12MB19162707D0F98D1A061F0A7AF8A20@DM5PR12MB1916.namprd12.prod.outlook.com>
-References: <20180324184940.19762-1-Yazen.Ghannam@amd.com>
- <20180324184940.19762-4-Yazen.Ghannam@amd.com>
- <20180329105448.GB29198@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Borislav Petkov <bp@alien8.de>
+Subject: [PATCH] efi/cper: Remove the INDENT_SP silliness
+Date: Thu, 29 Mar 2018 16:14:20 +0200
+Message-ID: <20180329141420.13042-1-bp@alien8.de>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180329105448.GB29198@pd.tnic>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "x86@kernel.org" <x86@kernel.org>, "tony.luck@intel.com" <tony.luck@intel.com>
+To: LKML <linux-kernel@vger.kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgPGJw
-QGFsaWVuOC5kZT4NCj4gU2VudDogVGh1cnNkYXksIE1hcmNoIDI5LCAyMDE4IDY6NTUgQU0NCj4g
-VG86IEdoYW5uYW0sIFlhemVuIDxZYXplbi5HaGFubmFtQGFtZC5jb20+DQo+IENjOiBsaW51eC1l
-ZmlAdmdlci5rZXJuZWwub3JnOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOw0KPiBhcmQu
-Ymllc2hldXZlbEBsaW5hcm8ub3JnOyB4ODZAa2VybmVsLm9yZzsgdG9ueS5sdWNrQGludGVsLmNv
-bQ0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHYzIDMvOF0gZWZpOiBEZWNvZGUgSUEzMi9YNjQgUHJv
-Y2Vzc29yIEVycm9yIEluZm8NCj4gU3RydWN0dXJlDQo+IA0KPiBPbiBTYXQsIE1hciAyNCwgMjAx
-OCBhdCAwMTo0OTozNVBNIC0wNTAwLCBZYXplbiBHaGFubmFtIHdyb3RlOg0KPiA+IEZyb206IFlh
-emVuIEdoYW5uYW0gPHlhemVuLmdoYW5uYW1AYW1kLmNvbT4NCj4gPg0KPiA+IFByaW50IHRoZSBm
-aWVsZHMgaW4gdGhlIElBMzIvWDY0IFByb2Nlc3NvciBFcnJvciBJbmZvIFN0cnVjdHVyZS4NCj4g
-Pg0KPiA+IEJhc2VkIG9uIFVFRkkgMi43IFRhYmxlIDI1My4gSUEzMi9YNjQgUHJvY2Vzc29yIEVy
-cm9yIEluZm9ybWF0aW9uDQo+ID4gU3RydWN0dXJlLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTog
-WWF6ZW4gR2hhbm5hbSA8eWF6ZW4uZ2hhbm5hbUBhbWQuY29tPg0KPiA+IC0tLQ0KPiA+IExpbms6
-DQo+ID4gaHR0cHM6Ly9sa21sLmtlcm5lbC5vcmcvci8yMDE4MDIyNjE5MzkwNC4yMDUzMi00LQ0K
-PiBZYXplbi5HaGFubmFtQGFtZC5jb20NCj4gPg0KPiA+IHYyLT52MzoNCj4gPiAqIEZpeCB0YWJs
-ZSBudW1iZXIgaW4gY29tbWl0IG1lc3NhZ2UuDQo+ID4gKiBEb24ndCBwcmludCByYXcgdmFsaWRh
-dGlvbiBiaXRzLg0KPiA+DQo+ID4gdjEtPnYyOg0KPiA+ICogQWRkIHBhcmFudGhlc2VzIGFyb3Vu
-ZCAiYml0cyIgZXhwcmVzc2lvbiBpbiBtYWNyby4NCj4gPiAqIEZpeCBpbmRlbnRhdGlvbiBvbiBt
-dWx0aS1saW5lIHN0YXRlbWVudHMuDQo+ID4NCj4gPiAgZHJpdmVycy9maXJtd2FyZS9lZmkvY3Bl
-ci14ODYuYyB8IDUwDQo+ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-DQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCA1MCBpbnNlcnRpb25zKCspDQo+ID4NCj4gPiBkaWZmIC0t
-Z2l0IGEvZHJpdmVycy9maXJtd2FyZS9lZmkvY3Blci14ODYuYyBiL2RyaXZlcnMvZmlybXdhcmUv
-ZWZpL2NwZXItDQo+IHg4Ni5jDQo+ID4gaW5kZXggODYzZjBjZDJhMGZmLi5hOWFiM2JiZjc5ODYg
-MTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9maXJtd2FyZS9lZmkvY3Blci14ODYuYw0KPiA+ICsr
-KyBiL2RyaXZlcnMvZmlybXdhcmUvZWZpL2NwZXIteDg2LmMNCj4gPiBAQCAtMywxNSArMywyOCBA
-QA0KPiA+DQo+ID4gICNpbmNsdWRlIDxsaW51eC9jcGVyLmg+DQo+ID4NCj4gPiArI2RlZmluZSBJ
-TkRFTlRfU1AJIiAiDQo+IA0KPiBUaGVyZSdzIHRoYXQgdGhpbmcgYWdhaW4uIFNvIGl0IHdhcyBh
-IHRvdGFsIHdhc3RlIG9mIHRpbWUgZGlzY3Vzc2luZw0KPiB0aGlzIGxhc3QgdGltZS4gU28gbGV0
-IG1lIHNhdmUgbXkgdGltZSB0aGlzIHRpbWU6DQo+IA0KPiBOQUtlZC1ieTogQm9yaXNsYXYgUGV0
-a292IDxicEBzdXNlLmRlPg0KPiANCg0KSUlSQywgdGhlIGFyZ3VtZW50cyBmb3Iga2VlcGluZyB0
-aGlzIGFyZQ0KMSkgY29udmVudGlvbiBmb3IgQ1BFUg0KMikgY29kZSByZWFkYWJpbGl0eQ0KDQpU
-aGUgYXJndW1lbnQgYWdhaW5zdCB3YXMNCjEpIGl0J3MgZHVtYg0KDQpTbyBJIGRlY2lkZWQgdG8g
-a2VlcCBpdC4gSSBkb24ndCByZWFsbHkgbWluZCBlaXRoZXIgd2F5IHNvIEknbGwgY2hhbmdlIGl0
-DQppZiB0aGVyZSdzIGEgc2Vjb25kIG9waW5pb24uDQoNClRoYW5rcywNCllhemVuDQo=
+From: Borislav Petkov <bp@suse.de>
+
+A separate define just to print a space character is silly and
+completely unneeded. Remove it.
+
+Signed-off-by: Borislav Petkov <bp@suse.de>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org
+---
+ drivers/firmware/efi/cper-arm.c | 6 ++----
+ drivers/firmware/efi/cper.c     | 6 ++----
+ 2 files changed, 4 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/firmware/efi/cper-arm.c b/drivers/firmware/efi/cper-arm.c
+index 698e5c8e0c8d..502811344e81 100644
+--- a/drivers/firmware/efi/cper-arm.c
++++ b/drivers/firmware/efi/cper-arm.c
+@@ -30,8 +30,6 @@
+ #include <acpi/ghes.h>
+ #include <ras/ras_event.h>
+ 
+-#define INDENT_SP	" "
+-
+ static const char * const arm_reg_ctx_strs[] = {
+ 	"AArch32 general purpose registers",
+ 	"AArch32 EL1 context registers",
+@@ -283,7 +281,7 @@ void cper_print_proc_arm(const char *pfx,
+ 			pfx, proc->psci_state);
+ 	}
+ 
+-	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
++	snprintf(newpfx, sizeof(newpfx), "%s ", pfx);
+ 
+ 	err_info = (struct cper_arm_err_info *)(proc + 1);
+ 	for (i = 0; i < proc->err_info_num; i++) {
+@@ -310,7 +308,7 @@ void cper_print_proc_arm(const char *pfx,
+ 		if (err_info->validation_bits & CPER_ARM_INFO_VALID_ERR_INFO) {
+ 			printk("%serror_info: 0x%016llx\n", newpfx,
+ 			       err_info->error_info);
+-			snprintf(infopfx, sizeof(infopfx), "%s%s", newpfx, INDENT_SP);
++			snprintf(infopfx, sizeof(infopfx), "%s ", newpfx);
+ 			cper_print_arm_err_info(infopfx, err_info->type,
+ 						err_info->error_info);
+ 		}
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index 5a59b582c9aa..3bf0dca378a6 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -37,8 +37,6 @@
+ #include <acpi/ghes.h>
+ #include <ras/ras_event.h>
+ 
+-#define INDENT_SP	" "
+-
+ static char rcd_decode_str[CPER_REC_LEN];
+ 
+ /*
+@@ -433,7 +431,7 @@ cper_estatus_print_section(const char *pfx, struct acpi_hest_generic_data *gdata
+ 	if (gdata->validation_bits & CPER_SEC_VALID_FRU_TEXT)
+ 		printk("%s""fru_text: %.20s\n", pfx, gdata->fru_text);
+ 
+-	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
++	snprintf(newpfx, sizeof(newpfx), "%s ", pfx);
+ 	if (guid_equal(sec_type, &CPER_SEC_PROC_GENERIC)) {
+ 		struct cper_sec_proc_generic *proc_err = acpi_hest_get_payload(gdata);
+ 
+@@ -510,7 +508,7 @@ void cper_estatus_print(const char *pfx,
+ 		       "It has been corrected by h/w "
+ 		       "and requires no further action");
+ 	printk("%s""event severity: %s\n", pfx, cper_severity_str(severity));
+-	snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
++	snprintf(newpfx, sizeof(newpfx), "%s ", pfx);
+ 
+ 	apei_estatus_for_each_section(estatus, gdata) {
+ 		cper_estatus_print_section(newpfx, gdata, sec_no);
+-- 
+2.13.0
