@@ -1,98 +1,80 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] efi/cper: Remove the INDENT_SP silliness
-Date: Thu, 29 Mar 2018 17:21:22 +0200
-Message-ID: <CAKv+Gu8ZqpmM9XFjU4LBrm3sdP5rH8TBxvtU4_a0VbT+qo856w@mail.gmail.com>
-References: <20180329141420.13042-1-bp@alien8.de>
+Subject: Re: [PATCH v3 3/8] efi: Decode IA32/X64 Processor Error Info Structure
+Date: Fri, 30 Mar 2018 12:25:23 +0100
+Message-ID: <CAKv+Gu_6D03iGvxsmiQS_ODET2cv4f7kVsK5S5EKhiVN1YxRaw@mail.gmail.com>
+References: <20180324184940.19762-1-Yazen.Ghannam@amd.com> <20180324184940.19762-4-Yazen.Ghannam@amd.com>
+ <20180329105448.GB29198@pd.tnic> <DM5PR12MB19162707D0F98D1A061F0A7AF8A20@DM5PR12MB1916.namprd12.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180329141420.13042-1-bp@alien8.de>
+In-Reply-To: <DM5PR12MB19162707D0F98D1A061F0A7AF8A20@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org
+To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Cc: Borislav Petkov <bp@alien8.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "tony.luck@intel.com" <tony.luck@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 29 March 2018 at 16:14, Borislav Petkov <bp@alien8.de> wrote:
-> From: Borislav Petkov <bp@suse.de>
+On 29 March 2018 at 14:53, Ghannam, Yazen <Yazen.Ghannam@amd.com> wrote:
+>> -----Original Message-----
+>> From: Borislav Petkov <bp@alien8.de>
+>> Sent: Thursday, March 29, 2018 6:55 AM
+>> To: Ghannam, Yazen <Yazen.Ghannam@amd.com>
+>> Cc: linux-efi@vger.kernel.org; linux-kernel@vger.kernel.org;
+>> ard.biesheuvel@linaro.org; x86@kernel.org; tony.luck@intel.com
+>> Subject: Re: [PATCH v3 3/8] efi: Decode IA32/X64 Processor Error Info
+>> Structure
+>>
+>> On Sat, Mar 24, 2018 at 01:49:35PM -0500, Yazen Ghannam wrote:
+>> > From: Yazen Ghannam <yazen.ghannam@amd.com>
+>> >
+>> > Print the fields in the IA32/X64 Processor Error Info Structure.
+>> >
+>> > Based on UEFI 2.7 Table 253. IA32/X64 Processor Error Information
+>> > Structure.
+>> >
+>> > Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
+>> > ---
+>> > Link:
+>> > https://lkml.kernel.org/r/20180226193904.20532-4-
+>> Yazen.Ghannam@amd.com
+>> >
+>> > v2->v3:
+>> > * Fix table number in commit message.
+>> > * Don't print raw validation bits.
+>> >
+>> > v1->v2:
+>> > * Add parantheses around "bits" expression in macro.
+>> > * Fix indentation on multi-line statements.
+>> >
+>> >  drivers/firmware/efi/cper-x86.c | 50
+>> +++++++++++++++++++++++++++++++++++++++++
+>> >  1 file changed, 50 insertions(+)
+>> >
+>> > diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-
+>> x86.c
+>> > index 863f0cd2a0ff..a9ab3bbf7986 100644
+>> > --- a/drivers/firmware/efi/cper-x86.c
+>> > +++ b/drivers/firmware/efi/cper-x86.c
+>> > @@ -3,15 +3,28 @@
+>> >
+>> >  #include <linux/cper.h>
+>> >
+>> > +#define INDENT_SP  " "
+>>
+>> There's that thing again. So it was a total waste of time discussing
+>> this last time. So let me save my time this time:
+>>
+>> NAKed-by: Borislav Petkov <bp@suse.de>
+>>
 >
-> A separate define just to print a space character is silly and
-> completely unneeded. Remove it.
+> IIRC, the arguments for keeping this are
+> 1) convention for CPER
+> 2) code readability
 >
-> Signed-off-by: Borislav Petkov <bp@suse.de>
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> Cc: linux-efi@vger.kernel.org
+> The argument against was
+> 1) it's dumb
+>
+> So I decided to keep it. I don't really mind either way so I'll change it
+> if there's a second opinion.
+>
 
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-
-I'll pick this up after the merge window
-
-> ---
->  drivers/firmware/efi/cper-arm.c | 6 ++----
->  drivers/firmware/efi/cper.c     | 6 ++----
->  2 files changed, 4 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/firmware/efi/cper-arm.c b/drivers/firmware/efi/cper-arm.c
-> index 698e5c8e0c8d..502811344e81 100644
-> --- a/drivers/firmware/efi/cper-arm.c
-> +++ b/drivers/firmware/efi/cper-arm.c
-> @@ -30,8 +30,6 @@
->  #include <acpi/ghes.h>
->  #include <ras/ras_event.h>
->
-> -#define INDENT_SP      " "
-> -
->  static const char * const arm_reg_ctx_strs[] = {
->         "AArch32 general purpose registers",
->         "AArch32 EL1 context registers",
-> @@ -283,7 +281,7 @@ void cper_print_proc_arm(const char *pfx,
->                         pfx, proc->psci_state);
->         }
->
-> -       snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
-> +       snprintf(newpfx, sizeof(newpfx), "%s ", pfx);
->
->         err_info = (struct cper_arm_err_info *)(proc + 1);
->         for (i = 0; i < proc->err_info_num; i++) {
-> @@ -310,7 +308,7 @@ void cper_print_proc_arm(const char *pfx,
->                 if (err_info->validation_bits & CPER_ARM_INFO_VALID_ERR_INFO) {
->                         printk("%serror_info: 0x%016llx\n", newpfx,
->                                err_info->error_info);
-> -                       snprintf(infopfx, sizeof(infopfx), "%s%s", newpfx, INDENT_SP);
-> +                       snprintf(infopfx, sizeof(infopfx), "%s ", newpfx);
->                         cper_print_arm_err_info(infopfx, err_info->type,
->                                                 err_info->error_info);
->                 }
-> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> index 5a59b582c9aa..3bf0dca378a6 100644
-> --- a/drivers/firmware/efi/cper.c
-> +++ b/drivers/firmware/efi/cper.c
-> @@ -37,8 +37,6 @@
->  #include <acpi/ghes.h>
->  #include <ras/ras_event.h>
->
-> -#define INDENT_SP      " "
-> -
->  static char rcd_decode_str[CPER_REC_LEN];
->
->  /*
-> @@ -433,7 +431,7 @@ cper_estatus_print_section(const char *pfx, struct acpi_hest_generic_data *gdata
->         if (gdata->validation_bits & CPER_SEC_VALID_FRU_TEXT)
->                 printk("%s""fru_text: %.20s\n", pfx, gdata->fru_text);
->
-> -       snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
-> +       snprintf(newpfx, sizeof(newpfx), "%s ", pfx);
->         if (guid_equal(sec_type, &CPER_SEC_PROC_GENERIC)) {
->                 struct cper_sec_proc_generic *proc_err = acpi_hest_get_payload(gdata);
->
-> @@ -510,7 +508,7 @@ void cper_estatus_print(const char *pfx,
->                        "It has been corrected by h/w "
->                        "and requires no further action");
->         printk("%s""event severity: %s\n", pfx, cper_severity_str(severity));
-> -       snprintf(newpfx, sizeof(newpfx), "%s%s", pfx, INDENT_SP);
-> +       snprintf(newpfx, sizeof(newpfx), "%s ", pfx);
->
->         apei_estatus_for_each_section(estatus, gdata) {
->                 cper_estatus_print_section(newpfx, gdata, sec_no);
-> --
-> 2.13.0
->
+Yes, please change it.
