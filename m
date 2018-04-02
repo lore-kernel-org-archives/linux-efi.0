@@ -1,69 +1,97 @@
-From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Subject: RE: [PATCH v3 3/8] efi: Decode IA32/X64 Processor Error Info
- Structure
-Date: Mon, 2 Apr 2018 13:21:20 +0000
-Message-ID: <DM5PR12MB1916AC5CC36AEF4364C7D317F8A60@DM5PR12MB1916.namprd12.prod.outlook.com>
-References: <20180324184940.19762-1-Yazen.Ghannam@amd.com>
- <20180324184940.19762-4-Yazen.Ghannam@amd.com>
- <20180329105448.GB29198@pd.tnic>
- <DM5PR12MB19162707D0F98D1A061F0A7AF8A20@DM5PR12MB1916.namprd12.prod.outlook.com>
- <CAKv+Gu_6D03iGvxsmiQS_ODET2cv4f7kVsK5S5EKhiVN1YxRaw@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v3 3/8] efi: Decode IA32/X64 Processor Error Info Structure
+Date: Mon, 2 Apr 2018 15:22:06 +0200
+Message-ID: <CAKv+Gu_6=WEapKMaqpkg+qKh1f4HqQRx0ascZXfr4HYJAPOBnA@mail.gmail.com>
+References: <20180324184940.19762-1-Yazen.Ghannam@amd.com> <20180324184940.19762-4-Yazen.Ghannam@amd.com>
+ <20180329105448.GB29198@pd.tnic> <DM5PR12MB19162707D0F98D1A061F0A7AF8A20@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <CAKv+Gu_6D03iGvxsmiQS_ODET2cv4f7kVsK5S5EKhiVN1YxRaw@mail.gmail.com> <DM5PR12MB1916AC5CC36AEF4364C7D317F8A60@DM5PR12MB1916.namprd12.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu_6D03iGvxsmiQS_ODET2cv4f7kVsK5S5EKhiVN1YxRaw@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <DM5PR12MB1916AC5CC36AEF4364C7D317F8A60@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
 Cc: Borislav Petkov <bp@alien8.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "tony.luck@intel.com" <tony.luck@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBcmQgQmllc2hldXZlbCA8YXJk
-LmJpZXNoZXV2ZWxAbGluYXJvLm9yZz4NCj4gU2VudDogRnJpZGF5LCBNYXJjaCAzMCwgMjAxOCA3
-OjI1IEFNDQo+IFRvOiBHaGFubmFtLCBZYXplbiA8WWF6ZW4uR2hhbm5hbUBhbWQuY29tPg0KPiBD
-YzogQm9yaXNsYXYgUGV0a292IDxicEBhbGllbjguZGU+OyBsaW51eC1lZmlAdmdlci5rZXJuZWwu
-b3JnOyBsaW51eC0NCj4ga2VybmVsQHZnZXIua2VybmVsLm9yZzsgeDg2QGtlcm5lbC5vcmc7IHRv
-bnkubHVja0BpbnRlbC5jb20NCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2MyAzLzhdIGVmaTogRGVj
-b2RlIElBMzIvWDY0IFByb2Nlc3NvciBFcnJvciBJbmZvIFN0cnVjdHVyZQ0KPiANCj4gT24gMjkg
-TWFyY2ggMjAxOCBhdCAxNDo1MywgR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5uYW1AYW1kLmNv
-bT4NCj4gd3JvdGU6DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206
-IEJvcmlzbGF2IFBldGtvdiA8YnBAYWxpZW44LmRlPg0KPiA+PiBTZW50OiBUaHVyc2RheSwgTWFy
-Y2ggMjksIDIwMTggNjo1NSBBTQ0KPiA+PiBUbzogR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5u
-YW1AYW1kLmNvbT4NCj4gPj4gQ2M6IGxpbnV4LWVmaUB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWtl
-cm5lbEB2Z2VyLmtlcm5lbC5vcmc7DQo+ID4+IGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc7IHg4
-NkBrZXJuZWwub3JnOyB0b255Lmx1Y2tAaW50ZWwuY29tDQo+ID4+IFN1YmplY3Q6IFJlOiBbUEFU
-Q0ggdjMgMy84XSBlZmk6IERlY29kZSBJQTMyL1g2NCBQcm9jZXNzb3IgRXJyb3IgSW5mbw0KPiA+
-PiBTdHJ1Y3R1cmUNCj4gPj4NCj4gPj4gT24gU2F0LCBNYXIgMjQsIDIwMTggYXQgMDE6NDk6MzVQ
-TSAtMDUwMCwgWWF6ZW4gR2hhbm5hbSB3cm90ZToNCj4gPj4gPiBGcm9tOiBZYXplbiBHaGFubmFt
-IDx5YXplbi5naGFubmFtQGFtZC5jb20+DQo+ID4+ID4NCj4gPj4gPiBQcmludCB0aGUgZmllbGRz
-IGluIHRoZSBJQTMyL1g2NCBQcm9jZXNzb3IgRXJyb3IgSW5mbyBTdHJ1Y3R1cmUuDQo+ID4+ID4N
-Cj4gPj4gPiBCYXNlZCBvbiBVRUZJIDIuNyBUYWJsZSAyNTMuIElBMzIvWDY0IFByb2Nlc3NvciBF
-cnJvciBJbmZvcm1hdGlvbg0KPiA+PiA+IFN0cnVjdHVyZS4NCj4gPj4gPg0KPiA+PiA+IFNpZ25l
-ZC1vZmYtYnk6IFlhemVuIEdoYW5uYW0gPHlhemVuLmdoYW5uYW1AYW1kLmNvbT4NCj4gPj4gPiAt
-LS0NCj4gPj4gPiBMaW5rOg0KPiA+PiA+IGh0dHBzOi8vbGttbC5rZXJuZWwub3JnL3IvMjAxODAy
-MjYxOTM5MDQuMjA1MzItNC0NCj4gPj4gWWF6ZW4uR2hhbm5hbUBhbWQuY29tDQo+ID4+ID4NCj4g
-Pj4gPiB2Mi0+djM6DQo+ID4+ID4gKiBGaXggdGFibGUgbnVtYmVyIGluIGNvbW1pdCBtZXNzYWdl
-Lg0KPiA+PiA+ICogRG9uJ3QgcHJpbnQgcmF3IHZhbGlkYXRpb24gYml0cy4NCj4gPj4gPg0KPiA+
-PiA+IHYxLT52MjoNCj4gPj4gPiAqIEFkZCBwYXJhbnRoZXNlcyBhcm91bmQgImJpdHMiIGV4cHJl
-c3Npb24gaW4gbWFjcm8uDQo+ID4+ID4gKiBGaXggaW5kZW50YXRpb24gb24gbXVsdGktbGluZSBz
-dGF0ZW1lbnRzLg0KPiA+PiA+DQo+ID4+ID4gIGRyaXZlcnMvZmlybXdhcmUvZWZpL2NwZXIteDg2
-LmMgfCA1MA0KPiA+PiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKw0K
-PiA+PiA+ICAxIGZpbGUgY2hhbmdlZCwgNTAgaW5zZXJ0aW9ucygrKQ0KPiA+PiA+DQo+ID4+ID4g
-ZGlmZiAtLWdpdCBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL2NwZXIteDg2LmMgYi9kcml2ZXJzL2Zp
-cm13YXJlL2VmaS9jcGVyLQ0KPiA+PiB4ODYuYw0KPiA+PiA+IGluZGV4IDg2M2YwY2QyYTBmZi4u
-YTlhYjNiYmY3OTg2IDEwMDY0NA0KPiA+PiA+IC0tLSBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL2Nw
-ZXIteDg2LmMNCj4gPj4gPiArKysgYi9kcml2ZXJzL2Zpcm13YXJlL2VmaS9jcGVyLXg4Ni5jDQo+
-ID4+ID4gQEAgLTMsMTUgKzMsMjggQEANCj4gPj4gPg0KPiA+PiA+ICAjaW5jbHVkZSA8bGludXgv
-Y3Blci5oPg0KPiA+PiA+DQo+ID4+ID4gKyNkZWZpbmUgSU5ERU5UX1NQICAiICINCj4gPj4NCj4g
-Pj4gVGhlcmUncyB0aGF0IHRoaW5nIGFnYWluLiBTbyBpdCB3YXMgYSB0b3RhbCB3YXN0ZSBvZiB0
-aW1lIGRpc2N1c3NpbmcNCj4gPj4gdGhpcyBsYXN0IHRpbWUuIFNvIGxldCBtZSBzYXZlIG15IHRp
-bWUgdGhpcyB0aW1lOg0KPiA+Pg0KPiA+PiBOQUtlZC1ieTogQm9yaXNsYXYgUGV0a292IDxicEBz
-dXNlLmRlPg0KPiA+Pg0KPiA+DQo+ID4gSUlSQywgdGhlIGFyZ3VtZW50cyBmb3Iga2VlcGluZyB0
-aGlzIGFyZQ0KPiA+IDEpIGNvbnZlbnRpb24gZm9yIENQRVINCj4gPiAyKSBjb2RlIHJlYWRhYmls
-aXR5DQo+ID4NCj4gPiBUaGUgYXJndW1lbnQgYWdhaW5zdCB3YXMNCj4gPiAxKSBpdCdzIGR1bWIN
-Cj4gPg0KPiA+IFNvIEkgZGVjaWRlZCB0byBrZWVwIGl0LiBJIGRvbid0IHJlYWxseSBtaW5kIGVp
-dGhlciB3YXkgc28gSSdsbCBjaGFuZ2UgaXQNCj4gPiBpZiB0aGVyZSdzIGEgc2Vjb25kIG9waW5p
-b24uDQo+ID4NCj4gDQo+IFllcywgcGxlYXNlIGNoYW5nZSBpdC4NCg0KT2theSwgd2lsbCBkby4g
-U2hvdWxkIEkgaW5jbHVkZSBhIHBhdGNoIHRoYXQgY2hhbmdlcyBpdCBmb3IgdGhlIG90aGVyIENQ
-RVINCmNvZGUgYWxzbz8NCg0KVGhhbmtzLA0KWWF6ZW4NCg==
+On 2 April 2018 at 15:21, Ghannam, Yazen <Yazen.Ghannam@amd.com> wrote:
+>> -----Original Message-----
+>> From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>> Sent: Friday, March 30, 2018 7:25 AM
+>> To: Ghannam, Yazen <Yazen.Ghannam@amd.com>
+>> Cc: Borislav Petkov <bp@alien8.de>; linux-efi@vger.kernel.org; linux-
+>> kernel@vger.kernel.org; x86@kernel.org; tony.luck@intel.com
+>> Subject: Re: [PATCH v3 3/8] efi: Decode IA32/X64 Processor Error Info Structure
+>>
+>> On 29 March 2018 at 14:53, Ghannam, Yazen <Yazen.Ghannam@amd.com>
+>> wrote:
+>> >> -----Original Message-----
+>> >> From: Borislav Petkov <bp@alien8.de>
+>> >> Sent: Thursday, March 29, 2018 6:55 AM
+>> >> To: Ghannam, Yazen <Yazen.Ghannam@amd.com>
+>> >> Cc: linux-efi@vger.kernel.org; linux-kernel@vger.kernel.org;
+>> >> ard.biesheuvel@linaro.org; x86@kernel.org; tony.luck@intel.com
+>> >> Subject: Re: [PATCH v3 3/8] efi: Decode IA32/X64 Processor Error Info
+>> >> Structure
+>> >>
+>> >> On Sat, Mar 24, 2018 at 01:49:35PM -0500, Yazen Ghannam wrote:
+>> >> > From: Yazen Ghannam <yazen.ghannam@amd.com>
+>> >> >
+>> >> > Print the fields in the IA32/X64 Processor Error Info Structure.
+>> >> >
+>> >> > Based on UEFI 2.7 Table 253. IA32/X64 Processor Error Information
+>> >> > Structure.
+>> >> >
+>> >> > Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
+>> >> > ---
+>> >> > Link:
+>> >> > https://lkml.kernel.org/r/20180226193904.20532-4-
+>> >> Yazen.Ghannam@amd.com
+>> >> >
+>> >> > v2->v3:
+>> >> > * Fix table number in commit message.
+>> >> > * Don't print raw validation bits.
+>> >> >
+>> >> > v1->v2:
+>> >> > * Add parantheses around "bits" expression in macro.
+>> >> > * Fix indentation on multi-line statements.
+>> >> >
+>> >> >  drivers/firmware/efi/cper-x86.c | 50
+>> >> +++++++++++++++++++++++++++++++++++++++++
+>> >> >  1 file changed, 50 insertions(+)
+>> >> >
+>> >> > diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-
+>> >> x86.c
+>> >> > index 863f0cd2a0ff..a9ab3bbf7986 100644
+>> >> > --- a/drivers/firmware/efi/cper-x86.c
+>> >> > +++ b/drivers/firmware/efi/cper-x86.c
+>> >> > @@ -3,15 +3,28 @@
+>> >> >
+>> >> >  #include <linux/cper.h>
+>> >> >
+>> >> > +#define INDENT_SP  " "
+>> >>
+>> >> There's that thing again. So it was a total waste of time discussing
+>> >> this last time. So let me save my time this time:
+>> >>
+>> >> NAKed-by: Borislav Petkov <bp@suse.de>
+>> >>
+>> >
+>> > IIRC, the arguments for keeping this are
+>> > 1) convention for CPER
+>> > 2) code readability
+>> >
+>> > The argument against was
+>> > 1) it's dumb
+>> >
+>> > So I decided to keep it. I don't really mind either way so I'll change it
+>> > if there's a second opinion.
+>> >
+>>
+>> Yes, please change it.
+>
+> Okay, will do. Should I include a patch that changes it for the other CPER
+> code also?
+>
+
+No worries, Boris already sent that out.
