@@ -1,97 +1,69 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: [GIT PULL] EFI updates for v4.17
-Date: Mon, 2 Apr 2018 12:41:48 +0200
-Message-ID: <20180402104148.m3hhkhjhdb5y7gyu@gmail.com>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH v3 3/8] efi: Decode IA32/X64 Processor Error Info
+ Structure
+Date: Mon, 2 Apr 2018 13:21:20 +0000
+Message-ID: <DM5PR12MB1916AC5CC36AEF4364C7D317F8A60@DM5PR12MB1916.namprd12.prod.outlook.com>
+References: <20180324184940.19762-1-Yazen.Ghannam@amd.com>
+ <20180324184940.19762-4-Yazen.Ghannam@amd.com>
+ <20180329105448.GB29198@pd.tnic>
+ <DM5PR12MB19162707D0F98D1A061F0A7AF8A20@DM5PR12MB1916.namprd12.prod.outlook.com>
+ <CAKv+Gu_6D03iGvxsmiQS_ODET2cv4f7kVsK5S5EKhiVN1YxRaw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
+In-Reply-To: <CAKv+Gu_6D03iGvxsmiQS_ODET2cv4f7kVsK5S5EKhiVN1YxRaw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Andrew Morton <akpm@linux-foundation.org>, linux-efi@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "tony.luck@intel.com" <tony.luck@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Linus,
-
-Please pull the latest efi-core-for-linus git tree from:
-
-   git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
-
-   # HEAD: 03781e40890c18bdea40092355b61431d0073c1d x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
-
-NOTE: this tree depends on the x86/mm tree - if you have not pulled that tree
-      then please disregard this pull request.
-
-The main EFI changes in this cycle were:
-
- - Fix the apple-properties code                 (Andy Shevchenko)
-
- - Add WARN() on arm64 if UEFI Runtime Services corrupt the
-   reserved x18 register
-                                                 (Ard Biesheuvel)
-
- - Use efi_switch_mm() on x86 instead of manipulating %cr3 directly
-
-                                                 (Sai Praneeth)
-
- - Fix early memremap leak in ESRT code          (Ard Biesheuvel)
-
- - Switch to L"xxx" notation for wide string literals
-
-                                                 (Ard Biesheuvel)
-
- - ... plus misc other cleanups and bugfixes
-
- Thanks,
-
-	Ingo
-
------------------->
-Andy Shevchenko (2):
-      efi/apple-properties: Remove redundant attribute initialization from unmarshal_key_value_pairs()
-      efi/apple-properties: Use memremap() instead of ioremap()
-
-Ard Biesheuvel (5):
-      efi/arm*: Stop printing addresses of virtual mappings
-      efi/arm64: Check whether x18 is preserved by runtime services calls
-      efi: Reorder pr_notice() with add_device_randomness() call
-      efi/esrt: Fix handling of early ESRT table mapping
-      efi: Use string literals for efi_char16_t variable initializers
-
-Colin Ian King (1):
-      efi: Make const array 'apple' static
-
-Ingo Molnar (1):
-      Merge branch 'x86/mm' into efi/core
-
-Jia-Ju Bai (1):
-      x86/efi: Replace GFP_ATOMIC with GFP_KERNEL in efi_query_variable_store()
-
-Mark Rutland (1):
-      efi/arm*: Only register page tables when they exist
-
-Sai Praneeth (3):
-      efi: Use efi_mm in x86 as well as ARM
-      x86/efi: Replace efi_pgd with efi_mm.pgd
-      x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
-
- arch/arm64/include/asm/efi.h              |  4 +++-
- arch/arm64/kernel/Makefile                |  3 ++-
- arch/arm64/kernel/efi-rt-wrapper.S        | 41 +++++++++++++++++++++++++++++++++++++++++
- arch/arm64/kernel/efi.c                   |  6 ++++++
- arch/x86/boot/compressed/eboot.c          |  3 ++-
- arch/x86/include/asm/efi.h                | 26 +++++++++++---------------
- arch/x86/mm/debug_pagetables.c            |  6 +++---
- arch/x86/platform/efi/efi_64.c            | 60 +++++++++++++++++++++++++++++++++---------------------------
- arch/x86/platform/efi/efi_thunk_64.S      |  2 +-
- arch/x86/platform/efi/quirks.c            | 10 ++++++----
- drivers/firmware/efi/apple-properties.c   | 20 +++++++-------------
- drivers/firmware/efi/arm-runtime.c        | 17 ++++-------------
- drivers/firmware/efi/efi.c                | 11 ++++++++++-
- drivers/firmware/efi/esrt.c               | 17 ++++-------------
- drivers/firmware/efi/libstub/Makefile     |  2 +-
- drivers/firmware/efi/libstub/secureboot.c | 12 +++---------
- drivers/firmware/efi/libstub/tpm.c        |  7 ++-----
- include/linux/efi.h                       |  2 ++
- 18 files changed, 141 insertions(+), 108 deletions(-)
- create mode 100644 arch/arm64/kernel/efi-rt-wrapper.S
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBcmQgQmllc2hldXZlbCA8YXJk
+LmJpZXNoZXV2ZWxAbGluYXJvLm9yZz4NCj4gU2VudDogRnJpZGF5LCBNYXJjaCAzMCwgMjAxOCA3
+OjI1IEFNDQo+IFRvOiBHaGFubmFtLCBZYXplbiA8WWF6ZW4uR2hhbm5hbUBhbWQuY29tPg0KPiBD
+YzogQm9yaXNsYXYgUGV0a292IDxicEBhbGllbjguZGU+OyBsaW51eC1lZmlAdmdlci5rZXJuZWwu
+b3JnOyBsaW51eC0NCj4ga2VybmVsQHZnZXIua2VybmVsLm9yZzsgeDg2QGtlcm5lbC5vcmc7IHRv
+bnkubHVja0BpbnRlbC5jb20NCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2MyAzLzhdIGVmaTogRGVj
+b2RlIElBMzIvWDY0IFByb2Nlc3NvciBFcnJvciBJbmZvIFN0cnVjdHVyZQ0KPiANCj4gT24gMjkg
+TWFyY2ggMjAxOCBhdCAxNDo1MywgR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5uYW1AYW1kLmNv
+bT4NCj4gd3JvdGU6DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206
+IEJvcmlzbGF2IFBldGtvdiA8YnBAYWxpZW44LmRlPg0KPiA+PiBTZW50OiBUaHVyc2RheSwgTWFy
+Y2ggMjksIDIwMTggNjo1NSBBTQ0KPiA+PiBUbzogR2hhbm5hbSwgWWF6ZW4gPFlhemVuLkdoYW5u
+YW1AYW1kLmNvbT4NCj4gPj4gQ2M6IGxpbnV4LWVmaUB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWtl
+cm5lbEB2Z2VyLmtlcm5lbC5vcmc7DQo+ID4+IGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc7IHg4
+NkBrZXJuZWwub3JnOyB0b255Lmx1Y2tAaW50ZWwuY29tDQo+ID4+IFN1YmplY3Q6IFJlOiBbUEFU
+Q0ggdjMgMy84XSBlZmk6IERlY29kZSBJQTMyL1g2NCBQcm9jZXNzb3IgRXJyb3IgSW5mbw0KPiA+
+PiBTdHJ1Y3R1cmUNCj4gPj4NCj4gPj4gT24gU2F0LCBNYXIgMjQsIDIwMTggYXQgMDE6NDk6MzVQ
+TSAtMDUwMCwgWWF6ZW4gR2hhbm5hbSB3cm90ZToNCj4gPj4gPiBGcm9tOiBZYXplbiBHaGFubmFt
+IDx5YXplbi5naGFubmFtQGFtZC5jb20+DQo+ID4+ID4NCj4gPj4gPiBQcmludCB0aGUgZmllbGRz
+IGluIHRoZSBJQTMyL1g2NCBQcm9jZXNzb3IgRXJyb3IgSW5mbyBTdHJ1Y3R1cmUuDQo+ID4+ID4N
+Cj4gPj4gPiBCYXNlZCBvbiBVRUZJIDIuNyBUYWJsZSAyNTMuIElBMzIvWDY0IFByb2Nlc3NvciBF
+cnJvciBJbmZvcm1hdGlvbg0KPiA+PiA+IFN0cnVjdHVyZS4NCj4gPj4gPg0KPiA+PiA+IFNpZ25l
+ZC1vZmYtYnk6IFlhemVuIEdoYW5uYW0gPHlhemVuLmdoYW5uYW1AYW1kLmNvbT4NCj4gPj4gPiAt
+LS0NCj4gPj4gPiBMaW5rOg0KPiA+PiA+IGh0dHBzOi8vbGttbC5rZXJuZWwub3JnL3IvMjAxODAy
+MjYxOTM5MDQuMjA1MzItNC0NCj4gPj4gWWF6ZW4uR2hhbm5hbUBhbWQuY29tDQo+ID4+ID4NCj4g
+Pj4gPiB2Mi0+djM6DQo+ID4+ID4gKiBGaXggdGFibGUgbnVtYmVyIGluIGNvbW1pdCBtZXNzYWdl
+Lg0KPiA+PiA+ICogRG9uJ3QgcHJpbnQgcmF3IHZhbGlkYXRpb24gYml0cy4NCj4gPj4gPg0KPiA+
+PiA+IHYxLT52MjoNCj4gPj4gPiAqIEFkZCBwYXJhbnRoZXNlcyBhcm91bmQgImJpdHMiIGV4cHJl
+c3Npb24gaW4gbWFjcm8uDQo+ID4+ID4gKiBGaXggaW5kZW50YXRpb24gb24gbXVsdGktbGluZSBz
+dGF0ZW1lbnRzLg0KPiA+PiA+DQo+ID4+ID4gIGRyaXZlcnMvZmlybXdhcmUvZWZpL2NwZXIteDg2
+LmMgfCA1MA0KPiA+PiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKw0K
+PiA+PiA+ICAxIGZpbGUgY2hhbmdlZCwgNTAgaW5zZXJ0aW9ucygrKQ0KPiA+PiA+DQo+ID4+ID4g
+ZGlmZiAtLWdpdCBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL2NwZXIteDg2LmMgYi9kcml2ZXJzL2Zp
+cm13YXJlL2VmaS9jcGVyLQ0KPiA+PiB4ODYuYw0KPiA+PiA+IGluZGV4IDg2M2YwY2QyYTBmZi4u
+YTlhYjNiYmY3OTg2IDEwMDY0NA0KPiA+PiA+IC0tLSBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL2Nw
+ZXIteDg2LmMNCj4gPj4gPiArKysgYi9kcml2ZXJzL2Zpcm13YXJlL2VmaS9jcGVyLXg4Ni5jDQo+
+ID4+ID4gQEAgLTMsMTUgKzMsMjggQEANCj4gPj4gPg0KPiA+PiA+ICAjaW5jbHVkZSA8bGludXgv
+Y3Blci5oPg0KPiA+PiA+DQo+ID4+ID4gKyNkZWZpbmUgSU5ERU5UX1NQICAiICINCj4gPj4NCj4g
+Pj4gVGhlcmUncyB0aGF0IHRoaW5nIGFnYWluLiBTbyBpdCB3YXMgYSB0b3RhbCB3YXN0ZSBvZiB0
+aW1lIGRpc2N1c3NpbmcNCj4gPj4gdGhpcyBsYXN0IHRpbWUuIFNvIGxldCBtZSBzYXZlIG15IHRp
+bWUgdGhpcyB0aW1lOg0KPiA+Pg0KPiA+PiBOQUtlZC1ieTogQm9yaXNsYXYgUGV0a292IDxicEBz
+dXNlLmRlPg0KPiA+Pg0KPiA+DQo+ID4gSUlSQywgdGhlIGFyZ3VtZW50cyBmb3Iga2VlcGluZyB0
+aGlzIGFyZQ0KPiA+IDEpIGNvbnZlbnRpb24gZm9yIENQRVINCj4gPiAyKSBjb2RlIHJlYWRhYmls
+aXR5DQo+ID4NCj4gPiBUaGUgYXJndW1lbnQgYWdhaW5zdCB3YXMNCj4gPiAxKSBpdCdzIGR1bWIN
+Cj4gPg0KPiA+IFNvIEkgZGVjaWRlZCB0byBrZWVwIGl0LiBJIGRvbid0IHJlYWxseSBtaW5kIGVp
+dGhlciB3YXkgc28gSSdsbCBjaGFuZ2UgaXQNCj4gPiBpZiB0aGVyZSdzIGEgc2Vjb25kIG9waW5p
+b24uDQo+ID4NCj4gDQo+IFllcywgcGxlYXNlIGNoYW5nZSBpdC4NCg0KT2theSwgd2lsbCBkby4g
+U2hvdWxkIEkgaW5jbHVkZSBhIHBhdGNoIHRoYXQgY2hhbmdlcyBpdCBmb3IgdGhlIG90aGVyIENQ
+RVINCmNvZGUgYWxzbz8NCg0KVGhhbmtzLA0KWWF6ZW4NCg==
