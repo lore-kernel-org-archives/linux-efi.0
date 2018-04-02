@@ -1,97 +1,67 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v3 3/8] efi: Decode IA32/X64 Processor Error Info Structure
-Date: Mon, 2 Apr 2018 15:22:06 +0200
-Message-ID: <CAKv+Gu_6=WEapKMaqpkg+qKh1f4HqQRx0ascZXfr4HYJAPOBnA@mail.gmail.com>
-References: <20180324184940.19762-1-Yazen.Ghannam@amd.com> <20180324184940.19762-4-Yazen.Ghannam@amd.com>
- <20180329105448.GB29198@pd.tnic> <DM5PR12MB19162707D0F98D1A061F0A7AF8A20@DM5PR12MB1916.namprd12.prod.outlook.com>
- <CAKv+Gu_6D03iGvxsmiQS_ODET2cv4f7kVsK5S5EKhiVN1YxRaw@mail.gmail.com> <DM5PR12MB1916AC5CC36AEF4364C7D317F8A60@DM5PR12MB1916.namprd12.prod.outlook.com>
+From: Yazen Ghannam <Yazen.Ghannam@amd.com>
+Subject: [PATCH v4 0/8] Decode IA32/X64 CPER
+Date: Mon,  2 Apr 2018 10:06:48 -0500
+Message-ID: <20180402150656.101022-1-Yazen.Ghannam@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <DM5PR12MB1916AC5CC36AEF4364C7D317F8A60@DM5PR12MB1916.namprd12.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
-Cc: Borislav Petkov <bp@alien8.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "tony.luck@intel.com" <tony.luck@intel.com>
+To: linux-efi@vger.kernel.org
+Cc: Yazen Ghannam <Yazen.Ghannam@amd.com>, linux-kernel@vger.kernel.org, ard.biesheuvel@linaro.org, bp@suse.de, x86@kernel.org, tony.luck@intel.com
 List-Id: linux-efi@vger.kernel.org
 
-On 2 April 2018 at 15:21, Ghannam, Yazen <Yazen.Ghannam@amd.com> wrote:
->> -----Original Message-----
->> From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->> Sent: Friday, March 30, 2018 7:25 AM
->> To: Ghannam, Yazen <Yazen.Ghannam@amd.com>
->> Cc: Borislav Petkov <bp@alien8.de>; linux-efi@vger.kernel.org; linux-
->> kernel@vger.kernel.org; x86@kernel.org; tony.luck@intel.com
->> Subject: Re: [PATCH v3 3/8] efi: Decode IA32/X64 Processor Error Info Structure
->>
->> On 29 March 2018 at 14:53, Ghannam, Yazen <Yazen.Ghannam@amd.com>
->> wrote:
->> >> -----Original Message-----
->> >> From: Borislav Petkov <bp@alien8.de>
->> >> Sent: Thursday, March 29, 2018 6:55 AM
->> >> To: Ghannam, Yazen <Yazen.Ghannam@amd.com>
->> >> Cc: linux-efi@vger.kernel.org; linux-kernel@vger.kernel.org;
->> >> ard.biesheuvel@linaro.org; x86@kernel.org; tony.luck@intel.com
->> >> Subject: Re: [PATCH v3 3/8] efi: Decode IA32/X64 Processor Error Info
->> >> Structure
->> >>
->> >> On Sat, Mar 24, 2018 at 01:49:35PM -0500, Yazen Ghannam wrote:
->> >> > From: Yazen Ghannam <yazen.ghannam@amd.com>
->> >> >
->> >> > Print the fields in the IA32/X64 Processor Error Info Structure.
->> >> >
->> >> > Based on UEFI 2.7 Table 253. IA32/X64 Processor Error Information
->> >> > Structure.
->> >> >
->> >> > Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
->> >> > ---
->> >> > Link:
->> >> > https://lkml.kernel.org/r/20180226193904.20532-4-
->> >> Yazen.Ghannam@amd.com
->> >> >
->> >> > v2->v3:
->> >> > * Fix table number in commit message.
->> >> > * Don't print raw validation bits.
->> >> >
->> >> > v1->v2:
->> >> > * Add parantheses around "bits" expression in macro.
->> >> > * Fix indentation on multi-line statements.
->> >> >
->> >> >  drivers/firmware/efi/cper-x86.c | 50
->> >> +++++++++++++++++++++++++++++++++++++++++
->> >> >  1 file changed, 50 insertions(+)
->> >> >
->> >> > diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-
->> >> x86.c
->> >> > index 863f0cd2a0ff..a9ab3bbf7986 100644
->> >> > --- a/drivers/firmware/efi/cper-x86.c
->> >> > +++ b/drivers/firmware/efi/cper-x86.c
->> >> > @@ -3,15 +3,28 @@
->> >> >
->> >> >  #include <linux/cper.h>
->> >> >
->> >> > +#define INDENT_SP  " "
->> >>
->> >> There's that thing again. So it was a total waste of time discussing
->> >> this last time. So let me save my time this time:
->> >>
->> >> NAKed-by: Borislav Petkov <bp@suse.de>
->> >>
->> >
->> > IIRC, the arguments for keeping this are
->> > 1) convention for CPER
->> > 2) code readability
->> >
->> > The argument against was
->> > 1) it's dumb
->> >
->> > So I decided to keep it. I don't really mind either way so I'll change it
->> > if there's a second opinion.
->> >
->>
->> Yes, please change it.
->
-> Okay, will do. Should I include a patch that changes it for the other CPER
-> code also?
->
+From: Yazen Ghannam <yazen.ghannam@amd.com>
 
-No worries, Boris already sent that out.
+This series adds decoding for the IA32/X64 Common Platform Error Record.
+
+Patch 1 fixes the IA32/X64 Processor Error Section definition to match
+the UEFI spec.
+
+Patches 2-8 add the new decoding. The patches incrementally add the
+decoding starting from the top-level "Error Section". Hopefully, this
+will make reviewing a bit easier compared to one large patch.
+
+The formatting of the field names and options is taken from the UEFI
+spec. I tried to keep everything the same to make searching easier.
+
+The patches were written to the UEFI 2.7 spec though the definition of
+the IA32/X64 CPER seems to be the same as when it was introduced in
+the UEFI 2.1 spec.
+
+Link:
+https://lkml.kernel.org/r/20180324184940.19762-1-Yazen.Ghannam@amd.com
+
+Changes V3 to V4:
+* Drop INDENT_SP use.
+
+Changes V2 to V3:
+* Fix table numbers in commit messages.
+* Don't print raw validation bits.
+* Only print GUID for unknown error types.
+
+Changes V1 to V2:
+* Remove stable request for all patches.
+* Address Ard's comments on formatting and other issues.
+* In Patch 8, always print context info even if the type is not
+  recognized.
+
+Yazen Ghannam (8):
+  efi: Fix IA32/X64 Processor Error Record definition
+  efi: Decode IA32/X64 Processor Error Section
+  efi: Decode IA32/X64 Processor Error Info Structure
+  efi: Decode UEFI-defined IA32/X64 Error Structure GUIDs
+  efi: Decode IA32/X64 Cache, TLB, and Bus Check structures
+  efi: Decode additional IA32/X64 Bus Check fields
+  efi: Decode IA32/X64 MS Check structure
+  efi: Decode IA32/X64 Context Info structure
+
+ drivers/firmware/efi/Kconfig    |   5 +
+ drivers/firmware/efi/Makefile   |   1 +
+ drivers/firmware/efi/cper-x86.c | 356 ++++++++++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/cper.c     |  10 ++
+ include/linux/cper.h            |   4 +-
+ 5 files changed, 375 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/firmware/efi/cper-x86.c
+
+-- 
+2.14.1
