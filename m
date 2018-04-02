@@ -1,163 +1,155 @@
-From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH 2/2] efi: Add embedded peripheral firmware support
-Date: Sun, 1 Apr 2018 08:22:15 +0800
-Message-ID: <201804010853.A1AUerP5%fengguang.wu@intel.com>
-References: <20180331121944.8618-2-hdegoede@redhat.com>
+From: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [RFC] arm64: extra entries in /proc/iomem for kexec
+Date: Mon, 2 Apr 2018 10:53:32 +0900
+Message-ID: <20180402015330.GA27603@linaro.org>
+References: <20180314082941.GM25863@linaro.org>
+ <2d2e1be6-b925-1595-9b6e-76dd270d396d@redhat.com>
+ <20180327101654.GB14737@linaro.org>
+ <da2989ec-7fa5-b044-3237-4e75f2fe6d98@arm.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="jI8keyz6grp/JLjh"
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20180331121944.8618-2-hdegoede@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-Cc: kbuild-all@01.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Hans de Goede <hdegoede@redhat.com>, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org, linux-efi@vger.kernel.org
+In-Reply-To: <da2989ec-7fa5-b044-3237-4e75f2fe6d98-5wv7dgnIgG8@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+James,
 
---jI8keyz6grp/JLjh
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+My apologies for slow response. I had a long weekend.
 
-Hi Hans,
+On Tue, Mar 27, 2018 at 02:32:49PM +0100, James Morse wrote:
+> Hi Akashi,
+> 
+> On 27/03/18 11:16, AKASHI Takahiro wrote:
+> > On Tue, Mar 20, 2018 at 01:18:34AM +0530, Bhupesh Sharma wrote:
+> >> On 03/14/2018 01:59 PM, AKASHI Takahiro wrote:
+> >>> Currently, there is a inconsistent view between (A) and the mainline's:
+> >>> see (A-1) and (B-1). If this is really a matter, I can fix it.
+> >>> Kexec-tools can be easily modified to accept both formats, though.
+> 
+> Ooer, what needs changing in kexec-tools? What happens if someone doesn't update
+> userspace at the same time?
 
-I love your patch! Yet something to improve:
+Basically, changes that I made on /proc/iomem in my new format D were:
+1. to move NOMAP region entries, formerly named "reserved" and now named
+   "reserved (no map)", under System RAM
+2. to add new entries for firmware-reserved regions as "reserved" also
+   under System RAM
 
-[auto build test ERROR on linus/master]
-[also build test ERROR on v4.16-rc7]
-[cannot apply to next-20180329]
-[if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
+On the other hand, current kexec-tools, in particular kexec command,
+only scan top-level "System RAM" entries as well as "reserved" entries.
 
-url:    https://github.com/0day-ci/linux/commits/Hans-de-Goede/efi-Export-boot-services-code-and-data-as-debugfs-blobs/20180401-062627
-config: ia64-allnoconfig (attached as .config)
-compiler: ia64-linux-gcc (GCC) 7.2.0
-reproduce:
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # save the attached .config to linux build tree
-        make.cross ARCH=ia64 
+So if someone doesn't update kexec-tools, secondary kernel may potentially
+crash during boot time either because
+a. new kernel (or initrd/dtb) may have been allocated on a NOMAP region
+   which are not suitable for usable memory, or
+b. new kernel (or initrd/dtb) may have been allocated on a reserved region
+   whose contents can be overwritten.
 
-All errors (new ones prefixed by >>):
+While we see (b) even today, (a) is a backward compatibility issue.
 
-   drivers/firmware/efi/embedded-firmware.o: In function `efi_check_for_embedded_firmwares':
->> embedded-firmware.c:(.init.text+0x202): undefined reference to `crc32_le'
+Note: we have a different story for kdump (alignment error), and I will
+take a different approach to fixing kdump case.
 
----
-0-DAY kernel test infrastructure                Open Source Technology Center
-https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
+> Is there a format which doesn't require a user-space change, (and shouldn't we
+> pick that one?)
 
---jI8keyz6grp/JLjh
-Content-Type: application/gzip
-Content-Disposition: attachment; filename=".config.gz"
-Content-Transfer-Encoding: base64
+The only solution that I can imagine for now to prevent (a) and (b)
+at the same time without any user-space change is
+2+. to add new entries for firmware-reserved regions as "reserved",
+    in addition to the current NOMAP regions, at top level
 
-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
+(format E)
+40000000-5858ffff : System RAM
+  40080000-40f1ffff : Kernel code
+  41040000-411e9fff : Kernel data
+  54400000-583fffff : Crash kernel
+58590000-585effff : reserved
+484f0000-586fffff : System RAM 
+58700000-5871ffff : reserved
+58720000-58b5ffff : reserved (no map)
+58b60000-58b0ffff : System RAM
+58b61000-58b61fff : reserved
+58620000-59a7b117 : System RAM
+59a7b118-59a7b667 : reserved
+59a7b668-5be3ffff : System RAM
+5be40000-5becffff : reserved (no map)
+5bed0000-5bedffff : System RAM
+5bee0000-5bffffff : reserved (no map)
+5ec00000-5edfffff : reserved
+5ee00000-5fffffff ; System RAM
+8000000000-ffffffffff : PCI Bus 0000:00
 
---jI8keyz6grp/JLjh--
+This does not only look quite noisy but also ignores the fact that
+reserved regions are part of System RAM (or memblock.memory). 
+
+Or to maximize the compatibility, we may adopt format B:
+
+(format B)
+40000000-5871ffff : System RAM
+  40080000-40f1ffff : Kernel code
+  41040000-411e9fff : Kernel data
+  54400000-583fffff : Crash kernel
+  58590000-585effff : reserved
+  58700000-5871ffff : reserved
+58720000-58b5ffff : reserved (no map)
+58b60000-5be3ffff : System RAM
+  58b61000-58b61fff : reserved
+  59a7b118-59a7b667 : reserved
+5be40000-5becffff : reserved (no map)
+5bed0000-5bedffff : System RAM
+5bee0000-5bffffff : reserved (no map)
+5c000000-5fffffff : System RAM
+  5ec00000-5edfffff : reserved
+8000000000-ffffffffff : PCI Bus 0000:00
+
+but, in this case, we need some change on kexec-tools to fix (b).
+
+> >>> 2. How should we determine which regions be exported in /proc/iomem?
+> >>>
+> >>>  a. Trust all the memblock_reserve'd regions as my previous patch [3] does.
+> >>>
+> >>>     As I said, it's a kind of "overkill." Some of regions, say fdt, are
+> >>>     not required to be preserved across kexec.
+> >>
+> >>
+> >> I think we should preserve all the memblock_reserve'd regions. So +1 on this
+> >> approach from my side. I believe it might help avoid issues we have seen in
+> >> the past with 'kexec-tools' _incorrectly_ determining which regions to pick
+> >> from the '/proc/iomem'.
+> > 
+> > As I said in my reply to Ard's comment, I now know *overkill* is not a big
+> > issue and I will go for this approach.
+> 
+> /sys/kernel/debug/memblock/reserved has all kinds of weird stuff in it,
+> including some smaller-than-a-page reservations that appear to come from the
+> percpu allocator.
+> 
+> I agree it will make the implementation simpler, and reserving 'too much' isn't
+> an issue.
+
+Are you suggesting that we should use /sys/kernel/debug/memblock/reserved
+without modifying current /proc/iomem?
+(Note that, even in this approach, we need an user-space change.)
+
+Hmm, overall, this approach will be preferable to format B/E.
+
+Thanks,
+-Takahiro AKASHI
+
+> 
+> Thanks,
+> 
+> James
