@@ -1,155 +1,97 @@
-From: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC] arm64: extra entries in /proc/iomem for kexec
-Date: Mon, 2 Apr 2018 10:53:32 +0900
-Message-ID: <20180402015330.GA27603@linaro.org>
-References: <20180314082941.GM25863@linaro.org>
- <2d2e1be6-b925-1595-9b6e-76dd270d396d@redhat.com>
- <20180327101654.GB14737@linaro.org>
- <da2989ec-7fa5-b044-3237-4e75f2fe6d98@arm.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: [GIT PULL] EFI updates for v4.17
+Date: Mon, 2 Apr 2018 12:41:48 +0200
+Message-ID: <20180402104148.m3hhkhjhdb5y7gyu@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <da2989ec-7fa5-b044-3237-4e75f2fe6d98-5wv7dgnIgG8@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Andrew Morton <akpm@linux-foundation.org>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-James,
+Linus,
 
-My apologies for slow response. I had a long weekend.
+Please pull the latest efi-core-for-linus git tree from:
 
-On Tue, Mar 27, 2018 at 02:32:49PM +0100, James Morse wrote:
-> Hi Akashi,
-> 
-> On 27/03/18 11:16, AKASHI Takahiro wrote:
-> > On Tue, Mar 20, 2018 at 01:18:34AM +0530, Bhupesh Sharma wrote:
-> >> On 03/14/2018 01:59 PM, AKASHI Takahiro wrote:
-> >>> Currently, there is a inconsistent view between (A) and the mainline's:
-> >>> see (A-1) and (B-1). If this is really a matter, I can fix it.
-> >>> Kexec-tools can be easily modified to accept both formats, though.
-> 
-> Ooer, what needs changing in kexec-tools? What happens if someone doesn't update
-> userspace at the same time?
+   git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
 
-Basically, changes that I made on /proc/iomem in my new format D were:
-1. to move NOMAP region entries, formerly named "reserved" and now named
-   "reserved (no map)", under System RAM
-2. to add new entries for firmware-reserved regions as "reserved" also
-   under System RAM
+   # HEAD: 03781e40890c18bdea40092355b61431d0073c1d x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
 
-On the other hand, current kexec-tools, in particular kexec command,
-only scan top-level "System RAM" entries as well as "reserved" entries.
+NOTE: this tree depends on the x86/mm tree - if you have not pulled that tree
+      then please disregard this pull request.
 
-So if someone doesn't update kexec-tools, secondary kernel may potentially
-crash during boot time either because
-a. new kernel (or initrd/dtb) may have been allocated on a NOMAP region
-   which are not suitable for usable memory, or
-b. new kernel (or initrd/dtb) may have been allocated on a reserved region
-   whose contents can be overwritten.
+The main EFI changes in this cycle were:
 
-While we see (b) even today, (a) is a backward compatibility issue.
+ - Fix the apple-properties code                 (Andy Shevchenko)
 
-Note: we have a different story for kdump (alignment error), and I will
-take a different approach to fixing kdump case.
+ - Add WARN() on arm64 if UEFI Runtime Services corrupt the
+   reserved x18 register
+                                                 (Ard Biesheuvel)
 
-> Is there a format which doesn't require a user-space change, (and shouldn't we
-> pick that one?)
+ - Use efi_switch_mm() on x86 instead of manipulating %cr3 directly
 
-The only solution that I can imagine for now to prevent (a) and (b)
-at the same time without any user-space change is
-2+. to add new entries for firmware-reserved regions as "reserved",
-    in addition to the current NOMAP regions, at top level
+                                                 (Sai Praneeth)
 
-(format E)
-40000000-5858ffff : System RAM
-  40080000-40f1ffff : Kernel code
-  41040000-411e9fff : Kernel data
-  54400000-583fffff : Crash kernel
-58590000-585effff : reserved
-484f0000-586fffff : System RAM 
-58700000-5871ffff : reserved
-58720000-58b5ffff : reserved (no map)
-58b60000-58b0ffff : System RAM
-58b61000-58b61fff : reserved
-58620000-59a7b117 : System RAM
-59a7b118-59a7b667 : reserved
-59a7b668-5be3ffff : System RAM
-5be40000-5becffff : reserved (no map)
-5bed0000-5bedffff : System RAM
-5bee0000-5bffffff : reserved (no map)
-5ec00000-5edfffff : reserved
-5ee00000-5fffffff ; System RAM
-8000000000-ffffffffff : PCI Bus 0000:00
+ - Fix early memremap leak in ESRT code          (Ard Biesheuvel)
 
-This does not only look quite noisy but also ignores the fact that
-reserved regions are part of System RAM (or memblock.memory). 
+ - Switch to L"xxx" notation for wide string literals
 
-Or to maximize the compatibility, we may adopt format B:
+                                                 (Ard Biesheuvel)
 
-(format B)
-40000000-5871ffff : System RAM
-  40080000-40f1ffff : Kernel code
-  41040000-411e9fff : Kernel data
-  54400000-583fffff : Crash kernel
-  58590000-585effff : reserved
-  58700000-5871ffff : reserved
-58720000-58b5ffff : reserved (no map)
-58b60000-5be3ffff : System RAM
-  58b61000-58b61fff : reserved
-  59a7b118-59a7b667 : reserved
-5be40000-5becffff : reserved (no map)
-5bed0000-5bedffff : System RAM
-5bee0000-5bffffff : reserved (no map)
-5c000000-5fffffff : System RAM
-  5ec00000-5edfffff : reserved
-8000000000-ffffffffff : PCI Bus 0000:00
+ - ... plus misc other cleanups and bugfixes
 
-but, in this case, we need some change on kexec-tools to fix (b).
+ Thanks,
 
-> >>> 2. How should we determine which regions be exported in /proc/iomem?
-> >>>
-> >>>  a. Trust all the memblock_reserve'd regions as my previous patch [3] does.
-> >>>
-> >>>     As I said, it's a kind of "overkill." Some of regions, say fdt, are
-> >>>     not required to be preserved across kexec.
-> >>
-> >>
-> >> I think we should preserve all the memblock_reserve'd regions. So +1 on this
-> >> approach from my side. I believe it might help avoid issues we have seen in
-> >> the past with 'kexec-tools' _incorrectly_ determining which regions to pick
-> >> from the '/proc/iomem'.
-> > 
-> > As I said in my reply to Ard's comment, I now know *overkill* is not a big
-> > issue and I will go for this approach.
-> 
-> /sys/kernel/debug/memblock/reserved has all kinds of weird stuff in it,
-> including some smaller-than-a-page reservations that appear to come from the
-> percpu allocator.
-> 
-> I agree it will make the implementation simpler, and reserving 'too much' isn't
-> an issue.
+	Ingo
 
-Are you suggesting that we should use /sys/kernel/debug/memblock/reserved
-without modifying current /proc/iomem?
-(Note that, even in this approach, we need an user-space change.)
+------------------>
+Andy Shevchenko (2):
+      efi/apple-properties: Remove redundant attribute initialization from unmarshal_key_value_pairs()
+      efi/apple-properties: Use memremap() instead of ioremap()
 
-Hmm, overall, this approach will be preferable to format B/E.
+Ard Biesheuvel (5):
+      efi/arm*: Stop printing addresses of virtual mappings
+      efi/arm64: Check whether x18 is preserved by runtime services calls
+      efi: Reorder pr_notice() with add_device_randomness() call
+      efi/esrt: Fix handling of early ESRT table mapping
+      efi: Use string literals for efi_char16_t variable initializers
 
-Thanks,
--Takahiro AKASHI
+Colin Ian King (1):
+      efi: Make const array 'apple' static
 
-> 
-> Thanks,
-> 
-> James
+Ingo Molnar (1):
+      Merge branch 'x86/mm' into efi/core
+
+Jia-Ju Bai (1):
+      x86/efi: Replace GFP_ATOMIC with GFP_KERNEL in efi_query_variable_store()
+
+Mark Rutland (1):
+      efi/arm*: Only register page tables when they exist
+
+Sai Praneeth (3):
+      efi: Use efi_mm in x86 as well as ARM
+      x86/efi: Replace efi_pgd with efi_mm.pgd
+      x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
+
+ arch/arm64/include/asm/efi.h              |  4 +++-
+ arch/arm64/kernel/Makefile                |  3 ++-
+ arch/arm64/kernel/efi-rt-wrapper.S        | 41 +++++++++++++++++++++++++++++++++++++++++
+ arch/arm64/kernel/efi.c                   |  6 ++++++
+ arch/x86/boot/compressed/eboot.c          |  3 ++-
+ arch/x86/include/asm/efi.h                | 26 +++++++++++---------------
+ arch/x86/mm/debug_pagetables.c            |  6 +++---
+ arch/x86/platform/efi/efi_64.c            | 60 +++++++++++++++++++++++++++++++++---------------------------
+ arch/x86/platform/efi/efi_thunk_64.S      |  2 +-
+ arch/x86/platform/efi/quirks.c            | 10 ++++++----
+ drivers/firmware/efi/apple-properties.c   | 20 +++++++-------------
+ drivers/firmware/efi/arm-runtime.c        | 17 ++++-------------
+ drivers/firmware/efi/efi.c                | 11 ++++++++++-
+ drivers/firmware/efi/esrt.c               | 17 ++++-------------
+ drivers/firmware/efi/libstub/Makefile     |  2 +-
+ drivers/firmware/efi/libstub/secureboot.c | 12 +++---------
+ drivers/firmware/efi/libstub/tpm.c        |  7 ++-----
+ include/linux/efi.h                       |  2 ++
+ 18 files changed, 141 insertions(+), 108 deletions(-)
+ create mode 100644 arch/arm64/kernel/efi-rt-wrapper.S
