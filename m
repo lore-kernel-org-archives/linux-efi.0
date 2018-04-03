@@ -1,46 +1,60 @@
-From: David Howells <dhowells@redhat.com>
-Subject: Re: [GIT PULL] Kernel lockdown for secure boot
-Date: Tue, 03 Apr 2018 20:49:04 +0100
-Message-ID: <13189.1522784944@warthog.procyon.org.uk>
-References: <CALCETrWHS9p1My=j07=V=OP7v4SwQkW-kJ3JOx6EbPU8fb_XEQ@mail.gmail.com> <4136.1522452584@warthog.procyon.org.uk> <alpine.LRH.2.21.1803311145180.7769@namei.org> <186aeb7e-1225-4bb8-3ff5-863a1cde86de@kernel.org> <30459.1522739219@warthog.procyon.org.uk> <CALCETrUFOdrH5ShCCd8yguGjC2NtG8fJY7AW26HH467-02UVGA@mail.gmail.com> <CACdnJut31+ZtiR40nkOjm89cfUxS0EM=w-oG69PtWHbXYJQxPg@mail.gmail.com> <CALCETrXeVod=kNpG-M7yKAMM0-n+PMg_OakN6ecWrTPmKXgMLg@mail.gmail.com> <9758.1522775763@warthog.procyon.org.uk>
+From: Peter Jones <pjones@redhat.com>
+Subject: Re: [PATCH 2/2] efi: Add embedded peripheral firmware support
+Date: Tue, 3 Apr 2018 12:53:34 -0700
+Message-ID: <20180403195332.tezh6alee26aic2s@redhat.com>
+References: <20180331121944.8618-1-hdegoede@redhat.com>
+ <20180331121944.8618-2-hdegoede@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CALCETrWHS9p1My=j07=V=OP7v4SwQkW-kJ3JOx6EbPU8fb_XEQ@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <20180331121944.8618-2-hdegoede@redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Lutomirski <luto@kernel.org>
-Cc: dhowells@redhat.com, Matthew Garrett <mjg59@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, joeyli <jlee@suse.com>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Andy Lutomirski <luto@kernel.org> wrote:
+On Sat, Mar 31, 2018 at 02:19:44PM +0200, Hans de Goede wrote:
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index fddc5f706fd2..1a5ea950f58f 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -455,6 +455,7 @@ int __init efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md)
+>  		u64 end;
+>  
+>  		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
+> +		    md->type != EFI_BOOT_SERVICES_CODE &&
+>  		    md->type != EFI_BOOT_SERVICES_DATA &&
+>  		    md->type != EFI_RUNTIME_SERVICES_DATA) {
+>  			continue;
 
-> >>> A kernel that allows users arbitrary access to ring 0 is just an
-> >>> overfeatured bootloader. Why would you want secure boot in that case?
-> >>
-> >> To get a chain of trust.
-> >
-> > You don't have a chain of trust that you can trust in that case.
-> >
-> Please elaborate on why I can’t trust it.
+Might be worth adding a comment here to ensure nobody comes along later
+and adds something like EFI_BOOT_LOADER_DATA or other stuff that's
+allocated later here.  I don't want to accidentally patch our way into
+having the ability to stumble across a firmware blob somebody dumped
+into the middle of a grub config file, especially since you only need to
+collide crc32 (within the same length) to pre-alias a match.
 
-If the user can arbitrarily modify the running kernel image, you cannot trust
-anything.  You cannot determine the trustworthiness of something because your
-basis for determining that trust can be compromised.
+...
+> +static int __init efi_check_md_for_embedded_firmware(
+> +	efi_memory_desc_t *md, const struct embedded_fw_desc *desc)
+> +{
+...
+> +	if (found_fw_count >= MAX_EMBEDDED_FIRMWARES) {
+> +		pr_err("Error already have %d embedded firmwares\n",
+> +		       MAX_EMBEDDED_FIRMWARES);
+> +		return -ENOSPC;
+> +	}
 
-> Please also elaborate on how lockdown helps at all.
+Doesn't seem like this needs to be pr_err(); after all we have already
+found a valid match, so the firmware vendor has done something
+moderately stupid, but we have a firmware that will probably work.  Of
+course it still needs to return != 0, but pr_warn() or even pr_info()
+seems more reasonable.
 
-Stopping the kernel from being arbitrarily modified allows you to preserve
-your trust.
+Aside from those nits, looks good to me.
 
-Stopping the kernel from being arbitrarily read stops any encryption keys it
-may be using from being retrieved.
+Reviewed-by: Peter Jones <pjones@redhat.com>
 
-And, if you can't guarantee the trustworthiness of your own image, you can't
-pass the trust onto the next image that you kexec.
-
-Now, I can't guarantee that my patches close every hole, they just close all
-the holes I know about - including some obscure ones like using DMA-capable
-ISA devices to hack/access the kernel image.
-
-David
+-- 
+  Peter
