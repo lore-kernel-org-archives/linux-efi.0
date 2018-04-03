@@ -1,57 +1,75 @@
 From: Andy Lutomirski <luto@kernel.org>
 Subject: Re: [GIT PULL] Kernel lockdown for secure boot
-Date: Tue, 3 Apr 2018 14:51:23 -0700
-Message-ID: <CALCETrVR_EcbKv5-4AR6Zm02XHhJQQGNDeO8FGkMbYozmuDTJw@mail.gmail.com>
+Date: Tue, 3 Apr 2018 14:58:01 -0700
+Message-ID: <CALCETrX4CuHVpn38R24TCcJgCBLSbh-sOD-qcD5kYF8Zo53ZJw@mail.gmail.com>
 References: <4136.1522452584@warthog.procyon.org.uk> <alpine.LRH.2.21.1803311145180.7769@namei.org>
  <186aeb7e-1225-4bb8-3ff5-863a1cde86de@kernel.org> <30459.1522739219@warthog.procyon.org.uk>
  <CALCETrUFOdrH5ShCCd8yguGjC2NtG8fJY7AW26HH467-02UVGA@mail.gmail.com>
  <CACdnJut31+ZtiR40nkOjm89cfUxS0EM=w-oG69PtWHbXYJQxPg@mail.gmail.com>
- <CALCETrXeVod=kNpG-M7yKAMM0-n+PMg_OakN6ecWrTPmKXgMLg@mail.gmail.com> <CACdnJuutJeeaaB2kwma0MMd9uDDbKavoHEk4koDLe1M6gYZWXQ@mail.gmail.com>
+ <CALCETrXeVod=kNpG-M7yKAMM0-n+PMg_OakN6ecWrTPmKXgMLg@mail.gmail.com>
+ <9758.1522775763@warthog.procyon.org.uk> <CALCETrWHS9p1My=j07=V=OP7v4SwQkW-kJ3JOx6EbPU8fb_XEQ@mail.gmail.com>
+ <13189.1522784944@warthog.procyon.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACdnJuutJeeaaB2kwma0MMd9uDDbKavoHEk4koDLe1M6gYZWXQ@mail.gmail.com>
+In-Reply-To: <13189.1522784944@warthog.procyon.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <mjg59@google.com>
-Cc: Andrew Lutomirski <luto@kernel.org>, David Howells <dhowells@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, joeyli <jlee@suse.com>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
+To: David Howells <dhowells@redhat.com>
+Cc: Andy Lutomirski <luto@kernel.org>, Matthew Garrett <mjg59@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, joeyli <jlee@suse.com>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 3, 2018 at 12:29 PM, Matthew Garrett <mjg59@google.com> wrote:
-> On Tue, Apr 3, 2018 at 9:46 AM Andy Lutomirski <luto@kernel.org> wrote:
->> On Tue, Apr 3, 2018 at 9:29 AM, Matthew Garrett <mjg59@google.com> wrote:
->> > A kernel that allows users arbitrary access to ring 0 is just an
->> > overfeatured bootloader. Why would you want secure boot in that case?
+On Tue, Apr 3, 2018 at 12:49 PM, David Howells <dhowells@redhat.com> wrote:
+> Andy Lutomirski <luto@kernel.org> wrote:
 >
->> To get a chain of trust.  I can provision a system with some public
->> keys, stored in UEFI authenticated variables, such that the system
->> will only boot a signed image.  That signed image, can, in turn, load
->> a signed (or hashed or otherwise verfified) kernel and a verified
->> initramfs.  The initramfs can run a full system from a verified (using
->> dm-verity or similar) filesystem, for example.  Now it's very hard to
->> persistently attack this system.  Chromium OS does something very much
->> like this, except that it doesn't use UEFI as far as I know.  So does
->> iOS, and so do some Android versions.  None of this requires lockdown,
->> or even a separation between usermode and kernelmode, to work
->> correctly.  One could even do this on an MMU-less system if one really
->> cared to.  More usefully, someone probably has done this using a
->> unikernel.
+>> >>> A kernel that allows users arbitrary access to ring 0 is just an
+>> >>> overfeatured bootloader. Why would you want secure boot in that case?
+>> >>
+>> >> To get a chain of trust.
+>> >
+>> > You don't have a chain of trust that you can trust in that case.
+>> >
+>> Please elaborate on why I can’t trust it.
 >
-> That's only viable if you're the only person with the ability to sign stuff
-> for your machine - the moment there are generic distributions that your
-> machine trusts, an attacker can use one as a bootloader to compromise your
-> trust chain.
+> If the user can arbitrarily modify the running kernel image, you cannot trust
+> anything.  You cannot determine the trustworthiness of something because your
+> basis for determining that trust can be compromised.
 
+I'm having a very, very hard time coming up with a scenario where I
+can "trust" something if an attacker can get root but can't modify the
+running kernel image but I can't "trust" something if the attacker
+can't.  About the only think I can come up with is that root generally
+has a hard time directly reading kernel keyring data.
 
-If you removed "as a bootloader", then I agree with that sentence.
+But if we really think that kernel keyring data is so sacred, let's
+please solve it properly using SGX or some hypervisor doodad like
+Microsoft's Credential Guard.  Protecting the keyring with lockdown is
+a whole lot of annoyance without all that much gain.
 
-Can someone please explain why the UEFI crowd cares so much about "as
-a bootloader"?  Once I'm able to install an OS (Linux kernel +
-bootloader, Windows embedded doodad, OpenBSD, whatever) on your
-machine, I can use your peripherals, read your data, write your data,
-see your keystrokes, use your network connection, re-flash your BIOS
-(at least as well as any OS can), run VMs, and generally own your
-system.  Somehow you all seem fine with all of this, except that the
-fact that I can chainload something else gives UEFI people the
-willies.
+>
+>> Please also elaborate on how lockdown helps at all.
+>
+> Stopping the kernel from being arbitrarily modified allows you to preserve
+> your trust.
 
-Can someone explain why?
+If I build a voting machine, an ATM, or a server that runs Panera
+Bread's website, I can certainly issue a press release that says "hey,
+the bad guy just downloaded tens of millions of customer records, but
+they didn't actually get to run CPL0 code, so all is well."
+
+</sarcasm>
+
+>
+> Stopping the kernel from being arbitrarily read stops any encryption keys it
+> may be using from being retrieved.
+
+If I build a server that runs Panera Bread 2.0's website, and the
+attacker exploits my machine to steal tens of millions of customer
+records by getting the machine to talk to some database server using
+keys that are securely stored in the kernel keyring, I would feel
+sooooooo much better knowing that the attacker didn't also manage to
+extract the key that lets the machine talk to the database server.
+Never mind that the attacker already stole the entire contents of the
+database.
+
+</sarcasm>
