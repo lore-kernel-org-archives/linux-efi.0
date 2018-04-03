@@ -1,60 +1,110 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [GIT PULL] Kernel lockdown for secure boot
-Date: Tue, 3 Apr 2018 15:25:56 +0200
-Message-ID: <CAKv+Gu9Na0j=T4syinQhPNZTnbhvnpDXR+Za73EmH3FFXV6KHA@mail.gmail.com>
-References: <4136.1522452584@warthog.procyon.org.uk> <alpine.LRH.2.21.1803311145180.7769@namei.org>
- <17792.1522491600@warthog.procyon.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Daniel Kiper <daniel.kiper@oracle.com>
+Subject: [PATCH v2] x86/xen/efi: Initialize UEFI secure boot state during dom0 boot
+Date: Tue,  3 Apr 2018 16:39:05 +0200
+Message-ID: <1522766345-4169-1-git-send-email-daniel.kiper@oracle.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <17792.1522491600@warthog.procyon.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>, Andy Lutomirski <luto@kernel.org>, Kees Cook <keescook@chromium.org>
-Cc: James Morris <jmorris@namei.org>, One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>, linux-efi@vger.kernel.org, Matthew Garrett <mjg59@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, jforbes@redhat.com, linux-man@vger.kernel.org, joeyli <jlee@suse.com>, linux-security-module <linux-security-module@vger.kernel.org>
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org
+Cc: ard.biesheuvel@linaro.org, boris.ostrovsky@oracle.com, eric.snowberg@oracle.com, hpa@zytor.com, jgross@suse.com, konrad.wilk@oracle.com, mingo@redhat.com, tglx@linutronix.de
 List-Id: linux-efi@vger.kernel.org
 
-(+ Andy and Kees so they can respond to the thread)
+Initialize UEFI secure boot state during dom0 boot. Otherwise the kernel
+may not even know that it runs on secure boot enabled platform.
 
-On 31 March 2018 at 12:20, David Howells <dhowells@redhat.com> wrote:
-> James Morris <jmorris@namei.org> wrote:
->
->> Are there any known coverage gaps now?
->
-> I've covered all the ones I know about.
->
+Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ arch/x86/xen/efi.c                        |   57 +++++++++++++++++++++++++++++
+ drivers/firmware/efi/libstub/secureboot.c |    3 ++
+ 2 files changed, 60 insertions(+)
 
-Andy (and Kees) responded to this without keeping all the cc's. Given
-that I share Andy's concern wrt the general nature of these patches, I
-will reiterate them here.
-
-First of all, in my experience, when introducing any kind of 'secure'
-mode, people will immediately assume that everything they use the
-system for will be more secure going forward, and so they are more
-likely to let their guard down, resulting in a less secure situation
-than we started out with. So I already argued for calling this a
-'lockdown policy' which is a clearly communicated as a best effort
-attempt to make the system more robust against inadvertent
-modifications, and documenting/logging clearly what it actually
-*means*. The latter is especially important because many of these
-things are arch specific, and need to be implemented for each arch
-individually in order to take effect on them. Also, v4.17 lockdown
-will most likely be different from v4.18 lockdown.
-
-Furthermore, there is a fundamental deviation from common security
-sense here, where things like command line parameters and other
-lockdown specific tunables are blacklisted rather than whitelisted,
-and so rather than locking everything down and re-enabling only once
-what needs to be re-enabled for the system to work, we are now forever
-going to have to track a moving target, where it is someone's job to
-ensure that incoming changes don't regress lockdown mode on any of the
-architectures it supports.
-
-If the distros are shipping their kernels with these patches applied
-to adhere to some kind of requirements imposed by MicroSoft in order
-for them to be willing to sign shim images, can we please involve
-those into the discussion as well? It seems to me that this is a
-solution without a problem statement, and I would like to fully
-understand the problem before reasoning about the solution.
-
+diff --git a/arch/x86/xen/efi.c b/arch/x86/xen/efi.c
+index a18703b..1804b27 100644
+--- a/arch/x86/xen/efi.c
++++ b/arch/x86/xen/efi.c
+@@ -115,6 +115,61 @@ static efi_system_table_t __init *xen_efi_probe(void)
+ 	return &efi_systab_xen;
+ }
+ 
++/*
++ * Determine whether we're in secure boot mode.
++ *
++ * Please keep the logic in sync with
++ * drivers/firmware/efi/libstub/secureboot.c:efi_get_secureboot().
++ */
++static enum efi_secureboot_mode xen_efi_get_secureboot(void)
++{
++	static efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
++	static efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
++	efi_status_t status;
++	u8 moksbstate, secboot, setupmode;
++	unsigned long size;
++
++	size = sizeof(secboot);
++	status = efi.get_variable(L"SecureBoot", &efi_variable_guid,
++				  NULL, &size, &secboot);
++
++	if (status == EFI_NOT_FOUND)
++		return efi_secureboot_mode_disabled;
++
++	if (status != EFI_SUCCESS)
++		goto out_efi_err;
++
++	size = sizeof(setupmode);
++	status = efi.get_variable(L"SetupMode", &efi_variable_guid,
++				  NULL, &size, &setupmode);
++
++	if (status != EFI_SUCCESS)
++		goto out_efi_err;
++
++	if (secboot == 0 || setupmode == 1)
++		return efi_secureboot_mode_disabled;
++
++	/* See if a user has put the shim into insecure mode. */
++	size = sizeof(moksbstate);
++	status = efi.get_variable(L"MokSBStateRT", &shim_guid,
++				  NULL, &size, &moksbstate);
++
++	/* If it fails, we don't care why. Default to secure. */
++	if (status != EFI_SUCCESS)
++		goto secure_boot_enabled;
++
++	if (moksbstate == 1)
++		return efi_secureboot_mode_disabled;
++
++ secure_boot_enabled:
++	pr_info("UEFI Secure Boot is enabled.\n");
++	return efi_secureboot_mode_enabled;
++
++ out_efi_err:
++	pr_err("Could not determine UEFI Secure Boot status.\n");
++	return efi_secureboot_mode_unknown;
++}
++
+ void __init xen_efi_init(void)
+ {
+ 	efi_system_table_t *efi_systab_xen;
+@@ -129,6 +184,8 @@ void __init xen_efi_init(void)
+ 	boot_params.efi_info.efi_systab = (__u32)__pa(efi_systab_xen);
+ 	boot_params.efi_info.efi_systab_hi = (__u32)(__pa(efi_systab_xen) >> 32);
+ 
++	boot_params.secure_boot = xen_efi_get_secureboot();
++
+ 	set_bit(EFI_BOOT, &efi.flags);
+ 	set_bit(EFI_PARAVIRT, &efi.flags);
+ 	set_bit(EFI_64BIT, &efi.flags);
+diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
+index 8f07eb4..72d9dfb 100644
+--- a/drivers/firmware/efi/libstub/secureboot.c
++++ b/drivers/firmware/efi/libstub/secureboot.c
+@@ -30,6 +30,9 @@
+ 
+ /*
+  * Determine whether we're in secure boot mode.
++ *
++ * Please keep the logic in sync with
++ * arch/x86/xen/efi.c:xen_efi_get_secureboot().
+  */
+ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
+ {
 -- 
-Ard.
+1.7.10.4
