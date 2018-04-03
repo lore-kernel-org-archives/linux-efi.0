@@ -1,110 +1,111 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: [PATCH v2] x86/xen/efi: Initialize UEFI secure boot state during dom0 boot
-Date: Tue,  3 Apr 2018 16:39:05 +0200
-Message-ID: <1522766345-4169-1-git-send-email-daniel.kiper@oracle.com>
+From: Andy Lutomirski <luto@kernel.org>
+Subject: Re: [GIT PULL] Kernel lockdown for secure boot
+Date: Tue, 3 Apr 2018 08:11:07 -0700
+Message-ID: <CALCETrUFOdrH5ShCCd8yguGjC2NtG8fJY7AW26HH467-02UVGA@mail.gmail.com>
+References: <4136.1522452584@warthog.procyon.org.uk> <alpine.LRH.2.21.1803311145180.7769@namei.org>
+ <186aeb7e-1225-4bb8-3ff5-863a1cde86de@kernel.org> <30459.1522739219@warthog.procyon.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <30459.1522739219@warthog.procyon.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org
-Cc: ard.biesheuvel@linaro.org, boris.ostrovsky@oracle.com, eric.snowberg@oracle.com, hpa@zytor.com, jgross@suse.com, konrad.wilk@oracle.com, mingo@redhat.com, tglx@linutronix.de
+To: David Howells <dhowells@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Andy Lutomirski <luto@kernel.org>, James Morris <jmorris@namei.org>, One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Matthew Garrett <mjg59@google.com>, Greg KH <gregkh@linuxfoundation.org>, LKML <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, joeyli <jlee@suse.com>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Initialize UEFI secure boot state during dom0 boot. Otherwise the kernel
-may not even know that it runs on secure boot enabled platform.
+[re-added cc's, I think.  Sorry, I think I failed to use the gmane
+gateway correctly there.]
 
-Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
----
- arch/x86/xen/efi.c                        |   57 +++++++++++++++++++++++++++++
- drivers/firmware/efi/libstub/secureboot.c |    3 ++
- 2 files changed, 60 insertions(+)
+On Tue, Apr 3, 2018 at 12:06 AM, David Howells <dhowells@redhat.com> wrote:
+> Andy Lutomirski <luto@kernel.org> wrote:
+>
+>> This is an attempt at a review.  I'm replying here because I can't find the
+>> actual relevant patch emails.
+>
+> This was the latest post:
+>
+>         https://lkml.org/lkml/2017/11/9/660
+>
+> and they were posted multiple times before that, plus distributions, such as
+> Fedora, have been carrying them for a long while.
+>
+>> For the rest of this review, I'm going to pretend that you actually want two
+>> features: "try-prevent-root-from-corrupting-the-kernel" and
+>> "try-to-prevent-root-from-reading-kernel-memory".
+>
+> It theoretically boils down into those two, but the line is blurrier than you
+> think.
+>
+> Further, some of the vectors that can be used to do one can potentially do the
+> other also and it starts getting to be a lot of extra work to distinguish the
+> two.
+>
+>> I do *not* see why the mere act of using Secure Boot should have this
+>> effect.
+>
+> To be able to pass secure boot mode over kexec, you have to make sure that the
+> kernel image doesn't get corrupted, lest someone blacklist your signing key in
+> the bootloader.
 
-diff --git a/arch/x86/xen/efi.c b/arch/x86/xen/efi.c
-index a18703b..1804b27 100644
---- a/arch/x86/xen/efi.c
-+++ b/arch/x86/xen/efi.c
-@@ -115,6 +115,61 @@ static efi_system_table_t __init *xen_efi_probe(void)
- 	return &efi_systab_xen;
- }
- 
-+/*
-+ * Determine whether we're in secure boot mode.
-+ *
-+ * Please keep the logic in sync with
-+ * drivers/firmware/efi/libstub/secureboot.c:efi_get_secureboot().
-+ */
-+static enum efi_secureboot_mode xen_efi_get_secureboot(void)
-+{
-+	static efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
-+	static efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
-+	efi_status_t status;
-+	u8 moksbstate, secboot, setupmode;
-+	unsigned long size;
-+
-+	size = sizeof(secboot);
-+	status = efi.get_variable(L"SecureBoot", &efi_variable_guid,
-+				  NULL, &size, &secboot);
-+
-+	if (status == EFI_NOT_FOUND)
-+		return efi_secureboot_mode_disabled;
-+
-+	if (status != EFI_SUCCESS)
-+		goto out_efi_err;
-+
-+	size = sizeof(setupmode);
-+	status = efi.get_variable(L"SetupMode", &efi_variable_guid,
-+				  NULL, &size, &setupmode);
-+
-+	if (status != EFI_SUCCESS)
-+		goto out_efi_err;
-+
-+	if (secboot == 0 || setupmode == 1)
-+		return efi_secureboot_mode_disabled;
-+
-+	/* See if a user has put the shim into insecure mode. */
-+	size = sizeof(moksbstate);
-+	status = efi.get_variable(L"MokSBStateRT", &shim_guid,
-+				  NULL, &size, &moksbstate);
-+
-+	/* If it fails, we don't care why. Default to secure. */
-+	if (status != EFI_SUCCESS)
-+		goto secure_boot_enabled;
-+
-+	if (moksbstate == 1)
-+		return efi_secureboot_mode_disabled;
-+
-+ secure_boot_enabled:
-+	pr_info("UEFI Secure Boot is enabled.\n");
-+	return efi_secureboot_mode_enabled;
-+
-+ out_efi_err:
-+	pr_err("Could not determine UEFI Secure Boot status.\n");
-+	return efi_secureboot_mode_unknown;
-+}
-+
- void __init xen_efi_init(void)
- {
- 	efi_system_table_t *efi_systab_xen;
-@@ -129,6 +184,8 @@ void __init xen_efi_init(void)
- 	boot_params.efi_info.efi_systab = (__u32)__pa(efi_systab_xen);
- 	boot_params.efi_info.efi_systab_hi = (__u32)(__pa(efi_systab_xen) >> 32);
- 
-+	boot_params.secure_boot = xen_efi_get_secureboot();
-+
- 	set_bit(EFI_BOOT, &efi.flags);
- 	set_bit(EFI_PARAVIRT, &efi.flags);
- 	set_bit(EFI_64BIT, &efi.flags);
-diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-index 8f07eb4..72d9dfb 100644
---- a/drivers/firmware/efi/libstub/secureboot.c
-+++ b/drivers/firmware/efi/libstub/secureboot.c
-@@ -30,6 +30,9 @@
- 
- /*
-  * Determine whether we're in secure boot mode.
-+ *
-+ * Please keep the logic in sync with
-+ * arch/x86/xen/efi.c:xen_efi_get_secureboot().
-  */
- enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
- {
--- 
-1.7.10.4
+Can you explain that much more clearly?  I'm asking why booting via
+UEFI Secure Boot should enable lockdown, and I don't see what this has
+to do with kexec.  And "someone blacklist[ing] your key in the
+bootloader" sounds like a political issue, not a technical issue.
+
+What is the actual purpose of these patches?
+
+>
+>> In particular, UEFI Secure Boot should *not* enable
+>> "try-to-prevent-root-from-reading-kernel-memory", which means that, unless
+>> you actually implement the split, you should drop a bunch of the patches.
+>
+> Yes it should.  If someone can read your kernel image, they can steal the
+> crypto keys you use to encrypt your filesystem.
+
+Can you please explain the actual attack that is avoided by doing this?
+
+Suppose I'm a bad guy attacking someone's laptop.  If I just have
+normal uid!=0 access, then these patches have no effect.  Instead,
+we're talking about an attacker who is somehow able to become global
+root and bypass all LSM restrictions but has not gained kernel code
+execution.  It is indeed the case that your patches make it harder to
+simply read the dm-crypt encryption key out of main memory.  But root
+can attack the disk encryption in many other ways.  They can
+persistently compromise the machine by adding services or user
+accounts or intentionally misconfiguring something.  They can directly
+read the entire contents of the disk.  They can modify the initrd so
+that the next time the machine reboots and the user types the
+password, the attacker gets the key (unless the TPM is involved, but
+getting *that* right on a standard distro is difficult or impossible).
+
+And I'm not even sure why an attacker who manages to become root wants
+your disk encryption key.  That key is worth nothing unless the
+attacker makes its attack persistent, but, if the attacker can install
+a persistent user-level backdoor, then they can read the cleartext off
+your disk just as easily as they can read the ciphertext.
+
+>
+>> "Restrict /dev/{mem,kmem,port} when the kernel is locked down": this should
+>> probably split into one restriction for read and one for write.
+>
+> Not so for /dev/port.  Read & Write here are _not_ the same as Read & Write
+> on, say, /dev/mem.  In fact, if /dev/mem gives you access to mmio ports, then
+> the same applies there.  Btw, Fedora hasn't even provided /dev/kmem for a
+> while.
+
+Then split /dev/mem and turn off /dev/port for all locked-down modes.
+
+>
+>> "bpf: Restrict kernel image access functions when the kernel is locked down":
+>> This patch just sucks in general.
+>
+> Yes - but that's what Alexei Starovoitov specified.  bpf kind of sucks since
+> it gives you unrestricted access to the kernel.
+
+bpf, in certain contexts, gives you unrestricted access to *reading*
+kernel memory.  bpf should, under no circumstances, let you write to
+the kernel unless you're using fault injection or similar.
+
+I'm surprised that Alexei acked this patch.  If something like XDP or
+bpfilter starts becoming widely used, this patch will require a lot of
+reworking to avoid breaking standard distros.
