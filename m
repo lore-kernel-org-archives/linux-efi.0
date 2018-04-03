@@ -1,127 +1,25 @@
-From: James Bottomley <James.Bottomley@HansenPartnership.com>
-Subject: Re: [PATCH v2] x86/xen/efi: Initialize UEFI secure boot state
- during dom0 boot
-Date: Tue, 03 Apr 2018 10:00:52 -0700
-Message-ID: <1522774852.4522.25.camel@HansenPartnership.com>
-References: <1522766345-4169-1-git-send-email-daniel.kiper@oracle.com>
-         <1522770281.4522.14.camel@HansenPartnership.com>
-         <20180403160712.GL26100@olila.local.net-space.pl>
+From: David Howells <dhowells@redhat.com>
+Subject: Re: [GIT PULL] Kernel lockdown for secure boot
+Date: Tue, 03 Apr 2018 18:16:03 +0100
+Message-ID: <9758.1522775763@warthog.procyon.org.uk>
+References: <CALCETrXeVod=kNpG-M7yKAMM0-n+PMg_OakN6ecWrTPmKXgMLg@mail.gmail.com> <4136.1522452584@warthog.procyon.org.uk> <alpine.LRH.2.21.1803311145180.7769@namei.org> <186aeb7e-1225-4bb8-3ff5-863a1cde86de@kernel.org> <30459.1522739219@warthog.procyon.org.uk> <CALCETrUFOdrH5ShCCd8yguGjC2NtG8fJY7AW26HH467-02UVGA@mail.gmail.com> <CACdnJut31+ZtiR40nkOjm89cfUxS0EM=w-oG69PtWHbXYJQxPg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180403160712.GL26100@olila.local.net-space.pl>
+In-Reply-To: <CALCETrXeVod=kNpG-M7yKAMM0-n+PMg_OakN6ecWrTPmKXgMLg@mail.gmail.com>
+Content-ID: <9757.1522775763.1@warthog.procyon.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Daniel Kiper <daniel.kiper@oracle.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org, ard.biesheuvel@linaro.org, boris.ostrovsky@oracle.com, eric.snowberg@oracle.com, hpa@zytor.com, jgross@suse.com, konrad.wilk@oracle.com, mingo@redhat.com, tglx@linutronix.de
+To: Andy Lutomirski <luto@kernel.org>
+Cc: dhowells@redhat.com, Matthew Garrett <mjg59@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, joeyli <jlee@suse.com>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2018-04-03 at 18:07 +0200, Daniel Kiper wrote:
-> On Tue, Apr 03, 2018 at 08:44:41AM -0700, James Bottomley wrote:
-> > 
-> > On Tue, 2018-04-03 at 16:39 +0200, Daniel Kiper wrote:
-> > > 
-> > > Initialize UEFI secure boot state during dom0 boot. Otherwise the
-> > > kernel may not even know that it runs on secure boot enabled
-> > > platform.
-> > > 
-> > > Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
-> > > ---
-> > >  arch/x86/xen/efi.c                        |   57
-> > > +++++++++++++++++++++++++++++
-> > >  drivers/firmware/efi/libstub/secureboot.c |    3 ++
-> > >  2 files changed, 60 insertions(+)
-> > > 
-> > > diff --git a/arch/x86/xen/efi.c b/arch/x86/xen/efi.c
-> > > index a18703b..1804b27 100644
-> > > --- a/arch/x86/xen/efi.c
-> > > +++ b/arch/x86/xen/efi.c
-> > > @@ -115,6 +115,61 @@ static efi_system_table_t __init
-> > > *xen_efi_probe(void)
-> > >  	return &efi_systab_xen;
-> > >  }
-> > >  
-> > > +/*
-> > > + * Determine whether we're in secure boot mode.
-> > > + *
-> > > + * Please keep the logic in sync with
-> > > + *
-> > > drivers/firmware/efi/libstub/secureboot.c:efi_get_secureboot().
-> > > + */
-> > > +static enum efi_secureboot_mode xen_efi_get_secureboot(void)
-> > > +{
-> > > +	static efi_guid_t efi_variable_guid =
-> > > EFI_GLOBAL_VARIABLE_GUID;
-> > > +	static efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
-> > > +	efi_status_t status;
-> > > +	u8 moksbstate, secboot, setupmode;
-> > > +	unsigned long size;
-> > > +
-> > > +	size = sizeof(secboot);
-> > > +	status = efi.get_variable(L"SecureBoot",
-> > > &efi_variable_guid,
-> > > +				  NULL, &size, &secboot);
-> > > +
-> > > +	if (status == EFI_NOT_FOUND)
-> > > +		return efi_secureboot_mode_disabled;
-> > > +
-> > > +	if (status != EFI_SUCCESS)
-> > > +		goto out_efi_err;
-> > > +
-> > > +	size = sizeof(setupmode);
-> > > +	status = efi.get_variable(L"SetupMode",
-> > > &efi_variable_guid,
-> > > +				  NULL, &size, &setupmode);
-> > > +
-> > > +	if (status != EFI_SUCCESS)
-> > > +		goto out_efi_err;
-> > > +
-> > > +	if (secboot == 0 || setupmode == 1)
-> > > +		return efi_secureboot_mode_disabled;
-> > > +
-> > > +	/* See if a user has put the shim into insecure mode. */
-> > > +	size = sizeof(moksbstate);
-> > > +	status = efi.get_variable(L"MokSBStateRT", &shim_guid,
-> > > +				  NULL, &size, &moksbstate);
-> > > +
-> > > +	/* If it fails, we don't care why. Default to secure. */
-> > > +	if (status != EFI_SUCCESS)
-> > > +		goto secure_boot_enabled;
-> > > +
-> > > +	if (moksbstate == 1)
-> > > +		return efi_secureboot_mode_disabled;
-> > > +
-> > > + secure_boot_enabled:
-> > > +	pr_info("UEFI Secure Boot is enabled.\n");
-> > > +	return efi_secureboot_mode_enabled;
-> > > +
-> > > + out_efi_err:
-> > > +	pr_err("Could not determine UEFI Secure Boot
-> > > status.\n");
-> > > +	return efi_secureboot_mode_unknown;
-> > > +}
-> > > +
-> > 
-> > This looks like a bad idea: you're duplicating the secure boot
-> > check in
-> > 
-> > drivers/firmware/efi/libstub/secureboot.c
-> > 
-> > Which is an implementation of policy.  If we have to have policy in
-> > the kernel, it should really only be in one place to prevent drift;
-> > why can't you simply use the libstub efi_get_secureboot() so we're
-> > not duplicating the implementation of policy?
+Andy Lutomirski <luto@kernel.org> wrote:
+
+> > A kernel that allows users arbitrary access to ring 0 is just an
+> > overfeatured bootloader. Why would you want secure boot in that case?
 > 
-> Well, here is the first version of this patch:
-> https://lkml.org/lkml/2018/1/9/496 Ard did not like it. I was not
-> happy too. In general both approaches are not perfect. More you can
-> find in the discussion around this patchset. If you have better idea
-> how to do that I am happy to implement it.
+> To get a chain of trust.
 
-One way might be simply to have the pre exit-boot-services code lay
-down a variable containing the state which you pick up, rather than you
-calling efi code separately and trying to use the insecure RT
-variables.  That way there's a uniform view of the internal kernel
-secure boot state that everyone can use.
+You don't have a chain of trust that you can trust in that case.
 
-James
+David
