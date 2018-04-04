@@ -1,7 +1,7 @@
-From: Andy Lutomirski <luto@kernel.org>
+From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: [GIT PULL] Kernel lockdown for secure boot
-Date: Tue, 3 Apr 2018 17:23:38 -0700
-Message-ID: <CALCETrXZWU1MC8LbLCg7VTVHMqKpXh51amnTjKePRCJ31jRiwg@mail.gmail.com>
+Date: Tue, 3 Apr 2018 17:25:20 -0700
+Message-ID: <CA+55aFwvuoSHhKnn82VnDndZ6oXMJgwHF604gZ=h3ehHyC600A@mail.gmail.com>
 References: <4136.1522452584@warthog.procyon.org.uk> <alpine.LRH.2.21.1803311145180.7769@namei.org>
  <186aeb7e-1225-4bb8-3ff5-863a1cde86de@kernel.org> <30459.1522739219@warthog.procyon.org.uk>
  <CALCETrUFOdrH5ShCCd8yguGjC2NtG8fJY7AW26HH467-02UVGA@mail.gmail.com>
@@ -18,65 +18,39 @@ References: <4136.1522452584@warthog.procyon.org.uk> <alpine.LRH.2.21.1803311145
  <CACdnJutZFKX+izBxRYbyxefT5KrKhVV0XsymU=vBhywd+TOE3A@mail.gmail.com>
  <CA+55aFwVUmjZ+Swe9xUdDOEE+EOoaU3dh7BcrH74BOLCi8y_Kw@mail.gmail.com>
  <CACdnJuvqQQ+hidokY5GA7g-yrAs5-358it0cs+m_d4RFDMuB_w@mail.gmail.com>
- <CA+55aFwJBGCr-anrdV9N63fUH4V_QJqgr0_fJyHhH=fuqGAoog@mail.gmail.com> <CAG48ez1MRsDGoea5MwGTXK6R0LJy9u0mX-1VrSSskwnV98kEjQ@mail.gmail.com>
+ <CA+55aFwJBGCr-anrdV9N63fUH4V_QJqgr0_fJyHhH=fuqGAoog@mail.gmail.com>
+ <CACdnJuvFqXGLsAv1Km3MmdssHBfuH5-C_vG3A4eq4Yuj0HhFBA@mail.gmail.com>
+ <CA+55aFzYbpRAdma0PvqE+9ygySuKzNKByqOzzMufBoovXVnfPw@mail.gmail.com> <CACdnJuv-VpdhjEe1cMysdHb6Oy67jQqg-_TVHbUrOfH9GmCVvg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAG48ez1MRsDGoea5MwGTXK6R0LJy9u0mX-1VrSSskwnV98kEjQ@mail.gmail.com>
+In-Reply-To: <CACdnJuv-VpdhjEe1cMysdHb6Oy67jQqg-_TVHbUrOfH9GmCVvg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jann Horn <jannh@google.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Matthew Garrett <mjg59@google.com>, Andrew Lutomirski <luto@kernel.org>, David Howells <dhowells@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, joeyli <jlee@suse.com>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
+To: Matthew Garrett <mjg59@google.com>
+Cc: Andrew Lutomirski <luto@kernel.org>, David Howells <dhowells@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, joeyli <jlee@suse.com>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 3, 2018 at 5:17 PM, Jann Horn <jannh@google.com> wrote:
-> On Wed, Apr 4, 2018 at 2:06 AM, Linus Torvalds
-> <torvalds@linux-foundation.org> wrote:
->> On Tue, Apr 3, 2018 at 4:59 PM, Matthew Garrett <mjg59@google.com> wrote:
->>>
->>> Ok. So we can build distribution kernels that *always* have this on, and to
->>> turn it off you have to disable Secure Boot and install a different kernel.
->>
->> Bingo.
->>
->> Exactly like EVERY OTHER KERNEL CONFIG OPTION.
->>
->> Just like all the ones that I've mentioned several times.
->>
->> Or, like a lot of other kernel options, maybe have a way to just
->> disable it on the kernel command line, and let the user know about it.
->>
->> That would still be better than disabling secure boot entirely in your
->> world view, so it's (a) more convenient and (b) better.
->>
->> Again, in no case does it make sense to tie it into "how did we boot".
->> Because that's just inconvenient for everybody.
+On Tue, Apr 3, 2018 at 5:16 PM, Matthew Garrett <mjg59@google.com> wrote:
 >
-> Without taking a stance regarding whether I think that kernel lockdown
-> makes sense, I think Matthew's point is this:
-> If you don't have lockdown, secure boot doesn't provide a benefit,
-> since an attacker could just modify the init binary instead of messing
-> with your kernel.
-> If you have secure boot, you want lockdown to prevent chainloading
-> into a backdoored version of the real OS.
+> I ignored it because it's not a viable option. Part of the patchset
+> disables various kernel command line options. If there's a kernel command
+> line option that disables the patchset then it's pointless.
 
-I don't think that's the argument here.  Secure boot can be used to
-protect initramfs, since initramfs comes from the secure boot-verified
-bootloader.  That verified initramfs can protect the init binary.
+Honestly, I don't think the patchset is viable at all in that case.
 
-As far as I can tell, what's really going on here is that there's a
-significant contingent here that wants to prevent Linux from
-chainloading something that isn't Linux.  (There doesn't seem to be a
-real benefit to preventing Linux from chainloading Linux, since the
-chainloaded Linux is unlikely to let the attacker do much that the
-original rooted Linux kernel wouldn't have allowed.)  In particular,
-Microsoft, which de facto controls most of the secure boot key
-ecosystem, doesn't want Windows to be chainloaded without having its
-signature verified.
+No way will any sane distribution take it, potentially breaking a lot
+of machines, and have no way to unbreak them except for "oh, btw, you
+have to disable secure boot to get things to work again".
 
-I admit I'm not quite sure why Microsoft considers this important.
-They already require a TPM for all new systems, and any important
-secrets can be sealed by the TPM such that a maliciously chainloaded
-Windows kernel couldn't access those secrets.  But secure boot
-predates the WHQL TPM requirement if I remember correctly, and I
-suspect that we're seeing leftover requirements from
-secure-boot-but-no-TPM era.
+That would be insane.
+
+So you'd better allow some command line options.
+
+One reasonable option may be to just disable lockdown by default (to
+make machines work reliably), and then have a "if you're anal about
+security, add 'lockdown' to the kernel command line".
+
+People who care about this already need to check the secure boot
+status, so this would be just one more thing they'd check.
+
+                Linus
