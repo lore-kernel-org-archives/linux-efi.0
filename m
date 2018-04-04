@@ -1,106 +1,102 @@
 From: Peter Jones <pjones@redhat.com>
-Subject: Re: [PATCH 2/2] efi: Add embedded peripheral firmware support
-Date: Wed, 4 Apr 2018 13:18:36 -0400
-Message-ID: <20180404171835.xvllgcqirl3b5gd5@redhat.com>
-References: <20180331121944.8618-1-hdegoede@redhat.com>
- <20180331121944.8618-2-hdegoede@redhat.com>
- <20180402232333.GU30543@wotan.suse.de>
- <17fb3c28-78ff-2e1f-2ada-d33320567761@redhat.com>
- <20180403180711.GA7957@wunner.de>
- <20180403185848.GD30543@wotan.suse.de>
+Subject: Re: [GIT PULL] Kernel lockdown for secure boot
+Date: Wed, 4 Apr 2018 14:42:56 -0400
+Message-ID: <20180404184255.exdrtpqnxlqme7tl@redhat.com>
+References: <4136.1522452584@warthog.procyon.org.uk>
+ <alpine.LRH.2.21.1803311145180.7769@namei.org>
+ <186aeb7e-1225-4bb8-3ff5-863a1cde86de@kernel.org>
+ <30459.1522739219@warthog.procyon.org.uk>
+ <CALCETrUFOdrH5ShCCd8yguGjC2NtG8fJY7AW26HH467-02UVGA@mail.gmail.com>
+ <CACdnJut31+ZtiR40nkOjm89cfUxS0EM=w-oG69PtWHbXYJQxPg@mail.gmail.com>
+ <CALCETrXeVod=kNpG-M7yKAMM0-n+PMg_OakN6ecWrTPmKXgMLg@mail.gmail.com>
+ <CACdnJuutJeeaaB2kwma0MMd9uDDbKavoHEk4koDLe1M6gYZWXQ@mail.gmail.com>
+ <CALCETrVR_EcbKv5-4AR6Zm02XHhJQQGNDeO8FGkMbYozmuDTJw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20180403185848.GD30543@wotan.suse.de>
+In-Reply-To: <CALCETrVR_EcbKv5-4AR6Zm02XHhJQQGNDeO8FGkMbYozmuDTJw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Cc: Lukas Wunner <lukas@wunner.de>, Hans de Goede <hdegoede@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org, linux-efi@vger.kernel.org, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Matthew Garrett <mjg59@srcf.ucam.org>, One Thousand Gnomes <gnomes@lxorguk.uk>
+To: Andy Lutomirski <luto@kernel.org>
+Cc: Matthew Garrett <mjg59@google.com>, David Howells <dhowells@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, joeyli <jlee@suse.com>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 03, 2018 at 06:58:48PM +0000, Luis R. Rodriguez wrote:
-> On Tue, Apr 03, 2018 at 08:07:11PM +0200, Lukas Wunner wrote:
-> > On Tue, Apr 03, 2018 at 10:33:25AM +0200, Hans de Goede wrote:
-> > > I asked Peter Jones for suggestions how to extract this during boot and
-> > > he suggested seeing if there was a copy of the firmware in the
-> > > EFI_BOOT_SERVICES_CODE memory segment, which it turns out there is.
-> > > 
-> > > My patch to add support for this contains a table of device-model (dmi
-> > > strings), firmware header (first 64 bits), length and crc32 and then if
-> > > we boot on a device-model which is in the table the code scans the
-> > > EFI_BOOT_SERVICES_CODE for the prefix, if found checks the crc and
-> > > caches the firmware for later use by request-firmware.
-> > > 
-> > > So I just do a brute-force search for the firmware, this really is hack,
-> > > nothing standard about it I'm afraid. But it works on 4 different x86
-> > > tablets I have and makes the touchscreen work OOTB on them, so I believe
-> > > it is a worthwhile hack to have.
-> > 
-> > The EFI Firmware Volume contains a kind of filesystem with files
-> > identified by GUIDs.  Those files include EFI drivers, ACPI tables,
-> > DMI data and so on.  It is actually quite common for vendors to
-> > also include device firmware on the Firmware Volume.  Apple is doing
-> > this to ship firmware updates e.g. for the GMUX controller found on
-> > dual GPU MacBook Pros.  If they want to update the controller's
-> > firmware, they include it in a BIOS update, and an EFI driver checks
-> > on boot if the firmware update for the controller is necessary and
-> > if so, flashes it.
-> > 
-> > The firmware files you're looking for are almost certainly included
-> > on the Firmware Volume as individual files.
+On Tue, Apr 03, 2018 at 02:51:23PM -0700, Andy Lutomirski wrote:
+> On Tue, Apr 3, 2018 at 12:29 PM, Matthew Garrett <mjg59@google.com> wrote:
+> > On Tue, Apr 3, 2018 at 9:46 AM Andy Lutomirski <luto@kernel.org> wrote:
+> >> On Tue, Apr 3, 2018 at 9:29 AM, Matthew Garrett <mjg59@google.com> wrote:
+> >> > A kernel that allows users arbitrary access to ring 0 is just an
+> >> > overfeatured bootloader. Why would you want secure boot in that case?
+> >
+> >> To get a chain of trust.  I can provision a system with some public
+> >> keys, stored in UEFI authenticated variables, such that the system
+> >> will only boot a signed image.  That signed image, can, in turn, load
+> >> a signed (or hashed or otherwise verfified) kernel and a verified
+> >> initramfs.  The initramfs can run a full system from a verified (using
+> >> dm-verity or similar) filesystem, for example.  Now it's very hard to
+> >> persistently attack this system.  Chromium OS does something very much
+> >> like this, except that it doesn't use UEFI as far as I know.  So does
+> >> iOS, and so do some Android versions.  None of this requires lockdown,
+> >> or even a separation between usermode and kernelmode, to work
+> >> correctly.  One could even do this on an MMU-less system if one really
+> >> cared to.  More usefully, someone probably has done this using a
+> >> unikernel.
+> >
+> > That's only viable if you're the only person with the ability to sign stuff
+> > for your machine - the moment there are generic distributions that your
+> > machine trusts, an attacker can use one as a bootloader to compromise your
+> > trust chain.
 > 
-> What Hans implemented seems to have been for a specific x86 hack, best if we
-> confirm if indeed they are present on the Firmware Volume.
-
-To be honest, I'm a bit skeptical about the firmware volume approach.
-Tools like UEFITool[0] and uefi-firmware-parser[1] have existed for
-years, still don't seem to reliably parse firmware images I see in the
-wild, and have a fairly regular need for fixes.  These are tools
-maintained by smart people who are making a real effort, and it still
-looks pretty hard to do a good job that applies across a lot of
-platforms.
-
-So I'd rather use Hans's existing patches, at least for now, and if
-someone is interested in hacking on making an efi firmware volume parser
-for the kernel, switch them to that when such a thing is ready.
-
-[0] git@github.com:LongSoft/UEFITool.git
-[1] git@github.com:theopolis/uefi-firmware-parser.git
-
-> > Rather than scraping
-> > the EFI memory for firmware, I think it would be cleaner and more
-> > elegant if you just retrieve the files you're interested in from
-> > the Firmware Volume.
-> > 
-> > We're doing something similar with Apple EFI properties, see
-> > 58c5475aba67 and c9cc3aaa0281.
-> > 
-> > Basically what you need to do to implement this approach is:
-> > 
-> > * Determine the GUIDs used by vendors for the files you're interested
-> >   in.  Either dump the Firmware Volume or take an EFI update as
-> >   shipped by the vendor, then feed it to UEFIExtract:
-> >   https://github.com/LongSoft/UEFITool
-> >   
-> > * Add the EFI Firmware Volume Protocol to include/linux/efi.h:
-> >   https://www.intel.com/content/dam/doc/reference-guide/efi-firmware-file-volume-specification.pdf
-> > 
-> > * Amend arch/x86/boot/compressed/eboot.c to read the files with the
-> >   GUIDs you're interested in into memory and pass the files to the
-> >   kernel as setup_data payloads.
-> > 
-> > * Once the kernel has booted, make the files you've retrieved
-> >   available to device drivers as firmware blobs.
 > 
-> Happen to know if devices using Firmware Volumes also sign their firmware
-> and if hw checks the firmware at load time?
+> If you removed "as a bootloader", then I agree with that sentence.
+> 
+> Can someone please explain why the UEFI crowd cares so much about "as
+> a bootloader"?  Once I'm able to install an OS (Linux kernel +
+> bootloader, Windows embedded doodad, OpenBSD, whatever) on your
+> machine, I can use your peripherals, read your data, write your data,
+> see your keystrokes, use your network connection, re-flash your BIOS
+> (at least as well as any OS can), run VMs, and generally own your
+> system.  Somehow you all seem fine with all of this, except that the
+> fact that I can chainload something else gives UEFI people the
+> willies.
+> 
+> Can someone explain why?
 
-It varies on a per-device basis, of course.  Most new Intel machines as
-of Haswell *should* be verifying their system firmware via Boot Guard,
-which both checks an RSA signature and measures the firmware into the
-TPM, but as with everything of this nature, there are certainly vendors
-that screw it up. (I think AMD has something similar, but I'm really not
-sure.)
+There's no inherent difference, in terms of the trust chain, between
+compromising it to use the machine as a toaster or to run a botnet - the
+trust chain is compromised either way.  But you're much more likely to
+notice if your desktop starts producing bread products than if it hides
+some malware and keeps on booting, and the second one is much more
+attractive to attackers anyway.
 
--- 
+The reason we talk about it as a bootloader is because of the model
+employed by malware.  I'm sure you know that one kind of malware that
+exists in the wild, a so-called "boot kit", operates by modifying a
+kernel during load (or on disk before loading) so that it has some
+malicious payload, like exfiltrating user data or allowing a way to
+install software that the kernel hides or *whatever*, and incorporating
+some way to achieve relative persistence on the system - for example
+hiding the real boot settings and loading a kernel with a different than
+normal initramfs that loads an exploit before continuing with a normal
+looking boot.
+
+As Kees has pointed out, the lockdown portion of this is about
+separating uid-0 from ring-0.  There are a lot of reasons to want to do
+that, of course.  But the reason Secure Boot exists, and ultimately the
+reason we started trying to do this, is so you can't build the
+persistence mechanism for a boot kit by using a trusted kernel to
+springboard into a modified one, even if it's the same kernel just
+modified before kexec.  If you can do that, you can use that to build
+the persistence mechanism in a boot kit.
+
+That is to say, as a result of the way malware has been written, our way
+of thinking about it is often that it's a way to build a boot loader for
+a malicious kernel, so that's how we wind up talking about it.  Are we
+concerned with malware stealing your data?  Yes, but Secure Boot is only
+indirectly about that.  It's primarily about denying the malware easy
+mechanisms to build a persistence mechanism.  The uid-0 != ring-0 aspect
+is useful independent of Secure Boot, but Secure Boot without it falls
+way short of accomplishing its goal.
+
+--
   Peter
