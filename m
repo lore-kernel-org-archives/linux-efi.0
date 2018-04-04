@@ -1,69 +1,106 @@
-From: Justin Forbes <jforbes@redhat.com>
-Subject: Re: [GIT PULL] Kernel lockdown for secure boot
-Date: Wed, 4 Apr 2018 11:46:31 -0500
-Message-ID: <CAFbkSA1BT6Ca7ZtcjvCubvtke07ctgMQVo25fcWY4ZTRLKw0pA@mail.gmail.com>
-References: <CA+55aFzYbpRAdma0PvqE+9ygySuKzNKByqOzzMufBoovXVnfPw@mail.gmail.com>
- <CACdnJuv-VpdhjEe1cMysdHb6Oy67jQqg-_TVHbUrOfH9GmCVvg@mail.gmail.com>
- <CA+55aFwvuoSHhKnn82VnDndZ6oXMJgwHF604gZ=h3ehHyC600A@mail.gmail.com>
- <CA+55aFzJ2sQR13T+20MKEJ5co-f3Ev8rRxQkRCWVaeDSUU3yhQ@mail.gmail.com>
- <CACdnJuti5Riqoi1sesqPALYHq9LT87o4MFj-0Y5BZqqzJ5579g@mail.gmail.com>
- <CA+55aFwhi=gz3HLoGST9--n1_kLJNP6jsf8GSesSFxTDCdPdtQ@mail.gmail.com>
- <CACdnJuuek-sS3esmomNOkjBMV_6VPL2NFCzRd+UGxbZrMe=4nw@mail.gmail.com>
- <CA+55aFxgrh5eeG9MRSEsJtyL5yTe0TehZ=BS2josGJaLxoMMBQ@mail.gmail.com>
- <CACdnJutuBaE3RaDx0KM5vDF9Sinrp=3tG9csrS-H3eU-J7-Utw@mail.gmail.com>
- <24353.1522848817@warthog.procyon.org.uk> <20180404135251.GD16242@thunk.org>
- <CACdnJuuGRRUt-a3i89o906ka3RDOhs+_7tz_G8LTG8Jc0DXAyQ@mail.gmail.com> <CALCETrXwp1faWnqRJ5iLeo6bOOrRS_-L74_xnRAN1Md1YZW8Tg@mail.gmail.com>
+From: Peter Jones <pjones@redhat.com>
+Subject: Re: [PATCH 2/2] efi: Add embedded peripheral firmware support
+Date: Wed, 4 Apr 2018 13:18:36 -0400
+Message-ID: <20180404171835.xvllgcqirl3b5gd5@redhat.com>
+References: <20180331121944.8618-1-hdegoede@redhat.com>
+ <20180331121944.8618-2-hdegoede@redhat.com>
+ <20180402232333.GU30543@wotan.suse.de>
+ <17fb3c28-78ff-2e1f-2ada-d33320567761@redhat.com>
+ <20180403180711.GA7957@wunner.de>
+ <20180403185848.GD30543@wotan.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CALCETrXwp1faWnqRJ5iLeo6bOOrRS_-L74_xnRAN1Md1YZW8Tg@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <20180403185848.GD30543@wotan.suse.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Lutomirski <luto@kernel.org>
-Cc: Matthew Garrett <mjg59@google.com>, Ted Ts'o <tytso@mit.edu>, David Howells <dhowells@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-man <linux-man@vger.kernel.org>, joeyli <jlee@suse.com>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
+To: "Luis R. Rodriguez" <mcgrof@kernel.org>
+Cc: Lukas Wunner <lukas@wunner.de>, Hans de Goede <hdegoede@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org, linux-efi@vger.kernel.org, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Matthew Garrett <mjg59@srcf.ucam.org>, One Thousand Gnomes <gnomes@lxorguk.uk>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 4, 2018 at 11:39 AM, Andy Lutomirski <luto@kernel.org> wrote:
-> On Wed, Apr 4, 2018 at 9:22 AM, Matthew Garrett <mjg59@google.com> wrote:
->> On Wed, Apr 4, 2018 at 6:52 AM Theodore Y. Ts'o <tytso@mit.edu> wrote:
->>
->>> On Wed, Apr 04, 2018 at 02:33:37PM +0100, David Howells wrote:
->>> > Theodore Y. Ts'o <tytso@mit.edu> wrote:
->>> >
->>> > > Whoa.  Why doesn't lockdown prevent kexec?  Put another away, why
->>> > > isn't this a problem for people who are fearful that Linux could be
->>> > > used as part of a Windows boot virus in a Secure UEFI context?
->>> >
->>> > Lockdown mode restricts kexec to booting an authorised image (where the
->>> > authorisation may be by signature or by IMA).
->>
->>> If that's true, then Matthew's assertion that lockdown w/o secure boot
->>> is insecure goes away, no?
->>
->> If you don't have secure boot then an attacker with root can modify your
->> bootloader or kernel, and on next boot lockdown can be silently disabled.
->
-> This has been rebutted over and over and over.  Secure boot is not the
-> only verified boot mechanism in the world.  Other, better, much more
-> auditable, and much simpler mechanisms have been around for a long,
-> long time.
->
-That is certainly the case, and one of the main reasons for the
-secureboot patchset being split out and lockdown taking a different
-name. The problem is, right now, secure boot is the only thing using
-lockdown. I certainly wouldn't go through any effort to tie into it
-with any other mechanism knowing that this patch set has been delayed
-upstream for years. I would hope and expect that once lockdown is in
-mainline, other verified boot mechanisms would leverage it as well.
+On Tue, Apr 03, 2018 at 06:58:48PM +0000, Luis R. Rodriguez wrote:
+> On Tue, Apr 03, 2018 at 08:07:11PM +0200, Lukas Wunner wrote:
+> > On Tue, Apr 03, 2018 at 10:33:25AM +0200, Hans de Goede wrote:
+> > > I asked Peter Jones for suggestions how to extract this during boot and
+> > > he suggested seeing if there was a copy of the firmware in the
+> > > EFI_BOOT_SERVICES_CODE memory segment, which it turns out there is.
+> > > 
+> > > My patch to add support for this contains a table of device-model (dmi
+> > > strings), firmware header (first 64 bits), length and crc32 and then if
+> > > we boot on a device-model which is in the table the code scans the
+> > > EFI_BOOT_SERVICES_CODE for the prefix, if found checks the crc and
+> > > caches the firmware for later use by request-firmware.
+> > > 
+> > > So I just do a brute-force search for the firmware, this really is hack,
+> > > nothing standard about it I'm afraid. But it works on 4 different x86
+> > > tablets I have and makes the touchscreen work OOTB on them, so I believe
+> > > it is a worthwhile hack to have.
+> > 
+> > The EFI Firmware Volume contains a kind of filesystem with files
+> > identified by GUIDs.  Those files include EFI drivers, ACPI tables,
+> > DMI data and so on.  It is actually quite common for vendors to
+> > also include device firmware on the Firmware Volume.  Apple is doing
+> > this to ship firmware updates e.g. for the GMUX controller found on
+> > dual GPU MacBook Pros.  If they want to update the controller's
+> > firmware, they include it in a BIOS update, and an EFI driver checks
+> > on boot if the firmware update for the controller is necessary and
+> > if so, flashes it.
+> > 
+> > The firmware files you're looking for are almost certainly included
+> > on the Firmware Volume as individual files.
+> 
+> What Hans implemented seems to have been for a specific x86 hack, best if we
+> confirm if indeed they are present on the Firmware Volume.
 
->>> The fact that this Verified Boot on, lockdown off causes trouble
->>> points to a clear problem.   User owns the hardware they should have
->>> the right to defeat secureboot if they wish to.
->>
->> Which is why Shim allows you to disable validation if you prove physical
->> user presence.
->
-> And that's a giant hack.  The actual feature should be that a user
-> proves physical presence and thus disables lockdown *without*
-> disabling verification.
->
-> --Andy
+To be honest, I'm a bit skeptical about the firmware volume approach.
+Tools like UEFITool[0] and uefi-firmware-parser[1] have existed for
+years, still don't seem to reliably parse firmware images I see in the
+wild, and have a fairly regular need for fixes.  These are tools
+maintained by smart people who are making a real effort, and it still
+looks pretty hard to do a good job that applies across a lot of
+platforms.
+
+So I'd rather use Hans's existing patches, at least for now, and if
+someone is interested in hacking on making an efi firmware volume parser
+for the kernel, switch them to that when such a thing is ready.
+
+[0] git@github.com:LongSoft/UEFITool.git
+[1] git@github.com:theopolis/uefi-firmware-parser.git
+
+> > Rather than scraping
+> > the EFI memory for firmware, I think it would be cleaner and more
+> > elegant if you just retrieve the files you're interested in from
+> > the Firmware Volume.
+> > 
+> > We're doing something similar with Apple EFI properties, see
+> > 58c5475aba67 and c9cc3aaa0281.
+> > 
+> > Basically what you need to do to implement this approach is:
+> > 
+> > * Determine the GUIDs used by vendors for the files you're interested
+> >   in.  Either dump the Firmware Volume or take an EFI update as
+> >   shipped by the vendor, then feed it to UEFIExtract:
+> >   https://github.com/LongSoft/UEFITool
+> >   
+> > * Add the EFI Firmware Volume Protocol to include/linux/efi.h:
+> >   https://www.intel.com/content/dam/doc/reference-guide/efi-firmware-file-volume-specification.pdf
+> > 
+> > * Amend arch/x86/boot/compressed/eboot.c to read the files with the
+> >   GUIDs you're interested in into memory and pass the files to the
+> >   kernel as setup_data payloads.
+> > 
+> > * Once the kernel has booted, make the files you've retrieved
+> >   available to device drivers as firmware blobs.
+> 
+> Happen to know if devices using Firmware Volumes also sign their firmware
+> and if hw checks the firmware at load time?
+
+It varies on a per-device basis, of course.  Most new Intel machines as
+of Haswell *should* be verifying their system firmware via Boot Guard,
+which both checks an RSA signature and measures the firmware into the
+TPM, but as with everything of this nature, there are certainly vendors
+that screw it up. (I think AMD has something similar, but I'm really not
+sure.)
+
+-- 
+  Peter
