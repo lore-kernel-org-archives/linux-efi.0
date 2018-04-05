@@ -1,20 +1,142 @@
-From: Matthew Garrett <mjg59@google.com>
-Subject: Re: An actual suggestion (Re: [GIT PULL] Kernel lockdown for secure boot)
-Date: Thu, 05 Apr 2018 00:22:02 +0000
-Message-ID: <CACdnJusC7pvGhaRZBHAQqxc8MLHBeFUdZAddUO5DG2kFZMktMA@mail.gmail.com>
-References: <CALCETrUVQLDC6_VEvuAbdCOuGrmcxohqTB6P8eyNojm9AryNkg@mail.gmail.com>
- <1119.1522858644@warthog.procyon.org.uk> <alpine.LRH.2.21.1804050918330.21060@namei.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 2/2] efi: Add embedded peripheral firmware support
+Date: Thu, 5 Apr 2018 02:28:06 +0200
+Message-ID: <CAKv+Gu_-AQp-+s2ojoDYicHm30QyQNXjECBBM0D8Rs9L5+n3RA@mail.gmail.com>
+References: <20180331121944.8618-1-hdegoede@redhat.com> <20180331121944.8618-2-hdegoede@redhat.com>
+ <20180402232333.GU30543@wotan.suse.de> <17fb3c28-78ff-2e1f-2ada-d33320567761@redhat.com>
+ <20180403180711.GA7957@wunner.de> <20180403185848.GD30543@wotan.suse.de>
+ <20180404171835.xvllgcqirl3b5gd5@redhat.com> <78ae4d18-8964-5748-a69f-0017d0dca5f7@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <alpine.LRH.2.21.1804050918330.21060@namei.org>
+In-Reply-To: <78ae4d18-8964-5748-a69f-0017d0dca5f7@redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: jmorris@namei.org
-Cc: David Howells <dhowells@redhat.com>, luto@kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Theodore Ts'o <tytso@mit.edu>, Linus Torvalds <torvalds@linux-foundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, jforbes@redhat.com, linux-man@vger.kernel.org, jlee@suse.com, LSM List <linux-security-module@vger.kernel.org>, linux-api@vger.kernel.org, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Peter Jones <pjones@redhat.com>, "Luis R. Rodriguez" <mcgrof@kernel.org>, Lukas Wunner <lukas@wunner.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Dave Olsthoorn <dave@bewaar.me>, the arch/x86 maintainers <x86@kernel.org>, linux-efi@vger.kernel.org, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Matthew Garrett <mj>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 4, 2018 at 4:25 PM James Morris <jmorris@namei.org> wrote:
-> It's surely reasonable to allow an already secure-booted system to be
-> debugged without needing to be rebooted.
+On 4 April 2018 at 22:25, Hans de Goede <hdegoede@redhat.com> wrote:
+> HI,
+>
+>
+> On 04-04-18 19:18, Peter Jones wrote:
+>>
+>> On Tue, Apr 03, 2018 at 06:58:48PM +0000, Luis R. Rodriguez wrote:
+>>>
+>>> On Tue, Apr 03, 2018 at 08:07:11PM +0200, Lukas Wunner wrote:
+>>>>
+>>>> On Tue, Apr 03, 2018 at 10:33:25AM +0200, Hans de Goede wrote:
+>>>>>
+>>>>> I asked Peter Jones for suggestions how to extract this during boot and
+>>>>> he suggested seeing if there was a copy of the firmware in the
+>>>>> EFI_BOOT_SERVICES_CODE memory segment, which it turns out there is.
+>>>>>
+>>>>> My patch to add support for this contains a table of device-model (dmi
+>>>>> strings), firmware header (first 64 bits), length and crc32 and then if
+>>>>> we boot on a device-model which is in the table the code scans the
+>>>>> EFI_BOOT_SERVICES_CODE for the prefix, if found checks the crc and
+>>>>> caches the firmware for later use by request-firmware.
+>>>>>
+>>>>> So I just do a brute-force search for the firmware, this really is
+>>>>> hack,
+>>>>> nothing standard about it I'm afraid. But it works on 4 different x86
+>>>>> tablets I have and makes the touchscreen work OOTB on them, so I
+>>>>> believe
+>>>>> it is a worthwhile hack to have.
+>>>>
+>>>>
+>>>> The EFI Firmware Volume contains a kind of filesystem with files
+>>>> identified by GUIDs.  Those files include EFI drivers, ACPI tables,
+>>>> DMI data and so on.  It is actually quite common for vendors to
+>>>> also include device firmware on the Firmware Volume.  Apple is doing
+>>>> this to ship firmware updates e.g. for the GMUX controller found on
+>>>> dual GPU MacBook Pros.  If they want to update the controller's
+>>>> firmware, they include it in a BIOS update, and an EFI driver checks
+>>>> on boot if the firmware update for the controller is necessary and
+>>>> if so, flashes it.
+>>>>
+>>>> The firmware files you're looking for are almost certainly included
+>>>> on the Firmware Volume as individual files.
+>>>
+>>>
+>>> What Hans implemented seems to have been for a specific x86 hack, best if
+>>> we
+>>> confirm if indeed they are present on the Firmware Volume.
+>>
+>>
+>> To be honest, I'm a bit skeptical about the firmware volume approach.
+>> Tools like UEFITool[0] and uefi-firmware-parser[1] have existed for
+>> years, still don't seem to reliably parse firmware images I see in the
+>> wild, and have a fairly regular need for fixes.  These are tools
+>> maintained by smart people who are making a real effort, and it still
+>> looks pretty hard to do a good job that applies across a lot of
+>> platforms.
+>>
+>> So I'd rather use Hans's existing patches, at least for now, and if
+>> someone is interested in hacking on making an efi firmware volume parser
+>> for the kernel, switch them to that when such a thing is ready.
+>>
+>> [0] git@github.com:LongSoft/UEFITool.git
+>> [1] git@github.com:theopolis/uefi-firmware-parser.git
+>>
+>>>> Rather than scraping
+>>>> the EFI memory for firmware, I think it would be cleaner and more
+>>>> elegant if you just retrieve the files you're interested in from
+>>>> the Firmware Volume.
+>>>>
+>>>> We're doing something similar with Apple EFI properties, see
+>>>> 58c5475aba67 and c9cc3aaa0281.
+>>>>
+>>>> Basically what you need to do to implement this approach is:
+>>>>
+>>>> * Determine the GUIDs used by vendors for the files you're interested
+>>>>    in.  Either dump the Firmware Volume or take an EFI update as
+>>>>    shipped by the vendor, then feed it to UEFIExtract:
+>>>>    https://github.com/LongSoft/UEFITool
+>>>>    * Add the EFI Firmware Volume Protocol to include/linux/efi.h:
+>>>>
+>>>> https://www.intel.com/content/dam/doc/reference-guide/efi-firmware-file-volume-specification.pdf
+>>>>
+>>>> * Amend arch/x86/boot/compressed/eboot.c to read the files with the
+>>>>    GUIDs you're interested in into memory and pass the files to the
+>>>>    kernel as setup_data payloads.
+>>>>
+>>>> * Once the kernel has booted, make the files you've retrieved
+>>>>    available to device drivers as firmware blobs.
+>>>
+>>>
+>>> Happen to know if devices using Firmware Volumes also sign their firmware
+>>> and if hw checks the firmware at load time?
+>>
+>>
+>> It varies on a per-device basis, of course.  Most new Intel machines as
+>> of Haswell *should* be verifying their system firmware via Boot Guard,
+>> which both checks an RSA signature and measures the firmware into the
+>> TPM, but as with everything of this nature, there are certainly vendors
+>> that screw it up. (I think AMD has something similar, but I'm really not
+>> sure.)
+>
+>
+> Lukas, thank you for your suggestions on this, but I doubt that these
+> devices use the Firmware Volume stuff.
+>
 
-alt-sysrq-x from a physical console will do that.
+Aren't Firmware Volumes a PI thing rather than a UEFI thing?
+
+> These are really cheap x86 Windows 10 tablets, everything about them is
+> simply hacked together by the manufacturer till it boots Windows10 and
+> then it is shipped to the customer without receiving any update
+> afterwards ever.
+>
+> What you are describing sounds like significantly more work then
+> the vendor just embedding the firmware as a char firmware[] in their
+> EFI mouse driver.
+>
+> That combined with Peter's worries about difficulties parsing the
+> Firmware Volume stuff, makes me believe that it is best to just
+> stick with my current approach as Peter suggests.
+>
+> Regards,
+>
+> Hans
+>
