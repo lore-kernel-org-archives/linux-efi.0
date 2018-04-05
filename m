@@ -1,80 +1,68 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [PATCH 2/2] efi: Add embedded peripheral firmware support
-Date: Thu, 5 Apr 2018 13:51:28 +0200
-Message-ID: <b43da07e-5ca6-ce06-c786-5dcbbfc4b300@redhat.com>
-References: <20180331121944.8618-1-hdegoede@redhat.com>
- <20180331121944.8618-2-hdegoede@redhat.com>
- <20180403195332.tezh6alee26aic2s@redhat.com>
+From: Mimi Zohar <zohar@linux.vnet.ibm.com>
+Subject: Re: An actual suggestion (Re: [GIT PULL] Kernel lockdown for secure
+ boot)
+Date: Thu, 05 Apr 2018 10:01:09 -0400
+Message-ID: <1522936869.16421.63.camel@linux.vnet.ibm.com>
+References: <CALCETrUVQLDC6_VEvuAbdCOuGrmcxohqTB6P8eyNojm9AryNkg@mail.gmail.com>
+         <1119.1522858644@warthog.procyon.org.uk>
+         <20180405021650.GC7362@linux-l9pv.suse>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180403195332.tezh6alee26aic2s@redhat.com>
-Content-Language: en-US
+In-Reply-To: <20180405021650.GC7362@linux-l9pv.suse>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Jones <pjones@redhat.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org, linux-efi@vger.kernel.org
+To: joeyli <jlee@suse.com>, David Howells <dhowells@redhat.com>
+Cc: Andy Lutomirski <luto@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Theodore Y. Ts'o" <tytso@mit.edu>, Matthew Garrett <mjg59@google.com>, Linus Torvalds <torvalds@linux-foundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
-
-On 03-04-18 21:53, Peter Jones wrote:
-> On Sat, Mar 31, 2018 at 02:19:44PM +0200, Hans de Goede wrote:
->> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
->> index fddc5f706fd2..1a5ea950f58f 100644
->> --- a/drivers/firmware/efi/efi.c
->> +++ b/drivers/firmware/efi/efi.c
->> @@ -455,6 +455,7 @@ int __init efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md)
->>   		u64 end;
->>   
->>   		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
->> +		    md->type != EFI_BOOT_SERVICES_CODE &&
->>   		    md->type != EFI_BOOT_SERVICES_DATA &&
->>   		    md->type != EFI_RUNTIME_SERVICES_DATA) {
->>   			continue;
+On Thu, 2018-04-05 at 10:16 +0800, joeyli wrote:
+> Hi David, 
 > 
-> Might be worth adding a comment here to ensure nobody comes along later
-> and adds something like EFI_BOOT_LOADER_DATA or other stuff that's
-> allocated later here.  I don't want to accidentally patch our way into
-> having the ability to stumble across a firmware blob somebody dumped
-> into the middle of a grub config file, especially since you only need to
-> collide crc32 (within the same length) to pre-alias a match.
-
-As discussed elsewhere in the thread, I'm going to switch to doing a
-kmemdup on the found firmware, so this chunk will go away :)
-
+> On Wed, Apr 04, 2018 at 05:17:24PM +0100, David Howells wrote:
+> > Andy Lutomirski <luto@kernel.org> wrote:
+> > 
+> > > Since this thread has devolved horribly, I'm going to propose a solution.
+> > > 
+> > > 1. Split the "lockdown" state into three levels:  (please don't
+> > > bikeshed about the names right now.)
+> > > 
+> > > LOCKDOWN_NONE: normal behavior
+> > > 
+> > > LOCKDOWN_PROTECT_INTEGREITY: kernel tries to keep root from writing to
+> > > kernel memory
+> > > 
+> > > LOCKDOWN_PROTECT_INTEGRITY_AND_SECRECY: kernel tries to keep root from
+> > > reading or writing kernel memory.
+> > 
+> > In theory, it's good idea, but in practice it's not as easy to implement as I
+> > think you think.
+> > 
+> > Let me list here the things that currently get restricted by lockdown:
+> > 
+> [...snip]
+> >  (5) Kexec.
+> >
 > 
-> ...
->> +static int __init efi_check_md_for_embedded_firmware(
->> +	efi_memory_desc_t *md, const struct embedded_fw_desc *desc)
->> +{
-> ...
->> +	if (found_fw_count >= MAX_EMBEDDED_FIRMWARES) {
->> +		pr_err("Error already have %d embedded firmwares\n",
->> +		       MAX_EMBEDDED_FIRMWARES);
->> +		return -ENOSPC;
->> +	}
-> 
-> Doesn't seem like this needs to be pr_err(); after all we have already
-> found a valid match, so the firmware vendor has done something
-> moderately stupid, but we have a firmware that will probably work.  Of
-> course it still needs to return != 0, but pr_warn() or even pr_info()
-> seems more reasonable.
+> About IMA with kernel module signing and kexec(not on x86_64 yet)...
 
-We break from the search loop as soon as a firmware is found, this can
-only trigger if someone adds a second firmware to the dmi data and then
-does not update MAX_EMBEDDED_FIRMWARES...
+Only carrying the measurement list across kexec is architecture
+specific, but everything else should work.  
 
-But mcgrof wants me to switch to a linked list here, so this is going
-away too.
+> Because IMA can be used to verify the integrity of kernel module or even
+> the image for kexec. I think that the
+> IMA_KEYRINGS_PERMIT_SIGNED_BY_BUILTIN_OR_SECONDARY must be enabled at runtime
+> when kernel is locked-down.
 
-> Aside from those nits, looks good to me.
-> 
-> Reviewed-by: Peter Jones <pjones@redhat.com>
+I think we need to understand the problem a bit better.  Is the
+problem that you're using the secondary keyring and loading the UEFI
+keys onto the secondary keyring?
 
-Thanks, but v2 is going to have so much changes that I don't feel
-comfortable bringing this forward to v2.
+> Because the root can enroll master key to keyring then IMA trusts the ima key
+> derived from master key. It causes that the arbitrary signed module can be loaded
+> when the root compromised.
 
-Regards,
+With only the builtin keyring, only keys signed by a builtin key can
+be added to the IMA keyring.
 
-Hans
+Mimi
