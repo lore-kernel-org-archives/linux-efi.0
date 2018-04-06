@@ -1,114 +1,58 @@
-From: Peter Dolding <oiaohm@gmail.com>
-Subject: Re: [GIT PULL] Kernel lockdown for secure boot
-Date: Fri, 6 Apr 2018 14:42:53 +1000
-Message-ID: <CANA3KFW_7VVm6=Sg=gu8eE0b2+NO_4MYhmxRg_UYOOYeDj83Fg@mail.gmail.com>
-References: <4136.1522452584@warthog.procyon.org.uk> <alpine.LRH.2.21.1803311145180.7769@namei.org>
- <186aeb7e-1225-4bb8-3ff5-863a1cde86de@kernel.org> <30459.1522739219@warthog.procyon.org.uk>
- <CALCETrUFOdrH5ShCCd8yguGjC2NtG8fJY7AW26HH467-02UVGA@mail.gmail.com>
- <CACdnJut31+ZtiR40nkOjm89cfUxS0EM=w-oG69PtWHbXYJQxPg@mail.gmail.com>
- <CALCETrXeVod=kNpG-M7yKAMM0-n+PMg_OakN6ecWrTPmKXgMLg@mail.gmail.com>
- <CACdnJuutJeeaaB2kwma0MMd9uDDbKavoHEk4koDLe1M6gYZWXQ@mail.gmail.com>
- <CALCETrVR_EcbKv5-4AR6Zm02XHhJQQGNDeO8FGkMbYozmuDTJw@mail.gmail.com> <20180404184255.exdrtpqnxlqme7tl@redhat.com>
+From: "Luis R. Rodriguez" <mcgrof@kernel.org>
+Subject: Re: [PATCH 2/2] efi: Add embedded peripheral firmware support
+Date: Fri, 6 Apr 2018 14:08:32 +0000
+Message-ID: <20180406140832.GF30543@wotan.suse.de>
+References: <78ae4d18-8964-5748-a69f-0017d0dca5f7@redhat.com>
+ <20180404171835.xvllgcqirl3b5gd5@redhat.com>
+ <20180405054349.GA25653@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180404184255.exdrtpqnxlqme7tl@redhat.com>
+Content-Disposition: inline
+In-Reply-To: <20180405054349.GA25653@wunner.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Jones <pjones@redhat.com>
-Cc: Andy Lutomirski <luto@kernel.org>, Matthew Garrett <mjg59@google.com>, David Howells <dhowells@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, joeyli <jlee@suse.com>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
+To: Lukas Wunner <lukas@wunner.de>
+Cc: Peter Jones <pjones@redhat.com>, Hans de Goede <hdegoede@redhat.com>, "Luis R. Rodriguez" <mcgrof@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org, linux-efi@vger.kernel.org, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Matthew Garrett <mjg59@srcf.ucam.or>
 List-Id: linux-efi@vger.kernel.org
 
->
-> There's no inherent difference, in terms of the trust chain, between
-> compromising it to use the machine as a toaster or to run a botnet - the
-> trust chain is compromised either way.  But you're much more likely to
-> notice if your desktop starts producing bread products than if it hides
-> some malware and keeps on booting, and the second one is much more
+On Thu, Apr 05, 2018 at 07:43:49AM +0200, Lukas Wunner wrote:
+> On Wed, Apr 04, 2018 at 01:18:36PM -0400, Peter Jones wrote:
+> > > On Tue, Apr 03, 2018 at 08:07:11PM +0200, Lukas Wunner wrote:
+> > > > * Add the EFI Firmware Volume Protocol to include/linux/efi.h:
+> > > >   https://www.intel.com/content/dam/doc/reference-guide/efi-firmware-file-volume-specification.pdf
+> > > > 
+> > > > * Amend arch/x86/boot/compressed/eboot.c to read the files with the
+> > > >   GUIDs you're interested in into memory and pass the files to the
+> > > >   kernel as setup_data payloads.
+> > 
+> > To be honest, I'm a bit skeptical about the firmware volume approach.
+> > Tools like UEFITool[0] and uefi-firmware-parser[1] have existed for
+> > years, still don't seem to reliably parse firmware images I see in the
+> > wild, and have a fairly regular need for fixes.  These are tools
+> > maintained by smart people who are making a real effort, and it still
+> > looks pretty hard to do a good job that applies across a lot of
+> > platforms.
+> > 
+> > So I'd rather use Hans's existing patches, at least for now, and if
+> > someone is interested in hacking on making an efi firmware volume parser
+> > for the kernel, switch them to that when such a thing is ready.
+> 
+> Hello?  As I've written in the above-quoted e-mail the kernel should
+> read the files using EFI_FIRMWARE_VOLUME_PROTOCOL.ReadFile().
+> 
+> *Not* by parsing the firmware volume!
+> 
+> Parsing the firmware volume is only necessary to find out the GUIDs
+> of the files you're looking for.  You only do that *once*.
 
-> That is to say, as a result of the way malware has been written, our way
-> of thinking about it is often that it's a way to build a boot loader for
-> a malicious kernel, so that's how we wind up talking about it.  Are we
-> concerned with malware stealing your data?  Yes, but Secure Boot is only
-> indirectly about that.  It's primarily about denying the malware easy
-> mechanisms to build a persistence mechanism.  The uid-0 != ring-0 aspect
-> is useful independent of Secure Boot, but Secure Boot without it falls
-> way short of accomplishing its goal.
->
-> --
-I am sorry the issue here this is really expanding Secure Boot to
-breaking point.
+How do you get the GUIDs for each driver BTW?
 
-Yes a person wants a secure system having the boot parts verified by
-some means and using a lockdown is advantage.
+Hans, I do believe we should *try* this approach at the very least.
 
-Problem comes in with the idea that UEFI Secure Boot and lockdown are linked.
+Why not?
 
-If I am running windows and linux on the same machine Secure Boot need
-to be on so windows run happy.
+Otherwise it would be wise to provide a technical reason for why
+we'd choose one custom mechanism which would only serve a few tablets
+over a mechanism which could serve more devices.
 
-Remember its my machine.  If I wish to compromise security on my
-machine because it make sense I should be allowed to,
-
-A proper lockdown would prevent you from messing with ACPI tables it a
-very creative hack have kernel load a DSDT and have it from ring zero
-turn bits in the kernel off.
-
-The reality here is we need to be able to operate without lockdown due
-to how badly broken some hardware it to configure system.
-
-Yes the need to include option to push button to disable secure boot
-is required due to how badly broken this stuff is.   Of course this
-does not address the issue that if I am working on a system from
-remote or embedded where I don't  have the push button to turn off as
-a option this is still a problem.
-
-
-Effective lockdown has to protect linux kernel boot parameters,
-initramfs and other bits from being modified as well.   This lead us
-to problem with the broken hardware in a machine we cannot turn secure
-boot off we still need to perform all these alterations.
-
-
-We do not live in a world of perfect computer hardware so at this
-stage proper unattackable secureboot cannot be done.
-
-
-We would be better off putting effort into improve means with UEFI of
-adding own KEK.   This is so that only boot loaders and kernels from
-the vendors user has approved in fact to work.  There could also be a
-configuration KEK that gets disabled after all the required operating
-systems are installed.    So Microsoft non OS KEK makes sense to be
-the configuration rule breaking KEK but the current deployments of
-UEFI don't have a off switch option on it.
-
-
-One KEK for everyone who is not Microsoft to boot with is highly insecure.
-
-
-UEFI secureboot falls way short in the validation department currently
-because too much is validated under one KEK key.
-
-UEFI also fall short due to failing to provide a system to protect
-boot parameters that can alter OS behaviour and make a secure kernel
-insecure this include kernels with this lockdown patches,
-
-
-Really you need to compare UEFI secureboot vs boot loader and /boot on
-a read only media.   Every where you can change something in the UEFI
-secureboot without is being signed that you cannot in the read only
-media of the boot loader and /boot is a defect in the UEFI secureboot
-design and implementation.
-
-If boot parameters were properly secured there would be no need for
-lockdown query if UEFI was in secureboot mode or not.
-
-Also lockdown being on and kernel and boot loader not running secured
-still would provide extra item attacker has to get past.
-
-So fairly much remove the EFI interrogation patches and work with UEFI
-to fix it properly.   Hacking around these UEFI defects means we will
-end up being stuck with them and the system still not being properly
-secured.
-
-
-Peter Dolding
+  Luis
