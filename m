@@ -1,106 +1,100 @@
-From: Lukas Wunner <lukas@wunner.de>
+From: Hans de Goede <hdegoede@redhat.com>
 Subject: Re: [PATCH 2/2] efi: Add embedded peripheral firmware support
-Date: Sat, 7 Apr 2018 11:51:22 +0200
-Message-ID: <20180407095122.GA21479@wunner.de>
-References: <CAKv+Gu9SH9a_e_Zen7QMbyrY3NbEVji8ZCsNvDoy8EdbP5yy=Q@mail.gmail.com>
+Date: Sat, 7 Apr 2018 13:13:31 +0200
+Message-ID: <f5f6871c-ed41-fa43-3012-e01949686c2f@redhat.com>
+References: <78ae4d18-8964-5748-a69f-0017d0dca5f7@redhat.com>
+ <20180404171835.xvllgcqirl3b5gd5@redhat.com>
+ <20180405054349.GA25653@wunner.de> <20180406140832.GF30543@wotan.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu9SH9a_e_Zen7QMbyrY3NbEVji8ZCsNvDoy8EdbP5yy=Q@mail.gmail.com>
- <20180406141642.23xfaub52gv3zpio@redhat.com>
- <20180406140832.GF30543@wotan.suse.de>
+In-Reply-To: <20180406140832.GF30543@wotan.suse.de>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Luis R. Rodriguez" <mcgrof@kernel.org>, Peter Jones <pjones@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org, linux-efi@vger.kernel.org, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Matthew Garrett <mjg59@srcf.ucam.org>, One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, dmitry.torokhov@
+To: "Luis R. Rodriguez" <mcgrof@kernel.org>, Lukas Wunner <lukas@wunner.de>
+Cc: Peter Jones <pjones@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org, linux-efi@vger.kernel.org, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Matthew Garrett <mjg59@srcf.ucam.org>, One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>, Linus Torvalds <torvalds>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Apr 06, 2018 at 02:08:32PM +0000, Luis R. Rodriguez wrote:
-> How do you get the GUIDs for each driver BTW?
+Hi,
 
-They're used as filenames when extracting a Firmware Volume with
-UEFIExtract.
-
-E.g. let's say I'm looking for the EFI driver containing the UCS-2
-string "ThunderboltDROM" in the MacBookPro9,1 Firmware Volume:
-
-$ UEFIExtract MBP91_00D3_B0C_LOCKED.scap
-$ grep -rl T.h.u.n.d.e.r.b.o.l.t.D.R.O.M MBP91_00D3_B0C_LOCKED.scap.dump
-MBP91_00D3_B0C_LOCKED.scap.dump/0 UEFI image/0 7A9354D9-0468-444A-81CE-0BF617D890DF/4 283FA2EE-532C-484D-9383-9F93B36F0B7E/0 7A9354D9-0468-444A-81CE-0BF617D890DF/0 77AD7FDB-DF2A-4302-8898-C72E4CDBD0F4/0 Compressed section/0 FC1BCDB0-7D31-49AA-936A-A4600D9DD083/0 Volume image section/0 7A9354D9-0468-444A-81CE-0BF617D890DF/97 9D1A8B60-6CB0-11DE-8E91-0002A5D5C51B/0 Compressed section/0 FC1BCDB0-7D31-49AA-936A-A4600D9DD083/0 PE32 image section/body.bin
-
-That file can then be examined with a hex editor, disassembler, etc.
-
-Since Hans knows the 8 byte signature of the file he's looking for,
-he'd just use:
-
-$ grep -rl '\x01\x23\x34\x56\x78\x9a\xbc\xde' ...
-
-(The \x syntax works with BSD grep shipping with macOS, but not with
-GNU grep.  pcregrep should work, or grep -P, though the latter has
-been unreliable for me.)
-
-Pretty trivial obviously, the problem is how do you get the Firmware
-Volume?  Apple ships firmware blobs for all supported machines as part
-of their OS updates, but if the vendor never provides updates (as Hans
-wrote), your only chance is to dump the ROM.  On Macs the ROM is at
-physical address 0xffe00000.  The rEFIt bootloader contains a "fvdump"
-tool which can be used to dump the Firmware Volume at this address to
-the ESP:
-https://github.com/yep/refit/blob/master/refit/dumpfv/dumpfv.c
-
-The tool dumps only 2 MByte, but contempary Macs use considerably larger
-firmware blobs (8 MByte+).  A quick Google search turns up these
-alternative addresses where the ROM may be located:
-https://github.com/tianocore/edk2/blob/master/OvmfPkg/README
-
-   "The base address for the 1MB image in QEMU physical memory is
-    0xfff00000. The base address for the 2MB image is 0xffe00000.
-    The base address for the 4MB image is 0xffc00000."
-
-
-> Otherwise it would be wise to provide a technical reason for why
-> we'd choose one custom mechanism which would only serve a few tablets
-> over a mechanism which could serve more devices.
-
-An advantage of the approach I'm suggesting is that it also catches
-firmware even if the EFI driver wasn't loaded.  There may even be
-firmware for devices that aren't present, vendors ship lots of
-surprising stuff on Firmware Volumes.  (I've found a FireWire driver
-on the 12" MacBook8,1 volume, even though the machine has neither a
-FireWire port, nor a Thunderbolt port that you could connect a
-FireWire adapter to.  They were probably just too lazy to constrain
-the firmware contents to what's actually needed on a specific machine.)
-
-
-On Fri, Apr 06, 2018 at 10:16:44AM -0400, Peter Jones wrote:
-> That said, EFI_FIRMWARE_VOLUME_PROTOCOL is part of the
-> PI spec, not the UEFI spec.  It's not required in order to implement UEFI,
-> and some implementations don't use it.  Even when the implementation
-> does include PI, there's no guarantee PI protocols are exposed after the
-> "End of DXE" event (though edk2 will expose this, I think).
-
-Thanks for pointing that out, I wasn't aware of it.
-
-
-On Fri, Apr 06, 2018 at 04:28:49PM +0200, Ard Biesheuvel wrote:
-> > EFI_FIRMWARE_VOLUME_PROTOCOL is not part of the UEFI spec but
-> > of the PI spec, and so we will be adding dependencies on
-> > implementation details of the firmware. I am aware we may already have
-> > done so for the Apple properties support
+On 06-04-18 16:08, Luis R. Rodriguez wrote:
+> On Thu, Apr 05, 2018 at 07:43:49AM +0200, Lukas Wunner wrote:
+>> On Wed, Apr 04, 2018 at 01:18:36PM -0400, Peter Jones wrote:
+>>>> On Tue, Apr 03, 2018 at 08:07:11PM +0200, Lukas Wunner wrote:
+>>>>> * Add the EFI Firmware Volume Protocol to include/linux/efi.h:
+>>>>>    https://www.intel.com/content/dam/doc/reference-guide/efi-firmware-file-volume-specification.pdf
+>>>>>
+>>>>> * Amend arch/x86/boot/compressed/eboot.c to read the files with the
+>>>>>    GUIDs you're interested in into memory and pass the files to the
+>>>>>    kernel as setup_data payloads.
+>>>
+>>> To be honest, I'm a bit skeptical about the firmware volume approach.
+>>> Tools like UEFITool[0] and uefi-firmware-parser[1] have existed for
+>>> years, still don't seem to reliably parse firmware images I see in the
+>>> wild, and have a fairly regular need for fixes.  These are tools
+>>> maintained by smart people who are making a real effort, and it still
+>>> looks pretty hard to do a good job that applies across a lot of
+>>> platforms.
+>>>
+>>> So I'd rather use Hans's existing patches, at least for now, and if
+>>> someone is interested in hacking on making an efi firmware volume parser
+>>> for the kernel, switch them to that when such a thing is ready.
+>>
+>> Hello?  As I've written in the above-quoted e-mail the kernel should
+>> read the files using EFI_FIRMWARE_VOLUME_PROTOCOL.ReadFile().
+>>
+>> *Not* by parsing the firmware volume!
+>>
+>> Parsing the firmware volume is only necessary to find out the GUIDs
+>> of the files you're looking for.  You only do that *once*.
 > 
-> ... or maybe not: I thought Lukas alluded to that in this thread, but
-> I can't actually find any traces of that in the code so I must have
-> misunderstood.
+> How do you get the GUIDs for each driver BTW?
+> 
+> Hans, I do believe we should *try* this approach at the very least.
 
-Retrieval of Apple device properties is done using a custom Apple
-protocol, it doesn't involve the EFI_FIRMWARE_VOLUME_PROTOCOL.
+Ok, so I've made a ROM dump of one of the tablets which I have with
+the touchscreen firmware embedded in the EFI code using flashrom,
+then I ran UEFIExtract on it, to get all the separate files.
 
-What I meant to say is, the EFI stub already stashes PCI ROMs and
-Apple device properties in setup_data payloads for consumption by
-the kernel proper, so extending that pattern to retrieval of
-device firmware (using EFI_FIRMWARE_VOLUME_PROTOCOL) seems kind of
-natural.
+Then I wrote a little test.sh script using hexdump piped to grep to
+find the magic prefix, here is the result of running this on all
+files UEFIExtract generated:
 
-Thanks,
+[hans@shalem chuwi-vi8-plus-cwi519-bios.bin.dump]$ find -type f -exec ./test.sh '{}' \;
+0x00000c40        3136    B0 07 00 00 E4 07 00 00
+found in ./2 BIOS region/6 8C8CE578-8A3D-4F1C-9935-896185C32DD3/31 I2cHid/1 EE4E5898-3914-4259-9D6E-DC7BD79403CF/0 PE32 image section/body.bin
+0x00000be0        3040    B0 07 00 00 E4 07 00 00
+found in ./2 BIOS region/5 8C8CE578-8A3D-4F1C-9935-896185C32DD3/31 I2cHid/1 EE4E5898-3914-4259-9D6E-DC7BD79403CF/0 PE32 image section/body.bin
 
-Lukas
+With the version found at offset 0xbe0 of the "5 8C8CE578-8A3D-4F1C-9935-896185C32DD3"
+section matching what we find in the efi_boot_services_code while running.
+
+As the I2cHid name suggests this is embedded in the driver (which is a PE executable), not in a separate file:
+[hans@shalem chuwi-vi8-plus-cwi519-bios.bin.dump]$ file './2 BIOS region/5 8C8CE578-8A3D-4F1C-9935-896185C32DD3/31 I2cHid/1 EE4E5898-3914-4259-9D6E-DC7BD79403CF/0 PE32 image section/body.bin'
+./2 BIOS region/5 8C8CE578-8A3D-4F1C-9935-896185C32DD3/31 I2cHid/1 EE4E5898-3914-4259-9D6E-DC7BD79403CF/0 PE32 image section/body.bin: MS-DOS executable
+
+So using the EFI_FIRMWARE_VOLUME_PROTOCOL.ReadFile() is not really
+going to help here, since this is not in a separate file which we
+can consume in its entirety, we still need to scan for the prefix
+and do e.g. a CRC check to make sure we've actually got what we
+expect, at which point simply scanning all of efi_boot_services_code
+is a lot simpler and less error prone.
+
+Using an implementation specific EFI protocol for this means calling
+into EFI code and potentially triggering various bugs in there, breaking
+boot. This is esp. likely to happen since this is a protocol which is
+not used outside of the EFI ROMs internal code so there are likely
+little ABI guarantees making this approach extra error prone.
+
+Just scanning the efi_boot_services_code OTOH is quite safe TODO.
+
+As for the overhead of scanning the efi_boot_services_code, we are
+only doing this on a dmi match, so on most machines there is no
+overhead other then the dmi check. On machines where there is
+a dmi match, the price (I guess about 30 ms or so for the scan)
+is well worth the result of having the touchscreen OOTB.
+
+Regard,
+
+Hans
