@@ -1,86 +1,68 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [GIT PULL] Kernel lockdown for secure boot
-Date: Sun, 8 Apr 2018 10:23:06 +0200
-Message-ID: <20180408082306.GB4965@amd>
-References: <CALCETrUFOdrH5ShCCd8yguGjC2NtG8fJY7AW26HH467-02UVGA@mail.gmail.com>
- <CACdnJut31+ZtiR40nkOjm89cfUxS0EM=w-oG69PtWHbXYJQxPg@mail.gmail.com>
- <CALCETrXeVod=kNpG-M7yKAMM0-n+PMg_OakN6ecWrTPmKXgMLg@mail.gmail.com>
- <9758.1522775763@warthog.procyon.org.uk>
- <CALCETrWHS9p1My=j07=V=OP7v4SwQkW-kJ3JOx6EbPU8fb_XEQ@mail.gmail.com>
- <13189.1522784944@warthog.procyon.org.uk>
- <CALCETrX4CuHVpn38R24TCcJgCBLSbh-sOD-qcD5kYF8Zo53ZJw@mail.gmail.com>
- <9349.1522794769@warthog.procyon.org.uk>
- <CALCETrV6E+r942K+fu-ALNf-x6qOZ3o1hNKGeu7qEMvr8sMP9A@mail.gmail.com>
- <10718.1522798745@warthog.procyon.org.uk>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="K8nIJk4ghYZn606h"
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: [PATCH v2 0/5] efi/firmware/platform-x86: Add EFI embedded fw support
+Date: Sun,  8 Apr 2018 19:26:31 +0200
+Message-ID: <20180408172636.13926-1-hdegoede@redhat.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <10718.1522798745@warthog.procyon.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Matthew Garrett <mjg59@google.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, joeyli <jlee@suse.com>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
+To: Darren Hart <dvhart@infradead.org>, Andy Shevchenko <andy@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Hans de Goede <hdegoede@redhat.com>, platform-driver-x86@vger.kernel.org, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, dmitry.torokhov@gmail.com, mfuzzey@parkeon.com, keescook@chromium.org, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, nbroeking@me.com, bjorn.andersson@linaro.org, Torsten Duwe <duwe@suse.de>, x86@kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
+Hi All,
 
---K8nIJk4ghYZn606h
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Here is v2 of my patch-set to add support for EFI embedded fw to the kernel.
 
-On Wed 2018-04-04 00:39:05, David Howells wrote:
-> Linus Torvalds <torvalds@linux-foundation.org> wrote:
->=20
-> > The same thing is true of some lockdown patch. Maybe it's a good thing
-> > in general. But whether it's a good thing is _entirely_ independent of
-> > any secure boot issue. I can see using secure boot without it, but I
-> > can very much also see using lockdown without secure boot.
-> >=20
-> > The two things are simply entirely orthogonal. They have _zero_
-> > overlap. I'm not seeing why they'd be linked at all in any way.
->=20
-> I'm not sure I agree.  Here's my reasoning:
->=20
->  (1) Lockdown mode really needs to activated during kernel boot, before
->      userspace has a chance to run, otherwise there's a window of opportu=
-nity
->      in which the kernel *isn't* locked down.
->=20
->  (2) If the kernel isn't booted in secure boot mode, then there's the
->      opportunity to tamper before the kernel even starts booting.
->=20
->  (3) There doesn't seem any point in booting in secure boot mode if you d=
-on't
->      protect the running kernel image against tampering.  What does it me=
-an to
->      be in "secure boot mode" in that case?  If the kernel can be tampered
->      with, it would seem to be, by definition, insecure.
+The 3 most prominent changes are:
 
-This one is not true, either.
+1) Add documentation describing the EFI embedded firmware mechanism to:
+   Documentation/driver-api/firmware/request_firmware.rst
 
-If kernel does "printk(KERN_CRIT "loading unsigned module");
-mdelay(10000);", it is useful for secure boot and provides way to
-owner to play.
+2) Instead of having a single dmi_system_id array with its driver_data
+   members pointing to efi_embedded_fw_desc structs, have the drivers which
+   need EFI embedded-fw support export a dmi_system_id array and register
+   that with the EFI embedded-fw code
 
-Nokia N9 / N950 uses this kind of "security" for example. It is rather
-annoying but better than not being able to run custom kernels at all.
-									Pavel
---=20
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
-g.html
+   This series also includes the first driver to use this, in the form of
+   the touchscreen_dmi code (formerly silead_dmi) from drivers/platfrom/x86
 
---K8nIJk4ghYZn606h
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+3) As discussed during the review of v1 we want to make the firmware_loader
+   code fallback to EFI embedded-fw optional.  Rather the adding yet another
+   firmware_request_foo variant for this, with the risk of later also needing
+   firmware_request_foo_nowait, etc. variants I've decided to make the code
+   check if the device has a "efi-embedded-fw" device-property bool set.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
+   This also seemed better because the same driver may want to use the
+   fallback on some systems, but not on others since e.g. not all (x86)
+   systems with a silead touchscreen have their touchscreen firmware embedded
+   in their EFI.
 
-iEYEARECAAYFAlrJ0WoACgkQMOfwapXb+vIUpgCfQTVxgQuJIcDh2bJZRy8WyNou
-NOMAmwboHWl217wYf3zGmTVqyXi9sm4P
-=judE
------END PGP SIGNATURE-----
+   Note that (as discussed) when the EFI fallback path is requested, the
+   usermodehelper fallback path is skipped.
 
---K8nIJk4ghYZn606h--
+Here is the full changelog of patch 2/5 which is where most of the changes are:
+
+Changes in v2:
+-Rebased on driver-core/driver-core-next
+-Add documentation describing the EFI embedded firmware mechanism to:
+ Documentation/driver-api/firmware/request_firmware.rst
+-Add a new EFI_EMBEDDED_FIRMWARE Kconfig bool and only build the embedded
+ fw support if this is set. This is an invisible option which should be
+ selected by drivers which need this
+-Remove the efi_embedded_fw_desc and dmi_system_id-s for known devices
+ from the efi-embedded-fw code, instead drivers using this are expected to
+ export a dmi_system_id array, with each entries' driver_data pointing to a
+ efi_embedded_fw_desc struct and register this with the efi-embedded-fw code
+-Use kmemdup to make a copy instead of efi_mem_reserve()-ing the firmware,
+ this avoids us messing with the EFI memmap and avoids the need to make
+ changes to efi_mem_desc_lookup()
+-Make the firmware-loader code only fallback to efi_get_embedded_fw() if
+ the passed in device has the "efi-embedded-fw" device-property bool set
+-Skip usermodehelper fallback when "efi-embedded-firmware" device-property
+ is set
+
+Patches 3-5 are new and implement using the EFI embedded-fw mechanism for
+Silead gslXXXX and Chipone icn8505 touchscreens on x86 devices.
+
+Regards,
+
+Hans
