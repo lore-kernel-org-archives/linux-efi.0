@@ -1,80 +1,73 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH v3 5/5] platform/x86: touchscreen_dmi: Add info for the
- Chuwi Vi8 Plus tablet
-Date: Mon, 9 Apr 2018 11:10:16 +0300
-Message-ID: <CAHp75VdM2Z+GeHE6154h7jJ5q2rWCEbVqVZRvo49fvZuaQcGjQ@mail.gmail.com>
-References: <20180408174014.21908-1-hdegoede@redhat.com> <20180408174014.21908-6-hdegoede@redhat.com>
+From: Daniel Borkmann <daniel@iogearbox.net>
+Subject: Re: [GIT PULL] Kernel lockdown for secure boot
+Date: Mon, 9 Apr 2018 10:14:15 +0200
+Message-ID: <9040da29-2803-5c00-d47c-ae676a86b65c@iogearbox.net>
+References: <CAADnVQLu5EZLJ1C9-dd4=K+sed6+38oy047+nqCMfuPFB=wttw@mail.gmail.com>
+ <20180408080742.GE7362@linux-l9pv.suse>
+ <20180409034008.dyte7k5kgkbjh5is@ast-mbp.dhcp.thefacebook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180408174014.21908-6-hdegoede@redhat.com>
+In-Reply-To: <20180409034008.dyte7k5kgkbjh5is@ast-mbp.dhcp.thefacebook.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Darren Hart <dvhart@infradead.org>, Andy Shevchenko <andy@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Platform Driver <platform-driver-x86@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Dmitry Torokhov <dmitry.torokhov@>
+To: Alexei Starovoitov <alexei.starovoitov@gmail.com>, joeyli <jlee@suse.com>
+Cc: Andy Lutomirski <luto@kernel.org>, David Howells <dhowells@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Matthew Garrett <mjg59@google.com>, Greg KH <gregkh@linuxfoundation.org>, LKML <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Apr 8, 2018 at 8:40 PM, Hans de Goede <hdegoede@redhat.com> wrote:
-> Add touchscreen info for the Chuwi Vi8 Plus tablet. This tablet uses a
-> Chipone ICN8505 touchscreen controller, with the firmware used by the
-> touchscreen embedded in the EFI firmware.
->
+On 04/09/2018 05:40 AM, Alexei Starovoitov wrote:
+> On Sun, Apr 08, 2018 at 04:07:42PM +0800, joeyli wrote:
+[...]
+>>> If the only thing that folks are paranoid about is reading
+>>> arbitrary kernel memory with bpf_probe_read() helper
+>>> then preferred patch would be to disable it during verification
+>>> when in lockdown mode
+>>
+>> Sorry for I didn't fully understand your idea...
+>> Do you mean that using bpf verifier to filter out bpf program that
+>> uses bpf_probe_read()?
+> 
+> Take a look bpf_get_trace_printk_proto().
+> Similarly we can add bpf_get_probe_read_proto() that
+> will return NULL if lockdown is on.
+> Then programs with bpf_probe_read() will be rejected by the verifier.
 
-Acked-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Fully agree with the above. For the two helpers, something like the below
+would be sufficient to reject progs at verification time.
 
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
-> ---
->  drivers/platform/x86/touchscreen_dmi.c | 25 +++++++++++++++++++++++++
->  1 file changed, 25 insertions(+)
->
-> diff --git a/drivers/platform/x86/touchscreen_dmi.c b/drivers/platform/x86/touchscreen_dmi.c
-> index 6488cd50ba79..5fdb6fe878f4 100644
-> --- a/drivers/platform/x86/touchscreen_dmi.c
-> +++ b/drivers/platform/x86/touchscreen_dmi.c
-> @@ -301,6 +301,22 @@ static const struct ts_dmi_data teclast_x3_plus_data = {
->         .properties     = teclast_x3_plus_props,
->  };
->
-> +static const struct property_entry efi_embedded_fw_props[] = {
-> +       PROPERTY_ENTRY_BOOL("efi-embedded-firmware"),
-> +       { }
-> +};
-> +
-> +static const struct ts_dmi_data chuwi_vi8_plus_data = {
-> +       .embedded_fw = {
-> +               .name   = "chipone/icn8505-HAMP0002.fw",
-> +               .prefix = { 0xb0, 0x07, 0x00, 0x00, 0xe4, 0x07, 0x00, 0x00 },
-> +               .length = 35012,
-> +               .crc    = 0x74dfd3fc,
-> +       },
-> +       .acpi_name      = "CHPN0001:00",
-> +       .properties     = efi_embedded_fw_props,
-> +};
-> +
->  const struct dmi_system_id touchscreen_dmi_table[] = {
->         {
->                 /* CUBE iwork8 Air */
-> @@ -487,6 +503,15 @@ const struct dmi_system_id touchscreen_dmi_table[] = {
->                         DMI_MATCH(DMI_PRODUCT_NAME, "Y8W81"),
->                 },
->         },
-> +       {
-> +               /* Chuwi Vi8 Plus (CWI506) */
-> +               .driver_data = (void *)&chuwi_vi8_plus_data,
-> +               .matches = {
-> +                       DMI_MATCH(DMI_SYS_VENDOR, "Hampoo"),
-> +                       DMI_MATCH(DMI_PRODUCT_NAME, "D2D3_Vi8A1"),
-> +                       DMI_MATCH(DMI_BOARD_NAME, "Cherry Trail CR"),
-> +               },
-> +       },
->         { },
->  };
->
-> --
-> 2.17.0
->
+diff --git a/kernel/trace/bpf_trace.c b/kernel/trace/bpf_trace.c
+index d88e96d..51a6c2e 100644
+--- a/kernel/trace/bpf_trace.c
++++ b/kernel/trace/bpf_trace.c
+@@ -117,6 +117,11 @@ static const struct bpf_func_proto bpf_probe_read_proto = {
+ 	.arg3_type	= ARG_ANYTHING,
+ };
 
++static const struct bpf_func_proto *bpf_get_probe_read_proto(void)
++{
++	return kernel_is_locked_down("BPF") ? NULL : &bpf_probe_read_proto;
++}
++
+ BPF_CALL_3(bpf_probe_write_user, void *, unsafe_ptr, const void *, src,
+ 	   u32, size)
+ {
+@@ -282,6 +287,9 @@ static const struct bpf_func_proto bpf_trace_printk_proto = {
 
-
--- 
-With Best Regards,
-Andy Shevchenko
+ const struct bpf_func_proto *bpf_get_trace_printk_proto(void)
+ {
++	if (kernel_is_locked_down("BPF"))
++		return NULL;
++
+ 	/*
+ 	 * this program might be calling bpf_trace_printk,
+ 	 * so allocate per-cpu printk buffers
+@@ -535,7 +543,7 @@ tracing_func_proto(enum bpf_func_id func_id, const struct bpf_prog *prog)
+ 	case BPF_FUNC_map_delete_elem:
+ 		return &bpf_map_delete_elem_proto;
+ 	case BPF_FUNC_probe_read:
+-		return &bpf_probe_read_proto;
++		return bpf_get_probe_read_proto();
+ 	case BPF_FUNC_ktime_get_ns:
+ 		return &bpf_ktime_get_ns_proto;
+ 	case BPF_FUNC_tail_call:
