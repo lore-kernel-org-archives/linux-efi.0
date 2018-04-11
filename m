@@ -1,39 +1,66 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [GIT PULL] Kernel lockdown for secure boot
-Date: Mon, 9 Apr 2018 21:55:47 +0800
-Message-ID: <20180409135547.GD17840@linux-l9pv.suse>
-References: <CAADnVQLu5EZLJ1C9-dd4=K+sed6+38oy047+nqCMfuPFB=wttw@mail.gmail.com>
- <20180408080742.GE7362@linux-l9pv.suse>
- <20180409034008.dyte7k5kgkbjh5is@ast-mbp.dhcp.thefacebook.com>
+From: Daniel Kiper <daniel.kiper@oracle.com>
+Subject: Re: [PATCH v2] x86/xen/efi: Initialize UEFI secure boot state during
+ dom0 boot
+Date: Wed, 11 Apr 2018 10:56:20 +0200
+Message-ID: <20180411085620.GI26100@olila.local.net-space.pl>
+References: <1522766345-4169-1-git-send-email-daniel.kiper@oracle.com>
+ <1522770281.4522.14.camel@HansenPartnership.com>
+ <20180403160712.GL26100@olila.local.net-space.pl>
+ <1522774852.4522.25.camel@HansenPartnership.com>
+ <20180404103824.GM26100@olila.local.net-space.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20180409034008.dyte7k5kgkbjh5is@ast-mbp.dhcp.thefacebook.com>
+In-Reply-To: <20180404103824.GM26100@olila.local.net-space.pl>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Alexei Starovoitov <alexei.starovoitov@gmail.com>
-Cc: Andy Lutomirski <luto@kernel.org>, David Howells <dhowells@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Matthew Garrett <mjg59@google.com>, Greg KH <gregkh@linuxfoundation.org>, LKML <linux-kernel@vger.kernel.org>, Justin Forbes <jforbes@redhat.com>, linux-man <linux-man@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>, Daniel Borkmann <daniel@iogearbox.net>
+To: james.bottomley@hansenpartnership.com, ard.biesheuvel@linaro.org
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, eric.snowberg@oracle.com, hpa@zytor.com, jgross@suse.com, konrad.wilk@oracle.com, mingo@redhat.com, tglx@linutronix.de
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Apr 08, 2018 at 08:40:10PM -0700, Alexei Starovoitov wrote:
-> On Sun, Apr 08, 2018 at 04:07:42PM +0800, joeyli wrote:
-> > 
-> > > If the only thing that folks are paranoid about is reading
-> > > arbitrary kernel memory with bpf_probe_read() helper
-> > > then preferred patch would be to disable it during verification
-> > > when in lockdown mode
-> > 
-> > Sorry for I didn't fully understand your idea...
-> > Do you mean that using bpf verifier to filter out bpf program that
-> > uses bpf_probe_read()?
-> 
-> Take a look bpf_get_trace_printk_proto().
-> Similarly we can add bpf_get_probe_read_proto() that
-> will return NULL if lockdown is on.
-> Then programs with bpf_probe_read() will be rejected by the verifier.
-> 
+On Wed, Apr 04, 2018 at 12:38:24PM +0200, Daniel Kiper wrote:
+> On Tue, Apr 03, 2018 at 10:00:52AM -0700, James Bottomley wrote:
+> > On Tue, 2018-04-03 at 18:07 +0200, Daniel Kiper wrote:
+> > > On Tue, Apr 03, 2018 at 08:44:41AM -0700, James Bottomley wrote:
+>
+> [...]
+>
+> > > > This looks like a bad idea: you're duplicating the secure boot
+> > > > check in
+> > > >
+> > > > drivers/firmware/efi/libstub/secureboot.c
+> > > >
+> > > > Which is an implementation of policy.  If we have to have policy in
+> > > > the kernel, it should really only be in one place to prevent drift;
+> > > > why can't you simply use the libstub efi_get_secureboot() so we're
+> > > > not duplicating the implementation of policy?
+> > >
+> > > Well, here is the first version of this patch:
+> > > https://lkml.org/lkml/2018/1/9/496 Ard did not like it. I was not
+> > > happy too. In general both approaches are not perfect. More you can
+> > > find in the discussion around this patchset. If you have better idea
+> > > how to do that I am happy to implement it.
+> >
+> > One way might be simply to have the pre exit-boot-services code lay
+> > down a variable containing the state which you pick up, rather than you
+>
+> Do you mean variable in kernel proper or something like that? If yes this
+> is not possible. EFI Linux stub is not executed in Xen dom0. All UEFI
+> infrastructure is owned and operated by Xen. Dom0 kernel can access some
+> stuff in UEFI, including variables, via hypercall. However, when dom0
+> runs only UEFI runtime services are available.
+>
+> > calling efi code separately and trying to use the insecure RT
+>
+> I am not sure why they are insecure.
+>
+> > variables.  That way there's a uniform view of the internal kernel
+> > secure boot state that everyone can use.
+>
+> That would be perfect but I have a feeling that in form proposed above
+> it is not possible.
 
-OK, I saw check_helper_call(). Thank you for point it out.
-it's good idea!
+Ping?
 
-Joey Lee
+Daniel
