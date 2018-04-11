@@ -1,66 +1,89 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: Re: [PATCH v2] x86/xen/efi: Initialize UEFI secure boot state during
- dom0 boot
-Date: Wed, 11 Apr 2018 10:56:20 +0200
-Message-ID: <20180411085620.GI26100@olila.local.net-space.pl>
-References: <1522766345-4169-1-git-send-email-daniel.kiper@oracle.com>
- <1522770281.4522.14.camel@HansenPartnership.com>
- <20180403160712.GL26100@olila.local.net-space.pl>
- <1522774852.4522.25.camel@HansenPartnership.com>
- <20180404103824.GM26100@olila.local.net-space.pl>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.9 149/310] x86/efi: Disable runtime services on kexec kernel if booted with efi=old_map
+Date: Wed, 11 Apr 2018 20:34:48 +0200
+Message-ID: <20180411183628.840963751@linuxfoundation.org>
+References: <20180411183622.305902791@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180404103824.GM26100@olila.local.net-space.pl>
+In-Reply-To: <20180411183622.305902791@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: james.bottomley@hansenpartnership.com, ard.biesheuvel@linaro.org
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, eric.snowberg@oracle.com, hpa@zytor.com, jgross@suse.com, konrad.wilk@oracle.com, mingo@redhat.com, tglx@linutronix.de
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Lee Chun-Yi <jlee@suse.com>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Dave Young <dyoung@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Ravi Shankar <ravi.v.shankar@intel.com>, Ricardo Neri <ricardo.neri@intel.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <alexander.levin@microsoft.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 04, 2018 at 12:38:24PM +0200, Daniel Kiper wrote:
-> On Tue, Apr 03, 2018 at 10:00:52AM -0700, James Bottomley wrote:
-> > On Tue, 2018-04-03 at 18:07 +0200, Daniel Kiper wrote:
-> > > On Tue, Apr 03, 2018 at 08:44:41AM -0700, James Bottomley wrote:
->
-> [...]
->
-> > > > This looks like a bad idea: you're duplicating the secure boot
-> > > > check in
-> > > >
-> > > > drivers/firmware/efi/libstub/secureboot.c
-> > > >
-> > > > Which is an implementation of policy.  If we have to have policy in
-> > > > the kernel, it should really only be in one place to prevent drift;
-> > > > why can't you simply use the libstub efi_get_secureboot() so we're
-> > > > not duplicating the implementation of policy?
-> > >
-> > > Well, here is the first version of this patch:
-> > > https://lkml.org/lkml/2018/1/9/496 Ard did not like it. I was not
-> > > happy too. In general both approaches are not perfect. More you can
-> > > find in the discussion around this patchset. If you have better idea
-> > > how to do that I am happy to implement it.
-> >
-> > One way might be simply to have the pre exit-boot-services code lay
-> > down a variable containing the state which you pick up, rather than you
->
-> Do you mean variable in kernel proper or something like that? If yes this
-> is not possible. EFI Linux stub is not executed in Xen dom0. All UEFI
-> infrastructure is owned and operated by Xen. Dom0 kernel can access some
-> stuff in UEFI, including variables, via hypercall. However, when dom0
-> runs only UEFI runtime services are available.
->
-> > calling efi code separately and trying to use the insecure RT
->
-> I am not sure why they are insecure.
->
-> > variables.  That way there's a uniform view of the internal kernel
-> > secure boot state that everyone can use.
->
-> That would be perfect but I have a feeling that in form proposed above
-> it is not possible.
+4.9-stable review patch.  If anyone has any objections, please let me know.
 
-Ping?
+------------------
 
-Daniel
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+
+
+[ Upstream commit 4e52797d2efefac3271abdc54439a3435abd77b9 ]
+
+Booting kexec kernel with "efi=old_map" in kernel command line hits
+kernel panic as shown below.
+
+ BUG: unable to handle kernel paging request at ffff88007fe78070
+ IP: virt_efi_set_variable.part.7+0x63/0x1b0
+ PGD 7ea28067
+ PUD 7ea2b067
+ PMD 7ea2d067
+ PTE 0
+ [...]
+ Call Trace:
+  virt_efi_set_variable()
+  efi_delete_dummy_variable()
+  efi_enter_virtual_mode()
+  start_kernel()
+  x86_64_start_reservations()
+  x86_64_start_kernel()
+  start_cpu()
+
+[ efi=old_map was never intended to work with kexec. The problem with
+  using efi=old_map is that the virtual addresses are assigned from the
+  memory region used by other kernel mappings; vmalloc() space.
+  Potentially there could be collisions when booting kexec if something
+  else is mapped at the virtual address we allocated for runtime service
+  regions in the initial boot - Matt Fleming ]
+
+Since kexec was never intended to work with efi=old_map, disable
+runtime services in kexec if booted with efi=old_map, so that we don't
+panic.
+
+Tested-by: Lee Chun-Yi <jlee@suse.com>
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Acked-by: Dave Young <dyoung@redhat.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20170526113652.21339-4-matt@codeblueprint.co.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ arch/x86/platform/efi/efi.c |    6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -832,9 +832,11 @@ static void __init kexec_enter_virtual_m
+ 
+ 	/*
+ 	 * We don't do virtual mode, since we don't do runtime services, on
+-	 * non-native EFI
++	 * non-native EFI. With efi=old_map, we don't do runtime services in
++	 * kexec kernel because in the initial boot something else might
++	 * have been mapped at these virtual addresses.
+ 	 */
+-	if (!efi_is_native()) {
++	if (!efi_is_native() || efi_enabled(EFI_OLD_MEMMAP)) {
+ 		efi_memmap_unmap();
+ 		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 		return;
