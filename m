@@ -1,70 +1,68 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH] efi: Fix the size not consistent issue when unmapping
- memory map
-Date: Mon, 16 Apr 2018 14:37:38 +0800
-Message-ID: <20180416063738.GH16023@linux-l9pv.suse>
-References: <20180413062716.8040-1-jlee@suse.com>
- <20180416025734.GA26685@dhcp-128-65.nay.redhat.com>
- <20180416030904.GB26685@dhcp-128-65.nay.redhat.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v2] x86/xen/efi: Initialize UEFI secure boot state during
+ dom0 boot
+Date: Mon, 16 Apr 2018 10:15:15 +0200
+Message-ID: <CAKv+Gu_1ydqYS+TBgYVEH9jTDEjSecBYxJbq_28mZJ9G3-T8EA@mail.gmail.com>
+References: <1522766345-4169-1-git-send-email-daniel.kiper@oracle.com>
+ <1522770281.4522.14.camel@HansenPartnership.com> <20180403160712.GL26100@olila.local.net-space.pl>
+ <1522774852.4522.25.camel@HansenPartnership.com> <20180404103824.GM26100@olila.local.net-space.pl>
+ <20180411085620.GI26100@olila.local.net-space.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180416030904.GB26685@dhcp-128-65.nay.redhat.com>
+In-Reply-To: <20180411085620.GI26100@olila.local.net-space.pl>
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Takashi Iwai <tiwai@suse.de>, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, Randy Wright <rwright@hpe.com>, Ingo Molnar <mingo@redhat.com>, akpm@linux-foundation.org, Vivek Goyal <vgoyal@redhat.com>, Dave Young <dyoung@redhat.com>
+To: Daniel Kiper <daniel.kiper@oracle.com>
+Cc: James Bottomley <james.bottomley@hansenpartnership.com>, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, xen-devel <xen-devel@lists.xenproject.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, eric.snowberg@oracle.com, "H. Peter Anvin" <hpa@zytor.com>, Juergen Gross <jgross@suse.com>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Ingo Molnar <mingo@redhat.com>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Randy,
-
-On Mon, Apr 16, 2018 at 11:09:04AM +0800, Dave Young wrote:
-> On 04/16/18 at 10:57am, Dave Young wrote:
-> > On 04/13/18 at 02:27pm, Lee, Chun-Yi wrote:
-> > > When using kdump, SOMETIMES the "size not consistent" warning message
-> > > shows up when the crash kernel boots with early_ioremap_debug parameter:
-> > > 
-> > > WARNING: CPU: 0 PID: 0 at ../mm/early_ioremap.c:182 early_iounmap+0x4f/0x12c()
-> > > early_iounmap(ffffffffff200180, 00000118) [0] size not consistent 00000120
-> > >
-[...snip] 
-> > 
-> > Good catch.  The kexec code need to be fixed to use a separate buffer so
-> > avoid the alignment like what kexec-tools did.  I can submit a fix for
-> > that.
-> 
-> Can you try below code, see if it works?
+On 11 April 2018 at 10:56, Daniel Kiper <daniel.kiper@oracle.com> wrote:
+> On Wed, Apr 04, 2018 at 12:38:24PM +0200, Daniel Kiper wrote:
+>> On Tue, Apr 03, 2018 at 10:00:52AM -0700, James Bottomley wrote:
+>> > On Tue, 2018-04-03 at 18:07 +0200, Daniel Kiper wrote:
+>> > > On Tue, Apr 03, 2018 at 08:44:41AM -0700, James Bottomley wrote:
+>>
+>> [...]
+>>
+>> > > > This looks like a bad idea: you're duplicating the secure boot
+>> > > > check in
+>> > > >
+>> > > > drivers/firmware/efi/libstub/secureboot.c
+>> > > >
+>> > > > Which is an implementation of policy.  If we have to have policy in
+>> > > > the kernel, it should really only be in one place to prevent drift;
+>> > > > why can't you simply use the libstub efi_get_secureboot() so we're
+>> > > > not duplicating the implementation of policy?
+>> > >
+>> > > Well, here is the first version of this patch:
+>> > > https://lkml.org/lkml/2018/1/9/496 Ard did not like it. I was not
+>> > > happy too. In general both approaches are not perfect. More you can
+>> > > find in the discussion around this patchset. If you have better idea
+>> > > how to do that I am happy to implement it.
+>> >
+>> > One way might be simply to have the pre exit-boot-services code lay
+>> > down a variable containing the state which you pick up, rather than you
+>>
+>> Do you mean variable in kernel proper or something like that? If yes this
+>> is not possible. EFI Linux stub is not executed in Xen dom0. All UEFI
+>> infrastructure is owned and operated by Xen. Dom0 kernel can access some
+>> stuff in UEFI, including variables, via hypercall. However, when dom0
+>> runs only UEFI runtime services are available.
+>>
+>> > calling efi code separately and trying to use the insecure RT
+>>
+>> I am not sure why they are insecure.
+>>
+>> > variables.  That way there's a uniform view of the internal kernel
+>> > secure boot state that everyone can use.
+>>
+>> That would be perfect but I have a feeling that in form proposed above
+>> it is not possible.
+>
+> Ping?
 >
 
-Randy, do you want to try Dave's kexec patch on your environment? Please remove
-my patch first.  
+(apologies if this is a duplicate email - I thought I had replied
+already but I don't see it in my sent folder)
 
-Thanks a lot!
-Joey Lee
- 
-> 
-> diff --git a/arch/x86/kernel/kexec-bzimage64.c b/arch/x86/kernel/kexec-bzimage64.c
-> index 3182908b7e6c..eaee37c54b7b 100644
-> --- a/arch/x86/kernel/kexec-bzimage64.c
-> +++ b/arch/x86/kernel/kexec-bzimage64.c
-> @@ -398,11 +398,10 @@ static void *bzImage64_load(struct kimage *image, char *kernel,
->  	 * little bit simple
->  	 */
->  	efi_map_sz = efi_get_runtime_map_size();
-> -	efi_map_sz = ALIGN(efi_map_sz, 16);
->  	params_cmdline_sz = sizeof(struct boot_params) + cmdline_len +
->  				MAX_ELFCOREHDR_STR_LEN;
->  	params_cmdline_sz = ALIGN(params_cmdline_sz, 16);
-> -	kbuf.bufsz = params_cmdline_sz + efi_map_sz +
-> +	kbuf.bufsz = params_cmdline_sz + ALIGN(efi_map_sz, 16)+
->  				sizeof(struct setup_data) +
->  				sizeof(struct efi_setup_data);
->  
-> @@ -410,7 +409,7 @@ static void *bzImage64_load(struct kimage *image, char *kernel,
->  	if (!params)
->  		return ERR_PTR(-ENOMEM);
->  	efi_map_offset = params_cmdline_sz;
-> -	efi_setup_data_offset = efi_map_offset + efi_map_sz;
-> +	efi_setup_data_offset = efi_map_offset + ALIGN(efi_map_sz, 16);
->  
->  	/* Copy setup header onto bootparams. Documentation/x86/boot.txt */
->  	setup_header_size = 0x0202 + kernel[0x0201] - setup_hdr_offset;
+Queued in efi/next - thanks.
