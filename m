@@ -1,62 +1,39 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [PATCH v3 2/5] efi: Add embedded peripheral firmware support
-Date: Tue, 17 Apr 2018 11:19:14 +0200
-Message-ID: <00800dc5-f6de-ab26-4d3e-eb2a47e10709@redhat.com>
-References: <20180408174014.21908-1-hdegoede@redhat.com>
- <20180408174014.21908-3-hdegoede@redhat.com>
- <20180417001738.GN30543@wotan.suse.de>
+From: Randy Wright <rwright@hpe.com>
+Subject: Re: [PATCH] efi: Fix the size not consistent issue when unmapping
+ memory map
+Date: Tue, 17 Apr 2018 14:34:05 -0600
+Message-ID: <20180417203405.GA4574@rfwz>
+References: <20180413062716.8040-1-jlee@suse.com>
+ <20180416025734.GA26685@dhcp-128-65.nay.redhat.com>
+ <20180416030904.GB26685@dhcp-128-65.nay.redhat.com>
+ <20180416063738.GH16023@linux-l9pv.suse>
+ <20180417003522.GA2741@rfwz>
+Reply-To: rwright@hpe.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180417001738.GN30543@wotan.suse.de>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20180417003522.GA2741@rfwz>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Cc: Darren Hart <dvhart@infradead.org>, Andy Shevchenko <andy@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, platform-driver-x86@vger.kernel.org, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, dmitry.torokhov@gmail.com, mfuzzey@parkeon.com, keescook@chromium.org, Kalle Valo <kvalo@codeaurora.org>, Arend
+To: joeyli <jlee@suse.com>
+Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Takashi Iwai <tiwai@suse.de>, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@redhat.com>, akpm@linux-foundation.org, Vivek Goyal <vgoyal@redhat.com>, Dave Young <dyoung@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+On Mon, Apr 16, 2018 at 06:35:22PM -0600, Randy Wright wrote:
 
-On 17-04-18 02:17, Luis R. Rodriguez wrote:
-> On Sun, Apr 08, 2018 at 07:40:11PM +0200, Hans de Goede wrote:
->>   static void firmware_free_data(const struct firmware *fw)
->>   {
->> @@ -576,6 +600,15 @@ _request_firmware(const struct firmware **firmware_p, const char *name,
->>   		goto out;
->>   
->>   	ret = fw_get_filesystem_firmware(device, fw->priv);
->> +#ifdef CONFIG_EFI_EMBEDDED_FIRMWARE
->> +	if (ret && device &&
->> +	    device_property_read_bool(device, "efi-embedded-firmware")) {
->> +		ret = fw_get_efi_embedded_fw(device, fw->priv, ret);
->> +		if (ret == 0)
->> +			ret = assign_fw(fw, device, opt_flags | FW_OPT_NOCACHE);
->> +		goto out;
->> +	}
->> +#endif
-> 
+> ... I will plan to run the same test tomorrow on
+> a build of the SuSE 4.4.120-94.17 kernel, on which I had also reported
+> the original bug.
 
-So thinking some more about this, I can put the device_property check
-inside the fw_get_efi_embedded_fw() call, as well as modify opt_flags
-there to or in FW_OPT_NOCACHE on success, then together with the discussed
-changed to drop the #ifdef, the code would look like this:
+I carried out the test on the older kernel today. I found the version of
+arch/x86/kernel/kexec-bzimage64.c in the SuSE kernel version
+4.4.120-94.17 was sufficiently different from the newer version that one
+chunk of the patch under discussion was rejected.  Specifically, the
+'struct kexec_buf kbuf' is not found in that older SuSE version of
+kexec-bzimage64.c.   But I made the same modification to the
+calculation of variable params_misc_sz in the older source, ran the same
+test, and there were no longer any warnings from early_ioremap.c.
 
-         ret = fw_get_filesystem_firmware(device, fw->priv);
-	if (ret)
-		fw_get_efi_embedded_fw(device, fw->priv, &opt_flags, ret);
-	if (ret)
-                 if (!(opt_flags & FW_OPT_NO_WARN))
-                         dev_warn(device,
-	...
-
-With just these 2 lines being new:
-
-	if (ret)
-		fw_get_efi_embedded_fw(device, fw->priv, &opt_flags, ret);
-
-So the main.c changes will be nice and clean then.
-
-Regards,
-
-Hans
+-- 
+Randy Wright            Hewlett Packard Enterprise
+Phone: (970) 898-0998   Mail: rwright@hpe.com
