@@ -1,43 +1,45 @@
-From: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Subject: Re: [PATCH v3 2/5] efi: Add embedded peripheral firmware support
-Date: Tue, 17 Apr 2018 00:17:38 +0000
-Message-ID: <20180417001738.GN30543@wotan.suse.de>
-References: <20180408174014.21908-1-hdegoede@redhat.com>
- <20180408174014.21908-3-hdegoede@redhat.com>
+From: Randy Wright <rwright@hpe.com>
+Subject: Re: [PATCH] efi: Fix the size not consistent issue when unmapping
+ memory map
+Date: Mon, 16 Apr 2018 18:35:22 -0600
+Message-ID: <20180417003522.GA2741@rfwz>
+References: <20180413062716.8040-1-jlee@suse.com>
+ <20180416025734.GA26685@dhcp-128-65.nay.redhat.com>
+ <20180416030904.GB26685@dhcp-128-65.nay.redhat.com>
+ <20180416063738.GH16023@linux-l9pv.suse>
+Reply-To: rwright@hpe.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20180408174014.21908-3-hdegoede@redhat.com>
+In-Reply-To: <20180416063738.GH16023@linux-l9pv.suse>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Darren Hart <dvhart@infradead.org>, Andy Shevchenko <andy@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, platform-driver-x86@vger.kernel.org, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, dmitry.torokhov@gmail.com, mfuzzey@parkeon.com, keescook@chromium.org, Kalle
+To: joeyli <jlee@suse.com>
+Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Takashi Iwai <tiwai@suse.de>, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@redhat.com>, akpm@linux-foundation.org, Vivek Goyal <vgoyal@redhat.com>, Dave Young <dyoung@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Apr 08, 2018 at 07:40:11PM +0200, Hans de Goede wrote:
->  static void firmware_free_data(const struct firmware *fw)
->  {
-> @@ -576,6 +600,15 @@ _request_firmware(const struct firmware **firmware_p, const char *name,
->  		goto out;
->  
->  	ret = fw_get_filesystem_firmware(device, fw->priv);
-> +#ifdef CONFIG_EFI_EMBEDDED_FIRMWARE
-> +	if (ret && device &&
-> +	    device_property_read_bool(device, "efi-embedded-firmware")) {
-> +		ret = fw_get_efi_embedded_fw(device, fw->priv, ret);
-> +		if (ret == 0)
-> +			ret = assign_fw(fw, device, opt_flags | FW_OPT_NOCACHE);
-> +		goto out;
-> +	}
-> +#endif
+On Mon, Apr 16, 2018 at 02:37:38PM +0800, joeyli wrote:
+> Hi Randy,
+> ...
+> Randy, do you want to try Dave's kexec patch on your environment? Please remove
+> my patch first.  
+> 
+> Thanks a lot!
+> Joey Lee
 
-You mussed what I asked for in terms of adding a new flag, (please work on top
-of Andre's patches as those likely will be merged first, and also have kdocs
-for the flags) and then a new firmware API to wrap the above into a function
-which would only do something if the driver *asked* for it on their firmware
-API call.  Ie, please add a new firmware_request_efi_fw(). Also if you see the
-work I've done to remove the ifdefs over fallback mechanism you'll see it helps
-split code and make it easier to read. We should strive to not add any more
-ifdefery and instead make tehis code read easily.
+Hi Joey, 
 
-  Luis
+I tried Dave's patch to kexec-bzimage64.c on my build of the SuSE
+4.12.14-15 kernel.   I ran the same test as I did with your patch: I
+verified the early_ioremap.c warnings occurred with a crash triggered
+from a kexec boot of the unmodified kernel. Then I applied the patch to
+kexec-bzimage64.c, rebuilt, re-ran the test to crash from the kexec'ed
+kernel, and verified the warnings are no longer seen.
+
+I'm out of time today, but I will plan to run the same  test tomorrow on
+a build of the SuSE 4.4.120-94.17 kernel, on which I had also reported
+the original bug.
+
+-- 
+Randy Wright            Hewlett Packard Enterprise
+Phone: (970) 898-0998   Mail: rwright@hpe.com
