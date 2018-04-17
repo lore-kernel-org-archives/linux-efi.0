@@ -1,8 +1,8 @@
-From: joeyli <jlee@suse.com>
+From: Dave Young <dyoung@redhat.com>
 Subject: Re: [PATCH] efi: Fix the size not consistent issue when unmapping
  memory map
-Date: Tue, 17 Apr 2018 09:20:48 +0800
-Message-ID: <20180417012048.GK16023@linux-l9pv.suse>
+Date: Tue, 17 Apr 2018 10:41:12 +0800
+Message-ID: <20180417024112.GA3953@dhcp-128-65.nay.redhat.com>
 References: <20180413062716.8040-1-jlee@suse.com>
  <20180416025734.GA26685@dhcp-128-65.nay.redhat.com>
  <20180416030904.GB26685@dhcp-128-65.nay.redhat.com>
@@ -15,10 +15,10 @@ Content-Disposition: inline
 In-Reply-To: <20180417003522.GA2741@rfwz>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Randy Wright <rwright@hpe.com>
-Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Takashi Iwai <tiwai@suse.de>, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@redhat.com>, akpm@linux-foundation.org, Vivek Goyal <vgoyal@redhat.com>, Dave Young <dyoung@redhat.com>
+Cc: joeyli <jlee@suse.com>, "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Takashi Iwai <tiwai@suse.de>, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@redhat.com>, akpm@linux-foundation.org, Vivek Goyal <vgoyal@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Apr 16, 2018 at 06:35:22PM -0600, Randy Wright wrote:
+On 04/16/18 at 06:35pm, Randy Wright wrote:
 > On Mon, Apr 16, 2018 at 02:37:38PM +0800, joeyli wrote:
 > > Hi Randy,
 > > ...
@@ -36,17 +36,9 @@ On Mon, Apr 16, 2018 at 06:35:22PM -0600, Randy Wright wrote:
 > from a kexec boot of the unmodified kernel. Then I applied the patch to
 > kexec-bzimage64.c, rebuilt, re-ran the test to crash from the kexec'ed
 > kernel, and verified the warnings are no longer seen.
->
 
-Thanks for your help! Looks that Dave's kexec patch works to prevent the
-warning message. 
- 
-> I'm out of time today, but I will plan to run the same  test tomorrow on
-> a build of the SuSE 4.4.120-94.17 kernel, on which I had also reported
-> the original bug.
->
+Great, thanks for the testing, will send out the patch after some local
+tests.
 
-Both kexec and efi sides will be applied patches.
-
-Thanks a lot!
-Joey Lee 
+Thanks
+Dave
