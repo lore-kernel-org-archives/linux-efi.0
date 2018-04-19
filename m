@@ -1,39 +1,77 @@
-From: Randy Wright <rwright@hpe.com>
-Subject: Re: [PATCH] efi: Fix the size not consistent issue when unmapping
- memory map
-Date: Tue, 17 Apr 2018 14:34:05 -0600
-Message-ID: <20180417203405.GA4574@rfwz>
-References: <20180413062716.8040-1-jlee@suse.com>
- <20180416025734.GA26685@dhcp-128-65.nay.redhat.com>
- <20180416030904.GB26685@dhcp-128-65.nay.redhat.com>
- <20180416063738.GH16023@linux-l9pv.suse>
- <20180417003522.GA2741@rfwz>
-Reply-To: rwright@hpe.com
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v4 0/8] Decode IA32/X64 CPER
+Date: Thu, 19 Apr 2018 12:07:11 +0200
+Message-ID: <CAKv+Gu8f2VCYDzpR9DPFhS-FYiOyjPDikOZWCejdS1rcDi5A_w@mail.gmail.com>
+References: <20180402150656.101022-1-Yazen.Ghannam@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180417003522.GA2741@rfwz>
+In-Reply-To: <20180402150656.101022-1-Yazen.Ghannam@amd.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: joeyli <jlee@suse.com>
-Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Takashi Iwai <tiwai@suse.de>, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@redhat.com>, akpm@linux-foundation.org, Vivek Goyal <vgoyal@redhat.com>, Dave Young <dyoung@redhat.com>
+To: Yazen Ghannam <Yazen.Ghannam@amd.com>
+Cc: linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, the arch/x86 maintainers <x86@kernel.org>, Tony Luck <tony.luck@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Apr 16, 2018 at 06:35:22PM -0600, Randy Wright wrote:
+On 2 April 2018 at 17:06, Yazen Ghannam <Yazen.Ghannam@amd.com> wrote:
+> From: Yazen Ghannam <yazen.ghannam@amd.com>
+>
+> This series adds decoding for the IA32/X64 Common Platform Error Record.
+>
+> Patch 1 fixes the IA32/X64 Processor Error Section definition to match
+> the UEFI spec.
+>
+> Patches 2-8 add the new decoding. The patches incrementally add the
+> decoding starting from the top-level "Error Section". Hopefully, this
+> will make reviewing a bit easier compared to one large patch.
+>
+> The formatting of the field names and options is taken from the UEFI
+> spec. I tried to keep everything the same to make searching easier.
+>
+> The patches were written to the UEFI 2.7 spec though the definition of
+> the IA32/X64 CPER seems to be the same as when it was introduced in
+> the UEFI 2.1 spec.
+>
+> Link:
+> https://lkml.kernel.org/r/20180324184940.19762-1-Yazen.Ghannam@amd.com
+>
 
-> ... I will plan to run the same test tomorrow on
-> a build of the SuSE 4.4.120-94.17 kernel, on which I had also reported
-> the original bug.
+Queued in linux-efi/next
 
-I carried out the test on the older kernel today. I found the version of
-arch/x86/kernel/kexec-bzimage64.c in the SuSE kernel version
-4.4.120-94.17 was sufficiently different from the newer version that one
-chunk of the patch under discussion was rejected.  Specifically, the
-'struct kexec_buf kbuf' is not found in that older SuSE version of
-kexec-bzimage64.c.   But I made the same modification to the
-calculation of variable params_misc_sz in the older source, ran the same
-test, and there were no longer any warnings from early_ioremap.c.
+Thanks Yazen
 
--- 
-Randy Wright            Hewlett Packard Enterprise
-Phone: (970) 898-0998   Mail: rwright@hpe.com
+
+> Changes V3 to V4:
+> * Drop INDENT_SP use.
+>
+> Changes V2 to V3:
+> * Fix table numbers in commit messages.
+> * Don't print raw validation bits.
+> * Only print GUID for unknown error types.
+>
+> Changes V1 to V2:
+> * Remove stable request for all patches.
+> * Address Ard's comments on formatting and other issues.
+> * In Patch 8, always print context info even if the type is not
+>   recognized.
+>
+> Yazen Ghannam (8):
+>   efi: Fix IA32/X64 Processor Error Record definition
+>   efi: Decode IA32/X64 Processor Error Section
+>   efi: Decode IA32/X64 Processor Error Info Structure
+>   efi: Decode UEFI-defined IA32/X64 Error Structure GUIDs
+>   efi: Decode IA32/X64 Cache, TLB, and Bus Check structures
+>   efi: Decode additional IA32/X64 Bus Check fields
+>   efi: Decode IA32/X64 MS Check structure
+>   efi: Decode IA32/X64 Context Info structure
+>
+>  drivers/firmware/efi/Kconfig    |   5 +
+>  drivers/firmware/efi/Makefile   |   1 +
+>  drivers/firmware/efi/cper-x86.c | 356 ++++++++++++++++++++++++++++++++++++++++
+>  drivers/firmware/efi/cper.c     |  10 ++
+>  include/linux/cper.h            |   4 +-
+>  5 files changed, 375 insertions(+), 1 deletion(-)
+>  create mode 100644 drivers/firmware/efi/cper-x86.c
+>
+> --
+> 2.14.1
+>
