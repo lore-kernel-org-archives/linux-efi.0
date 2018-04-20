@@ -1,77 +1,46 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v4 0/8] Decode IA32/X64 CPER
-Date: Thu, 19 Apr 2018 12:07:11 +0200
-Message-ID: <CAKv+Gu8f2VCYDzpR9DPFhS-FYiOyjPDikOZWCejdS1rcDi5A_w@mail.gmail.com>
-References: <20180402150656.101022-1-Yazen.Ghannam@amd.com>
+From: Darren Hart <dvhart@infradead.org>
+Subject: Re: [PATCH v3 3/5] platform/x86: Rename silead_dmi to touchscreen_dmi
+Date: Thu, 19 Apr 2018 17:20:30 -0700
+Message-ID: <20180420002030.GD11546@fury>
+References: <20180408174014.21908-1-hdegoede@redhat.com>
+ <20180408174014.21908-4-hdegoede@redhat.com>
+ <CAHp75Vdx0fJ0mmE1tSZjKEoHbRMubJpA8M1QYg1joKxMdLcVig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180402150656.101022-1-Yazen.Ghannam@amd.com>
+Content-Disposition: inline
+In-Reply-To: <CAHp75Vdx0fJ0mmE1tSZjKEoHbRMubJpA8M1QYg1joKxMdLcVig@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Yazen Ghannam <Yazen.Ghannam@amd.com>
-Cc: linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, the arch/x86 maintainers <x86@kernel.org>, Tony Luck <tony.luck@intel.com>
+To: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Hans de Goede <hdegoede@redhat.com>, Andy Shevchenko <andy@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Platform Driver <platform-driver-x86@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Dmitry Torokhov <dmitry.torokhov>
 List-Id: linux-efi@vger.kernel.org
 
-On 2 April 2018 at 17:06, Yazen Ghannam <Yazen.Ghannam@amd.com> wrote:
-> From: Yazen Ghannam <yazen.ghannam@amd.com>
->
-> This series adds decoding for the IA32/X64 Common Platform Error Record.
->
-> Patch 1 fixes the IA32/X64 Processor Error Section definition to match
-> the UEFI spec.
->
-> Patches 2-8 add the new decoding. The patches incrementally add the
-> decoding starting from the top-level "Error Section". Hopefully, this
-> will make reviewing a bit easier compared to one large patch.
->
-> The formatting of the field names and options is taken from the UEFI
-> spec. I tried to keep everything the same to make searching easier.
->
-> The patches were written to the UEFI 2.7 spec though the definition of
-> the IA32/X64 CPER seems to be the same as when it was introduced in
-> the UEFI 2.1 spec.
->
-> Link:
-> https://lkml.kernel.org/r/20180324184940.19762-1-Yazen.Ghannam@amd.com
->
+On Mon, Apr 09, 2018 at 11:07:03AM +0300, Andy Shevchenko wrote:
+> On Sun, Apr 8, 2018 at 8:40 PM, Hans de Goede <hdegoede@redhat.com> wrote:
+> > Not only silead touchscreens need some extra info not available in the
+> > ACPI tables to work properly. X86 devices with a Chipone ICN8505 chip also
+> > need some DMI based extra configuration.
+> >
+> > There is no reason to have separate dmi config code per touchscreen
+> > controller vendor. This commit renames silead_dmi to a more generic
+> > touchscreen_dmi name (and Kconfig option) in preparation of adding
+> > info for tablets with an ICN8505 based touchscreen.
+> >
+> > Note there are no functional changes all code changes are limited to
+> > removing references to silead where these are no longer applicable.
+> >
+> 
+> I have no objections from my side, though consider the following:
+> - I would like to be in sync with Darren on this
+> - make oldconfig will be broken after your change for existing users
+> - the usual pattern in kernel that we don't rename drivers; I guess
+> here we are on the safe side b/c this driver is used standalone
+> 
+> Taking above into attention, and assuming it will go via some other tree,
+> Acked-by: Andy Shevchenko <andy.shevchenko@gmail.com>
 
-Queued in linux-efi/next
+This driver is all kinds of a special case, so no objection here either. :-)
 
-Thanks Yazen
-
-
-> Changes V3 to V4:
-> * Drop INDENT_SP use.
->
-> Changes V2 to V3:
-> * Fix table numbers in commit messages.
-> * Don't print raw validation bits.
-> * Only print GUID for unknown error types.
->
-> Changes V1 to V2:
-> * Remove stable request for all patches.
-> * Address Ard's comments on formatting and other issues.
-> * In Patch 8, always print context info even if the type is not
->   recognized.
->
-> Yazen Ghannam (8):
->   efi: Fix IA32/X64 Processor Error Record definition
->   efi: Decode IA32/X64 Processor Error Section
->   efi: Decode IA32/X64 Processor Error Info Structure
->   efi: Decode UEFI-defined IA32/X64 Error Structure GUIDs
->   efi: Decode IA32/X64 Cache, TLB, and Bus Check structures
->   efi: Decode additional IA32/X64 Bus Check fields
->   efi: Decode IA32/X64 MS Check structure
->   efi: Decode IA32/X64 Context Info structure
->
->  drivers/firmware/efi/Kconfig    |   5 +
->  drivers/firmware/efi/Makefile   |   1 +
->  drivers/firmware/efi/cper-x86.c | 356 ++++++++++++++++++++++++++++++++++++++++
->  drivers/firmware/efi/cper.c     |  10 ++
->  include/linux/cper.h            |   4 +-
->  5 files changed, 375 insertions(+), 1 deletion(-)
->  create mode 100644 drivers/firmware/efi/cper-x86.c
->
-> --
-> 2.14.1
->
+-- 
+Darren Hart
+VMware Open Source Technology Center
