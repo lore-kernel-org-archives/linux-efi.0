@@ -1,23 +1,64 @@
-From: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Subject: Re: [PATCH v3 2/5] efi: Add embedded peripheral firmware support
-Date: Mon, 23 Apr 2018 21:11:43 +0000
-Message-ID: <20180423211143.GZ14440@wotan.suse.de>
-References: <20180408174014.21908-1-hdegoede@redhat.com>
- <20180408174014.21908-3-hdegoede@redhat.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: [PATCH] efi/libstub/arm64: handle randomized TEXT_OFFSET
+Date: Tue, 24 Apr 2018 12:00:58 +0100
+Message-ID: <20180424110058.29344-1-mark.rutland@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180408174014.21908-3-hdegoede@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>
-Cc: Darren Hart <dvhart@infradead.org>, Andy Shevchenko <andy@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, platform-driver-x86@vger.kernel.org, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Josh Triplett <josh@joshtriplett.org>, dmitry.torokhov@gmail.com, mfuzzey@parkeon.com, keescook@chromium.org, Kalle Valo <kvalo@codeaurora.org>, Arend
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Mark Rutland <mark.rutland@arm.com>, linux-efi@vger.kernel.org, kim.phillips@arm.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hans, please see use of READING_FIRMWARE_PREALLOC_BUFFER, we'll need a new ID
-and security for this type of request so IMA can reject it if the policy is
-configured for it.
+When CONFIG_RANDOMIZE_TEXT_OFFSET is selected, TEXT_OFFSET is an
+arbitrary multiple of PAGE_SIZE in the interval [0, 2MB).
 
-Please Cc Kees in future patches.
+The EFI stub doesn't accuont for this, and only handles the case where
+TEXT_OFFSET is multiple of EFI_KIMG_ALIGN. This can result in the kernel
+being loaded to an erroneous physical alignment. This has been observed
+to result in spurious stack overflow reports and failure to make use of
+the IRQ stacks, and theoretically could result in a number of other
+issues.
 
-  Luis
+We can OR in the low bits of TEXT_OFFSET to ensure that we have the
+necessary offset (and hence have the necessary alignment), so let's do
+that.
+
+Fixes: 6f26b3671184c36d ("arm64: kaslr: increase randomization granularity")
+Reported-by: Kim Phillips <kim.phillips@arm.com>
+Signed-off-by: Mark Rutland <mark.rutland@arm.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org
+---
+ drivers/firmware/efi/libstub/arm64-stub.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
+index b9bd827caa22..541b82fdc8a2 100644
+--- a/drivers/firmware/efi/libstub/arm64-stub.c
++++ b/drivers/firmware/efi/libstub/arm64-stub.c
+@@ -98,6 +98,13 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table_arg,
+ 			     (phys_seed >> 32) & mask : TEXT_OFFSET;
+ 
+ 		/*
++		 * With CONFIG_RANDOMIZE_TEXT_OFFSET, TEXT_OFFSET may not be a
++		 * multiple of EFI_KIMG_ALIGN, and we must ensure that we apply
++		 * the offset below EFI_KIMG_ALIGN.
++		 */
++		offset |= (TEXT_OFFSET % EFI_KIMG_ALIGN);
++
++		/*
+ 		 * If KASLR is enabled, and we have some randomness available,
+ 		 * locate the kernel at a randomized offset in physical memory.
+ 		 */
+-- 
+2.11.0
