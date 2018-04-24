@@ -1,55 +1,100 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] efi/libstub/arm64: handle randomized TEXT_OFFSET
-Date: Tue, 24 Apr 2018 17:17:30 +0200
-Message-ID: <CAKv+Gu9vUFQVUyq7yNKvmXFLvh4yfJq6wE2wYbAEXWXZ4rQH+Q@mail.gmail.com>
-References: <20180424110058.29344-1-mark.rutland@arm.com>
- <20180424101500.e5c032b91e87a354e92344c5@arm.com>
+From: Mimi Zohar <zohar@linux.vnet.ibm.com>
+Subject: Re: [PATCH v3 2/5] efi: Add embedded peripheral firmware support
+Date: Tue, 24 Apr 2018 12:07:01 -0400
+Message-ID: <1524586021.3364.20.camel@linux.vnet.ibm.com>
+References: <20180408174014.21908-1-hdegoede@redhat.com>
+         <20180408174014.21908-3-hdegoede@redhat.com>
+         <20180423211143.GZ14440@wotan.suse.de>
+         <71e6a45a-398d-b7a4-dab0-8b9936683226@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20180424101500.e5c032b91e87a354e92344c5@arm.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Kim Phillips <kim.phillips@arm.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, linux-efi@vger.kernel.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <71e6a45a-398d-b7a4-dab0-8b9936683226@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>, "Luis R. Rodriguez" <mcgrof@kernel.org>, Kees Cook <keescook@chromium.org>
+Cc: Darren Hart <dvhart@infradead.org>, Andy Shevchenko <andy@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, platform-driver-x86@vger.kernel.org, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Josh Triplett <josh@joshtriplett.org>, dmitry.torokhov@gmail.com, mfuzzey@parkeon.com, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@lin>
 List-Id: linux-efi@vger.kernel.org
 
-On 24 April 2018 at 17:15, Kim Phillips <kim.phillips@arm.com> wrote:
-> On Tue, 24 Apr 2018 12:00:58 +0100
-> Mark Rutland <mark.rutland@arm.com> wrote:
->
->> When CONFIG_RANDOMIZE_TEXT_OFFSET is selected, TEXT_OFFSET is an
->> arbitrary multiple of PAGE_SIZE in the interval [0, 2MB).
->>
->> The EFI stub doesn't accuont for this, and only handles the case where
->> TEXT_OFFSET is multiple of EFI_KIMG_ALIGN. This can result in the kernel
->> being loaded to an erroneous physical alignment. This has been observed
->> to result in spurious stack overflow reports and failure to make use of
->> the IRQ stacks, and theoretically could result in a number of other
->> issues.
->>
->> We can OR in the low bits of TEXT_OFFSET to ensure that we have the
->> necessary offset (and hence have the necessary alignment), so let's do
->> that.
->>
->> Fixes: 6f26b3671184c36d ("arm64: kaslr: increase randomization granularity")
->> Reported-by: Kim Phillips <kim.phillips@arm.com>
->> Signed-off-by: Mark Rutland <mark.rutland@arm.com>
->> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->> Cc: linux-efi@vger.kernel.org
->> ---
->
-> Tested-by: Kim Phillips <kim.phillips@arm.com>
->
+On Tue, 2018-04-24 at 17:09 +0200, Hans de Goede wrote:
+> Hi,
+> 
+> On 23-04-18 23:11, Luis R. Rodriguez wrote:
+> > Hans, please see use of READING_FIRMWARE_PREALLOC_BUFFER, we'll need a new ID
+> > and security for this type of request so IMA can reject it if the policy is
+> > configured for it.
+> 
+> Hmm, interesting, actually it seems like the whole existence
+> of READING_FIRMWARE_PREALLOC_BUFFER is a mistake, the IMA
+> framework really does not care if we are loading the firmware
+> into memory allocated by the firmware-loader code, or into
+> memory allocated by the device-driver requesting the firmware.
+> 
+> As such the current IMA code (from v4.17-rc2) actually does
+> not handle READING_FIRMWARE_PREALLOC_BUFFER at all, 
 
-Thanks all
+Right, it doesn't yet address READING_FIRMWARE_PREALLOC_BUFFER, but
+should.
 
-Queued in efi/urgent.
+Depending on whether the device requesting the firmware has access to
+the DMA memory, before the signature verification, will determine how
+IMA-appraisal addresses READING_FIRMWARE_PREALLOC_BUFFER.
+
+Mimi
+
+> here
+> are bits of code from: security/integrity/ima/ima_main.c:
+> 
+> static int read_idmap[READING_MAX_ID] = {
+>          [READING_FIRMWARE] = FIRMWARE_CHECK,
+>          [READING_MODULE] = MODULE_CHECK,
+>          [READING_KEXEC_IMAGE] = KEXEC_KERNEL_CHECK,
+>          [READING_KEXEC_INITRAMFS] = KEXEC_INITRAMFS_CHECK,
+>          [READING_POLICY] = POLICY_CHECK
+> };
+> 
+> int ima_post_read_file(struct file *file, void *buf, loff_t size,
+> 	...
+>          if (!file && read_id == READING_FIRMWARE) {
+>                  if ((ima_appraise & IMA_APPRAISE_FIRMWARE) &&
+>                      (ima_appraise & IMA_APPRAISE_ENFORCE))
+>                          return -EACCES; /* INTEGRITY_UNKNOWN */
+>                  return 0;
+>          }
+> 
+> Which show that the IMA code is not handling
+> READING_FIRMWARE_PREALLOC_BUFFER as it should (I believe it
+> should handle it the same as READING_FIRMWARE).
+> 
+> Now we could fix that, but the only user of
+> READING_FIRMWARE_PREALLOC_BUFFER is the code which originally
+> introduced it:
+> 
+> https://patchwork.kernel.org/patch/9162011/
+> 
+> So I believe it might be better to instead replace it
+> with just READING_FIRMWARE and find another way to tell
+> kernel_read_file() that there is a pre-allocated buffer,
+> perhaps the easiest way there is that  *buf must be
+> NULL when the caller wants kernel_read_file() to
+> vmalloc the mem. This would of course require auditing
+> all callers that the buf which the pass in is initialized
+> to NULL.
+> 
+> Either way adding a third READING_FIRMWARE_FOO to the
+> kernel_read_file_id enum seems like a bad idea, from
+> the IMA pov firmware is firmware.
+> 
+> What this whole exercise has shown me though is that
+> I need to call security_kernel_post_read_file() when
+> loading EFI embedded firmware. I will add a call to
+> security_kernel_post_read_file() for v4 of the patch-set.
+> 
+> > Please Cc Kees in future patches.
+> 
+> Will do.
+> 
+> Regards,
+> 
+> Hans
+> 
