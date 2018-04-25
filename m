@@ -1,223 +1,163 @@
-From: Mimi Zohar <zohar@linux.vnet.ibm.com>
-Subject: Re: [PATCH v3 2/5] efi: Add embedded peripheral firmware support
-Date: Wed, 25 Apr 2018 01:00:09 -0400
-Message-ID: <1524632409.3371.48.camel@linux.vnet.ibm.com>
-References: <20180408174014.21908-1-hdegoede@redhat.com>
-         <20180408174014.21908-3-hdegoede@redhat.com>
-         <20180423211143.GZ14440@wotan.suse.de>
-         <71e6a45a-398d-b7a4-dab0-8b9936683226@redhat.com>
-         <1524586021.3364.20.camel@linux.vnet.ibm.com>
-         <20180424234219.GX14440@wotan.suse.de>
+From: AKASHI Takahiro <takahiro.akashi@linaro.org>
+Subject: Re: [RFC] arm64: extra entries in /proc/iomem for kexec
+Date: Wed, 25 Apr 2018 18:20:13 +0900
+Message-ID: <20180425092011.GC21197@linaro.org>
+References: <20180314082941.GM25863@linaro.org>
+ <2d2e1be6-b925-1595-9b6e-76dd270d396d@redhat.com>
+ <20180327101654.GB14737@linaro.org>
+ <da2989ec-7fa5-b044-3237-4e75f2fe6d98@arm.com>
+ <20180402015330.GA27603@linaro.org>
+ <20180405024203.GD19607@linaro.org>
+ <4c59b4c3-cff4-ac69-9576-6bcbf507ef1f@arm.com>
+ <20180416100831.GF13168@linaro.org>
+ <954d8b58-579a-c688-36f3-dc8d4b13cef8@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180424234219.GX14440@wotan.suse.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Luis R. Rodriguez" <mcgrof@kernel.org>, Andrew Morton <akpm@linux-foundation.org>, linux-security-module@vger.kernel.org, Chris Wright <chrisw@sous-sol.org>, David Howells <dhowells@redhat.com>, Alan Cox <alan@linux.intel.com>, Kees Cook <keescook@chromium.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, Darren Hart <dvhart@infradead.org>, Andy Shevchenko <andy@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, platform-driver-x86@vger.kernel.org, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Josh Triplett <josh@joshtriplett.org>, dmitry.torokhov@gmail.com, mfuzzey@parkeon.com, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@lin>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <954d8b58-579a-c688-36f3-dc8d4b13cef8@arm.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: James Morse <james.morse@arm.com>
+Cc: linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org, jhugo@codeaurora.org, Bhupesh Sharma <bhsharma@redhat.com>, tbaicar@codeaurora.org, kexec@lists.infradead.org, Bhupesh SHARMA <bhupesh.linux@gmail.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2018-04-24 at 23:42 +0000, Luis R. Rodriguez wrote:
-> On Tue, Apr 24, 2018 at 12:07:01PM -0400, Mimi Zohar wrote:
-> > On Tue, 2018-04-24 at 17:09 +0200, Hans de Goede wrote:
-> > > Hi,
-> > > 
-> > > On 23-04-18 23:11, Luis R. Rodriguez wrote:
-> > > > Hans, please see use of READING_FIRMWARE_PREALLOC_BUFFER, we'll need a new ID
-> > > > and security for this type of request so IMA can reject it if the policy is
-> > > > configured for it.
-> > > 
-> > > Hmm, interesting, actually it seems like the whole existence
-> > > of READING_FIRMWARE_PREALLOC_BUFFER is a mistake, 
+On Tue, Apr 24, 2018 at 05:08:57PM +0100, James Morse wrote:
+> Hi Akashi,
 > 
-> request_firmware_into_buf() was merged without my own review, however,
-> the ID thing did get review from Mimi:
-> 
-> https://patchwork.kernel.org/patch/9074611/
-> 
-> The ID is not for IMA alone, its for any LSM to decide what to do.
-> Note Mimi asked for READING_FIRMWARE_DMA if such buffer was in DMA,
-> otherise READING_FIRMWARE_PREALLOC_BUFFER was suggested.
-> 
-> > > the IMA
-> > > framework really does not care if we are loading the firmware
-> > > into memory allocated by the firmware-loader code, or into
-> > > memory allocated by the device-driver requesting the firmware.
-> 
-> That's up to LSM folks to decide. We have these so far:
-> 
-> #define __kernel_read_file_id(id) \                                             
->         id(UNKNOWN, unknown)            \                                       
->         id(FIRMWARE, firmware)          \                                       
->         id(FIRMWARE_PREALLOC_BUFFER, firmware)  \                               
->         id(MODULE, kernel-module)               \                               
->         id(KEXEC_IMAGE, kexec-image)            \                               
->         id(KEXEC_INITRAMFS, kexec-initramfs)    \                               
->         id(POLICY, security-policy)             \                               
->         id(X509_CERTIFICATE, x509-certificate)  \                               
->         id(MAX_ID, )  
-> 
-> The first type of IDs added was about type of files the kernel
-> LSMs may want to do different things for.
-> 
-> Mimi why did you want a separate ID for it back before?
-
-The point of commit a098ecd2fa7d ("firmware: support loading into a
-pre-allocated buffer") is to avoid reading the firmware into kernel
-memory and then copying it "to it's final resting place".  My concern
-is that if the device driver has access to the buffer, it could access
-the buffer prior to the firmware's signature having been verified by
-the kernel.
-
-In tightly controlled environments interested in limiting which signed
-firmware version is loaded, require's the device driver not having
-access to the buffer until after the signature has been verified by
-the kernel (eg. IMA-appraisal).
-
-> 
-> I should note now that request_firmware_into_buf() and its
-> READING_FIRMWARE_PREALLOC_BUFFER was to enable a driver on memory constrained
-> devices. The files are large (commit says 16 MiB).
-> 
-> I've heard of larger possible files with remoteproc and with Android using
-> the custom fallback mechanism -- which could mean a proprietary tool
-> fetching firmware from a random special place on a device.
-> 
-> I could perhaps imagine an LSM which may be aware of such type of
-> arrangement may want to do its own vetting of some sort, but this
-> would not be specific to READING_FIRMWARE_PREALLOC_BUFFER, but rather
-> the custom fallback mechaism.
-> 
-> Whether or not the buffer was preallocated by the driver seems a little
-> odd for security folks to do something different with it. Security LSM
-> folks please chime in.
-> 
-> I could see a bit more of a use case for an ID for firmware scraped
-> from EFI, which Hans' patch will provide. But that *also* should get
-> good review from other LSM folks.
-> 
-> One of the issues with accepting more IDs loosely is where do we
-> stop though? If no one really is using READING_FIRMWARE_PREALLOC_BUFFER
-> I'd say lets remove it. Likewise, for this EFI thing I'd like an idea
-> if we really are going to have users for it.
-> 
-> If its of any help --
-> 
-> drivers/soc/qcom/mdt_loader.c is the only driver currently using
-> request_firmware_into_buf() however I'll note qcom_mdt_load() is used in many
-> other drivers so they are wrappers around request_firmware_into_buf():
-> 
-> drivers/gpu/drm/msm/adreno/a5xx_gpu.c:   * adreno_request_fw() handles this, but qcom_mdt_load() does
-> drivers/gpu/drm/msm/adreno/a5xx_gpu.c:          ret = qcom_mdt_load(dev, fw, fwname, GPU_PAS_ID,
-> drivers/gpu/drm/msm/adreno/a5xx_gpu.c:          ret = qcom_mdt_load(dev, fw, newname, GPU_PAS_ID,
-> drivers/media/platform/qcom/venus/firmware.c:   ret = qcom_mdt_load(dev, mdt, fwname, VENUS_PAS_ID, mem_va, mem_phys,
-> drivers/remoteproc/qcom_adsp_pil.c:     return qcom_mdt_load(adsp->dev, fw, rproc->firmware, adsp->pas_id,
-> drivers/remoteproc/qcom_wcnss.c:        return qcom_mdt_load(wcnss->dev, fw, rproc->firmware, WCNSS_PAS_ID,
-> 
-> Are we going to add more IDs for more types of firmware?
-> What type of *different* decisions could LSMs take if the firmware
-> was being written to a buffer? Or in this new case that is coming
-> up, if the file came scraping EFI, would having that information
-> be useful?
-> 
-> > > As such the current IMA code (from v4.17-rc2) actually does
-> > > not handle READING_FIRMWARE_PREALLOC_BUFFER at all, 
+> On 16/04/18 11:08, AKASHI Takahiro wrote:
+> > On Thu, Apr 12, 2018 at 05:01:52PM +0100, James Morse wrote:
+> >> On 05/04/18 03:42, AKASHI Takahiro wrote:
+> >>> On Mon, Apr 02, 2018 at 10:53:32AM +0900, AKASHI Takahiro wrote:
+> >>>> Basically, changes that I made on /proc/iomem in my new format D were:
+> >>>> 1. to move NOMAP region entries, formerly named "reserved" and now named
+> >>>>    "reserved (no map)", under System RAM
+> >>>> 2. to add new entries for firmware-reserved regions as "reserved" also
+> >>>>    under System RAM
+> >>>>
+> >>>> On the other hand, current kexec-tools, in particular kexec command,
+> >>>> only scan top-level "System RAM" entries as well as "reserved" entries.
+> >>
+> >> as well as?
 > > 
-> > Right, it doesn't yet address READING_FIRMWARE_PREALLOC_BUFFER, but
-> > should.
+> > I had few words here.
+> > The current kexec-tools assumes that "reserved" entries appear only
+> > at the top level. So,
 > > 
-> > Depending on whether the device requesting the firmware has access to
-> > the DMA memory, before the signature verification, 
-> 
-> It would seem from the original patch review about READING_FIRMWARE_PREALLOC_BUFFER
-> that this is not a DMA buffer.
-
-The call sequence:
-qcom_mdt_load() -> qcom_scm_pas_init_image() -> dma_alloc_coherent()
-
-If dma_alloc_coherent() isn't allocating a DMA buffer, then the
-function name is misleading/confusing.
-
-> 
-> The device driver should have access to the buffer pointer with write given
-> that with request_firmware_into_buf() the driver is giving full write access to
-> the memory pointer so that the firmware API can stuff the firmware it finds
-> there.
-> 
-> Firmware signature verification would be up to the device hardware to do upon
-> load *after* request_firmware_into_buf().
-
-We're discussing the kernel's signature verification, not the device
-hardware's signature verification.  Can the device driver access the
-buffer, before IMA-appraisal has verified the firmware's signature?
-
-Mimi
-
-> 
->   Luis
-> 
-> > will determine how
-> > IMA-appraisal addresses READING_FIRMWARE_PREALLOC_BUFFER.
+> >> Does this mean kexec will pick up the reserved region if its written as:
+> >> | 00001000-0009d7ff : System RAM
+> >> |    00001000-00001fff  : reserved
 > > 
-> > Mimi
+> > if this is the case, the range "0x1000-0x1fff" is added to an internal
+> > list of memory ranges 
+> 
+> I found this in get_memory_ranges_iomem_cb()...
+> 
+> 
+> > but will later be *ignored* by locate_hole() function
+> > due to its memory type.
+> 
+> Ugh. Great.
+> 
+> 
+> > That is, the range can potentially be overwritten by loaded kernel/initrd.
+> 
+> So two kernel bugs, one user-space bug, all conspiring.
+> 
+> 
+> >>>> either because
+> >>>> a. new kernel (or initrd/dtb) may have been allocated on a NOMAP region
+> >>>>    which are not suitable for usable memory, or
+> >>>> b. new kernel (or initrd/dtb) may have been allocated on a reserved region
+> >>>>    whose contents can be overwritten.
+> >>>>
+> >>>> While we see (b) even today, (a) is a backward compatibility issue.
+> >>
+> >> (a) doesn't happen because request_standard_resources() checks
+> >> memblock_is_nomap(), and reports those regions as 'reserved'.
 > > 
-> > > here
-> > > are bits of code from: security/integrity/ima/ima_main.c:
-> > > 
-> > > static int read_idmap[READING_MAX_ID] = {
-> > >          [READING_FIRMWARE] = FIRMWARE_CHECK,
-> > >          [READING_MODULE] = MODULE_CHECK,
-> > >          [READING_KEXEC_IMAGE] = KEXEC_KERNEL_CHECK,
-> > >          [READING_KEXEC_INITRAMFS] = KEXEC_INITRAMFS_CHECK,
-> > >          [READING_POLICY] = POLICY_CHECK
-> > > };
-> > > 
-> > > int ima_post_read_file(struct file *file, void *buf, loff_t size,
-> > > 	...
-> > >          if (!file && read_id == READING_FIRMWARE) {
-> > >                  if ((ima_appraise & IMA_APPRAISE_FIRMWARE) &&
-> > >                      (ima_appraise & IMA_APPRAISE_ENFORCE))
-> > >                          return -EACCES; /* INTEGRITY_UNKNOWN */
-> > >                  return 0;
-> > >          }
-> > > 
-> > > Which show that the IMA code is not handling
-> > > READING_FIRMWARE_PREALLOC_BUFFER as it should (I believe it
-> > > should handle it the same as READING_FIRMWARE).
-> > > 
-> > > Now we could fix that, but the only user of
-> > > READING_FIRMWARE_PREALLOC_BUFFER is the code which originally
-> > > introduced it:
-> > > 
-> > > https://patchwork.kernel.org/patch/9162011/
-> > > 
-> > > So I believe it might be better to instead replace it
-> > > with just READING_FIRMWARE and find another way to tell
-> > > kernel_read_file() that there is a pre-allocated buffer,
-> > > perhaps the easiest way there is that  *buf must be
-> > > NULL when the caller wants kernel_read_file() to
-> > > vmalloc the mem. This would of course require auditing
-> > > all callers that the buf which the pass in is initialized
-> > > to NULL.
-> > > 
-> > > Either way adding a third READING_FIRMWARE_FOO to the
-> > > kernel_read_file_id enum seems like a bad idea, from
-> > > the IMA pov firmware is firmware.
-> > > 
-> > > What this whole exercise has shown me though is that
-> > > I need to call security_kernel_post_read_file() when
-> > > loading EFI embedded firmware. I will add a call to
-> > > security_kernel_post_read_file() for v4 of the patch-set.
-> > > 
-> > > > Please Cc Kees in future patches.
-> > > 
-> > > Will do.
-> > > 
-> > > Regards,
-> > > 
-> > > Hans
-> > > 
+> > I might have confused you. The assumption here was that we adopt format (D),
+> > where all NOMAP regions are sub nodes of "System RAM", but still use
+> > the current kexec-tools.
+> > As I said above, this will end up an un-expected behavior.
+> 
+> I'd like to fix this without having to fix user-space at the same time. It looks
+> like no-one else has second level reserved regions,
+
+This was my assumption when I sent out a patch to kexec-tools.
+
+> so we can't blame
+> kexec-tools for looking straight at them, then ignoring them.
+> 
+> 
+> >> We can't expect user-space to upgrade to fix this issue.
 > > 
+> > I'm not sure what you mean here; we can't fix the issue anyway
+> > without changing user-space/kexec-tools as kexec_load system call totally
+> > relies on parameters passed by kexec-tools.
+> > (The only difference is whether we need additional kernel changes or not.)
+> 
+> It looks like this was always broken because the efi memory map isn't listed as
+> 'reserved' in /proc/iomem. The fallout for the new stuff is secondary.
+> 
+> 
+> >>> # I don't know yet whether people are happy with this fix, and also have
+> >>>   kernel patches for my other approaches. They are neither not much
+> >>>   complicated.
+> >>
+> >> I don't think we should fix this in userspace, exporting all the
+> >> memblock_reserved() regions as 'reserved' in /proc/iomem looks like the right
+> >> thing to do.
 > > 
+> > Again, if you modify /proc/iomem, you have to update kexec-tools, too.
+> 
+> If we squash the memblock_reserved() stuff down so it appears as a top level
+> 'reserved' region too, I don't think we do.
+
+If I correctly understand, you're talking about my format (E).
+As I said, it will fix the issue without modifying user-space, but
+
+|| This does not only look quite noisy but also ignores the fact that
+|| reserved regions are part of System RAM (or memblock.memory).
+
+> This prevents the efi-memory-map
+> being overwritten on kernels since kexec was merged.
+>
+> Its horribly fiddly to do this. The kernel code/data are special reserved
+> regions that we already describe as a subset of system-ram, even though they are
+> both also fragments of a bigger memblock_reserved() block.
+
+Actually, we don't have to avoid kernel code/data regions as copying
+loaded data to the final destinations will be done at the very end of kexec.
+
+> While we can walk memblock for regions that aren't reserved, allocating memory
+> in the loop changes what is reserved. That one O(N) walk ends up being four...
+
+At most O(n^2)?
+
+Thanks,
+-Takhairo AKASHI
+
+> I'm almost done tearing my hair out, I should have a working patch soon...
+> 
+> 
+> >> wasn't there going to be another version, with the core EFI
+> >> stuff split out?
+> > 
+> > ? I don't remember well ...
+> 
+> https://lkml.org/lkml/2018/2/1/496
+> 
+> 
+> Thanks,
+> 
+> James
 > 
