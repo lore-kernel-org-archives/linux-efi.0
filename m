@@ -1,140 +1,339 @@
-From: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC] arm64: extra entries in /proc/iomem for kexec
-Date: Thu, 26 Apr 2018 16:40:44 +0900
-Message-ID: <20180426074043.GD21197@linaro.org>
-References: <2d2e1be6-b925-1595-9b6e-76dd270d396d@redhat.com>
- <20180327101654.GB14737@linaro.org>
- <da2989ec-7fa5-b044-3237-4e75f2fe6d98@arm.com>
- <20180402015330.GA27603@linaro.org>
- <20180405024203.GD19607@linaro.org>
- <4c59b4c3-cff4-ac69-9576-6bcbf507ef1f@arm.com>
- <20180416100831.GF13168@linaro.org>
- <954d8b58-579a-c688-36f3-dc8d4b13cef8@arm.com>
- <20180425092011.GC21197@linaro.org>
- <4ae3fefb-5800-ab86-5bcd-2638602c5c3d@arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <4ae3fefb-5800-ab86-5bcd-2638602c5c3d-5wv7dgnIgG8@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v1] device property: Get rid of union aliasing
+Date: Thu, 26 Apr 2018 13:23:56 +0300
+Message-ID: <20180426102356.77394-1-andriy.shevchenko@linux.intel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Sakari Ailus <sakari.ailus@linux.intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Lukas Wunner <lukas@wunner.de>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-James,
+The commit
 
-On Wed, Apr 25, 2018 at 02:22:07PM +0100, James Morse wrote:
-> Hi Akashi,
-> 
-> On 25/04/18 10:20, AKASHI Takahiro wrote:
-> > On Tue, Apr 24, 2018 at 05:08:57PM +0100, James Morse wrote:
-> >> On 16/04/18 11:08, AKASHI Takahiro wrote:
-> >>> On Thu, Apr 12, 2018 at 05:01:52PM +0100, James Morse wrote:
-> >>>> On 05/04/18 03:42, AKASHI Takahiro wrote:
-> >>>>> On Mon, Apr 02, 2018 at 10:53:32AM +0900, AKASHI Takahiro wrote:
-> >>>>>> either because
-> >>>>>> a. new kernel (or initrd/dtb) may have been allocated on a NOMAP region
-> >>>>>>    which are not suitable for usable memory, or
-> >>>>>> b. new kernel (or initrd/dtb) may have been allocated on a reserved region
-> >>>>>>    whose contents can be overwritten.
-> >>>>>>
-> >>>>>> While we see (b) even today, (a) is a backward compatibility issue.
-> >>>>
-> >>>> (a) doesn't happen because request_standard_resources() checks
-> >>>> memblock_is_nomap(), and reports those regions as 'reserved'.
-> >>>
-> >>> I might have confused you. The assumption here was that we adopt format (D),
-> >>> where all NOMAP regions are sub nodes of "System RAM", but still use
-> >>> the current kexec-tools.
-> >>> As I said above, this will end up an un-expected behavior.
-> >>
-> >> I'd like to fix this without having to fix user-space at the same time. It looks
-> >> like no-one else has second level reserved regions,
-> > 
-> > This was my assumption when I sent out a patch to kexec-tools.
-> 
-> But this would still leave user-space that isn't updated broken.
-> 
-> 
-> >>>>> # I don't know yet whether people are happy with this fix, and also have
-> >>>>>   kernel patches for my other approaches. They are neither not much
-> >>>>>   complicated.
-> >>>>
-> >>>> I don't think we should fix this in userspace, exporting all the
-> >>>> memblock_reserved() regions as 'reserved' in /proc/iomem looks like the right
-> >>>> thing to do.
-> >>>
-> >>> Again, if you modify /proc/iomem, you have to update kexec-tools, too.
-> >>
-> >> If we squash the memblock_reserved() stuff down so it appears as a top level
-> >> 'reserved' region too, I don't think we do.
-> > 
-> > If I correctly understand, you're talking about my format (E).
-> > As I said, it will fix the issue without modifying user-space, but
-> > 
-> > || This does not only look quite noisy but also ignores the fact that
-> > || reserved regions are part of System RAM (or memblock.memory).
-> 
-> I agree its noisy, there are significantly more 'reserved' areas, but these are
-> all either nomap or memblock_reserved().
-> 
-> Why does it matter if a reserved-region is nomap or memblock_reserved()? Any new
-> kernel will learn the difference from the EFI memory map and make its own decisions.
+  318a19718261 ("device property: refactor built-in properties support")
 
-Yeah, kernel can do (though kernel won't look though system resources list
-for this purpose anyway), what about kexec-like user applications?
-It may want to seek /proc/iomem to identify all the *usable* memory on
-the system, that is "System RAM", but doesn't care whether some range is
-reserved or not (for some reason) yet does care !NOMAP.
+went way too far and brought a union aliasing. Partially revert it here
+to get rid of union aliasing.
 
-> Kexec-tools only needs to know what it can overwrite without clobbering
-> important data like the UEFI memory map, or the APCI tables covered by the
-> linear map.
-> 
-> 
-> >> This prevents the efi-memory-map
-> >> being overwritten on kernels since kexec was merged.
-> >>
-> >> Its horribly fiddly to do this. The kernel code/data are special reserved
-> >> regions that we already describe as a subset of system-ram, even though they are
-> >> both also fragments of a bigger memblock_reserved() block.
-> > 
-> > Actually, we don't have to avoid kernel code/data regions as copying
-> > loaded data to the final destinations will be done at the very end of kexec.
-> 
-> For kexec yes, but that is the existing format of the file, which we shouldn't
-> change, otherwise we break something else.
+Note, Apple properties support is still utilizing this trick.
 
-One trivial downside in this approach is that a secondary kernel will be
-loaded at an address different from the one of current kernel.
-While it is sane, it looks a bit odd that, every time kexec'ed, a new
-kernel (code/data) is located back and forth :)
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+---
+ drivers/base/property.c                 | 99 ++++++++++++++++++++-----
+ drivers/firmware/efi/apple-properties.c |  8 +-
+ include/linux/property.h                | 52 +++++++------
+ 3 files changed, 112 insertions(+), 47 deletions(-)
 
-> 
-> >> While we can walk memblock for regions that aren't reserved, allocating memory
-> >> in the loop changes what is reserved. That one O(N) walk ends up being four...
-> > 
-> > At most O(n^2)?
-> 
-> I think for_each_free_mem_range() is smart enough not to do that. Patch incoming...
-
-Yes, my v9 of kexec_file patch makes use of it.
-
-Thanks,
--Takahiro AKASHI
-
-
-> 
-> Thanks,
-> 
-> James
+diff --git a/drivers/base/property.c b/drivers/base/property.c
+index 8f205f6461ed..de19d7cc073b 100644
+--- a/drivers/base/property.c
++++ b/drivers/base/property.c
+@@ -56,6 +56,67 @@ pset_prop_get(const struct property_set *pset, const char *name)
+ 	return NULL;
+ }
+ 
++static const void *property_get_pointer(const struct property_entry *prop)
++{
++	switch (prop->type) {
++	case DEV_PROP_U8:
++		if (prop->is_array)
++			return prop->pointer.u8_data;
++		return &prop->value.u8_data;
++	case DEV_PROP_U16:
++		if (prop->is_array)
++			return prop->pointer.u16_data;
++		return &prop->value.u16_data;
++	case DEV_PROP_U32:
++		if (prop->is_array)
++			return prop->pointer.u32_data;
++		return &prop->value.u32_data;
++	case DEV_PROP_U64:
++		if (prop->is_array)
++			return prop->pointer.u64_data;
++		return &prop->value.u64_data;
++	default:
++		if (prop->is_array)
++			return prop->pointer.str;
++		return &prop->value.str;
++	}
++}
++
++static void property_set_pointer(struct property_entry *prop, const void *pointer)
++{
++	switch (prop->type) {
++	case DEV_PROP_U8:
++		if (prop->is_array)
++			prop->pointer.u8_data = pointer;
++		else
++			prop->value.u8_data = *((u8 *)pointer);
++		break;
++	case DEV_PROP_U16:
++		if (prop->is_array)
++			prop->pointer.u16_data = pointer;
++		else
++			prop->value.u16_data = *((u16 *)pointer);
++		break;
++	case DEV_PROP_U32:
++		if (prop->is_array)
++			prop->pointer.u32_data = pointer;
++		else
++			prop->value.u32_data = *((u32 *)pointer);
++		break;
++	case DEV_PROP_U64:
++		if (prop->is_array)
++			prop->pointer.u64_data = pointer;
++		else
++			prop->value.u64_data = *((u64 *)pointer);
++		break;
++	default:
++		if (prop->is_array)
++			prop->pointer.str = pointer;
++		else
++			prop->value.str = pointer;
++	}
++}
++
+ static const void *pset_prop_find(const struct property_set *pset,
+ 				  const char *propname, size_t length)
+ {
+@@ -65,10 +126,7 @@ static const void *pset_prop_find(const struct property_set *pset,
+ 	prop = pset_prop_get(pset, propname);
+ 	if (!prop)
+ 		return ERR_PTR(-EINVAL);
+-	if (prop->is_array)
+-		pointer = prop->pointer.raw_data;
+-	else
+-		pointer = &prop->value.raw_data;
++	pointer = property_get_pointer(prop);
+ 	if (!pointer)
+ 		return ERR_PTR(-ENODATA);
+ 	if (length > prop->length)
+@@ -698,16 +756,17 @@ EXPORT_SYMBOL_GPL(fwnode_property_get_reference_args);
+ 
+ static void property_entry_free_data(const struct property_entry *p)
+ {
++	const void *pointer = property_get_pointer(p);
+ 	size_t i, nval;
+ 
+ 	if (p->is_array) {
+-		if (p->is_string && p->pointer.str) {
++		if (p->type == DEV_PROP_STRING && p->pointer.str) {
+ 			nval = p->length / sizeof(const char *);
+ 			for (i = 0; i < nval; i++)
+ 				kfree(p->pointer.str[i]);
+ 		}
+-		kfree(p->pointer.raw_data);
+-	} else if (p->is_string) {
++		kfree(pointer);
++	} else if (p->type == DEV_PROP_STRING) {
+ 		kfree(p->value.str);
+ 	}
+ 	kfree(p->name);
+@@ -716,7 +775,7 @@ static void property_entry_free_data(const struct property_entry *p)
+ static int property_copy_string_array(struct property_entry *dst,
+ 				      const struct property_entry *src)
+ {
+-	char **d;
++	const char **d;
+ 	size_t nval = src->length / sizeof(*d);
+ 	int i;
+ 
+@@ -734,40 +793,44 @@ static int property_copy_string_array(struct property_entry *dst,
+ 		}
+ 	}
+ 
+-	dst->pointer.raw_data = d;
++	dst->pointer.str = d;
+ 	return 0;
+ }
+ 
+ static int property_entry_copy_data(struct property_entry *dst,
+ 				    const struct property_entry *src)
+ {
++	const void *pointer = property_get_pointer(src);
++	const void *new;
+ 	int error;
+ 
+ 	if (src->is_array) {
+ 		if (!src->length)
+ 			return -ENODATA;
+ 
+-		if (src->is_string) {
++		if (src->type == DEV_PROP_STRING) {
+ 			error = property_copy_string_array(dst, src);
+ 			if (error)
+ 				return error;
++			new = dst->pointer.str;
+ 		} else {
+-			dst->pointer.raw_data = kmemdup(src->pointer.raw_data,
+-							src->length, GFP_KERNEL);
+-			if (!dst->pointer.raw_data)
++			new = kmemdup(pointer, src->length, GFP_KERNEL);
++			if (!new)
+ 				return -ENOMEM;
+ 		}
+-	} else if (src->is_string) {
+-		dst->value.str = kstrdup(src->value.str, GFP_KERNEL);
+-		if (!dst->value.str && src->value.str)
++	} else if (src->type == DEV_PROP_STRING) {
++		new = kstrdup(src->value.str, GFP_KERNEL);
++		if (!new && src->value.str)
+ 			return -ENOMEM;
+ 	} else {
+-		dst->value.raw_data = src->value.raw_data;
++		new = pointer;
+ 	}
+ 
+ 	dst->length = src->length;
+ 	dst->is_array = src->is_array;
+-	dst->is_string = src->is_string;
++	dst->type = src->type;
++
++	property_set_pointer(dst, new);
+ 
+ 	dst->name = kstrdup(src->name, GFP_KERNEL);
+ 	if (!dst->name)
+diff --git a/drivers/firmware/efi/apple-properties.c b/drivers/firmware/efi/apple-properties.c
+index adaa9a3714b9..b2c2d5a45f91 100644
+--- a/drivers/firmware/efi/apple-properties.c
++++ b/drivers/firmware/efi/apple-properties.c
+@@ -13,6 +13,9 @@
+  *
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, see <http://www.gnu.org/licenses/>.
++ *
++ * FIXME: The approach is still based on union aliasing and should be
++ * replaced by a proper resource provider.
+  */
+ 
+ #define pr_fmt(fmt) "apple-properties: " fmt
+@@ -96,12 +99,13 @@ static void __init unmarshal_key_value_pairs(struct dev_header *dev_header,
+ 		entry[i].name = key;
+ 		entry[i].length = val_len - sizeof(val_len);
+ 		entry[i].is_array = !!entry[i].length;
+-		entry[i].pointer.raw_data = ptr + key_len + sizeof(val_len);
++		entry[i].type = DEV_PROP_U8;
++		entry[i].pointer.u8_data = ptr + key_len + sizeof(val_len);
+ 
+ 		if (dump_properties) {
+ 			dev_info(dev, "property: %s\n", entry[i].name);
+ 			print_hex_dump(KERN_INFO, pr_fmt(), DUMP_PREFIX_OFFSET,
+-				16, 1, entry[i].pointer.raw_data,
++				16, 1, entry[i].pointer.u8_data,
+ 				entry[i].length, true);
+ 		}
+ 
+diff --git a/include/linux/property.h b/include/linux/property.h
+index 2eea4b310fc2..ac8a1ebc4c1b 100644
+--- a/include/linux/property.h
++++ b/include/linux/property.h
+@@ -178,7 +178,7 @@ static inline int fwnode_property_read_u64(const struct fwnode_handle *fwnode,
+  * @name: Name of the property.
+  * @length: Length of data making up the value.
+  * @is_array: True when the property is an array.
+- * @is_string: True when property is a string.
++ * @type: Type of the data in unions.
+  * @pointer: Pointer to the property (an array of items of the given type).
+  * @value: Value of the property (when it is a single item of the given type).
+  */
+@@ -186,10 +186,9 @@ struct property_entry {
+ 	const char *name;
+ 	size_t length;
+ 	bool is_array;
+-	bool is_string;
++	enum dev_prop_type type;
+ 	union {
+ 		union {
+-			const void *raw_data;
+ 			const u8 *u8_data;
+ 			const u16 *u16_data;
+ 			const u32 *u32_data;
+@@ -197,7 +196,6 @@ struct property_entry {
+ 			const char * const *str;
+ 		} pointer;
+ 		union {
+-			unsigned long long raw_data;
+ 			u8 u8_data;
+ 			u16 u16_data;
+ 			u32 u32_data;
+@@ -213,55 +211,55 @@ struct property_entry {
+  * and structs.
+  */
+ 
+-#define PROPERTY_ENTRY_INTEGER_ARRAY(_name_, _type_, _val_)	\
+-(struct property_entry) {					\
+-	.name = _name_,						\
+-	.length = ARRAY_SIZE(_val_) * sizeof(_type_),		\
+-	.is_array = true,					\
+-	.is_string = false,					\
+-	{ .pointer = { ._type_##_data = _val_ } },		\
++#define PROPERTY_ENTRY_INTEGER_ARRAY(_name_, _type_, _Type_, _val_)	\
++(struct property_entry) {						\
++	.name = _name_,							\
++	.length = ARRAY_SIZE(_val_) * sizeof(_type_),			\
++	.is_array = true,						\
++	.type = DEV_PROP_##_Type_,					\
++	{ .pointer = { ._type_##_data = _val_ } },			\
+ }
+ 
+ #define PROPERTY_ENTRY_U8_ARRAY(_name_, _val_)			\
+-	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u8, _val_)
++	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u8, U8, _val_)
+ #define PROPERTY_ENTRY_U16_ARRAY(_name_, _val_)			\
+-	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u16, _val_)
++	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u16, U16, _val_)
+ #define PROPERTY_ENTRY_U32_ARRAY(_name_, _val_)			\
+-	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u32, _val_)
++	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u32, U32, _val_)
+ #define PROPERTY_ENTRY_U64_ARRAY(_name_, _val_)			\
+-	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u64, _val_)
++	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u64, U64, _val_)
+ 
+ #define PROPERTY_ENTRY_STRING_ARRAY(_name_, _val_)		\
+ (struct property_entry) {					\
+ 	.name = _name_,						\
+ 	.length = ARRAY_SIZE(_val_) * sizeof(const char *),	\
+ 	.is_array = true,					\
+-	.is_string = true,					\
++	.type = DEV_PROP_STRING,				\
+ 	{ .pointer = { .str = _val_ } },			\
+ }
+ 
+-#define PROPERTY_ENTRY_INTEGER(_name_, _type_, _val_)	\
+-(struct property_entry) {				\
+-	.name = _name_,					\
+-	.length = sizeof(_type_),			\
+-	.is_string = false,				\
+-	{ .value = { ._type_##_data = _val_ } },	\
++#define PROPERTY_ENTRY_INTEGER(_name_, _type_, _Type_, _val_)	\
++(struct property_entry) {					\
++	.name = _name_,						\
++	.length = sizeof(_type_),				\
++	.type = DEV_PROP_##_Type_,				\
++	{ .value = { ._type_##_data = _val_ } },		\
+ }
+ 
+ #define PROPERTY_ENTRY_U8(_name_, _val_)		\
+-	PROPERTY_ENTRY_INTEGER(_name_, u8, _val_)
++	PROPERTY_ENTRY_INTEGER(_name_, u8, U8, _val_)
+ #define PROPERTY_ENTRY_U16(_name_, _val_)		\
+-	PROPERTY_ENTRY_INTEGER(_name_, u16, _val_)
++	PROPERTY_ENTRY_INTEGER(_name_, u16, U16, _val_)
+ #define PROPERTY_ENTRY_U32(_name_, _val_)		\
+-	PROPERTY_ENTRY_INTEGER(_name_, u32, _val_)
++	PROPERTY_ENTRY_INTEGER(_name_, u32, U32, _val_)
+ #define PROPERTY_ENTRY_U64(_name_, _val_)		\
+-	PROPERTY_ENTRY_INTEGER(_name_, u64, _val_)
++	PROPERTY_ENTRY_INTEGER(_name_, u64, U64, _val_)
+ 
+ #define PROPERTY_ENTRY_STRING(_name_, _val_)		\
+ (struct property_entry) {				\
+ 	.name = _name_,					\
+ 	.length = sizeof(_val_),			\
+-	.is_string = true,				\
++	.type = DEV_PROP_STRING,			\
+ 	{ .value = { .str = _val_ } },			\
+ }
+ 
+-- 
+2.17.0
