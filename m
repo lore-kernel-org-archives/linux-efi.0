@@ -1,100 +1,95 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v4 0/5] efi/firmware/platform-x86: Add EFI embedded fw support
-Date: Thu, 26 Apr 2018 18:53:08 +0200
-Message-ID: <CAKv+Gu8sxnt6rHOQ0LCnzhWv0vyVZX+G5EN9g2pZB4SnjghN-Q@mail.gmail.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: [PATCH v4 1/5] efi: Export boot-services code and data as
+ debugfs-blobs
+Date: Thu, 26 Apr 2018 23:02:39 +0200
+Message-ID: <d587af46-72cb-8fc7-8432-36473b67de47@redhat.com>
 References: <20180426120637.21258-1-hdegoede@redhat.com>
+ <20180426120637.21258-2-hdegoede@redhat.com>
+ <CAKv+Gu9sx_TnSvxdO9eGLCqsQufKW6z9p0K8nYWF_KuDBuUwag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180426120637.21258-1-hdegoede@redhat.com>
+In-Reply-To: <CAKv+Gu9sx_TnSvxdO9eGLCqsQufKW6z9p0K8nYWF_KuDBuUwag@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Martin Fuzzey <mfuzzey@parkeon.com>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, Nicolas Broeking <nbroeking@me.com>, Bjorn
 List-Id: linux-efi@vger.kernel.org
 
-On 26 April 2018 at 14:06, Hans de Goede <hdegoede@redhat.com> wrote:
-> Hi All,
->
-> Here is v4 of my patch-set to add support for EFI embedded fw to the kernel.
->
-> Changes since v3:
-> -Drop note in docs about EFI_FIRMWARE_VOLUME_PROTOCOL, it is not part of
->  UEFI proper, so the EFI maintainers don't want us referring people to it
-> -Use new EFI_BOOT_SERVICES flag
-> -Put the new fw_get_efi_embedded_fw() function in its own fallback_efi.c
->  file which only gets built when EFI_EMBEDDED_FIRMWARE is selected
-> -Define an empty stub for fw_get_efi_embedded_fw() in fallback.h hwen
->  EFI_EMBEDDED_FIRMWARE is not selected, to avoid the need for #ifdefs
->  in firmware_loader/main.c
-> -Properly call security_kernel_post_read_file() on the firmware returned
->  by efi_get_embedded_fw() to make sure that we are allowed to use it
->
-> So I think this patch-set is getting close to ready for merging, which
-> brings us to the question of how to merge this, I think that patches 1
-> and 2 should probably both be merged through the same tree. Then an
-> unmutable branch should be created on that tree, merged into the
-> platform/x86 tree and then the last 3 patches can be merged through
-> that tree.
->
+Hi,
 
-I am perfectly happy to either ack the patches that fall under my
-responsibility so they can be taken via another tree, or take the
-whole thing via the EFI tree, whichever works for other maintainers.
+On 26-04-18 18:51, Ard Biesheuvel wrote:
+> On 26 April 2018 at 14:06, Hans de Goede <hdegoede@redhat.com> wrote:
+>> Sometimes it is useful to be able to dump the efi boot-services code and
+>> data. This commit adds these as debugfs-blobs to /sys/kernel/debug/efi,
+>> but only if efi=debug is passed on the kernel-commandline as this requires
+>> not freeing those memory-regions, which costs 20+ MB of RAM.
+>>
+>> Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+>> ---
+>> Changes in v4:
+>> -Add new EFI_BOOT_SERVICES flag and use it to determine if the boot-services
+>>   memory segments are available (and thus if it makes sense to register the
+>>   debugfs bits for them)
+>>
+>> Changes in v2:
+>> -Do not call pr_err on debugfs call failures
+>> ---
+>>   arch/x86/platform/efi/efi.c    |  1 +
+>>   arch/x86/platform/efi/quirks.c |  4 +++
+>>   drivers/firmware/efi/efi.c     | 53 ++++++++++++++++++++++++++++++++++
+>>   include/linux/efi.h            |  1 +
+>>   4 files changed, 59 insertions(+)
+>>
+>> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+>> index 9061babfbc83..568b7ee3d323 100644
+>> --- a/arch/x86/platform/efi/efi.c
+>> +++ b/arch/x86/platform/efi/efi.c
+>> @@ -208,6 +208,7 @@ int __init efi_memblock_x86_reserve_range(void)
+>>               efi.memmap.desc_version);
+>>
+>>          memblock_reserve(pmap, efi.memmap.nr_map * efi.memmap.desc_size);
+>> +       set_bit(EFI_BOOT_SERVICES, &efi.flags);
+>>
+> 
+> I think it would be better if the flag conveys whether boot services
+> regions are being preserved, because they will always exist when
+> EFI_BOOT is set.
+> The name should then reflect that as well, e.g., EFI_PRESERVE_BS_REGIONS.
 
-> For the record, here is the coverletter of v2 of this patchset:
->
-> The 3 most prominent changes in v2 are:
->
-> 1) Add documentation describing the EFI embedded firmware mechanism to:
->    Documentation/driver-api/firmware/request_firmware.rst
->
-> 2) Instead of having a single dmi_system_id array with its driver_data
->    members pointing to efi_embedded_fw_desc structs, have the drivers which
->    need EFI embedded-fw support export a dmi_system_id array and register
->    that with the EFI embedded-fw code
->
->    This series also includes the first driver to use this, in the form of
->    the touchscreen_dmi code (formerly silead_dmi) from drivers/platfrom/x86
->
-> 3) As discussed during the review of v1 we want to make the firmware_loader
->    code fallback to EFI embedded-fw optional.  Rather the adding yet another
->    firmware_request_foo variant for this, with the risk of later also needing
->    firmware_request_foo_nowait, etc. variants I've decided to make the code
->    check if the device has a "efi-embedded-firmware" device-property bool set.
->
->    This also seemed better because the same driver may want to use the
->    fallback on some systems, but not on others since e.g. not all (x86)
->    systems with a silead touchscreen have their touchscreen firmware embedded
->    in their EFI.
->
->    Note that (as discussed) when the EFI fallback path is requested, the
->    usermodehelper fallback path is skipped.
->
-> Here is the full changelog of patch 2/5 which is where most of the changes are:
->
-> Changes in v2:
-> -Rebased on driver-core/driver-core-next
-> -Add documentation describing the EFI embedded firmware mechanism to:
->  Documentation/driver-api/firmware/request_firmware.rst
-> -Add a new EFI_EMBEDDED_FIRMWARE Kconfig bool and only build the embedded
->  fw support if this is set. This is an invisible option which should be
->  selected by drivers which need this
-> -Remove the efi_embedded_fw_desc and dmi_system_id-s for known devices
->  from the efi-embedded-fw code, instead drivers using this are expected to
->  export a dmi_system_id array, with each entries' driver_data pointing to a
->  efi_embedded_fw_desc struct and register this with the efi-embedded-fw code
-> -Use kmemdup to make a copy instead of efi_mem_reserve()-ing the firmware,
->  this avoids us messing with the EFI memmap and avoids the need to make
->  changes to efi_mem_desc_lookup()
-> -Make the firmware-loader code only fallback to efi_get_embedded_fw() if the
->  passed in device has the "efi-embedded-firmware" device-property bool set
-> -Skip usermodehelper fallback when "efi-embedded-firmware" device-property
->  is set
->
-> Patches 3-5 are new and implement using the EFI embedded-fw mechanism for
-> Silead gslXXXX and Chipone icn8505 touchscreens on x86 devices.
->
-> Regards,
->
-> Hans
->
+Ok, I will rename the flag to EFI_PRESERVE_BS_REGIONS for v5
+(I'm going to wait a bit with sending out v5 to give others a change
+  to comment on v4).
+
+>>          return 0;
+>>   }
+>> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+>> index 36c1f8b9f7e0..16bdb9e3b343 100644
+>> --- a/arch/x86/platform/efi/quirks.c
+>> +++ b/arch/x86/platform/efi/quirks.c
+>> @@ -376,6 +376,10 @@ void __init efi_free_boot_services(void)
+>>          int num_entries = 0;
+>>          void *new, *new_md;
+>>
+>> +       /* Keep all regions for /sys/kernel/debug/efi */
+>> +       if (efi_enabled(EFI_DBG))
+>> +               return;
+>> +
+> 
+> Why is this only necessary when EFI_DBG is enabled? How are you
+> ensuring that the firmware is still in memory when the subsequent
+> patches start relying on that?
+
+The 2nd patch in this series makes init/main.c call
+efi_check_for_embedded_firmwares() before efi_free_boot_services(),
+efi_check_for_embedded_firmwares() then walks the dmi_system_id-s
+"registered" (its a static list) by drivers and if their is a dmi_match
+searches for the firmware described by the dmi_system_id.driver_data
+ptr. If a firmware gets found it gets memdup-ed, so that we do not
+have to keep all of the boot-services code around.
+
+Regards,
+
+Hans
