@@ -1,339 +1,89 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH v1] device property: Get rid of union aliasing
-Date: Thu, 26 Apr 2018 13:23:56 +0300
-Message-ID: <20180426102356.77394-1-andriy.shevchenko@linux.intel.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: [PATCH v4 0/5] efi/firmware/platform-x86: Add EFI embedded fw support
+Date: Thu, 26 Apr 2018 14:06:32 +0200
+Message-ID: <20180426120637.21258-1-hdegoede@redhat.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Sakari Ailus <sakari.ailus@linux.intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Lukas Wunner <lukas@wunner.de>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Hans de Goede <hdegoede@redhat.com>, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, dmitry.torokhov@gmail.com, mfuzzey@parkeon.com, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, nbroeking@me.com, bjorn.andersson@linaro.org, Torsten Duwe <duwe@suse.de>, Kees Cook <keescook@chromium.org>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-The commit
+Hi All,
 
-  318a19718261 ("device property: refactor built-in properties support")
+Here is v4 of my patch-set to add support for EFI embedded fw to the kernel.
 
-went way too far and brought a union aliasing. Partially revert it here
-to get rid of union aliasing.
+Changes since v3:
+-Drop note in docs about EFI_FIRMWARE_VOLUME_PROTOCOL, it is not part of
+ UEFI proper, so the EFI maintainers don't want us referring people to it
+-Use new EFI_BOOT_SERVICES flag
+-Put the new fw_get_efi_embedded_fw() function in its own fallback_efi.c
+ file which only gets built when EFI_EMBEDDED_FIRMWARE is selected
+-Define an empty stub for fw_get_efi_embedded_fw() in fallback.h hwen
+ EFI_EMBEDDED_FIRMWARE is not selected, to avoid the need for #ifdefs
+ in firmware_loader/main.c
+-Properly call security_kernel_post_read_file() on the firmware returned
+ by efi_get_embedded_fw() to make sure that we are allowed to use it
 
-Note, Apple properties support is still utilizing this trick.
+So I think this patch-set is getting close to ready for merging, which
+brings us to the question of how to merge this, I think that patches 1
+and 2 should probably both be merged through the same tree. Then an
+unmutable branch should be created on that tree, merged into the
+platform/x86 tree and then the last 3 patches can be merged through
+that tree.
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
----
- drivers/base/property.c                 | 99 ++++++++++++++++++++-----
- drivers/firmware/efi/apple-properties.c |  8 +-
- include/linux/property.h                | 52 +++++++------
- 3 files changed, 112 insertions(+), 47 deletions(-)
+For the record, here is the coverletter of v2 of this patchset:
 
-diff --git a/drivers/base/property.c b/drivers/base/property.c
-index 8f205f6461ed..de19d7cc073b 100644
---- a/drivers/base/property.c
-+++ b/drivers/base/property.c
-@@ -56,6 +56,67 @@ pset_prop_get(const struct property_set *pset, const char *name)
- 	return NULL;
- }
- 
-+static const void *property_get_pointer(const struct property_entry *prop)
-+{
-+	switch (prop->type) {
-+	case DEV_PROP_U8:
-+		if (prop->is_array)
-+			return prop->pointer.u8_data;
-+		return &prop->value.u8_data;
-+	case DEV_PROP_U16:
-+		if (prop->is_array)
-+			return prop->pointer.u16_data;
-+		return &prop->value.u16_data;
-+	case DEV_PROP_U32:
-+		if (prop->is_array)
-+			return prop->pointer.u32_data;
-+		return &prop->value.u32_data;
-+	case DEV_PROP_U64:
-+		if (prop->is_array)
-+			return prop->pointer.u64_data;
-+		return &prop->value.u64_data;
-+	default:
-+		if (prop->is_array)
-+			return prop->pointer.str;
-+		return &prop->value.str;
-+	}
-+}
-+
-+static void property_set_pointer(struct property_entry *prop, const void *pointer)
-+{
-+	switch (prop->type) {
-+	case DEV_PROP_U8:
-+		if (prop->is_array)
-+			prop->pointer.u8_data = pointer;
-+		else
-+			prop->value.u8_data = *((u8 *)pointer);
-+		break;
-+	case DEV_PROP_U16:
-+		if (prop->is_array)
-+			prop->pointer.u16_data = pointer;
-+		else
-+			prop->value.u16_data = *((u16 *)pointer);
-+		break;
-+	case DEV_PROP_U32:
-+		if (prop->is_array)
-+			prop->pointer.u32_data = pointer;
-+		else
-+			prop->value.u32_data = *((u32 *)pointer);
-+		break;
-+	case DEV_PROP_U64:
-+		if (prop->is_array)
-+			prop->pointer.u64_data = pointer;
-+		else
-+			prop->value.u64_data = *((u64 *)pointer);
-+		break;
-+	default:
-+		if (prop->is_array)
-+			prop->pointer.str = pointer;
-+		else
-+			prop->value.str = pointer;
-+	}
-+}
-+
- static const void *pset_prop_find(const struct property_set *pset,
- 				  const char *propname, size_t length)
- {
-@@ -65,10 +126,7 @@ static const void *pset_prop_find(const struct property_set *pset,
- 	prop = pset_prop_get(pset, propname);
- 	if (!prop)
- 		return ERR_PTR(-EINVAL);
--	if (prop->is_array)
--		pointer = prop->pointer.raw_data;
--	else
--		pointer = &prop->value.raw_data;
-+	pointer = property_get_pointer(prop);
- 	if (!pointer)
- 		return ERR_PTR(-ENODATA);
- 	if (length > prop->length)
-@@ -698,16 +756,17 @@ EXPORT_SYMBOL_GPL(fwnode_property_get_reference_args);
- 
- static void property_entry_free_data(const struct property_entry *p)
- {
-+	const void *pointer = property_get_pointer(p);
- 	size_t i, nval;
- 
- 	if (p->is_array) {
--		if (p->is_string && p->pointer.str) {
-+		if (p->type == DEV_PROP_STRING && p->pointer.str) {
- 			nval = p->length / sizeof(const char *);
- 			for (i = 0; i < nval; i++)
- 				kfree(p->pointer.str[i]);
- 		}
--		kfree(p->pointer.raw_data);
--	} else if (p->is_string) {
-+		kfree(pointer);
-+	} else if (p->type == DEV_PROP_STRING) {
- 		kfree(p->value.str);
- 	}
- 	kfree(p->name);
-@@ -716,7 +775,7 @@ static void property_entry_free_data(const struct property_entry *p)
- static int property_copy_string_array(struct property_entry *dst,
- 				      const struct property_entry *src)
- {
--	char **d;
-+	const char **d;
- 	size_t nval = src->length / sizeof(*d);
- 	int i;
- 
-@@ -734,40 +793,44 @@ static int property_copy_string_array(struct property_entry *dst,
- 		}
- 	}
- 
--	dst->pointer.raw_data = d;
-+	dst->pointer.str = d;
- 	return 0;
- }
- 
- static int property_entry_copy_data(struct property_entry *dst,
- 				    const struct property_entry *src)
- {
-+	const void *pointer = property_get_pointer(src);
-+	const void *new;
- 	int error;
- 
- 	if (src->is_array) {
- 		if (!src->length)
- 			return -ENODATA;
- 
--		if (src->is_string) {
-+		if (src->type == DEV_PROP_STRING) {
- 			error = property_copy_string_array(dst, src);
- 			if (error)
- 				return error;
-+			new = dst->pointer.str;
- 		} else {
--			dst->pointer.raw_data = kmemdup(src->pointer.raw_data,
--							src->length, GFP_KERNEL);
--			if (!dst->pointer.raw_data)
-+			new = kmemdup(pointer, src->length, GFP_KERNEL);
-+			if (!new)
- 				return -ENOMEM;
- 		}
--	} else if (src->is_string) {
--		dst->value.str = kstrdup(src->value.str, GFP_KERNEL);
--		if (!dst->value.str && src->value.str)
-+	} else if (src->type == DEV_PROP_STRING) {
-+		new = kstrdup(src->value.str, GFP_KERNEL);
-+		if (!new && src->value.str)
- 			return -ENOMEM;
- 	} else {
--		dst->value.raw_data = src->value.raw_data;
-+		new = pointer;
- 	}
- 
- 	dst->length = src->length;
- 	dst->is_array = src->is_array;
--	dst->is_string = src->is_string;
-+	dst->type = src->type;
-+
-+	property_set_pointer(dst, new);
- 
- 	dst->name = kstrdup(src->name, GFP_KERNEL);
- 	if (!dst->name)
-diff --git a/drivers/firmware/efi/apple-properties.c b/drivers/firmware/efi/apple-properties.c
-index adaa9a3714b9..b2c2d5a45f91 100644
---- a/drivers/firmware/efi/apple-properties.c
-+++ b/drivers/firmware/efi/apple-properties.c
-@@ -13,6 +13,9 @@
-  *
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-+ *
-+ * FIXME: The approach is still based on union aliasing and should be
-+ * replaced by a proper resource provider.
-  */
- 
- #define pr_fmt(fmt) "apple-properties: " fmt
-@@ -96,12 +99,13 @@ static void __init unmarshal_key_value_pairs(struct dev_header *dev_header,
- 		entry[i].name = key;
- 		entry[i].length = val_len - sizeof(val_len);
- 		entry[i].is_array = !!entry[i].length;
--		entry[i].pointer.raw_data = ptr + key_len + sizeof(val_len);
-+		entry[i].type = DEV_PROP_U8;
-+		entry[i].pointer.u8_data = ptr + key_len + sizeof(val_len);
- 
- 		if (dump_properties) {
- 			dev_info(dev, "property: %s\n", entry[i].name);
- 			print_hex_dump(KERN_INFO, pr_fmt(), DUMP_PREFIX_OFFSET,
--				16, 1, entry[i].pointer.raw_data,
-+				16, 1, entry[i].pointer.u8_data,
- 				entry[i].length, true);
- 		}
- 
-diff --git a/include/linux/property.h b/include/linux/property.h
-index 2eea4b310fc2..ac8a1ebc4c1b 100644
---- a/include/linux/property.h
-+++ b/include/linux/property.h
-@@ -178,7 +178,7 @@ static inline int fwnode_property_read_u64(const struct fwnode_handle *fwnode,
-  * @name: Name of the property.
-  * @length: Length of data making up the value.
-  * @is_array: True when the property is an array.
-- * @is_string: True when property is a string.
-+ * @type: Type of the data in unions.
-  * @pointer: Pointer to the property (an array of items of the given type).
-  * @value: Value of the property (when it is a single item of the given type).
-  */
-@@ -186,10 +186,9 @@ struct property_entry {
- 	const char *name;
- 	size_t length;
- 	bool is_array;
--	bool is_string;
-+	enum dev_prop_type type;
- 	union {
- 		union {
--			const void *raw_data;
- 			const u8 *u8_data;
- 			const u16 *u16_data;
- 			const u32 *u32_data;
-@@ -197,7 +196,6 @@ struct property_entry {
- 			const char * const *str;
- 		} pointer;
- 		union {
--			unsigned long long raw_data;
- 			u8 u8_data;
- 			u16 u16_data;
- 			u32 u32_data;
-@@ -213,55 +211,55 @@ struct property_entry {
-  * and structs.
-  */
- 
--#define PROPERTY_ENTRY_INTEGER_ARRAY(_name_, _type_, _val_)	\
--(struct property_entry) {					\
--	.name = _name_,						\
--	.length = ARRAY_SIZE(_val_) * sizeof(_type_),		\
--	.is_array = true,					\
--	.is_string = false,					\
--	{ .pointer = { ._type_##_data = _val_ } },		\
-+#define PROPERTY_ENTRY_INTEGER_ARRAY(_name_, _type_, _Type_, _val_)	\
-+(struct property_entry) {						\
-+	.name = _name_,							\
-+	.length = ARRAY_SIZE(_val_) * sizeof(_type_),			\
-+	.is_array = true,						\
-+	.type = DEV_PROP_##_Type_,					\
-+	{ .pointer = { ._type_##_data = _val_ } },			\
- }
- 
- #define PROPERTY_ENTRY_U8_ARRAY(_name_, _val_)			\
--	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u8, _val_)
-+	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u8, U8, _val_)
- #define PROPERTY_ENTRY_U16_ARRAY(_name_, _val_)			\
--	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u16, _val_)
-+	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u16, U16, _val_)
- #define PROPERTY_ENTRY_U32_ARRAY(_name_, _val_)			\
--	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u32, _val_)
-+	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u32, U32, _val_)
- #define PROPERTY_ENTRY_U64_ARRAY(_name_, _val_)			\
--	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u64, _val_)
-+	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u64, U64, _val_)
- 
- #define PROPERTY_ENTRY_STRING_ARRAY(_name_, _val_)		\
- (struct property_entry) {					\
- 	.name = _name_,						\
- 	.length = ARRAY_SIZE(_val_) * sizeof(const char *),	\
- 	.is_array = true,					\
--	.is_string = true,					\
-+	.type = DEV_PROP_STRING,				\
- 	{ .pointer = { .str = _val_ } },			\
- }
- 
--#define PROPERTY_ENTRY_INTEGER(_name_, _type_, _val_)	\
--(struct property_entry) {				\
--	.name = _name_,					\
--	.length = sizeof(_type_),			\
--	.is_string = false,				\
--	{ .value = { ._type_##_data = _val_ } },	\
-+#define PROPERTY_ENTRY_INTEGER(_name_, _type_, _Type_, _val_)	\
-+(struct property_entry) {					\
-+	.name = _name_,						\
-+	.length = sizeof(_type_),				\
-+	.type = DEV_PROP_##_Type_,				\
-+	{ .value = { ._type_##_data = _val_ } },		\
- }
- 
- #define PROPERTY_ENTRY_U8(_name_, _val_)		\
--	PROPERTY_ENTRY_INTEGER(_name_, u8, _val_)
-+	PROPERTY_ENTRY_INTEGER(_name_, u8, U8, _val_)
- #define PROPERTY_ENTRY_U16(_name_, _val_)		\
--	PROPERTY_ENTRY_INTEGER(_name_, u16, _val_)
-+	PROPERTY_ENTRY_INTEGER(_name_, u16, U16, _val_)
- #define PROPERTY_ENTRY_U32(_name_, _val_)		\
--	PROPERTY_ENTRY_INTEGER(_name_, u32, _val_)
-+	PROPERTY_ENTRY_INTEGER(_name_, u32, U32, _val_)
- #define PROPERTY_ENTRY_U64(_name_, _val_)		\
--	PROPERTY_ENTRY_INTEGER(_name_, u64, _val_)
-+	PROPERTY_ENTRY_INTEGER(_name_, u64, U64, _val_)
- 
- #define PROPERTY_ENTRY_STRING(_name_, _val_)		\
- (struct property_entry) {				\
- 	.name = _name_,					\
- 	.length = sizeof(_val_),			\
--	.is_string = true,				\
-+	.type = DEV_PROP_STRING,			\
- 	{ .value = { .str = _val_ } },			\
- }
- 
--- 
-2.17.0
+The 3 most prominent changes in v2 are:
+
+1) Add documentation describing the EFI embedded firmware mechanism to:
+   Documentation/driver-api/firmware/request_firmware.rst
+
+2) Instead of having a single dmi_system_id array with its driver_data
+   members pointing to efi_embedded_fw_desc structs, have the drivers which
+   need EFI embedded-fw support export a dmi_system_id array and register
+   that with the EFI embedded-fw code
+
+   This series also includes the first driver to use this, in the form of
+   the touchscreen_dmi code (formerly silead_dmi) from drivers/platfrom/x86
+
+3) As discussed during the review of v1 we want to make the firmware_loader
+   code fallback to EFI embedded-fw optional.  Rather the adding yet another
+   firmware_request_foo variant for this, with the risk of later also needing
+   firmware_request_foo_nowait, etc. variants I've decided to make the code
+   check if the device has a "efi-embedded-firmware" device-property bool set.
+
+   This also seemed better because the same driver may want to use the
+   fallback on some systems, but not on others since e.g. not all (x86)
+   systems with a silead touchscreen have their touchscreen firmware embedded
+   in their EFI.
+
+   Note that (as discussed) when the EFI fallback path is requested, the
+   usermodehelper fallback path is skipped.
+
+Here is the full changelog of patch 2/5 which is where most of the changes are:
+
+Changes in v2:
+-Rebased on driver-core/driver-core-next
+-Add documentation describing the EFI embedded firmware mechanism to:
+ Documentation/driver-api/firmware/request_firmware.rst
+-Add a new EFI_EMBEDDED_FIRMWARE Kconfig bool and only build the embedded
+ fw support if this is set. This is an invisible option which should be
+ selected by drivers which need this
+-Remove the efi_embedded_fw_desc and dmi_system_id-s for known devices
+ from the efi-embedded-fw code, instead drivers using this are expected to
+ export a dmi_system_id array, with each entries' driver_data pointing to a
+ efi_embedded_fw_desc struct and register this with the efi-embedded-fw code
+-Use kmemdup to make a copy instead of efi_mem_reserve()-ing the firmware,
+ this avoids us messing with the EFI memmap and avoids the need to make
+ changes to efi_mem_desc_lookup()
+-Make the firmware-loader code only fallback to efi_get_embedded_fw() if the
+ passed in device has the "efi-embedded-firmware" device-property bool set
+-Skip usermodehelper fallback when "efi-embedded-firmware" device-property
+ is set
+
+Patches 3-5 are new and implement using the EFI embedded-fw mechanism for
+Silead gslXXXX and Chipone icn8505 touchscreens on x86 devices.
+
+Regards,
+
+Hans
