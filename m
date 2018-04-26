@@ -1,99 +1,169 @@
-From: James Morse <james.morse-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [RFC] arm64: extra entries in /proc/iomem for kexec
-Date: Thu, 26 Apr 2018 15:26:29 +0100
-Message-ID: <4ed4afed-06a4-0079-8bf9-5fb31601f180@arm.com>
-References: <2d2e1be6-b925-1595-9b6e-76dd270d396d@redhat.com>
- <20180327101654.GB14737@linaro.org>
- <da2989ec-7fa5-b044-3237-4e75f2fe6d98@arm.com>
- <20180402015330.GA27603@linaro.org> <20180405024203.GD19607@linaro.org>
- <4c59b4c3-cff4-ac69-9576-6bcbf507ef1f@arm.com>
- <20180416100831.GF13168@linaro.org>
- <954d8b58-579a-c688-36f3-dc8d4b13cef8@arm.com>
- <20180425092011.GC21197@linaro.org>
- <4ae3fefb-5800-ab86-5bcd-2638602c5c3d@arm.com>
- <20180426074043.GD21197@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v4 1/5] efi: Export boot-services code and data as debugfs-blobs
+Date: Thu, 26 Apr 2018 18:51:22 +0200
+Message-ID: <CAKv+Gu9sx_TnSvxdO9eGLCqsQufKW6z9p0K8nYWF_KuDBuUwag@mail.gmail.com>
+References: <20180426120637.21258-1-hdegoede@redhat.com> <20180426120637.21258-2-hdegoede@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20180426074043.GD21197-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: AKASHI Takahiro <takahiro.akashi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jhugo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Bhupesh Sharma <bhsharma-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Bhupesh SHARMA <bhupesh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180426120637.21258-2-hdegoede@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Martin Fuzzey <mfuzzey@parkeon.com>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, Nicolas Broeking <nbroeking@me.com>, Bjorn
 List-Id: linux-efi@vger.kernel.org
 
-Hi Akashi,
+On 26 April 2018 at 14:06, Hans de Goede <hdegoede@redhat.com> wrote:
+> Sometimes it is useful to be able to dump the efi boot-services code and
+> data. This commit adds these as debugfs-blobs to /sys/kernel/debug/efi,
+> but only if efi=debug is passed on the kernel-commandline as this requires
+> not freeing those memory-regions, which costs 20+ MB of RAM.
+>
+> Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> ---
+> Changes in v4:
+> -Add new EFI_BOOT_SERVICES flag and use it to determine if the boot-services
+>  memory segments are available (and thus if it makes sense to register the
+>  debugfs bits for them)
+>
+> Changes in v2:
+> -Do not call pr_err on debugfs call failures
+> ---
+>  arch/x86/platform/efi/efi.c    |  1 +
+>  arch/x86/platform/efi/quirks.c |  4 +++
+>  drivers/firmware/efi/efi.c     | 53 ++++++++++++++++++++++++++++++++++
+>  include/linux/efi.h            |  1 +
+>  4 files changed, 59 insertions(+)
+>
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index 9061babfbc83..568b7ee3d323 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -208,6 +208,7 @@ int __init efi_memblock_x86_reserve_range(void)
+>              efi.memmap.desc_version);
+>
+>         memblock_reserve(pmap, efi.memmap.nr_map * efi.memmap.desc_size);
+> +       set_bit(EFI_BOOT_SERVICES, &efi.flags);
+>
 
-On 26/04/18 08:40, AKASHI Takahiro wrote:
-> On Wed, Apr 25, 2018 at 02:22:07PM +0100, James Morse wrote:
->> On 25/04/18 10:20, AKASHI Takahiro wrote:
->>> On Tue, Apr 24, 2018 at 05:08:57PM +0100, James Morse wrote:
->>>> If we squash the memblock_reserved() stuff down so it appears as a top level
->>>> 'reserved' region too, I don't think we do.
->>>
->>> If I correctly understand, you're talking about my format (E).
->>> As I said, it will fix the issue without modifying user-space, but
->>>
->>> || This does not only look quite noisy but also ignores the fact that
->>> || reserved regions are part of System RAM (or memblock.memory).
->>
->> I agree its noisy, there are significantly more 'reserved' areas, but these are
->> all either nomap or memblock_reserved().
->>
->> Why does it matter if a reserved-region is nomap or memblock_reserved()? Any new
->> kernel will learn the difference from the EFI memory map and make its own decisions.
-> 
-> Yeah, kernel can do (though kernel won't look though system resources list
-> for this purpose anyway), what about kexec-like user applications?
-> It may want to seek /proc/iomem to identify all the *usable* memory on
-> the system, that is "System RAM", but doesn't care whether some range is
-> reserved or not (for some reason) yet does care !NOMAP.
+I think it would be better if the flag conveys whether boot services
+regions are being preserved, because they will always exist when
+EFI_BOOT is set.
+The name should then reflect that as well, e.g., EFI_PRESERVE_BS_REGIONS.
 
-Do you have an example application?
-This would have to be a program digging in /dev/mem where it wants to touch
-memory the kernel has reserved, but doesn't want to receive a signal if it
-touches memory that's nomap. This doesn't seem a likely use-case.
+>         return 0;
+>  }
+> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+> index 36c1f8b9f7e0..16bdb9e3b343 100644
+> --- a/arch/x86/platform/efi/quirks.c
+> +++ b/arch/x86/platform/efi/quirks.c
+> @@ -376,6 +376,10 @@ void __init efi_free_boot_services(void)
+>         int num_entries = 0;
+>         void *new, *new_md;
+>
+> +       /* Keep all regions for /sys/kernel/debug/efi */
+> +       if (efi_enabled(EFI_DBG))
+> +               return;
+> +
 
-We could change the names for the memblock_reserved()/nomap entries, but as
-kexec-tools spots 'reserved' and almost does the right thing, I kept it as it is.
-
-
->>>> This prevents the efi-memory-map
->>>> being overwritten on kernels since kexec was merged.
->>>>
->>>> Its horribly fiddly to do this. The kernel code/data are special reserved
->>>> regions that we already describe as a subset of system-ram, even though they are
->>>> both also fragments of a bigger memblock_reserved() block.
->>>
->>> Actually, we don't have to avoid kernel code/data regions as copying
->>> loaded data to the final destinations will be done at the very end of kexec.
->>
->> For kexec yes, but that is the existing format of the file, which we shouldn't
->> change, otherwise we break something else.
-> 
-> One trivial downside in this approach is that a secondary kernel will be
-> loaded at an address different from the one of current kernel.
-> While it is sane, it looks a bit odd that, every time kexec'ed, a new> kernel (code/data) is located back and forth :)
-
-Yes, but all versions of the kernel that support kexec will be quite happy with
-this. The memory below the kernel could be re-used since KASLR support was
-merged before kexec.
-
-I was more worried that the extra fragmentation would cause kexec-tools to stop
-searching early, as it seems to have a #defined'd limit of how much of that file
-it will parse. But, this would be an existing bug, because there could be many
-nomap regions up-front before any large-enough chunk of system-ram appears.
+Why is this only necessary when EFI_DBG is enabled? How are you
+ensuring that the firmware is still in memory when the subsequent
+patches start relying on that?
 
 
-Thanks,
-
-James
+>         for_each_efi_memory_desc(md) {
+>                 unsigned long long start = md->phys_addr;
+>                 unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 232f4915223b..498a720a7684 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -18,6 +18,7 @@
+>  #include <linux/kobject.h>
+>  #include <linux/module.h>
+>  #include <linux/init.h>
+> +#include <linux/debugfs.h>
+>  #include <linux/device.h>
+>  #include <linux/efi.h>
+>  #include <linux/of.h>
+> @@ -325,6 +326,55 @@ static __init int efivar_ssdt_load(void)
+>  static inline int efivar_ssdt_load(void) { return 0; }
+>  #endif
+>
+> +#ifdef CONFIG_DEBUG_FS
+> +
+> +#define EFI_DEBUGFS_MAX_BLOBS 32
+> +
+> +static struct debugfs_blob_wrapper debugfs_blob[EFI_DEBUGFS_MAX_BLOBS];
+> +
+> +static void __init efi_debugfs_init(void)
+> +{
+> +       struct dentry *efi_debugfs;
+> +       efi_memory_desc_t *md;
+> +       char name[32];
+> +       int type_count[EFI_BOOT_SERVICES_DATA + 1] = {};
+> +       int i = 0;
+> +
+> +       efi_debugfs = debugfs_create_dir("efi", NULL);
+> +       if (IS_ERR_OR_NULL(efi_debugfs))
+> +               return;
+> +
+> +       for_each_efi_memory_desc(md) {
+> +               switch (md->type) {
+> +               case EFI_BOOT_SERVICES_CODE:
+> +                       snprintf(name, sizeof(name), "boot_services_code%d",
+> +                                type_count[md->type]++);
+> +                       break;
+> +               case EFI_BOOT_SERVICES_DATA:
+> +                       snprintf(name, sizeof(name), "boot_services_data%d",
+> +                                type_count[md->type]++);
+> +                       break;
+> +               default:
+> +                       continue;
+> +               }
+> +
+> +               debugfs_blob[i].size = md->num_pages << EFI_PAGE_SHIFT;
+> +               debugfs_blob[i].data = memremap(md->phys_addr,
+> +                                               debugfs_blob[i].size,
+> +                                               MEMREMAP_WB);
+> +               if (!debugfs_blob[i].data)
+> +                       continue;
+> +
+> +               debugfs_create_blob(name, 0400, efi_debugfs, &debugfs_blob[i]);
+> +               i++;
+> +               if (i == EFI_DEBUGFS_MAX_BLOBS)
+> +                       break;
+> +       }
+> +}
+> +#else
+> +static inline void efi_debugfs_init(void) {}
+> +#endif
+> +
+>  /*
+>   * We register the efi subsystem with the firmware subsystem and the
+>   * efivars subsystem with the efi subsystem, if the system was booted with
+> @@ -369,6 +419,9 @@ static int __init efisubsys_init(void)
+>                 goto err_remove_group;
+>         }
+>
+> +       if (efi_enabled(EFI_DBG) && efi_enabled(EFI_BOOT_SERVICES))
+> +               efi_debugfs_init();
+> +
+>         return 0;
+>
+>  err_remove_group:
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index f1b7d68ac460..396bf18ace5c 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -1144,6 +1144,7 @@ extern int __init efi_setup_pcdp_console(char *);
+>  #define EFI_DBG                        8       /* Print additional debug info at runtime */
+>  #define EFI_NX_PE_DATA         9       /* Can runtime data regions be mapped non-executable? */
+>  #define EFI_MEM_ATTR           10      /* Did firmware publish an EFI_MEMORY_ATTRIBUTES table? */
+> +#define EFI_BOOT_SERVICES      11      /* Are EFI boot-services memory segments available? */
+>
+>  #ifdef CONFIG_EFI
+>  /*
+> --
+> 2.17.0
+>
