@@ -1,30 +1,72 @@
-From: "Rafael J. Wysocki" <rafael@kernel.org>
-Subject: Re: [PATCH v1] device property: Get rid of union aliasing
-Date: Fri, 27 Apr 2018 12:56:08 +0200
-Message-ID: <CAJZ5v0jgQwQCSqAfnap+pLBqBy-aMTORU=P3g5J77GK46-xOBQ@mail.gmail.com>
-References: <20180426102356.77394-1-andriy.shevchenko@linux.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: [PATCH v2] efi: Ignore unrealistically large option roms
+Date: Fri, 27 Apr 2018 23:35:09 +0200
+Message-ID: <20180427213509.20385-1-hdegoede@redhat.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180426102356.77394-1-andriy.shevchenko@linux.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Sakari Ailus <sakari.ailus@linux.intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Lukas Wunner <lukas@wunner.de>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Hans de Goede <hdegoede@redhat.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Apr 26, 2018 at 12:23 PM, Andy Shevchenko
-<andriy.shevchenko@linux.intel.com> wrote:
-> The commit
->
->   318a19718261 ("device property: refactor built-in properties support")
->
-> went way too far and brought a union aliasing. Partially revert it here
-> to get rid of union aliasing.
->
-> Note, Apple properties support is still utilizing this trick.
+setup_efi_pci() tries to save a copy of each PCI option ROM as this may
+be necessary for the device driver for the PCI device to have access too.
 
-Can you please resend this with a slightly more detailed description
-of what's going on in the changelog?
+On some systems the efi_pci_io_protocol_64's romimage and romsize fields
+contain invalid data, which looks a bit like pointers pointing back into
+other EFI code or data. Interpreting these pointers as romsize leads to
+a very large value and if we then try to alloc this amount of memory to
+save a copy the alloc call fails.
 
-Someone reading git logs in the future would have a really hard time
-with decoding the above, and the last sentence in particular. :-)
+This leads to a "Failed to alloc mem for rom" error being printed on the
+EFI console for each PCI device.
+
+This commit avoids the printing of these errors, by checking romsize
+before doing the alloc and if it is larger then 256M silently ignore the
+ROM fields instead of trying to alloc mem and fail.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+Changes in v2:
+-Add the check to both __setup_efi_pci32 and __setup_efi_pci64 instead of
+ only to __setup_efi_pci64, some CHT devices which need this still use a
+ 32 bit UEFI
+---
+ arch/x86/boot/compressed/eboot.c | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 47d3efff6805..6d3257a459c8 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -122,7 +122,13 @@ __setup_efi_pci32(efi_pci_io_protocol_32 *pci, struct pci_setup_rom **__rom)
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+ 
+-	if (!pci->romimage || !pci->romsize)
++	/*
++	 * Some firmwares contain EFI function pointers at the place where the
++	 * romimage and romsize fields are supposed to be. Typically the EFI
++	 * code is mapped at high addresses, translating to an unrealistically
++	 * large romsize. We reject any roms over 256M in size to catch this.
++	 */
++	if (!pci->romimage || !pci->romsize || pci->romsize > 0x10000000)
+ 		return EFI_INVALID_PARAMETER;
+ 
+ 	size = pci->romsize + sizeof(*rom);
+@@ -230,7 +236,13 @@ __setup_efi_pci64(efi_pci_io_protocol_64 *pci, struct pci_setup_rom **__rom)
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+ 
+-	if (!pci->romimage || !pci->romsize)
++	/*
++	 * Some firmwares contain EFI function pointers at the place where the
++	 * romimage and romsize fields are supposed to be. Typically the EFI
++	 * code is mapped at high addresses, translating to an unrealistically
++	 * large romsize. We reject any roms over 256M in size to catch this.
++	 */
++	if (!pci->romimage || !pci->romsize || pci->romsize > 0x10000000)
+ 		return EFI_INVALID_PARAMETER;
+ 
+ 	size = pci->romsize + sizeof(*rom);
+-- 
+2.16.2
