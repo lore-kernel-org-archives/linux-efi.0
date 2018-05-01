@@ -1,60 +1,41 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] efi/capsule-loader: Don't output reset log when header
- flags is not set
-Date: Tue, 1 May 2018 11:54:12 +0200
-Message-ID: <CAKv+Gu89B-E+L2qybT9n5j72c+1vm1az4H9Cp7E71aP3i3VE6A@mail.gmail.com>
-References: <1524625806-23133-1-git-send-email-shunyong.yang@hxt-semitech.com>
+From: David Laight <David.Laight@ACULAB.COM>
+Subject: RE: [PATCH v2] efi: Ignore unrealistically large option roms
+Date: Tue, 1 May 2018 13:52:55 +0000
+Message-ID: <96034903ca984624a5972f7bb5aea975@AcuMS.aculab.com>
+References: <20180427213509.20385-1-hdegoede@redhat.com>
+ <CAKv+Gu9xxSy2XXN446etRC5xaXdeOBBBYBxZZy=0bZbdZA_K8Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1524625806-23133-1-git-send-email-shunyong.yang@hxt-semitech.com>
+In-Reply-To: <CAKv+Gu9xxSy2XXN446etRC5xaXdeOBBBYBxZZy=0bZbdZA_K8Q@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Shunyong Yang <shunyong.yang@hxt-semitech.com>
-Cc: linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Joey Zheng <yu.zheng@hxt-semitech.com>
+To: 'Ard Biesheuvel' <ard.biesheuvel@linaro.org>, Hans de Goede <hdegoede@redhat.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, the arch/x86 maintainers <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 25 April 2018 at 05:10, Shunyong Yang <shunyong.yang@hxt-semitech.com> wrote:
-> It means firmware attempts to immediately process or launch the capsule
-> when flags in capsule header is not set. Moreover, reset is not needed
-> in this case. Current code will output log to indicate reset.
->
-> This patch adds a branch to avoid reset log output when the flags is not
-> set.
->
-> Cc: Joey Zheng <yu.zheng@hxt-semitech.com>
-> Signed-off-by: Shunyong Yang <shunyong.yang@hxt-semitech.com>
-> ---
->  drivers/firmware/efi/capsule-loader.c | 13 +++++++++----
->  1 file changed, 9 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-> index e456f4602df1..a63b8e5bde23 100644
-> --- a/drivers/firmware/efi/capsule-loader.c
-> +++ b/drivers/firmware/efi/capsule-loader.c
-> @@ -134,10 +134,15 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
->
->         /* Indicate capsule binary uploading is done */
->         cap_info->index = NO_FURTHER_WRITE_ACTION;
-> -       pr_info("Successfully upload capsule file with reboot type '%s'\n",
-> -               !cap_info->reset_type ? "RESET_COLD" :
-> -               cap_info->reset_type == 1 ? "RESET_WARM" :
-> -               "RESET_SHUTDOWN");
-> +
-> +       if (cap_info->header.flags)
-
-You should check for the relevant flag bits here, because the 16 lower
-bits are platform dependent.
-
-> +               pr_info("Successfully upload capsule file with reboot type '%s'\n",
-> +                       !cap_info->reset_type ? "RESET_COLD" :
-> +                       cap_info->reset_type == 1 ? "RESET_WARM" :
-> +                       "RESET_SHUTDOWN");
-> +       else
-> +               pr_info("Successfully upload, process and launch capsule file\n");
-> +
->         return 0;
->  }
->
-> --
-> 1.8.3.1
->
+RnJvbTogQXJkIEJpZXNoZXV2ZWwNCj4gU2VudDogMjggQXByaWwgMjAxOCAwNzo0MQ0KPiBPbiAy
+NyBBcHJpbCAyMDE4IGF0IDIzOjM1LCBIYW5zIGRlIEdvZWRlIDxoZGVnb2VkZUByZWRoYXQuY29t
+PiB3cm90ZToNCj4gPiBzZXR1cF9lZmlfcGNpKCkgdHJpZXMgdG8gc2F2ZSBhIGNvcHkgb2YgZWFj
+aCBQQ0kgb3B0aW9uIFJPTSBhcyB0aGlzIG1heQ0KPiA+IGJlIG5lY2Vzc2FyeSBmb3IgdGhlIGRl
+dmljZSBkcml2ZXIgZm9yIHRoZSBQQ0kgZGV2aWNlIHRvIGhhdmUgYWNjZXNzIHRvby4NCj4gPg0K
+PiA+IE9uIHNvbWUgc3lzdGVtcyB0aGUgZWZpX3BjaV9pb19wcm90b2NvbF82NCdzIHJvbWltYWdl
+IGFuZCByb21zaXplIGZpZWxkcw0KPiA+IGNvbnRhaW4gaW52YWxpZCBkYXRhLCB3aGljaCBsb29r
+cyBhIGJpdCBsaWtlIHBvaW50ZXJzIHBvaW50aW5nIGJhY2sgaW50bw0KPiA+IG90aGVyIEVGSSBj
+b2RlIG9yIGRhdGEuIEludGVycHJldGluZyB0aGVzZSBwb2ludGVycyBhcyByb21zaXplIGxlYWRz
+IHRvDQo+ID4gYSB2ZXJ5IGxhcmdlIHZhbHVlIGFuZCBpZiB3ZSB0aGVuIHRyeSB0byBhbGxvYyB0
+aGlzIGFtb3VudCBvZiBtZW1vcnkgdG8NCj4gPiBzYXZlIGEgY29weSB0aGUgYWxsb2MgY2FsbCBm
+YWlscy4NCj4gPg0KPiA+IFRoaXMgbGVhZHMgdG8gYSAiRmFpbGVkIHRvIGFsbG9jIG1lbSBmb3Ig
+cm9tIiBlcnJvciBiZWluZyBwcmludGVkIG9uIHRoZQ0KPiA+IEVGSSBjb25zb2xlIGZvciBlYWNo
+IFBDSSBkZXZpY2UuDQo+ID4NCj4gPiBUaGlzIGNvbW1pdCBhdm9pZHMgdGhlIHByaW50aW5nIG9m
+IHRoZXNlIGVycm9ycywgYnkgY2hlY2tpbmcgcm9tc2l6ZQ0KPiA+IGJlZm9yZSBkb2luZyB0aGUg
+YWxsb2MgYW5kIGlmIGl0IGlzIGxhcmdlciB0aGVuIDI1Nk0gc2lsZW50bHkgaWdub3JlIHRoZQ0K
+PiA+IFJPTSBmaWVsZHMgaW5zdGVhZCBvZiB0cnlpbmcgdG8gYWxsb2MgbWVtIGFuZCBmYWlsLg0K
+PiA+DQo+IA0KPiBUaGUgVUVGSSBzcGVjIGxpbWl0cyB0aGUgc2l6ZSBvZiBvcHRpb24gUk9NcyB0
+byAxNiBNaUIsIHNvIEknZCBwcmVmZXINCj4gd2UgdXNlIHRoYXQgYXMgdGhlIHVwcGVyIGJvdW5k
+IGluc3RlYWQuDQoNCkNvcHlpbmcgZXZlbiAxNk1CIG9mIHJvbSBkYXRhIGludG8gcGh5c2ljYWwg
+bWVtb3J5IG9uIHRoZSAnb2ZmIGNoYW5jZScgdGhhdA0KdGhlIGtlcm5lbCBtaWdodCBuZWVkIGl0
+IHNlZW1zIGEgd2FzdGUgb2YgbWVtb3J5Lg0KDQpJIGNhbid0IGhlbHAgZmVlbGluZyB0aGF0IHNv
+bWUga2luZCBvZiBjYWNoaW5nIHdvdWxkIGJlIG1vcmUgYXBwcm9wcmlhdGUuDQoNCglEYXZpZA0K
+DQo=
