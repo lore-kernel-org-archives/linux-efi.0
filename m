@@ -1,51 +1,96 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v2] efi: Ignore unrealistically large option roms
-Date: Tue, 1 May 2018 15:57:54 +0200
-Message-ID: <CAKv+Gu9KNEWCY7eXJ1edpKdve5Em831f_rW2z1CSCaE5kWNCMw@mail.gmail.com>
-References: <20180427213509.20385-1-hdegoede@redhat.com> <CAKv+Gu9xxSy2XXN446etRC5xaXdeOBBBYBxZZy=0bZbdZA_K8Q@mail.gmail.com>
- <96034903ca984624a5972f7bb5aea975@AcuMS.aculab.com>
+From: Mimi Zohar <zohar@linux.vnet.ibm.com>
+Subject: Re: [PATCH v5 2/5] efi: Add embedded peripheral firmware support
+Date: Tue, 01 May 2018 10:36:14 -0400
+Message-ID: <1525185374.5669.49.camel@linux.vnet.ibm.com>
+References: <20180429093558.5411-1-hdegoede@redhat.com>
+         <20180429093558.5411-3-hdegoede@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <96034903ca984624a5972f7bb5aea975@AcuMS.aculab.com>
+In-Reply-To: <20180429093558.5411-3-hdegoede@redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: David Laight <David.Laight@aculab.com>
-Cc: Hans de Goede <hdegoede@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, the arch/x86 maintainers <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Hans de Goede <hdegoede@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Josh Triplett <josh@joshtriplett.org>, dmitry.torokhov@gmail.com, mfuzzey@parkeon.com, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, nbroeking@me.com, bjorn.andersson@linaro.org, Torsten Duwe <duwe@suse.de>, Kees Cook <keescook@chromium.org>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-security-module <linux-security-module@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 1 May 2018 at 15:52, David Laight <David.Laight@aculab.com> wrote:
-> From: Ard Biesheuvel
->> Sent: 28 April 2018 07:41
->> On 27 April 2018 at 23:35, Hans de Goede <hdegoede@redhat.com> wrote:
->> > setup_efi_pci() tries to save a copy of each PCI option ROM as this may
->> > be necessary for the device driver for the PCI device to have access too.
->> >
->> > On some systems the efi_pci_io_protocol_64's romimage and romsize fields
->> > contain invalid data, which looks a bit like pointers pointing back into
->> > other EFI code or data. Interpreting these pointers as romsize leads to
->> > a very large value and if we then try to alloc this amount of memory to
->> > save a copy the alloc call fails.
->> >
->> > This leads to a "Failed to alloc mem for rom" error being printed on the
->> > EFI console for each PCI device.
->> >
->> > This commit avoids the printing of these errors, by checking romsize
->> > before doing the alloc and if it is larger then 256M silently ignore the
->> > ROM fields instead of trying to alloc mem and fail.
->> >
->>
->> The UEFI spec limits the size of option ROMs to 16 MiB, so I'd prefer
->> we use that as the upper bound instead.
->
-> Copying even 16MB of rom data into physical memory on the 'off chance' that
-> the kernel might need it seems a waste of memory.
->
+[Cc'ing linux-security]
 
-16 MB is the smallest number we can use that still guarantees that we
-will not misidentify a valid option ROM as bogus. But in reality,
-option ROMs are rarely that large.
+On Sun, 2018-04-29 at 11:35 +0200, Hans de Goede wrote:
+[...]
+> diff --git a/drivers/base/firmware_loader/fallback_efi.c b/drivers/base/firmware_loader/fallback_efi.c
+> new file mode 100644
+> index 000000000000..82ba82f48a79
+> --- /dev/null
+> +++ b/drivers/base/firmware_loader/fallback_efi.c
+> @@ -0,0 +1,51 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +
+> +#include <linux/efi_embedded_fw.h>
+> +#include <linux/property.h>
+> +#include <linux/security.h>
+> +#include <linux/vmalloc.h>
+> +
+> +#include "fallback.h"
+> +#include "firmware.h"
+> +
+> +int fw_get_efi_embedded_fw(struct device *dev, struct fw_priv *fw_priv,
+> +			   enum fw_opt *opt_flags, int ret)
+> +{
+> +	enum kernel_read_file_id id = READING_FIRMWARE;
 
-> I can't help feeling that some kind of caching would be more appropriate.
->
+Please define a new kernel_read_file_id for this (eg.
+READING_FIRMWARE_EFI_EMBEDDED).
 
-Could you elaborate?
+> +	size_t size, max = INT_MAX;
+> +	int rc;
+> +
+> +	if (!dev)
+> +		return ret;
+> +
+> +	if (!device_property_read_bool(dev, "efi-embedded-firmware"))
+> +		return ret;
+
+Instead of calling security_kernel_post_read_file(), either in
+device_property_read_bool() or here call security_kernel_read_file().
+
+The pre read call is for deciding whether to allow this call
+independent of the firmware being loaded, whereas the post security
+call is currently being used by IMA-appraisal for verifying a
+signature.  There might be other LSMs using the post hook as well.  As
+there is no kernel signature associated with this firmware, use the
+security pre read_file hook.
+
+thanks,
+
+Mimi
+
+> +
+> +	*opt_flags |= FW_OPT_NO_WARN | FW_OPT_NOCACHE | FW_OPT_NOFALLBACK;
+> +
+> +	/* Already populated data member means we're loading into a buffer */
+> +	if (fw_priv->data) {
+> +		id = READING_FIRMWARE_PREALLOC_BUFFER;
+> +		max = fw_priv->allocated_size;
+> +	}
+> +
+> +	rc = efi_get_embedded_fw(fw_priv->fw_name, &fw_priv->data, &size, max);
+> +	if (rc) {
+> +		dev_warn(dev, "Firmware %s not in EFI\n", fw_priv->fw_name);
+> +		return ret;
+> +	}
+> +
+> +	rc = security_kernel_post_read_file(NULL, fw_priv->data, size, id);
+> +	if (rc) {
+> +		if (id != READING_FIRMWARE_PREALLOC_BUFFER) {
+> +			vfree(fw_priv->data);
+> +			fw_priv->data = NULL;
+> +		}
+> +		return rc;
+> +	}
+> +
+> +	dev_dbg(dev, "using efi-embedded fw %s\n", fw_priv->fw_name);
+> +	fw_priv->size = size;
+> +	fw_state_done(fw_priv);
+> +	return 0;
+> +}
