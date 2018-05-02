@@ -1,67 +1,86 @@
-From: Lukas Wunner <lukas@wunner.de>
-Subject: Re: [PATCH v5 2/5] efi: Add embedded peripheral firmware support
-Date: Tue, 1 May 2018 22:06:39 +0200
-Message-ID: <20180501200639.GA3628@wunner.de>
-References: <20180429093558.5411-1-hdegoede@redhat.com>
- <20180429093558.5411-3-hdegoede@redhat.com>
- <CALCETrXDrcxyESajDZs3L7sAAfDXXc_CUzy5nUZxLPxaTHZ80g@mail.gmail.com>
+From: "Yang, Shunyong" <shunyong.yang@hxt-semitech.com>
+Subject: Re: [PATCH] efi/capsule-loader: Don't output reset log when header
+ flags is not set
+Date: Wed, 2 May 2018 01:29:55 +0000
+Message-ID: <1525224594.2901.4.camel@hxt-semitech.com>
+References: <1524625806-23133-1-git-send-email-shunyong.yang@hxt-semitech.com>
+         <CAKv+Gu89B-E+L2qybT9n5j72c+1vm1az4H9Cp7E71aP3i3VE6A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="iso-8859-15"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CALCETrXDrcxyESajDZs3L7sAAfDXXc_CUzy5nUZxLPxaTHZ80g@mail.gmail.com>
+In-Reply-To: <CAKv+Gu89B-E+L2qybT9n5j72c+1vm1az4H9Cp7E71aP3i3VE6A@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <61C00092B24DA84CA2D1348016E5D5D3@hxt-semitech.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Lutomirski <luto@kernel.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R. Rodriguez" <mcgrof@kernel.org>, Greg KH <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Peter Jones <pjones@redhat.com>, dave@bewaar.me, Will Deacon <will.deacon@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Martin Fuzzey <mfuzzey@parkeon.com>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, nbroeking@me.com, Bjorn Andersson <bjorn.a>
+To: "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Zheng, Joey" <yu.zheng@hxt-semitech.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, May 01, 2018 at 07:29:19PM +0000, Andy Lutomirski wrote:
-> On Sun, Apr 29, 2018 at 2:36 AM Hans de Goede <hdegoede@redhat.com> wrote:
-> > +       for (i = 0; i < size; i += 8) {
-> > +               if (*((u64 *)(mem + i)) != *((u64 *)desc->prefix))
-> > +                       continue;
+Hi, Ard,
+
+On Tue, 2018-05-01 at 11:54 +0200, Ard Biesheuvel wrote:
+> On 25 April 2018 at 05:10, Shunyong Yang <shunyong.yang@hxt-semitech.
+> com> wrote:
+> > 
+> > It means firmware attempts to immediately process or launch the
+> > capsule
+> > when flags in capsule header is not set. Moreover, reset is not
+> > needed
+> > in this case. Current code will output log to indicate reset.
+> > 
+> > This patch adds a branch to avoid reset log output when the flags
+> > is not
+> > set.
+> > 
+> > Cc: Joey Zheng <yu.zheng@hxt-semitech.com>
+> > Signed-off-by: Shunyong Yang <shunyong.yang@hxt-semitech.com>
+> > ---
+> >  drivers/firmware/efi/capsule-loader.c | 13 +++++++++----
+> >  1 file changed, 9 insertions(+), 4 deletions(-)
+> > 
+> > diff --git a/drivers/firmware/efi/capsule-loader.c
+> > b/drivers/firmware/efi/capsule-loader.c
+> > index e456f4602df1..a63b8e5bde23 100644
+> > --- a/drivers/firmware/efi/capsule-loader.c
+> > +++ b/drivers/firmware/efi/capsule-loader.c
+> > @@ -134,10 +134,15 @@ static ssize_t
+> > efi_capsule_submit_update(struct capsule_info *cap_info)
+> > 
+> >         /* Indicate capsule binary uploading is done */
+> >         cap_info->index = NO_FURTHER_WRITE_ACTION;
+> > -       pr_info("Successfully upload capsule file with reboot type
+> > '%s'\n",
+> > -               !cap_info->reset_type ? "RESET_COLD" :
+> > -               cap_info->reset_type == 1 ? "RESET_WARM" :
+> > -               "RESET_SHUTDOWN");
 > > +
-> > +               /* Seed with ~0, invert to match crc32 userspace utility
-> */
-> > +               crc = ~crc32(~0, mem + i, desc->length);
-> > +               if (crc == desc->crc)
-> > +                       break;
-> > +       }
+> > +       if (cap_info->header.flags)
+> You should check for the relevant flag bits here, because the 16
+> lower
+> bits are platform dependent.
+In current three bits in flags, CAPSULE_FLAGS_POPULATE_SYSTEM_TABLE and
+CAPSULE_FLAGS_INITIATE_RESET are dependent on
+CAPSULE_FLAGS_PERSIST_ACROSS_RESET.
+
+So, maybe I only need to check CAPSULE_FLAGS_PERSIST_ACROSS_RESET?
+
+Thanks.
+Shunyong.
 > 
-> I hate to play the security card, but this stinks a bit.  The kernel
-> obviously needs to trust the EFI boot services code since the EFI boot
-> services code is free to modify the kernel image.  But your patch is not
-> actually getting this firmware blob from the boot services code via any
-> defined interface -- you're literally snarfing up the blob from a range of
-> memory.  I fully expect there to be any number of ways for untrustworthy
-> entities to inject malicious blobs into this memory range on quite a few
-> implementations.
-[snip]
-> It would be really nice if there was a way to pull a blob out of EFI space
-> that is marked, by EFI, as belonging to a particular device.
-
-Upthread I suggested to read the firmware from the EFI Firmware Volume.
->From my point of view that would fulfill your requirements:
-https://lkml.org/lkml/2018/4/3/568
-
-In the case of Hans' HID device, the firmware is embedded as a binary
-array in the EFI driver for the device.  So the kernel would read the
-driver from the Firmware Volume, but it would still have to extract
-the firmware from the driver, either by scanning for the 8 byte magic
-or by hardcoding the offset and length in the kernel.
-
-An attacker would have to modify the Firmware Volume as opposed to
-just modifying a particular space in memory.
-
-My suggestion was dismissed by Hans and Peter Jones on the grounds of
-causing additional work without perceived benefit, given that a working
-(albeit admitted to be hackish) solution exists.
-
-Moreover Ard criticized that the EFI Firmware Volume Protocol is not
-part of the UEFI spec.
-
-I agree with you completely BTW.
-
-Thanks,
-
-Lukas
+> > 
+> > +               pr_info("Successfully upload capsule file with
+> > reboot type '%s'\n",
+> > +                       !cap_info->reset_type ? "RESET_COLD" :
+> > +                       cap_info->reset_type == 1 ? "RESET_WARM" :
+> > +                       "RESET_SHUTDOWN");
+> > +       else
+> > +               pr_info("Successfully upload, process and launch
+> > capsule file\n");
+> > +
+> >         return 0;
+> >  }
+> > 
+> > --
+> > 1.8.3.1
+> > 
