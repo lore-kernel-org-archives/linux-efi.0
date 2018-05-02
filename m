@@ -1,86 +1,73 @@
-From: "Yang, Shunyong" <shunyong.yang@hxt-semitech.com>
-Subject: Re: [PATCH] efi/capsule-loader: Don't output reset log when header
- flags is not set
-Date: Wed, 2 May 2018 01:29:55 +0000
-Message-ID: <1525224594.2901.4.camel@hxt-semitech.com>
-References: <1524625806-23133-1-git-send-email-shunyong.yang@hxt-semitech.com>
-         <CAKv+Gu89B-E+L2qybT9n5j72c+1vm1az4H9Cp7E71aP3i3VE6A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-15"
-Content-Transfer-Encoding: 8BIT
+From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
+Subject: [PATCH] efi: Fix the size not consistent issue when unmapping memory map
+Date: Wed,  2 May 2018 14:17:24 +0800
+Message-ID: <20180502061724.25833-1-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu89B-E+L2qybT9n5j72c+1vm1az4H9Cp7E71aP3i3VE6A@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <61C00092B24DA84CA2D1348016E5D5D3@hxt-semitech.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Zheng, Joey" <yu.zheng@hxt-semitech.com>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Takashi Iwai <tiwai@suse.de>, Vivek Goyal <vgoyal@redhat.com>, Ingo Molnar <mingo@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-Hi, Ard,
+When using kdump, SOMETIMES the "size not consistent" warning message
+shows up when the crash kernel boots with early_ioremap_debug parameter:
 
-On Tue, 2018-05-01 at 11:54 +0200, Ard Biesheuvel wrote:
-> On 25 April 2018 at 05:10, Shunyong Yang <shunyong.yang@hxt-semitech.
-> com> wrote:
-> > 
-> > It means firmware attempts to immediately process or launch the
-> > capsule
-> > when flags in capsule header is not set. Moreover, reset is not
-> > needed
-> > in this case. Current code will output log to indicate reset.
-> > 
-> > This patch adds a branch to avoid reset log output when the flags
-> > is not
-> > set.
-> > 
-> > Cc: Joey Zheng <yu.zheng@hxt-semitech.com>
-> > Signed-off-by: Shunyong Yang <shunyong.yang@hxt-semitech.com>
-> > ---
-> >  drivers/firmware/efi/capsule-loader.c | 13 +++++++++----
-> >  1 file changed, 9 insertions(+), 4 deletions(-)
-> > 
-> > diff --git a/drivers/firmware/efi/capsule-loader.c
-> > b/drivers/firmware/efi/capsule-loader.c
-> > index e456f4602df1..a63b8e5bde23 100644
-> > --- a/drivers/firmware/efi/capsule-loader.c
-> > +++ b/drivers/firmware/efi/capsule-loader.c
-> > @@ -134,10 +134,15 @@ static ssize_t
-> > efi_capsule_submit_update(struct capsule_info *cap_info)
-> > 
-> >         /* Indicate capsule binary uploading is done */
-> >         cap_info->index = NO_FURTHER_WRITE_ACTION;
-> > -       pr_info("Successfully upload capsule file with reboot type
-> > '%s'\n",
-> > -               !cap_info->reset_type ? "RESET_COLD" :
-> > -               cap_info->reset_type == 1 ? "RESET_WARM" :
-> > -               "RESET_SHUTDOWN");
-> > +
-> > +       if (cap_info->header.flags)
-> You should check for the relevant flag bits here, because the 16
-> lower
-> bits are platform dependent.
-In current three bits in flags, CAPSULE_FLAGS_POPULATE_SYSTEM_TABLE and
-CAPSULE_FLAGS_INITIATE_RESET are dependent on
-CAPSULE_FLAGS_PERSIST_ACROSS_RESET.
+WARNING: CPU: 0 PID: 0 at ../mm/early_ioremap.c:182 early_iounmap+0x4f/0x12c()
+early_iounmap(ffffffffff200180, 00000118) [0] size not consistent 00000120
 
-So, maybe I only need to check CAPSULE_FLAGS_PERSIST_ACROSS_RESET?
+The root cause is that the unmapping size of memory map doesn't
+match with the original size when mapping:
 
-Thanks.
-Shunyong.
-> 
-> > 
-> > +               pr_info("Successfully upload capsule file with
-> > reboot type '%s'\n",
-> > +                       !cap_info->reset_type ? "RESET_COLD" :
-> > +                       cap_info->reset_type == 1 ? "RESET_WARM" :
-> > +                       "RESET_SHUTDOWN");
-> > +       else
-> > +               pr_info("Successfully upload, process and launch
-> > capsule file\n");
-> > +
-> >         return 0;
-> >  }
-> > 
-> > --
-> > 1.8.3.1
-> > 
+in __efi_memmap_init()
+	map.map = early_memremap(phys_map, data->size);
+
+in efi_memmap_unmap()
+        size = efi.memmap.desc_size * efi.memmap.nr_map;
+        early_memunmap(efi.memmap.map, size);
+
+But the efi.memmap.nr_map is from __efi_memmap_init(). The remainder
+of size was discarded when calculating the nr_map:
+        map.nr_map = data->size / data->desc_size;
+
+When the original size of memory map region does not equal to the
+result of multiplication. The "size not consistent" warning
+will be triggered.
+
+This issue sometimes was hit by kdump because kexec set the efi map
+size to align with 16 when loading crash kernel image:
+
+in bzImage64_load()
+        efi_map_sz = efi_get_runtime_map_size();
+        efi_map_sz = ALIGN(efi_map_sz, 16);
+
+Dave Young's a841aa83d patch fixed kexec issue. On UEFI side, this
+patch changes the logic in the unmapping function. Using the end
+address of map to calcuate original size.
+
+Thank Randy Wright for his report and testing. And also thank
+Takashi Iwai for his help to trace issue.
+
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Takashi Iwai <tiwai@suse.de>
+Cc: Vivek Goyal <vgoyal@redhat.com>
+Cc: Ingo Molnar <mingo@redhat.com>
+Tested-by: Randy Wright <rwright@hpe.com>
+Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
+---
+ drivers/firmware/efi/memmap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+index 5fc7052..1f592d8 100644
+--- a/drivers/firmware/efi/memmap.c
++++ b/drivers/firmware/efi/memmap.c
+@@ -121,7 +121,7 @@ void __init efi_memmap_unmap(void)
+ 	if (!efi.memmap.late) {
+ 		unsigned long size;
+ 
+-		size = efi.memmap.desc_size * efi.memmap.nr_map;
++		size = efi.memmap.map_end - efi.memmap.map;
+ 		early_memunmap(efi.memmap.map, size);
+ 	} else {
+ 		memunmap(efi.memmap.map);
+-- 
+2.10.2
