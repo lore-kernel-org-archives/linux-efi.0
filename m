@@ -1,96 +1,57 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [PATCH v5 2/5] efi: Add embedded peripheral firmware support
-Date: Wed, 2 May 2018 16:49:53 +0200
-Message-ID: <59023265-bfca-fe5d-e047-4c69404a0dd1@redhat.com>
-References: <20180429093558.5411-1-hdegoede@redhat.com>
- <20180429093558.5411-3-hdegoede@redhat.com>
- <CALCETrXDrcxyESajDZs3L7sAAfDXXc_CUzy5nUZxLPxaTHZ80g@mail.gmail.com>
+From: Shunyong Yang <shunyong.yang@hxt-semitech.com>
+Subject: [PATCH v2] efi/capsule-loader: Don't output reset log when reset flags are not set
+Date: Thu, 3 May 2018 13:45:09 +0800
+Message-ID: <1525326309-14627-1-git-send-email-shunyong.yang@hxt-semitech.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CALCETrXDrcxyESajDZs3L7sAAfDXXc_CUzy5nUZxLPxaTHZ80g@mail.gmail.com>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Lutomirski <luto@kernel.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R. Rodriguez" <mcgrof@kernel.org>, Greg KH <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Peter Jones <pjones@redhat.com>, dave@bewaar.me, Will Deacon <will.deacon@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Martin Fuzzey <mfuzzey@parkeon.com>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, nbroeking@me.com, Bjorn Andersson <bjorn.andersson@linaro.org>, duwe@suse.deK
+To: ard.biesheuvel@linaro.org
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Shunyong Yang <shunyong.yang@hxt-semitech.com>, Joey Zheng <yu.zheng@hxt-semitech.com>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+It means firmware attempts to immediately process or launch the capsule
+when reset flags in capsule header are not set. Moreover, reset is not
+needed in this case. The current code will output log to indicate reset.
 
-On 05/01/2018 09:29 PM, Andy Lutomirski wrote:
-> On Sun, Apr 29, 2018 at 2:36 AM Hans de Goede <hdegoede@redhat.com> wrote:
->> +The EFI embedded-fw code works by scanning all EFI_BOOT_SERVICES_CODE
-> memory
->> +segments for an eight byte sequence matching prefix, if the prefix is
-> found it
->> +then does a crc32 over length bytes and if that matches makes a copy of
-> length
->> +bytes and adds that to its list with found firmwares.
->> +
-> 
-> Eww, gross.  Is there really no better way to do this?
+This patch adds a branch to avoid reset log output when the flags are not
+set.
 
-I'm afraid not.
+Cc: Joey Zheng <yu.zheng@hxt-semitech.com>
+Signed-off-by: Shunyong Yang <shunyong.yang@hxt-semitech.com>
+---
 
->  Is the issue that
-> the EFI code does not intend to pass the firmware to the OS but that it has
-> a copy for its own purposes and that Linux is just going to hijack EFI's
-> copy?  If so, that's brilliant and terrible at the same time.
+Changes in v2:
+  *Add EFI_CAPSULE_PERSIST_ACROSS_RESET check according to Ard's
+   suggestion.
+  
+---
+ drivers/firmware/efi/capsule-loader.c | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
 
-Yes that is exactly the issue / what it happening here.
-
-> 
->> +       for (i = 0; i < size; i += 8) {
->> +               if (*((u64 *)(mem + i)) != *((u64 *)desc->prefix))
->> +                       continue;
->> +
->> +               /* Seed with ~0, invert to match crc32 userspace utility
-> */
->> +               crc = ~crc32(~0, mem + i, desc->length);
->> +               if (crc == desc->crc)
->> +                       break;
->> +       }
-> 
-> I hate to play the security card, but this stinks a bit.  The kernel
-> obviously needs to trust the EFI boot services code since the EFI boot
-> services code is free to modify the kernel image.  But your patch is not
-> actually getting this firmware blob from the boot services code via any
-> defined interface -- you're literally snarfing up the blob from a range of
-> memory.  I fully expect there to be any number of ways for untrustworthy
-> entities to inject malicious blobs into this memory range on quite a few
-> implementations.  For example, there are probably unauthenticated EFI
-> variables and even parts of USB sticks and such that get read into boot
-> services memory, and I see no reason at all to expect that nothing in the
-> so-called "boot services code" range is actually just plain old boot
-> services *heap*.
-> 
-> Fortunately, given your design, this is very easy to fix.  Just replace
-> CRC32 with SHA-256 or similar.  If you find the crypto api too ugly for
-> this purpose, I have patches that only need a small amount of dusting off
-> to give an entirely reasonable SHA-256 API in the kernel.
-
-My main reason for going with crc32 is that the scanning happens before
-the kernel is fully up and running (it happens just before the rest_init()
-call in start_kernel() (from init/main.c) I'm open to using the
-crypto api, but I was not sure if that is ready for use at that time.
-
-> (To be clear, I don't love my own suggestion here.  What I'd *really* like
-> to see is a better interface and no attempt to match the data to some
-> built-in hash at all.  In particular, there are plenty of devices for which
-> the driver wants access to a genuinely device-specific blob.  For example,
-> I'm typing this email while connected to a router that is running ath10k
-> and is using a calibration blob awkwardly snarfed out of flash somewhere.
-> It would be really nice if there was a way to pull a blob out of EFI space
-> that is marked, by EFI, as belonging to a particular device.  Then the
-> firmware could just pass it over without any particular verification.  But
-> since your code is literally scanning a wide swath of physical memory for
-> something that looks like a valid blob, I think you need to use a
-> cryptographically strong concept of validity.)
-
-Yes ideally this would not be needed at all and/or use a well defined
-interface, but alas we don't live in an ideal world :)
-
-Regards,
-
-Hans
+diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+index e456f4602df1..344785ef8539 100644
+--- a/drivers/firmware/efi/capsule-loader.c
++++ b/drivers/firmware/efi/capsule-loader.c
+@@ -134,10 +134,15 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
+ 
+ 	/* Indicate capsule binary uploading is done */
+ 	cap_info->index = NO_FURTHER_WRITE_ACTION;
+-	pr_info("Successfully upload capsule file with reboot type '%s'\n",
+-		!cap_info->reset_type ? "RESET_COLD" :
+-		cap_info->reset_type == 1 ? "RESET_WARM" :
+-		"RESET_SHUTDOWN");
++
++	if (cap_info->header.flags & EFI_CAPSULE_PERSIST_ACROSS_RESET)
++		pr_info("Successfully upload capsule file with reboot type '%s'\n",
++			!cap_info->reset_type ? "RESET_COLD" :
++			cap_info->reset_type == 1 ? "RESET_WARM" :
++			"RESET_SHUTDOWN");
++	else
++		pr_info("Successfully upload, process and launch capsule file\n");
++
+ 	return 0;
+ }
+ 
+-- 
+1.8.3.1
