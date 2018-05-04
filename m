@@ -1,82 +1,124 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [GIT PULL 00/17] EFI updates for v4.18
-Date: Fri,  4 May 2018 07:59:46 +0200
-Message-ID: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 01/17] x86/xen/efi: Initialize UEFI secure boot state during dom0 boot
+Date: Fri,  4 May 2018 07:59:47 +0200
+Message-ID: <20180504060003.19618-2-ard.biesheuvel@linaro.org>
+References: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Borislav Petkov <bp@suse.de>, Daniel Kiper <daniel.kiper@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, Joey Zheng <yu.zheng@hxt-semitech.com>, Kim Phillips <kim.phillips@arm.com>, Lukas Wunner <lukas@wunner.de>, Mark Rutland <mark.rutland@arm.com>, Shunyong Yang <shunyong.yang@hxt-semitech.com>, Wei Yongjun <weiyongjun1@huawei.com>, Yazen Ghannam <yazen.ghannam@amd.com>
+Cc: Daniel Kiper <daniel.kiper@oracle.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-The following changes since commit 60cc43fc888428bb2f18f08997432d426a243338:
+From: Daniel Kiper <daniel.kiper@oracle.com>
 
-  Linux 4.17-rc1 (2018-04-15 18:24:20 -0700)
+Initialize UEFI secure boot state during dom0 boot. Otherwise the kernel
+may not even know that it runs on secure boot enabled platform.
 
-are available in the Git repository at:
+Note that part of drivers/firmware/efi/libstub/secureboot.c is duplicated
+by this patch, only in this case, it runs in the context of the kernel
+proper rather than UEFI boot context. The reason for the duplication is
+that maintaining the original code to run correctly on ARM/arm64 as well
+as on all the quirky x86 firmware we support is enough of a burden as it
+is, and adding the x86/Xen execution context to that mix just so we can
+reuse a single routine just isn't worth it.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
+[ardb: explain rationale for code duplication]
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/x86/xen/efi.c                        | 57 +++++++++++++++++++++++
+ drivers/firmware/efi/libstub/secureboot.c |  3 ++
+ 2 files changed, 60 insertions(+)
 
-for you to fetch changes up to a0e781fedc0e975d2f33fda94e26d3f76331ee3d:
-
-  efi/libstub/arm64: handle randomized TEXT_OFFSET (2018-05-03 19:00:27 +0200)
-
-----------------------------------------------------------------
-First batch of EFI changes for v4.18:
-- Initialize UEFI secure boot state during Xen dom0 boot (Daniel Kiper)
-- Decode x86 CPER data (Yazen Ghannam)
-- Ignore unrealistically large option roms (Hans de Goede)
-- Additional minor tweaks
-- A fix for arm64 kernels with CONFIG_RANDOMIZE_TEXT_OFFSET=y and running
-  with KASLR enabled. I was on the fence whether to send it as a fix or
-  cc it to stable, so I chose the latter. (TEXT_OFFSET randomization is a
-  debug feature that the distros don't enable)
-
-----------------------------------------------------------------
-Ard Biesheuvel (3):
-      efi: fix efi_pci_io_protocol32 prototype for mixed mode
-      efi: align efi_pci_io_protocol typedefs to type naming convention
-      efi/x86: fold __setup_efi_pci32 and __setup_efi_pci64 into one
-
-Borislav Petkov (1):
-      efi/cper: Remove the INDENT_SP silliness
-
-Daniel Kiper (1):
-      x86/xen/efi: Initialize UEFI secure boot state during dom0 boot
-
-Hans de Goede (1):
-      efi/x86: Ignore unrealistically large option roms
-
-Mark Rutland (1):
-      efi/libstub/arm64: handle randomized TEXT_OFFSET
-
-Shunyong Yang (1):
-      efi/capsule-loader: Don't output reset log when reset flags are not set
-
-Wei Yongjun (1):
-      efi/libstub/tpm: Make function efi_retrieve_tpm2_eventlog_1_2() static
-
-Yazen Ghannam (8):
-      efi: Fix IA32/X64 Processor Error Record definition
-      efi: Decode IA32/X64 Processor Error Section
-      efi: Decode IA32/X64 Processor Error Info Structure
-      efi: Decode UEFI-defined IA32/X64 Error Structure GUIDs
-      efi: Decode IA32/X64 Cache, TLB, and Bus Check structures
-      efi: Decode additional IA32/X64 Bus Check fields
-      efi: Decode IA32/X64 MS Check structure
-      efi: Decode IA32/X64 Context Info structure
-
- arch/x86/boot/compressed/eboot.c          | 112 +++-------
- arch/x86/xen/efi.c                        |  57 +++++
- drivers/firmware/efi/Kconfig              |   5 +
- drivers/firmware/efi/Makefile             |   1 +
- drivers/firmware/efi/capsule-loader.c     |  14 +-
- drivers/firmware/efi/cper-arm.c           |   6 +-
- drivers/firmware/efi/cper-x86.c           | 356 ++++++++++++++++++++++++++++++
- drivers/firmware/efi/cper.c               |  16 +-
- drivers/firmware/efi/libstub/arm64-stub.c |   7 +
- drivers/firmware/efi/libstub/secureboot.c |   3 +
- drivers/firmware/efi/libstub/tpm.c        |   2 +-
- include/linux/cper.h                      |   4 +-
- include/linux/efi.h                       |  14 +-
- 13 files changed, 496 insertions(+), 101 deletions(-)
- create mode 100644 drivers/firmware/efi/cper-x86.c
+diff --git a/arch/x86/xen/efi.c b/arch/x86/xen/efi.c
+index a18703be9ead..1804b27f9632 100644
+--- a/arch/x86/xen/efi.c
++++ b/arch/x86/xen/efi.c
+@@ -115,6 +115,61 @@ static efi_system_table_t __init *xen_efi_probe(void)
+ 	return &efi_systab_xen;
+ }
+ 
++/*
++ * Determine whether we're in secure boot mode.
++ *
++ * Please keep the logic in sync with
++ * drivers/firmware/efi/libstub/secureboot.c:efi_get_secureboot().
++ */
++static enum efi_secureboot_mode xen_efi_get_secureboot(void)
++{
++	static efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
++	static efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
++	efi_status_t status;
++	u8 moksbstate, secboot, setupmode;
++	unsigned long size;
++
++	size = sizeof(secboot);
++	status = efi.get_variable(L"SecureBoot", &efi_variable_guid,
++				  NULL, &size, &secboot);
++
++	if (status == EFI_NOT_FOUND)
++		return efi_secureboot_mode_disabled;
++
++	if (status != EFI_SUCCESS)
++		goto out_efi_err;
++
++	size = sizeof(setupmode);
++	status = efi.get_variable(L"SetupMode", &efi_variable_guid,
++				  NULL, &size, &setupmode);
++
++	if (status != EFI_SUCCESS)
++		goto out_efi_err;
++
++	if (secboot == 0 || setupmode == 1)
++		return efi_secureboot_mode_disabled;
++
++	/* See if a user has put the shim into insecure mode. */
++	size = sizeof(moksbstate);
++	status = efi.get_variable(L"MokSBStateRT", &shim_guid,
++				  NULL, &size, &moksbstate);
++
++	/* If it fails, we don't care why. Default to secure. */
++	if (status != EFI_SUCCESS)
++		goto secure_boot_enabled;
++
++	if (moksbstate == 1)
++		return efi_secureboot_mode_disabled;
++
++ secure_boot_enabled:
++	pr_info("UEFI Secure Boot is enabled.\n");
++	return efi_secureboot_mode_enabled;
++
++ out_efi_err:
++	pr_err("Could not determine UEFI Secure Boot status.\n");
++	return efi_secureboot_mode_unknown;
++}
++
+ void __init xen_efi_init(void)
+ {
+ 	efi_system_table_t *efi_systab_xen;
+@@ -129,6 +184,8 @@ void __init xen_efi_init(void)
+ 	boot_params.efi_info.efi_systab = (__u32)__pa(efi_systab_xen);
+ 	boot_params.efi_info.efi_systab_hi = (__u32)(__pa(efi_systab_xen) >> 32);
+ 
++	boot_params.secure_boot = xen_efi_get_secureboot();
++
+ 	set_bit(EFI_BOOT, &efi.flags);
+ 	set_bit(EFI_PARAVIRT, &efi.flags);
+ 	set_bit(EFI_64BIT, &efi.flags);
+diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
+index 8f07eb414c00..72d9dfbebf08 100644
+--- a/drivers/firmware/efi/libstub/secureboot.c
++++ b/drivers/firmware/efi/libstub/secureboot.c
+@@ -30,6 +30,9 @@ static const efi_char16_t shim_MokSBState_name[] = L"MokSBState";
+ 
+ /*
+  * Determine whether we're in secure boot mode.
++ *
++ * Please keep the logic in sync with
++ * arch/x86/xen/efi.c:xen_efi_get_secureboot().
+  */
+ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
+ {
+-- 
+2.17.0
