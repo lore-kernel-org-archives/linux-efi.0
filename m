@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 06/17] efi: Decode UEFI-defined IA32/X64 Error Structure GUIDs
-Date: Fri,  4 May 2018 07:59:52 +0200
-Message-ID: <20180504060003.19618-7-ard.biesheuvel@linaro.org>
+Subject: [PATCH 09/17] efi: Decode IA32/X64 MS Check structure
+Date: Fri,  4 May 2018 07:59:55 +0200
+Message-ID: <20180504060003.19618-10-ard.biesheuvel@linaro.org>
 References: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
@@ -12,97 +12,102 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Yazen Ghannam <yazen.ghannam@amd.com>
 
-For easier handling, match the known IA32/X64 error structure GUIDs to
-enums.
+The IA32/X64 MS Check structure varies from the other Check structures
+in the the bit positions of its fields, and it includes an additional
+"Error Type" field.
 
-Also, print out the name of the matching Error Structure Type.
+Decode the MS Check structure in a separate function.
 
-Only print the GUID for unknown types.
-
-GUIDs taken from UEFI 2.7 section N.2.4.2.1 IA32/X64 Processor Error
-Information Structure.
+Based on UEFI 2.7 Table 257. IA32/X64 MS Check Field Description.
 
 Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/cper-x86.c | 47 +++++++++++++++++++++++++++++++--
- 1 file changed, 45 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/cper-x86.c | 55 ++++++++++++++++++++++++++++++++-
+ 1 file changed, 54 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-x86.c
-index e0633a103fcf..5438097b93ac 100644
+index 5e6716564dba..356b8d326219 100644
 --- a/drivers/firmware/efi/cper-x86.c
 +++ b/drivers/firmware/efi/cper-x86.c
-@@ -11,17 +11,53 @@
- #define VALID_CPUID_INFO		BIT_ULL(1)
- #define VALID_PROC_ERR_INFO_NUM(bits)	(((bits) & GENMASK_ULL(7, 2)) >> 2)
+@@ -57,6 +57,20 @@
+ #define CHECK_BUS_TIME_OUT		BIT_ULL(32)
+ #define CHECK_BUS_ADDR_SPACE(check)	(((check) & GENMASK_ULL(34, 33)) >> 33)
  
-+#define INFO_ERR_STRUCT_TYPE_CACHE					\
-+	GUID_INIT(0xA55701F5, 0xE3EF, 0x43DE, 0xAC, 0x72, 0x24, 0x9B,	\
-+		  0x57, 0x3F, 0xAD, 0x2C)
-+#define INFO_ERR_STRUCT_TYPE_TLB					\
-+	GUID_INIT(0xFC06B535, 0x5E1F, 0x4562, 0x9F, 0x25, 0x0A, 0x3B,	\
-+		  0x9A, 0xDB, 0x63, 0xC3)
-+#define INFO_ERR_STRUCT_TYPE_BUS					\
-+	GUID_INIT(0x1CF3F8B3, 0xC5B1, 0x49a2, 0xAA, 0x59, 0x5E, 0xEF,	\
-+		  0x92, 0xFF, 0xA6, 0x3C)
-+#define INFO_ERR_STRUCT_TYPE_MS						\
-+	GUID_INIT(0x48AB7F57, 0xDC34, 0x4f6c, 0xA7, 0xD3, 0xB0, 0xB5,	\
-+		  0xB0, 0xA7, 0x43, 0x14)
++#define CHECK_VALID_MS_ERR_TYPE		BIT_ULL(0)
++#define CHECK_VALID_MS_PCC		BIT_ULL(1)
++#define CHECK_VALID_MS_UNCORRECTED	BIT_ULL(2)
++#define CHECK_VALID_MS_PRECISE_IP	BIT_ULL(3)
++#define CHECK_VALID_MS_RESTARTABLE_IP	BIT_ULL(4)
++#define CHECK_VALID_MS_OVERFLOW		BIT_ULL(5)
 +
- #define INFO_VALID_CHECK_INFO		BIT_ULL(0)
- #define INFO_VALID_TARGET_ID		BIT_ULL(1)
- #define INFO_VALID_REQUESTOR_ID		BIT_ULL(2)
- #define INFO_VALID_RESPONDER_ID		BIT_ULL(3)
- #define INFO_VALID_IP			BIT_ULL(4)
++#define CHECK_MS_ERR_TYPE(check)	(((check) & GENMASK_ULL(18, 16)) >> 16)
++#define CHECK_MS_PCC			BIT_ULL(19)
++#define CHECK_MS_UNCORRECTED		BIT_ULL(20)
++#define CHECK_MS_PRECISE_IP		BIT_ULL(21)
++#define CHECK_MS_RESTARTABLE_IP		BIT_ULL(22)
++#define CHECK_MS_OVERFLOW		BIT_ULL(23)
++
+ enum err_types {
+ 	ERR_TYPE_CACHE = 0,
+ 	ERR_TYPE_TLB,
+@@ -111,17 +125,56 @@ static const char * const ia_check_bus_addr_space_strs[] = {
+ 	"Other Transaction",
+ };
  
-+enum err_types {
-+	ERR_TYPE_CACHE = 0,
-+	ERR_TYPE_TLB,
-+	ERR_TYPE_BUS,
-+	ERR_TYPE_MS,
-+	N_ERR_TYPES
++static const char * const ia_check_ms_error_type_strs[] = {
++	"No Error",
++	"Unclassified",
++	"Microcode ROM Parity Error",
++	"External Error",
++	"FRC Error",
++	"Internal Unclassified",
 +};
 +
-+static enum err_types cper_get_err_type(const guid_t *err_type)
+ static inline void print_bool(char *str, const char *pfx, u64 check, u64 bit)
+ {
+ 	printk("%s%s: %s\n", pfx, str, (check & bit) ? "true" : "false");
+ }
+ 
++static void print_err_info_ms(const char *pfx, u16 validation_bits, u64 check)
 +{
-+	if (guid_equal(err_type, &INFO_ERR_STRUCT_TYPE_CACHE))
-+		return ERR_TYPE_CACHE;
-+	else if (guid_equal(err_type, &INFO_ERR_STRUCT_TYPE_TLB))
-+		return ERR_TYPE_TLB;
-+	else if (guid_equal(err_type, &INFO_ERR_STRUCT_TYPE_BUS))
-+		return ERR_TYPE_BUS;
-+	else if (guid_equal(err_type, &INFO_ERR_STRUCT_TYPE_MS))
-+		return ERR_TYPE_MS;
-+	else
-+		return N_ERR_TYPES;
++	if (validation_bits & CHECK_VALID_MS_ERR_TYPE) {
++		u8 err_type = CHECK_MS_ERR_TYPE(check);
++
++		printk("%sError Type: %u, %s\n", pfx, err_type,
++		       err_type < ARRAY_SIZE(ia_check_ms_error_type_strs) ?
++		       ia_check_ms_error_type_strs[err_type] : "unknown");
++	}
++
++	if (validation_bits & CHECK_VALID_MS_PCC)
++		print_bool("Processor Context Corrupt", pfx, check, CHECK_MS_PCC);
++
++	if (validation_bits & CHECK_VALID_MS_UNCORRECTED)
++		print_bool("Uncorrected", pfx, check, CHECK_MS_UNCORRECTED);
++
++	if (validation_bits & CHECK_VALID_MS_PRECISE_IP)
++		print_bool("Precise IP", pfx, check, CHECK_MS_PRECISE_IP);
++
++	if (validation_bits & CHECK_VALID_MS_RESTARTABLE_IP)
++		print_bool("Restartable IP", pfx, check, CHECK_MS_RESTARTABLE_IP);
++
++	if (validation_bits & CHECK_VALID_MS_OVERFLOW)
++		print_bool("Overflow", pfx, check, CHECK_MS_OVERFLOW);
 +}
 +
- void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
+ static void print_err_info(const char *pfx, u8 err_type, u64 check)
  {
- 	int i;
- 	struct cper_ia_err_info *err_info;
- 	char newpfx[64];
-+	u8 err_type;
+ 	u16 validation_bits = CHECK_VALID_BITS(check);
  
- 	if (proc->validation_bits & VALID_LAPIC_ID)
- 		printk("%sLocal APIC_ID: 0x%llx\n", pfx, proc->lapic_id);
-@@ -38,8 +74,15 @@ void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
- 	for (i = 0; i < VALID_PROC_ERR_INFO_NUM(proc->validation_bits); i++) {
- 		printk("%sError Information Structure %d:\n", pfx, i);
++	/*
++	 * The MS Check structure varies a lot from the others, so use a
++	 * separate function for decoding.
++	 */
+ 	if (err_type == ERR_TYPE_MS)
+-		return;
++		return print_err_info_ms(pfx, validation_bits, check);
  
--		printk("%sError Structure Type: %pUl\n", newpfx,
--		       &err_info->err_type);
-+		err_type = cper_get_err_type(&err_info->err_type);
-+		printk("%sError Structure Type: %s\n", newpfx,
-+		       err_type < ARRAY_SIZE(cper_proc_error_type_strs) ?
-+		       cper_proc_error_type_strs[err_type] : "unknown");
-+
-+		if (err_type >= N_ERR_TYPES) {
-+			printk("%sError Structure Type: %pUl\n", newpfx,
-+			       &err_info->err_type);
-+		}
- 
- 		if (err_info->validation_bits & INFO_VALID_CHECK_INFO) {
- 			printk("%sCheck Information: 0x%016llx\n", newpfx,
+ 	if (validation_bits & CHECK_VALID_TRANS_TYPE) {
+ 		u8 trans_type = CHECK_TRANS_TYPE(check);
 -- 
 2.17.0
