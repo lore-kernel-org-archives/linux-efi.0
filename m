@@ -1,79 +1,115 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 12/17] efi: fix efi_pci_io_protocol32 prototype for mixed mode
-Date: Fri,  4 May 2018 07:59:58 +0200
-Message-ID: <20180504060003.19618-13-ard.biesheuvel@linaro.org>
+Subject: [PATCH 10/17] efi: Decode IA32/X64 Context Info structure
+Date: Fri,  4 May 2018 07:59:56 +0200
+Message-ID: <20180504060003.19618-11-ard.biesheuvel@linaro.org>
 References: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+Cc: Yazen Ghannam <yazen.ghannam@amd.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Mixed mode allows a kernel built for x86_64 to interact with 32-bit
-EFI firmware, but requires us to define all struct definitions carefully
-when it comes to pointer sizes. efi_pci_io_protocol32 currently uses a
-void* for the 'romimage' field, which will be interpreted as a 64-bit
-field on such kernels, potentially resulting in bogus memory references
-and subsequent crashes.
+From: Yazen Ghannam <yazen.ghannam@amd.com>
 
-Cc: <stable@vger.kernel.org>
-Tested-by: Hans de Goede <hdegoede@redhat.com>
+Print the fields of the IA32/X64 Context Information structure.
+
+Print the "Register Array" as raw values. Some context types are defined
+in the UEFI spec, so more detailed decoded may be added in the future.
+
+Based on UEFI 2.7 section N.2.4.2.2 IA32/X64 Processor Context
+Information Structure.
+
+Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/boot/compressed/eboot.c | 6 ++++--
- include/linux/efi.h              | 8 ++++----
- 2 files changed, 8 insertions(+), 6 deletions(-)
+ drivers/firmware/efi/cper-x86.c | 48 +++++++++++++++++++++++++++++++++
+ 1 file changed, 48 insertions(+)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 47d3efff6805..09f36c0d9d4f 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -163,7 +163,8 @@ __setup_efi_pci32(efi_pci_io_protocol_32 *pci, struct pci_setup_rom **__rom)
- 	if (status != EFI_SUCCESS)
- 		goto free_struct;
+diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-x86.c
+index 356b8d326219..2531de49f56c 100644
+--- a/drivers/firmware/efi/cper-x86.c
++++ b/drivers/firmware/efi/cper-x86.c
+@@ -10,6 +10,7 @@
+ #define VALID_LAPIC_ID			BIT_ULL(0)
+ #define VALID_CPUID_INFO		BIT_ULL(1)
+ #define VALID_PROC_ERR_INFO_NUM(bits)	(((bits) & GENMASK_ULL(7, 2)) >> 2)
++#define VALID_PROC_CXT_INFO_NUM(bits)	(((bits) & GENMASK_ULL(13, 8)) >> 8)
  
--	memcpy(rom->romdata, pci->romimage, pci->romsize);
-+	memcpy(rom->romdata, (void *)(unsigned long)pci->romimage,
-+	       pci->romsize);
- 	return status;
+ #define INFO_ERR_STRUCT_TYPE_CACHE					\
+ 	GUID_INIT(0xA55701F5, 0xE3EF, 0x43DE, 0xAC, 0x72, 0x24, 0x9B,	\
+@@ -71,6 +72,9 @@
+ #define CHECK_MS_RESTARTABLE_IP		BIT_ULL(22)
+ #define CHECK_MS_OVERFLOW		BIT_ULL(23)
  
- free_struct:
-@@ -269,7 +270,8 @@ __setup_efi_pci64(efi_pci_io_protocol_64 *pci, struct pci_setup_rom **__rom)
- 	if (status != EFI_SUCCESS)
- 		goto free_struct;
++#define CTX_TYPE_MSR			1
++#define CTX_TYPE_MMREG			7
++
+ enum err_types {
+ 	ERR_TYPE_CACHE = 0,
+ 	ERR_TYPE_TLB,
+@@ -134,6 +138,17 @@ static const char * const ia_check_ms_error_type_strs[] = {
+ 	"Internal Unclassified",
+ };
  
--	memcpy(rom->romdata, pci->romimage, pci->romsize);
-+	memcpy(rom->romdata, (void *)(unsigned long)pci->romimage,
-+	       pci->romsize);
- 	return status;
++static const char * const ia_reg_ctx_strs[] = {
++	"Unclassified Data",
++	"MSR Registers (Machine Check and other MSRs)",
++	"32-bit Mode Execution Context",
++	"64-bit Mode Execution Context",
++	"FXSAVE Context",
++	"32-bit Mode Debug Registers (DR0-DR7)",
++	"64-bit Mode Debug Registers (DR0-DR7)",
++	"Memory Mapped Registers",
++};
++
+ static inline void print_bool(char *str, const char *pfx, u64 check, u64 bit)
+ {
+ 	printk("%s%s: %s\n", pfx, str, (check & bit) ? "true" : "false");
+@@ -242,6 +257,7 @@ void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
+ {
+ 	int i;
+ 	struct cper_ia_err_info *err_info;
++	struct cper_ia_proc_ctx *ctx_info;
+ 	char newpfx[64], infopfx[64];
+ 	u8 err_type;
  
- free_struct:
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index f1b7d68ac460..3016d8c456bc 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -395,8 +395,8 @@ typedef struct {
- 	u32 attributes;
- 	u32 get_bar_attributes;
- 	u32 set_bar_attributes;
--	uint64_t romsize;
--	void *romimage;
-+	u64 romsize;
-+	u32 romimage;
- } efi_pci_io_protocol_32;
+@@ -305,4 +321,36 @@ void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
  
- typedef struct {
-@@ -415,8 +415,8 @@ typedef struct {
- 	u64 attributes;
- 	u64 get_bar_attributes;
- 	u64 set_bar_attributes;
--	uint64_t romsize;
--	void *romimage;
-+	u64 romsize;
-+	u64 romimage;
- } efi_pci_io_protocol_64;
- 
- typedef struct {
+ 		err_info++;
+ 	}
++
++	ctx_info = (struct cper_ia_proc_ctx *)err_info;
++	for (i = 0; i < VALID_PROC_CXT_INFO_NUM(proc->validation_bits); i++) {
++		int size = sizeof(*ctx_info) + ctx_info->reg_arr_size;
++		int groupsize = 4;
++
++		printk("%sContext Information Structure %d:\n", pfx, i);
++
++		printk("%sRegister Context Type: %s\n", newpfx,
++		       ctx_info->reg_ctx_type < ARRAY_SIZE(ia_reg_ctx_strs) ?
++		       ia_reg_ctx_strs[ctx_info->reg_ctx_type] : "unknown");
++
++		printk("%sRegister Array Size: 0x%04x\n", newpfx,
++		       ctx_info->reg_arr_size);
++
++		if (ctx_info->reg_ctx_type == CTX_TYPE_MSR) {
++			groupsize = 8; /* MSRs are 8 bytes wide. */
++			printk("%sMSR Address: 0x%08x\n", newpfx,
++			       ctx_info->msr_addr);
++		}
++
++		if (ctx_info->reg_ctx_type == CTX_TYPE_MMREG) {
++			printk("%sMM Register Address: 0x%016llx\n", newpfx,
++			       ctx_info->mm_reg_addr);
++		}
++
++		printk("%sRegister Array:\n", newpfx);
++		print_hex_dump(newpfx, "", DUMP_PREFIX_OFFSET, 16, groupsize,
++			       (ctx_info + 1), ctx_info->reg_arr_size, 0);
++
++		ctx_info = (struct cper_ia_proc_ctx *)((long)ctx_info + size);
++	}
+ }
 -- 
 2.17.0
