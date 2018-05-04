@@ -1,61 +1,57 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 17/17] efi/libstub/arm64: handle randomized TEXT_OFFSET
-Date: Fri,  4 May 2018 08:00:03 +0200
-Message-ID: <20180504060003.19618-18-ard.biesheuvel@linaro.org>
+Subject: [PATCH 16/17] efi/capsule-loader: Don't output reset log when reset flags are not set
+Date: Fri,  4 May 2018 08:00:02 +0200
+Message-ID: <20180504060003.19618-17-ard.biesheuvel@linaro.org>
 References: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+Cc: Shunyong Yang <shunyong.yang@hxt-semitech.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Mark Rutland <mark.rutland@arm.com>
+From: Shunyong Yang <shunyong.yang@hxt-semitech.com>
 
-When CONFIG_RANDOMIZE_TEXT_OFFSET is selected, TEXT_OFFSET is an
-arbitrary multiple of PAGE_SIZE in the interval [0, 2MB).
+When reset flags in capsule header are not set, it means firmware
+attempts to immediately process or launch the capsule. Moreover, reset
+is not needed in this case. The current code will output log to indicate
+reset.
 
-The EFI stub does not account for the potential misalignment of
-TEXT_OFFSET relative to EFI_KIMG_ALIGN, and produces a randomized
-physical offset which is always a round multiple of EFI_KIMG_ALIGN.
-This may result in statically allocated objects whose alignment exceeds
-PAGE_SIZE to appear misaligned in memory. This has been observed to
-result in spurious stack overflow reports and failure to make use of
-the IRQ stacks, and theoretically could result in a number of other
-issues.
+This patch adds a branch to avoid reset log output when the flags are not
+set.
 
-We can OR in the low bits of TEXT_OFFSET to ensure that we have the
-necessary offset (and hence preserve the misalignment of TEXT_OFFSET
-relative to EFI_KIMG_ALIGN), so let's do that.
-
-Fixes: 6f26b3671184c36d ("arm64: kaslr: increase randomization granularity")
-Cc: <stable@vger.kernel.org> # v4.7+
-Reported-by: Kim Phillips <kim.phillips@arm.com>
-Signed-off-by: Mark Rutland <mark.rutland@arm.com>
-Tested-by: Kim Phillips <kim.phillips@arm.com>
-[ardb: clarify commit log]
+Cc: Joey Zheng <yu.zheng@hxt-semitech.com>
+Signed-off-by: Shunyong Yang <shunyong.yang@hxt-semitech.com>
+[ardb: use braces in multi-line 'if', clarify comment and commit log]
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/libstub/arm64-stub.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+ drivers/firmware/efi/capsule-loader.c | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
-index b9bd827caa22..541b82fdc8a2 100644
---- a/drivers/firmware/efi/libstub/arm64-stub.c
-+++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -97,6 +97,13 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table_arg,
- 		u32 offset = !IS_ENABLED(CONFIG_DEBUG_ALIGN_RODATA) ?
- 			     (phys_seed >> 32) & mask : TEXT_OFFSET;
+diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
+index e456f4602df1..96688986da56 100644
+--- a/drivers/firmware/efi/capsule-loader.c
++++ b/drivers/firmware/efi/capsule-loader.c
+@@ -134,10 +134,16 @@ static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
  
-+		/*
-+		 * With CONFIG_RANDOMIZE_TEXT_OFFSET, TEXT_OFFSET may not be a
-+		 * multiple of EFI_KIMG_ALIGN, and we must ensure that we apply
-+		 * the offset below EFI_KIMG_ALIGN.
-+		 */
-+		offset |= (TEXT_OFFSET % EFI_KIMG_ALIGN);
+ 	/* Indicate capsule binary uploading is done */
+ 	cap_info->index = NO_FURTHER_WRITE_ACTION;
+-	pr_info("Successfully upload capsule file with reboot type '%s'\n",
+-		!cap_info->reset_type ? "RESET_COLD" :
+-		cap_info->reset_type == 1 ? "RESET_WARM" :
+-		"RESET_SHUTDOWN");
 +
- 		/*
- 		 * If KASLR is enabled, and we have some randomness available,
- 		 * locate the kernel at a randomized offset in physical memory.
++	if (cap_info->header.flags & EFI_CAPSULE_PERSIST_ACROSS_RESET) {
++		pr_info("Successfully uploaded capsule file with reboot type '%s'\n",
++			!cap_info->reset_type ? "RESET_COLD" :
++			cap_info->reset_type == 1 ? "RESET_WARM" :
++			"RESET_SHUTDOWN");
++	} else {
++		pr_info("Successfully processed capsule file\n");
++	}
++
+ 	return 0;
+ }
+ 
 -- 
 2.17.0
