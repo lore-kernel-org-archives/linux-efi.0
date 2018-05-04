@@ -1,120 +1,82 @@
-From: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Subject: Re: [PATCH v3 2/5] efi: Add embedded peripheral firmware support
-Date: Fri, 4 May 2018 00:21:42 +0000
-Message-ID: <20180504002142.GT27853@wotan.suse.de>
-References: <20180408174014.21908-1-hdegoede@redhat.com>
- <20180408174014.21908-3-hdegoede@redhat.com>
- <20180423211143.GZ14440@wotan.suse.de>
- <71e6a45a-398d-b7a4-dab0-8b9936683226@redhat.com>
- <1524586021.3364.20.camel@linux.vnet.ibm.com>
- <20180424234219.GX14440@wotan.suse.de>
- <1524632409.3371.48.camel@linux.vnet.ibm.com>
- <20180425175557.GY14440@wotan.suse.de>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v5 2/5] efi: Add embedded peripheral firmware support
+Date: Fri, 4 May 2018 07:54:28 +0200
+Message-ID: <CAKv+Gu94HNK3vDa2-ro+mb9L6XfWQQgR2qneEmtpA0WqS5SqGw@mail.gmail.com>
+References: <20180429093558.5411-1-hdegoede@redhat.com> <20180429093558.5411-3-hdegoede@redhat.com>
+ <20180503232920.GF27853@wotan.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180425175557.GY14440@wotan.suse.de>
+In-Reply-To: <20180503232920.GF27853@wotan.suse.de>
 Sender: linux-kernel-owner@vger.kernel.org
 To: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Cc: Mimi Zohar <zohar@linux.vnet.ibm.com>, Stephen Boyd <sboyd@kernel.org>, Vikram Mulukutla <markivx@codeaurora.org>, Arve =?iso-8859-1?B?SGr4bm5lduVn?= <arve@android.com>, Martijn Coenen <maco@android.com>, Todd Kjos <tkjos@android.com>, Andy Gross <andy.gross@linaro.org>, David Brown <david.brown@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, linux-security-module@vger.kernel.org, Chris Wright <chrisw@sous-sol.org>, David Howells <dhowells@redhat.com>, Alan Cox <alan@linux.intel.com>, Kees Cook <keescook@chromium.org>, Hans de Goede <hdegoede@redhat.com>, Andres Rodriguez <andresx7@gmail.com>, Darren Hart <dvhart@infradead.org>, Andy Shevchenko <andy@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Greg
+Cc: Hans de Goede <hdegoede@redhat.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, andresx7@gmail.com, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Martin Fuzzey <mfuzzey@parkeon.com>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, Nicolas Broeking <nbroeking@me.com>
 List-Id: linux-efi@vger.kernel.org
 
-Android folks, poke below. otherwise we'll have no option but to seriously
-consider Mimi's patch to prevent these calls when IMA appraisal is enforced:
+On 4 May 2018 at 01:29, Luis R. Rodriguez <mcgrof@kernel.org> wrote:
+> On Sun, Apr 29, 2018 at 11:35:55AM +0200, Hans de Goede wrote:
+[...]
+>> diff --git a/Documentation/driver-api/firmware/request_firmware.rst b/Documentation/driver-api/firmware/request_firmware.rst
+>> index c8bddbdcfd10..560dfed76e38 100644
+>> --- a/Documentation/driver-api/firmware/request_firmware.rst
+>> +++ b/Documentation/driver-api/firmware/request_firmware.rst
+>> @@ -73,3 +73,69 @@ If something went wrong firmware_request() returns non-zero and fw_entry
+>>  is set to NULL. Once your driver is done with processing the firmware it
+>>  can call call firmware_release(fw_entry) to release the firmware image
+>>  and any related resource.
+>> +
+>> +EFI embedded firmware support
+>> +=============================
+>
+> This is a new fallback mechanism, please see:
+>
+> Documentation/driver-api/firmware/fallback-mechanisms.rst
+>
+> Refer to the section "Types of fallback mechanisms", augument the list there
+> and then move the section "Firmware sysfs loading facility" to a new file, and
+> then add a new file for your own.
+>
+>> +
+>> +On some devices the system's EFI code / ROM may contain an embedded copy
+>> +of firmware for some of the system's integrated peripheral devices and
+>> +the peripheral's Linux device-driver needs to access this firmware.
+>
+> You in no way indicate this is a just an invented scheme, a custom solution and
+> nothing standard.  I realize Ard criticized that the EFI Firmware Volume Protocol
+> is not part of the UEFI spec -- however it is a bit more widely used right?
+> Why can't Linux support it instead?
+>
 
-http://lkml.kernel.org/r/1525182503-13849-7-git-send-email-zohar@linux.vnet.ibm.com
+Most implementations of UEFI are based on PI, and so it is likely that
+the protocols are available. However, the PI spec does not cover
+firmware blobs, and so it is undefined whether such blobs are self
+contained (i.e., in separate files in the firmware volume), statically
+linked into the driver or maybe even encrypted or otherwise
+encapsulated, and the actual loadable image only lives in memory.
 
-Please read below....
+Hans's case is the second one, i.e., the firmware is at an arbitrary
+offset in the driver image. Using the FV protocol in this case would
+result in a mix of both approaches: look up the driver file by GUID
+[which could change btw between different versions of the system
+firmware, although this is unlikely] and then still use the prefix/crc
+based approach to sift through the image itself.
 
-On Wed, Apr 25, 2018 at 05:55:57PM +0000, Luis R. Rodriguez wrote:
-> On Wed, Apr 25, 2018 at 01:00:09AM -0400, Mimi Zohar wrote:
-> > On Tue, 2018-04-24 at 23:42 +0000, Luis R. Rodriguez wrote:
-> > > On Tue, Apr 24, 2018 at 12:07:01PM -0400, Mimi Zohar wrote:
-> > > > On Tue, 2018-04-24 at 17:09 +0200, Hans de Goede wrote:
-> > > If its of any help --
-> > > 
-> > > drivers/soc/qcom/mdt_loader.c is the only driver currently using
-> > > request_firmware_into_buf() however I'll note qcom_mdt_load() is used in many
-> > > other drivers so they are wrappers around request_firmware_into_buf():
-> > > 
-> > > drivers/gpu/drm/msm/adreno/a5xx_gpu.c:   * adreno_request_fw() handles this, but qcom_mdt_load() does
-> > > drivers/gpu/drm/msm/adreno/a5xx_gpu.c:          ret = qcom_mdt_load(dev, fw, fwname, GPU_PAS_ID,
-> > > drivers/gpu/drm/msm/adreno/a5xx_gpu.c:          ret = qcom_mdt_load(dev, fw, newname, GPU_PAS_ID,
-> > > drivers/media/platform/qcom/venus/firmware.c:   ret = qcom_mdt_load(dev, mdt, fwname, VENUS_PAS_ID, mem_va, mem_phys,
-> > > drivers/remoteproc/qcom_adsp_pil.c:     return qcom_mdt_load(adsp->dev, fw, rproc->firmware, adsp->pas_id,
-> > > drivers/remoteproc/qcom_wcnss.c:        return qcom_mdt_load(wcnss->dev, fw, rproc->firmware, WCNSS_PAS_ID,
-> > > 
-> > > > > As such the current IMA code (from v4.17-rc2) actually does
-> > > > > not handle READING_FIRMWARE_PREALLOC_BUFFER at all, 
-> > > > 
-> > > > Right, it doesn't yet address READING_FIRMWARE_PREALLOC_BUFFER, but
-> > > > should.
-> > > > 
-> > > > Depending on whether the device requesting the firmware has access to
-> > > > the DMA memory, before the signature verification, 
-> > > 
-> > > It would seem from the original patch review about READING_FIRMWARE_PREALLOC_BUFFER
-> > > that this is not a DMA buffer.
+But my main objection is simply that from the UEFI forum point of
+view, there is a clear distinction between the OS visible interfaces
+in the UEFI spec and the internal interfaces in the PI spec (which for
+instance are not subject to the same rules when it comes to backward
+compatibility), and so I think we should not depend on PI at all. This
+is all the more important considering that we are trying to encourage
+the creation of other implementations of UEFI that are not based on PI
+(e.g., uboot for arm64 implements the required UEFI interfaces for
+booting the kernel via GRUB), and adding dependencies on PI protocols
+makes that a moving target.
 
-To be very clear I believe Stephen implied this was not DMA buffer. Mimi
-asked for READING_FIRMWARE_DMA if it was:
+So in my view, we either take a ad-hoc approach which works for the
+few platforms we expect to support, in which case Hans's approach is
+sufficient, or we architect it properly, in which case we shouldn't
+depend on PI because it does not belong in a properly architected
+OS<->firmware exchange.
 
-https://patchwork.kernel.org/patch/9074611/
-
-> > The call sequence:
-> > qcom_mdt_load() -> qcom_scm_pas_init_image() -> dma_alloc_coherent()
-> > 
-> > If dma_alloc_coherent() isn't allocating a DMA buffer, then the
-> > function name is misleading/confusing.
-> 
-> Hah, by *definition* the device *and* processor has immediate access
-> to data written *immediately* when dma_alloc_coherent() is used. From
-> Documentation/DMA-API.txt:
-> 
-> -----------------------------------------------------------------------
-> Part Ia - Using large DMA-coherent buffers                                      
-> ------------------------------------------                                      
->                                                                                 
-> ::                                                                              
->                                                                                 
->         void *                                                                  
->         dma_alloc_coherent(struct device *dev, size_t size,                     
->                            dma_addr_t *dma_handle, gfp_t flag)                  
->                                                                                 
-> Consistent memory is memory for which a write by either the device or           
-> the processor can immediately be read by the processor or device                
-> without having to worry about caching effects.  (You may however need           
-> to make sure to flush the processor's write buffers before telling              
-> devices to read that memory.)  
-> ------------------------------------------------------------------------
-> 
-> Is ptr below
-> 
-> 	ret = request_firmware_into_buf(&seg_fw, fw_name, dev,  
-> 					ptr, phdr->p_filesz); 
-> 
-> Also part of the DMA buffer allocated earlier via:
-> 
->         ret = qcom_scm_pas_init_image(pas_id, fw->data, fw->size);              
-> 
-> Android folks?
-
-Android folks?
-
-> > > The device driver should have access to the buffer pointer with write given
-> > > that with request_firmware_into_buf() the driver is giving full write access to
-> > > the memory pointer so that the firmware API can stuff the firmware it finds
-> > > there.
-> > > 
-> > > Firmware signature verification would be up to the device hardware to do upon
-> > > load *after* request_firmware_into_buf().
-> > 
-> > We're discussing the kernel's signature verification, not the device
-> > hardware's signature verification.  Can the device driver access the
-> > buffer, before IMA-appraisal has verified the firmware's signature?
-> 
-> It will depend on the above question.
-
-  Luis
+-- 
+Ard.
