@@ -1,126 +1,82 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 04/17] efi: Decode IA32/X64 Processor Error Section
-Date: Fri,  4 May 2018 07:59:50 +0200
-Message-ID: <20180504060003.19618-5-ard.biesheuvel@linaro.org>
-References: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
+Subject: [GIT PULL 00/17] EFI updates for v4.18
+Date: Fri,  4 May 2018 07:59:46 +0200
+Message-ID: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Yazen Ghannam <yazen.ghannam@amd.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Borislav Petkov <bp@suse.de>, Daniel Kiper <daniel.kiper@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, Joey Zheng <yu.zheng@hxt-semitech.com>, Kim Phillips <kim.phillips@arm.com>, Lukas Wunner <lukas@wunner.de>, Mark Rutland <mark.rutland@arm.com>, Shunyong Yang <shunyong.yang@hxt-semitech.com>, Wei Yongjun <weiyongjun1@huawei.com>, Yazen Ghannam <yazen.ghannam@amd.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Yazen Ghannam <yazen.ghannam@amd.com>
+The following changes since commit 60cc43fc888428bb2f18f08997432d426a243338:
 
-Recognize the IA32/X64 Processor Error Section.
+  Linux 4.17-rc1 (2018-04-15 18:24:20 -0700)
 
-Do the section decoding in a new "cper-x86.c" file and add this to the
-Makefile depending on a new "UEFI_CPER_X86" config option.
+are available in the Git repository at:
 
-Print the Local APIC ID and CPUID info from the Processor Error Record.
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
 
-The "Processor Error Info" and "Processor Context" fields will be
-decoded in following patches.
+for you to fetch changes up to a0e781fedc0e975d2f33fda94e26d3f76331ee3d:
 
-Based on UEFI 2.7 Table 252. Processor Error Record.
+  efi/libstub/arm64: handle randomized TEXT_OFFSET (2018-05-03 19:00:27 +0200)
 
-Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/Kconfig    |  5 +++++
- drivers/firmware/efi/Makefile   |  1 +
- drivers/firmware/efi/cper-x86.c | 23 +++++++++++++++++++++++
- drivers/firmware/efi/cper.c     | 10 ++++++++++
- include/linux/cper.h            |  2 ++
- 5 files changed, 41 insertions(+)
+----------------------------------------------------------------
+First batch of EFI changes for v4.18:
+- Initialize UEFI secure boot state during Xen dom0 boot (Daniel Kiper)
+- Decode x86 CPER data (Yazen Ghannam)
+- Ignore unrealistically large option roms (Hans de Goede)
+- Additional minor tweaks
+- A fix for arm64 kernels with CONFIG_RANDOMIZE_TEXT_OFFSET=y and running
+  with KASLR enabled. I was on the fence whether to send it as a fix or
+  cc it to stable, so I chose the latter. (TEXT_OFFSET randomization is a
+  debug feature that the distros don't enable)
+
+----------------------------------------------------------------
+Ard Biesheuvel (3):
+      efi: fix efi_pci_io_protocol32 prototype for mixed mode
+      efi: align efi_pci_io_protocol typedefs to type naming convention
+      efi/x86: fold __setup_efi_pci32 and __setup_efi_pci64 into one
+
+Borislav Petkov (1):
+      efi/cper: Remove the INDENT_SP silliness
+
+Daniel Kiper (1):
+      x86/xen/efi: Initialize UEFI secure boot state during dom0 boot
+
+Hans de Goede (1):
+      efi/x86: Ignore unrealistically large option roms
+
+Mark Rutland (1):
+      efi/libstub/arm64: handle randomized TEXT_OFFSET
+
+Shunyong Yang (1):
+      efi/capsule-loader: Don't output reset log when reset flags are not set
+
+Wei Yongjun (1):
+      efi/libstub/tpm: Make function efi_retrieve_tpm2_eventlog_1_2() static
+
+Yazen Ghannam (8):
+      efi: Fix IA32/X64 Processor Error Record definition
+      efi: Decode IA32/X64 Processor Error Section
+      efi: Decode IA32/X64 Processor Error Info Structure
+      efi: Decode UEFI-defined IA32/X64 Error Structure GUIDs
+      efi: Decode IA32/X64 Cache, TLB, and Bus Check structures
+      efi: Decode additional IA32/X64 Bus Check fields
+      efi: Decode IA32/X64 MS Check structure
+      efi: Decode IA32/X64 Context Info structure
+
+ arch/x86/boot/compressed/eboot.c          | 112 +++-------
+ arch/x86/xen/efi.c                        |  57 +++++
+ drivers/firmware/efi/Kconfig              |   5 +
+ drivers/firmware/efi/Makefile             |   1 +
+ drivers/firmware/efi/capsule-loader.c     |  14 +-
+ drivers/firmware/efi/cper-arm.c           |   6 +-
+ drivers/firmware/efi/cper-x86.c           | 356 ++++++++++++++++++++++++++++++
+ drivers/firmware/efi/cper.c               |  16 +-
+ drivers/firmware/efi/libstub/arm64-stub.c |   7 +
+ drivers/firmware/efi/libstub/secureboot.c |   3 +
+ drivers/firmware/efi/libstub/tpm.c        |   2 +-
+ include/linux/cper.h                      |   4 +-
+ include/linux/efi.h                       |  14 +-
+ 13 files changed, 496 insertions(+), 101 deletions(-)
  create mode 100644 drivers/firmware/efi/cper-x86.c
-
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 3098410abad8..781a4a337557 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -174,6 +174,11 @@ config UEFI_CPER_ARM
- 	depends on UEFI_CPER && ( ARM || ARM64 )
- 	default y
- 
-+config UEFI_CPER_X86
-+	bool
-+	depends on UEFI_CPER && X86
-+	default y
-+
- config EFI_DEV_PATH_PARSER
- 	bool
- 	depends on ACPI
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index cb805374f4bc..5f9f5039de50 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -31,3 +31,4 @@ obj-$(CONFIG_ARM)			+= $(arm-obj-y)
- obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
- obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
- obj-$(CONFIG_UEFI_CPER_ARM)		+= cper-arm.o
-+obj-$(CONFIG_UEFI_CPER_X86)		+= cper-x86.o
-diff --git a/drivers/firmware/efi/cper-x86.c b/drivers/firmware/efi/cper-x86.c
-new file mode 100644
-index 000000000000..863f0cd2a0ff
---- /dev/null
-+++ b/drivers/firmware/efi/cper-x86.c
-@@ -0,0 +1,23 @@
-+// SPDX-License-Identifier: GPL-2.0
-+// Copyright (C) 2018, Advanced Micro Devices, Inc.
-+
-+#include <linux/cper.h>
-+
-+/*
-+ * We don't need a "CPER_IA" prefix since these are all locally defined.
-+ * This will save us a lot of line space.
-+ */
-+#define VALID_LAPIC_ID			BIT_ULL(0)
-+#define VALID_CPUID_INFO		BIT_ULL(1)
-+
-+void cper_print_proc_ia(const char *pfx, const struct cper_sec_proc_ia *proc)
-+{
-+	if (proc->validation_bits & VALID_LAPIC_ID)
-+		printk("%sLocal APIC_ID: 0x%llx\n", pfx, proc->lapic_id);
-+
-+	if (proc->validation_bits & VALID_CPUID_INFO) {
-+		printk("%sCPUID Info:\n", pfx);
-+		print_hex_dump(pfx, "", DUMP_PREFIX_OFFSET, 16, 4, proc->cpuid,
-+			       sizeof(proc->cpuid), 0);
-+	}
-+}
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index ab21f1614007..3bf0dca378a6 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -467,6 +467,16 @@ cper_estatus_print_section(const char *pfx, struct acpi_hest_generic_data *gdata
- 			cper_print_proc_arm(newpfx, arm_err);
- 		else
- 			goto err_section_too_small;
-+#endif
-+#if defined(CONFIG_UEFI_CPER_X86)
-+	} else if (guid_equal(sec_type, &CPER_SEC_PROC_IA)) {
-+		struct cper_sec_proc_ia *ia_err = acpi_hest_get_payload(gdata);
-+
-+		printk("%ssection_type: IA32/X64 processor error\n", newpfx);
-+		if (gdata->error_data_length >= sizeof(*ia_err))
-+			cper_print_proc_ia(newpfx, ia_err);
-+		else
-+			goto err_section_too_small;
- #endif
- 	} else {
- 		const void *err = acpi_hest_get_payload(gdata);
-diff --git a/include/linux/cper.h b/include/linux/cper.h
-index 4b5f8459b403..9c703a0abe6e 100644
---- a/include/linux/cper.h
-+++ b/include/linux/cper.h
-@@ -551,5 +551,7 @@ const char *cper_mem_err_unpack(struct trace_seq *,
- 				struct cper_mem_err_compact *);
- void cper_print_proc_arm(const char *pfx,
- 			 const struct cper_sec_proc_arm *proc);
-+void cper_print_proc_ia(const char *pfx,
-+			const struct cper_sec_proc_ia *proc);
- 
- #endif
--- 
-2.17.0
