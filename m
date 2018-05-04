@@ -1,124 +1,99 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 01/17] x86/xen/efi: Initialize UEFI secure boot state during dom0 boot
-Date: Fri,  4 May 2018 07:59:47 +0200
-Message-ID: <20180504060003.19618-2-ard.biesheuvel@linaro.org>
-References: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
+From: joeyli <jlee@suse.com>
+Subject: Re: [PATCH] efi: Fix the size not consistent issue when unmapping
+ memory map
+Date: Fri, 4 May 2018 15:29:16 +0800
+Message-ID: <20180504072916.GR4235@linux-l9pv.suse>
+References: <20180502061724.25833-1-jlee@suse.com>
+ <CAKv+Gu_1vNmNy6vYEdSRW6r97DSxj_t=1LmWFE-nsv7oA=1ApQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu_1vNmNy6vYEdSRW6r97DSxj_t=1LmWFE-nsv7oA=1ApQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Daniel Kiper <daniel.kiper@oracle.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Takashi Iwai <tiwai@suse.de>, Vivek Goyal <vgoyal@redhat.com>, Ingo Molnar <mingo@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Daniel Kiper <daniel.kiper@oracle.com>
+Hi Ard,
 
-Initialize UEFI secure boot state during dom0 boot. Otherwise the kernel
-may not even know that it runs on secure boot enabled platform.
+On Thu, May 03, 2018 at 02:05:51PM +0200, Ard Biesheuvel wrote:
+> On 2 May 2018 at 08:17, Lee, Chun-Yi <joeyli.kernel@gmail.com> wrote:
+> > When using kdump, SOMETIMES the "size not consistent" warning message
+> > shows up when the crash kernel boots with early_ioremap_debug parameter:
+> >
+> > WARNING: CPU: 0 PID: 0 at ../mm/early_ioremap.c:182 early_iounmap+0x4f/0x12c()
+> > early_iounmap(ffffffffff200180, 00000118) [0] size not consistent 00000120
+> >
+> > The root cause is that the unmapping size of memory map doesn't
+> > match with the original size when mapping:
+> >
+> > in __efi_memmap_init()
+> >         map.map = early_memremap(phys_map, data->size);
+> >
+> > in efi_memmap_unmap()
+> >         size = efi.memmap.desc_size * efi.memmap.nr_map;
+> >         early_memunmap(efi.memmap.map, size);
+> >
+> > But the efi.memmap.nr_map is from __efi_memmap_init(). The remainder
+> > of size was discarded when calculating the nr_map:
+> >         map.nr_map = data->size / data->desc_size;
+> >
+> > When the original size of memory map region does not equal to the
+> > result of multiplication. The "size not consistent" warning
+> > will be triggered.
+> >
+> > This issue sometimes was hit by kdump because kexec set the efi map
+> > size to align with 16 when loading crash kernel image:
+> >
+> > in bzImage64_load()
+> >         efi_map_sz = efi_get_runtime_map_size();
+> >         efi_map_sz = ALIGN(efi_map_sz, 16);
+> >
+> > Dave Young's a841aa83d patch fixed kexec issue. On UEFI side, this
+> > patch changes the logic in the unmapping function. Using the end
+> > address of map to calcuate original size.
+> >
+> 
+> Why do we still need this patch? I.e., in which circumstances will
+> efi_memory_map_data::size assume a value that is rounded up or
+> otherwise incorrect?
+>
 
-Note that part of drivers/firmware/efi/libstub/secureboot.c is duplicated
-by this patch, only in this case, it runs in the context of the kernel
-proper rather than UEFI boot context. The reason for the duplication is
-that maintaining the original code to run correctly on ARM/arm64 as well
-as on all the quirky x86 firmware we support is enough of a burden as it
-is, and adding the x86/Xen execution context to that mix just so we can
-reuse a single routine just isn't worth it.
+There have no other case except kexec. But I think that it's better
+to sync mapping/unmapping size between __efi_memmap_init() and 
+efi_memmap_unmap(). 
 
-Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
-[ardb: explain rationale for code duplication]
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- arch/x86/xen/efi.c                        | 57 +++++++++++++++++++++++
- drivers/firmware/efi/libstub/secureboot.c |  3 ++
- 2 files changed, 60 insertions(+)
 
-diff --git a/arch/x86/xen/efi.c b/arch/x86/xen/efi.c
-index a18703be9ead..1804b27f9632 100644
---- a/arch/x86/xen/efi.c
-+++ b/arch/x86/xen/efi.c
-@@ -115,6 +115,61 @@ static efi_system_table_t __init *xen_efi_probe(void)
- 	return &efi_systab_xen;
- }
+Thanks
+Joey Lee
  
-+/*
-+ * Determine whether we're in secure boot mode.
-+ *
-+ * Please keep the logic in sync with
-+ * drivers/firmware/efi/libstub/secureboot.c:efi_get_secureboot().
-+ */
-+static enum efi_secureboot_mode xen_efi_get_secureboot(void)
-+{
-+	static efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
-+	static efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
-+	efi_status_t status;
-+	u8 moksbstate, secboot, setupmode;
-+	unsigned long size;
-+
-+	size = sizeof(secboot);
-+	status = efi.get_variable(L"SecureBoot", &efi_variable_guid,
-+				  NULL, &size, &secboot);
-+
-+	if (status == EFI_NOT_FOUND)
-+		return efi_secureboot_mode_disabled;
-+
-+	if (status != EFI_SUCCESS)
-+		goto out_efi_err;
-+
-+	size = sizeof(setupmode);
-+	status = efi.get_variable(L"SetupMode", &efi_variable_guid,
-+				  NULL, &size, &setupmode);
-+
-+	if (status != EFI_SUCCESS)
-+		goto out_efi_err;
-+
-+	if (secboot == 0 || setupmode == 1)
-+		return efi_secureboot_mode_disabled;
-+
-+	/* See if a user has put the shim into insecure mode. */
-+	size = sizeof(moksbstate);
-+	status = efi.get_variable(L"MokSBStateRT", &shim_guid,
-+				  NULL, &size, &moksbstate);
-+
-+	/* If it fails, we don't care why. Default to secure. */
-+	if (status != EFI_SUCCESS)
-+		goto secure_boot_enabled;
-+
-+	if (moksbstate == 1)
-+		return efi_secureboot_mode_disabled;
-+
-+ secure_boot_enabled:
-+	pr_info("UEFI Secure Boot is enabled.\n");
-+	return efi_secureboot_mode_enabled;
-+
-+ out_efi_err:
-+	pr_err("Could not determine UEFI Secure Boot status.\n");
-+	return efi_secureboot_mode_unknown;
-+}
-+
- void __init xen_efi_init(void)
- {
- 	efi_system_table_t *efi_systab_xen;
-@@ -129,6 +184,8 @@ void __init xen_efi_init(void)
- 	boot_params.efi_info.efi_systab = (__u32)__pa(efi_systab_xen);
- 	boot_params.efi_info.efi_systab_hi = (__u32)(__pa(efi_systab_xen) >> 32);
- 
-+	boot_params.secure_boot = xen_efi_get_secureboot();
-+
- 	set_bit(EFI_BOOT, &efi.flags);
- 	set_bit(EFI_PARAVIRT, &efi.flags);
- 	set_bit(EFI_64BIT, &efi.flags);
-diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-index 8f07eb414c00..72d9dfbebf08 100644
---- a/drivers/firmware/efi/libstub/secureboot.c
-+++ b/drivers/firmware/efi/libstub/secureboot.c
-@@ -30,6 +30,9 @@ static const efi_char16_t shim_MokSBState_name[] = L"MokSBState";
- 
- /*
-  * Determine whether we're in secure boot mode.
-+ *
-+ * Please keep the logic in sync with
-+ * arch/x86/xen/efi.c:xen_efi_get_secureboot().
-  */
- enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
- {
--- 
-2.17.0
+> > Thank Randy Wright for his report and testing. And also thank
+> > Takashi Iwai for his help to trace issue.
+> >
+> > Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> > Cc: Takashi Iwai <tiwai@suse.de>
+> > Cc: Vivek Goyal <vgoyal@redhat.com>
+> > Cc: Ingo Molnar <mingo@redhat.com>
+> > Tested-by: Randy Wright <rwright@hpe.com>
+> > Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
+> > ---
+> >  drivers/firmware/efi/memmap.c | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+> > index 5fc7052..1f592d8 100644
+> > --- a/drivers/firmware/efi/memmap.c
+> > +++ b/drivers/firmware/efi/memmap.c
+> > @@ -121,7 +121,7 @@ void __init efi_memmap_unmap(void)
+> >         if (!efi.memmap.late) {
+> >                 unsigned long size;
+> >
+> > -               size = efi.memmap.desc_size * efi.memmap.nr_map;
+> > +               size = efi.memmap.map_end - efi.memmap.map;
+> >                 early_memunmap(efi.memmap.map, size);
+> >         } else {
+> >                 memunmap(efi.memmap.map);
+> > --
+> > 2.10.2
+> >
