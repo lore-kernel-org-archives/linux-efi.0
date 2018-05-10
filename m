@@ -1,160 +1,181 @@
-From: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Subject: Re: [PATCH v5 2/5] efi: Add embedded peripheral firmware support
-Date: Tue, 8 May 2018 17:12:06 +0000
-Message-ID: <20180508171206.GF27853@wotan.suse.de>
-References: <20180429093558.5411-1-hdegoede@redhat.com>
- <20180429093558.5411-3-hdegoede@redhat.com>
- <20180503232920.GF27853@wotan.suse.de>
- <CAKv+Gu94HNK3vDa2-ro+mb9L6XfWQQgR2qneEmtpA0WqS5SqGw@mail.gmail.com>
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: [PATCH -resend 19/27] x86: assembly,
+ make some functions local
+Date: Thu, 10 May 2018 10:06:36 +0200
+Message-ID: <20180510080644.19752-20-jslaby@suse.cz>
+References: <20180510080644.19752-1-jslaby@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu94HNK3vDa2-ro+mb9L6XfWQQgR2qneEmtpA0WqS5SqGw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Howells <dhowells@redhat.com>, Andy Lutomirski <luto@kernel.org>, Martijn Coenen <maco@android.com>, Andy Gross <andy.gross@linaro.org>, David Brown <david.brown@linaro.org>, Bjorn Andersson <bjorn.andersson@linaro.org>
-Cc: "Luis R. Rodriguez" <mcgrof@kernel.org>, Hans de Goede <hdegoede@redhat.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, andresx7@gmail.com, Matt Fleming <matt@codeblueprint.co.uk>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Martin Fuzzey <mfuzzey@parkeon.com>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, Nicolas Broeking <nbroeking@me.com>, Torsten Duwe <duwe@suse.de>, Kees
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xenproject.org>
+In-Reply-To: <20180510080644.19752-1-jslaby@suse.cz>
+List-Unsubscribe: <https://lists.xenproject.org/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xenproject.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xenproject.org>
+List-Help: <mailto:xen-devel-request@lists.xenproject.org?subject=help>
+List-Subscribe: <https://lists.xenproject.org/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xenproject.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xenproject.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xenproject.org>
+To: mingo@redhat.com
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, x86@kernel.org, linux-kernel@vger.kernel.org, "H. Peter Anvin" <hpa@zytor.com>, xen-devel@lists.xenproject.org, Thomas Gleixner <tglx@linutronix.de>, Jiri Slaby <jslaby@suse.cz>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, May 04, 2018 at 07:54:28AM +0200, Ard Biesheuvel wrote:
-> On 4 May 2018 at 01:29, Luis R. Rodriguez <mcgrof@kernel.org> wrote:
-> > On Sun, Apr 29, 2018 at 11:35:55AM +0200, Hans de Goede wrote:
-> [...]
-> >> diff --git a/Documentation/driver-api/firmware/request_firmware.rst b/Documentation/driver-api/firmware/request_firmware.rst
-> >> index c8bddbdcfd10..560dfed76e38 100644
-> >> --- a/Documentation/driver-api/firmware/request_firmware.rst
-> >> +++ b/Documentation/driver-api/firmware/request_firmware.rst
-> >> @@ -73,3 +73,69 @@ If something went wrong firmware_request() returns non-zero and fw_entry
-> >>  is set to NULL. Once your driver is done with processing the firmware it
-> >>  can call call firmware_release(fw_entry) to release the firmware image
-> >>  and any related resource.
-> >> +
-> >> +EFI embedded firmware support
-> >> +=============================
-> >
-> > This is a new fallback mechanism, please see:
-> >
-> > Documentation/driver-api/firmware/fallback-mechanisms.rst
-> >
-> > Refer to the section "Types of fallback mechanisms", augument the list there
-> > and then move the section "Firmware sysfs loading facility" to a new file, and
-> > then add a new file for your own.
-> >
-> >> +
-> >> +On some devices the system's EFI code / ROM may contain an embedded copy
-> >> +of firmware for some of the system's integrated peripheral devices and
-> >> +the peripheral's Linux device-driver needs to access this firmware.
-> >
-> > You in no way indicate this is a just an invented scheme, a custom solution and
-> > nothing standard.  I realize Ard criticized that the EFI Firmware Volume Protocol
-> > is not part of the UEFI spec -- however it is a bit more widely used right?
-> > Why can't Linux support it instead?
-> >
-> 
-> Most implementations of UEFI are based on PI,
-
-That seems to be the UEFI Platform Initialization specification:
-
-http://www.uefi.org/sites/default/files/resources/PI_Spec_1_6.pdf
-
-> and so it is likely that
-> the protocols are available. However, the PI spec does not cover
-> firmware blobs,
-
-Indeed, I cannot find anything about it on the PI Spec, but I *can* easily
-find a few documents referring to the Firmware Volume Protocol:
-
-http://wiki.phoenix.com/wiki/index.php/EFI_FIRMWARE_VOLUME_PROTOCOL
-
-But this has no references at all...
-
-I see stupid patents over some of this and authentication mechanisms for it:
-
-https://patents.google.com/patent/US20170098084
-
-> and so it is undefined whether such blobs are self
-> contained (i.e., in separate files in the firmware volume), statically
-> linked into the driver or maybe even encrypted or otherwise
-> encapsulated, and the actual loadable image only lives in memory.
-
-Got it, thanks this helps! There are two things then:
-
- 1) The "EFI Firmware Volume Protocol" ("FV" for short in your descriptions
-    below), and whether to support it or not in the future and recommend it
-    for future use cases.
-
- b) Han's EFI scraper to help support 2 drivers, and whether or not to
-    recommend it for future use cases.
-
-> Hans's case is the second one, i.e., the firmware is at an arbitrary
-> offset in the driver image. Using the FV protocol in this case would
-> result in a mix of both approaches: look up the driver file by GUID
-> [which could change btw between different versions of the system
-> firmware, although this is unlikely] and then still use the prefix/crc
-> based approach to sift through the image itself.
-
-Got it. And to be clear its a reversed engineered solution to what
-two vendors decided to do.
-
-> But my main objection is simply that from the UEFI forum point of
-> view, there is a clear distinction between the OS visible interfaces
-> in the UEFI spec and the internal interfaces in the PI spec (which for
-> instance are not subject to the same rules when it comes to backward
-> compatibility), and so I think we should not depend on PI at all.
-
-Ah I see.
-
-> This
-> is all the more important considering that we are trying to encourage
-> the creation of other implementations of UEFI that are not based on PI
-> (e.g., uboot for arm64 implements the required UEFI interfaces for
-> booting the kernel via GRUB), and adding dependencies on PI protocols
-> makes that a moving target.
-
-Got it!
-
-> So in my view, we either take a ad-hoc approach which works for the
-> few platforms we expect to support, in which case Hans's approach is
-> sufficient, 
-
-Modulo it needs some work for ARM as it only works for x86 right now ;)
-
-> or we architect it properly, in which case we shouldn't
-> depend on PI because it does not belong in a properly architected
-> OS<->firmware exchange.
-
-OK, it sounds to me like we have room to then implement our own de-facto
-standard for letting vendors stuff firmware into EFI as we in the Linux
-community see fit.
-
-We can start out by supporting existing drivers, but also consider customizing
-this in the future for our own needs, so long as we document it and set
-expectations well.
-
-So we need to support what Hans is implementing for two reasons then:
-
-a) The FV Protocol cannot be used to support the two drivers he's
-   trying to provide support for -- I believe Hans tried and it didn't work,
-   Hans, correct me if I'm wrong?
-
-b) The FV Protocol relies on *internal* interfaces of PI spec, and since:
-    1) The PI spec does not define firmware at all
-    2) The internal interfaces of PI Spec does not guarantee any backward
-       compatibility
-   Any implementation details in FV may be subject to change, and may vary
-   system to system. Supporting the FV Protocol would be difficult as it
-   purposely ambiguous.
-
-If accurate, Hans, can you capture this in your documentation somehow?
-
-And.. we should review Hans' changes in light of not only supporting 2
-drivers but also helping advance the framework to properly expand it
-in the future as we see fit. And ensuring backward compatibility, should
-we change or enhance the interface.
-
-In that case I believe that, other than enhanced documentation justifying
-these new changes over supporting the FV protocol, the remaining sticking
-points to this patch series was the stronger hashing algorithms used for
-which Andy already provided feedback and recommendations for.
-
-  Luis
+VGhlcmUgaXMgYSBjb3VwbGUgb2YgYXNzZW1ibHkgZnVuY3Rpb25zLCB3aGljaCBhcmUgaW52b2tl
+ZCBvbmx5IGxvY2FsbHkKaW4gdGhlIGZpbGUgdGhleSBhcmUgZGVmaW5lZC4gSW4gQywgd2UgbWFy
+ayB0aGVtICJzdGF0aWMiLiBJbiBhc3NlbWJseSwKYW5ub3RhdGUgdGhlbSB1c2luZyBTWU1fe0ZV
+TkMsQ09ERX1fU1RBUlRfTE9DQUwgKGFuZCBzd2l0Y2ggdGhlaXIKRU5EUFJPQyB0byBTWU1fe0ZV
+TkMsQ09ERX1fRU5EIHRvbykuIFdoZXRoZXIgRlVOQyBvciBDT0RFIGRlcGVuZHMgb24KRU5EUFJP
+Qy9FTkQgZm9yIGEgcGFydGljdWxhciBmdW5jdGlvbiAoQyBvciBub24tQykuCgpTaWduZWQtb2Zm
+LWJ5OiBKaXJpIFNsYWJ5IDxqc2xhYnlAc3VzZS5jej4KQ2M6ICJILiBQZXRlciBBbnZpbiIgPGhw
+YUB6eXRvci5jb20+CkNjOiBUaG9tYXMgR2xlaXhuZXIgPHRnbHhAbGludXRyb25peC5kZT4KQ2M6
+IEluZ28gTW9sbmFyIDxtaW5nb0ByZWRoYXQuY29tPgpDYzogeDg2QGtlcm5lbC5vcmcKQ2M6IE1h
+dHQgRmxlbWluZyA8bWF0dEBjb2RlYmx1ZXByaW50LmNvLnVrPgpDYzogQXJkIEJpZXNoZXV2ZWwg
+PGFyZC5iaWVzaGV1dmVsQGxpbmFyby5vcmc+CkNjOiBsaW51eC1lZmlAdmdlci5rZXJuZWwub3Jn
+CkNjOiB4ZW4tZGV2ZWxAbGlzdHMueGVucHJvamVjdC5vcmcKLS0tCiBhcmNoL3g4Ni9ib290L2Nv
+bXByZXNzZWQvZWZpX3RodW5rXzY0LlMgfCAgOCArKysrLS0tLQogYXJjaC94ODYvZW50cnkvZW50
+cnlfNjQuUyAgICAgICAgICAgICAgIHwgMjEgKysrKysrKysrKystLS0tLS0tLS0tCiBhcmNoL3g4
+Ni9saWIvY29weV9wYWdlXzY0LlMgICAgICAgICAgICAgfCAgNCArKy0tCiBhcmNoL3g4Ni9saWIv
+bWVtY3B5XzY0LlMgICAgICAgICAgICAgICAgfCAxMiArKysrKystLS0tLS0KIGFyY2gveDg2L2xp
+Yi9tZW1zZXRfNjQuUyAgICAgICAgICAgICAgICB8ICA4ICsrKystLS0tCiBhcmNoL3g4Ni9wbGF0
+Zm9ybS9lZmkvZWZpX3RodW5rXzY0LlMgICAgfCAxMiArKysrKystLS0tLS0KIGFyY2gveDg2L3hl
+bi94ZW4tcHZoLlMgICAgICAgICAgICAgICAgICB8ICA0ICsrLS0KIDcgZmlsZXMgY2hhbmdlZCwg
+MzUgaW5zZXJ0aW9ucygrKSwgMzQgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvYXJjaC94ODYv
+Ym9vdC9jb21wcmVzc2VkL2VmaV90aHVua182NC5TIGIvYXJjaC94ODYvYm9vdC9jb21wcmVzc2Vk
+L2VmaV90aHVua182NC5TCmluZGV4IGQ2NjAwMGQyMzkyMS4uMzEzMTIwNzBkYjIyIDEwMDY0NAot
+LS0gYS9hcmNoL3g4Ni9ib290L2NvbXByZXNzZWQvZWZpX3RodW5rXzY0LlMKKysrIGIvYXJjaC94
+ODYvYm9vdC9jb21wcmVzc2VkL2VmaV90aHVua182NC5TCkBAIC05OSwxMiArOTksMTIgQEAgRU5U
+UlkoZWZpNjRfdGh1bmspCiAJcmV0CiBFTkRQUk9DKGVmaTY0X3RodW5rKQogCi1FTlRSWShlZmlf
+ZXhpdDMyKQorU1lNX0ZVTkNfU1RBUlRfTE9DQUwoZWZpX2V4aXQzMikKIAltb3ZxCWZ1bmNfcnRf
+cHRyKCVyaXApLCAlcmF4CiAJcHVzaAklcmF4CiAJbW92CSVyZGksICVyYXgKIAlyZXQKLUVORFBS
+T0MoZWZpX2V4aXQzMikKK1NZTV9GVU5DX0VORChlZmlfZXhpdDMyKQogCiAJLmNvZGUzMgogLyoK
+QEAgLTExMiw3ICsxMTIsNyBAQCBFTkRQUk9DKGVmaV9leGl0MzIpCiAgKgogICogVGhlIHN0YWNr
+IHNob3VsZCByZXByZXNlbnQgdGhlIDMyLWJpdCBjYWxsaW5nIGNvbnZlbnRpb24uCiAgKi8KLUVO
+VFJZKGVmaV9lbnRlcjMyKQorU1lNX0ZVTkNfU1RBUlRfTE9DQUwoZWZpX2VudGVyMzIpCiAJbW92
+bAkkX19LRVJORUxfRFMsICVlYXgKIAltb3ZsCSVlYXgsICVkcwogCW1vdmwJJWVheCwgJWVzCkBA
+IC0xNzIsNyArMTcyLDcgQEAgRU5UUlkoZWZpX2VudGVyMzIpCiAJYnRzbAkkWDg2X0NSMF9QR19C
+SVQsICVlYXgKIAltb3ZsCSVlYXgsICVjcjAKIAlscmV0Ci1FTkRQUk9DKGVmaV9lbnRlcjMyKQor
+U1lNX0ZVTkNfRU5EKGVmaV9lbnRlcjMyKQogCiAJLmRhdGEKIAkuYmFsaWduCTgKZGlmZiAtLWdp
+dCBhL2FyY2gveDg2L2VudHJ5L2VudHJ5XzY0LlMgYi9hcmNoL3g4Ni9lbnRyeS9lbnRyeV82NC5T
+CmluZGV4IGZkYTU1MzEwZGUyYS4uYzY4NDFjMDM4MTcwIDEwMDY0NAotLS0gYS9hcmNoL3g4Ni9l
+bnRyeS9lbnRyeV82NC5TCisrKyBiL2FyY2gveDg2L2VudHJ5L2VudHJ5XzY0LlMKQEAgLTEwNjgs
+NyArMTA2OCw4IEBAIGlkdGVudHJ5IGh5cGVydmlzb3JfY2FsbGJhY2sgeGVuX2RvX2h5cGVydmlz
+b3JfY2FsbGJhY2sgaGFzX2Vycm9yX2NvZGU9MAogICogZXhpc3RpbmcgYWN0aXZhdGlvbiBpbiBp
+dHMgY3JpdGljYWwgcmVnaW9uIC0tIGlmIHNvLCB3ZSBwb3AgdGhlIGN1cnJlbnQKICAqIGFjdGl2
+YXRpb24gYW5kIHJlc3RhcnQgdGhlIGhhbmRsZXIgdXNpbmcgdGhlIHByZXZpb3VzIG9uZS4KICAq
+LwotRU5UUlkoeGVuX2RvX2h5cGVydmlzb3JfY2FsbGJhY2spCQkvKiBkb19oeXBlcnZpc29yX2Nh
+bGxiYWNrKHN0cnVjdCAqcHRfcmVncykgKi8KKy8qIGRvX2h5cGVydmlzb3JfY2FsbGJhY2soc3Ry
+dWN0ICpwdF9yZWdzKSAqLworU1lNX0NPREVfU1RBUlRfTE9DQUwoeGVuX2RvX2h5cGVydmlzb3Jf
+Y2FsbGJhY2spCiAKIC8qCiAgKiBTaW5jZSB3ZSBkb24ndCBtb2RpZnkgJXJkaSwgZXZ0Y2huX2Rv
+X3VwYWxsKHN0cnVjdCAqcHRfcmVncykgd2lsbApAQCAtMTA4Niw3ICsxMDg3LDcgQEAgRU5UUlko
+eGVuX2RvX2h5cGVydmlzb3JfY2FsbGJhY2spCQkvKiBkb19oeXBlcnZpc29yX2NhbGxiYWNrKHN0
+cnVjdCAqcHRfcmVncykgKi8KIAljYWxsCXhlbl9tYXliZV9wcmVlbXB0X2hjYWxsCiAjZW5kaWYK
+IAlqbXAJZXJyb3JfZXhpdAotRU5EKHhlbl9kb19oeXBlcnZpc29yX2NhbGxiYWNrKQorU1lNX0NP
+REVfRU5EKHhlbl9kb19oeXBlcnZpc29yX2NhbGxiYWNrKQogCiAvKgogICogSHlwZXJ2aXNvciB1
+c2VzIHRoaXMgZm9yIGFwcGxpY2F0aW9uIGZhdWx0cyB3aGlsZSBpdCBleGVjdXRlcy4KQEAgLTEx
+NzUsNyArMTE3Niw3IEBAIGlkdGVudHJ5IG1hY2hpbmVfY2hlY2sJCWRvX21jZQkJCWhhc19lcnJv
+cl9jb2RlPTAJcGFyYW5vaWQ9MQogICogVXNlIHNsb3csIGJ1dCBzdXJlZmlyZSAiYXJlIHdlIGlu
+IGtlcm5lbD8iIGNoZWNrLgogICogUmV0dXJuOiBlYng9MDogbmVlZCBzd2FwZ3Mgb24gZXhpdCwg
+ZWJ4PTE6IG90aGVyd2lzZQogICovCi1FTlRSWShwYXJhbm9pZF9lbnRyeSkKK1NZTV9DT0RFX1NU
+QVJUX0xPQ0FMKHBhcmFub2lkX2VudHJ5KQogCVVOV0lORF9ISU5UX0ZVTkMKIAljbGQKIAlQVVNI
+X0FORF9DTEVBUl9SRUdTIHNhdmVfcmV0PTEKQEAgLTExOTIsNyArMTE5Myw3IEBAIEVOVFJZKHBh
+cmFub2lkX2VudHJ5KQogCVNBVkVfQU5EX1NXSVRDSF9UT19LRVJORUxfQ1IzIHNjcmF0Y2hfcmVn
+PSVyYXggc2F2ZV9yZWc9JXIxNAogCiAJcmV0Ci1FTkQocGFyYW5vaWRfZW50cnkpCitTWU1fQ09E
+RV9FTkQocGFyYW5vaWRfZW50cnkpCiAKIC8qCiAgKiAiUGFyYW5vaWQiIGV4aXQgcGF0aCBmcm9t
+IGV4Y2VwdGlvbiBzdGFjay4gIFRoaXMgaXMgaW52b2tlZApAQCAtMTIwNiw3ICsxMjA3LDcgQEAg
+RU5EKHBhcmFub2lkX2VudHJ5KQogICoKICAqIE9uIGVudHJ5LCBlYnggaXMgIm5vIHN3YXBncyIg
+ZmxhZyAoMTogZG9uJ3QgbmVlZCBzd2FwZ3MsIDA6IG5lZWQgaXQpCiAgKi8KLUVOVFJZKHBhcmFu
+b2lkX2V4aXQpCitTWU1fQ09ERV9TVEFSVF9MT0NBTChwYXJhbm9pZF9leGl0KQogCVVOV0lORF9I
+SU5UX1JFR1MKIAlESVNBQkxFX0lOVEVSUlVQVFMoQ0xCUl9BTlkpCiAJVFJBQ0VfSVJRU19PRkZf
+REVCVUcKQEAgLTEyMjEsMTMgKzEyMjIsMTMgQEAgRU5UUlkocGFyYW5vaWRfZXhpdCkKIAlSRVNU
+T1JFX0NSMwlzY3JhdGNoX3JlZz0lcmJ4IHNhdmVfcmVnPSVyMTQKIC5McGFyYW5vaWRfZXhpdF9y
+ZXN0b3JlOgogCWptcCByZXN0b3JlX3JlZ3NfYW5kX3JldHVybl90b19rZXJuZWwKLUVORChwYXJh
+bm9pZF9leGl0KQorU1lNX0NPREVfRU5EKHBhcmFub2lkX2V4aXQpCiAKIC8qCiAgKiBTYXZlIGFs
+bCByZWdpc3RlcnMgaW4gcHRfcmVncywgYW5kIHN3aXRjaCBHUyBpZiBuZWVkZWQuCiAgKiBSZXR1
+cm46IEVCWD0wOiBjYW1lIGZyb20gdXNlciBtb2RlOyBFQlg9MTogb3RoZXJ3aXNlCiAgKi8KLUVO
+VFJZKGVycm9yX2VudHJ5KQorU1lNX0NPREVfU1RBUlRfTE9DQUwoZXJyb3JfZW50cnkpCiAJVU5X
+SU5EX0hJTlRfRlVOQwogCWNsZAogCVBVU0hfQU5EX0NMRUFSX1JFR1Mgc2F2ZV9yZXQ9MQpAQCAt
+MTMxNCw3ICsxMzE1LDcgQEAgRU5UUlkoZXJyb3JfZW50cnkpCiAJbW92CSVyYXgsICVyc3AKIAlk
+ZWNsCSVlYngKIAlqbXAJLkxlcnJvcl9lbnRyeV9mcm9tX3VzZXJtb2RlX2FmdGVyX3N3YXBncwot
+RU5EKGVycm9yX2VudHJ5KQorU1lNX0NPREVfRU5EKGVycm9yX2VudHJ5KQogCiAKIC8qCkBAIC0x
+MzIyLDE0ICsxMzIzLDE0IEBAIEVORChlcnJvcl9lbnRyeSkKICAqICAgMTogYWxyZWFkeSBpbiBr
+ZXJuZWwgbW9kZSwgZG9uJ3QgbmVlZCBTV0FQR1MKICAqICAgMDogdXNlciBnc2Jhc2UgaXMgbG9h
+ZGVkLCB3ZSBuZWVkIFNXQVBHUyBhbmQgc3RhbmRhcmQgcHJlcGFyYXRpb24gZm9yIHJldHVybiB0
+byB1c2VybW9kZQogICovCi1FTlRSWShlcnJvcl9leGl0KQorU1lNX0NPREVfU1RBUlRfTE9DQUwo
+ZXJyb3JfZXhpdCkKIAlVTldJTkRfSElOVF9SRUdTCiAJRElTQUJMRV9JTlRFUlJVUFRTKENMQlJf
+QU5ZKQogCVRSQUNFX0lSUVNfT0ZGCiAJdGVzdGwJJWVieCwgJWVieAogCWpueglyZXRpbnRfa2Vy
+bmVsCiAJam1wCXJldGludF91c2VyCi1FTkQoZXJyb3JfZXhpdCkKK1NZTV9DT0RFX0VORChlcnJv
+cl9leGl0KQogCiAvKgogICogUnVucyBvbiBleGNlcHRpb24gc3RhY2suICBYZW4gUFYgZG9lcyBu
+b3QgZ28gdGhyb3VnaCB0aGlzIHBhdGggYXQgYWxsLApkaWZmIC0tZ2l0IGEvYXJjaC94ODYvbGli
+L2NvcHlfcGFnZV82NC5TIGIvYXJjaC94ODYvbGliL2NvcHlfcGFnZV82NC5TCmluZGV4IGZkMmQw
+OWFmYTA5Ny4uZjUwNTg3MGJkOTNiIDEwMDY0NAotLS0gYS9hcmNoL3g4Ni9saWIvY29weV9wYWdl
+XzY0LlMKKysrIGIvYXJjaC94ODYvbGliL2NvcHlfcGFnZV82NC5TCkBAIC0yMSw3ICsyMSw3IEBA
+IEVOVFJZKGNvcHlfcGFnZSkKIEVORFBST0MoY29weV9wYWdlKQogRVhQT1JUX1NZTUJPTChjb3B5
+X3BhZ2UpCiAKLUVOVFJZKGNvcHlfcGFnZV9yZWdzKQorU1lNX0ZVTkNfU1RBUlRfTE9DQUwoY29w
+eV9wYWdlX3JlZ3MpCiAJc3VicQkkMio4LAklcnNwCiAJbW92cQklcmJ4LAkoJXJzcCkKIAltb3Zx
+CSVyMTIsCTEqOCglcnNwKQpAQCAtODYsNCArODYsNCBAQCBFTlRSWShjb3B5X3BhZ2VfcmVncykK
+IAltb3ZxCTEqOCglcnNwKSwgJXIxMgogCWFkZHEJJDIqOCwgJXJzcAogCXJldAotRU5EUFJPQyhj
+b3B5X3BhZ2VfcmVncykKK1NZTV9GVU5DX0VORChjb3B5X3BhZ2VfcmVncykKZGlmZiAtLWdpdCBh
+L2FyY2gveDg2L2xpYi9tZW1jcHlfNjQuUyBiL2FyY2gveDg2L2xpYi9tZW1jcHlfNjQuUwppbmRl
+eCA0OTExYjFjNjFhYTguLjcyODcwM2M0N2Q1OCAxMDA2NDQKLS0tIGEvYXJjaC94ODYvbGliL21l
+bWNweV82NC5TCisrKyBiL2FyY2gveDg2L2xpYi9tZW1jcHlfNjQuUwpAQCAtMjcsNyArMjcsNyBA
+QAogICogcmF4IG9yaWdpbmFsIGRlc3RpbmF0aW9uCiAgKi8KIFNZTV9GVU5DX1NUQVJUX0FMSUFT
+KF9fbWVtY3B5KQotRU5UUlkobWVtY3B5KQorU1lNX0ZVTkNfU1RBUlRfTE9DQUwobWVtY3B5KQog
+CUFMVEVSTkFUSVZFXzIgImptcCBtZW1jcHlfb3JpZyIsICIiLCBYODZfRkVBVFVSRV9SRVBfR09P
+RCwgXAogCQkgICAgICAiam1wIG1lbWNweV9lcm1zIiwgWDg2X0ZFQVRVUkVfRVJNUwogCkBAIC0z
+OSw3ICszOSw3IEBAIEVOVFJZKG1lbWNweSkKIAltb3ZsICVlZHgsICVlY3gKIAlyZXAgbW92c2IK
+IAlyZXQKLUVORFBST0MobWVtY3B5KQorU1lNX0ZVTkNfRU5EKG1lbWNweSkKIFNZTV9GVU5DX0VO
+RF9BTElBUyhfX21lbWNweSkKIEVYUE9SVF9TWU1CT0wobWVtY3B5KQogRVhQT1JUX1NZTUJPTChf
+X21lbWNweSkKQEAgLTQ4LDE0ICs0OCwxNCBAQCBFWFBPUlRfU1lNQk9MKF9fbWVtY3B5KQogICog
+bWVtY3B5X2VybXMoKSAtIGVuaGFuY2VkIGZhc3Qgc3RyaW5nIG1lbWNweS4gVGhpcyBpcyBmYXN0
+ZXIgYW5kCiAgKiBzaW1wbGVyIHRoYW4gbWVtY3B5LiBVc2UgbWVtY3B5X2VybXMgd2hlbiBwb3Nz
+aWJsZS4KICAqLwotRU5UUlkobWVtY3B5X2VybXMpCitTWU1fRlVOQ19TVEFSVF9MT0NBTChtZW1j
+cHlfZXJtcykKIAltb3ZxICVyZGksICVyYXgKIAltb3ZxICVyZHgsICVyY3gKIAlyZXAgbW92c2IK
+IAlyZXQKLUVORFBST0MobWVtY3B5X2VybXMpCitTWU1fRlVOQ19FTkQobWVtY3B5X2VybXMpCiAK
+LUVOVFJZKG1lbWNweV9vcmlnKQorU1lNX0ZVTkNfU1RBUlRfTE9DQUwobWVtY3B5X29yaWcpCiAJ
+bW92cSAlcmRpLCAlcmF4CiAKIAljbXBxICQweDIwLCAlcmR4CkBAIC0xODAsNyArMTgwLDcgQEAg
+RU5UUlkobWVtY3B5X29yaWcpCiAKIC5MZW5kOgogCXJldHEKLUVORFBST0MobWVtY3B5X29yaWcp
+CitTWU1fRlVOQ19FTkQobWVtY3B5X29yaWcpCiAKICNpZm5kZWYgQ09ORklHX1VNTAogLyoKZGlm
+ZiAtLWdpdCBhL2FyY2gveDg2L2xpYi9tZW1zZXRfNjQuUyBiL2FyY2gveDg2L2xpYi9tZW1zZXRf
+NjQuUwppbmRleCA5MjdhYzQ0ZDM0YWEuLjU2NGFiZjllY2VkYiAxMDA2NDQKLS0tIGEvYXJjaC94
+ODYvbGliL21lbXNldF82NC5TCisrKyBiL2FyY2gveDg2L2xpYi9tZW1zZXRfNjQuUwpAQCAtNTks
+MTYgKzU5LDE2IEBAIEVYUE9SVF9TWU1CT0woX19tZW1zZXQpCiAgKgogICogcmF4ICAgb3JpZ2lu
+YWwgZGVzdGluYXRpb24KICAqLwotRU5UUlkobWVtc2V0X2VybXMpCitTWU1fRlVOQ19TVEFSVF9M
+T0NBTChtZW1zZXRfZXJtcykKIAltb3ZxICVyZGksJXI5CiAJbW92YiAlc2lsLCVhbAogCW1vdnEg
+JXJkeCwlcmN4CiAJcmVwIHN0b3NiCiAJbW92cSAlcjksJXJheAogCXJldAotRU5EUFJPQyhtZW1z
+ZXRfZXJtcykKK1NZTV9GVU5DX0VORChtZW1zZXRfZXJtcykKIAotRU5UUlkobWVtc2V0X29yaWcp
+CitTWU1fRlVOQ19TVEFSVF9MT0NBTChtZW1zZXRfb3JpZykKIAltb3ZxICVyZGksJXIxMAogCiAJ
+LyogZXhwYW5kIGJ5dGUgdmFsdWUgICovCkBAIC0xMzksNCArMTM5LDQgQEAgRU5UUlkobWVtc2V0
+X29yaWcpCiAJc3VicSAlcjgsJXJkeAogCWptcCAuTGFmdGVyX2JhZF9hbGlnbm1lbnQKIC5MZmlu
+YWw6Ci1FTkRQUk9DKG1lbXNldF9vcmlnKQorU1lNX0ZVTkNfRU5EKG1lbXNldF9vcmlnKQpkaWZm
+IC0tZ2l0IGEvYXJjaC94ODYvcGxhdGZvcm0vZWZpL2VmaV90aHVua182NC5TIGIvYXJjaC94ODYv
+cGxhdGZvcm0vZWZpL2VmaV90aHVua182NC5TCmluZGV4IDQ2YzU4YjA4NzM5Yy4uZDY3N2E3ZWIy
+ZDBhIDEwMDY0NAotLS0gYS9hcmNoL3g4Ni9wbGF0Zm9ybS9lZmkvZWZpX3RodW5rXzY0LlMKKysr
+IGIvYXJjaC94ODYvcGxhdGZvcm0vZWZpL2VmaV90aHVua182NC5TCkBAIC02Nyw3ICs2Nyw3IEBA
+IEVORFBST0MoZWZpNjRfdGh1bmspCiAgKgogICogVGhpcyBmdW5jdGlvbiBtdXN0IGJlIGludm9r
+ZWQgd2l0aCBhIDE6MSBtYXBwZWQgc3RhY2suCiAgKi8KLUVOVFJZKF9fZWZpNjRfdGh1bmspCitT
+WU1fRlVOQ19TVEFSVF9MT0NBTChfX2VmaTY0X3RodW5rKQogCW1vdmwJJWRzLCAlZWF4CiAJcHVz
+aAklcmF4CiAJbW92bAklZXMsICVlYXgKQEAgLTExNCwxNCArMTE0LDE0IEBAIEVOVFJZKF9fZWZp
+NjRfdGh1bmspCiAJb3IJJXJjeCwgJXJheAogMToKIAlyZXQKLUVORFBST0MoX19lZmk2NF90aHVu
+aykKK1NZTV9GVU5DX0VORChfX2VmaTY0X3RodW5rKQogCi1FTlRSWShlZmlfZXhpdDMyKQorU1lN
+X0ZVTkNfU1RBUlRfTE9DQUwoZWZpX2V4aXQzMikKIAltb3ZxCWZ1bmNfcnRfcHRyKCVyaXApLCAl
+cmF4CiAJcHVzaAklcmF4CiAJbW92CSVyZGksICVyYXgKIAlyZXQKLUVORFBST0MoZWZpX2V4aXQz
+MikKK1NZTV9GVU5DX0VORChlZmlfZXhpdDMyKQogCiAJLmNvZGUzMgogLyoKQEAgLTEyOSw3ICsx
+MjksNyBAQCBFTkRQUk9DKGVmaV9leGl0MzIpCiAgKgogICogVGhlIHN0YWNrIHNob3VsZCByZXBy
+ZXNlbnQgdGhlIDMyLWJpdCBjYWxsaW5nIGNvbnZlbnRpb24uCiAgKi8KLUVOVFJZKGVmaV9lbnRl
+cjMyKQorU1lNX0ZVTkNfU1RBUlRfTE9DQUwoZWZpX2VudGVyMzIpCiAJbW92bAkkX19LRVJORUxf
+RFMsICVlYXgKIAltb3ZsCSVlYXgsICVkcwogCW1vdmwJJWVheCwgJWVzCkBAIC0xNDUsNyArMTQ1
+LDcgQEAgRU5UUlkoZWZpX2VudGVyMzIpCiAJcHVzaGwJJWVheAogCiAJbHJldAotRU5EUFJPQyhl
+ZmlfZW50ZXIzMikKK1NZTV9GVU5DX0VORChlZmlfZW50ZXIzMikKIAogCS5kYXRhCiAJLmJhbGln
+bgk4CmRpZmYgLS1naXQgYS9hcmNoL3g4Ni94ZW4veGVuLXB2aC5TIGIvYXJjaC94ODYveGVuL3hl
+bi1wdmguUwppbmRleCA1MmIyODc5M2E2MjUuLmEyMGE1NWNjNTEzNSAxMDA2NDQKLS0tIGEvYXJj
+aC94ODYveGVuL3hlbi1wdmguUworKysgYi9hcmNoL3g4Ni94ZW4veGVuLXB2aC5TCkBAIC01NCw3
+ICs1NCw3IEBACiAgKiBjaGFyZ2Ugb2Ygc2V0dGluZyB1cCBpdCdzIG93biBzdGFjaywgR0RUIGFu
+ZCBJRFQuCiAgKi8KIAotRU5UUlkocHZoX3N0YXJ0X3hlbikKK1NZTV9DT0RFX1NUQVJUX0xPQ0FM
+KHB2aF9zdGFydF94ZW4pCiAJY2xkCiAKIAlsZ2R0IChfcGEoZ2R0KSkKQEAgLTEzMyw3ICsxMzMs
+NyBAQCBFTlRSWShwdmhfc3RhcnRfeGVuKQogCiAJbGptcCAkX19CT09UX0NTLCAkX3BhKHN0YXJ0
+dXBfMzIpCiAjZW5kaWYKLUVORChwdmhfc3RhcnRfeGVuKQorU1lNX0NPREVfRU5EKHB2aF9zdGFy
+dF94ZW4pCiAKIAkuc2VjdGlvbiAiLmluaXQuZGF0YSIsImF3IgogCS5iYWxpZ24gOAotLSAKMi4x
+Ni4zCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KWGVu
+LWRldmVsIG1haWxpbmcgbGlzdApYZW4tZGV2ZWxAbGlzdHMueGVucHJvamVjdC5vcmcKaHR0cHM6
+Ly9saXN0cy54ZW5wcm9qZWN0Lm9yZy9tYWlsbWFuL2xpc3RpbmZvL3hlbi1kZXZlbA==
