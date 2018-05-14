@@ -1,52 +1,52 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+From: Lukas Wunner <lukas@wunner.de>
 Subject: Re: [PATCH v2] device property: Get rid of union aliasing
-Date: Mon, 14 May 2018 15:48:09 +0300
-Message-ID: <f2109d06a0755dd2d9dc807c1e13dd2c19903905.camel@linux.intel.com>
+Date: Mon, 14 May 2018 17:40:17 +0200
+Message-ID: <20180514154017.GA6734@wunner.de>
 References: <20180508131547.44366-1-andriy.shevchenko@linux.intel.com>
-         <20180514121817.GA27869@wunner.de>
+ <20180514121817.GA27869@wunner.de>
+ <f2109d06a0755dd2d9dc807c1e13dd2c19903905.camel@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180514121817.GA27869@wunner.de>
+Content-Disposition: inline
+In-Reply-To: <f2109d06a0755dd2d9dc807c1e13dd2c19903905.camel@linux.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Lukas Wunner <lukas@wunner.de>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Sakari Ailus <sakari.ailus@linux.intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2018-05-14 at 14:18 +0200, Lukas Wunner wrote:
-> On Tue, May 08, 2018 at 04:15:47PM +0300, Andy Shevchenko wrote:
-> > --- a/drivers/firmware/efi/apple-properties.c
-> > +++ b/drivers/firmware/efi/apple-properties.c
-> > @@ -13,6 +13,9 @@
-> >   *
-> >   * You should have received a copy of the GNU General Public
-> > License
-> >   * along with this program; if not, see <http://www.gnu.org/license
-> > s/>.
-> > + *
-> > + * FIXME: The approach is still based on union aliasing and should
-> > be
-> > + * replaced by a proper resource provider.
+On Mon, May 14, 2018 at 03:48:09PM +0300, Andy Shevchenko wrote:
+> On Mon, 2018-05-14 at 14:18 +0200, Lukas Wunner wrote:
+> > On Tue, May 08, 2018 at 04:15:47PM +0300, Andy Shevchenko wrote:
+> > > --- a/drivers/firmware/efi/apple-properties.c
+> > > +++ b/drivers/firmware/efi/apple-properties.c
+> > > @@ -13,6 +13,9 @@
+> > > + * FIXME: The approach is still based on union aliasing and should be
+> > > + * replaced by a proper resource provider.
+> > 
+> > Why?  All Apple EFI properties are either boolean or u8 arrays.
+> > You've correctly changed this file to always supply u8 arrays,
+> > so I don't see where union aliasing is happening here?
 > 
-> Why?  All Apple EFI properties are either boolean or u8 arrays.
-> You've correctly changed this file to always supply u8 arrays,
-> so I don't see where union aliasing is happening here?
+> Okay, for now I can see only Thunderbolt user of these properties (is it
+> correct?) in upstream which uses u8 arrays indeed.
 
-Okay, for now I can see only Thunderbolt user of these properties (is it
-correct?) in upstream which uses u8 arrays indeed.
+That is correct, thunderbolt.ko is so far the only user.
 
-Though the implementation is quite fragile in this sense, because it
-doesn't discourage people to use device_property_read_string() in case
-when it's indeed a string (I saw these kind of properties in the very
-dump you posted on your GH page).
 
-So, I can agree that is "not happening _right_now_", but I can't agree
-on the implementation robustness.
+> Though the implementation is quite fragile in this sense, because it
+> doesn't discourage people to use device_property_read_string() in case
+> when it's indeed a string (I saw these kind of properties in the very
+> dump you posted on your GH page).
 
-I can change a wording of the commit message and the FIXME, but _leave_
-FIXME in place b/c of above.
+Well if that is your concern then you need to prevent functions which
+retrieve properties to use the wrong type.
 
--- 
-Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Intel Finland Oy
+E.g. to prevent retrieval of the u8 array as string, you'd have to
+amend drivers/base/property.c:pset_prop_read_string_array() to
+check the type of the property found and return -EINVAL if it's not
+string.
+
+Thanks,
+
+Lukas
