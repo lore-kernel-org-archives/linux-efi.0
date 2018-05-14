@@ -1,101 +1,71 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 17/17] efi/libstub/arm64: handle randomized TEXT_OFFSET
-Date: Mon, 14 May 2018 09:01:24 +0200
-Message-ID: <CAKv+Gu_RLb1fTNff0+HkQ9h5j-TFAJk=2nva72PSZExXdM1VJw@mail.gmail.com>
+Subject: Re: [PATCH 12/17] efi: fix efi_pci_io_protocol32 prototype for mixed mode
+Date: Mon, 14 May 2018 09:02:34 +0200
+Message-ID: <CAKv+Gu8QVR_BFLMKttqfmCMqXU13grwr846oftFysB8B0CJCZw@mail.gmail.com>
 References: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
- <20180504060003.19618-18-ard.biesheuvel@linaro.org> <20180514064701.GC16596@gmail.com>
- <CAKv+Gu9nud17L+FhMwbTb9AaVd0+qRgqXU1_c4K+GCH-=uhpxQ@mail.gmail.com> <20180514070010.GF16596@gmail.com>
+ <20180504060003.19618-13-ard.biesheuvel@linaro.org> <20180514065744.GD16596@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180514070010.GF16596@gmail.com>
+In-Reply-To: <20180514065744.GD16596@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>
-Cc: linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Mark Rutland <mark.rutland@arm.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Cc: linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 14 May 2018 at 09:00, Ingo Molnar <mingo@kernel.org> wrote:
+On 14 May 2018 at 08:57, Ingo Molnar <mingo@kernel.org> wrote:
 >
 > * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 >
->> On 14 May 2018 at 08:47, Ingo Molnar <mingo@kernel.org> wrote:
->> >
->> > * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
->> >
->> >> From: Mark Rutland <mark.rutland@arm.com>
->> >>
->> >> When CONFIG_RANDOMIZE_TEXT_OFFSET is selected, TEXT_OFFSET is an
->> >> arbitrary multiple of PAGE_SIZE in the interval [0, 2MB).
->> >>
->> >> The EFI stub does not account for the potential misalignment of
->> >> TEXT_OFFSET relative to EFI_KIMG_ALIGN, and produces a randomized
->> >> physical offset which is always a round multiple of EFI_KIMG_ALIGN.
->> >> This may result in statically allocated objects whose alignment exceeds
->> >> PAGE_SIZE to appear misaligned in memory. This has been observed to
->> >> result in spurious stack overflow reports and failure to make use of
->> >> the IRQ stacks, and theoretically could result in a number of other
->> >> issues.
->> >>
->> >> We can OR in the low bits of TEXT_OFFSET to ensure that we have the
->> >> necessary offset (and hence preserve the misalignment of TEXT_OFFSET
->> >> relative to EFI_KIMG_ALIGN), so let's do that.
->> >>
->> >> Fixes: 6f26b3671184c36d ("arm64: kaslr: increase randomization granularity")
->> >> Cc: <stable@vger.kernel.org> # v4.7+
->> >> Reported-by: Kim Phillips <kim.phillips@arm.com>
->> >> Signed-off-by: Mark Rutland <mark.rutland@arm.com>
->> >> Tested-by: Kim Phillips <kim.phillips@arm.com>
->> >> [ardb: clarify commit log]
->> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->> >> ---
->> >>  drivers/firmware/efi/libstub/arm64-stub.c | 7 +++++++
->> >>  1 file changed, 7 insertions(+)
->> >>
->> >> diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
->> >> index b9bd827caa22..541b82fdc8a2 100644
->> >> --- a/drivers/firmware/efi/libstub/arm64-stub.c
->> >> +++ b/drivers/firmware/efi/libstub/arm64-stub.c
->> >> @@ -97,6 +97,13 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table_arg,
->> >>               u32 offset = !IS_ENABLED(CONFIG_DEBUG_ALIGN_RODATA) ?
->> >>                            (phys_seed >> 32) & mask : TEXT_OFFSET;
->> >>
->> >> +             /*
->> >> +              * With CONFIG_RANDOMIZE_TEXT_OFFSET, TEXT_OFFSET may not be a
->> >> +              * multiple of EFI_KIMG_ALIGN, and we must ensure that we apply
->> >> +              * the offset below EFI_KIMG_ALIGN.
->> >> +              */
->> >
->> > When referring to config variables in comments and changelogs I'd suggest a bit
->> > more verbosity:
->> >
->> >   s/CONFIG_RANDOMIZE_TEXT_OFFSET
->> >    /CONFIG_RANDOMIZE_TEXT_OFFSET=y
->> >
->> > ... because at first I thought (based on the name) that
->> > CONFIG_RANDOMIZE_TEXT_OFFSET is an actual integer offset value - while it's a
->> > bool. The =y makes the bool nature obvious.
->> >
->> > ( Similarly, when negated the canonical way to refer to it is
->> >   !CONFIG_RANDOMIZE_TEXT_OFFSET. )
->> >
->>
->> Fair enough.
->>
->> >> +             offset |= (TEXT_OFFSET % EFI_KIMG_ALIGN);
->> >
->> > The parentheses are not needed here I think.
->> >
->>
->> Nope.
->>
->> Will you fix this up when applying? Or should I resend?
+>> Mixed mode allows a kernel built for x86_64 to interact with 32-bit
+>> EFI firmware, but requires us to define all struct definitions carefully
+>> when it comes to pointer sizes. efi_pci_io_protocol32 currently uses a
+>> void* for the 'romimage' field, which will be interpreted as a 64-bit
+>> field on such kernels, potentially resulting in bogus memory references
+>> and subsequent crashes.
 >
-> Since this was at the tail with no dependencies I'll skip this for now I think -
-> mind sending the refreshed version in the next batch?
+> Yeah, so the first confusion I ran into is:
+>
+>  s/efi_pci_io_protocol32
+>   /efi_pci_io_protocol_32
+>
+> Once I found it in the code I made this change:
+>
+>  s/efi: fix efi_pci_io_protocol32 prototype for mixed mode
+>   /efi: Fix 'struct efi_pci_io_protocol32' definition for mixed mode
+>
+> Because we normally use the 'prototype' name for function declarations, not for
+> data type definitions. Adding 'struct' and putting it between quotes makes it
+> obvious at a glance that we are talking about a structure definition here.
 >
 
-Actually, by the reasoning in your other reply, I'll fix this up and
-resend it for -urgent instead.
+OK.
 
-Thanks,
-Ard.
+> BTW., since it's marked -stable, due to:
+>
+>  > potentially resulting in bogus memory references
+>  > and subsequent crashes.
+>
+> I'm moving it to efi/urgent: the principle here is that if a patch is urgent
+> enough for -stable then it should generally not wait for the next merge window.
+>
+
+The issue was found by inspection rather than a crash report, so I was
+in doubt about this.
+
+> Also, because this actually fixes a crash, I extended the title to spell this out
+> more clearly:
+>
+>   Subject: efi: Avoid potential crashes, fix the 'struct efi_pci_io_protocol_32' definition for mixed mode
+>
+> ... which also makes it easier for maintainers of older stable kernels to decide
+> whether to backport the patch or not.
+>
+
+OK.
+
+> Anyway, the patch is looking good otherwise, no need to resend.
+>
+> Thanks,
+>
+>         Ingo
