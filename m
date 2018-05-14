@@ -1,75 +1,101 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] efi/x86: Clean up the eboot code a bit
-Date: Mon, 14 May 2018 08:59:33 +0200
-Message-ID: <CAKv+Gu9gzHXNfHwZAoXfOX4F-UbsGjbjZce-iD00E-uqRrC88Q@mail.gmail.com>
+Subject: Re: [PATCH 17/17] efi/libstub/arm64: handle randomized TEXT_OFFSET
+Date: Mon, 14 May 2018 09:01:24 +0200
+Message-ID: <CAKv+Gu_RLb1fTNff0+HkQ9h5j-TFAJk=2nva72PSZExXdM1VJw@mail.gmail.com>
 References: <20180504060003.19618-1-ard.biesheuvel@linaro.org>
- <20180504060003.19618-16-ard.biesheuvel@linaro.org> <20180514064323.GB16596@gmail.com>
- <CAKv+Gu-v-dw28pjo_8of_dNR7mEMK3ngDUksFYUTWwro14PFfw@mail.gmail.com> <20180514065852.GE16596@gmail.com>
+ <20180504060003.19618-18-ard.biesheuvel@linaro.org> <20180514064701.GC16596@gmail.com>
+ <CAKv+Gu9nud17L+FhMwbTb9AaVd0+qRgqXU1_c4K+GCH-=uhpxQ@mail.gmail.com> <20180514070010.GF16596@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180514065852.GE16596@gmail.com>
+In-Reply-To: <20180514070010.GF16596@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>
-Cc: linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Hans de Goede <hdegoede@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Cc: linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Mark Rutland <mark.rutland@arm.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 14 May 2018 at 08:58, Ingo Molnar <mingo@kernel.org> wrote:
+On 14 May 2018 at 09:00, Ingo Molnar <mingo@kernel.org> wrote:
 >
 > * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 >
->> On 14 May 2018 at 08:43, Ingo Molnar <mingo@kernel.org> wrote:
+>> On 14 May 2018 at 08:47, Ingo Molnar <mingo@kernel.org> wrote:
 >> >
->> > So I looked at arch/x86/boot/compressed/eboot.c to improve a printk message and
->> > ended up with the cleanups below.
+>> > * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 >> >
->> > Only build tested.
+>> >> From: Mark Rutland <mark.rutland@arm.com>
+>> >>
+>> >> When CONFIG_RANDOMIZE_TEXT_OFFSET is selected, TEXT_OFFSET is an
+>> >> arbitrary multiple of PAGE_SIZE in the interval [0, 2MB).
+>> >>
+>> >> The EFI stub does not account for the potential misalignment of
+>> >> TEXT_OFFSET relative to EFI_KIMG_ALIGN, and produces a randomized
+>> >> physical offset which is always a round multiple of EFI_KIMG_ALIGN.
+>> >> This may result in statically allocated objects whose alignment exceeds
+>> >> PAGE_SIZE to appear misaligned in memory. This has been observed to
+>> >> result in spurious stack overflow reports and failure to make use of
+>> >> the IRQ stacks, and theoretically could result in a number of other
+>> >> issues.
+>> >>
+>> >> We can OR in the low bits of TEXT_OFFSET to ensure that we have the
+>> >> necessary offset (and hence preserve the misalignment of TEXT_OFFSET
+>> >> relative to EFI_KIMG_ALIGN), so let's do that.
+>> >>
+>> >> Fixes: 6f26b3671184c36d ("arm64: kaslr: increase randomization granularity")
+>> >> Cc: <stable@vger.kernel.org> # v4.7+
+>> >> Reported-by: Kim Phillips <kim.phillips@arm.com>
+>> >> Signed-off-by: Mark Rutland <mark.rutland@arm.com>
+>> >> Tested-by: Kim Phillips <kim.phillips@arm.com>
+>> >> [ardb: clarify commit log]
+>> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>> >> ---
+>> >>  drivers/firmware/efi/libstub/arm64-stub.c | 7 +++++++
+>> >>  1 file changed, 7 insertions(+)
+>> >>
+>> >> diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
+>> >> index b9bd827caa22..541b82fdc8a2 100644
+>> >> --- a/drivers/firmware/efi/libstub/arm64-stub.c
+>> >> +++ b/drivers/firmware/efi/libstub/arm64-stub.c
+>> >> @@ -97,6 +97,13 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table_arg,
+>> >>               u32 offset = !IS_ENABLED(CONFIG_DEBUG_ALIGN_RODATA) ?
+>> >>                            (phys_seed >> 32) & mask : TEXT_OFFSET;
+>> >>
+>> >> +             /*
+>> >> +              * With CONFIG_RANDOMIZE_TEXT_OFFSET, TEXT_OFFSET may not be a
+>> >> +              * multiple of EFI_KIMG_ALIGN, and we must ensure that we apply
+>> >> +              * the offset below EFI_KIMG_ALIGN.
+>> >> +              */
 >> >
->> > Thanks,
+>> > When referring to config variables in comments and changelogs I'd suggest a bit
+>> > more verbosity:
 >> >
->> >         Ingo
+>> >   s/CONFIG_RANDOMIZE_TEXT_OFFSET
+>> >    /CONFIG_RANDOMIZE_TEXT_OFFSET=y
 >> >
->> > =================>
->> > Subject: efi/x86: Clean up the eboot code
->> > From: Ingo Molnar <mingo@kernel.org>
->> > Date: Mon May 14 08:33:40 CEST 2018
+>> > ... because at first I thought (based on the name) that
+>> > CONFIG_RANDOMIZE_TEXT_OFFSET is an actual integer offset value - while it's a
+>> > bool. The =y makes the bool nature obvious.
 >> >
->> > Various small cleanups:
+>> > ( Similarly, when negated the canonical way to refer to it is
+>> >   !CONFIG_RANDOMIZE_TEXT_OFFSET. )
 >> >
->> >  - Standardize printk messages:
->> >
->> >      'alloc' => 'allocate'
->> >      'mem'   => 'memory'
->> >
->> >    also put variable names in printk messages between quotes.
->> >
->> >  - Align mass-assignments vertically for better readability
->> >
->> >  - Break multi-line function prototypes at the name where possible,
->> >    not in the middle of the parameter list
->> >
->> >  - Use a newline before return statements consistently.
->> >
->> >  - Use curly braces in a balanced fashion.
->> >
->> >  - Remove stray newlines.
->> >
->> > No change in functionality.
->> >
->> > Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->> > Cc: Linus Torvalds <torvalds@linux-foundation.org>
->> > Cc: Matt Fleming <matt@codeblueprint.co.uk>
->> > Cc: Peter Zijlstra <peterz@infradead.org>
->> > Cc: Thomas Gleixner <tglx@linutronix.de>
->> > Cc: linux-efi@vger.kernel.org
->> > Signed-off-by: Ingo Molnar <mingo@kernel.org>
 >>
->> Thanks Ingo
+>> Fair enough.
 >>
->> Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>> >> +             offset |= (TEXT_OFFSET % EFI_KIMG_ALIGN);
+>> >
+>> > The parentheses are not needed here I think.
+>> >
+>>
+>> Nope.
+>>
+>> Will you fix this up when applying? Or should I resend?
 >
-> Thanks - mind picking it up into your tree? I only did minimal testing and don't
-> want to interfere with your patch flow either.
+> Since this was at the tail with no dependencies I'll skip this for now I think -
+> mind sending the refreshed version in the next batch?
 >
 
-Will do, thanks.
+Actually, by the reasoning in your other reply, I'll fix this up and
+resend it for -urgent instead.
+
+Thanks,
+Ard.
