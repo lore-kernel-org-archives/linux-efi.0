@@ -1,963 +1,181 @@
 From: Jiri Slaby <jslaby@suse.cz>
-Subject: [PATCH v6 27/28] x86_32/asm: change all ENTRY+ENDPROC to SYM_FUNC_*
-Date: Fri, 18 May 2018 11:17:20 +0200
-Message-ID: <20180518091721.7604-28-jslaby@suse.cz>
+Subject: [PATCH v6 20/28] x86/asm: make some functions local
+Date: Fri, 18 May 2018 11:17:13 +0200
+Message-ID: <20180518091721.7604-21-jslaby@suse.cz>
 References: <20180518091721.7604-1-jslaby@suse.cz>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xenproject.org>
 In-Reply-To: <20180518091721.7604-1-jslaby@suse.cz>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <https://lists.xenproject.org/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xenproject.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xenproject.org>
+List-Help: <mailto:xen-devel-request@lists.xenproject.org?subject=help>
+List-Subscribe: <https://lists.xenproject.org/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xenproject.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xenproject.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xenproject.org>
 To: mingo@redhat.com
-Cc: linux-arch@vger.kernel.org, linux-kernel@vger.kernel.org, Jiri Slaby <jslaby@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, x86@kernel.org, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, Bill Metzenthen <billm@melbpc.org.au>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-crypto@vger.kernel.org, linux-efi@vger.kernel.org
+Cc: linux-arch@vger.kernel.org, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, x86@kernel.org, linux-kernel@vger.kernel.org, "H. Peter Anvin" <hpa@zytor.com>, xen-devel@lists.xenproject.org, Thomas Gleixner <tglx@linutronix.de>, Jiri Slaby <jslaby@suse.cz>
 List-Id: linux-efi@vger.kernel.org
 
-These are all functions which are invoked from elsewhere, so we annotate
-them as global using the new SYM_FUNC_START. And their ENDPROC's by
-SYM_FUNC_END.
-
-Now, we can finally force ENTRY/ENDPROC to be undefined on X86.
-
-Signed-off-by: Jiri Slaby <jslaby@suse.cz>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: x86@kernel.org
-Cc: Herbert Xu <herbert@gondor.apana.org.au>
-Cc: "David S. Miller" <davem@davemloft.net>
-Cc: Bill Metzenthen <billm@melbpc.org.au>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-crypto@vger.kernel.org
-Cc: linux-efi@vger.kernel.org
----
- arch/x86/boot/compressed/efi_stub_32.S     |  4 ++--
- arch/x86/boot/compressed/head_32.S         | 12 +++++------
- arch/x86/crypto/salsa20-i586-asm_32.S      |  4 ++--
- arch/x86/crypto/serpent-sse2-i586-asm_32.S |  8 ++++----
- arch/x86/crypto/twofish-i586-asm_32.S      |  8 ++++----
- arch/x86/entry/entry_32.S                  | 24 +++++++++++-----------
- arch/x86/kernel/head_32.S                  | 16 +++++++--------
- arch/x86/lib/atomic64_386_32.S             |  4 ++--
- arch/x86/lib/atomic64_cx8_32.S             | 32 +++++++++++++++---------------
- arch/x86/lib/checksum_32.S                 |  8 ++++----
- arch/x86/math-emu/div_Xsig.S               |  4 ++--
- arch/x86/math-emu/div_small.S              |  4 ++--
- arch/x86/math-emu/mul_Xsig.S               | 12 +++++------
- arch/x86/math-emu/polynom_Xsig.S           |  4 ++--
- arch/x86/math-emu/reg_norm.S               |  8 ++++----
- arch/x86/math-emu/reg_round.S              |  4 ++--
- arch/x86/math-emu/reg_u_add.S              |  4 ++--
- arch/x86/math-emu/reg_u_div.S              |  4 ++--
- arch/x86/math-emu/reg_u_mul.S              |  4 ++--
- arch/x86/math-emu/reg_u_sub.S              |  4 ++--
- arch/x86/math-emu/round_Xsig.S             |  8 ++++----
- arch/x86/math-emu/shr_Xsig.S               |  4 ++--
- arch/x86/math-emu/wm_shrx.S                |  8 ++++----
- arch/x86/math-emu/wm_sqrt.S                |  4 ++--
- arch/x86/platform/efi/efi_stub_32.S        |  4 ++--
- include/linux/linkage.h                    |  8 +++-----
- 26 files changed, 103 insertions(+), 105 deletions(-)
-
-diff --git a/arch/x86/boot/compressed/efi_stub_32.S b/arch/x86/boot/compressed/efi_stub_32.S
-index 257e341fd2c8..ed6c351d34ed 100644
---- a/arch/x86/boot/compressed/efi_stub_32.S
-+++ b/arch/x86/boot/compressed/efi_stub_32.S
-@@ -24,7 +24,7 @@
-  */
- 
- .text
--ENTRY(efi_call_phys)
-+SYM_FUNC_START(efi_call_phys)
- 	/*
- 	 * 0. The function can only be called in Linux kernel. So CS has been
- 	 * set to 0x0010, DS and SS have been set to 0x0018. In EFI, I found
-@@ -77,7 +77,7 @@ ENTRY(efi_call_phys)
- 	movl	saved_return_addr(%edx), %ecx
- 	pushl	%ecx
- 	ret
--ENDPROC(efi_call_phys)
-+SYM_FUNC_END(efi_call_phys)
- .previous
- 
- .data
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index 7e8ab0bb6968..3fa36496af12 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -61,7 +61,7 @@
- 	.hidden _egot
- 
- 	__HEAD
--ENTRY(startup_32)
-+SYM_FUNC_START(startup_32)
- 	cld
- 	/*
- 	 * Test KEEP_SEGMENTS flag to see if the bootloader is asking
-@@ -142,14 +142,14 @@ ENTRY(startup_32)
-  */
- 	leal	relocated(%ebx), %eax
- 	jmp	*%eax
--ENDPROC(startup_32)
-+SYM_FUNC_END(startup_32)
- 
- #ifdef CONFIG_EFI_STUB
- /*
-  * We don't need the return address, so set up the stack so efi_main() can find
-  * its arguments.
-  */
--ENTRY(efi_pe_entry)
-+SYM_FUNC_START(efi_pe_entry)
- 	add	$0x4, %esp
- 
- 	call	1f
-@@ -174,9 +174,9 @@ ENTRY(efi_pe_entry)
- 	pushl	%eax
- 	pushl	%ecx
- 	jmp	2f		/* Skip efi_config initialization */
--ENDPROC(efi_pe_entry)
-+SYM_FUNC_END(efi_pe_entry)
- 
--ENTRY(efi32_stub_entry)
-+SYM_FUNC_START(efi32_stub_entry)
- 	add	$0x4, %esp
- 	popl	%ecx
- 	popl	%edx
-@@ -205,7 +205,7 @@ fail:
- 	movl	BP_code32_start(%esi), %eax
- 	leal	startup_32(%eax), %eax
- 	jmp	*%eax
--ENDPROC(efi32_stub_entry)
-+SYM_FUNC_END(efi32_stub_entry)
- #endif
- 
- 	.text
-diff --git a/arch/x86/crypto/salsa20-i586-asm_32.S b/arch/x86/crypto/salsa20-i586-asm_32.S
-index 6014b7b9e52a..edeb4c3e7389 100644
---- a/arch/x86/crypto/salsa20-i586-asm_32.S
-+++ b/arch/x86/crypto/salsa20-i586-asm_32.S
-@@ -8,7 +8,7 @@
- .text
- 
- # enter salsa20_encrypt_bytes
--ENTRY(salsa20_encrypt_bytes)
-+SYM_FUNC_START(salsa20_encrypt_bytes)
- 	mov	%esp,%eax
- 	and	$31,%eax
- 	add	$256,%eax
-@@ -935,4 +935,4 @@ ENTRY(salsa20_encrypt_bytes)
- 	add	$64,%esi
- 	# goto bytesatleast1
- 	jmp	._bytesatleast1
--ENDPROC(salsa20_encrypt_bytes)
-+SYM_FUNC_END(salsa20_encrypt_bytes)
-diff --git a/arch/x86/crypto/serpent-sse2-i586-asm_32.S b/arch/x86/crypto/serpent-sse2-i586-asm_32.S
-index d348f1553a79..f3cebd3c6739 100644
---- a/arch/x86/crypto/serpent-sse2-i586-asm_32.S
-+++ b/arch/x86/crypto/serpent-sse2-i586-asm_32.S
-@@ -512,7 +512,7 @@
- 	pxor t0,		x3; \
- 	movdqu x3,		(3*4*4)(out);
- 
--ENTRY(__serpent_enc_blk_4way)
-+SYM_FUNC_START(__serpent_enc_blk_4way)
- 	/* input:
- 	 *	arg_ctx(%esp): ctx, CTX
- 	 *	arg_dst(%esp): dst
-@@ -574,9 +574,9 @@ ENTRY(__serpent_enc_blk_4way)
- 	xor_blocks(%eax, RA, RB, RC, RD, RT0, RT1, RE);
- 
- 	ret;
--ENDPROC(__serpent_enc_blk_4way)
-+SYM_FUNC_END(__serpent_enc_blk_4way)
- 
--ENTRY(serpent_dec_blk_4way)
-+SYM_FUNC_START(serpent_dec_blk_4way)
- 	/* input:
- 	 *	arg_ctx(%esp): ctx, CTX
- 	 *	arg_dst(%esp): dst
-@@ -628,4 +628,4 @@ ENTRY(serpent_dec_blk_4way)
- 	write_blocks(%eax, RC, RD, RB, RE, RT0, RT1, RA);
- 
- 	ret;
--ENDPROC(serpent_dec_blk_4way)
-+SYM_FUNC_END(serpent_dec_blk_4way)
-diff --git a/arch/x86/crypto/twofish-i586-asm_32.S b/arch/x86/crypto/twofish-i586-asm_32.S
-index 694ea4587ba7..8ecb5234b2b3 100644
---- a/arch/x86/crypto/twofish-i586-asm_32.S
-+++ b/arch/x86/crypto/twofish-i586-asm_32.S
-@@ -220,7 +220,7 @@
- 	xor	%esi,		d ## D;\
- 	ror	$1,		d ## D;
- 
--ENTRY(twofish_enc_blk)
-+SYM_FUNC_START(twofish_enc_blk)
- 	push	%ebp			/* save registers according to calling convention*/
- 	push    %ebx
- 	push    %esi
-@@ -274,9 +274,9 @@ ENTRY(twofish_enc_blk)
- 	pop	%ebp
- 	mov	$1,	%eax
- 	ret
--ENDPROC(twofish_enc_blk)
-+SYM_FUNC_END(twofish_enc_blk)
- 
--ENTRY(twofish_dec_blk)
-+SYM_FUNC_START(twofish_dec_blk)
- 	push	%ebp			/* save registers according to calling convention*/
- 	push    %ebx
- 	push    %esi
-@@ -331,4 +331,4 @@ ENTRY(twofish_dec_blk)
- 	pop	%ebp
- 	mov	$1,	%eax
- 	ret
--ENDPROC(twofish_dec_blk)
-+SYM_FUNC_END(twofish_dec_blk)
-diff --git a/arch/x86/entry/entry_32.S b/arch/x86/entry/entry_32.S
-index ec2ea6379582..f82608268523 100644
---- a/arch/x86/entry/entry_32.S
-+++ b/arch/x86/entry/entry_32.S
-@@ -273,7 +273,7 @@ SYM_CODE_END(__switch_to_asm)
-  * asmlinkage function so its argument has to be pushed on the stack.  This
-  * wrapper creates a proper "end of stack" frame header before the call.
-  */
--ENTRY(schedule_tail_wrapper)
-+SYM_FUNC_START(schedule_tail_wrapper)
- 	FRAME_BEGIN
- 
- 	pushl	%eax
-@@ -282,7 +282,7 @@ ENTRY(schedule_tail_wrapper)
- 
- 	FRAME_END
- 	ret
--ENDPROC(schedule_tail_wrapper)
-+SYM_FUNC_END(schedule_tail_wrapper)
- /*
-  * A newly forked process directly context switches into this address.
-  *
-@@ -414,7 +414,7 @@ SYM_CODE_END(xen_sysenter_target)
-  * ebp  user stack
-  * 0(%ebp) arg6
-  */
--ENTRY(entry_SYSENTER_32)
-+SYM_FUNC_START(entry_SYSENTER_32)
- 	movl	TSS_sysenter_sp0(%esp), %esp
- .Lsysenter_past_esp:
- 	pushl	$__USER_DS		/* pt_regs->ss */
-@@ -504,7 +504,7 @@ ENTRY(entry_SYSENTER_32)
- 	popfl
- 	jmp	.Lsysenter_flags_fixed
- SYM_ENTRY(__end_SYSENTER_singlestep_region, SYM_L_GLOBAL, SYM_A_NONE)
--ENDPROC(entry_SYSENTER_32)
-+SYM_FUNC_END(entry_SYSENTER_32)
- 
- /*
-  * 32-bit legacy system call entry.
-@@ -534,7 +534,7 @@ ENDPROC(entry_SYSENTER_32)
-  * edi  arg5
-  * ebp  arg6
-  */
--ENTRY(entry_INT80_32)
-+SYM_FUNC_START(entry_INT80_32)
- 	ASM_CLAC
- 	pushl	%eax			/* pt_regs->orig_ax */
- 	SAVE_ALL pt_regs_ax=$-ENOSYS	/* save rest */
-@@ -620,7 +620,7 @@ SYM_CODE_END(iret_exc)
- 	lss	(%esp), %esp			/* switch to espfix segment */
- 	jmp	.Lrestore_nocheck
- #endif
--ENDPROC(entry_INT80_32)
-+SYM_FUNC_END(entry_INT80_32)
- 
- .macro FIXUP_ESPFIX_STACK
- /*
-@@ -688,7 +688,7 @@ SYM_CODE_START_LOCAL(common_interrupt)
- SYM_CODE_END(common_interrupt)
- 
- #define BUILD_INTERRUPT3(name, nr, fn)	\
--ENTRY(name)				\
-+SYM_FUNC_START(name)				\
- 	ASM_CLAC;			\
- 	pushl	$~(nr);			\
- 	SAVE_ALL;			\
-@@ -697,7 +697,7 @@ ENTRY(name)				\
- 	movl	%esp, %eax;		\
- 	call	fn;			\
- 	jmp	ret_from_intr;		\
--ENDPROC(name)
-+SYM_FUNC_END(name)
- 
- #define BUILD_INTERRUPT(name, nr)		\
- 	BUILD_INTERRUPT3(name, nr, smp_##name);	\
-@@ -816,7 +816,7 @@ SYM_CODE_START(spurious_interrupt_bug)
- SYM_CODE_END(spurious_interrupt_bug)
- 
- #ifdef CONFIG_XEN
--ENTRY(xen_hypervisor_callback)
-+SYM_FUNC_START(xen_hypervisor_callback)
- 	pushl	$-1				/* orig_ax = -1 => not a system call */
- 	SAVE_ALL
- 	ENCODE_FRAME_POINTER
-@@ -844,7 +844,7 @@ SYM_INNER_LABEL_ALIGN(xen_do_upcall, SYM_L_GLOBAL)
- 	call	xen_maybe_preempt_hcall
- #endif
- 	jmp	ret_from_intr
--ENDPROC(xen_hypervisor_callback)
-+SYM_FUNC_END(xen_hypervisor_callback)
- 
- /*
-  * Hypervisor uses this for application faults while it executes.
-@@ -858,7 +858,7 @@ ENDPROC(xen_hypervisor_callback)
-  * to pop the stack frame we end up in an infinite loop of failsafe callbacks.
-  * We distinguish between categories by maintaining a status value in EAX.
-  */
--ENTRY(xen_failsafe_callback)
-+SYM_FUNC_START(xen_failsafe_callback)
- 	pushl	%eax
- 	movl	$1, %eax
- 1:	mov	4(%esp), %ds
-@@ -895,7 +895,7 @@ ENTRY(xen_failsafe_callback)
- 	_ASM_EXTABLE(2b, 7b)
- 	_ASM_EXTABLE(3b, 8b)
- 	_ASM_EXTABLE(4b, 9b)
--ENDPROC(xen_failsafe_callback)
-+SYM_FUNC_END(xen_failsafe_callback)
- 
- BUILD_INTERRUPT3(xen_hvm_callback_vector, HYPERVISOR_CALLBACK_VECTOR,
- 		 xen_evtchn_do_upcall)
-diff --git a/arch/x86/kernel/head_32.S b/arch/x86/kernel/head_32.S
-index ba9df7cc545d..7840ab96bee3 100644
---- a/arch/x86/kernel/head_32.S
-+++ b/arch/x86/kernel/head_32.S
-@@ -180,12 +180,12 @@ SYM_CODE_END(startup_32)
-  * up already except stack. We just set up stack here. Then call
-  * start_secondary().
-  */
--ENTRY(start_cpu0)
-+SYM_FUNC_START(start_cpu0)
- 	movl initial_stack, %ecx
- 	movl %ecx, %esp
- 	call *(initial_code)
- 1:	jmp 1b
--ENDPROC(start_cpu0)
-+SYM_FUNC_END(start_cpu0)
- #endif
- 
- /*
-@@ -196,7 +196,7 @@ ENDPROC(start_cpu0)
-  * If cpu hotplug is not supported then this code can go in init section
-  * which will be freed later
-  */
--ENTRY(startup_32_smp)
-+SYM_FUNC_START(startup_32_smp)
- 	cld
- 	movl $(__BOOT_DS),%eax
- 	movl %eax,%ds
-@@ -363,7 +363,7 @@ ENTRY(startup_32_smp)
- 
- 	call *(initial_code)
- 1:	jmp 1b
--ENDPROC(startup_32_smp)
-+SYM_FUNC_END(startup_32_smp)
- 
- #include "verify_cpu.S"
- 
-@@ -393,7 +393,7 @@ setup_once:
- 	andl $0,setup_once_ref	/* Once is enough, thanks */
- 	ret
- 
--ENTRY(early_idt_handler_array)
-+SYM_FUNC_START(early_idt_handler_array)
- 	# 36(%esp) %eflags
- 	# 32(%esp) %cs
- 	# 28(%esp) %eip
-@@ -408,7 +408,7 @@ ENTRY(early_idt_handler_array)
- 	i = i + 1
- 	.fill early_idt_handler_array + i*EARLY_IDT_HANDLER_SIZE - ., 1, 0xcc
- 	.endr
--ENDPROC(early_idt_handler_array)
-+SYM_FUNC_END(early_idt_handler_array)
- 	
- SYM_CODE_START_LOCAL(early_idt_handler_common)
- 	/*
-@@ -464,7 +464,7 @@ SYM_CODE_START_LOCAL(early_idt_handler_common)
- SYM_CODE_END(early_idt_handler_common)
- 
- /* This is the default interrupt "handler" :-) */
--ENTRY(early_ignore_irq)
-+SYM_FUNC_START(early_ignore_irq)
- 	cld
- #ifdef CONFIG_PRINTK
- 	pushl %eax
-@@ -499,7 +499,7 @@ ENTRY(early_ignore_irq)
- hlt_loop:
- 	hlt
- 	jmp hlt_loop
--ENDPROC(early_ignore_irq)
-+SYM_FUNC_END(early_ignore_irq)
- 
- __INITDATA
- 	.align 4
-diff --git a/arch/x86/lib/atomic64_386_32.S b/arch/x86/lib/atomic64_386_32.S
-index 9b0ca8fe80fc..9ed71edd9dfe 100644
---- a/arch/x86/lib/atomic64_386_32.S
-+++ b/arch/x86/lib/atomic64_386_32.S
-@@ -24,10 +24,10 @@
- 
- #define BEGIN(op) \
- .macro endp; \
--ENDPROC(atomic64_##op##_386); \
-+SYM_FUNC_END(atomic64_##op##_386); \
- .purgem endp; \
- .endm; \
--ENTRY(atomic64_##op##_386); \
-+SYM_FUNC_START(atomic64_##op##_386); \
- 	LOCK v;
- 
- #define ENDP endp
-diff --git a/arch/x86/lib/atomic64_cx8_32.S b/arch/x86/lib/atomic64_cx8_32.S
-index db3ae85440ff..f02f70890121 100644
---- a/arch/x86/lib/atomic64_cx8_32.S
-+++ b/arch/x86/lib/atomic64_cx8_32.S
-@@ -20,12 +20,12 @@
- 	cmpxchg8b (\reg)
- .endm
- 
--ENTRY(atomic64_read_cx8)
-+SYM_FUNC_START(atomic64_read_cx8)
- 	read64 %ecx
- 	ret
--ENDPROC(atomic64_read_cx8)
-+SYM_FUNC_END(atomic64_read_cx8)
- 
--ENTRY(atomic64_set_cx8)
-+SYM_FUNC_START(atomic64_set_cx8)
- 1:
- /* we don't need LOCK_PREFIX since aligned 64-bit writes
-  * are atomic on 586 and newer */
-@@ -33,19 +33,19 @@ ENTRY(atomic64_set_cx8)
- 	jne 1b
- 
- 	ret
--ENDPROC(atomic64_set_cx8)
-+SYM_FUNC_END(atomic64_set_cx8)
- 
--ENTRY(atomic64_xchg_cx8)
-+SYM_FUNC_START(atomic64_xchg_cx8)
- 1:
- 	LOCK_PREFIX
- 	cmpxchg8b (%esi)
- 	jne 1b
- 
- 	ret
--ENDPROC(atomic64_xchg_cx8)
-+SYM_FUNC_END(atomic64_xchg_cx8)
- 
- .macro addsub_return func ins insc
--ENTRY(atomic64_\func\()_return_cx8)
-+SYM_FUNC_START(atomic64_\func\()_return_cx8)
- 	pushl %ebp
- 	pushl %ebx
- 	pushl %esi
-@@ -73,14 +73,14 @@ ENTRY(atomic64_\func\()_return_cx8)
- 	popl %ebx
- 	popl %ebp
- 	ret
--ENDPROC(atomic64_\func\()_return_cx8)
-+SYM_FUNC_END(atomic64_\func\()_return_cx8)
- .endm
- 
- addsub_return add add adc
- addsub_return sub sub sbb
- 
- .macro incdec_return func ins insc
--ENTRY(atomic64_\func\()_return_cx8)
-+SYM_FUNC_START(atomic64_\func\()_return_cx8)
- 	pushl %ebx
- 
- 	read64 %esi
-@@ -98,13 +98,13 @@ ENTRY(atomic64_\func\()_return_cx8)
- 	movl %ecx, %edx
- 	popl %ebx
- 	ret
--ENDPROC(atomic64_\func\()_return_cx8)
-+SYM_FUNC_END(atomic64_\func\()_return_cx8)
- .endm
- 
- incdec_return inc add adc
- incdec_return dec sub sbb
- 
--ENTRY(atomic64_dec_if_positive_cx8)
-+SYM_FUNC_START(atomic64_dec_if_positive_cx8)
- 	pushl %ebx
- 
- 	read64 %esi
-@@ -123,9 +123,9 @@ ENTRY(atomic64_dec_if_positive_cx8)
- 	movl %ecx, %edx
- 	popl %ebx
- 	ret
--ENDPROC(atomic64_dec_if_positive_cx8)
-+SYM_FUNC_END(atomic64_dec_if_positive_cx8)
- 
--ENTRY(atomic64_add_unless_cx8)
-+SYM_FUNC_START(atomic64_add_unless_cx8)
- 	pushl %ebp
- 	pushl %ebx
- /* these just push these two parameters on the stack */
-@@ -159,9 +159,9 @@ ENTRY(atomic64_add_unless_cx8)
- 	jne 2b
- 	xorl %eax, %eax
- 	jmp 3b
--ENDPROC(atomic64_add_unless_cx8)
-+SYM_FUNC_END(atomic64_add_unless_cx8)
- 
--ENTRY(atomic64_inc_not_zero_cx8)
-+SYM_FUNC_START(atomic64_inc_not_zero_cx8)
- 	pushl %ebx
- 
- 	read64 %esi
-@@ -181,4 +181,4 @@ ENTRY(atomic64_inc_not_zero_cx8)
- 3:
- 	popl %ebx
- 	ret
--ENDPROC(atomic64_inc_not_zero_cx8)
-+SYM_FUNC_END(atomic64_inc_not_zero_cx8)
-diff --git a/arch/x86/lib/checksum_32.S b/arch/x86/lib/checksum_32.S
-index 28a148de1843..7bd2d075d46a 100644
---- a/arch/x86/lib/checksum_32.S
-+++ b/arch/x86/lib/checksum_32.S
-@@ -50,7 +50,7 @@ unsigned int csum_partial(const unsigned char * buff, int len, unsigned int sum)
- 	   * Fortunately, it is easy to convert 2-byte alignment to 4-byte
- 	   * alignment for the unrolled loop.
- 	   */		
--ENTRY(csum_partial)
-+SYM_FUNC_START(csum_partial)
- 	pushl %esi
- 	pushl %ebx
- 	movl 20(%esp),%eax	# Function arg: unsigned int sum
-@@ -132,13 +132,13 @@ ENTRY(csum_partial)
- 	popl %ebx
- 	popl %esi
- 	ret
--ENDPROC(csum_partial)
-+SYM_FUNC_END(csum_partial)
- 
- #else
- 
- /* Version for PentiumII/PPro */
- 
--ENTRY(csum_partial)
-+SYM_FUNC_START(csum_partial)
- 	pushl %esi
- 	pushl %ebx
- 	movl 20(%esp),%eax	# Function arg: unsigned int sum
-@@ -250,7 +250,7 @@ ENTRY(csum_partial)
- 	popl %ebx
- 	popl %esi
- 	ret
--ENDPROC(csum_partial)
-+SYM_FUNC_END(csum_partial)
- 				
- #endif
- EXPORT_SYMBOL(csum_partial)
-diff --git a/arch/x86/math-emu/div_Xsig.S b/arch/x86/math-emu/div_Xsig.S
-index ee08449d20fd..951da2ad54bb 100644
---- a/arch/x86/math-emu/div_Xsig.S
-+++ b/arch/x86/math-emu/div_Xsig.S
-@@ -75,7 +75,7 @@ FPU_result_1:
- 
- 
- .text
--ENTRY(div_Xsig)
-+SYM_FUNC_START(div_Xsig)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- #ifndef NON_REENTRANT_FPU
-@@ -364,4 +364,4 @@ L_bugged_2:
- 	pop	%ebx
- 	jmp	L_exit
- #endif /* PARANOID */ 
--ENDPROC(div_Xsig)
-+SYM_FUNC_END(div_Xsig)
-diff --git a/arch/x86/math-emu/div_small.S b/arch/x86/math-emu/div_small.S
-index 8f5025c80ee0..d047d1816abe 100644
---- a/arch/x86/math-emu/div_small.S
-+++ b/arch/x86/math-emu/div_small.S
-@@ -19,7 +19,7 @@
- #include "fpu_emu.h"
- 
- .text
--ENTRY(FPU_div_small)
-+SYM_FUNC_START(FPU_div_small)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- 
-@@ -45,4 +45,4 @@ ENTRY(FPU_div_small)
- 
- 	leave
- 	ret
--ENDPROC(FPU_div_small)
-+SYM_FUNC_END(FPU_div_small)
-diff --git a/arch/x86/math-emu/mul_Xsig.S b/arch/x86/math-emu/mul_Xsig.S
-index 3e489122a2b0..4afc7b1fa6e9 100644
---- a/arch/x86/math-emu/mul_Xsig.S
-+++ b/arch/x86/math-emu/mul_Xsig.S
-@@ -25,7 +25,7 @@
- #include "fpu_emu.h"
- 
- .text
--ENTRY(mul32_Xsig)
-+SYM_FUNC_START(mul32_Xsig)
- 	pushl %ebp
- 	movl %esp,%ebp
- 	subl $16,%esp
-@@ -63,10 +63,10 @@ ENTRY(mul32_Xsig)
- 	popl %esi
- 	leave
- 	ret
--ENDPROC(mul32_Xsig)
-+SYM_FUNC_END(mul32_Xsig)
- 
- 
--ENTRY(mul64_Xsig)
-+SYM_FUNC_START(mul64_Xsig)
- 	pushl %ebp
- 	movl %esp,%ebp
- 	subl $16,%esp
-@@ -116,11 +116,11 @@ ENTRY(mul64_Xsig)
- 	popl %esi
- 	leave
- 	ret
--ENDPROC(mul64_Xsig)
-+SYM_FUNC_END(mul64_Xsig)
- 
- 
- 
--ENTRY(mul_Xsig_Xsig)
-+SYM_FUNC_START(mul_Xsig_Xsig)
- 	pushl %ebp
- 	movl %esp,%ebp
- 	subl $16,%esp
-@@ -176,4 +176,4 @@ ENTRY(mul_Xsig_Xsig)
- 	popl %esi
- 	leave
- 	ret
--ENDPROC(mul_Xsig_Xsig)
-+SYM_FUNC_END(mul_Xsig_Xsig)
-diff --git a/arch/x86/math-emu/polynom_Xsig.S b/arch/x86/math-emu/polynom_Xsig.S
-index 604f0b2d17e8..702315eecb86 100644
---- a/arch/x86/math-emu/polynom_Xsig.S
-+++ b/arch/x86/math-emu/polynom_Xsig.S
-@@ -37,7 +37,7 @@
- #define OVERFLOWED      -16(%ebp)	/* addition overflow flag */
- 
- .text
--ENTRY(polynomial_Xsig)
-+SYM_FUNC_START(polynomial_Xsig)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- 	subl	$32,%esp
-@@ -134,4 +134,4 @@ L_accum_done:
- 	popl	%esi
- 	leave
- 	ret
--ENDPROC(polynomial_Xsig)
-+SYM_FUNC_END(polynomial_Xsig)
-diff --git a/arch/x86/math-emu/reg_norm.S b/arch/x86/math-emu/reg_norm.S
-index 7f6b4392a15d..cad1d60b1e84 100644
---- a/arch/x86/math-emu/reg_norm.S
-+++ b/arch/x86/math-emu/reg_norm.S
-@@ -22,7 +22,7 @@
- 
- 
- .text
--ENTRY(FPU_normalize)
-+SYM_FUNC_START(FPU_normalize)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- 	pushl	%ebx
-@@ -95,12 +95,12 @@ L_overflow:
- 	call	arith_overflow
- 	pop	%ebx
- 	jmp	L_exit
--ENDPROC(FPU_normalize)
-+SYM_FUNC_END(FPU_normalize)
- 
- 
- 
- /* Normalise without reporting underflow or overflow */
--ENTRY(FPU_normalize_nuo)
-+SYM_FUNC_START(FPU_normalize_nuo)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- 	pushl	%ebx
-@@ -147,4 +147,4 @@ L_exit_nuo_zero:
- 	popl	%ebx
- 	leave
- 	ret
--ENDPROC(FPU_normalize_nuo)
-+SYM_FUNC_END(FPU_normalize_nuo)
-diff --git a/arch/x86/math-emu/reg_round.S b/arch/x86/math-emu/reg_round.S
-index 04563421ee7d..11a1f798451b 100644
---- a/arch/x86/math-emu/reg_round.S
-+++ b/arch/x86/math-emu/reg_round.S
-@@ -109,7 +109,7 @@ FPU_denormal:
- .globl fpu_Arith_exit
- 
- /* Entry point when called from C */
--ENTRY(FPU_round)
-+SYM_FUNC_START(FPU_round)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- 	pushl	%esi
-@@ -708,4 +708,4 @@ L_exception_exit:
- 	jmp	fpu_reg_round_special_exit
- #endif /* PARANOID */ 
- 
--ENDPROC(FPU_round)
-+SYM_FUNC_END(FPU_round)
-diff --git a/arch/x86/math-emu/reg_u_add.S b/arch/x86/math-emu/reg_u_add.S
-index 50fe9f8c893c..9c9e2c810afe 100644
---- a/arch/x86/math-emu/reg_u_add.S
-+++ b/arch/x86/math-emu/reg_u_add.S
-@@ -32,7 +32,7 @@
- #include "control_w.h"
- 
- .text
--ENTRY(FPU_u_add)
-+SYM_FUNC_START(FPU_u_add)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- 	pushl	%esi
-@@ -166,4 +166,4 @@ L_exit:
- 	leave
- 	ret
- #endif /* PARANOID */
--ENDPROC(FPU_u_add)
-+SYM_FUNC_END(FPU_u_add)
-diff --git a/arch/x86/math-emu/reg_u_div.S b/arch/x86/math-emu/reg_u_div.S
-index 94d545e118e4..e2fb5c2644c5 100644
---- a/arch/x86/math-emu/reg_u_div.S
-+++ b/arch/x86/math-emu/reg_u_div.S
-@@ -75,7 +75,7 @@ FPU_ovfl_flag:
- #define DEST	PARAM3
- 
- .text
--ENTRY(FPU_u_div)
-+SYM_FUNC_START(FPU_u_div)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- #ifndef NON_REENTRANT_FPU
-@@ -471,4 +471,4 @@ L_exit:
- 	ret
- #endif /* PARANOID */ 
- 
--ENDPROC(FPU_u_div)
-+SYM_FUNC_END(FPU_u_div)
-diff --git a/arch/x86/math-emu/reg_u_mul.S b/arch/x86/math-emu/reg_u_mul.S
-index 21cde47fb3e5..0c779c87ac5b 100644
---- a/arch/x86/math-emu/reg_u_mul.S
-+++ b/arch/x86/math-emu/reg_u_mul.S
-@@ -45,7 +45,7 @@ FPU_accum_1:
- 
- 
- .text
--ENTRY(FPU_u_mul)
-+SYM_FUNC_START(FPU_u_mul)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- #ifndef NON_REENTRANT_FPU
-@@ -147,4 +147,4 @@ L_exit:
- 	ret
- #endif /* PARANOID */ 
- 
--ENDPROC(FPU_u_mul)
-+SYM_FUNC_END(FPU_u_mul)
-diff --git a/arch/x86/math-emu/reg_u_sub.S b/arch/x86/math-emu/reg_u_sub.S
-index f05dea7dec38..e9bb7c248649 100644
---- a/arch/x86/math-emu/reg_u_sub.S
-+++ b/arch/x86/math-emu/reg_u_sub.S
-@@ -33,7 +33,7 @@
- #include "control_w.h"
- 
- .text
--ENTRY(FPU_u_sub)
-+SYM_FUNC_START(FPU_u_sub)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- 	pushl	%esi
-@@ -271,4 +271,4 @@ L_exit:
- 	popl	%esi
- 	leave
- 	ret
--ENDPROC(FPU_u_sub)
-+SYM_FUNC_END(FPU_u_sub)
-diff --git a/arch/x86/math-emu/round_Xsig.S b/arch/x86/math-emu/round_Xsig.S
-index 226a51e991f1..d9d7de8dbd7b 100644
---- a/arch/x86/math-emu/round_Xsig.S
-+++ b/arch/x86/math-emu/round_Xsig.S
-@@ -23,7 +23,7 @@
- 
- 
- .text
--ENTRY(round_Xsig)
-+SYM_FUNC_START(round_Xsig)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- 	pushl	%ebx		/* Reserve some space */
-@@ -79,11 +79,11 @@ L_exit:
- 	popl	%ebx
- 	leave
- 	ret
--ENDPROC(round_Xsig)
-+SYM_FUNC_END(round_Xsig)
- 
- 
- 
--ENTRY(norm_Xsig)
-+SYM_FUNC_START(norm_Xsig)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- 	pushl	%ebx		/* Reserve some space */
-@@ -139,4 +139,4 @@ L_n_exit:
- 	popl	%ebx
- 	leave
- 	ret
--ENDPROC(norm_Xsig)
-+SYM_FUNC_END(norm_Xsig)
-diff --git a/arch/x86/math-emu/shr_Xsig.S b/arch/x86/math-emu/shr_Xsig.S
-index 96f4779aa9c1..726af985f758 100644
---- a/arch/x86/math-emu/shr_Xsig.S
-+++ b/arch/x86/math-emu/shr_Xsig.S
-@@ -22,7 +22,7 @@
- #include "fpu_emu.h"
- 
- .text
--ENTRY(shr_Xsig)
-+SYM_FUNC_START(shr_Xsig)
- 	push	%ebp
- 	movl	%esp,%ebp
- 	pushl	%esi
-@@ -86,4 +86,4 @@ L_more_than_95:
- 	popl	%esi
- 	leave
- 	ret
--ENDPROC(shr_Xsig)
-+SYM_FUNC_END(shr_Xsig)
-diff --git a/arch/x86/math-emu/wm_shrx.S b/arch/x86/math-emu/wm_shrx.S
-index d588874eb6fb..4fc89174caf0 100644
---- a/arch/x86/math-emu/wm_shrx.S
-+++ b/arch/x86/math-emu/wm_shrx.S
-@@ -33,7 +33,7 @@
-  |   Results returned in the 64 bit arg and eax.                             |
-  +---------------------------------------------------------------------------*/
- 
--ENTRY(FPU_shrx)
-+SYM_FUNC_START(FPU_shrx)
- 	push	%ebp
- 	movl	%esp,%ebp
- 	pushl	%esi
-@@ -93,7 +93,7 @@ L_more_than_95:
- 	popl	%esi
- 	leave
- 	ret
--ENDPROC(FPU_shrx)
-+SYM_FUNC_END(FPU_shrx)
- 
- 
- /*---------------------------------------------------------------------------+
-@@ -112,7 +112,7 @@ ENDPROC(FPU_shrx)
-  |   part which has been shifted out of the arg.                             |
-  |   Results returned in the 64 bit arg and eax.                             |
-  +---------------------------------------------------------------------------*/
--ENTRY(FPU_shrxs)
-+SYM_FUNC_START(FPU_shrxs)
- 	push	%ebp
- 	movl	%esp,%ebp
- 	pushl	%esi
-@@ -204,4 +204,4 @@ Ls_more_than_95:
- 	popl	%esi
- 	leave
- 	ret
--ENDPROC(FPU_shrxs)
-+SYM_FUNC_END(FPU_shrxs)
-diff --git a/arch/x86/math-emu/wm_sqrt.S b/arch/x86/math-emu/wm_sqrt.S
-index f031c0e19356..3b2b58164ec1 100644
---- a/arch/x86/math-emu/wm_sqrt.S
-+++ b/arch/x86/math-emu/wm_sqrt.S
-@@ -75,7 +75,7 @@ FPU_fsqrt_arg_0:
- 
- 
- .text
--ENTRY(wm_sqrt)
-+SYM_FUNC_START(wm_sqrt)
- 	pushl	%ebp
- 	movl	%esp,%ebp
- #ifndef NON_REENTRANT_FPU
-@@ -469,4 +469,4 @@ sqrt_more_prec_large:
- /* Our estimate is too large */
- 	movl	$0x7fffff00,%eax
- 	jmp	sqrt_round_result
--ENDPROC(wm_sqrt)
-+SYM_FUNC_END(wm_sqrt)
-diff --git a/arch/x86/platform/efi/efi_stub_32.S b/arch/x86/platform/efi/efi_stub_32.S
-index ab2e91e76894..eed8b5b441f8 100644
---- a/arch/x86/platform/efi/efi_stub_32.S
-+++ b/arch/x86/platform/efi/efi_stub_32.S
-@@ -22,7 +22,7 @@
-  */
- 
- .text
--ENTRY(efi_call_phys)
-+SYM_FUNC_START(efi_call_phys)
- 	/*
- 	 * 0. The function can only be called in Linux kernel. So CS has been
- 	 * set to 0x0010, DS and SS have been set to 0x0018. In EFI, I found
-@@ -114,7 +114,7 @@ ENTRY(efi_call_phys)
- 	movl	(%edx), %ecx
- 	pushl	%ecx
- 	ret
--ENDPROC(efi_call_phys)
-+SYM_FUNC_END(efi_call_phys)
- .previous
- 
- .data
-diff --git a/include/linux/linkage.h b/include/linux/linkage.h
-index 1b06f6b45198..25cba413ee71 100644
---- a/include/linux/linkage.h
-+++ b/include/linux/linkage.h
-@@ -105,13 +105,13 @@
- 
- /* === DEPRECATED annotations === */
- 
--#ifndef CONFIG_X86_64
-+#ifndef CONFIG_X86
- #ifndef ENTRY
- /* deprecated, use SYM_FUNC_START */
- #define ENTRY(name) \
- 	SYM_FUNC_START(name)
- #endif
--#endif /* CONFIG_X86_64 */
-+#endif /* CONFIG_X86 */
- #endif /* LINKER_SCRIPT */
- 
- #ifndef WEAK
-@@ -126,9 +126,7 @@
- #define END(name) \
- 	.size name, .-name
- #endif
--#endif /* CONFIG_X86 */
- 
--#ifndef CONFIG_X86_64
- /* If symbol 'name' is treated as a subroutine (gets called, and returns)
-  * then please use ENDPROC to mark 'name' as STT_FUNC for the benefit of
-  * static analysis tools such as stack depth analyzer.
-@@ -138,7 +136,7 @@
- #define ENDPROC(name) \
- 	SYM_FUNC_END(name)
- #endif
--#endif /* CONFIG_X86_64 */
-+#endif /* CONFIG_X86 */
- 
- /* === generic annotations === */
- 
--- 
-2.16.3
+VGhlcmUgaXMgYSBjb3VwbGUgb2YgYXNzZW1ibHkgZnVuY3Rpb25zLCB3aGljaCBhcmUgaW52b2tl
+ZCBvbmx5IGxvY2FsbHkKaW4gdGhlIGZpbGUgdGhleSBhcmUgZGVmaW5lZC4gSW4gQywgd2UgbWFy
+ayB0aGVtICJzdGF0aWMiLiBJbiBhc3NlbWJseSwKYW5ub3RhdGUgdGhlbSB1c2luZyBTWU1fe0ZV
+TkMsQ09ERX1fU1RBUlRfTE9DQUwgKGFuZCBzd2l0Y2ggdGhlaXIKRU5EUFJPQyB0byBTWU1fe0ZV
+TkMsQ09ERX1fRU5EIHRvbykuIFdoZXRoZXIgd2UgdXNlIEZVTkMgb3IgQ09ERSwKZGVwZW5kcyBv
+biB3aGV0aGVyIEVORFBST0Mgb3IgRU5EIHdhcyB1c2VkIGZvciBhIHBhcnRpY3VsYXIgZnVuY3Rp
+b24KYmVmb3JlLgoKU2lnbmVkLW9mZi1ieTogSmlyaSBTbGFieSA8anNsYWJ5QHN1c2UuY3o+CkNj
+OiAiSC4gUGV0ZXIgQW52aW4iIDxocGFAenl0b3IuY29tPgpDYzogVGhvbWFzIEdsZWl4bmVyIDx0
+Z2x4QGxpbnV0cm9uaXguZGU+CkNjOiBJbmdvIE1vbG5hciA8bWluZ29AcmVkaGF0LmNvbT4KQ2M6
+IHg4NkBrZXJuZWwub3JnCkNjOiBNYXR0IEZsZW1pbmcgPG1hdHRAY29kZWJsdWVwcmludC5jby51
+az4KQ2M6IEFyZCBCaWVzaGV1dmVsIDxhcmQuYmllc2hldXZlbEBsaW5hcm8ub3JnPgpDYzogbGlu
+dXgtZWZpQHZnZXIua2VybmVsLm9yZwpDYzogeGVuLWRldmVsQGxpc3RzLnhlbnByb2plY3Qub3Jn
+Ci0tLQogYXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL2VmaV90aHVua182NC5TIHwgIDggKysrKy0t
+LS0KIGFyY2gveDg2L2VudHJ5L2VudHJ5XzY0LlMgICAgICAgICAgICAgICB8IDIxICsrKysrKysr
+KysrLS0tLS0tLS0tLQogYXJjaC94ODYvbGliL2NvcHlfcGFnZV82NC5TICAgICAgICAgICAgIHwg
+IDQgKystLQogYXJjaC94ODYvbGliL21lbWNweV82NC5TICAgICAgICAgICAgICAgIHwgMTIgKysr
+KysrLS0tLS0tCiBhcmNoL3g4Ni9saWIvbWVtc2V0XzY0LlMgICAgICAgICAgICAgICAgfCAgOCAr
+KysrLS0tLQogYXJjaC94ODYvcGxhdGZvcm0vZWZpL2VmaV90aHVua182NC5TICAgIHwgMTIgKysr
+KysrLS0tLS0tCiBhcmNoL3g4Ni94ZW4veGVuLXB2aC5TICAgICAgICAgICAgICAgICAgfCAgNCAr
+Ky0tCiA3IGZpbGVzIGNoYW5nZWQsIDM1IGluc2VydGlvbnMoKyksIDM0IGRlbGV0aW9ucygtKQoK
+ZGlmZiAtLWdpdCBhL2FyY2gveDg2L2Jvb3QvY29tcHJlc3NlZC9lZmlfdGh1bmtfNjQuUyBiL2Fy
+Y2gveDg2L2Jvb3QvY29tcHJlc3NlZC9lZmlfdGh1bmtfNjQuUwppbmRleCBkNjYwMDBkMjM5MjEu
+LjMxMzEyMDcwZGIyMiAxMDA2NDQKLS0tIGEvYXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL2VmaV90
+aHVua182NC5TCisrKyBiL2FyY2gveDg2L2Jvb3QvY29tcHJlc3NlZC9lZmlfdGh1bmtfNjQuUwpA
+QCAtOTksMTIgKzk5LDEyIEBAIEVOVFJZKGVmaTY0X3RodW5rKQogCXJldAogRU5EUFJPQyhlZmk2
+NF90aHVuaykKIAotRU5UUlkoZWZpX2V4aXQzMikKK1NZTV9GVU5DX1NUQVJUX0xPQ0FMKGVmaV9l
+eGl0MzIpCiAJbW92cQlmdW5jX3J0X3B0ciglcmlwKSwgJXJheAogCXB1c2gJJXJheAogCW1vdgkl
+cmRpLCAlcmF4CiAJcmV0Ci1FTkRQUk9DKGVmaV9leGl0MzIpCitTWU1fRlVOQ19FTkQoZWZpX2V4
+aXQzMikKIAogCS5jb2RlMzIKIC8qCkBAIC0xMTIsNyArMTEyLDcgQEAgRU5EUFJPQyhlZmlfZXhp
+dDMyKQogICoKICAqIFRoZSBzdGFjayBzaG91bGQgcmVwcmVzZW50IHRoZSAzMi1iaXQgY2FsbGlu
+ZyBjb252ZW50aW9uLgogICovCi1FTlRSWShlZmlfZW50ZXIzMikKK1NZTV9GVU5DX1NUQVJUX0xP
+Q0FMKGVmaV9lbnRlcjMyKQogCW1vdmwJJF9fS0VSTkVMX0RTLCAlZWF4CiAJbW92bAklZWF4LCAl
+ZHMKIAltb3ZsCSVlYXgsICVlcwpAQCAtMTcyLDcgKzE3Miw3IEBAIEVOVFJZKGVmaV9lbnRlcjMy
+KQogCWJ0c2wJJFg4Nl9DUjBfUEdfQklULCAlZWF4CiAJbW92bAklZWF4LCAlY3IwCiAJbHJldAot
+RU5EUFJPQyhlZmlfZW50ZXIzMikKK1NZTV9GVU5DX0VORChlZmlfZW50ZXIzMikKIAogCS5kYXRh
+CiAJLmJhbGlnbgk4CmRpZmYgLS1naXQgYS9hcmNoL3g4Ni9lbnRyeS9lbnRyeV82NC5TIGIvYXJj
+aC94ODYvZW50cnkvZW50cnlfNjQuUwppbmRleCBkNTUyMjg1MDhlODAuLmQyZTJkZTEwMGIxNiAx
+MDA2NDQKLS0tIGEvYXJjaC94ODYvZW50cnkvZW50cnlfNjQuUworKysgYi9hcmNoL3g4Ni9lbnRy
+eS9lbnRyeV82NC5TCkBAIC0xMDY4LDcgKzEwNjgsOCBAQCBpZHRlbnRyeSBoeXBlcnZpc29yX2Nh
+bGxiYWNrIHhlbl9kb19oeXBlcnZpc29yX2NhbGxiYWNrIGhhc19lcnJvcl9jb2RlPTAKICAqIGV4
+aXN0aW5nIGFjdGl2YXRpb24gaW4gaXRzIGNyaXRpY2FsIHJlZ2lvbiAtLSBpZiBzbywgd2UgcG9w
+IHRoZSBjdXJyZW50CiAgKiBhY3RpdmF0aW9uIGFuZCByZXN0YXJ0IHRoZSBoYW5kbGVyIHVzaW5n
+IHRoZSBwcmV2aW91cyBvbmUuCiAgKi8KLUVOVFJZKHhlbl9kb19oeXBlcnZpc29yX2NhbGxiYWNr
+KQkJLyogZG9faHlwZXJ2aXNvcl9jYWxsYmFjayhzdHJ1Y3QgKnB0X3JlZ3MpICovCisvKiBkb19o
+eXBlcnZpc29yX2NhbGxiYWNrKHN0cnVjdCAqcHRfcmVncykgKi8KK1NZTV9DT0RFX1NUQVJUX0xP
+Q0FMKHhlbl9kb19oeXBlcnZpc29yX2NhbGxiYWNrKQogCiAvKgogICogU2luY2Ugd2UgZG9uJ3Qg
+bW9kaWZ5ICVyZGksIGV2dGNobl9kb191cGFsbChzdHJ1Y3QgKnB0X3JlZ3MpIHdpbGwKQEAgLTEw
+ODYsNyArMTA4Nyw3IEBAIEVOVFJZKHhlbl9kb19oeXBlcnZpc29yX2NhbGxiYWNrKQkJLyogZG9f
+aHlwZXJ2aXNvcl9jYWxsYmFjayhzdHJ1Y3QgKnB0X3JlZ3MpICovCiAJY2FsbAl4ZW5fbWF5YmVf
+cHJlZW1wdF9oY2FsbAogI2VuZGlmCiAJam1wCWVycm9yX2V4aXQKLUVORCh4ZW5fZG9faHlwZXJ2
+aXNvcl9jYWxsYmFjaykKK1NZTV9DT0RFX0VORCh4ZW5fZG9faHlwZXJ2aXNvcl9jYWxsYmFjaykK
+IAogLyoKICAqIEh5cGVydmlzb3IgdXNlcyB0aGlzIGZvciBhcHBsaWNhdGlvbiBmYXVsdHMgd2hp
+bGUgaXQgZXhlY3V0ZXMuCkBAIC0xMTc1LDcgKzExNzYsNyBAQCBpZHRlbnRyeSBtYWNoaW5lX2No
+ZWNrCQlkb19tY2UJCQloYXNfZXJyb3JfY29kZT0wCXBhcmFub2lkPTEKICAqIFVzZSBzbG93LCBi
+dXQgc3VyZWZpcmUgImFyZSB3ZSBpbiBrZXJuZWw/IiBjaGVjay4KICAqIFJldHVybjogZWJ4PTA6
+IG5lZWQgc3dhcGdzIG9uIGV4aXQsIGVieD0xOiBvdGhlcndpc2UKICAqLwotRU5UUlkocGFyYW5v
+aWRfZW50cnkpCitTWU1fQ09ERV9TVEFSVF9MT0NBTChwYXJhbm9pZF9lbnRyeSkKIAlVTldJTkRf
+SElOVF9GVU5DCiAJY2xkCiAJUFVTSF9BTkRfQ0xFQVJfUkVHUyBzYXZlX3JldD0xCkBAIC0xMTky
+LDcgKzExOTMsNyBAQCBFTlRSWShwYXJhbm9pZF9lbnRyeSkKIAlTQVZFX0FORF9TV0lUQ0hfVE9f
+S0VSTkVMX0NSMyBzY3JhdGNoX3JlZz0lcmF4IHNhdmVfcmVnPSVyMTQKIAogCXJldAotRU5EKHBh
+cmFub2lkX2VudHJ5KQorU1lNX0NPREVfRU5EKHBhcmFub2lkX2VudHJ5KQogCiAvKgogICogIlBh
+cmFub2lkIiBleGl0IHBhdGggZnJvbSBleGNlcHRpb24gc3RhY2suICBUaGlzIGlzIGludm9rZWQK
+QEAgLTEyMDYsNyArMTIwNyw3IEBAIEVORChwYXJhbm9pZF9lbnRyeSkKICAqCiAgKiBPbiBlbnRy
+eSwgZWJ4IGlzICJubyBzd2FwZ3MiIGZsYWcgKDE6IGRvbid0IG5lZWQgc3dhcGdzLCAwOiBuZWVk
+IGl0KQogICovCi1FTlRSWShwYXJhbm9pZF9leGl0KQorU1lNX0NPREVfU1RBUlRfTE9DQUwocGFy
+YW5vaWRfZXhpdCkKIAlVTldJTkRfSElOVF9SRUdTCiAJRElTQUJMRV9JTlRFUlJVUFRTKENMQlJf
+QU5ZKQogCVRSQUNFX0lSUVNfT0ZGX0RFQlVHCkBAIC0xMjIxLDEzICsxMjIyLDEzIEBAIEVOVFJZ
+KHBhcmFub2lkX2V4aXQpCiAJUkVTVE9SRV9DUjMJc2NyYXRjaF9yZWc9JXJieCBzYXZlX3JlZz0l
+cjE0CiAuTHBhcmFub2lkX2V4aXRfcmVzdG9yZToKIAlqbXAgcmVzdG9yZV9yZWdzX2FuZF9yZXR1
+cm5fdG9fa2VybmVsCi1FTkQocGFyYW5vaWRfZXhpdCkKK1NZTV9DT0RFX0VORChwYXJhbm9pZF9l
+eGl0KQogCiAvKgogICogU2F2ZSBhbGwgcmVnaXN0ZXJzIGluIHB0X3JlZ3MsIGFuZCBzd2l0Y2gg
+R1MgaWYgbmVlZGVkLgogICogUmV0dXJuOiBFQlg9MDogY2FtZSBmcm9tIHVzZXIgbW9kZTsgRUJY
+PTE6IG90aGVyd2lzZQogICovCi1FTlRSWShlcnJvcl9lbnRyeSkKK1NZTV9DT0RFX1NUQVJUX0xP
+Q0FMKGVycm9yX2VudHJ5KQogCVVOV0lORF9ISU5UX0ZVTkMKIAljbGQKIAlQVVNIX0FORF9DTEVB
+Ul9SRUdTIHNhdmVfcmV0PTEKQEAgLTEzMTQsNyArMTMxNSw3IEBAIEVOVFJZKGVycm9yX2VudHJ5
+KQogCW1vdgklcmF4LCAlcnNwCiAJZGVjbAklZWJ4CiAJam1wCS5MZXJyb3JfZW50cnlfZnJvbV91
+c2VybW9kZV9hZnRlcl9zd2FwZ3MKLUVORChlcnJvcl9lbnRyeSkKK1NZTV9DT0RFX0VORChlcnJv
+cl9lbnRyeSkKIAogCiAvKgpAQCAtMTMyMiwxNCArMTMyMywxNCBAQCBFTkQoZXJyb3JfZW50cnkp
+CiAgKiAgIDE6IGFscmVhZHkgaW4ga2VybmVsIG1vZGUsIGRvbid0IG5lZWQgU1dBUEdTCiAgKiAg
+IDA6IHVzZXIgZ3NiYXNlIGlzIGxvYWRlZCwgd2UgbmVlZCBTV0FQR1MgYW5kIHN0YW5kYXJkIHBy
+ZXBhcmF0aW9uIGZvciByZXR1cm4gdG8gdXNlcm1vZGUKICAqLwotRU5UUlkoZXJyb3JfZXhpdCkK
+K1NZTV9DT0RFX1NUQVJUX0xPQ0FMKGVycm9yX2V4aXQpCiAJVU5XSU5EX0hJTlRfUkVHUwogCURJ
+U0FCTEVfSU5URVJSVVBUUyhDTEJSX0FOWSkKIAlUUkFDRV9JUlFTX09GRgogCXRlc3RsCSVlYngs
+ICVlYngKIAlqbnoJcmV0aW50X2tlcm5lbAogCWptcAlyZXRpbnRfdXNlcgotRU5EKGVycm9yX2V4
+aXQpCitTWU1fQ09ERV9FTkQoZXJyb3JfZXhpdCkKIAogLyoKICAqIFJ1bnMgb24gZXhjZXB0aW9u
+IHN0YWNrLiAgWGVuIFBWIGRvZXMgbm90IGdvIHRocm91Z2ggdGhpcyBwYXRoIGF0IGFsbCwKZGlm
+ZiAtLWdpdCBhL2FyY2gveDg2L2xpYi9jb3B5X3BhZ2VfNjQuUyBiL2FyY2gveDg2L2xpYi9jb3B5
+X3BhZ2VfNjQuUwppbmRleCBmZDJkMDlhZmEwOTcuLmY1MDU4NzBiZDkzYiAxMDA2NDQKLS0tIGEv
+YXJjaC94ODYvbGliL2NvcHlfcGFnZV82NC5TCisrKyBiL2FyY2gveDg2L2xpYi9jb3B5X3BhZ2Vf
+NjQuUwpAQCAtMjEsNyArMjEsNyBAQCBFTlRSWShjb3B5X3BhZ2UpCiBFTkRQUk9DKGNvcHlfcGFn
+ZSkKIEVYUE9SVF9TWU1CT0woY29weV9wYWdlKQogCi1FTlRSWShjb3B5X3BhZ2VfcmVncykKK1NZ
+TV9GVU5DX1NUQVJUX0xPQ0FMKGNvcHlfcGFnZV9yZWdzKQogCXN1YnEJJDIqOCwJJXJzcAogCW1v
+dnEJJXJieCwJKCVyc3ApCiAJbW92cQklcjEyLAkxKjgoJXJzcCkKQEAgLTg2LDQgKzg2LDQgQEAg
+RU5UUlkoY29weV9wYWdlX3JlZ3MpCiAJbW92cQkxKjgoJXJzcCksICVyMTIKIAlhZGRxCSQyKjgs
+ICVyc3AKIAlyZXQKLUVORFBST0MoY29weV9wYWdlX3JlZ3MpCitTWU1fRlVOQ19FTkQoY29weV9w
+YWdlX3JlZ3MpCmRpZmYgLS1naXQgYS9hcmNoL3g4Ni9saWIvbWVtY3B5XzY0LlMgYi9hcmNoL3g4
+Ni9saWIvbWVtY3B5XzY0LlMKaW5kZXggNDkxMWIxYzYxYWE4Li43Mjg3MDNjNDdkNTggMTAwNjQ0
+Ci0tLSBhL2FyY2gveDg2L2xpYi9tZW1jcHlfNjQuUworKysgYi9hcmNoL3g4Ni9saWIvbWVtY3B5
+XzY0LlMKQEAgLTI3LDcgKzI3LDcgQEAKICAqIHJheCBvcmlnaW5hbCBkZXN0aW5hdGlvbgogICov
+CiBTWU1fRlVOQ19TVEFSVF9BTElBUyhfX21lbWNweSkKLUVOVFJZKG1lbWNweSkKK1NZTV9GVU5D
+X1NUQVJUX0xPQ0FMKG1lbWNweSkKIAlBTFRFUk5BVElWRV8yICJqbXAgbWVtY3B5X29yaWciLCAi
+IiwgWDg2X0ZFQVRVUkVfUkVQX0dPT0QsIFwKIAkJICAgICAgImptcCBtZW1jcHlfZXJtcyIsIFg4
+Nl9GRUFUVVJFX0VSTVMKIApAQCAtMzksNyArMzksNyBAQCBFTlRSWShtZW1jcHkpCiAJbW92bCAl
+ZWR4LCAlZWN4CiAJcmVwIG1vdnNiCiAJcmV0Ci1FTkRQUk9DKG1lbWNweSkKK1NZTV9GVU5DX0VO
+RChtZW1jcHkpCiBTWU1fRlVOQ19FTkRfQUxJQVMoX19tZW1jcHkpCiBFWFBPUlRfU1lNQk9MKG1l
+bWNweSkKIEVYUE9SVF9TWU1CT0woX19tZW1jcHkpCkBAIC00OCwxNCArNDgsMTQgQEAgRVhQT1JU
+X1NZTUJPTChfX21lbWNweSkKICAqIG1lbWNweV9lcm1zKCkgLSBlbmhhbmNlZCBmYXN0IHN0cmlu
+ZyBtZW1jcHkuIFRoaXMgaXMgZmFzdGVyIGFuZAogICogc2ltcGxlciB0aGFuIG1lbWNweS4gVXNl
+IG1lbWNweV9lcm1zIHdoZW4gcG9zc2libGUuCiAgKi8KLUVOVFJZKG1lbWNweV9lcm1zKQorU1lN
+X0ZVTkNfU1RBUlRfTE9DQUwobWVtY3B5X2VybXMpCiAJbW92cSAlcmRpLCAlcmF4CiAJbW92cSAl
+cmR4LCAlcmN4CiAJcmVwIG1vdnNiCiAJcmV0Ci1FTkRQUk9DKG1lbWNweV9lcm1zKQorU1lNX0ZV
+TkNfRU5EKG1lbWNweV9lcm1zKQogCi1FTlRSWShtZW1jcHlfb3JpZykKK1NZTV9GVU5DX1NUQVJU
+X0xPQ0FMKG1lbWNweV9vcmlnKQogCW1vdnEgJXJkaSwgJXJheAogCiAJY21wcSAkMHgyMCwgJXJk
+eApAQCAtMTgwLDcgKzE4MCw3IEBAIEVOVFJZKG1lbWNweV9vcmlnKQogCiAuTGVuZDoKIAlyZXRx
+Ci1FTkRQUk9DKG1lbWNweV9vcmlnKQorU1lNX0ZVTkNfRU5EKG1lbWNweV9vcmlnKQogCiAjaWZu
+ZGVmIENPTkZJR19VTUwKIC8qCmRpZmYgLS1naXQgYS9hcmNoL3g4Ni9saWIvbWVtc2V0XzY0LlMg
+Yi9hcmNoL3g4Ni9saWIvbWVtc2V0XzY0LlMKaW5kZXggOTI3YWM0NGQzNGFhLi41NjRhYmY5ZWNl
+ZGIgMTAwNjQ0Ci0tLSBhL2FyY2gveDg2L2xpYi9tZW1zZXRfNjQuUworKysgYi9hcmNoL3g4Ni9s
+aWIvbWVtc2V0XzY0LlMKQEAgLTU5LDE2ICs1OSwxNiBAQCBFWFBPUlRfU1lNQk9MKF9fbWVtc2V0
+KQogICoKICAqIHJheCAgIG9yaWdpbmFsIGRlc3RpbmF0aW9uCiAgKi8KLUVOVFJZKG1lbXNldF9l
+cm1zKQorU1lNX0ZVTkNfU1RBUlRfTE9DQUwobWVtc2V0X2VybXMpCiAJbW92cSAlcmRpLCVyOQog
+CW1vdmIgJXNpbCwlYWwKIAltb3ZxICVyZHgsJXJjeAogCXJlcCBzdG9zYgogCW1vdnEgJXI5LCVy
+YXgKIAlyZXQKLUVORFBST0MobWVtc2V0X2VybXMpCitTWU1fRlVOQ19FTkQobWVtc2V0X2VybXMp
+CiAKLUVOVFJZKG1lbXNldF9vcmlnKQorU1lNX0ZVTkNfU1RBUlRfTE9DQUwobWVtc2V0X29yaWcp
+CiAJbW92cSAlcmRpLCVyMTAKIAogCS8qIGV4cGFuZCBieXRlIHZhbHVlICAqLwpAQCAtMTM5LDQg
+KzEzOSw0IEBAIEVOVFJZKG1lbXNldF9vcmlnKQogCXN1YnEgJXI4LCVyZHgKIAlqbXAgLkxhZnRl
+cl9iYWRfYWxpZ25tZW50CiAuTGZpbmFsOgotRU5EUFJPQyhtZW1zZXRfb3JpZykKK1NZTV9GVU5D
+X0VORChtZW1zZXRfb3JpZykKZGlmZiAtLWdpdCBhL2FyY2gveDg2L3BsYXRmb3JtL2VmaS9lZmlf
+dGh1bmtfNjQuUyBiL2FyY2gveDg2L3BsYXRmb3JtL2VmaS9lZmlfdGh1bmtfNjQuUwppbmRleCA0
+NmM1OGIwODczOWMuLmQ2NzdhN2ViMmQwYSAxMDA2NDQKLS0tIGEvYXJjaC94ODYvcGxhdGZvcm0v
+ZWZpL2VmaV90aHVua182NC5TCisrKyBiL2FyY2gveDg2L3BsYXRmb3JtL2VmaS9lZmlfdGh1bmtf
+NjQuUwpAQCAtNjcsNyArNjcsNyBAQCBFTkRQUk9DKGVmaTY0X3RodW5rKQogICoKICAqIFRoaXMg
+ZnVuY3Rpb24gbXVzdCBiZSBpbnZva2VkIHdpdGggYSAxOjEgbWFwcGVkIHN0YWNrLgogICovCi1F
+TlRSWShfX2VmaTY0X3RodW5rKQorU1lNX0ZVTkNfU1RBUlRfTE9DQUwoX19lZmk2NF90aHVuaykK
+IAltb3ZsCSVkcywgJWVheAogCXB1c2gJJXJheAogCW1vdmwJJWVzLCAlZWF4CkBAIC0xMTQsMTQg
+KzExNCwxNCBAQCBFTlRSWShfX2VmaTY0X3RodW5rKQogCW9yCSVyY3gsICVyYXgKIDE6CiAJcmV0
+Ci1FTkRQUk9DKF9fZWZpNjRfdGh1bmspCitTWU1fRlVOQ19FTkQoX19lZmk2NF90aHVuaykKIAot
+RU5UUlkoZWZpX2V4aXQzMikKK1NZTV9GVU5DX1NUQVJUX0xPQ0FMKGVmaV9leGl0MzIpCiAJbW92
+cQlmdW5jX3J0X3B0ciglcmlwKSwgJXJheAogCXB1c2gJJXJheAogCW1vdgklcmRpLCAlcmF4CiAJ
+cmV0Ci1FTkRQUk9DKGVmaV9leGl0MzIpCitTWU1fRlVOQ19FTkQoZWZpX2V4aXQzMikKIAogCS5j
+b2RlMzIKIC8qCkBAIC0xMjksNyArMTI5LDcgQEAgRU5EUFJPQyhlZmlfZXhpdDMyKQogICoKICAq
+IFRoZSBzdGFjayBzaG91bGQgcmVwcmVzZW50IHRoZSAzMi1iaXQgY2FsbGluZyBjb252ZW50aW9u
+LgogICovCi1FTlRSWShlZmlfZW50ZXIzMikKK1NZTV9GVU5DX1NUQVJUX0xPQ0FMKGVmaV9lbnRl
+cjMyKQogCW1vdmwJJF9fS0VSTkVMX0RTLCAlZWF4CiAJbW92bAklZWF4LCAlZHMKIAltb3ZsCSVl
+YXgsICVlcwpAQCAtMTQ1LDcgKzE0NSw3IEBAIEVOVFJZKGVmaV9lbnRlcjMyKQogCXB1c2hsCSVl
+YXgKIAogCWxyZXQKLUVORFBST0MoZWZpX2VudGVyMzIpCitTWU1fRlVOQ19FTkQoZWZpX2VudGVy
+MzIpCiAKIAkuZGF0YQogCS5iYWxpZ24JOApkaWZmIC0tZ2l0IGEvYXJjaC94ODYveGVuL3hlbi1w
+dmguUyBiL2FyY2gveDg2L3hlbi94ZW4tcHZoLlMKaW5kZXggNTJiMjg3OTNhNjI1Li5hMjBhNTVj
+YzUxMzUgMTAwNjQ0Ci0tLSBhL2FyY2gveDg2L3hlbi94ZW4tcHZoLlMKKysrIGIvYXJjaC94ODYv
+eGVuL3hlbi1wdmguUwpAQCAtNTQsNyArNTQsNyBAQAogICogY2hhcmdlIG9mIHNldHRpbmcgdXAg
+aXQncyBvd24gc3RhY2ssIEdEVCBhbmQgSURULgogICovCiAKLUVOVFJZKHB2aF9zdGFydF94ZW4p
+CitTWU1fQ09ERV9TVEFSVF9MT0NBTChwdmhfc3RhcnRfeGVuKQogCWNsZAogCiAJbGdkdCAoX3Bh
+KGdkdCkpCkBAIC0xMzMsNyArMTMzLDcgQEAgRU5UUlkocHZoX3N0YXJ0X3hlbikKIAogCWxqbXAg
+JF9fQk9PVF9DUywgJF9wYShzdGFydHVwXzMyKQogI2VuZGlmCi1FTkQocHZoX3N0YXJ0X3hlbikK
+K1NZTV9DT0RFX0VORChwdmhfc3RhcnRfeGVuKQogCiAJLnNlY3Rpb24gIi5pbml0LmRhdGEiLCJh
+dyIKIAkuYmFsaWduIDgKLS0gCjIuMTYuMwoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fClhlbi1kZXZlbCBtYWlsaW5nIGxpc3QKWGVuLWRldmVsQGxpc3Rz
+LnhlbnByb2plY3Qub3JnCmh0dHBzOi8vbGlzdHMueGVucHJvamVjdC5vcmcvbWFpbG1hbi9saXN0
+aW5mby94ZW4tZGV2ZWw=
