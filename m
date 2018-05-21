@@ -1,63 +1,94 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 1/1] efi/libstub/arm64: handle randomized TEXT_OFFSET
-Date: Fri, 18 May 2018 16:08:41 +0200
-Message-ID: <20180518140841.9731-2-ard.biesheuvel@linaro.org>
-References: <20180518140841.9731-1-ard.biesheuvel@linaro.org>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.16 047/110] efi: Avoid potential crashes, fix the struct efi_pci_io_protocol_32 definition for mixed mode
+Date: Mon, 21 May 2018 23:11:44 +0200
+Message-ID: <20180521210508.645245136@linuxfoundation.org>
+References: <20180521210503.823249477@linuxfoundation.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180518140841.9731-1-ard.biesheuvel@linaro.org>
+In-Reply-To: <20180521210503.823249477@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Mark Rutland <mark.rutland@arm.com>
+4.16-stable review patch.  If anyone has any objections, please let me know.
 
-When CONFIG_RANDOMIZE_TEXT_OFFSET=y, TEXT_OFFSET is an arbitrary
-multiple of PAGE_SIZE in the interval [0, 2MB).
+------------------
 
-The EFI stub does not account for the potential misalignment of
-TEXT_OFFSET relative to EFI_KIMG_ALIGN, and produces a randomized
-physical offset which is always a round multiple of EFI_KIMG_ALIGN.
-This may result in statically allocated objects whose alignment exceeds
-PAGE_SIZE to appear misaligned in memory. This has been observed to
-result in spurious stack overflow reports and failure to make use of
-the IRQ stacks, and theoretically could result in a number of other
-issues.
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-We can OR in the low bits of TEXT_OFFSET to ensure that we have the
-necessary offset (and hence preserve the misalignment of TEXT_OFFSET
-relative to EFI_KIMG_ALIGN), so let's do that.
+commit 0b3225ab9407f557a8e20f23f37aa7236c10a9b1 upstream.
 
-Fixes: 6f26b3671184c36d ("arm64: kaslr: increase randomization granularity")
-Reported-by: Kim Phillips <kim.phillips@arm.com>
-Signed-off-by: Mark Rutland <mark.rutland@arm.com>
-Tested-by: Kim Phillips <kim.phillips@arm.com>
-[ardb: clarify comment and commit log, drop unneeded parens]
+Mixed mode allows a kernel built for x86_64 to interact with 32-bit
+EFI firmware, but requires us to define all struct definitions carefully
+when it comes to pointer sizes.
+
+'struct efi_pci_io_protocol_32' currently uses a 'void *' for the
+'romimage' field, which will be interpreted as a 64-bit field
+on such kernels, potentially resulting in bogus memory references
+and subsequent crashes.
+
+Tested-by: Hans de Goede <hdegoede@redhat.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/libstub/arm64-stub.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+Cc: <stable@vger.kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20180504060003.19618-13-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
-index b9bd827caa22..1b4d465cc5d9 100644
---- a/drivers/firmware/efi/libstub/arm64-stub.c
-+++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -97,6 +97,16 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table_arg,
- 		u32 offset = !IS_ENABLED(CONFIG_DEBUG_ALIGN_RODATA) ?
- 			     (phys_seed >> 32) & mask : TEXT_OFFSET;
+---
+ arch/x86/boot/compressed/eboot.c |    6 ++++--
+ include/linux/efi.h              |    8 ++++----
+ 2 files changed, 8 insertions(+), 6 deletions(-)
+
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -163,7 +163,8 @@ __setup_efi_pci32(efi_pci_io_protocol_32
+ 	if (status != EFI_SUCCESS)
+ 		goto free_struct;
  
-+		/*
-+		 * With CONFIG_RANDOMIZE_TEXT_OFFSET=y, TEXT_OFFSET may not
-+		 * be a multiple of EFI_KIMG_ALIGN, and we must ensure that
-+		 * we preserve the misalignment of 'offset' relative to
-+		 * EFI_KIMG_ALIGN so that statically allocated objects whose
-+		 * alignment exceeds PAGE_SIZE appear correctly aligned in
-+		 * memory.
-+		 */
-+		offset |= TEXT_OFFSET % EFI_KIMG_ALIGN;
-+
- 		/*
- 		 * If KASLR is enabled, and we have some randomness available,
- 		 * locate the kernel at a randomized offset in physical memory.
--- 
-2.17.0
+-	memcpy(rom->romdata, pci->romimage, pci->romsize);
++	memcpy(rom->romdata, (void *)(unsigned long)pci->romimage,
++	       pci->romsize);
+ 	return status;
+ 
+ free_struct:
+@@ -269,7 +270,8 @@ __setup_efi_pci64(efi_pci_io_protocol_64
+ 	if (status != EFI_SUCCESS)
+ 		goto free_struct;
+ 
+-	memcpy(rom->romdata, pci->romimage, pci->romsize);
++	memcpy(rom->romdata, (void *)(unsigned long)pci->romimage,
++	       pci->romsize);
+ 	return status;
+ 
+ free_struct:
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -395,8 +395,8 @@ typedef struct {
+ 	u32 attributes;
+ 	u32 get_bar_attributes;
+ 	u32 set_bar_attributes;
+-	uint64_t romsize;
+-	void *romimage;
++	u64 romsize;
++	u32 romimage;
+ } efi_pci_io_protocol_32;
+ 
+ typedef struct {
+@@ -415,8 +415,8 @@ typedef struct {
+ 	u64 attributes;
+ 	u64 get_bar_attributes;
+ 	u64 set_bar_attributes;
+-	uint64_t romsize;
+-	void *romimage;
++	u64 romsize;
++	u64 romimage;
+ } efi_pci_io_protocol_64;
+ 
+ typedef struct {
