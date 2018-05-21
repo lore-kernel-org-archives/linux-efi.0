@@ -1,18 +1,18 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.16 047/110] efi: Avoid potential crashes, fix the struct efi_pci_io_protocol_32 definition for mixed mode
-Date: Mon, 21 May 2018 23:11:44 +0200
-Message-ID: <20180521210508.645245136@linuxfoundation.org>
-References: <20180521210503.823249477@linuxfoundation.org>
+Subject: [PATCH 4.14 34/95] efi: Avoid potential crashes, fix the struct efi_pci_io_protocol_32 definition for mixed mode
+Date: Mon, 21 May 2018 23:11:24 +0200
+Message-ID: <20180521210454.955873306@linuxfoundation.org>
+References: <20180521210447.219380974@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180521210503.823249477@linuxfoundation.org>
+In-Reply-To: <20180521210447.219380974@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.16-stable review patch.  If anyone has any objections, please let me know.
+4.14-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
