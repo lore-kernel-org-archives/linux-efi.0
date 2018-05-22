@@ -1,94 +1,183 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 26/87] efi: Avoid potential crashes, fix the struct efi_pci_io_protocol_32 definition for mixed mode
-Date: Mon, 21 May 2018 23:11:02 +0200
-Message-ID: <20180521210422.740871956@linuxfoundation.org>
-References: <20180521210420.222671977@linuxfoundation.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Subject: [PATCH V3 0/3] Use efi_rts_wq to invoke EFI Runtime Services
+Date: Mon, 21 May 2018 20:13:01 -0700
+Message-ID: <1526958784-14688-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180521210420.222671977@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, Dave Hansen <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Naresh Bhat <naresh.bhat@linaro.org>, Ricardo Neri <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Dan Williams <dan.j.williams@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-4.9-stable review patch.  If anyone has any objections, please let me know.
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
+Problem statement:
 ------------------
+Presently, efi_runtime_services() silently switch %cr3 from swapper_pgd
+to efi_pgd. As a consequence, kernel code that runs in efi_pgd (e.g.,
+perf code via an NMI) will have incorrect user space mappings[1]. This
+could lead to otherwise unexpected access errors and, worse, unauthorized
+access to firmware code and data.
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Detailed discussion of problem statement:
+-----------------------------------------
+As this switch is not propagated to other kernel subsystems; they will
+wrongly assume that swapper_pgd is still in use and it can lead to
+following issues:
 
-commit 0b3225ab9407f557a8e20f23f37aa7236c10a9b1 upstream.
+1. If kernel code tries to access user space addresses while in efi_pgd,
+it could lead to unauthorized accesses to firmware code/data.
+(e.g: <__>/copy_from_user_nmi()).
+[This could also be disastrous if the frame pointer happens to point at
+MMIO in the EFI runtime mappings] - Mark Rutland.
 
-Mixed mode allows a kernel built for x86_64 to interact with 32-bit
-EFI firmware, but requires us to define all struct definitions carefully
-when it comes to pointer sizes.
+An example of a subsystem that could touch user space while in efi_pgd is
+perf. Assume that we are in efi_pgd, a user could use perf to profile
+some user data and depending on the address the user is trying to
+profile, two things could happen.
+1. If the mappings are absent, perf fails to profile.
+2. If efi_pgd does have mappings for the requested address (these
+  mappings are erroneous), perf profiles firmware code/data. If the
+  address is MMIO'ed, perf could have potentially changed some device state.
 
-'struct efi_pci_io_protocol_32' currently uses a 'void *' for the
-'romimage' field, which will be interpreted as a 64-bit field
-on such kernels, potentially resulting in bogus memory references
-and subsequent crashes.
+The culprit in both the cases is, EFI subsystem swapping out pgd and not
+perf. Because, EFI subsystem has broken the *general assumption* that
+all other subsystems rely on - "user space might be valid and nobody has
+switched %cr3".
 
-Tested-by: Hans de Goede <hdegoede@redhat.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: <stable@vger.kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Solutions:
+----------
+There are two ways to fix this issue:
+1. Educate about pgd change to *all* the subsystems that could
+   potentially access user space while in efi_pgd.
+  On x86, AFAIK, it could happen only when some one touches user space
+  from the back of an NMI (a quick audit on <__>/copy_from_user_nmi,
+  showed perf and oprofile). On arm, it could happen from multiple
+  places as arm runs efi_runtime_services() interrupts enabled (ARM folks,
+  please comment on this as I might be wrong); whereas x86 runs
+  efi_runtime_services() interrupts disabled.
+
+  I think, this solution isn't holistic because
+  a. Any other subsystem might well do the same, if not now, in future.
+  b. Also, this solutions looks simpler on x86 but not true if it's the
+    same for arm (ARM folks, please comment on this as I might be wrong).
+  c. This solution looks like a work around rather than addressing the issue.
+
+2. Running efi_runtime_services() in kthread context.
+  This makes sense because efi_pgd doesn't have user space and kthread
+  by definition means that user space is not valid. Any kernel code that
+  tries to touch user space while in kthread is buggy in itself. If so,
+  it should be an easy fix in the other subsystem. This also take us one
+  step closer to long awaiting proposal of Andy - Running EFI at CPL 3.
+
+What does this patch set do?
+----------------------------
+Introduce efi_rts_wq (EFI runtime services work queue).
+When a user process requests the kernel to execute any efi_runtime_service(),
+kernel queues the work to efi_rts_wq, a kthread comes along, switches to
+efi_pgd and executes efi_runtime_service() in kthread context. IOW, this
+patch set adds support to the EFI subsystem to handle all calls to
+efi_runtime_services() using a work queue (which in turn uses kthread).
+
+How running efi_runtime_services() in kthread fixes above discussed issues?
+---------------------------------------------------------------------------
+If we run efi_runtime_services() in kthread context and if perf
+checks for it, we could get both the above scenarios correct by perf
+aborting the profiling. Not only perf, but any subsystem that tries to
+touch user space should first check for kthread context and if so,
+should abort.
+
+Q. If we still need check for kthread context in other subsystems that
+access user space, what does this patch set fix?
+A. This patch set makes sure that EFI subsystem is not at fault.
+Without this patch set the blame is upon EFI subsystem, because it's the
+one that changed pgd and hasn't communicated this change to everyone and
+hence broke the general assumption. Running efi_runtime_services() in
+kthread means explicitly communicating that user space is invalid, now 
+it's the responsibility of other subsystem to make sure that it's
+running in right context.
+
+Testing:
+--------
+Tested using LUV (Linux UEFI Validation) for x86_64, x86_32 and arm64
+(qemu only). Will appreciate the effort if someone could test the
+patches on real ARM/ARM64 machines.
+LUV: https://01.org/linux-uefi-validation
+
+Credits:
+--------
+Thanks to Ricardo, Dan, Miguel and Mark for initial reviews and
+suggestions. Thanks to Boris and Andy for making me think through/help
+on what I am addressing with this patch set. Please feel free to pour in
+your comments and concerns.
+
+Note:
+-----
+Patches are based on Linus's kernel v4.17-rc6
+
+[1] Backup: Detailing efi_pgd:
+------------------------------
+efi_pgd has mappings for EFI Runtime Code/Data (on x86, plus EFI Boot time
+Code/Data) regions. Due to the nature of these mappings, they fall
+in user space address ranges and they are not the same as swapper.
+
+[On arm64, the EFI mappings are in the VA range usually used for user
+space. The two halves of the address space are managed by separate
+tables, TTBR0 and TTBR1. We always map the kernel in TTBR1, and we map
+user space or EFI runtime mappings in TTBR0.] - Mark Rutland
+
+Changes from V2 to V3:
+----------------------
+1. Rewrite the cover letter to clearly state the problem. What we are
+fixing and what we are not fixing.
+2. Make efi_delete_dummy_variable() change local to x86.
+3. Avoid using BUG(), instead, print error message and exit gracefully.
+4. Move struct efi_runtime_work to runtime-wrappers.c file.
+5. Give enum a name (efi_rts_ids) and use it in efi_runtime_work.
+6. Add Naresh (maintainer of LUV for ARM) and Miguel to the CC list.
+
+Changes from V1 to V2:
+----------------------
+1. Remove unnecessary include of asm/efi.h file - Fixes build error on
+ia64, reported by 0-day
+2. Use enum to identify efi_runtime_services()
+3. Use alloc_ordered_workqueue() to create efi_rts_wq as
+create_workqueue() is scheduled for depreciation.
+4. Make efi_call_rts() static, as it has no callers outside
+runtime-wrappers.c
+5. Use BUG(), when we are unable to queue work or unable to identify
+requested efi_runtime_service() - Because these two situations should
+*never* happen.
+
+Sai Praneeth (3):
+  x86/efi: Call efi_delete_dummy_variable() after creating efi_rts_wq
+  efi: Introduce efi_queue_work() to queue any efi_runtime_service() on 
+       efi_rts_wq
+  efi: Use efi_rts_wq to invoke EFI Runtime Services
+
+ arch/x86/platform/efi/efi.c             |  15 +-
+ drivers/firmware/efi/arm-runtime.c      |   3 +
+ drivers/firmware/efi/efi.c              |  25 ++++
+ drivers/firmware/efi/runtime-wrappers.c | 250 +++++++++++++++++++++++++++++---
+ include/linux/efi.h                     |   4 +
+ 5 files changed, 271 insertions(+), 26 deletions(-)
+
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Suggested-by: Andy Lutomirski <luto@kernel.org>
+Cc: Lee Chun-Yi <jlee@suse.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Tony Luck <tony.luck@intel.com>
+Cc: Will Deacon <will.deacon@arm.com>
+Cc: Dave Hansen <dave.hansen@intel.com>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Naresh Bhat <naresh.bhat@linaro.org>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
 Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/20180504060003.19618-13-ard.biesheuvel@linaro.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Dan Williams <dan.j.williams@intel.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
 
----
- arch/x86/boot/compressed/eboot.c |    6 ++++--
- include/linux/efi.h              |    8 ++++----
- 2 files changed, 8 insertions(+), 6 deletions(-)
-
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -330,7 +330,8 @@ __setup_efi_pci32(efi_pci_io_protocol_32
- 	if (status != EFI_SUCCESS)
- 		goto free_struct;
- 
--	memcpy(rom->romdata, pci->romimage, pci->romsize);
-+	memcpy(rom->romdata, (void *)(unsigned long)pci->romimage,
-+	       pci->romsize);
- 	return status;
- 
- free_struct:
-@@ -436,7 +437,8 @@ __setup_efi_pci64(efi_pci_io_protocol_64
- 	if (status != EFI_SUCCESS)
- 		goto free_struct;
- 
--	memcpy(rom->romdata, pci->romimage, pci->romsize);
-+	memcpy(rom->romdata, (void *)(unsigned long)pci->romimage,
-+	       pci->romsize);
- 	return status;
- 
- free_struct:
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -380,8 +380,8 @@ typedef struct {
- 	u32 attributes;
- 	u32 get_bar_attributes;
- 	u32 set_bar_attributes;
--	uint64_t romsize;
--	void *romimage;
-+	u64 romsize;
-+	u32 romimage;
- } efi_pci_io_protocol_32;
- 
- typedef struct {
-@@ -400,8 +400,8 @@ typedef struct {
- 	u64 attributes;
- 	u64 get_bar_attributes;
- 	u64 set_bar_attributes;
--	uint64_t romsize;
--	void *romimage;
-+	u64 romsize;
-+	u64 romimage;
- } efi_pci_io_protocol_64;
- 
- typedef struct {
+-- 
+2.7.4
