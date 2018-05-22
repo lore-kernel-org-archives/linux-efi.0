@@ -1,7 +1,7 @@
 From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH V3 2/3] efi: Introduce efi_queue_work() to queue any efi_runtime_service() on efi_rts_wq
-Date: Mon, 21 May 2018 20:13:03 -0700
-Message-ID: <1526958784-14688-3-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH V3 3/3] efi: Use efi_rts_wq to invoke EFI Runtime Services
+Date: Mon, 21 May 2018 20:13:04 -0700
+Message-ID: <1526958784-14688-4-git-send-email-sai.praneeth.prakhya@intel.com>
 References: <1526958784-14688-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1526958784-14688-1-git-send-email-sai.praneeth.prakhya@intel.com>
@@ -12,29 +12,53 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-When a process requests the kernel to execute any efi_runtime_service(),
-the requested efi_runtime_service (represented as an identifier) and its
-arguments are packed into a struct named efi_runtime_work and queued
-onto work queue named efi_rts_wq. The caller then waits until the work
-is completed.
+Presently, when a user process requests the kernel to execute any
+efi_runtime_service(), kernel switches the page directory (%cr3) from
+swapper_pgd to efi_pgd. Other subsystems in the kernel aren't aware of
+this switch and they might think, user space is still valid (i.e. the
+user space mappings are still pointing to the process that requested to
+run efi_runtime_service()) but in reality it is not so.
 
-Introduce efi_queue_work() that 1. Populates efi_runtime_work 2. Queues
-work onto efi_rts_wq and 3. Waits until worker thread returns.
+A solution for this issue is to use kthread to run efi_runtime_service()
+When a user process requests the kernel to execute any
+efi_runtime_service(), kernel queues the work to efi_rts_wq, a kthread
+comes along, switches to efi_pgd and executes efi_runtime_service() in
+kthread context. Anything that tries to touch user space addresses while
+in kthread is terminally broken.
 
-The caller thread has to wait until the worker thread returns, because
-it depends on the return status of efi_runtime_service() and, in
-specific cases, the arguments populated by efi_runtime_service(). Some
-efi_runtime_services() takes a pointer to buffer as an argument and
-fills up the buffer with requested data. For instance,
-efi_get_variable() and efi_get_next_variable(). Hence, caller process
-cannot just post the work and get going.
+Implementation summary:
+-----------------------
+1. When user/kernel thread requests to execute efi_runtime_service(),
+enqueue work to efi_rts_wq.
+2. Caller thread waits until the work is finished because it's dependent
+on the return status of efi_runtime_service().
 
-Some facts about efi_runtime_services():
-1. A quick look at all the efi_runtime_services() shows that any
-efi_runtime_service() has five or less arguments.
-2. An argument of efi_runtime_service() can be a value (of any type) or
-a pointer (of any type).
-Hence, efi_runtime_work has five void pointers to store these arguments.
+Semantics to pack arguments in efi_runtime_work (has void pointers):
+1. If argument is a pointer (of any type), pass it as is.
+2. If argument is a value (of any type), address of the value is passed.
+
+Introduce a handler function (called efi_call_rts()) that
+1. Understands efi_runtime_work and
+2. Invokes the appropriate efi_runtime_service() with the appropriate
+arguments
+
+Semantics followed by efi_call_rts() to understand efi_runtime_work:
+1. If argument was a pointer, recast it from void pointer to original
+pointer type.
+2. If argument was a value, recast it from void pointer to original
+pointer type and dereference it.
+
+pstore writes could potentially be invoked in atomic context and it uses
+set_variable<>() and query_variable_info<>() to store logs. If we invoke
+efi_runtime_services() through efi_rts_wq while in atomic(), kernel
+issues a warning ("scheduling wile in atomic") and prints stack trace.
+One way to overcome this is to not make the caller process wait for the
+worker thread to finish. This approach breaks pstore i.e. the log
+messages aren't written to efi variables. Hence, pstore calls
+efi_runtime_services() without using efi_rts_wq or in other words
+efi_rts_wq will be used unconditionally for all the
+efi_runtime_services() except set_variable<>() and
+query_variable_info<>().
 
 Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 Suggested-by: Andy Lutomirski <luto@kernel.org>
@@ -54,113 +78,286 @@ Cc: Dan Williams <dan.j.williams@intel.com>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
 ---
- drivers/firmware/efi/runtime-wrappers.c | 80 +++++++++++++++++++++++++++++++++
- 1 file changed, 80 insertions(+)
+ drivers/firmware/efi/runtime-wrappers.c | 170 ++++++++++++++++++++++++++++----
+ 1 file changed, 150 insertions(+), 20 deletions(-)
 
 diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index ae54870b2788..a9866045ed52 100644
+index a9866045ed52..23ff128fcb2f 100644
 --- a/drivers/firmware/efi/runtime-wrappers.c
 +++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -1,6 +1,14 @@
- /*
-  * runtime-wrappers.c - Runtime Services function call wrappers
-  *
-+ * Implementation summary:
-+ * -----------------------
-+ * 1. When user/kernel thread requests to execute efi_runtime_service(),
-+ * enqueue work to efi_rts_wq.
-+ * 2. Caller thread waits until the work is finished because it's
-+ * dependent on the return status and execution of efi_runtime_service().
-+ * For instance, get_variable() and get_next_variable().
-+ *
-  * Copyright (C) 2014 Linaro Ltd. <ard.biesheuvel@linaro.org>
-  *
-  * Split off from arch/x86/platform/efi/efi.c
-@@ -22,6 +30,8 @@
- #include <linux/mutex.h>
- #include <linux/semaphore.h>
- #include <linux/stringify.h>
-+#include <linux/workqueue.h>
-+
- #include <asm/efi.h>
+@@ -170,13 +170,107 @@ void efi_call_virt_check_flags(unsigned long flags, const char *call)
+  */
+ static DEFINE_SEMAPHORE(efi_runtime_lock);
  
- /*
-@@ -33,6 +43,76 @@
- #define __efi_call_virt(f, args...) \
- 	__efi_call_virt_pointer(efi.systab->runtime, f, args)
- 
-+/* efi_runtime_service() function identifiers */
-+enum efi_rts_ids {
-+	GET_TIME,
-+	SET_TIME,
-+	GET_WAKEUP_TIME,
-+	SET_WAKEUP_TIME,
-+	GET_VARIABLE,
-+	GET_NEXT_VARIABLE,
-+	SET_VARIABLE,
-+	SET_VARIABLE_NONBLOCKING,
-+	QUERY_VARIABLE_INFO,
-+	QUERY_VARIABLE_INFO_NONBLOCKING,
-+	GET_NEXT_HIGH_MONO_COUNT,
-+	RESET_SYSTEM,
-+	UPDATE_CAPSULE,
-+	QUERY_CAPSULE_CAPS,
-+};
-+
 +/*
-+ * efi_runtime_work:	Details of EFI Runtime Service work
-+ * @func:		EFI Runtime Service function identifier
-+ * @arg<1-5>:		EFI Runtime Service function arguments
-+ * @status:		Status of executing EFI Runtime Service
-+ */
-+struct efi_runtime_work {
-+	void *arg1;
-+	void *arg2;
-+	void *arg3;
-+	void *arg4;
-+	void *arg5;
-+	efi_status_t status;
-+	struct work_struct work;
-+	enum efi_rts_ids efi_rts_id;
-+};
-+
-+/*
-+ * efi_queue_work:	Queue efi_runtime_service() and wait until it's done
-+ * @rts:		efi_runtime_service() function identifier
-+ * @rts_arg<1-5>:	efi_runtime_service() function arguments
++ * Calls the appropriate efi_runtime_service() with the appropriate
++ * arguments.
 + *
-+ * Accesses to efi_runtime_services() are serialized by a binary
-+ * semaphore (efi_runtime_lock) and caller waits until the work is
-+ * finished, hence _only_ one work is queued at a time and the queued
-+ * work gets flushed.
++ * Semantics followed by efi_call_rts() to understand efi_runtime_work:
++ * 1. If argument was a pointer, recast it from void pointer to original
++ * pointer type.
++ * 2. If argument was a value, recast it from void pointer to original
++ * pointer type and dereference it.
 + */
-+#define efi_queue_work(_rts, _arg1, _arg2, _arg3, _arg4, _arg5)	\
-+({									\
-+	struct efi_runtime_work efi_rts_work;				\
-+	efi_rts_work.status = EFI_ABORTED;				\
-+									\
-+	INIT_WORK_ONSTACK(&efi_rts_work.work, efi_call_rts);		\
-+	efi_rts_work.arg1 = _arg1;					\
-+	efi_rts_work.arg2 = _arg2;					\
-+	efi_rts_work.arg3 = _arg3;					\
-+	efi_rts_work.arg4 = _arg4;					\
-+	efi_rts_work.arg5 = _arg5;					\
-+	efi_rts_work.efi_rts_id = _rts;					\
-+									\
-+	/*								\
-+	 * queue_work() returns 0 if work was already on queue,         \
-+	 * _ideally_ this should never happen.                          \
-+	 */								\
-+	if (queue_work(efi_rts_wq, &efi_rts_work.work))			\
-+		flush_work(&efi_rts_work.work);				\
-+	else								\
-+		pr_err("Failed to queue work to efi_rts_wq.\n");	\
-+									\
-+	efi_rts_work.status;						\
-+})
++static void efi_call_rts(struct work_struct *work)
++{
++	struct efi_runtime_work *efi_rts_work;
++	void *arg1, *arg2, *arg3, *arg4, *arg5;
++	efi_status_t status = EFI_NOT_FOUND;
 +
- void efi_call_virt_check_flags(unsigned long flags, const char *call)
++	efi_rts_work = container_of(work, struct efi_runtime_work, work);
++	arg1 = efi_rts_work->arg1;
++	arg2 = efi_rts_work->arg2;
++	arg3 = efi_rts_work->arg3;
++	arg4 = efi_rts_work->arg4;
++	arg5 = efi_rts_work->arg5;
++
++	switch (efi_rts_work->efi_rts_id) {
++	case GET_TIME:
++		status = efi_call_virt(get_time, (efi_time_t *)arg1,
++				       (efi_time_cap_t *)arg2);
++		break;
++	case SET_TIME:
++		status = efi_call_virt(set_time, (efi_time_t *)arg1);
++		break;
++	case GET_WAKEUP_TIME:
++		status = efi_call_virt(get_wakeup_time, (efi_bool_t *)arg1,
++				       (efi_bool_t *)arg2, (efi_time_t *)arg3);
++		break;
++	case SET_WAKEUP_TIME:
++		status = efi_call_virt(set_wakeup_time, *(efi_bool_t *)arg1,
++				       (efi_time_t *)arg2);
++		break;
++	case GET_VARIABLE:
++		status = efi_call_virt(get_variable, (efi_char16_t *)arg1,
++				       (efi_guid_t *)arg2, (u32 *)arg3,
++				       (unsigned long *)arg4, (void *)arg5);
++		break;
++	case GET_NEXT_VARIABLE:
++		status = efi_call_virt(get_next_variable, (unsigned long *)arg1,
++				       (efi_char16_t *)arg2,
++				       (efi_guid_t *)arg3);
++		break;
++	case SET_VARIABLE:
++		/* fall through */
++	case SET_VARIABLE_NONBLOCKING:
++		status = efi_call_virt(set_variable, (efi_char16_t *)arg1,
++				       (efi_guid_t *)arg2, *(u32 *)arg3,
++				       *(unsigned long *)arg4, (void *)arg5);
++		break;
++	case QUERY_VARIABLE_INFO:
++		/* fall through */
++	case QUERY_VARIABLE_INFO_NONBLOCKING:
++		status = efi_call_virt(query_variable_info, *(u32 *)arg1,
++				       (u64 *)arg2, (u64 *)arg3, (u64 *)arg4);
++		break;
++	case GET_NEXT_HIGH_MONO_COUNT:
++		status = efi_call_virt(get_next_high_mono_count, (u32 *)arg1);
++		break;
++	case RESET_SYSTEM:
++		__efi_call_virt(reset_system, *(int *)arg1,
++				*(efi_status_t *)arg2,
++				*(unsigned long *)arg3,
++				(efi_char16_t *)arg4);
++		break;
++	case UPDATE_CAPSULE:
++		status = efi_call_virt(update_capsule,
++				       (efi_capsule_header_t **)arg1,
++				       *(unsigned long *)arg2,
++				       *(unsigned long *)arg3);
++		break;
++	case QUERY_CAPSULE_CAPS:
++		status = efi_call_virt(query_capsule_caps,
++				       (efi_capsule_header_t **)arg1,
++				       *(unsigned long *)arg2, (u64 *)arg3,
++				       (int *)arg4);
++		break;
++	default:
++		/*
++		 * Ideally, we should never reach here because a caller of this
++		 * function should have put the right efi_runtime_service()
++		 * function identifier into efi_rts_work->efi_rts_id
++		 */
++		pr_err("Requested executing invalid EFI Runtime Service.\n");
++	}
++	efi_rts_work->status = status;
++}
++
+ static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
  {
- 	unsigned long cur_flags, mismatch;
+ 	efi_status_t status;
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_call_virt(get_time, tm, tc);
++	status = efi_queue_work(GET_TIME, tm, tc, NULL, NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -187,7 +281,7 @@ static efi_status_t virt_efi_set_time(efi_time_t *tm)
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_call_virt(set_time, tm);
++	status = efi_queue_work(SET_TIME, tm, NULL, NULL, NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -200,7 +294,8 @@ static efi_status_t virt_efi_get_wakeup_time(efi_bool_t *enabled,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_call_virt(get_wakeup_time, enabled, pending, tm);
++	status = efi_queue_work(GET_WAKEUP_TIME, enabled, pending, tm, NULL,
++				NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -211,7 +306,8 @@ static efi_status_t virt_efi_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_call_virt(set_wakeup_time, enabled, tm);
++	status = efi_queue_work(SET_WAKEUP_TIME, &enabled, tm, NULL, NULL,
++				NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -226,8 +322,8 @@ static efi_status_t virt_efi_get_variable(efi_char16_t *name,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_call_virt(get_variable, name, vendor, attr, data_size,
+-			       data);
++	status = efi_queue_work(GET_VARIABLE, name, vendor, attr, data_size,
++				data);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -240,7 +336,8 @@ static efi_status_t virt_efi_get_next_variable(unsigned long *name_size,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_call_virt(get_next_variable, name_size, name, vendor);
++	status = efi_queue_work(GET_NEXT_VARIABLE, name_size, name, vendor,
++				NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -255,8 +352,15 @@ static efi_status_t virt_efi_set_variable(efi_char16_t *name,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_call_virt(set_variable, name, vendor, attr, data_size,
+-			       data);
++
++	/* pstore shouldn't use efi_rts_wq while in atomic */
++	if (!in_atomic())
++		status = efi_queue_work(SET_VARIABLE, name, vendor, &attr,
++					&data_size, data);
++	else
++		status = efi_call_virt(set_variable, name, vendor, attr,
++				       data_size, data);
++
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -271,8 +375,14 @@ virt_efi_set_variable_nonblocking(efi_char16_t *name, efi_guid_t *vendor,
+ 	if (down_trylock(&efi_runtime_lock))
+ 		return EFI_NOT_READY;
+ 
+-	status = efi_call_virt(set_variable, name, vendor, attr, data_size,
+-			       data);
++	/* pstore shouldn't use efi_rts_wq while in atomic */
++	if (!in_atomic())
++		status = efi_queue_work(SET_VARIABLE_NONBLOCKING, &name, vendor,
++					&attr,	&data_size, data);
++	else
++		status = efi_call_virt(set_variable, name, vendor, attr,
++				       data_size, data);
++
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -290,8 +400,17 @@ static efi_status_t virt_efi_query_variable_info(u32 attr,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_call_virt(query_variable_info, attr, storage_space,
+-			       remaining_space, max_variable_size);
++
++	/* pstore shouldn't use efi_rts_wq while in atomic */
++	if (!in_atomic())
++		status = efi_queue_work(QUERY_VARIABLE_INFO, &attr,
++					storage_space, remaining_space,
++					max_variable_size, NULL);
++	else
++		status = efi_call_virt(query_variable_info, attr,
++				       storage_space, remaining_space,
++				       max_variable_size);
++
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -310,8 +429,16 @@ virt_efi_query_variable_info_nonblocking(u32 attr,
+ 	if (down_trylock(&efi_runtime_lock))
+ 		return EFI_NOT_READY;
+ 
+-	status = efi_call_virt(query_variable_info, attr, storage_space,
+-			       remaining_space, max_variable_size);
++	/* pstore shouldn't use efi_rts_wq while in atomic */
++	if (!in_atomic())
++		status = efi_queue_work(QUERY_VARIABLE_INFO_NONBLOCKING, &attr,
++					storage_space, remaining_space,
++					max_variable_size, NULL);
++	else
++		status = efi_call_virt(query_variable_info, attr,
++				       storage_space, remaining_space,
++				       max_variable_size);
++
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -322,7 +449,8 @@ static efi_status_t virt_efi_get_next_high_mono_count(u32 *count)
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_call_virt(get_next_high_mono_count, count);
++	status = efi_queue_work(GET_NEXT_HIGH_MONO_COUNT, count, NULL, NULL,
++				NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -337,7 +465,8 @@ static void virt_efi_reset_system(int reset_type,
+ 			"could not get exclusive access to the firmware\n");
+ 		return;
+ 	}
+-	__efi_call_virt(reset_system, reset_type, status, data_size, data);
++	efi_queue_work(RESET_SYSTEM, &reset_type, &status, &data_size, data,
++		       NULL);
+ 	up(&efi_runtime_lock);
+ }
+ 
+@@ -352,7 +481,8 @@ static efi_status_t virt_efi_update_capsule(efi_capsule_header_t **capsules,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_call_virt(update_capsule, capsules, count, sg_list);
++	status = efi_queue_work(UPDATE_CAPSULE, capsules, &count, &sg_list,
++				NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -369,8 +499,8 @@ static efi_status_t virt_efi_query_capsule_caps(efi_capsule_header_t **capsules,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_call_virt(query_capsule_caps, capsules, count, max_size,
+-			       reset_type);
++	status = efi_queue_work(QUERY_CAPSULE_CAPS, capsules, &count,
++				max_size, reset_type, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
 -- 
 2.7.4
