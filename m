@@ -1,65 +1,94 @@
-From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Subject: Re: [PATCH v3] device property: Get rid of union aliasing
-Date: Wed, 23 May 2018 13:33:00 +0200
-Message-ID: <1613149.qu9zDKzsAX@aspire.rjw.lan>
-References: <20180515173202.84296-1-andriy.shevchenko@linux.intel.com> <20180516094133.GN32438@lahna.fi.intel.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.4 62/92] efi: Avoid potential crashes, fix the struct efi_pci_io_protocol_32 definition for mixed mode
+Date: Thu, 24 May 2018 11:38:39 +0200
+Message-ID: <20180524093205.251485804@linuxfoundation.org>
+References: <20180524093159.286472249@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180516094133.GN32438@lahna.fi.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Sakari Ailus <sakari.ailus@linux.intel.com>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Lukas Wunner <lukas@wunner.de>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20180524093159.286472249@linuxfoundation.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wednesday, May 16, 2018 11:41:33 AM CEST Mika Westerberg wrote:
-> On Tue, May 15, 2018 at 08:32:02PM +0300, Andy Shevchenko wrote:
-> > The commit
-> > 
-> >   318a19718261 ("device property: refactor built-in properties support")
-> > 
-> > went way too far and brought a union aliasing. Partially revert it here
-> > to get rid of union aliasing.
-> > 
-> > Note, all Apple properties are considered as u8 arrays. To get a value
-> > of any of them the caller must use device_property_read_u8_array().
-> > 
-> > What union aliasing is?
-> > ~~~~~~~~~~~~~~~~~~~~~~~
-> > The C99 standard in section 6.2.5 paragraph 20 defines union type as
-> > "an overlapping nonempty set of member objects". It also states in
-> > section 6.7.2.1 paragraph 14 that "the value of at most one of the
-> > members can be stored in a union object at any time'.
-> > 
-> > Union aliasing is a type punning mechanism using union members to store
-> > as one type and read back as another.
-> > 
-> > Why it's not good?
-> > ~~~~~~~~~~~~~~~~~~
-> > Section 6.2.6.1 paragraph 6 says that a union object may not be a trap
-> > representation, although its member objects may be.
-> > 
-> > Meanwhile annex J.1 says that "the value of a union member other than
-> > the last one stored into" is unspecified [removed in C11].
-> > 
-> > In TC3, a footnote is added which specifies that accessing a member of a
-> > union other than the last one stored causes "the object representation"
-> > to be re-interpreted in the new type and specifically refers to this as
-> > "type punning". This conflicts to some degree with Annex J.1.
-> > 
-> > While it's working in Linux with GCC, the use of union members to do
-> > type punning is not clear area in the C standard and might lead to
-> > unspecified behaviour.
-> > 
-> > More information is available in this [1] blog post.
-> > 
-> > [1]: https://davmac.wordpress.com/2010/02/26/c99-revisited/
-> > 
-> > Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> > Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> 
-> Reviewed-by: Mika Westerberg <mika.westerberg@linux.intel.com>
-> --
+4.4-stable review patch.  If anyone has any objections, please let me know.
 
-Applied, thanks!
+------------------
+
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+
+commit 0b3225ab9407f557a8e20f23f37aa7236c10a9b1 upstream.
+
+Mixed mode allows a kernel built for x86_64 to interact with 32-bit
+EFI firmware, but requires us to define all struct definitions carefully
+when it comes to pointer sizes.
+
+'struct efi_pci_io_protocol_32' currently uses a 'void *' for the
+'romimage' field, which will be interpreted as a 64-bit field
+on such kernels, potentially resulting in bogus memory references
+and subsequent crashes.
+
+Tested-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: <stable@vger.kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20180504060003.19618-13-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ arch/x86/boot/compressed/eboot.c |    6 ++++--
+ include/linux/efi.h              |    8 ++++----
+ 2 files changed, 8 insertions(+), 6 deletions(-)
+
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -364,7 +364,8 @@ __setup_efi_pci32(efi_pci_io_protocol_32
+ 	if (status != EFI_SUCCESS)
+ 		goto free_struct;
+ 
+-	memcpy(rom->romdata, pci->romimage, pci->romsize);
++	memcpy(rom->romdata, (void *)(unsigned long)pci->romimage,
++	       pci->romsize);
+ 	return status;
+ 
+ free_struct:
+@@ -470,7 +471,8 @@ __setup_efi_pci64(efi_pci_io_protocol_64
+ 	if (status != EFI_SUCCESS)
+ 		goto free_struct;
+ 
+-	memcpy(rom->romdata, pci->romimage, pci->romsize);
++	memcpy(rom->romdata, (void *)(unsigned long)pci->romimage,
++	       pci->romsize);
+ 	return status;
+ 
+ free_struct:
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -364,8 +364,8 @@ typedef struct {
+ 	u32 attributes;
+ 	u32 get_bar_attributes;
+ 	u32 set_bar_attributes;
+-	uint64_t romsize;
+-	void *romimage;
++	u64 romsize;
++	u32 romimage;
+ } efi_pci_io_protocol_32;
+ 
+ typedef struct {
+@@ -384,8 +384,8 @@ typedef struct {
+ 	u64 attributes;
+ 	u64 get_bar_attributes;
+ 	u64 set_bar_attributes;
+-	uint64_t romsize;
+-	void *romimage;
++	u64 romsize;
++	u64 romimage;
+ } efi_pci_io_protocol_64;
+ 
+ typedef struct {
