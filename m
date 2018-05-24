@@ -1,18 +1,18 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.4 62/92] efi: Avoid potential crashes, fix the struct efi_pci_io_protocol_32 definition for mixed mode
-Date: Thu, 24 May 2018 11:38:39 +0200
-Message-ID: <20180524093205.251485804@linuxfoundation.org>
-References: <20180524093159.286472249@linuxfoundation.org>
+Subject: [PATCH 3.18 34/45] efi: Avoid potential crashes, fix the struct efi_pci_io_protocol_32 definition for mixed mode
+Date: Thu, 24 May 2018 11:38:42 +0200
+Message-ID: <20180524093125.049014106@linuxfoundation.org>
+References: <20180524093120.599252450@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20180524093159.286472249@linuxfoundation.org>
+In-Reply-To: <20180524093120.599252450@linuxfoundation.org>
 Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.4-stable review patch.  If anyone has any objections, please let me know.
+3.18-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -48,7 +48,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 --- a/arch/x86/boot/compressed/eboot.c
 +++ b/arch/x86/boot/compressed/eboot.c
-@@ -364,7 +364,8 @@ __setup_efi_pci32(efi_pci_io_protocol_32
+@@ -365,7 +365,8 @@ __setup_efi_pci32(efi_pci_io_protocol_32
  	if (status != EFI_SUCCESS)
  		goto free_struct;
  
@@ -58,7 +58,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  	return status;
  
  free_struct:
-@@ -470,7 +471,8 @@ __setup_efi_pci64(efi_pci_io_protocol_64
+@@ -471,7 +472,8 @@ __setup_efi_pci64(efi_pci_io_protocol_64
  	if (status != EFI_SUCCESS)
  		goto free_struct;
  
@@ -70,7 +70,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  free_struct:
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
-@@ -364,8 +364,8 @@ typedef struct {
+@@ -360,8 +360,8 @@ typedef struct {
  	u32 attributes;
  	u32 get_bar_attributes;
  	u32 set_bar_attributes;
@@ -81,7 +81,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  } efi_pci_io_protocol_32;
  
  typedef struct {
-@@ -384,8 +384,8 @@ typedef struct {
+@@ -380,8 +380,8 @@ typedef struct {
  	u64 attributes;
  	u64 get_bar_attributes;
  	u64 set_bar_attributes;
