@@ -1,8 +1,10 @@
 From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH V4 0/3] Use efi_rts_wq to invoke EFI Runtime Services
-Date: Fri, 25 May 2018 15:05:00 -0700
-Message-ID: <1527285903-31799-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH V4 2/3] efi: Create efi_rts_wq and efi_queue_work() to invoke all efi_runtime_services()
+Date: Fri, 25 May 2018 15:05:02 -0700
+Message-ID: <1527285903-31799-3-git-send-email-sai.praneeth.prakhya@intel.com>
+References: <1527285903-31799-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1527285903-31799-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, Dave Hansen <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Naresh Bhat <naresh.bhat@linaro.org>, Ricardo Neri <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Dan Williams <dan.j.williams@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
@@ -10,166 +12,33 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-Problem statement:
-------------------
-Presently, efi_runtime_services() silently switch %cr3 from swapper_pgd
-to efi_pgd. As a consequence, kernel code that runs in efi_pgd (e.g.,
-perf code via an NMI) will have incorrect user space mappings[1]. This
-could lead to otherwise unexpected access errors and, worse, unauthorized
-access to firmware code and data.
+When a process requests the kernel to execute any efi_runtime_service(),
+the requested efi_runtime_service (represented as an identifier) and its
+arguments are packed into a struct named efi_runtime_work and queued
+onto work queue named efi_rts_wq. The caller then waits until the work
+is completed.
 
-Detailed discussion of problem statement:
------------------------------------------
-As this switch is not propagated to other kernel subsystems; they will
-wrongly assume that swapper_pgd is still in use and it can lead to
-following issues:
+Introduce some infrastructure:
+1. Creating workqueue named efi_rts_wq
+2. A macro (efi_queue_work()) that
+	a. Populates efi_runtime_work
+	b. Queues work onto efi_rts_wq and
+	c. Waits until worker thread completes
 
-1. If kernel code tries to access user space addresses while in efi_pgd,
-it could lead to unauthorized accesses to firmware code/data.
-(e.g: <__>/copy_from_user_nmi()).
-[This could also be disastrous if the frame pointer happens to point at
-MMIO in the EFI runtime mappings] - Mark Rutland.
+The caller thread has to wait until the worker thread completes, because
+it depends on the return status of efi_runtime_service() and, in
+specific cases, the arguments populated by efi_runtime_service(). Some
+efi_runtime_services() takes a pointer to buffer as an argument and
+fills up the buffer with requested data. For instance,
+efi_get_variable() and efi_get_next_variable(). Hence, caller process
+cannot just post the work and get going.
 
-An example of a subsystem that could touch user space while in efi_pgd is
-perf. Assume that we are in efi_pgd, a user could use perf to profile
-some user data and depending on the address the user is trying to
-profile, two things could happen.
-1. If the mappings are absent, perf fails to profile.
-2. If efi_pgd does have mappings for the requested address (these
-  mappings are erroneous), perf profiles firmware code/data. If the
-  address is MMIO'ed, perf could have potentially changed some device state.
-
-The culprit in both the cases is, EFI subsystem swapping out pgd and not
-perf. Because, EFI subsystem has broken the *general assumption* that
-all other subsystems rely on - "user space might be valid and nobody has
-switched %cr3".
-
-Solutions:
-----------
-There are two ways to fix this issue:
-1. Educate about pgd change to *all* the subsystems that could
-   potentially access user space while in efi_pgd.
-  On x86, AFAIK, it could happen only when some one touches user space
-  from the back of an NMI (a quick audit on <__>/copy_from_user_nmi,
-  showed perf and oprofile). On arm, it could happen from multiple
-  places as arm runs efi_runtime_services() interrupts enabled (ARM folks,
-  please comment on this as I might be wrong); whereas x86 runs
-  efi_runtime_services() interrupts disabled.
-
-  I think, this solution isn't holistic because
-  a. Any other subsystem might well do the same, if not now, in future.
-  b. Also, this solution looks simpler on x86 but not true if it's the
-    same for arm (ARM folks, please comment on this as I might be wrong).
-  c. This solution looks like a work around rather than addressing the issue.
-
-2. Running efi_runtime_services() in kthread context.
-  This makes sense because efi_pgd doesn't have user space and kthread
-  by definition means that user space is not valid. Any kernel code that
-  tries to touch user space while in kthread is buggy in itself. If so,
-  it should be an easy fix in the other subsystem. This also take us one
-  step closer to long awaiting proposal of Andy - Running EFI at CPL 3.
-
-What does this patch set do?
-----------------------------
-Introduce efi_rts_wq (EFI runtime services work queue).
-When a user process requests the kernel to execute any efi_runtime_service(),
-kernel queues the work to efi_rts_wq, a kthread comes along, switches to
-efi_pgd and executes efi_runtime_service() in kthread context. IOW, this
-patch set adds support to the EFI subsystem to handle all calls to
-efi_runtime_services() using a work queue (which in turn uses kthread).
-
-How running efi_runtime_services() in kthread fixes above discussed issues?
----------------------------------------------------------------------------
-If we run efi_runtime_services() in kthread context and if perf
-checks for it, we could get both the above scenarios correct by perf
-aborting the profiling. Not only perf, but any subsystem that tries to
-touch user space should first check for kthread context and if so,
-should abort.
-
-Q. If we still need check for kthread context in other subsystems that
-access user space, what does this patch set fix?
-A. This patch set makes sure that EFI subsystem is not at fault.
-Without this patch set the blame is upon EFI subsystem, because it's the
-one that changed pgd and hasn't communicated this change to everyone and
-hence broke the general assumption. Running efi_runtime_services() in
-kthread means explicitly communicating that user space is invalid, now 
-it's the responsibility of other subsystem to make sure that it's
-running in right context.
-
-Testing:
---------
-Tested using LUV (Linux UEFI Validation) for x86_64, x86_32 and arm64
-(qemu only). Will appreciate the effort if someone could test the
-patches on real ARM/ARM64 machines.
-LUV: https://01.org/linux-uefi-validation
-
-Credits:
---------
-Thanks to Ricardo, Dan, Miguel, Mark and Peter for reviews and suggestions.
-Thanks to Boris and Andy for making me think through/help on what I am
-addressing with this patch set.
-
-Please feel free to pour in your comments and concerns.
-
-Note:
------
-Patches are based on Linus's kernel v4.17-rc6
-
-[1] Backup: Detailing efi_pgd:
-------------------------------
-efi_pgd has mappings for EFI Runtime Code/Data (on x86, plus EFI Boot time
-Code/Data) regions. Due to the nature of these mappings, they fall
-in user space address ranges and they are not the same as swapper.
-
-[On arm64, the EFI mappings are in the VA range usually used for user
-space. The two halves of the address space are managed by separate
-tables, TTBR0 and TTBR1. We always map the kernel in TTBR1, and we map
-user space or EFI runtime mappings in TTBR0.] - Mark Rutland
-
-Changes from V3 to V4:
-----------------------
-1. As suggested by Peter, use completions instead of flush_work() as the
-  former is cheaper
-2. Call efi_delete_dummy_variable() from efisubsys_init(). Sorry! Ard,
-  wasn't able to find a better alternative to keep this change local to
-  arch/x86.
-
-Changes from V2 to V3:
-----------------------
-1. Rewrite the cover letter to clearly state the problem. What we are
-  fixing and what we are not fixing.
-2. Make efi_delete_dummy_variable() change local to x86.
-3. Avoid using BUG(), instead, print error message and exit gracefully.
-4. Move struct efi_runtime_work to runtime-wrappers.c file.
-5. Give enum a name (efi_rts_ids) and use it in efi_runtime_work.
-6. Add Naresh (maintainer of LUV for ARM) and Miguel to the CC list.
-
-Changes from V1 to V2:
-----------------------
-1. Remove unnecessary include of asm/efi.h file - Fixes build error on
-  ia64, reported by 0-day
-2. Use enum to identify efi_runtime_services()
-3. Use alloc_ordered_workqueue() to create efi_rts_wq as
-  create_workqueue() is scheduled for depreciation.
-4. Make efi_call_rts() static, as it has no callers outside
-  runtime-wrappers.c
-5. Use BUG(), when we are unable to queue work or unable to identify
-  requested efi_runtime_service() - Because these two situations should
-  *never* happen.
-
-Sai Praneeth (3):
-  x86/efi: Call efi_delete_dummy_variable() during efi subsystem
-    initialization
-  efi: Create efi_rts_wq and efi_queue_work() to invoke all
-    efi_runtime_services()
-  efi: Use efi_rts_wq to invoke EFI Runtime Services
-
- arch/x86/include/asm/efi.h              |   1 -
- arch/x86/platform/efi/efi.c             |   6 -
- drivers/firmware/efi/efi.c              |  20 +++
- drivers/firmware/efi/runtime-wrappers.c | 256 +++++++++++++++++++++++++++++---
- include/linux/efi.h                     |   6 +
- 5 files changed, 262 insertions(+), 27 deletions(-)
+Some facts about efi_runtime_services():
+1. A quick look at all the efi_runtime_services() shows that any
+efi_runtime_service() has five or less arguments.
+2. An argument of efi_runtime_service() can be a value (of any type)
+or a pointer (of any type).
+Hence, efi_runtime_work has five void pointers to store these arguments.
 
 Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 Suggested-by: Andy Lutomirski <luto@kernel.org>
@@ -188,6 +57,165 @@ Cc: Matt Fleming <matt@codeblueprint.co.uk>
 Cc: Dan Williams <dan.j.williams@intel.com>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+---
+ drivers/firmware/efi/efi.c              | 14 ++++++
+ drivers/firmware/efi/runtime-wrappers.c | 85 +++++++++++++++++++++++++++++++++
+ include/linux/efi.h                     |  3 ++
+ 3 files changed, 102 insertions(+)
 
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 1176af664013..2632294eb33f 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -84,6 +84,8 @@ struct mm_struct efi_mm = {
+ 	.mmlist			= LIST_HEAD_INIT(efi_mm.mmlist),
+ };
+ 
++struct workqueue_struct *efi_rts_wq;
++
+ static bool disable_runtime;
+ static int __init setup_noefi(char *arg)
+ {
+@@ -338,6 +340,18 @@ static int __init efisubsys_init(void)
+ 		return 0;
+ 
+ 	/*
++	 * Since we process only one efi_runtime_service() at a time, an
++	 * ordered workqueue (which creates only one execution context)
++	 * should suffice all our needs.
++	 */
++	efi_rts_wq = alloc_ordered_workqueue("efi_rts_wq", 0);
++	if (!efi_rts_wq) {
++		pr_err("Creating efi_rts_wq failed, EFI runtime services disabled.\n");
++		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
++		return 0;
++	}
++
++	/*
+ 	 * Clean DUMMY object calls EFI Runtime Service, set_variable(), so
+ 	 * it should be invoked only after efi_rts_wq is ready.
+ 	 */
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index ae54870b2788..534bd348feca 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -1,6 +1,15 @@
+ /*
+  * runtime-wrappers.c - Runtime Services function call wrappers
+  *
++ * Implementation summary:
++ * -----------------------
++ * 1. When user/kernel thread requests to execute efi_runtime_service(),
++ * enqueue work to efi_rts_wq.
++ * 2. Caller thread waits for completion until the work is finished
++ * because it's dependent on the return status and execution of
++ * efi_runtime_service().
++ * For instance, get_variable() and get_next_variable().
++ *
+  * Copyright (C) 2014 Linaro Ltd. <ard.biesheuvel@linaro.org>
+  *
+  * Split off from arch/x86/platform/efi/efi.c
+@@ -22,6 +31,9 @@
+ #include <linux/mutex.h>
+ #include <linux/semaphore.h>
+ #include <linux/stringify.h>
++#include <linux/workqueue.h>
++#include <linux/completion.h>
++
+ #include <asm/efi.h>
+ 
+ /*
+@@ -33,6 +45,79 @@
+ #define __efi_call_virt(f, args...) \
+ 	__efi_call_virt_pointer(efi.systab->runtime, f, args)
+ 
++/* efi_runtime_service() function identifiers */
++enum efi_rts_ids {
++	GET_TIME,
++	SET_TIME,
++	GET_WAKEUP_TIME,
++	SET_WAKEUP_TIME,
++	GET_VARIABLE,
++	GET_NEXT_VARIABLE,
++	SET_VARIABLE,
++	SET_VARIABLE_NONBLOCKING,
++	QUERY_VARIABLE_INFO,
++	QUERY_VARIABLE_INFO_NONBLOCKING,
++	GET_NEXT_HIGH_MONO_COUNT,
++	RESET_SYSTEM,
++	UPDATE_CAPSULE,
++	QUERY_CAPSULE_CAPS,
++};
++
++/*
++ * efi_runtime_work:	Details of EFI Runtime Service work
++ * @arg<1-5>:		EFI Runtime Service function arguments
++ * @status:		Status of executing EFI Runtime Service
++ * @efi_rts_id:		EFI Runtime Service function identifier
++ * @efi_rts_comp:	Struct used for handling completions
++ */
++struct efi_runtime_work {
++	void *arg1;
++	void *arg2;
++	void *arg3;
++	void *arg4;
++	void *arg5;
++	efi_status_t status;
++	struct work_struct work;
++	enum efi_rts_ids efi_rts_id;
++	struct completion efi_rts_comp;
++};
++
++/*
++ * efi_queue_work:	Queue efi_runtime_service() and wait until it's done
++ * @rts:		efi_runtime_service() function identifier
++ * @rts_arg<1-5>:	efi_runtime_service() function arguments
++ *
++ * Accesses to efi_runtime_services() are serialized by a binary
++ * semaphore (efi_runtime_lock) and caller waits until the work is
++ * finished, hence _only_ one work is queued at a time and the caller
++ * thread waits for completion.
++ */
++#define efi_queue_work(_rts, _arg1, _arg2, _arg3, _arg4, _arg5)		\
++({									\
++	struct efi_runtime_work efi_rts_work;				\
++	efi_rts_work.status = EFI_ABORTED;				\
++									\
++	init_completion(&efi_rts_work.efi_rts_comp);			\
++	INIT_WORK_ONSTACK(&efi_rts_work.work, efi_call_rts);		\
++	efi_rts_work.arg1 = _arg1;					\
++	efi_rts_work.arg2 = _arg2;					\
++	efi_rts_work.arg3 = _arg3;					\
++	efi_rts_work.arg4 = _arg4;					\
++	efi_rts_work.arg5 = _arg5;					\
++	efi_rts_work.efi_rts_id = _rts;					\
++									\
++	/*								\
++	 * queue_work() returns 0 if work was already on queue,         \
++	 * _ideally_ this should never happen.                          \
++	 */								\
++	if (queue_work(efi_rts_wq, &efi_rts_work.work))			\
++		wait_for_completion(&efi_rts_work.efi_rts_comp);	\
++	else								\
++		pr_err("Failed to queue work to efi_rts_wq.\n");	\
++									\
++	efi_rts_work.status;						\
++})
++
+ void efi_call_virt_check_flags(unsigned long flags, const char *call)
+ {
+ 	unsigned long cur_flags, mismatch;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 1b79939d0b1e..8fb1af15be67 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1654,4 +1654,7 @@ struct linux_efi_tpm_eventlog {
+ 
+ extern int efi_tpm_eventlog_init(void);
+ 
++/* Workqueue to queue EFI Runtime Services */
++extern struct workqueue_struct *efi_rts_wq;
++
+ #endif /* _LINUX_EFI_H */
 -- 
 2.7.4
