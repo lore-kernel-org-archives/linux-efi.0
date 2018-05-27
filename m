@@ -1,72 +1,42 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH V4 0/3] Use efi_rts_wq to invoke EFI Runtime Services
-Date: Sat, 26 May 2018 08:32:37 +0200
-Message-ID: <CAKv+Gu_eShqmjkDSXnFs-_Hcay67+JTMdb6TatNZpV2v5_MoaQ@mail.gmail.com>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH V4 0/3] Use efi_rts_wq to invoke EFI Runtime Services
+Date: Sun, 27 May 2018 05:32:52 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F3952F0CF@ORSMSX114.amr.corp.intel.com>
 References: <1527285903-31799-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <CAKv+Gu_oNUmOwTgM9sAsfMn4WgY+grC2f12vRC4HH9CgxxkfXQ@mail.gmail.com> <FFF73D592F13FD46B8700F0A279B802F39481456@ORSMSX114.amr.corp.intel.com>
+ <CAKv+Gu_oNUmOwTgM9sAsfMn4WgY+grC2f12vRC4HH9CgxxkfXQ@mail.gmail.com>
+ <FFF73D592F13FD46B8700F0A279B802F39481456@ORSMSX114.amr.corp.intel.com>
+ <CAKv+Gu_eShqmjkDSXnFs-_Hcay67+JTMdb6TatNZpV2v5_MoaQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F39481456@ORSMSX114.amr.corp.intel.com>
+In-Reply-To: <CAKv+Gu_eShqmjkDSXnFs-_Hcay67+JTMdb6TatNZpV2v5_MoaQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Naresh Bhat <naresh.bhat@linaro.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Williams, Dan J" <dan.j.williams@intel.com>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 26 May 2018 at 01:08, Prakhya, Sai Praneeth
-<sai.praneeth.prakhya@intel.com> wrote:
->> > Changes from V3 to V4:
->> > ----------------------
->> > 1. As suggested by Peter, use completions instead of flush_work() as the
->> >   former is cheaper
->> > 2. Call efi_delete_dummy_variable() from efisubsys_init(). Sorry! Ard,
->> >   wasn't able to find a better alternative to keep this change local to
->> >   arch/x86.
->> >
->>
->> Two questions:
->> - Should the non-blocking variants of the query and set_variable_store use the
->> work queue? Doesn't that make them blocking?
->
-> That's a good question . I think you are right, calling non-blocking variants of efi_rts
-> using work queues makes them blocking. But, I have a follow on question.
->
-> Assume some user requested to execute some non-blocking variant of efi_rts and
-> the kernel hasn't called efi_call_virt() yet, but was scheduled out. IOW, even though
-> user requests for non-blocking efi call, we might still block. Am I right?
->
-
-No, that is the whole point. These functions may be called from atomic
-context, which is why they trylock() and give up rather than block on
-the semaphore if a rt services call is already in progress. E.g.,
-
-/*
- * efivar_entry_set_nonblocking - call set_variable_nonblocking()
- *
- * This function is guaranteed to not block and is suitable for calling
- * from crash/panic handlers.
- *
- * Crucially, this function will not block if it cannot acquire
- * efivars_lock. Instead, it returns -EBUSY.
- */
-
-> With efi_rts_wq, I think, I have increased the window of getting blocked. With efi_rts_wq,
-> kernel should explicitly call schedule() to run firmware and the chances of getting blocked
-> are much more.
->
-> Expect this increased window, I think firmware should be executed as before.
->
-> So, can you please explain me the difference between blocking and non-blocking variants
-> from kernel perspective?
-> (the way we get locks are different down_interruptible() vs down_trylock())
->
->> - If the non-blocking set_variable() does not use the work queue, can we just call
->> it from efi_delete_dummy_variable(), and keep the calls where they are?
->
-> Yes, I think we can do that (if we don't use efi_rts_wq for non-blocking variants).
->
-
-OK, then please implement that change.
-
-Thanks,
-Ard.
+PiA+IEFzc3VtZSBzb21lIHVzZXIgcmVxdWVzdGVkIHRvIGV4ZWN1dGUgc29tZSBub24tYmxvY2tp
+bmcgdmFyaWFudCBvZg0KPiA+IGVmaV9ydHMgYW5kIHRoZSBrZXJuZWwgaGFzbid0IGNhbGxlZCBl
+ZmlfY2FsbF92aXJ0KCkgeWV0LCBidXQgd2FzDQo+ID4gc2NoZWR1bGVkIG91dC4gSU9XLCBldmVu
+IHRob3VnaCB1c2VyIHJlcXVlc3RzIGZvciBub24tYmxvY2tpbmcgZWZpIGNhbGwsIHdlDQo+IG1p
+Z2h0IHN0aWxsIGJsb2NrLiBBbSBJIHJpZ2h0Pw0KPiA+DQo+IA0KPiBObywgdGhhdCBpcyB0aGUg
+d2hvbGUgcG9pbnQuIFRoZXNlIGZ1bmN0aW9ucyBtYXkgYmUgY2FsbGVkIGZyb20gYXRvbWljIGNv
+bnRleHQsDQo+IHdoaWNoIGlzIHdoeSB0aGV5IHRyeWxvY2soKSBhbmQgZ2l2ZSB1cCByYXRoZXIg
+dGhhbiBibG9jayBvbiB0aGUgc2VtYXBob3JlIGlmIGEgcnQNCj4gc2VydmljZXMgY2FsbCBpcyBh
+bHJlYWR5IGluIHByb2dyZXNzLiBFLmcuLA0KPiANCj4gLyoNCj4gICogZWZpdmFyX2VudHJ5X3Nl
+dF9ub25ibG9ja2luZyAtIGNhbGwgc2V0X3ZhcmlhYmxlX25vbmJsb2NraW5nKCkNCj4gICoNCj4g
+ICogVGhpcyBmdW5jdGlvbiBpcyBndWFyYW50ZWVkIHRvIG5vdCBibG9jayBhbmQgaXMgc3VpdGFi
+bGUgZm9yIGNhbGxpbmcNCj4gICogZnJvbSBjcmFzaC9wYW5pYyBoYW5kbGVycy4NCj4gICoNCj4g
+ICogQ3J1Y2lhbGx5LCB0aGlzIGZ1bmN0aW9uIHdpbGwgbm90IGJsb2NrIGlmIGl0IGNhbm5vdCBh
+Y3F1aXJlDQo+ICAqIGVmaXZhcnNfbG9jay4gSW5zdGVhZCwgaXQgcmV0dXJucyAtRUJVU1kuDQo+
+ICAqLw0KPg0KDQpPbmUgbW9yZSBxdWVzdGlvbiBhZ2FpbiwgaWYgd2UgYXJlIHN1cmUgdGhhdCBu
+b24tYmxvY2tpbmcgdmFyaWFudHMgd2lsbA0KX2Fsd2F5c18gYmUgY2FsbGVkIGluIGF0b21pYyBj
+b250ZXh0LCB0aGVuLCB3ZSBnb3QgaXQgY292ZXJlZC4gQmVjYXVzZSwgaW4NCnNldF92YXJpYWJs
+ZSgpIGFuZCBxdWVyeV92YXJpYWJsZV9pbmZvKCkgKGJvdGggYmxvY2tpbmcgYW5kIG5vbi1ibG9j
+a2luZykgd2UgY2hlY2sNCmZvciBpbl9hdG9taWMoKSBhbmQgaWYgc28sIHdlIGRvbid0IHVzZSBl
+ZmlfcnRzX3dxIChwbGVhc2UgcmVmZXIgdG8gcGF0Y2ggMykuDQoNCklmIHlvdSB0aGluaywgdGhl
+cmUgbWlnaHQgYmUgYSBwcm9iYWJpbGl0eSBvZiBjYWxsaW5nIG5vbi1ibG9ja2luZyBlZmlfcnRz
+IG91dCBvZiBhdG9taWMNCmNvbnRleHQsIHRoZW4sIHN1cmUhIExldCdzIG1ha2UgdGhlbSBuZXZl
+ciB1c2UgZWZpX3J0c193cS4NCg0KUmVnYXJkcywNClNhaQ0K
