@@ -1,47 +1,99 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V4 0/3] Use efi_rts_wq to invoke EFI Runtime Services
-Date: Sun, 27 May 2018 15:47:23 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F3954D5DF@ORSMSX114.amr.corp.intel.com>
-References: <1527285903-31799-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <CAKv+Gu_oNUmOwTgM9sAsfMn4WgY+grC2f12vRC4HH9CgxxkfXQ@mail.gmail.com>
- <FFF73D592F13FD46B8700F0A279B802F39481456@ORSMSX114.amr.corp.intel.com>
- <CAKv+Gu_eShqmjkDSXnFs-_Hcay67+JTMdb6TatNZpV2v5_MoaQ@mail.gmail.com>
- <FFF73D592F13FD46B8700F0A279B802F3952F0CF@ORSMSX114.amr.corp.intel.com>
- <CAKv+Gu96gURHioy7hRLW2reyUwYMQDSLHhGE=m_TOz9CYF_Tjw@mail.gmail.com>
- <FFF73D592F13FD46B8700F0A279B802F39539372@ORSMSX114.amr.corp.intel.com>
- <CAKv+Gu9U5Ap37J-56=oDOuUfbcMyGaMnTZh1+JKHDTPU5pteZQ@mail.gmail.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.14 345/496] x86/mm: Fix bogus warning during EFI bootup, use boot_cpu_has() instead of this_cpu_has() in build_cr3_noflush()
+Date: Mon, 28 May 2018 12:02:10 +0200
+Message-ID: <20180528100334.344786377@linuxfoundation.org>
+References: <20180528100319.498712256@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu9U5Ap37J-56=oDOuUfbcMyGaMnTZh1+JKHDTPU5pteZQ@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Naresh Bhat <naresh.bhat@linaro.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Williams, Dan J" <dan.j.williams@intel.com>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20180528100319.498712256@linuxfoundation.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Lee Chun-Yi <jlee@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Peter Zijlstra <peterz@infradead.org>, Ravi Shankar <ravi.v.shankar@intel.com>, Ricardo Neri <ricardo.neri@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Tony Luck <tony.luck@intel.com>, linux-efi@vger.kernel.org, Ingo Molnar <mingo>
 List-Id: linux-efi@vger.kernel.org
 
-PiA+IEFub3RoZXIgZm9sbG93IG9uIHF1ZXN0aW9uIGlzLCBkb2VzIGV2ZXJ5IGZpcm13YXJlIHN1
-cHBvcnQgYm90aA0KPiA+IGJsb2NraW5nIGFuZCBub24tYmxvY2tpbmcgdmFyaWFudHMgKHNwZWNp
-YWxseSBsZWdhY3kgRUZJIGZpcm13YXJlKT8gSQ0KPiA+IGFtIHdvcnJpZWQgYWJvdXQgdGhpcyBi
-ZWNhdXNlLCBwcmVzZW50bHkgZWZpX2RlbGV0ZV9kdW1teV92YXJpYWJsZSgpDQo+ID4gdXNlcyBz
-ZXRfdmFyaWFibGUoKSBhbmQNCj4gPiBxdWVyeV92YXJpYWJsZV9pbmZvKCkgYnV0IGlmIEkgY2hh
-bmdlIGVmaV9kZWxldGVfZHVtbXlfdmFyaWFibGUoKSB0bw0KPiA+IHVzZSBub24tYmxvY2tpbmcg
-dmFyaWFudHMgYW5kIGlmIHRoZXkgYXJlbuKAmXQgc3VwcG9ydGVkLCB0aGVuLCBJIGd1ZXNzLA0K
-PiA+IGVmaV9kZWxldGVfZHVtbXlfdmFyaWFibGUoKSBtaWdodCBmYWlsIDooDQo+ID4NCj4gPiBT
-bywgY291bGQgeW91IHBsZWFzZSBjbGFyaWZ5IG9uIHRoYXQ/DQo+ID4NCj4gDQo+IEkgZG9uJ3Qg
-Zm9sbG93LiBXaHkgc2hvdWxkIGl0IG1ha2UgYW55IGRpZmZlcmVuY2UgdG8gdGhlIGZpcm13YXJl
-IHdoZXRoZXIgdGhlDQo+IE9TIHJvdXRpbmVzIGJsb2NrcyBvciBnaXZlcyB1cD8gV2UgYWx3YXlz
-IGhvbm9yIHRoZSBtdXR1YWwgZXhjbHVzaW9uIGJldHdlZW4NCj4gZGlmZmVyZW50IGludm9jYXRp
-b25zIG9mIHJ1bnRpbWUgc2VydmljZXMsIGFuZCB0aGUgZmlybXdhcmUgaXRzZWxmIGhhcyBubw0K
-PiBhd2FyZW5lc3Mgb2YgdGhlIGtpbmQgb2Ygc2NoZWR1bGluZyB0aGUgT1MgbmVlZHMgdG8gZG8g
-dG8gZW5zdXJlIHRoaXMuDQoNClNvcnJ5ISBteSBiYWQuLiBJIHRob3VnaHQgZmlybXdhcmUgKHdp
-dGggRUZJIFN5c3RlbSB0YWJsZSByZXZpc2lvbiA+IDIuMCApIG9mZmVycyB0d28gDQp0eXBlcyBv
-ZiBlZmkgcnVuIHRpbWUgc2VydmljZXMsIGEgYmxvY2tpbmcgdmFyaWFudCBhbmQgYSBub24tYmxv
-Y2tpbmcgdmFyaWFudC4gQnV0LCBub3cgSSANCm5vdGljZWQgaW4gdGhlIHNwZWMgdGhhdCB0aGVy
-ZSBpcyBvbmx5IHNldF92YXJpYWJsZSgpIGJ1dCBfbm9fIHNldF92YXJpYWJsZV9ub25ibG9ja2lu
-ZygpLiANClNhbWUgd2l0aCBxdWVyeV92YXJpYWJsZV9pbmZvKCkuIFRoZSBzYW1lIGlzIGFsc28g
-c2VlbiBpbiBydW50aW1lLXdyYXBwZXJzLmMgZmlsZS4gDQpCb3RoIHRoZSBibG9ja2luZyBhbmQg
-bm9uLWJsb2NraW5nIHZhcmlhbnRzIGNhbGwgdGhlIHNhbWUgZWZpIHJ1bnRpbWUgc2VydmljZS4g
-SSBzZWUgdGhhdCANCm5vbi1ibG9ja2luZygpIHZhcmlhbnRzIGFyZSBqdXN0IGFuIGFkZGl0aW9u
-YWwgZmVhdHVyZSAoQVBJKSBvZmZlcmVkIGJ5IE9TLg0KDQpSZWdhcmRzLA0KU2FpDQo=
+4.14-stable review patch.  If anyone has any objections, please let me know.
+
+------------------
+
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+
+[ Upstream commit 162ee5a8ab49be40d253f90e94aef712470a3a24 ]
+
+Linus reported the following boot warning:
+
+  WARNING: CPU: 0 PID: 0 at arch/x86/include/asm/tlbflush.h:134 load_new_mm_cr3+0x114/0x170
+  [...]
+  Call Trace:
+  switch_mm_irqs_off+0x267/0x590
+  switch_mm+0xe/0x20
+  efi_switch_mm+0x3e/0x50
+  efi_enter_virtual_mode+0x43f/0x4da
+  start_kernel+0x3bf/0x458
+  secondary_startup_64+0xa5/0xb0
+
+... after merging:
+
+  03781e40890c: x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
+
+When the platform supports PCID and if CONFIG_DEBUG_VM=y is enabled,
+build_cr3_noflush() (called via switch_mm()) does a sanity check to see
+if X86_FEATURE_PCID is set.
+
+Presently, build_cr3_noflush() uses "this_cpu_has(X86_FEATURE_PCID)" to
+perform the check but this_cpu_has() works only after SMP is initialized
+(i.e. per cpu cpu_info's should be populated) and this happens to be very
+late in the boot process (during rest_init()).
+
+As efi_runtime_services() are called during (early) kernel boot time
+and run time, modify build_cr3_noflush() to use boot_cpu_has() all the
+time. As suggested by Dave Hansen, this should be OK because all CPU's have
+same capabilities on x86.
+
+With this change the warning is fixed.
+
+( Dave also suggested that we put a warning in this_cpu_has() if it's used
+  early in the boot process. This is still work in progress as it affects
+  MCE. )
+
+Reported-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Dave Hansen <dave.hansen@intel.com>
+Cc: Lee Chun-Yi <jlee@suse.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Michael S. Tsirkin <mst@redhat.com>
+Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Tony Luck <tony.luck@intel.com>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/1522870459-7432-1-git-send-email-sai.praneeth.prakhya@intel.com
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ arch/x86/include/asm/tlbflush.h |    7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+--- a/arch/x86/include/asm/tlbflush.h
++++ b/arch/x86/include/asm/tlbflush.h
+@@ -131,7 +131,12 @@ static inline unsigned long build_cr3(pg
+ static inline unsigned long build_cr3_noflush(pgd_t *pgd, u16 asid)
+ {
+ 	VM_WARN_ON_ONCE(asid > MAX_ASID_AVAILABLE);
+-	VM_WARN_ON_ONCE(!this_cpu_has(X86_FEATURE_PCID));
++	/*
++	 * Use boot_cpu_has() instead of this_cpu_has() as this function
++	 * might be called during early boot. This should work even after
++	 * boot because all CPU's the have same capabilities:
++	 */
++	VM_WARN_ON_ONCE(!boot_cpu_has(X86_FEATURE_PCID));
+ 	return __sme_pa(pgd) | kern_pcid(asid) | CR3_NOFLUSH;
+ }
+ 
