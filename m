@@ -1,99 +1,112 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.14 345/496] x86/mm: Fix bogus warning during EFI bootup, use boot_cpu_has() instead of this_cpu_has() in build_cr3_noflush()
-Date: Mon, 28 May 2018 12:02:10 +0200
-Message-ID: <20180528100334.344786377@linuxfoundation.org>
-References: <20180528100319.498712256@linuxfoundation.org>
+Subject: [PATCH 4.16 191/272] efi/arm*: Only register page tables when they exist
+Date: Mon, 28 May 2018 12:03:44 +0200
+Message-ID: <20180528100256.680982724@linuxfoundation.org>
+References: <20180528100240.256525891@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20180528100319.498712256@linuxfoundation.org>
+In-Reply-To: <20180528100240.256525891@linuxfoundation.org>
 Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Lee Chun-Yi <jlee@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Peter Zijlstra <peterz@infradead.org>, Ravi Shankar <ravi.v.shankar@intel.com>, Ricardo Neri <ricardo.neri@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Tony Luck <tony.luck@intel.com>, linux-efi@vger.kernel.org, Ingo Molnar <mingo>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Will Deacon <will.deacon@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <alexander.levin@microsoft.com>
 List-Id: linux-efi@vger.kernel.org
 
-4.14-stable review patch.  If anyone has any objections, please let me know.
+4.16-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
-From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+From: Mark Rutland <mark.rutland@arm.com>
 
-[ Upstream commit 162ee5a8ab49be40d253f90e94aef712470a3a24 ]
+[ Upstream commit 6b31a2fa1e8f7bc6c2a474b4a12dad7a145cf83d ]
 
-Linus reported the following boot warning:
+Currently the arm/arm64 runtime code registers the runtime servies
+pagetables with ptdump regardless of whether runtime services page
+tables have been created.
 
-  WARNING: CPU: 0 PID: 0 at arch/x86/include/asm/tlbflush.h:134 load_new_mm_cr3+0x114/0x170
-  [...]
-  Call Trace:
-  switch_mm_irqs_off+0x267/0x590
-  switch_mm+0xe/0x20
-  efi_switch_mm+0x3e/0x50
-  efi_enter_virtual_mode+0x43f/0x4da
-  start_kernel+0x3bf/0x458
-  secondary_startup_64+0xa5/0xb0
+As efi_mm.pgd is NULL in these cases, attempting to dump the efi page
+tables results in a NULL pointer dereference in the ptdump code:
 
-... after merging:
+/sys/kernel/debug# cat efi_page_tables
+[  479.522600] Unable to handle kernel NULL pointer dereference at virtual address 00000000
+[  479.522715] Mem abort info:
+[  479.522764]   ESR = 0x96000006
+[  479.522850]   Exception class = DABT (current EL), IL = 32 bits
+[  479.522899]   SET = 0, FnV = 0
+[  479.522937]   EA = 0, S1PTW = 0
+[  479.528200] Data abort info:
+[  479.528230]   ISV = 0, ISS = 0x00000006
+[  479.528317]   CM = 0, WnR = 0
+[  479.528317] user pgtable: 4k pages, 48-bit VAs, pgd = 0000000064ab0cb0
+[  479.528449] [0000000000000000] *pgd=00000000fbbe4003, *pud=00000000fb66e003, *pmd=0000000000000000
+[  479.528600] Internal error: Oops: 96000006 [#1] PREEMPT SMP
+[  479.528664] Modules linked in:
+[  479.528699] CPU: 0 PID: 2457 Comm: cat Not tainted 4.15.0-rc3-00065-g2ad2ee7ecb5c-dirty #7
+[  479.528799] Hardware name: FVP Base (DT)
+[  479.528899] pstate: 00400009 (nzcv daif +PAN -UAO)
+[  479.528941] pc : walk_pgd.isra.1+0x20/0x1d0
+[  479.529011] lr : ptdump_walk_pgd+0x30/0x50
+[  479.529105] sp : ffff00000bf4bc20
+[  479.529185] x29: ffff00000bf4bc20 x28: 0000ffff9d22e000
+[  479.529271] x27: 0000000000020000 x26: ffff80007b4c63c0
+[  479.529358] x25: 00000000014000c0 x24: ffff80007c098900
+[  479.529445] x23: ffff00000bf4beb8 x22: 0000000000000000
+[  479.529532] x21: ffff00000bf4bd70 x20: 0000000000000001
+[  479.529618] x19: ffff00000bf4bcb0 x18: 0000000000000000
+[  479.529760] x17: 000000000041a1c8 x16: ffff0000082139d8
+[  479.529800] x15: 0000ffff9d3c6030 x14: 0000ffff9d2527f4
+[  479.529924] x13: 00000000000003f3 x12: 0000000000000038
+[  479.530000] x11: 0000000000000003 x10: 0101010101010101
+[  479.530099] x9 : 0000000017e94050 x8 : 000000000000003f
+[  479.530226] x7 : 0000000000000000 x6 : 0000000000000000
+[  479.530313] x5 : 0000000000000001 x4 : 0000000000000000
+[  479.530416] x3 : ffff000009069fd8 x2 : 0000000000000000
+[  479.530500] x1 : 0000000000000000 x0 : 0000000000000000
+[  479.530599] Process cat (pid: 2457, stack limit = 0x000000005d1b0e6f)
+[  479.530660] Call trace:
+[  479.530746]  walk_pgd.isra.1+0x20/0x1d0
+[  479.530833]  ptdump_walk_pgd+0x30/0x50
+[  479.530907]  ptdump_show+0x10/0x20
+[  479.530920]  seq_read+0xc8/0x470
+[  479.531023]  full_proxy_read+0x60/0x90
+[  479.531100]  __vfs_read+0x18/0x100
+[  479.531180]  vfs_read+0x88/0x160
+[  479.531267]  SyS_read+0x48/0xb0
+[  479.531299]  el0_svc_naked+0x20/0x24
+[  479.531400] Code: 91400420 f90033a0 a90707a2 f9403fa0 (f9400000)
+[  479.531499] ---[ end trace bfe8e28d8acb2b67 ]---
+Segmentation fault
 
-  03781e40890c: x86/efi: Use efi_switch_mm() rather than manually twiddling with %cr3
+Let's avoid this problem by only registering the tables after their
+successful creation, which is also less confusing when EFI runtime
+services are not in use.
 
-When the platform supports PCID and if CONFIG_DEBUG_VM=y is enabled,
-build_cr3_noflush() (called via switch_mm()) does a sanity check to see
-if X86_FEATURE_PCID is set.
-
-Presently, build_cr3_noflush() uses "this_cpu_has(X86_FEATURE_PCID)" to
-perform the check but this_cpu_has() works only after SMP is initialized
-(i.e. per cpu cpu_info's should be populated) and this happens to be very
-late in the boot process (during rest_init()).
-
-As efi_runtime_services() are called during (early) kernel boot time
-and run time, modify build_cr3_noflush() to use boot_cpu_has() all the
-time. As suggested by Dave Hansen, this should be OK because all CPU's have
-same capabilities on x86.
-
-With this change the warning is fixed.
-
-( Dave also suggested that we put a warning in this_cpu_has() if it's used
-  early in the boot process. This is still work in progress as it affects
-  MCE. )
-
-Reported-by: Linus Torvalds <torvalds@linux-foundation.org>
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Dave Hansen <dave.hansen@intel.com>
-Cc: Lee Chun-Yi <jlee@suse.com>
+Reported-by: Will Deacon <will.deacon@arm.com>
+Signed-off-by: Mark Rutland <mark.rutland@arm.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Acked-by: Will Deacon <will.deacon@arm.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Michael S. Tsirkin <mst@redhat.com>
-Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>
 Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-Cc: Ricardo Neri <ricardo.neri@intel.com>
 Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Tony Luck <tony.luck@intel.com>
 Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/1522870459-7432-1-git-send-email-sai.praneeth.prakhya@intel.com
+Link: http://lkml.kernel.org/r/20180308080020.22828-2-ard.biesheuvel@linaro.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 ---
- arch/x86/include/asm/tlbflush.h |    7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/arm-runtime.c |    3 +++
+ 1 file changed, 3 insertions(+)
 
---- a/arch/x86/include/asm/tlbflush.h
-+++ b/arch/x86/include/asm/tlbflush.h
-@@ -131,7 +131,12 @@ static inline unsigned long build_cr3(pg
- static inline unsigned long build_cr3_noflush(pgd_t *pgd, u16 asid)
- {
- 	VM_WARN_ON_ONCE(asid > MAX_ASID_AVAILABLE);
--	VM_WARN_ON_ONCE(!this_cpu_has(X86_FEATURE_PCID));
-+	/*
-+	 * Use boot_cpu_has() instead of this_cpu_has() as this function
-+	 * might be called during early boot. This should work even after
-+	 * boot because all CPU's the have same capabilities:
-+	 */
-+	VM_WARN_ON_ONCE(!boot_cpu_has(X86_FEATURE_PCID));
- 	return __sme_pa(pgd) | kern_pcid(asid) | CR3_NOFLUSH;
- }
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -54,6 +54,9 @@ static struct ptdump_info efi_ptdump_inf
  
+ static int __init ptdump_init(void)
+ {
++	if (!efi_enabled(EFI_RUNTIME_SERVICES))
++		return 0;
++
+ 	return ptdump_debugfs_register(&efi_ptdump_info, "efi_page_tables");
+ }
+ device_initcall(ptdump_init);
