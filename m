@@ -1,123 +1,157 @@
 From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH v6 0/5] efi/firmware/platform-x86: Add EFI embedded fw support
-Date: Fri,  1 Jun 2018 14:53:25 +0200
-Message-ID: <20180601125330.25054-1-hdegoede@redhat.com>
+Subject: [PATCH v6 1/5] efi: Export boot-services code and data as debugfs-blobs
+Date: Fri,  1 Jun 2018 14:53:26 +0200
+Message-ID: <20180601125330.25054-2-hdegoede@redhat.com>
+References: <20180601125330.25054-1-hdegoede@redhat.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180601125330.25054-1-hdegoede@redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Luis R . Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>
 Cc: Hans de Goede <hdegoede@redhat.com>, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, dmitry.torokhov@gmail.com, mfuzzey@parkeon.com, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, nbroeking@me.com, bjorn.andersson@linaro.org, Torsten Duwe <duwe@suse.de>, Kees Cook <keescook@chromium.org>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi All,
+Sometimes it is useful to be able to dump the efi boot-services code and
+data. This commit adds these as debugfs-blobs to /sys/kernel/debug/efi,
+but only if efi=debug is passed on the kernel-commandline as this requires
+not freeing those memory-regions, which costs 20+ MB of RAM.
 
-Here is v6 of my patch-set to add support for EFI embedded fw to the kernel.
-
-This patch-set applies on top of the "[PATCH v7 00/14] firmware_loader
-changes for v4.18" series from mcgrof.
-
-It now also depends on the series from Andy Lutomirski which allow using the
-sha256 code in a standalone manner. Andy what is the status of those?
-
-Changes since v5:
--Rework code to remove casts from if (prefix == mem) comparison
--Use SHA256 hashes instead of crc32 sums
--Add new READING_FIRMWARE_EFI_EMBEDDED read_file_id and use it
--Call security_kernel_read_file(NULL, READING_FIRMWARE_EFI_EMBEDDED)
- to check if this is allowed before looking at EFI embedded fw
--Document why we are not using the PI Firmware Volume protocol
-
-For reference I've included the coverletter from v4 (which includes
-previous covverletters) below.
-
-Regards,
-
-Hans
-
-
-Previous coverletter:
-
-Here is v5 of my patch-set to add support for EFI embedded fw to the kernel.
-
-Changes since v4:
+Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+Changes in v5:
 -Rename the EFI_BOOT_SERVICES flag to EFI_PRESERVE_BS_REGIONS
 
-So I think this patch-set is getting close to ready for merging, which
-brings us to the question of how to merge this, I think that patches 1
-and 2 should probably both be merged through the same tree. Then an
-unmutable branch should be created on that tree, merged into the
-platform/x86 tree and then the last 3 patches can be merged through
-that tree.
-
-Ard has already indicated he is fine with the EFI bits going upstream
-through another tree, so perhaps patches 1-2 can be merged through the
-firmware-loader-tree and then do an unmutable branch on the
-firmware-loader-tree for the platform/x86 tree to merge?
-
-I don't think taking all 5 through 1 tree is a good idea because of
-the file rename under platform/x86.
-
-
-For the record here are the cover letters of the previous versions:
-
-Changes since v3:
--Drop note in docs about EFI_FIRMWARE_VOLUME_PROTOCOL, it is not part of
- UEFI proper, so the EFI maintainers don't want us referring people to it
--Use new EFI_BOOT_SERVICES flag
--Put the new fw_get_efi_embedded_fw() function in its own fallback_efi.c
- file which only gets built when EFI_EMBEDDED_FIRMWARE is selected
--Define an empty stub for fw_get_efi_embedded_fw() in fallback.h hwen
- EFI_EMBEDDED_FIRMWARE is not selected, to avoid the need for #ifdefs
- in firmware_loader/main.c
--Properly call security_kernel_post_read_file() on the firmware returned
- by efi_get_embedded_fw() to make sure that we are allowed to use it
-
-The 3 most prominent changes in v2 are:
-
-1) Add documentation describing the EFI embedded firmware mechanism to:
-   Documentation/driver-api/firmware/request_firmware.rst
-
-2) Instead of having a single dmi_system_id array with its driver_data
-   members pointing to efi_embedded_fw_desc structs, have the drivers which
-   need EFI embedded-fw support export a dmi_system_id array and register
-   that with the EFI embedded-fw code
-
-   This series also includes the first driver to use this, in the form of
-   the touchscreen_dmi code (formerly silead_dmi) from drivers/platfrom/x86
-
-3) As discussed during the review of v1 we want to make the firmware_loader
-   code fallback to EFI embedded-fw optional.  Rather the adding yet another
-   firmware_request_foo variant for this, with the risk of later also needing
-   firmware_request_foo_nowait, etc. variants I've decided to make the code
-   check if the device has a "efi-embedded-firmware" device-property bool set.
-
-   This also seemed better because the same driver may want to use the
-   fallback on some systems, but not on others since e.g. not all (x86)
-   systems with a silead touchscreen have their touchscreen firmware embedded
-   in their EFI.
-
-   Note that (as discussed) when the EFI fallback path is requested, the
-   usermodehelper fallback path is skipped.
-
-Here is the full changelog of patch 2/5 which is where most of the changes are:
+Changes in v4:
+-Add new EFI_BOOT_SERVICES flag and use it to determine if the boot-services
+ memory segments are available (and thus if it makes sense to register the
+ debugfs bits for them)
 
 Changes in v2:
--Rebased on driver-core/driver-core-next
--Add documentation describing the EFI embedded firmware mechanism to:
- Documentation/driver-api/firmware/request_firmware.rst
--Add a new EFI_EMBEDDED_FIRMWARE Kconfig bool and only build the embedded
- fw support if this is set. This is an invisible option which should be
- selected by drivers which need this
--Remove the efi_embedded_fw_desc and dmi_system_id-s for known devices
- from the efi-embedded-fw code, instead drivers using this are expected to
- export a dmi_system_id array, with each entries' driver_data pointing to a
- efi_embedded_fw_desc struct and register this with the efi-embedded-fw code
--Use kmemdup to make a copy instead of efi_mem_reserve()-ing the firmware,
- this avoids us messing with the EFI memmap and avoids the need to make
- changes to efi_mem_desc_lookup()
--Make the firmware-loader code only fallback to efi_get_embedded_fw() if the
- passed in device has the "efi-embedded-firmware" device-property bool set
--Skip usermodehelper fallback when "efi-embedded-firmware" device-property
- is set
+-Do not call pr_err on debugfs call failures
+---
+ arch/x86/platform/efi/efi.c    |  1 +
+ arch/x86/platform/efi/quirks.c |  4 +++
+ drivers/firmware/efi/efi.c     | 53 ++++++++++++++++++++++++++++++++++
+ include/linux/efi.h            |  1 +
+ 4 files changed, 59 insertions(+)
 
-Patches 3-5 are new and implement using the EFI embedded-fw mechanism for
-Silead gslXXXX and Chipone icn8505 touchscreens on x86 devices.
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 9061babfbc83..82bbbbf0836d 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -208,6 +208,7 @@ int __init efi_memblock_x86_reserve_range(void)
+ 	     efi.memmap.desc_version);
+ 
+ 	memblock_reserve(pmap, efi.memmap.nr_map * efi.memmap.desc_size);
++	set_bit(EFI_PRESERVE_BS_REGIONS, &efi.flags);
+ 
+ 	return 0;
+ }
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 36c1f8b9f7e0..16bdb9e3b343 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -376,6 +376,10 @@ void __init efi_free_boot_services(void)
+ 	int num_entries = 0;
+ 	void *new, *new_md;
+ 
++	/* Keep all regions for /sys/kernel/debug/efi */
++	if (efi_enabled(EFI_DBG))
++		return;
++
+ 	for_each_efi_memory_desc(md) {
+ 		unsigned long long start = md->phys_addr;
+ 		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 232f4915223b..1590e4d6a857 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -18,6 +18,7 @@
+ #include <linux/kobject.h>
+ #include <linux/module.h>
+ #include <linux/init.h>
++#include <linux/debugfs.h>
+ #include <linux/device.h>
+ #include <linux/efi.h>
+ #include <linux/of.h>
+@@ -325,6 +326,55 @@ static __init int efivar_ssdt_load(void)
+ static inline int efivar_ssdt_load(void) { return 0; }
+ #endif
+ 
++#ifdef CONFIG_DEBUG_FS
++
++#define EFI_DEBUGFS_MAX_BLOBS 32
++
++static struct debugfs_blob_wrapper debugfs_blob[EFI_DEBUGFS_MAX_BLOBS];
++
++static void __init efi_debugfs_init(void)
++{
++	struct dentry *efi_debugfs;
++	efi_memory_desc_t *md;
++	char name[32];
++	int type_count[EFI_BOOT_SERVICES_DATA + 1] = {};
++	int i = 0;
++
++	efi_debugfs = debugfs_create_dir("efi", NULL);
++	if (IS_ERR_OR_NULL(efi_debugfs))
++		return;
++
++	for_each_efi_memory_desc(md) {
++		switch (md->type) {
++		case EFI_BOOT_SERVICES_CODE:
++			snprintf(name, sizeof(name), "boot_services_code%d",
++				 type_count[md->type]++);
++			break;
++		case EFI_BOOT_SERVICES_DATA:
++			snprintf(name, sizeof(name), "boot_services_data%d",
++				 type_count[md->type]++);
++			break;
++		default:
++			continue;
++		}
++
++		debugfs_blob[i].size = md->num_pages << EFI_PAGE_SHIFT;
++		debugfs_blob[i].data = memremap(md->phys_addr,
++						debugfs_blob[i].size,
++						MEMREMAP_WB);
++		if (!debugfs_blob[i].data)
++			continue;
++
++		debugfs_create_blob(name, 0400, efi_debugfs, &debugfs_blob[i]);
++		i++;
++		if (i == EFI_DEBUGFS_MAX_BLOBS)
++			break;
++	}
++}
++#else
++static inline void efi_debugfs_init(void) {}
++#endif
++
+ /*
+  * We register the efi subsystem with the firmware subsystem and the
+  * efivars subsystem with the efi subsystem, if the system was booted with
+@@ -369,6 +419,9 @@ static int __init efisubsys_init(void)
+ 		goto err_remove_group;
+ 	}
+ 
++	if (efi_enabled(EFI_DBG) && efi_enabled(EFI_PRESERVE_BS_REGIONS))
++		efi_debugfs_init();
++
+ 	return 0;
+ 
+ err_remove_group:
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 56add823f190..d72358e892e7 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1144,6 +1144,7 @@ extern int __init efi_setup_pcdp_console(char *);
+ #define EFI_DBG			8	/* Print additional debug info at runtime */
+ #define EFI_NX_PE_DATA		9	/* Can runtime data regions be mapped non-executable? */
+ #define EFI_MEM_ATTR		10	/* Did firmware publish an EFI_MEMORY_ATTRIBUTES table? */
++#define EFI_PRESERVE_BS_REGIONS	11	/* Are EFI boot-services memory segments available? */
+ 
+ #ifdef CONFIG_EFI
+ /*
+-- 
+2.17.0
