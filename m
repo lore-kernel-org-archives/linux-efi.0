@@ -1,7 +1,7 @@
 From: Nick Desaulniers <ndesaulniers@google.com>
-Subject: [PATCH 2/3] x86/build: use -std=gnu89 for proper extern inline semantics
-Date: Fri,  1 Jun 2018 09:55:49 -0700
-Message-ID: <20180601165550.90053-3-ndesaulniers@google.com>
+Subject: [PATCH 3/3] x86: paravirt: make native_save_fl extern inline
+Date: Fri,  1 Jun 2018 09:55:50 -0700
+Message-ID: <20180601165550.90053-4-ndesaulniers@google.com>
 References: <20180601165550.90053-1-ndesaulniers@google.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180601165550.90053-1-ndesaulniers@google.com>
@@ -10,37 +10,109 @@ To: akpm@linux-foundation.org, ard.biesheuvel@linaro.org, aryabinin@virtuozzo.co
 Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, virtualization@lists.linux-foundation.org
 List-Id: linux-efi@vger.kernel.org
 
-The top level Makefile explicitly sets the C standard used in the kernel
-to gnu89. By overriding KBUILD_CFLAGS, the C standard used for this
-subdir is now implicit based on compiler and compiler version. GCC
-changes this implicit default from gnu89 to gnu11 in v5.1.
+native_save_fl() is marked static inline, but by using it as
+a function pointer in arch/x86/kernel/paravirt.c, it MUST be outlined.
 
-This implies that depending on compiler version, parts of the kernel are
-being linked together from object files that were compiled with
-different C standard compiler flags.
+paravirt's use of native_save_fl() also requires that no GPRs other than
+%rax are clobbered.
 
-This is problematic for symbols declared as extern inline, as the
-semantics have switched since gnu89. See also:
-http://blahg.josefsipek.net/?p=529
+Compilers have different heuristics which they use to emit stack guard
+code, the emittance of which can break paravirt's callee saved assumption
+by clobbering %rcx.
 
+Marking a function definition extern inline means that if this version
+cannot be inlined, then the out-of-line version will be preferred. By
+having the out-of-line version be implemented in assembly, it cannot be
+instrumented with a stack protector, which might violate custom calling
+conventions that code like paravirt rely on.
+
+The semantics of extern inline has changed since gnu89. This means that
+folks using GCC versions >= 5.1 may see symbol redefinition errors at
+link time for subdirs that override KBUILD_CFLAGS (making the C standard
+used implicit) regardless of this patch. This has been cleaned up
+earlier in the patch set, but is left as a note in the commit message
+for future travelers.
+
+Reports:
+https://lkml.org/lkml/2018/5/7/534
+https://github.com/ClangBuiltLinux/linux/issues/16
+
+Discussion:
+https://bugs.llvm.org/show_bug.cgi?id=37512
+https://lkml.org/lkml/2018/5/24/1371
+
+Thanks to the many folks that participated in the discussion.
+
+Debugged-by: Alistair Strachan <astrachan@google.com>
+Debugged-by: Matthias Kaehlcke <mka@chromium.org>
+Reported-by: Sedat Dilek <sedat.dilek@gmail.com>
 Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
+Suggested-by: H. Peter Anvin <hpa@zytor.com>
+Suggested-by: Tom Stellar <tstellar@redhat.com>
 Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
 ---
- arch/x86/boot/compressed/Makefile | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/x86/include/asm/irqflags.h |  2 +-
+ arch/x86/kernel/Makefile        |  1 +
+ arch/x86/kernel/irqflags.S      | 26 ++++++++++++++++++++++++++
+ 3 files changed, 28 insertions(+), 1 deletion(-)
+ create mode 100644 arch/x86/kernel/irqflags.S
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index fa42f895fdde..1a04c7e9add1 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -26,7 +26,7 @@ KCOV_INSTRUMENT		:= n
- targets := vmlinux vmlinux.bin vmlinux.bin.gz vmlinux.bin.bz2 vmlinux.bin.lzma \
- 	vmlinux.bin.xz vmlinux.bin.lzo vmlinux.bin.lz4
+diff --git a/arch/x86/include/asm/irqflags.h b/arch/x86/include/asm/irqflags.h
+index 89f08955fff7..c4fc17220df9 100644
+--- a/arch/x86/include/asm/irqflags.h
++++ b/arch/x86/include/asm/irqflags.h
+@@ -13,7 +13,7 @@
+  * Interrupt control:
+  */
  
--KBUILD_CFLAGS := -m$(BITS) -O2
-+KBUILD_CFLAGS := -m$(BITS) -O2 -std=gnu89
- KBUILD_CFLAGS += -fno-strict-aliasing $(call cc-option, -fPIE, -fPIC)
- KBUILD_CFLAGS += -DDISABLE_BRANCH_PROFILING
- cflags-$(CONFIG_X86_32) := -march=i386
+-static inline unsigned long native_save_fl(void)
++extern inline unsigned long native_save_fl(void)
+ {
+ 	unsigned long flags;
+ 
+diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
+index 02d6f5cf4e70..8824d01c0c35 100644
+--- a/arch/x86/kernel/Makefile
++++ b/arch/x86/kernel/Makefile
+@@ -61,6 +61,7 @@ obj-y			+= alternative.o i8253.o hw_breakpoint.o
+ obj-y			+= tsc.o tsc_msr.o io_delay.o rtc.o
+ obj-y			+= pci-iommu_table.o
+ obj-y			+= resource.o
++obj-y			+= irqflags.o
+ 
+ obj-y				+= process.o
+ obj-y				+= fpu/
+diff --git a/arch/x86/kernel/irqflags.S b/arch/x86/kernel/irqflags.S
+new file mode 100644
+index 000000000000..937bd08c3f79
+--- /dev/null
++++ b/arch/x86/kernel/irqflags.S
+@@ -0,0 +1,26 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++
++#include <asm/asm.h>
++#include <asm/export.h>
++#include <linux/linkage.h>
++
++/*
++ * unsigned long native_save_fl(void)
++ */
++ENTRY(native_save_fl)
++	pushf
++	pop %_ASM_AX
++	ret
++ENDPROC(native_save_fl)
++EXPORT_SYMBOL(native_save_fl)
++
++/*
++ * void native_restore_fl(unsigned long flags)
++ * %rdi: flags
++ */
++ENTRY(native_restore_fl)
++	push %_ASM_DI
++	popf
++	ret
++ENDPROC(native_restore_fl)
++EXPORT_SYMBOL(native_restore_fl)
 -- 
 2.17.0.921.gf22659ad46-goog
