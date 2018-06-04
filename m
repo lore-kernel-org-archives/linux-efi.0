@@ -1,41 +1,27 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v6 0/5] efi/firmware/platform-x86: Add EFI embedded fw support
-Date: Sun, 3 Jun 2018 18:39:09 +0200
-Message-ID: <CAKv+Gu9v+BUTySe=0OWmjPSCe5qShO5r4P4Np7M8q2jR_tMcDQ@mail.gmail.com>
-References: <20180601125330.25054-1-hdegoede@redhat.com> <CALCETrXC2iuvHnTsnz=6Z_OqeMhiv9aSs372cGpsii021jsZrg@mail.gmail.com>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH V5 0/3] Use efi_rts_wq to invoke EFI Runtime Services
+Date: Mon, 4 Jun 2018 04:27:34 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F3B6EABDF@ORSMSX114.amr.corp.intel.com>
+References: <1527560464-19466-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <CAFoFrHYcD7fGYaJzKwcPCtu+XyR+mh5ORDqmCpiBjLmEkDfwOQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CALCETrXC2iuvHnTsnz=6Z_OqeMhiv9aSs372cGpsii021jsZrg@mail.gmail.com>
+In-Reply-To: <CAFoFrHYcD7fGYaJzKwcPCtu+XyR+mh5ORDqmCpiBjLmEkDfwOQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Lutomirski <luto@kernel.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, "Jason A. Donenfeld" <Jason@zx2c4.com>, "Luis R. Rodriguez" <mcgrof@kernel.org>, Greg KH <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Martin Fuzzey <mfuzzey@parkeon.com>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, Nicolas Broeking <nbr>
+To: Naresh Bhat <naresh.bhat@linaro.org>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Williams, Dan J" <dan.j.williams@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, "Nair, Jayachandran" <Jayachandran.Nair@cavium.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 2 June 2018 at 05:39, Andy Lutomirski <luto@kernel.org> wrote:
-> On Fri, Jun 1, 2018 at 5:53 AM Hans de Goede <hdegoede@redhat.com> wrote:
->>
->> Hi All,
->>
->> Here is v6 of my patch-set to add support for EFI embedded fw to the kernel.
->>
->> This patch-set applies on top of the "[PATCH v7 00/14] firmware_loader
->> changes for v4.18" series from mcgrof.
->>
->> It now also depends on the series from Andy Lutomirski which allow using the
->> sha256 code in a standalone manner. Andy what is the status of those?
->
-> They're currently sort of on hold, since Jason Donenfeld is working on
-> a more comprehensive solution to the same problem.  Jason, I don't
-> suppose the sha256 part of your patch set is ready?
->
-> Ard, if Jason's patches are too far in the future, would you be okay
-> with merging a cleaned-up version of my patch for sha256 even if the
-> sha512 equivalent isn't there?
->
-
-I'm not sure what you are asking me here. I'd be fine merging a
-version of Hans's patches that uses a suitable cryptographic hash
-algorithm, but the implementation of that would likely belong
-somewhere under crypto/, and so it is ultimately someone else's call
-(although I'm happy to review)
+PiA+IFRlc3Rpbmc6DQo+ID4gLS0tLS0tLS0NCj4gPiBUZXN0ZWQgdXNpbmcgTFVWIChMaW51eCBV
+RUZJIFZhbGlkYXRpb24pIGZvciB4ODZfNjQsIHg4Nl8zMiBhbmQgYXJtNjQNCj4gPiAocWVtdSBv
+bmx5KS4gV2lsbCBhcHByZWNpYXRlIHRoZSBlZmZvcnQgaWYgc29tZW9uZSBjb3VsZCB0ZXN0IHRo
+ZQ0KPiA+IHBhdGNoZXMgb24gcmVhbCBBUk0vQVJNNjQgbWFjaGluZXMuDQo+ID4gTFVWOiBodHRw
+czovLzAxLm9yZy9saW51eC11ZWZpLXZhbGlkYXRpb24NCj4gDQo+IEkgaGF2ZSB0ZXN0ZWQgVjQg
+c2VyaWVzIG9uIFRodW5kZXJYMiBWYWwxIGFuZCBTYWJlciBwbGF0Zm9ybSBieSBpbnRlZ3JhdGlu
+ZyB0aGUNCj4gcGF0Y2hlcyB3aXRoIExVViBwcm9qZWN0Lg0KPiBJIHdpbGwgdGVzdCBWNSB2ZXJz
+aW9uIHNvb24gYW5kIGxldCB5b3Uga25vdyB0aGUgb3V0Y29tZS4NCg0KVGhhbmtzIGEgbG90ISBm
+b3IgdGFraW5nIHRpbWUgdG8gdGVzdCB0aGUgcGF0Y2ggc2V0LCBOYXJlc2guIFdpbGwgYmUgd2Fp
+dGluZyB0byBzZWUgdGhlIHJlc3VsdC4NCg0KUmVnYXJkcywNClNhaQ0K
