@@ -1,13 +1,14 @@
 From: "H. Peter Anvin" <hpa@zytor.com>
 Subject: Re: [PATCH v2 2/2] x86: paravirt: make native_save_fl extern inline
-Date: Tue, 5 Jun 2018 10:28:39 -0700
-Message-ID: <26c7fd1c-ab40-368f-c2e3-43a6b45157fd@zytor.com>
+Date: Tue, 5 Jun 2018 10:31:11 -0700
+Message-ID: <0dd024cd-e05a-0d67-c1bf-1a532714bb1a@zytor.com>
 References: <20180605170532.170361-1-ndesaulniers@google.com>
 	<20180605170532.170361-3-ndesaulniers@google.com>
+	<26c7fd1c-ab40-368f-c2e3-43a6b45157fd@zytor.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="------------440690091998480EBFAA1FD9"
+Content-Type: multipart/mixed; boundary="------------A996B762124FDC7635524F0D"
 Return-path: <virtualization-bounces@lists.linux-foundation.org>
-In-Reply-To: <20180605170532.170361-3-ndesaulniers@google.com>
+In-Reply-To: <26c7fd1c-ab40-368f-c2e3-43a6b45157fd@zytor.com>
 Content-Language: en-US
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
 	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
@@ -23,32 +24,39 @@ Cc: linux-efi@vger.kernel.org, mawilcox@microsoft.com, arnd@arndb.de, tstellar@r
 List-Id: linux-efi@vger.kernel.org
 
 This is a multi-part message in MIME format.
---------------440690091998480EBFAA1FD9
+--------------A996B762124FDC7635524F0D
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 
-On 06/05/18 10:05, Nick Desaulniers wrote:
-> +
-> +/*
-> + * void native_restore_fl(unsigned long flags)
-> + * %rdi: flags
-> + */
-> +ENTRY(native_restore_fl)
-> +	push %_ASM_DI
-> +	popf
-> +	ret
-> +ENDPROC(native_restore_fl)
-> +EXPORT_SYMBOL(native_restore_fl)
+On 06/05/18 10:28, H. Peter Anvin wrote:
+> On 06/05/18 10:05, Nick Desaulniers wrote:
+>> +
+>> +/*
+>> + * void native_restore_fl(unsigned long flags)
+>> + * %rdi: flags
+>> + */
+>> +ENTRY(native_restore_fl)
+>> +	push %_ASM_DI
+>> +	popf
+>> +	ret
+>> +ENDPROC(native_restore_fl)
+>> +EXPORT_SYMBOL(native_restore_fl)
+>>
+> 
+> To work on i386, this would have to be %_ASM_AX in that case.
+> 
+> Something like this added to <asm/asm.h> might be useful; then you can
+> simply:
+> 
+> 	push %_ASM_ARG1
 > 
 
-To work on i386, this would have to be %_ASM_AX in that case.
+Version with fixed typo...
 
-Something like this added to <asm/asm.h> might be useful; then you can
-simply:
+	-hpa
 
-	push %_ASM_ARG1
 
---------------440690091998480EBFAA1FD9
+--------------A996B762124FDC7635524F0D
 Content-Type: text/x-patch;
  name="0001-x86-asm-add-_ASM_ARG-constants-for-argument-registes.patch"
 Content-Transfer-Encoding: 7bit
@@ -56,7 +64,7 @@ Content-Disposition: attachment;
  filename*0="0001-x86-asm-add-_ASM_ARG-constants-for-argument-registes.pa";
  filename*1="tch"
 
->From 83a7c1b7167dceee0eb731cf4ae3af7f9b2c05ea Mon Sep 17 00:00:00 2001
+>From 9946c03bc6648ea65e6f8e2576c390dca9555288 Mon Sep 17 00:00:00 2001
 From: "H. Peter Anvin" <hpa@linux.intel.com>
 Date: Tue, 5 Jun 2018 10:21:35 -0700
 Subject: [PATCH] x86/asm: add _ASM_ARG* constants for argument registes to
@@ -73,7 +81,7 @@ Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
  1 file changed, 59 insertions(+)
 
 diff --git a/arch/x86/include/asm/asm.h b/arch/x86/include/asm/asm.h
-index 219faaec51df..3cab54bce51d 100644
+index 219faaec51df..990770f9e76b 100644
 --- a/arch/x86/include/asm/asm.h
 +++ b/arch/x86/include/asm/asm.h
 @@ -46,6 +46,65 @@
@@ -124,7 +132,7 @@ index 219faaec51df..3cab54bce51d 100644
 +#define _ASM_ARG6L	r9d
 +
 +#define _ASM_ARG1W	di
-+#define _ASM_ARG2W	di
++#define _ASM_ARG2W	si
 +#define _ASM_ARG3W	dx
 +#define _ASM_ARG4W	cx
 +#define _ASM_ARG5W	r8w
@@ -146,7 +154,7 @@ index 219faaec51df..3cab54bce51d 100644
 2.14.4
 
 
---------------440690091998480EBFAA1FD9
+--------------A996B762124FDC7635524F0D
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -156,4 +164,4 @@ _______________________________________________
 Virtualization mailing list
 Virtualization@lists.linux-foundation.org
 https://lists.linuxfoundation.org/mailman/listinfo/virtualization
---------------440690091998480EBFAA1FD9--
+--------------A996B762124FDC7635524F0D--
