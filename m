@@ -1,49 +1,89 @@
-From: Nick Desaulniers <ndesaulniers@google.com>
-Subject: Re: [PATCH v2 2/2] x86: paravirt: make native_save_fl extern inline
-Date: Tue, 5 Jun 2018 14:51:23 -0700
-Message-ID: <CAKwvOdmqU+fco3JLPh66sfevrf5_E3pQBdus4sDqS-qP0bXr0A@mail.gmail.com>
+From: Joe Perches <joe@perches.com>
+Subject: Re: [PATCH v2 1/2] compiler-gcc.h: add gnu_inline to all inline
+ declarations
+Date: Tue, 05 Jun 2018 14:59:25 -0700
+Message-ID: <91704f8e949fd48869e1b36b959780cf19e96d44.camel@perches.com>
 References: <20180605170532.170361-1-ndesaulniers@google.com>
- <20180605170532.170361-3-ndesaulniers@google.com> <CAK8P3a0v6sr_oZmYTZV7E-uJ8JdG6D8JqUesHDPkPY2UrWKdvw@mail.gmail.com>
- <CAK8P3a1MY1-ennr_g=viLSiKodO8uva_jvmtUUU283aXWDLnHw@mail.gmail.com>
+         <20180605170532.170361-2-ndesaulniers@google.com>
+         <202492204c2d5bd5ca27307cbca5e44673b739ed.camel@perches.com>
+         <5ad1876557235a089a50e6ed6c558a7dcb0da714.camel@perches.com>
+         <CAKwvOd=zuy0BJC3f3EKT_9Mg83qdZxAxw_RJ4okAMKrpKjJRHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK8P3a1MY1-ennr_g=viLSiKodO8uva_jvmtUUU283aXWDLnHw@mail.gmail.com>
+In-Reply-To: <CAKwvOd=zuy0BJC3f3EKT_9Mg83qdZxAxw_RJ4okAMKrpKjJRHQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
+To: Nick Desaulniers <ndesaulniers@google.com>
 Cc: Andrew Morton <akpm@linux-foundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrey Ryabinin <aryabinin@virtuozzo.com>, akataria@vmware.com, boris.ostrovsky@oracle.com, brijesh.singh@amd.com, Cao jin <caoj.fnst@cn.fujitsu.com>, Greg KH <gregkh@linuxfoundation.org>, hpa@zytor.com, "J. Kiszka" <jan.kiszka@siemens.com>, jarkko.sakkinen@linux.intel.com, jgross@suse.com, Josh Poimboeuf <jpoimboe@redhat.com>, kirill.shutemov@linux.intel.com, mingo@redhat.com, mjg59@google.com, Matthias Kaehlcke <mka@chromium.org>, Philippe Ombredanne <pombredanne@nexb.com>, rostedt@goodmis.org, Thomas Gleixner <tglx@linutronix.de>, thomas.lendacky@amd.com, Thiebaud Weksteen <tweek@google.com>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, x86@kernel.org, virtua
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jun 5, 2018 at 2:31 PM Arnd Bergmann <arnd@arndb.de> wrote:
->
-> On Tue, Jun 5, 2018 at 11:28 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> > On Tue, Jun 5, 2018 at 7:05 PM, Nick Desaulniers
-> > <ndesaulniers@google.com> wrote:
-> >>
-> >> The semantics of extern inline has changed since gnu89. This means that
-> >> folks using GCC versions >= 5.1 may see symbol redefinition errors at
-> >> link time for subdirs that override KBUILD_CFLAGS (making the C standard
-> >> used implicit) regardless of this patch. This has been cleaned up
-> >> earlier in the patch set, but is left as a note in the commit message
-> >> for future travelers.
-> >
-> > I think the keyword you are missing is
-> >
-> > __attribute__((gnu_inline))
-> >
-> > which forces the gnu89 behavior on all compiler versions. It's been supported
-> > since gcc-4.2, so it should not cause problems on any compiler that is able
-> > to build an x86 kernel.
->
-> Nevermind, I just saw you already posted that.
->
->        Arnd
+On Tue, 2018-06-05 at 12:50 -0700, Nick Desaulniers wrote:
+> On Tue, Jun 5, 2018 at 12:14 PM Joe Perches <joe@perches.com> wrote:
+> > 
+> > On Tue, 2018-06-05 at 10:23 -0700, Joe Perches wrote:
+> > > Perhaps these are simpler as
+> > > 
+> > > #define __inline__    inline
+> > > #define __inline      inline
+> > 
+> > Currently, there are these uses of inline variants in the kernel
+> > 
+> > $ git grep -w inline | wc -l
+> > 68410
+> > $ git grep -w __inline__ | wc -l
+> > 503
+> > $ git grep -w __inline | wc -l
+> > 57
+> > 
+> > So it seems it's also reasonable to sed all uses of __inline to inline
+> > and perhaps remove __inline eventually altogether.
+> > (perhaps there are still too many __inline__ uses)
+> 
+> Yeah, that sounds good. Should I split that into 3 patches:
+> 
+> > Excluding scripts and a few other files,
+> > here's a possible patch done with:
+> > 
+> > $ git grep -w --name-only __inline | \
+> >   grep -vP '^(?:arch/alpha/|include/|scripts/)' | \
+> >   xargs sed -r -i -e 's/\b__inline\b/inline/g' \
+> >                   -e 's/\binline\s+static\b/static inline/g'
+> > ---
+> >  Documentation/trace/tracepoint-analysis.rst             |  2 +-
+> >  drivers/staging/rtl8723bs/core/rtw_pwrctrl.c            |  4 ++--
+> >  drivers/staging/rtl8723bs/core/rtw_wlan_util.c          |  2 +-
+> >  drivers/staging/rtl8723bs/include/drv_types.h           |  6 +++---
+> >  drivers/staging/rtl8723bs/include/ieee80211.h           |  6 +++---
+> >  drivers/staging/rtl8723bs/include/osdep_service.h       | 10 +++++-----
+> >  drivers/staging/rtl8723bs/include/osdep_service_linux.h | 14 +++++++-------
+> >  drivers/staging/rtl8723bs/include/rtw_mlme.h            | 14 +++++++-------
+> >  drivers/staging/rtl8723bs/include/rtw_recv.h            | 16 ++++++++--------
+> >  drivers/staging/rtl8723bs/include/sta_info.h            |  2 +-
+> >  drivers/staging/rtl8723bs/include/wifi.h                | 14 +++++++-------
+> >  drivers/staging/rtl8723bs/include/wlan_bssdef.h         |  2 +-
+> >  lib/zstd/mem.h                                          |  2 +-
+> >  13 files changed, 47 insertions(+), 47 deletions(-)
+> 
+> 
+> 1 for documentation, 1 for rtl8723bs, 1 for zstd?
 
-That's ok, I appreciate you taking the time to review.  Your point
-made me consider adding the function attribute to just
-native_save_fl() in this patch, but it seems that that lone function
-attribute is not used outside of compiler-gcc.h, so it would be good
-to change all users of inline in one place.
--- 
-Thanks,
-~Nick Desaulniers
+Seems sensible to me.
+
+> Follow up set or include in v3?
+
+Your choice.  Probably a follow up would work best.
+
+Also, the remaining __inline uses would be:
+
+arch/alpha/include/asm/compiler.h:#undef __inline
+include/linux/compiler-gcc.h:#define __inline __inline  __attribute__((always_inline,unused)) notrace
+include/linux/compiler-gcc.h:#define __inline __inline  __attribute__((unused)) notrace
+scripts/checkpatch.pl:our $Inline       = qr{inline|__always_inline|noinline|__inline|__inline__};
+scripts/checkpatch.pl:# Check for __inline__ and __inline, prefer inline
+scripts/checkpatch.pl:              $line =~ /\b(__inline__|__inline)\b/) {
+scripts/checkpatch.pl:                          $fixed[$fixlinenr] =~ s/\b(__inline__|__inline)\b/inline/;
+scripts/genksyms/keywords.c:    { "__inline", INLINE_KEYW },
+scripts/kernel-doc:    $prototype =~ s/^__inline +//;
+
+So all of these could be removed/updated appropriately too
