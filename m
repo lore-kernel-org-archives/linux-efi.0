@@ -1,72 +1,159 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: [PATCH v2 1/2] compiler-gcc.h: add gnu_inline to all inline
- declarations
-Date: Tue, 05 Jun 2018 10:23:40 -0700
-Message-ID: <202492204c2d5bd5ca27307cbca5e44673b739ed.camel@perches.com>
+From: "H. Peter Anvin" <hpa@zytor.com>
+Subject: Re: [PATCH v2 2/2] x86: paravirt: make native_save_fl extern inline
+Date: Tue, 5 Jun 2018 10:28:39 -0700
+Message-ID: <26c7fd1c-ab40-368f-c2e3-43a6b45157fd@zytor.com>
 References: <20180605170532.170361-1-ndesaulniers@google.com>
-         <20180605170532.170361-2-ndesaulniers@google.com>
+	<20180605170532.170361-3-ndesaulniers@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180605170532.170361-2-ndesaulniers@google.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Nick Desaulniers <ndesaulniers@google.com>, akpm@linux-foundation.org, ard.biesheuvel@linaro.org, aryabinin@virtuozzo.com, akataria@vmware.com, boris.ostrovsky@oracle.com, brijesh.singh@amd.com, caoj.fnst@cn.fujitsu.com, gregkh@linuxfoundation.org, hpa@zytor.com, jan.kiszka@siemens.com, jarkko.sakkinen@linux.intel.com, jgross@suse.com, jpoimboe@redhat.com, kirill.shutemov@linux.intel.com, mingo@redhat.com, mjg59@google.com, mka@chromium.org, pombredanne@nexb.com, rostedt@goodmis.org, tglx@linutronix.de, thomas.lendacky@amd.com, tweek@google.com
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, virtualization@lists.linux-foundation.org, astrachan@google.com, manojgupta@google.com, ghackmann@google.com, sedat.dilek@gmail.com, tstellar@redhat.com, keescook@google.com, yamada.masahiro@socionext.com, michal.lkml@markovi.net, linux-kbuild@vger.kernel.org, geert@linux-m68k.org, will.deacon@arm.com, mawilcox@microsoft.com, arnd@arndb.de, rientjes@google.com
+Content-Type: multipart/mixed; boundary="------------440690091998480EBFAA1FD9"
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+In-Reply-To: <20180605170532.170361-3-ndesaulniers@google.com>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: Nick Desaulniers <ndesaulniers@google.com>, akpm@linux-foundation.org, ard.biesheuvel@linaro.org, aryabinin@virtuozzo.com, akataria@vmware.com, boris.ostrovsky@oracle.com, brijesh.singh@amd.com, caoj.fnst@cn.fujitsu.com, gregkh@linuxfoundation.org, jan.kiszka@siemens.com, jarkko.sakkinen@linux.intel.com, jgross@suse.com, jpoimboe@redhat.com, kirill.shutemov@linux.intel.com, mingo@redhat.com, mjg59@google.com, mka@chromium.org, pombredanne@nexb.com, rostedt@goodmis.org, tglx@linutronix.de, thomas.lendacky@amd.com, tweek@google.com
+Cc: linux-efi@vger.kernel.org, mawilcox@microsoft.com, arnd@arndb.de, tstellar@redhat.com, x86@kernel.org, will.deacon@arm.com, astrachan@google.com, ghackmann@google.com, linux-kernel@vger.kernel.org, yamada.masahiro@socionext.com, michal.lkml@markovi.net, geert@linux-m68k.org, manojgupta@google.com, keescook@google.com, sedat.dilek@gmail.com, rientjes@google.com, virtualization@lists.linux-foundation.org, linux-kbuild@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2018-06-05 at 10:05 -0700, Nick Desaulniers wrote:
-> Functions marked extern inline do not emit an externally visible
-> function when the gnu89 C standard is used. Some KBUILD Makefiles
-> overwrite KBUILD_CFLAGS. This is an issue for GCC 5.1+ users as without
-> an explicit C standard specified, the default is gnu11. Since c99, the
-> semantics of extern inline have changed such that an externally visible
-> function is always emitted. This can lead to multiple definition errors
-> of extern inline functions at link time of compilation units whose build
-> files have removed an explicit C standard compiler flag for users of GCC
-> 5.1+ or Clang.
-[]
-> diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-[]
-> @@ -72,17 +72,24 @@
->   * -Wunused-function.  This turns out to avoid the need for complex #ifdef
->   * directives.  Suppress the warning in clang as well by using "unused"
->   * function attribute, which is redundant but not harmful for gcc.
-> + * Prefer gnu_inline, so that extern inline functions do not emit an
-> + * externally visible function. This makes extern inline behave as per gnu89
-> + * semantics rather than c99. This prevents multiple symbol definition errors
-> + * of extern inline functions at link time.
->   */
->  #if !defined(CONFIG_ARCH_SUPPORTS_OPTIMIZED_INLINING) ||		\
->      !defined(CONFIG_OPTIMIZE_INLINING) || (__GNUC__ < 4)
-> -#define inline inline		__attribute__((always_inline,unused)) notrace
-> -#define __inline__ __inline__	__attribute__((always_inline,unused)) notrace
-> -#define __inline __inline	__attribute__((always_inline,unused)) notrace
-> +#define inline \
-> +	inline __attribute__((always_inline, unused, gnu_inline)) notrace
-> +#define __inline__ \
-> +	__inline__ __attribute__((always_inline, unused, gnu_inline)) notrace
-> +#define __inline \
-> +	__inline __attribute__((always_inline, unused, gnu_inline)) notrace
+This is a multi-part message in MIME format.
+--------------440690091998480EBFAA1FD9
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 
-Perhaps these are simpler as
+On 06/05/18 10:05, Nick Desaulniers wrote:
+> +
+> +/*
+> + * void native_restore_fl(unsigned long flags)
+> + * %rdi: flags
+> + */
+> +ENTRY(native_restore_fl)
+> +	push %_ASM_DI
+> +	popf
+> +	ret
+> +ENDPROC(native_restore_fl)
+> +EXPORT_SYMBOL(native_restore_fl)
+> 
 
-#define __inline__	inline
-#define __inline	inline
+To work on i386, this would have to be %_ASM_AX in that case.
 
->  #else
->  /* A lot of inline functions can cause havoc with function tracing */
-> -#define inline inline		__attribute__((unused)) notrace
-> -#define __inline__ __inline__	__attribute__((unused)) notrace
-> -#define __inline __inline	__attribute__((unused)) notrace
-> +#define inline inline		__attribute__((unused, gnu_inline)) notrace
-> +#define __inline__ __inline__	__attribute__((unused, gnu_inline)) notrace
-> +#define __inline __inline	__attribute__((unused, gnu_inline)) notrace
->  #endif
+Something like this added to <asm/asm.h> might be useful; then you can
+simply:
 
-And only set once along with:
+	push %_ASM_ARG1
 
->  #define __always_inline	inline __attribute__((always_inline))
+--------------440690091998480EBFAA1FD9
+Content-Type: text/x-patch;
+ name="0001-x86-asm-add-_ASM_ARG-constants-for-argument-registes.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename*0="0001-x86-asm-add-_ASM_ARG-constants-for-argument-registes.pa";
+ filename*1="tch"
 
-And perhaps this __always_inline should be updated
-with gnu_inline as well
+>From 83a7c1b7167dceee0eb731cf4ae3af7f9b2c05ea Mon Sep 17 00:00:00 2001
+From: "H. Peter Anvin" <hpa@linux.intel.com>
+Date: Tue, 5 Jun 2018 10:21:35 -0700
+Subject: [PATCH] x86/asm: add _ASM_ARG* constants for argument registes to
+ <asm/asm.h>
+
+i386 and x86-64 uses different registers for arguments; make them
+available so we don't have to #ifdef in the actual code.
+
+Native size and specified size (q, l, w, b) versions are provided.
+
+Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
+---
+ arch/x86/include/asm/asm.h | 59 ++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 59 insertions(+)
+
+diff --git a/arch/x86/include/asm/asm.h b/arch/x86/include/asm/asm.h
+index 219faaec51df..3cab54bce51d 100644
+--- a/arch/x86/include/asm/asm.h
++++ b/arch/x86/include/asm/asm.h
+@@ -46,6 +46,65 @@
+ #define _ASM_SI		__ASM_REG(si)
+ #define _ASM_DI		__ASM_REG(di)
+ 
++#ifndef __x86_64__
++/* 32 bit */
++
++#define _ASM_ARG1	_ASM_AX
++#define _ASM_ARG2	_ASM_DX
++#define _ASM_ARG3	_ASM_CX
++
++#define _ASM_ARG1L	eax
++#define _ASM_ARG2L	edx
++#define _ASM_ARG3L	ecx
++
++#define _ASM_ARG1W	ax
++#define _ASM_ARG2W	dx
++#define _ASM_ARG3W	cx
++
++#define _ASM_ARG1B	al
++#define _ASM_ARG2B	dl
++#define _ASM_ARG3B	cl
++
++#else
++/* 64 bit */
++
++#define _ASM_ARG1	_ASM_DI
++#define _ASM_ARG2	_ASM_SI
++#define _ASM_ARG3	_ASM_DX
++#define _ASM_ARG4	_ASM_CX
++#define _ASM_ARG5	r8
++#define _ASM_ARG6	r9
++
++#define _ASM_ARG1Q	rdi
++#define _ASM_ARG2Q	rsi
++#define _ASM_ARG3Q	rdx
++#define _ASM_ARG4Q	rcx
++#define _ASM_ARG5Q	r8
++#define _ASM_ARG6Q	r9
++
++#define _ASM_ARG1L	edi
++#define _ASM_ARG2L	esi
++#define _ASM_ARG3L	edx
++#define _ASM_ARG4L	ecx
++#define _ASM_ARG5L	r8d
++#define _ASM_ARG6L	r9d
++
++#define _ASM_ARG1W	di
++#define _ASM_ARG2W	di
++#define _ASM_ARG3W	dx
++#define _ASM_ARG4W	cx
++#define _ASM_ARG5W	r8w
++#define _ASM_ARG6W	r9w
++
++#define _ASM_ARG1B	dil
++#define _ASM_ARG2B	sil
++#define _ASM_ARG3B	dl
++#define _ASM_ARG4B	cl
++#define _ASM_ARG5B	r8b
++#define _ASM_ARG6B	r9b
++
++#endif
++
+ /*
+  * Macros to generate condition code outputs from inline assembly,
+  * The output operand must be type "bool".
+-- 
+2.14.4
+
+
+--------------440690091998480EBFAA1FD9
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+Virtualization mailing list
+Virtualization@lists.linux-foundation.org
+https://lists.linuxfoundation.org/mailman/listinfo/virtualization
+--------------440690091998480EBFAA1FD9--
