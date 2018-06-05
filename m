@@ -1,80 +1,121 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: [GIT PULL] EFI changes for v4.18
-Date: Mon, 4 Jun 2018 10:53:21 +0200
-Message-ID: <20180604085321.GA13825@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Nick Desaulniers <ndesaulniers@google.com>
+Subject: [PATCH v2 2/2] x86: paravirt: make native_save_fl extern inline
+Date: Tue,  5 Jun 2018 10:05:32 -0700
+Message-ID: <20180605170532.170361-3-ndesaulniers@google.com>
+References: <20180605170532.170361-1-ndesaulniers@google.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
+In-Reply-To: <20180605170532.170361-1-ndesaulniers@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Andrew Morton <akpm@linux-foundation.org>
+To: akpm@linux-foundation.org, ard.biesheuvel@linaro.org, aryabinin@virtuozzo.com, akataria@vmware.com, boris.ostrovsky@oracle.com, brijesh.singh@amd.com, caoj.fnst@cn.fujitsu.com, gregkh@linuxfoundation.org, hpa@zytor.com, jan.kiszka@siemens.com, jarkko.sakkinen@linux.intel.com, jgross@suse.com, jpoimboe@redhat.com, kirill.shutemov@linux.intel.com, mingo@redhat.com, mjg59@google.com, mka@chromium.org, ndesaulniers@google.com, pombredanne@nexb.com, rostedt@goodmis.org, tglx@linutronix.de, thomas.lendacky@amd.com, tweek@google.com
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, virtualization@lists.linux-foundation.org, astrachan@google.com, manojgupta@google.com, ghackmann@google.com, sedat.dilek@gmail.com, tstellar@redhat.com, keescook@google.com, yamada.masahiro@socionext.com, michal.lkml@markovi.net, linux-kbuild@vger.kernel.org, geert@linux-m68k.org, will.deacon@arm.com, mawilcox@microsoft.com, arnd@arndb.de, rientjes@google.com
 List-Id: linux-efi@vger.kernel.org
 
-Linus,
+native_save_fl() is marked static inline, but by using it as
+a function pointer in arch/x86/kernel/paravirt.c, it MUST be outlined.
 
-Please pull the latest efi-core-for-linus git tree from:
+paravirt's use of native_save_fl() also requires that no GPRs other than
+%rax are clobbered.
 
-   git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
+Compilers have different heuristics which they use to emit stack guard
+code, the emittance of which can break paravirt's callee saved assumption
+by clobbering %rcx.
 
-   # HEAD: 83f0a7c7b265a56d757f7e3a80622e5b0b7ebc46 efi/capsule-loader: Don't output reset log when reset flags are not set
+Marking a function definition extern inline means that if this version
+cannot be inlined, then the out-of-line version will be preferred. By
+having the out-of-line version be implemented in assembly, it cannot be
+instrumented with a stack protector, which might violate custom calling
+conventions that code like paravirt rely on.
 
-The main EFI changes in this cycle were:
+The semantics of extern inline has changed since gnu89. This means that
+folks using GCC versions >= 5.1 may see symbol redefinition errors at
+link time for subdirs that override KBUILD_CFLAGS (making the C standard
+used implicit) regardless of this patch. This has been cleaned up
+earlier in the patch set, but is left as a note in the commit message
+for future travelers.
 
- - Decode x86 CPER data (Yazen Ghannam)
+Reports:
+https://lkml.org/lkml/2018/5/7/534
+https://github.com/ClangBuiltLinux/linux/issues/16
 
- - Ignore unrealistically large option ROMs (Hans de Goede)
+Discussion:
+https://bugs.llvm.org/show_bug.cgi?id=37512
+https://lkml.org/lkml/2018/5/24/1371
 
- - Initialize UEFI secure boot state during Xen dom0 boot (Daniel Kiper)
+Thanks to the many folks that participated in the discussion.
 
- - Additional minor tweaks and fixes.
+Debugged-by: Alistair Strachan <astrachan@google.com>
+Debugged-by: Matthias Kaehlcke <mka@chromium.org>
+Reported-by: Sedat Dilek <sedat.dilek@gmail.com>
+Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
+Suggested-by: H. Peter Anvin <hpa@zytor.com>
+Suggested-by: Tom Stellar <tstellar@redhat.com>
+Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
+---
+No changes in v2, but here's the discussion of v1:
+https://patchwork.kernel.org/patch/10444075/
 
- Thanks,
+ arch/x86/include/asm/irqflags.h |  2 +-
+ arch/x86/kernel/Makefile        |  1 +
+ arch/x86/kernel/irqflags.S      | 26 ++++++++++++++++++++++++++
+ 3 files changed, 28 insertions(+), 1 deletion(-)
+ create mode 100644 arch/x86/kernel/irqflags.S
 
-	Ingo
-
------------------->
-Ard Biesheuvel (2):
-      efi: Align efi_pci_io_protocol typedefs to type naming convention
-      efi/x86: Fold __setup_efi_pci32() and __setup_efi_pci64() into one function
-
-Borislav Petkov (1):
-      efi/cper: Remove the INDENT_SP silliness
-
-Daniel Kiper (1):
-      x86/xen/efi: Initialize UEFI secure boot state during dom0 boot
-
-Hans de Goede (1):
-      efi/x86: Ignore unrealistically large option ROMs
-
-Shunyong Yang (1):
-      efi/capsule-loader: Don't output reset log when reset flags are not set
-
-Wei Yongjun (1):
-      efi/libstub/tpm: Make function efi_retrieve_tpm2_eventlog_1_2() static
-
-Yazen Ghannam (8):
-      efi: Fix IA32/X64 Processor Error Record definition
-      efi: Decode IA32/X64 Processor Error Section
-      efi: Decode IA32/X64 Processor Error Info Structure
-      efi: Decode UEFI-defined IA32/X64 Error Structure GUIDs
-      efi: Decode IA32/X64 Cache, TLB, and Bus Check structures
-      efi: Decode additional IA32/X64 Bus Check fields
-      efi: Decode IA32/X64 MS Check structure
-      efi: Decode IA32/X64 Context Info structure
-
-
- arch/x86/boot/compressed/eboot.c          | 114 +++-------
- arch/x86/xen/efi.c                        |  57 +++++
- drivers/firmware/efi/Kconfig              |   5 +
- drivers/firmware/efi/Makefile             |   1 +
- drivers/firmware/efi/capsule-loader.c     |  14 +-
- drivers/firmware/efi/cper-arm.c           |   6 +-
- drivers/firmware/efi/cper-x86.c           | 356 ++++++++++++++++++++++++++++++
- drivers/firmware/efi/cper.c               |  16 +-
- drivers/firmware/efi/libstub/secureboot.c |   3 +
- drivers/firmware/efi/libstub/tpm.c        |   2 +-
- include/linux/cper.h                      |   4 +-
- include/linux/efi.h                       |   6 +-
- 12 files changed, 485 insertions(+), 99 deletions(-)
- create mode 100644 drivers/firmware/efi/cper-x86.c
+diff --git a/arch/x86/include/asm/irqflags.h b/arch/x86/include/asm/irqflags.h
+index 89f08955fff7..c4fc17220df9 100644
+--- a/arch/x86/include/asm/irqflags.h
++++ b/arch/x86/include/asm/irqflags.h
+@@ -13,7 +13,7 @@
+  * Interrupt control:
+  */
+ 
+-static inline unsigned long native_save_fl(void)
++extern inline unsigned long native_save_fl(void)
+ {
+ 	unsigned long flags;
+ 
+diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
+index 02d6f5cf4e70..8824d01c0c35 100644
+--- a/arch/x86/kernel/Makefile
++++ b/arch/x86/kernel/Makefile
+@@ -61,6 +61,7 @@ obj-y			+= alternative.o i8253.o hw_breakpoint.o
+ obj-y			+= tsc.o tsc_msr.o io_delay.o rtc.o
+ obj-y			+= pci-iommu_table.o
+ obj-y			+= resource.o
++obj-y			+= irqflags.o
+ 
+ obj-y				+= process.o
+ obj-y				+= fpu/
+diff --git a/arch/x86/kernel/irqflags.S b/arch/x86/kernel/irqflags.S
+new file mode 100644
+index 000000000000..937bd08c3f79
+--- /dev/null
++++ b/arch/x86/kernel/irqflags.S
+@@ -0,0 +1,26 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++
++#include <asm/asm.h>
++#include <asm/export.h>
++#include <linux/linkage.h>
++
++/*
++ * unsigned long native_save_fl(void)
++ */
++ENTRY(native_save_fl)
++	pushf
++	pop %_ASM_AX
++	ret
++ENDPROC(native_save_fl)
++EXPORT_SYMBOL(native_save_fl)
++
++/*
++ * void native_restore_fl(unsigned long flags)
++ * %rdi: flags
++ */
++ENTRY(native_restore_fl)
++	push %_ASM_DI
++	popf
++	ret
++ENDPROC(native_restore_fl)
++EXPORT_SYMBOL(native_restore_fl)
+-- 
+2.17.1.1185.g55be947832-goog
