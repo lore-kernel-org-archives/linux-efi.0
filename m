@@ -1,69 +1,56 @@
-From: Nick Desaulniers <ndesaulniers@google.com>
-Subject: Re: [PATCH v2 1/2] compiler-gcc.h: add gnu_inline to all inline declarations
-Date: Tue, 5 Jun 2018 12:50:34 -0700
-Message-ID: <CAKwvOd=zuy0BJC3f3EKT_9Mg83qdZxAxw_RJ4okAMKrpKjJRHQ@mail.gmail.com>
-References: <20180605170532.170361-1-ndesaulniers@google.com>
- <20180605170532.170361-2-ndesaulniers@google.com> <202492204c2d5bd5ca27307cbca5e44673b739ed.camel@perches.com>
- <5ad1876557235a089a50e6ed6c558a7dcb0da714.camel@perches.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH V5 3/3] efi: Use efi_rts_wq to invoke EFI Runtime Services
+Date: Tue, 5 Jun 2018 21:55:16 +0200
+Message-ID: <CAKv+Gu_Y3Lt1FpymS00AMD4ZJ3AFSV1m7ggxuRFCa4PROeX8XA@mail.gmail.com>
+References: <1527560464-19466-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1527560464-19466-4-git-send-email-sai.praneeth.prakhya@intel.com>
+ <CAKv+Gu_K3HsVoH0M7kFx12d8eGzdmAe-C06TnKek1xwsSFyStA@mail.gmail.com> <FFF73D592F13FD46B8700F0A279B802F3B812DFC@ORSMSX114.amr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5ad1876557235a089a50e6ed6c558a7dcb0da714.camel@perches.com>
+In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F3B812DFC@ORSMSX114.amr.corp.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: joe@perches.com
-Cc: Andrew Morton <akpm@linux-foundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrey Ryabinin <aryabinin@virtuozzo.com>, akataria@vmware.com, boris.ostrovsky@oracle.com, brijesh.singh@amd.com, Cao jin <caoj.fnst@cn.fujitsu.com>, Greg KH <gregkh@linuxfoundation.org>, hpa@zytor.com, "J. Kiszka" <jan.kiszka@siemens.com>, jarkko.sakkinen@linux.intel.com, jgross@suse.com, Josh Poimboeuf <jpoimboe@redhat.com>, kirill.shutemov@linux.intel.com, mingo@redhat.com, mjg59@google.com, Matthias Kaehlcke <mka@chromium.org>, Philippe Ombredanne <pombredanne@nexb.com>, rostedt@goodmis.org, Thomas Gleixner <tglx@linutronix.de>, thomas.lendacky@amd.com, Thiebaud Weksteen <tweek@google.com>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, x86@kernel.org, virtua
+To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Naresh Bhat <naresh.bhat@linaro.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Williams, Dan J" <dan.j.williams@intel.com>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jun 5, 2018 at 12:14 PM Joe Perches <joe@perches.com> wrote:
+On 5 June 2018 at 21:29, Prakhya, Sai Praneeth
+<sai.praneeth.prakhya@intel.com> wrote:
+>> > +       case RESET_SYSTEM:
+>> > +               __efi_call_virt(reset_system, *(int *)arg1,
+>> > +                               *(efi_status_t *)arg2,
+>> > +                               *(unsigned long *)arg3,
+>> > +                               (efi_char16_t *)arg4);
+>> > +               break;
+>>
+>> I noticed that -unsurprisingly- reboot no longer works with these changes.
+>>
+>> I will fix up the patch, and revert the efi_reset_system() change, both here and
+>> below.
 >
-> On Tue, 2018-06-05 at 10:23 -0700, Joe Perches wrote:
-> > Perhaps these are simpler as
-> >
-> > #define __inline__    inline
-> > #define __inline      inline
+> Could you please let me know what the bug is here? I am unable to see it right away :(
+> I have tested reboot on qemu x86_64 by passing "reboot=efi" as command line arg and
+> saw that reboot is working fine.
 >
-> Currently, there are these uses of inline variants in the kernel
->
-> $ git grep -w inline | wc -l
-> 68410
-> $ git grep -w __inline__ | wc -l
-> 503
-> $ git grep -w __inline | wc -l
-> 57
->
-> So it seems it's also reasonable to sed all uses of __inline to inline
-> and perhaps remove __inline eventually altogether.
-> (perhaps there are still too many __inline__ uses)
 
-Yeah, that sounds good. Should I split that into 3 patches:
+My arm64 hangs at reboot or power off, unless i revert the ResetSystem() part.
 
-> Excluding scripts and a few other files,
-> here's a possible patch done with:
->
-> $ git grep -w --name-only __inline | \
->   grep -vP '^(?:arch/alpha/|include/|scripts/)' | \
->   xargs sed -r -i -e 's/\b__inline\b/inline/g' \
->                   -e 's/\binline\s+static\b/static inline/g'
-> ---
->  Documentation/trace/tracepoint-analysis.rst             |  2 +-
->  drivers/staging/rtl8723bs/core/rtw_pwrctrl.c            |  4 ++--
->  drivers/staging/rtl8723bs/core/rtw_wlan_util.c          |  2 +-
->  drivers/staging/rtl8723bs/include/drv_types.h           |  6 +++---
->  drivers/staging/rtl8723bs/include/ieee80211.h           |  6 +++---
->  drivers/staging/rtl8723bs/include/osdep_service.h       | 10 +++++-----
->  drivers/staging/rtl8723bs/include/osdep_service_linux.h | 14 +++++++-------
->  drivers/staging/rtl8723bs/include/rtw_mlme.h            | 14 +++++++-------
->  drivers/staging/rtl8723bs/include/rtw_recv.h            | 16 ++++++++--------
->  drivers/staging/rtl8723bs/include/sta_info.h            |  2 +-
->  drivers/staging/rtl8723bs/include/wifi.h                | 14 +++++++-------
->  drivers/staging/rtl8723bs/include/wlan_bssdef.h         |  2 +-
->  lib/zstd/mem.h                                          |  2 +-
->  13 files changed, 47 insertions(+), 47 deletions(-)
+But given that it is both risky (relying on a kthread running a
+workqueue in the shutdown path) and unnecessary (ResetSystem() is not
+supposed to return, and is only called by the kernel when the whole
+system has already been torn down), I think the main reason is simply
+that there is no reason to add it.
 
 
-1 for documentation, 1 for rtl8723bs, 1 for zstd?
-
-Follow up set or include in v3?
--- 
-Thanks,
-~Nick Desaulniers
+>> > @@ -340,7 +441,8 @@ static void virt_efi_reset_system(int reset_type,
+>> >                         "could not get exclusive access to the firmware\n");
+>> >                 return;
+>> >         }
+>> > -       __efi_call_virt(reset_system, reset_type, status, data_size, data);
+>> > +       efi_queue_work(RESET_SYSTEM, &reset_type, &status, &data_size, data,
+>> > +                      NULL);
+>> >         up(&efi_runtime_lock);
+>> >  }
+>
+> Regards,
+> Sai
