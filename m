@@ -1,63 +1,66 @@
-From: Andy Lutomirski <luto@kernel.org>
-Subject: Re: [PATCH v6 0/5] efi/firmware/platform-x86: Add EFI embedded fw support
-Date: Wed, 6 Jun 2018 11:40:52 -0700
-Message-ID: <CALCETrVEw9cfHrxRmY3z+B9hS3X=QT0A4_bsX3nPp3h6oLBY7Q@mail.gmail.com>
-References: <20180601125330.25054-1-hdegoede@redhat.com> <20180605204623.GB4511@wotan.suse.de>
- <350930d6-5a0f-11e1-1b04-e5c11961931b@redhat.com>
+From: "Luis R. Rodriguez" <mcgrof@kernel.org>
+Subject: Do Qualcomm drivers use DMA buffers for request_firmware_into_buf()?
+Date: Wed, 6 Jun 2018 22:32:57 +0200
+Message-ID: <20180606203257.GH4511@wotan.suse.de>
+References: <20180408174014.21908-3-hdegoede@redhat.com>
+ <20180423211143.GZ14440@wotan.suse.de>
+ <71e6a45a-398d-b7a4-dab0-8b9936683226@redhat.com>
+ <1524586021.3364.20.camel@linux.vnet.ibm.com>
+ <20180424234219.GX14440@wotan.suse.de>
+ <1524632409.3371.48.camel@linux.vnet.ibm.com>
+ <20180425175557.GY14440@wotan.suse.de>
+ <CAB0TPYGnCu+anWHBGvkaigxD--8uHQaQJ2c62kegJ7mTqvkmnA@mail.gmail.com>
+ <20180508153805.GC27853@wotan.suse.de>
+ <20180601192346.GQ4511@wotan.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <350930d6-5a0f-11e1-1b04-e5c11961931b@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>, "Jason A. Donenfeld" <Jason@zx2c4.com>
-Cc: "Luis R. Rodriguez" <mcgrof@kernel.org>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Greg KH <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Peter Jones <pjones@redhat.com>, dave@bewaar.me, Will Deacon <will.deacon@arm.com>, Andrew Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Josh Triplett <josh@joshtriplett.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Martin Fuzzey <mfuzzey@parkeon.com>, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, Nicolas Broeking <nbroeking@me.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Disposition: inline
+In-Reply-To: <20180601192346.GQ4511@wotan.suse.de>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Andy Gross <andy.gross@linaro.org>, David Brown <david.brown@linaro.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Michal Hocko <mhocko@kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Rik van Riel <riel@surriel.com>, Laura Abbott <labbott@redhat.com>, Vlastimil Babka <vbabka@suse.cz>
+Cc: dmitry.torokhov@gmail.com, Matt Fleming <matt@codeblueprint.co.uk>, Will Deacon <will.deacon@arm.com>, platform-driver-x86@vger.kernel.org, David Howells <dhowells@redhat.com>, Peter Jones <pjones@redhat.com>, mcgrof@kernel.org, "H . Peter Anvin" <hpa@zytor.com>, "open list:ANDROID DRIVERS" <devel@driverdev.osuosl.org>, nbroeking@me.com, Jonathan Corbet <corbet@lwn.net>, x86@kernel.org, Arve =?iso-8859-1?B?SGr4bm5lduVn?= <arve@android.com>, Ingo Molnar <mingo@redhat.com>, Darren Hart <dvhart@infradead.org>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Todd Kjos <tkjos@android.com>, Kees Cook <keescook@chromium.org>, linux-efi <linux-efi@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Torsten Duwe <duwe@suse.de>, Josh Triplett <josh@joshtriplett.org>, Chris Wright <chrisw@sous-sol.org>, Andy Lutomirski <luto@kernel.org>, Thomas
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jun 6, 2018 at 11:17 AM Hans de Goede <hdegoede@redhat.com> wrote:
->
-> Hi,
->
-> On 05-06-18 22:46, Luis R. Rodriguez wrote:
-> > On Fri, Jun 01, 2018 at 02:53:25PM +0200, Hans de Goede wrote:
-> >> Hi All,
-> >>
-> >> Here is v6 of my patch-set to add support for EFI embedded fw to the kernel.
-> >>
-> >> This patch-set applies on top of the "[PATCH v7 00/14] firmware_loader
-> >> changes for v4.18" series from mcgrof.
-> >>
-> >> It now also depends on the series from Andy Lutomirski which allow using the
-> >> sha256 code in a standalone manner. Andy what is the status of those?
-> >>
-> >> Changes since v5:
-> >> -Rework code to remove casts from if (prefix == mem) comparison
-> >> -Use SHA256 hashes instead of crc32 sums
-> >
-> > Nice! I see no updates on this progress, but it would seem this
-> > may then mean this cannot be merged until the release after?
->
-> Once the sha256 bits are in place the subsys tree which has them
-> merged can create an immutable branch for Greg to merge and
-> then these can be applied on top of that merge.
->
-> But yes this means that these probably won't go in for another
-> cycle or 2, that is fine.
->
-> >> -Add new READING_FIRMWARE_EFI_EMBEDDED read_file_id and use it
-> >> -Call security_kernel_read_file(NULL, READING_FIRMWARE_EFI_EMBEDDED)
-> >>   to check if this is allowed before looking at EFI embedded fw
-> >
-> > There's a discussion over having security_kernel_read_file(NULL,
-> > READING_WHATEVER) become another LSM hook. So your series would conflict with
-> > that at the moment.
-> >
-> > So yet another piece of code which this series depends on.
->
-> Ah well, I'm in no big hurry to get this merged. OTOH if this is
-> ready and that discussion is not yet finished it might be better
-> to merge this as is and then have the security_kernel_read_file / LSM
-> hook series fix this up as necessary when it is merged.
->
+On Fri, Jun 01, 2018 at 09:23:46PM +0200, Luis R. Rodriguez wrote:
+> On Tue, May 08, 2018 at 03:38:05PM +0000, Luis R. Rodriguez wrote:
+> > On Fri, May 04, 2018 at 12:44:37PM -0700, Martijn Coenen wrote:
+> > > 
+> > > I think the Qualcomm folks owning this (Andy, David, Bjorn, already
+> > > cc'd here) are better suited to answer that question.
+> > 
+> > Andy, David, Bjorn?
+> 
+> Andy, David, Bjorn?
 
-Let's give Jason a bit longer to reply.  I know he's actively working
-on this thing, but it's part of a bigger project.
+A month now with no answer...
+
+Perhaps someone who has this hardware can find out empirically for us, as
+follows (mm folks is this right?):
+
+page = virt_to_page(address);
+if (!page)
+   fail closed...
+if (page_zone(page) == ZONE_DMA || page_zone(page) == ZONE_DMA32)
+	this is a DMA buffer
+else
+	not DMA!
+
+Note that when request_firmware_into_buf() was being reviewed Mimi had asked back
+in 2016 [0] that if a DMA buffer was going to be used READING_FIRMWARE_DMA should be
+used otherwise READING_FIRMWARE_PREALLOC_BUFFER was fine.
+
+If it is a DMA buffer *now*, why / how did this change?
+
+[0] https://patchwork.kernel.org/patch/9074611/
+
+  Luis
