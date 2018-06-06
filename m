@@ -1,89 +1,62 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: [PATCH v2 1/2] compiler-gcc.h: add gnu_inline to all inline
- declarations
-Date: Tue, 05 Jun 2018 14:59:25 -0700
-Message-ID: <91704f8e949fd48869e1b36b959780cf19e96d44.camel@perches.com>
+From: Sedat Dilek <sedat.dilek@gmail.com>
+Subject: Re: [PATCH v2 1/2] compiler-gcc.h: add gnu_inline to all inline declarations
+Date: Wed, 6 Jun 2018 10:05:45 +0200
+Message-ID: <CA+icZUXEpe954z0TSbhSJPdFCfOqsBtpO9mPZBcJ2HWubSo_zQ@mail.gmail.com>
 References: <20180605170532.170361-1-ndesaulniers@google.com>
-         <20180605170532.170361-2-ndesaulniers@google.com>
-         <202492204c2d5bd5ca27307cbca5e44673b739ed.camel@perches.com>
-         <5ad1876557235a089a50e6ed6c558a7dcb0da714.camel@perches.com>
-         <CAKwvOd=zuy0BJC3f3EKT_9Mg83qdZxAxw_RJ4okAMKrpKjJRHQ@mail.gmail.com>
+ <20180605170532.170361-2-ndesaulniers@google.com> <202492204c2d5bd5ca27307cbca5e44673b739ed.camel@perches.com>
+ <5ad1876557235a089a50e6ed6c558a7dcb0da714.camel@perches.com>
+Reply-To: sedat.dilek@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKwvOd=zuy0BJC3f3EKT_9Mg83qdZxAxw_RJ4okAMKrpKjJRHQ@mail.gmail.com>
+In-Reply-To: <5ad1876557235a089a50e6ed6c558a7dcb0da714.camel@perches.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nick Desaulniers <ndesaulniers@google.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrey Ryabinin <aryabinin@virtuozzo.com>, akataria@vmware.com, boris.ostrovsky@oracle.com, brijesh.singh@amd.com, Cao jin <caoj.fnst@cn.fujitsu.com>, Greg KH <gregkh@linuxfoundation.org>, hpa@zytor.com, "J. Kiszka" <jan.kiszka@siemens.com>, jarkko.sakkinen@linux.intel.com, jgross@suse.com, Josh Poimboeuf <jpoimboe@redhat.com>, kirill.shutemov@linux.intel.com, mingo@redhat.com, mjg59@google.com, Matthias Kaehlcke <mka@chromium.org>, Philippe Ombredanne <pombredanne@nexb.com>, rostedt@goodmis.org, Thomas Gleixner <tglx@linutronix.de>, thomas.lendacky@amd.com, Thiebaud Weksteen <tweek@google.com>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, x86@kernel.org, virtua
+To: Joe Perches <joe@perches.com>
+Cc: Nick Desaulniers <ndesaulniers@google.com>, akpm@linux-foundation.org, ard.biesheuvel@linaro.org, aryabinin@virtuozzo.com, akataria@vmware.com, boris.ostrovsky@oracle.com, brijesh.singh@amd.com, caoj.fnst@cn.fujitsu.com, gregkh@linuxfoundation.org, hpa@zytor.com, jan.kiszka@siemens.com, jarkko.sakkinen@linux.intel.com, jgross@suse.com, jpoimboe@redhat.com, kirill.shutemov@linux.intel.com, mingo@redhat.com, mjg59@google.com, mka@chromium.org, pombredanne@nexb.com, rostedt@goodmis.org, tglx@linutronix.de, thomas.lendacky@amd.com, tweek@google.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, virtualization@lists.linux-foundation.org, astrachan@google.com, manojgupta@google.com, ghackmann@google.com, tstellar@redhat.com, keescook@google.com
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2018-06-05 at 12:50 -0700, Nick Desaulniers wrote:
-> On Tue, Jun 5, 2018 at 12:14 PM Joe Perches <joe@perches.com> wrote:
-> > 
-> > On Tue, 2018-06-05 at 10:23 -0700, Joe Perches wrote:
-> > > Perhaps these are simpler as
-> > > 
-> > > #define __inline__    inline
-> > > #define __inline      inline
-> > 
-> > Currently, there are these uses of inline variants in the kernel
-> > 
-> > $ git grep -w inline | wc -l
-> > 68410
-> > $ git grep -w __inline__ | wc -l
-> > 503
-> > $ git grep -w __inline | wc -l
-> > 57
-> > 
-> > So it seems it's also reasonable to sed all uses of __inline to inline
-> > and perhaps remove __inline eventually altogether.
-> > (perhaps there are still too many __inline__ uses)
-> 
-> Yeah, that sounds good. Should I split that into 3 patches:
-> 
-> > Excluding scripts and a few other files,
-> > here's a possible patch done with:
-> > 
-> > $ git grep -w --name-only __inline | \
-> >   grep -vP '^(?:arch/alpha/|include/|scripts/)' | \
-> >   xargs sed -r -i -e 's/\b__inline\b/inline/g' \
-> >                   -e 's/\binline\s+static\b/static inline/g'
-> > ---
-> >  Documentation/trace/tracepoint-analysis.rst             |  2 +-
-> >  drivers/staging/rtl8723bs/core/rtw_pwrctrl.c            |  4 ++--
-> >  drivers/staging/rtl8723bs/core/rtw_wlan_util.c          |  2 +-
-> >  drivers/staging/rtl8723bs/include/drv_types.h           |  6 +++---
-> >  drivers/staging/rtl8723bs/include/ieee80211.h           |  6 +++---
-> >  drivers/staging/rtl8723bs/include/osdep_service.h       | 10 +++++-----
-> >  drivers/staging/rtl8723bs/include/osdep_service_linux.h | 14 +++++++-------
-> >  drivers/staging/rtl8723bs/include/rtw_mlme.h            | 14 +++++++-------
-> >  drivers/staging/rtl8723bs/include/rtw_recv.h            | 16 ++++++++--------
-> >  drivers/staging/rtl8723bs/include/sta_info.h            |  2 +-
-> >  drivers/staging/rtl8723bs/include/wifi.h                | 14 +++++++-------
-> >  drivers/staging/rtl8723bs/include/wlan_bssdef.h         |  2 +-
-> >  lib/zstd/mem.h                                          |  2 +-
-> >  13 files changed, 47 insertions(+), 47 deletions(-)
-> 
-> 
-> 1 for documentation, 1 for rtl8723bs, 1 for zstd?
+Hi,
 
-Seems sensible to me.
+when discovering 'gnu_inline', I found ...
 
-> Follow up set or include in v3?
+$ git grep -w  __FORTIFY_INLINE
+include/linux/string.h:#define __FORTIFY_INLINE extern __always_inline
+__attribute__((gnu_inline))
+include/linux/string.h:__FORTIFY_INLINE char *strncpy(char *p, const
+char *q, __kernel_size_t size)
+include/linux/string.h:__FORTIFY_INLINE char *strcat(char *p, const char *q)
+include/linux/string.h:__FORTIFY_INLINE __kernel_size_t strlen(const char *p)
+include/linux/string.h:__FORTIFY_INLINE __kernel_size_t strnlen(const
+char *p, __kernel_size_t maxlen)
+include/linux/string.h:__FORTIFY_INLINE size_t strlcpy(char *p, const
+char *q, size_t size)
+include/linux/string.h:__FORTIFY_INLINE char *strncat(char *p, const
+char *q, __kernel_size_t count)
+include/linux/string.h:__FORTIFY_INLINE void *memset(void *p, int c,
+__kernel_size_t size)
+include/linux/string.h:__FORTIFY_INLINE void *memcpy(void *p, const
+void *q, __kernel_size_t size)
+include/linux/string.h:__FORTIFY_INLINE void *memmove(void *p, const
+void *q, __kernel_size_t size)
+include/linux/string.h:__FORTIFY_INLINE void *memscan(void *p, int c,
+__kernel_size_t size)
+include/linux/string.h:__FORTIFY_INLINE int memcmp(const void *p,
+const void *q, __kernel_size_t size)
+include/linux/string.h:__FORTIFY_INLINE void *memchr(const void *p,
+int c, __kernel_size_t size)
+include/linux/string.h:__FORTIFY_INLINE void *memchr_inv(const void
+*p, int c, size_t size)
+include/linux/string.h:__FORTIFY_INLINE void *kmemdup(const void *p,
+size_t size, gfp_t gfp)
+include/linux/string.h:__FORTIFY_INLINE char *strcpy(char *p, const char *q)
 
-Your choice.  Probably a follow up would work best.
+After the inline changes suggested by Joe this can be adapted?
 
-Also, the remaining __inline uses would be:
+Beyond this, a general question: Can someone explain why all these
+inline defines are in compiler-gcc.h (as there exists compiler.h and
+compiler-clang.h)?
 
-arch/alpha/include/asm/compiler.h:#undef __inline
-include/linux/compiler-gcc.h:#define __inline __inline  __attribute__((always_inline,unused)) notrace
-include/linux/compiler-gcc.h:#define __inline __inline  __attribute__((unused)) notrace
-scripts/checkpatch.pl:our $Inline       = qr{inline|__always_inline|noinline|__inline|__inline__};
-scripts/checkpatch.pl:# Check for __inline__ and __inline, prefer inline
-scripts/checkpatch.pl:              $line =~ /\b(__inline__|__inline)\b/) {
-scripts/checkpatch.pl:                          $fixed[$fixlinenr] =~ s/\b(__inline__|__inline)\b/inline/;
-scripts/genksyms/keywords.c:    { "__inline", INLINE_KEYW },
-scripts/kernel-doc:    $prototype =~ s/^__inline +//;
+Thanks.
 
-So all of these could be removed/updated appropriately too
+Regards,
+- Sedat -
