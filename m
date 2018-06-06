@@ -1,33 +1,168 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V5 0/3] Use efi_rts_wq to invoke EFI Runtime Services
-Date: Wed, 6 Jun 2018 17:24:34 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F3B8BBBB8@ORSMSX114.amr.corp.intel.com>
-References: <1527560464-19466-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <CAFoFrHYcD7fGYaJzKwcPCtu+XyR+mh5ORDqmCpiBjLmEkDfwOQ@mail.gmail.com>
- <FFF73D592F13FD46B8700F0A279B802F3B6EABDF@ORSMSX114.amr.corp.intel.com>
- <CAFoFrHbOkKpfrt-NVX9wm49aR1Mv7dXLVrDuXGQPiD0ZNbvyrw@mail.gmail.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: [PATCH v6 0/5] efi/firmware/platform-x86: Add EFI embedded fw
+ support
+Date: Wed, 6 Jun 2018 20:17:26 +0200
+Message-ID: <350930d6-5a0f-11e1-1b04-e5c11961931b@redhat.com>
+References: <20180601125330.25054-1-hdegoede@redhat.com>
+ <20180605204623.GB4511@wotan.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAFoFrHbOkKpfrt-NVX9wm49aR1Mv7dXLVrDuXGQPiD0ZNbvyrw@mail.gmail.com>
+In-Reply-To: <20180605204623.GB4511@wotan.suse.de>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Naresh Bhat <naresh.bhat@linaro.org>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "Luck, Tony" <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, "Hansen, Dave" <dave.hansen@intel.com>, Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Williams, Dan J" <dan.j.williams@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, "Nair, Jayachandran" <Jayachandran.Nair@cavium.com>
+To: "Luis R. Rodriguez" <mcgrof@kernel.org>, Mimi Zohar <zohar@linux.vnet.ibm.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Josh Triplett <josh@joshtriplett.org>, dmitry.torokhov@gmail.com, mfuzzey@parkeon.com, Kalle Valo <kvalo@codeaurora.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Linus Torvalds <torvalds@linux-foundation.org>, nbroeking@me.com, bjorn.andersson@linaro.org, Torsten Duwe <duwe@suse.de>, Kees Cook <keescook@chromium.org>, x86@kernel.orglin
 List-Id: linux-efi@vger.kernel.org
 
-PiA+PiBJIGhhdmUgdGVzdGVkIFY0IHNlcmllcyBvbiBUaHVuZGVyWDIgVmFsMSBhbmQgU2FiZXIg
-cGxhdGZvcm0gYnkNCj4gPj4gaW50ZWdyYXRpbmcgdGhlIHBhdGNoZXMgd2l0aCBMVVYgcHJvamVj
-dC4NCj4gPj4gSSB3aWxsIHRlc3QgVjUgdmVyc2lvbiBzb29uIGFuZCBsZXQgeW91IGtub3cgdGhl
-IG91dGNvbWUuDQo+ID4NCj4gPiBUaGFua3MgYSBsb3QhIGZvciB0YWtpbmcgdGltZSB0byB0ZXN0
-IHRoZSBwYXRjaCBzZXQsIE5hcmVzaC4gV2lsbCBiZSB3YWl0aW5nIHRvDQo+IHNlZSB0aGUgcmVz
-dWx0Lg0KPiANCj4gU2FpLCBJIGRpZCB1cGdyYWRlIExVViBrZXJuZWwgdG8gdjQuMTcsIGFwcGx5
-IGFuZCB0ZXN0IHlvdXIgcGF0Y2hlcyBieSBydW5uaW5nDQo+IExVViBvbiBRRU1VIGFuZCBUaHVu
-ZGVyWDIgaGFyZHdhcmUuIEFsbCBlZmkgdGVzdCByZXN1bHRzIGxvb2tzIG9rLg0KDQpUaGFua3Mg
-YSBsb3QhIGZvciB0aGUgdXBkYXRlIDopDQoNCj4gQnV0IGFzIEFyZCBwb2ludGVkLCBJIGFsc28g
-bm90aWNlZCBoYW5nIGlzc3VlIGFmdGVyIGV4ZWN1dGluZyByZWJvb3QgY29tbWFuZCBvbiBjb25z
-b2xlDQo+IG9uIHJlYWwgaGFyZHdhcmUuDQoNCkFyZCBoYXMgZml4ZWQgdGhlIGlzc3VlIGJlZm9y
-ZSBhcHBseWluZyBhbmQgdGhlIGxhdGVzdCBwYXRjaGVzIGNhbiBiZSBmb3VuZCBhdDoNCmh0dHBz
-Oi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51eC9rZXJuZWwvZ2l0L2VmaS9lZmkuZ2l0L2xv
-Zy8/aD1uZXh0DQoNClJlZ2FyZHMsDQpTYWkNCg==
+Hi,
+
+On 05-06-18 22:46, Luis R. Rodriguez wrote:
+> On Fri, Jun 01, 2018 at 02:53:25PM +0200, Hans de Goede wrote:
+>> Hi All,
+>>
+>> Here is v6 of my patch-set to add support for EFI embedded fw to the kernel.
+>>
+>> This patch-set applies on top of the "[PATCH v7 00/14] firmware_loader
+>> changes for v4.18" series from mcgrof.
+>>
+>> It now also depends on the series from Andy Lutomirski which allow using the
+>> sha256 code in a standalone manner. Andy what is the status of those?
+>>
+>> Changes since v5:
+>> -Rework code to remove casts from if (prefix == mem) comparison
+>> -Use SHA256 hashes instead of crc32 sums
+> 
+> Nice! I see no updates on this progress, but it would seem this
+> may then mean this cannot be merged until the release after?
+
+Once the sha256 bits are in place the subsys tree which has them
+merged can create an immutable branch for Greg to merge and
+then these can be applied on top of that merge.
+
+But yes this means that these probably won't go in for another
+cycle or 2, that is fine.
+
+>> -Add new READING_FIRMWARE_EFI_EMBEDDED read_file_id and use it
+>> -Call security_kernel_read_file(NULL, READING_FIRMWARE_EFI_EMBEDDED)
+>>   to check if this is allowed before looking at EFI embedded fw
+> 
+> There's a discussion over having security_kernel_read_file(NULL,
+> READING_WHATEVER) become another LSM hook. So your series would conflict with
+> that at the moment.
+> 
+> So yet another piece of code which this series depends on.
+
+Ah well, I'm in no big hurry to get this merged. OTOH if this is
+ready and that discussion is not yet finished it might be better
+to merge this as is and then have the security_kernel_read_file / LSM
+hook series fix this up as necessary when it is merged.
+
+Regards,
+
+Hans
+
+
+
+> 
+>> -Document why we are not using the PI Firmware Volume protocol
+>>
+>> For reference I've included the coverletter from v4 (which includes
+>> previous covverletters) below.
+>>
+>> Regards,
+>>
+>> Hans
+>>
+>>
+>> Previous coverletter:
+>>
+>> Here is v5 of my patch-set to add support for EFI embedded fw to the kernel.
+>>
+>> Changes since v4:
+>> -Rename the EFI_BOOT_SERVICES flag to EFI_PRESERVE_BS_REGIONS
+>>
+>> So I think this patch-set is getting close to ready for merging, which
+>> brings us to the question of how to merge this, I think that patches 1
+>> and 2 should probably both be merged through the same tree. Then an
+>> unmutable branch should be created on that tree, merged into the
+>> platform/x86 tree and then the last 3 patches can be merged through
+>> that tree.
+>>
+>> Ard has already indicated he is fine with the EFI bits going upstream
+>> through another tree, so perhaps patches 1-2 can be merged through the
+>> firmware-loader-tree and then do an unmutable branch on the
+>> firmware-loader-tree for the platform/x86 tree to merge?
+>>
+>> I don't think taking all 5 through 1 tree is a good idea because of
+>> the file rename under platform/x86.
+>>
+>>
+>> For the record here are the cover letters of the previous versions:
+>>
+>> Changes since v3:
+>> -Drop note in docs about EFI_FIRMWARE_VOLUME_PROTOCOL, it is not part of
+>>   UEFI proper, so the EFI maintainers don't want us referring people to it
+>> -Use new EFI_BOOT_SERVICES flag
+>> -Put the new fw_get_efi_embedded_fw() function in its own fallback_efi.c
+>>   file which only gets built when EFI_EMBEDDED_FIRMWARE is selected
+>> -Define an empty stub for fw_get_efi_embedded_fw() in fallback.h hwen
+>>   EFI_EMBEDDED_FIRMWARE is not selected, to avoid the need for #ifdefs
+>>   in firmware_loader/main.c
+>> -Properly call security_kernel_post_read_file() on the firmware returned
+>>   by efi_get_embedded_fw() to make sure that we are allowed to use it
+>>
+>> The 3 most prominent changes in v2 are:
+>>
+>> 1) Add documentation describing the EFI embedded firmware mechanism to:
+>>     Documentation/driver-api/firmware/request_firmware.rst
+>>
+>> 2) Instead of having a single dmi_system_id array with its driver_data
+>>     members pointing to efi_embedded_fw_desc structs, have the drivers which
+>>     need EFI embedded-fw support export a dmi_system_id array and register
+>>     that with the EFI embedded-fw code
+>>
+>>     This series also includes the first driver to use this, in the form of
+>>     the touchscreen_dmi code (formerly silead_dmi) from drivers/platfrom/x86
+>>
+>> 3) As discussed during the review of v1 we want to make the firmware_loader
+>>     code fallback to EFI embedded-fw optional.  Rather the adding yet another
+>>     firmware_request_foo variant for this, with the risk of later also needing
+>>     firmware_request_foo_nowait, etc. variants I've decided to make the code
+>>     check if the device has a "efi-embedded-firmware" device-property bool set.
+>>
+>>     This also seemed better because the same driver may want to use the
+>>     fallback on some systems, but not on others since e.g. not all (x86)
+>>     systems with a silead touchscreen have their touchscreen firmware embedded
+>>     in their EFI.
+>>
+>>     Note that (as discussed) when the EFI fallback path is requested, the
+>>     usermodehelper fallback path is skipped.
+>>
+>> Here is the full changelog of patch 2/5 which is where most of the changes are:
+>>
+>> Changes in v2:
+>> -Rebased on driver-core/driver-core-next
+>> -Add documentation describing the EFI embedded firmware mechanism to:
+>>   Documentation/driver-api/firmware/request_firmware.rst
+>> -Add a new EFI_EMBEDDED_FIRMWARE Kconfig bool and only build the embedded
+>>   fw support if this is set. This is an invisible option which should be
+>>   selected by drivers which need this
+>> -Remove the efi_embedded_fw_desc and dmi_system_id-s for known devices
+>>   from the efi-embedded-fw code, instead drivers using this are expected to
+>>   export a dmi_system_id array, with each entries' driver_data pointing to a
+>>   efi_embedded_fw_desc struct and register this with the efi-embedded-fw code
+>> -Use kmemdup to make a copy instead of efi_mem_reserve()-ing the firmware,
+>>   this avoids us messing with the EFI memmap and avoids the need to make
+>>   changes to efi_mem_desc_lookup()
+>> -Make the firmware-loader code only fallback to efi_get_embedded_fw() if the
+>>   passed in device has the "efi-embedded-firmware" device-property bool set
+>> -Skip usermodehelper fallback when "efi-embedded-firmware" device-property
+>>   is set
+>>
+>> Patches 3-5 are new and implement using the EFI embedded-fw mechanism for
+>> Silead gslXXXX and Chipone icn8505 touchscreens on x86 devices.
+>>
+>>
+> 
