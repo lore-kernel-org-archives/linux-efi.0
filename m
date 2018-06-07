@@ -1,70 +1,76 @@
-From: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Subject: Re: [PATCH v6 2/5] efi: Add embedded peripheral firmware support
-Date: Thu, 7 Jun 2018 17:57:02 +0200
-Message-ID: <20180607155702.GA5527@wotan.suse.de>
-References: <20180601125330.25054-1-hdegoede@redhat.com>
- <20180601125330.25054-3-hdegoede@redhat.com>
- <20180605210753.GC4511@wotan.suse.de>
- <30260c62-eb8b-7d88-4ce1-83e969546790@redhat.com>
- <20180606214205.GI4511@wotan.suse.de>
- <4cb520a0-d3c8-477d-5d05-7b05637f5faf@redhat.com>
+From: Bjorn Andersson <bjorn.andersson@linaro.org>
+Subject: Re: Do Qualcomm drivers use DMA buffers for
+ request_firmware_into_buf()?
+Date: Thu, 7 Jun 2018 09:18:47 -0700
+Message-ID: <20180607161847.GN510@tuxbook-pro>
+References: <20180423211143.GZ14440@wotan.suse.de>
+ <71e6a45a-398d-b7a4-dab0-8b9936683226@redhat.com>
+ <1524586021.3364.20.camel@linux.vnet.ibm.com>
+ <20180424234219.GX14440@wotan.suse.de>
+ <1524632409.3371.48.camel@linux.vnet.ibm.com>
+ <20180425175557.GY14440@wotan.suse.de>
+ <CAB0TPYGnCu+anWHBGvkaigxD--8uHQaQJ2c62kegJ7mTqvkmnA@mail.gmail.com>
+ <20180508153805.GC27853@wotan.suse.de>
+ <20180601192346.GQ4511@wotan.suse.de>
+ <20180606203257.GH4511@wotan.suse.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4cb520a0-d3c8-477d-5d05-7b05637f5faf@redhat.com>
+In-Reply-To: <20180606203257.GH4511@wotan.suse.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: "Luis R. Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Torvalds <torvalds@linux-foundation.org>, Julia Lawall <julia.lawall@lip6.fr>, Martijn Coenen <maco@android.com>, Andy Gross <andy.gross@linaro.org>, David Brown <david.brown@linaro.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Jones <pjones@redhat.com>, Dave Olsthoorn <dave@bewaar.me>, Will Deacon <will.deacon@arm.com>, Andy Lutomirski <luto@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Josh Triplett <josh@>
+To: "Luis R. Rodriguez" <mcgrof@kernel.org>
+Cc: Andy Gross <andy.gross@linaro.org>, David Brown <david.brown@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Michal Hocko <mhocko@kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Rik van Riel <riel@surriel.com>, Laura Abbott <labbott@redhat.com>, Vlastimil Babka <vbabka@suse.cz>, Martijn Coenen <maco@android.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Stephen Boyd <sboyd@kernel.org>, Vikram Mulukutla <markivx@codeaurora.org>, Arve Hj?nnev?g <arve@android.com>, Todd Kjos <tkjos@android.com>, linux-security-module@vger.kernel.org, Chris Wright <chrisw@sous-sol.org>, David Howells <dhowells@redhat.com>, Alan Cox <alan@linux.intel.com>, Kees Cook <keescook@chromium.org>, Darren Hart <dvhart@infradead.org>Andy
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jun 07, 2018 at 03:46:11PM +0200, Hans de Goede wrote:
-> On 06-06-18 23:42, Luis R. Rodriguez wrote:
-> > On Wed, Jun 06, 2018 at 08:39:15PM +0200, Hans de Goede wrote:
-> > > On 05-06-18 23:07, Luis R. Rodriguez wrote:
-> > > 2) Should this flag then be checked inside _request_firmware() before it
-> > > calls fw_get_efi_embedded_fw() (which may be an empty stub),
+On Wed 06 Jun 13:32 PDT 2018, Luis R. Rodriguez wrote:
+
+> On Fri, Jun 01, 2018 at 09:23:46PM +0200, Luis R. Rodriguez wrote:
+> > On Tue, May 08, 2018 at 03:38:05PM +0000, Luis R. Rodriguez wrote:
+> > > On Fri, May 04, 2018 at 12:44:37PM -0700, Martijn Coenen wrote:
+> > > > 
+> > > > I think the Qualcomm folks owning this (Andy, David, Bjorn, already
+> > > > cc'd here) are better suited to answer that question.
+> > > 
+> > > Andy, David, Bjorn?
 > > 
-> > You are the architect behind this call, so its up to you.
-> > 
-> > To answer this you have to review the other flags and see if other users of the
-> > other flags may want your functionality. For instance the Android folks for
-> > instance rely on the FW_OPT_NOFALLBACK - the sysfs fallback mechanism to
-> > account for odd partition layouts. Could they ever want to use your fallback
-> > mechanism? Granted your mechanism is for x86, but they could eventually add
-> > support for it on ARM.
-> > 
-> > Checking if the firmware is on the EFI platform firmware list is much faster
-> > than the fallback mechanism, that would be one gain for them, as such it may
-> > make sense to check for firmware_request_platform() before using the sysfs
-> > fallback mechanism.  However if Android folks want to always override the
-> > platform firmware with the sysfs fallback interface we'd need another flag
-> > added and call to then change the order later if we checked for for the
-> > platform firmware first.
+> > Andy, David, Bjorn?
 > 
-> I believe we agreed a while back that the platform fallback would
-> replace the sysfs one when requested. I believe that still makes
-> sense. If a driver wants both it can simply call request_firmware_foo
-> itself twice and determine the order itself.
+> A month now with no answer...
+> 
 
-Fine by me, so in your case the syfs fallback will be ignored.
+The patch at the top of this thread doesn't interest me and you didn't
+bother sending your question To me.
 
-Which gets me thinking that perhaps we should have a separate
-syfs fallback call. There are only two drivers that use it
-explicitly:
+As a matter of fact I'm confused to what the actual question is.
 
-  o CONFIG_LEDS_LP55XX_COMMON
-	request_firmware_nowait(THIS_MODULE, false, ...);
-  o CONFIG_DELL_RBU
-	request_firmware_nowait(THIS_MODULE, FW_ACTION_NOHOTPLUG, ...)
+> Perhaps someone who has this hardware can find out empirically for us, as
+> follows (mm folks is this right?):
+> 
+> page = virt_to_page(address);
+> if (!page)
+>    fail closed...
+> if (page_zone(page) == ZONE_DMA || page_zone(page) == ZONE_DMA32)
+> 	this is a DMA buffer
+> else
+> 	not DMA!
+> 
 
-And FW_ACTION_NOHOTPLUG is 0.
+Where do you want to put this?
 
-The above revelation of the async call being data driven is a good
-opportunity to break that tradition to the more preferred functional
-one. And so we'd also get rid of the FW_ACTION_NOHOTPLUG option
-all together.
+> Note that when request_firmware_into_buf() was being reviewed Mimi had asked back
+> in 2016 [0] that if a DMA buffer was going to be used READING_FIRMWARE_DMA should be
+> used otherwise READING_FIRMWARE_PREALLOC_BUFFER was fine.
+> 
+> If it is a DMA buffer *now*, why / how did this change?
+> 
 
-So a new firmware_request_sysfs_async() I suppose.
+>From what I can see [0] says is to use READING_FIRMWARE_PREALLOC_BUFFER
+regardless of where the memory comes from.
 
-  Luis
+Regards,
+Bjorn
+
+> [0] https://patchwork.kernel.org/patch/9074611/
+> 
+>   Luis
