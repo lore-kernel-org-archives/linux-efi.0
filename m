@@ -1,132 +1,108 @@
-From: Nick Desaulniers <ndesaulniers@google.com>
-Subject: Re: [PATCH v3 3/3] x86: paravirt: make native_save_fl extern inline
-Date: Thu, 7 Jun 2018 11:39:46 -0700
-Message-ID: <CAKwvOdkoAwT2RiGzJ=dSfx9+SJ27gJimdtKQg2Aoi5+-SbA79g@mail.gmail.com>
-References: <20180607183219.192973-1-ndesaulniers@google.com> <20180607183219.192973-4-ndesaulniers@google.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: Do Qualcomm drivers use DMA buffers for
+ request_firmware_into_buf()?
+Date: Thu, 7 Jun 2018 20:42:47 +0200
+Message-ID: <CAKv+Gu9yfa=dP-5Fzv8-E6O23zPJXJqquTAt6gCqYyt3OowkvA@mail.gmail.com>
+References: <20180424234219.GX14440@wotan.suse.de>
+ <1524632409.3371.48.camel@linux.vnet.ibm.com>
+ <20180425175557.GY14440@wotan.suse.de>
+ <CAB0TPYGnCu+anWHBGvkaigxD--8uHQaQJ2c62kegJ7mTqvkmnA@mail.gmail.com>
+ <20180508153805.GC27853@wotan.suse.de> <20180601192346.GQ4511@wotan.suse.de>
+ <20180606203257.GH4511@wotan.suse.de> <20180607161847.GN510@tuxbook-pro>
+ <CAKv+Gu8+Fq7BD4XD-YCyXzZh0mg6Z2k-0styj0cw6_uZfaqy4Q@mail.gmail.com>
+ <20180607163308.GA18834@kroah.com> <20180607182117.GR510@tuxbook-pro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180607183219.192973-4-ndesaulniers@google.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>, hpa@zytor.com, mingo@redhat.com, Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, x86@kernel.org, virtualization@lists.linux-foundation.org, Alistair Strachan <astrachan@google.com>, Manoj Gupta <manojgupta@google.com>, Greg Hackmann <ghackmann@google.com>, sedat.dilek@gmail.com, tstellar@redhat.com, Kees Cook <keescook@google.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, geert@linux-m68k.org, Will Deacon <will.deacon@arm.com>, mawilcox@microsoft.com, Arnd Bergmann <arnd@arndb.de>, David Rientjes <rientjes@google.com>, acme@redhat.com, Philippe Ombredanne <pombredanne@nexb.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kate Stewart <kstewart@linuxfoundation.org>, boris.ostrovs
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20180607182117.GR510@tuxbook-pro>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Will Deacon <will.deacon@arm.com>, Michal Hocko <mhocko@kernel.org>, David Howells <dhowells@redhat.com>, David Brown <david.brown@linaro.org>, Peter Jones <pjones@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, "open list:ANDROID DRIVERS" <devel@driverdev.osuosl.org>, linux-security-module <linux-security-module@vger.kernel.org>, Nicolas Broeking <nbroeking@me.com>, Jonathan Corbet <corbet@lwn.net>, the arch/x86 maintainers <x86@kernel.org>, "Luis R. Rodriguez" <mcgrof@kernel.org>, Ingo Molnar <mingo@redhat.com>, Vlastimil Babka <vbabka@suse.cz>, Andy Gross <andy.gross@linaro.org>, Darren Hart <dvhart@infradead.org>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Todd Kjos <tkjos@android.com>, Kees Cook <keescook@chromium.org>, Rik van Riel <riel@surr>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jun 7, 2018 at 11:32 AM Nick Desaulniers
-<ndesaulniers@google.com> wrote:
+On 7 June 2018 at 20:21, Bjorn Andersson <bjorn.andersson@linaro.org> wrote:
+> On Thu 07 Jun 09:33 PDT 2018, Greg Kroah-Hartman wrote:
 >
-> native_save_fl() is marked static inline, but by using it as
-> a function pointer in arch/x86/kernel/paravirt.c, it MUST be outlined.
+>> On Thu, Jun 07, 2018 at 06:23:01PM +0200, Ard Biesheuvel wrote:
+>> > On 7 June 2018 at 18:18, Bjorn Andersson <bjorn.andersson@linaro.org> wrote:
+>> > > On Wed 06 Jun 13:32 PDT 2018, Luis R. Rodriguez wrote:
+>> > >
+>> > >> On Fri, Jun 01, 2018 at 09:23:46PM +0200, Luis R. Rodriguez wrote:
+>> > >> > On Tue, May 08, 2018 at 03:38:05PM +0000, Luis R. Rodriguez wrote:
+>> > >> > > On Fri, May 04, 2018 at 12:44:37PM -0700, Martijn Coenen wrote:
+>> > >> > > >
+>> > >> > > > I think the Qualcomm folks owning this (Andy, David, Bjorn, already
+>> > >> > > > cc'd here) are better suited to answer that question.
+>> > >> > >
+>> > >> > > Andy, David, Bjorn?
+>> > >> >
+>> > >> > Andy, David, Bjorn?
+>> > >>
+>> > >> A month now with no answer...
+>> > >>
+>> > >
+>> > > The patch at the top of this thread doesn't interest me and you didn't
+>> > > bother sending your question To me.
+>> > >
+>> > > As a matter of fact I'm confused to what the actual question is.
+>> > >
+>> >
+>> > The actual question is whether it is really required that the firmware
+>> > is loaded by the kernel into a buffer that is already mapped for DMA
+>> > at that point, and thus accessible by the device.
+>> >
+>> > To me, it is not entirely clear what the nature is of the firmware
+>> > that we are talking about, since it seems to be getting passed to the
+>> > secure world as well?
+>> >
+>> > In any case, the preferred model in terms of validation/sig checking is
+>> >
+>> > 1) allocate a CPU accessible buffer
+>> >
+>> > 2) request the firmware into it (which may include a sig check under the hood)
+>> >
+>> > 3) map the buffer for DMA to the device so it can load the firmware.
+>> >
+>> > 4) kick off the DMA transfer.
+>> >
+>> > The use of dma_alloc_coherent() for this purpose seems unnecessary,
+>> > given that the DMA transfer is not bidirectional. Would it be possible
+>> > to replace it with something like the above sequence?
+>>
+>> Why not just use kmalloc, it will always return a DMAable buffer.
+>>
 >
-> paravirt's use of native_save_fl() also requires that no GPRs other than
-> %rax are clobbered.
+> For the buffers being targeted by request_firmware_into_buf() the
+> problem is that some of them has requirements of physical placement and
+> they are all too big for kmalloc() (i.e. tens of mb).
 >
-> Compilers have different heuristics which they use to emit stack guard
-> code, the emittance of which can break paravirt's callee saved assumption
-> by clobbering %rcx.
 >
-> Marking a function definition extern inline means that if this version
-> cannot be inlined, then the out-of-line version will be preferred. By
-> having the out-of-line version be implemented in assembly, it cannot be
-> instrumented with a stack protector, which might violate custom calling
-> conventions that code like paravirt rely on.
->
-> The semantics of extern inline has changed since gnu89. This means that
-> folks using GCC versions >= 5.1 may see symbol redefinition errors at
-> link time for subdirs that override KBUILD_CFLAGS (making the C standard
-> used implicit) regardless of this patch. This has been cleaned up
-> earlier in the patch set, but is left as a note in the commit message
-> for future travelers.
->
-> Reports:
-> https://lkml.org/lkml/2018/5/7/534
-> https://github.com/ClangBuiltLinux/linux/issues/16
->
-> Discussion:
-> https://bugs.llvm.org/show_bug.cgi?id=37512
-> https://lkml.org/lkml/2018/5/24/1371
->
-> Thanks to the many folks that participated in the discussion.
->
-> Debugged-by: Alistair Strachan <astrachan@google.com>
-> Debugged-by: Matthias Kaehlcke <mka@chromium.org>
-> Reported-by: Sedat Dilek <sedat.dilek@gmail.com>
-> Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
-> Suggested-by: Arnd Bergmann <arnd@arndb.de>
-> Suggested-by: H. Peter Anvin <hpa@zytor.com>
-> Suggested-by: Tom Stellar <tstellar@redhat.com>
-> Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
-> ---
->  arch/x86/include/asm/irqflags.h |  2 +-
->  arch/x86/kernel/Makefile        |  1 +
->  arch/x86/kernel/irqflags.S      | 26 ++++++++++++++++++++++++++
->  3 files changed, 28 insertions(+), 1 deletion(-)
->  create mode 100644 arch/x86/kernel/irqflags.S
->
-> diff --git a/arch/x86/include/asm/irqflags.h b/arch/x86/include/asm/irqflags.h
-> index 89f08955fff7..c4fc17220df9 100644
-> --- a/arch/x86/include/asm/irqflags.h
-> +++ b/arch/x86/include/asm/irqflags.h
-> @@ -13,7 +13,7 @@
->   * Interrupt control:
->   */
->
-> -static inline unsigned long native_save_fl(void)
-> +extern inline unsigned long native_save_fl(void)
->  {
->         unsigned long flags;
->
-> diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
-> index 02d6f5cf4e70..8824d01c0c35 100644
-> --- a/arch/x86/kernel/Makefile
-> +++ b/arch/x86/kernel/Makefile
-> @@ -61,6 +61,7 @@ obj-y                 += alternative.o i8253.o hw_breakpoint.o
->  obj-y                  += tsc.o tsc_msr.o io_delay.o rtc.o
->  obj-y                  += pci-iommu_table.o
->  obj-y                  += resource.o
-> +obj-y                  += irqflags.o
->
->  obj-y                          += process.o
->  obj-y                          += fpu/
-> diff --git a/arch/x86/kernel/irqflags.S b/arch/x86/kernel/irqflags.S
-> new file mode 100644
-> index 000000000000..ddeeaac8adda
-> --- /dev/null
-> +++ b/arch/x86/kernel/irqflags.S
-> @@ -0,0 +1,26 @@
-> +/* SPDX-License-Identifier: GPL-2.0 */
-> +
-> +#include <asm/asm.h>
-> +#include <asm/export.h>
-> +#include <linux/linkage.h>
-> +
-> +/*
-> + * unsigned long native_save_fl(void)
-> + */
-> +ENTRY(native_save_fl)
-> +       pushf
-> +       pop %_ASM_AX
-> +       ret
-> +ENDPROC(native_save_fl)
-> +EXPORT_SYMBOL(native_save_fl)
-> +
-> +/*
-> + * void native_restore_fl(unsigned long flags)
-> + * %eax/%rdi: flags
-> + */
-> +ENTRY(native_restore_fl)
-> +       push %_ASM_ARG1
-> +       popf
-> +       ret
-> +ENDPROC(native_restore_fl)
-> +EXPORT_SYMBOL(native_restore_fl)
-> --
-> 2.17.1.1185.g55be947832-goog
+> For the dma_alloc_coherent() buffer that was mentioned earlier, which is
+> not related to the firmware loading, it's not used because the buffer is
+> passed to secure world, which temporarily locks Linux out from the
+> memory region. Traditionally this region was kmalloc'ed downstream, but
+> due to speculative access violations this code moved to use the DMA
+> streaming API, although there's no actual DMA going on.
 >
 
-Probably should have mentioned in the notes/cover letter that this was
-rebased on hpa's patch (2/3) in this series. As a change from v2.
+OK, so you are relying on the fact that dma_alloc_coherent() gives you
+a device mapping (because the qcom_scm device is described as non
+cache coherent), but this sounds risky to me. The linear alias of that
+memory will still be mapped cacheable, and could potentially still be
+accessed speculatively AFAIK.
 
--- 
-Thanks,
-~Nick Desaulniers
+> For this a way to allocate a chunk of physical memory dynamically and
+> then unmapping and remapping it dynamically in Linux sounds like a
+> solution, instead of (ab)using the DMA API. This could also serve as
+> basis for the firmware memory, where firmware is position independent -
+> in which case this would be passed to request_firmware_into_buf().
+>
