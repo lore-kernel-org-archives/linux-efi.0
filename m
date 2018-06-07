@@ -1,72 +1,60 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: [PATCH v3 1/3] compiler-gcc.h: add gnu_inline to all inline
- declarations
-Date: Thu, 07 Jun 2018 11:43:58 -0700
-Message-ID: <c58f58de39332a27f48dd485eab19a32c289a682.camel@perches.com>
-References: <20180607183219.192973-1-ndesaulniers@google.com>
-         <20180607183219.192973-2-ndesaulniers@google.com>
+From: Nick Desaulniers <ndesaulniers@google.com>
+Subject: Re: [PATCH v2 1/2] compiler-gcc.h: add gnu_inline to all inline declarations
+Date: Thu, 7 Jun 2018 11:51:59 -0700
+Message-ID: <CAKwvOdkDyVC02oXsTX9YYAFLw5Q+aFNWsAp911h6VdjMCYFwJQ@mail.gmail.com>
+References: <20180605170532.170361-1-ndesaulniers@google.com>
+ <20180605170532.170361-2-ndesaulniers@google.com> <202492204c2d5bd5ca27307cbca5e44673b739ed.camel@perches.com>
+ <CAKwvOdkUk7ZL8tXgBs0Y+0Y5NVebgAYne_qgdSWWDOvQaWFPhw@mail.gmail.com> <28c288fd3e87b6c839697519043cf642518e0262.camel@perches.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180607183219.192973-2-ndesaulniers@google.com>
+In-Reply-To: <28c288fd3e87b6c839697519043cf642518e0262.camel@perches.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nick Desaulniers <ndesaulniers@google.com>, akpm@linux-foundation.org, hpa@zytor.com, mingo@redhat.com, tglx@linutronix.de
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, virtualization@lists.linux-foundation.org, astrachan@google.com, manojgupta@google.com, ghackmann@google.com, sedat.dilek@gmail.com, tstellar@redhat.com, keescook@google.com, yamada.masahiro@socionext.com, michal.lkml@markovi.net, linux-kbuild@vger.kernel.org, geert@linux-m68k.org, will.deacon@arm.com, mawilcox@microsoft.com, arnd@arndb.de, rientjes@google.com, acme@redhat.com, pombredanne@nexb.com, aryabinin@virtuozzo.com, kstewart@linuxfoundation.org, boris.ostrovsky@oracle.com, jan.kiszka@siemens.com, rostedt@goodmis.org, kirill.shutemov@linux.intel.com, ard.biesheuvel@linaro.org, akataria@vmware.com, brijesh.singh@amd.com, caoj.fnst@cn.fujitsu.com, gregkh@linuxfoundation.org, jarkko.sakkinen@linux.intel.co
+To: joe@perches.com
+Cc: Andrew Morton <akpm@linux-foundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrey Ryabinin <aryabinin@virtuozzo.com>, akataria@vmware.com, boris.ostrovsky@oracle.com, brijesh.singh@amd.com, Cao jin <caoj.fnst@cn.fujitsu.com>, Greg KH <gregkh@linuxfoundation.org>, hpa@zytor.com, "J. Kiszka" <jan.kiszka@siemens.com>, jarkko.sakkinen@linux.intel.com, jgross@suse.com, Josh Poimboeuf <jpoimboe@redhat.com>, kirill.shutemov@linux.intel.com, mingo@redhat.com, mjg59@google.com, Matthias Kaehlcke <mka@chromium.org>, Philippe Ombredanne <pombredanne@nexb.com>, rostedt@goodmis.org, Thomas Gleixner <tglx@linutronix.de>, thomas.lendacky@amd.com, Thiebaud Weksteen <tweek@google.com>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, x86@kernel.org, virtua
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2018-06-07 at 11:32 -0700, Nick Desaulniers wrote:
-> Functions marked extern inline do not emit an externally visible
-> function when the gnu89 C standard is used. Some KBUILD Makefiles
-> overwrite KBUILD_CFLAGS. This is an issue for GCC 5.1+ users as without
-> an explicit C standard specified, the default is gnu11. Since c99, the
-> semantics of extern inline have changed such that an externally visible
-> function is always emitted. This can lead to multiple definition errors
-> of extern inline functions at link time of compilation units whose build
-> files have removed an explicit C standard compiler flag for users of GCC
-> 5.1+ or Clang.
-[]
-> diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-[]
-> @@ -72,17 +72,22 @@
->   * -Wunused-function.  This turns out to avoid the need for complex #ifdef
->   * directives.  Suppress the warning in clang as well by using "unused"
->   * function attribute, which is redundant but not harmful for gcc.
-> + * Prefer gnu_inline, so that extern inline functions do not emit an
-> + * externally visible function. This makes extern inline behave as per gnu89
-> + * semantics rather than c99. This prevents multiple symbol definition errors
-> + * of extern inline functions at link time.
->   */
->  #if !defined(CONFIG_ARCH_SUPPORTS_OPTIMIZED_INLINING) ||		\
->      !defined(CONFIG_OPTIMIZE_INLINING) || (__GNUC__ < 4)
-> -#define inline inline		__attribute__((always_inline,unused)) notrace
-> -#define __inline__ __inline__	__attribute__((always_inline,unused)) notrace
-> -#define __inline __inline	__attribute__((always_inline,unused)) notrace
-> +#define inline \
-> +	inline __attribute__((always_inline, unused, gnu_inline)) notrace
-> +#define __inline__ inline
-> +#define __inline inline
->  #else
->  /* A lot of inline functions can cause havoc with function tracing */
-> -#define inline inline		__attribute__((unused)) notrace
-> -#define __inline__ __inline__	__attribute__((unused)) notrace
-> -#define __inline __inline	__attribute__((unused)) notrace
-> +#define inline inline		__attribute__((unused, gnu_inline)) notrace
-> +#define __inline__ inline
-> +#define __inline inline
->  #endif
+On Thu, Jun 7, 2018 at 11:31 AM Joe Perches <joe@perches.com> wrote:
+>
+> On Thu, 2018-06-07 at 10:26 -0700, Nick Desaulniers wrote:
+> > I get the feeling that the use of __inline__ or __inline (vs inline)
+> > in the kernel may be wrong and their use should be eradicated in the
+> > follow up patch set, but it would be cool if others have additional
+> > insight.
+>
+> __inline is easy and useful to remove as it's used in
+> just a few files.
+>
+> But __inline__ is used in a lot of files and locations:
+>
+> $ git grep -w --name-only __inline__ | wc -l
+> 154
+> $ git grep -w __inline__ | wc -l
+> 503
+>
+> Some of these files are used in asm includes as
+> well where __inline__ may be preferred by gcc
+>
+> https://gcc.gnu.org/onlinedocs/gcc/Alternate-Keywords.html#Alternate-Keywords
+>
+> so perhaps asm exclusions would be necessary.
 
-Perhaps move these last 2 defines below the #endif
-as they are common to both cases
+Oops, just saw this email after sending v3: https://lkml.org/lkml/2018/6/7/1055
 
-#if !defined(CONFIG_ARCH_SUPPORTS_OPTIMIZED_INLINING) ||               \
-    !defined(CONFIG_OPTIMIZE_INLINING) || (__GNUC__ < 4)
-#define inline inline __attribute__((always_inline, unused, gnu_inline)) notrace
-#else
-/* A lot of inline functions can cause havoc with function tracing */
-#define inline inline __attribute__((unused, gnu_inline)) notrace
-#endif
+Guess I should re-add __inline__ and __inline then to 1/3?
+https://lkml.org/lkml/2018/6/7/1060
 
-#define __inline__	inline
-#define __inline	inline
-#define __always_inline	inline __attribute__((always_inline))
+ie:
+
++#define __inline__ __inline__ inline
+instead of
++#define __inline__ inline
+
+?
+
+On the other hand, I was able to assemble with gcc+binutils and v3 as it stands.
+
+Reading the link you sent, it seems more about compiling with
+-pedantic or non-gnu C standards being used (I'd call that unlikely
+for the kernel). So it still seems incorrect to me the use of
+__inline__ (but I do appreciate the link!) at least in the kernel.
