@@ -1,63 +1,62 @@
 From: Nick Desaulniers <ndesaulniers@google.com>
-Subject: Re: [PATCH v4 1/3] compiler-gcc.h: add gnu_inline to all inline declarations
-Date: Tue, 12 Jun 2018 14:36:19 -0700
-Message-ID: <CAKwvOdksGzdeFOAiYRNahFqxRoYoTMGkTeprfP4oZPzdF94WLA@mail.gmail.com>
-References: <20180607204927.219329-1-ndesaulniers@google.com>
- <20180607204927.219329-2-ndesaulniers@google.com> <CAK8P3a0yi+MrOS=+pjCeUu==YBE_AppB8vfqdsQS-1NpSO2c4A@mail.gmail.com>
- <CA+icZUXDoeo5ktZZPFcFyLzk3xthM-98N88QJFzesg6t+Vr5cQ@mail.gmail.com>
- <CAKwvOdmxFHfkj81YAXa8fE86fC+k+KvqMvgk4=e62pNCcXbKOg@mail.gmail.com>
- <201806121851.w5CIpTY7134381@mail.zytor.com> <CAKwvOdkeEqb0HnHoggpwmHiKtDo06VN0N_r9ffv0rzigNLvXUg@mail.gmail.com>
- <7e375fab-f8ad-705a-dd04-f7e18952bd0c@zytor.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH v5 0/3] extern inline native_save_fl for paravirt
+Date: Wed, 13 Jun 2018 14:05:15 -0700
+Message-ID: <20180613210518.113983-1-ndesaulniers@google.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <7e375fab-f8ad-705a-dd04-f7e18952bd0c@zytor.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: hpa@zytor.com
-Cc: sedat.dilek@gmail.com, Arnd Bergmann <arnd@arndb.de>, Andrew Morton <akpm@linux-foundation.org>, mingo@redhat.com, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, x86@kernel.org, virtualization@lists.linux-foundation.org, Alistair Strachan <astrachan@google.com>, Manoj Gupta <manojgupta@google.com>, Greg Hackmann <ghackmann@google.com>, tstellar@redhat.com, Kees Cook <keescook@google.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, geert@linux-m68k.org, Will Deacon <will.deacon@arm.com>, mawilcox@microsoft.com, David Rientjes <rientjes@google.com>, acme@redhat.com, Philippe Ombredanne <pombredanne@nexb.com>An
+To: akpm@linux-foundation.org, hpa@zytor.com, mingo@redhat.com, tglx@linutronix.de
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, virtualization@lists.linux-foundation.org, astrachan@google.com, manojgupta@google.com, ghackmann@google.com, sedat.dilek@gmail.com, tstellar@redhat.com, keescook@google.com, yamada.masahiro@socionext.com, michal.lkml@markovi.net, linux-kbuild@vger.kernel.org, geert@linux-m68k.org, will.deacon@arm.com, mawilcox@microsoft.com, arnd@arndb.de, rientjes@google.com, acme@redhat.com, pombredanne@nexb.com, aryabinin@virtuozzo.com, kstewart@linuxfoundation.org, boris.ostrovsky@oracle.com, jan.kiszka@siemens.com, rostedt@goodmis.org, kirill.shutemov@linux.intel.com, ard.biesheuvel@linaro.org, akataria@vmware.com, brijesh.singh@amd.com, caoj.fnst@cn.fujitsu.com, gregkh@linuxfoundation.org, jarkko.sakkinen@linux.intel.co
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jun 12, 2018 at 2:31 PM H. Peter Anvin <hpa@zytor.com> wrote:
->
-> On 06/12/18 13:19, Nick Desaulniers wrote:
-> >
-> > Oh, by [0] __GCC_STDC_INLINE__ is indeed actually the correct symbol
-> > to check for.  Clang does support that, so nothing to fix there.
-> >
-> >> By the way, you should check clang against gcc's predefined macros by doing:
-> >>
-> >> gcc [options] -x c -Wp,-dM -E /dev/null | sort
-> >>
-> >> Options can change the predefined macros substantially, especially the, -std=, arch and -O options. -x c can be replaced with e.g. -x c++, objective-c, assembler-with-cpp etc.
-> >
-> > Neat, I'll have to bookmark that incantation.  I can s/gcc/clang/ to
-> > get a similar list (which is how I know it supports
-> > __GCC_STDC_INLINE__).>
->
-> I bet that if you add -fgnu89-inlines then it *does* define
-> __GNUC_GNU_INLINE__.
+paravirt depends on a custom calling convention (callee saved), but
+expects this from a static inline function that it then forces to be
+outlined. This is problematic because different compilers or flags can
+then add a stack guard that violates the calling conventions.
 
-Indeed! I see what you mean about [options] changing the predefined symbol list.
+Uses extern inline with the out-of-line definition in assembly to
+prevent compilers from adding stack guards to the outlined version.
 
-> > Patch now becomes something like:
-> >
-> > #ifdef __GNUC_GNU_INLINE__
-> > #define __gnu_inline __attribute__((gnu_inline))
-> > #else
-> > #define __gnu_inline
-> > #endif
-> >
-> > #define inline inline __attribute__((always_inline, unused)) notrace
-> > __gnu_inline
-> > ...
-> >
-> > Issues with that approach?
-> >
->
-> s/__GNUC_GNU_INLINE__/__GNUC_STDC_INLINE__/
+Other parts of the codebase overwrite KBUILD_CFLAGS, which is *extremely
+problematic* for extern inline, as the sematics are completely the
+opposite depending on what C standard is used.
+http://blahg.josefsipek.net/?p=529
 
-Oops, sorry, yes good catch.
+Changes since v4:
+  Take Arnd's and hpa's suggestions properly feature detect gnu_inline
+  attribute to support gcc 4.1.
+
+Changes since v3:
+  Take Joe's suggestion to hoist __inline__ and __inline out of
+  conditional block.
+
+Changes since v2:
+  Take hpa's _ASM_ARG patch into the set in order to simplify cross
+  32b/64b x86 assembly and rebase my final patch to use it.  Apply
+  Sedat's typo fix to commit message and sign off on it. Take Joe's
+  suggestion to simplify __inline__ and __inline. Add Arnd to list of
+  folks who made helpful suggestions.
+
+Changes since v1:
+  Prefer gnu_inline function attribute instead of explicitly setting C
+  standard compiler flag in problematic Makefiles. We should instead
+  carefully evaluate if those Makefiles should be overwriting
+  KBUILD_CFLAGS at all. Dropped the previous first two patches and added
+  a new first patch.
+
+H. Peter Anvin (1):
+  x86/asm: add _ASM_ARG* constants for argument registers to <asm/asm.h>
+
+Nick Desaulniers (2):
+  compiler-gcc.h: add gnu_inline to all inline declarations
+  x86: paravirt: make native_save_fl extern inline
+
+ arch/x86/include/asm/asm.h      | 59 +++++++++++++++++++++++++++++++++
+ arch/x86/include/asm/irqflags.h |  2 +-
+ arch/x86/kernel/Makefile        |  1 +
+ arch/x86/kernel/irqflags.S      | 26 +++++++++++++++
+ include/linux/compiler-gcc.h    | 29 ++++++++++++----
+ 5 files changed, 109 insertions(+), 8 deletions(-)
+ create mode 100644 arch/x86/kernel/irqflags.S
 
 -- 
-Thanks,
-~Nick Desaulniers
+2.18.0.rc1.244.gcf134e6275-goog
