@@ -1,79 +1,75 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [PATCH 2/2] efifb: Copy the ACPI BGRT boot graphics to the
- framebuffer
-Date: Mon, 18 Jun 2018 10:30:08 +0200
-Message-ID: <08e59509-d790-b33d-99f4-20410726279f@redhat.com>
-References: <20180617153235.16219-1-hdegoede@redhat.com>
- <20180617153235.16219-3-hdegoede@redhat.com>
- <CAKv+Gu8xHTtHGi=WXHchk+avwResQR2sWgTWw-PyOD8ewkCV_w@mail.gmail.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.14 182/189] efi/libstub/arm64: Handle randomized TEXT_OFFSET
+Date: Mon, 18 Jun 2018 10:14:38 +0200
+Message-ID: <20180618081216.529334438@linuxfoundation.org>
+References: <20180618081209.254234434@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <CAKv+Gu8xHTtHGi=WXHchk+avwResQR2sWgTWw-PyOD8ewkCV_w@mail.gmail.com>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "open list:EFIFB FRAMEBUFFER DRIVER" <linux-fbdev@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, dri-devel <dri-devel@lists.freedesktop.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180618081209.254234434@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Kim Phillips <kim.phillips@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <alexander.levin@microsoft.com>
 List-Id: linux-efi@vger.kernel.org
 
-SGksCgpPbiAxOC0wNi0xOCAwOTozNiwgQXJkIEJpZXNoZXV2ZWwgd3JvdGU6Cj4gSGFsbG8gSGFu
-cywKPiAKPiBPbiAxNyBKdW5lIDIwMTggYXQgMTc6MzIsIEhhbnMgZGUgR29lZGUgPGhkZWdvZWRl
-QHJlZGhhdC5jb20+IHdyb3RlOgo+PiBPbiBzeXN0ZW1zIHdoZXJlIGZiY29uIGlzIGNvbmZpZ3Vy
-ZWQgZm9yIGRlZmVycmVkIGNvbnNvbGUgdGFrZW92ZXIsIHRoZQo+PiBpbnRlbmQgaXMgZm9yIHRo
-ZSBmcmFtZWJ1ZmZlciB0byBzaG93IHRoZSBib290IGdyYXBoaWNzIChlLmcgYSB2ZW5kb3IKPj4g
-bG9nbykgdW50aWwgc29tZSBtZXNzYWdlIChlLmcuIGFuIGVycm9yKSBpcyBwcmludGVkIG9yIGEg
-Z3JhcGhpY2FsCj4+IHNlc3Npb24gdGFrZXMgb3Zlci4KPj4KPj4gU29tZSBmaXJtd2FyZSBob3dl
-dmVyIHJlbGllcyBvbiB0aGUgT1MgdG8gc2hvdyB0aGUgYm9vdCBncmFwaGljcwo+PiAoaW5kaWNh
-dGVkIGJ5IGJncnRfdGFiLnN0YXR1cyBiZWluZyAwKSBhbmQgdGhlIGJvb3QgZ3JhcGhpY3MgbWF5
-IGhhdmUKPj4gYmVlbiBkZXN0cm95ZWQgYnkgZS5nLiB0aGUgZ3J1YiBib290IG1lbnUuCj4+Cj4+
-IFRoaXMgcGF0Y2ggYWRkcyBzdXBwb3J0IHRvIGVmaWZiIHRvIHNob3cgdGhlIGJvb3QgZ3JhcGhp
-Y3MgYW5kCj4+IGF1dG9tYXRpY2FsbHkgZW5hYmxlcyB0aGlzIHdoZW4gZmJjb24gaXMgY29uZmln
-dXJlZCBmb3IgZGVmZXJyZWQKPj4gY29uc29sZSB0YWtlb3Zlci4KPj4KPj4gU2lnbmVkLW9mZi1i
-eTogSGFucyBkZSBHb2VkZSA8aGRlZ29lZGVAcmVkaGF0LmNvbT4KPiAKPiBJIGhhdmUgdGVzdGVk
-IHRoaXMgY29kZSBvbiBBUk0gUUVNVS9tYWNoLXZpcnQsIGFuZCB3aXRoIGEgbGl0dGxlIHR3ZWFr
-Cj4gKHdoaWNoIEkgd2lsbCBwb3N0IHNlcGFyYXRlbHkpLCB0aGUgY29kZSB3b3JrcyBhcyBleHBl
-Y3RlZCwgaS5lLiwgaXQKPiByZWRyYXdzIHRoZSBib290IGxvZ28gYmFzZWQgb24gdGhlIGNvbnRl
-bnRzIG9mIHRoZSBCR1JUIHRhYmxlLgoKVGhhdCBpcyBncmVhdC4KCj4gSG93ZXZlciwgd2hhdCBp
-dCBkb2Vzbid0IGRvIGlzIGNsZWFyIHRoZSBzY3JlZW4sIHdoaWNoIG1lYW5zIHRoZSBsb2dvCj4g
-aXMgZHJhd24gb24gdG9wIG9mIHdoYXRldmVyIHRoZSBib290IGVudmlyb25tZW50IGxlZnQgYmVo
-aW5kLCBhbmQgSQo+IGVuZCB1cCB3aXRoIHNvbWV0aGluZyBsaWtlIHRoaXMuCj4gCj4gaHR0cDov
-L3Blb3BsZS5saW5hcm8ub3JnL35hcmQuYmllc2hldXZlbC9tYWNoLXZpcnQtYmdydC1sb2dvLXJl
-ZHJhd24ucG5nCgpIbW0sIGxlc3MgZ3JlYXQuIEknbSBub3Qgc3VyZSBob3cgdG8gZGVhbCB3aXRo
-IHRoaXMsIG9uIHg4NiBpdCBpcyBtb3JlCm9yIGxlc3MgZ3VhcmFudGVlZCB0aGF0IHRoZSBzY3Jl
-ZW4gaXMgYWxyZWFkeSBjbGVhcmVkIHdoZW4gd2UgbG9hZCBhbmQKY2xlYXJpbmcgYSA0ayBzY3Jl
-ZW4gbWVhbnMgd3JpdGluZyBhYm91dCAzMk1CLCB3aGljaCBJIGd1ZXNzIHdpdGggbW9kZXJuClJB
-TSBzcGVlZHMgaXMgbm90IHRoYXQgYmFkIGFjdHVhbGx5LgoKSSBzZWUgdGhhdCB5b3UgZ290IHRo
-aXMgcGljdHVyZSBieSBtYW51YWwgYm9vdGluZyBmcm9tIHRoZSBFRkkgc2hlbGwsCmluIHdoYXQg
-c3RhdGUgZG9lcyB0aGUgZmlybXdhcmUgLyBib290bG9hZGVyIG5vcm1hbGx5IGxlYXZlIHRoZQpm
-cmFtZWJ1ZmZlcj8gIEknbSBhc2tpbmcgYmVjYXVzZSBpZiBub3JtYWxseSBpdCBpcyBlaXRoZXIg
-Y2xlYXJlZAp0byBibGFjaywgb3IgYWxyZWFkeSBzaG93aW5nIHRoZSBsb2dvIEkgd29uZGVyIGlm
-IHdlIHNob3VsZCB0YWtlIHRoZQooc21hbGwpIHBlbmFsdHkgb2YgY2xlYXJpbmcgPwoKR2l2ZW4g
-dGhhdCB3ZSBhcmUgdGFsa2luZyBhYm91dCBvbmx5IDMyIE1CIEkgY291bGQgZG8gYSB2MiB3aGlj
-aCBqdXN0Cm1lbXNldHMgdGhlIHJlc3Qgb2YgdGhlIHNjcmVlbiB0byAwLgoKU28gd2UgZ2V0OgoK
-CWZvciAoeT0gMDsgeSA8IGhlaWdodDsgeSsrKSB7CgkJaWYgKGxpbmVfcGFydF9vZl9iZ3J0KSB7
-CgkJCW1lbXNldChsZWZ0LW9mLWJncnQpOwoJCQlkcmF3X2JncnRfbGluZSh5KTsKCQkJbWVtc2V0
-KHJpZ2h0LW9mLWJncnQpOwoJCX0gZWxzZSB7CgkJCW1lbXNldChsaW5lKTsKCQl9Cgl9CgpOb3Rl
-IEkndmUgZGVsaWJlcmF0ZWx5IGRvbmUgdGhlIGlmIG9uIGEgcGVyIGxpbmUKYmFzZSB0byBrZWVw
-IHRoZSBhY3R1YWwgYmxpdCBwYXJ0IG9mIHRoZSBsb29wCmVmZmljaWVudCBhbmQgd2l0aG91dCBh
-bnkgZXh0cmEgY29uZGl0aW9uYWxzIGluCnRoZXJlLiBJIGFsc28gZG9uJ3Qgc2ltcGx5IGZpcnN0
-IG1lbXNldCB0aGUgZW50aXJlCmZiIHRvIDAgdG8gYXZvaWQgYSBmbGFzaCAvIHRlYXJpbmcgaWYg
-dGhlIGJncnQKaW1hZ2UgaXMgYWxyZWFkeSBpbiBwbGFjZSAod2hpY2ggaGFwcGVucyBvZnRlbiBv
-bgp4ODYpLgoKSW1wbGVtZW50aW5nIHRoaXMgaXMgZWFzeSBhbmQgYXMgc2FpZCB0aGUgZXh0cmEg
-ZXhlY3V0aW9uIHRpbWUgc2hvdWxkCmJlIHF1aXRlIHNtYWxsLCBzdGlsbCBJIHdvbmRlciB3aGF0
-IG90aGVycyB0aGluayBhYm91dCB0aGlzPwoKSSdtIGxlYW5pbmcgdG93YXJkcyBkb2luZyB0aGUg
-Y2xlYXJpbmcgLyBtZW1zZXRzIHNpbmNlIEkndmUgc2Vlbgpzb21lIGZpcm13YXJlcyBsZWF2ZSBz
-b21lIGFydGlmYWN0cyBmcm9tIG5vdCBjb21wbGV0ZWx5IGNsZWFyaW5nCnRoaW5ncyBsaWtlIGEg
-IlByZXNzIEYyIHRvIGVudGVyIHNldHVwIiBtZXNzYWdlLCBtaXNzaW5nIGEgZmV3CnBpeGVscyBh
-bmQgbGVhdmluZyB0aG9zZSBvbiBzY3JlZW4uCgpSZWdhcmRzLAoKSGFucwpfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpkcmktZGV2ZWwgbWFpbGluZyBsaXN0
-CmRyaS1kZXZlbEBsaXN0cy5mcmVlZGVza3RvcC5vcmcKaHR0cHM6Ly9saXN0cy5mcmVlZGVza3Rv
-cC5vcmcvbWFpbG1hbi9saXN0aW5mby9kcmktZGV2ZWwK
+4.14-stable review patch.  If anyone has any objections, please let me know.
+
+------------------
+
+From: Mark Rutland <mark.rutland@arm.com>
+
+[ Upstream commit 4f74d72aa7067e75af92fbab077e6d7d0210be66 ]
+
+When CONFIG_RANDOMIZE_TEXT_OFFSET=y, TEXT_OFFSET is an arbitrary
+multiple of PAGE_SIZE in the interval [0, 2MB).
+
+The EFI stub does not account for the potential misalignment of
+TEXT_OFFSET relative to EFI_KIMG_ALIGN, and produces a randomized
+physical offset which is always a round multiple of EFI_KIMG_ALIGN.
+This may result in statically allocated objects whose alignment exceeds
+PAGE_SIZE to appear misaligned in memory. This has been observed to
+result in spurious stack overflow reports and failure to make use of
+the IRQ stacks, and theoretically could result in a number of other
+issues.
+
+We can OR in the low bits of TEXT_OFFSET to ensure that we have the
+necessary offset (and hence preserve the misalignment of TEXT_OFFSET
+relative to EFI_KIMG_ALIGN), so let's do that.
+
+Reported-by: Kim Phillips <kim.phillips@arm.com>
+Tested-by: Kim Phillips <kim.phillips@arm.com>
+[ardb: clarify comment and commit log, drop unneeded parens]
+Signed-off-by: Mark Rutland <mark.rutland@arm.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Fixes: 6f26b3671184c36d ("arm64: kaslr: increase randomization granularity")
+Link: http://lkml.kernel.org/r/20180518140841.9731-2-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ drivers/firmware/efi/libstub/arm64-stub.c |   10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+--- a/drivers/firmware/efi/libstub/arm64-stub.c
++++ b/drivers/firmware/efi/libstub/arm64-stub.c
+@@ -98,6 +98,16 @@ efi_status_t handle_kernel_image(efi_sys
+ 			     (phys_seed >> 32) & mask : TEXT_OFFSET;
+ 
+ 		/*
++		 * With CONFIG_RANDOMIZE_TEXT_OFFSET=y, TEXT_OFFSET may not
++		 * be a multiple of EFI_KIMG_ALIGN, and we must ensure that
++		 * we preserve the misalignment of 'offset' relative to
++		 * EFI_KIMG_ALIGN so that statically allocated objects whose
++		 * alignment exceeds PAGE_SIZE appear correctly aligned in
++		 * memory.
++		 */
++		offset |= TEXT_OFFSET % EFI_KIMG_ALIGN;
++
++		/*
+ 		 * If KASLR is enabled, and we have some randomness available,
+ 		 * locate the kernel at a randomized offset in physical memory.
+ 		 */
