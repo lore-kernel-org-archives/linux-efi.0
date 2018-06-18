@@ -1,61 +1,59 @@
-From: =?UTF-8?Q?M=c3=b4she_van_der_Sterre?= <me@moshe.nl>
-Subject: Re: [PATCH 2/2] efifb: Copy the ACPI BGRT boot graphics to the
- framebuffer
-Date: Mon, 18 Jun 2018 10:53:30 +0200
-Message-ID: <c8d28a61-46ed-c066-5a23-e74e9327380c@moshe.nl>
-References: <20180617153235.16219-1-hdegoede@redhat.com>
- <20180617153235.16219-3-hdegoede@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <20180617153235.16219-3-hdegoede@redhat.com>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: linux-efi@vger.kernel.org, linux-fbdev@vger.kernel.org, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, dri-devel@lists.freedesktop.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] efi: cper: avoid using get_seconds()
+Date: Mon, 18 Jun 2018 16:17:59 +0200
+Message-ID: <20180618141811.3353245-1-arnd@arndb.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: y2038@lists.linaro.org, Arnd Bergmann <arnd@arndb.de>, Tyler Baicar <tbaicar@codeaurora.org>, Will Deacon <will.deacon@arm.com>, Ingo Molnar <mingo@kernel.org>, Borislav Petkov <bp@suse.de>, Yazen Ghannam <yazen.ghannam@amd.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, gengdongjiu <gengdongjiu@huawei.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-SGkgSGFucywKCk9uIDA2LzE3LzIwMTggMDU6MzIgUE0sIEhhbnMgZGUgR29lZGUgd3JvdGU6Cj4g
-T24gc3lzdGVtcyB3aGVyZSBmYmNvbiBpcyBjb25maWd1cmVkIGZvciBkZWZlcnJlZCBjb25zb2xl
-IHRha2VvdmVyLCB0aGUKPiBpbnRlbmQgaXMgZm9yIHRoZSBmcmFtZWJ1ZmZlciB0byBzaG93IHRo
-ZSBib290IGdyYXBoaWNzIChlLmcgYSB2ZW5kb3IKPiBsb2dvKSB1bnRpbCBzb21lIG1lc3NhZ2Ug
-KGUuZy4gYW4gZXJyb3IpIGlzIHByaW50ZWQgb3IgYSBncmFwaGljYWwKPiBzZXNzaW9uIHRha2Vz
-IG92ZXIuCj4gCj4gU29tZSBmaXJtd2FyZSBob3dldmVyIHJlbGllcyBvbiB0aGUgT1MgdG8gc2hv
-dyB0aGUgYm9vdCBncmFwaGljcwo+IChpbmRpY2F0ZWQgYnkgYmdydF90YWIuc3RhdHVzIGJlaW5n
-IDApIGFuZCB0aGUgYm9vdCBncmFwaGljcyBtYXkgaGF2ZQo+IGJlZW4gZGVzdHJveWVkIGJ5IGUu
-Zy4gdGhlIGdydWIgYm9vdCBtZW51LgoKSXQgbWF5IGJlIGNsZWFyZXIgdG8ganVzdCBzYXkgdGhh
-dCB0aGUgYm9vdCBncmFwaGljcyBtYXkgaGF2ZSBiZWVuIGRlc3Ryb3llZC4gVGhlIHJlZmVyZW5j
-ZSB0byB0aGUgc3RhdHVzIGZpZWxkIGFuZCBmaXJtd2FyZSBleHBlY3RhdGlvbnMgb25seSBjb25m
-dXNlcyB0aGUgaW50ZW50aW9uIG9mIHRoaXMgcGF0Y2gsIGltaG8uCihUaGlzIHRpZXMgaW4gdG8g
-d2hhdCBJIHNheSBiZWxvdykKCj4gVGhpcyBwYXRjaCBhZGRzIHN1cHBvcnQgdG8gZWZpZmIgdG8g
-c2hvdyB0aGUgYm9vdCBncmFwaGljcyBhbmQKPiBhdXRvbWF0aWNhbGx5IGVuYWJsZXMgdGhpcyB3
-aGVuIGZiY29uIGlzIGNvbmZpZ3VyZWQgZm9yIGRlZmVycmVkCj4gY29uc29sZSB0YWtlb3Zlci4K
-PiAKPiArCS8qCj4gKwkgKiBXZSBkbyBub3QgY2hlY2sgYmdydF90YWIuc3RhdHVzIGhlcmUgYmVj
-YXVzZSB0aGlzIHNlZW1zIHRvIG9ubHkKPiArCSAqIHJlZmxlY3QgaWYgdGhlIGZpcm13YXJlIGhh
-cyBzaG93biB0aGUgYm9vdCBncmFwaGljcyBhdCBhbGwsIGlmIGl0Cj4gKwkgKiBsYXRlciBnb3Qg
-ZGVzdHJveWVkIGJ5IHNvbWV0aGluZyBzdGF0dXMgd2lsbCBzdGlsbCBiZSAxLgo+ICsJICogU2lu
-Y2Ugd2UgZHJhdyB0aGUgZXhhY3Qgc2FtZSBncmFwaGljIGF0IHRoZSBleGFjdCBzYW1lIHBsYWNl
-IHRoaXMKPiArCSAqIHdpbGwgbm90IGxlYWQgdG8gYW55IHRlYXJpbmcgaWYgdGhlIGJvb3QgZ3Jh
-cGhpYyBpcyBhbHJlYWR5IHRoZXJlLgo+ICsJICovCgpJIGFncmVlIHRoYXQgaWdub3JpbmcgYmdy
-dF90YWIuc3RhdHVzIGlzIHRoZSBhYnNvbHV0ZSBiZXN0IG9wdGlvbi4KClRoZSBzdGF0dXMgKHZh
-bGlkLWJpdCkgY2FuLCBpbiB0aGUgcmVhbCB3b3JsZCwgYmUgYW55IHZhbHVlIHdpdGggYW55IG1l
-YW5pbmcuCkkgY2hlY2tlZCB0aGlzIG9uIGEgZmV3IG1hY2hpbmVzIGFzIHBhcnQgb2YgY29tbWl0
-IDY2ZGJlOTljZmUzMC4KIC0gTXkgd29ya3N0YXRpb24gYWx3YXlzIGhhcyAwLgogLSBBbiBvbGQg
-c2VydmVyIHRoYXQgSSBjaGVja2VkIGFsd2F5cyBoYXMgMS4KIC0gTXkgbGFwdG9wIGhhcyAxIGlm
-IHRoZSBib290IGlzIHVuaW50ZXJydXB0ZWQsIDAgaWYgSSByZXF1ZXN0IHRoZSBVRUZJIGJvb3Qg
-bWVudS4KClNvLCBJIGhhdmUgdGhlIHNhbWUgcmVzZXJ2YXRpb24gYWJvdXQgdGhpcyBjb21tZW50
-IGFzIEkgaGF2ZSBhYm91dCB0aGUgY29tbWl0IG1lc3NhZ2UuIEltaG8sIHNpbXBseSBtZW50aW9u
-aW5nIHRoYXQgdGhlIHN0YXR1cyBmaWVsZCBjYW5ub3QgYmUgcmVsaWVkIHVwb24gKGluIGFueSBj
-YXNlKSwgd291bGQgZ2V0IHRoZSBwb2ludCBhY3Jvc3MuCl9fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fCmRyaS1kZXZlbCBtYWlsaW5nIGxpc3QKZHJpLWRldmVs
-QGxpc3RzLmZyZWVkZXNrdG9wLm9yZwpodHRwczovL2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWls
-bWFuL2xpc3RpbmZvL2RyaS1kZXZlbAo=
+get_seconds() is deprecated because of the 32-bit time overflow
+in y2038/y2106 on 32-bit architectures. The way it is used in
+cper_next_record_id() causes an overflow in 2106 when unsigned UTC
+seconds overflow, even on 64-bit architectures.
+
+This starts using ktime_get_real_seconds() to give us more than 32 bits
+of timestamp on all architectures, and then changes the algorithm to use
+39 bits for the timestamp after the y2038 wrap date, plus an always-1
+bit at the top. This gives us another 127 epochs of 136 years, with
+strictly monotonically increasing sequence numbers across boots.
+
+This is almost certainly overkill, but seems better than just extending
+the deadline from 2038 to 2106.
+
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+ drivers/firmware/efi/cper.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index 3bf0dca378a6..b73fc4cab083 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -48,8 +48,21 @@ u64 cper_next_record_id(void)
+ {
+ 	static atomic64_t seq;
+ 
+-	if (!atomic64_read(&seq))
+-		atomic64_set(&seq, ((u64)get_seconds()) << 32);
++	if (!atomic64_read(&seq)) {
++		time64_t time = ktime_get_real_seconds();
++
++		/*
++		 * This code is unlikely to still be needed in year 2106,
++		 * but just in case, let's use a few more bits for timestamps
++		 * after y2038 to be sure they keep increasing monotonically
++		 * for the next few hundred years...
++		 */
++		if (time < 0x80000000)
++			atomic64_set(&seq, (ktime_get_real_seconds()) << 32);
++		else
++			atomic64_set(&seq, 0x8000000000000000ull |
++					   ktime_get_real_seconds() << 24);
++	}
+ 
+ 	return atomic64_inc_return(&seq);
+ }
+-- 
+2.9.0
