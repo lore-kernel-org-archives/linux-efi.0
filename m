@@ -1,60 +1,93 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] efi: cper: avoid using get_seconds()
-Date: Mon, 18 Jun 2018 17:56:48 +0200
-Message-ID: <CAKv+Gu9zYJk+ubcn8ngqsXPBbxWM-S5kUWAHfe_zKDm1=FWB4w@mail.gmail.com>
-References: <20180618141811.3353245-1-arnd@arndb.de>
- <CAKv+Gu-r_+b_tCXeZeE6=EN3=1N98rheODOwV_4mpb9GMzdqrQ@mail.gmail.com>
- <CAK8P3a0dP+zvucn=_um1zRgBYQCskrhqa2KNSDtnpSu199baWw@mail.gmail.com>
- <CAKv+Gu9OD6s24Aq1bLBr-yq_tn6wPR0TAkddO+VTwM7jR76dOQ@mail.gmail.com>
- <CAK8P3a0xkPrDhoHaUzcN++b7TEh3v_a=VkP6VX9_FD56pG1A6w@mail.gmail.com>
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Subject: Re: [PATCH] x86/efi: Free allocated memory if remap fails
+Date: Mon, 18 Jun 2018 10:20:39 -0700
+Message-ID: <1529342439.2333.60.camel@intel.com>
+References: <1529111365-32295-1-git-send-email-sai.praneeth.prakhya@intel.com>
+         <CAKv+Gu-L=UMkzet7s1rUEYMYZxtoE1M_Qa1dqKo134S_hoZWuw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <y2038-bounces@lists.linaro.org>
-In-Reply-To: <CAK8P3a0xkPrDhoHaUzcN++b7TEh3v_a=VkP6VX9_FD56pG1A6w@mail.gmail.com>
-List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/y2038/>
-List-Post: <mailto:y2038@lists.linaro.org>
-List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
-List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=subscribe>
-Errors-To: y2038-bounces@lists.linaro.org
-Sender: "Y2038" <y2038-bounces@lists.linaro.org>
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, y2038 Mailman List <y2038@lists.linaro.org>, Tyler Baicar <tbaicar@codeaurora.org>, Will Deacon <will.deacon@arm.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, gengdongjiu <gengdongjiu@huawei.com>, Yazen Ghannam <yazen.ghannam@amd.com>, linux-efi <linux-efi@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Ingo Molnar <mingo@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAKv+Gu-L=UMkzet7s1rUEYMYZxtoE1M_Qa1dqKo134S_hoZWuw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Dave Hansen <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-T24gMTggSnVuZSAyMDE4IGF0IDE3OjU0LCBBcm5kIEJlcmdtYW5uIDxhcm5kQGFybmRiLmRlPiB3
-cm90ZToKPiBPbiBNb24sIEp1biAxOCwgMjAxOCBhdCA1OjUwIFBNLCBBcmQgQmllc2hldXZlbAo+
-IDxhcmQuYmllc2hldXZlbEBsaW5hcm8ub3JnPiB3cm90ZToKPj4gT24gMTggSnVuZSAyMDE4IGF0
-IDE3OjQ5LCBBcm5kIEJlcmdtYW5uIDxhcm5kQGFybmRiLmRlPiB3cm90ZToKPj4+IE9uIE1vbiwg
-SnVuIDE4LCAyMDE4IGF0IDU6NDcgUE0sIEFyZCBCaWVzaGV1dmVsCj4+PiA8YXJkLmJpZXNoZXV2
-ZWxAbGluYXJvLm9yZz4gd3JvdGU6Cj4+Pj4gT24gMTggSnVuZSAyMDE4IGF0IDE2OjE3LCBBcm5k
-IEJlcmdtYW5uIDxhcm5kQGFybmRiLmRlPiB3cm90ZToKPj4+Cj4+Pj4+IC0gICAgICAgICAgICAg
-ICBhdG9taWM2NF9zZXQoJnNlcSwgKCh1NjQpZ2V0X3NlY29uZHMoKSkgPDwgMzIpOwo+Pj4+PiAr
-ICAgICAgIGlmICghYXRvbWljNjRfcmVhZCgmc2VxKSkgewo+Pj4+PiArICAgICAgICAgICAgICAg
-dGltZTY0X3QgdGltZSA9IGt0aW1lX2dldF9yZWFsX3NlY29uZHMoKTsKPj4+Pj4gKwo+Pj4+PiAr
-ICAgICAgICAgICAgICAgLyoKPj4+Pj4gKyAgICAgICAgICAgICAgICAqIFRoaXMgY29kZSBpcyB1
-bmxpa2VseSB0byBzdGlsbCBiZSBuZWVkZWQgaW4geWVhciAyMTA2LAo+Pj4+PiArICAgICAgICAg
-ICAgICAgICogYnV0IGp1c3QgaW4gY2FzZSwgbGV0J3MgdXNlIGEgZmV3IG1vcmUgYml0cyBmb3Ig
-dGltZXN0YW1wcwo+Pj4+PiArICAgICAgICAgICAgICAgICogYWZ0ZXIgeTIwMzggdG8gYmUgc3Vy
-ZSB0aGV5IGtlZXAgaW5jcmVhc2luZyBtb25vdG9uaWNhbGx5Cj4+Pj4+ICsgICAgICAgICAgICAg
-ICAgKiBmb3IgdGhlIG5leHQgZmV3IGh1bmRyZWQgeWVhcnMuLi4KPj4+Pj4gKyAgICAgICAgICAg
-ICAgICAqLwo+Pj4+PiArICAgICAgICAgICAgICAgaWYgKHRpbWUgPCAweDgwMDAwMDAwKQo+Pj4+
-PiArICAgICAgICAgICAgICAgICAgICAgICBhdG9taWM2NF9zZXQoJnNlcSwgKGt0aW1lX2dldF9y
-ZWFsX3NlY29uZHMoKSkgPDwgMzIpOwo+Pj4+PiArICAgICAgICAgICAgICAgZWxzZQo+Pj4+PiAr
-ICAgICAgICAgICAgICAgICAgICAgICBhdG9taWM2NF9zZXQoJnNlcSwgMHg4MDAwMDAwMDAwMDAw
-MDAwdWxsIHwKPj4+Pj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-IGt0aW1lX2dldF9yZWFsX3NlY29uZHMoKSA8PCAyNCk7Cj4+Pj4+ICsgICAgICAgfQo+Pj4+Cj4+
-Pj4gR2l2ZW4gdGhhdCB0aGVzZSB2YWx1ZXMgYXJlIG5ldmVyIGRlY29kZWQgYW5kIGludGVycHJl
-dGVkIGFzCj4+Pj4gdGltZXN0YW1wcywgY2FuJ3Qgd2Ugc2ltcGx5IHN3aXRjaCB0byB0aGUgc2Vj
-b25kIGZsYXZvdXIgaW1tZWRpYXRlbHk/Cj4+Pgo+Pj4gSSBjb25zaWRlcmVkIHRoYXQsIGJ1dCB0
-aGUgZG93bnNpZGUgd291bGQgYmUgdGhhdCBhbGwgZnV0dXJlIGZpbGVuYW1lcyB3b3VsZAo+Pj4g
-Y29tZSBiZWZvcmUgYWxsIHBhc3QgZmlsZSBuYW1lcy4KPj4KPj4gV29uJ3Qgd2UgaGF2ZSB0aGF0
-IHNhbWUgcHJvYmxlbSBpbiAyMDM4Pwo+Cj4gTm8sIGl0IGdvZXMgZnJvbSAweDdmZmZmZmZmMDAw
-MDAwMDAgdG8gMHg4MDAwMDAwMDAwMDAwMDAwLCBmb2xsb3dlZAo+IGJ5IDB4ODAwMDAwMDAwMTAw
-MDAwMC4KPgoKQWgsIHJpZ2h0LiBJJ20gd2l0aCB5b3Ugbm93IDotKQoKSSdsbCBxdWV1ZSB0aGlz
-IGluIHRoZSBlZmkgdHJlZS4KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX18KWTIwMzggbWFpbGluZyBsaXN0ClkyMDM4QGxpc3RzLmxpbmFyby5vcmcKaHR0cHM6
-Ly9saXN0cy5saW5hcm8ub3JnL21haWxtYW4vbGlzdGluZm8veTIwMzgK
+
+> > It's a fact that memremap() and early_memremap() might never fail and
+> > this code might never get a chance to run but to maintain good kernel
+> > programming semantics, we might need this patch.
+> > 
+> > Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+> > Reviewed-by: Ricardo Neri <ricardo.neri-calderon@linux.intel.com>
+> Please don't include tags for reviews that did not happen on-list.
+> 
+
+Sure! Thanks for letting me know.
+
+> > @@ -450,10 +451,11 @@ void __init efi_free_boot_services(void)
+> > 
+> >         memunmap(new);
+> > 
+> > -       if (efi_memmap_install(new_phys, num_entries)) {
+> > +       if (efi_memmap_install(new_phys, num_entries))
+> >                 pr_err("Could not install new EFI memmap\n");
+> > -               return;
+> > -       }
+> > +
+> > +free_mem:
+> > +       efi_memmap_free(new_phys, num_entries);
+> Doesn't this free the memory map that you just installed?
+> 
+
+That's true! It's a bug. I will fix it.
+
+> > 
+> >  }
+> > 
+> >  /**
+> > + * efi_memmap_free - Free memory allocated by efi_memmap_alloc()
+> > + * @mem: Physical address allocated by efi_memmap_alloc()
+> > + * @num_entries: Number of entries in the allocated map.
+> > + *
+> > + * efi_memmap_alloc() allocates memory depending on whether mm_init()
+> > + * has already been invoked or not. It uses either memblock or "normal"
+> > + * page allocation. Use this function to free the memory allocated by
+> > + * efi_memmap_alloc(). Since the allocation is done in two different
+> > + * ways, similarly, we free it in two different ways.
+> > + *
+> > + */
+> > +void __init efi_memmap_free(phys_addr_t mem, unsigned int num_entries)
+> > +{
+> > +       unsigned long size = num_entries * efi.memmap.desc_size;
+> > +       unsigned int order = get_order(size);
+> > +       phys_addr_t end = mem + size - 1;
+> > +
+> > +       if (slab_is_available()) {
+> > +               __free_pages(pfn_to_page(PHYS_PFN(mem)), order);
+> How do you know that the memory you are freeing was allocated when
+> slab_is_available() was already true?
+> 
+
+efi_memmap_free() should be used *only* in conjunction
+with efi_memmap_alloc()(As I explicitly didn't mention this, maybe it might
+have confused you).
+
+When allocating memory efi_memmap_alloc() does similar check
+for slab_is_available() and if so, it allocates memory using alloc_pages().
+So, to free pages allocated using alloc_pages(), efi_memmap_free()
+uses __free_pages().
+
+> > 
+> > +               return;
+> > +       }
+> > +
+> > +       if (memblock_free(mem, size))
+> > +               pr_err("Failed to free mem from %pa to %pa\n", &mem,
+> > &end);
+> > +}
+> > +
+
+Regards,
+Sai
