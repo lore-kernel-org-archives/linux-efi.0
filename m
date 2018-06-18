@@ -1,44 +1,67 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 1/2] efi/bgrt: Drop __initdata from bgrt_image_size
-Date: Mon, 18 Jun 2018 08:42:20 +0200
-Message-ID: <CAKv+Gu-DVXti+02CZh9ZxW3wZeR2Kgw=6gAsvL_W7V0TO0vLDQ@mail.gmail.com>
-References: <20180617153235.16219-1-hdegoede@redhat.com>
- <20180617153235.16219-2-hdegoede@redhat.com>
+Subject: [PATCH] efi/arm: preserve early mapping of UEFI memory map longer for
+ BGRT
+Date: Mon, 18 Jun 2018 09:41:57 +0200
+Message-ID: <20180618074157.28716-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <20180617153235.16219-2-hdegoede@redhat.com>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: "open list:EFIFB FRAMEBUFFER DRIVER" <linux-fbdev@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, dri-devel <dri-devel@lists.freedesktop.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-efi@vger.kernel.org
+Cc: hdegoede@redhat.com, linux-arm-kernel@lists.infradead.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gMTcgSnVuZSAyMDE4IGF0IDE3OjMyLCBIYW5zIGRlIEdvZWRlIDxoZGVnb2VkZUByZWRoYXQu
-Y29tPiB3cm90ZToKPiBiZ3J0X2ltYWdlX3NpemUgaXMgbmVjZXNzYXJ5IHRvIChvcHRpb25hbGx5
-KSBzaG93IHRoZSBib290IGdyYXBoaWNzIGZyb20KPiB0aGUgZWZpZmIgY29kZS4gVGhlIGVmaWZi
-IGRyaXZlciBpcyBhIHBsYXRmb3JtIGRyaXZlciwgdXNpbmcgYSBub3JtYWwKPiBkcml2ZXIgcHJv
-YmUoKSBkcml2ZXIgY2FsbGJhY2suIFNvIGV2ZW4gdGhvdWdoIGl0IGlzIGFsd2F5cyBidWlsdGlu
-IGl0Cj4gY2Fubm90IHJlZmVyZW5jZSBfX2luaXRkYXRhLgo+Cj4gU2lnbmVkLW9mZi1ieTogSGFu
-cyBkZSBHb2VkZSA8aGRlZ29lZGVAcmVkaGF0LmNvbT4KCkFja2VkLWJ5OiBBcmQgQmllc2hldXZl
-bCA8YXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZz4KCj4gLS0tCj4gIGRyaXZlcnMvZmlybXdhcmUv
-ZWZpL2VmaS1iZ3J0LmMgfCAyICstCj4gIDEgZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKSwg
-MSBkZWxldGlvbigtKQo+Cj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL2VmaS1i
-Z3J0LmMgYi9kcml2ZXJzL2Zpcm13YXJlL2VmaS9lZmktYmdydC5jCj4gaW5kZXggNTA3OTNmZGE3
-ODE5Li5iMjJjY2ZiMGM5OTEgMTAwNjQ0Cj4gLS0tIGEvZHJpdmVycy9maXJtd2FyZS9lZmkvZWZp
-LWJncnQuYwo+ICsrKyBiL2RyaXZlcnMvZmlybXdhcmUvZWZpL2VmaS1iZ3J0LmMKPiBAQCAtMjAs
-NyArMjAsNyBAQAo+ICAjaW5jbHVkZSA8bGludXgvZWZpLWJncnQuaD4KPgo+ICBzdHJ1Y3QgYWNw
-aV90YWJsZV9iZ3J0IGJncnRfdGFiOwo+IC1zaXplX3QgX19pbml0ZGF0YSBiZ3J0X2ltYWdlX3Np
-emU7Cj4gK3NpemVfdCBiZ3J0X2ltYWdlX3NpemU7Cj4KPiAgc3RydWN0IGJtcF9oZWFkZXIgewo+
-ICAgICAgICAgdTE2IGlkOwo+IC0tCj4gMi4xNy4xCj4KX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX18KZHJpLWRldmVsIG1haWxpbmcgbGlzdApkcmktZGV2ZWxA
-bGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBzOi8vbGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxt
-YW4vbGlzdGluZm8vZHJpLWRldmVsCg==
+The BGRT code validates the contents of the table against the UEFI
+memory map, and so it expects it to be mapped when the code runs.
+
+On ARM, this is currently not the case, since we tear down the early
+mapping after efi_init() completes, and only create the permanent
+mapping in arm_enable_runtime_services(), which executes as an early
+initcall, but still leaves a window where the UEFI memory map is not
+mapped.
+
+So move the call to efi_memmap_unmap() from efi_init() to
+arm_enable_runtime_services().
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/arm-init.c    | 1 -
+ drivers/firmware/efi/arm-runtime.c | 2 ++
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index 80d1a885def5..a7c522eac640 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -259,7 +259,6 @@ void __init efi_init(void)
+ 
+ 	reserve_regions();
+ 	efi_esrt_init();
+-	efi_memmap_unmap();
+ 
+ 	memblock_reserve(params.mmap & PAGE_MASK,
+ 			 PAGE_ALIGN(params.mmap_size +
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 5889cbea60b8..59a8c0ec94d5 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -115,6 +115,8 @@ static int __init arm_enable_runtime_services(void)
+ 		return 0;
+ 	}
+ 
++	efi_memmap_unmap();
++
+ 	if (efi_runtime_disabled()) {
+ 		pr_info("EFI runtime services will be disabled.\n");
+ 		return 0;
+-- 
+2.17.1
