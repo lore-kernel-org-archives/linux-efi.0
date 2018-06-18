@@ -1,59 +1,39 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH] efi: cper: avoid using get_seconds()
-Date: Mon, 18 Jun 2018 16:17:59 +0200
-Message-ID: <20180618141811.3353245-1-arnd@arndb.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: y2038@lists.linaro.org, Arnd Bergmann <arnd@arndb.de>, Tyler Baicar <tbaicar@codeaurora.org>, Will Deacon <will.deacon@arm.com>, Ingo Molnar <mingo@kernel.org>, Borislav Petkov <bp@suse.de>, Yazen Ghannam <yazen.ghannam@amd.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, gengdongjiu <gengdongjiu@huawei.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: [PATCH v2 1/2] efi/bgrt: Drop __initdata from bgrt_image_size
+Date: Mon, 18 Jun 2018 17:13:57 +0200
+Message-ID: <20180618151358.4830-1-hdegoede@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Cc: Hans de Goede <hdegoede@redhat.com>, linux-fbdev@vger.kernel.org, linux-efi@vger.kernel.org, dri-devel@lists.freedesktop.org
 List-Id: linux-efi@vger.kernel.org
 
-get_seconds() is deprecated because of the 32-bit time overflow
-in y2038/y2106 on 32-bit architectures. The way it is used in
-cper_next_record_id() causes an overflow in 2106 when unsigned UTC
-seconds overflow, even on 64-bit architectures.
-
-This starts using ktime_get_real_seconds() to give us more than 32 bits
-of timestamp on all architectures, and then changes the algorithm to use
-39 bits for the timestamp after the y2038 wrap date, plus an always-1
-bit at the top. This gives us another 127 epochs of 136 years, with
-strictly monotonically increasing sequence numbers across boots.
-
-This is almost certainly overkill, but seems better than just extending
-the deadline from 2038 to 2106.
-
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- drivers/firmware/efi/cper.c | 17 +++++++++++++++--
- 1 file changed, 15 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index 3bf0dca378a6..b73fc4cab083 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -48,8 +48,21 @@ u64 cper_next_record_id(void)
- {
- 	static atomic64_t seq;
- 
--	if (!atomic64_read(&seq))
--		atomic64_set(&seq, ((u64)get_seconds()) << 32);
-+	if (!atomic64_read(&seq)) {
-+		time64_t time = ktime_get_real_seconds();
-+
-+		/*
-+		 * This code is unlikely to still be needed in year 2106,
-+		 * but just in case, let's use a few more bits for timestamps
-+		 * after y2038 to be sure they keep increasing monotonically
-+		 * for the next few hundred years...
-+		 */
-+		if (time < 0x80000000)
-+			atomic64_set(&seq, (ktime_get_real_seconds()) << 32);
-+		else
-+			atomic64_set(&seq, 0x8000000000000000ull |
-+					   ktime_get_real_seconds() << 24);
-+	}
- 
- 	return atomic64_inc_return(&seq);
- }
--- 
-2.9.0
+YmdydF9pbWFnZV9zaXplIGlzIG5lY2Vzc2FyeSB0byAob3B0aW9uYWxseSkgc2hvdyB0aGUgYm9v
+dCBncmFwaGljcyBmcm9tCnRoZSBlZmlmYiBjb2RlLiBUaGUgZWZpZmIgZHJpdmVyIGlzIGEgcGxh
+dGZvcm0gZHJpdmVyLCB1c2luZyBhIG5vcm1hbApkcml2ZXIgcHJvYmUoKSBkcml2ZXIgY2FsbGJh
+Y2suIFNvIGV2ZW4gdGhvdWdoIGl0IGlzIGFsd2F5cyBidWlsdGluIGl0CmNhbm5vdCByZWZlcmVu
+Y2UgX19pbml0ZGF0YS4KCkFja2VkLWJ5OiBBcmQgQmllc2hldXZlbCA8YXJkLmJpZXNoZXV2ZWxA
+bGluYXJvLm9yZz4KU2lnbmVkLW9mZi1ieTogSGFucyBkZSBHb2VkZSA8aGRlZ29lZGVAcmVkaGF0
+LmNvbT4KLS0tCiBkcml2ZXJzL2Zpcm13YXJlL2VmaS9lZmktYmdydC5jIHwgMiArLQogMSBmaWxl
+IGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pCgpkaWZmIC0tZ2l0IGEvZHJp
+dmVycy9maXJtd2FyZS9lZmkvZWZpLWJncnQuYyBiL2RyaXZlcnMvZmlybXdhcmUvZWZpL2VmaS1i
+Z3J0LmMKaW5kZXggNTA3OTNmZGE3ODE5Li5iMjJjY2ZiMGM5OTEgMTAwNjQ0Ci0tLSBhL2RyaXZl
+cnMvZmlybXdhcmUvZWZpL2VmaS1iZ3J0LmMKKysrIGIvZHJpdmVycy9maXJtd2FyZS9lZmkvZWZp
+LWJncnQuYwpAQCAtMjAsNyArMjAsNyBAQAogI2luY2x1ZGUgPGxpbnV4L2VmaS1iZ3J0Lmg+CiAK
+IHN0cnVjdCBhY3BpX3RhYmxlX2JncnQgYmdydF90YWI7Ci1zaXplX3QgX19pbml0ZGF0YSBiZ3J0
+X2ltYWdlX3NpemU7CitzaXplX3QgYmdydF9pbWFnZV9zaXplOwogCiBzdHJ1Y3QgYm1wX2hlYWRl
+ciB7CiAJdTE2IGlkOwotLSAKMi4xNy4xCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fXwpkcmktZGV2ZWwgbWFpbGluZyBsaXN0CmRyaS1kZXZlbEBsaXN0cy5m
+cmVlZGVza3RvcC5vcmcKaHR0cHM6Ly9saXN0cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1hbi9saXN0
+aW5mby9kcmktZGV2ZWwK
