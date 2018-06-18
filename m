@@ -1,129 +1,69 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH v2 2/2] efifb: Copy the ACPI BGRT boot graphics to the
- framebuffer
-Date: Mon, 18 Jun 2018 17:13:58 +0200
-Message-ID: <20180618151358.4830-2-hdegoede@redhat.com>
-References: <20180618151358.4830-1-hdegoede@redhat.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] efi: cper: avoid using get_seconds()
+Date: Mon, 18 Jun 2018 17:47:37 +0200
+Message-ID: <CAKv+Gu-r_+b_tCXeZeE6=EN3=1N98rheODOwV_4mpb9GMzdqrQ@mail.gmail.com>
+References: <20180618141811.3353245-1-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <20180618151358.4830-1-hdegoede@redhat.com>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Cc: Hans de Goede <hdegoede@redhat.com>, linux-fbdev@vger.kernel.org, linux-efi@vger.kernel.org, dri-devel@lists.freedesktop.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180618141811.3353245-1-arnd@arndb.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: y2038@lists.linaro.org, Tyler Baicar <tbaicar@codeaurora.org>, Will Deacon <will.deacon@arm.com>, Ingo Molnar <mingo@kernel.org>, Borislav Petkov <bp@suse.de>, Yazen Ghannam <yazen.ghannam@amd.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, gengdongjiu <gengdongjiu@huawei.com>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gc3lzdGVtcyB3aGVyZSBmYmNvbiBpcyBjb25maWd1cmVkIGZvciBkZWZlcnJlZCBjb25zb2xl
-IHRha2VvdmVyLCB0aGUKaW50ZW5kIGlzIGZvciB0aGUgZnJhbWVidWZmZXIgdG8gc2hvdyB0aGUg
-Ym9vdCBncmFwaGljcyAoZS5nIGEgdmVuZG9yCmxvZ28pIHVudGlsIHNvbWUgbWVzc2FnZSAoZS5n
-LiBhbiBlcnJvcikgaXMgcHJpbnRlZCBvciBhIGdyYXBoaWNhbApzZXNzaW9uIHRha2VzIG92ZXIu
-CgpTb21lIGZpcm13YXJlIHJlbGllcyBvbiB0aGUgT1MgdG8gc2hvdyB0aGUgYm9vdCBncmFwaGlj
-cy4KClRoaXMgcGF0Y2ggYWRkcyBzdXBwb3J0IHRvIGVmaWZiIHRvIHNob3cgdGhlIGJvb3QgZ3Jh
-cGhpY3MgYW5kCmF1dG9tYXRpY2FsbHkgZW5hYmxlcyB0aGlzIHdoZW4gZmJjb24gaXMgY29uZmln
-dXJlZCBmb3IgZGVmZXJyZWQKY29uc29sZSB0YWtlb3Zlci4KClNpZ25lZC1vZmYtYnk6IEhhbnMg
-ZGUgR29lZGUgPGhkZWdvZWRlQHJlZGhhdC5jb20+Ci0tLQpDaGFuZ2VzIGluIHYyOgotU2ltcGxp
-ZnkgdGhlIGNvbW1lbnQgYWJvdXQgYWNwaV9iZ3J0LnN0YXR1cwotQ2xlYXIgdGhlIHBhcnRzIG9m
-IHRoZSBzY3JlZW4gd2hpY2ggZG9uJ3QgY29udGFpbiB0aGUgbG9nbyB0byBibGFjawogKG1lbXNl
-dCB0byAwKSwgcmF0aGVyIHRoZW4gbGVhdmluZyB0aGVtIGFzIGlzCi0tLQogZHJpdmVycy92aWRl
-by9mYmRldi9lZmlmYi5jIHwgMTQwICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KwogMSBmaWxlIGNoYW5nZWQsIDE0MCBpbnNlcnRpb25zKCspCgpkaWZmIC0tZ2l0IGEvZHJpdmVy
-cy92aWRlby9mYmRldi9lZmlmYi5jIGIvZHJpdmVycy92aWRlby9mYmRldi9lZmlmYi5jCmluZGV4
-IDQ2YTQ0ODRlM2RhNy4uZmEwMWVlY2MwYTU1IDEwMDY0NAotLS0gYS9kcml2ZXJzL3ZpZGVvL2Zi
-ZGV2L2VmaWZiLmMKKysrIGIvZHJpdmVycy92aWRlby9mYmRldi9lZmlmYi5jCkBAIC05LDE2ICs5
-LDM5IEBACiAKICNpbmNsdWRlIDxsaW51eC9rZXJuZWwuaD4KICNpbmNsdWRlIDxsaW51eC9lZmku
-aD4KKyNpbmNsdWRlIDxsaW51eC9lZmktYmdydC5oPgogI2luY2x1ZGUgPGxpbnV4L2Vycm5vLmg+
-CiAjaW5jbHVkZSA8bGludXgvZmIuaD4KICNpbmNsdWRlIDxsaW51eC9wY2kuaD4KICNpbmNsdWRl
-IDxsaW51eC9wbGF0Zm9ybV9kZXZpY2UuaD4KKyNpbmNsdWRlIDxsaW51eC9wcmludGsuaD4KICNp
-bmNsdWRlIDxsaW51eC9zY3JlZW5faW5mby5oPgogI2luY2x1ZGUgPHZpZGVvL3ZnYS5oPgogI2lu
-Y2x1ZGUgPGFzbS9lZmkuaD4KICNpbmNsdWRlIDxkcm0vZHJtX3V0aWxzLmg+IC8qIEZvciBkcm1f
-Z2V0X3BhbmVsX29yaWVudGF0aW9uX3F1aXJrICovCiAjaW5jbHVkZSA8ZHJtL2RybV9jb25uZWN0
-b3IuaD4gIC8qIEZvciBEUk1fTU9ERV9QQU5FTF9PUklFTlRBVElPTl8qICovCiAKK3N0cnVjdCBi
-bXBfZmlsZV9oZWFkZXIgeworCXUxNiBpZDsKKwl1MzIgZmlsZV9zaXplOworCXUzMiByZXNlcnZl
-ZDsKKwl1MzIgYml0bWFwX29mZnNldDsKK30gX19wYWNrZWQ7CisKK3N0cnVjdCBibXBfZGliX2hl
-YWRlciB7CisJdTMyIGRpYl9oZWFkZXJfc2l6ZTsKKwlzMzIgd2lkdGg7CisJczMyIGhlaWdodDsK
-Kwl1MTYgcGxhbmVzOworCXUxNiBicHA7CisJdTMyIGNvbXByZXNzaW9uOworCXUzMiBiaXRtYXBf
-c2l6ZTsKKwl1MzIgaG9yel9yZXNvbHV0aW9uOworCXUzMiB2ZXJ0X3Jlc29sdXRpb247CisJdTMy
-IGNvbG9yc191c2VkOworCXUzMiBjb2xvcnNfaW1wb3J0YW50OworfSBfX3BhY2tlZDsKKwogc3Rh
-dGljIGJvb2wgcmVxdWVzdF9tZW1fc3VjY2VlZGVkID0gZmFsc2U7CiBzdGF0aWMgYm9vbCBub3dj
-ID0gZmFsc2U7CiAKQEAgLTY2LDYgKzg5LDEyMSBAQCBzdGF0aWMgaW50IGVmaWZiX3NldGNvbHJl
-Zyh1bnNpZ25lZCByZWdubywgdW5zaWduZWQgcmVkLCB1bnNpZ25lZCBncmVlbiwKIAlyZXR1cm4g
-MDsKIH0KIAorLyoKKyAqIElmIGZiY29uIGRlZmZlcmVkIGNvbnNvbGUgdGFrZW92ZXIgaXMgY29u
-ZmlndXJlZCwgdGhlIGludGVudCBpcyBmb3IgdGhlCisgKiBmcmFtZWJ1ZmZlciB0byBzaG93IHRo
-ZSBib290IGdyYXBoaWNzIChlLmcuIHZlbmRvciBsb2dvKSB1bnRpbCB0aGVyZSBpcyBzb21lCisg
-KiAoZXJyb3IpIG1lc3NhZ2UgdG8gZGlzcGxheS4gQnV0IHRoZSBib290IGdyYXBoaWNzIG1heSBo
-YXZlIGJlZW4gZGVzdHJveWVkIGJ5CisgKiBlLmcuIG9wdGlvbiBST00gb3V0cHV0LCBkZXRlY3Qg
-dGhpcyBhbmQgcmVzdG9yZSB0aGUgYm9vdCBncmFwaGljcy4KKyAqLworI2lmIGRlZmluZWQgQ09O
-RklHX0ZSQU1FQlVGRkVSX0NPTlNPTEVfREVGRVJSRURfVEFLRU9WRVIgJiYgXAorICAgIGRlZmlu
-ZWQgQ09ORklHX0FDUElfQkdSVAorc3RhdGljIHZvaWQgZWZpZmJfY29weV9ibXAodTggKnNyYywg
-dTMyICpkc3QsIGludCB3aWR0aCwgc3RydWN0IHNjcmVlbl9pbmZvICpzaSkKK3sKKwl1OCByLCBn
-LCBiOworCisJd2hpbGUgKHdpZHRoLS0pIHsKKwkJYiA9ICpzcmMrKzsKKwkJZyA9ICpzcmMrKzsK
-KwkJciA9ICpzcmMrKzsKKwkJKmRzdCsrID0gKHIgPDwgc2ktPnJlZF9wb3MpICAgfAorCQkJIChn
-IDw8IHNpLT5ncmVlbl9wb3MpIHwKKwkJCSAoYiA8PCBzaS0+Ymx1ZV9wb3MpOworCX0KK30KKwor
-c3RhdGljIHZvaWQgZWZpZmJfc2hvd19ib290X2dyYXBoaWNzKHN0cnVjdCBmYl9pbmZvICppbmZv
-KQoreworCXUzMiBibXBfd2lkdGgsIGJtcF9oZWlnaHQsIGJtcF9waXRjaCwgc2NyZWVuX3BpdGNo
-LCBkc3RfeCwgeSwgc3JjX3k7CisJc3RydWN0IHNjcmVlbl9pbmZvICpzaSA9ICZzY3JlZW5faW5m
-bzsKKwlzdHJ1Y3QgYm1wX2ZpbGVfaGVhZGVyICpmaWxlX2hlYWRlcjsKKwlzdHJ1Y3QgYm1wX2Rp
-Yl9oZWFkZXIgKmRpYl9oZWFkZXI7CisJdm9pZCAqYmdydF9pbWFnZSA9IE5VTEw7CisJdTggKmRz
-dCA9IGluZm8tPnNjcmVlbl9iYXNlOworCisJaWYgKCFiZ3J0X3RhYi5pbWFnZV9hZGRyZXNzKSB7
-CisJCXByX2luZm8oImVmaWZiOiBObyBCR1JULCBub3Qgc2hvd2luZyBib290IGdyYXBoaWNzXG4i
-KTsKKwkJcmV0dXJuOworCX0KKworCS8qIEF2b2lkIGZsYXNoaW5nIHRoZSBsb2dvIGlmIHdlJ3Jl
-IGdvaW5nIHRvIHByaW50IHN0ZCBwcm9iZSBtZXNzYWdlcyAqLworCWlmIChjb25zb2xlX2xvZ2xl
-dmVsID4gQ09OU09MRV9MT0dMRVZFTF9RVUlFVCkKKwkJcmV0dXJuOworCisJLyogYmdydF90YWIu
-c3RhdHVzIGlzIHVucmVsaWFibGUsIHNvIHdlIGRvbid0IGNoZWNrIGl0ICovCisKKwlpZiAoc2kt
-PmxmYl9kZXB0aCAhPSAzMikgeworCQlwcl9pbmZvKCJlZmlmYjogbm90IDMyIGJpdHMsIG5vdCBz
-aG93aW5nIGJvb3QgZ3JhcGhpY3NcbiIpOworCQlyZXR1cm47CisJfQorCisJYmdydF9pbWFnZSA9
-IG1lbXJlbWFwKGJncnRfdGFiLmltYWdlX2FkZHJlc3MsIGJncnRfaW1hZ2Vfc2l6ZSwKKwkJCSAg
-ICAgIE1FTVJFTUFQX1dCKTsKKwlpZiAoIWJncnRfaW1hZ2UpIHsKKwkJcHJfd2FybigiZWZpZmI6
-IElnbm9yaW5nIEJHUlQ6IGZhaWxlZCB0byBtYXAgaW1hZ2UgbWVtb3J5XG4iKTsKKwkJcmV0dXJu
-OworCX0KKworCWlmIChiZ3J0X2ltYWdlX3NpemUgPCAoc2l6ZW9mKCpmaWxlX2hlYWRlcikgKyBz
-aXplb2YoKmRpYl9oZWFkZXIpKSkKKwkJZ290byBlcnJvcjsKKworCWZpbGVfaGVhZGVyID0gYmdy
-dF9pbWFnZTsKKwlpZiAoZmlsZV9oZWFkZXItPmlkICE9IDB4NGQ0MiB8fCBmaWxlX2hlYWRlci0+
-cmVzZXJ2ZWQgIT0gMCkKKwkJZ290byBlcnJvcjsKKworCWRpYl9oZWFkZXIgPSBiZ3J0X2ltYWdl
-ICsgc2l6ZW9mKCpmaWxlX2hlYWRlcik7CisJaWYgKGRpYl9oZWFkZXItPmRpYl9oZWFkZXJfc2l6
-ZSAhPSA0MCB8fCBkaWJfaGVhZGVyLT53aWR0aCA8IDAgfHwKKwkgICAgZGliX2hlYWRlci0+cGxh
-bmVzICE9IDEgfHwgZGliX2hlYWRlci0+YnBwICE9IDI0IHx8CisJICAgIGRpYl9oZWFkZXItPmNv
-bXByZXNzaW9uICE9IDApCisJCWdvdG8gZXJyb3I7CisKKwlibXBfd2lkdGggPSBkaWJfaGVhZGVy
-LT53aWR0aDsKKwlibXBfaGVpZ2h0ID0gYWJzKGRpYl9oZWFkZXItPmhlaWdodCk7CisJYm1wX3Bp
-dGNoID0gcm91bmRfdXAoMyAqIGJtcF93aWR0aCwgNCk7CisJc2NyZWVuX3BpdGNoID0gc2ktPmxm
-Yl9saW5lbGVuZ3RoOworCisJaWYgKChmaWxlX2hlYWRlci0+Yml0bWFwX29mZnNldCArIGJtcF9w
-aXRjaCAqIGJtcF9oZWlnaHQpID4KKwkJCQliZ3J0X2ltYWdlX3NpemUpCisJCWdvdG8gZXJyb3I7
-CisKKwlpZiAoKGJncnRfdGFiLmltYWdlX29mZnNldF94ICsgYm1wX3dpZHRoKSA+IHNpLT5sZmJf
-d2lkdGggfHwKKwkgICAgKGJncnRfdGFiLmltYWdlX29mZnNldF95ICsgYm1wX2hlaWdodCkgPiBz
-aS0+bGZiX2hlaWdodCkKKwkJZ290byBlcnJvcjsKKworCXByX2luZm8oImVmaWZiOiBzaG93aW5n
-IGJvb3QgZ3JhcGhpY3NcbiIpOworCisJZm9yICh5ID0gMDsgeSA8IHNpLT5sZmJfaGVpZ2h0OyB5
-KyssIGRzdCArPSBzaS0+bGZiX2xpbmVsZW5ndGgpIHsKKwkJLyogT25seSBiYWNrZ3JvdW5kPyAq
-LworCQlpZiAoeSA8IGJncnRfdGFiLmltYWdlX29mZnNldF95IHx8CisJCSAgICB5ID49IChiZ3J0
-X3RhYi5pbWFnZV9vZmZzZXRfeSArIGJtcF9oZWlnaHQpKSB7CisJCQltZW1zZXQoZHN0LCAwLCA0
-ICogc2ktPmxmYl93aWR0aCk7CisJCQljb250aW51ZTsKKwkJfQorCisJCXNyY195ID0geSAtIGJn
-cnRfdGFiLmltYWdlX29mZnNldF95OworCQkvKiBQb3NpdGl2ZSBoZWFkZXIgaGVpZ2h0IG1lYW5z
-IHVwc2lkZSBkb3duIHJvdyBvcmRlciAqLworCQlpZiAoZGliX2hlYWRlci0+aGVpZ2h0ID4gMCkK
-KwkJCXNyY195ID0gKGJtcF9oZWlnaHQgLSAxKSAtIHNyY195OworCisJCW1lbXNldChkc3QsIDAs
-IGJncnRfdGFiLmltYWdlX29mZnNldF94ICogNCk7CisJCWRzdF94ID0gYmdydF90YWIuaW1hZ2Vf
-b2Zmc2V0X3g7CisJCWVmaWZiX2NvcHlfYm1wKGJncnRfaW1hZ2UgKyBmaWxlX2hlYWRlci0+Yml0
-bWFwX29mZnNldCArCisJCQkJCSAgICBzcmNfeSAqIGJtcF9waXRjaCwKKwkJCSAgICAgICAodTMy
-ICopZHN0ICsgZHN0X3gsIGJtcF93aWR0aCwgc2kpOworCQlkc3RfeCArPSBibXBfd2lkdGg7CisJ
-CW1lbXNldCgodTMyICopZHN0ICsgZHN0X3gsIDAsIChzaS0+bGZiX3dpZHRoIC0gZHN0X3gpICog
-NCk7CisJfQorCisJbWVtdW5tYXAoYmdydF9pbWFnZSk7CisJcmV0dXJuOworCitlcnJvcjoKKwlt
-ZW11bm1hcChiZ3J0X2ltYWdlKTsKKwlwcl93YXJuKCJlZmlmYjogSWdub3JpbmcgQkdSVDogdW5l
-eHBlY3RlZCBvciBpbnZhbGlkIEJNUCBkYXRhXG4iKTsKK30KKyNlbHNlCitzdGF0aWMgaW5saW5l
-IHZvaWQgZWZpZmJfc2hvd19ib290X2dyYXBoaWNzKHN0cnVjdCBmYl9pbmZvICppbmZvKSB7fQor
-I2VuZGlmCisKIHN0YXRpYyB2b2lkIGVmaWZiX2Rlc3Ryb3koc3RydWN0IGZiX2luZm8gKmluZm8p
-CiB7CiAJaWYgKGluZm8tPnNjcmVlbl9iYXNlKQpAQCAtMjgzLDYgKzQyMSw4IEBAIHN0YXRpYyBp
-bnQgZWZpZmJfcHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqZGV2KQogCQlnb3RvIGVycl9y
-ZWxlYXNlX2ZiOwogCX0KIAorCWVmaWZiX3Nob3dfYm9vdF9ncmFwaGljcyhpbmZvKTsKKwogCXBy
-X2luZm8oImVmaWZiOiBmcmFtZWJ1ZmZlciBhdCAweCVseCwgdXNpbmcgJWRrLCB0b3RhbCAlZGtc
-biIsCiAJICAgICAgIGVmaWZiX2ZpeC5zbWVtX3N0YXJ0LCBzaXplX3JlbWFwLzEwMjQsIHNpemVf
-dG90YWwvMTAyNCk7CiAJcHJfaW5mbygiZWZpZmI6IG1vZGUgaXMgJWR4JWR4JWQsIGxpbmVsZW5n
-dGg9JWQsIHBhZ2VzPSVkXG4iLAotLSAKMi4xNy4xCgpfX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fXwpkcmktZGV2ZWwgbWFpbGluZyBsaXN0CmRyaS1kZXZlbEBs
-aXN0cy5mcmVlZGVza3RvcC5vcmcKaHR0cHM6Ly9saXN0cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1h
-bi9saXN0aW5mby9kcmktZGV2ZWwK
+On 18 June 2018 at 16:17, Arnd Bergmann <arnd@arndb.de> wrote:
+> get_seconds() is deprecated because of the 32-bit time overflow
+> in y2038/y2106 on 32-bit architectures. The way it is used in
+> cper_next_record_id() causes an overflow in 2106 when unsigned UTC
+> seconds overflow, even on 64-bit architectures.
+>
+> This starts using ktime_get_real_seconds() to give us more than 32 bits
+> of timestamp on all architectures, and then changes the algorithm to use
+> 39 bits for the timestamp after the y2038 wrap date, plus an always-1
+> bit at the top. This gives us another 127 epochs of 136 years, with
+> strictly monotonically increasing sequence numbers across boots.
+>
+> This is almost certainly overkill, but seems better than just extending
+> the deadline from 2038 to 2106.
+>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> ---
+>  drivers/firmware/efi/cper.c | 17 +++++++++++++++--
+>  1 file changed, 15 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+> index 3bf0dca378a6..b73fc4cab083 100644
+> --- a/drivers/firmware/efi/cper.c
+> +++ b/drivers/firmware/efi/cper.c
+> @@ -48,8 +48,21 @@ u64 cper_next_record_id(void)
+>  {
+>         static atomic64_t seq;
+>
+> -       if (!atomic64_read(&seq))
+> -               atomic64_set(&seq, ((u64)get_seconds()) << 32);
+> +       if (!atomic64_read(&seq)) {
+> +               time64_t time = ktime_get_real_seconds();
+> +
+> +               /*
+> +                * This code is unlikely to still be needed in year 2106,
+> +                * but just in case, let's use a few more bits for timestamps
+> +                * after y2038 to be sure they keep increasing monotonically
+> +                * for the next few hundred years...
+> +                */
+> +               if (time < 0x80000000)
+> +                       atomic64_set(&seq, (ktime_get_real_seconds()) << 32);
+> +               else
+> +                       atomic64_set(&seq, 0x8000000000000000ull |
+> +                                          ktime_get_real_seconds() << 24);
+> +       }
+
+Given that these values are never decoded and interpreted as
+timestamps, can't we simply switch to the second flavour immediately?
+
+>
+>         return atomic64_inc_return(&seq);
+>  }
+> --
+> 2.9.0
+>
