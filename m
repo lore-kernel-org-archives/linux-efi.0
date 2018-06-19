@@ -1,131 +1,82 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH V2] x86/efi: Free allocated memory if remap fails
-Date: Tue, 19 Jun 2018 09:21:28 +0200
-Message-ID: <CAKv+Gu-yeXwLjd1Sp0jc41-9zVFOuxSBqMiHkivTLmT-u3Upjg@mail.gmail.com>
-References: <1529350614-15555-1-git-send-email-sai.praneeth.prakhya@intel.com>
+From: Juergen Gross <jgross@suse.com>
+Subject: Re: [PATCH v5 0/3] extern inline native_save_fl for paravirt
+Date: Tue, 19 Jun 2018 17:03:26 +0200
+Message-ID: <6a36db0d-e790-48d6-183a-263c355531b6@suse.com>
+References: <20180613210518.113983-1-ndesaulniers@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1529350614-15555-1-git-send-email-sai.praneeth.prakhya@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Dave Hansen <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+In-Reply-To: <20180613210518.113983-1-ndesaulniers@google.com>
+Content-Language: de-DE
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: Nick Desaulniers <ndesaulniers@google.com>, akpm@linux-foundation.org, hpa@zytor.com, mingo@redhat.com, tglx@linutronix.de
+Cc: kstewart@linuxfoundation.org, andrea.parri@amarulasolutions.com, linux-efi@vger.kernel.org, brijesh.singh@amd.com, jan.kiszka@siemens.com, will.deacon@arm.com, jarkko.sakkinen@linux.intel.com, linux-kernel@vger.kernel.org, yamada.masahiro@socionext.com, manojgupta@google.com, akataria@vmware.com, tweek@google.com, mawilcox@microsoft.com, x86@kernel.org, ghackmann@google.com, mka@chromium.org, geert@linux-m68k.org, rientjes@google.com, aryabinin@virtuozzo.com, thomas.lendacky@amd.com, arnd@arndb.de, linux-kbuild@vger.kernel.org, keescook@google.com, rostedt@goodmis.org, acme@redhat.com, caoj.fnst@cn.fujitsu.com, jpoimboe@redhat.com, sedat.dilek@gmail.com, boris.ostrovsky@oracle.com, virtualization@lists.linux-foundation.org, michal.lkml@markovi.net, tstellar@redhat.com, gregkh@linuxfoundation.org, ard.biesheuvel@linaro.org, astrachan@google.com, mjg59@google.com, pombre
 List-Id: linux-efi@vger.kernel.org
 
-On 18 June 2018 at 21:36, Sai Praneeth Prakhya
-<sai.praneeth.prakhya@intel.com> wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
->
-> efi_memmap_alloc(), as the name suggests, allocates memory for a new efi
-> memory map. It's referenced from couple of places, namely,
-> efi_arch_mem_reserve() and efi_free_boot_services(). These callers,
-> after allocating memory, remap it for further use. As usual, a routine
-> check is performed to confirm successful remap. If the remap fails,
-> ideally, the allocated memory should be freed but presently we just
-> return without freeing it up. Hence, fix this bug by freeing up the
-> memory appropriately.
->
-> As efi_memmap_alloc() allocates memory depending on whether mm_init()
-> has already been invoked or not, similarly, while freeing use
-> memblock_free() to free memory allocated before invoking mm_init() and
-> __free_pages() to free memory allocated after invoking mm_init().
->
-> It's a fact that memremap() and early_memremap() might never fail and
-> this code might never get a chance to run but to maintain good kernel
-> programming semantics, we might need this patch.
->
-> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-> Cc: Lee Chun-Yi <jlee@suse.com>
-> Cc: Borislav Petkov <bp@alien8.de>
-> Cc: Tony Luck <tony.luck@intel.com>
-> Cc: Dave Hansen <dave.hansen@intel.com>
-> Cc: Bhupesh Sharma <bhsharma@redhat.com>
-> Cc: Ricardo Neri <ricardo.neri@intel.com>
-> Cc: Peter Zijlstra <peterz@infradead.org>
-> Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-> Cc: Matt Fleming <matt@codeblueprint.co.uk>
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> ---
->
-> I found this bug when working on a different patch set which uses
-> efi_memmap_alloc() and then noticed that I never freed the allocated
-> memory. I found it weird, in the sense that, memory is allocated but is
-> not freed (upon returning from an error). So, wasn't sure if that should
-> be treated as a bug or should I just leave it as is because everything
-> works fine even without this patch. Since the effort for the patch is
-> very minimal, I just went ahead and posted one, so that I could know
-> your thoughts on it.
->
-> Changes from V1 to V2:
-> ----------------------
-> 1. Fix the bug of freeing memory map that was just installed by correctly
->     calling free_pages().
-> 2. Call memblock_free() and __free_pages() directly from the appropriate
->     places instead of efi_memmap_free().
->
-> Note: Patch based on Linus's mainline tree V4.18-rc1
->
->  arch/x86/platform/efi/quirks.c | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-> index 36c1f8b9f7e0..cfa93af97def 100644
-> --- a/arch/x86/platform/efi/quirks.c
-> +++ b/arch/x86/platform/efi/quirks.c
-> @@ -285,6 +285,7 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
->         new = early_memremap(new_phys, new_size);
->         if (!new) {
->                 pr_err("Failed to map new boot services memmap\n");
-> +               memblock_free(new_phys, new_size);
->                 return;
->         }
->
-> @@ -429,6 +430,7 @@ void __init efi_free_boot_services(void)
->         new = memremap(new_phys, new_size, MEMREMAP_WB);
->         if (!new) {
->                 pr_err("Failed to map new EFI memmap\n");
-> +               __free_pages(pfn_to_page(PHYS_PFN(new_phys)), get_order(new_size));
->                 return;
->         }
->
-> @@ -452,6 +454,7 @@ void __init efi_free_boot_services(void)
->
->         if (efi_memmap_install(new_phys, num_entries)) {
->                 pr_err("Could not install new EFI memmap\n");
-> +               __free_pages(pfn_to_page(PHYS_PFN(new_phys)), get_order(new_size));
->                 return;
->         }
->  }
-> --
-> 2.7.4
->
+On 13/06/18 23:05, Nick Desaulniers wrote:
+> paravirt depends on a custom calling convention (callee saved), but
+> expects this from a static inline function that it then forces to be
+> outlined. This is problematic because different compilers or flags can
+> then add a stack guard that violates the calling conventions.
+> 
+> Uses extern inline with the out-of-line definition in assembly to
+> prevent compilers from adding stack guards to the outlined version.
+> 
+> Other parts of the codebase overwrite KBUILD_CFLAGS, which is *extremely
+> problematic* for extern inline, as the sematics are completely the
+> opposite depending on what C standard is used.
+> http://blahg.josefsipek.net/?p=529
+> 
+> Changes since v4:
+>   Take Arnd's and hpa's suggestions properly feature detect gnu_inline
+>   attribute to support gcc 4.1.
+> 
+> Changes since v3:
+>   Take Joe's suggestion to hoist __inline__ and __inline out of
+>   conditional block.
+> 
+> Changes since v2:
+>   Take hpa's _ASM_ARG patch into the set in order to simplify cross
+>   32b/64b x86 assembly and rebase my final patch to use it.  Apply
+>   Sedat's typo fix to commit message and sign off on it. Take Joe's
+>   suggestion to simplify __inline__ and __inline. Add Arnd to list of
+>   folks who made helpful suggestions.
+> 
+> Changes since v1:
+>   Prefer gnu_inline function attribute instead of explicitly setting C
+>   standard compiler flag in problematic Makefiles. We should instead
+>   carefully evaluate if those Makefiles should be overwriting
+>   KBUILD_CFLAGS at all. Dropped the previous first two patches and added
+>   a new first patch.
+> 
+> H. Peter Anvin (1):
+>   x86/asm: add _ASM_ARG* constants for argument registers to <asm/asm.h>
+> 
+> Nick Desaulniers (2):
+>   compiler-gcc.h: add gnu_inline to all inline declarations
+>   x86: paravirt: make native_save_fl extern inline
+> 
+>  arch/x86/include/asm/asm.h      | 59 +++++++++++++++++++++++++++++++++
+>  arch/x86/include/asm/irqflags.h |  2 +-
+>  arch/x86/kernel/Makefile        |  1 +
+>  arch/x86/kernel/irqflags.S      | 26 +++++++++++++++
+>  include/linux/compiler-gcc.h    | 29 ++++++++++++----
+>  5 files changed, 109 insertions(+), 8 deletions(-)
+>  create mode 100644 arch/x86/kernel/irqflags.S
+> 
 
-Thank you Sai.
+For the series:
 
-But this is not really what I meant.
+Acked-by: Juergen Gross <jgross@suse.com>
 
-How about we modify efi_memmap_alloc() like this
 
-@@ -39,10 +39,12 @@ static phys_addr_t __init
-__efi_memmap_alloc_late(unsigned long size)
-  * Returns the physical address of the allocated memory map on
-  * success, zero on failure.
-  */
--phys_addr_t __init efi_memmap_alloc(unsigned int num_entries)
-+phys_addr_t __init efi_memmap_alloc(unsigned int num_entries, bool *late)
- {
-        unsigned long size = num_entries * efi.memmap.desc_size;
-
-+       if (late)
-+               *late = slab_is_available();
-        if (slab_is_available())
-                return __efi_memmap_alloc_late(size);
-
-and introduce efi_memmap_free() as before, but pass it the 'late'
-parameter you received from efi_memmap_alloc(). That way, it is the
-caller's job to take care of this.
-
-Also, it seems to me that efi_arch_mem_reserve() leaks the old memory
-map every time you create a new one, no? That is a separate issue that
-you may want to look into, but it affects the design of this API as
-well.
+Juergen
