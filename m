@@ -1,82 +1,98 @@
-From: Juergen Gross <jgross@suse.com>
-Subject: Re: [PATCH v5 0/3] extern inline native_save_fl for paravirt
-Date: Tue, 19 Jun 2018 17:03:26 +0200
-Message-ID: <6a36db0d-e790-48d6-183a-263c355531b6@suse.com>
-References: <20180613210518.113983-1-ndesaulniers@google.com>
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Subject: Re: [PATCH V2] x86/efi: Free allocated memory if remap fails
+Date: Tue, 19 Jun 2018 19:36:45 -0700
+Message-ID: <1529462205.2333.83.camel@intel.com>
+References: <1529350614-15555-1-git-send-email-sai.praneeth.prakhya@intel.com>
+         <CAKv+Gu-yeXwLjd1Sp0jc41-9zVFOuxSBqMiHkivTLmT-u3Upjg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <virtualization-bounces@lists.linux-foundation.org>
-In-Reply-To: <20180613210518.113983-1-ndesaulniers@google.com>
-Content-Language: de-DE
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
-List-Post: <mailto:virtualization@lists.linux-foundation.org>
-List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
-Sender: virtualization-bounces@lists.linux-foundation.org
-Errors-To: virtualization-bounces@lists.linux-foundation.org
-To: Nick Desaulniers <ndesaulniers@google.com>, akpm@linux-foundation.org, hpa@zytor.com, mingo@redhat.com, tglx@linutronix.de
-Cc: kstewart@linuxfoundation.org, andrea.parri@amarulasolutions.com, linux-efi@vger.kernel.org, brijesh.singh@amd.com, jan.kiszka@siemens.com, will.deacon@arm.com, jarkko.sakkinen@linux.intel.com, linux-kernel@vger.kernel.org, yamada.masahiro@socionext.com, manojgupta@google.com, akataria@vmware.com, tweek@google.com, mawilcox@microsoft.com, x86@kernel.org, ghackmann@google.com, mka@chromium.org, geert@linux-m68k.org, rientjes@google.com, aryabinin@virtuozzo.com, thomas.lendacky@amd.com, arnd@arndb.de, linux-kbuild@vger.kernel.org, keescook@google.com, rostedt@goodmis.org, acme@redhat.com, caoj.fnst@cn.fujitsu.com, jpoimboe@redhat.com, sedat.dilek@gmail.com, boris.ostrovsky@oracle.com, virtualization@lists.linux-foundation.org, michal.lkml@markovi.net, tstellar@redhat.com, gregkh@linuxfoundation.org, ard.biesheuvel@linaro.org, astrachan@google.com, mjg59@google.com, pombre
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAKv+Gu-yeXwLjd1Sp0jc41-9zVFOuxSBqMiHkivTLmT-u3Upjg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>, Dave Hansen <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-On 13/06/18 23:05, Nick Desaulniers wrote:
-> paravirt depends on a custom calling convention (callee saved), but
-> expects this from a static inline function that it then forces to be
-> outlined. This is problematic because different compilers or flags can
-> then add a stack guard that violates the calling conventions.
+
+> > 
+> Thank you Sai.
 > 
-> Uses extern inline with the out-of-line definition in assembly to
-> prevent compilers from adding stack guards to the outlined version.
-> 
-> Other parts of the codebase overwrite KBUILD_CFLAGS, which is *extremely
-> problematic* for extern inline, as the sematics are completely the
-> opposite depending on what C standard is used.
-> http://blahg.josefsipek.net/?p=529
-> 
-> Changes since v4:
->   Take Arnd's and hpa's suggestions properly feature detect gnu_inline
->   attribute to support gcc 4.1.
-> 
-> Changes since v3:
->   Take Joe's suggestion to hoist __inline__ and __inline out of
->   conditional block.
-> 
-> Changes since v2:
->   Take hpa's _ASM_ARG patch into the set in order to simplify cross
->   32b/64b x86 assembly and rebase my final patch to use it.  Apply
->   Sedat's typo fix to commit message and sign off on it. Take Joe's
->   suggestion to simplify __inline__ and __inline. Add Arnd to list of
->   folks who made helpful suggestions.
-> 
-> Changes since v1:
->   Prefer gnu_inline function attribute instead of explicitly setting C
->   standard compiler flag in problematic Makefiles. We should instead
->   carefully evaluate if those Makefiles should be overwriting
->   KBUILD_CFLAGS at all. Dropped the previous first two patches and added
->   a new first patch.
-> 
-> H. Peter Anvin (1):
->   x86/asm: add _ASM_ARG* constants for argument registers to <asm/asm.h>
-> 
-> Nick Desaulniers (2):
->   compiler-gcc.h: add gnu_inline to all inline declarations
->   x86: paravirt: make native_save_fl extern inline
-> 
->  arch/x86/include/asm/asm.h      | 59 +++++++++++++++++++++++++++++++++
->  arch/x86/include/asm/irqflags.h |  2 +-
->  arch/x86/kernel/Makefile        |  1 +
->  arch/x86/kernel/irqflags.S      | 26 +++++++++++++++
->  include/linux/compiler-gcc.h    | 29 ++++++++++++----
->  5 files changed, 109 insertions(+), 8 deletions(-)
->  create mode 100644 arch/x86/kernel/irqflags.S
+> But this is not really what I meant.
 > 
 
-For the series:
+Ya.. sorry! about that. I had a hunch that you might be suggesting something
+like below but I went ahead with this implementation as it looked very simple
+(just 3 insertions and no deletions)
 
-Acked-by: Juergen Gross <jgross@suse.com>
+> How about we modify efi_memmap_alloc() like this
+> 
 
+It sounds like a good idea to me. Leaving aside the pros (which are obvious),
+the only con I could see is few extra checks and some code but I don't think
+it's an issue at all because this code is not in fast path and it dosen't
+impact performance. So, I will post a V3 with suggested changes.
 
-Juergen
+> @@ -39,10 +39,12 @@ static phys_addr_t __init
+> __efi_memmap_alloc_late(unsigned long size)
+>   * Returns the physical address of the allocated memory map on
+>   * success, zero on failure.
+>   */
+> -phys_addr_t __init efi_memmap_alloc(unsigned int num_entries)
+> +phys_addr_t __init efi_memmap_alloc(unsigned int num_entries, bool *late)
+>  {
+>         unsigned long size = num_entries * efi.memmap.desc_size;
+> 
+> +       if (late)
+> +               *late = slab_is_available();
+>         if (slab_is_available())
+>                 return __efi_memmap_alloc_late(size);
+> 
+> and introduce efi_memmap_free() as before, but pass it the 'late'
+> parameter you received from efi_memmap_alloc(). That way, it is the
+> caller's job to take care of this.
+> 
+
+Sure! makes sense.
+
+> Also, it seems to me that efi_arch_mem_reserve() leaks the old memory
+> map every time you create a new one, no?
+
+I think you are right. The issue I see is (please let me know if you think
+otherwise):
+1. efi_arch_mem_reserve() comes up with a new memory map and then tries to
+install it via efi_memmap_install().
+2. efi_memmap_install(), unmaps the existing memory map and installs the new
+memory map but doesn't free the memory used by the existing memory map.
+Hence, as you said, leaks the old memory map.
+
+If this you what you meant, I think, the issue is not just limited to
+efi_arch_mem_reserve() but to all the places that call efi_memmap_install().
+I think, we could solve it as below
+
+diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+index 678e85704054..50ae4ffbf058 100644
+--- a/drivers/firmware/efi/memmap.c
++++ b/drivers/firmware/efi/memmap.c
+@@ -228,6 +228,7 @@ int __init efi_memmap_install(phys_addr_t addr, unsigned
+int nr_map)
+        struct efi_memory_map_data data;
+ 
+        efi_memmap_unmap();
++       efi_memmap_free(efi.memmap.phys_map, efi.memmap.nr_map,
+efi.memmap.late);
+ 
+        data.phys_map = addr;
+        data.size = efi.memmap.desc_size * nr_map;
+
+Please let me know your thoughts on it.
+
+> That is a separate issue that
+> you may want to look into, but it affects the design of this API as
+> well.
+
+Probably, I could have misunderstood you here.. but I think the
+efi_memmap_free() API in V3 should work (without changes). Don't you think so?
+
+Regards,
+Sai
