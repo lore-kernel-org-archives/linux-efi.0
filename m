@@ -1,102 +1,49 @@
-From: Nick Desaulniers <ndesaulniers@google.com>
-Subject: [PATCH v6 2/3] x86/asm: add _ASM_ARG* constants for argument
- registers to <asm/asm.h>
-Date: Thu, 21 Jun 2018 09:23:23 -0700
-Message-ID: <20180621162324.36656-3-ndesaulniers@google.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH v6 3/3] x86: paravirt: make native_save_fl extern inline
+Date: Fri, 22 Jun 2018 04:24:02 +0200
+Message-ID: <20180622022402.GA24194@gmail.com>
 References: <20180621162324.36656-1-ndesaulniers@google.com>
+	<20180621162324.36656-4-ndesaulniers@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180621162324.36656-1-ndesaulniers@google.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: mingo@redhat.com, tglx@linutronix.de
-Cc: akpm@linux-foundation.org, hpa@zytor.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, virtualization@lists.linux-foundation.org, astrachan@google.com, manojgupta@google.com, ghackmann@google.com, sedat.dilek@gmail.com, tstellar@redhat.com, keescook@google.com, yamada.masahiro@socionext.com, michal.lkml@markovi.net, linux-kbuild@vger.kernel.org, geert@linux-m68k.org, will.deacon@arm.com, mawilcox@microsoft.com, arnd@arndb.de, rientjes@google.com, acme@redhat.com, pombredanne@nexb.com, aryabinin@virtuozzo.com, kstewart@linuxfoundation.org, boris.ostrovsky@oracle.com, jan.kiszka@siemens.com, rostedt@goodmis.org, kirill.shutemov@linux.intel.com, ard.biesheuvel@linaro.org, akataria@vmware.com, brijesh.singh@amd.com, caoj.fnst@cn.fujitsu.com, gregkh@l
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+Content-Disposition: inline
+In-Reply-To: <20180621162324.36656-4-ndesaulniers@google.com>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: Nick Desaulniers <ndesaulniers@google.com>
+Cc: kstewart@linuxfoundation.org, andrea.parri@amarulasolutions.com, linux-efi@vger.kernel.org, brijesh.singh@amd.com, jan.kiszka@siemens.com, jpoimboe@redhat.com, will.deacon@arm.com, jarkko.sakkinen@linux.intel.com, virtualization@lists.linux-foundation.org, yamada.masahiro@socionext.com, manojgupta@google.com, hpa@zytor.com, boris.ostrovsky@oracle.com, tweek@google.com, mawilcox@microsoft.com, x86@kernel.org, akataria@vmware.com, ghackmann@google.com, mingo@redhat.com, astrachan@google.com, rientjes@google.com, geert@linux-m68k.org, thomas.lendacky@amd.com, arnd@arndb.de, linux-kbuild@vger.kernel.org, pombredanne@nexb.com, rostedt@goodmis.org, acme@redhat.com, caoj.fnst@cn.fujitsu.com, aryabinin@virtuozzo.com, sedat.dilek@gmail.com, tglx@linutronix.de, jgross@suse.com, michal.lkml@markovi.net, tstellar@redhat.com, gregkh@linuxfoundation.org, mka@chromium.org, ard.bieshe
 List-Id: linux-efi@vger.kernel.org
 
-From: "H. Peter Anvin" <hpa@linux.intel.com>
 
-i386 and x86-64 uses different registers for arguments; make them
-available so we don't have to #ifdef in the actual code.
+* Nick Desaulniers <ndesaulniers@google.com> wrote:
 
-Native size and specified size (q, l, w, b) versions are provided.
+> native_save_fl() is marked static inline, but by using it as
+> a function pointer in arch/x86/kernel/paravirt.c, it MUST be outlined.
 
-Acked-by: Juergen Gross <jgross@suse.com>
-Reviewed-by: Sedat Dilek <sedat.dilek@gmail.com>
-Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
-Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
----
- arch/x86/include/asm/asm.h | 59 ++++++++++++++++++++++++++++++++++++++
- 1 file changed, 59 insertions(+)
+> --- a/arch/x86/include/asm/irqflags.h
+> +++ b/arch/x86/include/asm/irqflags.h
+> @@ -13,7 +13,7 @@
+>   * Interrupt control:
+>   */
+>  
+> -static inline unsigned long native_save_fl(void)
+> +extern inline unsigned long native_save_fl(void)
+>  {
+>  	unsigned long flags;
+>  
 
-diff --git a/arch/x86/include/asm/asm.h b/arch/x86/include/asm/asm.h
-index 219faaec51df..990770f9e76b 100644
---- a/arch/x86/include/asm/asm.h
-+++ b/arch/x86/include/asm/asm.h
-@@ -46,6 +46,65 @@
- #define _ASM_SI		__ASM_REG(si)
- #define _ASM_DI		__ASM_REG(di)
- 
-+#ifndef __x86_64__
-+/* 32 bit */
-+
-+#define _ASM_ARG1	_ASM_AX
-+#define _ASM_ARG2	_ASM_DX
-+#define _ASM_ARG3	_ASM_CX
-+
-+#define _ASM_ARG1L	eax
-+#define _ASM_ARG2L	edx
-+#define _ASM_ARG3L	ecx
-+
-+#define _ASM_ARG1W	ax
-+#define _ASM_ARG2W	dx
-+#define _ASM_ARG3W	cx
-+
-+#define _ASM_ARG1B	al
-+#define _ASM_ARG2B	dl
-+#define _ASM_ARG3B	cl
-+
-+#else
-+/* 64 bit */
-+
-+#define _ASM_ARG1	_ASM_DI
-+#define _ASM_ARG2	_ASM_SI
-+#define _ASM_ARG3	_ASM_DX
-+#define _ASM_ARG4	_ASM_CX
-+#define _ASM_ARG5	r8
-+#define _ASM_ARG6	r9
-+
-+#define _ASM_ARG1Q	rdi
-+#define _ASM_ARG2Q	rsi
-+#define _ASM_ARG3Q	rdx
-+#define _ASM_ARG4Q	rcx
-+#define _ASM_ARG5Q	r8
-+#define _ASM_ARG6Q	r9
-+
-+#define _ASM_ARG1L	edi
-+#define _ASM_ARG2L	esi
-+#define _ASM_ARG3L	edx
-+#define _ASM_ARG4L	ecx
-+#define _ASM_ARG5L	r8d
-+#define _ASM_ARG6L	r9d
-+
-+#define _ASM_ARG1W	di
-+#define _ASM_ARG2W	si
-+#define _ASM_ARG3W	dx
-+#define _ASM_ARG4W	cx
-+#define _ASM_ARG5W	r8w
-+#define _ASM_ARG6W	r9w
-+
-+#define _ASM_ARG1B	dil
-+#define _ASM_ARG2B	sil
-+#define _ASM_ARG3B	dl
-+#define _ASM_ARG4B	cl
-+#define _ASM_ARG5B	r8b
-+#define _ASM_ARG6B	r9b
-+
-+#endif
-+
- /*
-  * Macros to generate condition code outputs from inline assembly,
-  * The output operand must be type "bool".
--- 
-2.18.0.rc2.346.g013aa6912e-goog
+What's the code generation effect of this on say a defconfig kernel vmlinux with 
+paravirt enabled?
+
+Thanks,
+
+	Ingo
