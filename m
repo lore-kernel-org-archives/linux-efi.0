@@ -1,33 +1,51 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [GIT PULL 0/1] EFI fix for v4.18
-Date: Fri, 22 Jun 2018 08:42:21 +0200
-Message-ID: <20180622064222.11633-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/1] efi/libstub/tpm: Initialize efi_physical_addr_t vars to zero for mixed mode
+Date: Fri, 22 Jun 2018 08:42:22 +0200
+Message-ID: <20180622064222.11633-2-ard.biesheuvel@linaro.org>
+References: <20180622064222.11633-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180622064222.11633-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: ard.biesheuvel@linaro.org, linux-kernel@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>
+Cc: ard.biesheuvel@linaro.org, Hans de Goede <hdegoede@redhat.com>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-The following changes since commit ce397d215ccd07b8ae3f71db689aedb85d56ab40:
+From: Hans de Goede <hdegoede@redhat.com>
 
-  Linux 4.18-rc1 (2018-06-17 08:04:49 +0900)
+Commit 79832f0b5f71 ("efi/libstub/tpm: Initialize pointer variables to zero
+for mixed mode") fixes a problem with the tpm code on mixed mode (64 bit
+kernel on 32 bit UEFI), where 64-bit pointer variables are not fully
+initialized by the 32-bit EFI code.
 
-are available in the Git repository at:
+A similar problem applies to the efi_physical_addr_t variables which
+are written by the get_event_log EFI call. Even though efi_physical_addr_t
+is 64 bit everywhere it seems that some 32 bit UEFI implementations only
+fill in the lower 32 bits when passed a pointer to an efi_physical_addr_t
+to fill.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
+This commit initializes these to 0 to, to ensure the upper 32 bits are
+0 in mixed mode. This fixes recent kernels sometimes hanging during
+early boot on mixed mode UEFI systems.
 
-for you to fetch changes up to 9cd00e314dee25f9b2e2c47759988cb353165011:
-
-  efi/libstub/tpm: Initialize efi_physical_addr_t vars to zero for mixed mode (2018-06-22 08:36:20 +0200)
-
-----------------------------------------------------------------
-EFI fix for v4.18:
-- initialize some efi_physical_addr_t variables to 0 so that buggy 32-bit
-  TPM UEFI code that only sets the lower 32 bits will work as expected.
-
-----------------------------------------------------------------
-Hans de Goede (1):
-      efi/libstub/tpm: Initialize efi_physical_addr_t vars to zero for mixed mode
-
+Cc: <stable@vger.kernel.org> # v4.16+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
  drivers/firmware/efi/libstub/tpm.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
+index caa37a6dd9d4..a90b0b8fc69a 100644
+--- a/drivers/firmware/efi/libstub/tpm.c
++++ b/drivers/firmware/efi/libstub/tpm.c
+@@ -64,7 +64,7 @@ static void efi_retrieve_tpm2_eventlog_1_2(efi_system_table_t *sys_table_arg)
+ 	efi_guid_t tcg2_guid = EFI_TCG2_PROTOCOL_GUID;
+ 	efi_guid_t linux_eventlog_guid = LINUX_EFI_TPM_EVENT_LOG_GUID;
+ 	efi_status_t status;
+-	efi_physical_addr_t log_location, log_last_entry;
++	efi_physical_addr_t log_location = 0, log_last_entry = 0;
+ 	struct linux_efi_tpm_eventlog *log_tbl = NULL;
+ 	unsigned long first_entry_addr, last_entry_addr;
+ 	size_t log_size, last_entry_size;
+-- 
+2.17.1
