@@ -1,13 +1,13 @@
 From: guomin chen <guomin.chen@suse.com>
 Subject: [PATCH 1/1] resource: Fixed iomem resource release failed on release_mem_region_adjustable() when memory node or cpu node hot-remove.
-Date: Fri, 22 Jun 2018 20:01:38 +0800
-Message-ID: <20180622120138.5411-1-guomin.chen@suse.com>
+Date: Fri, 22 Jun 2018 19:52:52 +0800
+Message-ID: <20180622115252.5174-1-guomin.chen@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Thomas Gleixner <tglx@linutronix.de>, Brijesh Singh <brijesh.singh@amd.com>, Borislav Petkov <bp@suse.de>, Andrew Morton <akpm@linux-foundation.org>
-Cc: Takashi Iwai <tiwai@suse.de>, Lee Chun-Yi <JLee@suse.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, guomin chen <guomin.chen@suse.com>, Tom Lendacky <thomas.lendacky@amd.com>, Bjorn Helgaas <bhelgaas@google.com>, Yaowei Bai <baiyaowei@cmss.chinamobile.com>, Dan Williams <dan.j.williams@intel.com>
+Cc: Takashi Iwai <tiwai@suse.de>, Lee Chun-Yi <JLee@suse.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, guomin chen <guomin.chen@suse.com>, Tom Lendacky <thomas.lendacky@amd.com>, Bjorn Helgaas <bhelgaas@google.com>, Yaowei Bai <baiyaowei@cmss.chinamobile.com>, Dan Williams <dan.j.williams@intel.com>, linux-kernel@vger.kernel.orgyour.patch
 List-Id: linux-efi@vger.kernel.org
 
 We've got a bug report indicating the hot-remove node resource
@@ -54,7 +54,7 @@ Cc: Yaowei Bai <baiyaowei@cmss.chinamobile.com>
 Cc: Takashi Iwai <tiwai@suse.de>
 Cc: Dan Williams <dan.j.williams@intel.com>
 Cc: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org your.patch
 Cc: Lee Chun-Yi <JLee@suse.com>
 Signed-off-by: guomin chen <guomin.chen@suse.com>
 ---
