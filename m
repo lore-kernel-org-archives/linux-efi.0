@@ -1,150 +1,77 @@
-From: Guomin Chen <guomin.chen@suse.com>
-Subject: RE: [PATCH 1/1] resource: Fixed iomem resource release failed on
- release_mem_region_adjustable() when memory node or cpu node hot-remove.
-Date: Sat, 23 Jun 2018 05:53:40 +0000
-Message-ID: <SN1PR18MB2143CB9E209AC070DB0EC8029C740@SN1PR18MB2143.namprd18.prod.outlook.com>
-References: <20180622120138.5411-1-guomin.chen@suse.com>
- <20180622231930.GA2834@bhelgaas-glaptop.roam.corp.google.com>
+From: Wilfried Klaebe <linux-kernel@lebenslange-mailadresse.de>
+Subject: [PATCH] make radeon driver find ATOM BIOS again on 64-bit EFI systems
+Date: Sat, 23 Jun 2018 19:43:22 +0200
+Message-ID: <20180623174258.GA15904@chaos.in-kiel.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180622231930.GA2834@bhelgaas-glaptop.roam.corp.google.com>
-Content-Language: en-US
+Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: Bjorn Helgaas <helgaas@kernel.org>
-Cc: Brijesh Singh <brijesh.singh@amd.com>, Tom Lendacky <thomas.lendacky@amd.com>, Yaowei Bai <baiyaowei@cmss.chinamobile.com>, Bjorn Helgaas <bhelgaas@google.com>, Toshi Kani <toshi.kani@hpe.com>, Dan Williams <dan.j.williams@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Andrew Morton <akpm@linux-foundation.org>, Joey Lee <JLee@suse.com>, Borislav Petkov <bp@suse.de>, Takashi Iwai <tiwai@suse.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>
+Cc: x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-SGkgDQoJVGhlIHJlcG9ydCBsaW5rIGZvciB0aGlzIGlzc3VlIGlzOiBodHRwczovL2J1Z3ppbGxh
-LnN1c2UuY29tL3Nob3dfYnVnLmNnaT9pZD0xMDkyNjg3DQoNClRoYW5rcyBhbmQgcmVnYXJkcw0K
-DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEJqb3JuIEhlbGdhYXMgW21h
-aWx0bzpoZWxnYWFzQGtlcm5lbC5vcmddDQo+IFNlbnQ6IDIwMTjE6jbUwjIzyNUgNzoyMA0KPiBU
-bzogR3VvbWluIENoZW4gPGd1b21pbi5jaGVuQHN1c2UuY29tPg0KPiBDYzogQnJpamVzaCBTaW5n
-aCA8YnJpamVzaC5zaW5naEBhbWQuY29tPjsgVG9tIExlbmRhY2t5DQo+IDx0aG9tYXMubGVuZGFj
-a3lAYW1kLmNvbT47IFlhb3dlaSBCYWkNCj4gPGJhaXlhb3dlaUBjbXNzLmNoaW5hbW9iaWxlLmNv
-bT47IEJqb3JuIEhlbGdhYXMgPGJoZWxnYWFzQGdvb2dsZS5jb20+Ow0KPiBUb3NoaSBLYW5pIDx0
-b3NoaS5rYW5pQGhwZS5jb20+OyBEYW4gV2lsbGlhbXMgPGRhbi5qLndpbGxpYW1zQGludGVsLmNv
-bT47DQo+IFRob21hcyBHbGVpeG5lciA8dGdseEBsaW51dHJvbml4LmRlPjsgQW5kcmV3IE1vcnRv
-bg0KPiA8YWtwbUBsaW51eC1mb3VuZGF0aW9uLm9yZz47IEpvZXkgTGVlIDxKTGVlQHN1c2UuY29t
-PjsgQm9yaXNsYXYgUGV0a292DQo+IDxicEBzdXNlLmRlPjsgVGFrYXNoaSBJd2FpIDx0aXdhaUBz
-dXNlLmRlPjsgbGludXgtZWZpQHZnZXIua2VybmVsLm9yZzsNCj4gbGludXgta2VybmVsQHZnZXIu
-a2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIDEvMV0gcmVzb3VyY2U6IEZpeGVkIGlv
-bWVtIHJlc291cmNlIHJlbGVhc2UgZmFpbGVkIG9uDQo+IHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1
-c3RhYmxlKCkgd2hlbiBtZW1vcnkgbm9kZSBvciBjcHUgbm9kZQ0KPiBob3QtcmVtb3ZlLg0KPiAN
-Cj4gWytjYyBUb3NoaV0NCj4gDQo+IE9uIEZyaSwgSnVuIDIyLCAyMDE4IGF0IDA4OjAxOjM4UE0g
-KzA4MDAsIGd1b21pbiBjaGVuIHdyb3RlOg0KPiA+IFdlJ3ZlIGdvdCBhIGJ1ZyByZXBvcnQgaW5k
-aWNhdGluZyB0aGUgaG90LXJlbW92ZSBub2RlIHJlc291cmNlIHJlbGVhc2UNCj4gPiBmYWlsZWQs
-d2hlbiB0aGUgbWVtb3J5IG9uIHRoaXMgbm9kZSBpcyBkaXZpZGVkIGludG8gc2V2ZXJhbA0KPiA+
-IHNlY3Rpb25zLmJlY2F1c2UgdGhlIHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKCkgY2Fu
-IG9ubHkgcmVsZWFzZQ0KPiA+IG9uZSByZXNvdXJjZSB0aGF0IG11c3QgYmUgW3N0YXJ0LGVuZF0u
-DQo+IA0KPiBDYW4geW91IHBsZWFzZSBpbmNsdWRlIGEgVVJMIGZvciB0aGUgYnVnIHJlcG9ydD8g
-IFRoYXQncyB1c2VmdWwgZm9yIGFkZGl0aW9uYWwNCj4gZGV0YWlscyBhbmQgZ2l2ZXMgaGludHMg
-YWJvdXQgaG93IGZ1dHVyZSBjaGFuZ2VzIGluIHRoaXMgYXJlYSBtaWdodCBiZSB0ZXN0ZWQuDQo+
-IA0KPiByZWxlYXNlX21lbV9yZWdpb25fYWRqdXN0YWJsZSgpIGFuZCB0aGUgb25seSBjYWxsIHRv
-IGl0IHdlcmUgYWRkZWQgYnkgVG9zaGkNCj4gKGNjJ2QpOg0KPiANCj4gICA4MjVmNzg3YmI0OTYg
-KCJyZXNvdXJjZTogYWRkIHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKCkiKQ0KPiAgIGZl
-NzRlYmIxMDZhNSAoIm1tOiBjaGFuZ2UgX19yZW1vdmVfcGFnZXMoKSB0byBjYWxsDQo+IHJlbGVh
-c2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKCkiKQ0KPiANCj4gPiBJbiBteSBjYXNlLCB0aGUgQklP
-UyBzdXBwb3J0cyBmYXVsdHkgbWVtb3J5IGlzb2xhdGlvbi4gaWYgQklPUw0KPiA+IGRldGVjdGVk
-IGJhZCBtZW1vcnkgYmxvY2ssIHRoZSBCSU9TIHdpbGwgaXNvbGF0ZXMgdGhpcyBiYWRibG9jay4N
-Cj4gPiBBbmQgc2V0IHRoaXMgYmFkYmxvY2sgbWVtb3J5IHRvIEVmaVVudXNhYmxlTWVtb3J5IGlu
-IEVGSSBtZW1vcnkgbWFwDQo+ID4gYmFzZSBvbiBVRUZJIDIuNyBzcGVjLkZvciBleGFtcGxlIGlu
-IG15IHN5c3RlbSwgdGhlIG1lbW9yeSByYW5nZSBvbg0KPiA+IG5vZGUyIGlzIFttZW0gMHgwMDAw
-MDgwMDAwMDAwMDAwLTB4MDAwMDA4MDdmZmZmZmZmZl0uYnV0IHRoZSBCSU9TDQo+ID4gZGV0ZWN0
-ZWQgdGhlIFs4MDA0ZTAwMDAwMC04MDA0ZTBmZmZmZl0gaXMgYSBiYWRibG9jayBtZW1vcnkuDQo+
-ID4gU28gdGhlIG1lbW9yeSBvbiBub2RlMiBzZWVtIGxpa2UgdGhpczoNCj4gPiAgICAJCTgwMDAw
-MDAwMDAwLTgwMDRkZmZmZmZmIDogU3lzdGVtIFJBTQ0KPiA+IAkJODAwNGUwMDAwMDAtODAwNGUw
-ZmZmZmYgOiBVbnVzYWJsZSBtZW1vcnkNCj4gPiAJCTgwMDRlMTAwMDAwLTgwN2ZmZmZmZmZmIDog
-U3lzdGVtIFJBTQ0KPiA+DQo+ID4gTm93LCB3aGVuIG9mZmxpbmUgdGhlIGNwdSBub2RlMix0aGUg
-a2VybmVsIHdpbGwgdHJ5IHRvIHJlbGVhc2UNCj4gPiBpb3Jlc291cmNlIFttZW0gMHgwMDAwMDgw
-MDAwMDAwMDAwLTB4MDAwMDA4MDdmZmZmZmZmZl0uIGF0IHRoaXMgdGltZSwNCj4gPiB0aGUga2Vy
-bmVsIHdpbGwgcmVsZWFzZSBmYWlsZWQsYW5kIG91dHB1dCBlcnJvciBtZXNzYWdlOg0KPiA+ICJV
-bmFibGUgdG8gcmVsZWFzZSByZXNvdXJjZSA8MHgwMDAwMDgwMDAwMDAwMDAwLTB4MDAwMDA4MDdm
-ZmZmZmZmZj4NCj4gPiAoLTIyKSIuDQo+ID4gQmVjYXVzZSB0aGUgcmVsZWFzZV9tZW1fcmVnaW9u
-X2FkanVzdGFibGUoKSBjYW4gb25seSByZWxlYXNlIG9uZQ0KPiA+IHJlc291cmNlIHRoYXQgbXVz
-dCBiZSBbMHgwMDAwMDgwMDAwMDAwMDAwICwgMHgwMDAwMDgwN2ZmZmZmZmZmXS4NCj4gPiBidXQg
-bm93LHRoZSBpb21lbSByZXNvdXJjZSBvbiBub2RlMiBbMHgwMDAwMDgwMDAwMDAwMDAwLA0KPiA+
-IDB4MDAwMDA4MDdmZmZmZmZmZl0gYXJlIGRpdmlkZWQgaW50byB0aHJlZSByZXNvdXJjZXMgWzgw
-MDAwMDAwMDAwLQ0KPiA+IDgwMDRkZmZmZmZmXSxbODAwNGUwMDAwMDAtODAwNGUwZmZmZmZdYW5k
-WzgwMDRlMTAwMDAwLTgwN2ZmZmZmZmZmXS4NCj4gPg0KPiA+IFRoaXMgcGF0Y2ggaGVscCB0byBS
-ZWxlYXNlIG11bHRpcGxlIGlvbWVtIHJlc291cmNlcyBhdCBvbmNlIHdoZW4gbm9kZQ0KPiA+IGhv
-dC1yZW1vdmUuIFN1Y2ggYXMgaW4gYWJvdmUgY2FzZSwgd2hlbiBob3QtcmVtb3ZlIHRoZSBjcHUg
-bm9kZTIsdGhlDQo+ID4ga2VybmVsIHdpbGwgdHJ5IHRvIHJlbGVhc2UgcmVzb3VyY2UgWzB4MDAw
-MDA4MDAwMDAwMDAwMC0NCj4gPiAweDAwMDAwODA3ZmZmZmZmZmZdLkFuZCB0aGlzIHBhdGNoIHdp
-bGwgcmVsZWFzZSB0aHJlZSByZXNvdXJjZXMNCj4gPiBbODAwMDAwMDAwMDAtODAwNGRmZmZmZmZd
-LFs4MDA0ZTAwMDAwMC04MDA0ZTBmZmZmZl0gYW5kDQo+ID4gWzgwMDRlMTAwMDAwLTgwN2ZmZmZm
-ZmZmXS4NCj4gPg0KPiA+IENjOiBUaG9tYXMgR2xlaXhuZXIgPHRnbHhAbGludXRyb25peC5kZT4N
-Cj4gPiBDYzogQnJpamVzaCBTaW5naCA8YnJpamVzaC5zaW5naEBhbWQuY29tPg0KPiA+IENjOiBC
-b3Jpc2xhdiBQZXRrb3YgPGJwQHN1c2UuZGU+DQo+ID4gQ2M6IEFuZHJldyBNb3J0b24gPGFrcG1A
-bGludXgtZm91bmRhdGlvbi5vcmc+DQo+ID4gQ2M6IFRvbSBMZW5kYWNreSA8dGhvbWFzLmxlbmRh
-Y2t5QGFtZC5jb20+DQo+ID4gQ2M6IEJqb3JuIEhlbGdhYXMgPGJoZWxnYWFzQGdvb2dsZS5jb20+
-DQo+ID4gQ2M6IFlhb3dlaSBCYWkgPGJhaXlhb3dlaUBjbXNzLmNoaW5hbW9iaWxlLmNvbT4NCj4g
-PiBDYzogVGFrYXNoaSBJd2FpIDx0aXdhaUBzdXNlLmRlPg0KPiA+IENjOiBEYW4gV2lsbGlhbXMg
-PGRhbi5qLndpbGxpYW1zQGludGVsLmNvbT4NCj4gPiBDYzogbGludXgtZWZpQHZnZXIua2VybmVs
-Lm9yZw0KPiA+IENjOiBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnDQo+ID4gQ2M6IExlZSBD
-aHVuLVlpIDxKTGVlQHN1c2UuY29tPg0KPiA+IFNpZ25lZC1vZmYtYnk6IGd1b21pbiBjaGVuIDxn
-dW9taW4uY2hlbkBzdXNlLmNvbT4NCj4gPiAtLS0NCj4gPiAga2VybmVsL3Jlc291cmNlLmMgfCA3
-Mw0KPiA+ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0NCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDQzIGluc2VydGlvbnMoKyksIDMwIGRlbGV0aW9u
-cygtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2tlcm5lbC9yZXNvdXJjZS5jIGIva2VybmVsL3Jl
-c291cmNlLmMgaW5kZXgNCj4gPiAzMGUxYmM2ODUwM2IuLjk1OWJjY2U0YzQwNSAxMDA2NDQNCj4g
-PiAtLS0gYS9rZXJuZWwvcmVzb3VyY2UuYw0KPiA+ICsrKyBiL2tlcm5lbC9yZXNvdXJjZS5jDQo+
-ID4gQEAgLTEyNDAsNiArMTI0MCw3IEBAIGludCByZWxlYXNlX21lbV9yZWdpb25fYWRqdXN0YWJs
-ZShzdHJ1Y3QNCj4gcmVzb3VyY2UgKnBhcmVudCwNCj4gPiAgCXN0cnVjdCByZXNvdXJjZSAqcmVz
-Ow0KPiA+ICAJc3RydWN0IHJlc291cmNlICpuZXdfcmVzOw0KPiA+ICAJcmVzb3VyY2Vfc2l6ZV90
-IGVuZDsNCj4gPiArCXJlc291cmNlX3NpemVfdCBuZXdfc3RhcnQgPSBzdGFydDsNCj4gPiAgCWlu
-dCByZXQgPSAtRUlOVkFMOw0KPiA+DQo+ID4gIAllbmQgPSBzdGFydCArIHNpemUgLSAxOw0KPiA+
-IEBAIC0xMjU3LDcgKzEyNTgsNyBAQCBpbnQgcmVsZWFzZV9tZW1fcmVnaW9uX2FkanVzdGFibGUo
-c3RydWN0DQo+IHJlc291cmNlICpwYXJlbnQsDQo+ID4gIAkJCWJyZWFrOw0KPiA+DQo+ID4gIAkJ
-LyogbG9vayBmb3IgdGhlIG5leHQgcmVzb3VyY2UgaWYgaXQgZG9lcyBub3QgZml0IGludG8gKi8N
-Cj4gPiAtCQlpZiAocmVzLT5zdGFydCA+IHN0YXJ0IHx8IHJlcy0+ZW5kIDwgZW5kKSB7DQo+ID4g
-KwkJaWYgKHJlcy0+ZW5kIDwgbmV3X3N0YXJ0KSB7DQo+ID4gIAkJCXAgPSAmcmVzLT5zaWJsaW5n
-Ow0KPiA+ICAJCQljb250aW51ZTsNCj4gPiAgCQl9DQo+ID4gQEAgLTEyNzEsNDIgKzEyNzIsNTQg
-QEAgaW50IHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKHN0cnVjdA0KPiByZXNvdXJjZSAq
-cGFyZW50LA0KPiA+ICAJCX0NCj4gPg0KPiA+ICAJCS8qIGZvdW5kIHRoZSB0YXJnZXQgcmVzb3Vy
-Y2U7IGxldCdzIGFkanVzdCBhY2NvcmRpbmdseSAqLw0KPiA+IC0JCWlmIChyZXMtPnN0YXJ0ID09
-IHN0YXJ0ICYmIHJlcy0+ZW5kID09IGVuZCkgew0KPiA+ICsJCWlmIChyZXMtPnN0YXJ0ID09IG5l
-d19zdGFydCAmJiByZXMtPmVuZCA9PSBlbmQpIHsNCj4gPiAgCQkJLyogZnJlZSB0aGUgd2hvbGUg
-ZW50cnkgKi8NCj4gPiAgCQkJKnAgPSByZXMtPnNpYmxpbmc7DQo+ID4gIAkJCWZyZWVfcmVzb3Vy
-Y2UocmVzKTsNCj4gPiAgCQkJcmV0ID0gMDsNCj4gPiAtCQl9IGVsc2UgaWYgKHJlcy0+c3RhcnQg
-PT0gc3RhcnQgJiYgcmVzLT5lbmQgIT0gZW5kKSB7DQo+ID4gLQkJCS8qIGFkanVzdCB0aGUgc3Rh
-cnQgKi8NCj4gPiAtCQkJcmV0ID0gX19hZGp1c3RfcmVzb3VyY2UocmVzLCBlbmQgKyAxLA0KPiA+
-IC0JCQkJCQlyZXMtPmVuZCAtIGVuZCk7DQo+ID4gLQkJfSBlbHNlIGlmIChyZXMtPnN0YXJ0ICE9
-IHN0YXJ0ICYmIHJlcy0+ZW5kID09IGVuZCkgew0KPiA+IC0JCQkvKiBhZGp1c3QgdGhlIGVuZCAq
-Lw0KPiA+IC0JCQlyZXQgPSBfX2FkanVzdF9yZXNvdXJjZShyZXMsIHJlcy0+c3RhcnQsDQo+ID4g
-LQkJCQkJCXN0YXJ0IC0gcmVzLT5zdGFydCk7DQo+ID4gKwkJfSBlbHNlIGlmIChyZXMtPmVuZCA+
-IGVuZCkgew0KPiA+ICsJCQlpZiAocmVzLT5zdGFydCA+PSBuZXdfc3RhcnQpIHsNCj4gPiArCQkJ
-CS8qIGFkanVzdCB0aGUgc3RhcnQgKi8NCj4gPiArCQkJCXJldCA9IF9fYWRqdXN0X3Jlc291cmNl
-KHJlcywgZW5kICsgMSwNCj4gPiArCQkJCQkJCXJlcy0+ZW5kIC0gZW5kKTsNCj4gPiArCQkJfSBl
-bHNlIHsNCj4gPiArCQkJCS8qIHNwbGl0IGludG8gdHdvIGVudHJpZXMgKi8NCj4gPiArCQkJCWlm
-ICghbmV3X3Jlcykgew0KPiA+ICsJCQkJCXJldCA9IC1FTk9NRU07DQo+ID4gKwkJCQkJYnJlYWs7
-DQo+ID4gKwkJCQl9DQo+ID4gKwkJCQluZXdfcmVzLT5uYW1lID0gcmVzLT5uYW1lOw0KPiA+ICsJ
-CQkJbmV3X3Jlcy0+c3RhcnQgPSBlbmQgKyAxOw0KPiA+ICsJCQkJbmV3X3Jlcy0+ZW5kID0gcmVz
-LT5lbmQ7DQo+ID4gKwkJCQluZXdfcmVzLT5mbGFncyA9IHJlcy0+ZmxhZ3M7DQo+ID4gKwkJCQlu
-ZXdfcmVzLT5kZXNjID0gcmVzLT5kZXNjOw0KPiA+ICsJCQkJbmV3X3Jlcy0+cGFyZW50ID0gcmVz
-LT5wYXJlbnQ7DQo+ID4gKwkJCQluZXdfcmVzLT5zaWJsaW5nID0gcmVzLT5zaWJsaW5nOw0KPiA+
-ICsJCQkJbmV3X3Jlcy0+Y2hpbGQgPSBOVUxMOw0KPiA+ICsNCj4gPiArCQkJCXJldCA9IF9fYWRq
-dXN0X3Jlc291cmNlKHJlcywgcmVzLT5zdGFydCwNCj4gPiArCQkJCQkJCW5ld19zdGFydCAtIHJl
-cy0+c3RhcnQpOw0KPiA+ICsJCQkJaWYgKHJldCkNCj4gPiArCQkJCQlicmVhazsNCj4gPiArCQkJ
-CXJlcy0+c2libGluZyA9IG5ld19yZXM7DQo+ID4gKwkJCQluZXdfcmVzID0gTlVMTDsNCj4gPiAr
-CQkJfQ0KPiA+ICAJCX0gZWxzZSB7DQo+ID4gLQkJCS8qIHNwbGl0IGludG8gdHdvIGVudHJpZXMg
-Ki8NCj4gPiAtCQkJaWYgKCFuZXdfcmVzKSB7DQo+ID4gLQkJCQlyZXQgPSAtRU5PTUVNOw0KPiA+
-IC0JCQkJYnJlYWs7DQo+ID4gKwkJCWlmIChyZXMtPnN0YXJ0IDwgbmV3X3N0YXJ0KSB7DQo+ID4g
-KwkJCQkvKiBhZGp1c3QgdGhlIGVuZCAqLw0KPiA+ICsJCQkJcmV0ID0gX19hZGp1c3RfcmVzb3Vy
-Y2UocmVzLCByZXMtPnN0YXJ0LA0KPiA+ICsJCQkJCQkJbmV3X3N0YXJ0IC0gcmVzLT5zdGFydCk7
-DQo+ID4gKwkJCQluZXdfc3RhcnQgPSByZXMtPmVuZCsxOw0KPiA+ICsJCQkJcCA9ICZyZXMtPnNp
-Ymxpbmc7DQo+ID4gKwkJCX0gZWxzZSB7DQo+ID4gKwkJCQluZXdfc3RhcnQgPSByZXMtPmVuZCsx
-Ow0KPiA+ICsJCQkJKnAgPSByZXMtPnNpYmxpbmc7DQo+ID4gKwkJCQlmcmVlX3Jlc291cmNlKHJl
-cyk7DQo+ID4gKwkJCQlyZXQgPSAwOw0KPiA+ICAJCQl9DQo+ID4gLQkJCW5ld19yZXMtPm5hbWUg
-PSByZXMtPm5hbWU7DQo+ID4gLQkJCW5ld19yZXMtPnN0YXJ0ID0gZW5kICsgMTsNCj4gPiAtCQkJ
-bmV3X3Jlcy0+ZW5kID0gcmVzLT5lbmQ7DQo+ID4gLQkJCW5ld19yZXMtPmZsYWdzID0gcmVzLT5m
-bGFnczsNCj4gPiAtCQkJbmV3X3Jlcy0+ZGVzYyA9IHJlcy0+ZGVzYzsNCj4gPiAtCQkJbmV3X3Jl
-cy0+cGFyZW50ID0gcmVzLT5wYXJlbnQ7DQo+ID4gLQkJCW5ld19yZXMtPnNpYmxpbmcgPSByZXMt
-PnNpYmxpbmc7DQo+ID4gLQkJCW5ld19yZXMtPmNoaWxkID0gTlVMTDsNCj4gPiAtDQo+ID4gLQkJ
-CXJldCA9IF9fYWRqdXN0X3Jlc291cmNlKHJlcywgcmVzLT5zdGFydCwNCj4gPiAtCQkJCQkJc3Rh
-cnQgLSByZXMtPnN0YXJ0KTsNCj4gPiAtCQkJaWYgKHJldCkNCj4gPiAtCQkJCWJyZWFrOw0KPiA+
-IC0JCQlyZXMtPnNpYmxpbmcgPSBuZXdfcmVzOw0KPiA+IC0JCQluZXdfcmVzID0gTlVMTDsNCj4g
-PiArCQkJaWYgKHJlcy0+ZW5kIDwgZW5kKQ0KPiA+ICsJCQkJY29udGludWU7DQo+ID4gIAkJfQ0K
-PiA+IC0NCj4gPiAgCQlicmVhazsNCj4gPiAgCX0NCj4gPg0KPiA+IC0tDQo+ID4gMi4xMi4zDQo+
-ID4NCg0K
+make radeon driver find ATOM BIOS again on 64-bit EFI systems
+
+Commit 2c3625cb9fa2c477d5877a1819e29d6a902e5fef ("efi/x86: Fold
+__setup_efi_pci32() and __setup_efi_pci64() into one function")
+broke finding radeon's BIOS ROM on Apple MacBook Pro 8,2. Fix.
+
+
+On my Apple MacBook Pro 8,2, Linux 4.18-rc1 was unable to locate a BIOS
+ROM for the radeon GPU. Comparing Linux 4.17 and 4.18-rc1 dmesg:
+
+ radeon 0000:01:00.0: Invalid PCI ROM header signature: expecting 0xaa55, got 0x0000
+ radeon 0000:01:00.0: Invalid PCI ROM header signature: expecting 0xaa55, got 0x0000
+-ATOM BIOS: Apple
++[drm:radeon_get_bios [radeon]] *ERROR* Unable to locate a BIOS ROM
+
+Bisecting found 2c3625cb9fa2c477d5877a1819e29d6a902e5fef.
+
+Comparing the old __setup_efi_pci32 and __setup_efi_pci64, and looking
+at what the new __setup_efi_pci does, I noticed that the first does
+
+        status = efi_early->call(pci->attributes, pci,
+                                 EfiPciIoAttributeOperationGet, 0, 0,
+                                 &attributes);
+
+while the second does
+
+        status = efi_early->call(pci->attributes, pci,
+                                 EfiPciIoAttributeOperationGet, 0,
+                                 &attributes);
+
+(note the difference of one "0, "), while the third has two occurences
+of "0, " too in it's EfiPciIoAttributeOperationGet call construct.
+
+Testing confirmed my machine works as expected with the variant with
+just one "0, "; I cannot test if this is true for other 64-bit EFI
+machines or maybe even 32-bit EFI machines.
+
+
+Signed-off-by: Wilfried Klaebe <linux-kernel@lebenslange-mailadresse.de>
+Fixes: 2c3625cb9fa2 ("efi/x86: Fold __setup_efi_pci32() and __setup_efi_pci64() into one function")
+
+ 
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index a8a8642d2b0b..1b348610bd86 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -117,9 +117,14 @@ __setup_efi_pci(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
+ 	uint64_t attributes, romsize;
+ 	void *romimage;
+ 
+-	status = efi_call_proto(efi_pci_io_protocol, attributes, pci,
+-				EfiPciIoAttributeOperationGet, 0, 0,
+-				&attributes);
++	if (efi_early->is64)
++		status = efi_call_proto(efi_pci_io_protocol, attributes, pci,
++					EfiPciIoAttributeOperationGet, 0,
++					&attributes);
++	else
++		status = efi_call_proto(efi_pci_io_protocol, attributes, pci,
++					EfiPciIoAttributeOperationGet, 0, 0,
++					&attributes);
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+ 
