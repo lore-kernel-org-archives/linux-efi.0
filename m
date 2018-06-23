@@ -1,188 +1,150 @@
-From: Bjorn Helgaas <helgaas@kernel.org>
-Subject: Re: [PATCH 1/1] resource: Fixed iomem resource release failed on
+From: Guomin Chen <guomin.chen@suse.com>
+Subject: RE: [PATCH 1/1] resource: Fixed iomem resource release failed on
  release_mem_region_adjustable() when memory node or cpu node hot-remove.
-Date: Fri, 22 Jun 2018 18:19:30 -0500
-Message-ID: <20180622231930.GA2834@bhelgaas-glaptop.roam.corp.google.com>
+Date: Sat, 23 Jun 2018 05:53:40 +0000
+Message-ID: <SN1PR18MB2143CB9E209AC070DB0EC8029C740@SN1PR18MB2143.namprd18.prod.outlook.com>
 References: <20180622120138.5411-1-guomin.chen@suse.com>
+ <20180622231930.GA2834@bhelgaas-glaptop.roam.corp.google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180622120138.5411-1-guomin.chen@suse.com>
+In-Reply-To: <20180622231930.GA2834@bhelgaas-glaptop.roam.corp.google.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: guomin chen <guomin.chen@suse.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Brijesh Singh <brijesh.singh@amd.com>, Borislav Petkov <bp@suse.de>, Andrew Morton <akpm@linux-foundation.org>, Takashi Iwai <tiwai@suse.de>, Lee Chun-Yi <JLee@suse.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Tom Lendacky <thomas.lendacky@amd.com>, Bjorn Helgaas <bhelgaas@google.com>, Yaowei Bai <baiyaowei@cmss.chinamobile.com>, Dan Williams <dan.j.williams@intel.com>, Toshi Kani <toshi.kani@hpe.com>
+To: Bjorn Helgaas <helgaas@kernel.org>
+Cc: Brijesh Singh <brijesh.singh@amd.com>, Tom Lendacky <thomas.lendacky@amd.com>, Yaowei Bai <baiyaowei@cmss.chinamobile.com>, Bjorn Helgaas <bhelgaas@google.com>, Toshi Kani <toshi.kani@hpe.com>, Dan Williams <dan.j.williams@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Andrew Morton <akpm@linux-foundation.org>, Joey Lee <JLee@suse.com>, Borislav Petkov <bp@suse.de>, Takashi Iwai <tiwai@suse.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-[+cc Toshi]
-
-On Fri, Jun 22, 2018 at 08:01:38PM +0800, guomin chen wrote:
-> We've got a bug report indicating the hot-remove node resource
-> release failed,when the memory on this node is divided into
-> several sections.because the release_mem_region_adjustable()
-> can only release one resource that must be [start,end].
-
-Can you please include a URL for the bug report?  That's useful for
-additional details and gives hints about how future changes in this
-area might be tested.
-
-release_mem_region_adjustable() and the only call to it were added
-by Toshi (cc'd):
-
-  825f787bb496 ("resource: add release_mem_region_adjustable()")
-  fe74ebb106a5 ("mm: change __remove_pages() to call release_mem_region_adjustable()")
-
-> In my case, the BIOS supports faulty memory isolation. if BIOS
-> detected bad memory block, the BIOS will isolates this badblock.
-> And set this badblock memory to EfiUnusableMemory in EFI memory map
-> base on UEFI 2.7 spec.For example in my system, the memory range on
-> node2 is [mem 0x0000080000000000-0x00000807ffffffff].but the BIOS
-> detected the [8004e000000-8004e0fffff] is a badblock memory.
-> So the memory on node2 seem like this:
->    		80000000000-8004dffffff : System RAM
-> 		8004e000000-8004e0fffff : Unusable memory
-> 		8004e100000-807ffffffff : System RAM
-> 
-> Now, when offline the cpu node2,the kernel will try to release
-> ioresource [mem 0x0000080000000000-0x00000807ffffffff]. at this
-> time, the kernel will release failed,and output error message:
-> "Unable to release resource <0x0000080000000000-0x00000807ffffffff>
-> (-22)".
-> Because the release_mem_region_adjustable() can only release one
-> resource that must be [0x0000080000000000 , 0x00000807ffffffff].
-> but now,the iomem resource on node2 [0x0000080000000000,
-> 0x00000807ffffffff] are divided into three resources [80000000000-
-> 8004dffffff],[8004e000000-8004e0fffff]and[8004e100000-807ffffffff].
-> 
-> This patch help to Release multiple iomem resources at once when
-> node hot-remove. Such as in above case, when hot-remove the cpu
-> node2,the kernel will try to release resource [0x0000080000000000-
-> 0x00000807ffffffff].And this patch will release three resources
-> [80000000000-8004dffffff],[8004e000000-8004e0fffff] and
-> [8004e100000-807ffffffff].
-> 
-> Cc: Thomas Gleixner <tglx@linutronix.de>
-> Cc: Brijesh Singh <brijesh.singh@amd.com>
-> Cc: Borislav Petkov <bp@suse.de>
-> Cc: Andrew Morton <akpm@linux-foundation.org>
-> Cc: Tom Lendacky <thomas.lendacky@amd.com>
-> Cc: Bjorn Helgaas <bhelgaas@google.com>
-> Cc: Yaowei Bai <baiyaowei@cmss.chinamobile.com>
-> Cc: Takashi Iwai <tiwai@suse.de>
-> Cc: Dan Williams <dan.j.williams@intel.com>
-> Cc: linux-efi@vger.kernel.org
-> Cc: linux-kernel@vger.kernel.org
-> Cc: Lee Chun-Yi <JLee@suse.com>
-> Signed-off-by: guomin chen <guomin.chen@suse.com>
-> ---
->  kernel/resource.c | 73 ++++++++++++++++++++++++++++++++-----------------------
->  1 file changed, 43 insertions(+), 30 deletions(-)
-> 
-> diff --git a/kernel/resource.c b/kernel/resource.c
-> index 30e1bc68503b..959bcce4c405 100644
-> --- a/kernel/resource.c
-> +++ b/kernel/resource.c
-> @@ -1240,6 +1240,7 @@ int release_mem_region_adjustable(struct resource *parent,
->  	struct resource *res;
->  	struct resource *new_res;
->  	resource_size_t end;
-> +	resource_size_t new_start = start;
->  	int ret = -EINVAL;
->  
->  	end = start + size - 1;
-> @@ -1257,7 +1258,7 @@ int release_mem_region_adjustable(struct resource *parent,
->  			break;
->  
->  		/* look for the next resource if it does not fit into */
-> -		if (res->start > start || res->end < end) {
-> +		if (res->end < new_start) {
->  			p = &res->sibling;
->  			continue;
->  		}
-> @@ -1271,42 +1272,54 @@ int release_mem_region_adjustable(struct resource *parent,
->  		}
->  
->  		/* found the target resource; let's adjust accordingly */
-> -		if (res->start == start && res->end == end) {
-> +		if (res->start == new_start && res->end == end) {
->  			/* free the whole entry */
->  			*p = res->sibling;
->  			free_resource(res);
->  			ret = 0;
-> -		} else if (res->start == start && res->end != end) {
-> -			/* adjust the start */
-> -			ret = __adjust_resource(res, end + 1,
-> -						res->end - end);
-> -		} else if (res->start != start && res->end == end) {
-> -			/* adjust the end */
-> -			ret = __adjust_resource(res, res->start,
-> -						start - res->start);
-> +		} else if (res->end > end) {
-> +			if (res->start >= new_start) {
-> +				/* adjust the start */
-> +				ret = __adjust_resource(res, end + 1,
-> +							res->end - end);
-> +			} else {
-> +				/* split into two entries */
-> +				if (!new_res) {
-> +					ret = -ENOMEM;
-> +					break;
-> +				}
-> +				new_res->name = res->name;
-> +				new_res->start = end + 1;
-> +				new_res->end = res->end;
-> +				new_res->flags = res->flags;
-> +				new_res->desc = res->desc;
-> +				new_res->parent = res->parent;
-> +				new_res->sibling = res->sibling;
-> +				new_res->child = NULL;
-> +
-> +				ret = __adjust_resource(res, res->start,
-> +							new_start - res->start);
-> +				if (ret)
-> +					break;
-> +				res->sibling = new_res;
-> +				new_res = NULL;
-> +			}
->  		} else {
-> -			/* split into two entries */
-> -			if (!new_res) {
-> -				ret = -ENOMEM;
-> -				break;
-> +			if (res->start < new_start) {
-> +				/* adjust the end */
-> +				ret = __adjust_resource(res, res->start,
-> +							new_start - res->start);
-> +				new_start = res->end+1;
-> +				p = &res->sibling;
-> +			} else {
-> +				new_start = res->end+1;
-> +				*p = res->sibling;
-> +				free_resource(res);
-> +				ret = 0;
->  			}
-> -			new_res->name = res->name;
-> -			new_res->start = end + 1;
-> -			new_res->end = res->end;
-> -			new_res->flags = res->flags;
-> -			new_res->desc = res->desc;
-> -			new_res->parent = res->parent;
-> -			new_res->sibling = res->sibling;
-> -			new_res->child = NULL;
-> -
-> -			ret = __adjust_resource(res, res->start,
-> -						start - res->start);
-> -			if (ret)
-> -				break;
-> -			res->sibling = new_res;
-> -			new_res = NULL;
-> +			if (res->end < end)
-> +				continue;
->  		}
-> -
->  		break;
->  	}
->  
-> -- 
-> 2.12.3
-> 
+SGkgDQoJVGhlIHJlcG9ydCBsaW5rIGZvciB0aGlzIGlzc3VlIGlzOiBodHRwczovL2J1Z3ppbGxh
+LnN1c2UuY29tL3Nob3dfYnVnLmNnaT9pZD0xMDkyNjg3DQoNClRoYW5rcyBhbmQgcmVnYXJkcw0K
+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEJqb3JuIEhlbGdhYXMgW21h
+aWx0bzpoZWxnYWFzQGtlcm5lbC5vcmddDQo+IFNlbnQ6IDIwMTjE6jbUwjIzyNUgNzoyMA0KPiBU
+bzogR3VvbWluIENoZW4gPGd1b21pbi5jaGVuQHN1c2UuY29tPg0KPiBDYzogQnJpamVzaCBTaW5n
+aCA8YnJpamVzaC5zaW5naEBhbWQuY29tPjsgVG9tIExlbmRhY2t5DQo+IDx0aG9tYXMubGVuZGFj
+a3lAYW1kLmNvbT47IFlhb3dlaSBCYWkNCj4gPGJhaXlhb3dlaUBjbXNzLmNoaW5hbW9iaWxlLmNv
+bT47IEJqb3JuIEhlbGdhYXMgPGJoZWxnYWFzQGdvb2dsZS5jb20+Ow0KPiBUb3NoaSBLYW5pIDx0
+b3NoaS5rYW5pQGhwZS5jb20+OyBEYW4gV2lsbGlhbXMgPGRhbi5qLndpbGxpYW1zQGludGVsLmNv
+bT47DQo+IFRob21hcyBHbGVpeG5lciA8dGdseEBsaW51dHJvbml4LmRlPjsgQW5kcmV3IE1vcnRv
+bg0KPiA8YWtwbUBsaW51eC1mb3VuZGF0aW9uLm9yZz47IEpvZXkgTGVlIDxKTGVlQHN1c2UuY29t
+PjsgQm9yaXNsYXYgUGV0a292DQo+IDxicEBzdXNlLmRlPjsgVGFrYXNoaSBJd2FpIDx0aXdhaUBz
+dXNlLmRlPjsgbGludXgtZWZpQHZnZXIua2VybmVsLm9yZzsNCj4gbGludXgta2VybmVsQHZnZXIu
+a2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIDEvMV0gcmVzb3VyY2U6IEZpeGVkIGlv
+bWVtIHJlc291cmNlIHJlbGVhc2UgZmFpbGVkIG9uDQo+IHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1
+c3RhYmxlKCkgd2hlbiBtZW1vcnkgbm9kZSBvciBjcHUgbm9kZQ0KPiBob3QtcmVtb3ZlLg0KPiAN
+Cj4gWytjYyBUb3NoaV0NCj4gDQo+IE9uIEZyaSwgSnVuIDIyLCAyMDE4IGF0IDA4OjAxOjM4UE0g
+KzA4MDAsIGd1b21pbiBjaGVuIHdyb3RlOg0KPiA+IFdlJ3ZlIGdvdCBhIGJ1ZyByZXBvcnQgaW5k
+aWNhdGluZyB0aGUgaG90LXJlbW92ZSBub2RlIHJlc291cmNlIHJlbGVhc2UNCj4gPiBmYWlsZWQs
+d2hlbiB0aGUgbWVtb3J5IG9uIHRoaXMgbm9kZSBpcyBkaXZpZGVkIGludG8gc2V2ZXJhbA0KPiA+
+IHNlY3Rpb25zLmJlY2F1c2UgdGhlIHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKCkgY2Fu
+IG9ubHkgcmVsZWFzZQ0KPiA+IG9uZSByZXNvdXJjZSB0aGF0IG11c3QgYmUgW3N0YXJ0LGVuZF0u
+DQo+IA0KPiBDYW4geW91IHBsZWFzZSBpbmNsdWRlIGEgVVJMIGZvciB0aGUgYnVnIHJlcG9ydD8g
+IFRoYXQncyB1c2VmdWwgZm9yIGFkZGl0aW9uYWwNCj4gZGV0YWlscyBhbmQgZ2l2ZXMgaGludHMg
+YWJvdXQgaG93IGZ1dHVyZSBjaGFuZ2VzIGluIHRoaXMgYXJlYSBtaWdodCBiZSB0ZXN0ZWQuDQo+
+IA0KPiByZWxlYXNlX21lbV9yZWdpb25fYWRqdXN0YWJsZSgpIGFuZCB0aGUgb25seSBjYWxsIHRv
+IGl0IHdlcmUgYWRkZWQgYnkgVG9zaGkNCj4gKGNjJ2QpOg0KPiANCj4gICA4MjVmNzg3YmI0OTYg
+KCJyZXNvdXJjZTogYWRkIHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKCkiKQ0KPiAgIGZl
+NzRlYmIxMDZhNSAoIm1tOiBjaGFuZ2UgX19yZW1vdmVfcGFnZXMoKSB0byBjYWxsDQo+IHJlbGVh
+c2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKCkiKQ0KPiANCj4gPiBJbiBteSBjYXNlLCB0aGUgQklP
+UyBzdXBwb3J0cyBmYXVsdHkgbWVtb3J5IGlzb2xhdGlvbi4gaWYgQklPUw0KPiA+IGRldGVjdGVk
+IGJhZCBtZW1vcnkgYmxvY2ssIHRoZSBCSU9TIHdpbGwgaXNvbGF0ZXMgdGhpcyBiYWRibG9jay4N
+Cj4gPiBBbmQgc2V0IHRoaXMgYmFkYmxvY2sgbWVtb3J5IHRvIEVmaVVudXNhYmxlTWVtb3J5IGlu
+IEVGSSBtZW1vcnkgbWFwDQo+ID4gYmFzZSBvbiBVRUZJIDIuNyBzcGVjLkZvciBleGFtcGxlIGlu
+IG15IHN5c3RlbSwgdGhlIG1lbW9yeSByYW5nZSBvbg0KPiA+IG5vZGUyIGlzIFttZW0gMHgwMDAw
+MDgwMDAwMDAwMDAwLTB4MDAwMDA4MDdmZmZmZmZmZl0uYnV0IHRoZSBCSU9TDQo+ID4gZGV0ZWN0
+ZWQgdGhlIFs4MDA0ZTAwMDAwMC04MDA0ZTBmZmZmZl0gaXMgYSBiYWRibG9jayBtZW1vcnkuDQo+
+ID4gU28gdGhlIG1lbW9yeSBvbiBub2RlMiBzZWVtIGxpa2UgdGhpczoNCj4gPiAgICAJCTgwMDAw
+MDAwMDAwLTgwMDRkZmZmZmZmIDogU3lzdGVtIFJBTQ0KPiA+IAkJODAwNGUwMDAwMDAtODAwNGUw
+ZmZmZmYgOiBVbnVzYWJsZSBtZW1vcnkNCj4gPiAJCTgwMDRlMTAwMDAwLTgwN2ZmZmZmZmZmIDog
+U3lzdGVtIFJBTQ0KPiA+DQo+ID4gTm93LCB3aGVuIG9mZmxpbmUgdGhlIGNwdSBub2RlMix0aGUg
+a2VybmVsIHdpbGwgdHJ5IHRvIHJlbGVhc2UNCj4gPiBpb3Jlc291cmNlIFttZW0gMHgwMDAwMDgw
+MDAwMDAwMDAwLTB4MDAwMDA4MDdmZmZmZmZmZl0uIGF0IHRoaXMgdGltZSwNCj4gPiB0aGUga2Vy
+bmVsIHdpbGwgcmVsZWFzZSBmYWlsZWQsYW5kIG91dHB1dCBlcnJvciBtZXNzYWdlOg0KPiA+ICJV
+bmFibGUgdG8gcmVsZWFzZSByZXNvdXJjZSA8MHgwMDAwMDgwMDAwMDAwMDAwLTB4MDAwMDA4MDdm
+ZmZmZmZmZj4NCj4gPiAoLTIyKSIuDQo+ID4gQmVjYXVzZSB0aGUgcmVsZWFzZV9tZW1fcmVnaW9u
+X2FkanVzdGFibGUoKSBjYW4gb25seSByZWxlYXNlIG9uZQ0KPiA+IHJlc291cmNlIHRoYXQgbXVz
+dCBiZSBbMHgwMDAwMDgwMDAwMDAwMDAwICwgMHgwMDAwMDgwN2ZmZmZmZmZmXS4NCj4gPiBidXQg
+bm93LHRoZSBpb21lbSByZXNvdXJjZSBvbiBub2RlMiBbMHgwMDAwMDgwMDAwMDAwMDAwLA0KPiA+
+IDB4MDAwMDA4MDdmZmZmZmZmZl0gYXJlIGRpdmlkZWQgaW50byB0aHJlZSByZXNvdXJjZXMgWzgw
+MDAwMDAwMDAwLQ0KPiA+IDgwMDRkZmZmZmZmXSxbODAwNGUwMDAwMDAtODAwNGUwZmZmZmZdYW5k
+WzgwMDRlMTAwMDAwLTgwN2ZmZmZmZmZmXS4NCj4gPg0KPiA+IFRoaXMgcGF0Y2ggaGVscCB0byBS
+ZWxlYXNlIG11bHRpcGxlIGlvbWVtIHJlc291cmNlcyBhdCBvbmNlIHdoZW4gbm9kZQ0KPiA+IGhv
+dC1yZW1vdmUuIFN1Y2ggYXMgaW4gYWJvdmUgY2FzZSwgd2hlbiBob3QtcmVtb3ZlIHRoZSBjcHUg
+bm9kZTIsdGhlDQo+ID4ga2VybmVsIHdpbGwgdHJ5IHRvIHJlbGVhc2UgcmVzb3VyY2UgWzB4MDAw
+MDA4MDAwMDAwMDAwMC0NCj4gPiAweDAwMDAwODA3ZmZmZmZmZmZdLkFuZCB0aGlzIHBhdGNoIHdp
+bGwgcmVsZWFzZSB0aHJlZSByZXNvdXJjZXMNCj4gPiBbODAwMDAwMDAwMDAtODAwNGRmZmZmZmZd
+LFs4MDA0ZTAwMDAwMC04MDA0ZTBmZmZmZl0gYW5kDQo+ID4gWzgwMDRlMTAwMDAwLTgwN2ZmZmZm
+ZmZmXS4NCj4gPg0KPiA+IENjOiBUaG9tYXMgR2xlaXhuZXIgPHRnbHhAbGludXRyb25peC5kZT4N
+Cj4gPiBDYzogQnJpamVzaCBTaW5naCA8YnJpamVzaC5zaW5naEBhbWQuY29tPg0KPiA+IENjOiBC
+b3Jpc2xhdiBQZXRrb3YgPGJwQHN1c2UuZGU+DQo+ID4gQ2M6IEFuZHJldyBNb3J0b24gPGFrcG1A
+bGludXgtZm91bmRhdGlvbi5vcmc+DQo+ID4gQ2M6IFRvbSBMZW5kYWNreSA8dGhvbWFzLmxlbmRh
+Y2t5QGFtZC5jb20+DQo+ID4gQ2M6IEJqb3JuIEhlbGdhYXMgPGJoZWxnYWFzQGdvb2dsZS5jb20+
+DQo+ID4gQ2M6IFlhb3dlaSBCYWkgPGJhaXlhb3dlaUBjbXNzLmNoaW5hbW9iaWxlLmNvbT4NCj4g
+PiBDYzogVGFrYXNoaSBJd2FpIDx0aXdhaUBzdXNlLmRlPg0KPiA+IENjOiBEYW4gV2lsbGlhbXMg
+PGRhbi5qLndpbGxpYW1zQGludGVsLmNvbT4NCj4gPiBDYzogbGludXgtZWZpQHZnZXIua2VybmVs
+Lm9yZw0KPiA+IENjOiBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnDQo+ID4gQ2M6IExlZSBD
+aHVuLVlpIDxKTGVlQHN1c2UuY29tPg0KPiA+IFNpZ25lZC1vZmYtYnk6IGd1b21pbiBjaGVuIDxn
+dW9taW4uY2hlbkBzdXNlLmNvbT4NCj4gPiAtLS0NCj4gPiAga2VybmVsL3Jlc291cmNlLmMgfCA3
+Mw0KPiA+ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0NCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDQzIGluc2VydGlvbnMoKyksIDMwIGRlbGV0aW9u
+cygtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2tlcm5lbC9yZXNvdXJjZS5jIGIva2VybmVsL3Jl
+c291cmNlLmMgaW5kZXgNCj4gPiAzMGUxYmM2ODUwM2IuLjk1OWJjY2U0YzQwNSAxMDA2NDQNCj4g
+PiAtLS0gYS9rZXJuZWwvcmVzb3VyY2UuYw0KPiA+ICsrKyBiL2tlcm5lbC9yZXNvdXJjZS5jDQo+
+ID4gQEAgLTEyNDAsNiArMTI0MCw3IEBAIGludCByZWxlYXNlX21lbV9yZWdpb25fYWRqdXN0YWJs
+ZShzdHJ1Y3QNCj4gcmVzb3VyY2UgKnBhcmVudCwNCj4gPiAgCXN0cnVjdCByZXNvdXJjZSAqcmVz
+Ow0KPiA+ICAJc3RydWN0IHJlc291cmNlICpuZXdfcmVzOw0KPiA+ICAJcmVzb3VyY2Vfc2l6ZV90
+IGVuZDsNCj4gPiArCXJlc291cmNlX3NpemVfdCBuZXdfc3RhcnQgPSBzdGFydDsNCj4gPiAgCWlu
+dCByZXQgPSAtRUlOVkFMOw0KPiA+DQo+ID4gIAllbmQgPSBzdGFydCArIHNpemUgLSAxOw0KPiA+
+IEBAIC0xMjU3LDcgKzEyNTgsNyBAQCBpbnQgcmVsZWFzZV9tZW1fcmVnaW9uX2FkanVzdGFibGUo
+c3RydWN0DQo+IHJlc291cmNlICpwYXJlbnQsDQo+ID4gIAkJCWJyZWFrOw0KPiA+DQo+ID4gIAkJ
+LyogbG9vayBmb3IgdGhlIG5leHQgcmVzb3VyY2UgaWYgaXQgZG9lcyBub3QgZml0IGludG8gKi8N
+Cj4gPiAtCQlpZiAocmVzLT5zdGFydCA+IHN0YXJ0IHx8IHJlcy0+ZW5kIDwgZW5kKSB7DQo+ID4g
+KwkJaWYgKHJlcy0+ZW5kIDwgbmV3X3N0YXJ0KSB7DQo+ID4gIAkJCXAgPSAmcmVzLT5zaWJsaW5n
+Ow0KPiA+ICAJCQljb250aW51ZTsNCj4gPiAgCQl9DQo+ID4gQEAgLTEyNzEsNDIgKzEyNzIsNTQg
+QEAgaW50IHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKHN0cnVjdA0KPiByZXNvdXJjZSAq
+cGFyZW50LA0KPiA+ICAJCX0NCj4gPg0KPiA+ICAJCS8qIGZvdW5kIHRoZSB0YXJnZXQgcmVzb3Vy
+Y2U7IGxldCdzIGFkanVzdCBhY2NvcmRpbmdseSAqLw0KPiA+IC0JCWlmIChyZXMtPnN0YXJ0ID09
+IHN0YXJ0ICYmIHJlcy0+ZW5kID09IGVuZCkgew0KPiA+ICsJCWlmIChyZXMtPnN0YXJ0ID09IG5l
+d19zdGFydCAmJiByZXMtPmVuZCA9PSBlbmQpIHsNCj4gPiAgCQkJLyogZnJlZSB0aGUgd2hvbGUg
+ZW50cnkgKi8NCj4gPiAgCQkJKnAgPSByZXMtPnNpYmxpbmc7DQo+ID4gIAkJCWZyZWVfcmVzb3Vy
+Y2UocmVzKTsNCj4gPiAgCQkJcmV0ID0gMDsNCj4gPiAtCQl9IGVsc2UgaWYgKHJlcy0+c3RhcnQg
+PT0gc3RhcnQgJiYgcmVzLT5lbmQgIT0gZW5kKSB7DQo+ID4gLQkJCS8qIGFkanVzdCB0aGUgc3Rh
+cnQgKi8NCj4gPiAtCQkJcmV0ID0gX19hZGp1c3RfcmVzb3VyY2UocmVzLCBlbmQgKyAxLA0KPiA+
+IC0JCQkJCQlyZXMtPmVuZCAtIGVuZCk7DQo+ID4gLQkJfSBlbHNlIGlmIChyZXMtPnN0YXJ0ICE9
+IHN0YXJ0ICYmIHJlcy0+ZW5kID09IGVuZCkgew0KPiA+IC0JCQkvKiBhZGp1c3QgdGhlIGVuZCAq
+Lw0KPiA+IC0JCQlyZXQgPSBfX2FkanVzdF9yZXNvdXJjZShyZXMsIHJlcy0+c3RhcnQsDQo+ID4g
+LQkJCQkJCXN0YXJ0IC0gcmVzLT5zdGFydCk7DQo+ID4gKwkJfSBlbHNlIGlmIChyZXMtPmVuZCA+
+IGVuZCkgew0KPiA+ICsJCQlpZiAocmVzLT5zdGFydCA+PSBuZXdfc3RhcnQpIHsNCj4gPiArCQkJ
+CS8qIGFkanVzdCB0aGUgc3RhcnQgKi8NCj4gPiArCQkJCXJldCA9IF9fYWRqdXN0X3Jlc291cmNl
+KHJlcywgZW5kICsgMSwNCj4gPiArCQkJCQkJCXJlcy0+ZW5kIC0gZW5kKTsNCj4gPiArCQkJfSBl
+bHNlIHsNCj4gPiArCQkJCS8qIHNwbGl0IGludG8gdHdvIGVudHJpZXMgKi8NCj4gPiArCQkJCWlm
+ICghbmV3X3Jlcykgew0KPiA+ICsJCQkJCXJldCA9IC1FTk9NRU07DQo+ID4gKwkJCQkJYnJlYWs7
+DQo+ID4gKwkJCQl9DQo+ID4gKwkJCQluZXdfcmVzLT5uYW1lID0gcmVzLT5uYW1lOw0KPiA+ICsJ
+CQkJbmV3X3Jlcy0+c3RhcnQgPSBlbmQgKyAxOw0KPiA+ICsJCQkJbmV3X3Jlcy0+ZW5kID0gcmVz
+LT5lbmQ7DQo+ID4gKwkJCQluZXdfcmVzLT5mbGFncyA9IHJlcy0+ZmxhZ3M7DQo+ID4gKwkJCQlu
+ZXdfcmVzLT5kZXNjID0gcmVzLT5kZXNjOw0KPiA+ICsJCQkJbmV3X3Jlcy0+cGFyZW50ID0gcmVz
+LT5wYXJlbnQ7DQo+ID4gKwkJCQluZXdfcmVzLT5zaWJsaW5nID0gcmVzLT5zaWJsaW5nOw0KPiA+
+ICsJCQkJbmV3X3Jlcy0+Y2hpbGQgPSBOVUxMOw0KPiA+ICsNCj4gPiArCQkJCXJldCA9IF9fYWRq
+dXN0X3Jlc291cmNlKHJlcywgcmVzLT5zdGFydCwNCj4gPiArCQkJCQkJCW5ld19zdGFydCAtIHJl
+cy0+c3RhcnQpOw0KPiA+ICsJCQkJaWYgKHJldCkNCj4gPiArCQkJCQlicmVhazsNCj4gPiArCQkJ
+CXJlcy0+c2libGluZyA9IG5ld19yZXM7DQo+ID4gKwkJCQluZXdfcmVzID0gTlVMTDsNCj4gPiAr
+CQkJfQ0KPiA+ICAJCX0gZWxzZSB7DQo+ID4gLQkJCS8qIHNwbGl0IGludG8gdHdvIGVudHJpZXMg
+Ki8NCj4gPiAtCQkJaWYgKCFuZXdfcmVzKSB7DQo+ID4gLQkJCQlyZXQgPSAtRU5PTUVNOw0KPiA+
+IC0JCQkJYnJlYWs7DQo+ID4gKwkJCWlmIChyZXMtPnN0YXJ0IDwgbmV3X3N0YXJ0KSB7DQo+ID4g
+KwkJCQkvKiBhZGp1c3QgdGhlIGVuZCAqLw0KPiA+ICsJCQkJcmV0ID0gX19hZGp1c3RfcmVzb3Vy
+Y2UocmVzLCByZXMtPnN0YXJ0LA0KPiA+ICsJCQkJCQkJbmV3X3N0YXJ0IC0gcmVzLT5zdGFydCk7
+DQo+ID4gKwkJCQluZXdfc3RhcnQgPSByZXMtPmVuZCsxOw0KPiA+ICsJCQkJcCA9ICZyZXMtPnNp
+Ymxpbmc7DQo+ID4gKwkJCX0gZWxzZSB7DQo+ID4gKwkJCQluZXdfc3RhcnQgPSByZXMtPmVuZCsx
+Ow0KPiA+ICsJCQkJKnAgPSByZXMtPnNpYmxpbmc7DQo+ID4gKwkJCQlmcmVlX3Jlc291cmNlKHJl
+cyk7DQo+ID4gKwkJCQlyZXQgPSAwOw0KPiA+ICAJCQl9DQo+ID4gLQkJCW5ld19yZXMtPm5hbWUg
+PSByZXMtPm5hbWU7DQo+ID4gLQkJCW5ld19yZXMtPnN0YXJ0ID0gZW5kICsgMTsNCj4gPiAtCQkJ
+bmV3X3Jlcy0+ZW5kID0gcmVzLT5lbmQ7DQo+ID4gLQkJCW5ld19yZXMtPmZsYWdzID0gcmVzLT5m
+bGFnczsNCj4gPiAtCQkJbmV3X3Jlcy0+ZGVzYyA9IHJlcy0+ZGVzYzsNCj4gPiAtCQkJbmV3X3Jl
+cy0+cGFyZW50ID0gcmVzLT5wYXJlbnQ7DQo+ID4gLQkJCW5ld19yZXMtPnNpYmxpbmcgPSByZXMt
+PnNpYmxpbmc7DQo+ID4gLQkJCW5ld19yZXMtPmNoaWxkID0gTlVMTDsNCj4gPiAtDQo+ID4gLQkJ
+CXJldCA9IF9fYWRqdXN0X3Jlc291cmNlKHJlcywgcmVzLT5zdGFydCwNCj4gPiAtCQkJCQkJc3Rh
+cnQgLSByZXMtPnN0YXJ0KTsNCj4gPiAtCQkJaWYgKHJldCkNCj4gPiAtCQkJCWJyZWFrOw0KPiA+
+IC0JCQlyZXMtPnNpYmxpbmcgPSBuZXdfcmVzOw0KPiA+IC0JCQluZXdfcmVzID0gTlVMTDsNCj4g
+PiArCQkJaWYgKHJlcy0+ZW5kIDwgZW5kKQ0KPiA+ICsJCQkJY29udGludWU7DQo+ID4gIAkJfQ0K
+PiA+IC0NCj4gPiAgCQlicmVhazsNCj4gPiAgCX0NCj4gPg0KPiA+IC0tDQo+ID4gMi4xMi4zDQo+
+ID4NCg0K
