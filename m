@@ -1,64 +1,92 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] efi: Remove the declaration of efi_late_init() as the
- function is unused
-Date: Mon, 25 Jun 2018 08:02:01 +0200
-Message-ID: <CAKv+Gu_xK9WSVPx-gfy=vNjUsrT8aChofghjDbQPJaHPkS7bnw@mail.gmail.com>
-References: <1529891271-24319-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH] efi/libstub/arm: add opt-in Kconfig option for the DTB loader
+Date: Mon, 25 Jun 2018 08:34:05 +0200
+Message-ID: <20180625063405.24387-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1529891271-24319-1-git-send-email-sai.praneeth.prakhya@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-efi@vger.kernel.org
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, leif.lindholm@linaro.org, linux-arm-kernel@lists.infradead.org, agraf@suse.de
 List-Id: linux-efi@vger.kernel.org
 
-On 25 June 2018 at 03:47, Sai Praneeth Prakhya
-<sai.praneeth.prakhya@intel.com> wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
->
-> Commit 7b0a911478c74 (efi/x86: Move the EFI BGRT init code to early
-> init code), removed the implementation and all the references to
-> efi_late_init() but the function is still declared at
-> include/linux/efi.h. Hence, remove the unnecessary declaration.
->
-> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-> Cc: Lee Chun-Yi <jlee@suse.com>
-> Cc: Borislav Petkov <bp@alien8.de>
-> Cc: Dave Young <dyoung@redhat.com>
-> Cc: Bhupesh Sharma <bhsharma@redhat.com>
-> Cc: Ricardo Neri <ricardo.neri@intel.com>
-> Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-> Cc: Matt Fleming <matt@codeblueprint.co.uk>
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+There are various ways a platform can provide a device tree binary
+to the kernel, with different levels of sophistication:
+- ideally, the UEFI firmware, which is tightly coupled with the
+  platform, provides a device tree image directly as a UEFI
+  configuration table, and typically permits the contents to be
+  manipulated either via menu options or via UEFI environment
+  variables that specify a replacement image,
+- GRUB for ARM has a 'devicetree' directive which allows a device
+  tree image to be loaded from any location accessible to GRUB, and
+  supersede the one provided by the firmware,
+- the EFI stub implements a dtb= command line option that allows a
+  device tree image to be loaded from a file residing in the same
+  file system as the one the kernel image was loaded from.
 
-Thanks Sai
+The dtb= command line option was never intended to be more than a
+development feature, to allow the other options to be implemented
+in parallel. So let's make it an opt-in feature that is disabled
+by default, but can be re-enabled at will.
 
-Queued in efi/next
+Note that we already disable the dtb= command line option when we
+detect that we are running with UEFI Secure Boot enabled.
 
-> ---
->  include/linux/efi.h | 2 --
->  1 file changed, 2 deletions(-)
->
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index 56add823f190..ae47be636b98 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -988,14 +988,12 @@ extern void efi_memmap_walk (efi_freemem_callback_t callback, void *arg);
->  extern void efi_gettimeofday (struct timespec64 *ts);
->  extern void efi_enter_virtual_mode (void);     /* switch EFI to virtual mode, if possible */
->  #ifdef CONFIG_X86
-> -extern void efi_late_init(void);
->  extern void efi_free_boot_services(void);
->  extern efi_status_t efi_query_variable_store(u32 attributes,
->                                              unsigned long size,
->                                              bool nonblocking);
->  extern void efi_find_mirror(void);
->  #else
-> -static inline void efi_late_init(void) {}
->  static inline void efi_free_boot_services(void) {}
->
->  static inline efi_status_t efi_query_variable_store(u32 attributes,
-> --
-> 2.7.4
->
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/Kconfig            | 12 ++++++++++++
+ drivers/firmware/efi/libstub/arm-stub.c |  7 ++++---
+ 2 files changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 781a4a337557..fc1cb2961d5b 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -87,6 +87,18 @@ config EFI_RUNTIME_WRAPPERS
+ config EFI_ARMSTUB
+ 	bool
+ 
++config EFI_ARMSTUB_DTB_LOADER
++	bool "Enable the DTB loader"
++	depends on EFI_ARMSTUB
++	help
++	  Select this config option to add support for the dtb= command
++	  line parameter, allowing a device tree blob to be loaded into
++	  memory from the EFI System Partition by the stub.
++
++	  The device tree is typically provided by the platform or by
++	  the bootloader, and so this option is mostly for development
++	  purposes only.
++
+ config EFI_BOOTLOADER_CONTROL
+ 	tristate "EFI Bootloader Control"
+ 	depends on EFI_VARS
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index 01a9d78ee415..c98b1856fc3d 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -202,9 +202,10 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 	 * 'dtb=' unless UEFI Secure Boot is disabled.  We assume that secure
+ 	 * boot is enabled if we can't determine its state.
+ 	 */
+-	if (secure_boot != efi_secureboot_mode_disabled &&
+-	    strstr(cmdline_ptr, "dtb=")) {
+-		pr_efi(sys_table, "Ignoring DTB from command line.\n");
++	if (!IS_ENABLED(CONFIG_EFI_ARMSTUB_DTB_LOADER) ||
++	     secure_boot != efi_secureboot_mode_disabled) {
++		if (strstr(cmdline_ptr, "dtb="))
++			pr_efi(sys_table, "Ignoring DTB from command line.\n");
+ 	} else {
+ 		status = handle_cmdline_files(sys_table, image, cmdline_ptr,
+ 					      "dtb=",
+-- 
+2.11.0
