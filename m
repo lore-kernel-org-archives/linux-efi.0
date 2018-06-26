@@ -1,80 +1,34 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [PATCH v6 3/3] x86: paravirt: make native_save_fl extern inline
-Date: Tue, 26 Jun 2018 09:13:25 +0200
-Message-ID: <20180626071325.GA25751@gmail.com>
-References: <20180621162324.36656-1-ndesaulniers@google.com>
-	<20180621162324.36656-4-ndesaulniers@google.com>
-	<20180622022402.GA24194@gmail.com>
-	<CAKwvOdn5gnB5cK=cy6weKyxAn4SNEdZTT_MtT_D_nHRG5EDZ4g@mail.gmail.com>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH] efi: Free existing memory map before installing new
+ memory map
+Date: Tue, 26 Jun 2018 07:18:28 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F45FD1614@ORSMSX111.amr.corp.intel.com>
+References: <1529980892-11833-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <201806261053.B3CmI5Dm%fengguang.wu@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <virtualization-bounces@lists.linux-foundation.org>
-Content-Disposition: inline
-In-Reply-To: <CAKwvOdn5gnB5cK=cy6weKyxAn4SNEdZTT_MtT_D_nHRG5EDZ4g@mail.gmail.com>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
-List-Post: <mailto:virtualization@lists.linux-foundation.org>
-List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
-Sender: virtualization-bounces@lists.linux-foundation.org
-Errors-To: virtualization-bounces@lists.linux-foundation.org
-To: Nick Desaulniers <ndesaulniers@google.com>
-Cc: Kate Stewart <kstewart@linuxfoundation.org>, andrea.parri@amarulasolutions.com, linux-efi@vger.kernel.org, brijesh.singh@amd.com, "J. Kiszka" <jan.kiszka@siemens.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Will Deacon <will.deacon@arm.com>, jarkko.sakkinen@linux.intel.com, virtualization@lists.linux-foundation.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Manoj Gupta <manojgupta@google.com>, hpa@zytor.com, boris.ostrovsky@oracle.com, Thiebaud Weksteen <tweek@google.com>, mawilcox@microsoft.com, x86@kernel.org, akataria@vmware.com, Greg Hackmann <ghackmann@google.com>, mingo@redhat.com, Alistair Strachan <astrachan@google.com>, David Rientjes <rientjes@google.com>, geert@linux-m68k.org, thomas.lendacky@amd.com, Arnd Bergmann <arnd@arndb.de>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, Philippe Ombredanne <pombredanne@nexb.com>, rostedt@goodmis.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <201806261053.B3CmI5Dm%fengguang.wu@intel.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: lkp <lkp@intel.com>
+Cc: "kbuild-all@01.org" <kbuild-all@01.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Laszlo Ersek <lersek@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-
-* Nick Desaulniers <ndesaulniers@google.com> wrote:
-
-> On Thu, Jun 21, 2018 at 7:24 PM Ingo Molnar <mingo@kernel.org> wrote:
-> > * Nick Desaulniers <ndesaulniers@google.com> wrote:
-> >
-> > > native_save_fl() is marked static inline, but by using it as
-> > > a function pointer in arch/x86/kernel/paravirt.c, it MUST be outlined.
-> >
-> > > --- a/arch/x86/include/asm/irqflags.h
-> > > +++ b/arch/x86/include/asm/irqflags.h
-> > > @@ -13,7 +13,7 @@
-> > >   * Interrupt control:
-> > >   */
-> > >
-> > > -static inline unsigned long native_save_fl(void)
-> > > +extern inline unsigned long native_save_fl(void)
-> > >  {
-> > >       unsigned long flags;
-> > >
-> >
-> > What's the code generation effect of this on say a defconfig kernel vmlinux with
-> > paravirt enabled?
 > 
-> Starting with this patch set applied:
-> $ make CC=gcc-8 -j46
-> $ objdump -d vmlinux | grep native_save_fl --context=3
-> ffffffff81059140 <native_save_fl>:
-> ffffffff81059140: 9c                    pushfq
-> ffffffff81059141: 58                    pop    %rax
-> ffffffff81059142: c3                    retq
-> $ git checkout HEAD~3
-> $ make CC=gcc-8 -j46
-> $ objdump -d vmlinux | grep native_save_fl --context=3
-> ffffffff81079410 <native_save_fl>:
-> ffffffff81079410: 9c                    pushfq
-> ffffffff81079411: 58                    pop    %rax
-> ffffffff81079412: c3                    retq
+> Hi Sai,
 > 
-> Mainly, this is to prevent the compiler from adding a stack protector
-> to the outlined version, as the stack protector clobbers %rcx, but
-> paravirt expects %rcx to be preserved. More info can be found:
-> https://lkml.org/lkml/2018/5/24/1242--
+> Thank you for the patch! Yet something to improve:
+> 
+> [auto build test ERROR on linus/master]
+> [also build test ERROR on v4.18-rc2 next-20180625] [if your patch is applied to
+> the wrong git tree, please drop us a note to help improve the system]
 
-Ok!
+Since efi_memmap_free() is a recently introduced API [1], please note that the patch 
+is based on efi tree @https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
 
-Acked-by: Ingo Molnar <mingo@kernel.org>
+[1] https://lkml.org/lkml/2018/6/22/39
 
-What's the planned upstreaming route for these patches/fixes?
-
-Thanks,
-
-	Ingo
+Regards,
+Sai
