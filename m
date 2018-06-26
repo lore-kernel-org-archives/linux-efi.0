@@ -1,58 +1,76 @@
-From: "Kani, Toshi" <toshi.kani@hpe.com>
-Subject: Re: [PATCH 1/1] resource: Fixed iomem resource release failed on
- release_mem_region_adjustable() when memory node or cpu node hot-remove.
-Date: Mon, 25 Jun 2018 23:55:36 +0000
-Message-ID: <1529970820.14039.224.camel@hpe.com>
-References: <20180622120138.5411-1-guomin.chen@suse.com>
-         <20180622231930.GA2834@bhelgaas-glaptop.roam.corp.google.com>
+From: Bjorn Andersson <bjorn.andersson@linaro.org>
+Subject: Re: Do Qualcomm drivers use DMA buffers for
+ request_firmware_into_buf()?
+Date: Mon, 25 Jun 2018 17:08:08 -0700
+Message-ID: <20180626000808.GE1860@tuxbook-pro>
+References: <20180425175557.GY14440@wotan.suse.de>
+ <CAB0TPYGnCu+anWHBGvkaigxD--8uHQaQJ2c62kegJ7mTqvkmnA@mail.gmail.com>
+ <20180508153805.GC27853@wotan.suse.de>
+ <20180601192346.GQ4511@wotan.suse.de>
+ <20180606203257.GH4511@wotan.suse.de>
+ <20180607161847.GN510@tuxbook-pro>
+ <CAKv+Gu8+Fq7BD4XD-YCyXzZh0mg6Z2k-0styj0cw6_uZfaqy4Q@mail.gmail.com>
+ <20180607163308.GA18834@kroah.com>
+ <20180607182117.GR510@tuxbook-pro>
+ <CAKv+Gu9yfa=dP-5Fzv8-E6O23zPJXJqquTAt6gCqYyt3OowkvA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180622231930.GA2834@bhelgaas-glaptop.roam.corp.google.com>
-Content-Language: en-US
-Content-ID: <B784A9CF924F8B4CB71A3819FF5BC6CA@NAMPRD84.PROD.OUTLOOK.COM>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Chen, Guomin" <Guomin.Chen@suse.com>, "helgaas@kernel.org" <helgaas@kernel.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Lee, Joey" <JLee@suse.com>, "bp@suse.de" <bp@suse.de>, "tglx@linutronix.de" <tglx@linutronix.de>, "tiwai@suse.de" <tiwai@suse.de>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "dan.j.williams@intel.com" <dan.j.williams@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "bhelgaas@google.com" <bhelgaas@google.com>, "thomas.lendacky@amd.com" <thomas.lendacky@amd.com>, "brijesh.singh@amd.com" <brijesh.singh@amd.com>, "baiyaowei@cmss.chinamobile.com" <baiyaowei@cmss.chinamobile.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu9yfa=dP-5Fzv8-E6O23zPJXJqquTAt6gCqYyt3OowkvA@mail.gmail.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Will Deacon <will.deacon@arm.com>, Michal Hocko <mhocko@kernel.org>, David Howells <dhowells@redhat.com>, David Brown <david.brown@linaro.org>, Peter Jones <pjones@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, "open list:ANDROID DRIVERS" <devel@driverdev.osuosl.org>, linux-security-module <linux-security-module@vger.kernel.org>, Nicolas Broeking <nbroeking@me.com>, Jonathan Corbet <corbet@lwn.net>, the arch/x86 maintainers <x86@kernel.org>, "Luis R. Rodriguez" <mcgrof@kernel.org>, Ingo Molnar <mingo@redhat.com>, Vlastimil Babka <vbabka@suse.cz>, Andy Gross <andy.gross@linaro.org>, Darren Hart <dvhart@infradead.org>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Todd Kjos <tkjos@android.com>, Kees Cook <keescook@chromium.org>, Rik van Riel <riel@surr>
 List-Id: linux-efi@vger.kernel.org
 
-T24gRnJpLCAyMDE4LTA2LTIyIGF0IDE4OjE5IC0wNTAwLCBCam9ybiBIZWxnYWFzIHdyb3RlOg0K
-PiBbK2NjIFRvc2hpXQ0KPiANCj4gT24gRnJpLCBKdW4gMjIsIDIwMTggYXQgMDg6MDE6MzhQTSAr
-MDgwMCwgZ3VvbWluIGNoZW4gd3JvdGU6DQo+ID4gV2UndmUgZ290IGEgYnVnIHJlcG9ydCBpbmRp
-Y2F0aW5nIHRoZSBob3QtcmVtb3ZlIG5vZGUgcmVzb3VyY2UNCj4gPiByZWxlYXNlIGZhaWxlZCx3
-aGVuIHRoZSBtZW1vcnkgb24gdGhpcyBub2RlIGlzIGRpdmlkZWQgaW50bw0KPiA+IHNldmVyYWwg
-c2VjdGlvbnMuYmVjYXVzZSB0aGUgcmVsZWFzZV9tZW1fcmVnaW9uX2FkanVzdGFibGUoKQ0KPiA+
-IGNhbiBvbmx5IHJlbGVhc2Ugb25lIHJlc291cmNlIHRoYXQgbXVzdCBiZSBbc3RhcnQsZW5kXS4N
-Cj4gDQo+IENhbiB5b3UgcGxlYXNlIGluY2x1ZGUgYSBVUkwgZm9yIHRoZSBidWcgcmVwb3J0PyAg
-VGhhdCdzIHVzZWZ1bCBmb3INCj4gYWRkaXRpb25hbCBkZXRhaWxzIGFuZCBnaXZlcyBoaW50cyBh
-Ym91dCBob3cgZnV0dXJlIGNoYW5nZXMgaW4gdGhpcw0KPiBhcmVhIG1pZ2h0IGJlIHRlc3RlZC4N
-Cj4gDQo+IHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKCkgYW5kIHRoZSBvbmx5IGNhbGwg
-dG8gaXQgd2VyZSBhZGRlZA0KPiBieSBUb3NoaSAoY2MnZCk6DQo+IA0KPiAgIDgyNWY3ODdiYjQ5
-NiAoInJlc291cmNlOiBhZGQgcmVsZWFzZV9tZW1fcmVnaW9uX2FkanVzdGFibGUoKSIpDQo+ICAg
-ZmU3NGViYjEwNmE1ICgibW06IGNoYW5nZSBfX3JlbW92ZV9wYWdlcygpIHRvIGNhbGwgcmVsZWFz
-ZV9tZW1fcmVnaW9uX2FkanVzdGFibGUoKSIpDQo+IA0KPiA+IEluIG15IGNhc2UsIHRoZSBCSU9T
-IHN1cHBvcnRzIGZhdWx0eSBtZW1vcnkgaXNvbGF0aW9uLiBpZiBCSU9TDQo+ID4gZGV0ZWN0ZWQg
-YmFkIG1lbW9yeSBibG9jaywgdGhlIEJJT1Mgd2lsbCBpc29sYXRlcyB0aGlzIGJhZGJsb2NrLg0K
-PiA+IEFuZCBzZXQgdGhpcyBiYWRibG9jayBtZW1vcnkgdG8gRWZpVW51c2FibGVNZW1vcnkgaW4g
-RUZJIG1lbW9yeSBtYXANCj4gPiBiYXNlIG9uIFVFRkkgMi43IHNwZWMuRm9yIGV4YW1wbGUgaW4g
-bXkgc3lzdGVtLCB0aGUgbWVtb3J5IHJhbmdlIG9uDQo+ID4gbm9kZTIgaXMgW21lbSAweDAwMDAw
-ODAwMDAwMDAwMDAtMHgwMDAwMDgwN2ZmZmZmZmZmXS5idXQgdGhlIEJJT1MNCj4gPiBkZXRlY3Rl
-ZCB0aGUgWzgwMDRlMDAwMDAwLTgwMDRlMGZmZmZmXSBpcyBhIGJhZGJsb2NrIG1lbW9yeS4NCj4g
-PiBTbyB0aGUgbWVtb3J5IG9uIG5vZGUyIHNlZW0gbGlrZSB0aGlzOg0KPiA+ICAgIAkJODAwMDAw
-MDAwMDAtODAwNGRmZmZmZmYgOiBTeXN0ZW0gUkFNDQo+ID4gCQk4MDA0ZTAwMDAwMC04MDA0ZTBm
-ZmZmZiA6IFVudXNhYmxlIG1lbW9yeQ0KPiA+IAkJODAwNGUxMDAwMDAtODA3ZmZmZmZmZmYgOiBT
-eXN0ZW0gUkFNDQo+ID4gDQo+ID4gTm93LCB3aGVuIG9mZmxpbmUgdGhlIGNwdSBub2RlMix0aGUg
-a2VybmVsIHdpbGwgdHJ5IHRvIHJlbGVhc2UNCj4gPiBpb3Jlc291cmNlIFttZW0gMHgwMDAwMDgw
-MDAwMDAwMDAwLTB4MDAwMDA4MDdmZmZmZmZmZl0uIGF0IHRoaXMNCj4gPiB0aW1lLCB0aGUga2Vy
-bmVsIHdpbGwgcmVsZWFzZSBmYWlsZWQsYW5kIG91dHB1dCBlcnJvciBtZXNzYWdlOg0KPiA+ICJV
-bmFibGUgdG8gcmVsZWFzZSByZXNvdXJjZSA8MHgwMDAwMDgwMDAwMDAwMDAwLTB4MDAwMDA4MDdm
-ZmZmZmZmZj4NCj4gPiAoLTIyKSIuDQoNCkhtbS4uLiB0aGlzIEJJTyBpbXBsZW1lbnRhdGlvbiBk
-b2VzIG5vdCBzb3VuZCByaWdodCB0byBtZS4gIFdoZW4gRUZJDQptZW1vcnkgbWFwIGhhcyBhIGhv
-bGUsIEFDUEkgbWVtb3J5IG9iamVjdCBzaG91bGQgaGF2ZSB0aGUgc2FtZSBob2xlIGluDQppdHMg
-cmVzb3VyY2UgaW5mby4gIElmIHNvLCB0aGlzIG5vZGUyIG1lbW9yeSBob3QtZGVsZXRlIHdvdWxk
-IGhhdmUNCnJlcXVlc3RlZCBhIGRlbGV0aW9uIG9mIDIgc2VwYXJhdGUgU3lzdGVtIFJBTSByYW5n
-ZXMsIG5vdCBhIHNpbmdsZSByYW5nZQ0KaW5jbHVkaW5nIHRoaXMgaG9sZS4gIFRoaXMgaXMgYWxz
-byBpbXBvcnRhbnQgZm9yIG1lbW9yeSBob3QtYWRkLiAgQUNQSQ0KbWVtb3J5IG9iamVjdCBuZWVk
-cyB0byBkZXNjcmliZSB0aGlzIGhvbGUgaW4gb3JkZXIgZm9yIHRoZSBPUyB0byBhdm9pZA0KYWRk
-aW5nIHRoaXMgYmFkYmxvY2sgbWVtb3J5Lg0KDQpUaGFua3MsDQotVG9zaGkNCg==
+On Thu 07 Jun 11:42 PDT 2018, Ard Biesheuvel wrote:
+
+> On 7 June 2018 at 20:21, Bjorn Andersson <bjorn.andersson@linaro.org> wrote:
+> > On Thu 07 Jun 09:33 PDT 2018, Greg Kroah-Hartman wrote:
+[..]
+> >>
+> >> Why not just use kmalloc, it will always return a DMAable buffer.
+> >>
+> >
+> > For the buffers being targeted by request_firmware_into_buf() the
+> > problem is that some of them has requirements of physical placement and
+> > they are all too big for kmalloc() (i.e. tens of mb).
+> >
+> >
+> > For the dma_alloc_coherent() buffer that was mentioned earlier, which is
+> > not related to the firmware loading, it's not used because the buffer is
+> > passed to secure world, which temporarily locks Linux out from the
+> > memory region. Traditionally this region was kmalloc'ed downstream, but
+> > due to speculative access violations this code moved to use the DMA
+> > streaming API, although there's no actual DMA going on.
+> >
+> 
+> OK, so you are relying on the fact that dma_alloc_coherent() gives you
+> a device mapping (because the qcom_scm device is described as non
+> cache coherent), but this sounds risky to me. The linear alias of that
+> memory will still be mapped cacheable, and could potentially still be
+> accessed speculatively AFAIK.
+> 
+
+Yes and we are aware of the risk of having the linear alias present, but
+have yet to find a suitable way to handle this.
+
+The proposed mechanism was to use reserved-memory and memremap() the
+region while it should be available in Linux, but while this would work
+for some cases (e.g. memory regions for semi-static firmware executed by
+co-processors) it doesn't handle the scenarios where the memory-need is
+dynamic.
+
+So suggestions are very welcome on how to better handle this.
+
+Regards,
+Bjorn
