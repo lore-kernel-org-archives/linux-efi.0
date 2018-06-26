@@ -1,34 +1,71 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH] efi: Free existing memory map before installing new
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] efi: Free existing memory map before installing new
  memory map
-Date: Tue, 26 Jun 2018 07:18:28 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F45FD1614@ORSMSX111.amr.corp.intel.com>
+Date: Tue, 26 Jun 2018 11:38:10 +0200
+Message-ID: <CAKv+Gu-_tQsYMUMp4NGrEkRrbFGJvE=vJVciaO6TEAC_u5bmfQ@mail.gmail.com>
 References: <1529980892-11833-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <201806261053.B3CmI5Dm%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <201806261053.B3CmI5Dm%fengguang.wu@intel.com>
-Content-Language: en-US
+In-Reply-To: <1529980892-11833-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: lkp <lkp@intel.com>
-Cc: "kbuild-all@01.org" <kbuild-all@01.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Laszlo Ersek <lersek@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Laszlo Ersek <lersek@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-> 
-> Hi Sai,
-> 
-> Thank you for the patch! Yet something to improve:
-> 
-> [auto build test ERROR on linus/master]
-> [also build test ERROR on v4.18-rc2 next-20180625] [if your patch is applied to
-> the wrong git tree, please drop us a note to help improve the system]
+On 26 June 2018 at 04:41, Sai Praneeth Prakhya
+<sai.praneeth.prakhya@intel.com> wrote:
+> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+>
+> efi_memmap_install(), unmaps the existing memory map and installs the
+> new memory map but doesn't free the memory allocated to the existing
+> memory map. Fortunately, the details about the existing memory map are
+> stored in efi.memmap. Hence, use them to free the memory.
+>
+> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+> Reported-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Cc: Lee Chun-Yi <jlee@suse.com>
+> Cc: Borislav Petkov <bp@alien8.de>
+> Cc: Dave Young <dyoung@redhat.com>
+> Cc: Laszlo Ersek <lersek@redhat.com>
+> Cc: Bhupesh Sharma <bhsharma@redhat.com>
+> Cc: Ricardo Neri <ricardo.neri@intel.com>
+> Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> ---
+>
+> Note: Patch based on efi tree @https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
+>
+>  drivers/firmware/efi/memmap.c | 3 +++
+>  1 file changed, 3 insertions(+)
+>
+> diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+> index 678e85704054..68b27b14fe94 100644
+> --- a/drivers/firmware/efi/memmap.c
+> +++ b/drivers/firmware/efi/memmap.c
+> @@ -229,6 +229,9 @@ int __init efi_memmap_install(phys_addr_t addr, unsigned int nr_map)
+>
+>         efi_memmap_unmap();
+>
+> +       /* Free the memory allocated to the existing memory map */
+> +       efi_memmap_free(efi.memmap.phys_map, efi.memmap.nr_map, efi.memmap.late);
+> +
+>         data.phys_map = addr;
+>         data.size = efi.memmap.desc_size * nr_map;
+>         data.desc_version = efi.memmap.desc_version;
+> --
+> 2.7.4
+>
 
-Since efi_memmap_free() is a recently introduced API [1], please note that the patch 
-is based on efi tree @https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
+If only it were so simple :-)
 
-[1] https://lkml.org/lkml/2018/6/22/39
+At this point, efi.memmap.phys_map could point to memory that was
+allocated early, allocated late or simply passed to the OS at boot
+time by the stub (in which case it was memblock_reserve()d but not
+memblock_alloc()d, and it should not be freed)
 
-Regards,
-Sai
+So only allocations made with efi_memmap_alloc() should be freed here.
+I'm not sure /how/ we should keep track of that: perhaps it is simply
+a matter of replacing the boolean 'late' with an enum that describes
+where the memory came from that phys_map points to.
