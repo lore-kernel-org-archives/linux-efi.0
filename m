@@ -1,74 +1,75 @@
-From: Guomin Chen <guomin.chen@suse.com>
-Subject: RE: [PATCH 1/1] resource: Fixed iomem resource release failed on
- release_mem_region_adjustable() when memory node or cpu node hot-remove.
-Date: Wed, 27 Jun 2018 06:43:36 +0000
-Message-ID: <SN1PR18MB2143231E715365031B3ACDD99C480@SN1PR18MB2143.namprd18.prod.outlook.com>
-References: <20180622120138.5411-1-guomin.chen@suse.com>
-         <20180622231930.GA2834@bhelgaas-glaptop.roam.corp.google.com>
- <1529970820.14039.224.camel@hpe.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] efi: Free existing memory map before installing new
+ memory map
+Date: Wed, 27 Jun 2018 09:01:51 +0200
+Message-ID: <CAKv+Gu982OPp73Tg5Rru3+1ymq6_P8XpFPROQPdZMSUDdwEOmw@mail.gmail.com>
+References: <1529980892-11833-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <CAKv+Gu-_tQsYMUMp4NGrEkRrbFGJvE=vJVciaO6TEAC_u5bmfQ@mail.gmail.com> <FFF73D592F13FD46B8700F0A279B802F4605BA0F@ORSMSX111.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1529970820.14039.224.camel@hpe.com>
-Content-Language: en-US
+In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F4605BA0F@ORSMSX111.amr.corp.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Kani, Toshi" <toshi.kani@hpe.com>, "helgaas@kernel.org" <helgaas@kernel.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Joey Lee <JLee@suse.com>, "bp@suse.de" <bp@suse.de>, "tglx@linutronix.de" <tglx@linutronix.de>, "tiwai@suse.de" <tiwai@suse.de>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "dan.j.williams@intel.com" <dan.j.williams@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "bhelgaas@google.com" <bhelgaas@google.com>, "thomas.lendacky@amd.com" <thomas.lendacky@amd.com>, "brijesh.singh@amd.com" <brijesh.singh@amd.com>, "baiyaowei@cmss.chinamobile.com" <baiyaowei@cmss.chinamobile.com>
+To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Laszlo Ersek <lersek@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-SGkgVG9zaGkNCglUaGFuayB5b3UgZm9yIHlvdXIgcmVwbHkgYW5kIHN1Z2dlc3Rpb25zLg0KCUkg
-d2lsbCBjb250aW51ZSB0byBmb2xsb3cgYW5kIGludmVzdGlnYXRpb24gdGhpcyBpc3N1ZS4gdGhh
-bmtzIA0KDQpUaGFua3MgYW5kIHJlZ2FyZHMNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
-LS0tDQo+IEZyb206IEthbmksIFRvc2hpIFttYWlsdG86dG9zaGkua2FuaUBocGUuY29tXQ0KPiBT
-ZW50OiAyMDE45bm0NuaciDI25pelIDc6NTYNCj4gVG86IEd1b21pbiBDaGVuIDxndW9taW4uY2hl
-bkBzdXNlLmNvbT47IGhlbGdhYXNAa2VybmVsLm9yZw0KPiBDYzogbGludXgta2VybmVsQHZnZXIu
-a2VybmVsLm9yZzsgSm9leSBMZWUgPEpMZWVAc3VzZS5jb20+OyBicEBzdXNlLmRlOw0KPiB0Z2x4
-QGxpbnV0cm9uaXguZGU7IHRpd2FpQHN1c2UuZGU7IGFrcG1AbGludXgtZm91bmRhdGlvbi5vcmc7
-DQo+IGRhbi5qLndpbGxpYW1zQGludGVsLmNvbTsgbGludXgtZWZpQHZnZXIua2VybmVsLm9yZzsg
-YmhlbGdhYXNAZ29vZ2xlLmNvbTsNCj4gdGhvbWFzLmxlbmRhY2t5QGFtZC5jb207IGJyaWplc2gu
-c2luZ2hAYW1kLmNvbTsNCj4gYmFpeWFvd2VpQGNtc3MuY2hpbmFtb2JpbGUuY29tDQo+IFN1Ympl
-Y3Q6IFJlOiBbUEFUQ0ggMS8xXSByZXNvdXJjZTogRml4ZWQgaW9tZW0gcmVzb3VyY2UgcmVsZWFz
-ZSBmYWlsZWQgb24NCj4gcmVsZWFzZV9tZW1fcmVnaW9uX2FkanVzdGFibGUoKSB3aGVuIG1lbW9y
-eSBub2RlIG9yIGNwdSBub2RlDQo+IGhvdC1yZW1vdmUuDQo+IA0KPiBPbiBGcmksIDIwMTgtMDYt
-MjIgYXQgMTg6MTkgLTA1MDAsIEJqb3JuIEhlbGdhYXMgd3JvdGU6DQo+ID4gWytjYyBUb3NoaV0N
-Cj4gPg0KPiA+IE9uIEZyaSwgSnVuIDIyLCAyMDE4IGF0IDA4OjAxOjM4UE0gKzA4MDAsIGd1b21p
-biBjaGVuIHdyb3RlOg0KPiA+ID4gV2UndmUgZ290IGEgYnVnIHJlcG9ydCBpbmRpY2F0aW5nIHRo
-ZSBob3QtcmVtb3ZlIG5vZGUgcmVzb3VyY2UNCj4gPiA+IHJlbGVhc2UgZmFpbGVkLHdoZW4gdGhl
-IG1lbW9yeSBvbiB0aGlzIG5vZGUgaXMgZGl2aWRlZCBpbnRvIHNldmVyYWwNCj4gPiA+IHNlY3Rp
-b25zLmJlY2F1c2UgdGhlIHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKCkgY2FuIG9ubHkN
-Cj4gPiA+IHJlbGVhc2Ugb25lIHJlc291cmNlIHRoYXQgbXVzdCBiZSBbc3RhcnQsZW5kXS4NCj4g
-Pg0KPiA+IENhbiB5b3UgcGxlYXNlIGluY2x1ZGUgYSBVUkwgZm9yIHRoZSBidWcgcmVwb3J0PyAg
-VGhhdCdzIHVzZWZ1bCBmb3INCj4gPiBhZGRpdGlvbmFsIGRldGFpbHMgYW5kIGdpdmVzIGhpbnRz
-IGFib3V0IGhvdyBmdXR1cmUgY2hhbmdlcyBpbiB0aGlzDQo+ID4gYXJlYSBtaWdodCBiZSB0ZXN0
-ZWQuDQo+ID4NCj4gPiByZWxlYXNlX21lbV9yZWdpb25fYWRqdXN0YWJsZSgpIGFuZCB0aGUgb25s
-eSBjYWxsIHRvIGl0IHdlcmUgYWRkZWQgYnkNCj4gPiBUb3NoaSAoY2MnZCk6DQo+ID4NCj4gPiAg
-IDgyNWY3ODdiYjQ5NiAoInJlc291cmNlOiBhZGQgcmVsZWFzZV9tZW1fcmVnaW9uX2FkanVzdGFi
-bGUoKSIpDQo+ID4gICBmZTc0ZWJiMTA2YTUgKCJtbTogY2hhbmdlIF9fcmVtb3ZlX3BhZ2VzKCkg
-dG8gY2FsbA0KPiA+IHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKCkiKQ0KPiA+DQo+ID4g
-PiBJbiBteSBjYXNlLCB0aGUgQklPUyBzdXBwb3J0cyBmYXVsdHkgbWVtb3J5IGlzb2xhdGlvbi4g
-aWYgQklPUw0KPiA+ID4gZGV0ZWN0ZWQgYmFkIG1lbW9yeSBibG9jaywgdGhlIEJJT1Mgd2lsbCBp
-c29sYXRlcyB0aGlzIGJhZGJsb2NrLg0KPiA+ID4gQW5kIHNldCB0aGlzIGJhZGJsb2NrIG1lbW9y
-eSB0byBFZmlVbnVzYWJsZU1lbW9yeSBpbiBFRkkgbWVtb3J5IG1hcA0KPiA+ID4gYmFzZSBvbiBV
-RUZJIDIuNyBzcGVjLkZvciBleGFtcGxlIGluIG15IHN5c3RlbSwgdGhlIG1lbW9yeSByYW5nZSBv
-bg0KPiA+ID4gbm9kZTIgaXMgW21lbSAweDAwMDAwODAwMDAwMDAwMDAtMHgwMDAwMDgwN2ZmZmZm
-ZmZmXS5idXQgdGhlIEJJT1MNCj4gPiA+IGRldGVjdGVkIHRoZSBbODAwNGUwMDAwMDAtODAwNGUw
-ZmZmZmZdIGlzIGEgYmFkYmxvY2sgbWVtb3J5Lg0KPiA+ID4gU28gdGhlIG1lbW9yeSBvbiBub2Rl
-MiBzZWVtIGxpa2UgdGhpczoNCj4gPiA+ICAgIAkJODAwMDAwMDAwMDAtODAwNGRmZmZmZmYgOiBT
-eXN0ZW0gUkFNDQo+ID4gPiAJCTgwMDRlMDAwMDAwLTgwMDRlMGZmZmZmIDogVW51c2FibGUgbWVt
-b3J5DQo+ID4gPiAJCTgwMDRlMTAwMDAwLTgwN2ZmZmZmZmZmIDogU3lzdGVtIFJBTQ0KPiA+ID4N
-Cj4gPiA+IE5vdywgd2hlbiBvZmZsaW5lIHRoZSBjcHUgbm9kZTIsdGhlIGtlcm5lbCB3aWxsIHRy
-eSB0byByZWxlYXNlDQo+ID4gPiBpb3Jlc291cmNlIFttZW0gMHgwMDAwMDgwMDAwMDAwMDAwLTB4
-MDAwMDA4MDdmZmZmZmZmZl0uIGF0IHRoaXMNCj4gPiA+IHRpbWUsIHRoZSBrZXJuZWwgd2lsbCBy
-ZWxlYXNlIGZhaWxlZCxhbmQgb3V0cHV0IGVycm9yIG1lc3NhZ2U6DQo+ID4gPiAiVW5hYmxlIHRv
-IHJlbGVhc2UgcmVzb3VyY2UgPDB4MDAwMDA4MDAwMDAwMDAwMC0weDAwMDAwODA3ZmZmZmZmZmY+
-DQo+ID4gPiAoLTIyKSIuDQo+IA0KPiBIbW0uLi4gdGhpcyBCSU8gaW1wbGVtZW50YXRpb24gZG9l
-cyBub3Qgc291bmQgcmlnaHQgdG8gbWUuICBXaGVuIEVGSQ0KPiBtZW1vcnkgbWFwIGhhcyBhIGhv
-bGUsIEFDUEkgbWVtb3J5IG9iamVjdCBzaG91bGQgaGF2ZSB0aGUgc2FtZSBob2xlIGluIGl0cw0K
-PiByZXNvdXJjZSBpbmZvLiAgSWYgc28sIHRoaXMgbm9kZTIgbWVtb3J5IGhvdC1kZWxldGUgd291
-bGQgaGF2ZSByZXF1ZXN0ZWQgYQ0KPiBkZWxldGlvbiBvZiAyIHNlcGFyYXRlIFN5c3RlbSBSQU0g
-cmFuZ2VzLCBub3QgYSBzaW5nbGUgcmFuZ2UgaW5jbHVkaW5nIHRoaXMNCj4gaG9sZS4gIFRoaXMg
-aXMgYWxzbyBpbXBvcnRhbnQgZm9yIG1lbW9yeSBob3QtYWRkLiAgQUNQSSBtZW1vcnkgb2JqZWN0
-IG5lZWRzDQo+IHRvIGRlc2NyaWJlIHRoaXMgaG9sZSBpbiBvcmRlciBmb3IgdGhlIE9TIHRvIGF2
-b2lkIGFkZGluZyB0aGlzIGJhZGJsb2NrIG1lbW9yeS4NCj4gDQo+IFRoYW5rcywNCj4gLVRvc2hp
-DQo=
+On 27 June 2018 at 06:51, Prakhya, Sai Praneeth
+<sai.praneeth.prakhya@intel.com> wrote:
+>> > +       /* Free the memory allocated to the existing memory map */
+>> > +       efi_memmap_free(efi.memmap.phys_map, efi.memmap.nr_map,
+>> > + efi.memmap.late);
+>> > +
+>> >         data.phys_map = addr;
+>> >         data.size = efi.memmap.desc_size * nr_map;
+>> >         data.desc_version = efi.memmap.desc_version;
+>> > --
+>> > 2.7.4
+>> >
+>>
+>> If only it were so simple :-)
+>>
+>> At this point, efi.memmap.phys_map could point to memory that was allocated
+>> early, allocated late or simply passed to the OS at boot time by the stub (in
+>> which case it was memblock_reserve()d but not memblock_alloc()d, and it
+>> should not be freed)
+>>
+>
+> Yes, completely agree that there could be three types of allocations for memmap.
+> I thought,
+> efi_memmap_free(efi.memmap.phys_map, efi.memmap.nr_map, efi.memmap.late);
+>
+> should work because the previous type of allocation should have been recorded in efi.memmap.late.
+> But, now I see this will fail for memblock_reserved() memory because it will be mistaken to
+> memblock_alloced() (I assumed both are almost similar :().
+>
+>> So only allocations made with efi_memmap_alloc() should be freed here.
+>
+> Makes sense and I think that also means efi_memmap_free() should be called from function
+> that called efi_memmap_alloc() and not efi_memmap_install().
+>
+>> I'm not sure /how/ we should keep track of that: perhaps it is simply a matter of
+>> replacing the boolean 'late' with an enum that describes where the memory
+>> came from that phys_map points to.
+>
+> I did try changing boolean late to enum and it seems to be working fine. I will do more
+> testing/clean up and will submit a patch for review.
+>
+> Also, could you please clarify if there is any specific reason why memory allocated
+> using memblock_reserve() shouldn't be freed. I mean, not with memblock_free() but I
+> think we could make it _available_ using free_bootmem() (or something similar, please
+> correct me if this is not the right API).
+
+On arm64, the memory map is provided to the core kernel by the stub,
+and after kexec, a pointer to the same memory map will be passed to
+the next kernel. So the kernel does not 'own' that allocation, and it
+should not free it or overwrite it.
+
+> If we allocate and install a new memory map (as
+> in case with efi_fake_memmap()), I think we should free the memory used by memory map
+> originally passed by EFI stub, because, at any point of time there should only be one active
+> memory map. If we don't free the original memory map passed by EFI stub, we will be having
+> two and hence will be leaking memory.
+>
+> Regards,
+> Sai
