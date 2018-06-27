@@ -1,35 +1,85 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH] efi: Free existing memory map before installing new
- memory map
-Date: Wed, 27 Jun 2018 07:28:01 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F4605BAD9@ORSMSX111.amr.corp.intel.com>
-References: <1529980892-11833-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <CAKv+Gu-_tQsYMUMp4NGrEkRrbFGJvE=vJVciaO6TEAC_u5bmfQ@mail.gmail.com>
- <FFF73D592F13FD46B8700F0A279B802F4605BA0F@ORSMSX111.amr.corp.intel.com>
- <CAKv+Gu982OPp73Tg5Rru3+1ymq6_P8XpFPROQPdZMSUDdwEOmw@mail.gmail.com>
+From: "Luis R. Rodriguez" <mcgrof@kernel.org>
+Subject: Re: Do Qualcomm drivers use DMA buffers for
+ request_firmware_into_buf()?
+Date: Wed, 27 Jun 2018 20:00:59 +0200
+Message-ID: <20180627180059.GA21242@wotan.suse.de>
+References: <CAB0TPYGnCu+anWHBGvkaigxD--8uHQaQJ2c62kegJ7mTqvkmnA@mail.gmail.com>
+ <20180508153805.GC27853@wotan.suse.de>
+ <20180601192346.GQ4511@wotan.suse.de>
+ <20180606203257.GH4511@wotan.suse.de>
+ <20180607161847.GN510@tuxbook-pro>
+ <CAKv+Gu8+Fq7BD4XD-YCyXzZh0mg6Z2k-0styj0cw6_uZfaqy4Q@mail.gmail.com>
+ <20180607163308.GA18834@kroah.com>
+ <20180607182117.GR510@tuxbook-pro>
+ <CAKv+Gu9yfa=dP-5Fzv8-E6O23zPJXJqquTAt6gCqYyt3OowkvA@mail.gmail.com>
+ <20180626000808.GE1860@tuxbook-pro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu982OPp73Tg5Rru3+1ymq6_P8XpFPROQPdZMSUDdwEOmw@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Laszlo Ersek <lersek@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Disposition: inline
+In-Reply-To: <20180626000808.GE1860@tuxbook-pro>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Bjorn Andersson <bjorn.andersson@linaro.org>, Vlastimil Babka <vbabka@suse.cz>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Will Deacon <will.deacon@arm.com>, Michal Hocko <mhocko@kernel.org>, David Howells <dhowells@redhat.com>, David Brown <david.brown@linaro.org>, Peter Jones <pjones@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, "open list:ANDROID DRIVERS" <devel@driverdev.osuosl.org>, linux-security-module <linux-security-module@vger.kernel.org>, Nicolas Broeking <nbroeking@me.com>, Jonathan Corbet <corbet@lwn.net>, the arch/x86 maintainers <x86@kernel.org>, "Luis R. Rodriguez" <mcgrof@kernel.org>, Ingo Molnar <mingo@redhat.com>, Andy Gross <andy.gross@linaro.org>, Darren Hart <dvhart@infradead.org>, Mimi Zohar <zohar@linux.vnet.ibm.com>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Todd Kjos <tkjos@android.com>, Kees Cook <keescook@chromium.org>, Rik van Riel <riel@surriel.com>, linux-arm-msm@vger.kern
 List-Id: linux-efi@vger.kernel.org
 
-PiA+IEFsc28sIGNvdWxkIHlvdSBwbGVhc2UgY2xhcmlmeSBpZiB0aGVyZSBpcyBhbnkgc3BlY2lm
-aWMgcmVhc29uIHdoeQ0KPiA+IG1lbW9yeSBhbGxvY2F0ZWQgdXNpbmcgbWVtYmxvY2tfcmVzZXJ2
-ZSgpIHNob3VsZG4ndCBiZSBmcmVlZC4gSSBtZWFuLA0KPiA+IG5vdCB3aXRoIG1lbWJsb2NrX2Zy
-ZWUoKSBidXQgSSB0aGluayB3ZSBjb3VsZCBtYWtlIGl0IF9hdmFpbGFibGVfDQo+ID4gdXNpbmcg
-ZnJlZV9ib290bWVtKCkgKG9yIHNvbWV0aGluZyBzaW1pbGFyLCBwbGVhc2UgY29ycmVjdCBtZSBp
-ZiB0aGlzIGlzIG5vdA0KPiB0aGUgcmlnaHQgQVBJKS4NCj4gDQo+IE9uIGFybTY0LCB0aGUgbWVt
-b3J5IG1hcCBpcyBwcm92aWRlZCB0byB0aGUgY29yZSBrZXJuZWwgYnkgdGhlIHN0dWIsIGFuZCBh
-ZnRlcg0KPiBrZXhlYywgYSBwb2ludGVyIHRvIHRoZSBzYW1lIG1lbW9yeSBtYXAgd2lsbCBiZSBw
-YXNzZWQgdG8gdGhlIG5leHQga2VybmVsLiBTbw0KPiB0aGUga2VybmVsIGRvZXMgbm90ICdvd24n
-IHRoYXQgYWxsb2NhdGlvbiwgYW5kIGl0IHNob3VsZCBub3QgZnJlZSBpdCBvciBvdmVyd3JpdGUN
-Cj4gaXQuDQoNClRoYW5rcyBmb3IgdGhlIHJlcGx5LiBJdCBjb25maXJtcyB0aGF0IHRoZSBpc3N1
-ZSBpcyBvbmx5IG9uIHg4NiBzeXN0ZW1zLg0KSSBzZWUgdGhhdCBhcm02NCBkb2Vzbid0IGNhbGwg
-ZWZpX21lbW1hcF9hbGxvYygpIGFuZCBoZW5jZSB0aGVyZSBpcyBubyBjb25jZXB0IA0Kb2YgYWxs
-b2NhdGluZyBtZW1vcnkgZm9yIG5ldyBtZW1vcnkgbWFwIGFuZCBpbnN0YWxsaW5nIGl0IChzbyBu
-byBtZW1vcnkgbGVhaykuDQoNClJlZ2FyZHMsDQpTYWkNCg==
+On Mon, Jun 25, 2018 at 05:08:08PM -0700, Bjorn Andersson wrote:
+> On Thu 07 Jun 11:42 PDT 2018, Ard Biesheuvel wrote:
+> 
+> > On 7 June 2018 at 20:21, Bjorn Andersson <bjorn.andersson@linaro.org> wrote:
+> > > On Thu 07 Jun 09:33 PDT 2018, Greg Kroah-Hartman wrote:
+> [..]
+> > >>
+> > >> Why not just use kmalloc, it will always return a DMAable buffer.
+> > >>
+> > >
+> > > For the buffers being targeted by request_firmware_into_buf() the
+> > > problem is that some of them has requirements of physical placement and
+> > > they are all too big for kmalloc() (i.e. tens of mb).
+> > >
+> > >
+> > > For the dma_alloc_coherent() buffer that was mentioned earlier, which is
+> > > not related to the firmware loading, it's not used because the buffer is
+> > > passed to secure world, which temporarily locks Linux out from the
+> > > memory region. Traditionally this region was kmalloc'ed downstream, but
+> > > due to speculative access violations this code moved to use the DMA
+> > > streaming API, although there's no actual DMA going on.
+> > >
+> > 
+> > OK, so you are relying on the fact that dma_alloc_coherent() gives you
+> > a device mapping (because the qcom_scm device is described as non
+> > cache coherent), but this sounds risky to me. The linear alias of that
+> > memory will still be mapped cacheable, and could potentially still be
+> > accessed speculatively AFAIK.
+> > 
+> 
+> Yes and we are aware of the risk of having the linear alias present, but
+> have yet to find a suitable way to handle this.
+> 
+> The proposed mechanism was to use reserved-memory and memremap() the
+> region while it should be available in Linux,
+
+That's still IO memory, and so it would be up to the specific device if
+or not it could access the memory before a full write is done.
+
+> but while this would work
+> for some cases (e.g. memory regions for semi-static firmware executed by
+> co-processors) it doesn't handle the scenarios where the memory-need is
+> dynamic.
+> 
+> So suggestions are very welcome on how to better handle this.
+
+I *believe* Vlastimil's seems to suggest kvmalloc(), but note that if getting the
+memory to be contiguous fails, it would fallback to a non-contiguous (vmalloc)
+allocation.
+
+  Luis
