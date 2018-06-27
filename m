@@ -1,37 +1,60 @@
-From: Nick Desaulniers <ndesaulniers@google.com>
-Subject: Re: [PATCH v6 3/3] x86: paravirt: make native_save_fl extern inline
-Date: Tue, 26 Jun 2018 12:22:47 -0400
-Message-ID: <CAKwvOdnW9r=pgmodEL0VXCv=PZVt_WMCA+B5x4D5oKRM1y-0Ow@mail.gmail.com>
-References: <20180621162324.36656-1-ndesaulniers@google.com>
- <20180621162324.36656-4-ndesaulniers@google.com> <20180622022402.GA24194@gmail.com>
- <CAKwvOdn5gnB5cK=cy6weKyxAn4SNEdZTT_MtT_D_nHRG5EDZ4g@mail.gmail.com> <20180626071325.GA25751@gmail.com>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH] efi: Free existing memory map before installing new
+ memory map
+Date: Wed, 27 Jun 2018 04:51:27 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F4605BA0F@ORSMSX111.amr.corp.intel.com>
+References: <1529980892-11833-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <CAKv+Gu-_tQsYMUMp4NGrEkRrbFGJvE=vJVciaO6TEAC_u5bmfQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180626071325.GA25751@gmail.com>
+In-Reply-To: <CAKv+Gu-_tQsYMUMp4NGrEkRrbFGJvE=vJVciaO6TEAC_u5bmfQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: mingo@redhat.com, Thomas Gleixner <tglx@linutronix.de>, Andrew Morton <akpm@linux-foundation.org>, hpa@zytor.com, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, x86@kernel.org, virtualization@lists.linux-foundation.org, Alistair Strachan <astrachan@google.com>, Manoj Gupta <manojgupta@google.com>, Greg Hackmann <ghackmann@google.com>, sedat.dilek@gmail.com, tstellar@redhat.com, Kees Cook <keescook@google.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, geert@linux-m68k.org, Will Deacon <will.deacon@arm.com>, mawilcox@microsoft.com, Arnd Bergmann <arnd@arndb.de>, David Rientjes <rientjes@google.com>, acme@redhat.com, Philippe Ombredanne <pombredanne@nexb.c>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Laszlo Ersek <lersek@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jun 26, 2018 at 3:13 AM Ingo Molnar <mingo@kernel.org> wrote:
-> Ok!
->
-> Acked-by: Ingo Molnar <mingo@kernel.org>
->
-> What's the planned upstreaming route for these patches/fixes?
-
-While the fix is mainly for paravirt, 2/3 of the patches exclusively
-touch arch/x86, so I think they should go up in the x86 tree (as
-opposed to paravirt's), if you would be so kind.  hpa mentioned not
-handling merges in https://lkml.org/lkml/2018/6/14/903, so I reached
-out to you and tglx.
-
-(Also, this is the first series I've ever sent (as opposed to one off
-commits), so I'm unfamiliar with the protocol for merging series that
-may be touch more than one subsystem.  I assume we don't split up
-series to take parts in one tree vs another?)
-
--- 
-Thanks,
-~Nick Desaulniers
+PiA+ICsgICAgICAgLyogRnJlZSB0aGUgbWVtb3J5IGFsbG9jYXRlZCB0byB0aGUgZXhpc3Rpbmcg
+bWVtb3J5IG1hcCAqLw0KPiA+ICsgICAgICAgZWZpX21lbW1hcF9mcmVlKGVmaS5tZW1tYXAucGh5
+c19tYXAsIGVmaS5tZW1tYXAubnJfbWFwLA0KPiA+ICsgZWZpLm1lbW1hcC5sYXRlKTsNCj4gPiAr
+DQo+ID4gICAgICAgICBkYXRhLnBoeXNfbWFwID0gYWRkcjsNCj4gPiAgICAgICAgIGRhdGEuc2l6
+ZSA9IGVmaS5tZW1tYXAuZGVzY19zaXplICogbnJfbWFwOw0KPiA+ICAgICAgICAgZGF0YS5kZXNj
+X3ZlcnNpb24gPSBlZmkubWVtbWFwLmRlc2NfdmVyc2lvbjsNCj4gPiAtLQ0KPiA+IDIuNy40DQo+
+ID4NCj4gDQo+IElmIG9ubHkgaXQgd2VyZSBzbyBzaW1wbGUgOi0pDQo+IA0KPiBBdCB0aGlzIHBv
+aW50LCBlZmkubWVtbWFwLnBoeXNfbWFwIGNvdWxkIHBvaW50IHRvIG1lbW9yeSB0aGF0IHdhcyBh
+bGxvY2F0ZWQNCj4gZWFybHksIGFsbG9jYXRlZCBsYXRlIG9yIHNpbXBseSBwYXNzZWQgdG8gdGhl
+IE9TIGF0IGJvb3QgdGltZSBieSB0aGUgc3R1YiAoaW4NCj4gd2hpY2ggY2FzZSBpdCB3YXMgbWVt
+YmxvY2tfcmVzZXJ2ZSgpZCBidXQgbm90IG1lbWJsb2NrX2FsbG9jKClkLCBhbmQgaXQNCj4gc2hv
+dWxkIG5vdCBiZSBmcmVlZCkNCj4gDQoNClllcywgY29tcGxldGVseSBhZ3JlZSB0aGF0IHRoZXJl
+IGNvdWxkIGJlIHRocmVlIHR5cGVzIG9mIGFsbG9jYXRpb25zIGZvciBtZW1tYXAuIA0KSSB0aG91
+Z2h0LCANCmVmaV9tZW1tYXBfZnJlZShlZmkubWVtbWFwLnBoeXNfbWFwLCBlZmkubWVtbWFwLm5y
+X21hcCwgZWZpLm1lbW1hcC5sYXRlKTsNCg0Kc2hvdWxkIHdvcmsgYmVjYXVzZSB0aGUgcHJldmlv
+dXMgdHlwZSBvZiBhbGxvY2F0aW9uIHNob3VsZCBoYXZlIGJlZW4gcmVjb3JkZWQgaW4gZWZpLm1l
+bW1hcC5sYXRlLg0KQnV0LCBub3cgSSBzZWUgdGhpcyB3aWxsIGZhaWwgZm9yIG1lbWJsb2NrX3Jl
+c2VydmVkKCkgbWVtb3J5IGJlY2F1c2UgaXQgd2lsbCBiZSBtaXN0YWtlbiB0byANCm1lbWJsb2Nr
+X2FsbG9jZWQoKSAoSSBhc3N1bWVkIGJvdGggYXJlIGFsbW9zdCBzaW1pbGFyIDooKS4NCg0KPiBT
+byBvbmx5IGFsbG9jYXRpb25zIG1hZGUgd2l0aCBlZmlfbWVtbWFwX2FsbG9jKCkgc2hvdWxkIGJl
+IGZyZWVkIGhlcmUuDQoNCk1ha2VzIHNlbnNlIGFuZCBJIHRoaW5rIHRoYXQgYWxzbyBtZWFucyBl
+ZmlfbWVtbWFwX2ZyZWUoKSBzaG91bGQgYmUgY2FsbGVkIGZyb20gZnVuY3Rpb24gDQp0aGF0IGNh
+bGxlZCBlZmlfbWVtbWFwX2FsbG9jKCkgYW5kIG5vdCBlZmlfbWVtbWFwX2luc3RhbGwoKS4NCg0K
+PiBJJ20gbm90IHN1cmUgL2hvdy8gd2Ugc2hvdWxkIGtlZXAgdHJhY2sgb2YgdGhhdDogcGVyaGFw
+cyBpdCBpcyBzaW1wbHkgYSBtYXR0ZXIgb2YNCj4gcmVwbGFjaW5nIHRoZSBib29sZWFuICdsYXRl
+JyB3aXRoIGFuIGVudW0gdGhhdCBkZXNjcmliZXMgd2hlcmUgdGhlIG1lbW9yeQ0KPiBjYW1lIGZy
+b20gdGhhdCBwaHlzX21hcCBwb2ludHMgdG8uDQoNCkkgZGlkIHRyeSBjaGFuZ2luZyBib29sZWFu
+IGxhdGUgdG8gZW51bSBhbmQgaXQgc2VlbXMgdG8gYmUgd29ya2luZyBmaW5lLiBJIHdpbGwgZG8g
+bW9yZSANCnRlc3RpbmcvY2xlYW4gdXAgYW5kIHdpbGwgc3VibWl0IGEgcGF0Y2ggZm9yIHJldmll
+dy4NCg0KQWxzbywgY291bGQgeW91IHBsZWFzZSBjbGFyaWZ5IGlmIHRoZXJlIGlzIGFueSBzcGVj
+aWZpYyByZWFzb24gd2h5IG1lbW9yeSBhbGxvY2F0ZWQgDQp1c2luZyBtZW1ibG9ja19yZXNlcnZl
+KCkgc2hvdWxkbid0IGJlIGZyZWVkLiBJIG1lYW4sIG5vdCB3aXRoIG1lbWJsb2NrX2ZyZWUoKSBi
+dXQgSSANCnRoaW5rIHdlIGNvdWxkIG1ha2UgaXQgX2F2YWlsYWJsZV8gdXNpbmcgZnJlZV9ib290
+bWVtKCkgKG9yIHNvbWV0aGluZyBzaW1pbGFyLCBwbGVhc2UgDQpjb3JyZWN0IG1lIGlmIHRoaXMg
+aXMgbm90IHRoZSByaWdodCBBUEkpLiBJZiB3ZSBhbGxvY2F0ZSBhbmQgaW5zdGFsbCBhIG5ldyBt
+ZW1vcnkgbWFwIChhcyANCmluIGNhc2Ugd2l0aCBlZmlfZmFrZV9tZW1tYXAoKSksIEkgdGhpbmsg
+d2Ugc2hvdWxkIGZyZWUgdGhlIG1lbW9yeSB1c2VkIGJ5IG1lbW9yeSBtYXAgDQpvcmlnaW5hbGx5
+IHBhc3NlZCBieSBFRkkgc3R1YiwgYmVjYXVzZSwgYXQgYW55IHBvaW50IG9mIHRpbWUgdGhlcmUg
+c2hvdWxkIG9ubHkgYmUgb25lIGFjdGl2ZSANCm1lbW9yeSBtYXAuIElmIHdlIGRvbid0IGZyZWUg
+dGhlIG9yaWdpbmFsIG1lbW9yeSBtYXAgcGFzc2VkIGJ5IEVGSSBzdHViLCB3ZSB3aWxsIGJlIGhh
+dmluZw0KdHdvIGFuZCBoZW5jZSB3aWxsIGJlIGxlYWtpbmcgbWVtb3J5Lg0KDQpSZWdhcmRzLA0K
+U2FpDQo=
