@@ -1,60 +1,62 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH] efi: Free existing memory map before installing new
- memory map
-Date: Wed, 27 Jun 2018 04:51:27 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F4605BA0F@ORSMSX111.amr.corp.intel.com>
+From: Ye Xiaolong <xiaolong.ye@intel.com>
+Subject: Re: [kbuild-all] [PATCH] efi: Free existing memory map before
+ installing new memory map
+Date: Wed, 27 Jun 2018 14:02:57 +0800
+Message-ID: <20180627060257.GD18756@yexl-desktop>
 References: <1529980892-11833-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <CAKv+Gu-_tQsYMUMp4NGrEkRrbFGJvE=vJVciaO6TEAC_u5bmfQ@mail.gmail.com>
+ <201806261053.B3CmI5Dm%fengguang.wu@intel.com>
+ <FFF73D592F13FD46B8700F0A279B802F45FD1614@ORSMSX111.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu-_tQsYMUMp4NGrEkRrbFGJvE=vJVciaO6TEAC_u5bmfQ@mail.gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F45FD1614@ORSMSX111.amr.corp.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, Dave Young <dyoung@redhat.com>, Laszlo Ersek <lersek@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, "Neri, Ricardo" <ricardo.neri@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
+To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Cc: lkp <lkp@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Laszlo Ersek <lersek@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "kbuild-all@01.org" <kbuild-all@01.org>, Dave Young <dyoung@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-PiA+ICsgICAgICAgLyogRnJlZSB0aGUgbWVtb3J5IGFsbG9jYXRlZCB0byB0aGUgZXhpc3Rpbmcg
-bWVtb3J5IG1hcCAqLw0KPiA+ICsgICAgICAgZWZpX21lbW1hcF9mcmVlKGVmaS5tZW1tYXAucGh5
-c19tYXAsIGVmaS5tZW1tYXAubnJfbWFwLA0KPiA+ICsgZWZpLm1lbW1hcC5sYXRlKTsNCj4gPiAr
-DQo+ID4gICAgICAgICBkYXRhLnBoeXNfbWFwID0gYWRkcjsNCj4gPiAgICAgICAgIGRhdGEuc2l6
-ZSA9IGVmaS5tZW1tYXAuZGVzY19zaXplICogbnJfbWFwOw0KPiA+ICAgICAgICAgZGF0YS5kZXNj
-X3ZlcnNpb24gPSBlZmkubWVtbWFwLmRlc2NfdmVyc2lvbjsNCj4gPiAtLQ0KPiA+IDIuNy40DQo+
-ID4NCj4gDQo+IElmIG9ubHkgaXQgd2VyZSBzbyBzaW1wbGUgOi0pDQo+IA0KPiBBdCB0aGlzIHBv
-aW50LCBlZmkubWVtbWFwLnBoeXNfbWFwIGNvdWxkIHBvaW50IHRvIG1lbW9yeSB0aGF0IHdhcyBh
-bGxvY2F0ZWQNCj4gZWFybHksIGFsbG9jYXRlZCBsYXRlIG9yIHNpbXBseSBwYXNzZWQgdG8gdGhl
-IE9TIGF0IGJvb3QgdGltZSBieSB0aGUgc3R1YiAoaW4NCj4gd2hpY2ggY2FzZSBpdCB3YXMgbWVt
-YmxvY2tfcmVzZXJ2ZSgpZCBidXQgbm90IG1lbWJsb2NrX2FsbG9jKClkLCBhbmQgaXQNCj4gc2hv
-dWxkIG5vdCBiZSBmcmVlZCkNCj4gDQoNClllcywgY29tcGxldGVseSBhZ3JlZSB0aGF0IHRoZXJl
-IGNvdWxkIGJlIHRocmVlIHR5cGVzIG9mIGFsbG9jYXRpb25zIGZvciBtZW1tYXAuIA0KSSB0aG91
-Z2h0LCANCmVmaV9tZW1tYXBfZnJlZShlZmkubWVtbWFwLnBoeXNfbWFwLCBlZmkubWVtbWFwLm5y
-X21hcCwgZWZpLm1lbW1hcC5sYXRlKTsNCg0Kc2hvdWxkIHdvcmsgYmVjYXVzZSB0aGUgcHJldmlv
-dXMgdHlwZSBvZiBhbGxvY2F0aW9uIHNob3VsZCBoYXZlIGJlZW4gcmVjb3JkZWQgaW4gZWZpLm1l
-bW1hcC5sYXRlLg0KQnV0LCBub3cgSSBzZWUgdGhpcyB3aWxsIGZhaWwgZm9yIG1lbWJsb2NrX3Jl
-c2VydmVkKCkgbWVtb3J5IGJlY2F1c2UgaXQgd2lsbCBiZSBtaXN0YWtlbiB0byANCm1lbWJsb2Nr
-X2FsbG9jZWQoKSAoSSBhc3N1bWVkIGJvdGggYXJlIGFsbW9zdCBzaW1pbGFyIDooKS4NCg0KPiBT
-byBvbmx5IGFsbG9jYXRpb25zIG1hZGUgd2l0aCBlZmlfbWVtbWFwX2FsbG9jKCkgc2hvdWxkIGJl
-IGZyZWVkIGhlcmUuDQoNCk1ha2VzIHNlbnNlIGFuZCBJIHRoaW5rIHRoYXQgYWxzbyBtZWFucyBl
-ZmlfbWVtbWFwX2ZyZWUoKSBzaG91bGQgYmUgY2FsbGVkIGZyb20gZnVuY3Rpb24gDQp0aGF0IGNh
-bGxlZCBlZmlfbWVtbWFwX2FsbG9jKCkgYW5kIG5vdCBlZmlfbWVtbWFwX2luc3RhbGwoKS4NCg0K
-PiBJJ20gbm90IHN1cmUgL2hvdy8gd2Ugc2hvdWxkIGtlZXAgdHJhY2sgb2YgdGhhdDogcGVyaGFw
-cyBpdCBpcyBzaW1wbHkgYSBtYXR0ZXIgb2YNCj4gcmVwbGFjaW5nIHRoZSBib29sZWFuICdsYXRl
-JyB3aXRoIGFuIGVudW0gdGhhdCBkZXNjcmliZXMgd2hlcmUgdGhlIG1lbW9yeQ0KPiBjYW1lIGZy
-b20gdGhhdCBwaHlzX21hcCBwb2ludHMgdG8uDQoNCkkgZGlkIHRyeSBjaGFuZ2luZyBib29sZWFu
-IGxhdGUgdG8gZW51bSBhbmQgaXQgc2VlbXMgdG8gYmUgd29ya2luZyBmaW5lLiBJIHdpbGwgZG8g
-bW9yZSANCnRlc3RpbmcvY2xlYW4gdXAgYW5kIHdpbGwgc3VibWl0IGEgcGF0Y2ggZm9yIHJldmll
-dy4NCg0KQWxzbywgY291bGQgeW91IHBsZWFzZSBjbGFyaWZ5IGlmIHRoZXJlIGlzIGFueSBzcGVj
-aWZpYyByZWFzb24gd2h5IG1lbW9yeSBhbGxvY2F0ZWQgDQp1c2luZyBtZW1ibG9ja19yZXNlcnZl
-KCkgc2hvdWxkbid0IGJlIGZyZWVkLiBJIG1lYW4sIG5vdCB3aXRoIG1lbWJsb2NrX2ZyZWUoKSBi
-dXQgSSANCnRoaW5rIHdlIGNvdWxkIG1ha2UgaXQgX2F2YWlsYWJsZV8gdXNpbmcgZnJlZV9ib290
-bWVtKCkgKG9yIHNvbWV0aGluZyBzaW1pbGFyLCBwbGVhc2UgDQpjb3JyZWN0IG1lIGlmIHRoaXMg
-aXMgbm90IHRoZSByaWdodCBBUEkpLiBJZiB3ZSBhbGxvY2F0ZSBhbmQgaW5zdGFsbCBhIG5ldyBt
-ZW1vcnkgbWFwIChhcyANCmluIGNhc2Ugd2l0aCBlZmlfZmFrZV9tZW1tYXAoKSksIEkgdGhpbmsg
-d2Ugc2hvdWxkIGZyZWUgdGhlIG1lbW9yeSB1c2VkIGJ5IG1lbW9yeSBtYXAgDQpvcmlnaW5hbGx5
-IHBhc3NlZCBieSBFRkkgc3R1YiwgYmVjYXVzZSwgYXQgYW55IHBvaW50IG9mIHRpbWUgdGhlcmUg
-c2hvdWxkIG9ubHkgYmUgb25lIGFjdGl2ZSANCm1lbW9yeSBtYXAuIElmIHdlIGRvbid0IGZyZWUg
-dGhlIG9yaWdpbmFsIG1lbW9yeSBtYXAgcGFzc2VkIGJ5IEVGSSBzdHViLCB3ZSB3aWxsIGJlIGhh
-dmluZw0KdHdvIGFuZCBoZW5jZSB3aWxsIGJlIGxlYWtpbmcgbWVtb3J5Lg0KDQpSZWdhcmRzLA0K
-U2FpDQo=
+Hi,
+
+On 06/26, Prakhya, Sai Praneeth wrote:
+>> 
+>> Hi Sai,
+>> 
+>> Thank you for the patch! Yet something to improve:
+>> 
+>> [auto build test ERROR on linus/master]
+>> [also build test ERROR on v4.18-rc2 next-20180625] [if your patch is applied to
+>> the wrong git tree, please drop us a note to help improve the system]
+>
+>Since efi_memmap_free() is a recently introduced API [1], please note that the patch 
+>is based on efi tree @https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
+
+I noticed the official efi tree recored in MAINTAINERS is git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git,
+are they identical?
+
+EXTENSIBLE FIRMWARE INTERFACE (EFI)
+M:      Matt Fleming <matt@codeblueprint.co.uk>
+L:      linux-efi@vger.kernel.org
+T:      git git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
+S:      Maintained
+F:      Documentation/efi-stub.txt
+F:      arch/ia64/kernel/efi.c
+F:      arch/x86/boot/compressed/eboot.[ch]
+F:      arch/x86/include/asm/efi.h
+F:      arch/x86/platform/efi/*
+F:      drivers/firmware/efi/*
+F:      include/linux/efi*.h
+
+
+Thanks,
+Xiaolong
+
+>
+>[1] https://lkml.org/lkml/2018/6/22/39
+>
+>Regards,
+>Sai
+>_______________________________________________
+>kbuild-all mailing list
+>kbuild-all@lists.01.org
+>https://lists.01.org/mailman/listinfo/kbuild-all
