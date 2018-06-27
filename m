@@ -1,75 +1,74 @@
-From: Ye Xiaolong <xiaolong.ye@intel.com>
-Subject: Re: [kbuild-all] [PATCH] efi: Free existing memory map before
- installing new memory map
-Date: Wed, 27 Jun 2018 14:29:38 +0800
-Message-ID: <20180627062938.GE18756@yexl-desktop>
-References: <1529980892-11833-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <201806261053.B3CmI5Dm%fengguang.wu@intel.com>
- <FFF73D592F13FD46B8700F0A279B802F45FD1614@ORSMSX111.amr.corp.intel.com>
- <20180627060257.GD18756@yexl-desktop>
- <CAKv+Gu8bQKnpHbGS2S3RwTErP_F3o8mogc4bAbtX1r7=Fyp=NA@mail.gmail.com>
+From: Guomin Chen <guomin.chen@suse.com>
+Subject: RE: [PATCH 1/1] resource: Fixed iomem resource release failed on
+ release_mem_region_adjustable() when memory node or cpu node hot-remove.
+Date: Wed, 27 Jun 2018 06:43:36 +0000
+Message-ID: <SN1PR18MB2143231E715365031B3ACDD99C480@SN1PR18MB2143.namprd18.prod.outlook.com>
+References: <20180622120138.5411-1-guomin.chen@suse.com>
+         <20180622231930.GA2834@bhelgaas-glaptop.roam.corp.google.com>
+ <1529970820.14039.224.camel@hpe.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu8bQKnpHbGS2S3RwTErP_F3o8mogc4bAbtX1r7=Fyp=NA@mail.gmail.com>
+In-Reply-To: <1529970820.14039.224.camel@hpe.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>, lkp <lkp@intel.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Laszlo Ersek <lersek@redhat.com>, Bhupesh Sharma <bhsharma@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, Lee Chun-Yi <jlee@suse.com>, Borislav Petkov <bp@alien8.de>, "kbuild-all@01.org" <kbuild-all@01.org>, Dave Young <dyoung@redhat.com>
+To: "Kani, Toshi" <toshi.kani@hpe.com>, "helgaas@kernel.org" <helgaas@kernel.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Joey Lee <JLee@suse.com>, "bp@suse.de" <bp@suse.de>, "tglx@linutronix.de" <tglx@linutronix.de>, "tiwai@suse.de" <tiwai@suse.de>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "dan.j.williams@intel.com" <dan.j.williams@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "bhelgaas@google.com" <bhelgaas@google.com>, "thomas.lendacky@amd.com" <thomas.lendacky@amd.com>, "brijesh.singh@amd.com" <brijesh.singh@amd.com>, "baiyaowei@cmss.chinamobile.com" <baiyaowei@cmss.chinamobile.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 06/27, Ard Biesheuvel wrote:
->On 27 June 2018 at 08:02, Ye Xiaolong <xiaolong.ye@intel.com> wrote:
->> Hi,
->>
->> On 06/26, Prakhya, Sai Praneeth wrote:
->>>>
->>>> Hi Sai,
->>>>
->>>> Thank you for the patch! Yet something to improve:
->>>>
->>>> [auto build test ERROR on linus/master]
->>>> [also build test ERROR on v4.18-rc2 next-20180625] [if your patch is applied to
->>>> the wrong git tree, please drop us a note to help improve the system]
->>>
->>>Since efi_memmap_free() is a recently introduced API [1], please note that the patch
->>>is based on efi tree @https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
->>
->> I noticed the official efi tree recored in MAINTAINERS is git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git,
->> are they identical?
->>
->
->Which version of MAINTAINERS did you look at?
-
-Oops, I just checked a old version. I'll add above efi.git tree to 0day's repo
-pool.
-
-Thanks,
-Xiaolong
->
->> EXTENSIBLE FIRMWARE INTERFACE (EFI)
->> M:      Matt Fleming <matt@codeblueprint.co.uk>
->> L:      linux-efi@vger.kernel.org
->> T:      git git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
->> S:      Maintained
->> F:      Documentation/efi-stub.txt
->> F:      arch/ia64/kernel/efi.c
->> F:      arch/x86/boot/compressed/eboot.[ch]
->> F:      arch/x86/include/asm/efi.h
->> F:      arch/x86/platform/efi/*
->> F:      drivers/firmware/efi/*
->> F:      include/linux/efi*.h
->>
->>
->> Thanks,
->> Xiaolong
->>
->>>
->>>[1] https://lkml.org/lkml/2018/6/22/39
->>>
->>>Regards,
->>>Sai
->>>_______________________________________________
->>>kbuild-all mailing list
->>>kbuild-all@lists.01.org
->>>https://lists.01.org/mailman/listinfo/kbuild-all
+SGkgVG9zaGkNCglUaGFuayB5b3UgZm9yIHlvdXIgcmVwbHkgYW5kIHN1Z2dlc3Rpb25zLg0KCUkg
+d2lsbCBjb250aW51ZSB0byBmb2xsb3cgYW5kIGludmVzdGlnYXRpb24gdGhpcyBpc3N1ZS4gdGhh
+bmtzIA0KDQpUaGFua3MgYW5kIHJlZ2FyZHMNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
+LS0tDQo+IEZyb206IEthbmksIFRvc2hpIFttYWlsdG86dG9zaGkua2FuaUBocGUuY29tXQ0KPiBT
+ZW50OiAyMDE45bm0NuaciDI25pelIDc6NTYNCj4gVG86IEd1b21pbiBDaGVuIDxndW9taW4uY2hl
+bkBzdXNlLmNvbT47IGhlbGdhYXNAa2VybmVsLm9yZw0KPiBDYzogbGludXgta2VybmVsQHZnZXIu
+a2VybmVsLm9yZzsgSm9leSBMZWUgPEpMZWVAc3VzZS5jb20+OyBicEBzdXNlLmRlOw0KPiB0Z2x4
+QGxpbnV0cm9uaXguZGU7IHRpd2FpQHN1c2UuZGU7IGFrcG1AbGludXgtZm91bmRhdGlvbi5vcmc7
+DQo+IGRhbi5qLndpbGxpYW1zQGludGVsLmNvbTsgbGludXgtZWZpQHZnZXIua2VybmVsLm9yZzsg
+YmhlbGdhYXNAZ29vZ2xlLmNvbTsNCj4gdGhvbWFzLmxlbmRhY2t5QGFtZC5jb207IGJyaWplc2gu
+c2luZ2hAYW1kLmNvbTsNCj4gYmFpeWFvd2VpQGNtc3MuY2hpbmFtb2JpbGUuY29tDQo+IFN1Ympl
+Y3Q6IFJlOiBbUEFUQ0ggMS8xXSByZXNvdXJjZTogRml4ZWQgaW9tZW0gcmVzb3VyY2UgcmVsZWFz
+ZSBmYWlsZWQgb24NCj4gcmVsZWFzZV9tZW1fcmVnaW9uX2FkanVzdGFibGUoKSB3aGVuIG1lbW9y
+eSBub2RlIG9yIGNwdSBub2RlDQo+IGhvdC1yZW1vdmUuDQo+IA0KPiBPbiBGcmksIDIwMTgtMDYt
+MjIgYXQgMTg6MTkgLTA1MDAsIEJqb3JuIEhlbGdhYXMgd3JvdGU6DQo+ID4gWytjYyBUb3NoaV0N
+Cj4gPg0KPiA+IE9uIEZyaSwgSnVuIDIyLCAyMDE4IGF0IDA4OjAxOjM4UE0gKzA4MDAsIGd1b21p
+biBjaGVuIHdyb3RlOg0KPiA+ID4gV2UndmUgZ290IGEgYnVnIHJlcG9ydCBpbmRpY2F0aW5nIHRo
+ZSBob3QtcmVtb3ZlIG5vZGUgcmVzb3VyY2UNCj4gPiA+IHJlbGVhc2UgZmFpbGVkLHdoZW4gdGhl
+IG1lbW9yeSBvbiB0aGlzIG5vZGUgaXMgZGl2aWRlZCBpbnRvIHNldmVyYWwNCj4gPiA+IHNlY3Rp
+b25zLmJlY2F1c2UgdGhlIHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKCkgY2FuIG9ubHkN
+Cj4gPiA+IHJlbGVhc2Ugb25lIHJlc291cmNlIHRoYXQgbXVzdCBiZSBbc3RhcnQsZW5kXS4NCj4g
+Pg0KPiA+IENhbiB5b3UgcGxlYXNlIGluY2x1ZGUgYSBVUkwgZm9yIHRoZSBidWcgcmVwb3J0PyAg
+VGhhdCdzIHVzZWZ1bCBmb3INCj4gPiBhZGRpdGlvbmFsIGRldGFpbHMgYW5kIGdpdmVzIGhpbnRz
+IGFib3V0IGhvdyBmdXR1cmUgY2hhbmdlcyBpbiB0aGlzDQo+ID4gYXJlYSBtaWdodCBiZSB0ZXN0
+ZWQuDQo+ID4NCj4gPiByZWxlYXNlX21lbV9yZWdpb25fYWRqdXN0YWJsZSgpIGFuZCB0aGUgb25s
+eSBjYWxsIHRvIGl0IHdlcmUgYWRkZWQgYnkNCj4gPiBUb3NoaSAoY2MnZCk6DQo+ID4NCj4gPiAg
+IDgyNWY3ODdiYjQ5NiAoInJlc291cmNlOiBhZGQgcmVsZWFzZV9tZW1fcmVnaW9uX2FkanVzdGFi
+bGUoKSIpDQo+ID4gICBmZTc0ZWJiMTA2YTUgKCJtbTogY2hhbmdlIF9fcmVtb3ZlX3BhZ2VzKCkg
+dG8gY2FsbA0KPiA+IHJlbGVhc2VfbWVtX3JlZ2lvbl9hZGp1c3RhYmxlKCkiKQ0KPiA+DQo+ID4g
+PiBJbiBteSBjYXNlLCB0aGUgQklPUyBzdXBwb3J0cyBmYXVsdHkgbWVtb3J5IGlzb2xhdGlvbi4g
+aWYgQklPUw0KPiA+ID4gZGV0ZWN0ZWQgYmFkIG1lbW9yeSBibG9jaywgdGhlIEJJT1Mgd2lsbCBp
+c29sYXRlcyB0aGlzIGJhZGJsb2NrLg0KPiA+ID4gQW5kIHNldCB0aGlzIGJhZGJsb2NrIG1lbW9y
+eSB0byBFZmlVbnVzYWJsZU1lbW9yeSBpbiBFRkkgbWVtb3J5IG1hcA0KPiA+ID4gYmFzZSBvbiBV
+RUZJIDIuNyBzcGVjLkZvciBleGFtcGxlIGluIG15IHN5c3RlbSwgdGhlIG1lbW9yeSByYW5nZSBv
+bg0KPiA+ID4gbm9kZTIgaXMgW21lbSAweDAwMDAwODAwMDAwMDAwMDAtMHgwMDAwMDgwN2ZmZmZm
+ZmZmXS5idXQgdGhlIEJJT1MNCj4gPiA+IGRldGVjdGVkIHRoZSBbODAwNGUwMDAwMDAtODAwNGUw
+ZmZmZmZdIGlzIGEgYmFkYmxvY2sgbWVtb3J5Lg0KPiA+ID4gU28gdGhlIG1lbW9yeSBvbiBub2Rl
+MiBzZWVtIGxpa2UgdGhpczoNCj4gPiA+ICAgIAkJODAwMDAwMDAwMDAtODAwNGRmZmZmZmYgOiBT
+eXN0ZW0gUkFNDQo+ID4gPiAJCTgwMDRlMDAwMDAwLTgwMDRlMGZmZmZmIDogVW51c2FibGUgbWVt
+b3J5DQo+ID4gPiAJCTgwMDRlMTAwMDAwLTgwN2ZmZmZmZmZmIDogU3lzdGVtIFJBTQ0KPiA+ID4N
+Cj4gPiA+IE5vdywgd2hlbiBvZmZsaW5lIHRoZSBjcHUgbm9kZTIsdGhlIGtlcm5lbCB3aWxsIHRy
+eSB0byByZWxlYXNlDQo+ID4gPiBpb3Jlc291cmNlIFttZW0gMHgwMDAwMDgwMDAwMDAwMDAwLTB4
+MDAwMDA4MDdmZmZmZmZmZl0uIGF0IHRoaXMNCj4gPiA+IHRpbWUsIHRoZSBrZXJuZWwgd2lsbCBy
+ZWxlYXNlIGZhaWxlZCxhbmQgb3V0cHV0IGVycm9yIG1lc3NhZ2U6DQo+ID4gPiAiVW5hYmxlIHRv
+IHJlbGVhc2UgcmVzb3VyY2UgPDB4MDAwMDA4MDAwMDAwMDAwMC0weDAwMDAwODA3ZmZmZmZmZmY+
+DQo+ID4gPiAoLTIyKSIuDQo+IA0KPiBIbW0uLi4gdGhpcyBCSU8gaW1wbGVtZW50YXRpb24gZG9l
+cyBub3Qgc291bmQgcmlnaHQgdG8gbWUuICBXaGVuIEVGSQ0KPiBtZW1vcnkgbWFwIGhhcyBhIGhv
+bGUsIEFDUEkgbWVtb3J5IG9iamVjdCBzaG91bGQgaGF2ZSB0aGUgc2FtZSBob2xlIGluIGl0cw0K
+PiByZXNvdXJjZSBpbmZvLiAgSWYgc28sIHRoaXMgbm9kZTIgbWVtb3J5IGhvdC1kZWxldGUgd291
+bGQgaGF2ZSByZXF1ZXN0ZWQgYQ0KPiBkZWxldGlvbiBvZiAyIHNlcGFyYXRlIFN5c3RlbSBSQU0g
+cmFuZ2VzLCBub3QgYSBzaW5nbGUgcmFuZ2UgaW5jbHVkaW5nIHRoaXMNCj4gaG9sZS4gIFRoaXMg
+aXMgYWxzbyBpbXBvcnRhbnQgZm9yIG1lbW9yeSBob3QtYWRkLiAgQUNQSSBtZW1vcnkgb2JqZWN0
+IG5lZWRzDQo+IHRvIGRlc2NyaWJlIHRoaXMgaG9sZSBpbiBvcmRlciBmb3IgdGhlIE9TIHRvIGF2
+b2lkIGFkZGluZyB0aGlzIGJhZGJsb2NrIG1lbW9yeS4NCj4gDQo+IFRoYW5rcywNCj4gLVRvc2hp
+DQo=
