@@ -1,35 +1,66 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] x86/efi: Access EFI MMIO data as unencrypted when SEV is active
-Date: Wed, 4 Jul 2018 00:40:46 +0200
-Message-ID: <CAKv+Gu-hWz4UUvvSyG5=RzCWmheva2-yUkSyuCM0_CDERCJihQ@mail.gmail.com>
-References: <1530624720-32004-1-git-send-email-brijesh.singh@amd.com>
- <CAKv+Gu8MZ1O2U=OiONCdaFQjNGVPjqASMP7ubKCg-9ULdk7Whw@mail.gmail.com>
- <20180703154418.GC4643@zn.tnic> <e17f101d-8509-17bc-f099-92cd7e817f49@amd.com>
- <20180703214604.GA15516@zn.tnic>
+Subject: Re: [PATCH v2 1/2] efi/bgrt: Drop __initdata from bgrt_image_size
+Date: Tue, 3 Jul 2018 17:25:29 +0200
+Message-ID: <CAKv+Gu-9vhRFsR+0agKAMVJfXir=+eQbMs=KZmvT5JAPg3hNCw@mail.gmail.com>
+References: <20180618151358.4830-1-hdegoede@redhat.com>
+ <45021554.rh2cuKUFdo@amdc3058>
+ <CGME20180703152453eucas1p2b6fe0c9a8c8e0e7607a5d5bd8438f61e@eucas1p2.samsung.com>
+ <CAKv+Gu9B58b75PC2F6e5ujVwXRisyM5TZ+18sski2OznJXDOhg@mail.gmail.com>
+ <1657054.xB6YDx91rD@amdc3058>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180703214604.GA15516@zn.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@suse.de>
-Cc: Brijesh Singh <brijesh.singh@amd.com>, the arch/x86 maintainers <x86@kernel.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Tom Lendacky <thomas.lendacky@amd.com>, Thomas Gleixner <tglx@linutronix.de>, KVM devel mailing list <kvm@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Andy Lutomirski <luto@kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+In-Reply-To: <1657054.xB6YDx91rD@amdc3058>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Cc: Hans de Goede <hdegoede@redhat.com>, "open list:EFIFB FRAMEBUFFER DRIVER" <linux-fbdev@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, dri-devel <dri-devel@lists.freedesktop.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 3 July 2018 at 23:46, Borislav Petkov <bp@suse.de> wrote:
-> On Tue, Jul 03, 2018 at 04:16:57PM -0500, Brijesh Singh wrote:
->> I agree with Ard,  it may be good idea to extend the UEFI spec to
->> include encryption information. Having this information may be helpful
->> in some cases, e.g if we ever need to map a specific non IO memory as
->> unencrypted. So far we have not seen the need for it. But I will ask AMD
->> folks working closely with UEFI committee to float this and submit it as
->> enhancement in Tianocore BZ.
->
-> Except that if the IO memory handling unencrypted changes in future
-> incarnations, the changes to the spec become moot. I'm just saying...
->
-
-Quite the opposite. If we allocate a EFI_MEMORY_xx bit to signify that
-a region should be mapped as encrypted, we no longer have to reason
-about these things in the kernel but we can simply apply the
-attributes that the UEFI memory map provides us. A platform could then
-describe both encrypted and unencrypted MMIO regions at will.
+T24gMyBKdWx5IDIwMTggYXQgMTc6MjQsIEJhcnRsb21pZWogWm9sbmllcmtpZXdpY3oKPGIuem9s
+bmllcmtpZUBzYW1zdW5nLmNvbT4gd3JvdGU6Cj4gT24gTW9uZGF5LCBKdWx5IDAyLCAyMDE4IDAy
+OjAyOjQ3IFBNIEFyZCBCaWVzaGV1dmVsIHdyb3RlOgo+PiBPbiAyIEp1bHkgMjAxOCBhdCAxMzo1
+NywgQmFydGxvbWllaiBab2xuaWVya2lld2ljego+PiA8Yi56b2xuaWVya2llQHNhbXN1bmcuY29t
+PiB3cm90ZToKPj4gPiBPbiBNb25kYXksIEp1bHkgMDIsIDIwMTggMDE6NDY6MDkgUE0gQXJkIEJp
+ZXNoZXV2ZWwgd3JvdGU6Cj4+ID4+IE9uIDIgSnVseSAyMDE4IGF0IDEzOjI2LCBIYW5zIGRlIEdv
+ZWRlIDxoZGVnb2VkZUByZWRoYXQuY29tPiB3cm90ZToKPj4gPj4gPiBCYXJ0bG9taWVqLAo+PiA+
+PiA+Cj4+ID4+ID4gTm93IHRoYXQgdGhlIGZiY29uIGRlZmVycmVkIGNvbnNvbGUgdGFrZW92ZXIg
+cGF0Y2hlcyBoYXZlIGJlZW4KPj4gPj4gPiBtZXJnZWQgSSBiZWxpZXZlIHRoaXMgc2VyaWVzIGNh
+biBiZSBtZXJnZWQgdG9vID8KPj4gPj4gPgo+PiA+PiA+IE5vdGUgdGhlIGZpcnN0IHBhdGNoIGhh
+cyBhbiBhY2sgZnJvbSBBcmQgZm9yIG1lcmdpbmcgdGhlCj4+ID4+ID4gMSBsaW5lIGVmaSBjaGFu
+Z2UgdGhyb3VnaCB0aGUgZmJkZXYgdHJlZS4KPj4gPj4gPgo+PiA+Pgo+PiA+PiAuLi4gb3IgSSBj
+b3VsZCB0YWtlIGV2ZXJ5dGhpbmcgdGhyb3VnaCB0aGUgZWZpIHRyZWUgaW5zdGVhZCwgYXMKPj4g
+Pj4gYWxyZWFkeSBkaXNjdXNzZWQgYmV0d2VlbiBCYXJ0bG9taWVqIGFuZCBtZSBpbiB0aGUgY29u
+dGV4dCBvZiBhbm90aGVyCj4+ID4+IHBhdGNoIHNlcmllcyB0aGF0IHRvdWNoZXMgYm90aCB0aGUg
+ZmJkZXYgYW5kIGVmaSB0cmVlcy4KPj4gPj4KPj4gPj4gQmFydGxvbWllaiwgdGhhdCB3b3VsZCBy
+ZXF1aXJlIHlvdXIgYWNrIG9uIHBhdGNoCj4+ID4+Cj4+ID4+IFtQQVRDSCB2MiAyLzJdIGVmaWZi
+OiBDb3B5IHRoZSBBQ1BJIEJHUlQgYm9vdCBncmFwaGljcyB0byB0aGUgZnJhbWVidWZmZXIKPj4g
+Pj4KPj4gPj4gaHR0cHM6Ly9tYXJjLmluZm8vP2w9bGludXgtZmJkZXYmbT0xNTI5MzM0ODQ2MTY5
+OTMmdz0yCj4+ID4+Cj4+ID4+IHNvIGlmIHlvdSdyZSBvayB3aXRoIHRoYXQsIEkgd2lsbCBxdWV1
+ZSBib3RoIG9mIHRoZXNlIGZvciB2NC4xOQo+PiA+Cj4+ID4gSSB3b3VsZCByZWFsbHkgcHJlZmVy
+IHRvIG1lcmdlIHRoaXMgcGF0Y2hzZXQgdGhyb3VnaCBmYmRldiB0cmVlCj4+ID4gYXMgZWZpIHRy
+ZWUgZG9lc24ndCBoYXZlIGZiY29uIGRlZmVycmVkIGNvbnNvbGUgdGFrZW92ZXIgcGF0Y2hlcwo+
+PiA+ICh3aGljaCBhcmUgcmVxdWlyZWQgYnkgZWZpZmIgY2hhbmdlcyB1bmRlciBkaXNjdXNzaW9u
+KS4KPj4gPgo+Pgo+PiBBaCBvaywgSSBkaWRuJ3QgcmVhbGlzZSB0aGF0LiBJIGRvbid0IHRoaW5r
+IHRoZXJlIHdpbGwgYmUgYW55Cj4+IGNvbmZsaWN0cywgc2luY2UgdGhlIGVmaWZiIGNoYW5nZXMg
+aW4gdGhlIGVmaSB0cmVlIGFuZCB0aGVzZSBjaGFuZ2VzCj4+IG9wZXJhdGUgb24gZGlmZmVyZW50
+IHBhcnRzIG9mIHRoZSBmaWxlLiBCdXQgbGV0J3MgZG91YmxlIGNoZWNrIGJlZm9yZQo+PiB0YWtp
+bmcgc3R1ZmYgaW50byAtbmV4dC4KPj4gKGVmaS9uZXh0IGlzIG5vdCBwdWxsZWQgaW50byAtbmV4
+dCBkaXJlY3RseSwgYnV0IHZpYSB0aGUgdGlwOmVmaSB0cmVlLAo+PiBhbmQgSSBoYXZlbid0IHNl
+bnQgYSBwdWxsIHJlcXVlc3QgeWV0IGZvciB2NC4xOSkKPgo+IEkndmUgdmVyaWZpZWQgdGhpcyB3
+aXRoIC1uZXh0IGZyb20gdG9kYXkgYW5kIGl0IGF1dG8tbWVyZ2VkIGZpbmUgKGZvcgo+IHRlc3Rp
+bmcgcHVycG9zZXMgSSd2ZSBhcHBsaWVkIGJvdGggcGF0Y2hlcyB0byAtbmV4dCBhbmQgdGhlbiBw
+dWxsZWQgaW4KPiBlZmkvbmV4dCBmcm9tIGVmaS5naXQgdHJlZSkuCj4KPiBJJ3ZlIGFwcGxpZWQg
+Ym90aCBwYXRjaGVzIHRvIGZiZGV2LWZvci1uZXh0IChJIGhvcGUgaXQgaXMgZmluZSB3aXRoIHlv
+dSkuCj4KCkFic29sdXRlbHkgZmluZSwgYW5kIHRoYW5rcyBmb3IgZG91YmxlIGNoZWNraW5nLgpf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpkcmktZGV2ZWwg
+bWFpbGluZyBsaXN0CmRyaS1kZXZlbEBsaXN0cy5mcmVlZGVza3RvcC5vcmcKaHR0cHM6Ly9saXN0
+cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1hbi9saXN0aW5mby9kcmktZGV2ZWwK
