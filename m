@@ -1,7 +1,7 @@
 From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH 1/6] efi: Introduce efi_memmap_free() to free memory allocated by efi_memmap_alloc()
-Date: Mon,  2 Jul 2018 18:50:49 -0700
-Message-ID: <1530582654-25662-2-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH 6/6] efi: Fix unaligned fake memmap entries corrupting efi memory map
+Date: Mon,  2 Jul 2018 18:50:54 -0700
+Message-ID: <1530582654-25662-7-git-send-email-sai.praneeth.prakhya@intel.com>
 References: <1530582654-25662-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1530582654-25662-1-git-send-email-sai.praneeth.prakhya@intel.com>
@@ -12,17 +12,16 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-efi_memmap_alloc() allocates memory depending on whether mm_init() has
-already been invoked or not. Apart from memblock_alloc() memory and
-alloc_pages() memory, efi memory map could also have a third variant of
-memory allocation and that is memblock_reserved. This happens only for
-the memory map passed to kernel by firmware and thus can happen only
-once during boot process.
-
-In order to identify these three different types of allocations and thus
-to call the appropriate free() variant, introduce an enum named
-efi_memmap_type and also introduce a efi memmap API named
-efi_memmap_free() to free memory allocated by efi_memmap_alloc().
+efi_fake_memmap() inserts user given fake memory map entries into the
+original efi memory map using efi_memmmap_insert(). efi_memmmap_insert()
+checks for EFI_PAGE_SIZE alignment and could fail if an unaligned efi
+memory region is passed (Eg: efi_fake_memmap=1K@0x73ae0000:
+0x8000000000000000). Since EFI_PAGE_SIZE is 4K the above request fails,
+but efi_fake_memmap() doesn't check for failures in efi_memmap_insert()
+and installs an empty efi memory map from efi_memmap_alloc(). Since efi
+memory map is corrupted all the later efi calls fail too. Hence, fix
+this bug by changing the return type of efi_memmap_insert() from void to
+int.
 
 Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 Suggested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
@@ -43,81 +42,103 @@ Cc: Matt Fleming <matt@codeblueprint.co.uk>
 Cc: Dan Williams <dan.j.williams@intel.com>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/memmap.c | 28 ++++++++++++++++++++++++++++
- include/linux/efi.h           |  8 ++++++++
- 2 files changed, 36 insertions(+)
+ arch/x86/platform/efi/quirks.c  |  8 +++++++-
+ drivers/firmware/efi/fake_mem.c | 11 +++++++++--
+ drivers/firmware/efi/memmap.c   | 12 ++++++++----
+ include/linux/efi.h             |  4 ++--
+ 4 files changed, 26 insertions(+), 9 deletions(-)
 
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 8fce327387e5..0e607ac24a3b 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -290,7 +290,13 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
+ 		return;
+ 	}
+ 
+-	efi_memmap_insert(&efi.memmap, new, &mr);
++	if (efi_memmap_insert(&efi.memmap, new, &mr)) {
++		pr_err("Failed to reserve EFI memory region\n");
++		early_memunmap(new, new_size);
++		efi_memmap_free(new_phys, num_entries, alloc_type);
++		return;
++	}
++
+ 	early_memunmap(new, new_size);
+ 
+ 	/* Free existing memory map before installing new memory map */
+diff --git a/drivers/firmware/efi/fake_mem.c b/drivers/firmware/efi/fake_mem.c
+index 09b0fabf07fd..ae373af6931b 100644
+--- a/drivers/firmware/efi/fake_mem.c
++++ b/drivers/firmware/efi/fake_mem.c
+@@ -84,8 +84,15 @@ void __init efi_fake_memmap(void)
+ 		return;
+ 	}
+ 
+-	for (i = 0; i < nr_fake_mem; i++)
+-		efi_memmap_insert(&efi.memmap, new_memmap, &fake_mems[i]);
++	for (i = 0; i < nr_fake_mem; i++) {
++		if (efi_memmap_insert(&efi.memmap, new_memmap, &fake_mems[i])) {
++			pr_err("efi_fake_mem: Failed to create fake memmap\n");
++			early_memunmap(new_memmap,
++				       efi.memmap.desc_size * new_nr_map);
++			efi_memmap_free(new_memmap_phy, new_nr_map, alloc_type);
++			return;
++		}
++	}
+ 
+ 	/* swap into new EFI memmap */
+ 	early_memunmap(new_memmap, efi.memmap.desc_size * new_nr_map);
 diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
-index 5fc70520e04c..0686e063c644 100644
+index d4e3e114cf86..05a556e63ec2 100644
 --- a/drivers/firmware/efi/memmap.c
 +++ b/drivers/firmware/efi/memmap.c
-@@ -12,6 +12,7 @@
- #include <asm/early_ioremap.h>
- #include <linux/memblock.h>
- #include <linux/slab.h>
-+#include <linux/bootmem.h>
- 
- static phys_addr_t __init __efi_memmap_alloc_early(unsigned long size)
- {
-@@ -50,6 +51,33 @@ phys_addr_t __init efi_memmap_alloc(unsigned int num_entries)
- }
- 
- /**
-+ * efi_memmap_free - Free memory allocated by efi_memmap_alloc()
-+ * @mem: Physical address allocated by efi_memmap_alloc().
-+ * @num_entries: Number of entries in the allocated map.
-+ * @alloc_type: What type of allocation did efi_memmap_alloc() perform?
+@@ -290,9 +290,11 @@ int __init efi_memmap_split_count(efi_memory_desc_t *md, struct range *range)
+  *
+  * It is suggested that you call efi_memmap_split_count() first
+  * to see how large @buf needs to be.
 + *
-+ * Use this function to free memory allocated by efi_memmap_alloc().
-+ * efi_memmap_alloc() allocates memory depending on whether mm_init()
-+ * has already been invoked or not. It uses either memblock or "normal"
-+ * page allocation, similarly, we free it in two different ways. Also
-+ * note that there is a third type of memory used by memmap which is
-+ * memblock_reserved() and is passed by EFI stub to kernel.
-+ */
-+void __init efi_memmap_free(phys_addr_t mem, unsigned int num_entries,
-+			    enum efi_memmap_type alloc_type)
-+{
-+	unsigned long size = num_entries * efi.memmap.desc_size;
-+	unsigned int order = get_order(size);
-+
-+	if (alloc_type == BUDDY_ALLOCATOR)
-+		__free_pages(pfn_to_page(PHYS_PFN(mem)), order);
-+	else if (alloc_type == MEMBLOCK)
-+		memblock_free(mem, size);
-+	else
-+		free_bootmem(mem, size);
-+}
-+
-+/**
-  * __efi_memmap_init - Common code for mapping the EFI memory map
-  * @data: EFI memory map data
-  * @late: Use early or late mapping function?
++ * Returns zero on success, a negative error code on failure.
+  */
+-void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
+-			      struct efi_mem_range *mem)
++int __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
++			     struct efi_mem_range *mem)
+ {
+ 	u64 m_start, m_end, m_attr;
+ 	efi_memory_desc_t *md;
+@@ -311,8 +313,9 @@ void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
+ 	 */
+ 	if (!IS_ALIGNED(m_start, EFI_PAGE_SIZE) ||
+ 	    !IS_ALIGNED(m_end + 1, EFI_PAGE_SIZE)) {
+-		WARN_ON(1);
+-		return;
++		WARN(1, "Address 0x%llx - 0x%llx is not EFI_PAGE_SIZE aligned",
++		     m_start, m_end);
++		return -EINVAL;
+ 	}
+ 
+ 	for (old = old_memmap->map, new = buf;
+@@ -379,4 +382,5 @@ void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
+ 			md->attribute |= m_attr;
+ 		}
+ 	}
++	return 0;
+ }
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 56add823f190..455875c01ed1 100644
+index c9752c67d184..bca955205a3f 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
-@@ -765,6 +765,12 @@ struct efi_memory_map_data {
- 	unsigned long desc_size;
- };
- 
-+enum efi_memmap_type {
-+	EFI_STUB,
-+	MEMBLOCK,
-+	BUDDY_ALLOCATOR,
-+};
-+
- struct efi_memory_map {
- 	phys_addr_t phys_map;
- 	void *map;
-@@ -1016,6 +1022,8 @@ extern int __init efi_memmap_split_count(efi_memory_desc_t *md,
+@@ -1023,8 +1023,8 @@ extern int __init efi_memmap_install(phys_addr_t addr, unsigned int nr_map,
+ 				     enum efi_memmap_type alloc_type);
+ extern int __init efi_memmap_split_count(efi_memory_desc_t *md,
  					 struct range *range);
- extern void __init efi_memmap_insert(struct efi_memory_map *old_memmap,
- 				     void *buf, struct efi_mem_range *mem);
-+extern void __init efi_memmap_free(phys_addr_t mem, unsigned int num_entries,
-+				   enum efi_memmap_type alloc_type);
+-extern void __init efi_memmap_insert(struct efi_memory_map *old_memmap,
+-				     void *buf, struct efi_mem_range *mem);
++extern int __init efi_memmap_insert(struct efi_memory_map *old_memmap,
++				    void *buf, struct efi_mem_range *mem);
+ extern void __init efi_memmap_free(phys_addr_t mem, unsigned int num_entries,
+ 				   enum efi_memmap_type alloc_type);
  
- extern int efi_config_init(efi_config_table_type_t *arch_tables);
- #ifdef CONFIG_EFI_ESRT
 -- 
 2.7.4
