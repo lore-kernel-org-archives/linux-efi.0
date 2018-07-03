@@ -1,57 +1,123 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v2 1/2] efi/bgrt: Drop __initdata from bgrt_image_size
-Date: Mon, 2 Jul 2018 13:46:09 +0200
-Message-ID: <CAKv+Gu9-=cjZy72-V99VXRmjRtZN93Azafxduwvmy8OOVobXnw@mail.gmail.com>
-References: <20180618151358.4830-1-hdegoede@redhat.com>
- <0333a338-fc21-7f78-7785-f62a67f232a5@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <0333a338-fc21-7f78-7785-f62a67f232a5@redhat.com>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: "open list:EFIFB FRAMEBUFFER DRIVER" <linux-fbdev@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, dri-devel <dri-devel@lists.freedesktop.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Subject: [PATCH 1/6] efi: Introduce efi_memmap_free() to free memory allocated by efi_memmap_alloc()
+Date: Mon,  2 Jul 2018 18:50:49 -0700
+Message-ID: <1530582654-25662-2-git-send-email-sai.praneeth.prakhya@intel.com>
+References: <1530582654-25662-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1530582654-25662-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Lee Chun-Yi <jlee@suse.com>, Dave Young <dyoung@redhat.com>, Borislav Petkov <bp@alien8.de>, Laszlo Ersek <lersek@redhat.com>, Jan Kiszka <jan.kiszka@siemens.com>, Dave Hansen <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Nicolai Stange <nicstange@gmail.com>, Naresh Bhat <naresh.bhat@linaro.org>, Ricardo Neri <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, Taku Izumi <izumi.taku@jp.fujitsu.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Dan Williams <dan.j.williams@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gMiBKdWx5IDIwMTggYXQgMTM6MjYsIEhhbnMgZGUgR29lZGUgPGhkZWdvZWRlQHJlZGhhdC5j
-b20+IHdyb3RlOgo+IEJhcnRsb21pZWosCj4KPiBOb3cgdGhhdCB0aGUgZmJjb24gZGVmZXJyZWQg
-Y29uc29sZSB0YWtlb3ZlciBwYXRjaGVzIGhhdmUgYmVlbgo+IG1lcmdlZCBJIGJlbGlldmUgdGhp
-cyBzZXJpZXMgY2FuIGJlIG1lcmdlZCB0b28gPwo+Cj4gTm90ZSB0aGUgZmlyc3QgcGF0Y2ggaGFz
-IGFuIGFjayBmcm9tIEFyZCBmb3IgbWVyZ2luZyB0aGUKPiAxIGxpbmUgZWZpIGNoYW5nZSB0aHJv
-dWdoIHRoZSBmYmRldiB0cmVlLgo+CgouLi4gb3IgSSBjb3VsZCB0YWtlIGV2ZXJ5dGhpbmcgdGhy
-b3VnaCB0aGUgZWZpIHRyZWUgaW5zdGVhZCwgYXMKYWxyZWFkeSBkaXNjdXNzZWQgYmV0d2VlbiBC
-YXJ0bG9taWVqIGFuZCBtZSBpbiB0aGUgY29udGV4dCBvZiBhbm90aGVyCnBhdGNoIHNlcmllcyB0
-aGF0IHRvdWNoZXMgYm90aCB0aGUgZmJkZXYgYW5kIGVmaSB0cmVlcy4KCkJhcnRsb21pZWosIHRo
-YXQgd291bGQgcmVxdWlyZSB5b3VyIGFjayBvbiBwYXRjaAoKW1BBVENIIHYyIDIvMl0gZWZpZmI6
-IENvcHkgdGhlIEFDUEkgQkdSVCBib290IGdyYXBoaWNzIHRvIHRoZSBmcmFtZWJ1ZmZlcgoKaHR0
-cHM6Ly9tYXJjLmluZm8vP2w9bGludXgtZmJkZXYmbT0xNTI5MzM0ODQ2MTY5OTMmdz0yCgpzbyBp
-ZiB5b3UncmUgb2sgd2l0aCB0aGF0LCBJIHdpbGwgcXVldWUgYm90aCBvZiB0aGVzZSBmb3IgdjQu
-MTkKCgo+Cj4gT24gMTgtMDYtMTggMTc6MTMsIEhhbnMgZGUgR29lZGUgd3JvdGU6Cj4+Cj4+IGJn
-cnRfaW1hZ2Vfc2l6ZSBpcyBuZWNlc3NhcnkgdG8gKG9wdGlvbmFsbHkpIHNob3cgdGhlIGJvb3Qg
-Z3JhcGhpY3MgZnJvbQo+PiB0aGUgZWZpZmIgY29kZS4gVGhlIGVmaWZiIGRyaXZlciBpcyBhIHBs
-YXRmb3JtIGRyaXZlciwgdXNpbmcgYSBub3JtYWwKPj4gZHJpdmVyIHByb2JlKCkgZHJpdmVyIGNh
-bGxiYWNrLiBTbyBldmVuIHRob3VnaCBpdCBpcyBhbHdheXMgYnVpbHRpbiBpdAo+PiBjYW5ub3Qg
-cmVmZXJlbmNlIF9faW5pdGRhdGEuCj4+Cj4+IEFja2VkLWJ5OiBBcmQgQmllc2hldXZlbCA8YXJk
-LmJpZXNoZXV2ZWxAbGluYXJvLm9yZz4KPj4gU2lnbmVkLW9mZi1ieTogSGFucyBkZSBHb2VkZSA8
-aGRlZ29lZGVAcmVkaGF0LmNvbT4KPj4gLS0tCj4+ICAgZHJpdmVycy9maXJtd2FyZS9lZmkvZWZp
-LWJncnQuYyB8IDIgKy0KPj4gICAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRpb24oKyksIDEgZGVs
-ZXRpb24oLSkKPj4KPj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvZmlybXdhcmUvZWZpL2VmaS1iZ3J0
-LmMKPj4gYi9kcml2ZXJzL2Zpcm13YXJlL2VmaS9lZmktYmdydC5jCj4+IGluZGV4IDUwNzkzZmRh
-NzgxOS4uYjIyY2NmYjBjOTkxIDEwMDY0NAo+PiAtLS0gYS9kcml2ZXJzL2Zpcm13YXJlL2VmaS9l
-ZmktYmdydC5jCj4+ICsrKyBiL2RyaXZlcnMvZmlybXdhcmUvZWZpL2VmaS1iZ3J0LmMKPj4gQEAg
-LTIwLDcgKzIwLDcgQEAKPj4gICAjaW5jbHVkZSA8bGludXgvZWZpLWJncnQuaD4KPj4gICAgIHN0
-cnVjdCBhY3BpX3RhYmxlX2JncnQgYmdydF90YWI7Cj4+IC1zaXplX3QgX19pbml0ZGF0YSBiZ3J0
-X2ltYWdlX3NpemU7Cj4+ICtzaXplX3QgYmdydF9pbWFnZV9zaXplOwo+PiAgICAgc3RydWN0IGJt
-cF9oZWFkZXIgewo+PiAgICAgICAgIHUxNiBpZDsKPj4KPgpfX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fXwpkcmktZGV2ZWwgbWFpbGluZyBsaXN0CmRyaS1kZXZl
-bEBsaXN0cy5mcmVlZGVza3RvcC5vcmcKaHR0cHM6Ly9saXN0cy5mcmVlZGVza3RvcC5vcmcvbWFp
-bG1hbi9saXN0aW5mby9kcmktZGV2ZWwK
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+
+efi_memmap_alloc() allocates memory depending on whether mm_init() has
+already been invoked or not. Apart from memblock_alloc() memory and
+alloc_pages() memory, efi memory map could also have a third variant of
+memory allocation and that is memblock_reserved. This happens only for
+the memory map passed to kernel by firmware and thus can happen only
+once during boot process.
+
+In order to identify these three different types of allocations and thus
+to call the appropriate free() variant, introduce an enum named
+efi_memmap_type and also introduce a efi memmap API named
+efi_memmap_free() to free memory allocated by efi_memmap_alloc().
+
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Suggested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Lee Chun-Yi <jlee@suse.com>
+Cc: Dave Young <dyoung@redhat.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Laszlo Ersek <lersek@redhat.com>
+Cc: Jan Kiszka <jan.kiszka@siemens.com>
+Cc: Dave Hansen <dave.hansen@intel.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Nicolai Stange <nicstange@gmail.com>
+Cc: Naresh Bhat <naresh.bhat@linaro.org>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Taku Izumi <izumi.taku@jp.fujitsu.com>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Dan Williams <dan.j.williams@intel.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/memmap.c | 28 ++++++++++++++++++++++++++++
+ include/linux/efi.h           |  8 ++++++++
+ 2 files changed, 36 insertions(+)
+
+diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+index 5fc70520e04c..0686e063c644 100644
+--- a/drivers/firmware/efi/memmap.c
++++ b/drivers/firmware/efi/memmap.c
+@@ -12,6 +12,7 @@
+ #include <asm/early_ioremap.h>
+ #include <linux/memblock.h>
+ #include <linux/slab.h>
++#include <linux/bootmem.h>
+ 
+ static phys_addr_t __init __efi_memmap_alloc_early(unsigned long size)
+ {
+@@ -50,6 +51,33 @@ phys_addr_t __init efi_memmap_alloc(unsigned int num_entries)
+ }
+ 
+ /**
++ * efi_memmap_free - Free memory allocated by efi_memmap_alloc()
++ * @mem: Physical address allocated by efi_memmap_alloc().
++ * @num_entries: Number of entries in the allocated map.
++ * @alloc_type: What type of allocation did efi_memmap_alloc() perform?
++ *
++ * Use this function to free memory allocated by efi_memmap_alloc().
++ * efi_memmap_alloc() allocates memory depending on whether mm_init()
++ * has already been invoked or not. It uses either memblock or "normal"
++ * page allocation, similarly, we free it in two different ways. Also
++ * note that there is a third type of memory used by memmap which is
++ * memblock_reserved() and is passed by EFI stub to kernel.
++ */
++void __init efi_memmap_free(phys_addr_t mem, unsigned int num_entries,
++			    enum efi_memmap_type alloc_type)
++{
++	unsigned long size = num_entries * efi.memmap.desc_size;
++	unsigned int order = get_order(size);
++
++	if (alloc_type == BUDDY_ALLOCATOR)
++		__free_pages(pfn_to_page(PHYS_PFN(mem)), order);
++	else if (alloc_type == MEMBLOCK)
++		memblock_free(mem, size);
++	else
++		free_bootmem(mem, size);
++}
++
++/**
+  * __efi_memmap_init - Common code for mapping the EFI memory map
+  * @data: EFI memory map data
+  * @late: Use early or late mapping function?
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 56add823f190..455875c01ed1 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -765,6 +765,12 @@ struct efi_memory_map_data {
+ 	unsigned long desc_size;
+ };
+ 
++enum efi_memmap_type {
++	EFI_STUB,
++	MEMBLOCK,
++	BUDDY_ALLOCATOR,
++};
++
+ struct efi_memory_map {
+ 	phys_addr_t phys_map;
+ 	void *map;
+@@ -1016,6 +1022,8 @@ extern int __init efi_memmap_split_count(efi_memory_desc_t *md,
+ 					 struct range *range);
+ extern void __init efi_memmap_insert(struct efi_memory_map *old_memmap,
+ 				     void *buf, struct efi_mem_range *mem);
++extern void __init efi_memmap_free(phys_addr_t mem, unsigned int num_entries,
++				   enum efi_memmap_type alloc_type);
+ 
+ extern int efi_config_init(efi_config_table_type_t *arch_tables);
+ #ifdef CONFIG_EFI_ESRT
+-- 
+2.7.4
