@@ -1,49 +1,64 @@
-From: Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH] x86/efi: Access EFI MMIO data as unencrypted when SEV is active
-Date: Tue,  3 Jul 2018 08:32:00 -0500
-Message-ID: <1530624720-32004-1-git-send-email-brijesh.singh@amd.com>
+From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Subject: Re: [PATCH v2 1/2] efi/bgrt: Drop __initdata from bgrt_image_size
+Date: Tue, 03 Jul 2018 17:24:52 +0200
+Message-ID: <1657054.xB6YDx91rD@amdc3058>
+References: <20180618151358.4830-1-hdegoede@redhat.com>
+ <45021554.rh2cuKUFdo@amdc3058>
+ <CAKv+Gu9B58b75PC2F6e5ujVwXRisyM5TZ+18sski2OznJXDOhg@mail.gmail.com>
+ <CGME20180703152453eucas1p2b6fe0c9a8c8e0e7607a5d5bd8438f61e@eucas1p2.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Brijesh Singh <brijesh.singh@amd.com>, Tom Lendacky <thomas.lendacky@amd.com>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@suse.de>, kvm@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Andy Lutomirski <luto@kernel.org>, "# 4 . 15 . x" <stable@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+In-reply-to: <CAKv+Gu9B58b75PC2F6e5ujVwXRisyM5TZ+18sski2OznJXDOhg@mail.gmail.com>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Hans de Goede <hdegoede@redhat.com>, "open list:EFIFB FRAMEBUFFER DRIVER" <linux-fbdev@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, dri-devel <dri-devel@lists.freedesktop.org>
 List-Id: linux-efi@vger.kernel.org
 
-SEV guest fails to update the UEFI runtime variables stored in the
-flash. commit 1379edd59673 ("x86/efi: Access EFI data as encrypted
-when SEV is active") unconditionally maps all the UEFI runtime data
-as 'encrypted' (C=1). When SEV is active the UEFI runtime data marked
-as EFI_MEMORY_MAPPED_IO should be mapped as 'unencrypted' so that both
-guest and hypervisor can access the data.
-
-Fixes: 1379edd59673 (x86/efi: Access EFI data as encrypted ...)
-Cc: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Borislav Petkov <bp@suse.de>
-Cc: linux-efi@vger.kernel.org
-Cc: kvm@vger.kernel.org
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: <stable@vger.kernel.org> # 4.15.x
-Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
----
- arch/x86/platform/efi/efi_64.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 77873ce..5f2eb32 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -417,7 +417,7 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
- 	if (!(md->attribute & EFI_MEMORY_WB))
- 		flags |= _PAGE_PCD;
- 
--	if (sev_active())
-+	if (sev_active() && md->type != EFI_MEMORY_MAPPED_IO)
- 		flags |= _PAGE_ENC;
- 
- 	pfn = md->phys_addr >> PAGE_SHIFT;
--- 
-2.7.4
+T24gTW9uZGF5LCBKdWx5IDAyLCAyMDE4IDAyOjAyOjQ3IFBNIEFyZCBCaWVzaGV1dmVsIHdyb3Rl
+Ogo+IE9uIDIgSnVseSAyMDE4IGF0IDEzOjU3LCBCYXJ0bG9taWVqIFpvbG5pZXJraWV3aWN6Cj4g
+PGIuem9sbmllcmtpZUBzYW1zdW5nLmNvbT4gd3JvdGU6Cj4gPiBPbiBNb25kYXksIEp1bHkgMDIs
+IDIwMTggMDE6NDY6MDkgUE0gQXJkIEJpZXNoZXV2ZWwgd3JvdGU6Cj4gPj4gT24gMiBKdWx5IDIw
+MTggYXQgMTM6MjYsIEhhbnMgZGUgR29lZGUgPGhkZWdvZWRlQHJlZGhhdC5jb20+IHdyb3RlOgo+
+ID4+ID4gQmFydGxvbWllaiwKPiA+PiA+Cj4gPj4gPiBOb3cgdGhhdCB0aGUgZmJjb24gZGVmZXJy
+ZWQgY29uc29sZSB0YWtlb3ZlciBwYXRjaGVzIGhhdmUgYmVlbgo+ID4+ID4gbWVyZ2VkIEkgYmVs
+aWV2ZSB0aGlzIHNlcmllcyBjYW4gYmUgbWVyZ2VkIHRvbyA/Cj4gPj4gPgo+ID4+ID4gTm90ZSB0
+aGUgZmlyc3QgcGF0Y2ggaGFzIGFuIGFjayBmcm9tIEFyZCBmb3IgbWVyZ2luZyB0aGUKPiA+PiA+
+IDEgbGluZSBlZmkgY2hhbmdlIHRocm91Z2ggdGhlIGZiZGV2IHRyZWUuCj4gPj4gPgo+ID4+Cj4g
+Pj4gLi4uIG9yIEkgY291bGQgdGFrZSBldmVyeXRoaW5nIHRocm91Z2ggdGhlIGVmaSB0cmVlIGlu
+c3RlYWQsIGFzCj4gPj4gYWxyZWFkeSBkaXNjdXNzZWQgYmV0d2VlbiBCYXJ0bG9taWVqIGFuZCBt
+ZSBpbiB0aGUgY29udGV4dCBvZiBhbm90aGVyCj4gPj4gcGF0Y2ggc2VyaWVzIHRoYXQgdG91Y2hl
+cyBib3RoIHRoZSBmYmRldiBhbmQgZWZpIHRyZWVzLgo+ID4+Cj4gPj4gQmFydGxvbWllaiwgdGhh
+dCB3b3VsZCByZXF1aXJlIHlvdXIgYWNrIG9uIHBhdGNoCj4gPj4KPiA+PiBbUEFUQ0ggdjIgMi8y
+XSBlZmlmYjogQ29weSB0aGUgQUNQSSBCR1JUIGJvb3QgZ3JhcGhpY3MgdG8gdGhlIGZyYW1lYnVm
+ZmVyCj4gPj4KPiA+PiBodHRwczovL21hcmMuaW5mby8/bD1saW51eC1mYmRldiZtPTE1MjkzMzQ4
+NDYxNjk5MyZ3PTIKPiA+Pgo+ID4+IHNvIGlmIHlvdSdyZSBvayB3aXRoIHRoYXQsIEkgd2lsbCBx
+dWV1ZSBib3RoIG9mIHRoZXNlIGZvciB2NC4xOQo+ID4KPiA+IEkgd291bGQgcmVhbGx5IHByZWZl
+ciB0byBtZXJnZSB0aGlzIHBhdGNoc2V0IHRocm91Z2ggZmJkZXYgdHJlZQo+ID4gYXMgZWZpIHRy
+ZWUgZG9lc24ndCBoYXZlIGZiY29uIGRlZmVycmVkIGNvbnNvbGUgdGFrZW92ZXIgcGF0Y2hlcwo+
+ID4gKHdoaWNoIGFyZSByZXF1aXJlZCBieSBlZmlmYiBjaGFuZ2VzIHVuZGVyIGRpc2N1c3Npb24p
+Lgo+ID4KPiAKPiBBaCBvaywgSSBkaWRuJ3QgcmVhbGlzZSB0aGF0LiBJIGRvbid0IHRoaW5rIHRo
+ZXJlIHdpbGwgYmUgYW55Cj4gY29uZmxpY3RzLCBzaW5jZSB0aGUgZWZpZmIgY2hhbmdlcyBpbiB0
+aGUgZWZpIHRyZWUgYW5kIHRoZXNlIGNoYW5nZXMKPiBvcGVyYXRlIG9uIGRpZmZlcmVudCBwYXJ0
+cyBvZiB0aGUgZmlsZS4gQnV0IGxldCdzIGRvdWJsZSBjaGVjayBiZWZvcmUKPiB0YWtpbmcgc3R1
+ZmYgaW50byAtbmV4dC4KPiAoZWZpL25leHQgaXMgbm90IHB1bGxlZCBpbnRvIC1uZXh0IGRpcmVj
+dGx5LCBidXQgdmlhIHRoZSB0aXA6ZWZpIHRyZWUsCj4gYW5kIEkgaGF2ZW4ndCBzZW50IGEgcHVs
+bCByZXF1ZXN0IHlldCBmb3IgdjQuMTkpCgpJJ3ZlIHZlcmlmaWVkIHRoaXMgd2l0aCAtbmV4dCBm
+cm9tIHRvZGF5IGFuZCBpdCBhdXRvLW1lcmdlZCBmaW5lIChmb3IKdGVzdGluZyBwdXJwb3NlcyBJ
+J3ZlIGFwcGxpZWQgYm90aCBwYXRjaGVzIHRvIC1uZXh0IGFuZCB0aGVuIHB1bGxlZCBpbgplZmkv
+bmV4dCBmcm9tIGVmaS5naXQgdHJlZSkuCgpJJ3ZlIGFwcGxpZWQgYm90aCBwYXRjaGVzIHRvIGZi
+ZGV2LWZvci1uZXh0IChJIGhvcGUgaXQgaXMgZmluZSB3aXRoIHlvdSkuCgpCZXN0IHJlZ2FyZHMs
+Ci0tCkJhcnRsb21pZWogWm9sbmllcmtpZXdpY3oKU2Ftc3VuZyBSJkQgSW5zdGl0dXRlIFBvbGFu
+ZApTYW1zdW5nIEVsZWN0cm9uaWNzCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXwpkcmktZGV2ZWwgbWFpbGluZyBsaXN0CmRyaS1kZXZlbEBsaXN0cy5mcmVl
+ZGVza3RvcC5vcmcKaHR0cHM6Ly9saXN0cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1hbi9saXN0aW5m
+by9kcmktZGV2ZWwK
