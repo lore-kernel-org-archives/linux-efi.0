@@ -1,66 +1,94 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v2 1/2] efi/bgrt: Drop __initdata from bgrt_image_size
-Date: Tue, 3 Jul 2018 17:25:29 +0200
-Message-ID: <CAKv+Gu-9vhRFsR+0agKAMVJfXir=+eQbMs=KZmvT5JAPg3hNCw@mail.gmail.com>
-References: <20180618151358.4830-1-hdegoede@redhat.com>
- <45021554.rh2cuKUFdo@amdc3058>
- <CGME20180703152453eucas1p2b6fe0c9a8c8e0e7607a5d5bd8438f61e@eucas1p2.samsung.com>
- <CAKv+Gu9B58b75PC2F6e5ujVwXRisyM5TZ+18sski2OznJXDOhg@mail.gmail.com>
- <1657054.xB6YDx91rD@amdc3058>
+Subject: [RFC PATCH 0/2] efi: add contents of LinuxExtraArgs EFI var to
+ command line
+Date: Wed,  4 Jul 2018 17:49:17 +0200
+Message-ID: <20180704154919.18564-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <1657054.xB6YDx91rD@amdc3058>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Cc: Hans de Goede <hdegoede@redhat.com>, "open list:EFIFB FRAMEBUFFER DRIVER" <linux-fbdev@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, dri-devel <dri-devel@lists.freedesktop.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-efi@vger.kernel.org
+Cc: mark.rutland@arm.com, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Geoff Levand <geoff@infradead.org>, catalin.marinas@arm.com, Riku Voipio <riku.voipio@linaro.org>, Sudeep Holla <sudeep.holla@arm.com>, will.deacon@arm.com, leif.lindholm@linaro.org, linux-acpi@vger.kernel.org, James Morse <james.morse@arm.com>, Hanjun Guo <hanjun.guo@linaro.org>, Mark Salter <msalter@redhat.com>, linux-arm-kernel@lists.infradead.org, Ian Campbell <ijc@debian.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gMyBKdWx5IDIwMTggYXQgMTc6MjQsIEJhcnRsb21pZWogWm9sbmllcmtpZXdpY3oKPGIuem9s
-bmllcmtpZUBzYW1zdW5nLmNvbT4gd3JvdGU6Cj4gT24gTW9uZGF5LCBKdWx5IDAyLCAyMDE4IDAy
-OjAyOjQ3IFBNIEFyZCBCaWVzaGV1dmVsIHdyb3RlOgo+PiBPbiAyIEp1bHkgMjAxOCBhdCAxMzo1
-NywgQmFydGxvbWllaiBab2xuaWVya2lld2ljego+PiA8Yi56b2xuaWVya2llQHNhbXN1bmcuY29t
-PiB3cm90ZToKPj4gPiBPbiBNb25kYXksIEp1bHkgMDIsIDIwMTggMDE6NDY6MDkgUE0gQXJkIEJp
-ZXNoZXV2ZWwgd3JvdGU6Cj4+ID4+IE9uIDIgSnVseSAyMDE4IGF0IDEzOjI2LCBIYW5zIGRlIEdv
-ZWRlIDxoZGVnb2VkZUByZWRoYXQuY29tPiB3cm90ZToKPj4gPj4gPiBCYXJ0bG9taWVqLAo+PiA+
-PiA+Cj4+ID4+ID4gTm93IHRoYXQgdGhlIGZiY29uIGRlZmVycmVkIGNvbnNvbGUgdGFrZW92ZXIg
-cGF0Y2hlcyBoYXZlIGJlZW4KPj4gPj4gPiBtZXJnZWQgSSBiZWxpZXZlIHRoaXMgc2VyaWVzIGNh
-biBiZSBtZXJnZWQgdG9vID8KPj4gPj4gPgo+PiA+PiA+IE5vdGUgdGhlIGZpcnN0IHBhdGNoIGhh
-cyBhbiBhY2sgZnJvbSBBcmQgZm9yIG1lcmdpbmcgdGhlCj4+ID4+ID4gMSBsaW5lIGVmaSBjaGFu
-Z2UgdGhyb3VnaCB0aGUgZmJkZXYgdHJlZS4KPj4gPj4gPgo+PiA+Pgo+PiA+PiAuLi4gb3IgSSBj
-b3VsZCB0YWtlIGV2ZXJ5dGhpbmcgdGhyb3VnaCB0aGUgZWZpIHRyZWUgaW5zdGVhZCwgYXMKPj4g
-Pj4gYWxyZWFkeSBkaXNjdXNzZWQgYmV0d2VlbiBCYXJ0bG9taWVqIGFuZCBtZSBpbiB0aGUgY29u
-dGV4dCBvZiBhbm90aGVyCj4+ID4+IHBhdGNoIHNlcmllcyB0aGF0IHRvdWNoZXMgYm90aCB0aGUg
-ZmJkZXYgYW5kIGVmaSB0cmVlcy4KPj4gPj4KPj4gPj4gQmFydGxvbWllaiwgdGhhdCB3b3VsZCBy
-ZXF1aXJlIHlvdXIgYWNrIG9uIHBhdGNoCj4+ID4+Cj4+ID4+IFtQQVRDSCB2MiAyLzJdIGVmaWZi
-OiBDb3B5IHRoZSBBQ1BJIEJHUlQgYm9vdCBncmFwaGljcyB0byB0aGUgZnJhbWVidWZmZXIKPj4g
-Pj4KPj4gPj4gaHR0cHM6Ly9tYXJjLmluZm8vP2w9bGludXgtZmJkZXYmbT0xNTI5MzM0ODQ2MTY5
-OTMmdz0yCj4+ID4+Cj4+ID4+IHNvIGlmIHlvdSdyZSBvayB3aXRoIHRoYXQsIEkgd2lsbCBxdWV1
-ZSBib3RoIG9mIHRoZXNlIGZvciB2NC4xOQo+PiA+Cj4+ID4gSSB3b3VsZCByZWFsbHkgcHJlZmVy
-IHRvIG1lcmdlIHRoaXMgcGF0Y2hzZXQgdGhyb3VnaCBmYmRldiB0cmVlCj4+ID4gYXMgZWZpIHRy
-ZWUgZG9lc24ndCBoYXZlIGZiY29uIGRlZmVycmVkIGNvbnNvbGUgdGFrZW92ZXIgcGF0Y2hlcwo+
-PiA+ICh3aGljaCBhcmUgcmVxdWlyZWQgYnkgZWZpZmIgY2hhbmdlcyB1bmRlciBkaXNjdXNzaW9u
-KS4KPj4gPgo+Pgo+PiBBaCBvaywgSSBkaWRuJ3QgcmVhbGlzZSB0aGF0LiBJIGRvbid0IHRoaW5r
-IHRoZXJlIHdpbGwgYmUgYW55Cj4+IGNvbmZsaWN0cywgc2luY2UgdGhlIGVmaWZiIGNoYW5nZXMg
-aW4gdGhlIGVmaSB0cmVlIGFuZCB0aGVzZSBjaGFuZ2VzCj4+IG9wZXJhdGUgb24gZGlmZmVyZW50
-IHBhcnRzIG9mIHRoZSBmaWxlLiBCdXQgbGV0J3MgZG91YmxlIGNoZWNrIGJlZm9yZQo+PiB0YWtp
-bmcgc3R1ZmYgaW50byAtbmV4dC4KPj4gKGVmaS9uZXh0IGlzIG5vdCBwdWxsZWQgaW50byAtbmV4
-dCBkaXJlY3RseSwgYnV0IHZpYSB0aGUgdGlwOmVmaSB0cmVlLAo+PiBhbmQgSSBoYXZlbid0IHNl
-bnQgYSBwdWxsIHJlcXVlc3QgeWV0IGZvciB2NC4xOSkKPgo+IEkndmUgdmVyaWZpZWQgdGhpcyB3
-aXRoIC1uZXh0IGZyb20gdG9kYXkgYW5kIGl0IGF1dG8tbWVyZ2VkIGZpbmUgKGZvcgo+IHRlc3Rp
-bmcgcHVycG9zZXMgSSd2ZSBhcHBsaWVkIGJvdGggcGF0Y2hlcyB0byAtbmV4dCBhbmQgdGhlbiBw
-dWxsZWQgaW4KPiBlZmkvbmV4dCBmcm9tIGVmaS5naXQgdHJlZSkuCj4KPiBJJ3ZlIGFwcGxpZWQg
-Ym90aCBwYXRjaGVzIHRvIGZiZGV2LWZvci1uZXh0IChJIGhvcGUgaXQgaXMgZmluZSB3aXRoIHlv
-dSkuCj4KCkFic29sdXRlbHkgZmluZSwgYW5kIHRoYW5rcyBmb3IgZG91YmxlIGNoZWNraW5nLgpf
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpkcmktZGV2ZWwg
-bWFpbGluZyBsaXN0CmRyaS1kZXZlbEBsaXN0cy5mcmVlZGVza3RvcC5vcmcKaHR0cHM6Ly9saXN0
-cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1hbi9saXN0aW5mby9kcmktZGV2ZWwK
+As noted by Ian, many DMI based quirks for x86 ACPI machines disable
+features that can also be disabled via the kernel command line. Similarly,
+a quirk is under discussion for a arm64 ACPI machine [0] that explodes
+when enabling support for hardware error reporting via the ACPI HEST table.
+
+When support for DMI tables was introduced to arm64 and ARM, the agreement
+was that they are informational only, i.e., provided to userland to describe
+the platform, not for keying off of to enable quirks in the kernel.
+
+There are a couple of reasons for this:
+- Unlike the x86 architecture, where virtually all platforms are PC variants,
+  and the presence of ACPI and DMI tables may be assumed, the arm64 architecture
+  is much more heterogeneous, and none of UEFI, ACPI or DMI or actually mandated
+  or especially common across arm64 platforms; using DMI only makes sense for
+  working around a limited subset of platform issues that have to do with
+  firmware running on platforms that bother to implement it in the first place.
+- DMI is not initialized as early as it is on x86, and doing so is not trivial.
+  This means that even on ACPI/DMI machines, some issues may require quirks that
+  are enabled in a different way, or we need to refactor the DMI support so that
+  we can enable it as early as x86 does.
+- Using DMI tables fundamentally means quirking *after* the fact, which makes it
+  a moving target. Some quirks may require the DMI match table to be updated if
+  someone happens to change a string in the DMI tables when shipping a mostly
+  identical platform.
+
+So instead, let's provide these platforms with the facilities required to enable
+such quirks at the platform level. Especially for UEFI systems, if upgrading
+firmware is a reasonable prerequisite for being able to upgrade to the latest
+kernel, having to run a script that sets a UEFI variable (either via the Linux
+command line of from the UEFI shell) should not be an unreasonable requirement
+either, and so we can solve part of this issue by configuring extra command line
+arguments persistenly from the firmware environment. This solves all the above
+issues in an unintrusive manner, given that the kernel command line is already
+made available extremely early in the boot, and the fact that it already permits
+a wide range of configuration options and overrides to be set, including the
+'hest_disable=1' option that works around the issue addressed by [0].
+
+Note that this deviates from the current common practice on x86. I am aware
+that the distros want everything to be the same in this regard, but I don't
+think the x86 maintainers will refer to the DMI quirks infrastructure as a
+shining example of functionality that should be ported across architectures.
+
+ACPI on arm64 is intended to support a narrowly defined class of server systems,
+as opposed to the wide range of Windows-logo hardware that arch/x86 aims to
+support, and a lot of time and effort has been going into validation against
+Linux itself. This means the likelihood that we will need a quirks
+infrastructure as elaborate as the x86 one is low, and so it would be my 
+preference to defer introducing it until the moment where we have exhausted
+all other options.
+
+[0] https://marc.info/?l=linux-acpi&m=153018042727125&w=2
+
+Cc: Mark Salter <msalter@redhat.com>
+Cc: Geoff Levand <geoff@infradead.org>
+Cc: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
+Cc: Hanjun Guo <hanjun.guo@linaro.org>
+Cc: Sudeep Holla <sudeep.holla@arm.com>
+Cc: Riku Voipio <riku.voipio@linaro.org>
+Cc: James Morse <james.morse@arm.com>
+Cc: Ian Campbell <ijc@debian.org>
+
+Ard Biesheuvel (2):
+  efi/libstub: refactor load option command line processing for reuse
+  efi/libstub: taken contents of LinuxExtraArgs UEFI variable into
+    account
+
+ .../firmware/efi/libstub/efi-stub-helper.c    | 94 +++++++++++++++----
+ include/linux/efi.h                           |  1 +
+ 2 files changed, 77 insertions(+), 18 deletions(-)
+
+-- 
+2.17.1
