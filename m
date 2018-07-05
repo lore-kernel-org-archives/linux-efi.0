@@ -1,145 +1,46 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 1/6] efi: Introduce efi_memmap_free() to free memory
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH 1/6] efi: Introduce efi_memmap_free() to free memory
  allocated by efi_memmap_alloc()
-Date: Thu, 5 Jul 2018 11:29:45 +0200
-Message-ID: <CAKv+Gu8FjCojLTckLVcOq1z4e=pp4U8GQWVHpvHTewRgef6HDg@mail.gmail.com>
-References: <1530582654-25662-1-git-send-email-sai.praneeth.prakhya@intel.com> <1530582654-25662-2-git-send-email-sai.praneeth.prakhya@intel.com>
+Date: Thu, 5 Jul 2018 18:30:33 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F4659B195@ORSMSX111.amr.corp.intel.com>
+References: <1530582654-25662-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1530582654-25662-2-git-send-email-sai.praneeth.prakhya@intel.com>
+ <CAKv+Gu8FjCojLTckLVcOq1z4e=pp4U8GQWVHpvHTewRgef6HDg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1530582654-25662-2-git-send-email-sai.praneeth.prakhya@intel.com>
+In-Reply-To: <CAKv+Gu8FjCojLTckLVcOq1z4e=pp4U8GQWVHpvHTewRgef6HDg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Dave Young <dyoung@redhat.com>, Borislav Petkov <bp@alien8.de>, Laszlo Ersek <lersek@redhat.com>, Jan Kiszka <jan.kiszka@siemens.com>, Dave Hansen <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Nicolai Stange <nicstange@gmail.com>, Naresh Bhat <naresh.bhat@linaro.org>, Ricardo Neri <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, Taku Izumi <izumi.taku@jp.fujitsu.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Dan Williams <dan.j.williams@intel.com>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Lee Chun-Yi <jlee@suse.com>, Dave Young <dyoung@redhat.com>, Borislav Petkov <bp@alien8.de>, Laszlo Ersek <lersek@redhat.com>, Jan Kiszka <jan.kiszka@siemens.com>, "Hansen, Dave" <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Nicolai Stange <nicstange@gmail.com>, Naresh Bhat <naresh.bhat@linaro.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, Peter Zijlstra <peterz@infradead.org>, Taku Izumi <izumi.taku@jp.fujitsu.com>, "Shankar, Ravi V" <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Williams, Dan J" <dan.j.williams@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 3 July 2018 at 03:50, Sai Praneeth Prakhya
-<sai.praneeth.prakhya@intel.com> wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
->
-> efi_memmap_alloc() allocates memory depending on whether mm_init() has
-> already been invoked or not. Apart from memblock_alloc() memory and
-> alloc_pages() memory, efi memory map could also have a third variant of
-> memory allocation and that is memblock_reserved. This happens only for
-> the memory map passed to kernel by firmware and thus can happen only
-> once during boot process.
->
-> In order to identify these three different types of allocations and thus
-> to call the appropriate free() variant, introduce an enum named
-> efi_memmap_type and also introduce a efi memmap API named
-> efi_memmap_free() to free memory allocated by efi_memmap_alloc().
->
-> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-> Suggested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> Cc: Lee Chun-Yi <jlee@suse.com>
-> Cc: Dave Young <dyoung@redhat.com>
-> Cc: Borislav Petkov <bp@alien8.de>
-> Cc: Laszlo Ersek <lersek@redhat.com>
-> Cc: Jan Kiszka <jan.kiszka@siemens.com>
-> Cc: Dave Hansen <dave.hansen@intel.com>
-> Cc: Bhupesh Sharma <bhsharma@redhat.com>
-> Cc: Nicolai Stange <nicstange@gmail.com>
-> Cc: Naresh Bhat <naresh.bhat@linaro.org>
-> Cc: Ricardo Neri <ricardo.neri@intel.com>
-> Cc: Peter Zijlstra <peterz@infradead.org>
-> Cc: Taku Izumi <izumi.taku@jp.fujitsu.com>
-> Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-> Cc: Matt Fleming <matt@codeblueprint.co.uk>
-> Cc: Dan Williams <dan.j.williams@intel.com>
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-
-Do you really think you should cc all these people?
-
-> ---
->  drivers/firmware/efi/memmap.c | 28 ++++++++++++++++++++++++++++
->  include/linux/efi.h           |  8 ++++++++
->  2 files changed, 36 insertions(+)
->
-> diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
-> index 5fc70520e04c..0686e063c644 100644
-> --- a/drivers/firmware/efi/memmap.c
-> +++ b/drivers/firmware/efi/memmap.c
-> @@ -12,6 +12,7 @@
->  #include <asm/early_ioremap.h>
->  #include <linux/memblock.h>
->  #include <linux/slab.h>
-> +#include <linux/bootmem.h>
->
->  static phys_addr_t __init __efi_memmap_alloc_early(unsigned long size)
->  {
-> @@ -50,6 +51,33 @@ phys_addr_t __init efi_memmap_alloc(unsigned int num_entries)
->  }
->
->  /**
-> + * efi_memmap_free - Free memory allocated by efi_memmap_alloc()
-> + * @mem: Physical address allocated by efi_memmap_alloc().
-> + * @num_entries: Number of entries in the allocated map.
-> + * @alloc_type: What type of allocation did efi_memmap_alloc() perform?
-> + *
-> + * Use this function to free memory allocated by efi_memmap_alloc().
-> + * efi_memmap_alloc() allocates memory depending on whether mm_init()
-> + * has already been invoked or not. It uses either memblock or "normal"
-> + * page allocation, similarly, we free it in two different ways. Also
-> + * note that there is a third type of memory used by memmap which is
-> + * memblock_reserved() and is passed by EFI stub to kernel.
-> + */
-> +void __init efi_memmap_free(phys_addr_t mem, unsigned int num_entries,
-> +                           enum efi_memmap_type alloc_type)
-> +{
-> +       unsigned long size = num_entries * efi.memmap.desc_size;
-> +       unsigned int order = get_order(size);
-> +
-> +       if (alloc_type == BUDDY_ALLOCATOR)
-> +               __free_pages(pfn_to_page(PHYS_PFN(mem)), order);
-> +       else if (alloc_type == MEMBLOCK)
-> +               memblock_free(mem, size);
-> +       else
-> +               free_bootmem(mem, size);
-> +}
-> +
-> +/**
->   * __efi_memmap_init - Common code for mapping the EFI memory map
->   * @data: EFI memory map data
->   * @late: Use early or late mapping function?
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index 56add823f190..455875c01ed1 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -765,6 +765,12 @@ struct efi_memory_map_data {
->         unsigned long desc_size;
->  };
->
-> +enum efi_memmap_type {
-> +       EFI_STUB,
-> +       MEMBLOCK,
-> +       BUDDY_ALLOCATOR,
-> +};
-> +
->  struct efi_memory_map {
->         phys_addr_t phys_map;
->         void *map;
-> @@ -1016,6 +1022,8 @@ extern int __init efi_memmap_split_count(efi_memory_desc_t *md,
->                                          struct range *range);
->  extern void __init efi_memmap_insert(struct efi_memory_map *old_memmap,
->                                      void *buf, struct efi_mem_range *mem);
-> +extern void __init efi_memmap_free(phys_addr_t mem, unsigned int num_entries,
-> +                                  enum efi_memmap_type alloc_type);
->
->  extern int efi_config_init(efi_config_table_type_t *arch_tables);
->  #ifdef CONFIG_EFI_ESRT
-> --
-> 2.7.4
->
-
-Sai,
-
-Thanks a lot for respinning all of this.
-
-I am now thinking we should perhaps hide the allocation type from the
-callers rather than passing around implementation details of the
-allocator, and have explicit alloc/free operations.
-
-Could we instead have a single 'efi_realloc_memmap()' function that
-takes care of all of this? We'd still need a free routine for error
-handling, I suppose, but it would get rid of the need for obscure
-enums or bools that the callers have to pass around.
+PiA+IFNpZ25lZC1vZmYtYnk6IFNhaSBQcmFuZWV0aCBQcmFraHlhIDxzYWkucHJhbmVldGgucHJh
+a2h5YUBpbnRlbC5jb20+DQo+ID4gU3VnZ2VzdGVkLWJ5OiBBcmQgQmllc2hldXZlbCA8YXJkLmJp
+ZXNoZXV2ZWxAbGluYXJvLm9yZz4NCj4gPiBDYzogTGVlIENodW4tWWkgPGpsZWVAc3VzZS5jb20+
+DQo+ID4gQ2M6IERhdmUgWW91bmcgPGR5b3VuZ0ByZWRoYXQuY29tPg0KPiA+IENjOiBCb3Jpc2xh
+diBQZXRrb3YgPGJwQGFsaWVuOC5kZT4NCj4gPiBDYzogTGFzemxvIEVyc2VrIDxsZXJzZWtAcmVk
+aGF0LmNvbT4NCj4gPiBDYzogSmFuIEtpc3prYSA8amFuLmtpc3prYUBzaWVtZW5zLmNvbT4NCj4g
+PiBDYzogRGF2ZSBIYW5zZW4gPGRhdmUuaGFuc2VuQGludGVsLmNvbT4NCj4gPiBDYzogQmh1cGVz
+aCBTaGFybWEgPGJoc2hhcm1hQHJlZGhhdC5jb20+DQo+ID4gQ2M6IE5pY29sYWkgU3RhbmdlIDxu
+aWNzdGFuZ2VAZ21haWwuY29tPg0KPiA+IENjOiBOYXJlc2ggQmhhdCA8bmFyZXNoLmJoYXRAbGlu
+YXJvLm9yZz4NCj4gPiBDYzogUmljYXJkbyBOZXJpIDxyaWNhcmRvLm5lcmlAaW50ZWwuY29tPg0K
+PiA+IENjOiBQZXRlciBaaWpsc3RyYSA8cGV0ZXJ6QGluZnJhZGVhZC5vcmc+DQo+ID4gQ2M6IFRh
+a3UgSXp1bWkgPGl6dW1pLnRha3VAanAuZnVqaXRzdS5jb20+DQo+ID4gQ2M6IFJhdmkgU2hhbmth
+ciA8cmF2aS52LnNoYW5rYXJAaW50ZWwuY29tPg0KPiA+IENjOiBNYXR0IEZsZW1pbmcgPG1hdHRA
+Y29kZWJsdWVwcmludC5jby51az4NCj4gPiBDYzogRGFuIFdpbGxpYW1zIDxkYW4uai53aWxsaWFt
+c0BpbnRlbC5jb20+DQo+ID4gQ2M6IEFyZCBCaWVzaGV1dmVsIDxhcmQuYmllc2hldXZlbEBsaW5h
+cm8ub3JnPg0KPiANCj4gRG8geW91IHJlYWxseSB0aGluayB5b3Ugc2hvdWxkIGNjIGFsbCB0aGVz
+ZSBwZW9wbGU/DQo+IA0KDQpTb3JyeSEgSSBnZXQgdGhhdC4uDQoNCj4gPiAtLS0NCj4gPiAgZHJp
+dmVycy9maXJtd2FyZS9lZmkvbWVtbWFwLmMgfCAyOCArKysrKysrKysrKysrKysrKysrKysrKysr
+KysrDQo+ID4gIGluY2x1ZGUvbGludXgvZWZpLmggICAgICAgICAgIHwgIDggKysrKysrKysNCj4g
+PiAgMiBmaWxlcyBjaGFuZ2VkLCAzNiBpbnNlcnRpb25zKCspDQo+ID4NCg0KW3NuaXBdDQoNCj4g
+SSBhbSBub3cgdGhpbmtpbmcgd2Ugc2hvdWxkIHBlcmhhcHMgaGlkZSB0aGUgYWxsb2NhdGlvbiB0
+eXBlIGZyb20gdGhlIGNhbGxlcnMNCj4gcmF0aGVyIHRoYW4gcGFzc2luZyBhcm91bmQgaW1wbGVt
+ZW50YXRpb24gZGV0YWlscyBvZiB0aGUgYWxsb2NhdG9yLCBhbmQgaGF2ZQ0KPiBleHBsaWNpdCBh
+bGxvYy9mcmVlIG9wZXJhdGlvbnMuDQo+IA0KPiBDb3VsZCB3ZSBpbnN0ZWFkIGhhdmUgYSBzaW5n
+bGUgJ2VmaV9yZWFsbG9jX21lbW1hcCgpJyBmdW5jdGlvbiB0aGF0IHRha2VzIGNhcmUNCj4gb2Yg
+YWxsIG9mIHRoaXM/DQoNClN1cmUhIEkgd2lsbCBnaXZlIGl0IGEgdHJ5Lg0KDQpSZWdhcmRzLA0K
+U2FpDQo=
