@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 7/8] efi: drop type and attribute checks in efi_mem_desc_lookup()
-Date: Wed, 11 Jul 2018 11:40:39 +0200
-Message-ID: <20180711094040.12506-8-ard.biesheuvel@linaro.org>
+Subject: [PATCH 8/8] fbdev/efifb: honour UEFI memory map attributes when mapping the fb
+Date: Wed, 11 Jul 2018 11:40:40 +0200
+Message-ID: <20180711094040.12506-9-ard.biesheuvel@linaro.org>
 References: <20180711094040.12506-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180711094040.12506-1-ard.biesheuvel@linaro.org>
@@ -10,113 +10,123 @@ To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-The current implementation of efi_mem_desc_lookup() includes the
-following check on the memory descriptor it returns:
+If the framebuffer address provided by the Graphics Output Protocol
+(GOP) is covered by the UEFI memory map, it will tell us which memory
+attributes are permitted when mapping this region. In some cases,
+(KVM guest on ARM), violating this will result in loss of coherency,
+which means that updates sent to the framebuffer by the guest will
+not be observeable by the host, and the emulated display simply does
+not work.
 
-    if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
-        md->type != EFI_BOOT_SERVICES_DATA &&
-        md->type != EFI_RUNTIME_SERVICES_DATA) {
-            continue;
-    }
-
-This means that only EfiBootServicesData or EfiRuntimeServicesData
-regions are considered, or any other region type provided that it
-has the EFI_MEMORY_RUNTIME attribute set.
-
-Given what the name of the function implies, and the fact that any
-physical address can be described in the UEFI memory map only a single
-time, it does not make sense to impose this condition in the body of the
-loop, but instead, should be imposed by the caller depending on the value
-that is returned to it.
-
-Two such callers exist at the moment:
-- The BGRT code when running on x86, via efi_mem_reserve() and
-  efi_arch_mem_reserve(). In this case, the region is already known to
-  be EfiBootServicesData, and so the check is redundant.
-- The ESRT handling code which introduced this function, which calls it
-  both directly from efi_esrt_init() and again via efi_mem_reserve() and
-  efi_arch_mem_reserve() [on x86].
-
-So let's move this check into the callers instead. This preserves the
-current behavior both for BGRT and ESRT handling, and allows the lookup
-routine to be reused by other [upcoming] users that don't have this
-limitation.
-
-In the ESRT case, keep the entire condition, so that platforms that
-deviate from the UEFI spec and use something other than
-EfiBootServicesData for the ESRT table will keep working as before.
-
-For x86's efi_arch_mem_reserve() implementation, limit the type to
-EfiBootServicesData, since it is the only type the reservation code
-expects to operate on in the first place.
-
-While we're at it, drop the __init annotation so that drivers can use it
-as well.
+So if the memory map contains such a description, take the attributes
+field into account, and add support for creating WT or WB mappings of
+the framebuffer region.
 
 Cc: Peter Jones <pjones@redhat.com>
 Tested-by: Laszlo Ersek <lersek@redhat.com>
+Acked-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/platform/efi/quirks.c | 3 ++-
- drivers/firmware/efi/efi.c     | 8 +-------
- drivers/firmware/efi/esrt.c    | 5 ++++-
- 3 files changed, 7 insertions(+), 9 deletions(-)
+ drivers/video/fbdev/efifb.c | 51 +++++++++++++++++++++++++++++--------
+ 1 file changed, 41 insertions(+), 10 deletions(-)
 
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 6af39dc40325..844d31cb8a0c 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -248,7 +248,8 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
- 	int num_entries;
- 	void *new;
+diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
+index 46a4484e3da7..c6f78d27947b 100644
+--- a/drivers/video/fbdev/efifb.c
++++ b/drivers/video/fbdev/efifb.c
+@@ -20,7 +20,7 @@
+ #include <drm/drm_connector.h>  /* For DRM_MODE_PANEL_ORIENTATION_* */
  
--	if (efi_mem_desc_lookup(addr, &md)) {
-+	if (efi_mem_desc_lookup(addr, &md) ||
-+	    md.type != EFI_BOOT_SERVICES_DATA) {
- 		pr_err("Failed to lookup EFI memory descriptor for %pa\n", &addr);
- 		return;
- 	}
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 1379a375dfa8..d8a33a781a57 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -402,7 +402,7 @@ subsys_initcall(efisubsys_init);
-  * and if so, populate the supplied memory descriptor with the appropriate
-  * data.
-  */
--int __init efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md)
-+int efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md)
+ static bool request_mem_succeeded = false;
+-static bool nowc = false;
++static u64 mem_flags = EFI_MEMORY_WC | EFI_MEMORY_UC;
+ 
+ static struct fb_var_screeninfo efifb_defined = {
+ 	.activate		= FB_ACTIVATE_NOW,
+@@ -68,8 +68,12 @@ static int efifb_setcolreg(unsigned regno, unsigned red, unsigned green,
+ 
+ static void efifb_destroy(struct fb_info *info)
  {
- 	efi_memory_desc_t *md;
- 
-@@ -420,12 +420,6 @@ int __init efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md)
- 		u64 size;
- 		u64 end;
- 
--		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
--		    md->type != EFI_BOOT_SERVICES_DATA &&
--		    md->type != EFI_RUNTIME_SERVICES_DATA) {
--			continue;
--		}
--
- 		size = md->num_pages << EFI_PAGE_SHIFT;
- 		end = md->phys_addr + size;
- 		if (phys_addr >= md->phys_addr && phys_addr < end) {
-diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
-index 1ab80e06e7c5..375a77c1c6e5 100644
---- a/drivers/firmware/efi/esrt.c
-+++ b/drivers/firmware/efi/esrt.c
-@@ -250,7 +250,10 @@ void __init efi_esrt_init(void)
- 		return;
- 
- 	rc = efi_mem_desc_lookup(efi.esrt, &md);
--	if (rc < 0) {
-+	if (rc < 0 ||
-+	    (!(md.attribute & EFI_MEMORY_RUNTIME) &&
-+	     md.type != EFI_BOOT_SERVICES_DATA &&
-+	     md.type != EFI_RUNTIME_SERVICES_DATA)) {
- 		pr_warn("ESRT header is not in the memory map.\n");
- 		return;
+-	if (info->screen_base)
+-		iounmap(info->screen_base);
++	if (info->screen_base) {
++		if (mem_flags & (EFI_MEMORY_UC | EFI_MEMORY_WC))
++			iounmap(info->screen_base);
++		else
++			memunmap(info->screen_base);
++	}
+ 	if (request_mem_succeeded)
+ 		release_mem_region(info->apertures->ranges[0].base,
+ 				   info->apertures->ranges[0].size);
+@@ -104,7 +108,7 @@ static int efifb_setup(char *options)
+ 			else if (!strncmp(this_opt, "width:", 6))
+ 				screen_info.lfb_width = simple_strtoul(this_opt+6, NULL, 0);
+ 			else if (!strcmp(this_opt, "nowc"))
+-				nowc = true;
++				mem_flags &= ~EFI_MEMORY_WC;
+ 		}
  	}
+ 
+@@ -164,6 +168,7 @@ static int efifb_probe(struct platform_device *dev)
+ 	unsigned int size_remap;
+ 	unsigned int size_total;
+ 	char *option = NULL;
++	efi_memory_desc_t md;
+ 
+ 	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI || pci_dev_disabled)
+ 		return -ENODEV;
+@@ -272,12 +277,35 @@ static int efifb_probe(struct platform_device *dev)
+ 	info->apertures->ranges[0].base = efifb_fix.smem_start;
+ 	info->apertures->ranges[0].size = size_remap;
+ 
+-	if (nowc)
+-		info->screen_base = ioremap(efifb_fix.smem_start, efifb_fix.smem_len);
+-	else
+-		info->screen_base = ioremap_wc(efifb_fix.smem_start, efifb_fix.smem_len);
++	if (!efi_mem_desc_lookup(efifb_fix.smem_start, &md)) {
++		if ((efifb_fix.smem_start + efifb_fix.smem_len) >
++		    (md.phys_addr + (md.num_pages << EFI_PAGE_SHIFT))) {
++			pr_err("efifb: video memory @ 0x%lx spans multiple EFI memory regions\n",
++			       efifb_fix.smem_start);
++			err = -EIO;
++			goto err_release_fb;
++		}
++		/*
++		 * If the UEFI memory map covers the efifb region, we may only
++		 * remap it using the attributes the memory map prescribes.
++		 */
++		mem_flags |= EFI_MEMORY_WT | EFI_MEMORY_WB;
++		mem_flags &= md.attribute;
++	}
++	if (mem_flags & EFI_MEMORY_WC)
++		info->screen_base = ioremap_wc(efifb_fix.smem_start,
++					       efifb_fix.smem_len);
++	else if (mem_flags & EFI_MEMORY_UC)
++		info->screen_base = ioremap(efifb_fix.smem_start,
++					    efifb_fix.smem_len);
++	else if (mem_flags & EFI_MEMORY_WT)
++		info->screen_base = memremap(efifb_fix.smem_start,
++					     efifb_fix.smem_len, MEMREMAP_WT);
++	else if (mem_flags & EFI_MEMORY_WB)
++		info->screen_base = memremap(efifb_fix.smem_start,
++					     efifb_fix.smem_len, MEMREMAP_WB);
+ 	if (!info->screen_base) {
+-		pr_err("efifb: abort, cannot ioremap video memory 0x%x @ 0x%lx\n",
++		pr_err("efifb: abort, cannot remap video memory 0x%x @ 0x%lx\n",
+ 			efifb_fix.smem_len, efifb_fix.smem_start);
+ 		err = -EIO;
+ 		goto err_release_fb;
+@@ -371,7 +399,10 @@ static int efifb_probe(struct platform_device *dev)
+ err_groups:
+ 	sysfs_remove_groups(&dev->dev.kobj, efifb_groups);
+ err_unmap:
+-	iounmap(info->screen_base);
++	if (mem_flags & (EFI_MEMORY_UC | EFI_MEMORY_WC))
++		iounmap(info->screen_base);
++	else
++		memunmap(info->screen_base);
+ err_release_fb:
+ 	framebuffer_release(info);
+ err_release_mem:
 -- 
 2.17.1
