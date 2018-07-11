@@ -1,89 +1,62 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 1/1] efi/x86: remove pointless call to PciIo->Attributes()
-Date: Wed, 11 Jul 2018 11:02:35 +0200
-Message-ID: <20180711090235.9327-2-ard.biesheuvel@linaro.org>
-References: <20180711090235.9327-1-ard.biesheuvel@linaro.org>
+Subject: [GIT PULL 0/8] EFI changes for v4.19
+Date: Wed, 11 Jul 2018 11:40:32 +0200
+Message-ID: <20180711094040.12506-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180711090235.9327-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Alexander Graf <agraf@suse.de>, Andy Lutomirski <luto@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Laszlo Ersek <lersek@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-When it was first introduced, the EFI stub code that copies the
-contents of PCI option ROMs originally only intended to do so if
-the EFI_PCI_IO_ATTRIBUTE_EMBEDDED_ROM attribute was *not* set.
+The following changes since commit 7daf201d7fe8334e2d2364d4e8ed3394ec9af819:
 
-The reason was that the UEFI spec permits PCI option ROM images
-to be provided by the platform directly, rather than via the ROM
-BAR, and in this case, the OS can only access them at runtime if
-they are preserved at boot time by copying them from the areas
-described by PciIo->RomImage and PciIo->RomSize.
+  Linux 4.18-rc2 (2018-06-24 20:54:29 +0800)
 
-However, it implemented this check erroneously, as can be seen in
-commit dd5fc854de5fd ("EFI: Stash ROMs if they're not in the PCI
-BAR"):
+are available in the Git repository at:
 
-    if (!attributes & EFI_PCI_IO_ATTRIBUTE_EMBEDDED_ROM)
-            continue;
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
 
-and given that the numeric value of EFI_PCI_IO_ATTRIBUTE_EMBEDDED_ROM
-is 0x4000, this condition never becomes true, and so the option ROMs
-were copied unconditionally.
+for you to fetch changes up to 6a3524a55f16437d210f61bbb53c7c099b18babe:
 
-This was spotted and 'fixed' by commit 886d751a2ea99a160
-("x86, efi: correct precedence of operators in setup_efi_pci"),
-but inadvertently inverted the logic at the same time, defeating
-the purpose of the code, since it now only preserves option ROM
-images that can be read from the ROM BAR as well.
+  fbdev/efifb: honour UEFI memory map attributes when mapping the fb (2018-07-11 11:23:26 +0200)
 
-Unsurprisingly, this broke some systems, and so the check was removed
-entirely in commit 739701888f5d ("x86, efi: remove attribute check
-from setup_efi_pci").
+----------------------------------------------------------------
+EFI changes for v4.19, batch #1:
+- Perform UEFI runtime services calls from a work queue so the calls into the
+  firmware occur from a kernel thread (Sai)
+- Honor the UEFI memory map attributes for live memory regions configured by
+  UEFI as a framebuffer. This works around a coherency problem with KVM guests
+  running on ARM. (Ard)
+- Cleanup for the x86 EFI stub code (Ingo)
+- A timekeeping fix from Arnd
+- Gradually phase out the DTB loader in the ARM version of the EFI stub. (Ard)
+- Drop an unused function declaration (Sai)
 
-It is debatable whether this check should have been included in the
-first place, since the option ROM image provided to the UEFI driver by
-the firmware may be different from the one that is actually present in
-the card's flash ROM, and so whatever PciIo->RomImage points at should
-be preferred regardless of whether the attribute is set.
+----------------------------------------------------------------
+Ard Biesheuvel (3):
+      efi/libstub/arm: add opt-in Kconfig option for the DTB loader
+      efi: drop type and attribute checks in efi_mem_desc_lookup()
+      fbdev/efifb: honour UEFI memory map attributes when mapping the fb
 
-As this was the only use of the attributes field, we can remove
-the call to PciIo->Attributes() entirely, which is especially
-nice because its prototype involves uint64_t type by-value
-arguments which the EFI mixed mode has trouble dealing with.
+Arnd Bergmann (1):
+      efi: cper: avoid using get_seconds()
 
-Tested-by: Wilfried Klaebe <linux-kernel@lebenslange-mailadresse.de>
-Tested-by: Hans de Goede <hdegoede@redhat.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- arch/x86/boot/compressed/eboot.c | 12 +++---------
- 1 file changed, 3 insertions(+), 9 deletions(-)
+Ingo Molnar (1):
+      efi/x86: Clean up the eboot code
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index e57665b4ba1c..e98522ea6f09 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -114,18 +114,12 @@ __setup_efi_pci(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
- 	struct pci_setup_rom *rom = NULL;
- 	efi_status_t status;
- 	unsigned long size;
--	uint64_t attributes, romsize;
-+	uint64_t romsize;
- 	void *romimage;
- 
--	status = efi_call_proto(efi_pci_io_protocol, attributes, pci,
--				EfiPciIoAttributeOperationGet, 0ULL,
--				&attributes);
--	if (status != EFI_SUCCESS)
--		return status;
--
- 	/*
--	 * Some firmware images contain EFI function pointers at the place where the
--	 * romimage and romsize fields are supposed to be. Typically the EFI
-+	 * Some firmware images contain EFI function pointers at the place where
-+	 * the romimage and romsize fields are supposed to be. Typically the EFI
- 	 * code is mapped at high addresses, translating to an unrealistically
- 	 * large romsize. The UEFI spec limits the size of option ROMs to 16
- 	 * MiB so we reject any ROMs over 16 MiB in size to catch this.
--- 
-2.17.1
+Sai Praneeth (3):
+      efi/x86: Use non-blocking SetVariable() for efi_delete_dummy_variable()
+      efi: Use a work queue to invoke EFI Runtime Services
+      efi: Remove the declaration of efi_late_init() as the function is unused
+
+ arch/x86/boot/compressed/eboot.c        | 245 ++++++++++++++++----------------
+ arch/x86/platform/efi/quirks.c          |  14 +-
+ drivers/firmware/efi/Kconfig            |  12 ++
+ drivers/firmware/efi/cper.c             |  17 ++-
+ drivers/firmware/efi/efi.c              |  22 ++-
+ drivers/firmware/efi/esrt.c             |   5 +-
+ drivers/firmware/efi/libstub/arm-stub.c |   7 +-
+ drivers/firmware/efi/runtime-wrappers.c | 202 ++++++++++++++++++++++++--
+ drivers/video/fbdev/efifb.c             |  51 +++++--
+ include/linux/efi.h                     |   5 +-
+ 10 files changed, 413 insertions(+), 167 deletions(-)
